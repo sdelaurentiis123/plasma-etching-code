@@ -17,7 +17,7 @@ from .levelset import advect, extend_velocity, reinit
 
 def run_etch(W=20.0, H=20.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
              sub_top=15.0, t_end=3.0, n_steps=60, par=None, flags=None,
-             n_part_ion=20000, n_part_neu=20000, snapshots=None, verbose=True):
+             n_part_ion=20000, n_part_neu=20000, seed=0, snapshots=None, verbose=True):
     if par is None:
         par = PAR
     if flags is None:
@@ -38,7 +38,7 @@ def run_etch(W=20.0, H=20.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
         is_mask = seg_in_mask(mid, mask, xs, ys, dx)
         t0 = time.time()
         m_i, m_F, m_O, cos_i = mc_flux(segs, mid, nrm, is_mask, L, y_src, W, par,
-                                       n_part_ion=n_part_ion, n_part_neu=n_part_neu)
+                                       n_part_ion=n_part_ion, n_part_neu=n_part_neu, seed=seed)
         timings['raytrace'] += time.time() - t0
         t0 = time.time()
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)

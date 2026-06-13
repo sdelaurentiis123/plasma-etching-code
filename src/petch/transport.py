@@ -59,24 +59,29 @@ def _trace(seg, nrm, is_mask, x0_src, y_src, dirs_x, dirs_y, sticking, n_reemit,
     return flux, ang_acc
 
 
-def mc_flux(seg, mid, nrm, is_mask, L, y_src, W, par, n_part_ion=20000, n_part_neu=20000):
-    """Compute per-segment normalized flux multipliers + mean ion incidence cos for 3 species."""
-    rng = np.random.default_rng(0)
+def mc_flux(seg, mid, nrm, is_mask, L, y_src, W, par, n_part_ion=20000, n_part_neu=20000, seed=0):
+    """Compute per-segment normalized flux multipliers + mean ion incidence cos for 3 species.
+
+    `seed` selects an independent Monte-Carlo realization (seed=0 reproduces the PoC exactly).
+    Used for seed-averaging in the convergence study and for variance estimates.
+    """
+    rng = np.random.default_rng(seed)
+    s_off = 3 * seed
     # --- ions: near-vertical, small angular spread ---
     xs0 = rng.uniform(0, W, n_part_ion)
     a = rng.normal(0, par['ion_ang_sigma'], n_part_ion)
     dix = np.sin(a); diy = -np.cos(a)
-    fi, ai = _trace(seg, nrm, is_mask, xs0, y_src, dix, diy, 1.0, 0, 1)
+    fi, ai = _trace(seg, nrm, is_mask, xs0, y_src, dix, diy, 1.0, 0, 1 + s_off)
     # --- F etchant: cosine launch, sticking s_F, re-emission ---
     xs1 = rng.uniform(0, W, n_part_neu)
     aF = np.arcsin(rng.uniform(-1, 1, n_part_neu))     # cosine-ish into lower hemisphere
     dfx = np.sin(aF); dfy = -np.cos(aF)
-    fF, _ = _trace(seg, nrm, is_mask, xs1, y_src, dfx, dfy, par['s_F'], 12, 2)
+    fF, _ = _trace(seg, nrm, is_mask, xs1, y_src, dfx, dfy, par['s_F'], 12, 2 + s_off)
     # --- O passivation ---
     xs2 = rng.uniform(0, W, n_part_neu)
     aO = np.arcsin(rng.uniform(-1, 1, n_part_neu))
     dox = np.sin(aO); doy = -np.cos(aO)
-    fO, _ = _trace(seg, nrm, is_mask, xs2, y_src, dox, doy, par['s_O'], 12, 3)
+    fO, _ = _trace(seg, nrm, is_mask, xs2, y_src, dox, doy, par['s_O'], 12, 3 + s_off)
     # normalize to open-field flux density (particles per unit x length)
     base_ion = n_part_ion / W
     base_neu = n_part_neu / W
