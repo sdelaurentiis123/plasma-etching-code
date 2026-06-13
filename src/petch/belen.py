@@ -31,8 +31,13 @@ def surface_rate_belen(m_i, m_F, m_O, cos_i, is_mask, par, flags=None):
 
     GY_ie = Yie * Fi                                  # ion-enhanced etchant removal rate
     GY_p = Yp * Fi                                    # ion-enhanced passivation removal rate
-    Gb_E = par['Fflux'] * m_F + eps                   # adsorbed F flux (m_F carries betaE sticking)
-    Gb_P = par['Oflux'] * m_O + eps                   # adsorbed O flux (m_O carries betaO sticking)
+    # Flux normalization to the ViennaPS convention: our m_F records STUCK flux (open-field ~=
+    # betaE), ViennaPS normalizes ARRIVING flux to 1 on open field. Divide by fnorm (=betaE/betaO)
+    # to match. fnorm=1.0 recovers the uncorrected PoC-style normalization (for A/B testing).
+    fnE = par.get('fnorm_E', 1.0)
+    fnO = par.get('fnorm_O', 1.0)
+    Gb_E = par['Fflux'] * m_F / fnE + eps             # arriving F flux (ViennaPS convention)
+    Gb_P = par['Oflux'] * m_O / fnO + eps             # arriving O flux
 
     a = (par['k_sigma'] + 2.0 * GY_ie) / Gb_E
     b = (par['beta_sigma'] + GY_p) / Gb_P
