@@ -89,7 +89,7 @@ def _trace(seg, nrm, is_mask, x0_src, y_src, dirs_x, dirs_y, sticking, n_reemit,
 
 
 def mc_flux(seg, mid, nrm, is_mask, L, y_src, W, par, n_part_ion=20000, n_part_neu=20000,
-            seed=0, n_reemit=12, sampling="pseudo"):
+            seed=0, n_reemit=12, sampling="pseudo", do_neutrals=True):
     """Compute per-segment normalized flux multipliers + mean ion incidence cos for 3 species.
 
     `seed` selects an independent Monte-Carlo realization (seed=0, sampling='pseudo' reproduces
@@ -113,8 +113,11 @@ def mc_flux(seg, mid, nrm, is_mask, L, y_src, W, par, n_part_ion=20000, n_part_n
         aO = np.arcsin(rng.uniform(-1, 1, n_part_neu))
         dox = np.sin(aO); doy = -np.cos(aO)
     fi, ai = _trace(seg, nrm, is_mask, xs0, y_src, dix, diy, 1.0, 0, 1 + s_off)
-    fF, _ = _trace(seg, nrm, is_mask, xs1, y_src, dfx, dfy, par['s_F'], n_reemit, 2 + s_off)
-    fO, _ = _trace(seg, nrm, is_mask, xs2, y_src, dox, doy, par['s_O'], n_reemit, 3 + s_off)
+    if do_neutrals:
+        fF, _ = _trace(seg, nrm, is_mask, xs1, y_src, dfx, dfy, par['s_F'], n_reemit, 2 + s_off)
+        fO, _ = _trace(seg, nrm, is_mask, xs2, y_src, dox, doy, par['s_O'], n_reemit, 3 + s_off)
+    else:  # ions-only (neutrals come from radiosity in the split path)
+        fF = np.zeros(seg.shape[0]); fO = np.zeros(seg.shape[0])
     # normalize to open-field flux density (particles per unit x length)
     base_ion = n_part_ion / W
     base_neu = n_part_neu / W

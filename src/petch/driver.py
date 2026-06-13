@@ -13,6 +13,7 @@ from .geometry import (make_trench, extract_surface, orient_normals,
 from .transport import mc_flux
 from .chemistry import surface_rate
 from .levelset import advect, extend_velocity, reinit
+from .radiosity import neutral_radiosity
 
 
 def run_etch(W=20.0, H=20.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
@@ -42,10 +43,15 @@ def run_etch(W=20.0, H=20.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
         nrm = orient_normals(mid, nrm, phi, xs, ys, dx)
         is_mask = seg_in_mask(mid, mask, xs, ys, dx)
         t0 = time.time()
+        split = getattr(flags, "transport_split", False)
         m_i, m_F, m_O, cos_i = mc_flux(segs, mid, nrm, is_mask, L, y_src, W, mc_par,
                                        n_part_ion=n_part_ion, n_part_neu=n_part_neu,
                                        seed=seed, n_reemit=n_reemit,
-                                       sampling=getattr(flags, "sampling", "pseudo"))
+                                       sampling=getattr(flags, "sampling", "pseudo"),
+                                       do_neutrals=not split)
+        if split:   # neutrals by deterministic radiosity (all-bounces, noise-free)
+            m_F = neutral_radiosity(segs, mid, nrm, L, mc_par['s_F'])
+            m_O = neutral_radiosity(segs, mid, nrm, L, mc_par['s_O'])
         timings['raytrace'] += time.time() - t0
         t0 = time.time()
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)

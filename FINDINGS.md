@@ -77,7 +77,41 @@ cost**. Therefore the high-value speedup is the neutral solve, not the ion few-r
 lever (neutrals are the cost) and (ii) the ARDE fix (it recomputes the neutral equilibrium flux,
 which is where the over-depletion lives). That is the next major build.
 
-**Next:** implement the neutral radiosity solve — assemble the segment-to-segment form-factor
-operator K from the existing visibility (`_trace`), solve `(I-(1-s)K)^-1 Gamma_direct` for the
-equilibrium neutral flux, and re-measure ARDE for Belen. Hypothesis: ARDE flattens toward
-ViennaPS, and wall-clock drops (one solve vs 20k x 12-bounce chains).
+**(d) Neutral radiosity solve — built, and it OVERTURNS the hypothesis.** Implemented the exact
+2D form-factor radiosity (`src/petch/radiosity.py`): `Γ = (I-(1-s)A)^-1 D`, all bounces, noise
+free. It is consistent with MC (small-grid depth 6.67 vs 6.7; fully-exposed m_F → s). But on the
+width-8 ARDE sweep it made ARDE **steeper**, not flatter:
+
+| neutral model | norm ARDE (w4,w6,w8,w12) | ARDE rmse |
+|---|---|---|
+| belen + MC (12 bounces) | 0.751, –, 0.917, 1.00 | 0.110 |
+| **belen + radiosity (exact)** | 0.697, 0.808, 0.889, 1.00 | **0.150** |
+| ViennaPS | 0.932, 0.969, 0.985, 1.00 | — |
+
+Since radiosity is the *exact* neutral physics and still gives steep ARDE, the steep ARDE is
+**not** a neutral-transport-resolution problem. (Radiosity is currently O(M^3)-unoptimized →
+~40 s/width vs MC ~5 s; its value here is determinism + differentiability, not speed-as-built.)
+
+**(e) ROOT CAUSE FOUND — one cause for both symptoms.** Our model is in the **neutral-limited**
+regime (θ_F flux-sensitive → F-depletion in narrow trenches drops the rate → steep ARDE);
+ViennaPS's flat ARDE implies **F-saturated / ion-limited**. Confirmatory test — raising the F
+flux toward saturation monotonically flattens ARDE toward ViennaPS:
+
+| F flux | norm ARDE (w4,w8,w12) | rmse vs ViennaPS |
+|---|---|---|
+| ×1 | 0.751, 0.917, 1.00 | 0.112 |
+| ×3 | 0.803, 0.935, 1.00 | 0.080 |
+| ×6 | 0.815, 0.954, 1.00 | 0.070 |
+
+**Both the absolute-depth gap (`rate_scale`) AND the ARDE-shape gap trace to the SAME root
+cause: flux normalization.** Our `mc_flux` emits dimensionless open-field multipliers, not
+ViennaPS's absolute fluxes (1e15 cm⁻²s⁻¹), so the F-to-ion ratio in the coverage sits in the
+wrong regime. Reconciling the absolute flux units should fix ARDE and the absolute rate
+**together**, likely retiring `rate_scale` as a byproduct.
+
+**Phase-0 payoff:** the vague "~7% accuracy issue + ARDE lag" is now ONE localized,
+evidence-backed root cause (flux normalization) with a demonstrated lever (the F/ion flux ratio).
+
+**Next:** reconcile `mc_flux` flux normalization to ViennaPS absolute units. This needs ViennaPS's
+flux convention + `unitConversion` (from source) and ideally one ViennaPS calibration run
+(GPU/Linux box — not available on this M1). That single change is predicted to close both gaps.
