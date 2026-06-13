@@ -26,6 +26,18 @@ def test_baseline_parity():
     assert abs(d - 9.18) < 0.4, f"baseline depth {d:.3f} drifted from 9.18"
 
 
+def test_3d_loop():
+    """3D etch loop runs end-to-end (Warp flux kernel) and deepens a feature."""
+    from petch import threed as t3
+    par = dict(petch.PAR); par['rate_scale'] = 0.3
+    geo = t3.run_etch_3d(Lx=8, Ly=4, Lz=12, dx=0.5, trench_width=3, mask_th=2, sub_top=8,
+                         t_end=1.5, n_steps=6, par=par, flags=petch.Flags(chemistry="langmuir"),
+                         n_ion=4000, n_neu=4000, verbose=False)
+    d = t3.center_depth_3d(geo)
+    assert d > 0.1, f"3D etch produced no depth ({d})"
+
+
 if __name__ == "__main__":
     test_small_run(); print("test_small_run OK")
     test_baseline_parity(); print("test_baseline_parity OK")
+    test_3d_loop(); print("test_3d_loop OK")
