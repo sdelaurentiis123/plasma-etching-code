@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOTA, Lineage &amp; Plan — Feature-Scale Etch</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html" class="active">SOTA &amp; Plan</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>SOTA, Lineage &amp; Plan</strong></p>
+<h1>State of the Art, the Research Lineage, and the Plan</h1>
+<p class="subtitle">Who does what today, whose shoulders this stands on, what is genuinely new, and the order of operations.</p>
+
+<h2>1. The tools</h2>
+<table>
+<thead><tr><th>Tool</th><th>Transport</th><th>Surface</th><th>GPU</th><th>Diff?</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td><strong>ViennaPS</strong> (TU Wien, open)</td><td>Monte Carlo (ViennaRay)</td><td>HRLE sparse level set, triangle/disk mesh</td><td><strong>Yes — OptiX</strong>, maturing</td><td>No</td><td>our reference; open, hackable</td></tr>
+<tr><td><strong>Sentaurus Topography 3D</strong> (Synopsys)</td><td><strong>Radiosity (default)</strong> + MC</td><td>level-set + faster "PMC" engine</td><td>Partial</td><td>No</td><td>industry TCAD standard</td></tr>
+<tr><td><strong>SEMulator3D</strong> (Lam/Coventor)</td><td>Monte Carlo, explicit surface</td><td>voxel/explicit</td><td>Some</td><td>No</td><td>dominant in virtual fab / integration</td></tr>
+<tr><td><strong>MCFPM</strong> (Kushner, U-Michigan)</td><td>Monte Carlo, pseudo-particles</td><td><strong>voxel/cell-based</strong></td><td>Academic</td><td>No</td><td>canonical academic feature profile model; 2D &amp; 3D</td></tr>
+</tbody>
+</table>
+<div class="callout key">
+<span class="lab">The honest read</span>
+<p>GPU ray tracing, radiosity, level sets, Monte-Carlo transport — <strong>all solved and shipping</strong>. None of these tools is <em>differentiable</em>, and none uses <em>learned operators</em> for the expensive physics. That negative space is the opportunity.</p>
+</div>
+
+<h2>2. The field's lineage: Kushner and Graves</h2>
+<p>This project sits at the <strong>feature scale</strong>. The two scales that bracket it were built largely by two groups, and our simulator is the bridge between them.</p>
+
+<figure>
+<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <rect x="40" y="20" width="640" height="58" rx="8" fill="#eef3f2" stroke="#2f5d62"/>
+  <text x="360" y="44" text-anchor="middle" font-size="15" font-weight="700" fill="#235">REACTOR / PLASMA SCALE  —  Kushner (HPEM, GlobalKin, PCMCM)</text>
+  <text x="360" y="64" text-anchor="middle" font-size="12" fill="#3c4148">produces incident fluxes, ion energy distribution (IED), ion angle distribution (IAD)</text>
+  <text x="360" y="95" text-anchor="middle" font-size="13" fill="#7a3b2e">▼  boundary conditions at the feature mouth  ▼</text>
+  <rect x="40" y="104" width="640" height="58" rx="8" fill="#fdf6e3" stroke="#9a6a00" stroke-width="2"/>
+  <text x="360" y="128" text-anchor="middle" font-size="15" font-weight="700" fill="#7a5a2a">FEATURE SCALE  —  THIS PROJECT  (+ ViennaPS, Sentaurus, MCFPM)</text>
+  <text x="360" y="148" text-anchor="middle" font-size="12" fill="#3c4148">ballistic transport · surface chemistry · level-set evolution · GPU · differentiable · learned ops</text>
+  <text x="360" y="179" text-anchor="middle" font-size="13" fill="#7a3b2e">▲  reaction probabilities, yields Y(E,θ), sticking, mechanisms  ▲</text>
+  <rect x="40" y="188" width="640" height="50" rx="8" fill="#f3f1ea" stroke="#7c7560"/>
+  <text x="360" y="210" text-anchor="middle" font-size="15" font-weight="700" fill="#5a4a2a">ATOMISTIC / SURFACE SCALE  —  Graves (MD, DeepMD plasma-surface)</text>
+  <text x="360" y="228" text-anchor="middle" font-size="12" fill="#3c4148">first-principles etch/sputter yields, ion-enhanced mechanisms, damage, ALE</text>
+</svg>
+<figcaption>Our simulator is the middle layer. Kushner's codes feed its inputs from above; Graves' MD grounds its reaction model from below.</figcaption>
+</figure>
+
+<h3>Mark Kushner — the scale above us, and our methodological ancestor</h3>
+<ul>
+<li><strong>HPEM</strong> (Hybrid Plasma Equipment Model) + <strong>GlobalKin</strong> (gas-phase chemistry kinetics) + <strong>PCMCM</strong> (Plasma Chemistry Monte Carlo Model) compute the reactor-scale plasma and deliver exactly the data we take as <em>given</em>: the species fluxes and the IED/IAD at the wafer. In the full vision, HPEM&nbsp;→&nbsp;PCMCM&nbsp;→ our feature sim is the reactor-to-feature coupling.</li>
+<li><strong>MCFPM</strong> (Monte Carlo Feature Profile Model) is the canonical academic feature-scale etch profile code — pseudo-particles launched with energies/angles sampled from HPEM, ballistic transport, surface reaction probabilities. It is the direct ancestor of our forward Monte-Carlo transport. The key contrast: MCFPM is <strong>voxel/cell-based</strong>, whereas we (like ViennaPS) use a <strong>level set</strong>. Same physics, different surface representation.</li>
+</ul>
+
+<h3>David Graves — the scale below us, and the reaction model's foundation</h3>
+<ul>
+<li>Pioneered <strong>molecular-dynamics simulation of plasma-surface interactions</strong>: ion bombardment of Si in F/Cl chemistries, computing <em>from first principles</em> the very quantities our <a href="physics.html">chemistry layer</a> uses phenomenologically — etch/sputter <strong>yields \(Y(E,\theta)\)</strong>, energy thresholds, the angular structure, sticking, and surface damage.</li>
+<li>Classified the ion-enhanced etching mechanisms we lump into one rate: <em>enhanced spontaneous etching, chemically enhanced physical sputtering, chemical sputtering</em> — the microscopic content of the Coburn-Winters synergy.</li>
+<li>Recent work uses <strong>Deep Potential MD (DeepMD)</strong> — machine-learned interatomic potentials — for Si-Cl-Ar etching, and MD of <strong>atomic layer etching</strong>. This is, at the atomistic scale, <em>exactly the learned-operator idea</em> on our <a href="differentiable-ml.html">Phase-2 page</a>: replace expensive physics with a trained surrogate. It is the strongest signal that the foundation-model convergence is the right bet.</li>
+</ul>
+
+<div class="callout key">
+<span class="lab">How they relate, in one sentence</span>
+<p>Kushner gives us our <strong>inputs</strong> (plasma → fluxes/IED/IAD) and our <strong>method's ancestor</strong> (MCFPM); Graves gives us our <strong>reaction model</strong> (MD-derived yields and mechanisms) and a <strong>preview of the ML future</strong> (DeepMD). Our contribution is the feature-scale layer between them, made GPU-fast, differentiable, and operator-accelerated — which neither classic code is.</p>
+</div>
+
+<h2>3. The novelty map</h2>
+<table>
+<thead><tr><th>Capability</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Sparse level set + BVH/GPU ray tracing</td><td><span class="tag stake">table stakes</span> ViennaPS, MCFPM, Sentaurus</td></tr>
+<tr><td>Radiosity for re-emission</td><td><span class="tag stake">table stakes</span> Sentaurus default — engineering, not novelty</td></tr>
+<tr><td>QMC + control-variate (equal fidelity, far fewer rays)</td><td><span class="tag win">defensible</span> mostly open in this domain</td></tr>
+<tr><td>Differentiable simulator (inverse design)</td><td><span class="tag win">defensible</span> no one ships this</td></tr>
+<tr><td>Learned operators for chemistry + scattering</td><td><span class="tag win">defensible</span> no one ships this; converges with foundation model</td></tr>
+</tbody>
+</table>
+<div class="callout warn">
+<span class="lab">The RT-core caveat (keep it honest)</span>
+<p>Hardware ray tracers hit their headline throughput (~10 GRays/s) only on <em>coherent</em> ray bundles. Diffuse neutral re-emission is <em>incoherent</em>, where RT cores underperform peak. This (a) tempers any "blazing on RT cores" claim and (b) is an argument <em>for</em> QMC and DDA, which are more coherent / coherence-agnostic. Do not pitch "faster ray tracer" — pitch "fewer rays + differentiable + learned operators."</p>
+</div>
+
+<h2>4. The phase plan</h2>
+<table>
+<thead><tr><th>Phase</th><th>Where</th><th>What</th></tr></thead>
+<tbody>
+<tr><td><strong>0 — Fidelity harness</strong></td><td>this Mac, CPU (Warp-CPU)</td><td>2D harness; retire bias contributors 1–6 each with a number; stand up DDA + QMC + control-variate + species split; convergence suite (grid &amp; ray refinement, Richardson). Benchmark against the <em>cached</em> ViennaPS numbers in <code>summary.json</code>.</td></tr>
+<tr><td><strong>1 — 3D + hardware</strong></td><td>NVIDIA (pending)</td><td>3D level set + Warp; DDA-on-level-set vs. BVH-triangle, per species; head-to-head vs. live ViennaPS — Chamfer / depth / sidewall / ARDE + rays/sec. The headline-number phase.</td></tr>
+<tr><td><strong>2 — Learned operators</strong></td><td>NVIDIA</td><td>surrogate the stiff chemistry source + multiple-scattering integral against the now-validated baseline. The foundation-model convergence.</td></tr>
+</tbody>
+</table>
+
+<h2>5. Benchmark methodology</h2>
+<ul>
+<li><strong>Accuracy:</strong> Chamfer distance to ViennaPS surface, plus depth, sidewall angle, ARDE slope. Target: match ViennaPS to &lt;2% <strong>without</strong> <code>rate_scale</code>.</li>
+<li><strong>Convergence:</strong> grid refinement \(\Delta x\to0\), ray refinement \(N\to\infty\) via Richardson extrapolation — separates discretization error from sampling noise.</li>
+<li><strong>Speed:</strong> rays-to-fidelity (rays to a fixed noise floor) and rays/sec. (See <a href="acceleration.html">Acceleration §7</a>.)</li>
+</ul>
+
+<h2>6. The reference code, mapped</h2>
+<p>The current proof-of-concept matches ViennaPS in shape and ARDE trend parameter-free, but needs <code>rate_scale = 0.29</code> for absolute depth. That knob stands in for six contributors, each retired in Phase 0:</p>
+<table>
+<thead><tr><th>#</th><th>Bias</th><th>Layer</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Langmuir steady state ≠ Belen/Ertl ODEs <em>(dominant)</em></td><td><a href="physics.html">chemistry</a></td></tr>
+<tr><td>2</td><td>yield at \(\langle E\rangle\), not \(\langle Y(E)\rangle\) (Jensen)</td><td><a href="physics.html">chemistry</a></td></tr>
+<tr><td>3</td><td>cosine angular yield, no grazing structure (microtrenching)</td><td><a href="physics.html">chemistry</a></td></tr>
+<tr><td>4</td><td>no ion specular reflection</td><td><a href="flux-transport.html">transport</a></td></tr>
+<tr><td>5</td><td>1st-order upwind + heavy reinit, coarse \(\Delta x\)</td><td><a href="numerics.html">numerics</a></td></tr>
+<tr><td>6</td><td>heuristic flux clips + 3D-cosine re-emission used in 2D</td><td><a href="flux-transport.html">transport</a></td></tr>
+</tbody>
+</table>
+
+<h2>7. References</h2>
+<ul style="font-size:14px">
+<li>Manstetten, <em>Efficient Flux Calculations for Topography Simulation</em> (TU Wien) — the flux-method taxonomy.</li>
+<li>Riedel, <em>GPU-Accelerated Ray-Tracing for Particle Simulations in ViennaPS</em> (TU Wien, 2026).</li>
+<li>ViennaPS / ViennaLS (ViennaTools); Sentaurus Topography 3D (Synopsys); SEMulator3D (Lam/Coventor).</li>
+<li>Kushner et&nbsp;al. — HPEM, GlobalKin, PCMCM, MCFPM (U-Michigan CPSEG).</li>
+<li>Graves et&nbsp;al. — MD of plasma-surface interactions; Deep Potential MD for Si-Cl-Ar etching (Princeton / PPPL).</li>
+<li>Coburn &amp; Winters (1979) — ion-neutral synergy; Steinbrüchel (1989) — \(\sqrt{E}\) yield law; Belen et&nbsp;al. — SF\(_6\)/O\(_2\) coverage model.</li>
+</ul>
+
+<div class="pagenav">
+<a href="differentiable-ml.html">← Differentiable &amp; ML</a>
+<a href="index.html">↑ Overview</a>
+</div>
+<div class="footer"><p>State of the art, lineage, and plan. This completes the explainer set.</p></div>
+</main>
+</body>
+</html>

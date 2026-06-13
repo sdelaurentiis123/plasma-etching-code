@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceleration — Feature-Scale Etch</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html" class="active">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>Acceleration</strong></p>
+<h1>Acceleration: The Full Speedup Catalog</h1>
+<p class="subtitle">Variance reduction, traversal, sparse data structures, and systems engineering — all expressions of one idea.</p>
+
+<div class="callout key">
+<span class="lab">The unifying theme</span>
+<p>In a Monte-Carlo etch simulator, the trench-floor <strong>roughness is variance</strong>. So every technique that reduces variance does three things at once: it makes the sim <strong>faster</strong> (fewer rays for the same noise floor), <strong>smoother</strong> (better-looking and physically cleaner), and <strong>differentiable</strong> (gradients survive). "Acceleration without loss of fidelity" is literally variance reduction.</p>
+</div>
+
+<h2>1. Sampling &amp; variance reduction</h2>
+<p>The standard error of a Monte-Carlo flux estimate is \(\propto\sigma/\sqrt{N}\). Every method below attacks either \(\sigma\) (the integrand variance) or the \(\sqrt{N}\) convergence rate.</p>
+<table>
+<thead><tr><th>Technique</th><th>What it does</th><th>Cost to fidelity</th></tr></thead>
+<tbody>
+<tr><td><strong>Quasi-Monte Carlo (Sobol)</strong></td><td>low-discrepancy directions fill sample space evenly; variance falls as \(\sim1/N\) instead of \(1/\sqrt N\) → ~10× fewer rays. Bonus: more <em>coherent</em> rays, helping RT-core throughput.</td><td>none (exact)</td></tr>
+<tr><td><strong>Control variate</strong></td><td>compute the direct, unobstructed flux in closed form (view factors) — exact — and Monte-Carlo only the small re-emission residual. Most of the signal becomes noise-free.</td><td>none</td></tr>
+<tr><td><strong>Russian roulette</strong></td><td>terminate low-weight re-emission paths <em>probabilistically</em> instead of a hard cap; replaces the biased \(n_{\rm re}=12\) truncation with an unbiased estimator.</td><td>none (removes bias)</td></tr>
+<tr><td><strong>Next-event estimation</strong></td><td>at every bounce, deterministically connect to the source instead of waiting for a random walk to escape upward. Kills "did this path find the source" variance.</td><td>none</td></tr>
+<tr><td><strong>Importance sampling + MIS</strong></td><td>sample re-emission toward unshadowed / surface-bound directions; combine direct and re-emission estimators optimally (multiple importance sampling).</td><td>none</td></tr>
+<tr><td><strong>Stratification / antithetic</strong></td><td>partition the source plane and angular domain so samples can't clump; paired antithetic samples cancel low-order error.</td><td>none</td></tr>
+<tr><td><strong>Adjoint / backward tracing</strong></td><td>trace <em>from</em> the trench bottom you care about back to the source (reciprocity). When only the floor matters, far cheaper than forward.</td><td>none</td></tr>
+<tr><td><strong>Bidirectional</strong></td><td>trace from source and from surface, connect in the middle — for deep features where forward paths rarely reach the bottom.</td><td>none</td></tr>
+</tbody>
+</table>
+
+<h2>2. The re-emission solve (neutrals)</h2>
+<table>
+<thead><tr><th>Technique</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>Radiosity linear solve</strong></td><td>solve \((I-(1-s)K)^{-1}\Gamma_{\rm direct}\) for the neutral equilibrium — all bounces at once, zero noise, differentiable by adjoint. (See <a href="flux-transport.html">Flux &amp; Transport §4</a>.)</td></tr>
+<tr><td><strong>Hierarchical radiosity</strong></td><td>cluster distant patches so the dense \(O(N^2)\) form-factor operator becomes \(O(N)\)–\(O(N\log N)\). (Hanrahan clustering.)</td></tr>
+<tr><td><strong>FMM / \(\mathcal{H}\)-matrix compression</strong></td><td>fast-multipole or hierarchical-matrix compression of \(K\) for fast matrix-vector products and solves.</td></tr>
+<tr><td><strong>Anderson acceleration</strong></td><td>fewer iterations on the coverage↔sticking fixed point and on iterative radiosity solves.</td></tr>
+</tbody>
+</table>
+
+<h2>3. Traversal &amp; GPU execution</h2>
+<table>
+<thead><tr><th>Technique</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>DDA / sphere tracing</strong></td><td>march the level-set grid directly — no mesh, no BVH rebuild; SDF gives free big steps. (See <a href="flux-transport.html">Flux &amp; Transport §5</a>.)</td></tr>
+<tr><td><strong>BVH + RT cores</strong></td><td>\(O(\log M)\) ray-triangle traversal in hardware; peak throughput on coherent rays.</td></tr>
+<tr><td><strong>Wavefront / persistent-thread tracing</strong></td><td>queue rays and process by stage to reduce warp divergence on bounce chains (vs. one megakernel).</td></tr>
+<tr><td><strong>Ray packets</strong></td><td>batch coherent rays for SIMD/warp-coherent traversal — fits the collimated ion beam.</td></tr>
+<tr><td><strong>Mixed precision</strong></td><td>fp32 (OptiX-native) or fp16 ray math: more throughput, less memory.</td></tr>
+<tr><td><strong>Atomic-free scatter</strong></td><td>accumulate flux to surface points by sort-then-segmented-reduce instead of contended atomics.</td></tr>
+<tr><td><strong>GPU-resident pipeline</strong></td><td>keep \(\varphi\), mesh, and flux on-device across steps — no host round-trips. Often a 5–10× wall-clock win on its own.</td></tr>
+</tbody>
+</table>
+
+<h2>4. Geometry &amp; level set</h2>
+<table>
+<thead><tr><th>Technique</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>Narrow band / HRLE</strong></td><td>store and update only near the surface — \(O(n^2)\) not \(O(n^3)\). The 3D enabler.</td></tr>
+<tr><td><strong>NanoVDB / sparse octree</strong></td><td>GPU-friendly sparse voxels; pairs with DDA marching.</td></tr>
+<tr><td><strong>AMR / octree refinement</strong></td><td>fine cells only near the surface or high-curvature regions.</td></tr>
+<tr><td><strong>Lazy + local reinitialization</strong></td><td>reinit every \(k\) steps and only near the front — less numerical diffusion <em>and</em> less cost.</td></tr>
+<tr><td><strong>Semi-implicit advection / local substepping</strong></td><td>relax the CFL limit for bigger stable \(\Delta t\); sub-step only where \(F\) is large.</td></tr>
+</tbody>
+</table>
+
+<h2>5. Chemistry &amp; structure</h2>
+<table>
+<thead><tr><th>Technique</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><strong>Stiff ODE integrators</strong></td><td>Rosenbrock / exponential integrators take big stable steps on the stiff coverage ODEs (vs. tiny explicit steps).</td></tr>
+<tr><td><strong>Symmetry / periodic unit cell</strong></td><td>a dense hole array is translation-symmetric — simulate one cell with periodic BCs instead of a trillion holes. Often the single biggest real-world win.</td></tr>
+<tr><td><strong>Temporal coherence (warm start)</strong></td><td>flux fields barely change step-to-step on quasi-static deep sidewalls; warm-start each step from the last and re-sample only where the surface moved.</td></tr>
+<tr><td><strong>Spatial flux caching</strong></td><td>cache the slowly-varying flux field and interpolate; recompute only where it changes (irradiance-caching analog).</td></tr>
+</tbody>
+</table>
+
+<h2>6. The priority queue</h2>
+<p>What to build first, ranked by payoff-to-risk, with the benchmark axis each one moves:</p>
+<table>
+<thead><tr><th>#</th><th>Speedup</th><th>Payoff</th><th>Benchmark axis</th><th>Risk</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>DDA / sphere-trace on level set</td><td>kills \(O(N\!\cdot\!M)\) brute force + per-step BVH build</td><td>rays/sec (wall clock)</td><td>grazing-angle steps</td></tr>
+<tr><td>2</td><td>Species split (ion few-ray, neutral radiosity)</td><td>deletes ~99% ion rays; removes neutral noise + truncation bias</td><td>rays-to-fidelity</td><td>low</td></tr>
+<tr><td>3</td><td>QMC (Sobol)</td><td>~10× fewer rays, exact</td><td>rays-to-fidelity</td><td>very low</td></tr>
+<tr><td>4</td><td>Control variate</td><td>most of signal exact, MC only residual</td><td>rays-to-fidelity</td><td>medium</td></tr>
+<tr><td>5</td><td>WENO + TVD-RK + real velocity extension</td><td>coarser grid for same accuracy</td><td>Chamfer vs. \(\Delta x\)</td><td>medium</td></tr>
+<tr><td>6</td><td>Russian roulette + next-event estimation</td><td>unbiased termination; source-connection variance kill</td><td>rays-to-fidelity</td><td>low</td></tr>
+<tr><td>7</td><td>GPU-resident pipeline + temporal coherence</td><td>wall-clock; reuse on quasi-static walls</td><td>rays/sec</td><td>low</td></tr>
+<tr><td>8</td><td>Symmetry / periodic unit cell</td><td>array problems collapse to one cell</td><td>wall-clock</td><td>low (when applicable)</td></tr>
+</tbody>
+</table>
+
+<h2>7. Two benchmark axes — never conflate them</h2>
+<div class="callout warn">
+<span class="lab">Measure speed and accuracy separately</span>
+<ul>
+<li><strong>Accuracy axis:</strong> Chamfer distance to ViennaPS, plus depth / sidewall-angle / ARDE. Moved by the <em>model-form &amp; numerical fixes</em> (<a href="physics.html">contributors 1–4</a>, <a href="numerics.html">5</a>). Goal: match ViennaPS <strong>without</strong> <code>rate_scale</code>.</li>
+<li><strong>Speed axis:</strong> <em>rays-to-fidelity</em> (rays needed to hit a fixed noise floor) and <em>rays/sec</em> (raw throughput). Moved by the <em>variance-reduction &amp; traversal</em> techniques above.</li>
+</ul>
+<p>A speedup that quietly loses accuracy will hide if you only watch one axis. The convergence harness (grid refinement, ray refinement, Richardson extrapolation) watches both.</p>
+</div>
+
+<div class="pagenav">
+<a href="flux-transport.html">← Flux &amp; Transport</a>
+<a href="differentiable-ml.html">Next: Differentiable &amp; ML →</a>
+</div>
+<div class="footer"><p>Acceleration layer. Next, the part nobody else ships: differentiability and learned operators.</p></div>
+</main>
+</body>
+</html>

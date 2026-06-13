@@ -1,0 +1,356 @@
+% =====================================================================
+% references.bib  —  Differentiable 3D Feature-Scale Plasma-Etch Simulation
+% Compiled for the technical explainer set (docs/).
+%
+% NOTE: Entries marked @misc are web-sourced; verify exact authors, year,
+% volume/pages against the primary venue before formal publication. Classic
+% @article entries are standard citations given with best-known details.
+% =====================================================================
+
+% ---------------------------------------------------------------------
+% A. Feature-scale topography tools & frameworks
+% ---------------------------------------------------------------------
+@article{viennaps2025,
+  author  = {Quell, Tobias and others},
+  title   = {{ViennaPS}: A flexible framework for semiconductor process simulation},
+  journal = {SoftwareX / Computer Physics Communications (ViennaTools)},
+  year    = {2025},
+  note    = {\url{https://www.sciencedirect.com/science/article/pii/S2352711025004194}; code: \url{https://github.com/ViennaTools/ViennaPS}}
+}
+
+@misc{viennaps_docs,
+  title        = {{ViennaPS} Documentation},
+  author       = {{ViennaTools}},
+  howpublished = {\url{https://viennatools.github.io/ViennaPS/}},
+  year         = {2025}
+}
+
+@phdthesis{riedel2026gpu,
+  author = {Riedel, Xaver},
+  title  = {{GPU}-Accelerated Ray-Tracing for Particle Simulations in {ViennaPS}},
+  school = {TU Wien},
+  year   = {2026},
+  note   = {Adds OptiX engines for disk, line, and level-set voxel meshes. \url{https://repositum.tuwien.at/handle/20.500.12708/226294}}
+}
+
+@phdthesis{manstetten_flux,
+  author = {Manstetten, Paul},
+  title  = {Efficient Flux Calculations for Topography Simulation},
+  school = {TU Wien (Institute for Microelectronics)},
+  year   = {2018},
+  note   = {Definitive taxonomy of particle-transport / flux methods (matrix-radiosity, iterative, Monte Carlo). \url{https://www.iue.tuwien.ac.at/phd/manstetten/}}
+}
+
+@misc{sentaurus_topo,
+  title        = {Sentaurus Topography 3D: Simulator for Topography-Modifying Processes},
+  author       = {{Synopsys}},
+  howpublished = {\url{https://www.synopsys.com/manufacturing/tcad/process-simulation/sentaurus-topography.html}},
+  year         = {2025},
+  note         = {Radiosity is the default flux method; Monte Carlo optional.}
+}
+
+@inproceedings{semulator3d,
+  author    = {{Coventor (Lam Research)}},
+  title     = {{SEMulator3D}: Monte Carlo feature-scale process modeling},
+  booktitle = {Virtual fabrication / process integration},
+  year      = {2024},
+  note      = {Monte Carlo transport with explicit surface representation.}
+}
+
+% ---------------------------------------------------------------------
+% B. Level set & surface-evolution numerics
+% ---------------------------------------------------------------------
+@article{osher_sethian_1988,
+  author  = {Osher, Stanley and Sethian, James A.},
+  title   = {Fronts propagating with curvature-dependent speed: Algorithms based on {Hamilton-Jacobi} formulations},
+  journal = {Journal of Computational Physics},
+  volume  = {79}, number = {1}, pages = {12--49}, year = {1988}
+}
+
+@article{sethian_fastmarching_1996,
+  author  = {Sethian, James A.},
+  title   = {A fast marching level set method for monotonically advancing fronts},
+  journal = {Proc. Natl. Acad. Sci.},
+  volume  = {93}, number = {4}, pages = {1591--1595}, year = {1996}
+}
+
+@article{adalsteinsson_sethian_1999,
+  author  = {Adalsteinsson, David and Sethian, James A.},
+  title   = {The fast construction of extension velocities in level set methods},
+  journal = {Journal of Computational Physics},
+  volume  = {148}, number = {1}, pages = {2--22}, year = {1999}
+}
+
+@article{jiang_shu_weno_1996,
+  author  = {Jiang, Guang-Shan and Shu, Chi-Wang},
+  title   = {Efficient implementation of weighted {ENO} schemes},
+  journal = {Journal of Computational Physics},
+  volume  = {126}, number = {1}, pages = {202--228}, year = {1996}
+}
+
+@article{shu_osher_tvdrk_1988,
+  author  = {Shu, Chi-Wang and Osher, Stanley},
+  title   = {Efficient implementation of essentially non-oscillatory shock-capturing schemes},
+  journal = {Journal of Computational Physics},
+  volume  = {77}, number = {2}, pages = {439--471}, year = {1988}
+}
+
+@article{sparsefield_etch_2004,
+  author  = {{(sparse-field level set)}},
+  title   = {3D etching profile evolution simulation using sparse field level set method},
+  journal = {arXiv:physics/0409130},
+  year    = {2004},
+  note    = {\url{https://arxiv.org/pdf/physics/0409130}}
+}
+
+@article{fastlevelset_topo_2009,
+  title   = {A fast level set framework for large three-dimensional topography simulations},
+  journal = {Computer Physics Communications},
+  year    = {2009},
+  note    = {\url{https://www.sciencedirect.com/science/article/abs/pii/S0010465509000459}}
+}
+
+@article{drie_narrowband_mc_2018,
+  title   = {Three-dimensional simulation of {DRIE} based on the narrow band level set and {Monte Carlo} method},
+  journal = {Micromachines},
+  year    = {2018},
+  note    = {\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6187289/}}
+}
+
+% ---------------------------------------------------------------------
+% C. Ray tracing / traversal / GPU
+% ---------------------------------------------------------------------
+@inproceedings{amanatides_woo_1987,
+  author    = {Amanatides, John and Woo, Andrew},
+  title     = {A Fast Voxel Traversal Algorithm for Ray Tracing},
+  booktitle = {Eurographics '87},
+  year      = {1987}
+}
+
+@article{hart_spheretracing_1996,
+  author  = {Hart, John C.},
+  title   = {Sphere tracing: a geometric method for the antialiased ray tracing of implicit surfaces},
+  journal = {The Visual Computer},
+  volume  = {12}, number = {10}, pages = {527--545}, year = {1996}
+}
+
+@misc{nvidia_optix,
+  title        = {{NVIDIA OptiX} Ray Tracing Engine},
+  author       = {{NVIDIA}},
+  howpublished = {\url{https://developer.nvidia.com/rtx/ray-tracing/optix}},
+  year         = {2025}
+}
+
+@misc{warp2022,
+  author       = {Macklin, Miles},
+  title        = {{Warp}: A High-Performance Python Framework for {GPU} Simulation and Graphics},
+  howpublished = {NVIDIA; \url{https://developer.nvidia.com/warp-python}},
+  year         = {2022}
+}
+
+@inproceedings{hwrt_montecarlo_sc19,
+  title     = {Exploiting Hardware-Accelerated Ray Tracing for {Monte Carlo} Particle Transport},
+  booktitle = {SC19 PMBS Workshop},
+  year      = {2019},
+  note      = {\url{https://sc19.supercomputing.org/proceedings/workshops/workshop_files/ws_pmbsf102s2-file1.pdf}}
+}
+
+@misc{gpu_harc_etch_2013,
+  author       = {Choi, K. and others},
+  title        = {{GPU}-based 3D feature profile simulation of high-aspect-ratio contact-hole etch under fluorocarbon plasmas},
+  howpublished = {APS GEC; \url{https://ui.adsabs.harvard.edu/abs/2013APS..GECMR1020C/abstract}},
+  year         = {2013}
+}
+
+% ---------------------------------------------------------------------
+% D. Variance reduction / quasi-Monte Carlo / differentiable rendering
+% ---------------------------------------------------------------------
+@article{qmcrt_radiative_2020,
+  title   = {Quasi-{Monte Carlo} ray tracing algorithm for radiative flux distribution simulation},
+  journal = {Solar Energy},
+  year    = {2020},
+  note    = {\url{https://www.sciencedirect.com/science/article/abs/pii/S0038092X20310148}}
+}
+
+@article{li_edge_sampling_2018,
+  author  = {Li, Tzu-Mao and Aittala, Miika and Durand, Fr{\'e}do and Lehtinen, Jaakko},
+  title   = {Differentiable {Monte Carlo} ray tracing through edge sampling},
+  journal = {ACM Transactions on Graphics (SIGGRAPH Asia)},
+  volume  = {37}, number = {6}, year = {2018}
+}
+
+@article{differentiable_neural_radiosity_2022,
+  title   = {Differentiable Neural Radiosity},
+  journal = {arXiv:2201.13190},
+  year    = {2022},
+  note    = {\url{https://arxiv.org/pdf/2201.13190}}
+}
+
+% ---------------------------------------------------------------------
+% E. Surface physics & chemistry (the reaction model)
+% ---------------------------------------------------------------------
+@article{coburn_winters_1979,
+  author  = {Coburn, J. W. and Winters, Harold F.},
+  title   = {Ion- and electron-assisted gas-surface chemistry: An important effect in plasma etching},
+  journal = {Journal of Applied Physics},
+  volume  = {50}, number = {5}, pages = {3189--3196}, year = {1979}
+}
+
+@article{steinbruchel_1989,
+  author  = {Steinbr{\"u}chel, Ch.},
+  title   = {Universal energy dependence of physical and ion-enhanced chemical etch yields at low ion energy},
+  journal = {Applied Physics Letters},
+  volume  = {55}, number = {19}, pages = {1960--1962}, year = {1989}
+}
+
+@article{sigmund_1969,
+  author  = {Sigmund, Peter},
+  title   = {Theory of sputtering. I. Sputtering yield of amorphous and polycrystalline targets},
+  journal = {Physical Review},
+  volume  = {184}, number = {2}, pages = {383--416}, year = {1969}
+}
+
+@article{belen_sf6o2_2005,
+  author  = {Belen, R. Jane and Gomez, Sergi and Cooperberg, David and Kiehlbauch, Mark and Aydil, Eray S.},
+  title   = {Feature-scale modeling of {Si} etching in {SF6/O2} plasmas},
+  journal = {Journal of Vacuum Science \& Technology A},
+  year    = {2005},
+  note    = {Coverage-based surface model used by ViennaPS SF6O2Etching; verify exact volume/pages.}
+}
+
+@article{graves_md_2009,
+  author  = {Graves, David B. and Brault, Pascal},
+  title   = {Molecular dynamics for low-temperature plasma-surface interaction studies},
+  journal = {J. Phys. D: Appl. Phys. (also arXiv:0902.2695)},
+  year    = {2009},
+  note    = {\url{https://arxiv.org/pdf/0902.2695}}
+}
+
+@article{graves_ions_md,
+  author  = {Graves, David B. and Humbird, David},
+  title   = {Controlling surfaces in plasma processing: role of ions via molecular dynamics simulations of surface chemistry},
+  journal = {(plasma processing surface chemistry)},
+  note    = {\url{https://www.researchgate.net/publication/231035137}}
+}
+
+@article{graves_deepmd_2024,
+  author  = {Graves, David B. and others},
+  title   = {Deep potential molecular dynamics simulations of low-temperature plasma-surface interactions},
+  journal = {(Princeton / PPPL)},
+  year    = {2024},
+  note    = {DeepMD for Si-Cl-Ar; predicts sputter yields and a-c interface depth. \url{https://www.osti.gov/biblio/2514378}}
+}
+
+@article{graves_ale_md,
+  author  = {Graves, David B. and others},
+  title   = {Dynamics of plasma atomic layer etching: molecular dynamics simulations and optical emission spectroscopy},
+  journal = {(ALE mechanisms)},
+  note    = {\url{https://www.osti.gov/biblio/2248044}}
+}
+
+% ---------------------------------------------------------------------
+% F. Reactor-scale plasma (Kushner)
+% ---------------------------------------------------------------------
+@misc{kushner_hpem,
+  author       = {Kushner, Mark J.},
+  title        = {Introduction to the Hybrid Plasma Equipment Model ({HPEM})},
+  howpublished = {U. Michigan CPSEG; \url{https://cpseg.eecs.umich.edu/pub/odp_files/hpem_intro.pdf}},
+  year         = {2020}
+}
+
+@misc{kushner_mcfpm,
+  author       = {Kushner, Mark J. and others},
+  title        = {Monte Carlo Feature Profile Model ({MCFPM})},
+  howpublished = {U. Michigan CPSEG; \url{https://cpseg.eecs.umich.edu/Projects/MCFPM/MCFPM.htm}},
+  note         = {Voxel-based kinetic feature-profile model; pseudo-particles with E/angle from HPEM. 2D and 3D.}
+}
+
+@misc{kushner_pcmcm,
+  author       = {Kushner, Mark J. and others},
+  title        = {Plasma Chemistry Monte Carlo Model ({PCMCM})},
+  howpublished = {U. Michigan CPSEG; \url{https://cpseg.eecs.umich.edu/Projects/PCMCM/PCMCM.htm}}
+}
+
+@article{kushner_harc_waveform_2024,
+  author  = {Kushner, Mark J. and others},
+  title   = {Voltage waveform tailoring for high-aspect-ratio plasma etching},
+  journal = {Physics of Plasmas},
+  volume  = {31}, number = {3}, pages = {033508}, year = {2024},
+  note    = {\url{https://cpseg.eecs.umich.edu/pub/articles/PhysPlasmas_31_033508_2024.pdf}}
+}
+
+% ---------------------------------------------------------------------
+% G. Machine learning: neural operators & interatomic potentials
+% ---------------------------------------------------------------------
+@inproceedings{li_fno_2021,
+  author    = {Li, Zongyi and Kovachki, Nikola and Azizzadenesheli, Kamyar and others},
+  title     = {Fourier Neural Operator for Parametric Partial Differential Equations},
+  booktitle = {ICLR; arXiv:2010.08895},
+  year      = {2021}
+}
+
+@article{lu_deeponet_2021,
+  author  = {Lu, Lu and Jin, Pengzhan and Pang, Guofei and Zhang, Zhongqiang and Karniadakis, George Em},
+  title   = {Learning nonlinear operators via {DeepONet} based on the universal approximation theorem of operators},
+  journal = {Nature Machine Intelligence},
+  volume  = {3}, pages = {218--229}, year = {2021}
+}
+
+@article{neuraloperators_review_2024,
+  author  = {Azizzadenesheli, Kamyar and others},
+  title   = {Neural operators for accelerating scientific simulations and design},
+  journal = {Nature Reviews Physics},
+  year    = {2024},
+  note    = {\url{https://www.nature.com/articles/s42254-024-00712-5}; arXiv:2309.15325}
+}
+
+@article{neuralop_plasma_edge_2025,
+  title   = {Neural operator surrogate models of plasma edge simulations: feasibility and data efficiency},
+  journal = {Nuclear Fusion (IOP); arXiv:2502.17386},
+  year    = {2025},
+  note    = {\url{https://arxiv.org/pdf/2502.17386}}
+}
+
+@inproceedings{batatia_mace_2022,
+  author    = {Batatia, Ilyes and Kov{\'a}cs, D{\'a}vid P. and Simm, Gregor and Ortner, Christoph and Cs{\'a}nyi, G{\'a}bor},
+  title     = {{MACE}: Higher Order Equivariant Message Passing Neural Networks for Fast and Accurate Force Fields},
+  booktitle = {NeurIPS; arXiv:2206.07697},
+  year      = {2022},
+  note      = {\url{https://github.com/ACEsuit/mace}}
+}
+
+@article{deepmd_kit_2018,
+  author  = {Wang, Han and Zhang, Linfeng and Han, Jiequn and E, Weinan},
+  title   = {{DeePMD-kit}: A deep learning package for many-body potential energy representation and molecular dynamics},
+  journal = {Computer Physics Communications},
+  volume  = {228}, pages = {178--184}, year = {2018}
+}
+
+@article{mlip_guide_2025,
+  title   = {A practical guide to machine learning interatomic potentials -- status},
+  author  = {Ryan, K. and others (Ceder group)},
+  year    = {2025},
+  note    = {\url{https://ceder.berkeley.edu/publications/2025_Ryan_MLP-guide.pdf}}
+}
+
+@article{multiscale_reactor_feature_ann_2025,
+  title   = {An efficient multiscale coupling method for reactor-scale {CVD} with microstructural features},
+  journal = {Advances in Engineering Software},
+  year    = {2025},
+  note    = {ANN surrogates replacing explicit KMC<->reactor coupling. \url{https://www.sciencedirect.com/science/article/abs/pii/S0965997825001899}}
+}
+
+% ---------------------------------------------------------------------
+% H. Application driver (3D NAND HARC)
+% ---------------------------------------------------------------------
+@misc{nand_etch_challenges_2024,
+  title        = {How Etch Breakthroughs Are Tackling 3D NAND Scaling Challenges on the Path to 1,000 Layers},
+  howpublished = {Semiconductor Digest; \url{https://www.semiconductor-digest.com/how-etch-breakthroughs-are-tackling-3d-nand-scaling-challenges-on-the-path-to-1000-layers/}},
+  year         = {2024}
+}
+
+@article{nand_onon_co_opt,
+  title   = {Etch and deposition co-optimization: enabling high-aspect-ratio 3D NAND Flash ONON channel-hole patterning},
+  journal = {(3D NAND patterning)},
+  note    = {\url{https://www.researchgate.net/publication/349505002}}
+}

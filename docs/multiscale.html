@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multiscale — The Cross-Scale Fast Model</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html" class="active">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>Multiscale</strong></p>
+<h1>The Cross-Scale Fast Model: From Atoms to Reactor</h1>
+<p class="subtitle">How to extend Graves' atomistic simulations into a learned surface operator, and chain differentiable surrogates across every scale into one fast, invertible model.</p>
+
+<p class="lede">The end state: a single differentiable pipeline where you turn a reactor knob and watch a 3D feature profile change &mdash; and, run backward, you name a target profile and it tells you the recipe. The atomistic physics (Graves) grounds the surface response; the plasma physics (Kushner) supplies the inputs; the feature solver sits in the middle. The trick to making it <em>fast</em> is to replace each expensive scale with a learned operator while keeping the geometry physical.</p>
+
+<h2>1. Three scales separated by a timescale wall</h2>
+<table>
+<thead><tr><th>Scale</th><th>Length / time</th><th>Code &amp; owner</th><th>Produces</th><th>Consumes</th></tr></thead>
+<tbody>
+<tr><td><strong>Reactor / plasma</strong></td><td>cm–m / µs–s</td><td>HPEM, GlobalKin, PCMCM (Kushner)</td><td>fluxes, IED, IAD at wafer</td><td>power, pressure, gas mix, bias waveform, geometry</td></tr>
+<tr><td><strong>Feature</strong></td><td>nm–µm / µs–s</td><td>this project, ViennaPS, MCFPM</td><td>3D profile evolution</td><td>fluxes/IED/IAD; a surface reaction model</td></tr>
+<tr><td><strong>Atomistic / surface</strong></td><td>Å–nm / fs–ns</td><td>MD, DeepMD (Graves)</td><td>yields \(Y(E,\theta)\), products, sticking, surface-state change, damage, roughness</td><td>incident particle + local surface state</td></tr>
+</tbody>
+</table>
+<div class="callout warn">
+<span class="lab">The wall</span>
+<p>These scales differ by <strong>~15 orders of magnitude in time</strong>. Molecular dynamics resolves femtoseconds; a feature etches over seconds. You can never run them on one clock. Classically the fix is <em>one-way, offline</em> coupling: run HPEM once, hand fluxes to the feature code; fit the surface model to MD once, by hand. The opportunity is to replace each scale-bridge with a <strong>fast differentiable surrogate</strong>, so the scales can be coupled tightly <em>and</em> inverted end-to-end.</p>
+</div>
+
+<h2>2. Why MD can never be inline (the amortization argument)</h2>
+<div class="callout deriv">
+<span class="lab">Back-of-envelope</span>
+<p>A feature has \(10^4\)–\(10^6\) surface elements. Each receives \(\gtrsim10^3\) particle impacts per timestep, over \(\sim10^2\) steps: \(\gtrsim10^9\) impacts per simulation. One MD impact is \(\sim\)ns of dynamics on \(\sim10^3\)–\(10^4\) atoms &mdash; seconds to minutes of compute <em>each</em>. Inline MD would be \(\sim10^{15}\times\) too slow. <strong>MD's role is therefore to be amortized into a surrogate</strong>: run it offline across the input space, train a model, evaluate the model inline.</p>
+</div>
+
+<h2>3. Building more into Graves' layer (expanding the MD)</h2>
+<p>"Expand the sims" has four concrete directions, in increasing ambition:</p>
+<table>
+<thead><tr><th></th><th>Direction</th><th>What it buys</th></tr></thead>
+<tbody>
+<tr><td>A</td><td><strong>Broaden chemistry with ML interatomic potentials</strong> (DeepMD, MACE, NequIP/Allegro)</td><td>near-DFT accuracy at MD cost over many more materials/species: Si-F, Si-Cl, Si-Br, SiO\(_2\), Si\(_3\)N\(_4\), high-\(k\), organic masks, ALE chemistries. Graves' DeepMD Si-Cl-Ar work is the template; extend its coverage.</td></tr>
+<tr><td>B</td><td><strong>Offline yield/mechanism sweep → train a surface-response operator</strong></td><td>turns scattered MD runs into a single fast callable that the feature sim can query millions of times per step. The linchpin (§4).</td></tr>
+<tr><td>C</td><td><strong>Active learning / MD-in-the-loop</strong></td><td>when the feature sim hits a surface state outside the training set, fire a new MD run, refine the operator. Closes the offline/inline gap; the model self-improves where it matters.</td></tr>
+<tr><td>D</td><td><strong>Learn surface <em>state</em> evolution, not just a scalar yield</strong></td><td>MD produces a mixed/reacted layer, stoichiometry, damage depth, roughness — memory the Langmuir model throws away. Carry a small learned state vector per surface element and evolve it: a <em>learned surface-state ODE</em>, richer and MD-justified.</td></tr>
+</tbody>
+</table>
+
+<h2>4. The surface-response operator \(\mathcal{S}\) — the linchpin</h2>
+<p>Define one operator that the whole field can reuse:</p>
+$$\mathcal{S}:\;\big(\underbrace{\text{species},E,\theta}_{\text{incident particle}},\;\underbrace{\mathbf{s}}_{\text{local surface state}}\big)\;\longmapsto\;\big(\underbrace{Y}_{\text{removal}},\;\underbrace{\boldsymbol\Phi_{\rm out}}_{\text{emitted/product fluxes}},\;\underbrace{\sigma}_{\text{sticking}},\;\underbrace{\Delta\mathbf{s}}_{\text{state update}},\;\underbrace{\text{roughness moments}}_{\text{stochastic}}\big).$$
+<div class="callout key">
+<span class="lab">Why this one object is the whole game</span>
+<ul>
+<li>It <strong>replaces inline MD</strong> — fast enough to call per surface element per step.</li>
+<li>It <strong>replaces the phenomenological chemistry</strong> (Langmuir + Steinbrüchel) — so it directly <strong>retires bias contributor #1</strong>, the dominant one. Higher fidelity <em>and</em> faster, at once.</li>
+<li>It is <strong>reusable across feature codes</strong> — MCFPM, ViennaPS, ours all need exactly this. The operator is the defensible, portable artifact: the core of the "plasma-chemistry foundation model."</li>
+</ul>
+</div>
+<h3>How to train it without drowning in MD</h3>
+<ul>
+<li><strong>Residual learning (control variate for ML).</strong> Don't learn \(Y\) from scratch — learn the <em>correction</em> to the known phenomenological model: \(Y=Y_{\rm Steinbr\ddot{u}chel}+\mathcal{S}_\Delta(\cdot)\). The network only carries what physics already doesn't, so it needs far less data and can't violate known asymptotics badly.</li>
+<li><strong>Bake in physics constraints.</strong> The \(\sqrt{E}\) threshold behavior, rotational symmetry in azimuth, the zero-below-threshold floor — impose these as hard structure, not things to be learned.</li>
+<li><strong>Active learning</strong> for the input-space curse: sample MD where the operator is most uncertain (uncertainty-quantified MLIPs make this measurable), not on a blind grid.</li>
+<li><strong>Output a distribution, not a mean.</strong> MD impacts are stochastic; the same input gives a spread of outcomes. The operator predicts moments, which is also where <em>physical</em> roughness comes from (distinct from Monte-Carlo noise — see <a href="flux-transport.html">Flux &amp; Transport §3</a>).</li>
+</ul>
+
+<h2>5. The plasma surrogate \(\mathcal{P}\) — Kushner's layer, amortized</h2>
+$$\mathcal{P}:\;(\text{power},\,p,\,\text{gas mix},\,\text{bias waveform},\,\text{geometry})\;\longmapsto\;(\boldsymbol\Gamma,\,\text{IED},\,\text{IAD})\ \text{at the wafer}.$$
+<p>Trained on HPEM/PCMCM runs (or, before that access, on published IED/IAD parametrizations). Neural-operator surrogates for plasma are already demonstrated for plasma-edge and MHD codes, so the architecture class is proven on plasma data. \(\mathcal{P}\) replaces inline HPEM and makes the <em>reactor knobs</em> differentiable inputs to the whole chain.</p>
+
+<h2>6. The coupled differentiable stack</h2>
+<figure>
+<svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Helvetica,Arial,sans-serif">
+  <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#7a3b2e"/></marker></defs>
+  <rect x="30" y="20" width="300" height="52" rx="8" fill="#eef3f2" stroke="#2f5d62"/>
+  <text x="180" y="42" text-anchor="middle" font-size="13" font-weight="700" fill="#235">reactor knobs</text>
+  <text x="180" y="60" text-anchor="middle" font-size="11" fill="#3c4148">power, p, gas, bias waveform, geometry</text>
+  <rect x="390" y="20" width="300" height="52" rx="8" fill="#fff" stroke="#7a3b2e" stroke-width="2"/>
+  <text x="540" y="42" text-anchor="middle" font-size="13" font-weight="700" fill="#7a3b2e">𝒫  plasma surrogate</text>
+  <text x="540" y="60" text-anchor="middle" font-size="11" fill="#3c4148">→ fluxes, IED, IAD</text>
+  <rect x="390" y="96" width="300" height="52" rx="8" fill="#fdf6e3" stroke="#9a6a00" stroke-width="2"/>
+  <text x="540" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#7a5a2a">feature transport (physical)</text>
+  <text x="540" y="136" text-anchor="middle" font-size="11" fill="#3c4148">DDA / radiosity, differentiable</text>
+  <rect x="390" y="172" width="300" height="52" rx="8" fill="#fff" stroke="#7a3b2e" stroke-width="2"/>
+  <text x="540" y="194" text-anchor="middle" font-size="13" font-weight="700" fill="#7a3b2e">𝒮  surface operator (MD-trained)</text>
+  <text x="540" y="212" text-anchor="middle" font-size="11" fill="#3c4148">→ yield, products, Δstate</text>
+  <rect x="390" y="248" width="300" height="40" rx="8" fill="#fdf6e3" stroke="#9a6a00" stroke-width="2"/>
+  <text x="540" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="#7a5a2a">level-set evolution → profile</text>
+  <rect x="30" y="172" width="300" height="116" rx="8" fill="#f3f1ea" stroke="#7c7560"/>
+  <text x="180" y="210" text-anchor="middle" font-size="13" font-weight="700" fill="#5a4a2a">offline / in-the-loop</text>
+  <text x="180" y="232" text-anchor="middle" font-size="11" fill="#3c4148">MD + ML potentials (DeepMD/MACE)</text>
+  <text x="180" y="250" text-anchor="middle" font-size="11" fill="#3c4148">train &amp; refine 𝒮 by active learning</text>
+  <line x1="330" y1="46" x2="388" y2="46" stroke="#7a3b2e" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="540" y1="72" x2="540" y2="94" stroke="#7a3b2e" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="540" y1="148" x2="540" y2="170" stroke="#7a3b2e" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="540" y1="224" x2="540" y2="246" stroke="#7a3b2e" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="330" y1="220" x2="388" y2="198" stroke="#7c7560" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+  <text x="365" y="150" text-anchor="middle" font-size="22" fill="#235">⟲</text>
+  <text x="200" y="150" text-anchor="middle" font-size="11" fill="#235">∂(profile)/∂(knobs) flows back up ⟲</text>
+</svg>
+<figcaption>Every box is differentiable: the transport and level-set are physical solvers differentiated by Warp autodiff; \(\mathcal{P}\) and \(\mathcal{S}\) are neural operators, differentiable by construction. So gradients flow from the profile all the way back to the reactor knobs.</figcaption>
+</figure>
+<div class="callout key">
+<span class="lab">The payoff: inverse design across scales</span>
+<p>Because the chain is end-to-end differentiable, \(\partial(\text{profile})/\partial(\text{reactor knobs})\) exists. You can pose: "I want <em>this</em> 3D-NAND channel-hole shape &mdash; what power, pressure, gas mix, and bias waveform produce it?" and solve it by gradient descent. That is the holy grail of process design, and no shipping tool does it because no shipping tool is differentiable across scales.</p>
+</div>
+
+<h2>7. Making the timescale coupling consistent</h2>
+<p>With the wall of §1, how do scales coexist in one run? <strong>Timescale separation</strong> (the heterogeneous multiscale method): each scale assumes the others are quasi-static within its own step. The surrogates make this clean &mdash; instead of waiting for a slow inner simulation to converge, the operator returns the <em>converged</em> response instantly. This is the same operator-splitting-in-time the feature solver already does when it freezes the surface during a flux calculation (see <a href="physics.html">Physics §8</a>), now applied up and down the scale ladder. Coupling can be <em>sequential</em> (cheap, small lag error) or <em>concurrent self-consistent</em> (a fixed point per macro-step) where accuracy demands.</p>
+
+<h2>8. Honest novelty and prior art</h2>
+<table>
+<thead><tr><th>Ingredient</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>ML interatomic potentials for etch (DeepMD Si-Cl-Ar)</td><td><span class="tag stake">exists</span> Graves</td></tr>
+<tr><td>Reactor↔feature coupling with ANN surrogates</td><td><span class="tag stake">exists</span> CVD/ALD prior art (KMC↔reactor)</td></tr>
+<tr><td>Differentiable neural operators for inverse design</td><td><span class="tag stake">established</span> general</td></tr>
+<tr><td><strong>End-to-end differentiable chain, reactor→feature→surface, etch-specific</strong></td><td><span class="tag win">open</span> nobody ships the full differentiable stack</td></tr>
+<tr><td><strong>MD-grounded surface operator \(\mathcal{S}\) as a reusable drop-in for feature codes</strong></td><td><span class="tag win">open</span> the portable core IP</td></tr>
+<tr><td><strong>Variance-reduced <em>differentiable</em> transport in the middle</strong></td><td><span class="tag win">open</span> our feature-scale contribution</td></tr>
+</tbody>
+</table>
+
+<h2>9. The build path (and where it bolts onto the plan)</h2>
+<table>
+<thead><tr><th>Phase</th><th>Move</th><th>Value / risk</th></tr></thead>
+<tbody>
+<tr><td><strong>2</strong></td><td>Build \(\mathcal{S}\) as a <em>residual</em> over the phenomenological model; train on a modest MD set (or first on ViennaPS/experimental yields). Drop into the feature sim.</td><td>highest value, tractable — retires contributor #1 and replaces hand-fit chemistry. Independently useful even if nothing else follows.</td></tr>
+<tr><td><strong>3</strong></td><td>Build \(\mathcal{P}\); couple reactor knobs; demonstrate feature→reactor inverse design on one structure.</td><td>medium; unlocks the cross-scale story.</td></tr>
+<tr><td><strong>4</strong></td><td>Active-learning MD-in-the-loop; full end-to-end differentiable co-optimization across all scales.</td><td>research bet; the foundation model. Each prior phase de-risks it.</td></tr>
+</tbody>
+</table>
+<p>The discipline: each phase is a standalone deliverable. \(\mathcal{S}\) alone is a better feature simulator. \(\mathcal{S}+\mathcal{P}\) is cross-scale design. The full loop is the thesis &mdash; but you never bet everything on the last phase.</p>
+
+<h2>10. The tooling</h2>
+<table>
+<thead><tr><th>Layer</th><th>Tools</th></tr></thead>
+<tbody>
+<tr><td>Atomistic / MD</td><td>DeepMD, MACE, NequIP/Allegro (potentials); LAMMPS; <strong>JAX-MD</strong> (differentiable MD — lets you differentiate <em>through</em> the atomistic scale too)</td></tr>
+<tr><td>Operators</td><td>FNO, DeepONet, graph neural operators (for surface geometry); uncertainty-quantified variants for active learning</td></tr>
+<tr><td>Feature substrate</td><td><strong>Warp</strong> (differentiable transport + level set on GPU); JAX for the operator training/coupling</td></tr>
+</tbody>
+</table>
+
+<div class="callout key">
+<span class="lab">The one-paragraph vision</span>
+<p>Keep the <em>geometry</em> physical (level set, ballistic transport, radiosity — all differentiable), and make the <em>physics inputs</em> learned operators: \(\mathcal{P}\) for the plasma (from Kushner-class data), \(\mathcal{S}\) for the surface response (from Graves-class MD). Train each against its own ground truth, validate the coupled chain against experiment, and differentiate the whole thing so a target shape yields a recipe. That is one fast, accurate, invertible model from atoms to reactor &mdash; and the surface operator \(\mathcal{S}\) is the reusable core that the rest of the field would adopt.</p>
+</div>
+
+<div class="pagenav">
+<a href="differentiable-ml.html">← Differentiable &amp; ML</a>
+<a href="sota-and-plan.html">Next: SOTA &amp; Plan →</a>
+</div>
+<div class="footer"><p>Multiscale layer. The atoms-to-reactor fast model, anchored on extending Graves' MD into a learned surface operator.</p></div>
+</main>
+</body>
+</html>

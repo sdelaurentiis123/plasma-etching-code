@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physics — Feature-Scale Etch</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html" class="active">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>Physics</strong></p>
+<h1>The Physics of Plasma Etching at the Feature Scale</h1>
+<p class="subtitle">From the plasma sheath to the surface reaction that moves the wall by one nanometer.</p>
+
+<h2>1. The multiscale picture: where "feature scale" sits</h2>
+<p>Plasma etching spans an enormous range of length scales, and we model only the smallest one:</p>
+<table>
+<thead><tr><th>Scale</th><th>Length</th><th>What happens</th><th>Modeled here?</th></tr></thead>
+<tbody>
+<tr><td>Reactor / plasma bulk</td><td>0.1–1 m</td><td>electron impact, ionization, radical generation</td><td>No — gives us boundary data</td></tr>
+<tr><td>Sheath</td><td>0.1–1 mm</td><td>ions accelerated toward the wafer; sets ion energy/angle</td><td>No — gives us \(I_{\rm ion}(E,\theta)\)</td></tr>
+<tr><td><strong>Feature</strong></td><td><strong>10 nm – 10 µm</strong></td><td><strong>ballistic transport into the trench, surface reactions, shape change</strong></td><td><strong>Yes — this is the whole simulator</strong></td></tr>
+</tbody>
+</table>
+<p>The plasma and sheath enter our problem only as <strong>boundary conditions at the top of the feature</strong>: the incident fluxes of each species, the ion energy distribution (IED), and the ion angular distribution (IAD). Everything below the feature mouth is ours to compute.</p>
+
+<h2>2. The sheath: why ions are a beam and neutrals are a fog</h2>
+<p>At the plasma–wafer boundary a thin space-charge <strong>sheath</strong> forms. Positive ions entering it are accelerated across a potential drop \(V_{\rm sheath}\) (tens to hundreds of volts), gaining directed energy \(E \approx eV_{\rm sheath}\) <em>normal to the wafer</em>. This is why ions arrive nearly vertical and energetic.</p>
+<div class="callout deriv">
+<span class="lab">Derivation — ion angular spread</span>
+<p>An ion enters the sheath with a small thermal transverse velocity \(v_\perp\sim\sqrt{k_BT_i/m}\) and is accelerated to a large normal velocity \(v_\parallel=\sqrt{2E/m}\). The arrival angle from vertical is</p>
+$$\tan\theta \;=\; \frac{v_\perp}{v_\parallel}\;\sim\;\sqrt{\frac{k_BT_i}{2E}}.$$
+<p>With \(k_BT_i\sim 0.05\) eV and \(E\sim 100\) eV, \(\theta\lesssim 1.5^\circ\). Hence the few-degree angular spread used for ions (the reference code uses \(\sigma_{\rm ion}=2.5^\circ\)). The IED is often <em>bimodal</em> in RF plasmas (ions sample the oscillating sheath voltage), which matters when we integrate the yield over energy.</p>
+</div>
+<p>Neutral radicals (F, O) are <em>not</em> accelerated &mdash; they are thermal. They arrive from the plasma with a near-isotropic, <strong>cosine-law (Lambertian)</strong> angular distribution. So at the feature mouth we have two utterly different populations: a vertical energetic <em>beam</em> (ions) and a diffuse thermal <em>fog</em> (neutrals).</p>
+
+<h2>3. Transport regime: why flight is ballistic</h2>
+<p>Inside the feature, do particles collide with gas molecules? The decider is the <strong>Knudsen number</strong> \(\mathrm{Kn}=\lambda/L\), the ratio of gas mean free path to feature size.</p>
+<div class="callout deriv">
+<span class="lab">Numbers</span>
+<p>At RIE pressures (\(\sim\)10 mTorr) the mean free path \(\lambda\sim\) mm–cm. A feature is \(L\sim\)µm. So</p>
+$$\mathrm{Kn}=\frac{\lambda}{L}\sim\frac{10^{-3}\,\text{m}}{10^{-6}\,\text{m}}=10^{3}\gg1.$$
+</div>
+<div class="callout key">
+<span class="lab">Consequence</span>
+<p>\(\mathrm{Kn}\gg1\) means transport inside the feature is <strong>collisionless and straight-line (ballistic / free-molecular)</strong>. Particles fly in straight lines from the mouth until they hit a wall. There is <strong>no gas-phase scattering term</strong>, and — crucially — <strong>ions and neutrals never interact in flight</strong>. They meet only at the surface. This is what makes the species-split solver (<a href="flux-transport.html">Flux &amp; Transport</a>) exact.</p>
+</div>
+
+<h2>4. The flux integral</h2>
+<p>The local flux of a species onto a surface point \(\mathbf{x}\) is the incident angular flux integrated over the visible hemisphere, weighted by the cosine of incidence and by visibility:</p>
+$$\Gamma(\mathbf{x}) \;=\; \int_{\Omega} I(\boldsymbol\omega)\,\big(\boldsymbol\omega\cdot\mathbf{n}\big)\,V(\mathbf{x},\boldsymbol\omega)\;d\boldsymbol\omega.$$
+<p>Here \(V(\mathbf{x},\boldsymbol\omega)=1\) if the source (or a re-emitting wall) is unobstructed along \(\boldsymbol\omega\), else \(0\). That visibility factor <em>is</em> shadowing &mdash; the geometric origin of aspect-ratio-dependent etching. Computing this integral is the entire job of the transport layer.</p>
+
+<h3>The Knudsen cosine law (neutral source), derived</h3>
+<div class="callout deriv">
+<span class="lab">Derivation — why neutrals arrive \(\propto\cos\theta\)</span>
+<p>For a gas in equilibrium effusing through the feature mouth, the number of molecules crossing into solid angle \(d\Omega\) at polar angle \(\theta\) is proportional to the <em>projected</em> area of the aperture seen from that direction, i.e. \(\propto\cos\theta\). In 3D the emitted distribution is \(p(\theta)\,d\Omega\propto\cos\theta\,d\Omega\); sampled by \(\cos\theta=\sqrt{U_1},\ \phi=2\pi U_2\). In 2D it collapses to</p>
+$$p(\theta)=\tfrac12\cos\theta,\quad \theta\in[-\tfrac\pi2,\tfrac\pi2],$$
+<p>sampled by \(\theta=\arcsin(U)\) with \(U\) uniform on \([-1,1]\). (Note: the 3D sampling rule \(\sqrt{U}\) is <em>wrong</em> in 2D but becomes correct in 3D — a subtle bug in the 2D reference code that the 3D port silently fixes.)</p>
+</div>
+
+<h2>5. Sticking and re-emission</h2>
+<p>When a neutral hits a wall it does not always react. With probability \(s\) (the <strong>sticking coefficient</strong>) it adsorbs/reacts; with probability \(1-s\) it desorbs and <strong>re-emits diffusely</strong> (another cosine lobe about the local normal) and flies on. Typical values are small: \(s_F\approx0.2\), \(s_O\approx0.3\). Low sticking means a neutral may bounce many times, which is how flux reaches the bottom of a deep feature — and is the entire reason neutral transport is a multiple-scattering problem rather than a single-shot one.</p>
+<p>Ions, by contrast, have effective sticking \(\approx1\): they deposit their energy on first contact (etch or sputter), with at most a single <em>specular</em> reflection at grazing incidence. So the two species sit at opposite ends of the "how many bounces" axis &mdash; the axis that decides the right numerical method.</p>
+
+<h2>6. Surface chemistry: yields</h2>
+<p>An energetic ion striking the surface removes material. The number of atoms removed per ion is the <strong>yield</strong> \(Y\). Two facts shape it:</p>
+
+<h3>Energy dependence: the threshold square-root law</h3>
+<p>Below a threshold energy \(E_{\rm th}\) the ion cannot displace a surface atom and \(Y=0\). Above it, the semi-empirical Steinbrüchel form (rooted in linear collision-cascade sputter theory near threshold) is linear in \(\sqrt{E}\):</p>
+$$Y(E)=A\big(\sqrt{E}-\sqrt{E_{\rm th}}\big)_+ .$$
+<p>Three channels are modeled, each with its own \((A,E_{\rm th})\): ion-enhanced chemical etch (\(Y_{ie}\)), physical sputter of bare material (\(Y_{sp}\)), and ion removal of the passivation layer (\(Y_p\)).</p>
+<div class="callout warn">
+<span class="lab">Bias contributor #2 — Jensen gap</span>
+<p>Evaluating \(Y\) at the <em>mean</em> energy \(\langle E\rangle\) is not the same as the energy-averaged yield \(\langle Y(E)\rangle\). Because \(\sqrt{\cdot}\) is concave, Jensen's inequality gives \(\langle Y(E)\rangle&lt;Y(\langle E\rangle)\) — a systematic over-estimate. For a narrow IED (\(\sigma=10\) at \(E=100\)) the gap is tiny (\(\sim0.2\%\)); for a broad or bimodal IED it is not. Fix: integrate \(Y\) over the real IED.</p>
+</div>
+
+<h3>Angular dependence: the source of microtrenching</h3>
+<p>Sputter yield is <em>not</em> monotonic in incidence angle. It rises from normal incidence to a peak at oblique angles (\(\sim60\text{–}70^\circ\)) as ions deposit momentum more efficiently into the surface plane, then collapses to zero near grazing. A simple forward-peaked \(\cos\theta\) (as in the reference code) misses this structure. The grazing-angle lobe is what concentrates removal at the <strong>bottom corners</strong> of a trench, carving the characteristic <strong>microtrenches</strong>. ViennaPS encodes it with an inflection near \(89^\circ\) and a steep exponent.</p>
+
+<h2>7. Ion–neutral synergy: the heart of reactive ion etching</h2>
+<div class="callout key">
+<span class="lab">Coburn–Winters (1979)</span>
+<p>The canonical experiment: XeF\(_2\) gas alone etches silicon slowly; Ar\(^+\) ions alone sputter slowly; <strong>together they etch roughly an order of magnitude faster than the sum</strong>. Neutrals build a reactive (fluorinated) layer; ions supply the energy to remove it. Neither works alone. This synergy <em>is</em> reactive ion etching, and it is the only place ions and neutrals couple.</p>
+</div>
+
+<h3>Competitive-Langmuir coverage model, derived</h3>
+<p>The surface is partitioned into fractional coverages: fluorinated \(\theta_F\), oxygen-passivated \(\theta_O\), and bare. Fluorine and oxygen <em>compete</em> for the same sites. Write the steady-state balance for fluorine — adsorption onto bare sites versus ion-driven removal:</p>
+<div class="callout deriv">
+<span class="lab">Derivation</span>
+$$\frac{d\theta_F}{dt}=s_F\Gamma_F\,(\text{bare}) - Y_{ie}\Gamma_{\rm ion}\,\theta_F = 0
+\;\Longrightarrow\; \frac{\theta_F}{\text{bare}}=\frac{s_F\Gamma_F}{Y_{ie}\Gamma_{\rm ion}}\equiv r_F.$$
+<p>Likewise \(r_O = s_O\Gamma_O/(Y_p\Gamma_{\rm ion})\). Close with site conservation \(1=\text{bare}+\theta_F+\theta_O=\text{bare}(1+r_F+r_O)\):</p>
+$$\boxed{\ \text{bare}=\frac{1}{1+r_F+r_O},\qquad \theta_F=r_F\cdot\text{bare}\ }$$
+</div>
+<p>The etch rate (normal velocity) sums the two removal channels — ion-enhanced etch of the fluorinated layer plus physical sputter of bare material — divided by the atomic number density \(\rho\) to convert a removed-atom flux into a recession speed:</p>
+$$V_n=\frac{1}{\rho}\Big(Y_{ie}\,\Gamma_{\rm ion}\,\theta_F + Y_{sp}\,\Gamma_{\rm ion}\,\text{bare}\Big).$$
+<p>Notice the dominant term \(V_n\sim Y_{ie}\Gamma_{\rm ion}\theta_F\) with \(\theta_F\sim\Gamma_F/\Gamma_{\rm ion}\): it is a <strong>product of an ion quantity and a neutral quantity</strong>. That multiplicative coupling is the synergy, and it lives entirely in this one expression.</p>
+<div class="callout warn">
+<span class="lab">Bias contributor #1 — the dominant one</span>
+<p>This clean steady-state <em>ratio</em> is not ViennaPS's exact Belen/Ertl form, which solves coupled coverage ODEs with extra redeposition / coupling terms (\(k_\sigma,\beta_\sigma\)) and a coverage-<em>dependent</em> sticking \(s(\theta)\). The different rate-vs-flux-ratio dependence is the leading source of the \(\sim7\%\) depth bias, and it is what makes our ARDE lag slightly too steep in narrow trenches.</p>
+</div>
+
+<h2>8. Where the coupling reaches back into transport</h2>
+<p>If sticking is constant, the two transports are fully independent and recombine only in the velocity formula above. But in the real model \(s=s(\theta)\), and \(\theta\) depends on the <em>ion</em> flux. So the neutral transport's boundary condition depends on the ion solution — a genuine ion↔neutral coupling. It is resolved by a cheap self-consistent fixed point per timestep:</p>
+<pre><code>guess θ
+repeat:
+    solve neutral transport with s(θ)   →  Γ_F, Γ_O
+    solve ion transport                 →  Γ_ion      (few rays)
+    update θ from chemistry             →  new θ
+until θ converges            # 2–4 iterations; geometry/operator K reused</code></pre>
+<p>Because the expensive geometry (visibility, form-factor operator \(K\)) is frozen during the step, each iteration only re-solves a cheap linear system with an updated diagonal. See <a href="flux-transport.html">Flux &amp; Transport</a> for the operator.</p>
+
+<h2>9. Emergent phenomena (what the physics produces)</h2>
+<table>
+<thead><tr><th>Phenomenon</th><th>Mechanism</th></tr></thead>
+<tbody>
+<tr><td><strong>ARDE / RIE lag</strong></td><td>Narrow/deep features subtend a smaller solid angle to the source, so flux (especially neutrals) falls with aspect ratio — deeper features etch slower. Pure geometry + shadowing; falls out parameter-free.</td></tr>
+<tr><td><strong>Bowing</strong></td><td>Excess sidewall flux (ion reflection, charging) widens the mid-depth. A 3D-NAND failure mode.</td></tr>
+<tr><td><strong>Microtrenching</strong></td><td>Grazing-angle sputter lobe + ion reflection concentrate removal at bottom corners.</td></tr>
+<tr><td><strong>Twisting / tilting</strong></td><td>Asymmetric charging / ion deflection in very high-aspect-ratio holes.</td></tr>
+<tr><td><strong>Faceting</strong></td><td>Angle-dependent yield erodes mask corners into facets.</td></tr>
+</tbody>
+</table>
+<div class="callout deriv">
+<span class="lab">Why ARDE is worse for holes than trenches</span>
+<p>A 2D trench of depth \(d\) and width \(w\) sees a source solid angle that shrinks roughly like \(w/d\). A 3D circular hole sees an angle that shrinks roughly like \((w/d)^2\) — the opening contracts in two dimensions at once. So aspect-ratio limitation bites <em>harder</em> in 3D contact/channel holes than in trenches. This is exactly why 3D-NAND channel-hole etch is the defining hard problem.</p>
+</div>
+
+<div class="pagenav">
+<a href="index.html">← Overview</a>
+<a href="numerics.html">Next: The Numerics →</a>
+</div>
+<div class="footer"><p>Physics layer. Next, the numerical machinery that represents and moves the surface.</p></div>
+</main>
+</body>
+</html>

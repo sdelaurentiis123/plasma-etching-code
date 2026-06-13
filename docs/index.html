@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview — Differentiable 3D Feature-Scale Etch Simulation</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html" class="active">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+
+<h1>Differentiable, GPU-Accelerated 3D Feature-Scale Plasma-Etch Simulation</h1>
+<p class="subtitle">A technical explainer: the field, the physics, the numerics, the acceleration, and where the defensible novelty actually lives.</p>
+
+<p class="lede">We are building a simulator that predicts how a single semiconductor feature &mdash; a trench, a contact hole, a 3D-NAND channel hole &mdash; changes shape as plasma etches it. The target is <strong>three-dimensional</strong>, <strong>GPU-accelerated</strong>, <strong>differentiable</strong>, and ultimately <strong>surrogate-accelerated</strong>. This site explains every layer of that stack from first principles.</p>
+
+<div class="callout key">
+<span class="lab">The one idea to hold onto</span>
+<p>Almost every optimization in this project is the same move wearing different clothes: <strong>do not spend compute where there is no information</strong>. A near-collimated ion beam carries almost no angular variance, so it needs almost no rays. A diffuse neutral field is deterministic at equilibrium, so it should be solved as linear algebra, not sampled as noise. Reducing variance makes the simulation <em>faster</em>, <em>smoother</em>, and <em>differentiable</em> &mdash; all at once.</p>
+</div>
+
+<h2>The two problems, kept strictly separate</h2>
+<p>The single most important conceptual move is to refuse to talk about "accuracy" as one thing. There are two completely different error sources, with two different fixes:</p>
+
+<table>
+<thead><tr><th>Problem</th><th>What it is</th><th>What fixes it</th></tr></thead>
+<tbody>
+<tr><td><strong>Statistical noise</strong> (variance)</td><td>Monte-Carlo sampling roughness. Each surface element collects only tens of particle hits, so the flux estimate carries \(\sim 1/\sqrt{N}\approx 10\text{–}20\%\) noise. It averages to the right answer but looks jagged and corrupts gradients.</td><td><strong>Variance reduction</strong>: quasi-Monte-Carlo, control variates, radiosity, more rays. Exact &mdash; no fidelity cost. See <a href="acceleration.html">Acceleration</a>.</td></tr>
+<tr><td><strong>Model-form &amp; numerical bias</strong></td><td>A systematic offset (e.g. \(\sim 7\%\) in depth) from approximations in the <em>physics model</em> and the <em>discretization</em> &mdash; not from sampling. It does not average away.</td><td><strong>Better models &amp; schemes</strong>: exact coverage chemistry, integrate yield over the energy spectrum, higher-order advection, ion reflection. See <a href="physics.html">Physics</a> and <a href="numerics.html">Numerics</a>.</td></tr>
+</tbody>
+</table>
+
+<p>Conflating these is what makes "accuracy" feel mushy. Noise is cured by counting; bias is cured by modeling. They are measured on different benchmark axes (<a href="sota-and-plan.html">rays-to-fidelity vs. Chamfer-distance</a>).</p>
+
+<h2>The stack, top to bottom</h2>
+<p>One timestep of the simulator flows through six layers. Each has its own physics and its own numerical method; each page below takes one in depth.</p>
+
+<pre><code>  φ field  ──(1) extract──▶  surface mesh + normals
+                                  │
+                            (2) build/march acceleration structure (DDA on the level set)
+                                  │
+        ┌─────────────────────────┴─────────────────────────┐
+   (3a) ION transport                            (3b) NEUTRAL transport
+        few-ray / analytic + specular                 radiosity linear solve
+        └─────────────────────────┬─────────────────────────┘
+                                  │
+                            (4) surface chemistry  ← the ONLY place species couple
+                                  │
+                            (5) velocity extension  →  (6) level-set advect + reinit  →  φ'</code></pre>
+
+<table>
+<thead><tr><th>Layer</th><th>Physics</th><th>Page</th></tr></thead>
+<tbody>
+<tr><td>Surface representation</td><td>implicit level set, signed distance, sparse narrow band</td><td><a href="numerics.html">Numerics</a></td></tr>
+<tr><td>Particle transport</td><td>ballistic (collisionless) flight; ions vs. neutrals</td><td><a href="flux-transport.html">Flux &amp; Transport</a></td></tr>
+<tr><td>Surface chemistry</td><td>ion–neutral synergy, competitive coverage, yields</td><td><a href="physics.html">Physics</a></td></tr>
+<tr><td>Surface evolution</td><td>Hamilton–Jacobi level-set PDE, WENO + TVD-RK</td><td><a href="numerics.html">Numerics</a></td></tr>
+<tr><td>Acceleration</td><td>variance reduction, traversal, sparse data structures</td><td><a href="acceleration.html">Acceleration</a></td></tr>
+<tr><td>Differentiability</td><td>autodiff, inverse design, learned operators</td><td><a href="differentiable-ml.html">Differentiable &amp; ML</a></td></tr>
+</tbody>
+</table>
+
+<h2>The honest thesis</h2>
+<p>The incumbent open-source tool (<a href="sota-and-plan.html">ViennaPS</a>) already has a maturing GPU/OptiX ray tracer. The industry tool (Sentaurus) already solves re-emission by radiosity, by default. So "we ray-trace faster on the same algorithm" is <strong>not</strong> a win &mdash; RT cores are RT cores. The three things nobody ships together, and that this project can:</p>
+<ol>
+<li><strong>Equal-or-better fidelity at far fewer rays</strong> &mdash; QMC + control variates + the ion/neutral solver split. An <em>algorithmic</em> win, not a hardware one.</li>
+<li><strong>Differentiability</strong> &mdash; gradients of the final profile with respect to recipe knobs, enabling inverse design (target shape → process recipe).</li>
+<li><strong>Learned operators</strong> &mdash; surrogate the two expensive pieces (stiff surface chemistry, multiple-scattering re-emission) with neural operators trained on high-ray ground truth. The same machinery as a plasma-chemistry foundation model.</li>
+</ol>
+
+<h2>Notation used throughout</h2>
+<table>
+<thead><tr><th>Symbol</th><th>Meaning</th><th>Symbol</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>\(\varphi(\mathbf{x},t)\)</td><td>level-set field; surface at \(\varphi=0\), solid \(\varphi&gt;0\)</td><td>\(\mathbf{n}\)</td><td>outward surface normal, \(-\nabla\varphi/|\nabla\varphi|\)</td></tr>
+<tr><td>\(\Gamma(\mathbf{x})\)</td><td>particle flux onto the surface</td><td>\(s\)</td><td>sticking coefficient (adsorption probability)</td></tr>
+<tr><td>\(I(\boldsymbol\omega)\)</td><td>incident angular flux distribution</td><td>\(V(\mathbf{x},\boldsymbol\omega)\)</td><td>visibility (1 unshadowed, 0 shadowed)</td></tr>
+<tr><td>\(Y(E,\theta)\)</td><td>yield: atoms removed per ion</td><td>\(\theta_F,\theta_O\)</td><td>fractional surface coverage (F, O)</td></tr>
+<tr><td>\(E_{\rm th}\)</td><td>threshold energy for sputter/etch</td><td>\(F_{ji}\)</td><td>view (form) factor, patch \(j\to i\)</td></tr>
+<tr><td>\(V_n\)</td><td>surface normal velocity (etch rate)</td><td>\(K\)</td><td>discrete form-factor / re-emission operator</td></tr>
+<tr><td>\(\mathrm{Kn}=\lambda/L\)</td><td>Knudsen number (free path / feature)</td><td>\(\Delta x\)</td><td>grid spacing</td></tr>
+</tbody>
+</table>
+
+<div class="callout warn">
+<span class="lab">Status of the reference code</span>
+<p>The existing proof-of-concept (<code>feature_etch.py</code>) is a 2D simulator that matches ViennaPS in <em>shape</em> and <em>ARDE trend</em> parameter-free, but needs a single global <code>rate_scale = 0.29</code> to match absolute depth. That knob is a stand-in for six identified bias contributors. The whole point of this project is to retire those contributors one at a time, each with a measured number, and delete the knob. The <a href="sota-and-plan.html">plan page</a> tracks them.</p>
+</div>
+
+<div class="pagenav">
+<span></span>
+<a href="physics.html">Next: The Physics →</a>
+</div>
+
+<div class="footer">
+<p>Technical explainer &middot; differentiable 3D feature-scale plasma-etch simulation. Equations render via MathJax (needs network). Companion to the <code>feature_etch.py</code> reference and the ViennaPS benchmark.</p>
+</div>
+</main>
+</body>
+</html>

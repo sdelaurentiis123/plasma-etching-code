@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flux &amp; Transport — Feature-Scale Etch</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html" class="active">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>Flux &amp; Transport</strong></p>
+<h1>Flux &amp; Transport: The Computational Heart</h1>
+<p class="subtitle">The transport integral, the three ways to solve it, the ion/neutral solver split, and DDA vs. hardware ray tracing.</p>
+
+<p>This is the layer that consumes ~94% of the runtime in the reference code and is the entire reason a GPU is in the plan. Everything here is about evaluating one integral — the flux \(\Gamma(\mathbf{x})\) on every surface element — as fast and as smoothly as possible.</p>
+
+<h2>1. The transport equation</h2>
+<p>Generalizing the <a href="physics.html">flux integral</a> to include re-emission, the outgoing surface flux distribution satisfies a Fredholm integral equation of the second kind:</p>
+$$\Gamma_{\rm out}(\mathbf{x},\boldsymbol\omega_0)=\underbrace{\Gamma_{\rm src}(\mathbf{x},\boldsymbol\omega_0)}_{\text{direct from source}}+\underbrace{\int_{\Omega} F_{\rm re}(\boldsymbol\omega_0,\boldsymbol\omega)\,\Gamma_{\rm in}(\mathbf{x},\boldsymbol\omega)\,d\boldsymbol\omega}_{\text{re-emitted from other walls}}.$$
+<p>The kernel \(F_{\rm re}\) encodes the re-emission law (and may change species or energy — e.g. an ion sputtering surface atoms). For the common diffuse case (isotropic re-emission, sticking \(s\)) this reduces to a radiosity-type equation. There are exactly three families of method to solve it.</p>
+
+<h2>2. The three methods (Manstetten taxonomy)</h2>
+<table>
+<thead><tr><th></th><th>(A) Radiosity / matrix</th><th>(B) Iterative (bottom-up)</th><th>(C) Monte Carlo (top-down)</th></tr></thead>
+<tbody>
+<tr><td><strong>Idea</strong></td><td>discretize surface into patches, build the view-factor matrix \(K\), solve a linear system</td><td>at each surface point, integrate incoming flux over sampled directions; iterate per bounce</td><td>launch particles from the source, trace, deposit on hit, re-emit stochastically</td></tr>
+<tr><td><strong>Re-emission</strong></td><td>implicit — matrix inverse = all bounces at once</td><td>explicit multi-pass</td><td>stochastic re-launch</td></tr>
+<tr><td><strong>Cost</strong></td><td>\(O(N^2)\) build + solve, heavy memory</td><td>\(O(N\cdot n)\) intersection tests</td><td>\(O(N_p\cdot n_{\rm re})\) tests</td></tr>
+<tr><td><strong>Noise</strong></td><td><strong>none — deterministic</strong></td><td>low</td><td><strong>yes — \(1/\sqrt{N}\)</strong> (the trench-floor roughness)</td></tr>
+<tr><td><strong>Used by</strong></td><td><strong>Sentaurus (default)</strong></td><td>—</td><td><strong>ViennaPS, SEMulator3D</strong></td></tr>
+</tbody>
+</table>
+
+<h3>The view (form) factor</h3>
+<p>The geometric core of radiosity is the fraction of radiation leaving patch \(j\) that arrives at patch \(i\):</p>
+$$F_{ji}=\frac{1}{\pi A_j}\iint_{A_i,A_j}\frac{\cos\theta_i\cos\theta_j}{r_{ij}^2}\;V_{ij}\;dA_i\,dA_j,$$
+<p>with \(V_{ij}\) the patch-to-patch visibility. Assemble these into the operator \(K\) and the diffuse radiosity equation with sticking \(s\) is</p>
+$$\Gamma=\Gamma_{\rm direct}+(1-s)\,K\,\Gamma.$$
+
+<h2>3. Why Monte Carlo is noisy — and why that matters</h2>
+<p>A Monte-Carlo estimate of the flux integral has standard error \(\propto\sigma/\sqrt{N}\), where \(\sigma\) is the variance of the integrand and \(N\) the hits per element. With only tens of hits per surface element, that is 10–20% noise. Two consequences:</p>
+<ul>
+<li>The trench floor looks <strong>jagged</strong> — but it averages to the right answer. This is <em>variance, not bias</em>.</li>
+<li>The noise <strong>corrupts gradients</strong>, which is fatal for the differentiable goal. You cannot backpropagate cleanly through a noisy flux field.</li>
+</ul>
+<p>So the variance is not just cosmetic — killing it is a prerequisite for inverse design. This is the through-line of the <a href="acceleration.html">Acceleration</a> page.</p>
+
+<h2>4. The species split</h2>
+<div class="callout key">
+<span class="lab">The organizing insight</span>
+<p>The right method is selected by the <strong>sticking coefficient</strong>, which sets how many bounces matter. \(s\to1\) is a single-shot <em>beam</em> problem (cheap, low-variance). \(s\to0\) is a diffuse <em>equilibrium</em> problem (radiosity). Ions and neutrals sit at opposite ends, so they want different solvers. The split is <strong>exact</strong> because ballistic flight is collisionless — they never interact until the surface (see <a href="physics.html">Physics §3, §8</a>).</p>
+</div>
+<table>
+<thead><tr><th></th><th>Ions (\(s\approx1\), collimated)</th><th>Neutrals (\(s\approx0.2\text{–}0.3\), diffuse)</th></tr></thead>
+<tbody>
+<tr><td>Transport character</td><td>near-delta beam, 0–1 bounce (specular)</td><td>diffuse, many bounces (radiosity)</td></tr>
+<tr><td>Method</td><td>few-ray / analytic visible-solid-angle + one reflection</td><td>radiosity linear solve \((I-(1-s)K)^{-1}\Gamma_{\rm direct}\)</td></tr>
+<tr><td>Cost</td><td>hundreds of rays, not 20k — variance is tiny</td><td>assemble \(K\) once, then solve — no bounce chains</td></tr>
+</tbody>
+</table>
+
+<h3>Radiosity for neutrals: the Neumann series IS the bounce chain</h3>
+<div class="callout deriv">
+<span class="lab">Derivation — why the linear solve beats truncated bouncing</span>
+<p>Expand the solve as a Neumann series:</p>
+$$\Gamma=\big(I-(1-s)K\big)^{-1}\Gamma_{\rm direct}=\sum_{n=0}^{\infty}\big[(1-s)K\big]^n\Gamma_{\rm direct}.$$
+<p>Term \(n\) is exactly the \(n\)-th re-emission bounce. A Monte-Carlo run with a fixed cap of \(n_{\rm re}=12\) bounces computes only the first 12 terms — it <strong>truncates the tail</strong>. The series converges at rate \(\sim(1-s)\,\rho(K)\), where \(\rho(K)\) measures how "closed" the feature is. In a deep, narrow hole \(\rho(K)\to1\) (little flux escapes), and with low sticking \((1-s)\to0.8\), convergence is <em>slow</em> — so the dropped tail is non-negligible. The matrix solve sums the whole series. Hence radiosity-for-neutrals is not only faster and noise-free, it is <strong>more accurate exactly in the high-aspect-ratio regime we care about</strong>.</p>
+</div>
+<p>Bonus: a linear solve is cleanly differentiable by the adjoint method (one extra solve), whereas stochastic bounce chains are noisy to differentiate. So the split also serves the <a href="differentiable-ml.html">differentiable</a> goal.</p>
+
+<h3>Ions: barely any rays needed</h3>
+<p>A near-collimated, stick-on-contact beam has almost no angular variance, so the flux at a point is essentially "what fraction of the narrow arrival cone sees the source, times \(\cos\theta\)." For perfectly vertical ions it is a single shadow ray straight up. A few hundred QMC rays — or a closed-form visible-solid-angle integral — suffice, plus one deterministic specular bounce for grazing reflection. Spending 20k pseudorandom particles on ions (as the reference code does) is pure waste.</p>
+
+<h2>5. Traversal: DDA grid marching vs. BVH triangles</h2>
+<p>Whatever the method, you must answer "where does this ray first hit the surface?" millions of times. Two architectures:</p>
+
+<h3>DDA / sphere tracing on the level set</h3>
+<p>The surface is <em>already</em> a level set on a uniform grid, and it moves every step. So march the ray cell-by-cell through the \(\varphi\) grid (Amanatides–Woo voxel traversal) and detect the sign change \(\varphi:\ \text{gas}(&lt;0)\to\text{solid}(&gt;0)\). That crossing is the hit. <strong>The grid is the acceleration structure</strong> — no mesh extraction, no BVH, nothing to rebuild.</p>
+<div class="callout deriv">
+<span class="lab">Sphere tracing — free acceleration from the SDF</span>
+<p>Because \(\varphi\) is a signed-distance function (\(|\nabla\varphi|=1\)), the value \(|\varphi(\mathbf{x})|\) is a guaranteed-safe step length: nothing is closer than that. So step along the ray by \(|\varphi|\) each time (Hart's algorithm). Big strides through open gas, fine steps near walls — no fixed step size needed.</p>
+</div>
+<ul>
+<li><strong>Pros:</strong> zero per-step build cost; SDF gives sphere-tracing for free; coherent, cache-friendly memory access; coherence-agnostic (good for incoherent diffuse neutral rays, where RT cores underperform).</li>
+<li><strong>Cons:</strong> accuracy tied to \(\Delta x\) (then interpolate \(\varphi\) sub-cell); sphere tracing degrades at <em>grazing</em> incidence (\(|\varphi|\) stays tiny → many tiny steps), which HARC sidewalls produce constantly — mitigate with relaxed sphere tracing or a fixed-step DDA fallback; a sparse narrow band stores valid distances only near the surface, so open-space stepping needs a coarse global distance or a "big-step-until-band, then DDA" hybrid; does <em>not</em> use the dedicated RT-core silicon.</li>
+</ul>
+
+<h3>BVH triangles + RT cores</h3>
+<p>Extract a triangle mesh, build a bounding-volume hierarchy, traverse in \(O(\log M)\) — accelerated in hardware by RT cores (ray-triangle is their native primitive). ViennaPS's OptiX path does this. Pros: peak ray throughput on coherent rays, sub-grid geometric precision. Cons: rebuild the BVH every step (geometry moves); RT cores hit peak only on coherent ray bundles, and diffuse re-emission is incoherent.</p>
+
+<div class="callout key">
+<span class="lab">The traversal choice lines up with the species split</span>
+<table style="margin:6px 0">
+<thead><tr><th>Species</th><th>Ray character</th><th>Best traversal</th></tr></thead>
+<tbody>
+<tr><td>Ions</td><td>collimated, coherent</td><td>DDA straight down a grid column (≈1D); or RT-core triangles to use the silicon</td></tr>
+<tr><td>Neutrals</td><td>diffuse, incoherent</td><td>DDA / sphere-trace on the level set — no rebuild, coherence-agnostic</td></tr>
+</tbody>
+</table>
+<p>Recommendation: make DDA-on-the-level-set the default, keep BVH-triangle as the benchmark comparison, and let the split decide per species. This is a measurement, and measuring it is the point.</p>
+</div>
+
+<h2>6. Shadowing falls out for free</h2>
+<p>Note there is never an explicit "visibility computation." In Monte Carlo, the <em>nearest</em> intersection along a ray <em>is</em> the shadow test — if a particle's first hit is a sidewall, the floor below simply never receives it. In radiosity, \(V_{ij}\) in the form factor is the same nearest-hit query between patches. Aspect-ratio-dependent etching is therefore an emergent geometric consequence, not a modeled effect.</p>
+
+<h2>7. One frozen geometry, two solvers, one chemistry</h2>
+<p>The full per-step structure, with the coupling preserved:</p>
+<pre><code>extract surface (geometry frozen for this step)
+build/refresh traversal structure (or reuse level-set grid)
+┌─ ion solver:     few-ray / analytic  → Γ_ion
+└─ neutral solver: radiosity (I-(1-s)K)⁻¹ → Γ_F, Γ_O      [share K, BVH/grid]
+recombine in surface chemistry → V_n           ← only coupling point
+   (if s depends on θ: iterate this block 2–4×, reusing K)
+extend velocity → advect (WENO/TVD-RK) → reinit → φ'</code></pre>
+<p>The split changes <em>how</em> each flux is computed but not <em>where</em> species couple — so it introduces no new approximation beyond what every tool already makes by freezing the surface during a step. See <a href="physics.html">Physics §8</a>.</p>
+
+<div class="pagenav">
+<a href="numerics.html">← Numerics</a>
+<a href="acceleration.html">Next: Acceleration →</a>
+</div>
+<div class="footer"><p>Transport layer. Next, the full catalog of speedups — all variations on one theme.</p></div>
+</main>
+</body>
+</html>

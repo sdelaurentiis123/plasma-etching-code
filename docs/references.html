@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>References — Feature-Scale Etch</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="references.html" class="active">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>References</strong></p>
+<h1>References &amp; Citations</h1>
+<p class="subtitle">Every source behind the explainer set, grouped by topic. Machine-readable export: <a href="references.bib"><code>references.bib</code></a>.</p>
+
+<div class="callout warn">
+<span class="lab">Before formal use</span>
+<p>Web-sourced entries (marked <span class="tag stake">web</span>) should have their exact authors, year, volume and pages verified against the primary venue before going into a thesis or paper. Classic entries (marked <span class="tag win">classic</span>) are given with best-known bibliographic details.</p>
+</div>
+
+<h2>A. Feature-scale topography tools &amp; frameworks</h2>
+<ol>
+<li><span class="tag win">classic</span> Quell et al. <em>ViennaPS: A flexible framework for semiconductor process simulation.</em> ViennaTools, 2025. — <a href="https://www.sciencedirect.com/science/article/pii/S2352711025004194">paper</a> · <a href="https://github.com/ViennaTools/ViennaPS">code</a> · <a href="https://viennatools.github.io/ViennaPS/">docs</a>. <em>Our reference incumbent.</em></li>
+<li><span class="tag stake">web</span> Riedel, X. <em>GPU-Accelerated Ray-Tracing for Particle Simulations in ViennaPS.</em> TU Wien, 2026. — <a href="https://repositum.tuwien.at/handle/20.500.12708/226294">thesis</a>. <em>OptiX engines incl. level-set voxel mesh.</em></li>
+<li><span class="tag stake">web</span> Synopsys. <em>Sentaurus Topography 3D.</em> — <a href="https://www.synopsys.com/manufacturing/tcad/process-simulation/sentaurus-topography.html">page</a>. <em>Radiosity default; MC optional.</em></li>
+<li>Coventor / Lam Research. <em>SEMulator3D.</em> <em>Monte Carlo, explicit surface; virtual fab.</em></li>
+</ol>
+
+<h2>B. Flux / transport methods &amp; reviews</h2>
+<ol start="5">
+<li><span class="tag win">classic</span> Manstetten, P. <em>Efficient Flux Calculations for Topography Simulation.</em> TU Wien (IuE), 2018. — <a href="https://www.iue.tuwien.ac.at/phd/manstetten/">dissertation</a>. <em>The flux-method taxonomy (matrix-radiosity / iterative / Monte Carlo); view factors, re-emission, ray-count accounting.</em></li>
+<li><span class="tag stake">web</span> <em>Quasi-Monte Carlo ray tracing for radiative flux distribution.</em> Solar Energy, 2020. — <a href="https://www.sciencedirect.com/science/article/abs/pii/S0038092X20310148">paper</a>.</li>
+</ol>
+
+<h2>C. Level set &amp; surface-evolution numerics</h2>
+<ol start="7">
+<li><span class="tag win">classic</span> Osher &amp; Sethian. <em>Fronts propagating with curvature-dependent speed.</em> J. Comput. Phys. 79(1):12–49, 1988. <em>The level-set method.</em></li>
+<li><span class="tag win">classic</span> Sethian. <em>A fast marching level set method.</em> PNAS 93(4):1591–1595, 1996.</li>
+<li><span class="tag win">classic</span> Adalsteinsson &amp; Sethian. <em>Fast construction of extension velocities.</em> J. Comput. Phys. 148(1):2–22, 1999.</li>
+<li><span class="tag win">classic</span> Jiang &amp; Shu. <em>Efficient implementation of weighted ENO schemes.</em> J. Comput. Phys. 126(1):202–228, 1996.</li>
+<li><span class="tag win">classic</span> Shu &amp; Osher. <em>Efficient implementation of ENO shock-capturing schemes (TVD-RK).</em> J. Comput. Phys. 77(2):439–471, 1988.</li>
+<li><span class="tag stake">web</span> <em>3D etching profile evolution using sparse-field level set.</em> arXiv:physics/0409130, 2004. — <a href="https://arxiv.org/pdf/physics/0409130">pdf</a>.</li>
+<li><span class="tag stake">web</span> <em>A fast level set framework for large 3D topography simulations.</em> Comput. Phys. Commun., 2009. — <a href="https://www.sciencedirect.com/science/article/abs/pii/S0010465509000459">paper</a>.</li>
+<li><span class="tag stake">web</span> <em>3D simulation of DRIE based on narrow-band level set + Monte Carlo.</em> Micromachines, 2018. — <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6187289/">paper</a>.</li>
+</ol>
+
+<h2>D. Ray tracing, traversal &amp; GPU</h2>
+<ol start="15">
+<li><span class="tag win">classic</span> Amanatides &amp; Woo. <em>A Fast Voxel Traversal Algorithm for Ray Tracing (DDA).</em> Eurographics '87.</li>
+<li><span class="tag win">classic</span> Hart. <em>Sphere tracing: antialiased ray tracing of implicit surfaces.</em> The Visual Computer 12(10):527–545, 1996.</li>
+<li><span class="tag stake">web</span> NVIDIA. <em>OptiX Ray Tracing Engine.</em> — <a href="https://developer.nvidia.com/rtx/ray-tracing/optix">page</a>.</li>
+<li><span class="tag stake">web</span> Macklin. <em>Warp: a High-Performance Python Framework for GPU Simulation and Graphics.</em> NVIDIA, 2022. — <a href="https://developer.nvidia.com/warp-python">page</a>.</li>
+<li><span class="tag stake">web</span> <em>Exploiting Hardware-Accelerated Ray Tracing for Monte Carlo Particle Transport.</em> SC19 PMBS. — <a href="https://sc19.supercomputing.org/proceedings/workshops/workshop_files/ws_pmbsf102s2-file1.pdf">pdf</a>. <em>The incoherent-ray caveat.</em></li>
+<li><span class="tag stake">web</span> Choi et al. <em>GPU-based 3D HARC contact-hole etch under fluorocarbon plasmas.</em> APS GEC 2013. — <a href="https://ui.adsabs.harvard.edu/abs/2013APS..GECMR1020C/abstract">abstract</a>.</li>
+</ol>
+
+<h2>E. Variance reduction &amp; differentiable rendering</h2>
+<ol start="21">
+<li><span class="tag win">classic</span> Li, Aittala, Durand, Lehtinen. <em>Differentiable Monte Carlo ray tracing through edge sampling.</em> ACM TOG (SIGGRAPH Asia) 37(6), 2018. <em>How to differentiate through visibility discontinuities.</em></li>
+<li><span class="tag stake">web</span> <em>Differentiable Neural Radiosity.</em> arXiv:2201.13190, 2022. — <a href="https://arxiv.org/pdf/2201.13190">pdf</a>.</li>
+</ol>
+
+<h2>F. Surface physics &amp; chemistry (Graves and the reaction model)</h2>
+<ol start="23">
+<li><span class="tag win">classic</span> Coburn &amp; Winters. <em>Ion- and electron-assisted gas-surface chemistry.</em> J. Appl. Phys. 50(5):3189, 1979. <em>The ion-neutral synergy.</em></li>
+<li><span class="tag win">classic</span> Steinbrüchel. <em>Universal energy dependence of etch yields at low ion energy.</em> Appl. Phys. Lett. 55(19):1960, 1989. <em>The √E threshold law.</em></li>
+<li><span class="tag win">classic</span> Sigmund. <em>Theory of sputtering I.</em> Phys. Rev. 184(2):383, 1969.</li>
+<li><span class="tag win">classic</span> Belen, Gomez, Cooperberg, Kiehlbauch, Aydil. <em>Feature-scale modeling of Si etching in SF6/O2 plasmas.</em> J. Vac. Sci. Technol. A, 2005. <em>The coverage model ViennaPS uses.</em></li>
+<li><span class="tag stake">web</span> Graves &amp; Brault. <em>Molecular dynamics for low-temperature plasma-surface interaction studies.</em> J. Phys. D, 2009. — <a href="https://arxiv.org/pdf/0902.2695">pdf</a>.</li>
+<li><span class="tag stake">web</span> Graves &amp; Humbird. <em>Controlling surfaces in plasma processing: role of ions via MD.</em> — <a href="https://www.researchgate.net/publication/231035137">link</a>.</li>
+<li><span class="tag stake">web</span> Graves et al. <em>Deep potential MD of low-temperature plasma-surface interactions (Si-Cl-Ar).</em> Princeton/PPPL, 2024. — <a href="https://www.osti.gov/biblio/2514378">OSTI</a>. <em>Predicts sputter yields + a-c interface; the learned-potential template.</em></li>
+<li><span class="tag stake">web</span> Graves et al. <em>Dynamics of plasma atomic layer etching: MD + OES.</em> — <a href="https://www.osti.gov/biblio/2248044">OSTI</a>.</li>
+</ol>
+
+<h2>G. Reactor-scale plasma (Kushner)</h2>
+<ol start="31">
+<li><span class="tag stake">web</span> Kushner. <em>Introduction to the Hybrid Plasma Equipment Model (HPEM).</em> U. Michigan CPSEG. — <a href="https://cpseg.eecs.umich.edu/pub/odp_files/hpem_intro.pdf">pdf</a>.</li>
+<li><span class="tag stake">web</span> Kushner et al. <em>Monte Carlo Feature Profile Model (MCFPM).</em> CPSEG. — <a href="https://cpseg.eecs.umich.edu/Projects/MCFPM/MCFPM.htm">project</a>. <em>Voxel-based feature profile model; our method's ancestor.</em></li>
+<li><span class="tag stake">web</span> Kushner et al. <em>Plasma Chemistry Monte Carlo Model (PCMCM).</em> CPSEG. — <a href="https://cpseg.eecs.umich.edu/Projects/PCMCM/PCMCM.htm">project</a>. <em>Produces the IED/IAD/flux our sim consumes.</em></li>
+<li><span class="tag stake">web</span> Kushner et al. <em>Voltage waveform tailoring for high-aspect-ratio plasma etching.</em> Phys. Plasmas 31:033508, 2024. — <a href="https://cpseg.eecs.umich.edu/pub/articles/PhysPlasmas_31_033508_2024.pdf">pdf</a>.</li>
+</ol>
+
+<h2>H. Machine learning: neural operators &amp; interatomic potentials</h2>
+<ol start="35">
+<li><span class="tag win">classic</span> Li, Kovachki, Azizzadenesheli et al. <em>Fourier Neural Operator for Parametric PDEs.</em> ICLR 2021, arXiv:2010.08895.</li>
+<li><span class="tag win">classic</span> Lu, Jin, Pang, Zhang, Karniadakis. <em>Learning nonlinear operators via DeepONet.</em> Nature Machine Intelligence 3:218–229, 2021.</li>
+<li><span class="tag stake">web</span> Azizzadenesheli et al. <em>Neural operators for accelerating scientific simulations and design.</em> Nature Reviews Physics, 2024. — <a href="https://www.nature.com/articles/s42254-024-00712-5">paper</a>.</li>
+<li><span class="tag stake">web</span> <em>Neural operator surrogate models of plasma edge simulations.</em> Nucl. Fusion 2025, arXiv:2502.17386. — <a href="https://arxiv.org/pdf/2502.17386">pdf</a>. <em>Operator surrogates proven on plasma data.</em></li>
+<li><span class="tag win">classic</span> Batatia, Kovács, Simm, Ortner, Csányi. <em>MACE: higher-order equivariant message-passing force fields.</em> NeurIPS 2022, arXiv:2206.07697. — <a href="https://github.com/ACEsuit/mace">code</a>.</li>
+<li><span class="tag win">classic</span> Wang, Zhang, Han, E. <em>DeePMD-kit.</em> Comput. Phys. Commun. 228:178–184, 2018.</li>
+<li><span class="tag stake">web</span> Ryan et al. (Ceder). <em>A practical guide to machine learning interatomic potentials.</em> 2025. — <a href="https://ceder.berkeley.edu/publications/2025_Ryan_MLP-guide.pdf">pdf</a>.</li>
+<li><span class="tag stake">web</span> <em>An efficient multiscale coupling method for reactor-scale CVD with microstructural features.</em> Adv. Eng. Software, 2025. — <a href="https://www.sciencedirect.com/science/article/abs/pii/S0965997825001899">paper</a>. <em>ANN-surrogate reactor↔feature coupling (CVD prior art).</em></li>
+</ol>
+
+<h2>I. Application driver (3D NAND HARC)</h2>
+<ol start="43">
+<li><span class="tag stake">web</span> <em>How Etch Breakthroughs Are Tackling 3D NAND Scaling Challenges on the Path to 1,000 Layers.</em> Semiconductor Digest, 2024. — <a href="https://www.semiconductor-digest.com/how-etch-breakthroughs-are-tackling-3d-nand-scaling-challenges-on-the-path-to-1000-layers/">article</a>.</li>
+<li><span class="tag stake">web</span> <em>Etch and deposition co-optimization for HAR 3D NAND ONON channel-hole patterning.</em> — <a href="https://www.researchgate.net/publication/349505002">link</a>.</li>
+</ol>
+
+<div class="pagenav">
+<a href="sota-and-plan.html">← SOTA &amp; Plan</a>
+<a href="index.html">↑ Overview</a>
+</div>
+<div class="footer"><p>44 sources across 9 topics. BibTeX: <a href="references.bib"><code>references.bib</code></a>. Verify <span class="tag stake">web</span> entries before formal citation.</p></div>
+</main>
+</body>
+</html>

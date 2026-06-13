@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Numerics — Feature-Scale Etch</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html" class="active">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>Numerics</strong></p>
+<h1>The Numerics: Representing and Moving the Surface</h1>
+<p class="subtitle">Level-set methods, signed distance, high-order Hamilton–Jacobi solvers, reinitialization, and sparse data structures.</p>
+
+<h2>1. Why a level set</h2>
+<p>The surface is stored implicitly as the zero contour of a scalar field \(\varphi(\mathbf{x},t)\):</p>
+$$\varphi&gt;0\ \text{(solid)},\qquad \varphi&lt;0\ \text{(gas)},\qquad \varphi=0\ \text{(surface)}.$$
+<p>Two properties make this the standard choice for etch/deposition:</p>
+<ul>
+<li><strong>Topology is automatic.</strong> Features merging, mask undercut pinching off, voids forming — all handled with no special-case code, because connectivity is never tracked. You evolve a field, not a curve.</li>
+<li><strong>Geometry comes from derivatives.</strong> The outward normal and curvature are
+$$\mathbf{n}=-\frac{\nabla\varphi}{|\nabla\varphi|},\qquad \kappa=\nabla\!\cdot\!\frac{\nabla\varphi}{|\nabla\varphi|}.$$
+The minus sign puts \(\mathbf{n}\) into the gas (decreasing \(\varphi\)), where the flux comes from.</li>
+</ul>
+
+<h2>2. Signed distance and the eikonal property</h2>
+<p>Among all fields with the same zero set, we keep the <strong>signed-distance function</strong>, characterized by</p>
+$$|\nabla\varphi|=1\quad\text{(eikonal equation).}$$
+<p>This is not required by the math, but it keeps \(\nabla\varphi\) well-conditioned so normals, curvature and the upwind scheme stay accurate. A field that drifts from \(|\nabla\varphi|=1\) produces noisy normals and a smeared front.</p>
+
+<h2>3. The level-set evolution equation</h2>
+<p>If the surface moves with normal speed \(F\) (the etch rate from <a href="physics.html">chemistry</a>), the field obeys a Hamilton–Jacobi PDE:</p>
+$$\frac{\partial\varphi}{\partial t} + F\,|\nabla\varphi| = 0.$$
+<div class="callout deriv">
+<span class="lab">Sign check</span>
+<p>\(\nabla\varphi\) points into the solid (\(\varphi&gt;0\) side). With \(F&gt;0\) the equation moves the zero-contour along \(+\nabla\varphi\), i.e. <em>into</em> the solid — material is removed. Since the chemistry gives \(V_n\ge0\), etching corresponds to \(F\ge0\). Consistent.</p>
+</div>
+
+<h2>4. Spatial discretization: upwinding the Hamiltonian</h2>
+<p>The term \(|\nabla\varphi|\) cannot be central-differenced — information must propagate from the correct upwind direction or the scheme is unstable. The <strong>Godunov / Rouy–Tourin</strong> Hamiltonian for an eroding front (\(F&gt;0\)) is</p>
+$$|\nabla\varphi|^2 \approx \max(D^-_x\varphi,0)^2+\min(D^+_x\varphi,0)^2+\;(\text{same for }y,z),$$
+<p>where \(D^\pm\) are forward/backward differences. This is <strong>first order</strong> — simple but numerically <em>diffusive</em>: it smears sharp corners and loses a little volume each step.</p>
+
+<h3>The upgrade: WENO</h3>
+<p><strong>WENO</strong> (Weighted Essentially Non-Oscillatory) reconstructs \(\nabla\varphi\) from a high-order stencil, adaptively down-weighting sub-stencils that straddle a kink so it stays sharp without spurious oscillations. Fifth-order WENO is the standard for level-set topography (Manstetten, ViennaLS). The payoff is indirect but real: a less diffusive scheme hits target fidelity on a <em>coarser</em> grid, which means fewer cells, fewer triangles, and fewer rays downstream.</p>
+
+<h2>5. Temporal discretization and CFL</h2>
+<p>Time is advanced with <strong>TVD Runge–Kutta</strong> (Total-Variation-Diminishing, 2nd–3rd order) — convex combinations of forward-Euler stages that do not increase total variation, so the front stays monotone. The explicit step is limited by the <strong>CFL condition</strong>:</p>
+$$\Delta t \;&lt;\; \alpha_{\rm CFL}\,\frac{\Delta x}{|F|_{\max}},\qquad \alpha_{\rm CFL}\in(0,1].$$
+<p>Physically: the front may not cross more than a fraction of a cell per step. Where \(F\) is large the timestep is sub-divided (the reference code computes <code>nsub</code> from exactly this ratio).</p>
+
+<h2>6. Reinitialization</h2>
+<p>After advection \(\varphi\) is no longer a signed distance (\(|\nabla\varphi|\neq1\)). <strong>Reinitialization</strong> restores it by re-solving the eikonal equation \(|\nabla\varphi|=1\) with the zero set fixed — either by a PDE relaxation</p>
+$$\partial_\tau\varphi+\operatorname{sgn}(\varphi_0)\big(|\nabla\varphi|-1\big)=0$$
+<p>to steady state, or directly by the <strong>fast marching method</strong> (a Dijkstra-like \(O(N\log N)\) sweep). The reference code reinitializes <em>every step</em> with fast marching.</p>
+<div class="callout warn">
+<span class="lab">Bias contributor #5 — numerical diffusion</span>
+<p>First-order upwind <em>plus</em> reinitializing every step is doubly diffusive, and 32 cells across an 8&nbsp;µm trench (\(\Delta x=0.25\)) is coarse. Fixes: WENO + TVD-RK; reinitialize <em>lazily</em> (every \(k\) steps) and <em>locally</em> (only near the moving front); refine \(\Delta x\). Each reduces diffusion and the depth/shape bias.</p>
+</div>
+
+<h2>7. Velocity extension</h2>
+<p>The etch rate \(V_n\) is defined only <em>on</em> the surface, but the PDE runs on the whole grid. \(F\) must be extended off the surface into a band. The principled extension makes \(F\) constant along normals, which preserves the signed-distance property under advection:</p>
+$$\nabla F\cdot\nabla\varphi = 0,$$
+<p>solved by fast marching outward from the front, or by a closest-point lookup \(F(\mathbf{x})=V_n(\mathbf{x}_{\rm cp})\). The reference code uses a cheap nearest-segment KD-tree query — an approximation worth upgrading.</p>
+
+<h2>8. Sparse data structures (the 3D enabler)</h2>
+<p>A dense 3D grid costs \(O(n^3)\) memory for a surface that is intrinsically 2D — nearly all of it wasted. Two SOTA structures fix this:</p>
+<table>
+<thead><tr><th>Structure</th><th>Idea</th><th>Used by</th></tr></thead>
+<tbody>
+<tr><td><strong>HRLE</strong> (hierarchical run-length encoding)</td><td>store only a thin band around \(\varphi=0\), run-length compressed; effective \(O(n^2)\)</td><td>ViennaLS / ViennaPS</td></tr>
+<tr><td><strong>Sparse-field method</strong></td><td>each step, update only the one active layer of grid points straddling the zero set</td><td>classic narrow-band level set</td></tr>
+<tr><td><strong>NanoVDB / sparse octree</strong></td><td>GPU-friendly sparse hierarchical voxels; pairs naturally with grid ray-marching</td><td>graphics, increasingly simulation</td></tr>
+</tbody>
+</table>
+<p>This is the difference between feasible and impossible for a 1000-layer channel hole. It also pairs directly with <strong>DDA grid traversal</strong> for ray tracing — see <a href="flux-transport.html">Flux &amp; Transport</a>.</p>
+
+<h2>9. Surface extraction and accumulation</h2>
+<p>For chemistry and (optionally) ray tracing you need an explicit surface. <strong>Marching cubes</strong> (2D: marching squares) extracts the \(\varphi=0\) isosurface as a triangle mesh; each element carries a normal, area and centroid. A lighter alternative is a <strong>disk mesh</strong> — surface sample points with normals and areas but <em>no connectivity</em> — which avoids rebuilding mesh topology every step as the surface moves. ViennaPS uses disk meshes for flux accumulation precisely for this reason.</p>
+
+<div class="callout key">
+<span class="lab">The numerics, in one line</span>
+<p>Implicit field for free topology and geometry; high-order non-diffusive Hamilton–Jacobi solver (WENO + TVD-RK) for the motion; reinitialization to keep distances clean; sparse storage to make 3D tractable; explicit (disk/triangle) mesh only where you need to touch the surface.</p>
+</div>
+
+<div class="pagenav">
+<a href="physics.html">← Physics</a>
+<a href="flux-transport.html">Next: Flux &amp; Transport →</a>
+</div>
+<div class="footer"><p>Numerics layer. Next, the core computational problem: computing the flux that drives \(F\).</p></div>
+</main>
+</body>
+</html>
