@@ -1,0 +1,56 @@
+{
+  "widths": [
+    4.0,
+    6.0,
+    8.0,
+    12.0
+  ],
+  "depth": {
+    "4.0": 9.56184889195297,
+    "6.0": 9.881213836301253,
+    "8.0": 10.052768184361916,
+    "12.0": 10.229600534703202
+  },
+  "depth8": 10.052768184361916,
+  "arde": [
+    9.56184889195297,
+    9.881213836301253,
+    10.052768184361916,
+    10.229600534703202
+  ],
+  "params": {
+    "etchStopDepth": -1.7976931348623157e+308,
+    "etchantFlux": 1800.0,
+    "ionFlux": 12.0,
+    "passivationFlux": 100.0,
+    "Ions.exponent": 500.0,
+    "Ions.inflectAngle": 1.55334303,
+    "Ions.meanEnergy": 100.0,
+    "Ions.minAngle": 1.3962634,
+    "Ions.n_l": 10.0,
+    "Ions.sigmaEnergy": 10.0,
+    "Ions.thetaRMax": 1.5707963267948966,
+    "Ions.thetaRMin": 1.2217304763960306,
+    "Substrate.A_ie": 7.0,
+    "Substrate.A_sp": 0.0337,
+    "Substrate.B_ie": 0.8,
+    "Substrate.B_sp": 9.3,
+    "Substrate.Eth_ie": 15.0,
+    "Substrate.Eth_sp": 20.0,
+    "Substrate.beta_sigma": 0.04,
+    "Substrate.k_sigma": 300.0,
+    "Substrate.rho": 5.02,
+    "Passivation.A_ie": 3.0,
+    "Passivation.Eth_ie": 10.0,
+    "Mask.A_sp": 0.0139,
+    "Mask.B_sp": 9.3,
+    "Mask.Eth_sp": 20.0,
+    "Mask.rho": 500.0
+  },
+  "DX": 0.25,
+  "W": 20.0,
+  "H": 24.0,
+  "MASK": 2.0,
+  "DUR": 3.0,
+  "version": "4.5.0"
+}

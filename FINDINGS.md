@@ -112,6 +112,27 @@ wrong regime. Reconciling the absolute flux units should fix ARDE and the absolu
 **Phase-0 payoff:** the vague "~7% accuracy issue + ARDE lag" is now ONE localized,
 evidence-backed root cause (flux normalization) with a demonstrated lever (the F/ion flux ratio).
 
-**Next:** reconcile `mc_flux` flux normalization to ViennaPS absolute units. This needs ViennaPS's
-flux convention + `unitConversion` (from source) and ideally one ViennaPS calibration run
-(GPU/Linux box — not available on this M1). That single change is predicted to close both gaps.
+**Next:** reconcile `mc_flux` flux normalization to ViennaPS absolute units. (Now actionable —
+real ViennaPS ground truth captured below.)
+
+## Step 6 — Real ViennaPS ground truth (Vast.ai RTX 2080 Ti, ~$0.02)
+
+`pip install ViennaPS` **works on Linux x86** (4.5.0) → arm64 was the only local blocker. Ran
+SF6O2 at the benchmark widths with the **CPU_DISK (Embree) engine** (the GPU/OptiX path on that
+box failed an OptiX driver-version check — note for Phase 1: needs a newer driver than 550.144).
+
+- **Real depths match the cached reference exactly:** w4 9.562, w6 9.881, w8 **10.053**, w12
+  10.230 → normalized ARDE `[0.935, 0.966, 0.983, 1.000]`. Validates the whole cached reference,
+  and we now have the **full surface meshes** (`harness/reference/viennaps_surfaces.npz`) →
+  Chamfer / sidewall-angle metrics are unlocked.
+- **Exact default params confirmed** (`harness/reference/viennaps_reference.json`): `k_sigma=300,
+  beta_sigma=0.04, A_ie=7, A_sp=0.0337, B_ie=0.8, B_sp=9.3, Eth_ie=15, Eth_sp=20, rho=5.02`;
+  passivation `A_ie=3, Eth_ie=10`; ions `meanEnergy=100, sigmaEnergy=10, exponent=500,
+  inflectAngle=1.553`; fluxes `etchantFlux=1800, ionFlux=12, passivationFlux=100`.
+- **Correction:** ViennaPS 4.5 SF6O2 exposes **no explicit sticking coefficient** (`beta_E=0.7`
+  was wrong — it came from the agent's inference of an older form). Sticking is implicit in the
+  particle model. The flux-normalization fit must be done empirically against this ground truth,
+  not by assuming a sticking value.
+
+**Status:** flux-normalization calibration is now a **local** task (fit our model to the real
+ViennaPS depth + ARDE + surfaces — no GPU needed). The box has been torn down.

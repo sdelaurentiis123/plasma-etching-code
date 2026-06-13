@@ -69,7 +69,17 @@ def vps_etch(width):
                    trenchDepth=MASK, taperingAngle=0.0, baseHeight=0.0,
                    periodicBoundary=False, makeMask=True, material=Mat.Si).apply()
     model = vps.SF6O2Etching(vps.SF6O2Etching.defaultParameters())
-    vps.Process(d, model, DUR).apply()
+    # ViennaPS 4.x auto-selects the GPU/OptiX engine when a GPU is present; force the CPU
+    # (Embree) disk engine — identical physics, and avoids the OptiX driver-version mismatch.
+    p = vps.Process()
+    p.setDomain(d)
+    p.setProcessModel(model)
+    p.setProcessDuration(DUR)
+    try:
+        p.setFluxEngineType(ps.FluxEngineType.CPU_DISK)
+    except Exception as e:
+        print("  (setFluxEngineType failed, using default:", e, ")")
+    p.apply()
     n = np.array(d.getSurfaceMesh().getNodes())
     return n[:, 0], n[:, 1]
 
