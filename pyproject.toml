@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "petch"
+version = "0.1.0"
+description = "2D feature-scale plasma-etch simulator (Phase 0): fidelity harness toward a differentiable 3D etcher"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "scikit-fmm",
+    "numba",
+    "scikit-image",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+warp = ["warp-lang>=1.13"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json"]
