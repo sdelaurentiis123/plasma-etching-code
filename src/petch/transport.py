@@ -5,8 +5,37 @@ targets). `mc_flux` launches ions + F + O species against the frozen surface. Th
 path is byte-identical to the original PoC; variant hooks (QMC sampling, clip removal,
 2D re-emission, ion/neutral split) are wired in later steps.
 """
+import warnings
+from contextlib import contextmanager
 import numpy as np
 from numba import njit
+from scipy.stats import qmc, norm
+
+
+@contextmanager
+def _suppress_qmc_warning():
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message=".*power of 2.*")
+        yield
+
+
+def _sobol_source(n, W, sigma, kind, seed):
+    """Low-discrepancy (Sobol) source launch: stratified (x-position, angle) per particle.
+
+    QMC over the *source* dimensions — the dominant variance source — drives variance toward
+    ~1/N instead of ~1/sqrt(N). Bounce decisions inside _trace stay pseudorandom.
+    kind: 'ion' (Gaussian angle, std=sigma) or 'neutral' (2D-cosine via arcsin).
+    """
+    eng = qmc.Sobol(d=2, scramble=True, seed=seed)
+    with np.errstate(all='ignore'), _suppress_qmc_warning():
+        u = eng.random(n)                   # (n, 2) in [0,1); non-pow2 n is fine (scrambled)
+    u0 = u[:, 0]; u1 = np.clip(u[:, 1], 1e-9, 1 - 1e-9)
+    xs = u0 * W
+    if kind == 'ion':
+        ang = norm.ppf(u1) * sigma
+    else:
+        ang = np.arcsin(2.0 * u1 - 1.0)     # inverse-CDF of the 2D cosine launch
+    return xs, np.sin(ang), -np.cos(ang)
 
 
 @njit(cache=True, fastmath=True)
@@ -59,29 +88,33 @@ def _trace(seg, nrm, is_mask, x0_src, y_src, dirs_x, dirs_y, sticking, n_reemit,
     return flux, ang_acc
 
 
-def mc_flux(seg, mid, nrm, is_mask, L, y_src, W, par, n_part_ion=20000, n_part_neu=20000, seed=0):
+def mc_flux(seg, mid, nrm, is_mask, L, y_src, W, par, n_part_ion=20000, n_part_neu=20000,
+            seed=0, n_reemit=12, sampling="pseudo"):
     """Compute per-segment normalized flux multipliers + mean ion incidence cos for 3 species.
 
-    `seed` selects an independent Monte-Carlo realization (seed=0 reproduces the PoC exactly).
-    Used for seed-averaging in the convergence study and for variance estimates.
+    `seed` selects an independent Monte-Carlo realization (seed=0, sampling='pseudo' reproduces
+    the PoC exactly). `n_reemit` is the neutral re-emission bounce cap. `sampling`: 'pseudo'
+    (PoC) or 'sobol' (QMC source launch — variance ~1/N instead of ~1/sqrt(N)).
     """
-    rng = np.random.default_rng(seed)
     s_off = 3 * seed
-    # --- ions: near-vertical, small angular spread ---
-    xs0 = rng.uniform(0, W, n_part_ion)
-    a = rng.normal(0, par['ion_ang_sigma'], n_part_ion)
-    dix = np.sin(a); diy = -np.cos(a)
+    if sampling == "sobol":
+        xs0, dix, diy = _sobol_source(n_part_ion, W, par['ion_ang_sigma'], 'ion', 10 + s_off)
+        xs1, dfx, dfy = _sobol_source(n_part_neu, W, None, 'neutral', 11 + s_off)
+        xs2, dox, doy = _sobol_source(n_part_neu, W, None, 'neutral', 12 + s_off)
+    else:  # pseudo — exact PoC behavior (one shared rng, in species order)
+        rng = np.random.default_rng(seed)
+        xs0 = rng.uniform(0, W, n_part_ion)
+        a = rng.normal(0, par['ion_ang_sigma'], n_part_ion)
+        dix = np.sin(a); diy = -np.cos(a)
+        xs1 = rng.uniform(0, W, n_part_neu)
+        aF = np.arcsin(rng.uniform(-1, 1, n_part_neu))
+        dfx = np.sin(aF); dfy = -np.cos(aF)
+        xs2 = rng.uniform(0, W, n_part_neu)
+        aO = np.arcsin(rng.uniform(-1, 1, n_part_neu))
+        dox = np.sin(aO); doy = -np.cos(aO)
     fi, ai = _trace(seg, nrm, is_mask, xs0, y_src, dix, diy, 1.0, 0, 1 + s_off)
-    # --- F etchant: cosine launch, sticking s_F, re-emission ---
-    xs1 = rng.uniform(0, W, n_part_neu)
-    aF = np.arcsin(rng.uniform(-1, 1, n_part_neu))     # cosine-ish into lower hemisphere
-    dfx = np.sin(aF); dfy = -np.cos(aF)
-    fF, _ = _trace(seg, nrm, is_mask, xs1, y_src, dfx, dfy, par['s_F'], 12, 2 + s_off)
-    # --- O passivation ---
-    xs2 = rng.uniform(0, W, n_part_neu)
-    aO = np.arcsin(rng.uniform(-1, 1, n_part_neu))
-    dox = np.sin(aO); doy = -np.cos(aO)
-    fO, _ = _trace(seg, nrm, is_mask, xs2, y_src, dox, doy, par['s_O'], 12, 3 + s_off)
+    fF, _ = _trace(seg, nrm, is_mask, xs1, y_src, dfx, dfy, par['s_F'], n_reemit, 2 + s_off)
+    fO, _ = _trace(seg, nrm, is_mask, xs2, y_src, dox, doy, par['s_O'], n_reemit, 3 + s_off)
     # normalize to open-field flux density (particles per unit x length)
     base_ion = n_part_ion / W
     base_neu = n_part_neu / W

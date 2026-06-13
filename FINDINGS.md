@@ -50,6 +50,34 @@ deficiency by letting more F survive to the bottom.
   in 1e15 cm⁻²s⁻¹), **separate from chemistry form**. Killing it needs flux-unit reconciliation,
   not a better coverage model.
 
-**Next:** Step 4 — implement the neutral radiosity solve (all-bounces, no truncation) and
-re-measure ARDE for Belen. Hypothesis: ARDE rmse drops back toward / below the Langmuir 0.038
-once narrow-trench flux is restored.
+## Step 4 — Eng speedups + transport diagnostics
+
+**(a) Bounce-truncation hypothesis — REFUTED.** Belen ARDE at `n_reemit` 12 vs 40 is *identical*
+(depths 8.38/10.24/11.16, same runtime) — the re-emission chain is already converged at 12
+bounces. So the narrow-trench over-depletion is **not** bounce truncation. The cause is deeper
+(re-emission angular law, flux normalization, or a saturation difference vs ViennaPS) — to be
+resolved by the radiosity reformulation, not by adding bounces.
+
+**(b) QMC (Sobol source launch) — WIN.** At fixed N=10000 (compact geom, 6 seeds):
+
+| sampling | depth mean | across-seed noise (std) |
+|---|---|---|
+| pseudo | 6.409 | 0.224 µm |
+| **sobol** | 6.443 | **0.118 µm** |
+
+Same mean (no fidelity cost), **1.9× lower noise** → ~3.6× fewer rays for the same noise floor.
+This is the "equal fidelity at far fewer rays" win, exact and measured.
+
+**(c) Ions are over-sampled, but ions are NOT the bottleneck.** Width-8 belen depth vs ion ray
+count: 20k→10.236, 5k→10.166 (unchanged), 1k→6.377 (collapses). So ions tolerate a ~4× ray cut
+— BUT raytrace time barely moved (3.3s→2.2s) because the **many-bounce neutrals dominate the ray
+cost**. Therefore the high-value speedup is the neutral solve, not the ion few-ray.
+
+**Priorities converge:** the **neutral radiosity solve** is simultaneously (i) the dominant speed
+lever (neutrals are the cost) and (ii) the ARDE fix (it recomputes the neutral equilibrium flux,
+which is where the over-depletion lives). That is the next major build.
+
+**Next:** implement the neutral radiosity solve — assemble the segment-to-segment form-factor
+operator K from the existing visibility (`_trace`), solve `(I-(1-s)K)^-1 Gamma_direct` for the
+equilibrium neutral flux, and re-measure ARDE for Belen. Hypothesis: ARDE flattens toward
+ViennaPS, and wall-clock drops (one solve vs 20k x 12-bounce chains).
