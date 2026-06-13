@@ -27,8 +27,10 @@ def configs():
     # Belen row (contributor #1) — added once chemistry='belen' is implemented (Step 3).
     try:
         from petch.belen import surface_rate_belen  # noqa: F401
-        belen_par = dict(petch.PAR)  # rate_scale stays 1.0
-        rows.append(("belen, rate_scale=1.0 (contributor #1)", belen_par,
+        # belen's depth-10 calibration scale is ~0.10 (units/flux-norm issue, not chemistry);
+        # see FINDINGS.md. Shown depth-matched so the ARDE shape is the comparison.
+        belen_par = dict(petch.PAR); belen_par['rate_scale'] = 0.10
+        rows.append(("belen @0.10 (contributor #1)", belen_par,
                      petch.Flags(chemistry="belen")))
     except Exception:
         pass

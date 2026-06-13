@@ -73,9 +73,13 @@ def scorecard(par, flags, label="", widths=ARDE_WIDTHS, n_part_ion=20000, n_part
     d8 = depths.get(8.0, float('nan'))
     vps8 = ref['depth_vps']
     # ARDE: normalize to widest trench (matches the figure-(c) convention)
-    our_arde = np.array([depths[w] for w in widths]) / depths[widths[-1]]
-    vps_arde = np.array(ref['vps_depth']) / ref['vps_depth'][-1]
-    arde_rmse = float(np.sqrt(np.mean((our_arde - vps_arde) ** 2)))
+    widest = depths[widths[-1]]
+    if widest <= 1e-6:   # saturated/failed run -> ARDE undefined
+        arde_rmse = float('nan')
+    else:
+        our_arde = np.array([depths[w] for w in widths]) / widest
+        vps_arde = np.array(ref['vps_depth']) / ref['vps_depth'][-1]
+        arde_rmse = float(np.sqrt(np.mean((our_arde - vps_arde) ** 2)))
     return dict(label=label, depths=depths, d8=d8, vps8=vps8,
                 d8_abs_err=d8 - vps8, d8_pct_err=100 * (d8 - vps8) / vps8,
                 arde_rmse=arde_rmse, speed=speed,

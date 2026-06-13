@@ -24,6 +24,10 @@ def run_etch(W=20.0, H=20.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
         flags = DEFAULT_FLAGS
     X, Y, xs, ys, phi, mask, nx, ny = make_trench(W, H, dx, trench_width, mask_thickness, sub_top)
     mask_phi = phi.copy()                  # to re-stamp mask each step
+    # belen chemistry uses ViennaPS sticking; keep transport re-emission consistent with it
+    mc_par = par
+    if getattr(flags, "chemistry", "langmuir") == "belen":
+        mc_par = dict(par); mc_par['s_F'] = par['betaE']; mc_par['s_O'] = par['betaO']
     y_src = H - dx
     dt = t_end / n_steps
     band = 5 * dx
@@ -37,7 +41,7 @@ def run_etch(W=20.0, H=20.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
         nrm = orient_normals(mid, nrm, phi, xs, ys, dx)
         is_mask = seg_in_mask(mid, mask, xs, ys, dx)
         t0 = time.time()
-        m_i, m_F, m_O, cos_i = mc_flux(segs, mid, nrm, is_mask, L, y_src, W, par,
+        m_i, m_F, m_O, cos_i = mc_flux(segs, mid, nrm, is_mask, L, y_src, W, mc_par,
                                        n_part_ion=n_part_ion, n_part_neu=n_part_neu, seed=seed)
         timings['raytrace'] += time.time() - t0
         t0 = time.time()
