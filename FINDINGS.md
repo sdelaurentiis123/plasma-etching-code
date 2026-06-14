@@ -136,3 +136,28 @@ box failed an OptiX driver-version check — note for Phase 1: needs a newer dri
 
 **Status:** flux-normalization calibration is now a **local** task (fit our model to the real
 ViennaPS depth + ARDE + surfaces — no GPU needed). The box has been torn down.
+
+## Phase 1 — 3D + GPU benchmark (Vast.ai RTX 3090, driver 590, ~$0.06)
+
+Built a working minimal 3D differentiable etcher (`src/petch/threed.py`): 3D level set ->
+marching-cubes mesh -> Warp ray-traced flux (`_trace3d`: wp.Mesh + mesh_query_ray, ions +
+neutral 3D-cosine re-emission) -> chemistry -> 3D advection. Trench and contact hole both etch.
+
+**GPU benchmark (`scripts/gpu_benchmark.py`):**
+- Our `_trace3d` flux kernel: **CPU 1.45 M rays/s -> GPU (RT cores) 198 M rays/s = 137x**
+  (300k neutral rays, 12 bounces, on a 2602-face etched-trench mesh).
+- Full 3D etch on GPU: 12 steps, 60k rays/step, **0.4 s**.
+
+**ViennaPS-3D for comparison (`scripts/viennaps_3d_bench.py`):** OptiX/GPU works on driver 590
+(it failed on the 2080 Ti's driver 550 — note for box selection). Full SF6O2 3D trench etch:
+**GPU 11.4 s vs CPU 52.8 s (4.6x)**.
+
+**Read:** our differentiable Warp kernel hits RT-core-class throughput (~200 M rays/s), the same
+ballpark as ViennaPS's OptiX — confirming "RT cores are RT cores." The defensible edge is NOT
+raw rays/sec; it is that our kernel is **differentiable** + **QMC-reducible** + surrogate-able,
+which ViennaPS is not.
+
+## 3D speedups (QMC)
+QMC (Sobol over the 4D source launch) ported to 3D: exact (same mean), floor m_F noise
+0.0032 -> 0.0025 (1.28x). Smaller than 2D's 1.9x because neutral re-emission bounces stay
+pseudorandom (only the source is QMC'd); radiosity remains the neutral-noise lever.
