@@ -20,17 +20,19 @@ Whether it can be set to a single physical constant (vs the PoC's empirical 0.29
 measured question — see scripts/run_phase0.py.
 """
 import numpy as np
-from .chemistry import _yields
+from .chemistry import _yields, angular_factors
 
 
 def surface_rate_belen(m_i, m_F, m_O, cos_i, is_mask, par, flags=None):
     Yie, Ysp, Yp = _yields(par)
-    fang = np.clip(cos_i, 0.0, 1.0)
-    Fi = par['ionFlux'] * m_i * fang                  # ion flux x angular (PoC convention)
+    mode = "cosine" if flags is None else getattr(flags, "yield_angular", "cosine")
+    f_ie, f_sp = angular_factors(cos_i, par, mode)
+    Fi = par['ionFlux'] * m_i                          # geometric ion flux (angular in yields)
+    Yie_a = Yie * f_ie; Ysp_a = Ysp * f_sp; Yp_a = Yp * f_ie
     eps = 1e-9
 
-    GY_ie = Yie * Fi                                  # ion-enhanced etchant removal rate
-    GY_p = Yp * Fi                                    # ion-enhanced passivation removal rate
+    GY_ie = Yie_a * Fi                                # ion-enhanced etchant removal rate
+    GY_p = Yp_a * Fi                                  # ion-enhanced passivation removal rate
     # Flux normalization to the ViennaPS convention: our m_F records STUCK flux (open-field ~=
     # betaE), ViennaPS normalizes ARRIVING flux to 1 on open field. Divide by fnorm (=betaE/betaO)
     # to match. fnorm=1.0 recovers the uncorrected PoC-style normalization (for A/B testing).
@@ -45,7 +47,7 @@ def surface_rate_belen(m_i, m_F, m_O, cos_i, is_mask, par, flags=None):
     thF = 1.0 / (1.0 + a * (1.0 + 1.0 / (b + eps)))   # fluorine coverage (coupled to O via b)
 
     # ViennaPS rate: chemical etch + physical sputter + ion-enhanced etch
-    rate = par['k_sigma'] * thF / 4.0 + Ysp * Fi + thF * Yie * Fi
+    rate = par['k_sigma'] * thF / 4.0 + Ysp_a * Fi + thF * Yie_a * Fi
     V = (1.0 / par['rho']) * rate * par['rate_scale']
     V[is_mask] = 0.0
     return V
