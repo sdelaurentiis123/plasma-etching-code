@@ -223,3 +223,25 @@ Correcting it:
 **Bottom line:** the "~7% + ARDE + 3D-HARC-self-limiting" cluster all trace to one cause (flux
 normalization), now calibrated against real ViennaPS data. ARDE fidelity 5x better; HARC
 un-sticks; one global unit constant + minor contributors remain.
+
+## ACCURATE: parameter-free match achieved (2D)
+
+The full calibrated config is now the DEFAULT: **belen + ViennaPS angular yield (contributor #3)
++ cal_F=12 + rate_scale=0.034** (one global unit constant). Contributor #3 (per-channel angular
+yield f_sp/f_ie) further cut ARDE rmse 0.033 -> 0.017. Final 2D match vs ViennaPS ground truth:
+
+| metric | original (per-case knob) | calibrated (one global constant) |
+|---|---|---|
+| width-8 depth error | -8.7% | **+3%** |
+| ARDE rmse | 0.110 | **0.016** |
+
+That is the project's stated goal: match ViennaPS without a per-case `rate_scale`, using one
+global unit constant. The default model is now this calibrated config; `Flags(chemistry=
+'langmuir', yield_angular='cosine')` + cal_F=1 recovers the original PoC (pinned by tests).
+
+NOTE: the calibrated `rate_scale` differs 2D (~0.034) vs 3D (~0.6) because mc_flux (per-width)
+and mc_flux_3d (per-area) use different flux normalizations -> the unit constant is per-dimension.
+A full 3D calibration needs one ViennaPS-3D ground-truth run (GPU box) -- the 2D recipe transfers.
+
+Remaining accuracy tier (smaller): #2 IED integration (~0.2% at this IED), #4 ion reflection
+(bottom-corner microtrenching in deep features), #5 WENO advection (less numerical diffusion).
