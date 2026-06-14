@@ -172,3 +172,27 @@ the trench floor etch at a target rate?" Gradient descent recovered it:
 
 Target outcome -> recipe, by autodiff. The same machinery scales to many parameters and
 full-profile targets. This is the defensible edge ViennaPS does not have.
+
+## Phase 1 — going faster + 3D quality
+
+**Per-phase profile (CPU, 2488 faces):** flux 13.2 ms, velocity-extend (KDTree) 5.4 ms,
+reinit (skfmm) 5.3 ms, marching-cubes 0.9 ms. On GPU the flux drops ~137x (0.1 ms), so the
+**CPU host ops (extend + reinit) become the bottleneck.**
+
+**Speed changes:**
+- **GPU velocity extension** (`wp.mesh_query_point`, `extend='gpu'`): exact-same etch outcome as
+  KDTree (depth 1.300 == 1.300); ~free on GPU. The right architecture for a GPU-resident loop.
+- **Lazy reinit REJECTED as a default:** reinit_every=3 changed depth 1.30 -> 1.60. Skipping
+  reinit lets |grad phi| drift from 1, and advect multiplies F*|grad phi| -> wrong front speed.
+  Only safe with a proper extension velocity (grad F . grad phi = 0). Kept reinit_every=1.
+- Beyond GPU, the real "even faster" levers are a GPU-resident level set (reinit/marching-cubes
+  on GPU) and the learned operator (Phase 2).
+
+**3D quality — deep HARC is GATED by the flux-normalization calibration.** A narrow contact hole
+self-limits shallow (stuck ~1.25 um over 30 steps). Cause: our model is **neutral-limited**, so
+as the hole deepens the floor is F-starved -> theta_F -> 0 -> ion-enhanced etch stops even though
+ions reach the floor. 3D ARDE is stronger (solid angle ~(w/d)^2), so it bites fast. Confirmed by
+forcing F-saturation: hole depth scales with F flux (1.0 -> 2.2 -> 4.0 um at Fflux x1/x5/x15).
+**Same root cause as the 2D ARDE/rate_scale gap (flux normalization).** => doing deep HARC well
+and being parameter-free are the SAME fix: calibrate the flux normalization to the ViennaPS
+ground truth (now captured). That is the #1 next step. (`docs/etch3d_harc.png`.)

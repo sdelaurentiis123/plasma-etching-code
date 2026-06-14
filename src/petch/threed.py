@@ -172,7 +172,7 @@ def advect_3d(phi, Fspeed, dx, dt):
 
 
 def extend_velocity_3d(V, centroids, geo, band):
-    """Nearest-face velocity extension into the 3D narrow band."""
+    """Nearest-face velocity extension into the 3D narrow band (CPU KDTree fallback)."""
     phi, dx = geo['phi'], geo['dx']
     Fs = np.zeros_like(phi)
     bm = np.abs(phi) < band
@@ -182,6 +182,31 @@ def extend_velocity_3d(V, centroids, geo, band):
         return Fs
     _, idx = cKDTree(centroids).query(pts)
     Fs[ii, jj, kk] = V[idx]
+    return Fs
+
+
+@wp.kernel
+def _extend_kernel(mesh: wp.uint64, pts: wp.array(dtype=wp.vec3),
+                   Vface: wp.array(dtype=float), out: wp.array(dtype=float)):
+    i = wp.tid()
+    q = wp.mesh_query_point_no_sign(mesh, pts[i], 1.0e6)
+    if q.result:
+        out[i] = Vface[q.face]
+
+
+def extend_velocity_gpu(mesh, V, geo, band):
+    """Nearest-face velocity extension via wp.mesh_query_point (BVH; GPU-resident)."""
+    phi = geo['phi']
+    Fs = np.zeros_like(phi)
+    ii, jj, kk = np.where(np.abs(phi) < band)
+    if len(ii) == 0:
+        return Fs
+    pts = np.stack([geo['xs'][ii], geo['ys'][jj], geo['zs'][kk]], axis=1).astype(np.float32)
+    out = wp.zeros(len(pts), dtype=float, device=DEVICE)
+    wp.launch(_extend_kernel, dim=len(pts), device=DEVICE,
+              inputs=[mesh.id, wp.array(pts, dtype=wp.vec3, device=DEVICE),
+                      wp.array(V.astype(np.float32), dtype=float, device=DEVICE), out])
+    Fs[ii, jj, kk] = out.numpy()
     return Fs
 
 
@@ -199,7 +224,7 @@ def faces_in_mask(centroids, geo, mask_th, trench_width, hole=False):
 # ----------------------------- driver -----------------------------
 def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 sub_top=10.0, t_end=2.0, n_steps=20, hole=False, par=None, flags=None,
-                n_ion=20000, n_neu=20000, verbose=True):
+                n_ion=20000, n_neu=20000, reinit_every=1, extend="gpu", verbose=True):
     if par is None:
         par = PAR
     if flags is None:
@@ -209,7 +234,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
     dt = t_end / n_steps
     band = 4 * dx
     import time
-    timings = dict(flux=0.0, total=0.0)
+    timings = dict(flux=0.0, extend=0.0, reinit=0.0, total=0.0)
     t0 = time.time()
     for step in range(n_steps):
         verts, faces, centroids, areas = extract_mesh_3d(geo['phi'], dx)
@@ -222,13 +247,22 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         timings['flux'] += time.time() - tf
         is_mask = faces_in_mask(centroids, geo, mask_th, trench_width, hole=hole)
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)
-        Fs = extend_velocity_3d(V, centroids, geo, band)
+        te = time.time()
+        Fs = (extend_velocity_gpu(mesh, V, geo, band) if extend == "gpu"
+              else extend_velocity_3d(V, centroids, geo, band))
+        timings['extend'] += time.time() - te
         Vmax = max(V.max(), 1e-6)
         nsub = max(1, min(int(np.ceil(Vmax * dt / (0.4 * dx))), 40))
         for _ in range(nsub):
             geo['phi'] = advect_3d(geo['phi'], Fs, dx, dt / nsub)
             geo['phi'][geo['mask']] = mask_phi[geo['mask']]
-        geo['phi'] = skfmm.distance(geo['phi'], dx=dx)
+        # reinit_every>1 (lazy reinit) is faster but DRIFTS the result: |grad phi| deviates from
+        # 1 between reinits and advect multiplies F*|grad phi|. Safe only with a proper extension
+        # velocity (grad F . grad phi = 0). Keep =1 for fidelity.
+        if (step + 1) % reinit_every == 0 or step == n_steps - 1:
+            tr = time.time()
+            geo['phi'] = skfmm.distance(geo['phi'], dx=dx)
+            timings['reinit'] += time.time() - tr
         if verbose and step % 5 == 0:
             depth = _depth3d(geo)
             print(f"  step {step:3d}/{n_steps}  faces {len(faces):5d}  depth ~ {depth:5.2f}  Vmax {Vmax:.3f}")
@@ -238,15 +272,28 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
 
 
 def _depth3d(geo, half=1.0):
-    """Center etch depth: deepest gas point near the feature center axis."""
+    """Center etch depth: robust over a small central region (median floor of central columns).
+
+    For each central column, the floor is the deepest grid cell that is gas AND connected to the
+    open top (no isolated-pocket spikes). Returns sub_top - median(floor_z) over the region.
+    """
     phi, xs, ys, zs = geo['phi'], geo['xs'], geo['ys'], geo['zs']
-    i0 = np.argmin(np.abs(xs - geo['Lx']/2)); j0 = np.argmin(np.abs(ys - geo['Ly']/2))
-    col = phi[i0, j0, :]
-    gas = np.where(col < 0)[0]
-    if len(gas) == 0:
+    ic = np.where(np.abs(xs - geo['Lx']/2) <= half)[0]
+    jc = np.where(np.abs(ys - geo['Ly']/2) <= half)[0]
+    floors = []
+    for i in ic:
+        for j in jc:
+            col = phi[i, j, :] < 0                       # gas mask, bottom..top
+            # floor = lowest z index of the gas run that reaches the top
+            k = len(col) - 1
+            if not col[k]:
+                continue
+            while k > 0 and col[k - 1]:
+                k -= 1
+            floors.append(zs[k])
+    if not floors:
         return 0.0
-    z_surf = zs[gas.min()]                              # top of the gas column at center
-    return float(geo['sub_top'] - z_surf)
+    return float(geo['sub_top'] - np.median(floors))
 
 
 def center_depth_3d(geo, half=1.0):
