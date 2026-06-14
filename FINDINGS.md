@@ -161,3 +161,14 @@ which ViennaPS is not.
 QMC (Sobol over the 4D source launch) ported to 3D: exact (same mean), floor m_F noise
 0.0032 -> 0.0025 (1.28x). Smaller than 2D's 1.9x because neutral re-emission bounces stay
 pseudorandom (only the source is QMC'd); radiosity remains the neutral-noise lever.
+
+## Differentiable inverse design (`scripts/inverse_design.py`)
+The payoff demo. Real per-face flux from the 3D simulator + the etch chemistry as a
+differentiable Warp kernel; `wp.Tape` gives d(loss)/d(recipe). Asked: "what ion energy makes
+the trench floor etch at a target rate?" Gradient descent recovered it:
+
+    target floor rate 1.998 (= rate at E*=140 eV);  start E=100 ->
+    129 -> 135 -> 138 -> 139.9 eV;  loss 2e-2 -> 5e-8;  recovered E=139.9 (true 140).
+
+Target outcome -> recipe, by autodiff. The same machinery scales to many parameters and
+full-profile targets. This is the defensible edge ViennaPS does not have.
