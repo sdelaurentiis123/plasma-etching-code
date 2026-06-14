@@ -36,8 +36,9 @@ def surface_rate_belen(m_i, m_F, m_O, cos_i, is_mask, par, flags=None):
     # to match. fnorm=1.0 recovers the uncorrected PoC-style normalization (for A/B testing).
     fnE = par.get('fnorm_E', 1.0)
     fnO = par.get('fnorm_O', 1.0)
-    Gb_E = par['Fflux'] * m_F / fnE + eps             # arriving F flux (ViennaPS convention)
-    Gb_P = par['Oflux'] * m_O / fnO + eps             # arriving O flux
+    calF = par.get('cal_F', 1.0)                       # flux-normalization calibration (~12)
+    Gb_E = par['Fflux'] * m_F * calF / fnE + eps       # arriving F flux (ViennaPS convention)
+    Gb_P = par['Oflux'] * m_O / fnO + eps              # arriving O flux
 
     a = (par['k_sigma'] + 2.0 * GY_ie) / Gb_E
     b = (par['beta_sigma'] + GY_p) / Gb_P

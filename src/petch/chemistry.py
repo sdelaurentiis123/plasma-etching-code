@@ -23,7 +23,7 @@ def surface_rate_langmuir(m_i, m_F, m_O, cos_i, is_mask, par):
     # angular factor for ion yields (forward-peaked; ~cos incidence)
     fang = np.clip(cos_i, 0.0, 1.0)
     Fi = par['ionFlux'] * m_i * fang
-    Fev = par['Fflux'] * m_F
+    Fev = par['Fflux'] * m_F * par.get('cal_F', 1.0)   # flux-normalization calibration
     Fp = par['Oflux'] * m_O
     eps = 1e-9
     # competitive Langmuir steady-state coverages

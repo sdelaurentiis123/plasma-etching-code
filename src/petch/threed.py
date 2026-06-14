@@ -92,6 +92,7 @@ def _trace3d(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dt
             o = hit + 1.0e-4 * n
 
 
+# (the old _launch_dirs helper was replaced by _source3d, which also does QMC)
 def _source3d(kind, n, Lx, Ly, z_src, sigma, sampling, rng, sd):
     """Source launch (position + direction). 'pseudo' (PoC) or 'sobol' (QMC over the 4D source).
 

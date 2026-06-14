@@ -9,8 +9,9 @@ import petch
 
 
 def test_small_run():
+    par = dict(petch.PAR); par['cal_F'] = 1.0   # PoC (uncalibrated) for the parity-style check
     r = petch.run_etch(W=12, H=12, dx=0.5, trench_width=5, mask_thickness=2.0,
-                       sub_top=9, t_end=0.5, n_steps=3, verbose=False)
+                       sub_top=9, t_end=0.5, n_steps=3, par=par, verbose=False)
     assert len(r['segs']) > 0
     d = petch.center_depth(r)
     assert 0.0 < d < 9.0          # some etching happened, not absurd
@@ -18,7 +19,7 @@ def test_small_run():
 
 
 def test_baseline_parity():
-    OURS = dict(petch.PAR); OURS['rate_scale'] = 0.29
+    OURS = dict(petch.PAR); OURS['rate_scale'] = 0.29; OURS['cal_F'] = 1.0   # uncalibrated PoC
     r = petch.run_etch(W=20.0, H=24.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
                        sub_top=18.0, t_end=3.0, n_steps=60, par=OURS, verbose=False)
     d = petch.center_depth(r)
@@ -29,7 +30,7 @@ def test_baseline_parity():
 def test_3d_loop():
     """3D etch loop runs end-to-end (Warp flux kernel) and deepens a feature."""
     from petch import threed as t3
-    par = dict(petch.PAR); par['rate_scale'] = 0.3
+    par = dict(petch.PAR); par['rate_scale'] = 0.05   # cal_F=12 default -> keep tiny grid sane
     geo = t3.run_etch_3d(Lx=8, Ly=4, Lz=12, dx=0.5, trench_width=3, mask_th=2, sub_top=8,
                          t_end=1.5, n_steps=6, par=par, flags=petch.Flags(chemistry="langmuir"),
                          n_ion=4000, n_neu=4000, verbose=False)

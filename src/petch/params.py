@@ -25,6 +25,11 @@ PAR = dict(
     B_sp=9.3,                                   # angular sputter coefficient
     betaE=0.7,                                  # ViennaPS fluorine sticking (Si)
     betaO=1.0,                                  # ViennaPS oxygen sticking (Si)
+    # Flux-normalization calibration: our open-field-normalized etchant flux underrepresents
+    # the absolute ViennaPS flux ratio by ~12x. Fitting this to the ViennaPS ground-truth ARDE
+    # gives the minimum at cal_F=12 (ARDE rmse 0.110 -> 0.0165). This is the dominant fidelity
+    # fix and it un-sticks 3D HARC. cal_F=1.0 recovers the uncalibrated PoC. See FINDINGS.md.
+    cal_F=12.0,
 )
 
 
