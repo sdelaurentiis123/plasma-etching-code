@@ -245,3 +245,23 @@ A full 3D calibration needs one ViennaPS-3D ground-truth run (GPU box) -- the 2D
 
 Remaining accuracy tier (smaller): #2 IED integration (~0.2% at this IED), #4 ion reflection
 (bottom-corner microtrenching in deep features), #5 WENO advection (less numerical diffusion).
+
+## 3D: contributor #4 + ViennaPS-3D ground truth + the honest 3D fidelity gap
+
+- **Contributor #4 (ion specular reflection)** implemented in the 3D kernel (grazing reflect,
+  energy retention) -> feeds the bottom corners; deepens a HARC hole 1.40 -> 1.70 um. Default off.
+- **ViennaPS-3D ground truth captured** (Vast.ai A4000, `harness/reference/viennaps_3d_groundtruth
+  .json`): SF6O2 contact HOLES depth 7.68/8.47/9.24 um at d=3/4/6 -> norm ARDE [0.832, 0.916, 1.0]
+  (genuine 3D, steeper than the trench ARDE); trenches 9.29..10.09 at w=3..8.
+- **Honest 3D fidelity gap.** Calibrating our 3D holes to that: cal_F~40 best fits the ARDE
+  *shape at shallow depth* (rmse 0.08), but at ViennaPS-comparable DEPTH our narrow holes over-lag
+  badly (d=3 norm 0.49 vs ViennaPS 0.83, rmse 0.26). **No single cal_F matches across depths** ->
+  our neutral transport over-depletes deep narrow 3D holes more than ViennaPS (3D ARDE ~(w/d)^2
+  bites harder). This is a model-form limit, not a constant: ViennaPS stays F-saturated at the
+  deep narrow floor; our minimal MC neutral transport does not. Closing it needs a better neutral
+  model (F-saturation / radiosity-with-correct-absolute-flux), not just calibration.
+
+**Net 3D state:** the 3D etcher works (holes+trenches, GPU 137x, differentiable, un-sticks with
+cal_F) and qualitatively does HARC; but **deep-HARC ARDE does not yet quantitatively match
+ViennaPS** -- a named, real gap in the neutral transport regime. 2D is parameter-free matched;
+3D needs the neutral-transport upgrade for deep features.
