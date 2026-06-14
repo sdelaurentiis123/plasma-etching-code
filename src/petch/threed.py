@@ -55,7 +55,11 @@ def extract_mesh_3d(phi, dx):
 @wp.kernel
 def _trace3d(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
              sticking: float, n_reemit: int, seed: int,
+             specular: int, cos_thr: float, eta: float,
              flux: wp.array(dtype=float), angacc: wp.array(dtype=float)):
+    """Trace a species. specular=0: diffuse re-emission (neutrals). specular=1: ions deposit
+    yield on hit and SPECULAR-REFLECT at grazing incidence (cosang < cos_thr) with energy
+    retention eta -- feeds the bottom corners of deep HARC features (contributor #4)."""
     p = wp.tid()
     state = wp.rand_init(seed, p)
     o = origin[p]
@@ -71,13 +75,26 @@ def _trace3d(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dt
         cosang = -wp.dot(d, n)
         if cosang < 0.0:
             cosang = 0.0
-        u = wp.randf(state)
-        if u < sticking or bounce == n_reemit:
-            wp.atomic_add(flux, q.face, w)
-            wp.atomic_add(angacc, q.face, w * cosang)
-            break
-        else:                                           # diffuse 3D-cosine re-emission about n
+        if specular == 1:                               # ION: deposit + grazing specular reflect
+            if cosang >= cos_thr or bounce == n_reemit:
+                wp.atomic_add(flux, q.face, w)
+                wp.atomic_add(angacc, q.face, w * cosang)
+                break
+            R = (cos_thr - cosang) / cos_thr            # reflected fraction (0 at thr, 1 grazing)
+            dep = w * (1.0 - R)
+            wp.atomic_add(flux, q.face, dep)
+            wp.atomic_add(angacc, q.face, dep * cosang)
+            w = w * R * eta                             # reflected weight (energy loss)
             hit = o + q.t * d
+            d = d - 2.0 * wp.dot(d, n) * n              # specular reflection
+            o = hit + 1.0e-4 * n
+        else:                                           # NEUTRAL: stick or diffuse re-emit
+            u = wp.randf(state)
+            if u < sticking or bounce == n_reemit:
+                wp.atomic_add(flux, q.face, w)
+                wp.atomic_add(angacc, q.face, w * cosang)
+                break
+            hit = o + q.t * d                           # diffuse 3D-cosine re-emission about n
             a = wp.vec3(1.0, 0.0, 0.0)
             if wp.abs(n[0]) > 0.9:
                 a = wp.vec3(0.0, 1.0, 0.0)
@@ -125,25 +142,30 @@ def _source3d(kind, n, Lx, Ly, z_src, sigma, sampling, rng, sd):
 
 
 def mc_flux_3d(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=20000, seed=0,
-               sampling="pseudo"):
+               sampling="pseudo", ion_reflection=False):
     """Per-face normalized flux multipliers (m_i,m_F,m_O) + mean ion cos, via Warp ray tracing."""
     Lx, Ly, Lz = geo['Lx'], geo['Ly'], geo['Lz']
     F = len(faces)
     rng = np.random.default_rng(seed)
     z_src = Lz - geo['dx']
     A_src = Lx * Ly
+    COS_THR, ETA = 0.34, 0.8                            # ion reflect onset (~70 deg), energy keep
 
-    def run(kind, n, sticking, n_re, sd):
+    def run(kind, n, sticking, n_re, sd, specular=0):
         origin, dirs = _source3d(kind, n, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, sd)
         flux = wp.zeros(F, dtype=float, device=DEVICE)
         ang = wp.zeros(F, dtype=float, device=DEVICE)
         wp.launch(_trace3d, dim=n, device=DEVICE,
                   inputs=[mesh.id, wp.array(origin, dtype=wp.vec3, device=DEVICE),
                           wp.array(dirs, dtype=wp.vec3, device=DEVICE),
-                          float(sticking), int(n_re), int(sd), flux, ang])
+                          float(sticking), int(n_re), int(sd),
+                          int(specular), float(COS_THR), float(ETA), flux, ang])
         return flux.numpy(), ang.numpy()
 
-    fi, ai = run('ion', n_ion, 1.0, 0, seed * 9 + 1)
+    if ion_reflection:
+        fi, ai = run('ion', n_ion, 1.0, 3, seed * 9 + 1, specular=1)
+    else:
+        fi, ai = run('ion', n_ion, 1.0, 0, seed * 9 + 1, specular=0)
     fF, _ = run('neutral', n_neu, par['s_F'], 12, seed * 9 + 2)
     fO, _ = run('neutral', n_neu, par['s_O'], 12, seed * 9 + 3)
 
@@ -298,7 +320,8 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         tf = time.time()
         m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, mc_par,
                                           n_ion=n_ion, n_neu=n_neu, seed=step,
-                                          sampling=getattr(flags, "sampling", "pseudo"))
+                                          sampling=getattr(flags, "sampling", "pseudo"),
+                                          ion_reflection=getattr(flags, "ion_reflection", False))
         timings['flux'] += time.time() - tf
         is_mask = faces_in_mask(centroids, geo, mask_th, trench_width, hole=hole)
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)
