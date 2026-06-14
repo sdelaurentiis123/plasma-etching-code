@@ -7,10 +7,12 @@ with diffuse re-emission) -> chemistry -> 3D upwind advection -> reinit.
 The flux kernel is a `wp.kernel` using wp.Mesh + wp.mesh_query_ray (BVH; RT cores on a GPU).
 CPU-first; set DEVICE='cuda' on an NVIDIA box and the identical kernel runs on RT cores.
 """
+import warnings
 import numpy as np
 import skfmm
 from skimage import measure
 from scipy.spatial import cKDTree
+from scipy.stats import qmc, norm
 import warp as wp
 
 from .params import PAR, DEFAULT_FLAGS
@@ -89,19 +91,39 @@ def _trace3d(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dt
             o = hit + 1.0e-4 * n
 
 
-def _launch_dirs(n, kind, sigma, rng):
-    """Downward (-z) launch directions: 'ion' near-vertical Gaussian, 'neutral' 3D cosine."""
-    if kind == 'ion':
-        ax = rng.normal(0, sigma, n); ay = rng.normal(0, sigma, n)
-        d = np.stack([np.sin(ax), np.sin(ay), -np.cos(ax) * np.cos(ay)], axis=1)
-    else:                                               # cosine about -z: cos(theta)=sqrt(U)
-        ct = np.sqrt(rng.uniform(0, 1, n)); st = np.sqrt(1 - ct**2)
-        ph = rng.uniform(0, 2 * np.pi, n)
-        d = np.stack([st * np.cos(ph), st * np.sin(ph), -ct], axis=1)
-    return (d / np.linalg.norm(d, axis=1, keepdims=True)).astype(np.float32)
+def _source3d(kind, n, Lx, Ly, z_src, sigma, sampling, rng, sd):
+    """Source launch (position + direction). 'pseudo' (PoC) or 'sobol' (QMC over the 4D source).
+
+    Each particle uses (x, y, angle1, angle2); QMC over those four dims drives variance ~1/N.
+    """
+    if sampling == "sobol":
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message=".*power of 2.*")
+            u = qmc.Sobol(d=4, scramble=True, seed=sd).random(n)
+        ox, oy = u[:, 0] * Lx, u[:, 1] * Ly
+        u2 = np.clip(u[:, 2], 1e-9, 1 - 1e-9); u3 = u[:, 3]
+        if kind == 'ion':
+            ax = norm.ppf(u2) * sigma; ay = norm.ppf(u3) * sigma
+            d = np.stack([np.sin(ax), np.sin(ay), -np.cos(ax) * np.cos(ay)], axis=1)
+        else:
+            ct = np.sqrt(u2); st = np.sqrt(1 - u2); ph = 2 * np.pi * u3
+            d = np.stack([st * np.cos(ph), st * np.sin(ph), -ct], axis=1)
+    else:
+        ox, oy = rng.uniform(0, Lx, n), rng.uniform(0, Ly, n)
+        if kind == 'ion':
+            ax = rng.normal(0, sigma, n); ay = rng.normal(0, sigma, n)
+            d = np.stack([np.sin(ax), np.sin(ay), -np.cos(ax) * np.cos(ay)], axis=1)
+        else:
+            ct = np.sqrt(rng.uniform(0, 1, n)); st = np.sqrt(1 - ct**2)
+            ph = rng.uniform(0, 2 * np.pi, n)
+            d = np.stack([st * np.cos(ph), st * np.sin(ph), -ct], axis=1)
+    origin = np.stack([ox, oy, np.full(n, z_src)], axis=1).astype(np.float32)
+    dirs = (d / np.linalg.norm(d, axis=1, keepdims=True)).astype(np.float32)
+    return origin, dirs
 
 
-def mc_flux_3d(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=20000, seed=0):
+def mc_flux_3d(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=20000, seed=0,
+               sampling="pseudo"):
     """Per-face normalized flux multipliers (m_i,m_F,m_O) + mean ion cos, via Warp ray tracing."""
     Lx, Ly, Lz = geo['Lx'], geo['Ly'], geo['Lz']
     F = len(faces)
@@ -110,9 +132,7 @@ def mc_flux_3d(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=20000, se
     A_src = Lx * Ly
 
     def run(kind, n, sticking, n_re, sd):
-        ox = rng.uniform(0, Lx, n); oy = rng.uniform(0, Ly, n)
-        origin = np.stack([ox, oy, np.full(n, z_src)], axis=1).astype(np.float32)
-        dirs = _launch_dirs(n, kind, par['ion_ang_sigma'], rng)
+        origin, dirs = _source3d(kind, n, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, sd)
         flux = wp.zeros(F, dtype=float, device=DEVICE)
         ang = wp.zeros(F, dtype=float, device=DEVICE)
         wp.launch(_trace3d, dim=n, device=DEVICE,
@@ -196,7 +216,8 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                        indices=wp.array(faces.flatten(), dtype=wp.int32, device=DEVICE))
         tf = time.time()
         m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, par,
-                                          n_ion=n_ion, n_neu=n_neu, seed=step)
+                                          n_ion=n_ion, n_neu=n_neu, seed=step,
+                                          sampling=getattr(flags, "sampling", "pseudo"))
         timings['flux'] += time.time() - tf
         is_mask = faces_in_mask(centroids, geo, mask_th, trench_width, hole=hole)
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)
