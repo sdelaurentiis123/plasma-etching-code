@@ -211,6 +211,55 @@ def extend_velocity_gpu(mesh, V, geo, band):
     return Fs
 
 
+@wp.kernel
+def _reinit_iter(phi: wp.array3d(dtype=float), phi0: wp.array3d(dtype=float),
+                 out: wp.array3d(dtype=float), inv_dx: float, dtau: float):
+    """One Godunov reinitialization sweep of phi_tau + sgn(phi0)(|grad phi|-1)=0."""
+    i, j, k = wp.tid()
+    nx = phi.shape[0]; ny = phi.shape[1]; nz = phi.shape[2]
+    c = phi[i, j, k]
+    s0 = phi0[i, j, k]
+    if wp.abs(s0) < 1.2 / inv_dx:        # interface band -> freeze (preserve phi=0 contour)
+        out[i, j, k] = c
+        return
+    Dxm = (c - phi[wp.max(i - 1, 0), j, k]) * inv_dx
+    Dxp = (phi[wp.min(i + 1, nx - 1), j, k] - c) * inv_dx
+    Dym = (c - phi[i, wp.max(j - 1, 0), k]) * inv_dx
+    Dyp = (phi[i, wp.min(j + 1, ny - 1), k] - c) * inv_dx
+    Dzm = (c - phi[i, j, wp.max(k - 1, 0)]) * inv_dx
+    Dzp = (phi[i, j, wp.min(k + 1, nz - 1)] - c) * inv_dx
+    sgn = s0 / wp.sqrt(s0 * s0 + 0.25 / (inv_dx * inv_dx))     # smoothed sign (eps = dx/2)
+    if sgn > 0.0:
+        gx = wp.max(wp.max(Dxm, 0.0), -wp.min(Dxp, 0.0))
+        gy = wp.max(wp.max(Dym, 0.0), -wp.min(Dyp, 0.0))
+        gz = wp.max(wp.max(Dzm, 0.0), -wp.min(Dzp, 0.0))
+    else:
+        gx = wp.max(-wp.min(Dxm, 0.0), wp.max(Dxp, 0.0))
+        gy = wp.max(-wp.min(Dym, 0.0), wp.max(Dyp, 0.0))
+        gz = wp.max(-wp.min(Dzm, 0.0), wp.max(Dzp, 0.0))
+    G = wp.sqrt(gx * gx + gy * gy + gz * gz)
+    out[i, j, k] = c - dtau * sgn * (G - 1.0)
+
+
+def reinit_gpu(phi_np, dx, n_iter=20):
+    """GPU iterative SDF reinit (Warp), interface-band frozen to pin the phi=0 contour.
+
+    EXPERIMENTAL / approximate: this first-order Godunov scheme plateaus at |grad phi| ~ 0.96
+    (~4% error, ~0.2*dx SDF error), which compounds over an etch -> depth differs from skfmm.
+    Use only where max throughput matters and small SDF error is acceptable. Production accuracy
+    needs a WENO reinit + Russo-Smereka subcell interface fix. Default reinit_method stays 'skfmm'.
+    """
+    a = wp.array(phi_np.astype(np.float32), dtype=float, device=DEVICE)
+    phi0 = wp.array(phi_np.astype(np.float32), dtype=float, device=DEVICE)
+    b = wp.zeros_like(a)
+    dtau = 0.5 * dx
+    inv = 1.0 / dx
+    for _ in range(n_iter):
+        wp.launch(_reinit_iter, dim=phi_np.shape, device=DEVICE, inputs=[a, phi0, b, inv, dtau])
+        a, b = b, a
+    return a.numpy().astype(np.float64)
+
+
 def faces_in_mask(centroids, geo, mask_th, trench_width, hole=False):
     """Mark faces whose centroid lies in the (un-etched) mask material."""
     x, y, z = centroids[:, 0], centroids[:, 1], centroids[:, 2]
@@ -225,7 +274,8 @@ def faces_in_mask(centroids, geo, mask_th, trench_width, hole=False):
 # ----------------------------- driver -----------------------------
 def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 sub_top=10.0, t_end=2.0, n_steps=20, hole=False, par=None, flags=None,
-                n_ion=20000, n_neu=20000, reinit_every=1, extend="gpu", verbose=True):
+                n_ion=20000, n_neu=20000, reinit_every=1, extend="gpu",
+                reinit_method="skfmm", verbose=True):
     if par is None:
         par = PAR
     if flags is None:
@@ -262,7 +312,8 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         # velocity (grad F . grad phi = 0). Keep =1 for fidelity.
         if (step + 1) % reinit_every == 0 or step == n_steps - 1:
             tr = time.time()
-            geo['phi'] = skfmm.distance(geo['phi'], dx=dx)
+            geo['phi'] = (reinit_gpu(geo['phi'], dx) if reinit_method == "gpu"
+                          else skfmm.distance(geo['phi'], dx=dx))
             timings['reinit'] += time.time() - tr
         if verbose and step % 5 == 0:
             depth = _depth3d(geo)
