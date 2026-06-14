@@ -362,3 +362,57 @@ velocity** (`grad F . grad phi = 0`, constant along normals) so `|grad phi|` sta
 and reinit becomes infrequent/amortized (this also retires the earlier "lazy reinit drifts" problem,
 which was caused by the *non*-proper extension velocity). (b) is preferred: it removes per-step reinit
 from the critical path instead of just making a subtly-biased reinit faster.
+
+## Literature grounding — authoritative SF6/O2 physics (multi-agent dig, cited)
+
+A deep primary-literature sweep (Belen/Ertl, Kushner, Graves, Steinbruchel/Gray, Gottscho, Coburn &
+Winters, Donnelly, Flamm lineage; new refs added to `docs/references.bib` section E2) to (i) confirm
+our constants are physical and (ii) find where ViennaPS approximates so we can exceed it. Headlines:
+
+**Our model is physically sound — constants validated, approach is field-standard.**
+- Yields (`A_ie=7, Eth_ie=15, A_sp=0.0337, Eth_sp=20, B_sp=9.3`), `k_sigma=300` (= Belen k*sigma_Si
+  = 3e17 cm^-2 s^-1, *identical*), `beta_sigma=0.04`, coupled-coverage forms, and the `k_sigma*theta_F/4`
+  chemical term all match the Belen 2005 SF6/O2 two-coverage model (JVST A 23(5), 1430; DOI
+  10.1116/1.2013317) that ViennaPS implements. Our `betaE=0.7` IS correct for the SF6/O2 path (ViennaPS
+  uses gamma_F=0.7, gamma_O=1.0; the generic 1.0 default is overridden there too).
+- **F sticking is a *fitted/flux-dependent* parameter everywhere** (Belen 0.7, Marcos 0.1, Donnelly
+  2017 flux curve 0.001-0.03, MD 0.98->0.23 as Si fluorinates). So our `cal_F` flux-normalization knob
+  is the field-standard treatment, not a hack.
+- **Our 3D-hole-steeper-than-2D-trench ARDE is CORRECT PHYSICS, not a bug** (Gottscho 1992, JVST B 10,
+  2133): pure-AR scaling is hole R_bottom ~ (w/d)^2 vs trench ~ (w/d) — a hole confines the neutral
+  acceptance solid angle in both lateral directions. Our holes [0.832,0.916,1.0] vs trenches [0.935,...]
+  is exactly this.
+
+**The ARDE master equation (Coburn & Winters 1989, APL 55, 2730; DOI 10.1063/1.101937):**
+`R_bottom/R_top = K / (K + S - K*S)`, K = Clausing transmission (0.11 at depth/diameter=10), S = floor
+reaction probability. **Neutral *delivery* limits, not product removal.** Crucially **as S->0,
+R_b/R_t -> 1/K** (lower floor sticking => FLATTER ARDE). This is the quantitative form behind our
+"neutral-limited (steep ARDE) vs F-saturated (flat ARDE)" diagnosis: ViennaPS's flat deep-ARDE is the
+F-saturated regime, and our `cal_F=12` fix pushed us toward it (rmse 0.110->0.016). The 3D deep-HARC
+parity job is therefore a **flux-normalization / floor-saturation** match, not new physics.
+
+**Strategic reframe of "more accurate than ViennaPS" (decisive):** the most likely cause of the
+*residual* deep-HARC floor over-lag is **surface charging** — differential in-feature potentials cut
+the floor ion current ~60% by AR 4 (Hwang & Giapis 1997) — and **ViennaPS OMITS charging entirely**
+(also omits volatile-product redeposition; Hoekstra & Kushner 1998 / Huard & Kushner 2017). Two
+consequences:
+1. **Matching ViennaPS-3D needs NO new physics** — it is the F-saturation/flux-normalization match above.
+   Adding charging would *diverge* us from ViennaPS (our only non-experimental reference).
+2. **Exceeding ViennaPS** = adding charging + redeposition + full-IEDF integration — but that is only
+   *demonstrable* against EXPERIMENTAL wafer data, which we do not have. So per the agreed plan:
+   match ViennaPS to parity + be faster now; stage the charging/redeposition physics as the
+   "exceed once we have wafer data" track.
+
+**Where a more rigorous model beats ViennaPS (ranked, for the exceed track):**
+(1) surface charging (floor ion-current drop; fully omitted) — highest value/effort;
+(2) volatile etch-product redeposition (narrows top, raises effective AR; omitted);
+(3) flux/coverage-dependent F sticking (Donnelly 2017 curve vs constant gamma_F) — attacks floor
+    starvation, cheap, keeps differentiability;
+(4) full bimodal IEDF + energy-angle correlation vs mean+sigma Gaussian (only ~0.2-7% on total yield,
+    but sharply nonlinear near the sqrt(E) threshold and for sidewall-vs-floor selectivity);
+(5) our existing structural edge ViennaPS lacks: differentiability + QMC + (later) learned surrogate.
+
+**Immediate next accuracy step (grounded):** reconcile the 3D absolute flux / floor-saturation regime
+to match ViennaPS-3D deep-HARC, using the Coburn-Winters `K/(K+S-KS)` form as the target relation —
+the physical version of extending `cal_F` to 3D, validated on a GPU box (deep holes, fresh ViennaPS-3D
+surfaces). Coverage-dependent sticking (already validated to cut ARDE error ~4x) becomes the 3D default.

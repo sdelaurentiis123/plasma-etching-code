@@ -212,10 +212,12 @@
 
 @article{belen_sf6o2_2005,
   author  = {Belen, R. Jane and Gomez, Sergi and Cooperberg, David and Kiehlbauch, Mark and Aydil, Eray S.},
-  title   = {Feature-scale modeling of {Si} etching in {SF6/O2} plasmas},
+  title   = {Feature-scale modeling of {Si} etching in {SF6/O2} plasmas with coupled {F}/{O} surface coverages},
   journal = {Journal of Vacuum Science \& Technology A},
-  year    = {2005},
-  note    = {Coverage-based surface model used by ViennaPS SF6O2Etching; verify exact volume/pages.}
+  volume  = {23}, number = {5}, pages = {1430--1439}, year = {2005},
+  doi     = {10.1116/1.2013317},
+  note    = {The two-coverage SF6/O2 model ViennaPS SF6O2Etching actually implements. SF6-only base:
+             JVST A 23(1), 99--113 (2005), DOI 10.1116/1.1830495 (the DOI the ViennaPS header cites).}
 }
 
 @article{graves_md_2009,
@@ -246,6 +248,96 @@
   title   = {Dynamics of plasma atomic layer etching: molecular dynamics simulations and optical emission spectroscopy},
   journal = {(ALE mechanisms)},
   note    = {\url{https://www.osti.gov/biblio/2248044}}
+}
+
+% ---------------------------------------------------------------------
+% E2. ARDE, neutral (Knudsen) transport, ion distributions, sticking
+%     (feature-scale mechanism references; the physics our 3D model must match/exceed)
+% ---------------------------------------------------------------------
+@article{coburn_winters_1989,
+  author  = {Coburn, J. W. and Winters, Harold F.},
+  title   = {Conductance considerations in the reactive ion etching of high aspect ratio features},
+  journal = {Applied Physics Letters},
+  volume  = {55}, number = {26}, pages = {2730--2732}, year = {1989},
+  doi     = {10.1063/1.101937},
+  note    = {Master ARDE result: R_bottom/R_top = K/(K + S - K*S), K = Clausing transmission
+             (0.11 at depth/diameter=10). Neutral DELIVERY limits, not product removal. As S->0,
+             R_b/R_t -> 1/K (etch can even rise with depth for collimated flux).}
+}
+
+@article{gottscho_arde_1992,
+  author  = {Gottscho, Richard A. and Jurgensen, C. W. and Vitkavage, D. J.},
+  title   = {Microscopic uniformity in plasma etching},
+  journal = {Journal of Vacuum Science \& Technology B},
+  volume  = {10}, number = {5}, pages = {2133--2147}, year = {1992},
+  doi     = {10.1116/1.586180},
+  note    = {Distinguishes RIE-lag/ARDE from microloading. Pure-aspect-ratio scaling:
+             3D hole R_bottom ~ (w/d)^2, 2D trench ~ (w/d) -> holes lag harder at equal AR.
+             Warns against replacing the Clausing K with a naive solid-angle factor.}
+}
+
+@article{flamm_fsi_1981,
+  author  = {Flamm, Daniel L. and Donnelly, Vincent M. and Mucha, John A.},
+  title   = {The reaction of fluorine atoms with silicon},
+  journal = {Journal of Applied Physics},
+  volume  = {52}, number = {5}, pages = {3633--3639}, year = {1981},
+  doi     = {10.1063/1.329098},
+  note    = {Spontaneous F+Si rate: R = 2.91e-12 * T^0.5 * n_F * exp(-0.108 eV / kT) [A/min].
+             E_a = 0.108 eV; physical origin of the ViennaPS k_sigma*theta_F/4 chemical term.
+             Small barrier -> cryo does NOT strongly suppress the floor rate (passivation does).}
+}
+
+@article{donnelly_sticking_2017,
+  author  = {Donnelly, Vincent M.},
+  title   = {Review of plasma--surface reaction probabilities and their flux dependence},
+  journal = {Journal of Vacuum Science \& Technology A},
+  volume  = {35}, number = {5}, pages = {05C202}, year = {2017},
+  doi     = {10.1116/1.4983922},
+  note    = {F-on-Si reaction probability is flux/coverage dependent across ~2000x: ~0.03 at low
+             F flux (1e12) -> ~0.001 at high flux (1e20). Use as a flux-dependent gamma_F to attack
+             floor-starvation ARDE rather than a constant.}
+}
+
+@article{yin_sawin_2008,
+  author  = {Yin, Yunpeng and Sawin, Herbert H.},
+  title   = {Surface roughening and angular yield dependence in ion-enhanced etching of silicon},
+  journal = {Journal of Vacuum Science \& Technology A},
+  volume  = {26}, number = {1}, pages = {78--92}, year = {2008},
+  doi     = {10.1116/1.2812424},
+  note    = {Directly measured angular yields. Sputter peaks 60--70 deg off-normal (the B_sp=9.3
+             analytic form peaks shallower, ~53 deg). Ion-enhanced f_ie monotonic at high neutral:ion.}
+}
+
+@article{kawamura_iedf_1999,
+  author  = {Kawamura, E. and Vahedi, V. and Lieberman, M. A. and Birdsall, C. K.},
+  title   = {Ion energy distributions in rf sheaths: review, analysis and simulation},
+  journal = {Plasma Sources Science and Technology},
+  volume  = {8}, number = {3}, pages = {R45--R64}, year = {1999},
+  doi     = {10.1088/0963-0252/8/3/202},
+  note    = {Bimodal (arcsine) IEDF at low bias frequency; width Delta-E ~ Vs/(f*sqrt(M)). IADF
+             half-width ~ sqrt(T_i/2E_i) ~ 1--5 deg. Basis for integrating the FULL IEDF/IADF
+             rather than a mean+sigma Gaussian (matters most near the sqrt(E) threshold).}
+}
+
+@article{hoekstra_kushner_microtrench_1998,
+  author  = {Hoekstra, Robert J. and Kushner, Mark J. and Sukharev, Valeriy and Schoenborn, Philippe},
+  title   = {Microtrenching resulting from specular reflection during chlorine etching of silicon},
+  journal = {Journal of Vacuum Science \& Technology B},
+  volume  = {16}, number = {4}, pages = {2102--2104}, year = {1998},
+  doi     = {10.1116/1.590135},
+  note    = {Specular ion reflection off sidewalls (>90% at >80 deg) focuses flux to bottom corners
+             -> microtrenches 30--50% of trench width. Corrects an earlier Guo/Sawin misattribution.}
+}
+
+@article{hwang_giapis_charging_1997,
+  author  = {Hwang, Gyeong S. and Giapis, Konstantinos P.},
+  title   = {On the origin of the notching effect during etching in uniform high density plasmas},
+  journal = {Journal of Vacuum Science \& Technology B},
+  volume  = {15}, number = {1}, pages = {70--87}, year = {1997},
+  doi     = {10.1116/1.589258},
+  note    = {Differential charging: in-feature potentials deflect ions (notching/bowing/extra ARDE).
+             Floor ion current drops ~60% by AR 4. FULLY OMITTED by ViennaPS -> the likely cause of
+             a residual deep-HARC over-lag, and a place a more rigorous model could exceed ViennaPS.}
 }
 
 % ---------------------------------------------------------------------
