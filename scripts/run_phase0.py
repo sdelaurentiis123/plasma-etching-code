@@ -20,20 +20,15 @@ import convergence as conv
 
 
 def configs():
-    """Model configurations to score. Extended as contributors are retired."""
+    """Model configurations to score: the original PoC vs the calibrated accurate default."""
     rows = []
-    base = dict(petch.PAR); base['rate_scale'] = 0.29
-    rows.append(("baseline langmuir (rate_scale=0.29)", base, petch.Flags(chemistry="langmuir")))
-    # Belen row (contributor #1) — added once chemistry='belen' is implemented (Step 3).
-    try:
-        from petch.belen import surface_rate_belen  # noqa: F401
-        # belen's depth-10 calibration scale is ~0.10 (units/flux-norm issue, not chemistry);
-        # see FINDINGS.md. Shown depth-matched so the ARDE shape is the comparison.
-        belen_par = dict(petch.PAR); belen_par['rate_scale'] = 0.10
-        rows.append(("belen @0.10 (contributor #1)", belen_par,
-                     petch.Flags(chemistry="belen")))
-    except Exception:
-        pass
+    poc = dict(petch.PAR); poc['rate_scale'] = 0.29; poc['cal_F'] = 1.0   # uncalibrated PoC
+    rows.append(("PoC baseline (uncalibrated, knob)",
+                 poc, petch.Flags(chemistry="langmuir", yield_angular="cosine")))
+    # the ViennaPS-calibrated accurate DEFAULT: belen + viennaps angular + cal_F=12, one global
+    # unit constant rate_scale=0.034. Matches ViennaPS to +3% depth / 0.016 ARDE. See FINDINGS.md.
+    cal = dict(petch.PAR); cal['rate_scale'] = 0.034
+    rows.append(("CALIBRATED default (belen+viennaps+cal_F=12)", cal, petch.Flags()))
     return rows
 
 

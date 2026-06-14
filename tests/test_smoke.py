@@ -30,6 +30,16 @@ def test_baseline_parity():
     assert abs(d - 9.18) < 0.4, f"baseline depth {d:.3f} drifted from 9.18"
 
 
+def test_calibrated_match():
+    """Regression guard: the calibrated default config lands the width-8 depth near ViennaPS
+    (10.05) -- catches accidental breakage of the cal_F / chemistry / angular-yield calibration."""
+    par = dict(petch.PAR); par['rate_scale'] = 0.034   # cal_F=12 default
+    r = petch.run_etch(W=20.0, H=24.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
+                       sub_top=18.0, t_end=3.0, n_steps=60, par=par, verbose=False)  # default flags
+    d = petch.center_depth(r)
+    assert 8.5 < d < 12.0, f"calibrated width-8 depth {d:.2f} drifted from ~10 um"
+
+
 def test_3d_loop():
     """3D etch loop runs end-to-end (Warp flux kernel) and deepens a feature."""
     from petch import threed as t3
