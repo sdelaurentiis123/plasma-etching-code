@@ -452,11 +452,13 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         timings['flux'] += time.time() - tf
         is_mask = faces_in_mask(centroids, geo, mask_th, trench_width, hole=hole)
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)
+        V = np.nan_to_num(V, nan=0.0, posinf=0.0, neginf=0.0)   # guard against blowup
         te = time.time()
         Fs = (extend_velocity_gpu(mesh, V, geo, band) if extend == "gpu"
               else extend_velocity_3d(V, centroids, geo, band))
         timings['extend'] += time.time() - te
-        Vmax = max(V.max(), 1e-6)
+        vmx = float(np.max(V)) if V.size else 0.0
+        Vmax = max(vmx if np.isfinite(vmx) else 0.0, 1e-6)
         nsub = max(1, min(int(np.ceil(Vmax * dt / (0.4 * dx))), 40))
         for _ in range(nsub):
             geo['phi'] = advect_3d(geo['phi'], Fs, dx, dt / nsub)

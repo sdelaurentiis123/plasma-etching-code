@@ -291,3 +291,42 @@ flux balance reconciled to ViennaPS (likely the absolute ion-vs-etchant flux rat
 a coverage-dependent ion yield), not just the neutral sticking. `coverage_sticking` is shipped
 (default off, it is slower + changes normalization) as the correct first piece. **Honest: the 3D
 deep-HARC ARDE gap is narrowed but still open.**
+
+## Clean GPU rate-matched validation of coverage-sticking (A4000, `scripts/gpu_3d_validate.py`)
+
+The CPU "~0.62 both, doesn't close it" above was **confounded** (compared at non-matched depth +
+CPU MC noise). A clean GPU run that **rate-matches both configs to the same d6 hole depth** and
+sweeps rate_scale tells a clearer story. Result (`harness/reference/gpu_3d_validate_result.json`):
+
+| config | normalized ARDE [d3,d4,d6] | rmse vs ViennaPS [0.832,0.916,1.0] |
+|---|---|---|
+| coverage **OFF** (rate 0.50, d6=3.0) | [0.50, 0.667, 1.0] | **0.2397** |
+| coverage **ON**  (rate 0.09, d6=2.75) | [0.727, 0.909, 1.0] | **0.0603** |
+
+**Coverage-dependent sticking cuts the 3D ARDE shape error ~4x** (0.24 -> 0.06) at matched depth;
+the d4/d6 ratio is near-exact (0.909 vs ViennaPS 0.916). It also etches **deeper at equal rate**
+(more F reaches the floor: at rate 0.09, cov-ON d6=2.75 vs cov-OFF 1.5; cov-ON reaches 6.75 um by
+rate 0.24 while cov-OFF plateaus ~3 um). So coverage-sticking IS the dominant missing 3D mechanism,
+confirmed cleanly — supersedes the earlier "doesn't close it" once depth is matched.
+
+**Two honest residuals remain.** (1) Matched depth here is ~3 um, not ViennaPS's 9.24 um — our
+floor still starves before full HARC depth (cov-OFF plateaus ~3 um regardless of rate; the max
+velocity stays high but sits on the re-pinned mask/sidewall, not the floor). (2) As cov-ON holes
+deepen (rate 0.24 -> d6=6.75 um) the smallest hole over-lags again (d3/d6 0.727 -> 0.481), so at
+full aspect ratio the gap reduces but does not vanish. Depth quantization (dx=0.25 -> +-1 cell)
+also makes individual ratios noisy. Net: **coverage-sticking is validated as the right fix and
+closes most of the gap; the residual is small-feature floor flux at the highest aspect ratios.**
+
+### Production GPU-reinit NaN bug found (follow-up, not yet fixed)
+While validating, the GPU Russo-Smereka reinit (`reinit_method="gpu"`) was found to develop a **NaN
+instability in deep holes** (~step 16-20): phi corrupts, the `nan_to_num` velocity guard then zeroes
+V (Vmax -> 0.000) and the depth runs negative. Isolated cleanly: **`reinit_method="skfmm"` (CPU) is
+rock-stable** on the identical run (Vmax steady ~8, depth grows monotonically), so the bug is in the
+GPU reinit kernel, not the flux/advection. The flux kernel (the expensive part) still runs on GPU;
+skfmm reinit cost is negligible for this grid. The validation therefore uses skfmm. The earlier
+"GPU reinit Russo-Smereka depth-exact" result held at shallower depth / fewer steps; it does NOT
+survive deep-hole HARC runs. **Action item: debug the GPU reinit subcell/Godunov kernel for the
+divide-by-zero / sqrt-of-negative that produces NaN at high curvature before using it in production.**
+
+A defensive guard was added to `run_etch_3d` (`V = np.nan_to_num(...)`, finite-Vmax floor) so a NaN
+can't propagate into the CFL substep count — but it masks rather than fixes the GPU-reinit root cause.
