@@ -357,8 +357,11 @@ def _reinit_iter(phi: wp.array3d(dtype=float), phi0: wp.array3d(dtype=float),
         gx0 = (o_xp - o_xm) * 0.5 * inv_dx
         gy0 = (o_yp - o_ym) * 0.5 * inv_dx
         gz0 = (o_zp - o_zm) * 0.5 * inv_dx
-        grad0 = wp.sqrt(gx0 * gx0 + gy0 * gy0 + gz0 * gz0) + 1.0e-9
-        D = s0 / grad0
+        # Floor |grad phi0| at 0.5 (not 1e-9): a near-flat cell mis-flagged as interface (deep-hole
+        # corner / re-pinned mask edge) otherwise makes D = s0/grad0 explode -> inf -> NaN spreads.
+        grad0 = wp.max(wp.sqrt(gx0 * gx0 + gy0 * gy0 + gz0 * gz0), 0.5)
+        dxl = 1.0 / inv_dx
+        D = wp.clamp(s0 / grad0, -1.8 * dxl, 1.8 * dxl)   # |dist| <= cell diagonal for an interface cell
         sgn0 = 1.0
         if s0 < 0.0:
             sgn0 = -1.0
@@ -395,7 +398,9 @@ def reinit_gpu(phi_np, dx, n_iter=24):
     a = wp.array(phi_np.astype(np.float32), dtype=float, device=DEVICE)
     phi0 = wp.array(phi_np.astype(np.float32), dtype=float, device=DEVICE)
     b = wp.zeros_like(a)
-    dtau = 0.5 * dx
+    # CFL: the Godunov |grad phi|=1 sweep is forward-Euler; in 3D the stable step is ~dx/sqrt(3).
+    # 0.5*dx is borderline (works shallow, grows under stress -> blowup); 0.3*dx has clear margin.
+    dtau = 0.3 * dx
     inv = 1.0 / dx
     for _ in range(n_iter):
         wp.launch(_reinit_iter, dim=phi_np.shape, device=DEVICE, inputs=[a, phi0, b, inv, dtau])

@@ -330,3 +330,35 @@ divide-by-zero / sqrt-of-negative that produces NaN at high curvature before usi
 
 A defensive guard was added to `run_etch_3d` (`V = np.nan_to_num(...)`, finite-Vmax floor) so a NaN
 can't propagate into the CFL substep count — but it masks rather than fixes the GPU-reinit root cause.
+
+### GPU-reinit NaN crash — FIXED; a separate |grad| bias found and characterized
+Reproduced the NaN locally (Warp runs on the M1 CPU — no GPU box needed) and fixed the crash:
+1. **Russo-Smereka `D = s0/grad0` blowup** — a near-flat cell mis-flagged as an interface cell (deep-
+   hole corner / re-pinned mask edge) drove `grad0 -> 1e-9` so `D -> inf -> NaN`. Fix: floor `grad0`
+   at 0.5 and **clamp `D` to +-1.8*dx** (an interface cell is within a cell-diagonal of the contour).
+2. **3D CFL** — the Godunov sweep is forward-Euler; `dtau=0.5*dx` is borderline in 3D (stable shallow,
+   grows under stress). Lowered to `dtau=0.3*dx` (~dx/sqrt(3) margin).
+Result: **no more NaN/blowup** (verified `scripts/repro_reinit_nan.py`: gpu now finishes with
+`any_nan=False`, depth no longer runs negative). The reinit is also high-fidelity on smooth fronts —
+`scripts/check_reinit_fidelity.py` (A): on a perturbed sphere it recovers the EXACT distance better
+than skfmm (max|err| 0.036 vs 0.064); (B): on a real developed front it agrees with skfmm to mean
+0.024 um with an **identical zero-contour**.
+
+**BUT a separate, real bias remains on MASKED fronts:** measuring `|grad phi|` (upwind, mask cells
+excluded) after one reinit of a real hole front gives gpu **mean 1.32 / std 0.43** vs skfmm 1.10 /
+0.16 — and this is **iteration-converged** (identical at n_iter 24/48/96/160), so it is a wrong fixed
+point, not under-convergence. Cause: the Russo-Smereka interface *freeze* (`out -> phi0/|grad phi0|`)
+locks adjacent interface cells at mutually-inconsistent sub-cell distances when the input is not a
+clean SDF — and the re-pinned mask boundary (`phi[mask]=mask_phi`) injects exactly such a kink each
+step. The band then inherits `|grad|>1`, and since `advect = F*|grad phi|`, the front **over-moves ->
+the full loop etches ~1-2 cells deeper than skfmm** (e.g. 2.0 vs 1.5 um wide-trench; 5.0 vs 2.75 um
+on a stiff cov-ON hole where it compounds). skfmm (exact global fast-marching) does not have this.
+
+**Status:** the crash is fixed and committed; **skfmm stays the trusted default**. For a fully
+GPU-resident *and depth-accurate* loop the GPU reinit needs a true `|grad|=1` Eikonal solve on masked
+geometry. Two candidate next steps: **(a)** a parallel **GPU fast-sweeping (FSM)** Eikonal solver
+(gives `|grad|=1` like skfmm), or **(b)** the architecturally cleaner route — a proper **extension
+velocity** (`grad F . grad phi = 0`, constant along normals) so `|grad phi|` stays ~1 under advection
+and reinit becomes infrequent/amortized (this also retires the earlier "lazy reinit drifts" problem,
+which was caused by the *non*-proper extension velocity). (b) is preferred: it removes per-step reinit
+from the critical path instead of just making a subtly-biased reinit faster.
