@@ -265,3 +265,29 @@ Remaining accuracy tier (smaller): #2 IED integration (~0.2% at this IED), #4 io
 cal_F) and qualitatively does HARC; but **deep-HARC ARDE does not yet quantitatively match
 ViennaPS** -- a named, real gap in the neutral transport regime. 2D is parameter-free matched;
 3D needs the neutral-transport upgrade for deep features.
+
+## Closing the 3D gap — investigation (web research + ViennaPS source)
+
+**Found the missing mechanism.** Reading the ViennaPS source (`psPlasmaEtching.hpp`): the etchant
+sticking is **coverage-dependent**, `S_eff = (1 - coverage) * beta` (Langmuir: radicals stick only
+on BARE sites), and flux is recorded as ARRIVING (every hit), not stuck. On the saturated upper
+sidewalls (high coverage -> low bare -> low sticking) radicals reflect and **penetrate deeper** to
+the under-fed floor. Our model used CONSTANT sticking (0.7) -> radicals stick on the upper walls ->
+floor starved. That is a real model deficiency we were missing.
+
+**Implemented it** (`mc_flux_3d_coupled` + `_trace3d_cov` + a flux<->coverage fixed point, flag
+`coverage_sticking`). It works mechanically: the etch goes **deeper** (more F reaches the floor).
+
+**But it does NOT close the ARDE ratio.** Matched against ViennaPS-3D holes (d3/d6 depth ratio
+0.832): both constant-sticking and coverage-sticking give **~0.62** -- and we run at FINER
+resolution than ViennaPS (dx 0.25 vs 0.3), so it is not a grid artifact. Our narrow holes are
+*steeper than the geometric shadowing ratio* (~0.74) while ViennaPS is *flatter*. So the dominant
+cause is **not** sticking/re-emission/resolution.
+
+**Narrowed residual:** the floor coverage balance. At the hole floor, vertical ions keep removing F
+(ion-enhanced etch consumes the fluorinated layer), so theta_F stays low and the etch is amplified-
+below-geometric; ViennaPS keeps the floor more F-saturated. Closing it needs the floor coverage/ion-
+flux balance reconciled to ViennaPS (likely the absolute ion-vs-etchant flux ratio at the floor, or
+a coverage-dependent ion yield), not just the neutral sticking. `coverage_sticking` is shipped
+(default off, it is slower + changes normalization) as the correct first piece. **Honest: the 3D
+deep-HARC ARDE gap is narrowed but still open.**

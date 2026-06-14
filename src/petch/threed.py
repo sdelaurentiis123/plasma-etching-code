@@ -179,6 +179,109 @@ def mc_flux_3d(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=20000, se
     return m_i, m_F, m_O, cos_i
 
 
+# ------------------- Langmuir coverage-dependent neutral transport (3D ARDE fix) -------------------
+@wp.kernel
+def _trace3d_cov(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
+                 bare: wp.array(dtype=float), beta: float, n_reemit: int, seed: int,
+                 flux: wp.array(dtype=float)):
+    """Neutral trace with COVERAGE-DEPENDENT sticking S_eff = bare*beta (Langmuir: stick only on
+    bare sites). Records ARRIVING flux on every hit (like ViennaPS). On saturated walls (low bare)
+    radicals reflect -> penetrate to the under-fed floor -> keeps deep-hole floors fed (flat ARDE).
+    """
+    p = wp.tid()
+    state = wp.rand_init(seed, p)
+    o = origin[p]
+    d = dir0[p]
+    for bounce in range(n_reemit + 1):
+        q = wp.mesh_query_ray(mesh, o, d, 1.0e6)
+        if not q.result:
+            break
+        n = q.normal
+        if wp.dot(n, d) > 0.0:
+            n = -n
+        wp.atomic_add(flux, q.face, 1.0)                # arriving flux (every hit)
+        S = bare[q.face] * beta                         # sticks on bare sites only
+        if wp.randf(state) < S or bounce == n_reemit:
+            break
+        hit = o + q.t * d                               # diffuse 3D-cosine re-emission
+        a = wp.vec3(1.0, 0.0, 0.0)
+        if wp.abs(n[0]) > 0.9:
+            a = wp.vec3(0.0, 1.0, 0.0)
+        t = wp.normalize(wp.cross(a, n))
+        b = wp.cross(n, t)
+        r1 = wp.randf(state)
+        r2 = wp.randf(state)
+        ct = wp.sqrt(r1)
+        st = wp.sqrt(1.0 - r1)
+        phi = 6.2831853 * r2
+        d = st * wp.cos(phi) * t + st * wp.sin(phi) * b + ct * n
+        o = hit + 1.0e-4 * n
+
+
+def _belen_coverages(m_i, m_F, m_O, cos_i, par, flags):
+    """Belen steady-state coverages theta_F, theta_O from per-face fluxes (for the fixed point)."""
+    from .chemistry import _yields, angular_factors
+    Yie, Ysp, Yp = _yields(par)
+    mode = "cosine" if flags is None else getattr(flags, "yield_angular", "cosine")
+    f_ie, _ = angular_factors(cos_i, par, mode)
+    Fi = par['ionFlux'] * m_i
+    eps = 1e-9
+    GY_ie = Yie * f_ie * Fi
+    GY_p = Yp * f_ie * Fi
+    Gb_E = par['Fflux'] * m_F * par.get('cal_F', 1.0) + eps
+    Gb_P = par['Oflux'] * m_O + eps
+    a = (par['k_sigma'] + 2.0 * GY_ie) / Gb_E
+    b = (par['beta_sigma'] + GY_p) / Gb_P
+    thF = 1.0 / (1.0 + a * (1.0 + 1.0 / (b + eps)))
+    thO = 1.0 / (1.0 + b * (1.0 + 1.0 / (a + eps)))
+    return thF, thO
+
+
+def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=20000, seed=0,
+                       sampling="pseudo", flags=None, n_fp=4):
+    """Coverage-coupled flux: ions once, then a flux<->coverage fixed point with coverage-dependent
+    neutral sticking. Returns per-face (m_i, m_F, m_O, cos_i) normalized to arriving open-field=1."""
+    Lx, Ly, Lz = geo['Lx'], geo['Ly'], geo['Lz']
+    F = len(faces)
+    rng = np.random.default_rng(seed)
+    z_src = Lz - geo['dx']
+    A_src = Lx * Ly
+    A = np.maximum(areas, 0.3 * np.median(areas))
+    betaE = par.get('betaE', 0.7); betaO = par.get('betaO', 1.0)
+
+    # ions (unchanged; not coverage-dependent)
+    oi, di = _source3d('ion', n_ion, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, seed * 9 + 1)
+    fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
+    spec = 1 if (flags is not None and getattr(flags, "ion_reflection", False)) else 0
+    nre_i = 3 if spec == 1 else 0
+    wp.launch(_trace3d, dim=n_ion, device=DEVICE,
+              inputs=[mesh.id, wp.array(oi, dtype=wp.vec3, device=DEVICE),
+                      wp.array(di, dtype=wp.vec3, device=DEVICE),
+                      1.0, int(nre_i), int(seed * 9 + 1), int(spec), 0.34, 0.8, fi, ai])
+    fi = fi.numpy(); ai = ai.numpy()
+    m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
+    cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
+
+    def neutral(beta, bare, sd):
+        o, d = _source3d('neutral', n_neu, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, sd)
+        fl = wp.zeros(F, dtype=float, device=DEVICE)
+        wp.launch(_trace3d_cov, dim=n_neu, device=DEVICE,
+                  inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
+                          wp.array(d, dtype=wp.vec3, device=DEVICE),
+                          wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
+                          float(beta), 24, int(sd), fl])
+        return np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
+
+    bare = np.ones(F)
+    m_F = m_O = np.zeros(F)
+    for it in range(n_fp):
+        m_F = neutral(betaE, bare, seed * 9 + 2 + 2 * it)
+        m_O = neutral(betaO, bare, seed * 9 + 3 + 2 * it)
+        thF, thO = _belen_coverages(m_i, m_F, m_O, cos_i, par, flags)
+        bare = np.clip(1.0 - thF - thO, 0.0, 1.0)
+    return m_i, m_F, m_O, cos_i
+
+
 # ----------------------------- 3D advection -----------------------------
 def advect_3d(phi, Fspeed, dx, dt):
     """phi_t + F|grad phi| = 0, first-order upwind Godunov in 3D."""
@@ -336,10 +439,16 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         mesh = wp.Mesh(points=wp.array(verts, dtype=wp.vec3, device=DEVICE),
                        indices=wp.array(faces.flatten(), dtype=wp.int32, device=DEVICE))
         tf = time.time()
-        m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, mc_par,
-                                          n_ion=n_ion, n_neu=n_neu, seed=step,
-                                          sampling=getattr(flags, "sampling", "pseudo"),
-                                          ion_reflection=getattr(flags, "ion_reflection", False))
+        if getattr(flags, "coverage_sticking", False):   # Langmuir coverage-dependent sticking
+            m_i, m_F, m_O, cos_i = mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par,
+                                                      n_ion=n_ion, n_neu=n_neu, seed=step,
+                                                      sampling=getattr(flags, "sampling", "pseudo"),
+                                                      flags=flags)
+        else:
+            m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, mc_par,
+                                              n_ion=n_ion, n_neu=n_neu, seed=step,
+                                              sampling=getattr(flags, "sampling", "pseudo"),
+                                              ion_reflection=getattr(flags, "ion_reflection", False))
         timings['flux'] += time.time() - tf
         is_mask = faces_in_mask(centroids, geo, mask_th, trench_width, hole=hole)
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)
