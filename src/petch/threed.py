@@ -7,6 +7,7 @@ with diffuse re-emission) -> chemistry -> 3D upwind advection -> reinit.
 The flux kernel is a `wp.kernel` using wp.Mesh + wp.mesh_query_ray (BVH; RT cores on a GPU).
 CPU-first; set DEVICE='cuda' on an NVIDIA box and the identical kernel runs on RT cores.
 """
+import os
 import warnings
 import numpy as np
 import skfmm
@@ -19,7 +20,7 @@ from .params import PAR, DEFAULT_FLAGS
 from .chemistry import surface_rate
 
 wp.init()
-DEVICE = "cpu"
+DEVICE = os.environ.get("PETCH_DEVICE", "cpu")   # set PETCH_DEVICE=cuda on a GPU box
 
 # ----------------------------- 3D geometry / level set -----------------------------
 def make_trench_3d(Lx, Ly, Lz, dx, trench_width, mask_th, sub_top, hole=False):
