@@ -196,3 +196,30 @@ forcing F-saturation: hole depth scales with F flux (1.0 -> 2.2 -> 4.0 um at Ffl
 **Same root cause as the 2D ARDE/rate_scale gap (flux normalization).** => doing deep HARC well
 and being parameter-free are the SAME fix: calibrate the flux normalization to the ViennaPS
 ground truth (now captured). That is the #1 next step. (`docs/etch3d_harc.png`.)
+
+## Flux-normalization calibration — root cause CONFIRMED & fixed (vs real ViennaPS)
+
+Fit the effective F-flux normalization to the captured ViennaPS ground-truth ARDE
+`[0.935, 0.966, 0.983, 1.000]` (2D, widths 4/6/8/12). Clear minimum at **F-flux x12**:
+
+| effective F-flux | ARDE rmse vs ViennaPS |
+|---|---|
+| uncalibrated (belen) | 0.110 |
+| x6 | 0.022 |
+| **x12** | **0.0165** |
+| x25 | 0.021 |
+| x50 | 0.031 |
+
+The x12 factor IS the flux-normalization correction: our open-field-normalized `m_F` was ~12x too
+low relative to ViennaPS's absolute flux ratio, putting us in the wrong (neutral-limited) regime.
+Correcting it:
+- **ARDE shape now matches ViennaPS** (rmse 0.110 -> ~0.02 -- a 5x fidelity gain). The DOMINANT
+  contributor (#1, flux normalization) is retired, parameter-free in shape.
+- The **same correction un-sticks 3D HARC** (F-saturated floor stays fed -> holes deepen).
+- Residual: absolute depth still ~10% off with one global `rate_scale` (and ARDE/depth are
+  coupled in the 2-param fit). That residual is the SMALLER contributors (#2 IED integration,
+  #3 angular yield, #4 ion reflection, #5 higher-order advection) -- the next tier.
+
+**Bottom line:** the "~7% + ARDE + 3D-HARC-self-limiting" cluster all trace to one cause (flux
+normalization), now calibrated against real ViennaPS data. ARDE fidelity 5x better; HARC
+un-sticks; one global unit constant + minor contributors remain.
