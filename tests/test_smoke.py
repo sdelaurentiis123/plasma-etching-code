@@ -8,10 +8,13 @@ import numpy as np
 import petch
 
 
+POC = petch.Flags(chemistry="langmuir", yield_angular="cosine")   # original PoC config
+
+
 def test_small_run():
     par = dict(petch.PAR); par['cal_F'] = 1.0   # PoC (uncalibrated) for the parity-style check
     r = petch.run_etch(W=12, H=12, dx=0.5, trench_width=5, mask_thickness=2.0,
-                       sub_top=9, t_end=0.5, n_steps=3, par=par, verbose=False)
+                       sub_top=9, t_end=0.5, n_steps=3, par=par, flags=POC, verbose=False)
     assert len(r['segs']) > 0
     d = petch.center_depth(r)
     assert 0.0 < d < 9.0          # some etching happened, not absurd
@@ -21,7 +24,7 @@ def test_small_run():
 def test_baseline_parity():
     OURS = dict(petch.PAR); OURS['rate_scale'] = 0.29; OURS['cal_F'] = 1.0   # uncalibrated PoC
     r = petch.run_etch(W=20.0, H=24.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
-                       sub_top=18.0, t_end=3.0, n_steps=60, par=OURS, verbose=False)
+                       sub_top=18.0, t_end=3.0, n_steps=60, par=OURS, flags=POC, verbose=False)
     d = petch.center_depth(r)
     # PoC baseline on this machine = 9.18 um; allow margin for MC variance.
     assert abs(d - 9.18) < 0.4, f"baseline depth {d:.3f} drifted from 9.18"

@@ -40,9 +40,11 @@ class Flags:
     Each non-default value flips exactly one bias contributor (or speedup) so the
     harness can attribute a measured number to each.
     """
-    chemistry: str = "langmuir"      # "langmuir" (PoC) | "belen" (contributor #1)
+    # Defaults = the ViennaPS-calibrated ACCURATE config (belen + viennaps angular + cal_F=12).
+    # Set chemistry='langmuir', yield_angular='cosine', cal_F=1.0 to recover the original PoC.
+    chemistry: str = "belen"         # "belen" (accurate, contributor #1) | "langmuir" (PoC)
     yield_energy: str = "mean"       # "mean" (PoC) | "ied"   (contributor #2)
-    yield_angular: str = "cosine"    # "cosine" (PoC) | "viennaps" (contributor #3)
+    yield_angular: str = "viennaps"  # "viennaps" (accurate, contributor #3) | "cosine" (PoC)
     ion_reflection: bool = False     # contributor #4
     advection: str = "upwind1"       # "upwind1" (PoC) | "weno_rk2" (contributor #5)
     flux_clips: bool = True          # contributor #6a (remove heuristic flux caps)

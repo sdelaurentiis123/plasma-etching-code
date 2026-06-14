@@ -280,6 +280,10 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         par = PAR
     if flags is None:
         flags = DEFAULT_FLAGS
+    # belen chemistry uses ViennaPS sticking; keep transport re-emission consistent with it
+    mc_par = par
+    if getattr(flags, "chemistry", "langmuir") == "belen":
+        mc_par = dict(par); mc_par['s_F'] = par['betaE']; mc_par['s_O'] = par['betaO']
     geo = make_trench_3d(Lx, Ly, Lz, dx, trench_width, mask_th, sub_top, hole=hole)
     mask_phi = geo['phi'].copy()
     dt = t_end / n_steps
@@ -292,7 +296,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         mesh = wp.Mesh(points=wp.array(verts, dtype=wp.vec3, device=DEVICE),
                        indices=wp.array(faces.flatten(), dtype=wp.int32, device=DEVICE))
         tf = time.time()
-        m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, par,
+        m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, mc_par,
                                           n_ion=n_ion, n_neu=n_neu, seed=step,
                                           sampling=getattr(flags, "sampling", "pseudo"))
         timings['flux'] += time.time() - tf
