@@ -39,3 +39,10 @@ Summary of what changed this session (newest first). Full detail in `FINDINGS.md
 All committed + pushed (both repos). No GPU boxes left running. Next levers ready: charging (the
 real-wafer differentiator), GPU iFIM reinit + radiosity neutral flux (push further past ViennaPS),
 and running the de Boer ARDE real-wafer validation on a box.
+
+## CAPSTONE: first REAL-wafer validation (honest gap found)
+Ran our model vs the de Boer/Blauw cryo experiment (NOT ViennaPS). Our trench STALLS at AR~7.75 and
+over-starves (~7x slower floor than the wafer at AR~8); RMSE 0.22 vs experiment. So: we match ViennaPS,
+but do NOT yet match real wafers -- our ballistic transport over-predicts ARDE vs real Knudsen molecular
+flow. Path (quantified): true Knudsen transport + condition calibration (lower betaE) + charging.
+This is the honest answer to "real physics accuracy": not there yet against wafers; clear path documented.

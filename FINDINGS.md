@@ -660,3 +660,32 @@ ViennaPS has only mean+Gaussian); (3) redeposition / SiOxFy passivation transpor
 probability; (5) absolute fluxes are FIT not predicted (feature-scale profile sim, not plasma-to-wafer).
 Bottom line: matching #1+#2 = "validated against real wafer SEMs + ARDE for shape/rate/yield/AR" -- as good as
 or better than ViennaPS demonstrates, against EXPERIMENT. To beat real production wafers: add charging + real IEDF.
+
+## REAL-WAFER validation result — we OVER-STARVE vs the de Boer/Blauw experiment (honest gap)
+
+First validation of our model against a REAL experiment (not ViennaPS): de Boer 2002 / Blauw cryo
+SF6/O2 trench RIE-lag. Experiment normalized etch-rate-vs-aspect-ratio = 1.0/0.43/0.29/0.20 at AR
+0/10/20/40 (F-transport-limited, S_F~0.47). Our model (the ViennaPS-validated config: coverage_sticking,
+betaE=0.7, RR transport, smoothing) etched a W=2um trench (`scripts/validate_experiment_arde.py`):
+
+- **Our trench STALLS at AR ~7.75** (depth ~15.5um) -- never reaches AR 10/20/40.
+- At AR~7.75 our normRate ~0.07-0.12 vs Blauw 0.35 and the experiment ~0.45-0.48 (interpolated).
+- **RMSE vs experiment = 0.22** (large). Our floor etches ~7x SLOWER than the real wafer at AR~8.
+
+**Conclusion (the honest "real physics accuracy" answer):** our model -- calibrated to ViennaPS --
+**does NOT match the de Boer real-wafer experiment: it OVER-STARVES deep features**, over-depleting the
+trench floor far more than the real Knudsen molecular-flow F-transport does. Matching ViennaPS got us
+to ViennaPS-level, but ViennaPS is calibrated to a DIFFERENT experiment (Belen holes) and our ballistic
+MC neutral transport gives steeper ARDE than the gentle Knudsen-conductance ARDE the de Boer trenches show.
+
+**Caveats (honest):** (1) the config was NOT calibrated to de Boer's cryo conditions (different
+plasma/temperature) -- some gap is un-matched conditions; (2) the betaE~0.08 "un-starving" lever (which
+flattened ARDE vs ViennaPS) was NOT applied here -- lower betaE = more wall reflection = gentler ARDE,
+likely closes much of this; (3) the Clausing K~1/(1+AR/2) is a simplified transmission.
+
+**The path to REAL-wafer accuracy (now quantified, not speculative):** (a) **true Knudsen molecular-flow
+neutral transport** (vs ballistic) -- the SOTA-flagged transport upgrade, the dominant lever for the gentle
+experimental ARDE; (b) calibrate betaE / fluxes to the de Boer cryo conditions; (c) add the missing physics
+(charging) for production wafers. This is the difference between "matches a simulator" and "matches a wafer"
+-- and we now have it measured. BIG honest finding: do NOT claim real-wafer accuracy yet; we match ViennaPS,
+and over-predict ARDE vs the de Boer experiment.
