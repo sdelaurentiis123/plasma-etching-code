@@ -463,7 +463,14 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         m_e = np.clip((fe.numpy() / A) / (n_neu / A_src) * par.get('eFlux', 1.0), 0.0, 8.0)
         if n_smooth > 0:
             m_e = _smooth(m_e)
-        f_charge = 1.0 - alpha * (1.0 - np.clip(m_e / np.maximum(m_i, 1e-6), 0.0, 1.0))
+        # Anchor each flux to its OWN open-field exposure (the most-exposed faces, top/field, ~unity
+        # shadow) so the charging factor is 1 at the field and rolls off only where electrons are MORE
+        # shadowed than ions. shadow = flux / open-field flux; f = 1 - alpha*(1 - shadow_e/shadow_i).
+        ref_i = np.percentile(m_i[m_i > 1e-6], 90) if (m_i > 1e-6).any() else 1.0
+        ref_e = np.percentile(m_e[m_e > 1e-6], 90) if (m_e > 1e-6).any() else 1.0
+        sh_e = np.clip(m_e / max(ref_e, 1e-6), 0.0, 1.0)
+        sh_i = np.clip(m_i / max(ref_i, 1e-6), 0.0, 1.0)
+        f_charge = 1.0 - alpha * np.clip(1.0 - sh_e / np.maximum(sh_i, 1e-3), 0.0, 1.0)
         m_i = m_i * f_charge
 
     def neutral(beta, bare, sd):
