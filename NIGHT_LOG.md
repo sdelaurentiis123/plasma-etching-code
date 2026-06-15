@@ -2,6 +2,21 @@
 
 Summary of what changed this session (newest first). Full detail in `FINDINGS.md`; explainers in `docs/`.
 
+## CUMULATIVE: 2.55x faster than the pre-night default, fully accuracy-neutral
+- Clean one-box headline (RTX 3090, d=6 hole, dx0.25, 20 steps, 30k rays):
+  **ORIGINAL (cold n_fp=4 + skfmm CPU + CPU smooth) 7.50s -> STACKED (warm n_fp=1 + fsm GPU +
+  GPU smooth) 2.95s = 2.55x**, depth identical (20.00um, delta 0.00). The fast config is also the
+  MORE-converged (more accurate) one. Stack: FSM reinit (kills 40% reinit) + warm-start (8x fewer
+  neutral launches, exact) + GPU prep-cached flux smoothing.
+- GPU flux smoothing IMPROVED via per-step prep caching (_smooth_prep_gpu): the 3 smooth calls/step
+  share pairs/weights -> build+upload once not 3x. Same-box A/B: flux 2.27->1.67s, wall 3.50->2.88s
+  (1.22x), depth identical. (Was only ~5% before caching -> now ~18%.) GPU micro-profile (68k-face
+  mesh) confirmed the real flux costs: smooth 6.74ms (numpy 22.6ms), source-gen 4.29ms; ray launch
+  only 0.69ms and sync 0.19ms -> cuBQL/faster-BVH would NOT help; the levers are host-op offload.
+- Remaining levers (NOT done, both have caveats): source-gen 4.3ms/call (Sobol rebuild -- accuracy-
+  sensitive, touches QMC); CUDA graphs + GPU marching-cubes (big device-resident-loop refactor).
+  Mesh is now #2 at ~16%.
+
 ## GPU flux smoothing: profiled the flux internals, modest win (honest)
 - After FSM+warm-start the loop is flux-bound (~70%). Profiled the flux INTERNALS
   (flux_internal_profile_3d, M1 -- host ops are device-independent): on a deep 54k-face mesh the
