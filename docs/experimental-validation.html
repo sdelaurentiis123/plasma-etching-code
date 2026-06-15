@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experimental Validation — Feature-Scale Etch</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="physics-grounding.html">Physics&nbsp;Grounding</a>
+  <a href="performance.html">Performance</a>
+  <a href="experimental-validation.html" class="active">Experiments</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>Experimental Validation</strong></p>
+<h1>Experimental Validation</h1>
+<p class="subtitle">Benchmarking the simulator against measured wafers — not just against another simulator.</p>
+
+<p>Everywhere else in these docs we compare our solver to <a href="https://github.com/ViennaTools/ViennaPS">ViennaPS</a>, the open-source state-of-the-art feature-scale etcher. That comparison tells us whether our <em>numerics</em> are right. It does not tell us whether our <em>physics</em> is right, because ViennaPS itself is a model. This page is about the harder and more honest question: how do we know the simulator reproduces what actually happens on a wafer?</p>
+
+<div class="callout key">
+<span class="lab">The honest reality</span>
+<p>ViennaPS validates its SF<sub>6</sub>/O<sub>2</sub> model against <strong>one</strong> experimental dataset — the Belen 2005 hole-etch SEMs — and it does so by <strong>fitting the incident fluxes separately for each process condition</strong>. Pressure is not modeled; charging is not modeled. The fluxes are calibration knobs tuned to make each SEM match. So "matching ViennaPS" really means "matching a model that was hand-calibrated to a handful of cross-sections." It is <em>not</em> a first-principles prediction of reality. To claim we are accurate against the real world, we have to benchmark directly to <strong>measured wafer data</strong>: etch rates, yields, sidewall angles, and aspect-ratio-dependent depths that someone put under an SEM and a profilometer. The rest of this page is the ranked set of those experimental targets and the exact numbers we hold ourselves to.</p>
+</div>
+
+<h2>1. Benchmark datasets</h2>
+<p>Three published experiments, ranked by how directly they pin down our model. #1 anchors absolute rate and yield, #2 anchors the aspect-ratio physics, and #3 anchors the ion-reflection morphology. All three are open literature with digitizable figures and full process conditions.</p>
+
+<h3>#1 — Gomez, Belen &amp; Aydil 2004: SF<sub>6</sub>/O<sub>2</sub> hole etch (the anchor)</h3>
+<p>This is the measured wafer data that ViennaPS's SF<sub>6</sub>/O<sub>2</sub> model is built on, which makes it doubly useful: it validates <em>us</em> and simultaneously cross-checks <em>ViennaPS</em> against its own source experiment. <span class="eqn-note">Gomez, Belen, Aydil, <em>JVST A</em> <strong>22</strong>, 606 (2004), DOI 10.1116/1.1710493.</span></p>
+<p><strong>Reactor &amp; geometry:</strong> Lam TCP9400 inductively-coupled plasma, 800 W source, 25 mTorr, 80 sccm, base feed ratio SF<sub>6</sub>:O<sub>2</sub> = 1.0, electrostatic chuck at 5 &deg;C, substrate bias swept 0 to &minus;120 V. Etched features are 0.35&ndash;0.5 µm holes through a 1.2 µm SiO<sub>2</sub> mask, reaching aspect ratios up to 20.</p>
+<table>
+<thead><tr><th>Measured quantity</th><th>Experimental result</th><th>What it pins</th></tr></thead>
+<tbody>
+<tr><td>Etch rate vs. pressure</td><td>~0.8 µm/min @ 10 mTorr → ~1.3 µm/min peak @ 25 mTorr → ~0 @ 75 mTorr</td><td>chemistry / flux balance</td></tr>
+<tr><td>Etch rate vs. bias</td><td>~0.3 µm/min @ 0 V → 1.3 @ &minus;40 V → saturates ~1.7 µm/min beyond &minus;120 V</td><td>ion-energy dependence of yield</td></tr>
+<tr><td><strong>Etch yield (Si atoms / ion)</strong></td><td><strong>7&ndash;8 @ \(\Gamma_F/\Gamma_i \approx 600\) → 9&ndash;14 @ \(\Gamma_F/\Gamma_i \approx 1000\text{–}2400\)</strong></td><td><strong>the cleanest absolute target</strong></td></tr>
+<tr><td>Sidewall angle vs. SF<sub>6</sub>:O<sub>2</sub></td><td>ratio ≥ 1.29 bowed/undercut · = 1.0 vertical · ≤ 0.78 tapered (Fig. 9 = canonical profile set)</td><td>profile-shape response to chemistry</td></tr>
+<tr><td>Selectivity Si:SiO<sub>2</sub></td><td>peaks &gt; 50 @ 25 mTorr; ~9 at the vertical-profile recipe</td><td>passivation / mask erosion</td></tr>
+</tbody>
+</table>
+<p>The yield row is the load-bearing one. A yield of 7&ndash;14 Si atoms removed per incident ion, rising with the neutral-to-ion flux ratio, is exactly the <strong>ion–neutral synergy</strong> the <a href="physics.html">chemistry model</a> is built to reproduce: \(V_n \sim Y_{ie}\,\Gamma_{\rm ion}\,\theta_F\) with \(\theta_F \sim \Gamma_F/\Gamma_{\rm ion}\). Anchoring our ion-enhanced channel so that it delivers 7&ndash;14 atoms/ion in this flux-ratio range is what turns an arbitrary unit constant into a physically grounded one.</p>
+<p>For reference, Belen's per-condition <em>calibrated</em> fluxes (the ones ViennaPS inherits) are \(\Gamma_F \approx 3\text{–}5.5\times10^{18}\), \(\Gamma_O \approx 0.2\text{–}1.5\times10^{18}\), and a constant \(\Gamma_i \approx 1\times10^{16}\) cm<sup>&minus;2</sup>s<sup>&minus;1</sup>, with sticking \(\gamma_F=0.7\), \(\gamma_O=1.0\). These are fits, not predictions — which is precisely why matching the <em>measured</em> yield, not the fitted flux, is the meaningful test.</p>
+
+<h3>#2 — de Boer 2002: cryogenic RIE-lag (the aspect-ratio anchor)</h3>
+<p>The cleanest digitizable aspect-ratio-dependent etching (ARDE / RIE-lag) curve in the literature with fully reported conditions. The Belen hole data alone cannot test this, because it does not sweep opening width at fixed chemistry; de Boer does. <span class="eqn-note">de Boer et al., <em>JMEMS</em> <strong>11</strong>, 385 (2002), DOI 10.1109/JMEMS.2002.800928, Fig. 9.</span></p>
+<p><strong>Reactor &amp; geometry:</strong> Oxford PlasmaLab 100, 600 W ICP, 10 mTorr, 90 sccm SF<sub>6</sub>, DC self-bias &minus;30 V, cryogenic substrate, SiO<sub>2</sub> mask, openings from 1 to 128 µm.</p>
+<table>
+<thead><tr><th>Quantity</th><th>Measured (25 min etch)</th></tr></thead>
+<tbody>
+<tr><td>Depth vs. opening</td><td>~52 µm at a 3 µm opening → ~77 µm plateau for openings &gt; 40 µm</td></tr>
+<tr><td>Narrow-feature lag</td><td>narrowest features etch ~32% shallower than the open field</td></tr>
+</tbody>
+</table>
+<p>The mechanistic backbone for this curve is the <strong>Blauw Knudsen/Clausing transport model</strong> <span class="eqn-note">(Blauw et al., <em>JVST B</em> <strong>18</strong>, 3453, 2000)</span>, in which the bottom-to-top etch-rate ratio is set by aperture conductance:</p>
+$$R_E \;\approx\; \frac{K^{\rm AR}}{K^{\rm AR} + S_F - K^{\rm AR}\,S_F},$$
+<p>where \(K^{\rm AR}\) is the aspect-ratio-dependent Clausing transmission probability and \(S_F\) is the fluorine reaction (sticking) probability at the floor, measured here as \(S_F \approx 0.47\) cryogenic / \(0.32\) for the ICP condition. The corresponding normalized etch rate falls steeply with aspect ratio:</p>
+<table>
+<thead><tr><th>Aspect ratio (AR)</th><th>0</th><th>10</th><th>20</th><th>40</th></tr></thead>
+<tbody>
+<tr><td>Normalized etch rate</td><td>1.00</td><td>0.43</td><td>0.29</td><td>0.20</td></tr>
+</tbody>
+</table>
+<div class="callout deriv">
+<span class="lab">Why this dataset matters</span>
+<p>The form above contains the entire reaction- vs. transport-limited story. At <strong>low ion flux</strong> the floor is reaction-limited and the etch is nearly AR-independent (flat ARDE). At <strong>high ion flux</strong> the floor consumes fluorine faster than conductance can deliver it, so the etch becomes F-transport-limited and ARDE turns steep. Note the limit \(S_F\to0 \Rightarrow R_E\to 1/K^{\rm AR}\): lower floor sticking gives a <em>flatter</em> ARDE. This is the quantitative version of the "neutral-limited vs. F-saturated" diagnosis that runs through our whole calibration story — and a dataset like this, which sweeps opening width at known \(S_F\), is the only way to test that we land in the right regime rather than just matching one depth.</p>
+</div>
+
+<h3>#3 — Hoekstra &amp; Kushner 1998: microtrenching (the ion-reflection anchor)</h3>
+<p>The cleanest open experiment-plus-SEM for ion-reflection microtrenching. It is in Cl<sub>2</sub> rather than SF<sub>6</sub>/O<sub>2</sub>, so for us it is a <em>mechanism</em> check on the specular-reflection model rather than a chemistry match. <span class="eqn-note">Hoekstra &amp; Kushner, <em>JVST B</em> <strong>16</strong>, 2102 (1998), DOI 10.1116/1.590135, Fig. 2.</span></p>
+<p><strong>Reactor:</strong> Lam 9400 ICP, 600 W source / 100 W bias, 10 mTorr Cl<sub>2</sub>.</p>
+<table>
+<thead><tr><th>Mechanism requirement</th><th>Measured / required value</th></tr></thead>
+<tbody>
+<tr><td>Specular reflection at grazing incidence</td><td>must exceed ~90% at &gt; 80&deg; from normal to reproduce the microtrenches</td></tr>
+<tr><td>Energy retention at grazing</td><td>ions retain up to ~99% of energy</td></tr>
+</tbody>
+</table>
+<p>This is the experimental authority behind the <a href="physics.html">grazing-angle ion-reflection</a> mechanism that carves microtrenches at the bottom corners of a feature. (It, not Hwang–Giapis, is the correct primary reference for <em>specular</em> microtrenching.) The related <strong>charging/notching</strong> phenomenon is documented separately by Hwang &amp; Giapis 1997 <span class="eqn-note">(<em>JVST B</em> <strong>15</strong>, 70, Fig. 17)</span>: a notch depth growing from ~50 nm at a 1.2 µm feature to a ~250&ndash;270 nm plateau — a target for the charging physics we do <em>not</em> yet include (see below).</p>
+
+<h2>2. Fundamental chemistry constants</h2>
+<p>Beneath the feature-scale fits sit two pieces of measured surface chemistry that anchor the spontaneous (ion-free) and flux-dependent behavior of fluorine on silicon. These are first-principles experimental laws, not calibration knobs.</p>
+
+<h3>Spontaneous F + Si etch rate (Flamm 1981)</h3>
+<p>The thermal, ion-free etch rate of silicon by atomic fluorine follows a measured Arrhenius law with a square-root temperature prefactor: <span class="eqn-note">Flamm et al., <em>JAP</em> <strong>52</strong>, 3633 (1981).</span></p>
+$$R \;=\; \big(2.91\times10^{-12}\big)\,T^{1/2}\,n_F\,\exp\!\Big(\frac{-0.108\ \text{eV}}{k_BT}\Big)\quad[\text{Å/min}],$$
+<p>with activation energy \(E_a = 0.108\) eV and \(n_F\) the atomic-fluorine number density. This fixes the absolute magnitude of the purely <em>chemical</em> etch term — the part that proceeds with no ion assistance at all — so that our ion-enhanced channel (7&ndash;14 atoms/ion, target #1) is added on top of a chemistry term that is itself anchored to measured data rather than tuned. The selectivity counterpart is the much slower F + SiO<sub>2</sub> rate, \(\epsilon_F = 1.63\times10^{-2}\exp(-0.163\ \text{eV}/k_BT)\).</p>
+
+<h3>Flux-dependent reaction probability (Donnelly 2017)</h3>
+<p>The fluorine reaction probability on silicon is <em>not</em> a single constant — it falls with incident flux by roughly 30&times;: <span class="eqn-note">Donnelly, <em>JVST A</em>, 2017.</span></p>
+<table>
+<thead><tr><th>Incident F flux (cm<sup>&minus;2</sup>s<sup>&minus;1</sup>)</th><th>Reaction probability</th></tr></thead>
+<tbody>
+<tr><td>~10<sup>12</sup></td><td>0.03</td></tr>
+<tr><td>~10<sup>20</sup></td><td>0.001</td></tr>
+</tbody>
+</table>
+<div class="callout warn">
+<span class="lab">A subtle but important distinction</span>
+<p>ViennaPS's \(\gamma_F = 0.7\) is an effective <strong>sticking</strong> coefficient in its particle model — it is <em>not</em> this measured reaction probability, and it does not vary with flux. Real fluorine sticking varies with both flux (Donnelly, above: 0.001&ndash;0.03) and surface state (MD studies show 0.98 on bare Si dropping to 0.23 as the surface fluorinates). Treating \(\gamma_F\) as a fitted, flux-normalized constant is the <em>field-standard</em> approximation (Belen uses 0.7, Marcos 0.1), so our flux-normalization knob is not a hack — but the experiments above are a reminder that the true quantity is flux- and coverage-dependent, and a model that captured that dependence would be strictly more physical than either us or ViennaPS today.</p>
+</div>
+
+<h2>3. What we can — and cannot — claim</h2>
+<div class="callout key">
+<span class="lab">Honest scorecard</span>
+<p><strong>What matching #1 + #2 lets us claim, validated against real wafer SEMs and profilometry:</strong></p>
+<ul>
+<li><strong>Profile-shape response to chemistry</strong> — SF<sub>6</sub>:O<sub>2</sub> ratio driving tapered → vertical → bowed sidewalls (target #1, Fig. 9).</li>
+<li><strong>Correct ARDE / RIE-lag trend</strong> — Knudsen F-transport with the reaction-limited vs. transport-limited crossover (target #2).</li>
+<li><strong>Ion-reflection microtrenching morphology</strong> — the bottom-corner carving from specular grazing reflection (target #3).</li>
+<li><strong>Reasonable absolute etch rate and yield</strong> — chemical term anchored to Flamm 1981, ion-enhanced term to the measured 7&ndash;14 atoms/ion.</li>
+</ul>
+<p>That is as good as, or better than, what ViennaPS itself demonstrates — and crucially it is measured against <em>experiment</em>, not against another simulator.</p>
+<p><strong>What still deviates from real wafers — and is also missing from ViennaPS:</strong></p>
+<ol>
+<li><strong>Charging</strong> — notching and aspect-ratio-dependent ion deflection. The biggest gap, and the target behind the Hwang–Giapis notch data above.</li>
+<li><strong>The real bimodal IEDF tail</strong> — we now have an ion energy distribution; ViennaPS carries only a mean-plus-Gaussian. Neither captures the full bimodal RF tail.</li>
+<li><strong>Redeposition / SiO<sub>x</sub>F<sub>y</sub> passivation transport</strong> — volatile product re-landing that narrows the top and raises effective aspect ratio.</li>
+<li><strong>Flux-dependent reaction probability</strong> — the Donnelly curve above; both models use an effective constant sticking instead.</li>
+<li><strong>Absolute fluxes are fit, not predicted</strong> — this is a feature-scale profile simulator, not a plasma-to-wafer model. The incident fluxes come from calibration, not from solving the reactor.</li>
+</ol>
+<p><strong>Bottom line:</strong> matching targets #1 and #2 means we are validated against real wafer SEMs and ARDE data for <em>shape, rate, yield, and aspect-ratio behavior</em> — as good as or better than ViennaPS demonstrates, and against experiment rather than against a calibrated model. To go further and beat real production wafers, the additions are clear and ranked: <strong>charging first, then the real IEDF</strong>.</p>
+</div>
+
+<div class="pagenav">
+<a href="multiscale.html">← Multiscale</a>
+<a href="sota-and-plan.html">Next: SOTA &amp; Plan →</a>
+</div>
+<div class="footer"><p>Experimental-validation layer. The targets above are how we keep the simulator honest against measured wafers, not just against ViennaPS.</p></div>
+</main>
+</body>
+</html>

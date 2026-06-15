@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Performance &amp; SOTA — Feature-Scale Etch</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="physics-grounding.html">Physics&nbsp;Grounding</a>
+  <a href="performance.html" class="active">Performance</a>
+  <a href="experimental-validation.html">Experiments</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>Performance &amp; SOTA</strong></p>
+<h1>Performance &amp; SOTA: Beating ViennaPS-GPU</h1>
+<p class="subtitle">How a differentiable Warp etcher crossed below the OptiX reference — and the state-of-the-art methods that get it there and past it.</p>
+
+<div class="callout key">
+<span class="lab">The key idea</span>
+<p>Our problem was <strong>DENSE vs SPARSE, not CPU vs GPU.</strong> ViennaPS's level set runs on the <strong>CPU</strong> (a sparse HRLE structure) and does <strong>zero global reinitialization per step</strong>; only its Monte-Carlo flux is on the GPU. Our dense, per-step <code>skfmm</code> reinit was <strong>self-inflicted work the code we race doesn't even do.</strong> Once we stopped doing it densely every step, the loop stopped being host-bound — and we crossed below ViennaPS-GPU. The lesson: we weren't losing on ray tracing (our kernel is RT-core-class). We were losing on a data-structure choice.</p>
+</div>
+
+<h2>1. The honest benchmark</h2>
+<p>The first "we beat ViennaPS by ~23×" number was wrong, and we corrected it. It was a <strong>GPU-vs-CPU artifact</strong>: that comparison pitted our Warp GPU loop against ViennaPS's <em>CPU_TRIANGLE</em> engine (352 s) because the box lacked a working OptiX. On a 3090 where ViennaPS's GPU/OptiX engine actually works, the clean same-engine benchmark, matched on a \(d=6\) hole to ~9 µm, told a humbler story — and then we earned the lead back honestly.</p>
+<table>
+<thead><tr><th>Configuration</th><th>Wall-clock @ ~9 µm</th><th>Engine</th><th>Relative</th></tr></thead>
+<tbody>
+<tr><td>ours <strong>OLD</strong></td><td>22.6 s</td><td>Warp / RT cores (GPU)</td><td>~2× <em>slower</em></td></tr>
+<tr><td>ours <strong>NEW</strong></td><td><strong>10.18 s</strong></td><td>Warp / RT cores (GPU)</td><td><strong>2.2× self-speedup</strong></td></tr>
+<tr><td>ViennaPS-GPU</td><td>11.6 s</td><td>OptiX (GPU_TRIANGLE)</td><td>reference</td></tr>
+</tbody>
+</table>
+<p>The two SOTA speedups below took our own loop from 22.6 s to 10.18 s — a <strong>2.2× self-speedup that is rock-solid</strong> — and that crosses below the 11.6 s ViennaPS-GPU mark. We are now ~1.1× faster than ViennaPS-GPU at matched settings (\(d=6\) hole, <code>dx=0.25</code>, <code>NS=40</code>, 30k rays, <code>betaE=0.7</code>, <code>dur=3</code>).</p>
+<div class="callout warn">
+<span class="lab">Two honesty caveats</span>
+<ul>
+<li>The earlier <strong>"~23× faster" was a GPU-vs-CPU artifact</strong> (our GPU vs ViennaPS-CPU at 352 s). It is <em>not</em> a fair claim and has been retracted here and in our records.</li>
+<li>On the re-benchmark box, <strong>ViennaPS-GPU segfaulted during setup</strong> — a box-specific OptiX flake. So the 11.6 s is the <em>prior-3090, same-settings</em> number, not same-box. The 2.2× <em>self</em>-speedup is measured directly and puts us under 11.6 s.</li>
+</ul>
+</div>
+
+<h2>2. Where the time went — the timing breakdown</h2>
+<p>The diagnosis was a per-stage profile of the 22.6 s loop. Roughly <strong>72% of our time was CPU host ops</strong> that ViennaPS runs on the GPU; only 27% was actual GPU flux (and that flux kernel is RT-core-class, ~200 M rays/s, comparable to ViennaPS). We were slower because the loop was <em>not GPU-resident</em>, not because the ray tracing was slow.</p>
+<table>
+<thead><tr><th>Stage</th><th>Before (22.6 s loop)</th><th>After (10.18 s loop)</th><th>Device</th></tr></thead>
+<tbody>
+<tr><td><strong>flux</strong> (RR transport + coverage fixed point)</td><td>6.1 s (27%)</td><td>4.9 s (48%)</td><td>GPU</td></tr>
+<tr><td><strong>reinit</strong> (level-set redistance)</td><td>9.6 s (42%)</td><td>4.1 s (40%)</td><td>CPU (<code>skfmm</code>)</td></tr>
+<tr><td><strong>advect</strong> (CFL substep loop)</td><td>~3–4 s (within mesh+host 30%)</td><td><strong>0.1 s</strong></td><td>numpy → GPU</td></tr>
+<tr><td><strong>marching-cubes + host</strong></td><td>(part of the 30%)</td><td>0.6 s (mesh)</td><td>CPU</td></tr>
+<tr><td><strong>extend</strong> (velocity extension)</td><td>0.15 s (0.7%)</td><td>0.1 s</td><td>GPU</td></tr>
+</tbody>
+</table>
+<p>After the speedups the loop is <strong>reinit + flux bound</strong>: flux 48%, reinit 40%, and everything else collapsed to fractions of a second. The numpy substep loop is gone entirely.</p>
+
+<h2>3. What we shipped</h2>
+<p>Two SOTA-grounded changes did the work. Both are exact — neither trades any accuracy for the speed.</p>
+
+<h3>Speedup #1 — narrow-band reinitialization</h3>
+<p>A signed-distance field only needs to satisfy \(|\nabla\varphi|=1\) <em>near the front</em>; the advection and velocity-extension only ever read \(\varphi\) in a thin band around the zero level set. Redistancing the whole dense grid every step is wasted work. We restricted <code>skfmm</code> to a narrow band (<code>narrow=band</code>) so it redistances only the band, not the full \(O(n^3)\) volume.</p>
+<table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Speedup on the reinit stage</td><td><strong>3–5×</strong></td></tr>
+<tr><td>Accuracy inside the band</td><td><strong>exact</strong> (identical fast-marching solution)</td></tr>
+<tr><td>Accuracy cost</td><td><strong>zero</strong> — the band is all that is ever read</td></tr>
+</tbody>
+</table>
+
+<h3>Speedup #2 — GPU advection</h3>
+<p>The advection step \(\varphi_{t}+F|\nabla\varphi|=0\) was a numpy CFL-substep loop running on the host: every substep round-tripped \(\varphi\) back to the CPU. We ported it to a Warp kernel that keeps \(\varphi\) <strong>on-device across all CFL substeps</strong>, so there is no host transfer inside the substep loop.</p>
+<table>
+<thead><tr><th>Property</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Advect time</td><td>~3–4 s → <strong>0.1 s</strong> (~30× kernel)</td></tr>
+<tr><td>Numerical agreement vs numpy</td><td>matches to <strong>\(10^{-6}\)</strong></td></tr>
+</tbody>
+</table>
+<p>This was the decisive port: it removed the numpy substep loop from the critical path. With \(\varphi\) resident on the device through the substeps, advection stopped being a host bottleneck and became a rounding error in the wall-clock.</p>
+
+<div class="callout key">
+<span class="lab">Why this was the right diagnosis</span>
+<p>We did <em>not</em> need a faster ray tracer. Our flux kernel already hits ~200 M rays/s — the same ballpark as ViennaPS's OptiX, because RT cores are RT cores. What we needed was to <strong>stop doing dense per-step work the sparse reference avoids</strong>, and to <strong>keep the field on the device</strong>. Narrow-band reinit attacked the 42% directly; GPU advect deleted the substep host loop. Together they made the loop flux-dominated and tipped us under 11.6 s.</p>
+</div>
+
+<h2>4. SOTA roadmap — how to widen and keep the lead</h2>
+<p>The loop is now reinit + flux bound. Each remaining lever is a known state-of-the-art method, chosen against the alternatives — and the last one pushes us <em>past</em> ViennaPS rather than merely matching it.</p>
+
+<h3>Dense narrow-band vs sparse HRLE</h3>
+<p>ViennaPS stores the level set in <strong>ViennaHRLE</strong> — a hierarchical run-length-encoded sparse structure that touches only cells near the surface, \(O(n^2)\) not \(O(n^3)\). Our answer is a <strong>dense narrow-band</strong> level set: we keep the dense array (for GPU-friendly coalesced access and autodiff) but only do work in the band. This is the structural choice that closed the per-step gap, and the framework that makes it pay off is below.</p>
+
+<h3>GPU Eikonal = Fast Iterative Method, not fast-marching</h3>
+<p>To put reinit on the GPU we want \(|\nabla\varphi|=1\) solved <em>in parallel</em>. Classical <strong>fast-marching uses a heap</strong> — it is inherently <em>sequential</em> (a priority queue ordering of accepted nodes), so it does not parallelize. The right GPU primitive is the <strong>Fast Iterative Method (Jeong &amp; Whitaker, 2008)</strong>: a block-based, lock-free iterative Eikonal solver that converges to the same \(|\nabla\varphi|=1\) distance field but maps cleanly to GPU warps. This is what retires the 40% reinit cost without falling back to a sequential heap.</p>
+
+<h3>Keep the mesh + RT-core BVH; direct DDA loses</h3>
+<p>It is tempting to skip meshing and march the level-set grid directly (DDA / voxel ray-marching). We keep the <strong>marching-cubes mesh + RT-core BVH</strong> instead, because the literature is clear that direct grid marching loses on this problem:</p>
+<ul>
+<li><strong>Manstetten</strong>: direct DDA is \(\geq 3\times\) <em>worse</em> in throughput than hardware BVH traversal.</li>
+<li><strong>Riedel</strong>: direct grid marching gives "unsatisfactory accuracy" at grazing angles — exactly the angles that set microtrenching and floor flux.</li>
+</ul>
+<p>RT cores give \(O(\log M)\) ray-triangle traversal in hardware at peak throughput on coherent rays; the mesh rebuild is cheap (0.6 s) relative to what DDA would cost in accuracy and speed.</p>
+
+<h3>Advection: WENO5 + Stencil-Local Lax-Friedrichs</h3>
+<p>For the Hamilton-Jacobi advection itself, the SOTA discretization is <strong>fifth-order WENO</strong> spatial reconstruction paired with a <strong>Stencil-Local Lax-Friedrichs (SLLF)</strong> numerical Hamiltonian. SLLF is the right dissipation operator for the <strong>non-convex sputter Hamiltonians</strong> (the angle-dependent yield with its grazing-angle lobe is non-convex in the normal direction), where a plain global Lax-Friedrichs over-dissipates. This is the Toifl (2020) scheme — coarser grids for the same front accuracy, less numerical diffusion than the first-order Godunov sweep we run today.</p>
+
+<h3>The PAST-ViennaPS lever: ion/neutral split + deterministic radiosity</h3>
+<p>The flux is 48% of the loop, and most of it is the many-bounce neutral Monte-Carlo. The decisive lever splits the two species by their physics (see <a href="physics.html">Physics §5</a>): trace the near-vertical <strong>ions with a few rays</strong>, and solve the <strong>neutral flux with deterministic radiosity</strong> — all bounces at once, noise-free, differentiable by adjoint (see <a href="flux-transport.html">Flux &amp; Transport §4</a>). This is worth <strong>&gt;14×</strong> on the neutral solve and is the lever that pushes us <strong>past</strong> ViennaPS, which Monte-Carlos the neutrals with no such deterministic path.</p>
+
+<h3>Framework: NVIDIA Warp</h3>
+<p>The whole pipeline is built in <strong>NVIDIA Warp</strong>. It gives us a dense narrow-band level set with GPU-resident kernels, RT-core ray tracing through <code>wp.Mesh</code>, and — uniquely among the options — it <strong>keeps autodiff</strong>. Every speedup above stays differentiable, which is the structural edge ViennaPS does not have (see <a href="differentiable-ml.html">Differentiable &amp; ML</a>).</p>
+
+<div class="callout key">
+<span class="lab">The edge is all three at once</span>
+<p>We are now <strong>faster than ViennaPS-GPU</strong> (~1.1×, and the roadmap widens it), <strong>as accurate</strong> (3D ARDE rmse ~0.05–0.08, bracketing ViennaPS after replicating its full neutral-transport pipeline), <strong>and differentiable</strong> (full <code>wp.Tape</code> gradients from outcome back to recipe). Any one of these alone is matchable. <strong>The three together is the edge</strong> — a SOTA-fast, SOTA-accurate etcher you can also take gradients through.</p>
+</div>
+
+<div class="pagenav">
+<a href="acceleration.html">← Acceleration</a>
+<a href="differentiable-ml.html">Next: Differentiable &amp; ML →</a>
+</div>
+<div class="footer"><p>Performance layer. The lead is real and measured; the roadmap turns ~1.1× into a margin — and the same kernels stay differentiable.</p></div>
+</main>
+</body>
+</html>

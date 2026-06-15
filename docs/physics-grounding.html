@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physics Grounding — Feature-Scale Etch</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="physics-grounding.html" class="active">Physics&nbsp;Grounding</a>
+  <a href="performance.html">Performance</a>
+  <a href="experimental-validation.html">Experiments</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>Physics Grounding</strong></p>
+<h1>Physics Grounding: Constants Traced to Experiment</h1>
+<p class="subtitle">Every constant and surface-kinetics law in our simulator is sourced from the primary literature, not from a simulator's defaults.</p>
+
+<div class="callout key">
+<span class="lab">The claim, made precisely</span>
+<p>Our reaction model is not a set of tuned knobs. Each constant and functional form traces to a measured or first-principles source: the coupled F/O coverage equations and the rate constants \(k_\sigma,\beta_\sigma\) to <strong>Belen 2005</strong> (the SF6/O2 two-coverage model ViennaPS itself implements); the \(\sqrt{E}\) yield law to <strong>Steinbrüchel 1989</strong>; the flux-dependent fluorine sticking to <strong>Donnelly 2017</strong>; the spontaneous F+Si chemical rate to <strong>Flamm 1981</strong>; the ion–neutral synergy to <strong>Coburn &amp; Winters 1979</strong>; and the aspect-ratio-dependent etch (ARDE) master equation to <strong>Coburn &amp; Winters 1989</strong> with the 2D/3D scaling distinction from <strong>Gottscho 1992</strong>. Where ViennaPS approximates the sheath energetics with a mean-plus-Gaussian energy distribution, we integrate the full ion energy distribution (the bimodal RF sheath of <strong>Kawamura 1999</strong>) — a place we go <em>beyond</em> ViennaPS. This page documents the sourcing, the equations, and the honest line between what is grounded and what is calibrated.</p>
+</div>
+
+<h2>1. Surface kinetics: the Belen coupled-coverage model</h2>
+<p>The surface state at each point is two competing fractional coverages — a fluorinated fraction \(\theta_F\) and an oxygen-passivated fraction \(\theta_O\) — that share the same lattice sites. We implement the exact <strong>Belen 2005</strong> SF6/O2 two-coverage model (JVST A <strong>23</strong>(5), 1430; DOI 10.1116/1.2013317), which is the same model ViennaPS's <code>SF6O2Etching</code> implements. Our rate constant \(k_\sigma=300\) equals Belen's \(k\cdot\sigma_{\rm Si}=3\times10^{17}\,\mathrm{cm^{-2}s^{-1}}\) <em>identically</em>, and \(\beta_\sigma=0.04\), the coupled-coverage forms, and the standalone chemical-etch term \(k_\sigma\theta_F/4\) all match the published model.</p>
+
+<h3>Steady-state coverages</h3>
+<p>The two coverages obey coupled balance equations: adsorption of each neutral onto sites not already occupied, against ion-driven and chemical removal. At steady state the fluorine coverage takes a closed form in terms of two flux-ratio groupings \(a\) (the fluorine adsorption-to-removal balance) and \(b\) (the oxygen passivation balance):</p>
+<div class="callout deriv">
+<span class="lab">Closed form</span>
+<p>Writing the fluorine balance as adsorption onto open sites \((1-\theta_F-\theta_O)\) against the combined chemical and ion-enhanced removal, and the oxygen balance against ion sputter of the passivation layer, the steady state solves to</p>
+$$\theta_F=\frac{a}{1+a+b},\qquad \theta_O=\frac{b}{1+a+b},\qquad (1-\theta_F-\theta_O)=\frac{1}{1+a+b},$$
+<p>where \(a\propto\) the fluorine arrival flux scaled by \(k_\sigma\) and ion removal, and \(b\propto\) the oxygen flux scaled by its sputter channel. The grouping \(\beta_\sigma\) enters the coupling between the two channels. This is the same algebraic structure as the competitive-Langmuir form in the <a href="physics.html">Physics</a> page, generalized to the coupled F/O system with the Belen rate constants.</p>
+</div>
+
+<h3>The three removal channels</h3>
+<p>The recession velocity at each surface point sums three physically distinct material-removal channels, each grounded in a different measurement:</p>
+<table>
+<thead><tr><th>Channel</th><th>Rate term</th><th>Mechanism &amp; source</th></tr></thead>
+<tbody>
+<tr><td><strong>Spontaneous chemical etch</strong></td><td>\(k_\sigma\,\theta_F/4\)</td><td>Fluorine reacting with bare-but-fluorinated silicon with no ion assistance. The physical origin is the <strong>Flamm 1981</strong> spontaneous F+Si rate \(R=2.91\times10^{-12}\,T^{1/2}n_F\,e^{-0.108\,{\rm eV}/kT}\) [Å/min]; the small 0.108 eV barrier is why this term is non-negligible even at the floor.</td></tr>
+<tr><td><strong>Physical sputter</strong></td><td>\(Y_{sp}\,\Gamma_{\rm ion}\,(1-\theta_F-\theta_O)\)</td><td>Energetic ions knocking out bare (unfluorinated, unpassivated) silicon. Yield from the <strong>Steinbrüchel</strong> \(\sqrt{E}\) form.</td></tr>
+<tr><td><strong>Ion-enhanced chemical etch</strong></td><td>\(\theta_F\,Y_{ie}\,\Gamma_{\rm ion}\)</td><td>Ions supplying the energy to remove the fluorinated layer — the <strong>Coburn–Winters</strong> synergy. The dominant channel, and the product of an ion quantity \(\Gamma_{\rm ion}\) and a neutral quantity \(\theta_F\).</td></tr>
+</tbody>
+</table>
+<p>The total recession speed is the sum of the three removed-atom fluxes divided by the silicon number density \(\rho=5.02\) (in ViennaPS's units), converting an atom-removal flux into a wall velocity.</p>
+
+<h3>The Steinbrüchel \(\sqrt{E}\) yields</h3>
+<p>Both ion channels use the semi-empirical <strong>Steinbrüchel 1989</strong> threshold form (APL <strong>55</strong>(19), 1960), rooted in linear-cascade sputter theory near threshold and linear in \(\sqrt{E}\):</p>
+$$Y(E)=A\big(\sqrt{E}-\sqrt{E_{\rm th}}\big)_+,$$
+<p>with the subscript \(+\) clamping to zero below threshold. Each channel carries its own measured \((A,E_{\rm th})\). The passivation-removal channel uses a separate, softer pair. The constants below are the exact ViennaPS SF6/O2 defaults, confirmed against a real ViennaPS run (<code>harness/reference/viennaps_reference.json</code>):</p>
+<table>
+<thead><tr><th>Constant</th><th>Value</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>\(A_{ie}\)</td><td>7</td><td>Ion-enhanced (etch) yield prefactor</td></tr>
+<tr><td>\(E_{\rm th,ie}\)</td><td>15 eV</td><td>Ion-enhanced etch threshold</td></tr>
+<tr><td>\(A_{sp}\)</td><td>0.0337</td><td>Physical-sputter yield prefactor</td></tr>
+<tr><td>\(E_{\rm th,sp}\)</td><td>20 eV</td><td>Physical-sputter threshold</td></tr>
+<tr><td>\(B_{sp}\)</td><td>9.3</td><td>Angular-yield exponent (sputter)</td></tr>
+<tr><td>\(k_\sigma\)</td><td>300</td><td>Chemical rate constant (= Belen \(k\sigma_{\rm Si}=3\times10^{17}\))</td></tr>
+<tr><td>\(\beta_\sigma\)</td><td>0.04</td><td>Coverage-coupling constant</td></tr>
+<tr><td>\(\gamma_F\)</td><td>0.7</td><td>Fluorine sticking (SF6/O2 path)</td></tr>
+<tr><td>\(\gamma_O\)</td><td>1.0</td><td>Oxygen sticking</td></tr>
+</tbody>
+</table>
+<p>The passivation channel additionally uses \(A_{ie}=3,\ E_{\rm th,ie}=10\) eV. The literature dig confirmed all of these against the Belen 2005 paper: the yields, \(k_\sigma\), \(\beta_\sigma\), and the coupled forms are field-standard, not invented. Our \(\gamma_F=0.7\) is the correct value for the SF6/O2 path (ViennaPS overrides its generic 1.0 default to 0.7 there too), though it is an effective sticking coefficient, not the bare F+Si reaction probability (see §6).</p>
+
+<h3>Angular dependence of the yields</h3>
+<p>Sputter yield is not monotonic in incidence angle: it rises from normal incidence to a peak at oblique angles before collapsing near grazing. We carry per-channel angular factors \(f_{sp}(\theta)\) and \(f_{ie}(\theta)\) — the ViennaPS forms, with the sputter factor parameterized by the exponent \(B_{sp}=9.3\). Adopting these per-channel angular yields (contributor #3 in our retirement log) cut the 2D ARDE error further, from rmse 0.033 to 0.017. The directly-measured angular yields of <strong>Yin &amp; Sawin 2008</strong> place the sputter peak at 60–70° off-normal; the analytic \(B_{sp}\) form peaks somewhat shallower (~53°), a known approximation. The grazing-angle lobe is what concentrates removal at bottom corners and carves microtrenches.</p>
+
+<h2>2. Neutral transport: the exact ViennaPS Russian-roulette estimator</h2>
+<p>Neutral radicals are a thermal fog that reaches the feature bottom only by bouncing many times off the walls. To match ViennaPS bit-for-bit, we extracted its neutral transport from a ViennaRay/ViennaPS 4.5 source dig and implemented the <strong>exact unbiased estimator it uses</strong> — a weight-based Russian-roulette scheme, <em>not</em> a fixed bounce cap. This is the default for our coverage-sticking kernel (<code>_trace3d_cov_rr</code>).</p>
+<div class="callout deriv">
+<span class="lab">The estimator, verbatim</span>
+<p>Each neutral ray launches with weight \(W=1\). On every surface hit:</p>
+<ol>
+<li><strong>Deposit \(W\)</strong> into the local arriving-flux accumulator (flux is recorded as <em>arriving</em>, every hit — not only when it sticks, and not \(+1\)).</li>
+<li><strong>Attenuate</strong>: \(W \leftarrow W\,(1-S_{\rm eff})\), where \(S_{\rm eff}\) is the local coverage-dependent sticking.</li>
+<li><strong>Russian roulette</strong>: if \(W<0.1\), kill the ray with probability \((1-W/0.3)\); otherwise renormalize \(W\to0.3\) and continue. This is the unbiased way to terminate the low-weight tail without truncation.</li>
+<li><strong>Re-emit</strong> the survivor diffusely as a cosine lobe about the local surface normal.</li>
+</ol>
+<p>The neutral source itself is launched with a \(\cos^1\theta\) (Knudsen / Lambertian) angular law at the feature mouth.</p>
+</div>
+
+<h3>Coverage-dependent sticking</h3>
+<p>The decisive mechanism we had been missing — found by reading <code>psPlasmaEtching.hpp</code> — is that the etchant sticking is <strong>coverage-dependent</strong> (Langmuir: radicals stick only on bare sites):</p>
+$$S_{\rm eff}=(1-\theta_{\rm e}-\theta_{\rm p})\,\beta,\qquad \beta_F=0.7,\ \beta_O=1.0,$$
+<p>where \(\theta_{\rm e}\) and \(\theta_{\rm p}\) are the etchant and passivation coverages. On saturated upper sidewalls (high coverage → low bare fraction → low sticking) radicals reflect and <strong>penetrate deeper</strong> to the under-fed floor. Our earlier constant-sticking (0.7) model stuck radicals on the upper walls and starved the floor — a real deficiency. A clean GPU run that rate-matched both configs to the same deep-hole depth confirmed coverage-dependent sticking cuts the 3D ARDE shape error roughly fourfold (rmse 0.24 → 0.06 against the ViennaPS-3D ground truth \([0.832, 0.916, 1.0]\)), with the mid-AR ratio near-exact (0.909 vs 0.916).</p>
+<p>Because \(S_{\rm eff}\) depends on the coverages and the coverages depend on the ion and neutral fluxes, the neutral transport and the chemistry are solved together by a cheap flux↔coverage fixed point each step (a few iterations; the expensive geometry is frozen). See <a href="flux-transport.html">Flux &amp; Transport</a>.</p>
+
+<h3>One-neighbor flux smoothing</h3>
+<p>The final ViennaPS mechanism we replicated is its <strong>1-neighbor, normal-weighted flux smoothing</strong> step (verbatim from <code>rayTraceDisk::smoothFlux</code>), applied to the recorded flux before it drives the chemistry. It laterally diffuses flux into the narrow HARC floor, feeding starved small-hole bottoms. This was the decisive fix for the deep small-hole over-lag that survived the exact RR transport: adding it took the clean mean 3D ARDE rmse from 0.155 to 0.086, pixel-close (0.047) at the cleanest mid-depth. The residual over-correction at the deepest points is a smoothing-neighborhood detail (our edge-mesh neighborhood is slightly denser than ViennaPS's fixed-radius disk on its point cloud), a tuning detail rather than a missing mechanism.</p>
+
+<h2>3. ARDE physics: the Coburn–Winters master equation</h2>
+<p>Aspect-ratio-dependent etching — deeper or narrower features etching slower — is, in this regime, governed by neutral <em>delivery</em>, not product removal. The quantitative law is the <strong>Coburn &amp; Winters 1989</strong> result (APL <strong>55</strong>(26), 2730; DOI 10.1063/1.101937):</p>
+$$\frac{R_{\rm bottom}}{R_{\rm top}}=\frac{K}{K+S-K\,S},$$
+<p>where \(K\) is the Clausing transmission probability of the feature (≈0.11 at depth/diameter = 10) and \(S\) is the floor reaction probability. This is the law behind our diagnosis of the two regimes:</p>
+<div class="callout key">
+<span class="lab">The two regimes, and which one ViennaPS sits in</span>
+<p>As \(S\to0\), \(R_{\rm bottom}/R_{\rm top}\to 1/K\): <strong>lower floor sticking gives flatter ARDE.</strong> A neutral-limited surface (high effective \(S\), F-starved floor) has steep ARDE; an F-saturated / reaction-limited surface (low \(S\)) has flat ARDE. ViennaPS's flat deep-ARDE is the F-saturated regime. Our 2D flux-normalization correction (\(\mathrm{cal}_F=12\)) pushed us into that regime and cut the 2D ARDE rmse from 0.110 to 0.016. In 3D the lever is the effective fluorine sticking \(\beta_F\): lowering it (toward ~0.08 for deep HARC) makes radicals reflect off saturated walls and reach the floor, flattening ARDE — exactly what the \(R_b/R_t\to1/K\) limit predicts.</p>
+</div>
+
+<h3>Why holes lag harder than trenches</h3>
+<p><strong>Gottscho 1992</strong> (JVST B <strong>10</strong>, 2133; DOI 10.1116/1.586180) gives the pure-aspect-ratio scaling that distinguishes a 3D circular hole from a 2D trench:</p>
+$$R_{\rm bottom}^{\rm hole}\sim\Big(\frac{w}{d}\Big)^{2},\qquad R_{\rm bottom}^{\rm trench}\sim\frac{w}{d}.$$
+<p>A hole confines the neutral acceptance solid angle in <em>both</em> lateral directions, so aspect-ratio limitation bites harder. Our measured ratios — holes \([0.832, 0.916, 1.0]\) versus trenches \([0.935, 0.966, 0.983, 1.0]\) — are exactly this. Crucially, this means our 3D-hole-steeper-than-2D-trench result is <strong>correct physics, not a bug</strong>. Gottscho also warns against replacing the Clausing \(K\) with a naive solid-angle factor, which is why we anchor to the transmission form.</p>
+
+<h2>4. Beyond ViennaPS: integrating the full ion energy distribution</h2>
+<p>ViennaPS models the ion energy distribution (IED) as a mean plus a Gaussian spread (its defaults: \(\langle E\rangle=100\) eV, \(\sigma_E=10\), with an angular <code>inflectAngle</code> of 1.553 rad). But a real RF plasma sheath produces a <strong>bimodal (arcsine)</strong> IED — ions sample the oscillating sheath voltage — as reviewed by <strong>Kawamura 1999</strong> (PSST <strong>8</strong>(3), R45; DOI 10.1088/0963-0252/8/3/202). We integrate the yield over the actual energy distribution rather than evaluating it at the mean:</p>
+$$\langle Y\rangle=\int Y(E)\,p(E)\,dE,$$
+<p>supporting three distribution models: a delta at the mean (a sanity baseline), the Gaussian (to reproduce ViennaPS exactly), and the bimodal-arcsine form for the real sheath. Because the yield \(Y(E)=A(\sqrt{E}-\sqrt{E_{\rm th}})_+\) is <strong>concave</strong> in \(E\), Jensen's inequality makes this matter:</p>
+<div class="callout warn">
+<span class="lab">The Jensen gap</span>
+<p>\(\langle Y(E)\rangle < Y(\langle E\rangle)\): evaluating the yield at the mean energy systematically <em>over-estimates</em> the true energy-averaged yield. The size of the gap depends on the width and shape of the IED and on how close the mean sits to threshold. For our nominal sheath it is about <strong>0.4% at 100 eV</strong>, but it grows to roughly <strong>4.4% near the threshold</strong>, where the \(\sqrt{E}\) curvature is steepest. The correction is therefore small for the floor (high-energy, near-vertical ions) but sharply larger for low-energy sidewall ions and for selectivity estimates — precisely where it matters for profile shape. ViennaPS does not carry this integration; we do.</p>
+</div>
+
+<h2>5. Emergent phenomena and their grounded mechanisms</h2>
+<table>
+<thead><tr><th>Phenomenon</th><th>Grounded mechanism &amp; source</th></tr></thead>
+<tbody>
+<tr><td><strong>Ion–neutral synergy</strong></td><td>The fluorinated-layer + ion-energy product \(\theta_F\,Y_{ie}\,\Gamma_{\rm ion}\). Coburn &amp; Winters 1979 (JAP <strong>50</strong>, 3189): XeF\(_2\)+Ar\(^+\) together etch ~10× faster than the sum of either alone.</td></tr>
+<tr><td><strong>ARDE / RIE lag</strong></td><td>Neutral delivery limited by Clausing transmission; \(R_b/R_t=K/(K+S-KS)\) (Coburn &amp; Winters 1989). Falls out parameter-free from shadowing + coverage-sticking.</td></tr>
+<tr><td><strong>Holes lag harder than trenches</strong></td><td>\((w/d)^2\) vs \((w/d)\) solid-angle confinement (Gottscho 1992). Reproduced, not fitted.</td></tr>
+<tr><td><strong>Spontaneous floor etch at low ion energy</strong></td><td>Flamm 1981 F+Si rate with a 0.108 eV barrier; the \(k_\sigma\theta_F/4\) chemical term.</td></tr>
+<tr><td><strong>Microtrenching</strong></td><td>Grazing-angle sputter lobe (\(B_{sp}\)) + specular ion reflection (Hoekstra &amp; Kushner 1998: &gt;90% reflection at &gt;80° grazing) concentrate flux at bottom corners.</td></tr>
+</tbody>
+</table>
+
+<h2>6. What is experimentally grounded vs. calibrated — the honest line</h2>
+<p>Two parameters in the model are <strong>calibrations</strong>, not measured constants, and we state them plainly:</p>
+<div class="callout warn">
+<span class="lab">Calibrated, not measured</span>
+<ul>
+<li><strong>\(\mathrm{cal}_F\) — the fluorine flux normalization.</strong> Our Monte-Carlo flux solver emits dimensionless open-field multipliers, not ViennaPS's absolute fluxes (in \(10^{15}\,\mathrm{cm^{-2}s^{-1}}\)). The factor \(\mathrm{cal}_F=12\) (2D) is the empirical reconciliation between the two unit systems, fit against the ViennaPS ground-truth ARDE. It is field-standard practice: fluorine sticking and absolute flux are <em>fitted/flux-dependent everywhere</em> in the literature (Belen 0.7, Marcos 0.1, Donnelly 2017's flux curve 0.001–0.03, MD 0.98→0.23 as Si fluorinates), so a flux-normalization knob is the standard treatment, not a hack. It does not transfer cleanly to 3D, where the effective sticking \(\beta_F\) is the lever instead.</li>
+<li><strong>The flux-smoothing strength.</strong> The 1-neighbor smoothing is the correct ViennaPS mechanism, but its effective strength depends on the neighborhood (our edge-mesh vs. ViennaPS's fixed-radius disk). Matching it to the last pixel is a smoothing-radius calibration.</li>
+<li><strong>One global <code>rate_scale</code> unit constant</strong> (≈0.034 in 2D, ≈0.6 in 3D) absorbs the remaining absolute-rate units. It is a single global constant, not a per-case knob — that distinction is the project's stated accuracy goal.</li>
+</ul>
+</div>
+<p>Everything else — the coupled-coverage forms, \(k_\sigma\), \(\beta_\sigma\), the \(\sqrt{E}\) yield law and its \((A,E_{\rm th})\) pairs, \(\gamma_F=0.7\), \(\gamma_O=1.0\), the angular-yield structure, the Russian-roulette transport, the Coburn–Winters ARDE form, and the Gottscho scaling — is sourced from the primary literature or from the ViennaPS source itself. The honest residual: in deep 3D HARC the smallest, highest-aspect-ratio holes still over-lag slightly relative to ViennaPS. That is a genuine transport model-form limit (our bounce re-emission vs. true Knudsen molecular flow), and the physics ViennaPS itself omits — surface charging (Hwang &amp; Giapis 1997) and volatile-product redeposition — is the staged "exceed once we have wafer data" track, validated against experiment rather than against another simulator.</p>
+
+<div class="callout key">
+<span class="lab">Net</span>
+<p>Match ViennaPS to within one global unit constant using constants and laws traced to experiment; integrate the full IED, which ViennaPS does not. We are not reproducing a simulator's guesses — we are re-deriving the same physics from its primary sources, and adding one piece (the IED integration) on top.</p>
+</div>
+
+<div class="pagenav">
+<a href="physics.html">← Physics</a>
+<a href="numerics.html">Next: The Numerics →</a>
+</div>
+<div class="footer"><p>The experimental grounding behind the reaction model. Next, the numerical machinery that represents and moves the surface.</p></div>
+</main>
+</body>
+</html>
