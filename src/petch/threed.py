@@ -222,6 +222,37 @@ def _source3d(kind, n, Lx, Ly, z_src, sigma, sampling, rng, sd):
     return origin, dirs
 
 
+@wp.kernel
+def _gen_source(kind: int, Lx: float, Ly: float, z_src: float, sigma: float, seed: int,
+                origin: wp.array(dtype=wp.vec3), dirs: wp.array(dtype=wp.vec3)):
+    """Generate one source ray (origin on the source plane + launch direction) ON THE GPU -- kills the
+    host Sobol gen + H2D upload (the ~4.3ms/call source-gen cost). PSEUDOrandom (not QMC); matches the
+    `sampling='pseudo'` transform exactly: ion = near-vertical Gaussian tilt, neutral = cosine hemisphere."""
+    p = wp.tid()
+    st8 = wp.rand_init(seed, p)
+    origin[p] = wp.vec3(wp.randf(st8) * Lx, wp.randf(st8) * Ly, z_src)
+    if kind == 1:                                  # ion: near-vertical Gaussian
+        ax = wp.randn(st8) * sigma
+        ay = wp.randn(st8) * sigma
+        d = wp.vec3(wp.sin(ax), wp.sin(ay), -wp.cos(ax) * wp.cos(ay))
+    else:                                          # neutral: cosine-weighted hemisphere about -z
+        r1 = wp.randf(st8); r2 = wp.randf(st8)
+        ct = wp.sqrt(r1); s = wp.sqrt(1.0 - r1); ph = 6.2831853 * r2
+        d = wp.vec3(s * wp.cos(ph), s * wp.sin(ph), -ct)
+    dirs[p] = wp.normalize(d)
+
+
+def gen_source_gpu(kind, n, Lx, Ly, z_src, sigma, seed):
+    """On-device source rays -> (origin, dirs) wp.vec3 arrays, no host gen / no upload. Returns Warp
+    arrays directly (pass straight to the trace kernels)."""
+    o = wp.zeros(n, dtype=wp.vec3, device=DEVICE)
+    d = wp.zeros(n, dtype=wp.vec3, device=DEVICE)
+    wp.launch(_gen_source, dim=n, device=DEVICE,
+              inputs=[1 if kind == 'ion' else 0, float(Lx), float(Ly), float(z_src), float(sigma),
+                      int(seed), o, d])
+    return o, d
+
+
 def mc_flux_3d(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=20000, seed=0,
                sampling="pseudo", ion_reflection=False):
     """Per-face normalized flux multipliers (m_i,m_F,m_O) + mean ion cos, via Warp ray tracing."""
@@ -381,6 +412,14 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     n_smooth = int(par.get('flux_smooth', 1))
     sm_alpha = float(par.get('flux_smooth_alpha', 1.0))   # strength knob (calibrate to ViennaPS)
     use_gpu_smooth = par.get('flux_smooth_gpu', DEVICE == 'cuda')
+    use_gpu_src = par.get('gpu_source', False)     # on-device ray gen (pseudorandom, kills host source-gen+upload)
+
+    def _src(kind, n, sd, sig):
+        if use_gpu_src:
+            return gen_source_gpu(kind, n, Lx, Ly, z_src, sig, sd)
+        o, d = _source3d(kind, n, Lx, Ly, z_src, sig, sampling, rng, sd)
+        return wp.array(o, dtype=wp.vec3, device=DEVICE), wp.array(d, dtype=wp.vec3, device=DEVICE)
+
     if n_smooth > 0:
         vv = verts[faces]
         fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
@@ -396,13 +435,12 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         _smooth = lambda x: x
 
     # ions (unchanged; not coverage-dependent)
-    oi, di = _source3d('ion', n_ion, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, seed * 9 + 1)
+    oi_w, di_w = _src('ion', n_ion, seed * 9 + 1, par['ion_ang_sigma'])
     fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
     spec = 1 if (flags is not None and getattr(flags, "ion_reflection", False)) else 0
     nre_i = 3 if spec == 1 else 0
     wp.launch(_trace3d, dim=n_ion, device=DEVICE,
-              inputs=[mesh.id, wp.array(oi, dtype=wp.vec3, device=DEVICE),
-                      wp.array(di, dtype=wp.vec3, device=DEVICE),
+              inputs=[mesh.id, oi_w, di_w,
                       1.0, int(nre_i), int(seed * 9 + 1), int(spec), 0.34, 0.8, fi, ai])
     fi = fi.numpy(); ai = ai.numpy()
     m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
@@ -411,22 +449,20 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         m_i = _smooth(m_i)
 
     def neutral(beta, bare, sd):
-        o, d = _source3d('neutral', n_neu, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, sd)
+        o_w, d_w = _src('neutral', n_neu, sd, par['ion_ang_sigma'])
         fl = wp.zeros(F, dtype=float, device=DEVICE)
         # EXACT ViennaPS transport: weighted ray + Russian roulette, no fixed bounce cap. The old
         # fixed/adaptive cap biased the deep-floor flux low (truncation); roulette is the unbiased
         # estimator ViennaPS uses (set par['cov_transport']='cap' to fall back to the capped kernel).
         if par.get('cov_transport', 'rr') == 'rr':
             wp.launch(_trace3d_cov_rr, dim=n_neu, device=DEVICE,
-                      inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
-                              wp.array(d, dtype=wp.vec3, device=DEVICE),
+                      inputs=[mesh.id, o_w, d_w,
                               wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
                               float(beta), int(sd), fl])
         else:
             nre = int(par.get('n_reemit_cov', np.clip(8.0 / max(beta, 0.02), 24, 200)))
             wp.launch(_trace3d_cov, dim=n_neu, device=DEVICE,
-                      inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
-                              wp.array(d, dtype=wp.vec3, device=DEVICE),
+                      inputs=[mesh.id, o_w, d_w,
                               wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
                               float(beta), int(nre), int(sd), fl])
         m = np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
