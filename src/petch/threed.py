@@ -942,7 +942,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
     import time
     timings = dict(flux=0.0, extend=0.0, reinit=0.0, mesh=0.0, advect=0.0, total=0.0, nsub_max=0)
     warm = getattr(flags, "warm_start_coverage", False)
-    cov_centroids = None; cov_bare = None      # previous-step coverage, for warm-starting the fixed point
+    cov_centroids = None; cov_bare = None       # previous-step coverage, for warm-starting the fixed point
     t0 = time.time()
     for step in range(n_steps):
         tm = time.time()
@@ -958,7 +958,10 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
             bi = None
             if warm and cov_bare is not None and np.all(np.isfinite(centroids)) \
                     and np.all(np.isfinite(cov_centroids)):   # seed from prev-step coverage (nearest old face)
-                _, ix = cKDTree(cov_centroids).query(centroids)
+                # fast tree: balanced_tree/compact_nodes=False cuts BUILD, workers=-1 parallelizes QUERY
+                # (the warm-start nearest-face lookup was ~90ms/step on deep meshes -- the hidden flux cost).
+                tree = cKDTree(cov_centroids, balanced_tree=False, compact_nodes=False)
+                _, ix = tree.query(centroids, workers=-1)
                 bi = cov_bare[ix]
             m_i, m_F, m_O, cos_i, cov_bare = mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par,
                                                       n_ion=n_ion, n_neu=n_neu, seed=step,
