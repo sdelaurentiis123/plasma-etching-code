@@ -46,3 +46,16 @@ over-starves (~7x slower floor than the wafer at AR~8); RMSE 0.22 vs experiment.
 but do NOT yet match real wafers -- our ballistic transport over-predicts ARDE vs real Knudsen molecular
 flow. Path (quantified): true Knudsen transport + condition calibration (lower betaE) + charging.
 This is the honest answer to "real physics accuracy": not there yet against wafers; clear path documented.
+
+## RADIOSITY built — the de Boer gap was MC under-sampling; we now BRACKET the real wafer
+- de Boer betaE sweep: lowering betaE does NOT fix the over-starvation (RMSE 0.19-0.25, ~0.13 at AR10 vs
+  wafer 0.43). Ray-count test: 30k->120k rays lifted AR10 rate 0.129->0.205 -> it's MC UNDER-SAMPLING of
+  the deep floor, not a transport-model error.
+- Built **deterministic radiosity neutral flux** (`mc_flux_3d_radiosity`, flags.neutral_transport='radiosity'):
+  form-factor matrix by single-bounce ray casting + exact multi-bounce linear solve -> the deep floor gets
+  its true conductance flux with NO under-sampling. Same build the SOTA research flagged as the speed lever.
+- Result vs de Boer wafer: radiosity reaches AR=33 (vs MC's 10) and lands in the gentle-ARDE regime, BUT
+  over-corrects (1.0 at AR10 vs wafer 0.43; 0.47 at AR20 vs 0.29). So **MC too steep, radiosity too flat,
+  the real wafer is between** -- bracket-then-tune, same pattern that closed the ViennaPS gap.
+- NEXT: tune/debug the radiosity over-recirculation (or blend MC<->radiosity) to nail the de Boer ARDE.
+  Mechanism is right (deterministic conductance, differentiable); calibration isn't yet.
