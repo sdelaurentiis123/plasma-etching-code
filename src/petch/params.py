@@ -30,6 +30,11 @@ PAR = dict(
     # gives the minimum at cal_F=12 (ARDE rmse 0.110 -> 0.0165). This is the dominant fidelity
     # fix and it un-sticks 3D HARC. cal_F=1.0 recovers the uncalibrated PoC. See FINDINGS.md.
     cal_F=12.0,
+    # Ion energy distribution (IED) for yield integration. 'mean' = evaluate yields at Emean (PoC);
+    # 'gauss' = integrate over N(Emean,Esig) (matches ViennaPS); 'bimodal' = arcsine sheath IED of
+    # full width ied_dE (the REAL low-freq-bias distribution, beyond ViennaPS). See chemistry._ied_yield.
+    ied_mode='mean',
+    ied_dE=40.0,            # bimodal IED full width (eV); Delta-E ~ Vs/(f*sqrt(M)) (Kawamura 1999)
 )
 
 
