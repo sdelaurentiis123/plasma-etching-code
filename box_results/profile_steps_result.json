@@ -1,0 +1,47 @@
+{
+  "geo": {
+    "Lx": 14,
+    "Ly": 14,
+    "Lz": 24,
+    "mask_th": 2,
+    "sub_top": 18,
+    "hole": true,
+    "t_end": 3.0
+  },
+  "dx": 0.25,
+  "diam": 6.0,
+  "ns": 30,
+  "nray": 30000,
+  "result": [
+    {
+      "label": "MC neutrals (coverage_sticking, n_fp=4 -> 8 launches/step)",
+      "wall": 16.45394515991211,
+      "depth": 18.0,
+      "timings": {
+        "flux": 10.053921461105347,
+        "extend": 0.16688227653503418,
+        "reinit": 4.022539138793945,
+        "mesh": 1.625889778137207,
+        "advect": 0.20836257934570312,
+        "total": 16.18655514717102,
+        "nsub_max": 146
+      }
+    },
+    {
+      "label": "RADIOSITY neutrals (1 launch/step + sparse solve)",
+      "wall": 34.57529973983765,
+      "depth": 18.0,
+      "timings": {
+        "flux": 29.854455709457397,
+        "extend": 0.11992573738098145,
+        "reinit": 3.627462387084961,
+        "mesh": 0.4561178684234619,
+        "advect": 0.2308201789855957,
+        "total": 34.32320547103882,
+        "nsub_max": 158
+      }
+    }
+  ],
+  "radiosity_speedup": 0.4758872745491742,
+  "depth_delta": 0.0
+}

@@ -2,6 +2,28 @@
 
 Summary of what changed this session (newest first). Full detail in `FINDINGS.md`; explainers in `docs/`.
 
+## GPU campaign Wave 2: FSM reinit kills the reinit bottleneck (RTX 3090, validated + box killed)
+- **GPU Jacobi Godunov-Eikonal reinit (`reinit_fsm`, `reinit_method='fsm'`)** replaces CPU skfmm AND
+  the biased PDE `reinit_gpu`. The Godunov solve enforces |grad phi|=1 EXACTLY at the fixed point;
+  the monotone min-update is unconditionally stable (no forward-Euler blowup).
+- **Correctness (validated on the Warp CPU backend, zero box cost):** |grad phi| mean 0.988 / p95 1.049
+  (the old PDE reinit was 1.32 -- masked-front bias GONE); distance vs skfmm max 0.61 cells; contour
+  preserved 100%; full-etch depth delta 0.000um.
+- **Speed (RTX 3090, d=6 hole, 30 steps, 30k rays):** reinit line **4.03s -> 0.07s = 57.9x**; overall
+  **16.18s -> 12.30s = 1.32x**, depth identical (18.00um, accuracy-neutral). Reinit went 25% -> 0.6%
+  of the loop. The ~40% reinit bottleneck is eliminated; loop is now flux-dominated (~62%).
+- **HONEST: radiosity-as-default REFUTED for speed.** Profiler measured radiosity 0.48x (SLOWER:
+  34.6s vs 16.5s MC) at this moderate AR -- the form-factor build (F x 64 rays) + host scipy sparse
+  solve (160 matvecs) costs more than 8 GPU neutral traces. Radiosity's speed win is HARC-only (where
+  MC bounce counts explode); it stays the accuracy/deep-floor tool, not the default. Depth identical.
+- **n_fp exposed via `par['n_fp']`** (coverage fixed-point iters; each = 2 neutral launches). Sweep:
+  n_fp=3 borderline-safe (depth delta 0.25um, 1.18x), n_fp<=2 drifts (1.75-4.25um). Default stays 4.
+- Next lever (own wave, accuracy-sensitive): cut the flux work -- warm-start coverage across steps /
+  Anderson acceleration to drop n_fp, the now-dominant 62%. Box destroyed; no instances running.
+- Key research finding: Warp `mesh_query_ray` is a SOFTWARE BVH (not OptiX/RT-cores) -> headroom
+  inside Warp (cuBQL, wavefront) without losing autodiff; OptiX+SER is last-resort (breaks autodiff).
+  Full 7-wave plan in `GPU_CAMPAIGN.md`.
+
 ## Speed: now FASTER than ViennaPS-GPU (was 2x slower)
 - Same-engine d=6 hole ~9um: **ours 10.18s vs ViennaPS-GPU 11.6s** (was 22.6s -> **2.2x self-speedup**).
 - The earlier "23x faster" was a GPU-vs-CPU artifact -- corrected.

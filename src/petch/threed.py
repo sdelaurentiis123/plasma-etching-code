@@ -379,6 +379,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
 
     bare = np.ones(F)
     m_F = m_O = np.zeros(F)
+    n_fp = int(par.get('n_fp', n_fp))      # coverage fixed-point iters (each = 2 neutral MC launches)
     for it in range(n_fp):
         m_F = neutral(betaE, bare, seed * 9 + 2 + 2 * it)
         m_O = neutral(betaO, bare, seed * 9 + 3 + 2 * it)
