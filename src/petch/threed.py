@@ -448,6 +448,24 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     if n_smooth > 0:
         m_i = _smooth(m_i)
 
+    # SURFACE CHARGING (beyond ViennaPS): electrons arrive DIFFUSELY (cosine, unity sticking) so they
+    # are more geometrically shadowed in HARC than the directional ions. On a floating/insulating
+    # surface the net current -> 0, so the floor's effective ion flux is throttled toward the electron
+    # arrival rate: f = 1 - alpha*(1 - Gamma_e/Gamma_i). Applied to m_i BEFORE the coverage fixed point
+    # so charging reduces both the physical etch and the ion-enhanced coverage coupling. Hwang-Giapis 1997.
+    alpha = float(par.get('charge_alpha', 0.0))
+    if flags is not None and getattr(flags, "surface_charging", False) and alpha > 0.0:
+        oe, de = _src('neutral', n_neu, seed * 9 + 7, par['ion_ang_sigma'])   # cosine (diffuse) launch
+        fe = wp.zeros(F, dtype=float, device=DEVICE)
+        wp.launch(_trace3d_cov_rr, dim=n_neu, device=DEVICE,                    # unity sticking: bare=1, beta=1
+                  inputs=[mesh.id, oe, de, wp.array(np.ones(F, np.float32), dtype=float, device=DEVICE),
+                          1.0, int(seed * 9 + 7), fe])
+        m_e = np.clip((fe.numpy() / A) / (n_neu / A_src) * par.get('eFlux', 1.0), 0.0, 8.0)
+        if n_smooth > 0:
+            m_e = _smooth(m_e)
+        f_charge = 1.0 - alpha * (1.0 - np.clip(m_e / np.maximum(m_i, 1e-6), 0.0, 1.0))
+        m_i = m_i * f_charge
+
     def neutral(beta, bare, sd):
         o_w, d_w = _src('neutral', n_neu, sd, par['ion_ang_sigma'])
         fl = wp.zeros(F, dtype=float, device=DEVICE)

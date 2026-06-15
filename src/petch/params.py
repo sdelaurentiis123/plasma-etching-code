@@ -39,6 +39,14 @@ PAR = dict(
     # s_redep, and k_redep couples the redeposited flux back into a velocity reduction (passivation).
     s_redep=0.5,
     k_redep=1.0,
+    # Surface charging (flags.surface_charging; BEYOND ViennaPS). Electrons arrive diffusely (cosine,
+    # unity-sticking) so they are MORE geometrically shadowed in HARC than the directional ions -> the
+    # floor floats positive -> the effective floor ion flux is throttled toward the electron arrival
+    # rate (insulator current balance): f_charge = 1 - charge_alpha*(1 - Gamma_e/Gamma_i). charge_alpha
+    # in [0,1] = insulator-ness / charging strength (0 = off). Calibrated to Hwang-Giapis 1997 (floor
+    # ion current drops ~60% by aspect-ratio ~4). eFlux = electron source flux (open-field normalized).
+    charge_alpha=0.0,
+    eFlux=1.0,
 )
 
 
@@ -67,6 +75,8 @@ class Flags:
     warm_start_coverage: bool = False  # speed (accuracy-neutral): seed the coverage fixed point from the
                                        # previous step's coverage -> converges in 1-2 iters not 4 (same
                                        # fixed point). The front moves <1 cell/step so coverage barely moves.
+    surface_charging: bool = False   # BEYOND ViennaPS: differential electron/ion charging throttles the
+                                     # deep-HARC floor ion flux (Hwang-Giapis). See PAR charge_alpha/eFlux.
 
     def to_dict(self):
         return asdict(self)
