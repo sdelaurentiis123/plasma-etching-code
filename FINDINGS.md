@@ -416,3 +416,58 @@ consequences:
 to match ViennaPS-3D deep-HARC, using the Coburn-Winters `K/(K+S-KS)` form as the target relation —
 the physical version of extending `cal_F` to 3D, validated on a GPU box (deep holes, fresh ViennaPS-3D
 surfaces). Coverage-dependent sticking (already validated to cut ARDE error ~4x) becomes the 3D default.
+
+## GPU campaign — depth-resolved ViennaPS-3D parity (RTX 3090, scripts/*_3d_*.py + harness/reference)
+
+Ran the full campaign on a fresh box: depth-RESOLVED ViennaPS-3D ground truth + a calibration sweep of
+the two candidate levers (`cal_F`, then `betaE`) + a head-to-head speed benchmark. Results below;
+ViennaPS used the CPU_TRIANGLE engine (OptiX/`libnvoptix.so` absent in the container — its `gpuAvailable()`
+probe FATALLY hangs/crashes, so never call it; force the CPU engine).
+
+**ViennaPS-3D depth-resolved ground truth** (`harness/reference/viennaps_3d_depth_resolved.json`,
+holes d=3/4/6, durations 1/2/3/4.5 min). The ARDE steepens monotonically with depth exactly as Gottscho
+1992 predicts (a hole confines neutral acceptance in both lateral dims):
+
+| dur | d6 (um) | normalized ARDE [d3/d6, d4/d6, 1] |
+|---|---|---|
+| 1.0 | 3.29 | [0.899, 0.951, 1.0] |
+| 2.0 | 6.37 | [0.862, 0.933, 1.0] |
+| 3.0 | 9.24 | [0.831, 0.917, 1.0]  (reproduces the cached ground truth to 3 digits) |
+| 4.5 | 13.21 | [0.793, 0.893, 1.0] |
+
+**SPEED — we beat ViennaPS by ~23x (decisive WIN).** Same box, matched deep hole (d6~13 um): our
+differentiable Warp etcher (GPU) **15.0 s** vs ViennaPS (CPU_TRIANGLE) **351.8 s** -> **23.4x faster** —
+and that is with our reinit still on CPU (skfmm). At shallower depths the lead is ~10-16x. (Caveat:
+ViennaPS GPU/OptiX was unavailable on this box, so it is our-GPU vs ViennaPS-CPU, not same-engine.)
+
+**ACCURACY — found the right lever; substantial but not full parity (honest).**
+- `rate_scale` does NOT fix deep-HARC: our d6 PLATEAUS at ~7 um regardless of rate -> hard floor
+  starvation. (`petch_3d_match_result.json`, uncalibrated.)
+- **`cal_F` does NOT fix it either** (`cal_F_sweep_3d_result.json`): swept 12->130 (10x the 2D fix);
+  d6 stays ~7-7.5 um, ARDE stays steep. **The 2D flux-normalization fix does NOT transfer to 3D.**
+  Reason: the F flux *reaching* the conductance-shadowed deep floor is ~0, so `Gb_E = Fflux*m_F*cal_F`
+  ~ 0 * cal_F is still ~0. This REFUTES the earlier optimistic "matching ViennaPS needs only
+  flux-normalization" reframe — see corrected [[accuracy-yardstick-vs-viennaps]].
+- **`betaE` (F sticking) IS the lever** (`beta_sweep_3d_result.json`), as Coburn-Winters predicts
+  (lower floor sticking S -> radicals reflect off saturated walls, penetrate deeper -> `R_b/R_t -> 1/K`,
+  floor keeps etching, ARDE flattens). Lowering betaE 0.7 -> 0.08: max reachable d6 **7.0 -> 13.0 um**
+  (un-starves; now matches/exceeds ViennaPS's deepest), and ARDE rmse-vs-VPS **0.207 -> 0.144**. betaE
+  ~0.08 is the optimum (0.03 over-shoots). 0.08 sits within the literature F-sticking range (Donnelly
+  2017 high-flux 0.001-0.03; feature-scale fits 0.1-0.7) — defensible, and physically sensible since
+  deep 3D HARC needs more wall reflection to feed the floor.
+- **Calibrated trajectory** (`petch_3d_match_calibrated_result.json`, betaE=0.08): our holes now reach
+  14 um (ViennaPS 13.21) and track ViennaPS ARDE to **rmse ~0.11-0.12 across all four depths** (down from
+  ~0.21). BUT a residual remains — the smallest, highest-AR hole over-lags: at d6=9.24 ours d3/d6=0.65 vs
+  ViennaPS 0.831; at d6=13.21 ours 0.615 vs 0.793. Even at maximal wall reflection (betaE->0.03) our d3
+  starves more than ViennaPS.
+
+**Verdict.** Calibrated to a physically-grounded `betaE~0.08`, our 3D model now (i) **reaches full
+deep-HARC depth** (floor starvation solved) and (ii) **matches ViennaPS-3D ARDE to rmse ~0.12 across the
+depth trajectory** — close, parameter-light, but NOT exact. The residual d3 over-lag at the highest
+aspect ratios is a genuine **transport model-form limit** (our bounce re-emission vs true Knudsen
+molecular flow; plus the charging ViennaPS also omits) — exactly the physics flagged in the literature
+dig as the "exceed" track. So: **we are decisively faster (~23x) and now close on 3D accuracy; closing
+the last d3 residual needs the Knudsen-transport / charging upgrade, not another calibration knob.**
+
+NOTE: betaE=0.08 is a 3D-HARC-specific effective sticking; the global default stays betaE=0.7 (correct
+for SF6/O2 and pinned by the 2D tests). The campaign scripts set betaE per-run; do not change PAR globally.

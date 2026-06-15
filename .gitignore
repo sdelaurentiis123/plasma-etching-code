@@ -16,3 +16,4 @@ env/
 # Build / sim artifacts (cached benchmark results are checked in explicitly)
 *.log
 /tmp/
+.gstack/
