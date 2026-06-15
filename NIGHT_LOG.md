@@ -2,6 +2,20 @@
 
 Summary of what changed this session (newest first). Full detail in `FINDINGS.md`; explainers in `docs/`.
 
+## Warm-start coverage: accuracy WITHOUT speed loss (the tradeoff was an artifact) -- VALIDATED
+- Q: "no way to get the accuracy without losing speed?" A: yes -- the 8 neutral MC traces/step were
+  8 COLD restarts of the same coverage fixed point. The geometry (transport visibility) is fixed
+  within a step; only sticking changes. Seed each step from the PREVIOUS step's coverage (front moves
+  <1 cell/step) -> same converged fixed point in 1-2 iters not 4. `warm_start_coverage` flag.
+- **ACCURACY (clean 30k-ray/dx0.25 box, non-bottoming):** WARM n_fp=1 (40 neutral launches) matches the
+  cold n_fp=8 converged truth EXACTLY (mean/max 0.000um). Same-budget COLD n_fp=2 drifts 1.57um.
+  Warm n_fp=1 is MORE converged than the old cold n_fp=4 (which still under-etches). Accuracy-neutral
+  by construction. (First CPU check at 8k rays was noise-dominated/inconclusive -- needed the clean regime.)
+- **SPEED (combined w/ FSM reinit):** NEW (warm n_fp=1 + fsm GPU) vs OLD default (cold n_fp=4 + skfmm CPU):
+  **7.15s -> 3.41s = 2.09x**, depth identical 20.00um. Loop now flux-THROUGHPUT-bound (72%); reinit 3.6%.
+- Next lever: flux throughput (cuBQL BVH 1-line, wavefront, or move smoothing/coverage host-ops to GPU).
+  Hardened: warm-start skips its KDTree seed if centroids non-finite (CFL-blowup safe).
+
 ## GPU campaign Wave 2: FSM reinit kills the reinit bottleneck (RTX 3090, validated + box killed)
 - **GPU Jacobi Godunov-Eikonal reinit (`reinit_fsm`, `reinit_method='fsm'`)** replaces CPU skfmm AND
   the biased PDE `reinit_gpu`. The Godunov solve enforces |grad phi|=1 EXACTLY at the fixed point;
