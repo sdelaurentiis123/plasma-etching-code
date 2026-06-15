@@ -2,6 +2,22 @@
 
 Summary of what changed this session (newest first). Full detail in `FINDINGS.md`; explainers in `docs/`.
 
+## CUMULATIVE now 3.25x (was 2.5x): GPU source-gen + fast warm-start KDTree
+- **GPU source-gen** (`gen_source_gpu`, par['gpu_source']): origins+dirs generated in a Warp kernel,
+  kills host Sobol gen (~4.3ms/call) + upload. VALIDATED accuracy-neutral on box (depth trajectory
+  0.00um vs Sobol; pseudo-host control also 0.00 -> QMC buys nothing at 30k rays). 1.11x alone.
+- **Fast warm-start KDTree**: profiling the full stack exposed the warm-start nearest-face KDTree as
+  the hidden flux cost (~65-91ms/step on deep meshes, grows with faces). `cKDTree(balanced_tree=False,
+  compact_nodes=False)` + `query(workers=-1)` -> **65ms->18.7ms (3.5x)** on 66k faces, SAME exact
+  nearest result so warm n_fp=1 stays accuracy-exact. (Tried a grid coverage cache first: it degraded
+  the seed -> warm n_fp=1 drifted to 14um vs 20 truth -> REVERTED. Honest: grid cache is not as good
+  a seed as true nearest-face.)
+- **Clean cumulative (RTX 3090, d6 hole, dx0.25, 20 steps, 30k rays): ORIGINAL 7.80s -> FULL 2.40s =
+  3.25x, depth identical (0.00 delta).** Stack = FSM reinit + warm-start + GPU smooth + GPU source +
+  fast KDTree. Breakdown now: flux 54%, MESH 26% (marching-cubes CPU, the new #2), advect/extend/reinit small.
+- Next: mesh (marching-cubes CPU, 26%) via band-crop or GPU MC; or the device-resident-loop + CUDA-graph
+  refactor (the step-change, but large). Flux residual is the fast KDTree (~18ms) + 3x GPU smooth.
+
 ## CUMULATIVE: 2.55x faster than the pre-night default, fully accuracy-neutral
 - Clean one-box headline (RTX 3090, d=6 hole, dx0.25, 20 steps, 30k rays):
   **ORIGINAL (cold n_fp=4 + skfmm CPU + CPU smooth) 7.50s -> STACKED (warm n_fp=1 + fsm GPU +
