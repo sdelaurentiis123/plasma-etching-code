@@ -524,9 +524,10 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     # ViennaPS 1-neighbor normal-weighted flux smoothing (default on; par['flux_smooth']=0 to disable).
     n_smooth = int(par.get('flux_smooth', 1))
     sm_alpha = float(par.get('flux_smooth_alpha', 1.0))   # strength knob (calibrate to ViennaPS)
-    use_gpu_smooth = par.get('flux_smooth_gpu', DEVICE == 'cuda')
-    use_gpu_src = par.get('gpu_source', False)     # on-device ray gen (pseudorandom, kills host source-gen+upload)
-    dev = bool(par.get('device_flux', False)) and use_gpu_smooth   # device-resident normalize+smooth (kernels)
+    _cuda = DEVICE == 'cuda'                                       # GPU speedups auto-enable on CUDA
+    use_gpu_smooth = par.get('flux_smooth_gpu', _cuda)
+    use_gpu_src = par.get('gpu_source', _cuda)     # on-device ray gen (pseudorandom, kills host source-gen+upload)
+    dev = bool(par.get('device_flux', _cuda)) and use_gpu_smooth   # device-resident normalize+smooth (kernels)
 
     def _src(kind, n, sd, sig):
         if use_gpu_src:
@@ -1122,8 +1123,10 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
     import time
     timings = dict(flux=0.0, extend=0.0, reinit=0.0, mesh=0.0, advect=0.0, total=0.0, nsub_max=0)
     warm = getattr(flags, "warm_start_coverage", False)
-    gpu_ws = par.get('gpu_warmstart', False)    # GPU nearest-face warm-start (mesh_query_point vs scipy KDTree)
-    _extract = extract_mesh_3d_gpu if par.get('gpu_mesh', False) else extract_mesh_3d   # GPU marching cubes
+    _cuda = DEVICE == 'cuda'                     # GPU speedups auto-enable on CUDA, fall back on CPU (portable)
+    gpu_ws = par.get('gpu_warmstart', _cuda) and _cuda          # GPU nearest-face warm-start vs scipy KDTree
+    use_gpu_mesh = par.get('gpu_mesh', _cuda) and _cuda         # Warp MarchingCubes is CUDA-only -> guard
+    _extract = extract_mesh_3d_gpu if use_gpu_mesh else extract_mesh_3d
     cov_centroids = None; cov_bare = None       # previous-step coverage, for warm-starting the fixed point
     prev_mesh = None; prev_bare_wp = None       # previous wp.Mesh + coverage (device) for GPU warm-start
     t0 = time.time()
