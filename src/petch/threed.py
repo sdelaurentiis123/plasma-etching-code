@@ -389,7 +389,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
 
 # ----------------------------- 3D advection -----------------------------
 def advect_3d(phi, Fspeed, dx, dt):
-    """phi_t + F|grad phi| = 0, first-order upwind Godunov in 3D."""
+    """phi_t + F|grad phi| = 0, first-order upwind Godunov in 3D (F>=0 etch). NumPy reference."""
     g = np.zeros_like(phi)
     for ax in range(3):
         dm = np.zeros_like(phi); dp = np.zeros_like(phi)
@@ -400,6 +400,54 @@ def advect_3d(phi, Fspeed, dx, dt):
         dp[tuple(sl_mm)] = diff
         g += np.maximum(dm, 0)**2 + np.minimum(dp, 0)**2
     return phi - dt * Fspeed * np.sqrt(g)
+
+
+@wp.kernel
+def _advect_iter(phi: wp.array3d(dtype=float), F: wp.array3d(dtype=float),
+                 mask: wp.array3d(dtype=float), mask_phi: wp.array3d(dtype=float),
+                 out: wp.array3d(dtype=float), inv_dx: float, dt: float):
+    """One upwind-Godunov advection substep (matches advect_3d) + mask re-pin, fused. On GPU."""
+    i, j, k = wp.tid()
+    if mask[i, j, k] > 0.5:
+        out[i, j, k] = mask_phi[i, j, k]                # re-pin mask material
+        return
+    nx = phi.shape[0]; ny = phi.shape[1]; nz = phi.shape[2]
+    c = phi[i, j, k]
+    g = float(0.0)
+    dm = float(0.0); dp = float(0.0)
+    if i >= 1:
+        dm = (c - phi[i - 1, j, k]) * inv_dx
+    if i <= nx - 2:
+        dp = (phi[i + 1, j, k] - c) * inv_dx
+    g += wp.max(dm, 0.0) * wp.max(dm, 0.0) + wp.min(dp, 0.0) * wp.min(dp, 0.0)
+    dm = 0.0; dp = 0.0
+    if j >= 1:
+        dm = (c - phi[i, j - 1, k]) * inv_dx
+    if j <= ny - 2:
+        dp = (phi[i, j + 1, k] - c) * inv_dx
+    g += wp.max(dm, 0.0) * wp.max(dm, 0.0) + wp.min(dp, 0.0) * wp.min(dp, 0.0)
+    dm = 0.0; dp = 0.0
+    if k >= 1:
+        dm = (c - phi[i, j, k - 1]) * inv_dx
+    if k <= nz - 2:
+        dp = (phi[i, j, k + 1] - c) * inv_dx
+    g += wp.max(dm, 0.0) * wp.max(dm, 0.0) + wp.min(dp, 0.0) * wp.min(dp, 0.0)
+    out[i, j, k] = c - dt * F[i, j, k] * wp.sqrt(g)
+
+
+def advect_3d_gpu(phi, Fspeed, mask, mask_phi, dx, dt, nsub):
+    """All CFL substeps on the GPU: phi/F/mask stay on-device, ping-pong buffers, no per-substep CPU
+    round-trip. The advect substep loop was the dominant CPU host op after narrow-band reinit."""
+    a = wp.array(phi.astype(np.float32), dtype=float, device=DEVICE)
+    Fw = wp.array(Fspeed.astype(np.float32), dtype=float, device=DEVICE)
+    mk = wp.array(mask.astype(np.float32), dtype=float, device=DEVICE)
+    mp = wp.array(mask_phi.astype(np.float32), dtype=float, device=DEVICE)
+    b = wp.zeros_like(a)
+    inv = 1.0 / dx
+    for _ in range(nsub):
+        wp.launch(_advect_iter, dim=phi.shape, device=DEVICE, inputs=[a, Fw, mk, mp, b, inv, dt])
+        a, b = b, a
+    return a.numpy().astype(np.float64)
 
 
 def extend_velocity_3d(V, centroids, geo, band):
@@ -555,12 +603,14 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
     dt = t_end / n_steps
     band = 4 * dx
     import time
-    timings = dict(flux=0.0, extend=0.0, reinit=0.0, total=0.0)
+    timings = dict(flux=0.0, extend=0.0, reinit=0.0, mesh=0.0, advect=0.0, total=0.0, nsub_max=0)
     t0 = time.time()
     for step in range(n_steps):
+        tm = time.time()
         verts, faces, centroids, areas = extract_mesh_3d(geo['phi'], dx)
         mesh = wp.Mesh(points=wp.array(verts, dtype=wp.vec3, device=DEVICE),
                        indices=wp.array(faces.flatten(), dtype=wp.int32, device=DEVICE))
+        timings['mesh'] += time.time() - tm
         tf = time.time()
         if getattr(flags, "coverage_sticking", False):   # Langmuir coverage-dependent sticking
             m_i, m_F, m_O, cos_i = mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par,
@@ -586,9 +636,15 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         # (Russian-roulette) neutral transport feeds the floor strongly -> high surface velocity; a
         # cap of 40 (max stable Vmax~53) blew up at moderate rates -> spurious deep depth. 160 -> ~190.
         nsub = max(1, min(int(np.ceil(Vmax * dt / (0.4 * dx))), 160))
-        for _ in range(nsub):
-            geo['phi'] = advect_3d(geo['phi'], Fs, dx, dt / nsub)
-            geo['phi'][geo['mask']] = mask_phi[geo['mask']]
+        timings['nsub_max'] = max(timings['nsub_max'], nsub)
+        ta = time.time()
+        if extend == "gpu":            # all substeps on GPU (no per-substep CPU round-trip)
+            geo['phi'] = advect_3d_gpu(geo['phi'], Fs, geo['mask'], mask_phi, dx, dt / nsub, nsub)
+        else:
+            for _ in range(nsub):
+                geo['phi'] = advect_3d(geo['phi'], Fs, dx, dt / nsub)
+                geo['phi'][geo['mask']] = mask_phi[geo['mask']]
+        timings['advect'] += time.time() - ta
         # reinit_every>1 (lazy reinit) is faster but DRIFTS the result: |grad phi| deviates from
         # 1 between reinits and advect multiplies F*|grad phi|. Safe only with a proper extension
         # velocity (grad F . grad phi = 0). Keep =1 for fidelity.
