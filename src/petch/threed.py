@@ -219,6 +219,52 @@ def _trace3d_cov(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.arra
         o = hit + 1.0e-4 * n
 
 
+@wp.kernel
+def _trace3d_cov_rr(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
+                    bare: wp.array(dtype=float), beta: float, seed: int, flux: wp.array(dtype=float)):
+    """EXACT ViennaPS neutral transport: weighted ray + Russian roulette, NO fixed bounce cap.
+    Verbatim from ViennaRay rayTraceKernel.hpp + psPlasmaEtching.hpp:
+      - ray weight W starts at 1.0; DEPOSIT W into arriving flux on every hit (not +1.0);
+      - S_eff = bare*beta (bare = 1 - eCov - pCov);  W *= (1 - S_eff);  stop if W <= 0;
+      - rejection control: if W >= 0.1 always continue; else kill w.p. (1 - W/0.3), survivors W = 0.3;
+      - diffuse cosine re-emission. The fixed cap (512) is only a safety bound (roulette/escape ends it).
+    This is the UNBIASED estimator ViennaPS uses; a fixed bounce cap biases the deep-floor flux low."""
+    p = wp.tid()
+    state = wp.rand_init(seed, p)
+    o = origin[p]
+    d = dir0[p]
+    w = float(1.0)
+    for bounce in range(512):
+        q = wp.mesh_query_ray(mesh, o, d, 1.0e6)
+        if not q.result:
+            break
+        n = q.normal
+        if wp.dot(n, d) > 0.0:
+            n = -n
+        wp.atomic_add(flux, q.face, w)                  # deposit ray WEIGHT (arriving flux)
+        S = bare[q.face] * beta
+        w = w - w * S                                   # W *= (1 - S_eff)
+        if w <= 1.0e-6:
+            break
+        if w < 0.1:                                     # Russian roulette (rejection control)
+            if wp.randf(state) < (1.0 - w / 0.3):
+                break
+            w = 0.3
+        hit = o + q.t * d                               # diffuse 3D-cosine re-emission
+        a = wp.vec3(1.0, 0.0, 0.0)
+        if wp.abs(n[0]) > 0.9:
+            a = wp.vec3(0.0, 1.0, 0.0)
+        t = wp.normalize(wp.cross(a, n))
+        b = wp.cross(n, t)
+        r1 = wp.randf(state)
+        r2 = wp.randf(state)
+        ct = wp.sqrt(r1)
+        st = wp.sqrt(1.0 - r1)
+        phi = 6.2831853 * r2
+        d = st * wp.cos(phi) * t + st * wp.sin(phi) * b + ct * n
+        o = hit + 1.0e-4 * n
+
+
 def _belen_coverages(m_i, m_F, m_O, cos_i, par, flags):
     """Belen steady-state coverages theta_F, theta_O from per-face fluxes (for the fixed point)."""
     from .chemistry import _yields, angular_factors
@@ -266,17 +312,22 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     def neutral(beta, bare, sd):
         o, d = _source3d('neutral', n_neu, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, sd)
         fl = wp.zeros(F, dtype=float, device=DEVICE)
-        # Adaptive bounce cap: a radical sticks with prob S=bare*beta per hit, so the re-emission
-        # chain has mean length ~1/beta and a long tail. The tail bounces are what reach the narrow
-        # HARC floor -> truncating them under-feeds the floor and over-steepens ARDE. Capping at a
-        # fixed 24 is fine at beta~0.7 but truncates badly at the 3D-calibrated beta~0.08 (mean ~12,
-        # tail 50-100+). Scale the cap with 1/beta (par['n_reemit_cov'] overrides).
-        nre = int(par.get('n_reemit_cov', np.clip(8.0 / max(beta, 0.02), 24, 200)))
-        wp.launch(_trace3d_cov, dim=n_neu, device=DEVICE,
-                  inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
-                          wp.array(d, dtype=wp.vec3, device=DEVICE),
-                          wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
-                          float(beta), int(nre), int(sd), fl])
+        # EXACT ViennaPS transport: weighted ray + Russian roulette, no fixed bounce cap. The old
+        # fixed/adaptive cap biased the deep-floor flux low (truncation); roulette is the unbiased
+        # estimator ViennaPS uses (set par['cov_transport']='cap' to fall back to the capped kernel).
+        if par.get('cov_transport', 'rr') == 'rr':
+            wp.launch(_trace3d_cov_rr, dim=n_neu, device=DEVICE,
+                      inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
+                              wp.array(d, dtype=wp.vec3, device=DEVICE),
+                              wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
+                              float(beta), int(sd), fl])
+        else:
+            nre = int(par.get('n_reemit_cov', np.clip(8.0 / max(beta, 0.02), 24, 200)))
+            wp.launch(_trace3d_cov, dim=n_neu, device=DEVICE,
+                      inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
+                              wp.array(d, dtype=wp.vec3, device=DEVICE),
+                              wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
+                              float(beta), int(nre), int(sd), fl])
         return np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
 
     bare = np.ones(F)
@@ -471,7 +522,10 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         timings['extend'] += time.time() - te
         vmx = float(np.max(V)) if V.size else 0.0
         Vmax = max(vmx if np.isfinite(vmx) else 0.0, 1e-6)
-        nsub = max(1, min(int(np.ceil(Vmax * dt / (0.4 * dx))), 40))
+        # CFL substepping: nsub so each advect moves < 0.4*dx. Cap raised 40->160 because the exact
+        # (Russian-roulette) neutral transport feeds the floor strongly -> high surface velocity; a
+        # cap of 40 (max stable Vmax~53) blew up at moderate rates -> spurious deep depth. 160 -> ~190.
+        nsub = max(1, min(int(np.ceil(Vmax * dt / (0.4 * dx))), 160))
         for _ in range(nsub):
             geo['phi'] = advect_3d(geo['phi'], Fs, dx, dt / nsub)
             geo['phi'][geo['mask']] = mask_phi[geo['mask']]

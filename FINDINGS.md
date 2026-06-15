@@ -471,3 +471,39 @@ the last d3 residual needs the Knudsen-transport / charging upgrade, not another
 
 NOTE: betaE=0.08 is a 3D-HARC-specific effective sticking; the global default stays betaE=0.7 (correct
 for SF6/O2 and pinned by the 2D tests). The campaign scripts set betaE per-run; do not change PAR globally.
+
+## Pixel-exact push vs ViennaPS-3D — exact transport (Russian roulette) + honest residual
+
+Goal: drive the 3D ARDE match to ~0 (pixel-exact). Key reframe: ViennaPS is ALSO a ballistic
+ray-traced + coverage-sticking model (no Knudsen, no charging), so exact match needs our SETUP to
+equal ITS setup, not new physics. Worked the candidate mismatches:
+
+1. **Bounce-cap truncation (real).** Our coverage neutral kernel hard-capped re-emission at 24
+   bounces. At low betaE the chain tail (50-100+ bounces) feeds the narrow floor; truncating it
+   under-fed small holes. Made the cap adaptive (~8/beta). Plus a `max_depth_3d` metric matching
+   ViennaPS's deepest-surface-node (vs our median-center). Together these cut the depth-resolved ARDE
+   rmse from ~0.12 to **~0.05** (`harness/reference/pixel_exact_3d_result.json`).
+
+2. **Exact transport (the right fix).** A source-code dig of ViennaRay/ViennaPS 4.5 extracted the
+   EXACT neutral transport: **weight-based Russian roulette, NOT a bounce cap** — ray weight W=1,
+   DEPOSIT W on every hit (not +1), `W *= (1 - S_eff)`, and below W=0.1 kill w.p. `(1 - W/0.3)` else
+   renorm to 0.3; diffuse cosine re-emission; betaF=0.7, betaO=1.0; `S_eff=(1-eCov-pCov)*beta`; a
+   1-neighbor normal-weighted flux SMOOTHING step; cos^1 neutral source. Implemented the unbiased
+   estimator verbatim (`_trace3d_cov_rr`, default for coverage_sticking). Also fixed a CFL blowup the
+   stronger floor-feeding exposed (substep cap 40 -> 160).
+
+**HONEST RESULT — the deep residual persists even with the exact RR transport.** At betaE=0.5 the
+deep (d6~13um) ARDE is [0.566, 0.736] vs ViennaPS [0.793, 0.893] -- still too steep. And the paradox:
+ViennaPS uses HIGHER sticking (0.7) yet gets FLATTER ARDE, so it still delivers more flux to the deep
+floor than our RR transport does. So **"RR + betaE=0.7 = pixel-exact" does NOT hold on its own.** The
+remaining difference is almost certainly the pieces we have not yet replicated: (a) the **oxygen
+passivation coupling** -- ViennaPS's `(1-eCov-pCov)` means O-passivated walls reflect F MORE toward the
+floor, and our oxygen coverage balance may under-passivate; (b) the **1-neighbor flux smoothing**;
+(c) **dx=0.25 quantization** (+-1 cell noise on the ratio). Plus the RR sweep is impractically slow
+(unbounded bounces x 160 substeps x many rays -> minutes per deep etch).
+
+**State:** RR transport + CFL fix committed as genuine correctness improvements (the RR estimator IS
+what ViennaPS does). True pixel-exact is reachable but requires methodically replicating ViennaPS's
+FULL numerical pipeline -- oxygen passivation coupling + flux smoothing + finer resolution -- and a
+faster validation harness, not one more knob. Deferred as a focused build. The big wins stand: **~23x
+faster than ViennaPS; 3D ARDE rmse ~0.05** (down from 0.21 uncalibrated) with the exact transport.
