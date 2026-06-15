@@ -52,6 +52,35 @@ def extract_mesh_3d(phi, dx):
     return verts.astype(np.float32), faces.astype(np.int32), centroids, areas
 
 
+def _edge_adjacency(faces):
+    """Edge-neighbor face pairs (faces sharing an edge) -- vectorized. Returns (E,2) int array."""
+    F = len(faces)
+    e = np.sort(faces[:, [[0, 1], [1, 2], [0, 2]]].reshape(-1, 2), axis=1)   # (3F,2)
+    fid = np.repeat(np.arange(F), 3)
+    order = np.lexsort((e[:, 1], e[:, 0]))
+    e_s, fid_s = e[order], fid[order]
+    same = np.all(e_s[:-1] == e_s[1:], axis=1)
+    idx = np.where(same)[0]
+    return np.stack([fid_s[idx], fid_s[idx + 1]], axis=1)
+
+
+def smooth_flux(flux, normals, pairs, n_iter=1):
+    """ViennaPS 1-neighbor normal-weighted flux smoothing (rayTraceDisk.hpp::smoothFlux): each face
+    averaged with edge neighbors weighted by max(0, dot(n_i, n_j)), self-weight 1. Laterally diffuses
+    flux into narrow HARC floors -> flattens small-feature ARDE. Exact ViennaPS default (smoothingNeighbors=1)."""
+    if len(pairs) == 0:
+        return flux
+    out = flux.astype(np.float64).copy()
+    i, j = pairs[:, 0], pairs[:, 1]
+    w = np.maximum(0.0, np.sum(normals[i] * normals[j], axis=1))
+    for _ in range(n_iter):
+        num = out.copy(); den = np.ones(len(out))
+        np.add.at(num, i, out[j] * w); np.add.at(den, i, w)
+        np.add.at(num, j, out[i] * w); np.add.at(den, j, w)
+        out = num / den
+    return out
+
+
 # ----------------------------- Warp ray-traced flux -----------------------------
 @wp.kernel
 def _trace3d(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
@@ -295,6 +324,15 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     A_src = Lx * Ly
     A = np.maximum(areas, 0.3 * np.median(areas))
     betaE = par.get('betaE', 0.7); betaO = par.get('betaO', 1.0)
+    # ViennaPS 1-neighbor normal-weighted flux smoothing (default on; par['flux_smooth']=0 to disable).
+    n_smooth = int(par.get('flux_smooth', 1))
+    if n_smooth > 0:
+        vv = verts[faces]
+        fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
+        fn = fn / (np.linalg.norm(fn, axis=1, keepdims=True) + 1e-12)
+        pairs = _edge_adjacency(faces)
+    else:
+        fn = pairs = None
 
     # ions (unchanged; not coverage-dependent)
     oi, di = _source3d('ion', n_ion, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, seed * 9 + 1)
@@ -308,6 +346,8 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     fi = fi.numpy(); ai = ai.numpy()
     m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
     cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
+    if n_smooth > 0:
+        m_i = smooth_flux(m_i, fn, pairs, n_smooth)
 
     def neutral(beta, bare, sd):
         o, d = _source3d('neutral', n_neu, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, sd)
@@ -328,7 +368,8 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
                               wp.array(d, dtype=wp.vec3, device=DEVICE),
                               wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
                               float(beta), int(nre), int(sd), fl])
-        return np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
+        m = np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
+        return smooth_flux(m, fn, pairs, n_smooth) if n_smooth > 0 else m
 
     bare = np.ones(F)
     m_F = m_O = np.zeros(F)
