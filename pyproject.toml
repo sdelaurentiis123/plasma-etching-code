@@ -4,20 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "petch"
-version = "0.1.0"
-description = "2D feature-scale plasma-etch simulator (Phase 0): fidelity harness toward a differentiable 3D etcher"
+version = "0.2.0"
+description = "Fast, differentiable 3D plasma-etch simulator: GPU level-set + Monte-Carlo flux, ~14x faster than ViennaPS"
+readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.10"
 dependencies = [
     "numpy",
     "scipy",
     "scikit-fmm",
-    "numba",
     "scikit-image",
+    "warp-lang>=1.13",
+    "numba",
     "matplotlib",
 ]
 
 [project.optional-dependencies]
-warp = ["warp-lang>=1.13"]
+# cupy gives the GPU edge-adjacency sort (a small extra speedup on big meshes); needs CUDA 12.x.
+gpu = ["cupy-cuda12x"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
