@@ -626,7 +626,8 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         m = np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
         return _smooth(m) if n_smooth > 0 else m
 
-    n_fp = int(par.get('n_fp', n_fp))      # coverage fixed-point iters (each = 2 neutral MC launches)
+    # coverage fixed-point iters: warm-started steps (bare_init given) converge in 1; cold needs ~4.
+    n_fp = int(par.get('n_fp', 1 if bare_init is not None else 4))
     bare = np.ones(F) if bare_init is None else np.clip(np.asarray(bare_init, float), 0.0, 1.0)
     m_F = m_O = np.zeros(F)
     for it in range(n_fp):
