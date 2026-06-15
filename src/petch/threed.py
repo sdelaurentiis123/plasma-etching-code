@@ -1143,9 +1143,11 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                                               sampling=getattr(flags, "sampling", "pseudo"),
                                               ion_reflection=getattr(flags, "ion_reflection", False))
         timings['flux'] += time.time() - tf
+        trt = time.time()
         is_mask = faces_in_mask(centroids, geo, mask_th, trench_width, hole=hole)
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)
         V = np.nan_to_num(V, nan=0.0, posinf=0.0, neginf=0.0)   # guard against blowup
+        timings['rate'] = timings.get('rate', 0.0) + time.time() - trt
         if getattr(flags, "redeposition", False):    # etch-product redeposition -> sidewall passivation
             fn = _gas_normals(verts, faces, centroids, geo)
             Rf = mc_redep_3d(mesh, centroids, areas, fn, V, n_redep=n_neu,
