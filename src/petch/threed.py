@@ -78,14 +78,16 @@ def extract_mesh_3d_gpu(phi, dx):
 
 
 def _edge_adjacency(faces):
-    """Edge-neighbor face pairs (faces sharing an edge) -- vectorized. Returns (E,2) int array."""
+    """Edge-neighbor face pairs (faces sharing an edge). Single-key int64 argsort (faster than the
+    2-column lexsort on big meshes: the edge sort was ~66ms/step on 180k faces). Returns (E,2) int."""
     F = len(faces)
-    e = np.sort(faces[:, [[0, 1], [1, 2], [0, 2]]].reshape(-1, 2), axis=1)   # (3F,2)
+    e = np.sort(faces[:, [[0, 1], [1, 2], [0, 2]]].reshape(-1, 2), axis=1)   # (3F,2) sorted edges
+    nv = int(faces.max()) + 1
+    key = e[:, 0].astype(np.int64) * nv + e[:, 1]                            # encode each edge as one int64
     fid = np.repeat(np.arange(F), 3)
-    order = np.lexsort((e[:, 1], e[:, 0]))
-    e_s, fid_s = e[order], fid[order]
-    same = np.all(e_s[:-1] == e_s[1:], axis=1)
-    idx = np.where(same)[0]
+    order = np.argsort(key, kind='stable')
+    key_s = key[order]; fid_s = fid[order]
+    idx = np.where(key_s[:-1] == key_s[1:])[0]
     return np.stack([fid_s[idx], fid_s[idx + 1]], axis=1)
 
 
@@ -124,6 +126,43 @@ def _smooth_scatter(src: wp.array(dtype=float), pi: wp.array(dtype=int), pj: wp.
     wp.atomic_add(den, j, wij)
 
 
+# ---- device-resident flux kernels (keep flux on the GPU through normalize+smooth -> 1 readback/step) ----
+@wp.kernel
+def _norm_clip(fl: wp.array(dtype=float), A: wp.array(dtype=float), scale: float,
+               lo: float, hi: float, out: wp.array(dtype=float)):
+    """out = clamp((fl/A)*scale, lo, hi) -- the host np.clip((fl/A)/(n/A_src),...) on device."""
+    i = wp.tid()
+    out[i] = wp.clamp((fl[i] / A[i]) * scale, lo, hi)
+
+
+@wp.kernel
+def _div_k(num: wp.array(dtype=float), den: wp.array(dtype=float), out: wp.array(dtype=float)):
+    i = wp.tid()
+    out[i] = num[i] / wp.max(den[i], 1.0e-12)
+
+
+@wp.kernel
+def _cos_k(fl: wp.array(dtype=float), ang: wp.array(dtype=float), out: wp.array(dtype=float)):
+    i = wp.tid()
+    if fl[i] > 0.0:
+        out[i] = ang[i] / fl[i]
+    else:
+        out[i] = 0.0
+
+
+def smooth_flux_dev(src_wp, prep):
+    """Device-resident smooth: src in/out are Warp arrays (no host round-trip). num seeded = src
+    (self-weight), den = 1; one scatter, one divide -- all on device."""
+    F = src_wp.shape[0]
+    num = wp.clone(src_wp)
+    den = wp.full(F, 1.0, dtype=float, device=DEVICE)
+    wp.launch(_smooth_scatter, dim=prep['pi'].shape[0], device=DEVICE,
+              inputs=[src_wp, prep['pi'], prep['pj'], prep['ww'], num, den])
+    out = wp.zeros(F, dtype=float, device=DEVICE)
+    wp.launch(_div_k, dim=F, device=DEVICE, inputs=[num, den, out])
+    return out
+
+
 def _smooth_prep_gpu(normals, pairs):
     """Build the device edge-pair index/weight arrays for smooth_flux_gpu ONCE per step. The 3 smooth
     calls/step (m_i, m_F, m_O) share the same mesh -> same pairs/weights; caching avoids rebuilding the
@@ -133,6 +172,38 @@ def _smooth_prep_gpu(normals, pairs):
     w = np.maximum(0.0, np.sum(normals[i] * normals[j], axis=1)).astype(np.float32)
     return dict(pi=wp.array(i, dtype=int, device=DEVICE), pj=wp.array(j, dtype=int, device=DEVICE),
                 ww=wp.array(w, dtype=float, device=DEVICE))
+
+
+@wp.kernel
+def _face_normals_k(verts: wp.array(dtype=wp.vec3), faces: wp.array(dtype=int), out: wp.array(dtype=wp.vec3)):
+    """Unit face normal (cross of two edges) on the GPU -- the host np.cross over the face array was
+    ~41ms/step on 180k faces."""
+    i = wp.tid()
+    a = verts[faces[3 * i + 0]]; b = verts[faces[3 * i + 1]]; c = verts[faces[3 * i + 2]]
+    out[i] = wp.normalize(wp.cross(b - a, c - a))
+
+
+@wp.kernel
+def _edge_weights_k(fn: wp.array(dtype=wp.vec3), pi: wp.array(dtype=int), pj: wp.array(dtype=int),
+                    w: wp.array(dtype=float)):
+    """Smooth weight w[p] = max(0, dot(n_i, n_j)) on the GPU."""
+    p = wp.tid()
+    w[p] = wp.max(0.0, wp.dot(fn[pi[p]], fn[pj[p]]))
+
+
+def _smooth_prep_dev(verts, faces, pairs):
+    """Device smooth prep: face normals + edge weights computed ON THE GPU (host cross + np.sum were
+    ~55ms/step on 180k faces). Only the edge-pair indices (from the host adjacency sort) are uploaded."""
+    F = len(faces)
+    vw = wp.array(verts.astype(np.float32), dtype=wp.vec3, device=DEVICE)
+    fwp = wp.array(np.ascontiguousarray(faces).astype(np.int32).reshape(-1), dtype=int, device=DEVICE)
+    fn = wp.zeros(F, dtype=wp.vec3, device=DEVICE)
+    wp.launch(_face_normals_k, dim=F, device=DEVICE, inputs=[vw, fwp, fn])
+    pi = wp.array(np.ascontiguousarray(pairs[:, 0]).astype(np.int32), dtype=int, device=DEVICE)
+    pj = wp.array(np.ascontiguousarray(pairs[:, 1]).astype(np.int32), dtype=int, device=DEVICE)
+    ww = wp.zeros(len(pairs), dtype=float, device=DEVICE)
+    wp.launch(_edge_weights_k, dim=len(pairs), device=DEVICE, inputs=[fn, pi, pj, ww])
+    return dict(pi=pi, pj=pj, ww=ww, n=len(pairs))
 
 
 def smooth_flux_gpu(flux, normals, pairs, n_iter=1, alpha=1.0, prep=None):
@@ -438,6 +509,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     sm_alpha = float(par.get('flux_smooth_alpha', 1.0))   # strength knob (calibrate to ViennaPS)
     use_gpu_smooth = par.get('flux_smooth_gpu', DEVICE == 'cuda')
     use_gpu_src = par.get('gpu_source', False)     # on-device ray gen (pseudorandom, kills host source-gen+upload)
+    dev = bool(par.get('device_flux', False)) and use_gpu_smooth   # device-resident normalize+smooth (kernels)
 
     def _src(kind, n, sd, sig):
         if use_gpu_src:
@@ -446,18 +518,28 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         return wp.array(o, dtype=wp.vec3, device=DEVICE), wp.array(d, dtype=wp.vec3, device=DEVICE)
 
     if n_smooth > 0:
-        vv = verts[faces]
-        fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
-        fn = fn / (np.linalg.norm(fn, axis=1, keepdims=True) + 1e-12)
         pairs = _edge_adjacency(faces)
-        if use_gpu_smooth:                       # build edge pairs/weights ONCE per step (3 smooth calls share them)
-            _prep = _smooth_prep_gpu(fn, pairs)
-            _smooth = lambda x: smooth_flux_gpu(x, fn, pairs, n_smooth, sm_alpha, prep=_prep)
+        if use_gpu_smooth:                       # normals + weights ON GPU (host cross was ~41ms/step on big meshes)
+            _prep = _smooth_prep_dev(verts, faces, pairs)
+            _smooth = lambda x: smooth_flux_gpu(x, None, pairs, n_smooth, sm_alpha, prep=_prep)
         else:
+            vv = verts[faces]
+            fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
+            fn = fn / (np.linalg.norm(fn, axis=1, keepdims=True) + 1e-12)
             _smooth = lambda x: smooth_flux(x, fn, pairs, n_smooth, sm_alpha)
     else:
-        fn = pairs = None
+        pairs = None
         _smooth = lambda x: x
+
+    A_wp = wp.array(A.astype(np.float32), dtype=float, device=DEVICE) if dev else None
+
+    def _finish(fl_wp, scale, hi):
+        """Device-resident: normalize (clamp((fl/A)*scale,0,hi)) + smooth, all on GPU -> host (1 readback)."""
+        m_wp = wp.zeros(F, dtype=float, device=DEVICE)
+        wp.launch(_norm_clip, dim=F, device=DEVICE, inputs=[fl_wp, A_wp, float(scale), 0.0, float(hi), m_wp])
+        if n_smooth > 0:
+            m_wp = smooth_flux_dev(m_wp, _prep)
+        return m_wp.numpy()
 
     # ions (unchanged; not coverage-dependent)
     oi_w, di_w = _src('ion', n_ion, seed * 9 + 1, par['ion_ang_sigma'])
@@ -467,11 +549,17 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     wp.launch(_trace3d, dim=n_ion, device=DEVICE,
               inputs=[mesh.id, oi_w, di_w,
                       1.0, int(nre_i), int(seed * 9 + 1), int(spec), 0.34, 0.8, fi, ai])
-    fi = fi.numpy(); ai = ai.numpy()
-    m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
-    cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
-    if n_smooth > 0:
-        m_i = _smooth(m_i)
+    if dev:
+        cw = wp.zeros(F, dtype=float, device=DEVICE)
+        wp.launch(_cos_k, dim=F, device=DEVICE, inputs=[fi, ai, cw])
+        cos_i = cw.numpy()
+        m_i = _finish(fi, A_src / n_ion, 1.5)          # cos from RAW fi/ai; m_i normalized+smoothed
+    else:
+        fi = fi.numpy(); ai = ai.numpy()
+        m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
+        cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
+        if n_smooth > 0:
+            m_i = _smooth(m_i)
 
     # SURFACE CHARGING (beyond ViennaPS): electrons arrive DIFFUSELY (cosine, unity sticking) so they
     # are more geometrically shadowed in HARC than the directional ions. On a floating/insulating
@@ -515,6 +603,8 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
                       inputs=[mesh.id, o_w, d_w,
                               wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
                               float(beta), int(nre), int(sd), fl])
+        if dev:
+            return _finish(fl, A_src / n_neu, 8.0)     # device normalize+smooth, 1 readback
         m = np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
         return _smooth(m) if n_smooth > 0 else m
 
