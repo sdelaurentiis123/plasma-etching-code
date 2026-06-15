@@ -1,0 +1,8 @@
+{
+  "vps_engine": "GPU_TRIANGLE",
+  "vps_wall": 11.616619348526001,
+  "vps_depth": 9.300583671476597,
+  "ours_wall": 22.599637269973755,
+  "ours_depth": 9.0,
+  "speedup": 0.5140179556757767
+}

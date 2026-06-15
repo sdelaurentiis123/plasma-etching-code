@@ -562,3 +562,34 @@ transport, AND the 1-neighbor flux smoothing (the decisive small-hole fix). The 
 of ViennaPS's neutral-transport mechanisms and BRACKETS its ARDE. The last few percent to true
 pixel-exact is a **smoothing-neighborhood calibration** (edge-mesh vs disk-cloud), a tuning detail, not
 a missing mechanism. Combined with ~23x faster + differentiable, this is a strong as-good-as-SOTA result.
+
+## HONEST SPEED CORRECTION — same-engine, we are ~2x SLOWER than ViennaPS-GPU (not faster)
+
+On a 3090 where ViennaPS's GPU/OptiX engine WORKS, the clean SAME-ENGINE benchmark
+(`scripts/head_to_head_3d.py`, matched d=6 hole to ~9.3um):
+
+| | wall-clock | engine |
+|---|---|---|
+| ViennaPS | **11.6s** | GPU_TRIANGLE (OptiX) |
+| ours (Warp) | **22.6s** | GPU (Warp/RT cores) |
+
+**ours = 0.5x = ~2x SLOWER than ViennaPS-GPU.** The earlier "~23x faster" was ENTIRELY a
+GPU-vs-CPU artifact (ViennaPS-CPU was 352s) -- it is NOT a fair claim. Corrected here and in memory.
+
+**Why, and the headroom (timing breakdown of our 22.7s loop):**
+| stage | time | % | device |
+|---|---|---|---|
+| reinit (skfmm) | 9.6s | 42% | CPU |
+| marching-cubes + advect + host | 6.8s | 30% | CPU |
+| flux (RR transport + coverage fixed point) | 6.1s | 27% | GPU |
+| extend | 0.15s | 0.7% | GPU |
+
+**~72% of our time is CPU host ops** that ViennaPS runs on GPU; only 27% is actual GPU flux (and our
+flux kernel is RT-core-class, ~200M rays/s, comparable to ViennaPS). So we are slower because the loop
+is NOT GPU-resident, not because the ray tracing is slow.
+
+**Kernel roadmap to actually beat ViennaPS-GPU (quantified):** port the 72% CPU work to GPU --
+(1) reinit -> GPU fast-sweeping Eikonal (fixes the 42% + the earlier |grad| bias); (2) marching-cubes
+-> GPU, or skip meshing via DDA voxel ray-marching of the SDF; (3) advect -> Warp kernel. Eliminating
+the CPU host ops makes the loop flux-dominated (~6-8s) -> faster than ViennaPS's 11.6s. The speed lead
+is reachable but NOT yet real; today we are flux-comparable and loop-slower.
