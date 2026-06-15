@@ -64,13 +64,18 @@ def _edge_adjacency(faces):
     return np.stack([fid_s[idx], fid_s[idx + 1]], axis=1)
 
 
-def smooth_flux(flux, normals, pairs, n_iter=1):
+def smooth_flux(flux, normals, pairs, n_iter=1, alpha=1.0):
     """ViennaPS 1-neighbor normal-weighted flux smoothing (rayTraceDisk.hpp::smoothFlux): each face
     averaged with edge neighbors weighted by max(0, dot(n_i, n_j)), self-weight 1. Laterally diffuses
-    flux into narrow HARC floors -> flattens small-feature ARDE. Exact ViennaPS default (smoothingNeighbors=1)."""
-    if len(pairs) == 0:
+    flux into narrow HARC floors -> flattens small-feature ARDE.
+
+    `alpha` (0..1) is a STRENGTH knob to calibrate our (dense edge-mesh) smoothing to ViennaPS's
+    (spatial disk-radius) neighborhood: result = (1-alpha)*raw + alpha*fully_smoothed. alpha=1 is the
+    default full smoothing; lower alpha = milder. (alpha=1 + n_iter=1 = exact ViennaPS default.)"""
+    if len(pairs) == 0 or n_iter <= 0 or alpha <= 0.0:
         return flux
-    out = flux.astype(np.float64).copy()
+    raw = flux.astype(np.float64)
+    out = raw.copy()
     i, j = pairs[:, 0], pairs[:, 1]
     w = np.maximum(0.0, np.sum(normals[i] * normals[j], axis=1))
     for _ in range(n_iter):
@@ -78,7 +83,7 @@ def smooth_flux(flux, normals, pairs, n_iter=1):
         np.add.at(num, i, out[j] * w); np.add.at(den, i, w)
         np.add.at(num, j, out[i] * w); np.add.at(den, j, w)
         out = num / den
-    return out
+    return out if alpha >= 1.0 else (1.0 - alpha) * raw + alpha * out
 
 
 # ----------------------------- Warp ray-traced flux -----------------------------
@@ -326,6 +331,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     betaE = par.get('betaE', 0.7); betaO = par.get('betaO', 1.0)
     # ViennaPS 1-neighbor normal-weighted flux smoothing (default on; par['flux_smooth']=0 to disable).
     n_smooth = int(par.get('flux_smooth', 1))
+    sm_alpha = float(par.get('flux_smooth_alpha', 1.0))   # strength knob (calibrate to ViennaPS)
     if n_smooth > 0:
         vv = verts[faces]
         fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
@@ -347,7 +353,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
     cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
     if n_smooth > 0:
-        m_i = smooth_flux(m_i, fn, pairs, n_smooth)
+        m_i = smooth_flux(m_i, fn, pairs, n_smooth, sm_alpha)
 
     def neutral(beta, bare, sd):
         o, d = _source3d('neutral', n_neu, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, sd)
@@ -369,7 +375,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
                               wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
                               float(beta), int(nre), int(sd), fl])
         m = np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
-        return smooth_flux(m, fn, pairs, n_smooth) if n_smooth > 0 else m
+        return smooth_flux(m, fn, pairs, n_smooth, sm_alpha) if n_smooth > 0 else m
 
     bare = np.ones(F)
     m_F = m_O = np.zeros(F)
