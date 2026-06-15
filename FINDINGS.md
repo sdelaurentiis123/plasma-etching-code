@@ -689,3 +689,21 @@ experimental ARDE; (b) calibrate betaE / fluxes to the de Boer cryo conditions; 
 (charging) for production wafers. This is the difference between "matches a simulator" and "matches a wafer"
 -- and we now have it measured. BIG honest finding: do NOT claim real-wafer accuracy yet; we match ViennaPS,
 and over-predict ARDE vs the de Boer experiment.
+
+## de Boer over-starvation is MC UNDER-SAMPLING, not a transport error -> radiosity fixes accuracy AND speed
+
+Followed up the real-wafer gap. (1) betaE sweep vs de Boer (0.7/0.47/0.30/0.15): NONE match -- RMSE
+0.19-0.25, floor rate ~0.10-0.14 at AR10 vs wafer 0.43 (3-4x too steep) across ALL sticking, and trenches
+only reach AR~10-12. So sticking calibration does NOT fix it. (2) **Ray-count test (the key)**: at
+betaE=0.30, raising rays 30k->120k lifted the AR10 floor rate **0.129 -> 0.205** AND deepened AR_max
+11.6 -> 14.0. **So the over-starvation is largely MC UNDER-SAMPLING of the deep floor** (Clausing K~0.11
+at AR10 means few rays random-walk that deep -> the floor flux estimate is biased LOW / noisy), NOT a
+fundamental transport-model error. The RR estimator is unbiased in expectation but starved by variance
+at depth.
+
+**Unifying insight: the fix is the SAME build that beats ViennaPS on speed -- deterministic RADIOSITY
+neutral flux.** Radiosity solves the multi-bounce conductance EXACTLY (a linear solve over form factors),
+so the deep floor gets its true Knudsen-conductance flux with NO under-sampling -> matches the gentle
+experimental ARDE; and it is >14x faster than many-bounce MC neutrals (Manstetten) -> pushes PAST
+ViennaPS (whose flux is still full MC). One build closes the real-wafer ARDE gap AND the speed frontier.
+This is the next major work (3D form-factor radiosity; we have the 2D version in radiosity.py).
