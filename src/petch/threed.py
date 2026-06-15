@@ -52,6 +52,31 @@ def extract_mesh_3d(phi, dx):
     return verts.astype(np.float32), faces.astype(np.int32), centroids, areas
 
 
+_mc_cache = {}
+
+
+def extract_mesh_3d_gpu(phi, dx):
+    """GPU marching cubes via Warp's built-in MarchingCubes (~24x faster than skimage incl. readback;
+    mesh was the #2 loop cost at ~26%). Slightly different triangulation in ambiguous cubes than
+    skimage's Lewiner (~96% of the faces) -> validate WITHIN-NOISE on depth before trusting. The
+    MarchingCubes context is cached per grid shape (its kernels compile once)."""
+    nx, ny, nz = phi.shape
+    mc = _mc_cache.get((nx, ny, nz))
+    if mc is None:
+        mv = mt = nx * ny * nz // 2 + 1000
+        mc = wp.MarchingCubes(nx, ny, nz, max_verts=mv, max_tris=mt, device=DEVICE)
+        _mc_cache[(nx, ny, nz)] = mc
+    fwp = wp.array(phi.astype(np.float32), dtype=float, device=DEVICE)
+    mc.surface(fwp, 0.0)
+    verts = mc.verts.numpy().astype(np.float64) * dx      # node-index coords -> physical
+    faces = mc.indices.numpy().reshape(-1, 3)
+    v = verts[faces]
+    centroids = v.mean(axis=1)
+    cross = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
+    areas = 0.5 * np.linalg.norm(cross, axis=1)
+    return verts.astype(np.float32), faces.astype(np.int32), centroids, areas
+
+
 def _edge_adjacency(faces):
     """Edge-neighbor face pairs (faces sharing an edge) -- vectorized. Returns (E,2) int array."""
     F = len(faces)
@@ -967,11 +992,12 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
     import time
     timings = dict(flux=0.0, extend=0.0, reinit=0.0, mesh=0.0, advect=0.0, total=0.0, nsub_max=0)
     warm = getattr(flags, "warm_start_coverage", False)
+    _extract = extract_mesh_3d_gpu if par.get('gpu_mesh', False) else extract_mesh_3d   # GPU marching cubes
     cov_centroids = None; cov_bare = None       # previous-step coverage, for warm-starting the fixed point
     t0 = time.time()
     for step in range(n_steps):
         tm = time.time()
-        verts, faces, centroids, areas = extract_mesh_3d(geo['phi'], dx)
+        verts, faces, centroids, areas = _extract(geo['phi'], dx)
         mesh = wp.Mesh(points=wp.array(verts, dtype=wp.vec3, device=DEVICE),
                        indices=wp.array(faces.flatten(), dtype=wp.int32, device=DEVICE))
         timings['mesh'] += time.time() - tm
