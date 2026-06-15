@@ -99,26 +99,35 @@ def _smooth_scatter(src: wp.array(dtype=float), pi: wp.array(dtype=int), pj: wp.
     wp.atomic_add(den, j, wij)
 
 
-def smooth_flux_gpu(flux, normals, pairs, n_iter=1, alpha=1.0):
-    """GPU smooth_flux: the np.add.at edge scatter (the ~17ms/call host bottleneck on deep meshes, the
-    dominant flux-line cost after FSM+warm-start) moved to a Warp atomic-add kernel. Matches the numpy
-    smooth_flux to ~1e-5 (float32 atomics, smoothing is not precision-critical). Same signature."""
+def _smooth_prep_gpu(normals, pairs):
+    """Build the device edge-pair index/weight arrays for smooth_flux_gpu ONCE per step. The 3 smooth
+    calls/step (m_i, m_F, m_O) share the same mesh -> same pairs/weights; caching avoids rebuilding the
+    weights (host np.sum over ~100k pairs) and re-uploading pi/pj/ww on every call."""
+    i = np.ascontiguousarray(pairs[:, 0]).astype(np.int32)
+    j = np.ascontiguousarray(pairs[:, 1]).astype(np.int32)
+    w = np.maximum(0.0, np.sum(normals[i] * normals[j], axis=1)).astype(np.float32)
+    return dict(pi=wp.array(i, dtype=int, device=DEVICE), pj=wp.array(j, dtype=int, device=DEVICE),
+                ww=wp.array(w, dtype=float, device=DEVICE))
+
+
+def smooth_flux_gpu(flux, normals, pairs, n_iter=1, alpha=1.0, prep=None):
+    """GPU smooth_flux: the np.add.at edge scatter (the dominant flux-line host cost after FSM+warm) on a
+    Warp atomic-add kernel. Matches numpy smooth_flux to ~1e-5 (float32 atomics). `prep` reuses cached
+    device pairs/weights from _smooth_prep_gpu (built once/step) -> no per-call rebuild + re-upload."""
     if len(pairs) == 0 or n_iter <= 0 or alpha <= 0.0:
         return flux
     raw = flux.astype(np.float64)
     F = len(flux)
-    i = np.ascontiguousarray(pairs[:, 0]).astype(np.int32)
-    j = np.ascontiguousarray(pairs[:, 1]).astype(np.int32)
-    w = np.maximum(0.0, np.sum(normals[i] * normals[j], axis=1)).astype(np.float32)
-    pi = wp.array(i, dtype=int, device=DEVICE); pj = wp.array(j, dtype=int, device=DEVICE)
-    ww = wp.array(w, dtype=float, device=DEVICE)
+    if prep is None:
+        prep = _smooth_prep_gpu(normals, pairs)
+    pi, pj, ww = prep['pi'], prep['pj'], prep['ww']
     out = raw.copy()
     for _ in range(n_iter):
         of = out.astype(np.float32)
         src = wp.array(of, dtype=float, device=DEVICE)
         num = wp.array(of.copy(), dtype=float, device=DEVICE)               # seed num=src (self-weight)
         den = wp.array(np.ones(F, np.float32), dtype=float, device=DEVICE)  # seed den=1
-        wp.launch(_smooth_scatter, dim=len(i), device=DEVICE, inputs=[src, pi, pj, ww, num, den])
+        wp.launch(_smooth_scatter, dim=pi.shape[0], device=DEVICE, inputs=[src, pi, pj, ww, num, den])
         out = (num.numpy() / np.maximum(den.numpy(), 1e-12)).astype(np.float64)
     return out if alpha >= 1.0 else (1.0 - alpha) * raw + alpha * out
 
@@ -371,14 +380,20 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     # ViennaPS 1-neighbor normal-weighted flux smoothing (default on; par['flux_smooth']=0 to disable).
     n_smooth = int(par.get('flux_smooth', 1))
     sm_alpha = float(par.get('flux_smooth_alpha', 1.0))   # strength knob (calibrate to ViennaPS)
-    _smooth = smooth_flux_gpu if par.get('flux_smooth_gpu', DEVICE == 'cuda') else smooth_flux
+    use_gpu_smooth = par.get('flux_smooth_gpu', DEVICE == 'cuda')
     if n_smooth > 0:
         vv = verts[faces]
         fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
         fn = fn / (np.linalg.norm(fn, axis=1, keepdims=True) + 1e-12)
         pairs = _edge_adjacency(faces)
+        if use_gpu_smooth:                       # build edge pairs/weights ONCE per step (3 smooth calls share them)
+            _prep = _smooth_prep_gpu(fn, pairs)
+            _smooth = lambda x: smooth_flux_gpu(x, fn, pairs, n_smooth, sm_alpha, prep=_prep)
+        else:
+            _smooth = lambda x: smooth_flux(x, fn, pairs, n_smooth, sm_alpha)
     else:
         fn = pairs = None
+        _smooth = lambda x: x
 
     # ions (unchanged; not coverage-dependent)
     oi, di = _source3d('ion', n_ion, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, seed * 9 + 1)
@@ -393,7 +408,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
     cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
     if n_smooth > 0:
-        m_i = _smooth(m_i, fn, pairs, n_smooth, sm_alpha)
+        m_i = _smooth(m_i)
 
     def neutral(beta, bare, sd):
         o, d = _source3d('neutral', n_neu, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, sd)
@@ -415,7 +430,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
                               wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
                               float(beta), int(nre), int(sd), fl])
         m = np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
-        return _smooth(m, fn, pairs, n_smooth, sm_alpha) if n_smooth > 0 else m
+        return _smooth(m) if n_smooth > 0 else m
 
     n_fp = int(par.get('n_fp', n_fp))      # coverage fixed-point iters (each = 2 neutral MC launches)
     bare = np.ones(F) if bare_init is None else np.clip(np.asarray(bare_init, float), 0.0, 1.0)
