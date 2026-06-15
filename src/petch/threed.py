@@ -417,9 +417,7 @@ def mc_flux_3d_radiosity(mesh, verts, faces, centroids, areas, geo, par, n_ion=2
     z_src = Lz - geo['dx']; A_src = Lx * Ly
     A = np.maximum(areas, 0.3 * np.median(areas))
     betaE = par.get('betaE', 0.7); betaO = par.get('betaO', 1.0)
-    vv = verts[faces]
-    fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
-    fn = fn / (np.linalg.norm(fn, axis=1, keepdims=True) + 1e-12)
+    fn = _gas_normals(verts, faces, centroids, geo)     # into-gas (essential for face emission)
 
     # ions: unchanged MC (directional)
     oi, di = _source3d('ion', n_ion, Lx, Ly, z_src, par['ion_ang_sigma'], 'sobol', rng, seed * 9 + 1)
@@ -648,6 +646,24 @@ def reinit_narrow(phi, dx, band):
     return out
 
 
+def _gas_normals(verts, faces, centroids, geo):
+    """Face normals oriented INTO THE GAS (phi<0 side) -- essential for face-emission ray casting
+    (radiosity form factors, redeposition). The marching-cubes cross-product normal has arbitrary sign;
+    we flip it to align with -grad(phi) (the SDF normal points toward solid, so into-gas = -grad)."""
+    vv = verts[faces]
+    fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
+    fn = fn / (np.linalg.norm(fn, axis=1, keepdims=True) + 1e-12)
+    dx = geo['dx']
+    gx, gy, gz = np.gradient(geo['phi'], dx)
+    ix = np.clip((centroids[:, 0] / dx).round().astype(int), 0, gx.shape[0] - 1)
+    iy = np.clip((centroids[:, 1] / dx).round().astype(int), 0, gx.shape[1] - 1)
+    iz = np.clip((centroids[:, 2] / dx).round().astype(int), 0, gx.shape[2] - 1)
+    into_gas = -np.stack([gx[ix, iy, iz], gy[ix, iy, iz], gz[ix, iy, iz]], axis=1)
+    flip = np.sum(fn * into_gas, axis=1) < 0.0
+    fn[flip] *= -1.0
+    return fn
+
+
 def _cosine_dirs(normals, rng):
     """Cosine-weighted hemisphere launch directions about each unit normal (diffuse emission)."""
     n = normals
@@ -740,9 +756,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)
         V = np.nan_to_num(V, nan=0.0, posinf=0.0, neginf=0.0)   # guard against blowup
         if getattr(flags, "redeposition", False):    # etch-product redeposition -> sidewall passivation
-            vv = verts[faces]
-            fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
-            fn = fn / (np.linalg.norm(fn, axis=1, keepdims=True) + 1e-12)
+            fn = _gas_normals(verts, faces, centroids, geo)
             Rf = mc_redep_3d(mesh, centroids, areas, fn, V, n_redep=n_neu,
                              s_redep=par.get('s_redep', 0.5), seed=step)
             V = np.maximum(V - par.get('k_redep', 1.0) * Rf, 0.0)   # redeposited material slows etch
