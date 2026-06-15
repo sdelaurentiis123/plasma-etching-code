@@ -21,6 +21,12 @@ from .chemistry import surface_rate
 
 wp.init()
 DEVICE = os.environ.get("PETCH_DEVICE", "cpu")   # set PETCH_DEVICE=cuda on a GPU box
+try:                                             # optional: cupy for the GPU edge-adjacency sort
+    import cupy as _cp
+    _HAS_CUPY = True
+except Exception:
+    _cp = None
+    _HAS_CUPY = False
 
 # ----------------------------- 3D geometry / level set -----------------------------
 def make_trench_3d(Lx, Ly, Lz, dx, trench_width, mask_th, sub_top, hole=False):
@@ -78,9 +84,20 @@ def extract_mesh_3d_gpu(phi, dx):
 
 
 def _edge_adjacency(faces):
-    """Edge-neighbor face pairs (faces sharing an edge). Single-key int64 argsort (faster than the
-    2-column lexsort on big meshes: the edge sort was ~66ms/step on 180k faces). Returns (E,2) int."""
+    """Edge-neighbor face pairs (faces sharing an edge). The edge sort was the #1 flux host cost
+    (~66ms/step on 180k faces). On GPU we offload the whole thing to cupy (argsort ~0.26ms); else a
+    single-key int64 argsort on host. Pair order is irrelevant (the smooth scatters symmetrically)."""
     F = len(faces)
+    if _HAS_CUPY and DEVICE == 'cuda':
+        fg = _cp.asarray(faces)
+        e = _cp.sort(fg[:, [[0, 1], [1, 2], [0, 2]]].reshape(-1, 2), axis=1)
+        nv = int(faces.max()) + 1
+        key = e[:, 0].astype(_cp.int64) * nv + e[:, 1]
+        fid = _cp.repeat(_cp.arange(F), 3)
+        order = _cp.argsort(key)
+        key_s = key[order]; fid_s = fid[order]
+        idx = _cp.where(key_s[:-1] == key_s[1:])[0]
+        return _cp.asnumpy(_cp.stack([fid_s[idx], fid_s[idx + 1]], axis=1))
     e = np.sort(faces[:, [[0, 1], [1, 2], [0, 2]]].reshape(-1, 2), axis=1)   # (3F,2) sorted edges
     nv = int(faces.max()) + 1
     key = e[:, 0].astype(np.int64) * nv + e[:, 1]                            # encode each edge as one int64

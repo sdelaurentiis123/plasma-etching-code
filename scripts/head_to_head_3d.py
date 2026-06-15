@@ -45,12 +45,14 @@ from petch import threed as t3
 GEO = dict(Lx=14, Ly=14, Lz=24, mask_th=2, sub_top=18, hole=True, t_end=3.0)
 def ours_run(rate, ns=40):
     p = dict(petch.PAR); p['rate_scale'] = rate; p['betaE'] = 0.7
+    p.update(flux_smooth_gpu=True, gpu_source=True, gpu_mesh=True, gpu_warmstart=True, device_flux=True, n_fp=1)
     t0 = time.time()
     g = t3.run_etch_3d(trench_width=DIAM, dx=DX, n_steps=ns, par=p,
-                       flags=petch.Flags(coverage_sticking=True, sampling="sobol"),
-                       n_ion=30000, n_neu=30000, reinit_method="skfmm", verbose=False, **GEO)
+                       flags=petch.Flags(coverage_sticking=True, sampling="sobol", warm_start_coverage=True),
+                       n_ion=30000, n_neu=30000, reinit_method="fsm", verbose=False, **GEO)
     return time.time() - t0, t3.center_depth_3d(g)
 
+ours_run(0.10, ns=4)   # warmup (JIT compile all GPU kernels)
 # quick rate find for ~vps_depth
 best = None
 for r in [0.04, 0.07, 0.10, 0.14]:
