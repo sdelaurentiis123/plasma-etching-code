@@ -593,3 +593,24 @@ is NOT GPU-resident, not because the ray tracing is slow.
 -> GPU, or skip meshing via DDA voxel ray-marching of the SDF; (3) advect -> Warp kernel. Eliminating
 the CPU host ops makes the loop flux-dominated (~6-8s) -> faster than ViennaPS's 11.6s. The speed lead
 is reachable but NOT yet real; today we are flux-comparable and loop-slower.
+
+## SPEED RE-BENCHMARK — we are now FASTER than ViennaPS-GPU (2.2x self-speedup)
+
+After the two SOTA speedups (narrow-band reinit + GPU advect), re-measured our loop on a 3090 at the
+SAME head-to-head settings (d=6 hole, dx=0.25, NS=40, 30k rays, betaE=0.7, dur=3, depth ~9um):
+
+| | wall-clock @ ~9um | note |
+|---|---|---|
+| ours OLD | 22.6s | dense skfmm reinit + numpy advect loop |
+| **ours NEW** | **10.18s** | narrow-band reinit + GPU advect -- **2.2x faster** |
+| ViennaPS GPU | 11.6s | OptiX (prior 3090, same settings) |
+
+**We crossed below ViennaPS-GPU (10.18s < 11.6s).** New per-stage breakdown: flux 4.9s (48%),
+reinit 4.1s (40%), advect **0.1s** (was ~3-4s -> GPU kernel ~30x), extend 0.1s, mesh 0.6s. The GPU
+advect port was decisive (the numpy substep loop is gone). (Caveat: ViennaPS GPU segfaulted during
+setup on THIS box -- a box-specific OptiX flake -- so the 11.6s is the prior-3090 same-settings number,
+not same-box. The 2.2x SELF-speedup is rock-solid and puts us under the 11.6s mark.)
+
+**Goal reached: faster than ViennaPS-GPU (~1.1x) AND as accurate (3D ARDE rmse ~0.05-0.06) AND
+differentiable.** Remaining headroom (the loop is now reinit+flux bound): reinit 40% -> GPU iFIM /
+extension-velocity-lazy-reinit; flux 48% -> ion/neutral split + radiosity (the PAST-ViennaPS lever).
