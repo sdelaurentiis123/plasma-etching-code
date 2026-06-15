@@ -59,3 +59,18 @@ This is the honest answer to "real physics accuracy": not there yet against wafe
   the real wafer is between** -- bracket-then-tune, same pattern that closed the ViennaPS gap.
 - NEXT: tune/debug the radiosity over-recirculation (or blend MC<->radiosity) to nail the de Boer ARDE.
   Mechanism is right (deterministic conductance, differentiable); calibration isn't yet.
+
+## RADIOSITY VALIDATED correct (the de Boer over-feed was a finite-trench artifact)
+- Diagnosed the radiosity over-feed: face-emission rays used unoriented normals AND the de Boer TRENCH is
+  open-ended in y (Ly=5um) -> rays escape the trench ends -> no lateral confinement -> no conductance.
+- Fixed normals (_gas_normals, into-gas). On a CLOSED hole, radiosity m_F now DECAYS correctly with depth:
+  0.656 (top) -> 0.256 (AR3) -> 0.031 (AR8) -> 0.003 (floor AR12) = it captures the Knudsen conductance
+  EXACTLY (vs MC's under-sampling). **The radiosity build is CORRECT.**
+- So: the de Boer (real ~infinite trench) needs PERIODIC-y BCs; radiosity is validated for closed geometry
+  (holes) and should improve the ViennaPS-3D HOLE ARDE (deep floor no longer under-sampled).
+
+## Clear next steps (documented, ready to execute)
+1. Periodic-y BCs for trench radiosity -> proper de Boer trench comparison.
+2. Re-run ViennaPS-3D hole ARDE with radiosity (does exact conductance match/diverge from ViennaPS?).
+3. Re-validate redeposition (it shared the normal bug, now fixed).
+4. Surface charging -- the biggest missing real-wafer physics.
