@@ -707,3 +707,26 @@ so the deep floor gets its true Knudsen-conductance flux with NO under-sampling 
 experimental ARDE; and it is >14x faster than many-bounce MC neutrals (Manstetten) -> pushes PAST
 ViennaPS (whose flux is still full MC). One build closes the real-wafer ARDE gap AND the speed frontier.
 This is the next major work (3D form-factor radiosity; we have the 2D version in radiosity.py).
+
+## Radiosity vs de Boer wafer — fixes the under-sampling, now BRACKETS the experiment (over-corrects)
+
+Ran the deterministic radiosity neutral flux on the de Boer trench (`validate_deBoer_radiosity.py`):
+
+| transport | AR_max | rate@AR10 | rate@AR20 |
+|---|---|---|---|
+| de Boer WAFER | -- | 0.43 | 0.29 |
+| MC betaE=0.47 | 10.2 | 0.056 | 0.043 |
+| **radiosity 0.47** | **33.0** | 1.00 | 0.47 |
+| radiosity 0.30 | 33.0 | 1.00 | 0.42 |
+
+**Radiosity FIXES the MC deep-floor under-sampling**: the trench now reaches AR=33 (vs MC's 10.2) and lands
+in the wafer's GENTLE-ARDE regime -- the floor is fed its true multi-bounce conductance flux, no starvation.
+**But it OVER-corrects**: ARDE onset is too late (rate=1.0 = no slowing until ~AR15 vs the wafer's 0.43 at
+AR10), then matches well at AR20 (0.47 vs 0.29). So we now **BRACKET the experiment: MC too steep
+(over-starves), radiosity too flat (over-recirculates the mid-AR floor); the real wafer sits between.**
+Huge improvement over MC's catastrophic over-starvation, with a clear path: tune the radiosity (the simple
+single-bounce form-factor + Jacobi solve over-feeds the mid floor -- likely the sky-view D under-estimate or
+the diffuse re-emission needs an angular/visibility correction), or blend MC<->radiosity, to nail the
+experimental ARDE. (Caveats: digitized wafer points are for one regime; rate-vs-AR extraction is noisy;
+cryo conditions not matched.) Net: the mechanism is right (deterministic conductance), the calibration isn't
+yet -- exactly the bracket-then-tune pattern we saw closing the ViennaPS gap.
