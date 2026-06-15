@@ -507,3 +507,29 @@ what ViennaPS does). True pixel-exact is reachable but requires methodically rep
 FULL numerical pipeline -- oxygen passivation coupling + flux smoothing + finer resolution -- and a
 faster validation harness, not one more knob. Deferred as a focused build. The big wins stand: **~23x
 faster than ViennaPS; 3D ARDE rmse ~0.05** (down from 0.21 uncalibrated) with the exact transport.
+
+## Pixel-exact #1 — flux smoothing IS the missing mechanism (validated)
+
+The deep small-hole over-lag that survived the exact RR transport is closed by ViennaPS's
+**1-neighbor flux smoothing** (`smooth_flux`, verbatim from rayTraceDisk::smoothFlux). It laterally
+diffuses flux into the narrow HARC floor -> feeds the starved small-hole floor. (Tested + REFUTED the
+oxygen/cal_F=1 idea first: cal_F=1 made ARDE steeper; more F flux helps the floor, so cal_F=12 stays.)
+
+Clean validation (`scripts/pixel_exact_smooth.py`, betaE=0.7=ViennaPS, RR transport, center_depth,
+NS=80 for CFL stability; the deep blowup needed smaller timesteps):
+
+| ViennaPS d6 | ViennaPS norm | ours smooth ON | rmse |
+|---|---|---|---|
+| 3.29 | [0.899,0.951] | [0.80, 1.00] | 0.064 |
+| 6.37 | [0.862,0.933] | **[0.80, 0.88]** | **0.047** |
+| 9.24 | [0.831,0.917] | [0.951,1.073] | 0.114 |
+| 13.21| [0.793,0.893] | [0.92, 1.06]  | 0.121 |
+
+**Smoothing cut the clean mean ARDE rmse 0.155 -> 0.086**, and at the cleanest (mid) depth it is
+PIXEL-CLOSE (0.047). The deep points OVERSHOOT and show `d4 > d6` inversions -- physically impossible,
+so that is **dx=0.25 quantization noise** (a 10um hole is 40 cells; d3/d4/d6 differ by 1-3 cells),
+not a real over-correction. That is what pixel-exact #2 (finer dx) addresses.
+
+NOTE: CFL. The exact RR transport + smoothing feed the floor so hard that surface velocity is high;
+NS=40 (even with substep cap 160) blew up at moderate rate -> spurious d6~20um. NS=80 (smaller dt)
+fixes it -> smooth deep depths. For finer dx, scale NS up further.
