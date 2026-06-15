@@ -35,6 +35,10 @@ PAR = dict(
     # full width ied_dE (the REAL low-freq-bias distribution, beyond ViennaPS). See chemistry._ied_yield.
     ied_mode='mean',
     ied_dE=40.0,            # bimodal IED full width (eV); Delta-E ~ Vs/(f*sqrt(M)) (Kawamura 1999)
+    # Redeposition (flags.redeposition): product emitted from each face ~ etch rate, sticks with
+    # s_redep, and k_redep couples the redeposited flux back into a velocity reduction (passivation).
+    s_redep=0.5,
+    k_redep=1.0,
 )
 
 
@@ -58,6 +62,7 @@ class Flags:
     transport_split: bool = False    # speedup: ion few-ray / neutral radiosity
     ion_reflection: bool = False     # contributor #4: ion specular reflection (3D)
     coverage_sticking: bool = False  # Langmuir coverage-dependent neutral sticking (3D ARDE fix)
+    redeposition: bool = False       # BEYOND ViennaPS: etch-product redeposition (sidewall passivation/taper)
 
     def to_dict(self):
         return asdict(self)

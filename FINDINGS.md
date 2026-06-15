@@ -614,3 +614,49 @@ not same-box. The 2.2x SELF-speedup is rock-solid and puts us under the 11.6s ma
 **Goal reached: faster than ViennaPS-GPU (~1.1x) AND as accurate (3D ARDE rmse ~0.05-0.06) AND
 differentiable.** Remaining headroom (the loop is now reinit+flux bound): reinit 40% -> GPU iFIM /
 extension-velocity-lazy-reinit; flux 48% -> ion/neutral split + radiosity (the PAST-ViennaPS lever).
+
+## REAL-EXPERIMENT validation targets (research dig — benchmark to wafers, not just ViennaPS)
+
+The honest reality (verified): **ViennaPS validates its SF6/O2 model against ONE dataset -- Belen 2005
+hole-etch SEMs -- by FITTING fluxes per condition** (a calibration to each SEM, not a first-principles
+prediction; pressure isn't modeled, charging isn't modeled). So "matching ViennaPS" == matching Belen's
+calibrated profiles. To claim REAL accuracy we benchmark to measured wafers. Ranked targets + numbers:
+
+**#1 Gomez/Belen/Aydil 2004 (JVST A 22, 606; DOI 10.1116/1.1710493)** -- the actual wafer data ViennaPS's
+model is built on, so it validates us AND cross-checks ViennaPS. Lam TCP9400 ICP, 800W, 25 mTorr, 80 sccm,
+SF6:O2 base 1.0, ESC 5C, bias 0..-120V. 0.35-0.5um holes in 1.2um SiO2 mask, AR up to 20. MEASURED:
+- etch rate vs pressure: ~0.8 um/min @10mTorr -> ~1.3 (peak) @25 -> ~0 @75.
+- etch rate vs bias: ~0.3 @0V -> 1.3 @-40 -> saturates ~1.7 um/min >= -120V.
+- **etch YIELD 7-8 Si/ion @ GammaF/Gammai~600 -> 9-14 @ ~1000-2400** (the cleanest ABSOLUTE target).
+- sidewall angle vs SF6:O2: >=1.29 bowed/undercut, =1.0 vertical, <=0.78 tapered (Fig.9 = canonical profile).
+- selectivity Si:SiO2 peaks >50 @25mTorr, 9 at the vertical recipe.
+- calibrated fluxes (Belen, per condition): GammaF 3-5.5e18, GammaO 0.2-1.5e18, **Gammai 1e16 const**, gF=0.7 gO=1.0.
+
+**#2 de Boer 2002 cryo RIE-lag (JMEMS 11, 385; DOI 10.1109/JMEMS.2002.800928), Fig.9** -- cleanest digitizable
+ARDE with full conditions. Oxford PL100, 600W ICP, 10 mTorr, 90 sccm SF6, Vdc -30V, cryo, SiO2 mask. Etch depth
+vs opening (1-128um) @25min: **~52um (3um) -> ~77um (>40um) plateau** (narrow ~32% shallower). Mechanistic
+backbone = **Blauw Knudsen/Clausing** (JVST B 18, 3453): R_E ~ K^AR/(K^AR+S_F-K^AR*S_F), F reaction prob
+**S_F~0.47 cryo / 0.32 ICP**; normalized ER(AR) = 1.0/0.43/0.29/0.20 @ AR 0/10/20/40. KEY: low ion flux ->
+reaction-limited (~AR-independent); high ion flux -> F-transport-limited (strong ARDE). This tests the
+aspect-ratio physics the Belen hole data alone does not.
+
+**#3 Hoekstra/Kushner 1998 microtrench (JVST B 16, 2102; DOI 10.1116/1.590135), Fig.2** -- cleanest open
+experiment+SEM for ion-reflection microtrenching (Cl2, so a mechanism check for F). Lam9400 ICP 600W/100W
+bias/10 mTorr Cl2. **Specular reflection must exceed ~90% at >80deg grazing** to reproduce the microtrenches;
+ions retain up to 99% energy at grazing. (NB: this paper, not Hwang-Giapis, is the real "specular microtrench"
+ref.) Notching/charging: Hwang-Giapis 1997 (JVST B 15, 70) Fig.17 notch depth ~50nm (1.2um) -> ~250-270nm plateau.
+
+**Fundamental F+Si chemistry (verbatim):** Flamm 1981 (JAP 52, 3633) spontaneous rate
+**R = (2.91e-12)*T^0.5*n_F*exp(-0.108eV/kT) [A/min]**, Ea=0.108 eV. Donnelly 2017: F reaction probability is
+flux-dependent, **0.03 @1e12 -> 0.001 @1e20** (~30x); ViennaPS's gF=0.7 is an effective STICKING coeff, NOT
+this reaction probability. F+SiO2 (selectivity): eps_F=1.63e-2*exp(-0.163eV/kT).
+
+**HONEST accuracy we can claim by matching #1-#3:** correct profile-shape response to chemistry (SF6:O2 ->
+taper/vertical/bow), correct ARDE/RIE-lag trend (Knudsen F-transport, reaction- vs transport-limited crossover),
+ion-reflection microtrenching morphology, reasonable absolute etch rate + yield (anchor chemical term to Flamm,
+ion-enhanced to 7-14 atoms/ion). **What still deviates from real wafers (and ViennaPS also lacks):**
+(1) CHARGING (notching, AR-dependent ion deflection -- biggest gap); (2) real bimodal IEDF tail (we now have IED,
+ViennaPS has only mean+Gaussian); (3) redeposition / SiOxFy passivation transport; (4) flux-dependent reaction
+probability; (5) absolute fluxes are FIT not predicted (feature-scale profile sim, not plasma-to-wafer).
+Bottom line: matching #1+#2 = "validated against real wafer SEMs + ARDE for shape/rate/yield/AR" -- as good as
+or better than ViennaPS demonstrates, against EXPERIMENT. To beat real production wafers: add charging + real IEDF.

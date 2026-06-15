@@ -574,6 +574,42 @@ def reinit_narrow(phi, dx, band):
     return out
 
 
+def _cosine_dirs(normals, rng):
+    """Cosine-weighted hemisphere launch directions about each unit normal (diffuse emission)."""
+    n = normals
+    a = np.where(np.abs(n[:, :1]) > 0.9, np.array([0.0, 1.0, 0.0]), np.array([1.0, 0.0, 0.0]))
+    t = np.cross(a, n); t /= (np.linalg.norm(t, axis=1, keepdims=True) + 1e-12)
+    b = np.cross(n, t)
+    u1 = rng.random(len(n)); u2 = rng.random(len(n))
+    ct = np.sqrt(u1); st = np.sqrt(1.0 - u1); ph = 2.0 * np.pi * u2
+    return (st * np.cos(ph))[:, None] * t + (st * np.sin(ph))[:, None] * b + ct[:, None] * n
+
+
+def mc_redep_3d(mesh, centroids, areas, normals, src_flux, n_redep=20000, s_redep=0.5, seed=0):
+    """Etch-product REDEPOSITION (beyond ViennaPS, which omits it). Emit product from each face in
+    proportion to its etch/sputter rate (src_flux), trace ballistically with diffuse re-emission, and
+    re-stick with probability s_redep -> redeposited flux per face. Because it re-emits and penetrates,
+    it deposits preferentially on the lower sidewalls in line-of-sight of the etching floor -> sidewall
+    passivation -> taper / top-narrowing (the Gomez SF6:O2-driven profile change). Reuses the exact RR
+    trace kernel. Returns redeposited flux density per face (subtract k_redep*this from the etch rate)."""
+    F = len(centroids)
+    w = np.maximum(src_flux * areas, 0.0)
+    tot = float(w.sum())
+    if tot <= 0.0 or F == 0:
+        return np.zeros(F)
+    rng = np.random.default_rng(seed * 7 + 5)
+    idx = rng.choice(F, size=n_redep, p=w / tot)
+    o = (centroids[idx] + 1.0e-3 * normals[idx]).astype(np.float32)
+    d = _cosine_dirs(normals[idx], rng).astype(np.float32)
+    fl = wp.zeros(F, dtype=float, device=DEVICE)
+    bare = np.ones(F, dtype=np.float32)            # product sticks anywhere it lands (S_eff = s_redep)
+    wp.launch(_trace3d_cov_rr, dim=n_redep, device=DEVICE,
+              inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
+                      wp.array(d, dtype=wp.vec3, device=DEVICE),
+                      wp.array(bare, dtype=float, device=DEVICE), float(s_redep), int(seed), fl])
+    return (fl.numpy() * (tot / n_redep)) / np.maximum(areas, 1.0e-9)
+
+
 def faces_in_mask(centroids, geo, mask_th, trench_width, hole=False):
     """Mark faces whose centroid lies in the (un-etched) mask material."""
     x, y, z = centroids[:, 0], centroids[:, 1], centroids[:, 2]
@@ -626,6 +662,13 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         is_mask = faces_in_mask(centroids, geo, mask_th, trench_width, hole=hole)
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)
         V = np.nan_to_num(V, nan=0.0, posinf=0.0, neginf=0.0)   # guard against blowup
+        if getattr(flags, "redeposition", False):    # etch-product redeposition -> sidewall passivation
+            vv = verts[faces]
+            fn = np.cross(vv[:, 1] - vv[:, 0], vv[:, 2] - vv[:, 0])
+            fn = fn / (np.linalg.norm(fn, axis=1, keepdims=True) + 1e-12)
+            Rf = mc_redep_3d(mesh, centroids, areas, fn, V, n_redep=n_neu,
+                             s_redep=par.get('s_redep', 0.5), seed=step)
+            V = np.maximum(V - par.get('k_redep', 1.0) * Rf, 0.0)   # redeposited material slows etch
         te = time.time()
         Fs = (extend_velocity_gpu(mesh, V, geo, band) if extend == "gpu"
               else extend_velocity_3d(V, centroids, geo, band))
