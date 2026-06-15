@@ -12,7 +12,13 @@ from .chemistry import surface_rate, surface_rate_langmuir
 from .levelset import advect, extend_velocity, reinit
 from .metrics import ours_profile, depth_centre, center_depth
 
+# High-level 3D API (ViennaPS-shaped). Importing api pulls in the 3D engine (threed/warp).
+from .api import Domain, SF6O2, Process, Result
+
 __all__ = [
+    # high-level 3D API (the main public interface)
+    "Domain", "SF6O2", "Process", "Result",
+    # config + low-level (full control)
     "PAR", "Flags", "DEFAULT_FLAGS", "run_etch",
     "make_trench", "extract_surface", "orient_normals", "seg_in_mask", "profile_bottom",
     "mc_flux", "_trace", "surface_rate", "surface_rate_langmuir",
@@ -20,4 +26,4 @@ __all__ = [
     "ours_profile", "depth_centre", "center_depth",
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
