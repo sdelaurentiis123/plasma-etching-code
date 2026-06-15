@@ -867,7 +867,8 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                                                         n_ion=n_ion, seed=step, flags=flags)
         elif getattr(flags, "coverage_sticking", False):   # Langmuir coverage-dependent sticking
             bi = None
-            if warm and cov_bare is not None:    # seed from prev-step coverage (nearest old face)
+            if warm and cov_bare is not None and np.all(np.isfinite(centroids)) \
+                    and np.all(np.isfinite(cov_centroids)):   # seed from prev-step coverage (nearest old face)
                 _, ix = cKDTree(cov_centroids).query(centroids)
                 bi = cov_bare[ix]
             m_i, m_F, m_O, cos_i, cov_bare = mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par,
