@@ -79,8 +79,12 @@ make_trench_3d → [ marching cubes → MC/radiosity flux → SF6O2 chemistry �
 petch includes physics ViennaPS omits, behind flags, **clearly marked experimental and not yet
 calibrated to wafer data**:
 - `redeposition` — etch-product redeposition → sidewall passivation/taper.
-- `surface_charging` — differential electron/ion charging (Hwang–Giapis). *Currently over-predicts the
-  AR rolloff; needs a better electron angular model. Off by default.*
+- `surface_charging` — differential electron/ion charging (Hwang–Giapis). *Honest status: the reduced
+  differential-shadowing model (electrons more HARC-shadowed than ions) does NOT reproduce the HG
+  floor-current rolloff at any electron angular spread — it over-throttles. HG needs the self-consistent
+  floor potential re-deflecting ions (a PIC-class field solve), not geometric shadowing. The
+  infrastructure (electron trace, charge factor, `e_ang_sigma`) is in place for that future work. Off by
+  default; the effect direction is right (throttles the floor) but it is not quantitatively calibrated.*
 - bimodal IEDF yield integration (`ied_mode`).
 
 ## Honest limitations
