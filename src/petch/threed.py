@@ -38,7 +38,8 @@ def make_trench_3d(Lx, Ly, Lz, dx, trench_width, mask_th, sub_top, hole=False):
     solid = solid | mask
     phi = skfmm.distance(np.where(solid, 1.0, -1.0), dx=dx)
     return dict(xs=xs, ys=ys, zs=zs, dx=dx, phi=phi, mask=mask,
-                Lx=Lx, Ly=Ly, Lz=Lz, sub_top=sub_top)
+                Lx=Lx, Ly=Ly, Lz=Lz, sub_top=sub_top,
+                trench_width=trench_width, hole=hole)
 
 
 def extract_mesh_3d(phi, dx):
@@ -265,11 +266,17 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     def neutral(beta, bare, sd):
         o, d = _source3d('neutral', n_neu, Lx, Ly, z_src, par['ion_ang_sigma'], sampling, rng, sd)
         fl = wp.zeros(F, dtype=float, device=DEVICE)
+        # Adaptive bounce cap: a radical sticks with prob S=bare*beta per hit, so the re-emission
+        # chain has mean length ~1/beta and a long tail. The tail bounces are what reach the narrow
+        # HARC floor -> truncating them under-feeds the floor and over-steepens ARDE. Capping at a
+        # fixed 24 is fine at beta~0.7 but truncates badly at the 3D-calibrated beta~0.08 (mean ~12,
+        # tail 50-100+). Scale the cap with 1/beta (par['n_reemit_cov'] overrides).
+        nre = int(par.get('n_reemit_cov', np.clip(8.0 / max(beta, 0.02), 24, 200)))
         wp.launch(_trace3d_cov, dim=n_neu, device=DEVICE,
                   inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
                           wp.array(d, dtype=wp.vec3, device=DEVICE),
                           wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
-                          float(beta), 24, int(sd), fl])
+                          float(beta), int(nre), int(sd), fl])
         return np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
 
     bare = np.ones(F)
@@ -511,3 +518,34 @@ def _depth3d(geo, half=1.0):
 
 def center_depth_3d(geo, half=1.0):
     return _depth3d(geo, half)
+
+
+def max_depth_3d(geo):
+    """Max etch depth = deepest etched point over the FEATURE footprint -- matches ViennaPS's
+    `-surfaceNodes[:,2].min()` (global deepest surface node), NOT the median-center of `center_depth_3d`.
+    For the smallest holes the two differ most (global-min picks the single deepest cell; median-center
+    averages a floor that fills most of the hole), which skews the normalized ARDE ratio. Use this for a
+    like-for-like comparison to ViennaPS hole depths."""
+    phi, xs, ys, zs = geo['phi'], geo['xs'], geo['ys'], geo['zs']
+    cx, cy = geo['Lx'] / 2.0, geo['Ly'] / 2.0
+    r = geo.get('trench_width', 4.0) / 2.0
+    if geo.get('hole', False):
+        ii, jj = np.where((xs[:, None] - cx) ** 2 + (ys[None, :] - cy) ** 2 <= (r + geo['dx']) ** 2)
+        cols = list(zip(ii, jj))
+    else:  # trench: footprint is the opening strip in x, all y
+        ix = np.where(np.abs(xs - cx) <= r + geo['dx'])[0]
+        cols = [(i, j) for i in ix for j in range(len(ys))]
+    floors = []
+    for i, j in cols:
+        col = phi[i, j, :] < 0
+        k = len(col) - 1
+        if not col[k]:
+            continue
+        while k > 0 and col[k - 1]:
+            k -= 1
+        floors.append(zs[k])
+    if not floors:
+        return 0.0
+    # robust "deepest": 5th-percentile floor z (reject thin level-set filaments at the footprint
+    # edge that a raw global-min would catch), matching ViennaPS's clean-surface deepest node.
+    return float(geo['sub_top'] - np.percentile(floors, 5))
