@@ -64,6 +64,9 @@ class Flags:
     coverage_sticking: bool = False  # Langmuir coverage-dependent neutral sticking (3D ARDE fix)
     redeposition: bool = False       # BEYOND ViennaPS: etch-product redeposition (sidewall passivation/taper)
     neutral_transport: str = "mc"    # "mc" (Russian-roulette MC) | "radiosity" (deterministic, exact deep-floor)
+    warm_start_coverage: bool = False  # speed (accuracy-neutral): seed the coverage fixed point from the
+                                       # previous step's coverage -> converges in 1-2 iters not 4 (same
+                                       # fixed point). The front moves <1 cell/step so coverage barely moves.
 
     def to_dict(self):
         return asdict(self)

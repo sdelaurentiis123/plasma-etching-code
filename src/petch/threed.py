@@ -319,9 +319,11 @@ def _belen_coverages(m_i, m_F, m_O, cos_i, par, flags):
 
 
 def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=20000, seed=0,
-                       sampling="pseudo", flags=None, n_fp=4):
+                       sampling="pseudo", flags=None, n_fp=4, bare_init=None):
     """Coverage-coupled flux: ions once, then a flux<->coverage fixed point with coverage-dependent
-    neutral sticking. Returns per-face (m_i, m_F, m_O, cos_i) normalized to arriving open-field=1."""
+    neutral sticking. Returns per-face (m_i, m_F, m_O, cos_i, bare); `bare` (1-thetaF-thetaO) is the
+    converged coverage so the caller can WARM-START the next step (same fixed point in 1-2 iters, not 4
+    from cold -- accuracy-neutral, the front moves <1 cell/step). `bare_init` seeds it when warm."""
     Lx, Ly, Lz = geo['Lx'], geo['Ly'], geo['Lz']
     F = len(faces)
     rng = np.random.default_rng(seed)
@@ -377,15 +379,15 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         m = np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
         return smooth_flux(m, fn, pairs, n_smooth, sm_alpha) if n_smooth > 0 else m
 
-    bare = np.ones(F)
-    m_F = m_O = np.zeros(F)
     n_fp = int(par.get('n_fp', n_fp))      # coverage fixed-point iters (each = 2 neutral MC launches)
+    bare = np.ones(F) if bare_init is None else np.clip(np.asarray(bare_init, float), 0.0, 1.0)
+    m_F = m_O = np.zeros(F)
     for it in range(n_fp):
         m_F = neutral(betaE, bare, seed * 9 + 2 + 2 * it)
         m_O = neutral(betaO, bare, seed * 9 + 3 + 2 * it)
         thF, thO = _belen_coverages(m_i, m_F, m_O, cos_i, par, flags)
         bare = np.clip(1.0 - thF - thO, 0.0, 1.0)
-    return m_i, m_F, m_O, cos_i
+    return m_i, m_F, m_O, cos_i, bare
 
 
 @wp.kernel
@@ -850,6 +852,8 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
     band = 4 * dx
     import time
     timings = dict(flux=0.0, extend=0.0, reinit=0.0, mesh=0.0, advect=0.0, total=0.0, nsub_max=0)
+    warm = getattr(flags, "warm_start_coverage", False)
+    cov_centroids = None; cov_bare = None      # previous-step coverage, for warm-starting the fixed point
     t0 = time.time()
     for step in range(n_steps):
         tm = time.time()
@@ -862,10 +866,15 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
             m_i, m_F, m_O, cos_i = mc_flux_3d_radiosity(mesh, verts, faces, centroids, areas, geo, par,
                                                         n_ion=n_ion, seed=step, flags=flags)
         elif getattr(flags, "coverage_sticking", False):   # Langmuir coverage-dependent sticking
-            m_i, m_F, m_O, cos_i = mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par,
+            bi = None
+            if warm and cov_bare is not None:    # seed from prev-step coverage (nearest old face)
+                _, ix = cKDTree(cov_centroids).query(centroids)
+                bi = cov_bare[ix]
+            m_i, m_F, m_O, cos_i, cov_bare = mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par,
                                                       n_ion=n_ion, n_neu=n_neu, seed=step,
                                                       sampling=getattr(flags, "sampling", "pseudo"),
-                                                      flags=flags)
+                                                      flags=flags, bare_init=bi)
+            cov_centroids = centroids
         else:
             m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, mc_par,
                                               n_ion=n_ion, n_neu=n_neu, seed=step,
