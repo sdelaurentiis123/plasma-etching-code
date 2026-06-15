@@ -2,6 +2,23 @@
 
 Summary of what changed this session (newest first). Full detail in `FINDINGS.md`; explainers in `docs/`.
 
+## GPU flux smoothing: profiled the flux internals, modest win (honest)
+- After FSM+warm-start the loop is flux-bound (~70%). Profiled the flux INTERNALS
+  (flux_internal_profile_3d, M1 -- host ops are device-independent): on a deep 54k-face mesh the
+  cost is HOST, not GPU traversal -- **smooth_flux 16.7ms/call** (np.add.at scatter over 80k edge
+  pairs) x3/step, source-gen 1.5ms, coverage 1.1ms. So the lever was host-op offload, NOT a faster
+  BVH (cuBQL would not have helped).
+- Shipped `smooth_flux_gpu` (Warp atomic-add scatter `_smooth_scatter`), matches numpy to 3e-7
+  (validated on the Warp CPU backend), auto-on under CUDA. **HONEST: only ~5% overall** (same-box A/B:
+  GPU 3.07s vs CPU 3.20s, flux 1.92 vs 2.13, depth identical) -- the per-call host->device transfers
+  (pairs/weights/src/num/den, 80k each, rebuilt every call) eat most of the savings, and averaged over
+  the run the mesh is smaller than the 54k deep-mesh profile. Kept (clean accuracy-neutral win).
+- Real remaining flux lever = the per-step host orchestration itself (array allocs, transfers,
+  .numpy() syncs spread thin) -> CUDA graph capture, which needs a device-resident loop (no mid-step
+  .numpy()). That's a refactor, not a one-liner. Next target after flux: mesh (marching-cubes CPU, ~18%).
+- Could ~2x the smoothing win by caching pairs/weights on-device ONCE per step (shared across the 3
+  smooth calls) instead of per-call -- deferred (moderate plumbing, ~5% more).
+
 ## Warm-start coverage: accuracy WITHOUT speed loss (the tradeoff was an artifact) -- VALIDATED
 - Q: "no way to get the accuracy without losing speed?" A: yes -- the 8 neutral MC traces/step were
   8 COLD restarts of the same coverage fixed point. The geometry (transport visibility) is fixed
