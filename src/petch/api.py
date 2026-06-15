@@ -99,6 +99,29 @@ class Result:
         v, f, _, _ = _t3.extract_mesh_3d(self._geo['phi'], self._geo['dx'])
         return v, f
 
+    def plot(self, path=None, show=False):
+        """Quick matplotlib cross-section (the etch profile through the feature centre). Returns the
+        Axes; pass `path` to save a PNG. The fast way to SEE the result."""
+        import matplotlib
+        if path is not None and not show:
+            matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+        g = self._geo
+        jc = g['phi'].shape[1] // 2                       # mid-y slice (x-z plane through the feature)
+        phi = g['phi'][:, jc, :].T                        # (nz, nx)
+        fig, ax = plt.subplots(figsize=(5, 4))
+        ax.contourf(g['xs'], g['zs'], (phi < 0).astype(float), levels=[0.5, 1.5], colors=["#cfe8ff"])
+        ax.contour(g['xs'], g['zs'], phi, levels=[0.0], colors="k", linewidths=1.2)
+        ax.axhline(g['sub_top'], color="0.6", lw=0.6, ls="--")
+        ax.set_xlabel("x (µm)"); ax.set_ylabel("z (µm)")
+        ax.set_title(f"depth {self.depth:.1f} µm  AR {self.aspect_ratio:.1f}  ({self.wall_time:.1f}s)")
+        ax.set_aspect("equal")
+        if path is not None:
+            fig.tight_layout(); fig.savefig(path, dpi=130)
+        if show:
+            plt.show()
+        return ax
+
     def save(self, path):
         """Write the surface mesh to `path` (.vtk for ParaView/ViennaPS, or .obj)."""
         v, f = self.mesh
