@@ -586,7 +586,10 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     # so charging reduces both the physical etch and the ion-enhanced coverage coupling. Hwang-Giapis 1997.
     alpha = float(par.get('charge_alpha', 0.0))
     if flags is not None and getattr(flags, "surface_charging", False) and alpha > 0.0:
-        oe, de = _src('neutral', n_neu, seed * 9 + 7, par['ion_ang_sigma'])   # cosine (diffuse) launch
+        # electrons: PARTIALLY collimated by the sheath -> a moderate-spread Gaussian source (the 'ion'
+        # source with e_ang_sigma), NOT a full cosine. Wider e_ang_sigma -> more HARC shadowing -> steeper
+        # charging rolloff. Calibrated to Hwang-Giapis (cosine over-predicted; ions are near-vertical).
+        oe, de = _src('ion', n_neu, seed * 9 + 7, par.get('e_ang_sigma', 0.5))
         fe = wp.zeros(F, dtype=float, device=DEVICE)
         wp.launch(_trace3d_cov_rr, dim=n_neu, device=DEVICE,                    # unity sticking: bare=1, beta=1
                   inputs=[mesh.id, oe, de, wp.array(np.ones(F, np.float32), dtype=float, device=DEVICE),

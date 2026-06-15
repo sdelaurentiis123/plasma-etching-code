@@ -47,6 +47,11 @@ PAR = dict(
     # ion current drops ~60% by aspect-ratio ~4). eFlux = electron source flux (open-field normalized).
     charge_alpha=0.0,
     eFlux=1.0,
+    # Electron angular spread at the surface (rad). Electrons reach the wafer through the sheath with
+    # PARTIAL collimation -- narrower than a full cosine (Lambertian) hemisphere but wider than the
+    # near-vertical ions. This sets how much MORE shadowed electrons are than ions in HARC (i.e. the
+    # steepness of the charging rolloff). Calibrated to Hwang-Giapis 1997. ~0.5 rad (29 deg).
+    e_ang_sigma=0.5,
 )
 
 
