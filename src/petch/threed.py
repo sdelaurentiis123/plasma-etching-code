@@ -972,6 +972,29 @@ def faces_in_mask(centroids, geo, mask_th, trench_width, hole=False):
     return in_band & (~opening)
 
 
+@wp.kernel
+def _nearest_face_cov(mesh: wp.uint64, pts: wp.array(dtype=wp.vec3),
+                      prev_bare: wp.array(dtype=float), out: wp.array(dtype=float)):
+    """For each new face centroid, find the nearest face on the PREVIOUS mesh and copy its coverage.
+    The GPU (BVH mesh_query_point) replacement for the scipy warm-start KDTree -- same nearest-face
+    seed, no host round-trip (the KDTree was ~15ms/step on deep meshes, the top flux host cost)."""
+    i = wp.tid()
+    q = wp.mesh_query_point_no_sign(mesh, pts[i], 1.0e6)
+    if q.result:
+        out[i] = prev_bare[q.face]
+    else:
+        out[i] = 1.0
+
+
+def gpu_warmstart_bare(prev_mesh, prev_bare_wp, centroids):
+    """Warm-start coverage seed via GPU nearest-face query on the previous mesh (replaces scipy KDTree)."""
+    n = len(centroids)
+    pts = wp.array(centroids.astype(np.float32), dtype=wp.vec3, device=DEVICE)
+    out = wp.zeros(n, dtype=float, device=DEVICE)
+    wp.launch(_nearest_face_cov, dim=n, device=DEVICE, inputs=[prev_mesh.id, pts, prev_bare_wp, out])
+    return out.numpy()
+
+
 # ----------------------------- driver -----------------------------
 def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 sub_top=10.0, t_end=2.0, n_steps=20, hole=False, par=None, flags=None,
@@ -992,8 +1015,10 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
     import time
     timings = dict(flux=0.0, extend=0.0, reinit=0.0, mesh=0.0, advect=0.0, total=0.0, nsub_max=0)
     warm = getattr(flags, "warm_start_coverage", False)
+    gpu_ws = par.get('gpu_warmstart', False)    # GPU nearest-face warm-start (mesh_query_point vs scipy KDTree)
     _extract = extract_mesh_3d_gpu if par.get('gpu_mesh', False) else extract_mesh_3d   # GPU marching cubes
     cov_centroids = None; cov_bare = None       # previous-step coverage, for warm-starting the fixed point
+    prev_mesh = None; prev_bare_wp = None       # previous wp.Mesh + coverage (device) for GPU warm-start
     t0 = time.time()
     for step in range(n_steps):
         tm = time.time()
@@ -1007,18 +1032,21 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                                                         n_ion=n_ion, seed=step, flags=flags)
         elif getattr(flags, "coverage_sticking", False):   # Langmuir coverage-dependent sticking
             bi = None
-            if warm and cov_bare is not None and np.all(np.isfinite(centroids)) \
-                    and np.all(np.isfinite(cov_centroids)):   # seed from prev-step coverage (nearest old face)
-                # fast tree: balanced_tree/compact_nodes=False cuts BUILD, workers=-1 parallelizes QUERY
-                # (the warm-start nearest-face lookup was ~90ms/step on deep meshes -- the hidden flux cost).
-                tree = cKDTree(cov_centroids, balanced_tree=False, compact_nodes=False)
-                _, ix = tree.query(centroids, workers=-1)
-                bi = cov_bare[ix]
+            if warm and cov_bare is not None and np.all(np.isfinite(centroids)):   # seed from prev-step coverage
+                if gpu_ws and prev_mesh is not None:           # GPU nearest-face query (no host KDTree)
+                    bi = gpu_warmstart_bare(prev_mesh, prev_bare_wp, centroids)
+                elif np.all(np.isfinite(cov_centroids)):       # scipy KDTree (fast build + parallel query)
+                    tree = cKDTree(cov_centroids, balanced_tree=False, compact_nodes=False)
+                    _, ix = tree.query(centroids, workers=-1)
+                    bi = cov_bare[ix]
             m_i, m_F, m_O, cos_i, cov_bare = mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par,
                                                       n_ion=n_ion, n_neu=n_neu, seed=step,
                                                       sampling=getattr(flags, "sampling", "pseudo"),
                                                       flags=flags, bare_init=bi)
             cov_centroids = centroids
+            if gpu_ws:                                         # keep prev mesh + coverage on device
+                prev_mesh = mesh
+                prev_bare_wp = wp.array(cov_bare.astype(np.float32), dtype=float, device=DEVICE)
         else:
             m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, mc_par,
                                               n_ion=n_ion, n_neu=n_neu, seed=step,
