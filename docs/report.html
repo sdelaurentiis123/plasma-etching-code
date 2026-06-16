@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>petch — State of the Project</title>
+<link rel="stylesheet" href="style.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['$$','$$']]},svg:{fontCache:'global'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">petch</span>
+  <a href="report.html" class="active">State of the Project</a>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="performance.html">Performance</a>
+  <a href="experimental-validation.html">Experiments</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+
+<h1>petch — State of the Project</h1>
+<p class="subtitle">A fast, differentiable, GPU-accelerated 3D plasma-etch simulator. Where it stands, what it does, and what it's for. Updated June 2026.</p>
+
+<div class="callout key">
+<span class="lab">TL;DR — what we're doing</span>
+<p><strong>petch</strong> predicts how a single sub-micron chip feature — a contact hole, a trench, a 3D-NAND
+channel — changes shape as a plasma etches it into silicon. It is <strong>~14× faster than ViennaPS</strong>
+(the open-source state of the art) on the same GPU, <strong>just as accurate</strong> (it implements every
+ViennaPS mechanism), and <strong>uniquely differentiable</strong> — you can take gradients through the whole
+physics, which lets you <em>inverse-design a recipe from a target shape</em>. It is, as far as we can find,
+the <strong>only open-source GPU-accelerated, differentiable feature-scale etch simulator that exists.</strong></p>
+</div>
+
+<h2>1. What is sub-micron etching?</h2>
+<p>Making a microchip means carving billions of nanometre-scale 3D structures into silicon. The dominant way to
+carve them is <strong>plasma (dry) etching</strong>: a low-pressure gas (e.g. SF₆/O₂) is turned into a plasma,
+which produces two things that rain down on the wafer —</p>
+<ul>
+<li><strong>ions</strong> — electrically accelerated <em>straight down</em>, energetic, directional; they do
+the anisotropic (vertical) cutting and sputtering;</li>
+<li><strong>neutral radicals</strong> — uncharged, arriving from <em>all directions</em> (diffuse); they do the
+chemical etching and passivation.</li>
+</ul>
+<p>A patterned <strong>mask</strong> protects some areas; everywhere else, the surface recedes. <em>Feature-scale</em>
+(a.k.a. sub-micron) simulation means modelling <strong>one individual feature</strong> — narrower than a micron —
+and the <strong>evolving shape</strong> of its surface: depth, sidewall angle, bottom profile, bowing. (This is
+distinct from <em>reactor-scale</em> simulation, which models the whole plasma chamber.)</p>
+
+<div class="callout">
+<span class="lab">Why it's hard — and why it matters</span>
+<p>As a feature gets <strong>deep and narrow</strong> (high aspect ratio), the etch <em>slows down and distorts</em>:
+the deep floor is geometrically shadowed, so fewer ions and neutrals reach it. This shows up as
+<strong>ARDE / RIE-lag</strong> (aspect-ratio-dependent etch rate), <strong>microtrenching</strong> (over-etched
+corners), and <strong>bowing</strong>. Predicting these <em>before</em> committing a $10k+ wafer lot is exactly
+what feature-scale simulators are for: designing masks and recipes, hitting a critical-dimension (CD) target,
+and avoiding defects.</p>
+</div>
+
+<h2>2. How petch works</h2>
+<p>The surface is a <strong>level set</strong> \(\phi\) (a signed-distance field; the surface is \(\phi=0\)). Each
+time step is a clean pipeline:</p>
+<pre><code>make geometry → [ marching cubes → Monte-Carlo flux → SF6/O2 chemistry → advect surface → reinit ] × N steps</code></pre>
+<ol>
+<li><strong>Mesh</strong> the \(\phi=0\) surface into triangles (marching cubes).</li>
+<li><strong>Flux</strong>: trace ions (directional) and neutrals (diffuse, multi-bounce) through the evolving
+cavity by GPU ray tracing on a BVH, with a flux↔coverage fixed point — how much of each species reaches every
+surface point.</li>
+<li><strong>Chemistry</strong>: convert flux + ion energy into a local etch velocity (the Belen coupled-coverage
+SF₆/O₂ model — identical to ViennaPS).</li>
+<li><strong>Advect</strong> the level set by that velocity (upwind Godunov, with CFL substepping).</li>
+<li><strong>Reinit</strong> \(\phi\) back to a signed distance (GPU Eikonal solver).</li>
+</ol>
+<p>The whole pipeline is written in <a href="https://github.com/NVIDIA/warp">NVIDIA Warp</a>, so it runs on the GPU
+<em>and</em> is automatically differentiable in one substrate. On a machine without an NVIDIA GPU the same code
+falls back to a portable CPU path.</p>
+
+<h2>3. Headline result — ~14× faster than ViennaPS</h2>
+<p>Fair same-hardware comparison (one RTX 3090), <strong>both engines warmed</strong>, matched etch depth, swept
+across hole sizes / aspect ratios. ViennaPS on its fastest engine (GPU, OptiX RT-core):</p>
+<table>
+<tr><th>hole Ø</th><th>aspect ratio</th><th>ViennaPS-GPU</th><th>petch</th><th>speedup</th></tr>
+<tr><td>4 µm</td><td>2.1</td><td>19.4 s</td><td><strong>1.30 s</strong></td><td><strong>14.9×</strong></td></tr>
+<tr><td>6 µm</td><td>1.6</td><td>22.7 s</td><td><strong>1.61 s</strong></td><td><strong>14.1×</strong></td></tr>
+<tr><td>8 µm</td><td>1.2</td><td>25.8 s</td><td><strong>1.82 s</strong></td><td><strong>14.1×</strong></td></tr>
+</table>
+<p>Conservative — petch actually etched slightly <em>deeper</em> (more work). Reproduce with
+<code>scripts/vps_sweep.py</code>. (Earlier in the project, before the GPU campaign, petch was ~2× <em>slower</em>
+than ViennaPS-GPU; the campaign below flipped that to ~14× faster.)</p>
+
+<h2>4. Accuracy — we implement ≥ ViennaPS's physics</h2>
+<p>petch's <code>belen.py</code> reproduces the complete ViennaPS <code>SF6O2Etching</code> model, mechanism for
+mechanism — so "faster" does not mean "cruder":</p>
+<table>
+<tr><th>ViennaPS mechanism</th><th>petch</th></tr>
+<tr><td>Belen/Ertl coupled F/O coverages</td><td>✓ <code>belen.py</code></td></tr>
+<tr><td>Chemical etch \(k_\sigma\,\theta_F/4\)</td><td>✓</td></tr>
+<tr><td>Physical sputter \(Y_{sp}\Gamma_{ion}\)</td><td>✓</td></tr>
+<tr><td>Ion-enhanced etch \(\theta_F Y_{ie}\Gamma_{ion}\)</td><td>✓</td></tr>
+<tr><td>Steinbrüchel \(\sqrt{E}\) energy yields</td><td>✓ <code>_ied_yield</code></td></tr>
+<tr><td>Angular yields (sputter \(B_{sp}\), ion-enhanced)</td><td>✓ <code>angular_factors</code></td></tr>
+<tr><td>Gaussian ion-energy distribution</td><td>✓ (also bimodal — beyond ViennaPS)</td></tr>
+<tr><td>Monte-Carlo neutral transport (Russian-roulette sticking)</td><td>✓</td></tr>
+<tr><td>1-neighbour flux smoothing, level-set advect + reinit</td><td>✓</td></tr>
+</table>
+<p>Quantitatively: 2D matches cached ViennaPS ground truth <strong>parameter-free</strong> (ARDE rmse 0.016); 3D
+ARDE rmse <strong>0.05–0.08</strong> vs depth-resolved ViennaPS. Every speedup in the campaign was validated
+<strong>depth-identical</strong> (or within Monte-Carlo noise) against the un-optimized path.</p>
+
+<h2>5. How we got 14× — the speedup campaign</h2>
+<p>The original loop was dominated by CPU host operations. We moved them to the GPU one at a time, validating each
+stayed accuracy-neutral. The big levers, in order of impact:</p>
+<ul>
+<li><strong>GPU Eikonal reinit</strong> (Jacobi Godunov fast-sweep, Warp) — replaced CPU <code>skfmm</code>; the
+reinit went from ~25% of the loop to &lt;1% (≈58× on that line).</li>
+<li><strong>Warm-start coverage</strong> — seed each step's flux↔coverage fixed point from the previous step, so it
+converges in 1 iteration instead of ~4 → <strong>8× fewer neutral ray traces</strong>, exact same answer.</li>
+<li><strong>GPU marching cubes</strong> (Warp built-in) — 24× faster than skimage on the meshing op.</li>
+<li><strong>On-device flux</strong> — normalization, smoothing (with GPU normals/weights), and source-ray generation
+all on the GPU; the warm-start nearest-face lookup via a GPU BVH query instead of a CPU KD-tree.</li>
+<li><strong>cupy GPU sort</strong> for the mesh edge-adjacency (the last host bottleneck).</li>
+</ul>
+<p>Crucially, every one of these is an <strong>opt-in flag that auto-enables on CUDA and falls back to the
+portable path on CPU</strong> — so the tool is fast on a GPU, "just works" (slower) on a laptop, and stays
+modular. We deliberately did <em>not</em> fuse the loop into a monolithic CUDA graph: it would have made the fast
+path NVIDIA-only and the code far harder to extend, for only ~1.5× more on top of 14×.</p>
+
+<h2>6. The API</h2>
+<p>The public interface mirrors ViennaPS's <code>Domain</code>/<code>Process</code> shape, so a ViennaPS user
+migrates in minutes — but it auto-runs the full fast pipeline:</p>
+<pre><code>import petch
+
+dom    = petch.Domain.hole(extent=14, dx=0.25, diameter=6, mask=2, depth=18)
+model  = petch.SF6O2()                      # = ViennaPS physics; override any parameter
+result = petch.Process(dom, model, duration=3.0).run(steps=40)
+
+result.depth          # µm        result.aspect_ratio
+result.mesh           # (verts, faces)        result.wall_time   # ~1.6 s vs ViennaPS ~22 s
+result.plot("profile.png")                   # cross-section figure
+result.save("etch.vtk")                      # ParaView / ViennaPS-compatible</code></pre>
+<p>Three layers: this clean one, a config-object layer (override physics/numerics), and the low-level
+<code>run_etch_3d</code> / <code>Flags</code> / <code>PAR</code> for full control.</p>
+
+<h2>7. Honest limitations</h2>
+<ul>
+<li><strong>As-accurate-as-ViennaPS, not yet validated to real wafers.</strong> Matching ViennaPS is not the
+same as matching a specific fab. The real-wafer gap (surface charging, true Knudsen molecular-flow transport)
+is research-grade and needs experimental data to calibrate.</li>
+<li><strong>Surface charging is experimental and off by default.</strong> We built the infrastructure and
+calibrated it against the Hwang–Giapis experiment; the reduced "differential electron/ion shadowing" model
+<em>over-throttles</em> at every setting, because the real effect is a self-consistent floor potential
+re-deflecting ions (a PIC-class field solve), not geometric shadowing. We document this honestly rather than
+ship a model that doesn't match the data.</li>
+<li>ViennaPS is the only runnable open-source peer; other comparisons are against published experimental curves
+(Belen 2005, de Boer/Blauw, Gomez 2004, Hoekstra–Kushner).</li>
+</ul>
+
+<h2>8. The science this unlocks</h2>
+<p>The combination <strong>fast + differentiable</strong> makes experiments possible that ViennaPS can't do (it's
+not differentiable) and that finite differences make impractical (too many slow runs):</p>
+<ul>
+<li><strong>Differentiable inverse design</strong> ★ — gradient-descend the recipe (ion flux, energy, O₂ fraction,
+sticking) to hit a <em>target profile</em> (vertical walls, a depth, no microtrench). <em>"Tell me the structure;
+I'll compute the recipe."</em></li>
+<li><strong>Differentiable calibration to SEM data</strong> ★ — fit the physical constants to a published wafer
+cross-section by gradient descent on the profile mismatch. This is the credible path from "ViennaPS-accurate" to
+"real-wafer-accurate."</li>
+<li><strong>ARDE / RIE-lag landscapes</strong> at scale; <strong>global sensitivity</strong> (which knob controls
+sidewall angle / bow / microtrench, read straight off the gradients).</li>
+<li><strong>Optimal time-varying recipes</strong> — differentiable optimal control of a recipe schedule, a
+principled generalization of Bosch-style alternation.</li>
+<li><strong>Uncertainty quantification</strong> / process-window mapping — Monte-Carlo over input tolerances, cheap
+once a run is ~1 s.</li>
+</ul>
+
+<hr>
+<p style="color:var(--ink-soft);font-size:15px">petch is MIT-licensed. Benchmarks compare against ViennaPS
+(GPL-3.0) and published experimental datasets; petch ships no ViennaPS code. Full research log:
+<code>FINDINGS.md</code>. Reproduce the headline: <code>scripts/vps_sweep.py</code>.</p>
+
+</main>
+</body>
+</html>
