@@ -8,7 +8,7 @@ PETCH_DEVICE=cuda python scripts/vps_profile_compare.py"""
 import time
 import numpy as np
 
-DX, EXT, DIAM, MASK, DUR = 0.01, 1.2, 0.4, 0.1, 1.0     # um / min ; sub-micron Belen-scale hole
+DX, EXT, DIAM, MASK, DUR = 0.025, 0.8, 0.4, 0.08, 0.2     # sub-micron; short etch so neither bottoms out
 DEPTH_BINS = np.arange(0.0, 1.2, DX)
 
 
@@ -66,7 +66,10 @@ v3.MakeHole(domain=d, gridDelta=DX, xExtent=EXT, yExtent=EXT, holeRadius=DIAM/2,
             holeDepth=MASK, makeMask=True, material=ps.Material.Si).apply()
 m = v3.SF6O2Etching(v3.SF6O2Etching.defaultParameters())
 p = v3.Process(); p.setDomain(d); p.setProcessModel(m); p.setProcessDuration(DUR)
-p.setFluxEngineType(ps.FluxEngineType.GPU_TRIANGLE)
+# CPU_TRIANGLE: GPU (OptiX) aborts the process if libnvoptix is absent, so use CPU -- the PROFILE/PHYSICS
+# is identical to GPU (same model, only the ray engine differs; speed is benchmarked separately).
+p.setFluxEngineType(ps.FluxEngineType.CPU_TRIANGLE)
+print("ViennaPS engine: CPU_TRIANGLE (profile is engine-independent)", flush=True)
 t0 = time.time(); p.apply(); vps_wall = time.time() - t0
 nodes = np.array(d.getSurfaceMesh().getNodes())                   # (M,3), hole centred at origin
 yc_v = 0.0
@@ -83,14 +86,20 @@ from petch import threed as t3
 
 # physics-parameter parity check: our PAR vs the ViennaPS defaults dumped above
 print("=== physics-parameter parity (petch PAR vs ViennaPS SF6O2 default) ===", flush=True)
-_cmp = {"ionFlux": "ionFlux", "Fflux": "etchantFlux", "Oflux": "oxygenFlux", "Emean": "meanEnergy",
-        "Esig": "sigmaEnergy", "A_ie": "A_ie", "Eth_ie": "Eth_ie", "A_sp": "A_sp", "Eth_sp": "Eth_sp",
-        "B_sp": "B_sp", "k_sigma": "k_sigma", "beta_sigma": "beta_sigma", "rho": "rho"}
+_cmp = {"ionFlux": "ionFlux", "Fflux": "etchantFlux", "Oflux": "passivationFlux",
+        "Emean": "Ions.meanEnergy", "Esig": "Ions.sigmaEnergy",
+        "A_ie": "Substrate.A_ie", "Eth_ie": "Substrate.Eth_ie", "A_sp": "Substrate.A_sp",
+        "Eth_sp": "Substrate.Eth_sp", "B_sp": "Substrate.B_sp", "k_sigma": "Substrate.k_sigma",
+        "beta_sigma": "Substrate.beta_sigma", "rho": "Substrate.rho",
+        "A_p": "Passivation.A_ie", "Eth_p": "Passivation.Eth_ie"}
 for ours_k, vk in _cmp.items():
-    pv = petch.PAR[ours_k]
-    vv = next((vps_par[k] for k in vps_par if k.split('.')[-1] == vk), None)
+    pv = petch.PAR[ours_k]; vv = vps_par.get(vk)
     tag = "MATCH" if (vv is not None and abs(pv - vv) < 1e-6 * max(1, abs(vv))) else ("DIFF" if vv is not None else "n/a")
-    print(f"    {ours_k:11s} petch {pv:>8g}   ViennaPS {('%.4g' % vv) if vv is not None else '----':>8}   {tag}", flush=True)
+    print(f"    {ours_k:11s} petch {pv:>8g}   ViennaPS.{vk:22s} {('%.4g' % vv) if vv is not None else '----':>8}   {tag}", flush=True)
+# physics ViennaPS HAS that petch does not model by default (affects bottom-corner shape):
+print("    NOTE: ViennaPS also has ion specular reflection (Ions.inflectAngle/minAngle/thetaR),", flush=True)
+print("          B_ie ion-enhanced angular term, and mask sputtering (Mask.*). petch: ion_reflection off,", flush=True)
+print("          hard mask. These shape the deep bottom/microtrench, not the bulk sidewall.", flush=True)
 print(flush=True)
 GEO = dict(Lx=EXT, Ly=EXT, Lz=MASK + 0.8 + 0.3, dx=DX, trench_width=DIAM, mask_th=MASK, sub_top=0.8 + 0.3, hole=True)
 

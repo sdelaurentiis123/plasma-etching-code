@@ -246,6 +246,39 @@ def smooth_flux_gpu(flux, normals, pairs, n_iter=1, alpha=1.0, prep=None):
 
 
 # ----------------------------- Warp ray-traced flux -----------------------------
+@wp.func
+def _wrap_y(mesh: wp.uint64, o: wp.vec3, d: wp.vec3, ly: float, lz: float, periodic: int):
+    """PERIODIC-Y boundary for trenches (invariant along y -> physically infinite). When a ray misses
+    and would exit a y-face BEFORE the top (z=lz, the open sky), re-enter the opposite y-face and keep
+    going. Returns the origin from which the caller should query (a hit, or a true escape via top/x).
+    Fixes the trench artifact: rays leaking out the open y-ends -> radiosity loses the conductance limit
+    (flat ARDE), MC under-samples the floor (erratic). periodic=0 -> no-op (holes)."""
+    if periodic == 0:
+        return o
+    oo = o
+    for _w in range(8):
+        q = wp.mesh_query_ray(mesh, oo, d, 1.0e6)
+        if q.result:
+            return oo                                   # hits a face from here
+        ty = 1.0e30
+        if d[1] > 1.0e-9:
+            ty = (ly - oo[1]) / d[1]
+        if d[1] < -1.0e-9:
+            ty = (0.0 - oo[1]) / d[1]
+        tz = 1.0e30
+        if d[2] > 1.0e-9:
+            tz = (lz - oo[2]) / d[2]                     # reaches the open top first -> real escape
+        if ty < tz and ty < 1.0e29 and ty > 1.0e-7:
+            px = oo[0] + ty * d[0]; pz = oo[2] + ty * d[2]
+            ny = ly - 1.0e-4
+            if d[1] > 0.0:
+                ny = 1.0e-4
+            oo = wp.vec3(px, ny, pz)                     # re-enter the opposite y face
+        else:
+            return oo                                   # escapes via top/x -> sky
+    return oo
+
+
 @wp.kernel
 def _trace3d(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
              sticking: float, n_reemit: int, seed: int,
@@ -445,7 +478,8 @@ def _trace3d_cov(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.arra
 
 @wp.kernel
 def _trace3d_cov_rr(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
-                    bare: wp.array(dtype=float), beta: float, seed: int, flux: wp.array(dtype=float)):
+                    bare: wp.array(dtype=float), beta: float, seed: int, flux: wp.array(dtype=float),
+                    ly: float, lz: float, periodic: int):
     """EXACT ViennaPS neutral transport: weighted ray + Russian roulette, NO fixed bounce cap.
     Verbatim from ViennaRay rayTraceKernel.hpp + psPlasmaEtching.hpp:
       - ray weight W starts at 1.0; DEPOSIT W into arriving flux on every hit (not +1.0);
@@ -459,6 +493,7 @@ def _trace3d_cov_rr(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.a
     d = dir0[p]
     w = float(1.0)
     for bounce in range(512):
+        o = _wrap_y(mesh, o, d, ly, lz, periodic)
         q = wp.mesh_query_ray(mesh, o, d, 1.0e6)
         if not q.result:
             break
@@ -593,7 +628,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         fe = wp.zeros(F, dtype=float, device=DEVICE)
         wp.launch(_trace3d_cov_rr, dim=n_neu, device=DEVICE,                    # unity sticking: bare=1, beta=1
                   inputs=[mesh.id, oe, de, wp.array(np.ones(F, np.float32), dtype=float, device=DEVICE),
-                          1.0, int(seed * 9 + 7), fe])
+                          1.0, int(seed * 9 + 7), fe, float(Ly), float(Lz), int(par.get('periodic_y', 0))])
         m_e = np.clip((fe.numpy() / A) / (n_neu / A_src) * par.get('eFlux', 1.0), 0.0, 8.0)
         if n_smooth > 0:
             m_e = _smooth(m_e)
@@ -617,7 +652,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
             wp.launch(_trace3d_cov_rr, dim=n_neu, device=DEVICE,
                       inputs=[mesh.id, o_w, d_w,
                               wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
-                              float(beta), int(sd), fl])
+                              float(beta), int(sd), fl, float(Ly), float(Lz), int(par.get('periodic_y', 0))])
         else:
             nre = int(par.get('n_reemit_cov', np.clip(8.0 / max(beta, 0.02), 24, 200)))
             wp.launch(_trace3d_cov, dim=n_neu, device=DEVICE,
@@ -643,11 +678,13 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
 
 @wp.kernel
 def _trace_ff(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
-              hitface: wp.array(dtype=int)):
+              hitface: wp.array(dtype=int), ly: float, lz: float, periodic: int):
     """Single-bounce form-factor ray: cast one diffuse ray from a face, record the FIRST face it hits
-    (or -1 = escapes to the open source/sky). The deterministic radiosity solve then does all bounces."""
+    (or -1 = escapes to the open source/sky). PERIODIC-Y for trenches: rays exiting the y-ends re-enter
+    the opposite side, so the deep floor sees the trench conductance instead of leaking to 'sky'."""
     p = wp.tid()
-    q = wp.mesh_query_ray(mesh, origin[p], dir0[p], 1.0e6)
+    o = _wrap_y(mesh, origin[p], dir0[p], ly, lz, periodic)
+    q = wp.mesh_query_ray(mesh, o, dir0[p], 1.0e6)
     if q.result:
         hitface[p] = q.face
     else:
@@ -689,7 +726,8 @@ def mc_flux_3d_radiosity(mesh, verts, faces, centroids, areas, geo, par, n_ion=2
     d = _cosine_dirs(fn[src], rng).astype(np.float32)
     hf = wp.zeros(F * n_ff, dtype=int, device=DEVICE)
     wp.launch(_trace_ff, dim=F * n_ff, device=DEVICE,
-              inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE), wp.array(d, dtype=wp.vec3, device=DEVICE), hf])
+              inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE), wp.array(d, dtype=wp.vec3, device=DEVICE),
+                      hf, float(Ly), float(Lz), int(par.get('periodic_y', 0))])
     hit = hf.numpy()
     esc = hit < 0
     D = np.bincount(src[esc], minlength=F).astype(np.float64) / n_ff          # D_i = sky view of i
@@ -1069,7 +1107,8 @@ def mc_redep_3d(mesh, centroids, areas, normals, src_flux, n_redep=20000, s_rede
     wp.launch(_trace3d_cov_rr, dim=n_redep, device=DEVICE,
               inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
                       wp.array(d, dtype=wp.vec3, device=DEVICE),
-                      wp.array(bare, dtype=float, device=DEVICE), float(s_redep), int(seed), fl])
+                      wp.array(bare, dtype=float, device=DEVICE), float(s_redep), int(seed), fl,
+                      1.0, 1.0, 0])                     # redep: no periodic-y
     return (fl.numpy() * (tot / n_redep)) / np.maximum(areas, 1.0e-9)
 
 
