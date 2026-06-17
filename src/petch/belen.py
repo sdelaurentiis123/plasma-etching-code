@@ -46,8 +46,13 @@ def surface_rate_belen(m_i, m_F, m_O, cos_i, is_mask, par, flags=None):
     b = (par['beta_sigma'] + GY_p) / Gb_P
     thF = 1.0 / (1.0 + a * (1.0 + 1.0 / (b + eps)))   # fluorine coverage (coupled to O via b)
 
-    # ViennaPS rate: chemical etch + physical sputter + ion-enhanced etch
-    rate = par['k_sigma'] * thF / 4.0 + Ysp_a * Fi + thF * Yie_a * Fi
+    # ViennaPS rate: chemical etch + physical sputter + ion-enhanced etch.
+    # Ysp_scale (default 1.0 = exact ViennaPS) lifts the AR-INDEPENDENT physical-sputter floor: in
+    # deep features the chemical/ion-enhanced terms vanish with the neutral coverage, so this directional
+    # ion-sputter term sets the high-AR etch-rate floor. The de Boer cryo-DRIE floor (~0.20 of the mouth
+    # rate at AR 40) is ~3x the ViennaPS-default sputter floor -> calibrate it here, not via sticking.
+    sps = par.get('Ysp_scale', 1.0)
+    rate = par['k_sigma'] * thF / 4.0 + sps * Ysp_a * Fi + thF * Yie_a * Fi
     V = (1.0 / par['rho']) * rate * par['rate_scale']
     V[is_mask] = 0.0
     return V

@@ -1150,7 +1150,7 @@ def gpu_warmstart_bare(prev_mesh, prev_bare_wp, centroids):
 def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 sub_top=10.0, t_end=2.0, n_steps=20, hole=False, par=None, flags=None,
                 n_ion=20000, n_neu=20000, reinit_every=1, extend="gpu",
-                reinit_method="skfmm", verbose=True, record_depth_every=0):
+                reinit_method="skfmm", verbose=True, record_depth_every=0, seed_offset=0):
     if par is None:
         par = PAR
     if flags is None:
@@ -1182,7 +1182,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         tf = time.time()
         if getattr(flags, "neutral_transport", "mc") == "radiosity":   # deterministic radiosity neutrals
             m_i, m_F, m_O, cos_i = mc_flux_3d_radiosity(mesh, verts, faces, centroids, areas, geo, par,
-                                                        n_ion=n_ion, seed=step, flags=flags)
+                                                        n_ion=n_ion, seed=step + seed_offset, flags=flags)
         elif getattr(flags, "coverage_sticking", False):   # Langmuir coverage-dependent sticking
             bi = None
             if warm and cov_bare is not None and np.all(np.isfinite(centroids)):   # seed from prev-step coverage
@@ -1193,7 +1193,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                     _, ix = tree.query(centroids, workers=-1)
                     bi = cov_bare[ix]
             m_i, m_F, m_O, cos_i, cov_bare = mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par,
-                                                      n_ion=n_ion, n_neu=n_neu, seed=step,
+                                                      n_ion=n_ion, n_neu=n_neu, seed=step + seed_offset,
                                                       sampling=getattr(flags, "sampling", "pseudo"),
                                                       flags=flags, bare_init=bi)
             cov_centroids = centroids
@@ -1202,7 +1202,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 prev_bare_wp = wp.array(cov_bare.astype(np.float32), dtype=float, device=DEVICE)
         else:
             m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, mc_par,
-                                              n_ion=n_ion, n_neu=n_neu, seed=step,
+                                              n_ion=n_ion, n_neu=n_neu, seed=step + seed_offset,
                                               sampling=getattr(flags, "sampling", "pseudo"),
                                               ion_reflection=getattr(flags, "ion_reflection", False))
         timings['flux'] += time.time() - tf
