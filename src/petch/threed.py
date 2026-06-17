@@ -167,16 +167,32 @@ def _cos_k(fl: wp.array(dtype=float), ang: wp.array(dtype=float), out: wp.array(
         out[i] = 0.0
 
 
-def smooth_flux_dev(src_wp, prep):
+@wp.kernel
+def _lerp_k(raw: wp.array(dtype=float), sm: wp.array(dtype=float), a: float, out: wp.array(dtype=float)):
+    """Device blend for the smoothing strength knob: out = (1-a)*raw + a*smoothed."""
+    i = wp.tid()
+    out[i] = (1.0 - a) * raw[i] + a * sm[i]
+
+
+def smooth_flux_dev(src_wp, prep, alpha=1.0):
     """Device-resident smooth: src in/out are Warp arrays (no host round-trip). num seeded = src
-    (self-weight), den = 1; one scatter, one divide -- all on device."""
+    (self-weight), den = 1; one scatter, one divide -- all on device. `alpha` (0..1) is the strength
+    knob: out = (1-alpha)*raw + alpha*fully_smoothed (alpha=1 = full smoothing; lower = milder). This
+    matches the host smooth_flux/smooth_flux_gpu blend so flux_smooth_alpha works on the GPU path too
+    (it was silently ignored here before -> the knob had no effect on the device-resident neutral flux)."""
     F = src_wp.shape[0]
+    if alpha <= 0.0:
+        return wp.clone(src_wp)
     num = wp.clone(src_wp)
     den = wp.full(F, 1.0, dtype=float, device=DEVICE)
     wp.launch(_smooth_scatter, dim=prep['pi'].shape[0], device=DEVICE,
               inputs=[src_wp, prep['pi'], prep['pj'], prep['ww'], num, den])
     out = wp.zeros(F, dtype=float, device=DEVICE)
     wp.launch(_div_k, dim=F, device=DEVICE, inputs=[num, den, out])
+    if alpha < 1.0:                                    # blend raw <-> fully-smoothed (strength knob)
+        res = wp.zeros(F, dtype=float, device=DEVICE)
+        wp.launch(_lerp_k, dim=F, device=DEVICE, inputs=[src_wp, out, float(alpha), res])
+        return res
     return out
 
 
@@ -614,7 +630,8 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         m_wp = wp.zeros(F, dtype=float, device=DEVICE)
         wp.launch(_norm_clip, dim=F, device=DEVICE, inputs=[fl_wp, A_wp, float(scale), 0.0, float(hi), m_wp])
         if n_smooth > 0:
-            m_wp = smooth_flux_dev(m_wp, _prep)
+            for _ in range(n_smooth):
+                m_wp = smooth_flux_dev(m_wp, _prep, alpha=sm_alpha)
         return m_wp.numpy()
 
     # ions (unchanged; not coverage-dependent)
