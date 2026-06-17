@@ -730,3 +730,40 @@ the diffuse re-emission needs an angular/visibility correction), or blend MC<->r
 experimental ARDE. (Caveats: digitized wafer points are for one regime; rate-vs-AR extraction is noisy;
 cryo conditions not matched.) Net: the mechanism is right (deterministic conductance), the calibration isn't
 yet -- exactly the bracket-then-tune pattern we saw closing the ViennaPS gap.
+
+## de Boer ARDE — full decomposition: knee FIXED, floor pinned to a reaction-model gap (2026-06-16)
+
+Craig flagged "petch != ViennaPS at sub-micron." Resolved + then pushed the de Boer EXPERIMENT match
+to its honest frontier. Three results (figures: trench_arde_3way.png, deboer_match.png, deboer_floor.png):
+
+1. **petch MC == ViennaPS** on the identical sub-micron trench (DX=0.03, W=0.5), normalized bottom-rate
+   within ~0.08 across AR 6-9. Two artifacts had made petch look off: (a) the RADIOSITY neutral transport
+   over-couples flux to the bottom at high AR (Lambertian) -> for deep features use neutral_transport="mc",
+   NOT radiosity; (b) the old domain floor (sub_top 5.3um) clamped every AR>9 point. Deep domain + MC ->
+   petch sits right under ViennaPS. Craig's gap was transport-mode + domain-floor, not a physics divergence.
+
+2. **The de Boer gap is NOT a missing transport integrator.** petch's MC neutral transport
+   (`_trace3d_cov_rr`) is ALREADY free-molecular Knudsen MC (sticking per wall hit, diffuse cosine
+   re-emit, weighted-ray Russian roulette, no bounce cap; verbatim ViennaRay). The gap decomposes into:
+   - KNEE (petch too gentle, 0.88 @AR10 vs exp 0.43): petch defaults are etchant-RICH (cal_F=12, the
+     ViennaPS regime) -> coverage saturated until ~98% F depletion -> knee at AR15-20. de Boer cryo DRIE is
+     etchant-STARVED/ion-driven. Lowering cal_F (12->~1.5) moves the knee left and MATCHES AR0-10.
+   - But starving for the knee makes the deep rate COLLAPSE -> trench STALLS ~AR19. So knee & floor are ONE
+     problem: petch's deep rate decays to ZERO where the wafer sustains a ~0.20-0.25 floor.
+
+3. **Floor mechanism built (bimodal ion IADF core) -> exposes a REACTION-MODEL limit.** Added opt-in
+   `ion_core_frac`/`ion_core_sigma` (a collimated sheath core that reaches AR40; core_frac=0 default = exact
+   single-Gaussian source, ViennaPS path unchanged, regression-guarded). The core IS the right mechanism
+   (lifts AR20 floor 0.17->0.20, extends the etch to higher AR) but CANNOT sustain de Boer's flat ~0.25
+   tail. The blocker is STRUCTURAL: the Belen rate is dominated at the surface by ion-enhanced
+   theta_F*Y_ie*Fi (Y_ie~43, needs neutral coverage); at depth theta_F->0 so that channel dies, leaving
+   only physical sputter Y_sp*Fi (Y_sp~0.19, ~200x smaller) as the coverage-INDEPENDENT floor -> a
+   structurally tiny fraction of the top rate. de Boer's sustained floor implies a LARGE coverage-
+   independent etch channel (spontaneous F+Si / larger cryo physical-sputter) that the Belen model -- petch
+   AND ViennaPS -- lacks. **That is the true de-Boer frontier: a reaction-model extension, not an
+   IADF/transport/charging knob -- and crossing it credibly needs real de Boer process data, not curve-
+   fitting one published ARDE curve.**
+
+de-Boer knee-match config: cal_F=1.5, ion_ang_sigma=0.8deg, betaE=0.85, Ysp_scale=10, neutral_transport=
+"mc", periodic_y=1 (matches AR0-10, stalls ~AR19). New backward-compatible knobs: Ysp_scale,
+ion_core_frac, ion_core_sigma, run_etch_3d(seed_offset=). Scripts: scripts/deboer_*.py, trench_arde_3way.py.
