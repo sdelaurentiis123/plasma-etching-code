@@ -30,30 +30,37 @@ xr = np.linspace(0, 40, 200)
 ax.plot(xr, np.interp(xr, EXP_AR, EXP_R), 'k-', lw=2.6, label='de Boer/Blauw experiment (cryo SF6 DRIE)')
 ax.plot(EXP_AR, EXP_R, 'ko', ms=8)
 ax.plot(*clean(ar_d, nr_d), '--', color='#1a73e8', lw=2,
-        label=f'petch, ViennaPS-default params  (RMSE {rmse_d:.2f})')
+        label='petch, ViennaPS-default params (gentle, never knees)')
 ax.plot(*clean(ar_b, nr_b), '-', color='#c0392b', lw=2.2,
-        label=f'petch, de-Boer process params  (RMSE {rmse_b:.2f})')
+        label='petch, knee-tightened (matches to AR~10, then stalls)')
 
-# shade the two regimes: knee region (params help) vs floor region (frontier)
-ax.axvspan(8, 20, color='#2e7d32', alpha=0.07)
-ax.axvspan(20, 40, color='#9e9e9e', alpha=0.10)
+arb_c, nrb_c = clean(ar_b, nr_b)
+ar_stall = arb_c.max()
+# shade: knee region (params nail it) vs the collapse/floor region (one frontier)
+ax.axvspan(0, 10.5, color='#2e7d32', alpha=0.07)
+ax.axvspan(10.5, 40, color='#9e9e9e', alpha=0.10)
 
 ax.set_xlim(0, 40); ax.set_ylim(0, 1.04)
 ax.set_xlabel("aspect ratio  (depth / width)", fontsize=12)
 ax.set_ylabel("normalized bottom etch rate", fontsize=12)
-ax.set_title("Closing the de Boer gap: de-Boer process params fix the KNEE;\n"
-             "the high-AR FLOOR (ion delivery past AR~20) is the remaining frontier", fontsize=11.5)
+ax.set_title("de Boer: petch now matches the KNEE to AR~10 (cal_F=1.5) — but starving for the\n"
+             "knee makes the deep rate COLLAPSE and the trench STALL by AR~%d. Knee & floor are one problem."
+             % int(round(ar_stall)), fontsize=10.5)
 ax.legend(loc='upper right', fontsize=10)
 ax.grid(alpha=0.3)
-ax.annotate("ViennaPS regime: etchant-rich,\nbroad IADF -> too gentle",
-            xy=(17, np.interp(17, *clean(ar_d, nr_d))), xytext=(20.0, 0.80),
+ax.axvline(ar_stall, color='#c0392b', ls=':', lw=1.3, alpha=0.7)
+ax.annotate("ViennaPS regime: etchant-rich\n-> too gentle, never knees",
+            xy=(17, np.interp(17, *clean(ar_d, nr_d))), xytext=(20.0, 0.82),
             fontsize=9.2, color='#1a4e8a', arrowprops=dict(arrowstyle='->', color='#1a73e8'))
-ax.annotate("knee moved by etchant-starved\nflux ratio + narrower IADF",
-            xy=(13, np.interp(13, *clean(ar_b, nr_b))), xytext=(2.4, 0.18),
+ax.annotate("knee MATCHES experiment\nthrough AR~10",
+            xy=(9, np.interp(9, arb_c, nrb_c)), xytext=(1.6, 0.30),
             fontsize=9.2, color='#7a241a', arrowprops=dict(arrowstyle='->', color='#c0392b'))
-ax.annotate("floor frontier: petch (& ViennaPS)\ncollapse past AR~20; experiment holds ~0.25",
-            xy=(30, 0.245), xytext=(22.5, 0.42),
-            fontsize=9.2, color='#555', arrowprops=dict(arrowstyle='->', color='#888'))
+ax.annotate("then COLLAPSES / trench stalls\n(deep rate -> 0, not a sustained floor)",
+            xy=(ar_stall, 0.16), xytext=(20.5, 0.45),
+            fontsize=9.2, color='#7a241a', arrowprops=dict(arrowstyle='->', color='#c0392b'))
+ax.annotate("experiment sustains a gradual\nconductance decline to ~0.20",
+            xy=(32, 0.225), xytext=(24.5, 0.62),
+            fontsize=9.2, color='#333', arrowprops=dict(arrowstyle='->', color='#888'))
 
 fig.tight_layout()
 out = "/Users/stanislavdelaurentiis/chip-etch/plasma-etching-code/deboer_match.png"

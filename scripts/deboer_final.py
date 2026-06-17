@@ -34,8 +34,8 @@ def run_curve(par_over, seeds=(0, 1, 2)):
     return arN, nr_avg
 
 
-DEFAULT = dict(cal_F=12.0, ion_ang_sigma=np.deg2rad(2.5))                              # ViennaPS regime
-DEBOER = dict(cal_F=3.5, ion_ang_sigma=np.deg2rad(0.8), betaE=0.8, Ysp_scale=10.0)     # de Boer regime
+DEFAULT = dict(cal_F=12.0, ion_ang_sigma=np.deg2rad(2.5))                               # ViennaPS regime
+DEBOER = dict(cal_F=1.5, ion_ang_sigma=np.deg2rad(0.8), betaE=0.85, Ysp_scale=10.0)     # de Boer knee-tightened
 
 print(f"device={t3.DEVICE}  computing seed-averaged curves...\n", flush=True)
 ar_d, nr_d = run_curve(DEFAULT)
