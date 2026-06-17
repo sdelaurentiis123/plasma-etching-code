@@ -108,6 +108,19 @@ def _edge_adjacency(faces):
     return np.stack([fid_s[idx], fid_s[idx + 1]], axis=1)
 
 
+def _radius_adjacency(centroids, radius):
+    """ViennaPS-style fixed-RADIUS face pairs: every pair of faces whose centroids are within `radius`,
+    matching ViennaRay's disk-radius smoothFlux neighborhood (vs the 1-ring edge topology). Geometry-
+    consistent: the 1-ring over-feeds a trench's long-strip floor (many co-planar neighbors) while a
+    fixed physical disk does not, so this matches ViennaPS on BOTH holes and trenches with one setting.
+    Normal-weighting (built in the smooth prep) still gates cross-orientation averaging."""
+    if len(centroids) == 0:
+        return np.zeros((0, 2), dtype=np.int64)
+    tree = cKDTree(centroids, balanced_tree=False, compact_nodes=False)
+    pr = tree.query_pairs(radius, output_type='ndarray')
+    return pr.astype(np.int64) if len(pr) else np.zeros((0, 2), dtype=np.int64)
+
+
 def smooth_flux(flux, normals, pairs, n_iter=1, alpha=1.0):
     """ViennaPS 1-neighbor normal-weighted flux smoothing (rayTraceDisk.hpp::smoothFlux): each face
     averaged with edge neighbors weighted by max(0, dot(n_i, n_j)), self-weight 1. Laterally diffuses
@@ -609,8 +622,16 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         o, d = _source3d(kind, n, Lx, Ly, z_src, sig, sampling, rng, sd, core_frac=kcf, core_sigma=kcs)
         return wp.array(o, dtype=wp.vec3, device=DEVICE), wp.array(d, dtype=wp.vec3, device=DEVICE)
 
+    # smoothing neighborhood: 'edge' = 1-ring mesh topology (default, fast); 'radius' = ViennaPS-style
+    # fixed physical disk (geometry-consistent: matches ViennaPS on holes AND trenches, where 1-ring
+    # over-feeds the trench's long-strip floor). flux_smooth_radius is in units of dx.
+    sm_mode = par.get('flux_smooth_mode', 'edge')
     if n_smooth > 0:
-        pairs = _edge_adjacency(faces)
+        if sm_mode == 'radius':
+            cents = verts[faces].mean(axis=1)
+            pairs = _radius_adjacency(cents, float(par.get('flux_smooth_radius', 2.0)) * geo['dx'])
+        else:
+            pairs = _edge_adjacency(faces)
         if use_gpu_smooth:                       # normals + weights ON GPU (host cross was ~41ms/step on big meshes)
             _prep = _smooth_prep_dev(verts, faces, pairs)
             _smooth = lambda x: smooth_flux_gpu(x, None, pairs, n_smooth, sm_alpha, prep=_prep)
