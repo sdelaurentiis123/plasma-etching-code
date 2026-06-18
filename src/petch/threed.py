@@ -551,7 +551,7 @@ def _belen_coverages(m_i, m_F, m_O, cos_i, par, flags):
     eps = 1e-9
     GY_ie = Yie * f_ie * Fi
     GY_p = Yp * f_ie * Fi
-    Gb_E = par['Fflux'] * m_F * par.get('cal_F', 1.0) + eps
+    Gb_E = par['Fflux'] * m_F + eps                   # arriving F flux (ViennaPS convention, no fudge)
     Gb_P = par['Oflux'] * m_O + eps
     a = (par['k_sigma'] + 2.0 * GY_ie) / Gb_E
     b = (par['beta_sigma'] + GY_p) / Gb_P

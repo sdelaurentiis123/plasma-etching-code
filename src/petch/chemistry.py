@@ -65,7 +65,7 @@ def surface_rate_langmuir(m_i, m_F, m_O, cos_i, is_mask, par, flags=None):
     mode = "cosine" if flags is None else getattr(flags, "yield_angular", "cosine")
     f_ie, f_sp = angular_factors(cos_i, par, mode)
     Fi = par['ionFlux'] * m_i                           # geometric ion flux (angular is in yields)
-    Fev = par['Fflux'] * m_F * par.get('cal_F', 1.0)    # flux-normalization calibration
+    Fev = par['Fflux'] * m_F                            # arriving etchant flux (ViennaPS convention)
     Fp = par['Oflux'] * m_O
     eps = 1e-9
     Yie_a = Yie * f_ie; Ysp_a = Ysp * f_sp; Yp_a = Yp * f_ie

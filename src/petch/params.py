@@ -23,13 +23,8 @@ PAR = dict(
     k_sigma=300.0,                              # chemical-etch coupling (1e15 cm^-2 s^-1)
     beta_sigma=0.04,                            # passivation coupling (1e15 cm^-2 s^-1)
     B_sp=9.3,                                   # angular sputter coefficient
-    betaE=0.7,                                  # ViennaPS fluorine sticking (Si)
-    betaO=1.0,                                  # ViennaPS oxygen sticking (Si)
-    # Flux-normalization calibration: our open-field-normalized etchant flux underrepresents
-    # the absolute ViennaPS flux ratio by ~12x. Fitting this to the ViennaPS ground-truth ARDE
-    # gives the minimum at cal_F=12 (ARDE rmse 0.110 -> 0.0165). This is the dominant fidelity
-    # fix and it un-sticks 3D HARC. cal_F=1.0 recovers the uncalibrated PoC. See FINDINGS.md.
-    cal_F=12.0,
+    betaE=0.7,                                  # ViennaPS SF6O2 fluorine sticking (Si), psSF6O2Etching.hpp
+    betaO=1.0,                                  # ViennaPS SF6O2 oxygen sticking (Si)
     # Ion energy distribution (IED) for yield integration. 'mean' = evaluate yields at Emean (PoC);
     # 'gauss' = integrate over N(Emean,Esig) (matches ViennaPS); 'bimodal' = arcsine sheath IED of
     # full width ied_dE (the REAL low-freq-bias distribution, beyond ViennaPS). See chemistry._ied_yield.
@@ -62,8 +57,8 @@ class Flags:
     Each non-default value flips exactly one bias contributor (or speedup) so the
     harness can attribute a measured number to each.
     """
-    # Defaults = the ViennaPS-calibrated ACCURATE config (belen + viennaps angular + cal_F=12).
-    # Set chemistry='langmuir', yield_angular='cosine', cal_F=1.0 to recover the original PoC.
+    # Defaults = the faithful ViennaPS SF6O2 model (belen + viennaps angular yields, no fudge factors).
+    # Set chemistry='langmuir', yield_angular='cosine' to recover the original PoC.
     chemistry: str = "belen"         # "belen" (accurate, contributor #1) | "langmuir" (PoC)
     yield_energy: str = "mean"       # "mean" (PoC) | "ied"   (contributor #2)
     yield_angular: str = "viennaps"  # "viennaps" (accurate, contributor #3) | "cosine" (PoC)
