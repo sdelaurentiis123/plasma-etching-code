@@ -108,18 +108,6 @@ def _edge_adjacency(faces):
     return np.stack([fid_s[idx], fid_s[idx + 1]], axis=1)
 
 
-def _radius_adjacency(centroids, radius):
-    """ViennaPS-style fixed-RADIUS face pairs: every pair of faces whose centroids are within `radius`,
-    matching ViennaRay's disk-radius smoothFlux neighborhood (vs the 1-ring edge topology). Geometry-
-    consistent: the 1-ring over-feeds a trench's long-strip floor (many co-planar neighbors) while a
-    fixed physical disk does not, so this matches ViennaPS on BOTH holes and trenches with one setting.
-    Normal-weighting (built in the smooth prep) still gates cross-orientation averaging."""
-    if len(centroids) == 0:
-        return np.zeros((0, 2), dtype=np.int64)
-    tree = cKDTree(centroids, balanced_tree=False, compact_nodes=False)
-    pr = tree.query_pairs(radius, output_type='ndarray')
-    return pr.astype(np.int64) if len(pr) else np.zeros((0, 2), dtype=np.int64)
-
 
 def smooth_flux(flux, normals, pairs, n_iter=1, alpha=1.0):
     """ViennaPS 1-neighbor normal-weighted flux smoothing (rayTraceDisk.hpp::smoothFlux): each face
@@ -366,15 +354,11 @@ def _trace3d(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dt
 
 
 # (the old _launch_dirs helper was replaced by _source3d, which also does QMC)
-def _source3d(kind, n, Lx, Ly, z_src, sigma, sampling, rng, sd, core_frac=0.0, core_sigma=0.0):
+def _source3d(kind, n, Lx, Ly, z_src, sigma, sampling, rng, sd):
     """Source launch (position + direction). 'pseudo' (PoC) or 'sobol' (QMC over the 4D source).
 
     Each particle uses (x, y, angle1, angle2); QMC over those four dims drives variance ~1/N.
-
-    BIMODAL ion IADF (opt-in, beyond ViennaPS): a fraction `core_frac` of ions are launched with a
-    much narrower spread `core_sigma` (the collimated sheath core that survives to very high AR and
-    sustains the deep-feature ion-sputter floor); the rest keep the broad `sigma`. core_frac=0 ->
-    EXACTLY the single-Gaussian source (the ViennaPS-matching default; no behavior change)."""
+    """
     if sampling == "sobol":
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message=".*power of 2.*")
@@ -382,10 +366,7 @@ def _source3d(kind, n, Lx, Ly, z_src, sigma, sampling, rng, sd, core_frac=0.0, c
         ox, oy = u[:, 0] * Lx, u[:, 1] * Ly
         u2 = np.clip(u[:, 2], 1e-9, 1 - 1e-9); u3 = u[:, 3]
         if kind == 'ion':
-            sig = np.full(n, sigma)
-            if core_frac > 0.0:                          # bimodal: tag a core fraction with narrow sigma
-                sig[(u[:, 0] + u[:, 1]) * 0.5 < core_frac] = core_sigma  # 4th Sobol dim reused for split
-            ax = norm.ppf(u2) * sig; ay = norm.ppf(u3) * sig
+            ax = norm.ppf(u2) * sigma; ay = norm.ppf(u3) * sigma
             d = np.stack([np.sin(ax), np.sin(ay), -np.cos(ax) * np.cos(ay)], axis=1)
         else:
             ct = np.sqrt(u2); st = np.sqrt(1 - u2); ph = 2 * np.pi * u3
@@ -393,10 +374,7 @@ def _source3d(kind, n, Lx, Ly, z_src, sigma, sampling, rng, sd, core_frac=0.0, c
     else:
         ox, oy = rng.uniform(0, Lx, n), rng.uniform(0, Ly, n)
         if kind == 'ion':
-            sig = np.full(n, sigma)
-            if core_frac > 0.0:
-                sig[rng.uniform(0, 1, n) < core_frac] = core_sigma
-            ax = rng.normal(0, 1, n) * sig; ay = rng.normal(0, 1, n) * sig
+            ax = rng.normal(0, sigma, n); ay = rng.normal(0, sigma, n)
             d = np.stack([np.sin(ax), np.sin(ay), -np.cos(ax) * np.cos(ay)], axis=1)
         else:
             ct = np.sqrt(rng.uniform(0, 1, n)); st = np.sqrt(1 - ct**2)
@@ -409,23 +387,16 @@ def _source3d(kind, n, Lx, Ly, z_src, sigma, sampling, rng, sd, core_frac=0.0, c
 
 @wp.kernel
 def _gen_source(kind: int, Lx: float, Ly: float, z_src: float, sigma: float, seed: int,
-                core_frac: float, core_sigma: float,
                 origin: wp.array(dtype=wp.vec3), dirs: wp.array(dtype=wp.vec3)):
     """Generate one source ray (origin on the source plane + launch direction) ON THE GPU -- kills the
     host Sobol gen + H2D upload (the ~4.3ms/call source-gen cost). PSEUDOrandom (not QMC); matches the
-    `sampling='pseudo'` transform exactly: ion = near-vertical Gaussian tilt, neutral = cosine hemisphere.
-    BIMODAL ion IADF (opt-in): a `core_frac` fraction of ions use the narrow `core_sigma` (collimated
-    sheath core -> sustains the deep-feature ion floor). core_frac=0 -> exact single-Gaussian source."""
+    `sampling='pseudo'` transform exactly: ion = near-vertical Gaussian tilt, neutral = cosine hemisphere."""
     p = wp.tid()
     st8 = wp.rand_init(seed, p)
     origin[p] = wp.vec3(wp.randf(st8) * Lx, wp.randf(st8) * Ly, z_src)
-    if kind == 1:                                  # ion: near-vertical Gaussian (bimodal if core_frac>0)
-        sig = sigma
-        if core_frac > 0.0:
-            if wp.randf(st8) < core_frac:
-                sig = core_sigma
-        ax = wp.randn(st8) * sig
-        ay = wp.randn(st8) * sig
+    if kind == 1:                                  # ion: near-vertical Gaussian
+        ax = wp.randn(st8) * sigma
+        ay = wp.randn(st8) * sigma
         d = wp.vec3(wp.sin(ax), wp.sin(ay), -wp.cos(ax) * wp.cos(ay))
     else:                                          # neutral: cosine-weighted hemisphere about -z
         r1 = wp.randf(st8); r2 = wp.randf(st8)
@@ -434,14 +405,14 @@ def _gen_source(kind: int, Lx: float, Ly: float, z_src: float, sigma: float, see
     dirs[p] = wp.normalize(d)
 
 
-def gen_source_gpu(kind, n, Lx, Ly, z_src, sigma, seed, core_frac=0.0, core_sigma=0.0):
+def gen_source_gpu(kind, n, Lx, Ly, z_src, sigma, seed):
     """On-device source rays -> (origin, dirs) wp.vec3 arrays, no host gen / no upload. Returns Warp
     arrays directly (pass straight to the trace kernels)."""
     o = wp.zeros(n, dtype=wp.vec3, device=DEVICE)
     d = wp.zeros(n, dtype=wp.vec3, device=DEVICE)
     wp.launch(_gen_source, dim=n, device=DEVICE,
               inputs=[1 if kind == 'ion' else 0, float(Lx), float(Ly), float(z_src), float(sigma),
-                      int(seed), float(core_frac), float(core_sigma), o, d])
+                      int(seed), o, d])
     return o, d
 
 
@@ -610,28 +581,14 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     use_gpu_src = par.get('gpu_source', _cuda)     # on-device ray gen (pseudorandom, kills host source-gen+upload)
     dev = bool(par.get('device_flux', _cuda)) and use_gpu_smooth   # device-resident normalize+smooth (kernels)
 
-    # bimodal ion IADF (opt-in, beyond ViennaPS): collimated sheath core that sustains the deep-feature
-    # ion-sputter floor. cf=0 (default) -> exact single-Gaussian source (ViennaPS-matching, no change).
-    cf = float(par.get('ion_core_frac', 0.0))
-    cs = float(par.get('ion_core_sigma', np.deg2rad(0.3)))
-
     def _src(kind, n, sd, sig):
-        kcf, kcs = (cf, cs) if kind == 'ion' else (0.0, 0.0)
         if use_gpu_src:
-            return gen_source_gpu(kind, n, Lx, Ly, z_src, sig, sd, core_frac=kcf, core_sigma=kcs)
-        o, d = _source3d(kind, n, Lx, Ly, z_src, sig, sampling, rng, sd, core_frac=kcf, core_sigma=kcs)
+            return gen_source_gpu(kind, n, Lx, Ly, z_src, sig, sd)
+        o, d = _source3d(kind, n, Lx, Ly, z_src, sig, sampling, rng, sd)
         return wp.array(o, dtype=wp.vec3, device=DEVICE), wp.array(d, dtype=wp.vec3, device=DEVICE)
 
-    # smoothing neighborhood: 'edge' = 1-ring mesh topology (default, fast); 'radius' = ViennaPS-style
-    # fixed physical disk (geometry-consistent: matches ViennaPS on holes AND trenches, where 1-ring
-    # over-feeds the trench's long-strip floor). flux_smooth_radius is in units of dx.
-    sm_mode = par.get('flux_smooth_mode', 'edge')
     if n_smooth > 0:
-        if sm_mode == 'radius':
-            cents = verts[faces].mean(axis=1)
-            pairs = _radius_adjacency(cents, float(par.get('flux_smooth_radius', 2.0)) * geo['dx'])
-        else:
-            pairs = _edge_adjacency(faces)
+        pairs = _edge_adjacency(faces)
         if use_gpu_smooth:                       # normals + weights ON GPU (host cross was ~41ms/step on big meshes)
             _prep = _smooth_prep_dev(verts, faces, pairs)
             _smooth = lambda x: smooth_flux_gpu(x, None, pairs, n_smooth, sm_alpha, prep=_prep)
