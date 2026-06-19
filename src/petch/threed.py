@@ -273,7 +273,7 @@ def _wrap_y(mesh: wp.uint64, o: wp.vec3, d: wp.vec3, ly: float, lz: float, perio
     if periodic == 0:
         return o
     oo = o
-    for _w in range(8):
+    for _w in range(256):                               # enough wraps for thin-y (was 8 -> dropped rays)
         q = wp.mesh_query_ray(mesh, oo, d, 1.0e6)
         if q.result:
             return oo                                   # hits a face from here
