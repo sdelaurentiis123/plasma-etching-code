@@ -480,7 +480,7 @@ def mc_flux_3d(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=20000, se
     fF, _ = run('neutral', n_neu, par['s_F'], 12, seed * 9 + 2)
     fO, _ = run('neutral', n_neu, par['s_O'], 12, seed * 9 + 3)
 
-    A = np.maximum(areas, 0.3 * np.median(areas))
+    A = np.maximum(areas, 1.0e-9)              # actual triangle area (ViennaPS uses area; only a tiny degeneracy floor)
     base_i = n_ion / A_src
     base_n = n_neu / A_src
     m_i = np.clip((fi / A) / base_i, 0.0, 1.5)
@@ -545,7 +545,7 @@ def _trace3d_cov_rr(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.a
     o = origin[p]
     d = dir0[p]
     w = float(1.0)
-    for bounce in range(512):
+    for bounce in range(1024):
         bc = _apply_bc(mesh, o, d, lx, ly, lz, periodic)
         o = bc.o
         d = bc.d
@@ -585,6 +585,7 @@ def _trace3d_ion_yield(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: w
                        A_sp: float, Eth_sp: float, B_sp: float,
                        A_ie: float, Eth_ie: float, A_p: float, Eth_p: float,
                        inflect: float, minang: float, n_l: float, A_en: float, minE: float,
+                       thrmin: float, thrmax: float,
                        lx: float, ly: float, lz: float, periodic: int,
                        sp: wp.array(dtype=float), ie: wp.array(dtype=float), ip: wp.array(dtype=float),
                        arr: wp.array(dtype=float), ang: wp.array(dtype=float)):
@@ -601,9 +602,10 @@ def _trace3d_ion_yield(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: w
     E = meanE + sigmaE * wp.randn(state)
     if E < 0.0:
         E = 0.0
+    w = float(1.0)                                                 # ray WEIGHT (ViennaPS: deposited yield *= w)
     PI_2 = 1.5707963
     sEsp = wp.sqrt(Eth_sp); sEie = wp.sqrt(Eth_ie); sEp = wp.sqrt(Eth_p)
-    for bounce in range(512):
+    for bounce in range(1024):
         bc = _apply_bc(mesh, o, d, lx, ly, lz, periodic)
         o = bc.o
         d = bc.d
@@ -628,11 +630,24 @@ def _trace3d_ion_yield(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: w
             f_ie = 3.0 - 6.0 * incAng / 3.14159265
             if f_ie < 0.0:
                 f_ie = 0.0
-        wp.atomic_add(sp, q.face, A_sp * wp.max(sqrtE - sEsp, 0.0) * f_sp)
-        wp.atomic_add(ie, q.face, A_ie * wp.max(sqrtE - sEie, 0.0) * f_ie)
-        wp.atomic_add(ip, q.face, A_p * wp.max(sqrtE - sEp, 0.0) * f_ie)
-        wp.atomic_add(arr, q.face, 1.0)                            # arrival count (m_i, diagnostics)
-        wp.atomic_add(ang, q.face, cosT)
+        wp.atomic_add(sp, q.face, A_sp * wp.max(sqrtE - sEsp, 0.0) * f_sp * w)   # deposit yield * rayWeight
+        wp.atomic_add(ie, q.face, A_ie * wp.max(sqrtE - sEie, 0.0) * f_ie * w)
+        wp.atomic_add(ip, q.face, A_p * wp.max(sqrtE - sEp, 0.0) * f_ie * w)
+        wp.atomic_add(arr, q.face, w)                             # weighted arrival (m_i, diagnostics)
+        wp.atomic_add(ang, q.face, cosT * w)
+        # ViennaPS angle-dependent ion sticking: ABSORB near-normal (incAng<thetaRMin, e.g. the floor),
+        # REFLECT at grazing (incAng>thetaRMin, e.g. sidewalls). This stops ions bouncing off the floor
+        # onto the walls -> keeps wall passivation right -> deep neutral floor not starved.
+        stick = float(1.0)
+        if incAng > thrmin:
+            rr = (incAng - thrmin) / (thrmax - thrmin)
+            if rr < 0.0:
+                rr = 0.0
+            if rr > 1.0:
+                rr = 1.0
+            stick = 1.0 - rr
+        if stick >= 1.0:                                          # near-normal -> fully absorbed
+            break
         if incAng >= inflect:                                      # ViennaPS updateEnergy (reflected energy)
             Eref = 1.0 - (1.0 - A_en) * (PI_2 - incAng) / (PI_2 - inflect)
         else:
@@ -650,16 +665,19 @@ def _trace3d_ion_yield(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: w
         if newE <= minE:                                          # ion thermalized -> stop (ViennaPS)
             break
         E = newE
+        w = w - w * stick                                         # reduce weight by the angle sticking
+        if w <= 1.0e-4:
+            break
         hit = o + q.t * d
-        w = wp.normalize(d - 2.0 * wp.dot(d, n) * n)              # specular direction (cone axis)
-        if w[2] < -0.9999999:                                     # Frisvad orthonormal basis about w
+        axis = wp.normalize(d - 2.0 * wp.dot(d, n) * n)           # specular direction (cone axis)
+        if axis[2] < -0.9999999:                                  # Frisvad orthonormal basis about axis
             tt = wp.vec3(0.0, -1.0, 0.0)
             bb = wp.vec3(-1.0, 0.0, 0.0)
         else:
-            aa = 1.0 / (1.0 + w[2])
-            cc = -w[0] * w[1] * aa
-            tt = wp.vec3(1.0 - w[0] * w[0] * aa, cc, -w[0])
-            bb = wp.vec3(cc, 1.0 - w[1] * w[1] * aa, -w[1])
+            aa = 1.0 / (1.0 + axis[2])
+            cc = -axis[0] * axis[1] * aa
+            tt = wp.vec3(1.0 - axis[0] * axis[0] * aa, cc, -axis[0])
+            bb = wp.vec3(cc, 1.0 - axis[1] * axis[1] * aa, -axis[1])
         maxcone = PI_2 - wp.min(incAng, minang)                  # cone narrows toward specular at grazing
         theta = float(0.0)
         for _t in range(64):                                     # ViennaRay ConedCosine accept-reject
@@ -669,7 +687,7 @@ def _trace3d_ion_yield(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: w
             if wp.randf(state) * theta * uu <= wp.cos(PI_2 * ss) * wp.sin(theta):
                 break
         phi = 6.2831853 * wp.randf(state)
-        nd = wp.sin(theta) * (wp.cos(phi) * tt + wp.sin(phi) * bb) + wp.cos(theta) * w
+        nd = wp.sin(theta) * (wp.cos(phi) * tt + wp.sin(phi) * bb) + wp.cos(theta) * axis
         nd = wp.normalize(nd)
         if wp.dot(nd, n) <= 0.0:                                  # keep it in the upper hemisphere
             nd = nd - 2.0 * wp.dot(nd, n) * n
@@ -713,7 +731,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
     rng = np.random.default_rng(seed)
     z_src = Lz - geo['dx']
     A_src = Lx * Ly
-    A = np.maximum(areas, 0.3 * np.median(areas))
+    A = np.maximum(areas, 1.0e-9)              # actual triangle area (ViennaPS uses area; only a tiny degeneracy floor)
     betaE = par.get('betaE', 0.7); betaO = par.get('betaO', 1.0)
     # ViennaPS 1-neighbor normal-weighted flux smoothing (default on; par['flux_smooth']=0 to disable).
     n_smooth = int(par.get('flux_smooth', 1))
@@ -773,6 +791,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
                           float(par['A_sp']), float(par['Eth_sp']), float(par['B_sp']),
                           float(par['A_ie']), float(par['Eth_ie']), float(par['A_p']), float(par['Eth_p']),
                           inflect, minang, n_l, float(A_en), minE,
+                          float(par.get('thetaRMin', 1.2217305)), float(par.get('thetaRMax', 1.5707963)),
                           float(Lx), float(Ly), float(Lz), int(par.get('periodic_y', 0)),
                           sp_w, ie_w, ip_w, fi, ai])
         norm = (A_src / n_ion)
@@ -895,7 +914,7 @@ def mc_flux_3d_radiosity(mesh, verts, faces, centroids, areas, geo, par, n_ion=2
     F = len(faces)
     rng = np.random.default_rng(seed)
     z_src = Lz - geo['dx']; A_src = Lx * Ly
-    A = np.maximum(areas, 0.3 * np.median(areas))
+    A = np.maximum(areas, 1.0e-9)              # actual triangle area (ViennaPS uses area; only a tiny degeneracy floor)
     betaE = par.get('betaE', 0.7); betaO = par.get('betaO', 1.0)
     fn = _gas_normals(verts, faces, centroids, geo)     # into-gas (essential for face emission)
 

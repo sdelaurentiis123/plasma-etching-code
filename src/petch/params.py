@@ -18,6 +18,7 @@ PAR = dict(
     # lose energy per bounce until E<min(Eth) -- funnels ions to deep floors (the deep-AR ARDE term).
     # Defaults verbatim from psSF6O2Etching.hpp defaultParameters (inflect 89deg, minAngle 80deg, n_l 10).
     inflectAngle=1.55334303, minAngle=1.3962634, n_l=10.0,
+    thetaRMin=np.deg2rad(70.0), thetaRMax=np.deg2rad(90.0),   # ion angle-dependent sticking: absorb <70deg, reflect >70deg
     Eth_ie=15.0, Eth_sp=20.0, Eth_p=10.0,       # yield thresholds (eV)
     A_ie=7.0, A_sp=0.0337, A_p=3.0,             # yield prefactors
     s_F=0.20, s_O=0.30,                         # neutral sticking coefficients (PoC values)
