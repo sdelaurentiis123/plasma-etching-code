@@ -31,8 +31,19 @@ def surface_rate_belen(m_i, m_F, m_O, cos_i, is_mask, par, flags=None):
     Yie_a = Yie * f_ie; Ysp_a = Ysp * f_sp; Yp_a = Yp * f_ie
     eps = 1e-9
 
-    GY_ie = Yie_a * Fi                                # ion-enhanced etchant removal rate
-    GY_p = Yp_a * Fi                                  # ion-enhanced passivation removal rate
+    iy = par.get('_ion_yield')
+    if iy is not None:                                # faithful ViennaPS ion: yields deposited during
+        _sp, _ie, _ip = iy                            # ray tracing (per-ion energy + reflection funneling)
+        ionF = par['ionFlux']
+        GY_ie = ionF * _ie                            # ion-enhanced etchant removal (Si)
+        GY_p = ionF * _ip                             # ion-enhanced passivation removal (O)
+        sputter = ionF * _sp                          # physical sputter rate
+        ion_enh = ionF * _ie                          # ion-enhanced etch rate (== GY_ie)
+    else:
+        GY_ie = Yie_a * Fi                            # ion-enhanced etchant removal rate
+        GY_p = Yp_a * Fi                              # ion-enhanced passivation removal rate
+        sputter = Ysp_a * Fi
+        ion_enh = Yie_a * Fi
     # Flux normalization to the ViennaPS convention: our m_F records STUCK flux (open-field ~=
     # betaE), ViennaPS normalizes ARRIVING flux to 1 on open field. Divide by fnorm (=betaE/betaO)
     # to match. fnorm=1.0 recovers the uncorrected PoC-style normalization (for A/B testing).
@@ -46,7 +57,7 @@ def surface_rate_belen(m_i, m_F, m_O, cos_i, is_mask, par, flags=None):
     thF = 1.0 / (1.0 + a * (1.0 + 1.0 / (b + eps)))   # fluorine coverage (coupled to O via b)
 
     # ViennaPS rate: chemical etch + physical sputter + ion-enhanced etch (psPlasmaEtching.hpp)
-    rate = par['k_sigma'] * thF / 4.0 + Ysp_a * Fi + thF * Yie_a * Fi
+    rate = par['k_sigma'] * thF / 4.0 + sputter + thF * ion_enh
     V = (1.0 / par['rho']) * rate * par['rate_scale']
     V[is_mask] = 0.0
     return V

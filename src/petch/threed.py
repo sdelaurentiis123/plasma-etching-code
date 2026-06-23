@@ -541,6 +541,102 @@ def _trace3d_cov_rr(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.a
         o = hit + 1.0e-4 * n
 
 
+@wp.kernel
+def _trace3d_ion_yield(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
+                       seed: int, meanE: float, sigmaE: float,
+                       A_sp: float, Eth_sp: float, B_sp: float,
+                       A_ie: float, Eth_ie: float, A_p: float, Eth_p: float,
+                       inflect: float, minang: float, n_l: float, A_en: float, minE: float,
+                       ly: float, lz: float, periodic: int,
+                       sp: wp.array(dtype=float), ie: wp.array(dtype=float), ip: wp.array(dtype=float),
+                       arr: wp.array(dtype=float), ang: wp.array(dtype=float)):
+    """EXACT ViennaPS SF6O2 ion (psPlasmaEtching.hpp PlasmaEtchingIon): near-vertical ions have
+    sticking=0 and REFLECT with ViennaRay's coned-cosine law, losing energy each bounce until the
+    energy drops below min(Eth). On EVERY hit they deposit the yield-WEIGHTED sputter, ion-enhanced
+    (Si) and passivation (O) rates (surfaceCollision) -- not just an arrival count. Grazing sidewall
+    hits keep their energy and glance forward, so the ion funnels down a deep trench and feeds the
+    floor: this is the deep-AR term petch's first-hit-stick ion model was missing (steep ARDE)."""
+    p = wp.tid()
+    state = wp.rand_init(seed, p)
+    o = origin[p]
+    d = dir0[p]
+    E = meanE + sigmaE * wp.randn(state)
+    if E < 0.0:
+        E = 0.0
+    PI_2 = 1.5707963
+    sEsp = wp.sqrt(Eth_sp); sEie = wp.sqrt(Eth_ie); sEp = wp.sqrt(Eth_p)
+    for bounce in range(512):
+        o = _wrap_y(mesh, o, d, ly, lz, periodic)
+        q = wp.mesh_query_ray(mesh, o, d, 1.0e6)
+        if not q.result:
+            break
+        n = q.normal
+        if wp.dot(n, d) > 0.0:
+            n = -n
+        cosT = -wp.dot(d, n)
+        if cosT < 0.0:
+            cosT = 0.0
+        if cosT > 1.0:
+            cosT = 1.0
+        incAng = wp.acos(cosT)
+        sqrtE = wp.sqrt(E)
+        f_sp = (1.0 + B_sp * (1.0 - cosT * cosT)) * cosT           # ViennaPS sputter angular factor
+        if f_sp < 0.0:
+            f_sp = 0.0
+        f_ie = float(1.0)                                          # ion-enhanced: flat to 60deg then -> 0
+        if cosT < 0.5:
+            f_ie = 3.0 - 6.0 * incAng / 3.14159265
+            if f_ie < 0.0:
+                f_ie = 0.0
+        wp.atomic_add(sp, q.face, A_sp * wp.max(sqrtE - sEsp, 0.0) * f_sp)
+        wp.atomic_add(ie, q.face, A_ie * wp.max(sqrtE - sEie, 0.0) * f_ie)
+        wp.atomic_add(ip, q.face, A_p * wp.max(sqrtE - sEp, 0.0) * f_ie)
+        wp.atomic_add(arr, q.face, 1.0)                            # arrival count (m_i, diagnostics)
+        wp.atomic_add(ang, q.face, cosT)
+        if incAng >= inflect:                                      # ViennaPS updateEnergy (reflected energy)
+            Eref = 1.0 - (1.0 - A_en) * (PI_2 - incAng) / (PI_2 - inflect)
+        else:
+            Eref = A_en * wp.pow(incAng / inflect, n_l)
+        newE = Eref * E
+        for _e in range(4):                                       # N(Eref*E, 0.1E) clamped to [0,E]
+            cand = Eref * E + 0.1 * E * wp.randn(state)
+            if cand >= 0.0 and cand <= E:
+                newE = cand
+                break
+        if newE < 0.0:
+            newE = 0.0
+        if newE > E:
+            newE = E
+        if newE <= minE:                                          # ion thermalized -> stop (ViennaPS)
+            break
+        E = newE
+        hit = o + q.t * d
+        w = wp.normalize(d - 2.0 * wp.dot(d, n) * n)              # specular direction (cone axis)
+        if w[2] < -0.9999999:                                     # Frisvad orthonormal basis about w
+            tt = wp.vec3(0.0, -1.0, 0.0)
+            bb = wp.vec3(-1.0, 0.0, 0.0)
+        else:
+            aa = 1.0 / (1.0 + w[2])
+            cc = -w[0] * w[1] * aa
+            tt = wp.vec3(1.0 - w[0] * w[0] * aa, cc, -w[0])
+            bb = wp.vec3(cc, 1.0 - w[1] * w[1] * aa, -w[1])
+        maxcone = PI_2 - wp.min(incAng, minang)                  # cone narrows toward specular at grazing
+        theta = float(0.0)
+        for _t in range(64):                                     # ViennaRay ConedCosine accept-reject
+            uu = wp.sqrt(wp.randf(state))
+            ss = wp.sqrt(wp.max(1.0 - uu, 0.0))
+            theta = maxcone * ss
+            if wp.randf(state) * theta * uu <= wp.cos(PI_2 * ss) * wp.sin(theta):
+                break
+        phi = 6.2831853 * wp.randf(state)
+        nd = wp.sin(theta) * (wp.cos(phi) * tt + wp.sin(phi) * bb) + wp.cos(theta) * w
+        nd = wp.normalize(nd)
+        if wp.dot(nd, n) <= 0.0:                                  # keep it in the upper hemisphere
+            nd = nd - 2.0 * wp.dot(nd, n) * n
+        d = nd
+        o = hit + 1.0e-4 * n
+
+
 def _belen_coverages(m_i, m_F, m_O, cos_i, par, flags):
     """Belen steady-state coverages theta_F, theta_O from per-face fluxes (for the fixed point)."""
     from .chemistry import _yields, angular_factors
@@ -549,8 +645,14 @@ def _belen_coverages(m_i, m_F, m_O, cos_i, par, flags):
     f_ie, _ = angular_factors(cos_i, par, mode)
     Fi = par['ionFlux'] * m_i
     eps = 1e-9
-    GY_ie = Yie * f_ie * Fi
-    GY_p = Yp * f_ie * Fi
+    iy = par.get('_ion_yield')
+    if iy is not None:                                # faithful ViennaPS ion model: yields deposited
+        _sp, _ie, _ip = iy                            # per-ion energy + reflection, during ray tracing
+        GY_ie = par['ionFlux'] * _ie                  # ion-enhanced etchant removal (Si)
+        GY_p = par['ionFlux'] * _ip                   # ion-enhanced passivation removal (O)
+    else:
+        GY_ie = Yie * f_ie * Fi
+        GY_p = Yp * f_ie * Fi
     Gb_E = par['Fflux'] * m_F + eps                   # arriving F flux (ViennaPS convention, no fudge)
     Gb_P = par['Oflux'] * m_O + eps
     a = (par['k_sigma'] + 2.0 * GY_ie) / Gb_E
@@ -614,23 +716,52 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
 
     # ions (unchanged; not coverage-dependent)
     oi_w, di_w = _src('ion', n_ion, seed * 9 + 1, par['ion_ang_sigma'])
-    fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
-    spec = 1 if (flags is not None and getattr(flags, "ion_reflection", False)) else 0
-    nre_i = 3 if spec == 1 else 0
-    wp.launch(_trace3d, dim=n_ion, device=DEVICE,
-              inputs=[mesh.id, oi_w, di_w,
-                      1.0, int(nre_i), int(seed * 9 + 1), int(spec), 0.34, 0.8, fi, ai])
-    if dev:
-        cw = wp.zeros(F, dtype=float, device=DEVICE)
-        wp.launch(_cos_k, dim=F, device=DEVICE, inputs=[fi, ai, cw])
-        cos_i = cw.numpy()
-        m_i = _finish(fi, A_src / n_ion, 1.5)          # cos from RAW fi/ai; m_i normalized+smoothed
-    else:
+    # Faithful ViennaPS ion: sticking=0 + coned-cosine reflection + per-ion energy, depositing the
+    # yield-WEIGHTED sputter/ion-enhanced/passivation rates directly (the deep-AR funneling term).
+    # Active for belen+ion_reflection; otherwise the legacy first-hit ion (with optional crude specular).
+    faithful_ion = (flags is not None and getattr(flags, "ion_reflection", False)
+                    and getattr(flags, "chemistry", "langmuir") == "belen")
+    if faithful_ion:
+        inflect = float(par.get('inflectAngle', 1.55334303)); minang = float(par.get('minAngle', 1.3962634))
+        n_l = float(par.get('n_l', 10.0)); A_en = 1.0 / (1.0 + n_l * (1.5707963 / inflect - 1.0))
+        minE = float(min(par['Eth_ie'], par['Eth_sp']))
+        sp_w = wp.zeros(F, dtype=float, device=DEVICE); ie_w = wp.zeros(F, dtype=float, device=DEVICE)
+        ip_w = wp.zeros(F, dtype=float, device=DEVICE)
+        fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
+        wp.launch(_trace3d_ion_yield, dim=n_ion, device=DEVICE,
+                  inputs=[mesh.id, oi_w, di_w, int(seed * 9 + 1), float(par['Emean']), float(par['Esig']),
+                          float(par['A_sp']), float(par['Eth_sp']), float(par['B_sp']),
+                          float(par['A_ie']), float(par['Eth_ie']), float(par['A_p']), float(par['Eth_p']),
+                          inflect, minang, n_l, float(A_en), minE,
+                          float(Ly), float(Lz), int(par.get('periodic_y', 0)),
+                          sp_w, ie_w, ip_w, fi, ai])
+        norm = (A_src / n_ion)
+        def _ynorm(a):                                  # normalize like m_i then smooth (no clip on yields)
+            m = (a.numpy() / A) * norm
+            return _smooth(m) if n_smooth > 0 else m
+        par['_ion_yield'] = (_ynorm(sp_w), _ynorm(ie_w), _ynorm(ip_w))
         fi = fi.numpy(); ai = ai.numpy()
-        m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
+        m_i = (fi / A) * norm                            # arrival flux (diagnostics; rate uses _ion_yield)
         cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
         if n_smooth > 0:
             m_i = _smooth(m_i)
+    else:
+        par.pop('_ion_yield', None)                      # belen falls back to analytic yields
+        fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
+        wp.launch(_trace3d, dim=n_ion, device=DEVICE,
+                  inputs=[mesh.id, oi_w, di_w,
+                          1.0, int(0), int(seed * 9 + 1), int(0), 0.34, 0.8, fi, ai])
+        if dev:
+            cw = wp.zeros(F, dtype=float, device=DEVICE)
+            wp.launch(_cos_k, dim=F, device=DEVICE, inputs=[fi, ai, cw])
+            cos_i = cw.numpy()
+            m_i = _finish(fi, A_src / n_ion, 1.5)        # cos from RAW fi/ai; m_i normalized+smoothed
+        else:
+            fi = fi.numpy(); ai = ai.numpy()
+            m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
+            cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
+            if n_smooth > 0:
+                m_i = _smooth(m_i)
 
     # SURFACE CHARGING (beyond ViennaPS): electrons arrive DIFFUSELY (cosine, unity sticking) so they
     # are more geometrically shadowed in HARC than the directional ions. On a floating/insulating
