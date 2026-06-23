@@ -263,37 +263,73 @@ def smooth_flux_gpu(flux, normals, pairs, n_iter=1, alpha=1.0, prep=None):
 
 
 # ----------------------------- Warp ray-traced flux -----------------------------
+@wp.struct
+class _BCRay:
+    o: wp.vec3
+    d: wp.vec3
+
+
 @wp.func
-def _wrap_y(mesh: wp.uint64, o: wp.vec3, d: wp.vec3, ly: float, lz: float, periodic: int):
-    """PERIODIC-Y boundary for trenches (invariant along y -> physically infinite). When a ray misses
-    and would exit a y-face BEFORE the top (z=lz, the open sky), re-enter the opposite y-face and keep
-    going. Returns the origin from which the caller should query (a hit, or a true escape via top/x).
-    Fixes the trench artifact: rays leaking out the open y-ends -> radiosity loses the conductance limit
-    (flat ARDE), MC under-samples the floor (erratic). periodic=0 -> no-op (holes)."""
-    if periodic == 0:
-        return o
+def _apply_bc(mesh: wp.uint64, o: wp.vec3, d: wp.vec3, lx: float, ly: float, lz: float, active: int):
+    """Lateral boundary conditions matching ViennaPS (default REFLECTIVE in x & y, INFINITE bottom,
+    open top=sky). When a ray misses the surface and would exit a lateral face before the open top:
+      - x faces: REFLECT (flip d_x) -- ViennaPS uses reflective lateral BCs; without this, wide-angle
+        cosine NEUTRALS escape the open x-domain (open-field flux ~0.78 not 1.0) and the deep-trench
+        floor is starved ~2x (steep ARDE). Ions funnel near-vertically so they barely notice -> this
+        is why the ion channel already matched but the etchant rolled off too steeply.
+      - y faces: REFLECT (flip d_y) -- matches ViennaPS's reflective-y (for a y-invariant trench this
+        equals the old periodic-y, but it now mirrors ViennaPS's boundary exactly).
+    Returns the (origin, direction) from which the caller should query. active=0 -> no-op (holes)."""
+    r = _BCRay()
+    r.o = o
+    r.d = d
+    if active == 0:
+        return r
     oo = o
-    for _w in range(256):                               # enough wraps for thin-y (was 8 -> dropped rays)
-        q = wp.mesh_query_ray(mesh, oo, d, 1.0e6)
+    dd = d
+    for _w in range(256):
+        q = wp.mesh_query_ray(mesh, oo, dd, 1.0e6)
         if q.result:
-            return oo                                   # hits a face from here
+            r.o = oo
+            r.d = dd
+            return r                                     # hits a face from here
+        tx = 1.0e30
+        if dd[0] > 1.0e-9:
+            tx = (lx - oo[0]) / dd[0]
+        if dd[0] < -1.0e-9:
+            tx = (0.0 - oo[0]) / dd[0]
         ty = 1.0e30
-        if d[1] > 1.0e-9:
-            ty = (ly - oo[1]) / d[1]
-        if d[1] < -1.0e-9:
-            ty = (0.0 - oo[1]) / d[1]
+        if dd[1] > 1.0e-9:
+            ty = (ly - oo[1]) / dd[1]
+        if dd[1] < -1.0e-9:
+            ty = (0.0 - oo[1]) / dd[1]
         tz = 1.0e30
-        if d[2] > 1.0e-9:
-            tz = (lz - oo[2]) / d[2]                     # reaches the open top first -> real escape
-        if ty < tz and ty < 1.0e29 and ty > 1.0e-7:
-            px = oo[0] + ty * d[0]; pz = oo[2] + ty * d[2]
+        if dd[2] > 1.0e-9:
+            tz = (lz - oo[2]) / dd[2]                     # reaches the open top first -> real escape
+        # earliest lateral exit before the top?
+        if tx < tz and tx < ty and tx > 1.0e-7:          # exit x -> reflect
+            hy = oo[1] + tx * dd[1]
+            hz = oo[2] + tx * dd[2]
+            nx = lx - 1.0e-4
+            if dd[0] < 0.0:
+                nx = 1.0e-4
+            oo = wp.vec3(nx, hy, hz)
+            dd = wp.vec3(-dd[0], dd[1], dd[2])
+        elif ty < tz and ty < 1.0e29 and ty > 1.0e-7:    # exit y -> REFLECT (ViennaPS reflective-y)
+            hx = oo[0] + ty * dd[0]
+            hz = oo[2] + ty * dd[2]
             ny = ly - 1.0e-4
-            if d[1] > 0.0:
+            if dd[1] < 0.0:
                 ny = 1.0e-4
-            oo = wp.vec3(px, ny, pz)                     # re-enter the opposite y face
+            oo = wp.vec3(hx, ny, hz)
+            dd = wp.vec3(dd[0], -dd[1], dd[2])
         else:
-            return oo                                   # escapes via top/x -> sky
-    return oo
+            r.o = oo
+            r.d = dd
+            return r                                     # escapes via top -> sky
+    r.o = oo
+    r.d = dd
+    return r
 
 
 @wp.kernel
@@ -496,7 +532,7 @@ def _trace3d_cov(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.arra
 @wp.kernel
 def _trace3d_cov_rr(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
                     bare: wp.array(dtype=float), beta: float, seed: int, flux: wp.array(dtype=float),
-                    ly: float, lz: float, periodic: int):
+                    lx: float, ly: float, lz: float, periodic: int):
     """EXACT ViennaPS neutral transport: weighted ray + Russian roulette, NO fixed bounce cap.
     Verbatim from ViennaRay rayTraceKernel.hpp + psPlasmaEtching.hpp:
       - ray weight W starts at 1.0; DEPOSIT W into arriving flux on every hit (not +1.0);
@@ -510,7 +546,9 @@ def _trace3d_cov_rr(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.a
     d = dir0[p]
     w = float(1.0)
     for bounce in range(512):
-        o = _wrap_y(mesh, o, d, ly, lz, periodic)
+        bc = _apply_bc(mesh, o, d, lx, ly, lz, periodic)
+        o = bc.o
+        d = bc.d
         q = wp.mesh_query_ray(mesh, o, d, 1.0e6)
         if not q.result:
             break
@@ -547,7 +585,7 @@ def _trace3d_ion_yield(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: w
                        A_sp: float, Eth_sp: float, B_sp: float,
                        A_ie: float, Eth_ie: float, A_p: float, Eth_p: float,
                        inflect: float, minang: float, n_l: float, A_en: float, minE: float,
-                       ly: float, lz: float, periodic: int,
+                       lx: float, ly: float, lz: float, periodic: int,
                        sp: wp.array(dtype=float), ie: wp.array(dtype=float), ip: wp.array(dtype=float),
                        arr: wp.array(dtype=float), ang: wp.array(dtype=float)):
     """EXACT ViennaPS SF6O2 ion (psPlasmaEtching.hpp PlasmaEtchingIon): near-vertical ions have
@@ -566,7 +604,9 @@ def _trace3d_ion_yield(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: w
     PI_2 = 1.5707963
     sEsp = wp.sqrt(Eth_sp); sEie = wp.sqrt(Eth_ie); sEp = wp.sqrt(Eth_p)
     for bounce in range(512):
-        o = _wrap_y(mesh, o, d, ly, lz, periodic)
+        bc = _apply_bc(mesh, o, d, lx, ly, lz, periodic)
+        o = bc.o
+        d = bc.d
         q = wp.mesh_query_ray(mesh, o, d, 1.0e6)
         if not q.result:
             break
@@ -733,7 +773,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
                           float(par['A_sp']), float(par['Eth_sp']), float(par['B_sp']),
                           float(par['A_ie']), float(par['Eth_ie']), float(par['A_p']), float(par['Eth_p']),
                           inflect, minang, n_l, float(A_en), minE,
-                          float(Ly), float(Lz), int(par.get('periodic_y', 0)),
+                          float(Lx), float(Ly), float(Lz), int(par.get('periodic_y', 0)),
                           sp_w, ie_w, ip_w, fi, ai])
         norm = (A_src / n_ion)
         def _ynorm(a):                                  # normalize like m_i then smooth (no clip on yields)
@@ -777,7 +817,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         fe = wp.zeros(F, dtype=float, device=DEVICE)
         wp.launch(_trace3d_cov_rr, dim=n_neu, device=DEVICE,                    # unity sticking: bare=1, beta=1
                   inputs=[mesh.id, oe, de, wp.array(np.ones(F, np.float32), dtype=float, device=DEVICE),
-                          1.0, int(seed * 9 + 7), fe, float(Ly), float(Lz), int(par.get('periodic_y', 0))])
+                          1.0, int(seed * 9 + 7), fe, float(Lx), float(Ly), float(Lz), int(par.get('periodic_y', 0))])
         m_e = np.clip((fe.numpy() / A) / (n_neu / A_src) * par.get('eFlux', 1.0), 0.0, 8.0)
         if n_smooth > 0:
             m_e = _smooth(m_e)
@@ -801,7 +841,7 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
             wp.launch(_trace3d_cov_rr, dim=n_neu, device=DEVICE,
                       inputs=[mesh.id, o_w, d_w,
                               wp.array(bare.astype(np.float32), dtype=float, device=DEVICE),
-                              float(beta), int(sd), fl, float(Ly), float(Lz), int(par.get('periodic_y', 0))])
+                              float(beta), int(sd), fl, float(Lx), float(Ly), float(Lz), int(par.get('periodic_y', 0))])
         else:
             nre = int(par.get('n_reemit_cov', np.clip(8.0 / max(beta, 0.02), 24, 200)))
             wp.launch(_trace3d_cov, dim=n_neu, device=DEVICE,
@@ -827,13 +867,13 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
 
 @wp.kernel
 def _trace_ff(mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), dir0: wp.array(dtype=wp.vec3),
-              hitface: wp.array(dtype=int), ly: float, lz: float, periodic: int):
+              hitface: wp.array(dtype=int), lx: float, ly: float, lz: float, periodic: int):
     """Single-bounce form-factor ray: cast one diffuse ray from a face, record the FIRST face it hits
-    (or -1 = escapes to the open source/sky). PERIODIC-Y for trenches: rays exiting the y-ends re-enter
-    the opposite side, so the deep floor sees the trench conductance instead of leaking to 'sky'."""
+    (or -1 = escapes to the open source/sky). Reflective-x / periodic-y lateral BCs (ViennaPS default):
+    rays exiting the lateral faces re-enter, so the deep floor sees the trench conductance not 'sky'."""
     p = wp.tid()
-    o = _wrap_y(mesh, origin[p], dir0[p], ly, lz, periodic)
-    q = wp.mesh_query_ray(mesh, o, dir0[p], 1.0e6)
+    bc = _apply_bc(mesh, origin[p], dir0[p], lx, ly, lz, periodic)
+    q = wp.mesh_query_ray(mesh, bc.o, bc.d, 1.0e6)
     if q.result:
         hitface[p] = q.face
     else:
@@ -876,7 +916,7 @@ def mc_flux_3d_radiosity(mesh, verts, faces, centroids, areas, geo, par, n_ion=2
     hf = wp.zeros(F * n_ff, dtype=int, device=DEVICE)
     wp.launch(_trace_ff, dim=F * n_ff, device=DEVICE,
               inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE), wp.array(d, dtype=wp.vec3, device=DEVICE),
-                      hf, float(Ly), float(Lz), int(par.get('periodic_y', 0))])
+                      hf, float(Lx), float(Ly), float(Lz), int(par.get('periodic_y', 0))])
     hit = hf.numpy()
     esc = hit < 0
     D = np.bincount(src[esc], minlength=F).astype(np.float64) / n_ff          # D_i = sky view of i
