@@ -67,15 +67,21 @@ def extract_mesh_3d_gpu(phi, dx):
     skimage's Lewiner (~96% of the faces) -> validate WITHIN-NOISE on depth before trusting. The
     MarchingCubes context is cached per grid shape (its kernels compile once)."""
     nx, ny, nz = phi.shape
-    mc = _mc_cache.get((nx, ny, nz))
-    if mc is None:
-        mv = mt = nx * ny * nz // 2 + 1000
-        mc = wp.MarchingCubes(nx, ny, nz, max_verts=mv, max_tris=mt, device=DEVICE)
-        _mc_cache[(nx, ny, nz)] = mc
-    fwp = wp.array(phi.astype(np.float32), dtype=float, device=DEVICE)
-    mc.surface(fwp, 0.0)
-    verts = mc.verts.numpy().astype(np.float64) * dx      # node-index coords -> physical
-    faces = mc.indices.numpy().reshape(-1, 3)
+    try:
+        mc = _mc_cache.get((nx, ny, nz))
+        if mc is None:
+            mv = mt = nx * ny * nz // 2 + 1000
+            mc = wp.MarchingCubes(nx, ny, nz, max_verts=mv, max_tris=mt, device=DEVICE)
+            _mc_cache[(nx, ny, nz)] = mc
+        fwp = wp.array(phi.astype(np.float32), dtype=float, device=DEVICE)
+        mc.surface(fwp, 0.0)
+        verts = mc.verts.numpy().astype(np.float64) * dx      # node-index coords -> physical
+        faces = mc.indices.numpy().reshape(-1, 3)
+        if len(faces) == 0:
+            raise RuntimeError("GPU MC produced no faces")
+    except Exception:
+        # Warp MarchingCubes can fail on thin dims / certain Warp versions -> CPU skimage (reliable).
+        return extract_mesh_3d(phi, dx)
     v = verts[faces]
     centroids = v.mean(axis=1)
     cross = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
@@ -1358,7 +1364,8 @@ def gpu_warmstart_bare(prev_mesh, prev_bare_wp, centroids):
 def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 sub_top=10.0, t_end=2.0, n_steps=20, hole=False, par=None, flags=None,
                 n_ion=20000, n_neu=20000, reinit_every=1, extend="gpu",
-                reinit_method="skfmm", verbose=True, record_depth_every=0, seed_offset=0):
+                reinit_method="skfmm", verbose=True, record_depth_every=0, seed_offset=0,
+                rays_per_point=None):
     if par is None:
         par = PAR
     if flags is None:
@@ -1387,10 +1394,19 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         mesh = wp.Mesh(points=wp.array(verts, dtype=wp.vec3, device=DEVICE),
                        indices=wp.array(faces.flatten(), dtype=wp.int32, device=DEVICE))
         timings['mesh'] += time.time() - tm
+        # ViennaPS-style ray budget: total rays = rays_per_point * #facets, so the per-facet
+        # sampling stays CONSTANT under grid refinement (a fixed total budget starves the deep
+        # floor at fine dx -> grid-sensitive ARDE). Sobol QMC lets petch use a far smaller
+        # rays_per_point than ViennaPS's 1000 for the same noise floor (keeps it fast).
+        if rays_per_point is not None:
+            n_eff = max(int(rays_per_point) * len(faces), 1000)
+            n_ion_s, n_neu_s = n_eff, n_eff
+        else:
+            n_ion_s, n_neu_s = n_ion, n_neu
         tf = time.time()
         if getattr(flags, "neutral_transport", "mc") == "radiosity":   # deterministic radiosity neutrals
             m_i, m_F, m_O, cos_i = mc_flux_3d_radiosity(mesh, verts, faces, centroids, areas, geo, par,
-                                                        n_ion=n_ion, seed=step + seed_offset, flags=flags)
+                                                        n_ion=n_ion_s, seed=step + seed_offset, flags=flags)
         elif getattr(flags, "coverage_sticking", False):   # Langmuir coverage-dependent sticking
             bi = None
             if warm and cov_bare is not None and np.all(np.isfinite(centroids)):   # seed from prev-step coverage
@@ -1401,7 +1417,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                     _, ix = tree.query(centroids, workers=-1)
                     bi = cov_bare[ix]
             m_i, m_F, m_O, cos_i, cov_bare = mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par,
-                                                      n_ion=n_ion, n_neu=n_neu, seed=step + seed_offset,
+                                                      n_ion=n_ion_s, n_neu=n_neu_s, seed=step + seed_offset,
                                                       sampling=getattr(flags, "sampling", "pseudo"),
                                                       flags=flags, bare_init=bi)
             cov_centroids = centroids
@@ -1410,7 +1426,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 prev_bare_wp = wp.array(cov_bare.astype(np.float32), dtype=float, device=DEVICE)
         else:
             m_i, m_F, m_O, cos_i = mc_flux_3d(mesh, verts, faces, areas, geo, mc_par,
-                                              n_ion=n_ion, n_neu=n_neu, seed=step + seed_offset,
+                                              n_ion=n_ion_s, n_neu=n_neu_s, seed=step + seed_offset,
                                               sampling=getattr(flags, "sampling", "pseudo"),
                                               ion_reflection=getattr(flags, "ion_reflection", False))
         timings['flux'] += time.time() - tf
