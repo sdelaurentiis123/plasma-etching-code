@@ -1501,11 +1501,25 @@ def _depth3d(geo, half=1.0):
     open top (no isolated-pocket spikes). Returns sub_top - median(floor_z) over the region.
     """
     phi, xs, ys, zs = geo['phi'], geo['xs'], geo['ys'], geo['zs']
-    ic = np.where(np.abs(xs - geo['Lx']/2) <= half)[0]
-    jc = np.where(np.abs(ys - geo['Ly']/2) <= half)[0]
+    # Clamp the sampling region to the FEATURE interior. Otherwise, for a trench/hole narrower than
+    # `half`, the region also covers UNETCHED substrate columns (floor at sub_top) -> the median is
+    # dragged to the surface and the reported depth collapses toward 0 (a metric artifact that looks
+    # like grid 'instability' at fine dx). Sample only columns inside the opening.
+    cx, cy = geo['Lx']/2, geo['Ly']/2
+    r_feat = geo.get('trench_width', 2.0) / 2.0 - geo['dx']      # stay just inside the wall
+    hx = max(min(half, r_feat), geo['dx'])
+    ic = np.where(np.abs(xs - cx) <= hx)[0]
+    if geo.get('hole', False):                                   # hole: radial footprint
+        jc = np.where(np.abs(ys - cy) <= hx)[0]
+        inside = lambda i, j: (xs[i]-cx)**2 + (ys[j]-cy)**2 <= r_feat**2
+    else:                                                        # trench: invariant in y, full y span ok
+        jc = np.where(np.abs(ys - cy) <= half)[0]
+        inside = lambda i, j: True
     floors = []
     for i in ic:
         for j in jc:
+            if not inside(i, j):
+                continue
             col = phi[i, j, :] < 0                       # gas mask, bottom..top
             # floor = lowest z index of the gas run that reaches the top
             k = len(col) - 1
