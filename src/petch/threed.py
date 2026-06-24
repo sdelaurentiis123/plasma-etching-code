@@ -42,7 +42,18 @@ def make_trench_3d(Lx, Ly, Lz, dx, trench_width, mask_th, sub_top, hole=False):
         opening = np.abs(X - Lx/2) < trench_width/2
     mask = mask_band & (~opening)
     solid = solid | mask
-    phi = skfmm.distance(np.where(solid, 1.0, -1.0), dx=dx)
+    # Smooth analytic SDF seed (phi>0 solid), sub-cell accurate -- NOT a binary +-1 carve. The binary
+    # carve quantizes the slot wall / substrate top to the nearest cell -> the effective trench width
+    # shifts with dx -> grid-sensitive ARDE (the "feels unstable" drift). Here we place the interfaces at
+    # their TRUE geometric positions via a CSG min/max field (substrate half-space UNION masked slab),
+    # then skfmm cleans the distance while preserving the sub-cell zero contour (matches ViennaLS's smooth
+    # geometry, grid-independent). r = lateral distance from the feature axis.
+    r = np.sqrt((X - Lx/2)**2 + (Y - Ly/2)**2) if hole else np.abs(X - Lx/2)
+    d_sub = sub_top - Z                                   # >0 inside substrate (z < sub_top)
+    d_slab = np.minimum(Z - sub_top, sub_top + mask_th - Z)   # >0 inside the mask z-band
+    d_mask = np.minimum(d_slab, r - trench_width / 2.0)   # mask solid = in z-band AND outside the slot
+    phi_analytic = np.maximum(d_sub, d_mask)              # total solid = substrate UNION masked slab
+    phi = skfmm.distance(phi_analytic, dx=dx)             # clean SDF, sub-cell zero contour preserved
     return dict(xs=xs, ys=ys, zs=zs, dx=dx, phi=phi, mask=mask,
                 Lx=Lx, Ly=Ly, Lz=Lz, sub_top=sub_top,
                 trench_width=trench_width, hole=hole)
