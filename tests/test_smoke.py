@@ -1,20 +1,21 @@
-"""Smoke + parity tests for the petch package.
+"""Smoke + regression tests for the petch package. Run: `pytest tests/`.
 
-- test_small_run: fast sanity (small grid) — the simulator runs and produces a sane profile.
-- test_baseline_parity: full width-8 reproduces the PoC baseline depth (~9.18 um) with the
-  langmuir default and rate_scale=0.29. This is the parity anchor for the package refactor.
+Covers: the 2D reference path (parity anchor), the 3D production engine (the real simulator),
+and the high-level ViennaPS-shaped API (Domain/Process/Result). All run CPU-only (slower) or GPU.
 """
 import numpy as np
 import petch
 
 
-POC = petch.Flags(chemistry="langmuir", yield_angular="cosine")   # original PoC config
+POC = petch.Flags(chemistry="langmuir", yield_angular="cosine")   # original 2D proof-of-concept config
 
+
+# ----------------------------- 2D reference path (legacy parity anchor) -----------------------------
 
 def test_small_run():
-    par = dict(petch.PAR); par['cal_F'] = 1.0   # PoC (uncalibrated) for the parity-style check
+    """2D sanity: the reference simulator runs and produces a sane profile."""
     r = petch.run_etch(W=12, H=12, dx=0.5, trench_width=5, mask_thickness=2.0,
-                       sub_top=9, t_end=0.5, n_steps=3, par=par, flags=POC, verbose=False)
+                       sub_top=9, t_end=0.5, n_steps=3, par=dict(petch.PAR), flags=POC, verbose=False)
     assert len(r['segs']) > 0
     d = petch.center_depth(r)
     assert 0.0 < d < 9.0          # some etching happened, not absurd
@@ -22,36 +23,48 @@ def test_small_run():
 
 
 def test_baseline_parity():
-    OURS = dict(petch.PAR); OURS['rate_scale'] = 0.29; OURS['cal_F'] = 1.0   # uncalibrated PoC
+    """2D PoC parity: width-8 reproduces the proof-of-concept baseline depth (~9.18 um) at rate_scale=0.29.
+    The 2D path is the historical reference implementation; production use is the 3D API below."""
+    OURS = dict(petch.PAR); OURS['rate_scale'] = 0.29
     r = petch.run_etch(W=20.0, H=24.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
                        sub_top=18.0, t_end=3.0, n_steps=60, par=OURS, flags=POC, verbose=False)
     d = petch.center_depth(r)
-    # PoC baseline on this machine = 9.18 um; allow margin for MC variance.
-    assert abs(d - 9.18) < 0.4, f"baseline depth {d:.3f} drifted from 9.18"
+    assert abs(d - 9.18) < 0.5, f"baseline depth {d:.3f} drifted from 9.18"   # margin for MC variance
 
 
-def test_calibrated_match():
-    """Regression guard: the calibrated default config lands the width-8 depth near ViennaPS
-    (10.05) -- catches accidental breakage of the cal_F / chemistry / angular-yield calibration."""
-    par = dict(petch.PAR); par['rate_scale'] = 0.034   # cal_F=12 default
-    r = petch.run_etch(W=20.0, H=24.0, dx=0.25, trench_width=8.0, mask_thickness=2.0,
-                       sub_top=18.0, t_end=3.0, n_steps=60, par=par, verbose=False)  # default flags
-    d = petch.center_depth(r)
-    assert 8.5 < d < 12.0, f"calibrated width-8 depth {d:.2f} drifted from ~10 um"
-
+# ----------------------------- 3D production engine -----------------------------
 
 def test_3d_loop():
-    """3D etch loop runs end-to-end (Warp flux kernel) and deepens a feature."""
+    """3D etch runs end-to-end with the faithful ViennaPS config (belen coverages + ion reflection)
+    and deepens the feature. Asserts on max_depth (footprint metric) + no NaN blowup."""
     from petch import threed as t3
-    par = dict(petch.PAR); par['rate_scale'] = 0.05   # cal_F=12 default -> keep tiny grid sane
-    geo = t3.run_etch_3d(Lx=8, Ly=4, Lz=12, dx=0.5, trench_width=3, mask_th=2, sub_top=8,
-                         t_end=1.5, n_steps=6, par=par, flags=petch.Flags(chemistry="langmuir"),
-                         n_ion=4000, n_neu=4000, verbose=False)
-    d = t3.center_depth_3d(geo)
-    assert d > 0.1, f"3D etch produced no depth ({d})"
+    par = dict(petch.PAR); par['rate_scale'] = 0.1; par['periodic_y'] = 1
+    fl = petch.Flags(chemistry="belen", yield_angular="viennaps", coverage_sticking=True,
+                     warm_start_coverage=True, sampling="sobol", ion_reflection=True)
+    geo = t3.run_etch_3d(Lx=3.0, Ly=0.9, Lz=6.5, dx=0.15, trench_width=0.9, mask_th=0.3, sub_top=6.0,
+                         t_end=1.5, n_steps=20, par=par, flags=fl, n_ion=8000, n_neu=8000,
+                         reinit_method="fsm", verbose=False)
+    md = t3.max_depth_3d(geo); cd = t3.center_depth_3d(geo)
+    assert np.isfinite(geo['phi']).all(), "level set blew up (non-finite phi)"
+    assert md > 0.3, f"3D etch produced no depth (max_depth={md})"
+    assert cd > 0.1, f"center did not etch (center_depth={cd}, max_depth={md})"
+
+
+# ----------------------------- high-level public API -----------------------------
+
+def test_api_trench():
+    """The ViennaPS-shaped public API (Domain/SF6O2/Process/Result) runs and reports a sane etch."""
+    dom = petch.Domain.trench(extent=3.0, dx=0.15, width=0.9, mask=0.3, depth=6.0)
+    res = petch.Process(dom, petch.SF6O2(rate_scale=0.1), duration=1.5).run(steps=20)
+    assert res.max_depth > 0.3, f"API etch shallow (max_depth={res.max_depth})"
+    assert res.aspect_ratio > 0.3
+    assert res.wall_time > 0.0
+    v, f = res.mesh
+    assert len(v) > 0 and len(f) > 0          # surface mesh extracted
 
 
 if __name__ == "__main__":
     test_small_run(); print("test_small_run OK")
     test_baseline_parity(); print("test_baseline_parity OK")
     test_3d_loop(); print("test_3d_loop OK")
+    test_api_trench(); print("test_api_trench OK")

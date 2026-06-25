@@ -73,7 +73,6 @@ class Flags:
     reemit_law: str = "3d_sqrtU"     # "3d_sqrtU" (PoC) | "2d_arcsin" (contributor #6b)
     sampling: str = "pseudo"         # "pseudo" (PoC) | "sobol" (speedup: QMC)
     transport_split: bool = False    # speedup: ion few-ray / neutral radiosity
-    ion_reflection: bool = False     # contributor #4: ion specular reflection (3D)
     coverage_sticking: bool = False  # Langmuir coverage-dependent neutral sticking (3D ARDE fix)
     redeposition: bool = False       # BEYOND ViennaPS: etch-product redeposition (sidewall passivation/taper)
     neutral_transport: str = "mc"    # "mc" (Russian-roulette MC) | "radiosity" (deterministic, exact deep-floor)

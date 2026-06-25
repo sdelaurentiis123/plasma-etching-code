@@ -57,15 +57,20 @@ class SF6O2:
     `iedf`: "mean" | "gauss" (=ViennaPS Gaussian IEDF) | "bimodal" (real RF-sheath, beyond ViennaPS).
     `rate_scale` calibrates absolute etch rate to a specific tool (ViennaPS `unitConversion` analog)."""
 
-    def __init__(self, rate_scale=0.07, iedf="gauss", **overrides):
+    def __init__(self, rate_scale=0.025, iedf="gauss", **overrides):
         self.par = dict(PAR)
         self.par['rate_scale'] = rate_scale
         self.par['ied_mode'] = iedf
         for k, v in overrides.items():
             self.par[_ALIASES.get(k, k)] = v
-        # physics flags: belen chemistry + ViennaPS angular yields (== ViennaPS), + the fast/accurate path
-        self.flags = dict(chemistry="belen", yield_angular="viennaps",
-                          coverage_sticking=True, warm_start_coverage=True, sampling="sobol")
+        # physics flags = the FULL faithful-ViennaPS config: belen coupled coverages + ViennaPS angular
+        # yields + coverage-dependent sticking + faithful ion reflection (sticking=0, coned-cosine,
+        # energy loss -> funnels ions to the deep floor; the deep-AR ARDE term, gated on ion_reflection).
+        # warm_start_coverage + sobol are accuracy-neutral speedups. This is the config all the accuracy
+        # validation was run with; do NOT drop ion_reflection (it ~3x's the deep-feature rate -> rate_scale
+        # is calibrated for the faithful path).
+        self.flags = dict(chemistry="belen", yield_angular="viennaps", coverage_sticking=True,
+                          ion_reflection=True, warm_start_coverage=True, sampling="sobol")
 
 
 class Result:
