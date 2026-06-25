@@ -21,9 +21,10 @@ def vps_run(dur):
     p.setFluxEngineType(ps.FluxEngineType.GPU_TRIANGLE); p.apply()
     return np.array(d.getSurfaceMesh().getNodes())
 
-# total wall-clock of a SINGLE full GPU etch (the honest speed number)
+# WARM the engine (first GPU_TRIANGLE call compiles OptiX PTX) -> then time a warm full etch (fair)
+_ = vps_run(0.3)
 t0 = time.time(); _ = vps_run(DUR); vps_wall = time.time() - t0
-print(f"[ViennaPS] full etch wall {vps_wall:.2f}s", flush=True)
+print(f"[ViennaPS] WARM full etch wall {vps_wall:.2f}s", flush=True)
 # shape snapshots at increasing fractions (centre y-slice profile)
 vps_frames = []
 for fr in np.linspace(0.07, 1.0, NFR):
@@ -38,11 +39,14 @@ GEO = dict(Lx=EXT, Ly=EXT, Lz=2*DX+SUB+0.4, dx=DX, trench_width=W, mask_th=2*DX,
 p_ = dict(petch.PAR); p_['rate_scale'] = 0.1
 fl = petch.Flags(chemistry="belen", yield_angular="viennaps", coverage_sticking=True,
                  warm_start_coverage=True, sampling="sobol", ion_reflection=True)
+# WARM petch (first launch JIT-compiles the Warp kernels ~9s) on a tiny run -> then time the real etch
+_ = t3.run_etch_3d(t_end=0.2, n_steps=2, par=p_, flags=fl, n_ion=4000, n_neu=4000,
+                   reinit_method="fsm", verbose=False, **GEO)
 t0 = time.time()
 g = t3.run_etch_3d(t_end=DUR, n_steps=NFR, par=p_, flags=fl, n_ion=40000, n_neu=40000,
                    reinit_method="fsm", verbose=False, record_depth_every=1, record_frames=True, **GEO)
 petch_wall = time.time() - t0
-print(f"[petch] full etch wall {petch_wall:.2f}s  -> {vps_wall/petch_wall:.1f}x faster", flush=True)
+print(f"[petch] WARM full etch wall {petch_wall:.2f}s  -> {vps_wall/petch_wall:.1f}x faster", flush=True)
 
 pframes = [dict(t=f['t'], depth=f['depth'], phi=f['phi_xz'].astype(np.float32)) for f in g['frames']]
 with open("/root/race.pkl", "wb") as fh:

@@ -132,8 +132,13 @@ $$n_r(\mathrm{AR}) \;=\; \frac{V_{\rm floor}(\mathrm{AR})}{V_{\rm field}}, \qqua
 </table>
 <p class="eqn-note">(These ideal-vertical-wall instantaneous rates are steeper than the etched-shape ARDE above: a real etched trench develops a tapered, rounded profile whose slanted walls reflect more flux to the floor. The vertical-trench number isolates transport; the etched number includes shape evolution. Both are deterministic and grid-converged.)</p>
 
-<h2>6. Speed</h2>
-<p>On the same RTX&nbsp;3090, both engines warmed, matched etch depth, swept across aspect ratios, petch completes a feature etch in ~1–2&nbsp;s against ViennaPS-GPU's ~20–26&nbsp;s — a <strong>~14× speedup</strong> (conservative; petch typically etches slightly deeper, i.e. does more work). The gain comes from a GPU-resident pipeline: built-in marching cubes, on-device flux accumulation, GPU warm-started coverage, fast-sweeping Eikonal reinitialization, and Sobol variance reduction. See <a href="performance.html">Performance</a> for the per-stage breakdown.</p>
+<h2>6. Speed — the real-time race</h2>
+<p>Both engines, warmed, etching the <strong>same hole to the same final depth</strong> on the same RTX&nbsp;3090, played back in <strong>real wall-clock time</strong> (scaled to a watchable length; the true speed ratio is preserved). petch finishes the full aspect-ratio-7 hole while ViennaPS has barely opened the mask:</p>
+<figure>
+<img src="race.gif" alt="Side-by-side real-time race: petch finishes the deep hole while ViennaPS is barely started." style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<figcaption>Same sub-micron hole (Ø&nbsp;=&nbsp;0.5&nbsp;µm) to the same 3.7&nbsp;µm depth: <strong>petch 1.5&nbsp;s vs ViennaPS-GPU 39&nbsp;s — 26× faster</strong> on this feature. (<a href="race.mp4">MP4</a>.) The ratio is feature-size-dependent — ~14× on the larger benchmark holes below; smaller features favour petch more.</figcaption>
+</figure>
+<p>On the larger benchmark holes (Ø&nbsp;4/6/8&nbsp;µm, matched depth) the measured speedup is <strong>~14×</strong> (ViennaPS-GPU 19–26&nbsp;s vs petch 1.3–1.8&nbsp;s; conservative — petch typically etches slightly deeper). The gain comes from a fully GPU-resident pipeline: built-in marching cubes, on-device flux accumulation, GPU warm-started coverage, fast-sweeping Eikonal reinitialization, and Sobol variance reduction. See <a href="performance.html">Performance</a> for the per-stage breakdown.</p>
 
 <h2>7. Honest scorecard</h2>
 <div class="callout key">
