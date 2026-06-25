@@ -1376,7 +1376,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 sub_top=10.0, t_end=2.0, n_steps=20, hole=False, par=None, flags=None,
                 n_ion=20000, n_neu=20000, reinit_every=1, extend="gpu",
                 reinit_method="skfmm", verbose=True, record_depth_every=0, seed_offset=0,
-                rays_per_point=None):
+                rays_per_point=None, record_frames=False):
     if par is None:
         par = PAR
     if flags is None:
@@ -1491,6 +1491,11 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
             timings['reinit'] += time.time() - tr
         if record_depth_every and (step % record_depth_every == 0 or step == n_steps - 1):
             geo.setdefault('depth_history', []).append((step + 1, _depth3d(geo)))
+            if record_frames:                               # stash the centre x-z slice for animation
+                jc = geo['phi'].shape[1] // 2
+                geo.setdefault('frames', []).append(
+                    dict(step=step + 1, t=(step + 1) / n_steps * t_end,
+                         depth=_depth3d(geo), phi_xz=geo['phi'][:, jc, :].copy()))
         if verbose and step % 5 == 0:
             depth = _depth3d(geo)
             print(f"  step {step:3d}/{n_steps}  faces {len(faces):5d}  depth ~ {depth:5.2f}  Vmax {Vmax:.3f}")
