@@ -19,7 +19,7 @@ def nr_curve(dur, dep):
     rate = np.diff(dep) / np.diff(dur)
     ref = np.interp(AR_REF, ar, rate) if ar.min() <= AR_REF <= ar.max() else rate[0]
     nr = rate / ref
-    good = (ar >= AR_REF - 0.6) & (nr > 0) & (nr < 1.25)        # drop shallow-depth transient + outliers
+    good = (ar >= AR_REF - 0.6) & (ar <= 7.5) & (nr > 0) & (nr < 1.25)   # clean common range; drop noisy tail
     return ar[good], nr[good]
 
 
