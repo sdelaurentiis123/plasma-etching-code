@@ -42,6 +42,17 @@
 <figcaption>Normalized bottom etch rate \(n_r(\mathrm{AR})\) for petch (blue) and ViennaPS-GPU (red), SF<sub>6</sub>/O<sub>2</sub>, W&nbsp;=&nbsp;0.5&nbsp;µm, \(\Delta x = 0.04\) µm. <strong>Left:</strong> trench (periodic) — petch is flatter (gentler ARDE). <strong>Right:</strong> hole (3-D) — petch and ViennaPS overlap. Each curve is normalized to \(n_r=1\) at AR&nbsp;=&nbsp;3 so the <em>shape</em> of the rolloff is compared independent of absolute rate. The stray low trench point near AR&nbsp;2 is a shallow-depth metric transient, not signal.</figcaption>
 </figure>
 
+<h2>See it etch</h2>
+<p>The same physics, watched directly. Both features are 1.0&nbsp;µm wide and etched for the same time; the filmstrips below show the centre cross-section deepening (wafer surface at top, silicon in brown, etched void in blue). The <strong>hole etches visibly slower than the trench</strong> — at the final frame the trench has reached aspect ratio 9.3 while the hole has only reached 5.9. That gap <em>is</em> aspect-ratio-dependent etching: the hole, walled on all sides, starves its floor faster than the open-ended trench. The quantitative version of exactly this picture is the ViennaPS comparison in §3.</p>
+<figure>
+<img src="etch_trench_filmstrip.png" alt="Trench cross-section deepening over five timesteps, from a surface dimple to aspect ratio 9.3." style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<figcaption>SF<sub>6</sub>/O<sub>2</sub> <strong>trench</strong> etch (W&nbsp;=&nbsp;1.0&nbsp;µm), petch. Animated: <a href="etch_trench.gif">trench&nbsp;GIF</a>.</figcaption>
+</figure>
+<figure>
+<img src="etch_hole_filmstrip.png" alt="Hole cross-section deepening over five timesteps, reaching only aspect ratio 5.9 in the same time." style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<figcaption>SF<sub>6</sub>/O<sub>2</sub> <strong>hole</strong> etch (&Oslash;&nbsp;=&nbsp;1.0&nbsp;µm), petch — same times, shallower (the ARDE effect). Animated: <a href="etch_hole.gif">hole&nbsp;GIF</a>.</figcaption>
+</figure>
+
 <h2>1. What is measured, and why this metric</h2>
 <p>Aspect-ratio-dependent etching (ARDE / RIE-lag) is a <em>geometric</em> property: at a given aspect ratio, the floor etches at some fraction \(n_r\) of the open-field rate, and that fraction is set by the feature's shape — not by how long you have been etching. A research tool should report it that way. We define</p>
 $$n_r(\mathrm{AR}) \;=\; \frac{V_{\rm floor}(\mathrm{AR})}{V_{\rm field}}, \qquad \mathrm{AR} = \frac{\text{depth}}{\text{width}},$$
