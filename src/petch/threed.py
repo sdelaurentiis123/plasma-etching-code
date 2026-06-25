@@ -288,15 +288,13 @@ class _BCRay:
 
 @wp.func
 def _apply_bc(mesh: wp.uint64, o: wp.vec3, d: wp.vec3, lx: float, ly: float, lz: float, active: int):
-    """Lateral boundary conditions matching ViennaPS (default REFLECTIVE in x & y, INFINITE bottom,
-    open top=sky). When a ray misses the surface and would exit a lateral face before the open top:
-      - x faces: REFLECT (flip d_x) -- ViennaPS uses reflective lateral BCs; without this, wide-angle
-        cosine NEUTRALS escape the open x-domain (open-field flux ~0.78 not 1.0) and the deep-trench
-        floor is starved ~2x (steep ARDE). Ions funnel near-vertically so they barely notice -> this
-        is why the ion channel already matched but the etchant rolled off too steeply.
-      - y faces: REFLECT (flip d_y) -- matches ViennaPS's reflective-y (for a y-invariant trench this
-        equals the old periodic-y, but it now mirrors ViennaPS's boundary exactly).
-    Returns the (origin, direction) from which the caller should query. active=0 -> no-op (holes)."""
+    """Lateral boundary conditions for TRENCHES, matching ViennaPS MakeTrench(periodicBoundary=True):
+    PERIODIC in x & y, infinite bottom, open top=sky. When a ray misses the surface and would exit a
+    lateral face before the open top, it WRAPS to the opposite face with the same direction (it sees the
+    periodic image of the feature). This keeps wide-angle cosine neutrals in the domain (open-field flux
+    ~1.0, not the ~0.78 of an open boundary that lets them escape) WITHOUT the over-feeding of reflective
+    BCs (which mirror flux straight back down a thin trench -> floor over-fed -> too-gentle ARDE; that was
+    a regression). Holes pass active=0 (no lateral wrap; they use the full 3D reflective domain)."""
     r = _BCRay()
     r.o = o
     r.d = d
@@ -323,23 +321,25 @@ def _apply_bc(mesh: wp.uint64, o: wp.vec3, d: wp.vec3, lx: float, ly: float, lz:
         tz = 1.0e30
         if dd[2] > 1.0e-9:
             tz = (lz - oo[2]) / dd[2]                     # reaches the open top first -> real escape
-        # earliest lateral exit before the top?
-        if tx < tz and tx < ty and tx > 1.0e-7:          # exit x -> reflect
+        # earliest lateral exit before the top? PERIODIC wrap (ViennaPS MakeTrench periodicBoundary=True):
+        # the ray re-enters the opposite face with the SAME direction (it sees the periodic image of the
+        # feature). NOT reflect -- reflective lateral BCs over-feed a thin trench floor -> too-gentle ARDE.
+        if tx < tz and tx < ty and tx > 1.0e-7:          # exit x -> wrap to opposite x face
             hy = oo[1] + tx * dd[1]
             hz = oo[2] + tx * dd[2]
-            nx = lx - 1.0e-4
+            nx = 1.0e-4                                  # exited +x -> re-enter at x=0
             if dd[0] < 0.0:
-                nx = 1.0e-4
+                nx = lx - 1.0e-4                          # exited -x -> re-enter at x=lx
             oo = wp.vec3(nx, hy, hz)
-            dd = wp.vec3(-dd[0], dd[1], dd[2])
-        elif ty < tz and ty < 1.0e29 and ty > 1.0e-7:    # exit y -> REFLECT (ViennaPS reflective-y)
+            dd = wp.vec3(dd[0], dd[1], dd[2])            # same direction (periodic, not mirrored)
+        elif ty < tz and ty < 1.0e29 and ty > 1.0e-7:    # exit y -> wrap to opposite y face
             hx = oo[0] + ty * dd[0]
             hz = oo[2] + ty * dd[2]
-            ny = ly - 1.0e-4
+            ny = 1.0e-4                                  # exited +y -> re-enter at y=0
             if dd[1] < 0.0:
-                ny = 1.0e-4
+                ny = ly - 1.0e-4                          # exited -y -> re-enter at y=ly
             oo = wp.vec3(hx, ny, hz)
-            dd = wp.vec3(dd[0], -dd[1], dd[2])
+            dd = wp.vec3(dd[0], dd[1], dd[2])            # same direction (periodic)
         else:
             r.o = oo
             r.d = dd
