@@ -1376,7 +1376,7 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 sub_top=10.0, t_end=2.0, n_steps=20, hole=False, par=None, flags=None,
                 n_ion=20000, n_neu=20000, reinit_every=1, extend="gpu",
                 reinit_method="skfmm", verbose=True, record_depth_every=0, seed_offset=0,
-                rays_per_point=None, record_frames=False):
+                rays_per_point=None, record_frames=False, surf_smooth=0.0):
     if par is None:
         par = PAR
     if flags is None:
@@ -1489,6 +1489,10 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
             else:                                  # default: SOTA narrow-band (skfmm 'narrow'), ~5x faster
                 geo['phi'] = reinit_narrow(geo['phi'], dx, band + 2.0 * dx)
             timings['reinit'] += time.time() - tr
+        if surf_smooth and surf_smooth > 0.0:      # light surface regularization (curvature/diffusion-like):
+            from scipy.ndimage import gaussian_filter   # suppresses noise-seeded mask-edge fingering, like
+            geo['phi'] = gaussian_filter(geo['phi'], surf_smooth)   # ViennaLS's implicit front regularization
+            geo['phi'][geo['mask']] = mask_phi[geo['mask']]         # keep the mask pinned
         if record_depth_every and (step % record_depth_every == 0 or step == n_steps - 1):
             geo.setdefault('depth_history', []).append((step + 1, _depth3d(geo)))
             if record_frames:                               # stash the centre x-z slice for animation

@@ -7,22 +7,23 @@ os.environ.setdefault("PETCH_DEVICE", "cuda")
 import numpy as np, petch
 from petch import threed as t3
 
-DX, W, SUB = 0.04, 1.0, 9.0      # fine grid, deep substrate
-DUR, STEPS = 2.6, 52
+DX, W, SUB, MASKTH = 0.05, 1.0, 9.0, 0.4     # fine grid, deep substrate, thicker mask (protects the top)
+DUR, STEPS = 2.6, 80                          # more timesteps -> finer CFL, no velocity-spike blowups
 
 
-def run(hole, rate=0.12):
-    Ly = (3.2 if hole else 0.32)
-    GEO = dict(Lx=3.2, Ly=Ly, Lz=2*DX+SUB+0.4, dx=DX, trench_width=W, mask_th=2*DX, sub_top=SUB, hole=hole)
+def run(hole, rate=0.08):                      # gentler rate -> lower surface velocity -> stable, smooth
+    Ly = (3.2 if hole else 0.4)
+    GEO = dict(Lx=3.2, Ly=Ly, Lz=2*DX+SUB+0.5, dx=DX, trench_width=W, mask_th=MASKTH, sub_top=SUB, hole=hole)
     p_ = dict(petch.PAR); p_['rate_scale'] = rate
     if not hole:
         p_['periodic_y'] = 1
     fl = petch.Flags(chemistry="belen", yield_angular="viennaps", coverage_sticking=True,
                      warm_start_coverage=True, sampling="sobol", ion_reflection=True)
-    # rays_per_point=70 -> total rays scale with #facets -> constant sampling per facet -> smooth walls
-    g = t3.run_etch_3d(t_end=DUR, n_steps=STEPS, par=p_, flags=fl, n_ion=40000, n_neu=40000,
-                       rays_per_point=70, reinit_method="fsm", verbose=True,
-                       record_depth_every=1, record_frames=True, **GEO)
+    # FIXED high ray count (well-sampled) + gentle rate + many steps + light surface regularization
+    # (surf_smooth) which suppresses the mask-edge fingering instability -> clean smooth walls.
+    g = t3.run_etch_3d(t_end=DUR, n_steps=STEPS, par=p_, flags=fl, n_ion=120000, n_neu=120000,
+                       reinit_method="fsm", verbose=True, surf_smooth=0.7,
+                       record_depth_every=2, record_frames=True, **GEO)
     return g
 
 
