@@ -2,8 +2,8 @@
 Smooth petch (rays_per_point) also brings the speed ratio into the documented ~14x regime. ViennaPS first.
 Saves /root/race2.pkl. cuda + libnvoptix in LD_LIBRARY_PATH."""
 import time, pickle, numpy as np
-W, DX, MASK, DUR, EXT, SUB = 1.0, 0.04, 0.16, 3.0, 2.2, 7.0
-NFR = 14
+W, DX, MASK, DUR, EXT, SUB = 0.5, 0.06, 0.08, 1.6, 1.2, 4.0
+NFR = 9
 
 import viennaps as ps
 import viennaps.d3 as v3
@@ -30,14 +30,14 @@ print("vps snapshots done", flush=True)
 
 import petch
 from petch import threed as t3
-GEO = dict(Lx=EXT, Ly=EXT, Lz=2*DX+SUB+0.5, dx=DX, trench_width=W, mask_th=0.4, sub_top=SUB, hole=True)
+GEO = dict(Lx=EXT, Ly=EXT, Lz=2*DX+SUB+0.5, dx=DX, trench_width=W, mask_th=0.3, sub_top=SUB, hole=True)
 fl = petch.Flags(chemistry="belen", yield_angular="viennaps", coverage_sticking=True,
                  warm_start_coverage=True, sampling="sobol", ion_reflection=True)
 def prun(rate, ns, cap=False):
     p_ = dict(petch.PAR); p_['rate_scale'] = rate
     kw = dict(record_depth_every=1, record_frames=True) if cap else {}
     t0 = time.time()
-    g = t3.run_etch_3d(t_end=DUR, n_steps=ns, par=p_, flags=fl, n_ion=120000, n_neu=120000,
+    g = t3.run_etch_3d(t_end=DUR, n_steps=ns, par=p_, flags=fl, n_ion=40000, n_neu=40000,
                        surf_smooth=0.7, reinit_method="fsm", verbose=False, **GEO, **kw)   # SMOOTH (regularized)
     return time.time()-t0, t3.max_depth_3d(g), g
 prun(0.1, 2)                                               # warm
