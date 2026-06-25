@@ -12,15 +12,19 @@ SUB = 6.3
 d = np.load(sys.argv[1] if len(sys.argv) > 1 else "accuracy_sweep.npz")
 
 
+COMMON_AR = np.arange(4.0, 6.6, 0.5)        # shared aspect-ratio grid -> both engines plotted at same X
+
+
 def nr_curve(dur, dep):
+    """Return nr sampled on the COMMON aspect-ratio grid, so petch and ViennaPS share X values."""
     keep = dep < SUB - 0.5
     dur, dep = dur[keep], dep[keep]
     ar = 0.5 * (dep[1:] + dep[:-1]) / W
     rate = np.diff(dep) / np.diff(dur)
     ref = np.interp(AR_REF, ar, rate)
-    nr = rate / ref
-    g = (ar >= AR_LO) & (ar <= AR_HI)
-    return ar[g], nr[g]
+    nr_raw = rate / ref
+    grid = COMMON_AR[(COMMON_AR >= ar.min()) & (COMMON_AR <= ar.max())]   # only where this engine has data
+    return grid, np.interp(grid, ar, nr_raw)
 
 
 plt.rcParams.update({"font.size": 12.5})
@@ -31,7 +35,7 @@ for ax, feat, title in [(axes[0], "trench", "TRENCH  (line / slot)"), (axes[1], 
         ax.plot(ar, nr, mk + "-", color=color, lw=2.6, ms=9, label=("ViennaPS" if eng == "vps" else "petch"))
     ax.set_title(title, fontsize=13.5, fontweight="bold")
     ax.set_xlabel("aspect ratio  (depth / width)")
-    ax.set_xlim(3.2, 7.1); ax.set_ylim(0.3, 1.12); ax.grid(alpha=0.3)
+    ax.set_xlim(3.7, 6.8); ax.set_ylim(0.4, 1.05); ax.grid(alpha=0.3)
     ax.legend(loc="lower left", framealpha=0.95)
 axes[0].set_ylabel("normalized etch rate  $n_r$\n(1 = open-field rate)")
 fig.suptitle("Aspect-ratio-dependent etch rate: petch vs ViennaPS   (SF$_6$/O$_2$, W = 0.5 µm, both GPU)",
