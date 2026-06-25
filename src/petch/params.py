@@ -69,8 +69,6 @@ class Flags:
     yield_angular: str = "viennaps"  # "viennaps" (accurate, contributor #3) | "cosine" (PoC)
     ion_reflection: bool = False     # contributor #4
     advection: str = "upwind1"       # "upwind1" (PoC) | "weno_rk2" (contributor #5)
-    flux_clips: bool = True          # contributor #6a (remove heuristic flux caps)
-    reemit_law: str = "3d_sqrtU"     # "3d_sqrtU" (PoC) | "2d_arcsin" (contributor #6b)
     sampling: str = "pseudo"         # "pseudo" (PoC) | "sobol" (speedup: QMC)
     transport_split: bool = False    # speedup: ion few-ray / neutral radiosity
     coverage_sticking: bool = False  # Langmuir coverage-dependent neutral sticking (3D ARDE fix)

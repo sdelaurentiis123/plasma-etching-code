@@ -7,26 +7,20 @@ On CPU / Apple Silicon the SAME code runs the portable numpy/skimage path (slowe
     PETCH_DEVICE=cuda python examples/etch_hole.py     # GPU
     PETCH_DEVICE=cpu  python examples/etch_hole.py     # CPU (or just omit; defaults to cpu)
 """
-import time
 import petch
-from petch import threed as t3
 
-# The fast + accurate config is ONE flag set. warm_start_coverage makes the coverage fixed point
-# converge in 1 iteration; on CUDA the GPU speedups (marching cubes, on-device flux, warm-start,
-# source generation) all auto-enable. On CPU they auto-fall-back. No other tuning needed.
-flags = petch.Flags(coverage_sticking=True, warm_start_coverage=True, sampling="sobol")
+# High-level, ViennaPS-shaped API. SF6O2() carries the full faithful config (Belen coupled coverages,
+# ViennaPS angular yields, coverage-dependent sticking, faithful ion reflection). rate_scale sets the
+# absolute etch rate (the per-tool calibration knob); it does not change the ARDE shape.
+dom    = petch.Domain.hole(extent=14, dx=0.25, diameter=6, mask=2, depth=18)
+model  = petch.SF6O2()
+result = petch.Process(dom, model, duration=3.0).run(steps=40)
 
-t0 = time.time()
-geo = t3.run_etch_3d(
-    trench_width=6.0, dx=0.25, n_steps=40,
-    Lx=14, Ly=14, Lz=24, mask_th=2, sub_top=18, hole=True, t_end=3.0,
-    par=dict(petch.PAR, rate_scale=0.07),
-    flags=flags, n_ion=30000, n_neu=30000, reinit_method="fsm", verbose=False,
-)
-wall = time.time() - t0
+print(f"depth        : {result.depth:.2f} µm")
+print(f"max depth    : {result.max_depth:.2f} µm")
+print(f"aspect ratio : {result.aspect_ratio:.2f}")
+print(f"wall clock   : {result.wall_time:.2f} s   (ViennaPS-GPU on the same hole: ~22 s)")
 
-print(f"device      : {t3.DEVICE}")
-print(f"wall clock  : {wall:.2f} s   (ViennaPS-GPU on the same hole: ~22 s)")
-print(f"center depth: {t3.center_depth_3d(geo):.2f} µm")
-print(f"max depth   : {t3.max_depth_3d(geo):.2f} µm")
-print(f"mesh faces  : {len(t3.extract_mesh_3d(geo['phi'], 0.25)[1])}")
+result.save("etch_hole.vtk")          # ParaView / ViennaPS-readable surface mesh
+# result.plot("etch_hole.png")        # quick x-z cross-section through the feature centre
+print("wrote etch_hole.vtk")

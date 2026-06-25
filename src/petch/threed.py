@@ -1444,7 +1444,12 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         trt = time.time()
         is_mask = faces_in_mask(centroids, geo, mask_th, trench_width, hole=hole)
         V = surface_rate(m_i, m_F, m_O, cos_i, is_mask, par, flags=flags)
-        V = np.nan_to_num(V, nan=0.0, posinf=0.0, neginf=0.0)   # guard against blowup
+        _nbad = int((~np.isfinite(V)).sum())                   # non-finite velocity = a real problem
+        if _nbad:                                              # warn (don't silently hide) then guard
+            import warnings
+            warnings.warn(f"step {step}: {_nbad} non-finite surface velocities (NaN/inf) zeroed; "
+                          "check flux normalization / coverage if this persists.", RuntimeWarning)
+        V = np.nan_to_num(V, nan=0.0, posinf=0.0, neginf=0.0)  # guard so the run doesn't crash
         timings['rate'] = timings.get('rate', 0.0) + time.time() - trt
         if getattr(flags, "redeposition", False):    # etch-product redeposition -> sidewall passivation
             fn = _gas_normals(verts, faces, centroids, geo)

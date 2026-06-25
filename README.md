@@ -21,10 +21,15 @@ whole pipeline is GPU-resident **and** autodifferentiable in one substrate. Runs
 (Conservative — petch etched slightly *deeper*, i.e. more work. Reproduce: `scripts/vps_sweep.py`.)
 
 - **As accurate as ViennaPS**: replicates every ViennaPS mechanism (Belen coupled coverages, exact
-  Russian-roulette weighted neutral transport, coverage-dependent sticking, 1-neighbour flux
-  smoothing); 3D ARDE rmse **0.05–0.08** vs depth-resolved ViennaPS, 2D rmse **0.016** parameter-free.
-- **Differentiable** end-to-end (`wp.Tape`): gradient-based inverse design of process recipes — which
-  ViennaPS cannot do.
+  Russian-roulette weighted neutral transport, coverage-dependent sticking, faithful ion reflection,
+  1-neighbour flux smoothing). 3D trench ARDE rmse **~0.08** vs ViennaPS (exact at low/mid aspect ratio;
+  a ~0.1 residual remains at the deepest AR — a discretization difference, both engines run the same
+  documented model). 2D ARDE-shape rmse **0.016**. The ARDE *curve* is parameter-free; one global
+  `rate_scale` sets only the absolute etch rate (the analog of ViennaPS's `unitConversion`), not the shape.
+- **Differentiable** end-to-end: the flux and level-set kernels are written in Warp, so the pipeline
+  carries gradients via `wp.Tape` — a substrate for gradient-based recipe optimization that ViennaPS
+  cannot do. Demonstrated on a single-parameter inverse-design recovery in `scripts/inverse_design.py`
+  (a one-call `petch.inverse_design(...)` API is not yet exposed — it's a demo script, not a product API).
 - **Portable & modular**: every GPU speedup auto-enables on CUDA and falls back to numpy/skimage on
   CPU. The loop is clean swappable stages (`mesh → flux → chemistry → advect → reinit`).
 
@@ -38,25 +43,31 @@ pip install cupy-cuda12x
 
 Warp runs on CPU (Apple Silicon included) and on NVIDIA CUDA. No GPU needed to try it.
 
+Verify the install:
+
+```bash
+pytest tests/            # 4 smoke/regression tests (2D parity, 3D engine, high-level API)
+```
+
 ## Quickstart
+
+The high-level API mirrors ViennaPS (`Domain` / process model / `Process`), with the full faithful
+config (Belen coverages + ion reflection) built in. On a GPU it auto-enables the GPU pipeline and runs
+~14× faster than ViennaPS; on CPU the same code drops to numpy/skimage.
 
 ```python
 import petch
-from petch import threed as t3
 
-# THE fast + accurate config — one flag. On a GPU this auto-enables the full GPU pipeline
-# (GPU marching cubes, on-device flux, GPU warm-start, ...) and runs ~14x faster than ViennaPS.
-flags = petch.Flags(coverage_sticking=True, warm_start_coverage=True, sampling="sobol")
+dom    = petch.Domain.hole(extent=14, dx=0.25, diameter=6, mask=2, depth=18)
+model  = petch.SF6O2()                      # faithful SF6/O2; rate_scale calibrates absolute rate
+result = petch.Process(dom, model, duration=3.0).run(steps=40)
 
-geo = t3.run_etch_3d(trench_width=6.0, dx=0.25, n_steps=40,
-                     Lx=14, Ly=14, Lz=24, mask_th=2, sub_top=18, hole=True, t_end=3.0,
-                     par=dict(petch.PAR), flags=flags, n_ion=30000, n_neu=30000,
-                     reinit_method="fsm")
-print("center depth:", t3.center_depth_3d(geo), "µm")
+print(f"depth {result.depth:.1f} µm   aspect ratio {result.aspect_ratio:.1f}   ({result.wall_time:.1f}s)")
+result.save("etch.vtk")                     # ParaView / ViennaPS-readable surface mesh
 ```
 
-On CPU the *same call* works (drops to the numpy/skimage path automatically). See
-[`examples/`](examples/) for a runnable script.
+For full control, the low-level `petch.run_etch_3d(...)`, `petch.Flags`, and `petch.PAR` stay public.
+See [`examples/`](examples/) for runnable scripts.
 
 ## How it works (and how to extend it)
 

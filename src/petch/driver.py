@@ -1,4 +1,9 @@
-"""Main etch driver. Ported from feature_etch.run_etch.
+"""2D etch driver (`run_etch`) -- the historical reference implementation / numerical parity anchor.
+
+NOTE: this 2D path is kept for the parity tests (tests/test_smoke.py) and as a readable reference.
+PRODUCTION USE IS THE 3D ENGINE: `petch.Domain`/`SF6O2`/`Process` (high-level) or
+`petch.run_etch_3d` (low-level), in src/petch/threed.py. The 2D modules
+(transport/chemistry/geometry/levelset + this driver) are not on the actively-developed path.
 
 Threads a `Flags` object through chemistry (and, later, transport) so model variants can be
 A/B'd without forking the loop. Default flags reproduce the original PoC behavior. Exposes
