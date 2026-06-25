@@ -1,7 +1,8 @@
 # petch — a fast, differentiable 3D plasma-etch simulator
 
 **The only open-source GPU-accelerated, differentiable feature-scale plasma-etch simulator** —
-and on the same GPU it runs **~14× faster than ViennaPS** (the open-source SOTA) at matched accuracy.
+and on the same GPU it runs **~14× faster than ViennaPS** (the open-source SOTA), tracking its ARDE
+within ~0.1 at low/mid aspect ratio (see *Accuracy* below for the honest deep-AR difference).
 
 Level-set surface evolution + Monte-Carlo / radiosity flux transport + SF₆/O₂ surface chemistry,
 with the flux and level-set kernels written in [NVIDIA Warp](https://github.com/NVIDIA/warp) — so the
@@ -20,12 +21,15 @@ whole pipeline is GPU-resident **and** autodifferentiable in one substrate. Runs
 
 (Conservative — petch etched slightly *deeper*, i.e. more work. Reproduce: `scripts/vps_sweep.py`.)
 
-- **As accurate as ViennaPS**: replicates every ViennaPS mechanism (Belen coupled coverages, exact
+- **Tracks ViennaPS**: replicates every ViennaPS mechanism (Belen coupled coverages, exact
   Russian-roulette weighted neutral transport, coverage-dependent sticking, faithful ion reflection,
-  1-neighbour flux smoothing). 3D trench ARDE rmse **~0.08** vs ViennaPS (exact at low/mid aspect ratio;
-  a ~0.1 residual remains at the deepest AR — a discretization difference, both engines run the same
-  documented model). 2D ARDE-shape rmse **0.016**. The ARDE *curve* is parameter-free; one global
-  `rate_scale` sets only the absolute etch rate (the analog of ViennaPS's `unitConversion`), not the shape.
+  1-neighbour flux smoothing). 3D trench ARDE: petch and ViennaPS agree within **~0.1** at low/mid aspect
+  ratio and diverge by **~0.1–0.2 at the deepest AR** (petch is slightly gentler — it delivers a bit more
+  flux to the deep floor). This is a genuine *converged* difference between two independent ballistic codes
+  (different source/transport discretization), not a calibration gap: both run the same documented model,
+  and **both sit ~0.3 above the real de Boer wafer** (ballistic transport omits gas-conductance / charging).
+  2D ARDE-shape rmse **0.016**. The ARDE *curve* is parameter-free; one global `rate_scale` sets only the
+  absolute etch rate (the analog of ViennaPS's `unitConversion`), not the shape.
 - **Differentiable** end-to-end: the flux and level-set kernels are written in Warp, so the pipeline
   carries gradients via `wp.Tape` — a substrate for gradient-based recipe optimization that ViennaPS
   cannot do. Demonstrated on a single-parameter inverse-design recovery in `scripts/inverse_design.py`
