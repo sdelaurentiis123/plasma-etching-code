@@ -9,6 +9,8 @@ with the flux and level-set kernels written in [NVIDIA Warp](https://github.com/
 whole pipeline is GPU-resident **and** autodifferentiable in one substrate. Runs on an NVIDIA GPU
 (fast) or on CPU / Apple Silicon (portable, slower) with the *same code*.
 
+📖 **[Read the docs →](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/index.html)** — the full technical explainer set (physics, numerics, transport, the ViennaPS head-to-head, and experimental validation), rendered with math and figures. Full index in [Documentation](#documentation) below.
+
 ## Headline numbers
 
 **Speed — same RTX 3090, both engines warmed, matched etch depth, swept across aspect ratios:**
@@ -110,13 +112,37 @@ calibrated to wafer data**:
 - ViennaPS is the only runnable open-source peer; other benchmarks are published experimental curves
   (Belen 2005, de Boer/Blauw, Gomez 2004, Hoekstra–Kushner).
 
+## Documentation
+
+A cross-linked technical explainer set (real math via MathJax, figures, derivations) lives in [`docs/`](docs/). GitHub renders those `.html` files as raw source when clicked, so the links below open them rendered through [githack](https://raw.githack.com) — math, figures, and cross-page nav all work in the browser:
+
+**▶︎ [Open the docs site](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/index.html)** — start at the Overview; every page is cross-linked from there.
+
+| Page | What |
+|---|---|
+| [Overview](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/index.html) | The thesis, the noise-vs-bias framing, the full stack top-to-bottom |
+| [Physics](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/physics.html) | Ion–neutral synergy, competitive coverage, sputter/ion-enhanced yields |
+| [Numerics](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/numerics.html) | Level-set Hamilton–Jacobi PDE, WENO + TVD-RK, reinitialization |
+| [Flux &amp; Transport](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/flux-transport.html) | Ballistic ion/neutral transport, multi-bounce radiosity |
+| [Acceleration](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/acceleration.html) | Variance reduction, GPU traversal, sparse data structures |
+| [Differentiable &amp; ML](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/differentiable-ml.html) | Autodiff, inverse design, learned operators |
+| [Multiscale](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/multiscale.html) | Reactor → feature-scale coupling |
+| [**ViennaPS Validation**](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/viennaps-validation.html) | Head-to-head vs ViennaPS-GPU — ARDE agreement + the ~47× real-time speed race |
+| [**Experiments**](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/experimental-validation.html) | ARDE vs the real de Boer/Blauw cryo wafer |
+| [Performance](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/performance.html) | Speed breakdown and where the time goes |
+| [SOTA &amp; Plan](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/sota-and-plan.html) | Where this sits vs the field, and the roadmap |
+| [Physics Grounding](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/physics-grounding.html) | First-principles basis and the Kushner/Graves lineage |
+| [References](https://raw.githack.com/sdelaurentiis123/plasma-etching-code/main/docs/references.html) | 52 BibTeX entries, human-readable |
+
+> Prefer a permanent URL without the proxy? Enable GitHub Pages on this repo (**Settings → Pages → Source: `main` / `/docs`**) and the same set is served at `https://sdelaurentiis123.github.io/plasma-etching-code/`.
+
 ## Repo
 
 ```
 src/petch/       2D (params/geometry/transport/chemistry/levelset/driver) + 3D (threed.py)
 scripts/         vps_sweep.py (the 14x benchmark), validate_*.py, inverse_design.py, profilers
 tests/           parity + 3D smoke
-docs/            design explainers (open docs/index.html)
+docs/            technical explainer set — see Documentation above for rendered links
 FINDINGS.md      full research log with every measured number
 ```
 
