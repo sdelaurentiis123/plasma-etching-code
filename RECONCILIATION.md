@@ -52,9 +52,9 @@ Clean W=0.5 µm trench, instantaneous nr(AR)=V_floor/V_field:
 - Knudsen: RMSE **0.048** ✅ (passes the 0.05 wafer gate)
 - source: RMSE 0.072
 
-Craig's engine matches the wafer because its defaults are calibrated to it. petch matches the wafer
-with its de Boer *process* params (narrow IADF / etchant-starved) — documented separately, not
-re-derived here (the W differs, and petch-DDA's numpy gather is too slow for W=2 µm deep ARs).
+Craig's engine matches the wafer because its defaults are calibrated to it (open rate tuned to Gomez,
+knee within RMSE 0.05–0.07). petch (DDA or MC) sits in the *ballistic* regime near/above the wafer
+knee; the de Boer "process" knobs do NOT bring it down to the wafer's deep-AR floor (see below).
 
 ## Speed (RTX 3090, CUDA) — real depth-matched test
 
@@ -80,12 +80,21 @@ With the Warp gather, DDA is **fast on CUDA (~0.1 s per static eval)**. petch-DD
 | 10 | 0.58 | 0.43 |
 | 20 | 0.23 | 0.29 |
 
-It straddles the wafer (above at AR10, below at AR20), RMSE ~0.09 with default ViennaPS-regime params
-(Craig's *calibrated* engine: 0.072). petch matching the wafer needs its de Boer process params.
+It straddles the wafer (above at AR10, below at AR20), RMSE ~0.11 with default ballistic params
+(Craig's *calibrated* engine: 0.072). **Tested 2026-06-30: the de Boer "process" knobs do NOT close
+the gap.** A narrow (0.8°) IADF funnels ions to the floor → *gentler* knee (0.77 @ AR10, wrong way);
+3× etchant starvation barely moves it (0.69). The wafer's flat high-AR tail (0.29 @ AR20, 0.20 @ AR40)
+is the **structural frontier** — it needs missing physics (surface charging / a coverage-independent
+etch channel), not a transport, IADF, or flux knob. So petch-DDA reproduces the clean *ballistic* ARDE
+(matching ViennaPS); it does not, with current knobs, reach the real wafer's deep-AR floor. (The figure
+is the right panel of `viz/dda_vs_mc_arde.png` / `dda_vs_mc_arde.npz`.)
 
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
+- ✅ Tested petch-DDA with de Boer process knobs (narrow IADF, etchant starvation) at W=2 — they do NOT
+  close the wafer gap (narrow IADF goes the wrong way; the deep-AR floor is structural).
 - Calibrate the Knudsen floor sink; diagnose petch radiosity's over-correction.
-- Re-run petch with de Boer *process* params (narrow IADF / etchant-starved) through the W=2 DDA scorecard
-  to show petch can match the wafer (not just the ViennaPS-regime defaults).
+- The real frontier: a surface-charging model and/or a coverage-independent etch channel to reproduce the
+  wafer's flat high-AR tail. (The old `cal_F` knee-fix was removed; an etchant-starvation term alone is
+  insufficient given ion-enhanced floor etching.)
