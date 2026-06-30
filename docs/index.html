@@ -30,7 +30,7 @@
 <h1>Differentiable, GPU-Accelerated 3D Feature-Scale Plasma-Etch Simulation</h1>
 <p class="subtitle">A technical explainer: the field, the physics, the numerics, the acceleration, and where the defensible novelty actually lives.</p>
 
-<p class="lede">We are building a simulator that predicts how a single semiconductor feature &mdash; a trench, a contact hole, a 3D-NAND channel hole &mdash; changes shape as plasma etches it. The target is <strong>three-dimensional</strong>, <strong>GPU-accelerated</strong>, <strong>differentiable</strong>, and ultimately <strong>surrogate-accelerated</strong>. This site explains every layer of that stack from first principles.</p>
+<p class="lede">We are building <strong>petch</strong>, a simulator that predicts how a single semiconductor feature &mdash; a trench, a contact hole, a 3D-NAND channel hole &mdash; changes shape as plasma etches it. The target is <strong>three-dimensional</strong>, <strong>GPU-accelerated</strong>, <strong>differentiable</strong>, and ultimately <strong>surrogate-accelerated</strong>. This site explains every layer of that stack from first principles.</p>
 
 <div class="callout key">
 <span class="lab">The one idea to hold onto</span>
@@ -55,11 +55,11 @@
 
 <pre><code>  φ field  ──(1) extract──▶  surface mesh + normals
                                   │
-                            (2) build/march acceleration structure (DDA on the level set)
+                            (2) build/march acceleration structure (DDA voxel traversal of the level set)
                                   │
         ┌─────────────────────────┴─────────────────────────┐
    (3a) ION transport                            (3b) NEUTRAL transport
-        few-ray / analytic + specular                 radiosity linear solve
+        few-ray / analytic + specular                 MC / radiosity / deterministic Sn transport
         └─────────────────────────┬─────────────────────────┘
                                   │
                             (4) surface chemistry  ← the ONLY place species couple
@@ -77,11 +77,12 @@
 <tr><td>Differentiability</td><td>autodiff, inverse design, learned operators</td><td><a href="differentiable-ml.html">Differentiable &amp; ML</a></td></tr>
 </tbody>
 </table>
+<p>Five further pages complete the picture: <a href="multiscale.html">Multiscale</a> (reactor&nbsp;→&nbsp;feature coupling), <a href="physics-grounding.html">Physics Grounding</a> (every constant traced to experiment), <a href="performance.html">Performance</a> (the ~8–15× CPU-dependent speed vs ViennaPS), <a href="experimental-validation.html">Experiments</a> (ARDE vs the real de Boer wafer), and <a href="viennaps-validation.html">ViennaPS Validation</a> (the like-for-like cross-check, including petch's deterministic S<sub>n</sub> neutral transport). <a href="references.html">References</a> closes the set.</p>
 
 <h2>The honest thesis</h2>
 <p>The incumbent open-source tool (<a href="sota-and-plan.html">ViennaPS</a>) already has a maturing GPU/OptiX ray tracer. The industry tool (Sentaurus) already solves re-emission by radiosity, by default. So "we ray-trace faster on the same algorithm" is <strong>not</strong> a win &mdash; RT cores are RT cores. The three things nobody ships together, and that this project can:</p>
 <ol>
-<li><strong>Equal-or-better fidelity at far fewer rays</strong> &mdash; QMC + control variates + the ion/neutral solver split. An <em>algorithmic</em> win, not a hardware one.</li>
+<li><strong>Equal-or-better fidelity at far fewer rays</strong> &mdash; QMC + control variates + the ion/neutral solver split, now including a deterministic, noise-free <strong>S<sub>n</sub> neutral transport</strong> that reproduces ViennaPS ARDE (see <a href="viennaps-validation.html">ViennaPS Validation §7</a>). An <em>algorithmic</em> win, not a hardware one.</li>
 <li><strong>Differentiability</strong> &mdash; gradients of the final profile with respect to recipe knobs, enabling inverse design (target shape → process recipe).</li>
 <li><strong>Learned operators</strong> &mdash; surrogate the two expensive pieces (stiff surface chemistry, multiple-scattering re-emission) with neural operators trained on high-ray ground truth. The same machinery as a plasma-chemistry foundation model.</li>
 </ol>
@@ -102,7 +103,7 @@
 
 <div class="callout warn">
 <span class="lab">Status of the reference code</span>
-<p>The existing proof-of-concept (<code>feature_etch.py</code>) is a 2D simulator that matches ViennaPS in <em>shape</em> and <em>ARDE trend</em> parameter-free, but needs a single global <code>rate_scale = 0.29</code> to match absolute depth. That knob is a stand-in for six identified bias contributors. The whole point of this project is to retire those contributors one at a time, each with a measured number, and delete the knob. The <a href="sota-and-plan.html">plan page</a> tracks them.</p>
+<p>The original proof-of-concept (<code>feature_etch.py</code>) is a 2D simulator that matches ViennaPS in <em>shape</em> and <em>ARDE trend</em> parameter-free, needing only a single global <code>rate_scale</code> (≈0.29 in that 2D PoC) for absolute depth — an absolute-units constant, the analog of ViennaPS's <code>unitConversion</code>, whose value tracks the flux-normalization convention (see <a href="physics-grounding.html">Physics Grounding</a>), not a fudge. The 3D engine (<strong>petch</strong>) now replicates ViennaPS's ballistic model directly — matching on holes, ~0.06–0.1 gentler on trenches (<a href="viennaps-validation.html">ViennaPS Validation</a>) — so the six historical bias contributors are now <em>second-order</em>; the first-order residual is the structural ballistic-vs-wafer gap (gas conductance / charging). The <a href="sota-and-plan.html">plan page</a> tracks them.</p>
 </div>
 
 <div class="pagenav">

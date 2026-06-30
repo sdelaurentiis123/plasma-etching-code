@@ -28,8 +28,10 @@
 <div class="callout key">
 <span class="lab">TL;DR — what we're doing</span>
 <p><strong>petch</strong> predicts how a single sub-micron chip feature — a contact hole, a trench, a 3D-NAND
-channel — changes shape as a plasma etches it into silicon. It is <strong>~14× faster than ViennaPS</strong>
-(the open-source state of the art) on the same GPU, <strong>just as accurate</strong> (it implements every
+channel — changes shape as a plasma etches it into silicon. It is <strong>~8–15× faster than ViennaPS</strong>
+(the open-source state of the art) on the same GPU — petch is ~1 s and GPU-resident while ViennaPS's level set
+is CPU-bound, so the ratio is CPU-dependent (~8× when ViennaPS gets a fast many-core CPU, more on a typical
+one) — <strong>just as accurate</strong> (it implements every
 ViennaPS mechanism), and <strong>uniquely differentiable</strong> — you can take gradients through the whole
 physics, which lets you <em>inverse-design a recipe from a target shape</em>. It is, as far as we can find,
 the <strong>only open-source GPU-accelerated, differentiable feature-scale etch simulator that exists.</strong></p>
@@ -78,9 +80,9 @@ SF₆/O₂ model — identical to ViennaPS).</li>
 <em>and</em> is automatically differentiable in one substrate. On a machine without an NVIDIA GPU the same code
 falls back to a portable CPU path.</p>
 
-<h2>3. Headline result — ~14× faster than ViennaPS</h2>
+<h2>3. Headline result — ~8–15× faster than ViennaPS (CPU-dependent)</h2>
 <p>Fair same-hardware comparison (one RTX 3090), <strong>both engines warmed</strong>, matched etch depth, swept
-across hole sizes / aspect ratios. ViennaPS on its fastest engine (GPU, OptiX RT-core):</p>
+across hole sizes / aspect ratios. ViennaPS on its fastest engine (GPU, OptiX RT-core), on a typical-CPU box:</p>
 <table>
 <tr><th>hole Ø</th><th>aspect ratio</th><th>ViennaPS-GPU</th><th>petch</th><th>speedup</th></tr>
 <tr><td>4 µm</td><td>2.1</td><td>19.4 s</td><td><strong>1.30 s</strong></td><td><strong>14.9×</strong></td></tr>
@@ -88,8 +90,11 @@ across hole sizes / aspect ratios. ViennaPS on its fastest engine (GPU, OptiX RT
 <tr><td>8 µm</td><td>1.2</td><td>25.8 s</td><td><strong>1.82 s</strong></td><td><strong>14.1×</strong></td></tr>
 </table>
 <p>Conservative — petch actually etched slightly <em>deeper</em> (more work). Reproduce with
-<code>scripts/vps_sweep.py</code>. (Earlier in the project, before the GPU campaign, petch was ~2× <em>slower</em>
-than ViennaPS-GPU; the campaign below flipped that to ~14× faster.)</p>
+<code>scripts/vps_sweep.py</code>. <strong>The ratio is CPU-dependent:</strong> the times above are a typical-CPU
+box. petch's ~1 s is GPU-resident and CPU-independent; ViennaPS's wall (its level-set advection runs on the CPU)
+drops to 7–12 s on a fast 32-core box → ~8× (the honest floor) and balloons to 50–64 s on a weak few-core box →
+40–60× (an artifact). (Earlier in the project, before the GPU campaign, petch was ~2× <em>slower</em> than
+ViennaPS-GPU; the campaign below flipped that.)</p>
 
 <h2>4. Accuracy — we implement ≥ ViennaPS's physics</h2>
 <p>petch's <code>belen.py</code> reproduces the complete ViennaPS <code>SF6O2Etching</code> model, mechanism for
@@ -110,7 +115,7 @@ mechanism — so "faster" does not mean "cruder":</p>
 ARDE rmse <strong>0.05–0.08</strong> vs depth-resolved ViennaPS. Every speedup in the campaign was validated
 <strong>depth-identical</strong> (or within Monte-Carlo noise) against the un-optimized path.</p>
 
-<h2>5. How we got 14× — the speedup campaign</h2>
+<h2>5. How we got there — the GPU speedup campaign</h2>
 <p>The original loop was dominated by CPU host operations. We moved them to the GPU one at a time, validating each
 stayed accuracy-neutral. The big levers, in order of impact:</p>
 <ul>
@@ -126,7 +131,7 @@ all on the GPU; the warm-start nearest-face lookup via a GPU BVH query instead o
 <p>Crucially, every one of these is an <strong>opt-in flag that auto-enables on CUDA and falls back to the
 portable path on CPU</strong> — so the tool is fast on a GPU, "just works" (slower) on a laptop, and stays
 modular. We deliberately did <em>not</em> fuse the loop into a monolithic CUDA graph: it would have made the fast
-path NVIDIA-only and the code far harder to extend, for only ~1.5× more on top of 14×.</p>
+path NVIDIA-only and the code far harder to extend, for only ~1.5× more on top of the existing speedup.</p>
 
 <h2>6. The API</h2>
 <p>The public interface mirrors ViennaPS's <code>Domain</code>/<code>Process</code> shape, so a ViennaPS user

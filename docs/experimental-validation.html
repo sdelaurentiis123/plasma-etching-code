@@ -81,7 +81,7 @@ $$R_E \;\approx\; \frac{K^{\rm AR}}{K^{\rm AR} + S_F - K^{\rm AR}\,S_F},$$
 </div>
 <figure>
 <img src="experiment_arde.png" alt="ARDE vs aspect ratio: de Boer measured wafer, a ballistic model (petch ≈ ViennaPS) that is too gentle, and petch with cryo process params reproducing the measurement." style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
-<figcaption>The measured de Boer/Blauw cryo SF<sub>6</sub>/O<sub>2</sub> wafer (stars) versus <strong>pure <a href="viennaps-validation.html">ViennaPS</a></strong> run on the same W&nbsp;=&nbsp;2&nbsp;µm trench geometry (red, GPU) and petch. ViennaPS — the open-source SOTA — sits well <em>above</em> the real wafer (AR&nbsp;10: 0.60 vs the measured 0.43): a ballistic feature-scale model that ignores gas-phase conductance and charging cannot reproduce a real wafer's roll-off. Given the cryo <em>process parameters</em> (etchant-starved flux, sub-degree ion angular spread), petch reproduces the measured ARDE through the knee (RMSE 0.04). The high-AR tail (AR&nbsp;&gt;&nbsp;20) is the remaining frontier — a sustained reaction-limited floor that the Belen model, like ViennaPS, does not yet carry.</figcaption>
+<figcaption>The measured de Boer/Blauw cryo SF<sub>6</sub>/O<sub>2</sub> wafer (stars) versus <strong>pure <a href="viennaps-validation.html">ViennaPS</a></strong> on the same W&nbsp;=&nbsp;2&nbsp;µm trench (red, GPU) and petch. ViennaPS — the open-source SOTA — sits well <em>above</em> the real wafer (AR&nbsp;10: 0.60 vs the measured 0.43): a ballistic feature-scale model that ignores gas-phase conductance and charging cannot reproduce a real wafer's roll-off. petch sits in the <em>same</em> ballistic regime — the deterministic <a href="viennaps-validation.html">DDA transport (§7)</a> gives 0.58 at AR&nbsp;10, straddling the wafer and agreeing with ViennaPS's 0.60; the blue cryo curve here (etchant-starved flux, sub-degree IADF) used the earlier <code>cal_F</code> flux-normalization to track the knee. Either way the <strong>high-AR tail (AR&nbsp;&gt;&nbsp;20) is the structural frontier</strong> — a sustained reaction-limited floor neither ballistic code carries, and which the cryo process knobs (narrow IADF, etchant starvation) do <em>not</em> close. A deterministic DDA neutral transport and a Knudsen-conductance tail are now ported into petch (the latter pending calibration).</figcaption>
 </figure>
 
 <h3>#3 — Hoekstra &amp; Kushner 1998: microtrenching (the ion-reflection anchor)</h3>
@@ -141,8 +141,8 @@ $$R \;=\; \big(2.91\times10^{-12}\big)\,T^{1/2}\,n_F\,\exp\!\Big(\frac{-0.108\ \
 </div>
 
 <div class="pagenav">
-<a href="multiscale.html">← Multiscale</a>
-<a href="sota-and-plan.html">Next: SOTA &amp; Plan →</a>
+<a href="performance.html">← Performance</a>
+<a href="viennaps-validation.html">Next: ViennaPS Validation →</a>
 </div>
 <div class="footer"><p>Experimental-validation layer. The targets above are how we keep the simulator honest against measured wafers, not just against ViennaPS.</p></div>
 </main>

@@ -147,7 +147,7 @@ $$\langle Y\rangle=\int Y(E)\,p(E)\,dE,$$
 <ul>
 <li><strong>\(\mathrm{cal}_F\) — the fluorine flux normalization.</strong> Our Monte-Carlo flux solver emits dimensionless open-field multipliers, not ViennaPS's absolute fluxes (in \(10^{15}\,\mathrm{cm^{-2}s^{-1}}\)). The factor \(\mathrm{cal}_F=12\) (2D) is the empirical reconciliation between the two unit systems, fit against the ViennaPS ground-truth ARDE. It is field-standard practice: fluorine sticking and absolute flux are <em>fitted/flux-dependent everywhere</em> in the literature (Belen 0.7, Marcos 0.1, Donnelly 2017's flux curve 0.001–0.03, MD 0.98→0.23 as Si fluorinates), so a flux-normalization knob is the standard treatment, not a hack. It does not transfer cleanly to 3D, where the effective sticking \(\beta_F\) is the lever instead.</li>
 <li><strong>The flux-smoothing strength.</strong> The 1-neighbor smoothing is the correct ViennaPS mechanism, but its effective strength depends on the neighborhood (our edge-mesh vs. ViennaPS's fixed-radius disk). Matching it to the last pixel is a smoothing-radius calibration.</li>
-<li><strong>One global <code>rate_scale</code> unit constant</strong> (≈0.034 in 2D, ≈0.6 in 3D) absorbs the remaining absolute-rate units. It is a single global constant, not a per-case knob — that distinction is the project's stated accuracy goal.</li>
+<li><strong>One global <code>rate_scale</code> unit constant</strong> — the analog of ViennaPS's <code>unitConversion</code> — absorbs the remaining absolute-rate units. Its numeric value tracks the flux-normalization convention, not the physics: ≈0.29 in the original 2D PoC, ≈0.034 in the normalized 2D harness, ≈0.6 in 3D. It is a single global constant, not a per-case knob — that distinction is the project's stated accuracy goal.</li>
 </ul>
 </div>
 <p>Everything else — the coupled-coverage forms, \(k_\sigma\), \(\beta_\sigma\), the \(\sqrt{E}\) yield law and its \((A,E_{\rm th})\) pairs, \(\gamma_F=0.7\), \(\gamma_O=1.0\), the angular-yield structure, the Russian-roulette transport, the Coburn–Winters ARDE form, and the Gottscho scaling — is sourced from the primary literature or from the ViennaPS source itself. The honest residual: in deep 3D HARC the smallest, highest-aspect-ratio holes still over-lag slightly relative to ViennaPS. That is a genuine transport model-form limit (our bounce re-emission vs. true Knudsen molecular flow), and the physics ViennaPS itself omits — surface charging (Hwang &amp; Giapis 1997) and volatile-product redeposition — is the staged "exceed once we have wafer data" track, validated against experiment rather than against another simulator.</p>
@@ -158,8 +158,8 @@ $$\langle Y\rangle=\int Y(E)\,p(E)\,dE,$$
 </div>
 
 <div class="pagenav">
-<a href="physics.html">← Physics</a>
-<a href="numerics.html">Next: The Numerics →</a>
+<a href="sota-and-plan.html">← SOTA &amp; Plan</a>
+<a href="performance.html">Next: Performance →</a>
 </div>
 <div class="footer"><p>The experimental grounding behind the reaction model. Next, the numerical machinery that represents and moves the surface.</p></div>
 </main>

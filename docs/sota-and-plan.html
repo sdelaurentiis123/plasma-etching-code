@@ -108,16 +108,20 @@
 <tr><td><strong>2 — Learned operators</strong></td><td>NVIDIA</td><td>surrogate the stiff chemistry source + multiple-scattering integral against the now-validated baseline. The foundation-model convergence.</td></tr>
 </tbody>
 </table>
+<div class="callout key">
+<span class="lab">Landed since (Phase 0/1 deliverables)</span>
+<p>A deterministic <strong>discrete-ordinates (S<sub>n</sub>) neutral transport</strong> has been absorbed from the sibling <code>plasma_sim</code> solver and reimplemented as a Warp kernel — it reproduces ViennaPS's ARDE (0.727 vs 0.73 @ AR&nbsp;8.6) noise-free (<a href="viennaps-validation.html">ViennaPS Validation §7</a>). Knudsen-tail and GMRES-radiosity neutral options are also ported, pending calibration. The Phase-1 head-to-head ran: petch is <strong>~8–15× faster</strong> than ViennaPS-GPU (CPU-dependent — see <a href="performance.html">Performance</a>), matching on holes and ~0.06–0.1 gentler on trenches. <em>(This S<sub>n</sub> transport is distinct from the "DDA" voxel traversal named in Phase 0.)</em></p>
+</div>
 
 <h2>5. Benchmark methodology</h2>
 <ul>
-<li><strong>Accuracy:</strong> Chamfer distance to ViennaPS surface, plus depth, sidewall angle, ARDE slope. Target: match ViennaPS to &lt;2% <strong>without</strong> <code>rate_scale</code>.</li>
+<li><strong>Accuracy:</strong> Chamfer distance to ViennaPS surface, plus depth, sidewall angle, ARDE slope. Target: match ViennaPS <strong>without</strong> <code>rate_scale</code> — now largely met (holes match; trenches are a converged ~0.06–0.1 <em>gentler</em>, a real source-discretization difference, not a failure — see <a href="viennaps-validation.html">ViennaPS Validation</a>). The live accuracy target has moved to the real <a href="experimental-validation.html">wafer</a>.</li>
 <li><strong>Convergence:</strong> grid refinement \(\Delta x\to0\), ray refinement \(N\to\infty\) via Richardson extrapolation — separates discretization error from sampling noise.</li>
 <li><strong>Speed:</strong> rays-to-fidelity (rays to a fixed noise floor) and rays/sec. (See <a href="acceleration.html">Acceleration §7</a>.)</li>
 </ul>
 
 <h2>6. The reference code, mapped</h2>
-<p>The current proof-of-concept matches ViennaPS in shape and ARDE trend parameter-free, but needs <code>rate_scale = 0.29</code> for absolute depth. That knob stands in for six contributors, each retired in Phase 0:</p>
+<p>The 2D proof-of-concept matches ViennaPS in shape and ARDE trend parameter-free, needing only a global <code>rate_scale</code> — an absolute-units constant (the analog of ViennaPS's <code>unitConversion</code>, not a fudge factor; its value tracks the flux-normalization convention — see <a href="physics-grounding.html">Physics Grounding</a>) — for absolute depth. The six contributors below are now <strong>second-order</strong>: petch already replicates ViennaPS's ballistic model (matching on holes, ~0.06–0.1 <em>gentler</em> on trenches), so the <em>first-order</em> residual is the structural ballistic-vs-wafer gap (gas conductance / charging), not these model-form refinements. The contributors, each retired in Phase 0:</p>
 <table>
 <thead><tr><th>#</th><th>Bias</th><th>Layer</th></tr></thead>
 <tbody>
@@ -141,8 +145,8 @@
 </ul>
 
 <div class="pagenav">
-<a href="differentiable-ml.html">← Differentiable &amp; ML</a>
-<a href="index.html">↑ Overview</a>
+<a href="multiscale.html">← Multiscale</a>
+<a href="physics-grounding.html">Next: Physics Grounding →</a>
 </div>
 <div class="footer"><p>State of the art, lineage, and plan. This completes the explainer set.</p></div>
 </main>

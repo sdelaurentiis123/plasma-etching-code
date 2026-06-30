@@ -55,7 +55,8 @@
 <table>
 <thead><tr><th>Technique</th><th>What it does</th></tr></thead>
 <tbody>
-<tr><td><strong>Radiosity linear solve</strong></td><td>solve \((I-(1-s)K)^{-1}\Gamma_{\rm direct}\) for the neutral equilibrium — all bounces at once, zero noise, differentiable by adjoint. (See <a href="flux-transport.html">Flux &amp; Transport §4</a>.)</td></tr>
+<tr><td><strong>Deterministic discrete-ordinates (S<sub>n</sub>) transport — ✓ shipped</strong></td><td>gather the neutral flux over a <em>fixed</em> cosine-weighted direction set marched through the level-set grid, re-emission iterated to convergence — noise-free, eliminates the \(1/\sqrt N\) floor for neutrals entirely. The petch deterministic option actually <em>validated</em> against ViennaPS ARDE (0.727 vs 0.73 @ AR&nbsp;8.6); Warp kernel, ~0.1 s/eval on CUDA. <em>(The S<sub>n</sub> transport solver — not the "DDA" voxel traversal in §3.)</em></td></tr>
+<tr><td><strong>Radiosity linear solve</strong></td><td>solve \((I-(1-s)K)^{-1}\Gamma_{\rm direct}\) for the neutral equilibrium — all bounces at once, zero noise, differentiable by adjoint. (See <a href="flux-transport.html">Flux &amp; Transport §4</a>.) Ported to petch (GMRES) but still needs calibration.</td></tr>
 <tr><td><strong>Hierarchical radiosity</strong></td><td>cluster distant patches so the dense \(O(N^2)\) form-factor operator becomes \(O(N)\)–\(O(N\log N)\). (Hanrahan clustering.)</td></tr>
 <tr><td><strong>FMM / \(\mathcal{H}\)-matrix compression</strong></td><td>fast-multipole or hierarchical-matrix compression of \(K\) for fast matrix-vector products and solves.</td></tr>
 <tr><td><strong>Anderson acceleration</strong></td><td>fewer iterations on the coverage↔sticking fixed point and on iterative radiosity solves.</td></tr>
@@ -119,7 +120,7 @@
 <div class="callout warn">
 <span class="lab">Measure speed and accuracy separately</span>
 <ul>
-<li><strong>Accuracy axis:</strong> Chamfer distance to ViennaPS, plus depth / sidewall-angle / ARDE. Moved by the <em>model-form &amp; numerical fixes</em> (<a href="physics.html">contributors 1–4</a>, <a href="numerics.html">5</a>). Goal: match ViennaPS <strong>without</strong> <code>rate_scale</code>.</li>
+<li><strong>Accuracy axis:</strong> Chamfer distance to ViennaPS, plus depth / sidewall-angle / ARDE. Moved by the <em>model-form &amp; numerical fixes</em> (<a href="physics.html">contributors 1–4</a>, <a href="numerics.html">5</a>). Goal: match ViennaPS <strong>without</strong> <code>rate_scale</code> — now largely demonstrated (petch replicates ViennaPS's ballistic model; the deterministic S<sub>n</sub> transport reproduces its ARDE). The live frontier has moved to matching the real <a href="experimental-validation.html">wafer</a>, not ViennaPS.</li>
 <li><strong>Speed axis:</strong> <em>rays-to-fidelity</em> (rays needed to hit a fixed noise floor) and <em>rays/sec</em> (raw throughput). Moved by the <em>variance-reduction &amp; traversal</em> techniques above.</li>
 </ul>
 <p>A speedup that quietly loses accuracy will hide if you only watch one axis. The convergence harness (grid refinement, ray refinement, Richardson extrapolation) watches both.</p>

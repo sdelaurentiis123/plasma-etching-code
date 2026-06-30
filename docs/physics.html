@@ -116,7 +116,7 @@ $$V_n=\frac{1}{\rho}\Big(Y_{ie}\,\Gamma_{\rm ion}\,\theta_F + Y_{sp}\,\Gamma_{\r
 <p>Notice the dominant term \(V_n\sim Y_{ie}\Gamma_{\rm ion}\theta_F\) with \(\theta_F\sim\Gamma_F/\Gamma_{\rm ion}\): it is a <strong>product of an ion quantity and a neutral quantity</strong>. That multiplicative coupling is the synergy, and it lives entirely in this one expression.</p>
 <div class="callout warn">
 <span class="lab">Bias contributor #1 — the dominant one</span>
-<p>This clean steady-state <em>ratio</em> is not ViennaPS's exact Belen/Ertl form, which solves coupled coverage ODEs with extra redeposition / coupling terms (\(k_\sigma,\beta_\sigma\)) and a coverage-<em>dependent</em> sticking \(s(\theta)\). The different rate-vs-flux-ratio dependence is the leading source of the \(\sim7\%\) depth bias, and it is what makes our ARDE lag slightly too steep in narrow trenches.</p>
+<p>This clean steady-state <em>ratio</em> is the original PoC simplification of ViennaPS's exact Belen/Ertl form, which solves coupled coverage ODEs with extra redeposition / coupling terms (\(k_\sigma,\beta_\sigma\)) and a coverage-<em>dependent</em> sticking \(s(\theta)\). petch now implements that exact Belen form — so this is a model-form note, not the headline gap. With it, petch's ARDE <em>matches</em> ViennaPS on holes and is ~0.06–0.1 <em>gentler</em> (flatter, not steeper) on trenches — a converged source-discretization difference, see <a href="viennaps-validation.html">ViennaPS Validation</a>. The first-order residual is structural (the ballistic-vs-wafer gap), not this ~7% chemistry detail.</p>
 </div>
 
 <h2>8. Where the coupling reaches back into transport</h2>

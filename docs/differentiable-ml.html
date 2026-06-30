@@ -51,7 +51,7 @@
 <h2>3. What is hard to differentiate, and how to fix it</h2>
 <p>Three pieces of the simulator each need care:</p>
 <h3>(a) The radiosity solve — easy</h3>
-<p>The neutral equilibrium \(\Gamma=(I-(1-s)K)^{-1}\Gamma_{\rm direct}\) is a linear solve, differentiated cleanly by the <strong>adjoint method</strong>: one extra solve with the transposed operator yields all gradients. This is one more reason to prefer radiosity over stochastic bounce chains, which are noisy to differentiate.</p>
+<p>The neutral equilibrium \(\Gamma=(I-(1-s)K)^{-1}\Gamma_{\rm direct}\) is a linear solve, differentiated cleanly by the <strong>adjoint method</strong>: one extra solve with the transposed operator yields all gradients. This is one more reason to prefer radiosity over stochastic bounce chains, which are noisy to differentiate. The newly shipped <strong>deterministic discrete-ordinates (S<sub>n</sub>) neutral transport</strong> (a Warp kernel; see <a href="flux-transport.html">Flux &amp; Transport §2</a>) is a second clean-gradient path for the same reason — it is deterministic and noise-free, so differentiable by construction, unlike the stochastic neutral Monte-Carlo. <em>(This S<sub>n</sub> transport solver is distinct from the "DDA" voxel traversal used for ray-surface hits.)</em></p>
 <h3>(b) Monte-Carlo noise — reduce it first</h3>
 <p>Gradients of a noisy estimator are <em>even noisier</em> than the estimator. This is why <a href="acceleration.html">variance reduction</a> is a prerequisite, not a nicety: QMC, control variates, and radiosity all smooth the flux field so its gradient is usable.</p>
 <h3>(c) Visibility discontinuities — the real subtlety</h3>
@@ -85,7 +85,7 @@
 
 <div class="pagenav">
 <a href="acceleration.html">← Acceleration</a>
-<a href="sota-and-plan.html">Next: SOTA &amp; Plan →</a>
+<a href="multiscale.html">Next: Multiscale →</a>
 </div>
 <div class="footer"><p>Differentiability &amp; ML layer. Next, the state of the art and the honest plan.</p></div>
 </main>
