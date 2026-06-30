@@ -16,7 +16,54 @@ plasma_sim's "source" solver. No mesh BVH, no random sampling -> deterministic, 
 """
 from __future__ import annotations
 
+import os
 import numpy as np
+import warp as wp
+
+DEVICE = os.environ.get("PETCH_DEVICE", "cpu")
+
+
+@wp.kernel
+def _dda_gather_kernel(phi: wp.array3d(dtype=wp.float32), origins: wp.array(dtype=wp.vec3),
+                       normals: wp.array(dtype=wp.vec3), dirs: wp.array(dtype=wp.vec3),
+                       weights: wp.array(dtype=wp.float32), remit: wp.array(dtype=wp.float32),
+                       dx: float, z_top: float, max_steps: int, nx: int, ny: int, nz: int,
+                       out: wp.array(dtype=wp.float32)):
+    """One thread per surface point: march each direction-ray through the occupancy grid,
+    escaping to source (1.0) or hitting a wall (its remit). Cosine-weighted -> arriving flux."""
+    i = wp.tid()
+    o = origins[i]
+    n = normals[i]
+    num = float(0.0)
+    den = float(0.0)
+    D = dirs.shape[0]
+    for k in range(D):
+        dk = dirs[k]
+        acc = wp.max(wp.dot(n, dk), 0.0)
+        den += weights[k] * acc
+        if acc > 1.0e-6:
+            px = o[0] + dk[0] * dx * 1.01
+            py = o[1] + dk[1] * dx * 1.01
+            pz = o[2] + dk[2] * dx * 1.01
+            contrib = float(0.0)
+            done = int(0)
+            for s in range(max_steps):
+                if done == 0:
+                    if pz >= z_top:
+                        contrib = 1.0
+                        done = 1
+                    else:
+                        ix = wp.clamp(int(px / dx + 0.5), 0, nx - 1)
+                        iy = wp.clamp(int(py / dx + 0.5), 0, ny - 1)
+                        iz = wp.clamp(int(pz / dx + 0.5), 0, nz - 1)
+                        if phi[ix, iy, iz] > 0.0:
+                            contrib = remit[(ix * ny + iy) * nz + iz]
+                            done = 1
+                    px += dk[0] * dx
+                    py += dk[1] * dx
+                    pz += dk[2] * dx
+            num += weights[k] * acc * contrib
+    out[i] = num / wp.max(den, 1.0e-12)
 
 
 def fib_hemisphere(n):
@@ -86,10 +133,10 @@ def dda_neutral_flux(phi, dx, zs, centroids, into_gas_normals, s_face,
     adjacent to each face (one step along -into_gas_normal) so a marching ray that stops at the
     wall picks it up. Iterates Gamma = direct + gather((1-s)Gamma). Returns flux (F,)."""
     nx, ny, nz = phi.shape
+    F = len(centroids)
     if z_top is None:
         z_top = zs[-1] - 0.5 * dx
     dirs, weights = fib_hemisphere(n_dir)
-    origins = centroids
     # solid-side cell index for each face (where its re-emitted flux lives)
     spos = centroids - 0.7 * dx * into_gas_normals
     inv = 1.0 / dx
@@ -99,12 +146,26 @@ def dda_neutral_flux(phi, dx, zs, centroids, into_gas_normals, s_face,
     wall_cell = (six * ny + siy) * nz + siz
     max_steps = int((z_top - zs[0]) / dx) + 4
 
-    zero = np.zeros(nx * ny * nz)
-    direct = _gather(phi, dx, origins, into_gas_normals, dirs, weights, zero, z_top, max_steps)
+    # Warp gather (CUDA or CPU): upload static arrays once, re-launch per re-emission iteration.
+    phi_wp = wp.array(np.ascontiguousarray(phi, dtype=np.float32), dtype=wp.float32, device=DEVICE)
+    orig_wp = wp.array(centroids.astype(np.float32), dtype=wp.vec3, device=DEVICE)
+    nrm_wp = wp.array(into_gas_normals.astype(np.float32), dtype=wp.vec3, device=DEVICE)
+    dirs_wp = wp.array(dirs.astype(np.float32), dtype=wp.vec3, device=DEVICE)
+    w_wp = wp.array(weights.astype(np.float32), dtype=wp.float32, device=DEVICE)
+    out_wp = wp.zeros(F, dtype=wp.float32, device=DEVICE)
+
+    def gather(remit_flat):
+        remit_wp = wp.array(remit_flat.astype(np.float32), dtype=wp.float32, device=DEVICE)
+        wp.launch(_dda_gather_kernel, dim=F, device=DEVICE,
+                  inputs=[phi_wp, orig_wp, nrm_wp, dirs_wp, w_wp, remit_wp,
+                          float(dx), float(z_top), int(max_steps), int(nx), int(ny), int(nz), out_wp])
+        return out_wp.numpy().astype(np.float64)
+
+    direct = gather(np.zeros(nx * ny * nz, np.float32))
     vf = direct.copy()
     alpha = np.clip(1.0 - np.asarray(s_face, float), 0.0, 1.0)
     for _ in range(max(1, n_reemit)):
         remit = np.zeros(nx * ny * nz)
         np.maximum.at(remit, wall_cell, alpha * np.maximum(vf, 0.0))   # face -> solid wall cell
-        vf = direct + _gather(phi, dx, origins, into_gas_normals, dirs, weights, remit, z_top, max_steps)
+        vf = direct + gather(remit)
     return np.clip(np.maximum(vf, 0.0), 0.0, 8.0)
