@@ -56,15 +56,17 @@ res = []
 for diam in DIAMS:
     vw, vdep = vps[diam]
     best = None
-    for r in [0.05, 0.08, 0.12]:
+    for r in [0.10, 0.15, 0.20, 0.25, 0.30]:          # wide enough to reach ViennaPS depth (~9um)
         ow, odep = ours_run(diam, r)
         if best is None or abs(odep - vdep) < abs(best[1] - vdep):
             best = (ow, odep, r)
     ow, odep, r = best
     sx = vw / max(ow, 1e-3)
+    dmatch = abs(odep - vdep) / max(vdep, 1e-9)        # depth-match quality (flag if >10%)
     res.append(dict(diam=diam, ar=round(vdep/diam, 1), vps_wall=vw, vps_depth=vdep,
-                    ours_wall=ow, ours_depth=odep, speedup=sx))
-    print(f"{diam:6.1f} {vdep/diam:5.1f} | {vw:11.2f}s {vdep:6.2f} | {ow:6.2f}s {odep:6.2f} | {sx:7.1f}x", flush=True)
+                    ours_wall=ow, ours_depth=odep, speedup=sx, depth_match=dmatch))
+    flag = "" if dmatch < 0.1 else "  <-- DEPTH NOT MATCHED"
+    print(f"{diam:6.1f} {vdep/diam:5.1f} | {vw:11.2f}s {vdep:6.2f} | {ow:6.2f}s {odep:6.2f} | {sx:7.1f}x  (dΔ={dmatch*100:.0f}%){flag}", flush=True)
 
 sp = sorted(r['speedup'] for r in res)
 print(f"\n  ours vs ViennaPS-GPU (OptiX RT-core), matched depth: {sp[0]:.1f}x - {sp[-1]:.1f}x (median {sp[len(sp)//2]:.1f}x)", flush=True)
