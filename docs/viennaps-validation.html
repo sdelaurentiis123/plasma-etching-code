@@ -34,7 +34,7 @@
 
 <div class="callout key">
 <span class="lab">The result in one figure</span>
-<p>On <strong>holes</strong> — the harder, more device-relevant geometry — petch tracks ViennaPS across the entire sweep. On <strong>trenches</strong>, petch is systematically <em>gentler</em> (less aspect-ratio rolloff) by \(\sim\!0.06\text{–}0.1\) in normalized rate. This is not a bug and not a boundary artifact: it is the genuine, <em>converged</em> difference between two independent ballistic transport discretizations. Both codes, in turn, sit well above real wafer data — because both omit the same physics (gas-phase conductance, charging). The honest headline is: <strong>petch matches ViennaPS on holes, is slightly gentler on trenches, and runs ~14× faster.</strong></p>
+<p>On <strong>holes</strong> — the harder, more device-relevant geometry — petch tracks ViennaPS across the entire sweep. On <strong>trenches</strong>, petch is systematically <em>gentler</em> (less aspect-ratio rolloff) by \(\sim\!0.06\text{–}0.1\) in normalized rate. This is not a bug and not a boundary artifact: it is the genuine, <em>converged</em> difference between two independent ballistic transport discretizations. Both codes, in turn, sit well above real wafer data — because both omit the same physics (gas-phase conductance, charging). The honest headline is: <strong>petch matches ViennaPS on holes, is slightly gentler on trenches, and runs ~8–15× faster</strong> (CPU-dependent — petch is GPU-resident at ~1&nbsp;s while ViennaPS's level-set is CPU-bound; see §6).</p>
 </div>
 
 <figure>
