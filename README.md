@@ -1,8 +1,10 @@
 # petch — a fast, differentiable 3D plasma-etch simulator
 
 **The only open-source GPU-accelerated, differentiable feature-scale plasma-etch simulator** —
-and on the same GPU it runs **~14× faster than ViennaPS** (the open-source SOTA), tracking its ARDE
-within ~0.1 at low/mid aspect ratio (see *Accuracy* below for the honest deep-AR difference).
+and on the same GPU it runs **~8–15× faster than ViennaPS** (the open-source SOTA), tracking its ARDE
+within ~0.1 at low/mid aspect ratio (see *Accuracy* below for the honest deep-AR difference). petch is
+GPU-resident (~1 s, **CPU-independent**) while ViennaPS's level-set advection is CPU-bound, so the
+*ratio* depends on the host CPU — ~8× when ViennaPS gets a fast many-core CPU, more on typical/weak ones.
 
 Level-set surface evolution + Monte-Carlo / radiosity flux transport + SF₆/O₂ surface chemistry,
 with the flux and level-set kernels written in [NVIDIA Warp](https://github.com/NVIDIA/warp) — so the
@@ -13,15 +15,20 @@ whole pipeline is GPU-resident **and** autodifferentiable in one substrate. Runs
 
 ## Headline numbers
 
-**Speed — same RTX 3090, both engines warmed, matched etch depth, swept across aspect ratios:**
+**Speed — same RTX 3090, both engines warmed, depth-matched, swept across aspect ratios.**
+Measured on a **32-core / RTX 3090** box (so ViennaPS gets a *fast* CPU — the conservative case):
 
 | hole Ø | aspect ratio | ViennaPS-GPU (OptiX RT-core) | **petch** | speedup |
 |---|---|---|---|---|
-| 4 µm | 2.1 | 19.4 s | **1.30 s** | **14.9×** |
-| 6 µm | 1.6 | 22.7 s | **1.61 s** | **14.1×** |
-| 8 µm | 1.2 | 25.8 s | **1.82 s** | **14.1×** |
+| 4 µm | 2.1 | 7.4 s | **0.90 s** | **8.3×** |
+| 6 µm | 1.6 | 7.4 s | **1.01 s** | **7.3×** |
+| 8 µm | 1.2 | 12.2 s | **1.17 s** | **10.4×** |
 
-(Conservative — petch etched slightly *deeper*, i.e. more work. Reproduce: `scripts/vps_sweep.py`.)
+Depth-matched within 3–7%. **The ratio is CPU-dependent** because ViennaPS's level-set advection runs
+on the CPU (~40% of its time): on this fast 32-core box ViennaPS is 7–12 s → ~8×; on a mid/typical CPU
+it's ~19–25 s → ~14×; on a weak few-core box it balloons to 50–64 s → 40–60× (an *artifact*, not a real
+gain). **petch's ~1 s is GPU-resident and steady regardless** — so ~8× is the honest floor, and the
+advantage only grows on weaker hosts. Reproduce: `scripts/vps_sweep.py`.
 
 - **Tracks ViennaPS**: replicates every ViennaPS mechanism (Belen coupled coverages, exact
   Russian-roulette weighted neutral transport, coverage-dependent sticking, faithful ion reflection,

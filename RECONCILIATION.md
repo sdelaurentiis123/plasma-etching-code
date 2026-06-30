@@ -56,15 +56,36 @@ Craig's engine matches the wafer because its defaults are calibrated to it. petc
 with its de Boer *process* params (narrow IADF / etchant-starved) — documented separately, not
 re-derived here (the W differs, and petch-DDA's numpy gather is too slow for W=2 µm deep ARs).
 
-## Speed (RTX 3090, CUDA)
+## Speed (RTX 3090, CUDA) — real depth-matched test
 
-petch sub-second (0.98–1.30 s) vs ViennaPS-OptiX. The benchmark box reported 46–66× but that is
-**inflated** — the box had only 6 weak vCPUs, so ViennaPS's CPU-side level-set (~40% of its time)
-was starved (52–64 s vs the validated 19–25 s), and the run wasn't depth-matched. **Honest,
-comparable speedup remains ~14×** (balanced box, depth-matched, as documented in the README).
+petch is **GPU-resident and CPU-independent (~1 s)**; ViennaPS's wall is CPU-bound (its level-set
+advection is ~40% CPU), so the *ratio* depends entirely on the ViennaPS host CPU:
+
+| ViennaPS host | ViennaPS wall | petch wall | speedup |
+|---|---|---|---|
+| 32-core @ 4.4 GHz (fast, **depth-matched**) | 7–12 s | 0.9–1.2 s | **7.3–10.4× (median 8.3×)** |
+| mid/typical CPU (documented) | 19–25 s | ~1.3–1.8 s | ~14× |
+| 6 weak vCPUs (CPU-starved) | 52–64 s | ~1 s | 46–66× (**artifact**) |
+
+So the honest floor is **~8×** (ViennaPS on a fast many-core CPU, depth-matched to 3–7%); the
+advantage only grows on weaker hosts. The 46–66× from the weak-vCPU box was the inflation trap and is
+NOT a real gain. `scripts/vps_sweep.py` (rate range widened so it actually depth-matches).
+
+## petch-DDA at the de Boer width (W=2 µm, CUDA)
+
+With the Warp gather, DDA is **fast on CUDA (~0.1 s per static eval)**. petch-DDA static ARDE at W=2 µm:
+
+| AR | petch-DDA nr | de Boer wafer |
+|----|------|------|
+| 10 | 0.58 | 0.43 |
+| 20 | 0.23 | 0.29 |
+
+It straddles the wafer (above at AR10, below at AR20), RMSE ~0.09 with default ViennaPS-regime params
+(Craig's *calibrated* engine: 0.072). petch matching the wafer needs its de Boer process params.
 
 ## Follow-ups
 
-- Warp-ify the DDA neutral gather (currently numpy) for CUDA speed — then `dda` is fast too.
+- ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
 - Calibrate the Knudsen floor sink; diagnose petch radiosity's over-correction.
-- petch-DDA static ARDE at W=2 µm for a direct petch-vs-wafer scorecard line.
+- Re-run petch with de Boer *process* params (narrow IADF / etchant-starved) through the W=2 DDA scorecard
+  to show petch can match the wafer (not just the ViennaPS-regime defaults).

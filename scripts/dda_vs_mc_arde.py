@@ -14,34 +14,46 @@ import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Panel A: W=0.5 um trench (MC vs DDA vs ViennaPS)
 AR = np.array([2, 4, 6, 8, 10], float)
 PETCH_MC  = np.array([0.536, 0.186, 0.077, 0.043, 0.029])     # under-samples deep floor (static)
 PETCH_DDA = np.array([0.989, 0.941, 0.857, 0.759, 0.652])     # deterministic, tracks ViennaPS
 VPS_AR, VPS_NR = 8.6, 0.73                                     # ViennaPS GPU_TRIANGLE reference
+# Panel B: W=2 um trench (petch-DDA vs the de Boer wafer, on CUDA)
+AR2 = np.array([2, 5, 10, 15, 20], float)
+PETCH_DDA_W2 = np.array([0.969, 0.871, 0.579, 0.363, 0.228])
 DEBOER_AR = np.array([10.0, 20.0, 40.0]); DEBOER_NR = np.array([0.43, 0.29, 0.20])   # W=2 um wafer
 
-fig, ax = plt.subplots(figsize=(8.6, 5.6))
-ax.plot(AR, PETCH_DDA, "o-", color="#2471c7", lw=2.6, ms=8, label="petch DDA (deterministic, new)")
-ax.plot(AR, PETCH_MC,  "s--", color="#c0392b", lw=2.2, ms=7, label="petch MC (200k rays, static)")
-ax.plot([VPS_AR], [VPS_NR], "*", color="#16a085", ms=22, label="ViennaPS-GPU (ballistic ref)", zorder=6)
-ax.plot(DEBOER_AR, DEBOER_NR, "kP", ms=12, label="de Boer wafer (measured, W=2 µm)", zorder=6)
-ax.plot(DEBOER_AR, DEBOER_NR, "k:", lw=1.2, alpha=0.5)
-ax.annotate("MC under-samples the deep floor\n(single static eval) → collapses",
-            xy=(8, 0.043), xytext=(4.4, 0.30), color="#c0392b", fontsize=9.5,
-            arrowprops=dict(arrowstyle="->", color="#c0392b"))
-ax.annotate("DDA reproduces ViennaPS's\nballistic rolloff (≈0.71 vs 0.73)",
-            xy=(8.6, 0.73), xytext=(2.3, 0.45), color="#16a085", fontsize=9.5,
-            arrowprops=dict(arrowstyle="->", color="#16a085"))
-ax.annotate("both ballistic engines sit\nABOVE the real wafer",
-            xy=(10, 0.43), xytext=(6.0, 0.16), color="0.25", fontsize=9.5,
-            arrowprops=dict(arrowstyle="->", color="0.4"))
-ax.set_xlabel("aspect ratio  (depth / width)"); ax.set_ylabel("normalized floor etch rate  $n_r = V_{floor}/V_{field}$")
-ax.set_xlim(1.5, 11); ax.set_ylim(0, 1.05); ax.grid(alpha=0.3); ax.legend(loc="upper right", fontsize=10)
-ax.set_title("Static ARDE — deterministic DDA fixes petch-MC's deep-floor under-sampling\n"
-             "and matches ViennaPS (W = 0.5 µm trench, SF$_6$/O$_2$)", fontsize=12, fontweight="bold")
+fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+
+axA.plot(AR, PETCH_DDA, "o-", color="#2471c7", lw=2.6, ms=8, label="petch DDA (deterministic, new)")
+axA.plot(AR, PETCH_MC,  "s--", color="#c0392b", lw=2.2, ms=7, label="petch MC (200k rays, static)")
+axA.plot([VPS_AR], [VPS_NR], "*", color="#16a085", ms=22, label="ViennaPS-GPU (ballistic ref)", zorder=6)
+axA.annotate("MC under-samples the\ndeep floor → collapses", xy=(8, 0.043), xytext=(3.8, 0.28),
+             color="#c0392b", fontsize=9, arrowprops=dict(arrowstyle="->", color="#c0392b"))
+axA.annotate("DDA ≈ ViennaPS\n(0.727 vs 0.73)", xy=(8.6, 0.73), xytext=(2.2, 0.42),
+             color="#16a085", fontsize=9, arrowprops=dict(arrowstyle="->", color="#16a085"))
+axA.set_xlim(1.5, 11); axA.set_title("W = 0.5 µm: DDA fixes MC under-sampling, matches ViennaPS", fontsize=11)
+axA.legend(loc="upper right", fontsize=9)
+
+axB.plot(AR2, PETCH_DDA_W2, "o-", color="#2471c7", lw=2.6, ms=8, label="petch DDA (W=2 µm, CUDA)")
+axB.plot(DEBOER_AR, DEBOER_NR, "kP", ms=13, label="de Boer wafer (measured)", zorder=6)
+axB.plot(DEBOER_AR, DEBOER_NR, "k:", lw=1.2, alpha=0.5)
+axB.annotate("petch-DDA straddles the wafer\n(above @ AR10, below @ AR20);\nViennaPS-regime params, RMSE≈0.09",
+             xy=(10, 0.58), xytext=(10.5, 0.74), color="#2471c7", fontsize=9,
+             arrowprops=dict(arrowstyle="->", color="#2471c7"))
+axB.set_xlim(1.5, 21); axB.set_title("W = 2 µm: petch DDA vs the real de Boer wafer", fontsize=11)
+axB.legend(loc="upper right", fontsize=9)
+
+for ax in (axA, axB):
+    ax.set_xlabel("aspect ratio  (depth / width)"); ax.set_ylim(0, 1.05); ax.grid(alpha=0.3)
+axA.set_ylabel("normalized floor etch rate  $n_r = V_{floor}/V_{field}$")
+fig.suptitle("petch deterministic DDA transport (ported from plasma_sim) — SF$_6$/O$_2$ static ARDE",
+             fontweight="bold", fontsize=13)
 plt.tight_layout()
-for p in [os.path.join(HERE, "viz", "dda_vs_mc_arde.png")]:
-    os.makedirs(os.path.dirname(p), exist_ok=True); plt.savefig(p, dpi=150); print("saved", p)
+p = os.path.join(HERE, "viz", "dda_vs_mc_arde.png")
+os.makedirs(os.path.dirname(p), exist_ok=True); plt.savefig(p, dpi=150); print("saved", p)
 np.savez(os.path.join(HERE, "dda_vs_mc_arde.npz"), ar=AR, petch_mc=PETCH_MC, petch_dda=PETCH_DDA,
-         vps_ar=VPS_AR, vps_nr=VPS_NR, deboer_ar=DEBOER_AR, deboer_nr=DEBOER_NR)
+         vps_ar=VPS_AR, vps_nr=VPS_NR, ar2=AR2, petch_dda_w2=PETCH_DDA_W2,
+         deboer_ar=DEBOER_AR, deboer_nr=DEBOER_NR)
 print("petch-DDA @ AR8.6 (interp):", round(float(np.interp(8.6, AR, PETCH_DDA)), 3), "vs ViennaPS", VPS_NR)
