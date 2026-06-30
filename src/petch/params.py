@@ -33,6 +33,8 @@ PAR = dict(
     # --- ported from Craig's plasma_sim (neutral_transport != "mc") ---
     radiosity_solver='jacobi',                  # 'jacobi' | 'gmres' (matrix-free, better-conditioned at low s)
     knudsen_wall_loss_scale=1.85,               # floor reaction-loss scale in the 1-D Knudsen conductance tail
+    dda_n_dir=64,                               # discrete-ordinates direction count (neutral_transport='dda')
+    dda_n_reemit=12,                            # diffuse re-emission iterations for the DDA neutral solve
     # Ion energy distribution (IED) for yield integration. 'mean' = evaluate yields at Emean (PoC);
     # 'gauss' = integrate over N(Emean,Esig) (matches ViennaPS); 'bimodal' = arcsine sheath IED of
     # full width ied_dE (the REAL low-freq-bias distribution, beyond ViennaPS). See chemistry._ied_yield.
@@ -77,7 +79,8 @@ class Flags:
     coverage_sticking: bool = False  # Langmuir coverage-dependent neutral sticking (3D ARDE fix)
     redeposition: bool = False       # BEYOND ViennaPS: etch-product redeposition (sidewall passivation/taper)
     neutral_transport: str = "mc"    # "mc" (Russian-roulette MC) | "radiosity" (deterministic form-factor) |
-                                     # "knudsen" (1-D molecular-flow conductance tail, ported from plasma_sim)
+                                     # "knudsen" (1-D molecular-flow conductance tail) | "dda" (deterministic
+                                     # discrete-ordinates grid-march, noise-free deep-AR) -- last two ex-plasma_sim
     warm_start_coverage: bool = False  # speed (accuracy-neutral): seed the coverage fixed point from the
                                        # previous step's coverage -> converges in 1-2 iters not 4 (same
                                        # fixed point). The front moves <1 cell/step so coverage barely moves.

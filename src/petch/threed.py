@@ -1035,6 +1035,44 @@ def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=200
     return m_i, m_F, m_O, cos_i
 
 
+def mc_flux_3d_dda(mesh, verts, faces, centroids, areas, geo, par, n_ion=20000,
+                   seed=0, flags=None, n_fp=4):
+    """DETERMINISTIC DDA neutral transport (discrete-ordinates grid-march, ported from Craig Xu
+    Chen's plasma_sim). Ions stay MC (directional, single-bounce); neutrals via dda.dda_neutral_flux
+    -- a fixed-quadrature grid-march with diffuse re-emission, coupled to the Belen coverage fixed
+    point. Noise-free deep-AR rolloff (no MC floor-starvation). neutral_transport='dda'."""
+    from .dda import dda_neutral_flux
+    Lx, Ly, Lz = geo['Lx'], geo['Ly'], geo['Lz']
+    F = len(faces)
+    rng = np.random.default_rng(seed)
+    z_src = Lz - geo['dx']; A_src = Lx * Ly
+    A = np.maximum(areas, 1.0e-9)
+    betaE = par.get('betaE', 0.7); betaO = par.get('betaO', 1.0)
+    fn = _gas_normals(verts, faces, centroids, geo)
+    phi, zs, dx = geo['phi'], geo['zs'], geo['dx']
+    n_dir = int(par.get('dda_n_dir', 64)); n_re = int(par.get('dda_n_reemit', 12))
+
+    # ions: MC directional (single-bounce), same as the radiosity/knudsen paths
+    oi, di = _source3d('ion', n_ion, Lx, Ly, z_src, par['ion_ang_sigma'], 'sobol', rng, seed * 9 + 1)
+    fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
+    wp.launch(_trace3d, dim=n_ion, device=DEVICE,
+              inputs=[mesh.id, wp.array(oi, dtype=wp.vec3, device=DEVICE), wp.array(di, dtype=wp.vec3, device=DEVICE),
+                      1.0, 0, int(seed * 9 + 1), 0, 0.34, 0.8, fi, ai])
+    fi = fi.numpy(); ai = ai.numpy()
+    m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
+    cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
+
+    # neutrals: deterministic DDA, coupled to the Belen coverage fixed point
+    bare = np.ones(F)
+    m_F = m_O = np.zeros(F)
+    for _ in range(n_fp):
+        m_F = dda_neutral_flux(phi, dx, zs, centroids, fn, np.clip(bare * betaE, 0.0, 1.0), n_dir, n_re)
+        m_O = dda_neutral_flux(phi, dx, zs, centroids, fn, np.clip(bare * betaO, 0.0, 1.0), n_dir, n_re)
+        thF, thO = _belen_coverages(m_i, m_F, m_O, cos_i, par, flags)
+        bare = np.clip(1.0 - thF - thO, 0.0, 1.0)
+    return m_i, m_F, m_O, cos_i
+
+
 # ----------------------------- 3D advection -----------------------------
 def advect_3d(phi, Fspeed, dx, dt):
     """phi_t + F|grad phi| = 0, first-order upwind Godunov in 3D (F>=0 etch). NumPy reference."""
@@ -1481,6 +1519,9 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         elif _nt == "knudsen":   # 1-D Knudsen conductance deep-neutral tail (ported from plasma_sim)
             m_i, m_F, m_O, cos_i = mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par,
                                                       n_ion=n_ion_s, seed=step + seed_offset, flags=flags)
+        elif _nt == "dda":       # deterministic discrete-ordinates DDA neutrals (ported from plasma_sim)
+            m_i, m_F, m_O, cos_i = mc_flux_3d_dda(mesh, verts, faces, centroids, areas, geo, par,
+                                                  n_ion=n_ion_s, seed=step + seed_offset, flags=flags)
         elif getattr(flags, "coverage_sticking", False):   # Langmuir coverage-dependent sticking
             bi = None
             if warm and cov_bare is not None and np.all(np.isfinite(centroids)):   # seed from prev-step coverage
