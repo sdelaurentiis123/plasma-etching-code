@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "petch"
-version = "0.2.0"
-description = "Fast, differentiable 3D plasma-etch simulator: GPU level-set + Monte-Carlo flux, ~14x faster than ViennaPS"
+version = "0.3.0"
+description = "Fast, differentiable 3D plasma-etch simulator: GPU level-set + MC/deterministic flux transport, ~8-15x faster than ViennaPS (CPU-dependent), wafer-validated Knudsen deep-AR option"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
