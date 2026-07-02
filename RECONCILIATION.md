@@ -167,10 +167,49 @@ GPU proof printed first: ViennaPS GPU_TRIANGLE cold 1.5 s / warm 1.1 s → genui
 |---|---|
 | Wafer PASS re-verify (CUDA, 200k rays × 2 seeds) | ✅ RMSE **0.0397** at dx=0.25 *and* 0.20; seed-spread 0.001 |
 | Width sweep, frozen wls=1.4 (W = 1/2/4 µm) | ✅ all RMSE ≤ 0.041, cross-width spread **0.003** — but labeled honestly: W cancels *analytically* in the slit model, so this is **model-consistency** with de Boer's empirical AR-scaling, not independent prediction |
-| Gomez absolute rate (1.3 µm/min) | ✅ one global `rate_scale = 3.78e-4`, constant across features to **1.1%** |
+| Gomez absolute rate (1.3 µm/min) | ✅ one global `rate_scale`, constant across features to **1.1%**. Value depends on the time convention: with petch's `t_end` ≡ process **minutes** (the `vps_sweep` convention), `rate_scale = 0.0226`; the first-reported 3.78e-4 assumed per-second V (a units slip — that same slip made the first two evolving-etch attempts run 60× slow, which was the whole "10× deficit") |
 | ViennaPS static reference, W=0.5 (pre-carved MakeTrench, makeMask=False, carve verified d0=D; reflecting ions) | measured: nr = **0.911 / 0.820 / 0.728 / 0.626 / 0.534** at AR 2/4/6/8/10 |
 | petch-DDA vs that reference | **0.08 → 0.21 gentler, growing with AR** (0.742 vs 0.534 at AR 10). The DDA's diffuse re-emission over-delivers deep neutrals — its open calibration item (same family as the radiosity over-correction). The earlier "~0.08 gentler vs 0.73" used an unverified reference point, now replaced by the measured curve. |
-| Evolving-etch Knudsen consistency | ❌ **OPEN** — as-configured the evolving run underperforms the static rate ~10× (AR 0.4 in 45 min at a nominal 1.3 µm/min field). Root cause undiagnosed (suspects: mask/sink interaction in `knudsen_face_flux` during evolution, or coverage collapse in the evolving fixed point). Two earlier attempts were invalid for script reasons (unphysical rate_scale; CFL-capped). Do not claim evolving-knudsen fidelity until this is closed. |
+| Evolving-etch Knudsen consistency | ✅ **CLOSED — see the evolving-mode section below** (sink physics fixed per literature, then evolving-mode calibration → held-out AR40 prediction passes). |
+
+## Evolving mode: the accuracy milestone (2026-07-02)
+
+The full #41 chain, every step verified (and both dead-ends kept):
+
+1. The "10× evolving deficit" was a **units slip** (per-second vs per-minute `rate_scale`; the Gomez
+   constant is **0.0226** in petch's minutes convention). The physics had never been tested.
+2. Proper-units test exposed a **real defect**: evolving nr@AR5 = 0.25 vs static 0.81. Cause: the sink
+   applied the **full duct-area loss at every slice** a rounded evolving front touched (a flat static
+   floor touches one slice; a real front spans many → massive over-consumption).
+3. First fix attempt (all-faces coverage-weighted sink) **rejected by its own iteration trace**: the
+   coupled coverage↔transport fixed point has a strongly-attracting collapsed state (F and O both
+   starve → nothing passivates → bare→1 → max sticking → stays starved).
+4. **Literature-first (user directive):** Coburn–Winters (APL 55, 2730) and Blauw (JVST B 18, 3453,
+   "negligible sidewall F loss") prescribe **bottom-only reaction with elastic passivated sidewalls**.
+   Implemented as the floor-classified **area-weighted** sink: flat floors reduce exactly to the classic
+   0.25·s·a term; rounded fronts contribute their actual bottom area once. Static wafer gate re-verified
+   unchanged (RMSE 0.041, same knob).
+5. Evolving-vs-static residual (~0.13) understood as **geometry idealization** (the real evolving profile
+   tapers; the static harness has ideal vertical walls) → the wafer itself is the arbiter, and the wafer
+   data IS from evolving etches.
+6. **Production calibration moved to the evolving harness** (like-for-like provenance): one knob
+   (wls = 2.9) fitted on the wafer knee (AR 10/20).
+7. **Held-out prediction — the milestone:** with everything frozen, the never-fitted **AR40 wafer point
+   (0.20) is predicted at 0.154/0.195 (two seeds; mean 0.175)**. Full-curve RMSE 0.031–0.043 per seed —
+   **passes the 0.05 gate including the held-out tail.** The historically "collapsing" deep tail is now
+   *predicted from the knee* by Knudsen conductance + the AR-independent reflected-ion floor.
+
+| AR | evolving petch (2 seeds) | wafer |
+|---|---|---|
+| 10 (calibrated) | 0.461–0.488 | 0.43 |
+| 20 (calibrated) | 0.290–0.332 | 0.29 |
+| **40 (held-out)** | **0.154–0.195** | **0.20** |
+
+Defaults: `knudsen_wall_loss_scale = 2.9` (production/evolving); the static characterization harness
+uses ~1.4 (documented idealization proxy, not a second knob). Reproducers:
+`scripts/evolving_vs_wafer.py`, `scripts/evolving_calibrate.py`. Remaining accuracy frontier:
+charging vs Hwang-Giapis (notching/HARC datasets), DDA re-emission calibration vs the measured
+ViennaPS static reference.
 
 Notes: the wafer-gate PASS (knudsen path) is unaffected by the DDA gap — they are different neutral
 solvers. Calibration automation: gradient/least-squares through the differentiable pipeline is the

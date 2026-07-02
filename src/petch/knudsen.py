@@ -91,12 +91,14 @@ def _solve_tridiagonal(lower, diag, upper, rhs):
     return x
 
 
-def conductance_profile(phi, zs, dx, sub_top, feature_shape, s_floor, n_floor,
+def conductance_profile(phi, zs, dx, sub_top, feature_shape, slice_loss,
                         wall_loss_scale=1.85):
     """Solve the 1-D Knudsen conductance system for the neutral depth profile.
 
-    `s_floor[nz]`  : mean floor-face sticking in each depth slice (coverage-dependent).
-    `n_floor[nz]`  : count of floor faces in each slice (the reaction-sink switch).
+    `slice_loss[nz]` : per-slice kinetic absorption 0.25*Sigma(s_face*A_face)/norm — the
+    coverage-weighted consumption of ALL surface faces in that depth slice (geometry-invariant:
+    a flat floor reduces to the classic 0.25*s*a floor term; a rounded evolving front
+    distributes the same total consumption over its slices instead of double-counting).
     Returns profile[nz] in [0, 1]: neutral concentration vs depth, 1 at/above the
     opening, decaying with depth. Slices outside the feature default to 1.0."""
     nz = phi.shape[2]
@@ -113,8 +115,7 @@ def conductance_profile(phi, zs, dx, sub_top, feature_shape, s_floor, n_floor,
     radius = np.maximum(2.0 * a / np.maximum(p, 1.0e-30), dx)
     conductance = (2.0 / 3.0) * radius * a / dx        # free-molecular (Knudsen) conductance
     loss_scale = max(float(wall_loss_scale), 0.0)
-    floor_loss = loss_scale * (n_floor[idx] > 0.0) * 0.25 * np.clip(s_floor[idx], 0.0, 1.0) * a
-    sink = floor_loss.copy()
+    sink = loss_scale * np.maximum(slice_loss[idx], 0.0)
 
     link = np.zeros(max(m - 1, 0))
     for i in range(m - 1):
@@ -151,37 +152,56 @@ def _nearest_valid_slice(valid_iz, iz):
     return np.where(choose_right, valid_iz[right], valid_iz[left])
 
 
-def knudsen_face_flux(phi, zs, dx, sub_top, feature_shape, centroids, gas_nz,
-                      s_face, wall_loss_scale=1.85):
+def knudsen_face_flux(phi, zs, dx, sub_top, feature_shape, centroids, gas_nz, face_areas, Ly,
+                      s_face, wall_loss_scale=1.85, center=None, half_width=None):
     """Per-face neutral arrival multiplier from the 1-D Knudsen conductance solve.
 
-    centroids : (F,3) face centroids; gas_nz : (F,) face into-gas normal z-component;
-    s_face    : (F,) per-face sticking (= bare*beta). Floor faces (gas_nz > 0.7)
-    inside the feature carry the coverage-dependent reaction sink. Returns m[F]."""
+    centroids  : (F,3) face centroids; gas_nz : (F,) into-gas normal z (floor classifier);
+    face_areas : (F,) triangle areas; Ly : trench length (per-unit-length norm; ignored for vias);
+    s_face     : (F,) per-face sticking (= bare*beta, the coverage physics).
+    LITERATURE MODEL (Coburn-Winters APL 55, 2730; Blauw JVST B 18, 3453 "negligible sidewall F
+    loss"): the reaction sink lives at the BOTTOM only; sidewalls are elastic diffuse scatterers
+    (cryo-passivated). Per-slice sink = 0.25*Sigma(s_face*A_face) over the FLOOR-classified faces
+    (gas_nz > 0.7) in that slice — a flat floor reduces exactly to the classic 0.25*s*a term, and
+    a rounded evolving front contributes its ACTUAL bottom area once (the old form applied the
+    full duct-area sink at every slice the front touched — the evolving over-consumption bug).
+    An all-faces sink was tried and rejected: the coupled coverage fixed point then has a
+    strongly-attracting collapsed state (F and O both starve -> nothing passivates -> bare=1 ->
+    max sticking -> stays starved). Returns m[F]."""
     nz = phi.shape[2]
     z0 = zs[0]
     area, perimeter = slice_geometry(phi, zs, dx, sub_top, feature_shape)
     valid_iz = np.flatnonzero((zs < sub_top) & (area > 0.0) & (perimeter > 0.0))
     iz_face = np.clip(np.round((centroids[:, 2] - z0) / dx).astype(int), 0, nz - 1)
-    # Mesh-face centroids sit ON the zero contour, so a floor face's raw slice index rounds into
+    # Mesh-face centroids sit ON the zero contour, so a face's raw slice index can round into
     # the gas-free slice just below the last valid one -- the sink would land on an invalid slice
     # and never enter the solve (the flat-profile bug). Snap every face to its nearest VALID
     # (gas-carrying) slice before accumulating; band-cell-based codes (plasma_sim) get this for free.
     snap = _nearest_valid_slice(valid_iz, iz_face)
     below = centroids[:, 2] < sub_top
-    floor = below & (gas_nz > 0.7)
+    # Footprint filter (plasma_sim's _feature_mask, restored): field-plane faces sit at sub_top-eps
+    # after marching cubes, would count as "below", snap to the duct mouth, and dump the entire
+    # field's absorption into the chain (collapses the profile). The field is the reservoir --
+    # already represented by the unit-concentration top BC -- so only faces inside the feature
+    # footprint belong in the sink.
+    inside = np.ones(len(centroids), bool)
+    if center is not None and half_width is not None:
+        band = half_width + 2.0 * dx
+        if feature_shape == "trench":
+            inside = np.abs(centroids[:, 0] - center[0]) <= band
+        else:
+            inside = np.hypot(centroids[:, 0] - center[0], centroids[:, 1] - center[1]) <= band
 
-    s_floor = np.zeros(nz)
-    n_floor = np.zeros(nz)
-    if floor.any() and valid_iz.size:
-        tgt = snap[floor]
-        np.add.at(s_floor, tgt, np.clip(s_face[floor], 0.0, 1.0))
-        np.add.at(n_floor, tgt, 1.0)
-        ok = n_floor > 0
-        s_floor[ok] /= n_floor[ok]
+    slice_loss = np.zeros(nz)
+    sel = below & inside & (snap >= 0) & (np.asarray(gas_nz) > 0.7)   # bottom faces only (Blauw)
+    if sel.any():
+        sA = np.clip(np.asarray(s_face, float)[sel], 0.0, 1.0) * np.asarray(face_areas, float)[sel]
+        np.add.at(slice_loss, snap[sel], 0.25 * sA)
+        if feature_shape == "trench":
+            slice_loss /= max(float(Ly), 1.0e-30)      # per unit trench length (area a is too)
 
     profile = conductance_profile(phi, zs, dx, sub_top, feature_shape,
-                                  s_floor, n_floor, wall_loss_scale)
+                                  slice_loss, wall_loss_scale)
     m = np.ones(len(centroids))
     has = snap >= 0
     m[has & below] = profile[snap[has & below]]

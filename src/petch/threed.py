@@ -1067,10 +1067,11 @@ def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=200
         s_bare = bare
         if sink_mode == 'field' and field.any():
             s_bare = np.minimum(bare, float(np.mean(bare[field])))
-        m_F = knudsen_face_flux(phi, zs, dx, sub_top, shape, centroids, gas_nz,
-                                np.clip(s_bare * betaE, 0.0, 1.0), wls)
-        m_O = knudsen_face_flux(phi, zs, dx, sub_top, shape, centroids, gas_nz,
-                                np.clip(s_bare * betaO, 0.0, 1.0), wls)
+        _ctr = (0.5 * Lx, 0.5 * Ly); _hw = 0.5 * float(geo.get('trench_width', Lx))
+        m_F = knudsen_face_flux(phi, zs, dx, sub_top, shape, centroids, gas_nz, A, Ly,
+                                np.clip(s_bare * betaE, 0.0, 1.0), wls, center=_ctr, half_width=_hw)
+        m_O = knudsen_face_flux(phi, zs, dx, sub_top, shape, centroids, gas_nz, A, Ly,
+                                np.clip(s_bare * betaO, 0.0, 1.0), wls, center=_ctr, half_width=_hw)
         thF, thO = _belen_coverages(m_i, m_F, m_O, cos_i, par, flags)
         bare = np.clip(1.0 - thF - thO, 0.0, 1.0)
     return m_i, m_F, m_O, cos_i
