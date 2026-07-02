@@ -108,7 +108,9 @@ sweeping the one knob `knudsen_wall_loss_scale`):
 
 Wafer = 1.0 / 0.43 / 0.29 / 0.20; gate ≤ 0.05. **RMSE 0.053 is a near-pass and ~2.4× better than any
 ballistic config (~0.13)** — the Knudsen conductance channel is the first petch transport that bends
-toward the real wafer. Honest labels: (a) this is a 1-knob *calibration*, not a prediction (same status
+toward the real wafer. **GPU-verified (2026-07-02, RTX 3090, 200k ion rays × 2 seeds): local wls=1.3
+RMSE 0.0540, field wls=2.0 RMSE 0.0501, seed-spread 0.001, dx=0.20 row 0.0529 — ray-converged,
+grid-insensitive, environment-independent.** Honest labels: (a) this is a 1-knob *calibration*, not a prediction (same status
 as plasma_sim's 1.85 on its own chemistry); (b) the residual is *structural in shape* — the single
 floor-sink model decays linearly with depth while the measured tail flattens (AR40: 0.11 vs 0.20), so
 no value of the knob passes the gate. The identified next physics: a self-limiting (starvation-coupled)
