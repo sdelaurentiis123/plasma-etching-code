@@ -20,7 +20,10 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AR = np.array([2, 4, 6, 8, 10], float)
 PETCH_MC  = np.array([0.536, 0.186, 0.077, 0.043, 0.029])     # under-samples deep floor (static)
 PETCH_DDA = np.array([0.993, 0.967, 0.914, 0.836, 0.742])     # faithful ion (legacy-ion was 0.99..0.65)
-VPS_AR, VPS_NR = 8.6, 0.73                                     # ViennaPS GPU_TRIANGLE reference
+# ViennaPS MEASURED static reference (2026-07-02 box run, driver 570 GPU_TRIANGLE): pre-carved
+# MakeTrench (makeMask=False, carve verified d0==D), 0.15-min window, reflecting ions. This replaces
+# the earlier single unverified "0.73 @ AR8.6" reference point.
+VPS_STATIC = np.array([0.911, 0.820, 0.728, 0.626, 0.534])
 # Panel B: W=2 um trench vs the de Boer wafer
 AR2 = np.array([2, 5, 10, 15, 20], float)
 PETCH_DDA_W2 = np.array([1.000, 1.005, 0.757, 0.486, 0.233])  # ballistic DDA, faithful ion
@@ -31,14 +34,14 @@ DEBOER_AR = np.array([0.0, 10.0, 20.0, 40.0]); DEBOER_NR = np.array([1.0, 0.43, 
 fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.5, 5.4))
 
 axA.plot(AR, PETCH_DDA, "o-", color="#2471c7", lw=2.6, ms=8, label="petch DDA (deterministic)")
+axA.plot(AR, VPS_STATIC, "*-", color="#16a085", lw=2.4, ms=13, label="ViennaPS-GPU (measured static)", zorder=6)
 axA.plot(AR, PETCH_MC,  "s--", color="#c0392b", lw=2.2, ms=7, label="petch MC (200k rays, static)")
-axA.plot([VPS_AR], [VPS_NR], "*", color="#16a085", ms=22, label="ViennaPS-GPU (ballistic ref)", zorder=6)
-axA.annotate("MC under-samples the\ndeep floor → collapses", xy=(8, 0.043), xytext=(3.8, 0.28),
+axA.annotate("MC under-samples the\ndeep floor → collapses", xy=(8, 0.043), xytext=(3.8, 0.25),
              color="#c0392b", fontsize=9, arrowprops=dict(arrowstyle="->", color="#c0392b"))
-axA.annotate("DDA ~0.08 gentler than ViennaPS\n(0.81 vs 0.73 @ AR 8.6) — the known\npetch trench transport difference",
-             xy=(8.6, 0.73), xytext=(2.0, 0.44), color="#16a085", fontsize=9,
+axA.annotate("DDA is noise-free but sits 0.08–0.21\nGENTLER than ViennaPS (grows with AR):\nits re-emission needs calibration",
+             xy=(9, 0.58), xytext=(2.0, 0.44), color="#16a085", fontsize=9,
              arrowprops=dict(arrowstyle="->", color="#16a085"))
-axA.set_xlim(1.5, 11); axA.set_title("W = 0.5 µm: DDA fixes MC under-sampling (deterministic, noise-free)", fontsize=11)
+axA.set_xlim(1.5, 11); axA.set_title("W = 0.5 µm: DDA fixes MC under-sampling; gap to ViennaPS is its open calibration", fontsize=11)
 axA.legend(loc="upper right", fontsize=9)
 
 axB.plot(KN_AR, KN_NR, "o-", color="#1e8449", lw=2.8, ms=8,
@@ -62,6 +65,7 @@ plt.tight_layout()
 p = os.path.join(HERE, "viz", "dda_vs_mc_arde.png")
 os.makedirs(os.path.dirname(p), exist_ok=True); plt.savefig(p, dpi=150); print("saved", p)
 np.savez(os.path.join(HERE, "dda_vs_mc_arde.npz"), ar=AR, petch_mc=PETCH_MC, petch_dda=PETCH_DDA,
-         vps_ar=VPS_AR, vps_nr=VPS_NR, ar2=AR2, petch_dda_w2=PETCH_DDA_W2,
+         vps_static=VPS_STATIC, ar2=AR2, petch_dda_w2=PETCH_DDA_W2,
          kn_ar=KN_AR, kn_nr=KN_NR, deboer_ar=DEBOER_AR, deboer_nr=DEBOER_NR)
-print("petch-DDA @ AR8.6 (interp):", round(float(np.interp(8.6, AR, PETCH_DDA)), 3), "vs ViennaPS", VPS_NR)
+print("petch-DDA vs ViennaPS-static @ AR10:", PETCH_DDA[-1], "vs", VPS_STATIC[-1],
+      f"(gap {PETCH_DDA[-1]-VPS_STATIC[-1]:.2f})")

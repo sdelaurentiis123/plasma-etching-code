@@ -159,6 +159,24 @@ labels still apply: one calibrated knob (wls), static-geometry harness, one wafe
   under the legacy ion) — the ballistic knee sits well above the wafer, as ballistic transport should.
   Figures regenerated (viz/dda_vs_mc_arde.png, viz/experiment_arde.png).
 
+## Fair-validation round (box, driver-570 GPU, 2026-07-02) — every claim gated
+
+GPU proof printed first: ViennaPS GPU_TRIANGLE cold 1.5 s / warm 1.1 s → genuinely on the GPU.
+
+| Gate | Result |
+|---|---|
+| Wafer PASS re-verify (CUDA, 200k rays × 2 seeds) | ✅ RMSE **0.0397** at dx=0.25 *and* 0.20; seed-spread 0.001 |
+| Width sweep, frozen wls=1.4 (W = 1/2/4 µm) | ✅ all RMSE ≤ 0.041, cross-width spread **0.003** — but labeled honestly: W cancels *analytically* in the slit model, so this is **model-consistency** with de Boer's empirical AR-scaling, not independent prediction |
+| Gomez absolute rate (1.3 µm/min) | ✅ one global `rate_scale = 3.78e-4`, constant across features to **1.1%** |
+| ViennaPS static reference, W=0.5 (pre-carved MakeTrench, makeMask=False, carve verified d0=D; reflecting ions) | measured: nr = **0.911 / 0.820 / 0.728 / 0.626 / 0.534** at AR 2/4/6/8/10 |
+| petch-DDA vs that reference | **0.08 → 0.21 gentler, growing with AR** (0.742 vs 0.534 at AR 10). The DDA's diffuse re-emission over-delivers deep neutrals — its open calibration item (same family as the radiosity over-correction). The earlier "~0.08 gentler vs 0.73" used an unverified reference point, now replaced by the measured curve. |
+| Evolving-etch Knudsen consistency | ❌ **OPEN** — as-configured the evolving run underperforms the static rate ~10× (AR 0.4 in 45 min at a nominal 1.3 µm/min field). Root cause undiagnosed (suspects: mask/sink interaction in `knudsen_face_flux` during evolution, or coverage collapse in the evolving fixed point). Two earlier attempts were invalid for script reasons (unphysical rate_scale; CFL-capped). Do not claim evolving-knudsen fidelity until this is closed. |
+
+Notes: the wafer-gate PASS (knudsen path) is unaffected by the DDA gap — they are different neutral
+solvers. Calibration automation: gradient/least-squares through the differentiable pipeline is the
+right tool for these 1–3-scalar fits (RL is the wrong tool — no sequential decision structure); the
+guard against overfitting is held-out gates, as above.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
