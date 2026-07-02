@@ -28,9 +28,16 @@ import numpy as np
 
 def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30.0,
                           iadf_hwhm_deg=4.3, cos_power=0.6, n_per_iter=6000, n_iter=120,
-                          relax=None, seed=0, verbose=False):
+                          relax=None, seed=0, verbose=False, smooth=False):
     """Steady-state charging of a 2-D insulating trench. Returns dict with:
-    floor_flux (normalized ion flux reaching the floor), V_floor_center, V_foot_peak, V (grid)."""
+    floor_flux (normalized ion flux reaching the floor), V_floor_center, V_foot_peak, V (grid).
+
+    smooth=False (default): raw tail-averaged segment potentials. smooth=True applies a
+    PRESENTATION-grade uniform filter to the converged segment potentials before the final
+    Laplace solve of the returned map -- purely cosmetic (removes per-segment MC shot-noise
+    raggedness from the walls); the gate quantities (floor_flux, V_floor_center, V_foot_peak)
+    are always computed from the UNsmoothed tail averages, and scripts/charging_gate.py must
+    always run with smooth=False."""
     rng = np.random.default_rng(seed)
     D = int(round(AR * W))
     nx = W + 2 * pad
@@ -148,6 +155,7 @@ def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30
 
     hist = []
     vfloor_hist = []
+    vleft_hist = []; vright_hist = []
     for it in range(n_iter):
         V = laplace(V)
         fi, li, ri, tli, tri = trace('ion', n_per_iter)
@@ -168,13 +176,25 @@ def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30
         Vtop_r = float(np.clip(Vtop_r, -3 * Te, 0.0))
         hist.append(fi.sum() / n_per_iter)
         vfloor_hist.append(Vfloor.copy())
+        vleft_hist.append(Vleft.copy()); vright_hist.append(Vright.copy())
         if verbose and it % 20 == 0:
             print(f"  it{it}: floor_i={fi.sum()/n_per_iter:.3f} floor_e={fe.sum()/n_per_iter:.3f} "
                   f"Vc={Vfloor[W//2]:.1f} Vfoot={max(Vfloor[0], Vfloor[-1]):.1f}", flush=True)
-    # steady state: average flux AND floor potentials over the last third (shot-noise suppression)
+    # steady state: average flux AND segment potentials over the last third (shot-noise suppression)
     k = max(n_iter // 3, 5)
     tail = np.mean(hist[-k:])
     Vf_avg = np.mean(np.array(vfloor_hist[-k:]), axis=0)
+    Vl_avg = np.mean(np.array(vleft_hist[-k:]), axis=0)
+    Vr_avg = np.mean(np.array(vright_hist[-k:]), axis=0)
+    # final map: re-solve Laplace with the tail-averaged (optionally smoothed) segment potentials
+    Vf_map, Vl_map, Vr_map = Vf_avg, Vl_avg, Vr_avg
+    if smooth:                                         # cosmetic only -- see docstring
+        from scipy.ndimage import uniform_filter1d
+        Vf_map = uniform_filter1d(Vf_avg, 5, mode="nearest")
+        Vl_map = uniform_filter1d(Vl_avg, 9, mode="nearest")
+        Vr_map = uniform_filter1d(Vr_avg, 9, mode="nearest")
+    Vfloor[:] = Vf_map; Vleft[:] = Vl_map; Vright[:] = Vr_map
+    V = laplace(V, sweeps=240)
     open_frac = W / nx                                 # fraction of source over the slot
     return dict(floor_flux=float(tail / open_frac), V_floor_center=float(Vf_avg[W // 2]),
                 V_foot_peak=float(Vf_avg.max()), Vfloor=Vf_avg, V=V)

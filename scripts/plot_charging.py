@@ -14,8 +14,8 @@ from petch.charging2d import solve_trench_charging
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 g = np.load(os.path.join(HERE, "charging_gate_result.npz"))
 
-print("solving AR=4 for the potential map...", flush=True)
-r4 = solve_trench_charging(4.0, n_per_iter=8000, n_iter=140, seed=7)
+print("solving AR=4 for the potential map (smooth=True, cosmetic only)...", flush=True)
+r4 = solve_trench_charging(4.0, n_per_iter=8000, n_iter=140, seed=7, smooth=True)
 V = r4["V"]
 
 fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.2, 5.4), gridspec_kw=dict(width_ratios=[1.15, 1]))
