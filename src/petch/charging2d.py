@@ -109,6 +109,8 @@ def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30
         hits_floor = np.zeros(W)
         hits_left = np.zeros(len(side_z)); hits_right = np.zeros(len(side_z))
         hit_top_l = 0.0; hit_top_r = 0.0
+        foot_n = 0.0; foot_E = 0.0                     # sidewall-FOOT impacts (bottom 15% of depth)
+        z_foot = mouth + 0.85 * D
         Ex = -(np.gradient(V, axis=0)); Ez = -(np.gradient(V, axis=1))
         for _ in range(int(14 * nz)):
             if not alive.any():
@@ -150,16 +152,19 @@ def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30
                         hits_left[zj] += 1
                     else:
                         hits_right[zj] += 1
+                    if z[j] >= z_foot:                  # deflected into the foot (notch driver)
+                        foot_n += 1.0
+                        foot_E += vx[j] ** 2 + vz[j] ** 2   # impact energy (v^2 = E in eV units)
                 alive[j] = False
-        return hits_floor, hits_left, hits_right, hit_top_l, hit_top_r
+        return hits_floor, hits_left, hits_right, hit_top_l, hit_top_r, foot_n, foot_E
 
     hist = []
     vfloor_hist = []
     vleft_hist = []; vright_hist = []
     for it in range(n_iter):
         V = laplace(V)
-        fi, li, ri, tli, tri = trace('ion', n_per_iter)
-        fe, le, re, tle, tre = trace('electron', n_per_iter)
+        fi, li, ri, tli, tri, _, _ = trace('ion', n_per_iter)
+        fe, le, re, tle, tre, _, _ = trace('electron', n_per_iter)
         # normalized net current per segment (per source particle); anneal the step so early
         # transients move fast and the steady state stops random-walking on shot noise
         anneal = max(1.0 / (1.0 + it / 25.0), 0.25)   # floor: late iters can still unpin clips
@@ -195,9 +200,14 @@ def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30
         Vr_map = uniform_filter1d(Vr_avg, 9, mode="nearest")
     Vfloor[:] = Vf_map; Vleft[:] = Vl_map; Vright[:] = Vr_map
     V = laplace(V, sweeps=240)
+    # deflected-ion foot statistics at the converged field (one clean high-stat ion trace):
+    # the sub-threshold IEDF slice bent into the sidewall foot -- the notching driver
+    fi2, _, _, _, _, fn2, fE2 = trace('ion', 4 * n_per_iter)
     open_frac = W / nx                                 # fraction of source over the slot
     return dict(floor_flux=float(tail / open_frac), V_floor_center=float(Vf_avg[W // 2]),
-                V_foot_peak=float(Vf_avg.max()), Vfloor=Vf_avg, V=V)
+                V_foot_peak=float(Vf_avg.max()), Vfloor=Vf_avg, V=V,
+                foot_ion_flux=float(fn2 / (4 * n_per_iter) / open_frac),
+                foot_ion_Emean=float(fE2 / max(fn2, 1.0)))
 
 
 # Gate-validated reference curve (scripts/charging_gate.py, RMSE 0.039 vs Hwang-Giapis JAP 82,566
@@ -205,15 +215,20 @@ def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30
 _GATE_AR = np.array([0.0, 1.0, 1.2, 1.6, 2.0, 2.6, 3.0, 3.6, 4.0])
 _GATE_FLUX = np.array([1.0, 0.648, 0.599, 0.504, 0.433, 0.334, 0.283, 0.213, 0.177])
 _GATE_VFLOOR = np.array([0.0, 13.4, 16.8, 24.4, 30.9, 39.2, 44.9, 48.5, 52.9])
+# Deflected-ion mean impact energy on the sidewall foot vs AR (eV). HG JAP 82,566 tabulated
+# values (15 -> 27.5 eV over AR 1 -> 4); the notching-mechanism gate (scripts/notching_gate.py)
+# validates our solver against these. AR=0 row: no charging, no deflection.
+_FOOT_E = np.array([0.0, 15.0, 16.5, 17.5, 20.0, 23.0, 25.0, 26.5, 27.5])
 
 
 def charging_floor_profile(AR):
     """Production hook (NOT yet wired into the flux pipeline): normalized floor ion flux and
     floor potential vs aspect ratio, from the gate-validated 2-D solver at the HG reference
-    conditions. Interpolates the gate curve; beyond AR 4 extrapolates the last slope (use with
-    care — re-run solve_trench_charging for other plasma conditions). Applies to INSULATING
-    floors (SiO2/SOI overetch, dielectric etch); a conductive grounded Si floor drains and
-    should NOT be throttled by this (the de Boer deep-Si case)."""
+    conditions. Returns (floor_flux_factor, V_floor, E_deflected) vs AR. Interpolates the gate
+    curve; beyond AR 4 clamps (re-run solve_trench_charging for other plasma conditions).
+    Applies to INSULATING floors (SiO2/SOI overetch, dielectric etch); a conductive grounded
+    Si floor drains and should NOT be throttled by this (the de Boer deep-Si case)."""
     AR = np.asarray(AR, float)
     return (np.interp(AR, _GATE_AR, _GATE_FLUX),
-            np.interp(AR, _GATE_AR, _GATE_VFLOOR))
+            np.interp(AR, _GATE_AR, _GATE_VFLOOR),
+            np.interp(AR, _GATE_AR, _FOOT_E))

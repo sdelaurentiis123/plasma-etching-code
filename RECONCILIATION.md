@@ -275,6 +275,30 @@ with passivated sidewalls — consistent with ViennaPS's nr 0.53 — vs 0.08 for
 Figures regenerated with the honest curves (`viz/dda_vs_mc_arde.png`, `viz/experiment_arde.png`
 ballistic reference now radiosity). The Knudsen wafer milestone is unaffected (different solver).
 
+## Notching: charging wired into the etch, mechanism gated vs Hwang–Giapis (2026-07-02)
+
+`flags.surface_charging="hg"` is live in the knudsen deterministic flux path (`_apply_hg_charging`,
+threed.py): the gate-validated charging closure (a) throttles the floor with the ENERGY-RESOLVED
+survivor slice (yields re-evaluated at E−eV_f, flux factor Q from the validated table) and (b)
+REDISTRIBUTES the sub-threshold slice to the sidewall foot at the deflected-ion energy E_defl(AR)
+— ions are not deleted; this is the notch driver. Scope: INSULATING floors (poly-on-insulator
+overetch); keep off for conductive grounded-Si floors (de Boer). v1 uses the HG-condition
+charging table; other plasma conditions need `solve_trench_charging` re-runs.
+
+**Gates, honestly (scripts/notching_gate.py):** the primary floor-flux gate passed earlier (RMSE
+0.039). The NEW mechanism gate — our solver's own deflected-ion foot population vs HG JAP 82,566
+— **FAILS as first measured**: foot mean energy 19→10 eV falling vs HG's 15→27.5 rising (max rel
+err 64%), foot flux rising ×3.3 vs ~constant. Root cause identified: our V_floor runs ~20 V above
+HG's (53 vs 33 V at AR 4) — an offset the flux gate tolerated (and partly a potential-reference
+difference: our V=0 is the sheath edge, HG's the grounded substrate) but impact energy feels
+directly; the missing physics is the documented RF-phase electron-burst simplification. Tracked.
+Because of this, the **production wiring uses HG's published E_defl(AR) table** (validated data),
+not our solver's foot energies. Full notch-DEPTH evolution vs Nozawa (JJAP 34, 2107) / Fujiwara
+(JJAP 34, 2095) is **deferred**: it needs multi-material etch-stop (poly over oxide), which petch
+does not have yet — those measured curves stay the final gate. Live-path smoke (static W=0.5
+trench): floor ×0.57 (AR2) → ×0.35 (AR4), foot rate ×~40, monotone with AR — the mechanism is
+live and directionally correct; its quantitative foot-energy validation is the open item.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).

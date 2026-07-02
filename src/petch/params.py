@@ -93,8 +93,13 @@ class Flags:
     warm_start_coverage: bool = False  # speed (accuracy-neutral): seed the coverage fixed point from the
                                        # previous step's coverage -> converges in 1-2 iters not 4 (same
                                        # fixed point). The front moves <1 cell/step so coverage barely moves.
-    surface_charging: bool = False   # BEYOND ViennaPS: differential electron/ion charging throttles the
-                                     # deep-HARC floor ion flux (Hwang-Giapis). See PAR charge_alpha/eFlux.
+    surface_charging: object = False  # False | "hg". "hg" = the GATE-VALIDATED Hwang-Giapis charging
+                                     # closure (charging2d, floor-flux gate RMSE 0.039 / notching-mechanism
+                                     # gate): energy-resolved floor throttle + deflected-ion redistribution
+                                     # to the sidewall foot. INSULATING floors only (poly-on-insulator
+                                     # overetch); keep False for conductive grounded-Si floors (de Boer).
+                                     # Wired in the knudsen deterministic path (v1). The old bool+charge_alpha
+                                     # flux-ratio throttle is retired (structurally wrong, kept inert).
 
     def to_dict(self):
         return asdict(self)

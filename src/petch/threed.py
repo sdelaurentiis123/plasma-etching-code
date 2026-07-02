@@ -1025,6 +1025,63 @@ def _ions_deterministic(mesh, F, A, A_src, Lx, Ly, Lz, n_ion, par, flags, seed, 
     return m_i, cos_i
 
 
+
+
+def _apply_hg_charging(m_i, par, flags, centroids, gas_nz, areas, geo):
+    """flags.surface_charging == "hg": the gate-validated Hwang-Giapis charging closure applied to
+    an INSULATING floor (poly-on-insulator overetch / dielectric etch -- NOT the conductive
+    grounded-Si de Boer case, where the floor drains and this must stay off).
+
+    Mechanism (HG JVST B 15,70; JAP 82,566): the charged floor at potential V_f (a) DECELERATES
+    the landing ions -- yields are re-evaluated at E - eV_f and the sub-threshold IEDF slice is
+    removed (floor flux factor Q from the gate-validated table); (b) the removed slice is NOT
+    deleted -- it is DEFLECTED to the sidewall foot with mean impact energy E_defl(AR) (HG
+    tabulated, mechanism-gated by scripts/notching_gate.py) where it deposits yield-weighted
+    etch rates: the notching driver. v1 scope: charging table at HG reference conditions;
+    per-condition tables need solve_trench_charging re-runs. Modifies par['_ion_yield'] in
+    place semantics (returns new m_i)."""
+    if getattr(flags, "surface_charging", False) != "hg" or par.get('_ion_yield') is None:
+        return m_i
+    from .charging2d import charging_floor_profile
+    from .chemistry import _yields
+    sub_top = geo['sub_top']; W = geo['trench_width']
+    cx0, cy0 = 0.5 * geo['Lx'], 0.5 * geo['Ly']
+    hw = 0.5 * W + 2.0 * geo['dx']
+    if geo.get('hole', False):
+        inside = np.hypot(centroids[:, 0] - cx0, centroids[:, 1] - cy0) <= hw
+    else:
+        inside = np.abs(centroids[:, 0] - cx0) <= hw
+    below = centroids[:, 2] < sub_top
+    floor = inside & below & (gas_nz > 0.7)
+    if not floor.any():
+        return m_i
+    depth = float(sub_top - centroids[floor, 2].min())
+    AR = depth / max(W, 1e-9)
+    Q, Vf, E_defl = charging_floor_profile(AR)
+    Q = float(Q); Vf = float(Vf); E_defl = float(E_defl)
+    sp, ie, ip = (a.copy() for a in par['_ion_yield'])
+    # (a) floor: survivor slice Q lands with E - eV_f -> re-evaluate the IED-integrated yields
+    p2 = dict(par); p2['Emean'] = max(par['Emean'] - Vf, 0.0)
+    y0 = _yields(par); yv = _yields(p2)                    # (Yie, Ysp, Yp)
+    r_ie = yv[0] / y0[0] if y0[0] > 0 else 0.0
+    r_sp = yv[1] / y0[1] if y0[1] > 0 else 0.0
+    r_p = yv[2] / y0[2] if y0[2] > 0 else 0.0
+    defl_total = float((m_i[floor] * areas[floor]).sum()) * (1.0 - Q)   # the removed slice
+    ie[floor] *= Q * r_ie; sp[floor] *= Q * r_sp; ip[floor] *= Q * r_p
+    m_i = m_i.copy(); m_i[floor] *= Q
+    # (b) deflected slice -> sidewall foot (within 15% of depth above the floor), yields at E_defl
+    zfloor = float(centroids[floor, 2].min())
+    foot = inside & below & (gas_nz <= 0.7) & (centroids[:, 2] <= zfloor + 0.15 * depth)
+    if foot.any() and defl_total > 0.0:
+        f_area = float(areas[foot].sum())
+        fdefl = defl_total / max(f_area, 1e-12)            # per-area deflected ion flux
+        sE = np.sqrt(E_defl)
+        ie[foot] += fdefl * par['A_ie'] * max(sE - np.sqrt(par['Eth_ie']), 0.0)
+        sp[foot] += fdefl * par['A_sp'] * max(sE - np.sqrt(par['Eth_sp']), 0.0)
+        ip[foot] += fdefl * par['A_p'] * max(sE - np.sqrt(par['Eth_p']), 0.0)
+    par['_ion_yield'] = (sp, ie, ip)
+    return m_i
+
 def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=20000,
                        seed=0, flags=None, n_fp=4):
     """KNUDSEN deep-neutral tail (vs many-bounce MC). Ions stay MC (directional, single-bounce);
@@ -1051,6 +1108,7 @@ def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=200
     oi_w = wp.array(oi, dtype=wp.vec3, device=DEVICE); di_w = wp.array(di, dtype=wp.vec3, device=DEVICE)
     m_i, cos_i = _ions_deterministic(mesh, F, A, A_src, Lx, Ly, Lz, n_ion, par, flags,
                                      seed * 9 + 1, oi_w, di_w)
+    m_i = _apply_hg_charging(m_i, par, flags, centroids, gas_nz, A, geo)   # surface_charging="hg"
 
     # neutrals: 1-D Knudsen conductance profile, coupled to the Belen coverage fixed point.
     # knudsen_sink='local' (default): sink sticking = betaE*bare with the LOCAL coverage -- as the
