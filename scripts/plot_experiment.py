@@ -20,7 +20,7 @@ vd = np.load(os.path.join(here, "..", "vps_deboer.npz"))  # PURE ViennaPS on the
 W = float(vd['W']); dur, dep = vd['dur'], vd['dep']
 vps_ar = 0.5*(dep[1:]+dep[:-1])/W; vps_nr = np.diff(dep)/np.diff(dur); vps_nr = vps_nr/vps_nr[0]
 dd = np.load(os.path.join(here, "..", "dda_vs_mc_arde.npz"))  # petch static curves (faithful ion)
-dda_ar, dda_nr = dd['ar2'], dd['petch_dda_w2']            # ballistic Sn reference
+dda_ar, dda_nr = dd['radio_w2_ar'], dd['radio_w2']        # ballistic radiosity reference (gmres)
 kn_ar, kn_nr = dd['kn_ar'], dd['kn_nr']                   # Knudsen + faithful ion, wls=1.4 (RMSE 0.040)
 
 fig, ax = plt.subplots(figsize=(8.4, 5.4))
@@ -28,7 +28,7 @@ ax.plot(exp_ar, exp_r, "k*", ms=20, label="de Boer wafer (measured)", zorder=6)
 ax.plot(exp_ar, exp_r, "k--", lw=1.3, alpha=0.55, zorder=2)
 ax.plot(vps_ar, vps_nr, "s-", color="#c0392b", lw=2.4, ms=7, label="ViennaPS (GPU, run pure)", zorder=4)
 ax.plot(dda_ar, dda_nr, "o--", color="#2471c7", lw=2.0, ms=7, alpha=0.85,
-        label="petch ballistic S$_n$ (reference)", zorder=4)
+        label="petch ballistic radiosity (reference)", zorder=4)
 ax.plot(kn_ar, kn_nr, "o-", color="#1e8449", lw=2.2, ms=7, alpha=0.75,
         label="petch Knudsen (static harness, wls=1.4)", zorder=5)
 # EVOLVING production mode (wls=2.9, calibrated on AR10/20; AR40 is HELD-OUT): 2 seeds, 2026-07-02
@@ -41,8 +41,8 @@ ax.set_xlabel("aspect ratio  (depth / width)"); ax.set_ylabel("normalized etch r
 ax.set_xlim(0, 42); ax.set_ylim(0, 1.05); ax.grid(alpha=0.3); ax.legend(loc="upper right", fontsize=10)
 ax.set_title("ARDE vs the real wafer — de Boer/Blauw cryo SF$_6$/O$_2$ DRIE (W = 2 µm trench)",
              fontsize=13, fontweight="bold")
-ax.annotate("ballistic engines (ViennaPS, petch-S$_n$)\nsit above the wafer — no gas transport",
-            xy=(10, 0.70), xytext=(13.5, 0.84), fontsize=10, color="#2471c7",
+ax.annotate("ballistic engines (ViennaPS, petch radiosity)\nsit above the wafer — no gas transport",
+            xy=(10, 0.66), xytext=(13.5, 0.84), fontsize=10, color="#2471c7",
             arrowprops=dict(arrowstyle="->", color="#2471c7"))
 ax.annotate("EVOLVING petch, knob frozen on AR10/20:\nthe held-out AR40 tail is PREDICTED\n(0.15–0.20 vs measured 0.20)",
             xy=(40, 0.175), xytext=(22, 0.52), fontsize=10, color="#7d3c98",
@@ -51,4 +51,4 @@ plt.tight_layout()
 for p in [os.path.join(here, "..", "viz", "experiment_arde.png"), os.path.join(here, "..", "docs", "experiment_arde.png")]:
     plt.savefig(p, dpi=150); print("saved", p)
 print(f"\nAR10: wafer {exp_r[1]} | ViennaPS {np.interp(10,vps_ar,vps_nr):.2f} | "
-      f"petch-Sn {np.interp(10,dda_ar,dda_nr):.2f} | petch-Knudsen {np.interp(10,kn_ar,kn_nr):.2f}")
+      f"petch-radiosity {np.interp(10,dda_ar,dda_nr):.2f} | petch-Knudsen {np.interp(10,kn_ar,kn_nr):.2f}")

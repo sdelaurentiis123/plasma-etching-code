@@ -1104,8 +1104,10 @@ def mc_flux_3d_dda(mesh, verts, faces, centroids, areas, geo, par, n_ion=20000,
     bare = np.ones(F)
     m_F = m_O = np.zeros(F)
     for _ in range(n_fp):
-        m_F = dda_neutral_flux(phi, dx, zs, centroids, fn, np.clip(bare * betaE, 0.0, 1.0), n_dir, n_re)
-        m_O = dda_neutral_flux(phi, dx, zs, centroids, fn, np.clip(bare * betaO, 0.0, 1.0), n_dir, n_re)
+        m_F = dda_neutral_flux(phi, dx, zs, centroids, fn, np.clip(bare * betaE, 0.0, 1.0), n_dir, n_re,
+                               face_areas=A, periodic_y=int(par.get('periodic_y', 0)))
+        m_O = dda_neutral_flux(phi, dx, zs, centroids, fn, np.clip(bare * betaO, 0.0, 1.0), n_dir, n_re,
+                               face_areas=A, periodic_y=int(par.get('periodic_y', 0)))
         thF, thO = _belen_coverages(m_i, m_F, m_O, cos_i, par, flags)
         bare = np.clip(1.0 - thF - thO, 0.0, 1.0)
     return m_i, m_F, m_O, cos_i

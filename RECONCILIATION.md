@@ -244,6 +244,37 @@ INSULATING floors only; the conductive de Boer-type Si floor drains and must not
 Wiring it in (with deflected-ion redistribution to the sidewall foot — the notching driver)
 is the follow-up.
 
+## DDA re-emission calibration vs the measured ViennaPS reference (2026-07-03) — resolved
+
+Working the DDA's documented gap against the measured ViennaPS static curve (W=0.5 µm trench,
+nr = 0.911/0.820/0.728/0.626/0.534 at AR 2–10) surfaced **five real transport defects**, each
+verified against analytic view factors and the mesh form-factor radiosity truth:
+
+1. **Sky double-counting** (the big one): the Warp gather hardcoded escape-contribution 1.0 in
+   *every* pass, so each re-emission pass re-added the whole direct sky term (a flat field read
+   2.0 instead of 1.0). Every earlier DDA figure was too gentle because of this — **the published
+   "0.727 vs 0.73 ≈ ViennaPS" match AND the later "0.08–0.21 gentler" characterization are both
+   retracted** (the first was this bug × the legacy ion; the second was this bug alone).
+2. Per-cell **max → area-weighted-mean** radiosity deposition.
+3. **Sub-cell (trilinear) wall tests** — cell-center rounding widened the slot ~dx/2 and let rays
+   clip mouth corners (direct at the floor: 0.115 → 0.106 vs analytic 0.084).
+4. **Solid-seeking re-emission pickup** — grazing rays (the duct-transport carriers) sampled gas
+   cells' zero radiosity (mirror-wall cavity 0.06 → 0.21 vs truth 0.45).
+5. **Full-sphere quadrature** — the inherited hemisphere direction set meant sidewall faces could
+   never look *down*: half their phase space was missing (this limitation is shared by the
+   plasma_sim original).
+
+**Where it landed:** at moderate albedo the fixed DDA matches the radiosity truth (~0.05 vs 0.06);
+in the **passivated-wall regime (albedo ≈ 0.99)** it still under-delivers ~2× — per-bounce grazing
+losses compound over the ~50-bounce cascade, a structural limit of the grid-march remit-field
+representation (documented, not tuned around). The gate is instead passed by the solver built for
+that regime: **petch's form-factor radiosity + GMRES — RMSE 0.043 vs the measured ViennaPS curve
+(gate 0.05), 1–2 s/eval** (`scripts/dda_static_gate.py` runs both and reports each honestly).
+The mirror-wall physics is real and large: converged truth puts the AR-10 floor arrival at 0.45
+with passivated sidewalls — consistent with ViennaPS's nr 0.53 — vs 0.08 for bare direct sky.
+Figures regenerated with the honest curves (`viz/dda_vs_mc_arde.png`, `viz/experiment_arde.png`
+ballistic reference now radiosity). The Knudsen wafer milestone is unaffected (different solver).
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
