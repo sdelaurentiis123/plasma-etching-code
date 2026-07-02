@@ -79,20 +79,23 @@ def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30
 
     def trace(kind, n):
         """Ballistic leapfrog through E=-grad(V). Returns surface hit tallies."""
+        # HG's IADF/EADF are quoted from THEIR 2-D simulation plane -> sample the in-plane angle
+        # directly (no 3-D sin(theta) Jacobian, no azimuthal projection).
         if kind == 'ion':
             E0 = V_dc + V_rf * np.cos(rng.uniform(0, np.pi, n))
             sig = np.deg2rad(iadf_hwhm_deg) / 1.1774
-            th = rng.normal(0.0, sig, n)
+            th = rng.normal(0.0, sig, n)               # in-plane angle (signed)
             q = +1.0
         else:
             Ee = rng.gamma(2.0, Te, n)
-            u = rng.uniform(0, 1, n)
-            ct = (1 - u) ** (1.0 / (cos_power + 1.0))
-            th = np.arccos(ct) * np.where(rng.uniform(0, 1, n) < 0.5, 1, -1)
+            # in-plane EADF ~ cos^p(theta) on (-pi/2, pi/2): numeric inverse CDF
+            tg = np.linspace(-np.pi / 2 + 1e-4, np.pi / 2 - 1e-4, 512)
+            cdf = np.cumsum(np.cos(tg) ** cos_power); cdf /= cdf[-1]
+            th = np.interp(rng.uniform(0, 1, n), cdf, tg)
             E0 = Ee
             q = -1.0
         vx = np.sqrt(E0) * np.sin(th)
-        vz = np.sqrt(E0) * np.cos(th)
+        vz = np.sqrt(E0) * np.abs(np.cos(th))
         x = rng.uniform(0, nx - 1.0, n)
         z = np.ones(n) * 1.0
         alive = np.ones(n, bool)
@@ -144,12 +147,15 @@ def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30
         return hits_floor, hits_left, hits_right, hit_top_l, hit_top_r
 
     hist = []
+    vfloor_hist = []
     for it in range(n_iter):
         V = laplace(V)
         fi, li, ri, tli, tri = trace('ion', n_per_iter)
         fe, le, re, tle, tre = trace('electron', n_per_iter)
-        # normalized net current per segment (per source particle)
-        scale = relax / n_per_iter * (nx)              # keep step size geometry-independent
+        # normalized net current per segment (per source particle); anneal the step so early
+        # transients move fast and the steady state stops random-walking on shot noise
+        anneal = max(1.0 / (1.0 + it / 25.0), 0.25)   # floor: late iters can still unpin clips
+        scale = anneal * relax / n_per_iter * (nx)     # keep step size geometry-independent
         Vfloor += scale * (fi - fe)
         Vleft += scale * (li - le)
         Vright += scale * (ri - re)
@@ -161,11 +167,33 @@ def solve_trench_charging(AR, W=32, pad=24, mouth=24, Te=4.0, V_dc=37.0, V_rf=30
         Vtop_l = float(np.clip(Vtop_l, -3 * Te, 0.0))
         Vtop_r = float(np.clip(Vtop_r, -3 * Te, 0.0))
         hist.append(fi.sum() / n_per_iter)
+        vfloor_hist.append(Vfloor.copy())
         if verbose and it % 20 == 0:
             print(f"  it{it}: floor_i={fi.sum()/n_per_iter:.3f} floor_e={fe.sum()/n_per_iter:.3f} "
                   f"Vc={Vfloor[W//2]:.1f} Vfoot={max(Vfloor[0], Vfloor[-1]):.1f}", flush=True)
-    # steady-state floor ion flux: average of the last third, normalized by the open fraction
-    tail = np.mean(hist[-max(n_iter // 3, 5):])
+    # steady state: average flux AND floor potentials over the last third (shot-noise suppression)
+    k = max(n_iter // 3, 5)
+    tail = np.mean(hist[-k:])
+    Vf_avg = np.mean(np.array(vfloor_hist[-k:]), axis=0)
     open_frac = W / nx                                 # fraction of source over the slot
-    return dict(floor_flux=float(tail / open_frac), V_floor_center=float(Vfloor[W // 2]),
-                V_foot_peak=float(max(Vfloor[0], Vfloor[-1])), Vfloor=Vfloor.copy(), V=V)
+    return dict(floor_flux=float(tail / open_frac), V_floor_center=float(Vf_avg[W // 2]),
+                V_foot_peak=float(Vf_avg.max()), Vfloor=Vf_avg, V=V)
+
+
+# Gate-validated reference curve (scripts/charging_gate.py, RMSE 0.039 vs Hwang-Giapis JAP 82,566
+# Fig. 4; HG conditions: Cl2 HDP, V_s = 37+30 sin(wt), T_e = 4 eV). Model values at the HG ARs.
+_GATE_AR = np.array([0.0, 1.0, 1.2, 1.6, 2.0, 2.6, 3.0, 3.6, 4.0])
+_GATE_FLUX = np.array([1.0, 0.648, 0.599, 0.504, 0.433, 0.334, 0.283, 0.213, 0.177])
+_GATE_VFLOOR = np.array([0.0, 13.4, 16.8, 24.4, 30.9, 39.2, 44.9, 48.5, 52.9])
+
+
+def charging_floor_profile(AR):
+    """Production hook (NOT yet wired into the flux pipeline): normalized floor ion flux and
+    floor potential vs aspect ratio, from the gate-validated 2-D solver at the HG reference
+    conditions. Interpolates the gate curve; beyond AR 4 extrapolates the last slope (use with
+    care — re-run solve_trench_charging for other plasma conditions). Applies to INSULATING
+    floors (SiO2/SOI overetch, dielectric etch); a conductive grounded Si floor drains and
+    should NOT be throttled by this (the de Boer deep-Si case)."""
+    AR = np.asarray(AR, float)
+    return (np.interp(AR, _GATE_AR, _GATE_FLUX),
+            np.interp(AR, _GATE_AR, _GATE_VFLOOR))

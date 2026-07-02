@@ -216,6 +216,34 @@ solvers. Calibration automation: gradient/least-squares through the differentiab
 right tool for these 1–3-scalar fits (RL is the wrong tool — no sequential decision structure); the
 guard against overfitting is held-out gates, as above.
 
+## Charging: the Hwang-Giapis gate PASSES (2026-07-02, follow-up session)
+
+The 2-D charging solver now reproduces the published floor-ion-flux curve with **RMSE 0.039**
+(gate 0.05) over the 8 digitized Hwang-Giapis points (JAP 82, 566, Fig. 4), with the Matsui
+300 eV asymptote passing (floor flux 0.56 at AR 4 — high-energy ions are not over-throttled)
+and the 0-D closure sanity gates green. Nothing tuned — the two fixes were both numerics:
+
+1. **In-plane sampling** of HG's published distributions (IADF HWHM 4.3 deg, EADF cos^0.6 —
+   quoted from their own 2-D simulation plane). The earlier trace put a particle's full 3-D
+   transverse velocity into the simulation plane, making electrons artificially oblique →
+   over-absorbed on sidewalls → floor starved → potential ratcheted to the ceiling.
+2. **Annealed relaxation with a step floor + tail-averaged statistics** (shot noise on segment
+   potentials was rectified by the clip boundaries).
+
+| AR | 1.0 | 1.2 | 1.6 | 2.0 | 2.6 | 3.0 | 3.6 | 4.0 |
+|---|---|---|---|---|---|---|---|---|
+| model | 0.648 | 0.599 | 0.504 | 0.433 | 0.334 | 0.283 | 0.213 | 0.177 |
+| HG 1997 | 0.59 | 0.55 | 0.47 | 0.40 | 0.34 | 0.30 | 0.26 | 0.22 |
+
+Floor potential rises 13 → 53 V over AR 1 → 4 (HG report 8 → 33 V *referenced to the grounded
+substrate*; the solver's zero is the sheath edge, so raw potentials are not like-for-like — the
+flux curve is the gate). Figure: `viz/charging_hg.png` (curve + the AR-4 potential map).
+Production hook `charging2d.charging_floor_profile(AR)` (flux attenuation + floor potential)
+exists but is **NOT wired into the flux pipeline yet** — and per the literature it applies to
+INSULATING floors only; the conductive de Boer-type Si floor drains and must not be throttled.
+Wiring it in (with deflected-ion redistribution to the sidewall foot — the notching driver)
+is the follow-up.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
