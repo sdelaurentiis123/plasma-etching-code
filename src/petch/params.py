@@ -32,9 +32,11 @@ PAR = dict(
     betaO=1.0,                                  # ViennaPS SF6O2 oxygen sticking (Si)
     # --- ported from Craig's plasma_sim (neutral_transport != "mc") ---
     radiosity_solver='jacobi',                  # 'jacobi' | 'gmres' (matrix-free, better-conditioned at low s)
-    knudsen_wall_loss_scale=1.3,                # floor reaction-loss scale in the 1-D Knudsen conductance tail.
+    knudsen_wall_loss_scale=1.4,                # floor reaction-loss scale in the 1-D Knudsen conductance tail.
                                                 # CALIBRATED (1 knob) to the de Boer W=2um wafer with petch's
-                                                # chemistry: RMSE 0.053 vs measured nr(AR) (ballistic ~0.13).
+                                                # chemistry + the faithful reflected ion: RMSE 0.040 vs the
+                                                # measured nr(AR) -- PASSES the 0.05 experimental gate
+                                                # (ballistic ~0.13; legacy first-hit ion 0.053 at best).
                                                 # plasma_sim's engine uses 1.85 with its own calibrated chemistry.
     dda_n_dir=64,                               # discrete-ordinates direction count (neutral_transport='dda')
     dda_n_reemit=12,                            # diffuse re-emission iterations for the DDA neutral solve

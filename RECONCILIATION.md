@@ -116,6 +116,42 @@ floor-sink model decays linearly with depth while the measured tail flattens (AR
 no value of the knob passes the gate. The identified next physics: a self-limiting (starvation-coupled)
 floor sink or distributed sidewall loss, which is what produces a flattening tail.
 
+## Literature hunt → the mechanism → the wafer gate PASSES (2026-07-02)
+
+A literature sweep for what sustains the de Boer wafer's efficient deep floor (nr ~ AR^-0.55) settled it:
+
+- **Spontaneous/thermal F floor channel: REFUTED.** de Boer 2002 (J. MEMS 11, 385) measured the cryo
+  floor rate to be *temperature-independent* → ion-assisted ("reactive spot"), not thermally activated;
+  Flamm's law (JAP 52, 3633) drops ~45× at −110 °C; cryo SiOxFy passivation exists to kill exactly this
+  channel. (We were about to implement it — the hunt prevented a fudge dressed as physics.)
+- **The cited mechanism:** Coburn–Winters (APL 55, 2730) conductance law with a LOW floor reaction
+  probability (S_b ≈ 0.22 for F/Si) flattens the neutral tail; the last mile is an **~AR-independent
+  ion-limited floor** — Blauw 2000 (JVST B 18, 3453) verbatim: *"fluorine-limited etching is
+  aspect-ratio dependent, in contrast to ion-limited etching, which is aspect-ratio independent"* —
+  sustained by ion reflection funneling flux/energy to the deep floor.
+
+**Diagnostic in petch confirmed the ion side was the steepener:** m_i(floor)/field decayed 0.66 → 0.32
+→ 0.11 over AR 10/20/40 (~1/AR). Root cause: an implementation gap, not physics — the deterministic
+neutral paths (knudsen/dda/radiosity) launched the *legacy first-hit* ion kernel; `flags.ion_reflection`
+was **silently ignored** outside the MC path, so petch's faithful ViennaPS coned-cosine reflection
+kernel (whose own comment says "funnels ions to deep floors — the deep-AR ARDE term") never ran there.
+
+**Fix:** shared `_ions_deterministic` helper — all three deterministic-neutral paths now run the
+faithful reflected ion + deposit `_ion_yield` under the validated config. Result on the wafer scorecard
+(static nr(AR), W=2 µm, AR 0/10/20/40):
+
+| config | nr @ AR [0,10,20,40] | RMSE | gate ≤ 0.05 |
+|---|---|---|---|
+| knudsen + legacy ion (best, wls=1.3) | 1.0 / 0.47 / 0.25 / 0.11 | 0.053 | fail |
+| **knudsen + faithful ion, wls=1.4 (new default)** | 1.0 / 0.48 / 0.27 / 0.14 | **0.040** | **PASS** |
+| wafer (measured) | 1.0 / 0.43 / 0.29 / 0.20 | — | — |
+
+A proper optimum basin (wls 1.4–1.5 both 0.040; 1.3 → 0.045), not an edge. The pass came from wiring
+in the documented ion physics the literature pointed at — the calibration knob barely moved. Honest
+labels still apply: one calibrated knob (wls), static-geometry harness, one wafer dataset. The DDA
+W=2 curves and the DDA-vs-ViennaPS number (0.727 vs 0.73) were computed under the legacy ion and are
+being re-measured; the ViennaPS cross-check needs a ViennaPS box to re-validate.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).

@@ -935,15 +935,11 @@ def mc_flux_3d_radiosity(mesh, verts, faces, centroids, areas, geo, par, n_ion=2
     betaE = par.get('betaE', 0.7); betaO = par.get('betaO', 1.0)
     fn = _gas_normals(verts, faces, centroids, geo)     # into-gas (essential for face emission)
 
-    # ions: unchanged MC (directional)
+    # ions: shared deterministic-path launch (faithful ViennaPS reflection when the config asks)
     oi, di = _source3d('ion', n_ion, Lx, Ly, z_src, par['ion_ang_sigma'], 'sobol', rng, seed * 9 + 1)
-    fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
-    wp.launch(_trace3d, dim=n_ion, device=DEVICE,
-              inputs=[mesh.id, wp.array(oi, dtype=wp.vec3, device=DEVICE), wp.array(di, dtype=wp.vec3, device=DEVICE),
-                      1.0, 0, int(seed * 9 + 1), 0, 0.34, 0.8, fi, ai])
-    fi = fi.numpy(); ai = ai.numpy()
-    m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
-    cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
+    oi_w = wp.array(oi, dtype=wp.vec3, device=DEVICE); di_w = wp.array(di, dtype=wp.vec3, device=DEVICE)
+    m_i, cos_i = _ions_deterministic(mesh, F, A, A_src, Lx, Ly, Lz, n_ion, par, flags,
+                                     seed * 9 + 1, oi_w, di_w)
 
     # form-factor matrix: n_ff cosine rays per face -> first-hit face (or escape=sky)
     src = np.repeat(np.arange(F), n_ff)
@@ -991,6 +987,44 @@ def mc_flux_3d_radiosity(mesh, verts, faces, centroids, areas, geo, par, n_ion=2
     return m_i, m_F, m_O, cos_i
 
 
+def _ions_deterministic(mesh, F, A, A_src, Lx, Ly, Lz, n_ion, par, flags, seed, oi_w, di_w):
+    """Shared ion launch for the deterministic-neutral paths (knudsen / dda / radiosity).
+    With flags.ion_reflection + belen (the validated accuracy config), runs the FAITHFUL ViennaPS
+    coned-cosine reflection kernel and deposits par['_ion_yield'] -- ions funnel to the deep floor,
+    keeping the ion-limited channel ~AR-independent (Blauw 2000). Previously these paths silently
+    ignored ion_reflection and used the legacy first-hit ion, whose floor flux decays ~1/AR -- the
+    dominant deep-tail steepener vs the de Boer wafer. Returns (m_i, cos_i)."""
+    faithful = (flags is not None and getattr(flags, "ion_reflection", False)
+                and getattr(flags, "chemistry", "langmuir") == "belen")
+    fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
+    if faithful:
+        inflect = float(par.get('inflectAngle', 1.55334303)); minang = float(par.get('minAngle', 1.3962634))
+        n_l = float(par.get('n_l', 10.0)); A_en = 1.0 / (1.0 + n_l * (1.5707963 / inflect - 1.0))
+        minE = float(min(par['Eth_ie'], par['Eth_sp']))
+        sp_w = wp.zeros(F, dtype=float, device=DEVICE); ie_w = wp.zeros(F, dtype=float, device=DEVICE)
+        ip_w = wp.zeros(F, dtype=float, device=DEVICE)
+        wp.launch(_trace3d_ion_yield, dim=n_ion, device=DEVICE,
+                  inputs=[mesh.id, oi_w, di_w, int(seed), float(par['Emean']), float(par['Esig']),
+                          float(par['A_sp']), float(par['Eth_sp']), float(par['B_sp']),
+                          float(par['A_ie']), float(par['Eth_ie']), float(par['A_p']), float(par['Eth_p']),
+                          inflect, minang, n_l, float(A_en), minE,
+                          float(par.get('thetaRMin', 1.2217305)), float(par.get('thetaRMax', 1.5707963)),
+                          Lx, Ly, Lz, int(par.get('periodic_y', 0)),
+                          sp_w, ie_w, ip_w, fi, ai])
+        norm = A_src / n_ion
+        par['_ion_yield'] = ((sp_w.numpy() / A) * norm, (ie_w.numpy() / A) * norm, (ip_w.numpy() / A) * norm)
+        fi = fi.numpy(); ai = ai.numpy()
+        m_i = (fi / A) * norm
+    else:
+        par.pop('_ion_yield', None)
+        wp.launch(_trace3d, dim=n_ion, device=DEVICE,
+                  inputs=[mesh.id, oi_w, di_w, 1.0, 0, int(seed), 0, 0.34, 0.8, fi, ai])
+        fi = fi.numpy(); ai = ai.numpy()
+        m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
+    cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
+    return m_i, cos_i
+
+
 def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=20000,
                        seed=0, flags=None, n_fp=4):
     """KNUDSEN deep-neutral tail (vs many-bounce MC). Ions stay MC (directional, single-bounce);
@@ -1012,15 +1046,11 @@ def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=200
     wls = float(par.get('knudsen_wall_loss_scale', 1.85))
     phi, zs, dx, sub_top = geo['phi'], geo['zs'], geo['dx'], geo['sub_top']
 
-    # ions: MC directional (single-bounce), same as the radiosity path
+    # ions: shared deterministic-path launch (faithful ViennaPS reflection when the config asks).
     oi, di = _source3d('ion', n_ion, Lx, Ly, z_src, par['ion_ang_sigma'], 'sobol', rng, seed * 9 + 1)
-    fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
-    wp.launch(_trace3d, dim=n_ion, device=DEVICE,
-              inputs=[mesh.id, wp.array(oi, dtype=wp.vec3, device=DEVICE), wp.array(di, dtype=wp.vec3, device=DEVICE),
-                      1.0, 0, int(seed * 9 + 1), 0, 0.34, 0.8, fi, ai])
-    fi = fi.numpy(); ai = ai.numpy()
-    m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
-    cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
+    oi_w = wp.array(oi, dtype=wp.vec3, device=DEVICE); di_w = wp.array(di, dtype=wp.vec3, device=DEVICE)
+    m_i, cos_i = _ions_deterministic(mesh, F, A, A_src, Lx, Ly, Lz, n_ion, par, flags,
+                                     seed * 9 + 1, oi_w, di_w)
 
     # neutrals: 1-D Knudsen conductance profile, coupled to the Belen coverage fixed point.
     # knudsen_sink='local' (default): sink sticking = betaE*bare with the LOCAL coverage -- as the
@@ -1063,15 +1093,11 @@ def mc_flux_3d_dda(mesh, verts, faces, centroids, areas, geo, par, n_ion=20000,
     phi, zs, dx = geo['phi'], geo['zs'], geo['dx']
     n_dir = int(par.get('dda_n_dir', 64)); n_re = int(par.get('dda_n_reemit', 12))
 
-    # ions: MC directional (single-bounce), same as the radiosity/knudsen paths
+    # ions: shared deterministic-path launch (faithful ViennaPS reflection when the config asks)
     oi, di = _source3d('ion', n_ion, Lx, Ly, z_src, par['ion_ang_sigma'], 'sobol', rng, seed * 9 + 1)
-    fi = wp.zeros(F, dtype=float, device=DEVICE); ai = wp.zeros(F, dtype=float, device=DEVICE)
-    wp.launch(_trace3d, dim=n_ion, device=DEVICE,
-              inputs=[mesh.id, wp.array(oi, dtype=wp.vec3, device=DEVICE), wp.array(di, dtype=wp.vec3, device=DEVICE),
-                      1.0, 0, int(seed * 9 + 1), 0, 0.34, 0.8, fi, ai])
-    fi = fi.numpy(); ai = ai.numpy()
-    m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
-    cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
+    oi_w = wp.array(oi, dtype=wp.vec3, device=DEVICE); di_w = wp.array(di, dtype=wp.vec3, device=DEVICE)
+    m_i, cos_i = _ions_deterministic(mesh, F, A, A_src, Lx, Ly, Lz, n_ion, par, flags,
+                                     seed * 9 + 1, oi_w, di_w)
 
     # neutrals: deterministic DDA, coupled to the Belen coverage fixed point
     bare = np.ones(F)
