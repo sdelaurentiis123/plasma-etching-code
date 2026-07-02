@@ -89,12 +89,39 @@ etch channel), not a transport, IADF, or flux knob. So petch-DDA reproduces the 
 (matching ViennaPS); it does not, with current knobs, reach the real wafer's deep-AR floor. (The figure
 is the right panel of `viz/dda_vs_mc_arde.png` / `dda_vs_mc_arde.npz`.)
 
+## Knudsen tail: bug found, fixed, calibrated to the wafer (2026-07-02)
+
+The flat-profile bug in petch's Knudsen port is fixed: mesh-face centroids sit ON the zero contour, so
+floor faces' slice index rounded into the gas-free slice below the last valid one — the reaction sink
+landed on an invalid slice and never entered the tridiagonal solve. Fix: snap every face to its nearest
+gas-carrying slice before accumulating (`knudsen.py`; plasma_sim's band-cell sampling is immune, which is
+why Craig's worked). Verified A/B vs plasma_sim's `_neutral_flux_knudsen`: petch now decays properly.
+
+**Benchmarked to the real wafer** (static nr(AR) at the de Boer points, W=2 µm, petch chemistry,
+sweeping the one knob `knudsen_wall_loss_scale`):
+
+| wls | nr @ AR [0,10,20,40] | RMSE vs wafer |
+|---|---|---|
+| 1.0 | 1.0 / 0.54 / 0.29 / 0.14 | 0.062 |
+| **1.3 (new petch default)** | 1.0 / 0.47 / 0.25 / 0.11 | **0.053** |
+| 1.85 (plasma_sim default) | 1.0 / 0.38 / 0.19 / 0.08 | 0.082 |
+
+Wafer = 1.0 / 0.43 / 0.29 / 0.20; gate ≤ 0.05. **RMSE 0.053 is a near-pass and ~2.4× better than any
+ballistic config (~0.13)** — the Knudsen conductance channel is the first petch transport that bends
+toward the real wafer. Honest labels: (a) this is a 1-knob *calibration*, not a prediction (same status
+as plasma_sim's 1.85 on its own chemistry); (b) the residual is *structural in shape* — the single
+floor-sink model decays linearly with depth while the measured tail flattens (AR40: 0.11 vs 0.20), so
+no value of the knob passes the gate. The identified next physics: a self-limiting (starvation-coupled)
+floor sink or distributed sidewall loss, which is what produces a flattening tail.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
 - ✅ Tested petch-DDA with de Boer process knobs (narrow IADF, etchant starvation) at W=2 — they do NOT
   close the wafer gap (narrow IADF goes the wrong way; the deep-AR floor is structural).
-- Calibrate the Knudsen floor sink; diagnose petch radiosity's over-correction.
-- The real frontier: a surface-charging model and/or a coverage-independent etch channel to reproduce the
-  wafer's flat high-AR tail. (The old `cal_F` knee-fix was removed; an etchant-starvation term alone is
-  insufficient given ion-enhanced floor etching.)
+- ✅ Knudsen floor sink: bug fixed (contour-snap), calibrated to the wafer (wls=1.3, RMSE 0.053 — near-pass,
+  2.4× better than ballistic). Remaining shape residual is structural (linear decay vs flattening tail).
+- Diagnose petch radiosity's over-correction.
+- The real frontier, sharpened: the wafer's *flattening* high-AR tail wants a self-limiting floor sink
+  (starvation feedback into the consumption term) and/or charging — not more knob range. (The old `cal_F`
+  knee-fix was removed; etchant starvation alone is insufficient given ion-enhanced floor etching.)

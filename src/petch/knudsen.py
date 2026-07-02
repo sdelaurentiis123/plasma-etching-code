@@ -160,24 +160,29 @@ def knudsen_face_flux(phi, zs, dx, sub_top, feature_shape, centroids, gas_nz,
     inside the feature carry the coverage-dependent reaction sink. Returns m[F]."""
     nz = phi.shape[2]
     z0 = zs[0]
+    area, perimeter = slice_geometry(phi, zs, dx, sub_top, feature_shape)
+    valid_iz = np.flatnonzero((zs < sub_top) & (area > 0.0) & (perimeter > 0.0))
     iz_face = np.clip(np.round((centroids[:, 2] - z0) / dx).astype(int), 0, nz - 1)
+    # Mesh-face centroids sit ON the zero contour, so a floor face's raw slice index rounds into
+    # the gas-free slice just below the last valid one -- the sink would land on an invalid slice
+    # and never enter the solve (the flat-profile bug). Snap every face to its nearest VALID
+    # (gas-carrying) slice before accumulating; band-cell-based codes (plasma_sim) get this for free.
+    snap = _nearest_valid_slice(valid_iz, iz_face)
     below = centroids[:, 2] < sub_top
     floor = below & (gas_nz > 0.7)
 
     s_floor = np.zeros(nz)
     n_floor = np.zeros(nz)
-    if floor.any():
-        np.add.at(s_floor, iz_face[floor], np.clip(s_face[floor], 0.0, 1.0))
-        np.add.at(n_floor, iz_face[floor], 1.0)
+    if floor.any() and valid_iz.size:
+        tgt = snap[floor]
+        np.add.at(s_floor, tgt, np.clip(s_face[floor], 0.0, 1.0))
+        np.add.at(n_floor, tgt, 1.0)
         ok = n_floor > 0
         s_floor[ok] /= n_floor[ok]
 
     profile = conductance_profile(phi, zs, dx, sub_top, feature_shape,
                                   s_floor, n_floor, wall_loss_scale)
-    valid_iz = np.flatnonzero((zs < sub_top)
-                              & (slice_geometry(phi, zs, dx, sub_top, feature_shape)[0] > 0.0))
-    sample = _nearest_valid_slice(valid_iz, iz_face)
     m = np.ones(len(centroids))
-    has = sample >= 0
-    m[has & below] = profile[sample[has & below]]
+    has = snap >= 0
+    m[has & below] = profile[snap[has & below]]
     return np.clip(m, 0.0, 8.0)
