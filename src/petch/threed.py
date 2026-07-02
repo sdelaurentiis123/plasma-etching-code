@@ -1022,14 +1022,25 @@ def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=200
     m_i = np.clip((fi / A) / (n_ion / A_src), 0.0, 1.5)
     cos_i = np.where(fi > 0, ai / np.maximum(fi, 1e-9), 0.0)
 
-    # neutrals: 1-D Knudsen conductance profile, coupled to the Belen coverage fixed point
+    # neutrals: 1-D Knudsen conductance profile, coupled to the Belen coverage fixed point.
+    # knudsen_sink='local' (default): sink sticking = betaE*bare with the LOCAL coverage -- as the
+    # floor starves, bare->1 and the sink GROWS, steepening the tail toward ~conc^2 decay.
+    # knudsen_sink='field': clamp the sink at the FIELD (well-fed) coverage's value, so the sink
+    # coefficient stays at its saturation level -- conc = 1/(1+k*AR), the flattening the real
+    # de Boer tail shows. Physically: the starved floor's F consumption is capped by the ion-driven
+    # demand it had when saturated, not boosted by emptier sites.
+    sink_mode = par.get('knudsen_sink', 'local')
+    field = centroids[:, 2] > sub_top - 0.5 * dx           # open-field faces (top surface)
     bare = np.ones(F)
     m_F = m_O = np.zeros(F)
     for _ in range(n_fp):
+        s_bare = bare
+        if sink_mode == 'field' and field.any():
+            s_bare = np.minimum(bare, float(np.mean(bare[field])))
         m_F = knudsen_face_flux(phi, zs, dx, sub_top, shape, centroids, gas_nz,
-                                np.clip(bare * betaE, 0.0, 1.0), wls)
+                                np.clip(s_bare * betaE, 0.0, 1.0), wls)
         m_O = knudsen_face_flux(phi, zs, dx, sub_top, shape, centroids, gas_nz,
-                                np.clip(bare * betaO, 0.0, 1.0), wls)
+                                np.clip(s_bare * betaO, 0.0, 1.0), wls)
         thF, thO = _belen_coverages(m_i, m_F, m_O, cos_i, par, flags)
         bare = np.clip(1.0 - thF - thO, 0.0, 1.0)
     return m_i, m_F, m_O, cos_i

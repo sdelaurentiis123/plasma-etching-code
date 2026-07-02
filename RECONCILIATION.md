@@ -122,6 +122,14 @@ floor sink or distributed sidewall loss, which is what produces a flattening tai
 - ✅ Knudsen floor sink: bug fixed (contour-snap), calibrated to the wafer (wls=1.3, RMSE 0.053 — near-pass,
   2.4× better than ballistic). Remaining shape residual is structural (linear decay vs flattening tail).
 - Diagnose petch radiosity's over-correction.
-- The real frontier, sharpened: the wafer's *flattening* high-AR tail wants a self-limiting floor sink
-  (starvation feedback into the consumption term) and/or charging — not more knob range. (The old `cal_F`
-  knee-fix was removed; etchant starvation alone is insufficient given ion-enhanced floor etching.)
+- ✅ Tested the self-limiting-sink hypothesis (`knudsen_sink='field'`: clamp the sink at the field
+  coverage so it stops growing as the floor starves). Result: RMSE 0.050 at wls=2.0 — marginally better
+  than local (0.053) but the tail *shape* is unchanged (~2× decay per AR-doubling vs the wafer's ~1.45×).
+  **Falsified**: the steepener is not the neutral-sink feedback. The concentration profile is ~1/(1+kAR);
+  nr decays faster because of the multiplicative ion-side decay (m_i drops with AR; starved-regime rate
+  ∝ θ_F ∝ conc × ion term).
+- The real frontier, re-sharpened: the wafer's flat tail needs something that keeps the *deep-floor etch
+  efficient* at high AR — the coverage-independent etch channel from FINDINGS (a reaction-limited floor
+  term that doesn't die with θ_F), NOT a transport/sink knob, and NOT charging (charging cuts deep ion
+  flux and would steepen the tail further). (The old `cal_F` knee-fix was removed; etchant starvation
+  alone is insufficient given ion-enhanced floor etching.)
