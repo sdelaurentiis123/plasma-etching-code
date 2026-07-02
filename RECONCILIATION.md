@@ -148,9 +148,16 @@ faithful reflected ion + deposit `_ion_yield` under the validated config. Result
 
 A proper optimum basin (wls 1.4–1.5 both 0.040; 1.3 → 0.045), not an edge. The pass came from wiring
 in the documented ion physics the literature pointed at — the calibration knob barely moved. Honest
-labels still apply: one calibrated knob (wls), static-geometry harness, one wafer dataset. The DDA
-W=2 curves and the DDA-vs-ViennaPS number (0.727 vs 0.73) were computed under the legacy ion and are
-being re-measured; the ViennaPS cross-check needs a ViennaPS box to re-validate.
+labels still apply: one calibrated knob (wls), static-geometry harness, one wafer dataset.
+
+**Re-measured DDA curves under the faithful ion (and one retraction):**
+- W=0.5 µm: petch-DDA is now **0.81 @ AR 8.6 vs ViennaPS 0.73** — ~0.08 *gentler*, i.e. the documented
+  converged trench transport difference reappears. **The earlier "0.727 vs 0.73" match is RETRACTED as a
+  legacy-ion coincidence** (the first-hit ion's spurious floor decay cancelled the gentler-transport bias).
+  A fair re-validation against ViennaPS (both engines with reflecting ions) needs a ViennaPS box.
+- W=2 µm ballistic DDA: 1.00 / 1.01 / 0.76 / 0.49 / 0.23 at AR 2/5/10/15/20 (was 0.97/0.87/0.58/0.36/0.23
+  under the legacy ion) — the ballistic knee sits well above the wafer, as ballistic transport should.
+  Figures regenerated (viz/dda_vs_mc_arde.png, viz/experiment_arde.png).
 
 ## Follow-ups
 
