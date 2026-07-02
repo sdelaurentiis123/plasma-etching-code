@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What petch does — one page</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="physics-grounding.html">Physics&nbsp;Grounding</a>
+  <a href="performance.html">Performance</a>
+  <a href="experimental-validation.html">Experiments</a>
+  <a href="viennaps-validation.html">ViennaPS&nbsp;Validation</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>What petch does</strong></p>
+<h1>What petch does — one page</h1>
+<p class="subtitle">The whole project in one screen: what it is, what's validated, against what, and what isn't.</p>
+
+<p><strong>petch</strong> is a 3-D feature-scale plasma-etch simulator: level-set surface evolution + flux transport + SF<sub>6</sub>/O<sub>2</sub> surface chemistry, with the flux and level-set kernels in NVIDIA Warp — <strong>GPU-resident end-to-end</strong> (~1&nbsp;s per etch, CPU-independent; <strong>~8–15× faster than ViennaPS</strong>, whose level set is CPU-bound), <strong>differentiable by substrate</strong>, with a ViennaPS-shaped API: <code>petch.Process(Domain.trench(...), SF6O2(), duration).run()</code>.</p>
+
+<h2>The stack, with its receipts</h2>
+<table>
+<thead><tr><th>Layer</th><th>What it is</th><th>Validation status (gate + reproducer)</th></tr></thead>
+<tbody>
+<tr><td>Chemistry</td><td>Belen/Ertl SF<sub>6</sub>/O<sub>2</sub> coupled coverages (= ViennaPS's documented model)</td><td>cross-checked vs ViennaPS; constants cited (<a href="physics-grounding.html">grounding</a>)</td></tr>
+<tr><td>Ions</td><td>faithful ViennaPS reflection (coned-cosine, per-bounce energy loss) in <em>all</em> transport paths</td><td>the deep-AR ARDE term; its earlier silent omission in deterministic paths was found &amp; fixed via gating</td></tr>
+<tr><td>Neutrals: MC</td><td>Russian-roulette weighted rays (= ViennaRay's estimator)</td><td>tracks ViennaPS within ~0.1 in evolving etches (<a href="viennaps-validation.html">validation</a>)</td></tr>
+<tr><td>Neutrals: radiosity+GMRES</td><td>deterministic form-factor solve — <strong>solver of record</strong> for ballistic reference</td><td><strong>RMSE 0.043</strong> vs a <em>measured</em> ViennaPS static curve (<code>scripts/dda_static_gate.py</code>)</td></tr>
+<tr><td>Neutrals: Knudsen</td><td>molecular-flow conductance down the feature — the gas-transport physics ballistic codes lack</td><td><strong>the wafer result below</strong> (<code>scripts/evolving_vs_wafer.py</code>)</td></tr>
+<tr><td>Neutrals: DDA grid-march</td><td>fast deterministic option (0.1&nbsp;s/eval CUDA)</td><td>valid at moderate sticking; <strong>quarantined</strong> at albedo≈0.99 (documented structural limit)</td></tr>
+<tr><td>Charging</td><td>2-D Hwang–Giapis solver (trace → per-segment current balance → Laplace); <code>surface_charging="hg"</code> wires floor throttle + deflected-ion foot redistribution (the notch driver) into the flux path</td><td>floor-flux gate <strong>RMSE 0.039, nothing tuned</strong> (<code>scripts/charging_gate.py</code>); foot-energy gate open (<code>scripts/notching_gate.py</code>)</td></tr>
+</tbody>
+</table>
+
+<h2>The three validated headlines</h2>
+<ol>
+<li><strong>It predicts a real wafer's deep tail it was never fitted to.</strong> Evolving petch, one transport knob calibrated on the de Boer knee (AR&nbsp;10/20) — the <strong>held-out AR&nbsp;40 point comes out 0.15–0.20 vs the measured 0.20</strong> (full-curve RMSE 0.031–0.043, gate 0.05). Ballistic codes, ViennaPS included, structurally miss this. <a href="experimental-validation.html">Experiments</a>.</li>
+<li><strong>Its charging solver reproduces the community reference with zero tuned constants.</strong> Floor ion flux vs AR: RMSE 0.039 vs Hwang–Giapis 1997; 300&nbsp;eV ions correctly stay open at AR&nbsp;4 (Matsui). ViennaPS has no charging model. <a href="experimental-validation.html">Experiments</a>.</li>
+<li><strong>Its deterministic transport matches a measured ViennaPS reference</strong> (radiosity+GMRES, RMSE 0.043) — and the numerics agreement comes with a like-for-like speed result: <strong>~8–15× (CPU-dependent; petch ~1&nbsp;s, GPU-resident)</strong>. <a href="viennaps-validation.html">ViennaPS Validation</a>, <a href="performance.html">Performance</a>.</li>
+</ol>
+
+<div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin:18px 0">
+  <a href="experiment_arde.png"><img src="experiment_arde.png" alt="ARDE vs the de Boer wafer with the held-out AR40 prediction" style="width:32%;min-width:260px;border:1px solid #e0ddd2;border-radius:8px"></a>
+  <a href="charging_hg.png"><img src="charging_hg.png" alt="Charging gate vs Hwang-Giapis + potential map" style="width:32%;min-width:260px;border:1px solid #e0ddd2;border-radius:8px"></a>
+  <a href="dda_vs_mc_arde.png"><img src="dda_vs_mc_arde.png" alt="Deterministic transports vs measured ViennaPS static reference" style="width:32%;min-width:260px;border:1px solid #e0ddd2;border-radius:8px"></a>
+</div>
+
+<div class="callout warn">
+<span class="lab">Honest limits</span>
+<p><strong>One wafer dataset, one chemistry</strong> (de Boer cryo SF<sub>6</sub>/O<sub>2</sub>; the Gomez yield gate and a second dataset are next). <strong>Two calibrated constants</strong>: the Knudsen floor-loss knob (fitted on the knee; the tail is then predicted) and one absolute-rate constant (1.3&nbsp;µm/min, consistent across features to 1.1%) — everything else is cited. <strong>DDA quarantined</strong> in the mirror-wall regime. <strong>Charging</strong>: insulating floors only (v1 table at Hwang–Giapis conditions); its foot-energy gate currently fails (V-floor offset, RF-burst physics missing) so the wired path uses the published deflected-energy table; notch-<em>depth</em> validation vs Nozawa/Fujiwara awaits multi-material etch-stop. Every number above has a reproducer script and a pass/fail gate in the repo (<code>RECONCILIATION.md</code> is the full log, retractions included).</p>
+</div>
+
+<div class="pagenav">
+<a href="index.html">↑ Overview</a>
+<a href="experimental-validation.html">The wafer evidence →</a>
+</div>
+<div class="footer"><p>One-page summary. Every claim links to its evidence; every gate is a script you can run.</p></div>
+</main>
+</body>
+</html>
