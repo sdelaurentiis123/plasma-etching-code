@@ -194,7 +194,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                           poly_um=0.3, feature_w_um=0.5, rf_bursts=True,
                           sheath_um=89.0, boundary_um=3.7, insul_vmin_Te=1.0,
                           trace_integrator="adaptive_numba", trace_step_cap_factor=40.0,
-                          see_model="none", see_generations=1):
+                          see_model="none", see_generations=1,
+                          ion_angle_energy_corr="anticorrelated"):
     """Steady-state charging of the HG poly-on-oxide trench. Returns dict with:
     floor_flux (normalized ion flux to the oxide floor), V_floor_center, V_foot_peak,
     V_poly (the poly-line equipotential), foot_ion_flux / foot_ion_Emean (ions striking the
@@ -283,7 +284,15 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
             # HG energy-angle anticorrelation: transverse T_i is fixed by the presheath while the
             # sheath sets the vertical energy -> theta(E) ~ 1/sqrt(E) ("largest-angle ions have
             # least energy"). Normalized so the flux-mean HWHM = iadf_hwhm_deg at <E> = V_dc.
-            sig = np.deg2rad(iadf_hwhm_deg) / 1.1774 * np.sqrt(V_dc / E0)
+            sig0 = np.deg2rad(iadf_hwhm_deg) / 1.1774
+            if ion_angle_energy_corr == "anticorrelated":
+                sig = sig0 * np.sqrt(V_dc / E0)
+            elif ion_angle_energy_corr == "independent":
+                sig = np.full(n, sig0)
+            elif ion_angle_energy_corr == "positive":
+                sig = sig0 * np.sqrt(E0 / V_dc)
+            else:
+                raise ValueError(f"unknown ion_angle_energy_corr: {ion_angle_energy_corr}")
             th = rng.normal(0.0, sig, n)
             q = +1.0
             sB = np.zeros(n)                           # ions: no V_B (arrival KE includes the fall)
@@ -320,6 +329,7 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         hits_left = np.zeros(n_side); hits_right = np.zeros(n_side)
         hit_top_l = 0.0; hit_top_r = 0.0
         foot_n = 0.0; foot_E = 0.0                     # ion impacts on the POLY sidewall band
+        foot_z_mean = np.nan; foot_E_p50 = np.nan; foot_E_p90 = np.nan
         max_steps = int(float(trace_step_cap_factor) * nz)
         if trace_integrator == "fixed":
             max_steps = int(14 * nz)
@@ -344,71 +354,112 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                 foot_hit = ((ht == 2) | (ht == 3)) & (hi >= n_side - poly_cells)
                 foot_n = float(foot_hit.sum())
                 foot_E = float(impact_E[foot_hit].sum())
+                if foot_n > 0:
+                    foot_z_mean = float(hi[foot_hit].mean())
+                    foot_E_p50 = float(np.percentile(impact_E[foot_hit], 50))
+                    foot_E_p90 = float(np.percentile(impact_E[foot_hit], 90))
 
+            see_wall = 0
             see_emit = 0
             see_back = 0
             see_sec = 0
             see_absorb = 0
+            see_survivors = 0
             if (kind == 'electron' and see_model in ("pmma_pr", "pmma")
                     and see_generations > 0 and _trace_particles_adaptive is not None):
-                wall_sel = ((ht == 2) | (ht == 3)) & (hi >= 0)
-                if poly_cells > 0:
-                    wall_sel &= hi < n_side - poly_cells
-                wall_idx = np.flatnonzero(wall_sel)
-                if wall_idx.size:
-                    _, eta, delta = _pmma_see_yields(impact_E[wall_idx])
-                    total = np.minimum(eta + delta, 0.98)
-                    u = rng.uniform(0.0, 1.0, wall_idx.size)
-                    back_local = u < eta
-                    sec_local = (u >= eta) & (u < total)
-                    emit_local = back_local | sec_local
-                    emit_idx = wall_idx[emit_local]
-                    if emit_idx.size:
-                        is_left = ht[emit_idx] == 2
-                        emit_hi = hi[emit_idx]
-                        for zj in emit_hi[is_left]:
-                            hits_left[zj] -= 1.0
-                        for zj in emit_hi[~is_left]:
-                            hits_right[zj] -= 1.0
+                cur_ht, cur_hi, cur_E = ht, hi, impact_E
+                cur_x, cur_z, cur_vx, cur_vz, cur_sB = hit_x, hit_z, hit_vx, hit_vz, sB
+                for gen in range(int(see_generations)):
+                    wall_sel = ((cur_ht == 2) | (cur_ht == 3)) & (cur_hi >= 0)
+                    if poly_cells > 0:
+                        wall_sel &= cur_hi < n_side - poly_cells
+                    wall_idx = np.flatnonzero(wall_sel)
+                    if not wall_idx.size:
+                        break
+                    see_wall += int(wall_idx.size)
+                    _, eta, delta = _pmma_see_yields(cur_E[wall_idx])
 
-                        speed = np.ones(emit_idx.size)
-                        back_emit = back_local[emit_local]
-                        speed[back_emit] = np.sqrt(np.maximum(impact_E[emit_idx][back_emit], 1.0e-9))
-                        a = np.arcsin(rng.uniform(-1.0, 1.0, emit_idx.size))
-                        xe = np.where(is_left, pad + 0.1, pad + W - 0.1).astype(float)
-                        ze = mouth + emit_hi.astype(float) + 0.5
-                        vxe = np.where(is_left, np.cos(a), -np.cos(a)) * speed
-                        vze = np.sin(a) * speed
-                        sBe = sB[emit_idx]
-                        hte, hie, _, _, _, _, _, surve, stepse = _trace_particles_adaptive(
-                            Ex, Ez, ExB, EzB, xe, ze, vxe, vze, sBe, -1.0,
-                            nx, nz, W, pad, mouth, n_side, z_poly0, max_steps
-                        )
-                        efloor = hte == 1
-                        if efloor.any():
-                            hits_floor += np.bincount(hie[efloor], minlength=W)[:W]
-                        eleft = hte == 2
-                        if eleft.any():
-                            hits_left += np.bincount(hie[eleft], minlength=n_side)[:n_side]
-                        eright = hte == 3
-                        if eright.any():
-                            hits_right += np.bincount(hie[eright], minlength=n_side)[:n_side]
-                        hit_top_l += float((hte == 4).sum())
-                        hit_top_r += float((hte == 5).sum())
-                        see_emit = int(emit_idx.size)
-                        see_back = int(back_emit.sum())
-                        see_sec = int((~back_emit).sum())
-                        see_absorb = int(wall_idx.size - see_emit)
-                        see_stats.append(dict(n_primary_wall=int(wall_idx.size), emitted=see_emit,
-                                              backscatter=see_back, secondary=see_sec,
-                                              absorbed=see_absorb,
-                                              survivor_frac=float(surve.sum() / max(emit_idx.size, 1))))
+                    back_mask = rng.uniform(0.0, 1.0, wall_idx.size) < np.minimum(eta, 1.0)
+                    sec_floor = np.floor(delta).astype(int)
+                    sec_count = sec_floor + (rng.uniform(0.0, 1.0, wall_idx.size) < (delta - sec_floor))
+                    emit_count = back_mask.astype(int) + sec_count
+                    see_absorb += int((emit_count == 0).sum())
+                    if emit_count.sum() == 0:
+                        continue
+
+                    src = np.repeat(wall_idx, emit_count)
+                    is_left = cur_ht[src] == 2
+                    src_hi = cur_hi[src]
+                    for zj, cnt in zip(*np.unique(src_hi[is_left], return_counts=True)):
+                        hits_left[zj] -= float(cnt)
+                    for zj, cnt in zip(*np.unique(src_hi[~is_left], return_counts=True)):
+                        hits_right[zj] -= float(cnt)
+
+                    back_src = wall_idx[back_mask]
+                    n_back = back_src.size
+                    sec_src = np.repeat(wall_idx, sec_count)
+                    n_sec = sec_src.size
+                    see_back += int(n_back)
+                    see_sec += int(n_sec)
+                    see_emit += int(n_back + n_sec)
+
+                    xs = []
+                    zs = []
+                    vxs = []
+                    vzs = []
+                    sbs = []
+                    if n_back:
+                        bl = cur_ht[back_src] == 2
+                        xs.append(np.where(bl, pad + 0.1, pad + W - 0.1).astype(float))
+                        zs.append(np.clip(cur_z[back_src], mouth + 0.1, nz - 1.6))
+                        vxs.append(np.where(bl, np.abs(cur_vx[back_src]), -np.abs(cur_vx[back_src])))
+                        vzs.append(cur_vz[back_src])
+                        sbs.append(cur_sB[back_src])
+                    if n_sec:
+                        sl = cur_ht[sec_src] == 2
+                        a = np.arcsin(rng.uniform(-1.0, 1.0, n_sec))
+                        xs.append(np.where(sl, pad + 0.1, pad + W - 0.1).astype(float))
+                        zs.append(np.clip(cur_z[sec_src], mouth + 0.1, nz - 1.6))
+                        vxs.append(np.where(sl, np.cos(a), -np.cos(a)))
+                        vzs.append(np.sin(a))
+                        sbs.append(cur_sB[sec_src])
+
+                    xe = np.concatenate(xs)
+                    ze = np.concatenate(zs)
+                    vxe = np.concatenate(vxs)
+                    vze = np.concatenate(vzs)
+                    sBe = np.concatenate(sbs)
+                    cur_ht, cur_hi, cur_E, cur_x, cur_z, cur_vx, cur_vz, surve, stepse = _trace_particles_adaptive(
+                        Ex, Ez, ExB, EzB, xe, ze, vxe, vze, sBe, -1.0,
+                        nx, nz, W, pad, mouth, n_side, z_poly0, max_steps
+                    )
+                    efloor = cur_ht == 1
+                    if efloor.any():
+                        hits_floor += np.bincount(cur_hi[efloor], minlength=W)[:W]
+                    eleft = cur_ht == 2
+                    if eleft.any():
+                        hits_left += np.bincount(cur_hi[eleft], minlength=n_side)[:n_side]
+                    eright = cur_ht == 3
+                    if eright.any():
+                        hits_right += np.bincount(cur_hi[eright], minlength=n_side)[:n_side]
+                    hit_top_l += float((cur_ht == 4).sum())
+                    hit_top_r += float((cur_ht == 5).sum())
+                    see_survivors += int(surve.sum())
+
+                if see_wall > 0:
+                    see_stats.append(dict(n_primary_wall=int(see_wall), emitted=int(see_emit),
+                                          backscatter=int(see_back), secondary=int(see_sec),
+                                          absorbed=int(see_absorb),
+                                          survivor_frac=float(see_survivors / max(see_emit, 1))))
             survivors = int(survivor.sum())
             steps_used = int(steps.max()) if steps.size else 0
             trace_stats.append(dict(kind=kind, n=int(n), survivors=survivors,
                                     survivor_frac=float(survivors / max(n, 1)),
                                     steps=int(steps_used), cap=int(max_steps),
                                     integrator=trace_integrator,
+                                    foot_z_mean=foot_z_mean, foot_E_p50=foot_E_p50,
+                                    foot_E_p90=foot_E_p90,
+                                    see_wall=int(see_wall),
                                     see_emitted=int(see_emit), see_backscatter=int(see_back),
                                     see_secondary=int(see_sec), see_absorbed=int(see_absorb)))
             return hits_floor, hits_left, hits_right, hit_top_l, hit_top_r, foot_n, foot_E

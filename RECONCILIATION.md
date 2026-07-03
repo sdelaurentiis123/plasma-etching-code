@@ -436,6 +436,24 @@ material SEE / electron landing redistribution, not conductor charge sharing or 
 Do not keep re-running PR-only SEE as a standalone fix; next falsification targets are all-wall
 material SEE and the HG-style RF sheath-MC source.
 
+**W2 code-review fixes and AR4 falsification (2026-07-03).** Review found the first PR-SEE branch
+was incomplete: `see_generations` was only an on/off switch, yield > 1 was clipped to one sub-unity
+emission probability, emitted electrons relaunched from bin centers rather than actual impact `z`,
+and diagnostics undercounted absorbed wall hits. Fixed these in the opt-in branch only: true
+multi-generation cascades, integer secondary multiplicity for `delta > 1`, elastic/specular primary
+backscatter from the actual sidewall impact height, and foot-hit energy diagnostics
+(`foot_E_p50`, `foot_E_p90`, `foot_z_mean`) in `diag["trace"]["last_ion"]`. Full AR4 probe
+(8000 x 110, seed 10): default W1 gives floor flux 0.269, `V_c = 43.62 V`, `V_poly = 36.62 V`,
+foot energy **15.77 eV** (p50 11.56, p90 29.12); corrected `see_model="pmma_pr",
+see_generations=3` gives floor flux 0.319, `V_c = 36.41 V`, `V_poly = 32.99 V`, foot energy
+**16.70 eV** (p50 12.79, p90 32.61), 2187 emitted electrons in the final 32000-electron trace,
+zero survivor leakage. Interpretation: complete PR-sidewall SEE is sign-correct and moves the
+voltage strongly toward HG, but it still raises deep foot energy by only **0.93 eV** vs the
+remaining ~11 eV miss and worsens floor flux. This falsifies PR-sidewall SEE as the standalone
+deep-AR fix. The foot-hit diagnostics show energetic ions exist in the tail (p90 ~30 eV) but the
+mean is dominated by low-energy foot hits; the next problem is source/trajectory selection, not
+silent orbits or scalar conductor potential.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
