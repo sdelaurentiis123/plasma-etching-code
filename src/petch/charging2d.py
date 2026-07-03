@@ -1117,15 +1117,17 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     _inside = ~solid
     _inside[:, 0] = False
 
-    def laplace(V, sweeps=260, omega=1.0, **bc):
+    def laplace(V, sweeps=260, omega=1.88, **bc):
+        # true red-black GS-SOR: the neighbor average is recomputed per color so the second
+        # color sees the first color's updated values (masked Jacobi diverges for omega > 1)
         for _ in range(sweeps):
             V = apply_dirichlet(V, **bc)
-            xm = np.empty_like(V); xp = np.empty_like(V)
-            xm[1:, :] = V[:-1, :]; xm[0, :] = V[0, :]
-            xp[:-1, :] = V[1:, :]; xp[-1, :] = V[-1, :]
-            avg = np.zeros_like(V)
-            avg[:, 1:-1] = 0.25 * (xm[:, 1:-1] + xp[:, 1:-1] + V[:, 2:] + V[:, :-2])
             for color in (_red, ~_red):
+                xm = np.empty_like(V); xp = np.empty_like(V)
+                xm[1:, :] = V[:-1, :]; xm[0, :] = V[0, :]
+                xp[:-1, :] = V[1:, :]; xp[-1, :] = V[-1, :]
+                avg = np.zeros_like(V)
+                avg[:, 1:-1] = 0.25 * (xm[:, 1:-1] + xp[:, 1:-1] + V[:, 2:] + V[:, :-2])
                 m = _inside & color
                 V[m] = (1.0 - omega) * V[m] + omega * avg[m]
         return apply_dirichlet(V, **bc)
@@ -1219,6 +1221,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     vsolid_hist = []
     vedge_hist = []
     vneighbor_hist = []
+    res_hist = []
     for it in range(n_iter):
         V = laplace(V)
         Ex = -(np.gradient(V, axis=0)); Ez = -(np.gradient(V, axis=1))
@@ -1231,6 +1234,9 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         explicit_outer_net_e = float((hte == 3).sum() - (hti == 3).sum())
         target_outer_net_e = edge_boundary_net(Vedge) * n_per_iter * open_frac
         edge_extra_e = max(target_outer_net_e - explicit_outer_net_e, 0.0)
+        res_hist.append((float(net[floor_trench_mask].sum()), float(net[pr_mask].sum()),
+                         float(net[cond == 1].sum() - edge_extra_e),
+                         float(net[cond == 2].sum())))
         Vedge += scale * (net[cond == 1].sum() - edge_extra_e) / max(geom["edge_exposed_area"], 1)
         Vneighbor += scale * net[cond == 2].sum() / max(geom["neighbor_exposed_area"], 1)
         Vedge = float(np.clip(Vedge, -3.0 * Te, V_dc + V_rf))
@@ -1281,7 +1287,19 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     explicit_outer_net_e = float(edge_outer_e.sum() - edge_outer_i.sum())
     target_outer_net_e = edge_boundary_net(Vedge_avg) * ntot * open_frac
     edge_extra_final = max(target_outer_net_e - explicit_outer_net_e, 0.0)
+    # steady-state residual = tail-averaged net current per surface. A single 4x-n snapshot is
+    # shot-noise limited (~0.05 at n_per_iter=1200); averaging the last k iterations measures the
+    # actual imbalance at the averaged potential with k-times the samples.
+    iter_norm = max(n_per_iter * open_frac, 1.0)
+    res_tail = np.mean(np.array(res_hist[-k:]), axis=0) / iter_norm
     residual = dict(
+        floor=float(res_tail[0]),
+        pr=float(res_tail[1]),
+        poly_edge=float(res_tail[2]),
+        poly_neighbor=float(res_tail[3]),
+        top=0.0,
+    )
+    residual_snapshot = dict(
         floor=float(net[floor_trench_mask].sum() / trench_norm),
         pr=float(net[pr_mask].sum() / trench_norm),
         poly_edge=float((net[cond == 1].sum() - edge_extra_final) / trench_norm),
@@ -1327,6 +1345,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                        open_width_cells=float(geom["open_w"]),
                        n=int(ntot)),
         residual=residual,
+        residual_snapshot=residual_snapshot,
         see=dict(model=see_model, generations=int(see_generations), last=None),
     )
     floor_line = Vsolid[geom["trench0"]:geom["trench1"], nz - 1]
