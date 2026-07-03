@@ -172,6 +172,21 @@ else:
 _PMMA_SIGMA_E_E = np.array([0.0, 5.0, 10.0, 16.0, 20.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0])
 _PMMA_SIGMA_E_Y = np.array([0.0, 0.08, 0.17, 0.28, 0.38, 0.60, 0.78, 0.94, 1.09, 1.39, 1.60])
 
+_HG_AR = np.array([1.0, 1.2, 1.6, 2.0, 2.6, 3.0, 3.6, 4.0])
+_HG_EDGE_OUTER_ELECTRON_GROSS_FLUX = np.array([0.18, 0.19, 0.20, 0.18, 0.19, 0.18, 0.18, 0.18])
+
+
+def _hg_edge_outer_electron_gross_flux(AR):
+    """HG Fig. 3 gross electron flux to the outer edge-line poly-Si sidewall.
+
+    This is not automatically a conductor-current source: the floating conductor responds to
+    net open-side current after any open-side ion/countercurrent. Use it as a published diagnostic
+    reference unless the open-side geometry is explicitly simulated.
+    """
+    return float(np.interp(float(AR), _HG_AR, _HG_EDGE_OUTER_ELECTRON_GROSS_FLUX,
+                           left=_HG_EDGE_OUTER_ELECTRON_GROSS_FLUX[0],
+                           right=_HG_EDGE_OUTER_ELECTRON_GROSS_FLUX[-1]))
+
 
 def _pmma_see_yields(energy):
     """Memos/Lidorikis/Kokkoris PMMA SEEE model, digitized from their Fig. 2.
@@ -198,7 +213,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                           trace_integrator="adaptive_numba", trace_step_cap_factor=40.0,
                           see_model="none", see_generations=1,
                           ion_angle_energy_corr="anticorrelated",
-                          source_model="analytic", poly_mode="tied", poly_bias_V=0.0):
+                          source_model="analytic", poly_mode="tied", poly_bias_V=0.0,
+                          edge_open_electron_flux=None):
     """Steady-state charging of the HG poly-on-oxide trench. Returns dict with:
     floor_flux (normalized ion flux to the oxide floor), V_floor_center, V_foot_peak,
     V_poly (the poly-line equipotential), foot_ion_flux / foot_ion_Emean (ions striking the
@@ -209,7 +225,11 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     filtering of the returned map only — gate quantities always computed raw
     (scripts/charging_gate.py and notching_gate.py must run smooth=False)."""
     rng = np.random.default_rng(seed)
-    D = int(round(AR * W))
+    # HG's aspect ratio varies the photoresist height over a fixed 0.3 um poly-Si line:
+    # AR=4 is 1.7 um PR + 0.3 um poly on a 0.5 um space, not a 2.0 um PR wall.
+    pr_cells = int(round((AR * feature_w_um - poly_um) / feature_w_um * W))
+    pr_cells = max(pr_cells, 1)
+    D = pr_cells + int(round(poly_um / feature_w_um * W)) if poly_um > 0 else int(round(AR * W))
     nx = W + 2 * pad
     nz = D + mouth
     poly_cells = int(round(poly_um / feature_w_um * W)) if poly_um > 0 else 0
@@ -230,7 +250,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     Vfloor = np.zeros(W)
     Vleft = np.zeros(n_side); Vright = np.zeros(n_side)
     Vpoly = 0.0                                        # one floating equipotential (periodic array)
-    Vpoly_l = 0.0; Vpoly_r = 0.0                       # split diagnostic: two neighboring poly lines
+    # left = edge-line inner sidewall; right = neighboring-line sidewall.
+    Vpoly_l = 0.0; Vpoly_r = 0.0
     Vtop_l = 0.0; Vtop_r = 0.0
 
     def apply_dirichlet(V, boundary=0.0, vf=None, vl=None, vr=None, vp=None, vpl=None, vpr=None,
@@ -241,7 +262,7 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         vr_ = (Vright if vr is None else vr).copy()
         vp_ = Vpoly if vp is None else vp
         if poly_cells > 0:
-            if poly_mode == "split":
+            if poly_mode in ("split", "edge_open"):
                 vl_[is_poly] = Vpoly_l if vpl is None else vpl
                 vr_[is_poly] = Vpoly_r if vpr is None else vpr
             elif poly_mode == "edge_bias":
@@ -288,6 +309,9 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
 
     trace_stats = []
     see_stats = []
+    open_frac = W / nx
+    edge_open_flux_value = 0.0 if edge_open_electron_flux is None else float(edge_open_electron_flux)
+    edge_outer_gross_flux = _hg_edge_outer_electron_gross_flux(AR)
 
     def trace(kind, n, Ex, Ez):
         """Ballistic trace. Ions: field E_A. Electrons: E_A + V_s(phi_e)*E_B (rf_bursts)."""
@@ -344,15 +368,16 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                 sB = np.zeros(n)
         vx = np.sqrt(E0) * np.sin(th)
         vz = np.sqrt(E0) * np.abs(np.cos(th))
-        x = rng.uniform(0, nx - 1.0, n)
+        x = rng.uniform(0, float(nx), n)
         z = np.ones(n) * 1.0
         alive = np.ones(n, bool)
         hits_floor = np.zeros(W)
         hits_left = np.zeros(n_side); hits_right = np.zeros(n_side)
         hit_top_l = 0.0; hit_top_r = 0.0
-        foot_n = 0.0; foot_E = 0.0                     # ion impacts on the POLY sidewall band
+        foot_n = 0.0; foot_E = 0.0; foot_En = 0.0      # ion impacts on the POLY sidewall band
         foot_z_mean = np.nan; foot_E_p50 = np.nan; foot_E_p90 = np.nan
         foot_n_left = 0.0; foot_E_left = 0.0; foot_n_right = 0.0; foot_E_right = 0.0
+        foot_En_left = 0.0; foot_En_right = 0.0
         max_steps = int(float(trace_step_cap_factor) * nz)
         if trace_integrator == "fixed":
             max_steps = int(14 * nz)
@@ -377,12 +402,15 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                 foot_hit = ((ht == 2) | (ht == 3)) & (hi >= n_side - poly_cells)
                 foot_n = float(foot_hit.sum())
                 foot_E = float(impact_E[foot_hit].sum())
+                foot_En = float((hit_vx[foot_hit] * hit_vx[foot_hit]).sum())
                 foot_left = foot_hit & (ht == 2)
                 foot_right = foot_hit & (ht == 3)
                 foot_n_left = float(foot_left.sum())
                 foot_E_left = float(impact_E[foot_left].sum())
+                foot_En_left = float((hit_vx[foot_left] * hit_vx[foot_left]).sum())
                 foot_n_right = float(foot_right.sum())
                 foot_E_right = float(impact_E[foot_right].sum())
+                foot_En_right = float((hit_vx[foot_right] * hit_vx[foot_right]).sum())
                 if foot_n > 0:
                     foot_z_mean = float(hi[foot_hit].mean())
                     foot_E_p50 = float(np.percentile(impact_E[foot_hit], 50))
@@ -488,8 +516,11 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                                     integrator=trace_integrator,
                                     foot_z_mean=foot_z_mean, foot_E_p50=foot_E_p50,
                                     foot_E_p90=foot_E_p90,
+                                    foot_n=foot_n, foot_E=foot_E, foot_En=foot_En,
                                     foot_n_left=foot_n_left, foot_E_left=foot_E_left,
+                                    foot_En_left=foot_En_left,
                                     foot_n_right=foot_n_right, foot_E_right=foot_E_right,
+                                    foot_En_right=foot_En_right,
                                     see_wall=int(see_wall),
                                     see_emitted=int(see_emit), see_backscatter=int(see_back),
                                     see_secondary=int(see_sec), see_absorbed=int(see_absorb)))
@@ -561,12 +592,14 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                     if kind == 'ion' and z[j] >= z_poly0:      # ion striking the poly line
                         foot_n += 1.0
                         foot_E += vx[j] ** 2 + vz[j] ** 2
+                        foot_En += vx[j] ** 2
                 alive[j] = False
         survivors = int(alive.sum())
         trace_stats.append(dict(kind=kind, n=int(n), survivors=survivors,
                                 survivor_frac=float(survivors / max(n, 1)),
                                 steps=int(steps_used), cap=int(max_steps),
-                                integrator=trace_integrator))
+                                integrator=trace_integrator,
+                                foot_n=foot_n, foot_E=foot_E, foot_En=foot_En))
         return hits_floor, hits_left, hits_right, hit_top_l, hit_top_r, foot_n, foot_E
 
     hist = []
@@ -601,6 +634,16 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                 Vpoly_l = float(np.clip(Vpoly_l, -3 * Te, V_dc + V_rf))
                 Vpoly_r = float(np.clip(Vpoly_r, -3 * Te, V_dc + V_rf))
                 Vpoly = 0.5 * (Vpoly_l + Vpoly_r)
+            elif poly_mode == "edge_open":
+                # Diagnostic HG edge-line cell: left is the outermost line, right is the
+                # neighboring line. The external term is NET open-side electron surplus, not the
+                # Fig. 3 gross electron flux; the latter needs an explicit outer-domain model.
+                edge_e = edge_open_flux_value * n_per_iter * open_frac
+                Vpoly_l += scale * ((li - le)[is_poly].sum() - edge_e) / max(poly_cells, 1)
+                Vpoly_r += scale * (ri - re)[is_poly].sum() / max(poly_cells, 1)
+                Vpoly_l = float(np.clip(Vpoly_l, -3 * Te, V_dc + V_rf))
+                Vpoly_r = float(np.clip(Vpoly_r, -3 * Te, V_dc + V_rf))
+                Vpoly = Vpoly_r
             else:
                 raise ValueError(f"unknown poly_mode: {poly_mode}")
         Vtop_l += scale * (tli - tle) / max(pad, 1)
@@ -644,13 +687,24 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     Ex = -(np.gradient(V, axis=0)); Ez = -(np.gradient(V, axis=1))
     ifl, ill, irr, itl, itr, fn2, fE2 = trace('ion', 4 * n_per_iter, Ex, Ez)
     efl, ell, err, etl, etr, _, _ = trace('electron', 4 * n_per_iter, Ex, Ez)
-    open_frac = W / nx
     ntot = 4 * n_per_iter
     # per-species landing budget over the trench mouth (fractions of mouth-entering particles)
     ie_poly = (ill[is_poly].sum() + irr[is_poly].sum())    # ions on the poly sidewall band = foot
     ie_pr = (ill[~is_poly].sum() + irr[~is_poly].sum())     # ions on the PR (insulating) sidewalls
     ee_poly = (ell[is_poly].sum() + err[is_poly].sum())
     ee_pr = (ell[~is_poly].sum() + err[~is_poly].sum())
+    edge_extra_e = 0.0
+    if poly_mode == "edge_open":
+        edge_extra_e = edge_open_flux_value * ntot * open_frac
+    residual = dict(
+        floor=float((ifl.sum() - efl.sum()) / max(ntot * open_frac, 1.0)),
+        pr=float((ie_pr - ee_pr) / max(ntot * open_frac, 1.0)),
+        poly=float((ie_poly - ee_poly - edge_extra_e) / max(ntot * open_frac, 1.0)),
+        poly_left=float((ill[is_poly].sum() - ell[is_poly].sum() - edge_extra_e)
+                        / max(ntot * open_frac, 1.0)),
+        poly_right=float((irr[is_poly].sum() - err[is_poly].sum()) / max(ntot * open_frac, 1.0)),
+        top=float((itl + itr - etl - etr) / max(ntot, 1.0)),
+    )
     diag = dict(
         ion=dict(floor=float(ifl.sum() / ntot / open_frac), poly=float(ie_poly / ntot / open_frac),
                  pr=float(ie_pr / ntot / open_frac), top=float((itl + itr) / ntot)),
@@ -661,15 +715,41 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                    cap_factor=float(trace_step_cap_factor),
                    integrator=trace_integrator,
                    source_model=source_model,
-                   poly_mode=poly_mode),
+                   poly_mode=poly_mode,
+                   edge_open_electron_flux=edge_open_flux_value,
+                   edge_outer_electron_gross_flux=edge_outer_gross_flux),
+        residual=residual,
         see=dict(model=see_model, generations=int(see_generations),
                  last=see_stats[-1] if see_stats else None))
+    last_ion = diag["trace"]["last_ion"] or {}
+    fn_l = float(last_ion.get("foot_n_left", 0.0))
+    fE_l = float(last_ion.get("foot_E_left", 0.0))
+    fEn_l = float(last_ion.get("foot_En_left", 0.0))
+    fn_r = float(last_ion.get("foot_n_right", 0.0))
+    fE_r = float(last_ion.get("foot_E_right", 0.0))
+    fEn_r = float(last_ion.get("foot_En_right", 0.0))
+    fn_all = float(last_ion.get("foot_n", fn2))
+    fEn_all = float(last_ion.get("foot_En", np.nan))
     _prwall = ~is_poly
-    return dict(floor_flux=float(tail / open_frac), V_floor_center=float(Vf_avg[W // 2]),
+    floor_flux_tail = float(tail / open_frac)
+    floor_flux_final = float(ifl.sum() / ntot / open_frac)
+    return dict(floor_flux=floor_flux_final, floor_flux_tail=floor_flux_tail,
+                V_floor_center=float(Vf_avg[W // 2]),
                 V_foot_peak=float(Vf_avg.max()), V_poly=Vp_avg, Vfloor=Vf_avg, V=V,
                 V_poly_left=Vpl_avg, V_poly_right=Vpr_avg,
+                V_poly_edge=Vpl_avg, V_poly_neighbor=Vpr_avg,
                 foot_ion_flux=float(fn2 / (4 * n_per_iter) / open_frac),
-                foot_ion_Emean=float(fE2 / max(fn2, 1.0)), diag=diag,
+                foot_ion_Emean=float(fE2 / max(fn2, 1.0)),
+                foot_ion_Enormal_mean=float(fEn_all / max(fn_all, 1.0)),
+                foot_ion_flux_left=float(fn_l / (4 * n_per_iter) / open_frac),
+                foot_ion_flux_right=float(fn_r / (4 * n_per_iter) / open_frac),
+                foot_ion_Emean_left=float(fE_l / max(fn_l, 1.0)),
+                foot_ion_Emean_right=float(fE_r / max(fn_r, 1.0)),
+                foot_ion_Enormal_mean_left=float(fEn_l / max(fn_l, 1.0)),
+                foot_ion_Enormal_mean_right=float(fEn_r / max(fn_r, 1.0)),
+                foot_ion_flux_edge=float(fn_l / (4 * n_per_iter) / open_frac),
+                foot_ion_Emean_edge=float(fE_l / max(fn_l, 1.0)),
+                foot_ion_Enormal_mean_edge=float(fEn_l / max(fn_l, 1.0)), diag=diag,
                 geom=dict(pad=int(pad), W=int(W), mouth=int(mouth), D=int(D), nx=int(nx), nz=int(nz),
                           poly_cells=int(poly_cells)),
                 Vprwall_mean=float(0.5 * (Vl_avg[_prwall].mean() + Vr_avg[_prwall].mean())) if _prwall.any() else 0.0,
