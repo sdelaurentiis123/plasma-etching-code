@@ -22,14 +22,16 @@ SEE_GENERATIONS = int(os.environ.get("PETCH_SEE_GENERATIONS", "1"))
 SOURCE_MODEL = os.environ.get("PETCH_SOURCE_MODEL", "analytic")
 POLY_MODE = os.environ.get("PETCH_POLY_MODE", "tied")
 POLY_BIAS_V = float(os.environ.get("PETCH_POLY_BIAS_V", "0.0"))
+EDGE_OPEN_MODEL = os.environ.get("PETCH_EDGE_OPEN_MODEL", "none")
 EDGE_OPEN_ELECTRON_FLUX = os.environ.get("PETCH_EDGE_OPEN_ELECTRON_FLUX")
 EDGE_OPEN_ELECTRON_FLUX = None if EDGE_OPEN_ELECTRON_FLUX is None else float(EDGE_OPEN_ELECTRON_FLUX)
 
 print("=== GATE 1 (2-D solver): floor ion flux vs AR (HG JAP 82,566 Fig.4) ===", flush=True)
 print(f"    see_model={SEE_MODEL} see_generations={SEE_GENERATIONS} "
       f"source_model={SOURCE_MODEL} poly_mode={POLY_MODE} poly_bias_V={POLY_BIAS_V} "
-      f"edge_open_electron_flux={EDGE_OPEN_ELECTRON_FLUX}", flush=True)
+      f"edge_open_model={EDGE_OPEN_MODEL} edge_open_electron_flux={EDGE_OPEN_ELECTRON_FLUX}", flush=True)
 pred, vcs, vfs, isurv, esurv = [], [], [], [], []
+edge_e_gross, edge_i_gross, edge_net, edge_hg_gross = [], [], [], []
 resmax = []
 for i, ar in enumerate(HG_AR):
     t0 = time.time()
@@ -37,6 +39,7 @@ for i, ar in enumerate(HG_AR):
                               see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
                               source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
                               poly_bias_V=POLY_BIAS_V,
+                              edge_open_model=EDGE_OPEN_MODEL,
                               edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX)
     pred.append(r["floor_flux"]); vcs.append(r["V_floor_center"]); vfs.append(r["V_foot_peak"])
     ti = r["diag"]["trace"]["last_ion"]; te = r["diag"]["trace"]["last_electron"]
@@ -44,6 +47,11 @@ for i, ar in enumerate(HG_AR):
     esurv.append(te["survivor_frac"] if te else np.nan)
     res = r["diag"].get("residual", {})
     resmax.append(max(abs(float(v)) for v in res.values()) if res else np.nan)
+    eo = r["diag"].get("edge_open", {})
+    edge_e_gross.append(float(eo.get("electron_gross", np.nan)))
+    edge_i_gross.append(float(eo.get("ion_gross", np.nan)))
+    edge_net.append(float(eo.get("net_electron", np.nan)))
+    edge_hg_gross.append(float(eo.get("hg_electron_gross", np.nan)))
     print(f"  AR {ar:3.1f}:  model={r['floor_flux']:.3f}  HG={HG_FLUX[i]:.2f}   "
           f"Vc={r['V_floor_center']:5.1f} Vfoot={r['V_foot_peak']:5.1f}  "
           f"surv_i/e={isurv[-1]:.4f}/{esurv[-1]:.4f} res={resmax[-1]:.3f}  "
@@ -61,6 +69,7 @@ r300 = solve_trench_charging(4.0, V_dc=300.0, V_rf=30.0, n_per_iter=8000, n_iter
                              see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
                              source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
                              poly_bias_V=POLY_BIAS_V,
+                             edge_open_model=EDGE_OPEN_MODEL,
                              edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX)
 ok2 = r300["floor_flux"] > 0.1
 print(f"  300 eV ions @ AR4: floor flux = {r300['floor_flux']:.3f}   [{'PASS' if ok2 else 'fail'}] (must stay well above 0)", flush=True)
@@ -74,7 +83,10 @@ np.savez(os.path.join(os.path.dirname(__file__), "..", "charging_gate_result.npz
          ar=HG_AR, hg=HG_FLUX, model=pred, vc=vcs, vfoot=vfs, rmse=rmse,
          survivor_ion=np.array(isurv), survivor_electron=np.array(esurv),
          residual_max=np.array(resmax),
+         edge_electron_gross=np.array(edge_e_gross), edge_ion_gross=np.array(edge_i_gross),
+         edge_net_electron=np.array(edge_net), edge_hg_electron_gross=np.array(edge_hg_gross),
          see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
          source_model=SOURCE_MODEL, poly_mode=POLY_MODE, poly_bias_V=POLY_BIAS_V,
+         edge_open_model=EDGE_OPEN_MODEL,
          edge_open_electron_flux=-1.0 if EDGE_OPEN_ELECTRON_FLUX is None else EDGE_OPEN_ELECTRON_FLUX)
 print("DONE", flush=True)

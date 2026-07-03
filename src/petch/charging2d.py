@@ -35,6 +35,8 @@ Units: potentials in volts (vs ground); particle energies in eV; v = sqrt(E) per
 """
 from __future__ import annotations
 
+import math
+
 import numpy as np
 
 from .sheath1d import sample_sheath_source
@@ -188,6 +190,62 @@ def _hg_edge_outer_electron_gross_flux(AR):
                            right=_HG_EDGE_OUTER_ELECTRON_GROSS_FLUX[-1]))
 
 
+def _sample_open_side_flux(rng, n, W, pr_cells, poly_cells, cos_power, iadf_hwhm_deg,
+                           ion_angle_energy_corr, V_dc, V_rf, open_width_cells):
+    """Line-of-sight current to the open-area side of the edge poly line.
+
+    The auxiliary domain is the half-space outside the edge line. Particles launch through a
+    horizontal open window and free-stream to the vertical outer sidewall; the counted band is the
+    0.3 um poly-Si sidewall, not the PR wall. Returned currents are normalized to the trench
+    opening width, matching the in-feature `floor_flux` convention.
+    """
+    if poly_cells <= 0:
+        return dict(electron_gross=0.0, ion_gross=0.0, net_electron=0.0,
+                    open_width_cells=float(open_width_cells), n=int(n))
+
+    width = float(max(open_width_cells, W))
+    x = rng.uniform(0.0, width, n)
+
+    # Electrons: same 3-D-to-2-D projected cos^p flux source used by the feature tracer.
+    u = rng.uniform(0.0, 1.0, n)
+    ct3 = (1.0 - u) ** (1.0 / (cos_power + 2.0))
+    st3 = np.sqrt(np.maximum(1.0 - ct3 * ct3, 0.0))
+    az = rng.uniform(0.0, 2.0 * np.pi, n)
+    th_e = np.arctan2(st3 * np.cos(az), ct3)
+    toward = th_e < 0.0
+    tan_e = np.tan(np.abs(th_e[toward]))
+    zhit_e = np.full(tan_e.shape, np.inf)
+    ok = tan_e > 1.0e-12
+    zhit_e[ok] = x[toward][ok] / tan_e[ok]
+    e_hits = (zhit_e >= pr_cells) & (zhit_e < pr_cells + poly_cells)
+    electron_gross = float(e_hits.sum() / max(n, 1) * width / max(W, 1))
+
+    # Ions: same narrow arrival-angle model; vertical ions rarely hit a vertical open sidewall.
+    phi_p = rng.uniform(0.0, 2.0 * np.pi, n)
+    E0 = np.maximum(V_dc + V_rf * np.sin(phi_p), 0.5)
+    sig0 = np.deg2rad(iadf_hwhm_deg) / 1.1774
+    if ion_angle_energy_corr == "anticorrelated":
+        sig = sig0 * np.sqrt(V_dc / E0)
+    elif ion_angle_energy_corr == "independent":
+        sig = np.full(n, sig0)
+    elif ion_angle_energy_corr == "positive":
+        sig = sig0 * np.sqrt(E0 / V_dc)
+    else:
+        raise ValueError(f"unknown ion_angle_energy_corr: {ion_angle_energy_corr}")
+    th_i = rng.normal(0.0, sig, n)
+    toward = th_i < 0.0
+    tan_i = np.tan(np.abs(th_i[toward]))
+    zhit_i = np.full(tan_i.shape, np.inf)
+    ok = tan_i > 1.0e-12
+    zhit_i[ok] = x[toward][ok] / tan_i[ok]
+    i_hits = (zhit_i >= pr_cells) & (zhit_i < pr_cells + poly_cells)
+    ion_gross = float(i_hits.sum() / max(n, 1) * width / max(W, 1))
+
+    return dict(electron_gross=electron_gross, ion_gross=ion_gross,
+                net_electron=max(electron_gross - ion_gross, 0.0),
+                open_width_cells=float(width), n=int(n))
+
+
 def _pmma_see_yields(energy):
     """Memos/Lidorikis/Kokkoris PMMA SEEE model, digitized from their Fig. 2.
 
@@ -214,7 +272,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                           see_model="none", see_generations=1,
                           ion_angle_energy_corr="anticorrelated",
                           source_model="analytic", poly_mode="tied", poly_bias_V=0.0,
-                          edge_open_electron_flux=None):
+                          edge_open_electron_flux=None, edge_open_model="none",
+                          edge_open_samples=None, edge_open_width_um=3.7):
     """Steady-state charging of the HG poly-on-oxide trench. Returns dict with:
     floor_flux (normalized ion flux to the oxide floor), V_floor_center, V_foot_peak,
     V_poly (the poly-line equipotential), foot_ion_flux / foot_ion_Emean (ions striking the
@@ -310,8 +369,42 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     trace_stats = []
     see_stats = []
     open_frac = W / nx
-    edge_open_flux_value = 0.0 if edge_open_electron_flux is None else float(edge_open_electron_flux)
     edge_outer_gross_flux = _hg_edge_outer_electron_gross_flux(AR)
+    edge_open_samples = int(edge_open_samples or max(32768, 4 * n_per_iter))
+    edge_open_width_cells = int(round(edge_open_width_um / feature_w_um * W))
+    edge_open_diag = dict(model=edge_open_model, electron_gross=0.0, ion_gross=0.0,
+                          net_electron=0.0, open_width_cells=float(edge_open_width_cells),
+                          n=int(edge_open_samples), hg_electron_gross=edge_outer_gross_flux,
+                          override=False)
+    if edge_open_electron_flux is not None:
+        edge_open_flux_value = float(edge_open_electron_flux)
+        edge_open_diag.update(model="override", net_electron=edge_open_flux_value,
+                              electron_gross=edge_open_flux_value, override=True)
+    elif edge_open_model in ("none", None):
+        edge_open_flux_value = 0.0
+    elif edge_open_model == "line_of_sight":
+        edge_open_diag.update(_sample_open_side_flux(
+            rng, edge_open_samples, W, pr_cells, poly_cells, cos_power, iadf_hwhm_deg,
+            ion_angle_energy_corr, V_dc, V_rf, edge_open_width_cells))
+        edge_open_flux_value = float(edge_open_diag["net_electron"])
+    else:
+        raise ValueError(f"unknown edge_open_model: {edge_open_model}")
+
+    def edge_open_net_electron(v_edge):
+        if edge_open_electron_flux is not None:
+            return edge_open_flux_value
+        if edge_open_model != "line_of_sight":
+            return 0.0
+        # The line-of-sight calculation gives the geometric gross supply. To hit a negative
+        # vertical sidewall, an electron's horizontal kinetic energy must clear the repulsive
+        # conductor potential. For a Maxwellian transverse component this survival is erfc; a
+        # positive edge line cannot collect more than the gross ballistic supply.
+        if v_edge < 0.0:
+            accept = math.erfc(math.sqrt(max(-float(v_edge), 0.0) / max(Te, 1.0e-9)))
+        else:
+            accept = 1.0
+        return max(float(edge_open_diag["electron_gross"]) * accept
+                   - float(edge_open_diag["ion_gross"]), 0.0)
 
     def trace(kind, n, Ex, Ez):
         """Ballistic trace. Ions: field E_A. Electrons: E_A + V_s(phi_e)*E_B (rf_bursts)."""
@@ -638,7 +731,7 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                 # Diagnostic HG edge-line cell: left is the outermost line, right is the
                 # neighboring line. The external term is NET open-side electron surplus, not the
                 # Fig. 3 gross electron flux; the latter needs an explicit outer-domain model.
-                edge_e = edge_open_flux_value * n_per_iter * open_frac
+                edge_e = edge_open_net_electron(Vpoly_l) * n_per_iter * open_frac
                 Vpoly_l += scale * ((li - le)[is_poly].sum() - edge_e) / max(poly_cells, 1)
                 Vpoly_r += scale * (ri - re)[is_poly].sum() / max(poly_cells, 1)
                 Vpoly_l = float(np.clip(Vpoly_l, -3 * Te, V_dc + V_rf))
@@ -695,7 +788,7 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     ee_pr = (ell[~is_poly].sum() + err[~is_poly].sum())
     edge_extra_e = 0.0
     if poly_mode == "edge_open":
-        edge_extra_e = edge_open_flux_value * ntot * open_frac
+        edge_extra_e = edge_open_net_electron(Vpl_avg) * ntot * open_frac
     residual = dict(
         floor=float((ifl.sum() - efl.sum()) / max(ntot * open_frac, 1.0)),
         pr=float((ie_pr - ee_pr) / max(ntot * open_frac, 1.0)),
@@ -705,6 +798,10 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         poly_right=float((irr[is_poly].sum() - err[is_poly].sum()) / max(ntot * open_frac, 1.0)),
         top=float((itl + itr - etl - etr) / max(ntot, 1.0)),
     )
+    edge_open_diag["net_electron"] = float(edge_open_net_electron(Vpl_avg))
+    edge_open_diag["electron_accepted"] = float(edge_open_diag["net_electron"]
+                                                + edge_open_diag["ion_gross"])
+    edge_open_diag["edge_potential_for_net"] = float(Vpl_avg)
     diag = dict(
         ion=dict(floor=float(ifl.sum() / ntot / open_frac), poly=float(ie_poly / ntot / open_frac),
                  pr=float(ie_pr / ntot / open_frac), top=float((itl + itr) / ntot)),
@@ -717,7 +814,9 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                    source_model=source_model,
                    poly_mode=poly_mode,
                    edge_open_electron_flux=edge_open_flux_value,
+                   edge_open_model=edge_open_model,
                    edge_outer_electron_gross_flux=edge_outer_gross_flux),
+        edge_open=edge_open_diag,
         residual=residual,
         see=dict(model=see_model, generations=int(see_generations),
                  last=see_stats[-1] if see_stats else None))

@@ -14,8 +14,23 @@ from petch.charging2d import solve_trench_charging
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 g = np.load(os.path.join(HERE, "charging_gate_result.npz"))
 
+def scalar(key, default):
+    return g[key].item() if key in g and getattr(g[key], "shape", ()) == () else default
+
+solve_kwargs = dict(
+    see_model=str(scalar("see_model", "none")),
+    see_generations=int(scalar("see_generations", 1)),
+    source_model=str(scalar("source_model", "analytic")),
+    poly_mode=str(scalar("poly_mode", "tied")),
+    poly_bias_V=float(scalar("poly_bias_V", 0.0)),
+)
+if "edge_open_model" in g:
+    solve_kwargs["edge_open_model"] = str(scalar("edge_open_model", "none"))
+if "edge_open_electron_flux" in g and float(g["edge_open_electron_flux"]) >= 0.0:
+    solve_kwargs["edge_open_electron_flux"] = float(g["edge_open_electron_flux"])
+
 print("solving AR=4 for the potential map (smooth=True, cosmetic only)...", flush=True)
-r4 = solve_trench_charging(4.0, n_per_iter=8000, n_iter=140, seed=7, smooth=True)
+r4 = solve_trench_charging(4.0, n_per_iter=8000, n_iter=140, seed=7, smooth=True, **solve_kwargs)
 V = r4["V"]
 
 fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.2, 5.4), gridspec_kw=dict(width_ratios=[1.15, 1]))

@@ -468,6 +468,20 @@ poly bias gave sidewall-foot means ~19.1/20.5/22.5/24.3 eV. Conclusion: the next
 HG edge-line/two-poly geometry and current balance (edge line supplied from the open outer side),
 not more PR SEE or analytic source tuning. Details are in `CHARGING_DEEP_ISSUES.md`.
 
+**Edge/open auxiliary boundary — implemented, measured, NOT sufficient (2026-07-03).** Added
+`poly_mode="edge_open"` diagnostics plus `edge_open_model="line_of_sight"`: an open-half-space
+free-flight model computes gross electron flux and ion counterflux to the outer edge-line poly
+sidewall; negative edge potential suppresses electron collection by transverse-energy survival
+`erfc(sqrt(|V_edge|/T_e))`, positive edge potential caps at the gross ballistic supply. This removes
+the fake scalar current knob and matches HG Fig. 3 gross outer electron flux well (new figure
+`viz/edge_open_current.png`; gross-electron RMSE ~0.02). Official gate with PR SEE:
+floor-flux RMSE **0.076 FAIL**, foot-energy max error **32% FAIL** though rising, foot-flux
+**PASS** (max/min 1.13), neighbor-poly potential **FAIL** (45% max error), survivor/current
+residual/Matsui **PASS**. Interpretation: the auxiliary current model is a useful diagnostic and
+reference boundary, but a scalar open-side boundary cannot replace the HG nonperiodic multi-line
+field solve. The next real implementation is explicit open area + edge line + neighboring line
+geometry with nonperiodic x electrostatics; do not tune the net current law.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).

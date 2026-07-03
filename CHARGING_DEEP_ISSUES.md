@@ -1,7 +1,8 @@
 # Charging deep issues after W1/W2
 
 Status: researched and measured 2026-07-03. This memo is the handoff after the adaptive
-trajectory integrator and PR-sidewall SEE work. It narrows the remaining Hwang-Giapis miss.
+trajectory integrator, PR-sidewall SEE, and the first edge/open-area auxiliary-current model. It
+narrows the remaining Hwang-Giapis miss.
 
 ## Measured facts
 
@@ -22,6 +23,13 @@ trajectory integrator and PR-sidewall SEE work. It narrows the remaining Hwang-G
   line**, and explains the driver as the potential difference between the edge line and neighboring
   line. The previous petch mechanism cell tied both poly sidewalls to one equipotential, so that
   lateral line-to-line tilt was absent by construction.
+- A first-principles auxiliary open-side boundary was implemented as
+  `poly_mode="edge_open", edge_open_model="line_of_sight"`: particles free-stream from the open
+  half-space to the outer edge-line poly sidewall, giving modeled gross electron flux close to HG
+  Fig. 3 (`edge_open_current.png`, gross-electron RMSE about 0.02) and an explicit ion counterflux.
+  Local negative edge potential suppresses sidewall electron collection by the transverse-energy
+  survival `erfc(sqrt(|V_edge|/T_e))`; positive edge potential is capped at the gross ballistic
+  supply. This removes the ad-hoc net-current knob, but still does **not** close the full gate.
 
 ## Deep issue
 
@@ -47,6 +55,31 @@ poly bias diagnostic moved the AR4 relevant-side foot energy strongly:
 This is the first diagnostic that moves deep-AR foot energy by multiple eV without relying on a
 yield knob. It points to an edge-line geometry/source-current implementation as the next real fix.
 
+The auxiliary open-side model confirms the diagnosis but also falsifies the idea that a scalar
+boundary-current correction is enough. Official gate run:
+
+```text
+PETCH_POLY_MODE=edge_open PETCH_EDGE_OPEN_MODEL=line_of_sight \
+PETCH_SEE_MODEL=pmma_pr PETCH_SEE_GENERATIONS=3
+```
+
+Results:
+
+| gate | result |
+|---|---|
+| floor flux RMSE <= 0.05 | **FAIL 0.076** |
+| foot energy 15 -> 27.5 eV, <=30% max err | **FAIL 32%**, trend rises |
+| foot flux max/min <= 2 for AR >= 1.6 | **PASS 1.13** |
+| neighbor poly potential 6 -> 39 V, <=30% max err | **FAIL 45%** |
+| survivor fraction < 0.001 | **PASS** |
+| current residual < 0.08 | **PASS 0.060** |
+| Matsui 300 eV floor-open sanity | **PASS 0.588 @ AR4** |
+
+Interpretation: the reduced open-side current model now supplies the right *gross* outer electron
+access and creates the right qualitative edge/neighbor split, but the periodic one-trench Laplace
+domain still under-builds the HG line-to-line electrostatics and over-feeds the oxide floor. The
+next fix is not another scalar current law; it is the nonperiodic multi-line/open-area geometry.
+
 ## Falsified or deprioritized
 
 - **PR-sidewall SEE alone:** falsified by corrected cascade AR4 probe.
@@ -56,16 +89,19 @@ yield knob. It points to an edge-line geometry/source-current implementation as 
   AR4 foot energy worse, not better.
 - **Single conductor charge sharing:** falsified as insufficient. Split left/right conductors in the
   symmetric periodic cell remain nearly equal; HG needs edge-line/open-area asymmetry.
+- **Scalar open-side net current:** falsified as sufficient. A manual net current can move one AR
+  point, and the `line_of_sight` model matches HG gross outer electron flux, but the 8-point gates
+  still fail because the periodic field geometry is wrong.
 
 ## Next diagnostics, in order
 
 1. **Recollection audit for SEE.** Count emitted electrons by source surface and final absorbing
    surface. If PR-sidewall emitted electrons mostly re-hit upper PR or escape, SEE cannot fix the
    deep gate without source changes.
-2. **Edge-line geometry/current balance.** Replace the periodic one-trench/tied-poly mechanism cell
-   with the HG edge-line cell: edge poly line plus neighboring poly line, separate equipotentials,
-   and an open-side electron supply on the outer edge-line sidewall. This is now higher priority
-   than source tuning.
+2. **Explicit nonperiodic edge-line geometry.** Replace the periodic one-trench mechanism cell with
+   the HG edge-line cell: open area, edge poly line, edge trench, neighboring poly line, separate
+   equipotentials, and nonperiodic x-boundary electrostatics. The auxiliary `line_of_sight` current
+   is now a validation/reference boundary, not the production closure.
 3. **Material SEE sign test.** Reuse the current SEE machinery as a binary diagnostic on PR-only,
    oxide-floor-only, poly-only, and all-wall surfaces. Do not treat PMMA yields on oxide/poly as a
    calibrated model; this is only a sign/magnitude test.

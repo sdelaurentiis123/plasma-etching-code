@@ -28,18 +28,21 @@ SEE_GENERATIONS = int(os.environ.get("PETCH_SEE_GENERATIONS", "1"))
 SOURCE_MODEL = os.environ.get("PETCH_SOURCE_MODEL", "analytic")
 POLY_MODE = os.environ.get("PETCH_POLY_MODE", "tied")
 POLY_BIAS_V = float(os.environ.get("PETCH_POLY_BIAS_V", "0.0"))
+EDGE_OPEN_MODEL = os.environ.get("PETCH_EDGE_OPEN_MODEL", "none")
 EDGE_OPEN_ELECTRON_FLUX = os.environ.get("PETCH_EDGE_OPEN_ELECTRON_FLUX")
 EDGE_OPEN_ELECTRON_FLUX = None if EDGE_OPEN_ELECTRON_FLUX is None else float(EDGE_OPEN_ELECTRON_FLUX)
 
 Em, En, Fl, Vp, Ve, Vc, Fx, isurv, esurv, resmax = [], [], [], [], [], [], [], [], [], []
+edge_e_gross, edge_i_gross, edge_net, edge_hg_gross = [], [], [], []
 print(f"see_model={SEE_MODEL} see_generations={SEE_GENERATIONS} "
       f"source_model={SOURCE_MODEL} poly_mode={POLY_MODE} poly_bias_V={POLY_BIAS_V} "
-      f"edge_open_electron_flux={EDGE_OPEN_ELECTRON_FLUX}", flush=True)
+      f"edge_open_model={EDGE_OPEN_MODEL} edge_open_electron_flux={EDGE_OPEN_ELECTRON_FLUX}", flush=True)
 for i, ar in enumerate(HG_AR):
     r = solve_trench_charging(ar, n_per_iter=8000, n_iter=110, seed=3 + i,
                               see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
                               source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
                               poly_bias_V=POLY_BIAS_V,
+                              edge_open_model=EDGE_OPEN_MODEL,
                               edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX)
     if POLY_MODE == "edge_open":
         Em.append(r["foot_ion_Emean_edge"])
@@ -59,6 +62,11 @@ for i, ar in enumerate(HG_AR):
     esurv.append(te["survivor_frac"] if te else np.nan)
     res = r["diag"].get("residual", {})
     resmax.append(max(abs(float(v)) for v in res.values()) if res else np.nan)
+    eo = r["diag"].get("edge_open", {})
+    edge_e_gross.append(float(eo.get("electron_gross", np.nan)))
+    edge_i_gross.append(float(eo.get("ion_gross", np.nan)))
+    edge_net.append(float(eo.get("net_electron", np.nan)))
+    edge_hg_gross.append(float(eo.get("hg_electron_gross", np.nan)))
     print(f"  AR {ar:3.1f}:  footE={Em[-1]:5.1f} eV (HG {HG_FOOT_E[i]:.1f}) "
           f"En={En[-1]:5.1f} footFlux={Fl[-1]:.3f}   "
           f"Vneighbor={Vp[-1]:5.1f} (HG {HG_VPOLY[i]:.0f}) Vedge={Ve[-1]:5.1f}   "
@@ -87,8 +95,11 @@ np.savez(os.path.join(os.path.dirname(__file__), "..", "notching_gate_result.npz
          ar=HG_AR, foot_E=Em, foot_Enormal=En, hg_foot_E=HG_FOOT_E, foot_flux=Fl,
          vpoly=Vp, vedge=Ve, hg_vpoly=HG_VPOLY,
          vc=Vc, floor_flux=Fx, residual_max=np.array(resmax), okA=okA, okB=okB, okC=okC,
+         edge_electron_gross=np.array(edge_e_gross), edge_ion_gross=np.array(edge_i_gross),
+         edge_net_electron=np.array(edge_net), edge_hg_electron_gross=np.array(edge_hg_gross),
          survivor_ion=np.array(isurv), survivor_electron=np.array(esurv),
          see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
          source_model=SOURCE_MODEL, poly_mode=POLY_MODE, poly_bias_V=POLY_BIAS_V,
+         edge_open_model=EDGE_OPEN_MODEL,
          edge_open_electron_flux=-1.0 if EDGE_OPEN_ELECTRON_FLUX is None else EDGE_OPEN_ELECTRON_FLUX)
 print("DONE")
