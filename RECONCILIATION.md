@@ -371,6 +371,27 @@ open root cause is the RF-burst electron under-supply**, not the insulator clip.
 touches `solve_trench_charging` (the mechanism-study solver), so notching and de Boer runs are
 untouched.
 
+**Full RF-phase electron trajectories — implemented, measured, REVERTED (2026-07-03).** The plan's
+hypothesized fix for the deep-AR over-charge: replace the first-order burst weighting (thermal
+`gamma(2,Te)` energy + `cos^p` angle + an ad-hoc residual sheath barrier `frac·V_s` inside the
+feature) with the physically-correct sheath-crossing entry. Derivation: a bulk electron crosses the
+instantaneous sheath `V_s(φ)` only if its vertical energy exceeds `eV_s` (Boltzmann); the
+flux-weighted 1-D vertical energy is `Exp(Te)`, so the **residual after climbing the barrier is again
+`Exp(Te)`** (memoryless) — phase-independent — with 2-DOF transverse energy `Exp(Te)` preserved and
+**no residual barrier inside** (already climbed). This is the correct free-flight-after-sheath picture.
+**Measured (AR 4, 8000×140): V_c = 61 V (worse than the first-order 43.5; HG 33), floor flux 0.142,
+~2× slower.** Why worse: the correct sheath-crossing arrival is **wide-angle** (median ~45°: `Exp(Te)`
+transverse vs `Exp(Te)` vertical), and those wide-angle low-energy electrons either strike the upper
+sidewalls or enter long/non-terminating orbits in the attractive floor well that the collisionless
+finite-step trace drops — so the deep floor is supplied *less*, not more. The first-order model's
+narrower `cos^p` angle was flattering the number (43.5), not solving the physics. **Conclusion (the
+plan's "stop rather than tune"):** the deep-AR electron deficit is a **collisionless-2-D FRAMEWORK
+limit** — electron collection into a deep attractive well is not resolvable by a collisionless
+ballistic trace — NOT the barrier/energy approximation the plan hypothesized; the correct physics
+*exposes* the deficit rather than fixing it. The real fix is a collisional or 3-D electron model
+(out of scope). Reverted to the first-order build (the committed mechanism config); the production
+closure table (0.039) is unaffected. The correct-physics finding is the deliverable.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
