@@ -19,14 +19,20 @@ HG_AR = np.array([1.0, 1.2, 1.6, 2.0, 2.6, 3.0, 3.6, 4.0])
 HG_FLUX = np.array([0.59, 0.55, 0.47, 0.40, 0.34, 0.30, 0.26, 0.22])
 SEE_MODEL = os.environ.get("PETCH_SEE_MODEL", "none")
 SEE_GENERATIONS = int(os.environ.get("PETCH_SEE_GENERATIONS", "1"))
+SOURCE_MODEL = os.environ.get("PETCH_SOURCE_MODEL", "analytic")
+POLY_MODE = os.environ.get("PETCH_POLY_MODE", "tied")
+POLY_BIAS_V = float(os.environ.get("PETCH_POLY_BIAS_V", "0.0"))
 
 print("=== GATE 1 (2-D solver): floor ion flux vs AR (HG JAP 82,566 Fig.4) ===", flush=True)
-print(f"    see_model={SEE_MODEL} see_generations={SEE_GENERATIONS}", flush=True)
+print(f"    see_model={SEE_MODEL} see_generations={SEE_GENERATIONS} "
+      f"source_model={SOURCE_MODEL} poly_mode={POLY_MODE} poly_bias_V={POLY_BIAS_V}", flush=True)
 pred, vcs, vfs, isurv, esurv = [], [], [], [], []
 for i, ar in enumerate(HG_AR):
     t0 = time.time()
     r = solve_trench_charging(ar, n_per_iter=8000, n_iter=140, seed=i,
-                              see_model=SEE_MODEL, see_generations=SEE_GENERATIONS)
+                              see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
+                              source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
+                              poly_bias_V=POLY_BIAS_V)
     pred.append(r["floor_flux"]); vcs.append(r["V_floor_center"]); vfs.append(r["V_foot_peak"])
     ti = r["diag"]["trace"]["last_ion"]; te = r["diag"]["trace"]["last_electron"]
     isurv.append(ti["survivor_frac"] if ti else np.nan)
@@ -42,7 +48,9 @@ print(f"  survivor max ion/electron = {np.nanmax(isurv):.4f}/{np.nanmax(esurv):.
 
 print("=== GATE 2 (2-D): Matsui asymptote (300 eV ions: no cutoff at AR 4) ===", flush=True)
 r300 = solve_trench_charging(4.0, V_dc=300.0, V_rf=30.0, n_per_iter=8000, n_iter=140,
-                             see_model=SEE_MODEL, see_generations=SEE_GENERATIONS)
+                             see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
+                             source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
+                             poly_bias_V=POLY_BIAS_V)
 ok2 = r300["floor_flux"] > 0.1
 print(f"  300 eV ions @ AR4: floor flux = {r300['floor_flux']:.3f}   [{'PASS' if ok2 else 'fail'}] (must stay well above 0)", flush=True)
 
@@ -54,5 +62,6 @@ print(f"  0-D: flux AR1={f0[0]:.3f} > AR4={f0[1]:.3f}, Matsui AR4@300eV={m0:.3f}
 np.savez(os.path.join(os.path.dirname(__file__), "..", "charging_gate_result.npz"),
          ar=HG_AR, hg=HG_FLUX, model=pred, vc=vcs, vfoot=vfs, rmse=rmse,
          survivor_ion=np.array(isurv), survivor_electron=np.array(esurv),
-         see_model=SEE_MODEL, see_generations=SEE_GENERATIONS)
+         see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
+         source_model=SOURCE_MODEL, poly_mode=POLY_MODE, poly_bias_V=POLY_BIAS_V)
 print("DONE", flush=True)

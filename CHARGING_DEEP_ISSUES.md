@@ -18,6 +18,10 @@ trajectory integrator and PR-sidewall SEE work. It narrows the remaining Hwang-G
   leaves AR4 foot energy near 22 eV in reduced probes.
 - The foot-hit distribution has an energetic tail but the mean is dominated by low-energy hits:
   full AR4 default p50 11.56 eV, p90 29.12 eV; corrected PR SEE p50 12.79 eV, p90 32.61 eV.
+- The primary HG paper defines the notching energy on the **inner poly-Si sidewall of the edge
+  line**, and explains the driver as the potential difference between the edge line and neighboring
+  line. The previous petch mechanism cell tied both poly sidewalls to one equipotential, so that
+  lateral line-to-line tilt was absent by construction.
 
 ## Deep issue
 
@@ -26,6 +30,23 @@ not the scalar poly potential, and not PR-sidewall SEE alone. HG's method used s
 joint arrival distributions. petch still uses analytic source shortcuts, especially for the joint
 ion/electron energy-angle-phase structure.
 
+The sharper issue after reading HG is geometry/current-balance: the notching gate is an edge-line
+quantity, while petch's mechanism cell is symmetric/periodic. A split-conductor diagnostic with
+left/right poly lines floating independently stayed symmetric at AR4 (left/right potentials differed
+by only ~0.24 V and foot energies were equal), proving that independent conductors alone are not
+enough; the open-area electron supply to the edge line must be represented. An imposed edge/neighbor
+poly bias diagnostic moved the AR4 relevant-side foot energy strongly:
+
+| imposed line-to-line bias | left poly Emean | right poly Emean | avg foot E |
+|---:|---:|---:|---:|
+| 0 V | 19.1 eV | 19.0 eV | 19.1 eV |
+| 5 V | 20.5 eV | 18.8 eV | 19.9 eV |
+| 10 V | 22.5 eV | 19.2 eV | 21.9 eV |
+| 15 V | 24.3 eV | 22.2 eV | 24.1 eV |
+
+This is the first diagnostic that moves deep-AR foot energy by multiple eV without relying on a
+yield knob. It points to an edge-line geometry/source-current implementation as the next real fix.
+
 ## Falsified or deprioritized
 
 - **PR-sidewall SEE alone:** falsified by corrected cascade AR4 probe.
@@ -33,23 +54,27 @@ ion/electron energy-angle-phase structure.
   barely moves while `V_c` and flux move strongly.
 - **Simple high-energy/high-angle ion coupling:** reduced `ion_angle_energy_corr="positive"` made
   AR4 foot energy worse, not better.
-- **Conductor charge sharing:** deprioritized because `V_poly` passes while foot energy fails.
+- **Single conductor charge sharing:** falsified as insufficient. Split left/right conductors in the
+  symmetric periodic cell remain nearly equal; HG needs edge-line/open-area asymmetry.
 
 ## Next diagnostics, in order
 
 1. **Recollection audit for SEE.** Count emitted electrons by source surface and final absorbing
    surface. If PR-sidewall emitted electrons mostly re-hit upper PR or escape, SEE cannot fix the
    deep gate without source changes.
-2. **Material SEE sign test.** Reuse the current SEE machinery as a binary diagnostic on PR-only,
+2. **Edge-line geometry/current balance.** Replace the periodic one-trench/tied-poly mechanism cell
+   with the HG edge-line cell: edge poly line plus neighboring poly line, separate equipotentials,
+   and an open-side electron supply on the outer edge-line sidewall. This is now higher priority
+   than source tuning.
+3. **Material SEE sign test.** Reuse the current SEE machinery as a binary diagnostic on PR-only,
    oxide-floor-only, poly-only, and all-wall surfaces. Do not treat PMMA yields on oxide/poly as a
    calibrated model; this is only a sign/magnitude test.
-3. **Sheath-source implementation.** Build the W3 source interface before another tuning pass:
-   sampled joint `f_e(E, theta, phase)` and `f_i(E, theta, phase)` from a 1-D RF sheath MC, with the
-   current analytic source retained for A/B.
-4. **Ion foot-hit phase audit.** For ions that hit the poly foot, record launch phase, initial
+4. **Sheath-source implementation.** Keep the new `source_model="sheath_mc"` interface for A/B, but
+   do not expect it to close the gate until the edge-line geometry exists.
+5. **Ion foot-hit phase audit.** For ions that hit the poly foot, record launch phase, initial
    energy, initial angle, impact `z`, and impact energy. The question is whether HG's rising foot
    energy requires a population our analytic source under-samples.
-5. **Mesh/geometry control.** Repeat the AR4 foot diagnostics at finer `W`/`D` only after the source
+6. **Mesh/geometry control.** Repeat the AR4 foot diagnostics at finer `W`/`D` only after the source
    audit; geometry is lower priority unless source diagnostics are flat.
 
 ## Primary references

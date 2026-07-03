@@ -37,6 +37,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from .sheath1d import sample_sheath_source
+
 try:
     from numba import njit, prange
 except Exception:  # pragma: no cover - optional acceleration
@@ -195,7 +197,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                           sheath_um=89.0, boundary_um=3.7, insul_vmin_Te=1.0,
                           trace_integrator="adaptive_numba", trace_step_cap_factor=40.0,
                           see_model="none", see_generations=1,
-                          ion_angle_energy_corr="anticorrelated"):
+                          ion_angle_energy_corr="anticorrelated",
+                          source_model="analytic", poly_mode="tied", poly_bias_V=0.0):
     """Steady-state charging of the HG poly-on-oxide trench. Returns dict with:
     floor_flux (normalized ion flux to the oxide floor), V_floor_center, V_foot_peak,
     V_poly (the poly-line equipotential), foot_ion_flux / foot_ion_Emean (ions striking the
@@ -227,17 +230,26 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     Vfloor = np.zeros(W)
     Vleft = np.zeros(n_side); Vright = np.zeros(n_side)
     Vpoly = 0.0                                        # one floating equipotential (periodic array)
+    Vpoly_l = 0.0; Vpoly_r = 0.0                       # split diagnostic: two neighboring poly lines
     Vtop_l = 0.0; Vtop_r = 0.0
 
-    def apply_dirichlet(V, boundary=0.0, vf=None, vl=None, vr=None, vp=None, vtl=None, vtr=None):
+    def apply_dirichlet(V, boundary=0.0, vf=None, vl=None, vr=None, vp=None, vpl=None, vpr=None,
+                        vtl=None, vtr=None):
         V[:, 0] = boundary
         V[floor_ix, nz - 1] = Vfloor if vf is None else vf
         vl_ = (Vleft if vl is None else vl).copy()
         vr_ = (Vright if vr is None else vr).copy()
         vp_ = Vpoly if vp is None else vp
         if poly_cells > 0:
-            vl_[is_poly] = vp_
-            vr_[is_poly] = vp_
+            if poly_mode == "split":
+                vl_[is_poly] = Vpoly_l if vpl is None else vpl
+                vr_[is_poly] = Vpoly_r if vpr is None else vpr
+            elif poly_mode == "edge_bias":
+                vl_[is_poly] = vp_ - 0.5 * poly_bias_V
+                vr_[is_poly] = vp_ + 0.5 * poly_bias_V
+            else:
+                vl_[is_poly] = vp_
+                vr_[is_poly] = vp_
         V[pad - 1, mouth:nz - 1] = vl_
         V[pad + W, mouth:nz - 1] = vr_
         V[:pad, mouth] = Vtop_l if vtl is None else vtl
@@ -265,7 +277,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     VB = np.zeros((nx, nz))
     if rf_bursts:
         z0 = np.zeros(W); zs_ = np.zeros(n_side)
-        VB = laplace(VB, sweeps=300, boundary=1.0, vf=z0, vl=zs_, vr=zs_, vp=0.0, vtl=0.0, vtr=0.0)
+        VB = laplace(VB, sweeps=300, boundary=1.0, vf=z0, vl=zs_, vr=zs_, vp=0.0,
+                     vpl=0.0, vpr=0.0, vtl=0.0, vtr=0.0)
     ExB = -(np.gradient(VB, axis=0)); EzB = -(np.gradient(VB, axis=1))
 
     # electron burst phase CDF: p(phi) ~ exp(-V_s(phi)/Te)
@@ -278,7 +291,16 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
 
     def trace(kind, n, Ex, Ez):
         """Ballistic trace. Ions: field E_A. Electrons: E_A + V_s(phi_e)*E_B (rf_bursts)."""
-        if kind == 'ion':
+        if source_model == "sheath_mc":
+            E0, th, sB = sample_sheath_source(kind, n, rng, Te=Te, V_dc=V_dc, V_rf=V_rf,
+                                              iadf_hwhm_deg=iadf_hwhm_deg,
+                                              cos_power=cos_power,
+                                              boundary_um=boundary_um,
+                                              sheath_um=sheath_um)
+            q = +1.0 if kind == 'ion' else -1.0
+        elif source_model != "analytic":
+            raise ValueError(f"unknown source_model: {source_model}")
+        elif kind == 'ion':
             phi_p = rng.uniform(0.0, 2.0 * np.pi, n)
             E0 = np.maximum(V_dc + V_rf * np.sin(phi_p), 0.5)
             # HG energy-angle anticorrelation: transverse T_i is fixed by the presheath while the
@@ -330,6 +352,7 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         hit_top_l = 0.0; hit_top_r = 0.0
         foot_n = 0.0; foot_E = 0.0                     # ion impacts on the POLY sidewall band
         foot_z_mean = np.nan; foot_E_p50 = np.nan; foot_E_p90 = np.nan
+        foot_n_left = 0.0; foot_E_left = 0.0; foot_n_right = 0.0; foot_E_right = 0.0
         max_steps = int(float(trace_step_cap_factor) * nz)
         if trace_integrator == "fixed":
             max_steps = int(14 * nz)
@@ -354,6 +377,12 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                 foot_hit = ((ht == 2) | (ht == 3)) & (hi >= n_side - poly_cells)
                 foot_n = float(foot_hit.sum())
                 foot_E = float(impact_E[foot_hit].sum())
+                foot_left = foot_hit & (ht == 2)
+                foot_right = foot_hit & (ht == 3)
+                foot_n_left = float(foot_left.sum())
+                foot_E_left = float(impact_E[foot_left].sum())
+                foot_n_right = float(foot_right.sum())
+                foot_E_right = float(impact_E[foot_right].sum())
                 if foot_n > 0:
                     foot_z_mean = float(hi[foot_hit].mean())
                     foot_E_p50 = float(np.percentile(impact_E[foot_hit], 50))
@@ -459,6 +488,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                                     integrator=trace_integrator,
                                     foot_z_mean=foot_z_mean, foot_E_p50=foot_E_p50,
                                     foot_E_p90=foot_E_p90,
+                                    foot_n_left=foot_n_left, foot_E_left=foot_E_left,
+                                    foot_n_right=foot_n_right, foot_E_right=foot_E_right,
                                     see_wall=int(see_wall),
                                     see_emitted=int(see_emit), see_backscatter=int(see_back),
                                     see_secondary=int(see_sec), see_absorbed=int(see_absorb)))
@@ -540,6 +571,7 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
 
     hist = []
     vfloor_hist, vleft_hist, vright_hist, vpoly_hist = [], [], [], []
+    vpoly_l_hist, vpoly_r_hist = [], []
     for it in range(n_iter):
         V = laplace(V)
         Ex = -(np.gradient(V, axis=0)); Ez = -(np.gradient(V, axis=1))
@@ -551,10 +583,26 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         ins = ~is_poly                                 # insulating (PR) wall segments only
         Vleft[ins] += scale * (li - le)[ins]
         Vright[ins] += scale * (ri - re)[ins]
-        if poly_cells > 0:                             # conductor: ONE equipotential from TOTAL net
-            net_poly = (li - le)[is_poly].sum() + (ri - re)[is_poly].sum()
-            Vpoly += scale * net_poly / max(2 * poly_cells, 1)
-            Vpoly = float(np.clip(Vpoly, -3 * Te, V_dc + V_rf))
+        if poly_cells > 0:
+            if poly_mode == "tied":                    # conductor: ONE equipotential from TOTAL net
+                net_poly = (li - le)[is_poly].sum() + (ri - re)[is_poly].sum()
+                Vpoly += scale * net_poly / max(2 * poly_cells, 1)
+                Vpoly = float(np.clip(Vpoly, -3 * Te, V_dc + V_rf))
+                Vpoly_l = Vpoly; Vpoly_r = Vpoly
+            elif poly_mode == "edge_bias":
+                net_poly = (li - le)[is_poly].sum() + (ri - re)[is_poly].sum()
+                Vpoly += scale * net_poly / max(2 * poly_cells, 1)
+                Vpoly = float(np.clip(Vpoly, -3 * Te, V_dc + V_rf))
+                Vpoly_l = float(np.clip(Vpoly - 0.5 * poly_bias_V, -3 * Te, V_dc + V_rf))
+                Vpoly_r = float(np.clip(Vpoly + 0.5 * poly_bias_V, -3 * Te, V_dc + V_rf))
+            elif poly_mode == "split":                 # diagnostic: left/right lines float separately
+                Vpoly_l += scale * (li - le)[is_poly].sum() / max(poly_cells, 1)
+                Vpoly_r += scale * (ri - re)[is_poly].sum() / max(poly_cells, 1)
+                Vpoly_l = float(np.clip(Vpoly_l, -3 * Te, V_dc + V_rf))
+                Vpoly_r = float(np.clip(Vpoly_r, -3 * Te, V_dc + V_rf))
+                Vpoly = 0.5 * (Vpoly_l + Vpoly_r)
+            else:
+                raise ValueError(f"unknown poly_mode: {poly_mode}")
         Vtop_l += scale * (tli - tle) / max(pad, 1)
         Vtop_r += scale * (tri - tre) / max(pad, 1)
         vmin = -insul_vmin_Te * Te                     # interior insulator floating bound (HG: -0.5..-4 V)
@@ -567,6 +615,7 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         vfloor_hist.append(Vfloor.copy())
         vleft_hist.append(Vleft.copy()); vright_hist.append(Vright.copy())
         vpoly_hist.append(Vpoly)
+        vpoly_l_hist.append(Vpoly_l); vpoly_r_hist.append(Vpoly_r)
         if verbose and it % 20 == 0:
             tsi = next((s for s in reversed(trace_stats) if s["kind"] == "ion"), None)
             tse = next((s for s in reversed(trace_stats) if s["kind"] == "electron"), None)
@@ -581,13 +630,16 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     Vl_avg = np.mean(np.array(vleft_hist[-k:]), axis=0)
     Vr_avg = np.mean(np.array(vright_hist[-k:]), axis=0)
     Vp_avg = float(np.mean(vpoly_hist[-k:]))
+    Vpl_avg = float(np.mean(vpoly_l_hist[-k:]))
+    Vpr_avg = float(np.mean(vpoly_r_hist[-k:]))
     Vf_map, Vl_map, Vr_map = Vf_avg, Vl_avg, Vr_avg
     if smooth:
         from scipy.ndimage import uniform_filter1d
         Vf_map = uniform_filter1d(Vf_avg, 5, mode="nearest")
         Vl_map = uniform_filter1d(Vl_avg, 9, mode="nearest")
         Vr_map = uniform_filter1d(Vr_avg, 9, mode="nearest")
-    Vfloor[:] = Vf_map; Vleft[:] = Vl_map; Vright[:] = Vr_map; Vpoly = Vp_avg
+    Vfloor[:] = Vf_map; Vleft[:] = Vl_map; Vright[:] = Vr_map
+    Vpoly = Vp_avg; Vpoly_l = Vpl_avg; Vpoly_r = Vpr_avg
     V = laplace(V, sweeps=240)
     Ex = -(np.gradient(V, axis=0)); Ez = -(np.gradient(V, axis=1))
     ifl, ill, irr, itl, itr, fn2, fE2 = trace('ion', 4 * n_per_iter, Ex, Ez)
@@ -607,12 +659,15 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         trace=dict(last_ion=next((s for s in reversed(trace_stats) if s["kind"] == "ion"), None),
                    last_electron=next((s for s in reversed(trace_stats) if s["kind"] == "electron"), None),
                    cap_factor=float(trace_step_cap_factor),
-                   integrator=trace_integrator),
+                   integrator=trace_integrator,
+                   source_model=source_model,
+                   poly_mode=poly_mode),
         see=dict(model=see_model, generations=int(see_generations),
                  last=see_stats[-1] if see_stats else None))
     _prwall = ~is_poly
     return dict(floor_flux=float(tail / open_frac), V_floor_center=float(Vf_avg[W // 2]),
                 V_foot_peak=float(Vf_avg.max()), V_poly=Vp_avg, Vfloor=Vf_avg, V=V,
+                V_poly_left=Vpl_avg, V_poly_right=Vpr_avg,
                 foot_ion_flux=float(fn2 / (4 * n_per_iter) / open_frac),
                 foot_ion_Emean=float(fE2 / max(fn2, 1.0)), diag=diag,
                 geom=dict(pad=int(pad), W=int(W), mouth=int(mouth), D=int(D), nx=int(nx), nz=int(nz),

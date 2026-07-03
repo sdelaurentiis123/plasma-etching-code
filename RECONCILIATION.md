@@ -454,6 +454,20 @@ deep-AR fix. The foot-hit diagnostics show energetic ions exist in the tail (p90
 mean is dominated by low-energy foot hits; the next problem is source/trajectory selection, not
 silent orbits or scalar conductor potential.
 
+**W3/source probe exposed the real geometry miss (2026-07-03).** Added an opt-in reduced
+`source_model="sheath_mc"` interface (`src/petch/sheath1d.py`) for joint RF-sheath-ish arrival
+sampling; AR4 probes moved floor flux and `V_c` but only shifted foot energy by ~0.5 eV, so source
+shape alone is not the missing 11 eV. Re-reading HG JAP 82,566 resolved the contradiction: Fig. 4's
+energy is the **average incident energy at the inner poly-Si sidewall of the edge line**, and Fig. 6
+attributes the acceleration to the **difference between the edge-line and neighboring-line poly-Si
+equipotentials**. petch's mechanism cell had tied both poly sidewalls to one periodic equipotential,
+which cannot create this lateral tilt. A split-conductor diagnostic left the two sides nearly equal
+(AR4 delta ~0.24 V), confirming that periodic symmetry lacks HG's open-side edge-line current. An
+imposed line-to-line bias diagnostic finally moved the relevant side strongly: at AR4, 0/5/10/15 V
+poly bias gave sidewall-foot means ~19.1/20.5/22.5/24.3 eV. Conclusion: the next real fix is an
+HG edge-line/two-poly geometry and current balance (edge line supplied from the open outer side),
+not more PR SEE or analytic source tuning. Details are in `CHARGING_DEEP_ISSUES.md`.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
