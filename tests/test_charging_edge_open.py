@@ -24,9 +24,11 @@ def test_edge_open_line_of_sight_reports_current_budget():
 def test_edge_array_geometry_labels_conductors_and_trench():
     g = _build_edge_array_geometry(2.0, W=12, mouth=40, open_width_um=1.0)
     assert g["edge0"] < g["edge1"] <= g["trench0"] < g["trench1"] <= g["neigh0"] < g["neigh1"]
+    assert g["neigh1"] <= g["right_trench0"] < g["right_trench1"] <= g["next0"]
     assert int((g["cond"] == 1).sum()) > 0
     assert int((g["cond"] == 2).sum()) > 0
     assert int(g["floor_trench_mask"].sum()) == 12
+    assert not g["solid"][g["right_trench0"]:g["right_trench1"], 40:-1].any()
 
 
 def test_edge_array_tiny_solve_reports_edge_observables():

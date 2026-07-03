@@ -531,14 +531,14 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
 
     def trace(kind, n, Ex, Ez):
         """Ballistic trace. Ions: field E_A. Electrons: E_A + V_s(phi_e)*E_B (rf_bursts)."""
-        if source_model == "sheath_mc":
+        if source_model == "sheath_mc" or (source_model == "sheath_electrons" and kind == "electron"):
             E0, th, sB = sample_sheath_source(kind, n, rng, Te=Te, V_dc=V_dc, V_rf=V_rf,
                                               iadf_hwhm_deg=iadf_hwhm_deg,
                                               cos_power=cos_power,
                                               boundary_um=boundary_um,
                                               sheath_um=sheath_um)
             q = +1.0 if kind == 'ion' else -1.0
-        elif source_model != "analytic":
+        elif source_model not in ("analytic", "sheath_electrons"):
             raise ValueError(f"unknown source_model: {source_model}")
         elif kind == 'ion':
             phi_p = rng.uniform(0.0, 2.0 * np.pi, n)
@@ -994,12 +994,16 @@ def _build_edge_array_geometry(AR, W=32, mouth=237, poly_um=0.3, feature_w_um=0.
     trench1 = trench0 + W
     neigh0 = trench1
     neigh1 = neigh0 + W
-    nx = neigh1 + buffer_w
+    right_trench0 = neigh1
+    right_trench1 = right_trench0 + W
+    next0 = right_trench1
+    nx = next0 + W + buffer_w
     z_poly0 = nz - 1 - poly_cells
 
     solid = np.zeros((nx, nz), dtype=np.bool_)
     solid[edge0:edge1, mouth:nz - 1] = True
-    solid[neigh0:nx, mouth:nz - 1] = True
+    solid[neigh0:neigh1, mouth:nz - 1] = True
+    solid[next0:nx, mouth:nz - 1] = True
     solid[:, nz - 1] = True
 
     cond = np.zeros((nx, nz), dtype=np.int8)
@@ -1013,13 +1017,15 @@ def _build_edge_array_geometry(AR, W=32, mouth=237, poly_um=0.3, feature_w_um=0.
     floor_trench_mask[trench0:trench1, nz - 1] = True
     pr_mask = solid & (cond == 0) & ~floor_mask
     edge_exposed_area = max(2 * poly_cells, 1)
-    neighbor_exposed_area = max(poly_cells, 1)
+    neighbor_exposed_area = max(2 * poly_cells, 1)
     return dict(solid=solid, cond=cond, floor_mask=floor_mask,
                 floor_trench_mask=floor_trench_mask, pr_mask=pr_mask,
                 nx=int(nx), nz=int(nz), D=int(D), W=int(W), mouth=int(mouth),
                 open_w=int(open_w), buffer_w=int(buffer_w),
                 edge0=int(edge0), edge1=int(edge1), trench0=int(trench0), trench1=int(trench1),
-                neigh0=int(neigh0), neigh1=int(neigh1), z_poly0=int(z_poly0),
+                neigh0=int(neigh0), neigh1=int(neigh1),
+                right_trench0=int(right_trench0), right_trench1=int(right_trench1),
+                next0=int(next0), z_poly0=int(z_poly0),
                 pr_cells=int(pr_cells), poly_cells=int(poly_cells),
                 edge_exposed_area=int(edge_exposed_area),
                 neighbor_exposed_area=int(neighbor_exposed_area))
@@ -1135,14 +1141,14 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     _pcdf = np.cumsum(_pw); _pcdf /= _pcdf[-1]
 
     def sample_source(kind, n):
-        if source_model == "sheath_mc":
+        if source_model == "sheath_mc" or (source_model == "sheath_electrons" and kind == "electron"):
             E0, th, sB = sample_sheath_source(kind, n, rng, Te=Te, V_dc=V_dc, V_rf=V_rf,
                                               iadf_hwhm_deg=iadf_hwhm_deg,
                                               cos_power=cos_power,
                                               boundary_um=boundary_um,
                                               sheath_um=sheath_um)
             q = +1.0 if kind == "ion" else -1.0
-        elif source_model != "analytic":
+        elif source_model not in ("analytic", "sheath_electrons"):
             raise ValueError(f"unknown source_model: {source_model}")
         elif kind == "ion":
             phi_p = rng.uniform(0.0, 2.0 * np.pi, n)
@@ -1176,7 +1182,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         vx = np.sqrt(E0) * np.sin(th)
         vz = np.sqrt(E0) * np.abs(np.cos(th))
         x = rng.uniform(0.0, float(nx - 1), n)
-        z = np.ones(n)
+        z = np.ones(n) * max(1.0, float(mouth) - 0.5)
         return x, z, vx, vz, sB, q
 
     trace_stats = []
@@ -1222,13 +1228,15 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         anneal = max(1.0 / (1.0 + it / 25.0), 0.25)
         scale = anneal * relax / n_per_iter * nx
         Vsolid[pr_mask | floor_mask] += scale * net[pr_mask | floor_mask]
-        edge_extra_e = edge_boundary_net(Vedge) * n_per_iter * open_frac
+        explicit_outer_net_e = float((hte == 3).sum() - (hti == 3).sum())
+        target_outer_net_e = edge_boundary_net(Vedge) * n_per_iter * open_frac
+        edge_extra_e = max(target_outer_net_e - explicit_outer_net_e, 0.0)
         Vedge += scale * (net[cond == 1].sum() - edge_extra_e) / max(geom["edge_exposed_area"], 1)
         Vneighbor += scale * net[cond == 2].sum() / max(geom["neighbor_exposed_area"], 1)
         Vedge = float(np.clip(Vedge, -3.0 * Te, V_dc + V_rf))
         Vneighbor = float(np.clip(Vneighbor, -3.0 * Te, V_dc + V_rf))
-        np.clip(Vsolid[floor_mask], 0.0, V_dc + V_rf, out=Vsolid[floor_mask])
-        np.clip(Vsolid[pr_mask], -insul_vmin_Te * Te, V_dc + V_rf, out=Vsolid[pr_mask])
+        Vsolid[floor_mask] = np.clip(Vsolid[floor_mask], 0.0, V_dc + V_rf)
+        Vsolid[pr_mask] = np.clip(Vsolid[pr_mask], -insul_vmin_Te * Te, V_dc + V_rf)
         hist.append(float((hti == 1).sum() / n_per_iter))
         vsolid_hist.append(Vsolid.copy())
         vedge_hist.append(Vedge); vneighbor_hist.append(Vneighbor)
@@ -1270,7 +1278,9 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     neighbor_n = float(neighbor_i.sum())
     neighbor_E = float(Ei[neighbor_i].sum())
     net = ci - ce
-    edge_extra_final = edge_boundary_net(Vedge_avg) * ntot * open_frac
+    explicit_outer_net_e = float(edge_outer_e.sum() - edge_outer_i.sum())
+    target_outer_net_e = edge_boundary_net(Vedge_avg) * ntot * open_frac
+    edge_extra_final = max(target_outer_net_e - explicit_outer_net_e, 0.0)
     residual = dict(
         floor=float(net[floor_trench_mask].sum() / trench_norm),
         pr=float(net[pr_mask].sum() / trench_norm),
@@ -1279,8 +1289,14 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         top=0.0,
     )
     edge_net = float(edge_boundary_net(Vedge_avg))
+    explicit_e_gross = float(edge_outer_e.sum() / trench_norm)
+    explicit_i_gross = float(edge_outer_i.sum() / trench_norm)
+    accepted_e_gross = edge_net + float(edge_aux["ion_gross"])
+    boundary_e_gross = max(accepted_e_gross - explicit_e_gross, 0.0)
+    boundary_i_gross = max(float(edge_aux["ion_gross"]) - explicit_i_gross, 0.0)
+    boundary_net = max(edge_net - (explicit_e_gross - explicit_i_gross), 0.0)
     edge_aux["net_electron"] = edge_net
-    edge_aux["electron_accepted"] = edge_net + float(edge_aux["ion_gross"])
+    edge_aux["electron_accepted"] = accepted_e_gross
     edge_aux["edge_potential_for_net"] = float(Vedge_avg)
     diag = dict(
         ion=dict(floor=float((hti == 1).sum() / trench_norm),
@@ -1300,14 +1316,13 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                    edge_open_model=edge_open_model,
                    edge_outer_electron_gross_flux=edge_outer_gross_flux),
         edge_open=dict(model="explicit_geometry",
-                       electron_gross=float(edge_outer_e.sum() / trench_norm + edge_aux["electron_accepted"]),
-                       ion_gross=float(edge_outer_i.sum() / trench_norm + edge_aux["ion_gross"]),
-                       net_electron=float((edge_outer_e.sum() - edge_outer_i.sum()) / trench_norm
-                                          + edge_aux["net_electron"]),
-                       explicit_electron_gross=float(edge_outer_e.sum() / trench_norm),
-                       explicit_ion_gross=float(edge_outer_i.sum() / trench_norm),
-                       boundary_electron_gross=float(edge_aux["electron_gross"]),
-                       boundary_net_electron=float(edge_aux["net_electron"]),
+                       electron_gross=float(explicit_e_gross + boundary_e_gross),
+                       ion_gross=float(explicit_i_gross + boundary_i_gross),
+                       net_electron=float(explicit_e_gross - explicit_i_gross + boundary_net),
+                       explicit_electron_gross=explicit_e_gross,
+                       explicit_ion_gross=explicit_i_gross,
+                       boundary_electron_gross=float(boundary_e_gross),
+                       boundary_net_electron=float(boundary_net),
                        hg_electron_gross=edge_outer_gross_flux,
                        open_width_cells=float(geom["open_w"]),
                        n=int(ntot)),
@@ -1341,7 +1356,10 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                   poly_cells=int(geom["poly_cells"]), open_w=int(geom["open_w"]),
                   edge0=int(geom["edge0"]), edge1=int(geom["edge1"]),
                   trench0=int(geom["trench0"]), trench1=int(geom["trench1"]),
-                  neigh0=int(geom["neigh0"]), neigh1=int(geom["neigh1"])),
+                  neigh0=int(geom["neigh0"]), neigh1=int(geom["neigh1"]),
+                  right_trench0=int(geom["right_trench0"]),
+                  right_trench1=int(geom["right_trench1"]),
+                  next0=int(geom["next0"])),
         Vprwall_mean=float(pr_vals.mean()) if pr_vals.size else 0.0,
         Vprwall_min=float(pr_vals.min()) if pr_vals.size else 0.0)
 

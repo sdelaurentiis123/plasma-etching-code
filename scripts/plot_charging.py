@@ -71,13 +71,17 @@ cy = "#4dd0e1"
 if charging_geometry == "edge_array":
     edge0, edge1 = gm["edge0"], gm["edge1"]
     trench0, trench1 = gm["trench0"], gm["trench1"]
-    neigh0 = gm["neigh0"]
+    neigh0, neigh1 = gm["neigh0"], gm["neigh1"]
+    next0 = gm.get("next0", neigh1)
     wall[edge0:edge1, mouth_:] = True
-    wall[neigh0:, mouth_:] = True
+    wall[neigh0:neigh1, mouth_:] = True
+    wall[next0:, mouth_:] = True
     outline = [
-        ([edge0, edge1], [mouth_, mouth_]), ([neigh0, nx_], [mouth_, mouth_]),
+        ([edge0, edge1], [mouth_, mouth_]), ([neigh0, neigh1], [mouth_, mouth_]),
+        ([next0, nx_], [mouth_, mouth_]),
         ([edge0, edge0], [mouth_, nz_ - 1]), ([edge1, edge1], [mouth_, nz_ - 1]),
-        ([neigh0, neigh0], [mouth_, nz_ - 1]), ([trench0, trench1], [nz_ - 1, nz_ - 1]),
+        ([neigh0, neigh0], [mouth_, nz_ - 1]), ([neigh1, neigh1], [mouth_, nz_ - 1]),
+        ([trench0, trench1], [nz_ - 1, nz_ - 1]),
     ]
 else:
     pad_ = gm["pad"]
