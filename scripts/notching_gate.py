@@ -18,7 +18,7 @@ Writes notching_gate_result.npz for viz/notching.png.
 import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import numpy as np
-from petch.charging2d import solve_trench_charging
+from petch.charging2d import solve_edge_array_charging, solve_trench_charging
 
 HG_AR = np.array([1.0, 1.2, 1.6, 2.0, 2.6, 3.0, 3.6, 4.0])
 HG_FOOT_E = np.array([15.0, 16.5, 17.5, 20.0, 23.0, 25.0, 26.5, 27.5])   # eV, poly-sidewall ions
@@ -26,25 +26,45 @@ HG_VPOLY = np.array([6.0, 9.0, 15.0, 20.0, 27.0, 31.0, 36.0, 39.0])       # V (6
 SEE_MODEL = os.environ.get("PETCH_SEE_MODEL", "none")
 SEE_GENERATIONS = int(os.environ.get("PETCH_SEE_GENERATIONS", "1"))
 SOURCE_MODEL = os.environ.get("PETCH_SOURCE_MODEL", "analytic")
+CHARGING_GEOMETRY = os.environ.get("PETCH_CHARGING_GEOMETRY", "trench")
 POLY_MODE = os.environ.get("PETCH_POLY_MODE", "tied")
 POLY_BIAS_V = float(os.environ.get("PETCH_POLY_BIAS_V", "0.0"))
 EDGE_OPEN_MODEL = os.environ.get("PETCH_EDGE_OPEN_MODEL", "none")
 EDGE_OPEN_ELECTRON_FLUX = os.environ.get("PETCH_EDGE_OPEN_ELECTRON_FLUX")
 EDGE_OPEN_ELECTRON_FLUX = None if EDGE_OPEN_ELECTRON_FLUX is None else float(EDGE_OPEN_ELECTRON_FLUX)
+CHARGING_W = int(os.environ.get("PETCH_CHARGING_W", "32"))
+CHARGING_MOUTH = int(os.environ.get("PETCH_CHARGING_MOUTH", "237"))
+N_PER_ITER = int(os.environ.get("PETCH_N_PER_ITER", "8000"))
+N_ITER = int(os.environ.get("PETCH_N_ITER", "110"))
 
 Em, En, Fl, Vp, Ve, Vc, Fx, isurv, esurv, resmax = [], [], [], [], [], [], [], [], [], []
 edge_e_gross, edge_i_gross, edge_net, edge_hg_gross = [], [], [], []
 print(f"see_model={SEE_MODEL} see_generations={SEE_GENERATIONS} "
-      f"source_model={SOURCE_MODEL} poly_mode={POLY_MODE} poly_bias_V={POLY_BIAS_V} "
-      f"edge_open_model={EDGE_OPEN_MODEL} edge_open_electron_flux={EDGE_OPEN_ELECTRON_FLUX}", flush=True)
+      f"source_model={SOURCE_MODEL} geometry={CHARGING_GEOMETRY} "
+      f"poly_mode={POLY_MODE} poly_bias_V={POLY_BIAS_V} "
+      f"edge_open_model={EDGE_OPEN_MODEL} edge_open_electron_flux={EDGE_OPEN_ELECTRON_FLUX} "
+      f"W={CHARGING_W} mouth={CHARGING_MOUTH} n={N_PER_ITER} it={N_ITER}", flush=True)
+
+
+def run_solver(ar, **kw):
+    if CHARGING_GEOMETRY == "edge_array":
+        return solve_edge_array_charging(ar, see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
+                                         source_model=SOURCE_MODEL,
+                                         edge_open_model=EDGE_OPEN_MODEL,
+                                         edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX,
+                                         **kw)
+    if CHARGING_GEOMETRY != "trench":
+        raise ValueError(f"unknown PETCH_CHARGING_GEOMETRY={CHARGING_GEOMETRY}")
+    return solve_trench_charging(ar, see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
+                                 source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
+                                 poly_bias_V=POLY_BIAS_V,
+                                 edge_open_model=EDGE_OPEN_MODEL,
+                                 edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX, **kw)
+
 for i, ar in enumerate(HG_AR):
-    r = solve_trench_charging(ar, n_per_iter=8000, n_iter=110, seed=3 + i,
-                              see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
-                              source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
-                              poly_bias_V=POLY_BIAS_V,
-                              edge_open_model=EDGE_OPEN_MODEL,
-                              edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX)
-    if POLY_MODE == "edge_open":
+    r = run_solver(ar, W=CHARGING_W, mouth=CHARGING_MOUTH, n_per_iter=N_PER_ITER,
+                   n_iter=N_ITER, seed=3 + i)
+    if POLY_MODE == "edge_open" or CHARGING_GEOMETRY == "edge_array":
         Em.append(r["foot_ion_Emean_edge"])
         En.append(r.get("foot_ion_Enormal_mean_edge", np.nan))
         Fl.append(r["foot_ion_flux_edge"])
@@ -99,7 +119,10 @@ np.savez(os.path.join(os.path.dirname(__file__), "..", "notching_gate_result.npz
          edge_net_electron=np.array(edge_net), edge_hg_electron_gross=np.array(edge_hg_gross),
          survivor_ion=np.array(isurv), survivor_electron=np.array(esurv),
          see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
-         source_model=SOURCE_MODEL, poly_mode=POLY_MODE, poly_bias_V=POLY_BIAS_V,
+         source_model=SOURCE_MODEL, charging_geometry=CHARGING_GEOMETRY,
+         poly_mode=POLY_MODE, poly_bias_V=POLY_BIAS_V,
+         charging_W=CHARGING_W, charging_mouth=CHARGING_MOUTH,
+         n_per_iter=N_PER_ITER, n_iter=N_ITER,
          edge_open_model=EDGE_OPEN_MODEL,
          edge_open_electron_flux=-1.0 if EDGE_OPEN_ELECTRON_FLUX is None else EDGE_OPEN_ELECTRON_FLUX)
 print("DONE")

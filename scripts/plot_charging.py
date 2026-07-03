@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import numpy as np
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from petch.charging2d import solve_trench_charging
+from petch.charging2d import solve_edge_array_charging, solve_trench_charging
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 g = np.load(os.path.join(HERE, "charging_gate_result.npz"))
@@ -24,13 +24,27 @@ solve_kwargs = dict(
     poly_mode=str(scalar("poly_mode", "tied")),
     poly_bias_V=float(scalar("poly_bias_V", 0.0)),
 )
+charging_geometry = str(scalar("charging_geometry", "trench"))
+charging_W = int(scalar("charging_W", 32))
+charging_mouth = int(scalar("charging_mouth", 237))
 if "edge_open_model" in g:
     solve_kwargs["edge_open_model"] = str(scalar("edge_open_model", "none"))
 if "edge_open_electron_flux" in g and float(g["edge_open_electron_flux"]) >= 0.0:
     solve_kwargs["edge_open_electron_flux"] = float(g["edge_open_electron_flux"])
 
 print("solving AR=4 for the potential map (smooth=True, cosmetic only)...", flush=True)
-r4 = solve_trench_charging(4.0, n_per_iter=8000, n_iter=140, seed=7, smooth=True, **solve_kwargs)
+if charging_geometry == "edge_array":
+    edge_kwargs = dict(see_model=solve_kwargs["see_model"],
+                       see_generations=solve_kwargs["see_generations"],
+                       source_model=solve_kwargs["source_model"],
+                       edge_open_model=solve_kwargs.get("edge_open_model", "none"))
+    if "edge_open_electron_flux" in solve_kwargs:
+        edge_kwargs["edge_open_electron_flux"] = solve_kwargs["edge_open_electron_flux"]
+    r4 = solve_edge_array_charging(4.0, W=charging_W, mouth=charging_mouth,
+                                   n_per_iter=5000, n_iter=120, seed=7, smooth=True, **edge_kwargs)
+else:
+    r4 = solve_trench_charging(4.0, W=charging_W, mouth=charging_mouth,
+                               n_per_iter=8000, n_iter=140, seed=7, smooth=True, **solve_kwargs)
 V = r4["V"]
 
 fig, (axA, axB) = plt.subplots(1, 2, figsize=(13.2, 5.4), gridspec_kw=dict(width_ratios=[1.15, 1]))
@@ -49,24 +63,39 @@ axA.annotate("with 300 eV ions the floor stays open\n(0.56 @ AR 4 — the Matsui
              xy=(4.0, 0.22), xytext=(1.6, 0.10), fontsize=9, color="0.3",
              arrowprops=dict(arrowstyle="->", color="0.5"))
 
-# exact solver geometry (aligns the outline to the field; the old hardcoded pad/mouth were wrong)
-gm = r4["geom"]; pad_, W_, mouth_, nz_, nx_ = gm["pad"], gm["W"], gm["mouth"], gm["nz"], gm["nx"]
-z0 = max(0, mouth_ - 30)                                # crop the long empty mouth/vacuum above the feature
-wall = np.zeros_like(V, bool)                           # mask the solid mask/sidewalls so color fills the
-wall[:pad_, mouth_:] = True                             # trench ONLY (the boundary-condition potential in
-wall[pad_ + W_:, mouth_:] = True                        # the solid cells otherwise bleeds past the walls)
+# exact solver geometry (aligns the outline to the field)
+gm = r4["geom"]; W_, mouth_, nz_, nx_ = gm["W"], gm["mouth"], gm["nz"], gm["nx"]
+z0 = max(0, mouth_ - 30)
+wall = np.zeros_like(V, bool)
+cy = "#4dd0e1"
+if charging_geometry == "edge_array":
+    edge0, edge1 = gm["edge0"], gm["edge1"]
+    trench0, trench1 = gm["trench0"], gm["trench1"]
+    neigh0 = gm["neigh0"]
+    wall[edge0:edge1, mouth_:] = True
+    wall[neigh0:, mouth_:] = True
+    outline = [
+        ([edge0, edge1], [mouth_, mouth_]), ([neigh0, nx_], [mouth_, mouth_]),
+        ([edge0, edge0], [mouth_, nz_ - 1]), ([edge1, edge1], [mouth_, nz_ - 1]),
+        ([neigh0, neigh0], [mouth_, nz_ - 1]), ([trench0, trench1], [nz_ - 1, nz_ - 1]),
+    ]
+else:
+    pad_ = gm["pad"]
+    wall[:pad_, mouth_:] = True
+    wall[pad_ + W_:, mouth_:] = True
+    outline = [
+        ([0, pad_], [mouth_, mouth_]), ([pad_ + W_, nx_], [mouth_, mouth_]),
+        ([pad_, pad_], [mouth_, nz_ - 1]), ([pad_ + W_, pad_ + W_], [mouth_, nz_ - 1]),
+        ([pad_, pad_ + W_], [nz_ - 1, nz_ - 1]),
+    ]
 Vshow = np.where(wall, np.nan, V)
-Vc = Vshow[:, z0:]                                     # show the feature (mouth->floor), not 237 empty cells
-cmap = plt.cm.inferno.copy(); cmap.set_bad("#08040f")  # masked walls render as the dark ground
+Vc = Vshow[:, z0:]
+cmap = plt.cm.inferno.copy(); cmap.set_bad("#08040f")
 im = axB.imshow(Vc.T, origin="upper", cmap=cmap, aspect="auto", extent=[0, nx_, nz_, z0])
 axB.contour(Vc.T, levels=10, colors="w", linewidths=0.4, alpha=0.5,
             extent=[0, nx_, nz_, z0], origin="upper")
-cy = "#4dd0e1"                                         # geometry outline: mask tops, trench walls, floor
-axB.plot([0, pad_], [mouth_, mouth_], color=cy, lw=2)
-axB.plot([pad_ + W_, nx_], [mouth_, mouth_], color=cy, lw=2)
-axB.plot([pad_, pad_], [mouth_, nz_ - 1], color=cy, lw=2)
-axB.plot([pad_ + W_, pad_ + W_], [mouth_, nz_ - 1], color=cy, lw=2)
-axB.plot([pad_, pad_ + W_], [nz_ - 1, nz_ - 1], color=cy, lw=2.5)
+for xs, ys in outline:
+    axB.plot(xs, ys, color=cy, lw=2)
 axB.set_xlim(0, nx_); axB.set_ylim(nz_, z0)
 axB.set_title(f"Steady-state potential at AR 4  (floor {r4['V_floor_center']:.0f} V)", fontsize=11)
 axB.set_xlabel("x (cells)"); axB.set_ylabel("z (cells, plasma at top)")

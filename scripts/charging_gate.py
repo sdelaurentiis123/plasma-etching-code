@@ -12,7 +12,7 @@ GATE 3 (secondary, 0-D closure sanity): shape monotone + Matsui pass (charging.f
 import os, sys, time
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import numpy as np
-from petch.charging2d import solve_trench_charging
+from petch.charging2d import solve_edge_array_charging, solve_trench_charging
 from petch.charging import floor_balance
 
 HG_AR = np.array([1.0, 1.2, 1.6, 2.0, 2.6, 3.0, 3.6, 4.0])
@@ -20,27 +20,47 @@ HG_FLUX = np.array([0.59, 0.55, 0.47, 0.40, 0.34, 0.30, 0.26, 0.22])
 SEE_MODEL = os.environ.get("PETCH_SEE_MODEL", "none")
 SEE_GENERATIONS = int(os.environ.get("PETCH_SEE_GENERATIONS", "1"))
 SOURCE_MODEL = os.environ.get("PETCH_SOURCE_MODEL", "analytic")
+CHARGING_GEOMETRY = os.environ.get("PETCH_CHARGING_GEOMETRY", "trench")
 POLY_MODE = os.environ.get("PETCH_POLY_MODE", "tied")
 POLY_BIAS_V = float(os.environ.get("PETCH_POLY_BIAS_V", "0.0"))
 EDGE_OPEN_MODEL = os.environ.get("PETCH_EDGE_OPEN_MODEL", "none")
 EDGE_OPEN_ELECTRON_FLUX = os.environ.get("PETCH_EDGE_OPEN_ELECTRON_FLUX")
 EDGE_OPEN_ELECTRON_FLUX = None if EDGE_OPEN_ELECTRON_FLUX is None else float(EDGE_OPEN_ELECTRON_FLUX)
+CHARGING_W = int(os.environ.get("PETCH_CHARGING_W", "32"))
+CHARGING_MOUTH = int(os.environ.get("PETCH_CHARGING_MOUTH", "237"))
+N_PER_ITER = int(os.environ.get("PETCH_N_PER_ITER", "8000"))
+N_ITER = int(os.environ.get("PETCH_N_ITER", "140"))
 
 print("=== GATE 1 (2-D solver): floor ion flux vs AR (HG JAP 82,566 Fig.4) ===", flush=True)
 print(f"    see_model={SEE_MODEL} see_generations={SEE_GENERATIONS} "
-      f"source_model={SOURCE_MODEL} poly_mode={POLY_MODE} poly_bias_V={POLY_BIAS_V} "
-      f"edge_open_model={EDGE_OPEN_MODEL} edge_open_electron_flux={EDGE_OPEN_ELECTRON_FLUX}", flush=True)
+      f"source_model={SOURCE_MODEL} geometry={CHARGING_GEOMETRY} "
+      f"poly_mode={POLY_MODE} poly_bias_V={POLY_BIAS_V} "
+      f"edge_open_model={EDGE_OPEN_MODEL} edge_open_electron_flux={EDGE_OPEN_ELECTRON_FLUX} "
+      f"W={CHARGING_W} mouth={CHARGING_MOUTH} n={N_PER_ITER} it={N_ITER}", flush=True)
+
+
+def run_solver(ar, **kw):
+    if CHARGING_GEOMETRY == "edge_array":
+        return solve_edge_array_charging(ar, see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
+                                         source_model=SOURCE_MODEL,
+                                         edge_open_model=EDGE_OPEN_MODEL,
+                                         edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX,
+                                         **kw)
+    if CHARGING_GEOMETRY != "trench":
+        raise ValueError(f"unknown PETCH_CHARGING_GEOMETRY={CHARGING_GEOMETRY}")
+    return solve_trench_charging(ar, see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
+                                 source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
+                                 poly_bias_V=POLY_BIAS_V,
+                                 edge_open_model=EDGE_OPEN_MODEL,
+                                 edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX, **kw)
+
 pred, vcs, vfs, isurv, esurv = [], [], [], [], []
 edge_e_gross, edge_i_gross, edge_net, edge_hg_gross = [], [], [], []
 resmax = []
 for i, ar in enumerate(HG_AR):
     t0 = time.time()
-    r = solve_trench_charging(ar, n_per_iter=8000, n_iter=140, seed=i,
-                              see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
-                              source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
-                              poly_bias_V=POLY_BIAS_V,
-                              edge_open_model=EDGE_OPEN_MODEL,
-                              edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX)
+    r = run_solver(ar, W=CHARGING_W, mouth=CHARGING_MOUTH, n_per_iter=N_PER_ITER,
+                   n_iter=N_ITER, seed=i)
     pred.append(r["floor_flux"]); vcs.append(r["V_floor_center"]); vfs.append(r["V_foot_peak"])
     ti = r["diag"]["trace"]["last_ion"]; te = r["diag"]["trace"]["last_electron"]
     isurv.append(ti["survivor_frac"] if ti else np.nan)
@@ -65,12 +85,8 @@ print(f"  current residual max = {np.nanmax(resmax):.3f}  "
       f"[{'PASS' if np.nanmax(resmax) < 0.08 else 'fail'}] (diagnostic gate 0.08)", flush=True)
 
 print("=== GATE 2 (2-D): Matsui asymptote (300 eV ions: no cutoff at AR 4) ===", flush=True)
-r300 = solve_trench_charging(4.0, V_dc=300.0, V_rf=30.0, n_per_iter=8000, n_iter=140,
-                             see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
-                             source_model=SOURCE_MODEL, poly_mode=POLY_MODE,
-                             poly_bias_V=POLY_BIAS_V,
-                             edge_open_model=EDGE_OPEN_MODEL,
-                             edge_open_electron_flux=EDGE_OPEN_ELECTRON_FLUX)
+r300 = run_solver(4.0, W=CHARGING_W, mouth=CHARGING_MOUTH, V_dc=300.0, V_rf=30.0,
+                  n_per_iter=N_PER_ITER, n_iter=N_ITER)
 ok2 = r300["floor_flux"] > 0.1
 print(f"  300 eV ions @ AR4: floor flux = {r300['floor_flux']:.3f}   [{'PASS' if ok2 else 'fail'}] (must stay well above 0)", flush=True)
 
@@ -86,7 +102,10 @@ np.savez(os.path.join(os.path.dirname(__file__), "..", "charging_gate_result.npz
          edge_electron_gross=np.array(edge_e_gross), edge_ion_gross=np.array(edge_i_gross),
          edge_net_electron=np.array(edge_net), edge_hg_electron_gross=np.array(edge_hg_gross),
          see_model=SEE_MODEL, see_generations=SEE_GENERATIONS,
-         source_model=SOURCE_MODEL, poly_mode=POLY_MODE, poly_bias_V=POLY_BIAS_V,
+         source_model=SOURCE_MODEL, charging_geometry=CHARGING_GEOMETRY,
+         poly_mode=POLY_MODE, poly_bias_V=POLY_BIAS_V,
+         charging_W=CHARGING_W, charging_mouth=CHARGING_MOUTH,
+         n_per_iter=N_PER_ITER, n_iter=N_ITER,
          edge_open_model=EDGE_OPEN_MODEL,
          edge_open_electron_flux=-1.0 if EDGE_OPEN_ELECTRON_FLUX is None else EDGE_OPEN_ELECTRON_FLUX)
 print("DONE", flush=True)

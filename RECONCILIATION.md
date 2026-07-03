@@ -482,6 +482,21 @@ reference boundary, but a scalar open-side boundary cannot replace the HG nonper
 field solve. The next real implementation is explicit open area + edge line + neighboring line
 geometry with nonperiodic x electrostatics; do not tune the net current law.
 
+**Explicit edge-array geometry — implemented as WIP, reduced gates measured (2026-07-03).**
+Added `solve_edge_array_charging`: open area + edge poly line + trench + neighboring line,
+nonperiodic x Laplace, explicit segment hits, separate edge/neighbor conductors, and optional
+line-of-sight feature-mouth boundary source applied to the real edge conductor. Reduced W16/mouth80
+8-point run with `edge_open_model="line_of_sight"`: floor RMSE **0.098 FAIL**, survivor **PASS**,
+Matsui **PASS**, current residual **FAIL 0.235**. The notching gate on the same reduced config now
+has foot-energy **PASS** (max error 28%, rising) and foot-flux **PASS** (max/min 1.67), while
+poly potential still **FAILS** (51% max error from low-AR overshoot) and residual **FAILS 0.192**.
+AR4 reduced point can hit the core mechanism numbers (floor ~0.27, Vc 42.5 V, edge/neighbor
+18/37 V, foot energy 22.5 eV, residual 0.047), and W24/mouth160 AR4 gives gross
+outer electrons 0.175 vs HG 0.18 plus neighbor 39.1 V, but the tail/final floor flux and PR residual
+are not steady. Conclusion: the missing conductor geometry is now coded and qualitatively works, but
+the edge-array relaxation/PR-surface balance must be stabilized before running expensive W32 gates
+or claiming closure.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).

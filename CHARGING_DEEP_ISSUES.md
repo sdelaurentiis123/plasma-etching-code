@@ -80,6 +80,23 @@ access and creates the right qualitative edge/neighbor split, but the periodic o
 domain still under-builds the HG line-to-line electrostatics and over-feeds the oxide floor. The
 next fix is not another scalar current law; it is the nonperiodic multi-line/open-area geometry.
 
+First explicit edge-array implementation (`solve_edge_array_charging`) now exists. It rasterizes an
+open area + edge line + trench + neighboring line, uses nonperiodic x electrostatics, traces particles
+to explicit edge-outer / edge-inner / neighbor / PR / floor segments, and can add the line-of-sight
+open-side source as a feature-mouth boundary current on the real edge conductor. Reduced runs show:
+
+| config | result |
+|---|---|
+| W16/mouth80, saved `charging_gate.py`, line-of-sight boundary | floor RMSE **0.098 FAIL**; survivor **PASS**; residual **FAIL 0.235**; Matsui **PASS 0.517 @ AR4** |
+| W16/mouth80, saved `notching_gate.py`, line-of-sight boundary | foot-energy **PASS** (max err 28%, rising); foot-flux **PASS** (max/min 1.67); poly potential **FAIL** (max err 51%, low-AR overshoot); residual **FAIL 0.192** |
+| W16/mouth80, AR4, representative n_iter=140 | floor 0.270 vs 0.22; Vc 42.5 V; edge/neighbor 18.1/37.2 V; foot energy 22.5 eV; residual 0.047 |
+| W24/mouth160, AR4, n_iter=100 | gross outer electrons 0.175 vs 0.18 and neighbor 39.1 V are excellent, but final floor 0.139 vs tail 0.250 and residual 1.095 show the solve is not numerically steady |
+
+Interpretation: explicit geometry fixes the missing line-to-line electrostatics qualitatively and
+gets the foot-energy gate within tolerance in reduced runs, but the new nonperiodic solver is not
+yet a stable production gate. The next work is numerical stabilization of the edge-array relaxation
+and PR/top-surface current balance (tail/final disagreement), not tuning the edge current.
+
 ## Falsified or deprioritized
 
 - **PR-sidewall SEE alone:** falsified by corrected cascade AR4 probe.
@@ -101,7 +118,8 @@ next fix is not another scalar current law; it is the nonperiodic multi-line/ope
 2. **Explicit nonperiodic edge-line geometry.** Replace the periodic one-trench mechanism cell with
    the HG edge-line cell: open area, edge poly line, edge trench, neighboring poly line, separate
    equipotentials, and nonperiodic x-boundary electrostatics. The auxiliary `line_of_sight` current
-   is now a validation/reference boundary, not the production closure.
+   is now a validation/reference boundary, not the production closure. First implementation is in
+   place but needs stabilization before full W32 gates are meaningful.
 3. **Material SEE sign test.** Reuse the current SEE machinery as a binary diagnostic on PR-only,
    oxide-floor-only, poly-only, and all-wall surfaces. Do not treat PMMA yields on oxide/poly as a
    calibrated model; this is only a sign/magnitude test.
