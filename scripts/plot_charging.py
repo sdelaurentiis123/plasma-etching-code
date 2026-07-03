@@ -26,8 +26,10 @@ axA.plot(g["ar"], g["hg"], "k*", ms=16, label="Hwang–Giapis 1997 (digitized)",
 axA.plot(g["ar"], g["hg"], "k--", lw=1.2, alpha=0.5)
 axA.set_xlabel("aspect ratio"); axA.set_ylabel("normalized floor ion flux")
 axA.set_ylim(0, 0.8); axA.grid(alpha=0.3); axA.legend(loc="upper right", fontsize=10)
-axA.set_title(f"Floor ion flux vs AR — mechanism config RMSE {float(g['rmse']):.3f} "
-              "(closure config passes at 0.039); nothing tuned", fontsize=10)
+axA.set_title("Floor ion flux vs AR — model vs published data", fontsize=11)
+axA.text(1.05, 0.34, f"mechanism config (RMSE {float(g['rmse']):.3f})\n"
+         "closure config passes the gate at 0.039\nnothing tuned",
+         fontsize=8.5, color="0.35", va="top", ha="left")
 axA.annotate("with 300 eV ions the floor stays open\n(0.56 @ AR 4 — the Matsui asymptote)",
              xy=(4.0, 0.22), xytext=(1.6, 0.10), fontsize=9, color="0.3",
              arrowprops=dict(arrowstyle="->", color="0.5"))
@@ -44,8 +46,7 @@ for x0, x1 in [(0, pad_), (pad_ + W_, V.shape[0])]:
 axB.plot([pad_, pad_], [mouth_, nz_ - 1], color="#4dd0e1", lw=2)
 axB.plot([pad_ + W_, pad_ + W_], [mouth_, nz_ - 1], color="#4dd0e1", lw=2)
 axB.plot([pad_, pad_ + W_], [nz_ - 1, nz_ - 1], color="#4dd0e1", lw=2.5)
-axB.set_title(f"Steady-state potential, AR = 4  (floor center {r4['V_floor_center']:.0f} V, "
-              f"foot peak {r4['V_foot_peak']:.0f} V)", fontsize=11)
+axB.set_title(f"Steady-state potential at AR 4  (floor {r4['V_floor_center']:.0f} V)", fontsize=11)
 axB.set_xlabel("x (cells)"); axB.set_ylabel("z (cells, plasma at top)")
 plt.colorbar(im, ax=axB, label="V (volts, sheath edge = 0)")
 
