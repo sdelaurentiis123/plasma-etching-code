@@ -1035,7 +1035,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                               iadf_hwhm_deg=4.3, cos_power=0.6, n_per_iter=6000, n_iter=120,
                               relax=None, seed=0, verbose=False, smooth=False,
                               poly_um=0.3, feature_w_um=0.5, rf_bursts=True,
-                              sheath_um=89.0, boundary_um=3.7, insul_vmin_Te=1.0,
+                              sheath_um=89.0, boundary_um=3.7, insul_vmin_Te=None,
                               trace_integrator="adaptive_numba", trace_step_cap_factor=40.0,
                               see_model="none", see_generations=1,
                               ion_angle_energy_corr="anticorrelated",
@@ -1068,6 +1068,12 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     open_frac = W / nx
     if relax is None:
         relax = 2.0 * Te
+    # Floating-insulator numerical guard. An insulator charges until local net current -> 0; the
+    # only bound is that it cannot charge past the incident particle energy, i.e. the sheath
+    # potential scale (V_dc + V_rf). None -> that physical guard (tracks the bias); a number sets
+    # a tighter guard in Te units for diagnostics. The old default 1*Te pinned the electron-
+    # collecting upper-sidewall PR cells and broke charge conservation (pr residual -0.14..-0.33).
+    pr_vguard = (V_dc + V_rf) if insul_vmin_Te is None else float(insul_vmin_Te) * Te
 
     V = np.zeros((nx, nz))
     Vsolid = np.zeros((nx, nz))
@@ -1242,7 +1248,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         Vedge = float(np.clip(Vedge, -3.0 * Te, V_dc + V_rf))
         Vneighbor = float(np.clip(Vneighbor, -3.0 * Te, V_dc + V_rf))
         Vsolid[floor_mask] = np.clip(Vsolid[floor_mask], 0.0, V_dc + V_rf)
-        Vsolid[pr_mask] = np.clip(Vsolid[pr_mask], -insul_vmin_Te * Te, V_dc + V_rf)
+        Vsolid[pr_mask] = np.clip(Vsolid[pr_mask], -pr_vguard, V_dc + V_rf)
         hist.append(float((hti == 1).sum() / n_per_iter))
         vsolid_hist.append(Vsolid.copy())
         vedge_hist.append(Vedge); vneighbor_hist.append(Vneighbor)
