@@ -37,8 +37,13 @@ axA.annotate("with 300 eV ions the floor stays open\n(0.56 @ AR 4 — the Matsui
 # exact solver geometry (aligns the outline to the field; the old hardcoded pad/mouth were wrong)
 gm = r4["geom"]; pad_, W_, mouth_, nz_, nx_ = gm["pad"], gm["W"], gm["mouth"], gm["nz"], gm["nx"]
 z0 = max(0, mouth_ - 30)                                # crop the long empty mouth/vacuum above the feature
-Vc = V[:, z0:]                                         # show the feature (mouth->floor), not 237 empty cells
-im = axB.imshow(Vc.T, origin="upper", cmap="inferno", aspect="auto", extent=[0, nx_, nz_, z0])
+wall = np.zeros_like(V, bool)                           # mask the solid mask/sidewalls so color fills the
+wall[:pad_, mouth_:] = True                             # trench ONLY (the boundary-condition potential in
+wall[pad_ + W_:, mouth_:] = True                        # the solid cells otherwise bleeds past the walls)
+Vshow = np.where(wall, np.nan, V)
+Vc = Vshow[:, z0:]                                     # show the feature (mouth->floor), not 237 empty cells
+cmap = plt.cm.inferno.copy(); cmap.set_bad("#08040f")  # masked walls render as the dark ground
+im = axB.imshow(Vc.T, origin="upper", cmap=cmap, aspect="auto", extent=[0, nx_, nz_, z0])
 axB.contour(Vc.T, levels=10, colors="w", linewidths=0.4, alpha=0.5,
             extent=[0, nx_, nz_, z0], origin="upper")
 cy = "#4dd0e1"                                         # geometry outline: mask tops, trench walls, floor
