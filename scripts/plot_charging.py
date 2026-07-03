@@ -37,7 +37,7 @@ axA.annotate("with 300 eV ions the floor stays open\n(0.56 @ AR 4 — the Matsui
 im = axB.imshow(V.T, origin="upper", cmap="inferno", aspect="auto",
                 extent=[0, V.shape[0], V.shape[1], 0])
 axB.contour(V.T, levels=10, colors="w", linewidths=0.4, alpha=0.5,
-            extent=[0, V.shape[0], 0, V.shape[1]], origin="upper")
+            extent=[0, V.shape[0], V.shape[1], 0], origin="upper")   # match imshow y-extent (was flipped)
 # geometry outline: mask blocks + trench slot (W=32, pad=24, mouth=24)
 W_, pad_, mouth_ = 32, 24, 24
 nz_ = V.shape[1]
