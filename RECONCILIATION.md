@@ -392,6 +392,16 @@ ballistic trace — NOT the barrier/energy approximation the plan hypothesized; 
 (out of scope). Reverted to the first-order build (the committed mechanism config); the production
 closure table (0.039) is unaffected. The correct-physics finding is the deliverable.
 
+**CORRECTION (same day, post literature review): the "framework limit" conclusion was premature.**
+HG themselves got V_c = 33 V at AR 4 in a 2-D collisionless MC (JVST B 15,70 — arrival distributions
+from a 1d/2v MC sheath simulation); Memos & Kokkoris (Micromachines 9,415 (2018)) trace fully
+ISOTROPIC Maxwellian electrons with an adaptive integrator without any orbit problem, and their
+secondary-electron-emission channel HALVES the charging potential (45→~22 V) by redistributing
+electrons into the positive well; and for a trench v_y is conserved, so 2-D x–z dynamics is exact.
+The deficit decomposes into (a) our fixed-step/step-cap integrator silently dropping well-captured
+electrons, (b) missing SEE, (c) analytic arrival shortcuts. All fixable in 2-D collisionless — the
+plan is `CHARGING_PHYSICS_PLAN.md` (W1 integrator → W2 SEE → W3 1-D RF-sheath MC source).
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
