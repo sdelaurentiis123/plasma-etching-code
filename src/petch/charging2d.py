@@ -42,7 +42,7 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                           iadf_hwhm_deg=4.3, cos_power=0.6, n_per_iter=6000, n_iter=120,
                           relax=None, seed=0, verbose=False, smooth=False,
                           poly_um=0.3, feature_w_um=0.5, rf_bursts=True,
-                          sheath_um=89.0, boundary_um=3.7):
+                          sheath_um=89.0, boundary_um=3.7, insul_vmin_Te=1.0):
     """Steady-state charging of the HG poly-on-oxide trench. Returns dict with:
     floor_flux (normalized ion flux to the oxide floor), V_floor_center, V_foot_peak,
     V_poly (the poly-line equipotential), foot_ion_flux / foot_ion_Emean (ions striking the
@@ -228,11 +228,12 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
             Vpoly = float(np.clip(Vpoly, -3 * Te, V_dc + V_rf))
         Vtop_l += scale * (tli - tle) / max(pad, 1)
         Vtop_r += scale * (tri - tre) / max(pad, 1)
+        vmin = -insul_vmin_Te * Te                     # interior insulator floating bound (HG: -0.5..-4 V)
         np.clip(Vfloor, 0.0, V_dc + V_rf, out=Vfloor)
-        np.clip(Vleft, -3 * Te, V_dc + V_rf, out=Vleft)
-        np.clip(Vright, -3 * Te, V_dc + V_rf, out=Vright)
-        Vtop_l = float(np.clip(Vtop_l, -3 * Te, 0.0))
-        Vtop_r = float(np.clip(Vtop_r, -3 * Te, 0.0))
+        np.clip(Vleft, vmin, V_dc + V_rf, out=Vleft)
+        np.clip(Vright, vmin, V_dc + V_rf, out=Vright)
+        Vtop_l = float(np.clip(Vtop_l, vmin, 0.0))
+        Vtop_r = float(np.clip(Vtop_r, vmin, 0.0))
         hist.append(fi.sum() / n_per_iter)
         vfloor_hist.append(Vfloor.copy())
         vleft_hist.append(Vleft.copy()); vright_hist.append(Vright.copy())
@@ -255,12 +256,27 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     Vfloor[:] = Vf_map; Vleft[:] = Vl_map; Vright[:] = Vr_map; Vpoly = Vp_avg
     V = laplace(V, sweeps=240)
     Ex = -(np.gradient(V, axis=0)); Ez = -(np.gradient(V, axis=1))
-    _, _, _, _, _, fn2, fE2 = trace('ion', 4 * n_per_iter, Ex, Ez)
+    ifl, ill, irr, itl, itr, fn2, fE2 = trace('ion', 4 * n_per_iter, Ex, Ez)
+    efl, ell, err, etl, etr, _, _ = trace('electron', 4 * n_per_iter, Ex, Ez)
     open_frac = W / nx
+    ntot = 4 * n_per_iter
+    # per-species landing budget over the trench mouth (fractions of mouth-entering particles)
+    ie_poly = (ill[is_poly].sum() + irr[is_poly].sum())    # ions on the poly sidewall band = foot
+    ie_pr = (ill[~is_poly].sum() + irr[~is_poly].sum())     # ions on the PR (insulating) sidewalls
+    ee_poly = (ell[is_poly].sum() + err[is_poly].sum())
+    ee_pr = (ell[~is_poly].sum() + err[~is_poly].sum())
+    diag = dict(
+        ion=dict(floor=float(ifl.sum() / ntot / open_frac), poly=float(ie_poly / ntot / open_frac),
+                 pr=float(ie_pr / ntot / open_frac), top=float((itl + itr) / ntot)),
+        electron=dict(floor=float(efl.sum() / ntot / open_frac), poly=float(ee_poly / ntot / open_frac),
+                      pr=float(ee_pr / ntot / open_frac), top=float((etl + etr) / ntot)))
+    _prwall = ~is_poly
     return dict(floor_flux=float(tail / open_frac), V_floor_center=float(Vf_avg[W // 2]),
                 V_foot_peak=float(Vf_avg.max()), V_poly=Vp_avg, Vfloor=Vf_avg, V=V,
                 foot_ion_flux=float(fn2 / (4 * n_per_iter) / open_frac),
-                foot_ion_Emean=float(fE2 / max(fn2, 1.0)))
+                foot_ion_Emean=float(fE2 / max(fn2, 1.0)), diag=diag,
+                Vprwall_mean=float(0.5 * (Vl_avg[_prwall].mean() + Vr_avg[_prwall].mean())) if _prwall.any() else 0.0,
+                Vprwall_min=float(min(Vl_avg[_prwall].min(), Vr_avg[_prwall].min())) if _prwall.any() else 0.0)
 
 
 # PRODUCTION TABLES = Hwang-Giapis PUBLISHED values (JAP 82,566): the 2-D solver is the

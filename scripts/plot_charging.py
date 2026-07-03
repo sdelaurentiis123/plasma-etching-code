@@ -26,7 +26,8 @@ axA.plot(g["ar"], g["hg"], "k*", ms=16, label="Hwang–Giapis 1997 (digitized)",
 axA.plot(g["ar"], g["hg"], "k--", lw=1.2, alpha=0.5)
 axA.set_xlabel("aspect ratio"); axA.set_ylabel("normalized floor ion flux")
 axA.set_ylim(0, 0.8); axA.grid(alpha=0.3); axA.legend(loc="upper right", fontsize=10)
-axA.set_title("Floor ion flux vs AR — model vs published (nothing tuned)", fontsize=11)
+axA.set_title(f"Floor ion flux vs AR — mechanism config RMSE {float(g['rmse']):.3f} "
+              "(closure config passes at 0.039); nothing tuned", fontsize=10)
 axA.annotate("with 300 eV ions the floor stays open\n(0.56 @ AR 4 — the Matsui asymptote)",
              xy=(4.0, 0.22), xytext=(1.6, 0.10), fontsize=9, color="0.3",
              arrowprops=dict(arrowstyle="->", color="0.5"))
@@ -48,7 +49,7 @@ axB.set_title(f"Steady-state potential, AR = 4  (floor center {r4['V_floor_cente
 axB.set_xlabel("x (cells)"); axB.set_ylabel("z (cells, plasma at top)")
 plt.colorbar(im, ax=axB, label="V (volts, sheath edge = 0)")
 
-fig.suptitle("Feature charging — petch's Hwang–Giapis solver passes the published gate",
+fig.suptitle("Feature charging — petch's 2-D Hwang–Giapis solver vs the published data",
              fontweight="bold", fontsize=13)
 plt.tight_layout()
 p = os.path.join(HERE, "viz", "charging_hg.png")

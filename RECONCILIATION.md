@@ -338,10 +338,10 @@ arrival weighted by the instantaneous sheath barrier), and **substrate-reference
 (Lieberman V_dc; potentials now comparable to HG's ground-referenced values). Measured result —
 an honest physics trade between the two solver configurations:
 
-| Gate | pre-conductor (`poly_um=0, rf_bursts=False`) | post-conductor (default) | HG target |
+| Gate | pre-conductor (`poly_um=0, rf_bursts=False`) | post-conductor (default, `insul_vmin_Te=1.0`) | HG target |
 |---|---|---|---|
-| Floor ion flux vs AR (8 pts) | **RMSE 0.039 PASS** | RMSE 0.060 fail (deep-AR too steep: 0.174 vs 0.22) | ≤ 0.05 |
-| V_floor center, AR 1 → 4 | ~20 → ~60 V (offset ref) | **11.1 → 53.6 V** (AR-1 anchor nearly exact; deep-AR over-charged) | 8 → 33 V |
+| Floor ion flux vs AR (8 pts) | **RMSE 0.039 PASS** | RMSE 0.071 fail (whole curve high: 0.267 vs 0.22 at AR4) | ≤ 0.05 |
+| V_floor center, AR 1 → 4 | ~20 → ~60 V (offset ref) | **8.9 → 43.5 V** (AR-1 on HG's 8 V; deep over-charge cut from 53.6) | 8 → 33 V |
 | Rising foot-potential peak | absent | **31.9 → 66.8 V, rising** | ~59 V at AR 4 |
 | Poly-line potential V_p(AR) | n/a (no conductor) | **6.1 → 44.2 V — PASS (±30%)** vs 6→39 | 6 → 39 V |
 | Foot-ion flux ~AR-independent | fail (×3.3 rise) | **PASS** (0.19→0.07→0.10) | ~constant |
@@ -358,6 +358,18 @@ stay reachable and documented**: the flux-gate-passing pre-conductor closure rem
 the production `charging_floor_profile` table; the conductor build is the mechanism model for
 notching work and the basis for the next fix (full RF-phase electron trajectories). Neither result
 is hidden; the gate scripts print both.
+
+**Insulator floating-potential bound (2026-07-02 follow-up):** the interior insulator segments were
+clipped at an arbitrary −3·Te; replaced with the physically-anchored **−Te** floating-wall bound
+(HG's cited value; `insul_vmin_Te=1.0`, NOT gate-fit). Measured: it **improves the potentials** —
+deep-AR floor over-charge drops 53.6 → **43.5 V** (HG 33) and AR-1 lands on HG's 8 V (8.9) — but
+**regresses the floor-flux gate 0.060 → 0.071**: the whole flux curve shifts up (over-predicts at
+every AR) because the looser −3·Te clip was partially masking a real flux over-prediction. Kept the
+physical bound anyway (removing the fudge clip is the honest call); the regression **confirms the
+open root cause is the RF-burst electron under-supply**, not the insulator clip. Production
+`charging_floor_profile` table is the closure config (0.039) and is unaffected; `insul_vmin_Te` only
+touches `solve_trench_charging` (the mechanism-study solver), so notching and de Boer runs are
+untouched.
 
 ## Follow-ups
 
