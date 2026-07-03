@@ -294,10 +294,40 @@ difference: our V=0 is the sheath edge, HG's the grounded substrate) but impact 
 directly; the missing physics is the documented RF-phase electron-burst simplification. Tracked.
 Because of this, the **production wiring uses HG's published E_defl(AR) table** (validated data),
 not our solver's foot energies. Full notch-DEPTH evolution vs Nozawa (JJAP 34, 2107) / Fujiwara
-(JJAP 34, 2095) is **deferred**: it needs multi-material etch-stop (poly over oxide), which petch
-does not have yet — those measured curves stay the final gate. Live-path smoke (static W=0.5
-trench): floor ×0.57 (AR2) → ×0.35 (AR4), foot rate ×~40, monotone with AR — the mechanism is
-live and directionally correct; its quantitative foot-energy validation is the open item.
+(JJAP 34, 2095) needed multi-material etch-stop (poly over oxide) — now built (next section).
+
+## Multi-material etch-stop → the measured notch-depth gate PASSES (2026-07-02)
+
+Built the missing piece: **multi-material etch-stop** in the evolving engine (`run_etch_3d(etch_stop_z=)`
++ `_apply_etch_stop`, threed.py) — the vertical front halts at a buried oxide (infinite selectivity),
+and the overlying poly keeps etching, so the charging-deflected foot ion flux can dig the notch at
+the poly/oxide junction. Gate: **`scripts/notching_depth_gate.py`** (line/space, W=2 µm at petch's
+VALIDATED dx=0.25 de Boer scale, poly = AR·W on oxide, PR mask, etch to oxide then overetch;
+`surface_charging="hg"` + the published E_defl table). Two engine facts made it work and are
+documented, not hidden: (1) the flat-floor **overetch regime runs the sidewalls away laterally**
+unless passivated — the ARDE-validated regime always advances, never dwells; **redeposition**
+(`flags.redeposition`, which had a latent kernel-arg bug — `_trace3d_cov_rr` was passed 10 args not
+11, FIXED) holds the walls; (2) the deflected-ion **foot band must be a fixed physical height**
+(~0.3·W, the corner-field/sheath-Debye scale; HG JVST B 15,70), NOT a depth fraction — the old
+`0.15·depth` smeared deep-AR flux over a taller band and spuriously shrank the deep notch.
+
+**Gates (first-wiring tolerances, all stated in-script):**
+
+| Gate | result |
+|---|---|
+| A — charging-specific mechanism: notch(OFF) ≈ 0 at every AR; notch(ON) resolved for AR ≥ 2 | **PASS** — OFF = 0.000 µm at AR 1–4 (perfectly anisotropic); ON = 0.144 / 0.149 / 0.164 µm at AR 2/3/4 |
+| B — Fujiwara (JJAP 34,2095) monotone rise of notch depth with AR | **PASS** — 0.000 → 0.144 → 0.149 → 0.164 µm over AR 1→4 |
+| C — Hwang–Giapis (JAP 82,566) notch-vs-AR shape, correlation over resolved AR ≥ 2 | **PASS** — r = 0.92 vs HG's 0.12 / 0.185 / 0.23 µm |
+
+**Honest caveats (stated on the figure and in-script):** the notch is **entirely charging-driven** —
+charging OFF gives zero undercut at every AR, the "no open feature-scale code does this" claim, shown
+as a controlled A/B. Absolute depth is **uncalibrated** (normalized notch/W ≈ 0.07–0.08 vs HG's
+0.24–0.46 at their W ≈ 0.5 µm — ~3–5× shallow; the overetch time / deflected-flux magnitude are not
+fit to HG). **AR 1 notch sits below the dx = 0.25 sub-cell + MC-noise floor** (reads 0.000). Sub-micron
+(W < 1 µm) grids — HG's actual feature size — are the finer-resolution frontier: there the sidewalls
+destabilize even without charging (base-etch stability at fine dx, a separate open item). Figure:
+`viz/notching_depth.png` (foot-notch cross-section + depth-vs-AR with HG overlay), from
+`notching_depth_result.npz` via `scripts/plot_notching_depth.py`.
 
 ## Conductor + RF-phase charging build — a documented trade (2026-07-02)
 

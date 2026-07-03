@@ -1027,6 +1027,18 @@ def _ions_deterministic(mesh, F, A, A_src, Lx, Ly, Lz, n_ion, par, flags, seed, 
 
 
 
+def _apply_etch_stop(Fs, zs, etch_stop_z):
+    """Buried etch-stop (e.g. SiO2 under poly-Si): zero the extended surface velocity in every grid
+    slice below z=etch_stop_z so the vertical front halts at the interface. Faces in the overlying
+    film (z >= etch_stop_z), including the charged-ion sidewall foot, keep their velocity -- this is
+    what lets the deflected-ion foot flux dig the lateral notch at the film/oxide junction during
+    overetch (HG JAP 82,566; Nozawa JJAP 34,2107). Selectivity is treated as infinite (oxide rate 0),
+    the wafer-relevant limit for poly/oxide plasma etch. Returns Fs modified in place."""
+    below = zs < float(etch_stop_z)                        # oxide slices: no etch
+    if below.any():
+        Fs[:, :, below] = 0.0
+    return Fs
+
 def _apply_hg_charging(m_i, par, flags, centroids, gas_nz, areas, geo):
     """flags.surface_charging == "hg": the gate-validated Hwang-Giapis charging closure applied to
     an INSULATING floor (poly-on-insulator overetch / dielectric etch -- NOT the conductive
@@ -1069,9 +1081,14 @@ def _apply_hg_charging(m_i, par, flags, centroids, gas_nz, areas, geo):
     defl_total = float((m_i[floor] * areas[floor]).sum()) * (1.0 - Q)   # the removed slice
     ie[floor] *= Q * r_ie; sp[floor] *= Q * r_sp; ip[floor] *= Q * r_p
     m_i = m_i.copy(); m_i[floor] *= Q
-    # (b) deflected slice -> sidewall foot (within 15% of depth above the floor), yields at E_defl
+    # (b) deflected slice -> sidewall foot, yields at E_defl. The deflection foot is set by the
+    # corner-field / sheath-Debye scale at the poly/oxide junction (~0.2-0.3 feature widths; HG
+    # JVST B 15,70), NOT by the trench depth -- a FIXED physical height above the floor so the notch
+    # localizes at the junction at every AR instead of smearing over a depth-fraction (which made the
+    # deep-AR notch spuriously shrink as flux thinned over a taller band).
     zfloor = float(centroids[floor, 2].min())
-    foot = inside & below & (gas_nz <= 0.7) & (centroids[:, 2] <= zfloor + 0.15 * depth)
+    foot_h = max(0.3 * W, 2.0 * geo['dx'])
+    foot = inside & below & (gas_nz <= 0.7) & (centroids[:, 2] <= zfloor + foot_h)
     if foot.any() and defl_total > 0.0:
         f_area = float(areas[foot].sum())
         fdefl = defl_total / max(f_area, 1e-12)            # per-area deflected ion flux
@@ -1528,7 +1545,7 @@ def mc_redep_3d(mesh, centroids, areas, normals, src_flux, n_redep=20000, s_rede
               inputs=[mesh.id, wp.array(o, dtype=wp.vec3, device=DEVICE),
                       wp.array(d, dtype=wp.vec3, device=DEVICE),
                       wp.array(bare, dtype=float, device=DEVICE), float(s_redep), int(seed), fl,
-                      1.0, 1.0, 0])                     # redep: no periodic-y
+                      1.0, 1.0, 1.0, 0])                # redep: no periodic-y (lx,ly,lz inert when periodic=0)
     return (fl.numpy() * (tot / n_redep)) / np.maximum(areas, 1.0e-9)
 
 
@@ -1571,7 +1588,8 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
                 sub_top=10.0, t_end=2.0, n_steps=20, hole=False, par=None, flags=None,
                 n_ion=20000, n_neu=20000, reinit_every=1, extend="gpu",
                 reinit_method="skfmm", verbose=True, record_depth_every=0, seed_offset=0,
-                rays_per_point=None, record_frames=False, surf_smooth=0.0):
+                rays_per_point=None, record_frames=False, surf_smooth=0.0,
+                etch_stop_z=None):
     if par is None:
         par = PAR
     if flags is None:
@@ -1661,6 +1679,8 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
         te = time.time()
         Fs = (extend_velocity_gpu(mesh, V, geo, band) if extend == "gpu"
               else extend_velocity_3d(V, centroids, geo, band))
+        if etch_stop_z is not None:                            # buried etch-stop (oxide): no etch below z
+            Fs = _apply_etch_stop(Fs, geo['zs'], etch_stop_z)  # zero the extended velocity in the oxide
         timings['extend'] += time.time() - te
         vmx = float(np.max(V)) if V.size else 0.0
         Vmax = max(vmx if np.isfinite(vmx) else 0.0, 1e-6)
