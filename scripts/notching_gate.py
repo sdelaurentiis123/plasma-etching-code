@@ -24,13 +24,17 @@ HG_AR = np.array([1.0, 1.2, 1.6, 2.0, 2.6, 3.0, 3.6, 4.0])
 HG_FOOT_E = np.array([15.0, 16.5, 17.5, 20.0, 23.0, 25.0, 26.5, 27.5])   # eV, poly-sidewall ions
 HG_VPOLY = np.array([6.0, 9.0, 15.0, 20.0, 27.0, 31.0, 36.0, 39.0])       # V (6->39, Fig. 6 trend)
 
-Em, Fl, Vp, Vc, Fx = [], [], [], [], []
+Em, Fl, Vp, Vc, Fx, isurv, esurv = [], [], [], [], [], [], []
 for i, ar in enumerate(HG_AR):
     r = solve_trench_charging(ar, n_per_iter=8000, n_iter=110, seed=3 + i)
     Em.append(r["foot_ion_Emean"]); Fl.append(r["foot_ion_flux"])
     Vp.append(r["V_poly"]); Vc.append(r["V_floor_center"]); Fx.append(r["floor_flux"])
+    ti = r["diag"]["trace"]["last_ion"]; te = r["diag"]["trace"]["last_electron"]
+    isurv.append(ti["survivor_frac"] if ti else np.nan)
+    esurv.append(te["survivor_frac"] if te else np.nan)
     print(f"  AR {ar:3.1f}:  footE={Em[-1]:5.1f} eV (HG {HG_FOOT_E[i]:.1f})   footFlux={Fl[-1]:.3f}   "
-          f"Vpoly={Vp[-1]:5.1f} (HG {HG_VPOLY[i]:.0f})   Vc={Vc[-1]:5.1f}   floorFlux={Fx[-1]:.3f}", flush=True)
+          f"Vpoly={Vp[-1]:5.1f} (HG {HG_VPOLY[i]:.0f})   Vc={Vc[-1]:5.1f}   floorFlux={Fx[-1]:.3f}   "
+          f"surv_i/e={isurv[-1]:.4f}/{esurv[-1]:.4f}", flush=True)
 Em = np.array(Em); Fl = np.array(Fl); Vp = np.array(Vp); Vc = np.array(Vc); Fx = np.array(Fx)
 
 relE = np.abs(Em - HG_FOOT_E) / HG_FOOT_E
@@ -45,7 +49,10 @@ relP = np.abs(Vp - HG_VPOLY) / HG_VPOLY
 okC = bool((relP <= 0.30).all()) and Vp[-1] > Vp[0]
 print(f"GATE C (poly potential 6->39 V, +-30%): max rel err = {relP.max()*100:.0f}%  "
       f"rising = {Vp[-1] > Vp[0]}   [{'PASS' if okC else 'fail'}]")
+print(f"W1 survivor gate: max ion/electron = {np.nanmax(isurv):.4f}/{np.nanmax(esurv):.4f}  "
+      f"[{'PASS' if max(np.nanmax(isurv), np.nanmax(esurv)) < 0.001 else 'fail'}] (gate 0.001)")
 np.savez(os.path.join(os.path.dirname(__file__), "..", "notching_gate_result.npz"),
          ar=HG_AR, foot_E=Em, hg_foot_E=HG_FOOT_E, foot_flux=Fl, vpoly=Vp, hg_vpoly=HG_VPOLY,
-         vc=Vc, floor_flux=Fx, okA=okA, okB=okB, okC=okC)
+         vc=Vc, floor_flux=Fx, okA=okA, okB=okB, okC=okC,
+         survivor_ion=np.array(isurv), survivor_electron=np.array(esurv))
 print("DONE")

@@ -19,16 +19,22 @@ HG_AR = np.array([1.0, 1.2, 1.6, 2.0, 2.6, 3.0, 3.6, 4.0])
 HG_FLUX = np.array([0.59, 0.55, 0.47, 0.40, 0.34, 0.30, 0.26, 0.22])
 
 print("=== GATE 1 (2-D solver): floor ion flux vs AR (HG JAP 82,566 Fig.4) ===", flush=True)
-pred, vcs, vfs = [], [], []
+pred, vcs, vfs, isurv, esurv = [], [], [], [], []
 for i, ar in enumerate(HG_AR):
     t0 = time.time()
     r = solve_trench_charging(ar, n_per_iter=8000, n_iter=140, seed=i)
     pred.append(r["floor_flux"]); vcs.append(r["V_floor_center"]); vfs.append(r["V_foot_peak"])
+    ti = r["diag"]["trace"]["last_ion"]; te = r["diag"]["trace"]["last_electron"]
+    isurv.append(ti["survivor_frac"] if ti else np.nan)
+    esurv.append(te["survivor_frac"] if te else np.nan)
     print(f"  AR {ar:3.1f}:  model={r['floor_flux']:.3f}  HG={HG_FLUX[i]:.2f}   "
-          f"Vc={r['V_floor_center']:5.1f} Vfoot={r['V_foot_peak']:5.1f}  ({time.time()-t0:.0f}s)", flush=True)
+          f"Vc={r['V_floor_center']:5.1f} Vfoot={r['V_foot_peak']:5.1f}  "
+          f"surv_i/e={isurv[-1]:.4f}/{esurv[-1]:.4f}  ({time.time()-t0:.0f}s)", flush=True)
 pred = np.array(pred)
 rmse = float(np.sqrt(np.mean((pred - HG_FLUX) ** 2)))
 print(f"  GATE 1 RMSE = {rmse:.3f}  [{'PASS' if rmse <= 0.05 else 'fail'}] (gate 0.05)", flush=True)
+print(f"  survivor max ion/electron = {np.nanmax(isurv):.4f}/{np.nanmax(esurv):.4f}  "
+      f"[{'PASS' if max(np.nanmax(isurv), np.nanmax(esurv)) < 0.001 else 'fail'}] (W1 gate 0.001)", flush=True)
 
 print("=== GATE 2 (2-D): Matsui asymptote (300 eV ions: no cutoff at AR 4) ===", flush=True)
 r300 = solve_trench_charging(4.0, V_dc=300.0, V_rf=30.0, n_per_iter=8000, n_iter=140)
@@ -41,5 +47,6 @@ m0 = floor_balance(4.0, V_dc=300.0, n=200000)[1]
 ok3 = f0[0] > f0[1] and m0 > 0.05
 print(f"  0-D: flux AR1={f0[0]:.3f} > AR4={f0[1]:.3f}, Matsui AR4@300eV={m0:.3f}  [{'PASS' if ok3 else 'fail'}]", flush=True)
 np.savez(os.path.join(os.path.dirname(__file__), "..", "charging_gate_result.npz"),
-         ar=HG_AR, hg=HG_FLUX, model=pred, vc=vcs, vfoot=vfs, rmse=rmse)
+         ar=HG_AR, hg=HG_FLUX, model=pred, vc=vcs, vfoot=vfs, rmse=rmse,
+         survivor_ion=np.array(isurv), survivor_electron=np.array(esurv))
 print("DONE", flush=True)

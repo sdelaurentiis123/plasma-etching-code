@@ -37,12 +37,130 @@ from __future__ import annotations
 
 import numpy as np
 
+try:
+    from numba import njit, prange
+except Exception:  # pragma: no cover - optional acceleration
+    njit = None
+    prange = range
+
+
+if njit is not None:
+    @njit(cache=True, parallel=True, fastmath=True)
+    def _trace_particles_adaptive(Ex, Ez, ExB, EzB, x0, vx0, vz0, sB, q,
+                                  nx, nz, W, pad, mouth, n_side, z_poly0,
+                                  max_steps):
+        n = x0.shape[0]
+        hit_type = np.zeros(n, np.int8)      # 0 escape/survivor, 1 floor, 2 left, 3 right, 4 top_l, 5 top_r
+        hit_idx = np.full(n, -1, np.int64)
+        foot_E = np.zeros(n)
+        survivor = np.zeros(n, np.uint8)
+        steps = np.zeros(n, np.int64)
+        xmax = float(nx)
+
+        for p in prange(n):
+            x = x0[p]
+            z = 1.0
+            vx = vx0[p]
+            vz = vz0[p]
+            sb = sB[p]
+            alive = True
+            last_step = 0
+            for st in range(max_steps):
+                last_step = st + 1
+                ix = int(x)
+                if ix < 0:
+                    ix = 0
+                elif ix > nx - 2:
+                    ix = nx - 2
+                iz = int(z)
+                if iz < 0:
+                    iz = 0
+                elif iz > nz - 2:
+                    iz = nz - 2
+
+                fx = Ex[ix, iz] + sb * ExB[ix, iz]
+                fz = Ez[ix, iz] + sb * EzB[ix, iz]
+                ax = q * fx * 0.5
+                az = q * fz * 0.5
+                avx = vx if vx >= 0.0 else -vx
+                avz = vz if vz >= 0.0 else -vz
+                vmax = avx if avx >= avz else avz
+                if vmax < 0.8:
+                    vmax = 0.8
+                dt_v = 0.45 / vmax
+                field = (fx * fx + fz * fz) ** 0.5
+                if field < 1.0e-9:
+                    field = 1.0e-9
+                dt_e = 0.3 / (field ** 0.5)
+                dt = dt_v if dt_v <= dt_e else dt_e
+
+                vx_half = vx + 0.5 * ax * dt
+                vz_half = vz + 0.5 * az * dt
+                xa = x + vx_half * dt
+                za = z + vz_half * dt
+
+                ix2 = int(xa)
+                if ix2 < 0:
+                    ix2 = 0
+                elif ix2 > nx - 2:
+                    ix2 = nx - 2
+                iz2 = int(za)
+                if iz2 < 0:
+                    iz2 = 0
+                elif iz2 > nz - 2:
+                    iz2 = nz - 2
+                fx2 = Ex[ix2, iz2] + sb * ExB[ix2, iz2]
+                fz2 = Ez[ix2, iz2] + sb * EzB[ix2, iz2]
+                vx = vx_half + 0.25 * q * fx2 * dt
+                vz = vz_half + 0.25 * q * fz2 * dt
+                x = xa
+                z = za
+
+                # periodic pitch
+                x = x % xmax
+
+                if z < 0.5:
+                    alive = False
+                    break
+                if z >= nz - 1.5:
+                    c = int(x - pad)
+                    if c >= 0 and c < W:
+                        hit_type[p] = 1
+                        hit_idx[p] = c
+                    alive = False
+                    break
+                if z >= mouth and z < nz - 1.5 and (x < pad or x >= pad + W):
+                    zj = int(z - mouth)
+                    if zj < 0:
+                        zj = 0
+                    elif zj > n_side - 1:
+                        zj = n_side - 1
+                    if z < mouth + 1.5:
+                        hit_type[p] = 4 if x < pad else 5
+                    else:
+                        if x < pad + 0.5 * W:
+                            hit_type[p] = 2
+                        else:
+                            hit_type[p] = 3
+                        hit_idx[p] = zj
+                        if q > 0.0 and z >= z_poly0:
+                            foot_E[p] = vx * vx + vz * vz
+                    alive = False
+                    break
+            if alive:
+                survivor[p] = 1
+            steps[p] = last_step
+        return hit_type, hit_idx, foot_E, survivor, steps
+else:
+    _trace_particles_adaptive = None
+
 
 def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                           iadf_hwhm_deg=4.3, cos_power=0.6, n_per_iter=6000, n_iter=120,
                           relax=None, seed=0, verbose=False, smooth=False,
                           poly_um=0.3, feature_w_um=0.5, rf_bursts=True,
-                          sheath_um=89.0, boundary_um=3.7, insul_vmin_Te=1.0):
+                          sheath_um=89.0, boundary_um=3.7, insul_vmin_Te=1.0,
+                          trace_integrator="adaptive_numba", trace_step_cap_factor=40.0):
     """Steady-state charging of the HG poly-on-oxide trench. Returns dict with:
     floor_flux (normalized ion flux to the oxide floor), V_floor_center, V_foot_peak,
     V_poly (the poly-line equipotential), foot_ion_flux / foot_ion_Emean (ions striking the
@@ -120,6 +238,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     _pw = np.exp(-(V_dc + V_rf * np.sin(_phi)) / Te)
     _pcdf = np.cumsum(_pw); _pcdf /= _pcdf[-1]
 
+    trace_stats = []
+
     def trace(kind, n, Ex, Ez):
         """Ballistic trace. Ions: field E_A. Electrons: E_A + V_s(phi_e)*E_B (rf_bursts)."""
         if kind == 'ion':
@@ -165,19 +285,75 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         hits_left = np.zeros(n_side); hits_right = np.zeros(n_side)
         hit_top_l = 0.0; hit_top_r = 0.0
         foot_n = 0.0; foot_E = 0.0                     # ion impacts on the POLY sidewall band
-        for _ in range(int(14 * nz)):
+        max_steps = int(float(trace_step_cap_factor) * nz)
+        if trace_integrator == "fixed":
+            max_steps = int(14 * nz)
+        steps_used = 0
+
+        if trace_integrator == "adaptive_numba" and _trace_particles_adaptive is not None:
+            ht, hi, fep, survivor, steps = _trace_particles_adaptive(
+                Ex, Ez, ExB, EzB, x, vx, vz, sB, q, nx, nz, W, pad, mouth, n_side, z_poly0, max_steps
+            )
+            floor_sel = ht == 1
+            if floor_sel.any():
+                hits_floor += np.bincount(hi[floor_sel], minlength=W)[:W]
+            left_sel = ht == 2
+            if left_sel.any():
+                hits_left += np.bincount(hi[left_sel], minlength=n_side)[:n_side]
+            right_sel = ht == 3
+            if right_sel.any():
+                hits_right += np.bincount(hi[right_sel], minlength=n_side)[:n_side]
+            hit_top_l = float((ht == 4).sum())
+            hit_top_r = float((ht == 5).sum())
+            foot_hit = fep > 0.0
+            foot_n = float(foot_hit.sum())
+            foot_E = float(fep[foot_hit].sum())
+            survivors = int(survivor.sum())
+            steps_used = int(steps.max()) if steps.size else 0
+            trace_stats.append(dict(kind=kind, n=int(n), survivors=survivors,
+                                    survivor_frac=float(survivors / max(n, 1)),
+                                    steps=int(steps_used), cap=int(max_steps),
+                                    integrator=trace_integrator))
+            return hits_floor, hits_left, hits_right, hit_top_l, hit_top_r, foot_n, foot_E
+
+        for _ in range(max_steps):
+            steps_used += 1
             if not alive.any():
                 break
             ix = np.clip(x[alive].astype(int), 0, nx - 2)
             iz = np.clip(z[alive].astype(int), 0, nz - 2)
-            ax = q * (Ex[ix, iz] + sB[alive] * ExB[ix, iz]) * 0.5
-            az = q * (Ez[ix, iz] + sB[alive] * EzB[ix, iz]) * 0.5
+            fx = Ex[ix, iz] + sB[alive] * ExB[ix, iz]
+            fz = Ez[ix, iz] + sB[alive] * EzB[ix, iz]
+            ax = q * fx * 0.5
+            az = q * fz * 0.5
             vmax = np.maximum(np.abs(vx[alive]), np.abs(vz[alive]))
-            dt = 0.45 / np.maximum(vmax, 0.8)
-            vx[alive] += ax * dt
-            vz[alive] += az * dt
-            x[alive] += vx[alive] * dt
-            z[alive] += vz[alive] * dt
+            if trace_integrator in ("adaptive", "adaptive_numba"):
+                field = np.hypot(fx, fz)
+                dt_v = 0.45 / np.maximum(vmax, 0.8)
+                dt_e = 0.3 / np.sqrt(np.maximum(field, 1.0e-9))
+                dt = np.minimum(dt_v, dt_e)
+                vx_half = vx[alive] + 0.5 * ax * dt
+                vz_half = vz[alive] + 0.5 * az * dt
+                xa = x[alive] + vx_half * dt
+                za = z[alive] + vz_half * dt
+                ix2 = np.clip(xa.astype(int), 0, nx - 2)
+                iz2 = np.clip(za.astype(int), 0, nz - 2)
+                fx2 = Ex[ix2, iz2] + sB[alive] * ExB[ix2, iz2]
+                fz2 = Ez[ix2, iz2] + sB[alive] * EzB[ix2, iz2]
+                ax2 = q * fx2 * 0.5
+                az2 = q * fz2 * 0.5
+                vx[alive] = vx_half + 0.5 * ax2 * dt
+                vz[alive] = vz_half + 0.5 * az2 * dt
+                x[alive] = xa
+                z[alive] = za
+            elif trace_integrator == "fixed":
+                dt = 0.45 / np.maximum(vmax, 0.8)
+                vx[alive] += ax * dt
+                vz[alive] += az * dt
+                x[alive] += vx[alive] * dt
+                z[alive] += vz[alive] * dt
+            else:
+                raise ValueError(f"unknown trace_integrator: {trace_integrator}")
             ia = np.flatnonzero(alive)
             xi, zi = x[ia], z[ia]
             x[ia] = np.mod(xi, float(nx))              # periodic pitch
@@ -207,6 +383,11 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                         foot_n += 1.0
                         foot_E += vx[j] ** 2 + vz[j] ** 2
                 alive[j] = False
+        survivors = int(alive.sum())
+        trace_stats.append(dict(kind=kind, n=int(n), survivors=survivors,
+                                survivor_frac=float(survivors / max(n, 1)),
+                                steps=int(steps_used), cap=int(max_steps),
+                                integrator=trace_integrator))
         return hits_floor, hits_left, hits_right, hit_top_l, hit_top_r, foot_n, foot_E
 
     hist = []
@@ -239,8 +420,13 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         vleft_hist.append(Vleft.copy()); vright_hist.append(Vright.copy())
         vpoly_hist.append(Vpoly)
         if verbose and it % 20 == 0:
+            tsi = next((s for s in reversed(trace_stats) if s["kind"] == "ion"), None)
+            tse = next((s for s in reversed(trace_stats) if s["kind"] == "electron"), None)
+            surv = ""
+            if tsi is not None and tse is not None:
+                surv = f" surv_i/e={tsi['survivor_frac']:.4f}/{tse['survivor_frac']:.4f}"
             print(f"  it{it}: floor_i={fi.sum()/n_per_iter:.3f} floor_e={fe.sum()/n_per_iter:.3f} "
-                  f"Vc={Vfloor[W//2]:.1f} Vpoly={Vpoly:.1f}", flush=True)
+                  f"Vc={Vfloor[W//2]:.1f} Vpoly={Vpoly:.1f}{surv}", flush=True)
     k = max(n_iter // 3, 5)
     tail = np.mean(hist[-k:])
     Vf_avg = np.mean(np.array(vfloor_hist[-k:]), axis=0)
@@ -269,7 +455,11 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         ion=dict(floor=float(ifl.sum() / ntot / open_frac), poly=float(ie_poly / ntot / open_frac),
                  pr=float(ie_pr / ntot / open_frac), top=float((itl + itr) / ntot)),
         electron=dict(floor=float(efl.sum() / ntot / open_frac), poly=float(ee_poly / ntot / open_frac),
-                      pr=float(ee_pr / ntot / open_frac), top=float((etl + etr) / ntot)))
+                      pr=float(ee_pr / ntot / open_frac), top=float((etl + etr) / ntot)),
+        trace=dict(last_ion=next((s for s in reversed(trace_stats) if s["kind"] == "ion"), None),
+                   last_electron=next((s for s in reversed(trace_stats) if s["kind"] == "electron"), None),
+                   cap_factor=float(trace_step_cap_factor),
+                   integrator=trace_integrator))
     _prwall = ~is_poly
     return dict(floor_flux=float(tail / open_frac), V_floor_center=float(Vf_avg[W // 2]),
                 V_foot_peak=float(Vf_avg.max()), V_poly=Vp_avg, Vfloor=Vf_avg, V=V,

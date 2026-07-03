@@ -402,6 +402,20 @@ The deficit decomposes into (a) our fixed-step/step-cap integrator silently drop
 electrons, (b) missing SEE, (c) analytic arrival shortcuts. All fixable in 2-D collisionless — the
 plan is `CHARGING_PHYSICS_PLAN.md` (W1 integrator → W2 SEE → W3 1-D RF-sheath MC source).
 
+**W1 integrator landed and measured (2026-07-03).** Replaced the fixed-step capped trace with an
+adaptive kick-drift-kick trajectory integrator and a Numba-compiled parallel particle loop
+(`trace_integrator="adaptive_numba"`, falling back to the pure NumPy adaptive path when Numba is
+absent). The numerical invariant is now explicit in the gates: max survivor fraction is <0.1%
+(`charging_gate_result.npz`: ion 0.0000, electron 0.0006; `notching_gate_result.npz`: ion 0.0000,
+electron 0.0007), so the silent well-captured-electron drop is gone. Runtime is usable again on the
+Vast EPYC/RTX box: full charging rows run ~15-18 s instead of ~190 s/row for the pure NumPy adaptive
+path. Physics result: W1 alone **does not close the gate**. Floor-flux RMSE is 0.075 (gate 0.05),
+AR4 V_c is 42.9 V (HG 33), Matsui 300 eV still passes (0.573), and the notching mechanism still
+fails the deep-AR foot-energy rise (15.8 vs HG 27.5 eV at AR4) while foot flux and poly potential
+remain green. Conclusion: the integrator artifact was real and is fixed, but the dominant residual
+is now W2/W3 physics — secondary electron emission and/or sheath-MC source distributions — not
+silent trajectory drops.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
