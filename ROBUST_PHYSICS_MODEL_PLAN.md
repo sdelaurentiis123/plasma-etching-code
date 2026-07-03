@@ -198,8 +198,8 @@ Quantitative anchors to digitize:
 - DP-GEN provenance: four-model ensemble, force-deviation uncertainty, candidate bounds around
   0.1-0.5 eV/A, final training set 43,682 frames, and ZBL interpolation for short-range ion collisions.
 
-This is independent of HG charging closure, but it is the path to real Resona-relevant chemistry and
-future MD-trained operators.
+This is independent of HG charging closure, but it is the path to real production-relevant chemistry
+and future MD-trained operators.
 
 ### W5 - 3-D charging/electrostatics production interface
 
