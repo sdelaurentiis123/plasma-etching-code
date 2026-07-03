@@ -299,6 +299,36 @@ does not have yet — those measured curves stay the final gate. Live-path smoke
 trench): floor ×0.57 (AR2) → ×0.35 (AR4), foot rate ×~40, monotone with AR — the mechanism is
 live and directionally correct; its quantitative foot-energy validation is the open item.
 
+## Conductor + RF-phase charging build — a documented trade (2026-07-02)
+
+The three fixes the foot-energy fail pointed at are now built into `charging2d.solve_trench_charging`
+(all HG-published physics, nothing tuned): a **poly-Si equipotential conductor line** with explicit
+charge redistribution (`poly_um=0.3`), **RF-phase-resolved electron bursts** (`rf_bursts=True`,
+arrival weighted by the instantaneous sheath barrier), and **substrate-referenced potentials**
+(Lieberman V_dc; potentials now comparable to HG's ground-referenced values). Measured result —
+an honest physics trade between the two solver configurations:
+
+| Gate | pre-conductor (`poly_um=0, rf_bursts=False`) | post-conductor (default) | HG target |
+|---|---|---|---|
+| Floor ion flux vs AR (8 pts) | **RMSE 0.039 PASS** | RMSE 0.060 fail (deep-AR too steep: 0.174 vs 0.22) | ≤ 0.05 |
+| V_floor center, AR 1 → 4 | ~20 → ~60 V (offset ref) | **11.1 → 53.6 V** (AR-1 anchor nearly exact; deep-AR over-charged) | 8 → 33 V |
+| Rising foot-potential peak | absent | **31.9 → 66.8 V, rising** | ~59 V at AR 4 |
+| Poly-line potential V_p(AR) | n/a (no conductor) | **6.1 → 44.2 V — PASS (±30%)** vs 6→39 | 6 → 39 V |
+| Foot-ion flux ~AR-independent | fail (×3.3 rise) | **PASS** (0.19→0.07→0.10) | ~constant |
+| Foot-ion energy rises 15→27.5 eV | fail (19→10, falling) | **still FAILS**: 15.2→18.0 (AR ≤ 2, on-curve) then decays to 10.3 | rising |
+
+Reading: the conductor physics works — the poly-line potential curve is quantitatively right, the
+foot peak exists and rises, the AR-1 floor potential lands on HG's 8 V (11.1 V), and the low-AR
+foot energies sit ON the HG curve (15.2 vs 15.0 at AR 1). The single remaining root cause is the
+**deep-AR floor over-charge** (V_c 53.6 vs 33 V at AR 4): the electron supply to the deep floor is
+still under-delivered (burst model is first-order; HG resolve full RF trajectories), which both
+steepens the deep flux (0.060 regression) and collapses the V_c−V_p gap that should accelerate
+deflected ions at deep AR (foot-energy decay). One cause, three symptoms. **Both configurations
+stay reachable and documented**: the flux-gate-passing pre-conductor closure remains the source of
+the production `charging_floor_profile` table; the conductor build is the mechanism model for
+notching work and the basis for the next fix (full RF-phase electron trajectories). Neither result
+is hidden; the gate scripts print both.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).

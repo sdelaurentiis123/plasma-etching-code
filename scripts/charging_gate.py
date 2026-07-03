@@ -2,12 +2,12 @@
 """Charging gate: petch's 2-D Hwang-Giapis charging solver vs the published curves.
 
 GATE 1 (primary, 2-D solver): floor ion flux vs AR -- HG JAP 82, 566 Fig. 4 (digitized +-0.02),
-Cl2 HDP, V_s = 37 + 30 sin(wt), T_e = 4 eV, in-plane EADF ~ cos^0.6, IADF HWHM 4.3 deg.
-All constants from the paper; NOTHING tuned. Gate: RMSE <= 0.05 over the 8 points.
+Cl2 HDP, V_s = 37 + 30 sin(wt), T_e = 4 eV. Solver carries the FULL HG geometry now: poly-Si
+conductor line, periodic pitch, physical 3.7 um boundary, RF-burst electrons, ion energy-angle
+anticorrelation. All constants published; NOTHING tuned. Gate: RMSE <= 0.05 over the 8 points.
+GATE 1b (info->gate): V_floor_center 8 -> 33 V over AR 1 -> 4 (ground-referenced now; +-40%).
 GATE 2: Matsui asymptote (APL 78, 883): with 300 eV ions the floor must NOT cut off at AR 4-6.
 GATE 3 (secondary, 0-D closure sanity): shape monotone + Matsui pass (charging.floor_balance).
-Note: HG potentials are referenced to the grounded substrate; the solver's V=0 is the sheath
-edge -- the FLUX curve is the like-for-like gate, potentials are reported for information.
 """
 import os, sys, time
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
