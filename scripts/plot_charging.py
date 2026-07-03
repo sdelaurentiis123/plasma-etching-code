@@ -34,18 +34,20 @@ axA.annotate("with 300 eV ions the floor stays open\n(0.56 @ AR 4 — the Matsui
              xy=(4.0, 0.22), xytext=(1.6, 0.10), fontsize=9, color="0.3",
              arrowprops=dict(arrowstyle="->", color="0.5"))
 
-im = axB.imshow(V.T, origin="upper", cmap="inferno", aspect="auto",
-                extent=[0, V.shape[0], V.shape[1], 0])
-axB.contour(V.T, levels=10, colors="w", linewidths=0.4, alpha=0.5,
-            extent=[0, V.shape[0], V.shape[1], 0], origin="upper")   # match imshow y-extent (was flipped)
-# geometry outline: mask blocks + trench slot (W=32, pad=24, mouth=24)
-W_, pad_, mouth_ = 32, 24, 24
-nz_ = V.shape[1]
-for x0, x1 in [(0, pad_), (pad_ + W_, V.shape[0])]:
-    axB.plot([x0, x1], [mouth_, mouth_], color="#4dd0e1", lw=2)
-axB.plot([pad_, pad_], [mouth_, nz_ - 1], color="#4dd0e1", lw=2)
-axB.plot([pad_ + W_, pad_ + W_], [mouth_, nz_ - 1], color="#4dd0e1", lw=2)
-axB.plot([pad_, pad_ + W_], [nz_ - 1, nz_ - 1], color="#4dd0e1", lw=2.5)
+# exact solver geometry (aligns the outline to the field; the old hardcoded pad/mouth were wrong)
+gm = r4["geom"]; pad_, W_, mouth_, nz_, nx_ = gm["pad"], gm["W"], gm["mouth"], gm["nz"], gm["nx"]
+z0 = max(0, mouth_ - 30)                                # crop the long empty mouth/vacuum above the feature
+Vc = V[:, z0:]                                         # show the feature (mouth->floor), not 237 empty cells
+im = axB.imshow(Vc.T, origin="upper", cmap="inferno", aspect="auto", extent=[0, nx_, nz_, z0])
+axB.contour(Vc.T, levels=10, colors="w", linewidths=0.4, alpha=0.5,
+            extent=[0, nx_, nz_, z0], origin="upper")
+cy = "#4dd0e1"                                         # geometry outline: mask tops, trench walls, floor
+axB.plot([0, pad_], [mouth_, mouth_], color=cy, lw=2)
+axB.plot([pad_ + W_, nx_], [mouth_, mouth_], color=cy, lw=2)
+axB.plot([pad_, pad_], [mouth_, nz_ - 1], color=cy, lw=2)
+axB.plot([pad_ + W_, pad_ + W_], [mouth_, nz_ - 1], color=cy, lw=2)
+axB.plot([pad_, pad_ + W_], [nz_ - 1, nz_ - 1], color=cy, lw=2.5)
+axB.set_xlim(0, nx_); axB.set_ylim(nz_, z0)
 axB.set_title(f"Steady-state potential at AR 4  (floor {r4['V_floor_center']:.0f} V)", fontsize=11)
 axB.set_xlabel("x (cells)"); axB.set_ylabel("z (cells, plasma at top)")
 plt.colorbar(im, ax=axB, label="V (volts, sheath edge = 0)")

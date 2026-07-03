@@ -275,6 +275,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                 V_foot_peak=float(Vf_avg.max()), V_poly=Vp_avg, Vfloor=Vf_avg, V=V,
                 foot_ion_flux=float(fn2 / (4 * n_per_iter) / open_frac),
                 foot_ion_Emean=float(fE2 / max(fn2, 1.0)), diag=diag,
+                geom=dict(pad=int(pad), W=int(W), mouth=int(mouth), D=int(D), nx=int(nx), nz=int(nz),
+                          poly_cells=int(poly_cells)),
                 Vprwall_mean=float(0.5 * (Vl_avg[_prwall].mean() + Vr_avg[_prwall].mean())) if _prwall.any() else 0.0,
                 Vprwall_min=float(min(Vl_avg[_prwall].min(), Vr_avg[_prwall].min())) if _prwall.any() else 0.0)
 
