@@ -46,20 +46,24 @@ except Exception:  # pragma: no cover - optional acceleration
 
 if njit is not None:
     @njit(cache=True, parallel=True, fastmath=True)
-    def _trace_particles_adaptive(Ex, Ez, ExB, EzB, x0, vx0, vz0, sB, q,
+    def _trace_particles_adaptive(Ex, Ez, ExB, EzB, x0, z0, vx0, vz0, sB, q,
                                   nx, nz, W, pad, mouth, n_side, z_poly0,
                                   max_steps):
         n = x0.shape[0]
         hit_type = np.zeros(n, np.int8)      # 0 escape/survivor, 1 floor, 2 left, 3 right, 4 top_l, 5 top_r
         hit_idx = np.full(n, -1, np.int64)
-        foot_E = np.zeros(n)
+        impact_E = np.zeros(n)
+        hit_x = np.zeros(n)
+        hit_z = np.zeros(n)
+        hit_vx = np.zeros(n)
+        hit_vz = np.zeros(n)
         survivor = np.zeros(n, np.uint8)
         steps = np.zeros(n, np.int64)
         xmax = float(nx)
 
         for p in prange(n):
             x = x0[p]
-            z = 1.0
+            z = z0[p]
             vx = vx0[p]
             vz = vz0[p]
             sb = sB[p]
@@ -127,6 +131,11 @@ if njit is not None:
                     if c >= 0 and c < W:
                         hit_type[p] = 1
                         hit_idx[p] = c
+                        impact_E[p] = vx * vx + vz * vz
+                        hit_x[p] = x
+                        hit_z[p] = z
+                        hit_vx[p] = vx
+                        hit_vz[p] = vz
                     alive = False
                     break
                 if z >= mouth and z < nz - 1.5 and (x < pad or x >= pad + W):
@@ -143,16 +152,40 @@ if njit is not None:
                         else:
                             hit_type[p] = 3
                         hit_idx[p] = zj
-                        if q > 0.0 and z >= z_poly0:
-                            foot_E[p] = vx * vx + vz * vz
+                    impact_E[p] = vx * vx + vz * vz
+                    hit_x[p] = x
+                    hit_z[p] = z
+                    hit_vx[p] = vx
+                    hit_vz[p] = vz
                     alive = False
                     break
             if alive:
                 survivor[p] = 1
             steps[p] = last_step
-        return hit_type, hit_idx, foot_E, survivor, steps
+        return hit_type, hit_idx, impact_E, hit_x, hit_z, hit_vx, hit_vz, survivor, steps
 else:
     _trace_particles_adaptive = None
+
+
+_PMMA_SIGMA_E_E = np.array([0.0, 5.0, 10.0, 16.0, 20.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0])
+_PMMA_SIGMA_E_Y = np.array([0.0, 0.08, 0.17, 0.28, 0.38, 0.60, 0.78, 0.94, 1.09, 1.39, 1.60])
+
+
+def _pmma_see_yields(energy):
+    """Memos/Lidorikis/Kokkoris PMMA SEEE model, digitized from their Fig. 2.
+
+    sigma_e is Dapor's total yield curve; Burke's polymer backscatter law separates eta;
+    true secondary yield delta is zero below 16 eV and sigma_e - eta above it.
+    """
+    e = np.asarray(energy, float)
+    sigma = np.interp(np.clip(e, 0.0, 100.0), _PMMA_SIGMA_E_E, _PMMA_SIGMA_E_Y)
+    eta = np.zeros_like(sigma)
+    hi = e > 0.0
+    eta[hi] = 0.115 * np.power(e[hi] / 1000.0, -0.223)
+    eta = np.minimum(eta, sigma)
+    delta = np.where(e >= 16.0, np.maximum(sigma - eta, 0.0), 0.0)
+    eta = np.where(e < 16.0, sigma, eta)
+    return sigma, eta, delta
 
 
 def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
@@ -160,7 +193,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                           relax=None, seed=0, verbose=False, smooth=False,
                           poly_um=0.3, feature_w_um=0.5, rf_bursts=True,
                           sheath_um=89.0, boundary_um=3.7, insul_vmin_Te=1.0,
-                          trace_integrator="adaptive_numba", trace_step_cap_factor=40.0):
+                          trace_integrator="adaptive_numba", trace_step_cap_factor=40.0,
+                          see_model="none", see_generations=1):
     """Steady-state charging of the HG poly-on-oxide trench. Returns dict with:
     floor_flux (normalized ion flux to the oxide floor), V_floor_center, V_foot_peak,
     V_poly (the poly-line equipotential), foot_ion_flux / foot_ion_Emean (ions striking the
@@ -239,6 +273,7 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
     _pcdf = np.cumsum(_pw); _pcdf /= _pcdf[-1]
 
     trace_stats = []
+    see_stats = []
 
     def trace(kind, n, Ex, Ez):
         """Ballistic trace. Ions: field E_A. Electrons: E_A + V_s(phi_e)*E_B (rf_bursts)."""
@@ -291,8 +326,8 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         steps_used = 0
 
         if trace_integrator == "adaptive_numba" and _trace_particles_adaptive is not None:
-            ht, hi, fep, survivor, steps = _trace_particles_adaptive(
-                Ex, Ez, ExB, EzB, x, vx, vz, sB, q, nx, nz, W, pad, mouth, n_side, z_poly0, max_steps
+            ht, hi, impact_E, hit_x, hit_z, hit_vx, hit_vz, survivor, steps = _trace_particles_adaptive(
+                Ex, Ez, ExB, EzB, x, z, vx, vz, sB, q, nx, nz, W, pad, mouth, n_side, z_poly0, max_steps
             )
             floor_sel = ht == 1
             if floor_sel.any():
@@ -305,15 +340,77 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
                 hits_right += np.bincount(hi[right_sel], minlength=n_side)[:n_side]
             hit_top_l = float((ht == 4).sum())
             hit_top_r = float((ht == 5).sum())
-            foot_hit = fep > 0.0
-            foot_n = float(foot_hit.sum())
-            foot_E = float(fep[foot_hit].sum())
+            if kind == 'ion' and poly_cells > 0:
+                foot_hit = ((ht == 2) | (ht == 3)) & (hi >= n_side - poly_cells)
+                foot_n = float(foot_hit.sum())
+                foot_E = float(impact_E[foot_hit].sum())
+
+            see_emit = 0
+            see_back = 0
+            see_sec = 0
+            see_absorb = 0
+            if (kind == 'electron' and see_model in ("pmma_pr", "pmma")
+                    and see_generations > 0 and _trace_particles_adaptive is not None):
+                wall_sel = ((ht == 2) | (ht == 3)) & (hi >= 0)
+                if poly_cells > 0:
+                    wall_sel &= hi < n_side - poly_cells
+                wall_idx = np.flatnonzero(wall_sel)
+                if wall_idx.size:
+                    _, eta, delta = _pmma_see_yields(impact_E[wall_idx])
+                    total = np.minimum(eta + delta, 0.98)
+                    u = rng.uniform(0.0, 1.0, wall_idx.size)
+                    back_local = u < eta
+                    sec_local = (u >= eta) & (u < total)
+                    emit_local = back_local | sec_local
+                    emit_idx = wall_idx[emit_local]
+                    if emit_idx.size:
+                        is_left = ht[emit_idx] == 2
+                        emit_hi = hi[emit_idx]
+                        for zj in emit_hi[is_left]:
+                            hits_left[zj] -= 1.0
+                        for zj in emit_hi[~is_left]:
+                            hits_right[zj] -= 1.0
+
+                        speed = np.ones(emit_idx.size)
+                        back_emit = back_local[emit_local]
+                        speed[back_emit] = np.sqrt(np.maximum(impact_E[emit_idx][back_emit], 1.0e-9))
+                        a = np.arcsin(rng.uniform(-1.0, 1.0, emit_idx.size))
+                        xe = np.where(is_left, pad + 0.1, pad + W - 0.1).astype(float)
+                        ze = mouth + emit_hi.astype(float) + 0.5
+                        vxe = np.where(is_left, np.cos(a), -np.cos(a)) * speed
+                        vze = np.sin(a) * speed
+                        sBe = sB[emit_idx]
+                        hte, hie, _, _, _, _, _, surve, stepse = _trace_particles_adaptive(
+                            Ex, Ez, ExB, EzB, xe, ze, vxe, vze, sBe, -1.0,
+                            nx, nz, W, pad, mouth, n_side, z_poly0, max_steps
+                        )
+                        efloor = hte == 1
+                        if efloor.any():
+                            hits_floor += np.bincount(hie[efloor], minlength=W)[:W]
+                        eleft = hte == 2
+                        if eleft.any():
+                            hits_left += np.bincount(hie[eleft], minlength=n_side)[:n_side]
+                        eright = hte == 3
+                        if eright.any():
+                            hits_right += np.bincount(hie[eright], minlength=n_side)[:n_side]
+                        hit_top_l += float((hte == 4).sum())
+                        hit_top_r += float((hte == 5).sum())
+                        see_emit = int(emit_idx.size)
+                        see_back = int(back_emit.sum())
+                        see_sec = int((~back_emit).sum())
+                        see_absorb = int(wall_idx.size - see_emit)
+                        see_stats.append(dict(n_primary_wall=int(wall_idx.size), emitted=see_emit,
+                                              backscatter=see_back, secondary=see_sec,
+                                              absorbed=see_absorb,
+                                              survivor_frac=float(surve.sum() / max(emit_idx.size, 1))))
             survivors = int(survivor.sum())
             steps_used = int(steps.max()) if steps.size else 0
             trace_stats.append(dict(kind=kind, n=int(n), survivors=survivors,
                                     survivor_frac=float(survivors / max(n, 1)),
                                     steps=int(steps_used), cap=int(max_steps),
-                                    integrator=trace_integrator))
+                                    integrator=trace_integrator,
+                                    see_emitted=int(see_emit), see_backscatter=int(see_back),
+                                    see_secondary=int(see_sec), see_absorbed=int(see_absorb)))
             return hits_floor, hits_left, hits_right, hit_top_l, hit_top_r, foot_n, foot_E
 
         for _ in range(max_steps):
@@ -459,7 +556,9 @@ def solve_trench_charging(AR, W=32, pad=16, mouth=237, Te=4.0, V_dc=37.0, V_rf=3
         trace=dict(last_ion=next((s for s in reversed(trace_stats) if s["kind"] == "ion"), None),
                    last_electron=next((s for s in reversed(trace_stats) if s["kind"] == "electron"), None),
                    cap_factor=float(trace_step_cap_factor),
-                   integrator=trace_integrator))
+                   integrator=trace_integrator),
+        see=dict(model=see_model, generations=int(see_generations),
+                 last=see_stats[-1] if see_stats else None))
     _prwall = ~is_poly
     return dict(floor_flux=float(tail / open_frac), V_floor_center=float(Vf_avg[W // 2]),
                 V_foot_peak=float(Vf_avg.max()), V_poly=Vp_avg, Vfloor=Vf_avg, V=V,

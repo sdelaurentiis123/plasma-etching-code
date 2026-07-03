@@ -23,10 +23,14 @@ from petch.charging2d import solve_trench_charging
 HG_AR = np.array([1.0, 1.2, 1.6, 2.0, 2.6, 3.0, 3.6, 4.0])
 HG_FOOT_E = np.array([15.0, 16.5, 17.5, 20.0, 23.0, 25.0, 26.5, 27.5])   # eV, poly-sidewall ions
 HG_VPOLY = np.array([6.0, 9.0, 15.0, 20.0, 27.0, 31.0, 36.0, 39.0])       # V (6->39, Fig. 6 trend)
+SEE_MODEL = os.environ.get("PETCH_SEE_MODEL", "none")
+SEE_GENERATIONS = int(os.environ.get("PETCH_SEE_GENERATIONS", "1"))
 
 Em, Fl, Vp, Vc, Fx, isurv, esurv = [], [], [], [], [], [], []
+print(f"see_model={SEE_MODEL} see_generations={SEE_GENERATIONS}", flush=True)
 for i, ar in enumerate(HG_AR):
-    r = solve_trench_charging(ar, n_per_iter=8000, n_iter=110, seed=3 + i)
+    r = solve_trench_charging(ar, n_per_iter=8000, n_iter=110, seed=3 + i,
+                              see_model=SEE_MODEL, see_generations=SEE_GENERATIONS)
     Em.append(r["foot_ion_Emean"]); Fl.append(r["foot_ion_flux"])
     Vp.append(r["V_poly"]); Vc.append(r["V_floor_center"]); Fx.append(r["floor_flux"])
     ti = r["diag"]["trace"]["last_ion"]; te = r["diag"]["trace"]["last_electron"]
@@ -54,5 +58,6 @@ print(f"W1 survivor gate: max ion/electron = {np.nanmax(isurv):.4f}/{np.nanmax(e
 np.savez(os.path.join(os.path.dirname(__file__), "..", "notching_gate_result.npz"),
          ar=HG_AR, foot_E=Em, hg_foot_E=HG_FOOT_E, foot_flux=Fl, vpoly=Vp, hg_vpoly=HG_VPOLY,
          vc=Vc, floor_flux=Fx, okA=okA, okB=okB, okC=okC,
-         survivor_ion=np.array(isurv), survivor_electron=np.array(esurv))
+         survivor_ion=np.array(isurv), survivor_electron=np.array(esurv),
+         see_model=SEE_MODEL, see_generations=SEE_GENERATIONS)
 print("DONE")

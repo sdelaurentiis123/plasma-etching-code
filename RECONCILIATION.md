@@ -416,6 +416,26 @@ remain green. Conclusion: the integrator artifact was real and is fixed, but the
 is now W2/W3 physics — secondary electron emission and/or sheath-MC source distributions — not
 silent trajectory drops.
 
+**W2 PR-only PMMA SEE implemented and measured (2026-07-03).** Added an opt-in
+`see_model="pmma_pr"` branch to `solve_trench_charging`: Dapor/Memos PMMA total electron yield
+digitized over 0-100 eV, Burke polymer backscatter `eta(E)`, zero true secondaries below 16 eV,
+1 eV cosine-isotropic true secondaries, elastic wall backscatter, and explicit charge bookkeeping
+at PR sidewall emission sites. The default remains `see_model="none"` so the W1 baseline and
+production closure tables are untouched. Measured on the Vast EPYC/RTX box with
+`PETCH_SEE_MODEL=pmma_pr`, generation cap 1:
+`charging_gate_see_result.npz` gives floor-flux RMSE **0.091 FAIL** (worse than W1 0.075), AR4
+`V_c = 40.6 V` (only a small improvement from W1 42.9; HG 33), Matsui 300 eV **PASS** (0.575),
+and max electron survivor **0.000906 PASS**. `notching_gate_see_result.npz` gives foot energy
+15.4/16.3/18.2/19.1/18.7/17.8/16.4/16.5 eV vs HG 15/16.5/17.5/20/23/25/26.5/27.5: low/mid AR
+improves, but deep AR still collapses; gate A **FAIL** (max rel err 40%), foot-flux constancy
+barely **FAIL** (2.05), poly potential **PASS** (4.6 -> 35.3 V vs HG 6 -> 39). Conclusion:
+PR-only PMMA SEE is a real, sign-correct partial channel, but it is **not** the missing deep-AR
+lever. The remaining issue is more specific: the poly conductor potential is already right while
+deep foot energy is low, so the residual likely lives in the joint arrival distributions / wall
+material SEE / electron landing redistribution, not conductor charge sharing or trajectory drops.
+Do not keep re-running PR-only SEE as a standalone fix; next falsification targets are all-wall
+material SEE and the HG-style RF sheath-MC source.
+
 ## Follow-ups
 
 - ✅ Warp-ify the DDA neutral gather — done (`_dda_gather_kernel`, ~14× over numpy on CPU, 0.1 s/eval on CUDA).
