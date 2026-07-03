@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scorecard — petch vs data vs other solvers</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="physics-grounding.html">Physics&nbsp;Grounding</a>
+  <a href="performance.html">Performance</a>
+  <a href="experimental-validation.html">Experiments</a>
+  <a href="viennaps-validation.html">ViennaPS&nbsp;Validation</a>
+  <a href="comparison.html" class="active">Scorecard</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+<p class="crumbs">Overview › <strong>Scorecard</strong></p>
+<h1>Scorecard — petch vs measured data vs other solvers</h1>
+<p class="subtitle">Every claim is a gate against published or measured data, with a reproducer script. Where petch is behind, it says so.</p>
+
+<p class="lede">Two questions decide whether a feature-scale etcher is worth using: does it match <em>real wafers</em> (not just another simulator), and can it do things the standard tool can't? This page puts petch beside <strong>ViennaPS</strong> (the open standard everyone benchmarks) and the <strong>Kushner-group Monte-Carlo codes</strong> (HPEM / MCFPM, the research reference for charging), against the measured data all three answer to.</p>
+
+<h2>1. Capability &amp; accuracy at a glance</h2>
+<table>
+<thead>
+<tr>
+  <th style="width:22%">Axis</th>
+  <th style="width:30%">petch</th>
+  <th style="width:26%">ViennaPS</th>
+  <th style="width:22%">Kushner MC (HPEM/MCFPM)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Neutral transport</strong></td>
+  <td>MC (Russian-roulette) + deterministic <em>radiosity+GMRES</em> + 1-D Knudsen tail — matches a measured ViennaPS reference to <strong>RMSE&nbsp;0.043</strong></td>
+  <td>ray-traced MC (ViennaRay), the reference we cross-check against</td>
+  <td>Monte-Carlo, reactor-coupled fluxes</td>
+</tr>
+<tr>
+  <td><strong>Real-wafer deep ARDE</strong> (held-out)</td>
+  <td class="tag-cell"><span class="tag win">predicts</span> de&nbsp;Boer AR&nbsp;40 it was never fit to: <strong>0.15–0.20 vs measured 0.20</strong> (curve RMSE 0.031–0.043)</td>
+  <td>ballistic — structurally misses the deep tail; validated to calibrated Belen SEMs</td>
+  <td>models it (gas-transport + charging), but CPU and closed</td>
+</tr>
+<tr>
+  <td><strong>Surface charging</strong></td>
+  <td class="tag-cell"><span class="tag win">yes</span> 2-D Hwang–Giapis solver; floor-flux <strong>RMSE&nbsp;0.039</strong>, nothing tuned</td>
+  <td><strong>none</strong> — no charging model</td>
+  <td>yes (the field's reference implementation)</td>
+</tr>
+<tr>
+  <td><strong>Charging notching</strong></td>
+  <td class="tag-cell"><span class="tag win">yes, gated</span> charging-specific, Fujiwara-monotone, HG shape <strong>r&nbsp;=&nbsp;0.92</strong>; absolute depth uncalibrated</td>
+  <td><strong>none</strong></td>
+  <td>yes (research)</td>
+</tr>
+<tr>
+  <td><strong>Differentiable / inverse design</strong></td>
+  <td class="tag-cell"><span class="tag win">yes</span> autodiff through the whole solver (NVIDIA Warp)</td>
+  <td>no</td>
+  <td>no</td>
+</tr>
+<tr>
+  <td><strong>Hardware &amp; speed</strong></td>
+  <td>GPU-resident, ~1&nbsp;s/eval; <strong>~8–15×</strong> a like-for-like ViennaPS run (CPU-dependent)</td>
+  <td>CPU level-set (optional GPU ray-trace); the speed baseline</td>
+  <td>CPU; not a feature-scale-speed comparison</td>
+</tr>
+<tr>
+  <td><strong>Open source</strong></td>
+  <td>yes</td>
+  <td>yes</td>
+  <td>no</td>
+</tr>
+</tbody>
+</table>
+
+<div class="callout warn">
+<span class="lab">Where petch is behind — stated plainly</span>
+<p>ViennaPS is <strong>mature and broadly validated</strong> across many chemistries and process conditions; petch's experimental validation is <strong>one wafer dataset, one chemistry</strong> (de&nbsp;Boer cryo SF<sub>6</sub>/O<sub>2</sub>) so far. petch's charging <strong>notch depth is not yet calibrated in absolute µm</strong> (~3–5× shallow of Hwang–Giapis; the <em>shape</em> and the on/off signature are what pass). The deterministic <strong>DDA transport is quarantined</strong> in the mirror-wall regime. Charging is <strong>insulating floors only</strong>, and the deep-AR electron supply (RF-phase trajectories) is an open item. Kushner's codes couple the reactor to the feature; petch takes incident fluxes as input (like ViennaPS). Nothing here is hidden — see <a href="experimental-validation.html">Experiments</a> and the repo's <code>RECONCILIATION.md</code> (retractions included).</p>
+</div>
+
+<h2>2. The killer plots</h2>
+
+<h3>#1 — Real wafer, held-out prediction</h3>
+<p>The accuracy claim that isn't circular: calibrate one transport knob on the de&nbsp;Boer knee (AR&nbsp;10/20), then <em>predict</em> the AR&nbsp;40 point. It lands on the measured wafer. Ballistic codes (ViennaPS included) roll off too fast in the deep tail.</p>
+<figure>
+<img src="experiment_arde.png" alt="petch ARDE curve vs the de Boer measured wafer with the held-out AR40 point predicted, next to a ballistic curve that misses the deep tail" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<figcaption><strong>petch vs measured wafer.</strong> Held-out AR&nbsp;40 predicted 0.15–0.20 vs measured 0.20; full-curve RMSE 0.031–0.043 (gate 0.05). The deep floor is where ballistic transport structurally deviates from the wafer. <a href="experimental-validation.html">Experiments</a>.</figcaption>
+</figure>
+
+<h3>#2 — Charging vs the published gate (ViennaPS has no charging at all)</h3>
+<p>petch carries a 2-D Hwang–Giapis charging solver built directly on the published method — ballistic ion/electron tracing through the in-feature field, per-segment current balance, Laplace in the vacuum.</p>
+<figure>
+<img src="charging_hg.png" alt="Left: petch charging floor-flux vs AR against the digitized Hwang-Giapis points. Right: the AR=4 potential map with equipotentials nesting from the charged floor" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<figcaption><strong>petch vs Hwang–Giapis 1997.</strong> The production <em>closure</em> config passes the floor-flux gate at <strong>RMSE&nbsp;0.039, nothing tuned</strong>. The full-geometry <em>mechanism</em> config shown here (poly-Si conductor + RF-burst electrons + the physical −T<sub>e</sub> insulator bound) gets the potentials right (poly-line 6→44&nbsp;V vs 6→39, AR-1 floor on HG's 8&nbsp;V) and trades the flux curve up to 0.071 — the honest number, with the deep-AR electron supply the one open root cause. The right panel is the in-trench field that deflects the ions. <strong>ViennaPS models none of this.</strong></figcaption>
+</figure>
+
+<h3>#3 — Charging-driven notching (nobody in petch's class does this)</h3>
+<p>The charging solver wired into an overetch: multi-material etch-stop (poly on buried oxide), and during overetch the deflected ion flux digs a notch at the poly/oxide junction — the measured Hwang–Giapis / Fujiwara phenomenon.</p>
+<figure>
+<img src="notching_depth.png" alt="Left: level-set cross-section with the notch at the poly/oxide foot. Right: notch depth vs AR, charging on rising with the measured Hwang-Giapis shape, charging off flat at zero" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<figcaption><strong>petch (charging on/off) vs measured notch data.</strong> A controlled A/B: charging <em>off</em> → 0.000&nbsp;µm undercut at every AR (perfectly anisotropic); charging <em>on</em> → 0.144/0.149/0.164&nbsp;µm at AR&nbsp;2/3/4. Gates pass: charging-specific, Fujiwara-monotone, HG shape <strong>r&nbsp;=&nbsp;0.92</strong>. Absolute depth uncalibrated (stated on the figure). No open feature-scale etcher — ViennaPS included — models this.</figcaption>
+</figure>
+
+<h3>#4 — Deterministic transport vs a measured ViennaPS reference</h3>
+<p>The like-for-like numerics cross-check: petch's deterministic neutral transport against a measured static ViennaPS ARDE curve, in the same geometry.</p>
+<figure>
+<img src="dda_vs_mc_arde.png" alt="petch deterministic transports (radiosity+GMRES, DDA) vs the measured ViennaPS static ARDE reference curve" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<figcaption><strong>petch vs ViennaPS (same geometry).</strong> radiosity+GMRES matches the measured ViennaPS reference to <strong>RMSE&nbsp;0.043</strong> and is the solver of record; DDA is quarantined at albedo≈0.99 (documented structural limit). The agreement comes with the ~8–15× speed result. <a href="viennaps-validation.html">ViennaPS Validation</a>.</figcaption>
+</figure>
+
+<div class="callout key">
+<span class="lab">Bottom line</span>
+<p>Against <strong>measured data</strong>, petch predicts a real wafer's deep ARDE tail it was never fit to, and reproduces the Hwang–Giapis charging curve with zero tuned constants. Against <strong>ViennaPS</strong>, it matches the transport numerics and runs ~8–15× faster, while adding two whole physics channels ViennaPS lacks — charging and charging-driven notching. Against the <strong>Kushner-group codes</strong>, it trades reactor coupling and decades of validation breadth for being open, GPU-resident, and differentiable. The honest gaps — absolute notch calibration, one dataset, DDA's mirror-wall regime — are on the table, not under it.</p>
+</div>
+
+<div class="pagenav">
+  <a href="experimental-validation.html">← Experiments</a>
+  <a href="viennaps-validation.html">ViennaPS Validation →</a>
+</div>
+<div class="footer">Every figure regenerates from a committed <code>.npz</code> via a script in <code>scripts/</code>; every number has a pass/fail gate. <code>RECONCILIATION.md</code> is the full log.</div>
+</main>
+</body>
+</html>
