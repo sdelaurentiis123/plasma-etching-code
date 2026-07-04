@@ -167,7 +167,8 @@ def sample_electrons(n, rng, nx, Te, cos_power=1.0):
 
 def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    n_per_iter=6000, n_iter=200, relax=None, seed=0,
-                   insul_vguard=None, verbose=False):
+                   insul_vguard=None, verbose=False,
+                   field_model="laplace", eps_insulator=3.9, rho_coupling=1.0):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -184,13 +185,38 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     if insul_vguard is None:
         insul_vguard = V_dc + V_rf
 
-    Vs = np.zeros((nx, nz))          # per-cell insulator potential
+    Vs = np.zeros((nx, nz))          # per-cell insulator potential (laplace mode)
     Vc = np.zeros(ncomp + 1)         # per-conductor-component equipotential (index 0 unused)
+    rho = np.zeros((nx, nz))         # per-cell free charge (poisson mode: on insulators)
 
     ii, jj = np.meshgrid(np.arange(nx), np.arange(nz), indexing="ij")
     red = ((ii + jj) % 2 == 0)
     inside = ~solid
     inside[:, 0] = False
+
+    # --- MCFPM-style variable-eps Poisson setup (field_model="poisson") ---
+    # Per-cell dielectric constant: gas 1, insulator eps_insulator, conductor Dirichlet (equipot,
+    # the high-mobility limit). The Poisson domain SOLVES gas AND insulator cells (the field
+    # penetrates the dielectric, carrying inter-feature coupling); conductors and the grounded
+    # top/bottom are Dirichlet. This is Kushner MCFPM's div(eps grad phi) = -rho with per-cell eps.
+    eps = np.ones((nx, nz))
+    eps[insul] = float(eps_insulator)
+    is_cond = cid > 0
+    # face conductances (arithmetic-mean eps on each face)
+    e_xm = np.empty_like(eps); e_xp = np.empty_like(eps)
+    e_zm = np.empty_like(eps); e_zp = np.empty_like(eps)
+    e_xm[1:, :] = 0.5 * (eps[1:, :] + eps[:-1, :]); e_xm[0, :] = eps[0, :]
+    e_xp[:-1, :] = 0.5 * (eps[:-1, :] + eps[1:, :]); e_xp[-1, :] = eps[-1, :]
+    e_zm[:, 1:] = 0.5 * (eps[:, 1:] + eps[:, :-1]); e_zm[:, 0] = eps[:, 0]
+    e_zp[:, :-1] = 0.5 * (eps[:, :-1] + eps[:, 1:]); e_zp[:, -1] = eps[:, -1]
+    e_diag = e_xm + e_xp + e_zm + e_zp
+    e_diag[e_diag < 1e-9] = 1e-9
+    poisson_inside = (~is_cond)
+    poisson_inside[:, 0] = False          # grounded plasma boundary (top) is the only Dirichlet
+    # NB: the bottom row is the SiO2 FLOOR (an insulator) and must FLOAT with its charge, not be
+    # grounded -- it charges positive relative to the plasma, which is the whole point. Zero-gradient
+    # (insulating) closure below it. (HG references to the substrate a few cells lower; the relative
+    # floor/edge/neighbour structure is reference-independent.)
 
     def apply_bc(V):
         V[:, 0] = 0.0
@@ -212,6 +238,30 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                 V[m] = (1.0 - omega) * V[m] + omega * avg[m]
         return apply_bc(V)
 
+    def poisson(V, sweeps=200, omega=1.7):
+        """Variable-eps Poisson div(eps grad phi) = -rho*k, red-black SOR. Conductors are
+        equipotential Dirichlet (set outside); top/bottom grounded; gas+insulator solved."""
+        k = float(rho_coupling)
+        for _ in range(sweeps):
+            V[:, 0] = 0.0
+            if ncomp > 0:
+                V[is_cond] = Vc[cid[is_cond]]
+            xm = np.empty_like(V); xp = np.empty_like(V)
+            zm = np.empty_like(V); zp = np.empty_like(V)
+            for color in (red, ~red):
+                xm[1:, :] = V[:-1, :]; xm[0, :] = V[0, :]
+                xp[:-1, :] = V[1:, :]; xp[-1, :] = V[-1, :]
+                zm[:, 1:] = V[:, :-1]; zm[:, 0] = V[:, 0]
+                zp[:, :-1] = V[:, 1:]; zp[:, -1] = V[:, -1]
+                num = e_xm * xm + e_xp * xp + e_zm * zm + e_zp * zp + k * rho
+                upd = num / e_diag
+                m = poisson_inside & color
+                V[m] = (1.0 - omega) * V[m] + omega * upd[m]
+        V[:, 0] = 0.0
+        if ncomp > 0:
+            V[is_cond] = Vc[cid[is_cond]]
+        return V
+
     def trace(kind, n, Ex, Ez):
         if kind == "ion":
             x, z, vx, vz = sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg)
@@ -226,18 +276,23 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             np.add.at(counts, (hix[m], hiz[m]), 1.0)
         return counts, float(surv.mean())
 
+    use_poisson = field_model == "poisson"
     V = np.zeros((nx, nz))
     hist = []
     for it in range(n_iter):
-        V = laplace(V)
+        V = poisson(V) if use_poisson else laplace(V)
         Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
         ci, si = trace("ion", n_per_iter, Ex, Ez)
         ce, se = trace("electron", n_per_iter, Ex, Ez)
         net = ci - ce
         anneal = max(1.0 / (1.0 + it / 25.0), 0.25)
         scale = anneal * relax / n_per_iter * nx
-        Vs[insul] += scale * net[insul]
-        Vs[insul] = np.clip(Vs[insul], -insul_vguard, V_dc + V_rf)
+        if use_poisson:
+            # insulators accumulate free CHARGE; the Poisson solve maps it to potential via eps
+            rho[insul] += scale * net[insul]
+        else:
+            Vs[insul] += scale * net[insul]
+            Vs[insul] = np.clip(Vs[insul], -insul_vguard, V_dc + V_rf)
         for c in range(1, ncomp + 1):
             m = cid == c
             area = max(int(m.sum()), 1)
@@ -245,10 +300,14 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             Vc[c] = float(np.clip(Vc[c], -3.0 * Te, V_dc + V_rf))
         hist.append((float(si), float(se)))
         if verbose and it % 20 == 0:
+            vmax = V.max() if use_poisson else Vs.max()
             print(f"  it{it}: surv_i/e={si:.3f}/{se:.3f} "
                   f"Vc={np.round(Vc[1:], 1) if ncomp else '-'} "
-                  f"Vs[max]={Vs.max():.1f}", flush=True)
+                  f"Vmax={vmax:.1f}", flush=True)
 
-    V = laplace(V, sweeps=180)
-    return dict(V=V, Vs=Vs, Vc=Vc[1:], ncomp=ncomp, cid=cid,
-                surv_ion=hist[-1][0], surv_electron=hist[-1][1])
+    V = poisson(V, sweeps=180) if use_poisson else laplace(V, sweeps=180)
+    # per-cell insulator potential is the solved field at insulator cells (poisson) or Vs (laplace)
+    Vs_out = np.where(insul, V, 0.0) if use_poisson else Vs
+    return dict(V=V, Vs=Vs_out, Vc=Vc[1:], ncomp=ncomp, cid=cid, rho=rho,
+                surv_ion=hist[-1][0], surv_electron=hist[-1][1],
+                field_model=field_model)
