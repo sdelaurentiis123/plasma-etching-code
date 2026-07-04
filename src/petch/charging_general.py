@@ -30,6 +30,8 @@ except Exception:  # pragma: no cover
     njit = None
     prange = range
 
+from .charging2d import _sky_view_factors
+
 GAS = 0
 INSULATOR = 1
 CONDUCTOR = 2
@@ -168,7 +170,8 @@ def sample_electrons(n, rng, nx, Te, cos_power=1.0):
 def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    n_per_iter=6000, n_iter=200, relax=None, seed=0,
                    insul_vguard=None, verbose=False,
-                   field_model="laplace", eps_insulator=3.9, rho_coupling=1.0):
+                   field_model="laplace", eps_insulator=3.9, rho_coupling=1.0,
+                   electron_open_vf=True, frame_every=0):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -213,6 +216,26 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     e_diag[e_diag < 1e-9] = 1e-9
     poisson_inside = (~is_cond)
     poisson_inside[:, 0] = False          # grounded plasma boundary (top) is the only Dirichlet
+
+    # --- open-plasma electron floor via sky view factor (closes the edge/neighbour split) ---
+    # The down-going electron trace under-samples OPEN-FACING walls (the edge line's outer wall
+    # facing the open area). For every surface cell, the electron collection should be at LEAST the
+    # isotropic open-plasma flux it can see = e_base * view_factor. Interior cells (deep walls, floor)
+    # get MORE from the field-focused trace, so max() keeps the trace there; open-facing cells (high
+    # VF) get their view-factor flux, which holds the edge line low while the walled-in neighbour
+    # stays starved and rises. General (VF-based), no hardcoded geometry.
+    vf_grid = None
+    if electron_open_vf:
+        gas_c = ~solid
+        exp_cell = np.zeros_like(solid)
+        exp_cell[1:, :] |= solid[1:, :] & gas_c[:-1, :]
+        exp_cell[:-1, :] |= solid[:-1, :] & gas_c[1:, :]
+        exp_cell[:, 1:] |= solid[:, 1:] & gas_c[:, :-1]
+        exp_cell[:, :-1] |= solid[:, :-1] & gas_c[:, 1:]
+        six, siz = np.where(exp_cell)
+        vf = _sky_view_factors(solid, six.astype(np.int64), siz.astype(np.int64), 180)
+        vf_grid = np.zeros((nx, nz))
+        vf_grid[six, siz] = vf
     # NB: the bottom row is the SiO2 FLOOR (an insulator) and must FLOAT with its charge, not be
     # grounded -- it charges positive relative to the plasma, which is the whole point. Zero-gradient
     # (insulating) closure below it. (HG references to the substrate a few cells lower; the relative
@@ -284,11 +307,18 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     use_poisson = field_model == "poisson"
     V = np.zeros((nx, nz))
     hist = []
+    frames = []          # (iter, V snapshot, Vc snapshot) for the dynamics movie
     for it in range(n_iter):
         V = poisson(V) if use_poisson else laplace(V)
         Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
         ci, si = trace("ion", n_per_iter, Ex, Ez)
         ce, se = trace("electron", n_per_iter, Ex, Ez)
+        if vf_grid is not None:
+            Vcell = (Vs if not use_poisson else V).copy()
+            if ncomp > 0:
+                Vcell[is_cond] = Vc[cid[is_cond]]
+            thr = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
+            ce = np.maximum(ce, (float(n_per_iter) / nx) * vf_grid * thr)
         net = ci - ce
         anneal = max(1.0 / (1.0 + it / 25.0), 0.25)
         scale = anneal * relax / n_per_iter * nx
@@ -304,6 +334,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             Vc[c] += scale * float(net[m].sum()) / area
             Vc[c] = float(np.clip(Vc[c], -3.0 * Te, V_dc + V_rf))
         hist.append((float(si), float(se)))
+        if frame_every and (it % frame_every == 0 or it == n_iter - 1):
+            frames.append((it, V.copy(), Vc[1:].copy()))
         if verbose and it % 20 == 0:
             vmax = V.max() if use_poisson else Vs.max()
             print(f"  it{it}: surv_i/e={si:.3f}/{se:.3f} "
@@ -316,10 +348,16 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     ci_f, _, Ei_f = trace("ion", 4 * n_per_iter, Ex, Ez, want_energy=True)
     ce_f, _ = trace("electron", 4 * n_per_iter, Ex, Ez)
     ntot = 4 * n_per_iter
+    if vf_grid is not None:
+        Vcell = (Vs if not use_poisson else V).copy()
+        if ncomp > 0:
+            Vcell[is_cond] = Vc[cid[is_cond]]
+        thr = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
+        ce_f = np.maximum(ce_f, (float(ntot) / nx) * vf_grid * thr)
     # per-cell insulator potential is the solved field at insulator cells (poisson) or Vs (laplace)
     Vs_out = np.where(insul, V, 0.0) if use_poisson else Vs
     return dict(V=V, Vs=Vs_out, Vc=Vc[1:], ncomp=ncomp, cid=cid, rho=rho,
                 surv_ion=hist[-1][0], surv_electron=hist[-1][1],
                 field_model=field_model,
                 ion_counts=ci_f, ion_energy=Ei_f, electron_counts=ce_f, ntot=ntot,
-                solid=solid, insul=insul)
+                solid=solid, insul=insul, frames=frames)
