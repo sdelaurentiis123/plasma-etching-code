@@ -1016,10 +1016,16 @@ def _build_edge_array_geometry(AR, W=32, mouth=237, poly_um=0.3, feature_w_um=0.
     floor_trench_mask = np.zeros_like(solid)
     floor_trench_mask[trench0:trench1, nz - 1] = True
     pr_mask = solid & (cond == 0) & ~floor_mask
+    # Outer wall of the edge line: its leftmost solid column (edge0), whose left neighbour is the
+    # open area. This face is exposed to the open plasma half-space and collects the open-area
+    # electron flux (W2). Split implicitly into PR (cond==0) and poly (cond==1) by cond.
+    edge_outer_mask = np.zeros_like(solid)
+    edge_outer_mask[edge0, mouth:nz - 1] = True
     edge_exposed_area = max(2 * poly_cells, 1)
     neighbor_exposed_area = max(2 * poly_cells, 1)
     return dict(solid=solid, cond=cond, floor_mask=floor_mask,
                 floor_trench_mask=floor_trench_mask, pr_mask=pr_mask,
+                edge_outer_mask=edge_outer_mask,
                 nx=int(nx), nz=int(nz), D=int(D), W=int(W), mouth=int(mouth),
                 open_w=int(open_w), buffer_w=int(buffer_w),
                 edge0=int(edge0), edge1=int(edge1), trench0=int(trench0), trench1=int(trench1),
@@ -1041,7 +1047,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                               ion_angle_energy_corr="anticorrelated",
                               source_model="analytic", open_width_um=3.7, right_buffer_um=0.5,
                               edge_open_model="none", edge_open_electron_flux=None,
-                              edge_open_samples=None):
+                              edge_open_samples=None, open_wall_frac=1.0):
     """Explicit nonperiodic HG edge-line/open-area charging cell.
 
     This is the next-step mechanism solver: open area + edge poly line + edge trench +
@@ -1092,7 +1098,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         edge_aux.update(_sample_open_side_flux(
             rng, edge_open_samples, W, geom["pr_cells"], geom["poly_cells"], cos_power,
             iadf_hwhm_deg, ion_angle_energy_corr, V_dc, V_rf, geom["open_w"]))
-    elif edge_open_model in ("none", None):
+    elif edge_open_model in ("none", None, "wall_flux"):
         pass
     else:
         raise ValueError(f"unknown edge_open_model: {edge_open_model}")
@@ -1236,6 +1242,20 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         net = ci - ce
         anneal = max(1.0 / (1.0 + it / 25.0), 0.25)
         scale = anneal * relax / n_per_iter * nx
+        # W2: open-plasma electron flux onto the edge line's OUTER wall (faces the open area).
+        # The down-going MC source never delivers side-arriving electrons, so this wall is added
+        # analytically: each outer-wall cell collects the open-field electron flux (one column's
+        # worth, open_wall_frac of it), throttled by its own potential (electrons repelled by a
+        # negative surface ~ exp(V/Te); a positive surface collects the full arriving flux). This
+        # holds the edge line low while the walled-in neighbour stays starved and rises -> the
+        # HG edge/neighbour potential split. Only active for edge_open_model="wall_flux".
+        if edge_open_model == "wall_flux":
+            eo = geom["edge_outer_mask"]
+            Vwall = np.where(cond == 1, Vedge, Vsolid)
+            accept = np.where(Vwall >= 0.0, 1.0, np.exp(np.clip(Vwall / max(Te, 1e-9), -40.0, 0.0)))
+            open_e = np.zeros_like(net)
+            open_e[eo] = open_wall_frac * (float(n_per_iter) / nx) * accept[eo]
+            net = net - open_e   # electrons: reduce net current on the outer-wall cells
         Vsolid[pr_mask | floor_mask] += scale * net[pr_mask | floor_mask]
         explicit_outer_net_e = float((hte == 3).sum() - (hti == 3).sum())
         target_outer_net_e = edge_boundary_net(Vedge) * n_per_iter * open_frac
