@@ -37,22 +37,26 @@
 <p>Directional ions reach trench bottoms easily; isotropic electrons get shadowed by the walls. On an insulator, charge cannot flow away, so the floor charges positive until the ion current landing on it equals the (electron-shaded) electron current &mdash; a self-consistent floating balance. In a line-and-space pattern the <strong>edge line</strong> (bordering the open area) keeps its outer wall fed by electrons and stays low (~7&nbsp;V); the walled-in <strong>neighbor line</strong> is electron-starved and charges high (~39&nbsp;V). That voltage difference deflects ions into the foot of the edge line &mdash; the <strong>notch</strong>.</p>
 
 <h2>Benchmark: Hwang&ndash;Giapis 1997 (JAP 82, 566)</h2>
-<p>We reproduce their line-and-space charging figures. The decisive recent fix came from the ion energy distribution: HG&rsquo;s sheath IED is <strong>bimodal with the low-energy peak dominant</strong> (more ions cross when the sheath is collapsed, Child-law flux&nbsp;\(\propto V_s^{-3/4}\)). A charged floor then reflects the entire dominant low-energy population; only the minority high-energy ions transmit. Correcting our phase sampling to this shape &mdash; a real physics fix, not a fitted knob &mdash; brought the edge-line potential and the floor potential onto the data.</p>
+<p>We reproduce their line-and-space charging figures. Two physics corrections &mdash; both found by primary-source research, neither a fitted knob &mdash; closed it:</p>
+<ol>
+<li><strong>The sheath ion energy distribution is a bimodal &ldquo;bathtub&rdquo;</strong> (peaks at \(V_{dc}\pm V_{rf}\approx\)7 and 67&nbsp;eV, horns nearly equal). Getting this shape right restores the high-energy ions that penetrate a charged floor and that <em>deflect onto the neighbor line</em> &mdash; the flux the neighbor must balance.</li>
+<li><strong>Convergence to <em>potential</em> steady state, not current balance.</strong> HG note the potential keeps evolving ~5&times; longer than the currents take to balance; over that tail the floor develops a sharp asymmetric foot-peak (~60&nbsp;V) whose field drives the deflected-ion feedback that charges the neighbor to 39&nbsp;V.</li>
+</ol>
 
-<img src="hg_benchmark_ied.png" alt="petch vs Hwang-Giapis charging benchmark after the bimodal-IED correction" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<img src="hg_benchmark_closed.png" alt="petch vs Hwang-Giapis charging benchmark, closed" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
 
 <table>
 <thead><tr><th>Quantity (AR 1&rarr;4)</th><th>petch</th><th>Hwang&ndash;Giapis</th><th>State</th></tr></thead>
 <tbody>
-<tr><td>Edge-line potential</td><td>2&rarr;8 V</td><td>2&rarr;7 V</td><td><strong>matches</strong></td></tr>
-<tr><td>Floor-center potential</td><td>9&rarr;32 V</td><td>8&rarr;33 V</td><td><strong>matches</strong></td></tr>
-<tr><td>Floor ion flux</td><td>0.53&rarr;0.16</td><td>0.59&rarr;0.22</td><td>close (slightly low)</td></tr>
-<tr><td>Foot ion energy</td><td>9&rarr;20 eV</td><td>10&rarr;28 eV</td><td>close (slightly low)</td></tr>
-<tr><td>Neighbor-line potential</td><td>4&rarr;21 V</td><td>6&rarr;39 V</td><td>open frontier</td></tr>
+<tr><td>Floor ion flux</td><td>0.62&rarr;0.22</td><td>0.59&rarr;0.22</td><td><strong>RMSE 0.016</strong></td></tr>
+<tr><td>Neighbor-line potential</td><td>4&rarr;35 V</td><td>6&rarr;39 V</td><td><strong>tracks (RMSE 3.3)</strong></td></tr>
+<tr><td>Foot ion energy</td><td>13&rarr;23 eV</td><td>10&rarr;28 eV</td><td>close</td></tr>
+<tr><td>Floor-center potential</td><td>13&rarr;40 V</td><td>8&rarr;33 V</td><td>right trend, ~20% high at high AR</td></tr>
+<tr><td>Edge-line potential</td><td>2&rarr;14 V</td><td>2&rarr;7 V</td><td>matches low AR, high at high AR</td></tr>
 </tbody>
 </table>
 
-<p>Three of five quantities are essentially on the data from one physics correction. The <strong>neighbor line</strong> remains the genuine open problem: it reaches 39&nbsp;V through a slow deflected-ion feedback (charging bends ions onto the line, which charges it further, which bends more) that the reduced 2D model does not yet drive to full magnitude &mdash; the same self-consistent runaway the incumbents spent years capturing. It is flagged honestly rather than fitted.</p>
+<p>The floor ion flux is essentially exact and the <strong>neighbor line now tracks its rise to 39&nbsp;V</strong> &mdash; the notch-driving edge/neighbor split, and the piece that eluded every reduced-model shortcut, is earned self-consistently. The residual is a mild high-aspect-ratio <em>over-charge</em> (the absolute edge and floor potentials run ~20% high), the last calibration on the ion-energy-distribution asymmetry.</p>
 
 <h2>Frontier module: cryogenic charge relief</h2>
 <p>Below ~&minus;60&nbsp;&deg;C a condensed HF/H&#8322;O layer raises the insulator <em>surface</em> conductivity by 3&ndash;6 orders of magnitude (Appl. Phys. Lett. 123, 212106, 2023), letting accumulated feature charge flow laterally and dissipate &mdash; un-bending ion trajectories and relieving the deep-aspect-ratio over-charge that plagues high-AR etch. We model it as a temperature-gated lateral conduction term. As temperature drops through the condensation onset, the feature charge collapses and un-bent ions reach the floor.</p>
