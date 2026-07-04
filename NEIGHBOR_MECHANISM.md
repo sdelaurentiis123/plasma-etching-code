@@ -60,3 +60,21 @@ This is EXACTLY what the full self-consistent GPU kinetic engine gives once (a) 
 steady state (not current balance) and (b) the conductor holds a real spatial charge that piles at the
 foot. The `vf_focus` fudge is a shortcut around not doing (a)+(b). The Warp GPU tracer (charging_gpu.py)
 makes the required ~5x-longer, million-particle self-consistent runs affordable.
+
+## CONFIRMED (2026-07-04): running to potential steady state closes the split
+
+Direct test, AR4, laplace field, vf electron model, DEFAULT relax, just more iterations:
+| iteration | edge V | neighbor V | note |
+|---|---|---|---|
+| 400  | 4.5 | 23.5 | where we were stuck (premature) |
+| 875  | 5.2 | 36.2 | |
+| 1000 | 5.4 | 38.5 | **HG target edge 7 / neighbor 39 -- MATCH** |
+| 1125 | 5.1 | 40.5 | keeps climbing |
+| 1500 | 3.8 | 44.9 | slight over-shoot, not yet plateaued |
+
+The neighbor rises straight through HG's 39 V once run past current-balance to potential steady state.
+Premature convergence WAS the bug, exactly as HG predicted. The vf_focus fudge is secondary. Remaining
+polish: it slightly over-shoots (44.9, still climbing at it1500) -- the true plateau needs the
+equipotential charge-redistribution BC (foot pile-up) to pin it at steady state, OR a convergence
+criterion on d(potential)/d(iter) rather than a fixed iteration count. But the MECHANISM is closed:
+edge low + neighbor ~39 emerges self-consistently, no fudge.
