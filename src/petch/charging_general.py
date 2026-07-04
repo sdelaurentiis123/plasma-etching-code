@@ -262,7 +262,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             V[is_cond] = Vc[cid[is_cond]]
         return V
 
-    def trace(kind, n, Ex, Ez):
+    def trace(kind, n, Ex, Ez, want_energy=False):
         if kind == "ion":
             x, z, vx, vz = sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg)
             q = 1.0
@@ -271,9 +271,14 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             q = -1.0
         hix, hiz, E, _, surv = _trace_general(Ex, Ez, solid, x, z, vx, vz, q, nx, nz, 40 * nz)
         counts = np.zeros((nx, nz))
+        energy = np.zeros((nx, nz)) if want_energy else None
         m = hix >= 0
         if m.any():
             np.add.at(counts, (hix[m], hiz[m]), 1.0)
+            if want_energy:
+                np.add.at(energy, (hix[m], hiz[m]), E[m])
+        if want_energy:
+            return counts, float(surv.mean()), energy
         return counts, float(surv.mean())
 
     use_poisson = field_model == "poisson"
@@ -306,8 +311,15 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                   f"Vmax={vmax:.1f}", flush=True)
 
     V = poisson(V, sweeps=180) if use_poisson else laplace(V, sweeps=180)
+    Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
+    # final high-stat pass for diagnostics (ion counts + impact energy grid, electron collection)
+    ci_f, _, Ei_f = trace("ion", 4 * n_per_iter, Ex, Ez, want_energy=True)
+    ce_f, _ = trace("electron", 4 * n_per_iter, Ex, Ez)
+    ntot = 4 * n_per_iter
     # per-cell insulator potential is the solved field at insulator cells (poisson) or Vs (laplace)
     Vs_out = np.where(insul, V, 0.0) if use_poisson else Vs
     return dict(V=V, Vs=Vs_out, Vc=Vc[1:], ncomp=ncomp, cid=cid, rho=rho,
                 surv_ion=hist[-1][0], surv_electron=hist[-1][1],
-                field_model=field_model)
+                field_model=field_model,
+                ion_counts=ci_f, ion_energy=Ei_f, electron_counts=ce_f, ntot=ntot,
+                solid=solid, insul=insul)
