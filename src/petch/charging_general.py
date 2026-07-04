@@ -146,11 +146,23 @@ def _connected_conductor_ids(mat):
 
 
 def sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg):
-    """Directional ions from the sheath: energy over the RF cycle, narrow angular cone, launched
-    at the mouth plane moving down. (Ion optics unchanged from the validated model.)"""
-    phi = rng.uniform(0.0, 2.0 * np.pi, n)
+    """Directional ions from the sheath with the correct BIMODAL energy distribution.
+
+    KEY (Hwang-Giapis JVST B 15,70): the sheath IED is bimodal (peaks at V_dc-V_rf and V_dc+V_rf)
+    with the LOW-energy peak DOMINANT -- the ion flux is higher during sheath collapse (Child-law
+    flux ~ V_s^-3/4), so more ions cross at low energy. This is what lets a ~33 V charged floor
+    repel ~78% of ions: the barrier reflects the entire dominant low-energy peak; only the minority
+    high-energy peak transmits. Uniform-phase sampling gives EQUAL peaks -> too many high-energy
+    ions punch through -> floor flux too high. We importance-sample the phase by the flux modulation.
+    The angular spread is energy-correlated (low-energy ions are the widest -> lost to sidewalls)."""
+    # importance-sample phase phi by the Child-law ion-flux modulation w(phi) ~ V_s(phi)^-3/4
+    phi_grid = np.linspace(0.0, 2.0 * np.pi, 2048)
+    Vs_grid = np.maximum(V_dc + V_rf * np.sin(phi_grid), 0.5)
+    w = Vs_grid ** (-0.75)
+    cdf = np.cumsum(w); cdf /= cdf[-1]
+    phi = np.interp(rng.uniform(0.0, 1.0, n), cdf, phi_grid)
     E0 = np.maximum(V_dc + V_rf * np.sin(phi), 0.5)
-    sig = np.deg2rad(iadf_hwhm_deg) / 1.1774 * np.sqrt(V_dc / E0)
+    sig = np.deg2rad(iadf_hwhm_deg) / 1.1774 * np.sqrt(V_dc / E0)   # energy-correlated angular spread
     th = rng.normal(0.0, sig, n)
     vx = np.sqrt(E0) * np.sin(th)
     vz = np.sqrt(E0) * np.abs(np.cos(th))
