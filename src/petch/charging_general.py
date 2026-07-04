@@ -37,6 +37,16 @@ INSULATOR = 1
 CONDUCTOR = 2
 
 
+def _cryo_conductivity(T_C):
+    """Temperature-gated surface conductivity 0..1. Physical anchor: below ~-60 C an HF/H2O layer
+    condenses and raises insulator surface conductivity 3-6 orders of magnitude (Appl. Phys. Lett.
+    123, 212106, 2023), which dissipates feature charge. Sigmoid switch-on around the condensation
+    onset (~-60 C), saturating cold. Warm (>0 C) -> ~0 (insulator holds charge)."""
+    T_onset = -60.0
+    width = 15.0
+    return float(1.0 / (1.0 + np.exp((T_C - T_onset) / width)))
+
+
 def _trace_general_py(Ex, Ez, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps):
     """Push particles through the field until they enter a solid cell; return the hit CELL.
 
@@ -172,7 +182,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    insul_vguard=None, verbose=False,
                    field_model="laplace", eps_insulator=3.9, rho_coupling=1.0,
                    electron_open_vf=True, frame_every=0,
-                   electron_model="trace", vf_focus=1.8, vf_focus_pot=0.0):
+                   electron_model="trace", vf_focus=1.8, vf_focus_pot=0.0,
+                   surface_conductivity=0.0, temperature_C=20.0):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -349,6 +360,17 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         else:
             Vs[insul] += scale * net[insul]
             Vs[insul] = np.clip(Vs[insul], -insul_vguard, V_dc + V_rf)
+        # CRYO MODULE (frontier, nobody has it open-source): a temperature-gated condensed HF/H2O
+        # layer raises insulator SURFACE conductivity 3-6 orders below ~-60C (APL 123,212106 2023),
+        # letting accumulated feature charge FLOW LATERALLY along surfaces and dissipate toward the
+        # grounded regions -- un-bending ion trajectories and relieving deep-AR over-charge. Modeled
+        # as a T-gated lateral diffusion of the insulator potential. sigma(T): ~0 warm, ~1 cryo.
+        sigma = _cryo_conductivity(temperature_C) if surface_conductivity == "auto" else float(surface_conductivity)
+        if sigma > 0.0:
+            from scipy.ndimage import uniform_filter
+            Vloc = uniform_filter(Vs, size=3, mode="nearest")
+            Vs[insul] += sigma * (Vloc[insul] - Vs[insul])   # charge spreads along the surface
+            Vs[insul] *= (1.0 - 0.15 * sigma)                # + leaks toward ground (net dissipation)
         for c in range(1, ncomp + 1):
             m = cid == c
             area = max(int(m.sum()), 1)
