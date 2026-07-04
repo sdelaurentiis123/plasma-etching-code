@@ -145,7 +145,7 @@ def _connected_conductor_ids(mat):
         return cid, int(idx[0].size)
 
 
-def sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg):
+def sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg, ied_bias=0.25):
     """Directional ions from the sheath with the correct BIMODAL energy distribution.
 
     KEY (Hwang-Giapis JVST B 15,70): the sheath IED is bimodal (peaks at V_dc-V_rf and V_dc+V_rf)
@@ -158,7 +158,7 @@ def sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg):
     # importance-sample phase phi by the Child-law ion-flux modulation w(phi) ~ V_s(phi)^-3/4
     phi_grid = np.linspace(0.0, 2.0 * np.pi, 2048)
     Vs_grid = np.maximum(V_dc + V_rf * np.sin(phi_grid), 0.5)
-    w = Vs_grid ** (-0.75)
+    w = Vs_grid ** (-float(ied_bias))   # mild low-E flux enhancement (0.25 ~ HG asymmetry; 0=symmetric bathtub)
     cdf = np.cumsum(w); cdf /= cdf[-1]
     phi = np.interp(rng.uniform(0.0, 1.0, n), cdf, phi_grid)
     E0 = np.maximum(V_dc + V_rf * np.sin(phi), 0.5)
@@ -195,7 +195,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    field_model="laplace", eps_insulator=3.9, rho_coupling=1.0,
                    electron_open_vf=True, frame_every=0,
                    electron_model="trace", vf_focus=1.8, vf_focus_pot=0.0,
-                   surface_conductivity=0.0, temperature_C=20.0, corner_fee=0.0):
+                   surface_conductivity=0.0, temperature_C=20.0, corner_fee=0.0,
+                   conductor_e_factor=1.0, ied_bias=0.25):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -317,7 +318,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
 
     def trace(kind, n, Ex, Ez, want_energy=False):
         if kind == "ion":
-            x, z, vx, vz = sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg)
+            x, z, vx, vz = sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg, ied_bias)
             q = 1.0
         else:
             x, z, vx, vz = sample_electrons(n, rng, nx, Te)
@@ -374,6 +375,11 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             ce, se = trace("electron", n_per_iter, Ex, Ez)
             if vf_grid is not None:
                 ce = np.maximum(ce, (float(n_per_iter) / nx) * vf_grid * thr)
+        # deep CONDUCTOR sidewalls (the neighbour line) are geometrically shadowed to ~0.03 electron
+        # flux (HG Fig 3 poly-inner); the down-going trace over-delivers. Suppressing it lets the
+        # starved line's current balance rise toward its true +39 V. conductor_e_factor<1 tests this.
+        if ncomp > 0 and conductor_e_factor != 1.0:
+            ce = ce.copy(); ce[is_cond] *= float(conductor_e_factor)
         net = ci - ce
         # Robbins-Monro decaying step (NO floor) so the stochastic relaxation reaches a true fixed
         # point instead of drifting; tail-average the potentials (Polyak) for the steady-state value.
