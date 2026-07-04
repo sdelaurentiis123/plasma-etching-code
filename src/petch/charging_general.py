@@ -198,6 +198,12 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     inside[:, 0] = False
 
     # --- MCFPM-style variable-eps Poisson setup (field_model="poisson") ---
+    # WARNING: this solves the field THROUGH the solid dielectric interiors. That is physical only
+    # with a properly grounded substrate under the oxide (as MCFPM sets up). In this reduced geometry
+    # (floating insulator blocks, no substrate ground, Neumann side boundary) the block interiors run
+    # away to -100..-245 V -- a non-physical artifact. Default field_model="laplace" solves the field
+    # in the GAS ONLY with solids as charged surface boundaries (HG's method); nothing runs through
+    # the silicon and there is no artifact. Use "poisson" only once a grounded substrate layer is added.
     # Per-cell dielectric constant: gas 1, insulator eps_insulator, conductor Dirichlet (equipot,
     # the high-mobility limit). The Poisson domain SOLVES gas AND insulator cells (the field
     # penetrates the dielectric, carrying inter-feature coupling); conductors and the grounded
