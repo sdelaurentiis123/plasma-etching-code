@@ -172,7 +172,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    insul_vguard=None, verbose=False,
                    field_model="laplace", eps_insulator=3.9, rho_coupling=1.0,
                    electron_open_vf=True, frame_every=0,
-                   electron_model="trace", vf_focus=1.8):
+                   electron_model="trace", vf_focus=1.8, vf_focus_pot=0.0):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -325,11 +325,15 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             Vcell[is_cond] = Vc[cid[is_cond]]
         thr = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
         if electron_model == "vf" and vf_grid is not None:
-            # pure view-factor electrons x bounded electrostatic-focusing factor: gives the RIGHT
-            # relative distribution (horizontal floor sees the opening -> fed; deep vertical
-            # sidewalls see ~no sky -> starved) that the down-going trace over-delivers to walls.
+            # view-factor electrons x POTENTIAL-DEPENDENT electrostatic focusing. Electrons are pulled
+            # harder toward the MOST-POSITIVE surface (the floor), so the floor's collection is enhanced
+            # beyond geometry (HG: "electrostatics decreases the geometric shadowing") while the low-V
+            # sidewalls stay starved. focus = vf_focus + vf_focus_pot*max(V,0). This is the physical
+            # form of the focusing the constant vf_focus faked; it lets the floor reach 0.22 (-> floor V
+            # ~33) without over-feeding the walls, so the neighbour can rise ABOVE the floor to ~39.
             se = 0.0
-            ce = (float(n_per_iter) / nx) * vf_grid * thr * float(vf_focus)
+            focus = float(vf_focus) + float(vf_focus_pot) * np.maximum(Vcell, 0.0)
+            ce = (float(n_per_iter) / nx) * vf_grid * thr * focus
         else:
             ce, se = trace("electron", n_per_iter, Ex, Ez)
             if vf_grid is not None:
@@ -376,7 +380,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         Vcell[is_cond] = Vc[cid[is_cond]]
     thr = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
     if electron_model == "vf" and vf_grid is not None:
-        ce_f = (float(ntot) / nx) * vf_grid * thr * float(vf_focus)
+        focus = float(vf_focus) + float(vf_focus_pot) * np.maximum(Vcell, 0.0)
+        ce_f = (float(ntot) / nx) * vf_grid * thr * focus
     else:
         ce_f, _ = trace("electron", 4 * n_per_iter, Ex, Ez)
         if vf_grid is not None:
