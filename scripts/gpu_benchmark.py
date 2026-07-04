@@ -38,7 +38,8 @@ def bench(dev, verts, faces, N=300000, n_re=12, s=0.2):
     d = wp.array(dirs, dtype=wp.vec3, device=dev)
     flux = wp.zeros(len(faces), dtype=float, device=dev)
     ang = wp.zeros(len(faces), dtype=float, device=dev)
-    args = [mesh.id, o, d, float(s), int(n_re), 1, flux, ang]
+    # _trace3d(mesh, origin, dir0, sticking, n_reemit, seed, specular, cos_thr, eta, flux, angacc)
+    args = [mesh.id, o, d, float(s), int(n_re), 1, int(0), 0.34, 0.8, flux, ang]
     wp.launch(t3._trace3d, dim=N, device=dev, inputs=args); wp.synchronize()  # warmup/compile
     best = 1e18
     for _ in range(3):
