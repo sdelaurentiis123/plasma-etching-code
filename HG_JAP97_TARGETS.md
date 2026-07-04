@@ -67,6 +67,24 @@ much more than that of the edge line."*
 3. Gate the SPLIT: Vedge 2->7 (+-30%) AND Vneigh 6->39 (+-30%) simultaneously (Fig. 6). Then the
    electron-flux components (Fig. 3) and floor flux (Fig. 4) should follow.
 
+### W2 attempt log (so the next pass doesn't repeat dead ends)
+
+- **FALSIFIED (2026-07-03): raise the electron launch plane to the sheath edge (z=1).** Hypothesis:
+  open-area electrons launched from the top would illuminate the edge line's tall outer sidewall.
+  Measured (AR1, W16, n4000/it400): outer-wall electron flux stayed 0.036 (unchanged, target 0.20);
+  all potentials blew up to ~40 V and became equal (Vedge 39.2, Vneigh 40.7); residual 0.381 (broke
+  convergence). Reason: the cos^0.6 MC launch is downward-biased, so few electrons ever move
+  horizontally enough to strike a vertical wall regardless of launch height. Under-collection on
+  vertical walls is intrinsic to the down-going MC source, not a launch-height artifact. Reverted.
+- **Correct approach (next):** the open-facing outer wall should receive the *isotropic open
+  half-space* electron flux directly, applied as a LOCAL per-cell boundary current on the outer-wall
+  cells, self-consistently reduced by the local wall potential (electron flux ~ exp(V_wall/Te) for
+  V_wall<0, saturated for V_wall>=0). The existing `edge_open_model="line_of_sight"` had the right
+  physics (analytic open-area flux to the poly outer band) but applied it as a SCALAR lump on the
+  whole edge conductor via `edge_boundary_net`, which over-fed and pinned Vedge=0. Reimplement it as
+  a per-cell outer-wall flux term inside the conductor/insulator charge balance, so the edge line's
+  outer wall is held low locally while its inner wall and the neighbor line stay starved and rise.
+
 ### New gates unlocked by reading the paper
 - Fig. 3 electron-component gate: petch's diag["electron"] already returns floor/edge_outer/
   edge_inner/neighbor; add PR-sidewall electron flux and gate all five vs the table above.
