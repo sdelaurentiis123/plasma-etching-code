@@ -315,6 +315,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     V = np.zeros((nx, nz))
     hist = []
     frames = []          # (iter, V snapshot, Vc snapshot) for the dynamics movie
+    vc_tail_sum = np.zeros(ncomp); vs_tail_sum = np.zeros((nx, nz)); tail_n = 0
     for it in range(n_iter):
         V = poisson(V) if use_poisson else laplace(V)
         Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
@@ -334,7 +335,9 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             if vf_grid is not None:
                 ce = np.maximum(ce, (float(n_per_iter) / nx) * vf_grid * thr)
         net = ci - ce
-        anneal = max(1.0 / (1.0 + it / 25.0), 0.25)
+        # Robbins-Monro decaying step (NO floor) so the stochastic relaxation reaches a true fixed
+        # point instead of drifting; tail-average the potentials (Polyak) for the steady-state value.
+        anneal = 1.0 / (1.0 + it / (0.15 * n_iter))
         scale = anneal * relax / n_per_iter * nx
         if use_poisson:
             # insulators accumulate free CHARGE; the Poisson solve maps it to potential via eps
@@ -348,6 +351,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             Vc[c] += scale * float(net[m].sum()) / area
             Vc[c] = float(np.clip(Vc[c], -3.0 * Te, V_dc + V_rf))
         hist.append((float(si), float(se)))
+        if it >= int(0.6 * n_iter):        # accumulate tail for Polyak steady-state average
+            vc_tail_sum += Vc[1:]; vs_tail_sum += Vs; tail_n += 1
         if frame_every and (it % frame_every == 0 or it == n_iter - 1):
             frames.append((it, V.copy(), Vc[1:].copy()))
         if verbose and it % 20 == 0:
@@ -356,6 +361,11 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                   f"Vc={np.round(Vc[1:], 1) if ncomp else '-'} "
                   f"Vmax={vmax:.1f}", flush=True)
 
+    # Polyak steady-state average over the tail (kills residual MC noise + any slow drift)
+    if tail_n > 0:
+        if ncomp > 0:
+            Vc[1:] = vc_tail_sum / tail_n
+        Vs = vs_tail_sum / tail_n
     V = poisson(V, sweeps=180) if use_poisson else laplace(V, sweeps=180)
     Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
     # final high-stat pass for diagnostics (ion counts + impact energy grid, electron collection)
