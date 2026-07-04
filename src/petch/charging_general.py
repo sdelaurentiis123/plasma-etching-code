@@ -171,7 +171,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    n_per_iter=6000, n_iter=200, relax=None, seed=0,
                    insul_vguard=None, verbose=False,
                    field_model="laplace", eps_insulator=3.9, rho_coupling=1.0,
-                   electron_open_vf=True, frame_every=0):
+                   electron_open_vf=True, frame_every=0,
+                   electron_model="trace", vf_focus=1.8):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -318,13 +319,20 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         V = poisson(V) if use_poisson else laplace(V)
         Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
         ci, si = trace("ion", n_per_iter, Ex, Ez)
-        ce, se = trace("electron", n_per_iter, Ex, Ez)
-        if vf_grid is not None:
-            Vcell = (Vs if not use_poisson else V).copy()
-            if ncomp > 0:
-                Vcell[is_cond] = Vc[cid[is_cond]]
-            thr = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
-            ce = np.maximum(ce, (float(n_per_iter) / nx) * vf_grid * thr)
+        Vcell = (Vs if not use_poisson else V).copy()
+        if ncomp > 0:
+            Vcell[is_cond] = Vc[cid[is_cond]]
+        thr = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
+        if electron_model == "vf" and vf_grid is not None:
+            # pure view-factor electrons x bounded electrostatic-focusing factor: gives the RIGHT
+            # relative distribution (horizontal floor sees the opening -> fed; deep vertical
+            # sidewalls see ~no sky -> starved) that the down-going trace over-delivers to walls.
+            se = 0.0
+            ce = (float(n_per_iter) / nx) * vf_grid * thr * float(vf_focus)
+        else:
+            ce, se = trace("electron", n_per_iter, Ex, Ez)
+            if vf_grid is not None:
+                ce = np.maximum(ce, (float(n_per_iter) / nx) * vf_grid * thr)
         net = ci - ce
         anneal = max(1.0 / (1.0 + it / 25.0), 0.25)
         scale = anneal * relax / n_per_iter * nx
@@ -352,14 +360,17 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
     # final high-stat pass for diagnostics (ion counts + impact energy grid, electron collection)
     ci_f, _, Ei_f = trace("ion", 4 * n_per_iter, Ex, Ez, want_energy=True)
-    ce_f, _ = trace("electron", 4 * n_per_iter, Ex, Ez)
     ntot = 4 * n_per_iter
-    if vf_grid is not None:
-        Vcell = (Vs if not use_poisson else V).copy()
-        if ncomp > 0:
-            Vcell[is_cond] = Vc[cid[is_cond]]
-        thr = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
-        ce_f = np.maximum(ce_f, (float(ntot) / nx) * vf_grid * thr)
+    Vcell = (Vs if not use_poisson else V).copy()
+    if ncomp > 0:
+        Vcell[is_cond] = Vc[cid[is_cond]]
+    thr = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
+    if electron_model == "vf" and vf_grid is not None:
+        ce_f = (float(ntot) / nx) * vf_grid * thr * float(vf_focus)
+    else:
+        ce_f, _ = trace("electron", 4 * n_per_iter, Ex, Ez)
+        if vf_grid is not None:
+            ce_f = np.maximum(ce_f, (float(ntot) / nx) * vf_grid * thr)
     # per-cell insulator potential is the solved field at insulator cells (poisson) or Vs (laplace)
     Vs_out = np.where(insul, V, 0.0) if use_poisson else Vs
     return dict(V=V, Vs=Vs_out, Vc=Vc[1:], ncomp=ncomp, cid=cid, rho=rho,
