@@ -195,7 +195,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    field_model="laplace", eps_insulator=3.9, rho_coupling=1.0,
                    electron_open_vf=True, frame_every=0,
                    electron_model="trace", vf_focus=1.8, vf_focus_pot=0.0,
-                   surface_conductivity=0.0, temperature_C=20.0):
+                   surface_conductivity=0.0, temperature_C=20.0, corner_fee=0.0):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -339,9 +339,22 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     hist = []
     frames = []          # (iter, V snapshot, Vc snapshot) for the dynamics movie
     vc_tail_sum = np.zeros(ncomp); vs_tail_sum = np.zeros((nx, nz)); tail_n = 0
+    # FEE (frontier, closed-form, never in any feature solver): sheath/charge fields are amplified
+    # at sharp CONVEX corners (lightning-rod effect) -- a field-enhancement factor set by local
+    # curvature that steers ions into corner hotspots (Chang/DTU, Mater.&Design 254,114144 2025).
+    # We precompute a per-cell enhancement from the solid's convex corners (poly/oxide foot etc.).
+    fee_gain = None
+    if corner_fee > 0.0:
+        from scipy.ndimage import uniform_filter
+        openness = 1.0 - uniform_filter(solid.astype(float), size=5, mode="nearest")  # fraction of gas nearby
+        gas_here = (~solid).astype(float)
+        # convex corner = gas cell adjacent to solid with a locally sharp solid boundary
+        fee_gain = 1.0 + corner_fee * gas_here * np.clip(1.0 - openness, 0.0, 1.0) * 4.0
     for it in range(n_iter):
         V = poisson(V) if use_poisson else laplace(V)
         Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
+        if fee_gain is not None:
+            Ex = Ex * fee_gain; Ez = Ez * fee_gain     # amplify the field at sharp corners
         ci, si = trace("ion", n_per_iter, Ex, Ez)
         Vcell = (Vs if not use_poisson else V).copy()
         if ncomp > 0:
