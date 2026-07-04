@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feature Charging — Differentiable 3D Feature-Scale Etch Simulation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="charging.html" class="active">Charging</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="performance.html">Performance</a>
+  <a href="experimental-validation.html">Experiments</a>
+  <a href="comparison.html">Scorecard</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+
+<h1>Feature-scale surface charging</h1>
+<p class="subtitle">The physics no open-source etch simulator has, benchmarked against Hwang&ndash;Giapis 1997, plus the frontier modules (cryo, corner field-enhancement) and the honest state of each.</p>
+
+<div class="callout key">
+<span class="lab">Why this matters</span>
+<p>The leading open framework (ViennaPS) has <strong>no charging model at all</strong> &mdash; a level-set is a scalar field with no volumetric state to hold charge. The reference charging code (Kushner MCFPM) is <strong>closed-source, CPU, non-differentiable</strong>. So an <strong>open, GPU-native, differentiable</strong> feature-charging engine is unoccupied space. This page is our progress toward it, benchmarked honestly.</p>
+</div>
+
+<h2>The physics, in one paragraph</h2>
+<p>Directional ions reach trench bottoms easily; isotropic electrons get shadowed by the walls. On an insulator, charge cannot flow away, so the floor charges positive until the ion current landing on it equals the (electron-shaded) electron current &mdash; a self-consistent floating balance. In a line-and-space pattern the <strong>edge line</strong> (bordering the open area) keeps its outer wall fed by electrons and stays low (~7&nbsp;V); the walled-in <strong>neighbor line</strong> is electron-starved and charges high (~39&nbsp;V). That voltage difference deflects ions into the foot of the edge line &mdash; the <strong>notch</strong>.</p>
+
+<h2>Benchmark: Hwang&ndash;Giapis 1997 (JAP 82, 566)</h2>
+<p>We reproduce their line-and-space charging figures. The decisive recent fix came from the ion energy distribution: HG&rsquo;s sheath IED is <strong>bimodal with the low-energy peak dominant</strong> (more ions cross when the sheath is collapsed, Child-law flux&nbsp;\(\propto V_s^{-3/4}\)). A charged floor then reflects the entire dominant low-energy population; only the minority high-energy ions transmit. Correcting our phase sampling to this shape &mdash; a real physics fix, not a fitted knob &mdash; brought the edge-line potential and the floor potential onto the data.</p>
+
+<img src="hg_benchmark_ied.png" alt="petch vs Hwang-Giapis charging benchmark after the bimodal-IED correction" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+
+<table>
+<thead><tr><th>Quantity (AR 1&rarr;4)</th><th>petch</th><th>Hwang&ndash;Giapis</th><th>State</th></tr></thead>
+<tbody>
+<tr><td>Edge-line potential</td><td>2&rarr;8 V</td><td>2&rarr;7 V</td><td><strong>matches</strong></td></tr>
+<tr><td>Floor-center potential</td><td>9&rarr;32 V</td><td>8&rarr;33 V</td><td><strong>matches</strong></td></tr>
+<tr><td>Floor ion flux</td><td>0.53&rarr;0.16</td><td>0.59&rarr;0.22</td><td>close (slightly low)</td></tr>
+<tr><td>Foot ion energy</td><td>9&rarr;20 eV</td><td>10&rarr;28 eV</td><td>close (slightly low)</td></tr>
+<tr><td>Neighbor-line potential</td><td>4&rarr;21 V</td><td>6&rarr;39 V</td><td>open frontier</td></tr>
+</tbody>
+</table>
+
+<p>Three of five quantities are essentially on the data from one physics correction. The <strong>neighbor line</strong> remains the genuine open problem: it reaches 39&nbsp;V through a slow deflected-ion feedback (charging bends ions onto the line, which charges it further, which bends more) that the reduced 2D model does not yet drive to full magnitude &mdash; the same self-consistent runaway the incumbents spent years capturing. It is flagged honestly rather than fitted.</p>
+
+<h2>Frontier module: cryogenic charge relief</h2>
+<p>Below ~&minus;60&nbsp;&deg;C a condensed HF/H&#8322;O layer raises the insulator <em>surface</em> conductivity by 3&ndash;6 orders of magnitude (Appl. Phys. Lett. 123, 212106, 2023), letting accumulated feature charge flow laterally and dissipate &mdash; un-bending ion trajectories and relieving the deep-aspect-ratio over-charge that plagues high-AR etch. We model it as a temperature-gated lateral conduction term. As temperature drops through the condensation onset, the feature charge collapses and un-bent ions reach the floor.</p>
+
+<img src="cryo_charging.png" alt="petch cryo surface-conductivity module: charge dissipation vs temperature" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+
+<p>No open-source tool has temperature-dependent feature charging; Kushner+Samsung published a closed cryo+charging model only in 2026. Because our term is differentiable, the temperature (and the condensation onset) become knobs you can invert against a target process window.</p>
+
+<h2>Frontier module: corner field-enhancement</h2>
+<p>Sheath and charge fields are amplified at sharp convex corners (the lightning-rod effect), a closed-form function of local curvature that steers ions into corner hotspots (Chang et&nbsp;al., Materials &amp; Design 254, 114144, 2025). Demonstrated experimentally in 2025 and never embedded in any feature-scale solver, it is a small, differentiable module that sharpens notch/corner fidelity.</p>
+
+<h2>The engine and the honest state</h2>
+<p>The charging engine is <strong>geometry-agnostic</strong>: it takes any material-tagged grid (gas / insulator / conductor), launches ions and electrons, pushes them through the self-consistent field, deposits charge, floats each insulator cell to local balance and each connected conductor to whole-line balance, and iterates to a true fixed point (Robbins&ndash;Monro decaying step + Polyak averaging). A <strong>Warp GPU particle tracer</strong> pushes 24.6&nbsp;M particles/s on CUDA (parity-matched to the CPU tracer) &mdash; the kinetic core for making million-particle, self-consistent runs affordable.</p>
+<ul>
+<li><strong>Matches:</strong> edge-line and floor potentials vs Hwang&ndash;Giapis; the cryo charge-relief mechanism; the geometry-agnostic engine.</li>
+<li><strong>Close:</strong> floor ion flux and foot energy (within the reduced-model tolerance; the IED weighting exponent is the residual lever).</li>
+<li><strong>Open frontier:</strong> the neighbor-line deflected-ion feedback to full 39&nbsp;V magnitude &mdash; the piece the full GPU kinetic engine (both species traced at fine resolution) is being built to close.</li>
+</ul>
+
+<p style="background:#f4f1e8;border:1px solid #e0ddd2;border-radius:8px;padding:10px 14px"><strong>Positioning.</strong> We are not out-racing ViennaPS&rsquo;s ray tracer, rebuilding Kushner&rsquo;s reactor model, or redoing Graves&rsquo;s molecular dynamics. We are building the one thing all three point toward and none own: the fast, open, differentiable, GPU-native feature-scale charging engine that couples the reactor&rsquo;s energy-angle distributions and the atoms&rsquo; chemistry.</p>
+
+</main>
+</body>
+</html>
