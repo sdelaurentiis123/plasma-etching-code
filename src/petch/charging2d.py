@@ -48,6 +48,57 @@ except Exception:  # pragma: no cover - optional acceleration
     prange = range
 
 
+def _sky_view_factors_py(solid, surf_ix, surf_iz, n_angles):
+    """Cosine-weighted fraction of the upper half-plane each surface cell can see 'sky' (z<0,
+    the plasma boundary) along a straight line without hitting solid. z=0 is the top (plasma),
+    z increases downward. A fully open upward-facing cell -> ~1.0; a vertical open wall -> ~0.5;
+    a deep shadowed trench wall -> small. This is the geometric isotropic-electron view factor:
+    for an isotropic species the collected flux is (base rate) x view_factor, so it captures the
+    orientation-dependent + shadowed electron collection the down-going MC source gets wrong."""
+    nx, nz = solid.shape
+    m = surf_ix.shape[0]
+    vf = np.zeros(m)
+    step = 0.5
+    maxsteps = 4 * (nx + nz)
+    for s in prange(m):
+        ix = surf_ix[s]
+        iz = surf_iz[s]
+        wsum = 0.0
+        wsky = 0.0
+        for a in range(n_angles):
+            theta = -1.5707963267 + 3.1415926535 * (a + 0.5) / n_angles
+            dx = math.sin(theta)
+            dz = -math.cos(theta)          # up = -z toward the plasma
+            w = math.cos(theta)            # cosine weight (angle from the upward normal)
+            wsum += w
+            fx = ix + 0.5
+            fz = iz + 0.5
+            saw_sky = False
+            for _ in range(maxsteps):
+                fx += dx * step
+                fz += dz * step
+                if fz < 0.5:               # reached the plasma boundary
+                    saw_sky = True
+                    break
+                cix = int(fx)
+                ciz = int(fz)
+                if cix < 0 or cix >= nx:    # exited the side into open plasma
+                    saw_sky = True
+                    break
+                if ciz >= nz:
+                    break
+                if (cix != ix or ciz != iz) and solid[cix, ciz]:
+                    break                  # blocked by solid
+            if saw_sky:
+                wsky += w
+        vf[s] = wsky / wsum if wsum > 0.0 else 0.0
+    return vf
+
+
+_sky_view_factors = (njit(cache=True, parallel=True, fastmath=True)(_sky_view_factors_py)
+                     if njit is not None else _sky_view_factors_py)
+
+
 if njit is not None:
     @njit(cache=True, parallel=True, fastmath=True)
     def _trace_particles_adaptive(Ex, Ez, ExB, EzB, x0, z0, vx0, vz0, sB, q,
@@ -1047,7 +1098,8 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                               ion_angle_energy_corr="anticorrelated",
                               source_model="analytic", open_width_um=3.7, right_buffer_um=0.5,
                               edge_open_model="none", edge_open_electron_flux=None,
-                              edge_open_samples=None, open_wall_frac=1.0):
+                              edge_open_samples=None, open_wall_frac=1.0,
+                              electron_model="mc"):
     """Explicit nonperiodic HG edge-line/open-area charging cell.
 
     This is the next-step mechanism solver: open area + edge poly line + edge trench +
@@ -1229,6 +1281,24 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                                 edge_outer_n=float(edge_outer.sum())))
         return counts, ht, impact_E, hit_vx
 
+    # W2 isotropic electron source: precompute the sky view factor per exposed surface cell ONCE
+    # (geometry is fixed). Electrons are isotropic, so each cell collects (base rate) x view_factor
+    # x potential-throttle instead of the down-going MC trace -- this correctly shadows deep walls
+    # (starves the neighbour -> it rises) and illuminates open ones (holds the edge line low).
+    vf_grid = None
+    if electron_model == "viewfactor":
+        gas = ~solid
+        exp_cell = np.zeros_like(solid)
+        exp_cell[1:, :] |= solid[1:, :] & gas[:-1, :]
+        exp_cell[:-1, :] |= solid[:-1, :] & gas[1:, :]
+        exp_cell[:, 1:] |= solid[:, 1:] & gas[:, :-1]
+        exp_cell[:, :-1] |= solid[:, :-1] & gas[:, 1:]
+        six, siz = np.where(exp_cell)
+        vf = _sky_view_factors(solid, six.astype(np.int64), siz.astype(np.int64), 180)
+        vf_grid = np.zeros((nx, nz))
+        vf_grid[six, siz] = vf
+    e_base = float(n_per_iter) / nx   # electrons arrive at the mouth at the ion rate (zero net current)
+
     hist = []
     vsolid_hist = []
     vedge_hist = []
@@ -1238,7 +1308,15 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         V = laplace(V)
         Ex = -(np.gradient(V, axis=0)); Ez = -(np.gradient(V, axis=1))
         ci, hti, _, _ = trace("ion", n_per_iter, Ex, Ez)
-        ce, hte, _, _ = trace("electron", n_per_iter, Ex, Ez)
+        if electron_model == "viewfactor":
+            Vcell = Vsolid.copy()
+            Vcell[cond == 1] = Vedge
+            Vcell[cond == 2] = Vneighbor
+            throttle = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
+            ce = e_base * vf_grid * throttle
+            hte = None
+        else:
+            ce, hte, _, _ = trace("electron", n_per_iter, Ex, Ez)
         net = ci - ce
         anneal = max(1.0 / (1.0 + it / 25.0), 0.25)
         scale = anneal * relax / n_per_iter * nx
@@ -1257,9 +1335,12 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
             open_e[eo] = open_wall_frac * (float(n_per_iter) / nx) * accept[eo]
             net = net - open_e   # electrons: reduce net current on the outer-wall cells
         Vsolid[pr_mask | floor_mask] += scale * net[pr_mask | floor_mask]
-        explicit_outer_net_e = float((hte == 3).sum() - (hti == 3).sum())
-        target_outer_net_e = edge_boundary_net(Vedge) * n_per_iter * open_frac
-        edge_extra_e = max(target_outer_net_e - explicit_outer_net_e, 0.0)
+        if hte is None:   # view-factor electrons: no per-particle hits, no scalar top-up
+            edge_extra_e = 0.0
+        else:
+            explicit_outer_net_e = float((hte == 3).sum() - (hti == 3).sum())
+            target_outer_net_e = edge_boundary_net(Vedge) * n_per_iter * open_frac
+            edge_extra_e = max(target_outer_net_e - explicit_outer_net_e, 0.0)
         res_hist.append((float(net[floor_trench_mask].sum()), float(net[pr_mask].sum()),
                          float(net[cond == 1].sum() - edge_extra_e),
                          float(net[cond == 2].sum())))
@@ -1274,11 +1355,10 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         vedge_hist.append(Vedge); vneighbor_hist.append(Vneighbor)
         if verbose and it % 20 == 0:
             tsi = next((s for s in reversed(trace_stats) if s["kind"] == "ion"), None)
-            tse = next((s for s in reversed(trace_stats) if s["kind"] == "electron"), None)
+            floor_e = float(ce[floor_trench_mask].sum()) if hte is None else float((hte == 1).sum())
             print(f"  it{it}: floor_i={(hti == 1).sum()/n_per_iter:.3f} "
-                  f"floor_e={(hte == 1).sum()/n_per_iter:.3f} "
-                  f"Vedge={Vedge:.1f} Vneighbor={Vneighbor:.1f} "
-                  f"surv_i/e={tsi['survivor_frac']:.4f}/{tse['survivor_frac']:.4f}", flush=True)
+                  f"floor_e={floor_e/n_per_iter:.3f} "
+                  f"Vedge={Vedge:.1f} Vneighbor={Vneighbor:.1f}", flush=True)
 
     k = max(n_iter // 3, 5)
     Vsolid_avg = np.mean(np.array(vsolid_hist[-k:]), axis=0)
@@ -1296,12 +1376,17 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     V = laplace(V, sweeps=180)
     Ex = -(np.gradient(V, axis=0)); Ez = -(np.gradient(V, axis=1))
     ci, hti, Ei, vxi = trace("ion", 4 * n_per_iter, Ex, Ez)
-    ce, hte, Ee, vxe = trace("electron", 4 * n_per_iter, Ex, Ez)
     ntot = 4 * n_per_iter
+    if electron_model == "viewfactor":
+        Vcell = Vsolid.copy(); Vcell[cond == 1] = Vedge; Vcell[cond == 2] = Vneighbor
+        throttle = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
+        ce = (float(ntot) / nx) * vf_grid * throttle   # electron collection grid at 4x stats
+        hte = None
+    else:
+        ce, hte, Ee, vxe = trace("electron", 4 * n_per_iter, Ex, Ez)
     trench_norm = max(ntot * open_frac, 1.0)
 
     edge_inner = hti == 4
-    edge_outer_e = hte == 3
     edge_outer_i = hti == 3
     neighbor_i = hti == 5
     foot_n = float(edge_inner.sum())
@@ -1310,7 +1395,19 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     neighbor_n = float(neighbor_i.sum())
     neighbor_E = float(Ei[neighbor_i].sum())
     net = ci - ce
-    explicit_outer_net_e = float(edge_outer_e.sum() - edge_outer_i.sum())
+    # electron region sums: from hit-labels (mc) or from the view-factor collection grid
+    if hte is None:
+        eouter = geom["edge_outer_mask"]
+        e_floor_sum = float(ce[floor_trench_mask].sum())
+        e_eouter_sum = float(ce[eouter].sum())
+        e_einner_sum = 0.0
+        e_neigh_sum = float(ce[cond == 2].sum())
+    else:
+        e_floor_sum = float((hte == 1).sum())
+        e_eouter_sum = float((hte == 3).sum())
+        e_einner_sum = float((hte == 4).sum())
+        e_neigh_sum = float((hte == 5).sum())
+    explicit_outer_net_e = float(e_eouter_sum - edge_outer_i.sum())
     target_outer_net_e = edge_boundary_net(Vedge_avg) * ntot * open_frac
     edge_extra_final = max(target_outer_net_e - explicit_outer_net_e, 0.0)
     # steady-state residual = tail-averaged net current per surface. A single 4x-n snapshot is
@@ -1333,7 +1430,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         top=0.0,
     )
     edge_net = float(edge_boundary_net(Vedge_avg))
-    explicit_e_gross = float(edge_outer_e.sum() / trench_norm)
+    explicit_e_gross = float(e_eouter_sum / trench_norm)
     explicit_i_gross = float(edge_outer_i.sum() / trench_norm)
     accepted_e_gross = edge_net + float(edge_aux["ion_gross"])
     boundary_e_gross = max(accepted_e_gross - explicit_e_gross, 0.0)
@@ -1347,10 +1444,10 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                  edge_outer_poly=float(edge_outer_i.sum() / trench_norm),
                  edge_inner_poly=float(edge_inner.sum() / trench_norm),
                  neighbor_poly=float(neighbor_i.sum() / trench_norm)),
-        electron=dict(floor=float((hte == 1).sum() / trench_norm),
-                      edge_outer_poly=float(edge_outer_e.sum() / trench_norm),
-                      edge_inner_poly=float((hte == 4).sum() / trench_norm),
-                      neighbor_poly=float((hte == 5).sum() / trench_norm)),
+        electron=dict(floor=float(e_floor_sum / trench_norm),
+                      edge_outer_poly=float(e_eouter_sum / trench_norm),
+                      edge_inner_poly=float(e_einner_sum / trench_norm),
+                      neighbor_poly=float(e_neigh_sum / trench_norm)),
         trace=dict(last_ion=next((s for s in reversed(trace_stats) if s["kind"] == "ion"), None),
                    last_electron=next((s for s in reversed(trace_stats) if s["kind"] == "electron"), None),
                    cap_factor=float(trace_step_cap_factor),

@@ -85,6 +85,25 @@ much more than that of the edge line."*
   a per-cell outer-wall flux term inside the conductor/insulator charge balance, so the edge line's
   outer wall is held low locally while its inner wall and the neighbor line stay starved and rise.
 
+- **BUILT + KEY FINDING (2026-07-03): isotropic electron source via sky view factors**
+  (`electron_model="viewfactor"`). Replaces the down-going electron MC trace with a per-cell
+  collection = (ion-rate base) x sky_view_factor x throttle(exp(V/Te) for V<0, else 1). View
+  factors are physically correct (open floor ~0.73, edge outer wall 0.25, edge inner 0.047, trench
+  floor 0.124 at AR4, ->0 with depth) and it removes the electron trace entirely (big speedup).
+  At AR4 the floor flux and foot energy briefly track HG (0.205 vs 0.22; 29 vs 28 eV).
+  **BUT purely geometric view factor OVER-shadows the floor**: converged electron floor flux -> the
+  VF value 0.12, below HG's 0.22, so potentials climb to the clip and do not converge. This is
+  exactly what HG warns about verbatim: *"This form of shadowing is not strictly geometric... the
+  reduction in electron current to the trench bottom is calculated to be significantly smaller than
+  that predicted by the decrease in solid angle that 'views' the plasma. Electrostatics plays a
+  vital role in decreasing the geometric shadowing."* The positive trench FOCUSES electrons inward,
+  so they reach the floor more than line-of-sight geometry predicts.
+  **Next:** (a) normalise VF so a fully open cell = 1.0 (currently 0.73 from side-blocking), and
+  (b) add electrostatic focusing — trace electrons ISOTROPICALLY (not the down hemisphere) through
+  the field so the inward focusing is captured self-consistently, OR boost VF by a field-derived
+  factor. HG says (b) is essential. This is the remaining W2 work; the mechanism (split + floor +
+  foot moving together) is confirmed, the electron collection just needs the electrostatic term.
+
 ### New gates unlocked by reading the paper
 - Fig. 3 electron-component gate: petch's diag["electron"] already returns floor/edge_outer/
   edge_inner/neighbor; add PR-sidewall electron flux and gate all five vs the table above.
