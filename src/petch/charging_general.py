@@ -171,14 +171,18 @@ def sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg, ied_bias=0.25):
     return x, z, vx, vz
 
 
-def sample_electrons(n, rng, nx, Te, cos_power=1.0):
-    """Isotropic thermal electrons entering through the plasma boundary (top, z~=1): thermal energy,
-    Lambert (cos^p) flux distribution so they arrive at ALL angles including near-horizontal. The
-    field then focuses them into positive features (the piece a down-going mouth-launch threw away).
-    Launched at the top so they traverse the field region and reach outward-facing walls."""
+def sample_electrons(n, rng, nx, Te, cos_power=1.0, iso=False):
+    """Thermal electrons entering through the plasma boundary (top, z~=1). Lambert (cos^p) flux by
+    default. iso=True gives a TRULY isotropic downward-hemisphere velocity (uniform over solid angle,
+    theta in [0,pi/2]) with a strong near-horizontal population, so electrons actually reach the
+    sideways-facing OUTER wall of the edge line (which a down-biased launch misses) -- the physical
+    fact that an isotropic plasma delivers the same flux to a vertical wall as to a horizontal one."""
     E0 = rng.gamma(2.0, Te, n)
-    u = rng.uniform(0.0, 1.0, n)
-    ct = (1.0 - u) ** (1.0 / (cos_power + 2.0))
+    if iso:
+        ct = rng.uniform(0.0, 1.0, n)          # cos(theta) uniform -> isotropic solid angle
+    else:
+        u = rng.uniform(0.0, 1.0, n)
+        ct = (1.0 - u) ** (1.0 / (cos_power + 2.0))
     st = np.sqrt(np.maximum(1.0 - ct * ct, 0.0))
     az = rng.uniform(0.0, 2.0 * np.pi, n)
     th = np.arctan2(st * np.cos(az), ct)
@@ -196,7 +200,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    electron_open_vf=True, frame_every=0,
                    electron_model="trace", vf_focus=1.8, vf_focus_pot=0.0,
                    surface_conductivity=0.0, temperature_C=20.0, corner_fee=0.0,
-                   conductor_e_factor=1.0, ied_bias=0.25):
+                   conductor_e_factor=1.0, ied_bias=0.25, trace_device="cpu", electron_iso=False):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -321,9 +325,14 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             x, z, vx, vz = sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg, ied_bias)
             q = 1.0
         else:
-            x, z, vx, vz = sample_electrons(n, rng, nx, Te)
+            x, z, vx, vz = sample_electrons(n, rng, nx, Te, iso=electron_iso)
             q = -1.0
-        hix, hiz, E, _, surv = _trace_general(Ex, Ez, solid, x, z, vx, vz, q, nx, nz, 40 * nz)
+        if trace_device == "cuda":
+            from .charging_gpu import trace_gpu
+            hix, hiz, E = trace_gpu(Ex, Ez, solid, x, z, vx, vz, q, 40 * nz, device="cuda")
+            surv = (hix < 0).astype(np.float64)
+        else:
+            hix, hiz, E, _, surv = _trace_general(Ex, Ez, solid, x, z, vx, vz, q, nx, nz, 40 * nz)
         counts = np.zeros((nx, nz))
         energy = np.zeros((nx, nz)) if want_energy else None
         m = hix >= 0
