@@ -1,11 +1,29 @@
 # C10 spec — Bosch DRIE scalloping, SEM-gated (open+gated+differentiable = unclaimed)
 
-Research verdict (2026-07-07): no published open, quantitatively SEM-gated, feature-scale Bosch
-scallop benchmark exists. ViennaPS's `boschProcess` example is demonstrative (arbitrary units, no
-gate); Ertl & Selberherr 2010 (the academic 3D reference) is a parameter study with NO experimental
-validation; the strongest experimental gate in the literature is Volland & Rangelow JVST B 20,3111
-(2002) (profile agreement, closed code). An open differentiable Bosch model gated on published
-scallop numbers is unclaimed space.
+Research verdict (2026-07-07, tightened): **no open, quantitatively SEM-gated, feature-scale,
+FORWARD-PREDICTIVE, DIFFERENTIABLE Bosch simulator exists.** Precision matters:
+- ViennaPS (now **v3.6.0**, SoftwareX framework paper Nov 2025) ships a Bosch example comparing
+  emulation / simple / physical tiers — still demonstrative (arbitrary units, no quantitative SEM
+  gate, results not guaranteed across releases, not differentiable).
+- Ertl & Selberherr 2010 (the academic 3D reference): parameter study, NO experimental validation.
+- Strongest experimental gate in the literature: Volland & Rangelow JVST B 20,3111 (2002) — profile
+  agreement, closed code.
+- **VLSet-AE (Nature Microsyst. Nanoeng., Mar 2026): prior art to cite and DISTINGUISH.** A
+  physics-constrained variational level-set autoencoder for INVERSE SEM profile extraction (nine
+  CDs incl. scallop depth/width/radius) — a measurement model, not a forward etch simulator (its
+  level-set is a contour-recognition regularizer; velocities fit to measured rates). It does NOT
+  compete with a forward differentiable solver — but it PUBLISHES an open SEM scallop dataset
+  (16-run orthogonal design, SPTS tool, etch cycle 4–8 s x passivation 2–6 s, 1000 cross-sections,
+  scallops 102 nm @ te/tp=1.125 → 595 nm @ te/tp=4.0, angles 83–92°, depths 47.3–273.5 µm over
+  5–50 µm lines). So "no open SEM scallop benchmark dataset" is FALSE as literally written; the
+  unclaimed space is the forward differentiable simulator gated on such data. Frame petch as
+  forward-predictive physics vs their inverse extraction. (Verify their data-availability statement
+  for raw Table 1/images before gating hard numbers on it.)
+- **Why now (motivation citation):** "Physics-informed generative AI for semiconductor
+  manufacturing" (arXiv 2606.11247, Jun 2026) explicitly calls for open, versioned physics-fidelity
+  benchmarks with reference solvers (near-term to 2027) and differentiable fab-simulator
+  infrastructure as open reimplementations of standard process solvers (2027–2030) — naming this
+  exact niche as the recognized, unbuilt bottleneck.
 
 ## The cycle model (standard emulation, same as Zhou'04/Ertl'10/ViennaPS)
 per cycle: (1) conformal polymer deposition thickness t over the profile; (2) directional ion
@@ -37,8 +55,16 @@ Ultrafast switching: 500 ms SF6 etch / 50 ms passivation, 1000 cycles, 10 µm tr
   3. s ≤ 30 nm                           (upper bound, "residual roughness")
   4. ARDE: depth(4µm)/depth(10µm) = 49.8/60.8 = 0.82 ± 0.05 (both firm)
 
+## Gate Config T — te-swept scaling (VLSet-AE dataset, single tool/lab — cleaner than cross-tool)
+SPTS, 16-run orthogonal design, etch cycle te = 4–8 s x passivation tp = 2–6 s:
+  1. scallop depth spans **102 nm (te/tp = 1.125) → 595 nm (te/tp = 4.0)** — reproduce the monotone
+     s vs te/tp trend and the ~5.8x span with one calibration point.
+  2. profile angles 83–92° across the design (secondary).
+  (Confirm raw-data availability before gating exact per-run numbers; the span+trend are published.)
+
 ## Cross-config assertion (kills accidentally-right models)
-s(3.5 s etch) / s(0.5 s etch) ≥ 4 within one model family.
+s(3.5 s etch) / s(0.5 s etch) ≥ 4 within one model family (Ayon vs Tillocher); consistent with the
+VLSet-AE in-dataset span of 5.8x over te/tp 1.125→4.
 
 ## Bonus/optional
 - Code-to-code: Ertl & Selberherr Fig 8/9 (2.5 µm hole, 20 cycles, their Tables 1-2 params) — beat
