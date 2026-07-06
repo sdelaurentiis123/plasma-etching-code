@@ -115,7 +115,18 @@ def _trace_general_py(Ex, Ez, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_
                 iz2 = nz - 2
             vx = vx_half + 0.25 * q * Ex[ix2, iz2] * dt
             vz = vz_half + 0.25 * q * Ez[ix2, iz2] * dt
-            x = xa % xmax
+            # REFLECTING x boundaries (mirror-image symmetry planes, HG's method; matches the field
+            # solver's Neumann sides). Periodic wrap was UNPHYSICAL here: it teleported grazing
+            # electrons out of the open area, starving the edge line's outer wall.
+            x = xa
+            if x < 0.0:
+                x = -x
+                vx = -vx
+            elif x >= xmax:
+                x = 2.0 * xmax - x
+                vx = -vx
+                if x < 0.0:
+                    x = 0.0
             z = za
             if z < 0.5:
                 alive = False
@@ -226,7 +237,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    conductor_e_factor=1.0, ied_bias=0.25, trace_device="cpu", electron_iso=False,
                    open_wall_boost=1.0, electron_Te=None, e_flux_power=None,
                    insulator_e_focus=0.0, trace_dt=0.45, trace_dt_field=0.3, trace_steps=40,
-                   poisson_step=1.0):
+                   poisson_step=1.0, charge_update="linear"):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -446,6 +457,21 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             # (poisson_step) keeps the lagged loop a contraction. See CHARGING_POISSON_PLAN.md for the full
             # first-principles fix (physical units, interface-sigma sheet, capacitance-matched substrate).
             rho[insul] += (scale * float(poisson_step)) * net[insul]
+        elif charge_update == "log":
+            # LOG CURRENT-BALANCE update (quasi-Newton for exponentially retarded electron flux):
+            # a floating surface obeys Gamma_e(V) ~ e^{V/Te} near balance, so the balance error in
+            # VOLTS is Te*ln(Gamma_i/Gamma_e). Stepping by it drives every cell to its LOCAL fixed
+            # point exponentially fast -- no frozen transients (the linear step + decaying anneal
+            # pinned near-zero-flux mouth walls at the -insul_vguard clip, over-collimating electrons
+            # and over-focusing the floor), no clip needed: cells with zero electron flux rise
+            # naturally, cells with zero ion flux sink until the Maxwellian tail balances the trickle.
+            eps_c = 0.5  # count regularizer (MC shot noise floor)
+            dV = Te * np.log((ci[insul] + eps_c) / (ce[insul] + eps_c))
+            Vs[insul] += anneal * np.clip(dV, -2.0 * Te, 2.0 * Te)
+            # physical negative bound: a surface cannot charge below the reach of the most energetic
+            # electrons (~top of the Maxwellian tail, 10*Te; P(E>10Te)~2e-3). Prevents the early
+            # large-step phase from freezing shadowed corner cells at unreachably deep potentials.
+            np.clip(Vs, -10.0 * Te, V_dc + V_rf, out=Vs)
         else:
             Vs[insul] += scale * net[insul]
             Vs[insul] = np.clip(Vs[insul], -insul_vguard, V_dc + V_rf)
@@ -463,8 +489,12 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         for c in range(1, ncomp + 1):
             m = cid == c
             area = max(int(m.sum()), 1)
-            Vc[c] += scale * float(net[m].sum()) / area
-            Vc[c] = float(np.clip(Vc[c], -3.0 * Te, V_dc + V_rf))
+            if charge_update == "log":
+                dVc = Te * np.log((float(ci[m].sum()) + 0.5) / (float(ce[m].sum()) + 0.5))
+                Vc[c] += anneal * float(np.clip(dVc, -2.0 * Te, 2.0 * Te))
+            else:
+                Vc[c] += scale * float(net[m].sum()) / area
+                Vc[c] = float(np.clip(Vc[c], -3.0 * Te, V_dc + V_rf))
         hist.append((float(si), float(se)))
         if it >= int(0.6 * n_iter):        # accumulate tail for Polyak steady-state average
             vc_tail_sum += Vc[1:]; vs_tail_sum += Vs; tail_n += 1

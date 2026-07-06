@@ -71,9 +71,16 @@ if _WARP:
                 iz2 = nz - 2
             vx = vx_half + 0.25 * q * Ex[ix2, iz2] * dt
             vz = vz_half + 0.25 * q * Ez[ix2, iz2] * dt
-            x = wp.mod(xa, xmax)
+            # reflecting x boundaries (mirror symmetry planes; parity with the CPU tracer)
+            x = xa
             if x < 0.0:
-                x = x + xmax
+                x = -x
+                vx = -vx
+            elif x >= xmax:
+                x = 2.0 * xmax - x
+                vx = -vx
+                if x < 0.0:
+                    x = wp.float32(0.0)
             z = za
             if z < 0.5:
                 break
