@@ -49,6 +49,16 @@ reactor↔atom coupling, which no open tool has.
 ## Cycle log
 (newest first; each entry: target, what was done, gate result PASS/FAIL, artifacts, commit)
 
+- **C4 (2026-07-06, DONE):** DIFFERENTIABLE ALE (`src/petch/ale_diff.py`, torch) — the moat payoff.
+  Reverse-mode autograd through the whole cyclic site-balance chemistry: `dEPC/dE` and `dEPC/dparams`.
+  Speed: integrate the coverage transient finely (~45 s) then add the constant bare-Si sputter-leak tail
+  analytically → ~40× fewer autograd steps, forward parity with numpy ale.py <2%. GATE PASS: autograd
+  `dEPC/dE` matches central finite-diff to 4 decimals (0.061/0.389/0.393 at 17.5/22.5/27.5 eV);
+  gradient-based INVERSE DESIGN recovers the ion energy from a target EPC (self-consistent <0.1 eV;
+  solved E=20.39 eV for target EPC=1.0 Å/cyc). 4/4 tests pass. No open feature-scale etch tool exposes
+  chemistry gradients (ViennaPS: no ALE; Kushner: closed/CPU/non-diff). Artifacts:
+  `scripts/ale_calibrate.py`, `viz/ale_calibrate.png`, `tests/test_ale_diff.py`. (Done live, no idle wait.)
+
 - **C3 (2026-07-06, DONE):** ALE chemistry module (`src/petch/ale.py`, `CHEMISTRY_FRONTIER_ALE.md`).
   Directional plasma ALE (Si/Cl₂/Ar⁺), Vella–Graves 2025 ROM — CPU, differentiable, unoccupied in open
   source. Process: scout picked it → CAUGHT a bad equation (scout's `J_Si=J_Ar·Y_Si·(1−θ₂)` gives ZERO
