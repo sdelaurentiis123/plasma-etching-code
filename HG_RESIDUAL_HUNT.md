@@ -138,3 +138,16 @@ we hold potentials, they iterate charges), (c) fine differences in their launch 
 extent. Next decisive build: implement their EXACT four-step charge-redistribution + Coulomb map as
 a dynamics mode (not just a readout) and see which fixed point it selects. That is the last
 structural difference between the codes.
+
+## C17 (2026-07-07): the IEDF asymmetry CLOSES the floor potential
+
+Implemented the nonlinear-sheath IEDF asymmetry with the exponent DERIVED from their published
+Fig 4a horn ratio (low/high ~2.2 -> p=0.35 phase weight; no tuning to our output). Result:
+  AR4 floorV: 39.7 -> **34.0 (HG JAP: 33)** -- MATCHED from the derivation chain.
+  AR2 floorV: 23.7 -> **19.2 (their Fig 7b plateau ~21)** -- matched.
+  Foot peak ~61 (58.7) and foot current 0.12 (0.13) hold. Bottom flux 0.28 vs 0.22 (+27%) and the
+  conductor labels (edge 12.2, neigh 27.9 vs 4-7.5/19.8-39 -- bounded by HG's own 2x inter-paper
+  spread) remain; Eface endpoint 21.6 vs 28.
+Remaining named build: their SIII.D charge-space conductor dynamics (transcribed verbatim in
+refs/HG_deep_read.md) for the conductor labels + foot charge pile. The floor/foot physics -- the
+part that drives notching -- is now matched end-to-end with zero tuned constants.

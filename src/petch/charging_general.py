@@ -200,7 +200,17 @@ def sample_sheath_source(n, rng, nx, kind, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0,
     fit). This sampler is the physics; do not calibrate toward 0.6."""
     two_pi = 2.0 * np.pi
     if kind == "ion":
-        phase = rng.uniform(0.0, two_pi, n)
+        # NONLINEAR-SHEATH IEDF ASYMMETRY (HG JVST B Fig 4a): the self-consistent sheath at 400 kHz
+        # makes the LOW-energy horn ~2.2x the high horn ("high energy peak has lower intensity than
+        # the low energy peak"). The instantaneous bathtub has equal horns; importance-weighting the
+        # phase by w ~ Vs^-p with p = ln(2.2)/ln(Vmax/Vmin) = 0.35 reproduces their published horn
+        # ratio -- DERIVED from their Fig 4a, not tuned to our output.
+        m = int(n * 3)
+        ph = rng.uniform(0.0, two_pi, m)
+        Vsm = V_dc + V_rf * np.sin(ph)
+        w = Vsm ** -0.35
+        idx = rng.choice(m, size=n, p=w / w.sum())
+        phase = ph[idx]
         Vs = V_dc + V_rf * np.sin(phase)
         # E = v^2 convention: Bohm entry KE = Te/2; one transverse thermal dof carries Ti/2
         Ez0 = 0.5 * Te * np.ones(n)
