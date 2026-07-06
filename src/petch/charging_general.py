@@ -200,7 +200,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    electron_open_vf=True, frame_every=0,
                    electron_model="trace", vf_focus=1.8, vf_focus_pot=0.0,
                    surface_conductivity=0.0, temperature_C=20.0, corner_fee=0.0,
-                   conductor_e_factor=1.0, ied_bias=0.25, trace_device="cpu", electron_iso=False):
+                   conductor_e_factor=1.0, ied_bias=0.25, trace_device="cpu", electron_iso=False,
+                   open_wall_boost=1.0):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -383,7 +384,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         else:
             ce, se = trace("electron", n_per_iter, Ex, Ez)
             if vf_grid is not None:
-                ce = np.maximum(ce, (float(n_per_iter) / nx) * vf_grid * thr)
+                vfb = vf_grid * np.where(vf_grid > 0.18, open_wall_boost, 1.0)
+                ce = np.maximum(ce, (float(n_per_iter) / nx) * vfb * thr)
         # deep CONDUCTOR sidewalls (the neighbour line) are geometrically shadowed to ~0.03 electron
         # flux (HG Fig 3 poly-inner); the down-going trace over-delivers. Suppressing it lets the
         # starved line's current balance rise toward its true +39 V. conductor_e_factor<1 tests this.
@@ -447,7 +449,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     else:
         ce_f, _ = trace("electron", 4 * n_per_iter, Ex, Ez)
         if vf_grid is not None:
-            ce_f = np.maximum(ce_f, (float(ntot) / nx) * vf_grid * thr)
+            vfb = vf_grid * np.where(vf_grid > 0.18, open_wall_boost, 1.0)
+            ce_f = np.maximum(ce_f, (float(ntot) / nx) * vfb * thr)
     # per-cell insulator potential is the solved field at insulator cells (poisson) or Vs (laplace)
     Vs_out = np.where(insul, V, 0.0) if use_poisson else Vs
     return dict(V=V, Vs=Vs_out, Vc=Vc[1:], ncomp=ncomp, cid=cid, rho=rho,
