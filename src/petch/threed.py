@@ -1052,9 +1052,15 @@ def _apply_hg_charging(m_i, par, flags, centroids, gas_nz, areas, geo):
     etch rates: the notching driver. v1 scope: charging table at HG reference conditions;
     per-condition tables need solve_trench_charging re-runs. Modifies par['_ion_yield'] in
     place semantics (returns new m_i)."""
-    if getattr(flags, "surface_charging", False) != "hg" or par.get('_ion_yield') is None:
+    mode = getattr(flags, "surface_charging", False)
+    if mode not in ("hg", "petch") or par.get('_ion_yield') is None:
         return m_i
-    from .charging2d import charging_floor_profile
+    if mode == "petch":
+        # first-principles table: computed by petch's own derived-source charging solver
+        # (charging_general, theorem-correct sheath source) instead of the published HG closure.
+        from .charging_general import petch_floor_profile as charging_floor_profile
+    else:
+        from .charging2d import charging_floor_profile
     from .chemistry import _yields
     sub_top = geo['sub_top']; W = geo['trench_width']
     cx0, cy0 = 0.5 * geo['Lx'], 0.5 * geo['Ly']
