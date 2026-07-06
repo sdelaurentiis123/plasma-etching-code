@@ -53,3 +53,40 @@ The conclusion that survives -- and is STRONGER than a kernel match:
 Status: the HG charging benchmark is CLOSED at the physics level. Remaining fidelity item for exact
 label comparison: multi-line array geometry (their pattern has many lines; ours 2.5) under their
 electron convention -- affects the neighbor label (14 vs 39) through the same map/convention layer.
+
+## RETRACTION + correction (2026-07-07, after reading the actual figures)
+
+Direct figure reads of refs/HG_jap97.pdf (pages 2-5) overturn two of this document's claims:
+
+1. **C13 "stack inversion" RETRACTED — it was OUR inversion.** Fig 1 caption + Sec. II verbatim:
+   "The photoresist thickness is varied from 0.2 to 1.7 um to change the aspect ratio... The height
+   of the poly-Si remains constant" (0.3 um). The "0.54 um PR" sentence was a hypothetical about the
+   0.18 um design rule (mangled 2-column text extraction). The ORIGINAL geometry builder
+   (poly_um=0.3 fixed, PR growing) is HG's actual structure. The C13 runs are valid data for a
+   DIFFERENT (non-HG) structure; their observable matches were coincidental.
+
+2. **The "internal inconsistency" claim (C14) RETRACTED as stated.** It assumed the 7/39 conductor
+   split spans most of the trench wall (the wrong C13 stack). On the TRUE geometry the poly split
+   occupies only the bottom 0.3 um (~15% of the AR4 trench depth); ions traverse the rest between
+   floating PR walls, and the deflection is LOCAL to the foot (which is exactly why the notch forms
+   at the foot). HG's published state is NOT shown inconsistent on their true geometry.
+
+What SURVIVES (independent of geometry): the invariance theorem; the uniform-in-angle injection
+convention finding (their Sec. III); the derived ion source; the integrator/mirror-BC/log-update
+numerics; the kernel under-specification observation (their sigma->V near-field details remain
+unpublished).
+
+## The TRUE-geometry state and the new prime suspect
+
+True-stack derived-source AR4: floorV 38.7 / flux 0.339 / edge 14.4 / neigh 34.5 (HG: 33/0.22/7/39).
+Direct figure reads give two NEW quantitative targets our model must match:
+- **Fig 2: PR top-corner potential ~ -4.5 V** (entrance dome rising to ~0 at mouth center; deepens
+  only ~0.5 V from AR1 to AR4). Our PR pins at the -10*Te bound (-40 V) -- 8x too negative if our
+  -40 cells are the top corners (needs instrumentation: WHERE are our -40 cells?).
+- **Fig 3: PR sidewalls absorb the largest ion share** (electron flux to PR 0.28->0.57 with AR;
+  at a floating steady state the ion flux there matches it). Mechanism per text: floor-rejected
+  slow ions are recaptured by the mildly negative PR walls on the way out. If our rejected ions
+  escape to the plasma instead (survivor exit) our walls starve of ions and sink to the bound,
+  over-collimating electrons (explains flux 0.34 vs 0.22) and distorting the edge (14 vs 7).
+Next: instrument PR-corner V, PR-wall ion/electron flux fractions vs Fig 3, and the fate of
+rejected ions, on the TRUE stack.
