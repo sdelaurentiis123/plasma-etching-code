@@ -49,6 +49,27 @@ reactor↔atom coupling, which no open tool has.
 ## Cycle log
 (newest first; each entry: target, what was done, gate result PASS/FAIL, artifacts, commit)
 
+- **C2 (2026-07-06, DONE — premise REFUTED with box data, box killed+verified-empty):** the original
+  premise ("a fine-grid GPU kinetic engine closes the floor over-charge") is WRONG, shown on a rented
+  RTX 4090 (contract 44044631, ~1 GPU-hr, destroyed, account verified 0 instances):
+  1. **GPU barely helps here:** the tracer round-trips host↔device each iteration, so at W16 the 4090 is
+     only ~35% faster than CPU (100 iters/31 s). A real GPU win needs the full device-resident rewrite
+     (persistent arrays + cell-sort + CUDA-graph) — not worth it for this problem.
+  2. **Fine grid is NOT the fix:** old sheath-source solver floorV = 26.7 (nit800) → 27.4 (nit1600) at
+     W16 — a plateau; convergence and (per memory) W32 don't move it.
+  3. **The electron-delivery knob feeds the WALLS, not the floor:** raising `open_wall_boost` 1.0→3.6 made
+     the floor WORSE (44→47 V) and drove the edge line negative (over-fed) — wrong lever.
+  Honest conclusion: the floor over-charge is set by the electron **launch geometry / EAD** delivering
+  the right floor flux. Old solver (boundary_um=3.7 sheath launch) over-delivers → floor 27 (best base,
+  ~18% low); general engine (z=1 launch) under-delivers → floor 45. The precise fix is a source-LAUNCH
+  calibration (which launch plane + EAD delivers HG's 0.22 floor flux) — small-grid, CPU-cheap,
+  differentiable. **NOT** a GPU build. Requeued as C6 (below). Net: spent ~1 GPU-hr to kill a multi-hour
+  wrong path — good trade.
+
+- [next] **C6 — floor source-launch calibration** (CPU, cheap): find the electron launch plane/EAD that
+  delivers HG's 0.22 floor flux (floorV→33) with the neighbor still ~39, bracketed between the old
+  solver (over, 27) and the general engine (under, 45). Gate: AR1→4 floor flux + floorV vs HG.
+
 - **C4 (2026-07-06, DONE):** DIFFERENTIABLE ALE (`src/petch/ale_diff.py`, torch) — the moat payoff.
   Reverse-mode autograd through the whole cyclic site-balance chemistry: `dEPC/dE` and `dEPC/dparams`.
   Speed: integrate the coverage transient finely (~45 s) then add the constant bare-Si sputter-leak tail
