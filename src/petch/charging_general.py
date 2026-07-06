@@ -171,7 +171,8 @@ def _connected_conductor_ids(mat):
         return cid, int(idx[0].size)
 
 
-def sample_sheath_source(n, rng, nx, kind, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0, M_amu=35.45):
+def sample_sheath_source(n, rng, nx, kind, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0, M_amu=35.45,
+                         hg_convention=False):
     """FIRST-PRINCIPLES collisionless RF-sheath source (HG's model, derived not parameterized).
 
     The sheath potential is V_s(t) = V_dc + V_rf sin(wt). At 400 kHz the ion transit time is
@@ -215,8 +216,14 @@ def sample_sheath_source(n, rng, nx, kind, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0,
     while got < n:
         m = (n - got) * 3 + 64
         E = rng.gamma(2.0, Te, m)                   # flux-weighted Maxwellian through a plane
-        u = rng.uniform(0.0, 1.0, m)
-        ct = np.sqrt(u)                             # Lambert flux (cos-weighted) at the sheath top
+        if hg_convention:
+            # HG-EMULATION ONLY (benchmark comparison, NOT physics): uniform-in-angle injection
+            # ("isotropic flux distribution", their stated convention) -- unphysical for a
+            # Maxwellian half-space; gives their broadened arrivals (closed form p~0.72-0.80).
+            ct = np.cos(rng.uniform(0.0, 0.5 * np.pi, m))
+        else:
+            u = rng.uniform(0.0, 1.0, m)
+            ct = np.sqrt(u)                         # Lambert flux (cos-weighted) at the sheath top
         st = np.sqrt(1.0 - ct * ct)
         phase = rng.uniform(0.0, two_pi, m)
         Vs = V_dc + V_rf * np.sin(phase)
@@ -304,7 +311,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    conductor_e_factor=1.0, ied_bias=0.25, trace_device="cpu", electron_iso=False,
                    open_wall_boost=1.0, electron_Te=None, e_flux_power=None,
                    insulator_e_focus=0.0, trace_dt=0.45, trace_dt_field=0.3, trace_steps=40,
-                   poisson_step=1.0, charge_update="linear", source_model="heuristic", Ti=0.5):
+                   poisson_step=1.0, charge_update="linear", source_model="heuristic", Ti=0.5,
+                   hg_convention=False):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -436,7 +444,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             # -- the pure-refraction electron derivation over-broadens (cos^0.35) because it omits the
             # collapse-phase field-reversal acceleration; using their published distribution is
             # faithful-to-benchmark until the reversal field is modeled.
-            x, z, vx, vz = sample_sheath_source(n, rng, nx, kind, Te=Te, Ti=Ti, V_dc=V_dc, V_rf=V_rf)
+            x, z, vx, vz = sample_sheath_source(n, rng, nx, kind, Te=Te, Ti=Ti, V_dc=V_dc, V_rf=V_rf,
+                                                hg_convention=hg_convention)
             q = 1.0 if kind == "ion" else -1.0
         elif kind == "ion":
             x, z, vx, vz = sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg, ied_bias)
