@@ -49,12 +49,19 @@ reactor↔atom coupling, which no open tool has.
 ## Cycle log
 (newest first; each entry: target, what was done, gate result PASS/FAIL, artifacts, commit)
 
-- **C3 (2026-07-06, in progress):** ALE chemistry module (`src/petch/ale.py`, `CHEMISTRY_FRONTIER_ALE.md`).
-  Research scout picked directional plasma ALE (Si/Cl₂/Ar⁺), Vella–Graves 2025 ROM — CPU, differentiable,
-  unoccupied. CAUGHT a bad equation: the scout's `J_Si = J_Ar·Y_Si·(1−θ₂)` gives ZERO etch in the
-  15–20 eV window (Y_Si=0 there) — that's the sputter-leak term only; real ALE removal is the SiCl/SiCl₂
-  channels. Pulled the real paper (OSTI 2586627), agent extracting the exact Si-removal flux + ODEs +
-  cycle schedule. GATE PENDING: EPC 0.67/0.75/1.0 Å/cyc at 15/17.5/20 eV, rise at 22.5/30 eV.
+- **C3 (2026-07-06, DONE):** ALE chemistry module (`src/petch/ale.py`, `CHEMISTRY_FRONTIER_ALE.md`).
+  Directional plasma ALE (Si/Cl₂/Ar⁺), Vella–Graves 2025 ROM — CPU, differentiable, unoccupied in open
+  source. Process: scout picked it → CAUGHT a bad equation (scout's `J_Si=J_Ar·Y_Si·(1−θ₂)` gives ZERO
+  window etch, Y_Si=0 there; that's only the sputter-leak term) → pulled the real paper (OSTI 2586627),
+  agent transcribed Eqs 6–17 verbatim → fixed: Si leaves in THREE channels (SiCl+SiCl₂ chemical-sputter
+  via `(θ₁+θ₂)` + bare-Si sputter), real step times t_dose 0.112 s / t_barr 113.5 s (fluence/flux).
+  GATE PASS (nothing tuned): EPC 17.5→0.76 (ROM 0.7), 20→0.86 (0.9), 30→4.74 (4.8); the 15–20 eV
+  **window** + **self-limitation loss** above 20 eV + **synergy 100%→20%** all emerge from the yields
+  alone. 15 eV floor 0.36 vs 0.6 runs low (near-threshold sensitivity) — the one soft point. 5/5 ALE
+  tests pass. Artifacts: `scripts/ale_window.py`, `viz/ale_window.png`, `tests/test_ale.py`.
+
+  Next chemistry (same skeleton, queued as C5): temperature-dependent physisorption term → cryo
+  SiO₂/Si₃N₄ (CHF₃ "rate doubles +20→−60 °C", JAP 133,113306); thermal Al₂O₃ ALE Arrhenius unit-test.
 
 - **C1 (2026-07-06, DONE):** reconciled charging_general vs charging2d edge_array. GATE = explain the
   floor over-charge. RESULT: **the electron source model brackets HG's floor** —
