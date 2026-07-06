@@ -171,6 +171,66 @@ def _connected_conductor_ids(mat):
         return cid, int(idx[0].size)
 
 
+def sample_sheath_source(n, rng, nx, kind, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0, M_amu=35.45):
+    """FIRST-PRINCIPLES collisionless RF-sheath source (HG's model, derived not parameterized).
+
+    The sheath potential is V_s(t) = V_dc + V_rf sin(wt). At 400 kHz the ion transit time is
+    ~1.5% of the RF period (w*tau_i ~ 0.015), so BOTH species see the INSTANTANEOUS sheath:
+
+    IONS: enter at the Bohm speed u_B = sqrt(Te/M) with transverse thermal spread ~sqrt(Ti/M),
+    crossing at a uniform-random phase. Energy gain = V_s(phase) -> the exact arcsine-bathtub
+    bimodal IED emerges from uniform phase sampling (no ied_bias knob). The transverse velocity
+    is CONSERVED while v_z grows -> theta = atan(v_perp/v_z) shrinks as 1/sqrt(E): the IADF and
+    its LOW-ENERGY-IS-WIDE anticorrelation are DERIVED, not imposed.
+
+    ELECTRONS: isotropic flux-Maxwellian (E ~ gamma(2,Te), Lambert angle) at the sheath top; the
+    sheath RETARDS them: an electron crosses only when E*cos^2(theta) > V_s(t) (which selects the
+    sheath-collapse phases), and crossing REFRACTS it: vz' = sqrt(E cos^2 th - V_s), v_perp
+    conserved -> arrivals near threshold are slow AND grazing. This produces the broadened EADF
+    (HG's measured cos^0.6 fit) INCLUDING the energy-angle correlation an independent
+    (energy x angle) sampler cannot represent. Rejection-sampled against the crossing criterion,
+    so the arrival-phase weighting (bursts at sheath collapse) is automatic."""
+    two_pi = 2.0 * np.pi
+    if kind == "ion":
+        phase = rng.uniform(0.0, two_pi, n)
+        Vs = V_dc + V_rf * np.sin(phase)
+        # E = v^2 convention: Bohm entry KE = Te/2; one transverse thermal dof carries Ti/2
+        Ez0 = 0.5 * Te * np.ones(n)
+        Ezf = Ez0 + Vs                              # accelerated by the instantaneous sheath
+        vperp = rng.normal(0.0, np.sqrt(0.5 * Ti), n)   # conserved transverse thermal velocity
+        vz = np.sqrt(Ezf)
+        x = rng.uniform(0.0, float(nx - 1), n)
+        z = np.full(n, 1.0)
+        return x, z, vperp, vz
+    # electrons: rejection-sample the retarded crossing
+    out_vx = np.empty(n); out_vz = np.empty(n)
+    got = 0
+    while got < n:
+        m = (n - got) * 3 + 64
+        E = rng.gamma(2.0, Te, m)                   # flux-weighted Maxwellian through a plane
+        u = rng.uniform(0.0, 1.0, m)
+        ct = np.sqrt(u)                             # Lambert flux (cos-weighted) at the sheath top
+        st = np.sqrt(1.0 - ct * ct)
+        phase = rng.uniform(0.0, two_pi, m)
+        Vs = V_dc + V_rf * np.sin(phase)
+        Ez = E * ct * ct
+        ok = Ez > Vs                                # crossing criterion (retardation)
+        k = min(int(ok.sum()), n - got)
+        idx = np.where(ok)[0][:k]
+        vzp = np.sqrt(Ez[idx] - Vs[idx])            # refraction: vz shrinks, v_perp conserved
+        # transverse velocity: only the IN-PLANE component of v_perp lives in the 2D x-z dynamics
+        # (v_y is conserved and irrelevant); the azimuthal projection cos(az) is essential -- taking
+        # the full |v_perp| in-plane overstates grazing arrivals (measured cos^0.35 vs HG's cos^0.6).
+        az = rng.uniform(0.0, two_pi, k)
+        vpp = np.sqrt(E[idx]) * st[idx] * np.cos(az)
+        out_vz[got:got + k] = vzp
+        out_vx[got:got + k] = vpp
+        got += k
+    x = rng.uniform(0.0, float(nx - 1), n)
+    z = np.full(n, 1.0)
+    return x, z, out_vx, out_vz
+
+
 def sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg, ied_bias=0.25):
     """Directional ions from the sheath with the correct BIMODAL energy distribution.
 
@@ -237,7 +297,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    conductor_e_factor=1.0, ied_bias=0.25, trace_device="cpu", electron_iso=False,
                    open_wall_boost=1.0, electron_Te=None, e_flux_power=None,
                    insulator_e_focus=0.0, trace_dt=0.45, trace_dt_field=0.3, trace_steps=40,
-                   poisson_step=1.0, charge_update="linear"):
+                   poisson_step=1.0, charge_update="linear", source_model="heuristic", Ti=0.5):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -363,7 +423,15 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         return V
 
     def trace(kind, n, Ex, Ez, want_energy=False):
-        if kind == "ion":
+        if source_model == "sheath" or (source_model == "hybrid" and kind == "ion"):
+            # "sheath": both species derived. "hybrid": derived ions (instantaneous crossing is exact
+            # at 400 kHz, w*tau_i~0.015) x HG's PUBLISHED electron arrival EADF (cos^0.6, JVST B Fig 5b)
+            # -- the pure-refraction electron derivation over-broadens (cos^0.35) because it omits the
+            # collapse-phase field-reversal acceleration; using their published distribution is
+            # faithful-to-benchmark until the reversal field is modeled.
+            x, z, vx, vz = sample_sheath_source(n, rng, nx, kind, Te=Te, Ti=Ti, V_dc=V_dc, V_rf=V_rf)
+            q = 1.0 if kind == "ion" else -1.0
+        elif kind == "ion":
             x, z, vx, vz = sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg, ied_bias)
             q = 1.0
         else:

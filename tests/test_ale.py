@@ -35,3 +35,15 @@ def test_absolute_epc_near_paper_at_anchor():
     """Absolute EPC at the 17.5/20 eV anchors is within ~25% of the ROM figure (0.7 / 0.9 A)."""
     assert abs(run_ale(17.5)["epc"] - 0.7) < 0.25
     assert abs(run_ale(20.0)["epc"] - 0.9) < 0.25
+
+
+def test_dose_saturation_self_limitation():
+    """VG Fig 9: EPC saturates with Ar+ dose below 1e18 cm^-2 (self-limitation DYNAMICS).
+    Doubling the dose beyond saturation must not change EPC; the saturated value matches the ROM."""
+    from petch.ale import run_ale, J_AR
+    e_sat = run_ale(17.5, t_barr=1e18 / J_AR)["epc"]
+    e_2x = run_ale(17.5, t_barr=2e18 / J_AR)["epc"]
+    assert abs(e_2x - e_sat) < 0.01              # saturated: more dose, same EPC
+    assert abs(e_sat - 0.75) < 0.1               # plateau at the ROM's ~0.75 A/cyc
+    e_low = run_ale(17.5, t_barr=1e17 / J_AR)["epc"]
+    assert e_low < 0.9 * e_sat                   # under-dosed cycles etch measurably less
