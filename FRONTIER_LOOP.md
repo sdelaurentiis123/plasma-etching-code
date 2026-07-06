@@ -49,6 +49,17 @@ reactor↔atom coupling, which no open tool has.
 ## Cycle log
 (newest first; each entry: target, what was done, gate result PASS/FAIL, artifacts, commit)
 
+- **C5 (2026-07-06, DONE):** CRYO etch chemistry (`src/petch/cryo.py`) — the hot 2023-2026 chemistry
+  (3D-NAND/DRAM), unoccupied in open source. Temperature-dependent physisorption: a condensed etchant
+  layer builds as T drops (residence time ~exp(E_ads/kT)) and multiplies the etch rate. Langmuir isotherm
+  θ(T)=Kp/(1+Kp), Kp=A·exp(E_ads/kT); rate ER(T)=R_base·(1+gain·θ). E_ads=0.4 eV FIXED from independent
+  measurement (Antoun Sci.Rep.11,357: 0.406 eV), not free-floated. GATE PASS vs CF4/H2 pseudo-wet (Small
+  Methods 2024, doi 10.1002/smtd.202400090): ER(+20°C)=2.32 (target 2.3 plateau), ER(−60°C)=3.76 (target
+  3.76), ratio 1.62 (target 1.6×). Honesty: the folk "rate doubles" anchor is really 1.6× and from CF4/H2
+  not CHF3 — gated on the true number. Cross-checks: HF cryo-ALE ~3.2× (diff system), C4F8 residence-time
+  cliff −120 vs −110°C reproduced. Smooth/differentiable (drops into the ale_diff pattern). 5/5 cryo tests,
+  14/14 full chemistry suite. Artifacts: `scripts/cryo_window.py`, `viz/cryo_window.png`, `tests/test_cryo.py`.
+
 - **C2 (2026-07-06, DONE — premise REFUTED with box data, box killed+verified-empty):** the original
   premise ("a fine-grid GPU kinetic engine closes the floor over-charge") is WRONG, shown on a rented
   RTX 4090 (contract 44044631, ~1 GPU-hr, destroyed, account verified 0 instances):
