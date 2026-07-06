@@ -49,6 +49,16 @@ reactor↔atom coupling, which no open tool has.
 ## Cycle log
 (newest first; each entry: target, what was done, gate result PASS/FAIL, artifacts, commit)
 
+- **C10 (2026-07-07, DONE — both configs + kill-test PASS):** Bosch DRIE scalloping, SEM-gated
+  (`src/petch/bosch.py`, BOSCH_BENCHMARK_SPEC.md). The first open, SEM-gated, forward-predictive Bosch
+  model (VLSet-AE 2026 = inverse/measurement, cited+distinguished; ViennaPS v3.6.0 example ungated;
+  arXiv 2606.11247 names the niche). Config R (Ayon 1999): depth 28.6 (28.2±2.8), pitch 440 (434±43),
+  scallop 140 (140±35 — exact), undercut 220 (250±50). Config S (Tillocher 2021): pitch 60.0 (60.8±6),
+  scallop 15 (≤30), D→60 µm ✓. Cross-config s_R/s_S = 9.3 (≥4). The DATA forced the physics: sequential
+  punch-then-iso mechanics (analytic s = r−sqrt(r²−(p/2)²) = 140 predicted, grid confirmed); the
+  simultaneous model provably gives 32 nm. Deferred: ARDE 0.82 sub-gate (needs the transport tier).
+  3/3 tests; suite 26/26. Artifacts: viz/bosch_scallops.png, tests/test_bosch.py.
+
 - **C5 (2026-07-06, DONE):** CRYO etch chemistry (`src/petch/cryo.py`) — the hot 2023-2026 chemistry
   (3D-NAND/DRAM), unoccupied in open source. Temperature-dependent physisorption: a condensed etchant
   layer builds as T drops (residence time ~exp(E_ads/kT)) and multiplies the etch rate. Langmuir isotherm
