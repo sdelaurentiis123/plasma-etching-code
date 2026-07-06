@@ -77,9 +77,26 @@ reactor↔atom coupling, which no open tool has.
   differentiable. **NOT** a GPU build. Requeued as C6 (below). Net: spent ~1 GPU-hr to kill a multi-hour
   wrong path — good trade.
 
-- [next] **C6 — floor source-launch calibration** (CPU, cheap): find the electron launch plane/EAD that
-  delivers HG's 0.22 floor flux (floorV→33) with the neighbor still ~39, bracketed between the old
-  solver (over, 27) and the general engine (under, 45). Gate: AR1→4 floor flux + floorV vs HG.
+- **C6 (2026-07-06, DONE — real numerics fix, first-principles, no fudge; GPU-ready):** the floor
+  over-charge is (partly) an INTEGRATOR bug, found by thinking physically. Tell: traced floor electron
+  flux (0.115-0.130) was ≤ pure geometric shadowing (0.124) — physically impossible if the integrator
+  is right, since electrostatic focusing must give MORE than geometry. The coarse leapfrog (dt_cap=0.45
+  cell/step) was losing focused floor-bound electrons. Parametrized the integrator resolution in BOTH
+  the numba CPU tracer AND the Warp-CUDA kernel (trace_dt/trace_dt_field/trace_steps; GPU-accelerated).
+  Result (AR4, no focus knob):
+    dt=0.45: floorV 46.0, e_traced 0.130 (≈geom)
+    dt=0.15: floorV 41.6, e_traced 0.154 (ABOVE geom 0.124 — the anti-shadowing now EMERGES from the trace)
+    dt=0.08: floorV 42.1, e_traced 0.152 (converged)
+  So refining the integrator makes HG's electrostatic focusing appear from first principles (no fitted
+  term), and drops the floor 46→42 V. Backward-compatible (default still 0.45; 4/4 charging tests pass).
+  Also ruled out SEE as the floor fix by physics: a 1-5 eV secondary from a +33 V floor is recaptured
+  (can't escape the well) → zero net electrons; SEE only redistributes from low-V regions.
+  RESIDUAL (42→33): the genuine reduced-model limit — at W16 the coarse FIELD grid gives too weak a
+  focusing lever. The honest close is fine grid + the corrected integrator on GPU (C2 tested fine grid
+  with the BROKEN integrator; re-test warranted). The earlier `insulator_e_focus` knob is kept opt-in
+  (default 0) as a documented phenomenological stand-in for this residual, NOT presented as the fix.
+- [next] **C7 — fine-grid GPU floor close**: re-run the AR sweep at W32/48 with the corrected integrator
+  (dt=0.15) on a CUDA box; test whether the now-emergent focusing + finer field lever lands floorV→33.
 
 - **C4 (2026-07-06, DONE):** DIFFERENTIABLE ALE (`src/petch/ale_diff.py`, torch) — the moat payoff.
   Reverse-mode autograd through the whole cyclic site-balance chemistry: `dEPC/dE` and `dEPC/dparams`.

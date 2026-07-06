@@ -47,7 +47,7 @@ def _cryo_conductivity(T_C):
     return float(1.0 / (1.0 + np.exp((T_C - T_onset) / width)))
 
 
-def _trace_general_py(Ex, Ez, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps):
+def _trace_general_py(Ex, Ez, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_cap, dt_field):
     """Push particles through the field until they enter a solid cell; return the hit CELL.
 
     No feature labels -- just (hit_ix, hit_iz) and the impact kinematics. Leapfrog with adaptive dt
@@ -79,11 +79,11 @@ def _trace_general_py(Ex, Ez, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps):
             vmax = avx if avx >= avz else avz
             if vmax < 0.8:
                 vmax = 0.8
-            dt_v = 0.45 / vmax
+            dt_v = dt_cap / vmax
             field = (fx * fx + fz * fz) ** 0.5
             if field < 1.0e-9:
                 field = 1.0e-9
-            dt_e = 0.3 / (field ** 0.5)
+            dt_e = dt_field / (field ** 0.5)
             dt = dt_v if dt_v <= dt_e else dt_e
             vx_half = vx + 0.5 * ax * dt
             vz_half = vz + 0.5 * az * dt
@@ -209,7 +209,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    electron_model="trace", vf_focus=1.8, vf_focus_pot=0.0,
                    surface_conductivity=0.0, temperature_C=20.0, corner_fee=0.0,
                    conductor_e_factor=1.0, ied_bias=0.25, trace_device="cpu", electron_iso=False,
-                   open_wall_boost=1.0, electron_Te=None, e_flux_power=None):
+                   open_wall_boost=1.0, electron_Te=None, e_flux_power=None,
+                   insulator_e_focus=0.0, trace_dt=0.45, trace_dt_field=0.3, trace_steps=40):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -337,12 +338,15 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             x, z, vx, vz = sample_electrons(n, rng, nx, (Te if electron_Te is None else electron_Te),
                                             iso=electron_iso, flux_power=e_flux_power)
             q = -1.0
+        msteps = int(trace_steps) * nz
         if trace_device == "cuda":
             from .charging_gpu import trace_gpu
-            hix, hiz, E = trace_gpu(Ex, Ez, solid, x, z, vx, vz, q, 40 * nz, device="cuda")
+            hix, hiz, E = trace_gpu(Ex, Ez, solid, x, z, vx, vz, q, msteps, device="cuda",
+                                    dt_cap=trace_dt, dt_field=trace_dt_field)
             surv = (hix < 0).astype(np.float64)
         else:
-            hix, hiz, E, _, surv = _trace_general(Ex, Ez, solid, x, z, vx, vz, q, nx, nz, 40 * nz)
+            hix, hiz, E, _, surv = _trace_general(Ex, Ez, solid, x, z, vx, vz, q, nx, nz,
+                                                  msteps, trace_dt, trace_dt_field)
         counts = np.zeros((nx, nz))
         energy = np.zeros((nx, nz)) if want_energy else None
         m = hix >= 0
@@ -400,6 +404,15 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         # starved line's current balance rise toward its true +39 V. conductor_e_factor<1 tests this.
         if ncomp > 0 and conductor_e_factor != 1.0:
             ce = ce.copy(); ce[is_cond] *= float(conductor_e_factor)
+        # ELECTROSTATIC ANTI-SHADOWING (HG: "electrostatics decreases the geometric shadowing"): the
+        # positive floor focuses extra electrons in beyond geometry. The reduced z=1 trace misses this
+        # (too weak a field lever), so the floor over-charges. Apply the focusing as an electron-collection
+        # boost proportional to the local positive potential -- but ONLY on INSULATOR cells (the floor),
+        # NOT conductors, so the electron-starved neighbour line keeps its high +39 V (a global V-focus
+        # collapses the split; insulator-only preserves it). Calibrated once vs HG floor V.
+        if insulator_e_focus > 0.0:
+            ce = ce.copy()
+            ce[insul] *= (1.0 + float(insulator_e_focus) * np.maximum(Vcell[insul], 0.0))
         net = ci - ce
         # Robbins-Monro decaying step (NO floor) so the stochastic relaxation reaches a true fixed
         # point instead of drifting; tail-average the potentials (Polyak) for the steady-state value.
@@ -463,6 +476,9 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             vfb = vf_grid * np.where(vf_grid > 0.18, open_wall_boost, 1.0)
             ce_geom = (float(ntot) / nx) * vfb * thr   # analytic sky-view floor (geometric shadowing)
             ce_f = np.maximum(ce_f, ce_geom)
+        if insulator_e_focus > 0.0:            # same electrostatic anti-shadowing as the loop (insulator-only)
+            ce_f = ce_f.copy()
+            ce_f[insul] *= (1.0 + float(insulator_e_focus) * np.maximum(Vcell[insul], 0.0))
     # per-cell insulator potential is the solved field at insulator cells (poisson) or Vs (laplace)
     Vs_out = np.where(insul, V, 0.0) if use_poisson else Vs
     out = dict(V=V, Vs=Vs_out, Vc=Vc[1:], ncomp=ncomp, cid=cid, rho=rho,

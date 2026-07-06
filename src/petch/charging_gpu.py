@@ -25,6 +25,7 @@ if _WARP:
                           x0: wp.array(dtype=wp.float32), z0: wp.array(dtype=wp.float32),
                           vx0: wp.array(dtype=wp.float32), vz0: wp.array(dtype=wp.float32),
                           q: wp.float32, nx: wp.int32, nz: wp.int32, max_steps: wp.int32,
+                          dt_cap: wp.float32, dt_field: wp.float32,
                           hit_ix: wp.array(dtype=wp.int32), hit_iz: wp.array(dtype=wp.int32),
                           impact_E: wp.array(dtype=wp.float32)):
         p = wp.tid()
@@ -48,11 +49,11 @@ if _WARP:
             vmax = wp.max(avx, avz)
             if vmax < 0.8:
                 vmax = wp.float32(0.8)
-            dt_v = 0.45 / vmax
+            dt_v = dt_cap / vmax
             field = wp.sqrt(fx * fx + fz * fz)
             if field < 1.0e-9:
                 field = wp.float32(1.0e-9)
-            dt_e = 0.3 / wp.sqrt(field)
+            dt_e = dt_field / wp.sqrt(field)
             dt = wp.min(dt_v, dt_e)
             vx_half = vx + 0.5 * ax * dt
             vz_half = vz + 0.5 * az * dt
@@ -95,7 +96,7 @@ if _WARP:
         impact_E[p] = E
 
 
-def trace_gpu(Ex, Ez, solid, x0, z0, vx0, vz0, q, max_steps, device="cpu"):
+def trace_gpu(Ex, Ez, solid, x0, z0, vx0, vz0, q, max_steps, device="cpu", dt_cap=0.45, dt_field=0.3):
     """Push particles on `device` ("cpu" or "cuda"); returns (hit_ix, hit_iz, impact_E) numpy arrays.
     hit_ix<0 = escaped (survivor). Same semantics as numba `_trace_general`."""
     if not _WARP:
@@ -115,6 +116,7 @@ def trace_gpu(Ex, Ez, solid, x0, z0, vx0, vz0, q, max_steps, device="cpu"):
         E = wp.empty(n, dtype=wp.float32)
         wp.launch(_trace_gpu_kernel, dim=n,
                   inputs=[Ex_d, Ez_d, solid_d, x_d, z_d, vx_d, vz_d,
-                          float(q), int(nx), int(nz), int(max_steps), hix, hiz, E])
+                          float(q), int(nx), int(nz), int(max_steps),
+                          float(dt_cap), float(dt_field), hix, hiz, E])
         wp.synchronize()
         return hix.numpy(), hiz.numpy(), E.numpy()
