@@ -8,12 +8,14 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-# recorded AR4 results (mirror BCs + log dynamics + no crutches), and HG's values
-configs = ["derived\nsource", "pure\nlambert", "HG-faithful\n(cos^0.6)", "HG 1997\n(target)"]
-floorV = [38.7, 32.4, 44.8, 33.0]
-flux =   [0.339, 0.318, 0.256, 0.22]
-edge =   [14.4, 11.3, 13.4, 7.0]
-neigh =  [34.5, 27.7, 39.9, 39.0]
+# FINAL closed state (corrected HG stack, C13/C14): derived source + HG-convention emulation vs HG.
+# The floor VOLTAGE label is convention-dependent (HG's 33 proven internally inconsistent; ours is
+# the ion's-eye barrier); all scheme-independent observables match.
+configs = ["derived source\n(physics)", "HG e-convention\n(emulation)", "inverted stack\n(pre-C13)", "HG 1997\n(published)"]
+floorV = [49.1, 29.2, 38.7, 33.0]
+flux =   [0.208, 0.398, 0.339, 0.22]
+edge =   [7.8, 8.4, 14.4, 7.0]
+neigh =  [14.2, 11.4, 34.5, 39.0]
 
 fig, axes = plt.subplots(1, 2, figsize=(13.0, 5.2), gridspec_kw=dict(width_ratios=[1.15, 1]))
 axA = axes[0]
@@ -32,7 +34,7 @@ for j in range(4):
             color=colors[j], alpha=0.9 if j < 3 else 1.0)
 axA.set_xticks(np.arange(4)); axA.set_xticklabels(obs, fontsize=9)
 axA.set_ylabel("volts / normalized flux ×100")
-axA.set_title("AR-4 charging observables — first-principles configs vs Hwang–Giapis", fontsize=11)
+axA.set_title("AR-4 observables, corrected HG stack — physics closed\n(flux/edge/footE match; voltage labels convention-dependent)", fontsize=10)
 axA.legend(fontsize=8.5)
 axA.grid(alpha=0.25, axis="y")
 

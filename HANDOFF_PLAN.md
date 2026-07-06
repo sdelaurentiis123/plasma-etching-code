@@ -84,6 +84,33 @@ Reading:
 4. The `edge_extra_e` line-of-sight top-up residual is small (+/-0.02) — leave it as diagnostic;
    its removal is W2 as planned.
 
+## 2b. W0 CLOSED (2026-07-03, commit 07ccae0) — measured
+
+The PR guard fix landed. Charge conservation now converges; the numerics track is done.
+
+- PR insulator: default guard is now `-(V_dc+V_rf)` (the sheath scale), param `insul_vmin_Te`
+  defaults to `None` and accepts a number in Te for a tighter diagnostic bound. Physical result
+  at AR4: PR sidewall floats +24 V at the ion-dominated bottom to -50 V near the electron-exposed
+  mouth; 324/3712 cells charge; the rest stay 0 (buried). This matches the expected sidewall
+  charge sign profile.
+- Convergence at AR4 (n1200), max per-surface tail residual: it200 0.034, it400 0.053, it900
+  0.007. Gate (<0.08) PASSES once converged. The earlier "flux drift" (0.30->0.39) was single-
+  4x-snapshot noise; the tail flux is stable at ~0.32.
+- **Confirmed W2 diagnosis, not a bug:** with the scalar `line_of_sight` top-up ON, the edge
+  conductor is pinned at Vedge=0 (the boundary current over-supplies electrons to it). With
+  `edge_open_model="none"` the edge conductor unpins and charges to ~18 V. Either way the
+  conductors plateau LOW (Vedge 18, Vneigh 22 vs HG 39) and floor flux tail sits at ~0.32 vs HG
+  0.22. These are the geometry/pattern-electrostatics misses W2 must fix, exactly as
+  CHARGING_DEEP_ISSUES predicted. The cleaner W0 reference config is `edge_open_model="none"`;
+  the `line_of_sight` current is diagnostic-only and W2 replaces it with explicit open field.
+- Task #44 (W0) is complete. Full post-W0 reduced-gate scorecard (it400, both configs) is being
+  regenerated; paste it into RECONCILIATION.md when done.
+
+Conductor convergence is slow (Vneigh reaches its ~22 plateau only after ~400 iters because the
+single-equipotential update divides the collected current by the full exposed area). This is not
+wrong, just slow; if W2 iteration gets tedious, give the conductor update a capacitance-scaled
+step so it plateaus in ~100 iters. Not required for correctness.
+
 ## 3. Physics order after W0 (from ROBUST_PHYSICS_MODEL_PLAN, sharpened)
 
 Work these strictly in order; each has a gate and a kill criterion. Reduced setting first
