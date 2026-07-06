@@ -49,6 +49,21 @@ reactor↔atom coupling, which no open tool has.
 ## Cycle log
 (newest first; each entry: target, what was done, gate result PASS/FAIL, artifacts, commit)
 
+- **C9 (2026-07-07, CONCLUDED — the charging module is pure-physics; joint residual ~20-35% attributed):**
+  the full first-principles rebuild: corrected integrator (C6) + mirror-image tracer BCs + log
+  current-balance dynamics + physical -10Te bound + DERIVED ion sheath source (exact at 400 kHz:
+  bathtub+Bohm+anticorrelation, P(E<33)=0.434=analytic) + electron derivation pushed to its honest
+  ceiling (projection bug found+fixed: cos^0.35→cos^1.0; isotropic-top→cos^0.88; HG's Vlasov gives
+  0.6 — the residual is thick-sheath time-resolved dynamics, agent hunting Ootera's theory).
+  Field reversal REJECTED as explanation by mass-ratio flux balance (collapse thermal flux covers
+  ions 2.6x). Final config table (AR4, all crutches OFF):
+    pure_lambert: floor 32.4✓/0.318/11.3/27.7 | pure_cos06: 39.7/0.259/10.3/35.3 |
+    HG-faithful: 44.8/0.256/13.4/39.9✓ | HG: 33/0.22/7/39.
+  Every observable individually reachable with faithful physics; foot peak 61V≈HG 60; all structure
+  (dipole, splits, focusing, deflection feedback) emergent. Remaining joint gap = 2D-projection
+  conventions + Vlasov EADF breadth + rectangular mask idealization — named modules, not knobs.
+  Retrofit queued: wire petch-computed charging into the notch arc (task #43).
+
 - **C10 (2026-07-07, DONE — both configs + kill-test PASS):** Bosch DRIE scalloping, SEM-gated
   (`src/petch/bosch.py`, BOSCH_BENCHMARK_SPEC.md). The first open, SEM-gated, forward-predictive Bosch
   model (VLSet-AE 2026 = inverse/measurement, cited+distinguished; ViennaPS v3.6.0 example ungated;
