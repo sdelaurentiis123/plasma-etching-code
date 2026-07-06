@@ -65,38 +65,43 @@ thermal flux covers the ion flux 2.6&times;), time-resolved sheath effects (quas
 in 10&sup3;).</li>
 </ul>
 
-<h2>Benchmark: Hwang&ndash;Giapis 1997 — matched on physics, corrected on conventions</h2>
-<img src="charging_first_principles.png" alt="charging first-principles state vs Hwang-Giapis" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<h2>Benchmark: Hwang&ndash;Giapis 1997 — every published curve, measured</h2>
+<img src="hg_curves.png" alt="all HG curves vs petch, three-way" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
 
-<p>With the geometry faithful to their stated stack (photoresist 0.54&nbsp;&micro;m fixed, poly
-growing with aspect ratio &mdash; our builder originally had this inverted; fixing it snapped two
-observables onto the benchmark) and <em>zero tuning knobs</em>:</p>
+<p>All channels of their Figs 2&ndash;6, on their true geometry (photoresist growing with AR over
+fixed 0.3&nbsp;&micro;m poly &mdash; verified against their Fig&nbsp;1 caption), with zero tuning
+knobs, in two source modes: the <strong>physics mode</strong> (our proven cos&thinsp;&theta;
+arrivals) and an <strong>HG-emulation mode</strong> (their stated uniform-in-angle injection).</p>
 
 <table>
-<thead><tr><th>Observable (AR&nbsp;4)</th><th>petch (derived)</th><th>Hwang&ndash;Giapis</th><th>State</th></tr></thead>
+<thead><tr><th>Channel (AR&nbsp;1&rarr;4)</th><th>petch</th><th>HG (figure reads)</th><th>State</th></tr></thead>
 <tbody>
-<tr><td>Floor ion flux</td><td>0.21&ndash;0.23</td><td>0.22</td><td><strong>match</strong></td></tr>
-<tr><td>Edge-line potential</td><td>7.8&nbsp;V</td><td>7&nbsp;V</td><td><strong>match</strong></td></tr>
-<tr><td>Deflected-ion foot energy</td><td>28.0&nbsp;eV</td><td>28&nbsp;eV</td><td><strong>match</strong></td></tr>
-<tr><td>Foot potential horns</td><td>~61&nbsp;V</td><td>~60&nbsp;V</td><td><strong>match</strong></td></tr>
-<tr><td>Floor potential <em>label</em></td><td>49&nbsp;V (ion&rsquo;s-eye) / 29&nbsp;V (their e&ndash;convention)</td><td>33&nbsp;V</td><td>convention-dependent (below)</td></tr>
+<tr><td>Deflected foot current (notch driver)</td><td>~0.15 flat</td><td>~0.14 flat</td><td><strong>match</strong></td></tr>
+<tr><td>Foot impact energy trend</td><td>rising 20&rarr;24&nbsp;eV</td><td>rising 15&rarr;28&nbsp;eV</td><td><strong>trend match</strong></td></tr>
+<tr><td>Poly-outer electron flux</td><td>~0.19 flat (AR&ge;2)</td><td>~0.19 flat</td><td><strong>match</strong></td></tr>
+<tr><td>PR sidewall recapture</td><td>0.57 at AR4 (emulation)</td><td>0.57</td><td><strong>match</strong></td></tr>
+<tr><td>Rejected-ion recapture</td><td>100% (0 escape)</td><td>required by their balance</td><td><strong>match</strong></td></tr>
+<tr><td>Floor potential</td><td>39.7 (physics) / 26.6 (emulation)</td><td>33</td><td><strong>bracketed</strong></td></tr>
+<tr><td>Bottom ion flux</td><td>0.29 (physics)</td><td>0.22</td><td>+30% &mdash; traced to corner capture (below)</td></tr>
+<tr><td>Neighbor line</td><td>32.7 (physics)</td><td>39</td><td>&minus;16%; multi-line geometry untested</td></tr>
 </tbody>
 </table>
 
-<h2>Two corrections to the benchmark itself</h2>
+<h2>What the validation campaign proved (and retracted)</h2>
 <ol>
-<li><strong>Their electron distribution is an injection artifact.</strong> HG launch electrons
-&ldquo;isotropic in flux&rdquo; (uniform in angle) &mdash; unphysical for a Maxwellian half-space.
-Their published cos<sup>0.6</sup> arrival fit follows from that convention (closed form:
-p&nbsp;&asymp;&nbsp;0.72&ndash;0.80); the theorem says the physical arrival is cos&thinsp;&theta;
-exactly. petch keeps their convention available as an emulation flag for comparisons.</li>
-<li><strong>Their published state is internally inconsistent.</strong> Floor 33&nbsp;V + flux 0.22 +
-walls at 7/39&nbsp;V cannot coexist: a 32&nbsp;V cross-trench field zeroes the floor flux in any
-electrostatic field (frozen-field trace). Their voltage labels come from an under-specified
-charge&rarr;potential readout &mdash; the same converged charge state reads anywhere from
-<strong>11 to 460&nbsp;V</strong> through defensible variants of their described kernel. petch&rsquo;s
-labels are the barrier the ions actually experience, by construction. (The physical observables
-&mdash; fluxes, energies, deflection &mdash; are invariant to all of this.)</li>
+<li><strong>Proved:</strong> the invariance theorem (arrival EADF = cos&thinsp;&theta; for any RF
+waveform under physical injection); HG&rsquo;s cos<sup>0.6</sup> is their injection-convention
+artifact; the sheath is quasi-static here to 10<sup>&minus;3</sup>; SEE cannot lower a positive
+floor; two of our own measurement-surface definitions were wrong (foot energy, poly-outer) and
+fixing them restored their trends.</li>
+<li><strong>Retracted, in public:</strong> an early &ldquo;stack inversion&rdquo; claim and an
+&ldquo;internal inconsistency&rdquo; claim &mdash; both fell when we read the paper&rsquo;s actual
+figures. The retractions are committed alongside the results; that discipline is the product.</li>
+<li><strong>The named remaining gaps</strong> (finite, instrumented): the low-AR corner capture
+(their &minus;4.5&nbsp;V corners harvest the low-energy ion horn more strongly than our
+&minus;1.5&nbsp;V corners &mdash; the upstream cause of the bottom-flux offset), the multi-line
+array geometry for the neighbor label, and the foot-energy endpoint. These are the full-match
+program, not mysteries.</li>
 </ol>
 
 <h2>Frontier module: cryogenic charge relief</h2>
