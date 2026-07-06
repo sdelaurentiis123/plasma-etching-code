@@ -183,13 +183,20 @@ def sample_sheath_source(n, rng, nx, kind, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0,
     is CONSERVED while v_z grows -> theta = atan(v_perp/v_z) shrinks as 1/sqrt(E): the IADF and
     its LOW-ENERGY-IS-WIDE anticorrelation are DERIVED, not imposed.
 
-    ELECTRONS: isotropic flux-Maxwellian (E ~ gamma(2,Te), Lambert angle) at the sheath top; the
-    sheath RETARDS them: an electron crosses only when E*cos^2(theta) > V_s(t) (which selects the
-    sheath-collapse phases), and crossing REFRACTS it: vz' = sqrt(E cos^2 th - V_s), v_perp
-    conserved -> arrivals near threshold are slow AND grazing. This produces the broadened EADF
-    (HG's measured cos^0.6 fit) INCLUDING the energy-angle correlation an independent
-    (energy x angle) sampler cannot represent. Rejection-sampled against the crossing criterion,
-    so the arrival-phase weighting (bursts at sheath collapse) is automatic."""
+    ELECTRONS: flux-Maxwellian (E ~ gamma(2,Te), Lambert cos-flux angle -- the physical injection
+    for a Maxwellian half-space) at the sheath top; the sheath RETARDS them: an electron crosses
+    only when E*cos^2(theta) > V_s(t) (selecting the sheath-collapse phases = the burst structure),
+    and crossing REFRACTS it: vz' = sqrt(E cos^2 th - V_s), in-plane v_perp conserved.
+
+    INVARIANCE THEOREM (proven, MC-verified): for Maxwellian + cosine-flux injection, barrier
+    selection and refraction cancel EXACTLY at every phase --
+        v_z e^{-mv_z^2/2kTe} dv_z = e^{-eV_s/kTe} v_z' e^{-mv_z'^2/2kTe} dv_z'
+    so the arrival ADF is cos(theta) EXACTLY for any V_s(t), any waveform; only the total flux is
+    modulated (cycle-avg (1/4)n c_bar e^{-eV_dc/kTe} I0(eV_rf/kTe), Koehler JAP 57,59). The sheath
+    is quasi-static here to 1e-3 (4 eV electron crosses 89 um in ~75 ps vs 2.5 us RF period).
+    NOTE: HG's published cos^0.6 EADF is an INJECTION-CONVENTION ARTIFACT (they launch uniform-in-
+    angle, not cosine-flux; that convention gives p~0.72-0.80 in closed form, ~ their noisy 0.6
+    fit). This sampler is the physics; do not calibrate toward 0.6."""
     two_pi = 2.0 * np.pi
     if kind == "ion":
         phase = rng.uniform(0.0, two_pi, n)
