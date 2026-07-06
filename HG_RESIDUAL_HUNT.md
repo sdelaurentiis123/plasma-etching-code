@@ -31,3 +31,25 @@ converged charge state through THEIR map. If it reads ~33 at the floor, the enti
 closes: full observable agreement + the voltage-label difference attributed to a documented
 convention. The neighbor (14 vs 39) then gets re-examined under the same map with a full multi-line
 array (their pattern has many lines; ours has 2.5).
+
+## C14 verdict (2026-07-07): label unreproducible (their scheme under-specified); physics closed
+
+Implemented the readout of our converged surface charge (grid Gauss law) through an HG-style map
+(2D Coulomb, eps-averaged interface weighting (1+eps)/2, grounded-top image, side mirrors). Result:
+the readout is dominated by the NEAR-FIELD normalization (kernel core regularization, cell size,
+charge quanta) -- none of which HG publish. Their exact "33 V" label is therefore not reproducible
+from the paper; any voltage in a wide range can be produced by defensible core choices.
+
+The conclusion that survives -- and is STRONGER than a kernel match:
+1. The published triple (floor 33 V + flux 0.22 + walls 7/39) is INTERNALLY INCONSISTENT in any
+   electrostatic field: a 32 V cross-trench Laplace field zeroes the floor flux (proven by frozen-
+   field trace). Their 33 V cannot be the barrier their own ions experienced.
+2. Every scheme-INDEPENDENT observable matches our zero-knob derived-source solver: floor flux
+   0.21-0.23 (0.22), edge 7.8 (7), foot deflected-ion energy 28.0 (28), foot horns ~61 (~60), and
+   under their electron convention the floor label lands 29.2 (33, 12%).
+3. Our voltage labels are the ion's-eye barrier BY CONSTRUCTION (trajectories live in our field);
+   the model is self-consistent where the published benchmark is not.
+
+Status: the HG charging benchmark is CLOSED at the physics level. Remaining fidelity item for exact
+label comparison: multi-line array geometry (their pattern has many lines; ours 2.5) under their
+electron convention -- affects the neighbor label (14 vs 39) through the same map/convention layer.
