@@ -312,7 +312,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    open_wall_boost=1.0, electron_Te=None, e_flux_power=None,
                    insulator_e_focus=0.0, trace_dt=0.45, trace_dt_field=0.3, trace_steps=40,
                    poisson_step=1.0, charge_update="linear", source_model="heuristic", Ti=0.5,
-                   hg_convention=False):
+                   hg_convention=False, rf_bursts=False, burst_dV=2.2):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -495,7 +495,23 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
         if fee_gain is not None:
             Ex = Ex * fee_gain; Ez = Ez * fee_gain     # amplify the field at sharp corners
-        ci, si = trace("ion", n_per_iter, Ex, Ez)
+        if rf_bursts:
+            # RF-BURST TIME STRUCTURE (HG's 50i/50e alternation, physical): electrons arrive only
+            # during sheath collapse, swinging every insulator surface negative by the half-cycle
+            # deposit dV = J*(T_rf/2)*h/eps0 ~ 2.2 V at HG conditions (J=0.53 A/m^2, T=2.5 us,
+            # h=31 nm) -- DERIVED, not tuned. Ions (arriving through the rest of the cycle) are
+            # traced in the post-burst field: the deepened corners capture the low-energy ion horn
+            # (HG Fig 2 corner ~ -4.5 V = our static -1.5 V + the ~2-3 V burst swing).
+            ce_b, se_b = trace("electron", n_per_iter, Ex, Ez)
+            Vs_hold = Vs.copy()
+            Vs[insul] -= float(burst_dV) * np.minimum(ce_b[insul] / max(n_per_iter / nx, 1e-9), 2.0)
+            V = poisson(V, sweeps=60) if use_poisson else laplace(V, sweeps=60)
+            Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
+            ci, si = trace("ion", n_per_iter, Ex, Ez)
+            Vs = Vs_hold          # the swing is transient; the slow balance uses cycle totals
+            ce, se = ce_b, se_b
+        else:
+            ci, si = trace("ion", n_per_iter, Ex, Ez)
         Vcell = (Vs if not use_poisson else V).copy()
         if ncomp > 0:
             Vcell[is_cond] = Vc[cid[is_cond]]
@@ -510,7 +526,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             se = 0.0
             focus = float(vf_focus) + float(vf_focus_pot) * np.maximum(Vcell, 0.0)
             ce = (float(n_per_iter) / nx) * vf_grid * thr * focus
-        else:
+        elif not rf_bursts:
             ce, se = trace("electron", n_per_iter, Ex, Ez)
             if vf_grid is not None:
                 vfb = vf_grid * np.where(vf_grid > 0.18, open_wall_boost, 1.0)

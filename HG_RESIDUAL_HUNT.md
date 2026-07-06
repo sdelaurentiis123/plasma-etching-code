@@ -116,3 +116,25 @@ NAMED remaining gaps (the "full match" program):
    potential drop).
 All three are FINITE, INSTRUMENTED questions -- not mysteries. The bottom-flux normalization
 question (their AR1 = 0.59 implying ~37% pre-barrier loss) is resolved by gap #1 arithmetic.
+
+## C16 (2026-07-07): two more suspects REFUTED by experiment — the residual is now sharply bounded
+
+- **RF-burst time structure** (implemented, derived amplitude 2.2 V = J*T_rf/2*h/eps0): applied as an
+  electron-phase swing before ion tracing. Result: bottom 0.32, floorV 38.2, edge 13.1 — UNCHANGED.
+  A -4 V corner does not have the reach to capture the low-energy horn; HG's -4.5 V corner is an
+  EFFECT of their state, not the cause of their capture. rf_bursts stays available (physical), but
+  it is not the unlock.
+- **Multi-line array** (4 lines, general engine, manual mat): interior line ladder 14.2 / 31.7 /
+  33.7 / 22.4 (last = right-margin artifact). The interior plateau is ~32-34, NOT 39. Array
+  truncation is not the neighbor gap.
+
+The remaining residual (bottom +30%, floorV +5, edge +6, neigh -6) now SURVIVES: both electron
+conventions, both ion sources, burst time structure, array size, grid refinement, and integrator
+resolution. The surviving suspects are structural: (a) HG's charge-space update + global eps-map
+DYNAMICS selecting a different coupled fixed point (the per-cell zero-current argument assumes
+uniqueness; coupled surfaces may admit more than one), (b) their conductor charge-redistribution
+procedure (charge piles at the poly/SiO2 corner, "critically important" per their JVST B p.75 --
+we hold potentials, they iterate charges), (c) fine differences in their launch plane / open-area
+extent. Next decisive build: implement their EXACT four-step charge-redistribution + Coulomb map as
+a dynamics mode (not just a readout) and see which fixed point it selects. That is the last
+structural difference between the codes.
