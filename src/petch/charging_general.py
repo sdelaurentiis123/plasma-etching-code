@@ -171,14 +171,22 @@ def sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg, ied_bias=0.25):
     return x, z, vx, vz
 
 
-def sample_electrons(n, rng, nx, Te, cos_power=1.0, iso=False):
+def sample_electrons(n, rng, nx, Te, cos_power=1.0, iso=False, flux_power=None):
     """Thermal electrons entering through the plasma boundary (top, z~=1). Lambert (cos^p) flux by
     default. iso=True gives a TRULY isotropic downward-hemisphere velocity (uniform over solid angle,
     theta in [0,pi/2]) with a strong near-horizontal population, so electrons actually reach the
     sideways-facing OUTER wall of the edge line (which a down-biased launch misses) -- the physical
-    fact that an isotropic plasma delivers the same flux to a vertical wall as to a horizontal one."""
+    fact that an isotropic plasma delivers the same flux to a vertical wall as to a horizontal one.
+
+    flux_power=p (if not None) launches the arriving flux as cos^p(theta): cos(theta)=u**(1/(p+1)).
+    p=1 is the cosine law; p<1 is BROADER (more oblique) -- HG's measured post-sheath EADF is cos^0.6
+    (JVST B 15,70 Fig 5b), broader than isotropic, and the oblique wing is what the floor field focuses
+    into the trench (the electrostatic anti-shadowing that lifts the floor electron flux above geometric)."""
     E0 = rng.gamma(2.0, Te, n)
-    if iso:
+    if flux_power is not None:
+        u = rng.uniform(0.0, 1.0, n)
+        ct = u ** (1.0 / (float(flux_power) + 1.0))   # flux ~ cos^p(theta); lower p = broader/more oblique
+    elif iso:
         ct = rng.uniform(0.0, 1.0, n)          # cos(theta) uniform -> isotropic solid angle
     else:
         u = rng.uniform(0.0, 1.0, n)
@@ -201,7 +209,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    electron_model="trace", vf_focus=1.8, vf_focus_pot=0.0,
                    surface_conductivity=0.0, temperature_C=20.0, corner_fee=0.0,
                    conductor_e_factor=1.0, ied_bias=0.25, trace_device="cpu", electron_iso=False,
-                   open_wall_boost=1.0):
+                   open_wall_boost=1.0, electron_Te=None, e_flux_power=None):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -326,7 +334,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             x, z, vx, vz = sample_ions(n, rng, mouth, nx, V_dc, V_rf, iadf_hwhm_deg, ied_bias)
             q = 1.0
         else:
-            x, z, vx, vz = sample_electrons(n, rng, nx, Te, iso=electron_iso)
+            x, z, vx, vz = sample_electrons(n, rng, nx, (Te if electron_Te is None else electron_Te),
+                                            iso=electron_iso, flux_power=e_flux_power)
             q = -1.0
         if trace_device == "cuda":
             from .charging_gpu import trace_gpu
@@ -448,13 +457,20 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         ce_f = (float(ntot) / nx) * vf_grid * thr * focus
     else:
         ce_f, _ = trace("electron", 4 * n_per_iter, Ex, Ez)
+        ce_traced = ce_f.copy()               # raw traced electron flux (kinetic, before geometric floor)
+        ce_geom = None
         if vf_grid is not None:
             vfb = vf_grid * np.where(vf_grid > 0.18, open_wall_boost, 1.0)
-            ce_f = np.maximum(ce_f, (float(ntot) / nx) * vfb * thr)
+            ce_geom = (float(ntot) / nx) * vfb * thr   # analytic sky-view floor (geometric shadowing)
+            ce_f = np.maximum(ce_f, ce_geom)
     # per-cell insulator potential is the solved field at insulator cells (poisson) or Vs (laplace)
     Vs_out = np.where(insul, V, 0.0) if use_poisson else Vs
-    return dict(V=V, Vs=Vs_out, Vc=Vc[1:], ncomp=ncomp, cid=cid, rho=rho,
-                surv_ion=hist[-1][0], surv_electron=hist[-1][1],
-                field_model=field_model,
-                ion_counts=ci_f, ion_energy=Ei_f, electron_counts=ce_f, ntot=ntot,
-                solid=solid, insul=insul, frames=frames)
+    out = dict(V=V, Vs=Vs_out, Vc=Vc[1:], ncomp=ncomp, cid=cid, rho=rho,
+               surv_ion=hist[-1][0], surv_electron=hist[-1][1],
+               field_model=field_model,
+               ion_counts=ci_f, ion_energy=Ei_f, electron_counts=ce_f, ntot=ntot,
+               solid=solid, insul=insul, frames=frames)
+    if electron_model != "vf":
+        out["electron_traced"] = ce_traced
+        out["electron_geom"] = ce_geom
+    return out
