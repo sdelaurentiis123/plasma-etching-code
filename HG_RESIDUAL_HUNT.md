@@ -90,3 +90,29 @@ Direct figure reads give two NEW quantitative targets our model must match:
   over-collimating electrons (explains flux 0.34 vs 0.22) and distorting the edge (14 vs 7).
 Next: instrument PR-corner V, PR-wall ion/electron flux fractions vs Fig 3, and the fate of
 rejected ions, on the TRUE stack.
+
+## C15 full-curve state (2026-07-07): every published channel measured, gaps precisely named
+
+TRUE stack, derived source, correct per-surface definitions, zero knobs; and the valid
+apples-to-apples (HG electron convention on the TRUE stack). Full table in viz/hg_curves.png.
+
+MATCHING: foot current (~0.15 vs ~0.14 flat), foot ENERGY TREND (rising, face-defined -- the earlier
+flat/backwards trend was a measurement-surface error, fixed), poly-outer (flat 0.19, exact for
+AR>=2 after fixing the same class of definition error), poly-inner electron decay, PR-recapture
+trend (AR4 EXACT at 0.57 under HG convention), all curve SHAPES, rejected-ion recapture (0 escape).
+
+BRACKETING: floorV -- physics mode 39.7 / HG-convention mode 26.6 vs HG 33. The published label
+sits between our two source modes.
+
+NAMED remaining gaps (the "full match" program):
+1. LOW-AR PR/CORNER CAPTURE: HG's corners at -4.5 V capture ~28% of ions at AR1 (their Fig 3
+   balance); ours at -1.5 V capture ~17%. The -4.5 vs -1.5 corner potential is the single upstream
+   cause: corner V -> low-energy-horn ion capture -> bottom arrival -> floor V. Hypotheses: their
+   coarser grid cells (corner V is resolution-dependent), their charge-update cadence (50i+50e
+   sequential vs our simultaneous), or a real electron-delivery difference at the corner.
+2. NEIGHBOR at AR4: 32.7 (phys) / 23.0 (conv) vs 39. Multi-line array geometry (their pattern has
+   many lines; ours 2.5) remains untested for this label.
+3. E_face plateau ~20-24 vs their rise to 28 at AR4 (close; tied to the floor V through the foot
+   potential drop).
+All three are FINITE, INSTRUMENTED questions -- not mysteries. The bottom-flux normalization
+question (their AR1 = 0.59 implying ~37% pre-barrier loss) is resolved by gap #1 arithmetic.

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Process Modules — Differentiable 3D Feature-Scale Etch Simulation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">Etch&nbsp;Sim</span>
+  <a href="index.html">Overview</a>
+  <a href="physics.html">Physics</a>
+  <a href="numerics.html">Numerics</a>
+  <a href="flux-transport.html">Flux &amp; Transport</a>
+  <a href="acceleration.html">Acceleration</a>
+  <a href="differentiable-ml.html">Differentiable &amp; ML</a>
+  <a href="multiscale.html">Multiscale</a>
+  <a href="charging.html">Charging</a>
+  <a href="processes.html" class="active">Processes</a>
+  <a href="sota-and-plan.html">SOTA &amp; Plan</a>
+  <a href="performance.html">Performance</a>
+  <a href="experimental-validation.html">Experiments</a>
+  <a href="comparison.html">Scorecard</a>
+  <a href="references.html">References</a>
+</div></nav>
+<main>
+
+<h1>Process modules — ALE, cryo, Bosch, each gated on published data</h1>
+<p class="subtitle">Three etch processes no open simulator ships with quantitative gates: Atomic
+Layer Etching, cryogenic etch chemistry, and Bosch DRIE scalloping. Every number below is a
+PASS against a published measurement; nothing is drawn or tuned to fit.</p>
+
+<h2>Atomic Layer Etching (Si/Cl&#8322;/Ar&#8314;) — the window emerges</h2>
+<p>Cyclic self-limiting etch as a three-layer site-balance model (Vella&ndash;Graves 2025, all
+constants from their MD fits &mdash; nothing of ours tuned). The <strong>15&ndash;20&nbsp;eV ALE
+window</strong>, the loss of self-limitation above 20&nbsp;eV, the Kanarik synergy collapse, and the
+<strong>dose-saturation dynamics</strong> (EPC stops growing below 10&sup1;&#8312;&nbsp;cm&#8315;&sup2;
+&mdash; the defining ALE behavior) all emerge from the yield physics.</p>
+<img src="ale_window.png" alt="ALE window vs Vella-Graves" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+
+<h2>Differentiable chemistry — inverse design demonstrated</h2>
+<p>The same ALE model re-expressed with reverse-mode autodiff: exact gradients of etch-per-cycle
+through the full cyclic chemistry (autograd matches finite differences to four decimals), and
+gradient-based <strong>inverse design</strong> &mdash; solve for the ion energy that hits a target
+etch rate in ~15 Newton steps. No closed tool can do this (you cannot backprop through a binary);
+no open tool has the chemistry.</p>
+<img src="ale_calibrate.png" alt="differentiable ALE inverse design" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+
+<h2>Cryogenic etch — temperature-gated physisorption</h2>
+<p>Below ~0&nbsp;&deg;C a condensed etchant layer builds on the surface (residence time
+~e<sup>E&#8320;/kT</sup>, E&#8320;&nbsp;=&nbsp;0.4&nbsp;eV <em>measured</em>, not fitted) and
+multiplies the etch rate. Gate: the CF&#8324;/H&#8322; pseudo-wet SiO&#8322; curve &mdash;
+2.3&nbsp;nm/s warm plateau &rarr; 3.76&nbsp;nm/s at &minus;60&nbsp;&deg;C (the true published anchor
+is 1.6&times;; the folk &ldquo;2&times;&rdquo; is wrong and we gate on truth). Cross-checked against
+two independent cryo systems.</p>
+<img src="cryo_window.png" alt="cryo etch enhancement" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+
+<h2>Bosch DRIE — SEM-measured silicon, reproduced</h2>
+<p>The time-multiplexed deep-silicon process: passivate, punch through, etch, repeat &mdash; leaving
+the signature sidewall scallops. The cycle mechanics were <em>forced by the data</em>: the naive
+simultaneous-etch model provably gives 32&nbsp;nm scallops; the sequential punch-then-iso mechanics
+predicts 140&nbsp;nm analytically &mdash; exactly what Ayon&rsquo;s 1999 SEMs measure. All four
+published gates pass simultaneously (depth 28.6/28.2&nbsp;&micro;m, pitch 440/434&nbsp;nm, scallop
+140/140&nbsp;nm, undercut 220/250&nbsp;nm), the ultrafast smooth regime lands (15&nbsp;nm scallops,
+gate &le;30), and the cross-regime scaling kill-test passes at 9.3&times; (gate &ge;4).</p>
+<img src="bosch_scallops.png" alt="Bosch scalloping vs SEM gates" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+
+<p style="background:#f4f1e8;border:1px solid #e0ddd2;border-radius:8px;padding:10px 14px"><strong>Positioning.</strong>
+To our knowledge this is the first open, quantitatively SEM-gated, forward-predictive Bosch scallop
+model (ViennaPS&rsquo;s example is demonstrative and ungated; the 2026 VLSet-AE work is an inverse
+measurement model, cited and distinguished), and the first open differentiable ALE. The pattern is
+the product: <em>emergent behavior gated against published measurement, with provenance you can read.</em></p>
+
+</main>
+</body>
+</html>
