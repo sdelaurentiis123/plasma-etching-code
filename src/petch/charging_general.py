@@ -35,6 +35,21 @@ from .charging2d import _sky_view_factors
 GAS = 0
 INSULATOR = 1
 CONDUCTOR = 2
+GROUND = 3          # grounded conductor (Dirichlet V=0): the substrate under the oxide stack
+
+
+def add_grounded_substrate(mat, ox_cells=24, sub_cells=4):
+    """Extend a material grid downward with a first-principles DIELECTRIC STACK on a GROUNDED SUBSTRATE
+    (the Si under the oxide). Below the feature (larger z), add `ox_cells` rows of INSULATOR (the oxide
+    the trench sits in) then `sub_cells` rows of GROUND. This is what makes the full-Poisson field
+    physical: the floating floor charge sits on a grounded backplane through the dielectric, producing
+    the long-range fringing field above the trench mouth that focuses electrons into the floor
+    (HG/Kushner electrostatic anti-shadowing) -- which a gas-only Laplace with no substrate cannot do.
+    Returns the extended (nx, nz+ox_cells+sub_cells) grid; trench-floor z-indices are unchanged."""
+    nx, nz = mat.shape
+    ox = np.full((nx, int(ox_cells)), INSULATOR, dtype=mat.dtype)
+    gnd = np.full((nx, int(sub_cells)), GROUND, dtype=mat.dtype)
+    return np.concatenate([mat, ox, gnd], axis=1)
 
 
 def _cryo_conductivity(T_C):
@@ -221,6 +236,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     nx, nz = mat.shape
     solid = mat != GAS
     insul = mat == INSULATOR
+    ground = mat == GROUND          # grounded substrate cells (Dirichlet V=0)
     cid, ncomp = _connected_conductor_ids(mat)
     if relax is None:
         relax = 2.0 * Te
@@ -260,7 +276,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     e_diag = e_xm + e_xp + e_zm + e_zp
     e_diag[e_diag < 1e-9] = 1e-9
     poisson_inside = (~is_cond)
-    poisson_inside[:, 0] = False          # grounded plasma boundary (top) is the only Dirichlet
+    poisson_inside[:, 0] = False          # grounded plasma boundary (top) is Dirichlet
+    poisson_inside[ground] = False        # grounded substrate below the oxide is Dirichlet V=0
 
     # --- open-plasma electron floor via sky view factor (closes the edge/neighbour split) ---
     # The down-going electron trace under-samples OPEN-FACING walls (the edge line's outer wall
@@ -288,6 +305,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
 
     def apply_bc(V):
         V[:, 0] = 0.0
+        V[ground] = 0.0
         V[insul] = Vs[insul]
         if ncomp > 0:
             V[cid > 0] = Vc[cid[cid > 0]]
@@ -312,6 +330,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         k = float(rho_coupling)
         for _ in range(sweeps):
             V[:, 0] = 0.0
+            V[ground] = 0.0            # grounded substrate Dirichlet
             if ncomp > 0:
                 V[is_cond] = Vc[cid[is_cond]]
             xm = np.empty_like(V); xp = np.empty_like(V)
@@ -326,6 +345,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                 m = poisson_inside & color
                 V[m] = (1.0 - omega) * V[m] + omega * upd[m]
         V[:, 0] = 0.0
+        V[ground] = 0.0
         if ncomp > 0:
             V[is_cond] = Vc[cid[is_cond]]
         return V
@@ -419,7 +439,11 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         anneal = 1.0 / (1.0 + it / (0.15 * n_iter))
         scale = anneal * relax / n_per_iter * nx
         if use_poisson:
-            # insulators accumulate free CHARGE; the Poisson solve maps it to potential via eps
+            # insulators accumulate free CHARGE; the Poisson solve maps it to potential via eps.
+            # NOTE (C8, open): this naive unbounded accumulation is UNSTABLE (electron-collecting walls
+            # run to -1000s of V). A correct first-principles fix needs physical-unit charge (rho*h^2/eps0),
+            # charge deposited as a sigma-SHEET on the gas-facing interface cell (not smeared over the
+            # dielectric body), and capacitance-matched substrate cells -- see CHARGING_POISSON_PLAN.md.
             rho[insul] += scale * net[insul]
         else:
             Vs[insul] += scale * net[insul]

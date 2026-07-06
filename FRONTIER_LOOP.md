@@ -77,6 +77,23 @@ reactor↔atom coupling, which no open tool has.
   differentiable. **NOT** a GPU build. Requeued as C6 (below). Net: spent ~1 GPU-hr to kill a multi-hour
   wrong path — good trade.
 
+- **C8 (2026-07-06, DIAGNOSED + infra built; stable Poisson solver is the open build — CHARGING_POISSON_PLAN.md):**
+  ROOT CAUSE of the floor over-charge fully pinned by 2 primary-source research passes + a line-referenced
+  code audit: it is the **LOCAL vs GLOBAL charge->surface-potential map**, NOT the interior PDE and NOT SEE.
+  HG solve Laplace-in-gas too (same as us); the difference is they map deposited charge to surface potential
+  GLOBALLY and ε-aware (Coulomb superposition / full variable-ε Poisson), while we map it LOCALLY
+  (`Vs+=net` per cell). Local map -> flat lateral potential -> no inward-bending field -> electrons hit the
+  floor by pure geometry -> floor climbs to 37 V. Confirmed: at fine grid e_traced -> 0.124 = geometric exactly.
+  My earlier "long-range fringing field" hypothesis was WRONG (the focusing is a LOCAL in-trench well effect).
+  BUILT (committed, correct, backward-compatible): `GROUND` material + `add_grounded_substrate()` (oxide
+  dielectric stack on grounded Si) + Poisson substrate BCs. NOT WORKING YET: `field_model="poisson"`+substrate
+  is UNSTABLE (walls run to -1000s V, no focusing) — unbounded `rho` accumulation with no physical scaling.
+  This is genuine MCFPM-level numerics. Concrete path in CHARGING_POISSON_PLAN.md: physical-unit charge
+  (ρ·h²/ε₀), σ-sheet on interface cell, capacitance-matched substrate, stable damped charge dynamics, uneven
+  conductor equipotential -> then remove the band-aid knobs. SEE ruled out for the floor (recaptured).
+- [next] **C9 — implement the stable first-principles Poisson** per CHARGING_POISSON_PLAN.md (physical units +
+  interface-σ + capacitance matching + stable dynamics). Gate: floorV->33, e_traced>geometric, all knobs OFF.
+
 - **C6 (2026-07-06, DONE — real numerics fix, first-principles, no fudge; GPU-ready):** the floor
   over-charge is (partly) an INTEGRATOR bug, found by thinking physically. Tell: traced floor electron
   flux (0.115-0.130) was ≤ pure geometric shadowing (0.124) — physically impossible if the integrator
