@@ -1,78 +1,111 @@
-# Charging floor over-charge: root cause + first-principles fix plan (C8, 2026-07-06)
+# Full-Poisson charging solver — implementation-ready handoff plan (v2, 2026-07-07)
 
-The last charging-accuracy gap: the AR-4 trench floor sits at **37 V** (converged, correct integrator)
-vs Hwang-Giapis **33 V**. This note records the fully-diagnosed root cause (2 primary-source research
-passes + a line-referenced code audit) and the concrete build to close it. SEE is NOT the fix (ruled out).
+**Goal:** replace the convention-dependent Dirichlet charge→potential map with a PHYSICAL-UNITS
+self-consistent variable-ε Poisson solve (Kushner MCFPM route). This makes voltage labels ABSOLUTE
+— the ground truth that arbitrates the HG label question (C14: the same converged state reads
+11–460 V through defensible variants of HG's under-specified σ→V kernel, while all physics
+observables are invariant; a units-honest Poisson solve ends that ambiguity). It also buys:
+thick-oxide capacitance physics (substrate coupling), the cryo surface-conductivity module in real
+units, and the 3D path.
 
-## Root cause: LOCAL vs GLOBAL charge -> surface-potential map (NOT the interior PDE)
+**Everything below is informed by what this campaign already built, broke, and proved. Read
+HG_RESIDUAL_HUNT.md + PHYSICS.md §5 + FRONTIER_LOOP.md (cycle log) first.**
 
-Confirmed against the actual papers:
-- **HG solve Laplace in the gas — same equation we do.** So Laplace-in-gas is not the bug.
-  (HG JVST B 15,70 p.75: "the Laplace equation ∇²V=0 is solved ... FDM"; sheath solved separately.)
-- The focusing ("electrostatics decreases the geometric shadowing", HG JAP 82,567) is a **LOCAL,
-  in-trench** effect — the positive floor is an attractive well that bends near-mouth electrons onto
-  the floor. HG: the dipole field "decays very fast ... felt only very close to the microstructure."
-  (My earlier "long-range fringing field above the mouth" hypothesis was WRONG.)
-- The gap is entirely in the **charge -> surface-potential map** (the Dirichlet values fed to Laplace):
-  - **We map charge to potential LOCALLY:** `Vs[cell] += net[cell]` (charging_general.py:445). Each
-    insulator cell's potential comes from its OWN accumulated current only.
-  - **HG/Kushner use a GLOBAL, ε-aware map:** each surface cell's potential depends on ALL deposited
-    charges through the dielectrics (HG: Coulomb superposition with per-material ε + mirror images;
-    Kushner: full variable-ε Poisson `∇·(εE)=ρ` over gas+solids, ρ in the cells). The ε-jump
-    `ε1E1-ε2E2=σ` falls out of the finite-volume form automatically.
-  A local map flattens the lateral surface-potential profile, so the harmonic gas field has no
-  inward-bending component -> electrons reach the floor by pure geometry -> floor climbs to 37 V to
-  balance the geometric-only electron deficit. The two symptoms (over-charge AND e_traced == geometric)
-  are one defect. Verified numerically: at fine grid + converged integrator, e_traced -> 0.124 = geometric
-  exactly (C7).
+## 0. Physical scale (HG reference conditions — precomputed, use these)
+- n = 1e12 cm⁻³, Te = 4 eV, Ti = 0.5 eV, M = 35.45 amu (Cl), V_s(t) = 37 + 30·sin(2π·400 kHz·t)
+- Bohm speed u_B = √(eTe/M) = 3.3e3 m/s → ion flux J_i = e·n·u_B ≈ 0.53 A/m² (53 µA/cm²)
+- λ_D = 743·√(Te/n[cm⁻³]) cm ≈ 15 µm ≫ W = 0.5 µm → **the gas is charge-free: Laplace-in-gas is
+  EXACT in the gas.** The Poisson content is the DIELECTRIC interior + substrate coupling, not the
+  gas. (Do not "fix" the gas solve.)
+- Grid: W = 0.5 µm / 16 cells → h = 31.25 nm. HG oxide under the floor: 1.8 µm (58 cells).
+- Charging timescale: σ(40 V across ~0.5 µm) ~ ε₀·8e7 V/m ≈ 7e-4 C/m² → τ ≈ σ/J_i ≈ 1.3 ms
+  ≈ 500 RF cycles. Quasi-static accumulation ✓ (the loop's per-iteration Δσ maps to real time).
+- ε_r: SiO2 3.9, photoresist 1.6, poly-Si = floating conductor, Si substrate = grounded conductor.
 
-## What is built (this session, committed, correct infrastructure)
-- `GROUND` material (Dirichlet V=0) + `add_grounded_substrate(mat, ox_cells, sub_cells)` — extends the
-  domain with an oxide dielectric stack on a grounded Si substrate (Kushner's bottom-ground route).
-- Field solvers pin GROUND to 0 (laplace `apply_bc`, poisson sweep); `poisson_inside` excludes it.
-- Backward-compatible: inert when no GROUND cells exist; 4/4 charging tests pass.
+## 1. Where the code stands (all in src/petch/charging_general.py)
+- `poisson(V, sweeps, omega)` — flux-conservative variable-ε red-black SOR, face-averaged ε
+  (arithmetic mean), `∇·(ε∇φ) = -k·ρ` with the `rho_coupling` FUDGE k (to be replaced by real units).
+  The ε-jump condition ε₁E₁−ε₂E₂=σ is automatic in this discretization (audit-verified).
+- `GROUND` material + `add_grounded_substrate(mat, ox_cells, sub_cells)` — dielectric stack on a
+  grounded substrate; solvers pin GROUND to 0. Built, tested inert-by-default.
+- `poisson_step` — under-relaxation of the charge update (tames but does not fix the instability).
+- `charge_update="log"` — quasi-Newton potential-space update (Laplace mode only; see P4 for the
+  Poisson-mode analog).
+- KNOWN-BROKEN naive path: `rho[insul] += scale*net[insul]` accumulates unboundedly (walls ran to
+  −1000s of V; C8). Root causes: no physical scale, charge smeared over the dielectric body, no
+  self-limiting dynamics.
+- Geometry: use the CORRECTED HG stack (C13): `_build_edge_array_geometry(AR, poly_um = AR*0.5-0.54)`
+  — PR fixed 0.54 µm, poly grows. The default builder is INVERTED vs HG; do not gate against HG
+  with the default.
 
-## What is NOT working yet (the hard part)
-Turning on `field_model="poisson"` + substrate is **UNSTABLE**: electron-collecting walls run to
--1000s of V (Vmin -547..-5505), no focusing emerges (floorV still ~40). Cause: the charge update
-`rho[insul] += scale*net` (charging_general.py:~443) accumulates **unboundedly** with no physical
-scaling, and the decaying anneal freezes early overshoots. A naive rho clip did not bind. This is the
-core of what makes Kushner MCFPM a decades-long codebase — it is real numerics work, not a one-liner.
+## 2. Build steps (P1–P7, in order; each with its own check)
 
-## Update: under-relaxation stabilizes but does NOT focus (confirms the full build is needed)
-Added `poisson_step` (under-relaxes the lagged charge update). It tames the runaway (Vmin -1922 -> -110
-at poisson_step=0.03) but focusing still does NOT emerge (e_traced stays ~0.13 = geometric; floor either
-stays 37 or under-converges). So stability is necessary but not sufficient — the focusing needs the
-CHARGE-DEPOSITION physics below (interface-sigma + physical units + capacitance match + conductor
-corner charge), not just a stable solve. This is a multi-hour numerics build.
+### P1 — Physical units
+Work in volts and real charge. Per launched macro-particle, the statistical weight is
+  w = J_i · A_column · Δt_iter / (e · n_per_iter_per_column)
+but the cleaner normalization: define the PER-ITERATION real fluence F_iter [ions/m² per iteration]
+as a solver input (default: F_iter chosen so ~50 iterations ≈ one charging time τ). Deposited charge
+per cell: Δσ_j [C/m²] = e·F_iter·(counts_j − e_counts_j)/(launched per column). RHS of the discrete
+Poisson (2D, cell size h): the flux-conservative stencil solves Σ_faces ε_face(V_nb−V_c) = −q_c/ε₀
+with q_c = σ_c·h (2D line-charge density per unit y). CHECK: a parallel-plate slab (uniform σ on a
+plane above the grounded substrate through ε_r oxide of thickness d) must read V = σd/(ε₀ε_r) to <2%.
 
-## The concrete first-principles build to land floor = 33 V (Kushner route, recommended)
-1. **Physical-unit charge.** Replace the `rho_coupling` fudge with `ρ·h²/ε₀` scaling (h = cell size in
-   meters, ρ = accumulated particle charge × statistical weight / cell volume). This makes the σ->V map
-   first-principles and self-consistently bounded (a given σ maps to a definite, physical V).
-2. **Charge as a σ-SHEET on the interface cell**, not smeared over the dielectric body (audit P2):
-   deposit `net` only on the gas-facing surface layer of each insulator, not `rho[insul]` (whole body).
-3. **Capacitance-matched substrate** (Kushner p.031304-8): tune the bottom 2-3 substrate rows' ε so the
-   feature-to-ground capacitance matches the true oxide thickness. Sets the floor's absolute potential.
-4. **Stable charge dynamics.** Under-relaxed, non-decaying-to-zero step; monitor per-surface net->0.
-   Consider implicit/damped update (the gain scale × d(net)/d(rho) must be <1 on high-flux walls).
-5. **Uneven conductor equipotential** (HG JVST B p.75, "critically important"): the poly-Si line must be
-   equipotential with charge PILED at the poly/SiO2 corner (not equidistributed) — needed for the field
-   that focuses electrons and drives the neighbour rise.
-6. Then **remove the band-aids** (audit P4): `insulator_e_focus`, `vf_focus_pot`, `open_wall_boost`, the
-   `np.maximum` geometric electron floor, `insul_vguard` clip — they fake the focusing the correct field
-   will now produce; leaving them on double-counts.
+### P2 — σ-sheet on the interface cell
+Deposit charge ONLY on the gas-facing surface layer (the cell where the particle lands), never
+smear into the dielectric body. Bookkeep σ as a per-surface-cell array (not the volumetric rho
+grid); inject into the Poisson RHS at those cells. Interior dielectric cells carry ρ=0 (no bulk
+conduction at room T; the cryo module later moves σ laterally).
 
-**Alternative (HG's exact route):** keep Laplace-in-gas, replace the local `Vs+=net` BC with a GLOBAL
-ε-weighted Coulomb superposition (Green's function from all deposited charges + mirror images about the
-side centerlines). Same physics, O(N²), GPU/differentiable-friendly, and stable (no runaway) — but more
-code than turning on the (fixed) Poisson.
+### P3 — Capacitance-matched substrate
+Domain economy: instead of gridding the full 1.8 µm oxide (58 rows), grid ~15 rows and scale the
+bottom 2–3 rows' ε so the feature→ground capacitance equals the true-thickness value
+(Kushner JVST A 37, 031304 p.8, verbatim trick). CHECK: the P1 slab test with the matched stack
+reproduces the full-thickness V to <5%.
 
-## Gate
-AR 1->4: floor ion flux vs HG (0.59/0.40/0.29/0.22), floorV -> 33 at AR4, edge -> 7, neigh -> 39, with
-ALL focus knobs OFF. e_traced must exceed geometric (0.124) — that is the focusing emerging from the field.
+### P4 — Stable charge dynamics (the part that killed C8 — do it this way)
+The instability is a lagged stiff loop: charge → field → (next iter) fluxes. Two required pieces:
+1. **Diagonal-capacitance Newton step**: precompute C_jj ≈ ΔV_j/Δσ_j numerically ONCE (unit charge
+   on cell j → solve → read V_j; or the cheap estimate C_jj ~ ε₀ε_eff/h per unit area). Then update
+   Δσ_j = C_jj⁻¹ · anneal · clip(Te·ln(Γi_j/Γe_j), ±2Te)  — the charge-space version of the proven
+   log current-balance update (drives each cell toward local balance in VOLTS, which is what the
+   fluxes respond to).
+2. **Physical bound**: V_j may not exceed (V_dc+V_rf) nor go below −10·Te (Maxwellian tail reach)
+   — enforce by capping Δσ when the solved V would cross (NOT a hard V clip; cap the CHARGE step).
+Robbins–Monro anneal + Polyak tail-averaging as in the Laplace mode. CHECK: AR4 corrected-stack run
+converges with Vmin ≥ −45 V, no runaway, and the scheme-independent observables reproduce the
+Laplace-mode values (floor flux 0.21±0.03, edge 7.8±1.5, foot E 28±3) — the physics must be
+map-invariant (we proved the fixed point is; this is the regression gate).
 
-## Sources
-- HG JVST B 15,70 (1997): https://authors.library.caltech.edu/records/ac5xn-zqb88 (methods, charge update)
-- HG JAP 82,566 (1997): https://authors.library.caltech.edu/records/je8bd-j6v68 (floor=33 V benchmark)
-- Huang/Kushner MCFPM, JVST A 37,031304 (2019): https://cpseg.eecs.umich.edu/pub/articles/JVSTA_37_031304_2019.pdf
+### P5 — Conductors
+Floating poly lines: keep the whole-component potential-space update (equipotential Dirichlet with
+Vc from the component log-balance — already correct and convention-free). Grounded substrate:
+Dirichlet 0 (already wired). The conductor's induced surface charge is an OUTPUT (Gauss law over
+its faces), not a state.
+
+### P6 — Absolute-label readout (the payoff)
+With P1–P5 green, the floor potential IS the physical answer in volts for HG's stated conditions.
+Report it. Whatever it reads (∼49 per the ion's-eye argument, or between), it arbitrates the C14
+convention question with units-honest electrostatics. Update HG_RESIDUAL_HUNT.md + PHYSICS.md §5
+with the number. Then re-run `petch_floor_profile` (the notch table) through the Poisson mode —
+the C11 AR4 notch-trend question (gates B/C) gets its first-principles retest with absolute Vf.
+
+### P7 — Follow-ons (do not block on these)
+- Cryo module re-wire: surface conductivity moves REAL σ laterally (units now exist).
+- Multigrid replacing SOR only if profiling demands; then the GPU port (device-resident).
+- 3D: the same discretization extends; the σ-sheet bookkeeping is already surface-based.
+
+## 3. Pitfalls already paid for (do not re-pay)
+1. Naive `rho += net` runaway (C8) — the reason P4 exists.
+2. Anneal-frozen transients pinning clips (C6/C9) — the reason the log/Newton step exists.
+3. Periodic-wrap tracer BCs (C9a) — mirror BCs are in; don't revert.
+4. Stack inversion (C13) — use poly_um = AR·0.5−0.54 for HG work.
+5. The `insul_vguard` V-clip is a Laplace-mode legacy — in Poisson mode bound the CHARGE step (P4.2).
+6. Keep `field_model="laplace"` the DEFAULT until all P-checks pass (26-test suite must stay green;
+   the Poisson mode is opt-in until gated).
+7. HG's published labels are NOT a gate for absolute volts (proven under-specified + internally
+   inconsistent; HG_RESIDUAL_HUNT.md) — gate on the P1/P3 analytic checks and the observable
+   invariance, not on "33".
+
+## 4. Effort estimate
+P1–P2: ~1–2 h. P3: ~1 h. P4: the real work, ~2–4 h with the checks. P5: mostly done. P6: runs.
+Total: a focused session. Everything is CPU-fine at these grids (~2 min/run at nit800).

@@ -36,6 +36,9 @@ axA.set_xticks(np.arange(4)); axA.set_xticklabels(obs, fontsize=9)
 axA.set_ylabel("volts / normalized flux ×100")
 axA.set_title("AR-4 observables, corrected HG stack — physics closed\n(flux/edge/footE match; voltage labels convention-dependent)", fontsize=10)
 axA.legend(fontsize=8.5)
+axA.text(0.02, 0.97, "C14: the same converged state reads 11–460 V through\ndefensible variants of HG's σ→V kernel (core unpublished)\n→ voltage labels unconstrained; physics observables invariant",
+         transform=axA.transAxes, fontsize=7.6, va="top",
+         bbox=dict(facecolor="#fff6e0", edgecolor="#c8a24a", alpha=0.9, pad=3))
 axA.grid(alpha=0.25, axis="y")
 
 # right: the petch-computed floor profile vs the HG closure
