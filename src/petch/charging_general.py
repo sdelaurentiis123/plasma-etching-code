@@ -225,7 +225,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    surface_conductivity=0.0, temperature_C=20.0, corner_fee=0.0,
                    conductor_e_factor=1.0, ied_bias=0.25, trace_device="cpu", electron_iso=False,
                    open_wall_boost=1.0, electron_Te=None, e_flux_power=None,
-                   insulator_e_focus=0.0, trace_dt=0.45, trace_dt_field=0.3, trace_steps=40):
+                   insulator_e_focus=0.0, trace_dt=0.45, trace_dt_field=0.3, trace_steps=40,
+                   poisson_step=1.0):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -440,11 +441,11 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         scale = anneal * relax / n_per_iter * nx
         if use_poisson:
             # insulators accumulate free CHARGE; the Poisson solve maps it to potential via eps.
-            # NOTE (C8, open): this naive unbounded accumulation is UNSTABLE (electron-collecting walls
-            # run to -1000s of V). A correct first-principles fix needs physical-unit charge (rho*h^2/eps0),
-            # charge deposited as a sigma-SHEET on the gas-facing interface cell (not smeared over the
-            # dielectric body), and capacitance-matched substrate cells -- see CHARGING_POISSON_PLAN.md.
-            rho[insul] += scale * net[insul]
+            # The charge<->field coupling LAGS (trace uses last iter's field), so a large step overshoots
+            # on electron-collecting walls before retardation catches up -> runaway. Heavy under-relaxation
+            # (poisson_step) keeps the lagged loop a contraction. See CHARGING_POISSON_PLAN.md for the full
+            # first-principles fix (physical units, interface-sigma sheet, capacitance-matched substrate).
+            rho[insul] += (scale * float(poisson_step)) * net[insul]
         else:
             Vs[insul] += scale * net[insul]
             Vs[insul] = np.clip(Vs[insul], -insul_vguard, V_dc + V_rf)

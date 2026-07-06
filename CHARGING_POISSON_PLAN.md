@@ -39,6 +39,13 @@ Turning on `field_model="poisson"` + substrate is **UNSTABLE**: electron-collect
 scaling, and the decaying anneal freezes early overshoots. A naive rho clip did not bind. This is the
 core of what makes Kushner MCFPM a decades-long codebase — it is real numerics work, not a one-liner.
 
+## Update: under-relaxation stabilizes but does NOT focus (confirms the full build is needed)
+Added `poisson_step` (under-relaxes the lagged charge update). It tames the runaway (Vmin -1922 -> -110
+at poisson_step=0.03) but focusing still does NOT emerge (e_traced stays ~0.13 = geometric; floor either
+stays 37 or under-converges). So stability is necessary but not sufficient — the focusing needs the
+CHARGE-DEPOSITION physics below (interface-sigma + physical units + capacitance match + conductor
+corner charge), not just a stable solve. This is a multi-hour numerics build.
+
 ## The concrete first-principles build to land floor = 33 V (Kushner route, recommended)
 1. **Physical-unit charge.** Replace the `rho_coupling` fudge with `ρ·h²/ε₀` scaling (h = cell size in
    meters, ρ = accumulated particle charge × statistical weight / cell volume). This makes the σ->V map
