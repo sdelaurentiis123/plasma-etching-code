@@ -49,6 +49,15 @@ reactor↔atom coupling, which no open tool has.
 ## Cycle log
 (newest first; each entry: target, what was done, gate result PASS/FAIL, artifacts, commit)
 
+- **C11 (2026-07-07, DONE — mechanism PASS under the fully-derived table; AR4 trend = coupling frontier):**
+  petch-computed charging table (Q/Vf/E_defl vs AR from the theorem-correct solver, zero knobs) wired
+  into the notch via surface_charging="petch". GATE A (charging-specific mechanism) PASS: off=0 at all
+  AR, resolved notches AR>=2 (0.207/0.265 um at AR2/3 — larger than the HG-closure mode). GATES B/C
+  fail at AR4: the notch forms then is ERASED in late overetch (0.076@100%OE -> 0.004 final) — the
+  table's documented +15-20% AR4 over-charge (Vf 39.7 vs 33; Q 0.40 vs 0.22) amplifies through the
+  overetch redep/erosion balance. Default stays "hg" (validated); "petch" is the first-principles path
+  with the AR4 sensitivity as the named frontier. E_defl(AR4)=28.0 eV lands exactly on HG's 28.
+
 - **C9 (2026-07-07, CONCLUDED — the charging module is pure-physics; joint residual ~20-35% attributed):**
   the full first-principles rebuild: corrected integrator (C6) + mirror-image tracer BCs + log
   current-balance dynamics + physical -10Te bound + DERIVED ion sheath source (exact at 400 kHz:
