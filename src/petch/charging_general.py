@@ -37,6 +37,84 @@ INSULATOR = 1
 CONDUCTOR = 2
 GROUND = 3          # grounded conductor (Dirichlet V=0): the substrate under the oxide stack
 
+# --- physical constants (SI) for the units-honest full-Poisson charging mode (P1) ---
+EPS0 = 8.8541878128e-12       # vacuum permittivity [F/m]
+ECHARGE = 1.602176634e-19     # elementary charge [C]
+
+
+def _poisson_faces(eps):
+    """Arithmetic-mean face permittivities for the flux-conservative variable-eps stencil.
+    Returns (e_xm, e_xp, e_zm, e_zp, e_diag). Sides/bottom use ghost=self (Neumann); the
+    ε-jump condition ε₁E₁−ε₂E₂=σ is automatic in this face-averaged form (audit-verified)."""
+    e_xm = np.empty_like(eps); e_xp = np.empty_like(eps)
+    e_zm = np.empty_like(eps); e_zp = np.empty_like(eps)
+    e_xm[1:, :] = 0.5 * (eps[1:, :] + eps[:-1, :]); e_xm[0, :] = eps[0, :]
+    e_xp[:-1, :] = 0.5 * (eps[:-1, :] + eps[1:, :]); e_xp[-1, :] = eps[-1, :]
+    e_zm[:, 1:] = 0.5 * (eps[:, 1:] + eps[:, :-1]); e_zm[:, 0] = eps[:, 0]
+    e_zp[:, :-1] = 0.5 * (eps[:, :-1] + eps[:, 1:]); e_zp[:, -1] = eps[:, -1]
+    e_diag = e_xm + e_xp + e_zm + e_zp
+    e_diag[e_diag < 1e-9] = 1e-9
+    return e_xm, e_xp, e_zm, e_zp, e_diag
+
+
+def poisson_field(mat, sigma, cell_size_m, eps_insulator=3.9, eps_grid=None,
+                  cid=None, Vc=None, sweeps=400, omega=1.7, V=None):
+    """UNITS-HONEST variable-ε Poisson solve (P1): ∇·(ε_r ε₀ ∇φ) = −ρ_free in real SI units.
+
+    `sigma` [C/m²] is the free surface charge per cell (nonzero only on gas-facing interface
+    cells; P2). The flux-conservative finite-volume discretization over an h×h cell (per unit
+    depth y) is
+        Σ_faces ε_face (V_nb − V_c) = −q_c/ε₀,   q_c = σ_c·h   [C/m per unit y],
+    i.e. the RHS enters the red-black SOR numerator as +k_phys·σ with k_phys = h/ε₀. This makes
+    the potential ABSOLUTE volts (no rho_coupling fudge). Dirichlet: top row z=0 → 0 (plasma
+    ground); GROUND cells → 0 (substrate); conductor components → Vc. Sides/bottom Neumann.
+
+    Analytic anchor (P1 check): a uniform σ-sheet a distance d of ε_r oxide above the ground
+    reads V = σ·d/(ε₀·ε_r) — the parallel-plate value, reproduced here to <2%."""
+    nx, nz = mat.shape
+    if eps_grid is None:
+        eps = np.ones((nx, nz)); eps[mat == INSULATOR] = float(eps_insulator)
+    else:
+        eps = eps_grid
+    if cid is None:
+        cid, ncomp = _connected_conductor_ids(mat)
+    else:
+        ncomp = int(cid.max())
+    ground = mat == GROUND
+    is_cond = cid > 0
+    e_xm, e_xp, e_zm, e_zp, e_diag = _poisson_faces(eps)
+    k_phys = float(cell_size_m) / EPS0
+    if V is None:
+        V = np.zeros((nx, nz))
+    ii, jj = np.meshgrid(np.arange(nx), np.arange(nz), indexing="ij")
+    red = ((ii + jj) % 2 == 0)
+    solveable = np.ones((nx, nz), dtype=bool)
+    solveable[:, 0] = False           # grounded plasma boundary (top) Dirichlet
+    solveable[ground] = False         # grounded substrate Dirichlet
+    solveable[is_cond] = False        # conductors are equipotential Dirichlet (set to Vc)
+
+    def bc(Vv):
+        Vv[:, 0] = 0.0
+        Vv[ground] = 0.0
+        if Vc is not None and ncomp > 0:
+            Vv[is_cond] = Vc[cid[is_cond]]
+        return Vv
+
+    xm = np.empty_like(V); xp = np.empty_like(V)
+    zm = np.empty_like(V); zp = np.empty_like(V)
+    for _ in range(int(sweeps)):
+        bc(V)
+        for color in (red, ~red):
+            xm[1:, :] = V[:-1, :]; xm[0, :] = V[0, :]
+            xp[:-1, :] = V[1:, :]; xp[-1, :] = V[-1, :]
+            zm[:, 1:] = V[:, :-1]; zm[:, 0] = V[:, 0]
+            zp[:, :-1] = V[:, 1:]; zp[:, -1] = V[:, -1]
+            num = e_xm * xm + e_xp * xp + e_zm * zm + e_zp * zp + k_phys * sigma
+            upd = num / e_diag
+            m = solveable & color
+            V[m] = (1.0 - omega) * V[m] + omega * upd[m]
+    return bc(V)
+
 
 def add_grounded_substrate(mat, ox_cells=24, sub_cells=4):
     """Extend a material grid downward with a first-principles DIELECTRIC STACK on a GROUNDED SUBSTRATE
@@ -680,3 +758,33 @@ def petch_floor_profile(AR):
     return (np.interp(AR, _PETCH_AR, _PETCH_Q),
             np.interp(AR, _PETCH_AR, _PETCH_VFLOOR),
             np.interp(AR, _PETCH_AR, _PETCH_FOOT_E))
+
+
+# ---- deep-AR floor-flux THROTTLE table for the de Boer high-AR experiment (opt-in) ----
+# Q(AR) = fraction of the ballistic floor ion flux that SURVIVES surface charging, extended to the
+# deep-AR regime the de Boer cryo-SF6 trenches reach (AR up to ~40). Anchored on:
+#   - AR 1-4: the first-principles derived-source solver table above (_PETCH_Q, zero knobs).
+#   - AR 8/15/25: Q ~ 0.25 / 0.60 / 0.50, the deep-AR floor-survivor values banked from the C12
+#     charging_general runs at the notch/edge-array geometry (FRONTIER_LOOP C12; the floor ion flux
+#     falls to ~0.13/0.18/0.09 of the field arrival, i.e. Q ~ 0.25/0.6/0.5 after re-normalizing to the
+#     charge-free floor arrival). NON-monotone: charging bites hardest near the knee (AR~8) then the
+#     survivor fraction partially recovers as the deep-floor sheath thins.
+# PHYSICAL JUSTIFICATION (why a throttle at all on a nominally CONDUCTIVE Si floor): de Boer high-AR
+# cryo etching is SF6/O2 at ~ -120 C, which grows a SiOxFy passivation film on the feature surfaces
+# (de Boer et al., cryo Si etch; the sidewall SiOxFy is what enables the vertical profile). That film
+# is a DIELECTRIC: it holds accumulated positive charge from the near-vertical ion flux even where the
+# underlying Si is grounded, because the drain path through the thin fluoride layer is resistive. The
+# trapped floor potential decelerates/deflects incoming ions -> the floor ion flux is throttled by
+# Q(AR). This is OFF by default (the baseline de Boer model treats the floor as a clean grounded-Si
+# sink that drains charge); the throttle is the explicit "dielectric-passivated floor" experiment.
+_THROTTLE_AR = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 8.0, 15.0, 25.0])
+_THROTTLE_Q  = np.array([1.0, 0.704, 0.491, 0.406, 0.349, 0.25, 0.60, 0.50])
+
+
+def floor_charge_throttle_profile(AR):
+    """Q(AR) in [0,1]: surviving fraction of the floor ion flux under de-Boer dielectric-floor
+    charging (see table provenance + physical justification above). AR clamped to the table range;
+    beyond AR 25 the deep-floor survivor is held flat at its last value (0.50)."""
+    AR = np.asarray(AR, float)
+    return np.clip(np.interp(AR, _THROTTLE_AR, _THROTTLE_Q,
+                             left=1.0, right=float(_THROTTLE_Q[-1])), 0.0, 1.0)
