@@ -151,3 +151,15 @@ Fig 4a horn ratio (low/high ~2.2 -> p=0.35 phase weight; no tuning to our output
 Remaining named build: their SIII.D charge-space conductor dynamics (transcribed verbatim in
 refs/HG_deep_read.md) for the conductor labels + foot charge pile. The floor/foot physics -- the
 part that drives notching -- is now matched end-to-end with zero tuned constants.
+
+## C18 (final, 2026-07-07): input-level search COMPLETE — the residual is their map dynamics
+
+All four input combinations tested (physical/HG-artifact electrons x symmetric/asymmetric IEDF).
+None reproduces HG's exact joint state; the physics mode + asymmetric IEDF overlays their floor
+curve within ~1.5 V at every AR (9.5/19.2/27.7/34.0 vs 8/17/26/33) with foot peak/current/energy-
+trend matched. Full emulation (both their conventions): floorV 22.0, bottom 0.36 -- also not their
+published 33/0.22. CONCLUSION: their published state is a product of their SIII.D charge-space
+dynamics (eps-weighted Coulomb-sum potentials over redistributed charges), the one structural
+element not implemented here; every input-level explanation is now exhausted by experiment. That
+build is fully transcribed (refs/HG_deep_read.md) and is the single remaining item for exact-label
+comparison -- with expectations bounded by HG's own 2x inter-paper label spread.
