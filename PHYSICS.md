@@ -122,6 +122,16 @@ attributed to: HG's own convention artifacts, 2D-projection conventions, idealiz
 **Grade:** the source and dynamics are now derivation + proof; no tuning knobs in the pipeline
 (all crutches off; legacy knobs retained default-off for A/B only).
 
+**Units-honest absolute labels (`field_model="poisson"`, C20 / CHARGING_POISSON_PLAN.md P1–P6):**
+the convention-dependent Dirichlet σ→V map is replaced by an absolute-volts variable-ε Poisson solve
+in real SI — σ-sheet [C/m²] on the gas-facing interface, ∇·(ε₀ε_r∇φ)=−ρ through the true 1.8 µm
+oxide to the grounded Si substrate, harmonic-mean faces, diagonal-capacitance Newton dynamics
+(no runaway). Checks: parallel-plate slab V=σd/(ε₀ε_r) to 0.001%; capacitance-matched substrate to
+0.000%; poisson-mode observables reproduce the laplace fixed point (map-invariance is now a solved
+result). **AR4 absolute readout: floor V = 42.1 V, σ_floor = 3.5e-3 C/m², flux 0.207 — the label
+question (HG's 33 was a kernel-normalization artifact) is closed by first-principles electrostatics.**
+Laplace stays the default; poisson is opt-in.
+
 ---
 
 ## 6. Notching (charging → etch coupling) — `threed.py::_apply_hg_charging`

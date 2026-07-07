@@ -188,3 +188,27 @@ notch forms then fills during AR4's long overetch; same signature as C11) — an
 dynamics item in threed.py (s_redep/k_redep during overetch), NOT a charging defect. Next session:
 fix the overetch redeposition treatment (notch cavity should not accumulate redep; line-of-sight
 redep kernel), then gates B/C vs Fujiwara complete the experiment-facing close.
+
+## C20 (2026-07-07): the C14 label question CLOSED by a units-honest full-Poisson solve
+
+The convention ambiguity that ended C14 (the same converged charge state reads 11–460 V through
+defensible variants of HG's under-specified σ→V kernel) is now removed by replacing the
+convention-dependent Dirichlet map with an ABSOLUTE-VOLTS variable-ε Poisson solve in real SI units
+(charging_general.py: `field_model="poisson"`, `poisson_field`, σ-sheet + diagonal-capacitance
+Newton dynamics; CHARGING_POISSON_PLAN.md P1–P6). The floor charge σ sits on the grounded Si
+substrate through the true 1.8 µm oxide (ε_r 3.9); the potential is then not a map choice but the
+solution of ∇·(ε₀ε_r∇φ)=−ρ.
+
+Validation chain (all PASS): P1 parallel-plate slab V=σd/(ε₀ε_r) to 0.001%; P3 capacitance-matched
+15-row substrate reproduces the full 58-row V to 0.000% (harmonic-mean faces + discrete half-cell
+end-correction); P4 the poisson-mode observables reproduce the laplace-mode fixed point (AR4 floor
+flux 0.207 vs 0.216, edge 13.7 vs 13.4, neigh 40.4 vs 39.9) — map-invariance is now a SOLVED
+electrostatics result, not just an argument.
+
+**ABSOLUTE READOUT (P6, HG AR4 conditions, full 58-row substrate, zero tuning):
+floor V = 42.1 V, σ_floor = 3.5e-3 C/m², floor ion flux 0.207 (HG 0.22).**
+So the units-honest label is ~42 V — ABOVE HG's published 33 (which is a convention/near-field-
+normalization artifact per C14), and inside the physically-defensible ion's-eye bracket (29–49).
+The scheme-independent observable (flux ≈ 0.21) matches HG at a label their own kernel cannot pin.
+This is the strongest possible close of the C14 question: the voltage is now derived from
+first-principles electrostatics with real permittivity and a real grounded backplane.
