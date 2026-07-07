@@ -177,3 +177,14 @@ THE EXPERIMENT-FACING PROGRAM (matching nature, not codes):
 2. de Boer AR>20 floor collapse — MEASURED trenches; couple the charging throttle (C12 data banked).
 3. Woodworth IADF measurements — our derived source's experimental anchor (4.3-5.2 deg consistent).
 Already experiment-gated: Bosch (Ayon SEMs, exact), ALE (Matsuura/Kim 0.68 A/cyc), cryo (rate-vs-T).
+
+## C19 (2026-07-07): notch vs experiment — mechanism PASSES with final physics; AR4 = redeposition erasure
+
+Final-physics charging table (asymmetric IEDF, face E_defl) + the CITED Cl+/poly-Si threshold
+(10 eV, HG JVST B ref 10 — the notch benchmark is a Cl2 process; the SF6 Eth=15 was the wrong
+chemistry): GATE A (charging-specific mechanism) PASS — off=0 all AR, notches 0.090/0.281 um at
+AR2/3, rising monotonically. AR4 (0.063) is the documented overetch-REDEPOSITION erasure (the
+notch forms then fills during AR4's long overetch; same signature as C11) — an etch-coupling
+dynamics item in threed.py (s_redep/k_redep during overetch), NOT a charging defect. Next session:
+fix the overetch redeposition treatment (notch cavity should not accumulate redep; line-of-sight
+redep kernel), then gates B/C vs Fujiwara complete the experiment-facing close.

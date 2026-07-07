@@ -664,10 +664,13 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
 # with charging / field-free arrival (survivor fraction); Vf = floor-center potential; E_defl =
 # mean impact energy on the foot cells (the deflected-ion notch driver). Replaces the published
 # HG-closure table for surface_charging="petch" (first-principles end-to-end notching).
+# v2 (C19): final physics mode — asymmetric IEDF (derived from HG Fig 4a horn ratio), FACE-defined
+# foot energy (poly-inner sidewall impacts, the notch driver), floor curve matching the canonical
+# model within ~1.5 V. Q = bottom flux / field-free arrival.
 _PETCH_AR = np.array([1.0, 2.0, 3.0, 4.0])
-_PETCH_Q = np.array([0.776, 0.519, 0.463, 0.404])
-_PETCH_VFLOOR = np.array([10.8, 23.7, 32.2, 39.7])
-_PETCH_FOOT_E = np.array([31.1, 25.9, 24.9, 28.0])
+_PETCH_Q = np.array([0.704, 0.491, 0.406, 0.349])
+_PETCH_VFLOOR = np.array([9.5, 19.2, 27.7, 34.0])
+_PETCH_FOOT_E = np.array([16.6, 14.2, 18.8, 21.6])
 
 
 def petch_floor_profile(AR):
