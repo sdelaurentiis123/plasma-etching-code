@@ -163,3 +163,17 @@ dynamics (eps-weighted Coulomb-sum potentials over redistributed charges), the o
 element not implemented here; every input-level explanation is now exhausted by experiment. That
 build is fully transcribed (refs/HG_deep_read.md) and is the single remaining item for exact-label
 comparison -- with expectations bounded by HG's own 2x inter-paper label spread.
+
+## STRATEGIC CLOSE (2026-07-07): HG is a SIMULATION — pivot to experimental anchors
+
+HG 1997 is a Monte Carlo simulation, not experimental data. This campaign was code-to-code
+validation of the charging MECHANISM against the canonical model: accomplished (floor curve within
+~1.5 V, foot physics matched, their artifacts identified, our derivation proven). Exact-label parity
+= matching 1997 bookkeeping; keep SIII.D as an optional config mode, not a priority.
+
+THE EXPERIMENT-FACING PROGRAM (matching nature, not codes):
+1. Notch depth vs AR — Fujiwara JJAP 34,2095 / Nozawa MEASUREMENTS. Rerun the notch gates with the
+   corrected foot table (E_defl face-defined, rising) — the payoff of the charging campaign.
+2. de Boer AR>20 floor collapse — MEASURED trenches; couple the charging throttle (C12 data banked).
+3. Woodworth IADF measurements — our derived source's experimental anchor (4.3-5.2 deg consistent).
+Already experiment-gated: Bosch (Ayon SEMs, exact), ALE (Matsuura/Kim 0.68 A/cyc), cryo (rate-vs-T).
