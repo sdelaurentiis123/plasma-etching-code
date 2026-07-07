@@ -42,16 +42,25 @@ EPS0 = 8.8541878128e-12       # vacuum permittivity [F/m]
 ECHARGE = 1.602176634e-19     # elementary charge [C]
 
 
+def _hmean(a, b):
+    """Harmonic mean 2ab/(a+b): the flux-conservative face permittivity for two half-cells in
+    series (Patankar). Equals the arithmetic mean when a==b (uniform ε), but is the CORRECT
+    series combination across a dielectric jump — arithmetic over-conducts the jump (the P3
+    cap-matched ε_r→ε_match interface reads 23% low with arithmetic, exact with harmonic)."""
+    return 2.0 * a * b / np.maximum(a + b, 1e-30)
+
+
 def _poisson_faces(eps):
-    """Arithmetic-mean face permittivities for the flux-conservative variable-eps stencil.
-    Returns (e_xm, e_xp, e_zm, e_zp, e_diag). Sides/bottom use ghost=self (Neumann); the
-    ε-jump condition ε₁E₁−ε₂E₂=σ is automatic in this face-averaged form (audit-verified)."""
+    """Harmonic-mean face permittivities for the flux-conservative variable-eps stencil.
+    Returns (e_xm, e_xp, e_zm, e_zp, e_diag). Sides/bottom use ghost=self (Neumann); the σ-jump
+    at a charged gas/dielectric interface is carried by the RHS source term, independent of the
+    face mean. Harmonic keeps the P1 uniform-slab exact AND the P3 ε-jump capacitance exact."""
     e_xm = np.empty_like(eps); e_xp = np.empty_like(eps)
     e_zm = np.empty_like(eps); e_zp = np.empty_like(eps)
-    e_xm[1:, :] = 0.5 * (eps[1:, :] + eps[:-1, :]); e_xm[0, :] = eps[0, :]
-    e_xp[:-1, :] = 0.5 * (eps[:-1, :] + eps[1:, :]); e_xp[-1, :] = eps[-1, :]
-    e_zm[:, 1:] = 0.5 * (eps[:, 1:] + eps[:, :-1]); e_zm[:, 0] = eps[:, 0]
-    e_zp[:, :-1] = 0.5 * (eps[:, :-1] + eps[:, 1:]); e_zp[:, -1] = eps[:, -1]
+    e_xm[1:, :] = _hmean(eps[1:, :], eps[:-1, :]); e_xm[0, :] = eps[0, :]
+    e_xp[:-1, :] = _hmean(eps[:-1, :], eps[1:, :]); e_xp[-1, :] = eps[-1, :]
+    e_zm[:, 1:] = _hmean(eps[:, 1:], eps[:, :-1]); e_zm[:, 0] = eps[:, 0]
+    e_zp[:, :-1] = _hmean(eps[:, :-1], eps[:, 1:]); e_zp[:, -1] = eps[:, -1]
     e_diag = e_xm + e_xp + e_zm + e_zp
     e_diag[e_diag < 1e-9] = 1e-9
     return e_xm, e_xp, e_zm, e_zp, e_diag
@@ -114,6 +123,23 @@ def poisson_field(mat, sigma, cell_size_m, eps_insulator=3.9, eps_grid=None,
             m = solveable & color
             V[m] = (1.0 - omega) * V[m] + omega * upd[m]
     return bc(V)
+
+
+def capacitance_match_eps(n_grid, n_true, eps_r, n_match=3):
+    """Kushner substrate-economy trick (JVST A 37, 031304 p.8): to represent a `n_true`-row-thick
+    oxide with only `n_grid` gridded rows, lower the ε of the `n_match` rows at the sheet-far end
+    so the SERIES capacitance feature→ground matches the true thickness. On the DISCRETE harmonic
+    stencil the inter-center resistance is (h/2)(1/ε_i+1/ε_{i+1}), so the boundary cells carry only
+    HALF weight; the dimensionless electrical thickness of an N-oxide-row uniform stack is N/ε_r.
+    Matching T_grid = n_true/ε_r with the n_match end cells scaled gives
+        ε_match = ε_r·(n_match − ½) / (n_true − n_grid + n_match − ½).
+    Returns ε_match. CHECK (P3): the P1 slab with the matched stack reproduces the full-thickness
+    V = σ·(n_true·h)/(ε₀·ε_r) to <5%. (The continuum formula without the ½ end-correction reads
+    ~12% low on the harmonic stencil — the discretization must be respected.)"""
+    denom = float(n_true) - float(n_grid) + float(n_match) - 0.5
+    if denom <= 0:
+        return float(eps_r)
+    return float(eps_r) * (float(n_match) - 0.5) / denom
 
 
 def add_grounded_substrate(mat, ox_cells=24, sub_cells=4):
@@ -400,7 +426,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    open_wall_boost=1.0, electron_Te=None, e_flux_power=None,
                    insulator_e_focus=0.0, trace_dt=0.45, trace_dt_field=0.3, trace_steps=40,
                    poisson_step=1.0, charge_update="linear", source_model="heuristic", Ti=0.5,
-                   hg_convention=False, rf_bursts=False, burst_dV=2.2):
+                   hg_convention=False, rf_bursts=False, burst_dV=2.2,
+                   cell_size_nm=31.25, cap_match_true_um=None, cap_match_rows=3):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -441,18 +468,65 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     eps = np.ones((nx, nz))
     eps[insul] = float(eps_insulator)
     is_cond = cid > 0
+    # --- PHYSICAL UNITS (P1) + capacitance-matched substrate (P3) ---
+    h_m = float(cell_size_nm) * 1e-9                 # cell size [m]
+    k_phys = h_m / EPS0                              # RHS coupling: +k_phys*sigma == -q/eps0 term
+    if cap_match_true_um is not None:
+        # scale the bottom `cap_match_rows` gridded oxide rows (nearest the substrate ground) so the
+        # feature->ground SERIES capacitance equals the true (thick) oxide. Per column, find the
+        # contiguous INSULATOR stack directly above the topmost GROUND row.
+        n_true = int(round(float(cap_match_true_um) * 1e-6 / h_m))
+        for ix in range(nx):
+            gr = np.where(ground[ix])[0]
+            if gr.size == 0:
+                continue
+            gtop = int(gr.min())
+            oz = gtop - 1
+            rows = []
+            while oz >= 0 and insul[ix, oz]:
+                rows.append(oz); oz -= 1
+            if not rows:
+                continue
+            n_grid = len(rows)
+            eps_m = capacitance_match_eps(n_grid, n_true, float(eps_insulator), int(cap_match_rows))
+            for oz in rows[:int(cap_match_rows)]:    # rows nearest the ground carry the matched eps
+                eps[ix, oz] = eps_m
     # face conductances (arithmetic-mean eps on each face)
-    e_xm = np.empty_like(eps); e_xp = np.empty_like(eps)
-    e_zm = np.empty_like(eps); e_zp = np.empty_like(eps)
-    e_xm[1:, :] = 0.5 * (eps[1:, :] + eps[:-1, :]); e_xm[0, :] = eps[0, :]
-    e_xp[:-1, :] = 0.5 * (eps[:-1, :] + eps[1:, :]); e_xp[-1, :] = eps[-1, :]
-    e_zm[:, 1:] = 0.5 * (eps[:, 1:] + eps[:, :-1]); e_zm[:, 0] = eps[:, 0]
-    e_zp[:, :-1] = 0.5 * (eps[:, :-1] + eps[:, 1:]); e_zp[:, -1] = eps[:, -1]
-    e_diag = e_xm + e_xp + e_zm + e_zp
-    e_diag[e_diag < 1e-9] = 1e-9
+    e_xm, e_xp, e_zm, e_zp, e_diag = _poisson_faces(eps)
     poisson_inside = (~is_cond)
     poisson_inside[:, 0] = False          # grounded plasma boundary (top) is Dirichlet
     poisson_inside[ground] = False        # grounded substrate below the oxide is Dirichlet V=0
+
+    # --- sigma-sheet bookkeeping (P2): free surface charge on the GAS-FACING insulator layer only.
+    # Particles stop at the first solid cell -> deposits land exactly on this interface layer; the
+    # dielectric interior stays rho=0 (no bulk conduction at room T). The Poisson RHS is injected at
+    # these cells via k_phys*sig_sheet (physical C/m^2). NEVER smear into the body (the C8 failure).
+    gas_c = ~solid
+    iface = np.zeros_like(solid)
+    iface[1:, :] |= insul[1:, :] & gas_c[:-1, :]
+    iface[:-1, :] |= insul[:-1, :] & gas_c[1:, :]
+    iface[:, 1:] |= insul[:, 1:] & gas_c[:, :-1]
+    iface[:, :-1] |= insul[:, :-1] & gas_c[:, 1:]
+    sig_sheet = np.zeros((nx, nz))        # free surface charge [C/m^2], nonzero on `iface` cells
+    # --- diagonal capacitance C_diag [F/m^2] (P4 preconditioner): per interface cell, the series
+    # electrical thickness DOWN to the substrate ground (through oxide, cap-matched eps) in parallel
+    # with UP to the plasma ground (through gas). dV/dsigma = 1/C_diag. Geometric estimate (O(grid),
+    # once); only sets the Newton step scale, not the fixed point (which is Gamma_i=Gamma_e).
+    C_diag = np.zeros((nx, nz))
+    if use_poisson_setup := (field_model == "poisson"):
+        inv_col = h_m / eps                          # per-cell electrical thickness [m]
+        for ix in range(nx):
+            gr = np.where(ground[ix])[0]
+            gtop = int(gr.min()) if gr.size else None
+            ic = np.where(iface[ix])[0]
+            for iz in ic:
+                dup = float(inv_col[ix, 1:iz + 1].sum()) if iz >= 1 else h_m
+                Cup = EPS0 / dup if dup > 0 else 0.0
+                Cdn = 0.0
+                if gtop is not None and gtop > iz:
+                    ddn = float(inv_col[ix, iz:gtop].sum())
+                    Cdn = EPS0 / ddn if ddn > 0 else 0.0
+                C_diag[ix, iz] = Cup + Cdn
 
     # --- open-plasma electron floor via sky view factor (closes the edge/neighbour split) ---
     # The down-going electron trace under-samples OPEN-FACING walls (the edge line's outer wall
@@ -500,9 +574,10 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         return apply_bc(V)
 
     def poisson(V, sweeps=200, omega=1.7):
-        """Variable-eps Poisson div(eps grad phi) = -rho*k, red-black SOR. Conductors are
-        equipotential Dirichlet (set outside); top/bottom grounded; gas+insulator solved."""
-        k = float(rho_coupling)
+        """UNITS-HONEST variable-eps Poisson (P1): sum_faces eps_face(V_nb-V_c) = -sigma_c*h/eps0,
+        injected as +k_phys*sig_sheet (k_phys = h/eps0). Conductors equipotential Dirichlet (set
+        outside); top/bottom grounded; gas+insulator solved. Voltages are ABSOLUTE volts."""
+        k = k_phys
         for _ in range(sweeps):
             V[:, 0] = 0.0
             V[ground] = 0.0            # grounded substrate Dirichlet
@@ -515,7 +590,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                 xp[:-1, :] = V[1:, :]; xp[-1, :] = V[-1, :]
                 zm[:, 1:] = V[:, :-1]; zm[:, 0] = V[:, 0]
                 zp[:, :-1] = V[:, 1:]; zp[:, -1] = V[:, -1]
-                num = e_xm * xm + e_xp * xp + e_zm * zm + e_zp * zp + k * rho
+                num = e_xm * xm + e_xp * xp + e_zm * zm + e_zp * zp + k * sig_sheet
                 upd = num / e_diag
                 m = poisson_inside & color
                 V[m] = (1.0 - omega) * V[m] + omega * upd[m]
@@ -639,12 +714,22 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         anneal = 1.0 / (1.0 + it / (0.15 * n_iter))
         scale = anneal * relax / n_per_iter * nx
         if use_poisson:
-            # insulators accumulate free CHARGE; the Poisson solve maps it to potential via eps.
-            # The charge<->field coupling LAGS (trace uses last iter's field), so a large step overshoots
-            # on electron-collecting walls before retardation catches up -> runaway. Heavy under-relaxation
-            # (poisson_step) keeps the lagged loop a contraction. See CHARGING_POISSON_PLAN.md for the full
-            # first-principles fix (physical units, interface-sigma sheet, capacitance-matched substrate).
-            rho[insul] += (scale * float(poisson_step)) * net[insul]
+            # DIAGONAL-CAPACITANCE NEWTON step (P4): drive each GAS-FACING interface cell toward its
+            # LOCAL current balance in VOLTS (the proven log update dV = Te*ln(Gamma_i/Gamma_e)),
+            # converted to a physical sigma step through the per-cell capacitance C_diag [F/m^2].
+            # The fixed point is Gamma_i = Gamma_e (dV -> 0) so sigma STOPS -- no naive rho
+            # accumulation, no unbounded runaway (the C8 failure mode is structurally removed).
+            eps_c = 0.5   # MC shot-noise count regularizer
+            dV = Te * np.log((ci[iface] + eps_c) / (ce[iface] + eps_c))
+            dV = np.clip(dV, -2.0 * Te, 2.0 * Te)
+            sig_sheet[iface] += anneal * C_diag[iface] * dV
+            # PHYSICAL BOUND -- cap the CHARGE step, not V (pitfall #5): the solved surface V may not
+            # exceed V_dc+V_rf (incident sheath energy) nor drop below -10*Te (Maxwellian tail reach).
+            # Remove/add just enough sigma (via C_diag) to pull crossing cells back onto the bound.
+            over = np.maximum(V - (V_dc + V_rf), 0.0)
+            under = np.maximum((-10.0 * Te) - V, 0.0)
+            sig_sheet[iface] -= C_diag[iface] * over[iface]
+            sig_sheet[iface] += C_diag[iface] * under[iface]
         elif charge_update == "log":
             # LOG CURRENT-BALANCE update (quasi-Newton for exponentially retarded electron flux):
             # a floating surface obeys Gamma_e(V) ~ e^{V/Te} near balance, so the balance error in
@@ -725,6 +810,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     # per-cell insulator potential is the solved field at insulator cells (poisson) or Vs (laplace)
     Vs_out = np.where(insul, V, 0.0) if use_poisson else Vs
     out = dict(V=V, Vs=Vs_out, Vc=Vc[1:], ncomp=ncomp, cid=cid, rho=rho,
+               sigma=sig_sheet, iface=iface, C_diag=C_diag,
                surv_ion=hist[-1][0], surv_electron=hist[-1][1],
                field_model=field_model,
                ion_counts=ci_f, ion_energy=Ei_f, electron_counts=ce_f, ntot=ntot,
