@@ -1681,6 +1681,15 @@ def run_etch_3d(Lx=10.0, Ly=4.0, Lz=14.0, dx=0.4, trench_width=4.0, mask_th=2.0,
             fn = _gas_normals(verts, faces, centroids, geo)
             Rf = mc_redep_3d(mesh, centroids, areas, fn, V, n_redep=n_neu,
                              s_redep=par.get('s_redep', 0.5), seed=step)
+            # DEFLECTED-ION FOOT CLEANING: the sidewall-foot band receives the charging-deflected
+            # ion torrent (E ~ 15-25 eV, above the Cl+/poly threshold), which re-sputters any
+            # redeposit -- physically the notch cavity stays clean while redep passivates the upper
+            # walls. Without this, redep FILLS the notch during long (AR>=4) overetch (the C11/C19
+            # AR4 erasure). Suppress redep sticking on the foot band when charging is active.
+            if getattr(flags, "surface_charging", False) and etch_stop_z is not None:
+                foot_h = max(0.3 * geo['trench_width'], 2.0 * geo['dx'])
+                foot_band = centroids[:, 2] <= (etch_stop_z + foot_h)
+                Rf = np.where(foot_band, 0.0, Rf)
             V = np.maximum(V - par.get('k_redep', 1.0) * Rf, 0.0)   # redeposited material slows etch
         te = time.time()
         Fs = (extend_velocity_gpu(mesh, V, geo, band) if extend == "gpu"
