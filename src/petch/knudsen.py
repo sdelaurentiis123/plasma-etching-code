@@ -114,7 +114,14 @@ def conductance_profile(phi, zs, dx, sub_top, feature_shape, slice_loss,
     p = perimeter[idx]
     radius = np.maximum(2.0 * a / np.maximum(p, 1.0e-30), dx)
     conductance = (2.0 / 3.0) * radius * a / dx        # free-molecular (Knudsen) conductance
-    loss_scale = max(float(wall_loss_scale), 0.0)
+    # wall_loss_scale is a scalar (default: uniform effective floor loss) OR a per-slice array of
+    # length nz (opt-in passivation-linked front loss -- see knudsen_face_flux). Per-slice lets the
+    # effective F-consumption enhancement relax with depth as the sidewall column passivates.
+    ls = np.asarray(wall_loss_scale, float)
+    if ls.ndim == 0:
+        loss_scale = np.maximum(float(ls), 0.0)
+    else:
+        loss_scale = np.maximum(ls[idx], 0.0)
     sink = loss_scale * np.maximum(slice_loss[idx], 0.0)
 
     link = np.zeros(max(m - 1, 0))
@@ -152,8 +159,29 @@ def _nearest_valid_slice(valid_iz, iz):
     return np.where(choose_right, valid_iz[right], valid_iz[left])
 
 
+def _front_loss_scale(zs, dx, sub_top, nz, W, wall_loss_scale, band_W, pass_frac, ar_pass):
+    """OPT-IN passivation-linked wall loss (flags.knudsen_front_loss): a per-slice effective
+    loss-scale array replacing the uniform scalar. PHYSICS: the >1 wall_loss_scale is a proxy for
+    F recombination on the reactive (contested) sidewall band adjacent to the etch front. On a
+    SHALLOW feature the whole sidewall column is freshly exposed -> full recombination -> full
+    scale. As the feature deepens, only a FIXED fresh band (height band_W feature-widths) near the
+    front stays contested; the tall column above it is SiOxFy-passivated and inert to F (Blauw JVST
+    B 18,3453; Coburn-Winters). So the depth-integrated recombination the neutral flux sees relaxes
+    from the full scale (shallow) toward pass_frac*scale (deep, mostly-passivated walls) on an AR
+    decay scale ar_pass. Per-slice: each slice's local AR = (sub_top - z)/W sets its fresh fraction.
+        scale(AR) = wls * (pass_frac + (1-pass_frac) * exp(-max(0, AR - band_W)/ar_pass))
+    band_W: fresh-band height in feature widths (full strength through AR<=band_W -> preserves the
+    knee). pass_frac: passivated-wall loss as a fraction of full (5-20% for a truly inert wall; the
+    de Boer floor calibrates nearer 0.5 = the bare kinetic floor term surviving under the fudge)."""
+    zc = zs[:nz]
+    ar_slice = np.maximum((sub_top - zc) / max(W, 1.0e-9), 0.0)
+    g = np.exp(-np.maximum(ar_slice - band_W, 0.0) / max(ar_pass, 1.0e-9))
+    return max(float(wall_loss_scale), 0.0) * (pass_frac + (1.0 - pass_frac) * g)
+
+
 def knudsen_face_flux(phi, zs, dx, sub_top, feature_shape, centroids, gas_nz, face_areas, Ly,
-                      s_face, wall_loss_scale=1.85, center=None, half_width=None):
+                      s_face, wall_loss_scale=1.85, center=None, half_width=None,
+                      front_loss=False, band_W=8.0, pass_frac=0.5, ar_pass=15.0):
     """Per-face neutral arrival multiplier from the 1-D Knudsen conductance solve.
 
     centroids  : (F,3) face centroids; gas_nz : (F,) into-gas normal z (floor classifier);
@@ -200,8 +228,13 @@ def knudsen_face_flux(phi, zs, dx, sub_top, feature_shape, centroids, gas_nz, fa
         if feature_shape == "trench":
             slice_loss /= max(float(Ly), 1.0e-30)      # per unit trench length (area a is too)
 
+    wls_arg = wall_loss_scale
+    if front_loss:
+        W = 2.0 * float(half_width) if half_width is not None else dx
+        wls_arg = _front_loss_scale(zs, dx, sub_top, nz, W, wall_loss_scale,
+                                    band_W, pass_frac, ar_pass)
     profile = conductance_profile(phi, zs, dx, sub_top, feature_shape,
-                                  slice_loss, wall_loss_scale)
+                                  slice_loss, wls_arg)
     m = np.ones(len(centroids))
     has = snap >= 0
     m[has & below] = profile[snap[has & below]]

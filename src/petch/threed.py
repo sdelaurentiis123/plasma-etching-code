@@ -1165,6 +1165,13 @@ def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=200
     gas_nz = fn[:, 2]
     shape = "via" if geo.get('hole', False) else "trench"
     wls = float(par.get('knudsen_wall_loss_scale', 1.85))
+    # OPT-IN passivation-linked front loss: a per-slice effective wall loss that relaxes with depth as
+    # the sidewall column passivates (see knudsen._front_loss_scale). Default OFF -> uniform scalar wls.
+    front_loss = bool(getattr(flags, 'knudsen_front_loss', False))
+    fl_kw = dict(front_loss=front_loss,
+                 band_W=float(par.get('knudsen_front_band_W', 8.0)),
+                 pass_frac=float(par.get('knudsen_passive_frac', 0.5)),
+                 ar_pass=float(par.get('knudsen_front_ar_pass', 15.0)))
     phi, zs, dx, sub_top = geo['phi'], geo['zs'], geo['dx'], geo['sub_top']
 
     # ions: shared deterministic-path launch (faithful ViennaPS reflection when the config asks).
@@ -1191,9 +1198,11 @@ def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=200
             s_bare = np.minimum(bare, float(np.mean(bare[field])))
         _ctr = (0.5 * Lx, 0.5 * Ly); _hw = 0.5 * float(geo.get('trench_width', Lx))
         m_F = knudsen_face_flux(phi, zs, dx, sub_top, shape, centroids, gas_nz, A, Ly,
-                                np.clip(s_bare * betaE, 0.0, 1.0), wls, center=_ctr, half_width=_hw)
+                                np.clip(s_bare * betaE, 0.0, 1.0), wls, center=_ctr, half_width=_hw,
+                                **fl_kw)
         m_O = knudsen_face_flux(phi, zs, dx, sub_top, shape, centroids, gas_nz, A, Ly,
-                                np.clip(s_bare * betaO, 0.0, 1.0), wls, center=_ctr, half_width=_hw)
+                                np.clip(s_bare * betaO, 0.0, 1.0), wls, center=_ctr, half_width=_hw,
+                                **fl_kw)
         thF, thO = _belen_coverages(m_i, m_F, m_O, cos_i, par, flags)
         bare = np.clip(1.0 - thF - thO, 0.0, 1.0)
     return m_i, m_F, m_O, cos_i

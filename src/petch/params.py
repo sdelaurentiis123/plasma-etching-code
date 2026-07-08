@@ -42,6 +42,13 @@ PAR = dict(
                                                 # evolving taper, so its effective loss requirement is lower
                                                 # (documented proxy bias, not a second knob).
                                                 # plasma_sim's engine uses 1.85 with its own calibrated chemistry.
+    # Passivation-linked front loss (flags.knudsen_front_loss; Knudsen path only, opt-in). Defaults
+    # tuned on the de Boer static-AR floor probe: base knudsen_wall_loss_scale ~2.0, decaying to
+    # knudsen_passive_frac of that on the passivated wall column.
+    knudsen_front_band_W=8.0,                   # fresh (contested) band height in feature widths (full
+                                                # strength through AR<=band_W -> preserves the knee)
+    knudsen_passive_frac=0.5,                   # passivated-wall effective loss as a fraction of full
+    knudsen_front_ar_pass=15.0,                 # AR decay scale for the fresh->passivated relaxation
     dda_n_dir=64,                               # discrete-ordinates direction count (neutral_transport='dda')
     dda_n_reemit=12,                            # diffuse re-emission iterations for the DDA neutral solve
     # Ion energy distribution (IED) for yield integration. 'mean' = evaluate yields at Emean (PoC);
@@ -106,6 +113,15 @@ class Flags:
                                      # (cryo SF6/O2). Tests whether charging alone reproduces the de Boer
                                      # deep-AR floor. Independent of surface_charging="hg"/"petch" (those
                                      # are the insulating-floor notch closure in the knudsen/radiosity path).
+    knudsen_front_loss: bool = False  # OPT-IN passivation-linked wall loss (default OFF; Knudsen path only).
+                                     # Replaces the uniform knudsen_wall_loss_scale with a per-slice effective
+                                     # loss that RELAXES with feature depth: full strength through a fresh
+                                     # (contested) band of height knudsen_front_band_W feature-widths near the
+                                     # etch front, decaying to knudsen_passive_frac*scale on the passivated
+                                     # (inert) sidewall column above it, over AR scale knudsen_front_ar_pass.
+                                     # Physics: SiOxFy passivation makes deep sidewalls inert to F, so the
+                                     # depth-integrated F recombination the neutral flux sees drops with depth
+                                     # -- sustains the deep-AR floor while preserving the knee (de Boer AR>20).
 
     def to_dict(self):
         return asdict(self)

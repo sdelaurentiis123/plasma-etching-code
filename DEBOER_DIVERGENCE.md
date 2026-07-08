@@ -78,11 +78,77 @@ Result (same tall-stack protocol, before vs after):
   (spontaneous/thermal SF6 etch of Si at cryo + ion-assist recovery, or a direct F+Si channel
   that survives coverage starvation) rather than any further transport/charging suppression.
 
+## STEP 3 -- hypothesis test: PASSIVATION-LINKED wall loss + the transport-artifact finding (2026-07-07)
+
+Hypothesis (mission): the uniform Knudsen wall-loss scale fits the knee but starves the deep floor;
+a FRONT-CONCENTRATED wall loss (full on the freshly-exposed contested band near the etch front,
+reduced 5-20% on the passivated SiOxFy sidewall column above it) should do BOTH. Implemented opt-in
+(`Flags.knudsen_front_loss`, default OFF; pytest 26/26 green): a per-slice effective loss that relaxes
+from the full base scale (shallow / all-fresh walls) toward `knudsen_passive_frac*base` (deep /
+mostly-passivated) over an AR band -- see `knudsen._front_loss_scale`.
+
+**First, a premise correction that dominates the result.** The banked AR46 divergence curves
+(STEP 1/2) run `neutral_transport="mc"`; the Knudsen path with `knudsen_wall_loss_scale` was NEVER
+exercised in them (it lives in the notching/evolving calibration). Testing the hypothesis therefore
+means running the de Boer geometry under `neutral_transport="knudsen"`. Doing so exposes the real
+lever: **the deep-floor collapse is largely a Monte-Carlo deep-floor UNDER-SAMPLING artifact, not a
+missing wall-loss term.** Deterministic Knudsen transport already sustains the floor.
+
+Tall stack (Lz=100, sub_top=94 -> AR46), 2 seeds + fine-cadence r0, KNEE process params, CPU
+(~270 s/run; Knudsen is deterministic + fast). Same r0/normalization protocol as STEP 1
+(analyze_tall). r0 is identical across bases (15.0 um/t): at AR<2 the open floor sees full flux
+regardless of wall loss.
+
+| AR | experiment | MC banked (STEP1) | Knudsen front-OFF (wls 2.9) | Knudsen front-ON base 2.9 | Knudsen front-ON base 2.6 |
+|---:|---:|---:|---:|---:|---:|
+| 5  | 0.715 | 0.758 | 0.667 | 0.667 | 0.667 |
+| 8  | 0.544 | 0.545 | 0.500 | 0.500 | 0.583 |
+| 10 | 0.430 | 0.309 | 0.333 | 0.500 | 0.500 |
+| 15 | 0.360 | 0.223 | 0.333 | 0.333 | 0.500 |
+| 20 | 0.290 | 0.148 | 0.217 | 0.233 | 0.239 |
+| 30 | 0.245 | 0.066 | 0.200 | 0.233 | 0.233 |
+| 40 | 0.200 | 0.051 | 0.200 | 0.233 | 0.233 |
+| 44 | 0.200 | 0.056 | 0.200 | 0.225 | 0.233 |
+| **RMSE(AR5-44)** | -- | **0.145** | **0.069** | **0.066** | **0.063** |
+
+**Two-sided gate:**
+- (a) PRESERVE the knee (AR<=8): the front-loss band is full through AR<=band_W, so at fixed base
+  the knee is byte-identical with the flag OFF (AR8 0.500 both, base 2.9). vs the MC banked 0.545
+  the Knudsen knee is 0.500 (delta -0.044) -- slightly softer than MC's near-perfect knee but well
+  inside the honest agreement band; co-tuning base to 2.6 restores AR8 0.583 (sim/exp 1.07). **PASS.**
+- (b) SUSTAIN the deep floor (target sim/exp @ AR30-40 from ~0.25 toward >0.6): Knudsen sim/exp is
+  0.82 @ AR30 / 1.00 @ AR40 (front-OFF) and 0.95 / 1.17 (front-ON). **PASS (far exceeds >0.6).**
+
+**Verdict -- both gate sides PASS, but the credit is split and honest:**
+1. The DOMINANT fix is the transport integrator: MC -> deterministic Knudsen drops RMSE(AR5-44)
+   from **0.145 to 0.069** and sustains the floor to ~0.20 (matching the experiment). The banked
+   "sim floor collapses 11x while the experiment sustains" narrative was substantially an MC
+   deep-floor sampling artifact -- consistent with [[reconcile-craig-into-petch]] ("petch-MC
+   under-samples deep floor in static eval"). The sustained tail is real (at AR40 the front is at
+   z=14.5 um, far from the z=0 domain floor) and is carried by the ion-sputter floor (Ysp) plus the
+   deterministic neutral tail, not a domain-bottom artifact.
+2. The passivation-linked front-loss is a REAL but SUBDOMINANT, knee-safe improvement: cleanly
+   ablated at fixed base 2.9 it lifts the mid+deep tail toward the experiment (AR10 0.333->0.500,
+   AR30 0.200->0.233) and improves RMSE 0.069 -> 0.066 without touching the knee; co-tuning the base
+   reaches 0.063. It does NOT make-or-break the gate (Knudsen alone passes) and it cannot fix the
+   one residual shape error -- the AR10-20 slope is slightly too steep vs the experiment's gentle
+   roll, and because the front-loss reduces loss monotonically with depth it lifts the deep tail
+   (already on target) as much as the mid, introducing a small AR10-15 bump when pushed. So the
+   hypothesis is directionally CORRECT (inert passivated walls -> flatter tail) but is a refinement,
+   not the missing physics; the missing physics was Monte-Carlo variance, not chemistry.
+
+Figure: `viz/deboer_passivation_wall_loss.png` (experiment vs MC-banked vs Knudsen OFF/ON/co-tuned).
+
 ## Status of the opt-in code
 
-- `src/petch/params.py`: `Flags.floor_charge_throttle` (default False -- default behavior
-  unchanged; pytest 26/26 green).
-- `src/petch/threed.py`: `_apply_floor_charge_throttle` + hook in `mc_flux_3d_coupled`.
+- `src/petch/params.py`: `Flags.floor_charge_throttle` and `Flags.knudsen_front_loss` (both default
+  False -- default behavior unchanged; pytest 26/26 green). Front-loss params: `knudsen_front_band_W`
+  (=8.0 feature-widths fresh band), `knudsen_passive_frac` (=0.5), `knudsen_front_ar_pass` (=15.0).
+- `src/petch/threed.py`: `_apply_floor_charge_throttle` + hook in `mc_flux_3d_coupled`;
+  `knudsen_front_loss` wired into `mc_flux_3d_knudsen` (per-slice loss array to `knudsen_face_flux`).
+- `src/petch/knudsen.py`: `_front_loss_scale` (per-slice passivation-linked scale) +
+  `conductance_profile` accepts a scalar OR per-slice `wall_loss_scale`.
 - `src/petch/charging_general.py`: `floor_charge_throttle_profile` + `_THROTTLE_*` table.
-The flag stays available as the "dielectric-passivated floor" experiment; it is NOT part of the
-de Boer configuration.
+Both flags stay available as opt-in physics experiments; neither is on in the default de Boer config.
+The actionable de Boer takeaway is the transport choice: `neutral_transport="knudsen"` (deterministic)
+should be preferred over `"mc"` for HARC deep-floor ARDE, where MC variance collapses the floor.
