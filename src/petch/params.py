@@ -100,6 +100,12 @@ class Flags:
                                      # overetch); keep False for conductive grounded-Si floors (de Boer).
                                      # Wired in the knudsen deterministic path (v1). The old bool+charge_alpha
                                      # flux-ratio throttle is retired (structurally wrong, kept inert).
+    floor_charge_throttle: bool = False  # OPT-IN de-Boer HIGH-AR experiment (default OFF). Multiplies the
+                                     # floor ion flux by Q(AR) from charging_general.floor_charge_throttle_
+                                     # profile -- the dielectric SiOxFy-passivated-floor charging throttle
+                                     # (cryo SF6/O2). Tests whether charging alone reproduces the de Boer
+                                     # deep-AR floor. Independent of surface_charging="hg"/"petch" (those
+                                     # are the insulating-floor notch closure in the knudsen/radiosity path).
 
     def to_dict(self):
         return asdict(self)

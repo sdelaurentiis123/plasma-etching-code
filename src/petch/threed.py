@@ -889,6 +889,10 @@ def mc_flux_3d_coupled(mesh, verts, faces, areas, geo, par, n_ion=20000, n_neu=2
         m = np.clip((fl.numpy() / A) / (n_neu / A_src), 0.0, 8.0)
         return _smooth(m) if n_smooth > 0 else m
 
+    # OPT-IN de-Boer high-AR dielectric-floor charging throttle (default OFF; see helper docstring).
+    if flags is not None and getattr(flags, "floor_charge_throttle", False):
+        m_i = _apply_floor_charge_throttle(m_i, par, verts, faces, geo)
+
     # coverage fixed-point iters: warm-started steps (bare_init given) converge in 1; cold needs ~4.
     n_fp = int(par.get('n_fp', 1 if bare_init is not None else 4))
     bare = np.ones(F) if bare_init is None else np.clip(np.asarray(bare_init, float), 0.0, 1.0)
@@ -1103,6 +1107,43 @@ def _apply_hg_charging(m_i, par, flags, centroids, gas_nz, areas, geo):
         sp[foot] += fdefl * par['A_sp'] * max(sE - np.sqrt(par['Eth_sp']), 0.0)
         ip[foot] += fdefl * par['A_p'] * max(sE - np.sqrt(par['Eth_p']), 0.0)
     par['_ion_yield'] = (sp, ie, ip)
+    return m_i
+
+def _apply_floor_charge_throttle(m_i, par, verts, faces, geo):
+    """OPT-IN (flags.floor_charge_throttle): multiply the FLOOR ion flux by Q(AR) from the deep-AR
+    de-Boer dielectric-floor charging table (charging_general.floor_charge_throttle_profile).
+
+    PHYSICAL JUSTIFICATION: de Boer high-AR cryo SF6/O2 etching grows a SiOxFy passivation film on
+    the feature surfaces. That film is a DIELECTRIC, so it holds accumulated positive charge from the
+    near-vertical ion flux even where the underlying Si is grounded (the drain path through the thin
+    fluoride is resistive). The trapped floor potential decelerates/deflects incoming ions -> the floor
+    ion flux is throttled by Q(AR). Applied to m_i BEFORE the coverage fixed point (so it reduces both
+    the physical ion-enhanced etch AND the ion-driven coverage coupling), mirroring the alpha-model
+    placement. _ion_yield floor faces (if the faithful-ion path set them) are scaled by the same Q.
+    Default OFF; the baseline de Boer model treats the floor as a clean grounded-Si charge sink."""
+    from .charging_general import floor_charge_throttle_profile
+    centroids = verts[faces].mean(axis=1)
+    gas_nz = _gas_normals(verts, faces, centroids, geo)[:, 2]
+    sub_top = geo['sub_top']; W = geo['trench_width']
+    cx0, cy0 = 0.5 * geo['Lx'], 0.5 * geo['Ly']
+    hw = 0.5 * W + 2.0 * geo['dx']
+    if geo.get('hole', False):
+        inside = np.hypot(centroids[:, 0] - cx0, centroids[:, 1] - cy0) <= hw
+    else:
+        inside = np.abs(centroids[:, 0] - cx0) <= hw
+    below = centroids[:, 2] < sub_top
+    floor = inside & below & (gas_nz > 0.7)                 # near-horizontal, in-trench, sub-mask faces
+    if not floor.any():
+        return m_i
+    depth = float(sub_top - centroids[floor, 2].min())
+    AR = depth / max(W, 1e-9)
+    Q = float(floor_charge_throttle_profile(AR))
+    m_i = m_i.copy(); m_i[floor] *= Q
+    iy = par.get('_ion_yield')
+    if iy is not None:                                      # keep the faithful-ion rate consistent
+        par['_ion_yield'] = tuple(a.copy() for a in iy)
+        for a in par['_ion_yield']:
+            a[floor] *= Q
     return m_i
 
 def mc_flux_3d_knudsen(mesh, verts, faces, centroids, areas, geo, par, n_ion=20000,
