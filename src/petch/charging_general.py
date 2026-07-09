@@ -429,7 +429,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    hg_convention=False, rf_bursts=False, burst_dV=2.2,
                    cell_size_nm=31.25, cap_match_true_um=None, cap_match_rows=3,
                    seed_state=None, return_state=False, leak_rate=0.0,
-                   transport="mc", det_cols=None):
+                   transport="mc", det_cols=None, preint_floor=False, preint_geom=None):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -643,6 +643,19 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             np.add.at(counts, (hix[m], hiz[m]), W[m] * scale)
             if want_energy:
                 np.add.at(energy, (hix[m], hiz[m]), W[m] * scale * E[m])
+            # PREINTEGRATION FLOOR OVERRIDE (opt-in): the tensor quadrature under-counts the deep-floor
+            # ELECTRON flux (~2x) -> floor over-charges. Replace the floor-band electron cells with the
+            # accurate, scalable preintegration value (P_acc in the grid[band].mean() convention, so
+            # counts = P_acc*scale). Cost is flat in AR (no tensor blowup). Fixed scramble seeds across
+            # iterations = common random numbers (the fixed point doesn't chase noise).
+            if kind == "electron" and preint_floor and preint_geom is not None:
+                from .charging_preint import preint_floor_fraction
+                Pacc, _ = preint_floor_fraction(preint_geom, Ex, Ez, Te=Te, V_dc=V_dc, V_rf=V_rf,
+                                                trace_dt=trace_dt, trace_dt_field=trace_dt_field,
+                                                trace_steps=trace_steps)
+                gg = preint_geom
+                fzz = int(np.where(gg['floor_trench_mask'].any(axis=0))[0].max())
+                counts[gg['trench0'] + 4:gg['trench1'] - 4, fzz] = Pacc * scale
             return (counts, float(surv.mean()), energy) if want_energy else (counts, float(surv.mean()))
         if source_model == "sheath" or (source_model == "hybrid" and kind == "ion"):
             # "sheath": both species derived. "hybrid": derived ions (instantaneous crossing is exact
