@@ -428,7 +428,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    poisson_step=1.0, charge_update="linear", source_model="heuristic", Ti=0.5,
                    hg_convention=False, rf_bursts=False, burst_dV=2.2,
                    cell_size_nm=31.25, cap_match_true_um=None, cap_match_rows=3,
-                   seed_state=None, return_state=False, leak_rate=0.0):
+                   seed_state=None, return_state=False, leak_rate=0.0,
+                   transport="mc", det_cols=None):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -612,6 +613,37 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         return V
 
     def trace(kind, n, Ex, Ez, want_energy=False):
+        if transport == "deterministic":
+            # DETERMINISTIC drop-in: swap MC sampling for the noise-free quadrature fan, same kernel.
+            # Reuses all of solve_charging's field/BC/charge machinery; only the transport changes.
+            from .charging_deterministic import ion_source_quadrature, electron_source_quadrature
+            # launch from FEATURE-MOUTH columns only (gas cells directly above solid) -- ions/electrons
+            # entering over open field just hit the mask and don't charge the feature, so including
+            # them is pure waste. det_cols overrides. (Full accuracy/speed at scale -> adaptive quad.)
+            if det_cols is not None:
+                cols = det_cols
+            else:
+                gas_mouth = ~solid[:, 1]
+                below_solid = np.zeros(nx, bool); below_solid[:] = solid[:, 2:].any(axis=1)
+                cols = np.where(gas_mouth & below_solid)[0]
+                if cols.size == 0:
+                    cols = np.where(gas_mouth)[0]
+            if kind == "ion":
+                X, Z, VP, VZ, W = ion_source_quadrature(cols, nx, Te=Te, Ti=Ti, V_dc=V_dc, V_rf=V_rf)
+                q = 1.0
+            else:
+                X, Z, VP, VZ, W = electron_source_quadrature(cols, nx, n_E=40, n_ct=28, n_phase=28,
+                                                             n_az=6, Te=Te, V_dc=V_dc, V_rf=V_rf)
+                q = -1.0
+            hix, hiz, E, _, surv = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, q, nx, nz,
+                                                  int(trace_steps) * nz, trace_dt, trace_dt_field)
+            counts = np.zeros((nx, nz)); energy = np.zeros((nx, nz)) if want_energy else None
+            scale = float(n) / max(float(W.sum()), 1e-12)   # match MC particle-budget magnitude (eps_c)
+            m = hix >= 0
+            np.add.at(counts, (hix[m], hiz[m]), W[m] * scale)
+            if want_energy:
+                np.add.at(energy, (hix[m], hiz[m]), W[m] * scale * E[m])
+            return (counts, float(surv.mean()), energy) if want_energy else (counts, float(surv.mean()))
         if source_model == "sheath" or (source_model == "hybrid" and kind == "ion"):
             # "sheath": both species derived. "hybrid": derived ions (instantaneous crossing is exact
             # at 400 kHz, w*tau_i~0.015) x HG's PUBLISHED electron arrival EADF (cos^0.6, JVST B Fig 5b)
@@ -667,6 +699,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
     hist = []
     frames = []          # (iter, V snapshot, Vc snapshot) for the dynamics movie
     vc_tail_sum = np.zeros(ncomp); vs_tail_sum = np.zeros((nx, nz)); tail_n = 0
+    _and_X = []; _and_F = []; and_m = 6; and_beta = 1.0   # Anderson-acceleration history (root-solve)
     # FEE (frontier, closed-form, never in any feature solver): sheath/charge fields are amplified
     # at sharp CONVEX corners (lightning-rod effect) -- a field-enhancement factor set by local
     # curvature that steers ions into corner hotspots (Chang/DTU, Mater.&Design 254,114144 2025).
@@ -770,6 +803,28 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             # electrons (~top of the Maxwellian tail, 10*Te; P(E>10Te)~2e-3). Prevents the early
             # large-step phase from freezing shadowed corner cells at unreachably deep potentials.
             np.clip(Vs, -10.0 * Te, V_dc + V_rf, out=Vs)
+        elif charge_update == "anderson":
+            # ANDERSON ACCELERATION -- the SCF root-solve. Deterministic transport removes the MC noise
+            # that was accidentally DAMPING the naive log relaxation, so plain relaxation OSCILLATES
+            # (Fable). Wrap the fixed-point map g(Vs)=Vs+dV in Anderson mixing over an m-history of
+            # (iterate, residual): Jacobian-free, the DFT/SCF workhorse, converges where relaxation
+            # wanders. dV is the balance residual in volts (Te*ln(ci/ce)); fixed point at dV->0.
+            eps_c = 0.5
+            # looser residual clip than the MC path: the +/-2Te clip guards MC noise spikes, but the
+            # deterministic residual is clean, so a tight clip only throttles Anderson's convergence.
+            f_k = np.clip(Te * np.log((ci[insul] + eps_c) / (ce[insul] + eps_c)), -5.0 * Te, 5.0 * Te)
+            x_k = Vs[insul].copy()
+            _and_X.append(x_k); _and_F.append(f_k)
+            if len(_and_X) > and_m + 1:
+                _and_X.pop(0); _and_F.pop(0)
+            if len(_and_F) >= 2:
+                dF = np.stack([_and_F[i + 1] - _and_F[i] for i in range(len(_and_F) - 1)], axis=1)
+                dX = np.stack([_and_X[i + 1] - _and_X[i] for i in range(len(_and_X) - 1)], axis=1)
+                gamma, *_ = np.linalg.lstsq(dF, f_k, rcond=1e-6)
+                Vs[insul] = x_k + and_beta * f_k - (dX + and_beta * dF) @ gamma
+            else:
+                Vs[insul] = x_k + and_beta * f_k
+            np.clip(Vs, -10.0 * Te, V_dc + V_rf, out=Vs)
         else:
             Vs[insul] += scale * net[insul]
             Vs[insul] = np.clip(Vs[insul], -insul_vguard, V_dc + V_rf)
@@ -799,7 +854,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         for c in range(1, ncomp + 1):
             m = cid == c
             area = max(int(m.sum()), 1)
-            if charge_update == "log":
+            if charge_update in ("log", "anderson"):
                 dVc = Te * np.log((float(ci[m].sum()) + 0.5) / (float(ce[m].sum()) + 0.5))
                 Vc[c] += anneal * float(np.clip(dVc, -2.0 * Te, 2.0 * Te))
             else:
