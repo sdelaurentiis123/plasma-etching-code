@@ -57,6 +57,74 @@ def ion_source_quadrature(cols, nx, n_vperp=21, n_phase=64, Te=4.0, Ti=0.5, V_dc
     return X, Z, np.tile(VP, ncol), np.tile(VZ, ncol), np.tile(W, ncol)
 
 
+def electron_source_quadrature(cols, nx, n_E=64, n_ct=48, n_phase=48, n_az=8,
+                               Te=4.0, V_dc=37.0, V_rf=30.0, E_max_mult=15.0):
+    """Deterministic node set for the retarded RF-sheath ELECTRON source (matches
+    sample_sheath_source('electron'): flux-Maxwellian E~gamma(2,Te), Lambert cos-flux angle, sheath
+    retardation crossing Ez=E*ct^2 > Vs(phase) with refraction vz=sqrt(Ez-Vs), in-plane transverse
+    sqrt(E)*sin(theta)*cos(az)). 4D quadrature (E x ct x phase x az) with the crossing filter applied
+    BEFORE tracing (only crossing nodes carry weight), renormalized so total crossed weight per column
+    = 1 -- matching the MC convention (sample_sheath_source returns exactly n CROSSED electrons), so
+    the deterministic ce is directly comparable to the MC ce in the current balance."""
+    # GRADED quadrature (advisor's #1 risk): the FLOOR is fed only by the rare high-E, near-vertical
+    # (ct->1), collapse-phase electron tail. A uniform grid starves that tail -> floor e-flux biased
+    # LOW (measured 4x). Grade BOTH axes toward the floor-reaching acceptance region, and weight by
+    # density*cell-width (correct on a non-uniform grid).
+    E_max = E_max_mult * Te
+    uE = np.linspace(0.0, 1.0, n_E + 1)
+    eE = E_max * uE ** 1.6                                             # cluster nodes toward high E
+    En = 0.5 * (eE[:-1] + eE[1:]); dE = eE[1:] - eE[:-1]
+    wE = (En / Te ** 2) * np.exp(-En / Te) * dE; wE = wE / wE.sum()    # gamma(2,Te) density * width
+    uc = np.linspace(0.0, 1.0, n_ct + 1)
+    ec = 1.0 - (1.0 - uc) ** 3.0                                       # cluster nodes HARD toward ct=1 (vertical)
+    ct = 0.5 * (ec[:-1] + ec[1:]); dct = ec[1:] - ec[:-1]
+    wct = 2.0 * ct * dct; wct = wct / wct.sum()                        # Lambert cos-flux density * width
+    ph = (np.arange(n_phase) + 0.5) / n_phase * 2.0 * np.pi
+    Vs = V_dc + V_rf * np.sin(ph); wph = np.full(n_phase, 1.0 / n_phase)
+    az = (np.arange(n_az) + 0.5) / n_az * 2.0 * np.pi
+    caz = np.cos(az); waz = np.full(n_az, 1.0 / n_az)
+    # crossing nodes over (E, ct, phase)
+    Eg, ctg, phg = np.meshgrid(En, ct, np.arange(n_phase), indexing='ij')
+    Wg = wE[:, None, None] * wct[None, :, None] * wph[None, None, :]
+    Ezg = Eg * ctg * ctg; Vsg = Vs[phg]
+    cross = Ezg > Vsg
+    Ec = Eg[cross]; stc = np.sqrt(np.maximum(1.0 - ctg[cross] ** 2, 0.0))
+    vzc = np.sqrt(Ezg[cross] - Vsg[cross]); Wc = Wg[cross]
+    # expand over azimuth (in-plane projection of the transverse velocity)
+    vz_f = np.repeat(vzc, n_az)
+    vperp_f = np.repeat(np.sqrt(Ec) * stc, n_az) * np.tile(caz, Ec.size)
+    W_f = np.repeat(Wc, n_az) * np.tile(waz, Ec.size)
+    W_f = W_f / W_f.sum()                                              # crossed weight -> 1 per column
+    ncol = len(cols)
+    X = np.repeat(np.asarray(cols, float), W_f.size); Z = np.ones_like(X)
+    return X, Z, np.tile(vperp_f, ncol), np.tile(vz_f, ncol), np.tile(W_f, ncol)
+
+
+def deterministic_electron_transport(g, Ex, Ez, n_E=96, n_ct=72, n_phase=72, n_az=16,
+                                     Te=4.0, V_dc=37.0, V_rf=30.0, trace_dt=0.15,
+                                     trace_dt_field=0.10, trace_steps=120):
+    """Charged deterministic ELECTRON transport (q=-1) through the actual field. Drop-in for
+    charging_general.trace('electron', ...), noise-free + weighted. Returns counts grid.
+
+    VALIDATED by convergence to MC (frozen AR6 field): total flux + surface distribution match at
+    modest resolution (corr 0.96), and the sensitive FLOOR flux converges to MC as the graded grid
+    refines -- floor 0.0375 (64x48x48x8) -> 0.0618 (96x72x72x16) -> 0.0734 (128x96x96x24) vs MC 0.0794.
+    So it's resolution, not a structural error. The floor tail (rare high-E near-vertical collapse-phase
+    electrons) is the sensitive corner; the defaults here give ~78% floor at moderate cost. FOLLOW-UP:
+    adaptive error-controlled quadrature (concentrate nodes only in the floor-sensitive corner) is the
+    efficient path to full floor accuracy without refining everywhere (advisor's #1 recommendation)."""
+    solid = g['solid']; nx, nz = g['nx'], g['nz']
+    t0, t1 = g['trench0'], g['trench1']
+    cols = np.arange(t0, t1)
+    X, Z, VP, VZ, W = electron_source_quadrature(cols, nx, n_E=n_E, n_ct=n_ct, n_phase=n_phase,
+                                                 n_az=n_az, Te=Te, V_dc=V_dc, V_rf=V_rf)
+    hix, hiz, _, _, _ = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, -1.0, nx, nz,
+                                       int(trace_steps) * nz, trace_dt, trace_dt_field)
+    counts = np.zeros((nx, nz)); m = hix >= 0
+    np.add.at(counts, (hix[m], hiz[m]), W[m])
+    return counts
+
+
 def deterministic_ion_transport(g, Ex, Ez, n_vperp=61, n_phase=96, Te=4.0, Ti=0.5,
                                 V_dc=37.0, V_rf=30.0, trace_dt=0.15, trace_dt_field=0.10,
                                 trace_steps=120):
