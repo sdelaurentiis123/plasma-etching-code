@@ -427,11 +427,22 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    insulator_e_focus=0.0, trace_dt=0.45, trace_dt_field=0.3, trace_steps=40,
                    poisson_step=1.0, charge_update="linear", source_model="heuristic", Ti=0.5,
                    hg_convention=False, rf_bursts=False, burst_dV=2.2,
-                   cell_size_nm=31.25, cap_match_true_um=None, cap_match_rows=3):
+                   cell_size_nm=31.25, cap_match_true_um=None, cap_match_rows=3,
+                   seed_state=None, return_state=False, leak_rate=0.0):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
-    Returns V (potential), per-cell insulator potential, and per-conductor equipotentials."""
+    Returns V (potential), per-cell insulator potential, and per-conductor equipotentials.
+
+    OPT-IN DYNAMIC-COUPLING hooks (both default off; behaviour unchanged when unused):
+      seed_state:   a dict {'Vs','Vc','V','sig_sheet'} from a previous solve on a similar grid, used
+                    to WARM-START this solve (charging_coupled's checkpoint re-solve). Arrays are
+                    seeded only where the shape matches the current grid; mismatched fields are
+                    ignored (a slightly-changed etch front stays close to its predecessor, so the log
+                    current-balance fixed point is reached in far fewer iterations -- see K2).
+      return_state: also return 'state' (the seed_state for the NEXT checkpoint) and 'v_history'
+                    (per-iteration mean insulator potential, for convergence/iteration-count
+                    measurement). Adds a per-iter mean() only; no effect on the physics."""
     if _trace_general is None:
         raise RuntimeError("numba unavailable")
     rng = np.random.default_rng(seed)
@@ -639,6 +650,20 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
 
     use_poisson = field_model == "poisson"
     V = np.zeros((nx, nz))
+    # WARM START (opt-in): seed the potentials/charge from a previous solve on a similar grid so the
+    # log current-balance fixed point is reached in far fewer iterations (dynamic-coupling checkpoint).
+    if seed_state is not None:
+        def _seed(dst, key):
+            src = seed_state.get(key)
+            if src is not None and np.shape(src) == dst.shape:
+                dst[...] = src
+        _seed(Vs, 'Vs'); _seed(V, 'V'); _seed(sig_sheet, 'sig_sheet')
+        sv = seed_state.get('Vc')
+        if sv is not None and np.shape(sv) == Vc.shape:
+            Vc[...] = sv
+        elif sv is not None and np.size(sv) == ncomp:          # stored without the unused index-0 slot
+            Vc[1:] = sv
+    v_history = []       # per-iter mean insulator potential (opt-in convergence trace)
     hist = []
     frames = []          # (iter, V snapshot, Vc snapshot) for the dynamics movie
     vc_tail_sum = np.zeros(ncomp); vs_tail_sum = np.zeros((nx, nz)); tail_n = 0
@@ -759,6 +784,18 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             Vloc = uniform_filter(Vs, size=3, mode="nearest")
             Vs[insul] += sigma * (Vloc[insul] - Vs[insul])   # charge spreads along the surface
             Vs[insul] *= (1.0 - 0.15 * sigma)                # + leaks toward ground (net dissipation)
+        # BASELINE SURFACE LEAKAGE (always-on finite dielectric conductivity, distinct from the cryo
+        # module). Physically real dielectrics have a small dark surface/bulk conductivity, so an
+        # EXTREME differential (deep positive floor vs negative sidewalls) partially relaxes -- this
+        # both CAPS the achievable floor-sidewall potential difference AND, numerically, adds a smooth
+        # restoring slope that CONDITIONS the razor's-edge current-balance fixed point in the near-zero
+        # floor-flux limit (AR>7): without it the balance is a 0/0 of vanishing MC-noisy fluxes and the
+        # equilibrium wanders (the AR15 unstable-fixed-point break). Lateral-only (no ground drain) so
+        # an isolated floor relaxes toward its NEIGHBORS, not spuriously to zero. Opt-in (default 0).
+        if leak_rate > 0.0:
+            from scipy.ndimage import uniform_filter
+            Vlk = uniform_filter(Vs, size=3, mode="nearest")
+            Vs[insul] += float(leak_rate) * (Vlk[insul] - Vs[insul])
         for c in range(1, ncomp + 1):
             m = cid == c
             area = max(int(m.sum()), 1)
@@ -769,6 +806,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                 Vc[c] += scale * float(net[m].sum()) / area
                 Vc[c] = float(np.clip(Vc[c], -3.0 * Te, V_dc + V_rf))
         hist.append((float(si), float(se)))
+        if return_state:                   # cheap per-iter convergence trace (mean insulator potential)
+            v_history.append(float(Vs[insul].mean()) if insul.any() else float(V.mean()))
         if it >= int(0.6 * n_iter):        # accumulate tail for Polyak steady-state average
             vc_tail_sum += Vc[1:]; vs_tail_sum += Vs; tail_n += 1
         if frame_every and (it % frame_every == 0 or it == n_iter - 1):
