@@ -57,6 +57,27 @@ def ion_source_quadrature(cols, nx, n_vperp=21, n_phase=64, Te=4.0, Ti=0.5, V_dc
     return X, Z, np.tile(VP, ncol), np.tile(VZ, ncol), np.tile(W, ncol)
 
 
+def deterministic_ion_transport(g, Ex, Ez, n_vperp=61, n_phase=96, Te=4.0, Ti=0.5,
+                                V_dc=37.0, V_rf=30.0, trace_dt=0.15, trace_dt_field=0.10,
+                                trace_steps=120):
+    """Charged deterministic ion transport: the quadrature fan integrated through the ACTUAL field
+    (Ex, Ez) -- trajectories bend. Drop-in for charging_general.trace('ion', ...), but noise-free and
+    WEIGHTED. Returns (counts, energy) grids [per-column-normalized: each trench column emits weight 1].
+    Same _trace_general kernel and same Boris-style push as the MC path, so identical physics."""
+    solid = g['solid']; nx, nz = g['nx'], g['nz']
+    t0, t1 = g['trench0'], g['trench1']
+    cols = np.arange(t0, t1)
+    X, Z, VP, VZ, W = ion_source_quadrature(cols, nx, n_vperp=n_vperp, n_phase=n_phase,
+                                            Te=Te, Ti=Ti, V_dc=V_dc, V_rf=V_rf)
+    hix, hiz, E, _, _ = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, 1.0, nx, nz,
+                                       int(trace_steps) * nz, trace_dt, trace_dt_field)
+    counts = np.zeros((nx, nz)); energy = np.zeros((nx, nz))
+    m = hix >= 0
+    np.add.at(counts, (hix[m], hiz[m]), W[m])
+    np.add.at(energy, (hix[m], hiz[m]), W[m] * E[m])
+    return counts, energy
+
+
 def deterministic_arrival(g, n_vperp=21, n_phase=64):
     """Field-free floor arrival (Q denominator) from the deterministic ion quadrature. Same estimand
     as charging_general MC arrival, but noise-free. Straight-line rays (E=0), same _trace_general."""
