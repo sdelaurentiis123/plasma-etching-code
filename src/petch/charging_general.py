@@ -429,7 +429,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    hg_convention=False, rf_bursts=False, burst_dV=2.2,
                    cell_size_nm=31.25, cap_match_true_um=None, cap_match_rows=3,
                    seed_state=None, return_state=False, leak_rate=0.0,
-                   transport="mc", det_cols=None, preint_floor=False, preint_geom=None):
+                   transport="mc", det_cols=None, preint_floor=False, preint_geom=None,
+                   picard_beta=0.25):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -655,7 +656,15 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                                                 trace_steps=trace_steps)
                 gg = preint_geom
                 fzz = int(np.where(gg['floor_trench_mask'].any(axis=0))[0].max())
-                counts[gg['trench0'] + 4:gg['trench1'] - 4, fzz] = Pacc * scale
+                # Set the band TOTAL from preint (accurate), but keep the tensor's per-cell SHAPE.
+                # A flat top-hat (band mean into every cell) feeds the PER-CELL balance dV=Te*ln(ci/ce)
+                # a wrong profile: fine at low AR (flat true profile) but at high AR the floor flux is
+                # field-FOCUSED (center-peaked), and flattening it lowers band-mean V by Te*ln(AM/GM)
+                # via Jensen -- the deep-AR non-monotone-floor bug. Tensor counts resolve the shape.
+                b0e, b1e = gg['trench0'] + 4, gg['trench1'] - 4
+                band = counts[b0e:b1e, fzz]; tot = float(band.sum()); nb = band.size
+                shape = band / tot if tot > 0 else np.full(nb, 1.0 / nb)
+                counts[b0e:b1e, fzz] = (Pacc * nb) * scale * shape
             return (counts, float(surv.mean()), energy) if want_energy else (counts, float(surv.mean()))
         if source_model == "sheath" or (source_model == "hybrid" and kind == "ion"):
             # "sheath": both species derived. "hybrid": derived ions (instantaneous crossing is exact
@@ -816,6 +825,16 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             # electrons (~top of the Maxwellian tail, 10*Te; P(E>10Te)~2e-3). Prevents the early
             # large-step phase from freezing shadowed corner cells at unreachably deep potentials.
             np.clip(Vs, -10.0 * Te, V_dc + V_rf, out=Vs)
+        elif charge_update == "picard":
+            # DAMPED PICARD (deep-AR robust, per advisor): small FIXED-fraction step on the balance
+            # residual -- no Anderson (whose CLIPPED-residual history poisons at a shaded deep floor
+            # where Gamma_e ~ exp(V/Te) is exponentially small) and no tight +/-2Te clip (which makes
+            # the stiff Gamma_e(V) branch overshoot/ring). Slow but robustly climbs to the physical
+            # saturated branch from a cold start. dV = Te*ln(ci/ce); step beta*dV, physical bound only.
+            eps_c = 0.5
+            dV = Te * np.log((ci[insul] + eps_c) / (ce[insul] + eps_c))
+            Vs[insul] += picard_beta * dV
+            np.clip(Vs, -10.0 * Te, V_dc + V_rf, out=Vs)
         elif charge_update == "anderson":
             # ANDERSON ACCELERATION -- the SCF root-solve. Deterministic transport removes the MC noise
             # that was accidentally DAMPING the naive log relaxation, so plain relaxation OSCILLATES
@@ -867,9 +886,9 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         for c in range(1, ncomp + 1):
             m = cid == c
             area = max(int(m.sum()), 1)
-            if charge_update in ("log", "anderson"):
+            if charge_update in ("log", "anderson", "picard"):
                 dVc = Te * np.log((float(ci[m].sum()) + 0.5) / (float(ce[m].sum()) + 0.5))
-                Vc[c] += anneal * float(np.clip(dVc, -2.0 * Te, 2.0 * Te))
+                Vc[c] += (picard_beta if charge_update == "picard" else anneal) * float(np.clip(dVc, -2.0 * Te, 2.0 * Te))
             else:
                 Vc[c] += scale * float(net[m].sum()) / area
                 Vc[c] = float(np.clip(Vc[c], -3.0 * Te, V_dc + V_rf))
