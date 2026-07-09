@@ -6,11 +6,10 @@ Operating model for the petch build loop.
 - **Opus (orchestrator + executor)** — owns git/gates/decisions and does the primary coding.
   Dispatches Opus sub-agents for heavy or parallel builds. Reviews all results critically before
   committing. This is the default actor.
-- **Fable (advisor)** — used SPARINGLY, only for a genuinely blocking/important question (a hard
-  scoping call, a plan that could waste real effort, a surprising result that needs a second mind).
-  Opus decides most things itself. The user launches most Fable consults; Opus invokes it only when
-  truly needed to unblock. Rules for Fable: high-level analysis only, **concise**, **no web search**,
-  no strenuous code. Output is a recommendation, not a deliverable.
+- **Fable (advisor)** — **launched by the USER only.** Opus does NOT spawn Fable sessions. Opus does
+  its own analysis/scoping and, when it genuinely needs a second mind, asks the user to launch a Fable
+  consult. When the user does provide Fable input, it's high-level advice, not a deliverable.
+- **Opus executors are the ONLY sub-agents Opus spawns** (`model: opus`), and only for execution.
 - **Opus executors** — sub-agents (`model: opus`) for delegated builds. Brief them with: exact
   file targets, a two-sided/quantitative GATE (PASS/fail), the paid-for pitfalls, foreground
   polling for long runs (do NOT rely on background re-invocation), and commit-local-don't-push.
