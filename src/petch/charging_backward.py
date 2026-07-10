@@ -125,8 +125,10 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
             E_surf = E_top + Vc
             m = np.sqrt(np.maximum(np.minimum(E_top, E_surf), 0.0))          # |vperp| cap
             ct = np.sqrt(u[:, 1]); st = np.sqrt(np.maximum(1.0 - ct * ct, 0.0))
-            sgn = np.where(u[:, 2] < 0.5, 1.0, -1.0)
-            vperp_nat = np.sqrt(E_top) * st * sgn
+            az = u[:, 2] * (2.0 * np.pi)                          # azimuth: cos(az) projects v_perp into
+            vperp_nat = np.sqrt(E_top) * st * np.cos(az)          # the 2D x-z plane (matches the forward
+            # source, charging_general.py:353-356). Omitting it (full |v_perp| in-plane) over-broadens the
+            # electron angular dist -> over-shadows the floor -> floor over-charges, worse with AR.
             if cone is not None:
                 sq = np.sqrt(np.maximum(E_surf, 0.0))
                 a = sq * np.sin(cone[0]); b = sq * np.sin(cone[1])
@@ -144,7 +146,11 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
                              1.0 / (1.0 - a_mix))
             else:
                 vperp = vperp_nat; w = np.ones(N)
-            vz2 = E_surf - vperp * vperp
+            # normal-energy retardation from the POLAR angle (vz_surf^2 = E_top*ct^2 + Vc), decoupled
+            # from the transverse cos(az) projection -- the two must be separate (Langmuir-exact + correct
+            # angular width). Old code conflated them via vz2=E_surf-vperp^2, which only worked because it
+            # also (wrongly) used the full |v_perp| in-plane.
+            vz2 = E_top * ct * ct + Vc
             valid = (E_surf > 0.0) & (vz2 > 0.0)
             vz_surf = np.sqrt(np.maximum(vz2, 0.0))
             vX = vperp; vZ = -vz_surf
@@ -155,6 +161,9 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
                                                         msteps, trace_dt, trace_dt_field)
             escaped = (hix < 0) & (surv < 0.5) & emit
             ratio = vdotn / np.maximum(np.abs(vZ), 0.3)
+            # NOTE: a naive score-at-exit reweight |vz_exit|/|vz_implied| amplifies the tracer's dt energy
+            # error for barely-escaping electrons on POSITIVE surfaces (the floor) -> worsens it. The
+            # unbiased adjoint reweight needs both species + energy-robust exit velocity; deferred.
             vals.append(float((w * escaped * ratio).sum()) / N)
         out[ci] = float(np.mean(vals))
     return out
@@ -228,7 +237,7 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
 
 
 def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=10, n_scramble=2,
-                             n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=True):
+                             n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=False):
     """Self-consistent BACKWARD charging solve: Laplace field <-> per-cell gathers <-> damped update
     dV = beta*Te*ln(k*Gi/Ge), where k=Ci/Ce is calibrated each iteration on the floating pillar tops.
     NO forward launch, NO per-region overrides -- the electron-shading dipole EMERGES. Deterministic,
@@ -242,16 +251,22 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
     t0, t1 = g['trench0'], g['trench1']; r0, r1 = int(g['mouth']), int(g['z_poly0']); fz = nz - 1
     cond = g['cond']; gas = ~solid
     red = (np.add.outer(np.arange(nx), np.arange(nz)) % 2 == 0)
-    cells, normals, kind, comp = [], [], [], []
-    wrows = np.linspace(r0 + 1, r1 - 2, n_wall).astype(int)
-    for z in wrows:
-        cells.append((t0 - 1, int(z))); normals.append((1.0, 0.0)); kind.append('Lwall'); comp.append(0)
-        cells.append((t1, int(z))); normals.append((-1.0, 0.0)); kind.append('Rwall'); comp.append(0)
+    # DENSE surface state: solve EVERY gas-facing insulator cell (per-cell float), so the field is never
+    # pinned at 0 V between collocation points (the sparse-solve field-corruption artifact). Observables
+    # then average the real solved field, convention-independently.
+    ic0, inn0 = _gas_faces(solid, solid & (cond == 0))
+    # keep only PHYSICAL trench-facing faces: the gas neighbor must be inside the trench gap [t0,t1) or
+    # above the mouth. This drops the finite-array pillars' OUTER faces (facing the open-area simulation
+    # boundary -- an array-edge artifact, not a real neighboring feature).
+    cells = []; normals = []; kind = []; comp = []
+    for (cx, cz), (nnx, nnz) in zip(ic0, inn0):
+        gx = cx + int(nnx); gz = cz + int(nnz)
+        if not ((t0 <= gx < t1) or gz <= r0):
+            continue
+        cells.append((cx, cz)); normals.append((float(nnx), float(nnz))); comp.append(0)
+        kind.append('floor' if cz == fz else ('mask' if cz <= r0 else 'wall'))
+    wrows = np.linspace(r0 + 1, r1 - 2, n_wall).astype(int)      # display sampling of the wall profile
     fcols = np.linspace(t0 + 2, t1 - 3, n_floor).astype(int)
-    for x in fcols:
-        cells.append((int(x), fz)); normals.append((0.0, -1.0)); kind.append('floor'); comp.append(0)
-    for x in (g['edge0'] + 2, g['neigh1'] - 3):
-        cells.append((int(x), r0)); normals.append((0.0, -1.0)); kind.append('mask'); comp.append(0)
     # floating POLY conductors: pool the current over the TRENCH-FACING inner faces (the physical notch
     # surfaces). NOT the pillar's outer face -- in this finite edge-array that face borders the open-area
     # simulation boundary (an array-edge artifact), and pooling it floats the poly the wrong way
@@ -318,9 +333,9 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
                                     n_scramble=n_scramble, seed=seed, aperture=aperture, want_energy=True)
     fmask = Gi_f > 1e-6
     E_defl = float(np.sum(E_f[fmask] * Gi_f[fmask]) / max(np.sum(Gi_f[fmask]), 1e-9)) if fmask.any() else 0.0
-    # floor_mean over the SOLVED cells (fcols) -- the backward solver is sparse (only sampled cells are
-    # updated), so averaging the full _extract band would include un-updated (0 V) cells.
-    floor_mean = float(Vs[fcols, fz].mean())
+    # floor_mean over the full _extract band (t0+4:t1-4) -- valid now that the state is DENSE (every
+    # floor cell solved), so this is convention-independent and matches the forward _extract exactly.
+    floor_mean = float(Vs[t0 + 4:t1 - 4, fz].mean())
     return dict(Vs=Vs, V=V, Ex=Ex, Ez=Ez, wall_rows=wrows, wall_depth=wrows - r0, Lwall=Vs[t0 - 1, wrows],
                 Rwall=Vs[t1, wrows], floor=Vs[fcols, fz], floor_mean=floor_mean, k=1.0,
                 V_poly=float(0.5 * (vc[1] + vc[2])), Vc=vc.copy(),
