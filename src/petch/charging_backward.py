@@ -56,6 +56,27 @@ def _cone_angles(x0, z0, aperture, pad):
     return th_lo, th_hi
 
 
+def _gas_faces(solid, target_mask, subsample=None):
+    """Enumerate every gas-facing face of the target_mask solid cells: returns (cells, normals) where the
+    outward normal points into the adjacent gas. A corner cell contributes one face per exposed side.
+    General (any geometry); used to pool a floating conductor's current over its FULL surface. Optional
+    even subsample keeps the pooled-current estimate cheap on long faces."""
+    nx, nz = solid.shape; gas = ~solid
+    cells, normals = [], []
+    for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        sh = np.zeros_like(gas)
+        i0 = max(dx, 0); i1 = nx + min(dx, 0); j0 = max(dz, 0); j1 = nz + min(dz, 0)
+        sh[i0 - dx:i1 - dx, j0 - dz:j1 - dz] = gas[i0:i1, j0:j1]        # gas shifted opposite the normal
+        face = target_mask & sh
+        ii, jj = np.where(face)
+        for i, j in zip(ii, jj):
+            cells.append((int(i), int(j))); normals.append((float(dx), float(dz)))
+    if subsample is not None and len(cells) > subsample:
+        idx = np.linspace(0, len(cells) - 1, subsample).astype(int)
+        cells = [cells[i] for i in idx]; normals = [normals[i] for i in idx]
+    return cells, normals
+
+
 def _draw_absmass(lo, hi, u):
     """Vectorized inverse-CDF of the density ~|v| on the signed interval [lo,hi] (lo<hi), plus its mass
     M = int_lo^hi |v'| dv'. Handles single-sign and straddling-0 intervals. Returns (v, M)."""
@@ -231,9 +252,11 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
         cells.append((int(x), fz)); normals.append((0.0, -1.0)); kind.append('floor'); comp.append(0)
     for x in (g['edge0'] + 2, g['neigh1'] - 3):
         cells.append((int(x), r0)); normals.append((0.0, -1.0)); kind.append('mask'); comp.append(0)
-    # floating POLY (conductor) inner sidewall faces [z_poly0:fz]: equipotential, each floats to its own
-    # current balance -> the HG V_poly (grounding the poly compressed the potential range + inflated the
-    # foot ion energy). Left poly = edge pillar (cond 1), right = neigh pillar (cond 2).
+    # floating POLY conductors: pool the current over the TRENCH-FACING inner faces (the physical notch
+    # surfaces). NOT the pillar's outer face -- in this finite edge-array that face borders the open-area
+    # simulation boundary (an array-edge artifact), and pooling it floats the poly the wrong way
+    # (empirically worse). In a real dense line/space array every poly face is trench-facing; _gas_faces
+    # restricted to trench-side normals is the general rule. cond 1 = edge pillar, cond 2 = neigh pillar.
     prows = np.linspace(r1 + 1, fz - 1, max(n_wall // 2, 4)).astype(int)
     for z in prows:
         cells.append((t0 - 1, int(z))); normals.append((1.0, 0.0)); kind.append('Lpoly'); comp.append(1)
