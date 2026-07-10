@@ -415,6 +415,39 @@ def sample_electrons(n, rng, nx, Te, cos_power=1.0, iso=False, flux_power=None):
     return x, z, vx, vz
 
 
+def _apply_vf_supply(ce, vfb, thr, vf_grid, ntot, nx, preint_floor, preint_geom):
+    """PHYSICAL-MAGNITUDE sky-view electron supply for shadowed walls.
+
+    The sky-view factor `vf_grid` is a GEOMETRIC (unretarded) electron flux: it counts the fraction
+    of the plasma hemisphere a surface cell can see, but NOT the sheath barrier that makes electrons
+    exponentially rare. Feeding it at a fixed count constant (n/nx OR n/ncols) is therefore wrong in
+    MAGNITUDE -- n/ncols over-charges every exposed cell ~13x (walls slam negative -> over-repel the
+    floor -> all AR saturate); n/nx under-supplies vs the deterministic ion counts (walls stay
+    positive -> deep-AR floor under-charges). The convention-independent PHYSICAL magnitude is the
+    TRACED electrons' own scale: on the well-sampled upper walls (vf>0.3) the traced flux `ce` is
+    trustworthy, so
+
+        alpha = sum(ce) / sum(vf*thr)   over vf>0.3, ce>0     [electron flux per unit view factor]
+
+    sets the retarded per-view-factor flux, and ce_vf = alpha*vf*thr EXTRAPOLATES it by geometry into
+    the under-sampled shadowed walls. This forms the physical upper-wall dipole (~ -2..-18 V, matching
+    the frozen-field Vf-sweep) whose focusing then yields the AR-dependent floor automatically, with NO
+    count-scale over-charge and NO AR tuning. The deep FLOOR band stays owned by the retarded preint
+    estimator (excluded here) -- the sky-view over-counts a deep floor's thin up-trench sky sliver."""
+    vft = vfb * thr
+    calm = (vf_grid > 0.3) & (ce > 0.0)              # well-exposed, well-sampled anchor (upper walls/mouth)
+    if calm.any():
+        alpha = float(ce[calm].sum()) / max(float(vft[calm].sum()), 1e-9)
+    else:
+        alpha = float(ntot) / nx                     # fallback: physical per-column plasma flux
+    ce_vf = alpha * vft
+    if preint_floor and preint_geom is not None:
+        gg = preint_geom
+        fzz = int(np.where(gg['floor_trench_mask'].any(axis=0))[0].max())
+        ce_vf[gg['trench0'] + 4:gg['trench1'] - 4, fzz] = 0.0
+    return np.maximum(ce, ce_vf)
+
+
 def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    n_per_iter=6000, n_iter=200, relax=None, seed=0,
                    insul_vguard=None, verbose=False,
@@ -787,7 +820,8 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             ce, se = trace("electron", n_per_iter, Ex, Ez)
             if vf_grid is not None:
                 vfb = vf_grid * np.where(vf_grid > 0.18, open_wall_boost, 1.0)
-                ce = np.maximum(ce, (float(n_per_iter) / nx) * vfb * thr)
+                ce = _apply_vf_supply(ce, vfb, thr, vf_grid, n_per_iter, nx,
+                                      preint_floor, preint_geom)
         # deep CONDUCTOR sidewalls (the neighbour line) are geometrically shadowed to ~0.03 electron
         # flux (HG Fig 3 poly-inner); the down-going trace over-delivers. Suppressing it lets the
         # starved line's current balance rise toward its true +39 V. conductor_e_factor<1 tests this.
@@ -942,8 +976,9 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         ce_geom = None
         if vf_grid is not None:
             vfb = vf_grid * np.where(vf_grid > 0.18, open_wall_boost, 1.0)
-            ce_geom = (float(ntot) / nx) * vfb * thr   # analytic sky-view floor (geometric shadowing)
-            ce_f = np.maximum(ce_f, ce_geom)
+            ce_f = _apply_vf_supply(ce_f, vfb, thr, vf_grid, ntot, nx,
+                                    preint_floor, preint_geom)
+            ce_geom = ce_f   # diagnostic: electron field after the physical sky-view supply
         if insulator_e_focus > 0.0:            # same electrostatic anti-shadowing as the loop (insulator-only)
             ce_f = ce_f.copy()
             ce_f[insul] *= (1.0 + float(insulator_e_focus) * np.maximum(Vcell[insul], 0.0))
