@@ -141,7 +141,7 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
 
 def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0,
                         n_log2=13, n_scramble=3, trace_dt=0.15, trace_dt_field=0.10, trace_steps=200,
-                        seed=0, aperture=None, pad_deg=3.0, alpha=0.85):
+                        seed=0, aperture=None, pad_deg=3.0, alpha=0.85, want_energy=False):
     """Backward ion flux per cell (fraction of incident ion flux; open flat V=0 -> 1).
 
     Incident ion (matches sample_sheath_source): phase -> Vs=V_dc+V_rf*sin (arcsine IED, weight
@@ -155,12 +155,13 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
     sig = np.sqrt(0.5 * Ti)
     pad = np.deg2rad(pad_deg)
     out = np.zeros(len(cells))
+    out_E = np.zeros(len(cells))                                     # flux-weighted mean impact energy [eV]
     for ci, ((cx, cz), (nnx, nnz)) in enumerate(zip(cells, normals)):
         Vc = float(V_surf[cx, cz])
         x0c = cx + 1.5 * nnx; z0c = cz + 1.5 * nnz
         cone = _cone_angles(x0c, z0c, aperture, pad)
         a_mix = alpha if cone is not None else 0.0
-        vals = []
+        vals = []; evals = []
         for sc in range(n_scramble):
             s = qmc.Sobol(d=4, scramble=True, seed=seed + sc)
             u = s.random_base2(n_log2)
@@ -194,9 +195,15 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
                                                         msteps, trace_dt, trace_dt_field)
             escaped = (hix < 0) & (surv < 0.5) & emit
             ratio = vdotn / np.maximum(np.abs(vZ), 0.3)
-            vals.append(float((w * wied * escaped * ratio).sum() / wied.sum()))
+            fnum = w * wied * escaped * ratio                        # per-sample flux contribution
+            vals.append(float(fnum.sum() / wied.sum()))
+            if want_energy:
+                E_impact = vperp * vperp + E_surf_z                  # total KE at the surface [eV]
+                evals.append(float((fnum * E_impact).sum() / max(fnum.sum(), 1e-12)))
         out[ci] = float(np.mean(vals))
-    return out
+        if want_energy:
+            out_E[ci] = float(np.mean(evals)) if evals else 0.0
+    return (out, out_E) if want_energy else out
 
 
 def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=10, n_scramble=2,
@@ -214,24 +221,31 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
     t0, t1 = g['trench0'], g['trench1']; r0, r1 = int(g['mouth']), int(g['z_poly0']); fz = nz - 1
     cond = g['cond']; gas = ~solid
     red = (np.add.outer(np.arange(nx), np.arange(nz)) % 2 == 0)
-    cells, normals, kind = [], [], []
+    cells, normals, kind, comp = [], [], [], []
     wrows = np.linspace(r0 + 1, r1 - 2, n_wall).astype(int)
     for z in wrows:
-        cells.append((t0 - 1, int(z))); normals.append((1.0, 0.0)); kind.append('Lwall')
-        cells.append((t1, int(z))); normals.append((-1.0, 0.0)); kind.append('Rwall')
+        cells.append((t0 - 1, int(z))); normals.append((1.0, 0.0)); kind.append('Lwall'); comp.append(0)
+        cells.append((t1, int(z))); normals.append((-1.0, 0.0)); kind.append('Rwall'); comp.append(0)
     fcols = np.linspace(t0 + 2, t1 - 3, n_floor).astype(int)
     for x in fcols:
-        cells.append((int(x), fz)); normals.append((0.0, -1.0)); kind.append('floor')
+        cells.append((int(x), fz)); normals.append((0.0, -1.0)); kind.append('floor'); comp.append(0)
     for x in (g['edge0'] + 2, g['neigh1'] - 3):
-        cells.append((int(x), r0)); normals.append((0.0, -1.0)); kind.append('mask')
-    kind = np.array(kind)
+        cells.append((int(x), r0)); normals.append((0.0, -1.0)); kind.append('mask'); comp.append(0)
+    # floating POLY (conductor) inner sidewall faces [z_poly0:fz]: equipotential, each floats to its own
+    # current balance -> the HG V_poly (grounding the poly compressed the potential range + inflated the
+    # foot ion energy). Left poly = edge pillar (cond 1), right = neigh pillar (cond 2).
+    prows = np.linspace(r1 + 1, fz - 1, max(n_wall // 2, 4)).astype(int)
+    for z in prows:
+        cells.append((t0 - 1, int(z))); normals.append((1.0, 0.0)); kind.append('Lpoly'); comp.append(1)
+        cells.append((t1, int(z))); normals.append((-1.0, 0.0)); kind.append('Rpoly'); comp.append(2)
+    kind = np.array(kind); comp = np.array(comp)
     clist = [tuple(c) for c in cells]; nlist = [tuple(n) for n in normals]
-    Vs = np.zeros((nx, nz))
+    Vs = np.zeros((nx, nz)); vc = np.zeros(3)               # vc[1],vc[2] = floating poly potentials
 
     def laplace(Vsurf, omega=1.9):
         V = np.zeros((nx, nz)); ins = solid & (cond == 0); condm = solid & (cond > 0)
         def bc(V):
-            V[:, 0] = 0.0; V[condm] = 0.0; V[ins] = Vsurf[ins]; return V
+            V[:, 0] = 0.0; V[condm] = Vsurf[condm]; V[ins] = Vsurf[ins]; return V
         for _ in range(sweeps):
             V = bc(V)
             for color in (red, ~red):
@@ -244,6 +258,8 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
 
     aperture = (t0, t1, r0) if cone_is else None
     for it in range(n_iter):
+        for c in (1, 2):
+            Vs[cond == c] = vc[c]                            # broadcast floating poly potential onto its body
         V = laplace(Vs); Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
         Ge = backward_electron_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
                                       n_scramble=n_scramble, seed=seed, aperture=aperture)
@@ -252,7 +268,30 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
         m = kind == 'mask'
         k = float(np.mean(Ge[m]) / max(np.mean(Gi[m]), 1e-6))
         dV = np.clip(beta * Te * np.log((k * Gi + 1e-6) / (Ge + 1e-6)), -dVmax, dVmax)
-        for (cx, cz), d in zip(clist, dV):
-            Vs[cx, cz] += d
-    return dict(Vs=Vs, wall_rows=wrows, wall_depth=wrows - r0, Lwall=Vs[t0 - 1, wrows],
-                Rwall=Vs[t1, wrows], floor=Vs[fcols, fz], floor_mean=float(Vs[fcols, fz].mean()), k=k)
+        for i, (cx, cz) in enumerate(clist):
+            if comp[i] == 0:                                 # insulator: per-cell update
+                Vs[cx, cz] += dV[i]
+        for c in (1, 2):                                     # poly: POOLED equipotential current balance
+            sel = comp == c
+            if sel.any():
+                dVc = np.clip(beta * Te * np.log((k * Gi[sel].sum() + 1e-6) / (Ge[sel].sum() + 1e-6)),
+                              -dVmax, dVmax)
+                vc[c] += dVc
+    # final field + notch-driver observable E_defl (flux-weighted ion impact energy on the poly-inner
+    # sidewall foot = the deflected-ion notch driver, HG _extract convention).
+    for c in (1, 2):
+        Vs[cond == c] = vc[c]
+    V = laplace(Vs); Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
+    zp = int(g['z_poly0'])
+    foot_h = max(int(0.3 * (t1 - t0)), 3)                  # HG foot band: within 0.3*W of the floor
+    fz0 = max(zp + 1, fz - foot_h)
+    foot = [(t0 - 1, int(z)) for z in np.arange(fz0, fz)]  # poly-inner face near the poly/oxide junction
+    fn = [(1.0, 0.0)] * len(foot)
+    Gi_f, E_f = backward_ion_gather(solid, Ex, Ez, Vs, foot, fn, Te=Te, n_log2=n_log2 + 1,
+                                    n_scramble=n_scramble, seed=seed, aperture=aperture, want_energy=True)
+    fmask = Gi_f > 1e-6
+    E_defl = float(np.sum(E_f[fmask] * Gi_f[fmask]) / max(np.sum(Gi_f[fmask]), 1e-9)) if fmask.any() else 0.0
+    return dict(Vs=Vs, V=V, Ex=Ex, Ez=Ez, wall_rows=wrows, wall_depth=wrows - r0, Lwall=Vs[t0 - 1, wrows],
+                Rwall=Vs[t1, wrows], floor=Vs[fcols, fz], floor_mean=float(Vs[fcols, fz].mean()), k=k,
+                V_poly=float(0.5 * (vc[1] + vc[2])), Vc=vc.copy(),
+                E_defl=E_defl, foot_flux=float(Gi_f[fmask].mean()) if fmask.any() else 0.0)
