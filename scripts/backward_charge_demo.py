@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 from petch.charging2d import _build_edge_array_geometry
 from petch.charging_backward import self_consistent_backward
 
-for AR in (4.0, 8.0, 15.0):
+for AR in (4.0, 8.0, 15.0, 30.0):                      # NEE cone importance sampling reaches AR30
     g = _build_edge_array_geometry(AR, W=16, mouth=80)
     r = self_consistent_backward(g, n_iter=14)
     print(f"\nAR{AR:g}  (floor mean = {r['floor_mean']:+.1f} V,  k=Ci/Ce={r['k']:.2f})")

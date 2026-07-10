@@ -36,89 +36,171 @@ from scipy.stats import qmc, gamma as gammadist, norm
 from .charging_general import _trace_general
 
 
+def _cone_angles(x0, z0, aperture, pad):
+    """Angular interval (theta_lo, theta_hi) from vertical subtended by the trench-mouth aperture at the
+    launch point (x0,z0), padded by `pad` rad each edge. NEE-style importance-sampling proposal for the
+    deep-cell escape cone (~1/AR). Returns None (=> natural sampling) if no aperture or the cell is at/
+    above the mouth (dz<=2), which keeps mask/flat cells -- the k-calibration anchor -- on the exact
+    natural path and preserves Gate B."""
+    if aperture is None:
+        return None
+    t0a, t1a, r0a = aperture
+    dz = z0 - r0a
+    if dz <= 2.0:
+        return None
+    lim = 0.5 * np.pi - 1e-3
+    th_lo = max(np.arctan2(t0a - x0, dz) - pad, -lim)
+    th_hi = min(np.arctan2(t1a - x0, dz) + pad, lim)
+    if th_hi <= th_lo + 1e-6:
+        return None
+    return th_lo, th_hi
+
+
+def _draw_absmass(lo, hi, u):
+    """Vectorized inverse-CDF of the density ~|v| on the signed interval [lo,hi] (lo<hi), plus its mass
+    M = int_lo^hi |v'| dv'. Handles single-sign and straddling-0 intervals. Returns (v, M)."""
+    loc = np.minimum(lo, 0.0); hic = np.maximum(hi, 0.0)
+    mass_neg = np.where(lo < 0.0, 0.5 * (lo * lo - np.minimum(hi, 0.0) ** 2), 0.0)
+    mass_pos = np.where(hi > 0.0, 0.5 * (hi * hi - np.maximum(lo, 0.0) ** 2), 0.0)
+    M = mass_neg + mass_pos
+    t = u * M
+    neg = (t < mass_neg) & (mass_neg > 0.0)
+    v_neg = -np.sqrt(np.maximum(lo * lo - 2.0 * t, 0.0))
+    tp = t - mass_neg
+    v_pos = np.sqrt(np.maximum(np.maximum(lo, 0.0) ** 2 + 2.0 * tp, 0.0))
+    v = np.where(neg, v_neg, v_pos)
+    return v, M
+
+
 def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
                              n_log2=13, n_scramble=3, trace_dt=0.15, trace_dt_field=0.10,
-                             trace_steps=200, seed=0):
+                             trace_steps=200, seed=0, aperture=None, pad_deg=6.0, alpha=0.85):
     """Backward electron flux per cell (fraction of incident electron flux; open flat V=0 -> 1).
 
     Incident-energy sampling: E_top ~ Gamma(2,Te) flux-Maxwellian, Lambert cos-flux angle about
     vertical, transverse conserved. E_surf = E_top + Vc (electron); needs E_top*ct^2 > |Vc| to sit on a
     negative wall -> retardation automatic; on a positive floor E_surf>0 always -> saturated, no blowup.
-    Flux factor (v.n_cell)/(v.z_surf): =1 on the floor (preserves the Langmuir law), <<1 on walls."""
+    Flux factor (v.n_cell)/(v.z_surf): =1 on the floor (preserves the Langmuir law), <<1 on walls.
+
+    aperture=(t0,t1,r0): enables NEE-style escape-cone importance sampling (mixture of cone + broad
+    natural) -> resolves the deep-cell 1/AR escape cone at high AR. UNBIASED (weight w=f_nat/q_mix); the
+    broad stratum captures field-focused escapers outside the geometric cone. aperture=None -> exact
+    natural sampling (Gate B / calibration path, bit-identical)."""
     nx, nz = solid.shape
     msteps = int(trace_steps) * nz
     N = 2 ** n_log2
+    pad = np.deg2rad(pad_deg)
     out = np.zeros(len(cells))
     for ci, ((cx, cz), (nnx, nnz)) in enumerate(zip(cells, normals)):
         Vc = float(V_surf[cx, cz])
+        x0c = cx + 1.5 * nnx; z0c = cz + 1.5 * nnz
+        cone = _cone_angles(x0c, z0c, aperture, pad)
+        a_mix = alpha if cone is not None else 0.0
         vals = []
         for sc in range(n_scramble):
-            s = qmc.Sobol(d=3, scramble=True, seed=seed + sc)
+            s = qmc.Sobol(d=5, scramble=True, seed=seed + sc)
             u = s.random_base2(n_log2)
             E_top = gammadist.ppf(u[:, 0], a=2.0, scale=Te)
+            E_surf = E_top + Vc
+            m = np.sqrt(np.maximum(np.minimum(E_top, E_surf), 0.0))          # |vperp| cap
             ct = np.sqrt(u[:, 1]); st = np.sqrt(np.maximum(1.0 - ct * ct, 0.0))
             sgn = np.where(u[:, 2] < 0.5, 1.0, -1.0)
-            spd = np.sqrt(E_top)
-            vperp = spd * st * sgn
-            E_surf = E_top + Vc
+            vperp_nat = np.sqrt(E_top) * st * sgn
+            if cone is not None:
+                sq = np.sqrt(np.maximum(E_surf, 0.0))
+                a = sq * np.sin(cone[0]); b = sq * np.sin(cone[1])
+                lo = np.minimum(a, b); hi = np.maximum(a, b)
+                if nnx > 0:   lo = np.maximum(lo, 0.0)                        # left wall: emit vperp>0
+                elif nnx < 0: hi = np.minimum(hi, 0.0)                        # right wall: emit vperp<0
+                lo = np.clip(lo, -m, m); hi = np.clip(hi, -m, m)
+                cone_ok = hi > lo + 1e-9
+                vcone, Mcone = _draw_absmass(lo, hi, u[:, 4])
+                Pcone = np.where(cone_ok, Mcone / np.maximum(E_top, 1e-12), 0.0)
+                use_cone = (u[:, 3] < a_mix) & cone_ok
+                vperp = np.where(use_cone, vcone, vperp_nat)
+                in_cone = cone_ok & (vperp >= lo) & (vperp <= hi)
+                w = np.where(in_cone, 1.0 / (a_mix / np.maximum(Pcone, 1e-12) + (1.0 - a_mix)),
+                             1.0 / (1.0 - a_mix))
+            else:
+                vperp = vperp_nat; w = np.ones(N)
             vz2 = E_surf - vperp * vperp
             valid = (E_surf > 0.0) & (vz2 > 0.0)
             vz_surf = np.sqrt(np.maximum(vz2, 0.0))
             vX = vperp; vZ = -vz_surf
             vdotn = vX * nnx + vZ * nnz
             emit = valid & (vdotn > 0.0)
-            x0 = np.full(N, cx + 1.5 * nnx); z0 = np.full(N, cz + 1.5 * nnz)
+            x0 = np.full(N, x0c); z0 = np.full(N, z0c)
             hix, hiz, _, _, surv, _, _ = _trace_general(Ex, Ez, solid, x0, z0, vX, vZ, -1.0, nx, nz,
                                                         msteps, trace_dt, trace_dt_field)
             escaped = (hix < 0) & (surv < 0.5) & emit
             ratio = vdotn / np.maximum(np.abs(vZ), 0.3)
-            vals.append(float((escaped * ratio).sum()) / N)
+            vals.append(float((w * escaped * ratio).sum()) / N)
         out[ci] = float(np.mean(vals))
     return out
 
 
 def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0,
                         n_log2=13, n_scramble=3, trace_dt=0.15, trace_dt_field=0.10, trace_steps=200,
-                        seed=0):
+                        seed=0, aperture=None, pad_deg=3.0, alpha=0.85):
     """Backward ion flux per cell (fraction of incident ion flux; open flat V=0 -> 1).
 
     Incident ion (matches sample_sheath_source): phase -> Vs=V_dc+V_rf*sin (arcsine IED, weight
     Vs^-0.35), vz_in=sqrt(0.5 Te+Vs), transverse vperp~N(0,sqrt(0.5 Ti)). Near-VERTICAL in the lab
     frame, so v.n>0 on a wall selects only the grazing tail. E_surf_z = 0.5 Te+Vs-Vc; E_surf_z<0 =>
     reflected (floor repels the low-IED-horn = retardation). Flux factor (v.n_cell)/(v.z_surf) suppresses
-    grazing ions on vertical walls."""
+    grazing ions on vertical walls. aperture -> escape-cone importance sampling (truncated-normal in the
+    cone + broad, unbiased); aperture=None -> exact natural sampling."""
     nx, nz = solid.shape
     msteps = int(trace_steps) * nz
     sig = np.sqrt(0.5 * Ti)
+    pad = np.deg2rad(pad_deg)
     out = np.zeros(len(cells))
     for ci, ((cx, cz), (nnx, nnz)) in enumerate(zip(cells, normals)):
         Vc = float(V_surf[cx, cz])
+        x0c = cx + 1.5 * nnx; z0c = cz + 1.5 * nnz
+        cone = _cone_angles(x0c, z0c, aperture, pad)
+        a_mix = alpha if cone is not None else 0.0
         vals = []
         for sc in range(n_scramble):
-            s = qmc.Sobol(d=3, scramble=True, seed=seed + sc)
+            s = qmc.Sobol(d=4, scramble=True, seed=seed + sc)
             u = s.random_base2(n_log2)
             ph = u[:, 0] * 2.0 * np.pi
             Vs = V_dc + V_rf * np.sin(ph)
             wied = Vs ** (-0.35)
-            vperp = sig * norm.ppf(np.clip(u[:, 2], 1e-6, 1 - 1e-6))
             E_surf_z = 0.5 * Te + Vs - Vc
             valid = E_surf_z > 0.0
             vz_surf = np.sqrt(np.maximum(E_surf_z, 0.0))
-            vX = vperp.copy(); vZ = -vz_surf
+            vperp_nat = sig * norm.ppf(np.clip(u[:, 2], 1e-6, 1 - 1e-6))
+            if cone is not None:
+                a = vz_surf * np.tan(cone[0]); b = vz_surf * np.tan(cone[1])
+                lo = np.minimum(a, b); hi = np.maximum(a, b)
+                if nnx > 0:   lo = np.maximum(lo, 0.0)
+                elif nnx < 0: hi = np.minimum(hi, 0.0)
+                Plo = norm.cdf(lo / sig); Phi_ = norm.cdf(hi / sig); Pcone = Phi_ - Plo
+                cone_ok = Pcone > 1e-9
+                vcone = sig * norm.ppf(np.clip(Plo + u[:, 3] * Pcone, 1e-9, 1 - 1e-9))
+                use_cone = (u[:, 1] < a_mix) & cone_ok
+                vperp = np.where(use_cone, vcone, vperp_nat)
+                in_cone = cone_ok & (vperp >= lo) & (vperp <= hi)
+                w = np.where(in_cone, 1.0 / (a_mix / np.maximum(Pcone, 1e-12) + (1.0 - a_mix)),
+                             1.0 / (1.0 - a_mix))
+            else:
+                vperp = vperp_nat; w = np.ones(u.shape[0])
+            vX = vperp; vZ = -vz_surf
             vdotn = vX * nnx + vZ * nnz
             emit = valid & (vdotn > 0.0)
-            x0 = np.full(u.shape[0], cx + 1.5 * nnx); z0 = np.full(u.shape[0], cz + 1.5 * nnz)
+            x0 = np.full(u.shape[0], x0c); z0 = np.full(u.shape[0], z0c)
             hix, hiz, _, _, surv, _, _ = _trace_general(Ex, Ez, solid, x0, z0, vX, vZ, 1.0, nx, nz,
                                                         msteps, trace_dt, trace_dt_field)
             escaped = (hix < 0) & (surv < 0.5) & emit
             ratio = vdotn / np.maximum(np.abs(vZ), 0.3)
-            vals.append(float((wied * escaped * ratio).sum() / wied.sum()))
+            vals.append(float((w * wied * escaped * ratio).sum() / wied.sum()))
         out[ci] = float(np.mean(vals))
     return out
 
 
-def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=11, n_scramble=2,
-                             n_wall=12, n_floor=6, sweeps=250, seed=0):
+def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=10, n_scramble=2,
+                             n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=True):
     """Self-consistent BACKWARD charging solve: Laplace field <-> per-cell gathers <-> damped update
     dV = beta*Te*ln(k*Gi/Ge), where k=Ci/Ce is calibrated each iteration on the floating pillar tops.
     NO forward launch, NO per-region overrides -- the electron-shading dipole EMERGES. Deterministic,
@@ -160,12 +242,13 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
                 V[m] = (1 - omega) * V[m] + omega * upd[m]
         return bc(V)
 
+    aperture = (t0, t1, r0) if cone_is else None
     for it in range(n_iter):
         V = laplace(Vs); Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
         Ge = backward_electron_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
-                                      n_scramble=n_scramble, seed=seed)
+                                      n_scramble=n_scramble, seed=seed, aperture=aperture)
         Gi = backward_ion_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
-                                 n_scramble=n_scramble, seed=seed)
+                                 n_scramble=n_scramble, seed=seed, aperture=aperture)
         m = kind == 'mask'
         k = float(np.mean(Ge[m]) / max(np.mean(Gi[m]), 1e-6))
         dV = np.clip(beta * Te * np.log((k * Gi + 1e-6) / (Ge + 1e-6)), -dVmax, dVmax)
