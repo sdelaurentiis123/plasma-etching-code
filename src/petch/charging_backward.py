@@ -265,16 +265,20 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
                                       n_scramble=n_scramble, seed=seed, aperture=aperture)
         Gi = backward_ion_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
                                  n_scramble=n_scramble, seed=seed, aperture=aperture)
-        m = kind == 'mask'
-        k = float(np.mean(Ge[m]) / max(np.mean(Gi[m]), 1e-6))
-        dV = np.clip(beta * Te * np.log((k * Gi + 1e-6) / (Ge + 1e-6)), -dVmax, dVmax)
+        # k = Ci/Ce = 1 EXACTLY (first principle): the domain is the WAFER FRAME (top plane = wafer
+        # surface below the sheath; the sheath drop is carried in the ion source energy and the electron
+        # gather samples the post-sheath arrival dist). Wafer-scale charge conservation -- zero net DC
+        # current is what DEFINES V_dc -- makes Gamma_i = Gamma_e on the uncharged wafer for ANY
+        # geometry. So the uncharged wafer is a fixed point by construction; NO mask calibration (that
+        # was a noisy estimator of 1 and an arbitrary reference knob). [invariant V1]
+        dV = np.clip(beta * Te * np.log((Gi + 1e-6) / (Ge + 1e-6)), -dVmax, dVmax)
         for i, (cx, cz) in enumerate(clist):
             if comp[i] == 0:                                 # insulator: per-cell update
                 Vs[cx, cz] += dV[i]
         for c in (1, 2):                                     # poly: POOLED equipotential current balance
             sel = comp == c
             if sel.any():
-                dVc = np.clip(beta * Te * np.log((k * Gi[sel].sum() + 1e-6) / (Ge[sel].sum() + 1e-6)),
+                dVc = np.clip(beta * Te * np.log((Gi[sel].sum() + 1e-6) / (Ge[sel].sum() + 1e-6)),
                               -dVmax, dVmax)
                 vc[c] += dVc
     # final field + notch-driver observable E_defl (flux-weighted ion impact energy on the poly-inner
@@ -291,7 +295,10 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
                                     n_scramble=n_scramble, seed=seed, aperture=aperture, want_energy=True)
     fmask = Gi_f > 1e-6
     E_defl = float(np.sum(E_f[fmask] * Gi_f[fmask]) / max(np.sum(Gi_f[fmask]), 1e-9)) if fmask.any() else 0.0
+    # floor_mean over the SOLVED cells (fcols) -- the backward solver is sparse (only sampled cells are
+    # updated), so averaging the full _extract band would include un-updated (0 V) cells.
+    floor_mean = float(Vs[fcols, fz].mean())
     return dict(Vs=Vs, V=V, Ex=Ex, Ez=Ez, wall_rows=wrows, wall_depth=wrows - r0, Lwall=Vs[t0 - 1, wrows],
-                Rwall=Vs[t1, wrows], floor=Vs[fcols, fz], floor_mean=float(Vs[fcols, fz].mean()), k=k,
+                Rwall=Vs[t1, wrows], floor=Vs[fcols, fz], floor_mean=floor_mean, k=1.0,
                 V_poly=float(0.5 * (vc[1] + vc[2])), Vc=vc.copy(),
                 E_defl=E_defl, foot_flux=float(Gi_f[fmask].mean()) if fmask.any() else 0.0)
