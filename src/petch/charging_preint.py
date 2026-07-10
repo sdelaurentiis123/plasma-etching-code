@@ -65,3 +65,58 @@ def preint_floor_fraction(g, Ex, Ez, n_log2=13, n_scramble=4, n_inner=64,
     vals = np.array(vals)
     # P(land|cross) * (ncol/band) = the grid[band].mean()-per-crossed convention (== MC 0.0794 @ AR6)
     return float(vals.mean() * conv), float(vals.std() / np.sqrt(len(vals)) * conv)
+
+
+def preint_floor_ion_fraction(g, Ex, Ez, n_log2=11, n_scramble=4, n_inner=96,
+                              Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0, trace_dt=0.15,
+                              trace_dt_field=0.10, trace_steps=120, tol=5e-3):
+    """Floor-band ION flux fraction on the field (Ex,Ez), via preintegration+QMC -- the ion twin of
+    preint_floor_fraction, fixing the deep-AR ci under-resolution (the tensor v_perp step ~1.8 deg
+    equals the AR15 acceptance half-cone, so the floor ci was a 1-3 quadrature-node quantity).
+
+    Source = sample_sheath_source(kind='ion') exactly: ions ALL cross (accelerated, no retardation),
+    phase ~ uniform importance-weighted w~Vs^-0.35 (HG Fig-4a IEDF asymmetry), vz=sqrt(0.5*Te+Vs),
+    v_perp ~ N(0, sqrt(0.5*Ti)) conserved. Outer scrambled-Sobol over (phase, x); inner = full-range
+    v_perp scan via the probit map v_perp = sigma*Phi^-1(u) (Gaussian density absorbed EXACTLY, nodes
+    auto-concentrated in the near-vertical acceptance cone, multi-band-safe through the warped field --
+    at high floor V the acceptance is field-deflected, so we scan the whole crossed range like the
+    electron ct-scan does). Fate oracle = _trace_general verbatim (q=+1). Cost flat in AR.
+
+    Same grid[band].mean()-per-launched convention as the deterministic tensor floor, so the caller
+    overrides: ci[floor band] = P_acc * scale (shape-preserving). Returns (value, stderr)."""
+    from scipy.stats import qmc, norm
+    solid = g['solid']; nx, nz = g['nx'], g['nz']
+    t0, t1 = g['trench0'], g['trench1']
+    fz = np.where(g['floor_trench_mask'].any(axis=0))[0].max()
+    b0, b1 = t0 + 4, t1 - 4
+    conv = float(t1 - t0) / float(b1 - b0)
+    msteps = int(trace_steps) * nz
+    sigma = np.sqrt(0.5 * Ti)
+    vp_nodes = sigma * norm.ppf((np.arange(n_inner) + 0.5) / n_inner)   # probit-mapped v_perp scan
+
+    def fate(vp, vz, x):
+        hx, hz, _, _, _ = _trace_general(Ex, Ez, solid, x.astype(float), np.ones_like(vz), vp, vz,
+                                         1.0, nx, nz, msteps, trace_dt, trace_dt_field)
+        return ((hz == fz) & (hx >= b0) & (hx < b1)).astype(np.float64)
+
+    def one(seed):
+        s = qmc.Sobol(d=2, scramble=True, seed=seed)
+        u = s.random_base2(n_log2)
+        phase = u[:, 0] * _TWO_PI
+        x = t0 + u[:, 1] * (t1 - t0)
+        Vs = V_dc + V_rf * np.sin(phase)
+        w = Vs ** -0.35                       # IEDF asymmetry weight (HG Fig 4a), matches MC+tensor
+        vz = np.sqrt(0.5 * Te + Vs)           # Bohm entry + instantaneous sheath gain
+        num = np.zeros_like(Vs)
+        for vpj in vp_nodes:                  # inner: E[fate] over v_perp ~ N(0, sigma), density exact
+            num += fate(np.full(Vs.size, vpj), vz, x) / n_inner
+        return float((w * num).sum() / w.sum())
+
+    vals = []
+    for k in range(n_scramble):
+        vals.append(one(k))
+        if len(vals) >= 2 and np.std(vals) / np.sqrt(len(vals)) < tol:
+            break
+    vals = np.array(vals)
+    # P(land in band) * (ncol/band) = grid[band].mean() per-launched-per-column convention
+    return float(vals.mean() * conv), float(vals.std() / np.sqrt(len(vals)) * conv)

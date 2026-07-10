@@ -649,11 +649,22 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             # accurate, scalable preintegration value (P_acc in the grid[band].mean() convention, so
             # counts = P_acc*scale). Cost is flat in AR (no tensor blowup). Fixed scramble seeds across
             # iterations = common random numbers (the fixed point doesn't chase noise).
-            if kind == "electron" and preint_floor and preint_geom is not None:
-                from .charging_preint import preint_floor_fraction
-                Pacc, _ = preint_floor_fraction(preint_geom, Ex, Ez, Te=Te, V_dc=V_dc, V_rf=V_rf,
-                                                trace_dt=trace_dt, trace_dt_field=trace_dt_field,
-                                                trace_steps=trace_steps)
+            if preint_floor and preint_geom is not None:
+                # BOTH species: the tensor quadrature under-resolves the deep floor (electrons ~2x low;
+                # ions: v_perp step ~1.8 deg == the AR15 acceptance half-cone -> ci is a 1-3 node
+                # quantity, noisy/biased -- the residual deep-AR non-monotone floor). Same estimator
+                # family, same convention (counts = P_acc*scale), same fixed scramble seeds (CRN).
+                if kind == "electron":
+                    from .charging_preint import preint_floor_fraction
+                    Pacc, _ = preint_floor_fraction(preint_geom, Ex, Ez, Te=Te, V_dc=V_dc, V_rf=V_rf,
+                                                    trace_dt=trace_dt, trace_dt_field=trace_dt_field,
+                                                    trace_steps=trace_steps)
+                else:
+                    from .charging_preint import preint_floor_ion_fraction
+                    Pacc, _ = preint_floor_ion_fraction(preint_geom, Ex, Ez, Te=Te, Ti=Ti, V_dc=V_dc,
+                                                        V_rf=V_rf, trace_dt=trace_dt,
+                                                        trace_dt_field=trace_dt_field,
+                                                        trace_steps=trace_steps)
                 gg = preint_geom
                 fzz = int(np.where(gg['floor_trench_mask'].any(axis=0))[0].max())
                 # Set the band TOTAL from preint (accurate), but keep the tensor's per-cell SHAPE.
@@ -665,6 +676,9 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                 band = counts[b0e:b1e, fzz]; tot = float(band.sum()); nb = band.size
                 shape = band / tot if tot > 0 else np.full(nb, 1.0 / nb)
                 counts[b0e:b1e, fzz] = (Pacc * nb) * scale * shape
+                if want_energy and tot > 0:
+                    # keep per-cell mean impact energy: rescale the band energy by the same factor
+                    energy[b0e:b1e, fzz] *= (Pacc * nb) * scale / tot
             return (counts, float(surv.mean()), energy) if want_energy else (counts, float(surv.mean()))
         if source_model == "sheath" or (source_model == "hybrid" and kind == "ion"):
             # "sheath": both species derived. "hybrid": derived ions (instantaneous crossing is exact
