@@ -177,6 +177,8 @@ def _trace_general_py(Ex, Ez, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_
     impact_E = np.zeros(n)
     hit_vx = np.zeros(n)
     survivor = np.zeros(n, np.uint8)
+    exit_vx = np.zeros(n)          # velocity at plasma escape (z<0.5); used by the backward/adjoint gather
+    exit_vz = np.zeros(n)
     xmax = float(nx)
     for p in prange(n):
         x = x0[p]; z = z0[p]; vx = vx0[p]; vz = vz0[p]
@@ -233,6 +235,7 @@ def _trace_general_py(Ex, Ez, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_
                     x = 0.0
             z = za
             if z < 0.5:
+                exit_vx[p] = vx; exit_vz[p] = vz   # record plasma-end velocity for the adjoint gather
                 alive = False
                 break
             ixh = int(x); izh = int(z)
@@ -253,7 +256,7 @@ def _trace_general_py(Ex, Ez, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_
                 break
         if alive:
             survivor[p] = 1
-    return hit_ix, hit_iz, impact_E, hit_vx, survivor
+    return hit_ix, hit_iz, impact_E, hit_vx, survivor, exit_vx, exit_vz
 
 
 _trace_general = (njit(cache=True, parallel=True, fastmath=True)(_trace_general_py)
@@ -415,7 +418,7 @@ def sample_electrons(n, rng, nx, Te, cos_power=1.0, iso=False, flux_power=None):
     return x, z, vx, vz
 
 
-def _apply_vf_supply(ce, vfb, thr, vf_grid, ntot, nx, preint_floor, preint_geom):
+def _apply_vf_supply(ce, vfb, thr, vf_grid, ntot, nx, preint_floor, preint_geom, preint_wall=False):
     """PHYSICAL-MAGNITUDE sky-view electron supply for shadowed walls.
 
     The sky-view factor `vf_grid` is a GEOMETRIC (unretarded) electron flux: it counts the fraction
@@ -445,6 +448,11 @@ def _apply_vf_supply(ce, vfb, thr, vf_grid, ntot, nx, preint_floor, preint_geom)
         gg = preint_geom
         fzz = int(np.where(gg['floor_trench_mask'].any(axis=0))[0].max())
         ce_vf[gg['trench0'] + 4:gg['trench1'] - 4, fzz] = 0.0
+    if preint_wall and preint_geom is not None:                 # upper insulator walls owned by preint
+        gg = preint_geom
+        r0w, r1w = int(gg['mouth']), int(gg['z_poly0'])
+        ce_vf[gg['trench0'] - 1, r0w:r1w] = 0.0                 # left wall
+        ce_vf[gg['trench1'], r0w:r1w] = 0.0                     # right wall
     return np.maximum(ce, ce_vf)
 
 
@@ -463,7 +471,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                    cell_size_nm=31.25, cap_match_true_um=None, cap_match_rows=3,
                    seed_state=None, return_state=False, leak_rate=0.0,
                    transport="mc", det_cols=None, preint_floor=False, preint_geom=None,
-                   picard_beta=0.25):
+                   picard_beta=0.25, preint_wall=False):
     """Steady-state feature charging for ANY material grid `mat` (GAS/INSULATOR/CONDUCTOR).
 
     mat: (nx, nz) int grid. z=0 is the plasma boundary (Dirichlet 0), z increases into the wafer.
@@ -669,7 +677,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                 X, Z, VP, VZ, W = electron_source_quadrature(cols, nx, n_E=40, n_ct=28, n_phase=28,
                                                              n_az=6, Te=Te, V_dc=V_dc, V_rf=V_rf)
                 q = -1.0
-            hix, hiz, E, _, surv = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, q, nx, nz,
+            hix, hiz, E, _, surv, _, _ = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, q, nx, nz,
                                                   int(trace_steps) * nz, trace_dt, trace_dt_field)
             counts = np.zeros((nx, nz)); energy = np.zeros((nx, nz)) if want_energy else None
             scale = float(n) / max(float(W.sum()), 1e-12)   # match MC particle-budget magnitude (eps_c)
@@ -712,6 +720,27 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                 if want_energy and tot > 0:
                     # keep per-cell mean impact energy: rescale the band energy by the same factor
                     energy[b0e:b1e, fzz] *= (Pacc * nb) * scale / tot
+            # PREINTEGRATION WALL OVERRIDE (opt-in, electrons only): the down-going fan under-samples
+            # side-arriving electrons onto the upper insulator sidewalls -> walls charge POSITIVE and the
+            # electron-shading DIPOLE never forms (deep-AR non-monotone floor). Replace the wall cells
+            # with the field-traced preint profile (P(cell|cross)*ncol in the counts=flux*scale
+            # convention), which captures focusing + retardation -> walls charge negative and self-limit.
+            if preint_wall and preint_geom is not None and kind == "electron":
+                from .charging_preint import preint_wall_fraction
+                flux, _ = preint_wall_fraction(preint_geom, Ex, Ez, Te=Te, V_dc=V_dc, V_rf=V_rf,
+                                               trace_dt=trace_dt, trace_dt_field=trace_dt_field,
+                                               trace_steps=trace_steps)
+                gg = preint_geom
+                cL, cR = gg['trench0'] - 1, gg['trench1']
+                r0w, r1w = int(gg['mouth']), int(gg['z_poly0'])
+                if r1w > r0w:
+                    old_L = counts[cL, r0w:r1w].copy(); old_R = counts[cR, r0w:r1w].copy()
+                    counts[cL, r0w:r1w] = flux[0] * scale        # OVERWRITE (same '=' as the floor)
+                    counts[cR, r0w:r1w] = flux[1] * scale
+                    if want_energy:                              # preserve per-cell mean impact energy
+                        with np.errstate(divide='ignore', invalid='ignore'):
+                            energy[cL, r0w:r1w] *= np.where(old_L > 0, counts[cL, r0w:r1w] / old_L, 1.0)
+                            energy[cR, r0w:r1w] *= np.where(old_R > 0, counts[cR, r0w:r1w] / old_R, 1.0)
             return (counts, float(surv.mean()), energy) if want_energy else (counts, float(surv.mean()))
         if source_model == "sheath" or (source_model == "hybrid" and kind == "ion"):
             # "sheath": both species derived. "hybrid": derived ions (instantaneous crossing is exact
@@ -736,7 +765,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
                                     dt_cap=trace_dt, dt_field=trace_dt_field)
             surv = (hix < 0).astype(np.float64)
         else:
-            hix, hiz, E, _, surv = _trace_general(Ex, Ez, solid, x, z, vx, vz, q, nx, nz,
+            hix, hiz, E, _, surv, _, _ = _trace_general(Ex, Ez, solid, x, z, vx, vz, q, nx, nz,
                                                   msteps, trace_dt, trace_dt_field)
         counts = np.zeros((nx, nz))
         energy = np.zeros((nx, nz)) if want_energy else None
@@ -821,7 +850,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
             if vf_grid is not None:
                 vfb = vf_grid * np.where(vf_grid > 0.18, open_wall_boost, 1.0)
                 ce = _apply_vf_supply(ce, vfb, thr, vf_grid, n_per_iter, nx,
-                                      preint_floor, preint_geom)
+                                      preint_floor, preint_geom, preint_wall)
         # deep CONDUCTOR sidewalls (the neighbour line) are geometrically shadowed to ~0.03 electron
         # flux (HG Fig 3 poly-inner); the down-going trace over-delivers. Suppressing it lets the
         # starved line's current balance rise toward its true +39 V. conductor_e_factor<1 tests this.
@@ -977,7 +1006,7 @@ def solve_charging(mat, mouth, Te=4.0, V_dc=37.0, V_rf=30.0, iadf_hwhm_deg=4.3,
         if vf_grid is not None:
             vfb = vf_grid * np.where(vf_grid > 0.18, open_wall_boost, 1.0)
             ce_f = _apply_vf_supply(ce_f, vfb, thr, vf_grid, ntot, nx,
-                                    preint_floor, preint_geom)
+                                    preint_floor, preint_geom, preint_wall)
             ce_geom = ce_f   # diagnostic: electron field after the physical sky-view supply
         if insulator_e_focus > 0.0:            # same electrostatic anti-shadowing as the loop (insulator-only)
             ce_f = ce_f.copy()

@@ -36,7 +36,7 @@ def preint_floor_fraction(g, Ex, Ez, n_log2=13, n_scramble=4, n_inner=64,
         vz = np.sqrt(np.maximum(E * ct * ct - Vs, 0.0))
         st = np.sqrt(np.maximum(1.0 - ct * ct, 0.0))
         vp = np.sqrt(E) * st * np.cos(az)
-        hx, hz, _, _, _ = _trace_general(Ex, Ez, solid, x.astype(float), np.ones_like(E), vp, vz,
+        hx, hz, _, _, _, _, _ = _trace_general(Ex, Ez, solid, x.astype(float), np.ones_like(E), vp, vz,
                                          -1.0, nx, nz, msteps, trace_dt, trace_dt_field)
         return ((hz == fz) & (hx >= b0) & (hx < b1)).astype(np.float64)
 
@@ -95,7 +95,7 @@ def preint_floor_ion_fraction(g, Ex, Ez, n_log2=11, n_scramble=4, n_inner=96,
     vp_nodes = sigma * norm.ppf((np.arange(n_inner) + 0.5) / n_inner)   # probit-mapped v_perp scan
 
     def fate(vp, vz, x):
-        hx, hz, _, _, _ = _trace_general(Ex, Ez, solid, x.astype(float), np.ones_like(vz), vp, vz,
+        hx, hz, _, _, _, _, _ = _trace_general(Ex, Ez, solid, x.astype(float), np.ones_like(vz), vp, vz,
                                          1.0, nx, nz, msteps, trace_dt, trace_dt_field)
         return ((hz == fz) & (hx >= b0) & (hx < b1)).astype(np.float64)
 
@@ -120,3 +120,92 @@ def preint_floor_ion_fraction(g, Ex, Ez, n_log2=11, n_scramble=4, n_inner=96,
     vals = np.array(vals)
     # P(land in band) * (ncol/band) = grid[band].mean() per-launched-per-column convention
     return float(vals.mean() * conv), float(vals.std() / np.sqrt(len(vals)) * conv)
+
+
+def preint_wall_fraction(g, Ex, Ez, n_log2=13, n_scramble=4, n_inner=64,
+                         Te=4.0, V_dc=37.0, V_rf=30.0, trace_dt=0.15,
+                         trace_dt_field=0.10, trace_steps=120, tol=5e-3):
+    """UPPER-SIDEWALL electron flux PROFILE on the field (Ex,Ez), via preintegration+QMC -- the WALL
+    analog of preint_floor_fraction, fixing the deep-AR non-monotone floor by forming the physical
+    electron-shading DIPOLE. The deterministic down-going quadrature fan structurally under-samples
+    side-arriving electrons onto the upper insulator sidewalls, so those walls receive ~0 traced flux
+    and charge POSITIVE (+34V) instead of negative -> the dipole never forms -> the floor under-charges.
+    This estimator traces electrons through the ACTUAL field (same _trace_general fate oracle, same
+    scrambled-Sobol source, same crossing-restricted ct-scan as the floor) and bins the ones that land
+    on each wall cell -> the walls charge negative and self-limit.
+
+    Three design points that make it CORRECT (do not "simplify" any):
+    0. FULL-WIDTH launch (x over ALL nx columns), NOT the floor's aperture launch x in [t0,t1). The
+       wide-angle electrons that physically charge the UPPER WALLS enter obliquely from launch positions
+       OVER THE MASK, outside the trench aperture; only near-vertical electrons launched over the aperture
+       reach the floor. Copying the floor's [t0,t1) launch truncated ~93% of the wall flux (measured 13.6x
+       under-delivery, walls stayed positive). With full-width launch the per-cell normalization factor is
+       conv = nx (not t1-t0): the P(cell|cross)*conv*scale count only matches the deterministic deposit
+       when conv equals the launch-domain width. (Floor: launch width = aperture = t1-t0, so conv=ncol.)
+    1. PER-CELL, not per-band. The dipole IS a depth gradient (less negative at mouth, more negative
+       deep), so the accumulator is a per-cell histogram [2 walls, nrows], NOT a single band scalar.
+       Convention mirrors the floor: a wall cell is a "band of size 1", so counts[c,r] = P(cell|cross)
+       * nx * scale, i.e. flux[c,r]*scale with flux = Pcell*nx. Same Sobol/den/_trace_general as the
+       floor => this IS the electron-beam-consistent flux the down-going fan WOULD deposit on those
+       cells if it sampled side-arrivals; ion wall flux uses the same `scale`, so ci-ce=0 lands the wall
+       on the right floating potential.
+    2. NO explicit thr=exp(V/Te) factor. The crossing gate uses Vs = the MOUTH sheath potential
+       (positive), NOT the wall surface potential, so it is invariant as the wall charges negative and
+       never zeros the flux. Retardation of the negative wall lives ENTIRELY in the traced field inside
+       _trace_general. An explicit thr would DOUBLE-COUNT retardation. This sign-discipline is why the
+       identical (floor-positive) machinery is sign-correct for a negative-charging wall: sign-agnostic
+       at the gate, sign-correct in the trace.
+
+    Returns (mean, stderr), both shape (2, nrows): row 0 = LEFT wall (col trench0-1), row 1 = RIGHT wall
+    (col trench1); columns index insulator rows [mouth : z_poly0]. Caller overrides
+    counts[cL/cR, mouth:z_poly0] = flux*scale (shape-exact, no borrowed shape)."""
+    from scipy.stats import qmc, gamma
+    solid = g['solid']; nx, nz = g['nx'], g['nz']
+    t0, t1 = g['trench0'], g['trench1']
+    cL, cR = t0 - 1, t1                                 # left/right trench INSULATOR walls
+    r0, r1 = int(g['mouth']), int(g['z_poly0'])         # PR (insulator) rows; below r1 the wall is conductor
+    nrows = r1 - r0
+    conv = float(nx)                                    # FULL-WIDTH launch (see note): per-cell factor = nx
+    if nrows <= 0:                                       # no insulator wall (all-conductor line): nothing to do
+        return np.zeros((2, 0)), np.zeros((2, 0))
+    msteps = int(trace_steps) * nz
+
+    def hits(E, ct, phase, az, x):
+        Vs = V_dc + V_rf * np.sin(phase)
+        vz = np.sqrt(np.maximum(E * ct * ct - Vs, 0.0))
+        st = np.sqrt(np.maximum(1.0 - ct * ct, 0.0))
+        vp = np.sqrt(E) * st * np.cos(az)
+        hx, hz, _, _, _, _, _ = _trace_general(Ex, Ez, solid, x.astype(float), np.ones_like(E), vp, vz,
+                                         -1.0, nx, nz, msteps, trace_dt, trace_dt_field)
+        return hx, hz
+
+    def one(seed):
+        s = qmc.Sobol(d=4, scramble=True, seed=seed)
+        u = s.random_base2(n_log2)
+        E = gamma.ppf(u[:, 0], a=2.0, scale=Te)
+        phase = u[:, 1] * _TWO_PI; az = u[:, 2] * _TWO_PI; x = u[:, 3] * (nx - 1)
+        Vs = V_dc + V_rf * np.sin(phase)
+        crossed = E > Vs
+        ct_lo = np.sqrt(np.clip(Vs / E, 0.0, 1.0))
+        span = 1.0 - ct_lo
+        num = np.zeros((2, nrows))
+        for j in (np.arange(n_inner) + 0.5) / n_inner:  # multi-band-safe ct-scan (same as floor)
+            ctj = ct_lo + j * span
+            hx, hz = hits(E, ctj, phase, az, x)
+            w = np.where(crossed, 2.0 * ctj * (span / n_inner), 0.0)
+            mL = (hx == cL) & (hz >= r0) & (hz < r1)
+            np.add.at(num[0], (hz[mL] - r0).astype(np.intp), w[mL])
+            mR = (hx == cR) & (hz >= r0) & (hz < r1)
+            np.add.at(num[1], (hz[mR] - r0).astype(np.intp), w[mR])
+        den = np.where(crossed, 1.0 - ct_lo ** 2, 0.0).sum()
+        return num / max(den, 1e-12)                    # P(land in each wall cell | crossed)
+
+    vals = []
+    for k in range(n_scramble):
+        vals.append(one(k))
+        if len(vals) >= 2:                              # auto-stop on the total wall-flux spread (CRN seeds)
+            tot = np.array([v.sum() for v in vals])
+            if np.std(tot) / np.sqrt(len(vals)) < tol:
+                break
+    vals = np.array(vals)                               # (k, 2, nrows)
+    return vals.mean(axis=0) * conv, vals.std(axis=0) / np.sqrt(len(vals)) * conv

@@ -43,7 +43,7 @@ def _field_free_arrival(g):
     rng = np.random.default_rng(11)
     x, z, vx, vz = sample_sheath_source(120000, rng, nx, "ion")
     Ex = np.zeros((nx, nz)); Ez = np.zeros((nx, nz))
-    hix, hiz, E, _, _ = _trace_general(Ex, Ez, solid, x, z, vx, vz, 1.0, nx, nz, 160 * nz, 0.15, 0.10)
+    hix, hiz, E, _, _, _, _ = _trace_general(Ex, Ez, solid, x, z, vx, vz, 1.0, nx, nz, 160 * nz, 0.15, 0.10)
     cnt = np.zeros((nx, nz)); m = hix >= 0
     np.add.at(cnt, (hix[m], hiz[m]), 1.0)
     return cnt[t0 + 4:t1 - 4, fz].mean() / (120000 / nx)

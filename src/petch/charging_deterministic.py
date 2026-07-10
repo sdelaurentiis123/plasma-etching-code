@@ -118,7 +118,7 @@ def deterministic_electron_transport(g, Ex, Ez, n_E=96, n_ct=72, n_phase=72, n_a
     cols = np.arange(t0, t1)
     X, Z, VP, VZ, W = electron_source_quadrature(cols, nx, n_E=n_E, n_ct=n_ct, n_phase=n_phase,
                                                  n_az=n_az, Te=Te, V_dc=V_dc, V_rf=V_rf)
-    hix, hiz, _, _, _ = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, -1.0, nx, nz,
+    hix, hiz, _, _, _, _, _ = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, -1.0, nx, nz,
                                        int(trace_steps) * nz, trace_dt, trace_dt_field)
     counts = np.zeros((nx, nz)); m = hix >= 0
     np.add.at(counts, (hix[m], hiz[m]), W[m])
@@ -137,7 +137,7 @@ def deterministic_ion_transport(g, Ex, Ez, n_vperp=61, n_phase=96, Te=4.0, Ti=0.
     cols = np.arange(t0, t1)
     X, Z, VP, VZ, W = ion_source_quadrature(cols, nx, n_vperp=n_vperp, n_phase=n_phase,
                                             Te=Te, Ti=Ti, V_dc=V_dc, V_rf=V_rf)
-    hix, hiz, E, _, _ = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, 1.0, nx, nz,
+    hix, hiz, E, _, _, _, _ = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, 1.0, nx, nz,
                                        int(trace_steps) * nz, trace_dt, trace_dt_field)
     counts = np.zeros((nx, nz)); energy = np.zeros((nx, nz))
     m = hix >= 0
@@ -155,7 +155,7 @@ def deterministic_arrival(g, n_vperp=21, n_phase=64):
     cols = np.arange(t0, t1)
     X, Z, VP, VZ, W = ion_source_quadrature(cols, nx, n_vperp=n_vperp, n_phase=n_phase)
     Ex = np.zeros((nx, nz)); Ez = np.zeros((nx, nz))
-    hix, hiz, _, _, _ = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, 1.0, nx, nz, 160 * nz, 0.15, 0.10)
+    hix, hiz, _, _, _, _, _ = _trace_general(Ex, Ez, solid, X, Z, VP, VZ, 1.0, nx, nz, 160 * nz, 0.15, 0.10)
     cnt = np.zeros((nx, nz)); m = hix >= 0
     np.add.at(cnt, (hix[m], hiz[m]), W[m])
     return float(cnt[t0 + 4:t1 - 4, fz].mean())
