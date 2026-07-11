@@ -3,6 +3,7 @@ import pytest
 
 from petch.boundary_state import (
     PlasmaBoundaryState,
+    RectilinearVelocityHistogramDensity,
     SpeciesBoundaryState,
     collisionless_sheath_boundary_state,
     instantaneous_sinusoidal_ion_boundary_state,
@@ -41,3 +42,29 @@ def test_both_sheath_models_produce_the_same_boundary_contract():
     assert finite.get("Ar+").velocity_sqrt_eV.shape == instant.get("Ar+").velocity_sqrt_eV.shape
     assert np.isclose(finite.get("Ar+").mean_energy_eV, 82.0, atol=0.08)
     assert np.isclose(instant.get("Ar+").mean_energy_eV, 82.0, atol=1e-12)
+
+
+def test_histogram_density_is_normalized_joint_support_for_adjoint_scoring():
+    edges = (np.array([-1.0, 0.0, 2.0]), np.array([-2.0, 1.0]), np.array([0.0, 1.0, 3.0]))
+    mass = np.arange(1, 2 * 1 * 2 + 1, dtype=float).reshape(2, 1, 2)
+    density = RectilinearVelocityHistogramDensity(edges, mass)
+    integral = 0.0
+    for i in range(2):
+        for j in range(1):
+            for k in range(2):
+                midpoint = np.array([[(edges[0][i] + edges[0][i + 1]) / 2,
+                                      (edges[1][j] + edges[1][j + 1]) / 2,
+                                      (edges[2][k] + edges[2][k + 1]) / 2]])
+                value = np.exp(density.log_flux_density(midpoint))[0]
+                volume = np.diff(edges[0])[i] * np.diff(edges[1])[j] * np.diff(edges[2])[k]
+                integral += value * volume
+    assert np.isclose(integral, 1.0)
+    assert np.isneginf(density.log_flux_density([[0.0, 0.0, -0.1]])[0])
+
+
+def test_species_exposes_same_density_contract_to_adjoint_consumers():
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-1, 1]), np.array([-1, 1]), np.array([0, 2])), np.ones((1, 1, 1)))
+    species = SpeciesBoundaryState("ion", 1, 40.0, 1e19, [[0, 0, 1]], [1], density_model=density)
+    assert np.isfinite(species.log_flux_density([[0.0, 0.0, 1.0]])[0])
+    RectilinearVelocityHistogramDensity,

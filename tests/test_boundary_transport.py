@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from petch.boundary_state import (
     PlasmaBoundaryState,
@@ -49,3 +50,21 @@ def test_same_transport_adapter_accepts_neutral_reactive_species():
         max_steps=20000)
     assert np.isclose(result["normalized_flux"], 1.0, atol=1e-12)
     assert np.isclose(result["absolute_flux_m2_s"], 7e20, rtol=1e-12)
+
+
+@pytest.mark.parametrize("aspect_ratio", [1, 4, 16])
+def test_same_boundary_transport_engine_spans_aspect_ratio_ladder(aspect_ratio):
+    width = 8; depth = aspect_ratio * width
+    nx = 3 * width; nz = depth + 2
+    left, right, floor = width, 2 * width, depth
+    solid = np.zeros((nx, nz), dtype=bool)
+    solid[left - 1, :floor + 1] = True
+    solid[right, :floor + 1] = True
+    solid[left - 1:right + 1, floor] = True
+    target = np.zeros_like(solid); target[left:right, floor] = True
+    vertical = SpeciesBoundaryState("test", 0, 40.0, 1e19, [[0.0, 0.0, 1.0]], [1.0])
+    boundary = PlasmaBoundaryState((vertical,), reference_plane_m=0.0)
+    result = trace_boundary_state_floor_flux(
+        boundary, "test", np.zeros((nx + 1, nz + 1)), solid, target,
+        n_position=3 * width, max_steps=1000 * nz)
+    assert np.isclose(result["normalized_flux"], 1.0, atol=1e-12)

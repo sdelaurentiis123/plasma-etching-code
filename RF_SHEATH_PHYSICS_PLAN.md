@@ -78,3 +78,9 @@ quadrature, preserves normalized probability, absolute flux, and three-dimension
 feeds the nodal particle tracer without reconstructing a source law. The identical adapter passes open-
 wafer gates for `Ar+` and neutral `CF2`. Migration is partial: existing production forward and adjoint
 charging paths still contain embedded analytic sources.
+
+The boundary contract now also accepts a normalized rectilinear joint velocity-flux density. This is the
+adjoint-side representation for reactor/PIC output or diagnostic histograms: traced exit states are scored
+against the same joint measure used by forward quadrature, without assuming independent energy and angle.
+The same boundary-state transport path passes a vertical collisionless geometry gate at AR 1, 4, and 16;
+this establishes solver unification across depth, not realistic high-AR chemistry validation.

@@ -122,6 +122,11 @@ energy and passes the same open-wafer transport gate for charged ions and neutra
 species-independent interface, not universal chemistry validation. Production source migration and an
 adjoint density representation remain open.
 
+A normalized joint velocity-histogram density now supplies the common adjoint scoring contract for
+reactor/PIC/diagnostic distributions. The unified boundary transport passes the same vertical-particle gate
+at AR 1/4/16 with geometry as the only change. This is an architecture/no-tunnelling invariant, not evidence
+that charging, collisions, chemistry, or profile evolution are validated at AR16.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark

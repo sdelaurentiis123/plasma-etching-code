@@ -7,11 +7,66 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import Mapping
+from typing import Mapping, Protocol
 
 import numpy as np
 
 from .sheath import CollisionlessRFSheath, ECHARGE
+
+
+class BoundaryDensityModel(Protocol):
+    """Normalized incident flux-density evaluator used by adjoint transport."""
+    def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None): ...
+
+
+@dataclass(frozen=True)
+class RectilinearVelocityHistogramDensity:
+    """Normalized piecewise-constant joint velocity flux density.
+
+    This representation can carry reactor/PIC output or diagnostic histograms without assuming that
+    energy and angle factor. The third velocity coordinate is incident-normal and must be nonnegative.
+    """
+    edges: tuple[np.ndarray, np.ndarray, np.ndarray]
+    probability_mass: np.ndarray
+
+    def __post_init__(self):
+        edges = tuple(np.asarray(edge, dtype=float).copy() for edge in self.edges)
+        if len(edges) != 3 or any(edge.ndim != 1 or edge.size < 2 or np.any(np.diff(edge) <= 0) for edge in edges):
+            raise ValueError("three strictly increasing velocity edges are required")
+        if edges[2][0] < 0.0:
+            raise ValueError("incident-normal velocity support must be nonnegative")
+        mass = np.asarray(self.probability_mass, dtype=float).copy()
+        expected = tuple(edge.size - 1 for edge in edges)
+        if mass.shape != expected or np.any(mass < 0.0) or not np.all(np.isfinite(mass)):
+            raise ValueError("probability_mass has invalid shape or values")
+        total = float(mass.sum())
+        if total <= 0.0:
+            raise ValueError("histogram must have positive probability mass")
+        mass /= total
+        for edge in edges: edge.setflags(write=False)
+        mass.setflags(write=False)
+        object.__setattr__(self, "edges", edges)
+        object.__setattr__(self, "probability_mass", mass)
+
+    def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None):
+        velocity = np.asarray(velocity_sqrt_eV, dtype=float)
+        if velocity.shape[-1] != 3:
+            raise ValueError("velocity must end in three components")
+        flat = velocity.reshape(-1, 3)
+        index = [np.searchsorted(self.edges[d], flat[:, d], side="right") - 1 for d in range(3)]
+        valid = np.ones(flat.shape[0], dtype=bool)
+        for d in range(3): valid &= (index[d] >= 0) & (index[d] < self.probability_mass.shape[d])
+        result = np.full(flat.shape[0], -np.inf)
+        if valid.any():
+            iv = tuple(idx[valid] for idx in index)
+            volume = np.ones(valid.sum())
+            for d in range(3):
+                volume *= np.diff(self.edges[d])[index[d][valid]]
+            density = self.probability_mass[iv] / volume
+            positive = density > 0.0
+            selected = np.where(valid)[0]
+            result[selected[positive]] = np.log(density[positive])
+        return result.reshape(velocity.shape[:-1])
 
 
 def _readonly_array(value, shape_tail=()):
@@ -39,6 +94,7 @@ class SpeciesBoundaryState:
     weight: np.ndarray
     phase_rad: np.ndarray | None = None
     position_m: np.ndarray | None = None
+    density_model: BoundaryDensityModel | None = None
     provenance: Mapping[str, object] = field(default_factory=dict)
 
     def __post_init__(self):
@@ -75,6 +131,11 @@ class SpeciesBoundaryState:
     @property
     def mean_energy_eV(self):
         return float(np.dot(self.weight, self.kinetic_energy_eV))
+
+    def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None):
+        if self.density_model is None:
+            raise ValueError(f"species {self.name!r} has no continuous boundary density model")
+        return self.density_model.log_flux_density(velocity_sqrt_eV, phase_rad, position_m)
 
 
 @dataclass(frozen=True)
