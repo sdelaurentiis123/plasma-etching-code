@@ -85,6 +85,9 @@ def test_finite_transit_sheath_builds_normalized_continuous_ion_density():
     assert ion.velocity_sqrt_eV.shape == (64 * 3 * 3, 3)
     assert np.isclose(ion.weight.sum(), 1.0)
     assert np.all(np.isfinite(ion.log_flux_density(ion.velocity_sqrt_eV)))
+    # A continuous phase-to-energy map has connected energy support; density quadrature must not
+    # manufacture empty internal bins merely because the transport rule uses few phase nodes.
+    assert np.all(ion.density_model.probability_mass > 0.0)
 
 
 def test_electron_boundary_is_analytic_half_maxwellian_flux_quadrature():

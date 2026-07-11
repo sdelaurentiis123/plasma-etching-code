@@ -42,6 +42,21 @@ from .boundary_transport import (
 from .adaptive_quadrature import adaptive_surface_quadrature
 
 
+class AdaptiveQuadratureConvergenceError(RuntimeError):
+    """Carries the rejected fixed-point state for estimator diagnosis without accepting it."""
+
+    def __init__(self, message, *, iteration, species, quadrature, surface_voltage, potential,
+                 cells, normals):
+        super().__init__(message)
+        self.iteration = int(iteration)
+        self.species = species
+        self.quadrature = quadrature
+        self.surface_voltage = np.asarray(surface_voltage).copy()
+        self.potential = np.asarray(potential).copy()
+        self.cells = tuple(cells)
+        self.normals = tuple(normals)
+
+
 def _cone_angles(x0, z0, aperture, pad):
     """Angular interval (theta_lo, theta_hi) from vertical subtended by the trench-mouth aperture at the
     launch point (x0,z0), padded by `pad` rad each edge. NEE-style importance-sampling proposal for the
@@ -509,7 +524,7 @@ def solve_boundary_state_charging(
     for component in range(1, conductor_voltage.size):
         values = surface_voltage[conductor_ids == component]
         conductor_voltage[component] = float(values.mean()) if values.size else 0.0
-    history = []; field_history = []; quadrature_history = []
+    history = []; field_history = []; quadrature_history = []; adaptive_levels = {}
     for iteration in range(int(n_iter)):
         for component in range(1, conductor_voltage.size):
             surface_voltage[conductor_ids == component] = conductor_voltage[component]
@@ -528,21 +543,43 @@ def solve_boundary_state_charging(
             else:
                 options = dict(adaptive_quadrature)
                 options.setdefault("n_face_position", n_face_position)
+                warm_start_backoff = int(options.pop("warm_start_backoff", 0))
+                if warm_start_backoff < 0:
+                    raise ValueError("warm_start_backoff must be nonnegative")
+                if species.name in adaptive_levels:
+                    base_level = int(options.get("base_log2", 6))
+                    initial_level = np.maximum(
+                        adaptive_levels[species.name] - warm_start_backoff, base_level)
+                    options.setdefault("initial_log2_samples", initial_level)
                 adaptive = adaptive_adjoint_boundary_state_face_flux(
                     boundary_state, species.name, potential, solid, cells, normals,
                     proposal_species=proposals.get(species.name), **options)
                 species_quadrature[species.name] = adaptive
+                adaptive_levels[species.name] = adaptive.log2_samples
                 if not adaptive.converged:
-                    worst = int(np.argmax(adaptive.element_stderr))
-                    raise RuntimeError(
+                    element_abs = options.get("element_absolute_tolerance")
+                    element_rel = float(options.get("element_relative_tolerance", 0.0))
+                    if element_abs is None:
+                        severity = adaptive.element_stderr
+                        allowed = np.full_like(severity, np.nan)
+                    else:
+                        allowed = float(element_abs) + element_rel * np.abs(adaptive.element_mean)
+                        severity = adaptive.element_stderr / np.maximum(allowed, 1e-300)
+                    worst = int(np.argmax(severity))
+                    message = (
                         f"adaptive phase-space quadrature did not converge for {species.name!r} "
                         f"at fixed-point iteration {iteration + 1}: total stderr="
                         f"{adaptive.total_stderr:.3g}, max face stderr="
                         f"{adaptive.element_stderr[worst]:.3g} at cell={cells[worst]}, "
                         f"normal={normals[worst]}, mean={adaptive.element_mean[worst]:.3g}, "
+                        f"allowed face stderr={allowed[worst]:.3g}, "
                         f"surface voltage={surface_voltage[cells[worst]]:.3g} V, "
                         f"level={adaptive.log2_samples[worst]}, max level="
                         f"{adaptive.log2_samples.max()}")
+                    raise AdaptiveQuadratureConvergenceError(
+                        message, iteration=iteration + 1, species=species.name,
+                        quadrature=adaptive, surface_voltage=surface_voltage,
+                        potential=potential, cells=cells, normals=normals)
                 normalized_face_flux = adaptive.element_mean
             species_current[species.name] = (normalized_face_flux * species.flux_m2_s
                                              * abs(species.charge_number))
@@ -584,6 +621,7 @@ def solve_boundary_state_charging(
         iterations=len(history), balance_history=history, balance_final=history[-1],
         field_history=field_history, field_final=field_final,
         quadrature_history=quadrature_history,
+        adaptive_levels={name: level.copy() for name, level in adaptive_levels.items()},
         conductor_voltage=conductor_voltage,
     )
 

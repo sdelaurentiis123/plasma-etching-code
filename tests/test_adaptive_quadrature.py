@@ -56,3 +56,13 @@ def test_element_mixed_tolerance_scales_with_local_signal():
         element_absolute_tolerance=1e-5, element_relative_tolerance=0.02)
     assert result.converged
     assert result.log2_samples[0] >= result.log2_samples[1]
+
+
+def test_adaptive_quadrature_warm_starts_per_element_levels():
+    evaluator = SyntheticEvaluator([0.2, 0.4, 0.6], [0.2, 0.2, 0.2])
+    initial = np.array([4, 6, 8])
+    result = adaptive_surface_quadrature(
+        evaluator, 3, base_log2=4, max_log2=10, n_replicates=3,
+        initial_log2_samples=initial, absolute_tolerance=1.0, relative_tolerance=0.0)
+    assert np.array_equal(result.log2_samples, initial)
+    assert result.evaluations == 3 * (2 ** 4 + 2 ** 6 + 2 ** 8)

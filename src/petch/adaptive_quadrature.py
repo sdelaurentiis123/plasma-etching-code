@@ -38,6 +38,7 @@ def adaptive_surface_quadrature(
     element_absolute_tolerance: float | None = None,
     element_relative_tolerance: float = 0.0,
     refine_fraction: float = 0.5,
+    initial_log2_samples=None,
 ) -> AdaptiveQuadratureResult:
     """Adapt nested per-element quadrature using replicate uncertainty as the sole error indicator.
 
@@ -64,7 +65,13 @@ def adaptive_surface_quadrature(
         if weights.shape != (n_elements,):
             raise ValueError("weights must have shape (n_elements,)")
 
-    levels = np.full(n_elements, int(base_log2), dtype=np.int64)
+    if initial_log2_samples is None:
+        levels = np.full(n_elements, int(base_log2), dtype=np.int64)
+    else:
+        levels = np.asarray(initial_log2_samples, dtype=np.int64).copy()
+        if (levels.shape != (n_elements,) or np.any(levels < base_log2)
+                or np.any(levels > max_log2)):
+            raise ValueError("initial sample levels must lie within the configured level range")
     estimates = np.empty((n_replicates, n_elements), dtype=float)
     evaluations = 0
 
@@ -77,8 +84,9 @@ def adaptive_surface_quadrature(
             estimates[replicate, indices] = values
         evaluations += int(indices.size) * n_replicates * (2 ** int(level))
 
-    all_indices = np.arange(n_elements, dtype=np.int64)
-    evaluate(all_indices, base_log2)
+    for initial_level in np.unique(levels):
+        indices = np.where(levels == initial_level)[0]
+        evaluate(indices, int(initial_level))
     rounds = 0
     converged = False
     while True:

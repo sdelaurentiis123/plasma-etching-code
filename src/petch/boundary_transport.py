@@ -121,6 +121,10 @@ def adjoint_boundary_state_face_flux(
             np.any(np.abs(np.linalg.norm(normals, axis=1) - 1.0) > 1e-12)):
         raise ValueError("face normals must be finite unit vectors")
     per_face = np.zeros(len(cells)); energy_numerator = np.zeros(len(cells))
+    effective_sample_size = np.zeros(len(cells)); max_sample_fraction = np.zeros(len(cells))
+    dominant_sample_index = np.full(len(cells), -1, dtype=int)
+    dominant_surface_velocity = np.zeros((len(cells), 3))
+    dominant_exit_velocity = np.zeros((len(cells), 3))
     base_velocity = proposal.velocity_sqrt_eV
     if face_position_samples is not None:
         face_position_samples = np.asarray(face_position_samples, dtype=float)
@@ -131,63 +135,68 @@ def adjoint_boundary_state_face_flux(
         base_velocity, proposal.phase_rad, proposal.position_m)
     if not np.all(np.isfinite(log_surface_density)):
         raise ValueError("surface proposal samples must lie inside their density support")
-    for ci, ((cx, cz), (normal_x, normal_z)) in enumerate(zip(cells, normals)):
-        if face_position_samples is None:
-            face_u = (np.arange(n_face_position) + face_quadrature_offset) / n_face_position
-            sample_index = np.repeat(np.arange(base_velocity.shape[0]), n_face_position)
-            quadrature_weight = proposal.weight[sample_index] / n_face_position
-        else:
-            face_u = face_position_samples
-            sample_index = np.arange(base_velocity.shape[0])
-            quadrature_weight = proposal.weight
-        # Face centre plus tangent coordinate, displaced one epsilon into the adjacent gas.
+    if face_position_samples is None:
+        face_u = (np.arange(n_face_position) + face_quadrature_offset) / n_face_position
+        sample_index = np.repeat(np.arange(base_velocity.shape[0]), n_face_position)
+        quadrature_weight = proposal.weight[sample_index] / n_face_position
+        face_s = np.tile(face_u - 0.5, base_velocity.shape[0])
+    else:
+        face_u = face_position_samples
+        sample_index = np.arange(base_velocity.shape[0])
+        quadrature_weight = proposal.weight
         face_s = face_u - 0.5
-        x_center = cx + 0.5 + (0.5 + 1e-3) * normal_x
-        z_center = cz + 0.5 + (0.5 + 1e-3) * normal_z
-        if face_position_samples is None:
-            x0 = np.tile(x_center - normal_z * face_s, base_velocity.shape[0])
-            z0 = np.tile(z_center + normal_x * face_s, base_velocity.shape[0])
-        else:
-            x0 = x_center - normal_z * face_s
-            z0 = z_center + normal_x * face_s
-        # Time reverse the forward incident quadrature to launch outward from the material face.
-        vx0 = -base_velocity[sample_index, 0]
-        vz0 = -base_velocity[sample_index, 2]
-        hit_x, _, _, _, survivor, exit_vx, exit_vz = trace_nodal(
-            nodal_potential, solid, x0, z0, vx0, vz0, float(species.charge_number),
-            nx, nz, int(max_steps), dt_cap, dt_field)
-        escaped = (hit_x < 0) & (survivor < 0.5) & (exit_vz < 0.0)
-        exit_forward = np.column_stack((
-            -exit_vx,
-            base_velocity[sample_index, 1],
-            -exit_vz,
-        ))
-        # RF phase is a trajectory label for the electrostatic feature solve and is preserved under
-        # time reversal. This retains phase-energy-angle correlations supplied by a sheath model.
-        exit_phase = (None if proposal.phase_rad is None
-                      else proposal.phase_rad[sample_index])
-        log_exit_density = species.log_flux_density(exit_forward, exit_phase)
-        surface_normal = -(base_velocity[sample_index, 0] * normal_x
-                           + base_velocity[sample_index, 2] * normal_z)
-        exit_normal = np.maximum(-exit_vz, 1e-300)
-        log_ratio = log_exit_density - log_surface_density[sample_index]
-        with np.errstate(over="ignore", invalid="ignore"):
-            density_ratio = np.exp(log_ratio)
-        contribution = np.where(
-            escaped & (surface_normal > 0.0) & np.isfinite(log_ratio),
-            surface_normal / exit_normal * density_ratio, 0.0)
-        per_face[ci] = float(np.sum(quadrature_weight * contribution))
-        if want_energy:
-            # The adjoint launches at the material face, so its initial kinetic energy is exactly the
-            # time-reversed forward impact energy. The tracer's ``impact_energy`` is zero for the desired
-            # escaping adjoint paths because those paths do not hit material a second time.
-            impact_energy_3d = np.sum(base_velocity[sample_index] ** 2, axis=1)
-            energy_numerator[ci] = float(np.sum(
-                quadrature_weight * contribution * impact_energy_3d))
+    cell_array = np.asarray(cells, dtype=float)
+    x_center = cell_array[:, 0] + 0.5 + (0.5 + 1e-3) * normals[:, 0]
+    z_center = cell_array[:, 1] + 0.5 + (0.5 + 1e-3) * normals[:, 1]
+    x0 = (x_center[:, None] - normals[:, 1, None] * face_s[None, :]).ravel()
+    z0 = (z_center[:, None] + normals[:, 0, None] * face_s[None, :]).ravel()
+    samples_per_face = sample_index.size; face_count = len(cells)
+    vx0 = np.tile(-base_velocity[sample_index, 0], face_count)
+    vz0 = np.tile(-base_velocity[sample_index, 2], face_count)
+    hit_x, _, _, _, survivor, exit_vx, exit_vz = trace_nodal(
+        nodal_potential, solid, x0, z0, vx0, vz0, float(species.charge_number),
+        nx, nz, int(max_steps), dt_cap, dt_field)
+    escaped = (hit_x < 0) & (survivor < 0.5) & (exit_vz < 0.0)
+    tiled_sample_index = np.tile(sample_index, face_count)
+    exit_forward = np.column_stack((
+        -exit_vx, base_velocity[tiled_sample_index, 1], -exit_vz))
+    exit_phase = (None if proposal.phase_rad is None
+                  else proposal.phase_rad[tiled_sample_index])
+    log_exit_density = species.log_flux_density(exit_forward, exit_phase)
+    surface_normal = -(
+        normals[:, 0, None] * base_velocity[sample_index, 0][None, :]
+        + normals[:, 1, None] * base_velocity[sample_index, 2][None, :]).ravel()
+    exit_normal = np.maximum(-exit_vz, 1e-300)
+    log_ratio = log_exit_density - np.tile(log_surface_density[sample_index], face_count)
+    with np.errstate(over="ignore", invalid="ignore"):
+        density_ratio = np.exp(log_ratio)
+    contribution = np.where(
+        escaped & (surface_normal > 0.0) & np.isfinite(log_ratio),
+        surface_normal / exit_normal * density_ratio, 0.0).reshape(face_count, samples_per_face)
+    weighted_contribution = contribution * quadrature_weight[None, :]
+    per_face[:] = weighted_contribution.sum(axis=1)
+    square_sum = np.sum(weighted_contribution * weighted_contribution, axis=1)
+    positive = square_sum > 0.0
+    effective_sample_size[positive] = per_face[positive] ** 2 / square_sum[positive]
+    dominant = np.argmax(weighted_contribution, axis=1)
+    dominant_sample_index[positive] = sample_index[dominant[positive]]
+    max_sample_fraction[positive] = (
+        weighted_contribution[np.where(positive)[0], dominant[positive]] / per_face[positive])
+    dominant_surface_velocity[positive] = base_velocity[dominant_sample_index[positive]]
+    exit_matrix = exit_forward.reshape(face_count, samples_per_face, 3)
+    dominant_exit_velocity[positive] = exit_matrix[np.where(positive)[0], dominant[positive]]
+    if want_energy:
+        impact_energy = np.sum(base_velocity[sample_index] ** 2, axis=1)
+        energy_numerator[:] = np.sum(weighted_contribution * impact_energy[None, :], axis=1)
     normalized_flux = float(per_face.mean())
     result = dict(normalized_flux=normalized_flux,
                   absolute_flux_m2_s=normalized_flux * species.flux_m2_s,
-                  per_face=per_face, per_cell=per_face)
+                  per_face=per_face, per_cell=per_face,
+                  effective_sample_size=effective_sample_size,
+                  max_sample_fraction=max_sample_fraction,
+                  dominant_sample_index=dominant_sample_index,
+                  dominant_surface_velocity=dominant_surface_velocity,
+                  dominant_exit_velocity=dominant_exit_velocity)
     if want_energy:
         result["mean_impact_energy_eV_per_face"] = np.divide(
             energy_numerator, per_face, out=np.zeros_like(per_face), where=per_face > 0.0)
@@ -201,7 +210,7 @@ def adaptive_adjoint_boundary_state_face_flux(
         n_face_position=4, base_log2=6, max_log2=12, n_replicates=4, seed=0,
         absolute_tolerance=1e-3, relative_tolerance=5e-3,
         element_absolute_tolerance=None, element_relative_tolerance=0.0, refine_fraction=0.5,
-        max_steps=None, dt_cap=0.15, dt_field=0.10):
+        max_steps=None, dt_cap=0.15, dt_field=0.10, initial_log2_samples=None):
     """Universally adapt randomized phase-space quadrature on arbitrary material faces."""
     physical = boundary.get(species_name)
     template = physical if proposal_species is None else proposal_species
@@ -227,7 +236,8 @@ def adaptive_adjoint_boundary_state_face_flux(
         base_log2=base_log2, max_log2=max_log2, n_replicates=n_replicates, seed=seed,
         absolute_tolerance=absolute_tolerance, relative_tolerance=relative_tolerance,
         element_absolute_tolerance=element_absolute_tolerance,
-        element_relative_tolerance=element_relative_tolerance, refine_fraction=refine_fraction)
+        element_relative_tolerance=element_relative_tolerance, refine_fraction=refine_fraction,
+        initial_log2_samples=initial_log2_samples)
 
 
 def adjoint_boundary_state_floor_flux(

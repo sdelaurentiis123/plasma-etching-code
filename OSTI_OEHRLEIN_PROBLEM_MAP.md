@@ -117,6 +117,14 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
   narrow per-face escape sets and the voltage iteration ran away. Therefore density support and numerical
   resolution are separate gates. The required fix is universal adaptive phase-space refinement per face,
   not voltage clipping, named-region rays, or accepting the emitted potentials.
+- The first heavy-tail diagnosis then found an upstream representation error: the continuous finite-
+  transit IEDF density had been built by binning the same small RF-phase rule used for transport, which
+  manufactured empty internal energy bins. The density now uses an independent dense deterministic
+  pushforward of uniform RF phase. This moved adaptive failure from iteration 8 to iteration 28 and
+  reduced the worst relevant face error from about 0.37 to about 0.022, without changing source physics.
+  Joint face/velocity adaptivity, effective-sample-size diagnostics, per-face warm starts, and batched
+  face tracing are now in place. The fixed point is still not declared converged: the remaining low-
+  flux sidewall importance map and CPU trajectory cost must close without loosening the current gate.
 
 ### Kill criteria
 

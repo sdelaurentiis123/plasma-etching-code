@@ -400,7 +400,7 @@ def qmc_boundary_proposal(template: SpeciesBoundaryState, log2_samples, seed=0, 
 def collisionless_sheath_boundary_state(sheath: CollisionlessRFSheath, flux_m2_s, *, n_phase=256,
                                          ion_name="ion", reference_plane_m=0.0,
                                          tangential_temperature_eV=None, n_transverse=3,
-                                         normal_energy_bins=64):
+                                         normal_energy_bins=64, density_phase_count=None):
     """Construct the common boundary state from the finite-transit collisionless sheath."""
     phase = 2.0 * np.pi * (np.arange(int(n_phase)) + 0.5) / int(n_phase)
     energy = sheath.ion_impact_energies(phase)
@@ -419,11 +419,21 @@ def collisionless_sheath_boundary_state(sheath: CollisionlessRFSheath, flux_m2_s
                                     np.sqrt(energy[ep.ravel()])))
         weight = (transverse_weight[ex.ravel()] * transverse_weight[ey.ravel()])
         sample_phase = phase[ep.ravel()]
-        span = max(float(np.ptp(energy)), 1e-6)
-        lo = max(0.0, float(energy.min()) - 0.01 * span)
-        hi = float(energy.max()) + 0.01 * span
+        # The transport quadrature and continuous-density representation have independent accuracy
+        # requirements. Binning only the output phase nodes creates artificial zero-density holes in
+        # the continuous pushforward of uniform RF phase, which causes catastrophic adjoint weights
+        # after even small electrostatic energy shifts. Densely integrate the same sheath map instead.
+        if density_phase_count is None:
+            density_phase_count = max(4096, 64 * int(normal_energy_bins))
+        density_phase = (2.0 * np.pi
+                         * (np.arange(int(density_phase_count)) + 0.5)
+                         / int(density_phase_count))
+        density_energy = sheath.ion_impact_energies(density_phase)
+        span = max(float(np.ptp(density_energy)), 1e-6)
+        lo = max(0.0, float(density_energy.min()) - 0.01 * span)
+        hi = float(density_energy.max()) + 0.01 * span
         edges = np.linspace(lo, hi, int(normal_energy_bins) + 1)
-        mass, _ = np.histogram(energy, bins=edges)
+        mass, _ = np.histogram(density_energy, bins=edges)
         density_model = IonEnergyTransverseMaxwellianDensity(
             edges, mass.astype(float), float(tangential_temperature_eV))
     ion = SpeciesBoundaryState(
