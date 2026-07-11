@@ -20,11 +20,17 @@ from scipy.stats import gamma as gamma_dist, norm, qmc
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from petch.charging2d import _build_edge_array_geometry
-from petch.charging_backward import backward_electron_gather, backward_ion_gather, self_consistent_backward
+from petch.charging_backward import (
+    backward_electron_gather,
+    backward_ion_gather,
+    self_consistent_backward,
+)
 from petch.charging_general import _trace_general
+from petch.charging_nodal import solve_nodal_laplace, trace_nodal
 
 
-def _forward_floor_flux(result, geometry, species, n_log2, seed, trace_dt, trace_dt_field):
+def _forward_floor_flux(result, geometry, species, n_log2, seed, trace_dt, trace_dt_field,
+                        nodal_fixed_dt=0.0):
     nx, nz = geometry["nx"], geometry["nz"]
     t0, t1 = geometry["trench0"], geometry["trench1"]
     sampler = qmc.Sobol(d=4 if species == "electron" else 3, scramble=True, seed=seed)
@@ -43,11 +49,17 @@ def _forward_floor_flux(result, geometry, species, n_log2, seed, trace_dt, trace
         xcoord = u[:, 2]
         charge = 1.0
     x = xcoord * nx
-    z = np.full_like(x, 0.51)
-    hit_x, hit_z, *_ = _trace_general(
-        result["Ex"], result["Ez"], geometry["solid"], x, z, vx, vz, charge, nx, nz,
-        200 * nz, trace_dt, trace_dt_field,
-    )
+    if "nodal_V" in result:
+        z = np.full_like(x, 1e-3)
+        hit_x, hit_z, *_ = trace_nodal(
+            result["nodal_V"], geometry["solid"], x, z, vx, vz, charge, nx, nz,
+            200 * nz, trace_dt, trace_dt_field, nodal_fixed_dt)
+    else:
+        z = np.full_like(x, 0.51)
+        hit_x, hit_z, *_ = _trace_general(
+            result["Ex"], result["Ez"], geometry["solid"], x, z, vx, vz, charge, nx, nz,
+            200 * nz, trace_dt, trace_dt_field,
+        )
     floor_hit = (hit_z == nz - 1) & (hit_x >= t0) & (hit_x < t1)
     # Convert probability under a source uniform over nx to flux per trench-opening width.
     return float(floor_hit.mean() * nx / (t1 - t0))
@@ -64,6 +76,8 @@ def main():
     parser.add_argument("--trace-dt-field", type=float, default=0.10)
     parser.add_argument("--exit-energy-mixture", type=float, default=0.2)
     parser.add_argument("--solve-with-exit-estimator", action="store_true")
+    parser.add_argument("--nodal-mover", action="store_true")
+    parser.add_argument("--nodal-fixed-dt", type=float, default=0.0)
     args = parser.parse_args()
 
     mouth = args.mouth if args.mouth is not None else 5 * args.width
@@ -74,6 +88,10 @@ def main():
         ion_exit_state_weight=args.solve_with_exit_estimator,
         ion_exit_energy_mixture=(args.exit_energy_mixture if args.solve_with_exit_estimator else 0.0),
     )
+    nodal_diag = None
+    if args.nodal_mover:
+        result["nodal_V"], nodal_diag = solve_nodal_laplace(
+            geometry["solid"], result["Vs"], sweeps=3000, omega=1.7, tolerance=1e-8)
     t0, t1, fz = geometry["trench0"], geometry["trench1"], geometry["nz"] - 1
     cells = [(x, fz) for x in range(t0, t1)]
     normals = [(0.0, -1.0)] * len(cells)
@@ -81,11 +99,13 @@ def main():
         geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
         n_log2=args.charge_log2 + 2, n_scramble=3, seed=101,
         trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
+        nodal_potential=result.get("nodal_V"),
     ).mean())
     backward_i = float(backward_ion_gather(
         geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
         n_log2=args.charge_log2 + 2, n_scramble=3, seed=103, ied_phase_exponent=0.0,
         trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
+        nodal_potential=result.get("nodal_V"),
     ).mean())
     backward_i_exit = float(backward_ion_gather(
         geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
@@ -93,16 +113,20 @@ def main():
         exit_state_weight=True,
         exit_energy_mixture=args.exit_energy_mixture,
         trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
+        nodal_potential=result.get("nodal_V"),
     ).mean())
     forward_e = _forward_floor_flux(result, geometry, "electron", args.score_log2, 107,
-                                    args.trace_dt, args.trace_dt_field)
+                                    args.trace_dt, args.trace_dt_field, args.nodal_fixed_dt)
     forward_i = _forward_floor_flux(result, geometry, "ion", args.score_log2, 109,
-                                    args.trace_dt, args.trace_dt_field)
+                                    args.trace_dt, args.trace_dt_field, args.nodal_fixed_dt)
 
     print(f"W={args.width} mouth={mouth} iterations={result['iterations']} floor={result['floor_mean']:.3f} V "
           f"trace_dt={args.trace_dt:g}/{args.trace_dt_field:g}")
     print(f"field residual rms={result['field_final']['rms']:.3e}; "
           f"charge residual rms={result['balance_preupdate']['rms_log_ratio']:.3e}")
+    if nodal_diag is not None:
+        print(f"nodal residual max={nodal_diag['max_abs']:.3e} rms={nodal_diag['rms']:.3e} "
+              f"sweeps={nodal_diag['sweeps']}")
     for name, backward, forward in (("electron", backward_e, forward_e),
                                     ("ion-1d", backward_i, forward_i),
                                     (f"ion-exit-{args.exit_energy_mixture:g}", backward_i_exit, forward_i)):

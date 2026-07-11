@@ -94,6 +94,12 @@ moves the floor from 38.8 V to 36.4 V, reduces charging-residual RMS from about 
 against HG: iteration 10 is not current-balanced, W16 electron reciprocity is still +13%, and the solver
 default remains unchanged until spatial and sample convergence are enforced together.
 
+A standalone boundary-fitted nodal Laplace/Q1 tracer now passes analytic field, exact-face absorption,
+no-tunnelling, and manufactured electron/ion reciprocity gates. On the high-stat W32 frozen AR4 audit it
+closes corrected-ion reciprocity to +1.6% but leaves electron reciprocity at -7.6%; therefore it is not a
+production replacement and is not wired into the fixed point. This separates the remaining frontier:
+electron adjoint proposal/source-boundary measure, with adequate rare-event importance sampling.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark

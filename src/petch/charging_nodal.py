@@ -11,6 +11,12 @@ from __future__ import annotations
 
 import numpy as np
 
+try:
+    from numba import njit, prange
+except Exception:  # pragma: no cover
+    njit = None
+    prange = range
+
 
 def nodal_domain(solid, surface_voltage):
     """Construct active and Dirichlet node data from a cell-centred material grid.
@@ -146,3 +152,110 @@ def nodal_field_at(V, x, z):
     ez = -((1.0 - fx) * (V[i, j + 1] - V[i, j])
            + fx * (V[i + 1, j + 1] - V[i + 1, j]))
     return float(ex), float(ez)
+
+
+def _nodal_field_scalar(V, x, z, nx, nz):
+    i = int(np.floor(x)); j = int(np.floor(z))
+    if i < 0: i = 0
+    elif i > nx - 1: i = nx - 1
+    if j < 0: j = 0
+    elif j > nz - 1: j = nz - 1
+    fx = x - i; fz = z - j
+    if fx < 0.0: fx = 0.0
+    elif fx > 1.0: fx = 1.0
+    if fz < 0.0: fz = 0.0
+    elif fz > 1.0: fz = 1.0
+    ex = -((1.0 - fz) * (V[i + 1, j] - V[i, j])
+           + fz * (V[i + 1, j + 1] - V[i, j + 1]))
+    ez = -((1.0 - fx) * (V[i, j + 1] - V[i, j])
+           + fx * (V[i + 1, j + 1] - V[i + 1, j]))
+    return ex, ez
+
+
+if njit is not None:
+    _nodal_field_scalar = njit(cache=True, fastmath=True)(_nodal_field_scalar)
+
+
+def _trace_nodal_py(V, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_cap, dt_field,
+                    fixed_dt=0.0):
+    """Trace particles in the boundary-fitted nodal field with exact first-face absorption.
+
+    Midpoint field iteration is second order in smooth elements. Adaptive substeps move less than
+    ``dt_cap`` cells per coordinate. Before accepting a cell change, a DDA face test identifies the
+    first crossed face and its adjacent cell, preventing particles from tunnelling through thin solids.
+    """
+    n = x0.shape[0]
+    hit_ix = np.full(n, -1, np.int64); hit_iz = np.full(n, -1, np.int64)
+    impact_E = np.zeros(n); hit_vx = np.zeros(n); survivor = np.zeros(n, np.uint8)
+    exit_vx = np.zeros(n); exit_vz = np.zeros(n)
+    for p in prange(n):
+        x = x0[p]; z = z0[p]; vx = vx0[p]; vz = vz0[p]
+        alive = True
+        for _ in range(max_steps):
+            ex, ez = _nodal_field_scalar(V, x, z, nx, nz)
+            vmax = max(abs(vx), abs(vz), 0.8)
+            field = max((ex * ex + ez * ez) ** 0.5, 1.0e-9)
+            dt = fixed_dt if fixed_dt > 0.0 else min(dt_cap / vmax, dt_field / field ** 0.5)
+            vxn = vx + 0.5 * q * ex * dt
+            vzn = vz + 0.5 * q * ez * dt
+            xa = x + 0.5 * (vx + vxn) * dt
+            za = z + 0.5 * (vz + vzn) * dt
+            for _mid in range(4):
+                xm = 0.5 * (x + xa); zm = 0.5 * (z + za)
+                emx, emz = _nodal_field_scalar(V, xm, zm, nx, nz)
+                vxn = vx + 0.5 * q * emx * dt
+                vzn = vz + 0.5 * q * emz * dt
+                xa = x + 0.5 * (vx + vxn) * dt
+                za = z + 0.5 * (vz + vzn) * dt
+
+            dx = xa - x; dz = za - z
+            ci = int(np.floor(x)); cj = int(np.floor(z))
+            tx = 2.0; tz = 2.0; ni = ci; nj = cj
+            if dx > 0.0:
+                tx = (ci + 1.0 - x) / dx; ni = ci + 1
+            elif dx < 0.0:
+                tx = (ci - x) / dx; ni = ci - 1
+            if dz > 0.0:
+                tz = (cj + 1.0 - z) / dz; nj = cj + 1
+            elif dz < 0.0:
+                tz = (cj - z) / dz; nj = cj - 1
+
+            crossed = False; hi = -1; hj = -1; hit_fraction = 2.0
+            # Test every grid face crossed by this short segment. The orthogonal cell index is
+            # evaluated AT the crossing, so a gas-gas crossing followed by a solid crossing cannot
+            # tunnel through a corner.
+            if tx >= 0.0 and tx <= 1.0:
+                test_i = ni; test_j = int(np.floor(z + dz * tx))
+                if test_i >= 0 and test_i < nx and test_j >= 0 and test_j < nz:
+                    if solid[test_i, test_j]:
+                        crossed = True; hi = test_i; hj = test_j; hit_fraction = tx
+            if tz >= 0.0 and tz <= 1.0:
+                test_i = int(np.floor(x + dx * tz)); test_j = nj
+                if test_j < 0 and tz < hit_fraction:
+                    exit_vx[p] = vx + tz * (vxn - vx)
+                    exit_vz[p] = vz + tz * (vzn - vz)
+                    alive = False; break
+                if (test_i >= 0 and test_i < nx and test_j >= 0 and test_j < nz
+                        and solid[test_i, test_j] and tz < hit_fraction):
+                    crossed = True; hi = test_i; hj = test_j; hit_fraction = tz
+            if not crossed and tx >= 0.0 and tx <= 1.0 and (ni < 0 or ni >= nx):
+                xa = 0.0 if ni < 0 else float(nx); vxn = -vxn
+            if not crossed and tz >= 0.0 and tz <= 1.0 and nj >= nz:
+                za = float(nz); vzn = -vzn
+            if crossed:
+                xa = x + dx * hit_fraction; za = z + dz * hit_fraction
+                hit_vxn = vx + hit_fraction * (vxn - vx)
+                hit_vzn = vz + hit_fraction * (vzn - vz)
+                hit_ix[p] = hi; hit_iz[p] = hj
+                impact_E[p] = hit_vxn * hit_vxn + hit_vzn * hit_vzn; hit_vx[p] = hit_vxn
+                alive = False; break
+            x = xa; z = za; vx = vxn; vz = vzn
+            if z <= 0.0:
+                exit_vx[p] = vx; exit_vz[p] = vz; alive = False; break
+        if alive:
+            survivor[p] = 1
+    return hit_ix, hit_iz, impact_E, hit_vx, survivor, exit_vx, exit_vz
+
+
+trace_nodal = (njit(cache=True, parallel=True, fastmath=True)(_trace_nodal_py)
+               if njit is not None else _trace_nodal_py)

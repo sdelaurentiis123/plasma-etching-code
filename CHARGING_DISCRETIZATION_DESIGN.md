@@ -69,6 +69,20 @@ conservation alone is insufficient. Relevant primary sources:
 7. Only then wire the nodal field through the deterministic fixed point and compare converged current
    residuals. HG remains a simulation reference, not a tuning target.
 
+### First nodal implementation result (2026-07-11)
+
+The standalone nodal Laplace solver and Q1 element-local tracer now pass parallel-plate potential/field,
+uniform-field impact energy, one-cell no-tunnelling, diagonal two-face crossing, and manufactured linear-
+field electron/ion reciprocity gates. The tracer resolves absorption at the first material-face event.
+
+The frozen AR4 audit is not yet a joint pass. At W32 and the required high ion statistics, corrected ion
+reciprocity is +1.6%, while electron reciprocity is -7.6%. A direct surface-Maxwellian/Liouville electron
+proposal passed the linear-field gate but became an unusable rare-event estimator on a +39 V floor (zero
+escapes at the available deterministic sample count), so it was removed rather than promoted. The nodal
+field/tracer remains experimental and is not wired into the charging fixed point. The next task is a
+low-variance, support-complete electron adjoint proposal with its full 3-D-to-2-D marginal/Jacobian derived
+and scramble uncertainty reported.
+
 The structured nodal implementation should remain embarrassingly parallel over particles and amenable
 to Warp/CUDA. General 3-D curved geometry can later replace Q1 rectangles with AMReX-style embedded
 boundaries or boundary-fitted simplex elements without changing the phase-space scoring derivation.

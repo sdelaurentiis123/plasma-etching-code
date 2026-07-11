@@ -34,6 +34,7 @@ import numpy as np
 from scipy.stats import qmc, gamma as gammadist, norm
 
 from .charging_general import _trace_general
+from .charging_nodal import trace_nodal
 
 
 def _cone_angles(x0, z0, aperture, pad):
@@ -95,7 +96,8 @@ def _draw_absmass(lo, hi, u):
 
 def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
                              n_log2=13, n_scramble=3, trace_dt=0.15, trace_dt_field=0.10,
-                             trace_steps=200, seed=0, aperture=None, pad_deg=6.0, alpha=0.85):
+                             trace_steps=200, seed=0, aperture=None, pad_deg=6.0, alpha=0.85,
+                             nodal_potential=None):
     """Backward electron flux per cell (fraction of incident electron flux; open flat V=0 -> 1).
 
     Incident-energy sampling: E_top ~ Gamma(2,Te) flux-Maxwellian, Lambert cos-flux angle about
@@ -167,8 +169,14 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
             face_s = u[:, 5] - 0.5
             x0 = x0c - nnz * face_s
             z0 = z0c + nnx * face_s
-            hix, hiz, _, _, surv, _, _ = _trace_general(Ex, Ez, solid, x0, z0, vX, vZ, -1.0, nx, nz,
-                                                        msteps, trace_dt, trace_dt_field)
+            if nodal_potential is None:
+                hix, hiz, _, _, surv, _, _ = _trace_general(
+                    Ex, Ez, solid, x0, z0, vX, vZ, -1.0, nx, nz,
+                    msteps, trace_dt, trace_dt_field)
+            else:
+                hix, hiz, _, _, surv, _, _ = trace_nodal(
+                    nodal_potential, solid, x0, z0, vX, vZ, -1.0, nx, nz,
+                    msteps, trace_dt, trace_dt_field)
             escaped = (hix < 0) & (surv < 0.5) & emit
             ratio = vdotn / np.maximum(np.abs(vZ), 0.3)
             # NOTE: a naive score-at-exit reweight |vz_exit|/|vz_implied| amplifies the tracer's dt energy
@@ -183,7 +191,7 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
                         n_log2=13, n_scramble=3, trace_dt=0.15, trace_dt_field=0.10, trace_steps=200,
                         seed=0, aperture=None, pad_deg=3.0, alpha=0.85, want_energy=False,
                         ied_phase_exponent=0.0, exit_state_weight=False,
-                        exit_energy_mixture=0.0):
+                        exit_energy_mixture=0.0, nodal_potential=None):
     """Backward ion flux per cell (fraction of incident ion flux; open flat V=0 -> 1).
 
     Incident ion: uniform RF phase -> Vs=V_dc+V_rf*sin (analytic instantaneous-sheath arcsine IED),
@@ -259,10 +267,14 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
             face_s = u[:, 4] - 0.5
             x0 = x0c - nnz * face_s
             z0 = z0c + nnx * face_s
-            hix, hiz, _, _, surv, exit_vx, exit_vz = _trace_general(
-                Ex, Ez, solid, x0, z0, vX, vZ, 1.0, nx, nz,
-                msteps, trace_dt, trace_dt_field,
-            )
+            if nodal_potential is None:
+                hix, hiz, _, _, surv, exit_vx, exit_vz = _trace_general(
+                    Ex, Ez, solid, x0, z0, vX, vZ, 1.0, nx, nz,
+                    msteps, trace_dt, trace_dt_field)
+            else:
+                hix, hiz, _, _, surv, exit_vx, exit_vz = trace_nodal(
+                    nodal_potential, solid, x0, z0, vX, vZ, 1.0, nx, nz,
+                    msteps, trace_dt, trace_dt_field)
             escaped = (hix < 0) & (surv < 0.5) & emit
             ratio = vdotn / np.maximum(np.abs(vZ), 0.3)
             if exit_state_weight:
