@@ -279,6 +279,20 @@ def test_general_charging_solver_uses_only_material_grid_components_and_boundary
     assert result["current_scale_m2_s"] == 1e19
 
 
+def test_general_charging_rejects_material_on_grounded_plasma_reference_plane():
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.1, 0.1]), np.array([-0.1, 0.1]), np.array([0.9, 1.1])),
+        np.ones((1, 1, 1)))
+    velocity = [[0.0, 0.0, 1.0]]
+    boundary = PlasmaBoundaryState((
+        SpeciesBoundaryState("ion", 1, 40.0, 1.0, velocity, [1.0], density_model=density),
+        SpeciesBoundaryState("electron", -1, 5.4858e-4, 1.0, velocity, [1.0], density_model=density),
+    ), reference_plane_m=0.0)
+    solid = np.zeros((8, 6), dtype=bool); solid[3, 0] = True
+    with pytest.raises(ValueError, match="gas-only top row"):
+        solve_boundary_state_charging(solid, np.zeros_like(solid, dtype=int), boundary)
+
+
 def test_charging_trust_region_rolls_back_merit_increase():
     nx, nz = 8, 6
     solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True

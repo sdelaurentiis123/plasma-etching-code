@@ -548,6 +548,9 @@ def solve_boundary_state_charging(
         raise ValueError("conductor_ids must be a nonnegative integer grid matching solid")
     if np.any((conductor_ids > 0) & ~solid):
         raise ValueError("conductor ids may only label solid cells")
+    if np.any(solid[:, 0]):
+        raise ValueError(
+            "plasma reference plane must be a gas-only top row above all material")
 
     def selected_species(selection, positive):
         if selection is None:
