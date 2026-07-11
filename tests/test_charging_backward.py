@@ -135,3 +135,23 @@ def test_backward_forward_electron_reciprocity_in_zero_field_trench():
     forward = np.mean((hit_z == floor_z) & (hit_x > left) & (hit_x < right))
 
     assert np.isclose(backward, forward, rtol=0.04, atol=0.005), (backward, forward)
+
+
+def test_trace_general_bounds_energy_error_in_uniform_field_at_production_step():
+    """Manufactured 1-D orbit: v^2 + qV is constant with V=-z and q=+1."""
+    nx, nz = 8, 16
+    solid = np.zeros((nx, nz), dtype=bool)
+    solid[:, 12:] = True
+    Ex = np.zeros((nx, nz), dtype=float)
+    Ez = np.ones((nx, nz), dtype=float)
+    x = np.array([4.0]); z = np.array([1.0])
+    vx = np.array([0.0]); vz = np.array([1.0])
+
+    hit_x, hit_z, impact_energy, *_ = _trace_general(
+        Ex, Ez, solid, x, z, vx, vz, 1.0, nx, nz,
+        1000, 0.15, 0.10,
+    )
+
+    assert hit_x[0] >= 0 and hit_z[0] == 12
+    # Cell-crossing impact detection limits this gate; the production step stays below 0.7% error.
+    assert np.isclose(impact_energy[0], 12.0, atol=0.08)
