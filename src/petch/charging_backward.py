@@ -119,7 +119,7 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
         a_mix = alpha if cone is not None else 0.0
         vals = []
         for sc in range(n_scramble):
-            s = qmc.Sobol(d=5, scramble=True, seed=seed + sc)
+            s = qmc.Sobol(d=6, scramble=True, seed=seed + sc)
             u = s.random_base2(n_log2)
             E_top = gammadist.ppf(u[:, 0], a=2.0, scale=Te)
             E_surf = E_top + Vc
@@ -156,7 +156,12 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
             vX = vperp; vZ = -vz_surf
             vdotn = vX * nnx + vZ * nnz
             emit = valid & (vdotn > 0.0)
-            x0 = np.full(N, x0c); z0 = np.full(N, z0c)
+            # Integrate uniformly over the finite face, not only its center. Face-center collocation
+            # creates a deterministic 6-16% reciprocity bias on coarse HAR grids that more rays cannot
+            # remove. The tangent (-nz,nx) spans one cell-face length.
+            face_s = u[:, 5] - 0.5
+            x0 = x0c - nnz * face_s
+            z0 = z0c + nnx * face_s
             hix, hiz, _, _, surv, _, _ = _trace_general(Ex, Ez, solid, x0, z0, vX, vZ, -1.0, nx, nz,
                                                         msteps, trace_dt, trace_dt_field)
             escaped = (hix < 0) & (surv < 0.5) & emit
@@ -193,7 +198,7 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
         a_mix = alpha if cone is not None else 0.0
         vals = []; evals = []
         for sc in range(n_scramble):
-            s = qmc.Sobol(d=4, scramble=True, seed=seed + sc)
+            s = qmc.Sobol(d=5, scramble=True, seed=seed + sc)
             u = s.random_base2(n_log2)
             ph = u[:, 0] * 2.0 * np.pi
             Vs = V_dc + V_rf * np.sin(ph)
@@ -220,7 +225,9 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
             vX = vperp; vZ = -vz_surf
             vdotn = vX * nnx + vZ * nnz
             emit = valid & (vdotn > 0.0)
-            x0 = np.full(u.shape[0], x0c); z0 = np.full(u.shape[0], z0c)
+            face_s = u[:, 4] - 0.5
+            x0 = x0c - nnz * face_s
+            z0 = z0c + nnx * face_s
             hix, hiz, _, _, surv, _, _ = _trace_general(Ex, Ez, solid, x0, z0, vX, vZ, 1.0, nx, nz,
                                                         msteps, trace_dt, trace_dt_field)
             escaped = (hix < 0) & (surv < 0.5) & emit
