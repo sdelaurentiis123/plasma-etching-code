@@ -4,10 +4,12 @@ import pytest
 from petch.boundary_state import (
     PlasmaBoundaryState,
     IonEnergyTransverseMaxwellianDensity,
+    MaxwellianFluxVelocityDensity,
     RectilinearVelocityHistogramDensity,
     SpeciesBoundaryState,
     collisionless_sheath_boundary_state,
     instantaneous_sinusoidal_ion_boundary_state,
+    maxwellian_electron_boundary_state,
 )
 from petch.sheath import CollisionlessRFSheath, ECHARGE
 
@@ -80,4 +82,16 @@ def test_finite_transit_sheath_builds_normalized_continuous_ion_density():
     assert ion.velocity_sqrt_eV.shape == (64 * 3 * 3, 3)
     assert np.isclose(ion.weight.sum(), 1.0)
     assert np.all(np.isfinite(ion.log_flux_density(ion.velocity_sqrt_eV)))
+
+
+def test_electron_boundary_is_analytic_half_maxwellian_flux_quadrature():
+    state = maxwellian_electron_boundary_state(
+        4.0, 2e19, n_transverse=5, n_normal=8, electron_name="e-")
+    electron = state.get("e-")
+    assert isinstance(electron.density_model, MaxwellianFluxVelocityDensity)
+    assert electron.velocity_sqrt_eV.shape == (5 * 5 * 8, 3)
+    assert np.isclose(electron.weight.sum(), 1.0)
+    # Flux-weighted half-Maxwellian: T/2 in each tangent plus T in the normal direction.
+    assert np.isclose(electron.mean_energy_eV, 8.0, atol=1e-12)
+    assert np.all(np.isfinite(electron.log_flux_density(electron.velocity_sqrt_eV)))
     RectilinearVelocityHistogramDensity,

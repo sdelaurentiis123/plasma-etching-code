@@ -106,6 +106,35 @@ class IonEnergyTransverseMaxwellianDensity:
         return result.reshape(velocity.shape[:-1])
 
 
+@dataclass(frozen=True)
+class MaxwellianFluxVelocityDensity:
+    """Normalized half-space Maxwellian flux density in energy-scaled velocity coordinates.
+
+    With ``|v|^2`` measured in eV, the two tangential components have density
+    ``exp(-v_t^2/T)/sqrt(pi*T)`` and the positive incident-normal component has density
+    ``2*vz*exp(-vz^2/T)/T``. This is the kinetic flux measure, not a fitted angular law.
+    """
+    temperature_eV: float
+
+    def __post_init__(self):
+        if not np.isfinite(self.temperature_eV) or self.temperature_eV <= 0.0:
+            raise ValueError("Maxwellian temperature must be positive and finite")
+
+    def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None):
+        velocity = np.asarray(velocity_sqrt_eV, dtype=float)
+        if velocity.shape[-1] != 3:
+            raise ValueError("velocity must end in three components")
+        flat = velocity.reshape(-1, 3); vz = flat[:, 2]
+        result = np.full(flat.shape[0], -np.inf)
+        valid = vz > 0.0
+        if valid.any():
+            temperature = float(self.temperature_eV)
+            energy = np.sum(flat[valid] ** 2, axis=1)
+            result[valid] = (np.log(2.0 * vz[valid]) - np.log(np.pi)
+                             - 2.0 * np.log(temperature) - energy / temperature)
+        return result.reshape(velocity.shape[:-1])
+
+
 def _readonly_array(value, shape_tail=()):
     array = np.asarray(value, dtype=float).copy()
     if array.ndim != 1 + len(shape_tail) or (shape_tail and array.shape[1:] != shape_tail):
@@ -199,6 +228,41 @@ class PlasmaBoundaryState:
     @property
     def current_density_A_m2(self):
         return float(ECHARGE * sum(item.charge_number * item.flux_m2_s for item in self.species))
+
+
+def maxwellian_electron_boundary_state(temperature_eV, flux_m2_s, *, n_transverse=5, n_normal=8,
+                                        electron_name="electron", reference_plane_m=0.0):
+    """Construct a deterministic electron half-Maxwellian flux quadrature.
+
+    Gauss-Hermite integrates each tangential Maxwellian and Gauss-Laguerre integrates the exponential
+    normal-energy distribution. The nodes and weights are numerical quadrature only; the physical law
+    is the analytic kinetic flux density above.
+    """
+    temperature = float(temperature_eV)
+    if temperature <= 0.0 or int(n_transverse) <= 0 or int(n_normal) <= 0:
+        raise ValueError("positive temperature and quadrature orders are required")
+    hermite_node, hermite_weight = np.polynomial.hermite.hermgauss(int(n_transverse))
+    laguerre_node, laguerre_weight = np.polynomial.laguerre.laggauss(int(n_normal))
+    ix, iy, iz = np.meshgrid(
+        np.arange(hermite_node.size), np.arange(hermite_node.size),
+        np.arange(laguerre_node.size), indexing="ij")
+    velocity = np.column_stack((
+        np.sqrt(temperature) * hermite_node[ix.ravel()],
+        np.sqrt(temperature) * hermite_node[iy.ravel()],
+        np.sqrt(temperature * laguerre_node[iz.ravel()]),
+    ))
+    weight = (hermite_weight[ix.ravel()] * hermite_weight[iy.ravel()]
+              * laguerre_weight[iz.ravel()] / np.pi)
+    electron = SpeciesBoundaryState(
+        name=electron_name, charge_number=-1, mass_amu=5.485799e-4,
+        flux_m2_s=float(flux_m2_s), velocity_sqrt_eV=velocity, weight=weight,
+        density_model=MaxwellianFluxVelocityDensity(temperature),
+        provenance={"model": "analytic_half_maxwellian_flux"},
+    )
+    return PlasmaBoundaryState(
+        species=(electron,), reference_plane_m=float(reference_plane_m),
+        provenance={"source": "kinetic_maxwellian"},
+    )
 
 
 def collisionless_sheath_boundary_state(sheath: CollisionlessRFSheath, flux_m2_s, *, n_phase=256,
