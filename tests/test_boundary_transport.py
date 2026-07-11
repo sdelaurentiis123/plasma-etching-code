@@ -6,6 +6,7 @@ from petch.boundary_state import (
     RectilinearVelocityHistogramDensity,
     SpeciesBoundaryState,
     instantaneous_sinusoidal_ion_boundary_state,
+    maxwellian_electron_boundary_state,
 )
 from petch.boundary_transport import (
     adaptive_adjoint_boundary_state_face_flux,
@@ -276,6 +277,37 @@ def test_general_charging_solver_uses_only_material_grid_components_and_boundary
     assert abs(result["conductor_voltage"][1]) <= 2e-15
     assert set(result["species_current"]) == {"positive_a", "positive_b", "negative"}
     assert result["current_scale_m2_s"] == 1e19
+
+
+def test_charging_trust_region_rolls_back_merit_increase():
+    nx, nz = 8, 6
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    conductor_ids = np.zeros_like(solid, dtype=int)
+    ion_density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.2, 0.2]), np.array([-0.2, 0.2]), np.array([1.0, 2.0])),
+        np.ones((1, 1, 1)))
+    ion = SpeciesBoundaryState(
+        "ion", 1, 40.0, 1.0, [[0.0, 0.0, 1.25], [0.0, 0.0, 1.75]], [1.0, 1.0],
+        density_model=ion_density)
+    electron = maxwellian_electron_boundary_state(
+        1.0, 1.0, n_transverse=3, n_normal=6).get("electron")
+    boundary = PlasmaBoundaryState((ion, electron), reference_plane_m=0.0)
+    initial = np.zeros_like(solid, dtype=float); initial[solid] = 1.0
+    result = solve_boundary_state_charging(
+        solid, conductor_ids, boundary, initial_surface_voltage=initial,
+        n_iter=20, min_iter=2, balance_tol=0.1, beta=0.8, dVmax=2.0,
+        field_sweeps=100, trust_region=True)
+    accepted_merit = np.array([
+        item["max_abs_log_ratio"] for item in result["interval_balance_history"]])
+    assert result["rejected_steps"] >= 1
+    assert np.all(np.diff(accepted_merit) <= 1e-14)
+    assert result["interval_balance_final"]["max_abs_log_ratio"] <= 0.1
+    accelerated = solve_boundary_state_charging(
+        solid, conductor_ids, boundary, initial_surface_voltage=initial,
+        n_iter=20, min_iter=2, balance_tol=0.1, beta=0.8, dVmax=2.0,
+        field_sweeps=100, trust_region=True, nonlinear_update="anderson")
+    assert accelerated["interval_balance_final"]["max_abs_log_ratio"] <= 0.1
+    assert accelerated["iterations"] <= result["iterations"]
 
 
 def _uniform_box_species(name, charge, flux, vx_edges, vz_edges, nx=8, nz=16):

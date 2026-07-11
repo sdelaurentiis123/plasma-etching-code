@@ -351,7 +351,8 @@ def adaptive_forward_boundary_state_cell_flux(
 def bidirectional_boundary_state_cell_flux(
         boundary, species_name, nodal_potential, solid, cells, normals, *,
         proposal_species=None, adjoint_options=None, forward_options=None,
-        element_absolute_tolerance=1e-3, element_relative_tolerance=0.05):
+        element_absolute_tolerance=1e-3, element_relative_tolerance=0.05,
+        method_hint=None, switch_factor=2.0):
     """Select forward or adjoint current per physical cell solely by measured uncertainty.
 
     This is not a named-region switch. Both unbiased estimators use the same physical boundary density;
@@ -371,6 +372,12 @@ def bidirectional_boundary_state_cell_flux(
         proposal_species=proposal_species, **adjoint_kwargs)
 
     unique_cells = list(dict.fromkeys(cells))
+    if method_hint is not None:
+        method_hint = np.asarray(method_hint)
+        if method_hint.shape != (len(unique_cells),):
+            raise ValueError("method_hint must match the number of unique cells")
+    if switch_factor < 1.0:
+        raise ValueError("switch_factor must be at least one")
     forward = adaptive_forward_boundary_state_cell_flux(
         boundary, species_name, nodal_potential, solid, unique_cells,
         proposal_species=None, **forward_kwargs)
@@ -385,10 +392,20 @@ def bidirectional_boundary_state_cell_flux(
         adjoint_stderr = float(adjoint_replicates.std(ddof=1) / np.sqrt(adjoint_replicates.size))
         forward_mean = float(forward.element_mean[cell_index])
         forward_stderr = float(forward.element_stderr[cell_index])
-        if forward_stderr < adjoint_stderr:
-            mean, stderr, chosen = forward_mean, forward_stderr, "forward"
+        forward_metric = forward_stderr / max(abs(forward_mean), element_absolute_tolerance)
+        adjoint_metric = adjoint_stderr / max(abs(adjoint_mean), element_absolute_tolerance)
+        preferred = "forward" if forward_metric < adjoint_metric else "adjoint"
+        if method_hint is not None and method_hint[cell_index] in ("forward", "adjoint"):
+            hinted = str(method_hint[cell_index])
+            hinted_metric = forward_metric if hinted == "forward" else adjoint_metric
+            other_metric = adjoint_metric if hinted == "forward" else forward_metric
+            chosen = preferred if hinted_metric > switch_factor * other_metric else hinted
         else:
-            mean, stderr, chosen = adjoint_mean, adjoint_stderr, "adjoint"
+            chosen = preferred
+        if chosen == "forward":
+            mean, stderr = forward_mean, forward_stderr
+        else:
+            mean, stderr = adjoint_mean, adjoint_stderr
         allowed = element_absolute_tolerance + element_relative_tolerance * abs(mean)
         converged &= stderr <= allowed
         index = first_face[cell]

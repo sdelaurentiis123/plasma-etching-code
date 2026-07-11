@@ -138,6 +138,13 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
   residual about 2.34. The remaining blocker is the globally coupled nonlinear solve and estimator-method
   switching, not license to accept the ±10 V iterate. A merit-decreasing trust-region/Anderson step with
   common estimator states is required before this gate is closed.
+- Repository-history review found that a prior deterministic Anderson solver initially converged but its
+  clipped near-zero-flux history later poisoned deep-AR updates; the new solver therefore admits only
+  confidence-certified accepted residuals and clears acceleration history on rejection. Full rollback now
+  restores voltages, conductor components, adaptive levels, and forward/adjoint method choices. Safeguarded
+  Picard reduced the certified max residual to about 1.90 (RMS 0.67) but a global trust factor throttled all
+  surface capacitors because a few contacts were stiff. Anderson did not beat Picard and remains rejected.
+  The next numerical gate is per-degree-of-freedom trust scaling with the same global acceptance test.
 
 ### Kill criteria
 

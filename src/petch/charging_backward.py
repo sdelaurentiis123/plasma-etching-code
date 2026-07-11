@@ -528,7 +528,9 @@ def solve_boundary_state_charging(
         initial_surface_voltage=None, n_iter=40, beta=0.5, response_energy_eV=4.0, dVmax=8.0,
         balance_tol=1e-3, min_iter=2, field_sweeps=500, field_tolerance=1e-9,
         boundary_proposals=None, n_face_position=8, adaptive_quadrature=None,
-        active_flux=1e-4, current_confidence_sigma=2.0):
+        active_flux=1e-4, current_confidence_sigma=2.0,
+        trust_region=True, trust_growth_tolerance=0.02, minimum_beta=1e-4,
+        trust_merit="rms", nonlinear_update="picard", anderson_depth=6):
     """Geometry- and chemistry-agnostic deterministic charging fixed point.
 
     ``solid`` is the 2-D material occupancy grid and ``conductor_ids`` assigns zero to locally floating
@@ -583,6 +585,21 @@ def solve_boundary_state_charging(
         values = surface_voltage[conductor_ids == component]
         conductor_voltage[component] = float(values.mean()) if values.size else 0.0
     history = []; interval_history = []; field_history = []; quadrature_history = []; adaptive_levels = {}
+    beta_current = float(beta); pending_step = None; rejected_steps = 0
+    trial_merit_history = []; accepted_beta_history = []
+    hybrid_method_hint = {}
+    if trust_merit not in ("rms", "max"):
+        raise ValueError("trust_merit must be 'rms' or 'max'")
+    if nonlinear_update not in ("picard", "anderson"):
+        raise ValueError("nonlinear_update must be 'picard' or 'anderson'")
+    if int(anderson_depth) < 1:
+        raise ValueError("anderson_depth must be positive")
+    anderson_x = []; anderson_f = []
+    insulator_cells = []
+    seen_insulator_cells = set()
+    for face_index, cell in enumerate(cells):
+        if components[face_index] == 0 and cell not in seen_insulator_cells:
+            seen_insulator_cells.add(cell); insulator_cells.append(cell)
     for iteration in range(int(n_iter)):
         for component in range(1, conductor_voltage.size):
             surface_voltage[conductor_ids == component] = conductor_voltage[component]
@@ -604,6 +621,7 @@ def solve_boundary_state_charging(
                 options = dict(adaptive_quadrature)
                 bidirectional = bool(options.pop("bidirectional", False))
                 forward_options = dict(options.pop("forward_options", {}))
+                method_switch_factor = float(options.pop("method_switch_factor", 2.0))
                 options.setdefault("n_face_position", n_face_position)
                 warm_start_backoff = int(options.pop("warm_start_backoff", 0))
                 if warm_start_backoff < 0:
@@ -623,7 +641,10 @@ def solve_boundary_state_charging(
                         proposal_species=proposals.get(species.name), adjoint_options=options,
                         forward_options=forward_options,
                         element_absolute_tolerance=element_abs,
-                        element_relative_tolerance=element_rel)
+                        element_relative_tolerance=element_rel,
+                        method_hint=hybrid_method_hint.get(species.name),
+                        switch_factor=method_switch_factor)
+                    hybrid_method_hint[species.name] = hybrid["method"].copy()
                     species_quadrature[species.name] = hybrid
                     if not hybrid["converged"]:
                         raise AdaptiveQuadratureConvergenceError(
@@ -684,36 +705,88 @@ def solve_boundary_state_charging(
         balance = _current_balance_diagnostics(
             ion_current / current_scale, electron_current / current_scale,
             components, cells, active_flux=active_flux)
-        history.append(balance)
         interval_balance = _interval_current_balance_diagnostics(
             ion_current / current_scale, electron_current / current_scale,
             ion_current_stderr / current_scale, electron_current_stderr / current_scale,
             components, cells, active_flux=active_flux,
             confidence_sigma=current_confidence_sigma)
-        interval_history.append(interval_balance)
+        merit_key = "rms_log_ratio" if trust_merit == "rms" else "max_abs_log_ratio"
+        merit = float(interval_balance[merit_key])
+        trial_merit_history.append(merit)
+        if (trust_region and pending_step is not None
+                and merit > pending_step["merit"] * (1.0 + trust_growth_tolerance)):
+            surface_voltage[:] = pending_step["surface_voltage"]
+            conductor_voltage[:] = pending_step["conductor_voltage"]
+            hybrid_method_hint = {
+                name: value.copy() for name, value in pending_step["hybrid_method_hint"].items()}
+            adaptive_levels = {
+                name: value.copy() for name, value in pending_step["adaptive_levels"].items()}
+            beta_current *= 0.5; rejected_steps += 1; pending_step = None
+            anderson_x.clear(); anderson_f.clear()
+            if beta_current < minimum_beta:
+                raise RuntimeError(
+                    f"charging trust region collapsed below minimum_beta={minimum_beta:g}")
+            continue
+        if trust_region and pending_step is not None and merit < 0.8 * pending_step["merit"]:
+            beta_current = min(float(beta), 1.2 * beta_current)
+        pending_step = None
+        history.append(balance); interval_history.append(interval_balance)
+        accepted_beta_history.append(beta_current)
         if (balance_tol is not None and len(history) >= int(min_iter)
                 and interval_balance["max_abs_log_ratio"] <= balance_tol):
             break
+        if trust_region:
+            pending_step = dict(
+                surface_voltage=surface_voltage.copy(),
+                conductor_voltage=conductor_voltage.copy(), merit=merit,
+                hybrid_method_hint={
+                    name: value.copy() for name, value in hybrid_method_hint.items()},
+                adaptive_levels={
+                    name: value.copy() for name, value in adaptive_levels.items()})
         by_cell = {}
         for face_index, cell in enumerate(cells):
             if components[face_index] == 0:
                 by_cell.setdefault(cell, []).append(face_index)
-        for cell, face_index in by_cell.items():
+        x_values = []; f_values = []; dof_kind = []
+        for cell in insulator_cells:
+            face_index = by_cell[cell]
             gi = float(ion_current[face_index].sum())
             ge = float(electron_current[face_index].sum())
-            if (gi + ge) / current_scale < active_flux:
-                continue
-            residual = float(interval_balance["log_ratio"][face_index[0]])
-            surface_voltage[cell] += np.clip(beta * response_energy_eV * residual, -dVmax, dVmax)
+            residual = (float(interval_balance["log_ratio"][face_index[0]])
+                        if (gi + ge) / current_scale >= active_flux else 0.0)
+            x_values.append(float(surface_voltage[cell]))
+            f_values.append(response_energy_eV * residual)
+            dof_kind.append(("cell", cell))
         for component in range(1, conductor_voltage.size):
             selected = components == component
             if selected.any():
                 gi = float(ion_current[selected].sum()); ge = float(electron_current[selected].sum())
-                if (gi + ge) / current_scale < active_flux:
-                    continue
-                residual = float(interval_balance["pooled"][component]["log_ratio"])
-                conductor_voltage[component] += np.clip(
-                    beta * response_energy_eV * residual, -dVmax, dVmax)
+                residual = (float(interval_balance["pooled"][component]["log_ratio"])
+                            if (gi + ge) / current_scale >= active_flux else 0.0)
+                x_values.append(float(conductor_voltage[component]))
+                f_values.append(response_energy_eV * residual)
+                dof_kind.append(("conductor", component))
+        x_vector = np.asarray(x_values); f_vector = np.asarray(f_values)
+        step = beta_current * f_vector
+        if nonlinear_update == "anderson":
+            anderson_x.append(x_vector.copy()); anderson_f.append(f_vector.copy())
+            if len(anderson_x) > int(anderson_depth) + 1:
+                anderson_x.pop(0); anderson_f.pop(0)
+            if len(anderson_f) >= 2:
+                delta_f = np.stack([
+                    anderson_f[index + 1] - anderson_f[index]
+                    for index in range(len(anderson_f) - 1)], axis=1)
+                delta_x = np.stack([
+                    anderson_x[index + 1] - anderson_x[index]
+                    for index in range(len(anderson_x) - 1)], axis=1)
+                gamma, *_ = np.linalg.lstsq(delta_f, f_vector, rcond=1e-8)
+                step = beta_current * f_vector - (delta_x + beta_current * delta_f) @ gamma
+        step = np.clip(step, -dVmax, dVmax)
+        for descriptor, value in zip(dof_kind, x_vector + step):
+            if descriptor[0] == "cell":
+                surface_voltage[descriptor[1]] = value
+            else:
+                conductor_voltage[descriptor[1]] = value
     for component in range(1, conductor_voltage.size):
         surface_voltage[conductor_ids == component] = conductor_voltage[component]
     potential, field_final = solve_nodal_laplace(
@@ -731,6 +804,11 @@ def solve_boundary_state_charging(
         adaptive_levels={name: level.copy() for name, level in adaptive_levels.items()},
         conductor_voltage=conductor_voltage,
         current_scale_m2_s=current_scale, active_flux=active_flux,
+        trial_merit_history=np.asarray(trial_merit_history),
+        accepted_beta_history=np.asarray(accepted_beta_history),
+        rejected_steps=rejected_steps, beta_final=beta_current,
+        trust_merit=trust_merit,
+        nonlinear_update=nonlinear_update,
     )
 
 
