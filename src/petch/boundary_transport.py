@@ -8,7 +8,7 @@ import numpy as np
 from .boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
 from .boundary_state import qmc_boundary_proposal
 from .charging_nodal import trace_nodal
-from .adaptive_quadrature import adaptive_surface_quadrature
+from .adaptive_quadrature import AdaptiveQuadratureResult, adaptive_surface_quadrature
 
 
 @dataclass(frozen=True)
@@ -81,6 +81,57 @@ def trace_boundary_state_floor_flux(
         hit_probability=hit_probability,
         incident_flux_m2_s=species.flux_m2_s,
     )
+
+
+def forward_boundary_state_cell_flux_qmc(
+        boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, *,
+        proposal_species=None, log2_samples=12, seed=0, x_min=0.0, x_max=None,
+        max_steps=None, dt_cap=0.15, dt_field=0.10):
+    """Forward QMC current to arbitrary material cells from the same boundary-density contract.
+
+    The score is total current to each unit-depth cell divided by incident current per unit horizontal
+    source length. It is therefore directly comparable to the sum of adjoint unit-face scores belonging
+    to that cell. No target orientation or feature label enters the estimator.
+    """
+    solid = np.asarray(solid, dtype=bool); nx, nz = solid.shape
+    if x_max is None:
+        x_max = float(nx)
+    if not float(x_max) > float(x_min):
+        raise ValueError("x_max must exceed x_min")
+    species = boundary.get(species_name)
+    template = species if proposal_species is None else proposal_species
+    proposal = qmc_boundary_proposal(
+        template, int(log2_samples), int(seed), name=f"{species_name}-forward-proposal")
+    velocity = proposal.velocity_sqrt_eV; count = velocity.shape[0]
+    rng = np.random.default_rng(int(seed) + 15485863)
+    lateral_u = (rng.permutation(count) + rng.random(count)) / count
+    x0 = float(x_min) + (float(x_max) - float(x_min)) * lateral_u
+    z0 = np.full(count, 1e-3)
+    hit_x, hit_z, *_ = trace_nodal(
+        nodal_potential, solid, x0, z0, velocity[:, 0], velocity[:, 2],
+        float(species.charge_number), nx, nz,
+        int(200 * nz if max_steps is None else max_steps), dt_cap, dt_field)
+    log_physical = species.log_flux_density(
+        velocity, proposal.phase_rad, proposal.position_m)
+    log_proposal = proposal.log_flux_density(
+        velocity, proposal.phase_rad, proposal.position_m)
+    with np.errstate(over="ignore", invalid="ignore"):
+        density_ratio = np.exp(log_physical - log_proposal)
+    score = proposal.weight * density_ratio * (float(x_max) - float(x_min))
+    cells = [tuple(map(int, cell)) for cell in cells]
+    result = np.zeros(len(cells)); lookup = {}
+    for index, cell in enumerate(cells):
+        lookup.setdefault(cell, []).append(index)
+    valid = hit_x >= 0
+    for hx, hz, value in zip(hit_x[valid], hit_z[valid], score[valid]):
+        indices = lookup.get((int(hx), int(hz)))
+        if indices is not None:
+            # A cell current is stored once even when the cell owns multiple exposed faces.
+            result[indices[0]] += value
+    return dict(
+        per_cell=result, normalized_total=float(result.sum()),
+        absolute_per_cell_m2_s=result * species.flux_m2_s,
+        samples=count, seed=int(seed))
 
 
 def adjoint_boundary_state_face_flux(
@@ -238,6 +289,114 @@ def adaptive_adjoint_boundary_state_face_flux(
         element_absolute_tolerance=element_absolute_tolerance,
         element_relative_tolerance=element_relative_tolerance, refine_fraction=refine_fraction,
         initial_log2_samples=initial_log2_samples)
+
+
+def adaptive_forward_boundary_state_cell_flux(
+        boundary, species_name, nodal_potential, solid, cells, *, proposal_species=None,
+        base_log2=8, max_log2=16, n_replicates=4, seed=0,
+        absolute_tolerance=1e-3, relative_tolerance=5e-3,
+        element_absolute_tolerance=None, element_relative_tolerance=0.0,
+        refine_fraction=0.5, initial_log2_samples=None,
+        x_min=0.0, x_max=None, max_steps=None, dt_cap=0.15, dt_field=0.10):
+    """Adapt the complementary forward estimator on arbitrary physical material cells."""
+    cells = [tuple(map(int, cell)) for cell in cells]
+    if proposal_species is not None:
+        raise ValueError("adaptive forward zero-hit bounds currently require direct physical sampling")
+    if n_replicates < 2:
+        raise ValueError("at least two forward replicates are required")
+    nx = np.asarray(solid).shape[0]
+    source_width = float(nx if x_max is None else x_max) - float(x_min)
+    evaluations = 0; converged = False; rounds = 0
+    estimates = np.empty((n_replicates, len(cells)))
+    start_level = int(base_log2)
+    if initial_log2_samples is not None:
+        initial = np.asarray(initial_log2_samples, dtype=int)
+        if initial.shape != (len(cells),):
+            raise ValueError("initial forward levels have wrong shape")
+        start_level = int(initial.max())
+    for level in range(start_level, int(max_log2) + 1):
+        rounds += 1
+        for replicate in range(n_replicates):
+            result = forward_boundary_state_cell_flux_qmc(
+                boundary, species_name, nodal_potential, solid, cells,
+                log2_samples=level, seed=int(seed + replicate), x_min=x_min, x_max=x_max,
+                max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field)
+            estimates[replicate] = result["per_cell"]
+        evaluations += n_replicates * (2 ** level)
+        element_mean = estimates.mean(axis=0)
+        element_stderr = estimates.std(axis=0, ddof=1) / np.sqrt(n_replicates)
+        # Zero observed hits do not imply zero flux. For direct physical sampling, the rule-of-three
+        # 95% upper probability bound is 3/N across the pooled independent histories.
+        zero = np.all(estimates == 0.0, axis=0)
+        zero_upper = 3.0 * source_width / (n_replicates * (2 ** level))
+        element_stderr[zero] = np.maximum(element_stderr[zero], zero_upper)
+        totals = estimates.mean(axis=1)
+        total_mean = float(totals.mean())
+        total_stderr = float(totals.std(ddof=1) / np.sqrt(n_replicates))
+        total_ok = total_stderr <= absolute_tolerance + relative_tolerance * abs(total_mean)
+        element_ok = (element_absolute_tolerance is None or np.all(
+            element_stderr <= element_absolute_tolerance
+            + element_relative_tolerance * np.abs(element_mean)))
+        if total_ok and element_ok:
+            converged = True
+            break
+    levels = np.full(len(cells), level, dtype=np.int64)
+    return AdaptiveQuadratureResult(
+        element_mean=element_mean.copy(), element_stderr=element_stderr.copy(),
+        element_replicates=estimates.copy(), log2_samples=levels,
+        total_mean=total_mean, total_stderr=total_stderr, converged=converged,
+        rounds=rounds, evaluations=evaluations)
+
+
+def bidirectional_boundary_state_cell_flux(
+        boundary, species_name, nodal_potential, solid, cells, normals, *,
+        proposal_species=None, adjoint_options=None, forward_options=None,
+        element_absolute_tolerance=1e-3, element_relative_tolerance=0.05):
+    """Select forward or adjoint current per physical cell solely by measured uncertainty.
+
+    This is not a named-region switch. Both unbiased estimators use the same physical boundary density;
+    the lower-uncertainty estimate wins independently for each cell. The result refuses cells for which
+    neither direction meets the requested mixed tolerance.
+    """
+    cells = [tuple(map(int, cell)) for cell in cells]
+    normals = np.asarray(normals, dtype=float)
+    adjoint_kwargs = {} if adjoint_options is None else dict(adjoint_options)
+    forward_kwargs = {} if forward_options is None else dict(forward_options)
+    adjoint_kwargs.setdefault("element_absolute_tolerance", element_absolute_tolerance)
+    adjoint_kwargs.setdefault("element_relative_tolerance", element_relative_tolerance)
+    forward_kwargs.setdefault("element_absolute_tolerance", element_absolute_tolerance)
+    forward_kwargs.setdefault("element_relative_tolerance", element_relative_tolerance)
+    adjoint = adaptive_adjoint_boundary_state_face_flux(
+        boundary, species_name, nodal_potential, solid, cells, normals,
+        proposal_species=proposal_species, **adjoint_kwargs)
+
+    unique_cells = list(dict.fromkeys(cells))
+    forward = adaptive_forward_boundary_state_cell_flux(
+        boundary, species_name, nodal_potential, solid, unique_cells,
+        proposal_species=None, **forward_kwargs)
+    first_face = {cell: cells.index(cell) for cell in unique_cells}
+    per_face = np.zeros(len(cells)); per_face_stderr = np.zeros(len(cells))
+    method = np.empty(len(unique_cells), dtype="U7")
+    converged = True
+    for cell_index, cell in enumerate(unique_cells):
+        face_indices = np.array([i for i, item in enumerate(cells) if item == cell], dtype=int)
+        adjoint_replicates = adjoint.element_replicates[:, face_indices].sum(axis=1)
+        adjoint_mean = float(adjoint_replicates.mean())
+        adjoint_stderr = float(adjoint_replicates.std(ddof=1) / np.sqrt(adjoint_replicates.size))
+        forward_mean = float(forward.element_mean[cell_index])
+        forward_stderr = float(forward.element_stderr[cell_index])
+        if forward_stderr < adjoint_stderr:
+            mean, stderr, chosen = forward_mean, forward_stderr, "forward"
+        else:
+            mean, stderr, chosen = adjoint_mean, adjoint_stderr, "adjoint"
+        allowed = element_absolute_tolerance + element_relative_tolerance * abs(mean)
+        converged &= stderr <= allowed
+        index = first_face[cell]
+        per_face[index] = mean; per_face_stderr[index] = stderr; method[cell_index] = chosen
+    return dict(
+        per_face=per_face, per_face_stderr=per_face_stderr,
+        unique_cells=np.asarray(unique_cells, dtype=int), method=method,
+        converged=bool(converged), adjoint=adjoint, forward=forward)
 
 
 def adjoint_boundary_state_floor_flux(

@@ -16,6 +16,7 @@ import numpy as np
 class AdaptiveQuadratureResult:
     element_mean: np.ndarray
     element_stderr: np.ndarray
+    element_replicates: np.ndarray
     log2_samples: np.ndarray
     total_mean: float
     total_stderr: float
@@ -122,6 +123,7 @@ def adaptive_surface_quadrature(
     return AdaptiveQuadratureResult(
         element_mean=element_mean.copy(),
         element_stderr=element_stderr.copy(),
+        element_replicates=estimates.copy(),
         log2_samples=levels.copy(),
         total_mean=total_mean,
         total_stderr=total_stderr,

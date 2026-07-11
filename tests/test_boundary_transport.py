@@ -9,9 +9,12 @@ from petch.boundary_state import (
 )
 from petch.boundary_transport import (
     adaptive_adjoint_boundary_state_face_flux,
+    adaptive_forward_boundary_state_cell_flux,
+    bidirectional_boundary_state_cell_flux,
     adjoint_boundary_state_face_flux,
     adjoint_boundary_state_floor_flux,
     boundary_launches_2d,
+    forward_boundary_state_cell_flux_qmc,
     trace_boundary_state_floor_flux,
 )
 from petch.charging2d import _build_edge_array_geometry
@@ -43,6 +46,23 @@ def test_boundary_state_transport_matches_open_vertical_ion_flux():
         boundary, "Ar+", V, solid, target, n_position=64)
     assert np.isclose(result["normalized_flux"], 1.0, atol=1e-12)
     assert np.isclose(result["absolute_flux_m2_s"], 3e19, rtol=1e-12)
+
+
+def test_forward_qmc_cell_flux_matches_open_surface_cell_measure():
+    nx, nz = 16, 10
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-1e-9, 1e-9]), np.array([-1e-9, 1e-9]), np.array([0.9, 1.1])),
+        np.ones((1, 1, 1)))
+    species = SpeciesBoundaryState(
+        "vertical", 0, 40.0, 2e19, [[0.0, 0.0, 1.0]], [1.0], density_model=density)
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    cells = [(x, nz - 1) for x in range(nx)]
+    result = forward_boundary_state_cell_flux_qmc(
+        boundary, "vertical", np.zeros((nx + 1, nz + 1)), solid, cells,
+        log2_samples=10, seed=31)
+    assert np.allclose(result["per_cell"], 1.0, atol=0.03)
+    assert np.isclose(result["normalized_total"], nx, atol=1e-12)
 
 
 def test_same_transport_adapter_accepts_neutral_reactive_species():
@@ -138,6 +158,47 @@ def test_adaptive_adjoint_refines_generic_face_phase_space_with_error_evidence()
     assert np.isclose(result.total_mean, 1.0, atol=2e-3)
 
 
+def test_bidirectional_estimator_selects_by_uncertainty_not_region_name():
+    nx, nz = 12, 10
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.2, 0.2]), np.array([-0.2, 0.2]), np.array([0.8, 1.2])),
+        np.ones((1, 1, 1)))
+    species = SpeciesBoundaryState(
+        "test", 1, 40.0, 1e19, [[0.0, 0.0, 1.0]], [1.0], density_model=density)
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    cells = [(x, nz - 1) for x in range(nx)]
+    result = bidirectional_boundary_state_cell_flux(
+        boundary, "test", np.zeros((nx + 1, nz + 1)), solid, cells,
+        [(0.0, -1.0)] * len(cells),
+        adjoint_options=dict(base_log2=4, max_log2=7, n_replicates=3),
+        forward_options=dict(base_log2=7, max_log2=10, n_replicates=3),
+        element_absolute_tolerance=0.04, element_relative_tolerance=0.0)
+    assert result["converged"]
+    assert np.allclose(result["per_face"], 1.0, atol=0.04)
+    assert set(result["method"]) <= {"forward", "adjoint"}
+
+
+def test_adaptive_forward_zero_hits_have_nonzero_confidence_bound():
+    nx, nz = 64, 8
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-1e-9, 1e-9]), np.array([-1e-9, 1e-9]), np.array([0.9, 1.1])),
+        np.ones((1, 1, 1)))
+    species = SpeciesBoundaryState(
+        "vertical", 0, 40.0, 1e19, [[0.0, 0.0, 1.0]], [1.0], density_model=density)
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    # At 2^4 source samples this particular one-cell target receives no hits for the fixed scrambles.
+    result = adaptive_forward_boundary_state_cell_flux(
+        boundary, "vertical", np.zeros((nx + 1, nz + 1)), solid, [(0, nz - 1)],
+        base_log2=4, max_log2=4, n_replicates=3,
+        absolute_tolerance=1.0, relative_tolerance=0.0,
+        element_absolute_tolerance=1e-6)
+    assert result.element_mean[0] == 0.0
+    assert result.element_stderr[0] > 0.0
+    assert not result.converged
+
+
 def test_arbitrary_face_adjoint_has_correct_wall_flux_jacobian():
     nx, nz = 128, 12
     solid = np.zeros((nx, nz), dtype=bool); solid[100, :] = True
@@ -214,6 +275,7 @@ def test_general_charging_solver_uses_only_material_grid_components_and_boundary
     assert np.allclose(result["surface_voltage"], 0.0, atol=2e-15)
     assert abs(result["conductor_voltage"][1]) <= 2e-15
     assert set(result["species_current"]) == {"positive_a", "positive_b", "negative"}
+    assert result["current_scale_m2_s"] == 1e19
 
 
 def _uniform_box_species(name, charge, flux, vx_edges, vz_edges, nx=8, nz=16):

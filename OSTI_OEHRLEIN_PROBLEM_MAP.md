@@ -125,6 +125,12 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
   Joint face/velocity adaptivity, effective-sample-size diagnostics, per-face warm starts, and batched
   face tracing are now in place. The fixed point is still not declared converged: the remaining low-
   flux sidewall importance map and CPU trajectory cost must close without loosening the current gate.
+- A complementary forward-QMC estimator is now available and a bidirectional controller selects forward
+  or adjoint estimates by measured cell-level uncertainty, never by region name. Its first fixed-point
+  run exposed two additional correctness requirements: zero forward hits need a nonzero binomial
+  confidence bound, and the activity threshold must operate on normalized rather than absolute particle
+  flux. Both are now enforced. The hybrid fixed point remains experimental until interval-aware current
+  updates close without selecting a statistically unresolved zero as an exact current.
 
 ### Kill criteria
 

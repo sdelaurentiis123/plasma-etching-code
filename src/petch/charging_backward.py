@@ -38,6 +38,7 @@ from .charging_nodal import solve_nodal_laplace, trace_nodal
 from .boundary_transport import (
     adaptive_adjoint_boundary_state_face_flux,
     adjoint_boundary_state_face_flux,
+    bidirectional_boundary_state_cell_flux,
 )
 from .adaptive_quadrature import adaptive_surface_quadrature
 
@@ -475,7 +476,8 @@ def solve_boundary_state_charging(
         solid, conductor_ids, boundary_state, *, ion_species=None, electron_species=None,
         initial_surface_voltage=None, n_iter=40, beta=0.5, response_energy_eV=4.0, dVmax=8.0,
         balance_tol=1e-3, min_iter=2, field_sweeps=500, field_tolerance=1e-9,
-        boundary_proposals=None, n_face_position=8, adaptive_quadrature=None):
+        boundary_proposals=None, n_face_position=8, adaptive_quadrature=None,
+        active_flux=1e-4):
     """Geometry- and chemistry-agnostic deterministic charging fixed point.
 
     ``solid`` is the 2-D material occupancy grid and ``conductor_ids`` assigns zero to locally floating
@@ -511,6 +513,11 @@ def solve_boundary_state_charging(
 
     positive_species = selected_species(ion_species, True)
     negative_species = selected_species(electron_species, False)
+    positive_incident_current = sum(
+        item.flux_m2_s * abs(item.charge_number) for item in positive_species)
+    negative_incident_current = sum(
+        item.flux_m2_s * abs(item.charge_number) for item in negative_species)
+    current_scale = max(positive_incident_current, negative_incident_current, 1e-300)
     proposals = {} if boundary_proposals is None else dict(boundary_proposals)
     cells, normals = _gas_faces(solid, solid)
     if not cells:
@@ -542,6 +549,8 @@ def solve_boundary_state_charging(
                 normalized_face_flux = result["per_face"]
             else:
                 options = dict(adaptive_quadrature)
+                bidirectional = bool(options.pop("bidirectional", False))
+                forward_options = dict(options.pop("forward_options", {}))
                 options.setdefault("n_face_position", n_face_position)
                 warm_start_backoff = int(options.pop("warm_start_backoff", 0))
                 if warm_start_backoff < 0:
@@ -551,6 +560,29 @@ def solve_boundary_state_charging(
                     initial_level = np.maximum(
                         adaptive_levels[species.name] - warm_start_backoff, base_level)
                     options.setdefault("initial_log2_samples", initial_level)
+                if bidirectional:
+                    # The bidirectional wrapper applies its own cell-level uncertainty gate. It uses
+                    # the same tolerances as the adjoint options unless explicitly overridden.
+                    element_abs = options.get("element_absolute_tolerance", 1e-3)
+                    element_rel = options.get("element_relative_tolerance", 0.05)
+                    hybrid = bidirectional_boundary_state_cell_flux(
+                        boundary_state, species.name, potential, solid, cells, normals,
+                        proposal_species=proposals.get(species.name), adjoint_options=options,
+                        forward_options=forward_options,
+                        element_absolute_tolerance=element_abs,
+                        element_relative_tolerance=element_rel)
+                    species_quadrature[species.name] = hybrid
+                    if not hybrid["converged"]:
+                        raise AdaptiveQuadratureConvergenceError(
+                            f"bidirectional phase-space quadrature did not converge for "
+                            f"{species.name!r} at fixed-point iteration {iteration + 1}",
+                            iteration=iteration + 1, species=species.name,
+                            quadrature=hybrid, surface_voltage=surface_voltage,
+                            potential=potential, cells=cells, normals=normals)
+                    normalized_face_flux = hybrid["per_face"]
+                    species_current[species.name] = (
+                        normalized_face_flux * species.flux_m2_s * abs(species.charge_number))
+                    continue
                 adaptive = adaptive_adjoint_boundary_state_face_flux(
                     boundary_state, species.name, potential, solid, cells, normals,
                     proposal_species=proposals.get(species.name), **options)
@@ -587,7 +619,8 @@ def solve_boundary_state_charging(
         ion_current = np.sum([species_current[item.name] for item in positive_species], axis=0)
         electron_current = np.sum([species_current[item.name] for item in negative_species], axis=0)
         balance = _current_balance_diagnostics(
-            ion_current, electron_current, components, cells)
+            ion_current / current_scale, electron_current / current_scale,
+            components, cells, active_flux=active_flux)
         history.append(balance)
         if (balance_tol is not None and len(history) >= int(min_iter)
                 and balance["max_abs_log_ratio"] <= balance_tol):
@@ -599,6 +632,8 @@ def solve_boundary_state_charging(
         for cell, face_index in by_cell.items():
             gi = float(ion_current[face_index].sum())
             ge = float(electron_current[face_index].sum())
+            if (gi + ge) / current_scale < active_flux:
+                continue
             surface_voltage[cell] += np.clip(
                 beta * response_energy_eV * np.log((gi + 1e-300) / (ge + 1e-300)),
                 -dVmax, dVmax)
@@ -606,6 +641,8 @@ def solve_boundary_state_charging(
             selected = components == component
             if selected.any():
                 gi = float(ion_current[selected].sum()); ge = float(electron_current[selected].sum())
+                if (gi + ge) / current_scale < active_flux:
+                    continue
                 conductor_voltage[component] += np.clip(
                     beta * response_energy_eV * np.log((gi + 1e-300) / (ge + 1e-300)),
                     -dVmax, dVmax)
@@ -623,6 +660,7 @@ def solve_boundary_state_charging(
         quadrature_history=quadrature_history,
         adaptive_levels={name: level.copy() for name, level in adaptive_levels.items()},
         conductor_voltage=conductor_voltage,
+        current_scale_m2_s=current_scale, active_flux=active_flux,
     )
 
 
