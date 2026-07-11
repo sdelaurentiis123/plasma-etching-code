@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from scipy.stats import gamma as gamma_dist, qmc
+from scipy.stats import gamma as gamma_dist, norm, qmc
 
 from petch.charging_backward import (
     _current_balance_diagnostics,
@@ -159,3 +159,42 @@ def test_trace_general_bounds_energy_error_in_uniform_field_at_production_step()
     assert hit_x[0] >= 0 and hit_z[0] == 12
     # Cell-crossing impact detection limits this gate; the production step stays below 0.7% error.
     assert np.isclose(impact_energy[0], 12.0, atol=0.08)
+
+
+@pytest.mark.parametrize("floor_potential", [0.0, 5.0])
+def test_backward_forward_ion_reciprocity_in_frozen_field_trench(floor_potential):
+    nx, nz = 160, 104
+    left, right, floor_z = 20, 132, 92
+    solid = np.zeros((nx, nz), dtype=bool)
+    solid[left, 2:floor_z + 1] = True
+    solid[right, 2:floor_z + 1] = True
+    solid[left:right + 1, floor_z] = True
+    slope = floor_potential / floor_z
+    Ex = np.zeros((nx, nz), dtype=float)
+    Ez = np.full((nx, nz), -slope, dtype=float)
+    potential = np.broadcast_to(slope * np.arange(nz), (nx, nz)).copy()
+    floor_cells = [(x, floor_z) for x in range(left + 1, right)]
+    floor_normals = [(0.0, -1.0)] * len(floor_cells)
+
+    backward = backward_ion_gather(
+        solid, Ex, Ez, potential, floor_cells, floor_normals,
+        n_log2=11, n_scramble=3, seed=53,
+    ).mean()
+
+    sampler = qmc.Sobol(d=3, scramble=True, seed=59)
+    u = sampler.random_base2(16)
+    phase = 2.0 * np.pi * u[:, 0]
+    sheath_energy = 37.0 + 30.0 * np.sin(phase)
+    weights = sheath_energy ** -0.35
+    vx = np.sqrt(0.25) * norm.ppf(np.clip(u[:, 1], 1e-6, 1.0 - 1e-6))
+    vz = np.sqrt(2.0 + sheath_energy)
+    x = left + 1.0 + u[:, 2] * (right - left - 1.0)
+    z = np.full_like(x, 0.51)
+    hit_x, hit_z, *_ = _trace_general(
+        Ex, Ez, solid, x, z, vx, vz, 1.0, nx, nz,
+        200 * nz, 0.15, 0.10,
+    )
+    floor_hit = (hit_z == floor_z) & (hit_x > left) & (hit_x < right)
+    forward = weights[floor_hit].sum() / weights.sum()
+
+    assert np.isclose(backward, forward, rtol=0.04, atol=0.005), (backward, forward)

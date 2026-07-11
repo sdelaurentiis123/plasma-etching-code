@@ -23,7 +23,7 @@ are different evidence classes and must not be described interchangeably.
 | Physics/module | Best evidence | Current status | What is actually established | What remains open |
 |---|---:|---|---|---|
 | Backward electron gather | A | passing on current gates | Open-wafer normalization, Langmuir `exp(V/Te)` retardation, positive-potential saturation, fixed-seed reproducibility, and independent forward/backward scoring of a refined trench at 0 and +9.2 V floor potential are automated. | Reciprocity in a nonuniform self-consistent field; explicit spatial-quadrature convergence; smooth/verified parameter sensitivities. A coarse version of the trench gate differed by 16% at zero field and about 6% at +9.2 V, showing face-center discretization materially biases flux. |
-| Backward ion gather | A | passing | Open uncharged wafer returns unit normalized flux. | IEDF moment replay, retarding-potential curve, frozen-field reciprocity, reflection/re-emission, and energy conservation versus step size. |
+| Backward ion gather | A | passing on current gates | Open uncharged wafer returns unit normalized flux; independent forward/backward scoring passes on a refined trench at zero field and a +5 V retarding floor; a manufactured uniform-field orbit bounds production-step impact-energy error below 0.7%. | IEDF moment replay and retarding-potential curve across the low-energy horn; nonuniform self-consistent-field reciprocity; reflection/re-emission. |
 | Self-consistent backward charging | A partial; S failing when converged | **conservation bug fixed; reference mismatch exposed** | A corner cell was incorrectly updated once per exposed face, giving contradictory currents to one floating capacitor. Pooling all faces per insulating cell makes AR4 residuals decay: maximum active `|log(Gi/Ge)|` 2.39→0.228 and RMS 0.96→0.097 over 30 iterations. | The corrected solution moves toward floor 50.3 V and foot energy 11.7 eV, not the forward references 34.0 V/21.6 eV. The earlier 5.0 V RMSE/corr 0.998 were under-converged transient outputs. Frozen-field reciprocity, source normalization, field solve, and estimator support must be audited before this solver is a validation engine. |
 | Backward notch-foot ion energy | S | failing | The observable is computed. | Replayed 2026-07-11: 10.5 eV RMSE and correlation -0.323 versus `_PETCH_FOOT_E`. The “face convention” note does not close this gate. Do not call it validated. |
 | HG floor-flux charging curve | S | passing in legacy/closure lineage; mixed in newer solvers | The code can reproduce the Hwang–Giapis published computational curve under documented configurations. | HG is a simulation benchmark, not wafer measurement. The general/backward estimator must pass without geometry-specific overrides and with convergence evidence. |
@@ -56,7 +56,8 @@ must be diagnosed before early stopping or any charging-validation claim.
 An independent forward-launch/backward-gather gate now passes on a refined trench at zero field and with
 a physically consistent +9.2 V floor potential. Coarse versions differed by 16% and 6%, respectively,
 so spatial face quadrature is a real error source and must be converged, not hidden by sample count. The
-next reciprocity gate needs a nonuniform self-consistent field and ions, with confidence/error estimates.
+ion reciprocity also passes at zero and +5 V retarding floor potential. The next reciprocity gate needs
+a nonuniform self-consistent field, with confidence/error estimates.
 
 ### 3. Pattern electrostatics is the first direct attack on academic state of the art
 
