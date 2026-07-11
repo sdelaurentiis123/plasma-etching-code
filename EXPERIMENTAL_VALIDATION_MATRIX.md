@@ -104,6 +104,13 @@ proposal support as the dominant residual. Exact lateral reflection fixes a smal
 forward scrambles reduce the W16 electron discrepancy to -1.4% (shifted Liouville -1.9%) and quantify
 forward standard error as 0.00144; the former single-scramble comparison overstated electron bias.
 
+The corrected-ion variance was traced to the uniform-energy broad proposal at RF-arcsine horns. Replacing
+it with an exact Chebyshev/arcsine broad density reduces W16 discrepancy to +0.45% in a four-scramble run,
+but replicate tails remain and a universal per-element adaptive controller correctly refuses stringent
+convergence even after refining all elements. This is not a reason for named corner sampling. A new
+collisionless finite-transit-time RF sheath model now passes static-energy, Child-thickness, and high-
+frequency phase-mixing gates; it is the upstream path toward a nonsingular physical boundary state.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark
