@@ -72,3 +72,9 @@ Recent and foundational work sharpens what later constructors must preserve:
 Accordingly, no downstream feature module may reconstruct missing energy-angle correlations from scalar
 means. Surrogates may predict a boundary state, but conservation, normalization, support, and uncertainty
 remain explicit fields and gates.
+
+`petch.boundary_transport` is the first real consumer. It tensors any species measure with spatial
+quadrature, preserves normalized probability, absolute flux, and three-dimensional kinetic energy, and
+feeds the nodal particle tracer without reconstructing a source law. The identical adapter passes open-
+wafer gates for `Ar+` and neutral `CF2`. Migration is partial: existing production forward and adjoint
+charging paths still contain embedded analytic sources.

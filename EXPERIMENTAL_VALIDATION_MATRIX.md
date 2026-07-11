@@ -117,6 +117,11 @@ provenance. Instantaneous and finite-transit sheath constructors pass the same c
 invariant. Production transport does not consume it yet; embedded source laws remain an explicit migration
 blocker.
 
+The first boundary-state transport adapter now preserves probability, absolute flux, and full 3-D kinetic
+energy and passes the same open-wafer transport gate for charged ions and neutral CF2. This demonstrates a
+species-independent interface, not universal chemistry validation. Production source migration and an
+adjoint density representation remain open.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark
