@@ -14,7 +14,7 @@ from petch.boundary_transport import (
     trace_boundary_state_floor_flux,
 )
 from petch.charging2d import _build_edge_array_geometry
-from petch.charging_backward import self_consistent_backward
+from petch.charging_backward import self_consistent_backward, solve_boundary_state_charging
 
 
 def test_boundary_launcher_preserves_probability_flux_and_joint_energy():
@@ -95,6 +95,29 @@ def test_same_boundary_density_drives_ion_and_neutral_adjoint(charge_number, nam
     assert np.isclose(result["absolute_flux_m2_s"], 2e19, rtol=1e-12)
 
 
+def test_adjoint_preserves_phase_label_when_scoring_plasma_exit():
+    class PhaseRequiredDensity:
+        def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None):
+            if phase_rad is None:
+                raise ValueError("phase label was lost")
+            velocity_sqrt_eV = np.asarray(velocity_sqrt_eV)
+            phase_rad = np.asarray(phase_rad)
+            return np.log((1.0 + 0.25 * np.cos(phase_rad)) / (2.0 * np.pi)) + np.zeros(
+                velocity_sqrt_eV.shape[:-1])
+
+    nx, nz = 8, 6
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    phase = np.array([0.25, 2.25])
+    species = SpeciesBoundaryState(
+        "ion", 1, 40.0, 1e19, [[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]], [0.5, 0.5],
+        phase_rad=phase, density_model=PhaseRequiredDensity())
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    result = adjoint_boundary_state_floor_flux(
+        boundary, "ion", np.zeros((nx + 1, nz + 1)), solid,
+        [(x, nz - 1) for x in range(nx)], n_face_position=2)
+    assert np.isclose(result["normalized_flux"], 1.0, atol=1e-12)
+
+
 def test_arbitrary_face_adjoint_has_correct_wall_flux_jacobian():
     nx, nz = 128, 12
     solid = np.zeros((nx, nz), dtype=bool); solid[100, :] = True
@@ -144,6 +167,33 @@ def test_self_consistent_charging_consumes_unified_boundary_state_without_source
     assert result["balance_preupdate"]["max_abs_log_ratio"] == 0.0
     assert np.all(result["Vs"] == 0.0)
     assert result["field_final"]["max_abs"] == 0.0
+
+
+def test_general_charging_solver_uses_only_material_grid_components_and_boundary_state():
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.5, 0.5]), np.array([-0.5, 0.5]), np.array([1.0, 2.0])),
+        np.ones((1, 1, 1)))
+    velocity = np.array([
+        [-0.25, 0.0, 1.25], [0.25, 0.0, 1.25],
+        [-0.25, 0.0, 1.75], [0.25, 0.0, 1.75],
+    ])
+    boundary = PlasmaBoundaryState((
+        SpeciesBoundaryState("positive_a", 1, 40.0, 0.4e19, velocity, np.ones(4), density_model=density),
+        SpeciesBoundaryState("positive_b", 1, 20.0, 0.6e19, velocity, np.ones(4), density_model=density),
+        SpeciesBoundaryState("negative", -1, 5.4858e-4, 1e19, velocity, np.ones(4), density_model=density),
+    ), reference_plane_m=0.0)
+    solid = np.zeros((24, 18), dtype=bool)
+    solid[5, 7:] = True; solid[18, 7:] = True; solid[5:19, 15:] = True
+    conductor_ids = np.zeros_like(solid, dtype=int)
+    conductor_ids[5, 10:14] = 1; conductor_ids[18, 10:14] = 1
+    result = solve_boundary_state_charging(
+        solid, conductor_ids, boundary, ion_species=("positive_a", "positive_b"),
+        electron_species="negative",
+        n_iter=2, min_iter=1, n_face_position=2, field_sweeps=100)
+    assert result["balance_final"]["max_abs_log_ratio"] <= 3 * np.finfo(float).eps
+    assert np.allclose(result["surface_voltage"], 0.0, atol=2e-15)
+    assert abs(result["conductor_voltage"][1]) <= 2e-15
+    assert set(result["species_current"]) == {"positive_a", "positive_b", "negative"}
 
 
 def _uniform_box_species(name, charge, flux, vx_edges, vz_edges, nx=8, nz=16):

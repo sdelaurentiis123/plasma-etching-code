@@ -142,7 +142,11 @@ def adjoint_boundary_state_face_flux(
             base_velocity[sample_index, 1],
             -exit_vz,
         ))
-        log_exit_density = species.log_flux_density(exit_forward)
+        # RF phase is a trajectory label for the electrostatic feature solve and is preserved under
+        # time reversal. This retains phase-energy-angle correlations supplied by a sheath model.
+        exit_phase = (None if proposal.phase_rad is None
+                      else proposal.phase_rad[sample_index])
+        log_exit_density = species.log_flux_density(exit_forward, exit_phase)
         surface_normal = -(base_velocity[sample_index, 0] * normal_x
                            + base_velocity[sample_index, 2] * normal_z)
         exit_normal = np.maximum(-exit_vz, 1e-300)

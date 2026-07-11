@@ -453,6 +453,114 @@ def _laplace_residual(V, gas):
     )
 
 
+def solve_boundary_state_charging(
+        solid, conductor_ids, boundary_state, *, ion_species=None, electron_species=None,
+        initial_surface_voltage=None, n_iter=40, beta=0.5, response_energy_eV=4.0, dVmax=8.0,
+        balance_tol=1e-3, min_iter=2, field_sweeps=500, field_tolerance=1e-9,
+        boundary_proposals=None, n_face_position=8):
+    """Geometry- and chemistry-agnostic deterministic charging fixed point.
+
+    ``solid`` is the 2-D material occupancy grid and ``conductor_ids`` assigns zero to locally floating
+    dielectric cells and a positive connected-component id to each floating equipotential conductor.
+    Every gas-facing material face participates; there are no named floor/wall/mask regions. Species
+    physics comes only from ``boundary_state``. The log-current update is a nonlinear root iteration,
+    not a physical charging-time integrator; ``response_energy_eV`` and ``beta`` set convergence speed
+    but do not change a converged current-balance solution.
+    """
+    solid = np.asarray(solid, dtype=bool)
+    conductor_ids = np.asarray(conductor_ids, dtype=int)
+    if int(n_iter) <= 0 or int(min_iter) <= 0:
+        raise ValueError("n_iter and min_iter must be positive")
+    if conductor_ids.shape != solid.shape or np.any(conductor_ids < 0):
+        raise ValueError("conductor_ids must be a nonnegative integer grid matching solid")
+    if np.any((conductor_ids > 0) & ~solid):
+        raise ValueError("conductor ids may only label solid cells")
+
+    def selected_species(selection, positive):
+        if selection is None:
+            items = [item for item in boundary_state.species
+                     if (item.charge_number > 0) == positive and item.charge_number != 0]
+        else:
+            names = [selection] if isinstance(selection, str) else list(selection)
+            items = [boundary_state.get(name) for name in names]
+        expected = 1 if positive else -1
+        if not items or any(np.sign(item.charge_number) != expected for item in items):
+            label = "positive" if positive else "negative"
+            raise ValueError(f"charging requires at least one {label} species")
+        if any(item.density_model is None for item in items):
+            raise ValueError("charging species require continuous boundary density models")
+        return items
+
+    positive_species = selected_species(ion_species, True)
+    negative_species = selected_species(electron_species, False)
+    proposals = {} if boundary_proposals is None else dict(boundary_proposals)
+    cells, normals = _gas_faces(solid, solid)
+    if not cells:
+        raise ValueError("solid grid has no gas-facing material surface")
+    components = np.asarray([conductor_ids[cell] for cell in cells], dtype=int)
+    surface_voltage = (np.zeros(solid.shape) if initial_surface_voltage is None
+                       else np.asarray(initial_surface_voltage, dtype=float).copy())
+    if surface_voltage.shape != solid.shape or not np.all(np.isfinite(surface_voltage)):
+        raise ValueError("initial_surface_voltage must be a finite grid matching solid")
+    conductor_voltage = np.zeros(int(conductor_ids.max()) + 1)
+    for component in range(1, conductor_voltage.size):
+        values = surface_voltage[conductor_ids == component]
+        conductor_voltage[component] = float(values.mean()) if values.size else 0.0
+    history = []; field_history = []
+    for _ in range(int(n_iter)):
+        for component in range(1, conductor_voltage.size):
+            surface_voltage[conductor_ids == component] = conductor_voltage[component]
+        potential, field_diag = solve_nodal_laplace(
+            solid, surface_voltage, sweeps=field_sweeps, omega=1.7,
+            tolerance=field_tolerance)
+        field_history.append(field_diag)
+        species_current = {}
+        for species in positive_species + negative_species:
+            result = adjoint_boundary_state_face_flux(
+                boundary_state, species.name, potential, solid, cells, normals,
+                proposal_species=proposals.get(species.name), n_face_position=n_face_position)
+            species_current[species.name] = (result["per_face"] * species.flux_m2_s
+                                             * abs(species.charge_number))
+        ion_current = np.sum([species_current[item.name] for item in positive_species], axis=0)
+        electron_current = np.sum([species_current[item.name] for item in negative_species], axis=0)
+        balance = _current_balance_diagnostics(
+            ion_current, electron_current, components, cells)
+        history.append(balance)
+        if (balance_tol is not None and len(history) >= int(min_iter)
+                and balance["max_abs_log_ratio"] <= balance_tol):
+            break
+        by_cell = {}
+        for face_index, cell in enumerate(cells):
+            if components[face_index] == 0:
+                by_cell.setdefault(cell, []).append(face_index)
+        for cell, face_index in by_cell.items():
+            gi = float(ion_current[face_index].sum())
+            ge = float(electron_current[face_index].sum())
+            surface_voltage[cell] += np.clip(
+                beta * response_energy_eV * np.log((gi + 1e-300) / (ge + 1e-300)),
+                -dVmax, dVmax)
+        for component in range(1, conductor_voltage.size):
+            selected = components == component
+            if selected.any():
+                gi = float(ion_current[selected].sum()); ge = float(electron_current[selected].sum())
+                conductor_voltage[component] += np.clip(
+                    beta * response_energy_eV * np.log((gi + 1e-300) / (ge + 1e-300)),
+                    -dVmax, dVmax)
+    for component in range(1, conductor_voltage.size):
+        surface_voltage[conductor_ids == component] = conductor_voltage[component]
+    potential, field_final = solve_nodal_laplace(
+        solid, surface_voltage, sweeps=field_sweeps, omega=1.7, tolerance=field_tolerance)
+    return dict(
+        surface_voltage=surface_voltage, potential=potential,
+        cells=np.asarray(cells, dtype=int), normals=np.asarray(normals, dtype=float),
+        components=components, ion_current=ion_current, electron_current=electron_current,
+        species_current=species_current,
+        iterations=len(history), balance_history=history, balance_final=history[-1],
+        field_history=field_history, field_final=field_final,
+        conductor_voltage=conductor_voltage,
+    )
+
+
 def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=10, n_scramble=2,
                              n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=False,
                              balance_tol=None, min_iter=6, ion_ied_phase_exponent=0.0,
