@@ -12,6 +12,7 @@ from petch.boundary_state import (
     instantaneous_sinusoidal_ion_boundary_state,
     maxwellian_electron_boundary_state,
     mixture_boundary_proposal,
+    qmc_boundary_proposal,
 )
 from petch.sheath import CollisionlessRFSheath, ECHARGE
 
@@ -110,4 +111,20 @@ def test_mixture_proposal_weights_are_numerical_and_density_is_exactly_scored():
         np.log(0.2) + broad.log_flux_density(velocity))
     assert np.allclose(proposal.log_flux_density(velocity), expected)
     assert proposal.provenance["role"] == "numerical_multiple_importance_proposal"
+
+
+def test_qmc_proposals_sample_supported_densities_reproducibly():
+    electron = maxwellian_electron_boundary_state(4.0, 1e19).get("electron")
+    first = qmc_boundary_proposal(electron, 8, seed=17)
+    second = qmc_boundary_proposal(electron, 8, seed=17)
+    assert np.array_equal(first.velocity_sqrt_eV, second.velocity_sqrt_eV)
+    assert np.all(np.isfinite(first.log_flux_density(first.velocity_sqrt_eV)))
+    assert np.isclose(first.mean_energy_eV, 8.0, rtol=0.03)
+
+    mixture = mixture_boundary_proposal((
+        electron, maxwellian_electron_boundary_state(40.0, 1.0).get("electron")), (0.9, 0.1))
+    sampled = qmc_boundary_proposal(mixture, 6, seed=23)
+    assert sampled.velocity_sqrt_eV.shape == (2 * 64, 3)
+    assert np.isclose(sampled.weight[:64].sum(), 0.9)
+    assert np.isclose(sampled.weight[64:].sum(), 0.1)
     RectilinearVelocityHistogramDensity,

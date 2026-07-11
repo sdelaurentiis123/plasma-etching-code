@@ -10,6 +10,7 @@ from types import MappingProxyType
 from typing import Mapping, Protocol
 
 import numpy as np
+from scipy.stats import norm, qmc
 
 from .sheath import CollisionlessRFSheath, ECHARGE
 
@@ -326,6 +327,73 @@ def mixture_boundary_proposal(components, mixture_weight=None, *, name="proposal
             tuple(item.density_model for item in components), mixture_weight),
         provenance={"role": "numerical_multiple_importance_proposal",
                     "components": tuple(item.name for item in components)},
+    )
+
+
+def qmc_boundary_proposal(template: SpeciesBoundaryState, log2_samples, seed=0, *, name=None):
+    """Scrambled-Sobol proposal sampled from a supported analytic/tabulated density.
+
+    The returned equal weights are numerical Monte Carlo weights. Repeated seeds give independent
+    randomized replicates for error estimation. Mixtures stratify every component separately, avoiding
+    random loss of a low-probability support-completion component.
+    """
+    level = int(log2_samples)
+    if level < 0 or template.density_model is None:
+        raise ValueError("nonnegative sample level and a continuous density are required")
+    density = template.density_model
+    proposal_name = template.name if name is None else name
+    if isinstance(density, MixtureBoundaryDensity):
+        components = []
+        for index, component_density in enumerate(density.components):
+            component = SpeciesBoundaryState(
+                name=f"{proposal_name}:{index}", charge_number=template.charge_number,
+                mass_amu=template.mass_amu, flux_m2_s=1.0,
+                velocity_sqrt_eV=[[0.0, 0.0, 1.0]], weight=[1.0],
+                density_model=component_density)
+            components.append(qmc_boundary_proposal(
+                component, level, seed=int(seed) + 104729 * index,
+                name=component.name))
+        return mixture_boundary_proposal(components, density.weight, name=proposal_name)
+
+    n = 2 ** level
+    if isinstance(density, MaxwellianFluxVelocityDensity):
+        u = qmc.Sobol(3, scramble=True, seed=int(seed)).random_base2(level)
+        temperature = float(density.temperature_eV)
+        velocity = np.column_stack((
+            np.sqrt(0.5 * temperature) * norm.ppf(np.clip(u[:, 0], 1e-12, 1.0 - 1e-12)),
+            np.sqrt(0.5 * temperature) * norm.ppf(np.clip(u[:, 1], 1e-12, 1.0 - 1e-12)),
+            np.sqrt(-temperature * np.log(np.clip(1.0 - u[:, 2], 1e-12, 1.0))),
+        ))
+    elif isinstance(density, IonEnergyTransverseMaxwellianDensity):
+        u = qmc.Sobol(4, scramble=True, seed=int(seed)).random_base2(level)
+        cdf = np.cumsum(density.probability_mass)
+        index = np.searchsorted(cdf, u[:, 0], side="right")
+        index = np.minimum(index, density.probability_mass.size - 1)
+        edge = density.normal_energy_edges_eV
+        energy = edge[index] + u[:, 1] * (edge[index + 1] - edge[index])
+        temperature = float(density.tangential_temperature_eV)
+        velocity = np.column_stack((
+            np.sqrt(0.5 * temperature) * norm.ppf(np.clip(u[:, 2], 1e-12, 1.0 - 1e-12)),
+            np.sqrt(0.5 * temperature) * norm.ppf(np.clip(u[:, 3], 1e-12, 1.0 - 1e-12)),
+            np.sqrt(energy),
+        ))
+    elif isinstance(density, RectilinearVelocityHistogramDensity):
+        u = qmc.Sobol(4, scramble=True, seed=int(seed)).random_base2(level)
+        flat_mass = density.probability_mass.ravel()
+        flat_index = np.searchsorted(np.cumsum(flat_mass), u[:, 0], side="right")
+        flat_index = np.minimum(flat_index, flat_mass.size - 1)
+        multi = np.array(np.unravel_index(flat_index, density.probability_mass.shape)).T
+        velocity = np.empty((n, 3))
+        for dimension in range(3):
+            edge = density.edges[dimension]
+            idx = multi[:, dimension]
+            velocity[:, dimension] = edge[idx] + u[:, dimension + 1] * (edge[idx + 1] - edge[idx])
+    else:
+        raise TypeError(f"QMC sampling is not implemented for {type(density).__name__}")
+    return SpeciesBoundaryState(
+        name=proposal_name, charge_number=template.charge_number, mass_amu=template.mass_amu,
+        flux_m2_s=1.0, velocity_sqrt_eV=velocity, weight=np.ones(n), density_model=density,
+        provenance={"role": "scrambled_sobol_proposal", "log2_samples": level, "seed": int(seed)},
     )
 
 

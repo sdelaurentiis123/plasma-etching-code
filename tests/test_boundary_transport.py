@@ -8,6 +8,7 @@ from petch.boundary_state import (
     instantaneous_sinusoidal_ion_boundary_state,
 )
 from petch.boundary_transport import (
+    adaptive_adjoint_boundary_state_face_flux,
     adjoint_boundary_state_face_flux,
     adjoint_boundary_state_floor_flux,
     boundary_launches_2d,
@@ -116,6 +117,25 @@ def test_adjoint_preserves_phase_label_when_scoring_plasma_exit():
         boundary, "ion", np.zeros((nx + 1, nz + 1)), solid,
         [(x, nz - 1) for x in range(nx)], n_face_position=2)
     assert np.isclose(result["normalized_flux"], 1.0, atol=1e-12)
+
+
+def test_adaptive_adjoint_refines_generic_face_phase_space_with_error_evidence():
+    nx, nz = 12, 10
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.5, 0.5]), np.array([-0.5, 0.5]), np.array([0.5, 1.5])),
+        np.ones((1, 1, 1)))
+    species = SpeciesBoundaryState(
+        "ion", 1, 40.0, 1e19, [[0.0, 0.0, 1.0]], [1.0], density_model=density)
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    cells = [(x, nz - 1) for x in range(nx)]
+    result = adaptive_adjoint_boundary_state_face_flux(
+        boundary, "ion", np.zeros((nx + 1, nz + 1)), solid, cells,
+        [(0.0, -1.0)] * len(cells), base_log2=4, max_log2=8, n_replicates=3,
+        absolute_tolerance=2e-3, relative_tolerance=0.0,
+        element_absolute_tolerance=2e-3, n_face_position=2)
+    assert result.converged
+    assert np.isclose(result.total_mean, 1.0, atol=2e-3)
 
 
 def test_arbitrary_face_adjoint_has_correct_wall_flux_jacobian():

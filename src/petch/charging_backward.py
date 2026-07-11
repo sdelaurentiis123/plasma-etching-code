@@ -35,7 +35,10 @@ from scipy.stats import qmc, gamma as gammadist, norm
 
 from .charging_general import _trace_general
 from .charging_nodal import solve_nodal_laplace, trace_nodal
-from .boundary_transport import adjoint_boundary_state_face_flux
+from .boundary_transport import (
+    adaptive_adjoint_boundary_state_face_flux,
+    adjoint_boundary_state_face_flux,
+)
 from .adaptive_quadrature import adaptive_surface_quadrature
 
 
@@ -457,7 +460,7 @@ def solve_boundary_state_charging(
         solid, conductor_ids, boundary_state, *, ion_species=None, electron_species=None,
         initial_surface_voltage=None, n_iter=40, beta=0.5, response_energy_eV=4.0, dVmax=8.0,
         balance_tol=1e-3, min_iter=2, field_sweeps=500, field_tolerance=1e-9,
-        boundary_proposals=None, n_face_position=8):
+        boundary_proposals=None, n_face_position=8, adaptive_quadrature=None):
     """Geometry- and chemistry-agnostic deterministic charging fixed point.
 
     ``solid`` is the 2-D material occupancy grid and ``conductor_ids`` assigns zero to locally floating
@@ -506,8 +509,8 @@ def solve_boundary_state_charging(
     for component in range(1, conductor_voltage.size):
         values = surface_voltage[conductor_ids == component]
         conductor_voltage[component] = float(values.mean()) if values.size else 0.0
-    history = []; field_history = []
-    for _ in range(int(n_iter)):
+    history = []; field_history = []; quadrature_history = []
+    for iteration in range(int(n_iter)):
         for component in range(1, conductor_voltage.size):
             surface_voltage[conductor_ids == component] = conductor_voltage[component]
         potential, field_diag = solve_nodal_laplace(
@@ -515,12 +518,35 @@ def solve_boundary_state_charging(
             tolerance=field_tolerance)
         field_history.append(field_diag)
         species_current = {}
+        species_quadrature = {}
         for species in positive_species + negative_species:
-            result = adjoint_boundary_state_face_flux(
-                boundary_state, species.name, potential, solid, cells, normals,
-                proposal_species=proposals.get(species.name), n_face_position=n_face_position)
-            species_current[species.name] = (result["per_face"] * species.flux_m2_s
+            if adaptive_quadrature is None:
+                result = adjoint_boundary_state_face_flux(
+                    boundary_state, species.name, potential, solid, cells, normals,
+                    proposal_species=proposals.get(species.name), n_face_position=n_face_position)
+                normalized_face_flux = result["per_face"]
+            else:
+                options = dict(adaptive_quadrature)
+                options.setdefault("n_face_position", n_face_position)
+                adaptive = adaptive_adjoint_boundary_state_face_flux(
+                    boundary_state, species.name, potential, solid, cells, normals,
+                    proposal_species=proposals.get(species.name), **options)
+                species_quadrature[species.name] = adaptive
+                if not adaptive.converged:
+                    worst = int(np.argmax(adaptive.element_stderr))
+                    raise RuntimeError(
+                        f"adaptive phase-space quadrature did not converge for {species.name!r} "
+                        f"at fixed-point iteration {iteration + 1}: total stderr="
+                        f"{adaptive.total_stderr:.3g}, max face stderr="
+                        f"{adaptive.element_stderr[worst]:.3g} at cell={cells[worst]}, "
+                        f"normal={normals[worst]}, mean={adaptive.element_mean[worst]:.3g}, "
+                        f"surface voltage={surface_voltage[cells[worst]]:.3g} V, "
+                        f"level={adaptive.log2_samples[worst]}, max level="
+                        f"{adaptive.log2_samples.max()}")
+                normalized_face_flux = adaptive.element_mean
+            species_current[species.name] = (normalized_face_flux * species.flux_m2_s
                                              * abs(species.charge_number))
+        quadrature_history.append(species_quadrature)
         ion_current = np.sum([species_current[item.name] for item in positive_species], axis=0)
         electron_current = np.sum([species_current[item.name] for item in negative_species], axis=0)
         balance = _current_balance_diagnostics(
@@ -557,6 +583,7 @@ def solve_boundary_state_charging(
         species_current=species_current,
         iterations=len(history), balance_history=history, balance_final=history[-1],
         field_history=field_history, field_final=field_final,
+        quadrature_history=quadrature_history,
         conductor_voltage=conductor_voltage,
     )
 

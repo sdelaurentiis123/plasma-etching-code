@@ -36,6 +36,7 @@ def adaptive_surface_quadrature(
     absolute_tolerance: float = 1e-3,
     relative_tolerance: float = 5e-3,
     element_absolute_tolerance: float | None = None,
+    element_relative_tolerance: float = 0.0,
     refine_fraction: float = 0.5,
 ) -> AdaptiveQuadratureResult:
     """Adapt nested per-element quadrature using replicate uncertainty as the sole error indicator.
@@ -43,7 +44,8 @@ def adaptive_surface_quadrature(
     ``evaluator(indices, log2_samples, seed)`` returns one estimate per requested element. At each round,
     elements are ranked by ``abs(weight) * replicate_std`` and the largest contributors are refined one
     level. Convergence requires the aggregate replicate standard error to meet its mixed tolerance and,
-    when requested, every element standard error to meet ``element_absolute_tolerance``.
+    when requested, every element standard error to meet the mixed element tolerance
+    ``element_absolute_tolerance + element_relative_tolerance*abs(element_mean)``.
     """
     if n_elements <= 0:
         raise ValueError("n_elements must be positive")
@@ -51,6 +53,8 @@ def adaptive_surface_quadrature(
         raise ValueError("refine_fraction must lie in (0, 1]")
     if n_replicates < 2:
         raise ValueError("at least two replicates are required to estimate uncertainty")
+    if element_relative_tolerance < 0.0:
+        raise ValueError("element_relative_tolerance must be nonnegative")
     if base_log2 < 0 or max_log2 < base_log2:
         raise ValueError("require 0 <= base_log2 <= max_log2")
     if weights is None:
@@ -86,7 +90,9 @@ def adaptive_surface_quadrature(
         total_stderr = float(totals.std(ddof=1) / np.sqrt(n_replicates))
         total_tol = float(absolute_tolerance + relative_tolerance * abs(total_mean))
         element_ok = (element_absolute_tolerance is None
-                      or bool(np.all(element_stderr <= element_absolute_tolerance)))
+                      or bool(np.all(element_stderr <= (
+                          element_absolute_tolerance
+                          + element_relative_tolerance * np.abs(element_mean)))))
         if total_stderr <= total_tol and element_ok:
             converged = True
             break

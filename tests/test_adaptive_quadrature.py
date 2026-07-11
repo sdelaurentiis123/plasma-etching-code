@@ -46,3 +46,13 @@ def test_adaptive_quadrature_reports_unmet_tolerance_at_budget_limit():
     )
     assert not result.converged
     assert np.all(result.log2_samples == 2)
+
+
+def test_element_mixed_tolerance_scales_with_local_signal():
+    evaluator = SyntheticEvaluator([1e-3, 1.0], [1e-3, 1e-3])
+    result = adaptive_surface_quadrature(
+        evaluator, 2, base_log2=2, max_log2=10, n_replicates=4,
+        absolute_tolerance=1.0, relative_tolerance=0.0,
+        element_absolute_tolerance=1e-5, element_relative_tolerance=0.02)
+    assert result.converged
+    assert result.log2_samples[0] >= result.log2_samples[1]

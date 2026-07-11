@@ -6,7 +6,9 @@ from dataclasses import dataclass
 import numpy as np
 
 from .boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
+from .boundary_state import qmc_boundary_proposal
 from .charging_nodal import trace_nodal
+from .adaptive_quadrature import adaptive_surface_quadrature
 
 
 @dataclass(frozen=True)
@@ -84,7 +86,7 @@ def trace_boundary_state_floor_flux(
 def adjoint_boundary_state_face_flux(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, normals, *,
         proposal_species=None, n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10,
-        want_energy=False):
+        want_energy=False, face_quadrature_offset=0.5, face_position_samples=None):
     """Generic Liouville adjoint gather on arbitrary axis-aligned material faces.
 
     This function contains no species source law. The supplied species quadrature is used as the surface
@@ -106,10 +108,13 @@ def adjoint_boundary_state_face_flux(
     if max_steps is None:
         max_steps = 200 * nz
     n_face_position = int(n_face_position)
+    face_quadrature_offset = float(face_quadrature_offset)
     cells = [tuple(map(int, cell)) for cell in cells]
     normals = np.asarray(normals, dtype=float)
     if n_face_position <= 0 or not cells:
         raise ValueError("positive face quadrature and nonempty cells are required")
+    if not 0.0 <= face_quadrature_offset < 1.0:
+        raise ValueError("face_quadrature_offset must lie in [0,1)")
     if normals.shape != (len(cells), 2):
         raise ValueError("one 2-D outward normal is required per face")
     if (np.any(~np.isfinite(normals)) or
@@ -117,26 +122,41 @@ def adjoint_boundary_state_face_flux(
         raise ValueError("face normals must be finite unit vectors")
     per_face = np.zeros(len(cells)); energy_numerator = np.zeros(len(cells))
     base_velocity = proposal.velocity_sqrt_eV
+    if face_position_samples is not None:
+        face_position_samples = np.asarray(face_position_samples, dtype=float)
+        if (face_position_samples.shape != (base_velocity.shape[0],)
+                or np.any((face_position_samples < 0.0) | (face_position_samples >= 1.0))):
+            raise ValueError("face_position_samples must provide one coordinate in [0,1) per velocity")
     log_surface_density = proposal.log_flux_density(
         base_velocity, proposal.phase_rad, proposal.position_m)
     if not np.all(np.isfinite(log_surface_density)):
         raise ValueError("surface proposal samples must lie inside their density support")
     for ci, ((cx, cz), (normal_x, normal_z)) in enumerate(zip(cells, normals)):
-        face_u = (np.arange(n_face_position) + 0.5) / n_face_position
+        if face_position_samples is None:
+            face_u = (np.arange(n_face_position) + face_quadrature_offset) / n_face_position
+            sample_index = np.repeat(np.arange(base_velocity.shape[0]), n_face_position)
+            quadrature_weight = proposal.weight[sample_index] / n_face_position
+        else:
+            face_u = face_position_samples
+            sample_index = np.arange(base_velocity.shape[0])
+            quadrature_weight = proposal.weight
         # Face centre plus tangent coordinate, displaced one epsilon into the adjacent gas.
         face_s = face_u - 0.5
         x_center = cx + 0.5 + (0.5 + 1e-3) * normal_x
         z_center = cz + 0.5 + (0.5 + 1e-3) * normal_z
-        x0 = np.tile(x_center - normal_z * face_s, base_velocity.shape[0])
-        z0 = np.tile(z_center + normal_x * face_s, base_velocity.shape[0])
+        if face_position_samples is None:
+            x0 = np.tile(x_center - normal_z * face_s, base_velocity.shape[0])
+            z0 = np.tile(z_center + normal_x * face_s, base_velocity.shape[0])
+        else:
+            x0 = x_center - normal_z * face_s
+            z0 = z_center + normal_x * face_s
         # Time reverse the forward incident quadrature to launch outward from the material face.
-        vx0 = np.repeat(-base_velocity[:, 0], n_face_position)
-        vz0 = np.repeat(-base_velocity[:, 2], n_face_position)
+        vx0 = -base_velocity[sample_index, 0]
+        vz0 = -base_velocity[sample_index, 2]
         hit_x, _, _, _, survivor, exit_vx, exit_vz = trace_nodal(
             nodal_potential, solid, x0, z0, vx0, vz0, float(species.charge_number),
             nx, nz, int(max_steps), dt_cap, dt_field)
         escaped = (hit_x < 0) & (survivor < 0.5) & (exit_vz < 0.0)
-        sample_index = np.repeat(np.arange(base_velocity.shape[0]), n_face_position)
         exit_forward = np.column_stack((
             -exit_vx,
             base_velocity[sample_index, 1],
@@ -156,7 +176,6 @@ def adjoint_boundary_state_face_flux(
         contribution = np.where(
             escaped & (surface_normal > 0.0) & np.isfinite(log_ratio),
             surface_normal / exit_normal * density_ratio, 0.0)
-        quadrature_weight = proposal.weight[sample_index] / n_face_position
         per_face[ci] = float(np.sum(quadrature_weight * contribution))
         if want_energy:
             # The adjoint launches at the material face, so its initial kinetic energy is exactly the
@@ -175,6 +194,40 @@ def adjoint_boundary_state_face_flux(
         result["mean_impact_energy_eV"] = (
             float(energy_numerator.sum() / per_face.sum()) if per_face.sum() > 0.0 else 0.0)
     return result
+
+
+def adaptive_adjoint_boundary_state_face_flux(
+        boundary, species_name, nodal_potential, solid, cells, normals, *, proposal_species=None,
+        n_face_position=4, base_log2=6, max_log2=12, n_replicates=4, seed=0,
+        absolute_tolerance=1e-3, relative_tolerance=5e-3,
+        element_absolute_tolerance=None, element_relative_tolerance=0.0, refine_fraction=0.5,
+        max_steps=None, dt_cap=0.15, dt_field=0.10):
+    """Universally adapt randomized phase-space quadrature on arbitrary material faces."""
+    physical = boundary.get(species_name)
+    template = physical if proposal_species is None else proposal_species
+    cells = [tuple(cell) for cell in cells]; normals = np.asarray(normals, dtype=float)
+
+    def evaluator(indices, log2_samples, replicate_seed):
+        proposal = qmc_boundary_proposal(
+            template, log2_samples, replicate_seed, name=f"{species_name}-adaptive-proposal")
+        # Jointly refine surface position with velocity. Randomly permuted stratification avoids a
+        # fixed velocity-position correlation and works for stratified mixtures of any component count.
+        rng = np.random.default_rng(replicate_seed + 7919)
+        count = proposal.weight.size
+        face_position = (rng.permutation(count) + rng.random(count)) / count
+        result = adjoint_boundary_state_face_flux(
+            boundary, species_name, nodal_potential, solid,
+            [cells[index] for index in indices], normals[indices], proposal_species=proposal,
+            n_face_position=n_face_position, max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field,
+            face_position_samples=face_position)
+        return result["per_face"]
+
+    return adaptive_surface_quadrature(
+        evaluator, len(cells), weights=np.full(len(cells), 1.0 / len(cells)),
+        base_log2=base_log2, max_log2=max_log2, n_replicates=n_replicates, seed=seed,
+        absolute_tolerance=absolute_tolerance, relative_tolerance=relative_tolerance,
+        element_absolute_tolerance=element_absolute_tolerance,
+        element_relative_tolerance=element_relative_tolerance, refine_fraction=refine_fraction)
 
 
 def adjoint_boundary_state_floor_flux(
