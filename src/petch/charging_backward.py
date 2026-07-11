@@ -288,6 +288,21 @@ def _current_balance_diagnostics(Gi, Ge, comp, cells=None, active_flux=1e-4):
     )
 
 
+def _laplace_residual(V, gas):
+    """Five-point finite-difference Laplace residual on gas cells."""
+    xm = np.empty_like(V); xp = np.empty_like(V); zm = np.empty_like(V); zp = np.empty_like(V)
+    xm[1:] = V[:-1]; xm[0] = V[0]
+    xp[:-1] = V[1:]; xp[-1] = V[-1]
+    zm[:, 1:] = V[:, :-1]; zm[:, 0] = V[:, 0]
+    zp[:, :-1] = V[:, 1:]; zp[:, -1] = V[:, -1]
+    residual = V - 0.25 * (xm + xp + zm + zp)
+    values = residual[gas]
+    return dict(
+        max_abs=float(np.max(np.abs(values))) if values.size else 0.0,
+        rms=float(np.sqrt(np.mean(values ** 2))) if values.size else 0.0,
+    )
+
+
 def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=10, n_scramble=2,
                              n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=False,
                              balance_tol=None, min_iter=6):
@@ -350,10 +365,13 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
 
     aperture = (t0, t1, r0) if cone_is else None
     balance_history = []
+    field_history = []
     for it in range(n_iter):
         for c in (1, 2):
             Vs[cond == c] = vc[c]                            # broadcast floating poly potential onto its body
-        V = laplace(Vs); Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
+        V = laplace(Vs)
+        field_history.append(_laplace_residual(V, gas))
+        Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
         Ge = backward_electron_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
                                       n_scramble=n_scramble, seed=seed, aperture=aperture)
         Gi = backward_ion_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
@@ -407,6 +425,7 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
                 V_poly=float(0.5 * (vc[1] + vc[2])), Vc=vc.copy(),
                 E_defl=E_defl, foot_flux=float(Gi_f[fmask].mean()) if fmask.any() else 0.0,
                 iterations=len(balance_history), balance_history=balance_history,
+                field_history=field_history, field_final=_laplace_residual(V, gas),
                 balance_preupdate=balance_history[-1], sampled_cells=np.asarray(clist, dtype=int),
                 sampled_normals=np.asarray(nlist, dtype=float), sampled_kind=kind.copy(),
                 sampled_component=comp.copy(), sampled_Gi=Gi.copy(), sampled_Ge=Ge.copy())

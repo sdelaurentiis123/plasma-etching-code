@@ -4,6 +4,7 @@ from scipy.stats import gamma as gamma_dist, norm, qmc
 
 from petch.charging_backward import (
     _current_balance_diagnostics,
+    _laplace_residual,
     backward_electron_gather,
     backward_ion_gather,
 )
@@ -100,6 +101,16 @@ def test_current_balance_pools_multiple_faces_of_one_insulator_cell():
     assert np.allclose(result['log_ratio'], 0.0)
     assert result['active_count'] == 3
     assert np.isclose(result['max_abs_log_ratio'], 0.0)
+
+
+def test_laplace_residual_is_zero_for_constant_harmonic_field():
+    potential = np.full((12, 9), 7.25)
+    gas = np.ones_like(potential, dtype=bool)
+
+    result = _laplace_residual(potential, gas)
+
+    assert result['max_abs'] == 0.0
+    assert result['rms'] == 0.0
 
 
 @pytest.mark.parametrize("floor_potential", [0.0, 9.2])
