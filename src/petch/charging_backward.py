@@ -360,7 +360,8 @@ def _laplace_residual(V, gas):
 
 def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=10, n_scramble=2,
                              n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=False,
-                             balance_tol=None, min_iter=6, ion_ied_phase_exponent=0.0):
+                             balance_tol=None, min_iter=6, ion_ied_phase_exponent=0.0,
+                             ion_exit_state_weight=False, ion_exit_energy_mixture=0.0):
     """Self-consistent BACKWARD charging solve: Laplace field <-> per-cell gathers <-> damped update
     dV = beta*Te*ln(k*Gi/Ge), where k=Ci/Ce is calibrated each iteration on the floating pillar tops.
     NO forward launch, NO per-region overrides -- the electron-shading dipole EMERGES. Deterministic,
@@ -431,7 +432,9 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
                                       n_scramble=n_scramble, seed=seed, aperture=aperture)
         Gi = backward_ion_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
                                  n_scramble=n_scramble, seed=seed, aperture=aperture,
-                                 ied_phase_exponent=ion_ied_phase_exponent)
+                                 ied_phase_exponent=ion_ied_phase_exponent,
+                                 exit_state_weight=ion_exit_state_weight,
+                                 exit_energy_mixture=ion_exit_energy_mixture)
         balance = _current_balance_diagnostics(Gi, Ge, comp, clist)
         balance_history.append(balance)
         if balance_tol is not None and it + 1 >= min_iter and balance['max_abs_log_ratio'] <= balance_tol:
@@ -471,7 +474,9 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
     fn = [(1.0, 0.0)] * len(foot)
     Gi_f, E_f = backward_ion_gather(solid, Ex, Ez, Vs, foot, fn, Te=Te, n_log2=n_log2 + 1,
                                     n_scramble=n_scramble, seed=seed, aperture=aperture, want_energy=True,
-                                    ied_phase_exponent=ion_ied_phase_exponent)
+                                    ied_phase_exponent=ion_ied_phase_exponent,
+                                    exit_state_weight=ion_exit_state_weight,
+                                    exit_energy_mixture=ion_exit_energy_mixture)
     fmask = Gi_f > 1e-6
     E_defl = float(np.sum(E_f[fmask] * Gi_f[fmask]) / max(np.sum(Gi_f[fmask]), 1e-9)) if fmask.any() else 0.0
     # floor_mean over the full _extract band (t0+4:t1-4) -- valid now that the state is DENSE (every

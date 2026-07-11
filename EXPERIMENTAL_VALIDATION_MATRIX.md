@@ -87,6 +87,13 @@ weight. At production statistics it gives W16 ion error +1.4% and W32 +2.7% (ele
 integrable RF-arcsine horns. Therefore this is a correct-but-statistics-sensitive experimental path, not
 yet the self-consistent default; sample convergence must be automated before promotion.
 
+The corrected estimator is also wired through `self_consistent_backward()` behind explicit
+`ion_exit_state_weight` / `ion_exit_energy_mixture` options. A W16, iteration-10, `n_log2=10` diagnostic
+moves the floor from 38.8 V to 36.4 V, reduces charging-residual RMS from about 0.75 to 0.61, and gives
+−0.5% ion reciprocity on the newly generated frozen field. This is a mechanism consequence, not validation
+against HG: iteration 10 is not current-balanced, W16 electron reciprocity is still +13%, and the solver
+default remains unchanged until spatial and sample convergence are enforced together.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark

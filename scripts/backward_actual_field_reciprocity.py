@@ -63,6 +63,7 @@ def main():
     parser.add_argument("--trace-dt", type=float, default=0.15)
     parser.add_argument("--trace-dt-field", type=float, default=0.10)
     parser.add_argument("--exit-energy-mixture", type=float, default=0.2)
+    parser.add_argument("--solve-with-exit-estimator", action="store_true")
     args = parser.parse_args()
 
     mouth = args.mouth if args.mouth is not None else 5 * args.width
@@ -70,6 +71,8 @@ def main():
     result = self_consistent_backward(
         geometry, n_iter=args.iterations, n_log2=args.charge_log2, n_scramble=2,
         ion_ied_phase_exponent=0.0,
+        ion_exit_state_weight=args.solve_with_exit_estimator,
+        ion_exit_energy_mixture=(args.exit_energy_mixture if args.solve_with_exit_estimator else 0.0),
     )
     t0, t1, fz = geometry["trench0"], geometry["trench1"], geometry["nz"] - 1
     cells = [(x, fz) for x in range(t0, t1)]
