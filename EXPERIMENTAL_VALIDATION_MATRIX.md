@@ -78,6 +78,15 @@ at W32 it reduces −20.7% to −6.0%, while electron error falls to +1.1%. A 4x
 W16 residual unchanged. Thus the source-score derivation fixes the dominant ion error, and the remaining
 error is spatial/interface convergence. The new estimator remains opt-in until that interface gate closes.
 
+The remaining gap was then traced to proposal support, not a fitted physical term. The 1-D proposal only
+launches surface vertical energies in the shifted RF interval, but a 2-D field can exchange lateral and
+vertical kinetic energy. An opt-in multiple-importance proposal now mixes that efficient analytic stratum
+with a broad, known-density surface-energy stratum; the exact mixture density appears in the Liouville
+weight. At production statistics it gives W16 ion error +1.4% and W32 +2.7% (electron +0.6%), closing the
+4% reciprocity gate. W32 one Sobol level lower overshoots by 10%, exposing slow convergence near the
+integrable RF-arcsine horns. Therefore this is a correct-but-statistics-sensitive experimental path, not
+yet the self-consistent default; sample convergence must be automated before promotion.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark

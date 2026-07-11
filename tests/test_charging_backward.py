@@ -172,9 +172,10 @@ def test_trace_general_bounds_energy_error_in_uniform_field_at_production_step()
     assert np.isclose(impact_energy[0], 12.0, atol=0.08)
 
 
-@pytest.mark.parametrize("exit_state_weight", [False, True])
+@pytest.mark.parametrize("exit_state_weight,exit_energy_mixture", [(False, 0.0), (True, 0.0), (True, 0.2)])
 @pytest.mark.parametrize("floor_potential", [0.0, 5.0])
-def test_backward_forward_ion_reciprocity_in_frozen_field_trench(floor_potential, exit_state_weight):
+def test_backward_forward_ion_reciprocity_in_frozen_field_trench(
+        floor_potential, exit_state_weight, exit_energy_mixture):
     nx, nz = 160, 104
     left, right, floor_z = 20, 132, 92
     solid = np.zeros((nx, nz), dtype=bool)
@@ -191,6 +192,7 @@ def test_backward_forward_ion_reciprocity_in_frozen_field_trench(floor_potential
     backward = backward_ion_gather(
         solid, Ex, Ez, potential, floor_cells, floor_normals,
         n_log2=11, n_scramble=3, seed=53, exit_state_weight=exit_state_weight,
+        exit_energy_mixture=exit_energy_mixture,
     ).mean()
 
     sampler = qmc.Sobol(d=3, scramble=True, seed=59)

@@ -182,7 +182,8 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
 def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0,
                         n_log2=13, n_scramble=3, trace_dt=0.15, trace_dt_field=0.10, trace_steps=200,
                         seed=0, aperture=None, pad_deg=3.0, alpha=0.85, want_energy=False,
-                        ied_phase_exponent=0.0, exit_state_weight=False):
+                        ied_phase_exponent=0.0, exit_state_weight=False,
+                        exit_energy_mixture=0.0):
     """Backward ion flux per cell (fraction of incident ion flux; open flat V=0 -> 1).
 
     Incident ion: uniform RF phase -> Vs=V_dc+V_rf*sin (analytic instantaneous-sheath arcsine IED),
@@ -200,6 +201,10 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
     requires the first-principles uniform-RF-phase source (``ied_phase_exponent=0``)."""
     if exit_state_weight and ied_phase_exponent != 0.0:
         raise ValueError("exit-state weighting currently requires analytic uniform RF phase")
+    if not 0.0 <= exit_energy_mixture < 1.0:
+        raise ValueError("exit_energy_mixture must lie in [0, 1)")
+    if exit_energy_mixture and not exit_state_weight:
+        raise ValueError("broad exit-energy proposal requires exit-state weighting")
     nx, nz = solid.shape
     msteps = int(trace_steps) * nz
     sig = np.sqrt(0.5 * Ti)
@@ -215,12 +220,21 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
         a_mix = alpha if cone is not None else 0.0
         vals = []; evals = []
         for sc in range(n_scramble):
-            s = qmc.Sobol(d=5, scramble=True, seed=seed + sc)
+            s = qmc.Sobol(d=6 if exit_energy_mixture else 5, scramble=True, seed=seed + sc)
             u = s.random_base2(n_log2)
             ph = u[:, 0] * 2.0 * np.pi
             Vs = V_dc + V_rf * np.sin(ph)
             wied = Vs ** (-float(ied_phase_exponent))
             E_surf_z = 0.5 * Te + Vs - Vc
+            if exit_energy_mixture:
+                # Complete the proposal support in a genuinely 2-D field. Electrostatic work can
+                # exchange vx and vz, so surface Ez is not confined to the 1-D shifted RF interval.
+                # The upper bound covers the maximum source Ez, the sampled transverse tail, and
+                # acceleration from a negative surface. It is a proposal bound, not physical data.
+                center = 0.5 * Te + V_dc
+                E_cap = center + V_rf + 0.5 * Ti * norm.ppf(1.0 - 1e-6) ** 2 + max(-Vc, 0.0)
+                broad = u[:, 5] < exit_energy_mixture
+                E_surf_z = np.where(broad, u[:, 0] * E_cap, E_surf_z)
             valid = E_surf_z > 0.0
             vz_surf = np.sqrt(np.maximum(E_surf_z, 0.0))
             vperp_nat = sig * norm.ppf(np.clip(u[:, 2], 1e-6, 1 - 1e-6))
@@ -259,12 +273,19 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
                 center = 0.5 * Te + V_dc
                 exit_Ez = exit_vz * exit_vz
                 support_exit = np.abs(exit_Ez - center) < V_rf
-                root_sample = np.sqrt(np.maximum(V_rf * V_rf - (E_surf_z + Vc - center) ** 2, 1e-24))
                 root_exit = np.sqrt(np.maximum(V_rf * V_rf - (exit_Ez - center) ** 2, 1e-24))
                 # No weight clipping: vX is already drawn from the explicitly truncated normal above,
                 # so the exponent is bounded on the positive side; clipping would bias the adjoint.
                 log_px_ratio = (vX * vX - exit_vx * exit_vx) / (2.0 * sig * sig)
-                source_ratio = np.where(support_exit, np.exp(log_px_ratio) * root_sample / root_exit, 0.0)
+                p_exit = np.where(support_exit, 1.0 / (np.pi * root_exit), 0.0)
+                mapped_delta = E_surf_z + Vc - center
+                mapped_support = np.abs(mapped_delta) < V_rf
+                mapped_root = np.sqrt(np.maximum(V_rf * V_rf - mapped_delta * mapped_delta, 1e-24))
+                p_mapped = np.where(mapped_support, 1.0 / (np.pi * mapped_root), 0.0)
+                proposal_E = (1.0 - exit_energy_mixture) * p_mapped
+                if exit_energy_mixture:
+                    proposal_E = proposal_E + exit_energy_mixture / E_cap
+                source_ratio = np.where(proposal_E > 0.0, np.exp(log_px_ratio) * p_exit / proposal_E, 0.0)
                 ratio = ratio * source_ratio
             fnum = w * wied * escaped * ratio                        # per-sample flux contribution
             vals.append(float(fnum.sum() / wied.sum()))

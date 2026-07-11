@@ -62,6 +62,7 @@ def main():
     parser.add_argument("--iterations", type=int, default=10)
     parser.add_argument("--trace-dt", type=float, default=0.15)
     parser.add_argument("--trace-dt-field", type=float, default=0.10)
+    parser.add_argument("--exit-energy-mixture", type=float, default=0.2)
     args = parser.parse_args()
 
     mouth = args.mouth if args.mouth is not None else 5 * args.width
@@ -87,6 +88,7 @@ def main():
         geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
         n_log2=args.charge_log2 + 2, n_scramble=3, seed=103, ied_phase_exponent=0.0,
         exit_state_weight=True,
+        exit_energy_mixture=args.exit_energy_mixture,
         trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
     ).mean())
     forward_e = _forward_floor_flux(result, geometry, "electron", args.score_log2, 107,
@@ -100,7 +102,7 @@ def main():
           f"charge residual rms={result['balance_preupdate']['rms_log_ratio']:.3e}")
     for name, backward, forward in (("electron", backward_e, forward_e),
                                     ("ion-1d", backward_i, forward_i),
-                                    ("ion-exit", backward_i_exit, forward_i)):
+                                    (f"ion-exit-{args.exit_energy_mixture:g}", backward_i_exit, forward_i)):
         rel = (backward / forward - 1.0) if forward else np.nan
         print(f"{name:8s} backward={backward:.6f} forward={forward:.6f} relative={rel:+.2%}")
 
