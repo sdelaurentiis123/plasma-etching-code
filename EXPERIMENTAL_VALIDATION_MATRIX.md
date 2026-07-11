@@ -65,6 +65,12 @@ At W32 the electron error falls to +5.3%, confirming spatial convergence, while 
 discrete conservative pair on the actual nonuniform field; fix the discretization or derive an exit-state
 weight rather than introducing a fitted correction.
 
+The audit is now reproducible as `scripts/backward_actual_field_reciprocity.py`. Its W16 production-
+statistics check with analytic uniform RF phase reports backward/forward floor-flux errors of +8.6% for
+electrons and −16.9% for ions at iteration 10 (field residual RMS 1.0e-4; charging residual RMS 0.75).
+The fixed iteration is deliberately not called converged; the script freezes one field solely to test the
+transport reciprocity invariant. Run its W16/W32 ladder before accepting any particle-mover replacement.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark
