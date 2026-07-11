@@ -14,7 +14,9 @@ print(f"{'AR':>4} {'floor_bw':>9} {'VFLOOR_fw':>10} | {'Edefl_bw':>9} {'FOOT_E_f
 fb, eb = [], []
 for AR in [1.0, 2.0, 3.0, 4.0]:
     g = _build_edge_array_geometry(AR, W=16, mouth=80)
-    r = self_consistent_backward(g, n_iter=14)
+    # Explicit benchmark-only source convention: p=0.35 reproduces HG's simulated low/high IEDF
+    # horn ratio. The first-principles reduced-sheath default is uniform RF phase (p=0).
+    r = self_consistent_backward(g, n_iter=14, ion_ied_phase_exponent=0.35)
     fb.append(r['floor_mean']); eb.append(r['E_defl'])
     i = list(_PETCH_AR).index(AR)
     print(f"{AR:>4.1f} {r['floor_mean']:>9.1f} {_PETCH_VFLOOR[i]:>10.1f} | "

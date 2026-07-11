@@ -114,7 +114,12 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
     out = np.zeros(len(cells))
     for ci, ((cx, cz), (nnx, nnz)) in enumerate(zip(cells, normals)):
         Vc = float(V_surf[cx, cz])
-        x0c = cx + 1.5 * nnx; z0c = cz + 1.5 * nnz
+        # Grid cell (cx,cz) occupies [cx,cx+1)x[cz,cz+1). Launch just OUTSIDE its exposed face.
+        # The old cx+1.5*n formula was asymmetric and placed floor rays 1.5 cells above the actual
+        # interface, producing a 22-44% electron reciprocity bias that only slowly vanished with dx.
+        face_eps = 1e-3
+        x0c = cx + 0.5 + (0.5 + face_eps) * nnx
+        z0c = cz + 0.5 + (0.5 + face_eps) * nnz
         cone = _cone_angles(x0c, z0c, aperture, pad)
         a_mix = alpha if cone is not None else 0.0
         vals = []
@@ -176,11 +181,14 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
 
 def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0,
                         n_log2=13, n_scramble=3, trace_dt=0.15, trace_dt_field=0.10, trace_steps=200,
-                        seed=0, aperture=None, pad_deg=3.0, alpha=0.85, want_energy=False):
+                        seed=0, aperture=None, pad_deg=3.0, alpha=0.85, want_energy=False,
+                        ied_phase_exponent=0.0):
     """Backward ion flux per cell (fraction of incident ion flux; open flat V=0 -> 1).
 
-    Incident ion (matches sample_sheath_source): phase -> Vs=V_dc+V_rf*sin (arcsine IED, weight
-    Vs^-0.35), vz_in=sqrt(0.5 Te+Vs), transverse vperp~N(0,sqrt(0.5 Ti)). Near-VERTICAL in the lab
+    Incident ion: uniform RF phase -> Vs=V_dc+V_rf*sin (analytic instantaneous-sheath arcsine IED),
+    vz_in=sqrt(0.5 Te+Vs), transverse vperp~N(0,sqrt(0.5 Ti)). ``ied_phase_exponent`` optionally
+    applies a Vs^-p phase weight; p=0.35 reproduces the Hwang-Giapis simulated horn ratio but is a
+    named BENCHMARK convention, not first-principles input. Near-VERTICAL in the lab
     frame, so v.n>0 on a wall selects only the grazing tail. E_surf_z = 0.5 Te+Vs-Vc; E_surf_z<0 =>
     reflected (floor repels the low-IED-horn = retardation). Flux factor (v.n_cell)/(v.z_surf) suppresses
     grazing ions on vertical walls. aperture -> escape-cone importance sampling (truncated-normal in the
@@ -193,7 +201,9 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
     out_E = np.zeros(len(cells))                                     # flux-weighted mean impact energy [eV]
     for ci, ((cx, cz), (nnx, nnz)) in enumerate(zip(cells, normals)):
         Vc = float(V_surf[cx, cz])
-        x0c = cx + 1.5 * nnx; z0c = cz + 1.5 * nnz
+        face_eps = 1e-3
+        x0c = cx + 0.5 + (0.5 + face_eps) * nnx
+        z0c = cz + 0.5 + (0.5 + face_eps) * nnz
         cone = _cone_angles(x0c, z0c, aperture, pad)
         a_mix = alpha if cone is not None else 0.0
         vals = []; evals = []
@@ -202,7 +212,7 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
             u = s.random_base2(n_log2)
             ph = u[:, 0] * 2.0 * np.pi
             Vs = V_dc + V_rf * np.sin(ph)
-            wied = Vs ** (-0.35)
+            wied = Vs ** (-float(ied_phase_exponent))
             E_surf_z = 0.5 * Te + Vs - Vc
             valid = E_surf_z > 0.0
             vz_surf = np.sqrt(np.maximum(E_surf_z, 0.0))
@@ -305,7 +315,7 @@ def _laplace_residual(V, gas):
 
 def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=10, n_scramble=2,
                              n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=False,
-                             balance_tol=None, min_iter=6):
+                             balance_tol=None, min_iter=6, ion_ied_phase_exponent=0.0):
     """Self-consistent BACKWARD charging solve: Laplace field <-> per-cell gathers <-> damped update
     dV = beta*Te*ln(k*Gi/Ge), where k=Ci/Ce is calibrated each iteration on the floating pillar tops.
     NO forward launch, NO per-region overrides -- the electron-shading dipole EMERGES. Deterministic,
@@ -375,7 +385,8 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
         Ge = backward_electron_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
                                       n_scramble=n_scramble, seed=seed, aperture=aperture)
         Gi = backward_ion_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
-                                 n_scramble=n_scramble, seed=seed, aperture=aperture)
+                                 n_scramble=n_scramble, seed=seed, aperture=aperture,
+                                 ied_phase_exponent=ion_ied_phase_exponent)
         balance = _current_balance_diagnostics(Gi, Ge, comp, clist)
         balance_history.append(balance)
         if balance_tol is not None and it + 1 >= min_iter and balance['max_abs_log_ratio'] <= balance_tol:
@@ -414,7 +425,8 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
     foot = [(t0 - 1, int(z)) for z in np.arange(fz0, fz)]  # poly-inner face near the poly/oxide junction
     fn = [(1.0, 0.0)] * len(foot)
     Gi_f, E_f = backward_ion_gather(solid, Ex, Ez, Vs, foot, fn, Te=Te, n_log2=n_log2 + 1,
-                                    n_scramble=n_scramble, seed=seed, aperture=aperture, want_energy=True)
+                                    n_scramble=n_scramble, seed=seed, aperture=aperture, want_energy=True,
+                                    ied_phase_exponent=ion_ied_phase_exponent)
     fmask = Gi_f > 1e-6
     E_defl = float(np.sum(E_f[fmask] * Gi_f[fmask]) / max(np.sum(Gi_f[fmask]), 1e-9)) if fmask.any() else 0.0
     # floor_mean over the full _extract band (t0+4:t1-4) -- valid now that the state is DENSE (every

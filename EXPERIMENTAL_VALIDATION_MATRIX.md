@@ -23,7 +23,7 @@ are different evidence classes and must not be described interchangeably.
 | Physics/module | Best evidence | Current status | What is actually established | What remains open |
 |---|---:|---|---|---|
 | Backward electron gather | A | passing on current gates | Open-wafer normalization, Langmuir `exp(V/Te)` retardation, positive-potential saturation, fixed-seed reproducibility, and independent forward/backward scoring of a refined trench at 0 and +9.2 V floor potential are automated. | Reciprocity in a nonuniform self-consistent field; explicit spatial-quadrature convergence; smooth/verified parameter sensitivities. A coarse version of the trench gate differed by 16% at zero field and about 6% at +9.2 V, showing face-center discretization materially biases flux. |
-| Backward ion gather | A | passing on current gates | Open uncharged wafer returns unit normalized flux; independent forward/backward scoring passes on a refined trench at zero field and a +5 V retarding floor; a manufactured uniform-field orbit bounds production-step impact-energy error below 0.7%. | IEDF moment replay and retarding-potential curve across the low-energy horn; nonuniform self-consistent-field reciprocity; reflection/re-emission. |
+| Backward ion gather | A | passing on current gates | Open uncharged wafer returns unit normalized flux; independent forward/backward scoring passes on a refined trench at zero field and a +5 V retarding floor; a manufactured uniform-field orbit bounds production-step impact-energy error below 0.7%. The core now defaults to analytic uniform RF phase. | IEDF moment replay and retarding-potential curve; nonuniform self-consistent-field reciprocity; reflection/re-emission; replace the reduced instantaneous sheath with a derived time-dependent sheath when its regime requires it. The `p=0.35` phase weight is explicitly HG-benchmark-only. |
 | Self-consistent backward charging | A partial; S failing when converged | **conservation bug fixed; reference mismatch exposed** | Corner-face current pooling restores residual decay; deterministic sub-face integration removes point collocation; electron/ion sample ladders are converged; the 3.7 µm physical source-plane correction is inert; W32 does not move toward the reference; and 250/500/1000 Laplace sweeps give the same iteration-10 floor (34.10–34.11 V) with field RMS residual ~6–9×10⁻⁵. | The published 34 V match is exactly an iteration-10 transient while charging residual RMS is ~0.61. Continuing toward current balance drives AR4 toward floor ~51 V and foot energy ~11.5 eV, not 34.0 V/21.6 eV. Remaining suspects are source/current normalization, conductor/insulator physics, boundary geometry, or missing charge transport—not particles, source height, fixed Laplace sweeps, or simple W16→W32 refinement. |
 | Backward notch-foot ion energy | S | failing | The observable is computed. | Replayed 2026-07-11: 10.5 eV RMSE and correlation -0.323 versus `_PETCH_FOOT_E`. The “face convention” note does not close this gate. Do not call it validated. |
 | HG floor-flux charging curve | S | passing in legacy/closure lineage; mixed in newer solvers | The code can reproduce the Hwang–Giapis published computational curve under documented configurations. | HG is a simulation benchmark, not wafer measurement. The general/backward estimator must pass without geometry-specific overrides and with convergence evidence. |
@@ -55,6 +55,16 @@ Subsequent kill tests narrowed the cause. Electron and ion fluxes are stable fro
 using the physical 3.7 µm source plane instead of the reduced 2.5 µm plane is inert; W32 does not move the
 solution toward 34 V; and tripling/quadrupling Laplace sweeps leaves the voltage unchanged with small PDE
 residual. The next work must audit the actual current/source normalization and material charge physics.
+
+The actual-field reciprocity audit found an additional geometry bug: backward rays were launched 1.5
+cells away from the interface with an asymmetric origin formula. Launching just outside the true cell face
+reduces W16 electron reciprocity error from +43.5% to +15.3%. Residual electron/ion errors have opposite
+signs and are step-size invariant from 0.15 to 0.04, so field/interface discretization remains open.
+
+The ion source audit also separated reference emulation from first principles. The formerly hard-coded
+`Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
+uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark
+script. Experimental/reference curves must not silently define the production transport law.
 
 ### 2. Adjoint reciprocity is asserted more broadly than it is gated
 

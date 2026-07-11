@@ -196,7 +196,7 @@ def test_backward_forward_ion_reciprocity_in_frozen_field_trench(floor_potential
     u = sampler.random_base2(16)
     phase = 2.0 * np.pi * u[:, 0]
     sheath_energy = 37.0 + 30.0 * np.sin(phase)
-    weights = sheath_energy ** -0.35
+    weights = np.ones_like(sheath_energy)
     vx = np.sqrt(0.25) * norm.ppf(np.clip(u[:, 1], 1e-6, 1.0 - 1e-6))
     vz = np.sqrt(2.0 + sheath_energy)
     x = left + 1.0 + u[:, 2] * (right - left - 1.0)
