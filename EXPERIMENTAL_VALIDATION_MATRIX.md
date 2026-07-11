@@ -60,11 +60,18 @@ The actual-field reciprocity audit found an additional geometry bug: backward ra
 cells away from the interface with an asymmetric origin formula. Launching just outside the true cell face
 reduces W16 electron reciprocity error from +43.5% to +15.3%. Residual electron/ion errors have opposite
 signs and are step-size invariant from 0.15 to 0.04, so field/interface discretization remains open.
+At W32 the electron error falls to +5.3%, confirming spatial convergence, while the ion error remains
+−21.3%. The ion launch-energy map and nearest-cell electric-field integration are therefore not yet a
+discrete conservative pair on the actual nonuniform field; fix the discretization or derive an exit-state
+weight rather than introducing a fitted correction.
 
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark
 script. Experimental/reference curves must not silently define the production transport law.
+With analytic uniform phase, the W32 AR4 iteration-10 floor is 38.6 V rather than the benchmark-shaped
+value near 34 V. That movement is honest: restoring the high-energy IEDF horn increases penetrating ion
+current. A time-dependent sheath model must determine the real phase distribution from physical inputs.
 
 ### 2. Adjoint reciprocity is asserted more broadly than it is gated
 
