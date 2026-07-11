@@ -90,3 +90,11 @@ surface proposal, traced exit states are scored by the same joint flux-density e
 Liouville normal-velocity Jacobian is applied without clipped weights. The identical implementation passes
 open-surface gates for Ar+ and neutral CF2. Nonuniform charged-field validation with reactor/sheath density
 models remains open.
+
+Finite-transit sheath states can now include a physical transverse ion temperature represented by
+Gauss-Hermite quadrature and a normalized tabulated normal-energy density. A separate normalized surface
+proposal closes unified forward/adjoint reciprocity to -0.48% in a spatially nonuniform charged field.
+The first attempt exposed a 6.25% midpoint-quadrature alias at a discontinuous histogram support edge;
+aligning/refining proposal nodes removes it, and the automated gate is tightened to 1% relative plus 0.002
+absolute. Smooth density representations and adaptive support-boundary quadrature remain preferable for
+reactor data.

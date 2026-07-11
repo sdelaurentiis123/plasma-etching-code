@@ -69,6 +69,43 @@ class RectilinearVelocityHistogramDensity:
         return result.reshape(velocity.shape[:-1])
 
 
+@dataclass(frozen=True)
+class IonEnergyTransverseMaxwellianDensity:
+    """Joint ion flux density from normal-energy mass and transverse ion temperature."""
+    normal_energy_edges_eV: np.ndarray
+    probability_mass: np.ndarray
+    tangential_temperature_eV: float
+
+    def __post_init__(self):
+        edge = np.asarray(self.normal_energy_edges_eV, dtype=float).copy()
+        mass = np.asarray(self.probability_mass, dtype=float).copy()
+        if edge.ndim != 1 or edge.size < 2 or np.any(np.diff(edge) <= 0.0) or edge[0] < 0.0:
+            raise ValueError("normal energy edges must be nonnegative and strictly increasing")
+        if mass.shape != (edge.size - 1,) or np.any(mass < 0.0) or mass.sum() <= 0.0:
+            raise ValueError("normal-energy probability mass has invalid shape or values")
+        if self.tangential_temperature_eV <= 0.0:
+            raise ValueError("tangential ion temperature must be positive")
+        mass /= mass.sum(); edge.setflags(write=False); mass.setflags(write=False)
+        object.__setattr__(self, "normal_energy_edges_eV", edge)
+        object.__setattr__(self, "probability_mass", mass)
+
+    def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None):
+        velocity = np.asarray(velocity_sqrt_eV, dtype=float)
+        flat = velocity.reshape(-1, 3); vz = flat[:, 2]; energy = vz * vz
+        index = np.searchsorted(self.normal_energy_edges_eV, energy, side="right") - 1
+        valid = (vz > 0.0) & (index >= 0) & (index < self.probability_mass.size)
+        result = np.full(flat.shape[0], -np.inf)
+        if valid.any():
+            width = np.diff(self.normal_energy_edges_eV)[index[valid]]
+            p_energy = self.probability_mass[index[valid]] / width
+            temperature = float(self.tangential_temperature_eV)
+            transverse_log = (-np.log(np.pi * temperature)
+                              - (flat[valid, 0] ** 2 + flat[valid, 1] ** 2) / temperature)
+            # Transform normal energy E=vz^2 to normal speed: p(vz)=2*vz*p(E).
+            result[valid] = transverse_log + np.log(2.0 * vz[valid] * p_energy)
+        return result.reshape(velocity.shape[:-1])
+
+
 def _readonly_array(value, shape_tail=()):
     array = np.asarray(value, dtype=float).copy()
     if array.ndim != 1 + len(shape_tail) or (shape_tail and array.shape[1:] != shape_tail):
@@ -165,15 +202,38 @@ class PlasmaBoundaryState:
 
 
 def collisionless_sheath_boundary_state(sheath: CollisionlessRFSheath, flux_m2_s, *, n_phase=256,
-                                         ion_name="ion", reference_plane_m=0.0):
+                                         ion_name="ion", reference_plane_m=0.0,
+                                         tangential_temperature_eV=None, n_transverse=3,
+                                         normal_energy_bins=64):
     """Construct the common boundary state from the finite-transit collisionless sheath."""
     phase = 2.0 * np.pi * (np.arange(int(n_phase)) + 0.5) / int(n_phase)
     energy = sheath.ion_impact_energies(phase)
-    velocity = np.zeros((phase.size, 3)); velocity[:, 2] = np.sqrt(energy)
+    density_model = None
+    if tangential_temperature_eV is None:
+        velocity = np.zeros((phase.size, 3)); velocity[:, 2] = np.sqrt(energy)
+        weight = np.ones(phase.size)
+        sample_phase = phase
+    else:
+        nodes, gh_weight = np.polynomial.hermite.hermgauss(int(n_transverse))
+        transverse = np.sqrt(float(tangential_temperature_eV)) * nodes
+        transverse_weight = gh_weight / np.sqrt(np.pi)
+        ex, ey, ep = np.meshgrid(np.arange(nodes.size), np.arange(nodes.size),
+                                 np.arange(phase.size), indexing="ij")
+        velocity = np.column_stack((transverse[ex.ravel()], transverse[ey.ravel()],
+                                    np.sqrt(energy[ep.ravel()])))
+        weight = (transverse_weight[ex.ravel()] * transverse_weight[ey.ravel()])
+        sample_phase = phase[ep.ravel()]
+        span = max(float(np.ptp(energy)), 1e-6)
+        lo = max(0.0, float(energy.min()) - 0.01 * span)
+        hi = float(energy.max()) + 0.01 * span
+        edges = np.linspace(lo, hi, int(normal_energy_bins) + 1)
+        mass, _ = np.histogram(energy, bins=edges)
+        density_model = IonEnergyTransverseMaxwellianDensity(
+            edges, mass.astype(float), float(tangential_temperature_eV))
     ion = SpeciesBoundaryState(
         name=ion_name, charge_number=1, mass_amu=sheath.ion_mass_amu,
         flux_m2_s=float(flux_m2_s), velocity_sqrt_eV=velocity,
-        weight=np.ones(phase.size), phase_rad=phase,
+        weight=weight, phase_rad=sample_phase, density_model=density_model,
         provenance={"model": "collisionless_finite_transit_child_sheath"},
     )
     return PlasmaBoundaryState(

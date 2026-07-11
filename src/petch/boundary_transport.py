@@ -83,7 +83,7 @@ def trace_boundary_state_floor_flux(
 
 def adjoint_boundary_state_floor_flux(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, floor_cells, *,
-        n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10):
+        proposal_species=None, n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10):
     """Generic Liouville adjoint floor gather using the boundary state's joint flux density.
 
     This function contains no species source law. The supplied species quadrature is used as the surface
@@ -93,14 +93,18 @@ def adjoint_boundary_state_floor_flux(
     species = boundary.get(species_name)
     if species.density_model is None:
         raise ValueError("adjoint transport requires a boundary density model")
+    proposal = species if proposal_species is None else proposal_species
+    if proposal.density_model is None:
+        raise ValueError("adjoint surface proposal requires a density model")
     if max_steps is None:
         max_steps = 200 * nz
     n_face_position = int(n_face_position)
     if n_face_position <= 0 or not floor_cells:
         raise ValueError("positive face quadrature and nonempty floor_cells are required")
     per_cell = np.zeros(len(floor_cells))
-    base_velocity = species.velocity_sqrt_eV
-    log_surface_density = species.log_flux_density(base_velocity, species.phase_rad, species.position_m)
+    base_velocity = proposal.velocity_sqrt_eV
+    log_surface_density = proposal.log_flux_density(
+        base_velocity, proposal.phase_rad, proposal.position_m)
     if not np.all(np.isfinite(log_surface_density)):
         raise ValueError("surface proposal samples must lie inside their density support")
     for ci, (cx, cz) in enumerate(floor_cells):
@@ -129,7 +133,7 @@ def adjoint_boundary_state_floor_flux(
         contribution = np.where(
             escaped & np.isfinite(log_ratio),
             surface_normal / exit_normal * density_ratio, 0.0)
-        quadrature_weight = species.weight[sample_index] / n_face_position
+        quadrature_weight = proposal.weight[sample_index] / n_face_position
         per_cell[ci] = float(np.sum(quadrature_weight * contribution))
     normalized_flux = float(per_cell.mean())
     return dict(normalized_flux=normalized_flux,

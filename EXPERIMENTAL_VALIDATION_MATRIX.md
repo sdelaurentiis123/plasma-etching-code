@@ -132,6 +132,12 @@ Ar+ and neutral CF2. It contains no species source equation and applies the comm
 Liouville normal-velocity Jacobian without weight clipping. Nonuniform-field and arbitrary-face gates are
 still required before production migration.
 
+Finite-transit sheath output now constructs a continuous joint ion density using physical transverse
+temperature, Gauss-Hermite velocity quadrature, and tabulated normal-energy mass. The unified forward and
+adjoint adapters agree to -0.48% in a nonuniform charged nodal field with a separate support-complete
+surface proposal. A 6.25% failed predecessor was traced to midpoint aliasing at sharp histogram support;
+the gate is now 1% relative plus 0.002 absolute, not the former 4% diagnostic tolerance.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark

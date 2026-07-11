@@ -90,4 +90,40 @@ def test_same_boundary_density_drives_ion_and_neutral_adjoint(charge_number, nam
     result = adjoint_boundary_state_floor_flux(boundary, name, V, solid, cells, n_face_position=4)
     assert np.isclose(result["normalized_flux"], 1.0, atol=1e-12)
     assert np.isclose(result["absolute_flux_m2_s"], 2e19, rtol=1e-12)
+
+
+def _uniform_box_species(name, charge, flux, vx_edges, vz_edges, nx=8, nz=16):
+    density = RectilinearVelocityHistogramDensity(
+        (np.asarray(vx_edges), np.array([-0.5, 0.5]), np.asarray(vz_edges)),
+        np.ones((1, 1, 1)))
+    vx = np.linspace(vx_edges[0], vx_edges[1], nx, endpoint=False) + (vx_edges[1] - vx_edges[0]) / (2 * nx)
+    vz = np.linspace(vz_edges[0], vz_edges[1], nz, endpoint=False) + (vz_edges[1] - vz_edges[0]) / (2 * nz)
+    xx, zz = np.meshgrid(vx, vz, indexing="ij")
+    velocity = np.column_stack((xx.ravel(), np.zeros(xx.size), zz.ravel()))
+    return SpeciesBoundaryState(name, charge, 40.0, flux, velocity, np.ones(xx.size), density_model=density)
+
+
+def test_unified_forward_adjoint_reciprocity_in_nonuniform_field_with_separate_proposal():
+    nx, nz = 40, 30
+    left, right, floor = 10, 30, 25
+    solid = np.zeros((nx, nz), dtype=bool)
+    solid[left - 1, :floor + 1] = True; solid[right, :floor + 1] = True
+    solid[left - 1:right + 1, floor] = True
+    target = np.zeros_like(solid); target[left:right, floor] = True
+    ii, jj = np.meshgrid(np.arange(nx + 1), np.arange(nz + 1), indexing="ij")
+    # Harmonic bilinear potential: both Ex and Ez vary spatially.
+    V = 0.015 * jj + 0.0008 * (ii - nx / 2) * jj
+    physical = _uniform_box_species("ion", 1, 2e19, (-0.4, 0.4), (5.0, 7.0), nx=12, nz=24)
+    # Proposal nodes align both physical histogram edges; misaligned midpoint quadrature converges only
+    # first order at the discontinuous support boundary and is tested separately by density gates.
+    proposal = _uniform_box_species("proposal", 1, 1.0, (-1.0, 1.0), (4.0, 8.0), nx=20, nz=32)
+    boundary = PlasmaBoundaryState((physical,), reference_plane_m=0.0)
+    forward = trace_boundary_state_floor_flux(
+        boundary, "ion", V, solid, target, n_position=160, max_steps=200 * nz)
+    cells = [(x, floor) for x in range(left, right)]
+    backward = adjoint_boundary_state_floor_flux(
+        boundary, "ion", V, solid, cells, proposal_species=proposal,
+        n_face_position=16, max_steps=200 * nz)
+    assert np.isclose(backward["normalized_flux"], forward["normalized_flux"], rtol=0.01, atol=0.002), (
+        backward["normalized_flux"], forward["normalized_flux"])
     RectilinearVelocityHistogramDensity,

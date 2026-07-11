@@ -3,6 +3,7 @@ import pytest
 
 from petch.boundary_state import (
     PlasmaBoundaryState,
+    IonEnergyTransverseMaxwellianDensity,
     RectilinearVelocityHistogramDensity,
     SpeciesBoundaryState,
     collisionless_sheath_boundary_state,
@@ -67,4 +68,16 @@ def test_species_exposes_same_density_contract_to_adjoint_consumers():
         (np.array([-1, 1]), np.array([-1, 1]), np.array([0, 2])), np.ones((1, 1, 1)))
     species = SpeciesBoundaryState("ion", 1, 40.0, 1e19, [[0, 0, 1]], [1], density_model=density)
     assert np.isfinite(species.log_flux_density([[0.0, 0.0, 1.0]])[0])
+
+
+def test_finite_transit_sheath_builds_normalized_continuous_ion_density():
+    sheath = CollisionlessRFSheath(80.0, 20.0, 4e5, 4.0, 40.0, thickness_m=1e-3)
+    state = collisionless_sheath_boundary_state(
+        sheath, 1e19, n_phase=64, tangential_temperature_eV=0.1,
+        n_transverse=3, normal_energy_bins=16)
+    ion = state.get("ion")
+    assert isinstance(ion.density_model, IonEnergyTransverseMaxwellianDensity)
+    assert ion.velocity_sqrt_eV.shape == (64 * 3 * 3, 3)
+    assert np.isclose(ion.weight.sum(), 1.0)
+    assert np.all(np.isfinite(ion.log_flux_density(ion.velocity_sqrt_eV)))
     RectilinearVelocityHistogramDensity,
