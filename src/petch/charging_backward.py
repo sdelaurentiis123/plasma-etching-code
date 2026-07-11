@@ -182,7 +182,7 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
 def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0,
                         n_log2=13, n_scramble=3, trace_dt=0.15, trace_dt_field=0.10, trace_steps=200,
                         seed=0, aperture=None, pad_deg=3.0, alpha=0.85, want_energy=False,
-                        ied_phase_exponent=0.0):
+                        ied_phase_exponent=0.0, exit_state_weight=False):
     """Backward ion flux per cell (fraction of incident ion flux; open flat V=0 -> 1).
 
     Incident ion: uniform RF phase -> Vs=V_dc+V_rf*sin (analytic instantaneous-sheath arcsine IED),
@@ -192,7 +192,14 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
     frame, so v.n>0 on a wall selects only the grazing tail. E_surf_z = 0.5 Te+Vs-Vc; E_surf_z<0 =>
     reflected (floor repels the low-IED-horn = retardation). Flux factor (v.n_cell)/(v.z_surf) suppresses
     grazing ions on vertical walls. aperture -> escape-cone importance sampling (truncated-normal in the
-    cone + broad, unbiased); aperture=None -> exact natural sampling."""
+    cone + broad, unbiased); aperture=None -> exact natural sampling.
+
+    ``exit_state_weight`` evaluates the incident phase-space density at the ACTUAL traced plasma-exit
+    velocity.  This is the Liouville-consistent adjoint weight required in a nonuniform 2-D field; the
+    older 1-D energy map is recovered exactly when vx is conserved and vz_exit^2=E_top_z.  It currently
+    requires the first-principles uniform-RF-phase source (``ied_phase_exponent=0``)."""
+    if exit_state_weight and ied_phase_exponent != 0.0:
+        raise ValueError("exit-state weighting currently requires analytic uniform RF phase")
     nx, nz = solid.shape
     msteps = int(trace_steps) * nz
     sig = np.sqrt(0.5 * Ti)
@@ -238,10 +245,27 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
             face_s = u[:, 4] - 0.5
             x0 = x0c - nnz * face_s
             z0 = z0c + nnx * face_s
-            hix, hiz, _, _, surv, _, _ = _trace_general(Ex, Ez, solid, x0, z0, vX, vZ, 1.0, nx, nz,
-                                                        msteps, trace_dt, trace_dt_field)
+            hix, hiz, _, _, surv, exit_vx, exit_vz = _trace_general(
+                Ex, Ez, solid, x0, z0, vX, vZ, 1.0, nx, nz,
+                msteps, trace_dt, trace_dt_field,
+            )
             escaped = (hix < 0) & (surv < 0.5) & emit
             ratio = vdotn / np.maximum(np.abs(vZ), 0.3)
+            if exit_state_weight:
+                # At the source, E_z=0.5*Te+Vdc+Vrf*sin(phi) has the arcsine density
+                # p(E)=1/[pi*sqrt(Vrf^2-(E-Ec)^2)].  Flux PDF = p_x(vx)*p_vz(vz), while
+                # f/incident_flux = PDF/vz = 2*p_x*p(E).  Dividing by the surface proposal
+                # p_x(vX)*2*|vZ|*p(E_top) leaves the existing v.n/|vZ| times this density ratio.
+                center = 0.5 * Te + V_dc
+                exit_Ez = exit_vz * exit_vz
+                support_exit = np.abs(exit_Ez - center) < V_rf
+                root_sample = np.sqrt(np.maximum(V_rf * V_rf - (E_surf_z + Vc - center) ** 2, 1e-24))
+                root_exit = np.sqrt(np.maximum(V_rf * V_rf - (exit_Ez - center) ** 2, 1e-24))
+                # No weight clipping: vX is already drawn from the explicitly truncated normal above,
+                # so the exponent is bounded on the positive side; clipping would bias the adjoint.
+                log_px_ratio = (vX * vX - exit_vx * exit_vx) / (2.0 * sig * sig)
+                source_ratio = np.where(support_exit, np.exp(log_px_ratio) * root_sample / root_exit, 0.0)
+                ratio = ratio * source_ratio
             fnum = w * wied * escaped * ratio                        # per-sample flux contribution
             vals.append(float(fnum.sum() / wied.sum()))
             if want_energy:

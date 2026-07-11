@@ -24,7 +24,7 @@ from petch.charging_backward import backward_electron_gather, backward_ion_gathe
 from petch.charging_general import _trace_general
 
 
-def _forward_floor_flux(result, geometry, species, n_log2, seed):
+def _forward_floor_flux(result, geometry, species, n_log2, seed, trace_dt, trace_dt_field):
     nx, nz = geometry["nx"], geometry["nz"]
     t0, t1 = geometry["trench0"], geometry["trench1"]
     sampler = qmc.Sobol(d=4 if species == "electron" else 3, scramble=True, seed=seed)
@@ -46,7 +46,7 @@ def _forward_floor_flux(result, geometry, species, n_log2, seed):
     z = np.full_like(x, 0.51)
     hit_x, hit_z, *_ = _trace_general(
         result["Ex"], result["Ez"], geometry["solid"], x, z, vx, vz, charge, nx, nz,
-        200 * nz, 0.15, 0.10,
+        200 * nz, trace_dt, trace_dt_field,
     )
     floor_hit = (hit_z == nz - 1) & (hit_x >= t0) & (hit_x < t1)
     # Convert probability under a source uniform over nx to flux per trench-opening width.
@@ -60,6 +60,8 @@ def main():
     parser.add_argument("--charge-log2", type=int, default=10)
     parser.add_argument("--score-log2", type=int, default=17)
     parser.add_argument("--iterations", type=int, default=10)
+    parser.add_argument("--trace-dt", type=float, default=0.15)
+    parser.add_argument("--trace-dt-field", type=float, default=0.10)
     args = parser.parse_args()
 
     mouth = args.mouth if args.mouth is not None else 5 * args.width
@@ -74,18 +76,31 @@ def main():
     backward_e = float(backward_electron_gather(
         geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
         n_log2=args.charge_log2 + 2, n_scramble=3, seed=101,
+        trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
     ).mean())
     backward_i = float(backward_ion_gather(
         geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
         n_log2=args.charge_log2 + 2, n_scramble=3, seed=103, ied_phase_exponent=0.0,
+        trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
     ).mean())
-    forward_e = _forward_floor_flux(result, geometry, "electron", args.score_log2, 107)
-    forward_i = _forward_floor_flux(result, geometry, "ion", args.score_log2, 109)
+    backward_i_exit = float(backward_ion_gather(
+        geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
+        n_log2=args.charge_log2 + 2, n_scramble=3, seed=103, ied_phase_exponent=0.0,
+        exit_state_weight=True,
+        trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
+    ).mean())
+    forward_e = _forward_floor_flux(result, geometry, "electron", args.score_log2, 107,
+                                    args.trace_dt, args.trace_dt_field)
+    forward_i = _forward_floor_flux(result, geometry, "ion", args.score_log2, 109,
+                                    args.trace_dt, args.trace_dt_field)
 
-    print(f"W={args.width} mouth={mouth} iterations={result['iterations']} floor={result['floor_mean']:.3f} V")
+    print(f"W={args.width} mouth={mouth} iterations={result['iterations']} floor={result['floor_mean']:.3f} V "
+          f"trace_dt={args.trace_dt:g}/{args.trace_dt_field:g}")
     print(f"field residual rms={result['field_final']['rms']:.3e}; "
           f"charge residual rms={result['balance_preupdate']['rms_log_ratio']:.3e}")
-    for name, backward, forward in (("electron", backward_e, forward_e), ("ion", backward_i, forward_i)):
+    for name, backward, forward in (("electron", backward_e, forward_e),
+                                    ("ion-1d", backward_i, forward_i),
+                                    ("ion-exit", backward_i_exit, forward_i)):
         rel = (backward / forward - 1.0) if forward else np.nan
         print(f"{name:8s} backward={backward:.6f} forward={forward:.6f} relative={rel:+.2%}")
 

@@ -71,6 +71,13 @@ electrons and −16.9% for ions at iteration 10 (field residual RMS 1.0e-4; char
 The fixed iteration is deliberately not called converged; the script freezes one field solely to test the
 transport reciprocity invariant. Run its W16/W32 ladder before accepting any particle-mover replacement.
 
+A Liouville-consistent opt-in ion estimator now evaluates the declared RF-arcsine/Gaussian source density
+at the actual traced plasma-exit velocity. This supplies the phase-space-density ratio missing from the old
+1-D launch-energy map, without a fitted coefficient. At W16 it reduces the ion error from −16.9% to −9.0%;
+at W32 it reduces −20.7% to −6.0%, while electron error falls to +1.1%. A 4x smaller timestep leaves the
+W16 residual unchanged. Thus the source-score derivation fixes the dominant ion error, and the remaining
+error is spatial/interface convergence. The new estimator remains opt-in until that interface gate closes.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark
