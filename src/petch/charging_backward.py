@@ -236,12 +236,59 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
     return (out, out_E) if want_energy else out
 
 
+def _current_balance_diagnostics(Gi, Ge, comp, cells=None, active_flux=1e-4):
+    """Dimensionless floating-current residuals for insulators and pooled conductors.
+
+    ``log(Gi/Ge)`` is the undamped fixed-point voltage residual in units of ``Te``. Cells for which
+    both normalized fluxes are below ``active_flux`` are reported but excluded from the active maximum:
+    their floating potential is physically underdetermined at the estimator's resolution. Conductors
+    are evaluated from their pooled current, matching the voltage update used by the solver.
+    """
+    Gi = np.asarray(Gi, dtype=float); Ge = np.asarray(Ge, dtype=float); comp = np.asarray(comp)
+    eps = 1e-12
+    residual = np.full(Gi.shape, np.nan)
+    active = np.zeros(Gi.shape, dtype=bool)
+    ins = comp == 0
+    if cells is None:
+        ins_groups = [[i] for i in np.where(ins)[0]]
+    else:
+        by_cell = {}
+        for i in np.where(ins)[0]:
+            by_cell.setdefault(tuple(cells[i]), []).append(int(i))
+        ins_groups = list(by_cell.values())
+    for idx in ins_groups:
+        gi = float(Gi[idx].sum()); ge = float(Ge[idx].sum())
+        value = float(np.log((gi + eps) / (ge + eps)))
+        residual[idx] = value
+        active[idx] = (gi + ge) >= active_flux
+    pooled = {}
+    for c in np.unique(comp[comp > 0]):
+        sel = comp == c
+        gi = float(Gi[sel].sum()); ge = float(Ge[sel].sum())
+        value = float(np.log((gi + eps) / (ge + eps)))
+        residual[sel] = value
+        active[sel] = (gi + ge) >= active_flux
+        pooled[int(c)] = dict(Gi=gi, Ge=ge, log_ratio=value)
+    active_values = np.abs(residual[active])
+    return dict(
+        log_ratio=residual,
+        active=active,
+        active_count=int(active.sum()),
+        inactive_count=int((~active).sum()),
+        max_abs_log_ratio=float(active_values.max()) if active_values.size else 0.0,
+        rms_log_ratio=float(np.sqrt(np.mean(active_values ** 2))) if active_values.size else 0.0,
+        pooled=pooled,
+    )
+
+
 def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=10, n_scramble=2,
-                             n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=False):
+                             n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=False,
+                             balance_tol=None, min_iter=6):
     """Self-consistent BACKWARD charging solve: Laplace field <-> per-cell gathers <-> damped update
     dV = beta*Te*ln(k*Gi/Ge), where k=Ci/Ce is calibrated each iteration on the floating pillar tops.
     NO forward launch, NO per-region overrides -- the electron-shading dipole EMERGES. Deterministic,
-    well-conditioned (converges in ~10 iters without razor's-edge tricks).
+    The fixed-point residual is returned explicitly; a fixed iteration count must not be interpreted as
+    convergence. ``balance_tol`` enables optional stopping on the maximum active ``|log(Gi/Ge)|``.
 
     Reproduces the Kushner picture: upper wall negative (electron shading), deep wall positive (grazing
     ions), the low-AR->high-AR crossover of the potential maximum from floor to sidewall, floor monotone
@@ -295,6 +342,7 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
         return bc(V)
 
     aperture = (t0, t1, r0) if cone_is else None
+    balance_history = []
     for it in range(n_iter):
         for c in (1, 2):
             Vs[cond == c] = vc[c]                            # broadcast floating poly potential onto its body
@@ -303,16 +351,27 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
                                       n_scramble=n_scramble, seed=seed, aperture=aperture)
         Gi = backward_ion_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
                                  n_scramble=n_scramble, seed=seed, aperture=aperture)
+        balance = _current_balance_diagnostics(Gi, Ge, comp, clist)
+        balance_history.append(balance)
+        if balance_tol is not None and it + 1 >= min_iter and balance['max_abs_log_ratio'] <= balance_tol:
+            break
         # k = Ci/Ce = 1 EXACTLY (first principle): the domain is the WAFER FRAME (top plane = wafer
         # surface below the sheath; the sheath drop is carried in the ion source energy and the electron
         # gather samples the post-sheath arrival dist). Wafer-scale charge conservation -- zero net DC
         # current is what DEFINES V_dc -- makes Gamma_i = Gamma_e on the uncharged wafer for ANY
         # geometry. So the uncharged wafer is a fixed point by construction; NO mask calibration (that
         # was a noisy estimator of 1 and an arbitrary reference knob). [invariant V1]
-        dV = np.clip(beta * Te * np.log((Gi + 1e-6) / (Ge + 1e-6)), -dVmax, dVmax)
-        for i, (cx, cz) in enumerate(clist):
-            if comp[i] == 0:                                 # insulator: per-cell update
-                Vs[cx, cz] += dV[i]
+        # A corner cell has multiple exposed faces, but only ONE floating potential. Pool the current
+        # over all faces of that physical cell and apply one update; treating faces independently gives
+        # contradictory updates to the same capacitor and cannot converge.
+        ins_by_cell = {}
+        for i, cell in enumerate(clist):
+            if comp[i] == 0:
+                ins_by_cell.setdefault(cell, []).append(i)
+        for (cx, cz), idx in ins_by_cell.items():
+            gi = Gi[idx].sum(); ge = Ge[idx].sum()
+            dVcell = np.clip(beta * Te * np.log((gi + 1e-6) / (ge + 1e-6)), -dVmax, dVmax)
+            Vs[cx, cz] += dVcell
         for c in (1, 2):                                     # poly: POOLED equipotential current balance
             sel = comp == c
             if sel.any():
@@ -339,4 +398,8 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
     return dict(Vs=Vs, V=V, Ex=Ex, Ez=Ez, wall_rows=wrows, wall_depth=wrows - r0, Lwall=Vs[t0 - 1, wrows],
                 Rwall=Vs[t1, wrows], floor=Vs[fcols, fz], floor_mean=floor_mean, k=1.0,
                 V_poly=float(0.5 * (vc[1] + vc[2])), Vc=vc.copy(),
-                E_defl=E_defl, foot_flux=float(Gi_f[fmask].mean()) if fmask.any() else 0.0)
+                E_defl=E_defl, foot_flux=float(Gi_f[fmask].mean()) if fmask.any() else 0.0,
+                iterations=len(balance_history), balance_history=balance_history,
+                balance_preupdate=balance_history[-1], sampled_cells=np.asarray(clist, dtype=int),
+                sampled_normals=np.asarray(nlist, dtype=float), sampled_kind=kind.copy(),
+                sampled_component=comp.copy(), sampled_Gi=Gi.copy(), sampled_Ge=Ge.copy())

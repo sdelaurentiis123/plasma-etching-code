@@ -1,6 +1,7 @@
 import numpy as np
 
 from petch.charging_backward import (
+    _current_balance_diagnostics,
     backward_electron_gather,
     backward_ion_gather,
 )
@@ -67,3 +68,32 @@ def test_backward_gather_is_reproducible_for_fixed_seed():
     second = _electron_flux(-4.0)
 
     assert first == second
+
+
+def test_current_balance_diagnostics_match_solver_component_physics():
+    Gi = np.array([1.0, 2.0, 2.0, 1e-8])
+    Ge = np.array([1.0, 1.0, 3.0, 1e-8])
+    comp = np.array([0, 1, 1, 0])
+
+    result = _current_balance_diagnostics(Gi, Ge, comp)
+
+    assert result['active_count'] == 3
+    assert result['inactive_count'] == 1
+    assert np.isclose(result['log_ratio'][0], 0.0)
+    assert np.allclose(result['log_ratio'][1:3], np.log(4.0 / 4.0))
+    assert np.isclose(result['pooled'][1]['Gi'], 4.0)
+    assert np.isclose(result['pooled'][1]['Ge'], 4.0)
+    assert np.isclose(result['max_abs_log_ratio'], 0.0)
+
+
+def test_current_balance_pools_multiple_faces_of_one_insulator_cell():
+    Gi = np.array([1.0, 0.25, 0.5])
+    Ge = np.array([0.25, 1.0, 0.5])
+    comp = np.zeros(3, dtype=int)
+    cells = [(4, 7), (4, 7), (8, 9)]
+
+    result = _current_balance_diagnostics(Gi, Ge, comp, cells)
+
+    assert np.allclose(result['log_ratio'], 0.0)
+    assert result['active_count'] == 3
+    assert np.isclose(result['max_abs_log_ratio'], 0.0)

@@ -24,7 +24,7 @@ are different evidence classes and must not be described interchangeably.
 |---|---:|---|---|---|
 | Backward electron gather | A | passing | Open-wafer normalization, Langmuir `exp(V/Te)` retardation, positive-potential saturation, and fixed-seed reproducibility are automated. | Frozen-field forward/backward reciprocity over nontrivial geometry; trajectory-step convergence; smooth/verified parameter sensitivities. |
 | Backward ion gather | A | passing | Open uncharged wafer returns unit normalized flux. | IEDF moment replay, retarding-potential curve, frozen-field reciprocity, reflection/re-emission, and energy conservation versus step size. |
-| Self-consistent backward charging | S + A partial | partially supported | Deterministic mean dipole and floor-potential trend; backward floor potential matches the forward reference table with 5.0 V RMSE and correlation 0.998. | Residual-based convergence, charge/current conservation output, domain/grid convergence, experimental voltage/charge data. Fixed 14 iterations is not a convergence proof. |
+| Self-consistent backward charging | A partial; S failing when converged | **conservation bug fixed; reference mismatch exposed** | A corner cell was incorrectly updated once per exposed face, giving contradictory currents to one floating capacitor. Pooling all faces per insulating cell makes AR4 residuals decay: maximum active `|log(Gi/Ge)|` 2.39→0.228 and RMS 0.96→0.097 over 30 iterations. | The corrected solution moves toward floor 50.3 V and foot energy 11.7 eV, not the forward references 34.0 V/21.6 eV. The earlier 5.0 V RMSE/corr 0.998 were under-converged transient outputs. Frozen-field reciprocity, source normalization, field solve, and estimator support must be audited before this solver is a validation engine. |
 | Backward notch-foot ion energy | S | failing | The observable is computed. | Replayed 2026-07-11: 10.5 eV RMSE and correlation -0.323 versus `_PETCH_FOOT_E`. The “face convention” note does not close this gate. Do not call it validated. |
 | HG floor-flux charging curve | S | passing in legacy/closure lineage; mixed in newer solvers | The code can reproduce the Hwang–Giapis published computational curve under documented configurations. | HG is a simulation benchmark, not wafer measurement. The general/backward estimator must pass without geometry-specific overrides and with convergence evidence. |
 | Charging-driven notch mechanism | E2 | partial | Charging-on creates a localized foot notch while charging-off does not; normalized notch trend is compared with published notch measurements. | Absolute geometry/process matched experiment; width dependence; uncertainty in digitization; foot-energy mechanism inconsistency above. |
@@ -43,10 +43,13 @@ are different evidence classes and must not be described interchangeably.
 
 ### 1. Charging convergence is not yet demonstrated
 
-`self_consistent_backward()` performs a fixed number of damped voltage updates. It does not expose a
-final current-balance residual or stop on a physical tolerance. The next change must report per-component
-and per-surface `log(Gi/Ge)` residuals, voltage-step history, field-solve residual, and iteration count.
-Early stopping should remain opt-in until it reproduces the fixed-iteration reference.
+`self_consistent_backward()` historically performed a fixed number of damped voltage updates. It now
+reports per-surface and pooled-conductor `log(Gi/Ge)` residuals and supports opt-in tolerance stopping.
+The first measurement falsified the prior convergence claim. It also exposed a concrete bug: a corner
+cell was assigned one independent floating balance per exposed face, so opposing face currents applied
+multiple contradictory updates to the same potential. Pooling faces by physical cell restores residual
+decay, but the converged direction now misses the forward reference badly. Estimator/source/field parity
+must be diagnosed before early stopping or any charging-validation claim.
 
 ### 2. Adjoint reciprocity is asserted more broadly than it is gated
 
