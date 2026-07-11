@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from petch.charging2d import _build_edge_array_geometry
 from petch.charging_backward import (
+    backward_electron_floor_liouville,
     backward_electron_gather,
     backward_ion_gather,
     self_consistent_backward,
@@ -69,6 +70,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--width", type=int, default=16)
     parser.add_argument("--mouth", type=int, default=None)
+    parser.add_argument("--open-width-um", type=float, default=3.7)
+    parser.add_argument("--right-buffer-um", type=float, default=0.5)
     parser.add_argument("--charge-log2", type=int, default=10)
     parser.add_argument("--score-log2", type=int, default=17)
     parser.add_argument("--iterations", type=int, default=10)
@@ -81,7 +84,9 @@ def main():
     args = parser.parse_args()
 
     mouth = args.mouth if args.mouth is not None else 5 * args.width
-    geometry = _build_edge_array_geometry(4.0, W=args.width, mouth=mouth)
+    geometry = _build_edge_array_geometry(
+        4.0, W=args.width, mouth=mouth, open_width_um=args.open_width_um,
+        right_buffer_um=args.right_buffer_um)
     result = self_consistent_backward(
         geometry, n_iter=args.iterations, n_log2=args.charge_log2, n_scramble=2,
         ion_ied_phase_exponent=0.0,
@@ -101,6 +106,12 @@ def main():
         trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
         nodal_potential=result.get("nodal_V"),
     ).mean())
+    backward_e_liouville = None
+    if args.nodal_mover:
+        backward_e_liouville = float(backward_electron_floor_liouville(
+            geometry["solid"], result["nodal_V"], result["Vs"], cells,
+            n_log2=args.charge_log2 + 2, n_scramble=3, seed=113,
+            trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field).mean())
     backward_i = float(backward_ion_gather(
         geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
         n_log2=args.charge_log2 + 2, n_scramble=3, seed=103, ied_phase_exponent=0.0,
@@ -132,6 +143,10 @@ def main():
                                     (f"ion-exit-{args.exit_energy_mixture:g}", backward_i_exit, forward_i)):
         rel = (backward / forward - 1.0) if forward else np.nan
         print(f"{name:8s} backward={backward:.6f} forward={forward:.6f} relative={rel:+.2%}")
+    if backward_e_liouville is not None:
+        rel = backward_e_liouville / forward_e - 1.0
+        print(f"electron-liouville backward={backward_e_liouville:.6f} forward={forward_e:.6f} "
+              f"relative={rel:+.2%}")
 
 
 if __name__ == "__main__":

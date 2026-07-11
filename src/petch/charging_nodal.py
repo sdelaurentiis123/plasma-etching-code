@@ -239,9 +239,12 @@ def _trace_nodal_py(V, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_cap, dt
                         and solid[test_i, test_j] and tz < hit_fraction):
                     crossed = True; hi = test_i; hj = test_j; hit_fraction = tz
             if not crossed and tx >= 0.0 and tx <= 1.0 and (ni < 0 or ni >= nx):
-                xa = 0.0 if ni < 0 else float(nx); vxn = -vxn
+                # Specular symmetry reflection keeps the REMAINDER of the proposed step. Clipping
+                # at the wall shortens the orbit and is not time reversible.
+                xa = -xa if ni < 0 else 2.0 * nx - xa
+                vxn = -vxn
             if not crossed and tz >= 0.0 and tz <= 1.0 and nj >= nz:
-                za = float(nz); vzn = -vzn
+                za = 2.0 * nz - za; vzn = -vzn
             if crossed:
                 xa = x + dx * hit_fraction; za = z + dz * hit_fraction
                 hit_vxn = vx + hit_fraction * (vxn - vx)

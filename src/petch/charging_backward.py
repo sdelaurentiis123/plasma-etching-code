@@ -187,6 +187,48 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
     return out
 
 
+def backward_electron_floor_liouville(solid, nodal_potential, V_surf, cells, Te=4.0,
+                                       n_log2=13, n_scramble=3, trace_dt=0.15,
+                                       trace_dt_field=0.10, trace_steps=200, seed=0,
+                                       shifted_fraction=0.8):
+    """Low-variance, support-complete Liouville gather for horizontal floor faces.
+
+    Surface ``vx`` is Maxwellian. Surface normal energy ``r=w^2`` is sampled from a mixture of the
+    natural exponential and that exponential shifted by the local positive barrier ``B=max(Vc,0)``.
+    The natural stratum preserves full support; the shifted stratum resolves the exponentially rare
+    escaping population. The exact mixture density is divided out, so ``shifted_fraction`` controls
+    variance only and is not physical input.
+    """
+    if not 0.0 <= shifted_fraction < 1.0:
+        raise ValueError("shifted_fraction must lie in [0, 1)")
+    solid = np.asarray(solid, dtype=bool); V_surf = np.asarray(V_surf, dtype=float)
+    nx, nz = solid.shape; N = 2 ** int(n_log2); msteps = int(trace_steps) * nz
+    sig = np.sqrt(0.5 * Te); out = np.zeros(len(cells))
+    for ci, (cx, cz) in enumerate(cells):
+        barrier = max(float(V_surf[cx, cz]), 0.0)
+        vals = []
+        for sc in range(n_scramble):
+            u = qmc.Sobol(d=4, scramble=True, seed=seed + sc).random_base2(n_log2)
+            shifted = u[:, 0] < shifted_fraction
+            base_r = -Te * np.log(np.clip(1.0 - u[:, 1], 1e-12, 1.0))
+            r = base_r + shifted * barrier
+            vx = sig * norm.ppf(np.clip(u[:, 2], 1e-9, 1.0 - 1e-9))
+            x0 = cx + u[:, 3]; z0 = np.full(N, cz - 1e-3)
+            hix, _, _, _, surv, exit_vx, exit_vz = trace_nodal(
+                nodal_potential, solid, x0, z0, vx, -np.sqrt(r), -1.0, nx, nz,
+                msteps, trace_dt, trace_dt_field)
+            escaped = (hix < 0) & (surv < 0.5)
+            natural = (1.0 - shifted_fraction) * np.exp(-r / Te)
+            shifted_density = shifted_fraction * np.where(
+                r >= barrier, np.exp(-(r - barrier) / Te), 0.0)
+            density_scaled = natural + shifted_density  # common 1/Te cancels analytically
+            exit_K = exit_vx * exit_vx + exit_vz * exit_vz
+            weight = np.exp((vx * vx - exit_K) / Te) / np.maximum(density_scaled, 1e-300)
+            vals.append(float(np.sum(escaped * weight)) / N)
+        out[ci] = float(np.mean(vals))
+    return out
+
+
 def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V_dc=37.0, V_rf=30.0,
                         n_log2=13, n_scramble=3, trace_dt=0.15, trace_dt_field=0.10, trace_steps=200,
                         seed=0, aperture=None, pad_deg=3.0, alpha=0.85, want_energy=False,

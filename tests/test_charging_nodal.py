@@ -1,7 +1,11 @@
 import numpy as np
 from scipy.stats import gamma as gamma_dist, norm, qmc
 
-from petch.charging_backward import backward_electron_gather, backward_ion_gather
+from petch.charging_backward import (
+    backward_electron_floor_liouville,
+    backward_electron_gather,
+    backward_ion_gather,
+)
 from petch.charging_nodal import nodal_domain, nodal_field_at, solve_nodal_laplace, trace_nodal
 
 
@@ -66,6 +70,20 @@ def test_nodal_tracer_checks_second_crossed_face_on_diagonal_step():
     assert hit_z[0] == 5
 
 
+def test_nodal_tracer_lateral_reflection_keeps_remaining_step():
+    nx, nz = 8, 6
+    solid = np.zeros((nx, nz), dtype=bool)
+    # A vertical detector catches the particle only if reflection preserves the remaining distance.
+    solid[1, :] = True
+    V = np.zeros((nx + 1, nz + 1))
+    x = np.array([0.1]); z = np.array([2.5])
+    vx = np.array([-4.0]); vz = np.array([0.0])
+    hit_x, hit_z, *_ = trace_nodal(V, solid, x, z, vx, vz, 1.0, nx, nz, 20, 0.4, 0.1,
+                                   fixed_dt=0.2)
+    assert hit_x[0] == 1
+    assert hit_z[0] == 2
+
+
 def test_nodal_tracer_uniform_field_energy_error_is_small():
     nx, nz = 8, 16
     solid = np.zeros((nx, nz), dtype=bool)
@@ -111,6 +129,11 @@ def test_nodal_electron_forward_backward_reciprocity_in_linear_field():
     hx, hz, *_ = trace_nodal(V, solid, x, z, vx, vz, -1.0, nx, nz, 200 * nz, 0.15, 0.1)
     forward = np.mean((hz == floor_z) & (hx > left) & (hx < right))
     assert np.isclose(backward, forward, rtol=0.04, atol=0.006), (backward, forward)
+    for shifted_fraction in (0.2, 0.8):
+        liouville = backward_electron_floor_liouville(
+            solid, V, surface, cells, n_log2=10, n_scramble=3, seed=89,
+            shifted_fraction=shifted_fraction).mean()
+        assert np.isclose(liouville, forward, rtol=0.04, atol=0.006), (liouville, forward)
 
 def test_nodal_ion_forward_backward_reciprocity_in_linear_field():
     solid, V, surface, cells, normals, left, right, floor_z = _nodal_trench(5.0)

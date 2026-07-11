@@ -98,7 +98,9 @@ A standalone boundary-fitted nodal Laplace/Q1 tracer now passes analytic field, 
 no-tunnelling, and manufactured electron/ion reciprocity gates. On the high-stat W32 frozen AR4 audit it
 closes corrected-ion reciprocity to +1.6% but leaves electron reciprocity at -7.6%; therefore it is not a
 production replacement and is not wired into the fixed point. This separates the remaining frontier:
-electron adjoint proposal/source-boundary measure, with adequate rare-event importance sampling.
+forward electron source-plane quadrature/domain convergence. A support-complete natural/barrier-shifted
+Liouville proposal resolves the +39 V rare event and agrees with the legacy electron gather, ruling out
+proposal support as the dominant residual. Exact lateral reflection fixes a smaller orbit error.
 
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
