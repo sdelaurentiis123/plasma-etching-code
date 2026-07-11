@@ -82,9 +82,11 @@ natural and barrier-shifted normal energies resolves the population and agrees w
 gather (W16: -4.7% versus -4.2%; W32: -7.4% versus -7.6%). Thus proposal support is no longer the leading
 electron suspect. Exact remainder-preserving lateral reflection fixes a real orbit bug but only improves
 W16 by about 0.3 percentage point. The nodal field/tracer remains experimental and is not wired into the
-charging fixed point. The next task is source-plane spatial quadrature and domain convergence with signed
-scramble uncertainty; enlarging the domain changed the forward estimate while both backward estimates
-stayed nearly fixed.
+charging fixed point. Adding four independent forward scrambles then exposed the apparent W16 electron
+residual as reference-estimator uncertainty: the forward mean shifted from 0.0754 to 0.0733 with standard
+error 0.00144, leaving legacy and shifted-Liouville adjoints at -1.4% and -1.9%. Corrected ion is +4.6%
+with forward standard error 0.00109 and remains the near-gate statistics frontier. W32 must be repeated
+with the same multi-scramble forward protocol before promotion.
 
 The structured nodal implementation should remain embarrassingly parallel over particles and amenable
 to Warp/CUDA. General 3-D curved geometry can later replace Q1 rectangles with AMReX-style embedded

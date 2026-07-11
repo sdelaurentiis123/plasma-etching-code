@@ -100,7 +100,9 @@ closes corrected-ion reciprocity to +1.6% but leaves electron reciprocity at -7.
 production replacement and is not wired into the fixed point. This separates the remaining frontier:
 forward electron source-plane quadrature/domain convergence. A support-complete natural/barrier-shifted
 Liouville proposal resolves the +39 V rare event and agrees with the legacy electron gather, ruling out
-proposal support as the dominant residual. Exact lateral reflection fixes a smaller orbit error.
+proposal support as the dominant residual. Exact lateral reflection fixes a smaller orbit error. Four
+forward scrambles reduce the W16 electron discrepancy to -1.4% (shifted Liouville -1.9%) and quantify
+forward standard error as 0.00144; the former single-scramble comparison overstated electron bias.
 
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
