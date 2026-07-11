@@ -131,6 +131,13 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
   confidence bound, and the activity threshold must operate on normalized rather than absolute particle
   flux. Both are now enforced. The hybrid fixed point remains experimental until interval-aware current
   updates close without selecting a statistically unresolved zero as an exact current.
+- The bidirectional fixed point now propagates per-species current uncertainty and updates voltage only
+  from non-overlapping ion/electron confidence intervals. Current activity is normalized by the common
+  incident charge-flux scale; the prior absolute-current comparison made every tiny current appear active.
+  This removed residual spikes near 70, but a 20-step generic-trench run plateaued at certified log-current
+  residual about 2.34. The remaining blocker is the globally coupled nonlinear solve and estimator-method
+  switching, not license to accept the ±10 V iterate. A merit-decreasing trust-region/Anderson step with
+  common estimator states is required before this gate is closed.
 
 ### Kill criteria
 

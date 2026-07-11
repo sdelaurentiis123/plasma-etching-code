@@ -457,6 +457,57 @@ def _current_balance_diagnostics(Gi, Ge, comp, cells=None, active_flux=1e-4):
     )
 
 
+def _interval_current_balance_diagnostics(
+        Gi, Ge, Gi_stderr, Ge_stderr, comp, cells=None, active_flux=1e-4,
+        confidence_sigma=2.0):
+    """Current-balance residual certified by non-overlapping estimator confidence intervals."""
+    Gi = np.asarray(Gi, dtype=float); Ge = np.asarray(Ge, dtype=float)
+    Si = np.asarray(Gi_stderr, dtype=float); Se = np.asarray(Ge_stderr, dtype=float)
+    comp = np.asarray(comp); residual = np.full(Gi.shape, np.nan); active = np.zeros(Gi.shape, bool)
+
+    def interval_residual(indices):
+        gi = float(Gi[indices].sum()); ge = float(Ge[indices].sum())
+        si = float(np.sqrt(np.sum(Si[indices] ** 2)))
+        se = float(np.sqrt(np.sum(Se[indices] ** 2)))
+        ilo = max(gi - confidence_sigma * si, 0.0); ihi = gi + confidence_sigma * si
+        elo = max(ge - confidence_sigma * se, 0.0); ehi = ge + confidence_sigma * se
+        if ilo > ehi:
+            value = np.log(ilo / max(ehi, 1e-300))
+        elif elo > ihi:
+            value = np.log(max(ihi, 1e-300) / elo)
+        else:
+            value = 0.0
+        return float(value), dict(Gi=gi, Ge=ge, Gi_stderr=si, Ge_stderr=se,
+                                  ion_interval=(ilo, ihi), electron_interval=(elo, ehi))
+
+    if cells is None:
+        ins_groups = [[i] for i in np.where(comp == 0)[0]]
+    else:
+        by_cell = {}
+        for index in np.where(comp == 0)[0]:
+            by_cell.setdefault(tuple(cells[index]), []).append(int(index))
+        ins_groups = list(by_cell.values())
+    detail = {}
+    for indices in ins_groups:
+        value, info = interval_residual(indices)
+        residual[indices] = value
+        active[indices] = (info["Gi"] + info["Ge"]) >= active_flux
+        detail[("cell", tuple(cells[indices[0]]) if cells is not None else indices[0])] = info
+    pooled = {}
+    for component in np.unique(comp[comp > 0]):
+        indices = np.where(comp == component)[0]
+        value, info = interval_residual(indices)
+        residual[indices] = value; active[indices] = (info["Gi"] + info["Ge"]) >= active_flux
+        info["log_ratio"] = value; pooled[int(component)] = info
+    values = np.abs(residual[active])
+    return dict(
+        log_ratio=residual, active=active, active_count=int(active.sum()),
+        inactive_count=int((~active).sum()),
+        max_abs_log_ratio=float(values.max()) if values.size else 0.0,
+        rms_log_ratio=float(np.sqrt(np.mean(values ** 2))) if values.size else 0.0,
+        pooled=pooled, detail=detail, confidence_sigma=float(confidence_sigma))
+
+
 def _laplace_residual(V, gas):
     """Five-point finite-difference Laplace residual on gas cells."""
     xm = np.empty_like(V); xp = np.empty_like(V); zm = np.empty_like(V); zp = np.empty_like(V)
@@ -477,7 +528,7 @@ def solve_boundary_state_charging(
         initial_surface_voltage=None, n_iter=40, beta=0.5, response_energy_eV=4.0, dVmax=8.0,
         balance_tol=1e-3, min_iter=2, field_sweeps=500, field_tolerance=1e-9,
         boundary_proposals=None, n_face_position=8, adaptive_quadrature=None,
-        active_flux=1e-4):
+        active_flux=1e-4, current_confidence_sigma=2.0):
     """Geometry- and chemistry-agnostic deterministic charging fixed point.
 
     ``solid`` is the 2-D material occupancy grid and ``conductor_ids`` assigns zero to locally floating
@@ -531,7 +582,7 @@ def solve_boundary_state_charging(
     for component in range(1, conductor_voltage.size):
         values = surface_voltage[conductor_ids == component]
         conductor_voltage[component] = float(values.mean()) if values.size else 0.0
-    history = []; field_history = []; quadrature_history = []; adaptive_levels = {}
+    history = []; interval_history = []; field_history = []; quadrature_history = []; adaptive_levels = {}
     for iteration in range(int(n_iter)):
         for component in range(1, conductor_voltage.size):
             surface_voltage[conductor_ids == component] = conductor_voltage[component]
@@ -540,6 +591,7 @@ def solve_boundary_state_charging(
             tolerance=field_tolerance)
         field_history.append(field_diag)
         species_current = {}
+        species_current_stderr = {}
         species_quadrature = {}
         for species in positive_species + negative_species:
             if adaptive_quadrature is None:
@@ -547,6 +599,7 @@ def solve_boundary_state_charging(
                     boundary_state, species.name, potential, solid, cells, normals,
                     proposal_species=proposals.get(species.name), n_face_position=n_face_position)
                 normalized_face_flux = result["per_face"]
+                normalized_face_stderr = np.zeros_like(normalized_face_flux)
             else:
                 options = dict(adaptive_quadrature)
                 bidirectional = bool(options.pop("bidirectional", False))
@@ -580,8 +633,11 @@ def solve_boundary_state_charging(
                             quadrature=hybrid, surface_voltage=surface_voltage,
                             potential=potential, cells=cells, normals=normals)
                     normalized_face_flux = hybrid["per_face"]
+                    normalized_face_stderr = hybrid["per_face_stderr"]
                     species_current[species.name] = (
                         normalized_face_flux * species.flux_m2_s * abs(species.charge_number))
+                    species_current_stderr[species.name] = (
+                        normalized_face_stderr * species.flux_m2_s * abs(species.charge_number))
                     continue
                 adaptive = adaptive_adjoint_boundary_state_face_flux(
                     boundary_state, species.name, potential, solid, cells, normals,
@@ -613,17 +669,30 @@ def solve_boundary_state_charging(
                         quadrature=adaptive, surface_voltage=surface_voltage,
                         potential=potential, cells=cells, normals=normals)
                 normalized_face_flux = adaptive.element_mean
+                normalized_face_stderr = adaptive.element_stderr
             species_current[species.name] = (normalized_face_flux * species.flux_m2_s
                                              * abs(species.charge_number))
+            species_current_stderr[species.name] = (
+                normalized_face_stderr * species.flux_m2_s * abs(species.charge_number))
         quadrature_history.append(species_quadrature)
         ion_current = np.sum([species_current[item.name] for item in positive_species], axis=0)
         electron_current = np.sum([species_current[item.name] for item in negative_species], axis=0)
+        ion_current_stderr = np.sqrt(np.sum([
+            species_current_stderr[item.name] ** 2 for item in positive_species], axis=0))
+        electron_current_stderr = np.sqrt(np.sum([
+            species_current_stderr[item.name] ** 2 for item in negative_species], axis=0))
         balance = _current_balance_diagnostics(
             ion_current / current_scale, electron_current / current_scale,
             components, cells, active_flux=active_flux)
         history.append(balance)
+        interval_balance = _interval_current_balance_diagnostics(
+            ion_current / current_scale, electron_current / current_scale,
+            ion_current_stderr / current_scale, electron_current_stderr / current_scale,
+            components, cells, active_flux=active_flux,
+            confidence_sigma=current_confidence_sigma)
+        interval_history.append(interval_balance)
         if (balance_tol is not None and len(history) >= int(min_iter)
-                and balance["max_abs_log_ratio"] <= balance_tol):
+                and interval_balance["max_abs_log_ratio"] <= balance_tol):
             break
         by_cell = {}
         for face_index, cell in enumerate(cells):
@@ -634,18 +703,17 @@ def solve_boundary_state_charging(
             ge = float(electron_current[face_index].sum())
             if (gi + ge) / current_scale < active_flux:
                 continue
-            surface_voltage[cell] += np.clip(
-                beta * response_energy_eV * np.log((gi + 1e-300) / (ge + 1e-300)),
-                -dVmax, dVmax)
+            residual = float(interval_balance["log_ratio"][face_index[0]])
+            surface_voltage[cell] += np.clip(beta * response_energy_eV * residual, -dVmax, dVmax)
         for component in range(1, conductor_voltage.size):
             selected = components == component
             if selected.any():
                 gi = float(ion_current[selected].sum()); ge = float(electron_current[selected].sum())
                 if (gi + ge) / current_scale < active_flux:
                     continue
+                residual = float(interval_balance["pooled"][component]["log_ratio"])
                 conductor_voltage[component] += np.clip(
-                    beta * response_energy_eV * np.log((gi + 1e-300) / (ge + 1e-300)),
-                    -dVmax, dVmax)
+                    beta * response_energy_eV * residual, -dVmax, dVmax)
     for component in range(1, conductor_voltage.size):
         surface_voltage[conductor_ids == component] = conductor_voltage[component]
     potential, field_final = solve_nodal_laplace(
@@ -654,8 +722,10 @@ def solve_boundary_state_charging(
         surface_voltage=surface_voltage, potential=potential,
         cells=np.asarray(cells, dtype=int), normals=np.asarray(normals, dtype=float),
         components=components, ion_current=ion_current, electron_current=electron_current,
-        species_current=species_current,
+        ion_current_stderr=ion_current_stderr, electron_current_stderr=electron_current_stderr,
+        species_current=species_current, species_current_stderr=species_current_stderr,
         iterations=len(history), balance_history=history, balance_final=history[-1],
+        interval_balance_history=interval_history, interval_balance_final=interval_history[-1],
         field_history=field_history, field_final=field_final,
         quadrature_history=quadrature_history,
         adaptive_levels={name: level.copy() for name, level in adaptive_levels.items()},

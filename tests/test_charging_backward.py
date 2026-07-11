@@ -4,6 +4,7 @@ from scipy.stats import gamma as gamma_dist, norm, qmc
 
 from petch.charging_backward import (
     _current_balance_diagnostics,
+    _interval_current_balance_diagnostics,
     _laplace_residual,
     adaptive_backward_ion_gather,
     backward_electron_gather,
@@ -102,6 +103,17 @@ def test_current_balance_pools_multiple_faces_of_one_insulator_cell():
     assert np.allclose(result['log_ratio'], 0.0)
     assert result['active_count'] == 3
     assert np.isclose(result['max_abs_log_ratio'], 0.0)
+
+
+def test_interval_current_balance_updates_only_certified_imbalance():
+    result = _interval_current_balance_diagnostics(
+        Gi=np.array([1.0, 2.0, 0.01]), Ge=np.array([0.9, 1.0, 0.02]),
+        Gi_stderr=np.array([0.1, 0.1, 0.01]), Ge_stderr=np.array([0.1, 0.1, 0.01]),
+        comp=np.array([0, 1, 0]), cells=[(0, 0), (1, 0), (2, 0)],
+        active_flux=0.05, confidence_sigma=2.0)
+    assert result['log_ratio'][0] == 0.0
+    assert result['log_ratio'][1] > 0.0
+    assert not result['active'][2]
 
 
 def test_laplace_residual_is_zero_for_constant_harmonic_field():
