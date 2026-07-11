@@ -5,11 +5,13 @@ from petch.boundary_state import (
     PlasmaBoundaryState,
     IonEnergyTransverseMaxwellianDensity,
     MaxwellianFluxVelocityDensity,
+    MixtureBoundaryDensity,
     RectilinearVelocityHistogramDensity,
     SpeciesBoundaryState,
     collisionless_sheath_boundary_state,
     instantaneous_sinusoidal_ion_boundary_state,
     maxwellian_electron_boundary_state,
+    mixture_boundary_proposal,
 )
 from petch.sheath import CollisionlessRFSheath, ECHARGE
 
@@ -94,4 +96,18 @@ def test_electron_boundary_is_analytic_half_maxwellian_flux_quadrature():
     # Flux-weighted half-Maxwellian: T/2 in each tangent plus T in the normal direction.
     assert np.isclose(electron.mean_energy_eV, 8.0, atol=1e-12)
     assert np.all(np.isfinite(electron.log_flux_density(electron.velocity_sqrt_eV)))
+
+
+def test_mixture_proposal_weights_are_numerical_and_density_is_exactly_scored():
+    cold = maxwellian_electron_boundary_state(4.0, 1e19, n_transverse=3, n_normal=4).get("electron")
+    broad = maxwellian_electron_boundary_state(40.0, 1e19, n_transverse=3, n_normal=4).get("electron")
+    proposal = mixture_boundary_proposal((cold, broad), (0.8, 0.2), name="electron-proposal")
+    assert isinstance(proposal.density_model, MixtureBoundaryDensity)
+    assert np.isclose(proposal.weight.sum(), 1.0)
+    velocity = proposal.velocity_sqrt_eV
+    expected = np.logaddexp(
+        np.log(0.8) + cold.log_flux_density(velocity),
+        np.log(0.2) + broad.log_flux_density(velocity))
+    assert np.allclose(proposal.log_flux_density(velocity), expected)
+    assert proposal.provenance["role"] == "numerical_multiple_importance_proposal"
     RectilinearVelocityHistogramDensity,

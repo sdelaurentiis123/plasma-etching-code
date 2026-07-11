@@ -102,7 +102,10 @@ class IonEnergyTransverseMaxwellianDensity:
             transverse_log = (-np.log(np.pi * temperature)
                               - (flat[valid, 0] ** 2 + flat[valid, 1] ** 2) / temperature)
             # Transform normal energy E=vz^2 to normal speed: p(vz)=2*vz*p(E).
-            result[valid] = transverse_log + np.log(2.0 * vz[valid] * p_energy)
+            positive = p_energy > 0.0
+            selected = np.where(valid)[0]
+            result[selected[positive]] = (transverse_log[positive]
+                                          + np.log(2.0 * vz[selected[positive]] * p_energy[positive]))
         return result.reshape(velocity.shape[:-1])
 
 
@@ -133,6 +136,32 @@ class MaxwellianFluxVelocityDensity:
             result[valid] = (np.log(2.0 * vz[valid]) - np.log(np.pi)
                              - 2.0 * np.log(temperature) - energy / temperature)
         return result.reshape(velocity.shape[:-1])
+
+
+@dataclass(frozen=True)
+class MixtureBoundaryDensity:
+    """Normalized mixture of boundary densities used for support-complete numerical proposals."""
+    components: tuple[BoundaryDensityModel, ...]
+    weight: np.ndarray
+
+    def __post_init__(self):
+        components = tuple(self.components)
+        weight = np.asarray(self.weight, dtype=float).copy()
+        if (not components or weight.shape != (len(components),) or np.any(weight < 0.0)
+                or not np.all(np.isfinite(weight)) or weight.sum() <= 0.0):
+            raise ValueError("mixture requires matching nonnegative component weights")
+        weight /= weight.sum(); weight.setflags(write=False)
+        object.__setattr__(self, "components", components)
+        object.__setattr__(self, "weight", weight)
+
+    def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None):
+        terms = np.stack([
+            np.log(mixture_weight) + component.log_flux_density(
+                velocity_sqrt_eV, phase_rad, position_m)
+            for component, mixture_weight in zip(self.components, self.weight)
+            if mixture_weight > 0.0
+        ])
+        return np.logaddexp.reduce(terms, axis=0)
 
 
 def _readonly_array(value, shape_tail=()):
@@ -262,6 +291,41 @@ def maxwellian_electron_boundary_state(temperature_eV, flux_m2_s, *, n_transvers
     return PlasmaBoundaryState(
         species=(electron,), reference_plane_m=float(reference_plane_m),
         provenance={"source": "kinetic_maxwellian"},
+    )
+
+
+def mixture_boundary_proposal(components, mixture_weight=None, *, name="proposal"):
+    """Combine species quadratures into an exactly scored multiple-importance proposal.
+
+    This object is numerical, not a plasma source: component weights may change estimator variance but
+    cannot change the physical density scored by adjoint transport. Components must provide continuous
+    densities. Phase/position labels are retained when every component supplies them.
+    """
+    components = tuple(components)
+    if not components or any(item.density_model is None for item in components):
+        raise ValueError("proposal components require continuous density models")
+    if mixture_weight is None:
+        mixture_weight = np.ones(len(components))
+    mixture_weight = np.asarray(mixture_weight, dtype=float)
+    if (mixture_weight.shape != (len(components),) or np.any(mixture_weight < 0.0)
+            or mixture_weight.sum() <= 0.0):
+        raise ValueError("invalid mixture weights")
+    mixture_weight = mixture_weight / mixture_weight.sum()
+    velocity = np.concatenate([item.velocity_sqrt_eV for item in components])
+    weight = np.concatenate([
+        fraction * item.weight for fraction, item in zip(mixture_weight, components)])
+    phase = (np.concatenate([item.phase_rad for item in components])
+             if all(item.phase_rad is not None for item in components) else None)
+    position = (np.concatenate([item.position_m for item in components])
+                if all(item.position_m is not None for item in components) else None)
+    first = components[0]
+    return SpeciesBoundaryState(
+        name=name, charge_number=first.charge_number, mass_amu=first.mass_amu, flux_m2_s=1.0,
+        velocity_sqrt_eV=velocity, weight=weight, phase_rad=phase, position_m=position,
+        density_model=MixtureBoundaryDensity(
+            tuple(item.density_model for item in components), mixture_weight),
+        provenance={"role": "numerical_multiple_importance_proposal",
+                    "components": tuple(item.name for item in components)},
     )
 
 

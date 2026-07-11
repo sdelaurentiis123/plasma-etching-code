@@ -111,6 +111,12 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
 - The asymmetric centerline field changes by less than 5% between 121- and 161-cell lateral domains.
 - This is deliberately not called a twisting result: the charge contrast is prescribed. The next gate
   must generate it from the unified ion/electron boundary state and then add discrete arrival histories.
+- A first nontrivial unified fixed-point run used finite-transit ions and an analytic half-Maxwellian
+  electron source on a generic trench. A physical-plus-broad exactly scored mixture delayed but did not
+  prevent estimator collapse: after initial residual reduction, globally fixed quadrature nodes missed
+  narrow per-face escape sets and the voltage iteration ran away. Therefore density support and numerical
+  resolution are separate gates. The required fix is universal adaptive phase-space refinement per face,
+  not voltage clipping, named-region rays, or accepting the emitted potentials.
 
 ### Kill criteria
 
