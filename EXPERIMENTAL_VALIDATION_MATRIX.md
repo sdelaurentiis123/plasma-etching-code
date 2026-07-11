@@ -111,6 +111,12 @@ convergence even after refining all elements. This is not a reason for named cor
 collisionless finite-transit-time RF sheath model now passes static-energy, Child-thickness, and high-
 frequency phase-mixing gates; it is the upstream path toward a nonsingular physical boundary state.
 
+`PlasmaBoundaryState` now provides the single immutable plasma-to-feature contract: normalized weighted
+joint velocity-energy samples, phase/position, signed charge, mass, absolute flux, reference plane, and
+provenance. Instantaneous and finite-transit sheath constructors pass the same contract and current-density
+invariant. Production transport does not consume it yet; embedded source laws remain an explicit migration
+blocker.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark

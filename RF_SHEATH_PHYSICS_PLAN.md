@@ -46,3 +46,29 @@ Child thickness scaling, and high-frequency phase mixing.
 
 The instantaneous arcsine constructor remains useful as a named low-transit-time numerical limit. It must
 not silently serve as universal production physics.
+
+## Boundary-state implementation and current research implications
+
+`petch.boundary_state` now implements the common contract as immutable weighted joint velocity-energy
+measures with absolute species flux, charge, mass, RF phase, optional wafer position, reference plane,
+and provenance. Both the instantaneous limit and `CollisionlessRFSheath` construct it.
+
+Recent and foundational work sharpens what later constructors must preserve:
+
+- HPEM/MCFPM reactor-to-feature coupling passes spatially resolved species fluxes and energy/angle
+  distributions, not recipe knobs directly (Hoekstra, Kushner & Sukharev, OSTI 323619).
+- Hybrid bulk/sheath models produce coupled IEDF and IADF in electronegative biased ICPs; energy and angle
+  cannot generally be factored (OSTI 1399615).
+- Measured sheath waveforms and density can drive fast virtual IED sensors including ion-neutral
+  collisions (Bogdanova et al., arXiv:2012.14882).
+- Tailored and chirped waveforms deliberately reshape IEDFs, so arbitrary measured voltage waveforms must
+  be first-class inputs rather than reduced to one `Vrf` (Lanham & Kushner, DOI 10.1063/1.4993785;
+  Giesekus et al., arXiv:2509.01171).
+- Charge exchange creates secondary peaks and couples pressure to IEDF/IADF (Georgieva et al.,
+  Phys. Rev. E 69, 026406).
+- Reactor wall seasoning changes radical and ion flux composition wafer-to-wafer, requiring boundary
+  state provenance and time/wafer indexing (Agarwal & Kushner, DOI 10.1116/1.2909966).
+
+Accordingly, no downstream feature module may reconstruct missing energy-angle correlations from scalar
+means. Surrogates may predict a boundary state, but conservation, normalization, support, and uncertainty
+remain explicit fields and gates.
