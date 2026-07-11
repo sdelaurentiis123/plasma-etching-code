@@ -5,6 +5,7 @@ from scipy.stats import gamma as gamma_dist, norm, qmc
 from petch.charging_backward import (
     _current_balance_diagnostics,
     _laplace_residual,
+    adaptive_backward_ion_gather,
     backward_electron_gather,
     backward_ion_gather,
 )
@@ -221,3 +222,15 @@ def test_ion_exit_state_weight_rejects_benchmark_shaped_phase_law():
             solid, field, field, potential, cells, normals,
             n_log2=5, n_scramble=1, ied_phase_exponent=0.35, exit_state_weight=True,
         )
+
+
+def test_adaptive_ion_gather_is_geometry_agnostic_on_open_surface():
+    solid, field, potential, cells, normals = _open_flat(0.0)
+    result = adaptive_backward_ion_gather(
+        solid, field, field, potential, cells, normals,
+        base_log2=5, max_log2=8, n_replicates=3,
+        absolute_tolerance=5e-3, relative_tolerance=0.0,
+        ied_phase_exponent=0.0,
+    )
+    assert result.converged
+    assert np.isclose(result.total_mean, 1.0, atol=5e-3)

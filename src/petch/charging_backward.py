@@ -35,6 +35,7 @@ from scipy.stats import qmc, gamma as gammadist, norm
 
 from .charging_general import _trace_general
 from .charging_nodal import trace_nodal
+from .adaptive_quadrature import adaptive_surface_quadrature
 
 
 def _cone_angles(x0, z0, aperture, pad):
@@ -284,7 +285,10 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
                 center = 0.5 * Te + V_dc
                 E_cap = center + V_rf + 0.5 * Ti * norm.ppf(1.0 - 1e-6) ** 2 + max(-Vc, 0.0)
                 broad = u[:, 5] < exit_energy_mixture
-                E_surf_z = np.where(broad, u[:, 0] * E_cap, E_surf_z)
+                # Chebyshev/arcsine broad stratum. Uniform energy is a poor proposal for the
+                # endpoint-singular RF source density and dominated the estimator variance.
+                broad_E = 0.5 * E_cap * (1.0 + np.sin(ph))
+                E_surf_z = np.where(broad, broad_E, E_surf_z)
             valid = E_surf_z > 0.0
             vz_surf = np.sqrt(np.maximum(E_surf_z, 0.0))
             vperp_nat = sig * norm.ppf(np.clip(u[:, 2], 1e-6, 1 - 1e-6))
@@ -338,7 +342,11 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
                 p_mapped = np.where(mapped_support, 1.0 / (np.pi * mapped_root), 0.0)
                 proposal_E = (1.0 - exit_energy_mixture) * p_mapped
                 if exit_energy_mixture:
-                    proposal_E = proposal_E + exit_energy_mixture / E_cap
+                    broad_root = np.sqrt(np.maximum(E_surf_z * (E_cap - E_surf_z), 1e-24))
+                    p_broad = np.where(
+                        (E_surf_z > 0.0) & (E_surf_z < E_cap),
+                        1.0 / (np.pi * broad_root), 0.0)
+                    proposal_E = proposal_E + exit_energy_mixture * p_broad
                 source_ratio = np.where(proposal_E > 0.0, np.exp(log_px_ratio) * p_exit / proposal_E, 0.0)
                 ratio = ratio * source_ratio
             fnum = w * wied * escaped * ratio                        # per-sample flux contribution
@@ -350,6 +358,38 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
         if want_energy:
             out_E[ci] = float(np.mean(evals)) if evals else 0.0
     return (out, out_E) if want_energy else out
+
+
+def adaptive_backward_ion_gather(
+        solid, Ex, Ez, V_surf, cells, normals, *, base_log2=10, max_log2=16,
+        n_replicates=4, seed=0, absolute_tolerance=1e-3, relative_tolerance=5e-3,
+        element_absolute_tolerance=None, refine_fraction=0.5, **gather_kwargs):
+    """Apply the universal error-controlled surface quadrature to the ion adjoint gather.
+
+    Refinement is selected only from replicate uncertainty and surface measure. No geometry labels or
+    region-specific sample counts enter this adapter. Returns ``AdaptiveQuadratureResult``.
+    """
+    if gather_kwargs.get("want_energy", False):
+        raise ValueError("adaptive flux adapter does not yet aggregate the energy observable")
+    for reserved in ("n_log2", "n_scramble", "seed"):
+        if reserved in gather_kwargs:
+            raise ValueError(f"{reserved} is controlled by adaptive_backward_ion_gather")
+    cells = [tuple(c) for c in cells]; normals = [tuple(n) for n in normals]
+
+    def evaluator(indices, log2_samples, replicate_seed):
+        subset_cells = [cells[int(i)] for i in indices]
+        subset_normals = [normals[int(i)] for i in indices]
+        return backward_ion_gather(
+            solid, Ex, Ez, V_surf, subset_cells, subset_normals,
+            n_log2=log2_samples, n_scramble=1, seed=replicate_seed, **gather_kwargs)
+
+    return adaptive_surface_quadrature(
+        evaluator, len(cells), base_log2=base_log2, max_log2=max_log2,
+        n_replicates=n_replicates, seed=seed, absolute_tolerance=absolute_tolerance,
+        relative_tolerance=relative_tolerance,
+        element_absolute_tolerance=element_absolute_tolerance,
+        refine_fraction=refine_fraction,
+    )
 
 
 def _current_balance_diagnostics(Gi, Ge, comp, cells=None, active_flux=1e-4):

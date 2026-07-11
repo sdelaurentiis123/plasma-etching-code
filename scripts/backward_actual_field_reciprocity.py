@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from petch.charging2d import _build_edge_array_geometry
 from petch.charging_backward import (
+    adaptive_backward_ion_gather,
     backward_electron_floor_liouville,
     backward_electron_gather,
     backward_ion_gather,
@@ -78,11 +79,17 @@ def main():
     parser.add_argument("--iterations", type=int, default=10)
     parser.add_argument("--trace-dt", type=float, default=0.15)
     parser.add_argument("--trace-dt-field", type=float, default=0.10)
-    parser.add_argument("--exit-energy-mixture", type=float, default=0.2)
+    parser.add_argument("--exit-energy-mixture", type=float, default=0.05)
     parser.add_argument("--solve-with-exit-estimator", action="store_true")
     parser.add_argument("--nodal-mover", action="store_true")
     parser.add_argument("--nodal-fixed-dt", type=float, default=0.0)
     parser.add_argument("--forward-scrambles", type=int, default=4)
+    parser.add_argument("--backward-ion-scrambles", type=int, default=4)
+    parser.add_argument("--backward-log2", type=int, default=None)
+    parser.add_argument("--adaptive-ion", action="store_true")
+    parser.add_argument("--adaptive-max-log2", type=int, default=15)
+    parser.add_argument("--adaptive-total-tol", type=float, default=1e-3)
+    parser.add_argument("--adaptive-element-tol", type=float, default=5e-3)
     args = parser.parse_args()
 
     mouth = args.mouth if args.mouth is not None else 5 * args.width
@@ -102,9 +109,10 @@ def main():
     t0, t1, fz = geometry["trench0"], geometry["trench1"], geometry["nz"] - 1
     cells = [(x, fz) for x in range(t0, t1)]
     normals = [(0.0, -1.0)] * len(cells)
+    backward_log2 = args.backward_log2 if args.backward_log2 is not None else args.charge_log2 + 2
     backward_e = float(backward_electron_gather(
         geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
-        n_log2=args.charge_log2 + 2, n_scramble=3, seed=101,
+        n_log2=backward_log2, n_scramble=3, seed=101,
         trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
         nodal_potential=result.get("nodal_V"),
     ).mean())
@@ -112,22 +120,43 @@ def main():
     if args.nodal_mover:
         backward_e_liouville = float(backward_electron_floor_liouville(
             geometry["solid"], result["nodal_V"], result["Vs"], cells,
-            n_log2=args.charge_log2 + 2, n_scramble=3, seed=113,
+            n_log2=backward_log2, n_scramble=3, seed=113,
             trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field).mean())
     backward_i = float(backward_ion_gather(
         geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
-        n_log2=args.charge_log2 + 2, n_scramble=3, seed=103, ied_phase_exponent=0.0,
+        n_log2=backward_log2, n_scramble=3, seed=103, ied_phase_exponent=0.0,
         trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
         nodal_potential=result.get("nodal_V"),
     ).mean())
-    backward_i_exit = float(backward_ion_gather(
-        geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
-        n_log2=args.charge_log2 + 2, n_scramble=3, seed=103, ied_phase_exponent=0.0,
-        exit_state_weight=True,
-        exit_energy_mixture=args.exit_energy_mixture,
-        trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
-        nodal_potential=result.get("nodal_V"),
-    ).mean())
+    backward_i_exit_samples = []
+    backward_i_exit_cells = []
+    for sc in range(args.backward_ion_scrambles):
+        cell_flux = backward_ion_gather(
+            geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
+            n_log2=backward_log2, n_scramble=1, seed=103 + sc, ied_phase_exponent=0.0,
+            exit_state_weight=True, exit_energy_mixture=args.exit_energy_mixture,
+            trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
+            nodal_potential=result.get("nodal_V"))
+        backward_i_exit_cells.append(cell_flux)
+        backward_i_exit_samples.append(float(cell_flux.mean()))
+    backward_i_exit_samples = np.asarray(backward_i_exit_samples)
+    backward_i_exit_cells = np.asarray(backward_i_exit_cells)
+    backward_i_exit = float(backward_i_exit_samples.mean())
+    backward_i_exit_se = (float(backward_i_exit_samples.std(ddof=1)
+                                / np.sqrt(backward_i_exit_samples.size))
+                          if backward_i_exit_samples.size > 1 else 0.0)
+    adaptive_i = None
+    if args.adaptive_ion:
+        adaptive_i = adaptive_backward_ion_gather(
+            geometry["solid"], result["Ex"], result["Ez"], result["Vs"], cells, normals,
+            base_log2=backward_log2, max_log2=args.adaptive_max_log2,
+            n_replicates=args.backward_ion_scrambles, seed=103,
+            absolute_tolerance=args.adaptive_total_tol, relative_tolerance=0.0,
+            element_absolute_tolerance=args.adaptive_element_tol,
+            ied_phase_exponent=0.0, exit_state_weight=True,
+            exit_energy_mixture=args.exit_energy_mixture,
+            trace_dt=args.trace_dt, trace_dt_field=args.trace_dt_field,
+            nodal_potential=result.get("nodal_V"))
     forward_e, forward_e_se = _forward_floor_flux(
         result, geometry, "electron", args.score_log2, 107, args.trace_dt, args.trace_dt_field,
         args.nodal_fixed_dt, args.forward_scrambles)
@@ -144,6 +173,20 @@ def main():
               f"sweeps={nodal_diag['sweeps']}")
     print(f"forward standard errors: electron={forward_e_se:.6f} ion={forward_i_se:.6f} "
           f"({args.forward_scrambles} scrambles)")
+    print(f"backward corrected-ion standard error={backward_i_exit_se:.6f} "
+          f"range=[{backward_i_exit_samples.min():.6f},{backward_i_exit_samples.max():.6f}] "
+          f"({args.backward_ion_scrambles} scrambles, log2={backward_log2})")
+    if backward_i_exit_cells.shape[0] > 1:
+        cell_se = backward_i_exit_cells.std(axis=0, ddof=1) / np.sqrt(backward_i_exit_cells.shape[0])
+        worst = int(np.argmax(cell_se))
+        print(f"worst corrected-ion cell={cells[worst]} mean={backward_i_exit_cells[:, worst].mean():.6f} "
+              f"se={cell_se[worst]:.6f} range=[{backward_i_exit_cells[:, worst].min():.6f},"
+              f"{backward_i_exit_cells[:, worst].max():.6f}]")
+    if adaptive_i is not None:
+        print(f"adaptive corrected-ion mean={adaptive_i.total_mean:.6f} se={adaptive_i.total_stderr:.6f} "
+              f"converged={adaptive_i.converged} rounds={adaptive_i.rounds} "
+              f"levels=[{adaptive_i.log2_samples.min()},{adaptive_i.log2_samples.max()}] "
+              f"max_element_se={adaptive_i.element_stderr.max():.6f}")
     for name, backward, forward in (("electron", backward_e, forward_e),
                                     ("ion-1d", backward_i, forward_i),
                                     (f"ion-exit-{args.exit_energy_mixture:g}", backward_i_exit, forward_i)):
