@@ -84,3 +84,9 @@ adjoint-side representation for reactor/PIC output or diagnostic histograms: tra
 against the same joint measure used by forward quadrature, without assuming independent energy and angle.
 The same boundary-state transport path passes a vertical collisionless geometry gate at AR 1, 4, and 16;
 this establishes solver unification across depth, not realistic high-AR chemistry validation.
+
+The first generic adjoint consumer now uses only the boundary contract: quadrature samples define the
+surface proposal, traced exit states are scored by the same joint flux-density evaluator, and the
+Liouville normal-velocity Jacobian is applied without clipped weights. The identical implementation passes
+open-surface gates for Ar+ and neutral CF2. Nonuniform charged-field validation with reactor/sheath density
+models remains open.

@@ -79,3 +79,59 @@ def trace_boundary_state_floor_flux(
         hit_probability=hit_probability,
         incident_flux_m2_s=species.flux_m2_s,
     )
+
+
+def adjoint_boundary_state_floor_flux(
+        boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, floor_cells, *,
+        n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10):
+    """Generic Liouville adjoint floor gather using the boundary state's joint flux density.
+
+    This function contains no species source law. The supplied species quadrature is used as the surface
+    proposal, and its density model scores both surface and time-reversed plasma-exit states.
+    """
+    solid = np.asarray(solid, dtype=bool); nx, nz = solid.shape
+    species = boundary.get(species_name)
+    if species.density_model is None:
+        raise ValueError("adjoint transport requires a boundary density model")
+    if max_steps is None:
+        max_steps = 200 * nz
+    n_face_position = int(n_face_position)
+    if n_face_position <= 0 or not floor_cells:
+        raise ValueError("positive face quadrature and nonempty floor_cells are required")
+    per_cell = np.zeros(len(floor_cells))
+    base_velocity = species.velocity_sqrt_eV
+    log_surface_density = species.log_flux_density(base_velocity, species.phase_rad, species.position_m)
+    if not np.all(np.isfinite(log_surface_density)):
+        raise ValueError("surface proposal samples must lie inside their density support")
+    for ci, (cx, cz) in enumerate(floor_cells):
+        face_u = (np.arange(n_face_position) + 0.5) / n_face_position
+        x0 = np.tile(cx + face_u, base_velocity.shape[0])
+        z0 = np.full(x0.shape, cz - 1e-3)
+        # Time reverse the incident quadrature to launch outward from the floor.
+        vx0 = np.repeat(-base_velocity[:, 0], n_face_position)
+        vz0 = np.repeat(-base_velocity[:, 2], n_face_position)
+        hit_x, _, _, _, survivor, exit_vx, exit_vz = trace_nodal(
+            nodal_potential, solid, x0, z0, vx0, vz0, float(species.charge_number),
+            nx, nz, int(max_steps), dt_cap, dt_field)
+        escaped = (hit_x < 0) & (survivor < 0.5) & (exit_vz < 0.0)
+        sample_index = np.repeat(np.arange(base_velocity.shape[0]), n_face_position)
+        exit_forward = np.column_stack((
+            -exit_vx,
+            base_velocity[sample_index, 1],
+            -exit_vz,
+        ))
+        log_exit_density = species.log_flux_density(exit_forward)
+        surface_normal = base_velocity[sample_index, 2]
+        exit_normal = np.maximum(-exit_vz, 1e-300)
+        log_ratio = log_exit_density - log_surface_density[sample_index]
+        with np.errstate(over="ignore", invalid="ignore"):
+            density_ratio = np.exp(log_ratio)
+        contribution = np.where(
+            escaped & np.isfinite(log_ratio),
+            surface_normal / exit_normal * density_ratio, 0.0)
+        quadrature_weight = species.weight[sample_index] / n_face_position
+        per_cell[ci] = float(np.sum(quadrature_weight * contribution))
+    normalized_flux = float(per_cell.mean())
+    return dict(normalized_flux=normalized_flux,
+                absolute_flux_m2_s=normalized_flux * species.flux_m2_s,
+                per_cell=per_cell)

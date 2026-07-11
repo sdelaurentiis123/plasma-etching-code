@@ -127,6 +127,11 @@ reactor/PIC/diagnostic distributions. The unified boundary transport passes the 
 at AR 1/4/16 with geometry as the only change. This is an architecture/no-tunnelling invariant, not evidence
 that charging, collisions, chemistry, or profile evolution are validated at AR16.
 
+A generic boundary-state adjoint floor gather now passes the same open-surface normalization for charged
+Ar+ and neutral CF2. It contains no species source equation and applies the common density ratio and
+Liouville normal-velocity Jacobian without weight clipping. Nonuniform-field and arbitrary-face gates are
+still required before production migration.
+
 The ion source audit also separated reference emulation from first principles. The formerly hard-coded
 `Vs^-0.35` phase weight came from the Hwang-Giapis simulated IEDF horn ratio. The backward core now uses
 uniform RF phase by default; `ion_ied_phase_exponent=0.35` is passed explicitly only by the HG benchmark

@@ -3,10 +3,15 @@ import pytest
 
 from petch.boundary_state import (
     PlasmaBoundaryState,
+    RectilinearVelocityHistogramDensity,
     SpeciesBoundaryState,
     instantaneous_sinusoidal_ion_boundary_state,
 )
-from petch.boundary_transport import boundary_launches_2d, trace_boundary_state_floor_flux
+from petch.boundary_transport import (
+    adjoint_boundary_state_floor_flux,
+    boundary_launches_2d,
+    trace_boundary_state_floor_flux,
+)
 
 
 def test_boundary_launcher_preserves_probability_flux_and_joint_energy():
@@ -68,3 +73,21 @@ def test_same_boundary_transport_engine_spans_aspect_ratio_ladder(aspect_ratio):
         boundary, "test", np.zeros((nx + 1, nz + 1)), solid, target,
         n_position=3 * width, max_steps=1000 * nz)
     assert np.isclose(result["normalized_flux"], 1.0, atol=1e-12)
+
+
+@pytest.mark.parametrize("charge_number,name", [(1, "Ar+"), (0, "CF2")])
+def test_same_boundary_density_drives_ion_and_neutral_adjoint(charge_number, name):
+    nx, nz = 12, 10
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    V = np.zeros((nx + 1, nz + 1))
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.5, 0.5]), np.array([-0.5, 0.5]), np.array([0.5, 1.5])),
+        np.ones((1, 1, 1)))
+    species = SpeciesBoundaryState(
+        name, charge_number, 40.0, 2e19, [[0.0, 0.0, 1.0]], [1.0], density_model=density)
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    cells = [(x, nz - 1) for x in range(nx)]
+    result = adjoint_boundary_state_floor_flux(boundary, name, V, solid, cells, n_face_position=4)
+    assert np.isclose(result["normalized_flux"], 1.0, atol=1e-12)
+    assert np.isclose(result["absolute_flux_m2_s"], 2e19, rtol=1e-12)
+    RectilinearVelocityHistogramDensity,
