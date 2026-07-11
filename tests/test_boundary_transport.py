@@ -8,10 +8,13 @@ from petch.boundary_state import (
     instantaneous_sinusoidal_ion_boundary_state,
 )
 from petch.boundary_transport import (
+    adjoint_boundary_state_face_flux,
     adjoint_boundary_state_floor_flux,
     boundary_launches_2d,
     trace_boundary_state_floor_flux,
 )
+from petch.charging2d import _build_edge_array_geometry
+from petch.charging_backward import self_consistent_backward
 
 
 def test_boundary_launcher_preserves_probability_flux_and_joint_energy():
@@ -90,6 +93,57 @@ def test_same_boundary_density_drives_ion_and_neutral_adjoint(charge_number, nam
     result = adjoint_boundary_state_floor_flux(boundary, name, V, solid, cells, n_face_position=4)
     assert np.isclose(result["normalized_flux"], 1.0, atol=1e-12)
     assert np.isclose(result["absolute_flux_m2_s"], 2e19, rtol=1e-12)
+
+
+def test_arbitrary_face_adjoint_has_correct_wall_flux_jacobian():
+    nx, nz = 128, 12
+    solid = np.zeros((nx, nz), dtype=bool); solid[100, :] = True
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([0.5, 1.5]), np.array([-0.5, 0.5]), np.array([1.0, 2.0])),
+        np.ones((1, 1, 1)))
+    vx = np.linspace(0.5, 1.5, 64, endpoint=False) + 0.5 / 64
+    vz = np.linspace(1.0, 2.0, 128, endpoint=False) + 0.5 / 128
+    xx, zz = np.meshgrid(vx, vz, indexing="ij")
+    species = SpeciesBoundaryState(
+        "ion", 1, 40.0, 2e19, np.column_stack((xx.ravel(), np.zeros(xx.size), zz.ravel())),
+        np.ones(xx.size), density_model=density)
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    cells = [(100, z) for z in range(2, 9)]
+    result = adjoint_boundary_state_face_flux(
+        boundary, "ion", np.zeros((nx + 1, nz + 1)), solid, cells,
+        [(-1.0, 0.0)] * len(cells), n_face_position=2, max_steps=1000, want_energy=True)
+    # The finite tensor midpoint rule must reproduce its own Liouville Jacobian exactly; its continuum
+    # limit is E[vx/vz] = 1*ln(2).
+    expected = float(np.mean(xx / zz))
+    assert np.isclose(result["normalized_flux"], expected, atol=1e-12)
+    assert np.isclose(expected, np.log(2.0), rtol=1.1e-3)
+    expected_energy = float(np.sum((xx / zz) * (xx * xx + zz * zz)) / np.sum(xx / zz))
+    assert np.isclose(result["mean_impact_energy_eV"], expected_energy, atol=1e-12)
+
+
+def test_self_consistent_charging_consumes_unified_boundary_state_without_source_branches():
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.5, 0.5]), np.array([-0.5, 0.5]), np.array([1.0, 2.0])),
+        np.ones((1, 1, 1)))
+    velocity = np.array([
+        [-0.25, 0.0, 1.25], [0.25, 0.0, 1.25],
+        [-0.25, 0.0, 1.75], [0.25, 0.0, 1.75],
+    ])
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 1e19, velocity, np.ones(4), density_model=density)
+    electron = SpeciesBoundaryState(
+        "e-", -1, 5.4858e-4, 1e19, velocity, np.ones(4), density_model=density)
+    boundary = PlasmaBoundaryState((ion, electron), reference_plane_m=0.0)
+    geometry = _build_edge_array_geometry(1.0, W=16, mouth=20)
+    result = self_consistent_backward(
+        geometry, n_iter=1, n_wall=4, n_floor=3, sweeps=100,
+        boundary_state=boundary, ion_species="Ar+", electron_species="e-",
+        n_face_position=2)
+    # Identical countercharged phase-space measures have identical collisionless trajectories at V=0,
+    # so every material capacitor is exactly at its current-balance fixed point.
+    assert result["balance_preupdate"]["max_abs_log_ratio"] == 0.0
+    assert np.all(result["Vs"] == 0.0)
+    assert result["field_final"]["max_abs"] == 0.0
 
 
 def _uniform_box_species(name, charge, flux, vx_edges, vz_edges, nx=8, nz=16):

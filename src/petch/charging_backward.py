@@ -34,7 +34,8 @@ import numpy as np
 from scipy.stats import qmc, gamma as gammadist, norm
 
 from .charging_general import _trace_general
-from .charging_nodal import trace_nodal
+from .charging_nodal import solve_nodal_laplace, trace_nodal
+from .boundary_transport import adjoint_boundary_state_face_flux
 from .adaptive_quadrature import adaptive_surface_quadrature
 
 
@@ -455,7 +456,9 @@ def _laplace_residual(V, gas):
 def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=10, n_scramble=2,
                              n_wall=12, n_floor=6, sweeps=250, seed=0, cone_is=False,
                              balance_tol=None, min_iter=6, ion_ied_phase_exponent=0.0,
-                             ion_exit_state_weight=False, ion_exit_energy_mixture=0.0):
+                             ion_exit_state_weight=False, ion_exit_energy_mixture=0.0,
+                             boundary_state=None, ion_species="ion", electron_species="electron",
+                             boundary_proposals=None, n_face_position=8):
     """Self-consistent BACKWARD charging solve: Laplace field <-> per-cell gathers <-> damped update
     dV = beta*Te*ln(k*Gi/Ge), where k=Ci/Ce is calibrated each iteration on the floating pillar tops.
     NO forward launch, NO per-region overrides -- the electron-shading dipole EMERGES. Deterministic,
@@ -465,6 +468,11 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
     Reproduces the Kushner picture: upper wall negative (electron shading), deep wall positive (grazing
     ions), the low-AR->high-AR crossover of the potential maximum from floor to sidewall, floor monotone
     in AR. Returns dict with Vs grid, wall/floor profiles, and the sampled cell coords.
+    When ``boundary_state`` is supplied, both charged species are gathered from its joint velocity
+    density through the boundary-fitted nodal field. This is the unified reactor/sheath/diagnostic path;
+    the legacy analytic source remains the default until experimental gates close. ``boundary_proposals``
+    may map species names to numerical quadratures and changes variance only, never source physics.
+
     Cost ~ (n_wall*2 + n_floor + 2) cells * 2^n_log2 * n_scramble * 2 species * n_iter traces."""
     solid = g['solid']; nx, nz = g['nx'], g['nz']
     t0, t1 = g['trench0'], g['trench1']; r0, r1 = int(g['mouth']), int(g['z_poly0']); fz = nz - 1
@@ -498,6 +506,14 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
     kind = np.array(kind); comp = np.array(comp)
     clist = [tuple(c) for c in cells]; nlist = [tuple(n) for n in normals]
     Vs = np.zeros((nx, nz)); vc = np.zeros(3)               # vc[1],vc[2] = floating poly potentials
+    if boundary_state is not None:
+        ion_state = boundary_state.get(ion_species)
+        electron_state = boundary_state.get(electron_species)
+        if ion_state.charge_number <= 0 or electron_state.charge_number >= 0:
+            raise ValueError("unified charging requires positive-ion and negative-electron species")
+        if ion_state.density_model is None or electron_state.density_model is None:
+            raise ValueError("unified charging species require continuous boundary density models")
+        proposals = {} if boundary_proposals is None else dict(boundary_proposals)
 
     def laplace(Vsurf, omega=1.9):
         V = np.zeros((nx, nz)); ins = solid & (cond == 0); condm = solid & (cond > 0)
@@ -519,16 +535,31 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
     for it in range(n_iter):
         for c in (1, 2):
             Vs[cond == c] = vc[c]                            # broadcast floating poly potential onto its body
-        V = laplace(Vs)
-        field_history.append(_laplace_residual(V, gas))
-        Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
-        Ge = backward_electron_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
-                                      n_scramble=n_scramble, seed=seed, aperture=aperture)
-        Gi = backward_ion_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
-                                 n_scramble=n_scramble, seed=seed, aperture=aperture,
-                                 ied_phase_exponent=ion_ied_phase_exponent,
-                                 exit_state_weight=ion_exit_state_weight,
-                                 exit_energy_mixture=ion_exit_energy_mixture)
+        if boundary_state is None:
+            V = laplace(Vs)
+            field_history.append(_laplace_residual(V, gas))
+            Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
+            Ge = backward_electron_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
+                                          n_scramble=n_scramble, seed=seed, aperture=aperture)
+            Gi = backward_ion_gather(solid, Ex, Ez, Vs, clist, nlist, Te=Te, n_log2=n_log2,
+                                     n_scramble=n_scramble, seed=seed, aperture=aperture,
+                                     ied_phase_exponent=ion_ied_phase_exponent,
+                                     exit_state_weight=ion_exit_state_weight,
+                                     exit_energy_mixture=ion_exit_energy_mixture)
+        else:
+            V, field_diag = solve_nodal_laplace(
+                solid, Vs, sweeps=sweeps, omega=1.7, tolerance=1e-9)
+            field_history.append(field_diag)
+            ion_result = adjoint_boundary_state_face_flux(
+                boundary_state, ion_species, V, solid, clist, nlist,
+                proposal_species=proposals.get(ion_species), n_face_position=n_face_position)
+            electron_result = adjoint_boundary_state_face_flux(
+                boundary_state, electron_species, V, solid, clist, nlist,
+                proposal_species=proposals.get(electron_species), n_face_position=n_face_position)
+            Gi = (ion_result["per_face"] * ion_state.flux_m2_s
+                  * abs(ion_state.charge_number))
+            Ge = (electron_result["per_face"] * electron_state.flux_m2_s
+                  * abs(electron_state.charge_number))
         balance = _current_balance_diagnostics(Gi, Ge, comp, clist)
         balance_history.append(balance)
         if balance_tol is not None and it + 1 >= min_iter and balance['max_abs_log_ratio'] <= balance_tol:
@@ -560,17 +591,29 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
     # sidewall foot = the deflected-ion notch driver, HG _extract convention).
     for c in (1, 2):
         Vs[cond == c] = vc[c]
-    V = laplace(Vs); Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
+    if boundary_state is None:
+        V = laplace(Vs); final_field = _laplace_residual(V, gas)
+    else:
+        V, final_field = solve_nodal_laplace(solid, Vs, sweeps=sweeps, omega=1.7, tolerance=1e-9)
+    Ex = -np.gradient(V, axis=0); Ez = -np.gradient(V, axis=1)
     zp = int(g['z_poly0'])
     foot_h = max(int(0.3 * (t1 - t0)), 3)                  # HG foot band: within 0.3*W of the floor
     fz0 = max(zp + 1, fz - foot_h)
     foot = [(t0 - 1, int(z)) for z in np.arange(fz0, fz)]  # poly-inner face near the poly/oxide junction
     fn = [(1.0, 0.0)] * len(foot)
-    Gi_f, E_f = backward_ion_gather(solid, Ex, Ez, Vs, foot, fn, Te=Te, n_log2=n_log2 + 1,
-                                    n_scramble=n_scramble, seed=seed, aperture=aperture, want_energy=True,
-                                    ied_phase_exponent=ion_ied_phase_exponent,
-                                    exit_state_weight=ion_exit_state_weight,
-                                    exit_energy_mixture=ion_exit_energy_mixture)
+    if boundary_state is None:
+        Gi_f, E_f = backward_ion_gather(
+            solid, Ex, Ez, Vs, foot, fn, Te=Te, n_log2=n_log2 + 1,
+            n_scramble=n_scramble, seed=seed, aperture=aperture, want_energy=True,
+            ied_phase_exponent=ion_ied_phase_exponent, exit_state_weight=ion_exit_state_weight,
+            exit_energy_mixture=ion_exit_energy_mixture)
+    else:
+        foot_result = adjoint_boundary_state_face_flux(
+            boundary_state, ion_species, V, solid, foot, fn,
+            proposal_species=proposals.get(ion_species), n_face_position=n_face_position,
+            want_energy=True)
+        Gi_f = foot_result["per_face"]
+        E_f = foot_result["mean_impact_energy_eV_per_face"]
     fmask = Gi_f > 1e-6
     E_defl = float(np.sum(E_f[fmask] * Gi_f[fmask]) / max(np.sum(Gi_f[fmask]), 1e-9)) if fmask.any() else 0.0
     # floor_mean over the full _extract band (t0+4:t1-4) -- valid now that the state is DENSE (every
@@ -581,7 +624,7 @@ def self_consistent_backward(g, Te=4.0, n_iter=14, beta=0.5, dVmax=8.0, n_log2=1
                 V_poly=float(0.5 * (vc[1] + vc[2])), Vc=vc.copy(),
                 E_defl=E_defl, foot_flux=float(Gi_f[fmask].mean()) if fmask.any() else 0.0,
                 iterations=len(balance_history), balance_history=balance_history,
-                field_history=field_history, field_final=_laplace_residual(V, gas),
+                field_history=field_history, field_final=final_field,
                 balance_preupdate=balance_history[-1], sampled_cells=np.asarray(clist, dtype=int),
                 sampled_normals=np.asarray(nlist, dtype=float), sampled_kind=kind.copy(),
                 sampled_component=comp.copy(), sampled_Gi=Gi.copy(), sampled_Ge=Ge.copy())

@@ -81,13 +81,20 @@ def trace_boundary_state_floor_flux(
     )
 
 
-def adjoint_boundary_state_floor_flux(
-        boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, floor_cells, *,
-        proposal_species=None, n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10):
-    """Generic Liouville adjoint floor gather using the boundary state's joint flux density.
+def adjoint_boundary_state_face_flux(
+        boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, normals, *,
+        proposal_species=None, n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10,
+        want_energy=False):
+    """Generic Liouville adjoint gather on arbitrary axis-aligned material faces.
 
     This function contains no species source law. The supplied species quadrature is used as the surface
-    proposal, and its density model scores both surface and time-reversed plasma-exit states.
+    proposal, and its density model scores both surface and time-reversed plasma-exit states. Velocities
+    use the boundary convention (positive ``vz`` points into the feature). For outward material normal
+    ``n``, a forward surface state is incident only when ``-v.n > 0``. Its time reverse is traced to the
+    plasma plane and weighted by the Liouville flux Jacobian ``(-v.n)/vz_exit``.
+
+    The returned values are fluxes per unit face length divided by incident flux per unit horizontal
+    source length. No orientation correction is hidden in the caller.
     """
     solid = np.asarray(solid, dtype=bool); nx, nz = solid.shape
     species = boundary.get(species_name)
@@ -99,19 +106,30 @@ def adjoint_boundary_state_floor_flux(
     if max_steps is None:
         max_steps = 200 * nz
     n_face_position = int(n_face_position)
-    if n_face_position <= 0 or not floor_cells:
-        raise ValueError("positive face quadrature and nonempty floor_cells are required")
-    per_cell = np.zeros(len(floor_cells))
+    cells = [tuple(map(int, cell)) for cell in cells]
+    normals = np.asarray(normals, dtype=float)
+    if n_face_position <= 0 or not cells:
+        raise ValueError("positive face quadrature and nonempty cells are required")
+    if normals.shape != (len(cells), 2):
+        raise ValueError("one 2-D outward normal is required per face")
+    if (np.any(~np.isfinite(normals)) or
+            np.any(np.abs(np.linalg.norm(normals, axis=1) - 1.0) > 1e-12)):
+        raise ValueError("face normals must be finite unit vectors")
+    per_face = np.zeros(len(cells)); energy_numerator = np.zeros(len(cells))
     base_velocity = proposal.velocity_sqrt_eV
     log_surface_density = proposal.log_flux_density(
         base_velocity, proposal.phase_rad, proposal.position_m)
     if not np.all(np.isfinite(log_surface_density)):
         raise ValueError("surface proposal samples must lie inside their density support")
-    for ci, (cx, cz) in enumerate(floor_cells):
+    for ci, ((cx, cz), (normal_x, normal_z)) in enumerate(zip(cells, normals)):
         face_u = (np.arange(n_face_position) + 0.5) / n_face_position
-        x0 = np.tile(cx + face_u, base_velocity.shape[0])
-        z0 = np.full(x0.shape, cz - 1e-3)
-        # Time reverse the incident quadrature to launch outward from the floor.
+        # Face centre plus tangent coordinate, displaced one epsilon into the adjacent gas.
+        face_s = face_u - 0.5
+        x_center = cx + 0.5 + (0.5 + 1e-3) * normal_x
+        z_center = cz + 0.5 + (0.5 + 1e-3) * normal_z
+        x0 = np.tile(x_center - normal_z * face_s, base_velocity.shape[0])
+        z0 = np.tile(z_center + normal_x * face_s, base_velocity.shape[0])
+        # Time reverse the forward incident quadrature to launch outward from the material face.
         vx0 = np.repeat(-base_velocity[:, 0], n_face_position)
         vz0 = np.repeat(-base_velocity[:, 2], n_face_position)
         hit_x, _, _, _, survivor, exit_vx, exit_vz = trace_nodal(
@@ -125,17 +143,43 @@ def adjoint_boundary_state_floor_flux(
             -exit_vz,
         ))
         log_exit_density = species.log_flux_density(exit_forward)
-        surface_normal = base_velocity[sample_index, 2]
+        surface_normal = -(base_velocity[sample_index, 0] * normal_x
+                           + base_velocity[sample_index, 2] * normal_z)
         exit_normal = np.maximum(-exit_vz, 1e-300)
         log_ratio = log_exit_density - log_surface_density[sample_index]
         with np.errstate(over="ignore", invalid="ignore"):
             density_ratio = np.exp(log_ratio)
         contribution = np.where(
-            escaped & np.isfinite(log_ratio),
+            escaped & (surface_normal > 0.0) & np.isfinite(log_ratio),
             surface_normal / exit_normal * density_ratio, 0.0)
         quadrature_weight = proposal.weight[sample_index] / n_face_position
-        per_cell[ci] = float(np.sum(quadrature_weight * contribution))
-    normalized_flux = float(per_cell.mean())
-    return dict(normalized_flux=normalized_flux,
-                absolute_flux_m2_s=normalized_flux * species.flux_m2_s,
-                per_cell=per_cell)
+        per_face[ci] = float(np.sum(quadrature_weight * contribution))
+        if want_energy:
+            # The adjoint launches at the material face, so its initial kinetic energy is exactly the
+            # time-reversed forward impact energy. The tracer's ``impact_energy`` is zero for the desired
+            # escaping adjoint paths because those paths do not hit material a second time.
+            impact_energy_3d = np.sum(base_velocity[sample_index] ** 2, axis=1)
+            energy_numerator[ci] = float(np.sum(
+                quadrature_weight * contribution * impact_energy_3d))
+    normalized_flux = float(per_face.mean())
+    result = dict(normalized_flux=normalized_flux,
+                  absolute_flux_m2_s=normalized_flux * species.flux_m2_s,
+                  per_face=per_face, per_cell=per_face)
+    if want_energy:
+        result["mean_impact_energy_eV_per_face"] = np.divide(
+            energy_numerator, per_face, out=np.zeros_like(per_face), where=per_face > 0.0)
+        result["mean_impact_energy_eV"] = (
+            float(energy_numerator.sum() / per_face.sum()) if per_face.sum() > 0.0 else 0.0)
+    return result
+
+
+def adjoint_boundary_state_floor_flux(
+        boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, floor_cells, *,
+        proposal_species=None, n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10,
+        want_energy=False):
+    """Backward-compatible horizontal-floor specialization of the arbitrary-face gather."""
+    return adjoint_boundary_state_face_flux(
+        boundary, species_name, nodal_potential, solid, floor_cells,
+        [(0.0, -1.0)] * len(floor_cells), proposal_species=proposal_species,
+        n_face_position=n_face_position, max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field,
+        want_energy=want_energy)
