@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from scipy.stats import gamma as gamma_dist, qmc
 
 from petch.charging_backward import (
@@ -101,22 +102,25 @@ def test_current_balance_pools_multiple_faces_of_one_insulator_cell():
     assert np.isclose(result['max_abs_log_ratio'], 0.0)
 
 
-def test_backward_forward_electron_reciprocity_in_zero_field_trench():
+@pytest.mark.parametrize("floor_potential", [0.0, 9.2])
+def test_backward_forward_electron_reciprocity_in_frozen_field_trench(floor_potential):
     """Independent forward launch and backward gather must score the same frozen geometry."""
-    nx, nz = 80, 52
-    left, right, floor_z = 10, 66, 46
+    nx, nz = 160, 104
+    left, right, floor_z = 20, 132, 92
     solid = np.zeros((nx, nz), dtype=bool)
     solid[left, 2:floor_z + 1] = True
     solid[right, 2:floor_z + 1] = True
     solid[left:right + 1, floor_z] = True
-    field = np.zeros((nx, nz), dtype=float)
-    potential = np.zeros((nx, nz), dtype=float)
+    potential_slope = floor_potential / floor_z
+    Ex = np.zeros((nx, nz), dtype=float)
+    Ez = np.full((nx, nz), -potential_slope, dtype=float)
+    potential = np.broadcast_to(potential_slope * np.arange(nz), (nx, nz)).copy()
     floor_cells = [(x, floor_z) for x in range(left + 1, right)]
     floor_normals = [(0.0, -1.0)] * len(floor_cells)
 
     backward = backward_electron_gather(
-        solid, field, field, potential, floor_cells, floor_normals,
-        n_log2=10, n_scramble=2, seed=31,
+        solid, Ex, Ez, potential, floor_cells, floor_normals,
+        n_log2=11, n_scramble=3, seed=31,
     ).mean()
 
     sampler = qmc.Sobol(d=4, scramble=True, seed=47)
@@ -127,9 +131,9 @@ def test_backward_forward_electron_reciprocity_in_zero_field_trench():
     vx = np.sqrt(energy) * sin_theta * np.cos(2.0 * np.pi * u[:, 2])
     vz = np.sqrt(energy) * cos_theta
     x = left + 1.0 + u[:, 3] * (right - left - 1.0)
-    z = np.ones_like(x)
+    z = np.full_like(x, 0.51)
     hit_x, hit_z, *_ = _trace_general(
-        field, field, solid, x, z, vx, vz, -1.0, nx, nz,
+        Ex, Ez, solid, x, z, vx, vz, -1.0, nx, nz,
         200 * nz, 0.15, 0.10,
     )
     forward = np.mean((hit_z == floor_z) & (hit_x > left) & (hit_x < right))

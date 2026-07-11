@@ -22,7 +22,7 @@ are different evidence classes and must not be described interchangeably.
 
 | Physics/module | Best evidence | Current status | What is actually established | What remains open |
 |---|---:|---|---|---|
-| Backward electron gather | A | passing on current gates | Open-wafer normalization, Langmuir `exp(V/Te)` retardation, positive-potential saturation, fixed-seed reproducibility, and independent forward/backward scoring of a refined zero-field trench are automated. | Reciprocity with a nonzero self-consistent field; explicit spatial-quadrature convergence; trajectory-step convergence; smooth/verified parameter sensitivities. A coarse version of the trench gate differed by 16%, showing face-center discretization matters. |
+| Backward electron gather | A | passing on current gates | Open-wafer normalization, Langmuir `exp(V/Te)` retardation, positive-potential saturation, fixed-seed reproducibility, and independent forward/backward scoring of a refined trench at 0 and +9.2 V floor potential are automated. | Reciprocity in a nonuniform self-consistent field; explicit spatial-quadrature convergence; smooth/verified parameter sensitivities. A coarse version of the trench gate differed by 16% at zero field and about 6% at +9.2 V, showing face-center discretization materially biases flux. |
 | Backward ion gather | A | passing | Open uncharged wafer returns unit normalized flux. | IEDF moment replay, retarding-potential curve, frozen-field reciprocity, reflection/re-emission, and energy conservation versus step size. |
 | Self-consistent backward charging | A partial; S failing when converged | **conservation bug fixed; reference mismatch exposed** | A corner cell was incorrectly updated once per exposed face, giving contradictory currents to one floating capacitor. Pooling all faces per insulating cell makes AR4 residuals decay: maximum active `|log(Gi/Ge)|` 2.39→0.228 and RMS 0.96→0.097 over 30 iterations. | The corrected solution moves toward floor 50.3 V and foot energy 11.7 eV, not the forward references 34.0 V/21.6 eV. The earlier 5.0 V RMSE/corr 0.998 were under-converged transient outputs. Frozen-field reciprocity, source normalization, field solve, and estimator support must be audited before this solver is a validation engine. |
 | Backward notch-foot ion energy | S | failing | The observable is computed. | Replayed 2026-07-11: 10.5 eV RMSE and correlation -0.323 versus `_PETCH_FOOT_E`. The “face convention” note does not close this gate. Do not call it validated. |
@@ -53,10 +53,10 @@ must be diagnosed before early stopping or any charging-validation claim.
 
 ### 2. Adjoint reciprocity is asserted more broadly than it is gated
 
-An independent forward-launch/backward-gather gate now passes on a refined zero-field trench. The same
-aspect ratio on a coarse grid differed by 16%, so spatial face quadrature is a real error source and must
-be converged, not hidden by sample count. The next reciprocity gate needs a nonzero frozen field and both
-species, with trajectory-step refinement and confidence/error estimates.
+An independent forward-launch/backward-gather gate now passes on a refined trench at zero field and with
+a physically consistent +9.2 V floor potential. Coarse versions differed by 16% and 6%, respectively,
+so spatial face quadrature is a real error source and must be converged, not hidden by sample count. The
+next reciprocity gate needs a nonuniform self-consistent field and ions, with confidence/error estimates.
 
 ### 3. Pattern electrostatics is the first direct attack on academic state of the art
 
