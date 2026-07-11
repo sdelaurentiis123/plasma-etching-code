@@ -82,8 +82,9 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
 
 ### Current petch gap
 
-- `charging_backward.py` solves a deterministic mean charging state in a small 2-D edge-array
-  geometry.
+- `charging_backward.py` now has an opt-in path that consumes the common species boundary densities
+  on arbitrary material-face orientations through the boundary-fitted nodal field. The legacy analytic
+  sources remain the default while experimental gates are open.
 - It has no ensemble of discrete arrival histories, no variance observable, and no evolving 3-D tilt.
 - The finite edge-array excludes some outer faces to avoid an artificial open boundary; that is not
   yet a general dense/sparse pattern model.
@@ -101,6 +102,15 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
    nonzero; asymmetric mean tilt must remain nonzero.
 4. **Profile gate:** only then couple lateral force to a 3-D evolving feature and compare tilt/twist
    distributions, not a hand-selected trajectory.
+
+### Current gate status (2026-07-11)
+
+- The units-honest variable-permittivity Poisson kernel passes the frozen electrostatic prerequisite:
+  a reflection-symmetric charged pattern has exactly zero centerline lateral field, while a prescribed
+  more-positive left/dense region produces a field toward the right/sparse region, matching Huang et al.
+- The asymmetric centerline field changes by less than 5% between 121- and 161-cell lateral domains.
+- This is deliberately not called a twisting result: the charge contrast is prescribed. The next gate
+  must generate it from the unified ion/electron boundary state and then add discrete arrival histories.
 
 ### Kill criteria
 
@@ -245,8 +255,9 @@ same object. The feature engine remains independently testable.
    elements, then an evolving 2-D interface.
 5. **Stochastic charging ensemble** -- distributional twist/tilt after the deterministic mean field is
    converged and boundary-independent.
-6. **Reactor boundary objects** -- refactor sources behind the common physical contract; later ingest
-   HPEM/PCMCM tables or a reactor surrogate without changing feature physics.
+6. **Reactor boundary objects** -- the common immutable input object and the first unified forward and
+   arbitrary-face adjoint consumers now exist. Next add position/time-resolved ingestion and the reverse
+   `SurfaceFeedbackState`; later HPEM/PCMCM tables or a reactor surrogate must not change feature physics.
 
 This ordering makes each layer independently falsifiable and keeps speed work honest: optimize only
 after the physical observable and its convergence gate are defined.
