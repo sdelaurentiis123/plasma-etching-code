@@ -157,6 +157,30 @@ This cleanly separates the moat: CHEMISTRY-parameter (calibration) gradients are
 GEOMETRY/shape gradients hit the discontinuous ray-hit boundary (the docs' "differentiability open" is
 really this half -- inverse SHAPE design). Gated in `tests/test_arde_transport.py`.
 
+## Phase 1 moat DEMO — data-efficient gradient calibration (`scripts/diff_calibration_demo.py`)
+
+Recovering a K-band sticking map from floor fluxes, adjoint vs finite-difference L-BFGS-B:
+```
+   K  adjoint_solves  FD_solves  ratio   adj_err   fd_err
+   2        81           114      1.4    3e-15    1.3e-5
+   6       210           462      2.2    1e-13    3.4e-5
+  12       210           897      4.3    8e-2     8e-2
+```
+Adjoint solve-count is flat in K (the full gradient is ONE solve); finite-difference grows O(K), so
+the wedge ratio climbs 1.4->4.3. The exact adjoint recovers to machine precision (3e-15) vs FD 1e-5.
+K=12 hits a physical IDENTIFIABILITY limit (12 depth bands from floor-only data at one AR is
+under-determined) -- an honest result that quantifies how many structures must be observed.
+
+## Self-consistency status (honest)
+
+- Neutral radiosity re-emission IS a self-consistent (linear) fixed point (converged, conserved).
+- **Self-consistent CHARGING loop is built, wired, AND tested**: `solve_dielectric_charging_steady_3d`
+  converges the nonlinear current balance (I+ = I- per node to rtol 1e-14) to a self-consistent surface
+  potential and reuses the field-converged ion events for chemistry; gate
+  `tests/test_feature_step_3d.py::test_feature_step_solves_charge...` passes in the green suite. It was
+  simply not EXERCISED in the de Boer/ARDE context this session (those ion runs are ballistic).
+  Phase 2 connects it to notching + the deep-AR residual.
+
 ## Roadmap (remaining)
 
 1. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow
