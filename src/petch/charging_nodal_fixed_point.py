@@ -331,6 +331,12 @@ def solve_boundary_state_charging_nodal(
             anderson_x=np.asarray(last_accepted_state["anderson_x"]).copy(),
             anderson_residual=np.asarray(
                 last_accepted_state["anderson_residual"]).copy(),
+            raw_max_abs_log_ratio=float(last_accepted_state["raw_max_abs_log_ratio"]),
+            raw_rms_log_ratio=float(last_accepted_state["raw_rms_log_ratio"]),
+            confidence_envelope_max_abs_log_ratio=float(
+                last_accepted_state["confidence_envelope_max_abs_log_ratio"]),
+            confidence_envelope_rms_log_ratio=float(
+                last_accepted_state["confidence_envelope_rms_log_ratio"]),
             accepted_iterations_total=int(
                 last_accepted_state["accepted_iterations_total"]),
             restart_accepted_iterations=max(
@@ -592,6 +598,12 @@ def solve_boundary_state_charging_nodal(
             forward_adaptive_levels={
                 name: value.copy() for name, value in forward_adaptive_levels.items()},
             beta_current=float(beta_current),
+            raw_max_abs_log_ratio=balance["max_abs_log_ratio"],
+            raw_rms_log_ratio=balance["rms_log_ratio"],
+            confidence_envelope_max_abs_log_ratio=(
+                interval_balance["confidence_envelope_max_abs_log_ratio"]),
+            confidence_envelope_rms_log_ratio=(
+                interval_balance["confidence_envelope_rms_log_ratio"]),
             anderson_x=(np.stack(anderson_x) if anderson_x
                         else np.empty((0, dof_count))),
             anderson_residual=(np.stack(anderson_residual) if anderson_residual

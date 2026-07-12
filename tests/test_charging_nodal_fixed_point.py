@@ -318,6 +318,10 @@ def test_nodal_quadrature_failure_carries_last_accepted_restart_state(monkeypatc
     assert checkpoint["anderson_x"].ndim == 2
     assert checkpoint["anderson_x"].shape[0] == 0
     assert checkpoint["anderson_residual"].shape == checkpoint["anderson_x"].shape
+    assert checkpoint["raw_max_abs_log_ratio"] == 0.0
+    assert checkpoint["raw_rms_log_ratio"] == 0.0
+    assert checkpoint["confidence_envelope_max_abs_log_ratio"] == 0.0
+    assert checkpoint["confidence_envelope_rms_log_ratio"] == 0.0
     assert rejected is not None
     assert np.array_equal(rejected["solid"], solid)
     assert rejected["boundary_nodal_voltage"].shape == (5, 5)

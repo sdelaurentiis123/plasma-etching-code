@@ -291,6 +291,12 @@ except AdaptiveQuadratureConvergenceError as error:
             accepted_iterations_total=accepted["accepted_iterations_total"],
             restart_accepted_iterations=accepted["restart_accepted_iterations"],
             restart_beta=accepted["beta_current"],
+            accepted_raw_max=accepted["raw_max_abs_log_ratio"],
+            accepted_raw_rms=accepted["raw_rms_log_ratio"],
+            accepted_confidence_max=(
+                accepted["confidence_envelope_max_abs_log_ratio"]),
+            accepted_confidence_rms=(
+                accepted["confidence_envelope_rms_log_ratio"]),
             anderson_x_history=accepted["anderson_x"],
             anderson_residual_history=accepted["anderson_residual"],
             **{f"adaptive_{name}": value
