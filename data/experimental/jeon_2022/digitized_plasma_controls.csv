@@ -1,0 +1,13 @@
+source_figure,condition_family,c4f8_fraction,pulse_off_ms,neutral_to_ion_flux_ratio,pixel_y,axis_slope_ratio_per_pixel,axis_intercept_ratio,digitization_uncertainty_ratio,published_errorbar_semantics,evidence_type,role,source_location
+3c,gas_fraction_cw,0.2,0,993.2,125,-34.24657534246575,5273.972602739726,70,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 3c
+3c,gas_fraction_cw,0.4,0,1917.8,98,-34.24657534246575,5273.972602739726,70,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 3c
+3c,gas_fraction_cw,0.6,0,2911.0,69,-34.24657534246575,5273.972602739726,70,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 3c
+3c,gas_fraction_cw,0.8,0,4212.3,31,-34.24657534246575,5273.972602739726,70,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 3c
+6c,pulse_off_20pct,0.2,0,662.0,122,-8.450704225352112,1692.9577464788733,17,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 6c
+6c,pulse_off_20pct,0.2,0.1,577.5,132,-8.450704225352112,1692.9577464788733,17,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 6c
+6c,pulse_off_20pct,0.2,0.5,932.4,90,-8.450704225352112,1692.9577464788733,17,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 6c
+6c,pulse_off_20pct,0.2,1,1380.3,37,-8.450704225352112,1692.9577464788733,17,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 6c
+8c,pulse_off_80pct,0.8,0,4720.3,111,-41.95804195804196,9377.622377622378,85,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 8c
+8c,pulse_off_80pct,0.8,0.1,3839.2,132,-41.95804195804196,9377.622377622378,85,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 8c
+8c,pulse_off_80pct,0.8,0.5,4846.2,108,-41.95804195804196,9377.622377622378,85,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 8c
+8c,pulse_off_80pct,0.8,1,8118.9,30,-41.95804195804196,9377.622377622378,85,not_specified,diagnostic_derived_digitized,physical_boundary_input,Jeon et al. 2022 Fig. 8c

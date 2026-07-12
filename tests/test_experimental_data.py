@@ -6,6 +6,7 @@ import pytest
 from petch.experimental_data import (
     load_bosch_wafer_measurements,
     load_bosch_wafer_measurements_89pt,
+    load_jeon_2022_plasma_controls,
     load_jeon_2022_trench_depths,
     load_krueger_2024_evidence,
 )
@@ -23,6 +24,7 @@ DATA_89 = DATA.with_name("Si_Oxide_etch_89_points.csv")
 JEON_DATA = (
     Path(__file__).parents[1] / "data" / "experimental" / "jeon_2022"
     / "digitized_trench_depths.csv")
+JEON_CONTROLS = JEON_DATA.with_name("digitized_plasma_controls.csv")
 
 
 def test_bosch_wafer_measurements_have_verified_provenance_and_units():
@@ -149,3 +151,36 @@ def test_jeon_2022_rejects_unverified_digitization(tmp_path):
     altered.write_bytes(JEON_DATA.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="checksum mismatch"):
         load_jeon_2022_trench_depths(altered)
+
+
+def test_jeon_2022_controls_replay_and_remain_diagnostic_derived_inputs():
+    controls = load_jeon_2022_plasma_controls(JEON_CONTROLS)
+    assert len(controls) == 12
+    assert all(item.evidence_type == "diagnostic_derived_digitized" for item in controls)
+    assert all(item.role == "physical_boundary_input" for item in controls)
+    by_key = {
+        (item.condition_family, item.c4f8_fraction, item.pulse_off_ms): item
+        for item in controls}
+    for fraction, family in ((0.2, "pulse_off_20pct"), (0.8, "pulse_off_80pct")):
+        assert (by_key[(family, fraction, 0.1)].neutral_to_ion_flux_ratio
+                < by_key[(family, fraction, 0.0)].neutral_to_ion_flux_ratio)
+        assert (by_key[(family, fraction, 1.0)].neutral_to_ion_flux_ratio
+                > by_key[(family, fraction, 0.0)].neutral_to_ion_flux_ratio)
+
+
+def test_every_jeon_depth_condition_has_a_published_physical_control_ratio():
+    depths = load_jeon_2022_trench_depths(JEON_DATA)
+    controls = load_jeon_2022_plasma_controls(JEON_CONTROLS)
+    control_conditions = {
+        (item.condition_family, item.c4f8_fraction, item.pulse_off_ms)
+        for item in controls}
+    assert all(
+        (item.condition_family, item.c4f8_fraction, item.pulse_off_ms) in control_conditions
+        for item in depths)
+
+
+def test_jeon_2022_controls_reject_unverified_digitization(tmp_path):
+    altered = tmp_path / "controls.csv"
+    altered.write_bytes(JEON_CONTROLS.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        load_jeon_2022_plasma_controls(altered)
