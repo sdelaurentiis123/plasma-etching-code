@@ -119,7 +119,7 @@ Two statistical false-certification paths were also closed:
   implausible precision for rare deep-cell hits.
 
 These are numerical support and evidence rules, not fitted physics. A corrected ten-step continuation
-from the formerly failing state reduced certified current-balance RMS from 0.462 to 0.382 without an
+from the formerly failing state reduced resolved update-distance RMS from 0.462 to 0.382 without an
 estimator refusal. Full fixed-point convergence, initialization/damping invariance, and the AR/profile
 ladder remain open and must precede any charging-validation claim.
 
@@ -141,7 +141,7 @@ replicate ensembles are deposited through this basis, so face covariance is meas
 
 This path is isolated in `charging_nodal_fixed_point.py`; the established solver has not been replaced.
 On the same freestanding-wall numerical stress geometry, switching from face-constant to endpoint-resolved
-deposition lowered the certified RMS residual from roughly 0.5 to 0.35 and the maximum from about 1.5 to
+deposition lowered the resolved update-distance RMS from roughly 0.5 to 0.35 and the maximum from about 1.5 to
 1.08 at the saved state. This is progress, not convergence. The filled-material trench is the physically
 relevant geometry; checkpoints from the freestanding-wall and filled-material topologies must never be
 interchanged, and the diagnostic harness now refuses such a mismatch.
@@ -193,7 +193,7 @@ diagnostics remain open.
 
 ### Physical surface-charge / variable-permittivity Poisson mode (experimental)
 
-The converged boundary-voltage candidate is a useful current-balance root solver, but dielectric voltage
+The boundary-voltage candidate is a useful current-balance root solver, but dielectric voltage
 is not an independent physical state. A dielectric stores free surface charge; its voltage follows from
 the material permittivity, grounded/floating conductors, and Poisson's equation. The nodal candidate now
 has an opt-in physical mode built on a reusable Q1 weak-form system:
@@ -211,7 +211,7 @@ machine precision, preserve normal displacement across a permittivity jump, clos
 against the Dirichlet reaction below 1e-24 C/m, conserve lumped edge charge, and verify positive response
 capacitance. On a narrow AR1
 filled trench with a three-cell SiO2 layer over a grounded bottom (a numerical gate, not an experimental
-stack), twelve accepted high-resolution evaluations reduced certified current-balance RMS from 1.071 to
+stack), twelve accepted high-resolution evaluations reduced resolved update-distance RMS from 1.071 to
 0.459 while the Poisson residual stayed below 8e-15 V. A longer pre-restart-contract continuation reached
 0.326, but is not used as restart evidence because estimator state was not then serialized.
 
@@ -221,8 +221,8 @@ and RMS residual, currents, standard errors, method counts, potential, and elect
 This closes the restart invariant; it does not yet close Poisson-mode AR/grid/sample convergence.
 
 On the filled-material trench, the endpoint-resolved candidate accepted 20 consecutive fixed-point
-evaluations. Its certified current-balance RMS fell from 2.31 to a best value of 0.305 before fluctuating
-at 0.35 as rare-hit sampling error became comparable to the remaining imbalance; the certified maximum
+evaluations. Its resolved update-distance RMS fell from 2.31 to a best value of 0.305 before fluctuating
+at 0.35 as rare-hit sampling error became comparable to the remaining imbalance; the corresponding maximum
 fell from 5.87 to a best value of 0.668. This establishes a stable descent path on the physical topology,
 not final convergence. A higher-sample independent evaluation and AR/grid/initialization invariance remain
 required before promotion.
@@ -238,7 +238,7 @@ A zero-hit direct estimate carries a finite rule-of-three upper bound. The selec
 even when the adjoint also reports zero: an exact adjoint zero cannot erase finite forward uncertainty. This
 case first became visible on the deepest electron-shadowed nodes of a narrow AR16 trench. After the fix, an
 identical six-evaluation diagnostic (same finite-transit ion/electron boundary state and numerics; only trench
-depth changed) reduced certified RMS current imbalance from 1.50 to 0.52 at AR1, 1.44 to 0.69 at AR4, and
+depth changed) reduced resolved update-distance RMS from 1.50 to 0.52 at AR1, 1.44 to 0.69 at AR4, and
 0.82 to 0.53 at AR16. The AR16 sequence contained a recoverable sampling transient to 1.91, so this is a
 cross-AR descent gate, not convergence or experimental validation. It motivates uncertainty-aware local step
 control; it does not motivate an AR branch or a fabricated nonzero electron current.
