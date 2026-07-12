@@ -9,6 +9,7 @@ This is deliberately standalone until its analytic and reciprocity gates close.
 """
 from __future__ import annotations
 
+import os
 import numpy as np
 
 try:
@@ -296,5 +297,20 @@ def _trace_nodal_py(V, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_cap, dt
             hit_nx, hit_nz, hit_x_position, hit_z_position)
 
 
-trace_nodal = (njit(cache=True, parallel=True, fastmath=True)(_trace_nodal_py)
-               if njit is not None else _trace_nodal_py)
+trace_nodal_cpu = (njit(cache=True, parallel=True, fastmath=True)(_trace_nodal_py)
+                   if njit is not None else _trace_nodal_py)
+
+
+def trace_nodal(*args, **kwargs):
+    """Dispatch the verified nodal orbit map to Numba CPU or Warp CUDA.
+
+    ``PETCH_DEVICE=cpu`` retains the established Numba path. ``cuda``/``cuda:N`` selects Warp CUDA;
+    ``warp:cpu`` exists solely for device-parity tests. Both backends return the identical eleven-array
+    contract.
+    """
+    configured = os.environ.get("PETCH_DEVICE", "cpu")
+    if configured == "cpu":
+        return trace_nodal_cpu(*args, **kwargs)
+    device = configured.split(":", 1)[1] if configured.startswith("warp:") else configured
+    from .charging_nodal_gpu import trace_nodal_warp
+    return trace_nodal_warp(*args, **kwargs, device=device)

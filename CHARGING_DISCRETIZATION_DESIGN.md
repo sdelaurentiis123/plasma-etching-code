@@ -161,6 +161,17 @@ not close sample/grid/AR/initialization ladders, dielectric-volume permittivity/
 The warm CPU path still costs roughly ten seconds per nonlinear iteration in this environment; CUDA
 acceleration and proposal-variance reduction remain required product work.
 
+### Exact Warp orbit backend (experimental)
+
+The compatible Q1/midpoint/DDA orbit map now has a float64 Warp implementation. It preserves the four
+midpoint iterations, adaptive step, first crossed-face ordering, lateral/bottom remainder reflection,
+plasma exit state, impact energy, oriented hit normal, and exact hit position of the Numba reference.
+Three parity gates cover wall/floor hits, exits/reflections, and nonuniform-field ion/electron trajectories:
+all discrete outputs agree exactly and floating outputs agree to 2e-10 or tighter. The complete suite is
+116 passing tests with Warp enabled. `PETCH_DEVICE=cpu` keeps the established Numba backend;
+`PETCH_DEVICE=cuda` or `cuda:N` selects Warp. CUDA performance and full-solver CPU/GPU result parity are
+still open and must be measured on an actual accelerator before any speed claim.
+
 On the filled-material trench, the endpoint-resolved candidate accepted 20 consecutive fixed-point
 evaluations. Its certified current-balance RMS fell from 2.31 to a best value of 0.305 before fluctuating
 at 0.35 as rare-hit sampling error became comparable to the remaining imbalance; the certified maximum
