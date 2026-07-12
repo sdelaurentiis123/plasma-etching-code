@@ -197,6 +197,18 @@ def test_replicated_joint_phase_space_narrows_current_confidence_envelope():
     assert fine_envelope < coarse_envelope
 
 
+def test_current_estimator_raises_nested_sobol_level_until_uncertainty_is_resolved():
+    arguments = _continuous_maxwellian_floating_problem()
+    result = solve_dielectric_charging_steady_3d(
+        **arguments, phase_space_log2_samples=6,
+        phase_space_max_log2_samples=10, current_estimator_relative_tol=0.03)
+
+    state = result.history[0]
+    assert state["current_estimator_converged"]
+    assert 6 < state["phase_space_log2_samples"] <= 10
+    assert state["current_estimator_max_relative_uncertainty"] <= 0.03
+
+
 def test_current_replicates_require_full_continuous_phase_space_sampling():
     system, arguments = _flat_dielectric_problem(_manufactured_floating_boundary())
     with pytest.raises(ValueError, match="joint continuous-density"):

@@ -243,6 +243,7 @@ def solve_dielectric_charging_steady_3d(
         beta=0.5, response_energy_eV=4.0, maximum_voltage_step=8.0,
         trust_growth_tolerance=0.02, minimum_beta=1e-4,
         phase_space_replicates=1, current_confidence_sigma=2.0,
+        phase_space_max_log2_samples=None, current_estimator_relative_tol=None,
         require_converged=True):
     """Solve local steady dielectric current balance on the compatible 3-D charge basis.
 
@@ -271,6 +272,16 @@ def solve_dielectric_charging_steady_3d(
     if phase_space_replicates > 1 and phase_space_log2_samples is None:
         raise ValueError(
             "multiple current replicates require joint continuous-density phase-space sampling")
+    if (phase_space_max_log2_samples is None) != (current_estimator_relative_tol is None):
+        raise ValueError(
+            "adaptive current estimation requires both a maximum phase-space level and tolerance")
+    if phase_space_max_log2_samples is not None:
+        if (phase_space_log2_samples is None or phase_space_replicates < 2
+                or int(phase_space_max_log2_samples) != phase_space_max_log2_samples
+                or phase_space_max_log2_samples < phase_space_log2_samples
+                or not np.isfinite(current_estimator_relative_tol)
+                or current_estimator_relative_tol <= 0.0):
+            raise ValueError("invalid adaptive current-estimator controls")
     if (not any(species.charge_number > 0 for species in boundary.species)
             or not any(species.charge_number < 0 for species in boundary.species)):
         raise ValueError("steady dielectric charging requires positive and negative incident species")
@@ -301,36 +312,48 @@ def solve_dielectric_charging_steady_3d(
     beta_current = float(beta); rejected_steps = 0; history = []
 
     def assess(state_charge):
-        evaluations = []
-        positive_replicates = []; negative_replicates = []
-        for replicate in range(int(phase_space_replicates)):
-            arguments = dict(evaluate_arguments)
-            arguments["seed"] = int(seed) + 104729 * replicate
-            item = _evaluate_incident_current_3d(charge=state_charge, **arguments)
-            evaluations.append(item)
-            positive_replicates.append(
-                item["positive_node_current"][tuple(support_nodes.T)])
-            negative_replicates.append(
-                item["negative_node_current"][tuple(support_nodes.T)])
-        positive_replicates = np.stack(positive_replicates)
-        negative_replicates = np.stack(negative_replicates)
-        positive = positive_replicates.mean(axis=0)
-        negative = negative_replicates.mean(axis=0)
-        signed_replicates = positive_replicates - negative_replicates
-        net_stderr = (
-            signed_replicates.std(axis=0, ddof=1) / np.sqrt(int(phase_space_replicates))
-            if int(phase_space_replicates) > 1 else np.zeros_like(positive))
-        total = positive + negative
-        scale = float(np.max(total)) if total.size else 0.0
-        active = total > max(1e-15 * scale, 1e-300)
-        if not np.any(active):
-            raise RuntimeError("steady charging has no resolved incident current on its surface")
+        base_level = phase_space_log2_samples
+        maximum_level = (base_level if phase_space_max_log2_samples is None
+                         else int(phase_space_max_log2_samples))
+        level_sequence = (None,) if base_level is None else range(int(base_level), maximum_level + 1)
+        estimator_converged = phase_space_max_log2_samples is None
+        for level in level_sequence:
+            evaluations = []
+            positive_replicates = []; negative_replicates = []
+            for replicate in range(int(phase_space_replicates)):
+                arguments = dict(evaluate_arguments)
+                arguments["seed"] = int(seed) + 104729 * replicate
+                arguments["phase_space_log2_samples"] = level
+                item = _evaluate_incident_current_3d(charge=state_charge, **arguments)
+                evaluations.append(item)
+                positive_replicates.append(
+                    item["positive_node_current"][tuple(support_nodes.T)])
+                negative_replicates.append(
+                    item["negative_node_current"][tuple(support_nodes.T)])
+            positive_replicates = np.stack(positive_replicates)
+            negative_replicates = np.stack(negative_replicates)
+            positive = positive_replicates.mean(axis=0)
+            negative = negative_replicates.mean(axis=0)
+            signed_replicates = positive_replicates - negative_replicates
+            net_stderr = (
+                signed_replicates.std(axis=0, ddof=1) / np.sqrt(int(phase_space_replicates))
+                if int(phase_space_replicates) > 1 else np.zeros_like(positive))
+            total = positive + negative
+            scale = float(np.max(total)) if total.size else 0.0
+            active = total > max(1e-15 * scale, 1e-300)
+            if not np.any(active):
+                raise RuntimeError("steady charging has no resolved incident current on its surface")
+            uncertainty_width = np.zeros_like(total)
+            uncertainty_width[active] = (
+                float(current_confidence_sigma) * net_stderr[active] / total[active])
+            maximum_uncertainty = float(np.max(uncertainty_width[active]))
+            if (phase_space_max_log2_samples is None
+                    or maximum_uncertainty <= float(current_estimator_relative_tol)):
+                estimator_converged = True
+                break
         relative = np.zeros_like(total)
         relative[active] = np.abs(positive[active] - negative[active]) / total[active]
-        confidence_envelope = np.zeros_like(total)
-        confidence_envelope[active] = (
-            np.abs(positive[active] - negative[active])
-            + float(current_confidence_sigma) * net_stderr[active]) / total[active]
+        confidence_envelope = relative + uncertainty_width
         current_floor = max(1e-15 * scale, 1e-300)
         log_ratio = np.log(
             np.maximum(positive, current_floor) / np.maximum(negative, current_floor))
@@ -338,18 +361,24 @@ def solve_dielectric_charging_steady_3d(
         maximum = float(np.max(relative[active]))
         maximum_confidence = float(np.max(confidence_envelope[active]))
         return (evaluations[0], positive, negative, net_stderr, active, log_ratio,
-                merit, maximum, maximum_confidence)
+                merit, maximum, maximum_confidence, maximum_uncertainty,
+                estimator_converged, level)
 
     (evaluated, positive, negative, net_stderr, active, log_ratio,
-     merit, maximum, maximum_confidence) = assess(charge)
+     merit, maximum, maximum_confidence, maximum_uncertainty,
+     estimator_converged, estimator_level) = assess(charge)
     history.append(dict(
         iteration=1, rms_relative_current_imbalance=merit,
         max_relative_current_imbalance=maximum, beta=beta_current,
         confidence_envelope_max_relative_current_imbalance=maximum_confidence,
+        current_estimator_max_relative_uncertainty=maximum_uncertainty,
+        current_estimator_converged=bool(estimator_converged),
+        phase_space_log2_samples=(-1 if estimator_level is None else int(estimator_level)),
         mean_surface_voltage_v=float(np.mean(
             evaluated["potential"][tuple(support_nodes.T)]))))
     while len(history) < int(max_iter) and not (
             len(history) >= int(min_iter)
+            and estimator_converged
             and maximum_confidence <= float(current_balance_tol)):
         voltage_step = np.clip(
             beta_current * float(response_energy_eV) * log_ratio,
@@ -369,16 +398,21 @@ def solve_dielectric_charging_steady_3d(
             beta_current = min(float(beta), 1.2 * beta_current)
         charge = trial_charge
         (evaluated, positive, negative, net_stderr, active, log_ratio,
-         merit, maximum, maximum_confidence) = trial
+         merit, maximum, maximum_confidence, maximum_uncertainty,
+         estimator_converged, estimator_level) = trial
         history.append(dict(
             iteration=len(history) + 1, rms_relative_current_imbalance=merit,
             max_relative_current_imbalance=maximum, beta=accepted_beta,
             confidence_envelope_max_relative_current_imbalance=maximum_confidence,
+            current_estimator_max_relative_uncertainty=maximum_uncertainty,
+            current_estimator_converged=bool(estimator_converged),
+            phase_space_log2_samples=(-1 if estimator_level is None else int(estimator_level)),
             mean_surface_voltage_v=float(np.mean(
                 evaluated["potential"][tuple(support_nodes.T)]))))
 
     converged = bool(
         len(history) >= int(min_iter)
+        and estimator_converged
         and maximum_confidence <= float(current_balance_tol))
     positive_grid = np.zeros(poisson_system.shape)
     negative_grid = np.zeros(poisson_system.shape)
