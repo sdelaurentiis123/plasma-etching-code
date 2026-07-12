@@ -452,7 +452,7 @@ def bidirectional_boundary_state_cell_flux(
         proposal_species=None, adjoint_options=None, forward_options=None,
         element_absolute_tolerance=1e-3, element_relative_tolerance=0.05,
         method_hint=None, switch_factor=2.0, consistency_sigma=5.0,
-        support_sigma=2.0, support_ratio=0.5):
+        support_sigma=2.0, support_ratio=0.5, freeze_method_hint=False):
     """Select forward or adjoint current per physical cell solely by measured uncertainty.
 
     This is not a named-region switch. Both unbiased estimators use the same physical boundary density;
@@ -487,6 +487,8 @@ def bidirectional_boundary_state_cell_flux(
         method_hint = np.asarray(method_hint)
         if method_hint.shape != (len(unique_cells),):
             raise ValueError("method_hint must match the number of unique cells")
+        if freeze_method_hint and np.any(~np.isin(method_hint, ("forward", "adjoint"))):
+            raise ValueError("a frozen method hint must select forward or adjoint for every cell")
     if switch_factor < 1.0:
         raise ValueError("switch_factor must be at least one")
     if consistency_sigma <= 0.0:
@@ -668,7 +670,13 @@ def bidirectional_boundary_state_cell_flux(
         # Hysteresis is only allowed between two estimators with the same certification status. An
         # old method hint must never retain an uncertified estimate when the complementary estimator
         # meets the requested tolerance.
-        if forward_ok != adjoint_ok:
+        if freeze_method_hint and method_hint is not None:
+            # Adaptive estimator discovery is a discrete model-selection operation. Once a nonlinear
+            # solve or derivative campaign starts, changing that selection with the state would make
+            # the sampled current map discontinuous. Keep the declared estimator and fail its
+            # certification gate instead of silently switching the equation being solved.
+            chosen = str(method_hint[cell_index])
+        elif forward_ok != adjoint_ok:
             chosen = "forward" if forward_ok else "adjoint"
         elif method_hint is not None and method_hint[cell_index] in ("forward", "adjoint"):
             hinted = str(method_hint[cell_index])
@@ -691,8 +699,8 @@ def bidirectional_boundary_state_cell_flux(
             selected_face_replicates[:, face_indices] = adjoint.element_replicates[:, face_indices]
             selected_endpoint_replicates[:, face_indices] = (
                 adjoint_endpoint_replicates[:, face_indices])
-        allowed = element_absolute_tolerance + element_relative_tolerance * abs(mean)
-        method_within_tolerance[cell_index] = stderr <= allowed
+        method_within_tolerance[cell_index] = (
+            forward_ok if chosen == "forward" else adjoint_ok)
         # A support audit that invalidates the adjoint estimator does not invalidate an independently
         # certified direct-physical forward estimate. Require agreement only when both estimators are
         # actually admissible; otherwise use the admissible direction and retain the diagnostic flag.
@@ -725,6 +733,7 @@ def bidirectional_boundary_state_cell_flux(
         consistency_sigma=float(consistency_sigma),
         support_sigma=float(support_sigma),
         support_ratio=float(support_ratio),
+        method_hint_frozen=bool(freeze_method_hint and method_hint is not None),
         cross_refinement_rounds=cross_refinement_rounds,
         forward_cross_refinement_rounds=forward_cross_refinement_rounds,
         forward_pool_refinement_rounds=forward_pool_refinement_rounds,

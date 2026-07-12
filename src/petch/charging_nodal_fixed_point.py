@@ -346,6 +346,7 @@ def solve_boundary_state_charging_nodal(
                 consistency_sigma = float(options.pop("consistency_sigma", 5.0))
                 support_sigma = float(options.pop("support_sigma", 2.0))
                 support_ratio = float(options.pop("support_ratio", 0.5))
+                freeze_method_hint = bool(options.pop("freeze_method_hint", False))
                 warm_start_backoff = int(options.pop("warm_start_backoff", 0))
                 if warm_start_backoff < 0:
                     raise ValueError("warm_start_backoff must be nonnegative")
@@ -372,7 +373,8 @@ def solve_boundary_state_charging_nodal(
                         element_relative_tolerance=options.get("element_relative_tolerance", 0.05),
                         method_hint=hybrid_hint.get(species.name), switch_factor=switch_factor,
                         consistency_sigma=consistency_sigma, support_sigma=support_sigma,
-                        support_ratio=support_ratio)
+                        support_ratio=support_ratio,
+                        freeze_method_hint=freeze_method_hint)
                     hybrid_hint[species.name] = hybrid["method"].copy()
                     adaptive_levels[species.name] = hybrid["adjoint"].log2_samples.copy()
                     forward_adaptive_levels[species.name] = (

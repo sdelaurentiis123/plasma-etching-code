@@ -227,6 +227,45 @@ def test_bidirectional_hysteresis_never_retains_an_uncertified_estimator(monkeyp
     assert np.isclose(result["per_face"][0], mean_forward)
 
 
+def test_bidirectional_frozen_estimator_refuses_instead_of_switching_map(monkeypatch):
+    mean_adjoint = 0.1402
+    stderr_adjoint = 0.0338
+    delta = stderr_adjoint * np.sqrt(3.0)
+    adjoint = AdaptiveQuadratureResult(
+        element_mean=np.array([mean_adjoint]),
+        element_stderr=np.array([stderr_adjoint]),
+        element_replicates=np.array([
+            [mean_adjoint - delta], [mean_adjoint - delta],
+            [mean_adjoint + delta], [mean_adjoint + delta]]),
+        log2_samples=np.array([12]), total_mean=mean_adjoint,
+        total_stderr=stderr_adjoint, converged=True, rounds=1, evaluations=1)
+    mean_forward = 0.1562
+    forward = AdaptiveQuadratureResult(
+        element_mean=np.array([mean_forward]), element_stderr=np.array([0.0269]),
+        element_replicates=np.array([[mean_forward]] * 4),
+        log2_samples=np.array([12]), total_mean=mean_forward,
+        total_stderr=0.0269, converged=True, rounds=1, evaluations=1)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        lambda *args, **kwargs: adjoint)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        lambda *args, **kwargs: forward)
+
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "ion", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0)], [(0.0, -1.0)], method_hint=np.array(["adjoint"]),
+        freeze_method_hint=True, element_absolute_tolerance=0.01,
+        element_relative_tolerance=0.15, switch_factor=2.0)
+
+    assert result["method_hint_frozen"]
+    assert result["method"][0] == "adjoint"
+    assert not result["method_within_tolerance"][0]
+    assert not result["cell_converged"][0]
+    assert not result["converged"]
+    assert np.isclose(result["per_face"][0], mean_adjoint)
+
+
 def test_bidirectional_adjoint_zero_is_not_exact_when_forward_sees_flux(monkeypatch):
     adjoint = AdaptiveQuadratureResult(
         element_mean=np.array([0.0]), element_stderr=np.array([0.0]),
