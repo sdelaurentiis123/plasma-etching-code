@@ -186,6 +186,19 @@ def test_polymer_inventory_has_exact_deposition_removal_balance_and_never_goes_n
         rtol=2e-11, atol=1e-8)
 
 
+def test_polymer_removal_limit_reaches_exact_nonnegative_inventory_floor():
+    mechanism = _mechanism(
+        complex_formation_probability={},
+        polymer_deposition_probability_on_substrate={},
+        polymer_deposition_probability_on_polymer={})
+    initial = SiO2SurfaceState(0.0, 3.4e21)
+    result = mechanism.advance(initial, SurfaceFluxes({}, (_ions(2e21),)), 1000.0)
+
+    assert result.state.polymer_units_m2 == 0.0
+    assert result.deposited_polymer_units_m2 == 0.0
+    assert result.removed_polymer_units_m2 == initial.polymer_units_m2
+
+
 def test_polymer_mixed_flux_preserves_inactive_face_as_bitwise_identity():
     mechanism = _mechanism(complex_formation_probability={})
     initial = SiO2SurfaceState([0.0, 0.0], [4.920299e18, 0.0])

@@ -7,6 +7,7 @@ from petch.boundary_state import (
 )
 from petch.boundary_transport_3d import (
     estimate_diffuse_form_factors_3d,
+    gather_boundary_state_ballistic_3d,
     merge_boundary_transport_results_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
@@ -70,6 +71,47 @@ def test_first_hit_3d_preserves_dimensional_species_flux_and_exact_energy_angle_
     law = EnergeticYield(0.2, 20.0, 100.0, energy_exponent=2.0)
     integrated_yield_rate = np.dot(energetic.yield_rate_m2_s(law), areas)
     assert np.isclose(integrated_yield_rate, 2e19 * 0.25 * 0.2, rtol=1e-12)
+
+
+def test_deterministic_face_gather_reproduces_open_plane_flux_without_particle_tallies():
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    result = gather_boundary_state_ballistic_3d(
+        _boundary(), {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        verts, faces, areas, centroids, np.tile([0.0, 0.0, 1.0], (2, 1)),
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, face_quadrature_points=3, device="cpu")
+
+    assert result.transport_model == "collisionless_deterministic_face_gather_3d"
+    assert np.isclose(result.hit_probability["Ar+"], 1.0, rtol=1e-15)
+    assert np.isclose(result.hit_probability["CF2"], 1.0, rtol=1e-15)
+    assert np.allclose(result.surface_fluxes.neutral_flux_m2_s["CF2"], 3e19)
+    energetic = result.surface_fluxes.energetic_fluxes[0]
+    assert np.allclose(energetic.flux_m2_s, 2e19)
+    assert set(np.round(energetic.event_energy_eV, 12)) == {20.0, 100.0}
+    assert np.allclose(energetic.event_cosine_incidence, 1.0)
+
+
+def test_deterministic_face_gather_uses_first_visible_surface_only():
+    bottom, plane_faces, _ = _flat_unit_plane()
+    top = bottom + [0.0, 0.0, 0.5]
+    verts = np.vstack((bottom, top))
+    faces = np.vstack((plane_faces, plane_faces + 4))
+    areas = np.full(4, 0.5)
+    centroids = verts[faces].mean(axis=1)
+    neutral = SpeciesBoundaryState(
+        "CF2", 0, 50.0, 3e19, velocity_sqrt_eV=[[0.0, 0.0, 1.0]], weight=[1.0])
+    boundary = PlasmaBoundaryState((neutral,), reference_plane_m=1e-6)
+    result = gather_boundary_state_ballistic_3d(
+        boundary, {"CF2": "neutral_reactant"}, verts, faces, areas, centroids,
+        np.tile([0.0, 0.0, 1.0], (4, 1)),
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, face_quadrature_points=1, device="cpu")
+
+    flux = result.surface_fluxes.neutral_flux_m2_s["CF2"]
+    assert np.array_equal(flux[:2], np.zeros(2))
+    assert np.allclose(flux[2:], 3e19)
+    assert np.isclose(result.hit_probability["CF2"], 1.0, rtol=1e-15)
 
 
 def test_boundary_to_surface_chain_conserves_dimensional_formula_unit_removal():

@@ -20,6 +20,7 @@ from skimage.measure import euler_number
 from .boundary_state import PlasmaBoundaryState
 from .boundary_transport_3d import (
     BoundaryTransport3DResult,
+    gather_boundary_state_ballistic_3d,
     estimate_diffuse_form_factors_3d,
     merge_boundary_transport_results_3d,
     trace_boundary_state_field_3d,
@@ -254,6 +255,30 @@ def _physical_volume_component_sizes(geometry, etchable_material_ids):
     if count == 0:
         return ()
     return tuple(sorted(np.bincount(component.ravel())[1:].tolist(), reverse=True))
+
+
+def _changed_physical_slice_topology(old_geometry, new_geometry, etchable_material_ids):
+    """Locate a refused 3-D topology event without weakening the physical-volume gate."""
+    materials = tuple(etchable_material_ids)
+    old_solid = ((old_geometry.phi > 0.0)
+                 & np.isin(old_geometry.material_id, materials))
+    new_solid = ((new_geometry.phi > 0.0)
+                 & np.isin(new_geometry.material_id, materials))
+    changed = {}
+    for axis, name in enumerate("xyz"):
+        axis_changes = []
+        for index in range(old_solid.shape[axis]):
+            old_slice = np.take(old_solid, index, axis=axis)
+            new_slice = np.take(new_solid, index, axis=axis)
+            old_signature = (
+                int(label(old_slice)[1]), int(euler_number(old_slice, connectivity=1)))
+            new_signature = (
+                int(label(new_slice)[1]), int(euler_number(new_slice, connectivity=1)))
+            if old_signature != new_signature:
+                axis_changes.append((index, old_signature, new_signature))
+        if axis_changes:
+            changed[name] = tuple(axis_changes[:12])
+    return changed
 
 
 def _remove_unresolved_subcell_solid_components(
@@ -517,7 +542,8 @@ def advance_feature_step_3d(
         trajectory_fixed_dt=None, trajectory_max_steps=10000,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         initial_charge_node_c=None, charging_options=None,
-        neutral_radiosity_options=None, cfl_number=0.3, reinitialize=True,
+        neutral_radiosity_options=None, ballistic_transport="forward",
+        ballistic_face_quadrature_points=1, cfl_number=0.3, reinitialize=True,
         transport_device=None):
     """Advance one stateful, dimensional feature step.
 
@@ -547,6 +573,11 @@ def advance_feature_step_3d(
     if charging_poisson_system is None and (
             initial_charge_node_c is not None or charging_options is not None):
         raise ValueError("charging state/options require charging_poisson_system")
+    if ballistic_transport not in ("forward", "face_gather"):
+        raise ValueError("ballistic_transport must be 'forward' or 'face_gather'")
+    if ballistic_transport == "face_gather" and (
+            charging_poisson_system is not None or nodal_potential_v is not None):
+        raise ValueError("deterministic ballistic face gather does not yet trace electric fields")
 
     verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
     face_material = _face_material_ids(centroids, geometry)
@@ -639,8 +670,20 @@ def advance_feature_step_3d(
                 periodic_lateral=True,
                 domain_size=radiosity_options.get(
                     "domain_size", np.asarray(geometry.phi.shape) * geometry.dx))
-        transport = trace_boundary_state_first_hit_3d(
-            **common_transport, **first_hit_options)
+        if ballistic_transport == "face_gather":
+            transport = gather_boundary_state_ballistic_3d(
+                boundary, species_role, verts, faces, areas, centroids,
+                _surface_gas_normals(verts, faces, centroids, geometry),
+                source_bounds=source_bounds, source_z=source_z,
+                mesh_length_unit_m=geometry.mesh_length_unit_m,
+                mesh_origin_m=geometry.mesh_origin_m,
+                face_quadrature_points=ballistic_face_quadrature_points,
+                periodic_lateral=periodic_neutral,
+                domain_size=first_hit_options.get("domain_size"),
+                ray_offset=1e-3 * geometry.dx, device=transport_device)
+        else:
+            transport = trace_boundary_state_first_hit_3d(
+                **common_transport, **first_hit_options)
     else:
         if potential_origin is None or potential_spacing is None or trajectory_fixed_dt is None:
             raise ValueError(
@@ -702,6 +745,8 @@ def advance_feature_step_3d(
             f"component sizes changed from "
             f"{_physical_volume_component_sizes(geometry, etchable)} to "
             f"{_physical_volume_component_sizes(output_geometry, etchable)}; "
+            f"changed slice topology="
+            f"{_changed_physical_slice_topology(geometry, output_geometry, etchable)}; "
             "state transfer requires an explicit topology event")
     next_surface_state, remap_diagnostics = conservative_remap_surface_state(
         surface.state, centroids[active_face], areas[active_face], face_material[active_face],
@@ -770,7 +815,8 @@ def solve_feature_3d(
         potential_spacing=None, trajectory_fixed_dt=None, trajectory_max_steps=10000,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         charging_system_builder=None, initial_charge_node_c=None, charging_options=None,
-        neutral_radiosity_options=None):
+        neutral_radiosity_options=None, ballistic_transport="forward",
+        ballistic_face_quadrature_points=1):
     """Run verified feature steps with conserved surface state and optional quasi-static charging.
 
     A fixed ``charging_poisson_system`` is valid for one geometry only. Repeated charged evolution
@@ -820,6 +866,8 @@ def solve_feature_3d(
                 initial_charge_node_c=step_initial_charge,
                 charging_options=charging_options,
                 neutral_radiosity_options=neutral_radiosity_options,
+                ballistic_transport=ballistic_transport,
+                ballistic_face_quadrature_points=ballistic_face_quadrature_points,
                 cfl_number=cfl_number, reinitialize=reinitialize,
                 transport_device=transport_device)
         except (ValueError, RuntimeError) as error:

@@ -151,6 +151,40 @@ def test_one_physical_3d_step_moves_a_uniform_sio2_plane_by_flux_yield_over_dens
     assert result.state_remap_diagnostics["new_topology"] == (1, 1)
 
 
+def test_deterministic_face_gather_feature_step_is_independent_of_forward_particle_budget():
+    geometry, _ = _plane_geometry()
+    common = dict(
+        geometry=geometry, boundary=_boundary(),
+        species_role={"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        mechanism=_mechanism(), etchable_material_ids=(1,), duration_s=1.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        ballistic_transport="face_gather", ballistic_face_quadrature_points=3,
+        cfl_number=0.3, reinitialize=False, transport_device="cpu")
+
+    one = advance_feature_step_3d(**common, n_position=1, seed=3)
+    many = advance_feature_step_3d(**common, n_position=1024, seed=99)
+
+    assert one.transport.transport_model == "collisionless_deterministic_face_gather_3d"
+    assert np.array_equal(one.face_velocity_mesh_units_s, many.face_velocity_mesh_units_s)
+    assert np.array_equal(one.geometry.phi, many.geometry.phi)
+
+
+def test_deterministic_face_gather_moves_plane_by_same_dimensional_flux_law():
+    geometry, initial_height = _plane_geometry()
+    result = advance_feature_step_3d(
+        geometry, _boundary(),
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=1.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        ballistic_transport="face_gather", ballistic_face_quadrature_points=3,
+        seed=3, cfl_number=0.3, reinitialize=False, transport_device="cpu")
+
+    final_height = _area_weighted_height(result.geometry.phi, geometry.dx)
+    assert np.isclose(initial_height - final_height, 0.02, atol=0.002)
+    assert np.isclose(result.diagnostics["max_velocity_m_s"], 2e-8, rtol=1e-12)
+    assert result.transport.transport_model == "collisionless_deterministic_face_gather_3d"
+
+
 def test_feature_step_diffusely_reemits_unreacted_neutrals_with_global_balance():
     geometry, _ = _plane_geometry()
     ion = SpeciesBoundaryState(

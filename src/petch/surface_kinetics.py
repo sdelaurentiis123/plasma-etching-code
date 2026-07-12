@@ -22,7 +22,6 @@ from types import MappingProxyType
 from typing import Mapping
 
 import numpy as np
-from scipy.special import logsumexp
 
 
 @dataclass(frozen=True)
@@ -462,7 +461,7 @@ class ReducedSiO2FluorocarbonMechanism:
         log_y0 = inventory / monolayer
         small = np.abs(coefficient) <= 1e-14 * np.maximum(
             deposit_substrate + deposit_polymer + removal_capacity, 1.0)
-        log_y1 = np.empty(shape)
+        delta_log_y = np.empty(shape)
         if np.any(small):
             # coefficient -> 0: y1=y0-transition*t/M. Evaluate as log(y0)+log1p(delta/y0)
             # so an already thick polymer never forms exp(N/M).
@@ -470,35 +469,69 @@ class ReducedSiO2FluorocarbonMechanism:
             ratio = delta * np.exp(-log_y0[small])
             if np.any(1.0 + ratio <= 0.0):
                 raise RuntimeError("polymer inventory integrator violated positivity")
-            log_y1[small] = log_y0[small] + np.log1p(ratio)
+            delta_log_y[small] = np.log1p(ratio)
         if np.any(~small):
-            # y1=exp(x)*(y0-a)+a, a=transition/coefficient. Signed log-sum-exp
-            # remains finite for both deposition (x>0) and removal (x<0) regimes.
+            # y1/y0 = exp(x)*d + (1-d), where d=1-a/y0 and
+            # a=transition/coefficient.  Evaluate log(y1/y0) directly so a thick film's small
+            # increment never comes from subtracting two O(N/M) logarithms.
             selected_log_y0 = log_y0[~small]
             a = transition[~small] / coefficient[~small]
-            scaled_a = a * np.exp(-selected_log_y0)
-            difference = 1.0 - scaled_a
-            sign_difference = np.sign(difference)
-            log_difference = (selected_log_y0
-                              + np.log(np.maximum(np.abs(difference), np.finfo(float).tiny)))
-            sign_a = np.sign(a)
-            log_a = np.where(
-                sign_a == 0.0, -np.inf,
-                np.log(np.maximum(np.abs(a), np.finfo(float).tiny)))
-            terms = np.stack((exponent[~small] + log_difference, log_a))
-            signs = np.stack((sign_difference, sign_a))
-            value, sign = logsumexp(terms, b=signs, axis=0, return_sign=True)
-            if np.any(sign <= 0.0):
+            difference = 1.0 - a * np.exp(-selected_log_y0)
+            selected_exponent = exponent[~small]
+            local_delta = np.empty(selected_exponent.shape)
+            growing = selected_exponent >= 0.0
+            if np.any(growing):
+                argument = (difference[growing]
+                            + (1.0 - difference[growing])
+                            * np.exp(-selected_exponent[growing]))
+                if np.any(argument <= 0.0):
+                    raise RuntimeError("polymer inventory integrator violated positivity")
+                local_delta[growing] = selected_exponent[growing] + np.log(argument)
+            if np.any(~growing):
+                # Here coefficient<0 implies a>1.  When y0 is much larger than a and x is very
+                # negative, log1p(expm1(x)*d) rounds to log(0) even though the exact limiting ratio
+                # is a/y0.  Resolve the two positive terms in log space; use a factored difference
+                # only when y0<a and the exponential term is subtractive.
+                local_a = a[~growing]
+                local_log_y0 = selected_log_y0[~growing]
+                local_difference = difference[~growing]
+                nonnegative = local_difference >= 0.0
+                negative_delta = np.empty(local_difference.shape)
+                if np.any(nonnegative):
+                    log_first = np.where(
+                        local_difference[nonnegative] > 0.0,
+                        selected_exponent[~growing][nonnegative]
+                        + np.log(np.maximum(
+                            local_difference[nonnegative], np.finfo(float).tiny)),
+                        -np.inf)
+                    log_second = np.log(local_a[nonnegative]) - local_log_y0[nonnegative]
+                    negative_delta[nonnegative] = np.logaddexp(log_first, log_second)
+                if np.any(~nonnegative):
+                    log_b = np.log(local_a[~nonnegative]) - local_log_y0[~nonnegative]
+                    subtract_fraction = (
+                        np.exp(selected_exponent[~growing][~nonnegative])
+                        * (-np.expm1(-log_b)))
+                    if np.any(subtract_fraction >= 1.0):
+                        raise RuntimeError("polymer inventory integrator violated positivity")
+                    negative_delta[~nonnegative] = log_b + np.log1p(-subtract_fraction)
+                local_delta[~growing] = negative_delta
+            if np.any(~np.isfinite(local_delta)):
                 raise RuntimeError("polymer inventory integrator violated positivity")
-            log_y1[~small] = value
+            delta_log_y[~small] = local_delta
+        log_y1 = log_y0 + delta_log_y
         if np.any(log_y1 < -1e-12):
             raise RuntimeError("polymer inventory integrator violated positivity")
-        updated = monolayer * np.maximum(log_y1, 0.0)
+        # Carry the analytic increment directly.  Reconstructing it later as N1-N0 loses several
+        # digits once a thick film (O(1e21) m^-2) changes by only O(1e17) m^-2 in one substep.
+        # That cancellation is numerical bookkeeping error, not a physical non-conservation.
+        at_inventory_floor = log_y1 <= 0.0
+        delta = np.where(
+            at_inventory_floor, -inventory, monolayer * delta_log_y)
+        updated = np.where(at_inventory_floor, 0.0, inventory + delta)
         # Preserve the exact no-flux identity face-by-face. Otherwise exp(log(N)) changes a large
         # inactive inventory by an ULP when a different face is active, creating a false local source.
         updated = np.where(active_reaction, updated, inventory)
-
-        delta = updated - inventory
+        delta = np.where(active_reaction, delta, 0.0)
         nonzero_transition = np.abs(transition) > 1e-14 * np.maximum(
             deposit_substrate + deposit_polymer + removal_capacity, 1.0)
         coverage_integral = np.empty(shape)
@@ -522,9 +555,9 @@ class ReducedSiO2FluorocarbonMechanism:
         deposited = (deposit_substrate * duration_s
                      + (deposit_polymer - deposit_substrate) * coverage_integral)
         removed = removal_capacity * coverage_integral
-        polymer_balance = (updated - inventory) - (deposited - removed)
+        polymer_balance = delta - (deposited - removed)
         polymer_scale = np.maximum.reduce((
-            np.abs(updated - inventory), np.abs(deposited), np.abs(removed), np.ones(shape)))
+            np.abs(delta), np.abs(deposited), np.abs(removed), np.ones(shape)))
         relative_balance = np.abs(polymer_balance) / polymer_scale
         if np.any(relative_balance > 5e-13):
             failed = np.unravel_index(np.argmax(relative_balance), relative_balance.shape)

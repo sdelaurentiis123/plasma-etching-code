@@ -294,6 +294,151 @@ def estimate_diffuse_form_factors_3d(
         escape_fraction, rays_per_face)
 
 
+def gather_boundary_state_ballistic_3d(
+        boundary: PlasmaBoundaryState, species_role: Mapping[str, str], verts, faces, areas,
+        centroids, gas_normals, *, source_bounds, source_z, mesh_length_unit_m=1e-6,
+        mesh_origin_m=(0.0, 0.0, 0.0), face_quadrature_points=1,
+        periodic_lateral=False, domain_size=None, ray_offset=1e-5, device=None):
+    """Deterministically gather collisionless boundary flux onto every visible triangle.
+
+    For boundary direction ``d`` (pointing from the horizontal source plane toward the surface),
+    conservation of projected area gives
+
+    ``Gamma_face = Gamma_plane * w * max(0, -d.n) / abs(d.z)``.
+
+    A reverse ray from each triangle quadrature point supplies only the geometric visibility.  This
+    is the adjoint form of absorbing first-hit transport: unlike a forward particle tally it gives
+    every face a deterministic local flux and cannot imprint zero-count triangles into an evolving
+    interface.  The boundary's discrete energy-angle measure is retained exactly.
+    """
+    verts = np.asarray(verts, dtype=float); faces = np.asarray(faces, dtype=int)
+    areas = np.asarray(areas, dtype=float); centroids = np.asarray(centroids, dtype=float)
+    normals = np.asarray(gas_normals, dtype=float); bounds = np.asarray(source_bounds, dtype=float)
+    if (verts.ndim != 2 or verts.shape[1] != 3 or faces.ndim != 2 or faces.shape[1] != 3
+            or areas.shape != (faces.shape[0],) or centroids.shape != (faces.shape[0], 3)
+            or normals.shape != centroids.shape or np.any(~np.isfinite(verts))
+            or np.any(~np.isfinite(centroids)) or np.any(~np.isfinite(normals))
+            or np.any(faces < 0) or np.any(faces >= len(verts)) or np.any(areas <= 0.0)
+            or bounds.shape != (4,) or np.any(~np.isfinite(bounds))
+            or bounds[1] <= bounds[0] or bounds[3] <= bounds[2]
+            or not np.isfinite(source_z) or not np.isfinite(ray_offset) or ray_offset <= 0.0):
+        raise ValueError("invalid deterministic face-gather geometry")
+    geometric_areas = 0.5 * np.linalg.norm(np.cross(
+        verts[faces[:, 1]] - verts[faces[:, 0]],
+        verts[faces[:, 2]] - verts[faces[:, 0]]), axis=1)
+    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=0.0):
+        raise ValueError("triangle areas must match the supplied mesh geometry")
+    if not np.allclose(np.linalg.norm(normals, axis=1), 1.0, rtol=0.0, atol=2e-6):
+        raise ValueError("gas normals must be unit length")
+    role = dict(species_role); names = {item.name for item in boundary.species}
+    if set(role) != names:
+        raise ValueError("species_role must classify every and only boundary species")
+    allowed_roles = {"neutral_reactant", "energetic_bombardment", "charge_carrier"}
+    if any(value not in allowed_roles for value in role.values()):
+        raise ValueError(f"species roles must be one of {sorted(allowed_roles)}")
+    if any(item.position_m is not None for item in boundary.species):
+        raise ValueError("face gather currently requires a spatially uniform boundary state")
+    if int(face_quadrature_points) != face_quadrature_points or int(face_quadrature_points) not in (1, 3):
+        raise ValueError("face_quadrature_points must be 1 or 3")
+    face_quadrature_points = int(face_quadrature_points)
+    origin_m = np.asarray(mesh_origin_m, dtype=float)
+    if (origin_m.shape != (3,) or np.any(~np.isfinite(origin_m))
+            or not np.isfinite(mesh_length_unit_m) or mesh_length_unit_m <= 0.0):
+        raise ValueError("invalid mesh SI coordinate mapping")
+    mapped_reference = origin_m[2] + float(source_z) * float(mesh_length_unit_m)
+    if not np.isclose(
+            mapped_reference, boundary.reference_plane_m, rtol=0.0,
+            atol=max(1e-15, 1e-9 * float(mesh_length_unit_m))):
+        raise ValueError("mesh source plane does not match PlasmaBoundaryState.reference_plane_m")
+    if domain_size is None:
+        domain = np.maximum(np.ptp(verts, axis=0), 1.0)
+    else:
+        domain = np.asarray(domain_size, dtype=float)
+    if domain.shape != (3,) or np.any(~np.isfinite(domain)) or np.any(domain <= 0.0):
+        raise ValueError("domain_size must contain three positive lengths")
+
+    if face_quadrature_points == 1:
+        points = centroids[:, None, :]
+    else:
+        barycentric = np.array([
+            [2.0 / 3.0, 1.0 / 6.0, 1.0 / 6.0],
+            [1.0 / 6.0, 2.0 / 3.0, 1.0 / 6.0],
+            [1.0 / 6.0, 1.0 / 6.0, 2.0 / 3.0],
+        ])
+        points = np.einsum("qv,fvc->fqc", barycentric, verts[faces])
+    selected_device = DEVICE if device is None else str(device)
+    if selected_device.startswith("warp:"):
+        selected_device = selected_device.split(":", 1)[1]
+    ensure_writable_warp_cache(wp)
+    mesh = wp.Mesh(
+        points=wp.array(verts.astype(np.float32), dtype=wp.vec3, device=selected_device),
+        indices=wp.array(faces.astype(np.int32).ravel(), dtype=wp.int32, device=selected_device))
+    source_area = (bounds[1] - bounds[0]) * (bounds[3] - bounds[2])
+    neutral_flux = {}; energetic_flux = []; hit_probability = {}; escape_probability = {}
+    face_count = faces.shape[0]; point_count = face_quadrature_points
+    for species in boundary.species:
+        velocity = np.asarray(species.velocity_sqrt_eV, dtype=float).copy()
+        velocity[:, 2] *= -1.0
+        speed = np.linalg.norm(velocity, axis=1)
+        direction = velocity / speed[:, None]
+        if np.any(direction[:, 2] >= 0.0):
+            raise ValueError("face gather requires boundary velocities directed toward the surface")
+        incidence_cosine = np.clip(
+            -np.einsum("sd,fd->sf", direction, normals), 0.0, 1.0)
+        projection = incidence_cosine / (-direction[:, 2, None])
+        normalized_gathered = np.zeros((direction.shape[0], face_count))
+        for sample_index, incident_direction in enumerate(direction):
+            reverse = -incident_direction
+            origin = points.reshape(-1, 3) + np.repeat(
+                float(ray_offset) * normals, point_count, axis=0)
+            ray_direction = np.broadcast_to(reverse, origin.shape).copy()
+            hit_wp = wp.full(origin.shape[0], -1, dtype=wp.int32, device=selected_device)
+            wp.launch(
+                _diffuse_form_factor_events_3d, dim=origin.shape[0], device=selected_device,
+                inputs=[mesh.id,
+                        wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
+                        wp.array(ray_direction.astype(np.float32), dtype=wp.vec3, device=selected_device),
+                        float(domain[0]), float(domain[1]), float(domain[2]),
+                        int(bool(periodic_lateral)), hit_wp])
+            visible = hit_wp.numpy().reshape(face_count, point_count) < 0
+            if not periodic_lateral:
+                travel = (float(source_z) - points[:, :, 2]) / reverse[2]
+                source_point = points[:, :, :2] + travel[:, :, None] * reverse[None, None, :2]
+                visible &= ((travel >= 0.0)
+                            & (source_point[:, :, 0] >= bounds[0])
+                            & (source_point[:, :, 0] <= bounds[1])
+                            & (source_point[:, :, 1] >= bounds[2])
+                            & (source_point[:, :, 1] <= bounds[3]))
+            normalized_gathered[sample_index] = (
+                species.weight[sample_index] * projection[sample_index]
+                * visible.mean(axis=1))
+        gathered = species.flux_m2_s * normalized_gathered
+        probability = float(np.dot(normalized_gathered.sum(axis=0), areas) / source_area)
+        hit_probability[species.name] = probability
+        escape_probability[species.name] = 1.0 - probability
+        if role[species.name] == "neutral_reactant":
+            neutral_flux[species.name] = gathered.sum(axis=0)
+        else:
+            event_sample, event_face = np.where(gathered > 0.0)
+            energetic_flux.append(FaceResolvedEnergeticFlux(
+                species.name, face_count, event_face,
+                gathered[event_sample, event_face],
+                species.kinetic_energy_eV[event_sample],
+                incidence_cosine[event_sample, event_face]))
+    return BoundaryTransport3DResult(
+        surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
+        hit_probability=hit_probability, escape_probability=escape_probability,
+        truncation_probability={name: 0.0 for name in hit_probability},
+        transport_model="collisionless_deterministic_face_gather_3d",
+        known_limitations=(
+            "no intra-feature electric-field trajectory coupling",
+            "no surface reflection or neutral re-emission",
+            "no spatially varying boundary density",
+            "triangle visibility quadrature requires refinement at partial occlusion",
+            "float32 triangle-ray intersection",
+        ))
+
+
 def trace_boundary_state_first_hit_3d(
         boundary: PlasmaBoundaryState, species_role: Mapping[str, str], verts, faces, areas, *,
         source_bounds, source_z, mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
