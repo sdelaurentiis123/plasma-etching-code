@@ -15,6 +15,42 @@ from scipy.sparse.linalg import gmres
 
 
 @dataclass(frozen=True)
+class DiffuseFormFactors3D:
+    face_count: int
+    source_face: np.ndarray
+    target_face: np.ndarray
+    transfer_fraction: np.ndarray
+    escape_fraction: np.ndarray
+    rays_per_face: int
+
+    def __post_init__(self):
+        source = np.asarray(self.source_face, dtype=int).copy()
+        target = np.asarray(self.target_face, dtype=int).copy()
+        fraction = np.asarray(self.transfer_fraction, dtype=float).copy()
+        escape = np.asarray(self.escape_fraction, dtype=float).copy()
+        n_face = int(self.face_count)
+        n_ray = int(self.rays_per_face)
+        if (n_face <= 0 or n_ray <= 0 or source.ndim != 1 or target.shape != source.shape
+                or fraction.shape != source.shape or escape.shape != (n_face,)
+                or np.any(source < 0) or np.any(source >= n_face)
+                or np.any(target < 0) or np.any(target >= n_face)
+                or np.any(~np.isfinite(fraction)) or np.any(fraction <= 0.0)
+                or np.any(~np.isfinite(escape)) or np.any(escape < 0.0)):
+            raise ValueError("invalid diffuse form factors")
+        outgoing = escape + np.bincount(source, weights=fraction, minlength=n_face)
+        if not np.allclose(outgoing, 1.0, rtol=0.0, atol=5e-13):
+            raise ValueError("diffuse form factors must classify every emitted ray")
+        for value in (source, target, fraction, escape):
+            value.setflags(write=False)
+        object.__setattr__(self, "face_count", n_face)
+        object.__setattr__(self, "rays_per_face", n_ray)
+        object.__setattr__(self, "source_face", source)
+        object.__setattr__(self, "target_face", target)
+        object.__setattr__(self, "transfer_fraction", fraction)
+        object.__setattr__(self, "escape_fraction", escape)
+
+
+@dataclass(frozen=True)
 class DiffuseNeutralSolve3D:
     incident_flux_m2_s: np.ndarray
     reacted_flux_m2_s: np.ndarray

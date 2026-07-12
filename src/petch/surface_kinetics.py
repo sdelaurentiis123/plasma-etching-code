@@ -352,6 +352,41 @@ class ReducedSiO2FluorocarbonMechanism:
     def initial_state(shape=()):
         return SiO2SurfaceState.bare(shape)
 
+    def neutral_reaction_probability(self, state: SiO2SurfaceState):
+        """Per-collision probability that each neutral leaves the ballistic population.
+
+        The loss is the sum of the same competing channels advanced by this mechanism: complex
+        formation on accessible uncomplexed oxide, deposition on bare/polymer-covered surface, and
+        oxygen removal of polymer. Transport may diffusely re-emit the remaining probability.
+        """
+        if not isinstance(state, SiO2SurfaceState):
+            raise TypeError("neutral reaction probabilities require SiO2SurfaceState")
+        par = self.parameters
+        access = np.exp(-state.polymer_units_m2 / par.polymer_monolayer_density_m2)
+        polymer_coverage = 1.0 - access
+        probability = {}
+
+        def add(species, value):
+            probability[species] = probability.get(species, np.zeros_like(access)) + value
+
+        for species, value in par.complex_formation_probability.items():
+            add(species, value * access * (1.0 - state.complex_fraction))
+        all_deposition_species = (
+            set(par.polymer_deposition_probability_on_substrate)
+            | set(par.polymer_deposition_probability_on_polymer))
+        for species in all_deposition_species:
+            add(species,
+                par.polymer_deposition_probability_on_substrate.get(species, 0.0) * access
+                + par.polymer_deposition_probability_on_polymer.get(species, 0.0)
+                * polymer_coverage)
+        add(par.oxygen_species, par.oxygen_polymer_etch_probability * polymer_coverage)
+        if any(np.any(value > 1.0 + 5e-14) for value in probability.values()):
+            raise ValueError(
+                "competing neutral reaction probabilities exceed one; chemistry inputs are invalid")
+        return MappingProxyType({
+            species: np.minimum(np.maximum(value, 0.0), 1.0)
+            for species, value in probability.items()})
+
     def validity(self, fluxes: SurfaceFluxes):
         par = self.parameters
         supported = (set(par.complex_formation_probability)

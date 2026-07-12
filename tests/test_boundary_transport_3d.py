@@ -6,6 +6,7 @@ from petch.boundary_state import (
     PlasmaBoundaryState, SpeciesBoundaryState, maxwellian_electron_boundary_state,
 )
 from petch.boundary_transport_3d import (
+    estimate_diffuse_form_factors_3d,
     merge_boundary_transport_results_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
@@ -318,6 +319,42 @@ def test_first_hit_3d_refuses_unimplemented_spatial_boundary_density():
             {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
             verts, faces, areas, source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
             mesh_length_unit_m=1e-6, n_position=8, device="cpu")
+
+
+def test_diffuse_form_factor_estimator_classifies_open_plane_as_escape():
+    verts, faces, _ = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    factors = estimate_diffuse_form_factors_3d(
+        verts, faces, centroids, np.tile([0.0, 0.0, 1.0], (2, 1)),
+        rays_per_face=16, seed=4, domain_size=(1.0, 1.0, 1.0), device="cpu")
+
+    assert factors.source_face.size == factors.target_face.size == 0
+    assert np.array_equal(factors.escape_fraction, [1.0, 1.0])
+
+
+def test_diffuse_form_factor_estimator_replays_cavity_exchange_deterministically():
+    bottom, faces, _ = _flat_unit_plane()
+    top = bottom + [0.0, 0.0, 1.0]
+    verts = np.vstack((bottom, top))
+    faces = np.vstack((faces, faces + 4))
+    centroids = verts[faces].mean(axis=1)
+    normals = np.vstack((
+        np.tile([0.0, 0.0, 1.0], (2, 1)),
+        np.tile([0.0, 0.0, -1.0], (2, 1))))
+    arguments = dict(
+        verts=verts, faces=faces, centroids=centroids, gas_normals=normals,
+        rays_per_face=64, seed=9, domain_size=(1.0, 1.0, 2.0), device="cpu")
+    first = estimate_diffuse_form_factors_3d(**arguments)
+    replay = estimate_diffuse_form_factors_3d(**arguments)
+
+    assert first.transfer_fraction.size > 0
+    assert np.array_equal(first.source_face, replay.source_face)
+    assert np.array_equal(first.target_face, replay.target_face)
+    assert np.array_equal(first.transfer_fraction, replay.transfer_fraction)
+    assert np.array_equal(first.escape_fraction, replay.escape_fraction)
+    outgoing = first.escape_fraction + np.bincount(
+        first.source_face, weights=first.transfer_fraction, minlength=4)
+    assert np.array_equal(outgoing, np.ones(4))
 
 
 @pytest.mark.skipif(not wp.is_cuda_available(), reason="CUDA device unavailable")

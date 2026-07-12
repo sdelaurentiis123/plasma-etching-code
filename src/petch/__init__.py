@@ -17,7 +17,8 @@ from .surface_kinetics import (
     SiO2SurfaceState, SurfaceFluxes,
 )
 from .boundary_transport_3d import (
-    BoundaryTransport3DResult, merge_boundary_transport_results_3d,
+    BoundaryTransport3DResult, estimate_diffuse_form_factors_3d,
+    merge_boundary_transport_results_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
 )
@@ -47,7 +48,7 @@ from .validation_demo import (
     Jeon2022Prediction, score_jeon_2022_demo,
 )
 from .neutral_radiosity_3d import (
-    DiffuseNeutralSolve3D, solve_diffuse_neutral_radiosity_3d,
+    DiffuseFormFactors3D, DiffuseNeutralSolve3D, solve_diffuse_neutral_radiosity_3d,
 )
 
 # High-level 3D API (ViennaPS-shaped). Importing api pulls in the 3D engine (threed/warp).
@@ -66,6 +67,7 @@ __all__ = [
     "ReducedSiO2FluorocarbonMechanism", "ReducedSiO2FluorocarbonParameters",
     "SiO2SurfaceState", "SurfaceFluxes",
     "BoundaryTransport3DResult", "merge_boundary_transport_results_3d",
+    "estimate_diffuse_form_factors_3d",
     "trace_boundary_state_field_3d",
     "trace_boundary_state_first_hit_3d",
     "NodalPoissonSystem3D", "PoissonDiagnostics3D", "assemble_q1_stiffness_3d",
@@ -81,7 +83,7 @@ __all__ = [
     "advance_feature_step_3d", "conservative_remap_surface_state", "solve_feature_3d",
     "JEON_2022_DEMO_VERSION", "Jeon2022DemoScore", "Jeon2022DemoThresholds",
     "Jeon2022Prediction", "score_jeon_2022_demo",
-    "DiffuseNeutralSolve3D", "solve_diffuse_neutral_radiosity_3d",
+    "DiffuseFormFactors3D", "DiffuseNeutralSolve3D", "solve_diffuse_neutral_radiosity_3d",
 ]
 
 __version__ = "0.2.0"

@@ -17,7 +17,8 @@ import warp as wp
 
 from .boundary_state import PlasmaBoundaryState
 from .surface_kinetics import FaceResolvedEnergeticFlux, SurfaceFluxes
-from .threed import DEVICE
+from .neutral_radiosity_3d import DiffuseFormFactors3D
+from .threed import DEVICE, _apply_bc
 from .warp_runtime import ensure_writable_warp_cache
 
 
@@ -34,6 +35,20 @@ def _first_hit_events_3d(
         cosine = -wp.dot(direction[particle], normal)
         hit_face[particle] = ray.face
         hit_cosine[particle] = wp.clamp(cosine, 0.0, 1.0)
+
+
+@wp.kernel
+def _diffuse_form_factor_events_3d(
+        mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), direction: wp.array(dtype=wp.vec3),
+        domain_x: float, domain_y: float, domain_z: float, periodic_lateral: int,
+        hit_face: wp.array(dtype=int)):
+    ray_index = wp.tid()
+    boundary_ray = _apply_bc(
+        mesh, origin[ray_index], direction[ray_index],
+        domain_x, domain_y, domain_z, periodic_lateral)
+    ray = wp.mesh_query_ray(mesh, boundary_ray.o, boundary_ray.d, 1.0e6)
+    if ray.result:
+        hit_face[ray_index] = ray.face
 
 
 @wp.func
@@ -168,6 +183,98 @@ def merge_boundary_transport_results_3d(*results):
         truncation_probability=truncated,
         transport_model=" + ".join(dict.fromkeys(models)),
         known_limitations=tuple(dict.fromkeys(limitations)))
+
+
+def estimate_diffuse_form_factors_3d(
+        verts, faces, centroids, gas_normals, *, rays_per_face=64, seed=0,
+        domain_size=None, periodic_lateral=False, ray_offset=1e-5, device=None):
+    """Estimate deterministic diffuse face exchange and classify every emitted ray.
+
+    A scrambled Sobol hemisphere rule is Cranley-shifted per source face. The estimator produces
+    geometric form factors only; sticking and chemistry enter the separate conservative radiosity
+    solve. ``periodic_lateral`` uses the same periodic-cell ray geometry as the legacy trench engine,
+    with the top remaining an open escape boundary.
+    """
+    verts = np.asarray(verts, dtype=float)
+    faces = np.asarray(faces, dtype=int)
+    centroids = np.asarray(centroids, dtype=float)
+    normals = np.asarray(gas_normals, dtype=float)
+    if (verts.ndim != 2 or verts.shape[1] != 3 or faces.ndim != 2 or faces.shape[1] != 3
+            or centroids.shape != (faces.shape[0], 3) or normals.shape != centroids.shape
+            or np.any(~np.isfinite(verts)) or np.any(~np.isfinite(centroids))
+            or np.any(~np.isfinite(normals)) or np.any(faces < 0)
+            or np.any(faces >= len(verts)) or ray_offset <= 0.0):
+        raise ValueError("invalid mesh or gas-normal input for diffuse form factors")
+    normal_length = np.linalg.norm(normals, axis=1)
+    if not np.allclose(normal_length, 1.0, rtol=0.0, atol=2e-6):
+        raise ValueError("gas normals must be unit length")
+    if int(rays_per_face) != rays_per_face:
+        raise ValueError("rays_per_face must be an integer")
+    rays_per_face = int(rays_per_face)
+    if rays_per_face <= 0 or rays_per_face & (rays_per_face - 1):
+        raise ValueError("rays_per_face must be a positive power of two")
+    if domain_size is None:
+        domain = np.maximum(np.ptp(verts, axis=0), 1.0)
+    else:
+        domain = np.asarray(domain_size, dtype=float)
+    if domain.shape != (3,) or np.any(~np.isfinite(domain)) or np.any(domain <= 0.0):
+        raise ValueError("domain_size must contain three positive lengths")
+    if periodic_lateral and (
+            np.min(verts[:, :2]) < -1e-7
+            or np.any(np.max(verts[:, :2], axis=0) > domain[:2] + 1e-7)
+            or np.max(verts[:, 2]) > domain[2] + 1e-7):
+        raise ValueError("periodic mesh must lie inside [0, domain_size]")
+
+    base = qmc.Sobol(2, scramble=True, seed=int(seed)).random_base2(
+        int(np.log2(rays_per_face)))
+    face_index = np.arange(faces.shape[0], dtype=float)[:, None]
+    shift = np.mod(face_index * np.array([[0.6180339887498949, 0.4142135623730950]]), 1.0)
+    sample = np.mod(base[None, :, :] + shift[:, None, :], 1.0)
+    normal = np.repeat(normals, rays_per_face, axis=0)
+    sample = sample.reshape(-1, 2)
+    tangent_seed = np.where(
+        np.abs(normal[:, :1]) > 0.9,
+        np.array([0.0, 1.0, 0.0]), np.array([1.0, 0.0, 0.0]))
+    tangent = np.cross(tangent_seed, normal)
+    tangent /= np.linalg.norm(tangent, axis=1, keepdims=True)
+    bitangent = np.cross(normal, tangent)
+    cosine = np.sqrt(sample[:, 0])
+    sine = np.sqrt(1.0 - sample[:, 0])
+    azimuth = 2.0 * np.pi * sample[:, 1]
+    direction = ((sine * np.cos(azimuth))[:, None] * tangent
+                 + (sine * np.sin(azimuth))[:, None] * bitangent
+                 + cosine[:, None] * normal)
+    source = np.repeat(np.arange(faces.shape[0]), rays_per_face)
+    origin = centroids[source] + float(ray_offset) * normal
+
+    selected_device = DEVICE if device is None else str(device)
+    if selected_device.startswith("warp:"):
+        selected_device = selected_device.split(":", 1)[1]
+    ensure_writable_warp_cache(wp)
+    mesh = wp.Mesh(
+        points=wp.array(verts.astype(np.float32), dtype=wp.vec3, device=selected_device),
+        indices=wp.array(faces.astype(np.int32).ravel(), dtype=wp.int32, device=selected_device))
+    hit_wp = wp.full(source.size, -1, dtype=wp.int32, device=selected_device)
+    wp.launch(
+        _diffuse_form_factor_events_3d, dim=source.size, device=selected_device,
+        inputs=[mesh.id,
+                wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
+                wp.array(direction.astype(np.float32), dtype=wp.vec3, device=selected_device),
+                float(domain[0]), float(domain[1]), float(domain[2]),
+                int(bool(periodic_lateral)), hit_wp])
+    hit = hit_wp.numpy().astype(int)
+    escaped = hit < 0
+    escape_fraction = np.bincount(
+        source[escaped], minlength=faces.shape[0]).astype(float) / rays_per_face
+    valid_source = source[~escaped]
+    valid_target = hit[~escaped]
+    pair = valid_source.astype(np.int64) * faces.shape[0] + valid_target
+    unique, count = np.unique(pair, return_counts=True)
+    source_face = (unique // faces.shape[0]).astype(int)
+    target_face = (unique % faces.shape[0]).astype(int)
+    return DiffuseFormFactors3D(
+        faces.shape[0], source_face, target_face, count.astype(float) / rays_per_face,
+        escape_fraction, rays_per_face)
 
 
 def trace_boundary_state_first_hit_3d(

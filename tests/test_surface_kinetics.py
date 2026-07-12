@@ -85,6 +85,30 @@ def test_no_flux_is_an_exact_identity_and_zero_velocity():
     assert np.array_equal(result.etch_velocity_m_s, np.zeros(2))
 
 
+def test_neutral_transport_loss_is_sum_of_the_same_state_dependent_reaction_channels():
+    mechanism = _mechanism(
+        polymer_deposition_probability_on_substrate={"CF2": 0.3},
+        polymer_deposition_probability_on_polymer={"CF2": 0.1},
+        oxygen_polymer_etch_probability=0.4)
+    state = SiO2SurfaceState(
+        complex_fraction=[0.0, 0.5],
+        polymer_units_m2=[0.0, np.log(2.0) * 4e18])
+    probability = mechanism.neutral_reaction_probability(state)
+
+    # Bare: CF2 complex formation (0.2) competes with substrate deposition (0.3).
+    # Half-accessible: 0.2*.5*.5 complex + .3*.5+.1*.5 deposition.
+    assert np.allclose(probability["CF2"], [0.5, 0.25])
+    assert np.allclose(probability["O"], [0.0, 0.2])
+
+
+def test_neutral_transport_refuses_competing_channel_probability_above_one():
+    mechanism = _mechanism(
+        complex_formation_probability={"CF2": 0.8},
+        polymer_deposition_probability_on_substrate={"CF2": 0.4})
+    with pytest.raises(ValueError, match="exceed one"):
+        mechanism.neutral_reaction_probability(SiO2SurfaceState.bare())
+
+
 def test_complex_formation_is_bounded_and_conserves_surface_sites():
     mechanism = _mechanism(
         polymer_deposition_probability_on_substrate={},
