@@ -121,6 +121,17 @@ AR [0, 10, 20, 40].
   transport (narrow IonEnergyTransverseMaxwellianDensity) and, if the residual persists above the
   error budget, add charging.
 
+## Phase 0 (approved plan) — de Boer ARDE from real coupled chemistry through the engine: WORKING
+
+`scripts/deboer_feature3d.py` runs de Boer Si SF6/O2 through `feature_step_3d` with the VALIDATED
+coupled kernel `ReducedSiO2FluorocarbonMechanism` reparameterized for Si-F (complex=SiF_x built by F
+and removed by ion; polymer=O-passivation gating F access). The ARDE EMERGES from the coupling (not an
+additive sum): normalized floor rate 1.0/0.87/0.74/0.53 at AR 0/2/4/8 (coarse dx=0.02, uncalibrated).
+The etch is genuinely ion-assisted: ion_flux=0 -> rate exactly 0.0. This replaces the additive
+`deboer_two_channel.py` diagnostic with real coupled surface chemistry. Remaining Phase 0: finer grid +
+calibrate declared inputs (s_F, ion IAD, yields, O passivation) on de Boer AR10,20, predict AR40
+held-out; add a fast pytest gate.
+
 ## Roadmap (remaining)
 
 1. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow
