@@ -137,8 +137,9 @@ def test_periodic_face_gather_conserves_each_energy_angle_atom_not_only_total_fl
     centroids = verts[faces].mean(axis=1)
     ion = SpeciesBoundaryState(
         "Ar+", 1, 40.0, 2e19,
-        velocity_sqrt_eV=[[0.1, 0.0, 10.0], [-0.2, 0.0, np.sqrt(20.0)]],
-        weight=[0.25, 0.75])
+        velocity_sqrt_eV=[
+            [0.1, 0.0, 10.0], [-0.2, 0.0, np.sqrt(20.0)], [0.0, 0.0, 2.0]],
+        weight=[0.25, 0.75, 0.0])
     boundary = PlasmaBoundaryState((ion,), reference_plane_m=1e-6)
     result = gather_boundary_state_ballistic_3d(
         boundary, {"Ar+": "energetic_bombardment"}, verts, faces, areas, centroids,

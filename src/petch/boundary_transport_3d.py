@@ -419,12 +419,16 @@ def gather_boundary_state_ballistic_3d(
             # land. Enforce this independently for every discrete energy-angle atom so geometric
             # quadrature error cannot distort the boundary distribution while conserving its total.
             expected_probability = np.asarray(species.weight, dtype=float)
-            if (np.any(sample_probability <= 0.0)
-                    or np.any(~np.isfinite(sample_probability))):
+            positive_weight = expected_probability > 0.0
+            if (np.any(sample_probability[positive_weight] <= 0.0)
+                    or np.any(~np.isfinite(sample_probability[positive_weight]))):
                 raise RuntimeError(
                     f"periodic face visibility has no landed measure for {species.name!r}")
-            normalized_gathered *= (
-                expected_probability / sample_probability)[:, None]
+            scale = np.ones(expected_probability.shape, dtype=float)
+            scale[positive_weight] = (
+                expected_probability[positive_weight]
+                / sample_probability[positive_weight])
+            normalized_gathered *= scale[:, None]
             sample_probability = expected_probability.copy()
             probability = float(sample_probability.sum())
         elif not -5e-13 <= probability <= 1.0 + 5e-13:

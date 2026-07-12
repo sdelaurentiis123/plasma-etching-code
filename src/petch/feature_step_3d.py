@@ -66,7 +66,8 @@ class FeatureGeometry3D:
         if not np.any(phi < 0.0) or not np.any(phi > 0.0):
             raise ValueError("phi must contain both gas and solid")
         if layers is not None:
-            if (not layers or any(key <= 0 for key in layers)
+            material_ids = set(np.unique(material)) - {0}
+            if (not layers or set(layers) != material_ids or any(key <= 0 for key in layers)
                     or any(value.shape != phi.shape or np.any(~np.isfinite(value))
                            for value in layers.values())):
                 raise ValueError("invalid material level-set fields")
