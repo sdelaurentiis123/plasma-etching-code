@@ -125,6 +125,31 @@ def test_complex_formation_is_bounded_and_conserves_surface_sites():
     assert np.all(result.state.complex_fraction < 1.0)
 
 
+def test_complex_mixed_flux_preserves_inactive_face_as_bitwise_identity():
+    mechanism = _mechanism(
+        polymer_deposition_probability_on_substrate={},
+        polymer_deposition_probability_on_polymer={})
+    initial = SiO2SurfaceState([0.7, 0.0], [0.0, 0.0])
+    result = mechanism.advance(
+        initial, SurfaceFluxes({"CF2": np.array([0.0, 1e18])}), 10.0)
+
+    assert result.state.complex_fraction[0] == initial.complex_fraction[0]
+    assert result.formed_complex_units_m2[0] == 0.0
+    assert result.removed_complex_units_m2[0] == 0.0
+
+
+def test_sub_ulp_complex_events_obey_float64_site_resolution_without_false_failure():
+    mechanism = _mechanism(
+        polymer_deposition_probability_on_substrate={},
+        polymer_deposition_probability_on_polymer={})
+    initial = SiO2SurfaceState(0.695, 0.0)
+    result = mechanism.advance(initial, SurfaceFluxes({"CF2": 1e3}), 10.0)
+
+    assert abs(result.state.complex_fraction - initial.complex_fraction) <= np.spacing(0.695)
+    assert result.formed_complex_units_m2 <= (
+        8 * np.finfo(float).eps * mechanism.parameters.site_density_m2)
+
+
 def test_complex_sputtering_conserves_sites_and_removed_formula_units():
     mechanism = _mechanism(
         complex_formation_probability={},
@@ -159,6 +184,17 @@ def test_polymer_inventory_has_exact_deposition_removal_balance_and_never_goes_n
         result.state.polymer_units_m2 - initial.polymer_units_m2,
         result.deposited_polymer_units_m2 - result.removed_polymer_units_m2,
         rtol=2e-11, atol=1e-8)
+
+
+def test_polymer_mixed_flux_preserves_inactive_face_as_bitwise_identity():
+    mechanism = _mechanism(complex_formation_probability={})
+    initial = SiO2SurfaceState([0.0, 0.0], [4.920299e18, 0.0])
+    fluxes = SurfaceFluxes({"CF2": np.array([0.0, 1e18])})
+    result = mechanism.advance(initial, fluxes, 10.0)
+
+    assert result.state.polymer_units_m2[0] == initial.polymer_units_m2[0]
+    assert result.deposited_polymer_units_m2[0] == 0.0
+    assert result.removed_polymer_units_m2[0] == 0.0
 
 
 def test_strang_coupling_converges_when_polymer_shields_substrate():

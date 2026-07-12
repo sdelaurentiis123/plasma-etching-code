@@ -71,6 +71,13 @@ def extract_mesh_3d(phi, dx):
     centroids = v.mean(axis=1)
     cross = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
     areas = 0.5 * np.linalg.norm(cross, axis=1)
+    # Exact grid-aligned CSG intersections can make marching cubes emit duplicate-vertex,
+    # zero-measure triangles. They contain no surface and cannot carry flux; retain every triangle
+    # above a float32 scale-aware roundoff floor and refuse no physical geometry downstream.
+    nondegenerate = areas > 32.0 * np.finfo(np.float32).eps * dx * dx
+    faces = faces[nondegenerate]
+    centroids = centroids[nondegenerate]
+    areas = areas[nondegenerate]
     return verts, faces, centroids, areas
 
 
@@ -1548,10 +1555,21 @@ def reinit_narrow(phi, dx, band):
     far field keeps its sign at a large magnitude. ~5x faster than full reinit with EXACT agreement in
     the band -- this is the SOTA narrow-band approach (ViennaLS/HRLE do the same: no global reinit).
     Was the self-inflicted ~42% bottleneck vs ViennaPS, which never does a full per-step reinit."""
-    d = skfmm.distance(phi, dx=dx, narrow=band)
+    phi = np.asarray(phi, dtype=np.float64)
+    # skfmm treats exact zero-valued grid nodes as seeds rather than as belonging to either
+    # material.  At intersecting grid-aligned CSG surfaces that can make its local sign choice
+    # inconsistent: strictly positive nodes have been observed to return with negative distance,
+    # creating disconnected one-cell solid islands.  petch's level-set convention is phi > 0 in
+    # solid, so give the zero level the positive-side limiting value before fast marching.  The
+    # displacement is O(machine epsilon), many orders below any resolved geometric length.
+    scale = max(float(np.max(np.abs(phi))), float(dx), 1.0)
+    strict_phi = phi + 64.0 * np.finfo(np.float64).eps * scale
+    d = skfmm.distance(strict_phi, dx=dx, narrow=band)
     masked = np.ma.getmaskarray(d)
     out = np.ma.filled(d, 0.0).astype(np.float64)
-    out[masked] = np.sign(phi[masked]) * (band + dx)   # far field: correct sign, |phi|>band
+    out[masked] = np.sign(strict_phi[masked]) * (band + dx)  # far field: correct sign
+    if np.any((strict_phi > 0.0) != (out > 0.0)):
+        raise RuntimeError("fast-marching reinitialization changed the material sign")
     return out
 
 

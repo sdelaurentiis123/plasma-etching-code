@@ -10,6 +10,8 @@ from petch.boundary_state import (
 from petch.charging_poisson_3d import NodalPoissonSystem3D
 from petch.feature_step_3d import (
     FeatureGeometry3D,
+    _physical_volume_topology_signature,
+    _remove_unresolved_subcell_solid_components,
     advance_feature_step_3d,
     conservative_remap_surface_state,
     make_rectangular_trench_geometry_3d,
@@ -116,6 +118,17 @@ def _area_weighted_height(phi, dx):
     return float(np.dot(centroids[:, 2], areas) / areas.sum())
 
 
+@pytest.mark.parametrize("dx", (0.02, 0.01, 0.005))
+@pytest.mark.parametrize("opening_width", (0.06, 0.08, 0.10, 0.15, 0.18, 0.20))
+def test_rectangular_trench_is_one_connected_substrate_at_jeon_widths(dx, opening_width):
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=0.5, cell_length=3.0 * dx, domain_height=2.35, dx=dx,
+        opening_width=opening_width, mask_thickness=0.7,
+        substrate_top=1.4, etched_depth=3.0 * dx)
+
+    assert _physical_volume_topology_signature(geometry, (1,)) == (1, 1)
+
+
 def test_one_physical_3d_step_moves_a_uniform_sio2_plane_by_flux_yield_over_density():
     geometry, initial_height = _plane_geometry()
     result = advance_feature_step_3d(
@@ -218,6 +231,29 @@ def test_diffuse_neutral_transport_widens_from_local_plane_to_trench_width_ring(
     wide = _static_trench_floor_neutral_flux(0.4)
 
     assert 0.0 < narrow < wide < 3e20
+
+
+def test_unetched_rectangular_trench_mesh_drops_only_zero_measure_csg_faces():
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=0.5, cell_length=0.06, domain_height=2.35, dx=0.02,
+        opening_width=0.2, mask_thickness=0.7, substrate_top=1.4, etched_depth=0.0)
+    _, _, _, areas = extract_mesh_3d(geometry.phi, geometry.dx)
+
+    assert areas.size > 0
+    assert np.all(areas > 0.0)
+
+
+def test_subcell_solid_component_is_removed_but_one_cell_support_is_preserved():
+    phi = -np.ones((5, 5, 5))
+    material = np.ones_like(phi, dtype=int)
+    phi[0:2, 0:2, 0:2] = 1.0
+    phi[4, 4, 4] = 0.1
+
+    cleaned, removed = _remove_unresolved_subcell_solid_components(phi, material, (1,), 1.0)
+
+    assert removed == 1
+    assert np.all(cleaned[0:2, 0:2, 0:2] > 0.0)
+    assert cleaned[4, 4, 4] < 0.0
 
 
 def test_diffuse_neutral_trench_floor_flux_converges_with_form_factor_rule():

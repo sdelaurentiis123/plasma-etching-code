@@ -13,7 +13,9 @@ from types import MappingProxyType
 from typing import Mapping
 
 import numpy as np
+from scipy.ndimage import label
 from scipy.spatial import cKDTree
+from skimage.measure import euler_number
 
 from .boundary_state import PlasmaBoundaryState
 from .boundary_transport_3d import (
@@ -236,6 +238,42 @@ def _surface_topology_signature(faces, active_face):
     components = len({find(index) for index in range(active.shape[0])})
     euler_characteristic = int(vertex_count - edge_count + active.shape[0])
     return int(components), euler_characteristic
+
+
+def _physical_volume_topology_signature(geometry, etchable_material_ids):
+    solid = (geometry.phi > 0.0) & np.isin(
+        geometry.material_id, tuple(etchable_material_ids))
+    _, components = label(solid)
+    return int(components), int(euler_number(solid, connectivity=1))
+
+
+def _physical_volume_component_sizes(geometry, etchable_material_ids):
+    solid = (geometry.phi > 0.0) & np.isin(
+        geometry.material_id, tuple(etchable_material_ids))
+    component, count = label(solid)
+    if count == 0:
+        return ()
+    return tuple(sorted(np.bincount(component.ravel())[1:].tolist(), reverse=True))
+
+
+def _remove_unresolved_subcell_solid_components(
+        phi, material_id, etchable_material_ids, dx):
+    updated = np.array(phi, copy=True)
+    solid = (updated > 0.0) & np.isin(material_id, tuple(etchable_material_ids))
+    component, count = label(solid)
+    if count == 0:
+        return updated, 0
+    sizes = np.bincount(component.ravel())
+    # Eight corner nodes are the minimum support of one resolved hexahedral volume cell.
+    unresolved_label = np.flatnonzero(sizes < 8)
+    unresolved_label = unresolved_label[unresolved_label != 0]
+    if unresolved_label.size == 0:
+        return updated, 0
+    unresolved = np.isin(component, unresolved_label)
+    # A subcell component has no resolved 3-D volume. Give it an unambiguous gas sign,
+    # then let the signed-distance reconstruction restore a consistent neighborhood.
+    updated[unresolved] = -np.maximum(np.abs(updated[unresolved]), float(dx))
+    return updated, int(np.count_nonzero(unresolved))
 
 
 def _conserve_nonnegative_surface_field(raw, target_integral, new_area, *, upper=None):
@@ -639,6 +677,11 @@ def advance_feature_step_3d(
     if reinitialize and duration_s > 0.0:
         phi = reinit_narrow(phi, geometry.dx, 4.0 * geometry.dx)
         phi[pinned] = geometry.phi[pinned]
+    phi, removed_unresolved_solid_cells = _remove_unresolved_subcell_solid_components(
+        phi, geometry.material_id, etchable, geometry.dx)
+    if removed_unresolved_solid_cells:
+        phi = reinit_narrow(phi, geometry.dx, 4.0 * geometry.dx)
+        phi[pinned] = geometry.phi[pinned]
 
     output_geometry = FeatureGeometry3D(
         phi, geometry.material_id, geometry.dx, geometry.mesh_length_unit_m,
@@ -649,11 +692,16 @@ def advance_feature_step_3d(
     next_active_face = np.where(np.isin(next_face_material, etchable))[0]
     if next_active_face.size == 0:
         raise ValueError("etch step removed every requested material surface")
-    old_topology = _surface_topology_signature(faces, active_face)
-    next_topology = _surface_topology_signature(next_faces, next_active_face)
+    old_mesh_topology = _surface_topology_signature(faces, active_face)
+    next_mesh_topology = _surface_topology_signature(next_faces, next_active_face)
+    old_topology = _physical_volume_topology_signature(geometry, etchable)
+    next_topology = _physical_volume_topology_signature(output_geometry, etchable)
     if old_topology != next_topology:
         raise ValueError(
             f"surface topology changed from {old_topology} to {next_topology}; "
+            f"component sizes changed from "
+            f"{_physical_volume_component_sizes(geometry, etchable)} to "
+            f"{_physical_volume_component_sizes(output_geometry, etchable)}; "
             "state transfer requires an explicit topology event")
     next_surface_state, remap_diagnostics = conservative_remap_surface_state(
         surface.state, centroids[active_face], areas[active_face], face_material[active_face],
@@ -665,6 +713,7 @@ def advance_feature_step_3d(
         next_verts, next_faces, next_active_face, next_face_material, output_geometry)
     remap_diagnostics = dict(
         remap_diagnostics, old_topology=old_topology, new_topology=next_topology,
+        old_mesh_topology=old_mesh_topology, new_mesh_topology=next_mesh_topology,
         next_active_face_count=int(next_active_face.size))
     reasons = []
     if not surface.validity.within_declared_scope:
@@ -681,7 +730,7 @@ def advance_feature_step_3d(
         reasons=tuple(reasons),
         known_limitations=tuple(dict.fromkeys(transport_limitations)) + (
             "first-order material-local conservative surface-state remap",
-            "topology-changing surface steps are refused",
+            "physical volume-topology-changing surface steps are refused",
             "first-order Godunov interface advection",
         ) + tuple(surface.validity.known_model_form_omissions),
         parameter_evidence_supports_prediction=(
@@ -704,6 +753,7 @@ def advance_feature_step_3d(
             max_velocity_m_s=maximum_velocity * geometry.mesh_length_unit_m,
             max_displacement_mesh_units=displacement, cfl_substeps=int(substeps),
             cfl_number=float(cfl_number), reinitialized=bool(reinitialize),
+            removed_unresolved_solid_cells=removed_unresolved_solid_cells,
             self_consistent_charging=charging is not None,
             charging_iterations=(0 if charging is None else len(charging.history)),
             charging_converged=(None if charging is None else charging.converged),
@@ -755,22 +805,25 @@ def solve_feature_3d(
             # In the quasi-static limit the new geometry owns a new independently converged root.
             if step_index > 0:
                 step_initial_charge = np.zeros(step_poisson_system.shape)
-        result = advance_feature_step_3d(
-            current_geometry, boundary, species_role, mechanism,
-            etchable_material_ids=etchable_material_ids, duration_s=step_duration,
-            source_bounds=source_bounds, source_z=source_z,
-            surface_state=current_state,
-            surface_state_mesh_fingerprint=current_fingerprint,
-            n_position=n_position, seed=int(seed) + step_index,
-            nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
-            potential_spacing=potential_spacing, trajectory_fixed_dt=trajectory_fixed_dt,
-            trajectory_max_steps=trajectory_max_steps,
-            charging_poisson_system=step_poisson_system,
-            initial_charge_node_c=step_initial_charge,
-            charging_options=charging_options,
-            neutral_radiosity_options=neutral_radiosity_options,
-            cfl_number=cfl_number, reinitialize=reinitialize,
-            transport_device=transport_device)
+        try:
+            result = advance_feature_step_3d(
+                current_geometry, boundary, species_role, mechanism,
+                etchable_material_ids=etchable_material_ids, duration_s=step_duration,
+                source_bounds=source_bounds, source_z=source_z,
+                surface_state=current_state,
+                surface_state_mesh_fingerprint=current_fingerprint,
+                n_position=n_position, seed=int(seed) + step_index,
+                nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+                potential_spacing=potential_spacing, trajectory_fixed_dt=trajectory_fixed_dt,
+                trajectory_max_steps=trajectory_max_steps,
+                charging_poisson_system=step_poisson_system,
+                initial_charge_node_c=step_initial_charge,
+                charging_options=charging_options,
+                neutral_radiosity_options=neutral_radiosity_options,
+                cfl_number=cfl_number, reinitialize=reinitialize,
+                transport_device=transport_device)
+        except (ValueError, RuntimeError) as error:
+            raise type(error)(f"feature step {step_index + 1}/{int(n_steps)}: {error}") from error
         results.append(result)
         current_geometry = result.geometry
         current_state = result.next_surface_state

@@ -22,6 +22,7 @@ from types import MappingProxyType
 from typing import Mapping
 
 import numpy as np
+from scipy.special import logsumexp
 
 
 @dataclass(frozen=True)
@@ -449,7 +450,8 @@ class ReducedSiO2FluorocarbonMechanism:
             fluxes.neutral_flux_m2_s.get(par.oxygen_species, 0.0), shape)
         removal_capacity = (oxygen_flux * par.oxygen_polymer_etch_probability
                             + self._energetic_rate(fluxes, par.polymer_sputter_yield, shape))
-        if not np.any(deposit_substrate + deposit_polymer + removal_capacity > 0.0):
+        active_reaction = deposit_substrate + deposit_polymer + removal_capacity > 0.0
+        if not np.any(active_reaction):
             return np.array(inventory, copy=True), np.zeros(shape), np.zeros(shape)
 
         # dN/dt = D_sub + (D_poly-D_sub-R) * (1-exp(-N/N_mono)).  With y=exp(N/N_mono)
@@ -457,19 +459,44 @@ class ReducedSiO2FluorocarbonMechanism:
         coefficient = deposit_polymer - removal_capacity
         transition = deposit_polymer - deposit_substrate - removal_capacity
         exponent = coefficient * duration_s / monolayer
-        y0 = np.exp(inventory / monolayer)
+        log_y0 = inventory / monolayer
         small = np.abs(coefficient) <= 1e-14 * np.maximum(
             deposit_substrate + deposit_polymer + removal_capacity, 1.0)
-        y1 = np.empty(shape)
-        y1[small] = y0[small] - transition[small] * duration_s / monolayer
+        log_y1 = np.empty(shape)
+        if np.any(small):
+            # coefficient -> 0: y1=y0-transition*t/M. Evaluate as log(y0)+log1p(delta/y0)
+            # so an already thick polymer never forms exp(N/M).
+            delta = -transition[small] * duration_s / monolayer
+            ratio = delta * np.exp(-log_y0[small])
+            if np.any(1.0 + ratio <= 0.0):
+                raise RuntimeError("polymer inventory integrator violated positivity")
+            log_y1[small] = log_y0[small] + np.log1p(ratio)
         if np.any(~small):
-            em1 = np.expm1(exponent[~small])
-            y1[~small] = (y0[~small] * (1.0 + em1)
-                          - transition[~small] / coefficient[~small] * em1)
-        if np.any(y1 < 1.0 - 1e-12):
+            # y1=exp(x)*(y0-a)+a, a=transition/coefficient. Signed log-sum-exp
+            # remains finite for both deposition (x>0) and removal (x<0) regimes.
+            selected_log_y0 = log_y0[~small]
+            a = transition[~small] / coefficient[~small]
+            scaled_a = a * np.exp(-selected_log_y0)
+            difference = 1.0 - scaled_a
+            sign_difference = np.sign(difference)
+            log_difference = (selected_log_y0
+                              + np.log(np.maximum(np.abs(difference), np.finfo(float).tiny)))
+            sign_a = np.sign(a)
+            log_a = np.where(
+                sign_a == 0.0, -np.inf,
+                np.log(np.maximum(np.abs(a), np.finfo(float).tiny)))
+            terms = np.stack((exponent[~small] + log_difference, log_a))
+            signs = np.stack((sign_difference, sign_a))
+            value, sign = logsumexp(terms, b=signs, axis=0, return_sign=True)
+            if np.any(sign <= 0.0):
+                raise RuntimeError("polymer inventory integrator violated positivity")
+            log_y1[~small] = value
+        if np.any(log_y1 < -1e-12):
             raise RuntimeError("polymer inventory integrator violated positivity")
-        y1 = np.maximum(y1, 1.0)
-        updated = monolayer * np.log(y1)
+        updated = monolayer * np.maximum(log_y1, 0.0)
+        # Preserve the exact no-flux identity face-by-face. Otherwise exp(log(N)) changes a large
+        # inactive inventory by an ULP when a different face is active, creating a false local source.
+        updated = np.where(active_reaction, updated, inventory)
 
         delta = updated - inventory
         nonzero_transition = np.abs(transition) > 1e-14 * np.maximum(
@@ -498,8 +525,18 @@ class ReducedSiO2FluorocarbonMechanism:
         polymer_balance = (updated - inventory) - (deposited - removed)
         polymer_scale = np.maximum.reduce((
             np.abs(updated - inventory), np.abs(deposited), np.abs(removed), np.ones(shape)))
-        if np.any(np.abs(polymer_balance) > 5e-13 * polymer_scale):
-            raise RuntimeError("polymer reaction bookkeeping failed conservation")
+        relative_balance = np.abs(polymer_balance) / polymer_scale
+        if np.any(relative_balance > 5e-13):
+            failed = np.unravel_index(np.argmax(relative_balance), relative_balance.shape)
+            raise RuntimeError(
+                "polymer reaction bookkeeping failed conservation: "
+                f"max relative residual={float(relative_balance[failed]):.3e}, "
+                f"Dsub={float(deposit_substrate[failed]):.6e}, "
+                f"Dpoly={float(deposit_polymer[failed]):.6e}, "
+                f"R={float(removal_capacity[failed]):.6e}, "
+                f"N0={float(inventory[failed]):.6e}, N1={float(updated[failed]):.6e}, "
+                f"deposited={float(deposited[failed]):.6e}, "
+                f"removed={float(removed[failed]):.6e}")
         return updated, deposited, removed
 
     def _substrate_step(self, complex_fraction, polymer_inventory, fluxes, duration_s, shape):
@@ -518,22 +555,44 @@ class ReducedSiO2FluorocarbonMechanism:
             formation_hazard, total_hazard, out=np.zeros(shape), where=total_hazard > 0.0)
         decay = np.exp(-total_hazard * duration_s)
         updated = equilibrium + (complex_fraction - equilibrium) * decay
-        integral_complex = np.empty(shape)
         active = total_hazard > 0.0
+        updated = np.where(active, updated, complex_fraction)
+        integral_complex = np.empty(shape)
         integral_complex[active] = (
             equilibrium[active] * duration_s
             + (complex_fraction[active] - equilibrium[active])
             * (-np.expm1(-total_hazard[active] * duration_s)) / total_hazard[active])
         integral_complex[~active] = complex_fraction[~active] * duration_s
         removed_complex = complex_removal_event_rate * integral_complex
-        formed_complex = formation_event_rate * (duration_s - integral_complex)
+        formed_from_rate = formation_event_rate * (duration_s - integral_complex)
         removed_bare = bare_removal_event_rate * (duration_s - integral_complex)
         site_change = (updated - complex_fraction) * par.site_density_m2
-        site_balance = site_change - (formed_complex - removed_complex)
+        # This identity is the conservative state equation and is better conditioned near saturation
+        # than subtracting two large rate integrals. Keep the independent rate integral as an audit.
+        formed_complex = site_change + removed_complex
+        rate_consistency = formed_from_rate - formed_complex
         site_scale = np.maximum.reduce((
-            np.abs(site_change), np.abs(formed_complex), np.abs(removed_complex), np.ones(shape)))
-        if np.any(np.abs(site_balance) > 5e-13 * site_scale):
-            raise RuntimeError("oxide-complex reaction bookkeeping failed conservation")
+            np.abs(site_change), np.abs(formed_from_rate), np.abs(removed_complex), np.ones(shape)))
+        relative_consistency = np.abs(rate_consistency) / site_scale
+        # A fractional coverage cannot represent fewer than O(eps*site_density) surface units.
+        # Use that absolute floating-point floor in addition to the relative analytic audit; this is
+        # relevant only on essentially unilluminated faces, where both physical rates are sub-ULP.
+        roundoff_floor = (8.0 * np.finfo(float).eps * par.site_density_m2
+                          * np.maximum(np.abs(complex_fraction), 1.0))
+        failed_mask = np.abs(rate_consistency) > np.maximum(5e-12 * site_scale, roundoff_floor)
+        if np.any(failed_mask):
+            failed_score = np.where(failed_mask, relative_consistency, -np.inf)
+            failed = np.unravel_index(np.argmax(failed_score), relative_consistency.shape)
+            raise RuntimeError(
+                "oxide-complex analytic rate integral disagrees with conserved state update: "
+                f"max relative residual={float(relative_consistency[failed]):.3e}, "
+                f"formation={float(formation_event_rate[failed]):.6e}, "
+                f"removal={float(complex_removal_event_rate[failed]):.6e}, "
+                f"theta0={float(complex_fraction[failed]):.6e}, "
+                f"theta1={float(updated[failed]):.6e}, "
+                f"formed_rate={float(formed_from_rate[failed]):.6e}, "
+                f"formed_conserved={float(formed_complex[failed]):.6e}, "
+                f"removed={float(removed_complex[failed]):.6e}")
         return updated, formed_complex, removed_complex, removed_bare
 
     def advance(self, state: SiO2SurfaceState, fluxes: SurfaceFluxes, duration_s: float, *,
