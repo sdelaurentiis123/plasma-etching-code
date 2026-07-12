@@ -54,6 +54,7 @@ def test_first_hit_3d_preserves_dimensional_species_flux_and_exact_energy_angle_
     assert result.transport_model == "collisionless_absorbing_first_hit_3d"
     assert result.hit_probability == {"Ar+": 1.0, "CF2": 1.0}
     assert result.escape_probability == {"Ar+": 0.0, "CF2": 0.0}
+    assert result.truncation_probability == {"Ar+": 0.0, "CF2": 0.0}
     neutral = result.surface_fluxes.neutral_flux_m2_s["CF2"]
     assert np.isclose(np.dot(neutral, areas), 3e19, rtol=1e-12)
 
@@ -143,6 +144,47 @@ def test_linear_nodal_potential_gives_exact_electrostatic_energy_gain_under_refi
 
     assert np.allclose(fine_energy, 30.0, atol=2e-3)
     assert np.max(np.abs(fine_energy - 30.0)) <= np.max(np.abs(coarse_energy - 30.0)) + 1e-6
+
+
+def test_field_3d_uses_each_physical_grid_spacing_in_electric_gradient():
+    verts, faces, areas = _flat_unit_plane()
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 1e19, [[0.0, 0.0, np.sqrt(20.0)]], [1.0])
+    boundary = PlasmaBoundaryState((ion,), reference_plane_m=1e-6)
+    # Ten volts along z over one mesh unit. Deliberately choose unequal x/y spacing so
+    # treating the grid as isotropic would produce the wrong z extent or gradient.
+    potential = np.broadcast_to(
+        np.linspace(10.0, 0.0, 11), (3, 4, 11)).copy()
+    result = trace_boundary_state_field_3d(
+        boundary, {"Ar+": "energetic_bombardment"}, verts, faces, areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=potential, potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=(0.5, 1.0 / 3.0, 0.1), mesh_length_unit_m=1e-6,
+        n_position=16, seed=41, fixed_dt=0.0025, max_steps=2000, device="cpu")
+
+    impact_energy = result.surface_fluxes.energetic_fluxes[0].event_energy_eV
+    assert np.allclose(impact_energy, 10.0, atol=3e-3)
+
+
+def test_field_3d_separates_time_horizon_truncation_from_physical_escape():
+    verts, faces, areas = _flat_unit_plane()
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 1e19, [[0.0, 0.0, np.sqrt(20.0)]], [1.0])
+    boundary = PlasmaBoundaryState((ion,), reference_plane_m=1e-6)
+    arguments = dict(
+        boundary=boundary, species_role={"Ar+": "energetic_bombardment"},
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=np.zeros((2, 2, 2)), potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=1.0, mesh_length_unit_m=1e-6,
+        n_position=16, seed=41, fixed_dt=0.005, max_steps=1, device="cpu")
+    with pytest.raises(RuntimeError, match="exhausted max_steps"):
+        trace_boundary_state_field_3d(**arguments)
+
+    diagnostic = trace_boundary_state_field_3d(**arguments, allow_truncation=True)
+    assert diagnostic.hit_probability["Ar+"] == 0.0
+    assert diagnostic.escape_probability["Ar+"] == 0.0
+    assert diagnostic.truncation_probability["Ar+"] == 1.0
 
 
 @pytest.mark.parametrize("device", DEVICES)

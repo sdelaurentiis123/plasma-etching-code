@@ -39,8 +39,11 @@ def _first_hit_events_3d(
 @wp.func
 def _trilinear_electric_field_3d(
         potential: wp.array3d(dtype=float), position: wp.vec3,
-        grid_origin: wp.vec3, spacing: float):
-    coordinate = (position - grid_origin) / spacing
+        grid_origin: wp.vec3, spacing: wp.vec3):
+    displacement = position - grid_origin
+    coordinate = wp.vec3(
+        displacement[0] / spacing[0], displacement[1] / spacing[1],
+        displacement[2] / spacing[2])
     nx = potential.shape[0]; ny = potential.shape[1]; nz = potential.shape[2]
     i = wp.int32(wp.floor(coordinate[0])); j = wp.int32(wp.floor(coordinate[1]))
     k = wp.int32(wp.floor(coordinate[2]))
@@ -53,28 +56,28 @@ def _trilinear_electric_field_3d(
         (one - fy) * (one - fz) * (potential[i + 1, j, k] - potential[i, j, k])
         + fy * (one - fz) * (potential[i + 1, j + 1, k] - potential[i, j + 1, k])
         + (one - fy) * fz * (potential[i + 1, j, k + 1] - potential[i, j, k + 1])
-        + fy * fz * (potential[i + 1, j + 1, k + 1] - potential[i, j + 1, k + 1])) / spacing
+        + fy * fz * (potential[i + 1, j + 1, k + 1] - potential[i, j + 1, k + 1])) / spacing[0]
     dvy = (
         (one - fx) * (one - fz) * (potential[i, j + 1, k] - potential[i, j, k])
         + fx * (one - fz) * (potential[i + 1, j + 1, k] - potential[i + 1, j, k])
         + (one - fx) * fz * (potential[i, j + 1, k + 1] - potential[i, j, k + 1])
-        + fx * fz * (potential[i + 1, j + 1, k + 1] - potential[i + 1, j, k + 1])) / spacing
+        + fx * fz * (potential[i + 1, j + 1, k + 1] - potential[i + 1, j, k + 1])) / spacing[1]
     dvz = (
         (one - fx) * (one - fy) * (potential[i, j, k + 1] - potential[i, j, k])
         + fx * (one - fy) * (potential[i + 1, j, k + 1] - potential[i + 1, j, k])
         + (one - fx) * fy * (potential[i, j + 1, k + 1] - potential[i, j + 1, k])
-        + fx * fy * (potential[i + 1, j + 1, k + 1] - potential[i + 1, j + 1, k])) / spacing
+        + fx * fy * (potential[i + 1, j + 1, k + 1] - potential[i + 1, j + 1, k])) / spacing[2]
     return wp.vec3(-dvx, -dvy, -dvz)
 
 
 @wp.kernel
 def _field_hit_events_3d(
         mesh: wp.uint64, potential: wp.array3d(dtype=float), grid_origin: wp.vec3,
-        grid_spacing: float, grid_maximum: wp.vec3,
+        grid_spacing: wp.vec3, grid_maximum: wp.vec3,
         origin: wp.array(dtype=wp.vec3), velocity: wp.array(dtype=wp.vec3),
         charge_number: float, fixed_dt: float, max_steps: int,
         hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float),
-        hit_energy: wp.array(dtype=float)):
+        hit_energy: wp.array(dtype=float), termination: wp.array(dtype=wp.int8)):
     particle = wp.tid()
     position = origin[particle]
     speed_vector = velocity[particle]
@@ -104,6 +107,7 @@ def _field_hit_events_3d(
                 hit_face[particle] = ray.face
                 hit_cosine[particle] = wp.clamp(cosine, 0.0, 1.0)
                 hit_energy[particle] = wp.dot(impact_velocity, impact_velocity)
+                termination[particle] = wp.int8(1)
                 break
         position = next_position
         speed_vector = next_velocity
@@ -111,6 +115,7 @@ def _field_hit_events_3d(
                    or position[2] < grid_origin[2] or position[0] > grid_maximum[0]
                    or position[1] > grid_maximum[1] or position[2] > grid_maximum[2])
         if outside:
+            termination[particle] = wp.int8(2)
             break
 
 
@@ -119,12 +124,15 @@ class BoundaryTransport3DResult:
     surface_fluxes: SurfaceFluxes
     hit_probability: Mapping[str, float]
     escape_probability: Mapping[str, float]
+    truncation_probability: Mapping[str, float]
     transport_model: str
     known_limitations: tuple[str, ...]
 
     def __post_init__(self):
         object.__setattr__(self, "hit_probability", MappingProxyType(dict(self.hit_probability)))
         object.__setattr__(self, "escape_probability", MappingProxyType(dict(self.escape_probability)))
+        object.__setattr__(
+            self, "truncation_probability", MappingProxyType(dict(self.truncation_probability)))
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
 
 
@@ -254,6 +262,7 @@ def trace_boundary_state_first_hit_3d(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
         hit_probability=hit_probability,
         escape_probability=escape_probability,
+        truncation_probability={name: 0.0 for name in hit_probability},
         transport_model="collisionless_absorbing_first_hit_3d",
         known_limitations=(
             "no intra-feature electric-field trajectory coupling",
@@ -267,7 +276,7 @@ def trace_boundary_state_field_3d(
         boundary: PlasmaBoundaryState, species_role: Mapping[str, str], verts, faces, areas, *,
         source_bounds, source_z, nodal_potential_v, potential_origin, potential_spacing,
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0), n_position=256,
-        seed=0, fixed_dt=0.01, max_steps=10000, device=None):
+        seed=0, fixed_dt=0.01, max_steps=10000, allow_truncation=False, device=None):
     """Trace collisionless species through a supplied 3-D nodal electrostatic potential.
 
     Velocity coordinates retain the ``sqrt(eV)`` convention of ``PlasmaBoundaryState``. With mesh
@@ -290,16 +299,20 @@ def trace_boundary_state_field_3d(
     if (bounds.shape != (4,) or bounds[1] <= bounds[0] or bounds[3] <= bounds[2]
             or np.any(~np.isfinite(bounds)) or not np.isfinite(source_z)):
         raise ValueError("invalid source plane")
+    grid_spacing = np.asarray(potential_spacing, dtype=float)
+    if grid_spacing.ndim == 0:
+        grid_spacing = np.full(3, float(grid_spacing))
     if (potential.ndim != 3 or min(potential.shape) < 2 or np.any(~np.isfinite(potential))
             or grid_origin.shape != (3,) or np.any(~np.isfinite(grid_origin))
-            or not np.isfinite(potential_spacing) or potential_spacing <= 0.0):
+            or grid_spacing.shape != (3,) or np.any(~np.isfinite(grid_spacing))
+            or np.any(grid_spacing <= 0.0)):
         raise ValueError("invalid nodal potential grid")
-    grid_maximum = grid_origin + (np.asarray(potential.shape) - 1) * float(potential_spacing)
+    grid_maximum = grid_origin + (np.asarray(potential.shape) - 1) * grid_spacing
     source_corners = np.array([
         [bounds[0], bounds[2], source_z], [bounds[0], bounds[3], source_z],
         [bounds[1], bounds[2], source_z], [bounds[1], bounds[3], source_z]])
     points = np.vstack((verts, source_corners))
-    tolerance = 1e-7 * max(float(potential_spacing), 1.0)
+    tolerance = 1e-7 * max(float(np.max(grid_spacing)), 1.0)
     if np.any(points < grid_origin - tolerance) or np.any(points > grid_maximum + tolerance):
         raise ValueError("mesh and source plane must lie inside the nodal potential grid")
     origin_m = np.asarray(mesh_origin_m, dtype=float)
@@ -342,7 +355,8 @@ def trace_boundary_state_field_3d(
     potential_wp = wp.array(
         np.ascontiguousarray(potential.astype(np.float32)), dtype=float, device=selected_device)
 
-    neutral_flux = {}; energetic_flux = []; hit_probability = {}; escape_probability = {}
+    neutral_flux = {}; energetic_flux = []
+    hit_probability = {}; escape_probability = {}; truncation_probability = {}
     for species in boundary.species:
         sample_count = species.velocity_sqrt_eV.shape[0]; ray_count = sample_count * n_position
         origin = np.column_stack((
@@ -356,19 +370,27 @@ def trace_boundary_state_field_3d(
         hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
         hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
         hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
+        termination_wp = wp.zeros(ray_count, dtype=wp.int8, device=selected_device)
         wp.launch(
             _field_hit_events_3d, dim=ray_count, device=selected_device,
-            inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), float(potential_spacing),
+            inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), wp.vec3(*grid_spacing),
                     wp.vec3(*grid_maximum),
                     wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
                     wp.array(velocity.astype(np.float32), dtype=wp.vec3, device=selected_device),
                     float(species.charge_number), float(fixed_dt), int(max_steps),
-                    hit_face_wp, hit_cosine_wp, hit_energy_wp])
-        hit_face = hit_face_wp.numpy().astype(int); hit = hit_face >= 0
+                    hit_face_wp, hit_cosine_wp, hit_energy_wp, termination_wp])
+        hit_face = hit_face_wp.numpy().astype(int)
+        termination = termination_wp.numpy().astype(int)
+        hit = termination == 1; escaped = termination == 2; truncated = termination == 0
         hit_cosine = hit_cosine_wp.numpy().astype(float)
         hit_energy = hit_energy_wp.numpy().astype(float)
         hit_probability[species.name] = float(physical_weight[hit].sum())
-        escape_probability[species.name] = float(physical_weight[~hit].sum())
+        escape_probability[species.name] = float(physical_weight[escaped].sum())
+        truncation_probability[species.name] = float(physical_weight[truncated].sum())
+        if truncation_probability[species.name] > 0.0 and not allow_truncation:
+            raise RuntimeError(
+                f"3-D trajectories for {species.name!r} exhausted max_steps; "
+                "increase the physical time horizon or explicitly allow diagnostic truncation")
         event_flux = (species.flux_m2_s * source_area * physical_weight[hit]
                       / areas[hit_face[hit]])
         if role[species.name] == "neutral_reactant":
@@ -381,6 +403,7 @@ def trace_boundary_state_field_3d(
     return BoundaryTransport3DResult(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
         hit_probability=hit_probability, escape_probability=escape_probability,
+        truncation_probability=truncation_probability,
         transport_model="collisionless_fixed_step_nodal_field_3d",
         known_limitations=(
             "nodal potential is supplied rather than self-consistently charged",
