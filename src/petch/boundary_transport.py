@@ -6,7 +6,7 @@ from dataclasses import dataclass, replace
 import numpy as np
 
 from .boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
-from .boundary_state import qmc_boundary_proposal
+from .boundary_state import qmc_boundary_proposal, qmc_boundary_proposal_with_auxiliary
 from .charging_nodal import trace_nodal
 from .adaptive_quadrature import AdaptiveQuadratureResult, adaptive_surface_quadrature
 
@@ -164,7 +164,7 @@ def adjoint_boundary_state_face_flux(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, normals, *,
         proposal_species=None, n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10,
         want_energy=False, face_quadrature_offset=0.5, face_position_samples=None,
-        fixed_dt=0.0):
+        fixed_dt=0.0, face_offset=1e-3):
     """Generic Liouville adjoint gather on arbitrary axis-aligned material faces.
 
     This function contains no species source law. The supplied species quadrature is used as the surface
@@ -189,12 +189,15 @@ def adjoint_boundary_state_face_flux(
         max_steps = 200 * nz
     n_face_position = int(n_face_position)
     face_quadrature_offset = float(face_quadrature_offset)
+    face_offset = float(face_offset)
     cells = [tuple(map(int, cell)) for cell in cells]
     normals = np.asarray(normals, dtype=float)
     if n_face_position <= 0 or not cells:
         raise ValueError("positive face quadrature and nonempty cells are required")
     if not 0.0 <= face_quadrature_offset < 1.0:
         raise ValueError("face_quadrature_offset must lie in [0,1)")
+    if not np.isfinite(face_offset) or not 0.0 < face_offset < 0.5:
+        raise ValueError("face_offset must lie strictly between zero and half a cell")
     if normals.shape != (len(cells), 2):
         raise ValueError("one 2-D outward normal is required per face")
     if (np.any(~np.isfinite(normals)) or
@@ -228,8 +231,8 @@ def adjoint_boundary_state_face_flux(
         sample_face_u = face_u
         face_s = sample_face_u - 0.5
     cell_array = np.asarray(cells, dtype=float)
-    x_center = cell_array[:, 0] + 0.5 + (0.5 + 1e-3) * normals[:, 0]
-    z_center = cell_array[:, 1] + 0.5 + (0.5 + 1e-3) * normals[:, 1]
+    x_center = cell_array[:, 0] + 0.5 + (0.5 + face_offset) * normals[:, 0]
+    z_center = cell_array[:, 1] + 0.5 + (0.5 + face_offset) * normals[:, 1]
     x0 = (x_center[:, None] - normals[:, 1, None] * face_s[None, :]).ravel()
     z0 = (z_center[:, None] + normals[:, 0, None] * face_s[None, :]).ravel()
     samples_per_face = sample_index.size; face_count = len(cells)
@@ -313,7 +316,7 @@ def adaptive_adjoint_boundary_state_face_flux(
         absolute_tolerance=1e-3, relative_tolerance=5e-3,
         element_absolute_tolerance=None, element_relative_tolerance=0.0, refine_fraction=0.5,
         max_steps=None, dt_cap=0.15, dt_field=0.10, fixed_dt=0.0,
-        initial_log2_samples=None):
+        initial_log2_samples=None, face_offset=1e-3):
     """Universally adapt randomized phase-space quadrature on arbitrary material faces."""
     physical = boundary.get(species_name)
     template = physical if proposal_species is None else proposal_species
@@ -321,18 +324,15 @@ def adaptive_adjoint_boundary_state_face_flux(
     endpoint_cache = {}
 
     def evaluate_full(indices, log2_samples, replicate_seed):
-        proposal = qmc_boundary_proposal(
-            template, log2_samples, replicate_seed, name=f"{species_name}-adaptive-proposal")
-        # Jointly refine surface position with velocity. Randomly permuted stratification avoids a
-        # fixed velocity-position correlation and works for stratified mixtures of any component count.
-        rng = np.random.default_rng(replicate_seed + 7919)
-        count = proposal.weight.size
-        face_position = (rng.permutation(count) + rng.random(count)) / count
+        proposal, auxiliary = qmc_boundary_proposal_with_auxiliary(
+            template, log2_samples, 1, replicate_seed,
+            name=f"{species_name}-adaptive-proposal")
+        face_position = auxiliary[:, 0]
         result = adjoint_boundary_state_face_flux(
             boundary, species_name, nodal_potential, solid,
             [cells[index] for index in indices], normals[indices], proposal_species=proposal,
             n_face_position=n_face_position, max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field,
-            face_position_samples=face_position, fixed_dt=fixed_dt)
+            face_position_samples=face_position, fixed_dt=fixed_dt, face_offset=face_offset)
         for local_index, element_index in enumerate(indices):
             endpoint_cache[(int(replicate_seed), int(log2_samples), int(element_index))] = (
                 result["per_face_endpoint"][local_index].copy())

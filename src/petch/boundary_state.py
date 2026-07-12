@@ -203,6 +203,59 @@ class MaxwellianFluxVelocityDensity:
 
 
 @dataclass(frozen=True)
+class FoldedNormalTangentialDensity:
+    """Source density rotated into a grazing-incidence surface proposal.
+
+    The source coordinates are ``(transverse_x, transverse_y, incident_normal)``.  A vertical
+    material face instead needs local coordinates ``(tangent, out_of_plane, inward_normal)``.
+    This normalized pushforward maps source normal speed to signed surface tangent and folds the
+    signed source transverse speed into positive surface-normal speed.  It changes only the numerical
+    importance distribution; the physical density is still evaluated at the plasma boundary.
+    """
+    source: BoundaryDensityModel
+    tangent_sign: int = 1
+
+    def __post_init__(self):
+        if int(self.tangent_sign) not in (-1, 1):
+            raise ValueError("tangent_sign must be -1 or +1")
+        object.__setattr__(self, "tangent_sign", int(self.tangent_sign))
+
+    def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None):
+        velocity = np.asarray(velocity_sqrt_eV, dtype=float)
+        if velocity.shape[-1] != 3:
+            raise ValueError("velocity must end in three components")
+        flat = velocity.reshape(-1, 3)
+        tangent = self.tangent_sign * flat[:, 0]
+        normal = flat[:, 2]
+        valid = (tangent > 0.0) & (normal > 0.0)
+        result = np.full(flat.shape[0], -np.inf)
+        if valid.any():
+            positive = np.column_stack((normal[valid], flat[valid, 1], tangent[valid]))
+            negative = positive.copy(); negative[:, 0] *= -1.0
+            phase = (None if phase_rad is None
+                     else np.asarray(phase_rad).reshape(-1)[valid])
+            position = (None if position_m is None
+                        else np.asarray(position_m).reshape(-1, 2)[valid])
+            result[valid] = np.logaddexp(
+                self.source.log_flux_density(positive, phase, position),
+                self.source.log_flux_density(negative, phase, position))
+        return result.reshape(velocity.shape[:-1])
+
+    @property
+    def sampling_dimension(self):
+        if not hasattr(self.source, "sampling_dimension"):
+            raise TypeError("source density must implement deterministic flux sampling")
+        return int(self.source.sampling_dimension)
+
+    def sample_flux_velocity(self, unit_interval):
+        if not hasattr(self.source, "sample_flux_velocity"):
+            raise TypeError("source density must implement deterministic flux sampling")
+        source = self.source.sample_flux_velocity(unit_interval)
+        return np.column_stack((
+            self.tangent_sign * source[:, 2], source[:, 1], np.abs(source[:, 0])))
+
+
+@dataclass(frozen=True)
 class MixtureBoundaryDensity:
     """Normalized mixture of boundary densities used for support-complete numerical proposals."""
     components: tuple[BoundaryDensityModel, ...]
@@ -434,6 +487,26 @@ def mixture_boundary_proposal(components, mixture_weight=None, *, name="proposal
     )
 
 
+def folded_normal_tangential_proposal(template, tangent_sign, *, name=None):
+    """Return a template for the normalized grazing-incidence pushforward of a source density."""
+    if template.density_model is None:
+        raise ValueError("grazing-incidence proposal requires a continuous source density")
+    sign = int(tangent_sign)
+    if sign not in (-1, 1):
+        raise ValueError("tangent_sign must be -1 or +1")
+    velocity = template.velocity_sqrt_eV
+    transformed = np.column_stack((
+        sign * velocity[:, 2], velocity[:, 1], np.abs(velocity[:, 0])))
+    return SpeciesBoundaryState(
+        name=(f"{template.name}-grazing-{sign:+d}" if name is None else name),
+        charge_number=template.charge_number, mass_amu=template.mass_amu, flux_m2_s=1.0,
+        velocity_sqrt_eV=transformed, weight=template.weight,
+        density_model=FoldedNormalTangentialDensity(template.density_model, sign),
+        provenance={"role": "normal_tangential_grazing_importance_proposal",
+                    "source": template.name, "tangent_sign": sign},
+    )
+
+
 def qmc_boundary_proposal(template: SpeciesBoundaryState, log2_samples, seed=0, *, name=None):
     """Scrambled-Sobol proposal sampled from a supported analytic/tabulated density.
 
@@ -459,6 +532,26 @@ def qmc_boundary_proposal(template: SpeciesBoundaryState, log2_samples, seed=0, 
                 name=component.name))
         return mixture_boundary_proposal(components, density.weight, name=proposal_name)
 
+    if isinstance(density, FoldedNormalTangentialDensity):
+        source_template = SpeciesBoundaryState(
+            name=f"{proposal_name}:source", charge_number=template.charge_number,
+            mass_amu=template.mass_amu, flux_m2_s=1.0,
+            velocity_sqrt_eV=[[0.0, 0.0, 1.0]], weight=[1.0],
+            density_model=density.source)
+        source = qmc_boundary_proposal(
+            source_template, level, seed=int(seed), name=source_template.name)
+        velocity = source.velocity_sqrt_eV
+        transformed = np.column_stack((
+            density.tangent_sign * velocity[:, 2], velocity[:, 1], np.abs(velocity[:, 0])))
+        return SpeciesBoundaryState(
+            name=proposal_name, charge_number=template.charge_number,
+            mass_amu=template.mass_amu, flux_m2_s=1.0,
+            velocity_sqrt_eV=transformed, weight=source.weight,
+            density_model=density,
+            provenance={"role": "scrambled_sobol_grazing_proposal",
+                        "log2_samples": level, "seed": int(seed),
+                        "tangent_sign": density.tangent_sign})
+
     if not hasattr(density, "sampling_dimension") or not hasattr(density, "sample_flux_velocity"):
         raise TypeError(f"QMC sampling is not implemented for {type(density).__name__}")
     n = 2 ** level
@@ -470,6 +563,49 @@ def qmc_boundary_proposal(template: SpeciesBoundaryState, log2_samples, seed=0, 
         flux_m2_s=1.0, velocity_sqrt_eV=velocity, weight=np.ones(n), density_model=density,
         provenance={"role": "scrambled_sobol_proposal", "log2_samples": level, "seed": int(seed)},
     )
+
+
+def qmc_boundary_proposal_with_auxiliary(
+        template: SpeciesBoundaryState, log2_samples, auxiliary_dimension=1, seed=0, *, name=None):
+    """Sample velocity and auxiliary coordinates from one joint scrambled-Sobol rule.
+
+    Surface position is coupled to the phase-space acceptance map, so independently permuting a
+    one-dimensional position stratification against a velocity QMC rule is not a joint low-discrepancy
+    integration. Mixtures remain component-stratified and every component receives its own joint rule.
+    """
+    level = int(log2_samples); auxiliary_dimension = int(auxiliary_dimension)
+    if level < 0 or auxiliary_dimension <= 0 or template.density_model is None:
+        raise ValueError("require a nonnegative level, positive auxiliary dimension, and density")
+    density = template.density_model
+    proposal_name = template.name if name is None else name
+    if isinstance(density, MixtureBoundaryDensity):
+        components = []; auxiliary = []
+        for index, component_density in enumerate(density.components):
+            component = SpeciesBoundaryState(
+                name=f"{proposal_name}:{index}", charge_number=template.charge_number,
+                mass_amu=template.mass_amu, flux_m2_s=1.0,
+                velocity_sqrt_eV=[[0.0, 0.0, 1.0]], weight=[1.0],
+                density_model=component_density)
+            sampled, component_auxiliary = qmc_boundary_proposal_with_auxiliary(
+                component, level, auxiliary_dimension,
+                seed=int(seed) + 104729 * index, name=component.name)
+            components.append(sampled); auxiliary.append(component_auxiliary)
+        return (mixture_boundary_proposal(components, density.weight, name=proposal_name),
+                np.concatenate(auxiliary, axis=0))
+    if not hasattr(density, "sampling_dimension") or not hasattr(density, "sample_flux_velocity"):
+        raise TypeError(f"QMC sampling is not implemented for {type(density).__name__}")
+    physical_dimension = int(density.sampling_dimension)
+    unit = qmc.Sobol(
+        physical_dimension + auxiliary_dimension, scramble=True,
+        seed=int(seed)).random_base2(level)
+    velocity = density.sample_flux_velocity(unit[:, :physical_dimension])
+    proposal = SpeciesBoundaryState(
+        name=proposal_name, charge_number=template.charge_number, mass_amu=template.mass_amu,
+        flux_m2_s=1.0, velocity_sqrt_eV=velocity, weight=np.ones(2 ** level),
+        density_model=density,
+        provenance={"role": "joint_scrambled_sobol_proposal", "log2_samples": level,
+                    "seed": int(seed), "auxiliary_dimension": auxiliary_dimension})
+    return proposal, unit[:, physical_dimension:].copy()
 
 
 def collisionless_sheath_boundary_state(sheath: CollisionlessRFSheath, flux_m2_s, *, n_phase=256,

@@ -3,6 +3,7 @@ import pytest
 from scipy.stats import qmc
 
 from petch.boundary_state import (
+    FoldedNormalTangentialDensity,
     PlasmaBoundaryState,
     IonEnergyTransverseMaxwellianDensity,
     MaxwellianFluxVelocityDensity,
@@ -10,10 +11,12 @@ from petch.boundary_state import (
     RectilinearVelocityHistogramDensity,
     SpeciesBoundaryState,
     collisionless_sheath_boundary_state,
+    folded_normal_tangential_proposal,
     instantaneous_sinusoidal_ion_boundary_state,
     maxwellian_electron_boundary_state,
     mixture_boundary_proposal,
     qmc_boundary_proposal,
+    qmc_boundary_proposal_with_auxiliary,
 )
 from petch.sheath import CollisionlessRFSheath, ECHARGE
 
@@ -131,6 +134,50 @@ def test_qmc_proposals_sample_supported_densities_reproducibly():
     assert sampled.velocity_sqrt_eV.shape == (2 * 64, 3)
     assert np.isclose(sampled.weight[:64].sum(), 0.9)
     assert np.isclose(sampled.weight[64:].sum(), 0.1)
+
+
+def test_joint_qmc_proposal_preserves_mixture_strata_and_auxiliary_alignment():
+    cold = maxwellian_electron_boundary_state(4.0, 1.0).get("electron")
+    hot = maxwellian_electron_boundary_state(40.0, 1.0).get("electron")
+    mixture = mixture_boundary_proposal((cold, hot), (0.8, 0.2))
+    first, first_auxiliary = qmc_boundary_proposal_with_auxiliary(
+        mixture, 8, 2, seed=31)
+    second, second_auxiliary = qmc_boundary_proposal_with_auxiliary(
+        mixture, 8, 2, seed=31)
+
+    assert first.velocity_sqrt_eV.shape == (2 * 256, 3)
+    assert first_auxiliary.shape == (2 * 256, 2)
+    assert np.array_equal(first.velocity_sqrt_eV, second.velocity_sqrt_eV)
+    assert np.array_equal(first_auxiliary, second_auxiliary)
+    assert np.all((first_auxiliary > 0.0) & (first_auxiliary < 1.0))
+    assert np.isclose(first.weight[:256].sum(), 0.8)
+    assert np.isclose(first.weight[256:].sum(), 0.2)
+
+
+@pytest.mark.parametrize("tangent_sign", [-1, 1])
+def test_folded_normal_tangential_proposal_is_normalized_source_pushforward(tangent_sign):
+    temperature = 4.0
+    source = maxwellian_electron_boundary_state(temperature, 1.0).get("electron")
+    template = folded_normal_tangential_proposal(source, tangent_sign)
+    assert isinstance(template.density_model, FoldedNormalTangentialDensity)
+    sampled = qmc_boundary_proposal(template, 15, seed=29)
+    velocity = sampled.velocity_sqrt_eV
+
+    assert np.all(tangent_sign * velocity[:, 0] > 0.0)
+    assert np.all(velocity[:, 2] > 0.0)
+    assert np.all(np.isfinite(sampled.log_flux_density(velocity)))
+    # The pushforward maps source normal -> signed local tangent and folds source x -> local normal.
+    assert np.allclose(
+        np.mean(velocity ** 2, axis=0),
+        [temperature, temperature / 2.0, temperature / 2.0], rtol=3e-3)
+
+    probe = np.array([[tangent_sign * 3.0, 0.4, 0.2]])
+    source_positive = np.array([[0.2, 0.4, 3.0]])
+    source_negative = np.array([[-0.2, 0.4, 3.0]])
+    expected = np.logaddexp(
+        source.log_flux_density(source_positive),
+        source.log_flux_density(source_negative))
+    assert np.allclose(template.log_flux_density(probe), expected)
 
 
 def test_maxwellian_continuous_sampler_reproduces_energy_moments_and_tail():
