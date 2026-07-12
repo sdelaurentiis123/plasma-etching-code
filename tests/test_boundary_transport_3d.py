@@ -6,6 +6,7 @@ from petch.boundary_state import (
     PlasmaBoundaryState, SpeciesBoundaryState, maxwellian_electron_boundary_state,
 )
 from petch.boundary_transport_3d import (
+    merge_boundary_transport_results_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
 )
@@ -101,6 +102,29 @@ def test_boundary_to_surface_chain_conserves_dimensional_formula_unit_removal():
     removed_per_source_area = np.dot(surface.state.removed_formula_units_m2, areas)
     expected = 2e19 * (0.25 * 0.2 + 0.75 * 0.0) * duration_s
     assert np.isclose(removed_per_source_area, expected, rtol=1e-12)
+
+
+def test_disjoint_transport_merge_preserves_exact_event_objects_and_probabilities():
+    verts, faces, areas = _flat_unit_plane(); boundary = _boundary()
+    ion_boundary = PlasmaBoundaryState((boundary.get("Ar+"),), boundary.reference_plane_m)
+    neutral_boundary = PlasmaBoundaryState((boundary.get("CF2"),), boundary.reference_plane_m)
+    common = dict(
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, n_position=16, seed=19, device="cpu")
+    ion = trace_boundary_state_first_hit_3d(
+        ion_boundary, {"Ar+": "energetic_bombardment"}, **common)
+    neutral = trace_boundary_state_first_hit_3d(
+        neutral_boundary, {"CF2": "neutral_reactant"}, **common)
+    merged = merge_boundary_transport_results_3d(ion, neutral)
+
+    assert merged.surface_fluxes.energetic_fluxes[0] is ion.surface_fluxes.energetic_fluxes[0]
+    assert np.array_equal(
+        merged.surface_fluxes.neutral_flux_m2_s["CF2"],
+        neutral.surface_fluxes.neutral_flux_m2_s["CF2"])
+    assert merged.hit_probability == {"Ar+": 1.0, "CF2": 1.0}
+    with pytest.raises(ValueError, match="disjoint"):
+        merge_boundary_transport_results_3d(ion, ion)
 
 
 def test_zero_nodal_field_reproduces_ballistic_3d_event_measure():

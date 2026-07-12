@@ -136,16 +136,53 @@ class BoundaryTransport3DResult:
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
 
 
+def merge_boundary_transport_results_3d(*results):
+    """Merge disjoint species transports without changing any event measure."""
+    results = tuple(results)
+    if not results or any(not isinstance(item, BoundaryTransport3DResult) for item in results):
+        raise ValueError("one or more BoundaryTransport3DResult objects are required")
+    neutral = {}; energetic = []; hit = {}; escaped = {}; truncated = {}
+    species_seen = set(); models = []; limitations = []
+    for result in results:
+        species = set(result.hit_probability)
+        if (species != set(result.escape_probability)
+                or species != set(result.truncation_probability)):
+            raise ValueError("transport probability maps must classify identical species")
+        if species_seen & species:
+            raise ValueError("merged transport results must contain disjoint species")
+        species_seen |= species
+        for name, value in result.surface_fluxes.neutral_flux_m2_s.items():
+            if name in neutral:
+                raise ValueError("merged neutral species names must be unique")
+            neutral[name] = value
+        energetic.extend(result.surface_fluxes.energetic_fluxes)
+        hit.update(result.hit_probability); escaped.update(result.escape_probability)
+        truncated.update(result.truncation_probability)
+        models.append(result.transport_model); limitations.extend(result.known_limitations)
+    energetic_names = [item.name for item in energetic]
+    if len(set(energetic_names)) != len(energetic_names):
+        raise ValueError("merged energetic species names must be unique")
+    return BoundaryTransport3DResult(
+        surface_fluxes=SurfaceFluxes(neutral, tuple(energetic)),
+        hit_probability=hit, escape_probability=escaped,
+        truncation_probability=truncated,
+        transport_model=" + ".join(dict.fromkeys(models)),
+        known_limitations=tuple(dict.fromkeys(limitations)))
+
+
 def trace_boundary_state_first_hit_3d(
         boundary: PlasmaBoundaryState, species_role: Mapping[str, str], verts, faces, areas, *,
         source_bounds, source_z, mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
         n_position=256, seed=0, max_distance=None, device=None):
     """Transport a spatially uniform boundary state to exact triangle-hit events.
 
-    ``species_role`` is a physical input mapping each boundary species to ``"neutral_reactant"`` or
-    ``"energetic_bombardment"``; no species name selects a formula. Mesh coordinates may use any
-    length unit declared by ``mesh_length_unit_m``. The mapped source plane must equal the boundary's
-    SI reference plane, preventing a silent geometry/boundary unit mismatch.
+    ``species_role`` is a physical input mapping each boundary species to
+    ``"neutral_reactant"``, ``"energetic_bombardment"``, or ``"charge_carrier"``; no species name
+    selects a formula. Charge carriers contribute charged-particle hit events for current deposition,
+    but a downstream surface mechanism must explicitly select which energetic populations drive its
+    chemistry. Mesh coordinates may use any length unit declared by ``mesh_length_unit_m``. The mapped
+    source plane must equal the boundary's SI reference plane, preventing a silent geometry/boundary
+    unit mismatch.
 
     Boundary velocity quadrature is retained exactly. Scrambled Sobol points integrate only the uniform
     source-plane position, so changing ``n_position`` cannot change the physical energy-angle law.
@@ -188,7 +225,7 @@ def trace_boundary_state_first_hit_3d(
     names = {item.name for item in boundary.species}
     if set(role) != names:
         raise ValueError("species_role must classify every and only boundary species")
-    allowed_roles = {"neutral_reactant", "energetic_bombardment"}
+    allowed_roles = {"neutral_reactant", "energetic_bombardment", "charge_carrier"}
     if any(value not in allowed_roles for value in role.values()):
         raise ValueError(f"species roles must be one of {sorted(allowed_roles)}")
     if any(item.position_m is not None for item in boundary.species):
@@ -339,7 +376,7 @@ def trace_boundary_state_field_3d(
     role = dict(species_role); names = {item.name for item in boundary.species}
     if set(role) != names:
         raise ValueError("species_role must classify every and only boundary species")
-    allowed_roles = {"neutral_reactant", "energetic_bombardment"}
+    allowed_roles = {"neutral_reactant", "energetic_bombardment", "charge_carrier"}
     if any(value not in allowed_roles for value in role.values()):
         raise ValueError(f"species roles must be one of {sorted(allowed_roles)}")
     if any(item.position_m is not None for item in boundary.species):

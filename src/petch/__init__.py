@@ -17,7 +17,8 @@ from .surface_kinetics import (
     SiO2SurfaceState, SurfaceFluxes,
 )
 from .boundary_transport_3d import (
-    BoundaryTransport3DResult, trace_boundary_state_field_3d,
+    BoundaryTransport3DResult, merge_boundary_transport_results_3d,
+    trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
 )
 from .charging_poisson_3d import (
@@ -53,7 +54,8 @@ __all__ = [
     "EnergeticFlux", "EnergeticYield", "FaceResolvedEnergeticFlux", "ParameterEvidence",
     "ReducedSiO2FluorocarbonMechanism", "ReducedSiO2FluorocarbonParameters",
     "SiO2SurfaceState", "SurfaceFluxes",
-    "BoundaryTransport3DResult", "trace_boundary_state_field_3d",
+    "BoundaryTransport3DResult", "merge_boundary_transport_results_3d",
+    "trace_boundary_state_field_3d",
     "trace_boundary_state_first_hit_3d",
     "NodalPoissonSystem3D", "PoissonDiagnostics3D", "assemble_q1_stiffness_3d",
     "lump_triangle_sheet_charge_3d",

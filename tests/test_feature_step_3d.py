@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from petch.boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
+from petch.charging_poisson_3d import NodalPoissonSystem3D
 from petch.feature_step_3d import (
     FeatureGeometry3D,
     advance_feature_step_3d,
@@ -55,6 +56,22 @@ def _boundary():
     neutral = SpeciesBoundaryState(
         "CF2", 0, 50.0, 0.0, [[0.0, 0.0, 1.0]], [1.0])
     return PlasmaBoundaryState((ion, neutral), reference_plane_m=1.75e-6)
+
+
+def _charging_boundary():
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 2.2e21, [[0.0, 0.0, 10.0]], [1.0])
+    electron = SpeciesBoundaryState(
+        "electron", -1, 5.4858e-4, 2.2e22,
+        [[0.0, 0.0, 1.0], [0.0, 0.0, np.sqrt(20.0)]], [0.9, 0.1])
+    return PlasmaBoundaryState((ion, electron), reference_plane_m=1.75e-6)
+
+
+def _plane_poisson_system(geometry):
+    fixed = np.zeros(geometry.phi.shape, dtype=bool); fixed[:, :, -1] = True
+    return NodalPoissonSystem3D(
+        np.ones(tuple(np.asarray(geometry.phi.shape) - 1)),
+        geometry.dx * geometry.mesh_length_unit_m, fixed)
 
 
 def _area_weighted_height(phi, dx):
@@ -180,3 +197,54 @@ def test_feature_step_uses_supplied_3d_potential_for_ion_energy_and_surface_velo
     assert result.transport.transport_model == "collisionless_fixed_step_nodal_field_3d"
     assert np.isclose(average_velocity, expected_velocity, rtol=3e-4)
     assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.02
+
+
+def test_feature_step_solves_charge_reuses_ion_events_and_excludes_electron_from_chemistry():
+    geometry, initial_height = _plane_geometry()
+    mechanism = _mechanism()
+    result = advance_feature_step_3d(
+        geometry, _charging_boundary(),
+        {"Ar+": "energetic_bombardment", "electron": "charge_carrier"},
+        mechanism, etchable_material_ids=(1,), duration_s=1.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        potential_origin=(0.0, 0.0, 0.0), potential_spacing=geometry.dx,
+        trajectory_fixed_dt=0.005, trajectory_max_steps=2000,
+        charging_poisson_system=_plane_poisson_system(geometry),
+        charging_options=dict(
+            max_iter=30, min_iter=2, current_balance_tol=1e-12,
+            beta=0.5, response_energy_eV=4.0),
+        n_position=64, seed=61, cfl_number=0.3, reinitialize=False,
+        transport_device="cpu")
+
+    assert result.charging is not None and result.charging.converged
+    assert result.transport is result.charging.transport
+    support = (result.charging.positive_current_node_a
+               + result.charging.negative_current_node_a) > 0.0
+    assert np.allclose(
+        result.charging.positive_current_node_a[support],
+        result.charging.negative_current_node_a[support], rtol=1e-14)
+    surface_voltage = result.charging.potential_v[:, :, 4]
+    assert np.all((-20.0 < surface_voltage) & (surface_voltage < -1.0))
+
+    populations = {item.name: item for item in result.transport.surface_fluxes.energetic_fluxes}
+    assert set(populations) == {"Ar+", "electron"}
+    ion_only_velocity = (
+        populations["Ar+"].yield_rate_m2_s(mechanism.parameters.bare_sio2_yield)
+        [result.active_face_index] / mechanism.parameters.bulk_formula_density_m3)
+    assert np.allclose(result.surface.etch_velocity_m_s, ion_only_velocity, rtol=2e-13)
+    assert result.diagnostics["self_consistent_charging"]
+    assert result.diagnostics["charging_converged"]
+    assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.02
+
+
+def test_multistep_charged_profile_refuses_missing_charge_and_permittivity_remap():
+    geometry, _ = _plane_geometry()
+    with pytest.raises(ValueError, match="permittivity rebuild"):
+        solve_feature_3d(
+            geometry, _charging_boundary(),
+            {"Ar+": "energetic_bombardment", "electron": "charge_carrier"},
+            _mechanism(), etchable_material_ids=(1,), duration_s=2.0, n_steps=2,
+            source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+            potential_origin=(0.0, 0.0, 0.0), potential_spacing=geometry.dx,
+            trajectory_fixed_dt=0.005,
+            charging_poisson_system=_plane_poisson_system(geometry))

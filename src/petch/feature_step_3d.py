@@ -18,9 +18,14 @@ from scipy.spatial import cKDTree
 from .boundary_state import PlasmaBoundaryState
 from .boundary_transport_3d import (
     BoundaryTransport3DResult,
+    merge_boundary_transport_results_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
 )
+from .charging_coupled_3d import (
+    SteadyDielectricCharging3DResult, solve_dielectric_charging_steady_3d,
+)
+from .charging_poisson_3d import NodalPoissonSystem3D
 from .surface_kinetics import (
     EnergeticFlux,
     FaceResolvedEnergeticFlux,
@@ -77,6 +82,7 @@ class FeatureStepValidity:
 class FeatureStep3DResult:
     geometry: FeatureGeometry3D
     transport: BoundaryTransport3DResult
+    charging: SteadyDielectricCharging3DResult | None
     surface: SurfaceStepResult
     active_face_index: np.ndarray
     active_face_centroid: np.ndarray
@@ -280,15 +286,19 @@ def conservative_remap_surface_state(
         materials=material_diagnostics)
 
 
-def _select_surface_fluxes(fluxes, selected_face, face_count):
+def _select_surface_fluxes(fluxes, selected_face, face_count, species_role=None):
     selected_face = np.asarray(selected_face, dtype=int)
+    role = None if species_role is None else dict(species_role)
     old_to_new = np.full(int(face_count), -1, dtype=int)
     old_to_new[selected_face] = np.arange(selected_face.size)
     neutral = {
         name: np.asarray(value)[selected_face]
-        for name, value in fluxes.neutral_flux_m2_s.items()}
+        for name, value in fluxes.neutral_flux_m2_s.items()
+        if role is None or role.get(name) == "neutral_reactant"}
     energetic = []
     for population in fluxes.energetic_fluxes:
+        if role is not None and role.get(population.name) != "energetic_bombardment":
+            continue
         if isinstance(population, FaceResolvedEnergeticFlux):
             mapped = old_to_new[population.event_face]
             retained = mapped >= 0
@@ -315,6 +325,8 @@ def advance_feature_step_3d(
         surface_state_mesh_fingerprint=None,
         nodal_potential_v=None, potential_origin=None, potential_spacing=None,
         trajectory_fixed_dt=None, trajectory_max_steps=10000,
+        charging_poisson_system: NodalPoissonSystem3D | None = None,
+        initial_charge_node_c=None, charging_options=None,
         cfl_number=0.3, reinitialize=True, transport_device=None):
     """Advance one stateful, dimensional, collisionless-absorbing feature step.
 
@@ -329,6 +341,21 @@ def advance_feature_step_3d(
     etchable = tuple(sorted({int(value) for value in etchable_material_ids}))
     if not etchable or any(value <= 0 for value in etchable):
         raise ValueError("etchable material ids must be positive")
+    role = dict(species_role)
+    if set(role) != {species.name for species in boundary.species}:
+        raise ValueError("species_role must classify every and only boundary species")
+    allowed_roles = {"neutral_reactant", "energetic_bombardment", "charge_carrier"}
+    if any(value not in allowed_roles for value in role.values()):
+        raise ValueError(f"species roles must be one of {sorted(allowed_roles)}")
+    if any(species.charge_number != 0 and role[species.name] == "neutral_reactant"
+           for species in boundary.species):
+        raise ValueError("charged species cannot be classified as neutral_reactant")
+    if any(species.charge_number == 0 and role[species.name] == "charge_carrier"
+           for species in boundary.species):
+        raise ValueError("charge_carrier species must carry nonzero charge")
+    if charging_poisson_system is None and (
+            initial_charge_node_c is not None or charging_options is not None):
+        raise ValueError("charging state/options require charging_poisson_system")
 
     verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
     face_material = _face_material_ids(centroids, geometry)
@@ -343,7 +370,48 @@ def advance_feature_step_3d(
         mesh_length_unit_m=geometry.mesh_length_unit_m,
         mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
         device=transport_device)
-    if nodal_potential_v is None:
+    charging = None
+    if charging_poisson_system is not None:
+        if nodal_potential_v is not None:
+            raise ValueError("self-consistent charging and a supplied nodal potential are exclusive")
+        if potential_origin is None or potential_spacing is None or trajectory_fixed_dt is None:
+            raise ValueError(
+                "self-consistent charging requires potential_origin, potential_spacing, "
+                "and trajectory_fixed_dt")
+        initial_charge = (np.zeros(charging_poisson_system.shape)
+                          if initial_charge_node_c is None
+                          else np.asarray(initial_charge_node_c, dtype=float))
+        options = {} if charging_options is None else dict(charging_options)
+        charging = solve_dielectric_charging_steady_3d(
+            charging_poisson_system, initial_charge, boundary, verts, faces, areas,
+            source_bounds=source_bounds, source_z=source_z,
+            potential_origin=potential_origin, potential_spacing=potential_spacing,
+            mesh_length_unit_m=geometry.mesh_length_unit_m,
+            mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
+            trajectory_fixed_dt=trajectory_fixed_dt,
+            trajectory_max_steps=trajectory_max_steps,
+            transport_device=transport_device, **options)
+        transport = charging.transport
+        uncharged_species = tuple(
+            species for species in boundary.species if species.charge_number == 0)
+        if uncharged_species:
+            uncharged_boundary = PlasmaBoundaryState(
+                uncharged_species, boundary.reference_plane_m, provenance=boundary.provenance)
+            uncharged_role = {species.name: role[species.name] for species in uncharged_species}
+            uncharged_transport = trace_boundary_state_field_3d(
+                uncharged_boundary, uncharged_role, verts, faces, areas,
+                source_bounds=source_bounds, source_z=source_z,
+                nodal_potential_v=charging.potential_v,
+                potential_origin=potential_origin, potential_spacing=potential_spacing,
+                mesh_length_unit_m=geometry.mesh_length_unit_m,
+                mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
+                fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps,
+                device=transport_device)
+            transport = merge_boundary_transport_results_3d(
+                charging.transport, uncharged_transport)
+    elif nodal_potential_v is None:
+        if initial_charge_node_c is not None or charging_options is not None:
+            raise ValueError("charging state/options require charging_poisson_system")
         if any(value is not None for value in (
                 potential_origin, potential_spacing, trajectory_fixed_dt)):
             raise ValueError("field trajectory options require nodal_potential_v")
@@ -357,7 +425,7 @@ def advance_feature_step_3d(
             potential_origin=potential_origin, potential_spacing=potential_spacing,
             fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps)
     active_flux = _select_surface_fluxes(
-        transport.surface_fluxes, active_face, len(faces))
+        transport.surface_fluxes, active_face, len(faces), role)
     if surface_state is None:
         if surface_state_mesh_fingerprint is not None:
             raise ValueError("surface_state_mesh_fingerprint requires a supplied surface_state")
@@ -420,16 +488,23 @@ def advance_feature_step_3d(
     reasons = []
     if not surface.validity.within_declared_scope:
         reasons.extend(surface.validity.reasons)
+    transport_limitations = tuple(transport.known_limitations)
+    if charging is not None:
+        extra = tuple(
+            limitation for limitation in transport.known_limitations
+            if limitation not in charging.transport.known_limitations
+            and limitation != "nodal potential is supplied rather than self-consistently charged")
+        transport_limitations = tuple(charging.known_limitations) + extra
     validity = FeatureStepValidity(
         within_declared_scope=not reasons,
         reasons=tuple(reasons),
-        known_limitations=tuple(transport.known_limitations) + (
+        known_limitations=tuple(dict.fromkeys(transport_limitations)) + (
             "first-order material-local conservative surface-state remap",
             "topology-changing surface steps are refused",
             "first-order Godunov interface advection",
         ) + tuple(surface.validity.known_model_form_omissions))
     return FeatureStep3DResult(
-        geometry=output_geometry, transport=transport, surface=surface,
+        geometry=output_geometry, transport=transport, charging=charging, surface=surface,
         active_face_index=active_face, active_face_centroid=centroids[active_face],
         active_face_area=areas[active_face],
         surface_state_mesh_fingerprint=mesh_fingerprint,
@@ -444,7 +519,10 @@ def advance_feature_step_3d(
             face_count=int(len(faces)), active_face_count=int(active_face.size),
             max_velocity_m_s=maximum_velocity * geometry.mesh_length_unit_m,
             max_displacement_mesh_units=displacement, cfl_substeps=int(substeps),
-            cfl_number=float(cfl_number), reinitialized=bool(reinitialize)),
+            cfl_number=float(cfl_number), reinitialized=bool(reinitialize),
+            self_consistent_charging=charging is not None,
+            charging_iterations=(0 if charging is None else len(charging.history)),
+            charging_converged=(None if charging is None else charging.converged)),
         validity=validity)
 
 
@@ -454,12 +532,18 @@ def solve_feature_3d(
         etchable_material_ids, duration_s, n_steps, source_bounds, source_z,
         n_position=256, seed=0, cfl_number=0.3, reinitialize=True,
         transport_device=None, nodal_potential_v=None, potential_origin=None,
-        potential_spacing=None, trajectory_fixed_dt=None, trajectory_max_steps=10000):
+        potential_spacing=None, trajectory_fixed_dt=None, trajectory_max_steps=10000,
+        charging_poisson_system: NodalPoissonSystem3D | None = None,
+        initial_charge_node_c=None, charging_options=None):
     """Run multiple verified feature steps, carrying only conservatively remapped surface state."""
     if int(n_steps) != n_steps or int(n_steps) <= 0:
         raise ValueError("n_steps must be a positive integer")
     if not np.isfinite(duration_s) or duration_s < 0.0:
         raise ValueError("duration_s must be finite and nonnegative")
+    if charging_poisson_system is not None and int(n_steps) > 1:
+        raise ValueError(
+            "multi-step charged profile evolution requires permittivity rebuild and conservative "
+            "surface-charge remap; use one verified step until that operator is supplied")
     step_duration = float(duration_s) / int(n_steps)
     current_geometry = geometry; current_state = None; current_fingerprint = None
     results = []
@@ -474,6 +558,9 @@ def solve_feature_3d(
             nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
             potential_spacing=potential_spacing, trajectory_fixed_dt=trajectory_fixed_dt,
             trajectory_max_steps=trajectory_max_steps,
+            charging_poisson_system=charging_poisson_system,
+            initial_charge_node_c=initial_charge_node_c,
+            charging_options=charging_options,
             cfl_number=cfl_number, reinitialize=reinitialize,
             transport_device=transport_device)
         results.append(result)
