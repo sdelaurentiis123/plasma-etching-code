@@ -172,6 +172,33 @@ all discrete outputs agree exactly and floating outputs agree to 2e-10 or tighte
 `PETCH_DEVICE=cuda` or `cuda:N` selects Warp. CUDA performance and full-solver CPU/GPU result parity are
 still open and must be measured on an actual accelerator before any speed claim.
 
+### Physical surface-charge / variable-permittivity Poisson mode (experimental)
+
+The converged boundary-voltage candidate is a useful current-balance root solver, but dielectric voltage
+is not an independent physical state. A dielectric stores free surface charge; its voltage follows from
+the material permittivity, grounded/floating conductors, and Poisson's equation. The nodal candidate now
+has an opt-in physical mode built on a reusable Q1 weak-form system:
+
+- cellwise positive relative permittivity enters one compatible nodal stiffness matrix;
+- dielectric state is nodal line charge in C/m (the 2-D per-unit-depth representation), with face sheet
+  charge mass-lumped to the same endpoint basis as particle current;
+- top plasma, grounded material, and floating-conductor nodes are explicit Dirichlet sets;
+- one sparse factorization serves every field solve and supplies the exact diagonal Green response, in
+  F/m, used to convert a resolved voltage correction into a physical charge correction; and
+- every solve reports the free-node Poisson residual and electrostatic energy.
+
+Manufactured gates reproduce a uniform parallel-plate voltage and a two-dielectric series capacitance to
+machine precision, conserve lumped edge charge, and verify positive response capacitance. On a narrow AR1
+filled trench with a three-cell SiO2 layer over a grounded bottom (a numerical gate, not an experimental
+stack), twelve accepted high-resolution evaluations reduced certified current-balance RMS from 1.071 to
+0.459 while the Poisson residual stayed below 8e-15 V. A longer pre-restart-contract continuation reached
+0.326, but is not used as restart evidence because estimator state was not then serialized.
+
+Checkpoint state now includes physical surface charge, adaptive forward/adjoint levels, estimator method
+hints, and accepted gain age. A six-evaluation checkpoint and a fresh one-evaluation process replayed max
+and RMS residual, currents, standard errors, method counts, potential, and electrostatic energy exactly.
+This closes the restart invariant; it does not yet close Poisson-mode AR/grid/sample convergence.
+
 On the filled-material trench, the endpoint-resolved candidate accepted 20 consecutive fixed-point
 evaluations. Its certified current-balance RMS fell from 2.31 to a best value of 0.305 before fluctuating
 at 0.35 as rare-hit sampling error became comparable to the remaining imbalance; the certified maximum

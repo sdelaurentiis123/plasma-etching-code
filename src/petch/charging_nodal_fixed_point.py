@@ -14,6 +14,7 @@ from .boundary_transport import (
 )
 from .charging_backward import AdaptiveQuadratureConvergenceError, _gas_faces
 from .charging_nodal import material_face_nodes, nodal_domain, solve_nodal_laplace
+from .charging_poisson import NodalPoissonSystem
 
 
 def _confidence_separated_log_ratio(
@@ -62,7 +63,10 @@ def solve_boundary_state_charging_nodal(
         field_tolerance=1e-9, boundary_proposals=None, n_face_position=8,
         adaptive_quadrature=None, active_flux=1e-4, current_confidence_sigma=2.0,
         trust_region=True, trust_growth_tolerance=0.02, minimum_beta=1e-4,
-        gain_decay=0.0, gain_offset=5.0):
+        gain_decay=0.0, gain_offset=5.0, epsilon_r=None, cell_size_m=None,
+        grounded_nodes=None, initial_surface_charge_node_c_per_m=None,
+        initial_adaptive_levels=None, initial_forward_adaptive_levels=None,
+        initial_method_hint=None, initial_accepted_iterations=0):
     """Solve steady floating-current balance on physical material-boundary vertices.
 
     Dielectric unknowns and the electrostatic field share the same nodal basis. Particle histories and
@@ -81,6 +85,18 @@ def solve_boundary_state_charging_nodal(
         raise ValueError("iteration counts, beta, and dVmax must be positive")
     if not 0.0 <= gain_decay <= 1.0 or gain_offset <= 0.0:
         raise ValueError("gain_decay must lie in [0,1] and gain_offset must be positive")
+    if int(initial_accepted_iterations) != initial_accepted_iterations or initial_accepted_iterations < 0:
+        raise ValueError("initial_accepted_iterations must be a nonnegative integer")
+    charge_mode = epsilon_r is not None
+    if charge_mode:
+        epsilon_r = np.asarray(epsilon_r, dtype=float)
+        if (epsilon_r.shape != solid.shape or not np.all(np.isfinite(epsilon_r))
+                or np.any(epsilon_r <= 0.0)):
+            raise ValueError("epsilon_r must be a finite positive cell grid matching solid")
+        if cell_size_m is None or not np.isfinite(cell_size_m) or cell_size_m <= 0.0:
+            raise ValueError("charge-space Poisson mode requires positive cell_size_m")
+    elif grounded_nodes is not None or initial_surface_charge_node_c_per_m is not None:
+        raise ValueError("grounded nodes and physical surface charge require epsilon_r")
 
     def select(selection, positive):
         if selection is None:
@@ -146,10 +162,47 @@ def solve_boundary_state_charging_nodal(
                   else initial_cell[conductor_ids == component])
         conductor_voltage[component] = float(values.mean()) if values.size else 0.0
 
+    poisson_system = None
+    surface_charge_node = np.zeros_like(boundary_voltage)
+    surface_capacitance = np.zeros(dof_count)
+    node_surface_length_m = np.zeros_like(boundary_voltage)
+    if charge_mode:
+        fixed = np.zeros_like(boundary_voltage, dtype=bool); fixed[:, 0] = True
+        fixed_voltage = np.zeros_like(boundary_voltage)
+        for node in node_component:
+            fixed[node] = True
+        if grounded_nodes is not None:
+            grounded = np.asarray(grounded_nodes, dtype=bool)
+            if grounded.shape != boundary_voltage.shape:
+                raise ValueError("grounded_nodes must match the nodal grid")
+            if any(grounded[node] for node in node_component):
+                raise ValueError("a floating-conductor node cannot also be grounded")
+            fixed |= grounded
+        poisson_system = NodalPoissonSystem(epsilon_r, fixed, fixed_voltage)
+        if initial_surface_charge_node_c_per_m is not None:
+            initial_charge = np.asarray(initial_surface_charge_node_c_per_m, dtype=float)
+            if initial_charge.shape != boundary_voltage.shape or not np.all(np.isfinite(initial_charge)):
+                raise ValueError("initial surface charge must be a finite nodal grid")
+            surface_charge_node[:] = initial_charge
+        dielectric_array = np.asarray(dielectric_nodes, dtype=int)
+        if dielectric_array.size:
+            surface_capacitance[:len(dielectric_nodes)] = (
+                poisson_system.diagonal_surface_capacitance(dielectric_array))
+        for endpoints in face_nodes:
+            for node in endpoints:
+                if node in dielectric_index:
+                    node_surface_length_m[node] += 0.5 * float(cell_size_m)
+
     def impose_conductors():
         for node, component in node_component.items():
-            boundary_voltage[node] = conductor_voltage[component]
-        boundary_voltage[:, 0] = 0.0
+            if poisson_system is None:
+                boundary_voltage[node] = conductor_voltage[component]
+            else:
+                poisson_system.dirichlet_voltage[node] = conductor_voltage[component]
+        if poisson_system is None:
+            boundary_voltage[:, 0] = 0.0
+        else:
+            poisson_system.dirichlet_voltage[:, 0] = 0.0
 
     by_cell = {}
     for cell, endpoints in zip(cells, face_nodes):
@@ -163,8 +216,14 @@ def solve_boundary_state_charging_nodal(
             result[conductor_ids == component] = conductor_voltage[component]
         return result
 
-    hybrid_hint = {}
-    adaptive_levels = {}; forward_adaptive_levels = {}
+    hybrid_hint = ({} if initial_method_hint is None else {
+        name: np.asarray(value).copy() for name, value in initial_method_hint.items()})
+    adaptive_levels = ({} if initial_adaptive_levels is None else {
+        name: np.asarray(value, dtype=int).copy()
+        for name, value in initial_adaptive_levels.items()})
+    forward_adaptive_levels = ({} if initial_forward_adaptive_levels is None else {
+        name: np.asarray(value, dtype=int).copy()
+        for name, value in initial_forward_adaptive_levels.items()})
     history = []; interval_history = []; field_history = []; quadrature_history = []
     species_face_current = {}; species_face_stderr = {}; species_face_replicates = {}
     species_endpoint_stderr = {}; species_endpoint_replicates = {}
@@ -173,9 +232,19 @@ def solve_boundary_state_charging_nodal(
     trial_merit_history = []; accepted_beta_history = []; accepted_gain_history = []
     for iteration in range(int(n_iter)):
         impose_conductors()
-        potential, field_diag = solve_nodal_laplace(
-            solid, boundary_nodal_voltage=boundary_voltage,
-            sweeps=field_sweeps, omega=1.7, tolerance=field_tolerance)
+        if poisson_system is None:
+            potential, field_diag = solve_nodal_laplace(
+                solid, boundary_nodal_voltage=boundary_voltage,
+                sweeps=field_sweeps, omega=1.7, tolerance=field_tolerance)
+        else:
+            potential, poisson_diag = poisson_system.solve(surface_charge_node)
+            boundary_voltage[:] = potential
+            field_diag = dict(
+                sweeps=1, max_abs=poisson_diag.max_abs_residual_v,
+                rms=poisson_diag.rms_residual_v,
+                active_nodes=int(np.prod(potential.shape)),
+                free_nodes=poisson_diag.free_nodes,
+                electrostatic_energy_j_per_m=poisson_diag.electrostatic_energy_j_per_m)
         field_history.append(field_diag); species_quadrature = {}
         for species in positive_species + negative_species:
             if adaptive_quadrature is None:
@@ -321,6 +390,7 @@ def solve_boundary_state_charging_nodal(
                 and merit > pending_step["merit"] * (1.0 + trust_growth_tolerance)):
             boundary_voltage[:] = pending_step["boundary_voltage"]
             conductor_voltage[:] = pending_step["conductor_voltage"]
+            surface_charge_node[:] = pending_step["surface_charge_node"]
             hybrid_hint = {
                 name: value.copy() for name, value in pending_step["hybrid_hint"].items()}
             adaptive_levels = {
@@ -338,11 +408,13 @@ def solve_boundary_state_charging_nodal(
         pending_step = None
         history.append(balance); interval_history.append(interval_balance)
         accepted_beta_history.append(beta_current)
-        iteration_gain = beta_current * (1.0 + len(history) / gain_offset) ** (-gain_decay)
+        gain_iteration = int(initial_accepted_iterations) + len(history)
+        iteration_gain = beta_current * (1.0 + gain_iteration / gain_offset) ** (-gain_decay)
         accepted_gain_history.append(iteration_gain)
         last_accepted_state = dict(
             boundary_voltage=boundary_voltage.copy(),
             conductor_voltage=conductor_voltage.copy(), potential=potential.copy(),
+            surface_charge_node=surface_charge_node.copy(),
             ion_current=ion_current.copy(), electron_current=electron_current.copy(),
             ion_stderr=ion_stderr.copy(), electron_stderr=electron_stderr.copy(),
             species_face_current={
@@ -363,6 +435,7 @@ def solve_boundary_state_charging_nodal(
             pending_step = dict(
                 boundary_voltage=boundary_voltage.copy(),
                 conductor_voltage=conductor_voltage.copy(), merit=merit,
+                surface_charge_node=surface_charge_node.copy(),
                 hybrid_hint={name: value.copy() for name, value in hybrid_hint.items()},
                 adaptive_levels={
                     name: value.copy() for name, value in adaptive_levels.items()},
@@ -375,7 +448,10 @@ def solve_boundary_state_charging_nodal(
         step = np.clip(iteration_gain * response_energy_eV * update_residual, -dVmax, dVmax)
         for index, node in enumerate(dielectric_nodes):
             if activity[index]:
-                boundary_voltage[node] += step[index]
+                if poisson_system is None:
+                    boundary_voltage[node] += step[index]
+                else:
+                    surface_charge_node[node] += surface_capacitance[index] * step[index]
         for component in components:
             index = component_index[component]
             if activity[index]:
@@ -387,6 +463,7 @@ def solve_boundary_state_charging_nodal(
         raise RuntimeError("nodal charging solve produced no accepted state")
     boundary_voltage[:] = last_accepted_state["boundary_voltage"]
     conductor_voltage[:] = last_accepted_state["conductor_voltage"]
+    surface_charge_node[:] = last_accepted_state["surface_charge_node"]
     ion_current = last_accepted_state["ion_current"]
     electron_current = last_accepted_state["electron_current"]
     ion_stderr = last_accepted_state["ion_stderr"]
@@ -397,12 +474,25 @@ def solve_boundary_state_charging_nodal(
     species_endpoint_stderr = last_accepted_state["species_endpoint_stderr"]
     species_endpoint_replicates = last_accepted_state["species_endpoint_replicates"]
     impose_conductors()
-    potential, field_final = solve_nodal_laplace(
-        solid, boundary_nodal_voltage=boundary_voltage,
-        sweeps=field_sweeps, omega=1.7, tolerance=field_tolerance)
+    if poisson_system is None:
+        potential, field_final = solve_nodal_laplace(
+            solid, boundary_nodal_voltage=boundary_voltage,
+            sweeps=field_sweeps, omega=1.7, tolerance=field_tolerance)
+    else:
+        potential, poisson_diag = poisson_system.solve(surface_charge_node)
+        boundary_voltage[:] = potential
+        field_final = dict(
+            sweeps=1, max_abs=poisson_diag.max_abs_residual_v,
+            rms=poisson_diag.rms_residual_v,
+            active_nodes=int(np.prod(potential.shape)), free_nodes=poisson_diag.free_nodes,
+            electrostatic_energy_j_per_m=poisson_diag.electrostatic_energy_j_per_m)
     return dict(
         solid=solid.copy(), conductor_ids=conductor_ids.copy(),
         surface_voltage=surface_readout(), boundary_nodal_voltage=boundary_voltage.copy(),
+        surface_charge_node_c_per_m=surface_charge_node.copy(),
+        surface_charge_density_c_per_m2=np.divide(
+            surface_charge_node, node_surface_length_m, out=np.zeros_like(surface_charge_node),
+            where=node_surface_length_m > 0.0),
         potential=potential, cells=np.asarray(cells, dtype=int), normals=normals_array,
         face_components=face_components, dielectric_nodes=np.asarray(dielectric_nodes, dtype=int),
         conductor_voltage=conductor_voltage, iterations=len(history),
@@ -418,11 +508,14 @@ def solve_boundary_state_charging_nodal(
         ion_current=ion_current, electron_current=electron_current,
         ion_current_stderr=ion_stderr, electron_current_stderr=electron_stderr,
         active_flux=active_flux, surface_discretization="boundary_nodal",
+        electrostatic_state=("surface_charge_poisson" if charge_mode else "dirichlet_voltage"),
         update_residual="confidence_separated_log_current_ratio", rejected_steps=rejected_steps,
         beta_final=beta_current, trial_merit_history=np.asarray(trial_merit_history),
         accepted_beta_history=np.asarray(accepted_beta_history),
         accepted_gain_history=np.asarray(accepted_gain_history),
         gain_decay=float(gain_decay), gain_offset=float(gain_offset),
+        accepted_iterations_total=int(initial_accepted_iterations) + len(history),
+        method_hint={name: value.copy() for name, value in hybrid_hint.items()},
         adaptive_levels={name: value.copy() for name, value in adaptive_levels.items()},
         forward_adaptive_levels={
             name: value.copy() for name, value in forward_adaptive_levels.items()})

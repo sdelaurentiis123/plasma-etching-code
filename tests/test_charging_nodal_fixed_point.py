@@ -27,6 +27,19 @@ def _balanced_boundary():
     return PlasmaBoundaryState((ion, electron), reference_plane_m=0.0)
 
 
+def _two_to_one_boundary():
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.1, 0.1]), np.array([-0.1, 0.1]), np.array([0.9, 1.1])),
+        np.ones((1, 1, 1)))
+    velocity = [[0.0, 0.0, 1.0]]
+    return PlasmaBoundaryState((
+        SpeciesBoundaryState(
+            "ion", 1, 40.0, 2.0, velocity, [1.0], density_model=density),
+        SpeciesBoundaryState(
+            "electron", -1, 5.485799e-4, 1.0, velocity, [1.0], density_model=density),
+    ), reference_plane_m=0.0)
+
+
 def test_confidence_separated_residual_has_exact_limit_and_unresolved_band():
     residual, ilo, ihi, elo, ehi = _confidence_separated_log_ratio(
         np.array([1.0, 2.0, 0.1, 2.0]),
@@ -57,19 +70,9 @@ def test_nodal_surface_fixed_point_balances_on_actual_boundary_vertices():
 
 
 def test_nodal_charging_returns_last_evaluated_state_not_unassessed_step():
-    density = RectilinearVelocityHistogramDensity(
-        (np.array([-0.1, 0.1]), np.array([-0.1, 0.1]), np.array([0.9, 1.1])),
-        np.ones((1, 1, 1)))
-    velocity = [[0.0, 0.0, 1.0]]
-    boundary = PlasmaBoundaryState((
-        SpeciesBoundaryState(
-            "ion", 1, 40.0, 2.0, velocity, [1.0], density_model=density),
-        SpeciesBoundaryState(
-            "electron", -1, 5.485799e-4, 1.0, velocity, [1.0], density_model=density),
-    ), reference_plane_m=0.0)
     solid = np.zeros((6, 5), dtype=bool); solid[:, -1] = True
     result = solve_boundary_state_charging_nodal(
-        solid, np.zeros_like(solid, dtype=int), boundary,
+        solid, np.zeros_like(solid, dtype=int), _two_to_one_boundary(),
         n_iter=1, min_iter=1, balance_tol=None, beta=0.5,
         response_energy_eV=4.0, field_sweeps=50, trust_region=False)
 
@@ -78,6 +81,23 @@ def test_nodal_charging_returns_last_evaluated_state_not_unassessed_step():
     assert np.isclose(result["balance_final"]["max_abs_log_ratio"], np.log(2.0))
     assert np.allclose(result["ion_current"], 2.0 * result["electron_current"])
     assert np.all(result["ion_current"] > 0.0)
+
+
+def test_nodal_poisson_mode_updates_physical_surface_charge_not_dirichlet_voltage():
+    nx, nz = 6, 5
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    epsilon_r = np.ones_like(solid, dtype=float); epsilon_r[solid] = 3.9
+    grounded = np.zeros((nx + 1, nz + 1), dtype=bool); grounded[:, -1] = True
+    result = solve_boundary_state_charging_nodal(
+        solid, np.zeros_like(solid, dtype=int), _two_to_one_boundary(),
+        n_iter=2, min_iter=1, balance_tol=None, beta=0.1,
+        response_energy_eV=4.0, field_sweeps=20, trust_region=False,
+        epsilon_r=epsilon_r, cell_size_m=20e-9, grounded_nodes=grounded)
+
+    assert result["electrostatic_state"] == "surface_charge_poisson"
+    assert result["surface_charge_node_c_per_m"].sum() > 0.0
+    assert np.all(result["boundary_nodal_voltage"][:, -2] > 0.0)
+    assert result["field_final"]["max_abs"] < 1e-9
 
 
 def test_nodal_gain_decay_is_deterministic_and_robbins_monro_compatible():
@@ -90,6 +110,14 @@ def test_nodal_gain_decay_is_deterministic_and_robbins_monro_compatible():
     expected = 0.2 * (1.0 + np.arange(1, 4) / 5.0) ** -0.6
     assert np.allclose(result["accepted_gain_history"], expected)
     assert result["gain_decay"] == 0.6
+    continued = solve_boundary_state_charging_nodal(
+        solid, np.zeros_like(solid, dtype=int), _balanced_boundary(),
+        n_iter=2, min_iter=1, balance_tol=None, beta=0.2,
+        gain_decay=0.6, gain_offset=5.0, initial_accepted_iterations=3,
+        field_sweeps=20, trust_region=False)
+    expected_continued = 0.2 * (1.0 + np.arange(4, 6) / 5.0) ** -0.6
+    assert np.allclose(continued["accepted_gain_history"], expected_continued)
+    assert continued["accepted_iterations_total"] == 5
 
 
 def test_endpoint_current_basis_removes_face_constant_alternating_null_mode():
@@ -154,3 +182,18 @@ def test_nodal_fixed_point_warm_starts_both_transport_estimators(monkeypatch):
     assert np.all(calls[3][1] == 9) and np.all(calls[3][2] == 11)
     assert np.all(result["adaptive_levels"]["ion"] == 9)
     assert np.all(result["forward_adaptive_levels"]["electron"] == 11)
+
+    calls.clear()
+    replay = solve_boundary_state_charging_nodal(
+        solid, np.zeros_like(solid, dtype=int), _balanced_boundary(),
+        n_iter=1, min_iter=1, balance_tol=None, field_sweeps=20,
+        trust_region=False, adaptive_quadrature=dict(
+            bidirectional=True, base_log2=6, max_log2=12, n_replicates=4,
+            forward_options=dict(base_log2=8, max_log2=14, n_replicates=4)),
+        initial_adaptive_levels=result["adaptive_levels"],
+        initial_forward_adaptive_levels=result["forward_adaptive_levels"],
+        initial_method_hint=result["method_hint"],
+        initial_accepted_iterations=result["accepted_iterations_total"])
+    assert np.all(calls[0][1] == 9) and np.all(calls[0][2] == 11)
+    assert np.all(calls[1][1] == 9) and np.all(calls[1][2] == 11)
+    assert replay["accepted_iterations_total"] == result["accepted_iterations_total"] + 1
