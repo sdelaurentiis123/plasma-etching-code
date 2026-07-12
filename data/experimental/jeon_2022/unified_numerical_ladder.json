@@ -302,5 +302,25 @@
     ],
     "outcome": "The matched 10-to-20-interval comparison misses the 3% gate at 3.91%. This is provisional because both runs used the skfmm reinitializer now known to erase repeated subcell motion near the trench CSG corner. It establishes unresolved finite-extrusion sensitivity, but does not by itself authorize a symmetry-reduction decision or further brute-force extrusion runs."
   },
-  "conclusion": "Deterministic face gather removes the sparse-tally pillar/topology failure and a flat physical start removes the artificial seed. The apparent 80 nm etch-stop bifurcation is a four-cell resolution artifact and disappears at eight cells across; the refined 2.5-to-1.25 s gate changes depth by 1.80% and passes. Correcting the nodal endpoint removes a real periodic-domain inconsistency. The remaining 3.91% finite-extrusion change was measured with the subsequently rejected skfmm reinitialization path, so the 60 nm spatial ladder remains open without yet selecting symmetry reduction or more extrusion as its remedy. No experimental or calibrated-chemistry claim is authorized from rejected runs."
+  "constrained_layered_evolution_gate": {
+    "root_cause": "The combined union level set was advected and then overwritten at static mask nodes. Per-step skfmm redistancing erased part of each subcell floor displacement near the resulting CSG corner. This was a geometry-evolution error, not a chemistry, ballistic-transport, or neutral-radiosity closure.",
+    "method": "Hartmann CR-2 constrained redistancing anchors the interpolated interface and solves the Eikonal equation away from it. Additive per-material level sets evolve only where each material is the exposed union layer; the mask level set remains unchanged and the exposed union is reconstructed after every step.",
+    "operator_gates": {
+      "distorted_slanted_interface": "material sign preserved; maximum cut-edge displacement <0.08 dx; mean <0.02 dx; mean near-interface gradient within 8% of unity",
+      "repeated_subcell_motion": "forty successive 0.01 dx shifts accumulate within 3% of the analytic displacement",
+      "pinned_mask_reproduction": "sixteen subcell steps retain >80% of analytic motion and agree with the identical no-redistance reference within 3%",
+      "additive_material_layers": "exposed substrate advances 20 nm within 3% while the mask level-set array remains bitwise unchanged",
+      "integrated_two_step_80nm": {
+        "duration_s": 2.5,
+        "steps": 2,
+        "dx_um": 0.02,
+        "etched_increment_nm": 0.21051155191131876,
+        "maximum_centerline_fraction_change_from_redistancing": 2.916679120223087e-10,
+        "ion_hit_probability": 1.0
+      },
+      "full_regression": "277 passed, 1 skipped in 79.89 s"
+    },
+    "evidence_boundary": "These are numerical operator and compatibility gates, not Jeon profile agreement. Every earlier evolving-profile timestep, spatial, and extrusion result in this file used the superseded combined-field/skfmm path and is historical diagnostic evidence only. Current-engine convergence must be re-earned with a bounded layered+CR-2 ladder."
+  },
+  "conclusion": "Deterministic face gather removes sparse triangle-tally starvation, the N+1 nodal constructor closes the periodic domain, per-atom periodic normalization preserves the supplied energy-angle measure, CR-2 prevents redistancing from erasing subcell motion, and additive material level sets replace nonphysical mask-node overwrites. The corrected engine passes its numerical operator gates and 277-test compatibility suite. Jeon timestep, spatial, extrusion, and experimental-profile qualification remain open because the earlier campaign used the superseded geometry path; no experimental or calibrated-chemistry claim is authorized from those historical runs."
 }
