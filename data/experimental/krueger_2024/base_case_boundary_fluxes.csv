@@ -1,0 +1,8 @@
+species,value,unit,evidence_type,split,source_location
+C3F4,9.5e16,cm^-2 s^-1,HPEM_simulation,calibration_input,Table I
+C2F3,6.8e16,cm^-2 s^-1,HPEM_simulation,calibration_input,Table I
+CF,4.4e16,cm^-2 s^-1,HPEM_simulation,calibration_input,Table I
+CF2,9.4e16,cm^-2 s^-1,HPEM_simulation,calibration_input,Table I
+CF3,8.4e15,cm^-2 s^-1,HPEM_simulation,calibration_input,Table I
+O,7.7e16,cm^-2 s^-1,HPEM_simulation,calibration_input,Table I
+ions,1.2e16,cm^-2 s^-1,HPEM_simulation,calibration_input,Table I

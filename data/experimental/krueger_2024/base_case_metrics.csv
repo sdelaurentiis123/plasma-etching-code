@@ -1,0 +1,7 @@
+metric,symbol,value,unit,evidence_type,split,source_location
+mask_opening,wm,45,nm,experiment,calibration,Table IV
+top_feature_width,wt,90,nm,experiment,calibration,Table IV
+maximum_feature_width,wf,90,nm,experiment,calibration,Table IV
+etch_depth,hf,825,nm,experiment,calibration,Table IV
+remaining_mask_thickness,hm,850,nm,experiment,calibration,Table IV
+asymmetry,ah,0,cell_count,experiment,calibration,Table IV

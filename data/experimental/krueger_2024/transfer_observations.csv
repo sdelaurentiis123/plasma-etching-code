@@ -1,0 +1,10 @@
+family,control,observable,value,unit,evidence_type,split,source_location
+oxygen_ratio,0.5,feature_clogged,true,boolean,experiment,held_out,Section IX.A
+oxygen_ratio,2.5,necking_essentially_absent,true,boolean,experiment_and_simulation,held_out,Section IX.A
+oxygen_ratio,1.5,etch_depth_rank,maximum,category,experiment,held_out,Section IX.A
+oxygen_ratio,1.5_to_2.5,etch_depth_increase,false,boolean,experiment,held_out,Section IX.A
+low_frequency_power_kw,0,feature_clogged,true,boolean,experiment_and_simulation,held_out,Section IX.B
+low_frequency_power_kw,4_to_8,final_profile_difference,few_differences,category,experiment,held_out,Section IX.B
+low_frequency_power_kw,4,etch_depth,635,nm,MCFPM_simulation_reference,reference_only,Section IX.B
+low_frequency_power_kw,6,etch_depth,715,nm,MCFPM_simulation_reference,reference_only,Section IX.B
+low_frequency_power_kw,8,etch_depth,720,nm,MCFPM_simulation_reference,reference_only,Section IX.B

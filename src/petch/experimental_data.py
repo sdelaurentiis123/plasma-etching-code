@@ -6,7 +6,7 @@ calibration harness.
 """
 
 from dataclasses import dataclass
-from hashlib import md5
+from hashlib import md5, sha256
 import csv
 from pathlib import Path
 from typing import Optional
@@ -15,6 +15,12 @@ import numpy as np
 
 
 ZENODO_17122442_9PT_MD5 = "78515caf25e29e558e1859b92f8a4827"
+
+KRUEGER_2024_SHA256 = {
+    "base_case_metrics.csv": "5d51d124a93e1f942a9b999649b8adcf217662967d9ea2a40089f72940992351",
+    "base_case_boundary_fluxes.csv": "ad50b6099a52d2c2cc00eb4eade496b9d75c41d19881c5fec9e905f9dfd3808b",
+    "transfer_observations.csv": "85cef607f20ab5e56e606666aa7e0e6241abb546d0369277b21833542e04d425",
+}
 
 
 @dataclass(frozen=True)
@@ -30,6 +36,106 @@ class BoschWaferMeasurement:
     step_height_um: float
     oxide_etch_um: float
     silicon_etch_um: float
+
+
+@dataclass(frozen=True)
+class ProfileTargetMetric:
+    metric: str
+    symbol: str
+    value: float
+    unit: str
+    evidence_type: str
+    split: str
+    source_location: str
+
+
+@dataclass(frozen=True)
+class BoundaryFluxReference:
+    species: str
+    value_cm2_s: float
+    evidence_type: str
+    split: str
+    source_location: str
+
+
+@dataclass(frozen=True)
+class TransferObservation:
+    family: str
+    control: str
+    observable: str
+    value: str
+    unit: str
+    evidence_type: str
+    split: str
+    source_location: str
+
+
+@dataclass(frozen=True)
+class Krueger2024Evidence:
+    calibration_metrics: tuple[ProfileTargetMetric, ...]
+    boundary_fluxes: tuple[BoundaryFluxReference, ...]
+    transfer_observations: tuple[TransferObservation, ...]
+
+
+def _verified_csv_rows(path, expected_fields, expected_sha256, verify_checksum):
+    path = Path(path)
+    payload = path.read_bytes()
+    if verify_checksum and sha256(payload).hexdigest() != expected_sha256:
+        raise ValueError(f"checksum mismatch for experimental evidence: {path}")
+    with path.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        if reader.fieldnames != expected_fields:
+            raise ValueError(f"unexpected experimental-evidence schema: {reader.fieldnames}")
+        rows = list(reader)
+    if not rows:
+        raise ValueError(f"experimental evidence is empty: {path}")
+    return rows
+
+
+def load_krueger_2024_evidence(directory, *, verify_checksum=True):
+    """Load the Krüger 2024 calibration/transfer facts without conflating evidence types.
+
+    Table-I boundary fluxes are HPEM outputs rather than measurements.  Transfer observations retain
+    the source's evidence label, and MCFPM-only values are explicitly reference-only.
+    """
+    directory = Path(directory)
+    metric_rows = _verified_csv_rows(
+        directory / "base_case_metrics.csv",
+        ["metric", "symbol", "value", "unit", "evidence_type", "split", "source_location"],
+        KRUEGER_2024_SHA256["base_case_metrics.csv"], verify_checksum)
+    flux_rows = _verified_csv_rows(
+        directory / "base_case_boundary_fluxes.csv",
+        ["species", "value", "unit", "evidence_type", "split", "source_location"],
+        KRUEGER_2024_SHA256["base_case_boundary_fluxes.csv"], verify_checksum)
+    transfer_rows = _verified_csv_rows(
+        directory / "transfer_observations.csv",
+        ["family", "control", "observable", "value", "unit", "evidence_type", "split",
+         "source_location"],
+        KRUEGER_2024_SHA256["transfer_observations.csv"], verify_checksum)
+
+    metrics = tuple(ProfileTargetMetric(
+        metric=row["metric"], symbol=row["symbol"], value=float(row["value"]), unit=row["unit"],
+        evidence_type=row["evidence_type"], split=row["split"],
+        source_location=row["source_location"])
+        for row in metric_rows)
+    fluxes = tuple(BoundaryFluxReference(
+        species=row["species"], value_cm2_s=float(row["value"]),
+        evidence_type=row["evidence_type"], split=row["split"],
+        source_location=row["source_location"])
+        for row in flux_rows)
+    observations = tuple(TransferObservation(
+        family=row["family"], control=row["control"], observable=row["observable"],
+        value=row["value"], unit=row["unit"], evidence_type=row["evidence_type"],
+        split=row["split"], source_location=row["source_location"])
+        for row in transfer_rows)
+
+    if any(item.evidence_type != "experiment" or item.split != "calibration" for item in metrics):
+        raise ValueError("base-case metrics must be experimental calibration evidence")
+    if any(item.evidence_type != "HPEM_simulation" for item in fluxes):
+        raise ValueError("base-case boundary fluxes must remain labeled as HPEM simulation outputs")
+    if any(item.split == "calibration" for item in observations):
+        raise ValueError("transfer observations must not leak into the calibration split")
+    return Krueger2024Evidence(metrics, fluxes, observations)
 
 
 def load_bosch_wafer_measurements(path, *, verify_checksum=True):
