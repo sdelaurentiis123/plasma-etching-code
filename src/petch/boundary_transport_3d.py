@@ -51,6 +51,23 @@ def _diffuse_form_factor_events_3d(
         hit_face[ray_index] = ray.face
 
 
+@wp.kernel
+def _periodic_first_hit_events_3d(
+        mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), direction: wp.array(dtype=wp.vec3),
+        domain_x: float, domain_y: float, domain_z: float,
+        hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float)):
+    particle = wp.tid()
+    boundary_ray = _apply_bc(
+        mesh, origin[particle], direction[particle], domain_x, domain_y, domain_z, 1)
+    ray = wp.mesh_query_ray(mesh, boundary_ray.o, boundary_ray.d, 1.0e6)
+    if ray.result:
+        normal = ray.normal
+        if wp.dot(normal, boundary_ray.d) > 0.0:
+            normal = -normal
+        hit_face[particle] = ray.face
+        hit_cosine[particle] = wp.clamp(-wp.dot(boundary_ray.d, normal), 0.0, 1.0)
+
+
 @wp.func
 def _trilinear_electric_field_3d(
         potential: wp.array3d(dtype=float), position: wp.vec3,
@@ -280,7 +297,8 @@ def estimate_diffuse_form_factors_3d(
 def trace_boundary_state_first_hit_3d(
         boundary: PlasmaBoundaryState, species_role: Mapping[str, str], verts, faces, areas, *,
         source_bounds, source_z, mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
-        n_position=256, seed=0, max_distance=None, device=None):
+        n_position=256, seed=0, max_distance=None, periodic_lateral=False,
+        domain_size=None, device=None):
     """Transport a spatially uniform boundary state to exact triangle-hit events.
 
     ``species_role`` is a physical input mapping each boundary species to
@@ -361,6 +379,15 @@ def trace_boundary_state_first_hit_3d(
             source_corners[:, None, :] - verts[None, :, :], axis=2)))
     if not np.isfinite(max_distance) or max_distance <= 0.0:
         raise ValueError("max_distance must be positive and finite")
+    if periodic_lateral:
+        domain = np.asarray(domain_size, dtype=float)
+        if (domain.shape != (3,) or np.any(~np.isfinite(domain)) or np.any(domain <= 0.0)
+                or np.min(verts[:, :2]) < -1e-7
+                or np.any(np.max(verts[:, :2], axis=0) > domain[:2] + 1e-7)
+                or np.max(verts[:, 2]) > domain[2] + 1e-7):
+            raise ValueError("periodic first-hit transport requires a containing domain_size")
+    else:
+        domain = np.ones(3)
 
     neutral_flux = {}; energetic_flux = []; hit_probability = {}; escape_probability = {}
     for species in boundary.species:
@@ -381,12 +408,19 @@ def trace_boundary_state_first_hit_3d(
 
         hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
         hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
-        wp.launch(
-            _first_hit_events_3d, dim=ray_count, device=selected_device,
-            inputs=[mesh.id,
-                    wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
-                    wp.array(direction.astype(np.float32), dtype=wp.vec3, device=selected_device),
-                    float(max_distance), hit_face_wp, hit_cosine_wp])
+        origin_wp = wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device)
+        direction_wp = wp.array(direction.astype(np.float32), dtype=wp.vec3, device=selected_device)
+        if periodic_lateral:
+            wp.launch(
+                _periodic_first_hit_events_3d, dim=ray_count, device=selected_device,
+                inputs=[mesh.id, origin_wp, direction_wp,
+                        float(domain[0]), float(domain[1]), float(domain[2]),
+                        hit_face_wp, hit_cosine_wp])
+        else:
+            wp.launch(
+                _first_hit_events_3d, dim=ray_count, device=selected_device,
+                inputs=[mesh.id, origin_wp, direction_wp, float(max_distance),
+                        hit_face_wp, hit_cosine_wp])
         hit_face = hit_face_wp.numpy().astype(int)
         hit_cosine = hit_cosine_wp.numpy().astype(float)
         hit = hit_face >= 0
@@ -407,7 +441,8 @@ def trace_boundary_state_first_hit_3d(
         hit_probability=hit_probability,
         escape_probability=escape_probability,
         truncation_probability={name: 0.0 for name in hit_probability},
-        transport_model="collisionless_absorbing_first_hit_3d",
+        transport_model=("collisionless_absorbing_first_hit_3d_periodic_cell"
+                         if periodic_lateral else "collisionless_absorbing_first_hit_3d"),
         known_limitations=(
             "no intra-feature electric-field trajectory coupling",
             "no surface reflection or neutral re-emission",

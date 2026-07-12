@@ -62,11 +62,16 @@ def make_trench_3d(Lx, Ly, Lz, dx, trench_width, mask_th, sub_top, hole=False):
 def extract_mesh_3d(phi, dx):
     """Marching cubes -> triangle mesh. Returns verts (physical), faces, centroids, areas."""
     verts, faces, _, _ = measure.marching_cubes(phi, level=0.0, spacing=(dx, dx, dx))
-    v = verts[faces]                                   # (F,3,3)
+    # Warp consumes float32 vertices. Recompute every derived geometric quantity from those exact
+    # returned vertices; retaining areas from the pre-cast marching-cubes coordinates breaks the
+    # mesh/area conservation contract by O(float32 epsilon) on small physical cells.
+    verts = verts.astype(np.float32)
+    faces = faces.astype(np.int32)
+    v = verts.astype(np.float64)[faces]                # (F,3,3)
     centroids = v.mean(axis=1)
     cross = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
     areas = 0.5 * np.linalg.norm(cross, axis=1)
-    return verts.astype(np.float32), faces.astype(np.int32), centroids, areas
+    return verts, faces, centroids, areas
 
 
 _mc_cache = {}

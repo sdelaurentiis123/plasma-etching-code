@@ -41,7 +41,8 @@ from .tabulated_chemistry import (
 )
 from .feature_step_3d import (
     FeatureGeometry3D, FeatureSolve3DResult, FeatureStep3DResult, FeatureStepValidity,
-    advance_feature_step_3d, conservative_remap_surface_state, solve_feature_3d,
+    advance_feature_step_3d, conservative_remap_surface_state,
+    make_rectangular_trench_geometry_3d, solve_feature_3d,
 )
 from .validation_demo import (
     JEON_2022_DEMO_VERSION, Jeon2022DemoScore, Jeon2022DemoThresholds,
@@ -81,6 +82,7 @@ __all__ = [
     "TabulatedSiClArMechanism", "TabulatedSiSurfaceState", "TabulatedSiSurfaceStepResult",
     "FeatureGeometry3D", "FeatureSolve3DResult", "FeatureStep3DResult", "FeatureStepValidity",
     "advance_feature_step_3d", "conservative_remap_surface_state", "solve_feature_3d",
+    "make_rectangular_trench_geometry_3d",
     "JEON_2022_DEMO_VERSION", "Jeon2022DemoScore", "Jeon2022DemoThresholds",
     "Jeon2022Prediction", "score_jeon_2022_demo",
     "DiffuseFormFactors3D", "DiffuseNeutralSolve3D", "solve_diffuse_neutral_radiosity_3d",

@@ -18,10 +18,12 @@ from scipy.spatial import cKDTree
 from .boundary_state import PlasmaBoundaryState
 from .boundary_transport_3d import (
     BoundaryTransport3DResult,
+    estimate_diffuse_form_factors_3d,
     merge_boundary_transport_results_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
 )
+from .neutral_radiosity_3d import solve_diffuse_neutral_radiosity_3d
 from .charging_coupled_3d import (
     SteadyDielectricCharging3DResult, solve_dielectric_charging_steady_3d,
 )
@@ -66,6 +68,55 @@ class FeatureGeometry3D:
     @property
     def coordinate_arrays(self):
         return tuple(np.arange(size) * self.dx for size in self.phi.shape)
+
+
+def make_rectangular_trench_geometry_3d(
+        *, cell_width, cell_length, domain_height, dx, opening_width, mask_thickness,
+        substrate_top, etched_depth, mesh_length_unit_m=1e-6,
+        substrate_material_id=1, mask_material_id=2):
+    """Construct a periodic-cell rectangular trench from units-explicit physical geometry.
+
+    The trench is translationally invariant along the cell-length axis. ``etched_depth=0`` gives an
+    unetched substrate under an open mask; positive depth creates vertical SiO2 sidewalls and a flat
+    floor without a benchmark- or aspect-ratio-specific branch.
+    """
+    values = np.asarray([
+        cell_width, cell_length, domain_height, dx, opening_width, mask_thickness,
+        substrate_top, etched_depth, mesh_length_unit_m], dtype=float)
+    if (np.any(~np.isfinite(values)) or np.any(values[:7] <= 0.0) or etched_depth < 0.0
+            or opening_width >= cell_width or substrate_top <= etched_depth
+            or substrate_top + mask_thickness >= domain_height
+            or int(substrate_material_id) <= 0 or int(mask_material_id) <= 0
+            or int(substrate_material_id) == int(mask_material_id)):
+        raise ValueError("invalid rectangular trench geometry inputs")
+    shape = tuple(max(3, int(round(length / dx)))
+                  for length in (cell_width, cell_length, domain_height))
+    x, y, z = (np.arange(size) * dx for size in shape)
+    X, _, Z = np.meshgrid(x, y, z, indexing="ij")
+    radius = np.abs(X - 0.5 * cell_width)
+    floor = substrate_top - etched_depth
+    base = floor - Z
+    if etched_depth > 0.0:
+        substrate_wall_slab = np.minimum(Z - floor, substrate_top - Z)
+        substrate_wall = np.minimum(substrate_wall_slab, radius - 0.5 * opening_width)
+        substrate_levelset = np.maximum(base, substrate_wall)
+    else:
+        substrate_levelset = substrate_top - Z
+    mask_slab = np.minimum(Z - substrate_top, substrate_top + mask_thickness - Z)
+    mask_levelset = np.minimum(mask_slab, radius - 0.5 * opening_width)
+    analytic = np.maximum(substrate_levelset, mask_levelset)
+    phi = reinit_narrow(analytic, dx, domain_height + cell_width)
+    substrate_solid = (Z < substrate_top) & ~(
+        (etched_depth > 0.0) & (Z > floor) & (radius < 0.5 * opening_width))
+    mask_solid = ((Z >= substrate_top) & (Z < substrate_top + mask_thickness)
+                  & (radius >= 0.5 * opening_width))
+    material = np.zeros(shape, dtype=int)
+    material[substrate_solid] = int(substrate_material_id)
+    material[mask_solid] = int(mask_material_id)
+    material[(phi > 0.0) & (material == 0)] = np.where(
+        Z[(phi > 0.0) & (material == 0)] < substrate_top,
+        int(substrate_material_id), int(mask_material_id))
+    return FeatureGeometry3D(phi, material, dx, mesh_length_unit_m)
 
 
 @dataclass(frozen=True)
@@ -123,6 +174,22 @@ def _face_material_ids(centroids, geometry):
     _, nearest = cKDTree(points).query(centroids)
     chosen = index[np.asarray(nearest, dtype=int)]
     return geometry.material_id[tuple(chosen.T)]
+
+
+def _surface_gas_normals(verts, faces, centroids, geometry):
+    triangle = np.asarray(verts)[np.asarray(faces)]
+    normal = np.cross(triangle[:, 1] - triangle[:, 0], triangle[:, 2] - triangle[:, 0])
+    normal /= np.linalg.norm(normal, axis=1, keepdims=True)
+    gradient = np.gradient(geometry.phi, geometry.dx)
+    index = np.rint(np.asarray(centroids) / geometry.dx).astype(int)
+    for axis in range(3):
+        index[:, axis] = np.clip(index[:, axis], 0, geometry.phi.shape[axis] - 1)
+    # phi is positive in solid, so -grad(phi) points into gas.
+    into_gas = -np.column_stack([
+        component[tuple(index.T)] for component in gradient])
+    flip = np.einsum("ij,ij->i", normal, into_gas) < 0.0
+    normal[flip] *= -1.0
+    return normal
 
 
 def _surface_mesh_fingerprint(verts, faces, active_face, face_material, geometry):
@@ -320,6 +387,88 @@ def _select_surface_fluxes(fluxes, selected_face, face_count, species_role=None)
     return SurfaceFluxes(neutral, tuple(energetic))
 
 
+def _apply_diffuse_neutral_transport(
+        transport, geometry, verts, faces, centroids, areas, face_material, active_face,
+        surface_state, mechanism, species_role, options, transport_device):
+    options = dict(options)
+    allowed = {
+        "rays_per_face", "seed", "periodic_lateral", "domain_size", "ray_offset",
+        "nonetchable_reaction_probability_by_material", "relative_tolerance",
+        "maximum_iterations",
+    }
+    unknown = set(options) - allowed
+    if unknown:
+        raise ValueError("unknown neutral radiosity options: " + ", ".join(sorted(unknown)))
+    material_probability = dict(options.pop(
+        "nonetchable_reaction_probability_by_material", {}))
+    solver_tolerance = float(options.pop("relative_tolerance", 1e-10))
+    maximum_iterations = int(options.pop("maximum_iterations", 500))
+    if "domain_size" not in options:
+        options["domain_size"] = np.asarray(geometry.phi.shape) * geometry.dx
+    if "ray_offset" not in options:
+        options["ray_offset"] = 1e-3 * geometry.dx
+    factors = estimate_diffuse_form_factors_3d(
+        verts, faces, centroids, _surface_gas_normals(
+            verts, faces, centroids, geometry),
+        device=transport_device, **options)
+    if not hasattr(mechanism, "neutral_reaction_probability"):
+        raise TypeError("diffuse neutral transport requires a mechanism reaction-probability contract")
+    active_probability = dict(mechanism.neutral_reaction_probability(surface_state))
+    neutral_names = [
+        name for name, value in species_role.items() if value == "neutral_reactant"]
+    reaction_probability = {}
+    for name in neutral_names:
+        probability = np.zeros(len(faces))
+        if name in active_probability:
+            value = np.asarray(active_probability[name], dtype=float)
+            if value.shape != (active_face.size,):
+                raise ValueError("mechanism neutral probability does not match active surface")
+            probability[active_face] = value
+        inactive = np.ones(len(faces), dtype=bool)
+        inactive[active_face] = False
+        for material in np.unique(face_material[inactive]):
+            material_input = dict(material_probability.get(int(material), {}))
+            if name not in material_input:
+                raise ValueError(
+                    f"missing neutral reaction probability for material {int(material)}, {name}")
+            probability[inactive & (face_material == material)] = float(material_input[name])
+        if np.any((probability < 0.0) | (probability > 1.0)):
+            raise ValueError("material neutral reaction probabilities must lie in [0,1]")
+        reaction_probability[name] = probability
+
+    neutral_flux = {}
+    diagnostics = {}
+    physical_area = np.asarray(areas) * geometry.mesh_length_unit_m ** 2
+    for name, direct in transport.surface_fluxes.neutral_flux_m2_s.items():
+        if name not in reaction_probability:
+            neutral_flux[name] = direct
+            continue
+        solution = solve_diffuse_neutral_radiosity_3d(
+            direct, physical_area, factors.source_face, factors.target_face,
+            factors.transfer_fraction, factors.escape_fraction,
+            reaction_probability[name], relative_tolerance=solver_tolerance,
+            maximum_iterations=maximum_iterations)
+        neutral_flux[name] = solution.incident_flux_m2_s
+        diagnostics[name] = dict(
+            source_rate_s=solution.source_rate_s,
+            reacted_rate_s=solution.reacted_rate_s,
+            escaped_rate_s=solution.escaped_rate_s,
+            relative_balance_error=solution.relative_balance_error,
+            relative_linear_residual=solution.relative_linear_residual)
+    limitations = tuple(
+        item for item in transport.known_limitations
+        if item != "no surface reflection or neutral re-emission") + (
+        "neutral re-emission is diffuse with material/state reaction probabilities",
+    )
+    updated = BoundaryTransport3DResult(
+        SurfaceFluxes(neutral_flux, transport.surface_fluxes.energetic_fluxes),
+        transport.hit_probability, transport.escape_probability,
+        transport.truncation_probability,
+        transport.transport_model + " + flux_conservative_diffuse_radiosity",
+        limitations)
+    return updated, MappingProxyType(diagnostics)
+
+
 def advance_feature_step_3d(
         geometry: FeatureGeometry3D, boundary: PlasmaBoundaryState,
         species_role: Mapping[str, str], mechanism, *,
@@ -330,8 +479,9 @@ def advance_feature_step_3d(
         trajectory_fixed_dt=None, trajectory_max_steps=10000,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         initial_charge_node_c=None, charging_options=None,
-        cfl_number=0.3, reinitialize=True, transport_device=None):
-    """Advance one stateful, dimensional, collisionless-absorbing feature step.
+        neutral_radiosity_options=None, cfl_number=0.3, reinitialize=True,
+        transport_device=None):
+    """Advance one stateful, dimensional feature step.
 
     The chemistry is evaluated only on triangles whose nearest positive-phi material id is in
     ``etchable_material_ids``. Other labeled solids are pinned. The method refuses a supplied surface
@@ -367,6 +517,29 @@ def advance_feature_step_3d(
         raise ValueError("current interface contains no requested etchable material")
     mesh_fingerprint = _surface_mesh_fingerprint(
         verts, faces, active_face, face_material, geometry)
+    if surface_state is None:
+        if surface_state_mesh_fingerprint is not None:
+            raise ValueError("surface_state_mesh_fingerprint requires a supplied surface_state")
+        if not hasattr(mechanism, "initial_state"):
+            raise TypeError("surface mechanism must provide initial_state(shape)")
+        surface_state = mechanism.initial_state((active_face.size,))
+    else:
+        if surface_state_mesh_fingerprint != mesh_fingerprint:
+            raise ValueError(
+                "surface_state mesh fingerprint mismatch; conservative remap is required")
+        if not hasattr(surface_state, "conservative_surface_fields"):
+            raise TypeError("surface state does not implement the conservative remap contract")
+        state_fields = dict(surface_state.conservative_surface_fields())
+        if not state_fields or any(
+                np.asarray(value).shape != (active_face.size,) for value in state_fields.values()):
+            raise ValueError(
+                "surface_state does not match the current active mesh; conservative remap is required")
+    radiosity_options = (None if neutral_radiosity_options is None
+                         else dict(neutral_radiosity_options))
+    periodic_neutral = bool(
+        radiosity_options is not None and radiosity_options.get("periodic_lateral", False))
+    if periodic_neutral and (charging_poisson_system is not None or nodal_potential_v is not None):
+        raise ValueError("periodic neutral radiosity is not yet supported with field trajectories")
     common_transport = dict(
         boundary=boundary, species_role=species_role, verts=verts, faces=faces, areas=areas,
         source_bounds=source_bounds, source_z=source_z,
@@ -422,7 +595,14 @@ def advance_feature_step_3d(
         if any(value is not None for value in (
                 potential_origin, potential_spacing, trajectory_fixed_dt)):
             raise ValueError("field trajectory options require nodal_potential_v")
-        transport = trace_boundary_state_first_hit_3d(**common_transport)
+        first_hit_options = {}
+        if periodic_neutral:
+            first_hit_options = dict(
+                periodic_lateral=True,
+                domain_size=radiosity_options.get(
+                    "domain_size", np.asarray(geometry.phi.shape) * geometry.dx))
+        transport = trace_boundary_state_first_hit_3d(
+            **common_transport, **first_hit_options)
     else:
         if potential_origin is None or potential_spacing is None or trajectory_fixed_dt is None:
             raise ValueError(
@@ -431,25 +611,13 @@ def advance_feature_step_3d(
             **common_transport, nodal_potential_v=nodal_potential_v,
             potential_origin=potential_origin, potential_spacing=potential_spacing,
             fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps)
+    neutral_radiosity_diagnostics = MappingProxyType({})
+    if radiosity_options is not None:
+        transport, neutral_radiosity_diagnostics = _apply_diffuse_neutral_transport(
+            transport, geometry, verts, faces, centroids, areas, face_material, active_face,
+            surface_state, mechanism, role, radiosity_options, transport_device)
     active_flux = _select_surface_fluxes(
         transport.surface_fluxes, active_face, len(faces), role)
-    if surface_state is None:
-        if surface_state_mesh_fingerprint is not None:
-            raise ValueError("surface_state_mesh_fingerprint requires a supplied surface_state")
-        if not hasattr(mechanism, "initial_state"):
-            raise TypeError("surface mechanism must provide initial_state(shape)")
-        surface_state = mechanism.initial_state((active_face.size,))
-    else:
-        if surface_state_mesh_fingerprint != mesh_fingerprint:
-            raise ValueError(
-                "surface_state mesh fingerprint mismatch; conservative remap is required")
-        if not hasattr(surface_state, "conservative_surface_fields"):
-            raise TypeError("surface state does not implement the conservative remap contract")
-        state_fields = dict(surface_state.conservative_surface_fields())
-        if not state_fields or any(
-                np.asarray(value).shape != (active_face.size,) for value in state_fields.values()):
-            raise ValueError(
-                "surface_state does not match the current active mesh; conservative remap is required")
     surface = mechanism.advance(surface_state, active_flux, float(duration_s))
 
     face_velocity = np.zeros(len(faces))
@@ -538,7 +706,8 @@ def advance_feature_step_3d(
             cfl_number=float(cfl_number), reinitialized=bool(reinitialize),
             self_consistent_charging=charging is not None,
             charging_iterations=(0 if charging is None else len(charging.history)),
-            charging_converged=(None if charging is None else charging.converged)),
+            charging_converged=(None if charging is None else charging.converged),
+            neutral_radiosity=neutral_radiosity_diagnostics),
         validity=validity)
 
 
@@ -550,7 +719,8 @@ def solve_feature_3d(
         transport_device=None, nodal_potential_v=None, potential_origin=None,
         potential_spacing=None, trajectory_fixed_dt=None, trajectory_max_steps=10000,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
-        charging_system_builder=None, initial_charge_node_c=None, charging_options=None):
+        charging_system_builder=None, initial_charge_node_c=None, charging_options=None,
+        neutral_radiosity_options=None):
     """Run verified feature steps with conserved surface state and optional quasi-static charging.
 
     A fixed ``charging_poisson_system`` is valid for one geometry only. Repeated charged evolution
@@ -598,6 +768,7 @@ def solve_feature_3d(
             charging_poisson_system=step_poisson_system,
             initial_charge_node_c=step_initial_charge,
             charging_options=charging_options,
+            neutral_radiosity_options=neutral_radiosity_options,
             cfl_number=cfl_number, reinitialize=reinitialize,
             transport_device=transport_device)
         results.append(result)

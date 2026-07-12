@@ -1,14 +1,18 @@
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from petch.boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
+from petch.boundary_state import (
+    PlasmaBoundaryState, SpeciesBoundaryState, maxwellian_electron_boundary_state,
+)
 from petch.charging_poisson_3d import NodalPoissonSystem3D
 from petch.feature_step_3d import (
     FeatureGeometry3D,
     advance_feature_step_3d,
     conservative_remap_surface_state,
+    make_rectangular_trench_geometry_3d,
     solve_feature_3d,
 )
 from petch.interaction_data import load_kounis_melas_2024_tables
@@ -132,6 +136,95 @@ def test_one_physical_3d_step_moves_a_uniform_sio2_plane_by_flux_yield_over_dens
     assert "conservative surface-state remap" in " ".join(result.validity.known_limitations)
     assert result.state_remap_diagnostics["old_topology"] == (1, 1)
     assert result.state_remap_diagnostics["new_topology"] == (1, 1)
+
+
+def test_feature_step_diffusely_reemits_unreacted_neutrals_with_global_balance():
+    geometry, _ = _plane_geometry()
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 2.2e21, [[0.0, 0.0, 10.0]], [1.0])
+    neutral = SpeciesBoundaryState(
+        "CF2", 0, 50.0, 3e20, [[0.0, 0.0, 1.0]], [1.0])
+    boundary = PlasmaBoundaryState((ion, neutral), reference_plane_m=1.75e-6)
+    result = advance_feature_step_3d(
+        geometry, boundary,
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=0.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        n_position=64, seed=3, reinitialize=False, transport_device="cpu",
+        neutral_radiosity_options={"rays_per_face": 16, "seed": 5})
+
+    audit = result.diagnostics["neutral_radiosity"]["CF2"]
+    assert audit["source_rate_s"] > 0.0
+    assert audit["reacted_rate_s"] == 0.0
+    assert np.isclose(audit["source_rate_s"], audit["escaped_rate_s"], rtol=1e-12)
+    assert audit["relative_balance_error"] < 1e-12
+    assert "flux_conservative_diffuse_radiosity" in result.transport.transport_model
+
+
+def test_feature_step_radiosity_requires_explicit_probability_for_every_pinned_material():
+    geometry, _ = _plane_geometry()
+    material = np.array(geometry.material_id, copy=True)
+    material[2:, :, :] = np.where(material[2:, :, :] > 0, 2, 0)
+    mixed = FeatureGeometry3D(
+        geometry.phi, material, geometry.dx, geometry.mesh_length_unit_m)
+    with pytest.raises(ValueError, match="missing neutral reaction probability for material 2"):
+        advance_feature_step_3d(
+            mixed, _boundary(),
+            {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+            _mechanism(), etchable_material_ids=(1,), duration_s=0.0,
+            source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+            n_position=16, seed=3, reinitialize=False, transport_device="cpu",
+            neutral_radiosity_options={"rays_per_face": 8, "seed": 5})
+
+
+def _static_trench_floor_neutral_flux(opening_width, *, rays_per_face=32):
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=0.8, cell_length=0.15, domain_height=1.4, dx=0.05,
+        opening_width=opening_width, mask_thickness=0.2,
+        substrate_top=0.9, etched_depth=0.5)
+    source_z = geometry.phi.shape[2] * geometry.dx - geometry.dx
+    quadrature = maxwellian_electron_boundary_state(
+        0.026, 3e20, n_transverse=3, n_normal=4,
+        reference_plane_m=source_z * geometry.mesh_length_unit_m).species[0]
+    neutral = SpeciesBoundaryState(
+        "CF2", 0, 50.0, quadrature.flux_m2_s,
+        quadrature.velocity_sqrt_eV, quadrature.weight)
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 1e19, [[0.0, 0.0, 30.0]], [1.0])
+    boundary = PlasmaBoundaryState(
+        (ion, neutral), reference_plane_m=source_z * geometry.mesh_length_unit_m)
+    parameters = replace(
+        _mechanism().parameters, complex_formation_probability={"CF2": 0.2})
+    mechanism = ReducedSiO2FluorocarbonMechanism(parameters)
+    result = advance_feature_step_3d(
+        geometry, boundary,
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        mechanism, etchable_material_ids=(1,), duration_s=0.0,
+        source_bounds=(0.0, 0.8, 0.0, 0.15), source_z=source_z,
+        n_position=32, seed=7, reinitialize=False, transport_device="cpu",
+        neutral_radiosity_options={
+            "rays_per_face": rays_per_face, "seed": 11, "periodic_lateral": True,
+            "domain_size": np.asarray(geometry.phi.shape) * geometry.dx,
+            "nonetchable_reaction_probability_by_material": {2: {"CF2": 0.2}},
+        })
+    floor = result.active_face_centroid[:, 2] < 0.45
+    flux = result.transport.surface_fluxes.neutral_flux_m2_s["CF2"][
+        result.active_face_index[floor]]
+    return float(np.average(flux, weights=result.active_face_area[floor]))
+
+
+def test_diffuse_neutral_transport_widens_from_local_plane_to_trench_width_ring():
+    narrow = _static_trench_floor_neutral_flux(0.2)
+    wide = _static_trench_floor_neutral_flux(0.4)
+
+    assert 0.0 < narrow < wide < 3e20
+
+
+def test_diffuse_neutral_trench_floor_flux_converges_with_form_factor_rule():
+    coarse = _static_trench_floor_neutral_flux(0.2, rays_per_face=16)
+    fine = _static_trench_floor_neutral_flux(0.2, rays_per_face=32)
+
+    assert abs(coarse - fine) / fine < 0.15
 
 
 def test_feature_step_refuses_surface_history_without_matching_mesh_fingerprint():
