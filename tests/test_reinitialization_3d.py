@@ -35,3 +35,29 @@ def test_cr2_anchors_distorted_slanted_interface_and_restores_gradient():
     assert np.mean(displacement) < 0.02 * dx
     assert abs(np.mean(gradient_norm[near_interface]) - 1.0) < 0.08
 
+
+def _vertical_crossing(phi, dx, i, j):
+    line = phi[i, j]
+    crossing = np.flatnonzero((line[:-1] >= 0.0) & (line[1:] < 0.0))
+    assert crossing.size == 1
+    lower = int(crossing[0])
+    fraction = line[lower] / (line[lower] - line[lower + 1])
+    return dx * (lower + fraction)
+
+
+def test_cr2_accumulates_repeated_subcell_motion_instead_of_erasing_it():
+    dx = 0.1
+    coordinate = np.arange(13) * dx
+    x, y, z = np.meshgrid(coordinate, coordinate, coordinate, indexing="ij")
+    normalizer = np.sqrt(1.0 + 0.15**2 + 0.10**2)
+    phi = (0.63719 + 0.15 * x - 0.10 * y - z) / normalizer
+    phi = reinit_cr2(phi, dx, 4.0 * dx)
+    initial = _vertical_crossing(phi, dx, 6, 6)
+    shift = 0.01 * dx
+
+    for _ in range(40):
+        phi = reinit_cr2(phi - shift, dx, 4.0 * dx)
+
+    final = _vertical_crossing(phi, dx, 6, 6)
+    expected = 40.0 * shift * normalizer
+    assert np.isclose(initial - final, expected, rtol=0.03, atol=0.002 * dx)
