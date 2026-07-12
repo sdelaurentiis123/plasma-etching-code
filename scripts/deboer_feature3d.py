@@ -138,12 +138,44 @@ def floor_rate(aspect_ratio, mechanism, *, opening_um=0.10, dx_um=0.01, mask_um=
     return float(np.mean(vel[floor]))
 
 
+def deboer_calibrate_predict(*, dx_um=0.01, iad_sigma_deg=1.0, sF_grid=(0.08, 0.14, 0.22)):
+    """Calibrate F sticking on the de Boer knee (AR10,20); predict AR40 held-out.
+
+    Verified result (dx=0.01, iad=1deg): best knee s_F=0.08 gives NR10/NR20 = 0.476/0.289 vs exp
+    0.43/0.29 (RMSE 0.033); held-out AR40 predicted 0.166 vs exp 0.20 (error 0.034). The AR40
+    under-prediction is the sub-degree-IAD / charging frontier (Phase 2). AR40 runs in ~10 s.
+    """
+    exp = {10.0: 0.43, 20.0: 0.29, 40.0: 0.20}
+    print("de Boer through the COUPLED engine: calibrate knee (AR10,20), predict AR40 held-out")
+    print(f"{'s_F':>5} {'NR10':>6} {'NR20':>6} {'knee_RMSE':>9}")
+    best = None
+    for sF in sF_grid:
+        m = build_deboer_si_mechanism(s_F=sF)
+        r0 = floor_rate(0.0, m, dx_um=dx_um, iad_sigma_deg=iad_sigma_deg)
+        nr = {ar: floor_rate(ar, m, dx_um=dx_um, iad_sigma_deg=iad_sigma_deg) / r0 for ar in (10.0, 20.0)}
+        err = float(np.sqrt(np.mean([(nr[a] - exp[a]) ** 2 for a in (10.0, 20.0)])))
+        print(f"{sF:>5.2f} {nr[10.0]:>6.3f} {nr[20.0]:>6.3f} {err:>9.4f}", flush=True)
+        if best is None or err < best[0]:
+            best = (err, sF)
+    err, sF = best
+    m = build_deboer_si_mechanism(s_F=sF)
+    r0 = floor_rate(0.0, m, dx_um=dx_um, iad_sigma_deg=iad_sigma_deg)
+    nr40 = floor_rate(40.0, m, dx_um=dx_um, iad_sigma_deg=iad_sigma_deg) / r0
+    print(f"\nbest knee s_F={sF} (RMSE {err:.4f}); HELD-OUT AR40 = {nr40:.3f} vs exp 0.20 "
+          f"(error {abs(nr40 - 0.20):.3f})")
+
+
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--deboer", action="store_true",
+                        help="calibrate the de Boer knee and predict AR40 held-out, then exit")
     parser.add_argument("--aspect-ratios", type=float, nargs="+", default=[0.0, 2.0])
     parser.add_argument("--dx-um", type=float, default=0.01)
     parser.add_argument("--iad-sigma-deg", type=float, default=1.0)
     args = parser.parse_args()
+    if args.deboer:
+        deboer_calibrate_predict(dx_um=args.dx_um, iad_sigma_deg=args.iad_sigma_deg)
+        return
     mech = build_deboer_si_mechanism()
     print("de Boer Si SF6/O2 ARDE through feature-3d (COUPLED ion+neutral chemistry)")
     print(f"{'AR':>5} {'floor_rate_m_s':>16} {'normalized':>12}")
