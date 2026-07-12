@@ -151,6 +151,19 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
   transport now refuses state-dependent stepping. A new nodal Anderson option operates in voltage-equivalent
   coordinates and clears its learned Jacobian history on trust rejection; it is an opt-in convergence
   experiment, not yet promotion evidence.
+- A later charged AR4 state exposed a second, distinct failure at the nominal `2^18` ceiling: one
+  sidewall ion current differed by 6.60 combined standard errors. Frozen-state replay showed that the
+  surface adjoint rule had only 21--29 effective samples out of 524,288 histories per scramble and one
+  grazing trajectory carried as much as 11.5% of the estimate. The missing phase-space mode was
+  physical source-normal motion rotated into trench-tangential motion at a vertical wall, not a new
+  fitted ion population. A normalized fold/rotation of the source density now supplies both tangent
+  signs as exactly scored numerical importance components, and surface position is sampled as a true
+  fourth Sobol coordinate instead of being independently permuted against velocity. These proposal
+  weights cancel from the physical estimator; they are not experimental or chemistry parameters.
+  At `2^22` histories the original failing frozen cell gives forward
+  `0.0601048 +/- 0.0002235` and adjoint `0.0601425 +/- 0.0004549`, a 0.074-sigma difference. This
+  closes that reciprocity diagnosis but not the full charging claim: the nonlinear AR/grid/sample
+  ladder and final launch-offset/timestep limits remain required.
 
 ### Kill criteria
 
