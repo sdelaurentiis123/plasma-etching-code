@@ -34,25 +34,31 @@ AR-shaped fudge; adaptive mesh/phase-space refinement (AMR); fast + GPU-accelera
   face-gather (`gather_boundary_state_ballistic_3d`) → diffuse molecular-flow radiosity
   (`solve_diffuse_neutral_radiosity_3d`, one physical sticking `s`). Conservation exact (balance ~1e-13).
 
-- **CONFIRMED: a FIXED angular quadrature flatlines the floor flux at high AR; adaptive refinement
-  (AMR) fixes it and the engine then matches first-principles.** At s=1 (pure line-of-sight shadowing)
-  a fixed 5-node quadrature flatlines transmission ~0.53 for AR≥2 (~17x too high at AR16). Root cause,
-  literature-confirmed (Coburn-Winters; JVST A 35 05C301): the floor-reaching acceptance cone is
-  ~arctan(1/A), so a fixed N-node quadrature aliases it once A≳N; angular samples must scale ∝A.
-  Fix: adaptive angular refinement (`converged_floor_transmission`, error-driven stop). With it, the
-  converged engine transmission MATCHES the analytic slot view factor sqrt(1+A_eff^2)-A_eff
-  (A_eff=A+mask/opening) to ~1-2% where resolved:
+- **CONFIRMED: a FIXED angular quadrature flatlines the floor flux at high AR; the AMR requirement is
+  real.** At s=1 (pure line-of-sight shadowing) a fixed 5-node quadrature flatlines transmission ~0.53
+  for AR≥2 (~17x too high at AR16). Root cause, literature-confirmed (Coburn-Winters; JVST A 35
+  05C301): the floor-reaching acceptance cone is ~arctan(1/A), so a fixed N-node quadrature aliases it
+  once A≳N; angular samples must scale ∝A.
 
-  | AR | A_eff | engine | analytic | ratio |
-  |----|-------|--------|----------|-------|
-  | 1.0 | 1.50 | 0.3056 | 0.3028 | 1.009 |
-  | 1.5 | 2.00 | 0.2333 | 0.2361 | 0.988 |
-  | 2.0 | 2.50 | 0.1891 | 0.1926 | 0.982 |
+- **GPU-ready high-AR path found: QMC-sampled source + forward first-hit tracer.** The forward tracer
+  batches every angular atom x source position into ONE Warp kernel; sampling the flux density with
+  N=2^L Sobol points (`thermal_neutral_qmc_boundary_state`) concentrates rays by the physical cosine
+  measure so the acceptance cone is resolved by raising N. It is **N-converged and fast** (AR16 in ~1s,
+  stable across N=2^14..2^18): T(AR8)=0.065, T(AR16)=0.0355.
 
-  This validates the common engine's neutral transport reproduces first-principles geometric shadowing.
-  Analytic targets + citations: `ARDE_PHYSICS_REFERENCE.md`. Higher AR is under-resolved by the adjoint
-  face-gather (Python-loop over angular atoms, cost-bound); the forward first-hit tracer batches all
-  atoms into one Warp kernel (GPU-ready) and is the high-AR + fast path (next increment).
+- **HONESTY CORRECTION (supersedes commit 405e555's claim).** That commit reported the adjoint matching
+  the analytic slot view factor to ~1-2% at AR1-2. That was **premature convergence**: the adaptive
+  loop's loose tolerance stopped at nt=24 (T=0.306), but nt=32 gives 0.318 and the value is still
+  drifting up. Properly compared, the two independent estimators DISAGREE by ~8-14% (AR1: adjoint 0.318
+  vs forward+QMC 0.344; AR2: 0.186 vs 0.212) and BOTH sit above the simple opposed-strip analytic
+  (0.303, 0.193). The engine reproduces the geometric-shadowing **trend and magnitude** across AR1-16,
+  but this is **not** a sub-5% first-principles validation yet. Two open items for a clean gate:
+  1. Exact view factor for the COMPOUND aperture (source plane -> open region -> mask opening -> trench),
+     not the single-slot approximation — both methods exceeding it is consistent with a wider effective
+     aperture, so the analytic is the suspect, but this must be computed, not assumed.
+  2. Reconcile the ~10% adjoint-vs-forward gap (independent methods must agree within uncertainty; prime
+     suspect is the adjoint gather's periodic renormalization vs the forward MC tally).
+  Analytic targets + citations: `ARDE_PHYSICS_REFERENCE.md`.
 
 ## Guardrails honored
 

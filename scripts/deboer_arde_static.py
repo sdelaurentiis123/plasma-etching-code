@@ -32,6 +32,7 @@ from petch.boundary_state import (
 )
 from petch.boundary_transport_3d import (
     estimate_diffuse_form_factors_3d, gather_boundary_state_ballistic_3d,
+    trace_boundary_state_first_hit_3d,
 )
 from petch.feature_step_3d import (
     _face_material_ids, _surface_gas_normals, make_rectangular_trench_geometry_3d,
@@ -70,13 +71,43 @@ def thermal_neutral_boundary_state(name, mass_amu, temperature_eV, flux_m2_s, *,
     return PlasmaBoundaryState(species=(species,), reference_plane_m=float(reference_plane_m))
 
 
+def thermal_neutral_qmc_boundary_state(name, mass_amu, temperature_eV, flux_m2_s, *,
+                                       log2_samples=16, seed=0, reference_plane_m=0.0):
+    """Neutral radical source as N = 2**log2_samples scrambled-Sobol samples of the SAME analytic
+    half-Maxwellian flux density.
+
+    Unlike the tensor Gauss-Hermite quadrature, QMC samples concentrate by the physical cosine flux
+    measure, so the near-vertical acceptance cone at high AR is resolved by raising N (error-driven,
+    the Monte-Carlo AMR the ARDE literature prescribes) rather than by an A-scaled tensor grid. Equal
+    weights; the physical law is unchanged.
+    """
+    from scipy.stats import qmc
+    density = MaxwellianFluxVelocityDensity(float(temperature_eV))
+    unit = qmc.Sobol(3, scramble=True, seed=int(seed)).random_base2(int(log2_samples))
+    velocity = density.sample_flux_velocity(unit)
+    weight = np.full(velocity.shape[0], 1.0 / velocity.shape[0])
+    species = SpeciesBoundaryState(
+        name=name, charge_number=0, mass_amu=float(mass_amu),
+        flux_m2_s=float(flux_m2_s), velocity_sqrt_eV=velocity, weight=weight,
+        density_model=density,
+        provenance={"model": "qmc_half_maxwellian_flux_neutral", "log2_samples": int(log2_samples)})
+    return PlasmaBoundaryState(species=(species,), reference_plane_m=float(reference_plane_m))
+
+
 def floor_transmission(aspect_ratio, sticking, *, opening_um, dx_um, rays_per_face,
-                       n_transverse, n_normal, mask_um=0.05, seed=0):
+                       n_transverse, n_normal, mask_um=0.05, seed=0,
+                       transport_method="adjoint", n_position=64, device=None,
+                       source_method="quadrature", log2_samples=16):
     """Return the area-weighted floor incident flux / source flux for one (AR, s) point.
 
     Pure transport + conservation. ``s`` (sticking) is the only physical surface input; it is applied
     uniformly on every gas-facing face (substrate walls, floor, and mask), the single-sticking-
     coefficient Coburn-Winters molecular-flow model.
+
+    ``transport_method``: ``"adjoint"`` uses the deterministic per-face gather (one Warp launch per
+    angular atom -- cost-bound at high angular resolution); ``"forward"`` uses the first-hit tracer
+    which batches every angular atom x source position into ONE Warp kernel (GPU-ready, so high
+    angular resolution needed at high AR is affordable). ``device`` threads to Warp (e.g. "cuda").
     """
     etched = aspect_ratio * opening_um
     substrate_top = etched + max(4.0 * dx_um, 0.05)
@@ -90,16 +121,32 @@ def floor_transmission(aspect_ratio, sticking, *, opening_um, dx_um, rays_per_fa
     domain_size = (np.asarray(geometry.phi.shape) - 1) * geometry.dx
     source_z = float(domain_size[2])
     source_flux = 1.0e20
-    boundary = thermal_neutral_boundary_state(
-        "F", 19.0, 0.05, source_flux, n_transverse=n_transverse, n_normal=n_normal,
-        reference_plane_m=source_z * geometry.mesh_length_unit_m)
+    ref_m = source_z * geometry.mesh_length_unit_m
+    if source_method == "qmc":
+        boundary = thermal_neutral_qmc_boundary_state(
+            "F", 19.0, 0.05, source_flux, log2_samples=log2_samples, seed=seed,
+            reference_plane_m=ref_m)
+    else:
+        boundary = thermal_neutral_boundary_state(
+            "F", 19.0, 0.05, source_flux, n_transverse=n_transverse, n_normal=n_normal,
+            reference_plane_m=ref_m)
 
-    transport = gather_boundary_state_ballistic_3d(
-        boundary, {"F": "neutral_reactant"}, verts, faces, areas, centroids, gas_normals,
-        source_bounds=(0.0, float(domain_size[0]), 0.0, float(domain_size[1])),
-        source_z=source_z, mesh_length_unit_m=geometry.mesh_length_unit_m,
-        mesh_origin_m=geometry.mesh_origin_m, face_quadrature_points=3,
-        periodic_lateral=True, domain_size=domain_size, ray_offset=1e-3 * geometry.dx)
+    source_bounds = (0.0, float(domain_size[0]), 0.0, float(domain_size[1]))
+    if transport_method == "forward":
+        transport = trace_boundary_state_first_hit_3d(
+            boundary, {"F": "neutral_reactant"}, verts, faces, areas,
+            source_bounds=source_bounds, source_z=source_z,
+            mesh_length_unit_m=geometry.mesh_length_unit_m,
+            mesh_origin_m=geometry.mesh_origin_m, n_position=n_position,
+            periodic_lateral=True, domain_size=domain_size, device=device)
+    else:
+        transport = gather_boundary_state_ballistic_3d(
+            boundary, {"F": "neutral_reactant"}, verts, faces, areas, centroids, gas_normals,
+            source_bounds=source_bounds, source_z=source_z,
+            mesh_length_unit_m=geometry.mesh_length_unit_m,
+            mesh_origin_m=geometry.mesh_origin_m, face_quadrature_points=3,
+            periodic_lateral=True, domain_size=domain_size, ray_offset=1e-3 * geometry.dx,
+            device=device)
     direct = np.asarray(transport.surface_fluxes.neutral_flux_m2_s["F"], dtype=float)
 
     factors = estimate_diffuse_form_factors_3d(

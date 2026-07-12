@@ -42,15 +42,22 @@ In the feature the flux-limiting slot runs from the mask top to the floor, so th
 ratio includes the mask: `A_eff = A + mask/opening`, and the target is `T_geom(A_eff)`. The gate's
 `--validate-geometric` mode checks the converged engine transmission against this.
 
-Verified (2026-07-12, common engine + adaptive angular refinement, dx=0.02um, opening=0.10um,
-mask=0.05um):
+Status (2026-07-12, common engine, dx=0.02um, opening=0.10um, mask=0.05um). The engine reproduces the
+geometric-shadowing TREND and magnitude, but this simple opposed-strip formula is only an APPROXIMATE
+target here: the real geometry is a compound aperture (source plane -> open region -> mask opening ->
+trench), and both engine estimators exceed the single-slot value. Two independent estimators and the
+approximate analytic:
 
-| AR | A_eff | engine | sqrt(1+A_eff^2)-A_eff | ratio |
-|----|-------|--------|-----------------------|-------|
-| 1.0 | 1.50 | 0.3056 | 0.3028 | 1.009 |
-| 1.5 | 2.00 | 0.2333 | 0.2361 | 0.988 |
+| AR | forward+QMC (N-converged) | adjoint gather | sqrt(1+A_eff^2)-A_eff |
+|----|---------------------------|----------------|-----------------------|
+| 1.0 | 0.3444 | 0.318 | 0.3028 |
+| 2.0 | 0.2121 | 0.186 | 0.1926 |
+| 8.0 | 0.0649 | (under-resolved on CPU) | 0.0586 |
+| 16.0 | 0.0355 | (under-resolved on CPU) | 0.0303 |
 
-Agreement to ~1-2% where the angular quadrature resolves the acceptance cone.
+Open for a clean sub-5% gate: (1) the EXACT compound-aperture view factor; (2) reconcile the ~10%
+adjoint-vs-forward gap (independent methods must agree; suspect = adjoint periodic renormalization).
+An earlier note claiming ~1-2% agreement was a premature-convergence artifact and is withdrawn.
 
 ## 3. Numerics: adaptive angular refinement (AMR) is REQUIRED
 
