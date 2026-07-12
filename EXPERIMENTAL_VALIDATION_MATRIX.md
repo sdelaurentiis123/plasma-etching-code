@@ -1,6 +1,6 @@
 # Experimental validation matrix
 
-Audit date: 2026-07-11. This is the claim-control document for petch. A numerical invariant, agreement
+Audit date: 2026-07-12. This is the claim-control document for petch. A numerical invariant, agreement
 with another simulator, agreement with a published simulation, and agreement with a physical experiment
 are different evidence classes and must not be described interchangeably.
 
@@ -17,6 +17,28 @@ are different evidence classes and must not be described interchangeably.
 - **Open:** no adequate gate.
 
 “Validated” without a qualifier should be reserved for E3/E4 and must name the calibrated quantities.
+
+## Cumulative regression contract
+
+New unified-engine work does not replace an older capability merely by sharing a module name. Every
+accepted change must pass the full automated suite, and each legacy result must separately state whether
+it is (a) preserved only on its original path or (b) re-earned through the common boundary, transport,
+surface-state, remap, and evolving-interface contracts. The 2026-07-12 numerical checkpoint
+(`952a80d`) passes **263 tests with 1 skipped**; this protects the automated invariants below but does not
+upgrade any evidence class.
+
+| Legacy capability | Automated original-path gate | Unified-engine status |
+|---|---|---|
+| HG/Hwang–Giapis charging and notch lineage | Transport, Poisson, current-accounting, and mechanism tests pass; the converged general solver still misses the HG simulation reference | 3-D quasi-static dielectric charging is wired through the common feature step, but the HG curve and experimental notch profile have not been re-earned |
+| HAR/de Boer SF6/O2 ARDE | Historical calibrated/held-out result is documented; no canonical de Boer campaign is currently part of `pytest` | Not yet replayed through the dimensional stateful mechanism and common 3-D boundary contract |
+| Bosch DRIE | `tests/test_bosch.py` passes the Ayon/Tillocher reduced-process gates | Not yet migrated to the common surface-state/profile engine |
+| Si/Cl2/Ar+ ALE | `tests/test_ale.py` and `tests/test_ale_diff.py` pass the reduced 0-D forward/gradient gates | A sourced Si-Cl2-Ar+ table runs through the common 3-D engine in its released narrow RIE domain; transient ALE state memory remains open |
+| Cryogenic reduced chemistry | `tests/test_cryo.py` passes its narrow calibrated anchors | Not yet migrated to the common 3-D engine |
+| Second-chemistry architecture | Archived DeepMD table, extrapolation refusal, uncertainty, and two evolving feature steps pass | Re-earned in the released 100 eV Si-Cl2-Ar+ RIE slice only |
+
+The next cumulative gate is therefore not “all old tests are green.” It is a versioned campaign runner
+that reproduces the original numerical/experimental score and, where claimed, the unified-engine score
+from repository-owned inputs without hard-coded scratch paths or undocumented parameter decks.
 
 ## Current scorecard
 
