@@ -58,9 +58,10 @@ Two convergence requirements, both error-driven (no AR/benchmark branch):
 - ANGULAR (AMR): a fixed quadrature aliases the ~arctan(1/A) cone. Refining the adjoint at AR1 climbs
   nt 24->48->72 = 0.302->0.342->0.348, converging to forward+QMC 0.345. QMC-sampling the source
   (N=2^L Sobol) resolves it batched (GPU-ready), N-stable across 2^14..2^18.
-- GRID: at coarse dx=0.02 (5 cells/opening) the engine over-predicts (AR1 ratio 1.14, shrinking to 1.03
-  at AR8 as the tiny deep transmission is less sensitive to the staircase). Refining dx 0.02->0.008 at
-  AR1 gives 0.345->0.310, converging to the reference 0.303. Need >=~12 cells/opening.
+- GRID: use dx that EVENLY divides the opening (else marching cubes misplaces the walls and the
+  convergence oscillates). With grid-aligned dx the engine converges cleanly to the reference:
+  AR2 (ref 0.192): dx 0.02/0.01/0.005/0.004 (5/10/20/25 cells) = ratio 1.105/0.960/0.979/1.011;
+  AR4 (ref 0.110): = 1.067/0.944/0.971/1.000. At >=~25 cells/opening the engine matches to ~1%.
 
 A prior note claiming ~1-2% agreement at coarse settings was a premature-convergence artifact
 (nt=24 + dx=0.02 landing near the approximate analytic) and was withdrawn; the validated conclusion
