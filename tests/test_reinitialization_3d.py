@@ -1,6 +1,9 @@
 import numpy as np
 
-from petch.feature_step_3d import make_rectangular_trench_geometry_3d
+from petch.feature_step_3d import (
+    _advect_exposed_material_levelsets,
+    make_rectangular_trench_geometry_3d,
+)
 from petch.threed import advect_3d, reinit_cr2
 
 
@@ -94,3 +97,26 @@ def test_cr2_accumulates_floor_motion_beneath_a_pinned_narrow_mask():
     expected = 16.0 * duration_per_step * speed.flat[0]
     assert initial - final > 0.8 * expected
     assert np.isclose(initial - final, initial - reference, rtol=0.03, atol=0.002 * geometry.dx)
+
+
+def test_additive_material_layers_move_exposed_substrate_without_moving_mask():
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=0.5, cell_length=0.1, domain_height=2.35, dx=0.02,
+        opening_width=0.08, mask_thickness=0.7,
+        substrate_top=1.4, etched_depth=0.0)
+    speed = np.full(geometry.phi.shape, 1.0e-4)
+    initial = _vertical_crossing(
+        geometry.phi, geometry.dx,
+        geometry.phi.shape[0] // 2, geometry.phi.shape[1] // 2)
+
+    layers = _advect_exposed_material_levelsets(
+        geometry.material_levelsets, (1,), speed,
+        geometry.dx, duration_s=200.0, substeps=16)
+    layers[1] = reinit_cr2(layers[1], geometry.dx, 4.0 * geometry.dx)
+    combined = reinit_cr2(
+        np.maximum.reduce(tuple(layers.values())), geometry.dx, 4.0 * geometry.dx)
+    final = _vertical_crossing(
+        combined, geometry.dx, combined.shape[0] // 2, combined.shape[1] // 2)
+
+    assert np.array_equal(layers[2], geometry.material_levelsets[2])
+    assert np.isclose(initial - final, 0.02, rtol=0.03, atol=0.002 * geometry.dx)

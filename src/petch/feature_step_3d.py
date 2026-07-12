@@ -13,7 +13,7 @@ from types import MappingProxyType
 from typing import Mapping
 
 import numpy as np
-from scipy.ndimage import label
+from scipy.ndimage import label, map_coordinates
 from scipy.spatial import cKDTree
 from skimage.measure import euler_number
 
@@ -48,11 +48,15 @@ class FeatureGeometry3D:
     dx: float
     mesh_length_unit_m: float
     mesh_origin_m: tuple[float, float, float] = (0.0, 0.0, 0.0)
+    material_levelsets: Mapping[int, np.ndarray] | None = None
 
     def __post_init__(self):
         phi = np.asarray(self.phi, dtype=float).copy()
         material = np.asarray(self.material_id, dtype=int).copy()
         origin = tuple(float(value) for value in self.mesh_origin_m)
+        layers = (None if self.material_levelsets is None
+                  else {int(key): np.asarray(value, dtype=float).copy()
+                        for key, value in self.material_levelsets.items()})
         if (phi.ndim != 3 or min(phi.shape) < 2 or material.shape != phi.shape
                 or np.any(~np.isfinite(phi)) or np.any(material < 0)
                 or not np.isfinite(self.dx) or self.dx <= 0.0
@@ -61,12 +65,25 @@ class FeatureGeometry3D:
             raise ValueError("invalid 3-D feature geometry")
         if not np.any(phi < 0.0) or not np.any(phi > 0.0):
             raise ValueError("phi must contain both gas and solid")
+        if layers is not None:
+            if (not layers or any(key <= 0 for key in layers)
+                    or any(value.shape != phi.shape or np.any(~np.isfinite(value))
+                           for value in layers.values())):
+                raise ValueError("invalid material level-set fields")
+            union = np.maximum.reduce(tuple(layers.values()))
+            if np.any((union >= 0.0) != (phi >= 0.0)):
+                raise ValueError("material level sets do not reconstruct the combined solid")
+            for value in layers.values():
+                value.setflags(write=False)
         phi.setflags(write=False); material.setflags(write=False)
         object.__setattr__(self, "phi", phi)
         object.__setattr__(self, "material_id", material)
         object.__setattr__(self, "dx", float(self.dx))
         object.__setattr__(self, "mesh_length_unit_m", float(self.mesh_length_unit_m))
         object.__setattr__(self, "mesh_origin_m", origin)
+        object.__setattr__(
+            self, "material_levelsets",
+            None if layers is None else MappingProxyType(layers))
 
     @property
     def coordinate_arrays(self):
@@ -110,7 +127,9 @@ def make_rectangular_trench_geometry_3d(
         substrate_levelset = substrate_top - Z
     mask_slab = np.minimum(Z - substrate_top, substrate_top + mask_thickness - Z)
     mask_levelset = np.minimum(mask_slab, radius - 0.5 * opening_width)
-    analytic = np.maximum(substrate_levelset, mask_levelset)
+    substrate_phi = reinit_narrow(substrate_levelset, dx, domain_height + cell_width)
+    mask_phi = reinit_narrow(mask_levelset, dx, domain_height + cell_width)
+    analytic = np.maximum(substrate_phi, mask_phi)
     phi = reinit_narrow(analytic, dx, domain_height + cell_width)
     substrate_solid = (Z < substrate_top) & ~(
         (etched_depth > 0.0) & (Z > floor) & (radius < 0.5 * opening_width))
@@ -128,7 +147,12 @@ def make_rectangular_trench_geometry_3d(
     material[unlabeled_solid] = np.where(
         substrate_owner[unlabeled_solid],
         int(substrate_material_id), int(mask_material_id))
-    return FeatureGeometry3D(phi, material, dx, mesh_length_unit_m)
+    return FeatureGeometry3D(
+        phi, material, dx, mesh_length_unit_m,
+        material_levelsets={
+            int(substrate_material_id): substrate_phi,
+            int(mask_material_id): mask_phi,
+        })
 
 
 @dataclass(frozen=True)
@@ -185,6 +209,15 @@ def _face_material_ids(centroids, geometry):
     A nearest-solid search remains only as a fallback at degenerate zero-gradient CSG corners.
     """
     centroids = np.asarray(centroids, dtype=float)
+    if geometry.material_levelsets is not None:
+        material_ids = np.asarray(tuple(geometry.material_levelsets), dtype=int)
+        coordinates = (centroids / geometry.dx).T
+        values = np.vstack([
+            map_coordinates(
+                geometry.material_levelsets[int(material_id)], coordinates,
+                order=1, mode="nearest", prefilter=False)
+            for material_id in material_ids])
+        return material_ids[np.argmax(values, axis=0)]
     solid = (geometry.phi > 0.0) & (geometry.material_id > 0)
     index = np.column_stack(np.where(solid))
     if index.size == 0:
@@ -345,6 +378,40 @@ def _remove_unresolved_subcell_solid_components(
     # then let the signed-distance reconstruction restore a consistent neighborhood.
     updated[unresolved] = -np.maximum(np.abs(updated[unresolved]), float(dx))
     return updated, int(np.count_nonzero(unresolved))
+
+
+def _redistance_feature_field(phi, dx, method):
+    if method == "fsm":
+        return reinit_fsm(phi, dx, 4.0 * dx)
+    if method == "cr2":
+        return reinit_cr2(phi, dx, 4.0 * dx)
+    return reinit_narrow(phi, dx, 4.0 * dx)
+
+
+def _advect_exposed_material_levelsets(
+        material_levelsets, etchable_material_ids, extended_velocity,
+        dx, duration_s, substeps):
+    """Move each material only where its level set is the exposed union boundary."""
+    current = {
+        int(material_id): np.asarray(levelset, dtype=float).copy()
+        for material_id, levelset in material_levelsets.items()}
+    etchable = set(int(value) for value in etchable_material_ids)
+    step_duration = float(duration_s) / int(substeps)
+    for _ in range(int(substeps)):
+        previous = current
+        current = {}
+        for material_id, levelset in previous.items():
+            if material_id not in etchable:
+                current[material_id] = levelset
+                continue
+            other_fields = tuple(
+                value for key, value in previous.items() if key != material_id)
+            exposed = (np.ones(levelset.shape, dtype=bool) if not other_fields
+                       else levelset >= np.maximum.reduce(other_fields))
+            current[material_id] = advect_3d(
+                levelset, np.where(exposed, extended_velocity, 0.0),
+                dx, step_duration)
+    return current
 
 
 def _conserve_nonnegative_surface_field(raw, target_integral, new_area, *, upper=None):
@@ -794,10 +861,17 @@ def advance_feature_step_3d(
             centerline_phi_lower_before=float(centerline[lower]),
             centerline_phi_upper_before=float(centerline[lower + 1]))
     pinned = (geometry.material_id > 0) & ~np.isin(geometry.material_id, etchable)
-    for _ in range(substeps):
-        phi = advect_3d(
-            phi, extended_velocity, geometry.dx, float(duration_s) / substeps)
-        phi[pinned] = geometry.phi[pinned]
+    material_levelsets = None
+    if geometry.material_levelsets is None:
+        for _ in range(substeps):
+            phi = advect_3d(
+                phi, extended_velocity, geometry.dx, float(duration_s) / substeps)
+            phi[pinned] = geometry.phi[pinned]
+    else:
+        material_levelsets = _advect_exposed_material_levelsets(
+            geometry.material_levelsets, etchable, extended_velocity,
+            geometry.dx, duration_s, substeps)
+        phi = np.maximum.reduce(tuple(material_levelsets.values()))
     advected_centerline = phi[center]
     advected_crossing = np.flatnonzero(
         (advected_centerline[:-1] >= 0.0) & (advected_centerline[1:] < 0.0))
@@ -807,13 +881,16 @@ def advance_feature_step_3d(
             advected_centerline[lower]
             / (advected_centerline[lower] - advected_centerline[lower + 1]))
     if reinitialize and duration_s > 0.0:
-        if reinitialization_method == "fsm":
-            phi = reinit_fsm(phi, geometry.dx, 4.0 * geometry.dx)
-        elif reinitialization_method == "cr2":
-            phi = reinit_cr2(phi, geometry.dx, 4.0 * geometry.dx)
-        else:
-            phi = reinit_narrow(phi, geometry.dx, 4.0 * geometry.dx)
-        phi[pinned] = geometry.phi[pinned]
+        if material_levelsets is not None:
+            material_levelsets = {
+                material_id: (
+                    _redistance_feature_field(levelset, geometry.dx, reinitialization_method)
+                    if material_id in etchable else levelset)
+                for material_id, levelset in material_levelsets.items()}
+            phi = np.maximum.reduce(tuple(material_levelsets.values()))
+        phi = _redistance_feature_field(phi, geometry.dx, reinitialization_method)
+        if material_levelsets is None:
+            phi[pinned] = geometry.phi[pinned]
     reinitialized_centerline = phi[center]
     reinitialized_crossing = np.flatnonzero(
         (reinitialized_centerline[:-1] >= 0.0) & (reinitialized_centerline[1:] < 0.0))
@@ -825,17 +902,15 @@ def advance_feature_step_3d(
     phi, removed_unresolved_solid_cells = _remove_unresolved_subcell_solid_components(
         phi, geometry.material_id, etchable, geometry.dx)
     if removed_unresolved_solid_cells:
-        if reinitialization_method == "fsm":
-            phi = reinit_fsm(phi, geometry.dx, 4.0 * geometry.dx)
-        elif reinitialization_method == "cr2":
-            phi = reinit_cr2(phi, geometry.dx, 4.0 * geometry.dx)
-        else:
-            phi = reinit_narrow(phi, geometry.dx, 4.0 * geometry.dx)
+        if material_levelsets is not None:
+            raise RuntimeError(
+                "subcell cleanup requires an explicit material-layer topology update")
+        phi = _redistance_feature_field(phi, geometry.dx, reinitialization_method)
         phi[pinned] = geometry.phi[pinned]
 
     output_geometry = FeatureGeometry3D(
         phi, geometry.material_id, geometry.dx, geometry.mesh_length_unit_m,
-        geometry.mesh_origin_m)
+        geometry.mesh_origin_m, material_levelsets=material_levelsets)
     next_verts, next_faces, next_centroids, next_areas = extract_mesh_3d(
         output_geometry.phi, output_geometry.dx)
     next_face_material = _face_material_ids(next_centroids, output_geometry)
