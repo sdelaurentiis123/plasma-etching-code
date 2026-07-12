@@ -4,6 +4,7 @@ import pytest
 from petch.surface_kinetics import (
     EnergeticFlux,
     EnergeticYield,
+    FaceResolvedEnergeticFlux,
     ParameterEvidence,
     ReducedSiO2FluorocarbonMechanism,
     ReducedSiO2FluorocarbonParameters,
@@ -58,6 +59,21 @@ def test_energetic_yield_reproduces_threshold_reference_and_angular_limits():
     assert np.isclose(sputter.evaluate(100.0, 1.0), 0.2)
     assert sputter.evaluate(100.0, 0.5) > 0.2
     assert sputter.evaluate(100.0, 0.0) == 0.0
+
+
+def test_face_resolved_events_preserve_nonlinear_energy_angle_yield_without_averaging():
+    events = FaceResolvedEnergeticFlux(
+        "Ar+", 2, event_face=[0, 0, 1], event_flux_m2_s=[1e18, 2e18, 4e18],
+        event_energy_eV=[20.0, 100.0, 60.0], event_cosine_incidence=[1.0, 0.5, 1.0])
+    law = EnergeticYield(
+        0.2, 20.0, 100.0, energy_exponent=2.0, angular_model="chang_sawin_1997")
+
+    expected_event_yield = law.evaluate(
+        events.event_energy_eV, events.event_cosine_incidence)
+    expected = np.bincount(
+        events.event_face, weights=events.event_flux_m2_s * expected_event_yield, minlength=2)
+    assert np.array_equal(events.flux_m2_s, [3e18, 4e18])
+    assert np.allclose(events.yield_rate_m2_s(law), expected)
 
 
 def test_no_flux_is_an_exact_identity_and_zero_velocity():

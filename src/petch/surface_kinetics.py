@@ -128,6 +128,57 @@ class EnergeticFlux:
         values = yield_law.evaluate(self.energy_eV, self.cosine_incidence)
         return float(np.dot(self.weight, values))
 
+    def yield_rate_m2_s(self, yield_law: EnergeticYield):
+        return np.asarray(self.flux_m2_s) * self.mean_yield(yield_law)
+
+
+@dataclass(frozen=True)
+class FaceResolvedEnergeticFlux:
+    """Exact sparse energetic hit events on a surface mesh.
+
+    ``event_flux_m2_s`` is each event's contribution to the dimensional flux density of its hit
+    face.  Retaining events avoids energy/angle histogram binning and mean-energy yield bias.  A
+    production transport backend may compact identical events, but it must preserve this measure.
+    """
+
+    name: str
+    face_count: int
+    event_face: np.ndarray
+    event_flux_m2_s: np.ndarray
+    event_energy_eV: np.ndarray
+    event_cosine_incidence: np.ndarray
+
+    def __post_init__(self):
+        if not self.name or int(self.face_count) <= 0:
+            raise ValueError("face-resolved energetic flux requires a name and positive face_count")
+        face = np.asarray(self.event_face, dtype=int).copy()
+        flux = np.asarray(self.event_flux_m2_s, dtype=float).copy()
+        energy = np.asarray(self.event_energy_eV, dtype=float).copy()
+        cosine = np.asarray(self.event_cosine_incidence, dtype=float).copy()
+        if (face.ndim != 1 or flux.shape != face.shape or energy.shape != face.shape
+                or cosine.shape != face.shape or np.any(face < 0) or np.any(face >= self.face_count)
+                or np.any(~np.isfinite(flux)) or np.any(flux < 0.0)
+                or np.any(~np.isfinite(energy)) or np.any(energy < 0.0)
+                or np.any(~np.isfinite(cosine)) or np.any((cosine < 0.0) | (cosine > 1.0))):
+            raise ValueError("invalid face-resolved energetic events")
+        for array in (face, flux, energy, cosine): array.setflags(write=False)
+        object.__setattr__(self, "face_count", int(self.face_count))
+        object.__setattr__(self, "event_face", face)
+        object.__setattr__(self, "event_flux_m2_s", flux)
+        object.__setattr__(self, "event_energy_eV", energy)
+        object.__setattr__(self, "event_cosine_incidence", cosine)
+
+    @property
+    def flux_m2_s(self):
+        return np.bincount(
+            self.event_face, weights=self.event_flux_m2_s, minlength=self.face_count)
+
+    def yield_rate_m2_s(self, yield_law: EnergeticYield):
+        event_yield = yield_law.evaluate(self.event_energy_eV, self.event_cosine_incidence)
+        return np.bincount(
+            self.event_face, weights=self.event_flux_m2_s * event_yield,
+            minlength=self.face_count)
+
 
 @dataclass(frozen=True)
 class SurfaceFluxes:
@@ -147,8 +198,10 @@ class SurfaceFluxes:
             array.setflags(write=False); neutral[name] = array
         object.__setattr__(self, "neutral_flux_m2_s", MappingProxyType(neutral))
         energetic = tuple(self.energetic_fluxes)
-        if any(not isinstance(item, EnergeticFlux) for item in energetic):
-            raise TypeError("energetic_fluxes must contain EnergeticFlux objects")
+        if any(not isinstance(item, (EnergeticFlux, FaceResolvedEnergeticFlux))
+               for item in energetic):
+            raise TypeError(
+                "energetic_fluxes must contain EnergeticFlux or FaceResolvedEnergeticFlux objects")
         object.__setattr__(self, "energetic_fluxes", energetic)
 
 
@@ -310,8 +363,7 @@ class ReducedSiO2FluorocarbonMechanism:
     def _energetic_rate(self, fluxes, yield_law, shape):
         total = np.zeros(shape)
         for population in fluxes.energetic_fluxes:
-            total = total + self._broadcast(population.flux_m2_s, shape) * population.mean_yield(
-                yield_law)
+            total = total + self._broadcast(population.yield_rate_m2_s(yield_law), shape)
         return total
 
     def _polymer_step(self, inventory, fluxes, duration_s, shape):

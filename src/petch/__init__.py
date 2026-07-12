@@ -12,7 +12,7 @@ from .chemistry import surface_rate, surface_rate_langmuir
 from .levelset import advect, extend_velocity, reinit
 from .metrics import ours_profile, depth_centre, center_depth
 from .surface_kinetics import (
-    EnergeticFlux, EnergeticYield, ParameterEvidence,
+    EnergeticFlux, EnergeticYield, FaceResolvedEnergeticFlux, ParameterEvidence,
     ReducedSiO2FluorocarbonMechanism, ReducedSiO2FluorocarbonParameters,
     SiO2SurfaceState, SurfaceFluxes,
 )
@@ -29,7 +29,7 @@ __all__ = [
     "mc_flux", "_trace", "surface_rate", "surface_rate_langmuir",
     "advect", "extend_velocity", "reinit",
     "ours_profile", "depth_centre", "center_depth",
-    "EnergeticFlux", "EnergeticYield", "ParameterEvidence",
+    "EnergeticFlux", "EnergeticYield", "FaceResolvedEnergeticFlux", "ParameterEvidence",
     "ReducedSiO2FluorocarbonMechanism", "ReducedSiO2FluorocarbonParameters",
     "SiO2SurfaceState", "SurfaceFluxes",
 ]
