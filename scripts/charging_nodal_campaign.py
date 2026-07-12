@@ -337,8 +337,12 @@ print("seconds", time.perf_counter() - start)
 print("iterations", result["iterations"], "rejected", result.get("rejected_steps", 0))
 print("converged", result.get("converged", False), result.get("termination_reason"))
 print("beta_final", result.get("beta_final", args.beta))
-print("max", [round(x["max_abs_log_ratio"], 4) for x in result["interval_balance_history"]])
-print("rms", [round(x["rms_log_ratio"], 4) for x in result["interval_balance_history"]])
+print("raw_max", [round(x["max_abs_log_ratio"], 4) for x in result["balance_history"]])
+print("raw_rms", [round(x["rms_log_ratio"], 4) for x in result["balance_history"]])
+print("certified_update_max", [
+    round(x["max_abs_log_ratio"], 4) for x in result["interval_balance_history"]])
+print("certified_update_rms", [
+    round(x["rms_log_ratio"], 4) for x in result["interval_balance_history"]])
 print("confidence_max", [
     round(x["confidence_envelope_max_abs_log_ratio"], 4)
     for x in result["interval_balance_history"]])
@@ -389,6 +393,8 @@ np.savez(
     converged=result.get("converged", False), solid=solid,
     surface_voltage=result["surface_voltage"], potential=result["potential"],
     cells=result["cells"], normals=result["normals"],
+    raw_max=np.asarray([x["max_abs_log_ratio"] for x in result["balance_history"]]),
+    raw_rms=np.asarray([x["rms_log_ratio"] for x in result["balance_history"]]),
     interval_max=np.asarray([x["max_abs_log_ratio"] for x in result["interval_balance_history"]]),
     interval_rms=np.asarray([x["rms_log_ratio"] for x in result["interval_balance_history"]]),
     mean_log_ratio_history=np.stack([
