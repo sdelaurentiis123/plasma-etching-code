@@ -92,6 +92,29 @@ def test_boundary_to_surface_chain_conserves_dimensional_formula_unit_removal():
     assert np.isclose(removed_per_source_area, expected, rtol=1e-12)
 
 
+def test_first_hit_3d_reports_geometric_oblique_incidence_without_angle_fit():
+    verts = np.array([
+        [-2.0, -2.0, 0.0], [2.0, -2.0, 0.0],
+        [2.0, 2.0, 0.0], [-2.0, 2.0, 0.0],
+    ])
+    faces = np.array([[0, 1, 2], [0, 2, 3]], dtype=int)
+    areas = np.array([8.0, 8.0])
+    species = SpeciesBoundaryState(
+        "ion", 1, 40.0, 1e19,
+        velocity_sqrt_eV=[[0.5, 0.0, 1.0]], weight=[1.0])
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=1e-6)
+    result = trace_boundary_state_first_hit_3d(
+        boundary, {"ion": "energetic_bombardment"}, verts, faces, areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, n_position=16, seed=5, device="cpu")
+
+    events = result.surface_fluxes.energetic_fluxes[0]
+    assert result.hit_probability["ion"] == 1.0
+    assert np.allclose(events.event_energy_eV, 1.25)
+    assert np.allclose(events.event_cosine_incidence, 1.0 / np.sqrt(1.25), atol=2e-7)
+    assert np.isclose(np.dot(events.flux_m2_s, areas), 1e19, rtol=1e-12)
+
+
 def test_first_hit_3d_requires_complete_role_and_reference_plane_contracts():
     verts, faces, areas = _flat_unit_plane()
     common = dict(
