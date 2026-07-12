@@ -13,6 +13,8 @@ import numpy as np
 from scipy import sparse
 from scipy.sparse.linalg import gmres
 
+from .surface_exchange import SurfaceProductPopulation
+
 
 @dataclass(frozen=True)
 class DiffuseFormFactors3D:
@@ -215,3 +217,29 @@ def transport_diffuse_surface_emission_3d(
         emitted_rate, downstream.reacted_rate_s, escaped_without_impact,
         downstream.escaped_rate_s, balance, downstream.relative_linear_residual,
         downstream.iterations_converged)
+
+
+def transport_surface_product_population_3d(
+        population: SurfaceProductPopulation, duration_s, face_area_m2,
+        form_factors: DiffuseFormFactors3D, reaction_probability, *,
+        relative_tolerance=1e-10, maximum_iterations=500):
+    """Transport one explicitly resolved surface-product population.
+
+    This operator consumes the population's angular declaration but does not invent it. The current
+    form-factor backend implements diffuse-cosine emission only. Its flight geometry is energy independent;
+    an energy-dependent target interaction must already be represented in ``reaction_probability`` or use
+    a future event-resolved backend.
+    """
+    if not isinstance(population, SurfaceProductPopulation):
+        raise TypeError("population must be SurfaceProductPopulation")
+    if not population.transport_ready:
+        raise ValueError("surface product lacks a declared energy/angular emission model")
+    if population.angular_model != "diffuse_cosine":
+        raise ValueError(
+            f"diffuse form-factor transport cannot consume {population.angular_model!r} emission")
+    if not np.isfinite(duration_s) or duration_s <= 0.0:
+        raise ValueError("surface-product transport duration must be positive and finite")
+    return transport_diffuse_surface_emission_3d(
+        population.integrated_particle_count_m2 / float(duration_s),
+        face_area_m2, form_factors, reaction_probability,
+        relative_tolerance=relative_tolerance, maximum_iterations=maximum_iterations)

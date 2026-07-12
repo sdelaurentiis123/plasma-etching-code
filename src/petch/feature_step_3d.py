@@ -960,6 +960,21 @@ def advance_feature_step_3d(
     else:
         exchange_limitations = tuple(material_exchange.known_limitations)
         product_routing_complete = bool(material_exchange.product_routing_complete)
+    product_populations = tuple(getattr(surface, "product_populations", ()))
+    outgoing_material = bool(
+        material_exchange is not None
+        and any(np.any(value > 0.0) for value in material_exchange.outgoing_units_m2.values()))
+    if not outgoing_material:
+        product_transport_ready = None
+    elif not product_populations:
+        product_transport_ready = False
+        exchange_limitations += (
+            "outgoing material has no declared surface-product populations",)
+    else:
+        product_transport_ready = all(item.transport_ready for item in product_populations)
+        if not product_transport_ready:
+            exchange_limitations += (
+                "surface-product populations lack a complete energy/angular launch model",)
     validity = FeatureStepValidity(
         within_declared_scope=not reasons,
         reasons=tuple(reasons),
@@ -994,6 +1009,8 @@ def advance_feature_step_3d(
             charging_iterations=(0 if charging is None else len(charging.history)),
             charging_converged=(None if charging is None else charging.converged),
             product_routing_complete=product_routing_complete,
+            product_population_count=len(product_populations),
+            product_transport_ready=product_transport_ready,
             neutral_radiosity=neutral_radiosity_diagnostics,
             **center_diagnostics),
         validity=validity)

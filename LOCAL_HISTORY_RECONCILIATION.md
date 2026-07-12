@@ -18,6 +18,12 @@ The two Codex clients therefore wrote serially into one history. There is no alt
 The reconciliation problem is semantic: rapid successive implementations created multiple solver
 lineages and allowed evidence from one lineage to be described as evidence for another.
 
+During the reconciliation itself, a resumed Codex CLI rooted at the parent `chip-etch` directory and a
+newer duplicate Codex app node session were found still writing this worktree. Both were terminated before
+further commits. Their partial product-transport edits were reviewed line-by-line; useful generic mechanism
+work was retained and reconciled with the stricter sourced-table implementation. This branch now has one
+active writer.
+
 ## What changed after the last remote checkpoint
 
 The committed range is approximately 25,599 insertions and 47 deletions across 80 files. It is primarily

@@ -37,7 +37,9 @@ from .surface_interaction_table import (
 )
 from .interaction_data import KounisMelas2024Tables, load_kounis_melas_2024_tables
 from .tabulated_chemistry import (
-    TabulatedSiClArMechanism, TabulatedSiSurfaceState, TabulatedSiSurfaceStepResult,
+    TabulatedSiClArMechanism, TabulatedSiPhysicalSputterMechanism,
+    TabulatedSiPhysicalSputterStepResult, TabulatedSiSurfaceState,
+    TabulatedSiSurfaceStepResult,
 )
 from .feature_step_3d import (
     FeatureGeometry3D, FeatureSolve3DResult, FeatureStep3DResult, FeatureStepValidity,
@@ -51,12 +53,20 @@ from .validation_demo import (
 from .neutral_radiosity_3d import (
     DiffuseFormFactors3D, DiffuseNeutralSolve3D, DiffuseSurfaceEmissionSolve3D,
     solve_diffuse_neutral_radiosity_3d, transport_diffuse_surface_emission_3d,
+    transport_surface_product_population_3d,
 )
 from .experimental_boundary import (
     Jeon2022BoundaryClosure, build_jeon_2022_boundary_state,
 )
 from .physical_api import COMMON_FEATURE_ENGINE, PhysicalProcess, PhysicalResult
-from .surface_exchange import SurfaceMaterialExchange, unresolved_surface_exchange
+from .surface_exchange import (
+    SurfaceMaterialExchange, SurfaceProductPopulation, unresolved_surface_exchange,
+    validate_surface_product_routing,
+)
+from .physical_sputtering import (
+    PhysicalSputterMechanism, PhysicalSputterParameters, PhysicalSputterState,
+    PhysicalSputterStepResult,
+)
 
 # High-level 3D API (ViennaPS-shaped). Importing api pulls in the 3D engine (threed/warp).
 from .api import Domain, SF6O2, Process, Result
@@ -64,7 +74,10 @@ from .api import Domain, SF6O2, Process, Result
 __all__ = [
     # Explicit dimensional common engine and legacy compatibility interface.
     "COMMON_FEATURE_ENGINE", "PhysicalProcess", "PhysicalResult",
-    "SurfaceMaterialExchange", "unresolved_surface_exchange",
+    "SurfaceMaterialExchange", "SurfaceProductPopulation", "unresolved_surface_exchange",
+    "validate_surface_product_routing",
+    "PhysicalSputterMechanism", "PhysicalSputterParameters", "PhysicalSputterState",
+    "PhysicalSputterStepResult",
     "Domain", "SF6O2", "Process", "Result",
     # config + low-level (full control)
     "PAR", "Flags", "DEFAULT_FLAGS", "run_etch",
@@ -87,7 +100,9 @@ __all__ = [
     "InteractionAxis", "SurfaceInteractionDomainError", "SurfaceInteractionEvaluation",
     "SurfaceInteractionInterpolationAudit", "SurfaceInteractionTable",
     "KounisMelas2024Tables", "load_kounis_melas_2024_tables",
-    "TabulatedSiClArMechanism", "TabulatedSiSurfaceState", "TabulatedSiSurfaceStepResult",
+    "TabulatedSiClArMechanism", "TabulatedSiPhysicalSputterMechanism",
+    "TabulatedSiPhysicalSputterStepResult", "TabulatedSiSurfaceState",
+    "TabulatedSiSurfaceStepResult",
     "FeatureGeometry3D", "FeatureSolve3DResult", "FeatureStep3DResult", "FeatureStepValidity",
     "advance_feature_step_3d", "conservative_remap_surface_state", "solve_feature_3d",
     "make_rectangular_trench_geometry_3d",
@@ -95,6 +110,7 @@ __all__ = [
     "Jeon2022Prediction", "score_jeon_2022_demo",
     "DiffuseFormFactors3D", "DiffuseNeutralSolve3D", "DiffuseSurfaceEmissionSolve3D",
     "solve_diffuse_neutral_radiosity_3d", "transport_diffuse_surface_emission_3d",
+    "transport_surface_product_population_3d",
     "Jeon2022BoundaryClosure", "build_jeon_2022_boundary_state",
 ]
 

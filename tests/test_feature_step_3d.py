@@ -20,6 +20,9 @@ from petch.feature_step_3d import (
 )
 from petch.interaction_data import load_kounis_melas_2024_tables
 from petch.physical_api import COMMON_FEATURE_ENGINE, PhysicalProcess
+from petch.physical_sputtering import (
+    PhysicalSputterMechanism, PhysicalSputterParameters,
+)
 from petch.surface_kinetics import (
     EnergeticYield,
     ParameterEvidence,
@@ -200,6 +203,38 @@ def test_public_physical_process_uses_common_engine_and_exposes_validity():
     assert not result.validity.parameter_evidence_supports_prediction
     assert len(result.steps) == 1
     assert result.wall_time_s >= 0.0
+
+
+def test_physical_sputter_mechanism_uses_same_feature_engine_and_reports_product_readiness():
+    evidence = {
+        name: ParameterEvidence(
+            "manufactured common-engine sputter gate", "analytic",
+            supports_prediction_within_declared_domain=True)
+        for name in (
+            "bulk_material_unit_density_m3", "sputter_yield",
+            "emitted_product_mass_amu", "emission_angular_model", "emission_energy_model")}
+    mechanism = PhysicalSputterMechanism(PhysicalSputterParameters(
+        material_name="SiO2", material_inventory_name="SiO2_formula_unit",
+        projectile_species=("Ar+",), bulk_material_unit_density_m3=2.2e28,
+        sputter_yield=EnergeticYield(0.2, 20.0, 100.0),
+        emitted_product_name="sputtered_SiO2_unit", emitted_product_mass_amu=60.084,
+        emitted_material_units_per_particle=1.0, emission_angular_model="diffuse_cosine",
+        emission_energy_model="thompson", emission_energy_parameters={
+            "surface_binding_energy_eV": 4.7, "maximum_energy_eV": 100.0},
+        evidence=evidence))
+    geometry, _ = _plane_geometry()
+    ion_boundary = PlasmaBoundaryState(
+        (_boundary().species[0],), reference_plane_m=1.75e-6)
+    result = advance_feature_step_3d(
+        geometry, ion_boundary, {"Ar+": "energetic_bombardment"},
+        mechanism, etchable_material_ids=(1,), duration_s=1.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        n_position=16384, seed=3, cfl_number=0.3, reinitialize=False,
+        transport_device="cpu")
+
+    assert result.surface.material_exchange.product_routing_complete
+    assert result.diagnostics["product_population_count"] == 1
+    assert result.diagnostics["product_transport_ready"] is True
 
 
 def test_deterministic_face_gather_feature_step_is_independent_of_forward_particle_budget():

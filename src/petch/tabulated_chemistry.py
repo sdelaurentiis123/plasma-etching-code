@@ -10,7 +10,10 @@ from .surface_kinetics import (
     EnergeticFlux, FaceResolvedEnergeticFlux, MechanismValidity, ParameterEvidence,
     SurfaceFluxes,
 )
-from .surface_exchange import SurfaceMaterialExchange, unresolved_surface_exchange
+from .surface_exchange import (
+    SurfaceMaterialExchange, SurfaceProductPopulation, unresolved_surface_exchange,
+    validate_surface_product_routing,
+)
 
 
 @dataclass(frozen=True)
@@ -56,6 +59,164 @@ class TabulatedSiSurfaceStepResult:
                 "removed_atoms_m2"):
             value = np.asarray(getattr(self, name), dtype=float).copy()
             value.setflags(write=False); object.__setattr__(self, name, value)
+
+
+@dataclass(frozen=True)
+class TabulatedSiPhysicalSputterStepResult:
+    state: TabulatedSiSurfaceState
+    etch_velocity_m_s: np.ndarray
+    etch_velocity_standard_uncertainty_m_s: np.ndarray
+    removed_atoms_m2: np.ndarray
+    material_exchange: SurfaceMaterialExchange
+    product_populations: tuple[SurfaceProductPopulation, ...]
+    table_fingerprint: str
+    validity: MechanismValidity
+
+    def __post_init__(self):
+        for name in (
+                "etch_velocity_m_s", "etch_velocity_standard_uncertainty_m_s",
+                "removed_atoms_m2"):
+            value = np.asarray(getattr(self, name), dtype=float).copy()
+            value.setflags(write=False); object.__setattr__(self, name, value)
+        populations = validate_surface_product_routing(
+            self.material_exchange, self.product_populations)
+        object.__setattr__(self, "product_populations", populations)
+
+
+class TabulatedSiPhysicalSputterMechanism:
+    """Normal-incidence Ar+ physical sputtering of Si from the pinned DeepMD table.
+
+    The table supplies energy-dependent total Si yield, not a differential energy/angular distribution
+    for emitted Si. Removed material is therefore routed exactly to neutral Si products but those products
+    remain ineligible for transport until that missing distribution is supplied from evidence.
+    """
+
+    def __init__(
+            self, interaction_table: SurfaceInteractionTable, bulk_atom_density_m3: float,
+            bulk_density_evidence: ParameterEvidence, *, ion_species="Ar+",
+            cosine_tolerance=1e-5):
+        table = interaction_table
+        if (table.material != "Si(100)" or table.incident_species != ("Ar+",)
+                or len(table.axes) != 1 or table.axes[0].name != "ion_energy"
+                or set(table.outputs) != {
+                    "physical_sputter_yield", "amorphous_layer_thickness"}
+                or table.output_units["physical_sputter_yield"] != "Si/Ar+"):
+            raise ValueError("interaction table does not implement the Si Ar+ sputter contract")
+        conditions = dict(table.provenance.get("conditions", {}))
+        if conditions.get("incidence_angle_deg") != 0.0:
+            raise ValueError("Si sputter table must declare normal incidence")
+        if (not np.isfinite(bulk_atom_density_m3) or bulk_atom_density_m3 <= 0.0
+                or not isinstance(bulk_density_evidence, ParameterEvidence)
+                or not ion_species or not np.isfinite(cosine_tolerance)
+                or cosine_tolerance < 0.0):
+            raise ValueError("invalid tabulated physical-sputter inputs")
+        self.table = table
+        self.bulk_atom_density_m3 = float(bulk_atom_density_m3)
+        self.bulk_density_evidence = bulk_density_evidence
+        self.ion_species = str(ion_species)
+        self.cosine_tolerance = float(cosine_tolerance)
+
+    @staticmethod
+    def initial_state(shape=()):
+        return TabulatedSiSurfaceState.bare(shape)
+
+    def validity(self, fluxes: SurfaceFluxes):
+        unsupported_neutral = tuple(sorted(
+            name for name, value in fluxes.neutral_flux_m2_s.items()
+            if np.any(np.asarray(value) > 0.0)))
+        unsupported_energetic = tuple(sorted({
+            item.name for item in fluxes.energetic_fluxes
+            if item.name != self.ion_species and np.any(np.asarray(item.flux_m2_s) > 0.0)}))
+        wrong_angle = False
+        for population in fluxes.energetic_fluxes:
+            if population.name != self.ion_species:
+                continue
+            cosine = (population.event_cosine_incidence
+                      if isinstance(population, FaceResolvedEnergeticFlux)
+                      else population.cosine_incidence)
+            wrong_angle |= bool(np.any(np.abs(cosine - 1.0) > self.cosine_tolerance))
+        reasons = []
+        if unsupported_neutral or unsupported_energetic:
+            reasons.append("positive incident flux has no physical-sputter table channel")
+        if wrong_angle:
+            reasons.append("ion incidence leaves the fixed normal-incidence sputter condition")
+        nonpredictive = []
+        if not self.bulk_density_evidence.supports_prediction_within_declared_domain:
+            nonpredictive.append("bulk_atom_density_m3")
+        if self.table.provenance.get("supports_prediction_within_declared_domain") is not True:
+            nonpredictive.append("interaction_table")
+        return MechanismValidity(
+            within_declared_scope=not reasons, reasons=tuple(reasons),
+            unsupported_neutral_species=unsupported_neutral,
+            known_model_form_omissions=(
+                "physical-sputter table has no incidence-angle sweep",
+                "amorphous-layer thickness is reported but not evolved as a damage state",
+                "emitted Si energy and angular distributions are absent from the source table",
+            ),
+            parameter_evidence_supports_prediction=not nonpredictive,
+            nonpredictive_parameters=tuple(nonpredictive))
+
+    def _rate_and_uncertainty(self, population, shape):
+        if isinstance(population, FaceResolvedEnergeticFlux):
+            evaluated = self.table.evaluate({"ion_energy": population.event_energy_eV})
+            rate = np.bincount(
+                population.event_face,
+                weights=(population.event_flux_m2_s
+                         * evaluated.values["physical_sputter_yield"]),
+                minlength=population.face_count)
+            # Source-table uncertainty is epistemic; use the fully correlated linear propagation.
+            uncertainty = np.bincount(
+                population.event_face,
+                weights=(population.event_flux_m2_s
+                         * evaluated.standard_uncertainty["physical_sputter_yield"]),
+                minlength=population.face_count)
+            return np.broadcast_to(rate, shape), np.broadcast_to(uncertainty, shape)
+        evaluated = self.table.evaluate({"ion_energy": population.energy_eV})
+        mean_yield = float(np.dot(
+            population.weight, evaluated.values["physical_sputter_yield"]))
+        mean_uncertainty = float(np.dot(
+            population.weight,
+            evaluated.standard_uncertainty["physical_sputter_yield"]))
+        flux = np.broadcast_to(np.asarray(population.flux_m2_s, dtype=float), shape)
+        return flux * mean_yield, flux * mean_uncertainty
+
+    def advance(self, state, fluxes: SurfaceFluxes, duration_s: float, *, strict=True):
+        if not isinstance(state, TabulatedSiSurfaceState):
+            raise TypeError("Si physical sputtering requires TabulatedSiSurfaceState")
+        if not np.isfinite(duration_s) or duration_s < 0.0:
+            raise ValueError("duration_s must be finite and nonnegative")
+        validity = self.validity(fluxes)
+        if strict and not validity.within_declared_scope:
+            raise ValueError("surface mechanism outside declared scope: " + "; ".join(validity.reasons))
+        shape = state.removed_atoms_m2.shape
+        removal_rate = np.zeros(shape); removal_uncertainty = np.zeros(shape)
+        for population in fluxes.energetic_fluxes:
+            if population.name == self.ion_species:
+                rate, uncertainty = self._rate_and_uncertainty(population, shape)
+                removal_rate += rate; removal_uncertainty += uncertainty
+        removed = removal_rate * float(duration_s)
+        updated = TabulatedSiSurfaceState(state.removed_atoms_m2 + removed)
+        exchange = SurfaceMaterialExchange(
+            removed_units_m2={"Si_atom": removed},
+            outgoing_units_m2={"Si_atom": removed}, unresolved_units_m2={},
+            deposited_units_m2={}, known_limitations=(
+                "outgoing Si is materially identified but lacks a sourced launch distribution",))
+        products = (SurfaceProductPopulation(
+            "Si", "Si_atom", removed, 1.0, 28.085,
+            provenance={
+                "source": self.table.provenance["source"],
+                "table_fingerprint": self.table.fingerprint,
+                "evidence_type": self.table.provenance["evidence_type"],
+                "missing": "differential emitted energy-angle distribution",
+            }),)
+        return TabulatedSiPhysicalSputterStepResult(
+            state=updated,
+            etch_velocity_m_s=removal_rate / self.bulk_atom_density_m3,
+            etch_velocity_standard_uncertainty_m_s=(
+                removal_uncertainty / self.bulk_atom_density_m3),
+            removed_atoms_m2=removed, material_exchange=exchange,
+            product_populations=products, table_fingerprint=self.table.fingerprint,
+            validity=validity)
 
 
 class TabulatedSiClArMechanism:

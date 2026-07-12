@@ -5,8 +5,13 @@ import pytest
 
 from petch.interaction_data import load_kounis_melas_2024_tables
 from petch.surface_interaction_table import SurfaceInteractionDomainError
-from petch.surface_kinetics import EnergeticFlux, ParameterEvidence, SurfaceFluxes
-from petch.tabulated_chemistry import TabulatedSiClArMechanism, TabulatedSiSurfaceState
+from petch.surface_kinetics import (
+    EnergeticFlux, FaceResolvedEnergeticFlux, ParameterEvidence, SurfaceFluxes,
+)
+from petch.tabulated_chemistry import (
+    TabulatedSiClArMechanism, TabulatedSiPhysicalSputterMechanism,
+    TabulatedSiSurfaceState,
+)
 
 
 DATA = (
@@ -20,6 +25,15 @@ def _mechanism():
         table, SI_ATOM_DENSITY_M3,
         ParameterEvidence(
             "Kounis-Melas OSTI 2589032 RIE in.lammps: diamond-Si lattice a=5.43 angstrom",
+            "source_derived", supports_prediction_within_declared_domain=True))
+
+
+def _sputter_mechanism():
+    table = load_kounis_melas_2024_tables(DATA).sputtering
+    return TabulatedSiPhysicalSputterMechanism(
+        table, SI_ATOM_DENSITY_M3,
+        ParameterEvidence(
+            "Kounis-Melas OSTI 2589032 diamond-Si lattice a=5.43 angstrom",
             "source_derived", supports_prediction_within_declared_domain=True))
 
 
@@ -73,3 +87,47 @@ def test_tabulated_si_rie_refuses_unparameterized_one_sided_exposures():
         mechanism.advance(state, SurfaceFluxes({"Cl2": 2e22}), 1.0)
     with pytest.raises(ValueError, match="simultaneous"):
         mechanism.advance(state, SurfaceFluxes({}, (_ions(),)), 1.0)
+
+
+def test_tabulated_si_physical_sputter_routes_every_removed_atom_to_named_product():
+    mechanism = _sputter_mechanism(); state = mechanism.initial_state((3,))
+    flux = np.array([1e20, 2e20, 3e20])
+    result = mechanism.advance(
+        state, SurfaceFluxes({}, (_ions(energy=100.0, flux=flux),)), 2.0)
+    source = mechanism.table.evaluate({"ion_energy": 100.0})
+    expected = 2.0 * flux * source.values["physical_sputter_yield"]
+
+    assert np.allclose(result.removed_atoms_m2, expected)
+    assert result.material_exchange.product_routing_complete
+    assert np.array_equal(result.material_exchange.outgoing_units_m2["Si_atom"], expected)
+    assert len(result.product_populations) == 1
+    assert result.product_populations[0].name == "Si"
+    assert np.array_equal(result.product_populations[0].integrated_particle_count_m2, expected)
+    assert not result.product_populations[0].transport_ready
+    assert "energy and angular" in " ".join(result.validity.known_model_form_omissions)
+
+
+def test_tabulated_si_physical_sputter_integrates_face_resolved_energy_events():
+    mechanism = _sputter_mechanism(); state = mechanism.initial_state((2,))
+    events = FaceResolvedEnergeticFlux(
+        "Ar+", 2, event_face=np.array([0, 0, 1]),
+        event_flux_m2_s=np.array([1e20, 2e20, 4e20]),
+        event_energy_eV=np.array([50.0, 200.0, 100.0]),
+        event_cosine_incidence=np.ones(3))
+    result = mechanism.advance(state, SurfaceFluxes({}, (events,)), 1.0)
+    yields = mechanism.table.evaluate({"ion_energy": np.array([50.0, 200.0, 100.0])})
+    expected = np.array([
+        1e20 * yields.values["physical_sputter_yield"][0]
+        + 2e20 * yields.values["physical_sputter_yield"][1],
+        4e20 * yields.values["physical_sputter_yield"][2],
+    ])
+
+    assert np.allclose(result.removed_atoms_m2, expected)
+
+
+def test_tabulated_si_physical_sputter_refuses_angle_and_energy_extrapolation():
+    mechanism = _sputter_mechanism(); state = mechanism.initial_state()
+    with pytest.raises(ValueError, match="normal-incidence"):
+        mechanism.advance(state, SurfaceFluxes({}, (_ions(cosine=0.9),)), 1.0)
+    with pytest.raises(SurfaceInteractionDomainError, match="ion_energy"):
+        mechanism.advance(state, SurfaceFluxes({}, (_ions(energy=300.0),)), 1.0)

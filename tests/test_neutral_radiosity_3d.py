@@ -5,7 +5,9 @@ from petch.neutral_radiosity_3d import (
     DiffuseFormFactors3D,
     solve_diffuse_neutral_radiosity_3d,
     transport_diffuse_surface_emission_3d,
+    transport_surface_product_population_3d,
 )
+from petch.surface_exchange import SurfaceProductPopulation
 
 
 def test_open_plane_reacts_and_escapes_without_artificial_reemission():
@@ -86,3 +88,45 @@ def test_surface_emission_multiple_impacts_conserve_material():
         + result.escaped_after_reflection_rate_s,
         rtol=2e-13)
     assert result.relative_balance_error < 2e-13
+
+
+def test_named_surface_product_population_reuses_conservative_emission_operator():
+    factors = DiffuseFormFactors3D(
+        face_count=2, source_face=np.array([0, 1]), target_face=np.array([1, 0]),
+        transfer_fraction=np.array([0.4, 0.2]), escape_fraction=np.array([0.6, 0.8]),
+        rays_per_face=10)
+    product = SurfaceProductPopulation(
+        "Si", "Si_atom", integrated_particle_count_m2=np.array([2.0, 0.0]),
+        material_units_per_particle=1.0, mass_amu=28.085,
+        angular_model="diffuse_cosine", energy_model="thompson",
+        energy_parameters={
+            "surface_binding_energy_eV": 4.7, "maximum_energy_eV": 100.0},
+        provenance={"source": "manufactured transport bridge"})
+    result = transport_surface_product_population_3d(
+        product, duration_s=2.0, face_area_m2=np.array([1.0, 2.0]),
+        form_factors=factors, reaction_probability=np.ones(2))
+
+    assert np.isclose(result.emitted_rate_s, 1.0)
+    assert np.isclose(result.reacted_rate_s, 0.4)
+    assert np.isclose(result.escaped_without_impact_rate_s, 0.6)
+
+
+def test_surface_product_transport_refuses_missing_or_unsupported_launch_law():
+    factors = DiffuseFormFactors3D(
+        face_count=1, source_face=np.array([], dtype=int),
+        target_face=np.array([], dtype=int), transfer_fraction=np.array([]),
+        escape_fraction=np.array([1.0]), rays_per_face=1)
+    unresolved = SurfaceProductPopulation(
+        "Si", "Si_atom", [1.0], 1.0, 28.085,
+        provenance={"source": "yield-only table"})
+    with pytest.raises(ValueError, match="lacks"):
+        transport_surface_product_population_3d(
+            unresolved, 1.0, [1.0], factors, [1.0])
+    unsupported = SurfaceProductPopulation(
+        "Si", "Si_atom", [1.0], 1.0, 28.085,
+        angular_model="cosine_power_3", energy_model="thompson",
+        energy_parameters={
+            "surface_binding_energy_eV": 4.7, "maximum_energy_eV": 100.0})
+    with pytest.raises(ValueError, match="cannot consume"):
+        transport_surface_product_population_3d(
+            unsupported, 1.0, [1.0], factors, [1.0])
