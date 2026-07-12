@@ -64,6 +64,24 @@ class SurfaceInteractionEvaluation:
 
 
 @dataclass(frozen=True)
+class SurfaceInteractionInterpolationAudit:
+    """Interior-node leave-one-out error, kept separate from source uncertainty."""
+
+    axis_name: str
+    output_name: str
+    coordinates: np.ndarray
+    observed: np.ndarray
+    predicted: np.ndarray
+    absolute_error: np.ndarray
+    table_fingerprint: str
+
+    def __post_init__(self):
+        for name in ("coordinates", "observed", "predicted", "absolute_error"):
+            array = np.asarray(getattr(self, name), dtype=float).copy()
+            array.setflags(write=False); object.__setattr__(self, name, array)
+
+
+@dataclass(frozen=True)
 class SurfaceInteractionTable:
     """Regular-grid physical response table with explicit validity and conservation contracts.
 
@@ -231,3 +249,32 @@ class SurfaceInteractionTable:
             values=values, standard_uncertainty=uncertainty,
             extrapolated_fraction=float(np.mean(outside)) if outside.size else float(outside),
             outside_axes=tuple(outside_axes), table_fingerprint=self.fingerprint)
+
+    def leave_one_out_interpolation_audit(self, output_name):
+        """Withhold each interior node of a one-axis table and predict it from its neighbors.
+
+        Endpoint extrapolation is intentionally excluded. The result measures interpolation model
+        error at released coordinates; it does not replace or combine with the source's MD/experimental
+        standard uncertainty.
+        """
+        if len(self.axes) != 1:
+            raise ValueError("leave-one-out audit currently requires exactly one interaction axis")
+        if output_name not in self.outputs:
+            raise ValueError(f"unknown interaction output: {output_name!r}")
+        axis = self.axes[0]
+        if axis.values.size < 3:
+            raise ValueError("leave-one-out audit requires at least three axis nodes")
+        coordinate = axis.interpolation_values
+        observed = self.outputs[output_name]
+        held_index = np.arange(1, axis.values.size - 1)
+        predicted = np.empty(held_index.size)
+        for output_index, withheld in enumerate(held_index):
+            retained = np.arange(axis.values.size) != withheld
+            predicted[output_index] = np.interp(
+                coordinate[withheld], coordinate[retained], observed[retained])
+        held_observed = observed[held_index]
+        return SurfaceInteractionInterpolationAudit(
+            axis_name=axis.name, output_name=output_name,
+            coordinates=axis.values[held_index], observed=held_observed,
+            predicted=predicted, absolute_error=np.abs(predicted - held_observed),
+            table_fingerprint=self.fingerprint)

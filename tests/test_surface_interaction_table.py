@@ -112,3 +112,35 @@ def test_surface_interaction_table_enforces_branch_conservation_and_output_bound
     payload["outputs"]["silicon_product_fraction"][0][0][0] = 0.5
     with pytest.raises(ValueError, match="sum to one"):
         SurfaceInteractionTable.from_payload(payload)
+
+
+def test_one_axis_leave_one_out_audit_reports_interpolation_error_separately():
+    axis = InteractionAxis("energy", np.array([10.0, 20.0, 30.0, 40.0]), "eV")
+    table = SurfaceInteractionTable(
+        material="Si", incident_species=("Ar+",), axes=(axis,),
+        outputs={"yield": np.array([1.0, 4.0, 9.0, 16.0])},
+        output_units={"yield": "Si/ion"},
+        standard_uncertainty={"yield": np.array([0.1, 0.2, 0.3, 0.4])},
+        bounds={"yield": (0.0, None)},
+        provenance={"source": "manufactured quadratic", "evidence_type": "analytic"})
+
+    audit = table.leave_one_out_interpolation_audit("yield")
+
+    assert np.array_equal(audit.coordinates, [20.0, 30.0])
+    assert np.array_equal(audit.observed, [4.0, 9.0])
+    assert np.array_equal(audit.predicted, [5.0, 10.0])
+    assert np.array_equal(audit.absolute_error, [1.0, 1.0])
+    assert audit.table_fingerprint == table.fingerprint
+    assert not hasattr(audit, "combined_uncertainty")
+
+
+def test_leave_one_out_audit_refuses_multiaxis_and_unknown_outputs():
+    with pytest.raises(ValueError, match="exactly one"):
+        _table().leave_one_out_interpolation_audit("etch_yield")
+    axis = InteractionAxis("energy", np.array([10.0, 20.0, 30.0]), "eV")
+    table = SurfaceInteractionTable(
+        material="Si", incident_species=("Ar+",), axes=(axis,),
+        outputs={"yield": np.ones(3)}, output_units={"yield": "Si/ion"},
+        provenance={"source": "manufactured", "evidence_type": "analytic"})
+    with pytest.raises(ValueError, match="unknown"):
+        table.leave_one_out_interpolation_audit("damage")

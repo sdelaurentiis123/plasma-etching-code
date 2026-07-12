@@ -200,8 +200,10 @@ far too slow.
 - The continuous-etch path still centers on compact empirical yield laws.
 - `ale.py` implements the later ALE reduced-order model, but the general evolving feature solver does
   not carry a unified per-surface coverage/mixed-layer/damage state.
-- There is no versioned schema for energy-angle-flux-ratio yield and product-branching tables.
-- Extrapolation outside a table's validated domain is not centrally prohibited or reported.
+- The versioned interaction schema and sourced Si tables now exist, but no Si-Cl2-Ar+ state mechanism
+  consumes them through the same evolving feature interface as the SiO2 mechanism.
+- Released tables are sparse and do not include incidence-angle dependence. Leave-one-out interpolation
+  error is now measurable, but the compact-law comparison and angle data remain open.
 
 ### Current implementation update (2026-07-12)
 
@@ -209,20 +211,30 @@ far too slow.
   replays all source nodes exactly, supports declared linear/log axes, carries separate standard
   uncertainty, constrains product-branch sums, fingerprints serialized payloads, and refuses silent
   extrapolation by default.
-- Its tests use manufactured values only. OSTI confirms that dataset 2589032 contains result tables,
-  model/training data, and example simulations, but the Princeton public download currently stops this
-  automated session at human verification. No values were inferred from figures or substituted from the
-  article abstract. Acquiring and checksumming the small result tables therefore remains open.
+- Princeton's public catalog JSON exposed the CC-BY archive through its Globus endpoint without
+  bypassing the human-verification page. The 595,544,258-byte archive is pinned at SHA-256
+  `4c9fa0b9268ac314da77b1012906dff4e45c5af79afd7ea674b26ace48e0f269`.
+- Byte-exact copies of `Sputtering.csv`, `RIE.csv`, and `ALE/Products.csv` are now retained under
+  `data/surface_interactions/kounis_melas_2024/`, each with its source checksum. The 596 MB model,
+  training corpus, inputs, and 13,020-row ALE trajectory remain reproducibly available from the pinned
+  archive rather than being duplicated in Git.
+- `load_kounis_melas_2024_tables` constructs sourced tables for Ar+ physical sputter yield/damage
+  thickness, 100 eV Si-Cl2-Ar+ reactive etch yield versus flux ratio, and 80 eV species-resolved ALE
+  products. Values and uncertainty replay at every archived node and default extrapolation refusal is
+  tested. Evidence remains labeled `DeepMD_molecular_dynamics`, never experiment.
+- The remaining gate is architectural: run a Si-Cl2-Ar+ mechanism through the unchanged evolving
+  feature-state interface. Merely loading a second chemistry table does not prove chemistry generality.
 
 ### Attack sequence
 
-1. Acquire and checksum the OSTI 2589032 result tables without vendoring the large training corpus.
-2. Define a units-explicit `SurfaceInteractionTable` containing material/species, energy, angle,
-   flux-ratio/coverage axes, yield, product branching, damage/mixed-layer outputs, uncertainty, and
-   source citation.
-3. Reproduce the paper tables exactly at their nodes; test interpolation by leave-one-out withholding.
-4. Refuse silent extrapolation by default. Permit an explicit policy that records the extrapolated
-   fraction of surface impacts.
+1. **Done:** acquire and checksum the OSTI 2589032 result tables without vendoring the large corpus.
+2. **Done for released axes:** define units-explicit tables containing material/species, energy or
+   flux-ratio/dose axes, yield, product outputs, uncertainty, and source citation. The released summary
+   tables contain no incidence-angle sweep.
+3. **Done for archived summary tables:** reproduce nodes exactly and report interior-node leave-one-out
+   interpolation error separately from source uncertainty.
+4. **Done:** refuse silent extrapolation by default; explicit linear extrapolation records the affected
+   fraction and axes.
 5. Compare the table path with the current compact law on identical frozen incident distributions.
 6. Couple the table to stateful surface chemistry only after the static replay and units gates pass.
 
