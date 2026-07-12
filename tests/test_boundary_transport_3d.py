@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+import warp as wp
 
 from petch.boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
 from petch.boundary_transport_3d import trace_boundary_state_first_hit_3d
@@ -10,6 +11,9 @@ from petch.surface_kinetics import (
     ReducedSiO2FluorocarbonParameters,
     SiO2SurfaceState,
 )
+
+
+DEVICES = ["cpu"] + (["cuda:0"] if wp.is_cuda_available() else [])
 
 
 def _flat_unit_plane():
@@ -36,12 +40,13 @@ def _boundary(position_m=None):
         provenance={"source": "manufactured flat-plane gate"})
 
 
-def test_first_hit_3d_preserves_dimensional_species_flux_and_exact_energy_angle_events():
+@pytest.mark.parametrize("device", DEVICES)
+def test_first_hit_3d_preserves_dimensional_species_flux_and_exact_energy_angle_events(device):
     verts, faces, areas = _flat_unit_plane()
     result = trace_boundary_state_first_hit_3d(
         _boundary(), {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
         verts, faces, areas, source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
-        mesh_length_unit_m=1e-6, n_position=256, seed=7, device="cpu")
+        mesh_length_unit_m=1e-6, n_position=256, seed=7, device=device)
 
     assert result.transport_model == "collisionless_absorbing_first_hit_3d"
     assert result.hit_probability == {"Ar+": 1.0, "CF2": 1.0}
@@ -92,7 +97,8 @@ def test_boundary_to_surface_chain_conserves_dimensional_formula_unit_removal():
     assert np.isclose(removed_per_source_area, expected, rtol=1e-12)
 
 
-def test_first_hit_3d_reports_geometric_oblique_incidence_without_angle_fit():
+@pytest.mark.parametrize("device", DEVICES)
+def test_first_hit_3d_reports_geometric_oblique_incidence_without_angle_fit(device):
     verts = np.array([
         [-2.0, -2.0, 0.0], [2.0, -2.0, 0.0],
         [2.0, 2.0, 0.0], [-2.0, 2.0, 0.0],
@@ -106,7 +112,7 @@ def test_first_hit_3d_reports_geometric_oblique_incidence_without_angle_fit():
     result = trace_boundary_state_first_hit_3d(
         boundary, {"ion": "energetic_bombardment"}, verts, faces, areas,
         source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
-        mesh_length_unit_m=1e-6, n_position=16, seed=5, device="cpu")
+        mesh_length_unit_m=1e-6, n_position=16, seed=5, device=device)
 
     events = result.surface_fluxes.energetic_fluxes[0]
     assert result.hit_probability["ion"] == 1.0
