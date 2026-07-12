@@ -27,6 +27,8 @@ JEON_2022_DEPTH_SHA256 = (
     "0f737d0d44866684513e8f16fd3a4feab8618a81866ea02357a6b3f5da98310f")
 JEON_2022_CONTROL_SHA256 = (
     "2c4e28cd4b3cbf34f356a5a7dd292a3a93ecdcbfbad291c44bba1b5f91c4ee8a")
+JEON_2022_ELECTRON_BIAS_SHA256 = (
+    "f775e240914a8f874990596876e504e28fde331793453a405b45f4ac2945bae8")
 
 
 @dataclass(frozen=True)
@@ -114,6 +116,29 @@ class Jeon2022PlasmaControl:
     axis_slope_ratio_per_pixel: float
     axis_intercept_ratio: float
     digitization_uncertainty_ratio: float
+    published_errorbar_semantics: str
+    evidence_type: str
+    role: str
+    source_location: str
+
+
+@dataclass(frozen=True)
+class Jeon2022ElectronBiasControl:
+    source_figure: str
+    condition_family: str
+    c4f8_fraction: float
+    pulse_off_ms: float
+    electron_density_m3: float
+    electron_pixel_y: float
+    electron_axis_transform: str
+    electron_axis_slope_per_pixel: float
+    electron_axis_intercept: float
+    electron_digitization_uncertainty_m3: float
+    self_bias_magnitude_v: float
+    self_bias_pixel_y: float
+    self_bias_axis_slope_v_per_pixel: float
+    self_bias_axis_intercept_v: float
+    self_bias_digitization_uncertainty_v: float
     published_errorbar_semantics: str
     evidence_type: str
     role: str
@@ -278,6 +303,89 @@ def load_jeon_2022_plasma_controls(path, *, verify_checksum=True):
             or any(item.published_errorbar_semantics != "not_specified" for item in rows)):
         raise ValueError("Jeon 2022 plasma controls violate their digitization/evidence contract")
     return rows
+
+
+def load_jeon_2022_electron_bias_controls(path, *, verify_checksum=True):
+    """Load digitized electron density and self-bias diagnostics as boundary evidence.
+
+    The self-bias magnitude is an experimentally constrained sheath-energy scale, not an ion energy
+    distribution. Electron densities can reproduce the paper's Bohm-flux estimate through
+    :func:`jeon_2022_bohm_ion_flux_m2_s`; neither diagnostic supplies ion composition.
+    """
+    expected = [
+        "source_figure", "condition_family", "c4f8_fraction", "pulse_off_ms",
+        "electron_density_m3", "electron_pixel_y", "electron_axis_transform",
+        "electron_axis_slope_per_pixel", "electron_axis_intercept",
+        "electron_digitization_uncertainty_m3", "self_bias_magnitude_v",
+        "self_bias_pixel_y", "self_bias_axis_slope_v_per_pixel",
+        "self_bias_axis_intercept_v", "self_bias_digitization_uncertainty_v",
+        "published_errorbar_semantics", "evidence_type", "role", "source_location",
+    ]
+    raw = _verified_csv_rows(
+        path, expected, JEON_2022_ELECTRON_BIAS_SHA256, verify_checksum)
+    rows = tuple(Jeon2022ElectronBiasControl(
+        source_figure=row["source_figure"], condition_family=row["condition_family"],
+        c4f8_fraction=float(row["c4f8_fraction"]), pulse_off_ms=float(row["pulse_off_ms"]),
+        electron_density_m3=float(row["electron_density_m3"]),
+        electron_pixel_y=float(row["electron_pixel_y"]),
+        electron_axis_transform=row["electron_axis_transform"],
+        electron_axis_slope_per_pixel=float(row["electron_axis_slope_per_pixel"]),
+        electron_axis_intercept=float(row["electron_axis_intercept"]),
+        electron_digitization_uncertainty_m3=float(
+            row["electron_digitization_uncertainty_m3"]),
+        self_bias_magnitude_v=float(row["self_bias_magnitude_v"]),
+        self_bias_pixel_y=float(row["self_bias_pixel_y"]),
+        self_bias_axis_slope_v_per_pixel=float(row["self_bias_axis_slope_v_per_pixel"]),
+        self_bias_axis_intercept_v=float(row["self_bias_axis_intercept_v"]),
+        self_bias_digitization_uncertainty_v=float(
+            row["self_bias_digitization_uncertainty_v"]),
+        published_errorbar_semantics=row["published_errorbar_semantics"],
+        evidence_type=row["evidence_type"], role=row["role"],
+        source_location=row["source_location"]) for row in raw)
+    electron_replay = np.asarray([
+        (10.0 ** (item.electron_axis_slope_per_pixel * item.electron_pixel_y
+                  + item.electron_axis_intercept)
+         if item.electron_axis_transform == "log10"
+         else item.electron_axis_slope_per_pixel * item.electron_pixel_y
+         + item.electron_axis_intercept)
+        for item in rows])
+    bias_replay = np.asarray([
+        item.self_bias_axis_slope_v_per_pixel * item.self_bias_pixel_y
+        + item.self_bias_axis_intercept_v for item in rows])
+    keys = {(item.condition_family, item.c4f8_fraction, item.pulse_off_ms) for item in rows}
+    if (len(keys) != len(rows)
+            or np.max(np.abs(electron_replay / np.asarray(
+                [item.electron_density_m3 for item in rows]) - 1.0)) > 3e-6
+            or np.max(np.abs(bias_replay - np.asarray(
+                [item.self_bias_magnitude_v for item in rows]))) > 0.051
+            or any(item.electron_axis_transform not in {"linear", "log10"}
+                   or item.electron_density_m3 <= 0.0
+                   or item.electron_digitization_uncertainty_m3 <= 0.0
+                   or item.self_bias_magnitude_v <= 0.0
+                   or item.self_bias_digitization_uncertainty_v <= 0.0 for item in rows)
+            or any(item.evidence_type != "diagnostic_digitized" for item in rows)
+            or any(item.role != "physical_boundary_input" for item in rows)
+            or any(item.published_errorbar_semantics != "not_specified" for item in rows)):
+        raise ValueError("Jeon 2022 electron/bias controls violate their evidence contract")
+    return rows
+
+
+def jeon_2022_bohm_ion_flux_m2_s(
+        control, *, electron_temperature_eV=3.0, ion_mass_u=39.948):
+    """Replay Jeong et al.'s assumed Bohm ion flux from its measured electron density.
+
+    This is a diagnostic-derived boundary estimate, not a direct ion-flux measurement. The defaults
+    are the paper's assumed 3 eV electron temperature and Ar ion mass; ion composition was unmeasured.
+    """
+    if not isinstance(control, Jeon2022ElectronBiasControl):
+        raise TypeError("Bohm replay requires a Jeon2022ElectronBiasControl")
+    if electron_temperature_eV <= 0.0 or ion_mass_u <= 0.0:
+        raise ValueError("electron temperature and ion mass must be positive")
+    elementary_charge_c = 1.602176634e-19
+    atomic_mass_kg = 1.66053906660e-27
+    bohm_velocity_m_s = np.sqrt(
+        electron_temperature_eV * elementary_charge_c / (ion_mass_u * atomic_mass_kg))
+    return float(control.electron_density_m3 * bohm_velocity_m_s)
 
 
 def _positive_ratio_interval(numerator, numerator_budget, denominator, denominator_budget):

@@ -42,6 +42,13 @@ used a simplified on/off duty model for pulsed operation. Published error bars a
 statistical semantics are not stated. The CSV therefore retains `not_specified` rather than inventing a
 standard deviation.
 
+`digitized_electron_bias_controls.csv` independently replays the black electron-density markers and
+blue self-bias markers in Figures 3b, 6b, and 8b. It stores each marker's y pixel, the linear or log-axis
+map, and conservative digitization bounds (4e14 m^-3 and 20 V). Electron density supports replay of the
+paper's Bohm-flux estimate using its assumed 3 eV electron temperature and Ar ion mass. Self-bias is an
+energy-scale diagnostic only: it is not mislabeled as a measured IEDF, and the ion composition remains
+unmeasured.
+
 The vertical pixel-to-depth maps were least-squares fits to the four labeled y-axis ticks
 (400, 800, 1200, 1600 nm) in each source image. Every CSV row retains its marker-centre pixel,
 slope, and intercept so the reported depth can be replayed rather than trusted as an opaque number.

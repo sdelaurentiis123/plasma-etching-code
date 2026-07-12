@@ -5,8 +5,10 @@ import pytest
 
 from petch.experimental_data import (
     build_jeon_2022_dimensionless_targets,
+    jeon_2022_bohm_ion_flux_m2_s,
     load_bosch_wafer_measurements,
     load_bosch_wafer_measurements_89pt,
+    load_jeon_2022_electron_bias_controls,
     load_jeon_2022_plasma_controls,
     load_jeon_2022_trench_depths,
     load_krueger_2024_evidence,
@@ -26,6 +28,7 @@ JEON_DATA = (
     Path(__file__).parents[1] / "data" / "experimental" / "jeon_2022"
     / "digitized_trench_depths.csv")
 JEON_CONTROLS = JEON_DATA.with_name("digitized_plasma_controls.csv")
+JEON_ELECTRON_BIAS = JEON_DATA.with_name("digitized_electron_bias_controls.csv")
 
 
 def test_bosch_wafer_measurements_have_verified_provenance_and_units():
@@ -185,6 +188,43 @@ def test_jeon_2022_controls_reject_unverified_digitization(tmp_path):
     altered.write_bytes(JEON_CONTROLS.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="checksum mismatch"):
         load_jeon_2022_plasma_controls(altered)
+
+
+def test_jeon_electron_bias_diagnostics_replay_physical_boundary_evidence():
+    rows = load_jeon_2022_electron_bias_controls(JEON_ELECTRON_BIAS)
+
+    assert len(rows) == 12
+    assert {item.electron_axis_transform for item in rows} == {"linear", "log10"}
+    assert all(item.evidence_type == "diagnostic_digitized" for item in rows)
+    assert all(item.role == "physical_boundary_input" for item in rows)
+    assert min(item.self_bias_magnitude_v for item in rows) > 800.0
+    assert max(item.self_bias_magnitude_v for item in rows) < 950.0
+    cw_20 = next(item for item in rows if item.source_figure == "3b"
+                 and item.c4f8_fraction == 0.2)
+    assert np.isclose(jeon_2022_bohm_ion_flux_m2_s(cw_20), 9.16e18, rtol=0.01)
+
+
+def test_jeon_independently_digitized_electron_bias_controls_close_within_budget():
+    rows = load_jeon_2022_electron_bias_controls(JEON_ELECTRON_BIAS)
+    by_key = {
+        (item.source_figure, item.c4f8_fraction, item.pulse_off_ms): item
+        for item in rows}
+    for fraction, pulse_figure in ((0.2, "6b"), (0.8, "8b")):
+        gas_sweep = by_key[("3b", fraction, 0.0)]
+        pulse_sweep = by_key[(pulse_figure, fraction, 0.0)]
+        assert abs(gas_sweep.electron_density_m3 - pulse_sweep.electron_density_m3) <= max(
+            gas_sweep.electron_digitization_uncertainty_m3,
+            pulse_sweep.electron_digitization_uncertainty_m3)
+        assert abs(gas_sweep.self_bias_magnitude_v - pulse_sweep.self_bias_magnitude_v) <= max(
+            gas_sweep.self_bias_digitization_uncertainty_v,
+            pulse_sweep.self_bias_digitization_uncertainty_v)
+
+
+def test_jeon_electron_bias_diagnostics_reject_unverified_digitization(tmp_path):
+    altered = tmp_path / "electron_bias.csv"
+    altered.write_bytes(JEON_ELECTRON_BIAS.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        load_jeon_2022_electron_bias_controls(altered)
 
 
 def test_jeon_dimensionless_targets_remove_rate_scale_without_split_leakage():
