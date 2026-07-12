@@ -592,7 +592,9 @@ def solve_boundary_state_charging(
         values = surface_voltage[conductor_ids == component]
         conductor_voltage[component] = float(values.mean()) if values.size else 0.0
     history = []; interval_history = []; field_history = []; quadrature_history = []; adaptive_levels = {}
+    forward_adaptive_levels = {}
     beta_current = float(beta); pending_step = None; rejected_steps = 0
+    last_accepted_state = None
     trial_merit_history = []; accepted_beta_history = []
     hybrid_method_hint = {}
     if trust_merit not in ("rms", "max"):
@@ -630,6 +632,8 @@ def solve_boundary_state_charging(
                 forward_options = dict(options.pop("forward_options", {}))
                 method_switch_factor = float(options.pop("method_switch_factor", 2.0))
                 estimator_consistency_sigma = float(options.pop("consistency_sigma", 5.0))
+                estimator_support_sigma = float(options.pop("support_sigma", 2.0))
+                estimator_support_ratio = float(options.pop("support_ratio", 0.5))
                 options.setdefault("n_face_position", n_face_position)
                 warm_start_backoff = int(options.pop("warm_start_backoff", 0))
                 if warm_start_backoff < 0:
@@ -644,6 +648,13 @@ def solve_boundary_state_charging(
                     # the same tolerances as the adjoint options unless explicitly overridden.
                     element_abs = options.get("element_absolute_tolerance", 1e-3)
                     element_rel = options.get("element_relative_tolerance", 0.05)
+                    if species.name in forward_adaptive_levels:
+                        forward_base = int(forward_options.get("base_log2", 8))
+                        forward_initial = np.maximum(
+                            forward_adaptive_levels[species.name] - warm_start_backoff,
+                            forward_base)
+                        forward_options.setdefault(
+                            "initial_log2_samples", forward_initial)
                     hybrid = bidirectional_boundary_state_cell_flux(
                         boundary_state, species.name, potential, solid, cells, normals,
                         proposal_species=proposals.get(species.name), adjoint_options=options,
@@ -652,8 +663,13 @@ def solve_boundary_state_charging(
                         element_relative_tolerance=element_rel,
                         method_hint=hybrid_method_hint.get(species.name),
                         switch_factor=method_switch_factor,
-                        consistency_sigma=estimator_consistency_sigma)
+                        consistency_sigma=estimator_consistency_sigma,
+                        support_sigma=estimator_support_sigma,
+                        support_ratio=estimator_support_ratio)
                     hybrid_method_hint[species.name] = hybrid["method"].copy()
+                    adaptive_levels[species.name] = hybrid["adjoint"].log2_samples.copy()
+                    forward_adaptive_levels[species.name] = (
+                        hybrid["forward"].log2_samples.copy())
                     species_quadrature[species.name] = hybrid
                     if not hybrid["converged"]:
                         failed = np.where(~hybrid["cell_converged"])[0]
@@ -740,6 +756,9 @@ def solve_boundary_state_charging(
                 name: value.copy() for name, value in pending_step["hybrid_method_hint"].items()}
             adaptive_levels = {
                 name: value.copy() for name, value in pending_step["adaptive_levels"].items()}
+            forward_adaptive_levels = {
+                name: value.copy()
+                for name, value in pending_step["forward_adaptive_levels"].items()}
             beta_current *= 0.5; rejected_steps += 1; pending_step = None
             anderson_x.clear(); anderson_f.clear()
             if beta_current < minimum_beta:
@@ -751,6 +770,16 @@ def solve_boundary_state_charging(
         pending_step = None
         history.append(balance); interval_history.append(interval_balance)
         accepted_beta_history.append(beta_current)
+        last_accepted_state = dict(
+            surface_voltage=surface_voltage.copy(),
+            conductor_voltage=conductor_voltage.copy(), potential=potential.copy(),
+            ion_current=ion_current.copy(), electron_current=electron_current.copy(),
+            ion_current_stderr=ion_current_stderr.copy(),
+            electron_current_stderr=electron_current_stderr.copy(),
+            species_current={name: value.copy() for name, value in species_current.items()},
+            species_current_stderr={
+                name: value.copy() for name, value in species_current_stderr.items()},
+            quadrature=species_quadrature)
         if (balance_tol is not None and len(history) >= int(min_iter)
                 and interval_balance["max_abs_log_ratio"] <= balance_tol):
             break
@@ -761,7 +790,9 @@ def solve_boundary_state_charging(
                 hybrid_method_hint={
                     name: value.copy() for name, value in hybrid_method_hint.items()},
                 adaptive_levels={
-                    name: value.copy() for name, value in adaptive_levels.items()})
+                    name: value.copy() for name, value in adaptive_levels.items()},
+                forward_adaptive_levels={
+                    name: value.copy() for name, value in forward_adaptive_levels.items()})
         by_cell = {}
         for face_index, cell in enumerate(cells):
             if components[face_index] == 0:
@@ -809,6 +840,19 @@ def solve_boundary_state_charging(
                 surface_voltage[descriptor[1]] = value
             else:
                 conductor_voltage[descriptor[1]] = value
+    # A final nonlinear proposal is not an evaluated state. Return the last accepted state so voltage,
+    # currents, residuals, and checkpoint restarts all describe the same physical iterate. This also
+    # handles a rejected terminal trust-region trial without leaking its currents into the result.
+    if last_accepted_state is None:
+        raise RuntimeError("charging solve produced no accepted state")
+    surface_voltage[:] = last_accepted_state["surface_voltage"]
+    conductor_voltage[:] = last_accepted_state["conductor_voltage"]
+    ion_current = last_accepted_state["ion_current"]
+    electron_current = last_accepted_state["electron_current"]
+    ion_current_stderr = last_accepted_state["ion_current_stderr"]
+    electron_current_stderr = last_accepted_state["electron_current_stderr"]
+    species_current = last_accepted_state["species_current"]
+    species_current_stderr = last_accepted_state["species_current_stderr"]
     for component in range(1, conductor_voltage.size):
         surface_voltage[conductor_ids == component] = conductor_voltage[component]
     potential, field_final = solve_nodal_laplace(
@@ -823,7 +867,10 @@ def solve_boundary_state_charging(
         interval_balance_history=interval_history, interval_balance_final=interval_history[-1],
         field_history=field_history, field_final=field_final,
         quadrature_history=quadrature_history,
+        quadrature_final=last_accepted_state["quadrature"],
         adaptive_levels={name: level.copy() for name, level in adaptive_levels.items()},
+        forward_adaptive_levels={
+            name: level.copy() for name, level in forward_adaptive_levels.items()},
         conductor_voltage=conductor_voltage,
         current_scale_m2_s=current_scale, active_flux=active_flux,
         trial_merit_history=np.asarray(trial_merit_history),

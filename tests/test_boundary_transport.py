@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 import petch.boundary_transport as boundary_transport_module
+import petch.charging_backward as charging_backward_module
 from petch.adaptive_quadrature import AdaptiveQuadratureResult
 
 from petch.boundary_state import (
@@ -250,6 +251,7 @@ def test_bidirectional_adjoint_zero_is_not_exact_when_forward_sees_flux(monkeypa
 
     assert result["converged"]
     assert result["adjoint_zero_unresolved"][0]
+    assert result["adjoint_support_unresolved"][0]
     assert result["method"][0] == "forward"
     assert np.isclose(result["per_face"][0], 0.1)
 
@@ -321,6 +323,190 @@ def test_bidirectional_cross_refines_a_missed_adjoint_mode(monkeypatch):
     assert result["estimator_consistent"][0]
 
 
+def test_bidirectional_refines_nonoverlapping_forward_and_adjoint_support(monkeypatch):
+    forward = AdaptiveQuadratureResult(
+        element_mean=np.array([0.034]), element_stderr=np.array([0.009]),
+        element_replicates=np.array([[0.016], [0.034], [0.034], [0.052]]),
+        log2_samples=np.array([12]), total_mean=0.034, total_stderr=0.009,
+        converged=True, rounds=1, evaluations=1)
+    levels_seen = []
+
+    def adjoint_estimate(*args, **kwargs):
+        level = int(np.asarray(kwargs.get("initial_log2_samples", [6])).max())
+        levels_seen.append(level)
+        mean = 0.034 if level >= 10 else 0.0
+        stderr = 0.004 if level >= 10 else 1e-31
+        delta = stderr * np.sqrt(3.0)
+        return AdaptiveQuadratureResult(
+            element_mean=np.array([mean]), element_stderr=np.array([stderr]),
+            element_replicates=np.array([
+                [mean - delta], [mean - delta], [mean + delta], [mean + delta]]),
+            log2_samples=np.array([level]), total_mean=mean, total_stderr=stderr,
+            converged=True, rounds=1, evaluations=1)
+
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        adjoint_estimate)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        lambda *args, **kwargs: forward)
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "ion", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0)], [(1.0, 0.0)],
+        adjoint_options={"base_log2": 6, "max_log2": 12},
+        element_absolute_tolerance=0.01, element_relative_tolerance=0.15,
+        consistency_sigma=5.0, support_sigma=2.0, support_ratio=0.5)
+
+    assert levels_seen == [6, 8, 10]
+    assert result["cross_refinement_rounds"] == 2
+    assert not result["adjoint_support_unresolved"][0]
+    assert result["converged"]
+
+
+def test_bidirectional_support_guard_does_not_reject_modest_multicell_disagreement(monkeypatch):
+    def estimate(mean, stderr):
+        delta = stderr * np.sqrt(3.0)
+        return AdaptiveQuadratureResult(
+            element_mean=np.array([mean]), element_stderr=np.array([stderr]),
+            element_replicates=np.array([
+                [mean - delta], [mean - delta], [mean + delta], [mean + delta]]),
+            log2_samples=np.array([14]), total_mean=mean, total_stderr=stderr,
+            converged=True, rounds=1, evaluations=1)
+
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        lambda *args, **kwargs: estimate(0.297, 0.0005))
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        lambda *args, **kwargs: estimate(0.364, 0.021))
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "electron", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0)], [(0.0, -1.0)], element_absolute_tolerance=0.05,
+        element_relative_tolerance=0.0, consistency_sigma=5.0,
+        support_sigma=2.0, support_ratio=0.5)
+
+    assert result["estimator_discrepancy_sigma"][0] < 5.0
+    assert not result["adjoint_support_unresolved"][0]
+    assert result["converged"]
+
+
+def test_bidirectional_refines_forward_uncertainty_after_pooling_cell_faces(monkeypatch):
+    adjoint = AdaptiveQuadratureResult(
+        element_mean=np.array([0.05, 0.05]),
+        element_stderr=np.array([0.001, 0.001]),
+        element_replicates=np.array([
+            [0.049, 0.049], [0.050, 0.050], [0.050, 0.050], [0.051, 0.051]]),
+        log2_samples=np.array([12, 12]), total_mean=0.05, total_stderr=0.001,
+        converged=True, rounds=1, evaluations=1)
+    levels_seen = []
+
+    def forward_estimate(*args, **kwargs):
+        level = int(np.asarray(kwargs.get("initial_log2_samples", [12])).max())
+        levels_seen.append(level)
+        face_stderr = 0.009 if level == 12 else 0.004
+        delta = face_stderr * np.sqrt(3.0)
+        replicates = np.array([
+            [0.05 - delta, 0.05 - delta], [0.05 - delta, 0.05 - delta],
+            [0.05 + delta, 0.05 + delta], [0.05 + delta, 0.05 + delta]])
+        return AdaptiveQuadratureResult(
+            element_mean=np.array([0.05, 0.05]),
+            element_stderr=np.array([face_stderr, face_stderr]),
+            element_replicates=replicates, log2_samples=np.array([level, level]),
+            total_mean=0.05, total_stderr=face_stderr,
+            converged=True, rounds=1, evaluations=1)
+
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        lambda *args, **kwargs: adjoint)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        forward_estimate)
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "ion", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0), (0, 0)], [(1.0, 0.0), (-1.0, 0.0)],
+        forward_options={"base_log2": 12, "max_log2": 14},
+        element_absolute_tolerance=0.005, element_relative_tolerance=0.1)
+
+    assert levels_seen == [12, 13]
+    assert result["forward_pool_refinement_rounds"] == 1
+    assert result["converged"]
+
+
+def test_charging_warm_starts_bidirectional_levels_from_accepted_iteration(monkeypatch):
+    calls = []
+
+    def hybrid(boundary, species_name, potential, solid, cells, normals, **kwargs):
+        calls.append((
+            species_name,
+            kwargs["adjoint_options"].get("initial_log2_samples"),
+            kwargs["forward_options"].get("initial_log2_samples")))
+        face_count = len(cells)
+        unique_cells = list(dict.fromkeys(cells))
+        replicates = np.ones((4, face_count))
+        adjoint = AdaptiveQuadratureResult(
+            element_mean=np.ones(face_count), element_stderr=np.zeros(face_count),
+            element_replicates=replicates, log2_samples=np.full(face_count, 9),
+            total_mean=1.0, total_stderr=0.0, converged=True, rounds=1, evaluations=1)
+        forward = AdaptiveQuadratureResult(
+            element_mean=np.ones(face_count), element_stderr=np.zeros(face_count),
+            element_replicates=replicates, log2_samples=np.full(face_count, 11),
+            total_mean=1.0, total_stderr=0.0, converged=True, rounds=1, evaluations=1)
+        return dict(
+            per_face=np.ones(face_count), per_face_stderr=np.zeros(face_count),
+            unique_cells=np.asarray(unique_cells),
+            method=np.full(len(unique_cells), "adjoint"), converged=True,
+            adjoint=adjoint, forward=forward)
+
+    monkeypatch.setattr(
+        charging_backward_module, "bidirectional_boundary_state_cell_flux", hybrid)
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.1, 0.1]), np.array([-0.1, 0.1]), np.array([0.9, 1.1])),
+        np.ones((1, 1, 1)))
+    ion = SpeciesBoundaryState(
+        "ion", 1, 40.0, 1.0, [[0.0, 0.0, 1.0]], [1.0], density_model=density)
+    electron = SpeciesBoundaryState(
+        "electron", -1, 5.4858e-4, 1.0, [[0.0, 0.0, 1.0]], [1.0],
+        density_model=density)
+    boundary = PlasmaBoundaryState((ion, electron), reference_plane_m=0.0)
+    solid = np.zeros((4, 4), dtype=bool); solid[:, -1] = True
+    result = solve_boundary_state_charging(
+        solid, np.zeros_like(solid, dtype=int), boundary,
+        n_iter=2, min_iter=1, balance_tol=None, field_sweeps=20,
+        trust_region=False, adaptive_quadrature=dict(
+            bidirectional=True, base_log2=6, max_log2=12, n_replicates=4,
+            forward_options=dict(base_log2=8, max_log2=14, n_replicates=4)))
+
+    assert calls[0][1] is None and calls[0][2] is None
+    assert calls[1][1] is None and calls[1][2] is None
+    assert np.all(calls[2][1] == 9) and np.all(calls[2][2] == 11)
+    assert np.all(calls[3][1] == 9) and np.all(calls[3][2] == 11)
+    assert np.all(result["adaptive_levels"]["ion"] == 9)
+    assert np.all(result["forward_adaptive_levels"]["electron"] == 11)
+
+
+def test_charging_returns_last_evaluated_state_not_an_unassessed_final_step():
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.1, 0.1]), np.array([-0.1, 0.1]), np.array([0.9, 1.1])),
+        np.ones((1, 1, 1)))
+    velocity = [[0.0, 0.0, 1.0]]
+    boundary = PlasmaBoundaryState((
+        SpeciesBoundaryState(
+            "ion", 1, 40.0, 2.0, velocity, [1.0], density_model=density),
+        SpeciesBoundaryState(
+            "electron", -1, 5.4858e-4, 1.0, velocity, [1.0], density_model=density),
+    ), reference_plane_m=0.0)
+    solid = np.zeros((6, 5), dtype=bool); solid[:, -1] = True
+    result = solve_boundary_state_charging(
+        solid, np.zeros_like(solid, dtype=int), boundary,
+        n_iter=1, min_iter=1, balance_tol=None, beta=0.5,
+        response_energy_eV=4.0, field_sweeps=50, trust_region=False)
+
+    assert np.all(result["surface_voltage"][solid] == 0.0)
+    assert np.isclose(result["balance_final"]["max_abs_log_ratio"], np.log(2.0))
+    assert np.allclose(result["ion_current"], 2.0)
+    assert np.allclose(result["electron_current"], 1.0)
+
+
 def test_adaptive_forward_zero_hits_have_nonzero_confidence_bound():
     nx, nz = 64, 8
     solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
@@ -361,6 +547,28 @@ def test_adaptive_forward_rare_hits_keep_counting_uncertainty_floor():
     assert result.element_stderr[0] >= binomial_floor - 1e-15
 
 
+def test_forward_transport_resolves_exact_oriented_hit_face_without_losing_cell_current():
+    nx, nz = 10, 8
+    solid = np.zeros((nx, nz), dtype=bool); solid[4, 5] = True
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-1e-9, 1e-9]), np.array([-1e-9, 1e-9]), np.array([0.9, 1.1])),
+        np.ones((1, 1, 1)))
+    species = SpeciesBoundaryState(
+        "vertical", 0, 40.0, 1.0, [[0.0, 0.0, 1.0]], [1.0], density_model=density)
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    potential = np.zeros((nx + 1, nz + 1))
+    cell = forward_boundary_state_cell_flux_qmc(
+        boundary, "vertical", potential, solid, [(4, 5)], log2_samples=10, seed=31)
+    normals = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    faces = forward_boundary_state_cell_flux_qmc(
+        boundary, "vertical", potential, solid, [(4, 5)] * 4,
+        normals=normals, log2_samples=10, seed=31)
+    assert np.isclose(faces["per_cell"].sum(), cell["per_cell"][0])
+    assert np.isclose(faces["per_cell"][2], cell["per_cell"][0])
+    assert np.allclose(faces["per_face_endpoint"].sum(axis=1), faces["per_cell"])
+    assert np.count_nonzero(faces["per_cell"]) == 1
+
+
 def test_arbitrary_face_adjoint_has_correct_wall_flux_jacobian():
     nx, nz = 128, 12
     solid = np.zeros((nx, nz), dtype=bool); solid[100, :] = True
@@ -392,6 +600,7 @@ def test_arbitrary_face_adjoint_has_correct_wall_flux_jacobian():
     # limit is E[vx/vz] = 1*ln(2).
     expected = float(np.mean(xx / zz))
     assert np.isclose(result["normalized_flux"], expected, atol=1e-12)
+    assert np.allclose(result["per_face_endpoint"].sum(axis=1), result["per_face"], atol=1e-14)
     assert np.isclose(expected, np.log(2.0), rtol=1.1e-3)
     expected_energy = float(np.sum((xx / zz) * (xx * xx + zz * zz)) / np.sum(xx / zz))
     assert np.isclose(result["mean_impact_energy_eV"], expected_energy, atol=1e-12)

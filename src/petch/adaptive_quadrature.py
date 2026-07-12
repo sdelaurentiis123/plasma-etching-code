@@ -23,6 +23,8 @@ class AdaptiveQuadratureResult:
     converged: bool
     rounds: int
     evaluations: int
+    auxiliary_mean: np.ndarray | None = None
+    auxiliary_replicates: np.ndarray | None = None
 
 
 def adaptive_surface_quadrature(

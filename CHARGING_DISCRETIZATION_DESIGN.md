@@ -123,6 +123,43 @@ from the formerly failing state reduced certified current-balance RMS from 0.462
 estimator refusal. Full fixed-point convergence, initialization/damping invariance, and the AR/profile
 ladder remain open and must precede any charging-validation claim.
 
+### Compatible boundary-current unknowns (experimental, not promoted)
+
+Longer continuation showed that independent covered-cell voltages averaged onto shared boundary nodes
+still contain weak checkerboard modes. For the diagnostic trench, the map from cell voltages to actual
+face-average boundary voltage has condition number about 183; directly inverting it would amplify current
+estimator noise by more than two orders of magnitude. A separate nodal fixed-point candidate therefore
+places dielectric voltage unknowns directly on the physical material-boundary vertices used by the Q1
+field solve.
+
+The first mass-lumped prototype assigned half of each face-total current to each endpoint. That is also
+insufficient: on an open boundary chain, face-constant deposition has one alternating nodal null mode.
+The tracer now returns the exact DDA hit face and intersection position; forward histories deposit through
+the two linear endpoint shape functions, and adjoint face-position quadrature returns the same two endpoint
+moments. The resulting endpoint-current basis has full row rank on the diagnostic geometry. Selected
+replicate ensembles are deposited through this basis, so face covariance is measured rather than assumed.
+
+This path is isolated in `charging_nodal_fixed_point.py`; the established solver has not been replaced.
+On the same freestanding-wall numerical stress geometry, switching from face-constant to endpoint-resolved
+deposition lowered the certified RMS residual from roughly 0.5 to 0.35 and the maximum from about 1.5 to
+1.08 at the saved state. This is progress, not convergence. The filled-material trench is the physically
+relevant geometry; checkpoints from the freestanding-wall and filled-material topologies must never be
+interchanged, and the diagnostic harness now refuses such a mismatch.
+
+On the filled-material trench, the endpoint-resolved candidate accepted 20 consecutive fixed-point
+evaluations. Its certified current-balance RMS fell from 2.31 to a best value of 0.305 before fluctuating
+at 0.35 as rare-hit sampling error became comparable to the remaining imbalance; the certified maximum
+fell from 5.87 to a best value of 0.668. This establishes a stable descent path on the physical topology,
+not final convergence. A higher-sample independent evaluation and AR/grid/initialization invariance remain
+required before promotion.
+
+The direct forward estimator is the physical support audit; the adjoint estimator is an importance-sampled
+accelerator. When both are statistically admissible they must agree. When the adjoint misses a rare support
+mode but the independent forward estimate satisfies its declared uncertainty tolerance, the solver now uses
+the forward estimate and retains `adjoint_support_unresolved` as a diagnostic instead of rejecting valid
+physics. It still refuses the cell when neither direction is certified or when two admissible estimators
+disagree beyond the declared consistency threshold.
+
 ## Signed error budget: what else can be wrong and how errors stack
 
 The charging fixed point balances `Gi(V) = Ge(V)`. For small relative transport errors, the raw voltage
