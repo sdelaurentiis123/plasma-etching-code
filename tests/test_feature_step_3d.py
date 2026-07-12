@@ -2,7 +2,12 @@ import numpy as np
 import pytest
 
 from petch.boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
-from petch.feature_step_3d import FeatureGeometry3D, advance_feature_step_3d
+from petch.feature_step_3d import (
+    FeatureGeometry3D,
+    advance_feature_step_3d,
+    conservative_remap_surface_state,
+    solve_feature_3d,
+)
 from petch.surface_kinetics import (
     EnergeticYield,
     ParameterEvidence,
@@ -72,7 +77,9 @@ def test_one_physical_3d_step_moves_a_uniform_sio2_plane_by_flux_yield_over_dens
     assert np.isclose(result.diagnostics["max_velocity_m_s"], 2e-8, rtol=0.08)
     assert result.diagnostics["cfl_substeps"] == 1
     assert result.validity.within_declared_scope
-    assert "no conservative remap yet" in " ".join(result.validity.known_limitations)
+    assert "conservative surface-state remap" in " ".join(result.validity.known_limitations)
+    assert result.state_remap_diagnostics["old_topology"] == (1, 1)
+    assert result.state_remap_diagnostics["new_topology"] == (1, 1)
 
 
 def test_feature_step_refuses_surface_history_without_matching_mesh_fingerprint():
@@ -103,3 +110,49 @@ def test_feature_step_accepts_surface_history_with_exact_current_mesh_fingerprin
         surface_state_mesh_fingerprint=first.surface_state_mesh_fingerprint)
     assert replay.surface_state_mesh_fingerprint == first.surface_state_mesh_fingerprint
     assert np.array_equal(replay.surface.state.complex_fraction, first.surface.state.complex_fraction)
+
+
+def test_surface_remap_preserves_material_integrals_and_coverage_bounds():
+    from petch.surface_kinetics import SiO2SurfaceState
+    old_centroid = np.array([
+        [0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]])
+    new_centroid = old_centroid + [0.0, 0.0, -0.1]
+    old_area = np.array([1.0, 2.0, 1.5, 0.5])
+    new_area = np.array([0.8, 2.2, 1.4, 0.6])
+    material = np.array([1, 1, 2, 2])
+    state = SiO2SurfaceState(
+        [0.1, 0.8, 0.3, 0.6], [1e18, 2e18, 3e18, 4e18], [2e17, 4e17, 6e17, 8e17])
+    remapped, diagnostics = conservative_remap_surface_state(
+        state, old_centroid, old_area, material, new_centroid, new_area, material,
+        dx=1.0, mesh_length_unit_m=1e-6)
+
+    for material_id in (1, 2):
+        old = material == material_id; new = material == material_id
+        for before, after in (
+                (state.complex_fraction, remapped.complex_fraction),
+                (state.polymer_units_m2, remapped.polymer_units_m2),
+                (state.removed_formula_units_m2, remapped.removed_formula_units_m2)):
+            assert np.isclose(np.dot(before[old], old_area[old]),
+                              np.dot(after[new], new_area[new]), rtol=2e-13)
+    assert np.all((remapped.complex_fraction >= 0.0) & (remapped.complex_fraction <= 1.0))
+    assert diagnostics["maximum_nearest_distance"] <= 0.1 + 1e-12
+
+
+def test_multistep_solver_carries_remapped_state_and_matches_planar_total_motion():
+    geometry, initial_height = _plane_geometry()
+    result = solve_feature_3d(
+        geometry, _boundary(),
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=2.0, n_steps=2,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        n_position=16384, seed=13, cfl_number=0.3, reinitialize=False,
+        transport_device="cpu")
+
+    final_height = _area_weighted_height(result.geometry.phi, geometry.dx)
+    assert np.isclose(initial_height - final_height, 0.04, atol=0.004)
+    assert len(result.steps) == 2
+    assert result.steps[0].next_surface_state_mesh_fingerprint == (
+        result.steps[1].surface_state_mesh_fingerprint)
+    assert result.surface_state_mesh_fingerprint == (
+        result.steps[-1].next_surface_state_mesh_fingerprint)
+    assert result.validity.within_declared_scope

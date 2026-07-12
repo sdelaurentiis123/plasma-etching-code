@@ -1,8 +1,9 @@
-"""One fully dimensional feature-evolution step through the new physical contracts.
+"""Dimensional feature evolution through the new physical contracts.
 
-The step is intentionally not wrapped in a multi-step loop yet.  Its returned surface state is attached to
-the pre-step mesh; iterating it requires a separately verified conservative state-remap operator.  Refusing
-to hide nearest-face history copying is part of the solver's validity contract.
+Each step transfers surface state material-by-material with an area-conservative, bounded remap. Smooth
+CFL-limited motion can be iterated; topology changes, material appearance/disappearance, excessive remap
+distance, and impossible coverage compression are refused. This makes the multi-step loop explicit about
+the domain in which surface history is numerically supported.
 """
 from __future__ import annotations
 
@@ -77,6 +78,11 @@ class FeatureStep3DResult:
     active_face_centroid: np.ndarray
     active_face_area: np.ndarray
     surface_state_mesh_fingerprint: str
+    next_surface_state: SiO2SurfaceState
+    next_active_face_centroid: np.ndarray
+    next_active_face_area: np.ndarray
+    next_surface_state_mesh_fingerprint: str
+    state_remap_diagnostics: Mapping[str, object]
     face_material_id: np.ndarray
     face_velocity_mesh_units_s: np.ndarray
     diagnostics: Mapping[str, object]
@@ -84,6 +90,18 @@ class FeatureStep3DResult:
 
     def __post_init__(self):
         object.__setattr__(self, "diagnostics", MappingProxyType(dict(self.diagnostics)))
+        object.__setattr__(
+            self, "state_remap_diagnostics", MappingProxyType(dict(self.state_remap_diagnostics)))
+
+
+@dataclass(frozen=True)
+class FeatureSolve3DResult:
+    geometry: FeatureGeometry3D
+    surface_state: SiO2SurfaceState
+    surface_state_mesh_fingerprint: str
+    steps: tuple[FeatureStep3DResult, ...]
+    duration_s: float
+    validity: FeatureStepValidity
 
 
 def _face_material_ids(centroids, geometry):
@@ -108,6 +126,154 @@ def _surface_mesh_fingerprint(verts, faces, active_face, face_material, geometry
         [geometry.dx, geometry.mesh_length_unit_m, *geometry.mesh_origin_m],
         dtype="<f8").tobytes())
     return digest.hexdigest()
+
+
+def _surface_topology_signature(faces, active_face):
+    active = np.asarray(faces, dtype=int)[np.asarray(active_face, dtype=int)]
+    if active.size == 0:
+        return 0, 0
+    edge = np.concatenate((active[:, [0, 1]], active[:, [1, 2]], active[:, [2, 0]]))
+    edge.sort(axis=1)
+    edge_count = np.unique(edge, axis=0).shape[0]
+    vertex_count = np.unique(active).size
+    parent = np.arange(active.shape[0])
+
+    def find(index):
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    def union(left, right):
+        left = find(left); right = find(right)
+        if left != right:
+            parent[right] = left
+
+    owner = {}
+    for face_index, vertices in enumerate(active):
+        for vertex in vertices:
+            vertex = int(vertex)
+            if vertex in owner:
+                union(face_index, owner[vertex])
+            else:
+                owner[vertex] = face_index
+    components = len({find(index) for index in range(active.shape[0])})
+    euler_characteristic = int(vertex_count - edge_count + active.shape[0])
+    return int(components), euler_characteristic
+
+
+def _conserve_nonnegative_surface_field(raw, target_integral, new_area, *, upper=None):
+    raw = np.maximum(np.asarray(raw, dtype=float), 0.0)
+    area = np.asarray(new_area, dtype=float)
+    target = float(target_integral)
+    scale = max(abs(target), 1.0)
+    if target < -1e-13 * scale:
+        raise ValueError("negative conservative-remap target")
+    if target <= 1e-15 * scale:
+        return np.zeros_like(raw)
+    if upper is None:
+        raw_integral = float(np.dot(raw, area))
+        if raw_integral <= 0.0:
+            raw = np.ones_like(raw)
+            raw_integral = float(area.sum())
+        return raw * (target / raw_integral)
+    capacity = float(upper) * float(area.sum())
+    if target > capacity * (1.0 + 5e-13):
+        raise ValueError("surface contraction exceeds bounded coverage capacity")
+    seed = raw if np.any(raw > 0.0) else np.ones_like(raw)
+
+    def integral(multiplier):
+        return float(np.dot(np.minimum(multiplier * seed, upper), area))
+
+    lower = 0.0; upper_multiplier = 1.0
+    while integral(upper_multiplier) < target:
+        upper_multiplier *= 2.0
+        if upper_multiplier > 1e300:
+            raise RuntimeError("bounded conservative remap failed to bracket target")
+    for _ in range(80):
+        midpoint = 0.5 * (lower + upper_multiplier)
+        if integral(midpoint) < target:
+            lower = midpoint
+        else:
+            upper_multiplier = midpoint
+    return np.minimum(upper_multiplier * seed, upper)
+
+
+def conservative_remap_surface_state(
+        state, old_centroid, old_area, old_material, new_centroid, new_area, new_material, *,
+        dx, mesh_length_unit_m, neighbor_count=4, maximum_distance=None):
+    """First-order material-local remap with exact area-integrated state conservation.
+
+    The interpolation supplies spatial locality; a constrained correction then preserves each material's
+    integrated complex sites, polymer units, and cumulative removed formula units. Complex coverage remains
+    in [0,1]. This operator does not authorize topology change; the caller must gate topology separately.
+    """
+    old_centroid = np.asarray(old_centroid, dtype=float)
+    new_centroid = np.asarray(new_centroid, dtype=float)
+    old_area = np.asarray(old_area, dtype=float); new_area = np.asarray(new_area, dtype=float)
+    old_material = np.asarray(old_material, dtype=int)
+    new_material = np.asarray(new_material, dtype=int)
+    if (old_centroid.ndim != 2 or old_centroid.shape[1] != 3
+            or new_centroid.ndim != 2 or new_centroid.shape[1] != 3
+            or old_area.shape != (old_centroid.shape[0],)
+            or new_area.shape != (new_centroid.shape[0],)
+            or old_material.shape != old_area.shape or new_material.shape != new_area.shape
+            or state.complex_fraction.shape != old_area.shape
+            or np.any(old_area <= 0.0) or np.any(new_area <= 0.0)):
+        raise ValueError("invalid surface-state remap geometry")
+    if maximum_distance is None:
+        maximum_distance = 2.0 * float(dx)
+    if not np.isfinite(maximum_distance) or maximum_distance <= 0.0:
+        raise ValueError("maximum remap distance must be positive")
+    output = [np.zeros(new_area.shape) for _ in range(3)]
+    maximum_nearest = 0.0; material_diagnostics = {}
+    physical_area_scale = float(mesh_length_unit_m) ** 2
+    for material in sorted(set(old_material) | set(new_material)):
+        old_index = np.where(old_material == material)[0]
+        new_index = np.where(new_material == material)[0]
+        if old_index.size == 0 or new_index.size == 0:
+            raise ValueError(
+                "material surface appeared or disappeared; initialize/retire state explicitly")
+        count = min(int(neighbor_count), old_index.size)
+        distance, local = cKDTree(old_centroid[old_index]).query(
+            new_centroid[new_index], k=count)
+        if count == 1:
+            distance = np.asarray(distance)[:, None]; local = np.asarray(local)[:, None]
+        nearest = float(np.max(distance[:, 0])); maximum_nearest = max(maximum_nearest, nearest)
+        if nearest > maximum_distance:
+            raise ValueError(
+                f"surface remap distance {nearest:g} exceeds {maximum_distance:g}")
+        source_index = old_index[np.asarray(local, dtype=int)]
+        regularization = (0.25 * float(dx)) ** 2
+        weight = old_area[source_index] / (distance * distance + regularization)
+        weight /= weight.sum(axis=1, keepdims=True)
+        old_values = (
+            state.complex_fraction, state.polymer_units_m2,
+            state.removed_formula_units_m2)
+        targets = []; residuals = []
+        for field_index, old_value in enumerate(old_values):
+            raw = np.sum(weight * old_value[source_index], axis=1)
+            target = float(np.dot(old_value[old_index], old_area[old_index]))
+            remapped = _conserve_nonnegative_surface_field(
+                raw, target, new_area[new_index], upper=1.0 if field_index == 0 else None)
+            output[field_index][new_index] = remapped
+            achieved = float(np.dot(remapped, new_area[new_index]))
+            residuals.append(abs(achieved - target) / max(abs(target), 1.0))
+            targets.append(target * physical_area_scale)
+        material_diagnostics[int(material)] = dict(
+            old_face_count=int(old_index.size), new_face_count=int(new_index.size),
+            old_area_m2=float(old_area[old_index].sum() * physical_area_scale),
+            new_area_m2=float(new_area[new_index].sum() * physical_area_scale),
+            target_complex_area_m2=float(targets[0]),
+            target_polymer_units=float(targets[1]),
+            target_removed_formula_units=float(targets[2]),
+            max_relative_conservation_residual=float(max(residuals)))
+    remapped_state = SiO2SurfaceState(*output)
+    return remapped_state, dict(
+        method="material_local_area_conservative_knn",
+        neighbor_count=int(neighbor_count), maximum_nearest_distance=float(maximum_nearest),
+        maximum_allowed_distance=float(maximum_distance),
+        materials=material_diagnostics)
 
 
 def _select_surface_fluxes(fluxes, selected_face, face_count):
@@ -209,6 +375,29 @@ def advance_feature_step_3d(
     output_geometry = FeatureGeometry3D(
         phi, geometry.material_id, geometry.dx, geometry.mesh_length_unit_m,
         geometry.mesh_origin_m)
+    next_verts, next_faces, next_centroids, next_areas = extract_mesh_3d(
+        output_geometry.phi, output_geometry.dx)
+    next_face_material = _face_material_ids(next_centroids, output_geometry)
+    next_active_face = np.where(np.isin(next_face_material, etchable))[0]
+    if next_active_face.size == 0:
+        raise ValueError("etch step removed every requested material surface")
+    old_topology = _surface_topology_signature(faces, active_face)
+    next_topology = _surface_topology_signature(next_faces, next_active_face)
+    if old_topology != next_topology:
+        raise ValueError(
+            f"surface topology changed from {old_topology} to {next_topology}; "
+            "state transfer requires an explicit topology event")
+    next_surface_state, remap_diagnostics = conservative_remap_surface_state(
+        surface.state, centroids[active_face], areas[active_face], face_material[active_face],
+        next_centroids[next_active_face], next_areas[next_active_face],
+        next_face_material[next_active_face], dx=geometry.dx,
+        mesh_length_unit_m=geometry.mesh_length_unit_m,
+        maximum_distance=displacement + 1.5 * geometry.dx)
+    next_mesh_fingerprint = _surface_mesh_fingerprint(
+        next_verts, next_faces, next_active_face, next_face_material, output_geometry)
+    remap_diagnostics = dict(
+        remap_diagnostics, old_topology=old_topology, new_topology=next_topology,
+        next_active_face_count=int(next_active_face.size))
     reasons = []
     if not surface.validity.within_declared_scope:
         reasons.extend(surface.validity.reasons)
@@ -216,7 +405,8 @@ def advance_feature_step_3d(
         within_declared_scope=not reasons,
         reasons=tuple(reasons),
         known_limitations=tuple(transport.known_limitations) + (
-            "surface state is attached to the pre-step mesh; no conservative remap yet",
+            "first-order material-local conservative surface-state remap",
+            "topology-changing surface steps are refused",
             "first-order Godunov interface advection",
         ) + tuple(surface.validity.known_model_form_omissions))
     return FeatureStep3DResult(
@@ -224,6 +414,11 @@ def advance_feature_step_3d(
         active_face_index=active_face, active_face_centroid=centroids[active_face],
         active_face_area=areas[active_face],
         surface_state_mesh_fingerprint=mesh_fingerprint,
+        next_surface_state=next_surface_state,
+        next_active_face_centroid=next_centroids[next_active_face],
+        next_active_face_area=next_areas[next_active_face],
+        next_surface_state_mesh_fingerprint=next_mesh_fingerprint,
+        state_remap_diagnostics=remap_diagnostics,
         face_material_id=face_material,
         face_velocity_mesh_units_s=face_velocity,
         diagnostics=dict(
@@ -232,3 +427,41 @@ def advance_feature_step_3d(
             max_displacement_mesh_units=displacement, cfl_substeps=int(substeps),
             cfl_number=float(cfl_number), reinitialized=bool(reinitialize)),
         validity=validity)
+
+
+def solve_feature_3d(
+        geometry: FeatureGeometry3D, boundary: PlasmaBoundaryState,
+        species_role: Mapping[str, str], mechanism: ReducedSiO2FluorocarbonMechanism, *,
+        etchable_material_ids, duration_s, n_steps, source_bounds, source_z,
+        n_position=256, seed=0, cfl_number=0.3, reinitialize=True,
+        transport_device=None):
+    """Run multiple verified feature steps, carrying only conservatively remapped surface state."""
+    if int(n_steps) != n_steps or int(n_steps) <= 0:
+        raise ValueError("n_steps must be a positive integer")
+    if not np.isfinite(duration_s) or duration_s < 0.0:
+        raise ValueError("duration_s must be finite and nonnegative")
+    step_duration = float(duration_s) / int(n_steps)
+    current_geometry = geometry; current_state = None; current_fingerprint = None
+    results = []
+    for step_index in range(int(n_steps)):
+        result = advance_feature_step_3d(
+            current_geometry, boundary, species_role, mechanism,
+            etchable_material_ids=etchable_material_ids, duration_s=step_duration,
+            source_bounds=source_bounds, source_z=source_z,
+            surface_state=current_state,
+            surface_state_mesh_fingerprint=current_fingerprint,
+            n_position=n_position, seed=int(seed) + step_index,
+            cfl_number=cfl_number, reinitialize=reinitialize,
+            transport_device=transport_device)
+        results.append(result)
+        current_geometry = result.geometry
+        current_state = result.next_surface_state
+        current_fingerprint = result.next_surface_state_mesh_fingerprint
+    reasons = tuple(reason for result in results for reason in result.validity.reasons)
+    limitations = tuple(dict.fromkeys(
+        limitation for result in results for limitation in result.validity.known_limitations))
+    return FeatureSolve3DResult(
+        geometry=current_geometry, surface_state=current_state,
+        surface_state_mesh_fingerprint=current_fingerprint,
+        steps=tuple(results), duration_s=float(duration_s),
+        validity=FeatureStepValidity(not reasons, reasons, limitations))
