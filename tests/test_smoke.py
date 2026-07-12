@@ -32,7 +32,7 @@ def test_baseline_parity():
     assert abs(d - 9.18) < 0.5, f"baseline depth {d:.3f} drifted from 9.18"   # margin for MC variance
 
 
-# ----------------------------- 3D production engine -----------------------------
+# ----------------------------- 3D legacy compatibility engine -----------------------------
 
 def test_3d_loop():
     """3D etch runs end-to-end with the faithful ViennaPS config (belen coverages + ion reflection)
@@ -56,6 +56,7 @@ def test_api_trench():
     """The ViennaPS-shaped public API (Domain/SF6O2/Process/Result) runs and reports a sane etch."""
     dom = petch.Domain.trench(extent=3.0, dx=0.15, width=0.9, mask=0.3, depth=6.0)
     res = petch.Process(dom, petch.SF6O2(rate_scale=0.1), duration=1.5).run(steps=20)
+    assert res.engine == "legacy-threed-v1"
     assert res.max_depth > 0.3, f"API etch shallow (max_depth={res.max_depth})"
     assert res.aspect_ratio > 0.3
     assert res.wall_time > 0.0

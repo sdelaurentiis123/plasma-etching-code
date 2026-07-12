@@ -1,4 +1,4 @@
-"""petch high-level API — a clean, ViennaPS-shaped public interface.
+"""petch legacy high-level API — a clean, ViennaPS-shaped interface.
 
     import petch
     dom    = petch.Domain.hole(extent=14, dx=0.25, diameter=6, mask=2, depth=18)
@@ -7,9 +7,11 @@
     result.depth          # center etch depth (um)
     result.save("etch.vtk")
 
-Mirrors ViennaPS's Domain / Process so its users migrate in minutes; underneath it calls the modular
-`run_etch_3d` with the auto-fast (GPU) / portable (CPU) config. The low-level `run_etch_3d`, `Flags`,
-and `PAR` stay public for full control.
+Mirrors ViennaPS's Domain / Process so its users migrate in minutes. This compatibility interface calls
+the legacy `run_etch_3d` path; it is not the dimensional, validity-reporting common engine in
+`feature_step_3d`. Results disclose that provenance through `Result.engine`. The low-level
+`run_etch_3d`, `Flags`, and `PAR` stay public for full control while mechanisms are re-earned through the
+common engine.
 """
 import time
 import numpy as np
@@ -76,9 +78,10 @@ class SF6O2:
 class Result:
     """Outcome of a Process.run() — etch metrics + the surface/level-set, with VTK/OBJ export."""
 
-    def __init__(self, geo, wall_time):
+    def __init__(self, geo, wall_time, *, engine):
         self._geo = geo
         self.wall_time = wall_time
+        self.engine = str(engine)
 
     @property
     def depth(self):
@@ -168,4 +171,4 @@ class Process:
                               par=dict(self.model.par), flags=flags,
                               n_ion=self.n_ion, n_neu=self.n_neu, reinit_method="fsm",
                               verbose=verbose, **self.domain._geo)
-        return Result(geo, time.time() - t0)
+        return Result(geo, time.time() - t0, engine="legacy-threed-v1")
