@@ -349,3 +349,28 @@ def test_nodal_anderson_checkpoint_replays_monolithic_next_state():
                           monolithic["boundary_nodal_voltage"])
     assert np.array_equal(replay["ion_current"], monolithic["ion_current"])
     assert np.array_equal(replay["electron_current"], monolithic["electron_current"])
+
+
+def test_nodal_anderson_checkpoint_accepts_full_depth_plus_one_point_window():
+    solid = np.zeros((6, 5), dtype=bool); solid[:, -1] = True
+    common = dict(
+        solid=solid, conductor_ids=np.zeros_like(solid, dtype=int),
+        boundary_state=_two_to_one_boundary(), min_iter=1, balance_tol=None,
+        beta=0.1, response_energy_eV=4.0, field_sweeps=40,
+        trust_region=False, nonlinear_update="anderson", anderson_depth=3)
+    monolithic = solve_boundary_state_charging_nodal(n_iter=7, **common)
+    first = solve_boundary_state_charging_nodal(n_iter=6, **common)
+    assert first["anderson_x_history"].shape[0] == 4
+
+    replay = solve_boundary_state_charging_nodal(
+        n_iter=2, **common,
+        initial_surface_voltage=first["surface_voltage"],
+        initial_boundary_nodal_voltage=first["boundary_nodal_voltage"],
+        initial_accepted_iterations=first["restart_accepted_iterations"],
+        initial_beta=first["restart_beta"],
+        initial_anderson_x=first["anderson_x_history"],
+        initial_anderson_residual=first["anderson_residual_history"])
+
+    assert replay["accepted_iterations_total"] == monolithic["accepted_iterations_total"]
+    assert np.array_equal(replay["boundary_nodal_voltage"],
+                          monolithic["boundary_nodal_voltage"])

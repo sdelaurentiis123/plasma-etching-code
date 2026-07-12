@@ -198,7 +198,7 @@ def solve_boundary_state_charging_nodal(
         if (initial_anderson_x_array.ndim != 2
                 or initial_anderson_x_array.shape[1:] != (dof_count,)
                 or initial_anderson_residual_array.shape != initial_anderson_x_array.shape
-                or initial_anderson_x_array.shape[0] > int(anderson_depth)
+                or initial_anderson_x_array.shape[0] > int(anderson_depth) + 1
                 or not np.all(np.isfinite(initial_anderson_x_array))
                 or not np.all(np.isfinite(initial_anderson_residual_array))):
             raise ValueError("invalid Anderson restart histories")
