@@ -953,6 +953,13 @@ def advance_feature_step_3d(
             if limitation not in charging.transport.known_limitations
             and limitation != "nodal potential is supplied rather than self-consistently charged")
         transport_limitations = tuple(charging.known_limitations) + extra
+    material_exchange = getattr(surface, "material_exchange", None)
+    if material_exchange is None:
+        exchange_limitations = ("surface mechanism does not expose a material-exchange ledger",)
+        product_routing_complete = None
+    else:
+        exchange_limitations = tuple(material_exchange.known_limitations)
+        product_routing_complete = bool(material_exchange.product_routing_complete)
     validity = FeatureStepValidity(
         within_declared_scope=not reasons,
         reasons=tuple(reasons),
@@ -960,7 +967,7 @@ def advance_feature_step_3d(
             "first-order material-local conservative surface-state remap",
             "physical volume-topology-changing surface steps are refused",
             "first-order Godunov interface advection",
-        ) + tuple(surface.validity.known_model_form_omissions),
+        ) + tuple(surface.validity.known_model_form_omissions) + exchange_limitations,
         parameter_evidence_supports_prediction=(
             surface.validity.parameter_evidence_supports_prediction),
         nonpredictive_parameters=surface.validity.nonpredictive_parameters)
@@ -986,6 +993,7 @@ def advance_feature_step_3d(
             self_consistent_charging=charging is not None,
             charging_iterations=(0 if charging is None else len(charging.history)),
             charging_converged=(None if charging is None else charging.converged),
+            product_routing_complete=product_routing_complete,
             neutral_radiosity=neutral_radiosity_diagnostics,
             **center_diagnostics),
         validity=validity)

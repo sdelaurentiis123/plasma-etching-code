@@ -23,6 +23,8 @@ from typing import Mapping
 
 import numpy as np
 
+from .surface_exchange import SurfaceMaterialExchange, unresolved_surface_exchange
+
 
 @dataclass(frozen=True)
 class ParameterEvidence:
@@ -339,6 +341,7 @@ class SurfaceStepResult:
     removed_bare_formula_units_m2: np.ndarray
     deposited_polymer_units_m2: np.ndarray
     removed_polymer_units_m2: np.ndarray
+    material_exchange: SurfaceMaterialExchange
     validity: MechanismValidity
 
 
@@ -663,6 +666,17 @@ class ReducedSiO2FluorocarbonMechanism:
         velocity = ((removed_complex + removed_bare)
                     / self.parameters.bulk_formula_density_m3
                     / duration_s if duration_s > 0.0 else np.zeros(shape))
+        removed_sio2 = removed_complex + removed_bare
+        exchange = unresolved_surface_exchange(
+            removed_units_m2={
+                "SiO2_formula_unit": removed_sio2,
+                "fluorocarbon_film_unit": removed_polymer,
+            },
+            deposited_units_m2={"fluorocarbon_film_unit": deposited_polymer},
+            limitations=(
+                "reactive SiO2 and fluorocarbon product identities and branching are unresolved",
+                "unresolved removed material is not eligible for redeposition transport",
+            ))
         return SurfaceStepResult(
             state=new_state,
             etch_velocity_m_s=np.asarray(velocity),
@@ -671,4 +685,5 @@ class ReducedSiO2FluorocarbonMechanism:
             removed_bare_formula_units_m2=removed_bare,
             deposited_polymer_units_m2=deposited_polymer,
             removed_polymer_units_m2=removed_polymer,
+            material_exchange=exchange,
             validity=validity)

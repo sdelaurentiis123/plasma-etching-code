@@ -173,6 +173,9 @@ def test_one_physical_3d_step_moves_a_uniform_sio2_plane_by_flux_yield_over_dens
     assert not result.validity.parameter_evidence_supports_prediction
     assert "bare_sio2_yield" in result.validity.nonpredictive_parameters
     assert "conservative surface-state remap" in " ".join(result.validity.known_limitations)
+    assert "product identities and branching are unresolved" in " ".join(
+        result.validity.known_limitations)
+    assert result.diagnostics["product_routing_complete"] is False
     assert result.state_remap_diagnostics["old_topology"] == (1, 1)
     assert result.state_remap_diagnostics["new_topology"] == (1, 1)
 

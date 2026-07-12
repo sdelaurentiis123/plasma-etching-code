@@ -10,6 +10,7 @@ from .surface_kinetics import (
     EnergeticFlux, FaceResolvedEnergeticFlux, MechanismValidity, ParameterEvidence,
     SurfaceFluxes,
 )
+from .surface_exchange import SurfaceMaterialExchange, unresolved_surface_exchange
 
 
 @dataclass(frozen=True)
@@ -45,6 +46,7 @@ class TabulatedSiSurfaceStepResult:
     etch_velocity_m_s: np.ndarray
     etch_velocity_standard_uncertainty_m_s: np.ndarray
     removed_atoms_m2: np.ndarray
+    material_exchange: SurfaceMaterialExchange
     table_fingerprint: str
     validity: MechanismValidity
 
@@ -181,10 +183,17 @@ class TabulatedSiClArMechanism:
         removal_uncertainty = ion_flux * yield_uncertainty
         removed = removal_rate * float(duration_s)
         updated = TabulatedSiSurfaceState(state.removed_atoms_m2 + removed)
+        exchange = unresolved_surface_exchange(
+            removed_units_m2={"Si_atom": removed},
+            limitations=(
+                "reactive Si-Cl2-Ar+ product branching is absent from the released RIE table",
+                "unresolved removed Si is not eligible for redeposition transport",
+            ))
         return TabulatedSiSurfaceStepResult(
             state=updated,
             etch_velocity_m_s=removal_rate / self.bulk_atom_density_m3,
             etch_velocity_standard_uncertainty_m_s=(
                 removal_uncertainty / self.bulk_atom_density_m3),
-            removed_atoms_m2=removed, table_fingerprint=self.table.fingerprint,
+            removed_atoms_m2=removed, material_exchange=exchange,
+            table_fingerprint=self.table.fingerprint,
             validity=validity)

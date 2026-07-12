@@ -43,6 +43,9 @@ def test_tabulated_si_rie_replays_source_yield_and_propagates_md_uncertainty():
     assert result.table_fingerprint == mechanism.table.fingerprint
     assert result.validity.parameter_evidence_supports_prediction
     assert result.validity.nonpredictive_parameters == ()
+    assert not result.material_exchange.product_routing_complete
+    assert np.array_equal(
+        result.material_exchange.unresolved_units_m2["Si_atom"], result.removed_atoms_m2)
 
 
 def test_tabulated_si_rie_refuses_unreleased_energy_angle_ratio_and_species():

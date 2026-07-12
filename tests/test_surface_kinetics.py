@@ -167,6 +167,11 @@ def test_complex_sputtering_conserves_sites_and_removed_formula_units():
     assert np.allclose(
         result.state.removed_formula_units_m2,
         result.removed_complex_units_m2 + result.removed_bare_formula_units_m2)
+    assert not result.material_exchange.product_routing_complete
+    assert np.allclose(
+        result.material_exchange.removed_units_m2["SiO2_formula_unit"],
+        result.removed_complex_units_m2 + result.removed_bare_formula_units_m2)
+    assert np.all(result.material_exchange.residual_units_m2("SiO2_formula_unit") == 0.0)
     assert np.allclose(
         result.etch_velocity_m_s,
         (result.removed_complex_units_m2 + result.removed_bare_formula_units_m2)

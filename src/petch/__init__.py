@@ -55,6 +55,7 @@ from .experimental_boundary import (
     Jeon2022BoundaryClosure, build_jeon_2022_boundary_state,
 )
 from .physical_api import COMMON_FEATURE_ENGINE, PhysicalProcess, PhysicalResult
+from .surface_exchange import SurfaceMaterialExchange, unresolved_surface_exchange
 
 # High-level 3D API (ViennaPS-shaped). Importing api pulls in the 3D engine (threed/warp).
 from .api import Domain, SF6O2, Process, Result
@@ -62,6 +63,7 @@ from .api import Domain, SF6O2, Process, Result
 __all__ = [
     # Explicit dimensional common engine and legacy compatibility interface.
     "COMMON_FEATURE_ENGINE", "PhysicalProcess", "PhysicalResult",
+    "SurfaceMaterialExchange", "unresolved_surface_exchange",
     "Domain", "SF6O2", "Process", "Result",
     # config + low-level (full control)
     "PAR", "Flags", "DEFAULT_FLAGS", "run_etch",
