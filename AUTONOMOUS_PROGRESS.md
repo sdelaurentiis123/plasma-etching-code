@@ -138,6 +138,25 @@ fast at high AR: AR40 runs in ~10 s at dx=0.01 — the feared "mesh wall" does n
 under-prediction (0.166 vs 0.20) is the sub-degree-IAD / charging frontier (Phase 2). TODO: relabeled
 Si product class; fast pytest gate; then Phase 1 (the root: differentiable + scalable transport).
 
+## Phase 1a spike (the root, differentiability) — CALIBRATION gradients are EXACT
+
+`scripts/diff_calibration_gradient.py`. The near-term moat is gradient-based CALIBRATION (calibrate
+declared surface params on structure N, predict N+1). Those params (sticking, yields) enter the diffuse
+radiosity operator M(s)=I-(1-s)B SMOOTHLY, so d(floor flux)/ds is exact via implicit differentiation of
+the linear fixed point -- one adjoint solve, `-(M^{-T}c)^T (B H)` -- matching central FD to ~1e-7:
+
+```
+  AR   s    analytic       central_FD      rel_err
+   1 0.05  -2.00960e+00   -2.00960e+00    6.1e-08
+   4 0.05  -4.72304e+00   -4.72305e+00    6.0e-07
+```
+
+Go/no-go: **GO** for the calibration half of the moat -- it is a solved problem (exact adjoint through
+the radiosity fixed point; the same IFT structure will wrap the nonlinear charging fixed point later).
+This cleanly separates the moat: CHEMISTRY-parameter (calibration) gradients are exact and cheap; only
+GEOMETRY/shape gradients hit the discontinuous ray-hit boundary (the docs' "differentiability open" is
+really this half -- inverse SHAPE design). Gated in `tests/test_arde_transport.py`.
+
 ## Roadmap (remaining)
 
 1. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow

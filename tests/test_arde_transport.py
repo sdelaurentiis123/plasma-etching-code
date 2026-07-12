@@ -89,3 +89,18 @@ def test_reactive_family_monotone_in_ar_and_ordered_in_sticking():
         assert t[(4.0, s)] < t[(1.0, s)], (s, t)
     for ar in (1.0, 4.0):
         assert t[(ar, 0.5)] < t[(ar, 0.1)], (ar, t)
+
+
+def test_calibration_gradient_is_exact_through_radiosity_fixed_point():
+    # The differentiable-calibration moat: d(floor flux)/d(sticking) via implicit differentiation of
+    # the radiosity linear solve (one adjoint solve) must equal central finite difference. Sticking
+    # enters M(s)=I-(1-s)B smoothly, so this is exact -- unlike geometry gradients (discontinuous).
+    from diff_calibration_gradient import radiosity_system, floor_transmission, sticking_gradient
+    B, direct, c, flux0 = radiosity_system(1.0)
+    s = 0.1
+    _, M, H = floor_transmission(B, direct, c, s)
+    g_an = sticking_gradient(B, c, M, H) / flux0
+    h = 1e-4
+    g_fd = (floor_transmission(B, direct, c, s + h)[0]
+            - floor_transmission(B, direct, c, s - h)[0]) / (2 * h) / flux0
+    assert g_an == pytest.approx(g_fd, rel=1e-4), (g_an, g_fd)
