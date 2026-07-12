@@ -259,6 +259,27 @@ def solve_boundary_state_charging_nodal(
     anderson_x = []; anderson_residual = []
     last_accepted_state = None
     trial_merit_history = []; accepted_beta_history = []; accepted_gain_history = []
+
+    def accepted_checkpoint():
+        """Return only the serializable state needed to restart the last accepted iterate."""
+        if last_accepted_state is None:
+            return None
+        return dict(
+            solid=solid.copy(),
+            surface_voltage=last_accepted_state["surface_voltage"].copy(),
+            boundary_nodal_voltage=last_accepted_state["boundary_voltage"].copy(),
+            surface_charge_node_c_per_m=last_accepted_state["surface_charge_node"].copy(),
+            adaptive_levels={
+                name: value.copy()
+                for name, value in last_accepted_state["adaptive_levels"].items()},
+            forward_adaptive_levels={
+                name: value.copy()
+                for name, value in last_accepted_state["forward_adaptive_levels"].items()},
+            method_hint={
+                name: value.copy() for name, value in last_accepted_state["method_hint"].items()},
+            accepted_iterations_total=int(
+                last_accepted_state["accepted_iterations_total"]))
+
     for iteration in range(int(n_iter)):
         impose_conductors()
         if poisson_system is None:
@@ -339,7 +360,8 @@ def solve_boundary_state_charging_nodal(
                             f"{tuple(hybrid['unique_cells'][worst])}",
                             iteration=iteration + 1, species=species.name, quadrature=hybrid,
                             surface_voltage=surface_readout(), potential=potential,
-                            cells=cells, normals=normals)
+                            cells=cells, normals=normals,
+                            accepted_state=accepted_checkpoint())
                     normalized = hybrid["selected_face_mean"]
                     normalized_stderr = hybrid["selected_face_stderr"]
                     normalized_replicates = hybrid["selected_face_replicates"]
@@ -355,7 +377,8 @@ def solve_boundary_state_charging_nodal(
                             f"nodal charging adjoint quadrature failed for {species.name!r}",
                             iteration=iteration + 1, species=species.name,
                             quadrature=estimate, surface_voltage=surface_readout(),
-                            potential=potential, cells=cells, normals=normals)
+                            potential=potential, cells=cells, normals=normals,
+                            accepted_state=accepted_checkpoint())
                     normalized = estimate.element_mean
                     normalized_stderr = estimate.element_stderr
                     normalized_replicates = estimate.element_replicates
@@ -472,6 +495,7 @@ def solve_boundary_state_charging_nodal(
             boundary_voltage=boundary_voltage.copy(),
             conductor_voltage=conductor_voltage.copy(), potential=potential.copy(),
             surface_charge_node=surface_charge_node.copy(),
+            surface_voltage=surface_readout(),
             ion_current=ion_current.copy(), electron_current=electron_current.copy(),
             ion_stderr=ion_stderr.copy(), electron_stderr=electron_stderr.copy(),
             species_face_current={
@@ -484,7 +508,12 @@ def solve_boundary_state_charging_nodal(
                 name: value.copy() for name, value in species_endpoint_stderr.items()},
             species_endpoint_replicates={
                 name: value.copy() for name, value in species_endpoint_replicates.items()},
-            quadrature=species_quadrature)
+            quadrature=species_quadrature,
+            method_hint={name: value.copy() for name, value in hybrid_hint.items()},
+            adaptive_levels={name: value.copy() for name, value in adaptive_levels.items()},
+            forward_adaptive_levels={
+                name: value.copy() for name, value in forward_adaptive_levels.items()},
+            accepted_iterations_total=int(initial_accepted_iterations) + len(history))
         if (balance_tol is not None and len(history) >= int(min_iter)
                 and interval_history[-1]["confidence_envelope_max_abs_log_ratio"] <= balance_tol):
             break

@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 import petch.charging_nodal_fixed_point as nodal_fixed_point_module
 from petch.adaptive_quadrature import AdaptiveQuadratureResult
@@ -12,7 +13,7 @@ from petch.charging_nodal_fixed_point import (
     _confidence_separated_log_ratio,
     solve_boundary_state_charging_nodal,
 )
-from petch.charging_backward import _gas_faces
+from petch.charging_backward import AdaptiveQuadratureConvergenceError, _gas_faces
 from petch.charging_nodal import material_face_nodes
 
 
@@ -253,3 +254,65 @@ def test_nodal_fixed_point_warm_starts_both_transport_estimators(monkeypatch):
     assert np.all(calls[0][1] == 9) and np.all(calls[0][2] == 11)
     assert np.all(calls[1][1] == 9) and np.all(calls[1][2] == 11)
     assert replay["accepted_iterations_total"] == result["accepted_iterations_total"] + 1
+
+
+def test_nodal_quadrature_failure_carries_last_accepted_restart_state(monkeypatch):
+    calls = 0
+    fail_enabled = True
+
+    def hybrid(boundary, species_name, potential, solid, cells, normals, **kwargs):
+        nonlocal calls
+        face_count = len(cells); unique_cells = list(dict.fromkeys(cells))
+        replicates = np.ones((4, face_count)); endpoints = np.full((4, face_count, 2), 0.5)
+        levels = np.full(face_count, 9)
+        estimate = AdaptiveQuadratureResult(
+            np.ones(face_count), np.zeros(face_count), replicates, levels,
+            1.0, 0.0, True, 1, 1,
+            auxiliary_mean=endpoints.mean(axis=0), auxiliary_replicates=endpoints)
+        fail = fail_enabled and calls >= 2
+        calls += 1
+        cell_count = len(unique_cells)
+        return dict(
+            selected_face_mean=np.ones(face_count),
+            selected_face_stderr=np.zeros(face_count),
+            selected_face_replicates=replicates,
+            selected_endpoint_stderr=np.zeros((face_count, 2)),
+            selected_endpoint_replicates=endpoints,
+            unique_cells=np.asarray(unique_cells), method=np.full(cell_count, "adjoint"),
+            converged=not fail, cell_converged=np.full(cell_count, not fail),
+            estimator_discrepancy_sigma=np.arange(cell_count, dtype=float),
+            adjoint=estimate, forward=estimate)
+
+    monkeypatch.setattr(
+        nodal_fixed_point_module, "bidirectional_boundary_state_cell_flux", hybrid)
+    solid = np.zeros((4, 4), dtype=bool); solid[:, -1] = True
+    options = dict(
+        bidirectional=True, base_log2=6, max_log2=12, n_replicates=4,
+        forward_options=dict(base_log2=8, max_log2=14, n_replicates=4))
+    with pytest.raises(AdaptiveQuadratureConvergenceError) as captured:
+        solve_boundary_state_charging_nodal(
+            solid, np.zeros_like(solid, dtype=int), _balanced_boundary(),
+            n_iter=3, min_iter=1, balance_tol=None, field_sweeps=20,
+            trust_region=False, adaptive_quadrature=options)
+
+    error = captured.value
+    checkpoint = error.accepted_state
+    assert error.iteration == 2
+    assert checkpoint is not None
+    assert checkpoint["accepted_iterations_total"] == 1
+    assert np.array_equal(checkpoint["solid"], solid)
+    assert np.allclose(checkpoint["boundary_nodal_voltage"], 0.0)
+    assert np.all(checkpoint["adaptive_levels"]["ion"] == 9)
+
+    fail_enabled = False
+    replay = solve_boundary_state_charging_nodal(
+        solid, np.zeros_like(solid, dtype=int), _balanced_boundary(),
+        n_iter=1, min_iter=1, balance_tol=None, field_sweeps=20,
+        trust_region=False, adaptive_quadrature=options,
+        initial_surface_voltage=checkpoint["surface_voltage"],
+        initial_boundary_nodal_voltage=checkpoint["boundary_nodal_voltage"],
+        initial_adaptive_levels=checkpoint["adaptive_levels"],
+        initial_forward_adaptive_levels=checkpoint["forward_adaptive_levels"],
+        initial_method_hint=checkpoint["method_hint"],
+        initial_accepted_iterations=checkpoint["accepted_iterations_total"])
+    assert replay["accepted_iterations_total"] == 2

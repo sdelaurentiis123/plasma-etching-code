@@ -30,6 +30,7 @@ OPEN: (1) deep cells at very high AR still benefit from directional importance s
 this gather as the transport estimator inside solve_charging and retire the vf/thr/preint override
 layer. Requires the exit-kinematics return added to _trace_general (charging_general.py).
 """
+import copy
 import numpy as np
 from scipy.stats import qmc, gamma as gammadist, norm
 
@@ -47,7 +48,7 @@ class AdaptiveQuadratureConvergenceError(RuntimeError):
     """Carries the rejected fixed-point state for estimator diagnosis without accepting it."""
 
     def __init__(self, message, *, iteration, species, quadrature, surface_voltage, potential,
-                 cells, normals):
+                 cells, normals, accepted_state=None):
         super().__init__(message)
         self.iteration = int(iteration)
         self.species = species
@@ -56,6 +57,7 @@ class AdaptiveQuadratureConvergenceError(RuntimeError):
         self.potential = np.asarray(potential).copy()
         self.cells = tuple(cells)
         self.normals = tuple(normals)
+        self.accepted_state = copy.deepcopy(accepted_state)
 
 
 def _cone_angles(x0, z0, aperture, pad):
