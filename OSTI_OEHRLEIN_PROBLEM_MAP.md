@@ -190,6 +190,17 @@ far too slow.
 - There is no versioned schema for energy-angle-flux-ratio yield and product-branching tables.
 - Extrapolation outside a table's validated domain is not centrally prohibited or reported.
 
+### Current implementation update (2026-07-12)
+
+- `SurfaceInteractionTable` now supplies the versioned, units-explicit multidimensional schema. It
+  replays all source nodes exactly, supports declared linear/log axes, carries separate standard
+  uncertainty, constrains product-branch sums, fingerprints serialized payloads, and refuses silent
+  extrapolation by default.
+- Its tests use manufactured values only. OSTI confirms that dataset 2589032 contains result tables,
+  model/training data, and example simulations, but the Princeton public download currently stops this
+  automated session at human verification. No values were inferred from figures or substituted from the
+  article abstract. Acquiring and checksumming the small result tables therefore remains open.
+
 ### Attack sequence
 
 1. Acquire and checksum the OSTI 2589032 result tables without vendoring the large training corpus.
