@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from petch.experimental_data import (
+    build_jeon_2022_dimensionless_targets,
     load_bosch_wafer_measurements,
     load_bosch_wafer_measurements_89pt,
     load_jeon_2022_plasma_controls,
@@ -184,3 +185,37 @@ def test_jeon_2022_controls_reject_unverified_digitization(tmp_path):
     altered.write_bytes(JEON_CONTROLS.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="checksum mismatch"):
         load_jeon_2022_plasma_controls(altered)
+
+
+def test_jeon_dimensionless_targets_remove_rate_scale_without_split_leakage():
+    targets = build_jeon_2022_dimensionless_targets(
+        load_jeon_2022_trench_depths(JEON_DATA))
+    shapes = [item for item in targets
+              if item.observable == "width_shape_depth_over_200nm"]
+    pulse = [item for item in targets if item.observable == "pulse_depth_over_cw"]
+
+    assert len(shapes) == 54
+    assert len(pulse) == 24
+    assert sum(item.split == "calibration" for item in targets) == 6
+    assert all(item.observable == "width_shape_depth_over_200nm"
+               for item in targets if item.split == "calibration")
+    assert all(item.value == 1.0 for item in shapes if item.trench_width_nm == 200.0)
+    assert all(item.digitization_lower == item.digitization_upper == 1.0
+               for item in shapes if item.trench_width_nm == 200.0)
+    assert all(item.digitization_lower <= item.value <= item.digitization_upper
+               for item in targets)
+
+
+def test_jeon_held_out_dimensionless_pulse_gate_preserves_regime_reversal():
+    targets = build_jeon_2022_dimensionless_targets(
+        load_jeon_2022_trench_depths(JEON_DATA))
+    pulse_1ms = [item for item in targets
+                 if item.observable == "pulse_depth_over_cw" and item.pulse_off_ms == 1.0]
+    low_radical = [item for item in pulse_1ms if item.c4f8_fraction == 0.2]
+    high_radical = [item for item in pulse_1ms if item.c4f8_fraction == 0.8]
+
+    assert len(low_radical) == len(high_radical) == 6
+    assert all(item.value > 1.0 for item in low_radical)
+    assert all(item.value < 1.0 for item in high_radical)
+    assert all(item.cancellation_assumption == "common_etch_duration_within_pulse_series"
+               for item in pulse_1ms)

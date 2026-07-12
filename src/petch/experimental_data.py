@@ -120,6 +120,24 @@ class Jeon2022PlasmaControl:
     source_location: str
 
 
+@dataclass(frozen=True)
+class Jeon2022DimensionlessTarget:
+    """Exposure-time-cancelling target with a digitization-only uncertainty interval."""
+
+    observable: str
+    source_figure: str
+    condition_family: str
+    c4f8_fraction: float
+    pulse_off_ms: float
+    trench_width_nm: float
+    value: float
+    digitization_lower: float
+    digitization_upper: float
+    split: str
+    denominator: str
+    cancellation_assumption: str
+
+
 def _verified_csv_rows(path, expected_fields, expected_sha256, verify_checksum):
     path = Path(path)
     payload = path.read_bytes()
@@ -260,6 +278,103 @@ def load_jeon_2022_plasma_controls(path, *, verify_checksum=True):
             or any(item.published_errorbar_semantics != "not_specified" for item in rows)):
         raise ValueError("Jeon 2022 plasma controls violate their digitization/evidence contract")
     return rows
+
+
+def _positive_ratio_interval(numerator, numerator_budget, denominator, denominator_budget):
+    """Worst-case positive ratio interval; budgets are bounds, not standard deviations."""
+    denominator_lower = denominator - denominator_budget
+    if denominator_lower <= 0.0:
+        raise ValueError("digitization budget does not bound a positive denominator")
+    return (
+        max(numerator - numerator_budget, 0.0) / (denominator + denominator_budget),
+        (numerator + numerator_budget) / denominator_lower,
+    )
+
+
+def build_jeon_2022_dimensionless_targets(rows):
+    """Build ARDE-shape and pulse-response targets that do not require reported etch time.
+
+    Width-shape targets divide each depth by the 200 nm trench depth under the same plasma
+    condition. Pulse-response targets divide a pulsed depth by the continuous-wave depth at the
+    same width within the same source panel. The latter cancellation relies on the paper's statement
+    that coupons in each pulse series were etched under the same conditions; the assumption remains
+    explicit because an absolute etch duration was not reported.
+
+    Returned intervals propagate only the stored digitization budgets as worst-case bounds. They do
+    not stand in for the publication's statistically unspecified experimental error bars.
+    """
+    rows = tuple(rows)
+    if not rows or any(not isinstance(item, Jeon2022TrenchDepth) for item in rows):
+        raise TypeError("dimensionless Jeon targets require Jeon2022TrenchDepth rows")
+    by_condition = {}
+    for item in rows:
+        key = (item.source_figure, item.condition_family,
+               item.c4f8_fraction, item.pulse_off_ms)
+        by_width = by_condition.setdefault(key, {})
+        if item.trench_width_nm in by_width:
+            raise ValueError(f"duplicate Jeon condition/width row: {key}, {item.trench_width_nm}")
+        by_width[item.trench_width_nm] = item
+
+    targets = []
+    for key, by_width in sorted(by_condition.items()):
+        if 200.0 not in by_width:
+            raise ValueError(f"Jeon condition lacks its 200 nm shape reference: {key}")
+        reference = by_width[200.0]
+        for width, item in sorted(by_width.items()):
+            if item is reference:
+                lower = upper = 1.0
+            else:
+                lower, upper = _positive_ratio_interval(
+                    item.depth_nm, item.digitization_uncertainty_nm,
+                    reference.depth_nm, reference.digitization_uncertainty_nm)
+            targets.append(Jeon2022DimensionlessTarget(
+                observable="width_shape_depth_over_200nm",
+                source_figure=item.source_figure,
+                condition_family=item.condition_family,
+                c4f8_fraction=item.c4f8_fraction,
+                pulse_off_ms=item.pulse_off_ms,
+                trench_width_nm=width,
+                value=item.depth_nm / reference.depth_nm,
+                digitization_lower=lower,
+                digitization_upper=upper,
+                split=item.split,
+                denominator="same_condition_200nm_trench_depth",
+                cancellation_assumption="same_coupon_exposure_within_width_series"))
+
+    for family in ("pulse_off_20pct", "pulse_off_80pct"):
+        family_conditions = {
+            key: by_width for key, by_width in by_condition.items() if key[1] == family}
+        if not family_conditions:
+            raise ValueError(f"Jeon pulse family is missing: {family}")
+        for key, by_width in sorted(family_conditions.items()):
+            source_figure, _, fraction, pulse_off = key
+            if pulse_off == 0.0:
+                continue
+            cw_key = (source_figure, family, fraction, 0.0)
+            if cw_key not in family_conditions:
+                raise ValueError(f"Jeon pulse family lacks its continuous-wave reference: {key}")
+            cw_by_width = family_conditions[cw_key]
+            if set(by_width) != set(cw_by_width):
+                raise ValueError(f"Jeon pulse/CW widths do not match: {key}")
+            for width, item in sorted(by_width.items()):
+                reference = cw_by_width[width]
+                lower, upper = _positive_ratio_interval(
+                    item.depth_nm, item.digitization_uncertainty_nm,
+                    reference.depth_nm, reference.digitization_uncertainty_nm)
+                targets.append(Jeon2022DimensionlessTarget(
+                    observable="pulse_depth_over_cw",
+                    source_figure=source_figure,
+                    condition_family=family,
+                    c4f8_fraction=fraction,
+                    pulse_off_ms=pulse_off,
+                    trench_width_nm=width,
+                    value=item.depth_nm / reference.depth_nm,
+                    digitization_lower=lower,
+                    digitization_upper=upper,
+                    split="held_out_transfer",
+                    denominator="same_width_continuous_wave_depth",
+                    cancellation_assumption="common_etch_duration_within_pulse_series"))
+    return tuple(targets)
 
 
 def load_bosch_wafer_measurements(path, *, verify_checksum=True):

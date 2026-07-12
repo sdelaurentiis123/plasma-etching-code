@@ -56,6 +56,12 @@ slope, and intercept so the reported depth can be replayed rather than trusted a
 - The paper does not report etch duration, a measured IEDF, or species-resolved surface fluxes.
   Consequently these observations constrain relative depth/profile transfer, not absolute etch rate
   from a complete physical boundary state.
+- Two dimensionless comparisons remain usable without inventing the missing duration. The loader builds
+  depth-versus-width shape ratios using the 200 nm trench under the same condition, and pulsed/CW depth
+  ratios at the same width within Figures 7 and 9. The first shares one coupon exposure; the paper says
+  each pulse series used the same etch conditions, so the second records a common-duration assumption
+  explicitly. Their intervals propagate digitization budgets only and are not mislabeled as total
+  experimental uncertainty.
 
 ## Preregistered split
 
