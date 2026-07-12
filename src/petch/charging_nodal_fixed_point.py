@@ -244,7 +244,11 @@ def solve_boundary_state_charging_nodal(
                 rms=poisson_diag.rms_residual_v,
                 active_nodes=int(np.prod(potential.shape)),
                 free_nodes=poisson_diag.free_nodes,
-                electrostatic_energy_j_per_m=poisson_diag.electrostatic_energy_j_per_m)
+                electrostatic_energy_j_per_m=poisson_diag.electrostatic_energy_j_per_m,
+                specified_charge_c_per_m=poisson_diag.specified_charge_c_per_m,
+                dirichlet_reaction_charge_c_per_m=(
+                    poisson_diag.dirichlet_reaction_charge_c_per_m),
+                charge_balance_c_per_m=poisson_diag.charge_balance_c_per_m)
         field_history.append(field_diag); species_quadrature = {}
         for species in positive_species + negative_species:
             if adaptive_quadrature is None:
@@ -461,6 +465,9 @@ def solve_boundary_state_charging_nodal(
     # so voltage, potential, residual, and checkpoint restarts all describe one physical iterate.
     if last_accepted_state is None:
         raise RuntimeError("nodal charging solve produced no accepted state")
+    converged = bool(
+        balance_tol is not None and len(history) >= int(min_iter)
+        and interval_history[-1]["max_abs_log_ratio"] <= float(balance_tol))
     boundary_voltage[:] = last_accepted_state["boundary_voltage"]
     conductor_voltage[:] = last_accepted_state["conductor_voltage"]
     surface_charge_node[:] = last_accepted_state["surface_charge_node"]
@@ -485,7 +492,11 @@ def solve_boundary_state_charging_nodal(
             sweeps=1, max_abs=poisson_diag.max_abs_residual_v,
             rms=poisson_diag.rms_residual_v,
             active_nodes=int(np.prod(potential.shape)), free_nodes=poisson_diag.free_nodes,
-            electrostatic_energy_j_per_m=poisson_diag.electrostatic_energy_j_per_m)
+            electrostatic_energy_j_per_m=poisson_diag.electrostatic_energy_j_per_m,
+            specified_charge_c_per_m=poisson_diag.specified_charge_c_per_m,
+            dirichlet_reaction_charge_c_per_m=(
+                poisson_diag.dirichlet_reaction_charge_c_per_m),
+            charge_balance_c_per_m=poisson_diag.charge_balance_c_per_m)
     return dict(
         solid=solid.copy(), conductor_ids=conductor_ids.copy(),
         surface_voltage=surface_readout(), boundary_nodal_voltage=boundary_voltage.copy(),
@@ -493,9 +504,15 @@ def solve_boundary_state_charging_nodal(
         surface_charge_density_c_per_m2=np.divide(
             surface_charge_node, node_surface_length_m, out=np.zeros_like(surface_charge_node),
             where=node_surface_length_m > 0.0),
+        node_surface_length_m=node_surface_length_m,
         potential=potential, cells=np.asarray(cells, dtype=int), normals=normals_array,
         face_components=face_components, dielectric_nodes=np.asarray(dielectric_nodes, dtype=int),
         conductor_voltage=conductor_voltage, iterations=len(history),
+        converged=converged,
+        termination_reason=(
+            "balance_tolerance" if converged else
+            "fixed_iteration_budget" if balance_tol is None else "iteration_limit"),
+        requested_balance_tolerance=(None if balance_tol is None else float(balance_tol)),
         balance_history=history, balance_final=history[-1],
         interval_balance_history=interval_history, interval_balance_final=interval_history[-1],
         field_history=field_history, field_final=field_final,

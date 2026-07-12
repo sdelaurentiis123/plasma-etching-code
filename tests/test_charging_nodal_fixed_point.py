@@ -63,6 +63,8 @@ def test_nodal_surface_fixed_point_balances_on_actual_boundary_vertices():
         n_face_position=2, field_sweeps=100)
     assert result["surface_discretization"] == "boundary_nodal"
     assert result["iterations"] == 1
+    assert result["converged"]
+    assert result["termination_reason"] == "balance_tolerance"
     assert result["interval_balance_final"]["max_abs_log_ratio"] == 0.0
     assert np.allclose(result["ion_current"], result["electron_current"], atol=1e-14)
     assert result["dielectric_nodes"].shape == (nx + 1, 2)
@@ -81,6 +83,20 @@ def test_nodal_charging_returns_last_evaluated_state_not_unassessed_step():
     assert np.isclose(result["balance_final"]["max_abs_log_ratio"], np.log(2.0))
     assert np.allclose(result["ion_current"], 2.0 * result["electron_current"])
     assert np.all(result["ion_current"] > 0.0)
+    assert not result["converged"]
+    assert result["termination_reason"] == "fixed_iteration_budget"
+
+
+def test_nodal_charging_marks_exhausted_tolerance_run_unconverged():
+    solid = np.zeros((6, 5), dtype=bool); solid[:, -1] = True
+    result = solve_boundary_state_charging_nodal(
+        solid, np.zeros_like(solid, dtype=int), _two_to_one_boundary(),
+        n_iter=1, min_iter=1, balance_tol=1e-6, beta=0.1,
+        response_energy_eV=4.0, field_sweeps=20, trust_region=False)
+
+    assert not result["converged"]
+    assert result["termination_reason"] == "iteration_limit"
+    assert result["requested_balance_tolerance"] == 1e-6
 
 
 def test_nodal_poisson_mode_updates_physical_surface_charge_not_dirichlet_voltage():
@@ -96,8 +112,12 @@ def test_nodal_poisson_mode_updates_physical_surface_charge_not_dirichlet_voltag
 
     assert result["electrostatic_state"] == "surface_charge_poisson"
     assert result["surface_charge_node_c_per_m"].sum() > 0.0
+    assert np.isclose(
+        np.sum(result["surface_charge_density_c_per_m2"] * result["node_surface_length_m"]),
+        result["surface_charge_node_c_per_m"].sum())
     assert np.all(result["boundary_nodal_voltage"][:, -2] > 0.0)
     assert result["field_final"]["max_abs"] < 1e-9
+    assert abs(result["field_final"]["charge_balance_c_per_m"]) < 1e-24
 
 
 def test_nodal_gain_decay_is_deterministic_and_robbins_monro_compatible():

@@ -55,6 +55,9 @@ class PoissonDiagnostics:
     rms_residual_v: float
     free_nodes: int
     electrostatic_energy_j_per_m: float
+    specified_charge_c_per_m: float
+    dirichlet_reaction_charge_c_per_m: float
+    charge_balance_c_per_m: float
 
 
 class NodalPoissonSystem:
@@ -105,6 +108,8 @@ class NodalPoissonSystem:
         voltage = flat_voltage.reshape(self.shape)
         residual = self.stiffness @ flat_voltage - load
         free_residual = residual[self.free]
+        specified_charge = float(np.sum(charge))
+        dirichlet_reaction_charge = EPS0 * float(np.sum(residual[self.fixed]))
         energy = 0.5 * EPS0 * float(flat_voltage @ (self.stiffness @ flat_voltage))
         diagnostics = PoissonDiagnostics(
             max_abs_residual_v=(float(np.max(np.abs(free_residual)))
@@ -112,7 +117,10 @@ class NodalPoissonSystem:
             rms_residual_v=(float(np.sqrt(np.mean(free_residual ** 2)))
                             if free_residual.size else 0.0),
             free_nodes=int(self.free.size),
-            electrostatic_energy_j_per_m=energy)
+            electrostatic_energy_j_per_m=energy,
+            specified_charge_c_per_m=specified_charge,
+            dirichlet_reaction_charge_c_per_m=dirichlet_reaction_charge,
+            charge_balance_c_per_m=specified_charge + dirichlet_reaction_charge)
         return voltage, diagnostics
 
     def diagonal_surface_capacitance(self, surface_nodes):
