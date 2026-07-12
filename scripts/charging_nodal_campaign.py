@@ -205,6 +205,10 @@ if args.initial is not None:
                 or set(initial_forward_adaptive_levels) != {"ion", "electron"}
                 or set(initial_method_hint) != {"ion", "electron"}):
             raise ValueError("rejected state is missing its frozen estimator rule")
+        # Refining a rejected trial changes the deterministic sample-average map. Secant/Anderson
+        # history from the preceding rule is no longer a Jacobian approximation to this map.
+        initial_anderson_x = None
+        initial_anderson_residual = None
 if args.override_restart_beta is not None:
     if not np.isfinite(args.override_restart_beta) or args.override_restart_beta <= 0.0:
         raise ValueError("override restart beta must be finite and positive")
