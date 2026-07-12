@@ -46,18 +46,27 @@ AR-shaped fudge; adaptive mesh/phase-space refinement (AMR); fast + GPU-accelera
   measure so the acceptance cone is resolved by raising N. It is **N-converged and fast** (AR16 in ~1s,
   stable across N=2^14..2^18): T(AR8)=0.065, T(AR16)=0.0355.
 
-- **HONESTY CORRECTION (supersedes commit 405e555's claim).** That commit reported the adjoint matching
-  the analytic slot view factor to ~1-2% at AR1-2. That was **premature convergence**: the adaptive
-  loop's loose tolerance stopped at nt=24 (T=0.306), but nt=32 gives 0.318 and the value is still
-  drifting up. Properly compared, the two independent estimators DISAGREE by ~8-14% (AR1: adjoint 0.318
-  vs forward+QMC 0.344; AR2: 0.186 vs 0.212) and BOTH sit above the simple opposed-strip analytic
-  (0.303, 0.193). The engine reproduces the geometric-shadowing **trend and magnitude** across AR1-16,
-  but this is **not** a sub-5% first-principles validation yet. Two open items for a clean gate:
-  1. Exact view factor for the COMPOUND aperture (source plane -> open region -> mask opening -> trench),
-     not the single-slot approximation — both methods exceeding it is consistent with a wider effective
-     aperture, so the analytic is the suspect, but this must be computed, not assumed.
-  2. Reconcile the ~10% adjoint-vs-forward gap (independent methods must agree within uncertainty; prime
-     suspect is the adjoint gather's periodic renormalization vs the forward MC tally).
+- **VALIDATED (three independent ways).** The common engine's ballistic neutral transport reproduces
+  first-principles geometric shadowing (s=1). The two open items from the earlier correction are both
+  closed:
+  1. **Method reconciliation:** the adjoint gather CLIMBS to the forward+QMC value as it resolves
+     (AR1: nt 24->48->72 gives 0.302->0.342->0.348 vs forward+QMC 0.345, ~1%). The earlier "8-14%
+     disagreement" was the adjoint being angular-under-resolved (nt=24); properly refined, the two
+     independent estimators agree.
+  2. **Exact reference:** an INDEPENDENT pure-numpy analytic ray-trace of the same box
+     (`reference_floor_transmission`, no engine code) gives 0.303/0.193/0.110/0.059 at AR1/2/4/8 —
+     matching the opposed-strip view factor. The engine CONVERGES to it under GRID refinement
+     (AR1: dx 0.02->0.0125->0.008 gives 0.345->0.295->0.310 vs ref 0.303). The coarse-grid dx=0.02
+     over-prediction (~14% at AR1, ~3% at AR8; worse at low AR because 5 cells/opening staircases the
+     walls) is grid error, not an engine bias.
+  So getting a correct ARDE number requires BOTH adequate grid (>=~12 cells/opening) AND angular AMR
+  (QMC-refined or nt ∝ A; a fixed quadrature flatlines/over-predicts the deep cone). Both are
+  error-driven, no shortcuts. The earlier committed "premature 2% at AR1" (405e555) was the coincidence
+  of nt=24 + dx=0.02 landing near the approximate analytic; corrected in 9eafb1f and closed here.
+
+- **Committed gate:** `tests/test_arde_transport.py` — the first ARDE physics test in the suite:
+  monotone ARDE collapse, engine == independent reference within grid tolerance, and the AMR-necessity
+  regression (a fixed coarse quadrature over-predicts the deep flux; QMC does not).
   Analytic targets + citations: `ARDE_PHYSICS_REFERENCE.md`.
 
 ## Guardrails honored

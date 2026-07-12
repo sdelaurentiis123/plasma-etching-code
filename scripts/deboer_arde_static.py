@@ -190,6 +190,42 @@ def geometric_slot_transmission(aspect_ratio):
     return float(np.sqrt(1.0 + a * a) - a)
 
 
+def reference_floor_transmission(aspect_ratio, *, opening_um=0.10, mask_um=0.05, dx_um=0.02,
+                                 log2_samples=21, seed=1):
+    """Independent pure-numpy analytic ray-trace of the SAME box geometry, s=1 (no engine transport).
+
+    Cosine flux source over the full periodic cell; analytic tube-clearance test against the compound
+    aperture (open region -> mask opening -> trench -> floor). x is linear in z, so a ray reaches the
+    floor iff it enters the opening at the mask top and exits within the SAME tube at the floor (any
+    lateral wall crossing is absorbed). Walls are infinite along the cell-length axis, so only the
+    cross-slot coordinate matters. Returns floor incident flux / source flux, matching the engine's
+    definition (per-area normalization = source cell width / floor opening width = 2). This is the
+    ground-truth geometric target the engine's ballistic transport must reproduce as the mesh refines.
+    """
+    from scipy.stats import qmc
+    opening, mask = float(opening_um), float(mask_um)
+    etched = aspect_ratio * opening
+    substrate_top = etched + max(4.0 * dx_um, 0.05)
+    floor_z = substrate_top - etched
+    mask_top = substrate_top + mask
+    cell = 2.0 * opening
+    source_z = substrate_top + mask + max(6.0 * dx_um, 0.06)
+    ox0 = (cell - opening) / 2.0
+    ox1 = ox0 + opening
+    u = qmc.Sobol(4, scramble=True, seed=int(seed)).random_base2(int(log2_samples))
+    vel = MaxwellianFluxVelocityDensity(0.05).sample_flux_velocity(u[:, :3])
+    d = vel / np.linalg.norm(vel, axis=1, keepdims=True)
+    slope_x = d[:, 0] / d[:, 2]                       # dx per unit downward travel (d[:,2] > 0)
+    x0 = u[:, 3] * cell
+    x_enter = x0 - slope_x * (source_z - mask_top)
+    x_exit = x_enter - slope_x * (mask_top - floor_z)
+    ef = np.mod(x_enter, cell)
+    enter_ok = (ef >= ox0) & (ef <= ox1)
+    exit_rel = x_exit - (x_enter - ef)
+    exit_ok = (exit_rel >= ox0) & (exit_rel <= ox1)
+    return 2.0 * float(np.mean(enter_ok & exit_ok))
+
+
 def converged_floor_transmission(aspect_ratio, sticking, *, opening_um, dx_um, rays_per_face,
                                  nt_schedule=(8, 12, 16, 24, 32, 48), n_normal=10, rel_tol=0.03):
     """Adaptive angular refinement (AMR in phase space).

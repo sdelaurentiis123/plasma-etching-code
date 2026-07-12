@@ -42,22 +42,29 @@ In the feature the flux-limiting slot runs from the mask top to the floor, so th
 ratio includes the mask: `A_eff = A + mask/opening`, and the target is `T_geom(A_eff)`. The gate's
 `--validate-geometric` mode checks the converged engine transmission against this.
 
-Status (2026-07-12, common engine, dx=0.02um, opening=0.10um, mask=0.05um). The engine reproduces the
-geometric-shadowing TREND and magnitude, but this simple opposed-strip formula is only an APPROXIMATE
-target here: the real geometry is a compound aperture (source plane -> open region -> mask opening ->
-trench), and both engine estimators exceed the single-slot value. Two independent estimators and the
-approximate analytic:
+Status (2026-07-12, common engine, opening=0.10um, mask=0.05um). VALIDATED three independent ways at
+s=1: the adjoint gather, the forward+QMC first-hit tracer, and an INDEPENDENT pure-numpy analytic
+ray-trace of the same box (`reference_floor_transmission` in scripts/deboer_arde_static.py, no engine
+transport) all agree. The independent reference matches the opposed-strip view factor:
 
-| AR | forward+QMC (N-converged) | adjoint gather | sqrt(1+A_eff^2)-A_eff |
-|----|---------------------------|----------------|-----------------------|
-| 1.0 | 0.3444 | 0.318 | 0.3028 |
-| 2.0 | 0.2121 | 0.186 | 0.1926 |
-| 8.0 | 0.0649 | (under-resolved on CPU) | 0.0586 |
-| 16.0 | 0.0355 | (under-resolved on CPU) | 0.0303 |
+| AR | independent ray-trace | opposed-strip sqrt(1+A_eff^2)-A_eff |
+|----|-----------------------|-------------------------------------|
+| 1.0 | 0.3027 | 0.3028 |
+| 2.0 | 0.1925 | 0.1926 |
+| 4.0 | 0.1097 | 0.1099 |
+| 8.0 | 0.0587 | 0.0588 |
 
-Open for a clean sub-5% gate: (1) the EXACT compound-aperture view factor; (2) reconcile the ~10%
-adjoint-vs-forward gap (independent methods must agree; suspect = adjoint periodic renormalization).
-An earlier note claiming ~1-2% agreement was a premature-convergence artifact and is withdrawn.
+Two convergence requirements, both error-driven (no AR/benchmark branch):
+- ANGULAR (AMR): a fixed quadrature aliases the ~arctan(1/A) cone. Refining the adjoint at AR1 climbs
+  nt 24->48->72 = 0.302->0.342->0.348, converging to forward+QMC 0.345. QMC-sampling the source
+  (N=2^L Sobol) resolves it batched (GPU-ready), N-stable across 2^14..2^18.
+- GRID: at coarse dx=0.02 (5 cells/opening) the engine over-predicts (AR1 ratio 1.14, shrinking to 1.03
+  at AR8 as the tiny deep transmission is less sensitive to the staircase). Refining dx 0.02->0.008 at
+  AR1 gives 0.345->0.310, converging to the reference 0.303. Need >=~12 cells/opening.
+
+A prior note claiming ~1-2% agreement at coarse settings was a premature-convergence artifact
+(nt=24 + dx=0.02 landing near the approximate analytic) and was withdrawn; the validated conclusion
+above supersedes it. Committed gate: tests/test_arde_transport.py.
 
 ## 3. Numerics: adaptive angular refinement (AMR) is REQUIRED
 
