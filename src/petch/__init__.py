@@ -16,7 +16,10 @@ from .surface_kinetics import (
     ReducedSiO2FluorocarbonMechanism, ReducedSiO2FluorocarbonParameters,
     SiO2SurfaceState, SurfaceFluxes,
 )
-from .boundary_transport_3d import BoundaryTransport3DResult, trace_boundary_state_first_hit_3d
+from .boundary_transport_3d import (
+    BoundaryTransport3DResult, trace_boundary_state_field_3d,
+    trace_boundary_state_first_hit_3d,
+)
 from .feature_step_3d import (
     FeatureGeometry3D, FeatureSolve3DResult, FeatureStep3DResult, FeatureStepValidity,
     advance_feature_step_3d, conservative_remap_surface_state, solve_feature_3d,
@@ -37,7 +40,8 @@ __all__ = [
     "EnergeticFlux", "EnergeticYield", "FaceResolvedEnergeticFlux", "ParameterEvidence",
     "ReducedSiO2FluorocarbonMechanism", "ReducedSiO2FluorocarbonParameters",
     "SiO2SurfaceState", "SurfaceFluxes",
-    "BoundaryTransport3DResult", "trace_boundary_state_first_hit_3d",
+    "BoundaryTransport3DResult", "trace_boundary_state_field_3d",
+    "trace_boundary_state_first_hit_3d",
     "FeatureGeometry3D", "FeatureSolve3DResult", "FeatureStep3DResult", "FeatureStepValidity",
     "advance_feature_step_3d", "conservative_remap_surface_state", "solve_feature_3d",
 ]

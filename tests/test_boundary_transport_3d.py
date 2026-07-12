@@ -3,7 +3,10 @@ import pytest
 import warp as wp
 
 from petch.boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
-from petch.boundary_transport_3d import trace_boundary_state_first_hit_3d
+from petch.boundary_transport_3d import (
+    trace_boundary_state_field_3d,
+    trace_boundary_state_first_hit_3d,
+)
 from petch.surface_kinetics import (
     EnergeticYield,
     ParameterEvidence,
@@ -95,6 +98,51 @@ def test_boundary_to_surface_chain_conserves_dimensional_formula_unit_removal():
     removed_per_source_area = np.dot(surface.state.removed_formula_units_m2, areas)
     expected = 2e19 * (0.25 * 0.2 + 0.75 * 0.0) * duration_s
     assert np.isclose(removed_per_source_area, expected, rtol=1e-12)
+
+
+def test_zero_nodal_field_reproduces_ballistic_3d_event_measure():
+    verts, faces, areas = _flat_unit_plane()
+    common = dict(
+        boundary=_boundary(),
+        species_role={"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, n_position=64, seed=29, device="cpu")
+    ballistic = trace_boundary_state_first_hit_3d(**common)
+    field = trace_boundary_state_field_3d(
+        **common, nodal_potential_v=np.zeros((2, 2, 2)), potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=1.0, fixed_dt=0.01, max_steps=200)
+
+    ballistic_events = ballistic.surface_fluxes.energetic_fluxes[0]
+    field_events = field.surface_fluxes.energetic_fluxes[0]
+    assert np.array_equal(field_events.event_face, ballistic_events.event_face)
+    assert np.allclose(field_events.event_energy_eV, ballistic_events.event_energy_eV, atol=2e-5)
+    assert np.allclose(field_events.event_cosine_incidence,
+                       ballistic_events.event_cosine_incidence, atol=2e-7)
+    assert np.allclose(field.surface_fluxes.neutral_flux_m2_s["CF2"],
+                       ballistic.surface_fluxes.neutral_flux_m2_s["CF2"])
+
+
+def test_linear_nodal_potential_gives_exact_electrostatic_energy_gain_under_refinement():
+    verts, faces, areas = _flat_unit_plane()
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 1e19, [[0.0, 0.0, np.sqrt(20.0)]], [1.0])
+    boundary = PlasmaBoundaryState((ion,), reference_plane_m=1e-6)
+    potential = np.zeros((2, 2, 2)); potential[:, :, 1] = 10.0
+    arguments = dict(
+        boundary=boundary, species_role={"Ar+": "energetic_bombardment"},
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=potential, potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=1.0, mesh_length_unit_m=1e-6,
+        n_position=16, seed=31, max_steps=1000, device="cpu")
+    coarse = trace_boundary_state_field_3d(**arguments, fixed_dt=0.02)
+    fine = trace_boundary_state_field_3d(**arguments, fixed_dt=0.005)
+    coarse_energy = coarse.surface_fluxes.energetic_fluxes[0].event_energy_eV
+    fine_energy = fine.surface_fluxes.energetic_fluxes[0].event_energy_eV
+
+    assert np.allclose(fine_energy, 30.0, atol=2e-3)
+    assert np.max(np.abs(fine_energy - 30.0)) <= np.max(np.abs(coarse_energy - 30.0)) + 1e-6
 
 
 @pytest.mark.parametrize("device", DEVICES)

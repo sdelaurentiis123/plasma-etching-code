@@ -16,7 +16,11 @@ import numpy as np
 from scipy.spatial import cKDTree
 
 from .boundary_state import PlasmaBoundaryState
-from .boundary_transport_3d import BoundaryTransport3DResult, trace_boundary_state_first_hit_3d
+from .boundary_transport_3d import (
+    BoundaryTransport3DResult,
+    trace_boundary_state_field_3d,
+    trace_boundary_state_first_hit_3d,
+)
 from .surface_kinetics import (
     EnergeticFlux,
     FaceResolvedEnergeticFlux,
@@ -309,6 +313,8 @@ def advance_feature_step_3d(
         etchable_material_ids, duration_s, source_bounds, source_z,
         surface_state: SiO2SurfaceState | None = None, n_position=256, seed=0,
         surface_state_mesh_fingerprint=None,
+        nodal_potential_v=None, potential_origin=None, potential_spacing=None,
+        trajectory_fixed_dt=None, trajectory_max_steps=10000,
         cfl_number=0.3, reinitialize=True, transport_device=None):
     """Advance one stateful, dimensional, collisionless-absorbing feature step.
 
@@ -331,12 +337,25 @@ def advance_feature_step_3d(
         raise ValueError("current interface contains no requested etchable material")
     mesh_fingerprint = _surface_mesh_fingerprint(
         verts, faces, active_face, face_material, geometry)
-    transport = trace_boundary_state_first_hit_3d(
-        boundary, species_role, verts, faces, areas,
+    common_transport = dict(
+        boundary=boundary, species_role=species_role, verts=verts, faces=faces, areas=areas,
         source_bounds=source_bounds, source_z=source_z,
         mesh_length_unit_m=geometry.mesh_length_unit_m,
         mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
         device=transport_device)
+    if nodal_potential_v is None:
+        if any(value is not None for value in (
+                potential_origin, potential_spacing, trajectory_fixed_dt)):
+            raise ValueError("field trajectory options require nodal_potential_v")
+        transport = trace_boundary_state_first_hit_3d(**common_transport)
+    else:
+        if potential_origin is None or potential_spacing is None or trajectory_fixed_dt is None:
+            raise ValueError(
+                "nodal_potential_v requires potential_origin, potential_spacing, and trajectory_fixed_dt")
+        transport = trace_boundary_state_field_3d(
+            **common_transport, nodal_potential_v=nodal_potential_v,
+            potential_origin=potential_origin, potential_spacing=potential_spacing,
+            fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps)
     active_flux = _select_surface_fluxes(
         transport.surface_fluxes, active_face, len(faces))
     if surface_state is None:
@@ -434,7 +453,8 @@ def solve_feature_3d(
         species_role: Mapping[str, str], mechanism: ReducedSiO2FluorocarbonMechanism, *,
         etchable_material_ids, duration_s, n_steps, source_bounds, source_z,
         n_position=256, seed=0, cfl_number=0.3, reinitialize=True,
-        transport_device=None):
+        transport_device=None, nodal_potential_v=None, potential_origin=None,
+        potential_spacing=None, trajectory_fixed_dt=None, trajectory_max_steps=10000):
     """Run multiple verified feature steps, carrying only conservatively remapped surface state."""
     if int(n_steps) != n_steps or int(n_steps) <= 0:
         raise ValueError("n_steps must be a positive integer")
@@ -451,6 +471,9 @@ def solve_feature_3d(
             surface_state=current_state,
             surface_state_mesh_fingerprint=current_fingerprint,
             n_position=n_position, seed=int(seed) + step_index,
+            nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+            potential_spacing=potential_spacing, trajectory_fixed_dt=trajectory_fixed_dt,
+            trajectory_max_steps=trajectory_max_steps,
             cfl_number=cfl_number, reinitialize=reinitialize,
             transport_device=transport_device)
         results.append(result)

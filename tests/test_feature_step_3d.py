@@ -156,3 +156,27 @@ def test_multistep_solver_carries_remapped_state_and_matches_planar_total_motion
     assert result.surface_state_mesh_fingerprint == (
         result.steps[-1].next_surface_state_mesh_fingerprint)
     assert result.validity.within_declared_scope
+
+
+def test_feature_step_uses_supplied_3d_potential_for_ion_energy_and_surface_velocity():
+    geometry, initial_height = _plane_geometry()
+    z = np.arange(geometry.phi.shape[2]) * geometry.dx
+    potential = np.broadcast_to(10.0 * z / 1.75, geometry.phi.shape).copy()
+    result = advance_feature_step_3d(
+        geometry, _boundary(),
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=1.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        nodal_potential_v=potential, potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=geometry.dx, trajectory_fixed_dt=0.005,
+        trajectory_max_steps=1000, n_position=16384, seed=37,
+        cfl_number=0.3, reinitialize=False, transport_device="cpu")
+
+    expected_energy = 100.0 + 10.0 * (1.0 - initial_height / 1.75)
+    expected_yield = 0.2 * (expected_energy - 20.0) / (100.0 - 20.0)
+    expected_velocity = 2.2e21 * expected_yield / 2.2e28
+    average_velocity = np.dot(
+        result.surface.etch_velocity_m_s, result.active_face_area) / result.active_face_area.sum()
+    assert result.transport.transport_model == "collisionless_fixed_step_nodal_field_3d"
+    assert np.isclose(average_velocity, expected_velocity, rtol=3e-4)
+    assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.02
