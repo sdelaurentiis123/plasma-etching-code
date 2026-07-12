@@ -69,30 +69,37 @@ AR-shaped fudge; adaptive mesh/phase-space refinement (AMR); fast + GPU-accelera
   regression (a fixed coarse quadrature over-predicts the deep flux; QMC does not).
   Analytic targets + citations: `ARDE_PHYSICS_REFERENCE.md`.
 
-## Reactive s<1 family (qualitative demonstration, not yet a validated gate)
+## Reactive s<1 family — VALIDATED vs independent particle Monte Carlo
 
-Engine forward+QMC, dx=0.02, floor transmission vs AR for sticking s (Coburn-Winters regime):
+The reactive case (walls+floor re-emit diffusely, reflection 1-s) is now validated by an INDEPENDENT
+method, not just demonstrated. `scripts/arde_mc_reference.py::mc_reactive_transmission` is a stochastic
+particle MC of the same box (region-aware straight-line tracing; react w.p. s or diffuse-reflect;
+tally floor incidence). It self-checks to the s=1 geometric reference exactly (0.303/0.193/0.110 at
+AR1/2/4), then across s the engine's deterministic radiosity agrees to ~1-3%:
 
-```
-  AR  s=0.03  s=0.1   s=0.5   s=1
-   1  0.928   0.797   0.466   0.345
-   2  0.871   0.660   0.300   0.212
-   4  0.717   0.436   0.160   0.119
-   8  0.487   0.220   0.077   0.062
-```
+| AR | s | particle MC | engine radiosity | ratio |
+|----|-----|-------------|------------------|-------|
+| 1 | 0.10 | 0.7666 | 0.7750 | 1.011 |
+| 2 | 0.10 | 0.6264 | 0.6374 | 1.018 |
+| 4 | 0.10 | 0.4214 | 0.4268 | 1.013 |
+| 1 | 0.50 | 0.4185 | 0.4328 | 1.034 |
+| 2 | 0.50 | 0.2737 | 0.2800 | 1.023 |
+| 4 | 0.50 | 0.1485 | 0.1494 | 1.006 |
 
-Correct behavior: monotone-decreasing in AR for every s; higher s -> lower floor flux (more wall
-consumption); gentlest collapse at s->0 (T(AR8)/T(AR1)=0.53, approaching the Clausing conductance
-limit) steepening as s rises. s=0.5 slightly steeper than s=1 is the expected exp(-alpha*s*A^2)-vs-1/A
-crossover, not a defect. This is a DEMONSTRATION that the reactive re-emission machinery
-(diffuse radiosity with one physical sticking coefficient) produces the right physics; a validated
-reactive gate needs an independent multi-bounce reference (next step).
+Behavior matches Coburn-Winters (monotone in AR, decreasing in s). Gated in
+`tests/test_arde_transport.py` (now 8 tests). So the full ARDE TRANSPORT (s=1 geometric AND reactive
+s<1) is validated by independent methods.
+
+## Determinism
+
+All estimators are bit-identical across repeated calls (seeded scrambled-Sobol + seeded default_rng;
+deterministic Warp ray-mesh hits + numpy accumulation + GMRES): forward+QMC 0.3746781163693154,
+adjoint 0.1434127263028523, particle MC 0.36712646484375, numpy ray-trace 0.19273757934570312 — each
+identical on re-run. The gate is a stable deterministic regression.
 
 ## Roadmap to the de Boer product (remaining)
 
-1. Reactive gate: independent multi-bounce numpy reference (diffuse re-emission with sticking) ->
-   promote the s-family to a validated pytest gate like the s=1 one.
-2. de Boer SF6/O2 rate curve: rate model = f(ion flux, radical floor flux, sticking); sticking is a
+1. de Boer SF6/O2 rate curve: rate model = f(ion flux, radical floor flux, sticking); sticking is a
    DECLARED calibrated input with provenance/uncertainty. Calibrate on low-AR points, PREDICT held-out
    AR40. Report grid/ray/digitization/model error separately.
 3. GPU: run the forward+QMC path with device="cuda" (already threaded); accuracy-matched speed report.

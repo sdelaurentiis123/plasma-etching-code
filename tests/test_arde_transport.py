@@ -24,6 +24,14 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 from deboer_arde_static import floor_transmission, reference_floor_transmission  # noqa: E402
+from arde_mc_reference import mc_reactive_transmission  # noqa: E402
+
+
+def _engine_reactive(ar, s, dx=0.0125, log2=15):
+    return floor_transmission(
+        ar, s, opening_um=0.10, dx_um=dx, rays_per_face=64,
+        n_transverse=0, n_normal=0, transport_method="forward", n_position=32,
+        source_method="qmc", log2_samples=log2)["floor_transmission"]
 
 
 def _engine(ar, dx=0.02, log2=15):
@@ -60,3 +68,24 @@ def test_fixed_coarse_quadrature_fails_deep_feature_without_amr(n_transverse):
         n_transverse=n_transverse, n_normal=8)["floor_transmission"]
     assert (fixed > 2.0 * ref8) or (fixed < 0.5 * ref8), (n_transverse, fixed, ref8)
     assert _engine(8.0) == pytest.approx(ref8, rel=0.15), (ref8,)
+
+
+@pytest.mark.parametrize("ar,s", [(1.0, 0.5), (2.0, 0.3)])
+def test_reactive_radiosity_matches_independent_particle_mc(ar, s):
+    # The engine's deterministic diffuse radiosity (re-emission with sticking s) must agree with a
+    # completely independent stochastic particle Monte Carlo of the same box. Two different methods
+    # agreeing validates the reactive transport. Tolerance covers grid (continuum MC vs dx mesh),
+    # QMC, and MC noise.
+    mc = mc_reactive_transmission(ar, s, dx=0.0125, log2n=16)
+    eng = _engine_reactive(ar, s)
+    assert eng == pytest.approx(mc, rel=0.08), (ar, s, mc, eng)
+
+
+def test_reactive_family_monotone_in_ar_and_ordered_in_sticking():
+    # Coburn-Winters: floor transmission decreases with aspect ratio at fixed sticking, and decreases
+    # with sticking at fixed aspect ratio (more wall consumption -> less flux reaches the floor).
+    t = {(ar, s): _engine_reactive(ar, s, dx=0.02, log2=14) for ar in (1.0, 4.0) for s in (0.1, 0.5)}
+    for s in (0.1, 0.5):
+        assert t[(4.0, s)] < t[(1.0, s)], (s, t)
+    for ar in (1.0, 4.0):
+        assert t[(ar, 0.5)] < t[(ar, 0.1)], (ar, t)

@@ -66,6 +66,25 @@ A prior note claiming ~1-2% agreement at coarse settings was a premature-converg
 (nt=24 + dx=0.02 landing near the approximate analytic) and was withdrawn; the validated conclusion
 above supersedes it. Committed gate: tests/test_arde_transport.py.
 
+## 2b. Reactive family (s < 1) VALIDATED vs independent particle Monte Carlo
+
+The reactive case (walls+floor re-emit diffusely with reflection 1-s) is validated by an INDEPENDENT
+method: a stochastic particle Monte Carlo of the same box (scripts/arde_mc_reference.py,
+`mc_reactive_transmission`) vs the engine's deterministic diffuse radiosity. The MC self-checks to the
+s=1 geometric reference exactly, then across s the two methods agree to ~1-3% (engine, dx=0.008):
+
+| AR | s | particle MC | engine radiosity | ratio |
+|----|-----|-------------|------------------|-------|
+| 1  | 0.10 | 0.7666 | 0.7750 | 1.011 |
+| 2  | 0.10 | 0.6264 | 0.6374 | 1.018 |
+| 4  | 0.10 | 0.4214 | 0.4268 | 1.013 |
+| 1  | 0.50 | 0.4185 | 0.4328 | 1.034 |
+| 2  | 0.50 | 0.2737 | 0.2800 | 1.023 |
+| 4  | 0.50 | 0.1485 | 0.1494 | 1.006 |
+
+Behavior matches Coburn-Winters: monotone-decreasing in AR at fixed s; decreasing in s at fixed AR;
+gentlest collapse toward s->0 (Clausing limit). Gated in tests/test_arde_transport.py.
+
 ## 3. Numerics: adaptive angular refinement (AMR) is REQUIRED
 
 The floor-reaching acceptance cone has half-angle `~arctan(1/A) -> 1/A`. A fixed uniform angular
