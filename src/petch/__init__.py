@@ -49,7 +49,8 @@ from .validation_demo import (
     Jeon2022Prediction, score_jeon_2022_demo,
 )
 from .neutral_radiosity_3d import (
-    DiffuseFormFactors3D, DiffuseNeutralSolve3D, solve_diffuse_neutral_radiosity_3d,
+    DiffuseFormFactors3D, DiffuseNeutralSolve3D, DiffuseSurfaceEmissionSolve3D,
+    solve_diffuse_neutral_radiosity_3d, transport_diffuse_surface_emission_3d,
 )
 from .experimental_boundary import (
     Jeon2022BoundaryClosure, build_jeon_2022_boundary_state,
@@ -92,7 +93,8 @@ __all__ = [
     "make_rectangular_trench_geometry_3d",
     "JEON_2022_DEMO_VERSION", "Jeon2022DemoScore", "Jeon2022DemoThresholds",
     "Jeon2022Prediction", "score_jeon_2022_demo",
-    "DiffuseFormFactors3D", "DiffuseNeutralSolve3D", "solve_diffuse_neutral_radiosity_3d",
+    "DiffuseFormFactors3D", "DiffuseNeutralSolve3D", "DiffuseSurfaceEmissionSolve3D",
+    "solve_diffuse_neutral_radiosity_3d", "transport_diffuse_surface_emission_3d",
     "Jeon2022BoundaryClosure", "build_jeon_2022_boundary_state",
 ]
 

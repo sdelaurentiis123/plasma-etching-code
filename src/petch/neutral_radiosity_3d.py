@@ -63,6 +63,31 @@ class DiffuseNeutralSolve3D:
     iterations_converged: bool
 
 
+@dataclass(frozen=True)
+class DiffuseSurfaceEmissionSolve3D:
+    """Transport and reaction balance for a population emitted by the feature surface."""
+
+    emitted_flux_m2_s: np.ndarray
+    first_incident_flux_m2_s: np.ndarray
+    total_incident_flux_m2_s: np.ndarray
+    reacted_flux_m2_s: np.ndarray
+    reflected_flux_m2_s: np.ndarray
+    emitted_rate_s: float
+    reacted_rate_s: float
+    escaped_without_impact_rate_s: float
+    escaped_after_reflection_rate_s: float
+    relative_balance_error: float
+    relative_linear_residual: float
+    iterations_converged: bool
+
+    def __post_init__(self):
+        for name in (
+                "emitted_flux_m2_s", "first_incident_flux_m2_s", "total_incident_flux_m2_s",
+                "reacted_flux_m2_s", "reflected_flux_m2_s"):
+            value = np.asarray(getattr(self, name), dtype=float).copy()
+            value.setflags(write=False); object.__setattr__(self, name, value)
+
+
 def solve_diffuse_neutral_radiosity_3d(
         direct_flux_m2_s, face_area_m2, source_face, target_face, transfer_fraction,
         escape_fraction, reaction_probability, *, relative_tolerance=1e-10,
@@ -138,3 +163,55 @@ def solve_diffuse_neutral_radiosity_3d(
     return DiffuseNeutralSolve3D(
         incident, reacted, reflected, source_rate, reacted_rate, escaped_rate,
         balance, residual, info == 0)
+
+
+def transport_diffuse_surface_emission_3d(
+        emitted_flux_m2_s, face_area_m2, form_factors: DiffuseFormFactors3D,
+        reaction_probability, *, relative_tolerance=1e-10, maximum_iterations=500):
+    """Transport a diffuse population emitted by surface faces and close its global balance.
+
+    The first flight differs from plasma-boundary illumination: the source is an outgoing rate density
+    on each face. Form factors convert it to first-incident target flux, while their escape fractions
+    account for material that leaves the feature without another impact. Subsequent nonreacting impacts
+    use the same diffuse radiosity equation as neutral re-emission.
+    """
+    emitted = np.asarray(emitted_flux_m2_s, dtype=float)
+    area = np.asarray(face_area_m2, dtype=float)
+    reaction = np.asarray(reaction_probability, dtype=float)
+    if (not isinstance(form_factors, DiffuseFormFactors3D)
+            or emitted.ndim != 1 or emitted.shape != (form_factors.face_count,)
+            or area.shape != emitted.shape or reaction.shape != emitted.shape
+            or np.any(~np.isfinite(emitted)) or np.any(emitted < 0.0)
+            or np.any(~np.isfinite(area)) or np.any(area <= 0.0)
+            or np.any(~np.isfinite(reaction))
+            or np.any((reaction < 0.0) | (reaction > 1.0))):
+        raise ValueError("invalid diffuse surface-emission inputs")
+    source = form_factors.source_face
+    target = form_factors.target_face
+    fraction = form_factors.transfer_fraction
+    first_incident = np.bincount(
+        target, weights=(fraction * area[source] * emitted[source] / area[target]),
+        minlength=form_factors.face_count)
+    escaped_without_impact = float(np.dot(
+        area * form_factors.escape_fraction, emitted))
+    emitted_rate = float(np.dot(area, emitted))
+    entered_rate = float(np.dot(area, first_incident))
+    first_balance = abs(emitted_rate - entered_rate - escaped_without_impact) / max(
+        emitted_rate, np.finfo(float).tiny)
+    if first_balance > 2e-12:
+        raise RuntimeError(f"surface-emission first-flight balance failed: {first_balance:.3e}")
+    downstream = solve_diffuse_neutral_radiosity_3d(
+        first_incident, area, source, target, fraction,
+        form_factors.escape_fraction, reaction,
+        relative_tolerance=relative_tolerance, maximum_iterations=maximum_iterations)
+    escaped_total = escaped_without_impact + downstream.escaped_rate_s
+    balance = abs(emitted_rate - downstream.reacted_rate_s - escaped_total) / max(
+        emitted_rate, np.finfo(float).tiny)
+    if balance > max(20.0 * relative_tolerance, 2e-12):
+        raise RuntimeError(f"surface-emission projectile balance failed: {balance:.3e}")
+    return DiffuseSurfaceEmissionSolve3D(
+        emitted, first_incident, downstream.incident_flux_m2_s,
+        downstream.reacted_flux_m2_s, downstream.reflected_flux_m2_s,
+        emitted_rate, downstream.reacted_rate_s, escaped_without_impact,
+        downstream.escaped_rate_s, balance, downstream.relative_linear_residual,
+        downstream.iterations_converged)
