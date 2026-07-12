@@ -157,6 +157,8 @@ initial_accepted_iterations = 0
 initial_beta = None
 initial_anderson_x = None
 initial_anderson_residual = None
+initial_trust_best_rms = None
+initial_trust_best_max = None
 if args.initial is not None:
     with np.load(args.initial) as saved:
         if "solid" in saved and not np.array_equal(saved["solid"], solid):
@@ -199,6 +201,10 @@ if args.initial is not None:
         if "anderson_x_history" in saved:
             initial_anderson_x = saved["anderson_x_history"]
             initial_anderson_residual = saved["anderson_residual_history"]
+        if "trust_best_rms" in saved:
+            initial_trust_best_rms = float(saved["trust_best_rms"])
+        if "trust_best_max" in saved:
+            initial_trust_best_max = float(saved["trust_best_max"])
     if args.initial_state == "rejected":
         if args.poisson and args.nodal and initial_surface_charge_node_c_per_m is None:
             raise ValueError("rejected Poisson state is missing its physical surface charge")
@@ -273,6 +279,8 @@ try:
             initial_beta=initial_beta,
             initial_anderson_x=initial_anderson_x,
             initial_anderson_residual=initial_anderson_residual,
+            initial_trust_best_rms=initial_trust_best_rms,
+            initial_trust_best_max=initial_trust_best_max,
             nonlinear_update=args.update, anderson_depth=args.anderson_depth,
             trust_merit=args.trust_merit,
             **poisson_options,
@@ -305,6 +313,8 @@ except AdaptiveQuadratureConvergenceError as error:
                 accepted["confidence_envelope_max_abs_log_ratio"]),
             accepted_confidence_rms=(
                 accepted["confidence_envelope_rms_log_ratio"]),
+            trust_best_rms=accepted["trust_best_rms"],
+            trust_best_max=accepted["trust_best_max"],
             anderson_x_history=accepted["anderson_x"],
             anderson_residual_history=accepted["anderson_residual"],
             **{f"adaptive_{name}": value
@@ -439,6 +449,8 @@ np.savez(
     restart_accepted_iterations=result.get(
         "restart_accepted_iterations", max(result.get("accepted_iterations_total", 1) - 1, 0)),
     restart_beta=result.get("restart_beta", result.get("beta_final", args.beta)),
+    trust_best_rms=result.get("trust_best_rms", np.inf),
+    trust_best_max=result.get("trust_best_max", np.inf),
     anderson_x_history=result.get("anderson_x_history", np.empty((0, 0))),
     anderson_residual_history=result.get("anderson_residual_history", np.empty((0, 0))),
     **{f"adaptive_{name}": value for name, value in result.get("adaptive_levels", {}).items()},

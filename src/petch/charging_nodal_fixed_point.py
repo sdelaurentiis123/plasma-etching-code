@@ -117,6 +117,7 @@ def solve_boundary_state_charging_nodal(
         initial_adaptive_levels=None, initial_forward_adaptive_levels=None,
         initial_method_hint=None, initial_accepted_iterations=0,
         initial_beta=None, initial_anderson_x=None, initial_anderson_residual=None,
+        initial_trust_best_rms=None, initial_trust_best_max=None,
         nonlinear_update="picard", anderson_depth=4):
     """Solve steady floating-current balance on physical material-boundary vertices.
 
@@ -147,6 +148,10 @@ def solve_boundary_state_charging_nodal(
     if initial_beta is not None and (
             not np.isfinite(initial_beta) or initial_beta <= 0.0 or initial_beta > beta):
         raise ValueError("initial_beta must be positive and no larger than beta")
+    for name, value in (("initial_trust_best_rms", initial_trust_best_rms),
+                        ("initial_trust_best_max", initial_trust_best_max)):
+        if value is not None and (not np.isfinite(value) or value < 0.0):
+            raise ValueError(f"{name} must be finite and nonnegative")
     charge_mode = epsilon_r is not None
     if charge_mode:
         epsilon_r = np.asarray(epsilon_r, dtype=float)
@@ -309,6 +314,10 @@ def solve_boundary_state_charging_nodal(
     last_accepted_state = None
     trial_merit_history = []; trial_max_history = []
     accepted_beta_history = []; accepted_gain_history = []
+    trust_best_rms = (float("inf") if initial_trust_best_rms is None
+                      else float(initial_trust_best_rms))
+    trust_best_max = (float("inf") if initial_trust_best_max is None
+                      else float(initial_trust_best_max))
 
     def accepted_checkpoint():
         """Return only the serializable state needed to restart the last accepted iterate."""
@@ -337,6 +346,8 @@ def solve_boundary_state_charging_nodal(
                 last_accepted_state["confidence_envelope_max_abs_log_ratio"]),
             confidence_envelope_rms_log_ratio=float(
                 last_accepted_state["confidence_envelope_rms_log_ratio"]),
+            trust_best_rms=float(last_accepted_state["trust_best_rms"]),
+            trust_best_max=float(last_accepted_state["trust_best_max"]),
             accepted_iterations_total=int(
                 last_accepted_state["accepted_iterations_total"]),
             restart_accepted_iterations=max(
@@ -543,11 +554,12 @@ def solve_boundary_state_charging_nodal(
         merit = balance["rms_log_ratio"]
         maximum_merit = balance["max_abs_log_ratio"]
         trial_merit_history.append(merit); trial_max_history.append(maximum_merit)
+        # The tolerance is a fixed numerical-noise tube around the best accepted component values,
+        # not a per-step allowance that may ratchet upward over a long continuation.
         if (trust_region and pending_step is not None
                 and _trust_merit_worsened(
-                    merit, maximum_merit, pending_step["merit"],
-                    pending_step["maximum_merit"], trust_growth_tolerance,
-                    trust_merit)):
+                    merit, maximum_merit, trust_best_rms, trust_best_max,
+                    trust_growth_tolerance, trust_merit)):
             boundary_voltage[:] = pending_step["boundary_voltage"]
             conductor_voltage[:] = pending_step["conductor_voltage"]
             surface_charge_node[:] = pending_step["surface_charge_node"]
@@ -570,6 +582,8 @@ def solve_boundary_state_charging_nodal(
                     pending_step["maximum_merit"], trust_merit)):
             beta_current = min(float(beta), 1.2 * beta_current)
         pending_step = None
+        trust_best_rms = min(trust_best_rms, merit)
+        trust_best_max = min(trust_best_max, maximum_merit)
         history.append(balance); interval_history.append(interval_balance)
         accepted_beta_history.append(beta_current)
         gain_iteration = int(initial_accepted_iterations) + len(history)
@@ -604,6 +618,7 @@ def solve_boundary_state_charging_nodal(
                 interval_balance["confidence_envelope_max_abs_log_ratio"]),
             confidence_envelope_rms_log_ratio=(
                 interval_balance["confidence_envelope_rms_log_ratio"]),
+            trust_best_rms=float(trust_best_rms), trust_best_max=float(trust_best_max),
             anderson_x=(np.stack(anderson_x) if anderson_x
                         else np.empty((0, dof_count))),
             anderson_residual=(np.stack(anderson_residual) if anderson_residual
@@ -724,6 +739,8 @@ def solve_boundary_state_charging_nodal(
         trust_merit=("mean_rms_and_max_log_current_ratio" if trust_merit == "pareto"
                      else f"mean_{trust_merit}_log_current_ratio"),
         trust_merit_mode=trust_merit, rejected_steps=rejected_steps,
+        trust_best_rms=float(last_accepted_state["trust_best_rms"]),
+        trust_best_max=float(last_accepted_state["trust_best_max"]),
         beta_final=beta_current, trial_merit_history=np.asarray(trial_merit_history),
         trial_max_history=np.asarray(trial_max_history),
         accepted_beta_history=np.asarray(accepted_beta_history),

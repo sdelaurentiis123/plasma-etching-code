@@ -72,6 +72,10 @@ def test_pareto_trust_merit_rejects_worse_max_even_when_rms_improves():
     assert not _trust_merit_worsened(0.8, 1.1, 1.0, 1.0, 0.02, "rms")
     assert not _trust_merit_strongly_improved(0.7, 0.9, 1.0, 1.0, "pareto")
     assert _trust_merit_strongly_improved(0.7, 0.7, 1.0, 1.0, "pareto")
+    # A 2% allowance must remain anchored to the best component values. Comparing only with the
+    # previous accepted point would let repeated 1.5% degradations ratchet arbitrarily far.
+    assert not _trust_merit_worsened(1.03, 1.03, 1.015, 1.015, 0.02, "pareto")
+    assert _trust_merit_worsened(1.03, 1.03, 1.0, 1.0, 0.02, "pareto")
 
 
 def test_overlap_only_stops_update_and_does_not_certify_convergence():
@@ -322,6 +326,8 @@ def test_nodal_quadrature_failure_carries_last_accepted_restart_state(monkeypatc
     assert checkpoint["raw_rms_log_ratio"] == 0.0
     assert checkpoint["confidence_envelope_max_abs_log_ratio"] == 0.0
     assert checkpoint["confidence_envelope_rms_log_ratio"] == 0.0
+    assert checkpoint["trust_best_rms"] == 0.0
+    assert checkpoint["trust_best_max"] == 0.0
     assert rejected is not None
     assert np.array_equal(rejected["solid"], solid)
     assert rejected["boundary_nodal_voltage"].shape == (5, 5)

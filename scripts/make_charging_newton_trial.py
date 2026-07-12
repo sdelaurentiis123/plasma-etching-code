@@ -14,11 +14,14 @@ parser.add_argument("--output", required=True)
 parser.add_argument("--regularization", type=float, required=True)
 parser.add_argument("--fraction", type=float, default=1.0)
 parser.add_argument("--maximum-coordinate-step", type=float, default=1.0)
+parser.add_argument("--maximum-row-weight", type=float, default=0.0)
 parser.add_argument("--epsilon-solid", type=float, default=3.9)
 args = parser.parse_args()
 if (args.regularization <= 0.0 or not 0.0 < args.fraction <= 1.0
         or args.maximum_coordinate_step <= 0.0 or args.epsilon_solid <= 0.0):
     raise ValueError("regularization, fraction, step limit, and permittivity must be positive")
+if args.maximum_row_weight < 0.0:
+    raise ValueError("maximum row weight must be nonnegative")
 
 
 def load(path):
@@ -41,6 +44,9 @@ log_stderr = np.sqrt(
     (ion_stderr / np.maximum(ion, 1e-300)) ** 2
     + (electron_stderr / np.maximum(electron, 1e-300)) ** 2)
 row_weight = 1.0 / np.maximum(log_stderr, 0.05)
+row_weight /= np.median(row_weight)
+row_weight *= 1.0 + args.maximum_row_weight * (
+    np.abs(residual) / max(float(np.max(np.abs(residual))), 1e-300)) ** 4
 row_weight /= np.median(row_weight)
 identity = np.eye(residual.size)
 system = np.vstack((row_weight[:, None] * jacobian, args.regularization * identity))
@@ -80,6 +86,7 @@ payload.update(
     newton_step_coordinate_volts=step,
     newton_regularization=np.asarray(args.regularization),
     newton_fraction=np.asarray(args.fraction), newton_step_scale=np.asarray(step_scale),
+    newton_maximum_row_weight=np.asarray(args.maximum_row_weight),
     newton_predicted_raw_max=np.asarray(np.max(np.abs(predicted))),
     newton_predicted_raw_rms=np.asarray(np.sqrt(np.mean(predicted ** 2))),
     newton_poisson_charge_balance_c_per_m=np.asarray(
