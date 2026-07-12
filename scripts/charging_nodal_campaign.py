@@ -58,6 +58,7 @@ parser.add_argument("--perturb-node-volts", type=float, default=0.0)
 parser.add_argument("--perturb-charge-dof", type=int, default=None)
 parser.add_argument("--perturb-charge-coordinate-volts", type=float, default=0.0)
 parser.add_argument("--trust", action="store_true")
+parser.add_argument("--trust-merit", choices=("rms", "max", "pareto"), default="rms")
 parser.add_argument("--nodal", action="store_true")
 args = parser.parse_args()
 
@@ -249,6 +250,7 @@ try:
             initial_anderson_x=initial_anderson_x,
             initial_anderson_residual=initial_anderson_residual,
             nonlinear_update=args.update, anderson_depth=args.anderson_depth,
+            trust_merit=args.trust_merit,
             **poisson_options,
             **solve_options)
     else:
@@ -394,4 +396,3 @@ np.savez(
     **{f"forward_adaptive_{name}": value
        for name, value in result.get("forward_adaptive_levels", {}).items()},
     **{f"method_hint_{name}": value for name, value in result.get("method_hint", {}).items()})
-
