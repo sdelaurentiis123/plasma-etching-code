@@ -437,7 +437,10 @@ def solve_boundary_state_charging_nodal(
                 float(np.sqrt(np.mean(confidence_envelope ** 2)))
                 if confidence_envelope.size else 0.0),
             confidence_intervals_finite=bool(np.all(np.isfinite(confidence_envelope))))
-        merit = interval_balance["rms_log_ratio"]
+        # Trust-region acceptance follows the physical mean-current equation under common deterministic
+        # samples. The confidence-separated distance can shrink merely because uncertainty widened and
+        # therefore cannot be used as an optimization merit.
+        merit = balance["rms_log_ratio"]
         trial_merit_history.append(merit)
         if (trust_region and pending_step is not None
                 and merit > pending_step["merit"] * (1.0 + trust_growth_tolerance)):
@@ -495,10 +498,11 @@ def solve_boundary_state_charging_nodal(
                     name: value.copy() for name, value in adaptive_levels.items()},
                 forward_adaptive_levels={
                     name: value.copy() for name, value in forward_adaptive_levels.items()})
-        # Step only on the direction and magnitude resolved by the current samples. In the exact-current
-        # limit this is the physical mean log ratio. A sample ladder must demonstrate that the resulting
-        # confidence band is narrower than the claimed numerical accuracy.
-        update_residual = np.where(activity, certified, 0.0)
+        # Confidence intervals gate the direction; the residual magnitude remains the physical mean
+        # equation. Using an interval edge as the residual would move the fixed point with sampling
+        # tolerance. A sample ladder must still narrow the final confidence envelope below the claim.
+        direction_resolved = certified != 0.0
+        update_residual = np.where(activity & direction_resolved, raw, 0.0)
         preconditioned_state = np.empty(dof_count)
         for index, node in enumerate(dielectric_nodes):
             preconditioned_state[index] = (
@@ -591,7 +595,8 @@ def solve_boundary_state_charging_nodal(
         ion_current_stderr=ion_stderr, electron_current_stderr=electron_stderr,
         active_flux=active_flux, surface_discretization="boundary_nodal",
         electrostatic_state=("surface_charge_poisson" if charge_mode else "dirichlet_voltage"),
-        update_residual="confidence_separated_log_current_ratio", rejected_steps=rejected_steps,
+        update_residual="mean_log_current_ratio_when_direction_resolved",
+        trust_merit="mean_rms_log_current_ratio", rejected_steps=rejected_steps,
         beta_final=beta_current, trial_merit_history=np.asarray(trial_merit_history),
         accepted_beta_history=np.asarray(accepted_beta_history),
         accepted_gain_history=np.asarray(accepted_gain_history),

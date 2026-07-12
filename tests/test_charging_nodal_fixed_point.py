@@ -119,6 +119,8 @@ def test_nodal_charging_returns_last_evaluated_state_not_unassessed_step():
     assert np.all(result["ion_current"] > 0.0)
     assert not result["converged"]
     assert result["termination_reason"] == "fixed_iteration_budget"
+    assert result["update_residual"] == "mean_log_current_ratio_when_direction_resolved"
+    assert result["trust_merit"] == "mean_rms_log_current_ratio"
 
 
 def test_nodal_charging_marks_exhausted_tolerance_run_unconverged():
