@@ -4,6 +4,39 @@ Standing autonomous loop (authorized 2026-07-06). Each cycle pushes one frontier
 GPU, differentiable, feature-scale etch simulator, benchmarks it honestly against published data,
 visualizes it, smoke-tests it, documents it, and commits. Runs across wake-ups; survives compaction.
 
+## Superseding operating contract (2026-07-12)
+
+The external intended-use demonstration, rather than an internal residual in isolation, defines the
+active objective. The first demonstration is Jeon 2022 SiO2 **dimensionless depth transfer**: calibrate
+only the 20% C4F8 continuous-wave width curve, then predict the untouched widths, gas fractions, and
+pulse conditions, including all twelve 1 ms pulse-response directions. The versioned scorecard is
+`src/petch/validation_demo.py`. It was frozen before the first unified-engine prediction run.
+
+Every proposed physics or numerical change now follows this bounded loop:
+
+1. derive the change or cite a primary source, and state which error term it should reduce;
+2. pass the nearest analytic/conservation/limit invariant;
+3. immediately widen one ring: neighboring widths, aspect ratios, geometries, and the external score;
+4. compare with the last accepted checkpoint, reporting improvements and regressions separately;
+5. promote only if the broader evidence improves, or document an explicit, useful tradeoff;
+6. after two attempts that do not improve the external objective, stop and change method or research
+   the missing physics rather than extending the same campaign.
+
+Numerical approximations are allowed only with a measured convergence error below the relevant
+experimental/model uncertainty. Unknown surface chemistry remains an explicit closure input with
+provenance and validity limits; it must not be disguised as derived physics. Geometry-, benchmark-,
+aspect-ratio-, or condition-specific correction branches are prohibited.
+
+Charging is no longer an open-ended `confidence max < 0.15` campaign. Its accepted fixed-map
+checkpoint is retained. For the Jeon demonstration, charged and uncharged predictions are first
+compared on the narrowest/deepest structure. Charging work resumes only if that profile sensitivity
+is material relative to the declared error budget, and then converges against profile error rather
+than a detached balance statistic.
+
+No remote accelerator is launched until a reproducible local bottleneck is named. Each remote run
+needs a wall-time and dollar ceiling in advance, must preserve an accepted checkpoint, and ends by
+verifying that no instance remains. Nothing is pushed without an explicit request.
+
 ## First principles (the whole thing in one line)
 Etch is electrons + bonds evolving forward under ion/neutral/photon flux. We model that transport +
 surface kinetics FAST (GPU), DIFFERENTIABLE (autodiff calibration/inverse design), at FEATURE SCALE,
@@ -32,7 +65,15 @@ reactor↔atom coupling, which no open tool has.
   `Claude-Session:` line. Commit each cycle's work; keep local.
 
 ## Target queue (reprioritize as findings land)
-- [active] **C1 — reconcile the two charging solvers** (charging_general vs charging2d edge_array):
+- [active] **D1 — Jeon SiO2 depth-transfer baseline**: run the unified engine without using held-out
+  observations, expose numerical/model/parameter-evidence errors separately, and identify the one
+  dominant product-facing miss. Gate with `jeon_2022_depth_transfer_v1`.
+- [next] **D2 — bounded SiO2 closure calibration**: source or derive fixed yield/threshold/angular
+  forms; calibrate no more than three global surface parameters on the five nontrivial 20% C4F8 CW
+  ratios; predict the 64 nontrivial held-out targets without condition-specific corrections.
+- [next] **D3 — charging relevance ablation**: charged versus uncharged narrow/deep Jeon structure;
+  resume charging convergence only when the predicted profile effect exceeds the error budget.
+- [historical] **C1 — reconcile the two charging solvers** (charging_general vs charging2d edge_array):
   quantify the floor-flux gap (0.16 vs 0.22) and attribute it to the old solver's sheath launch
   plane (`boundary_um=3.7`) + adaptive survivor-gated integrator + rf_bursts source. Output = the
   spec for the kinetic engine.
