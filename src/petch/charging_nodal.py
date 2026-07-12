@@ -308,6 +308,9 @@ def trace_nodal(*args, **kwargs):
     ``warp:cpu`` exists solely for device-parity tests. Both backends return the identical eleven-array
     contract.
     """
+    fixed_dt = kwargs.get("fixed_dt", args[12] if len(args) > 12 else 0.0)
+    if not np.isfinite(fixed_dt) or fixed_dt < 0.0:
+        raise ValueError("fixed_dt must be finite and nonnegative")
     configured = os.environ.get("PETCH_DEVICE", "cpu")
     if configured == "cpu":
         return trace_nodal_cpu(*args, **kwargs)

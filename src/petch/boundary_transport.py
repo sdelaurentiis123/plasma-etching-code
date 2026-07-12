@@ -461,6 +461,15 @@ def bidirectional_boundary_state_cell_flux(
     normals = np.asarray(normals, dtype=float)
     adjoint_kwargs = {} if adjoint_options is None else dict(adjoint_options)
     forward_kwargs = {} if forward_options is None else dict(forward_options)
+    adjoint_fixed_dt = float(adjoint_kwargs.get("fixed_dt", 0.0))
+    forward_fixed_dt = float(forward_kwargs.get("fixed_dt", 0.0))
+    if np.ptp(np.asarray(nodal_potential, dtype=float)) > 0.0:
+        if adjoint_fixed_dt <= 0.0 or forward_fixed_dt <= 0.0:
+            raise ValueError(
+                "bidirectional transport in a nonuniform field requires a positive fixed_dt; "
+                "state-dependent timesteps do not define a reversible adjoint map")
+        if not np.isclose(adjoint_fixed_dt, forward_fixed_dt, rtol=0.0, atol=0.0):
+            raise ValueError("forward and adjoint estimators require the same fixed_dt")
     adjoint_kwargs.setdefault("element_absolute_tolerance", element_absolute_tolerance)
     adjoint_kwargs.setdefault("element_relative_tolerance", element_relative_tolerance)
     forward_kwargs.setdefault("element_absolute_tolerance", element_absolute_tolerance)

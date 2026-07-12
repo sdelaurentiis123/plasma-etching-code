@@ -142,6 +142,8 @@ def trace_nodal_warp(
     """Run the nodal tracer on a Warp CPU/CUDA device and return NumPy arrays."""
     if wp is None:
         raise RuntimeError("warp unavailable")
+    if not np.isfinite(fixed_dt) or fixed_dt < 0.0:
+        raise ValueError("fixed_dt must be finite and nonnegative")
     # Sandboxed services and read-only home mounts can make Warp's default user-cache path unusable.
     # Select a process-local temporary cache only after proving the configured directory unwritable.
     # This changes compilation storage, never device choice or numerical behavior.

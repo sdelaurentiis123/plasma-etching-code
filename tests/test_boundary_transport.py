@@ -814,4 +814,32 @@ def test_unified_forward_adjoint_reciprocity_in_nonuniform_field_with_separate_p
         n_face_position=16, max_steps=200 * nz)
     assert np.isclose(backward["normalized_flux"], forward["normalized_flux"], rtol=0.01, atol=0.002), (
         backward["normalized_flux"], forward["normalized_flux"])
-    RectilinearVelocityHistogramDensity,
+
+
+def test_bidirectional_nonuniform_field_refuses_state_dependent_timestep():
+    nx, nz = 6, 5
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-0.1, 0.1]), np.array([-0.1, 0.1]), np.array([0.9, 1.1])),
+        np.ones((1, 1, 1)))
+    species = SpeciesBoundaryState(
+        "ion", 1, 40.0, 1.0, [[0.0, 0.0, 1.0]], [1.0], density_model=density)
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    potential = np.tile(np.arange(nz + 1), (nx + 1, 1)).astype(float)
+    cells = [(index, nz - 1) for index in range(nx)]
+    normals = [(0.0, -1.0)] * nx
+
+    with pytest.raises(ValueError, match="reversible adjoint map"):
+        bidirectional_boundary_state_cell_flux(
+            boundary, "ion", potential, solid, cells, normals,
+            adjoint_options=dict(base_log2=4, max_log2=4, n_replicates=4),
+            forward_options=dict(base_log2=4, max_log2=4, n_replicates=4))
+
+    result = bidirectional_boundary_state_cell_flux(
+        boundary, "ion", potential, solid, cells, normals,
+        element_absolute_tolerance=10.0, consistency_sigma=1e6,
+        adjoint_options=dict(
+            base_log2=4, max_log2=4, n_replicates=4, fixed_dt=0.02),
+        forward_options=dict(
+            base_log2=4, max_log2=4, n_replicates=4, fixed_dt=0.02))
+    assert result["converged"]

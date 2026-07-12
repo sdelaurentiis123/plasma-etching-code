@@ -153,24 +153,43 @@ regression requires the selected endpoint mean to reflect the final refined face
 
 With that fix, the filled-material 20x18 trench (gas-only plasma row, ten-cell opening, fourteen-cell
 depth), finite-transit 40+/-10 V RF sheath, 4 eV electrons, four QMC replicates, and level-14 adjoint ceiling
-reached certified nodal current balance: max `|log(Gi/Ge)|` outside 2-sigma current intervals = 0.1428 and
-RMS = 0.0382. Restarting the same evaluated state with beta changed from 0.25 to 0.1 re-certified at max
-0.1053 and RMS 0.0266. The two results differ by at most 0.052 V on boundary nodes (0.0039 V RMS) against
-surface potentials of order 27 V. This closes one nontrivial bulk-trench convergence/restart gate. It does
-not close sample/grid/AR/initialization ladders, dielectric-volume permittivity/storage, SEE, or experiment.
-The warm CPU path still costs roughly ten seconds per nonlinear iteration in this environment; CUDA
-acceleration and proposal-variance reduction remain required product work.
+reduced the *resolved update distance* outside overlapping 2-sigma current intervals to max 0.1428 and RMS
+0.0382. A restart reached max 0.1053 and RMS 0.0266, with at most 0.052 V boundary-node difference. A later
+audit caught an important interpretation error: an interval that overlaps zero imbalance stops a
+noise-unsafe update, but does not certify balance unless the entire log-current-ratio interval lies inside
+the requested tolerance. The solver now reports that confidence envelope separately and uses it for its
+`converged` flag. Therefore the restart invariant remains evidence, but the former convergence claim is
+withdrawn; sample/grid/AR/initialization convergence remains open.
 
 ### Exact Warp orbit backend (experimental)
 
 The compatible Q1/midpoint/DDA orbit map now has a float64 Warp implementation. It preserves the four
 midpoint iterations, adaptive step, first crossed-face ordering, lateral/bottom remainder reflection,
 plasma exit state, impact energy, oriented hit normal, and exact hit position of the Numba reference.
-Three parity gates cover wall/floor hits, exits/reflections, and nonuniform-field ion/electron trajectories:
-all discrete outputs agree exactly and floating outputs agree to 2e-10 or tighter. The complete suite is
-116 passing tests with Warp enabled. `PETCH_DEVICE=cpu` keeps the established Numba backend;
-`PETCH_DEVICE=cuda` or `cuda:N` selects Warp. CUDA performance and full-solver CPU/GPU result parity are
-still open and must be measured on an actual accelerator before any speed claim.
+Device-parameterized parity gates cover wall/floor hits, exits/reflections, and nonuniform-field
+ion/electron trajectories. On an A100 80 GB, CPU/Warp-CPU/Warp-CUDA discrete outputs agree exactly and
+floating outputs agree to 7e-13 or tighter in a 65,536-particle stress batch. Warm end-to-end tracer timings,
+including transfer, were 2.7x, 9.8x, and 4.8x faster than 32-core Numba at 4,096, 16,384, and 65,536
+particles, respectively. These are engineering diagnostics, not yet a reproducible accuracy-matched
+product benchmark; the Python fixed-point loop still launches many small kernels and underutilizes the GPU.
+`PETCH_DEVICE=cpu` keeps Numba; `PETCH_DEVICE=cuda` or `cuda:N` selects Warp.
+
+### Reversible timestep requirement for the adjoint
+
+High-sample AR4 evaluation exposed a systematic error hidden by the earlier mixed tolerance. With the
+state-dependent adaptive timestep, exposed top-cell electron estimates disagreed at 8.38 combined standard
+errors (forward 0.9660 versus adjoint 0.9951) even at a `2^18` ceiling. The adjoint uses the Hamiltonian
+Poincare-map flux Jacobian; an ordinary phase-space-dependent timestep does not preserve the discrete
+time-reversal/volume map that identity requires.
+
+The same midpoint/DDA mover already supports one constant timestep. That option is now carried through
+every forward and adjoint adapter, and bidirectional transport in a nonuniform field refuses to run unless
+both directions use the same positive `fixed_dt`. On the frozen coarse AR4 state, `fixed_dt` 0.04, 0.02,
+and 0.01 gave deep-node electron currents 0.003274, 0.003278, and 0.003341 and ion currents 0.05895,
+0.05904, and 0.05903. The 0.02-to-0.01 change is below combined sampling uncertainty; the worst electron
+bidirectional discrepancy fell to 1.79 sigma at 0.01. This closes the diagnosed adaptive-map bias for that
+state, not the full time-step/sample/AR ladder. Automatic timestep selection and long-orbit truncation
+diagnostics remain open.
 
 ### Physical surface-charge / variable-permittivity Poisson mode (experimental)
 
@@ -188,7 +207,9 @@ has an opt-in physical mode built on a reusable Q1 weak-form system:
 - every solve reports the free-node Poisson residual and electrostatic energy.
 
 Manufactured gates reproduce a uniform parallel-plate voltage and a two-dielectric series capacitance to
-machine precision, conserve lumped edge charge, and verify positive response capacitance. On a narrow AR1
+machine precision, preserve normal displacement across a permittivity jump, close global Gauss-law charge
+against the Dirichlet reaction below 1e-24 C/m, conserve lumped edge charge, and verify positive response
+capacitance. On a narrow AR1
 filled trench with a three-cell SiO2 layer over a grounded bottom (a numerical gate, not an experimental
 stack), twelve accepted high-resolution evaluations reduced certified current-balance RMS from 1.071 to
 0.459 while the Poisson residual stayed below 8e-15 V. A longer pre-restart-contract continuation reached
@@ -237,18 +258,14 @@ not only a final floor-voltage comparison.
 
 ### Transport discretization errors
 
-- **Boundary location:** cell-centred solid voltage displaces the electrical surface relative to the
-  geometric hit face. This is currently the leading spatial suspect.
-- **Field/particle incompatibility:** nearest-cell `E`, the Laplace stencil, and face absorption do not
-  derive from one potential basis. A trajectory can conserve energy in a reconstructed potential yet be
-  the wrong physical trajectory.
-- **Post-step collision detection:** the tracer records the first solid cell after a step rather than the
-  exact ray/face intersection. This perturbs impact energy, face identity near corners, and reversibility.
-- **Element tunnelling and corner ordering:** one step can cross more than one grid face; the selected hit
-  can depend on update order. Grazing wall trajectories are especially sensitive.
-- **Time integration:** the production mover has bounded uniform-field energy error, but nonuniform-field
-  time reversibility is not gated. The observed timestep invariance says this is not the dominant current
-  error, not that it is zero.
+- **Boundary/field compatibility:** the nodal candidate now shares one Q1 potential basis between
+  dielectric state, Poisson solve, and particle field. The legacy cell-voltage path does not and cannot be
+  used as promotion evidence.
+- **Face events:** the nodal DDA returns the first exact face, oriented normal, and intersection point.
+  Step-size refinement must still demonstrate that corner/grazing classifications are stable.
+- **Time integration:** state-dependent stepping was proven to bias nonuniform-field bidirectional
+  transport. A common fixed step removes the observed bias, but a complete step/time-horizon ladder is not
+  closed; observed agreement bounds this error for one state rather than proving it is zero.
 - **Geometry staircasing:** W16 and W32 represent the same nominal dimensions with different discrete
   corners, conductor thicknesses, and sampled face sets. This changes both numerics and the represented
   physical geometry unless a common analytic boundary is used.
