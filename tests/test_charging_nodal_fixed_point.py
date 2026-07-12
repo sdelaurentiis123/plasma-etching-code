@@ -8,6 +8,7 @@ from petch.boundary_state import (
     SpeciesBoundaryState,
 )
 from petch.charging_nodal_fixed_point import (
+    _anderson_step,
     _confidence_separated_log_ratio,
     solve_boundary_state_charging_nodal,
 )
@@ -52,6 +53,15 @@ def test_confidence_separated_residual_has_exact_limit_and_unresolved_band():
     assert np.isclose(residual[2], np.log(0.12 / 0.18))
     assert np.isclose(residual[3], np.log(2.0))
     assert ilo[0] <= ehi[0] and elo[0] <= ihi[0]
+
+
+def test_anderson_step_solves_scalar_linear_fixed_point_without_fitted_jacobian():
+    x_history = []; residual_history = []
+    x = np.array([0.0])
+    x += _anderson_step(x, 1.0 - x, x_history, residual_history, 0.5, 3)
+    assert np.allclose(x, 0.5)
+    x += _anderson_step(x, 1.0 - x, x_history, residual_history, 0.5, 3)
+    assert np.allclose(x, 1.0)
 
 
 def test_overlap_only_stops_update_and_does_not_certify_convergence():

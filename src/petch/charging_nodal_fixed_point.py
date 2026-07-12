@@ -17,6 +17,29 @@ from .charging_nodal import material_face_nodes, nodal_domain, solve_nodal_lapla
 from .charging_poisson import NodalPoissonSystem
 
 
+def _anderson_step(x, residual, x_history, residual_history, gain, depth):
+    """Return a type-II Anderson step for one preconditioned fixed-point residual."""
+    x = np.asarray(x, dtype=float); residual = np.asarray(residual, dtype=float)
+    if x.shape != residual.shape or x.ndim != 1:
+        raise ValueError("Anderson state and residual must be matching vectors")
+    if int(depth) != depth or depth <= 0 or not np.isfinite(gain) or gain <= 0.0:
+        raise ValueError("Anderson depth and gain must be positive")
+    x_history.append(x.copy()); residual_history.append(residual.copy())
+    if len(x_history) > int(depth) + 1:
+        x_history.pop(0); residual_history.pop(0)
+    step = float(gain) * residual
+    if len(residual_history) >= 2:
+        delta_residual = np.stack([
+            residual_history[index + 1] - residual_history[index]
+            for index in range(len(residual_history) - 1)], axis=1)
+        delta_x = np.stack([
+            x_history[index + 1] - x_history[index]
+            for index in range(len(x_history) - 1)], axis=1)
+        gamma, *_ = np.linalg.lstsq(delta_residual, residual, rcond=1e-8)
+        step = step - (delta_x + float(gain) * delta_residual) @ gamma
+    return step
+
+
 def _confidence_separated_log_ratio(
         ion_current, electron_current, ion_stderr, electron_stderr, confidence_sigma):
     """Return the current imbalance resolved outside estimator confidence intervals.
@@ -66,7 +89,8 @@ def solve_boundary_state_charging_nodal(
         gain_decay=0.0, gain_offset=5.0, epsilon_r=None, cell_size_m=None,
         grounded_nodes=None, initial_surface_charge_node_c_per_m=None,
         initial_adaptive_levels=None, initial_forward_adaptive_levels=None,
-        initial_method_hint=None, initial_accepted_iterations=0):
+        initial_method_hint=None, initial_accepted_iterations=0,
+        nonlinear_update="picard", anderson_depth=4):
     """Solve steady floating-current balance on physical material-boundary vertices.
 
     Dielectric unknowns and the electrostatic field share the same nodal basis. Particle histories and
@@ -87,6 +111,10 @@ def solve_boundary_state_charging_nodal(
         raise ValueError("gain_decay must lie in [0,1] and gain_offset must be positive")
     if int(initial_accepted_iterations) != initial_accepted_iterations or initial_accepted_iterations < 0:
         raise ValueError("initial_accepted_iterations must be a nonnegative integer")
+    if nonlinear_update not in {"picard", "anderson"}:
+        raise ValueError("nonlinear_update must be 'picard' or 'anderson'")
+    if int(anderson_depth) != anderson_depth or anderson_depth <= 0:
+        raise ValueError("anderson_depth must be a positive integer")
     charge_mode = epsilon_r is not None
     if charge_mode:
         epsilon_r = np.asarray(epsilon_r, dtype=float)
@@ -228,6 +256,7 @@ def solve_boundary_state_charging_nodal(
     species_face_current = {}; species_face_stderr = {}; species_face_replicates = {}
     species_endpoint_stderr = {}; species_endpoint_replicates = {}
     beta_current = float(beta); pending_step = None; rejected_steps = 0
+    anderson_x = []; anderson_residual = []
     last_accepted_state = None
     trial_merit_history = []; accepted_beta_history = []; accepted_gain_history = []
     for iteration in range(int(n_iter)):
@@ -423,6 +452,7 @@ def solve_boundary_state_charging_nodal(
                 name: value.copy()
                 for name, value in pending_step["forward_adaptive_levels"].items()}
             beta_current *= 0.5; rejected_steps += 1; pending_step = None
+            anderson_x.clear(); anderson_residual.clear()
             if beta_current < minimum_beta:
                 raise RuntimeError(
                     f"nodal charging trust region collapsed below minimum_beta={minimum_beta:g}")
@@ -469,7 +499,21 @@ def solve_boundary_state_charging_nodal(
         # limit this is the physical mean log ratio. A sample ladder must demonstrate that the resulting
         # confidence band is narrower than the claimed numerical accuracy.
         update_residual = np.where(activity, certified, 0.0)
-        step = np.clip(iteration_gain * response_energy_eV * update_residual, -dVmax, dVmax)
+        preconditioned_state = np.empty(dof_count)
+        for index, node in enumerate(dielectric_nodes):
+            preconditioned_state[index] = (
+                boundary_voltage[node] if poisson_system is None
+                else surface_charge_node[node] / surface_capacitance[index])
+        for component in components:
+            preconditioned_state[component_index[component]] = conductor_voltage[component]
+        fixed_point_residual = response_energy_eV * update_residual
+        if nonlinear_update == "anderson":
+            step = _anderson_step(
+                preconditioned_state, fixed_point_residual,
+                anderson_x, anderson_residual, iteration_gain, anderson_depth)
+        else:
+            step = iteration_gain * fixed_point_residual
+        step = np.clip(step, -dVmax, dVmax)
         for index, node in enumerate(dielectric_nodes):
             if activity[index]:
                 if poisson_system is None:
@@ -552,6 +596,7 @@ def solve_boundary_state_charging_nodal(
         accepted_beta_history=np.asarray(accepted_beta_history),
         accepted_gain_history=np.asarray(accepted_gain_history),
         gain_decay=float(gain_decay), gain_offset=float(gain_offset),
+        nonlinear_update=nonlinear_update, anderson_depth=int(anderson_depth),
         accepted_iterations_total=int(initial_accepted_iterations) + len(history),
         method_hint={name: value.copy() for name, value in hybrid_hint.items()},
         adaptive_levels={name: value.copy() for name, value in adaptive_levels.items()},
