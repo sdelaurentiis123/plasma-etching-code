@@ -7,6 +7,9 @@ wp = pytest.importorskip("warp")
 from petch.charging_nodal_gpu import trace_nodal_warp
 
 
+DEVICES = ["cpu"] + (["cuda:0"] if wp.is_cuda_available() else [])
+
+
 def _compare(cpu, warp, atol=2e-12):
     for index in (0, 1, 4, 7, 8):
         assert np.array_equal(cpu[index], warp[index]), index
@@ -14,7 +17,8 @@ def _compare(cpu, warp, atol=2e-12):
         assert np.allclose(cpu[index], warp[index], rtol=2e-12, atol=atol), index
 
 
-def test_warp_nodal_matches_exact_face_hits_exits_and_reflections():
+@pytest.mark.parametrize("device", DEVICES)
+def test_warp_nodal_matches_exact_face_hits_exits_and_reflections(device):
     nx, nz = 9, 8
     solid = np.zeros((nx, nz), dtype=bool)
     solid[6, :] = True
@@ -27,13 +31,14 @@ def test_warp_nodal_matches_exact_face_hits_exits_and_reflections():
     arguments = (potential, solid, x, z, vx, vz, 1.0, nx, nz, 500, 0.4, 0.1)
 
     cpu = trace_nodal_cpu(*arguments)
-    warp = trace_nodal_warp(*arguments, device="cpu")
+    warp = trace_nodal_warp(*arguments, device=device)
 
     _compare(cpu, warp)
 
 
+@pytest.mark.parametrize("device", DEVICES)
 @pytest.mark.parametrize("charge", [-1.0, 1.0])
-def test_warp_nodal_matches_nonuniform_q1_orbits(charge):
+def test_warp_nodal_matches_nonuniform_q1_orbits(charge, device):
     nx, nz = 18, 14
     solid = np.zeros((nx, nz), dtype=bool)
     solid[:4, 1:] = True; solid[14:, 1:] = True; solid[4:14, 11:] = True
@@ -49,6 +54,6 @@ def test_warp_nodal_matches_nonuniform_q1_orbits(charge):
         potential, solid, x, z, vx, vz, charge, nx, nz, 1000, 0.15, 0.1, 0.02)
 
     cpu = trace_nodal_cpu(*arguments)
-    warp = trace_nodal_warp(*arguments, device="cpu")
+    warp = trace_nodal_warp(*arguments, device=device)
 
     _compare(cpu, warp, atol=2e-10)
