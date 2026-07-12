@@ -51,6 +51,9 @@ from .validation_demo import (
 from .neutral_radiosity_3d import (
     DiffuseFormFactors3D, DiffuseNeutralSolve3D, solve_diffuse_neutral_radiosity_3d,
 )
+from .experimental_boundary import (
+    Jeon2022BoundaryClosure, build_jeon_2022_boundary_state,
+)
 
 # High-level 3D API (ViennaPS-shaped). Importing api pulls in the 3D engine (threed/warp).
 from .api import Domain, SF6O2, Process, Result
@@ -86,6 +89,7 @@ __all__ = [
     "JEON_2022_DEMO_VERSION", "Jeon2022DemoScore", "Jeon2022DemoThresholds",
     "Jeon2022Prediction", "score_jeon_2022_demo",
     "DiffuseFormFactors3D", "DiffuseNeutralSolve3D", "solve_diffuse_neutral_radiosity_3d",
+    "Jeon2022BoundaryClosure", "build_jeon_2022_boundary_state",
 ]
 
 __version__ = "0.2.0"
