@@ -177,9 +177,14 @@ under-determined) -- an honest result that quantifies how many structures must b
 - **Self-consistent CHARGING loop is built, wired, AND tested**: `solve_dielectric_charging_steady_3d`
   converges the nonlinear current balance (I+ = I- per node to rtol 1e-14) to a self-consistent surface
   potential and reuses the field-converged ion events for chemistry; gate
-  `tests/test_feature_step_3d.py::test_feature_step_solves_charge...` passes in the green suite. It was
-  simply not EXERCISED in the de Boer/ARDE context this session (those ion runs are ballistic).
-  Phase 2 connects it to notching + the deep-AR residual.
+  `tests/test_feature_step_3d.py::test_feature_step_solves_charge...` passes in the green suite.
+- **DEMONSTRATED (`scripts/charging_selfconsistent_demo.py`):** the loop converges in 8 iterations
+  (3 trust-region rejections) to a current-balance residual of EXACTLY 0.0 on all 32 active nodes
+  (I+ = I- = floating condition) and a self-consistent surface potential -10.77..0 V (dielectric charges
+  negative under net-electron arrival). So the self-consistent engine works, concretely. Known gap: a
+  periodic-cell TRENCH trips a float32 cell-boundary tolerance in `lump_triangle_sheet_charge_3d` (verts
+  exactly on the cell edge) -- a Phase-2 robustness fix, not physics. Phase 2 next: fix that, connect
+  charging to notching + the deep-AR residual.
 
 ## Roadmap (remaining)
 
