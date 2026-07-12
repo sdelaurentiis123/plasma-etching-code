@@ -87,7 +87,7 @@ def trace_boundary_state_floor_flux(
 def forward_boundary_state_cell_flux_qmc(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, *,
         normals=None, proposal_species=None, log2_samples=12, seed=0, x_min=0.0, x_max=None,
-        max_steps=None, dt_cap=0.15, dt_field=0.10, fixed_dt=0.0):
+        max_steps=None, dt_cap=0.15, dt_field=0.10, fixed_dt=0.0, source_offset=1e-3):
     """Forward QMC current to arbitrary material cells from the same boundary-density contract.
 
     The score is total current to each unit-depth cell divided by incident current per unit horizontal
@@ -99,6 +99,9 @@ def forward_boundary_state_cell_flux_qmc(
         x_max = float(nx)
     if not float(x_max) > float(x_min):
         raise ValueError("x_max must exceed x_min")
+    source_offset = float(source_offset)
+    if not np.isfinite(source_offset) or not 0.0 <= source_offset < 0.5:
+        raise ValueError("source_offset must lie in [0, half a cell)")
     species = boundary.get(species_name)
     template = species if proposal_species is None else proposal_species
     proposal = qmc_boundary_proposal(
@@ -107,7 +110,7 @@ def forward_boundary_state_cell_flux_qmc(
     rng = np.random.default_rng(int(seed) + 15485863)
     lateral_u = (rng.permutation(count) + rng.random(count)) / count
     x0 = float(x_min) + (float(x_max) - float(x_min)) * lateral_u
-    z0 = np.full(count, 1e-3)
+    z0 = np.full(count, source_offset)
     traced = trace_nodal(
         nodal_potential, solid, x0, z0, velocity[:, 0], velocity[:, 2],
         float(species.charge_number), nx, nz,
@@ -366,7 +369,7 @@ def adaptive_forward_boundary_state_cell_flux(
         element_absolute_tolerance=None, element_relative_tolerance=0.0,
         refine_fraction=0.5, initial_log2_samples=None,
         x_min=0.0, x_max=None, max_steps=None, dt_cap=0.15, dt_field=0.10,
-        fixed_dt=0.0):
+        fixed_dt=0.0, source_offset=1e-3):
     """Adapt the complementary forward estimator on arbitrary physical material cells."""
     cells = [tuple(map(int, cell)) for cell in cells]
     if proposal_species is not None:
@@ -395,7 +398,8 @@ def adaptive_forward_boundary_state_cell_flux(
                 boundary, species_name, nodal_potential, solid, cells,
                 normals=normals,
                 log2_samples=level, seed=int(seed + replicate), x_min=x_min, x_max=x_max,
-                max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field, fixed_dt=fixed_dt)
+                max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field, fixed_dt=fixed_dt,
+                source_offset=source_offset)
             estimates[replicate] = result["per_cell"]
             if endpoint_estimates is not None:
                 endpoint_estimates[replicate] = result["per_face_endpoint"]
