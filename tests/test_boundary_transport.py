@@ -349,6 +349,7 @@ def test_bidirectional_cross_refines_a_missed_adjoint_mode(monkeypatch):
     assert result["cross_refinement_rounds"] == 2
     assert result["converged"]
     assert result["estimator_consistent"][0]
+    assert np.allclose(result["selected_endpoint_mean"][0], [0.025, 0.025])
 
 
 def test_bidirectional_refines_nonoverlapping_forward_and_adjoint_support(monkeypatch):

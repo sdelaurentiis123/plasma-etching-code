@@ -487,12 +487,6 @@ def bidirectional_boundary_state_cell_flux(
             "bidirectional certification requires at least four independent replicates")
     if adjoint.element_replicates.shape[0] != forward.element_replicates.shape[0]:
         raise ValueError("bidirectional estimators require the same replicate count")
-    adjoint_endpoint_replicates = (
-        adjoint.auxiliary_replicates if adjoint.auxiliary_replicates is not None
-        else np.repeat(0.5 * adjoint.element_replicates[:, :, None], 2, axis=2))
-    forward_endpoint_replicates = (
-        forward.auxiliary_replicates if forward.auxiliary_replicates is not None
-        else np.repeat(0.5 * forward.element_replicates[:, :, None], 2, axis=2))
     first_face = {cell: cells.index(cell) for cell in unique_cells}
 
     # The forward controller resolves oriented faces, but a dielectric cell owns the sum of all its
@@ -575,6 +569,15 @@ def bidirectional_boundary_state_cell_flux(
             proposal_species=proposal_species, **refined_options)
         cross_refinement_rounds += 1
 
+    # Refinement replaces the replicate ensembles. Endpoint moments must be read from the final
+    # ensembles, never from the pre-refinement cache, or nodal deposition becomes history-dependent
+    # even while face totals are certified.
+    adjoint_endpoint_replicates = (
+        adjoint.auxiliary_replicates if adjoint.auxiliary_replicates is not None
+        else np.repeat(0.5 * adjoint.element_replicates[:, :, None], 2, axis=2))
+    forward_endpoint_replicates = (
+        forward.auxiliary_replicates if forward.auxiliary_replicates is not None
+        else np.repeat(0.5 * forward.element_replicates[:, :, None], 2, axis=2))
     per_face = np.zeros(len(cells)); per_face_stderr = np.zeros(len(cells))
     selected_face_mean = np.zeros(len(cells)); selected_face_stderr = np.zeros(len(cells))
     selected_face_replicates = np.zeros_like(adjoint.element_replicates)

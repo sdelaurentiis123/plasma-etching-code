@@ -146,6 +146,21 @@ deposition lowered the certified RMS residual from roughly 0.5 to 0.35 and the m
 relevant geometry; checkpoints from the freestanding-wall and filled-material topologies must never be
 interchanged, and the diagnostic harness now refuses such a mismatch.
 
+A subsequent restart audit found that endpoint replicate arrays were cached before forward/adjoint cross
+refinement. Face totals used the refined ensemble while nodal deposition used stale endpoint moments, so
+an apparent pass was history dependent. Endpoint moments are now extracted only after all refinement; a
+regression requires the selected endpoint mean to reflect the final refined face ensemble.
+
+With that fix, the filled-material 20x18 trench (gas-only plasma row, ten-cell opening, fourteen-cell
+depth), finite-transit 40+/-10 V RF sheath, 4 eV electrons, four QMC replicates, and level-14 adjoint ceiling
+reached certified nodal current balance: max `|log(Gi/Ge)|` outside 2-sigma current intervals = 0.1428 and
+RMS = 0.0382. Restarting the same evaluated state with beta changed from 0.25 to 0.1 re-certified at max
+0.1053 and RMS 0.0266. The two results differ by at most 0.052 V on boundary nodes (0.0039 V RMS) against
+surface potentials of order 27 V. This closes one nontrivial bulk-trench convergence/restart gate. It does
+not close sample/grid/AR/initialization ladders, dielectric-volume permittivity/storage, SEE, or experiment.
+The warm CPU path still costs roughly ten seconds per nonlinear iteration in this environment; CUDA
+acceleration and proposal-variance reduction remain required product work.
+
 On the filled-material trench, the endpoint-resolved candidate accepted 20 consecutive fixed-point
 evaluations. Its certified current-balance RMS fell from 2.31 to a best value of 0.305 before fluctuating
 at 0.35 as rare-hit sampling error became comparable to the remaining imbalance; the certified maximum
