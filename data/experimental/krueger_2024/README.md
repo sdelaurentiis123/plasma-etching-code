@@ -26,6 +26,15 @@ The profile images themselves are not numerically recoverable from the paper wit
 tables therefore gate scalar/trend validation only. Pixel- or contour-level matching requires source SEMs,
 an explicit digitization uncertainty, or new measurements; it must not silently use the printed figures.
 
+The paper's Table V probabilities are **experiment-calibrated mechanism inputs**, not first-principles
+constants. The four-feature optimization reports 0.0909 for bare-SiO2 sputtering, 0.1384 for
+SiO2-fluorocarbon-complex sputtering, 0.2729 for complex formation, 0.0628 for O-based polymer etching,
+and 0.0842 for polymer deposition on the amorphous-carbon mask. They cannot be copied wholesale into
+petch's current reduced SiO2 kernel: Krueger's mechanism also resolves species-specific complexes,
+SiO2 redeposition, polymer crosslinking/bond breaking, mask chemistry, and a measured/simulated IEAD up
+to 4.8 keV. Until those state channels and the complete reaction table are represented, the values are
+comparison evidence rather than an executable petch parameter package.
+
 ## Base process context
 
 - CCP pressure: 10 mTorr.

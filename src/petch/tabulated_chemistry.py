@@ -136,6 +136,11 @@ class TabulatedSiClArMechanism:
             reasons.append("ion energy leaves the fixed 100 eV RIE table condition")
         if wrong_angle:
             reasons.append("ion incidence leaves the fixed normal-incidence RIE table condition")
+        nonpredictive = []
+        if not self.bulk_density_evidence.supports_prediction_within_declared_domain:
+            nonpredictive.append("bulk_atom_density_m3")
+        if self.table.provenance.get("supports_prediction_within_declared_domain") is not True:
+            nonpredictive.append("interaction_table")
         return MechanismValidity(
             within_declared_scope=not reasons, reasons=tuple(reasons),
             unsupported_neutral_species=unsupported_neutral,
@@ -144,7 +149,9 @@ class TabulatedSiClArMechanism:
                 f"normal incidence is accepted only within cosine tolerance {self.cosine_tolerance:g}",
                 "surface coverage and damage memory are implicit in archived steady RIE yields",
                 "etch-product branching is available only for the separate 80 eV ALE table",
-            ))
+            ),
+            parameter_evidence_supports_prediction=not nonpredictive,
+            nonpredictive_parameters=tuple(nonpredictive))
 
     def advance(self, state, fluxes: SurfaceFluxes, duration_s: float, *, strict=True):
         if not isinstance(state, TabulatedSiSurfaceState):

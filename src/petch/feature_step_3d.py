@@ -73,6 +73,8 @@ class FeatureStepValidity:
     within_declared_scope: bool
     reasons: tuple[str, ...]
     known_limitations: tuple[str, ...]
+    parameter_evidence_supports_prediction: bool
+    nonpredictive_parameters: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -513,7 +515,10 @@ def advance_feature_step_3d(
             "first-order material-local conservative surface-state remap",
             "topology-changing surface steps are refused",
             "first-order Godunov interface advection",
-        ) + tuple(surface.validity.known_model_form_omissions))
+        ) + tuple(surface.validity.known_model_form_omissions),
+        parameter_evidence_supports_prediction=(
+            surface.validity.parameter_evidence_supports_prediction),
+        nonpredictive_parameters=surface.validity.nonpredictive_parameters)
     return FeatureStep3DResult(
         geometry=output_geometry, transport=transport, charging=charging, surface=surface,
         active_face_index=active_face, active_face_centroid=centroids[active_face],
@@ -602,6 +607,8 @@ def solve_feature_3d(
     reasons = tuple(reason for result in results for reason in result.validity.reasons)
     limitations = tuple(dict.fromkeys(
         limitation for result in results for limitation in result.validity.known_limitations))
+    nonpredictive = tuple(dict.fromkeys(
+        name for result in results for name in result.validity.nonpredictive_parameters))
     if charging_system_builder is not None:
         limitations += (
             "quasi-static charging re-solves each geometry independently; transient charge memory "
@@ -611,4 +618,5 @@ def solve_feature_3d(
         geometry=current_geometry, surface_state=current_state,
         surface_state_mesh_fingerprint=current_fingerprint,
         steps=tuple(results), duration_s=float(duration_s),
-        validity=FeatureStepValidity(not reasons, reasons, limitations))
+        validity=FeatureStepValidity(
+            not reasons, reasons, limitations, not nonpredictive, nonpredictive))

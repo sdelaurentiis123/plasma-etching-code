@@ -50,6 +50,7 @@ def _provenance(table_name, **conditions):
             "Kounis-Melas et al., Data from Deep Potential Molecular Dynamics Simulations "
             "of Low-Temperature Plasma-Surface Interactions"),
         "evidence_type": "DeepMD_molecular_dynamics",
+        "supports_prediction_within_declared_domain": True,
         "dataset_doi": "10.34770/rjv6-2w31",
         "paper_doi": "10.1116/6.0004027",
         "osti_dataset_id": "2589032",

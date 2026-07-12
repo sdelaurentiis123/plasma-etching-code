@@ -32,6 +32,7 @@ class ParameterEvidence:
     evidence_type: str
     relative_standard_uncertainty: float | None = None
     note: str = ""
+    supports_prediction_within_declared_domain: bool = False
 
     def __post_init__(self):
         if not self.source or not self.evidence_type:
@@ -39,6 +40,8 @@ class ParameterEvidence:
         uncertainty = self.relative_standard_uncertainty
         if uncertainty is not None and (not np.isfinite(uncertainty) or uncertainty < 0.0):
             raise ValueError("relative standard uncertainty must be finite and nonnegative")
+        if not isinstance(self.supports_prediction_within_declared_domain, bool):
+            raise TypeError("prediction-support flag must be boolean")
 
 
 @dataclass(frozen=True)
@@ -323,6 +326,8 @@ class MechanismValidity:
     reasons: tuple[str, ...]
     unsupported_neutral_species: tuple[str, ...]
     known_model_form_omissions: tuple[str, ...]
+    parameter_evidence_supports_prediction: bool
+    nonpredictive_parameters: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -363,6 +368,10 @@ class ReducedSiO2FluorocarbonMechanism:
             "bare_sio2_yield", "complex_sio2_yield", "polymer_sputter_yield",
         }
         missing_evidence = tuple(sorted(required_evidence - set(par.evidence)))
+        nonpredictive = tuple(sorted(
+            name for name in required_evidence
+            if name not in par.evidence
+            or not par.evidence[name].supports_prediction_within_declared_domain))
         reasons = []
         if unsupported:
             reasons.append("positive incident neutral flux has no declared reaction channel")
@@ -372,7 +381,9 @@ class ReducedSiO2FluorocarbonMechanism:
             within_declared_scope=not reasons,
             reasons=tuple(reasons),
             unsupported_neutral_species=unsupported,
-            known_model_form_omissions=par.known_omissions)
+            known_model_form_omissions=par.known_omissions,
+            parameter_evidence_supports_prediction=not nonpredictive,
+            nonpredictive_parameters=nonpredictive)
 
     @staticmethod
     def _broadcast(value, shape):

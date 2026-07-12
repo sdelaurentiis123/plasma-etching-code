@@ -163,4 +163,6 @@ def test_unsupported_species_and_missing_evidence_refuse_strict_execution():
 def test_reduced_mechanism_reports_known_model_form_omissions():
     result = _mechanism().advance(SiO2SurfaceState.bare(), SurfaceFluxes({}), 0.0)
     assert result.validity.within_declared_scope
+    assert not result.validity.parameter_evidence_supports_prediction
+    assert set(result.validity.nonpredictive_parameters) == set(_evidence())
     assert "polymer_crosslinking" in result.validity.known_model_form_omissions

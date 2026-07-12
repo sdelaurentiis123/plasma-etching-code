@@ -20,7 +20,7 @@ def _mechanism():
         table, SI_ATOM_DENSITY_M3,
         ParameterEvidence(
             "Kounis-Melas OSTI 2589032 RIE in.lammps: diamond-Si lattice a=5.43 angstrom",
-            "source_derived"))
+            "source_derived", supports_prediction_within_declared_domain=True))
 
 
 def _ions(energy=100.0, cosine=1.0, flux=2e21):
@@ -41,6 +41,8 @@ def test_tabulated_si_rie_replays_source_yield_and_propagates_md_uncertainty():
         result.etch_velocity_standard_uncertainty_m_s,
         2e21 * table.standard_uncertainty["reactive_etch_yield"] / SI_ATOM_DENSITY_M3)
     assert result.table_fingerprint == mechanism.table.fingerprint
+    assert result.validity.parameter_evidence_supports_prediction
+    assert result.validity.nonpredictive_parameters == ()
 
 
 def test_tabulated_si_rie_refuses_unreleased_energy_angle_ratio_and_species():

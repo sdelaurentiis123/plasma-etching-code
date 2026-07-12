@@ -90,7 +90,7 @@ def _si_cl_ar_mechanism():
         table, SI_ATOM_DENSITY_M3,
         ParameterEvidence(
             "Kounis-Melas OSTI 2589032 RIE in.lammps: diamond-Si lattice a=5.43 angstrom",
-            "source_derived"))
+            "source_derived", supports_prediction_within_declared_domain=True))
 
 
 def _plane_poisson_system(geometry):
@@ -127,6 +127,8 @@ def test_one_physical_3d_step_moves_a_uniform_sio2_plane_by_flux_yield_over_dens
     assert np.isclose(result.diagnostics["max_velocity_m_s"], 2e-8, rtol=0.08)
     assert result.diagnostics["cfl_substeps"] == 1
     assert result.validity.within_declared_scope
+    assert not result.validity.parameter_evidence_supports_prediction
+    assert "bare_sio2_yield" in result.validity.nonpredictive_parameters
     assert "conservative surface-state remap" in " ".join(result.validity.known_limitations)
     assert result.state_remap_diagnostics["old_topology"] == (1, 1)
     assert result.state_remap_diagnostics["new_topology"] == (1, 1)
@@ -342,5 +344,7 @@ def test_second_chemistry_runs_through_unchanged_transport_remap_and_interface_e
     assert np.isclose(mean_velocity, expected_velocity_m_s, rtol=0.01)
     assert all(step.surface.table_fingerprint == mechanism.table.fingerprint
                for step in result.steps)
+    assert result.validity.parameter_evidence_supports_prediction
+    assert result.validity.nonpredictive_parameters == ()
     assert result.surface_state.removed_atoms_m2.size == result.steps[-1].next_active_face_area.size
     assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.03
