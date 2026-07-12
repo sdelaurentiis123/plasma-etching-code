@@ -90,6 +90,7 @@ def solve_boundary_state_charging_nodal(
         grounded_nodes=None, initial_surface_charge_node_c_per_m=None,
         initial_adaptive_levels=None, initial_forward_adaptive_levels=None,
         initial_method_hint=None, initial_accepted_iterations=0,
+        initial_beta=None, initial_anderson_x=None, initial_anderson_residual=None,
         nonlinear_update="picard", anderson_depth=4):
     """Solve steady floating-current balance on physical material-boundary vertices.
 
@@ -115,6 +116,9 @@ def solve_boundary_state_charging_nodal(
         raise ValueError("nonlinear_update must be 'picard' or 'anderson'")
     if int(anderson_depth) != anderson_depth or anderson_depth <= 0:
         raise ValueError("anderson_depth must be a positive integer")
+    if initial_beta is not None and (
+            not np.isfinite(initial_beta) or initial_beta <= 0.0 or initial_beta > beta):
+        raise ValueError("initial_beta must be positive and no larger than beta")
     charge_mode = epsilon_r is not None
     if charge_mode:
         epsilon_r = np.asarray(epsilon_r, dtype=float)
@@ -183,6 +187,21 @@ def solve_boundary_state_charging_nodal(
     dof_count = len(dielectric_nodes) + len(components)
     if dof_count == 0:
         raise ValueError("charging surface has no floating electrical degrees of freedom")
+    if (initial_anderson_x is None) != (initial_anderson_residual is None):
+        raise ValueError("both Anderson restart histories are required together")
+    if initial_anderson_x is None:
+        initial_anderson_x_array = np.empty((0, dof_count))
+        initial_anderson_residual_array = np.empty((0, dof_count))
+    else:
+        initial_anderson_x_array = np.asarray(initial_anderson_x, dtype=float)
+        initial_anderson_residual_array = np.asarray(initial_anderson_residual, dtype=float)
+        if (initial_anderson_x_array.ndim != 2
+                or initial_anderson_x_array.shape[1:] != (dof_count,)
+                or initial_anderson_residual_array.shape != initial_anderson_x_array.shape
+                or initial_anderson_x_array.shape[0] > int(anderson_depth)
+                or not np.all(np.isfinite(initial_anderson_x_array))
+                or not np.all(np.isfinite(initial_anderson_residual_array))):
+            raise ValueError("invalid Anderson restart histories")
     conductor_voltage = np.zeros(int(conductor_ids.max()) + 1)
     for component in components:
         values = (np.asarray([boundary_voltage[node] for node, owner in node_component.items()
@@ -255,8 +274,10 @@ def solve_boundary_state_charging_nodal(
     history = []; interval_history = []; field_history = []; quadrature_history = []
     species_face_current = {}; species_face_stderr = {}; species_face_replicates = {}
     species_endpoint_stderr = {}; species_endpoint_replicates = {}
-    beta_current = float(beta); pending_step = None; rejected_steps = 0
-    anderson_x = []; anderson_residual = []
+    beta_current = float(beta if initial_beta is None else initial_beta)
+    pending_step = None; rejected_steps = 0
+    anderson_x = [row.copy() for row in initial_anderson_x_array]
+    anderson_residual = [row.copy() for row in initial_anderson_residual_array]
     last_accepted_state = None
     trial_merit_history = []; accepted_beta_history = []; accepted_gain_history = []
 
@@ -277,8 +298,14 @@ def solve_boundary_state_charging_nodal(
                 for name, value in last_accepted_state["forward_adaptive_levels"].items()},
             method_hint={
                 name: value.copy() for name, value in last_accepted_state["method_hint"].items()},
+            beta_current=float(last_accepted_state["beta_current"]),
+            anderson_x=np.asarray(last_accepted_state["anderson_x"]).copy(),
+            anderson_residual=np.asarray(
+                last_accepted_state["anderson_residual"]).copy(),
             accepted_iterations_total=int(
-                last_accepted_state["accepted_iterations_total"]))
+                last_accepted_state["accepted_iterations_total"]),
+            restart_accepted_iterations=max(
+                int(last_accepted_state["accepted_iterations_total"]) - 1, 0))
 
     for iteration in range(int(n_iter)):
         impose_conductors()
@@ -513,6 +540,11 @@ def solve_boundary_state_charging_nodal(
             adaptive_levels={name: value.copy() for name, value in adaptive_levels.items()},
             forward_adaptive_levels={
                 name: value.copy() for name, value in forward_adaptive_levels.items()},
+            beta_current=float(beta_current),
+            anderson_x=(np.stack(anderson_x) if anderson_x
+                        else np.empty((0, dof_count))),
+            anderson_residual=(np.stack(anderson_residual) if anderson_residual
+                               else np.empty((0, dof_count))),
             accepted_iterations_total=int(initial_accepted_iterations) + len(history))
         if (balance_tol is not None and len(history) >= int(min_iter)
                 and interval_history[-1]["confidence_envelope_max_abs_log_ratio"] <= balance_tol):
@@ -632,7 +664,16 @@ def solve_boundary_state_charging_nodal(
         gain_decay=float(gain_decay), gain_offset=float(gain_offset),
         nonlinear_update=nonlinear_update, anderson_depth=int(anderson_depth),
         accepted_iterations_total=int(initial_accepted_iterations) + len(history),
-        method_hint={name: value.copy() for name, value in hybrid_hint.items()},
-        adaptive_levels={name: value.copy() for name, value in adaptive_levels.items()},
+        restart_accepted_iterations=max(
+            int(initial_accepted_iterations) + len(history) - 1, 0),
+        restart_beta=float(last_accepted_state["beta_current"]),
+        anderson_x_history=last_accepted_state["anderson_x"].copy(),
+        anderson_residual_history=last_accepted_state["anderson_residual"].copy(),
+        method_hint={
+            name: value.copy() for name, value in last_accepted_state["method_hint"].items()},
+        adaptive_levels={
+            name: value.copy()
+            for name, value in last_accepted_state["adaptive_levels"].items()},
         forward_adaptive_levels={
-            name: value.copy() for name, value in forward_adaptive_levels.items()})
+            name: value.copy()
+            for name, value in last_accepted_state["forward_adaptive_levels"].items()})

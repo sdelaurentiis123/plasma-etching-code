@@ -250,10 +250,10 @@ def test_nodal_fixed_point_warm_starts_both_transport_estimators(monkeypatch):
         initial_adaptive_levels=result["adaptive_levels"],
         initial_forward_adaptive_levels=result["forward_adaptive_levels"],
         initial_method_hint=result["method_hint"],
-        initial_accepted_iterations=result["accepted_iterations_total"])
+        initial_accepted_iterations=result["restart_accepted_iterations"])
     assert np.all(calls[0][1] == 9) and np.all(calls[0][2] == 11)
     assert np.all(calls[1][1] == 9) and np.all(calls[1][2] == 11)
-    assert replay["accepted_iterations_total"] == result["accepted_iterations_total"] + 1
+    assert replay["accepted_iterations_total"] == result["accepted_iterations_total"]
 
 
 def test_nodal_quadrature_failure_carries_last_accepted_restart_state(monkeypatch):
@@ -300,9 +300,14 @@ def test_nodal_quadrature_failure_carries_last_accepted_restart_state(monkeypatc
     assert error.iteration == 2
     assert checkpoint is not None
     assert checkpoint["accepted_iterations_total"] == 1
+    assert checkpoint["restart_accepted_iterations"] == 0
     assert np.array_equal(checkpoint["solid"], solid)
     assert np.allclose(checkpoint["boundary_nodal_voltage"], 0.0)
     assert np.all(checkpoint["adaptive_levels"]["ion"] == 9)
+    assert checkpoint["beta_current"] == 0.5
+    assert checkpoint["anderson_x"].ndim == 2
+    assert checkpoint["anderson_x"].shape[0] == 0
+    assert checkpoint["anderson_residual"].shape == checkpoint["anderson_x"].shape
 
     fail_enabled = False
     replay = solve_boundary_state_charging_nodal(
@@ -314,5 +319,33 @@ def test_nodal_quadrature_failure_carries_last_accepted_restart_state(monkeypatc
         initial_adaptive_levels=checkpoint["adaptive_levels"],
         initial_forward_adaptive_levels=checkpoint["forward_adaptive_levels"],
         initial_method_hint=checkpoint["method_hint"],
-        initial_accepted_iterations=checkpoint["accepted_iterations_total"])
-    assert replay["accepted_iterations_total"] == 2
+        initial_accepted_iterations=checkpoint["restart_accepted_iterations"],
+        initial_beta=checkpoint["beta_current"],
+        initial_anderson_x=checkpoint["anderson_x"],
+        initial_anderson_residual=checkpoint["anderson_residual"])
+    assert replay["accepted_iterations_total"] == 1
+
+
+def test_nodal_anderson_checkpoint_replays_monolithic_next_state():
+    solid = np.zeros((6, 5), dtype=bool); solid[:, -1] = True
+    common = dict(
+        solid=solid, conductor_ids=np.zeros_like(solid, dtype=int),
+        boundary_state=_two_to_one_boundary(), min_iter=1, balance_tol=None,
+        beta=0.1, response_energy_eV=4.0, field_sweeps=40,
+        trust_region=False, nonlinear_update="anderson", anderson_depth=3)
+    monolithic = solve_boundary_state_charging_nodal(n_iter=3, **common)
+    first = solve_boundary_state_charging_nodal(n_iter=2, **common)
+    replay = solve_boundary_state_charging_nodal(
+        n_iter=2, **common,
+        initial_surface_voltage=first["surface_voltage"],
+        initial_boundary_nodal_voltage=first["boundary_nodal_voltage"],
+        initial_accepted_iterations=first["restart_accepted_iterations"],
+        initial_beta=first["restart_beta"],
+        initial_anderson_x=first["anderson_x_history"],
+        initial_anderson_residual=first["anderson_residual_history"])
+
+    assert replay["accepted_iterations_total"] == monolithic["accepted_iterations_total"]
+    assert np.array_equal(replay["boundary_nodal_voltage"],
+                          monolithic["boundary_nodal_voltage"])
+    assert np.array_equal(replay["ion_current"], monolithic["ion_current"])
+    assert np.array_equal(replay["electron_current"], monolithic["electron_current"])
