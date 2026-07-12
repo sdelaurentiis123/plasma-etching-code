@@ -215,8 +215,13 @@ class SurfaceInteractionTable:
             np.asarray(coordinates[axis.name], dtype=float) for axis in self.axes])
         transformed = []; outside = np.zeros(broadcast[0].shape, dtype=bool); outside_axes = []
         for axis, value in zip(self.axes, broadcast):
-            transformed_value = axis.transform(value)
-            axis_outside = (value < axis.values[0]) | (value > axis.values[-1])
+            lower = axis.values[0]; upper = axis.values[-1]
+            tolerance = 64.0 * np.finfo(float).eps * max(1.0, abs(lower), abs(upper))
+            snapped = np.where(
+                (value < lower) & (value >= lower - tolerance), lower,
+                np.where((value > upper) & (value <= upper + tolerance), upper, value))
+            transformed_value = axis.transform(snapped)
+            axis_outside = (snapped < lower) | (snapped > upper)
             if np.any(axis_outside):
                 outside_axes.append(axis.name); outside |= axis_outside
             transformed.append(transformed_value)

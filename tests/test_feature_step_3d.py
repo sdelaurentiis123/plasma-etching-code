@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -9,13 +11,20 @@ from petch.feature_step_3d import (
     conservative_remap_surface_state,
     solve_feature_3d,
 )
+from petch.interaction_data import load_kounis_melas_2024_tables
 from petch.surface_kinetics import (
     EnergeticYield,
     ParameterEvidence,
     ReducedSiO2FluorocarbonMechanism,
     ReducedSiO2FluorocarbonParameters,
 )
+from petch.tabulated_chemistry import TabulatedSiClArMechanism, TabulatedSiSurfaceState
 from petch.threed import extract_mesh_3d
+
+
+INTERACTION_DATA = (
+    Path(__file__).parents[1] / "data" / "surface_interactions" / "kounis_melas_2024")
+SI_ATOM_DENSITY_M3 = 8.0 / (5.43e-10) ** 3
 
 
 def _evidence():
@@ -65,6 +74,23 @@ def _charging_boundary():
         "electron", -1, 5.4858e-4, 2.2e22,
         [[0.0, 0.0, 1.0], [0.0, 0.0, np.sqrt(20.0)]], [0.9, 0.1])
     return PlasmaBoundaryState((ion, electron), reference_plane_m=1.75e-6)
+
+
+def _si_cl_ar_boundary():
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 2e21, [[0.0, 0.0, 10.0]], [1.0])
+    chlorine = SpeciesBoundaryState(
+        "Cl2", 0, 70.906, 2e22, [[0.0, 0.0, 1.0]], [1.0])
+    return PlasmaBoundaryState((ion, chlorine), reference_plane_m=1.75e-6)
+
+
+def _si_cl_ar_mechanism():
+    table = load_kounis_melas_2024_tables(INTERACTION_DATA).reactive_ion_etch
+    return TabulatedSiClArMechanism(
+        table, SI_ATOM_DENSITY_M3,
+        ParameterEvidence(
+            "Kounis-Melas OSTI 2589032 RIE in.lammps: diamond-Si lattice a=5.43 angstrom",
+            "source_derived"))
 
 
 def _plane_poisson_system(geometry):
@@ -298,3 +324,23 @@ def test_feature_step_refuses_nonconverged_charging_for_profile_motion():
             trajectory_fixed_dt=0.005,
             charging_poisson_system=_plane_poisson_system(geometry),
             charging_options={"require_converged": False})
+
+
+def test_second_chemistry_runs_through_unchanged_transport_remap_and_interface_engine():
+    geometry, initial_height = _plane_geometry(); mechanism = _si_cl_ar_mechanism()
+    result = solve_feature_3d(
+        geometry, _si_cl_ar_boundary(),
+        {"Ar+": "energetic_bombardment", "Cl2": "neutral_reactant"},
+        mechanism, etchable_material_ids=(1,), duration_s=4.0, n_steps=2,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        n_position=4096, seed=73, cfl_number=0.3, reinitialize=False,
+        transport_device="cpu")
+
+    expected_velocity_m_s = 2e21 * 0.24182079610957588 / SI_ATOM_DENSITY_M3
+    mean_velocity = np.mean(result.steps[0].surface.etch_velocity_m_s)
+    assert isinstance(result.surface_state, TabulatedSiSurfaceState)
+    assert np.isclose(mean_velocity, expected_velocity_m_s, rtol=0.01)
+    assert all(step.surface.table_fingerprint == mechanism.table.fingerprint
+               for step in result.steps)
+    assert result.surface_state.removed_atoms_m2.size == result.steps[-1].next_active_face_area.size
+    assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.03

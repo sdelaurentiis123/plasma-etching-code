@@ -238,6 +238,28 @@ class SiO2SurfaceState:
     def bare(cls, shape=()):
         return cls(np.zeros(shape), np.zeros(shape), np.zeros(shape))
 
+    def conservative_surface_fields(self):
+        return {
+            "complex_fraction": self.complex_fraction,
+            "polymer_units_m2": self.polymer_units_m2,
+            "removed_formula_units_m2": self.removed_formula_units_m2,
+        }
+
+    def conservative_surface_upper_bounds(self):
+        return {
+            "complex_fraction": 1.0,
+            "polymer_units_m2": None,
+            "removed_formula_units_m2": None,
+        }
+
+    def with_conservative_surface_fields(self, fields):
+        fields = dict(fields)
+        if set(fields) != set(self.conservative_surface_fields()):
+            raise ValueError("SiO2 remap fields do not match its state contract")
+        return type(self)(
+            fields["complex_fraction"], fields["polymer_units_m2"],
+            fields["removed_formula_units_m2"])
+
 
 @dataclass(frozen=True)
 class ReducedSiO2FluorocarbonParameters:
@@ -320,6 +342,10 @@ class ReducedSiO2FluorocarbonMechanism:
 
     def __init__(self, parameters: ReducedSiO2FluorocarbonParameters):
         self.parameters = parameters
+
+    @staticmethod
+    def initial_state(shape=()):
+        return SiO2SurfaceState.bare(shape)
 
     def validity(self, fluxes: SurfaceFluxes):
         par = self.parameters

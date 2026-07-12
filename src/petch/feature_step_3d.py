@@ -29,10 +29,7 @@ from .charging_poisson_3d import NodalPoissonSystem3D
 from .surface_kinetics import (
     EnergeticFlux,
     FaceResolvedEnergeticFlux,
-    ReducedSiO2FluorocarbonMechanism,
-    SiO2SurfaceState,
     SurfaceFluxes,
-    SurfaceStepResult,
 )
 from .threed import advect_3d, extend_velocity_3d, extract_mesh_3d, reinit_narrow
 
@@ -83,12 +80,12 @@ class FeatureStep3DResult:
     geometry: FeatureGeometry3D
     transport: BoundaryTransport3DResult
     charging: SteadyDielectricCharging3DResult | None
-    surface: SurfaceStepResult
+    surface: object
     active_face_index: np.ndarray
     active_face_centroid: np.ndarray
     active_face_area: np.ndarray
     surface_state_mesh_fingerprint: str
-    next_surface_state: SiO2SurfaceState
+    next_surface_state: object
     next_active_face_centroid: np.ndarray
     next_active_face_area: np.ndarray
     next_surface_state_mesh_fingerprint: str
@@ -107,7 +104,7 @@ class FeatureStep3DResult:
 @dataclass(frozen=True)
 class FeatureSolve3DResult:
     geometry: FeatureGeometry3D
-    surface_state: SiO2SurfaceState
+    surface_state: object
     surface_state_mesh_fingerprint: str
     steps: tuple[FeatureStep3DResult, ...]
     duration_s: float
@@ -214,28 +211,37 @@ def conservative_remap_surface_state(
         dx, mesh_length_unit_m, neighbor_count=4, maximum_distance=None):
     """First-order material-local remap with exact area-integrated state conservation.
 
-    The interpolation supplies spatial locality; a constrained correction then preserves each material's
-    integrated complex sites, polymer units, and cumulative removed formula units. Complex coverage remains
-    in [0,1]. This operator does not authorize topology change; the caller must gate topology separately.
+    The state declares named nonnegative fields, optional upper bounds, and reconstruction. Interpolation
+    supplies spatial locality; a constrained correction then preserves every material/field area integral.
+    This operator does not authorize topology change; the caller must gate topology separately.
     """
     old_centroid = np.asarray(old_centroid, dtype=float)
     new_centroid = np.asarray(new_centroid, dtype=float)
     old_area = np.asarray(old_area, dtype=float); new_area = np.asarray(new_area, dtype=float)
     old_material = np.asarray(old_material, dtype=int)
     new_material = np.asarray(new_material, dtype=int)
+    if (not hasattr(state, "conservative_surface_fields")
+            or not hasattr(state, "conservative_surface_upper_bounds")
+            or not hasattr(state, "with_conservative_surface_fields")):
+        raise TypeError("surface state does not implement the conservative remap contract")
+    old_values = dict(state.conservative_surface_fields())
+    upper_bounds = dict(state.conservative_surface_upper_bounds())
+    if not old_values or set(upper_bounds) != set(old_values):
+        raise ValueError("surface-state remap fields and upper bounds must match")
+    old_values = {name: np.asarray(value, dtype=float) for name, value in old_values.items()}
     if (old_centroid.ndim != 2 or old_centroid.shape[1] != 3
             or new_centroid.ndim != 2 or new_centroid.shape[1] != 3
             or old_area.shape != (old_centroid.shape[0],)
             or new_area.shape != (new_centroid.shape[0],)
             or old_material.shape != old_area.shape or new_material.shape != new_area.shape
-            or state.complex_fraction.shape != old_area.shape
+            or any(value.shape != old_area.shape for value in old_values.values())
             or np.any(old_area <= 0.0) or np.any(new_area <= 0.0)):
         raise ValueError("invalid surface-state remap geometry")
     if maximum_distance is None:
         maximum_distance = 2.0 * float(dx)
     if not np.isfinite(maximum_distance) or maximum_distance <= 0.0:
         raise ValueError("maximum remap distance must be positive")
-    output = [np.zeros(new_area.shape) for _ in range(3)]
+    output = {name: np.zeros(new_area.shape) for name in old_values}
     maximum_nearest = 0.0; material_diagnostics = {}
     physical_area_scale = float(mesh_length_unit_m) ** 2
     for material in sorted(set(old_material) | set(new_material)):
@@ -257,28 +263,23 @@ def conservative_remap_surface_state(
         regularization = (0.25 * float(dx)) ** 2
         weight = old_area[source_index] / (distance * distance + regularization)
         weight /= weight.sum(axis=1, keepdims=True)
-        old_values = (
-            state.complex_fraction, state.polymer_units_m2,
-            state.removed_formula_units_m2)
-        targets = []; residuals = []
-        for field_index, old_value in enumerate(old_values):
+        targets = {}; residuals = []
+        for field_name, old_value in old_values.items():
             raw = np.sum(weight * old_value[source_index], axis=1)
             target = float(np.dot(old_value[old_index], old_area[old_index]))
             remapped = _conserve_nonnegative_surface_field(
-                raw, target, new_area[new_index], upper=1.0 if field_index == 0 else None)
-            output[field_index][new_index] = remapped
+                raw, target, new_area[new_index], upper=upper_bounds[field_name])
+            output[field_name][new_index] = remapped
             achieved = float(np.dot(remapped, new_area[new_index]))
             residuals.append(abs(achieved - target) / max(abs(target), 1.0))
-            targets.append(target * physical_area_scale)
+            targets[field_name] = target * physical_area_scale
         material_diagnostics[int(material)] = dict(
             old_face_count=int(old_index.size), new_face_count=int(new_index.size),
             old_area_m2=float(old_area[old_index].sum() * physical_area_scale),
             new_area_m2=float(new_area[new_index].sum() * physical_area_scale),
-            target_complex_area_m2=float(targets[0]),
-            target_polymer_units=float(targets[1]),
-            target_removed_formula_units=float(targets[2]),
+            target_field_integrals=targets,
             max_relative_conservation_residual=float(max(residuals)))
-    remapped_state = SiO2SurfaceState(*output)
+    remapped_state = state.with_conservative_surface_fields(output)
     return remapped_state, dict(
         method="material_local_area_conservative_knn",
         neighbor_count=int(neighbor_count), maximum_nearest_distance=float(maximum_nearest),
@@ -319,9 +320,9 @@ def _select_surface_fluxes(fluxes, selected_face, face_count, species_role=None)
 
 def advance_feature_step_3d(
         geometry: FeatureGeometry3D, boundary: PlasmaBoundaryState,
-        species_role: Mapping[str, str], mechanism: ReducedSiO2FluorocarbonMechanism, *,
+        species_role: Mapping[str, str], mechanism, *,
         etchable_material_ids, duration_s, source_bounds, source_z,
-        surface_state: SiO2SurfaceState | None = None, n_position=256, seed=0,
+        surface_state=None, n_position=256, seed=0,
         surface_state_mesh_fingerprint=None,
         nodal_potential_v=None, potential_origin=None, potential_spacing=None,
         trajectory_fixed_dt=None, trajectory_max_steps=10000,
@@ -433,12 +434,18 @@ def advance_feature_step_3d(
     if surface_state is None:
         if surface_state_mesh_fingerprint is not None:
             raise ValueError("surface_state_mesh_fingerprint requires a supplied surface_state")
-        surface_state = SiO2SurfaceState.bare((active_face.size,))
+        if not hasattr(mechanism, "initial_state"):
+            raise TypeError("surface mechanism must provide initial_state(shape)")
+        surface_state = mechanism.initial_state((active_face.size,))
     else:
         if surface_state_mesh_fingerprint != mesh_fingerprint:
             raise ValueError(
                 "surface_state mesh fingerprint mismatch; conservative remap is required")
-        if surface_state.complex_fraction.shape != (active_face.size,):
+        if not hasattr(surface_state, "conservative_surface_fields"):
+            raise TypeError("surface state does not implement the conservative remap contract")
+        state_fields = dict(surface_state.conservative_surface_fields())
+        if not state_fields or any(
+                np.asarray(value).shape != (active_face.size,) for value in state_fields.values()):
             raise ValueError(
                 "surface_state does not match the current active mesh; conservative remap is required")
     surface = mechanism.advance(surface_state, active_flux, float(duration_s))
@@ -532,7 +539,7 @@ def advance_feature_step_3d(
 
 def solve_feature_3d(
         geometry: FeatureGeometry3D, boundary: PlasmaBoundaryState,
-        species_role: Mapping[str, str], mechanism: ReducedSiO2FluorocarbonMechanism, *,
+        species_role: Mapping[str, str], mechanism, *,
         etchable_material_ids, duration_s, n_steps, source_bounds, source_z,
         n_position=256, seed=0, cfl_number=0.3, reinitialize=True,
         transport_device=None, nodal_potential_v=None, potential_origin=None,

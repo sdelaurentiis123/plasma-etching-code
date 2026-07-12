@@ -222,8 +222,12 @@ far too slow.
   thickness, 100 eV Si-Cl2-Ar+ reactive etch yield versus flux ratio, and 80 eV species-resolved ALE
   products. Values and uncertainty replay at every archived node and default extrapolation refusal is
   tested. Evidence remains labeled `DeepMD_molecular_dynamics`, never experiment.
-- The remaining gate is architectural: run a Si-Cl2-Ar+ mechanism through the unchanged evolving
-  feature-state interface. Merely loading a second chemistry table does not prove chemistry generality.
+- The surface-state remap and mechanism initialization contracts are now chemistry-neutral. A sourced
+  Si-Cl2-Ar+ RIE mechanism runs two profile steps through the same arbitrary-triangle transport,
+  species filtering, conservative state remap, and level-set motion used by SiO2. At the archived
+  100 eV, normal-incidence, 10:1 flux-ratio node, its mean dimensional velocity agrees with the table
+  yield within 1%, and MD yield uncertainty propagates separately. Unreleased energy, angle, ratio,
+  and species are refused. This proves a narrow second-chemistry architecture gate, not general Si.
 
 ### Attack sequence
 
@@ -236,7 +240,8 @@ far too slow.
 4. **Done:** refuse silent extrapolation by default; explicit linear extrapolation records the affected
    fraction and axes.
 5. Compare the table path with the current compact law on identical frozen incident distributions.
-6. Couple the table to stateful surface chemistry only after the static replay and units gates pass.
+6. **Done in the released RIE slice:** couple the table to a cumulative-removal Si state and replay it
+   through two unchanged feature steps. Coverage/damage memory awaits richer archived axes.
 
 ### Gates
 

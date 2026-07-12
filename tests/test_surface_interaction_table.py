@@ -94,6 +94,21 @@ def test_surface_interaction_table_refuses_silent_extrapolation_and_reports_expl
     assert evaluated.outside_axes == ("ion_energy",)
 
 
+def test_interaction_axis_snaps_only_machine_roundoff_at_validated_endpoints():
+    table = _table()
+    coordinates = {
+        "ion_energy": 10.0,
+        "cosine_incidence": 0.5,
+        "neutral_to_ion_flux_ratio": np.nextafter(1.0, 0.0),
+    }
+    evaluated = table.evaluate(coordinates)
+    exact = table.evaluate({**coordinates, "neutral_to_ion_flux_ratio": 1.0})
+    assert evaluated.extrapolated_fraction == 0.0
+    assert np.array_equal(evaluated.values["etch_yield"], exact.values["etch_yield"])
+    with pytest.raises(SurfaceInteractionDomainError):
+        table.evaluate({**coordinates, "neutral_to_ion_flux_ratio": 0.999})
+
+
 def test_surface_interaction_payload_round_trip_is_bitwise_replayable():
     table = _table()
     replay = SurfaceInteractionTable.from_payload(table.to_payload())

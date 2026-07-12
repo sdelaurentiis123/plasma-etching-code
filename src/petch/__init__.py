@@ -35,6 +35,9 @@ from .surface_interaction_table import (
     SurfaceInteractionInterpolationAudit, SurfaceInteractionTable,
 )
 from .interaction_data import KounisMelas2024Tables, load_kounis_melas_2024_tables
+from .tabulated_chemistry import (
+    TabulatedSiClArMechanism, TabulatedSiSurfaceState, TabulatedSiSurfaceStepResult,
+)
 from .feature_step_3d import (
     FeatureGeometry3D, FeatureSolve3DResult, FeatureStep3DResult, FeatureStepValidity,
     advance_feature_step_3d, conservative_remap_surface_state, solve_feature_3d,
@@ -66,6 +69,7 @@ __all__ = [
     "InteractionAxis", "SurfaceInteractionDomainError", "SurfaceInteractionEvaluation",
     "SurfaceInteractionInterpolationAudit", "SurfaceInteractionTable",
     "KounisMelas2024Tables", "load_kounis_melas_2024_tables",
+    "TabulatedSiClArMechanism", "TabulatedSiSurfaceState", "TabulatedSiSurfaceStepResult",
     "FeatureGeometry3D", "FeatureSolve3DResult", "FeatureStep3DResult", "FeatureStepValidity",
     "advance_feature_step_3d", "conservative_remap_surface_state", "solve_feature_3d",
 ]
