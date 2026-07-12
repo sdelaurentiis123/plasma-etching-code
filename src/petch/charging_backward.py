@@ -1,4 +1,4 @@
-"""BACKWARD / ADJOINT per-cell flux gather for feature charging (EXPERIMENTAL, WIP 2026-07-10).
+"""Backward/adjoint per-cell flux experiments for the legacy 2-D charging geometry.
 
 The forward launch-fan starves deep/shadowed target cells (deep floor, upper walls) -> every accuracy
 fix has been a per-region importance-sampling patch (preint_floor, preint_floor_ion, preint_wall).
@@ -8,7 +8,7 @@ BACKWARD from each surface cell out through the field to the plasma, weight by t
 distribution. No starvation (every sample per cell is relevant), no per-region overrides, uniform
 across cells and species, and better-shaped for autodiff.
 
-Core result (VALIDATED, Gate B exact): sample the INCIDENT plasma-side velocity from the species flux
+Core estimator: sample the incident plasma-side velocity from the species flux
 distribution, map to the surface energy by energy conservation (E_surf = E_top - q*Vc), launch OUTWARD
 from the cell, require v.n>0, trace through the field, and count escapes -- weighted by the flux factor
 (v.n_cell)/(v.z_surface). Retardation (Boltzmann for electrons, IED-horn reflection for ions) is
@@ -20,15 +20,14 @@ Convention: both gathers return flux as a fraction of the incident flux through 
 (open flat V=0 -> 1). The ion/electron scale ratio k=Ci/Ce is pinned by ONE ambipolar calibration on a
 floating open surface (mask top). Then per-cell dV = Te*ln(k*Gi/Ge) is the charging direction.
 
-STATUS: gathers validated on analytic gates (retardation, saturation, grazing suppression) + cross-
-checked vs the forward floor equilibrium. self_consistent_backward() CONVERGES the dipole cleanly and
-reproduces the Kushner picture across AR4/8/15 (upper wall negative ~-12.7V electron-shading; deep wall
-positive and rising with AR = grazing ions; floor positive + monotone in AR; the low->high-AR crossover
-of the potential max from floor to sidewall). Deterministic, ~1-2s/iter, no per-region overrides.
-OPEN: (1) deep cells at very high AR still benefit from directional importance sampling / more samples;
-(2) absolute floor magnitude to be calibrated vs experiment (de Boer ARDE / Fujiwara notch); (3) wire
-this gather as the transport estimator inside solve_charging and retire the vf/thr/preint override
-layer. Requires the exit-kinematics return added to _trace_general (charging_general.py).
+STATUS: analytic open-surface, retardation, saturation, energy, and selected forward/adjoint reciprocity
+gates exist. The historical claim that ``self_consistent_backward()`` supplied the converged production
+charging solution has been withdrawn: current-balance convergence, nonuniform-field reciprocity, and the
+HG reference cannot all be claimed by the same demonstrated configuration. HG is a low-aspect-ratio
+simulation/reference-emulation gate, not modern HARC experimental validation. This module is retained for
+reproducibility and estimator research; the common 3-D feature engine uses ``boundary_transport_3d`` and
+``charging_coupled_3d``. Do not route product results through this module or merge its benchmark source
+conventions into the common boundary contract.
 """
 import copy
 import numpy as np
