@@ -1,11 +1,9 @@
 """Warp implementation of the compatible nodal charged-particle tracer."""
 from __future__ import annotations
 
-import os
-from pathlib import Path
-import tempfile
-
 import numpy as np
+
+from .warp_runtime import ensure_writable_warp_cache
 
 try:
     import warp as wp
@@ -144,17 +142,7 @@ def trace_nodal_warp(
         raise RuntimeError("warp unavailable")
     if not np.isfinite(fixed_dt) or fixed_dt < 0.0:
         raise ValueError("fixed_dt must be finite and nonnegative")
-    # Sandboxed services and read-only home mounts can make Warp's default user-cache path unusable.
-    # Select a process-local temporary cache only after proving the configured directory unwritable.
-    # This changes compilation storage, never device choice or numerical behavior.
-    cache = Path(wp.config.kernel_cache_dir)
-    try:
-        probe = Path(tempfile.mkdtemp(prefix="petch-probe-", dir=cache))
-        probe.rmdir()
-    except OSError:
-        fallback = Path(tempfile.gettempdir()) / "petch-warp-cache" / wp.config.version
-        fallback.mkdir(parents=True, exist_ok=True)
-        wp.config.kernel_cache_dir = os.fspath(fallback)
+    ensure_writable_warp_cache(wp)
     inputs = [np.asarray(value) for value in (x0, z0, vx0, vz0)]
     if len({value.shape for value in inputs}) != 1:
         raise ValueError("particle input arrays must have identical shapes")
