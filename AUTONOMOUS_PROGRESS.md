@@ -186,6 +186,22 @@ under-determined) -- an honest result that quantifies how many structures must b
   exactly on the cell edge) -- a Phase-2 robustness fix, not physics. Phase 2 next: fix that, connect
   charging to notching + the deep-AR residual.
 
+## Phase 2 robustness follow-up (2026-07-12)
+
+- **Float32 endpoint projection is fixed and regression-gated.**
+  `lump_triangle_sheet_charge_3d` now admits only a source-precision-scaled roundoff band at the nodal
+  grid boundary and clamps admitted normalized coordinates to the exact endpoint.  A marching-cubes
+  `float32(0.3)` endpoint previously normalized to `30.00000119` on a `dx=0.01` grid and was rejected;
+  `tests/test_charging_poisson_3d.py` now reproduces that case while retaining charge conservation.
+- **A real trench now passes sheet-charge projection, but production periodic-feature charging is not
+  yet earned.**  The next failure is physical boundary handling, not the projection tolerance:
+  `trace_boundary_state_field_3d` treats every lateral grid crossing as escape and exposes no periodic
+  charged-trajectory option, unlike the periodic ballistic/radiosity paths.  Wide-angle half-Maxwellian
+  electrons therefore leak from a periodic unit cell and the local current-balance solve does not
+  converge.  Do not promote a trench charging gate by loosening its residual.  The next bounded physics
+  task is a periodic, fixed-step charged trajectory map (with crossing-segment hit handling) plus a
+  compatible periodic Poisson operator, each independently gated before reconnecting Phase 2b.
+
 ## Roadmap (remaining)
 
 1. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow

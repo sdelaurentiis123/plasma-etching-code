@@ -100,6 +100,23 @@ def test_triangle_sheet_projection_conserves_charge_and_first_moment():
     assert np.allclose(deposited_centroid, vertices.mean(axis=0), rtol=1e-13, atol=1e-14)
 
 
+def test_triangle_sheet_projection_accepts_float32_vertices_on_grid_endpoint():
+    # Marching cubes emits float32 coordinates.  The endpoint rounds upward before division by the
+    # float64 grid spacing: float32(0.3) / 0.01 > 30, although the intended vertex is on the grid.
+    vertices = np.array([
+        [0.30, 0.10, 0.10],
+        [0.30, 0.11, 0.10],
+        [0.30, 0.10, 0.11],
+    ], dtype=np.float32)
+    faces = np.array([[0, 1, 2]])
+
+    charge = lump_triangle_sheet_charge_3d(
+        (31, 31, 31), vertices, faces, np.array([1.0]), grid_spacing=0.01)
+
+    assert np.isclose(charge.sum(), 0.00005, rtol=2e-6)
+    assert np.count_nonzero(charge[-1]) > 0
+
+
 def test_q1_3d_diagonal_capacitance_is_positive_and_symmetric():
     epsilon = np.full((3, 3, 4), 3.9)
     fixed = np.zeros((4, 4, 5), dtype=bool); fixed[:, :, -1] = True

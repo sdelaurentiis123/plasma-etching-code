@@ -180,6 +180,7 @@ def lump_triangle_sheet_charge_3d(
     conserved without nearest-node assignment. Coordinates may use any declared length unit.
     """
     shape = tuple(int(value) for value in shape)
+    input_vertices = np.asarray(vertices)
     vertices = np.asarray(vertices, dtype=float); faces = np.asarray(faces, dtype=int)
     sigma = np.asarray(sigma_c_per_m2, dtype=float)
     origin = np.asarray(grid_origin, dtype=float)
@@ -196,10 +197,18 @@ def lump_triangle_sheet_charge_3d(
         raise ValueError("invalid triangle sheet-charge projection inputs")
     cell_shape = np.asarray(shape) - 1
     normalized_vertices = (vertices - origin) / spacing
-    tolerance = 1e-10
+    # Marching-cubes vertices are float32.  A vertex on a physical endpoint can therefore land a few
+    # ulps beyond the matching nodal-grid endpoint after division by ``spacing`` (for example,
+    # float32(0.3) / 0.01 = 30.00000119).  Scale the admission tolerance by the source precision and
+    # grid extent, then clamp only the admitted roundoff so downstream cell selection remains exact.
+    source_epsilon = (np.finfo(input_vertices.dtype).eps
+                      if np.issubdtype(input_vertices.dtype, np.floating)
+                      else np.finfo(float).eps)
+    tolerance = max(1e-10, 8.0 * source_epsilon * max(1.0, float(np.max(cell_shape))))
     if (np.any(normalized_vertices < -tolerance)
             or np.any(normalized_vertices > cell_shape + tolerance)):
         raise ValueError("triangle vertices lie outside the nodal grid")
+    normalized_vertices = np.clip(normalized_vertices, 0.0, cell_shape)
 
     barycentric = np.asarray([
         [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
