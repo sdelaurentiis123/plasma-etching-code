@@ -195,9 +195,10 @@ def backward_electron_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0,
                     Ex, Ez, solid, x0, z0, vX, vZ, -1.0, nx, nz,
                     msteps, trace_dt, trace_dt_field)
             else:
-                hix, hiz, _, _, surv, _, _ = trace_nodal(
+                traced = trace_nodal(
                     nodal_potential, solid, x0, z0, vX, vZ, -1.0, nx, nz,
                     msteps, trace_dt, trace_dt_field)
+                hix, hiz, surv = traced[0], traced[1], traced[4]
             escaped = (hix < 0) & (surv < 0.5) & emit
             ratio = vdotn / np.maximum(np.abs(vZ), 0.3)
             # NOTE: a naive score-at-exit reweight |vz_exit|/|vz_implied| amplifies the tracer's dt energy
@@ -235,9 +236,10 @@ def backward_electron_floor_liouville(solid, nodal_potential, V_surf, cells, Te=
             r = base_r + shifted * barrier
             vx = sig * norm.ppf(np.clip(u[:, 2], 1e-9, 1.0 - 1e-9))
             x0 = cx + u[:, 3]; z0 = np.full(N, cz - 1e-3)
-            hix, _, _, _, surv, exit_vx, exit_vz = trace_nodal(
+            traced = trace_nodal(
                 nodal_potential, solid, x0, z0, vx, -np.sqrt(r), -1.0, nx, nz,
                 msteps, trace_dt, trace_dt_field)
+            hix, surv, exit_vx, exit_vz = traced[0], traced[4], traced[5], traced[6]
             escaped = (hix < 0) & (surv < 0.5)
             natural = (1.0 - shifted_fraction) * np.exp(-r / Te)
             shifted_density = shifted_fraction * np.where(
@@ -338,9 +340,11 @@ def backward_ion_gather(solid, Ex, Ez, V_surf, cells, normals, Te=4.0, Ti=0.5, V
                     Ex, Ez, solid, x0, z0, vX, vZ, 1.0, nx, nz,
                     msteps, trace_dt, trace_dt_field)
             else:
-                hix, hiz, _, _, surv, exit_vx, exit_vz = trace_nodal(
+                traced = trace_nodal(
                     nodal_potential, solid, x0, z0, vX, vZ, 1.0, nx, nz,
                     msteps, trace_dt, trace_dt_field)
+                hix, hiz = traced[0], traced[1]
+                surv, exit_vx, exit_vz = traced[4], traced[5], traced[6]
             escaped = (hix < 0) & (surv < 0.5) & emit
             ratio = vdotn / np.maximum(np.abs(vZ), 0.3)
             if exit_state_weight:
@@ -625,6 +629,7 @@ def solve_boundary_state_charging(
                 bidirectional = bool(options.pop("bidirectional", False))
                 forward_options = dict(options.pop("forward_options", {}))
                 method_switch_factor = float(options.pop("method_switch_factor", 2.0))
+                estimator_consistency_sigma = float(options.pop("consistency_sigma", 5.0))
                 options.setdefault("n_face_position", n_face_position)
                 warm_start_backoff = int(options.pop("warm_start_backoff", 0))
                 if warm_start_backoff < 0:
@@ -646,13 +651,24 @@ def solve_boundary_state_charging(
                         element_absolute_tolerance=element_abs,
                         element_relative_tolerance=element_rel,
                         method_hint=hybrid_method_hint.get(species.name),
-                        switch_factor=method_switch_factor)
+                        switch_factor=method_switch_factor,
+                        consistency_sigma=estimator_consistency_sigma)
                     hybrid_method_hint[species.name] = hybrid["method"].copy()
                     species_quadrature[species.name] = hybrid
                     if not hybrid["converged"]:
+                        failed = np.where(~hybrid["cell_converged"])[0]
+                        worst = int(failed[np.argmax(
+                            hybrid["estimator_discrepancy_sigma"][failed])])
+                        failed_cell = tuple(hybrid["unique_cells"][worst])
                         raise AdaptiveQuadratureConvergenceError(
                             f"bidirectional phase-space quadrature did not converge for "
-                            f"{species.name!r} at fixed-point iteration {iteration + 1}",
+                            f"{species.name!r} at fixed-point iteration {iteration + 1}: "
+                            f"cell={failed_cell}, chosen={hybrid['method'][worst]}, "
+                            f"forward={hybrid['forward_cell_mean'][worst]:.4g} +/- "
+                            f"{hybrid['forward_cell_stderr'][worst]:.3g}, "
+                            f"adjoint={hybrid['adjoint_cell_mean'][worst]:.4g} +/- "
+                            f"{hybrid['adjoint_cell_stderr'][worst]:.3g}, discrepancy="
+                            f"{hybrid['estimator_discrepancy_sigma'][worst]:.2f} sigma",
                             iteration=iteration + 1, species=species.name,
                             quadrature=hybrid, surface_voltage=surface_voltage,
                             potential=potential, cells=cells, normals=normals)
@@ -755,7 +771,10 @@ def solve_boundary_state_charging(
             face_index = by_cell[cell]
             gi = float(ion_current[face_index].sum())
             ge = float(electron_current[face_index].sum())
-            residual = (float(interval_balance["log_ratio"][face_index[0]])
+            # Iterate on the physical mean-current equation. Confidence intervals certify whether
+            # that root is resolved; their nearest edge is not itself a nonlinear residual and would
+            # make the fixed-point map depend on sampling tolerance and confidence level.
+            residual = (float(balance["log_ratio"][face_index[0]])
                         if (gi + ge) / current_scale >= active_flux else 0.0)
             x_values.append(float(surface_voltage[cell]))
             f_values.append(response_energy_eV * residual)
@@ -764,7 +783,7 @@ def solve_boundary_state_charging(
             selected = components == component
             if selected.any():
                 gi = float(ion_current[selected].sum()); ge = float(electron_current[selected].sum())
-                residual = (float(interval_balance["pooled"][component]["log_ratio"])
+                residual = (float(balance["pooled"][component]["log_ratio"])
                             if (gi + ge) / current_scale >= active_flux else 0.0)
                 x_values.append(float(conductor_voltage[component]))
                 f_values.append(response_energy_eV * residual)
@@ -812,6 +831,7 @@ def solve_boundary_state_charging(
         rejected_steps=rejected_steps, beta_final=beta_current,
         trust_merit=trust_merit,
         nonlinear_update=nonlinear_update,
+        update_residual="mean_log_current_ratio",
     )
 
 

@@ -85,7 +85,7 @@ def trace_boundary_state_floor_flux(
 
 def forward_boundary_state_cell_flux_qmc(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, *,
-        proposal_species=None, log2_samples=12, seed=0, x_min=0.0, x_max=None,
+        normals=None, proposal_species=None, log2_samples=12, seed=0, x_min=0.0, x_max=None,
         max_steps=None, dt_cap=0.15, dt_field=0.10):
     """Forward QMC current to arbitrary material cells from the same boundary-density contract.
 
@@ -107,10 +107,11 @@ def forward_boundary_state_cell_flux_qmc(
     lateral_u = (rng.permutation(count) + rng.random(count)) / count
     x0 = float(x_min) + (float(x_max) - float(x_min)) * lateral_u
     z0 = np.full(count, 1e-3)
-    hit_x, hit_z, *_ = trace_nodal(
+    traced = trace_nodal(
         nodal_potential, solid, x0, z0, velocity[:, 0], velocity[:, 2],
         float(species.charge_number), nx, nz,
         int(200 * nz if max_steps is None else max_steps), dt_cap, dt_field)
+    hit_x, hit_z, hit_nx, hit_nz = traced[0], traced[1], traced[7], traced[8]
     log_physical = species.log_flux_density(
         velocity, proposal.phase_rad, proposal.position_m)
     log_proposal = proposal.log_flux_density(
@@ -119,19 +120,31 @@ def forward_boundary_state_cell_flux_qmc(
         density_ratio = np.exp(log_physical - log_proposal)
     score = proposal.weight * density_ratio * (float(x_max) - float(x_min))
     cells = [tuple(map(int, cell)) for cell in cells]
-    result = np.zeros(len(cells)); lookup = {}
+    if normals is not None:
+        normals = np.asarray(normals, dtype=int)
+        if normals.shape != (len(cells), 2):
+            raise ValueError("normals must match cells")
+    result = np.zeros(len(cells)); hit_count = np.zeros(len(cells), dtype=np.int64); lookup = {}
     for index, cell in enumerate(cells):
-        lookup.setdefault(cell, []).append(index)
+        key = cell if normals is None else (cell, tuple(normals[index]))
+        lookup.setdefault(key, []).append(index)
     valid = hit_x >= 0
-    for hx, hz, value in zip(hit_x[valid], hit_z[valid], score[valid]):
-        indices = lookup.get((int(hx), int(hz)))
+    for hx, hz, hnx, hnz, value in zip(
+            hit_x[valid], hit_z[valid], hit_nx[valid], hit_nz[valid], score[valid]):
+        cell = (int(hx), int(hz))
+        key = cell if normals is None else (cell, (int(hnx), int(hnz)))
+        indices = lookup.get(key)
         if indices is not None:
             # A cell current is stored once even when the cell owns multiple exposed faces.
             result[indices[0]] += value
+            hit_count[indices[0]] += 1
     return dict(
         per_cell=result, normalized_total=float(result.sum()),
         absolute_per_cell_m2_s=result * species.flux_m2_s,
-        samples=count, seed=int(seed))
+        hit_count_per_cell=hit_count, samples=count,
+        equal_weight_sampling=bool(np.allclose(
+            proposal.weight, np.full(count, 1.0 / count), rtol=1e-12, atol=1e-15)),
+        seed=int(seed))
 
 
 def adjoint_boundary_state_face_flux(
@@ -141,10 +154,12 @@ def adjoint_boundary_state_face_flux(
     """Generic Liouville adjoint gather on arbitrary axis-aligned material faces.
 
     This function contains no species source law. The supplied species quadrature is used as the surface
-    proposal, and its density model scores both surface and time-reversed plasma-exit states. Velocities
-    use the boundary convention (positive ``vz`` points into the feature). For outward material normal
-    ``n``, a forward surface state is incident only when ``-v.n > 0``. Its time reverse is traced to the
-    plasma plane and weighted by the Liouville flux Jacobian ``(-v.n)/vz_exit``.
+    proposal is interpreted in each face's local tangent/outward-normal frame: proposal ``vx`` is the
+    in-plane tangent and positive proposal ``vz`` is the inward normal speed. Rotating that local rule
+    per face is essential for support completeness: on a vertical wall, global ``vz`` is tangential and
+    must span both signs. The time-reversed global state is traced to the plasma plane and weighted by
+    the Liouville flux Jacobian ``v_normal_in/vz_exit``. The proposal density is numerical and remains
+    evaluated in its local coordinates; the rotation has unit Jacobian.
 
     The returned values are fluxes per unit face length divided by incident flux per unit horizontal
     source length. No orientation correction is hidden in the caller.
@@ -202,11 +217,20 @@ def adjoint_boundary_state_face_flux(
     x0 = (x_center[:, None] - normals[:, 1, None] * face_s[None, :]).ravel()
     z0 = (z_center[:, None] + normals[:, 0, None] * face_s[None, :]).ravel()
     samples_per_face = sample_index.size; face_count = len(cells)
-    vx0 = np.tile(-base_velocity[sample_index, 0], face_count)
-    vz0 = np.tile(-base_velocity[sample_index, 2], face_count)
-    hit_x, _, _, _, survivor, exit_vx, exit_vz = trace_nodal(
+    local_tangent = base_velocity[sample_index, 0]
+    local_normal_in = base_velocity[sample_index, 2]
+    # In-plane unit tangent t=(-nz,nx). A forward incident surface velocity is
+    # v = local_tangent*t - local_normal_in*n; trace its exact time reverse.
+    surface_vx = (-normals[:, 1, None] * local_tangent[None, :]
+                  - normals[:, 0, None] * local_normal_in[None, :])
+    surface_vz = (normals[:, 0, None] * local_tangent[None, :]
+                  - normals[:, 1, None] * local_normal_in[None, :])
+    vx0 = -surface_vx.ravel()
+    vz0 = -surface_vz.ravel()
+    traced = trace_nodal(
         nodal_potential, solid, x0, z0, vx0, vz0, float(species.charge_number),
         nx, nz, int(max_steps), dt_cap, dt_field)
+    hit_x, survivor, exit_vx, exit_vz = traced[0], traced[4], traced[5], traced[6]
     escaped = (hit_x < 0) & (survivor < 0.5) & (exit_vz < 0.0)
     tiled_sample_index = np.tile(sample_index, face_count)
     exit_forward = np.column_stack((
@@ -214,9 +238,7 @@ def adjoint_boundary_state_face_flux(
     exit_phase = (None if proposal.phase_rad is None
                   else proposal.phase_rad[tiled_sample_index])
     log_exit_density = species.log_flux_density(exit_forward, exit_phase)
-    surface_normal = -(
-        normals[:, 0, None] * base_velocity[sample_index, 0][None, :]
-        + normals[:, 1, None] * base_velocity[sample_index, 2][None, :]).ravel()
+    surface_normal = np.tile(local_normal_in, face_count)
     exit_normal = np.maximum(-exit_vz, 1e-300)
     log_ratio = log_exit_density - np.tile(log_surface_density[sample_index], face_count)
     with np.errstate(over="ignore", invalid="ignore"):
@@ -233,7 +255,11 @@ def adjoint_boundary_state_face_flux(
     dominant_sample_index[positive] = sample_index[dominant[positive]]
     max_sample_fraction[positive] = (
         weighted_contribution[np.where(positive)[0], dominant[positive]] / per_face[positive])
-    dominant_surface_velocity[positive] = base_velocity[dominant_sample_index[positive]]
+    positive_face = np.where(positive)[0]
+    positive_sample = dominant[positive]
+    dominant_surface_velocity[positive, 0] = surface_vx[positive_face, positive_sample]
+    dominant_surface_velocity[positive, 1] = base_velocity[dominant_sample_index[positive], 1]
+    dominant_surface_velocity[positive, 2] = surface_vz[positive_face, positive_sample]
     exit_matrix = exit_forward.reshape(face_count, samples_per_face, 3)
     dominant_exit_velocity[positive] = exit_matrix[np.where(positive)[0], dominant[positive]]
     if want_energy:
@@ -293,6 +319,7 @@ def adaptive_adjoint_boundary_state_face_flux(
 
 def adaptive_forward_boundary_state_cell_flux(
         boundary, species_name, nodal_potential, solid, cells, *, proposal_species=None,
+        normals=None,
         base_log2=8, max_log2=16, n_replicates=4, seed=0,
         absolute_tolerance=1e-3, relative_tolerance=5e-3,
         element_absolute_tolerance=None, element_relative_tolerance=0.0,
@@ -308,6 +335,9 @@ def adaptive_forward_boundary_state_cell_flux(
     source_width = float(nx if x_max is None else x_max) - float(x_min)
     evaluations = 0; converged = False; rounds = 0
     estimates = np.empty((n_replicates, len(cells)))
+    hit_counts = np.empty((n_replicates, len(cells)), dtype=np.int64)
+    replicate_samples = np.empty(n_replicates, dtype=np.int64)
+    equal_weight_sampling = True
     start_level = int(base_log2)
     if initial_log2_samples is not None:
         initial = np.asarray(initial_log2_samples, dtype=int)
@@ -319,16 +349,32 @@ def adaptive_forward_boundary_state_cell_flux(
         for replicate in range(n_replicates):
             result = forward_boundary_state_cell_flux_qmc(
                 boundary, species_name, nodal_potential, solid, cells,
+                normals=normals,
                 log2_samples=level, seed=int(seed + replicate), x_min=x_min, x_max=x_max,
                 max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field)
             estimates[replicate] = result["per_cell"]
+            hit_counts[replicate] = result["hit_count_per_cell"]
+            replicate_samples[replicate] = result["samples"]
+            equal_weight_sampling &= result["equal_weight_sampling"]
         evaluations += n_replicates * (2 ** level)
         element_mean = estimates.mean(axis=0)
         element_stderr = estimates.std(axis=0, ddof=1) / np.sqrt(n_replicates)
+        if equal_weight_sampling:
+            # A handful of randomized-QMC replicates can accidentally agree on the same rare hit
+            # count and dramatically understate uncertainty. Direct physical sampling has equal
+            # weights, so the ordinary Bernoulli hit-count standard error is a conservative floor.
+            # This does not change the mean and does not assume a region or species.
+            sample_count = int(replicate_samples.sum())
+            hit_probability = hit_counts.sum(axis=0) / sample_count
+            count_stderr = source_width * np.sqrt(
+                hit_probability * (1.0 - hit_probability) / sample_count)
+            element_stderr = np.maximum(element_stderr, count_stderr)
         # Zero observed hits do not imply zero flux. For direct physical sampling, the rule-of-three
         # 95% upper probability bound is 3/N across the pooled independent histories.
         zero = np.all(estimates == 0.0, axis=0)
-        zero_upper = 3.0 * source_width / (n_replicates * (2 ** level))
+        zero_sample_count = (int(replicate_samples.sum()) if equal_weight_sampling
+                             else n_replicates * (2 ** level))
+        zero_upper = 3.0 * source_width / zero_sample_count
         element_stderr[zero] = np.maximum(element_stderr[zero], zero_upper)
         totals = estimates.mean(axis=1)
         total_mean = float(totals.mean())
@@ -352,12 +398,14 @@ def bidirectional_boundary_state_cell_flux(
         boundary, species_name, nodal_potential, solid, cells, normals, *,
         proposal_species=None, adjoint_options=None, forward_options=None,
         element_absolute_tolerance=1e-3, element_relative_tolerance=0.05,
-        method_hint=None, switch_factor=2.0):
+        method_hint=None, switch_factor=2.0, consistency_sigma=5.0):
     """Select forward or adjoint current per physical cell solely by measured uncertainty.
 
     This is not a named-region switch. Both unbiased estimators use the same physical boundary density;
     the lower-uncertainty estimate wins independently for each cell. The result refuses cells for which
-    neither direction meets the requested mixed tolerance.
+    neither direction meets the requested mixed tolerance. When both estimators claim certification,
+    they must also agree within ``consistency_sigma`` combined standard errors; otherwise a precise but
+    biased transport path could silently control the charging fixed point.
     """
     cells = [tuple(map(int, cell)) for cell in cells]
     normals = np.asarray(normals, dtype=float)
@@ -378,24 +426,112 @@ def bidirectional_boundary_state_cell_flux(
             raise ValueError("method_hint must match the number of unique cells")
     if switch_factor < 1.0:
         raise ValueError("switch_factor must be at least one")
+    if consistency_sigma <= 0.0:
+        raise ValueError("consistency_sigma must be positive")
     forward = adaptive_forward_boundary_state_cell_flux(
-        boundary, species_name, nodal_potential, solid, unique_cells,
+        boundary, species_name, nodal_potential, solid, cells, normals=normals,
         proposal_species=None, **forward_kwargs)
+    if (adjoint.element_replicates.shape[0] < 4
+            or forward.element_replicates.shape[0] < 4):
+        raise ValueError(
+            "bidirectional certification requires at least four independent replicates")
     first_face = {cell: cells.index(cell) for cell in unique_cells}
+
+    # A replicate-only importance-sampling controller cannot detect a mode missed by every scramble:
+    # all replicates then agree on a spuriously precise near-zero value. Direct forward transport is
+    # the independent support audit. Refine only adjoint faces whose two certified estimates disagree,
+    # without using species, orientation, region, aspect ratio, or geometry names.
+    cross_refinement_rounds = 0
+    max_adjoint_level = int(adjoint_kwargs.get("max_log2", 12))
+    while True:
+        inconsistent_cells = []
+        for cell_index, cell in enumerate(unique_cells):
+            face_indices = np.array([i for i, item in enumerate(cells) if item == cell], dtype=int)
+            replicates = adjoint.element_replicates[:, face_indices].sum(axis=1)
+            adjoint_mean = float(replicates.mean())
+            adjoint_stderr = float(replicates.std(ddof=1) / np.sqrt(replicates.size))
+            forward_replicates = forward.element_replicates[:, face_indices].sum(axis=1)
+            forward_mean = float(forward_replicates.mean())
+            forward_stderr = max(
+                float(forward_replicates.std(ddof=1) / np.sqrt(forward_replicates.size)),
+                float(np.sqrt(np.sum(forward.element_stderr[face_indices] ** 2))))
+            forward_ok = forward_stderr <= (
+                element_absolute_tolerance + element_relative_tolerance * abs(forward_mean))
+            adjoint_ok = adjoint_stderr <= (
+                element_absolute_tolerance + element_relative_tolerance * abs(adjoint_mean))
+            combined = np.hypot(forward_stderr, adjoint_stderr)
+            discrepancy = (abs(forward_mean - adjoint_mean) / combined
+                           if combined > 0.0
+                           else (0.0 if forward_mean == adjoint_mean else np.inf))
+            if forward_ok and adjoint_ok and discrepancy > consistency_sigma:
+                inconsistent_cells.append(cell)
+        if not inconsistent_cells:
+            break
+        inconsistent_set = set(inconsistent_cells)
+        levels = adjoint.log2_samples.copy()
+        selected_faces = np.array([
+            index for index, cell in enumerate(cells) if cell in inconsistent_set
+            and levels[index] < max_adjoint_level], dtype=int)
+        if selected_faces.size == 0:
+            break
+        levels[selected_faces] = np.minimum(
+            levels[selected_faces] + 2, max_adjoint_level)
+        refined_options = dict(adjoint_kwargs)
+        refined_options["initial_log2_samples"] = levels
+        adjoint = adaptive_adjoint_boundary_state_face_flux(
+            boundary, species_name, nodal_potential, solid, cells, normals,
+            proposal_species=proposal_species, **refined_options)
+        cross_refinement_rounds += 1
+
     per_face = np.zeros(len(cells)); per_face_stderr = np.zeros(len(cells))
+    selected_face_mean = np.zeros(len(cells)); selected_face_stderr = np.zeros(len(cells))
     method = np.empty(len(unique_cells), dtype="U7")
+    forward_cell_mean = np.zeros(len(unique_cells)); forward_cell_stderr = np.zeros(len(unique_cells))
+    adjoint_cell_mean = np.zeros(len(unique_cells)); adjoint_cell_stderr = np.zeros(len(unique_cells))
+    estimator_discrepancy_sigma = np.zeros(len(unique_cells))
+    method_within_tolerance = np.zeros(len(unique_cells), dtype=bool)
+    estimator_consistent = np.ones(len(unique_cells), dtype=bool)
+    cell_converged = np.zeros(len(unique_cells), dtype=bool)
+    adjoint_zero_unresolved = np.zeros(len(unique_cells), dtype=bool)
     converged = True
     for cell_index, cell in enumerate(unique_cells):
         face_indices = np.array([i for i, item in enumerate(cells) if item == cell], dtype=int)
         adjoint_replicates = adjoint.element_replicates[:, face_indices].sum(axis=1)
         adjoint_mean = float(adjoint_replicates.mean())
         adjoint_stderr = float(adjoint_replicates.std(ddof=1) / np.sqrt(adjoint_replicates.size))
-        forward_mean = float(forward.element_mean[cell_index])
-        forward_stderr = float(forward.element_stderr[cell_index])
+        forward_replicates = forward.element_replicates[:, face_indices].sum(axis=1)
+        forward_mean = float(forward_replicates.mean())
+        forward_stderr = max(
+            float(forward_replicates.std(ddof=1) / np.sqrt(forward_replicates.size)),
+            float(np.sqrt(np.sum(forward.element_stderr[face_indices] ** 2))))
+        forward_cell_mean[cell_index] = forward_mean
+        forward_cell_stderr[cell_index] = forward_stderr
+        adjoint_cell_mean[cell_index] = adjoint_mean
+        adjoint_cell_stderr[cell_index] = adjoint_stderr
+        combined_stderr = np.hypot(forward_stderr, adjoint_stderr)
+        estimator_discrepancy_sigma[cell_index] = (
+            abs(forward_mean - adjoint_mean) / combined_stderr
+            if combined_stderr > 0.0 else (0.0 if forward_mean == adjoint_mean else np.inf))
         forward_metric = forward_stderr / max(abs(forward_mean), element_absolute_tolerance)
         adjoint_metric = adjoint_stderr / max(abs(adjoint_mean), element_absolute_tolerance)
+        forward_allowed = element_absolute_tolerance + element_relative_tolerance * abs(forward_mean)
+        adjoint_allowed = element_absolute_tolerance + element_relative_tolerance * abs(adjoint_mean)
+        forward_ok = forward_stderr <= forward_allowed
+        # Replicate variance cannot distinguish an exact zero from a rare event missed by every
+        # surface-launched adjoint history. The independent forward estimator supplies the missing
+        # support check. Unlike direct physical sampling, weighted adjoint histories do not have a
+        # finite universal rule-of-three upper bound.
+        adjoint_zero_unresolved[cell_index] = (
+            adjoint_mean == 0.0 and adjoint_stderr == 0.0 and forward_mean > 0.0)
+        adjoint_ok = (adjoint_stderr <= adjoint_allowed
+                      and not adjoint_zero_unresolved[cell_index])
         preferred = "forward" if forward_metric < adjoint_metric else "adjoint"
-        if method_hint is not None and method_hint[cell_index] in ("forward", "adjoint"):
+        # Hysteresis is only allowed between two estimators with the same certification status. An
+        # old method hint must never retain an uncertified estimate when the complementary estimator
+        # meets the requested tolerance.
+        if forward_ok != adjoint_ok:
+            chosen = "forward" if forward_ok else "adjoint"
+        elif method_hint is not None and method_hint[cell_index] in ("forward", "adjoint"):
             hinted = str(method_hint[cell_index])
             hinted_metric = forward_metric if hinted == "forward" else adjoint_metric
             other_metric = adjoint_metric if hinted == "forward" else forward_metric
@@ -404,15 +540,34 @@ def bidirectional_boundary_state_cell_flux(
             chosen = preferred
         if chosen == "forward":
             mean, stderr = forward_mean, forward_stderr
+            selected_face_mean[face_indices] = forward.element_mean[face_indices]
+            selected_face_stderr[face_indices] = forward.element_stderr[face_indices]
         else:
             mean, stderr = adjoint_mean, adjoint_stderr
+            selected_face_mean[face_indices] = adjoint.element_mean[face_indices]
+            selected_face_stderr[face_indices] = adjoint.element_stderr[face_indices]
         allowed = element_absolute_tolerance + element_relative_tolerance * abs(mean)
-        converged &= stderr <= allowed
+        method_within_tolerance[cell_index] = stderr <= allowed
+        estimator_consistent[cell_index] = (
+            not (forward_ok and adjoint_ok)
+            or estimator_discrepancy_sigma[cell_index] <= consistency_sigma)
+        cell_converged[cell_index] = (
+            method_within_tolerance[cell_index] and estimator_consistent[cell_index])
+        converged &= cell_converged[cell_index]
         index = first_face[cell]
         per_face[index] = mean; per_face_stderr[index] = stderr; method[cell_index] = chosen
     return dict(
         per_face=per_face, per_face_stderr=per_face_stderr,
+        selected_face_mean=selected_face_mean, selected_face_stderr=selected_face_stderr,
         unique_cells=np.asarray(unique_cells, dtype=int), method=method,
+        forward_cell_mean=forward_cell_mean, forward_cell_stderr=forward_cell_stderr,
+        adjoint_cell_mean=adjoint_cell_mean, adjoint_cell_stderr=adjoint_cell_stderr,
+        estimator_discrepancy_sigma=estimator_discrepancy_sigma,
+        method_within_tolerance=method_within_tolerance,
+        estimator_consistent=estimator_consistent, cell_converged=cell_converged,
+        adjoint_zero_unresolved=adjoint_zero_unresolved,
+        consistency_sigma=float(consistency_sigma),
+        cross_refinement_rounds=cross_refinement_rounds,
         converged=bool(converged), adjoint=adjoint, forward=forward)
 
 

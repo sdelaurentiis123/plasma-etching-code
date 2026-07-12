@@ -92,6 +92,37 @@ The structured nodal implementation should remain embarrassingly parallel over p
 to Warp/CUDA. General 3-D curved geometry can later replace Q1 rectangles with AMReX-style embedded
 boundaries or boundary-fitted simplex elements without changing the phase-space scoring derivation.
 
+### Arbitrary-face support and estimator certification (2026-07-11 continuation)
+
+Wiring the nodal tracer into a material-grid fixed point exposed a support error that floor-only gates
+could not see. The adjoint surface proposal was expressed in global plasma-boundary coordinates on every
+face. That is complete on a horizontal floor, but on a vertical wall global vertical velocity is
+tangential and must span both signs. The old rule omitted valid upward-moving wall impacts and produced
+forward/adjoint ion discrepancies as large as 8--11 replicate standard errors even when the timestep and
+sample count were refined.
+
+The proposal is now defined in each face's local tangent/inward-normal frame and rotated into global
+coordinates with a unit Jacobian before time reversal. The physical density is still evaluated only at
+the traced plasma exit. A zero-field vertical-wall gate checks the analytic `E[vx/vz]` Liouville factor
+using an explicit local surface proposal. On the frozen nonuniform trench field, the former systematic
+wall undercount disappears; remaining wall-adjoint uncertainty is proposal variance, and the independent
+forward estimator is selected when it is better resolved.
+
+Two statistical false-certification paths were also closed:
+
+- method hysteresis may no longer retain an uncertified estimator when the complementary direction meets
+  tolerance;
+- when both directions claim precision, their cell currents must agree within a declared combined-error
+  threshold, and bidirectional certification requires at least four independent replicates;
+- direct equal-weight forward sampling carries a Bernoulli hit-count standard-error floor plus the
+  existing zero-hit upper bound, preventing a few accidentally similar QMC scrambles from reporting
+  implausible precision for rare deep-cell hits.
+
+These are numerical support and evidence rules, not fitted physics. A corrected ten-step continuation
+from the formerly failing state reduced certified current-balance RMS from 0.462 to 0.382 without an
+estimator refusal. Full fixed-point convergence, initialization/damping invariance, and the AR/profile
+ladder remain open and must precede any charging-validation claim.
+
 ## Signed error budget: what else can be wrong and how errors stack
 
 The charging fixed point balances `Gi(V) = Ge(V)`. For small relative transport errors, the raw voltage

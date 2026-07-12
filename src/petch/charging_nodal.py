@@ -70,13 +70,42 @@ def nodal_domain(solid, surface_voltage):
     return active, dirichlet, boundary_voltage
 
 
-def solve_nodal_laplace(solid, surface_voltage, sweeps=1000, omega=1.7, tolerance=None, initial=None):
+def material_face_nodes(cell, normal):
+    """Return the two grid vertices of one axis-aligned gas-facing material face."""
+    i, j = map(int, cell); nx, nz = map(int, normal)
+    if (nx, nz) == (-1, 0):
+        return ((i, j), (i, j + 1))
+    if (nx, nz) == (1, 0):
+        return ((i + 1, j), (i + 1, j + 1))
+    if (nx, nz) == (0, -1):
+        return ((i, j), (i + 1, j))
+    if (nx, nz) == (0, 1):
+        return ((i, j + 1), (i + 1, j + 1))
+    raise ValueError("material face normal must be axis aligned")
+
+
+def solve_nodal_laplace(
+        solid, surface_voltage=None, sweeps=1000, omega=1.7, tolerance=None, initial=None,
+        boundary_nodal_voltage=None):
     """Solve Laplace's equation on the gas-node complex with exact material-edge Dirichlet data.
 
     Missing neighbours at lateral/bottom exterior boundaries implement zero normal flux. Returns
     ``(V, diagnostics)``. The residual is the graph finite-volume balance on free active nodes.
     """
-    active, fixed, fixed_value = nodal_domain(solid, surface_voltage)
+    if boundary_nodal_voltage is None:
+        if surface_voltage is None:
+            raise ValueError("surface_voltage or boundary_nodal_voltage is required")
+        active, fixed, fixed_value = nodal_domain(solid, surface_voltage)
+    else:
+        boundary_nodal_voltage = np.asarray(boundary_nodal_voltage, dtype=float)
+        expected = (np.asarray(solid).shape[0] + 1, np.asarray(solid).shape[1] + 1)
+        if (boundary_nodal_voltage.shape != expected
+                or not np.all(np.isfinite(boundary_nodal_voltage))):
+            raise ValueError("boundary_nodal_voltage must be a finite nodal grid")
+        active, fixed, _ = nodal_domain(
+            solid, np.zeros(np.asarray(solid).shape, dtype=float))
+        fixed_value = boundary_nodal_voltage.copy()
+        fixed_value[:, 0] = 0.0
     gas = ~np.asarray(solid, dtype=bool)
     # A nodal edge participates iff it bounds at least one gas cell. Endpoint activity alone is
     # insufficient near covered corners and can create a graph connection through solid material.
@@ -188,6 +217,8 @@ def _trace_nodal_py(V, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_cap, dt
     hit_ix = np.full(n, -1, np.int64); hit_iz = np.full(n, -1, np.int64)
     impact_E = np.zeros(n); hit_vx = np.zeros(n); survivor = np.zeros(n, np.uint8)
     exit_vx = np.zeros(n); exit_vz = np.zeros(n)
+    hit_nx = np.zeros(n, np.int8); hit_nz = np.zeros(n, np.int8)
+    hit_x_position = np.zeros(n); hit_z_position = np.zeros(n)
     for p in prange(n):
         x = x0[p]; z = z0[p]; vx = vx0[p]; vz = vz0[p]
         alive = True
@@ -220,7 +251,7 @@ def _trace_nodal_py(V, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_cap, dt
             elif dz < 0.0:
                 tz = (cj - z) / dz; nj = cj - 1
 
-            crossed = False; hi = -1; hj = -1; hit_fraction = 2.0
+            crossed = False; hi = -1; hj = -1; hnx = 0; hnz = 0; hit_fraction = 2.0
             # Test every grid face crossed by this short segment. The orthogonal cell index is
             # evaluated AT the crossing, so a gas-gas crossing followed by a solid crossing cannot
             # tunnel through a corner.
@@ -228,7 +259,8 @@ def _trace_nodal_py(V, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_cap, dt
                 test_i = ni; test_j = int(np.floor(z + dz * tx))
                 if test_i >= 0 and test_i < nx and test_j >= 0 and test_j < nz:
                     if solid[test_i, test_j]:
-                        crossed = True; hi = test_i; hj = test_j; hit_fraction = tx
+                        crossed = True; hi = test_i; hj = test_j
+                        hnx = -1 if dx > 0.0 else 1; hnz = 0; hit_fraction = tx
             if tz >= 0.0 and tz <= 1.0:
                 test_i = int(np.floor(x + dx * tz)); test_j = nj
                 if test_j < 0 and tz < hit_fraction:
@@ -238,6 +270,7 @@ def _trace_nodal_py(V, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_cap, dt
                 if (test_i >= 0 and test_i < nx and test_j >= 0 and test_j < nz
                         and solid[test_i, test_j] and tz < hit_fraction):
                     crossed = True; hi = test_i; hj = test_j; hit_fraction = tz
+                    hnx = 0; hnz = -1 if dz > 0.0 else 1
             if not crossed and tx >= 0.0 and tx <= 1.0 and (ni < 0 or ni >= nx):
                 # Specular symmetry reflection keeps the REMAINDER of the proposed step. Clipping
                 # at the wall shortens the orbit and is not time reversible.
@@ -251,13 +284,16 @@ def _trace_nodal_py(V, solid, x0, z0, vx0, vz0, q, nx, nz, max_steps, dt_cap, dt
                 hit_vzn = vz + hit_fraction * (vzn - vz)
                 hit_ix[p] = hi; hit_iz[p] = hj
                 impact_E[p] = hit_vxn * hit_vxn + hit_vzn * hit_vzn; hit_vx[p] = hit_vxn
+                hit_nx[p] = hnx; hit_nz[p] = hnz
+                hit_x_position[p] = xa; hit_z_position[p] = za
                 alive = False; break
             x = xa; z = za; vx = vxn; vz = vzn
             if z <= 0.0:
                 exit_vx[p] = vx; exit_vz[p] = vz; alive = False; break
         if alive:
             survivor[p] = 1
-    return hit_ix, hit_iz, impact_E, hit_vx, survivor, exit_vx, exit_vz
+    return (hit_ix, hit_iz, impact_E, hit_vx, survivor, exit_vx, exit_vz,
+            hit_nx, hit_nz, hit_x_position, hit_z_position)
 
 
 trace_nodal = (njit(cache=True, parallel=True, fastmath=True)(_trace_nodal_py)

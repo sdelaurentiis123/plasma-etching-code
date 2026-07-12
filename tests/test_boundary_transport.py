@@ -1,6 +1,9 @@
 import numpy as np
 import pytest
 
+import petch.boundary_transport as boundary_transport_module
+from petch.adaptive_quadrature import AdaptiveQuadratureResult
+
 from petch.boundary_state import (
     PlasmaBoundaryState,
     RectilinearVelocityHistogramDensity,
@@ -172,12 +175,150 @@ def test_bidirectional_estimator_selects_by_uncertainty_not_region_name():
     result = bidirectional_boundary_state_cell_flux(
         boundary, "test", np.zeros((nx + 1, nz + 1)), solid, cells,
         [(0.0, -1.0)] * len(cells),
-        adjoint_options=dict(base_log2=4, max_log2=7, n_replicates=3),
-        forward_options=dict(base_log2=7, max_log2=10, n_replicates=3),
+        adjoint_options=dict(base_log2=4, max_log2=7, n_replicates=4),
+        forward_options=dict(base_log2=7, max_log2=11, n_replicates=4),
         element_absolute_tolerance=0.04, element_relative_tolerance=0.0)
     assert result["converged"]
     assert np.allclose(result["per_face"], 1.0, atol=0.04)
     assert set(result["method"]) <= {"forward", "adjoint"}
+    assert result["method_within_tolerance"].all()
+    assert np.all(np.isfinite(result["estimator_discrepancy_sigma"]))
+    assert result["forward_cell_mean"].shape == (len(cells),)
+    assert result["adjoint_cell_mean"].shape == (len(cells),)
+
+
+def test_bidirectional_hysteresis_never_retains_an_uncertified_estimator(monkeypatch):
+    mean_adjoint = 0.1402
+    stderr_adjoint = 0.0338
+    delta = stderr_adjoint * np.sqrt(3.0)
+    adjoint_replicates = np.array([
+        [mean_adjoint - delta], [mean_adjoint - delta],
+        [mean_adjoint + delta], [mean_adjoint + delta]])
+    adjoint = AdaptiveQuadratureResult(
+        element_mean=np.array([mean_adjoint]),
+        element_stderr=np.array([stderr_adjoint]),
+        element_replicates=adjoint_replicates,
+        log2_samples=np.array([12]), total_mean=mean_adjoint,
+        total_stderr=stderr_adjoint, converged=True, rounds=1, evaluations=1)
+    mean_forward = 0.1562
+    stderr_forward = 0.0269
+    forward = AdaptiveQuadratureResult(
+        element_mean=np.array([mean_forward]),
+        element_stderr=np.array([stderr_forward]),
+        element_replicates=np.array([[mean_forward]] * 4),
+        log2_samples=np.array([12]), total_mean=mean_forward,
+        total_stderr=stderr_forward, converged=True, rounds=1, evaluations=1)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        lambda *args, **kwargs: adjoint)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        lambda *args, **kwargs: forward)
+
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "ion", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0)], [(0.0, -1.0)], method_hint=np.array(["adjoint"]),
+        element_absolute_tolerance=0.01, element_relative_tolerance=0.15,
+        switch_factor=2.0)
+
+    assert result["converged"]
+    assert result["method"][0] == "forward"
+    assert np.isclose(result["per_face"][0], mean_forward)
+
+
+def test_bidirectional_adjoint_zero_is_not_exact_when_forward_sees_flux(monkeypatch):
+    adjoint = AdaptiveQuadratureResult(
+        element_mean=np.array([0.0]), element_stderr=np.array([0.0]),
+        element_replicates=np.zeros((4, 1)), log2_samples=np.array([12]),
+        total_mean=0.0, total_stderr=0.0, converged=True, rounds=1, evaluations=1)
+    forward = AdaptiveQuadratureResult(
+        element_mean=np.array([0.1]), element_stderr=np.array([0.01]),
+        element_replicates=np.array([[0.09], [0.09], [0.11], [0.11]]),
+        log2_samples=np.array([12]), total_mean=0.1, total_stderr=0.01,
+        converged=True, rounds=1, evaluations=1)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        lambda *args, **kwargs: adjoint)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        lambda *args, **kwargs: forward)
+
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "ion", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0)], [(0.0, -1.0)], method_hint=np.array(["adjoint"]),
+        element_absolute_tolerance=0.02, element_relative_tolerance=0.15)
+
+    assert result["converged"]
+    assert result["adjoint_zero_unresolved"][0]
+    assert result["method"][0] == "forward"
+    assert np.isclose(result["per_face"][0], 0.1)
+
+
+def test_bidirectional_refuses_inconsistent_estimators_that_both_claim_precision(monkeypatch):
+    def estimate(mean):
+        delta = 0.001 * np.sqrt(3.0)
+        return AdaptiveQuadratureResult(
+            element_mean=np.array([mean]), element_stderr=np.array([0.001]),
+            element_replicates=np.array([
+                [mean - delta], [mean - delta], [mean + delta], [mean + delta]]),
+            log2_samples=np.array([12]), total_mean=mean, total_stderr=0.001,
+            converged=True, rounds=1, evaluations=1)
+
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        lambda *args, **kwargs: estimate(0.10))
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        lambda *args, **kwargs: estimate(0.20))
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "ion", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0)], [(0.0, -1.0)], element_absolute_tolerance=0.01,
+        element_relative_tolerance=0.0, consistency_sigma=5.0)
+
+    assert result["method_within_tolerance"][0]
+    assert not result["estimator_consistent"][0]
+    assert not result["cell_converged"][0]
+    assert not result["converged"]
+
+
+def test_bidirectional_cross_refines_a_missed_adjoint_mode(monkeypatch):
+    forward = AdaptiveQuadratureResult(
+        element_mean=np.array([0.05]), element_stderr=np.array([0.001]),
+        element_replicates=np.array([[0.048], [0.050], [0.050], [0.052]]),
+        log2_samples=np.array([12]), total_mean=0.05, total_stderr=0.001,
+        converged=True, rounds=1, evaluations=1)
+    levels_seen = []
+
+    def adjoint_estimate(*args, **kwargs):
+        levels = np.asarray(kwargs.get("initial_log2_samples", [6]), dtype=int)
+        level = int(levels[0]); levels_seen.append(level)
+        mean = 0.05 if level >= 10 else 0.0
+        stderr = 0.001 if level >= 10 else 0.0
+        delta = stderr * np.sqrt(3.0)
+        replicates = np.array([
+            [mean - delta], [mean - delta], [mean + delta], [mean + delta]])
+        return AdaptiveQuadratureResult(
+            element_mean=np.array([mean]), element_stderr=np.array([stderr]),
+            element_replicates=replicates, log2_samples=np.array([level]),
+            total_mean=mean, total_stderr=stderr, converged=True,
+            rounds=1, evaluations=1)
+
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        adjoint_estimate)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        lambda *args, **kwargs: forward)
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "ion", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0)], [(0.0, -1.0)],
+        adjoint_options={"base_log2": 6, "max_log2": 12},
+        element_absolute_tolerance=0.01, element_relative_tolerance=0.0)
+
+    assert levels_seen == [6, 8, 10]
+    assert result["cross_refinement_rounds"] == 2
+    assert result["converged"]
+    assert result["estimator_consistent"][0]
 
 
 def test_adaptive_forward_zero_hits_have_nonzero_confidence_bound():
@@ -200,6 +341,26 @@ def test_adaptive_forward_zero_hits_have_nonzero_confidence_bound():
     assert not result.converged
 
 
+def test_adaptive_forward_rare_hits_keep_counting_uncertainty_floor():
+    nx, nz = 128, 8
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    density = RectilinearVelocityHistogramDensity(
+        (np.array([-1e-9, 1e-9]), np.array([-1e-9, 1e-9]), np.array([0.9, 1.1])),
+        np.ones((1, 1, 1)))
+    species = SpeciesBoundaryState(
+        "vertical", 0, 40.0, 1e19, [[0.0, 0.0, 1.0]], [1.0], density_model=density)
+    boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
+    result = adaptive_forward_boundary_state_cell_flux(
+        boundary, "vertical", np.zeros((nx + 1, nz + 1)), solid, [(0, nz - 1)],
+        base_log2=10, max_log2=10, n_replicates=4,
+        absolute_tolerance=1.0, relative_tolerance=0.0,
+        element_absolute_tolerance=1.0)
+    probability = result.element_mean[0] / nx
+    binomial_floor = nx * np.sqrt(probability * (1.0 - probability) / (4 * 2 ** 10))
+    assert result.element_mean[0] > 0.0
+    assert result.element_stderr[0] >= binomial_floor - 1e-15
+
+
 def test_arbitrary_face_adjoint_has_correct_wall_flux_jacobian():
     nx, nz = 128, 12
     solid = np.zeros((nx, nz), dtype=bool); solid[100, :] = True
@@ -212,11 +373,21 @@ def test_arbitrary_face_adjoint_has_correct_wall_flux_jacobian():
     species = SpeciesBoundaryState(
         "ion", 1, 40.0, 2e19, np.column_stack((xx.ravel(), np.zeros(xx.size), zz.ravel())),
         np.ones(xx.size), density_model=density)
+    # The surface proposal is expressed in local (tangent, out-of-plane, inward-normal) coordinates.
+    # For the left-facing wall n=(-1,0), local tangent=-global vz and local normal=global vx.
+    local_density = RectilinearVelocityHistogramDensity(
+        (np.array([-2.0, -1.0]), np.array([-0.5, 0.5]), np.array([0.5, 1.5])),
+        np.ones((1, 1, 1)))
+    proposal = SpeciesBoundaryState(
+        "wall-proposal", 1, 40.0, 1.0,
+        np.column_stack((-zz.ravel(), np.zeros(xx.size), xx.ravel())),
+        np.ones(xx.size), density_model=local_density)
     boundary = PlasmaBoundaryState((species,), reference_plane_m=0.0)
     cells = [(100, z) for z in range(2, 9)]
     result = adjoint_boundary_state_face_flux(
         boundary, "ion", np.zeros((nx + 1, nz + 1)), solid, cells,
-        [(-1.0, 0.0)] * len(cells), n_face_position=2, max_steps=1000, want_energy=True)
+        [(-1.0, 0.0)] * len(cells), proposal_species=proposal,
+        n_face_position=2, max_steps=1000, want_energy=True)
     # The finite tensor midpoint rule must reproduce its own Liouville Jacobian exactly; its continuum
     # limit is E[vx/vz] = 1*ln(2).
     expected = float(np.mean(xx / zz))

@@ -111,6 +111,15 @@ convergence even after refining all elements. This is not a reason for named cor
 collisionless finite-transit-time RF sheath model now passes static-energy, Child-thickness, and high-
 frequency phase-mixing gates; it is the upstream path toward a nonsingular physical boundary state.
 
+The unified arbitrary-face adapter subsequently exposed a separate orientation-support bug: it reused a
+global downward boundary proposal on vertical walls, where vertical velocity is tangential and valid
+surface states require both signs. Rotating a local tangent/inward-normal proposal on every face removes
+the systematic wall-current deficit. Bidirectional transport now also refuses mutually inconsistent
+precise estimates, requires four independent replicates, and applies a rare-hit counting-error floor to
+direct forward sampling. These changes close false numerical certification; they do not by themselves
+validate the converged charging state. The corrected generic trench continuation is decreasing its
+current-balance RMS, but the full convergence and invariance ladders remain open.
+
 `PlasmaBoundaryState` now provides the single immutable plasma-to-feature contract: normalized weighted
 joint velocity-energy samples, phase/position, signed charge, mass, absolute flux, reference plane, and
 provenance. Instantaneous and finite-transit sheath constructors pass the same contract and current-density

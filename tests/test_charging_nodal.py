@@ -38,6 +38,18 @@ def test_nodal_laplace_reproduces_linear_parallel_plate_solution():
     assert np.isclose(ez, -0.7, atol=2e-9)
 
 
+def test_nodal_solver_accepts_actual_boundary_node_values_without_cell_averaging():
+    nx, nz = 8, 6
+    solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True
+    boundary = np.zeros((nx + 1, nz + 1))
+    boundary[:, -2] = np.linspace(1.0, 3.0, nx + 1)
+    V, diag = solve_nodal_laplace(
+        solid, boundary_nodal_voltage=boundary,
+        sweeps=1000, omega=1.7, tolerance=1e-11)
+    assert np.allclose(V[:, -2], boundary[:, -2], atol=1e-12)
+    assert diag["max_abs"] < 1e-10
+
+
 def test_nodal_laplace_constant_boundary_is_constant():
     solid, surface = _flat_gap(nx=8, gas_rows=6, voltage=0.0)
     V, diag = solve_nodal_laplace(solid, surface, sweeps=20)
@@ -52,9 +64,12 @@ def test_nodal_tracer_cannot_tunnel_through_one_cell_wall():
     V = np.zeros((nx + 1, nz + 1))
     x = np.array([2.25]); z = np.array([3.4])
     vx = np.array([30.0]); vz = np.array([0.0])
-    hit_x, hit_z, *_ = trace_nodal(V, solid, x, z, vx, vz, 1.0, nx, nz, 500, 0.4, 0.1)
+    traced = trace_nodal(V, solid, x, z, vx, vz, 1.0, nx, nz, 500, 0.4, 0.1)
+    hit_x, hit_z = traced[0], traced[1]
     assert hit_x[0] == 6
     assert hit_z[0] == 3
+    assert (traced[7][0], traced[8][0]) == (-1, 0)
+    assert np.isclose(traced[9][0], 6.0, atol=1e-12)
 
 
 def test_nodal_tracer_checks_second_crossed_face_on_diagonal_step():
@@ -65,9 +80,12 @@ def test_nodal_tracer_checks_second_crossed_face_on_diagonal_step():
     # Cross x=4 first into gas, then z=5 into the solid floor during the same step.
     x = np.array([3.95]); z = np.array([4.8])
     vx = np.array([1.0]); vz = np.array([3.0])
-    hit_x, hit_z, *_ = trace_nodal(V, solid, x, z, vx, vz, 1.0, nx, nz, 20, 0.4, 0.1)
+    traced = trace_nodal(V, solid, x, z, vx, vz, 1.0, nx, nz, 20, 0.4, 0.1)
+    hit_x, hit_z = traced[0], traced[1]
     assert hit_x[0] == 4
     assert hit_z[0] == 5
+    assert (traced[7][0], traced[8][0]) == (0, -1)
+    assert np.isclose(traced[10][0], 5.0, atol=1e-12)
 
 
 def test_nodal_tracer_lateral_reflection_keeps_remaining_step():
