@@ -78,6 +78,31 @@ def _confidence_separated_log_ratio(
     return residual, ion_low, ion_high, electron_low, electron_high
 
 
+def _trust_merit_worsened(current_rms, current_max, previous_rms, previous_max, tolerance, mode):
+    """Return whether a trial violates the selected physical mean-current trust merit."""
+    rms_worse = current_rms > previous_rms * (1.0 + tolerance)
+    max_worse = current_max > previous_max * (1.0 + tolerance)
+    if mode == "rms":
+        return rms_worse
+    if mode == "max":
+        return max_worse
+    if mode == "pareto":
+        return rms_worse or max_worse
+    raise ValueError("trust_merit must be 'rms', 'max', or 'pareto'")
+
+
+def _trust_merit_strongly_improved(
+        current_rms, current_max, previous_rms, previous_max, mode, factor=0.8):
+    if mode == "rms":
+        return current_rms < factor * previous_rms
+    if mode == "max":
+        return current_max < factor * previous_max
+    if mode == "pareto":
+        return (current_rms < factor * previous_rms
+                and current_max < factor * previous_max)
+    raise ValueError("trust_merit must be 'rms', 'max', or 'pareto'")
+
+
 def solve_boundary_state_charging_nodal(
         solid, conductor_ids, boundary_state, *, ion_species=None, electron_species=None,
         initial_surface_voltage=None, initial_boundary_nodal_voltage=None,
@@ -86,6 +111,7 @@ def solve_boundary_state_charging_nodal(
         field_tolerance=1e-9, boundary_proposals=None, n_face_position=8,
         adaptive_quadrature=None, active_flux=1e-4, current_confidence_sigma=2.0,
         trust_region=True, trust_growth_tolerance=0.02, minimum_beta=1e-4,
+        trust_merit="rms",
         gain_decay=0.0, gain_offset=5.0, epsilon_r=None, cell_size_m=None,
         grounded_nodes=None, initial_surface_charge_node_c_per_m=None,
         initial_adaptive_levels=None, initial_forward_adaptive_levels=None,
@@ -116,6 +142,8 @@ def solve_boundary_state_charging_nodal(
         raise ValueError("nonlinear_update must be 'picard' or 'anderson'")
     if int(anderson_depth) != anderson_depth or anderson_depth <= 0:
         raise ValueError("anderson_depth must be a positive integer")
+    if trust_merit not in {"rms", "max", "pareto"}:
+        raise ValueError("trust_merit must be 'rms', 'max', or 'pareto'")
     if initial_beta is not None and (
             not np.isfinite(initial_beta) or initial_beta <= 0.0 or initial_beta > beta):
         raise ValueError("initial_beta must be positive and no larger than beta")
@@ -279,7 +307,8 @@ def solve_boundary_state_charging_nodal(
     anderson_x = [row.copy() for row in initial_anderson_x_array]
     anderson_residual = [row.copy() for row in initial_anderson_residual_array]
     last_accepted_state = None
-    trial_merit_history = []; accepted_beta_history = []; accepted_gain_history = []
+    trial_merit_history = []; trial_max_history = []
+    accepted_beta_history = []; accepted_gain_history = []
 
     def accepted_checkpoint():
         """Return only the serializable state needed to restart the last accepted iterate."""
@@ -493,9 +522,13 @@ def solve_boundary_state_charging_nodal(
         # samples. The confidence-separated distance can shrink merely because uncertainty widened and
         # therefore cannot be used as an optimization merit.
         merit = balance["rms_log_ratio"]
-        trial_merit_history.append(merit)
+        maximum_merit = balance["max_abs_log_ratio"]
+        trial_merit_history.append(merit); trial_max_history.append(maximum_merit)
         if (trust_region and pending_step is not None
-                and merit > pending_step["merit"] * (1.0 + trust_growth_tolerance)):
+                and _trust_merit_worsened(
+                    merit, maximum_merit, pending_step["merit"],
+                    pending_step["maximum_merit"], trust_growth_tolerance,
+                    trust_merit)):
             boundary_voltage[:] = pending_step["boundary_voltage"]
             conductor_voltage[:] = pending_step["conductor_voltage"]
             surface_charge_node[:] = pending_step["surface_charge_node"]
@@ -512,7 +545,10 @@ def solve_boundary_state_charging_nodal(
                 raise RuntimeError(
                     f"nodal charging trust region collapsed below minimum_beta={minimum_beta:g}")
             continue
-        if trust_region and pending_step is not None and merit < 0.8 * pending_step["merit"]:
+        if (trust_region and pending_step is not None
+                and _trust_merit_strongly_improved(
+                    merit, maximum_merit, pending_step["merit"],
+                    pending_step["maximum_merit"], trust_merit)):
             beta_current = min(float(beta), 1.2 * beta_current)
         pending_step = None
         history.append(balance); interval_history.append(interval_balance)
@@ -555,6 +591,7 @@ def solve_boundary_state_charging_nodal(
             pending_step = dict(
                 boundary_voltage=boundary_voltage.copy(),
                 conductor_voltage=conductor_voltage.copy(), merit=merit,
+                maximum_merit=maximum_merit,
                 surface_charge_node=surface_charge_node.copy(),
                 hybrid_hint={name: value.copy() for name, value in hybrid_hint.items()},
                 adaptive_levels={
@@ -659,8 +696,11 @@ def solve_boundary_state_charging_nodal(
         active_flux=active_flux, surface_discretization="boundary_nodal",
         electrostatic_state=("surface_charge_poisson" if charge_mode else "dirichlet_voltage"),
         update_residual="mean_log_current_ratio_when_direction_resolved",
-        trust_merit="mean_rms_log_current_ratio", rejected_steps=rejected_steps,
+        trust_merit=("mean_rms_and_max_log_current_ratio" if trust_merit == "pareto"
+                     else f"mean_{trust_merit}_log_current_ratio"),
+        trust_merit_mode=trust_merit, rejected_steps=rejected_steps,
         beta_final=beta_current, trial_merit_history=np.asarray(trial_merit_history),
+        trial_max_history=np.asarray(trial_max_history),
         accepted_beta_history=np.asarray(accepted_beta_history),
         accepted_gain_history=np.asarray(accepted_gain_history),
         gain_decay=float(gain_decay), gain_offset=float(gain_offset),

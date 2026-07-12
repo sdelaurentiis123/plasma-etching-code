@@ -11,6 +11,8 @@ from petch.boundary_state import (
 from petch.charging_nodal_fixed_point import (
     _anderson_step,
     _confidence_separated_log_ratio,
+    _trust_merit_strongly_improved,
+    _trust_merit_worsened,
     solve_boundary_state_charging_nodal,
 )
 from petch.charging_backward import AdaptiveQuadratureConvergenceError, _gas_faces
@@ -63,6 +65,13 @@ def test_anderson_step_solves_scalar_linear_fixed_point_without_fitted_jacobian(
     assert np.allclose(x, 0.5)
     x += _anderson_step(x, 1.0 - x, x_history, residual_history, 0.5, 3)
     assert np.allclose(x, 1.0)
+
+
+def test_pareto_trust_merit_rejects_worse_max_even_when_rms_improves():
+    assert _trust_merit_worsened(0.8, 1.1, 1.0, 1.0, 0.02, "pareto")
+    assert not _trust_merit_worsened(0.8, 1.1, 1.0, 1.0, 0.02, "rms")
+    assert not _trust_merit_strongly_improved(0.7, 0.9, 1.0, 1.0, "pareto")
+    assert _trust_merit_strongly_improved(0.7, 0.7, 1.0, 1.0, "pareto")
 
 
 def test_overlap_only_stops_update_and_does_not_certify_convergence():
