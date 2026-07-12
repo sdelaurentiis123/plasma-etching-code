@@ -131,13 +131,11 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
   confidence bound, and the activity threshold must operate on normalized rather than absolute particle
   flux. Both are now enforced. The hybrid fixed point remains experimental until interval-aware current
   updates close without selecting a statistically unresolved zero as an exact current.
-- The bidirectional fixed point now propagates per-species current uncertainty and updates voltage only
-  from non-overlapping ion/electron confidence intervals. Current activity is normalized by the common
-  incident charge-flux scale; the prior absolute-current comparison made every tiny current appear active.
-  This removed residual spikes near 70, but a 20-step generic-trench run plateaued at certified log-current
-  residual about 2.34. The remaining blocker is the globally coupled nonlinear solve and estimator-method
-  switching, not license to accept the ±10 V iterate. A merit-decreasing trust-region/Anderson step with
-  common estimator states is required before this gate is closed.
+- The bidirectional fixed point propagates per-species current uncertainty and uses non-overlapping
+  ion/electron intervals only to choose a safe update direction. A later audit corrected the stopping rule:
+  interval overlap means the direction is unresolved, not that balance is certified. `converged` now
+  requires the entire log-current-ratio confidence envelope to fit inside the requested tolerance. Earlier
+  residual descents remain numerical history but no longer count as a convergence gate.
 - Repository-history review found that a prior deterministic Anderson solver initially converged but its
   clipped near-zero-flux history later poisoned deep-AR updates; the new solver therefore admits only
   confidence-certified accepted residuals and clears acceleration history on rejection. Full rollback now
@@ -145,6 +143,14 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
   Picard reduced the certified max residual to about 1.90 (RMS 0.67) but a global trust factor throttled all
   surface capacitors because a few contacts were stiff. Anderson did not beat Picard and remains rejected.
   The next numerical gate is per-degree-of-freedom trust scaling with the same global acceptance test.
+- A high-sample A100 audit then found a more fundamental source of the forward/adjoint disagreement:
+  phase-space-dependent adaptive stepping changed the discrete Hamiltonian Poincare map. Exposed electron
+  currents disagreed at 8.38 combined standard errors at a `2^18` ceiling. Replaying the same state with a
+  common fixed midpoint step reduced the worst electron discrepancy to 1.79 sigma; deep-node currents were
+  stable within sampling uncertainty across steps 0.04, 0.02, and 0.01. Nonuniform-field bidirectional
+  transport now refuses state-dependent stepping. A new nodal Anderson option operates in voltage-equivalent
+  coordinates and clears its learned Jacobian history on trust rejection; it is an opt-in convergence
+  experiment, not yet promotion evidence.
 
 ### Kill criteria
 
