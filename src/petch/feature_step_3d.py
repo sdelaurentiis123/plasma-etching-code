@@ -116,8 +116,14 @@ def make_rectangular_trench_geometry_3d(
     material = np.zeros(shape, dtype=int)
     material[substrate_solid] = int(substrate_material_id)
     material[mask_solid] = int(mask_material_id)
-    material[(phi > 0.0) & (material == 0)] = np.where(
-        Z[(phi > 0.0) & (material == 0)] < substrate_top,
+    unlabeled_solid = (phi > 0.0) & (material == 0)
+    # Reinitialization assigns exact-zero interface nodes to the positive (solid) side.  Material
+    # ownership at those nodes must follow the CSG union winner, not a z threshold: at a flat mask
+    # opening z==substrate_top belongs to the substrate level set, while the adjacent mask surface
+    # belongs to the mask level set.
+    substrate_owner = substrate_levelset >= mask_levelset
+    material[unlabeled_solid] = np.where(
+        substrate_owner[unlabeled_solid],
         int(substrate_material_id), int(mask_material_id))
     return FeatureGeometry3D(phi, material, dx, mesh_length_unit_m)
 
@@ -168,15 +174,52 @@ class FeatureSolve3DResult:
 
 
 def _face_material_ids(centroids, geometry):
-    """Assign the nearest positive-phi material node to each interface triangle."""
+    """Assign each interface triangle by probing locally into its positive-phi solid.
+
+    A global nearest-solid lookup is ambiguous at a material junction: an unetched substrate face
+    inside a mask opening can be closer to the mask corner than to the next substrate grid node.
+    The signed-distance gradient gives the physical solid-side normal and therefore the local owner.
+    A nearest-solid search remains only as a fallback at degenerate zero-gradient CSG corners.
+    """
+    centroids = np.asarray(centroids, dtype=float)
     solid = (geometry.phi > 0.0) & (geometry.material_id > 0)
     index = np.column_stack(np.where(solid))
     if index.size == 0:
         raise ValueError("geometry contains no labeled solid material")
-    points = index * geometry.dx
-    _, nearest = cKDTree(points).query(centroids)
-    chosen = index[np.asarray(nearest, dtype=int)]
-    return geometry.material_id[tuple(chosen.T)]
+    gradient = np.gradient(geometry.phi, geometry.dx)
+    nearest_grid = np.rint(centroids / geometry.dx).astype(int)
+    for axis in range(3):
+        nearest_grid[:, axis] = np.clip(
+            nearest_grid[:, axis], 0, geometry.phi.shape[axis] - 1)
+    solid_normal = np.column_stack([
+        component[tuple(nearest_grid.T)] for component in gradient])
+    magnitude = np.linalg.norm(solid_normal, axis=1)
+    valid_normal = magnitude > 1e-12
+    solid_normal[valid_normal] /= magnitude[valid_normal, None]
+
+    material = np.zeros(centroids.shape[0], dtype=int)
+    unresolved = np.ones(centroids.shape[0], dtype=bool)
+    for distance in (0.35, 0.75, 1.25):
+        selected = np.where(unresolved & valid_normal)[0]
+        if not selected.size:
+            break
+        probe = centroids[selected] + distance * geometry.dx * solid_normal[selected]
+        probe_index = np.rint(probe / geometry.dx).astype(int)
+        for axis in range(3):
+            probe_index[:, axis] = np.clip(
+                probe_index[:, axis], 0, geometry.phi.shape[axis] - 1)
+        local_solid = geometry.phi[tuple(probe_index.T)] > 0.0
+        local_material = geometry.material_id[tuple(probe_index.T)]
+        accepted = local_solid & (local_material > 0)
+        material[selected[accepted]] = local_material[accepted]
+        unresolved[selected[accepted]] = False
+
+    if np.any(unresolved):
+        points = index * geometry.dx
+        _, nearest = cKDTree(points).query(centroids[unresolved])
+        chosen = index[np.asarray(nearest, dtype=int)]
+        material[unresolved] = geometry.material_id[tuple(chosen.T)]
+    return material
 
 
 def _surface_gas_normals(verts, faces, centroids, geometry):
@@ -722,16 +765,52 @@ def advance_feature_step_3d(
     phi = np.array(geometry.phi, copy=True)
     xs, ys, zs = geometry.coordinate_arrays
     extension_geometry = dict(phi=phi, dx=geometry.dx, xs=xs, ys=ys, zs=zs)
+    # Extend only from the material surface that is actually evolving.  Including pinned mask
+    # triangles with zero velocity lets them win the nearest-face query below a narrow opening and
+    # numerically pins a physically bombarded floor after roughly one grid cell of motion.
     extended_velocity = extend_velocity_3d(
-        face_velocity, centroids, extension_geometry, 4.0 * geometry.dx)
+        face_velocity[active_face], centroids[active_face],
+        extension_geometry, 4.0 * geometry.dx)
+    center = (geometry.phi.shape[0] // 2, geometry.phi.shape[1] // 2)
+    centerline = geometry.phi[center]
+    center_crossing = np.flatnonzero(
+        (centerline[:-1] >= 0.0) & (centerline[1:] < 0.0))
+    center_diagnostics = {}
+    if center_crossing.size == 1:
+        lower = int(center_crossing[0])
+        fraction = centerline[lower] / (centerline[lower] - centerline[lower + 1])
+        center_diagnostics = dict(
+            centerline_interface_lower_index=lower,
+            centerline_interface_fraction=float(fraction),
+            centerline_extended_velocity_mesh_units_s=float(
+                (1.0 - fraction) * extended_velocity[center + (lower,)]
+                + fraction * extended_velocity[center + (lower + 1,)]),
+            centerline_phi_lower_before=float(centerline[lower]),
+            centerline_phi_upper_before=float(centerline[lower + 1]))
     pinned = (geometry.material_id > 0) & ~np.isin(geometry.material_id, etchable)
     for _ in range(substeps):
         phi = advect_3d(
             phi, extended_velocity, geometry.dx, float(duration_s) / substeps)
         phi[pinned] = geometry.phi[pinned]
+    advected_centerline = phi[center]
+    advected_crossing = np.flatnonzero(
+        (advected_centerline[:-1] >= 0.0) & (advected_centerline[1:] < 0.0))
+    if advected_crossing.size == 1:
+        lower = int(advected_crossing[0])
+        center_diagnostics["centerline_advected_interface_fraction"] = float(
+            advected_centerline[lower]
+            / (advected_centerline[lower] - advected_centerline[lower + 1]))
     if reinitialize and duration_s > 0.0:
         phi = reinit_narrow(phi, geometry.dx, 4.0 * geometry.dx)
         phi[pinned] = geometry.phi[pinned]
+    reinitialized_centerline = phi[center]
+    reinitialized_crossing = np.flatnonzero(
+        (reinitialized_centerline[:-1] >= 0.0) & (reinitialized_centerline[1:] < 0.0))
+    if reinitialized_crossing.size == 1:
+        lower = int(reinitialized_crossing[0])
+        center_diagnostics["centerline_reinitialized_interface_fraction"] = float(
+            reinitialized_centerline[lower]
+            / (reinitialized_centerline[lower] - reinitialized_centerline[lower + 1]))
     phi, removed_unresolved_solid_cells = _remove_unresolved_subcell_solid_components(
         phi, geometry.material_id, etchable, geometry.dx)
     if removed_unresolved_solid_cells:
@@ -814,7 +893,8 @@ def advance_feature_step_3d(
             self_consistent_charging=charging is not None,
             charging_iterations=(0 if charging is None else len(charging.history)),
             charging_converged=(None if charging is None else charging.converged),
-            neutral_radiosity=neutral_radiosity_diagnostics),
+            neutral_radiosity=neutral_radiosity_diagnostics,
+            **center_diagnostics),
         validity=validity)
 
 

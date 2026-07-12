@@ -10,6 +10,7 @@ from petch.boundary_state import (
 from petch.charging_poisson_3d import NodalPoissonSystem3D
 from petch.feature_step_3d import (
     FeatureGeometry3D,
+    _face_material_ids,
     _physical_volume_topology_signature,
     _remove_unresolved_subcell_solid_components,
     advance_feature_step_3d,
@@ -127,6 +128,19 @@ def test_rectangular_trench_is_one_connected_substrate_at_jeon_widths(dx, openin
         substrate_top=1.4, etched_depth=3.0 * dx)
 
     assert _physical_volume_topology_signature(geometry, (1,)) == (1, 1)
+
+
+def test_unetched_opening_surface_is_owned_by_substrate_not_adjacent_mask():
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=0.5, cell_length=0.1, domain_height=2.35, dx=0.02,
+        opening_width=0.2, mask_thickness=0.7, substrate_top=1.4, etched_depth=0.0)
+    _, faces, centroids, _ = extract_mesh_3d(geometry.phi, geometry.dx)
+    material = _face_material_ids(centroids, geometry)
+    opening = ((np.abs(centroids[:, 0] - 0.25) < 0.09)
+               & (np.abs(centroids[:, 2] - 1.4) < 0.03))
+
+    assert np.any(opening)
+    assert np.all(material[opening] == 1)
 
 
 def test_one_physical_3d_step_moves_a_uniform_sio2_plane_by_flux_yield_over_density():
