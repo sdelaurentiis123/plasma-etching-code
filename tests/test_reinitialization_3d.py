@@ -1,6 +1,7 @@
 import numpy as np
 
-from petch.threed import reinit_cr2
+from petch.feature_step_3d import make_rectangular_trench_geometry_3d
+from petch.threed import advect_3d, reinit_cr2
 
 
 def _cut_edge_displacements(before, after, dx):
@@ -61,3 +62,35 @@ def test_cr2_accumulates_repeated_subcell_motion_instead_of_erasing_it():
     final = _vertical_crossing(phi, dx, 6, 6)
     expected = 40.0 * shift * normalizer
     assert np.isclose(initial - final, expected, rtol=0.03, atol=0.002 * dx)
+
+
+def test_cr2_accumulates_floor_motion_beneath_a_pinned_narrow_mask():
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=0.5, cell_length=0.1, domain_height=2.35, dx=0.02,
+        opening_width=0.08, mask_thickness=0.7,
+        substrate_top=1.4, etched_depth=0.0)
+    phi = geometry.phi.copy()
+    pinned_mask = geometry.material_id == 2
+    speed = np.full(phi.shape, 1.0e-4)
+    initial = _vertical_crossing(
+        phi, geometry.dx, phi.shape[0] // 2, phi.shape[1] // 2)
+
+    duration_per_step = 12.5
+    unreinitialized = geometry.phi.copy()
+    for _ in range(16):
+        unreinitialized = advect_3d(
+            unreinitialized, speed, geometry.dx, duration_per_step)
+        unreinitialized[pinned_mask] = geometry.phi[pinned_mask]
+        phi = advect_3d(phi, speed, geometry.dx, duration_per_step)
+        phi[pinned_mask] = geometry.phi[pinned_mask]
+        phi = reinit_cr2(phi, geometry.dx, 4.0 * geometry.dx)
+        phi[pinned_mask] = geometry.phi[pinned_mask]
+
+    final = _vertical_crossing(
+        phi, geometry.dx, phi.shape[0] // 2, phi.shape[1] // 2)
+    reference = _vertical_crossing(
+        unreinitialized, geometry.dx,
+        unreinitialized.shape[0] // 2, unreinitialized.shape[1] // 2)
+    expected = 16.0 * duration_per_step * speed.flat[0]
+    assert initial - final > 0.8 * expected
+    assert np.isclose(initial - final, initial - reference, rtol=0.03, atol=0.002 * geometry.dx)
