@@ -97,13 +97,39 @@ deterministic Warp ray-mesh hits + numpy accumulation + GMRES): forward+QMC 0.37
 adjoint 0.1434127263028523, particle MC 0.36712646484375, numpy ray-trace 0.19273757934570312 — each
 identical on re-run. The gate is a stable deterministic regression.
 
-## Roadmap to the de Boer product (remaining)
+## de Boer SF6/O2 ARDE — two-channel result
 
-1. de Boer SF6/O2 rate curve: rate model = f(ion flux, radical floor flux, sticking); sticking is a
-   DECLARED calibrated input with provenance/uncertainty. Calibrate on low-AR points, PREDICT held-out
-   AR40. Report grid/ray/digitization/model error separately.
-3. GPU: run the forward+QMC path with device="cuda" (already threaded); accuracy-matched speed report.
-4. Then Jeon SiO2 depth-transfer, then charging (only if it moves the profile above the error budget).
+Experiment (de Boer/Blauw cryo, from the legacy npz): normalized rate [1.0, 0.43, 0.29, 0.20] at
+AR [0, 10, 20, 40].
+
+- **Radical-only (validated transport) is too steep, and this is DEFINITIVELY physics, not numerics.**
+  Best radical-only normalized rate collapses to ~0.035 at AR40 (calibrated s~0.06 gives 0.25/0.09/0.035
+  at 10/20/40). The MC floor is bit-identical across max_bounce 400..8000 at AR40 -> converged, no
+  truncation. This RULES OUT the old "petch-MC under-samples the deep floor" suspicion (memory
+  [[reconcile-craig-into-petch]]): the transport is correct Knudsen physics; the de Boer high-AR floor
+  is a real second-channel effect.
+- **Two-channel (radical + directional ion) reproduces the experiment.** de Boer SF6/O2 is
+  ion-assisted; directional ions sustain the high-AR floor. `scripts/deboer_two_channel.py` adds a
+  reduced directional-ion channel (Gaussian cross-slot angle, absorbing walls) and fits an additive
+  radical+ion rate. Calibrated on the AR10,20 knee (RMSE 0.008), it PREDICTS the held-out AR40 floor:
+  model NR [1.0, 0.43, 0.279, 0.169] vs experiment [1.0, 0.43, 0.29, 0.20], held-out AR40 error 0.031.
+  Physical params: radical sticking s=0.06, ion IAD sigma~1 deg, ion/radical strength beta~0.4.
+- **Caveats / remaining frontier:** the ion channel is a REDUCED analytic model (not yet the full
+  common-engine ion transport), and the rate law is an additive assumption. The AR40 residual
+  (0.169 vs 0.20) and the near-sub-degree ion IAD (sigma~1 deg) are the frontier the prior work
+  flagged (sub-degree IADF and/or charging). Next: run the ion channel THROUGH the validated engine
+  transport (narrow IonEnergyTransverseMaxwellianDensity) and, if the residual persists above the
+  error budget, add charging.
+
+## Roadmap (remaining)
+
+1. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow
+   IonEnergyTransverseMaxwellianDensity), replacing the reduced analytic ion model; sticking + ion IAD
+   are DECLARED calibrated inputs with provenance/uncertainty; calibrate low-AR, predict held-out AR40;
+   report grid/ray/digitization/model error separately. Add charging only if the AR40 residual exceeds
+   the combined error budget.
+2. GPU: run the forward+QMC path with device="cuda" (already threaded); accuracy-matched speed report.
+3. Then Jeon SiO2 depth-transfer, then charging (only if it moves the profile above the error budget).
 
 ## Guardrails honored
 
