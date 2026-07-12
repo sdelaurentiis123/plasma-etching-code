@@ -166,3 +166,28 @@ def test_first_hit_3d_refuses_unimplemented_spatial_boundary_density():
             {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
             verts, faces, areas, source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
             mesh_length_unit_m=1e-6, n_position=8, device="cpu")
+
+
+@pytest.mark.skipif(not wp.is_cuda_available(), reason="CUDA device unavailable")
+def test_first_hit_3d_cpu_cuda_event_measure_parity():
+    verts, faces, areas = _flat_unit_plane()
+    arguments = dict(
+        boundary=_boundary(),
+        species_role={"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, n_position=256, seed=19)
+    cpu = trace_boundary_state_first_hit_3d(**arguments, device="cpu")
+    cuda = trace_boundary_state_first_hit_3d(**arguments, device="cuda:0")
+
+    cpu_events = cpu.surface_fluxes.energetic_fluxes[0]
+    cuda_events = cuda.surface_fluxes.energetic_fluxes[0]
+    assert np.array_equal(cpu_events.event_face, cuda_events.event_face)
+    assert np.array_equal(cpu_events.event_energy_eV, cuda_events.event_energy_eV)
+    assert np.allclose(
+        cpu_events.event_cosine_incidence, cuda_events.event_cosine_incidence,
+        rtol=0.0, atol=2e-7)
+    assert np.allclose(cpu_events.event_flux_m2_s, cuda_events.event_flux_m2_s)
+    assert np.allclose(
+        cpu.surface_fluxes.neutral_flux_m2_s["CF2"],
+        cuda.surface_fluxes.neutral_flux_m2_s["CF2"])
