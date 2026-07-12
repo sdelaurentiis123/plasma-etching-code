@@ -69,6 +69,35 @@ AR-shaped fudge; adaptive mesh/phase-space refinement (AMR); fast + GPU-accelera
   regression (a fixed coarse quadrature over-predicts the deep flux; QMC does not).
   Analytic targets + citations: `ARDE_PHYSICS_REFERENCE.md`.
 
+## Reactive s<1 family (qualitative demonstration, not yet a validated gate)
+
+Engine forward+QMC, dx=0.02, floor transmission vs AR for sticking s (Coburn-Winters regime):
+
+```
+  AR  s=0.03  s=0.1   s=0.5   s=1
+   1  0.928   0.797   0.466   0.345
+   2  0.871   0.660   0.300   0.212
+   4  0.717   0.436   0.160   0.119
+   8  0.487   0.220   0.077   0.062
+```
+
+Correct behavior: monotone-decreasing in AR for every s; higher s -> lower floor flux (more wall
+consumption); gentlest collapse at s->0 (T(AR8)/T(AR1)=0.53, approaching the Clausing conductance
+limit) steepening as s rises. s=0.5 slightly steeper than s=1 is the expected exp(-alpha*s*A^2)-vs-1/A
+crossover, not a defect. This is a DEMONSTRATION that the reactive re-emission machinery
+(diffuse radiosity with one physical sticking coefficient) produces the right physics; a validated
+reactive gate needs an independent multi-bounce reference (next step).
+
+## Roadmap to the de Boer product (remaining)
+
+1. Reactive gate: independent multi-bounce numpy reference (diffuse re-emission with sticking) ->
+   promote the s-family to a validated pytest gate like the s=1 one.
+2. de Boer SF6/O2 rate curve: rate model = f(ion flux, radical floor flux, sticking); sticking is a
+   DECLARED calibrated input with provenance/uncertainty. Calibrate on low-AR points, PREDICT held-out
+   AR40. Report grid/ray/digitization/model error separately.
+3. GPU: run the forward+QMC path with device="cuda" (already threaded); accuracy-matched speed report.
+4. Then Jeon SiO2 depth-transfer, then charging (only if it moves the profile above the error budget).
+
 ## Guardrails honored
 
 Single writer. Local only. No benchmark/AR/region branch in governing physics. Sticking is the one
