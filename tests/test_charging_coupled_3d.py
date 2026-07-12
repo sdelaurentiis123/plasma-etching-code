@@ -1,7 +1,12 @@
 import numpy as np
 import pytest
 
-from petch.boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
+from petch.boundary_state import (
+    IonEnergyTransverseMaxwellianDensity,
+    PlasmaBoundaryState,
+    SpeciesBoundaryState,
+    maxwellian_electron_boundary_state,
+)
 from petch.charging_coupled_3d import (
     DielectricChargingConvergenceError,
     advance_dielectric_charging_3d,
@@ -141,3 +146,60 @@ def test_steady_3d_solver_rejects_a_current_balance_worsening_trial():
     assert result.converged
     assert result.rejected_steps > 0
     assert result.history[-1]["rms_relative_current_imbalance"] == 0.0
+
+
+def _continuous_maxwellian_floating_problem():
+    temperature = 4.0; ion_flux = 1e15
+    ion = SpeciesBoundaryState(
+        "ion", 1, 40.0, ion_flux, [[0.0, 0.0, 10.0]], [1.0],
+        density_model=IonEnergyTransverseMaxwellianDensity(
+            np.array([99.0, 101.0]), np.array([1.0]), 0.01))
+    electron = maxwellian_electron_boundary_state(
+        temperature, 10.0 * ion_flux, n_transverse=3, n_normal=4,
+        reference_plane_m=1e-6).species[0]
+    boundary = PlasmaBoundaryState((ion, electron), reference_plane_m=1e-6)
+    spacing_m = np.array([200e-6, 200e-6, 0.1e-6])
+    fixed = np.zeros((2, 2, 11), dtype=bool); fixed[:, :, -1] = True
+    system = NodalPoissonSystem3D(np.ones((1, 1, 10)), spacing_m, fixed)
+    vertices = np.array([
+        [-100.0, -100.0, 0.0], [100.0, -100.0, 0.0],
+        [100.0, 100.0, 0.0], [-100.0, 100.0, 0.0],
+    ])
+    faces = np.array([[0, 1, 2], [0, 2, 3]]); areas = np.full(2, 20000.0)
+    barrier = temperature * np.log(10.0)
+    sigma = -EPS0 * barrier / 1e-6
+    initial_charge = np.zeros(system.shape)
+    initial_charge[:, :, 0] = sigma * spacing_m[0] * spacing_m[1] / 4.0
+    arguments = dict(
+        poisson_system=system, initial_charge_node_c=initial_charge, boundary=boundary,
+        verts=vertices, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        potential_origin=(-100.0, -100.0, 0.0), potential_spacing=(200.0, 200.0, 0.1),
+        mesh_length_unit_m=1e-6, n_position=16, seed=59,
+        trajectory_fixed_dt=0.01, trajectory_max_steps=20000,
+        transport_device="cpu", max_iter=1, min_iter=1,
+        current_balance_tol=1e-8, phase_space_replicates=8,
+        current_confidence_sigma=2.0, require_converged=False)
+    return arguments
+
+
+def test_replicated_joint_phase_space_narrows_current_confidence_envelope():
+    arguments = _continuous_maxwellian_floating_problem()
+    coarse = solve_dielectric_charging_steady_3d(
+        **arguments, phase_space_log2_samples=6)
+    fine = solve_dielectric_charging_steady_3d(
+        **arguments, phase_space_log2_samples=10)
+
+    coarse_envelope = coarse.history[0]["confidence_envelope_max_relative_current_imbalance"]
+    fine_envelope = fine.history[0]["confidence_envelope_max_relative_current_imbalance"]
+    assert not coarse.converged and not fine.converged
+    assert np.max(fine.net_current_stderr_node_a) > 0.0
+    assert fine_envelope < coarse_envelope
+
+
+def test_current_replicates_require_full_continuous_phase_space_sampling():
+    system, arguments = _flat_dielectric_problem(_manufactured_floating_boundary())
+    with pytest.raises(ValueError, match="joint continuous-density"):
+        solve_dielectric_charging_steady_3d(
+            initial_charge_node_c=np.zeros(system.shape), max_iter=2, min_iter=1,
+            phase_space_replicates=2, **arguments)

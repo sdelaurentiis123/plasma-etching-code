@@ -48,6 +48,7 @@ class SteadyDielectricCharging3DResult:
     potential_v: np.ndarray
     positive_current_node_a: np.ndarray
     negative_current_node_a: np.ndarray
+    net_current_stderr_node_a: np.ndarray
     transport: BoundaryTransport3DResult
     poisson: PoissonDiagnostics3D
     history: tuple[Mapping[str, float], ...]
@@ -58,7 +59,7 @@ class SteadyDielectricCharging3DResult:
     def __post_init__(self):
         for name in (
                 "charge_node_c", "potential_v", "positive_current_node_a",
-                "negative_current_node_a"):
+                "negative_current_node_a", "net_current_stderr_node_a"):
             array = np.asarray(getattr(self, name), dtype=float).copy()
             array.setflags(write=False)
             object.__setattr__(self, name, array)
@@ -240,7 +241,9 @@ def solve_dielectric_charging_steady_3d(
         phase_space_log2_samples=None, transport_device=None,
         max_iter=30, min_iter=2, current_balance_tol=1e-3,
         beta=0.5, response_energy_eV=4.0, maximum_voltage_step=8.0,
-        trust_growth_tolerance=0.02, minimum_beta=1e-4, require_converged=True):
+        trust_growth_tolerance=0.02, minimum_beta=1e-4,
+        phase_space_replicates=1, current_confidence_sigma=2.0,
+        require_converged=True):
     """Solve local steady dielectric current balance on the compatible 3-D charge basis.
 
     The physical residual is ``abs(I+ - I-)/(I+ + I-)`` at every active surface node. Diagonal
@@ -260,8 +263,14 @@ def solve_dielectric_charging_steady_3d(
             or not np.isfinite(response_energy_eV) or response_energy_eV <= 0.0
             or not np.isfinite(maximum_voltage_step) or maximum_voltage_step <= 0.0
             or not np.isfinite(trust_growth_tolerance) or trust_growth_tolerance < 0.0
-            or not np.isfinite(minimum_beta) or minimum_beta <= 0.0 or minimum_beta > beta):
+            or not np.isfinite(minimum_beta) or minimum_beta <= 0.0 or minimum_beta > beta
+            or int(phase_space_replicates) != phase_space_replicates
+            or phase_space_replicates <= 0 or not np.isfinite(current_confidence_sigma)
+            or current_confidence_sigma <= 0.0):
         raise ValueError("invalid steady charging solver controls")
+    if phase_space_replicates > 1 and phase_space_log2_samples is None:
+        raise ValueError(
+            "multiple current replicates require joint continuous-density phase-space sampling")
     if (not any(species.charge_number > 0 for species in boundary.species)
             or not any(species.charge_number < 0 for species in boundary.species)):
         raise ValueError("steady dielectric charging requires positive and negative incident species")
@@ -292,9 +301,25 @@ def solve_dielectric_charging_steady_3d(
     beta_current = float(beta); rejected_steps = 0; history = []
 
     def assess(state_charge):
-        evaluated = _evaluate_incident_current_3d(charge=state_charge, **evaluate_arguments)
-        positive = evaluated["positive_node_current"][tuple(support_nodes.T)]
-        negative = evaluated["negative_node_current"][tuple(support_nodes.T)]
+        evaluations = []
+        positive_replicates = []; negative_replicates = []
+        for replicate in range(int(phase_space_replicates)):
+            arguments = dict(evaluate_arguments)
+            arguments["seed"] = int(seed) + 104729 * replicate
+            item = _evaluate_incident_current_3d(charge=state_charge, **arguments)
+            evaluations.append(item)
+            positive_replicates.append(
+                item["positive_node_current"][tuple(support_nodes.T)])
+            negative_replicates.append(
+                item["negative_node_current"][tuple(support_nodes.T)])
+        positive_replicates = np.stack(positive_replicates)
+        negative_replicates = np.stack(negative_replicates)
+        positive = positive_replicates.mean(axis=0)
+        negative = negative_replicates.mean(axis=0)
+        signed_replicates = positive_replicates - negative_replicates
+        net_stderr = (
+            signed_replicates.std(axis=0, ddof=1) / np.sqrt(int(phase_space_replicates))
+            if int(phase_space_replicates) > 1 else np.zeros_like(positive))
         total = positive + negative
         scale = float(np.max(total)) if total.size else 0.0
         active = total > max(1e-15 * scale, 1e-300)
@@ -302,21 +327,30 @@ def solve_dielectric_charging_steady_3d(
             raise RuntimeError("steady charging has no resolved incident current on its surface")
         relative = np.zeros_like(total)
         relative[active] = np.abs(positive[active] - negative[active]) / total[active]
+        confidence_envelope = np.zeros_like(total)
+        confidence_envelope[active] = (
+            np.abs(positive[active] - negative[active])
+            + float(current_confidence_sigma) * net_stderr[active]) / total[active]
         current_floor = max(1e-15 * scale, 1e-300)
         log_ratio = np.log(
             np.maximum(positive, current_floor) / np.maximum(negative, current_floor))
         merit = float(np.sqrt(np.mean(relative[active] ** 2)))
         maximum = float(np.max(relative[active]))
-        return evaluated, positive, negative, active, log_ratio, merit, maximum
+        maximum_confidence = float(np.max(confidence_envelope[active]))
+        return (evaluations[0], positive, negative, net_stderr, active, log_ratio,
+                merit, maximum, maximum_confidence)
 
-    evaluated, positive, negative, active, log_ratio, merit, maximum = assess(charge)
+    (evaluated, positive, negative, net_stderr, active, log_ratio,
+     merit, maximum, maximum_confidence) = assess(charge)
     history.append(dict(
         iteration=1, rms_relative_current_imbalance=merit,
         max_relative_current_imbalance=maximum, beta=beta_current,
+        confidence_envelope_max_relative_current_imbalance=maximum_confidence,
         mean_surface_voltage_v=float(np.mean(
             evaluated["potential"][tuple(support_nodes.T)]))))
     while len(history) < int(max_iter) and not (
-            len(history) >= int(min_iter) and maximum <= float(current_balance_tol)):
+            len(history) >= int(min_iter)
+            and maximum_confidence <= float(current_balance_tol)):
         voltage_step = np.clip(
             beta_current * float(response_energy_eV) * log_ratio,
             -float(maximum_voltage_step), float(maximum_voltage_step))
@@ -324,7 +358,7 @@ def solve_dielectric_charging_steady_3d(
         trial_charge = charge.copy()
         trial_charge[tuple(support_nodes.T)] += capacitance * voltage_step
         trial = assess(trial_charge)
-        trial_merit = trial[5]
+        trial_merit = trial[6]
         if trial_merit > merit * (1.0 + float(trust_growth_tolerance)):
             beta_current *= 0.5; rejected_steps += 1
             if beta_current < float(minimum_beta):
@@ -334,22 +368,28 @@ def solve_dielectric_charging_steady_3d(
         if trial_merit < 0.8 * merit:
             beta_current = min(float(beta), 1.2 * beta_current)
         charge = trial_charge
-        evaluated, positive, negative, active, log_ratio, merit, maximum = trial
+        (evaluated, positive, negative, net_stderr, active, log_ratio,
+         merit, maximum, maximum_confidence) = trial
         history.append(dict(
             iteration=len(history) + 1, rms_relative_current_imbalance=merit,
             max_relative_current_imbalance=maximum, beta=accepted_beta,
+            confidence_envelope_max_relative_current_imbalance=maximum_confidence,
             mean_surface_voltage_v=float(np.mean(
                 evaluated["potential"][tuple(support_nodes.T)]))))
 
     converged = bool(
-        len(history) >= int(min_iter) and maximum <= float(current_balance_tol))
+        len(history) >= int(min_iter)
+        and maximum_confidence <= float(current_balance_tol))
     positive_grid = np.zeros(poisson_system.shape)
     negative_grid = np.zeros(poisson_system.shape)
+    net_stderr_grid = np.zeros(poisson_system.shape)
     positive_grid[tuple(support_nodes.T)] = positive
     negative_grid[tuple(support_nodes.T)] = negative
+    net_stderr_grid[tuple(support_nodes.T)] = net_stderr
     result = SteadyDielectricCharging3DResult(
         charge_node_c=charge, potential_v=evaluated["potential"],
         positive_current_node_a=positive_grid, negative_current_node_a=negative_grid,
+        net_current_stderr_node_a=net_stderr_grid,
         transport=evaluated["transport"], poisson=evaluated["poisson"],
         history=tuple(history), converged=converged, rejected_steps=rejected_steps,
         known_limitations=(
@@ -361,5 +401,5 @@ def solve_dielectric_charging_steady_3d(
     if require_converged and not converged:
         raise DielectricChargingConvergenceError(
             f"3-D dielectric current balance did not converge in {len(history)} accepted iterations; "
-            f"max relative imbalance={maximum:.6g}", result)
+            f"confidence-envelope max relative imbalance={maximum_confidence:.6g}", result)
     return result
