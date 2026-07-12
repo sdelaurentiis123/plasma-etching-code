@@ -464,10 +464,17 @@ def _current_balance_diagnostics(Gi, Ge, comp, cells=None, active_flux=1e-4):
 def _interval_current_balance_diagnostics(
         Gi, Ge, Gi_stderr, Ge_stderr, comp, cells=None, active_flux=1e-4,
         confidence_sigma=2.0):
-    """Current-balance residual certified by non-overlapping estimator confidence intervals."""
+    """Current-balance direction and confidence-envelope diagnostics.
+
+    ``log_ratio`` is the signed distance of the confidence interval from zero and is suitable for a
+    noise-aware update: it is zero when the sampled currents cannot resolve a direction.  That is not
+    evidence of convergence.  A balance tolerance is certified only when the entire log-current-ratio
+    interval lies inside it, reported by ``confidence_envelope_max_abs_log_ratio``.
+    """
     Gi = np.asarray(Gi, dtype=float); Ge = np.asarray(Ge, dtype=float)
     Si = np.asarray(Gi_stderr, dtype=float); Se = np.asarray(Ge_stderr, dtype=float)
     comp = np.asarray(comp); residual = np.full(Gi.shape, np.nan); active = np.zeros(Gi.shape, bool)
+    lower = np.full(Gi.shape, np.nan); upper = np.full(Gi.shape, np.nan)
 
     def interval_residual(indices):
         gi = float(Gi[indices].sum()); ge = float(Ge[indices].sum())
@@ -481,8 +488,11 @@ def _interval_current_balance_diagnostics(
             value = np.log(max(ihi, 1e-300) / elo)
         else:
             value = 0.0
+        log_lower = np.log(ilo / max(ehi, 1e-300)) if ilo > 0.0 else -np.inf
+        log_upper = np.log(max(ihi, 1e-300) / elo) if elo > 0.0 else np.inf
         return float(value), dict(Gi=gi, Ge=ge, Gi_stderr=si, Ge_stderr=se,
-                                  ion_interval=(ilo, ihi), electron_interval=(elo, ehi))
+                                  ion_interval=(ilo, ihi), electron_interval=(elo, ehi),
+                                  log_ratio_interval=(float(log_lower), float(log_upper)))
 
     if cells is None:
         ins_groups = [[i] for i in np.where(comp == 0)[0]]
@@ -495,20 +505,30 @@ def _interval_current_balance_diagnostics(
     for indices in ins_groups:
         value, info = interval_residual(indices)
         residual[indices] = value
+        lower[indices], upper[indices] = info["log_ratio_interval"]
         active[indices] = (info["Gi"] + info["Ge"]) >= active_flux
         detail[("cell", tuple(cells[indices[0]]) if cells is not None else indices[0])] = info
     pooled = {}
     for component in np.unique(comp[comp > 0]):
         indices = np.where(comp == component)[0]
         value, info = interval_residual(indices)
-        residual[indices] = value; active[indices] = (info["Gi"] + info["Ge"]) >= active_flux
+        residual[indices] = value
+        lower[indices], upper[indices] = info["log_ratio_interval"]
+        active[indices] = (info["Gi"] + info["Ge"]) >= active_flux
         info["log_ratio"] = value; pooled[int(component)] = info
     values = np.abs(residual[active])
+    envelope = np.maximum(np.abs(lower[active]), np.abs(upper[active]))
     return dict(
-        log_ratio=residual, active=active, active_count=int(active.sum()),
+        log_ratio=residual, log_ratio_interval_lower=lower,
+        log_ratio_interval_upper=upper, active=active, active_count=int(active.sum()),
         inactive_count=int((~active).sum()),
         max_abs_log_ratio=float(values.max()) if values.size else 0.0,
         rms_log_ratio=float(np.sqrt(np.mean(values ** 2))) if values.size else 0.0,
+        confidence_envelope_max_abs_log_ratio=(
+            float(envelope.max()) if envelope.size else 0.0),
+        confidence_envelope_rms_log_ratio=(
+            float(np.sqrt(np.mean(envelope ** 2))) if envelope.size else 0.0),
+        confidence_intervals_finite=bool(np.all(np.isfinite(envelope))),
         pooled=pooled, detail=detail, confidence_sigma=float(confidence_sigma))
 
 
@@ -781,7 +801,7 @@ def solve_boundary_state_charging(
                 name: value.copy() for name, value in species_current_stderr.items()},
             quadrature=species_quadrature)
         if (balance_tol is not None and len(history) >= int(min_iter)
-                and interval_balance["max_abs_log_ratio"] <= balance_tol):
+                and interval_balance["confidence_envelope_max_abs_log_ratio"] <= balance_tol):
             break
         if trust_region:
             pending_step = dict(
@@ -845,6 +865,10 @@ def solve_boundary_state_charging(
     # handles a rejected terminal trust-region trial without leaking its currents into the result.
     if last_accepted_state is None:
         raise RuntimeError("charging solve produced no accepted state")
+    converged = bool(
+        balance_tol is not None and len(history) >= int(min_iter)
+        and interval_history[-1]["confidence_envelope_max_abs_log_ratio"]
+        <= float(balance_tol))
     surface_voltage[:] = last_accepted_state["surface_voltage"]
     conductor_voltage[:] = last_accepted_state["conductor_voltage"]
     ion_current = last_accepted_state["ion_current"]
@@ -863,7 +887,12 @@ def solve_boundary_state_charging(
         components=components, ion_current=ion_current, electron_current=electron_current,
         ion_current_stderr=ion_current_stderr, electron_current_stderr=electron_current_stderr,
         species_current=species_current, species_current_stderr=species_current_stderr,
-        iterations=len(history), balance_history=history, balance_final=history[-1],
+        iterations=len(history), converged=converged,
+        termination_reason=(
+            "balance_tolerance" if converged else
+            "fixed_iteration_budget" if balance_tol is None else "iteration_limit"),
+        requested_balance_tolerance=(None if balance_tol is None else float(balance_tol)),
+        balance_history=history, balance_final=history[-1],
         interval_balance_history=interval_history, interval_balance_final=interval_history[-1],
         field_history=field_history, field_final=field_final,
         quadrature_history=quadrature_history,

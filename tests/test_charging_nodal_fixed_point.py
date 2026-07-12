@@ -54,6 +54,30 @@ def test_confidence_separated_residual_has_exact_limit_and_unresolved_band():
     assert ilo[0] <= ehi[0] and elo[0] <= ihi[0]
 
 
+def test_overlap_only_stops_update_and_does_not_certify_convergence():
+    solid = np.zeros((6, 5), dtype=bool); solid[:, -1] = True
+    original = nodal_fixed_point_module._confidence_separated_log_ratio
+
+    def unresolved(ion, electron, ion_stderr, electron_stderr, sigma):
+        residual, ilo, ihi, elo, ehi = original(
+            ion, electron, np.full_like(ion, 0.1), np.full_like(electron, 0.1), sigma)
+        return residual, ilo, ihi, elo, ehi
+
+    nodal_fixed_point_module._confidence_separated_log_ratio = unresolved
+    try:
+        result = solve_boundary_state_charging_nodal(
+            solid, np.zeros_like(solid, dtype=int), _balanced_boundary(),
+            n_iter=1, min_iter=1, balance_tol=0.1, field_sweeps=20,
+            trust_region=False)
+    finally:
+        nodal_fixed_point_module._confidence_separated_log_ratio = original
+
+    assert result["interval_balance_final"]["max_abs_log_ratio"] == 0.0
+    assert result["interval_balance_final"][
+        "confidence_envelope_max_abs_log_ratio"] > 0.1
+    assert not result["converged"]
+
+
 def test_nodal_surface_fixed_point_balances_on_actual_boundary_vertices():
     nx, nz = 8, 6
     solid = np.zeros((nx, nz), dtype=bool); solid[:, -1] = True

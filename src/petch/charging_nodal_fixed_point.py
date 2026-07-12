@@ -388,6 +388,26 @@ def solve_boundary_state_charging_nodal(
             log_ratio=certified.copy(), active=activity.copy(),
             max_abs_log_ratio=float(cert_active.max()) if cert_active.size else 0.0,
             rms_log_ratio=float(np.sqrt(np.mean(cert_active ** 2))) if cert_active.size else 0.0)
+        log_lower = np.full(dof_count, -np.inf)
+        log_upper = np.full(dof_count, np.inf)
+        positive_ion_lower = ilo > 0.0
+        positive_electron_lower = elo > 0.0
+        log_lower[positive_ion_lower] = np.log(
+            ilo[positive_ion_lower] / np.maximum(ehi[positive_ion_lower], 1e-300))
+        log_upper[positive_electron_lower] = np.log(
+            np.maximum(ihi[positive_electron_lower], 1e-300)
+            / elo[positive_electron_lower])
+        confidence_envelope = np.maximum(
+            np.abs(log_lower[activity]), np.abs(log_upper[activity]))
+        interval_balance.update(
+            log_ratio_interval_lower=log_lower,
+            log_ratio_interval_upper=log_upper,
+            confidence_envelope_max_abs_log_ratio=(
+                float(confidence_envelope.max()) if confidence_envelope.size else 0.0),
+            confidence_envelope_rms_log_ratio=(
+                float(np.sqrt(np.mean(confidence_envelope ** 2)))
+                if confidence_envelope.size else 0.0),
+            confidence_intervals_finite=bool(np.all(np.isfinite(confidence_envelope))))
         merit = interval_balance["rms_log_ratio"]
         trial_merit_history.append(merit)
         if (trust_region and pending_step is not None
@@ -433,7 +453,7 @@ def solve_boundary_state_charging_nodal(
                 name: value.copy() for name, value in species_endpoint_replicates.items()},
             quadrature=species_quadrature)
         if (balance_tol is not None and len(history) >= int(min_iter)
-                and interval_history[-1]["max_abs_log_ratio"] <= balance_tol):
+                and interval_history[-1]["confidence_envelope_max_abs_log_ratio"] <= balance_tol):
             break
         if trust_region:
             pending_step = dict(
@@ -467,7 +487,8 @@ def solve_boundary_state_charging_nodal(
         raise RuntimeError("nodal charging solve produced no accepted state")
     converged = bool(
         balance_tol is not None and len(history) >= int(min_iter)
-        and interval_history[-1]["max_abs_log_ratio"] <= float(balance_tol))
+        and interval_history[-1]["confidence_envelope_max_abs_log_ratio"]
+        <= float(balance_tol))
     boundary_voltage[:] = last_accepted_state["boundary_voltage"]
     conductor_voltage[:] = last_accepted_state["conductor_voltage"]
     surface_charge_node[:] = last_accepted_state["surface_charge_node"]

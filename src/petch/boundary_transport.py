@@ -46,7 +46,8 @@ def boundary_launches_2d(species: SpeciesBoundaryState, x_min, x_max, n_position
 
 def trace_boundary_state_floor_flux(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, target_mask, *,
-        x_min=0.0, x_max=None, n_position=256, max_steps=None, dt_cap=0.15, dt_field=0.10):
+        x_min=0.0, x_max=None, n_position=256, max_steps=None, dt_cap=0.15, dt_field=0.10,
+        fixed_dt=0.0):
     """Trace one boundary-state species and return normalized/absolute target flux.
 
     `target_mask` is a cell mask, making this adapter independent of named regions. Normalized flux is
@@ -65,7 +66,7 @@ def trace_boundary_state_floor_flux(
         max_steps = 200 * nz
     hit_x, hit_z, *_ = trace_nodal(
         nodal_potential, solid, launches.x, z, launches.vx, launches.vz,
-        float(species.charge_number), nx, nz, int(max_steps), dt_cap, dt_field)
+        float(species.charge_number), nx, nz, int(max_steps), dt_cap, dt_field, fixed_dt)
     valid = hit_x >= 0
     target = np.zeros(hit_x.shape, dtype=bool)
     target[valid] = target_mask[hit_x[valid], hit_z[valid]]
@@ -86,7 +87,7 @@ def trace_boundary_state_floor_flux(
 def forward_boundary_state_cell_flux_qmc(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, *,
         normals=None, proposal_species=None, log2_samples=12, seed=0, x_min=0.0, x_max=None,
-        max_steps=None, dt_cap=0.15, dt_field=0.10):
+        max_steps=None, dt_cap=0.15, dt_field=0.10, fixed_dt=0.0):
     """Forward QMC current to arbitrary material cells from the same boundary-density contract.
 
     The score is total current to each unit-depth cell divided by incident current per unit horizontal
@@ -110,7 +111,7 @@ def forward_boundary_state_cell_flux_qmc(
     traced = trace_nodal(
         nodal_potential, solid, x0, z0, velocity[:, 0], velocity[:, 2],
         float(species.charge_number), nx, nz,
-        int(200 * nz if max_steps is None else max_steps), dt_cap, dt_field)
+        int(200 * nz if max_steps is None else max_steps), dt_cap, dt_field, fixed_dt)
     hit_x, hit_z, hit_nx, hit_nz = traced[0], traced[1], traced[7], traced[8]
     hit_x_position, hit_z_position = traced[9], traced[10]
     log_physical = species.log_flux_density(
@@ -162,7 +163,8 @@ def forward_boundary_state_cell_flux_qmc(
 def adjoint_boundary_state_face_flux(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, normals, *,
         proposal_species=None, n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10,
-        want_energy=False, face_quadrature_offset=0.5, face_position_samples=None):
+        want_energy=False, face_quadrature_offset=0.5, face_position_samples=None,
+        fixed_dt=0.0):
     """Generic Liouville adjoint gather on arbitrary axis-aligned material faces.
 
     This function contains no species source law. The supplied species quadrature is used as the surface
@@ -243,7 +245,7 @@ def adjoint_boundary_state_face_flux(
     vz0 = -surface_vz.ravel()
     traced = trace_nodal(
         nodal_potential, solid, x0, z0, vx0, vz0, float(species.charge_number),
-        nx, nz, int(max_steps), dt_cap, dt_field)
+        nx, nz, int(max_steps), dt_cap, dt_field, fixed_dt)
     hit_x, survivor, exit_vx, exit_vz = traced[0], traced[4], traced[5], traced[6]
     escaped = (hit_x < 0) & (survivor < 0.5) & (exit_vz < 0.0)
     tiled_sample_index = np.tile(sample_index, face_count)
@@ -310,7 +312,8 @@ def adaptive_adjoint_boundary_state_face_flux(
         n_face_position=4, base_log2=6, max_log2=12, n_replicates=4, seed=0,
         absolute_tolerance=1e-3, relative_tolerance=5e-3,
         element_absolute_tolerance=None, element_relative_tolerance=0.0, refine_fraction=0.5,
-        max_steps=None, dt_cap=0.15, dt_field=0.10, initial_log2_samples=None):
+        max_steps=None, dt_cap=0.15, dt_field=0.10, fixed_dt=0.0,
+        initial_log2_samples=None):
     """Universally adapt randomized phase-space quadrature on arbitrary material faces."""
     physical = boundary.get(species_name)
     template = physical if proposal_species is None else proposal_species
@@ -329,7 +332,7 @@ def adaptive_adjoint_boundary_state_face_flux(
             boundary, species_name, nodal_potential, solid,
             [cells[index] for index in indices], normals[indices], proposal_species=proposal,
             n_face_position=n_face_position, max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field,
-            face_position_samples=face_position)
+            face_position_samples=face_position, fixed_dt=fixed_dt)
         for local_index, element_index in enumerate(indices):
             endpoint_cache[(int(replicate_seed), int(log2_samples), int(element_index))] = (
                 result["per_face_endpoint"][local_index].copy())
@@ -362,7 +365,8 @@ def adaptive_forward_boundary_state_cell_flux(
         absolute_tolerance=1e-3, relative_tolerance=5e-3,
         element_absolute_tolerance=None, element_relative_tolerance=0.0,
         refine_fraction=0.5, initial_log2_samples=None,
-        x_min=0.0, x_max=None, max_steps=None, dt_cap=0.15, dt_field=0.10):
+        x_min=0.0, x_max=None, max_steps=None, dt_cap=0.15, dt_field=0.10,
+        fixed_dt=0.0):
     """Adapt the complementary forward estimator on arbitrary physical material cells."""
     cells = [tuple(map(int, cell)) for cell in cells]
     if proposal_species is not None:
@@ -391,7 +395,7 @@ def adaptive_forward_boundary_state_cell_flux(
                 boundary, species_name, nodal_potential, solid, cells,
                 normals=normals,
                 log2_samples=level, seed=int(seed + replicate), x_min=x_min, x_max=x_max,
-                max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field)
+                max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field, fixed_dt=fixed_dt)
             estimates[replicate] = result["per_cell"]
             if endpoint_estimates is not None:
                 endpoint_estimates[replicate] = result["per_face_endpoint"]
@@ -717,10 +721,10 @@ def bidirectional_boundary_state_cell_flux(
 def adjoint_boundary_state_floor_flux(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, floor_cells, *,
         proposal_species=None, n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10,
-        want_energy=False):
+        want_energy=False, fixed_dt=0.0):
     """Backward-compatible horizontal-floor specialization of the arbitrary-face gather."""
     return adjoint_boundary_state_face_flux(
         boundary, species_name, nodal_potential, solid, floor_cells,
         [(0.0, -1.0)] * len(floor_cells), proposal_species=proposal_species,
         n_face_position=n_face_position, max_steps=max_steps, dt_cap=dt_cap, dt_field=dt_field,
-        want_energy=want_energy)
+        want_energy=want_energy, fixed_dt=fixed_dt)
