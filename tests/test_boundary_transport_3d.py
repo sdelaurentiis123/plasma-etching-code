@@ -114,6 +114,51 @@ def test_deterministic_face_gather_uses_first_visible_surface_only():
     assert np.isclose(result.hit_probability["CF2"], 1.0, rtol=1e-15)
 
 
+def test_periodic_face_gather_projects_triangle_quadrature_to_exact_boundary_flux():
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    neutral = SpeciesBoundaryState(
+        "CF2", 0, 50.0, 3e19, velocity_sqrt_eV=[[0.2, 0.0, 1.0]], weight=[1.0])
+    boundary = PlasmaBoundaryState((neutral,), reference_plane_m=1e-6)
+    result = gather_boundary_state_ballistic_3d(
+        boundary, {"CF2": "neutral_reactant"}, verts, faces, areas, centroids,
+        np.tile([0.0, 0.0, 1.0], (2, 1)),
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, face_quadrature_points=3,
+        periodic_lateral=True, domain_size=(1.0, 1.0, 1.0), device="cpu")
+
+    flux = result.surface_fluxes.neutral_flux_m2_s["CF2"]
+    assert result.hit_probability["CF2"] == 1.0
+    assert np.isclose(np.dot(flux, areas), 3e19, rtol=2e-15)
+
+
+def test_periodic_face_gather_conserves_each_energy_angle_atom_not_only_total_flux():
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 2e19,
+        velocity_sqrt_eV=[[0.1, 0.0, 10.0], [-0.2, 0.0, np.sqrt(20.0)]],
+        weight=[0.25, 0.75])
+    boundary = PlasmaBoundaryState((ion,), reference_plane_m=1e-6)
+    result = gather_boundary_state_ballistic_3d(
+        boundary, {"Ar+": "energetic_bombardment"}, verts, faces, areas, centroids,
+        np.tile([0.0, 0.0, 1.0], (2, 1)),
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, face_quadrature_points=3,
+        periodic_lateral=True, domain_size=(1.0, 1.0, 1.0), device="cpu")
+
+    energetic = result.surface_fluxes.energetic_fluxes[0]
+    energies = np.unique(energetic.event_energy_eV)
+    integrated = [
+        np.dot(
+            energetic.event_flux_m2_s[energetic.event_energy_eV == energy],
+            areas[energetic.event_face[energetic.event_energy_eV == energy]])
+        for energy in energies]
+    assert np.allclose(energies, [20.04, 100.01])
+    assert np.isclose(integrated[0], 0.75 * 2e19, rtol=2e-6)
+    assert np.isclose(integrated[1], 0.25 * 2e19, rtol=2e-6)
+
+
 def test_boundary_to_surface_chain_conserves_dimensional_formula_unit_removal():
     verts, faces, areas = _flat_unit_plane()
     transport = trace_boundary_state_first_hit_3d(

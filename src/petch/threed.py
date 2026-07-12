@@ -18,6 +18,7 @@ import warp as wp
 
 from .params import PAR, DEFAULT_FLAGS
 from .chemistry import surface_rate
+from .warp_runtime import ensure_writable_warp_cache
 
 wp.init()
 DEVICE = os.environ.get("PETCH_DEVICE", "cpu")   # set PETCH_DEVICE=cuda on a GPU box
@@ -1532,6 +1533,7 @@ def reinit_fsm(phi_np, dx, band, n_iter=None):
     (no forward-Euler CFL blowup). Distance info propagates 1 cell/sweep, so ~band/dx + a few sweeps
     cover the band -- the rest of the grid is left at the far-field sign*(band+dx) like reinit_narrow.
     On a GPU this removes the per-step CPU round-trip (the ~40% reinit bottleneck) and is graph-capturable."""
+    ensure_writable_warp_cache(wp)
     nx = phi_np.shape
     big = float(band + 4.0 * dx)
     if n_iter is None:
@@ -1547,6 +1549,84 @@ def reinit_fsm(phi_np, dx, band, n_iter=None):
     Un = U.numpy().astype(np.float64)
     sgn = np.sign(phi_np); sgn = np.where(sgn == 0, 1.0, sgn)
     return sgn * np.minimum(Un, band + dx)
+
+
+def _interface_node_mask(phi):
+    """Return nodes incident to a sign-changing Cartesian grid edge."""
+    phi = np.asarray(phi)
+    interface = np.zeros(phi.shape, dtype=bool)
+    solid = phi >= 0.0
+    for axis in range(phi.ndim):
+        left = [slice(None)] * phi.ndim; right = [slice(None)] * phi.ndim
+        left[axis] = slice(None, -1); right[axis] = slice(1, None)
+        cut = solid[tuple(left)] != solid[tuple(right)]
+        interface[tuple(left)] |= cut
+        interface[tuple(right)] |= cut
+    return interface
+
+
+def reinit_cr2(phi_np, dx, band, n_iter=None):
+    """Constrained CR-2 redistancing followed by a parallel Eikonal solve.
+
+    The preliminary distance on positive-solid interface nodes is retained.  For every negative-gas
+    interface node, Hartmann's CR-2 relation rescales the value against its opposite solid neighbors
+    so their representative linearly interpolated zero location is anchored.  These interface values
+    are then frozen while the monotone Godunov-Eikonal iteration restores distance away from the front.
+
+    Hartmann, Meinke & Schroeder, JCP 227 (2008) 6821-6845, equations (30)-(36).
+    """
+    phi_np = np.asarray(phi_np, dtype=np.float64)
+    if (phi_np.ndim != 3 or min(phi_np.shape) < 2 or np.any(~np.isfinite(phi_np))
+            or not np.isfinite(dx) or dx <= 0.0 or not np.isfinite(band) or band <= 0.0):
+        raise ValueError("invalid CR-2 reinitialization inputs")
+    preliminary = reinit_fsm(phi_np, dx, band, n_iter=n_iter)
+    interface = _interface_node_mask(phi_np)
+    solid = phi_np >= 0.0
+    reference = interface & solid
+    correction = interface & ~solid
+    numerator = np.zeros(phi_np.shape, dtype=np.float64)
+    denominator = np.zeros(phi_np.shape, dtype=np.float64)
+    neighbor_count = np.zeros(phi_np.shape, dtype=np.int8)
+    for axis in range(phi_np.ndim):
+        for offset in (-1, 1):
+            source = [slice(None)] * phi_np.ndim
+            neighbor = [slice(None)] * phi_np.ndim
+            if offset < 0:
+                source[axis] = slice(1, None); neighbor[axis] = slice(None, -1)
+            else:
+                source[axis] = slice(None, -1); neighbor[axis] = slice(1, None)
+            source = tuple(source); neighbor = tuple(neighbor)
+            use = correction[source] & reference[neighbor]
+            numerator[source] += np.where(use, preliminary[neighbor], 0.0)
+            denominator[source] += np.where(use, phi_np[neighbor], 0.0)
+            neighbor_count[source] += use.astype(np.int8)
+    if np.any(correction & (neighbor_count == 0)):
+        raise RuntimeError("CR-2 solid/gas partition left an interface node unanchored")
+    constrained = preliminary.copy()
+    finite_ratio = correction & (np.abs(denominator) > 64.0 * np.finfo(np.float64).eps)
+    constrained[finite_ratio] = (
+        phi_np[finite_ratio] * numerator[finite_ratio] / denominator[finite_ratio])
+    if (np.any(~np.isfinite(constrained[interface]))
+            or np.any((constrained[interface] >= 0.0) != solid[interface])):
+        raise RuntimeError("CR-2 produced an invalid signed interface boundary")
+
+    shape = phi_np.shape
+    far = float(band + 4.0 * dx)
+    if n_iter is None:
+        n_iter = int(np.ceil(band / dx)) + 4
+    unsigned_seed = np.full(shape, far, dtype=np.float32)
+    unsigned_seed[interface] = np.abs(constrained[interface]).astype(np.float32)
+    unsigned = wp.array(unsigned_seed, dtype=float, device=DEVICE)
+    frozen = wp.array(interface.astype(np.float32), dtype=float, device=DEVICE)
+    work = wp.zeros(shape, dtype=float, device=DEVICE)
+    for _ in range(n_iter):
+        wp.launch(
+            _eik_jacobi, dim=shape, device=DEVICE,
+            inputs=[unsigned, frozen, work, float(dx), far])
+        unsigned, work = work, unsigned
+    distance = unsigned.numpy().astype(np.float64)
+    sign = np.where(phi_np < 0.0, -1.0, 1.0)
+    return sign * np.minimum(distance, band + dx)
 
 
 def reinit_narrow(phi, dx, band):

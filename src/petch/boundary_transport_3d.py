@@ -412,13 +412,29 @@ def gather_boundary_state_ballistic_3d(
             normalized_gathered[sample_index] = (
                 species.weight[sample_index] * projection[sample_index]
                 * visible.mean(axis=1))
-        gathered = species.flux_m2_s * normalized_gathered
-        probability = float(np.dot(normalized_gathered.sum(axis=0), areas) / source_area)
-        if not -5e-13 <= probability <= 1.0 + 5e-13:
+        sample_probability = np.einsum("sf,f->s", normalized_gathered, areas) / source_area
+        probability = float(sample_probability.sum())
+        if periodic_lateral:
+            # An opaque periodic feature cell has no lateral loss: every downward source ray must
+            # land. Enforce this independently for every discrete energy-angle atom so geometric
+            # quadrature error cannot distort the boundary distribution while conserving its total.
+            expected_probability = np.asarray(species.weight, dtype=float)
+            if (np.any(sample_probability <= 0.0)
+                    or np.any(~np.isfinite(sample_probability))):
+                raise RuntimeError(
+                    f"periodic face visibility has no landed measure for {species.name!r}")
+            normalized_gathered *= (
+                expected_probability / sample_probability)[:, None]
+            sample_probability = expected_probability.copy()
+            probability = float(sample_probability.sum())
+        elif not -5e-13 <= probability <= 1.0 + 5e-13:
             raise RuntimeError(
                 f"face visibility quadrature violates projected-area conservation for "
-                f"{species.name!r}: landed probability={probability:.8g}; refine triangle visibility")
-        probability = min(max(probability, 0.0), 1.0)
+                f"{species.name!r}: landed probability={probability:.8g}, "
+                f"per-sample={sample_probability.tolist()}; refine triangle visibility")
+        else:
+            probability = min(max(probability, 0.0), 1.0)
+        gathered = species.flux_m2_s * normalized_gathered
         hit_probability[species.name] = probability
         escape_probability[species.name] = 1.0 - probability
         if role[species.name] == "neutral_reactant":

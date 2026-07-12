@@ -132,16 +132,17 @@ def run_width(width_nm, args, plasma_control, electron_bias):
         mechanism, etchable_material_ids=(1,), duration_s=args.duration_s,
         n_steps=args.steps, source_bounds=(0.0, args.pitch_um, 0.0, args.cell_length_um),
         source_z=source_z, n_position=args.source_positions, seed=args.seed,
-        cfl_number=0.3, reinitialize=True, transport_device="cpu",
+        cfl_number=0.3, reinitialize=args.reinitialize, transport_device="cpu",
         neutral_radiosity_options={
             "rays_per_face": args.form_factor_rays, "seed": args.seed + 1000,
             "periodic_lateral": True,
-            "domain_size": np.asarray(geometry.phi.shape) * geometry.dx,
+            "domain_size": (np.asarray(geometry.phi.shape) - 1) * geometry.dx,
             "nonetchable_reaction_probability_by_material": {
                 2: {"FC_total": args.mask_reaction_probability}},
         },
         ballistic_transport=args.ballistic_transport,
-        ballistic_face_quadrature_points=args.ballistic_face_quadrature_points)
+        ballistic_face_quadrature_points=args.ballistic_face_quadrature_points,
+        reinitialization_method=args.reinitialization_method)
     wall = perf_counter() - started
     floor = _floor_height(result.geometry.phi, geometry.dx)
     initial_depth_nm = (args.substrate_top_um - initial_floor) * 1000.0
@@ -236,6 +237,10 @@ def main():
         default="face_gather")
     parser.add_argument(
         "--ballistic-face-quadrature-points", type=int, choices=(1, 3), default=3)
+    parser.add_argument(
+        "--reinitialize", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument(
+        "--reinitialization-method", choices=("skfmm", "fsm", "cr2"), default="cr2")
     parser.add_argument("--history-every", type=int, default=0)
     parser.add_argument("--seed", type=int, default=17)
     args = parser.parse_args()
@@ -303,6 +308,8 @@ def main():
             "form_factor_rays": args.form_factor_rays,
             "ballistic_transport": args.ballistic_transport,
             "ballistic_face_quadrature_points": args.ballistic_face_quadrature_points,
+            "reinitialize": args.reinitialize,
+            "reinitialization_method": args.reinitialization_method,
             "seed": args.seed,
         },
         "runs": runs,

@@ -130,6 +130,17 @@ def test_rectangular_trench_is_one_connected_substrate_at_jeon_widths(dx, openin
     assert _physical_volume_topology_signature(geometry, (1,)) == (1, 1)
 
 
+def test_rectangular_trench_nodal_grid_includes_requested_physical_endpoints():
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=0.5, cell_length=0.1, domain_height=2.35, dx=0.01,
+        opening_width=0.08, mask_thickness=0.7,
+        substrate_top=1.4, etched_depth=0.03)
+
+    assert np.array_equal(
+        (np.asarray(geometry.phi.shape) - 1) * geometry.dx,
+        np.array([0.5, 0.1, 2.35]))
+
+
 def test_unetched_opening_surface_is_owned_by_substrate_not_adjacent_mask():
     geometry = make_rectangular_trench_geometry_3d(
         cell_width=0.5, cell_length=0.1, domain_height=2.35, dx=0.02,
@@ -265,7 +276,7 @@ def _static_trench_floor_neutral_flux(opening_width, *, rays_per_face=32):
         n_position=32, seed=7, reinitialize=False, transport_device="cpu",
         neutral_radiosity_options={
             "rays_per_face": rays_per_face, "seed": 11, "periodic_lateral": True,
-            "domain_size": np.asarray(geometry.phi.shape) * geometry.dx,
+            "domain_size": (np.asarray(geometry.phi.shape) - 1) * geometry.dx,
             "nonetchable_reaction_probability_by_material": {2: {"CF2": 0.2}},
         })
     floor = result.active_face_centroid[:, 2] < 0.45

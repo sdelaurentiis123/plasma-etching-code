@@ -36,7 +36,7 @@ from .surface_kinetics import (
     FaceResolvedEnergeticFlux,
     SurfaceFluxes,
 )
-from .threed import advect_3d, extend_velocity_3d, extract_mesh_3d, reinit_narrow
+from .threed import advect_3d, extend_velocity_3d, extract_mesh_3d, reinit_cr2, reinit_fsm, reinit_narrow
 
 
 @dataclass(frozen=True)
@@ -92,7 +92,10 @@ def make_rectangular_trench_geometry_3d(
             or int(substrate_material_id) <= 0 or int(mask_material_id) <= 0
             or int(substrate_material_id) == int(mask_material_id)):
         raise ValueError("invalid rectangular trench geometry inputs")
-    shape = tuple(max(3, int(round(length / dx)))
+    # ``phi`` is nodal: N intervals require N+1 nodes so the requested physical endpoint belongs to
+    # the mesh.  Using only N nodes silently shortened every domain by one dx while source/wrap bounds
+    # still used the requested length, leaving a periodic gap with no surface geometry.
+    shape = tuple(max(3, int(round(length / dx)) + 1)
                   for length in (cell_width, cell_length, domain_height))
     x, y, z = (np.arange(size) * dx for size in shape)
     X, _, Z = np.meshgrid(x, y, z, indexing="ij")
@@ -522,7 +525,7 @@ def _apply_diffuse_neutral_transport(
     solver_tolerance = float(options.pop("relative_tolerance", 1e-10))
     maximum_iterations = int(options.pop("maximum_iterations", 500))
     if "domain_size" not in options:
-        options["domain_size"] = np.asarray(geometry.phi.shape) * geometry.dx
+        options["domain_size"] = (np.asarray(geometry.phi.shape) - 1) * geometry.dx
     if "ray_offset" not in options:
         options["ray_offset"] = 1e-3 * geometry.dx
     factors = estimate_diffuse_form_factors_3d(
@@ -599,6 +602,7 @@ def advance_feature_step_3d(
         initial_charge_node_c=None, charging_options=None,
         neutral_radiosity_options=None, ballistic_transport="forward",
         ballistic_face_quadrature_points=1, cfl_number=0.3, reinitialize=True,
+        reinitialization_method="skfmm",
         transport_device=None):
     """Advance one stateful, dimensional feature step.
 
@@ -630,6 +634,8 @@ def advance_feature_step_3d(
         raise ValueError("charging state/options require charging_poisson_system")
     if ballistic_transport not in ("forward", "face_gather"):
         raise ValueError("ballistic_transport must be 'forward' or 'face_gather'")
+    if reinitialization_method not in ("skfmm", "fsm", "cr2"):
+        raise ValueError("reinitialization_method must be 'skfmm', 'fsm', or 'cr2'")
     if ballistic_transport == "face_gather" and (
             charging_poisson_system is not None or nodal_potential_v is not None):
         raise ValueError("deterministic ballistic face gather does not yet trace electric fields")
@@ -724,7 +730,7 @@ def advance_feature_step_3d(
             first_hit_options = dict(
                 periodic_lateral=True,
                 domain_size=radiosity_options.get(
-                    "domain_size", np.asarray(geometry.phi.shape) * geometry.dx))
+                    "domain_size", (np.asarray(geometry.phi.shape) - 1) * geometry.dx))
         if ballistic_transport == "face_gather":
             transport = gather_boundary_state_ballistic_3d(
                 boundary, species_role, verts, faces, areas, centroids,
@@ -801,7 +807,12 @@ def advance_feature_step_3d(
             advected_centerline[lower]
             / (advected_centerline[lower] - advected_centerline[lower + 1]))
     if reinitialize and duration_s > 0.0:
-        phi = reinit_narrow(phi, geometry.dx, 4.0 * geometry.dx)
+        if reinitialization_method == "fsm":
+            phi = reinit_fsm(phi, geometry.dx, 4.0 * geometry.dx)
+        elif reinitialization_method == "cr2":
+            phi = reinit_cr2(phi, geometry.dx, 4.0 * geometry.dx)
+        else:
+            phi = reinit_narrow(phi, geometry.dx, 4.0 * geometry.dx)
         phi[pinned] = geometry.phi[pinned]
     reinitialized_centerline = phi[center]
     reinitialized_crossing = np.flatnonzero(
@@ -814,7 +825,12 @@ def advance_feature_step_3d(
     phi, removed_unresolved_solid_cells = _remove_unresolved_subcell_solid_components(
         phi, geometry.material_id, etchable, geometry.dx)
     if removed_unresolved_solid_cells:
-        phi = reinit_narrow(phi, geometry.dx, 4.0 * geometry.dx)
+        if reinitialization_method == "fsm":
+            phi = reinit_fsm(phi, geometry.dx, 4.0 * geometry.dx)
+        elif reinitialization_method == "cr2":
+            phi = reinit_cr2(phi, geometry.dx, 4.0 * geometry.dx)
+        else:
+            phi = reinit_narrow(phi, geometry.dx, 4.0 * geometry.dx)
         phi[pinned] = geometry.phi[pinned]
 
     output_geometry = FeatureGeometry3D(
@@ -889,6 +905,7 @@ def advance_feature_step_3d(
             max_velocity_m_s=maximum_velocity * geometry.mesh_length_unit_m,
             max_displacement_mesh_units=displacement, cfl_substeps=int(substeps),
             cfl_number=float(cfl_number), reinitialized=bool(reinitialize),
+            reinitialization_method=(reinitialization_method if reinitialize else None),
             removed_unresolved_solid_cells=removed_unresolved_solid_cells,
             self_consistent_charging=charging is not None,
             charging_iterations=(0 if charging is None else len(charging.history)),
@@ -908,7 +925,7 @@ def solve_feature_3d(
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         charging_system_builder=None, initial_charge_node_c=None, charging_options=None,
         neutral_radiosity_options=None, ballistic_transport="forward",
-        ballistic_face_quadrature_points=1):
+        ballistic_face_quadrature_points=1, reinitialization_method="skfmm"):
     """Run verified feature steps with conserved surface state and optional quasi-static charging.
 
     A fixed ``charging_poisson_system`` is valid for one geometry only. Repeated charged evolution
@@ -960,6 +977,7 @@ def solve_feature_3d(
                 neutral_radiosity_options=neutral_radiosity_options,
                 ballistic_transport=ballistic_transport,
                 ballistic_face_quadrature_points=ballistic_face_quadrature_points,
+                reinitialization_method=reinitialization_method,
                 cfl_number=cfl_number, reinitialize=reinitialize,
                 transport_device=transport_device)
         except (ValueError, RuntimeError) as error:
