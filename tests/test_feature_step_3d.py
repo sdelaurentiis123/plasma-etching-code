@@ -353,6 +353,28 @@ def test_surface_remap_preserves_material_integrals_and_coverage_bounds():
     assert diagnostics["maximum_nearest_distance"] <= 0.1 + 1e-12
 
 
+def test_surface_remap_is_exact_identity_on_unchanged_heterogeneous_mesh():
+    from petch.surface_kinetics import SiO2SurfaceState
+    centroid = np.array([
+        [0.0, 0.0, 0.0], [0.5, 0.0, 0.0],
+        [0.0, 0.5, 0.0], [0.5, 0.5, 0.0]])
+    area = np.array([0.7, 1.1, 0.9, 1.3])
+    material = np.ones(4, dtype=int)
+    state = SiO2SurfaceState(
+        [0.0, 0.2, 0.7, 1.0],
+        [0.0, 2e18, 9e18, 4e19],
+        [1e16, 3e17, 2e18, 8e18])
+
+    remapped, diagnostics = conservative_remap_surface_state(
+        state, centroid, area, material, centroid.copy(), area.copy(), material.copy(),
+        dx=0.1, mesh_length_unit_m=1e-6)
+
+    assert np.array_equal(remapped.complex_fraction, state.complex_fraction)
+    assert np.array_equal(remapped.polymer_units_m2, state.polymer_units_m2)
+    assert np.array_equal(remapped.removed_formula_units_m2, state.removed_formula_units_m2)
+    assert diagnostics["maximum_nearest_distance"] == 0.0
+
+
 def test_multistep_solver_carries_remapped_state_and_matches_planar_total_motion():
     geometry, initial_height = _plane_geometry()
     result = solve_feature_3d(

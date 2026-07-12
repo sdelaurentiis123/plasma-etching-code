@@ -414,6 +414,11 @@ def gather_boundary_state_ballistic_3d(
                 * visible.mean(axis=1))
         gathered = species.flux_m2_s * normalized_gathered
         probability = float(np.dot(normalized_gathered.sum(axis=0), areas) / source_area)
+        if not -5e-13 <= probability <= 1.0 + 5e-13:
+            raise RuntimeError(
+                f"face visibility quadrature violates projected-area conservation for "
+                f"{species.name!r}: landed probability={probability:.8g}; refine triangle visibility")
+        probability = min(max(probability, 0.0), 1.0)
         hit_probability[species.name] = probability
         escape_probability[species.name] = 1.0 - probability
         if role[species.name] == "neutral_reactant":

@@ -392,8 +392,20 @@ def conservative_remap_surface_state(
             raise ValueError(
                 f"surface remap distance {nearest:g} exceeds {maximum_distance:g}")
         source_index = old_index[np.asarray(local, dtype=int)]
-        regularization = (0.25 * float(dx)) ** 2
-        weight = old_area[source_index] / (distance * distance + regularization)
+        # A fixed O(dx) denominator regularization makes every remap smooth neighboring states by
+        # O(1), even as the interface displacement tends to zero.  Repeating smaller time steps then
+        # increases artificial diffusion and the method has no dt->0 limit.  Use only a roundoff-scale
+        # floor: coincident predecessor faces map identically, while inverse-distance interpolation is
+        # recovered when marching-cubes connectivity genuinely changes.
+        coordinate_scale = max(
+            float(dx), float(np.max(np.abs(old_centroid[old_index]))),
+            float(np.max(np.abs(new_centroid[new_index]))), 1.0)
+        distance_floor = 64.0 * np.finfo(float).eps * coordinate_scale
+        exact = distance[:, 0] <= distance_floor
+        weight = old_area[source_index] / np.maximum(distance * distance, distance_floor ** 2)
+        if np.any(exact):
+            weight[exact] = 0.0
+            weight[exact, 0] = 1.0
         weight /= weight.sum(axis=1, keepdims=True)
         targets = {}; residuals = []
         for field_name, old_value in old_values.items():
