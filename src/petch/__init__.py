@@ -17,6 +17,9 @@ from .surface_kinetics import (
     SiO2SurfaceState, SurfaceFluxes,
 )
 from .boundary_transport_3d import BoundaryTransport3DResult, trace_boundary_state_first_hit_3d
+from .feature_step_3d import (
+    FeatureGeometry3D, FeatureStep3DResult, FeatureStepValidity, advance_feature_step_3d,
+)
 
 # High-level 3D API (ViennaPS-shaped). Importing api pulls in the 3D engine (threed/warp).
 from .api import Domain, SF6O2, Process, Result
@@ -34,6 +37,8 @@ __all__ = [
     "ReducedSiO2FluorocarbonMechanism", "ReducedSiO2FluorocarbonParameters",
     "SiO2SurfaceState", "SurfaceFluxes",
     "BoundaryTransport3DResult", "trace_boundary_state_first_hit_3d",
+    "FeatureGeometry3D", "FeatureStep3DResult", "FeatureStepValidity",
+    "advance_feature_step_3d",
 ]
 
 __version__ = "0.2.0"
