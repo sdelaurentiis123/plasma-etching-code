@@ -6,6 +6,7 @@ import pytest
 from petch.experimental_data import (
     load_bosch_wafer_measurements,
     load_bosch_wafer_measurements_89pt,
+    load_jeon_2022_trench_depths,
     load_krueger_2024_evidence,
 )
 
@@ -19,6 +20,9 @@ DATA = (
 )
 KRUEGER_DATA = Path(__file__).parents[1] / "data" / "experimental" / "krueger_2024"
 DATA_89 = DATA.with_name("Si_Oxide_etch_89_points.csv")
+JEON_DATA = (
+    Path(__file__).parents[1] / "data" / "experimental" / "jeon_2022"
+    / "digitized_trench_depths.csv")
 
 
 def test_bosch_wafer_measurements_have_verified_provenance_and_units():
@@ -100,3 +104,48 @@ def test_krueger_2024_rejects_unverified_transcription(tmp_path):
 
     with pytest.raises(ValueError, match="checksum mismatch"):
         load_krueger_2024_evidence(target)
+
+
+def test_jeon_2022_preserves_digitization_error_and_preregistered_transfer_split():
+    rows = load_jeon_2022_trench_depths(JEON_DATA)
+
+    assert len(rows) == 54
+    assert {item.trench_width_nm for item in rows} == {60, 80, 100, 150, 180, 200}
+    calibration = [item for item in rows if item.split == "calibration"]
+    assert len(calibration) == 6
+    assert {(item.source_figure, item.c4f8_fraction, item.pulse_off_ms)
+            for item in calibration} == {("4b", 0.2, 0.0)}
+    assert all(item.digitization_uncertainty_nm == 35.0 for item in rows)
+    assert all(item.published_errorbar_semantics == "not_specified" for item in rows)
+
+
+def test_jeon_2022_held_out_pulse_response_reverses_between_radical_regimes():
+    rows = load_jeon_2022_trench_depths(JEON_DATA)
+    by_key = {
+        (item.c4f8_fraction, item.pulse_off_ms, item.trench_width_nm): item.depth_nm
+        for item in rows if item.condition_family.startswith("pulse_off")}
+    for width in (60, 80, 100, 150, 180, 200):
+        assert by_key[(0.2, 1.0, width)] > by_key[(0.2, 0.0, width)]
+        assert by_key[(0.8, 1.0, width)] < by_key[(0.8, 0.0, width)]
+
+
+def test_jeon_2022_independently_digitized_duplicate_controls_close_within_budget():
+    rows = load_jeon_2022_trench_depths(JEON_DATA)
+    by_panel = {
+        (item.source_figure, item.c4f8_fraction, item.pulse_off_ms,
+         item.trench_width_nm): item
+        for item in rows}
+    for fraction, duplicate_figure in ((0.2, "7b"), (0.8, "9b")):
+        for width in (60, 80, 100, 150, 180, 200):
+            reference = by_panel[("4b", fraction, 0.0, width)]
+            duplicate = by_panel[(duplicate_figure, fraction, 0.0, width)]
+            assert abs(reference.depth_nm - duplicate.depth_nm) <= max(
+                reference.digitization_uncertainty_nm,
+                duplicate.digitization_uncertainty_nm)
+
+
+def test_jeon_2022_rejects_unverified_digitization(tmp_path):
+    altered = tmp_path / "digitized.csv"
+    altered.write_bytes(JEON_DATA.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        load_jeon_2022_trench_depths(altered)

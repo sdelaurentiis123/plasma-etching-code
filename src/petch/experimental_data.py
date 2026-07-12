@@ -23,6 +23,9 @@ KRUEGER_2024_SHA256 = {
     "transfer_observations.csv": "85cef607f20ab5e56e606666aa7e0e6241abb546d0369277b21833542e04d425",
 }
 
+JEON_2022_SHA256 = (
+    "0f737d0d44866684513e8f16fd3a4feab8618a81866ea02357a6b3f5da98310f")
+
 
 @dataclass(frozen=True)
 class BoschWaferMeasurement:
@@ -78,6 +81,24 @@ class Krueger2024Evidence:
     calibration_metrics: tuple[ProfileTargetMetric, ...]
     boundary_fluxes: tuple[BoundaryFluxReference, ...]
     transfer_observations: tuple[TransferObservation, ...]
+
+
+@dataclass(frozen=True)
+class Jeon2022TrenchDepth:
+    source_figure: str
+    condition_family: str
+    c4f8_fraction: float
+    pulse_off_ms: float
+    trench_width_nm: float
+    depth_nm: float
+    pixel_y: float
+    axis_slope_nm_per_pixel: float
+    axis_intercept_nm: float
+    digitization_uncertainty_nm: float
+    published_errorbar_semantics: str
+    evidence_type: str
+    split: str
+    source_location: str
 
 
 def _verified_csv_rows(path, expected_fields, expected_sha256, verify_checksum):
@@ -139,6 +160,51 @@ def load_krueger_2024_evidence(directory, *, verify_checksum=True):
     if any(item.split == "calibration" for item in observations):
         raise ValueError("transfer observations must not leak into the calibration split")
     return Krueger2024Evidence(metrics, fluxes, observations)
+
+
+def load_jeon_2022_trench_depths(path, *, verify_checksum=True):
+    """Load preregistered SiO2 depth-transfer targets digitized from Jeon et al. (2022).
+
+    The plotted error bars are retained as semantically unspecified rather than being mislabeled as
+    standard deviations. Pixel coordinates and axis maps are checked against every reported depth,
+    keeping transcription error separate from the experiment's unreported measurement uncertainty.
+    """
+    expected = [
+        "source_figure", "condition_family", "c4f8_fraction", "pulse_off_ms",
+        "trench_width_nm", "depth_nm", "pixel_y", "axis_slope_nm_per_pixel",
+        "axis_intercept_nm", "digitization_uncertainty_nm",
+        "published_errorbar_semantics", "evidence_type", "split", "source_location",
+    ]
+    raw = _verified_csv_rows(path, expected, JEON_2022_SHA256, verify_checksum)
+    rows = tuple(Jeon2022TrenchDepth(
+        source_figure=row["source_figure"], condition_family=row["condition_family"],
+        c4f8_fraction=float(row["c4f8_fraction"]), pulse_off_ms=float(row["pulse_off_ms"]),
+        trench_width_nm=float(row["trench_width_nm"]), depth_nm=float(row["depth_nm"]),
+        pixel_y=float(row["pixel_y"]),
+        axis_slope_nm_per_pixel=float(row["axis_slope_nm_per_pixel"]),
+        axis_intercept_nm=float(row["axis_intercept_nm"]),
+        digitization_uncertainty_nm=float(row["digitization_uncertainty_nm"]),
+        published_errorbar_semantics=row["published_errorbar_semantics"],
+        evidence_type=row["evidence_type"], split=row["split"],
+        source_location=row["source_location"]) for row in raw)
+    replay_error = np.asarray([
+        item.depth_nm - (
+            item.axis_slope_nm_per_pixel * item.pixel_y + item.axis_intercept_nm)
+        for item in rows])
+    keys = {
+        (item.source_figure, item.c4f8_fraction, item.pulse_off_ms, item.trench_width_nm)
+        for item in rows}
+    calibration = [item for item in rows if item.split == "calibration"]
+    if (len(keys) != len(rows) or np.max(np.abs(replay_error)) > 0.051
+            or any(item.depth_nm <= 0.0 or item.trench_width_nm <= 0.0
+                   or item.digitization_uncertainty_nm <= 0.0 for item in rows)
+            or any(item.evidence_type != "experiment_digitized" for item in rows)
+            or any(item.published_errorbar_semantics != "not_specified" for item in rows)
+            or any(item.split not in {"calibration", "held_out_transfer"} for item in rows)
+            or any(item.source_figure != "4b" or item.c4f8_fraction != 0.2
+                   or item.pulse_off_ms != 0.0 for item in calibration)):
+        raise ValueError("Jeon 2022 evidence violates its digitization or split contract")
+    return rows
 
 
 def load_bosch_wafer_measurements(path, *, verify_checksum=True):
