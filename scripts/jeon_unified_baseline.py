@@ -146,6 +146,54 @@ def run_width(width_nm, args, plasma_control, electron_bias):
     floor = _floor_height(result.geometry.phi, geometry.dx)
     initial_depth_nm = (args.substrate_top_um - initial_floor) * 1000.0
     final_depth_nm = (args.substrate_top_um - floor) * 1000.0
+    final_centroid = result.steps[-1].next_active_face_centroid
+    final_area = result.steps[-1].next_active_face_area
+    final_state = result.surface_state
+    floor_band = final_centroid[:, 2] <= float(np.min(final_centroid[:, 2]) + geometry.dx)
+
+    def weighted_mean(value, selected=None):
+        value = np.asarray(value, dtype=float)
+        use = np.ones(value.shape, dtype=bool) if selected is None else np.asarray(selected, dtype=bool)
+        return float(np.dot(value[use], final_area[use]) / final_area[use].sum())
+
+    state_summary = {
+        "area_weighted_complex_fraction": weighted_mean(final_state.complex_fraction),
+        "area_weighted_polymer_units_m2": weighted_mean(final_state.polymer_units_m2),
+        "floor_complex_fraction": weighted_mean(final_state.complex_fraction, floor_band),
+        "floor_polymer_units_m2": weighted_mean(final_state.polymer_units_m2, floor_band),
+        "maximum_polymer_units_m2": float(np.max(final_state.polymer_units_m2)),
+    }
+    history = None
+    if args.history_every:
+        history = []
+        for step_index, step_result in enumerate(result.steps, start=1):
+            if step_index % args.history_every == 0 or step_index == len(result.steps):
+                step_floor = _floor_height(step_result.geometry.phi, geometry.dx)
+                active_velocity = step_result.face_velocity_mesh_units_s[
+                    step_result.active_face_index]
+                active_centroid = step_result.active_face_centroid
+                active_area = step_result.active_face_area
+                active_floor = active_centroid[:, 2] <= (
+                    float(np.min(active_centroid[:, 2])) + geometry.dx)
+                history.append({
+                    "step": step_index,
+                    "time_s": args.duration_s * step_index / args.steps,
+                    "etched_increment_nm": (
+                        initial_floor - step_floor) * 1000.0,
+                    "ion_hit_probability": step_result.transport.hit_probability["Ar+"],
+                    "floor_area_weighted_velocity_um_s": float(np.dot(
+                        active_velocity[active_floor], active_area[active_floor])
+                        / active_area[active_floor].sum()),
+                    "maximum_face_velocity_um_s": float(np.max(active_velocity)),
+                    "centerline_extended_velocity_um_s": step_result.diagnostics.get(
+                        "centerline_extended_velocity_mesh_units_s"),
+                    "centerline_interface_fraction": step_result.diagnostics.get(
+                        "centerline_interface_fraction"),
+                    "centerline_advected_interface_fraction": step_result.diagnostics.get(
+                        "centerline_advected_interface_fraction"),
+                    "centerline_reinitialized_interface_fraction": step_result.diagnostics.get(
+                        "centerline_reinitialized_interface_fraction"),
+                })
     return {
         "width_nm": width_nm,
         "initialized_depth_nm": initial_depth_nm,
@@ -161,6 +209,8 @@ def run_width(width_nm, args, plasma_control, electron_bias):
         "maximum_neutral_balance_error": max(
             step.diagnostics["neutral_radiosity"]["FC_total"]["relative_balance_error"]
             for step in result.steps),
+        "surface_state": state_summary,
+        "depth_history": history,
     }
 
 
@@ -175,7 +225,7 @@ def main():
     parser.add_argument("--mask-thickness-um", type=float, default=0.70)
     parser.add_argument("--substrate-top-um", type=float, default=1.40)
     parser.add_argument("--domain-height-um", type=float, default=2.35)
-    parser.add_argument("--initial-depth-um", type=float, default=0.03)
+    parser.add_argument("--initial-depth-um", type=float, default=0.0)
     parser.add_argument("--complex-probability", type=float, default=1e-3)
     parser.add_argument("--deposition-probability", type=float, default=5e-4)
     parser.add_argument("--mask-reaction-probability", type=float, default=1e-3)
@@ -186,6 +236,7 @@ def main():
         default="face_gather")
     parser.add_argument(
         "--ballistic-face-quadrature-points", type=int, choices=(1, 3), default=3)
+    parser.add_argument("--history-every", type=int, default=0)
     parser.add_argument("--seed", type=int, default=17)
     args = parser.parse_args()
     plasma = load_jeon_2022_plasma_controls(DATA / "digitized_plasma_controls.csv")

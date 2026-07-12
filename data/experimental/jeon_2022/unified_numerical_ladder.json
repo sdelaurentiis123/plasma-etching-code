@@ -1,0 +1,276 @@
+{
+  "campaign": "jeon_2022_unified_numerical_ladder_v1",
+  "date": "2026-07-12",
+  "observable": "200_nm_trench_etched_increment_nm",
+  "common_physical_closures": {
+    "predictive": false,
+    "iedf": "self_bias_monoenergy_nonpredictive",
+    "neutral_composition": "aggregate_FC_total_nonpredictive",
+    "initial_bare_sidewall_depth_um": 0.03,
+    "periodic_cell_length_um": 0.1
+  },
+  "acceptance_thresholds": {
+    "maximum_relative_change": 0.03,
+    "purpose": "numerical qualification only; not experimental validation"
+  },
+  "rejected_forward_particle_tally": {
+    "reason": "direct hit counts were sparse over thousands of evolving triangles and did not converge monotonically",
+    "runs": [
+      {
+        "source_positions": 1024,
+        "dx_um": 0.02,
+        "duration_s": 1000.0,
+        "steps": 100,
+        "form_factor_rays": 32,
+        "etched_increment_nm": 150.12099337826254
+      },
+      {
+        "source_positions": 2048,
+        "dx_um": 0.02,
+        "duration_s": 1000.0,
+        "steps": 100,
+        "form_factor_rays": 32,
+        "etched_increment_nm": 161.8287362722084,
+        "relative_change_from_previous": 0.07798871184155873
+      }
+    ],
+    "lower_sample_outcome": "physical-volume topology refusal caused by zero-count and overweight face velocities"
+  },
+  "deterministic_ballistic_face_quadrature": {
+    "common": {
+      "dx_um": 0.02,
+      "duration_s": 1000.0,
+      "steps": 100,
+      "form_factor_rays": 32
+    },
+    "runs": [
+      {
+        "face_quadrature_points": 1,
+        "etched_increment_nm": 176.77090670399707
+      },
+      {
+        "face_quadrature_points": 3,
+        "etched_increment_nm": 175.91245016346943,
+        "relative_change_from_previous": 0.00485632255066229
+      }
+    ],
+    "accepted_level": 3
+  },
+  "time_step": {
+    "common": {
+      "dx_um": 0.02,
+      "duration_s": 1000.0,
+      "form_factor_rays": 32,
+      "ballistic_face_quadrature_points": 3
+    },
+    "runs": [
+      {
+        "steps": 100,
+        "step_s": 10.0,
+        "etched_increment_nm": 175.91245016346943
+      },
+      {
+        "steps": 200,
+        "step_s": 5.0,
+        "etched_increment_nm": 170.9046342723073,
+        "relative_change_from_previous": 0.028467660398729777
+      }
+    ],
+    "accepted_step_s": 5.0
+  },
+  "neutral_form_factor": {
+    "common": {
+      "dx_um": 0.02,
+      "duration_s": 1000.0,
+      "steps": 200,
+      "ballistic_face_quadrature_points": 3
+    },
+    "runs": [
+      {
+        "rays_per_face": 32,
+        "etched_increment_nm": 170.9046342723073
+      },
+      {
+        "rays_per_face": 64,
+        "etched_increment_nm": 171.18339213746037,
+        "relative_change_from_previous": 0.0016310725940229041
+      }
+    ],
+    "accepted_rays_per_face": 64
+  },
+  "spatial_grid_short_duration": {
+    "common": {
+      "duration_s": 100.0,
+      "steps": 20,
+      "step_s": 5.0,
+      "form_factor_rays": 64,
+      "ballistic_face_quadrature_points": 3
+    },
+    "runs": [
+      {
+        "dx_um": 0.02,
+        "etched_increment_nm": 14.814018539513583
+      },
+      {
+        "dx_um": 0.01,
+        "etched_increment_nm": 14.250150166540188,
+        "relative_change_from_previous": 0.03806316101666699
+      },
+      {
+        "dx_um": 0.005,
+        "etched_increment_nm": 13.893452901176936,
+        "relative_change_from_previous": 0.02503112326498766
+      }
+    ],
+    "accepted_broad_width_dx_um": 0.01,
+    "verification_dx_um": 0.005
+  },
+  "long_duration_time_step_after_consistent_remap": {
+    "common": {
+      "dx_um": 0.02,
+      "duration_s": 1000.0,
+      "form_factor_rays": 32,
+      "ballistic_face_quadrature_points": 1,
+      "commit": "ce58490"
+    },
+    "runs": [
+      {
+        "steps": 200,
+        "step_s": 5.0,
+        "etched_increment_nm": 172.64617978040974
+      },
+      {
+        "steps": 400,
+        "step_s": 2.5,
+        "etched_increment_nm": 160.14160228517625,
+        "relative_change_from_previous": 0.0724324075862634,
+        "absolute_change_nm": 12.50457749523349
+      }
+    ],
+    "pure_ion_kill_test": {
+      "five_second_increment_nm": 116.60044861991237,
+      "two_point_five_second_increment_nm": 108.93122255570508,
+      "absolute_change_nm": 7.66922606420729
+    },
+    "interpretation": "The long-horizon absolute increment is not qualified at the 3% relative gate, although both changes remain below one 20 nm cell. A 200 s full-chemistry control differs by only 0.10%, so the discrepancy appears after deeper geometry evolution and is not a chemistry-only effect. Do not promote an absolute-rate claim from this ladder; test convergence of the duration-free width ratios directly."
+  },
+  "long_duration_width_ratio_failure": {
+    "reference_width_nm": 200,
+    "five_second_reference_increment_nm": 172.64617978040974,
+    "two_point_five_second_reference_increment_nm": 160.14160228517625,
+    "selected_widths": [
+      {
+        "width_nm": 60,
+        "five_second_increment_nm": 15.01323816834077,
+        "two_point_five_second_increment_nm": 12.976204256858196,
+        "five_second_ratio": 0.0869595734896497,
+        "two_point_five_second_ratio": 0.0810308073415608
+      },
+      {
+        "width_nm": 80,
+        "five_second_increment_nm": 76.540023549035,
+        "two_point_five_second_increment_nm": 13.317668494484678,
+        "five_second_ratio": 0.4433345912123009,
+        "two_point_five_second_ratio": 0.0831618124429865
+      },
+      {
+        "width_nm": 150,
+        "five_second_increment_nm": 174.34159386683757,
+        "two_point_five_second_increment_nm": 115.2978019844053,
+        "five_second_ratio": 1.009820166046516,
+        "two_point_five_second_ratio": 0.7200009718918925
+      }
+    ],
+    "interpretation": "Width normalization does not cancel the long-horizon time-step error. The 80 nm trajectory crosses a numerical or model-state etch-stop bifurcation. Bracket its onset and inspect polymer/complex state before any physical calibration."
+  },
+  "zero_seed_80nm_time_step_followup": {
+    "common": {
+      "width_nm": 80.0,
+      "dx_um": 0.02,
+      "initial_bare_sidewall_depth_um": 0.0,
+      "form_factor_rays": 32,
+      "ballistic_face_quadrature_points": 1,
+      "periodic_cell_length_um": 0.1
+    },
+    "runs": [
+      {
+        "duration_s": 1000.0,
+        "step_s": 5.0,
+        "etched_increment_nm": 78.5824967605282,
+        "floor_polymer_units_m2": 3.858254404485029e18
+      },
+      {
+        "duration_s": 1000.0,
+        "step_s": 2.5,
+        "etched_increment_nm": 23.093700975225453,
+        "floor_polymer_units_m2": 4.448171341599207e18
+      },
+      {
+        "duration_s": 400.0,
+        "step_s": 1.25,
+        "etched_increment_nm": 21.393014828969378,
+        "floor_polymer_units_m2": 4.3005930217176924e18
+      }
+    ],
+    "matched_400s_comparison": {
+      "step_2p5_s_increment_nm": 23.097361432151686,
+      "step_1p25_s_increment_nm": 21.393014828969378,
+      "relative_change": 0.07378966676296828
+    },
+    "interpretation": "The 5 s trajectory numerically tunnels through an etch-stop state. The 2.5 and 1.25 s trajectories both approach a shallow polymer-limited branch, although their stop depths are not yet within 3%. Further time refinement of the unsupported chemistry closure is deferred in favor of mechanism ablation."
+  },
+  "seed_free_followup": {
+    "reason": "CSG material ownership was corrected so a flat substrate can expose and initialize new sidewalls without an artificial pre-etched seed",
+    "common": {
+      "initial_bare_sidewall_depth_um": 0.0,
+      "duration_s": 100.0,
+      "steps": 20,
+      "step_s": 5.0,
+      "form_factor_rays": 64,
+      "ballistic_face_quadrature_points": 3,
+      "periodic_cell_length_um": 0.1
+    },
+    "runs": [
+      {
+        "width_nm": 200.0,
+        "dx_um": 0.01,
+        "etched_increment_nm": 14.520417818914222
+      },
+      {
+        "width_nm": 60.0,
+        "dx_um": 0.01,
+        "etched_increment_nm": 14.103012882405563
+      },
+      {
+        "width_nm": 60.0,
+        "dx_um": 0.005,
+        "etched_increment_nm": 13.158470142142331,
+        "relative_change_from_same_width_previous": 0.06697453573495714
+      }
+    ],
+    "conclusion": "Zero-seed surface birth passes, but the 60 nm trench is not spatially qualified: 0.01 to 0.005 um changes the shallow increment by 6.70%. Use 0.005 um only as a provisional narrow-width level until finer, AMR, or symmetry-reduced evidence closes the 3% gate."
+  },
+  "eighty_nm_resolution_root": {
+    "duration_s": 400.0,
+    "initial_bare_sidewall_depth_um": 0.03,
+    "coarse_four_cells_across": {
+      "dx_um": 0.02,
+      "five_second_increment_nm": 36.481206644050516,
+      "two_point_five_second_increment_nm": 13.295080952656633,
+      "outcome": "false etch-stop branch with a one-cell visibility transition near 250-300 s"
+    },
+    "refined_eight_cells_across": {
+      "dx_um": 0.01,
+      "five_second_increment_nm": 63.138100290580866,
+      "two_point_five_second_increment_nm": 60.616911651657276,
+      "absolute_change_nm": 2.52118863892359,
+      "change_in_cells": 0.252118863892359,
+      "relative_change": 0.0399301326420418,
+      "one_point_two_five_second_increment_nm": 61.73132840575835,
+      "two_point_five_to_one_point_two_five_relative_change": 0.0180485462832026,
+      "outcome": "smooth monotone depth histories; coarse-grid etch-stop bifurcation removed; 2.5-to-1.25 s refinement passes the 3% gate"
+    },
+    "validity_rule": "Do not qualify an evolving opening with fewer than eight cells across its initial width. This is a geometry/dx numerical rule, not an AR- or benchmark-specific physics branch. At eight cells across, the accepted time level is 1.25 s for this 80 nm/400 s gate."
+  },
+  "conclusion": "Deterministic face gather removes the sparse-tally pillar/topology failure and a flat physical start removes the artificial seed. The apparent 80 nm etch-stop bifurcation is a four-cell resolution artifact and disappears at eight cells across; the refined 2.5-to-1.25 s gate changes depth by 1.80% and passes. The 60 nm grid ladder remains open. No experimental or calibrated-chemistry claim is authorized from rejected coarse-width runs."
+}
