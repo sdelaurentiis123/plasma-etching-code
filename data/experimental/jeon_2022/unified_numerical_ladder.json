@@ -272,5 +272,35 @@
     },
     "validity_rule": "Do not qualify an evolving opening with fewer than eight cells across its initial width. This is a geometry/dx numerical rule, not an AR- or benchmark-specific physics branch. At eight cells across, the accepted time level is 1.25 s for this 80 nm/400 s gate."
   },
-  "conclusion": "Deterministic face gather removes the sparse-tally pillar/topology failure and a flat physical start removes the artificial seed. The apparent 80 nm etch-stop bifurcation is a four-cell resolution artifact and disappears at eight cells across; the refined 2.5-to-1.25 s gate changes depth by 1.80% and passes. The 60 nm grid ladder remains open. No experimental or calibrated-chemistry claim is authorized from rejected coarse-width runs."
+  "periodic_extrusion_after_endpoint_fix": {
+    "root_cause": "The nodal constructor allocated N points for N requested intervals, ending every mesh at L-dx while source and periodic-wrap bounds still used L. The corrected constructor allocates N+1 nodes and all transport domain sizes use (shape-1)*dx.",
+    "common": {
+      "width_nm": 60.0,
+      "dx_um": 0.005,
+      "duration_s": 100.0,
+      "steps": 20,
+      "step_s": 5.0,
+      "initial_bare_sidewall_depth_um": 0.0,
+      "form_factor_rays": 64,
+      "ballistic_face_quadrature_points": 3,
+      "reinitialization": "skfmm"
+    },
+    "runs": [
+      {
+        "periodic_cell_length_um": 0.05,
+        "periodic_intervals": 10,
+        "etched_increment_nm": 9.601543999502526,
+        "maximum_neutral_balance_error": 1.427985939908531e-10
+      },
+      {
+        "periodic_cell_length_um": 0.1,
+        "periodic_intervals": 20,
+        "etched_increment_nm": 9.992161705725033,
+        "maximum_neutral_balance_error": 1.2144565442508208e-10,
+        "relative_change_from_previous": 0.03909241240548594
+      }
+    ],
+    "outcome": "The matched 10-to-20-interval comparison misses the 3% gate at 3.91%. This is provisional because both runs used the skfmm reinitializer now known to erase repeated subcell motion near the trench CSG corner. It establishes unresolved finite-extrusion sensitivity, but does not by itself authorize a symmetry-reduction decision or further brute-force extrusion runs."
+  },
+  "conclusion": "Deterministic face gather removes the sparse-tally pillar/topology failure and a flat physical start removes the artificial seed. The apparent 80 nm etch-stop bifurcation is a four-cell resolution artifact and disappears at eight cells across; the refined 2.5-to-1.25 s gate changes depth by 1.80% and passes. Correcting the nodal endpoint removes a real periodic-domain inconsistency. The remaining 3.91% finite-extrusion change was measured with the subsequently rejected skfmm reinitialization path, so the 60 nm spatial ladder remains open without yet selecting symmetry reduction or more extrusion as its remedy. No experimental or calibrated-chemistry claim is authorized from rejected runs."
 }
