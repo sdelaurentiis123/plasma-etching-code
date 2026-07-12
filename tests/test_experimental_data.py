@@ -5,6 +5,7 @@ import pytest
 
 from petch.experimental_data import (
     load_bosch_wafer_measurements,
+    load_bosch_wafer_measurements_89pt,
     load_krueger_2024_evidence,
 )
 
@@ -17,6 +18,7 @@ DATA = (
     / "Si_Oxide_etch_9_points.csv"
 )
 KRUEGER_DATA = Path(__file__).parents[1] / "data" / "experimental" / "krueger_2024"
+DATA_89 = DATA.with_name("Si_Oxide_etch_89_points.csv")
 
 
 def test_bosch_wafer_measurements_have_verified_provenance_and_units():
@@ -39,6 +41,26 @@ def test_bosch_wafer_measurements_reject_unverified_content(tmp_path):
 
     with pytest.raises(ValueError, match="checksum mismatch"):
         load_bosch_wafer_measurements(altered)
+
+
+def test_bosch_89_point_measurements_preserve_source_missingness_and_distinct_identities():
+    rows = load_bosch_wafer_measurements_89pt(DATA_89)
+
+    assert len(rows) == 7832
+    assert len({(row.experiment_key, row.lot_number, row.wafer_number) for row in rows}) == 88
+    assert all(row.sampling_grid == "89_point" and row.location_id is None for row in rows)
+    assert sum(row.post_oxide_original_um is None for row in rows) == 157
+    assert np.isclose(min(row.silicon_etch_um for row in rows), 28.653)
+    assert np.isclose(max(row.silicon_etch_um for row in rows), 52.7809)
+    assert np.isclose(min(row.oxide_etch_um for row in rows), 0.4248)
+    assert np.isclose(max(row.oxide_etch_um for row in rows), 0.838006352)
+
+
+def test_bosch_89_point_measurements_reject_unverified_content(tmp_path):
+    altered = tmp_path / "measurements_89.csv"
+    altered.write_bytes(DATA_89.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        load_bosch_wafer_measurements_89pt(altered)
 
 
 def test_krueger_2024_keeps_calibration_measurements_and_simulated_inputs_separate():

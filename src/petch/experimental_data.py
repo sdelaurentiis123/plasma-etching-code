@@ -15,6 +15,7 @@ import numpy as np
 
 
 ZENODO_17122442_9PT_MD5 = "78515caf25e29e558e1859b92f8a4827"
+ZENODO_17122442_89PT_MD5 = "446e75b040eea37b634eeb8f763a62fc"
 
 KRUEGER_2024_SHA256 = {
     "base_case_metrics.csv": "5d51d124a93e1f942a9b999649b8adcf217662967d9ea2a40089f72940992351",
@@ -28,7 +29,7 @@ class BoschWaferMeasurement:
     experiment_key: Optional[str]
     lot_number: Optional[int]
     wafer_number: Optional[int]
-    location_id: str
+    location_id: Optional[str]
     x_um: float
     y_um: float
     pre_oxide_um: float
@@ -36,6 +37,8 @@ class BoschWaferMeasurement:
     step_height_um: float
     oxide_etch_um: float
     silicon_etch_um: float
+    post_oxide_original_um: Optional[float] = None
+    sampling_grid: str = "9_point"
 
 
 @dataclass(frozen=True)
@@ -171,6 +174,8 @@ def load_bosch_wafer_measurements(path, *, verify_checksum=True):
                 step_height_um=float(row["stepheight"]),
                 oxide_etch_um=float(row["oxide_etch"]),
                 silicon_etch_um=float(row["si_etch"]),
+                post_oxide_original_um=float(row["postox_thickness"]),
+                sampling_grid="9_point",
             )
             for row in reader
         ]
@@ -185,4 +190,56 @@ def load_bosch_wafer_measurements(path, *, verify_checksum=True):
     ])
     if np.max(np.abs(oxide_error)) > 1e-10 or np.max(np.abs(silicon_error)) > 1e-10:
         raise ValueError("experimental dataset violates its etch-depth measurement identities")
+    return rows
+
+
+def load_bosch_wafer_measurements_89pt(path, *, verify_checksum=True):
+    """Load the high-spatial-resolution wafer table from Zenodo record 17122442.
+
+    This source has a distinct schema and defining identities from the nine-point table. Its
+    ``postox_thickness`` column is the processed thickness used for derived values, while
+    ``postox_thickness_nan`` preserves ``N/A`` at 157 originally unavailable measurements. Here
+    ``oxide_etch = preox - postox`` and ``si_etch = stepheight - postox``. The distinction is kept
+    explicit rather than forcing both source tables through one accidental convention.
+    """
+    path = Path(path)
+    payload = path.read_bytes()
+    if verify_checksum and md5(payload).hexdigest() != ZENODO_17122442_89PT_MD5:
+        raise ValueError(f"checksum mismatch for experimental dataset: {path}")
+    expected = [
+        "experiment_key", "lot_number", "wafer_number", "X", "Y",
+        "preox_thickness", "postox_thickness", "postox_thickness_nan",
+        "stepheight", "oxide_etch", "si_etch",
+    ]
+    with path.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        if reader.fieldnames != expected:
+            raise ValueError(f"unexpected experimental-data schema: {reader.fieldnames}")
+        rows = []
+        for row in reader:
+            original = row["postox_thickness_nan"]
+            rows.append(BoschWaferMeasurement(
+                experiment_key=row["experiment_key"] or None,
+                lot_number=int(row["lot_number"]) if row["lot_number"] else None,
+                wafer_number=int(row["wafer_number"]) if row["wafer_number"] else None,
+                location_id=None, x_um=float(row["X"]), y_um=float(row["Y"]),
+                pre_oxide_um=float(row["preox_thickness"]),
+                post_oxide_um=float(row["postox_thickness"]),
+                step_height_um=float(row["stepheight"]),
+                oxide_etch_um=float(row["oxide_etch"]),
+                silicon_etch_um=float(row["si_etch"]),
+                post_oxide_original_um=(None if original == "N/A" else float(original)),
+                sampling_grid="89_point"))
+    if not rows:
+        raise ValueError(f"experimental dataset is empty: {path}")
+    oxide_error = np.array([
+        row.oxide_etch_um - (row.pre_oxide_um - row.post_oxide_um) for row in rows])
+    silicon_error = np.array([
+        row.silicon_etch_um - (row.step_height_um - row.post_oxide_um) for row in rows])
+    original_error = np.array([
+        row.post_oxide_original_um - row.post_oxide_um
+        for row in rows if row.post_oxide_original_um is not None])
+    if (np.max(np.abs(oxide_error)) > 1e-8 or np.max(np.abs(silicon_error)) > 1e-8
+            or np.max(np.abs(original_error)) > 1e-12):
+        raise ValueError("high-resolution dataset violates its measurement identities")
     return rows

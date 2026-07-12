@@ -10,10 +10,14 @@ Included here:
 
 - `Si_Oxide_etch_9_points.csv` — 684 measurements from 76 processed 200-mm silicon wafers, at nine
   nominal positions per wafer (some source measurements are unavailable).
+- `Si_Oxide_etch_89_points.csv` — 7,832 measurements from 88 identified wafers. Its distinct source
+  schema preserves 157 originally unavailable post-oxide measurements as `N/A` in
+  `postox_thickness_nan`, alongside the processed `postox_thickness` used in the derived columns.
 - Nine rows forming one complete nine-position wafer have blank experiment, lot, and wafer identifiers
   in the source CSV. The physical measurements are retained and the loader exposes those identifiers as
   missing; identified-wafer analyses must exclude or separately handle this record.
 - Source MD5: `78515caf25e29e558e1859b92f8a4827`, verified at acquisition on 2026-07-11.
+- 89-point source MD5: `446e75b040eea37b634eeb8f763a62fc`, verified at acquisition on 2026-07-12.
 - All measurement values and coordinates are in micrometres, per the dataset README.
 
 Experiment: SPTS Omega i2L DSi Rapier Bosch process, SF6 etch/C4F8 passivation, 100 cycles with 4.5 s
