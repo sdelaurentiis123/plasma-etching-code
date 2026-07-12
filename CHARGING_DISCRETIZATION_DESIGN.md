@@ -160,6 +160,15 @@ the forward estimate and retains `adjoint_support_unresolved` as a diagnostic in
 physics. It still refuses the cell when neither direction is certified or when two admissible estimators
 disagree beyond the declared consistency threshold.
 
+A zero-hit direct estimate carries a finite rule-of-three upper bound. The selector must preserve that bound
+even when the adjoint also reports zero: an exact adjoint zero cannot erase finite forward uncertainty. This
+case first became visible on the deepest electron-shadowed nodes of a narrow AR16 trench. After the fix, an
+identical six-evaluation diagnostic (same finite-transit ion/electron boundary state and numerics; only trench
+depth changed) reduced certified RMS current imbalance from 1.50 to 0.52 at AR1, 1.44 to 0.69 at AR4, and
+0.82 to 0.53 at AR16. The AR16 sequence contained a recoverable sampling transient to 1.91, so this is a
+cross-AR descent gate, not convergence or experimental validation. It motivates uncertainty-aware local step
+control; it does not motivate an AR branch or a fabricated nonzero electron current.
+
 ## Signed error budget: what else can be wrong and how errors stack
 
 The charging fixed point balances `Gi(V) = Ge(V)`. For small relative transport errors, the raw voltage

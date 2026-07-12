@@ -256,6 +256,34 @@ def test_bidirectional_adjoint_zero_is_not_exact_when_forward_sees_flux(monkeypa
     assert np.isclose(result["per_face"][0], 0.1)
 
 
+def test_bidirectional_adjoint_zero_keeps_forward_zero_hit_upper_bound(monkeypatch):
+    adjoint = AdaptiveQuadratureResult(
+        element_mean=np.array([0.0]), element_stderr=np.array([0.0]),
+        element_replicates=np.zeros((4, 1)), log2_samples=np.array([12]),
+        total_mean=0.0, total_stderr=0.0, converged=True, rounds=1, evaluations=1)
+    forward = AdaptiveQuadratureResult(
+        element_mean=np.array([0.0]), element_stderr=np.array([0.005]),
+        element_replicates=np.zeros((4, 1)), log2_samples=np.array([12]),
+        total_mean=0.0, total_stderr=0.005, converged=True, rounds=1, evaluations=1)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        lambda *args, **kwargs: adjoint)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        lambda *args, **kwargs: forward)
+
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "electron", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0)], [(0.0, -1.0)], method_hint=np.array(["adjoint"]),
+        element_absolute_tolerance=0.01, element_relative_tolerance=0.0)
+
+    assert result["converged"]
+    assert result["adjoint_zero_unresolved"][0]
+    assert result["method"][0] == "forward"
+    assert result["per_face"][0] == 0.0
+    assert result["per_face_stderr"][0] == 0.005
+
+
 def test_bidirectional_refuses_inconsistent_estimators_that_both_claim_precision(monkeypatch):
     def estimate(mean):
         delta = 0.001 * np.sqrt(3.0)

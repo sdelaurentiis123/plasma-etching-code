@@ -617,7 +617,8 @@ def bidirectional_boundary_state_cell_flux(
         # support check. Unlike direct physical sampling, weighted adjoint histories do not have a
         # finite universal rule-of-three upper bound.
         adjoint_zero_unresolved[cell_index] = (
-            adjoint_mean == 0.0 and adjoint_stderr == 0.0 and forward_mean > 0.0)
+            adjoint_mean == 0.0 and adjoint_stderr == 0.0
+            and forward_mean + support_sigma * forward_stderr > 0.0)
         adjoint_support_unresolved[cell_index] = (
             adjoint_mean + support_sigma * adjoint_stderr
             < support_ratio * max(
