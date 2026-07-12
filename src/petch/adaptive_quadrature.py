@@ -42,6 +42,7 @@ def adaptive_surface_quadrature(
     element_relative_tolerance: float = 0.0,
     refine_fraction: float = 0.5,
     initial_log2_samples=None,
+    freeze_levels: bool = False,
 ) -> AdaptiveQuadratureResult:
     """Adapt nested per-element quadrature using replicate uncertainty as the sole error indicator.
 
@@ -106,6 +107,11 @@ def adaptive_surface_quadrature(
                           + element_relative_tolerance * np.abs(element_mean)))))
         if total_stderr <= total_tol and element_ok:
             converged = True
+            break
+        if freeze_levels:
+            # Adaptation is a discrete controller decision. Derivative and nonlinear-root epochs use
+            # an already certified rule as a fixed deterministic map; if that rule no longer meets
+            # tolerance, report failure so the caller can start a separate refinement epoch.
             break
 
         refinable = np.where(levels < max_log2)[0]

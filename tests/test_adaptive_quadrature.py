@@ -66,3 +66,15 @@ def test_adaptive_quadrature_warm_starts_per_element_levels():
         initial_log2_samples=initial, absolute_tolerance=1.0, relative_tolerance=0.0)
     assert np.array_equal(result.log2_samples, initial)
     assert result.evaluations == 3 * (2 ** 4 + 2 ** 6 + 2 ** 8)
+
+
+def test_frozen_quadrature_keeps_exact_rule_and_reports_lost_certification():
+    evaluator = SyntheticEvaluator([0.2, 0.4, 0.6], [10.0, 10.0, 10.0])
+    initial = np.array([4, 6, 8])
+    result = adaptive_surface_quadrature(
+        evaluator, 3, base_log2=4, max_log2=12, n_replicates=3,
+        initial_log2_samples=initial, absolute_tolerance=1e-12,
+        relative_tolerance=0.0, freeze_levels=True)
+    assert not result.converged
+    assert np.array_equal(result.log2_samples, initial)
+    assert result.evaluations == 3 * (2 ** 4 + 2 ** 6 + 2 ** 8)

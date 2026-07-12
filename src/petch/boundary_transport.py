@@ -319,7 +319,7 @@ def adaptive_adjoint_boundary_state_face_flux(
         absolute_tolerance=1e-3, relative_tolerance=5e-3,
         element_absolute_tolerance=None, element_relative_tolerance=0.0, refine_fraction=0.5,
         max_steps=None, dt_cap=0.15, dt_field=0.10, fixed_dt=0.0,
-        initial_log2_samples=None, face_offset=1e-3):
+        initial_log2_samples=None, face_offset=1e-3, freeze_levels=False):
     """Universally adapt randomized phase-space quadrature on arbitrary material faces."""
     physical = boundary.get(species_name)
     template = physical if proposal_species is None else proposal_species
@@ -350,7 +350,7 @@ def adaptive_adjoint_boundary_state_face_flux(
         absolute_tolerance=absolute_tolerance, relative_tolerance=relative_tolerance,
         element_absolute_tolerance=element_absolute_tolerance,
         element_relative_tolerance=element_relative_tolerance, refine_fraction=refine_fraction,
-        initial_log2_samples=initial_log2_samples)
+        initial_log2_samples=initial_log2_samples, freeze_levels=freeze_levels)
     endpoint_replicates = np.empty((n_replicates, len(cells), 2))
     for element_index, level in enumerate(adaptive.log2_samples):
         for replicate in range(n_replicates):
@@ -369,7 +369,7 @@ def adaptive_forward_boundary_state_cell_flux(
         element_absolute_tolerance=None, element_relative_tolerance=0.0,
         refine_fraction=0.5, initial_log2_samples=None,
         x_min=0.0, x_max=None, max_steps=None, dt_cap=0.15, dt_field=0.10,
-        fixed_dt=0.0, source_offset=1e-3):
+        fixed_dt=0.0, source_offset=1e-3, freeze_levels=False):
     """Adapt the complementary forward estimator on arbitrary physical material cells."""
     cells = [tuple(map(int, cell)) for cell in cells]
     if proposal_species is not None:
@@ -436,6 +436,8 @@ def adaptive_forward_boundary_state_cell_flux(
         if total_ok and element_ok:
             converged = True
             break
+        if freeze_levels:
+            break
     levels = np.full(len(cells), level, dtype=np.int64)
     return AdaptiveQuadratureResult(
         element_mean=element_mean.copy(), element_stderr=element_stderr.copy(),
@@ -467,6 +469,11 @@ def bidirectional_boundary_state_cell_flux(
     forward_kwargs = {} if forward_options is None else dict(forward_options)
     adjoint_fixed_dt = float(adjoint_kwargs.get("fixed_dt", 0.0))
     forward_fixed_dt = float(forward_kwargs.get("fixed_dt", 0.0))
+    adjoint_levels_frozen = bool(adjoint_kwargs.get("freeze_levels", False))
+    forward_levels_frozen = bool(forward_kwargs.get("freeze_levels", False))
+    if adjoint_levels_frozen != forward_levels_frozen:
+        raise ValueError("bidirectional estimators must freeze quadrature levels together")
+    quadrature_levels_frozen = adjoint_levels_frozen
     if np.ptp(np.asarray(nodal_potential, dtype=float)) > 0.0:
         if adjoint_fixed_dt <= 0.0 or forward_fixed_dt <= 0.0:
             raise ValueError(
@@ -526,7 +533,8 @@ def bidirectional_boundary_state_cell_flux(
             pooled_forward_ok &= stderr <= (
                 element_absolute_tolerance + element_relative_tolerance * abs(mean))
         current_forward_level = int(forward.log2_samples.max())
-        if pooled_forward_ok or current_forward_level >= max_forward_level:
+        if (pooled_forward_ok or current_forward_level >= max_forward_level
+                or quadrature_levels_frozen):
             break
         next_level = current_forward_level + 1
         refined_forward_options = dict(forward_kwargs)
@@ -573,6 +581,8 @@ def bidirectional_boundary_state_cell_flux(
                     and (discrepancy > consistency_sigma or support_separated)):
                 inconsistent_cells.append(cell)
         if not inconsistent_cells:
+            break
+        if quadrature_levels_frozen:
             break
         inconsistent_set = set(inconsistent_cells)
         levels = adjoint.log2_samples.copy()
@@ -734,6 +744,7 @@ def bidirectional_boundary_state_cell_flux(
         support_sigma=float(support_sigma),
         support_ratio=float(support_ratio),
         method_hint_frozen=bool(freeze_method_hint and method_hint is not None),
+        quadrature_levels_frozen=quadrature_levels_frozen,
         cross_refinement_rounds=cross_refinement_rounds,
         forward_cross_refinement_rounds=forward_cross_refinement_rounds,
         forward_pool_refinement_rounds=forward_pool_refinement_rounds,
