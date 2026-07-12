@@ -44,6 +44,7 @@ parser.add_argument("--update", choices=("picard", "anderson"), default="picard"
 parser.add_argument("--anderson-depth", type=int, default=4)
 parser.add_argument("--output", default="/tmp/petch_charging_diag_result.npz")
 parser.add_argument("--initial", default=None)
+parser.add_argument("--initial-state", choices=("accepted", "rejected"), default="accepted")
 parser.add_argument("--override-restart-beta", type=float)
 parser.add_argument("--geometry", choices=("bulk", "sheet"), default="bulk")
 parser.add_argument("--trench-width", type=int, default=10)
@@ -159,9 +160,14 @@ if args.initial is not None:
     with np.load(args.initial) as saved:
         if "solid" in saved and not np.array_equal(saved["solid"], solid):
             raise ValueError("checkpoint material topology does not match requested geometry")
-        initial_surface_voltage = saved["surface_voltage"]
-        if "boundary_nodal_voltage" in saved:
-            initial_boundary_nodal_voltage = saved["boundary_nodal_voltage"]
+        prefix = "failed_" if args.initial_state == "rejected" else ""
+        if args.initial_state == "rejected" and str(saved.get("status", "")) != "quadrature_failure":
+            raise ValueError("a rejected initial state requires a quadrature-failure checkpoint")
+        initial_surface_voltage = saved[f"{prefix}surface_voltage"]
+        if f"{prefix}boundary_nodal_voltage" in saved:
+            initial_boundary_nodal_voltage = saved[f"{prefix}boundary_nodal_voltage"]
+        elif args.initial_state == "rejected" and "failed_potential" in saved:
+            initial_boundary_nodal_voltage = saved["failed_potential"]
         elif args.nodal and "potential" in saved:
             initial_boundary_nodal_voltage = saved["potential"]
         if args.perturb_node_i is not None or args.perturb_node_j is not None:
@@ -170,16 +176,19 @@ if args.initial is not None:
             initial_boundary_nodal_voltage = initial_boundary_nodal_voltage.copy()
             initial_boundary_nodal_voltage[
                 args.perturb_node_i, args.perturb_node_j] += args.perturb_node_volts
-        if "surface_charge_node_c_per_m" in saved:
-            initial_surface_charge_node_c_per_m = saved["surface_charge_node_c_per_m"]
+        if f"{prefix}surface_charge_node_c_per_m" in saved:
+            initial_surface_charge_node_c_per_m = saved[
+                f"{prefix}surface_charge_node_c_per_m"]
         for species_name in ("ion", "electron"):
-            if f"adaptive_{species_name}" in saved:
-                initial_adaptive_levels[species_name] = saved[f"adaptive_{species_name}"]
-            if f"forward_adaptive_{species_name}" in saved:
+            if f"{prefix}adaptive_{species_name}" in saved:
+                initial_adaptive_levels[species_name] = saved[
+                    f"{prefix}adaptive_{species_name}"]
+            if f"{prefix}forward_adaptive_{species_name}" in saved:
                 initial_forward_adaptive_levels[species_name] = saved[
-                    f"forward_adaptive_{species_name}"]
-            if f"method_hint_{species_name}" in saved:
-                initial_method_hint[species_name] = saved[f"method_hint_{species_name}"]
+                    f"{prefix}forward_adaptive_{species_name}"]
+            if f"{prefix}method_hint_{species_name}" in saved:
+                initial_method_hint[species_name] = saved[
+                    f"{prefix}method_hint_{species_name}"]
         if "restart_accepted_iterations" in saved:
             initial_accepted_iterations = int(saved["restart_accepted_iterations"])
         elif "accepted_iterations_total" in saved:
@@ -189,6 +198,13 @@ if args.initial is not None:
         if "anderson_x_history" in saved:
             initial_anderson_x = saved["anderson_x_history"]
             initial_anderson_residual = saved["anderson_residual_history"]
+    if args.initial_state == "rejected":
+        if args.poisson and args.nodal and initial_surface_charge_node_c_per_m is None:
+            raise ValueError("rejected Poisson state is missing its physical surface charge")
+        if (set(initial_adaptive_levels) != {"ion", "electron"}
+                or set(initial_forward_adaptive_levels) != {"ion", "electron"}
+                or set(initial_method_hint) != {"ion", "electron"}):
+            raise ValueError("rejected state is missing its frozen estimator rule")
 if args.override_restart_beta is not None:
     if not np.isfinite(args.override_restart_beta) or args.override_restart_beta <= 0.0:
         raise ValueError("override restart beta must be finite and positive")
@@ -283,6 +299,19 @@ except AdaptiveQuadratureConvergenceError as error:
                for name, value in accepted["forward_adaptive_levels"].items()},
             **{f"method_hint_{name}": value
                for name, value in accepted["method_hint"].items()})
+    rejected = error.rejected_state
+    failed = {}
+    if rejected is not None:
+        failed = dict(
+            failed_boundary_nodal_voltage=rejected["boundary_nodal_voltage"],
+            failed_surface_charge_node_c_per_m=(
+                rejected["surface_charge_node_c_per_m"]),
+            **{f"failed_adaptive_{name}": value
+               for name, value in rejected["adaptive_levels"].items()},
+            **{f"failed_forward_adaptive_{name}": value
+               for name, value in rejected["forward_adaptive_levels"].items()},
+            **{f"failed_method_hint_{name}": value
+               for name, value in rejected["method_hint"].items()})
     np.savez(
         args.output, status="quadrature_failure", iteration=error.iteration,
         species=error.species, solid=solid,
@@ -295,7 +324,7 @@ except AdaptiveQuadratureConvergenceError as error:
         discrepancy_sigma=q["estimator_discrepancy_sigma"],
         method=q["method"], method_within_tolerance=q["method_within_tolerance"],
         estimator_consistent=q["estimator_consistent"], cell_converged=q["cell_converged"],
-        consistency_sigma=q["consistency_sigma"], **restart)
+        consistency_sigma=q["consistency_sigma"], **restart, **failed)
     raise
 
 print("seconds", time.perf_counter() - start)

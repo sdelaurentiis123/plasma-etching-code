@@ -336,6 +336,17 @@ def solve_boundary_state_charging_nodal(
             restart_accepted_iterations=max(
                 int(last_accepted_state["accepted_iterations_total"]) - 1, 0))
 
+    def rejected_quadrature_checkpoint(potential):
+        """Capture the failed trial solely so a new quadrature epoch can certify its neighborhood."""
+        return dict(
+            solid=solid.copy(), surface_voltage=surface_readout(),
+            boundary_nodal_voltage=np.asarray(potential).copy(),
+            surface_charge_node_c_per_m=surface_charge_node.copy(),
+            adaptive_levels={name: value.copy() for name, value in adaptive_levels.items()},
+            forward_adaptive_levels={
+                name: value.copy() for name, value in forward_adaptive_levels.items()},
+            method_hint={name: value.copy() for name, value in hybrid_hint.items()})
+
     for iteration in range(int(n_iter)):
         impose_conductors()
         if poisson_system is None:
@@ -419,7 +430,8 @@ def solve_boundary_state_charging_nodal(
                             iteration=iteration + 1, species=species.name, quadrature=hybrid,
                             surface_voltage=surface_readout(), potential=potential,
                             cells=cells, normals=normals,
-                            accepted_state=accepted_checkpoint())
+                            accepted_state=accepted_checkpoint(),
+                            rejected_state=rejected_quadrature_checkpoint(potential))
                     normalized = hybrid["selected_face_mean"]
                     normalized_stderr = hybrid["selected_face_stderr"]
                     normalized_replicates = hybrid["selected_face_replicates"]
@@ -436,7 +448,8 @@ def solve_boundary_state_charging_nodal(
                             iteration=iteration + 1, species=species.name,
                             quadrature=estimate, surface_voltage=surface_readout(),
                             potential=potential, cells=cells, normals=normals,
-                            accepted_state=accepted_checkpoint())
+                            accepted_state=accepted_checkpoint(),
+                            rejected_state=rejected_quadrature_checkpoint(potential))
                     normalized = estimate.element_mean
                     normalized_stderr = estimate.element_stderr
                     normalized_replicates = estimate.element_replicates

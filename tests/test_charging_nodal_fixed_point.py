@@ -306,6 +306,7 @@ def test_nodal_quadrature_failure_carries_last_accepted_restart_state(monkeypatc
 
     error = captured.value
     checkpoint = error.accepted_state
+    rejected = error.rejected_state
     assert error.iteration == 2
     assert checkpoint is not None
     assert checkpoint["accepted_iterations_total"] == 1
@@ -317,6 +318,11 @@ def test_nodal_quadrature_failure_carries_last_accepted_restart_state(monkeypatc
     assert checkpoint["anderson_x"].ndim == 2
     assert checkpoint["anderson_x"].shape[0] == 0
     assert checkpoint["anderson_residual"].shape == checkpoint["anderson_x"].shape
+    assert rejected is not None
+    assert np.array_equal(rejected["solid"], solid)
+    assert rejected["boundary_nodal_voltage"].shape == (5, 5)
+    assert rejected["surface_charge_node_c_per_m"].shape == (5, 5)
+    assert np.all(rejected["adaptive_levels"]["ion"] == 9)
 
     fail_enabled = False
     replay = solve_boundary_state_charging_nodal(

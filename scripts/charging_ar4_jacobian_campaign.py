@@ -12,11 +12,17 @@ parser.add_argument("--checkpoint", required=True)
 parser.add_argument("--output", required=True)
 parser.add_argument("--step", type=float, required=True)
 parser.add_argument("--workers", type=int, default=5)
+parser.add_argument("--adjoint-max", type=int, default=20)
+parser.add_argument("--forward-max", type=int, default=20)
+parser.add_argument("--element-absolute", type=float, default=0.01)
+parser.add_argument("--element-relative", type=float, default=0.15)
 parser.add_argument(
     "--driver", default=str(Path(__file__).with_name("charging_nodal_campaign.py")))
 args = parser.parse_args()
-if args.step == 0.0 or args.workers <= 0:
-    raise ValueError("nonzero step and positive worker count are required")
+if (args.step == 0.0 or args.workers <= 0 or args.adjoint_max < 0
+        or args.forward_max < 0 or args.element_absolute < 0.0
+        or args.element_relative < 0.0):
+    raise ValueError("campaign step, workers, quadrature levels, and tolerances are invalid")
 
 output_directory = Path(args.output)
 output_directory.mkdir(parents=True, exist_ok=True)
@@ -28,8 +34,10 @@ base = [
     "--side-thickness", "5", "--nodal", "--poisson", "--update", "picard",
     "--iterations", "1", "--beta", "0.025", "--override-restart-beta", "0.025",
     "--fixed-dt", "0.01", "--face-offset", "0.000001", "--grazing",
-    "--freeze-method", "--freeze-levels", "--adjoint-max", "20", "--forward-max", "20",
-    "--element-absolute", "0.01", "--element-relative", "0.15",
+    "--freeze-method", "--freeze-levels",
+    "--adjoint-max", str(args.adjoint_max), "--forward-max", str(args.forward_max),
+    "--element-absolute", str(args.element_absolute),
+    "--element-relative", str(args.element_relative),
     "--initial", args.checkpoint,
 ]
 environment = dict(os.environ)

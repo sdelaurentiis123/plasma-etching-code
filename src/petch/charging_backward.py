@@ -48,7 +48,7 @@ class AdaptiveQuadratureConvergenceError(RuntimeError):
     """Carries the rejected fixed-point state for estimator diagnosis without accepting it."""
 
     def __init__(self, message, *, iteration, species, quadrature, surface_voltage, potential,
-                 cells, normals, accepted_state=None):
+                 cells, normals, accepted_state=None, rejected_state=None):
         super().__init__(message)
         self.iteration = int(iteration)
         self.species = species
@@ -58,6 +58,9 @@ class AdaptiveQuadratureConvergenceError(RuntimeError):
         self.cells = tuple(cells)
         self.normals = tuple(normals)
         self.accepted_state = copy.deepcopy(accepted_state)
+        # A rejected state is diagnostic evidence, not a valid restart. It lets an outer
+        # adaptation epoch certify the exact trial that left the current frozen-rule neighborhood.
+        self.rejected_state = copy.deepcopy(rejected_state)
 
 
 def _cone_angles(x0, z0, aperture, pad):
