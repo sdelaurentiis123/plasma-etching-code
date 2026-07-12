@@ -80,6 +80,18 @@ def test_nodal_charging_returns_last_evaluated_state_not_unassessed_step():
     assert np.all(result["ion_current"] > 0.0)
 
 
+def test_nodal_gain_decay_is_deterministic_and_robbins_monro_compatible():
+    solid = np.zeros((6, 5), dtype=bool); solid[:, -1] = True
+    result = solve_boundary_state_charging_nodal(
+        solid, np.zeros_like(solid, dtype=int), _balanced_boundary(),
+        n_iter=3, min_iter=1, balance_tol=None, beta=0.2,
+        gain_decay=0.6, gain_offset=5.0, field_sweeps=20, trust_region=False)
+
+    expected = 0.2 * (1.0 + np.arange(1, 4) / 5.0) ** -0.6
+    assert np.allclose(result["accepted_gain_history"], expected)
+    assert result["gain_decay"] == 0.6
+
+
 def test_endpoint_current_basis_removes_face_constant_alternating_null_mode():
     solid = np.zeros((20, 18), dtype=bool)
     solid[5, 1:] = True; solid[14, 1:] = True; solid[5:15, 15:] = True

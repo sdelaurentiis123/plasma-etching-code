@@ -352,6 +352,53 @@ def test_bidirectional_cross_refines_a_missed_adjoint_mode(monkeypatch):
     assert np.allclose(result["selected_endpoint_mean"][0], [0.025, 0.025])
 
 
+def test_bidirectional_cross_refines_forward_and_uses_final_endpoint_ensemble(monkeypatch):
+    adjoint_replicates = np.array([[0.098], [0.100], [0.100], [0.102]])
+    adjoint_endpoints = np.repeat(
+        np.array([[[0.04, 0.06]]]), adjoint_replicates.shape[0], axis=0)
+    adjoint = AdaptiveQuadratureResult(
+        element_mean=np.array([0.1]), element_stderr=np.array([0.001]),
+        element_replicates=adjoint_replicates, log2_samples=np.array([12]),
+        total_mean=0.1, total_stderr=0.001, converged=True, rounds=1, evaluations=1,
+        auxiliary_mean=adjoint_endpoints.mean(axis=0),
+        auxiliary_replicates=adjoint_endpoints)
+    levels_seen = []
+
+    def forward_estimate(*args, **kwargs):
+        level = int(np.asarray(kwargs.get("initial_log2_samples", [12])).max())
+        levels_seen.append(level)
+        mean = 0.2 if level == 12 else 0.1
+        delta = 0.001 * np.sqrt(3.0)
+        replicates = np.array([
+            [mean - delta], [mean - delta], [mean + delta], [mean + delta]])
+        endpoint = np.array([0.10, 0.10]) if level == 12 else np.array([0.03, 0.07])
+        endpoints = np.repeat(endpoint[None, None, :], 4, axis=0)
+        return AdaptiveQuadratureResult(
+            element_mean=np.array([mean]), element_stderr=np.array([0.001]),
+            element_replicates=replicates, log2_samples=np.array([level]),
+            total_mean=mean, total_stderr=0.001, converged=True, rounds=1, evaluations=1,
+            auxiliary_mean=endpoints.mean(axis=0), auxiliary_replicates=endpoints)
+
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_adjoint_boundary_state_face_flux",
+        lambda *args, **kwargs: adjoint)
+    monkeypatch.setattr(
+        boundary_transport_module, "adaptive_forward_boundary_state_cell_flux",
+        forward_estimate)
+    result = bidirectional_boundary_state_cell_flux(
+        object(), "ion", np.zeros((2, 2)), np.zeros((1, 1), dtype=bool),
+        [(0, 0)], [(0.0, -1.0)], method_hint=np.array(["forward"]),
+        adjoint_options={"max_log2": 12},
+        forward_options={"base_log2": 12, "max_log2": 14},
+        element_absolute_tolerance=0.01, element_relative_tolerance=0.0)
+
+    assert levels_seen == [12, 13]
+    assert result["forward_cross_refinement_rounds"] == 1
+    assert result["estimator_consistent"][0]
+    assert result["method"][0] == "forward"
+    assert np.allclose(result["selected_endpoint_mean"][0], [0.03, 0.07])
+
+
 def test_bidirectional_refines_nonoverlapping_forward_and_adjoint_support(monkeypatch):
     forward = AdaptiveQuadratureResult(
         element_mean=np.array([0.034]), element_stderr=np.array([0.009]),

@@ -520,9 +520,11 @@ def bidirectional_boundary_state_cell_flux(
 
     # A replicate-only importance-sampling controller cannot detect a mode missed by every scramble:
     # all replicates then agree on a spuriously precise near-zero value. Direct forward transport is
-    # the independent support audit. Refine only adjoint faces whose two certified estimates disagree,
-    # without using species, orientation, region, aspect ratio, or geometry names.
+    # the independent support audit. When two nominally precise estimates disagree, refine both the
+    # selected adjoint faces and the common forward history budget without using species, orientation,
+    # region, aspect ratio, or geometry names.
     cross_refinement_rounds = 0
+    forward_cross_refinement_rounds = 0
     max_adjoint_level = int(adjoint_kwargs.get("max_log2", 12))
     while True:
         inconsistent_cells = []
@@ -558,15 +560,30 @@ def bidirectional_boundary_state_cell_flux(
         selected_faces = np.array([
             index for index, cell in enumerate(cells) if cell in inconsistent_set
             and levels[index] < max_adjoint_level], dtype=int)
-        if selected_faces.size == 0:
+        current_forward_level = int(forward.log2_samples.max())
+        refine_forward = current_forward_level < max_forward_level
+        if selected_faces.size == 0 and not refine_forward:
             break
-        levels[selected_faces] = np.minimum(
-            levels[selected_faces] + 2, max_adjoint_level)
-        refined_options = dict(adjoint_kwargs)
-        refined_options["initial_log2_samples"] = levels
-        adjoint = adaptive_adjoint_boundary_state_face_flux(
-            boundary, species_name, nodal_potential, solid, cells, normals,
-            proposal_species=proposal_species, **refined_options)
+        if selected_faces.size:
+            levels[selected_faces] = np.minimum(
+                levels[selected_faces] + 2, max_adjoint_level)
+            refined_options = dict(adjoint_kwargs)
+            refined_options["initial_log2_samples"] = levels
+            adjoint = adaptive_adjoint_boundary_state_face_flux(
+                boundary, species_name, nodal_potential, solid, cells, normals,
+                proposal_species=proposal_species, **refined_options)
+        if refine_forward:
+            refined_forward_options = dict(forward_kwargs)
+            refined_forward_options["initial_log2_samples"] = np.full(
+                len(cells), current_forward_level + 1, dtype=int)
+            refined_forward = adaptive_forward_boundary_state_cell_flux(
+                boundary, species_name, nodal_potential, solid, cells, normals=normals,
+                proposal_species=None, **refined_forward_options)
+            if int(refined_forward.log2_samples.max()) <= current_forward_level:
+                max_forward_level = current_forward_level
+            else:
+                forward = refined_forward
+                forward_cross_refinement_rounds += 1
         cross_refinement_rounds += 1
 
     # Refinement replaces the replicate ensembles. Endpoint moments must be read from the final
@@ -692,6 +709,7 @@ def bidirectional_boundary_state_cell_flux(
         support_sigma=float(support_sigma),
         support_ratio=float(support_ratio),
         cross_refinement_rounds=cross_refinement_rounds,
+        forward_cross_refinement_rounds=forward_cross_refinement_rounds,
         forward_pool_refinement_rounds=forward_pool_refinement_rounds,
         converged=bool(converged), adjoint=adjoint, forward=forward)
 

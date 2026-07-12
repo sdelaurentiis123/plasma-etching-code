@@ -61,8 +61,8 @@ def solve_boundary_state_charging_nodal(
         dVmax=8.0, balance_tol=1e-3, min_iter=2, field_sweeps=500,
         field_tolerance=1e-9, boundary_proposals=None, n_face_position=8,
         adaptive_quadrature=None, active_flux=1e-4, current_confidence_sigma=2.0,
-        trust_region=True, trust_growth_tolerance=0.02, trust_absolute_tolerance=0.05,
-        trust_scope="local", minimum_beta=1e-4):
+        trust_region=True, trust_growth_tolerance=0.02, minimum_beta=1e-4,
+        gain_decay=0.0, gain_offset=5.0):
     """Solve steady floating-current balance on physical material-boundary vertices.
 
     Dielectric unknowns and the electrostatic field share the same nodal basis. Particle histories and
@@ -79,10 +79,8 @@ def solve_boundary_state_charging_nodal(
         raise ValueError("plasma reference plane must be a gas-only top row above all material")
     if n_iter <= 0 or min_iter <= 0 or beta <= 0.0 or dVmax <= 0.0:
         raise ValueError("iteration counts, beta, and dVmax must be positive")
-    if trust_scope not in ("local", "global"):
-        raise ValueError("trust_scope must be 'local' or 'global'")
-    if trust_growth_tolerance < 0.0 or trust_absolute_tolerance < 0.0:
-        raise ValueError("trust tolerances must be nonnegative")
+    if not 0.0 <= gain_decay <= 1.0 or gain_offset <= 0.0:
+        raise ValueError("gain_decay must lie in [0,1] and gain_offset must be positive")
 
     def select(selection, positive):
         if selection is None:
@@ -153,21 +151,6 @@ def solve_boundary_state_charging_nodal(
             boundary_voltage[node] = conductor_voltage[component]
         boundary_voltage[:, 0] = 0.0
 
-    def read_dof_values():
-        return np.asarray(
-            [boundary_voltage[node] for node in dielectric_nodes]
-            + [conductor_voltage[component] for component in components], dtype=float)
-
-    def restore_dof_values(values, selected):
-        for index, node in enumerate(dielectric_nodes):
-            if selected[index]:
-                boundary_voltage[node] = values[index]
-        for component in components:
-            index = component_index[component]
-            if selected[index]:
-                conductor_voltage[component] = values[index]
-        impose_conductors()
-
     by_cell = {}
     for cell, endpoints in zip(cells, face_nodes):
         by_cell.setdefault(cell, []).extend(endpoints)
@@ -185,10 +168,9 @@ def solve_boundary_state_charging_nodal(
     history = []; interval_history = []; field_history = []; quadrature_history = []
     species_face_current = {}; species_face_stderr = {}; species_face_replicates = {}
     species_endpoint_stderr = {}; species_endpoint_replicates = {}
-    beta_current = float(beta); beta_dof = np.full(dof_count, float(beta))
-    pending_step = None; rejected_steps = 0
+    beta_current = float(beta); pending_step = None; rejected_steps = 0
     last_accepted_state = None
-    trial_merit_history = []; accepted_beta_history = []; accepted_beta_dof_history = []
+    trial_merit_history = []; accepted_beta_history = []; accepted_gain_history = []
     for iteration in range(int(n_iter)):
         impose_conductors()
         potential, field_diag = solve_nodal_laplace(
@@ -335,53 +317,29 @@ def solve_boundary_state_charging_nodal(
             rms_log_ratio=float(np.sqrt(np.mean(cert_active ** 2))) if cert_active.size else 0.0)
         merit = interval_balance["rms_log_ratio"]
         trial_merit_history.append(merit)
-        if trust_region and pending_step is not None:
-            if trust_scope == "global":
-                if merit > (pending_step["merit"] * (1.0 + trust_growth_tolerance)
-                             + trust_absolute_tolerance):
-                    boundary_voltage[:] = pending_step["boundary_voltage"]
-                    conductor_voltage[:] = pending_step["conductor_voltage"]
-                    hybrid_hint = {
-                        name: value.copy()
-                        for name, value in pending_step["hybrid_hint"].items()}
-                    adaptive_levels = {
-                        name: value.copy()
-                        for name, value in pending_step["adaptive_levels"].items()}
-                    forward_adaptive_levels = {
-                        name: value.copy()
-                        for name, value in pending_step["forward_adaptive_levels"].items()}
-                    beta_current *= 0.5; rejected_steps += 1; pending_step = None
-                    if beta_current < minimum_beta:
-                        raise RuntimeError(
-                            "nodal charging trust region collapsed below "
-                            f"minimum_beta={minimum_beta:g}")
-                    continue
-                if merit + trust_absolute_tolerance < 0.8 * pending_step["merit"]:
-                    beta_current = min(float(beta), 1.2 * beta_current)
-            else:
-                previous_abs = pending_step["absolute_residual"]
-                current_abs = np.abs(certified)
-                comparable = activity | pending_step["activity"]
-                worsened = comparable & (
-                    current_abs > previous_abs * (1.0 + trust_growth_tolerance)
-                    + trust_absolute_tolerance)
-                if np.any(worsened):
-                    # Retain successful coupled updates and roll back only degrees of freedom whose
-                    # resolved imbalance worsened. Re-evaluate the mixed state before accepting it.
-                    restore_dof_values(pending_step["dof_values"], worsened)
-                    beta_dof[worsened] = np.maximum(
-                        0.5 * beta_dof[worsened], float(minimum_beta))
-                    rejected_steps += 1; pending_step = None
-                    continue
-                improved = comparable & (
-                    current_abs + trust_absolute_tolerance < 0.8 * previous_abs)
-                beta_dof[improved] = np.minimum(
-                    float(beta), 1.2 * beta_dof[improved])
+        if (trust_region and pending_step is not None
+                and merit > pending_step["merit"] * (1.0 + trust_growth_tolerance)):
+            boundary_voltage[:] = pending_step["boundary_voltage"]
+            conductor_voltage[:] = pending_step["conductor_voltage"]
+            hybrid_hint = {
+                name: value.copy() for name, value in pending_step["hybrid_hint"].items()}
+            adaptive_levels = {
+                name: value.copy() for name, value in pending_step["adaptive_levels"].items()}
+            forward_adaptive_levels = {
+                name: value.copy()
+                for name, value in pending_step["forward_adaptive_levels"].items()}
+            beta_current *= 0.5; rejected_steps += 1; pending_step = None
+            if beta_current < minimum_beta:
+                raise RuntimeError(
+                    f"nodal charging trust region collapsed below minimum_beta={minimum_beta:g}")
+            continue
+        if trust_region and pending_step is not None and merit < 0.8 * pending_step["merit"]:
+            beta_current = min(float(beta), 1.2 * beta_current)
         pending_step = None
         history.append(balance); interval_history.append(interval_balance)
-        accepted_beta_history.append(
-            beta_current if trust_scope == "global" else float(beta_dof.min()))
-        accepted_beta_dof_history.append(beta_dof.copy())
+        accepted_beta_history.append(beta_current)
+        iteration_gain = beta_current * (1.0 + len(history) / gain_offset) ** (-gain_decay)
+        accepted_gain_history.append(iteration_gain)
         last_accepted_state = dict(
             boundary_voltage=boundary_voltage.copy(),
             conductor_voltage=conductor_voltage.copy(), potential=potential.copy(),
@@ -405,8 +363,6 @@ def solve_boundary_state_charging_nodal(
             pending_step = dict(
                 boundary_voltage=boundary_voltage.copy(),
                 conductor_voltage=conductor_voltage.copy(), merit=merit,
-                dof_values=read_dof_values(), absolute_residual=np.abs(certified).copy(),
-                activity=activity.copy(),
                 hybrid_hint={name: value.copy() for name, value in hybrid_hint.items()},
                 adaptive_levels={
                     name: value.copy() for name, value in adaptive_levels.items()},
@@ -416,8 +372,7 @@ def solve_boundary_state_charging_nodal(
         # limit this is the physical mean log ratio. A sample ladder must demonstrate that the resulting
         # confidence band is narrower than the claimed numerical accuracy.
         update_residual = np.where(activity, certified, 0.0)
-        gain = beta_current if trust_scope == "global" else beta_dof
-        step = np.clip(gain * response_energy_eV * update_residual, -dVmax, dVmax)
+        step = np.clip(iteration_gain * response_energy_eV * update_residual, -dVmax, dVmax)
         for index, node in enumerate(dielectric_nodes):
             if activity[index]:
                 boundary_voltage[node] += step[index]
@@ -464,11 +419,10 @@ def solve_boundary_state_charging_nodal(
         ion_current_stderr=ion_stderr, electron_current_stderr=electron_stderr,
         active_flux=active_flux, surface_discretization="boundary_nodal",
         update_residual="confidence_separated_log_current_ratio", rejected_steps=rejected_steps,
-        beta_final=(beta_current if trust_scope == "global" else float(beta_dof.min())),
-        beta_dof_final=beta_dof.copy(), trust_scope=trust_scope,
-        trial_merit_history=np.asarray(trial_merit_history),
+        beta_final=beta_current, trial_merit_history=np.asarray(trial_merit_history),
         accepted_beta_history=np.asarray(accepted_beta_history),
-        accepted_beta_dof_history=np.asarray(accepted_beta_dof_history),
+        accepted_gain_history=np.asarray(accepted_gain_history),
+        gain_decay=float(gain_decay), gain_offset=float(gain_offset),
         adaptive_levels={name: value.copy() for name, value in adaptive_levels.items()},
         forward_adaptive_levels={
             name: value.copy() for name, value in forward_adaptive_levels.items()})
