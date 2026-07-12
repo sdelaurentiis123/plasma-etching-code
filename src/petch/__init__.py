@@ -11,6 +11,11 @@ from .transport import mc_flux, _trace
 from .chemistry import surface_rate, surface_rate_langmuir
 from .levelset import advect, extend_velocity, reinit
 from .metrics import ours_profile, depth_centre, center_depth
+from .surface_kinetics import (
+    EnergeticFlux, EnergeticYield, ParameterEvidence,
+    ReducedSiO2FluorocarbonMechanism, ReducedSiO2FluorocarbonParameters,
+    SiO2SurfaceState, SurfaceFluxes,
+)
 
 # High-level 3D API (ViennaPS-shaped). Importing api pulls in the 3D engine (threed/warp).
 from .api import Domain, SF6O2, Process, Result
@@ -24,6 +29,9 @@ __all__ = [
     "mc_flux", "_trace", "surface_rate", "surface_rate_langmuir",
     "advect", "extend_velocity", "reinit",
     "ours_profile", "depth_centre", "center_depth",
+    "EnergeticFlux", "EnergeticYield", "ParameterEvidence",
+    "ReducedSiO2FluorocarbonMechanism", "ReducedSiO2FluorocarbonParameters",
+    "SiO2SurfaceState", "SurfaceFluxes",
 ]
 
 __version__ = "0.2.0"
