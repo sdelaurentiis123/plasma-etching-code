@@ -54,12 +54,14 @@ from .neutral_radiosity_3d import (
 from .experimental_boundary import (
     Jeon2022BoundaryClosure, build_jeon_2022_boundary_state,
 )
+from .physical_api import COMMON_FEATURE_ENGINE, PhysicalProcess, PhysicalResult
 
 # High-level 3D API (ViennaPS-shaped). Importing api pulls in the 3D engine (threed/warp).
 from .api import Domain, SF6O2, Process, Result
 
 __all__ = [
-    # high-level 3D API (the main public interface)
+    # Explicit dimensional common engine and legacy compatibility interface.
+    "COMMON_FEATURE_ENGINE", "PhysicalProcess", "PhysicalResult",
     "Domain", "SF6O2", "Process", "Result",
     # config + low-level (full control)
     "PAR", "Flags", "DEFAULT_FLAGS", "run_etch",

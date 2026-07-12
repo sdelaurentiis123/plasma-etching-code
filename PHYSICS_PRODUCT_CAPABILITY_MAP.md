@@ -46,7 +46,7 @@ contract, with the old and new scores reported separately until each capability 
 | Reactor coupling | Reactor/sheath outputs define feature boundary; surface returns effective reaction/sticking/product fluxes | Inbound state exists; feedback contract does not | None coherent | Held-out wafer-position/process transfer | Add a `SurfaceFeedbackState`; do not claim a multiscale digital twin yet |
 | UQ and refusal | Numerical convergence plus parameter, measurement and model-form uncertainty | Step validity exists | Public API omits it | Coverage/refusal on preregistered held-out cases | Validity is mandatory product output, not documentation |
 | Differentiable calibration | Sensitivities through transport, state, converged fixed point and interface/profile loss | Only reduced ALE gradient is verified | None end-to-end | Finite-difference agreement and structure-N to N+1 calibration transfer | Do not sell feature-scale backpropagation until boundary terms are handled |
-| Public product API | Versioned config/result/checkpoint schemas using the common engine | Missing | Friendly API calls legacy engine and omits provenance/UQ/validity | Fresh-install replay of verification manifest | Build an explicit common-engine API; do not silently change `Process.run()` |
+| Public product API | Versioned config/result/checkpoint schemas using the common engine | `PhysicalProcess` explicitly calls the common engine and returns provenance plus validity; serialization/checkpoints remain open | Friendly `Process` API calls legacy engine and now labels that provenance | Fresh-install replay of verification manifest | Extend the explicit common-engine API; do not silently change `Process.run()` |
 
 ## External bar set by recent work
 

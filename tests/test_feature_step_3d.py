@@ -19,6 +19,7 @@ from petch.feature_step_3d import (
     solve_feature_3d,
 )
 from petch.interaction_data import load_kounis_melas_2024_tables
+from petch.physical_api import COMMON_FEATURE_ENGINE, PhysicalProcess
 from petch.surface_kinetics import (
     EnergeticYield,
     ParameterEvidence,
@@ -174,6 +175,28 @@ def test_one_physical_3d_step_moves_a_uniform_sio2_plane_by_flux_yield_over_dens
     assert "conservative surface-state remap" in " ".join(result.validity.known_limitations)
     assert result.state_remap_diagnostics["old_topology"] == (1, 1)
     assert result.state_remap_diagnostics["new_topology"] == (1, 1)
+
+
+def test_public_physical_process_uses_common_engine_and_exposes_validity():
+    geometry, _ = _plane_geometry()
+    process = PhysicalProcess(
+        geometry=geometry, boundary=_boundary(),
+        species_role={"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        mechanism=_mechanism(), etchable_material_ids=(1,), duration_s=1.0, n_steps=1,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        solver_options={
+            "n_position": 16384, "seed": 3, "cfl_number": 0.3,
+            "reinitialize": False, "transport_device": "cpu",
+        })
+
+    result = process.run()
+
+    assert process.engine == COMMON_FEATURE_ENGINE
+    assert result.engine == COMMON_FEATURE_ENGINE
+    assert result.validity.within_declared_scope
+    assert not result.validity.parameter_evidence_supports_prediction
+    assert len(result.steps) == 1
+    assert result.wall_time_s >= 0.0
 
 
 def test_deterministic_face_gather_feature_step_is_independent_of_forward_particle_budget():
