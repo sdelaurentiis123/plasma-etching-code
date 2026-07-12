@@ -69,8 +69,15 @@ def _charging_boundary():
 
 def _plane_poisson_system(geometry):
     fixed = np.zeros(geometry.phi.shape, dtype=bool); fixed[:, :, -1] = True
+    # Q1 value at the cell centre; this manufactured planar gate has one dielectric material.
+    phi_center = sum(
+        geometry.phi[i:i + geometry.phi.shape[0] - 1,
+                     j:j + geometry.phi.shape[1] - 1,
+                     k:k + geometry.phi.shape[2] - 1]
+        for i in (0, 1) for j in (0, 1) for k in (0, 1)) / 8.0
+    epsilon_r = np.where(phi_center > 0.0, 3.9, 1.0)
     return NodalPoissonSystem3D(
-        np.ones(tuple(np.asarray(geometry.phi.shape) - 1)),
+        epsilon_r,
         geometry.dx * geometry.mesh_length_unit_m, fixed)
 
 
@@ -237,9 +244,9 @@ def test_feature_step_solves_charge_reuses_ion_events_and_excludes_electron_from
     assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.02
 
 
-def test_multistep_charged_profile_refuses_missing_charge_and_permittivity_remap():
+def test_multistep_charged_profile_refuses_a_fixed_geometry_poisson_operator():
     geometry, _ = _plane_geometry()
-    with pytest.raises(ValueError, match="permittivity rebuild"):
+    with pytest.raises(ValueError, match="geometry-dependent Poisson builder"):
         solve_feature_3d(
             geometry, _charging_boundary(),
             {"Ar+": "energetic_bombardment", "electron": "charge_carrier"},
@@ -248,3 +255,46 @@ def test_multistep_charged_profile_refuses_missing_charge_and_permittivity_remap
             potential_origin=(0.0, 0.0, 0.0), potential_spacing=geometry.dx,
             trajectory_fixed_dt=0.005,
             charging_poisson_system=_plane_poisson_system(geometry))
+
+
+def test_multistep_quasistatic_charging_rebuilds_material_operator_and_reconverges():
+    geometry, initial_height = _plane_geometry(); systems = []
+
+    def build(current_geometry):
+        system = _plane_poisson_system(current_geometry); systems.append(system)
+        return system
+
+    result = solve_feature_3d(
+        geometry, _charging_boundary(),
+        {"Ar+": "energetic_bombardment", "electron": "charge_carrier"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=10.0, n_steps=2,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        potential_origin=(0.0, 0.0, 0.0), potential_spacing=geometry.dx,
+        trajectory_fixed_dt=0.005, trajectory_max_steps=2000,
+        charging_system_builder=build,
+        charging_options=dict(
+            max_iter=30, min_iter=2, current_balance_tol=1e-12,
+            beta=0.5, response_energy_eV=4.0),
+        n_position=64, seed=67, cfl_number=0.3, reinitialize=False,
+        transport_device="cpu")
+
+    assert len(systems) == 2 and len(result.steps) == 2
+    assert all(step.charging is not None and step.charging.converged for step in result.steps)
+    assert np.count_nonzero(systems[1].epsilon_r == 3.9) < np.count_nonzero(
+        systems[0].epsilon_r == 3.9)
+    assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.15
+    assert "quasi-static charging" in " ".join(result.validity.known_limitations)
+
+
+def test_feature_step_refuses_nonconverged_charging_for_profile_motion():
+    geometry, _ = _plane_geometry()
+    with pytest.raises(ValueError, match="requires a converged"):
+        advance_feature_step_3d(
+            geometry, _charging_boundary(),
+            {"Ar+": "energetic_bombardment", "electron": "charge_carrier"},
+            _mechanism(), etchable_material_ids=(1,), duration_s=1.0,
+            source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+            potential_origin=(0.0, 0.0, 0.0), potential_spacing=geometry.dx,
+            trajectory_fixed_dt=0.005,
+            charging_poisson_system=_plane_poisson_system(geometry),
+            charging_options={"require_converged": False})

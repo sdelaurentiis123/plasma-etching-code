@@ -382,6 +382,8 @@ def advance_feature_step_3d(
                           if initial_charge_node_c is None
                           else np.asarray(initial_charge_node_c, dtype=float))
         options = {} if charging_options is None else dict(charging_options)
+        if options.get("require_converged", True) is not True:
+            raise ValueError("feature evolution requires a converged steady charging solve")
         charging = solve_dielectric_charging_steady_3d(
             charging_poisson_system, initial_charge, boundary, verts, faces, areas,
             source_bounds=source_bounds, source_z=source_z,
@@ -391,6 +393,8 @@ def advance_feature_step_3d(
             trajectory_fixed_dt=trajectory_fixed_dt,
             trajectory_max_steps=trajectory_max_steps,
             transport_device=transport_device, **options)
+        if not charging.converged:
+            raise RuntimeError("feature evolution cannot consume a nonconverged charging field")
         transport = charging.transport
         uncharged_species = tuple(
             species for species in boundary.species if species.charge_number == 0)
@@ -534,20 +538,41 @@ def solve_feature_3d(
         transport_device=None, nodal_potential_v=None, potential_origin=None,
         potential_spacing=None, trajectory_fixed_dt=None, trajectory_max_steps=10000,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
-        initial_charge_node_c=None, charging_options=None):
-    """Run multiple verified feature steps, carrying only conservatively remapped surface state."""
+        charging_system_builder=None, initial_charge_node_c=None, charging_options=None):
+    """Run verified feature steps with conserved surface state and optional quasi-static charging.
+
+    A fixed ``charging_poisson_system`` is valid for one geometry only. Repeated charged evolution
+    instead requires ``charging_system_builder(geometry)`` to rebuild the physical material operator
+    after every interface update. Each geometry is independently converged from zero stored charge;
+    this is the quasi-static charging limit, not a claim that transient surface charge was remapped.
+    """
     if int(n_steps) != n_steps or int(n_steps) <= 0:
         raise ValueError("n_steps must be a positive integer")
     if not np.isfinite(duration_s) or duration_s < 0.0:
         raise ValueError("duration_s must be finite and nonnegative")
+    if charging_poisson_system is not None and charging_system_builder is not None:
+        raise ValueError("supply either a fixed charging system or a geometry-dependent builder")
     if charging_poisson_system is not None and int(n_steps) > 1:
         raise ValueError(
-            "multi-step charged profile evolution requires permittivity rebuild and conservative "
-            "surface-charge remap; use one verified step until that operator is supplied")
+            "multi-step charged profile evolution requires a geometry-dependent Poisson builder")
+    if charging_system_builder is not None and not callable(charging_system_builder):
+        raise TypeError("charging_system_builder must be callable")
     step_duration = float(duration_s) / int(n_steps)
     current_geometry = geometry; current_state = None; current_fingerprint = None
     results = []
     for step_index in range(int(n_steps)):
+        step_poisson_system = charging_poisson_system
+        step_initial_charge = initial_charge_node_c
+        if charging_system_builder is not None:
+            step_poisson_system = charging_system_builder(current_geometry)
+            if not isinstance(step_poisson_system, NodalPoissonSystem3D):
+                raise TypeError("charging_system_builder must return NodalPoissonSystem3D")
+            if step_poisson_system.shape != current_geometry.phi.shape:
+                raise ValueError("rebuilt Poisson nodal grid must match the feature geometry")
+            # A previous nodal charge grid is not a conservative representation on the moved surface.
+            # In the quasi-static limit the new geometry owns a new independently converged root.
+            if step_index > 0:
+                step_initial_charge = np.zeros(step_poisson_system.shape)
         result = advance_feature_step_3d(
             current_geometry, boundary, species_role, mechanism,
             etchable_material_ids=etchable_material_ids, duration_s=step_duration,
@@ -558,8 +583,8 @@ def solve_feature_3d(
             nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
             potential_spacing=potential_spacing, trajectory_fixed_dt=trajectory_fixed_dt,
             trajectory_max_steps=trajectory_max_steps,
-            charging_poisson_system=charging_poisson_system,
-            initial_charge_node_c=initial_charge_node_c,
+            charging_poisson_system=step_poisson_system,
+            initial_charge_node_c=step_initial_charge,
             charging_options=charging_options,
             cfl_number=cfl_number, reinitialize=reinitialize,
             transport_device=transport_device)
@@ -570,6 +595,11 @@ def solve_feature_3d(
     reasons = tuple(reason for result in results for reason in result.validity.reasons)
     limitations = tuple(dict.fromkeys(
         limitation for result in results for limitation in result.validity.known_limitations))
+    if charging_system_builder is not None:
+        limitations += (
+            "quasi-static charging re-solves each geometry independently; transient charge memory "
+            "requires a conservative moving-surface charge equation",
+        )
     return FeatureSolve3DResult(
         geometry=current_geometry, surface_state=current_state,
         surface_state_mesh_fingerprint=current_fingerprint,
