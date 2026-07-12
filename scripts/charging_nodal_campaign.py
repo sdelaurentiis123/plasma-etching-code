@@ -45,6 +45,7 @@ parser.add_argument("--anderson-depth", type=int, default=4)
 parser.add_argument("--output", default="/tmp/petch_charging_diag_result.npz")
 parser.add_argument("--initial", default=None)
 parser.add_argument("--initial-state", choices=("accepted", "rejected"), default="accepted")
+parser.add_argument("--clear-acceleration-history", action="store_true")
 parser.add_argument("--override-restart-beta", type=float)
 parser.add_argument("--geometry", choices=("bulk", "sheet"), default="bulk")
 parser.add_argument("--trench-width", type=int, default=10)
@@ -209,6 +210,9 @@ if args.initial is not None:
         # history from the preceding rule is no longer a Jacobian approximation to this map.
         initial_anderson_x = None
         initial_anderson_residual = None
+if args.clear_acceleration_history:
+    initial_anderson_x = None
+    initial_anderson_residual = None
 if args.override_restart_beta is not None:
     if not np.isfinite(args.override_restart_beta) or args.override_restart_beta <= 0.0:
         raise ValueError("override restart beta must be finite and positive")
