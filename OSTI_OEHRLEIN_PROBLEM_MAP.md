@@ -164,6 +164,36 @@ twist, and a single isolated trench cannot validate inter-feature electrostatics
   `0.0601048 +/- 0.0002235` and adjoint `0.0601425 +/- 0.0004549`, a 0.074-sigma difference. This
   closes that reciprocity diagnosis but not the full charging claim: the nonlinear AR/grid/sample
   ladder and final launch-offset/timestep limits remain required.
+- Nonlinear continuation then exposed two discrete numerical maps that had been hidden inside the
+  apparent fixed point: the controller could switch between forward and adjoint estimators, and it
+  could change per-face Sobol levels as voltage changed. Both decisions are now frozen inside a root
+  or derivative epoch. If the frozen rule ceases to certify a trial, the accepted physical state is
+  rolled back and a separate adaptation epoch records and refines the rejected trial itself. This is
+  the sample-average/common-random-number contract needed for a meaningful trust-region comparison;
+  loosening the current tolerance or silently changing the map is not allowed.
+- Continued safeguarded trials produced two useful, distinct checkpoints. The best physical-mean
+  root has raw max/RMS about `0.353/0.173`, certified-update max/RMS about `0.345/0.136`, and a
+  two-sigma confidence-envelope max/RMS about `0.438/0.232`. The best confidence checkpoint is
+  `0.403/0.230`, at raw `0.375/0.174`. A fresh `0.05 V` Jacobian certified all 47 central columns and
+  has condition number about `1.53e4`; the smaller `0.025 V` map was about `7.2e4`. These are accepted
+  numerical checkpoints, not AR4 experimental validation. The open-ended `confidence max < 0.15`
+  campaign is terminated: charging resumes for the product demonstration only if a charged/uncharged
+  profile ablation exceeds the declared error budget, and then converges against profile error.
+- Deterministic gather alone also does not prove differentiability. A finite ray set contains hard
+  hit/escape indicators whose discontinuity surfaces move with voltage and geometry. The physical
+  expectation can be smooth while the fixed-sample program is piecewise smooth or discontinuous.
+  Central finite-difference charging Jacobians remain ill-conditioned (`1.53e4` at `0.05 V` and
+  `7.2e4` at `0.025 V`). Correct implicit gradients therefore require a validated boundary/edge term,
+  reparameterization, or equivalent unbiased sensitivity estimator; differentiating only the
+  within-trajectory arithmetic would omit visibility/topology derivatives.
+
+Numerical precedents for that conclusion include Li et al.'s boundary/edge estimator for moving
+visibility discontinuities (DOI `10.1145/3272127.3275109`), Loubet et al.'s change-of-variables
+approach for discontinuous transport integrals (DOI `10.1145/3355089.3356510`), and the probabilistic
+trust-region requirement that trial values and local models be accurate at the current radius
+(Bandeira, Scheinberg, and Vicente, arXiv `1304.2808`). These are analogies and numerical tools, not
+evidence that their rendering formulas can be copied into charged-particle transport without a new
+derivation.
 
 ### Kill criteria
 
@@ -326,19 +356,20 @@ same object. The feature engine remains independently testable.
 
 ## 6. Ranked local program
 
-1. **Charging invariants and convergence** -- current work. Establish analytic boundary gates,
-   forward/backward reciprocity, current residuals, and pattern-domain convergence.
-2. **Pattern mean-field sign experiment** -- smallest direct attack on OSTI 1802573; frozen geometry,
-   symmetric versus dense/sparse.
-3. **OSTI surface-table schema and replay** -- start with the released result tables from 2589032;
-   no feature coupling until interpolation/provenance gates pass.
-4. **Spatial surface-state prototype** -- lift the already-gated ALE model onto static surface
-   elements, then an evolving 2-D interface.
-5. **Stochastic charging ensemble** -- distributional twist/tilt after the deterministic mean field is
-   converged and boundary-independent.
-6. **Reactor boundary objects** -- the common immutable input object and the first unified forward and
-   arbitrary-face adjoint consumers now exist. Next add position/time-resolved ingestion and the reverse
-   `SurfaceFeedbackState`; later HPEM/PCMCM tables or a reactor surrogate must not change feature physics.
+1. **Jeon SiO2 depth-transfer demonstration** -- current work. Calibrate only the preregistered 20%
+   C4F8 CW width curve, then score untouched widths/gas fractions/pulse conditions through the same
+   engine. IEDF, species composition, and ACL interaction remain explicit closures.
+2. **Bounded chemistry evidence** -- source or measure fixed energy/angle/yield forms and calibrate no
+   more than three global closure parameters. Do not import Guo/Sawin's roughly 20 fitted coefficients
+   outside their reported neutral/ion-ratio domain of 3--70; Jeon's ratios span roughly 600--8100.
+3. **Charging profile ablation** -- charged versus uncharged narrow/deep Jeon structure. Resume the
+   nonlinear charging campaign only if the profile change exceeds the experimental/model error budget.
+4. **Pattern mean-field and stochastic twist** -- symmetric versus dense/sparse deterministic sign,
+   followed by ensemble twist/tilt after the mean field is boundary-independent.
+5. **OSTI surface-table expansion** -- continue released atomistic-table replay through the unchanged
+   feature engine, then acquire a second predictive chemistry domain.
+6. **Reactor feedback object** -- add `SurfaceFeedbackState` consumption/product/current outputs; later
+   HPEM/PCMCM tables or a reactor surrogate must not change feature physics.
 
 This ordering makes each layer independently falsifiable and keeps speed work honest: optimize only
 after the physical observable and its convergence gate are defined.
