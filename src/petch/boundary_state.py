@@ -18,6 +18,20 @@ from .sheath import CollisionlessRFSheath, ECHARGE
 class BoundaryDensityModel(Protocol):
     """Normalized incident flux-density evaluator used by adjoint transport."""
     def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None): ...
+    @property
+    def sampling_dimension(self): ...
+    def sample_flux_velocity(self, unit_interval): ...
+
+
+def _unit_interval_samples(value, dimension):
+    samples = np.asarray(value, dtype=float)
+    if (samples.ndim != 2 or samples.shape[1] != int(dimension)
+            or np.any(~np.isfinite(samples)) or np.any(samples < 0.0)
+            or np.any(samples > 1.0)):
+        raise ValueError(f"unit_interval must have shape (n,{int(dimension)}) in [0,1]")
+    # Inverse normal/exponential maps are infinite at the endpoints. Deterministic digital nets may
+    # contain zero exactly, so move endpoints by one representable value without perturbing interiors.
+    return np.clip(samples, np.nextafter(0.0, 1.0), np.nextafter(1.0, 0.0))
 
 
 @dataclass(frozen=True)
@@ -69,6 +83,23 @@ class RectilinearVelocityHistogramDensity:
             result[selected[positive]] = np.log(density[positive])
         return result.reshape(velocity.shape[:-1])
 
+    @property
+    def sampling_dimension(self):
+        return 4
+
+    def sample_flux_velocity(self, unit_interval):
+        samples = _unit_interval_samples(unit_interval, self.sampling_dimension)
+        cumulative = np.cumsum(self.probability_mass.ravel())
+        flat_index = np.searchsorted(cumulative, samples[:, 0], side="right")
+        flat_index = np.minimum(flat_index, cumulative.size - 1)
+        index = np.column_stack(np.unravel_index(flat_index, self.probability_mass.shape))
+        velocity = np.empty((samples.shape[0], 3))
+        for axis in range(3):
+            lower = self.edges[axis][index[:, axis]]
+            upper = self.edges[axis][index[:, axis] + 1]
+            velocity[:, axis] = lower + samples[:, axis + 1] * (upper - lower)
+        return velocity
+
 
 @dataclass(frozen=True)
 class IonEnergyTransverseMaxwellianDensity:
@@ -109,6 +140,26 @@ class IonEnergyTransverseMaxwellianDensity:
                                           + np.log(2.0 * vz[selected[positive]] * p_energy[positive]))
         return result.reshape(velocity.shape[:-1])
 
+    @property
+    def sampling_dimension(self):
+        return 3
+
+    def sample_flux_velocity(self, unit_interval):
+        samples = _unit_interval_samples(unit_interval, self.sampling_dimension)
+        temperature = float(self.tangential_temperature_eV)
+        velocity = np.empty((samples.shape[0], 3))
+        velocity[:, :2] = np.sqrt(temperature / 2.0) * norm.ppf(samples[:, :2])
+        cumulative = np.cumsum(self.probability_mass)
+        index = np.searchsorted(cumulative, samples[:, 2], side="right")
+        index = np.minimum(index, self.probability_mass.size - 1)
+        previous = np.where(index > 0, cumulative[np.maximum(index - 1, 0)], 0.0)
+        local = (samples[:, 2] - previous) / self.probability_mass[index]
+        energy = (self.normal_energy_edges_eV[index]
+                  + local * (self.normal_energy_edges_eV[index + 1]
+                             - self.normal_energy_edges_eV[index]))
+        velocity[:, 2] = np.sqrt(np.maximum(energy, 0.0))
+        return velocity
+
 
 @dataclass(frozen=True)
 class MaxwellianFluxVelocityDensity:
@@ -138,6 +189,18 @@ class MaxwellianFluxVelocityDensity:
                              - 2.0 * np.log(temperature) - energy / temperature)
         return result.reshape(velocity.shape[:-1])
 
+    @property
+    def sampling_dimension(self):
+        return 3
+
+    def sample_flux_velocity(self, unit_interval):
+        samples = _unit_interval_samples(unit_interval, self.sampling_dimension)
+        temperature = float(self.temperature_eV)
+        velocity = np.empty((samples.shape[0], 3))
+        velocity[:, :2] = np.sqrt(temperature / 2.0) * norm.ppf(samples[:, :2])
+        velocity[:, 2] = np.sqrt(-temperature * np.log1p(-samples[:, 2]))
+        return velocity
+
 
 @dataclass(frozen=True)
 class MixtureBoundaryDensity:
@@ -163,6 +226,32 @@ class MixtureBoundaryDensity:
             if mixture_weight > 0.0
         ])
         return np.logaddexp.reduce(terms, axis=0)
+
+    @property
+    def sampling_dimension(self):
+        dimensions = []
+        for component in self.components:
+            if not hasattr(component, "sampling_dimension"):
+                raise TypeError("every mixture component must implement deterministic flux sampling")
+            dimensions.append(int(component.sampling_dimension))
+        return 1 + max(dimensions)
+
+    def sample_flux_velocity(self, unit_interval):
+        samples = _unit_interval_samples(unit_interval, self.sampling_dimension)
+        cumulative = np.cumsum(self.weight)
+        selection = np.searchsorted(cumulative, samples[:, 0], side="right")
+        selection = np.minimum(selection, len(self.components) - 1)
+        velocity = np.empty((samples.shape[0], 3))
+        for index, component in enumerate(self.components):
+            selected = selection == index
+            if not np.any(selected):
+                continue
+            if not hasattr(component, "sample_flux_velocity"):
+                raise TypeError("every mixture component must implement deterministic flux sampling")
+            dimension = int(component.sampling_dimension)
+            velocity[selected] = component.sample_flux_velocity(
+                samples[selected, 1:1 + dimension])
+        return velocity
 
 
 def _readonly_array(value, shape_tail=()):
@@ -232,6 +321,21 @@ class SpeciesBoundaryState:
         if self.density_model is None:
             raise ValueError(f"species {self.name!r} has no continuous boundary density model")
         return self.density_model.log_flux_density(velocity_sqrt_eV, phase_rad, position_m)
+
+    @property
+    def flux_sampling_dimension(self):
+        if self.density_model is None or not hasattr(self.density_model, "sampling_dimension"):
+            raise ValueError(f"species {self.name!r} has no deterministic continuous-density sampler")
+        return int(self.density_model.sampling_dimension)
+
+    def sample_flux_velocity(self, unit_interval):
+        if self.density_model is None or not hasattr(self.density_model, "sample_flux_velocity"):
+            raise ValueError(f"species {self.name!r} has no deterministic continuous-density sampler")
+        velocity = np.asarray(self.density_model.sample_flux_velocity(unit_interval), dtype=float)
+        if (velocity.ndim != 2 or velocity.shape[1] != 3 or np.any(~np.isfinite(velocity))
+                or np.any(velocity[:, 2] < 0.0)):
+            raise RuntimeError("boundary density sampler returned invalid incident velocities")
+        return velocity
 
 
 @dataclass(frozen=True)
@@ -355,41 +459,12 @@ def qmc_boundary_proposal(template: SpeciesBoundaryState, log2_samples, seed=0, 
                 name=component.name))
         return mixture_boundary_proposal(components, density.weight, name=proposal_name)
 
-    n = 2 ** level
-    if isinstance(density, MaxwellianFluxVelocityDensity):
-        u = qmc.Sobol(3, scramble=True, seed=int(seed)).random_base2(level)
-        temperature = float(density.temperature_eV)
-        velocity = np.column_stack((
-            np.sqrt(0.5 * temperature) * norm.ppf(np.clip(u[:, 0], 1e-12, 1.0 - 1e-12)),
-            np.sqrt(0.5 * temperature) * norm.ppf(np.clip(u[:, 1], 1e-12, 1.0 - 1e-12)),
-            np.sqrt(-temperature * np.log(np.clip(1.0 - u[:, 2], 1e-12, 1.0))),
-        ))
-    elif isinstance(density, IonEnergyTransverseMaxwellianDensity):
-        u = qmc.Sobol(4, scramble=True, seed=int(seed)).random_base2(level)
-        cdf = np.cumsum(density.probability_mass)
-        index = np.searchsorted(cdf, u[:, 0], side="right")
-        index = np.minimum(index, density.probability_mass.size - 1)
-        edge = density.normal_energy_edges_eV
-        energy = edge[index] + u[:, 1] * (edge[index + 1] - edge[index])
-        temperature = float(density.tangential_temperature_eV)
-        velocity = np.column_stack((
-            np.sqrt(0.5 * temperature) * norm.ppf(np.clip(u[:, 2], 1e-12, 1.0 - 1e-12)),
-            np.sqrt(0.5 * temperature) * norm.ppf(np.clip(u[:, 3], 1e-12, 1.0 - 1e-12)),
-            np.sqrt(energy),
-        ))
-    elif isinstance(density, RectilinearVelocityHistogramDensity):
-        u = qmc.Sobol(4, scramble=True, seed=int(seed)).random_base2(level)
-        flat_mass = density.probability_mass.ravel()
-        flat_index = np.searchsorted(np.cumsum(flat_mass), u[:, 0], side="right")
-        flat_index = np.minimum(flat_index, flat_mass.size - 1)
-        multi = np.array(np.unravel_index(flat_index, density.probability_mass.shape)).T
-        velocity = np.empty((n, 3))
-        for dimension in range(3):
-            edge = density.edges[dimension]
-            idx = multi[:, dimension]
-            velocity[:, dimension] = edge[idx] + u[:, dimension + 1] * (edge[idx + 1] - edge[idx])
-    else:
+    if not hasattr(density, "sampling_dimension") or not hasattr(density, "sample_flux_velocity"):
         raise TypeError(f"QMC sampling is not implemented for {type(density).__name__}")
+    n = 2 ** level
+    u = qmc.Sobol(
+        int(density.sampling_dimension), scramble=True, seed=int(seed)).random_base2(level)
+    velocity = density.sample_flux_velocity(u)
     return SpeciesBoundaryState(
         name=proposal_name, charge_number=template.charge_number, mass_amu=template.mass_amu,
         flux_m2_s=1.0, velocity_sqrt_eV=velocity, weight=np.ones(n), density_model=density,

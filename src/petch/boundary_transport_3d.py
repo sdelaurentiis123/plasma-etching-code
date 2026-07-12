@@ -276,7 +276,8 @@ def trace_boundary_state_field_3d(
         boundary: PlasmaBoundaryState, species_role: Mapping[str, str], verts, faces, areas, *,
         source_bounds, source_z, nodal_potential_v, potential_origin, potential_spacing,
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0), n_position=256,
-        seed=0, fixed_dt=0.01, max_steps=10000, allow_truncation=False, device=None):
+        seed=0, fixed_dt=0.01, max_steps=10000, allow_truncation=False,
+        phase_space_log2_samples=None, device=None):
     """Trace collisionless species through a supplied 3-D nodal electrostatic potential.
 
     Velocity coordinates retain the ``sqrt(eV)`` convention of ``PlasmaBoundaryState``. With mesh
@@ -324,11 +325,15 @@ def trace_boundary_state_field_3d(
             mapped_reference, boundary.reference_plane_m, rtol=0.0,
             atol=max(1e-15, 1e-9 * float(mesh_length_unit_m))):
         raise ValueError("mesh source plane does not match PlasmaBoundaryState.reference_plane_m")
-    if int(n_position) != n_position:
-        raise ValueError("n_position must be an integer")
-    n_position = int(n_position)
-    if n_position <= 0 or n_position & (n_position - 1):
-        raise ValueError("n_position must be a positive power of two for a balanced Sobol rule")
+    if phase_space_log2_samples is None:
+        if int(n_position) != n_position:
+            raise ValueError("n_position must be an integer")
+        n_position = int(n_position)
+        if n_position <= 0 or n_position & (n_position - 1):
+            raise ValueError("n_position must be a positive power of two for a balanced Sobol rule")
+    elif (int(phase_space_log2_samples) != phase_space_log2_samples
+          or phase_space_log2_samples < 0):
+        raise ValueError("phase_space_log2_samples must be a nonnegative integer")
     if not np.isfinite(fixed_dt) or fixed_dt <= 0.0 or int(max_steps) != max_steps or max_steps <= 0:
         raise ValueError("fixed_dt and max_steps must be positive")
     role = dict(species_role); names = {item.name for item in boundary.species}
@@ -340,10 +345,11 @@ def trace_boundary_state_field_3d(
     if any(item.position_m is not None for item in boundary.species):
         raise ValueError("field 3-D transport currently requires a spatially uniform boundary state")
 
-    sampler = qmc.Sobol(2, scramble=True, seed=int(seed))
-    positions = sampler.random_base2(int(np.log2(n_position)))
-    x_position = bounds[0] + positions[:, 0] * (bounds[1] - bounds[0])
-    y_position = bounds[2] + positions[:, 1] * (bounds[3] - bounds[2])
+    if phase_space_log2_samples is None:
+        sampler = qmc.Sobol(2, scramble=True, seed=int(seed))
+        positions = sampler.random_base2(int(np.log2(n_position)))
+        x_position = bounds[0] + positions[:, 0] * (bounds[1] - bounds[0])
+        y_position = bounds[2] + positions[:, 1] * (bounds[3] - bounds[2])
     source_area = (bounds[1] - bounds[0]) * (bounds[3] - bounds[2])
     selected_device = DEVICE if device is None else str(device)
     if selected_device.startswith("warp:"):
@@ -358,15 +364,29 @@ def trace_boundary_state_field_3d(
     neutral_flux = {}; energetic_flux = []
     hit_probability = {}; escape_probability = {}; truncation_probability = {}
     for species in boundary.species:
-        sample_count = species.velocity_sqrt_eV.shape[0]; ray_count = sample_count * n_position
-        origin = np.column_stack((
-            np.tile(x_position, sample_count), np.tile(y_position, sample_count),
-            np.full(ray_count, float(source_z))))
-        velocity = np.repeat(species.velocity_sqrt_eV, n_position, axis=0)
+        if phase_space_log2_samples is None:
+            sample_count = species.velocity_sqrt_eV.shape[0]
+            ray_count = sample_count * n_position
+            origin = np.column_stack((
+                np.tile(x_position, sample_count), np.tile(y_position, sample_count),
+                np.full(ray_count, float(source_z))))
+            velocity = np.repeat(species.velocity_sqrt_eV, n_position, axis=0)
+            physical_weight = np.repeat(species.weight / n_position, n_position)
+        else:
+            density_dimension = species.flux_sampling_dimension
+            sampler = qmc.Sobol(
+                2 + density_dimension, scramble=True, seed=int(seed))
+            phase_space = sampler.random_base2(int(phase_space_log2_samples))
+            ray_count = phase_space.shape[0]
+            origin = np.column_stack((
+                bounds[0] + phase_space[:, 0] * (bounds[1] - bounds[0]),
+                bounds[2] + phase_space[:, 1] * (bounds[3] - bounds[2]),
+                np.full(ray_count, float(source_z))))
+            velocity = species.sample_flux_velocity(phase_space[:, 2:])
+            physical_weight = np.full(ray_count, 1.0 / ray_count)
         velocity[:, 2] *= -1.0
         if np.any(np.linalg.norm(velocity, axis=1) <= 0.0):
             raise ValueError(f"species {species.name!r} contains a zero-speed incident sample")
-        physical_weight = np.repeat(species.weight / n_position, n_position)
         hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
         hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
         hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
@@ -404,10 +424,15 @@ def trace_boundary_state_field_3d(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
         hit_probability=hit_probability, escape_probability=escape_probability,
         truncation_probability=truncation_probability,
-        transport_model="collisionless_fixed_step_nodal_field_3d",
+        transport_model=(
+            "collisionless_fixed_step_nodal_field_3d"
+            if phase_space_log2_samples is None
+            else "collisionless_fixed_step_nodal_field_joint_qmc_3d"),
         known_limitations=(
             "nodal potential is supplied rather than self-consistently charged",
             "no surface reflection or neutral re-emission",
             "no spatially varying boundary density",
             "float32 field integration and triangle-ray intersection",
-        ))
+        ) + (() if phase_space_log2_samples is None else (
+            "joint scrambled-Sobol phase-space quadrature requires replicate/refinement error control",
+        )))

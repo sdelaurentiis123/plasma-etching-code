@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from scipy.stats import qmc
 
 from petch.boundary_state import (
     PlasmaBoundaryState,
@@ -130,4 +131,49 @@ def test_qmc_proposals_sample_supported_densities_reproducibly():
     assert sampled.velocity_sqrt_eV.shape == (2 * 64, 3)
     assert np.isclose(sampled.weight[:64].sum(), 0.9)
     assert np.isclose(sampled.weight[64:].sum(), 0.1)
-    RectilinearVelocityHistogramDensity,
+
+
+def test_maxwellian_continuous_sampler_reproduces_energy_moments_and_tail():
+    temperature = 4.0
+    density = MaxwellianFluxVelocityDensity(temperature)
+    unit = qmc.Sobol(
+        density.sampling_dimension, scramble=True, seed=101).random_base2(14)
+    velocity = density.sample_flux_velocity(unit)
+    component_energy = np.mean(velocity ** 2, axis=0)
+    tail = np.mean(velocity[:, 2] ** 2 > temperature * np.log(10.0))
+
+    assert np.allclose(component_energy, [temperature / 2, temperature / 2, temperature], rtol=3e-3)
+    assert np.isclose(tail, 0.1, atol=2e-4)
+
+
+def test_ion_and_histogram_continuous_samplers_preserve_declared_probability_mass():
+    ion_density = IonEnergyTransverseMaxwellianDensity(
+        np.array([0.0, 1.0, 3.0]), np.array([0.25, 0.75]), 0.2)
+    ion_unit = qmc.Sobol(
+        ion_density.sampling_dimension, scramble=True, seed=103).random_base2(14)
+    ion_velocity = ion_density.sample_flux_velocity(ion_unit)
+    normal_energy = ion_velocity[:, 2] ** 2
+    assert np.isclose(np.mean(normal_energy < 1.0), 0.25, atol=1e-4)
+    assert np.isclose(np.mean(normal_energy), 1.625, rtol=2e-3)
+    assert np.allclose(np.mean(ion_velocity[:, :2] ** 2, axis=0), 0.1, rtol=4e-3)
+
+    histogram = RectilinearVelocityHistogramDensity(
+        (np.array([-1.0, 0.0, 2.0]), np.array([-2.0, 1.0]), np.array([0.0, 1.0])),
+        np.array([[[0.3]], [[0.7]]]))
+    histogram_unit = qmc.Sobol(
+        histogram.sampling_dimension, scramble=True, seed=107).random_base2(14)
+    histogram_velocity = histogram.sample_flux_velocity(histogram_unit)
+    assert np.isclose(np.mean(histogram_velocity[:, 0] < 0.0), 0.3, atol=1e-4)
+    assert np.all((histogram_velocity[:, 2] >= 0.0) & (histogram_velocity[:, 2] <= 1.0))
+
+
+def test_mixture_continuous_sampler_preserves_physical_component_weights():
+    density = MixtureBoundaryDensity(
+        (MaxwellianFluxVelocityDensity(1.0), MaxwellianFluxVelocityDensity(9.0)),
+        np.array([0.75, 0.25]))
+    unit = qmc.Sobol(
+        density.sampling_dimension, scramble=True, seed=109).random_base2(15)
+    velocity = density.sample_flux_velocity(unit)
+
+    # Flux-weighted Maxwellian total kinetic energy is 2T.
+    assert np.isclose(np.mean(np.sum(velocity ** 2, axis=1)), 2.0 * 3.0, rtol=4e-3)

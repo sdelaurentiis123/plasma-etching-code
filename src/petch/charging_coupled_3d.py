@@ -98,7 +98,8 @@ def _coordinate_spacing_3d(poisson_system, potential_spacing, mesh_length_unit_m
 def _evaluate_incident_current_3d(
         poisson_system, charge, boundary, verts, faces, areas, *, source_bounds, source_z,
         potential_origin, coordinate_spacing, mesh_length_unit_m, mesh_origin_m,
-        n_position, seed, trajectory_fixed_dt, trajectory_max_steps, transport_device):
+        n_position, seed, trajectory_fixed_dt, trajectory_max_steps,
+        phase_space_log2_samples, transport_device):
     charged_species = tuple(species for species in boundary.species if species.charge_number != 0)
     if not charged_species:
         raise ValueError("dielectric charging requires at least one charged boundary species")
@@ -113,7 +114,9 @@ def _evaluate_incident_current_3d(
         potential_spacing=coordinate_spacing,
         mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
         n_position=n_position, seed=seed, fixed_dt=trajectory_fixed_dt,
-        max_steps=trajectory_max_steps, device=transport_device)
+        max_steps=trajectory_max_steps,
+        phase_space_log2_samples=phase_space_log2_samples,
+        device=transport_device)
 
     population_by_name = {
         population.name: population for population in transport.surface_fluxes.energetic_fluxes}
@@ -153,7 +156,8 @@ def advance_dielectric_charging_3d(
         verts, faces, areas, *, source_bounds, source_z, potential_origin,
         potential_spacing, duration_s, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
-        trajectory_fixed_dt=0.01, trajectory_max_steps=10000, transport_device=None):
+        trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
+        phase_space_log2_samples=None, transport_device=None):
     """Advance stored dielectric charge by the signed incident-particle current.
 
     The sequence is charge -> Q1 Poisson voltage -> collisionless charged-particle trajectories ->
@@ -181,7 +185,9 @@ def advance_dielectric_charging_3d(
         potential_origin=potential_origin, coordinate_spacing=coordinate_spacing,
         mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
         n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
-        trajectory_max_steps=trajectory_max_steps, transport_device=transport_device)
+        trajectory_max_steps=trajectory_max_steps,
+        phase_space_log2_samples=phase_space_log2_samples,
+        transport_device=transport_device)
     face_current = evaluated["positive_face_current"] - evaluated["negative_face_current"]
     current_node = evaluated["positive_node_current"] - evaluated["negative_node_current"]
     charge_increment = current_node * float(duration_s)
@@ -230,7 +236,8 @@ def solve_dielectric_charging_steady_3d(
         boundary: PlasmaBoundaryState, verts, faces, areas, *, source_bounds, source_z,
         potential_origin, potential_spacing, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
-        trajectory_fixed_dt=0.01, trajectory_max_steps=10000, transport_device=None,
+        trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
+        phase_space_log2_samples=None, transport_device=None,
         max_iter=30, min_iter=2, current_balance_tol=1e-3,
         beta=0.5, response_energy_eV=4.0, maximum_voltage_step=8.0,
         trust_growth_tolerance=0.02, minimum_beta=1e-4, require_converged=True):
@@ -278,7 +285,9 @@ def solve_dielectric_charging_steady_3d(
         potential_origin=potential_origin, coordinate_spacing=coordinate_spacing,
         mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
         n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
-        trajectory_max_steps=trajectory_max_steps, transport_device=transport_device)
+        trajectory_max_steps=trajectory_max_steps,
+        phase_space_log2_samples=phase_space_log2_samples,
+        transport_device=transport_device)
 
     beta_current = float(beta); rejected_steps = 0; history = []
 

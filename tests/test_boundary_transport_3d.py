@@ -2,7 +2,9 @@ import numpy as np
 import pytest
 import warp as wp
 
-from petch.boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
+from petch.boundary_state import (
+    PlasmaBoundaryState, SpeciesBoundaryState, maxwellian_electron_boundary_state,
+)
 from petch.boundary_transport_3d import (
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
@@ -144,6 +146,42 @@ def test_linear_nodal_potential_gives_exact_electrostatic_energy_gain_under_refi
 
     assert np.allclose(fine_energy, 30.0, atol=2e-3)
     assert np.max(np.abs(fine_energy - 30.0)) <= np.max(np.abs(coarse_energy - 30.0)) + 1e-6
+
+
+def test_joint_phase_space_qmc_resolves_analytic_maxwellian_barrier_tail():
+    # A wide collector removes lateral finite-target escape from this one-dimensional analytic gate.
+    verts = np.array([
+        [-100.0, -100.0, 0.0], [100.0, -100.0, 0.0],
+        [100.0, 100.0, 0.0], [-100.0, 100.0, 0.0],
+    ])
+    faces = np.array([[0, 1, 2], [0, 2, 3]])
+    areas = np.full(2, 20000.0)
+    temperature = 4.0; barrier = temperature * np.log(10.0)
+    boundary = maxwellian_electron_boundary_state(
+        temperature, 1e19, n_transverse=3, n_normal=4,
+        reference_plane_m=1e-6)
+    potential = np.zeros((2, 2, 2)); potential[:, :, 0] = -barrier
+    arguments = dict(
+        boundary=boundary, species_role={"electron": "energetic_bombardment"},
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=potential, potential_origin=(-100.0, -100.0, 0.0),
+        potential_spacing=(200.0, 200.0, 1.0), mesh_length_unit_m=1e-6,
+        seed=47, fixed_dt=0.0025, max_steps=2000, device="cpu")
+    coarse = trace_boundary_state_field_3d(
+        **arguments, phase_space_log2_samples=8)
+    fine = trace_boundary_state_field_3d(
+        **arguments, phase_space_log2_samples=12)
+
+    expected = np.exp(-barrier / temperature)
+    assert coarse.transport_model.endswith("joint_qmc_3d")
+    assert abs(fine.hit_probability["electron"] - expected) <= 1.0 / 2 ** 12
+    assert (abs(fine.hit_probability["electron"] - expected)
+            <= abs(coarse.hit_probability["electron"] - expected))
+    landed_flux = np.dot(
+        fine.surface_fluxes.energetic_fluxes[0].flux_m2_s, areas)
+    assert np.isclose(
+        landed_flux, 1e19 * fine.hit_probability["electron"], rtol=1e-14)
 
 
 def test_field_3d_uses_each_physical_grid_spacing_in_electric_gradient():
