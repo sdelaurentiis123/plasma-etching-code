@@ -25,7 +25,9 @@ from .charging_poisson_3d import (
     lump_triangle_sheet_charge_3d,
 )
 from .charging_coupled_3d import (
-    DielectricChargingStep3DResult, advance_dielectric_charging_3d,
+    DielectricChargingConvergenceError, DielectricChargingStep3DResult,
+    SteadyDielectricCharging3DResult, advance_dielectric_charging_3d,
+    solve_dielectric_charging_steady_3d,
 )
 from .feature_step_3d import (
     FeatureGeometry3D, FeatureSolve3DResult, FeatureStep3DResult, FeatureStepValidity,
@@ -51,7 +53,9 @@ __all__ = [
     "trace_boundary_state_first_hit_3d",
     "NodalPoissonSystem3D", "PoissonDiagnostics3D", "assemble_q1_stiffness_3d",
     "lump_triangle_sheet_charge_3d",
-    "DielectricChargingStep3DResult", "advance_dielectric_charging_3d",
+    "DielectricChargingConvergenceError", "DielectricChargingStep3DResult",
+    "SteadyDielectricCharging3DResult", "advance_dielectric_charging_3d",
+    "solve_dielectric_charging_steady_3d",
     "FeatureGeometry3D", "FeatureSolve3DResult", "FeatureStep3DResult", "FeatureStepValidity",
     "advance_feature_step_3d", "conservative_remap_surface_state", "solve_feature_3d",
 ]
