@@ -21,6 +21,7 @@ from .charging_poisson_3d import (
 )
 from .charged_surface_cascade_3d import (
     ChargedSurfaceCascade3DResult,
+    augment_transport_with_charged_reimpacts_3d,
     solve_charged_surface_cascade_3d,
 )
 from .charged_surface_response_3d import (
@@ -553,6 +554,8 @@ def _evaluate_incident_current_3d(
             raise RuntimeError(
                 "charged surface-response cascade reached its bounce cap with explicit "
                 "unresolved charge; refine response_max_bounces")
+        transport = augment_transport_with_charged_reimpacts_3d(
+            transport, surface_transfer)
     positive_face_current = surface_transfer.positive_deposition_current_density_a_m2
     negative_face_current = surface_transfer.negative_deposition_current_density_a_m2
     projection_arguments = dict(

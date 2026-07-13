@@ -15,7 +15,7 @@ import numpy as np
 from scipy.stats import qmc
 
 from .sheath import ECHARGE
-from .surface_kinetics import FaceResolvedEnergeticFlux
+from .surface_kinetics import FaceResolvedEnergeticFlux, ParameterEvidence
 
 
 @dataclass(frozen=True)
@@ -113,6 +113,11 @@ class ChargedSurfaceTransfer3D:
     deposited_charge_rate_c_s: float
     charge_balance_residual_c_s: float
     relative_charge_balance_error: float
+    incident_kinetic_energy_rate_eV_s: float
+    outgoing_kinetic_energy_rate_eV_s: float
+    deposited_kinetic_energy_rate_eV_s: float
+    kinetic_energy_balance_residual_eV_s: float
+    relative_kinetic_energy_balance_error: float
 
     def __post_init__(self):
         positive = np.asarray(
@@ -136,6 +141,16 @@ class ChargedSurfaceTransfer3D:
         if (np.any(~np.isfinite(rates)) or self.relative_charge_balance_error < 0.0
                 or any(item.face_count != positive.size for item in outgoing)):
             raise ValueError("invalid charged surface-transfer diagnostics")
+        energy = np.asarray([
+            self.incident_kinetic_energy_rate_eV_s,
+            self.outgoing_kinetic_energy_rate_eV_s,
+            self.deposited_kinetic_energy_rate_eV_s,
+            self.kinetic_energy_balance_residual_eV_s,
+            self.relative_kinetic_energy_balance_error], dtype=float)
+        if (np.any(~np.isfinite(energy)) or self.incident_kinetic_energy_rate_eV_s < 0.0
+                or self.outgoing_kinetic_energy_rate_eV_s < 0.0
+                or self.relative_kinetic_energy_balance_error < 0.0):
+            raise ValueError("invalid charged surface-transfer kinetic-energy ledger")
         for value in (positive, negative, signed):
             value.setflags(write=False)
         object.__setattr__(self, "positive_deposition_current_density_a_m2", positive)
@@ -178,6 +193,7 @@ def account_charged_surface_transfer_3d(
     negative = np.zeros(face_count)
     incident_charge_rate = 0.0
     incident_absolute_charge_rate = 0.0
+    incident_energy_rate = 0.0
     for population in incident:
         event_current_density = (
             ECHARGE * int(charge[population.name]) * population.event_flux_m2_s)
@@ -190,9 +206,13 @@ def account_charged_surface_transfer_3d(
         incident_charge_rate += float(np.dot(event_current_density, area[population.event_face]))
         incident_absolute_charge_rate += float(np.dot(
             np.abs(event_current_density), area[population.event_face]))
+        incident_energy_rate += float(np.dot(
+            population.event_flux_m2_s * population.event_energy_eV,
+            area[population.event_face]))
 
     outgoing_charge_rate = 0.0
     outgoing_absolute_charge_rate = 0.0
+    outgoing_energy_rate = 0.0
     for population in outgoing:
         # Outgoing current leaves the surface, so its contribution to stored charge has the
         # opposite sign. Convert particle rate back to source-face current density exactly once.
@@ -208,6 +228,10 @@ def account_charged_surface_transfer_3d(
         outgoing_charge_rate += population.charge_rate_c_s
         outgoing_absolute_charge_rate += float(
             ECHARGE * abs(population.charge_number) * np.sum(population.event_rate_s))
+        outgoing_energy_rate += float(np.dot(
+            population.event_rate_s,
+            np.einsum("rc,rc->r", population.event_velocity_sqrt_eV,
+                      population.event_velocity_sqrt_eV)))
 
     signed = positive - negative
     deposited_charge_rate = float(np.dot(signed, area))
@@ -215,13 +239,24 @@ def account_charged_surface_transfer_3d(
     scale = max(
         incident_absolute_charge_rate, outgoing_absolute_charge_rate,
         abs(deposited_charge_rate), np.finfo(float).tiny)
+    deposited_energy_rate = incident_energy_rate - outgoing_energy_rate
+    energy_residual = (
+        incident_energy_rate - outgoing_energy_rate - deposited_energy_rate)
+    energy_scale = max(
+        incident_energy_rate, outgoing_energy_rate, abs(deposited_energy_rate),
+        np.finfo(float).tiny)
     return ChargedSurfaceTransfer3D(
         positive, negative, signed, outgoing,
         incident_charge_rate_c_s=incident_charge_rate,
         outgoing_charge_rate_c_s=outgoing_charge_rate,
         deposited_charge_rate_c_s=deposited_charge_rate,
         charge_balance_residual_c_s=float(residual),
-        relative_charge_balance_error=float(abs(residual) / scale))
+        relative_charge_balance_error=float(abs(residual) / scale),
+        incident_kinetic_energy_rate_eV_s=incident_energy_rate,
+        outgoing_kinetic_energy_rate_eV_s=outgoing_energy_rate,
+        deposited_kinetic_energy_rate_eV_s=deposited_energy_rate,
+        kinetic_energy_balance_residual_eV_s=float(energy_residual),
+        relative_kinetic_energy_balance_error=float(abs(energy_residual) / energy_scale))
 
 
 def perfect_absorber_surface_transfer_3d(
@@ -259,13 +294,22 @@ def perfect_absorber_surface_transfer_3d(
             negative += current
     signed = positive - negative
     deposited_charge_rate = float(np.dot(signed, area))
+    incident_energy_rate = float(sum(
+        np.dot(population.event_flux_m2_s * population.event_energy_eV,
+               area[population.event_face])
+        for population in incident))
     return ChargedSurfaceTransfer3D(
         positive, negative, signed, (),
         incident_charge_rate_c_s=deposited_charge_rate,
         outgoing_charge_rate_c_s=0.0,
         deposited_charge_rate_c_s=deposited_charge_rate,
         charge_balance_residual_c_s=0.0,
-        relative_charge_balance_error=0.0)
+        relative_charge_balance_error=0.0,
+        incident_kinetic_energy_rate_eV_s=incident_energy_rate,
+        outgoing_kinetic_energy_rate_eV_s=0.0,
+        deposited_kinetic_energy_rate_eV_s=incident_energy_rate,
+        kinetic_energy_balance_residual_eV_s=0.0,
+        relative_kinetic_energy_balance_error=0.0)
 
 
 @dataclass(frozen=True)
@@ -279,6 +323,150 @@ class PerfectAbsorberChargedSurfaceResponse3D:
             raise TypeError("context must be ChargedSurfaceContext3D")
         return perfect_absorber_surface_transfer_3d(
             incident_populations, charge_number_by_species, context.face_area_m2)
+
+
+@dataclass(frozen=True)
+class GrazingSpecularIonReflection3D:
+    """Declared v1 grazing-ion reflection sensitivity with exact weighted lineage.
+
+    ``P_reflect = grazing_reflection_probability * (1 - cos(theta)**angular_exponent)``.
+    The reflected event retains ``energy_retention_fraction`` of incident kinetic energy and uses
+    the specular direction about the local gas normal.  The remaining weighted particles and energy
+    are deposited.  This is a phenomenological, material-tagged sensitivity law: it is not promoted
+    as a universal Si/SiO2 scattering distribution, and all three parameters carry provenance and
+    declared bounds.
+    """
+
+    material_id: object
+    ion_species_name: str
+    grazing_reflection_probability: float
+    angular_exponent: float
+    energy_retention_fraction: float
+    parameter_evidence: Mapping[str, ParameterEvidence]
+    parameter_bounds: Mapping[str, tuple[float, float]]
+
+    def __post_init__(self):
+        parameters = {
+            "grazing_reflection_probability": self.grazing_reflection_probability,
+            "angular_exponent": self.angular_exponent,
+            "energy_retention_fraction": self.energy_retention_fraction}
+        evidence = dict(self.parameter_evidence)
+        bounds = {name: tuple(value) for name, value in self.parameter_bounds.items()}
+        if (not self.ion_species_name or set(evidence) != set(parameters)
+                or set(bounds) != set(parameters)
+                or any(not isinstance(value, ParameterEvidence) for value in evidence.values())
+                or any(len(value) != 2 or not np.all(np.isfinite(value))
+                       or value[0] > value[1] for value in bounds.values())
+                or not 0.0 <= self.grazing_reflection_probability <= 1.0
+                or not np.isfinite(self.angular_exponent) or self.angular_exponent <= 0.0
+                or not 0.0 < self.energy_retention_fraction <= 1.0
+                or any(not bounds[name][0] <= value <= bounds[name][1]
+                       for name, value in parameters.items())):
+            raise ValueError("invalid grazing specular-ion reflection model")
+        object.__setattr__(self, "parameter_evidence", MappingProxyType(evidence))
+        object.__setattr__(self, "parameter_bounds", MappingProxyType(bounds))
+
+    @classmethod
+    def literature_bounded_sensitivity(cls, material_id, ion_species_name="Ar+"):
+        """Central v1 point inside published grazing-reflection observations."""
+        sources = (
+            "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; "
+            "Hoekstra et al., JVST B 16, 2102 (1998); "
+            "Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008")
+        evidence = {
+            name: ParameterEvidence(
+                sources, "literature_bounded_phenomenological_sensitivity",
+                note=(
+                    "Bounds span reported >90% grazing reflection, up-to-99% retained energy, "
+                    "and modern MD angle/energy/material dependence; not a calibrated material law"))
+            for name in (
+                "grazing_reflection_probability", "angular_exponent",
+                "energy_retention_fraction")}
+        return cls(
+            material_id=material_id, ion_species_name=ion_species_name,
+            grazing_reflection_probability=0.95, angular_exponent=3.0,
+            energy_retention_fraction=0.90, parameter_evidence=evidence,
+            parameter_bounds={
+                "grazing_reflection_probability": (0.80, 1.0),
+                "angular_exponent": (2.0, 8.0),
+                "energy_retention_fraction": (0.50, 0.99)})
+
+    @property
+    def provenance(self):
+        return MappingProxyType(dict(
+            model="weighted angle-dependent specular reflection with constant energy retention",
+            material_id=self.material_id,
+            ion_species_name=self.ion_species_name,
+            parameters={
+                "grazing_reflection_probability": self.grazing_reflection_probability,
+                "angular_exponent": self.angular_exponent,
+                "energy_retention_fraction": self.energy_retention_fraction},
+            bounds=dict(self.parameter_bounds),
+            evidence={name: value.source for name, value in self.parameter_evidence.items()},
+            claim="literature-bounded sensitivity; not material-calibrated prediction"))
+
+    def reflection_probability(self, cosine_incidence):
+        cosine = np.asarray(cosine_incidence, dtype=float)
+        if (np.any(~np.isfinite(cosine))
+                or np.any((cosine < 0.0) | (cosine > 1.0))):
+            raise ValueError("incidence cosine must lie in [0, 1]")
+        return self.grazing_reflection_probability * (
+            1.0 - cosine ** self.angular_exponent)
+
+    def evaluate(
+            self, incident_populations, charge_number_by_species,
+            context: ChargedSurfaceContext3D):
+        incident = tuple(incident_populations)
+        charge = dict(charge_number_by_species)
+        if not isinstance(context, ChargedSurfaceContext3D):
+            raise TypeError("context must be ChargedSurfaceContext3D")
+        selected_population = next(
+            (item for item in incident if item.name == self.ion_species_name), None)
+        outgoing = ()
+        if selected_population is not None:
+            ion_charge = charge.get(self.ion_species_name)
+            if ion_charge is None or ion_charge <= 0:
+                raise ValueError("ion reflection requires a positively charged incident species")
+            if (selected_population.event_position is None
+                    or selected_population.event_incident_direction is None):
+                raise ValueError("ion reflection requires impact position and direction lineage")
+            face = selected_population.event_face
+            normal = context.face_gas_normal[face]
+            geometric_cosine = -np.einsum(
+                "rc,rc->r", selected_population.event_incident_direction, normal)
+            if (np.any(geometric_cosine < -2e-6)
+                    or not np.allclose(
+                        geometric_cosine, selected_population.event_cosine_incidence,
+                        rtol=0.0, atol=2e-5)):
+                raise ValueError(
+                    "ion impact cosine is inconsistent with direction and gas normal")
+            selected = context.face_material_id[face] == self.material_id
+            probability = self.reflection_probability(
+                selected_population.event_cosine_incidence)
+            selected &= probability > 0.0
+            if np.any(selected):
+                normal = normal[selected]
+                incident_direction = selected_population.event_incident_direction[selected]
+                specular = incident_direction - 2.0 * np.einsum(
+                    "rc,rc->r", incident_direction, normal)[:, None] * normal
+                specular /= np.linalg.norm(specular, axis=1)[:, None]
+                if np.any(np.einsum("rc,rc->r", specular, normal) <= 0.0):
+                    raise ValueError("specular ion response did not point into the gas")
+                event_rate = (
+                    selected_population.event_flux_m2_s[selected]
+                    * context.face_area_m2[face[selected]] * probability[selected])
+                outgoing = (OutgoingChargedParticleEvents3D(
+                    self.ion_species_name, int(ion_charge), len(context.face_area_m2),
+                    face[selected], event_rate,
+                    selected_population.event_position[selected],
+                    np.sqrt(
+                        self.energy_retention_fraction
+                        * selected_population.event_energy_eV[selected])[:, None] * specular),)
+        if not outgoing:
+            return perfect_absorber_surface_transfer_3d(
+                incident, charge, context.face_area_m2)
+        return account_charged_surface_transfer_3d(
+            incident, charge, context.face_area_m2, outgoing=outgoing)
 
 
 def sobolewski_2021_ar_kinetic_see_yield(impact_energy_eV):

@@ -8,6 +8,7 @@ from typing import Mapping
 import numpy as np
 
 from .boundary_transport_3d import (
+    BoundaryTransport3DResult,
     ChargedSurfaceReimpactPopulation3D,
     trace_charged_surface_events_field_3d,
 )
@@ -17,7 +18,7 @@ from .charged_surface_response_3d import (
     ChargedSurfaceTransfer3D,
 )
 from .sheath import ECHARGE
-from .surface_kinetics import FaceResolvedEnergeticFlux
+from .surface_kinetics import FaceResolvedEnergeticFlux, SurfaceFluxes
 
 
 @dataclass(frozen=True)
@@ -203,3 +204,82 @@ def solve_charged_surface_cascade_3d(
         charge_balance_residual_c_s=float(residual),
         relative_charge_balance_error=float(abs(residual) / scale),
         completed=not bool(current))
+
+
+def _merge_face_resolved_populations_3d(populations):
+    """Concatenate one species' exact event measures without histogramming lineage."""
+    populations = tuple(populations)
+    if (not populations
+            or any(not isinstance(item, FaceResolvedEnergeticFlux) for item in populations)
+            or len({item.name for item in populations}) != 1
+            or len({item.face_count for item in populations}) != 1):
+        raise ValueError("face-resolved populations must share one species and mesh")
+    positions = [item.event_position for item in populations]
+    directions = [item.event_incident_direction for item in populations]
+    if any(value is None for value in positions) and not all(value is None for value in positions):
+        raise ValueError("cannot merge partially preserved impact positions")
+    if any(value is None for value in directions) and not all(value is None for value in directions):
+        raise ValueError("cannot merge partially preserved incident directions")
+    first = populations[0]
+    return FaceResolvedEnergeticFlux(
+        first.name, first.face_count,
+        np.concatenate([item.event_face for item in populations]),
+        np.concatenate([item.event_flux_m2_s for item in populations]),
+        np.concatenate([item.event_energy_eV for item in populations]),
+        np.concatenate([item.event_cosine_incidence for item in populations]),
+        event_position=(None if positions[0] is None else np.concatenate(positions)),
+        event_incident_direction=(
+            None if directions[0] is None else np.concatenate(directions)))
+
+
+def augment_transport_with_charged_reimpacts_3d(
+        transport: BoundaryTransport3DResult, cascade: ChargedSurfaceCascade3DResult):
+    """Return the chemistry-facing impact measure including every landed charged re-impact.
+
+    Boundary hit/escape probabilities continue to describe particles launched at the plasma
+    boundary. The energetic surface measure instead contains the primary hits plus all landed
+    cascade hits. Events are concatenated by species with their face, position, energy, angle,
+    and direction lineage intact. An incomplete cascade is refused because omitting its remaining
+    impacts would silently violate the energetic-flux contract.
+    """
+    if not isinstance(transport, BoundaryTransport3DResult):
+        raise TypeError("transport must be BoundaryTransport3DResult")
+    if not isinstance(cascade, ChargedSurfaceCascade3DResult):
+        raise TypeError("cascade must be ChargedSurfaceCascade3DResult")
+    if not cascade.completed:
+        raise ValueError("cannot construct a chemistry flux from an incomplete charged cascade")
+
+    energetic = list(transport.surface_fluxes.energetic_fluxes)
+    reimpacts = [
+        flight.incident
+        for bounce in cascade.flights_by_bounce
+        for flight in bounce
+        if flight.landed_rate_s > 0.0]
+    if not reimpacts:
+        return transport
+
+    ordered_names = []
+    grouped = {}
+    passthrough = []
+    for population in energetic + reimpacts:
+        if isinstance(population, FaceResolvedEnergeticFlux):
+            if population.name not in grouped:
+                ordered_names.append(population.name)
+                grouped[population.name] = []
+            grouped[population.name].append(population)
+        else:
+            passthrough.append(population)
+    merged = tuple(
+        _merge_face_resolved_populations_3d(grouped[name]) for name in ordered_names)
+    limitations = tuple(transport.known_limitations) + (
+        "energetic surface flux includes conservative charged-particle re-impacts",
+        "boundary hit/escape probabilities exclude subsequent surface-response flights",
+    )
+    return BoundaryTransport3DResult(
+        SurfaceFluxes(
+            transport.surface_fluxes.neutral_flux_m2_s,
+            tuple(passthrough) + merged),
+        transport.hit_probability, transport.escape_probability,
+        transport.truncation_probability,
+        transport.transport_model + " + charged_surface_reimpact_cascade",
+        tuple(dict.fromkeys(limitations)))
