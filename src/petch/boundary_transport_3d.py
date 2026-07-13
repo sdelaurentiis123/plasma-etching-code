@@ -19,6 +19,7 @@ from .boundary_state import (
     FoldedNormalTangentialDensity, MixtureBoundaryDensity, PlasmaBoundaryState,
     qmc_boundary_proposal,
 )
+from .charged_surface_response_3d import OutgoingChargedParticleEvents3D
 from .surface_kinetics import FaceResolvedEnergeticFlux, SurfaceFluxes
 from .neutral_radiosity_3d import DiffuseFormFactors3D
 from .threed import DEVICE, _apply_bc
@@ -199,7 +200,10 @@ def _field_hit_events_3d(
                     hit_cosine[particle] = wp.clamp(cosine, 0.0, 1.0)
                     hit_energy[particle] = wp.dot(impact_velocity, impact_velocity)
                     termination[particle] = wp.int8(1)
-                    terminal_position[particle] = position + fraction * segment
+                    # Store the in-cell intersection.  ``position + fraction * segment`` is in the
+                    # covering space and can lie outside the Poisson cell after a periodic wrap,
+                    # which is invalid as the origin of a later reflected/emitted flight.
+                    terminal_position[particle] = query_origin + ray.t * direction
                     terminal_velocity[particle] = impact_velocity
                     break
                 if wrap_axis < 0:
@@ -247,6 +251,168 @@ class BoundaryTransport3DResult:
         object.__setattr__(
             self, "truncation_probability", MappingProxyType(dict(self.truncation_probability)))
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
+
+
+@dataclass(frozen=True)
+class ChargedSurfaceReimpactPopulation3D:
+    """One emitted charged population after a conservative full-field flight."""
+
+    emitted: OutgoingChargedParticleEvents3D
+    incident: FaceResolvedEnergeticFlux
+    emitted_rate_s: float
+    landed_rate_s: float
+    escaped_rate_s: float
+    truncated_rate_s: float
+    relative_particle_balance_error: float
+
+    def __post_init__(self):
+        if (not isinstance(self.emitted, OutgoingChargedParticleEvents3D)
+                or not isinstance(self.incident, FaceResolvedEnergeticFlux)
+                or self.incident.name != self.emitted.name
+                or self.incident.face_count != self.emitted.face_count):
+            raise TypeError("re-impact populations require matching emitted and incident measures")
+        rates = np.asarray([
+            self.emitted_rate_s, self.landed_rate_s, self.escaped_rate_s,
+            self.truncated_rate_s, self.relative_particle_balance_error], dtype=float)
+        if (np.any(~np.isfinite(rates)) or np.any(rates < 0.0)):
+            raise ValueError("invalid charged re-impact balance")
+        residual = (
+            self.emitted_rate_s - self.landed_rate_s
+            - self.escaped_rate_s - self.truncated_rate_s)
+        if abs(residual) > 5e-15 * max(self.emitted_rate_s, np.finfo(float).tiny):
+            raise ValueError("charged re-impact must classify the complete emitted particle rate")
+
+
+def trace_charged_surface_events_field_3d(
+        outgoing_populations, verts, faces, areas, face_gas_normals, *,
+        nodal_potential_v, potential_origin, potential_spacing,
+        mesh_length_unit_m=1e-6, launch_offset=1e-5, fixed_dt=0.01,
+        max_steps=10000, periodic_lateral=False, allow_truncation=False, device=None):
+    """Trace sparse charged surface emissions through the shared nodal-field integrator.
+
+    Particle rate is the invariant measure: a landed event is divided by its target's physical
+    area exactly once to become incident flux density.  Every emitted event is classified as landed,
+    escaped, or truncated.  Truncation is fatal by default because silently dropping a bounce would
+    violate the charge-continuity equation that consumes this transport result.
+    """
+    outgoing = tuple(outgoing_populations)
+    verts = np.asarray(verts, dtype=float)
+    faces = np.asarray(faces, dtype=int)
+    areas = np.asarray(areas, dtype=float)
+    normals = np.asarray(face_gas_normals, dtype=float)
+    potential = np.asarray(nodal_potential_v, dtype=float)
+    grid_origin = np.asarray(potential_origin, dtype=float)
+    grid_spacing = np.asarray(potential_spacing, dtype=float)
+    if grid_spacing.ndim == 0:
+        grid_spacing = np.full(3, float(grid_spacing))
+    if (not outgoing
+            or any(not isinstance(item, OutgoingChargedParticleEvents3D) for item in outgoing)
+            or verts.ndim != 2 or verts.shape[1] != 3
+            or faces.ndim != 2 or faces.shape[1] != 3
+            or areas.shape != (len(faces),) or normals.shape != (len(faces), 3)
+            or np.any(~np.isfinite(verts)) or np.any(faces < 0) or np.any(faces >= len(verts))
+            or np.any(~np.isfinite(areas)) or np.any(areas <= 0.0)
+            or np.any(~np.isfinite(normals))
+            or not np.allclose(np.linalg.norm(normals, axis=1), 1.0, rtol=0.0, atol=2e-6)
+            or any(item.face_count != len(faces) for item in outgoing)):
+        raise ValueError("invalid charged surface-emission mesh or event measure")
+    geometric_areas = 0.5 * np.linalg.norm(np.cross(
+        verts[faces[:, 1]] - verts[faces[:, 0]],
+        verts[faces[:, 2]] - verts[faces[:, 0]]), axis=1)
+    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=0.0):
+        raise ValueError("triangle areas must match the supplied mesh geometry")
+    if (potential.ndim != 3 or min(potential.shape) < 2 or np.any(~np.isfinite(potential))
+            or grid_origin.shape != (3,) or np.any(~np.isfinite(grid_origin))
+            or grid_spacing.shape != (3,) or np.any(~np.isfinite(grid_spacing))
+            or np.any(grid_spacing <= 0.0)
+            or not np.isfinite(mesh_length_unit_m) or mesh_length_unit_m <= 0.0
+            or not np.isfinite(launch_offset) or launch_offset <= 0.0
+            or not np.isfinite(fixed_dt) or fixed_dt <= 0.0
+            or int(max_steps) != max_steps or max_steps <= 0):
+        raise ValueError("invalid charged surface-emission field or integration controls")
+    grid_maximum = grid_origin + (np.asarray(potential.shape) - 1) * grid_spacing
+    tolerance = 1e-7 * max(float(np.max(grid_spacing)), 1.0)
+    if (np.any(verts < grid_origin - tolerance)
+            or np.any(verts > grid_maximum + tolerance)):
+        raise ValueError("surface mesh must lie inside the nodal potential grid")
+
+    physical_area = areas * float(mesh_length_unit_m) ** 2
+    selected_device = DEVICE if device is None else str(device)
+    if selected_device.startswith("warp:"):
+        selected_device = selected_device.split(":", 1)[1]
+    ensure_writable_warp_cache(wp)
+    mesh = wp.Mesh(
+        points=wp.array(verts.astype(np.float32), dtype=wp.vec3, device=selected_device),
+        indices=wp.array(faces.astype(np.int32).ravel(), dtype=wp.int32, device=selected_device))
+    potential_wp = wp.array(
+        np.ascontiguousarray(potential.astype(np.float32)), dtype=float, device=selected_device)
+    results = []
+    for population in outgoing:
+        velocity = population.event_velocity_sqrt_eV
+        normal = normals[population.source_face]
+        outward_speed = np.einsum("rc,rc->r", velocity, normal)
+        if np.any(outward_speed <= 0.0):
+            raise ValueError(
+                f"outgoing population {population.name!r} contains a non-outward launch")
+        origin = population.event_position + float(launch_offset) * normal
+        if (np.any(origin < grid_origin - tolerance)
+                or np.any(origin > grid_maximum + tolerance)):
+            raise ValueError("offset charged-particle launch lies outside the potential grid")
+        ray_count = len(population.event_rate_s)
+        if ray_count == 0:
+            incident = FaceResolvedEnergeticFlux(
+                population.name, len(faces), np.empty(0, dtype=int), np.empty(0),
+                np.empty(0), np.empty(0), event_position=np.empty((0, 3)),
+                event_incident_direction=np.empty((0, 3)))
+            results.append(ChargedSurfaceReimpactPopulation3D(
+                population, incident, 0.0, 0.0, 0.0, 0.0, 0.0))
+            continue
+        hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
+        hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
+        hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
+        termination_wp = wp.zeros(ray_count, dtype=wp.int8, device=selected_device)
+        terminal_position_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
+        terminal_velocity_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
+        wp.launch(
+            _field_hit_events_3d, dim=ray_count, device=selected_device,
+            inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), wp.vec3(*grid_spacing),
+                    wp.vec3(*grid_maximum),
+                    wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
+                    wp.array(velocity.astype(np.float32), dtype=wp.vec3, device=selected_device),
+                    float(population.charge_number), float(fixed_dt), int(max_steps),
+                    int(bool(periodic_lateral)), hit_face_wp, hit_cosine_wp, hit_energy_wp,
+                    termination_wp, terminal_position_wp, terminal_velocity_wp])
+        hit_face = hit_face_wp.numpy().astype(int)
+        termination = termination_wp.numpy().astype(int)
+        hit = termination == 1
+        escaped = termination == 2
+        truncated = termination == 0
+        if not np.all(hit | escaped | truncated):
+            raise RuntimeError("charged field transport returned an unknown termination state")
+        if np.any(truncated) and not allow_truncation:
+            raise RuntimeError(
+                f"surface-emitted trajectories for {population.name!r} exhausted max_steps; "
+                "increase the physical time horizon or explicitly allow diagnostic truncation")
+        event_rate = population.event_rate_s
+        terminal_velocity = terminal_velocity_wp.numpy().astype(float)
+        incident = FaceResolvedEnergeticFlux(
+            population.name, len(faces), hit_face[hit],
+            event_rate[hit] / physical_area[hit_face[hit]],
+            hit_energy_wp.numpy().astype(float)[hit],
+            hit_cosine_wp.numpy().astype(float)[hit],
+            event_position=terminal_position_wp.numpy().astype(float)[hit],
+            event_incident_direction=(
+                terminal_velocity[hit]
+                / np.linalg.norm(terminal_velocity[hit], axis=1, keepdims=True)))
+        emitted_rate = float(np.sum(event_rate))
+        landed_rate = float(np.sum(event_rate[hit]))
+        escaped_rate = float(np.sum(event_rate[escaped]))
+        truncated_rate = float(np.sum(event_rate[truncated]))
+        residual = emitted_rate - landed_rate - escaped_rate - truncated_rate
+        results.append(ChargedSurfaceReimpactPopulation3D(
+            population, incident, emitted_rate, landed_rate, escaped_rate, truncated_rate,
+            abs(residual) / max(emitted_rate, np.finfo(float).tiny)))
+    return tuple(results)
 
 
 @dataclass(frozen=True)

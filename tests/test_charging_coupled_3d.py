@@ -111,6 +111,9 @@ def test_physical_3d_charging_step_conserves_incident_charge_and_capacitance():
     expected_voltage = expected_sigma * 1e-6 / EPS0
     assert np.isclose(result.charge_increment_node_c.sum(), expected_charge, rtol=1e-14)
     assert abs(result.diagnostics["charge_conservation_residual_c"]) < 1e-30
+    assert result.surface_transfer.outgoing == ()
+    assert result.diagnostics["surface_transfer_charge_balance_residual_c"] == 0.0
+    assert result.diagnostics["surface_transfer_relative_charge_balance_error"] == 0.0
     assert np.allclose(result.potential_before_v, 0.0, atol=1e-14)
     assert np.isclose(result.potential_after_v[:, :, 0].mean(), expected_voltage, rtol=2e-12)
 
@@ -225,6 +228,8 @@ def test_physical_time_driver_matches_manual_steps_and_audits_final_current_stat
     assert transient.history[-1]["physical_time_s"] == 2.0 * duration
     assert transient.history[-1]["max_relative_current_imbalance_node"] == 1.0
     assert abs(transient.diagnostics["cumulative_charge_conservation_residual_c"]) < 1e-30
+    assert transient.surface_transfer.outgoing == ()
+    assert transient.diagnostics["final_surface_transfer_charge_balance_residual_c_s"] == 0.0
     assert transient.positive_current_node_a.flags.writeable is False
 
 

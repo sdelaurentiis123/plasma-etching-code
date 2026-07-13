@@ -18,7 +18,10 @@ from .charging_poisson_3d import (
     PoissonDiagnostics3D,
     lump_triangle_sheet_charge_3d,
 )
-from .sheath import ECHARGE
+from .charged_surface_response_3d import (
+    ChargedSurfaceTransfer3D,
+    perfect_absorber_surface_transfer_3d,
+)
 from .surface_kinetics import FaceResolvedEnergeticFlux
 
 
@@ -33,6 +36,7 @@ class DielectricChargingStep3DResult:
     face_current_density_a_m2: np.ndarray
     positive_current_node_a: np.ndarray
     negative_current_node_a: np.ndarray
+    surface_transfer: ChargedSurfaceTransfer3D
     transport: BoundaryTransport3DResult
     poisson_before: PoissonDiagnostics3D
     poisson_after: PoissonDiagnostics3D
@@ -70,6 +74,7 @@ class PhysicalTimeDielectricCharging3DResult:
     positive_current_node_a: np.ndarray
     negative_current_node_a: np.ndarray
     charge_history_node_c: np.ndarray
+    surface_transfer: ChargedSurfaceTransfer3D
     transport: BoundaryTransport3DResult
     poisson: PoissonDiagnostics3D
     bidirectional_method_hint: Mapping[str, np.ndarray]
@@ -440,19 +445,16 @@ def _evaluate_incident_current_3d(
         population.name: population for population in transport.surface_fluxes.energetic_fluxes}
     if set(population_by_name) != set(species_role):
         raise RuntimeError("charged transport did not preserve every species current measure")
-    face_count = np.asarray(faces).shape[0]
-    positive_face_current = np.zeros(face_count)
-    negative_face_current = np.zeros(face_count)
     for species in charged_species:
         population = population_by_name[species.name]
         if not isinstance(population, FaceResolvedEnergeticFlux):
             raise RuntimeError("3-D charging requires face-resolved incident events")
-        current = (ECHARGE * abs(float(species.charge_number))
-                   * population.flux_m2_s)
-        if species.charge_number > 0:
-            positive_face_current += current
-        else:
-            negative_face_current += current
+    surface_transfer = perfect_absorber_surface_transfer_3d(
+        tuple(population_by_name[species.name] for species in charged_species),
+        {species.name: species.charge_number for species in charged_species},
+        np.asarray(areas, dtype=float) * float(mesh_length_unit_m) ** 2)
+    positive_face_current = surface_transfer.positive_deposition_current_density_a_m2
+    negative_face_current = surface_transfer.negative_deposition_current_density_a_m2
     projection_arguments = dict(
         shape=poisson_system.shape, vertices=verts, faces=faces,
         grid_origin=potential_origin, grid_spacing=coordinate_spacing,
@@ -467,6 +469,7 @@ def _evaluate_incident_current_3d(
         negative_face_current=negative_face_current,
         positive_node_current=positive_node_current,
         negative_node_current=negative_node_current,
+        surface_transfer=surface_transfer,
         bidirectional_method_hint=bidirectional_method_hint)
 
 
@@ -540,7 +543,8 @@ def advance_dielectric_charging_3d(
         adjoint_proposal_frames=adjoint_proposal_frames,
         bidirectional_options=bidirectional_options,
         transport_device=transport_device)
-    face_current = evaluated["positive_face_current"] - evaluated["negative_face_current"]
+    surface_transfer = evaluated["surface_transfer"]
+    face_current = surface_transfer.face_current_density_a_m2
     current_node = evaluated["positive_node_current"] - evaluated["negative_node_current"]
     charge_increment = current_node * float(duration_s)
     incident_node_current = (
@@ -570,6 +574,7 @@ def advance_dielectric_charging_3d(
         face_current_density_a_m2=face_current,
         positive_current_node_a=evaluated["positive_node_current"],
         negative_current_node_a=evaluated["negative_node_current"],
+        surface_transfer=surface_transfer,
         transport=evaluated["transport"],
         poisson_before=evaluated["poisson"],
         poisson_after=poisson_after,
@@ -579,6 +584,10 @@ def advance_dielectric_charging_3d(
             incident_charge_c=incident_charge,
             deposited_charge_c=deposited_charge,
             charge_conservation_residual_c=conservation_residual,
+            surface_transfer_charge_balance_residual_c=(
+                surface_transfer.charge_balance_residual_c_s * float(duration_s)),
+            surface_transfer_relative_charge_balance_error=(
+                surface_transfer.relative_charge_balance_error),
             maximum_abs_face_current_density_a_m2=float(np.max(np.abs(face_current)))),
         known_limitations=(
             "all supplied surface triangles are treated as charge-storing dielectric",
@@ -722,6 +731,7 @@ def integrate_dielectric_charging_transient_3d(
         positive_current_node_a=final["positive_node_current"],
         negative_current_node_a=final["negative_node_current"],
         charge_history_node_c=np.stack(charge_history),
+        surface_transfer=final["surface_transfer"],
         transport=final["transport"], poisson=final["poisson"],
         bidirectional_method_hint=final["bidirectional_method_hint"], history=tuple(history),
         converged=converged,
@@ -732,7 +742,11 @@ def integrate_dielectric_charging_transient_3d(
             total_deposited_charge_c=total_deposited_charge,
             cumulative_charge_conservation_residual_c=(
                 total_deposited_charge - total_incident_charge),
-            maximum_step_charge_conservation_residual_c=max_conservation_residual),
+            maximum_step_charge_conservation_residual_c=max_conservation_residual,
+            final_surface_transfer_charge_balance_residual_c_s=(
+                final["surface_transfer"].charge_balance_residual_c_s),
+            final_surface_transfer_relative_charge_balance_error=(
+                final["surface_transfer"].relative_charge_balance_error)),
         known_limitations=(
             "fixed-step physical-time forward Euler requires timestep-halving evidence",
             "fixed estimator samples require an independent final current audit",

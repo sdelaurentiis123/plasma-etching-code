@@ -17,8 +17,10 @@ from .surface_kinetics import (
     SiO2SurfaceState, SurfaceFluxes,
 )
 from .boundary_transport_3d import (
-    BoundaryTransport3DResult, estimate_diffuse_form_factors_3d,
+    BoundaryTransport3DResult, ChargedSurfaceReimpactPopulation3D,
+    estimate_diffuse_form_factors_3d,
     merge_boundary_transport_results_3d,
+    trace_charged_surface_events_field_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
 )
@@ -33,6 +35,10 @@ from .charging_coupled_3d import (
     SteadyDielectricCharging3DResult,
     advance_dielectric_charging_3d, current_balance_metrics_3d,
     integrate_dielectric_charging_transient_3d, solve_dielectric_charging_steady_3d,
+)
+from .charged_surface_response_3d import (
+    ChargedSurfaceTransfer3D, OutgoingChargedParticleEvents3D,
+    account_charged_surface_transfer_3d, perfect_absorber_surface_transfer_3d,
 )
 from .surface_interaction_table import (
     InteractionAxis, SurfaceInteractionDomainError, SurfaceInteractionEvaluation,
@@ -91,7 +97,8 @@ __all__ = [
     "EnergeticFlux", "EnergeticYield", "FaceResolvedEnergeticFlux", "ParameterEvidence",
     "ReducedSiO2FluorocarbonMechanism", "ReducedSiO2FluorocarbonParameters",
     "SiO2SurfaceState", "SurfaceFluxes",
-    "BoundaryTransport3DResult", "merge_boundary_transport_results_3d",
+    "BoundaryTransport3DResult", "ChargedSurfaceReimpactPopulation3D",
+    "merge_boundary_transport_results_3d", "trace_charged_surface_events_field_3d",
     "estimate_diffuse_form_factors_3d",
     "trace_boundary_state_field_3d",
     "trace_boundary_state_first_hit_3d",
@@ -103,6 +110,8 @@ __all__ = [
     "SteadyDielectricCharging3DResult",
     "advance_dielectric_charging_3d", "current_balance_metrics_3d",
     "integrate_dielectric_charging_transient_3d", "solve_dielectric_charging_steady_3d",
+    "ChargedSurfaceTransfer3D", "OutgoingChargedParticleEvents3D",
+    "account_charged_surface_transfer_3d", "perfect_absorber_surface_transfer_3d",
     "InteractionAxis", "SurfaceInteractionDomainError", "SurfaceInteractionEvaluation",
     "SurfaceInteractionInterpolationAudit", "SurfaceInteractionTable",
     "KounisMelas2024Tables", "load_kounis_melas_2024_tables",

@@ -445,6 +445,18 @@ under-determined) -- an honest result that quantifies how many structures must b
   absorbing-map preflight summary, CSV, and PNG retain identical git object hashes after replay;
   57 targeted surface/transport/charging tests pass with one unavailable-CUDA skip. No response has
   yet been applied.
+- **The charging current now uses one conservative surface-transfer contract.** Perfect absorption
+  exactly reproduces the historical accumulate-flux-then-multiply current order, but now exposes
+  incident, outgoing, and deposited signed charge rates. Step and physical-time results report the
+  response balance separately from compatible-Q1 projection balance. Artificial reflection/emission
+  accounting gates close at roundoff; no yield or reflection law has been activated.
+- **Charged surface-origin re-impact reuses the production field tracer.** Sparse outgoing particle
+  rates are launched from their preserved impact points, advanced by the same velocity-Verlet nodal
+  field kernel, and converted to target-face flux exactly once. Every rate is classified as landed,
+  escaped, or truncated; truncation raises by default. A periodic provenance defect was fixed so a
+  wrapped hit stores its in-cell intersection rather than a covering-space coordinate. Synthetic
+  landing/escape/horizon gates conserve particle rate exactly. The full response cascade remains
+  unconnected, so the governing physical operator is still the exact perfect absorber.
 
 ## Roadmap (remaining)
 

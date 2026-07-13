@@ -268,6 +268,8 @@ def test_periodic_field_transport_wraps_lateral_crossings_without_energy_change(
     assert periodic.hit_probability["Ar+"] == 1.0
     assert periodic.escape_probability["Ar+"] == 0.0
     assert np.allclose(events.event_energy_eV, 5.0, atol=2e-5)
+    assert np.all((events.event_position[:, :2] >= 0.0)
+                  & (events.event_position[:, :2] <= 1.0))
 
 
 def test_periodic_adjoint_field_gather_reproduces_flat_maxwellian_flux_and_energy():

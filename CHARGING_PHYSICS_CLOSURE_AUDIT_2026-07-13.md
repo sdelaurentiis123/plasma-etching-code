@@ -214,7 +214,8 @@ first-hit/gather paths preserve direction; bidirectional selection, face replace
 filtering retain the richer event measure. The archived preflight summary, CSV, and PNG are bitwise
 unchanged after replay (git object ids `84a65d8a`, `23099578`, `f47d675e`). The absorber current law
 does not consume the new fields. Targeted transport/charging/surface tests pass 57/57 with one CUDA
-skip.
+skip. The historical absorber is now an explicit `PerfectAbsorber` surface-transfer identity used by
+the charging advance operator; the archived preflight artifacts remain bitwise unchanged.
 
 ### P1 — conservative charged re-impact kernel
 
@@ -224,6 +225,15 @@ cavity. Gate `incoming charge = deposited charge + outgoing/escaped charge` at e
 after Q1 projection. Refine timestep, ray offset, surface quadrature, and cascade termination.
 
 Kill: a configuration can lose charge at a bounce cap or double-count a reflected primary.
+
+**Status: flight/accounting substrate passed; cascade response remains.** The engine now has one
+signed surface-transfer identity, sparse outgoing charged event measures, and a surface-origin flight
+operator that reuses the production velocity-Verlet/Poisson-field/hard-triangle kernel. Particle rate
+is invariant across source and target face areas. Synthetic gates cover absorbed electrons, reflected
+electrons, two true secondaries, ion neutralization plus emission, landed re-impact, explicit escape,
+and fatal-by-default trajectory truncation. A periodic hit now records its wrapped in-cell position,
+fixing provenance that absorption did not previously consume. Remaining P1 work is the material
+response/cascade driver plus specular, Lambertian-per-ion, and closed-cavity cascade refinement.
 
 ### P2 — sourced Ar+ -> electron SEE slice
 
