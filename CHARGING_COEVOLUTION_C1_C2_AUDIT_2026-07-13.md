@@ -1,8 +1,9 @@
 # Charging co-evolution C1/C2 audit
 
-Date: 2026-07-13. This report implements the work permitted before convergence-contract sign-off in
-the charging co-evolution handoff. `CONVERGENCE_CONTRACT_AMENDMENT.md` remains a draft, so C3 and all
-downstream co-evolution/validation work have not started.
+Date: 2026-07-13. This report implements the C1/C2 work completed before convergence-contract
+sign-off in the charging co-evolution handoff. Revision `CCA-2026-07-13-R2` was subsequently signed
+on 2026-07-13, authorizing C3 subject to its full entry gates and no-gos. This report contains no C3
+result.
 
 ## Outcome
 
@@ -45,8 +46,8 @@ uniform recession with exact positive/negative removal ledger. The observed conv
 first-order, consistent with a piecewise-constant face field and the existing first-order moving
 interface/state-transfer contract.
 
-This operator is intentionally solver-independent and not yet called by a C3 profile/charging loop.
-That wiring is forbidden until the contract amendment is signed.
+This operator is intentionally solver-independent and was not called by a C3 profile/charging loop
+in this audit. Revision `CCA-2026-07-13-R2` subsequently authorized that wiring.
 
 ## C2 — energetic grazing reflection
 
@@ -107,6 +108,8 @@ provenance/bounds, and all conservation gates. Outputs are under
 
 ## Boundary after this report
 
-C1 and the bounded C2 channel are ready for review. They do not authorize C3. The old frozen-map root
-solver family remains closed, the active 0.08 node diagnostic is unchanged, and no result here claims
-charging convergence, notching validation, twisting prediction, or calibrated ion scattering.
+C1 and the bounded C2 channel passed their pre-C3 review. Signed revision
+`CCA-2026-07-13-R2` separately authorizes C3; it does not alter this report's evidence. The old
+frozen-map root solver family remains closed, the per-node diagnostic remains mandatory on every
+run, and no result here claims charging convergence, notching validation, twisting prediction, or
+calibrated ion scattering.

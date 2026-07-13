@@ -509,17 +509,18 @@ under-determined) -- an honest result that quantifies how many structures must b
 
 ### Charging co-evolution C1/C2 pre-sign-off work (2026-07-13)
 
-- **The convergence-contract amendment is drafted but not active.** The draft preserves the old
-  per-node RMS/worst-node diagnostic forever while proposing potential saturation, fixed-physical-
-  patch balance under refinement, observable invariance, exact conservation, and an independent
-  hard-visibility final audit. No runtime threshold or `END_STATE_VERIFICATION.md` criterion was
-  weakened. C3 and all downstream work remain blocked on Stan's explicit signature.
+- **Convergence-contract revision `CCA-2026-07-13-R2` is signed and active.** Stan's two binding
+  riders require at least two physical patch scales (one no larger than any claimed feature) and cap
+  every experimental-claim observable tolerance at the benchmark's experimental plus digitization
+  uncertainty. The old per-node RMS/worst-node diagnostic remains mandatory on every run including
+  failures. C3 is authorized; its task-entry gates and every handoff no-go remain binding.
 - **C1 moving-surface charge remap passes.** The declared closure carries charge with retained or
   advancing material, removes and itemizes charge on an etched-away layer, and initializes newly
   exposed material uncharged. No-op is bitwise identical; translation and signed removal ledgers
   close; a 4/8/16/32-cell refinement ladder has observed RMS orders 1.124/1.204/1.187 with maximum
   relative charge-ledger error `1.48e-15`. Positive and negative inventories are conserved
-  separately. The operator is solver-independent and deliberately not wired into C3 before sign-off.
+  separately. The operator is solver-independent and was deliberately not wired into C3 before
+  sign-off; revision R2 now permits that integration.
 - **C2 bounded grazing reflection passes its common-engine certification.** Config
   `b3df9406a4ac848dafa410eee924ca587217a39fef22065dfc70e6b998c1ed5d` uses exact hard triangle
   visibility and deterministic manufactured 100 eV Ar+ events. The explicit literature-bounded
