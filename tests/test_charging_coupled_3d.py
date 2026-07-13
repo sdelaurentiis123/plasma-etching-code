@@ -129,6 +129,8 @@ def test_physical_3d_charging_step_conserves_incident_charge_and_capacitance():
     expected_voltage = expected_sigma * 1e-6 / EPS0
     assert np.isclose(result.charge_increment_node_c.sum(), expected_charge, rtol=1e-14)
     assert abs(result.diagnostics["charge_conservation_residual_c"]) < 1e-30
+    assert result.diagnostics["absolute_incident_charge_c"] >= abs(
+        result.diagnostics["incident_charge_c"])
     assert result.surface_transfer.outgoing == ()
     assert result.diagnostics["surface_transfer_charge_balance_residual_c"] == 0.0
     assert result.diagnostics["surface_transfer_relative_charge_balance_error"] == 0.0

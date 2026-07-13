@@ -569,7 +569,7 @@ under-determined) -- an honest result that quantifies how many structures must b
 - **Manufactured C3 integration passes; scientific C3 closure remains pending.** Config
   `d3b5485aff03a950c82f6fb4a0161e76532b5120dc7f5a075bb340a7a4c444fc` gives planar B1 rate 0,
   node RMS/worst 0/0, patch maxima 0/0 at 0.25/1.0 micrometers, exact transport reuse, and zero
-  deposition/remap ledger error. The full suite is 366 passed, 1 skipped. The real-trench cold/warm
+  deposition/remap ledger error. The full suite is 368 passed, 1 skipped. The real-trench cold/warm
   branch, timestep/grid/sample refinement, observable invariance, and independent high-sample B5
   audit remain required; C4 has not started. Evidence is in
   `CHARGING_COEVOLUTION_C3_AUDIT_2026-07-13.md` and `results/charging_coevolution_c3/`.
@@ -595,6 +595,30 @@ under-determined) -- an honest result that quantifies how many structures must b
   potential by `4.53e-15`, while the tighter maximum L1 bound is `8.52e-14`. Pilot evidence is in
   `results/charging_coevolution_c3_trench_pilot*/`, with the paired differences and artifact hashes
   in `results/charging_coevolution_c3_trench_pilot/tail_refinement_comparison.json`.
+- **The first real C3 timestep-refinement sequence tightens, but is not declared closed.** At 2.5
+  microseconds, fixed 125/62.5/31.25 ns runs give node RMS 0.3963/0.3956/0.3952 and B2 maxima
+  19.81/19.68/19.67 at the 0.25 micrometer scale. Successive halving changes face sigma 3.76% then
+  1.32%, nodal charge 2.12% then 0.843%, and potential 0.261% then 0.164%. The sequence is tightening
+  (face-charge observed order about 1.50), but the finest face state is not yet invariant and the
+  state is not saturated.
+- **SER/PTC now performs real trial rollback on the same conservative operator.** The real trench
+  exposed that the initial implementation (a) used denominator-sensitive B2 as a step-rejection
+  merit, (b) halved a timestep without rolling back the already advanced charge, and (c) could use a
+  new SER step for the face candidate while the nodal candidate retained the old duration. SER now
+  safeguards the dimensional current residual, restores face/nodal state and both clocks, retries
+  rejected trials, and preserves the compatible-Q1 mismatch below `2.46e-16`.
+- **Signed charge cancellation no longer creates false conservation failures.** The engine records
+  positive, negative, absolute-throughput, and signed-net inventories independently and normalizes
+  roundoff by positive-plus-negative throughput. The failure that exposed this was only `9.12e-34`
+  C of residual divided by a near-zero `9.42e-22` C signed net. The corrected real SER run's worst
+  relative deposition-ledger error is `9.53e-17`.
+- **Bounded PTC agrees with fixed physical time and accelerates it, but equilibrium remains open.**
+  At 4.3549 versus 4.3750 microseconds, 80-step SER and 140-step fixed time differ by 0.339% in face
+  sigma and 0.176% in potential. SER uses 42.9% fewer accepted steps and is 1.65x faster; its two
+  growing-residual trials are explicitly rolled back. The endpoint still has node RMS/worst
+  0.350/0.790, B2 11.50/10.59, and potential rate `1.46e6` V/s, so neither B1/B2 nor C3 closes.
+  Paired hashes and differences are in
+  `results/charging_coevolution_c3_trench_refinement/comparison.json`.
 
 ## Roadmap (remaining)
 

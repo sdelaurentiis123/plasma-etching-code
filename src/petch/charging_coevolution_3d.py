@@ -166,14 +166,21 @@ class SurfaceChargingSaturation3DResult:
 class SurfaceChargingSaturationError(RuntimeError):
     """A C3 fixed-geometry charging trajectory failed with replayable state/history."""
 
-    def __init__(self, message, sigma_c_per_m2, history, accepted_steps, rejected_steps):
+    def __init__(
+            self, message, sigma_c_per_m2, history, accepted_steps, rejected_steps,
+            physical_time_s=0.0, pseudo_time_s=0.0):
         super().__init__(message)
         sigma = np.asarray(sigma_c_per_m2, dtype=float).copy()
+        clocks = np.asarray([physical_time_s, pseudo_time_s], dtype=float)
+        if np.any(~np.isfinite(clocks)) or np.any(clocks < 0.0):
+            raise ValueError("failure checkpoint clocks must be finite and nonnegative")
         sigma.setflags(write=False)
         self.sigma_c_per_m2 = sigma
         self.history = tuple(MappingProxyType(dict(item)) for item in history)
         self.accepted_steps = int(accepted_steps)
         self.rejected_steps = int(rejected_steps)
+        self.physical_time_s = float(physical_time_s)
+        self.pseudo_time_s = float(pseudo_time_s)
 
 
 def physical_surface_patch_groups_3d(
@@ -241,6 +248,16 @@ def _patch_balances(
     return tuple(results)
 
 
+def _ser_candidate_acceptance(
+        activated_ser, residual_norm_a, last_residual_norm_a, allowed_residual_growth):
+    """Safeguard PTC with the dimensional ODE residual, never a normalized gate ratio."""
+    if not activated_ser or last_residual_norm_a is None:
+        return True, None
+    if residual_norm_a > (1.0 + allowed_residual_growth) * last_residual_norm_a:
+        return False, "absolute_current_residual_growth"
+    return True, None
+
+
 def integrate_surface_charging_to_saturation_3d(
         poisson_system: NodalPoissonSystem3D, initial_sigma_c_per_m2,
         boundary: PlasmaBoundaryState, verts, faces, areas, *,
@@ -265,9 +282,11 @@ def integrate_surface_charging_to_saturation_3d(
     """Integrate one fixed geometry to B1/B2 saturation with fixed time or safeguarded SER.
 
     SER follows the residual-ratio rule ``dt[n+1] = dt[n] * ||F[n]||/||F[n+1]||`` with declared
-    minimum/maximum steps and a residual-growth rejection safeguard. It changes only the explicit
-    step size of the same conservative charge ODE. The returned current and all gates are evaluated
-    on the exact caller-supplied kinetic surface operator.
+    minimum/maximum steps and an absolute-current-residual rejection safeguard. The signed B2 patch
+    ratio remains an acceptance gate for the final state, but cannot reject a dynamical step because
+    its local ion denominator can change non-monotonically. SER changes only the explicit step size
+    of the same conservative charge ODE. The returned current and all gates are evaluated on the
+    exact caller-supplied kinetic surface operator.
     """
     if not isinstance(poisson_system, NodalPoissonSystem3D):
         raise TypeError("poisson_system must be NodalPoissonSystem3D")
@@ -330,8 +349,7 @@ def integrate_surface_charging_to_saturation_3d(
     physical_time = 0.0
     pseudo_time = 0.0
     last_residual_norm = None
-    last_merit = None
-    last_patch_maximum = None
+    pending_trial = None
 
     common = dict(
         poisson_system=poisson_system, boundary=boundary, verts=verts, faces=faces, areas=areas,
@@ -356,7 +374,7 @@ def integrate_surface_charging_to_saturation_3d(
     final_patch = None
     converged = False
     attempt = 0
-    while attempt <= int(maximum_steps):
+    while True:
         attempt += 1
         try:
             step = advance_dielectric_charging_3d(
@@ -364,7 +382,7 @@ def integrate_surface_charging_to_saturation_3d(
         except Exception as error:
             raise SurfaceChargingSaturationError(
                 f"C3 charging evaluation failed after {accepted} accepted steps: {error}",
-                sigma, history, accepted, rejected) from error
+                sigma, history, accepted, rejected, physical_time, pseudo_time) from error
         if step.bidirectional_method_hint:
             # Freeze the separately certified method map at its measured sample levels. This is the
             # same replay contract used by the lower physical-time engine and prevents estimator
@@ -384,7 +402,7 @@ def integrate_surface_charging_to_saturation_3d(
         residual_norm = float(np.linalg.norm(
             step.positive_current_node_a - step.negative_current_node_a))
         charge_conservation_scale = max(
-            abs(float(step.diagnostics["incident_charge_c"])),
+            float(step.diagnostics["absolute_incident_charge_c"]),
             abs(float(step.diagnostics["deposited_charge_c"])), np.finfo(float).tiny)
         charge_conservation_relative_error = abs(float(
             step.diagnostics["charge_conservation_residual_c"])) / charge_conservation_scale
@@ -392,16 +410,18 @@ def integrate_surface_charging_to_saturation_3d(
             item.b2_maximum_ion_normalized_imbalance for item in patch)
         merit = node_metrics.rms_relative_imbalance
         activated_ser = bool(timestep_policy == "ser" and merit <= ser_activation_rms)
-        accept = True
-        if (activated_ser and last_merit is not None
-                and (merit > (1.0 + ser_allowed_residual_growth) * last_merit
-                     or patch_maximum > (1.0 + ser_allowed_residual_growth)
-                     * last_patch_maximum)):
-            accept = False
+        accept, rejection_reason = _ser_candidate_acceptance(
+            activated_ser and pending_trial is not None,
+            residual_norm, last_residual_norm,
+            float(ser_allowed_residual_growth))
+        prospective_accepted_steps = int(
+            accepted + (1 if accept and pending_trial is not None else 0))
         item = dict(
-            evaluation=int(attempt), accepted=bool(accept), accepted_steps=int(accepted),
+            evaluation=int(attempt), accepted=bool(accept),
+            accepted_steps=prospective_accepted_steps,
             rejected_steps=int(rejected), timestep_s=float(dt),
             physical_time_s=float(physical_time), pseudo_time_s=float(pseudo_time),
+            ser_activated=activated_ser, rejection_reason=rejection_reason,
             potential_rate_max_v_s=potential_rate,
             rms_relative_current_imbalance_node=merit,
             max_relative_current_imbalance_node=node_metrics.maximum_relative_imbalance,
@@ -425,6 +445,12 @@ def integrate_surface_charging_to_saturation_3d(
             patch_symmetric_max_relative_imbalance=tuple(
                 value.maximum_relative_imbalance for value in patch),
             incident_charge_c=float(step.diagnostics["incident_charge_c"]),
+            positive_incident_charge_c=float(
+                step.diagnostics["positive_incident_charge_c"]),
+            negative_incident_charge_c=float(
+                step.diagnostics["negative_incident_charge_c"]),
+            absolute_incident_charge_c=float(
+                step.diagnostics["absolute_incident_charge_c"]),
             deposited_charge_c=float(step.diagnostics["deposited_charge_c"]),
             charge_conservation_residual_c=float(
                 step.diagnostics["charge_conservation_residual_c"]),
@@ -442,21 +468,27 @@ def integrate_surface_charging_to_saturation_3d(
                 or step.surface_transfer.relative_charge_balance_error > 5e-13):
             raise SurfaceChargingSaturationError(
                 "C3 charge-deposition ledger failed roundoff conservation",
-                sigma, history, accepted, rejected)
+                sigma, history, accepted, rejected, physical_time, pseudo_time)
 
         if not accept:
             rejected += 1
-            dt *= 0.5
+            sigma = pending_trial["sigma_c_per_m2"]
+            charge = pending_trial["charge_node_c"]
+            physical_time = pending_trial["physical_time_s"]
+            pseudo_time = pending_trial["pseudo_time_s"]
+            dt = 0.5 * pending_trial["timestep_s"]
+            pending_trial = None
             if dt < float(minimum_timestep_s):
                 raise SurfaceChargingSaturationError(
                     "safeguarded SER exhausted its minimum timestep",
-                    sigma, history, accepted, rejected)
+                    sigma, history, accepted, rejected, physical_time, pseudo_time)
             continue
 
+        if pending_trial is not None:
+            accepted += 1
+            pending_trial = None
         final_step = step
         final_patch = patch
-        last_merit = merit
-        last_patch_maximum = patch_maximum
         b1 = potential_rate <= float(potential_rate_tolerance_v_s)
         b2 = all(value.b2_maximum_ion_normalized_imbalance <= current_balance_tolerance
                  for value in patch)
@@ -467,32 +499,41 @@ def integrate_surface_charging_to_saturation_3d(
         if accepted >= int(maximum_steps):
             break
 
-        candidate_sigma = sigma + step.face_current_density_a_m2 * dt
-        projected_candidate = lump_triangle_sheet_charge_3d(
-            sigma_c_per_m2=candidate_sigma, **projection)
-        difference = projected_candidate - step.charge_node_c
-        projection_scale = max(
-            float(np.sum(np.abs(projected_candidate))),
-            float(np.sum(np.abs(step.charge_node_c))), np.finfo(float).tiny)
-        consistency = float(np.sum(np.abs(difference)) / projection_scale)
-        history[-1]["face_to_node_update_relative_error"] = consistency
-        if consistency > 5e-13:
-            raise SurfaceChargingSaturationError(
-                "face-charge and compatible-Q1 nodal updates diverged",
-                sigma, history, accepted, rejected)
-        sigma = candidate_sigma
-        charge = projected_candidate
-        accepted += 1
         if activated_ser:
-            pseudo_time += dt
             if last_residual_norm is not None and residual_norm > 0.0:
                 ratio = last_residual_norm / residual_norm
                 growth = min(float(ser_maximum_growth), max(0.5, ratio))
                 dt = float(np.clip(dt * growth, minimum_timestep_s, maximum_timestep_s))
             last_residual_norm = residual_norm
         else:
-            physical_time += dt
+            last_residual_norm = None
             dt = float(timestep_s)
+
+        candidate_sigma = sigma + step.face_current_density_a_m2 * dt
+        projected_candidate = lump_triangle_sheet_charge_3d(
+            sigma_c_per_m2=candidate_sigma, **projection)
+        nodal_candidate = charge + (
+            step.positive_current_node_a - step.negative_current_node_a) * dt
+        difference = projected_candidate - nodal_candidate
+        projection_scale = max(
+            float(np.sum(np.abs(projected_candidate))),
+            float(np.sum(np.abs(nodal_candidate))), np.finfo(float).tiny)
+        consistency = float(np.sum(np.abs(difference)) / projection_scale)
+        history[-1]["face_to_node_update_relative_error"] = consistency
+        if consistency > 5e-13:
+            raise SurfaceChargingSaturationError(
+                "face-charge and compatible-Q1 nodal updates diverged",
+                sigma, history, accepted, rejected, physical_time, pseudo_time)
+        pending_trial = dict(
+            sigma_c_per_m2=sigma.copy(), charge_node_c=charge.copy(),
+            physical_time_s=float(physical_time), pseudo_time_s=float(pseudo_time),
+            timestep_s=float(dt))
+        sigma = candidate_sigma
+        charge = projected_candidate
+        if activated_ser:
+            pseudo_time += dt
+        else:
+            physical_time += dt
 
     if final_step is None or final_patch is None:  # pragma: no cover - guarded by first evaluation
         raise RuntimeError("surface charging produced no current evaluation")
@@ -826,7 +867,8 @@ def solve_charging_coevolution_3d(
             raise SurfaceChargingSaturationError(
                 f"co-evolution step {step_index + 1} failed signed B1/B2 saturation gates",
                 charging.sigma_c_per_m2, charging.history,
-                charging.accepted_steps, charging.rejected_steps)
+                charging.accepted_steps, charging.rejected_steps,
+                charging.physical_time_s, charging.pseudo_time_s)
         transport = _merge_final_neutral_transport(
             charging.final_step.transport, current_geometry, step_boundary, role,
             verts, faces, areas, charging.potential_v,

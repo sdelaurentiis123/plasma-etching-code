@@ -23,10 +23,10 @@
       "exact_visibility": true,
       "convergence_contract_revision": "CCA-2026-07-13-R2"
     },
-    "engine_git_revision": "d2636d8ee850a4f22eb41a8d1867a4e51e2e7a22",
+    "engine_git_revision": "1030f1a84e596f6b6338761923dfb64eb4b5f26d",
     "source_sha256": {
-      "src/petch/charging_coevolution_3d.py": "2bb6029fcd652972a6ec19c744ca30d66ddcfca1c98817e839d01669eed83429",
-      "src/petch/charging_coupled_3d.py": "995e0ebc868a968d7d2da093ff618b846eec4362a9b82e565d4770a54b2971eb",
+      "src/petch/charging_coevolution_3d.py": "e7b1b3aa32c3bbff020359ee0356e9ec8034203eb1a0dcfc1fe8f395e378c4bd",
+      "src/petch/charging_coupled_3d.py": "7ec38295f602b3bd11231cf50fecddbcb8b9d88482b3603d039dcd36a2866af3",
       "src/petch/charged_surface_cascade_3d.py": "9287129c01696b928b6097b88db84100f1cc81128d8ad0c2a984e73f95ab4dd9",
       "src/petch/feature_step_3d.py": "4fd836f2abac114ec0da3bd57d2ef4686ae93cb50db74f0427502bbedee5e778",
       "src/petch/surface_charge_remap_3d.py": "e24b2897050b430b32fb427894c8ee88f97f020e10273fc79656106cf5e8f9d6",
@@ -67,7 +67,7 @@
       "retained_negative_charge_c": 0.0,
       "removed_positive_charge_c": 0.0,
       "removed_negative_charge_c": 0.0,
-      "wall_clock_s": 0.027687999419867992
+      "wall_clock_s": 0.025812541134655476
     },
     "reflection_manifest": {
       "model": "weighted angle-dependent specular reflection with constant energy retention",
@@ -124,7 +124,7 @@
           0.33333333333333337,
           0.33333333333333337
         ],
-        "maximum_charge_conservation_relative_error": 2.428426105993666e-16,
+        "maximum_charge_conservation_relative_error": 8.094753686645555e-17,
         "maximum_surface_transfer_relative_charge_balance_error": 0.0,
         "exact_transport_reused": true,
         "remap_relative_charge_balance_error": 0.0,
@@ -132,7 +132,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 9.913467922874998e-20,
         "removed_negative_charge_c": 0.0,
-        "wall_clock_s": 0.022438250482082367
+        "wall_clock_s": 0.021389874629676342
       },
       {
         "charging_converged": false,
@@ -155,7 +155,7 @@
           0.33333333333333337,
           0.33333333333333337
         ],
-        "maximum_charge_conservation_relative_error": 1.214213052996833e-16,
+        "maximum_charge_conservation_relative_error": 4.047376843322777e-17,
         "maximum_surface_transfer_relative_charge_balance_error": 0.0,
         "exact_transport_reused": true,
         "remap_relative_charge_balance_error": 0.0,
@@ -163,7 +163,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 0.0,
         "removed_negative_charge_c": 9.913467922874998e-20,
-        "wall_clock_s": 0.02298629190772772
+        "wall_clock_s": 0.020720249973237514
       }
     ],
     "saturation_required": [

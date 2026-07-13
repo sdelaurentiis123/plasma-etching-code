@@ -90,7 +90,7 @@ saturated. Deposition conservation closes to `2.43e-16` and `1.21e-16`; signed c
 the two etched surface increments is itemized separately. This earns a tested co-simulation path,
 not pulsed-process validation.
 
-The full local regression suite after the bounded real-trench integration is **366 passed, 1
+The full local regression suite after the bounded real-trench integration is **368 passed, 1
 skipped**. The skip is the
 existing unavailable-CUDA condition on this CPU-only build.
 
@@ -152,6 +152,53 @@ charge deposition below `1.78e-16` relative and surface-transfer charge below `4
 machine-readable comparison, including hashes of both source summaries and face checkpoints, is
 `results/charging_coevolution_c3_trench_pilot/tail_refinement_comparison.json`. Each two-update run
 takes about 1.14 seconds on the recorded CPU; both exact wall-clock values are in their manifests.
+
+## Fixed-timestep refinement and safeguarded SER/PTC
+
+The coarse trench was advanced from zero face charge to the same 2.5 microsecond physical time with
+three fixed steps. Every run used the same source checksums, hard-visibility transport, frozen
+estimator-method map, and `1e-12` response-tail tolerance.
+
+| Step | Updates | Node RMS / worst | B2 max, 0.25 / 0.50 micrometers | Potential rate (V/s) |
+| ---: | ---: | ---: | ---: | ---: |
+| 125 ns | 20 | 0.3963 / 0.8919 | 19.813 / 17.074 | 1.508e6 |
+| 62.5 ns | 40 | 0.3956 / 0.8887 | 19.685 / 17.335 | 1.554e6 |
+| 31.25 ns | 80 | 0.3952 / 0.8887 | 19.674 / 17.327 | 1.549e6 |
+
+Successive halving changes face sigma by `3.76%` then `1.32%`, nodal charge by `2.12%` then
+`0.843%`, and potential by `0.261%` then `0.164%`. The sequence tightens and its face-charge
+successive-difference order is about 1.50, but the finest face state is not yet invariant enough to
+close the timestep gate. The B2 rebound after the initial two updates survives refinement. It is not
+an explicit-step blow-up; its local ion-normalized denominator changes as accessibility evolves.
+
+The first real SER run exposed three engine issues that are now corrected without changing the
+kinetic operator or any acceptance tolerance:
+
+1. The old safeguard rejected a step when the signed B2 ratio grew even if the dimensional current
+   residual fell. B2 remains the final contract gate, but only the absolute ODE current residual now
+   safeguards the PTC trajectory.
+2. The old rejection was detected at the candidate state without restoring the prior charge. SER
+   now retains the prior authoritative face/nodal state and clocks, rolls a rejected trial back,
+   halves its timestep, and retries. Both face and independent nodal candidates use that same trial
+   timestep; their maximum relative mismatch in the real run is `2.46e-16`.
+3. Charge-ledger roundoff had been normalized by near-cancelled signed charge. Each step now retains
+   positive, negative, absolute-throughput, and signed-net inventories separately; conservation is
+   normalized by positive-plus-negative throughput. The prior false failure was a `9.12e-34` C
+   residual divided by a `9.42e-22` C signed net. The corrected 80-step SER run's worst relative
+   deposition-ledger error is `9.53e-17`.
+
+At approximately equal elapsed time, SER reaches 4.3549 microseconds with 80 accepted steps and two
+rolled-back trials; the 31.25 ns reference reaches 4.3750 microseconds with 140 steps. SER differs
+from fixed time by relative L2 `0.339%` in face sigma and `0.176%` in potential, uses 42.9% fewer
+accepted steps, and is 1.65x faster on the recorded CPU. This passes the bounded same-operator PTC
+mechanics check. It does not pass the stationary-state or schedule-refinement gates: the SER endpoint
+still has node RMS/worst `0.350/0.790`, B2 maxima `11.50/10.59`, and potential rate `1.46e6` V/s.
+
+The complete paired evidence is
+`results/charging_coevolution_c3_trench_refinement/comparison.json`; it hashes every source, summary,
+and face checkpoint. The runner also writes a replayable face checkpoint, full diagnostics, source
+hashes, and wall clock before exiting nonzero on any `SurfaceChargingSaturationError`, so rejected
+campaigns no longer disappear into tracebacks.
 
 ## Evidence and provenance
 

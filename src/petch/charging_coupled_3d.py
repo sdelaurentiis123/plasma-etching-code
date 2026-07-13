@@ -677,8 +677,14 @@ def advance_dielectric_charging_3d(
     potential_after, poisson_after = poisson_system.solve(updated_charge)
 
     areas = np.asarray(areas, dtype=float)
+    physical_face_area = areas * float(mesh_length_unit_m) ** 2
+    positive_incident_charge = float(np.dot(
+        evaluated["positive_face_current"], physical_face_area) * float(duration_s))
+    negative_incident_charge = float(np.dot(
+        evaluated["negative_face_current"], physical_face_area) * float(duration_s))
+    absolute_incident_charge = positive_incident_charge + negative_incident_charge
     incident_charge = float(np.dot(
-        face_current, areas * float(mesh_length_unit_m) ** 2) * float(duration_s))
+        face_current, physical_face_area) * float(duration_s))
     deposited_charge = float(np.sum(charge_increment))
     conservation_residual = deposited_charge - incident_charge
     return DielectricChargingStep3DResult(
@@ -701,6 +707,9 @@ def advance_dielectric_charging_3d(
         diagnostics=dict(
             duration_s=float(duration_s),
             incident_charge_c=incident_charge,
+            positive_incident_charge_c=positive_incident_charge,
+            negative_incident_charge_c=negative_incident_charge,
+            absolute_incident_charge_c=absolute_incident_charge,
             primary_incident_charge_c=(
                 surface_transfer.initial_incident_charge_rate_c_s * float(duration_s)
                 if isinstance(surface_transfer, ChargedSurfaceCascade3DResult)
@@ -838,7 +847,7 @@ def integrate_dielectric_charging_transient_3d(
             break
         charge = final_step.charge_node_c.copy()
         total_incident_charge += final_step.diagnostics["incident_charge_c"]
-        total_absolute_incident_charge += abs(final_step.diagnostics["incident_charge_c"])
+        total_absolute_incident_charge += final_step.diagnostics["absolute_incident_charge_c"]
         total_deposited_charge += final_step.diagnostics["deposited_charge_c"]
         max_conservation_residual = max(
             max_conservation_residual,

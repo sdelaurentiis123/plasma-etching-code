@@ -1,0 +1,96 @@
+{
+  "schema": "petch.charging.coevolution.c3.trench-refinement.v1",
+  "status": "coarse fixed-geometry transient evidence; not a saturation or C3 closure claim",
+  "common_source_sha256": {
+    "src/petch/charging_coevolution_3d.py": "e7b1b3aa32c3bbff020359ee0356e9ec8034203eb1a0dcfc1fe8f395e378c4bd",
+    "src/petch/charging_coupled_3d.py": "7ec38295f602b3bd11231cf50fecddbcb8b9d88482b3603d039dcd36a2866af3",
+    "src/petch/charged_surface_cascade_3d.py": "9287129c01696b928b6097b88db84100f1cc81128d8ad0c2a984e73f95ab4dd9",
+    "src/petch/charged_surface_response_3d.py": "788ce3b575477e989332274deb4f31aec8a5e7a98d6d5cd265062395e170965a",
+    "scripts/charging_coevolution_c3_trench.py": "34fd66e1dac476b827cc48cc78e9305a1fd57d8a531324e028af6a61bfe8fbde"
+  },
+  "fixed_timestep_refinement_at_2p5_us": [
+    {
+      "timestep_s": 1.25e-7,
+      "accepted_steps": 20,
+      "config_hash": "b905d72546dab73935ea2008ce1519701e62d071b19945ff20d025e585bd3a0b",
+      "summary_sha256": "10d7e6172cc85f5a5001db94e0f33a97c4faddfad4ee887d1099b25c90149d12",
+      "face_checkpoint_sha256": "5657389dac4fcfc75d7d516de70efdf8ee65f46a5937c8faf45cbdf7983948d4",
+      "wall_clock_s": 7.983106791041791,
+      "node_rms": 0.3962580599627248,
+      "node_worst": 0.8919499344943753,
+      "patch_b2_max": [19.812968740462306, 17.073634905394588],
+      "potential_rate_max_v_s": 1508137.55632894
+    },
+    {
+      "timestep_s": 6.25e-8,
+      "accepted_steps": 40,
+      "config_hash": "b696119e284fe5e59771567b21a68ce53b9fc1248fdd463782d59206e56923c2",
+      "summary_sha256": "349125d89d54dc44db3cd014d45613394cc414bdc810987e1057033b86b4092b",
+      "face_checkpoint_sha256": "f9947f8e91c196cefeb103c287bcabe11649ac7bc6d554ea7cdd497b6bd7cc2f",
+      "wall_clock_s": 15.642427584156394,
+      "node_rms": 0.3955763434931889,
+      "node_worst": 0.8887468201196111,
+      "patch_b2_max": [19.68475644274563, 17.33500629188127],
+      "potential_rate_max_v_s": 1554125.9599557833
+    },
+    {
+      "timestep_s": 3.125e-8,
+      "accepted_steps": 80,
+      "config_hash": "5d70ce6bc446d1c5cbe051991f0659879ccd482f4b6e41921422b148d74fb511",
+      "summary_sha256": "a1356455f816073836483dd9d18bcb542d7125461a03ad346aaed8994433697a",
+      "face_checkpoint_sha256": "90b7a295371f012ad9c89203666b1aa10979bd104cd3b01d5e24058dbf94085c",
+      "wall_clock_s": 30.735015416517854,
+      "node_rms": 0.3951588074967062,
+      "node_worst": 0.8887082411175056,
+      "patch_b2_max": [19.67409515969858, 17.32676631847909],
+      "potential_rate_max_v_s": 1548735.4813216429
+    }
+  ],
+  "successive_halving_relative_l2_difference": {
+    "sigma_c_per_m2": [0.03762567327280837, 0.013174854341910482],
+    "face_charge_c": [0.03541744527866857, 0.012319873408617888],
+    "charge_node_c": [0.0212422628069888, 0.008433336495142614],
+    "potential_v": [0.0026114272751091194, 0.0016448057163512646]
+  },
+  "successive_difference_observed_order": {
+    "sigma_c_per_m2": 1.500603077253941,
+    "face_charge_c": 1.5113119068312524,
+    "charge_node_c": 1.3238613510084574,
+    "potential_v": 0.6687810258392605
+  },
+  "ser_vs_fixed_at_approximately_4p36_us": {
+    "relative_time_mismatch": 0.004585612199783467,
+    "ser": {
+      "physical_plus_pseudo_time_s": 4.354937946625938e-6,
+      "accepted_steps": 80,
+      "rejected_trials": 2,
+      "config_hash": "9d97c2495c4baf01beae3546b1ab573d8584995737140709c5751fd22fa6914a",
+      "summary_sha256": "d1fa46b48aa00bb3af85d79d0f40393b6a591c0ce4c177dbe64b3fd2cdfc574f",
+      "face_checkpoint_sha256": "dd9d083dbdae2811e1ec1cfd830474fec8236dfe69a522be1fdf6d2217d700e4",
+      "wall_clock_s": 32.04793020803481
+    },
+    "fixed": {
+      "physical_time_s": 4.374999999999991e-6,
+      "accepted_steps": 140,
+      "config_hash": "9cf4685cd371b7849d5057c5f878a372256839d7e49b814e5d5f768f25c3773f",
+      "summary_sha256": "dffc5c2e6712ee8c1afae48b03e2e55a58c35133492d77709a09b9d4f463c22c",
+      "face_checkpoint_sha256": "d93fcfb25d13ad633b18cf030b29ec940c95d8361e7c852f12d927449547cd0f",
+      "wall_clock_s": 53.08999791648239
+    },
+    "ser_relative_l2_difference_from_fixed": {
+      "sigma_c_per_m2": 0.0033914555590176796,
+      "face_charge_c": 0.0034192748364798293,
+      "charge_node_c": 0.0027815471736872864,
+      "potential_v": 0.0017591430088231721
+    },
+    "relative_diagnostic_difference": {
+      "node_rms": 0.001430506084924879,
+      "node_worst": 0.00234930552227401,
+      "patch_b2_max": [0.04945783164485357, 0.01447612607024889],
+      "potential_rate_max_v_s": 0.01300667185267529
+    },
+    "wall_clock_speedup": 1.6565811761276261,
+    "accepted_step_reduction_fraction": 0.4285714285714286
+  },
+  "conclusion": "timestep refinement tightens and safeguarded SER follows the same transient state within the reported errors; the state is not saturated and B1/B2 do not pass"
+}

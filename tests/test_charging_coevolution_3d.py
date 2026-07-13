@@ -8,6 +8,8 @@ from petch.charged_surface_response_3d import GrazingSpecularIonReflection3D
 from petch.charging_coevolution_3d import (
     ExperimentalObservableTolerance3D,
     ResolvedBiasSegment3D,
+    SurfaceChargingSaturationError,
+    _ser_candidate_acceptance,
     integrate_surface_charging_to_saturation_3d,
     physical_surface_patch_groups_3d,
     solve_charging_coevolution_3d,
@@ -146,6 +148,8 @@ def test_equal_currents_pass_b1_b2_without_an_unnecessary_update():
     assert result.rejected_steps == 0
     assert np.array_equal(result.sigma_c_per_m2, np.zeros(2))
     assert np.array_equal(result.charge_node_c, np.zeros(system.shape))
+    assert result.history[0]["absolute_incident_charge_c"] > 0.0
+    assert result.history[0]["charge_conservation_relative_error"] < 3e-16
     assert result.diagnostics["final_potential_rate_max_v_s"] < 1e-6
     assert all(item.maximum_relative_imbalance < 1e-6
                for item in result.patch_balance)
@@ -167,6 +171,26 @@ def test_ser_uses_the_same_conservative_ode_and_records_pseudo_time():
     assert np.array_equal(result.sigma_c_per_m2, np.zeros(2))
     assert all(item["charge_conservation_relative_error"] < 3e-16
                for item in result.history)
+
+
+def test_ser_safeguard_uses_absolute_ode_residual_not_b2_denominator():
+    accepted, reason = _ser_candidate_acceptance(True, 0.9, 1.0, 0.005)
+    rejected, rejection_reason = _ser_candidate_acceptance(True, 1.006, 1.0, 0.005)
+
+    assert accepted
+    assert reason is None
+    assert not rejected
+    assert rejection_reason == "absolute_current_residual_growth"
+
+
+def test_saturation_failure_checkpoint_carries_its_exact_clocks():
+    error = SurfaceChargingSaturationError(
+        "manufactured failure", np.zeros(2), (), 3, 1, 2.5e-6, 4.0e-6)
+
+    assert error.accepted_steps == 3
+    assert error.rejected_steps == 1
+    assert error.physical_time_s == 2.5e-6
+    assert error.pseudo_time_s == 4.0e-6
 
 
 def test_physical_patch_groups_separate_wall_and_floor_at_a_shared_corner():
