@@ -494,6 +494,11 @@ under-determined) -- an honest result that quantifies how many structures must b
   ceiling-based replay remains only as a conservative compatibility path for method-only archives.
   New equilibrium pilot and physical-time checkpoints serialize the provenance beside the method
   map, so later current audits can distinguish estimator selection from estimator accuracy.
+- **Steady and transient diagnostics now return the same evidence classes.** The direct steady result
+  retains final face currents, the charged-transfer/cascade ledger, its frozen estimator map, and
+  sampling provenance instead of exposing only projected node currents. This does not promote the
+  retired solver family; it makes any diagnostic use auditable against the same conservation and
+  exact-operator checks as physical time.
 - **P3 remains correctly data-blocked, not numerically blocked.** The 2026 paper's electron-TSE law
   refers its six material coefficients to NASA TM-79299 but does not publish the SiO2 values; the
   NASA memorandum derives and sensitivity-tests the NASCAP form while explicitly avoiding any

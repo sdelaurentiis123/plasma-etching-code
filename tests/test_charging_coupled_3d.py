@@ -305,6 +305,9 @@ def test_steady_3d_solver_converges_the_physical_local_current_equation():
 
     support = (result.positive_current_node_a + result.negative_current_node_a) > 0.0
     surface_voltage = result.potential_v[:, :, 0]
+    assert result.positive_face_current_density_a_m2.shape == (2,)
+    assert result.negative_face_current_density_a_m2.shape == (2,)
+    assert result.surface_transfer.relative_charge_balance_error == 0.0
     assert result.converged
     assert result.history[0]["max_relative_current_imbalance"] > 0.8
     assert result.history[-1]["max_relative_current_imbalance"] == 0.0

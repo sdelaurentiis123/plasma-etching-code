@@ -158,11 +158,16 @@ class CurrentBalanceMetrics3D:
 class SteadyDielectricCharging3DResult:
     charge_node_c: np.ndarray
     potential_v: np.ndarray
+    positive_face_current_density_a_m2: np.ndarray
+    negative_face_current_density_a_m2: np.ndarray
     positive_current_node_a: np.ndarray
     negative_current_node_a: np.ndarray
     net_current_stderr_node_a: np.ndarray
+    surface_transfer: ChargedSurfaceTransfer3D | ChargedSurfaceCascade3DResult
     transport: BoundaryTransport3DResult
     poisson: PoissonDiagnostics3D
+    bidirectional_method_hint: Mapping[str, np.ndarray]
+    bidirectional_sampling_provenance: Mapping[str, BidirectionalSamplingProvenance3D]
     history: tuple[Mapping[str, float], ...]
     converged: bool
     rejected_steps: int
@@ -170,13 +175,27 @@ class SteadyDielectricCharging3DResult:
 
     def __post_init__(self):
         for name in (
-                "charge_node_c", "potential_v", "positive_current_node_a",
+                "charge_node_c", "potential_v", "positive_face_current_density_a_m2",
+                "negative_face_current_density_a_m2", "positive_current_node_a",
                 "negative_current_node_a", "net_current_stderr_node_a"):
             array = np.asarray(getattr(self, name), dtype=float).copy()
             array.setflags(write=False)
             object.__setattr__(self, name, array)
         object.__setattr__(
             self, "history", tuple(MappingProxyType(dict(item)) for item in self.history))
+        method_hint = {}
+        for name, value in self.bidirectional_method_hint.items():
+            array = np.asarray(value).copy()
+            array.setflags(write=False)
+            method_hint[name] = array
+        sampling = dict(self.bidirectional_sampling_provenance)
+        if (set(sampling) != set(method_hint)
+                or any(not isinstance(value, BidirectionalSamplingProvenance3D)
+                       for value in sampling.values())):
+            raise ValueError("bidirectional sampling provenance must match the method map")
+        object.__setattr__(self, "bidirectional_method_hint", MappingProxyType(method_hint))
+        object.__setattr__(
+            self, "bidirectional_sampling_provenance", MappingProxyType(sampling))
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
 
 
@@ -1133,9 +1152,15 @@ def solve_dielectric_charging_steady_3d(
     net_stderr_grid[tuple(support_nodes.T)] = net_stderr
     result = SteadyDielectricCharging3DResult(
         charge_node_c=charge, potential_v=evaluated["potential"],
+        positive_face_current_density_a_m2=evaluated["positive_face_current"],
+        negative_face_current_density_a_m2=evaluated["negative_face_current"],
         positive_current_node_a=positive_grid, negative_current_node_a=negative_grid,
         net_current_stderr_node_a=net_stderr_grid,
+        surface_transfer=evaluated["surface_transfer"],
         transport=evaluated["transport"], poisson=evaluated["poisson"],
+        bidirectional_method_hint=evaluated["bidirectional_method_hint"],
+        bidirectional_sampling_provenance=evaluated[
+            "bidirectional_sampling_provenance"],
         history=tuple(history), converged=converged, rejected_steps=rejected_steps,
         known_limitations=(
             "all supplied surface triangles are treated as charge-storing dielectric",
