@@ -417,12 +417,36 @@ under-determined) -- an honest result that quantifies how many structures must b
   physical time. In parallel, scope the currently absent surface-conduction, bulk-leakage, secondary-
   electron, and reflection closures as physics-model questions, not numerical patches.
 
+### Charging surface-physics closure audit (2026-07-13)
+
+- **The surviving imbalance is a localized material-response question.** Exact absorbing-map preflight
+  config `6fdaa46785f8f9f861a2b6aece83cb5d5282814839f0cdb570af13af6fc08e94` replays the refined
+  15-microsecond state with the frozen ion method map and level-11 scoring. Integrated signed balance
+  is +0.032 top, -0.126 upper wall, +0.003 lower wall, and -0.030 floor. The upper wall alone fails
+  the four-region 0.08 screen; a global current multiplier would damage already-balanced regions.
+- **Impact energies now constrain the missing physics.** Upper-wall electrons have mean/median impact
+  energies 14.4/9.7 eV, while lower-wall and floor electrons are field-accelerated to means of
+  49.8/41.1 eV. The physical response must consume impact energy, angle, material id, and surface
+  state. Source temperature or local voltage is insufficient.
+- **Ion SEE is sourced and bounded, but unlikely sufficient.** The event-weighted Sobolewski 2021
+  kinetic Ar+-on-SiO2 fit gives yields 0.031--0.065 and 0.052 on the upper wall. This is recorded only
+  as a diagnostic and was not applied. Electron backscatter/true SEE is the stronger literature-backed
+  redistribution mechanism, but its SiO2 parameter table and full incident direction data are not yet
+  in the engine.
+- **Unified engine path is specified.** `CHARGING_PHYSICS_CLOSURE_AUDIT_2026-07-13.md` defines a richer
+  charged-impact measure, material-tagged surface response, conservative full-field re-impact loop,
+  and common charge-continuity operator consumed by physical time, PTC, and steady diagnostics. The
+  existing neutral-emission machinery supplies the conservation pattern but cannot replace charged
+  field trajectories. Bulk leakage is held by a Maxwell-timescale screen; surface conduction is held
+  for sourced material/surface-state conductivity. No new governing physics was applied.
+
 ## Roadmap (remaining)
 
-1. Finish Phase 2 charging: preserve certified method *and sampling-level* provenance, then extend the
-   accuracy-matched refined physical transient (preferably on GPU). Audit whether surface conduction,
-   bulk leakage, secondary electrons, or reflection are required physical closures before any new
-   nonlinear root method; independently audit any final state before promotion.
+1. Finish Phase 2 charging through the unified engine: preserve full incident direction and certified
+   estimator provenance, add a material-tagged charged-surface response plus charge-conserving
+   full-field re-impact kernel, and exact-regress the present perfect absorber. Validate the sourced
+   Ar+-SiO2 SEE slice first, then admit electron backscatter/true SEE only with recovered SiO2 data.
+   Physical time remains the reference; independently audit any final state before promotion.
 2. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow
    IonEnergyTransverseMaxwellianDensity), replacing the reduced analytic ion model; sticking + ion IAD
    are DECLARED calibrated inputs with provenance/uncertainty; calibrate low-AR, predict held-out AR40;

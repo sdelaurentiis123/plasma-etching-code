@@ -1,0 +1,16 @@
+{
+  "schema": "petch.charging.surface_response_preflight.v1",
+  "state": "final_states.npz",
+  "state_sha256": "341c3d5d5b98d2581bad21e2547ace6e9623e0ee0e690732d6c20ad18dbbcdcf",
+  "charge_key": "refined_charge_node_c",
+  "method_key": "refined_method_hint_Ar+",
+  "forward_level": 11,
+  "thresholds_eV": [
+    10.0,
+    25.0,
+    50.0,
+    100.0
+  ],
+  "diagnostic_yield_model": "Ar+ kinetic SEE only: Sobolewski, PSST 30 025004 (2021), Eq. 8; not applied to charge or transport",
+  "exact_operator": "absorbing first-hit, hard visibility; no surface response applied"
+}
