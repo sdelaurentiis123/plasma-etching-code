@@ -10,7 +10,8 @@ import numpy as np
 from .boundary_state import PlasmaBoundaryState
 from .boundary_transport_3d import (
     BoundaryTransport3DResult, gather_boundary_state_field_adjoint_3d,
-    merge_boundary_transport_results_3d, trace_boundary_state_field_3d,
+    merge_boundary_transport_results_3d, trace_boundary_state_bidirectional_field_3d,
+    trace_boundary_state_field_3d,
 )
 from .charging_poisson_3d import (
     NodalPoissonSystem3D,
@@ -77,6 +78,10 @@ class DielectricChargingConvergenceError(RuntimeError):
         self.result = result
 
 
+class BidirectionalCurrentCertificationError(RuntimeError):
+    """A sampled current map failed its per-face precision or consistency contract."""
+
+
 def _anderson_step(x, residual, x_history, residual_history, gain, depth):
     """Type-II Anderson acceleration for a preconditioned fixed-point residual."""
     x = np.asarray(x, dtype=float); residual = np.asarray(residual, dtype=float)
@@ -129,10 +134,11 @@ def _validate_transport_estimators_3d(
         {name: transport_estimator for name in charged_names}
         if isinstance(transport_estimator, str) else dict(transport_estimator))
     if (not charged_names or set(estimator_by_name) != charged_names
-            or any(value not in {"forward", "adjoint"}
+            or any(value not in {"forward", "adjoint", "bidirectional"}
                    for value in estimator_by_name.values())):
-        raise ValueError("transport_estimator must select forward or adjoint for every charged species")
-    if "adjoint" in estimator_by_name.values():
+        raise ValueError(
+            "transport_estimator must select forward, adjoint, or bidirectional for every charged species")
+    if {"adjoint", "bidirectional"} & set(estimator_by_name.values()):
         centroids = np.asarray(face_centroids, dtype=float)
         normals = np.asarray(face_gas_normals, dtype=float)
         if (centroids.shape != (len(faces), 3) or normals.shape != centroids.shape
@@ -143,7 +149,8 @@ def _validate_transport_estimators_3d(
 
 def _validate_adjoint_proposal_frames_3d(estimator_by_name, adjoint_proposal_frames):
     adjoint_names = {
-        name for name, estimator in estimator_by_name.items() if estimator == "adjoint"}
+        name for name, estimator in estimator_by_name.items()
+        if estimator in {"adjoint", "bidirectional"}}
     proposal_frames = (
         {name: adjoint_proposal_frames for name in adjoint_names}
         if isinstance(adjoint_proposal_frames, str) else dict(adjoint_proposal_frames))
@@ -161,7 +168,8 @@ def _evaluate_incident_current_3d(
         n_position, seed, trajectory_fixed_dt, trajectory_max_steps,
         phase_space_log2_samples, periodic_lateral, transport_estimator,
         face_centroids, face_gas_normals, adjoint_face_quadrature_points,
-        adjoint_ray_offset, adjoint_proposals, adjoint_proposal_frames, transport_device):
+        adjoint_ray_offset, adjoint_proposals, adjoint_proposal_frames,
+        bidirectional_options, transport_device):
     charged_species = tuple(species for species in boundary.species if species.charge_number != 0)
     if not charged_species:
         raise ValueError("dielectric charging requires at least one charged boundary species")
@@ -173,7 +181,7 @@ def _evaluate_incident_current_3d(
         {species.name: str(transport_estimator) for species in charged_species}
         if isinstance(transport_estimator, str) else dict(transport_estimator))
     transports = []
-    for estimator in ("forward", "adjoint"):
+    for estimator in ("forward", "adjoint", "bidirectional"):
         selected = tuple(
             species for species in charged_species
             if estimator_by_name.get(species.name) == estimator)
@@ -182,7 +190,31 @@ def _evaluate_incident_current_3d(
         selected_boundary = PlasmaBoundaryState(
             selected, charged_boundary.reference_plane_m, provenance=boundary.provenance)
         selected_role = {species.name: species_role[species.name] for species in selected}
-        if estimator == "adjoint":
+        if estimator == "bidirectional":
+            options = {} if bidirectional_options is None else dict(bidirectional_options)
+            proposal_subset = (None if adjoint_proposals is None else {
+                species.name: adjoint_proposals[species.name] for species in selected
+                if species.name in adjoint_proposals})
+            frame_subset = (
+                adjoint_proposal_frames if isinstance(adjoint_proposal_frames, str) else {
+                    species.name: adjoint_proposal_frames[species.name] for species in selected})
+            bidirectional = trace_boundary_state_bidirectional_field_3d(
+                selected_boundary, selected_role, verts, faces, areas,
+                face_centroids, face_gas_normals,
+                source_bounds=source_bounds, source_z=source_z,
+                nodal_potential_v=potential, potential_origin=potential_origin,
+                potential_spacing=coordinate_spacing,
+                mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
+                seed=seed, fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps,
+                periodic_lateral=periodic_lateral, proposal_by_species=proposal_subset,
+                proposal_frame_by_species=frame_subset, device=transport_device, **options)
+            if not all(item.converged for item in bidirectional.selection_by_species.values()):
+                failed = [name for name, item in bidirectional.selection_by_species.items()
+                          if not item.converged]
+                raise BidirectionalCurrentCertificationError(
+                    f"bidirectional current estimator did not certify species {failed}")
+            transports.append(bidirectional.transport)
+        elif estimator == "adjoint":
             proposal_subset = (None if adjoint_proposals is None else {
                 species.name: adjoint_proposals[species.name] for species in selected
                 if species.name in adjoint_proposals})
@@ -259,6 +291,7 @@ def advance_dielectric_charging_3d(
         transport_estimator="forward", face_centroids=None, face_gas_normals=None,
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
         adjoint_proposals=None, adjoint_proposal_frames="surface_local",
+        bidirectional_options=None,
         transport_device=None):
     """Advance stored dielectric charge by the signed incident-particle current.
 
@@ -302,6 +335,7 @@ def advance_dielectric_charging_3d(
         adjoint_ray_offset=adjoint_ray_offset,
         adjoint_proposals=adjoint_proposals,
         adjoint_proposal_frames=adjoint_proposal_frames,
+        bidirectional_options=bidirectional_options,
         transport_device=transport_device)
     face_current = evaluated["positive_face_current"] - evaluated["negative_face_current"]
     current_node = evaluated["positive_node_current"] - evaluated["negative_node_current"]
@@ -356,6 +390,7 @@ def solve_dielectric_charging_steady_3d(
         transport_estimator="forward", face_centroids=None, face_gas_normals=None,
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
         adjoint_proposals=None, adjoint_proposal_frames="surface_local",
+        bidirectional_options=None,
         transport_device=None,
         max_iter=30, min_iter=2, current_balance_tol=1e-3,
         beta=0.5, response_energy_eV=4.0, maximum_voltage_step=8.0,
@@ -441,6 +476,7 @@ def solve_dielectric_charging_steady_3d(
         adjoint_ray_offset=adjoint_ray_offset,
         adjoint_proposals=adjoint_proposals,
         adjoint_proposal_frames=adjoint_proposal_frames,
+        bidirectional_options=bidirectional_options,
         transport_device=transport_device)
 
     beta_current = float(beta); rejected_steps = 0; history = []
@@ -535,7 +571,14 @@ def solve_dielectric_charging_steady_3d(
         # This is a preconditioner only: acceptance and convergence still use physical current balance.
         charge_step = np.linalg.solve(voltage_response, voltage_step)
         trial_charge[tuple(support_nodes.T)] += charge_step
-        trial = assess(trial_charge)
+        try:
+            trial = assess(trial_charge)
+        except BidirectionalCurrentCertificationError:
+            beta_current *= 0.5; rejected_steps += 1
+            if beta_current < float(minimum_beta):
+                break
+            cached_voltage_step *= 0.5
+            continue
         trial_merit = trial[6]
         if trial_merit > merit * (1.0 + float(trust_growth_tolerance)):
             beta_current *= 0.5; rejected_steps += 1

@@ -102,6 +102,36 @@ def test_charging_step_routes_directional_ions_forward_and_maxwellian_electrons_
     assert abs(result.charge_increment_node_c.sum()) < 1e-6 * one_species_charge
 
 
+def test_charging_step_consumes_a_certified_bidirectional_face_event_measure():
+    flux = 3.0e15
+    ion = SpeciesBoundaryState(
+        "ion", 1, 40.0, flux, [[0.0, 0.0, np.sqrt(20.0)]], [1.0],
+        density_model=IonEnergyTransverseMaxwellianDensity(
+            np.array([19.0, 21.0]), np.array([1.0]), 0.1))
+    electron = maxwellian_electron_boundary_state(
+        4.0, flux, n_transverse=3, n_normal=4,
+        reference_plane_m=1e-6).species[0]
+    system, arguments = _flat_dielectric_problem((ion, electron))
+    arguments = dict(arguments); arguments["trajectory_max_steps"] = 100000
+    faces = arguments["faces"]
+    centroids = arguments["verts"][faces].mean(axis=1)
+    normals = np.broadcast_to([0.0, 0.0, 1.0], centroids.shape)
+
+    result = advance_dielectric_charging_3d(
+        charge_node_c=np.zeros(system.shape), duration_s=1e-6,
+        transport_estimator="bidirectional", face_centroids=centroids,
+        face_gas_normals=normals, periodic_lateral=True,
+        bidirectional_options=dict(
+            forward_log2_samples=8, adjoint_log2_samples=6, n_replicates=4,
+            element_absolute_tolerance=0.08, element_relative_tolerance=0.1,
+            face_quadrature_points=4), **arguments)
+
+    assert result.transport.transport_model.endswith("bidirectional_3d_periodic_cell")
+    assert set(result.transport.hit_probability) == {"ion", "electron"}
+    assert all(population.event_energy_eV.size > 0
+               for population in result.transport.surface_fluxes.energetic_fluxes)
+
+
 def test_second_charging_step_uses_first_steps_self_consistent_field():
     flux = 1.0e15
     system, arguments = _flat_dielectric_problem((_species("ion", 1, flux),))

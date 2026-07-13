@@ -15,7 +15,7 @@ import numpy as np
 from scipy.stats import qmc
 import warp as wp
 
-from .boundary_state import PlasmaBoundaryState
+from .boundary_state import PlasmaBoundaryState, qmc_boundary_proposal
 from .surface_kinetics import FaceResolvedEnergeticFlux, SurfaceFluxes
 from .neutral_radiosity_3d import DiffuseFormFactors3D
 from .threed import DEVICE, _apply_bc
@@ -236,6 +236,142 @@ class BoundaryTransport3DResult:
         object.__setattr__(
             self, "truncation_probability", MappingProxyType(dict(self.truncation_probability)))
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
+
+
+@dataclass(frozen=True)
+class BidirectionalFaceSelection3D:
+    population: FaceResolvedEnergeticFlux
+    face_stderr_m2_s: np.ndarray
+    method: np.ndarray
+    forward_face_mean_m2_s: np.ndarray
+    forward_face_stderr_m2_s: np.ndarray
+    adjoint_face_mean_m2_s: np.ndarray
+    adjoint_face_stderr_m2_s: np.ndarray
+    estimator_consistent: np.ndarray
+    method_within_tolerance: np.ndarray
+    converged: bool
+
+    def __post_init__(self):
+        face_count = self.population.face_count
+        for name in (
+                "face_stderr_m2_s", "forward_face_mean_m2_s", "forward_face_stderr_m2_s",
+                "adjoint_face_mean_m2_s", "adjoint_face_stderr_m2_s"):
+            value = np.asarray(getattr(self, name), dtype=float).copy()
+            if value.shape != (face_count,) or np.any(~np.isfinite(value)) or np.any(value < 0.0):
+                raise ValueError("bidirectional face statistics must be finite nonnegative arrays")
+            value.setflags(write=False); object.__setattr__(self, name, value)
+        method = np.asarray(self.method).astype("U7", copy=True)
+        consistent = np.asarray(self.estimator_consistent, dtype=bool).copy()
+        within = np.asarray(self.method_within_tolerance, dtype=bool).copy()
+        if (method.shape != (face_count,) or np.any(~np.isin(method, ("forward", "adjoint")))
+                or consistent.shape != (face_count,) or within.shape != (face_count,)):
+            raise ValueError("invalid bidirectional face classifications")
+        for value in (method, consistent, within): value.setflags(write=False)
+        object.__setattr__(self, "method", method)
+        object.__setattr__(self, "estimator_consistent", consistent)
+        object.__setattr__(self, "method_within_tolerance", within)
+        object.__setattr__(self, "converged", bool(self.converged))
+
+
+@dataclass(frozen=True)
+class BidirectionalBoundaryTransport3DResult:
+    transport: BoundaryTransport3DResult
+    selection_by_species: Mapping[str, BidirectionalFaceSelection3D]
+
+    def __post_init__(self):
+        if not isinstance(self.transport, BoundaryTransport3DResult):
+            raise TypeError("transport must be a BoundaryTransport3DResult")
+        selection = dict(self.selection_by_species)
+        if (set(selection) != set(self.transport.hit_probability)
+                or any(not isinstance(item, BidirectionalFaceSelection3D)
+                       for item in selection.values())):
+            raise ValueError("bidirectional selections must classify every transported species")
+        object.__setattr__(self, "selection_by_species", MappingProxyType(selection))
+
+
+def select_bidirectional_face_events_3d(
+        forward_populations, adjoint_populations, *, forward_zero_upper_m2_s,
+        absolute_tolerance_m2_s, relative_tolerance=0.05, consistency_sigma=5.0,
+        support_sigma=2.0, support_ratio=0.5, method_hint=None):
+    """Select independently replicated forward or adjoint event measures per triangle.
+
+    Selection uses measured standard error only. The direct forward estimator also audits adjoint
+    support: a precise adjoint zero cannot win when forward transport resolves nonzero current. When
+    both directions claim the requested precision, they must agree within the combined uncertainty.
+    The selected replicate event measures are averaged without energy/angle binning.
+    """
+    forward = tuple(forward_populations); adjoint = tuple(adjoint_populations)
+    if len(forward) < 4 or len(adjoint) != len(forward):
+        raise ValueError("bidirectional selection requires matching sets of at least four replicates")
+    first = forward[0]
+    if (not isinstance(first, FaceResolvedEnergeticFlux)
+            or any(not isinstance(item, FaceResolvedEnergeticFlux) for item in forward + adjoint)
+            or any(item.name != first.name or item.face_count != first.face_count
+                   for item in forward + adjoint)):
+        raise ValueError("bidirectional replicates must describe one matching face-resolved species")
+    face_count = first.face_count; replicate_count = len(forward)
+    if (not np.isfinite(absolute_tolerance_m2_s) or absolute_tolerance_m2_s < 0.0
+            or not np.isfinite(relative_tolerance) or relative_tolerance < 0.0
+            or not np.isfinite(consistency_sigma) or consistency_sigma <= 0.0
+            or not np.isfinite(support_sigma) or support_sigma <= 0.0
+            or not np.isfinite(support_ratio) or not 0.0 < support_ratio < 1.0):
+        raise ValueError("invalid bidirectional estimator controls")
+    zero_upper = np.asarray(forward_zero_upper_m2_s, dtype=float)
+    if (zero_upper.shape != (face_count,) or np.any(~np.isfinite(zero_upper))
+            or np.any(zero_upper < 0.0)):
+        raise ValueError("forward zero-hit bounds must match the surface mesh")
+    forward_replicates = np.stack([item.flux_m2_s for item in forward])
+    adjoint_replicates = np.stack([item.flux_m2_s for item in adjoint])
+    forward_mean = forward_replicates.mean(axis=0)
+    adjoint_mean = adjoint_replicates.mean(axis=0)
+    forward_stderr = forward_replicates.std(axis=0, ddof=1) / np.sqrt(replicate_count)
+    adjoint_stderr = adjoint_replicates.std(axis=0, ddof=1) / np.sqrt(replicate_count)
+    forward_stderr = np.where(forward_mean == 0.0, np.maximum(forward_stderr, zero_upper),
+                              forward_stderr)
+    forward_allowed = absolute_tolerance_m2_s + relative_tolerance * np.abs(forward_mean)
+    adjoint_allowed = absolute_tolerance_m2_s + relative_tolerance * np.abs(adjoint_mean)
+    forward_ok = forward_stderr <= forward_allowed
+    adjoint_support_unresolved = (
+        adjoint_mean + support_sigma * adjoint_stderr
+        < support_ratio * np.maximum(forward_mean - support_sigma * forward_stderr, 0.0))
+    adjoint_ok = (adjoint_stderr <= adjoint_allowed) & ~adjoint_support_unresolved
+    combined = np.hypot(forward_stderr, adjoint_stderr)
+    discrepancy_sigma = np.divide(
+        np.abs(forward_mean - adjoint_mean), combined,
+        out=np.where(forward_mean == adjoint_mean, 0.0, np.inf), where=combined > 0.0)
+    consistent = ~(forward_ok & adjoint_ok) | (discrepancy_sigma <= consistency_sigma)
+    metric_floor = max(float(absolute_tolerance_m2_s), np.finfo(float).tiny)
+    forward_metric = forward_stderr / np.maximum(np.abs(forward_mean), metric_floor)
+    adjoint_metric = adjoint_stderr / np.maximum(np.abs(adjoint_mean), metric_floor)
+    method = np.where(forward_metric < adjoint_metric, "forward", "adjoint")
+    method = np.where(forward_ok & ~adjoint_ok, "forward", method)
+    method = np.where(adjoint_ok & ~forward_ok, "adjoint", method)
+    if method_hint is not None:
+        hint = np.asarray(method_hint).astype("U7")
+        if hint.shape != (face_count,) or np.any(~np.isin(hint, ("forward", "adjoint"))):
+            raise ValueError("method_hint must select forward or adjoint for every face")
+        method = hint
+    within = np.where(method == "forward", forward_ok, adjoint_ok)
+    selected_events = []
+    for populations, selected_method in ((forward, "forward"), (adjoint, "adjoint")):
+        for population in populations:
+            keep = method[population.event_face] == selected_method
+            selected_events.append((
+                population.event_face[keep],
+                population.event_flux_m2_s[keep] / replicate_count,
+                population.event_energy_eV[keep],
+                population.event_cosine_incidence[keep]))
+    population = FaceResolvedEnergeticFlux(
+        first.name, face_count,
+        np.concatenate([item[0] for item in selected_events]),
+        np.concatenate([item[1] for item in selected_events]),
+        np.concatenate([item[2] for item in selected_events]),
+        np.concatenate([item[3] for item in selected_events]))
+    selected_stderr = np.where(method == "forward", forward_stderr, adjoint_stderr)
+    return BidirectionalFaceSelection3D(
+        population, selected_stderr, method,
+        forward_mean, forward_stderr, adjoint_mean, adjoint_stderr,
+        consistent, within, bool(np.all(consistent & within)))
 
 
 def merge_boundary_transport_results_3d(*results):
@@ -874,7 +1010,7 @@ def gather_boundary_state_field_adjoint_3d(
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
         face_quadrature_points=3, ray_offset=1e-5, fixed_dt=0.01,
         max_steps=10000, periodic_lateral=False, proposal_by_species=None,
-        proposal_frame_by_species="surface_local", device=None):
+        proposal_frame_by_species="surface_local", face_position_seed=None, device=None):
     """Gather charged boundary flux on every triangle with a reversible Liouville adjoint.
 
     A boundary velocity proposal may be interpreted in the triangle's local two-tangent/inward-normal
@@ -903,7 +1039,10 @@ def gather_boundary_state_field_adjoint_3d(
             or bounds.shape != (4,) or np.any(~np.isfinite(bounds))
             or bounds[0] >= bounds[1] or bounds[2] >= bounds[3] or not np.isfinite(source_z)
             or int(face_quadrature_points) != face_quadrature_points
-            or int(face_quadrature_points) not in (1, 3, 7)
+            or face_quadrature_points <= 0
+            or (face_position_seed is None and int(face_quadrature_points) not in (1, 3, 7))
+            or (face_position_seed is not None
+                and int(face_position_seed) != face_position_seed)
             or not np.isfinite(ray_offset) or ray_offset <= 0.0
             or not np.isfinite(fixed_dt) or fixed_dt <= 0.0
             or int(max_steps) != max_steps or max_steps <= 0):
@@ -947,7 +1086,19 @@ def gather_boundary_state_field_adjoint_3d(
         raise ValueError(
             "proposal_frame_by_species must select surface_local or source_aligned for every species")
 
-    if int(face_quadrature_points) == 1:
+    if face_position_seed is not None:
+        position_count = int(face_quadrature_points)
+        position_level = int(np.ceil(np.log2(position_count)))
+        position_u = qmc.Sobol(
+            d=2, scramble=True, seed=int(face_position_seed)).random_base2(position_level)
+        position_u = position_u[:position_count]
+        root = np.sqrt(position_u[:, 0])
+        barycentric = np.column_stack((
+            1.0 - root, root * (1.0 - position_u[:, 1]), root * position_u[:, 1]))
+        point_weight = np.full(
+            int(face_quadrature_points), 1.0 / int(face_quadrature_points))
+        points = np.einsum("qv,fvc->fqc", barycentric, verts[faces])
+    elif int(face_quadrature_points) == 1:
         points = centroids[:, None, :]
         point_weight = np.ones(1)
     elif int(face_quadrature_points) == 3:
@@ -1082,3 +1233,101 @@ def gather_boundary_state_field_adjoint_3d(
          "triangle position quadrature requires refinement at partial visibility",
          "no surface reflection or re-emission",
          "float32 field integration and triangle-ray intersection"))
+
+
+def trace_boundary_state_bidirectional_field_3d(
+        boundary: PlasmaBoundaryState, species_role: Mapping[str, str],
+        verts, faces, areas, centroids, gas_normals, *, source_bounds, source_z,
+        nodal_potential_v, potential_origin, potential_spacing,
+        mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
+        forward_log2_samples=12, adjoint_log2_samples=10, n_replicates=4, seed=0,
+        element_absolute_tolerance=0.01, element_relative_tolerance=0.05,
+        consistency_sigma=5.0, support_sigma=2.0, support_ratio=0.5,
+        proposal_by_species=None, proposal_frame_by_species="surface_local", method_hint=None,
+        face_quadrature_points=3, ray_offset=1e-5, fixed_dt=0.01, max_steps=10000,
+        periodic_lateral=False, device=None):
+    """Audit and select forward or adjoint charged transport independently on every triangle.
+
+    Four or more independent scrambled-QMC replicates supply per-face standard errors. A direct
+    forward zero-hit upper bound audits modes missed by every adjoint replicate. If both estimators
+    claim precision they must agree within their combined uncertainty. ``method_hint`` freezes a
+    previously certified map during a nonlinear-root epoch without silently changing estimators.
+    """
+    if (int(forward_log2_samples) != forward_log2_samples or forward_log2_samples < 0
+            or int(adjoint_log2_samples) != adjoint_log2_samples or adjoint_log2_samples < 0
+            or int(n_replicates) != n_replicates or n_replicates < 4
+            or not np.isfinite(element_absolute_tolerance) or element_absolute_tolerance < 0.0):
+        raise ValueError("invalid bidirectional sampling controls")
+    names = {species.name for species in boundary.species}
+    roles = dict(species_role)
+    proposals = {} if proposal_by_species is None else dict(proposal_by_species)
+    frames = ({name: proposal_frame_by_species for name in names}
+              if isinstance(proposal_frame_by_species, str)
+              else dict(proposal_frame_by_species))
+    hints = {} if method_hint is None else dict(method_hint)
+    if set(roles) != names or set(proposals) - names or set(frames) != names or set(hints) - names:
+        raise ValueError("bidirectional species controls must match the physical boundary")
+    areas_array = np.asarray(areas, dtype=float)
+    bounds = np.asarray(source_bounds, dtype=float)
+    source_area = (bounds[1] - bounds[0]) * (bounds[3] - bounds[2])
+    selections = {}; populations = []; hit = {}; escaped = {}; truncated = {}
+    for species_index, species in enumerate(boundary.species):
+        species_boundary = PlasmaBoundaryState(
+            (species,), boundary.reference_plane_m, provenance=boundary.provenance)
+        species_roles = {species.name: roles[species.name]}
+        forward_results = []; adjoint_results = []
+        template = proposals.get(species.name, species)
+        for replicate in range(int(n_replicates)):
+            replicate_seed = int(seed) + 104729 * replicate + 15485863 * species_index
+            forward_results.append(trace_boundary_state_field_3d(
+                species_boundary, species_roles, verts, faces, areas,
+                source_bounds=source_bounds, source_z=source_z,
+                nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+                potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
+                mesh_origin_m=mesh_origin_m, seed=replicate_seed, fixed_dt=fixed_dt,
+                max_steps=max_steps, phase_space_log2_samples=int(forward_log2_samples),
+                periodic_lateral=periodic_lateral, device=device))
+            proposal = qmc_boundary_proposal(
+                template, int(adjoint_log2_samples), replicate_seed,
+                name=species.name)
+            adjoint_results.append(gather_boundary_state_field_adjoint_3d(
+                species_boundary, species_roles, verts, faces, areas, centroids, gas_normals,
+                source_bounds=source_bounds, source_z=source_z,
+                nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+                potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
+                mesh_origin_m=mesh_origin_m, face_quadrature_points=face_quadrature_points,
+                ray_offset=ray_offset, fixed_dt=fixed_dt, max_steps=max_steps,
+                periodic_lateral=periodic_lateral,
+                proposal_by_species={species.name: proposal},
+                proposal_frame_by_species={species.name: frames[species.name]},
+                face_position_seed=replicate_seed, device=device))
+        forward_populations = [item.surface_fluxes.energetic_fluxes[0]
+                               for item in forward_results]
+        adjoint_populations = [item.surface_fluxes.energetic_fluxes[0]
+                               for item in adjoint_results]
+        pooled_forward_samples = int(n_replicates) * 2 ** int(forward_log2_samples)
+        zero_upper = (3.0 * species.flux_m2_s * source_area
+                      / (pooled_forward_samples * areas_array))
+        selection = select_bidirectional_face_events_3d(
+            forward_populations, adjoint_populations,
+            forward_zero_upper_m2_s=zero_upper,
+            absolute_tolerance_m2_s=float(element_absolute_tolerance) * species.flux_m2_s,
+            relative_tolerance=element_relative_tolerance,
+            consistency_sigma=consistency_sigma, support_sigma=support_sigma,
+            support_ratio=support_ratio, method_hint=hints.get(species.name))
+        selections[species.name] = selection; populations.append(selection.population)
+        landing = float(np.dot(selection.population.flux_m2_s, areas_array)
+                        / (species.flux_m2_s * source_area)) if species.flux_m2_s > 0.0 else 0.0
+        hit[species.name] = landing
+        escaped[species.name] = max(0.0, 1.0 - landing)
+        truncated[species.name] = max(
+            max(item.truncation_probability[species.name] for item in forward_results),
+            max(item.truncation_probability[species.name] for item in adjoint_results))
+    transport = BoundaryTransport3DResult(
+        SurfaceFluxes({}, tuple(populations)), hit, escaped, truncated,
+        "collisionless_fixed_step_nodal_field_bidirectional_3d"
+        + ("_periodic_cell" if periodic_lateral else ""),
+        ("per-face estimator map must be frozen during a nonlinear-root epoch",
+         "scrambled-QMC uncertainty requires independent replicate and level refinement",
+         "no surface reflection or re-emission"))
+    return BidirectionalBoundaryTransport3DResult(transport, selections)

@@ -269,6 +269,36 @@ under-determined) -- an honest result that quantifies how many structures must b
   refine or switch estimators from those diagnostics, and include that uncertainty in the existing
   current-balance confidence envelope before the nonlinear root can be earned.
 
+### Phase 2e variance-certified bidirectional 3-D transport
+
+- Primary-source review confirmed the estimator architecture. Veach's multiple-importance framework
+  requires unbiased technique combination and Grittmann et al. (TOG 2019,
+  doi:10.1145/3355089.3356515) show why density-only MIS can lose the benefit of stratification.
+  Owen's scrambled-net analysis (SIAM JNA 1997, doi:10.1137/S0036142994277468) supports independent
+  randomized-QMC replicates for error estimation. Backward particle-transport validation likewise
+  treats independent forward/backward agreement as the judge rather than assuming the adjoint is
+  correct (Niess et al., CPC 2018, arXiv:1705.05636).
+- The common arbitrary-triangle engine now runs independent forward and reversible-adjoint ensembles,
+  measures standard error per triangle, applies a direct-forward upper bound to unresolved adjoint
+  zeros, requires cross-estimator consistency when both directions claim precision, and selects the
+  lower-uncertainty event measure per face. Selected replicate events are averaged without discarding
+  their energy-angle distribution, so chemistry consumes the certified measure rather than a scalar
+  current reconstruction.
+- Triangle position sampling is independently scrambled along with velocity sampling. On the real
+  zero-field trench this exposed a deterministic visibility bias that fixed Gaussian points had hidden;
+  with eight independent replicates both ion and electron maps certify on all 40 faces, global landing
+  is within about 0.1% of conservation, 39/40 ion faces select adjoint, one selects forward, and every
+  electron face selects adjoint.
+- Charging accepts `bidirectional` per species and refuses uncertified current maps. A failed sampled
+  nonlinear trial is rejected without advancing the charge state. A flat coupled gate proves the
+  selected face-resolved energy-angle events pass through signed-current projection.
+- A global sample-refinement experiment was deliberately removed: a few inconsistent triangles caused
+  all faces and species to be retraced and made a six-state trench audit impractically slow. The next
+  bounded port from the mature 2-D lineage is selective adjoint retracing on only inconsistent triangle
+  indices (while retaining the full collision mesh), with global forward refinement only when its
+  source-launched audit is unresolved. The real root and dipole gate remain unpromoted until that
+  controller certifies every accepted field state and meets the unchanged 0.08 local-balance target.
+
 ## Roadmap (remaining)
 
 1. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow

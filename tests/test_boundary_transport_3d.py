@@ -11,6 +11,7 @@ from petch.boundary_transport_3d import (
     gather_boundary_state_ballistic_3d,
     gather_boundary_state_field_adjoint_3d,
     merge_boundary_transport_results_3d,
+    trace_boundary_state_bidirectional_field_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
 )
@@ -317,6 +318,32 @@ def test_adjoint_and_forward_field_transport_reproduce_maxwellian_barrier_tail()
     assert np.isclose(adjoint.hit_probability["electron"], expected, rtol=0.015)
     assert np.isclose(
         adjoint.hit_probability["electron"], forward.hit_probability["electron"], rtol=0.015)
+
+
+def test_bidirectional_field_transport_certifies_and_preserves_barrier_event_measure():
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    normals = np.broadcast_to([0.0, 0.0, 1.0], centroids.shape)
+    boundary = maxwellian_electron_boundary_state(
+        4.0, 2e19, n_transverse=3, n_normal=4, reference_plane_m=1e-6)
+    potential = np.zeros((2, 2, 2)); potential[:, :, 0] = -4.0
+
+    result = trace_boundary_state_bidirectional_field_3d(
+        boundary, {"electron": "charge_carrier"}, verts, faces, areas, centroids, normals,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=potential, potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=1.0, mesh_length_unit_m=1e-6,
+        forward_log2_samples=10, adjoint_log2_samples=8, n_replicates=4,
+        element_absolute_tolerance=0.035, element_relative_tolerance=0.05,
+        face_quadrature_points=3, fixed_dt=0.0025, max_steps=4000,
+        periodic_lateral=True, seed=97, device="cpu")
+
+    selection = result.selection_by_species["electron"]
+    expected = np.exp(-1.0)
+    assert selection.converged
+    assert np.all(selection.estimator_consistent)
+    assert np.isclose(result.transport.hit_probability["electron"], expected, atol=0.035)
+    assert result.transport.surface_fluxes.energetic_fluxes[0].event_energy_eV.size > 0
 
 
 def test_linear_nodal_potential_gives_exact_electrostatic_energy_gain_under_refinement():
