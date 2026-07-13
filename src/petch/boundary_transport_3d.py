@@ -305,6 +305,39 @@ class ChargedSurfaceReimpactPopulation3D:
         object.__setattr__(self, "hit_face", hit_face)
 
 
+def _certify_field_hit_lineage_3d(
+        species_name, hit_face, stored_cosine, terminal_velocity, face_gas_normal):
+    """Return gas-normal incidence data and refuse trajectories entering from solid."""
+    face = np.asarray(hit_face, dtype=int)
+    stored = np.asarray(stored_cosine, dtype=float)
+    velocity = np.asarray(terminal_velocity, dtype=float)
+    all_normals = np.asarray(face_gas_normal, dtype=float)
+    if (face.ndim != 1 or stored.shape != face.shape or velocity.shape != (len(face), 3)
+            or all_normals.ndim != 2 or all_normals.shape[1:] != (3,)
+            or np.any(face < 0) or np.any(face >= len(all_normals))
+            or np.any(~np.isfinite(stored)) or np.any(~np.isfinite(velocity))
+            or np.any(~np.isfinite(all_normals))
+            or not np.allclose(
+                np.linalg.norm(all_normals, axis=1), 1.0, rtol=0.0, atol=2e-6)):
+        raise ValueError("invalid field-hit lineage inputs")
+    normal = all_normals[face]
+    speed = np.linalg.norm(velocity, axis=1)
+    if np.any(speed <= 0.0):
+        raise RuntimeError(f"field hits for {species_name!r} contain zero impact speed")
+    direction = velocity / speed[:, None]
+    geometric = -np.einsum("rc,rc->r", direction, normal)
+    difference = np.abs(geometric - stored)
+    invalid = (geometric < -2e-6) | (difference > 2e-5)
+    if np.any(invalid):
+        event = int(np.flatnonzero(invalid)[np.argmax(difference[invalid])])
+        raise RuntimeError(
+            f"field hit for {species_name!r} violates gas-side incidence lineage: "
+            f"event={event}, face={int(face[event])}, stored={stored[event]:.9g}, "
+            f"geometric={geometric[event]:.9g}, difference={difference[event]:.9g}, "
+            f"direction={direction[event].tolist()}, normal={normal[event].tolist()}")
+    return direction, np.clip(geometric, 0.0, 1.0)
+
+
 def trace_charged_surface_events_field_3d(
         outgoing_populations, verts, faces, areas, face_gas_normals, *,
         nodal_potential_v, potential_origin, potential_spacing,
@@ -418,15 +451,16 @@ def trace_charged_surface_events_field_3d(
                 "increase the physical time horizon or explicitly allow diagnostic truncation")
         event_rate = population.event_rate_s
         terminal_velocity = terminal_velocity_wp.numpy().astype(float)
+        incident_direction, incident_cosine = _certify_field_hit_lineage_3d(
+            population.name, hit_face[hit], hit_cosine_wp.numpy().astype(float)[hit],
+            terminal_velocity[hit], normals)
         incident = FaceResolvedEnergeticFlux(
             population.name, len(faces), hit_face[hit],
             event_rate[hit] / physical_area[hit_face[hit]],
             hit_energy_wp.numpy().astype(float)[hit],
-            hit_cosine_wp.numpy().astype(float)[hit],
+            incident_cosine,
             event_position=terminal_position_wp.numpy().astype(float)[hit],
-            event_incident_direction=(
-                terminal_velocity[hit]
-                / np.linalg.norm(terminal_velocity[hit], axis=1, keepdims=True)))
+            event_incident_direction=incident_direction)
         emitted_rate = float(np.sum(event_rate))
         landed_rate = float(np.sum(event_rate[hit]))
         escaped_rate = float(np.sum(event_rate[escaped]))
@@ -1111,7 +1145,8 @@ def trace_boundary_state_field_3d(
         source_bounds, source_z, nodal_potential_v, potential_origin, potential_spacing,
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0), n_position=256,
         seed=0, fixed_dt=0.01, max_steps=10000, allow_truncation=False,
-        phase_space_log2_samples=None, periodic_lateral=False, device=None):
+        phase_space_log2_samples=None, periodic_lateral=False, face_gas_normals=None,
+        device=None):
     """Trace collisionless species through a supplied 3-D nodal electrostatic potential.
 
     Velocity coordinates retain the ``sqrt(eV)`` convention of ``PlasmaBoundaryState``. With mesh
@@ -1128,9 +1163,21 @@ def trace_boundary_state_field_3d(
         raise ValueError("invalid triangle mesh")
     edge_a = verts[faces[:, 1]] - verts[faces[:, 0]]
     edge_b = verts[faces[:, 2]] - verts[faces[:, 0]]
-    geometric_areas = 0.5 * np.linalg.norm(np.cross(edge_a, edge_b), axis=1)
+    triangle_cross = np.cross(edge_a, edge_b)
+    geometric_areas = 0.5 * np.linalg.norm(triangle_cross, axis=1)
     if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=0.0):
         raise ValueError("triangle areas must match the supplied mesh geometry")
+    if face_gas_normals is None:
+        # Compatibility path for consistently oriented manufactured/legacy meshes. Production
+        # feature paths pass the level-set-derived gas normals explicitly because extracted
+        # marching-cubes triangle winding is not itself a physical gas/solid declaration.
+        normals = triangle_cross / np.linalg.norm(triangle_cross, axis=1, keepdims=True)
+    else:
+        normals = np.asarray(face_gas_normals, dtype=float)
+    if (normals.shape != (len(faces), 3) or np.any(~np.isfinite(normals))
+            or not np.allclose(
+                np.linalg.norm(normals, axis=1), 1.0, rtol=0.0, atol=2e-6)):
+        raise ValueError("face_gas_normals must contain one finite unit vector per face")
     if (bounds.shape != (4,) or bounds[1] <= bounds[0] or bounds[3] <= bounds[2]
             or np.any(~np.isfinite(bounds)) or not np.isfinite(source_z)):
         raise ValueError("invalid source plane")
@@ -1258,17 +1305,17 @@ def trace_boundary_state_field_3d(
                 "increase the physical time horizon or explicitly allow diagnostic truncation")
         event_flux = (species.flux_m2_s * source_area * physical_weight[hit]
                       / areas[hit_face[hit]])
+        incident_direction, incident_cosine = _certify_field_hit_lineage_3d(
+            species.name, hit_face[hit], hit_cosine[hit], terminal_velocity[hit], normals)
         if role[species.name] == "neutral_reactant":
             neutral_flux[species.name] = np.bincount(
                 hit_face[hit], weights=event_flux, minlength=faces.shape[0])
         else:
             energetic_flux.append(FaceResolvedEnergeticFlux(
                 species.name, faces.shape[0], hit_face[hit], event_flux,
-                hit_energy[hit], hit_cosine[hit],
+                hit_energy[hit], incident_cosine,
                 event_position=terminal_position[hit],
-                event_incident_direction=(
-                    terminal_velocity[hit]
-                    / np.linalg.norm(terminal_velocity[hit], axis=1, keepdims=True))))
+                event_incident_direction=incident_direction))
     return BoundaryTransport3DResult(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
         hit_probability=hit_probability, escape_probability=escape_probability,
@@ -1620,7 +1667,8 @@ def trace_boundary_state_bidirectional_field_3d(
                     potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
                     mesh_origin_m=mesh_origin_m, seed=replicate_seed, fixed_dt=fixed_dt,
                     max_steps=max_steps, phase_space_log2_samples=int(forward_log2_samples),
-                    periodic_lateral=periodic_lateral, device=device))
+                    periodic_lateral=periodic_lateral, face_gas_normals=gas_normals,
+                    device=device))
             if frozen_adjoint_needed:
                 proposal = qmc_boundary_proposal(
                     template, int(adjoint_log2_samples), replicate_seed,
@@ -1681,7 +1729,8 @@ def trace_boundary_state_bidirectional_field_3d(
                     potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
                     mesh_origin_m=mesh_origin_m, seed=replicate_seed, fixed_dt=fixed_dt,
                     max_steps=max_steps, phase_space_log2_samples=forward_level,
-                    periodic_lateral=periodic_lateral, device=device)
+                    periodic_lateral=periodic_lateral, face_gas_normals=gas_normals,
+                    device=device)
                     for replicate_seed in replicate_seeds]
                 forward_populations = [item.surface_fluxes.energetic_fluxes[0]
                                        for item in forward_results]

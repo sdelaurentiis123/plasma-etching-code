@@ -434,12 +434,20 @@ class GrazingSpecularIonReflection3D:
             normal = context.face_gas_normal[face]
             geometric_cosine = -np.einsum(
                 "rc,rc->r", selected_population.event_incident_direction, normal)
-            if (np.any(geometric_cosine < -2e-6)
-                    or not np.allclose(
-                        geometric_cosine, selected_population.event_cosine_incidence,
-                        rtol=0.0, atol=2e-5)):
+            cosine_difference = np.abs(
+                geometric_cosine - selected_population.event_cosine_incidence)
+            invalid_cosine = (geometric_cosine < -2e-6) | (cosine_difference > 2e-5)
+            if np.any(invalid_cosine):
+                event = int(np.flatnonzero(invalid_cosine)[
+                    np.argmax(cosine_difference[invalid_cosine])])
                 raise ValueError(
-                    "ion impact cosine is inconsistent with direction and gas normal")
+                    "ion impact cosine is inconsistent with direction and gas normal: "
+                    f"event={event}, face={int(face[event])}, "
+                    f"stored={selected_population.event_cosine_incidence[event]:.9g}, "
+                    f"geometric={geometric_cosine[event]:.9g}, "
+                    f"difference={cosine_difference[event]:.9g}, "
+                    f"direction={selected_population.event_incident_direction[event].tolist()}, "
+                    f"normal={normal[event].tolist()}")
             selected = context.face_material_id[face] == self.material_id
             probability = self.reflection_probability(
                 selected_population.event_cosine_incidence)

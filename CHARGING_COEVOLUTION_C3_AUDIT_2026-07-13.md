@@ -16,6 +16,12 @@ Date: 2026-07-13. Contract revision: `CCA-2026-07-13-R2` (signed and in force).
 - **This is an engine-integration pass, not C3 scientific closure.** The designated real-trench
   timestep/grid/sample refinement, cold-versus-warm branch test, observable invariance, and independent
   high-sample exact-operator B5 audit remain pending. C4 is therefore not authorized by this report.
+- **The production trajectory step has been corrected and centrally certified.** A later charged
+  checkpoint exposed that the former `0.005` fixed trajectory step could cross a material surface
+  and report a back-face ion hit. The shared field transport now derives impact direction and cosine
+  from terminal velocity plus the declared gas normal and refuses every solid-side hit. All earlier
+  `0.005` trench trajectories are retained only as controller-mechanics evidence, not physical-time
+  refinement evidence.
 
 Replay artifact: `results/charging_coevolution_c3/audit_summary.json`.
 
@@ -86,11 +92,11 @@ two physical patch scales, the bounded C2 reflection response, and physical sput
 
 The waveform smoke gate uses a 1 ns ion-rich segment followed by a 1 ns electron-rich segment.
 Both segments complete exactly one physical charge update; neither is required or reported to be
-saturated. Deposition conservation closes to `2.43e-16` and `1.21e-16`; signed charge removed with
+saturated. Deposition conservation closes to `8.09e-17` and `4.05e-17`; signed charge removed with
 the two etched surface increments is itemized separately. This earns a tested co-simulation path,
 not pulsed-process validation.
 
-The full local regression suite after the bounded real-trench integration is **368 passed, 1
+The full local regression suite after the trajectory-lineage integration is **370 passed, 1
 skipped**. The skip is the
 existing unavailable-CUDA condition on this CPU-only build.
 
@@ -153,7 +159,7 @@ machine-readable comparison, including hashes of both source summaries and face 
 `results/charging_coevolution_c3_trench_pilot/tail_refinement_comparison.json`. Each two-update run
 takes about 1.14 seconds on the recorded CPU; both exact wall-clock values are in their manifests.
 
-## Fixed-timestep refinement and safeguarded SER/PTC
+## Charging-timestep refinement and safeguarded SER/PTC
 
 The coarse trench was advanced from zero face charge to the same 2.5 microsecond physical time with
 three fixed steps. Every run used the same source checksums, hard-visibility transport, frozen
@@ -170,6 +176,11 @@ Successive halving changes face sigma by `3.76%` then `1.32%`, nodal charge by `
 successive-difference order is about 1.50, but the finest face state is not yet invariant enough to
 close the timestep gate. The B2 rebound after the initial two updates survives refinement. It is not
 an explicit-step blow-up; its local ion-normalized denominator changes as accessibility evolves.
+
+These runs all used the former `0.005` **particle-trajectory** step. The later trajectory audit below
+shows that setting becomes invalid as the field strengthens. The table therefore remains evidence
+that the charge-ODE timestep controller and conservation ledgers behave consistently on the early
+trajectory, but it no longer supports a physical transient-refinement claim.
 
 The first real SER run exposed three engine issues that are now corrected without changing the
 kinetic operator or any acceptance tolerance:
@@ -200,6 +211,44 @@ and face checkpoint. The runner also writes a replayable face checkpoint, full d
 hashes, and wall clock before exiting nonzero on any `SurfaceChargingSaturationError`, so rejected
 campaigns no longer disappear into tracebacks.
 
+## Particle-trajectory resolution and back-face refusal
+
+At the first later checkpoint where fixed-time continuation failed, the shared field kernel reported
+an Ar+ event on top mask face 3 with stored incidence cosine `+0.998886`, but its terminal velocity
+pointed along the declared `+z` gas normal. The authoritative geometric cosine was therefore
+`-0.998886`: the fixed-step trajectory had crossed the solid and intersected the surface from behind.
+The old response-level consistency check refused this event before it could affect reflection or
+charge. That check has now been moved into the shared field transport, so primary boundary particles,
+neutral reuse, bidirectional forward estimates, and surface-emitted re-impact cascades all use the
+same terminal-velocity/gas-normal certification. The response check remains as defense in depth.
+
+The exact face checkpoint was replayed without a charging update over a fixed phase-space sample set.
+The `0.005` level refuses. All finer levels shown below finish without truncation and close deposition
+and surface-transfer charge at roundoff.
+
+| Particle step | Status | Node RMS / worst | B2 max, 0.25 / 0.50 micrometers | Potential rate (V/s) |
+| ---: | --- | ---: | ---: | ---: |
+| 0.005 | refused: solid-side hit | -- | -- | -- |
+| 0.0025 | accepted | 0.34376 / 0.78032 | 10.6601 / 10.3011 | 9.635e5 |
+| 0.00125 | accepted | 0.34463 / 0.78228 | 10.7789 / 10.4142 | 7.289e5 |
+| 0.000625 | accepted | 0.34515 / 0.78328 | 10.8407 / 10.4722 | 8.238e5 |
+| 0.0003125 | accepted | 0.34574 / 0.78376 | 10.8721 / 10.5021 | 8.791e5 |
+| 0.00015625 | accepted | 0.34577 / 0.78402 | 10.8878 / 10.5169 | 9.030e5 |
+| 0.000078125 | accepted | 0.34584 / 0.78414 | 10.8954 / 10.5244 | 9.162e5 |
+
+The final halving changes node RMS/worst by `0.0216% / 0.0159%`, the two exact B2 maxima by
+`0.0697% / 0.0708%`, and maximum potential rate by `1.44%`. The bounded pilot default is now
+`0.0003125` with a 50,000-step horizon: relative to the finest audit it differs by `0.029%` in node
+RMS, `0.048%` in worst node, `0.214% / 0.211%` in B2, and `4.05%` in maximum potential rate. This is
+appropriate for far-from-saturation progress where B1 is almost three orders of magnitude above its
+gate. A stationary-state claim must replay at `0.00015625` and `0.000078125`; the default is not a
+waiver of B1 refinement.
+
+Machine-readable evidence, source hashes, all per-node and patch diagnostics including the refused
+run, and the durable input checkpoint are in
+`results/charging_coevolution_c3_trajectory_refinement/audit.json`. This audit changes the next step:
+long continuation must restart with the resolved transport, not continue a coarse-trajectory state.
+
 ## Evidence and provenance
 
 Audit config hash: `d3b5485aff03a950c82f6fb4a0161e76532b5120dc7f5a075bb340a7a4c444fc`.
@@ -215,8 +264,8 @@ Before scientific closure or C4:
 
 1. Run a designated real-trench mid-etch and final-profile checkpoint from both zero charge and the
    remapped warm start generated by C3 itself; require the same stationary branch.
-2. Compare fixed physical time and safeguarded SER on the same exact operator; perform timestep
-   halving and schedule refinement.
+2. Restart fixed physical time and safeguarded SER with the resolved particle trajectory; compare the
+   same exact operator under charge-timestep halving and SER schedule refinement.
 3. Report B2 on at least two physical patch scales and demonstrate tightening under one grid
    refinement, with a scale no larger than each claimed feature.
 4. Demonstrate sample-level, timestep, and grid invariance of the declared observables. For any

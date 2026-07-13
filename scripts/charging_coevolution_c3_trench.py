@@ -83,7 +83,7 @@ def main():
     parser.add_argument("--adjoint-level", type=int, default=8)
     parser.add_argument("--n-position", type=int, default=256)
     parser.add_argument("--seed", type=int, default=79)
-    parser.add_argument("--trajectory-dt", type=float, default=0.005)
+    parser.add_argument("--trajectory-dt", type=float, default=0.0003125)
     parser.add_argument("--trajectory-max-steps", type=int, default=50000)
     parser.add_argument("--response-tail-tolerance", type=float, default=1e-10)
     args = parser.parse_args()
@@ -147,6 +147,7 @@ def main():
     source_paths = (
         ROOT / "src/petch/charging_coevolution_3d.py",
         ROOT / "src/petch/charging_coupled_3d.py",
+        ROOT / "src/petch/boundary_transport_3d.py",
         ROOT / "src/petch/charged_surface_cascade_3d.py",
         ROOT / "src/petch/charged_surface_response_3d.py",
         Path(__file__).resolve(),

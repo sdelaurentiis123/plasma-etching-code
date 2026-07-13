@@ -7,6 +7,7 @@ from petch.boundary_state import (
     maxwellian_electron_boundary_state, qmc_boundary_proposal,
 )
 from petch.boundary_transport_3d import (
+    _certify_field_hit_lineage_3d,
     estimate_diffuse_form_factors_3d,
     gather_boundary_state_ballistic_3d,
     gather_boundary_state_field_adjoint_3d,
@@ -25,6 +26,26 @@ from petch.surface_kinetics import (
 
 
 DEVICES = ["cpu"] + (["cuda:0"] if wp.is_cuda_available() else [])
+
+
+def test_field_hit_lineage_uses_declared_gas_normal():
+    direction, cosine = _certify_field_hit_lineage_3d(
+        "Ar+", np.array([0]), np.array([0.8]),
+        np.array([[0.6, 0.0, -0.8]]), np.array([[0.0, 0.0, 1.0]]))
+
+    np.testing.assert_allclose(direction, [[0.6, 0.0, -0.8]])
+    np.testing.assert_allclose(cosine, [0.8])
+
+
+def test_field_hit_lineage_refuses_backface_and_cosine_mismatch():
+    with pytest.raises(RuntimeError, match="gas-side incidence lineage"):
+        _certify_field_hit_lineage_3d(
+            "Ar+", np.array([0]), np.array([1.0]),
+            np.array([[0.0, 0.0, 1.0]]), np.array([[0.0, 0.0, 1.0]]))
+    with pytest.raises(RuntimeError, match="gas-side incidence lineage"):
+        _certify_field_hit_lineage_3d(
+            "Ar+", np.array([0]), np.array([0.5]),
+            np.array([[0.0, 0.0, -1.0]]), np.array([[0.0, 0.0, 1.0]]))
 
 
 def _flat_unit_plane():

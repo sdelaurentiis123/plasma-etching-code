@@ -1,0 +1,105 @@
+{
+  "schema": "petch.charging.coevolution.c3.trajectory-refinement.v1",
+  "date": "2026-07-13",
+  "status": "transport trajectory resolution audit at a fixed charged trench checkpoint; not charging convergence",
+  "checkpoint": {
+    "path": "input_face_checkpoint.npz",
+    "sha256": "d3e2110a5de18ffa279ebf2e74b1fc79bc56d17ddc8062f719896000c2c1fd25",
+    "origin": "face-authoritative fixed-time continuation endpoint after 18 accepted coarse-trajectory charging updates",
+    "use": "diagnostic state only; it is not promoted as a resolved physical transient"
+  },
+  "common_controls": {
+    "maximum_charging_steps": 0,
+    "fixed_checkpoint": true,
+    "hard_visibility": true,
+    "response": "bounded grazing-ion reflection with complete-or-refused cascades",
+    "forward_log2_samples": 10,
+    "adjoint_log2_samples": 8,
+    "seed": 79,
+    "minimum_physical_trajectory_horizon": 15.625,
+    "horizon_note": "the three finest levels hold the horizon at 15.625; coarser levels use an equal or longer horizon, and no accepted level truncates a trajectory"
+  },
+  "levels": [
+    {
+      "trajectory_dt": 0.005,
+      "trajectory_max_steps": 50000,
+      "status": "refused",
+      "reason": "Ar+ event 170 hit face 3 from the solid side: stored cosine 0.998886049, gas-normal geometric cosine -0.998886040",
+      "summary": "dt_0p005_refused/summary.json",
+      "summary_sha256": "cfd5a2b26ab935f75c4ff08a878e2f1a5fa2c2a55e21ef613c74a07ac1f1d1b4"
+    },
+    {
+      "trajectory_dt": 0.0025,
+      "trajectory_max_steps": 50000,
+      "node_rms": 0.3437582511461264,
+      "node_worst": 0.7803152658741864,
+      "patch_b2": [10.66010244411769, 10.301110949841462],
+      "potential_rate_max_v_s": 963530.2152497687,
+      "summary": "dt_0p0025/summary.json",
+      "summary_sha256": "abc80d3a1bdf73992c825970e5d9603fa8f50e3e09ee998c427266968d74308e"
+    },
+    {
+      "trajectory_dt": 0.00125,
+      "trajectory_max_steps": 50000,
+      "node_rms": 0.34463457575443684,
+      "node_worst": 0.782281643977709,
+      "patch_b2": [10.778891808107431, 10.414165593381268],
+      "potential_rate_max_v_s": 728872.9687269076,
+      "summary": "dt_0p00125/summary.json",
+      "summary_sha256": "3463611326d4427198ce5f3d1cb78d2d0f84ce0aaba10fb8a338ceecbaa8d660"
+    },
+    {
+      "trajectory_dt": 0.000625,
+      "trajectory_max_steps": 50000,
+      "node_rms": 0.3451523979569816,
+      "node_worst": 0.7832812978048759,
+      "patch_b2": [10.840737162645663, 10.472168042101103],
+      "potential_rate_max_v_s": 823779.0204539124,
+      "summary": "dt_0p000625/summary.json",
+      "summary_sha256": "8b1981d7027a52490bcd15e75dcee13c6fd9b2e2371f9d977558805649bce858"
+    },
+    {
+      "trajectory_dt": 0.0003125,
+      "trajectory_max_steps": 50000,
+      "node_rms": 0.3457420701066678,
+      "node_worst": 0.7837620494221731,
+      "patch_b2": [10.87213690200022, 10.50213494961156],
+      "potential_rate_max_v_s": 879106.0875883404,
+      "summary": "dt_0p0003125/summary.json",
+      "summary_sha256": "5a00881c849a351a6563cd035226d5bd854acd8650f8c0d100ee0b1a0588c0d4"
+    },
+    {
+      "trajectory_dt": 0.00015625,
+      "trajectory_max_steps": 100000,
+      "node_rms": 0.34576860614983496,
+      "node_worst": 0.7840172024817512,
+      "patch_b2": [10.887818064196537, 10.516923278151372],
+      "potential_rate_max_v_s": 903033.6355762928,
+      "summary": "dt_0p00015625/summary.json",
+      "summary_sha256": "1b4f3243ed4ab078995b9e7a05659a1202fb4bd5e40250667781bbd3176ee4e2"
+    },
+    {
+      "trajectory_dt": 0.000078125,
+      "trajectory_max_steps": 200000,
+      "node_rms": 0.34584336588045694,
+      "node_worst": 0.7841421950817528,
+      "patch_b2": [10.89540751664445, 10.524377056633918],
+      "potential_rate_max_v_s": 916211.6611652494,
+      "summary": "dt_0p000078125/summary.json",
+      "summary_sha256": "9e1499ae41811640cbd32a2768191402cf000b7d3213e7763ddc3b4497341bb3"
+    }
+  ],
+  "last_halving_relative_changes_percent": {
+    "node_rms": 0.021616644411166282,
+    "node_worst": 0.015940042607770582,
+    "patch_b2_0p25_um": 0.06965735275453552,
+    "patch_b2_0p50_um": 0.07082393991051007,
+    "potential_rate_max_v_s": 1.4383167282761589
+  },
+  "selected_bounded_pilot_default": {
+    "trajectory_dt": 0.0003125,
+    "trajectory_max_steps": 50000,
+    "rationale": "first audited setting with stable gas-side lineage; differs from the finest audit by 0.029% node RMS, 0.048% worst node, 0.214%/0.211% B2, and 4.05% potential rate. Final B1/B2 claims still require the finer replay."
+  },
+  "conclusion": "The old 0.005 production step is invalid at this charged state and all coarse-step transient evidence is downgraded to controller mechanics. The shared engine now refuses solid-side hits. A 0.0003125 step is adequate for bounded far-from-saturation progress, while any stationary-state claim must be replayed at 0.00015625 and 0.000078125."
+}

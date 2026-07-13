@@ -765,6 +765,7 @@ def advance_feature_step_3d(
         mesh_length_unit_m=geometry.mesh_length_unit_m,
         mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
         device=transport_device)
+    face_gas_normals = _surface_gas_normals(verts, faces, centroids, geometry)
     charging = None
     if precomputed_transport is not None:
         transport = precomputed_transport
@@ -827,6 +828,7 @@ def advance_feature_step_3d(
                 mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
                 fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps,
                 periodic_lateral=charging_periodic,
+                face_gas_normals=face_gas_normals,
                 device=transport_device)
             transport = merge_boundary_transport_results_3d(
                 charging.transport, uncharged_transport)
@@ -864,7 +866,8 @@ def advance_feature_step_3d(
             **common_transport, nodal_potential_v=nodal_potential_v,
             potential_origin=potential_origin, potential_spacing=potential_spacing,
             fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps,
-            periodic_lateral=bool(field_periodic_lateral))
+            periodic_lateral=bool(field_periodic_lateral),
+            face_gas_normals=face_gas_normals)
     neutral_radiosity_diagnostics = MappingProxyType({})
     if radiosity_options is not None:
         transport, neutral_radiosity_diagnostics = _apply_diffuse_neutral_transport(

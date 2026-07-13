@@ -512,7 +512,8 @@ def _evaluate_incident_current_3d(
                 n_position=n_position, seed=seed, fixed_dt=trajectory_fixed_dt,
                 max_steps=trajectory_max_steps,
                 phase_space_log2_samples=phase_space_log2_samples,
-                periodic_lateral=periodic_lateral, device=transport_device))
+                periodic_lateral=periodic_lateral, face_gas_normals=face_gas_normals,
+                device=transport_device))
     transport = (transports[0] if len(transports) == 1
                  else merge_boundary_transport_results_3d(*transports))
 

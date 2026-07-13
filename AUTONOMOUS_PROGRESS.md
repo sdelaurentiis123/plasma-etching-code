@@ -564,12 +564,12 @@ under-determined) -- an honest result that quantifies how many structures must b
   waveform. `waveform_resolved` advances the same charge ODE once per explicit physical segment,
   drives chemistry/profile motion with that segment's exact endpoint transport, then uses the same
   signed remap/field rebuild. A two-segment 1 ns ion-rich/electron-rich smoke gate completes one
-  physical update per segment and closes deposition charge to `2.43e-16` and `1.21e-16`; saturation
+  physical update per segment and closes deposition charge to `8.09e-17` and `4.05e-17`; saturation
   is neither required nor claimed.
 - **Manufactured C3 integration passes; scientific C3 closure remains pending.** Config
   `d3b5485aff03a950c82f6fb4a0161e76532b5120dc7f5a075bb340a7a4c444fc` gives planar B1 rate 0,
   node RMS/worst 0/0, patch maxima 0/0 at 0.25/1.0 micrometers, exact transport reuse, and zero
-  deposition/remap ledger error. The full suite is 368 passed, 1 skipped. The real-trench cold/warm
+  deposition/remap ledger error. The full suite is 370 passed, 1 skipped. The real-trench cold/warm
   branch, timestep/grid/sample refinement, observable invariance, and independent high-sample B5
   audit remain required; C4 has not started. Evidence is in
   `CHARGING_COEVOLUTION_C3_AUDIT_2026-07-13.md` and `results/charging_coevolution_c3/`.
@@ -619,6 +619,21 @@ under-determined) -- an honest result that quantifies how many structures must b
   0.350/0.790, B2 11.50/10.59, and potential rate `1.46e6` V/s, so neither B1/B2 nor C3 closes.
   Paired hashes and differences are in
   `results/charging_coevolution_c3_trench_refinement/comparison.json`.
+- **A hidden particle-trajectory resolution failure was caught before scientific promotion.** At a
+  later charged checkpoint the former `0.005` trajectory step sent an Ar+ through the top mask and
+  reported a solid-side hit: stored cosine `+0.998886`, gas-normal geometric cosine `-0.998886`.
+  The common field transport now reconstructs incidence from terminal velocity and the explicitly
+  declared gas normal, and refuses back-face or inconsistent lineage before current or response
+  physics consumes it. Production callers pass level-set gas normals through primary, bidirectional,
+  neutral-reuse, and re-impact paths; focused charging/transport tests pass.
+- **The real-trench particle trajectory now has its own seven-level audit.** On the durable fixed
+  checkpoint, `dt=0.005` refuses while `0.0025` through `0.000078125` pass without truncation. The
+  final halving changes node RMS/worst by `0.0216%/0.0159%`, exact B2 at 0.25/0.50 micrometers by
+  `0.0697%/0.0708%`, and potential rate by `1.44%`. The bounded pilot default is `0.0003125`; it is
+  within `0.214%` in B2 of the finest replay but differs `4.05%` in potential rate, so final B1 claims
+  require the two finer levels. All earlier `0.005` transient/PTC runs are downgraded to controller
+  mechanics evidence and will not seed the resolved physical continuation. Evidence and the input
+  face checkpoint are in `results/charging_coevolution_c3_trajectory_refinement/`.
 
 ## Roadmap (remaining)
 

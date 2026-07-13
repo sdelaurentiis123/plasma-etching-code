@@ -685,7 +685,8 @@ def _boundary_manifest(boundary):
 
 
 def _merge_final_neutral_transport(
-        charged_transport, geometry, boundary, species_role, verts, faces, areas, potential_v, *,
+        charged_transport, geometry, boundary, species_role, verts, faces, areas,
+        face_gas_normals, potential_v, *,
         source_bounds, source_z, potential_origin, potential_spacing,
         n_position, seed, trajectory_fixed_dt, trajectory_max_steps,
         periodic_lateral, transport_device):
@@ -705,7 +706,7 @@ def _merge_final_neutral_transport(
         mesh_origin_m=geometry.mesh_origin_m,
         n_position=n_position, seed=seed, fixed_dt=trajectory_fixed_dt,
         max_steps=trajectory_max_steps, periodic_lateral=periodic_lateral,
-        device=transport_device)
+        face_gas_normals=face_gas_normals, device=transport_device)
     return merge_boundary_transport_results_3d(charged_transport, neutral)
 
 
@@ -871,7 +872,7 @@ def solve_charging_coevolution_3d(
                 charging.physical_time_s, charging.pseudo_time_s)
         transport = _merge_final_neutral_transport(
             charging.final_step.transport, current_geometry, step_boundary, role,
-            verts, faces, areas, charging.potential_v,
+            verts, faces, areas, normals, charging.potential_v,
             source_bounds=source_bounds, source_z=source_z,
             potential_origin=potential_origin, potential_spacing=potential_spacing,
             n_position=n_position, seed=int(seed) + step_index,

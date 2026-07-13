@@ -547,6 +547,7 @@ def test_feature_step_consumes_a_precomputed_exact_transport_without_retracing()
     boundary = _boundary()
     role = {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"}
     verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
+    normals = _surface_gas_normals(verts, faces, centroids, geometry)
     potential = np.zeros(geometry.phi.shape)
     transport = trace_boundary_state_field_3d(
         boundary, role, verts, faces, areas,
@@ -554,7 +555,7 @@ def test_feature_step_consumes_a_precomputed_exact_transport_without_retracing()
         nodal_potential_v=potential, potential_origin=(0.0, 0.0, 0.0),
         potential_spacing=geometry.dx, mesh_length_unit_m=geometry.mesh_length_unit_m,
         n_position=1024, seed=37, fixed_dt=0.005, max_steps=1000,
-        device="cpu")
+        face_gas_normals=normals, device="cpu")
     mechanism = _mechanism()
     result = advance_feature_step_3d(
         geometry, boundary, role, mechanism,
@@ -633,7 +634,7 @@ def test_periodic_trench_forward_and_adjoint_electron_currents_close_by_region()
         mesh_length_unit_m=geometry.mesh_length_unit_m,
         fixed_dt=0.005, max_steps=50000, periodic_lateral=True, device="cpu")
     forward = trace_boundary_state_field_3d(
-        **common, phase_space_log2_samples=14)
+        **common, phase_space_log2_samples=14, face_gas_normals=normals)
     adjoint = gather_boundary_state_field_adjoint_3d(
         **common, centroids=centroids, gas_normals=normals,
         face_quadrature_points=3, ray_offset=1e-4,
@@ -676,7 +677,7 @@ def test_periodic_trench_source_aligned_adjoint_resolves_directional_ion_current
         mesh_length_unit_m=geometry.mesh_length_unit_m,
         fixed_dt=0.005, max_steps=50000, periodic_lateral=True, device="cpu")
     forward = trace_boundary_state_field_3d(
-        **common, phase_space_log2_samples=14)
+        **common, phase_space_log2_samples=14, face_gas_normals=normals)
     proposal = {"Ar+": qmc_boundary_proposal(boundary.get("Ar+"), 10, seed=79)}
     coarse_adjoint = gather_boundary_state_field_adjoint_3d(
         **common, centroids=centroids, gas_normals=normals,

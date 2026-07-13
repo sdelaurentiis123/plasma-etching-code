@@ -222,6 +222,7 @@ def main():
     source_paths = (
         ROOT / "src/petch/charging_coevolution_3d.py",
         ROOT / "src/petch/charging_coupled_3d.py",
+        ROOT / "src/petch/boundary_transport_3d.py",
         ROOT / "src/petch/charged_surface_cascade_3d.py",
         ROOT / "src/petch/feature_step_3d.py",
         ROOT / "src/petch/surface_charge_remap_3d.py",
