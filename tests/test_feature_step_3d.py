@@ -624,6 +624,58 @@ def test_periodic_trench_forward_and_adjoint_electron_currents_close_by_region()
         assert np.isclose(adjoint_measure, forward_measure, atol=0.012)
 
 
+def test_periodic_trench_source_aligned_adjoint_resolves_directional_ion_current():
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=1.0, cell_length=0.5, domain_height=2.0, dx=0.25,
+        opening_width=0.5, mask_thickness=0.25,
+        substrate_top=1.25, etched_depth=0.75)
+    source_z = 2.0
+    boundary = _continuous_trench_charging_boundary(
+        source_z * geometry.mesh_length_unit_m)
+    verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
+    normals = _surface_gas_normals(verts, faces, centroids, geometry)
+    ion_boundary = PlasmaBoundaryState((boundary.get("Ar+"),), boundary.reference_plane_m)
+    common = dict(
+        boundary=ion_boundary, species_role={"Ar+": "energetic_bombardment"},
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 0.5), source_z=source_z,
+        nodal_potential_v=np.zeros(geometry.phi.shape),
+        potential_origin=(0.0, 0.0, 0.0), potential_spacing=geometry.dx,
+        mesh_length_unit_m=geometry.mesh_length_unit_m,
+        fixed_dt=0.005, max_steps=50000, periodic_lateral=True, device="cpu")
+    forward = trace_boundary_state_field_3d(
+        **common, phase_space_log2_samples=14)
+    proposal = {"Ar+": qmc_boundary_proposal(boundary.get("Ar+"), 10, seed=79)}
+    coarse_adjoint = gather_boundary_state_field_adjoint_3d(
+        **common, centroids=centroids, gas_normals=normals,
+        face_quadrature_points=3, ray_offset=1e-4,
+        proposal_by_species=proposal,
+        proposal_frame_by_species={"Ar+": "source_aligned"})
+    adjoint = gather_boundary_state_field_adjoint_3d(
+        **common, centroids=centroids, gas_normals=normals,
+        face_quadrature_points=7, ray_offset=1e-4,
+        proposal_by_species=proposal,
+        proposal_frame_by_species={"Ar+": "source_aligned"})
+    physical_flux = boundary.get("Ar+").flux_m2_s
+    forward_flux = forward.surface_fluxes.energetic_fluxes[0].flux_m2_s / physical_flux
+    adjoint_flux = adjoint.surface_fluxes.energetic_fluxes[0].flux_m2_s / physical_flux
+    regions = (
+        centroids[:, 2] < 0.75,
+        (centroids[:, 2] >= 0.75) & (centroids[:, 2] < 1.25),
+        (centroids[:, 2] >= 1.25) & (centroids[:, 2] < 1.45),
+        centroids[:, 2] >= 1.45,
+    )
+
+    assert np.isclose(forward.hit_probability["Ar+"], 1.0, atol=1.0 / 2 ** 14)
+    assert abs(adjoint.hit_probability["Ar+"] - 1.0) < abs(
+        coarse_adjoint.hit_probability["Ar+"] - 1.0)
+    assert np.isclose(adjoint.hit_probability["Ar+"], 1.0, rtol=6e-3)
+    for region in regions:
+        forward_measure = np.dot(forward_flux[region], areas[region]) / 0.5
+        adjoint_measure = np.dot(adjoint_flux[region], areas[region]) / 0.5
+        assert np.isclose(adjoint_measure, forward_measure, atol=0.012)
+
+
 def test_multistep_charged_profile_refuses_a_fixed_geometry_poisson_operator():
     geometry, _ = _plane_geometry()
     with pytest.raises(ValueError, match="geometry-dependent Poisson builder"):

@@ -246,6 +246,29 @@ under-determined) -- an honest result that quantifies how many structures must b
   ion proposal (then adaptive bidirectional selection/error accounting), followed by the same unchanged
   convergence and charging-dipole gates.
 
+### Phase 2d arbitrary-face directional-ion follow-up
+
+- The reversible 3-D gather now supports a per-species `source_aligned` proposal frame in addition to
+  the original `surface_local` frame. Source-aligned samples retain the global plasma-boundary
+  direction while each arbitrary triangle supplies only the incident-normal projection. This closes
+  the orientation/support defect for narrow ions without a face-, region-, or benchmark-specific law.
+- A periodic-trench ion reciprocity gate now compares independent forward QMC with the source-aligned
+  adjoint globally and over the same four depth regions used for electrons. Standard seven-point
+  triangle quadrature reduces the global visibility-integration error from 0.94% to 0.48%; the gate
+  requires both refinement improvement and a 0.6% absolute budget.
+- The unchanged steady trench root was rerun with source-aligned adjoint ions, a stratified
+  field-shift-support proposal, hybrid forward-ion/adjoint-electron transport, Picard, and Anderson.
+  None met the 0.08 maximum local current-balance criterion (best audited maximum remained far above
+  tolerance), so the charging dipole/profile gate is still not promoted. A worst-node coordinate
+  relaxation experiment produced unphysical oscillatory voltages and was removed rather than added
+  as speculative solver machinery.
+- The remaining engine gap is now narrower: the estimator needs adaptive bidirectional local-current
+  error control that follows the field-shifted narrow ion support per surface element. A single fixed
+  broad proposal can have global support yet only a handful of effective samples in each shifted
+  two-eV window. The next implementation must expose per-face variance/effective-sample diagnostics,
+  refine or switch estimators from those diagnostics, and include that uncertainty in the existing
+  current-balance confidence envelope before the nonlinear root can be earned.
+
 ## Roadmap (remaining)
 
 1. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow

@@ -141,13 +141,27 @@ def _validate_transport_estimators_3d(
     return estimator_by_name
 
 
+def _validate_adjoint_proposal_frames_3d(estimator_by_name, adjoint_proposal_frames):
+    adjoint_names = {
+        name for name, estimator in estimator_by_name.items() if estimator == "adjoint"}
+    proposal_frames = (
+        {name: adjoint_proposal_frames for name in adjoint_names}
+        if isinstance(adjoint_proposal_frames, str) else dict(adjoint_proposal_frames))
+    if (set(proposal_frames) != adjoint_names
+            or any(value not in {"surface_local", "source_aligned"}
+                   for value in proposal_frames.values())):
+        raise ValueError(
+            "adjoint_proposal_frames must select surface_local or source_aligned for adjoint species")
+    return proposal_frames
+
+
 def _evaluate_incident_current_3d(
         poisson_system, charge, boundary, verts, faces, areas, *, source_bounds, source_z,
         potential_origin, coordinate_spacing, mesh_length_unit_m, mesh_origin_m,
         n_position, seed, trajectory_fixed_dt, trajectory_max_steps,
         phase_space_log2_samples, periodic_lateral, transport_estimator,
         face_centroids, face_gas_normals, adjoint_face_quadrature_points,
-        adjoint_ray_offset, adjoint_proposals, transport_device):
+        adjoint_ray_offset, adjoint_proposals, adjoint_proposal_frames, transport_device):
     charged_species = tuple(species for species in boundary.species if species.charge_number != 0)
     if not charged_species:
         raise ValueError("dielectric charging requires at least one charged boundary species")
@@ -182,7 +196,12 @@ def _evaluate_incident_current_3d(
                 face_quadrature_points=adjoint_face_quadrature_points,
                 ray_offset=adjoint_ray_offset, fixed_dt=trajectory_fixed_dt,
                 max_steps=trajectory_max_steps, periodic_lateral=periodic_lateral,
-                proposal_by_species=proposal_subset, device=transport_device))
+                proposal_by_species=proposal_subset,
+                proposal_frame_by_species=(
+                    adjoint_proposal_frames if isinstance(adjoint_proposal_frames, str) else {
+                        species.name: adjoint_proposal_frames[species.name]
+                        for species in selected}),
+                device=transport_device))
         else:
             transports.append(trace_boundary_state_field_3d(
                 selected_boundary, selected_role, verts, faces, areas,
@@ -239,7 +258,7 @@ def advance_dielectric_charging_3d(
         phase_space_log2_samples=None, periodic_lateral=False,
         transport_estimator="forward", face_centroids=None, face_gas_normals=None,
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
-        adjoint_proposals=None,
+        adjoint_proposals=None, adjoint_proposal_frames="surface_local",
         transport_device=None):
     """Advance stored dielectric charge by the signed incident-particle current.
 
@@ -251,7 +270,8 @@ def advance_dielectric_charging_3d(
     This is a physical-time forward-Euler update, not the accelerated steady current-balance solve.
     ``duration_s`` must therefore resolve the charging transient selected by the caller.
     ``transport_estimator`` may select ``"forward"`` or ``"adjoint"`` independently for each charged
-    species; adjoint species require per-face centroids and gas normals.
+    species; adjoint species require per-face centroids and gas normals. Adjoint proposal frames may
+    likewise be selected per species for broad local incidence or narrow source-aligned incidence.
     """
     if not isinstance(poisson_system, NodalPoissonSystem3D):
         raise TypeError("poisson_system must be a NodalPoissonSystem3D")
@@ -264,8 +284,9 @@ def advance_dielectric_charging_3d(
         raise ValueError("stored dielectric charge cannot be assigned to Dirichlet reservoir nodes")
     coordinate_spacing = _coordinate_spacing_3d(
         poisson_system, potential_spacing, mesh_length_unit_m)
-    _validate_transport_estimators_3d(
+    estimator_by_name = _validate_transport_estimators_3d(
         boundary, faces, transport_estimator, face_centroids, face_gas_normals)
+    _validate_adjoint_proposal_frames_3d(estimator_by_name, adjoint_proposal_frames)
     evaluated = _evaluate_incident_current_3d(
         poisson_system, charge, boundary, verts, faces, areas,
         source_bounds=source_bounds, source_z=source_z,
@@ -280,6 +301,7 @@ def advance_dielectric_charging_3d(
         adjoint_face_quadrature_points=adjoint_face_quadrature_points,
         adjoint_ray_offset=adjoint_ray_offset,
         adjoint_proposals=adjoint_proposals,
+        adjoint_proposal_frames=adjoint_proposal_frames,
         transport_device=transport_device)
     face_current = evaluated["positive_face_current"] - evaluated["negative_face_current"]
     current_node = evaluated["positive_node_current"] - evaluated["negative_node_current"]
@@ -333,7 +355,7 @@ def solve_dielectric_charging_steady_3d(
         phase_space_log2_samples=None, periodic_lateral=False,
         transport_estimator="forward", face_centroids=None, face_gas_normals=None,
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
-        adjoint_proposals=None,
+        adjoint_proposals=None, adjoint_proposal_frames="surface_local",
         transport_device=None,
         max_iter=30, min_iter=2, current_balance_tol=1e-3,
         beta=0.5, response_energy_eV=4.0, maximum_voltage_step=8.0,
@@ -368,11 +390,12 @@ def solve_dielectric_charging_steady_3d(
             or current_confidence_sigma <= 0.0
             or nonlinear_update not in {"picard", "anderson"}
             or int(anderson_depth) != anderson_depth or anderson_depth <= 0
-            or int(adjoint_face_quadrature_points) not in {1, 3}
+            or int(adjoint_face_quadrature_points) not in {1, 3, 7}
             or not np.isfinite(adjoint_ray_offset) or adjoint_ray_offset <= 0.0):
         raise ValueError("invalid steady charging solver controls")
-    _validate_transport_estimators_3d(
+    estimator_by_name = _validate_transport_estimators_3d(
         boundary, faces, transport_estimator, face_centroids, face_gas_normals)
+    _validate_adjoint_proposal_frames_3d(estimator_by_name, adjoint_proposal_frames)
     if phase_space_replicates > 1 and phase_space_log2_samples is None:
         raise ValueError(
             "multiple current replicates require joint continuous-density phase-space sampling")
@@ -417,6 +440,7 @@ def solve_dielectric_charging_steady_3d(
         adjoint_face_quadrature_points=adjoint_face_quadrature_points,
         adjoint_ray_offset=adjoint_ray_offset,
         adjoint_proposals=adjoint_proposals,
+        adjoint_proposal_frames=adjoint_proposal_frames,
         transport_device=transport_device)
 
     beta_current = float(beta); rejected_steps = 0; history = []

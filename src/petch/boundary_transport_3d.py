@@ -873,14 +873,16 @@ def gather_boundary_state_field_adjoint_3d(
         nodal_potential_v, potential_origin, potential_spacing,
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
         face_quadrature_points=3, ray_offset=1e-5, fixed_dt=0.01,
-        max_steps=10000, periodic_lateral=False, proposal_by_species=None, device=None):
+        max_steps=10000, periodic_lateral=False, proposal_by_species=None,
+        proposal_frame_by_species="surface_local", device=None):
     """Gather charged boundary flux on every triangle with a reversible Liouville adjoint.
 
-    Each boundary velocity atom is interpreted as a numerical proposal in the triangle's local
-    two-tangent/inward-normal frame.  Its exact time reverse is integrated through the same fixed-step
-    nodal Hamiltonian map used by forward transport.  Trajectories that reach the plasma plane are
-    scored by the physical boundary density and ``v_normal_surface / v_normal_boundary`` Jacobian.
-    The proposal changes variance only; it does not replace the declared plasma density.
+    A boundary velocity proposal may be interpreted in the triangle's local two-tangent/inward-normal
+    frame or in the global source frame. Its exact time reverse is integrated through the same
+    fixed-step nodal Hamiltonian map used by forward transport. Trajectories that reach the plasma
+    plane are scored by the physical boundary density and
+    ``v_normal_surface / v_normal_boundary`` Jacobian. The proposal changes variance only; it does
+    not replace the declared plasma density.
     """
     verts = np.asarray(verts, dtype=float); faces = np.asarray(faces, dtype=int)
     areas = np.asarray(areas, dtype=float); centroids = np.asarray(centroids, dtype=float)
@@ -901,7 +903,7 @@ def gather_boundary_state_field_adjoint_3d(
             or bounds.shape != (4,) or np.any(~np.isfinite(bounds))
             or bounds[0] >= bounds[1] or bounds[2] >= bounds[3] or not np.isfinite(source_z)
             or int(face_quadrature_points) != face_quadrature_points
-            or int(face_quadrature_points) not in (1, 3)
+            or int(face_quadrature_points) not in (1, 3, 7)
             or not np.isfinite(ray_offset) or ray_offset <= 0.0
             or not np.isfinite(fixed_dt) or fixed_dt <= 0.0
             or int(max_steps) != max_steps or max_steps <= 0):
@@ -936,11 +938,19 @@ def gather_boundary_state_field_adjoint_3d(
     proposals = {} if proposal_by_species is None else dict(proposal_by_species)
     if set(proposals) - names:
         raise ValueError("adjoint proposal names must belong to the physical boundary")
+    proposal_frames = (
+        {name: proposal_frame_by_species for name in names}
+        if isinstance(proposal_frame_by_species, str) else dict(proposal_frame_by_species))
+    if (set(proposal_frames) != names
+            or any(value not in {"surface_local", "source_aligned"}
+                   for value in proposal_frames.values())):
+        raise ValueError(
+            "proposal_frame_by_species must select surface_local or source_aligned for every species")
 
     if int(face_quadrature_points) == 1:
         points = centroids[:, None, :]
         point_weight = np.ones(1)
-    else:
+    elif int(face_quadrature_points) == 3:
         barycentric = np.array([
             [2.0 / 3.0, 1.0 / 6.0, 1.0 / 6.0],
             [1.0 / 6.0, 2.0 / 3.0, 1.0 / 6.0],
@@ -948,6 +958,22 @@ def gather_boundary_state_field_adjoint_3d(
         ])
         points = np.einsum("qv,fvc->fqc", barycentric, verts[faces])
         point_weight = np.full(3, 1.0 / 3.0)
+    elif int(face_quadrature_points) == 7:
+        barycentric = np.array([
+            [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
+            [0.059715871789770, 0.470142064105115, 0.470142064105115],
+            [0.470142064105115, 0.059715871789770, 0.470142064105115],
+            [0.470142064105115, 0.470142064105115, 0.059715871789770],
+            [0.797426985353087, 0.101286507323456, 0.101286507323456],
+            [0.101286507323456, 0.797426985353087, 0.101286507323456],
+            [0.101286507323456, 0.101286507323456, 0.797426985353087],
+        ])
+        point_weight = np.array([
+            0.225,
+            0.132394152788506, 0.132394152788506, 0.132394152788506,
+            0.125939180544827, 0.125939180544827, 0.125939180544827,
+        ])
+        points = np.einsum("qv,fvc->fqc", barycentric, verts[faces])
     reference = np.zeros_like(normals)
     use_z = np.abs(normals[:, 2]) < 0.9
     reference[use_z, 2] = 1.0; reference[~use_z, 0] = 1.0
@@ -977,11 +1003,18 @@ def gather_boundary_state_field_adjoint_3d(
         point_index = np.tile(np.repeat(np.arange(point_count), sample_count), len(faces))
         velocity_index = np.tile(np.arange(sample_count), len(faces) * point_count)
         launch_point = points[face_index, point_index] + float(ray_offset) * normals[face_index]
-        local = base_velocity[velocity_index]
-        forward_surface_velocity = (
-            local[:, 0, None] * tangent_a[face_index]
-            + local[:, 1, None] * tangent_b[face_index]
-            - local[:, 2, None] * normals[face_index])
+        sampled_velocity = base_velocity[velocity_index]
+        if proposal_frames[species.name] == "source_aligned":
+            forward_surface_velocity = sampled_velocity.copy()
+            forward_surface_velocity[:, 2] *= -1.0
+            surface_normal_speed = -np.einsum(
+                "rc,rc->r", forward_surface_velocity, normals[face_index])
+        else:
+            forward_surface_velocity = (
+                sampled_velocity[:, 0, None] * tangent_a[face_index]
+                + sampled_velocity[:, 1, None] * tangent_b[face_index]
+                - sampled_velocity[:, 2, None] * normals[face_index])
+            surface_normal_speed = sampled_velocity[:, 2]
         reverse_velocity = -forward_surface_velocity
         ray_count = launch_point.shape[0]
         hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
@@ -1018,7 +1051,6 @@ def gather_boundary_state_field_adjoint_3d(
             -terminal_velocity[:, 0], -terminal_velocity[:, 1], terminal_velocity[:, 2]))
         log_physical = species.log_flux_density(boundary_velocity)
         log_proposal = proposal.log_flux_density(base_velocity)[velocity_index]
-        surface_normal_speed = local[:, 2]
         source_normal_speed = np.maximum(terminal_velocity[:, 2], 1e-300)
         with np.errstate(over="ignore", invalid="ignore"):
             density_ratio = np.exp(log_physical - log_proposal)
@@ -1030,8 +1062,10 @@ def gather_boundary_state_field_adjoint_3d(
         positive = contribution > 0.0
         event_face = face_index[positive]
         event_flux = species.flux_m2_s * contribution[positive]
-        event_energy = np.sum(local[positive] ** 2, axis=1)
-        event_cosine = surface_normal_speed[positive] / np.linalg.norm(local[positive], axis=1)
+        event_energy = np.sum(forward_surface_velocity[positive] ** 2, axis=1)
+        event_cosine = (
+            surface_normal_speed[positive]
+            / np.linalg.norm(forward_surface_velocity[positive], axis=1))
         energetic_flux.append(FaceResolvedEnergeticFlux(
             species.name, len(faces), event_face, event_flux, event_energy, event_cosine))
         normalized_landing = float(np.dot(
