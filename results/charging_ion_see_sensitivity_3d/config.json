@@ -1,0 +1,65 @@
+{
+  "schema": "petch.charging.ion_see_sensitivity.v1",
+  "state": "final_states.npz",
+  "state_sha256": "341c3d5d5b98d2581bad21e2547ace6e9623e0ee0e690732d6c20ad18dbbcdcf",
+  "primary_forward_log2_samples": 11,
+  "material_assignment": "all feature faces declared plasma_exposed_SiO2 for bounded sensitivity",
+  "response_provenance": {
+    "yield_source": "Sobolewski, Plasma Sources Sci. Technol. 30 025004 (2021), Eq. 8; DOI 10.1088/1361-6595/abd61f",
+    "yield_scope": "kinetic Ar+-induced electron emission from plasma-exposed SiO2 only; photon, metastable, fast-neutral, and ion-potential channels excluded",
+    "yield_fit_range": "10 eV to 10 keV; values below 50 eV derive from literature, not the in-situ measurement",
+    "angular_source": "Huang and Kushner, J. Vac. Sci. Technol. A 44, 023013 (2026), DOI 10.1116/6.0005187; Lambertian ion-induced secondary emission",
+    "emission_energy_source": "bounded literature sensitivity"
+  },
+  "runs": [
+    {
+      "name": "absorber",
+      "emission_energy_eV": null,
+      "angular_log2_samples": 0,
+      "trajectory_fixed_dt": 0.005,
+      "response_fixed_dt": 0.005,
+      "response_launch_offset": 0.0001
+    },
+    {
+      "name": "energy_1eV",
+      "emission_energy_eV": 1.0,
+      "angular_log2_samples": 4,
+      "trajectory_fixed_dt": 0.005,
+      "response_fixed_dt": 0.005,
+      "response_launch_offset": 0.0001
+    },
+    {
+      "name": "energy_3eV",
+      "emission_energy_eV": 3.0,
+      "angular_log2_samples": 4,
+      "trajectory_fixed_dt": 0.005,
+      "response_fixed_dt": 0.005,
+      "response_launch_offset": 0.0001
+    },
+    {
+      "name": "energy_5eV",
+      "emission_energy_eV": 5.0,
+      "angular_log2_samples": 4,
+      "trajectory_fixed_dt": 0.005,
+      "response_fixed_dt": 0.005,
+      "response_launch_offset": 0.0001
+    },
+    {
+      "name": "angular_level3",
+      "emission_energy_eV": 3.0,
+      "angular_log2_samples": 3,
+      "trajectory_fixed_dt": 0.005,
+      "response_fixed_dt": 0.005,
+      "response_launch_offset": 0.0001
+    },
+    {
+      "name": "refined_flight",
+      "emission_energy_eV": 3.0,
+      "angular_log2_samples": 4,
+      "trajectory_fixed_dt": 0.005,
+      "response_fixed_dt": 0.0025,
+      "response_launch_offset": 5e-05
+    }
+  ],
+  "exact_operator": "hard visibility; full nodal-field charged re-impact; no electron-impact SEE, surface conduction, bulk leakage, photon/metastable/potential emission"
+}

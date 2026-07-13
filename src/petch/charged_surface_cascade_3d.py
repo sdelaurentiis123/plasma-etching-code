@@ -1,0 +1,205 @@
+"""Conservative charged surface-response and full-field re-impact cascades."""
+from __future__ import annotations
+
+from dataclasses import dataclass
+from types import MappingProxyType
+from typing import Mapping
+
+import numpy as np
+
+from .boundary_transport_3d import (
+    ChargedSurfaceReimpactPopulation3D,
+    trace_charged_surface_events_field_3d,
+)
+from .charged_surface_response_3d import (
+    ChargedSurfaceContext3D,
+    ChargedSurfaceResponse3D,
+    ChargedSurfaceTransfer3D,
+)
+from .sheath import ECHARGE
+from .surface_kinetics import FaceResolvedEnergeticFlux
+
+
+@dataclass(frozen=True)
+class ChargedSurfaceCascade3DResult:
+    """Complete charge ledger for a finite response/re-impact cascade."""
+
+    positive_deposition_current_density_a_m2: np.ndarray
+    negative_deposition_current_density_a_m2: np.ndarray
+    face_current_density_a_m2: np.ndarray
+    transfers: tuple[ChargedSurfaceTransfer3D, ...]
+    flights_by_bounce: tuple[tuple[ChargedSurfaceReimpactPopulation3D, ...], ...]
+    unresolved_incident: tuple[FaceResolvedEnergeticFlux, ...]
+    unresolved_charge_number_by_species: Mapping[str, int]
+    initial_incident_charge_rate_c_s: float
+    deposited_charge_rate_c_s: float
+    escaped_charge_rate_c_s: float
+    unresolved_charge_rate_c_s: float
+    charge_balance_residual_c_s: float
+    relative_charge_balance_error: float
+    completed: bool
+
+    def __post_init__(self):
+        positive = np.asarray(
+            self.positive_deposition_current_density_a_m2, dtype=float).copy()
+        negative = np.asarray(
+            self.negative_deposition_current_density_a_m2, dtype=float).copy()
+        signed = np.asarray(self.face_current_density_a_m2, dtype=float).copy()
+        if (positive.ndim != 1 or negative.shape != positive.shape or signed.shape != positive.shape
+                or np.any(~np.isfinite(positive)) or np.any(positive < 0.0)
+                or np.any(~np.isfinite(negative)) or np.any(negative < 0.0)
+                or not np.allclose(signed, positive - negative, rtol=1e-14, atol=0.0)):
+            raise ValueError("invalid charged-cascade deposition currents")
+        transfers = tuple(self.transfers)
+        flights = tuple(tuple(items) for items in self.flights_by_bounce)
+        unresolved = tuple(self.unresolved_incident)
+        charge = {name: int(value) for name, value in self.unresolved_charge_number_by_species.items()}
+        if (not transfers
+                or any(not isinstance(item, ChargedSurfaceTransfer3D) for item in transfers)
+                or any(any(not isinstance(item, ChargedSurfaceReimpactPopulation3D)
+                            for item in items) for items in flights)
+                or any(not isinstance(item, FaceResolvedEnergeticFlux) for item in unresolved)
+                or set(charge) != {item.name for item in unresolved}
+                or any(value == 0 for value in charge.values())
+                or bool(unresolved) == bool(self.completed)):
+            raise ValueError("invalid charged-cascade history or completion state")
+        rates = np.asarray([
+            self.initial_incident_charge_rate_c_s, self.deposited_charge_rate_c_s,
+            self.escaped_charge_rate_c_s, self.unresolved_charge_rate_c_s,
+            self.charge_balance_residual_c_s, self.relative_charge_balance_error], dtype=float)
+        if np.any(~np.isfinite(rates)) or self.relative_charge_balance_error < 0.0:
+            raise ValueError("invalid charged-cascade charge ledger")
+        if self.relative_charge_balance_error > 5e-13:
+            raise ValueError("charged surface cascade does not conserve signed charge")
+        for value in (positive, negative, signed):
+            value.setflags(write=False)
+        object.__setattr__(self, "positive_deposition_current_density_a_m2", positive)
+        object.__setattr__(self, "negative_deposition_current_density_a_m2", negative)
+        object.__setattr__(self, "face_current_density_a_m2", signed)
+        object.__setattr__(self, "transfers", transfers)
+        object.__setattr__(self, "flights_by_bounce", flights)
+        object.__setattr__(self, "unresolved_incident", unresolved)
+        object.__setattr__(
+            self, "unresolved_charge_number_by_species", MappingProxyType(charge))
+
+
+def _incident_charge_rate(populations, charge_number_by_species, face_area_m2):
+    charge = dict(charge_number_by_species)
+    area = np.asarray(face_area_m2, dtype=float)
+    result = 0.0
+    for population in populations:
+        result += float(
+            ECHARGE * int(charge[population.name])
+            * np.dot(population.event_flux_m2_s, area[population.event_face]))
+    return result
+
+
+def _incident_absolute_charge_rate(populations, charge_number_by_species, face_area_m2):
+    charge = dict(charge_number_by_species)
+    area = np.asarray(face_area_m2, dtype=float)
+    result = 0.0
+    for population in populations:
+        result += float(
+            ECHARGE * abs(int(charge[population.name]))
+            * np.dot(population.event_flux_m2_s, area[population.event_face]))
+    return result
+
+
+def solve_charged_surface_cascade_3d(
+        incident_populations, charge_number_by_species, response: ChargedSurfaceResponse3D,
+        context: ChargedSurfaceContext3D, verts, faces, areas, *,
+        nodal_potential_v, potential_origin, potential_spacing,
+        mesh_length_unit_m=1e-6, launch_offset=1e-5, fixed_dt=0.01,
+        max_steps=10000, max_bounces=16, periodic_lateral=False, device=None):
+    """Alternate material response and full-field flight without losing capped charge.
+
+    ``max_bounces`` caps response evaluations, not charge accounting.  If the cap is reached, the
+    landed-but-unprocessed population is returned in ``unresolved_incident`` and included explicitly
+    in the global charge ledger.  Production callers may refine the cap or apply an independently
+    justified unbiased roulette; they may not treat an incomplete cascade as closed.
+    """
+    incident = tuple(incident_populations)
+    supplied_charge = dict(charge_number_by_species)
+    charge = {name: int(value) for name, value in supplied_charge.items()}
+    if (not incident or any(not isinstance(item, FaceResolvedEnergeticFlux) for item in incident)
+            or set(charge) != {item.name for item in incident}
+            or any(int(value) != value or int(value) == 0 for value in supplied_charge.values())
+            or not isinstance(context, ChargedSurfaceContext3D)
+            or not hasattr(response, "evaluate")
+            or int(max_bounces) != max_bounces or max_bounces <= 0):
+        raise ValueError("invalid charged surface-cascade inputs")
+
+    positive = np.zeros_like(context.face_area_m2)
+    negative = np.zeros_like(context.face_area_m2)
+    transfers = []
+    flights_by_bounce = []
+    escaped_charge_rate = 0.0
+    current = incident
+    current_charge = charge
+    initial_charge_rate = _incident_charge_rate(
+        incident, charge, context.face_area_m2)
+    for _bounce in range(int(max_bounces)):
+        expected_incident_charge_rate = _incident_charge_rate(
+            current, current_charge, context.face_area_m2)
+        expected_absolute_charge_rate = _incident_absolute_charge_rate(
+            current, current_charge, context.face_area_m2)
+        transfer = response.evaluate(current, current_charge, context)
+        if (not isinstance(transfer, ChargedSurfaceTransfer3D)
+                or transfer.face_current_density_a_m2.shape != context.face_area_m2.shape):
+            raise TypeError("charged surface response returned an incompatible transfer")
+        local_scale = max(
+            expected_absolute_charge_rate, abs(transfer.incident_charge_rate_c_s),
+            np.finfo(float).tiny)
+        if (abs(transfer.incident_charge_rate_c_s - expected_incident_charge_rate)
+                    > 5e-13 * local_scale
+                or transfer.relative_charge_balance_error > 5e-13):
+            raise ValueError("charged surface response violated its local charge ledger")
+        transfers.append(transfer)
+        positive += transfer.positive_deposition_current_density_a_m2
+        negative += transfer.negative_deposition_current_density_a_m2
+        if not transfer.outgoing:
+            current = ()
+            current_charge = {}
+            break
+        outgoing_names = [item.name for item in transfer.outgoing]
+        if len(set(outgoing_names)) != len(outgoing_names):
+            raise ValueError("one response evaluation must use unique outgoing population names")
+        flights = trace_charged_surface_events_field_3d(
+            transfer.outgoing, verts, faces, areas, context.face_gas_normal,
+            nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+            potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
+            launch_offset=launch_offset, fixed_dt=fixed_dt, max_steps=max_steps,
+            periodic_lateral=periodic_lateral, allow_truncation=False, device=device)
+        flights_by_bounce.append(flights)
+        for flight in flights:
+            escaped_charge_rate += float(
+                ECHARGE * flight.emitted.charge_number * flight.escaped_rate_s)
+        landed = tuple(flight for flight in flights if flight.landed_rate_s > 0.0)
+        current = tuple(flight.incident for flight in landed)
+        current_charge = {
+            flight.incident.name: flight.emitted.charge_number for flight in landed}
+        if not current:
+            break
+
+    signed = positive - negative
+    deposited_charge_rate = float(sum(item.deposited_charge_rate_c_s for item in transfers))
+    unresolved_charge_rate = (
+        _incident_charge_rate(current, current_charge, context.face_area_m2)
+        if current else 0.0)
+    residual = (
+        initial_charge_rate - deposited_charge_rate
+        - escaped_charge_rate - unresolved_charge_rate)
+    scale = max(
+        _incident_absolute_charge_rate(incident, charge, context.face_area_m2),
+        abs(deposited_charge_rate), abs(escaped_charge_rate), abs(unresolved_charge_rate),
+        np.finfo(float).tiny)
+    return ChargedSurfaceCascade3DResult(
+        positive, negative, signed, tuple(transfers), tuple(flights_by_bounce),
+        current, current_charge,
+        initial_incident_charge_rate_c_s=initial_charge_rate,
+        deposited_charge_rate_c_s=deposited_charge_rate,
+        escaped_charge_rate_c_s=escaped_charge_rate,
+        unresolved_charge_rate_c_s=unresolved_charge_rate,
+        charge_balance_residual_c_s=float(residual),
+        relative_charge_balance_error=float(abs(residual) / scale),
+        completed=not bool(current))

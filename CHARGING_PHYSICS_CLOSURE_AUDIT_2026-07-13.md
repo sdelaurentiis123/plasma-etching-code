@@ -226,14 +226,17 @@ after Q1 projection. Refine timestep, ray offset, surface quadrature, and cascad
 
 Kill: a configuration can lose charge at a bounce cap or double-count a reflected primary.
 
-**Status: flight/accounting substrate passed; cascade response remains.** The engine now has one
+**Status: passed.** The engine now has one
 signed surface-transfer identity, sparse outgoing charged event measures, and a surface-origin flight
 operator that reuses the production velocity-Verlet/Poisson-field/hard-triangle kernel. Particle rate
 is invariant across source and target face areas. Synthetic gates cover absorbed electrons, reflected
 electrons, two true secondaries, ion neutralization plus emission, landed re-impact, explicit escape,
 and fatal-by-default trajectory truncation. A periodic hit now records its wrapped in-cell position,
-fixing provenance that absorption did not previously consume. Remaining P1 work is the material
-response/cascade driver plus specular, Lambertian-per-ion, and closed-cavity cascade refinement.
+fixing provenance that absorption did not previously consume. The material-tagged response context
+and cascade driver are shared by physical time, the direct steady diagnostic, and any future PTC
+policy. Perfect absorber, specular closed cavity, one Lambertian electron per ion, Q1 projection,
+angular refinement, timestep/offset refinement, and explicit cap-remainder gates pass. A charging
+advance refuses an incomplete cascade rather than discarding its unresolved charge.
 
 ### P2 — sourced Ar+ -> electron SEE slice
 
@@ -245,6 +248,27 @@ Gates: analytic yield replay, energy/charge conservation, zero-yield exact regre
 cascade refinement, then rerun physical time from zero and warm starts. Expected result is a bounded
 sensitivity, not convergence. The final high-sample audit uses the full response.
 
+**Status: response/operator passed; fixed-state sensitivity complete; transient promotion held.**
+`Sobolewski2021ArKineticSEE3D` implements only Eq. (8)'s kinetic Ar+ term for explicitly tagged
+plasma-exposed SiO2. It serializes the DOI, 10 eV--10 keV fit range, the paper's below-50-eV evidence
+caveat, and the excluded photon/metastable/fast-neutral/potential channels. The emitted energy is a
+mandatory evidence-labeled input because the yield paper does not supply a spectrum; the bounded
+replay uses 1/3/5 eV around the separate literature statement of a few-eV average. Zero matching
+material is bitwise identical to perfect absorption.
+
+Config `603a7df78819f06ff380b2263674c2e8491dfddc61240362bf10c9329f8e94f7`
+replays the refined stuck state with the unchanged primary level-11 map, hard visibility, and full
+charged re-impact. The 3 eV central case changes nodal RMS `0.29975 -> 0.29257` and worst node
+`0.77171 -> 0.75842`; upper-wall signed imbalance changes `-0.12574 -> -0.12243`. About 35.5% of
+the emitted rate re-impacts and 64.5% escapes the finite feature field domain. Angular level 3 -> 4
+and isolated re-impact `dt 0.005 -> 0.0025` plus launch offset halving change RMS by less than
+`3.2e-4`; cascade charge error is below `4.9e-15`. The 1--5 eV range does not approach the unchanged
+0.08 contract. A full zero/warm-start transient is therefore not promoted until an emitted-energy
+distribution is better specified; the present result is a bounded mechanism sensitivity, not a new
+converged charging state.
+
+![Ion-SEE sensitivity](results/charging_ion_see_sensitivity_3d/ion_see_sensitivity.png)
+
 ### P3 — electron backscatter + true SEE
 
 Entry requires recovered primary parameter tables for SiO2 and an explicit decision about the
@@ -255,6 +279,17 @@ energy/angular distribution.
 Gates: material curve reproduction, flat-surface yield/reflection tests, charge and energy closure,
 then the same transient/grid/sample/branch audit. The mechanism passes only if the upper-wall error
 improves without pushing lower wall or floor outside tolerance.
+
+**Status: held at the data gate after primary-source follow-through.** The 2026 paper gives the
+electron-TSE formula but not the SiO2 values of `c1`, `c2`, `r1`, `r2`, `n1`, and `n2`; it says they
+come from Purvis 1979 and that supporting data are available from the corresponding author upon
+reasonable request. The cited [NASA TM-79299](https://ntrs.nasa.gov/citations/19800007833) derives
+and sensitivity-tests the NASCAP parameterization, explicitly says it does not predict any particular
+material, and supplies no SiO2 coefficient set. The backscatter formula additionally requires a
+material atomic-number choice that is not specified for mixed SiO2/conditioned surfaces. Therefore
+neither the SiO2 TSE curve nor a complete low-energy backscatter curve can be reproduced from the
+published primary sources currently in hand. Do not fit Fig. 2 or substitute the paper's constant PR
+yield. P3 requires author-supplied coefficients/data or an independent plasma-exposed-SiO2 dataset.
 
 ### P4 — charge transport in material
 

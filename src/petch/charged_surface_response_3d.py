@@ -8,11 +8,48 @@ models from each inventing their own charge convention.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
+from typing import Protocol
 
 import numpy as np
+from scipy.stats import qmc
 
 from .sheath import ECHARGE
 from .surface_kinetics import FaceResolvedEnergeticFlux
+
+
+@dataclass(frozen=True)
+class ChargedSurfaceContext3D:
+    """Geometry/material fields presented unchanged to every charged response model."""
+
+    face_area_m2: np.ndarray
+    face_gas_normal: np.ndarray
+    face_material_id: np.ndarray
+    material_state: object | None = None
+
+    def __post_init__(self):
+        area = np.asarray(self.face_area_m2, dtype=float).copy()
+        normal = np.asarray(self.face_gas_normal, dtype=float).copy()
+        material = np.asarray(self.face_material_id).copy()
+        if (area.ndim != 1 or area.size == 0 or normal.shape != (area.size, 3)
+                or material.shape != area.shape or np.any(~np.isfinite(area))
+                or np.any(area <= 0.0) or np.any(~np.isfinite(normal))
+                or not np.allclose(np.linalg.norm(normal, axis=1), 1.0, rtol=0.0, atol=2e-6)):
+            raise ValueError("invalid charged-surface geometry or material fields")
+        for value in (area, normal, material):
+            value.setflags(write=False)
+        object.__setattr__(self, "face_area_m2", area)
+        object.__setattr__(self, "face_gas_normal", normal)
+        object.__setattr__(self, "face_material_id", material)
+
+
+class ChargedSurfaceResponse3D(Protocol):
+    """Material response contract shared by transient, PTC, and steady current audits."""
+
+    def evaluate(
+            self, incident_populations, charge_number_by_species,
+            context: ChargedSurfaceContext3D) -> "ChargedSurfaceTransfer3D":
+        ...
 
 
 @dataclass(frozen=True)
@@ -140,6 +177,7 @@ def account_charged_surface_transfer_3d(
     positive = np.zeros(face_count)
     negative = np.zeros(face_count)
     incident_charge_rate = 0.0
+    incident_absolute_charge_rate = 0.0
     for population in incident:
         event_current_density = (
             ECHARGE * int(charge[population.name]) * population.event_flux_m2_s)
@@ -150,8 +188,11 @@ def account_charged_surface_transfer_3d(
             population.event_face, weights=np.maximum(-event_current_density, 0.0),
             minlength=face_count)
         incident_charge_rate += float(np.dot(event_current_density, area[population.event_face]))
+        incident_absolute_charge_rate += float(np.dot(
+            np.abs(event_current_density), area[population.event_face]))
 
     outgoing_charge_rate = 0.0
+    outgoing_absolute_charge_rate = 0.0
     for population in outgoing:
         # Outgoing current leaves the surface, so its contribution to stored charge has the
         # opposite sign. Convert particle rate back to source-face current density exactly once.
@@ -165,13 +206,15 @@ def account_charged_surface_transfer_3d(
             population.source_face, weights=np.maximum(-event_deposition_density, 0.0),
             minlength=face_count)
         outgoing_charge_rate += population.charge_rate_c_s
+        outgoing_absolute_charge_rate += float(
+            ECHARGE * abs(population.charge_number) * np.sum(population.event_rate_s))
 
     signed = positive - negative
     deposited_charge_rate = float(np.dot(signed, area))
     residual = incident_charge_rate - outgoing_charge_rate - deposited_charge_rate
     scale = max(
-        abs(incident_charge_rate), abs(outgoing_charge_rate), abs(deposited_charge_rate),
-        np.finfo(float).tiny)
+        incident_absolute_charge_rate, outgoing_absolute_charge_rate,
+        abs(deposited_charge_rate), np.finfo(float).tiny)
     return ChargedSurfaceTransfer3D(
         positive, negative, signed, outgoing,
         incident_charge_rate_c_s=incident_charge_rate,
@@ -223,3 +266,153 @@ def perfect_absorber_surface_transfer_3d(
         deposited_charge_rate_c_s=deposited_charge_rate,
         charge_balance_residual_c_s=0.0,
         relative_charge_balance_error=0.0)
+
+
+@dataclass(frozen=True)
+class PerfectAbsorberChargedSurfaceResponse3D:
+    """Material-independent identity response used by the historical charging operator."""
+
+    def evaluate(
+            self, incident_populations, charge_number_by_species,
+            context: ChargedSurfaceContext3D):
+        if not isinstance(context, ChargedSurfaceContext3D):
+            raise TypeError("context must be ChargedSurfaceContext3D")
+        return perfect_absorber_surface_transfer_3d(
+            incident_populations, charge_number_by_species, context.face_area_m2)
+
+
+def sobolewski_2021_ar_kinetic_see_yield(impact_energy_eV):
+    """Recommended kinetic Ar+-induced electron yield for plasma-exposed SiO2.
+
+    This is Eq. (8) of Sobolewski, Plasma Sources Sci. Technol. 30 025004 (2021),
+    DOI 10.1088/1361-6595/abd61f.  It excludes the paper's separately recommended photon,
+    metastable, and ion-potential emission terms.
+    """
+    energy = np.asarray(impact_energy_eV, dtype=float)
+    if np.any(~np.isfinite(energy)) or np.any(energy < 0.0):
+        raise ValueError("impact energy must be finite and nonnegative")
+    return 0.030 * energy ** 2 / (200.0 + energy) ** 1.5
+
+
+@dataclass(frozen=True)
+class Sobolewski2021ArKineticSEE3D:
+    """Material-tagged Ar+ kinetic SEE with deterministic Lambertian quadrature.
+
+    The yield is sourced, but the cited yield paper does not determine a full emitted-electron
+    spectrum.  ``emission_energy_eV`` and its evidence are therefore mandatory declared inputs.
+    Huang and Kushner (JVST A 44, 023013, 2026) support a Lambertian angular law and an average
+    energy of a few eV for ion-induced secondaries; callers must refine the declared energy and
+    angular quadrature instead of treating either as a fitted charging knob.
+    """
+
+    material_id: object
+    emission_energy_eV: float
+    emission_energy_evidence: str
+    ion_species_name: str = "Ar+"
+    emitted_species_name: str = "secondary_electron"
+    angular_log2_samples: int = 3
+    angular_seed: int = 0
+    minimum_supported_impact_energy_eV: float = 10.0
+    maximum_supported_impact_energy_eV: float = 1.0e4
+
+    def __post_init__(self):
+        if (not self.ion_species_name or not self.emitted_species_name
+                or self.ion_species_name == self.emitted_species_name
+                or not np.isfinite(self.emission_energy_eV) or self.emission_energy_eV <= 0.0
+                or not self.emission_energy_evidence
+                or int(self.angular_log2_samples) != self.angular_log2_samples
+                or self.angular_log2_samples < 0
+                or int(self.angular_seed) != self.angular_seed
+                or not np.isfinite(self.minimum_supported_impact_energy_eV)
+                or not np.isfinite(self.maximum_supported_impact_energy_eV)
+                or self.minimum_supported_impact_energy_eV < 0.0
+                or self.maximum_supported_impact_energy_eV
+                <= self.minimum_supported_impact_energy_eV):
+            raise ValueError("invalid Sobolewski-2021 Ar+ kinetic-SEE response")
+        object.__setattr__(self, "angular_log2_samples", int(self.angular_log2_samples))
+        object.__setattr__(self, "angular_seed", int(self.angular_seed))
+
+    @property
+    def provenance(self):
+        return MappingProxyType(dict(
+            yield_source=(
+                "Sobolewski, Plasma Sources Sci. Technol. 30 025004 (2021), Eq. 8; "
+                "DOI 10.1088/1361-6595/abd61f"),
+            yield_scope=(
+                "kinetic Ar+-induced electron emission from plasma-exposed SiO2 only; "
+                "photon, metastable, fast-neutral, and ion-potential channels excluded"),
+            yield_fit_range="10 eV to 10 keV; values below 50 eV derive from literature, not the in-situ measurement",
+            angular_source=(
+                "Huang and Kushner, J. Vac. Sci. Technol. A 44, 023013 (2026), "
+                "DOI 10.1116/6.0005187; Lambertian ion-induced secondary emission"),
+            emission_energy_source=self.emission_energy_evidence,
+        ))
+
+    def evaluate(
+            self, incident_populations, charge_number_by_species,
+            context: ChargedSurfaceContext3D):
+        incident = tuple(incident_populations)
+        charge = dict(charge_number_by_species)
+        if not isinstance(context, ChargedSurfaceContext3D):
+            raise TypeError("context must be ChargedSurfaceContext3D")
+        selected_population = next(
+            (item for item in incident if item.name == self.ion_species_name), None)
+        outgoing = ()
+        if selected_population is not None:
+            if charge.get(self.ion_species_name) != 1:
+                raise ValueError("Sobolewski Ar+ response requires a singly charged positive ion")
+            if (selected_population.event_position is None
+                    or selected_population.event_incident_direction is None):
+                raise ValueError("Ar+ SEE requires preserved impact position and direction")
+            material_selected = (
+                context.face_material_id[selected_population.event_face] == self.material_id)
+            emitted_event = np.flatnonzero(material_selected)
+            if emitted_event.size:
+                impact_energy = selected_population.event_energy_eV[emitted_event]
+                if (np.any(impact_energy < self.minimum_supported_impact_energy_eV)
+                        or np.any(impact_energy > self.maximum_supported_impact_energy_eV)):
+                    raise ValueError("Ar+ impact lies outside the declared Sobolewski fit range")
+                emission_yield = sobolewski_2021_ar_kinetic_see_yield(impact_energy)
+                if np.any(emission_yield * self.emission_energy_eV > impact_energy):
+                    raise ValueError("declared emitted-electron energy exceeds incident energy budget")
+                direction_count = 2 ** self.angular_log2_samples
+                angular = qmc.Sobol(
+                    2, scramble=True, seed=self.angular_seed).random_base2(
+                        self.angular_log2_samples)
+                cosine = np.sqrt(angular[:, 0])
+                sine = np.sqrt(1.0 - angular[:, 0])
+                base_azimuth = 2.0 * np.pi * angular[:, 1]
+                face = selected_population.event_face[emitted_event]
+                normal = context.face_gas_normal[face]
+                reference = np.zeros_like(normal)
+                use_z = np.abs(normal[:, 2]) < 0.9
+                reference[use_z, 2] = 1.0
+                reference[~use_z, 0] = 1.0
+                tangent_a = np.cross(reference, normal)
+                tangent_a /= np.linalg.norm(tangent_a, axis=1)[:, None]
+                tangent_b = np.cross(normal, tangent_a)
+                azimuth_rotation = 2.0 * np.pi * np.mod(
+                    emitted_event * 0.6180339887498949, 1.0)
+                azimuth = base_azimuth[None, :] + azimuth_rotation[:, None]
+                direction = (
+                    cosine[None, :, None] * normal[:, None, :]
+                    + sine[None, :, None] * (
+                        np.cos(azimuth)[:, :, None] * tangent_a[:, None, :]
+                        + np.sin(azimuth)[:, :, None] * tangent_b[:, None, :]))
+                incident_rate = (
+                    selected_population.event_flux_m2_s[emitted_event]
+                    * context.face_area_m2[face])
+                event_rate = np.repeat(
+                    incident_rate * emission_yield / direction_count, direction_count)
+                outgoing = (OutgoingChargedParticleEvents3D(
+                    self.emitted_species_name, -1, len(context.face_area_m2),
+                    np.repeat(face, direction_count), event_rate,
+                    np.repeat(
+                        selected_population.event_position[emitted_event],
+                        direction_count, axis=0),
+                    np.sqrt(self.emission_energy_eV) * direction.reshape(-1, 3)),)
+        if not outgoing:
+            return perfect_absorber_surface_transfer_3d(
+                incident, charge, context.face_area_m2)
+        return account_charged_surface_transfer_3d(
+            incident, charge, context.face_area_m2, outgoing=outgoing)

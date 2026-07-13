@@ -18,6 +18,7 @@ from petch.charging_coupled_3d import (
 )
 from petch.charging_poisson import EPS0
 from petch.charging_poisson_3d import NodalPoissonSystem3D
+from petch.charged_surface_response_3d import PerfectAbsorberChargedSurfaceResponse3D
 from petch.sheath import ECHARGE
 
 
@@ -122,6 +123,26 @@ def test_physical_3d_charging_step_conserves_incident_charge_and_capacitance():
         charge_node_c=np.zeros(system.shape), duration_s=duration, **refined_arguments)
     assert (np.std(refined.potential_after_v[:, :, 0])
             < np.std(result.potential_after_v[:, :, 0]))
+
+
+def test_explicit_perfect_absorber_uses_unified_response_path_without_changing_engine_result():
+    flux = 2.0e15; duration = 1.0e-3
+    system, arguments = _flat_dielectric_problem((_species("ion", 1, flux),))
+    baseline = advance_dielectric_charging_3d(
+        charge_node_c=np.zeros(system.shape), duration_s=duration, **arguments)
+    explicit = advance_dielectric_charging_3d(
+        charge_node_c=np.zeros(system.shape), duration_s=duration,
+        charged_surface_response=PerfectAbsorberChargedSurfaceResponse3D(),
+        face_material_id=np.array(["SiO2", "SiO2"]),
+        face_gas_normals=np.tile([0.0, 0.0, 1.0], (2, 1)), **arguments)
+
+    assert np.array_equal(explicit.face_current_density_a_m2,
+                          baseline.face_current_density_a_m2)
+    assert np.array_equal(explicit.charge_increment_node_c,
+                          baseline.charge_increment_node_c)
+    assert np.array_equal(explicit.potential_after_v, baseline.potential_after_v)
+    assert explicit.surface_transfer.completed
+    assert explicit.surface_transfer.relative_charge_balance_error < 3e-16
 
 
 def test_equal_positive_and_negative_incident_currents_leave_dielectric_uncharged():

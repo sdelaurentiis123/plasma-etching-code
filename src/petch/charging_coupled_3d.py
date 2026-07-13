@@ -18,7 +18,12 @@ from .charging_poisson_3d import (
     PoissonDiagnostics3D,
     lump_triangle_sheet_charge_3d,
 )
+from .charged_surface_cascade_3d import (
+    ChargedSurfaceCascade3DResult,
+    solve_charged_surface_cascade_3d,
+)
 from .charged_surface_response_3d import (
+    ChargedSurfaceContext3D,
     ChargedSurfaceTransfer3D,
     perfect_absorber_surface_transfer_3d,
 )
@@ -36,7 +41,7 @@ class DielectricChargingStep3DResult:
     face_current_density_a_m2: np.ndarray
     positive_current_node_a: np.ndarray
     negative_current_node_a: np.ndarray
-    surface_transfer: ChargedSurfaceTransfer3D
+    surface_transfer: ChargedSurfaceTransfer3D | ChargedSurfaceCascade3DResult
     transport: BoundaryTransport3DResult
     poisson_before: PoissonDiagnostics3D
     poisson_after: PoissonDiagnostics3D
@@ -74,7 +79,7 @@ class PhysicalTimeDielectricCharging3DResult:
     positive_current_node_a: np.ndarray
     negative_current_node_a: np.ndarray
     charge_history_node_c: np.ndarray
-    surface_transfer: ChargedSurfaceTransfer3D
+    surface_transfer: ChargedSurfaceTransfer3D | ChargedSurfaceCascade3DResult
     transport: BoundaryTransport3DResult
     poisson: PoissonDiagnostics3D
     bidirectional_method_hint: Mapping[str, np.ndarray]
@@ -294,12 +299,21 @@ def _anderson_step(x, residual, x_history, residual_history, gain, depth):
     return step
 
 
-def _coupled_transport_limitations(transport):
+def _coupled_transport_limitations(transport, charged_surface_response=False):
     # The low-level trajectory call correctly says its voltage was supplied. At this coupling level
     # that voltage came from the current charge state, so retaining that line would misreport scope.
-    return tuple(
+    limitations = tuple(
         limitation for limitation in transport.known_limitations
         if limitation != "nodal potential is supplied rather than self-consistently charged")
+    if charged_surface_response:
+        limitations = tuple(
+            limitation for limitation in limitations
+            if not limitation.startswith("no surface reflection"))
+        limitations += (
+            "primary transport output contains plasma-boundary impacts; charged re-impact "
+            "history is stored in surface_transfer",
+        )
+    return limitations
 
 
 def _coordinate_spacing_3d(poisson_system, potential_spacing, mesh_length_unit_m):
@@ -358,7 +372,9 @@ def _evaluate_incident_current_3d(
         phase_space_log2_samples, periodic_lateral, transport_estimator,
         face_centroids, face_gas_normals, adjoint_face_quadrature_points,
         adjoint_ray_offset, adjoint_proposals, adjoint_proposal_frames,
-        bidirectional_options, transport_device):
+        bidirectional_options, transport_device, charged_surface_response=None,
+        face_material_id=None, surface_material_state=None,
+        response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16):
     charged_species = tuple(species for species in boundary.species if species.charge_number != 0)
     if not charged_species:
         raise ValueError("dielectric charging requires at least one charged boundary species")
@@ -449,10 +465,37 @@ def _evaluate_incident_current_3d(
         population = population_by_name[species.name]
         if not isinstance(population, FaceResolvedEnergeticFlux):
             raise RuntimeError("3-D charging requires face-resolved incident events")
-    surface_transfer = perfect_absorber_surface_transfer_3d(
-        tuple(population_by_name[species.name] for species in charged_species),
-        {species.name: species.charge_number for species in charged_species},
-        np.asarray(areas, dtype=float) * float(mesh_length_unit_m) ** 2)
+    incident_populations = tuple(
+        population_by_name[species.name] for species in charged_species)
+    charge_number_by_species = {
+        species.name: species.charge_number for species in charged_species}
+    physical_face_area = np.asarray(areas, dtype=float) * float(mesh_length_unit_m) ** 2
+    if charged_surface_response is None:
+        surface_transfer = perfect_absorber_surface_transfer_3d(
+            incident_populations, charge_number_by_species, physical_face_area)
+    else:
+        material = np.asarray(face_material_id)
+        normals = np.asarray(face_gas_normals, dtype=float)
+        if material.shape != (len(faces),) or normals.shape != (len(faces), 3):
+            raise ValueError(
+                "charged surface response requires material id and gas normal per face")
+        response_context = ChargedSurfaceContext3D(
+            physical_face_area, normals, material, surface_material_state)
+        surface_transfer = solve_charged_surface_cascade_3d(
+            incident_populations, charge_number_by_species, charged_surface_response,
+            response_context, verts, faces, areas,
+            nodal_potential_v=potential, potential_origin=potential_origin,
+            potential_spacing=coordinate_spacing,
+            mesh_length_unit_m=mesh_length_unit_m,
+            launch_offset=response_launch_offset,
+            fixed_dt=(trajectory_fixed_dt if response_fixed_dt is None else response_fixed_dt),
+            max_steps=trajectory_max_steps,
+            max_bounces=response_max_bounces, periodic_lateral=periodic_lateral,
+            device=transport_device)
+        if not surface_transfer.completed:
+            raise RuntimeError(
+                "charged surface-response cascade reached its bounce cap with explicit "
+                "unresolved charge; refine response_max_bounces")
     positive_face_current = surface_transfer.positive_deposition_current_density_a_m2
     negative_face_current = surface_transfer.negative_deposition_current_density_a_m2
     projection_arguments = dict(
@@ -498,7 +541,9 @@ def advance_dielectric_charging_3d(
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
         adjoint_proposals=None, adjoint_proposal_frames="surface_local",
         bidirectional_options=None,
-        transport_device=None):
+        transport_device=None, charged_surface_response=None,
+        face_material_id=None, surface_material_state=None,
+        response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16):
     """Advance stored dielectric charge by the signed incident-particle current.
 
     The sequence is charge -> Q1 Poisson voltage -> collisionless charged-particle trajectories ->
@@ -542,7 +587,13 @@ def advance_dielectric_charging_3d(
         adjoint_proposals=adjoint_proposals,
         adjoint_proposal_frames=adjoint_proposal_frames,
         bidirectional_options=bidirectional_options,
-        transport_device=transport_device)
+        transport_device=transport_device,
+        charged_surface_response=charged_surface_response,
+        face_material_id=face_material_id,
+        surface_material_state=surface_material_state,
+        response_launch_offset=response_launch_offset,
+        response_fixed_dt=response_fixed_dt,
+        response_max_bounces=response_max_bounces)
     surface_transfer = evaluated["surface_transfer"]
     face_current = surface_transfer.face_current_density_a_m2
     current_node = evaluated["positive_node_current"] - evaluated["negative_node_current"]
@@ -582,6 +633,13 @@ def advance_dielectric_charging_3d(
         diagnostics=dict(
             duration_s=float(duration_s),
             incident_charge_c=incident_charge,
+            primary_incident_charge_c=(
+                surface_transfer.initial_incident_charge_rate_c_s * float(duration_s)
+                if isinstance(surface_transfer, ChargedSurfaceCascade3DResult)
+                else surface_transfer.incident_charge_rate_c_s * float(duration_s)),
+            escaped_charge_c=(
+                surface_transfer.escaped_charge_rate_c_s * float(duration_s)
+                if isinstance(surface_transfer, ChargedSurfaceCascade3DResult) else 0.0),
             deposited_charge_c=deposited_charge,
             charge_conservation_residual_c=conservation_residual,
             surface_transfer_charge_balance_residual_c=(
@@ -592,9 +650,15 @@ def advance_dielectric_charging_3d(
         known_limitations=(
             "all supplied surface triangles are treated as charge-storing dielectric",
             "physical-time forward-Euler charge update requires timestep convergence",
+        ) + ((
             "no secondary-electron emission, reflection, leakage, or surface conduction",
+        ) if charged_surface_response is None else (
+            "caller-supplied charged surface response requires material-data and cascade refinement",
+            "no surface conduction or bulk leakage",
+        )) + (
             "no floating-conductor circuit equations",
-        ) + _coupled_transport_limitations(evaluated["transport"]))
+        ) + _coupled_transport_limitations(
+            evaluated["transport"], charged_surface_response is not None))
 
 
 def integrate_dielectric_charging_transient_3d(
@@ -608,7 +672,10 @@ def integrate_dielectric_charging_transient_3d(
         transport_estimator="forward", face_centroids=None, face_gas_normals=None,
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
         adjoint_proposals=None, adjoint_proposal_frames="surface_local",
-        bidirectional_options=None, transport_device=None):
+        bidirectional_options=None, transport_device=None,
+        charged_surface_response=None, face_material_id=None,
+        surface_material_state=None, response_launch_offset=1e-5,
+        response_fixed_dt=None, response_max_bounces=16):
     """Integrate the conservative dielectric charge ODE with fixed physical timesteps.
 
     ``n_steps`` is the maximum number of forward-Euler charge updates. History contains the initial
@@ -641,7 +708,13 @@ def integrate_dielectric_charging_transient_3d(
         adjoint_face_quadrature_points=adjoint_face_quadrature_points,
         adjoint_ray_offset=adjoint_ray_offset, adjoint_proposals=adjoint_proposals,
         adjoint_proposal_frames=adjoint_proposal_frames,
-        bidirectional_options=bidirectional_options, transport_device=transport_device)
+        bidirectional_options=bidirectional_options, transport_device=transport_device,
+        charged_surface_response=charged_surface_response,
+        face_material_id=face_material_id,
+        surface_material_state=surface_material_state,
+        response_launch_offset=response_launch_offset,
+        response_fixed_dt=response_fixed_dt,
+        response_max_bounces=response_max_bounces)
     history = []
     total_incident_charge = 0.0
     total_absolute_incident_charge = 0.0
@@ -750,9 +823,15 @@ def integrate_dielectric_charging_transient_3d(
         known_limitations=(
             "fixed-step physical-time forward Euler requires timestep-halving evidence",
             "fixed estimator samples require an independent final current audit",
+        ) + ((
             "no secondary-electron emission, reflection, leakage, or surface conduction",
+        ) if charged_surface_response is None else (
+            "caller-supplied charged surface response requires material-data and cascade refinement",
+            "no surface conduction or bulk leakage",
+        )) + (
             "no floating-conductor circuit equations",
-        ) + _coupled_transport_limitations(final["transport"]))
+        ) + _coupled_transport_limitations(
+            final["transport"], charged_surface_response is not None))
 
 
 def solve_dielectric_charging_steady_3d(
@@ -766,7 +845,9 @@ def solve_dielectric_charging_steady_3d(
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
         adjoint_proposals=None, adjoint_proposal_frames="surface_local",
         bidirectional_options=None,
-        transport_device=None,
+        transport_device=None, charged_surface_response=None,
+        face_material_id=None, surface_material_state=None,
+        response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16,
         max_iter=30, min_iter=2, current_balance_tol=1e-3,
         beta=0.5, response_energy_eV=4.0, maximum_voltage_step=8.0,
         trust_growth_tolerance=0.02, minimum_beta=1e-4,
@@ -852,7 +933,13 @@ def solve_dielectric_charging_steady_3d(
         adjoint_proposals=adjoint_proposals,
         adjoint_proposal_frames=adjoint_proposal_frames,
         bidirectional_options=bidirectional_options,
-        transport_device=transport_device)
+        transport_device=transport_device,
+        charged_surface_response=charged_surface_response,
+        face_material_id=face_material_id,
+        surface_material_state=surface_material_state,
+        response_launch_offset=response_launch_offset,
+        response_fixed_dt=response_fixed_dt,
+        response_max_bounces=response_max_bounces)
 
     beta_current = float(beta); rejected_steps = 0; history = []
 
@@ -1013,9 +1100,15 @@ def solve_dielectric_charging_steady_3d(
         known_limitations=(
             "all supplied surface triangles are treated as charge-storing dielectric",
             "fixed deterministic launch quadrature requires an external sample-refinement ladder",
+        ) + ((
             "no secondary-electron emission, reflection, leakage, or surface conduction",
+        ) if charged_surface_response is None else (
+            "caller-supplied charged surface response requires material-data and cascade refinement",
+            "no surface conduction or bulk leakage",
+        )) + (
             "no floating-conductor circuit equations",
-        ) + _coupled_transport_limitations(evaluated["transport"]))
+        ) + _coupled_transport_limitations(
+            evaluated["transport"], charged_surface_response is not None))
     if require_converged and not converged:
         raise DielectricChargingConvergenceError(
             f"3-D dielectric current balance did not converge in {len(history)} accepted iterations; "

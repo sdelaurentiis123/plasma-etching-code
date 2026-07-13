@@ -455,8 +455,30 @@ under-determined) -- an honest result that quantifies how many structures must b
   field kernel, and converted to target-face flux exactly once. Every rate is classified as landed,
   escaped, or truncated; truncation raises by default. A periodic provenance defect was fixed so a
   wrapped hit stores its in-cell intersection rather than a covering-space coordinate. Synthetic
-  landing/escape/horizon gates conserve particle rate exactly. The full response cascade remains
-  unconnected, so the governing physical operator is still the exact perfect absorber.
+  landing/escape/horizon gates conserve particle rate exactly. The default governing operator remains
+  the exact perfect absorber; non-absorbing responses require an explicit caller-supplied model.
+- **P1 charged response/re-impact cascade passes.** Material ids, face normals, and material state now
+  enter one response context. Physical time and the direct steady diagnostic call the same optional
+  response/cascade path; default perfect absorption remains exact. Artificial perfect-absorber,
+  specular closed-cavity, Lambertian-per-ion, explicit escape, Q1 projection, quadrature, timestep,
+  launch-offset, and bounce-cap ledgers conserve signed charge. A capped cascade is returned with its
+  unresolved particle charge for diagnostics and is rejected by a charging advance.
+- **P2 sourced ion-SEE is real but insufficient at the audited state.** Config
+  `603a7df78819f06ff380b2263674c2e8491dfddc61240362bf10c9329f8e94f7` applies only the Sobolewski
+  2021 Eq. (8) kinetic Ar+-on-plasma-exposed-SiO2 yield, with deterministic Lambertian full-field
+  re-impact and a declared 1/3/5 eV emitted-energy sensitivity. The central 3 eV case changes nodal
+  RMS/worst from `0.29975/0.77171` to `0.29257/0.75842`; upper-wall signed imbalance changes only
+  `-0.12574 -> -0.12243`. Angular and isolated flight refinement are stable, charge closes below
+  `4.9e-15`, and roughly 64.5% of emitted electrons escape. This does not approach 0.08. No full
+  transient or convergence claim is promoted while the SiO2 emitted-energy spectrum remains a
+  bounded input and electron-impact response remains data-gated.
+- **P3 remains correctly data-blocked, not numerically blocked.** The 2026 paper's electron-TSE law
+  refers its six material coefficients to NASA TM-79299 but does not publish the SiO2 values; the
+  NASA memorandum derives and sensitivity-tests the NASCAP form while explicitly avoiding any
+  particular-material prediction. The paper makes supporting data available only upon author
+  request. Its backscatter form also leaves the effective material atomic-number choice unresolved
+  for SiO2/conditioned layers. No curve digitization, PR constant, or guessed effective-Z model was
+  admitted. Author-supplied coefficients or an independent plasma-exposed-SiO2 dataset are required.
 
 ## Roadmap (remaining)
 

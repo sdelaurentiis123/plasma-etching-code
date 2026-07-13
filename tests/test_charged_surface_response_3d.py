@@ -3,9 +3,12 @@ import pytest
 
 from petch.boundary_transport_3d import trace_charged_surface_events_field_3d
 from petch.charged_surface_response_3d import (
+    ChargedSurfaceContext3D,
     OutgoingChargedParticleEvents3D,
+    Sobolewski2021ArKineticSEE3D,
     account_charged_surface_transfer_3d,
     perfect_absorber_surface_transfer_3d,
+    sobolewski_2021_ar_kinetic_see_yield,
 )
 from petch.sheath import ECHARGE
 from petch.surface_kinetics import FaceResolvedEnergeticFlux
@@ -94,6 +97,17 @@ def test_neutralized_ion_emitting_one_electron_deposits_two_positive_charges():
     assert result.relative_charge_balance_error < 5e-16
 
 
+def test_nearly_neutral_incident_ledger_scales_roundoff_by_absolute_throughput():
+    area = np.array([2e-12, 5e-12])
+    ion = _incident("Ar+", [0, 1], [3e18, 4e18])
+    electron = _incident("electron", [0, 1], [3e18, 4e18 * (1.0 - 1e-14)])
+    result = account_charged_surface_transfer_3d(
+        (ion, electron), {"Ar+": 1, "electron": -1}, area)
+
+    assert abs(result.incident_charge_rate_c_s) < 1e-13
+    assert result.relative_charge_balance_error < 5e-16
+
+
 def _parallel_triangle_transport_geometry():
     verts = np.array([
         [0.25, 0.0, 0.0], [0.25, 1.0, 0.0], [0.25, 0.0, 1.0],
@@ -171,3 +185,50 @@ def test_surface_emitted_charge_escape_is_explicit_and_conservative():
     assert result.escaped_rate_s == emitted.event_rate_s[0]
     assert result.truncated_rate_s == 0.0
     assert result.relative_particle_balance_error == 0.0
+
+
+def test_sobolewski_2021_kinetic_yield_replays_published_equation_8():
+    energy = np.array([10.0, 100.0, 1000.0, 10000.0])
+    expected = 0.030 * energy ** 2 / (200.0 + energy) ** 1.5
+    assert np.array_equal(sobolewski_2021_ar_kinetic_see_yield(energy), expected)
+
+
+def test_sobolewski_ar_see_is_material_tagged_lambertian_and_rate_conservative():
+    area = np.array([2e-12, 5e-12])
+    context = ChargedSurfaceContext3D(
+        area, np.tile([0.0, 0.0, 1.0], (2, 1)), np.array(["SiO2", "mask"]))
+    ion = _incident("Ar+", [0, 1], [3e18, 4e18])
+    response = Sobolewski2021ArKineticSEE3D(
+        "SiO2", emission_energy_eV=3.0,
+        emission_energy_evidence="bounded 1--5 eV sensitivity around literature 'few eV'",
+        angular_log2_samples=8, angular_seed=17)
+    result = response.evaluate((ion,), {"Ar+": 1}, context)
+
+    emitted, = result.outgoing
+    expected_rate = (
+        ion.event_flux_m2_s[0] * area[0]
+        * sobolewski_2021_ar_kinetic_see_yield(ion.event_energy_eV[0]))
+    assert np.isclose(np.sum(emitted.event_rate_s), expected_rate, rtol=3e-16)
+    assert np.all(emitted.source_face == 0)
+    cosine = emitted.event_velocity_sqrt_eV[:, 2] / np.sqrt(3.0)
+    assert np.all(cosine > 0.0)
+    assert np.isclose(np.mean(cosine), 2.0 / 3.0, rtol=2e-3)
+    assert response.provenance["yield_scope"].startswith("kinetic Ar+")
+    assert result.relative_charge_balance_error < 5e-16
+
+
+def test_sobolewski_response_is_exact_perfect_absorber_when_material_is_absent():
+    area = np.array([2e-12, 5e-12])
+    context = ChargedSurfaceContext3D(
+        area, np.tile([0.0, 0.0, 1.0], (2, 1)), np.array(["mask", "mask"]))
+    ion = _incident("Ar+", [0, 1], [3e18, 4e18])
+    response = Sobolewski2021ArKineticSEE3D(
+        "SiO2", emission_energy_eV=3.0,
+        emission_energy_evidence="bounded literature sensitivity")
+    result = response.evaluate((ion,), {"Ar+": 1}, context)
+    absorber = perfect_absorber_surface_transfer_3d((ion,), {"Ar+": 1}, area)
+
+    assert np.array_equal(result.face_current_density_a_m2,
+                          absorber.face_current_density_a_m2)
+    assert result.outgoing == ()
+    assert result.charge_balance_residual_c_s == 0.0

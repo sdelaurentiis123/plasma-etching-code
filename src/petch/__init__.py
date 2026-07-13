@@ -37,8 +37,14 @@ from .charging_coupled_3d import (
     integrate_dielectric_charging_transient_3d, solve_dielectric_charging_steady_3d,
 )
 from .charged_surface_response_3d import (
-    ChargedSurfaceTransfer3D, OutgoingChargedParticleEvents3D,
+    ChargedSurfaceContext3D, ChargedSurfaceResponse3D, ChargedSurfaceTransfer3D,
+    OutgoingChargedParticleEvents3D, PerfectAbsorberChargedSurfaceResponse3D,
+    Sobolewski2021ArKineticSEE3D,
     account_charged_surface_transfer_3d, perfect_absorber_surface_transfer_3d,
+    sobolewski_2021_ar_kinetic_see_yield,
+)
+from .charged_surface_cascade_3d import (
+    ChargedSurfaceCascade3DResult, solve_charged_surface_cascade_3d,
 )
 from .surface_interaction_table import (
     InteractionAxis, SurfaceInteractionDomainError, SurfaceInteractionEvaluation,
@@ -110,8 +116,12 @@ __all__ = [
     "SteadyDielectricCharging3DResult",
     "advance_dielectric_charging_3d", "current_balance_metrics_3d",
     "integrate_dielectric_charging_transient_3d", "solve_dielectric_charging_steady_3d",
-    "ChargedSurfaceTransfer3D", "OutgoingChargedParticleEvents3D",
+    "ChargedSurfaceContext3D", "ChargedSurfaceResponse3D", "ChargedSurfaceTransfer3D",
+    "OutgoingChargedParticleEvents3D", "PerfectAbsorberChargedSurfaceResponse3D",
+    "Sobolewski2021ArKineticSEE3D",
     "account_charged_surface_transfer_3d", "perfect_absorber_surface_transfer_3d",
+    "sobolewski_2021_ar_kinetic_see_yield",
+    "ChargedSurfaceCascade3DResult", "solve_charged_surface_cascade_3d",
     "InteractionAxis", "SurfaceInteractionDomainError", "SurfaceInteractionEvaluation",
     "SurfaceInteractionInterpolationAudit", "SurfaceInteractionTable",
     "KounisMelas2024Tables", "load_kounis_melas_2024_tables",
