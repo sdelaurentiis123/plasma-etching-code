@@ -19,9 +19,11 @@ Date: 2026-07-13. Contract revision: `CCA-2026-07-13-R2` (signed and in force).
 - **The production trajectory step has been corrected and centrally certified.** A later charged
   checkpoint exposed that the former `0.005` fixed trajectory step could cross a material surface
   and report a back-face ion hit. The shared field transport now derives impact direction and cosine
-  from terminal velocity plus the declared gas normal and refuses every solid-side hit. All earlier
-  `0.005` trench trajectories are retained only as controller-mechanics evidence, not physical-time
-  refinement evidence.
+  from terminal velocity plus the declared gas normal and refuses every solid-side hit. A subsequent
+  refinement exposed a rarer float32 shared-edge miss: only a hit that fails that certificate is now
+  replayed from its original state with the same fixed-step Verlet scheme and edge-inclusive float64
+  hard-triangle visibility. Every replay is counted. All earlier `0.005` trench trajectories are
+  retained only as controller-mechanics evidence, not physical-time refinement evidence.
 
 Replay artifact: `results/charging_coevolution_c3/audit_summary.json`.
 
@@ -96,7 +98,7 @@ saturated. Deposition conservation closes to `8.09e-17` and `4.05e-17`; signed c
 the two etched surface increments is itemized separately. This earns a tested co-simulation path,
 not pulsed-process validation.
 
-The full local regression suite after the trajectory-lineage integration is **370 passed, 1
+The full local regression suite after the trajectory-lineage integration is **371 passed, 1
 skipped**. The skip is the
 existing unavailable-CUDA condition on this CPU-only build.
 
@@ -237,17 +239,64 @@ and surface-transfer charge at roundoff.
 | 0.000078125 | accepted | 0.34584 / 0.78414 | 10.8954 / 10.5244 | 9.162e5 |
 
 The final halving changes node RMS/worst by `0.0216% / 0.0159%`, the two exact B2 maxima by
-`0.0697% / 0.0708%`, and maximum potential rate by `1.44%`. The bounded pilot default is now
-`0.0003125` with a 50,000-step horizon: relative to the finest audit it differs by `0.029%` in node
-RMS, `0.048%` in worst node, `0.214% / 0.211%` in B2, and `4.05%` in maximum potential rate. This is
-appropriate for far-from-saturation progress where B1 is almost three orders of magnitude above its
-gate. A stationary-state claim must replay at `0.00015625` and `0.000078125`; the default is not a
-waiver of B1 refinement.
+`0.0697% / 0.0708%`, and maximum potential rate by `1.44%`. This first audit established local
+timestep convergence at one fixed checkpoint, but it did not prove that a raw float32 mesh query
+would remain certified everywhere along a changing charge trajectory. The initially selected
+`0.0003125` level is therefore a bounded campaign setting, not a globally certified visibility
+scale or a waiver of final B1 refinement.
 
 Machine-readable evidence, source hashes, all per-node and patch diagnostics including the refused
 run, and the durable input checkpoint are in
 `results/charging_coevolution_c3_trajectory_refinement/audit.json`. This audit changes the next step:
 long continuation must restart with the resolved transport, not continue a coarse-trajectory state.
+
+## Flight-horizon separation and exact hard-visibility replay
+
+Restarting from zero charge separated two numerical effects that the preceding fixed-checkpoint
+audit could not distinguish:
+
+1. At `dt=0.0003125`, a 50,000-step horizon (dimensionless flight time `15.625`) refuses because
+   slow adjoint electrons remain unresolved. A 128,000-step horizon (`40`) passes, and doubling it
+   to `80` produces identical reported currents. The bounded runner default is therefore 128,000
+   steps; horizon and timestep are recorded independently.
+2. At 2.375 microseconds, the raw float32 Warp mesh query misses a wall intersection near a shared
+   triangle edge and later reports a solid-side hit on top-mask face 38. Halving the particle step
+   once removes the failure, but halving it again produces a different solid-side hit. That
+   non-monotone `refuse / pass / refuse` pattern is a floating intersection degeneracy, not evidence
+   of a physical smoothing length or ordinary ODE truncation error.
+
+The engine response is deliberately narrow. The Warp float32 fixed-step Verlet path remains the fast
+operator. Its terminal velocity and declared level-set gas normal form an independent lineage
+certificate. Only a hit that fails that certificate is replayed from the original incident or
+surface-emitted state using the same fixed timestep, the same trilinear Q1 electric field, and an
+edge-inclusive float64 hard-triangle intersection. The replay may land on another exact face or
+escape; it may not be softened, dropped, or accepted incomplete. Primary and reflected/re-emitted
+charged paths share this repair, and `transport_lineage_replay_count` is retained in every charging
+evaluation.
+
+The exact failure checkpoint was then evaluated at three particle steps:
+
+| Particle step | Replays | Node RMS / worst | B2 max, 0.25 / 0.50 micrometers | Potential rate (V/s) |
+| ---: | ---: | ---: | ---: | ---: |
+| 0.0003125 | 1 | 0.401044 / 0.892723 | 20.9533 / 17.2026 | 1.427e6 |
+| 0.00015625 | 0 | 0.401382 / 0.892854 | 20.9813 / 17.2261 | 1.401e6 |
+| 0.000078125 | 1 | 0.401436 / 0.892920 | 20.9943 / 17.2376 | 1.387e6 |
+
+Across both halvings, node RMS changes `0.0975%`, worst node `0.0220%`, the two B2 scales
+`0.196% / 0.203%`, and potential rate `2.89%`. Replay incidence is non-monotone (`1 / 0 / 1`), while
+the physical diagnostics refine smoothly. A manufactured ray aimed exactly at the diagonal shared
+edge of two coplanar triangles also lands with unit incidence and closes its lineage.
+
+Finally, the repaired zero-charge trajectory completes all 20 requested 125 ns charging steps to
+2.5 microseconds. Exactly one lineage is replayed, at evaluation 20 (physical time 2.375
+microseconds), where the unrepaired operator refused after 18 accepted steps. The repaired endpoint
+has node RMS/worst `0.396962 / 0.886989`, B2 `19.8109 / 17.4492`, potential rate `1.498e6` V/s,
+deposition conservation `1.51e-16`, and surface-transfer balance `4.51e-15`. These values remain far
+from B1/B2; this is transport certification and bounded progress, not charging convergence.
+
+Machine-readable hashes, the refusal/repair pair, horizon pair, failure-state refinement, replay
+counts, and decisions are in
+`results/charging_coevolution_c3_lineage_replay/audit.json`.
 
 ## Evidence and provenance
 

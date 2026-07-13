@@ -44,6 +44,12 @@ class ChargedSurfaceCascade3DResult:
     relative_charge_balance_error: float
     completed: bool
 
+    @property
+    def lineage_replay_count(self):
+        return sum(
+            flight.lineage_replay_count
+            for bounce in self.flights_by_bounce for flight in bounce)
+
     def __post_init__(self):
         positive = np.asarray(
             self.positive_deposition_current_density_a_m2, dtype=float).copy()
@@ -331,4 +337,5 @@ def augment_transport_with_charged_reimpacts_3d(
         transport.hit_probability, transport.escape_probability,
         transport.truncation_probability,
         transport.transport_model + " + charged_surface_reimpact_cascade",
-        tuple(dict.fromkeys(limitations)))
+        tuple(dict.fromkeys(limitations)),
+        transport.lineage_replay_count + cascade.lineage_replay_count)

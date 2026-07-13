@@ -23,13 +23,13 @@
       "exact_visibility": true,
       "convergence_contract_revision": "CCA-2026-07-13-R2"
     },
-    "engine_git_revision": "1c2611dc7f4d498c686258ab3dfd9f1801d5ed02",
+    "engine_git_revision": "fa373a7154a9888d42b4e8ede677d63e8d946b2d",
     "source_sha256": {
-      "src/petch/charging_coevolution_3d.py": "402982fa485ea7060fe53fb4fa33571c18c2ee6c11f8e0f5a27071381df31422",
-      "src/petch/charging_coupled_3d.py": "52a12ced1c894e2c79569df39ea3ef78f4c2c4f040f7e63576ad849759557a92",
-      "src/petch/boundary_transport_3d.py": "008a406bc3e05ec6653ee92c3ebdaa1e1975bed575fa0fb109f9d25ba4424392",
-      "src/petch/charged_surface_cascade_3d.py": "9287129c01696b928b6097b88db84100f1cc81128d8ad0c2a984e73f95ab4dd9",
-      "src/petch/feature_step_3d.py": "1bce9f160dbe54f5ec3071f6342910d9f6a73dcc9a0013f3ee9f03479e7d40c5",
+      "src/petch/charging_coevolution_3d.py": "5a8675ad18194e147a403f4ef1380c0c8daa406b5b011d968794ddda4e3850a1",
+      "src/petch/charging_coupled_3d.py": "583e4f4f5196b30dc17893f312a85fa51ce0fd0db0e9b1d431fe80b24b2e2c87",
+      "src/petch/boundary_transport_3d.py": "6b56c5f9c662c9c590f708960e1a060a194b7f6f0ecd25d2295fb3abf22a2548",
+      "src/petch/charged_surface_cascade_3d.py": "e702fee653a7041f738e07fecde8e9c246d21ca30c5e828837cb8405f45c78b9",
+      "src/petch/feature_step_3d.py": "93523f80b08e5edbe67730bebadaab312c944422f292d010c07784f37cbeda48",
       "src/petch/surface_charge_remap_3d.py": "e24b2897050b430b32fb427894c8ee88f97f020e10273fc79656106cf5e8f9d6",
       "src/petch/charged_surface_response_3d.py": "233aee07c5178ada37c5b465c7d94688eabcfd6f973f2e11c28ef1c66c732e4c",
       "scripts/audit_charging_coevolution_c3.py": "2d6e8c72a1add23f692b549cc68f7f7ebf52ffd3423f79a68de744579ab95b30"
@@ -68,7 +68,7 @@
       "retained_negative_charge_c": 0.0,
       "removed_positive_charge_c": 0.0,
       "removed_negative_charge_c": 0.0,
-      "wall_clock_s": 0.025899000465869904
+      "wall_clock_s": 0.02585708349943161
     },
     "reflection_manifest": {
       "model": "weighted angle-dependent specular reflection with constant energy retention",
@@ -133,7 +133,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 9.913467922874998e-20,
         "removed_negative_charge_c": 0.0,
-        "wall_clock_s": 0.02252291701734066
+        "wall_clock_s": 0.022020083852112293
       },
       {
         "charging_converged": false,
@@ -164,7 +164,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 0.0,
         "removed_negative_charge_c": 9.913467922874998e-20,
-        "wall_clock_s": 0.021773417480289936
+        "wall_clock_s": 0.021844999864697456
       }
     ],
     "saturation_required": [

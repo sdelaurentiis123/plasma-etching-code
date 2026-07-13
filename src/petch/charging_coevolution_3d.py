@@ -461,6 +461,8 @@ def integrate_surface_charging_to_saturation_3d(
             response_tail_closure_l1_current_error_bound_relative=float(getattr(
                 step.surface_transfer,
                 "tail_closure_l1_current_error_bound_relative", 0.0)),
+            transport_lineage_replay_count=int(
+                step.diagnostics["transport_lineage_replay_count"]),
             surface_transfer_relative_charge_balance_error=(
                 step.surface_transfer.relative_charge_balance_error))
         history.append(item)

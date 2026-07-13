@@ -728,6 +728,7 @@ def advance_dielectric_charging_3d(
                 surface_transfer, "tail_closure_relative_absolute_charge_rate", 0.0)),
             response_tail_closure_l1_current_error_bound_relative=float(getattr(
                 surface_transfer, "tail_closure_l1_current_error_bound_relative", 0.0)),
+            transport_lineage_replay_count=evaluated["transport"].lineage_replay_count,
             maximum_abs_face_current_density_a_m2=float(np.max(np.abs(face_current)))),
         known_limitations=(
             "all supplied surface triangles are treated as charge-storing dielectric",

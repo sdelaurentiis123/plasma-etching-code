@@ -12,6 +12,7 @@ from types import MappingProxyType
 from typing import Mapping
 
 import numpy as np
+from numba import njit
 from scipy.stats import qmc
 import warp as wp
 
@@ -24,6 +25,157 @@ from .surface_kinetics import FaceResolvedEnergeticFlux, SurfaceFluxes
 from .neutral_radiosity_3d import DiffuseFormFactors3D
 from .threed import DEVICE, _apply_bc
 from .warp_runtime import ensure_writable_warp_cache
+
+
+@njit(cache=True)
+def _electric_field_float64_3d(potential, position, origin, spacing):
+    coordinate = (position - origin) / spacing
+    index = np.floor(coordinate).astype(np.int64)
+    for axis in range(3):
+        index[axis] = min(max(index[axis], 0), potential.shape[axis] - 2)
+    fraction = np.empty(3)
+    for axis in range(3):
+        fraction[axis] = min(max(coordinate[axis] - index[axis], 0.0), 1.0)
+    i, j, k = index
+    fx, fy, fz = fraction
+    one = 1.0
+    dvx = (
+        (one - fy) * (one - fz) * (potential[i + 1, j, k] - potential[i, j, k])
+        + fy * (one - fz) * (potential[i + 1, j + 1, k] - potential[i, j + 1, k])
+        + (one - fy) * fz * (potential[i + 1, j, k + 1] - potential[i, j, k + 1])
+        + fy * fz * (potential[i + 1, j + 1, k + 1] - potential[i, j + 1, k + 1])) / spacing[0]
+    dvy = (
+        (one - fx) * (one - fz) * (potential[i, j + 1, k] - potential[i, j, k])
+        + fx * (one - fz) * (potential[i + 1, j + 1, k] - potential[i + 1, j, k])
+        + (one - fx) * fz * (potential[i, j + 1, k + 1] - potential[i, j, k + 1])
+        + fx * fz * (potential[i + 1, j + 1, k + 1] - potential[i + 1, j, k + 1])) / spacing[1]
+    dvz = (
+        (one - fx) * (one - fy) * (potential[i, j, k + 1] - potential[i, j, k])
+        + fx * (one - fy) * (potential[i + 1, j, k + 1] - potential[i + 1, j, k])
+        + (one - fx) * fy * (potential[i, j + 1, k + 1] - potential[i, j + 1, k])
+        + fx * fy * (potential[i + 1, j + 1, k + 1] - potential[i + 1, j + 1, k])) / spacing[2]
+    return np.array((-dvx, -dvy, -dvz))
+
+
+@njit(cache=True)
+def _first_segment_triangle_hit_float64_3d(position, segment, verts, faces, domain, periodic):
+    """Return the earliest edge-inclusive hard-triangle hit in the periodic covering space."""
+    best_fraction = 2.0
+    best_face = -1
+    best_position = np.zeros(3)
+    shift_count = 3 if periodic else 1
+    for ix in range(shift_count):
+        shift_x = (ix - 1) * domain[0] if periodic else 0.0
+        for iy in range(shift_count):
+            shift_y = (iy - 1) * domain[1] if periodic else 0.0
+            for face_index in range(len(faces)):
+                triangle = faces[face_index]
+                a = verts[triangle[0]].copy()
+                b = verts[triangle[1]].copy()
+                c = verts[triangle[2]].copy()
+                a[0] += shift_x; b[0] += shift_x; c[0] += shift_x
+                a[1] += shift_y; b[1] += shift_y; c[1] += shift_y
+                edge0 = b - a
+                edge1 = c - a
+                normal = np.cross(edge0, edge1)
+                denominator = np.dot(segment, normal)
+                scale = np.linalg.norm(segment) * np.linalg.norm(normal)
+                if scale == 0.0 or abs(denominator) <= 2e-15 * scale:
+                    continue
+                fraction = np.dot(a - position, normal) / denominator
+                if fraction <= 2e-12 or fraction > 1.0 + 2e-12 or fraction >= best_fraction:
+                    continue
+                point = position + fraction * segment
+                relative = point - a
+                d00 = np.dot(edge0, edge0)
+                d01 = np.dot(edge0, edge1)
+                d11 = np.dot(edge1, edge1)
+                d20 = np.dot(relative, edge0)
+                d21 = np.dot(relative, edge1)
+                determinant = d00 * d11 - d01 * d01
+                if determinant <= 0.0:
+                    continue
+                u = (d11 * d20 - d01 * d21) / determinant
+                v = (d00 * d21 - d01 * d20) / determinant
+                # Shared edges belong to at least one adjacent triangle. The small double-precision
+                # tolerance prevents both faces rejecting the same mathematically exact edge hit.
+                if u >= -2e-12 and v >= -2e-12 and u + v <= 1.0 + 2e-12:
+                    best_fraction = max(fraction, 0.0)
+                    best_face = face_index
+                    best_position = point
+    return best_face, best_fraction, best_position
+
+
+@njit(cache=True)
+def _trace_field_events_float64_3d(
+        origin, velocity, charge_number, potential, grid_origin, grid_spacing,
+        verts, faces, fixed_dt, max_steps, periodic_lateral):
+    """Replay rare uncertified Warp hits with double-precision hard visibility."""
+    count = len(origin)
+    hit_face = np.full(count, -1, dtype=np.int64)
+    hit_cosine = np.zeros(count)
+    hit_energy = np.zeros(count)
+    termination = np.zeros(count, dtype=np.int8)
+    terminal_position = origin.copy()
+    terminal_velocity = velocity.copy()
+    grid_maximum = grid_origin + (np.asarray(potential.shape) - 1) * grid_spacing
+    domain = grid_maximum - grid_origin
+    for particle in range(count):
+        position = origin[particle].copy()
+        speed_vector = velocity[particle].copy()
+        for _step in range(max_steps):
+            field0 = _electric_field_float64_3d(
+                potential, position, grid_origin, grid_spacing)
+            half_velocity = speed_vector + 0.25 * charge_number * fixed_dt * field0
+            segment = fixed_dt * half_velocity
+            unwrapped_next = position + segment
+            next_position = unwrapped_next.copy()
+            if periodic_lateral:
+                for axis in range(2):
+                    while next_position[axis] < grid_origin[axis]:
+                        next_position[axis] += domain[axis]
+                    while next_position[axis] > grid_maximum[axis]:
+                        next_position[axis] -= domain[axis]
+            field1 = _electric_field_float64_3d(
+                potential, next_position, grid_origin, grid_spacing)
+            next_velocity = half_velocity + 0.25 * charge_number * fixed_dt * field1
+            face, fraction, impact_position = _first_segment_triangle_hit_float64_3d(
+                position, segment, verts, faces, domain, periodic_lateral)
+            if face >= 0:
+                impact_velocity = speed_vector + fraction * (next_velocity - speed_vector)
+                direction = impact_velocity / np.linalg.norm(impact_velocity)
+                triangle = faces[face]
+                normal = np.cross(
+                    verts[triangle[1]] - verts[triangle[0]],
+                    verts[triangle[2]] - verts[triangle[0]])
+                normal /= np.linalg.norm(normal)
+                if np.dot(normal, impact_velocity) > 0.0:
+                    normal *= -1.0
+                for axis in range(2):
+                    while impact_position[axis] < grid_origin[axis]:
+                        impact_position[axis] += domain[axis]
+                    while impact_position[axis] > grid_maximum[axis]:
+                        impact_position[axis] -= domain[axis]
+                hit_face[particle] = face
+                hit_cosine[particle] = min(max(-np.dot(direction, normal), 0.0), 1.0)
+                hit_energy[particle] = np.dot(impact_velocity, impact_velocity)
+                termination[particle] = 1
+                terminal_position[particle] = impact_position
+                terminal_velocity[particle] = impact_velocity
+                break
+            position = next_position
+            speed_vector = next_velocity
+            terminal_position[particle] = position
+            terminal_velocity[particle] = speed_vector
+            outside = position[2] < grid_origin[2] or position[2] > grid_maximum[2]
+            if not periodic_lateral:
+                outside = outside or np.any(position[:2] < grid_origin[:2]) or np.any(
+                    position[:2] > grid_maximum[:2])
+            if outside:
+                termination[particle] = 2
+                break
+    return (hit_face, hit_cosine, hit_energy, termination,
+            terminal_position, terminal_velocity)
 
 
 def _contains_surface_local_density(density):
@@ -244,6 +396,7 @@ class BoundaryTransport3DResult:
     truncation_probability: Mapping[str, float]
     transport_model: str
     known_limitations: tuple[str, ...]
+    lineage_replay_count: int = 0
 
     def __post_init__(self):
         object.__setattr__(self, "hit_probability", MappingProxyType(dict(self.hit_probability)))
@@ -251,6 +404,9 @@ class BoundaryTransport3DResult:
         object.__setattr__(
             self, "truncation_probability", MappingProxyType(dict(self.truncation_probability)))
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
+        if int(self.lineage_replay_count) != self.lineage_replay_count or self.lineage_replay_count < 0:
+            raise ValueError("lineage_replay_count must be a nonnegative integer")
+        object.__setattr__(self, "lineage_replay_count", int(self.lineage_replay_count))
 
 
 @dataclass(frozen=True)
@@ -266,6 +422,7 @@ class ChargedSurfaceReimpactPopulation3D:
     escaped_rate_s: float
     truncated_rate_s: float
     relative_particle_balance_error: float
+    lineage_replay_count: int = 0
 
     def __post_init__(self):
         if (not isinstance(self.emitted, OutgoingChargedParticleEvents3D)
@@ -286,6 +443,8 @@ class ChargedSurfaceReimpactPopulation3D:
             self.truncated_rate_s, self.relative_particle_balance_error], dtype=float)
         if (np.any(~np.isfinite(rates)) or np.any(rates < 0.0)):
             raise ValueError("invalid charged re-impact balance")
+        if int(self.lineage_replay_count) != self.lineage_replay_count or self.lineage_replay_count < 0:
+            raise ValueError("re-impact lineage_replay_count must be a nonnegative integer")
         residual = (
             self.emitted_rate_s - self.landed_rate_s
             - self.escaped_rate_s - self.truncated_rate_s)
@@ -303,6 +462,7 @@ class ChargedSurfaceReimpactPopulation3D:
         hit_face.setflags(write=False)
         object.__setattr__(self, "termination", termination)
         object.__setattr__(self, "hit_face", hit_face)
+        object.__setattr__(self, "lineage_replay_count", int(self.lineage_replay_count))
 
 
 def _certify_field_hit_lineage_3d(
@@ -336,6 +496,51 @@ def _certify_field_hit_lineage_3d(
             f"geometric={geometric[event]:.9g}, difference={difference[event]:.9g}, "
             f"direction={direction[event].tolist()}, normal={normal[event].tolist()}")
     return direction, np.clip(geometric, 0.0, 1.0)
+
+
+def _invalid_field_hit_lineage_3d(hit_face, stored_cosine, terminal_velocity, normals):
+    face = np.asarray(hit_face, dtype=int)
+    velocity = np.asarray(terminal_velocity, dtype=float)
+    speed = np.linalg.norm(velocity, axis=1)
+    direction = velocity / speed[:, None]
+    geometric = -np.einsum("rc,rc->r", direction, np.asarray(normals)[face])
+    return (geometric < -2e-6) | (
+        np.abs(geometric - np.asarray(stored_cosine, dtype=float)) > 2e-5)
+
+
+def _repair_invalid_field_hits_float64_3d(
+        species_name, origin, velocity, charge_number, potential, grid_origin, grid_spacing,
+        verts, faces, normals, fixed_dt, max_steps, periodic_lateral,
+        hit_face, hit_cosine, hit_energy, termination, terminal_position, terminal_velocity):
+    """Replay only gas-normal-invalid Warp hits with the float64 edge-inclusive tracer."""
+    hit = termination == 1
+    compressed_invalid = _invalid_field_hit_lineage_3d(
+        hit_face[hit], hit_cosine[hit], terminal_velocity[hit], normals)
+    invalid_ray = np.flatnonzero(hit)[compressed_invalid]
+    if not invalid_ray.size:
+        return 0
+    replay = _trace_field_events_float64_3d(
+        np.asarray(origin, dtype=float)[invalid_ray],
+        np.asarray(velocity, dtype=float)[invalid_ray], float(charge_number),
+        np.asarray(potential, dtype=float), np.asarray(grid_origin, dtype=float),
+        np.asarray(grid_spacing, dtype=float), np.asarray(verts, dtype=float),
+        np.asarray(faces, dtype=np.int64), float(fixed_dt), int(max_steps),
+        bool(periodic_lateral))
+    for target, repaired in zip(
+            (hit_face, hit_cosine, hit_energy, termination,
+             terminal_position, terminal_velocity), replay):
+        target[invalid_ray] = repaired
+    repaired_hit = termination[invalid_ray] == 1
+    if np.any(repaired_hit):
+        selected = invalid_ray[repaired_hit]
+        _certify_field_hit_lineage_3d(
+            species_name, hit_face[selected], hit_cosine[selected],
+            terminal_velocity[selected], normals)
+    if np.any(termination[invalid_ray] == 0):
+        raise RuntimeError(
+            f"float64 replay for {species_name!r} exhausted max_steps while repairing "
+            f"{invalid_ray.size} uncertified Warp hit(s)")
+    return int(invalid_ray.size)
 
 
 def trace_charged_surface_events_field_3d(
@@ -450,16 +655,27 @@ def trace_charged_surface_events_field_3d(
                 f"surface-emitted trajectories for {population.name!r} exhausted max_steps; "
                 "increase the physical time horizon or explicitly allow diagnostic truncation")
         event_rate = population.event_rate_s
+        hit_cosine = hit_cosine_wp.numpy().astype(float)
+        hit_energy = hit_energy_wp.numpy().astype(float)
+        terminal_position = terminal_position_wp.numpy().astype(float)
         terminal_velocity = terminal_velocity_wp.numpy().astype(float)
+        lineage_replay_count = _repair_invalid_field_hits_float64_3d(
+            population.name, origin, velocity, population.charge_number,
+            potential, grid_origin, grid_spacing, verts, faces, normals,
+            fixed_dt, max_steps, periodic_lateral, hit_face, hit_cosine, hit_energy,
+            termination, terminal_position, terminal_velocity)
+        hit = termination == 1
+        escaped = termination == 2
+        truncated = termination == 0
         incident_direction, incident_cosine = _certify_field_hit_lineage_3d(
-            population.name, hit_face[hit], hit_cosine_wp.numpy().astype(float)[hit],
+            population.name, hit_face[hit], hit_cosine[hit],
             terminal_velocity[hit], normals)
         incident = FaceResolvedEnergeticFlux(
             population.name, len(faces), hit_face[hit],
             event_rate[hit] / physical_area[hit_face[hit]],
-            hit_energy_wp.numpy().astype(float)[hit],
+            hit_energy[hit],
             incident_cosine,
-            event_position=terminal_position_wp.numpy().astype(float)[hit],
+            event_position=terminal_position[hit],
             event_incident_direction=incident_direction)
         emitted_rate = float(np.sum(event_rate))
         landed_rate = float(np.sum(event_rate[hit]))
@@ -469,7 +685,8 @@ def trace_charged_surface_events_field_3d(
         results.append(ChargedSurfaceReimpactPopulation3D(
             population, incident, termination, hit_face, emitted_rate, landed_rate,
             escaped_rate, truncated_rate,
-            abs(residual) / max(emitted_rate, np.finfo(float).tiny)))
+            abs(residual) / max(emitted_rate, np.finfo(float).tiny),
+            lineage_replay_count))
     return tuple(results)
 
 
@@ -692,7 +909,7 @@ def merge_boundary_transport_results_3d(*results):
     if not results or any(not isinstance(item, BoundaryTransport3DResult) for item in results):
         raise ValueError("one or more BoundaryTransport3DResult objects are required")
     neutral = {}; energetic = []; hit = {}; escaped = {}; truncated = {}
-    species_seen = set(); models = []; limitations = []
+    species_seen = set(); models = []; limitations = []; replay_count = 0
     for result in results:
         species = set(result.hit_probability)
         if (species != set(result.escape_probability)
@@ -709,6 +926,7 @@ def merge_boundary_transport_results_3d(*results):
         hit.update(result.hit_probability); escaped.update(result.escape_probability)
         truncated.update(result.truncation_probability)
         models.append(result.transport_model); limitations.extend(result.known_limitations)
+        replay_count += result.lineage_replay_count
     energetic_names = [item.name for item in energetic]
     if len(set(energetic_names)) != len(energetic_names):
         raise ValueError("merged energetic species names must be unique")
@@ -717,7 +935,8 @@ def merge_boundary_transport_results_3d(*results):
         hit_probability=hit, escape_probability=escaped,
         truncation_probability=truncated,
         transport_model=" + ".join(dict.fromkeys(models)),
-        known_limitations=tuple(dict.fromkeys(limitations)))
+        known_limitations=tuple(dict.fromkeys(limitations)),
+        lineage_replay_count=replay_count)
 
 
 def estimate_diffuse_form_factors_3d(
@@ -1249,6 +1468,7 @@ def trace_boundary_state_field_3d(
 
     neutral_flux = {}; energetic_flux = []
     hit_probability = {}; escape_probability = {}; truncation_probability = {}
+    float64_replay_count = 0
     for species in boundary.species:
         if phase_space_log2_samples is None:
             sample_count = species.velocity_sqrt_eV.shape[0]
@@ -1296,6 +1516,12 @@ def trace_boundary_state_field_3d(
         hit_energy = hit_energy_wp.numpy().astype(float)
         terminal_position = terminal_position_wp.numpy().astype(float)
         terminal_velocity = terminal_velocity_wp.numpy().astype(float)
+        float64_replay_count += _repair_invalid_field_hits_float64_3d(
+            species.name, origin, velocity, species.charge_number,
+            potential, grid_origin, grid_spacing, verts, faces, normals,
+            fixed_dt, max_steps, periodic_lateral, hit_face, hit_cosine, hit_energy,
+            termination, terminal_position, terminal_velocity)
+        hit = termination == 1; escaped = termination == 2; truncated = termination == 0
         hit_probability[species.name] = float(physical_weight[hit].sum())
         escape_probability[species.name] = float(physical_weight[escaped].sum())
         truncation_probability[species.name] = float(physical_weight[truncated].sum())
@@ -1324,6 +1550,7 @@ def trace_boundary_state_field_3d(
             ("collisionless_fixed_step_nodal_field_3d"
              if phase_space_log2_samples is None
              else "collisionless_fixed_step_nodal_field_joint_qmc_3d")
+            + ("_float64_lineage_replay" if float64_replay_count else "")
             + ("_periodic_cell" if periodic_lateral else "")),
         known_limitations=(
             "nodal potential is supplied rather than self-consistently charged",
@@ -1332,7 +1559,10 @@ def trace_boundary_state_field_3d(
             "float32 field integration and triangle-ray intersection",
         ) + (() if phase_space_log2_samples is None else (
             "joint scrambled-Sobol phase-space quadrature requires replicate/refinement error control",
-        )))
+        )) + (() if not float64_replay_count else (
+            f"{float64_replay_count} gas-normal-invalid float32 hit(s) were replayed with the "
+            "same Verlet path and edge-inclusive float64 hard-triangle visibility",
+        )), lineage_replay_count=float64_replay_count)
 
 
 def gather_boundary_state_field_adjoint_3d(
@@ -1632,6 +1862,7 @@ def trace_boundary_state_bidirectional_field_3d(
     bounds = np.asarray(source_bounds, dtype=float)
     source_area = (bounds[1] - bounds[0]) * (bounds[3] - bounds[2])
     selections = {}; sampling = {}; populations = []; hit = {}; escaped = {}; truncated = {}
+    bidirectional_replay_count = 0
     for species_index, species in enumerate(boundary.species):
         species_boundary = PlasmaBoundaryState(
             (species,), boundary.reference_plane_m, provenance=boundary.provenance)
@@ -1779,11 +2010,14 @@ def trace_boundary_state_bidirectional_field_3d(
             item.truncation_probability[species.name]
             for item in forward_results + adjoint_results]
         truncated[species.name] = max(truncation) if truncation else 0.0
+        bidirectional_replay_count += sum(
+            item.lineage_replay_count for item in forward_results)
     transport = BoundaryTransport3DResult(
         SurfaceFluxes({}, tuple(populations)), hit, escaped, truncated,
         "collisionless_fixed_step_nodal_field_bidirectional_3d"
         + ("_periodic_cell" if periodic_lateral else ""),
         ("per-face estimator map must be frozen during a nonlinear-root epoch",
          "scrambled-QMC uncertainty requires independent replicate and level refinement",
-         "no surface reflection or re-emission"))
+         "no surface reflection or re-emission"),
+        lineage_replay_count=bidirectional_replay_count)
     return BidirectionalBoundaryTransport3DResult(transport, selections, sampling)

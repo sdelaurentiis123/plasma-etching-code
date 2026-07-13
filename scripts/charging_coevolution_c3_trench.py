@@ -84,7 +84,7 @@ def main():
     parser.add_argument("--n-position", type=int, default=256)
     parser.add_argument("--seed", type=int, default=79)
     parser.add_argument("--trajectory-dt", type=float, default=0.0003125)
-    parser.add_argument("--trajectory-max-steps", type=int, default=50000)
+    parser.add_argument("--trajectory-max-steps", type=int, default=128000)
     parser.add_argument("--response-tail-tolerance", type=float, default=1e-10)
     args = parser.parse_args()
     if args.maximum_steps < 0:
@@ -240,6 +240,9 @@ def main():
                 maximum_response_tail_closure_l1_current_error_bound_relative=max(
                     (item["response_tail_closure_l1_current_error_bound_relative"]
                      for item in history), default=None),
+                maximum_transport_lineage_replay_count=max(
+                    (item.get("transport_lineage_replay_count", 0) for item in history),
+                    default=None),
                 minimum_potential_v=float(np.min(failure_potential)),
                 maximum_potential_v=float(np.max(failure_potential))),
             history=json_value(history),
@@ -288,6 +291,8 @@ def main():
             maximum_response_tail_closure_l1_current_error_bound_relative=max(
                 item["response_tail_closure_l1_current_error_bound_relative"]
                 for item in result.history),
+            maximum_transport_lineage_replay_count=max(
+                item.get("transport_lineage_replay_count", 0) for item in result.history),
             minimum_potential_v=float(np.min(result.potential_v)),
             maximum_potential_v=float(np.max(result.potential_v))),
         history=json_value(result.history),

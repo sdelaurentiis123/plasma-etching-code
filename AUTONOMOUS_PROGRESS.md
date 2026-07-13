@@ -634,6 +634,25 @@ under-determined) -- an honest result that quantifies how many structures must b
   require the two finer levels. All earlier `0.005` transient/PTC runs are downgraded to controller
   mechanics evidence and will not seed the resolved physical continuation. Evidence and the input
   face checkpoint are in `results/charging_coevolution_c3_trajectory_refinement/`.
+- **Flight horizon and hit precision are now separate certified controls.** At the resolved
+  `0.0003125` particle step, the old 50,000-step horizon (flight time 15.625) refuses unresolved slow
+  adjoint electrons; 128,000 steps (time 40) passes and doubling to time 80 leaves reported currents
+  identical. The bounded runner now defaults to the time-40 horizon. This is a trajectory-completion
+  requirement, not a charging convergence tolerance.
+- **Rare float32 shared-edge misses are repaired inside the unified exact operator.** A fresh
+  zero-charge continuation reached a solid-side top-mask hit at 2.375 microseconds. Raw Warp replay
+  was non-monotone under particle-step halving (`refuse / pass / refuse`), diagnosing triangle-edge
+  floating-point degeneracy rather than ODE error. The fast path now certifies every hit from terminal
+  velocity and the declared gas normal; only an invalid lineage is replayed from its original state
+  with the same fixed-step Verlet path and edge-inclusive float64 hard triangles. Nothing is softened,
+  dropped, or accepted incomplete, and primary plus charged re-impact paths share the fallback.
+- **The hard-visibility repair is counted and refinement-tested.** At the exact failure checkpoint,
+  particle steps `0.0003125 / 0.00015625 / 0.000078125` require `1 / 0 / 1` replays while node RMS,
+  worst node, and both B2 scales change by at most `0.0975% / 0.0220% / 0.203%`; potential rate changes
+  `2.89%`. The repaired 20-step physical trajectory completes to 2.5 microseconds with exactly one
+  replay, closes deposition/transfer ledgers to `1.51e-16 / 4.51e-15`, and remains unconverged at
+  node RMS/worst `0.3970/0.8870`, B2 `19.81/17.45`, and potential rate `1.50e6` V/s. Evidence is in
+  `results/charging_coevolution_c3_lineage_replay/`; C3 remains open and C4 remains unauthorized.
 
 ## Roadmap (remaining)
 

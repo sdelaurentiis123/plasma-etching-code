@@ -8,6 +8,7 @@ from petch.boundary_state import (
 )
 from petch.boundary_transport_3d import (
     _certify_field_hit_lineage_3d,
+    _trace_field_events_float64_3d,
     estimate_diffuse_form_factors_3d,
     gather_boundary_state_ballistic_3d,
     gather_boundary_state_field_adjoint_3d,
@@ -46,6 +47,23 @@ def test_field_hit_lineage_refuses_backface_and_cosine_mismatch():
         _certify_field_hit_lineage_3d(
             "Ar+", np.array([0]), np.array([0.5]),
             np.array([[0.0, 0.0, -1.0]]), np.array([[0.0, 0.0, 1.0]]))
+
+
+def test_float64_field_replay_assigns_a_shared_triangle_edge():
+    verts, faces, _ = _flat_unit_plane()
+    potential = np.zeros((2, 2, 2))
+    replay = _trace_field_events_float64_3d(
+        np.array([[0.5, 0.5, 1.0]]), np.array([[0.0, 0.0, -1.0]]), 1.0,
+        potential, np.zeros(3), np.ones(3), verts, faces,
+        1.0, 2, False)
+
+    hit_face, cosine, energy, termination, position, velocity = replay
+    assert termination.tolist() == [1]
+    assert hit_face[0] in (0, 1)
+    np.testing.assert_allclose(cosine, [1.0])
+    np.testing.assert_allclose(energy, [1.0])
+    np.testing.assert_allclose(position, [[0.5, 0.5, 0.0]])
+    np.testing.assert_allclose(velocity, [[0.0, 0.0, -1.0]])
 
 
 def _flat_unit_plane():

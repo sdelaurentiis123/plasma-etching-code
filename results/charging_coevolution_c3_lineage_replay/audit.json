@@ -1,0 +1,100 @@
+{
+  "schema": "petch.charging.coevolution.c3.lineage-replay-audit.v1",
+  "date": "2026-07-13",
+  "status": "bounded hard-visibility transport certification and repair audit; not C3 convergence",
+  "finding": "Warp float32 segment/triangle queries can miss a shared-edge wall hit and later return a solid-side top-face hit. The event is rare and non-monotone under timestep halving, so timestep reduction alone is not a reliable repair.",
+  "engine_response": {
+    "fast_path": "Warp fixed-step velocity-Verlet with hard triangle visibility",
+    "certificate": "terminal velocity dotted with the declared level-set gas normal",
+    "fallback": "only invalid hits replay from their original boundary/surface state with the same fixed-step velocity-Verlet scheme in float64 and edge-inclusive hard-triangle intersection",
+    "forbidden_behavior": [
+      "no soft visibility",
+      "no dropped particle",
+      "no response-law change",
+      "no incomplete trajectory acceptance"
+    ],
+    "provenance": "every charging evaluation records transport_lineage_replay_count"
+  },
+  "horizon_audit_at_zero_charge": {
+    "short_horizon_refusal": {
+      "trajectory_dt": 0.0003125,
+      "maximum_steps": 50000,
+      "horizon": 15.625,
+      "reason": "slow adjoint electrons exhausted the horizon"
+    },
+    "selected": {
+      "trajectory_dt": 0.0003125,
+      "maximum_steps": 128000,
+      "horizon": 40.0,
+      "summary": "../charging_coevolution_c3_trench_resolved_horizon40_zero/summary.json",
+      "summary_sha256": "318211bbb1f4dfe33b3ac1e6d5c88725f7e084128dc17f6e2f73284988fba31f"
+    },
+    "doubled": {
+      "trajectory_dt": 0.0003125,
+      "maximum_steps": 256000,
+      "horizon": 80.0,
+      "summary": "../charging_coevolution_c3_trench_resolved_horizon80_zero/summary.json",
+      "summary_sha256": "213b2a5d93a5ff9471cd9811bf9013f5b26a02d34e72ab144887bbb6d1a1a69a"
+    },
+    "result": "40 and 80 produce identical reported currents; 128000 is the bounded pilot default"
+  },
+  "failure_and_repair": {
+    "unrepaired_trajectory": {
+      "accepted_charging_steps_before_refusal": 18,
+      "particle_trajectory_dt": 0.0003125,
+      "error": "Ar+ solid-side hit on top-mask face 38",
+      "summary": "../charging_coevolution_c3_trench_resolved_dt125ns_20/summary.json",
+      "summary_sha256": "736c2fbfe70cfa04d2d3c207c11584134d01fc57809091f44057619f13939ebb",
+      "checkpoint_sha256": "d4c085f6158a41cf63c0e7d6c727eb3905b5f6b37c7b80daa069bde512e9f294"
+    },
+    "counted_repaired_trajectory": {
+      "accepted_charging_steps": 20,
+      "physical_time_s": 0.0000025,
+      "replay_evaluation": 20,
+      "replay_physical_time_s": 0.000002375,
+      "maximum_replays_per_evaluation": 1,
+      "node_rms": 0.396962365350271,
+      "node_worst": 0.8869886341706703,
+      "patch_b2": [19.810859409883996, 17.449169626359797],
+      "potential_rate_max_v_s": 1498271.334492408,
+      "maximum_charge_conservation_relative_error": 1.5102966175273856e-16,
+      "maximum_surface_transfer_relative_charge_balance_error": 4.513022244360654e-15,
+      "summary": "../charging_coevolution_c3_trench_resolved_replay_counted_dt125ns_20/summary.json",
+      "summary_sha256": "9c5239d3bd2e011adce3c25d4c3149b41ae73ae633409b1ba94de3183764df61"
+    }
+  },
+  "failure_checkpoint_timestep_refinement": [
+    {
+      "trajectory_dt": 0.0003125,
+      "lineage_replays": 1,
+      "node_rms": 0.40104414932458526,
+      "node_worst": 0.8927229950659497,
+      "patch_b2": [20.95331461191061, 17.202629470008677],
+      "potential_rate_max_v_s": 1426975.6315051722,
+      "summary": "../charging_coevolution_c3_trench_resolved_failstate_repaired_dt0p0003125/summary.json",
+      "summary_sha256": "ff8025667448427622119b84683b23c7abd49ac17fdee124a92e152ee771ac6e"
+    },
+    {
+      "trajectory_dt": 0.00015625,
+      "lineage_replays": 0,
+      "node_rms": 0.40138217206030774,
+      "node_worst": 0.892854243549157,
+      "patch_b2": [20.981256509917195, 17.226080850171773],
+      "potential_rate_max_v_s": 1401028.2938273947,
+      "summary": "../charging_coevolution_c3_trench_resolved_failstate_dt0p00015625/summary.json",
+      "summary_sha256": "c6f34bd1628724738c594c82183c190869d936f40414351af60b889c768886c0"
+    },
+    {
+      "trajectory_dt": 0.000078125,
+      "lineage_replays": 1,
+      "node_rms": 0.4014357246657916,
+      "node_worst": 0.8929196746264992,
+      "patch_b2": [20.99431002481638, 17.237572417289176],
+      "potential_rate_max_v_s": 1386869.61537951,
+      "summary": "../charging_coevolution_c3_trench_resolved_failstate_repaired_dt0p000078125/summary.json",
+      "summary_sha256": "4526c75c57f4dcbffbc301b249970e29bfcea53239b2284c2af454ffb23bc905"
+    }
+  ],
+  "refinement_conclusion": "Across the two halvings, node RMS changes 0.0975%, worst node 0.0220%, B2 changes 0.196%/0.203%, and potential rate changes 2.89%. Replay incidence is non-monotone (1,0,1), which diagnoses a floating triangle-edge degeneracy rather than a physical visibility smoothing scale.",
+  "campaign_decision": "The repaired shared operator earns continued bounded transient work. C3 remains open because the state is far from B1/B2 and grid/sample/cold-warm/B5 gates remain pending."
+}
