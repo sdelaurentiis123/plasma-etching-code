@@ -15,11 +15,22 @@ import numpy as np
 from scipy.stats import qmc
 import warp as wp
 
-from .boundary_state import PlasmaBoundaryState, qmc_boundary_proposal
+from .boundary_state import (
+    FoldedNormalTangentialDensity, MixtureBoundaryDensity, PlasmaBoundaryState,
+    qmc_boundary_proposal,
+)
 from .surface_kinetics import FaceResolvedEnergeticFlux, SurfaceFluxes
 from .neutral_radiosity_3d import DiffuseFormFactors3D
 from .threed import DEVICE, _apply_bc
 from .warp_runtime import ensure_writable_warp_cache
+
+
+def _contains_surface_local_density(density):
+    if isinstance(density, FoldedNormalTangentialDensity):
+        return True
+    if isinstance(density, MixtureBoundaryDensity):
+        return any(_contains_surface_local_density(item) for item in density.components)
+    return False
 
 
 @wp.kernel
@@ -1173,6 +1184,11 @@ def gather_boundary_state_field_adjoint_3d(
         if (proposal.name != species.name or proposal.charge_number != species.charge_number
                 or proposal.density_model is None):
             raise ValueError("adjoint proposals must preserve species name, charge, and density")
+        if (proposal_frames[species.name] == "source_aligned"
+                and _contains_surface_local_density(proposal.density_model)):
+            raise ValueError(
+                "folded grazing proposals use surface-local coordinates and cannot be "
+                "combined with a source-aligned proposal frame")
         base_velocity = np.asarray(proposal.velocity_sqrt_eV, dtype=float)
         sample_count = base_velocity.shape[0]; point_count = points.shape[1]
         face_index = np.repeat(target_faces, point_count * sample_count)
@@ -1315,35 +1331,61 @@ def trace_boundary_state_bidirectional_field_3d(
         species_roles = {species.name: roles[species.name]}
         forward_results = []; adjoint_results = []; replicate_seeds = []
         template = proposals.get(species.name, species)
+        supplied_method = hints.get(species.name)
+        frozen_adjoint_faces = None
+        frozen_forward_needed = True
+        frozen_adjoint_needed = True
+        if supplied_method is not None and not require_certification:
+            supplied_method = np.asarray(supplied_method).astype("U7")
+            if (supplied_method.shape != (len(faces),)
+                    or np.any(~np.isin(supplied_method, ("forward", "adjoint")))):
+                raise ValueError("method_hint must select forward or adjoint for every face")
+            selected = np.where(supplied_method == "adjoint")[0]
+            # Adjoint work is face-local. Once a separately certified method map is frozen, do not
+            # retrace faces whose events will be discarded in favor of the global forward estimator.
+            if selected.size:
+                frozen_adjoint_faces = selected
+            else:
+                frozen_adjoint_needed = False
+            if np.all(supplied_method == "adjoint"):
+                frozen_forward_needed = False
         for replicate in range(int(n_replicates)):
             replicate_seed = int(seed) + 104729 * replicate + 15485863 * species_index
             replicate_seeds.append(replicate_seed)
-            forward_results.append(trace_boundary_state_field_3d(
-                species_boundary, species_roles, verts, faces, areas,
-                source_bounds=source_bounds, source_z=source_z,
-                nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
-                potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
-                mesh_origin_m=mesh_origin_m, seed=replicate_seed, fixed_dt=fixed_dt,
-                max_steps=max_steps, phase_space_log2_samples=int(forward_log2_samples),
-                periodic_lateral=periodic_lateral, device=device))
-            proposal = qmc_boundary_proposal(
-                template, int(adjoint_log2_samples), replicate_seed,
-                name=species.name)
-            adjoint_results.append(gather_boundary_state_field_adjoint_3d(
-                species_boundary, species_roles, verts, faces, areas, centroids, gas_normals,
-                source_bounds=source_bounds, source_z=source_z,
-                nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
-                potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
-                mesh_origin_m=mesh_origin_m, face_quadrature_points=face_quadrature_points,
-                ray_offset=ray_offset, fixed_dt=fixed_dt, max_steps=max_steps,
-                periodic_lateral=periodic_lateral,
-                proposal_by_species={species.name: proposal},
-                proposal_frame_by_species={species.name: frames[species.name]},
-                face_position_seed=replicate_seed, device=device))
-        forward_populations = [item.surface_fluxes.energetic_fluxes[0]
-                               for item in forward_results]
-        adjoint_populations = [item.surface_fluxes.energetic_fluxes[0]
-                               for item in adjoint_results]
+            if frozen_forward_needed:
+                forward_results.append(trace_boundary_state_field_3d(
+                    species_boundary, species_roles, verts, faces, areas,
+                    source_bounds=source_bounds, source_z=source_z,
+                    nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+                    potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
+                    mesh_origin_m=mesh_origin_m, seed=replicate_seed, fixed_dt=fixed_dt,
+                    max_steps=max_steps, phase_space_log2_samples=int(forward_log2_samples),
+                    periodic_lateral=periodic_lateral, device=device))
+            if frozen_adjoint_needed:
+                proposal = qmc_boundary_proposal(
+                    template, int(adjoint_log2_samples), replicate_seed,
+                    name=species.name)
+                adjoint_results.append(gather_boundary_state_field_adjoint_3d(
+                    species_boundary, species_roles, verts, faces, areas, centroids, gas_normals,
+                    source_bounds=source_bounds, source_z=source_z,
+                    nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+                    potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
+                    mesh_origin_m=mesh_origin_m, face_quadrature_points=face_quadrature_points,
+                    ray_offset=ray_offset, fixed_dt=fixed_dt, max_steps=max_steps,
+                    periodic_lateral=periodic_lateral,
+                    proposal_by_species={species.name: proposal},
+                    proposal_frame_by_species={species.name: frames[species.name]},
+                    face_position_seed=replicate_seed,
+                    gather_face_indices=frozen_adjoint_faces, device=device))
+        empty_population = FaceResolvedEnergeticFlux(
+            species.name, len(faces), np.empty(0, dtype=int), np.empty(0),
+            np.empty(0), np.empty(0))
+        forward_populations = (
+            [item.surface_fluxes.energetic_fluxes[0] for item in forward_results]
+            if frozen_forward_needed else [empty_population] * int(n_replicates))
+        adjoint_populations = (
+            [item.surface_fluxes.energetic_fluxes[0] for item in adjoint_results]
+            if frozen_adjoint_needed else [empty_population] * int(n_replicates))
         pooled_forward_samples = int(n_replicates) * 2 ** int(forward_log2_samples)
         zero_upper = (3.0 * species.flux_m2_s * source_area
                       / (pooled_forward_samples * areas_array))
@@ -1416,9 +1458,10 @@ def trace_boundary_state_bidirectional_field_3d(
                         / (species.flux_m2_s * source_area)) if species.flux_m2_s > 0.0 else 0.0
         hit[species.name] = landing
         escaped[species.name] = max(0.0, 1.0 - landing)
-        truncated[species.name] = max(
-            max(item.truncation_probability[species.name] for item in forward_results),
-            max(item.truncation_probability[species.name] for item in adjoint_results))
+        truncation = [
+            item.truncation_probability[species.name]
+            for item in forward_results + adjoint_results]
+        truncated[species.name] = max(truncation) if truncation else 0.0
     transport = BoundaryTransport3DResult(
         SurfaceFluxes({}, tuple(populations)), hit, escaped, truncated,
         "collisionless_fixed_step_nodal_field_bidirectional_3d"

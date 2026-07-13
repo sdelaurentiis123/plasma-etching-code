@@ -1,0 +1,40 @@
+{
+  "config_hash": "ebd916cc40387c23bbb917999225be8aa131a9149c9d5867c13cd5a4cc4efab7",
+  "config": {
+    "model": "hard_visibility_current_direction_ptc",
+    "initial_state_sha256": "d664979ba3416a9cb351eda40c3c0d62164a4eabc1d1505449c34ca545d9ca0e",
+    "initial_timestep_s": 1.25e-07,
+    "maximum_timestep_s": 5e-07,
+    "minimum_timestep_s": 1e-11,
+    "accepted_step_limit": 80,
+    "growth": 1.25,
+    "allowed_growth": 0.005,
+    "method_map_source": "separate certified pilot archive"
+  },
+  "accepted_steps": 6,
+  "rejected_steps": 14,
+  "final": {
+    "accepted_step": 6,
+    "rejected_steps": 13,
+    "pseudo_time_s": 6.79168701171875e-08,
+    "timestep_s": 1.52587890625e-11,
+    "rms_relative_current_imbalance_node": 0.17942363166777497,
+    "max_relative_current_imbalance_node": 0.4659486205832285,
+    "minimum_potential_v": -13.463007634616133,
+    "maximum_potential_v": 43.591151867424124,
+    "charge_conservation_residual_c": 7.052966104933725e-38
+  },
+  "best": {
+    "rms": 0.17942363166777497,
+    "worst_node": 0.4659486205832285
+  },
+  "converged": false,
+  "exhausted_minimum_timestep": true,
+  "exact_operator_statement": "hard visibility; unchanged kinetic residual and current direction",
+  "best_charge_regions_c": {
+    "upper": -1.0430784164113351e-15,
+    "lower_wall": 1.1293704426351784e-15,
+    "floor": -1.6945726869784313e-16
+  },
+  "conclusion": "PTC candidate requires an independent high-sample exact-map audit"
+}

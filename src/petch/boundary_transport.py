@@ -116,7 +116,8 @@ def forward_boundary_state_cell_flux_qmc(
         nodal_potential, solid, x0, z0, velocity[:, 0], velocity[:, 2],
         float(species.charge_number), nx, nz,
         int(200 * nz if max_steps is None else max_steps), dt_cap, dt_field, fixed_dt)
-    hit_x, hit_z, hit_nx, hit_nz = traced[0], traced[1], traced[7], traced[8]
+    hit_x, hit_z, survivor, hit_nx, hit_nz = (
+        traced[0], traced[1], traced[4], traced[7], traced[8])
     hit_x_position, hit_z_position = traced[9], traced[10]
     log_physical = species.log_flux_density(
         velocity, proposal.phase_rad, proposal.position_m)
@@ -169,7 +170,8 @@ def forward_boundary_state_cell_flux_qmc(
     if return_trajectory_outcomes:
         # Keep this opt-in: a production current evaluation needs only reduced moments, while
         # response audits need to pair identical histories and count hard hit/escape switches.
-        status = np.where(hit_x >= 0, 0, 1).astype(np.int64)
+        status = np.where(
+            hit_x >= 0, 0, np.where(survivor < 0.5, 1, 2)).astype(np.int64)
         result["trajectory_outcomes"] = np.column_stack((
             status, hit_x, hit_z, hit_nx, hit_nz)).astype(np.int64, copy=False)
     if return_trajectory_contributions:

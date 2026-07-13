@@ -3,8 +3,8 @@ import pytest
 import warp as wp
 
 from petch.boundary_state import (
-    PlasmaBoundaryState, SpeciesBoundaryState, maxwellian_electron_boundary_state,
-    qmc_boundary_proposal,
+    PlasmaBoundaryState, SpeciesBoundaryState, folded_normal_tangential_proposal,
+    maxwellian_electron_boundary_state, qmc_boundary_proposal,
 )
 from petch.boundary_transport_3d import (
     estimate_diffuse_form_factors_3d,
@@ -344,6 +344,41 @@ def test_bidirectional_field_transport_certifies_and_preserves_barrier_event_mea
     assert np.all(selection.estimator_consistent)
     assert np.isclose(result.transport.hit_probability["electron"], expected, atol=0.035)
     assert result.transport.surface_fluxes.energetic_fluxes[0].event_energy_eV.size > 0
+
+    frozen = trace_boundary_state_bidirectional_field_3d(
+        boundary, {"electron": "charge_carrier"}, verts, faces, areas, centroids, normals,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=potential, potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=1.0, mesh_length_unit_m=1e-6,
+        forward_log2_samples=10, adjoint_log2_samples=8, n_replicates=4,
+        element_absolute_tolerance=0.035, element_relative_tolerance=0.05,
+        face_quadrature_points=3, fixed_dt=0.0025, max_steps=4000,
+        periodic_lateral=True, seed=97, device="cpu",
+        method_hint={"electron": selection.method}, require_certification=False)
+    assert np.array_equal(frozen.selection_by_species["electron"].method, selection.method)
+    assert np.allclose(
+        frozen.transport.surface_fluxes.energetic_fluxes[0].flux_m2_s,
+        result.transport.surface_fluxes.energetic_fluxes[0].flux_m2_s, rtol=0.0, atol=0.0)
+
+
+def test_source_aligned_adjoint_rejects_surface_local_folded_proposal():
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    normals = np.broadcast_to([0.0, 0.0, 1.0], centroids.shape)
+    boundary = maxwellian_electron_boundary_state(
+        4.0, 2e19, n_transverse=3, n_normal=4, reference_plane_m=1e-6)
+    folded = folded_normal_tangential_proposal(
+        boundary.get("electron"), +1, name="electron")
+    with pytest.raises(ValueError, match="surface-local coordinates"):
+        gather_boundary_state_field_adjoint_3d(
+            boundary, {"electron": "charge_carrier"}, verts, faces, areas,
+            centroids, normals, source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+            nodal_potential_v=np.zeros((2, 2, 2)), potential_origin=(0.0, 0.0, 0.0),
+            potential_spacing=1.0, mesh_length_unit_m=1e-6,
+            proposal_by_species={"electron": folded},
+            proposal_frame_by_species={"electron": "source_aligned"},
+            face_quadrature_points=1, fixed_dt=0.0025, max_steps=4000,
+            periodic_lateral=True, device="cpu")
 
 
 def test_subset_adjoint_gather_matches_full_collision_mesh_measure_on_selected_face():

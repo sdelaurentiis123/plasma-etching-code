@@ -10,6 +10,7 @@ from petch.boundary_state import (
 from petch.charging_coupled_3d import (
     DielectricChargingConvergenceError,
     advance_dielectric_charging_3d,
+    integrate_dielectric_charging_transient_3d,
     solve_dielectric_charging_steady_3d,
 )
 from petch.charging_poisson import EPS0
@@ -146,6 +147,31 @@ def test_second_charging_step_uses_first_steps_self_consistent_field():
     assert np.isclose(first.potential_after_v[:, :, 0].mean(), 10.0, rtol=2e-12)
     assert np.allclose(second.potential_before_v, first.potential_after_v, rtol=1e-13)
     assert np.isclose(impact_energy.mean(), 10.0, atol=3e-4)
+
+
+def test_physical_time_driver_matches_manual_steps_and_audits_final_current_state():
+    flux = 1.0e15
+    system, arguments = _flat_dielectric_problem((_species("ion", 1, flux),))
+    duration = 2.0 * EPS0 / (ECHARGE * flux * 1e-6)
+    first = advance_dielectric_charging_3d(
+        charge_node_c=np.zeros(system.shape), duration_s=duration, **arguments)
+    second = advance_dielectric_charging_3d(
+        charge_node_c=first.charge_node_c, duration_s=duration, **arguments)
+
+    transient = integrate_dielectric_charging_transient_3d(
+        initial_charge_node_c=np.zeros(system.shape), timestep_s=duration, n_steps=2,
+        **arguments)
+
+    assert np.allclose(transient.charge_node_c, second.charge_node_c, rtol=1e-13)
+    assert np.allclose(transient.potential_v, second.potential_after_v, rtol=1e-13)
+    assert len(transient.history) == 3
+    assert transient.charge_history_node_c.shape == (3, *system.shape)
+    assert np.allclose(transient.charge_history_node_c[-1], transient.charge_node_c)
+    assert transient.diagnostics["updates_completed"] == 2
+    assert transient.history[-1]["physical_time_s"] == 2.0 * duration
+    assert transient.history[-1]["max_relative_current_imbalance_node"] == 1.0
+    assert abs(transient.diagnostics["cumulative_charge_conservation_residual_c"]) < 1e-30
+    assert transient.positive_current_node_a.flags.writeable is False
 
 
 def _manufactured_floating_boundary():

@@ -1,0 +1,15 @@
+{
+  "schema": "petch.charging.task1pre.horizon.summary.v1",
+  "config_hash": "21cdb54c47754ec652b424260684b8fc8e15bdabd2c76716df2cc65b9795c3bd",
+  "checkpoint": "stuck_ar4_checkpoint.npz",
+  "checkpoint_sha256": "6e092bf7704d74e5da03a42493559a74f08de086f9c83e18d254b7a7f93fe65d",
+  "exact_operator": "hard visibility",
+  "reference_label": "dt_half_reference",
+  "reference_imbalance_rms": 0.3894603574197508,
+  "reference_imbalance_worst": 0.8396691960622903,
+  "timestep_refinement_pass": true,
+  "selected_production_label": "default",
+  "selected_production_max_steps": 4000,
+  "horizon_gate_pass": true,
+  "decision": "Task 1 horizon entry gate passed"
+}

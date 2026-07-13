@@ -1,0 +1,49 @@
+{
+  "schema": "petch.charging.task1pre.horizon.config.v1",
+  "checkpoint": "stuck_ar4_checkpoint.npz",
+  "checkpoint_sha256": "6e092bf7704d74e5da03a42493559a74f08de086f9c83e18d254b7a7f93fe65d",
+  "level": 9,
+  "seeds": [
+    401,
+    409,
+    419,
+    421,
+    431,
+    433,
+    439,
+    443
+  ],
+  "variants": [
+    {
+      "label": "default",
+      "fixed_dt": 0.01,
+      "max_steps": 4000
+    },
+    {
+      "label": "horizon_x4",
+      "fixed_dt": 0.01,
+      "max_steps": 16000
+    },
+    {
+      "label": "horizon_x8",
+      "fixed_dt": 0.01,
+      "max_steps": 32000
+    },
+    {
+      "label": "dt_half_reference",
+      "fixed_dt": 0.005,
+      "max_steps": 64000
+    }
+  ],
+  "reference_label": "dt_half_reference",
+  "dt_comparison_label": "horizon_x8",
+  "common_random_numbers": true,
+  "hard_visibility": true,
+  "gates": {
+    "max_unresolved_fraction": 0.005,
+    "max_relative_current_change": 0.01,
+    "max_rms_imbalance_change": 0.01,
+    "max_worst_imbalance_change": 0.02
+  },
+  "config_hash": "21cdb54c47754ec652b424260684b8fc8e15bdabd2c76716df2cc65b9795c3bd"
+}

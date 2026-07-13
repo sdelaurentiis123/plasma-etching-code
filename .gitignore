@@ -19,5 +19,20 @@ env/
 # Superseded relaxed-checkpoint pilot; the canonical stuck-state audit below is retained.
 results/charging_task0a/
 results/charging_task0a_stuck/raw/
+results/charging_task1pre_horizon/raw/
+# Superseded Task-1 pilot/continuation checkpoints retained locally; accepted evidence dirs are tracked.
+results/charging_task1_3d/
+results/charging_task1_3d_bidir/
+results/charging_task1_3d_bidir_cont/
+results/charging_task1_3d_bidir_cont2/
+results/charging_task1_3d_bidir_cont3/
+results/charging_task1_3d_bidir_cont4/
+results/charging_task1_3d_bidir_cont5/
+results/charging_task1_3d_cont6_strict_audit/
+results/charging_task1_3d_final_audit_strict/
+results/charging_task1_3d_final_audit_strict8/
+results/charging_task1_3d_long/
+results/charging_task1_3d_strict_face32/
+results/charging_task1_3d_strict_failure/
 /tmp/
 .gstack/

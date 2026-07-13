@@ -291,7 +291,7 @@ def test_forward_and_adjoint_can_expose_paired_trajectory_outcomes():
 
     assert forward["trajectory_outcomes"].shape == (2 ** 5, 5)
     assert adjoint["trajectory_outcomes"].shape == (4, 2 ** 4, 5)
-    assert np.all(np.isin(forward["trajectory_outcomes"][:, 0], (0, 1)))
+    assert np.all(np.isin(forward["trajectory_outcomes"][:, 0], (0, 1, 2)))
     assert np.all(np.isin(adjoint["trajectory_outcomes"][:, :, 0], (0, 1, 2)))
     assert forward["trajectory_score"].shape == (2 ** 5,)
     assert forward["trajectory_face_index"].shape == (2 ** 5,)

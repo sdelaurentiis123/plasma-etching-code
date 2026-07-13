@@ -342,6 +342,56 @@ under-determined) -- an honest result that quantifies how many structures must b
   these audits after the Numba workqueue abort; process workers pin all nested math runtimes to one
   thread.
 
+### Charging solver campaign scope amendment and Task 1-pre (2026-07-13)
+
+- **Physical time is unblocked; response-based accelerators are not.** The original decision table
+  routes every resolved Task 0A outcome through the conservative derivative-free transient. The
+  signal/error gate instead controls Tasks 3--4 and any measured response preconditioner. The local
+  Maxwellian electron split remains rejected, and no replacement global preconditioner is promoted:
+  none of the measured response radii is yet decision-grade.
+- **The archived Jacobian was paired.** Its plus/minus launches reused the checkpoint, deterministic
+  proposal seeds, frozen method map, and frozen levels. The large full-space frozen-map condition
+  therefore must not be reinterpreted as an unpaired-difference artifact. The present restricted
+  ensemble comparison remains underpowered and cannot attribute the discrepancy.
+- **Task 1-pre passes on the actual stuck current map.** Config
+  `21cdb54c47754ec652b424260684b8fc8e15bdabd2c76716df2cc65b9795c3bd` used common samples for the
+  production horizon (`dt=0.01`, 4,000 steps), 4x and 8x horizons, and a half-timestep reference over
+  eight level-9 scrambles. Every estimator reported zero unresolved trajectories. Horizon extension
+  changed no current; timestep halving changed the ensemble ion/electron currents by 0.287%/0.170%
+  and RMS/worst-node imbalance by 0.130%/0.095%. The historical stuck residual is not a finite-horizon
+  artifact. Exact hard visibility is unchanged. Task 1 may enter with its original refinement and
+  final-audit gates.
+
+### Charging physical-time and PTC campaign (2026-07-13)
+
+- **This is engine work, not a test-only workaround.** The 3-D charging engine now has a reusable,
+  conservative multi-step physical-time API with separate ion/electron node and face currents,
+  replayable charge histories, exact-throughput conservation, final current evaluation, frozen
+  method-map propagation, and resumable integration failures. The established 0.08 convergence
+  equation is nodal; triangle imbalance remains a separate discretization diagnostic.
+- **Deterministic physical time is stable but does not close the root.** A 50-microsecond paired ladder
+  at 250/125 ns agrees within 0.298% charge and 0.139% potential and reaches RMS 0.195/0.197, worst
+  node 0.439/0.440. A 500 ns step is rejected by 31.6% potential disagreement. The physical dipole
+  forms, conservation remains at roundoff, and longer exact-map trajectories fluctuate above the
+  unchanged node contract.
+- **The independent ion audit certifies the map, not convergence.** Sixteen bidirectional replicates,
+  level-13 ceilings, and 32 face-position points certify all ion faces. With a level-12 electron
+  proposal the unchanged endpoint is RMS 0.193551, worst node 0.445733, worst face 0.841180. Electron
+  between-scramble uncertainty remains to be attached before any final-state claim.
+- **Fresh scrambles do not remove the floor.** A 200-step stochastic physical trajectory using a
+  separately frozen method map has final-window RMS 0.199220 +/- 0.006366 and worst node
+  0.574845 +/- 0.016865; its confidence envelope is nowhere near 0.08. Conservation residual is
+  1.40e-17 of absolute throughput.
+- **Safeguarded current-direction PTC collapses.** Six accepted pseudo-steps and 14 rejections reduce
+  the pseudo-step below 1e-11 s with best RMS 0.179424 and worst node 0.465949. No derivative,
+  quasi-Newton, smoothing, or altered residual was used. Further frozen-map solver variants are
+  closed; the next bounded path is the handoff's nodal/face/coarsened-patch equilibrium audit under
+  grid refinement, with the 0.08 contract unchanged.
+- **Estimator debugging hardened the engine.** Frozen bidirectional maps now skip discarded estimator
+  directions/faces without changing selected currents. Surface-local folded grazing densities are
+  explicitly rejected in source-aligned frames; this prevents the slow-ray horizon failure exposed
+  during Task 1 entry.
+
 ## Roadmap (remaining)
 
 1. Finish Phase 2 charging: batch the frozen replicate ensemble into an efficient deterministic root

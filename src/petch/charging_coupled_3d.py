@@ -28,20 +28,72 @@ class DielectricChargingStep3DResult:
     charge_increment_node_c: np.ndarray
     potential_before_v: np.ndarray
     potential_after_v: np.ndarray
+    positive_face_current_density_a_m2: np.ndarray
+    negative_face_current_density_a_m2: np.ndarray
     face_current_density_a_m2: np.ndarray
+    positive_current_node_a: np.ndarray
+    negative_current_node_a: np.ndarray
     transport: BoundaryTransport3DResult
     poisson_before: PoissonDiagnostics3D
     poisson_after: PoissonDiagnostics3D
+    bidirectional_method_hint: Mapping[str, np.ndarray]
     diagnostics: Mapping[str, float]
     known_limitations: tuple[str, ...]
 
     def __post_init__(self):
         for name in (
                 "charge_node_c", "charge_increment_node_c", "potential_before_v",
-                "potential_after_v", "face_current_density_a_m2"):
+                "potential_after_v", "positive_face_current_density_a_m2",
+                "negative_face_current_density_a_m2", "face_current_density_a_m2",
+                "positive_current_node_a", "negative_current_node_a"):
             array = np.asarray(getattr(self, name), dtype=float).copy()
             array.setflags(write=False)
             object.__setattr__(self, name, array)
+        object.__setattr__(self, "diagnostics", MappingProxyType(dict(self.diagnostics)))
+        method_hint = {}
+        for name, value in self.bidirectional_method_hint.items():
+            array = np.asarray(value).copy()
+            array.setflags(write=False)
+            method_hint[name] = array
+        object.__setattr__(self, "bidirectional_method_hint", MappingProxyType(method_hint))
+        object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
+
+
+@dataclass(frozen=True)
+class PhysicalTimeDielectricCharging3DResult:
+    """A timestep-resolved dielectric charging trajectory and exact final current state."""
+
+    charge_node_c: np.ndarray
+    potential_v: np.ndarray
+    positive_face_current_density_a_m2: np.ndarray
+    negative_face_current_density_a_m2: np.ndarray
+    positive_current_node_a: np.ndarray
+    negative_current_node_a: np.ndarray
+    charge_history_node_c: np.ndarray
+    transport: BoundaryTransport3DResult
+    poisson: PoissonDiagnostics3D
+    bidirectional_method_hint: Mapping[str, np.ndarray]
+    history: tuple[Mapping[str, float], ...]
+    converged: bool
+    diagnostics: Mapping[str, float]
+    known_limitations: tuple[str, ...]
+
+    def __post_init__(self):
+        for name in (
+                "charge_node_c", "potential_v", "positive_face_current_density_a_m2",
+                "negative_face_current_density_a_m2", "positive_current_node_a",
+                "negative_current_node_a", "charge_history_node_c"):
+            array = np.asarray(getattr(self, name), dtype=float).copy()
+            array.setflags(write=False)
+            object.__setattr__(self, name, array)
+        object.__setattr__(
+            self, "history", tuple(MappingProxyType(dict(item)) for item in self.history))
+        method_hint = {}
+        for name, value in self.bidirectional_method_hint.items():
+            array = np.asarray(value).copy()
+            array.setflags(write=False)
+            method_hint[name] = array
+        object.__setattr__(self, "bidirectional_method_hint", MappingProxyType(method_hint))
         object.__setattr__(self, "diagnostics", MappingProxyType(dict(self.diagnostics)))
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
 
@@ -80,6 +132,22 @@ class DielectricChargingConvergenceError(RuntimeError):
 
 class BidirectionalCurrentCertificationError(RuntimeError):
     """A sampled current map failed its per-face precision or consistency contract."""
+
+    def __init__(self, message, result=None):
+        super().__init__(message)
+        self.result = result
+
+
+class PhysicalTimeChargingIntegrationError(RuntimeError):
+    """A physical-time trajectory failed with a resumable charge/history checkpoint."""
+
+    def __init__(self, message, charge_node_c, history, step):
+        super().__init__(message)
+        charge = np.asarray(charge_node_c, dtype=float).copy()
+        charge.setflags(write=False)
+        self.charge_node_c = charge
+        self.history = tuple(MappingProxyType(dict(item)) for item in history)
+        self.step = int(step)
 
 
 def _anderson_step(x, residual, x_history, residual_history, gain, depth):
@@ -212,7 +280,8 @@ def _evaluate_incident_current_3d(
                 failed = [name for name, item in bidirectional.selection_by_species.items()
                           if not item.converged]
                 raise BidirectionalCurrentCertificationError(
-                    f"bidirectional current estimator did not certify species {failed}")
+                    f"bidirectional current estimator did not certify species {failed}",
+                    result=bidirectional)
             bidirectional_method_hint.update({
                 name: item.method.copy()
                 for name, item in bidirectional.selection_by_species.items()})
@@ -283,6 +352,31 @@ def _evaluate_incident_current_3d(
         positive_node_current=positive_node_current,
         negative_node_current=negative_node_current,
         bidirectional_method_hint=bidirectional_method_hint)
+
+
+def _physical_current_balance_metrics(
+        positive_face, negative_face, positive_node, negative_node):
+    """Return scale-free face and node current-balance diagnostics."""
+    metrics = {}
+    for label, positive, negative in (
+            ("face", positive_face, negative_face),
+            ("node", positive_node, negative_node)):
+        positive = np.asarray(positive, dtype=float)
+        negative = np.asarray(negative, dtype=float)
+        total = positive + negative
+        scale = float(np.max(total)) if total.size else 0.0
+        active = total > max(1e-15 * scale, 1e-300)
+        if np.any(active):
+            relative = np.abs(positive[active] - negative[active]) / total[active]
+            metrics[f"rms_relative_current_imbalance_{label}"] = float(
+                np.sqrt(np.mean(relative ** 2)))
+            metrics[f"max_relative_current_imbalance_{label}"] = float(np.max(relative))
+            metrics[f"active_{label}_count"] = int(np.count_nonzero(active))
+        else:
+            metrics[f"rms_relative_current_imbalance_{label}"] = float("inf")
+            metrics[f"max_relative_current_imbalance_{label}"] = float("inf")
+            metrics[f"active_{label}_count"] = 0
+    return metrics
 
 
 def advance_dielectric_charging_3d(
@@ -366,10 +460,15 @@ def advance_dielectric_charging_3d(
         charge_increment_node_c=charge_increment,
         potential_before_v=evaluated["potential"],
         potential_after_v=potential_after,
+        positive_face_current_density_a_m2=evaluated["positive_face_current"],
+        negative_face_current_density_a_m2=evaluated["negative_face_current"],
         face_current_density_a_m2=face_current,
+        positive_current_node_a=evaluated["positive_node_current"],
+        negative_current_node_a=evaluated["negative_node_current"],
         transport=evaluated["transport"],
         poisson_before=evaluated["poisson"],
         poisson_after=poisson_after,
+        bidirectional_method_hint=evaluated["bidirectional_method_hint"],
         diagnostics=dict(
             duration_s=float(duration_s),
             incident_charge_c=incident_charge,
@@ -382,6 +481,170 @@ def advance_dielectric_charging_3d(
             "no secondary-electron emission, reflection, leakage, or surface conduction",
             "no floating-conductor circuit equations",
         ) + _coupled_transport_limitations(evaluated["transport"]))
+
+
+def integrate_dielectric_charging_transient_3d(
+        poisson_system: NodalPoissonSystem3D, initial_charge_node_c,
+        boundary: PlasmaBoundaryState, verts, faces, areas, *, source_bounds, source_z,
+        potential_origin, potential_spacing, timestep_s, n_steps,
+        current_balance_tol=None, mesh_length_unit_m=1e-6,
+        mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
+        trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
+        phase_space_log2_samples=None, periodic_lateral=False,
+        transport_estimator="forward", face_centroids=None, face_gas_normals=None,
+        adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
+        adjoint_proposals=None, adjoint_proposal_frames="surface_local",
+        bidirectional_options=None, transport_device=None):
+    """Integrate the conservative dielectric charge ODE with fixed physical timesteps.
+
+    ``n_steps`` is the maximum number of forward-Euler charge updates. History contains the initial
+    state, every pre-update current state, and an exact current evaluation at the returned final state.
+    If ``current_balance_tol`` is supplied, integration stops before an update once the worst active
+    Q1 charge-node imbalance meets it. Face imbalance is reported separately but is not a convergence
+    equation: individual triangles are integration elements, while stored charge and the conservative
+    ODE live on the compatible nodal basis. The estimator configuration and samples are held fixed;
+    stochastic fresh-scramble integration is intentionally a campaign-level policy, not hidden here.
+    """
+    if int(n_steps) != n_steps or n_steps < 0:
+        raise ValueError("n_steps must be a nonnegative integer")
+    if not np.isfinite(timestep_s) or timestep_s <= 0.0:
+        raise ValueError("timestep_s must be finite and positive")
+    if (current_balance_tol is not None
+            and (not np.isfinite(current_balance_tol) or current_balance_tol <= 0.0)):
+        raise ValueError("current_balance_tol must be finite and positive when supplied")
+
+    charge = np.asarray(initial_charge_node_c, dtype=float).copy()
+    common_arguments = dict(
+        poisson_system=poisson_system, boundary=boundary, verts=verts, faces=faces, areas=areas,
+        source_bounds=source_bounds, source_z=source_z,
+        potential_origin=potential_origin, potential_spacing=potential_spacing,
+        mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
+        n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
+        trajectory_max_steps=trajectory_max_steps,
+        phase_space_log2_samples=phase_space_log2_samples,
+        periodic_lateral=periodic_lateral, transport_estimator=transport_estimator,
+        face_centroids=face_centroids, face_gas_normals=face_gas_normals,
+        adjoint_face_quadrature_points=adjoint_face_quadrature_points,
+        adjoint_ray_offset=adjoint_ray_offset, adjoint_proposals=adjoint_proposals,
+        adjoint_proposal_frames=adjoint_proposal_frames,
+        bidirectional_options=bidirectional_options, transport_device=transport_device)
+    history = []
+    total_incident_charge = 0.0
+    total_absolute_incident_charge = 0.0
+    total_deposited_charge = 0.0
+    max_conservation_residual = 0.0
+    final_step = None
+    converged = False
+    charge_history = []
+
+    def record(step_index, potential, positive_face, negative_face, positive_node, negative_node):
+        item = dict(step=int(step_index), physical_time_s=float(step_index) * float(timestep_s))
+        item.update(_physical_current_balance_metrics(
+            positive_face, negative_face, positive_node, negative_node))
+        item.update(
+            minimum_potential_v=float(np.min(potential)),
+            maximum_potential_v=float(np.max(potential)),
+            mean_potential_v=float(np.mean(potential)),
+            total_stored_charge_c=float(np.sum(charge)))
+        history.append(item)
+        charge_history.append(charge.copy())
+        return item
+
+    for step_index in range(int(n_steps)):
+        try:
+            final_step = advance_dielectric_charging_3d(
+                charge_node_c=charge, duration_s=timestep_s, **common_arguments)
+        except BidirectionalCurrentCertificationError:
+            raise
+        except RuntimeError as error:
+            raise PhysicalTimeChargingIntegrationError(
+                f"physical-time charging failed before update {step_index}: {error}",
+                charge, history, step_index) from error
+        if final_step.bidirectional_method_hint:
+            frozen_options = (
+                {} if common_arguments["bidirectional_options"] is None
+                else dict(common_arguments["bidirectional_options"]))
+            discovered_hint = dict(final_step.bidirectional_method_hint)
+            if "method_hint" in frozen_options:
+                supplied_hint = dict(frozen_options["method_hint"])
+                if (set(supplied_hint) != set(discovered_hint)
+                        or any(not np.array_equal(supplied_hint[name], discovered_hint[name])
+                               for name in discovered_hint)):
+                    raise RuntimeError(
+                        "supplied bidirectional method map differs from the certified initial map")
+            else:
+                frozen_options["method_hint"] = discovered_hint
+            frozen_options["require_certification"] = False
+            common_arguments["bidirectional_options"] = frozen_options
+        state = record(
+            step_index, final_step.potential_before_v,
+            final_step.positive_face_current_density_a_m2,
+            final_step.negative_face_current_density_a_m2,
+            final_step.positive_current_node_a, final_step.negative_current_node_a)
+        if (current_balance_tol is not None
+                and state["max_relative_current_imbalance_node"] <= current_balance_tol):
+            converged = True
+            break
+        charge = final_step.charge_node_c.copy()
+        total_incident_charge += final_step.diagnostics["incident_charge_c"]
+        total_absolute_incident_charge += abs(final_step.diagnostics["incident_charge_c"])
+        total_deposited_charge += final_step.diagnostics["deposited_charge_c"]
+        max_conservation_residual = max(
+            max_conservation_residual,
+            abs(final_step.diagnostics["charge_conservation_residual_c"]))
+
+    coordinate_spacing = _coordinate_spacing_3d(
+        poisson_system, potential_spacing, mesh_length_unit_m)
+    estimator_by_name = _validate_transport_estimators_3d(
+        boundary, faces, transport_estimator, face_centroids, face_gas_normals)
+    _validate_adjoint_proposal_frames_3d(estimator_by_name, adjoint_proposal_frames)
+    final = _evaluate_incident_current_3d(
+        poisson_system, charge, boundary, verts, faces, areas,
+        source_bounds=source_bounds, source_z=source_z,
+        potential_origin=potential_origin, coordinate_spacing=coordinate_spacing,
+        mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
+        n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
+        trajectory_max_steps=trajectory_max_steps,
+        phase_space_log2_samples=phase_space_log2_samples,
+        periodic_lateral=periodic_lateral, transport_estimator=transport_estimator,
+        face_centroids=face_centroids, face_gas_normals=face_gas_normals,
+        adjoint_face_quadrature_points=adjoint_face_quadrature_points,
+        adjoint_ray_offset=adjoint_ray_offset, adjoint_proposals=adjoint_proposals,
+        adjoint_proposal_frames=adjoint_proposal_frames,
+        bidirectional_options=bidirectional_options, transport_device=transport_device)
+    if not converged:
+        final_state = record(
+            len(history), final["potential"], final["positive_face_current"],
+            final["negative_face_current"], final["positive_node_current"],
+            final["negative_node_current"])
+        converged = bool(
+            current_balance_tol is not None
+            and final_state["max_relative_current_imbalance_node"] <= current_balance_tol)
+
+    return PhysicalTimeDielectricCharging3DResult(
+        charge_node_c=charge, potential_v=final["potential"],
+        positive_face_current_density_a_m2=final["positive_face_current"],
+        negative_face_current_density_a_m2=final["negative_face_current"],
+        positive_current_node_a=final["positive_node_current"],
+        negative_current_node_a=final["negative_node_current"],
+        charge_history_node_c=np.stack(charge_history),
+        transport=final["transport"], poisson=final["poisson"],
+        bidirectional_method_hint=final["bidirectional_method_hint"], history=tuple(history),
+        converged=converged,
+        diagnostics=dict(
+            timestep_s=float(timestep_s), updates_completed=max(0, len(history) - 1),
+            total_incident_charge_c=total_incident_charge,
+            total_absolute_incident_charge_c=total_absolute_incident_charge,
+            total_deposited_charge_c=total_deposited_charge,
+            cumulative_charge_conservation_residual_c=(
+                total_deposited_charge - total_incident_charge),
+            maximum_step_charge_conservation_residual_c=max_conservation_residual),
+        known_limitations=(
+            "fixed-step physical-time forward Euler requires timestep-halving evidence",
+            "fixed estimator samples require an independent final current audit",
+            "no secondary-electron emission, reflection, leakage, or surface conduction",
+            "no floating-conductor circuit equations",
+        ) + _coupled_transport_limitations(final["transport"]))
 
 
 def solve_dielectric_charging_steady_3d(

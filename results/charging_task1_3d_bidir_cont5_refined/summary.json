@@ -1,0 +1,98 @@
+{
+  "config_hash": "9f6f218e6f072a2f753032a5c1670818b743f325819d29a19511fa4e7c30901e",
+  "config": {
+    "model": "exact_hard_visibility_3d_physical_time",
+    "geometry": {
+      "cell_width": 1.0,
+      "cell_length": 0.5,
+      "domain_height": 2.0,
+      "dx": 0.25,
+      "opening_width": 0.5,
+      "mask_thickness": 0.25,
+      "substrate_top": 1.25,
+      "etched_depth": 0.75
+    },
+    "timestep_s": 2.5e-07,
+    "steps": 200,
+    "refined_timestep_s": 1.25e-07,
+    "refined_steps": 400,
+    "forward_level": 10,
+    "ion_estimator": "bidirectional",
+    "ion_proposal_level": 8,
+    "ion_proposal_seed": 79,
+    "electron_proposal_level": 8,
+    "electron_proposal_seed": 83,
+    "trajectory_dt": 0.005,
+    "trajectory_max_steps": 50000,
+    "adjoint_face_points": 3,
+    "bidirectional_replicates": 4,
+    "bidirectional_max_level": 11,
+    "bidirectional_max_face_points": 7,
+    "bidirectional_absolute_tolerance": 0.02,
+    "bidirectional_relative_tolerance": 0.1,
+    "initial_state_sha256": "7b98c4e08db37d9f33efadfa8902e3480ebba0e5926c754f52eb122d790923d6",
+    "initial_key": "refined_charge_node_c",
+    "estimators": {
+      "Ar+": "bidirectional",
+      "electron": "adjoint"
+    }
+  },
+  "geometry_faces": 40,
+  "exact_operator_statement": "hard visibility; no smoothing or analytic current replacement",
+  "coarse_final": {
+    "step": 200,
+    "physical_time_s": 4.9999999999999996e-05,
+    "rms_relative_current_imbalance_face": 0.4540246330323682,
+    "max_relative_current_imbalance_face": 0.9101036395382526,
+    "active_face_count": 40,
+    "rms_relative_current_imbalance_node": 0.1952024976207055,
+    "max_relative_current_imbalance_node": 0.4387678097705803,
+    "active_node_count": 42,
+    "minimum_potential_v": -12.390910506126051,
+    "maximum_potential_v": 32.16595683409693,
+    "mean_potential_v": 10.874859363327179,
+    "total_stored_charge_c": -8.42790434148376e-17
+  },
+  "refined_final": {
+    "step": 400,
+    "physical_time_s": 4.9999999999999996e-05,
+    "rms_relative_current_imbalance_face": 0.4546075305787838,
+    "max_relative_current_imbalance_face": 0.9098454068985886,
+    "active_face_count": 40,
+    "rms_relative_current_imbalance_node": 0.196823458800581,
+    "max_relative_current_imbalance_node": 0.4397315205829103,
+    "active_node_count": 42,
+    "minimum_potential_v": -12.397143693117565,
+    "maximum_potential_v": 32.055888337073874,
+    "mean_potential_v": 10.855466168265448,
+    "total_stored_charge_c": -8.437711890867163e-17
+  },
+  "timestep_refinement": {
+    "charge_relative_l2": 0.0029788998157497955,
+    "potential_relative_l2": 0.0013896245895324332
+  },
+  "refined_charge_regions_c": {
+    "upper": -7.790400441523492e-16,
+    "lower_wall": 6.551501551119328e-16,
+    "floor": 3.951277013174461e-17
+  },
+  "conservation": {
+    "timestep_s": 1.25e-07,
+    "updates_completed": 400,
+    "total_incident_charge_c": -1.0369387088818034e-18,
+    "total_deposited_charge_c": -1.0369387088814521e-18,
+    "cumulative_charge_conservation_residual_c": 3.512896218562318e-31,
+    "maximum_step_charge_conservation_residual_c": 3.9481563859938335e-33
+  },
+  "gates": {
+    "charge_conservation": true,
+    "timestep_charge_relative_l2": true,
+    "timestep_potential_relative_l2": true,
+    "dipole_sign": true,
+    "rms_decreased": true,
+    "exact_operator": true,
+    "residual_contract": false
+  },
+  "campaign_complete": false,
+  "conclusion": "bounded Task 1 remains diagnostic; inspect failed gates before extension"
+}

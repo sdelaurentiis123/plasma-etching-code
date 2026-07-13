@@ -28,7 +28,9 @@ from .charging_poisson_3d import (
 )
 from .charging_coupled_3d import (
     DielectricChargingConvergenceError, DielectricChargingStep3DResult,
-    SteadyDielectricCharging3DResult, advance_dielectric_charging_3d,
+    PhysicalTimeChargingIntegrationError, PhysicalTimeDielectricCharging3DResult,
+    SteadyDielectricCharging3DResult,
+    advance_dielectric_charging_3d, integrate_dielectric_charging_transient_3d,
     solve_dielectric_charging_steady_3d,
 )
 from .surface_interaction_table import (
@@ -95,7 +97,9 @@ __all__ = [
     "NodalPoissonSystem3D", "PoissonDiagnostics3D", "assemble_q1_stiffness_3d",
     "lump_triangle_sheet_charge_3d",
     "DielectricChargingConvergenceError", "DielectricChargingStep3DResult",
-    "SteadyDielectricCharging3DResult", "advance_dielectric_charging_3d",
+    "PhysicalTimeChargingIntegrationError", "PhysicalTimeDielectricCharging3DResult",
+    "SteadyDielectricCharging3DResult",
+    "advance_dielectric_charging_3d", "integrate_dielectric_charging_transient_3d",
     "solve_dielectric_charging_steady_3d",
     "InteractionAxis", "SurfaceInteractionDomainError", "SurfaceInteractionEvaluation",
     "SurfaceInteractionInterpolationAudit", "SurfaceInteractionTable",

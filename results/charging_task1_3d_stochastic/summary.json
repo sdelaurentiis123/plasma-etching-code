@@ -1,0 +1,51 @@
+{
+  "config_hash": "31d3a034054200b3f2dcff745984b1b11046d86dbe06a4c154c87fd283055f9e",
+  "config": {
+    "model": "exact_hard_visibility_3d_fresh_scramble_physical_time",
+    "initial_state_sha256": "d664979ba3416a9cb351eda40c3c0d62164a4eabc1d1505449c34ca545d9ca0e",
+    "timestep_s": 1.25e-07,
+    "steps": 200,
+    "base_seed": 1009,
+    "seed_stride": 104729,
+    "forward_level": 10,
+    "ion_proposal_level": 8,
+    "electron_proposal_level": 9,
+    "method_map_source": "separate certified pilot archive",
+    "trajectory_dt": 0.005,
+    "trajectory_max_steps": 50000
+  },
+  "exact_operator_statement": "hard visibility; no smoothing or analytic current replacement",
+  "frozen_method_counts": {
+    "forward": 40,
+    "adjoint": 0
+  },
+  "final": {
+    "step": 199,
+    "physical_time_s": 2.4874999999999998e-05,
+    "seed": 20842080,
+    "rms_relative_current_imbalance_node": 0.22422780852814228,
+    "max_relative_current_imbalance_node": 0.5879690705355297,
+    "rms_relative_current_imbalance_face": 0.4491096869618212,
+    "max_relative_current_imbalance_face": 0.8494342264673751,
+    "minimum_potential_v": -12.405440884072041,
+    "maximum_potential_v": 50.076732562596625,
+    "total_stored_charge_c": -8.432673952968971e-17
+  },
+  "tail_steps": 40,
+  "tail_statistics": {
+    "rms_mean": 0.19922000448513114,
+    "rms_stderr": 0.0063662179851474475,
+    "worst_node_mean": 0.5748451266012056,
+    "worst_node_stderr": 0.016865250147586473
+  },
+  "charge_regions_c": {
+    "upper": -1.173729373688736e-15,
+    "lower_wall": 1.3274091860513076e-15,
+    "floor": -2.3522691543717497e-16
+  },
+  "maximum_step_charge_conservation_residual_c": 3.851859888774472e-33,
+  "total_absolute_charge_throughput_c": 2.7580900908052746e-16,
+  "conservation_relative_to_throughput": 1.396567828446043e-17,
+  "statistically_inside_contract": false,
+  "conclusion": "stochastic trajectory requires an independent high-sample final-state audit"
+}

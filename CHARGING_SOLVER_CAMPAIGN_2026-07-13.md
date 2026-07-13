@@ -4,7 +4,11 @@ Date: 2026-07-13
 
 ## Outcome
 
-The Task 0 decision gate is **closed**. Tasks 1--4 were not implemented or run.
+The Task 0 diagnostic gate is **closed**. Its response-precision result continues to hold Tasks 3--4
+and any response-derived accelerator, but it no longer blocks the derivative-free physical-time
+transient in Task 1. This is a scope correction: every resolved Task 0A branch in the original handoff
+sent the campaign through Task 1, which consumes conservative current evaluations rather than a
+finite-difference response.
 
 - Task 0A produced a complete, paired, exact-operator audit, but the smallest level-13
   signal-to-between-scramble-error ratio is 0.512. The required response is therefore still below
@@ -109,13 +113,90 @@ is diagnostic only; every score and final statement uses the hard-visibility kin
 `results/charging_task0b/electron_boundary_audit.png` and
 `results/charging_task0b/summary.json`.
 
-## Decision and bounded next action
+## Decision amendment and bounded next action
 
-1. Hold Tasks 1, 2a, 3, and 4. Task 0A has not cleared its precision gate.
-2. Drop Task 2b's local planar Maxwellian split for this model; it passed flat physics but failed the
+1. Run Task 1 after a paired production trajectory-horizon/timestep audit. Task 1 remains subject to
+   all conservation, timestep-refinement, independent-final-audit, branch, and exact-operator gates.
+2. Continue to hold Tasks 3 and 4. Task 0A has not cleared the response-precision gate needed to
+   select those accelerators.
+3. Drop Task 2b's local planar Maxwellian split for this model; it passed flat physics but failed the
    actual trench stiffness criterion.
-3. If the campaign resumes, acquire a higher-precision paired ensemble response at the stuck state.
+4. Hold Task 2a and any replacement preconditioner until Task 1 establishes a timestep-refined steady
+   state. A measured nonlocal response is the only replacement currently consistent with Task 0B,
+   and it must not be built until its paired basis clears the signal/error gate. No present radius does.
+5. In parallel, acquire a higher-precision paired ensemble response at the stuck state only if it is
+   needed to choose an accelerator.
    The level-13 minimum signal/error of 0.512 implies that brute-force replicate scaling alone would be
    expensive; use an accuracy-matched GPU run or a targeted estimator-variance improvement rather than
    another broad CPU sweep.
-4. Preserve the unchanged 0.08 contract and exact hard-visibility final audit.
+6. Preserve the unchanged 0.08 contract and exact hard-visibility final audit.
+
+The archived 47-by-47 finite-difference campaign used the same deterministic checkpoint, frozen
+proposal rules, and seeds for each plus/minus pair. It must not be described as an unpaired Jacobian.
+Its large full-space condition number remains real evidence about that frozen discrete operator, while
+the underpowered five-direction ensemble audit cannot yet attribute the difference.
+
+## Task 1-pre: production trajectory horizon
+
+Configuration hash: `21cdb54c47754ec652b424260684b8fc8e15bdabd2c76716df2cc65b9795c3bd`
+
+The canonical stuck current map was evaluated with common samples across the production horizon
+(`dt=0.01`, 4,000 steps), 4x and 8x horizons, and a half-timestep reference (`dt=0.005`, 64,000
+steps). Eight scrambles at level 9 found zero unresolved ion-forward, ion-adjoint, or
+electron-adjoint trajectories at every horizon. The 1x, 4x, and 8x current maps are identical.
+
+Against the half-timestep reference, the ensemble ion and electron current changes are 0.287% and
+0.170%; RMS and worst-node imbalance changes are 0.130% and 0.095%. The paired per-scramble RMS
+change is noisier (3.23% +/- 0.86%), but the ensemble-mean current and residual gates pass. Therefore
+the historical stuck residual is not explained by the 4.7% unresolved-electron artifact seen only in
+the earlier flat zero-field audit, and Task 1's horizon entry gate passes. See
+`results/charging_task1pre_horizon/trajectory_horizon_audit.png` and `summary.json`.
+
+## Task 1 and 2a execution: engine transient works; equilibrium contract remains red
+
+The engine now exposes a reusable `integrate_dielectric_charging_transient_3d` API rather than a
+campaign-only loop. It records separate positive/negative face and compatible Q1-node currents,
+worst/RMS node and face imbalance, exact per-step conservation, replayable nodal charge histories,
+and a resumable checkpoint on transport failure. The convergence equation remains the established
+active-node balance. Triangle balance is reported separately because triangles are integration
+elements, not independent stored-charge degrees of freedom.
+
+Two estimator bugs/inefficiencies were fixed during entry:
+
+- A folded surface-local grazing proposal was briefly combined with a source-aligned ion frame. That
+  swaps the ion's large source-normal speed into a horizontal component and creates arbitrarily slow
+  reverse rays. The invalid combination is removed and now rejected by the engine.
+- Once a separately certified forward/adjoint face map is frozen, the engine now traces adjoint rays
+  only on adjoint-selected faces and skips a direction entirely for all-forward/all-adjoint maps. A
+  regression gate proves the selected current is bitwise unchanged.
+
+The deterministic exact-operator branch used paired timestep ladders from 1 ns through 250 ns and
+warm continuation to about 160 microseconds. Key accepted comparison: over a 50-microsecond interval,
+250 ns versus 125 ns steps agree to 0.298% in charge and 0.139% in potential, ending at RMS 0.195/0.197
+and worst node 0.439/0.440. A 500 ns step is rejected (31.6% potential disagreement). The trajectory
+forms the nonlocal dipole expected from the physics: upper regions become strongly negative while
+lower-wall/floor regions become positive. Longer accepted-step trajectories fluctuate instead of
+closing the 0.08 node contract; this is not a conservation or timestep blow-up.
+
+An independent exact hard-visibility endpoint audit used 16 ion bidirectional replicates through
+level 13, up to 32 face-position points, and an electron proposal at level 12. Every ion face
+certified; the unchanged state scored RMS 0.193551, worst node 0.445733, and worst face 0.841180.
+Electron between-scramble uncertainty is not yet attached, so this is not represented as a complete
+final audit—and the residual is far above contract regardless.
+
+The fresh-scramble Task 1 variant froze the method map from that separate pilot and used independent
+scrambles at every physical step. Over the final 40 of 200 steps its statistically stationary values
+are RMS 0.199220 +/- 0.006366 and worst node 0.574845 +/- 0.016865. Conservation residual is
+1.40e-17 relative to absolute charge throughput. Unfreezing samples therefore changes the path but
+does not remove the residual floor.
+
+The bounded current-direction PTC used no derivative or quasi-Newton update. It accepted only
+safeguarded physical-current directions and halved pseudo-time after residual worsening. Result: 6
+accepted steps, 14 rejections, pseudo-step collapse below 1e-11 s, best RMS 0.179424 and worst node
+0.465949. It does not converge and the PTC branch is closed.
+
+Decision: no additional frozen-map solver variant. Promote the handoff's equilibrium/discretization
+audit (compatible nodal balance versus area-weighted faces and coarsened patches under grid
+refinement). Preserve the 0.08 contract and flag any demonstrated discretization-scale mismatch for
+human review rather than changing it. The local planar electron preconditioner remains rejected;
+Tasks 3--4 remain held by the Task 0A precision gate.

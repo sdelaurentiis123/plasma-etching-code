@@ -187,7 +187,9 @@ def _method_per_face(model, species_name):
     return np.asarray([by_cell[tuple(cell)] for cell in model.cells])
 
 
-def _species_evaluation(model, species_name, potential, log2_samples, seed):
+def _species_evaluation(
+        model, species_name, potential, log2_samples, seed, max_steps=None,
+        fixed_dt=0.01):
     method_face = _method_per_face(model, species_name)
     endpoint = np.zeros((len(model.cells), 2))
     detail = {}
@@ -195,7 +197,7 @@ def _species_evaluation(model, species_name, potential, log2_samples, seed):
         forward = forward_boundary_state_cell_flux_qmc(
             model.boundary, species_name, potential, model.solid, model.cells,
             normals=model.normals, log2_samples=log2_samples, seed=seed,
-            fixed_dt=0.01, source_offset=1e-6,
+            fixed_dt=fixed_dt, max_steps=max_steps, source_offset=1e-6,
             return_trajectory_outcomes=True, return_trajectory_contributions=True)
         selected = method_face == "forward"
         endpoint[selected] = forward["per_face_endpoint"][selected]
@@ -209,7 +211,7 @@ def _species_evaluation(model, species_name, potential, log2_samples, seed):
             model.boundary, species_name, potential, model.solid,
             model.cells[adjoint_faces], model.normals[adjoint_faces],
             proposal_species=proposal, face_position_samples=auxiliary[:, 0],
-            fixed_dt=0.01, face_offset=1e-6,
+            fixed_dt=fixed_dt, max_steps=max_steps, face_offset=1e-6,
             return_trajectory_outcomes=True, return_trajectory_contributions=True)
         endpoint[adjoint_faces] = adjoint["per_face_endpoint"]
         detail["adjoint"] = adjoint
