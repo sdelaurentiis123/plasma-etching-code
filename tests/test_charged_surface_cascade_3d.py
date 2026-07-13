@@ -62,6 +62,25 @@ class _PerfectSpecularResponse:
             outgoing=tuple(outgoing))
 
 
+class _HalfWeightSpecularResponse:
+    def evaluate(self, incident_populations, charge_number_by_species, context):
+        outgoing = []
+        for population in incident_populations:
+            normal = context.face_gas_normal[population.event_face]
+            direction = population.event_incident_direction
+            reflected = direction - 2.0 * np.sum(direction * normal, axis=1)[:, None] * normal
+            outgoing.append(OutgoingChargedParticleEvents3D(
+                population.name, charge_number_by_species[population.name],
+                population.face_count, population.event_face,
+                0.5 * population.event_flux_m2_s
+                * context.face_area_m2[population.event_face],
+                population.event_position,
+                np.sqrt(population.event_energy_eV)[:, None] * reflected))
+        return account_charged_surface_transfer_3d(
+            incident_populations, charge_number_by_species, context.face_area_m2,
+            outgoing=tuple(outgoing))
+
+
 class _LambertianElectronPerIonResponse:
     """Manufactured one-electron yield with deterministic cosine-weighted directions."""
 
@@ -112,14 +131,17 @@ class _LambertianElectronPerIonResponse:
             outgoing=outgoing)
 
 
-def _solve(incident, charge, response, *, max_bounces=16, fixed_dt=0.05, launch_offset=1e-4):
+def _solve(
+        incident, charge, response, *, max_bounces=16, fixed_dt=0.05,
+        launch_offset=1e-4, relative_tail_tolerance=0.0):
     verts, faces, areas, context = _parallel_triangle_geometry()
     return solve_charged_surface_cascade_3d(
         (incident,), {incident.name: charge}, response, context, verts, faces, areas,
         nodal_potential_v=np.zeros((3, 3, 3)), potential_origin=(0.0, 0.0, 0.0),
         potential_spacing=0.5, mesh_length_unit_m=1e-6,
         launch_offset=launch_offset, fixed_dt=fixed_dt, max_steps=200,
-        max_bounces=max_bounces, device="cpu")
+        max_bounces=max_bounces, relative_tail_tolerance=relative_tail_tolerance,
+        device="cpu")
 
 
 def test_perfect_absorber_closes_one_response_with_exact_charge_ledger():
@@ -154,6 +176,36 @@ def test_closed_specular_cavity_keeps_cap_remainder_in_charge_ledger():
         result.initial_incident_charge_rate_c_s, rtol=3e-16)
     assert result.relative_charge_balance_error < 3e-16
     assert all(item.relative_charge_balance_error < 5e-16 for item in result.transfers)
+
+
+def test_declared_tail_closure_is_conservative_and_exposes_spatial_error_bound():
+    _, _, _, context = _parallel_triangle_geometry()
+    incident = _impact("electron", 0, 2.5e7, context, [-1.0, 0.0, 0.0])
+    strict = _solve(incident, -1, _HalfWeightSpecularResponse(), max_bounces=5)
+    closed = _solve(
+        incident, -1, _HalfWeightSpecularResponse(), max_bounces=5,
+        relative_tail_tolerance=0.1)
+
+    assert not strict.completed
+    assert closed.completed
+    assert closed.unresolved_charge_rate_c_s == 0.0
+    assert np.isclose(closed.tail_closure_relative_absolute_charge_rate, 0.0625)
+    assert np.isclose(closed.tail_closure_l1_current_error_bound_relative, 0.125)
+    assert np.isclose(
+        closed.deposited_charge_rate_c_s,
+        closed.initial_incident_charge_rate_c_s, rtol=5e-16)
+    assert closed.relative_charge_balance_error < 5e-16
+
+
+def test_tail_tolerance_never_closes_a_nondecaying_specular_cavity():
+    _, _, _, context = _parallel_triangle_geometry()
+    incident = _impact("electron", 0, 2.5e7, context, [-1.0, 0.0, 0.0])
+    result = _solve(
+        incident, -1, _PerfectSpecularResponse(), max_bounces=4,
+        relative_tail_tolerance=1e-6)
+
+    assert not result.completed
+    assert result.tail_closure_absolute_charge_rate_c_s == 0.0
 
 
 def test_one_lambertian_electron_per_ion_closes_charge_and_q1_projection():

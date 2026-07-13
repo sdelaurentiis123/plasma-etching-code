@@ -221,6 +221,8 @@ def main():
         json.dumps(config, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     source_paths = (
         ROOT / "src/petch/charging_coevolution_3d.py",
+        ROOT / "src/petch/charging_coupled_3d.py",
+        ROOT / "src/petch/charged_surface_cascade_3d.py",
         ROOT / "src/petch/feature_step_3d.py",
         ROOT / "src/petch/surface_charge_remap_3d.py",
         ROOT / "src/petch/charged_surface_response_3d.py",

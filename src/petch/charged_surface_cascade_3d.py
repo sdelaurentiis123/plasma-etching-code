@@ -16,6 +16,7 @@ from .charged_surface_response_3d import (
     ChargedSurfaceContext3D,
     ChargedSurfaceResponse3D,
     ChargedSurfaceTransfer3D,
+    perfect_absorber_surface_transfer_3d,
 )
 from .sheath import ECHARGE
 from .surface_kinetics import FaceResolvedEnergeticFlux, SurfaceFluxes
@@ -36,6 +37,9 @@ class ChargedSurfaceCascade3DResult:
     deposited_charge_rate_c_s: float
     escaped_charge_rate_c_s: float
     unresolved_charge_rate_c_s: float
+    tail_closure_absolute_charge_rate_c_s: float
+    tail_closure_relative_absolute_charge_rate: float
+    tail_closure_l1_current_error_bound_relative: float
     charge_balance_residual_c_s: float
     relative_charge_balance_error: float
     completed: bool
@@ -67,9 +71,20 @@ class ChargedSurfaceCascade3DResult:
         rates = np.asarray([
             self.initial_incident_charge_rate_c_s, self.deposited_charge_rate_c_s,
             self.escaped_charge_rate_c_s, self.unresolved_charge_rate_c_s,
+            self.tail_closure_absolute_charge_rate_c_s,
+            self.tail_closure_relative_absolute_charge_rate,
+            self.tail_closure_l1_current_error_bound_relative,
             self.charge_balance_residual_c_s, self.relative_charge_balance_error], dtype=float)
-        if np.any(~np.isfinite(rates)) or self.relative_charge_balance_error < 0.0:
+        if (np.any(~np.isfinite(rates)) or self.relative_charge_balance_error < 0.0
+                or self.tail_closure_absolute_charge_rate_c_s < 0.0
+                or self.tail_closure_relative_absolute_charge_rate < 0.0
+                or self.tail_closure_l1_current_error_bound_relative < 0.0):
             raise ValueError("invalid charged-cascade charge ledger")
+        if not np.isclose(
+                self.tail_closure_l1_current_error_bound_relative,
+                2.0 * self.tail_closure_relative_absolute_charge_rate,
+                rtol=0.0, atol=8.0 * np.finfo(float).eps):
+            raise ValueError("charged-cascade tail error bound is inconsistent")
         if self.relative_charge_balance_error > 5e-13:
             raise ValueError("charged surface cascade does not conserve signed charge")
         for value in (positive, negative, signed):
@@ -111,13 +126,20 @@ def solve_charged_surface_cascade_3d(
         context: ChargedSurfaceContext3D, verts, faces, areas, *,
         nodal_potential_v, potential_origin, potential_spacing,
         mesh_length_unit_m=1e-6, launch_offset=1e-5, fixed_dt=0.01,
-        max_steps=10000, max_bounces=16, periodic_lateral=False, device=None):
+        max_steps=10000, max_bounces=16, relative_tail_tolerance=0.0,
+        periodic_lateral=False, device=None):
     """Alternate material response and full-field flight without losing capped charge.
 
     ``max_bounces`` caps response evaluations, not charge accounting.  If the cap is reached, the
     landed-but-unprocessed population is returned in ``unresolved_incident`` and included explicitly
     in the global charge ledger.  Production callers may refine the cap or apply an independently
     justified unbiased roulette; they may not treat an incomplete cascade as closed.
+
+    A positive ``relative_tail_tolerance`` enables a deterministic conservative tail closure once
+    the absolute charge rate remaining after at least one flight is below that fraction of the
+    primary absolute charge rate. The remaining landed population is absorbed on its current faces.
+    Global charge remains exact; the normalized L1 error of the spatial current distribution is
+    bounded by twice the reported tail fraction. Zero retains the strict no-truncation behavior.
     """
     incident = tuple(incident_populations)
     supplied_charge = dict(charge_number_by_species)
@@ -127,7 +149,9 @@ def solve_charged_surface_cascade_3d(
             or any(int(value) != value or int(value) == 0 for value in supplied_charge.values())
             or not isinstance(context, ChargedSurfaceContext3D)
             or not hasattr(response, "evaluate")
-            or int(max_bounces) != max_bounces or max_bounces <= 0):
+            or int(max_bounces) != max_bounces or max_bounces <= 0
+            or not np.isfinite(relative_tail_tolerance)
+            or not 0.0 <= relative_tail_tolerance < 1.0):
         raise ValueError("invalid charged surface-cascade inputs")
 
     positive = np.zeros_like(context.face_area_m2)
@@ -139,12 +163,22 @@ def solve_charged_surface_cascade_3d(
     current_charge = charge
     initial_charge_rate = _incident_charge_rate(
         incident, charge, context.face_area_m2)
+    initial_absolute_charge_rate = _incident_absolute_charge_rate(
+        incident, charge, context.face_area_m2)
+    tail_closure_absolute_charge_rate = 0.0
     for _bounce in range(int(max_bounces)):
         expected_incident_charge_rate = _incident_charge_rate(
             current, current_charge, context.face_area_m2)
         expected_absolute_charge_rate = _incident_absolute_charge_rate(
             current, current_charge, context.face_area_m2)
-        transfer = response.evaluate(current, current_charge, context)
+        tail_close = bool(
+            _bounce > 0 and relative_tail_tolerance > 0.0
+            and expected_absolute_charge_rate
+            <= float(relative_tail_tolerance) * initial_absolute_charge_rate)
+        transfer = (
+            perfect_absorber_surface_transfer_3d(
+                current, current_charge, context.face_area_m2)
+            if tail_close else response.evaluate(current, current_charge, context))
         if (not isinstance(transfer, ChargedSurfaceTransfer3D)
                 or transfer.face_current_density_a_m2.shape != context.face_area_m2.shape):
             raise TypeError("charged surface response returned an incompatible transfer")
@@ -158,6 +192,11 @@ def solve_charged_surface_cascade_3d(
         transfers.append(transfer)
         positive += transfer.positive_deposition_current_density_a_m2
         negative += transfer.negative_deposition_current_density_a_m2
+        if tail_close:
+            tail_closure_absolute_charge_rate = expected_absolute_charge_rate
+            current = ()
+            current_charge = {}
+            break
         if not transfer.outgoing:
             current = ()
             current_charge = {}
@@ -191,9 +230,12 @@ def solve_charged_surface_cascade_3d(
         initial_charge_rate - deposited_charge_rate
         - escaped_charge_rate - unresolved_charge_rate)
     scale = max(
-        _incident_absolute_charge_rate(incident, charge, context.face_area_m2),
+        initial_absolute_charge_rate,
         abs(deposited_charge_rate), abs(escaped_charge_rate), abs(unresolved_charge_rate),
         np.finfo(float).tiny)
+    tail_relative = float(
+        tail_closure_absolute_charge_rate
+        / max(initial_absolute_charge_rate, np.finfo(float).tiny))
     return ChargedSurfaceCascade3DResult(
         positive, negative, signed, tuple(transfers), tuple(flights_by_bounce),
         current, current_charge,
@@ -201,6 +243,9 @@ def solve_charged_surface_cascade_3d(
         deposited_charge_rate_c_s=deposited_charge_rate,
         escaped_charge_rate_c_s=escaped_charge_rate,
         unresolved_charge_rate_c_s=unresolved_charge_rate,
+        tail_closure_absolute_charge_rate_c_s=tail_closure_absolute_charge_rate,
+        tail_closure_relative_absolute_charge_rate=tail_relative,
+        tail_closure_l1_current_error_bound_relative=2.0 * tail_relative,
         charge_balance_residual_c_s=float(residual),
         relative_charge_balance_error=float(abs(residual) / scale),
         completed=not bool(current))
@@ -271,10 +316,14 @@ def augment_transport_with_charged_reimpacts_3d(
             passthrough.append(population)
     merged = tuple(
         _merge_face_resolved_populations_3d(grouped[name]) for name in ordered_names)
+    tail_limitation = (() if cascade.tail_closure_absolute_charge_rate_c_s == 0.0 else (
+        "charged cascade tail was absorbed on its current faces with normalized spatial-current "
+        f"L1 error bounded by {cascade.tail_closure_l1_current_error_bound_relative:.6g}",
+    ))
     limitations = tuple(transport.known_limitations) + (
         "energetic surface flux includes conservative charged-particle re-impacts",
         "boundary hit/escape probabilities exclude subsequent surface-response flights",
-    )
+    ) + tail_limitation
     return BoundaryTransport3DResult(
         SurfaceFluxes(
             transport.surface_fluxes.neutral_flux_m2_s,

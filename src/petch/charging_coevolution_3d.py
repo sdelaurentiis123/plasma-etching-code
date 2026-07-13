@@ -260,7 +260,8 @@ def integrate_surface_charging_to_saturation_3d(
         bidirectional_options=None, transport_device=None,
         charged_surface_response=None, surface_material_state=None,
         response_launch_offset=1e-5, response_fixed_dt=None,
-        response_max_bounces=16, stop_on_saturation=True):
+        response_max_bounces=16, response_relative_tail_tolerance=0.0,
+        stop_on_saturation=True):
     """Integrate one fixed geometry to B1/B2 saturation with fixed time or safeguarded SER.
 
     SER follows the residual-ratio rule ``dt[n+1] = dt[n] * ||F[n]||/||F[n+1]||`` with declared
@@ -291,6 +292,8 @@ def integrate_surface_charging_to_saturation_3d(
             or not np.isfinite(timestep_s) or timestep_s <= 0.0
             or int(maximum_steps) != maximum_steps or maximum_steps < 0
             or timestep_policy not in {"fixed", "ser"}
+            or not np.isfinite(response_relative_tail_tolerance)
+            or not 0.0 <= response_relative_tail_tolerance < 1.0
             or not isinstance(stop_on_saturation, (bool, np.bool_))):
         raise ValueError("invalid C3 surface-charging integration inputs")
     if timestep_policy == "ser":
@@ -346,7 +349,8 @@ def integrate_surface_charging_to_saturation_3d(
         charged_surface_response=charged_surface_response, face_material_id=material,
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset, response_fixed_dt=response_fixed_dt,
-        response_max_bounces=response_max_bounces)
+        response_max_bounces=response_max_bounces,
+        response_relative_tail_tolerance=response_relative_tail_tolerance)
 
     final_step = None
     final_patch = None
@@ -425,6 +429,12 @@ def integrate_surface_charging_to_saturation_3d(
             charge_conservation_residual_c=float(
                 step.diagnostics["charge_conservation_residual_c"]),
             charge_conservation_relative_error=charge_conservation_relative_error,
+            response_tail_closure_relative_absolute_charge_rate=float(getattr(
+                step.surface_transfer,
+                "tail_closure_relative_absolute_charge_rate", 0.0)),
+            response_tail_closure_l1_current_error_bound_relative=float(getattr(
+                step.surface_transfer,
+                "tail_closure_l1_current_error_bound_relative", 0.0)),
             surface_transfer_relative_charge_balance_error=(
                 step.surface_transfer.relative_charge_balance_error))
         history.append(item)
@@ -496,7 +506,11 @@ def integrate_surface_charging_to_saturation_3d(
             current_balance_tolerance=float(current_balance_tolerance),
             patch_scales_m=scales,
             exact_operator_statement=(
-                "caller-supplied hard-visibility kinetic response; no smoothed residual"),
+                "caller-supplied hard-visibility kinetic response; no smoothed residual; "
+                f"response-tail tolerance={float(response_relative_tail_tolerance):.17g}"),
+            response_relative_tail_tolerance=float(response_relative_tail_tolerance),
+            final_response_tail_closure_l1_current_error_bound_relative=float(
+                history[-1]["response_tail_closure_l1_current_error_bound_relative"]),
             retained_node_rms_relative_current_imbalance=(
                 history[-1]["rms_relative_current_imbalance_node"]),
             retained_node_max_relative_current_imbalance=(

@@ -569,7 +569,7 @@ under-determined) -- an honest result that quantifies how many structures must b
 - **Manufactured C3 integration passes; scientific C3 closure remains pending.** Config
   `d3b5485aff03a950c82f6fb4a0161e76532b5120dc7f5a075bb340a7a4c444fc` gives planar B1 rate 0,
   node RMS/worst 0/0, patch maxima 0/0 at 0.25/1.0 micrometers, exact transport reuse, and zero
-  deposition/remap ledger error. The full suite is 364 passed, 1 skipped. The real-trench cold/warm
+  deposition/remap ledger error. The full suite is 366 passed, 1 skipped. The real-trench cold/warm
   branch, timestep/grid/sample refinement, observable invariance, and independent high-sample B5
   audit remain required; C4 has not started. Evidence is in
   `CHARGING_COEVOLUTION_C3_AUDIT_2026-07-13.md` and `results/charging_coevolution_c3/`.
@@ -579,6 +579,22 @@ under-determined) -- an honest result that quantifies how many structures must b
   The inverse is neither unique nor accurate, so migration is refused. The real C3 trajectory must
   start from zero face charge or a face-authoritative checkpoint produced by C3 itself; no
   minimum-norm or regularized sheet-charge guess is admitted.
+- **The first bounded real-trench C3 trajectory now writes a genuine face checkpoint.** Config
+  `f188a7eb1eb6a7476313ffa44af810c47432fe71c3f940a8a8313f3478c7b96e` starts the coarse 40-face
+  trench from zero sigma and reuses only the separately selected estimator map. Over two 0.125
+  microsecond updates, node RMS/worst falls 0.760/0.995 -> 0.513/0.930 and exact ion-normalized B2
+  patch max falls from 1111/663 to 0.963/0.963 at 0.25/0.50 micrometers. It remains far from 0.08;
+  this is a cost/integration pilot, not convergence.
+- **A real production blocker in weighted reflection was fixed with a declared error bound.** Strict
+  zero-tolerance behavior refused the trench because fractional specular weight never becomes
+  literally empty, even though the unresolved charge falls to `1e-43` by 16 bounces. A positive,
+  explicit response-tail tolerance now closes only a decayed post-flight tail by absorbing it on its
+  current impact faces; global charge remains exact and the spatial-current L1 error is bounded and
+  reported as twice the tail fraction. The default remains zero, and a nondecaying closed specular
+  cavity still refuses. Tightening `1e-10 -> 1e-12` changes face sigma by `1.44e-14` relative L2 and
+  potential by `4.53e-15`, while the tighter maximum L1 bound is `8.52e-14`. Pilot evidence is in
+  `results/charging_coevolution_c3_trench_pilot*/`, with the paired differences and artifact hashes
+  in `results/charging_coevolution_c3_trench_pilot/tail_refinement_comparison.json`.
 
 ## Roadmap (remaining)
 

@@ -1,0 +1,31 @@
+{
+  "schema": "petch.charging.coevolution.c3.response-tail-refinement.v1",
+  "status": "bounded coarse pilot; not a convergence claim",
+  "baseline": {
+    "relative_tail_tolerance": 1e-10,
+    "config_hash": "f188a7eb1eb6a7476313ffa44af810c47432fe71c3f940a8a8313f3478c7b96e",
+    "summary_sha256": "5ddbbc707d4e8ecfce01af42780fa98f8148efbc6786bba8d7ff7419b60f0a65",
+    "face_checkpoint_sha256": "b78ecae88a67473d40d4cd71c2e9f451a356668aa50864bbac11089b5bd26ccb",
+    "maximum_l1_current_error_bound_relative": 6.543584535379836e-11
+  },
+  "refined": {
+    "relative_tail_tolerance": 1e-12,
+    "config_hash": "f4746da2a94e945eb5103b25d4f37c9f160d50477e1887a11922ac78f01af520",
+    "summary_sha256": "b0b461b0d76417cda88f3fc6628078810be46adb11c0c4f39da1d49b0545f74b",
+    "face_checkpoint_sha256": "4296cf232ffb7eae533bb6f25cfb9236747faa3c61df57762a90c1cfafb60df9",
+    "maximum_l1_current_error_bound_relative": 8.518990285962657e-14
+  },
+  "relative_l2_difference": {
+    "sigma_c_per_m2": 1.444509373635041e-14,
+    "face_charge_c": 1.7697898807546476e-14,
+    "charge_node_c": 7.84912011284638e-15,
+    "potential_v": 4.534618185175303e-15
+  },
+  "absolute_linf_difference": {
+    "sigma_c_per_m2": 1.1939776424496618e-17,
+    "face_charge_c": 5.277048047621026e-31,
+    "charge_node_c": 2.262967684655002e-31,
+    "potential_v": 1.4210854715202004e-13
+  },
+  "conclusion": "tail-tolerance refinement is numerically indistinguishable at this pilot state"
+}

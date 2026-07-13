@@ -90,7 +90,8 @@ saturated. Deposition conservation closes to `2.43e-16` and `1.21e-16`; signed c
 the two etched surface increments is itemized separately. This earns a tested co-simulation path,
 not pulsed-process validation.
 
-The full local regression suite after integration is **364 passed, 1 skipped**. The skip is the
+The full local regression suite after the bounded real-trench integration is **366 passed, 1
+skipped**. The skip is the
 existing unavailable-CUDA condition on this CPU-only build.
 
 ## Legacy checkpoint migration refusal
@@ -106,6 +107,51 @@ was initialized and evolved as a nodal state and contains components outside the
 There is no unique conservative surface charge that can be remapped from it. The real C3 campaign
 must start from zero face charge or a checkpoint written by this C3 face-authoritative path. No
 minimum-norm, regularized, or guessed inverse is admitted.
+
+## Bounded real-trench pilot
+
+A two-update coarse real-trench run now exercises C3 from zero authoritative face charge with the
+existing separately selected 40-face ion estimator map, exact hard visibility, bounded C2 grazing
+reflection, and the 0.25/0.50 micrometer B2 scales. No legacy nodal charge is reused. Config
+`f188a7eb1eb6a7476313ffa44af810c47432fe71c3f940a8a8313f3478c7b96e` writes the first replayable
+C3 face checkpoint to `results/charging_coevolution_c3_trench_pilot/`.
+
+The first strict run correctly refused the response cascade: deterministic weighted reflection can
+leave a positive but geometrically vanishing tail forever, so merely raising the 16-bounce cap cannot
+make the population literally empty. A declared conservative tail closure was added with default
+tolerance zero. After at least one reflected flight, if the remaining absolute charge rate is below
+the declared fraction of the primary absolute rate, it is absorbed on its current impact faces. The
+global charge ledger remains exact. The normalized L1 error of the spatial current distribution is
+rigorously bounded by twice the closed tail fraction and is reported on every evaluation. A
+nondecaying perfect-specular cavity still refuses; the tolerance cannot hide a trapped finite tail.
+
+This is a deterministic bounded-error closure, not stochastic roulette. Classical transport codes
+normally use weight cutoffs with Russian roulette so the mean carried weight stays unbiased; see the
+[Los Alamos Monte Carlo error analysis](https://www.osti.gov/servlets/purl/6286976-DagIii/). C3 keeps
+the deterministic replay and exact per-run charge ledger instead, and requires tail-tolerance
+refinement as a separate numerical error dimension.
+
+| Quantity | Initial evaluation | After 1 update | After 2 updates |
+| --- | ---: | ---: | ---: |
+| Physical time (microseconds) | 0 | 0.125 | 0.250 |
+| Node RMS / worst diagnostic | 0.760 / 0.995 | 0.533 / 0.959 | 0.513 / 0.930 |
+| B2 max, 0.25 micrometers | 1111.15 | 0.9785 | 0.9628 |
+| B2 max, 0.50 micrometers | 662.94 | 0.9784 | 0.9626 |
+| Maximum potential-rate magnitude (V/s) | 2.217e8 | 2.158e7 | 2.115e7 |
+| Tail spatial-current L1 bound | 2.40e-12 | 4.62e-11 | 6.54e-11 |
+
+The huge initial B2 value is real under the signed contract normalization: some active patches
+receive far more electron than ion current, so division by local ion current is severe. It is not the
+historical symmetric metric. The pilot remains far from the 0.08 B2 gate and makes no convergence
+claim.
+
+Tightening the tail tolerance from `1e-10` to `1e-12` changes final face sigma by relative L2
+`1.44e-14` and potential by relative L2 `4.53e-15`; the tighter run's largest reported L1 current
+bound is `8.52e-14`. This passes the bounded tail-refinement check at the pilot state. Both runs close
+charge deposition below `1.78e-16` relative and surface-transfer charge below `4.68e-15`. The
+machine-readable comparison, including hashes of both source summaries and face checkpoints, is
+`results/charging_coevolution_c3_trench_pilot/tail_refinement_comparison.json`. Each two-update run
+takes about 1.14 seconds on the recorded CPU; both exact wall-clock values are in their manifests.
 
 ## Evidence and provenance
 

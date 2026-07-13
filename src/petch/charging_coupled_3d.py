@@ -431,7 +431,8 @@ def _evaluate_incident_current_3d(
         adjoint_ray_offset, adjoint_proposals, adjoint_proposal_frames,
         bidirectional_options, transport_device, charged_surface_response=None,
         face_material_id=None, surface_material_state=None,
-        response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16):
+        response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16,
+        response_relative_tail_tolerance=0.0):
     charged_species = tuple(species for species in boundary.species if species.charge_number != 0)
     if not charged_species:
         raise ValueError("dielectric charging requires at least one charged boundary species")
@@ -548,7 +549,9 @@ def _evaluate_incident_current_3d(
             launch_offset=response_launch_offset,
             fixed_dt=(trajectory_fixed_dt if response_fixed_dt is None else response_fixed_dt),
             max_steps=trajectory_max_steps,
-            max_bounces=response_max_bounces, periodic_lateral=periodic_lateral,
+            max_bounces=response_max_bounces,
+            relative_tail_tolerance=response_relative_tail_tolerance,
+            periodic_lateral=periodic_lateral,
             device=transport_device)
         if not surface_transfer.completed:
             raise RuntimeError(
@@ -604,7 +607,8 @@ def advance_dielectric_charging_3d(
         bidirectional_options=None,
         transport_device=None, charged_surface_response=None,
         face_material_id=None, surface_material_state=None,
-        response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16):
+        response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16,
+        response_relative_tail_tolerance=0.0):
     """Advance stored dielectric charge by the signed incident-particle current.
 
     The sequence is charge -> Q1 Poisson voltage -> collisionless charged-particle trajectories ->
@@ -654,7 +658,8 @@ def advance_dielectric_charging_3d(
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset,
         response_fixed_dt=response_fixed_dt,
-        response_max_bounces=response_max_bounces)
+        response_max_bounces=response_max_bounces,
+        response_relative_tail_tolerance=response_relative_tail_tolerance)
     surface_transfer = evaluated["surface_transfer"]
     face_current = surface_transfer.face_current_density_a_m2
     current_node = evaluated["positive_node_current"] - evaluated["negative_node_current"]
@@ -709,6 +714,10 @@ def advance_dielectric_charging_3d(
                 surface_transfer.charge_balance_residual_c_s * float(duration_s)),
             surface_transfer_relative_charge_balance_error=(
                 surface_transfer.relative_charge_balance_error),
+            response_tail_closure_relative_absolute_charge_rate=float(getattr(
+                surface_transfer, "tail_closure_relative_absolute_charge_rate", 0.0)),
+            response_tail_closure_l1_current_error_bound_relative=float(getattr(
+                surface_transfer, "tail_closure_l1_current_error_bound_relative", 0.0)),
             maximum_abs_face_current_density_a_m2=float(np.max(np.abs(face_current)))),
         known_limitations=(
             "all supplied surface triangles are treated as charge-storing dielectric",
@@ -738,7 +747,8 @@ def integrate_dielectric_charging_transient_3d(
         bidirectional_options=None, transport_device=None,
         charged_surface_response=None, face_material_id=None,
         surface_material_state=None, response_launch_offset=1e-5,
-        response_fixed_dt=None, response_max_bounces=16):
+        response_fixed_dt=None, response_max_bounces=16,
+        response_relative_tail_tolerance=0.0):
     """Integrate the conservative dielectric charge ODE with fixed physical timesteps.
 
     ``n_steps`` is the maximum number of forward-Euler charge updates. History contains the initial
@@ -777,7 +787,8 @@ def integrate_dielectric_charging_transient_3d(
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset,
         response_fixed_dt=response_fixed_dt,
-        response_max_bounces=response_max_bounces)
+        response_max_bounces=response_max_bounces,
+        response_relative_tail_tolerance=response_relative_tail_tolerance)
     history = []
     total_incident_charge = 0.0
     total_absolute_incident_charge = 0.0
@@ -858,7 +869,8 @@ def integrate_dielectric_charging_transient_3d(
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset,
         response_fixed_dt=response_fixed_dt,
-        response_max_bounces=response_max_bounces)
+        response_max_bounces=response_max_bounces,
+        response_relative_tail_tolerance=response_relative_tail_tolerance)
     if not converged:
         final_state = record(
             len(history), final["potential"], final["positive_face_current"],
@@ -921,6 +933,7 @@ def solve_dielectric_charging_steady_3d(
         transport_device=None, charged_surface_response=None,
         face_material_id=None, surface_material_state=None,
         response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16,
+        response_relative_tail_tolerance=0.0,
         max_iter=30, min_iter=2, current_balance_tol=1e-3,
         beta=0.5, response_energy_eV=4.0, maximum_voltage_step=8.0,
         trust_growth_tolerance=0.02, minimum_beta=1e-4,
@@ -1012,7 +1025,8 @@ def solve_dielectric_charging_steady_3d(
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset,
         response_fixed_dt=response_fixed_dt,
-        response_max_bounces=response_max_bounces)
+        response_max_bounces=response_max_bounces,
+        response_relative_tail_tolerance=response_relative_tail_tolerance)
 
     beta_current = float(beta); rejected_steps = 0; history = []
 
