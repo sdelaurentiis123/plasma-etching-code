@@ -134,7 +134,9 @@ def main():
         ser_allowed_residual_growth=args.ser_allowed_residual_growth,
         potential_rate_tolerance_v_s=args.potential_rate_tolerance_v_s,
         patch_scales_um=list(args.patch_scales_um), n_position=args.n_position,
-        seed=args.seed, trajectory_dt=args.trajectory_dt,
+        seed=args.seed,
+        adjoint_proposal_seeds={"Ar+": args.seed, "electron": args.seed + 4},
+        trajectory_dt=args.trajectory_dt,
         trajectory_max_steps=args.trajectory_max_steps,
         forward_level=args.forward_level, adjoint_level=args.adjoint_level,
         initial_face_state_sha256=initial_state_sha256,
@@ -190,8 +192,9 @@ def main():
             transport_estimator={"Ar+": "bidirectional", "electron": "adjoint"},
             adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-4,
             adjoint_proposals={
-                "Ar+": _ion_proposal(boundary, args.adjoint_level, 79),
-                "electron": _electron_proposal(boundary, args.adjoint_level, 83)},
+                "Ar+": _ion_proposal(boundary, args.adjoint_level, args.seed),
+                "electron": _electron_proposal(
+                    boundary, args.adjoint_level, args.seed + 4)},
             adjoint_proposal_frames={"Ar+": "source_aligned", "electron": "surface_local"},
             bidirectional_options=dict(
                 forward_log2_samples=args.forward_level,
@@ -306,15 +309,37 @@ def main():
                     "bounded pilot only; continue from face checkpoint with refinement evidence"))
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "config.json").write_text(json.dumps(config, indent=2) + "\n")
-    (args.output_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    checkpoint_path = args.output_dir / "face_checkpoint.npz"
+    current_audit_path = args.output_dir / "current_audit.npz"
     np.savez_compressed(
-        args.output_dir / "face_checkpoint.npz",
+        checkpoint_path,
         sigma_c_per_m2=result.sigma_c_per_m2,
         face_charge_c=result.face_charge_c,
         charge_node_c=result.charge_node_c,
         potential_v=result.potential_v,
         vertices=vertices, faces=faces, centroids=centroids, areas=areas,
         face_material_id=material, method_hint_Ar=method_hint)
+    np.savez_compressed(
+        current_audit_path,
+        positive_face_current_density_a_m2=(
+            result.final_step.positive_face_current_density_a_m2),
+        negative_face_current_density_a_m2=(
+            result.final_step.negative_face_current_density_a_m2),
+        net_face_current_density_a_m2=result.final_step.face_current_density_a_m2,
+        positive_current_node_a=result.final_step.positive_current_node_a,
+        negative_current_node_a=result.final_step.negative_current_node_a,
+        patch_scales_m=np.asarray(
+            [item.patch_scale_m for item in result.patch_balance], dtype=float),
+        patch_group_by_scale=np.stack(
+            [item.group for item in result.patch_balance], axis=0),
+        physical_face_area_m2=areas * geometry.mesh_length_unit_m ** 2)
+    summary["artifacts"] = {
+        "face_checkpoint": {
+            "name": checkpoint_path.name, "sha256": file_hash(checkpoint_path)},
+        "current_audit": {
+            "name": current_audit_path.name, "sha256": file_hash(current_audit_path)},
+    }
+    (args.output_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary, indent=2), flush=True)
 
 

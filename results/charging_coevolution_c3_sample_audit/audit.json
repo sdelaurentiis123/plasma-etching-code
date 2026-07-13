@@ -1,0 +1,118 @@
+{
+  "schema": "petch.charging.coevolution.c3.sample-audit.v1",
+  "date": "2026-07-13",
+  "status": "bounded exact-operator audit; not a convergence claim",
+  "checkpoint": {
+    "name": "results/charging_coevolution_c3_decay_fixed_cold_dt125ns_60/face_checkpoint.npz",
+    "sha256": "91122190f3e306f119ffff62ba7b2140559a7ebf45555883a2219de0ddb2954e",
+    "physical_time_s": 7.5e-06
+  },
+  "protocol": {
+    "maximum_steps": 0,
+    "operator": "exact hard visibility, repaired horizon, certified float64 replay, bounded grazing-ion reflection",
+    "method_map": "separately selected and frozen",
+    "nested_same_seed_levels": [
+      {"forward_log2_samples": 10, "adjoint_log2_samples": 8},
+      {"forward_log2_samples": 11, "adjoint_log2_samples": 9},
+      {"forward_log2_samples": 12, "adjoint_log2_samples": 10}
+    ],
+    "independent_level_11_seeds": [79, 179, 279, 379, 479, 579, 679, 779],
+    "seed_contract": "--seed controls the forward scramble and Ar+ adjoint proposal; electron adjoint proposal uses seed+4"
+  },
+  "paired_level_results_seed_79": [
+    {
+      "forward_level": 10,
+      "adjoint_level": 8,
+      "node_rms": 0.2998873804167051,
+      "node_worst": 0.7229241356394761,
+      "b2_0p25_um": 8.435885843865663,
+      "b2_0p50_um": 7.523539700110725,
+      "potential_rate_max_v_s": 1026880.974989185
+    },
+    {
+      "forward_level": 11,
+      "adjoint_level": 9,
+      "node_rms": 0.297123504170249,
+      "node_worst": 0.7198286872719598,
+      "b2_0p25_um": 7.933204362339658,
+      "b2_0p50_um": 7.170258803772939,
+      "potential_rate_max_v_s": 1110173.629345192
+    },
+    {
+      "forward_level": 12,
+      "adjoint_level": 10,
+      "node_rms": 0.29180545456669854,
+      "node_worst": 0.6980303241400295,
+      "b2_0p25_um": 7.265210167308755,
+      "b2_0p50_um": 6.773717179908557,
+      "potential_rate_max_v_s": 874149.4241442749
+    }
+  ],
+  "paired_relative_change_percent": {
+    "level_10_to_11_seed_79": {
+      "node_rms": -0.9216380638010002,
+      "node_worst": -0.42818439929083185,
+      "b2_0p25_um": -5.9588464190935,
+      "b2_0p50_um": -4.695673983518511,
+      "potential_rate_max_v_s": 8.111227725967396
+    },
+    "level_11_to_12_seed_79": {
+      "node_rms": -1.7898448049075477,
+      "node_worst": -3.0282709646572648,
+      "b2_0p25_um": -8.420231781775234,
+      "b2_0p50_um": -5.53036696047463,
+      "potential_rate_max_v_s": -21.260116342353598
+    },
+    "level_11_to_12_seed_179": {
+      "node_rms": 0.4157985044357382,
+      "node_worst": -1.3831390243420505,
+      "b2_0p25_um": -7.408921281601266,
+      "b2_0p50_um": -5.288865705735512,
+      "potential_rate_max_v_s": -3.7837558028178564
+    }
+  },
+  "independent_level_11_ensemble": {
+    "replicates": 8,
+    "confidence": "two-sided 95% Student-t interval on the replicate mean",
+    "node_rms": {"mean": 0.291454033382978, "sd": 0.002956299981179816, "ci_half_width": 0.002471528634260264},
+    "node_worst": {"mean": 0.6993422327664496, "sd": 0.013469669858780042, "ci_half_width": 0.011260925806562247},
+    "b2_0p25_um": {"mean": 7.228192561795305, "sd": 0.6114263440156669, "ci_half_width": 0.5111652155045194},
+    "b2_0p50_um": {"mean": 6.48051171585754, "sd": 0.6303559081117294, "ci_half_width": 0.526990727122191},
+    "potential_rate_max_v_s": {"mean": 1125529.1804132555, "sd": 158759.7903869286, "ci_half_width": 132726.5062437468}
+  },
+  "worst_patch_localization": {
+    "surface": "lower mask sidewall",
+    "material_id": 2,
+    "typical_0p25_um_bbox_mesh_um": [0.75, 0.083, 1.333, 0.75, 0.167, 1.417],
+    "typical_0p50_um_bbox_mesh_um": [0.75, 0.083, 1.333, 0.75, 0.417, 1.417],
+    "typical_0p50_um_total_throughput_fraction": 0.03,
+    "interpretation": "electron collection is approximately 8-9 times ion collection; the ion-normalized denominator remains sample-sensitive"
+  },
+  "integrity": {
+    "level_11_replay_count": 1,
+    "level_11_replay_eligible_count": 145269,
+    "level_11_replay_fraction": 6.883781123295404e-06,
+    "maximum_observed_charge_conservation_relative_error": 2.882227588566418e-17,
+    "maximum_observed_surface_transfer_relative_charge_balance_error": 5.023112460580154e-15,
+    "current_audit_sha256_by_level_seed": {
+      "10:79": "1822d1433aee88a2460d5f4bcc02447e462ee28d7901c7f276b7a77cd75f9a47",
+      "11:79": "b10750b91ff74c7db199b8da68f5cccd09f17a3e1cddfeb3354b0623c217db76",
+      "11:179": "9ce73bfd1a3a7d4bce60ae6ec462b9523d27650a4214c9a2e37a49c3bcbbf699",
+      "11:279": "4f6b8339a435f3e2155a7ed6d8407c7eafdcf5226228ab150ef0b4e1e1710bc7",
+      "11:379": "f55914ed5e65ba8d5569acf61ea30aabe5833dbe1399807307cf8fb32af97313",
+      "11:479": "481df51b8e3fb6fc8bb19fca6bc5604af81eaec50e3eed4d437d35ab55d3bdd9",
+      "11:579": "211fc2a04989c579b36908ebdd5387b779f1bb75676df90a95945f5d62a5d97d",
+      "11:679": "15859337dc7aa4c30c309dcf96f5cb1fdf8ad9142441a2917c904f9646d90ae0",
+      "11:779": "630ef84ed821c228e8b6da85a20b36c798bf4adb2c9bf571124f781d61c1ad70",
+      "12:79": "10e1f65337848ea5ab4b1f321fd1033f3343eac1657d122ac7323add63f25f28",
+      "12:179": "84cd4fbe2c804eae92975c9fa2e394588c55e5a3e37f5a7288b20e1158175167"
+    }
+  },
+  "decision": {
+    "convergence": "fail by orders of magnitude at every sample level and scramble",
+    "sample_refinement": "fail for quantitative B2 and potential-rate claims at this checkpoint",
+    "fit_and_jump": "held; the voltage-rate observable is not sample stable",
+    "potential_space_rewrite": "rejected; the physical charge update already propagates through the Poisson response and the face-to-node map is rank deficient",
+    "next": "continue a bounded exact-operator physical/PTC trajectory with current fields archived; use higher-sample independent audits only at checkpoints, not at every transient step"
+  }
+}

@@ -362,6 +362,46 @@ refinement; none is assumed here. See [Coffey, Kelley, and Keyes](https://doi.or
 Machine-readable fits, hashes, schedule comparisons, unit interpretation, replay fractions, and
 accelerator decisions are in `results/charging_coevolution_c3_decay_audit/audit.json`.
 
+## Independent-scramble and sample-level audit at 7.5 microseconds
+
+The repaired 7.5 microsecond face checkpoint was evaluated without another charge update using the
+same hard-visibility operator and frozen estimator-method map. The audit uses nested same-scramble
+sample doubling at forward/adjoint levels `10/8`, `11/9`, and `12/10`; eight independent scrambles
+at `11/9`; and a second nested `11/9 -> 12/10` pair. A runner defect discovered during setup is now
+fixed: `--seed` previously changed forward phase-space samples but left the adjoint proposals frozen
+at 79/83. It now controls the Ar+ adjoint proposal as well, with the electron proposal declared as
+`seed+4`. The default seed-79 evaluation remains identical, while independent runs now refresh every
+sample family.
+
+| Forward / adjoint level, seed | Node RMS / worst | B2 max, 0.25 / 0.50 micrometers | Maximum `abs(dV/dt)` (V/s) |
+| --- | ---: | ---: | ---: |
+| 10 / 8, 79 | 0.299887 / 0.722924 | 8.43589 / 7.52354 | 1.027e6 |
+| 11 / 9, 79 | 0.297124 / 0.719829 | 7.93320 / 7.17026 | 1.110e6 |
+| 12 / 10, 79 | 0.291805 / 0.698030 | 7.26521 / 6.77372 | 8.741e5 |
+| 11 / 9, 179 | 0.291437 / 0.697093 | 7.12022 / 6.76942 | 1.164e6 |
+| 12 / 10, 179 | 0.292649 / 0.687451 | 6.59268 / 6.41140 | 1.120e6 |
+
+The eight-scramble `11/9` ensemble gives node RMS `0.29145 +/- 0.00247`, worst node
+`0.69934 +/- 0.01126`, B2 `7.228 +/- 0.511` and `6.481 +/- 0.527`, and maximum potential rate
+`(1.126 +/- 0.133)e6 V/s` (95% Student-t intervals on the mean). Every confidence interval is far
+outside B1/B2, so the non-convergence conclusion is robust. The numerical value of the apparent
+late-time state is not sample-refined: the two same-seed level doublings reduce B2 by 5.3--8.4%, and
+the potential-rate change ranges from 3.8% to 21.3%. A longer transient may still be informative,
+but these data do not earn a precise saturation projection, plateau claim, or fit-and-jump.
+
+The runner now stores `current_audit.npz` with positive, negative, and net face currents, nodal
+currents, physical face area, and patch membership at both scales. Localization shows that the B2
+maximum is the lower mask sidewall (material 2, approximately z=1.33--1.42 micrometers). Its
+0.5-micrometer patch carries about 3% of total current throughput; it is not an inactive numerical
+speck. Electron collection is approximately 8--9 times ion collection there, and the relatively
+small ion denominator controls much of the remaining B2 sampling variation. This is an operator
+diagnostic, not grounds to exclude, merge, or loosen that patch.
+
+Across the eight `11/9` audits, exact replay is used once among 145,269 eligible lineages
+(`0.000688%`). Maximum deposition and surface-transfer ledger errors are `2.89e-17` and `5.03e-15`.
+Machine-readable protocol, intervals, paired changes, patch localization, and decisions are in
+`results/charging_coevolution_c3_sample_audit/audit.json`.
+
 ## Evidence and provenance
 
 Audit config hash: `d3b5485aff03a950c82f6fb4a0161e76532b5120dc7f5a075bb340a7a4c444fc`.

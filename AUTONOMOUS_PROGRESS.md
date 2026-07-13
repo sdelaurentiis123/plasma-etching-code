@@ -688,6 +688,22 @@ under-determined) -- an honest result that quantifies how many structures must b
   is held until it can preserve the ledger and pass schedule refinement. Fit-and-jump is rejected by
   the decay evidence; ML proposals remain downstream of a converged exact-operator training target.
   Evidence is in `results/charging_coevolution_c3_decay_audit/`.
+- **The repaired 7.5-microsecond state fails B1/B2 robustly but is not yet sample-refined.** Eight
+  independent `11/9` scrambles give node RMS `0.29145 +/- 0.00247`, worst node
+  `0.69934 +/- 0.01126`, B2 `7.228 +/- 0.511 / 6.481 +/- 0.527`, and maximum potential rate
+  `(1.126 +/- 0.133)e6 V/s` (95% intervals on the mean). These are orders of magnitude outside the
+  gates, but nested `11/9 -> 12/10` doubling still shifts B2 by 5.3--8.4% and potential rate by
+  3.8--21.3%, so no precise plateau or relaxation-time claim is made.
+- **B2's controlling region is preserved and localized, not thresholded away.** New checksummed
+  current-audit artifacts retain every face current and both physical patch maps. The worst patches
+  are the lower mask sidewall, carry about 3% of total throughput at 0.5 micrometers, and collect
+  roughly 8--9 times more electron than ion current. The smaller ion denominator drives much of the
+  B2 sampling variation. One exact replay occurs among 145,269 eligible `11/9` lineages, and charge
+  ledgers remain at roundoff.
+- **Independent-scramble provenance is now complete.** The C3 runner formerly refreshed forward
+  samples with `--seed` while silently retaining adjoint proposal seeds 79/83. It now records and
+  applies Ar+ seed `s` and electron seed `s+4`; default seed 79 is unchanged. Evidence is in
+  `results/charging_coevolution_c3_sample_audit/` and the C3 audit report.
 
 ## Roadmap (remaining)
 
