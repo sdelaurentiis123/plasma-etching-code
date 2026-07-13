@@ -180,7 +180,7 @@ def _evaluate_incident_current_3d(
     estimator_by_name = (
         {species.name: str(transport_estimator) for species in charged_species}
         if isinstance(transport_estimator, str) else dict(transport_estimator))
-    transports = []
+    transports = []; bidirectional_method_hint = {}
     for estimator in ("forward", "adjoint", "bidirectional"):
         selected = tuple(
             species for species in charged_species
@@ -213,6 +213,9 @@ def _evaluate_incident_current_3d(
                           if not item.converged]
                 raise BidirectionalCurrentCertificationError(
                     f"bidirectional current estimator did not certify species {failed}")
+            bidirectional_method_hint.update({
+                name: item.method.copy()
+                for name, item in bidirectional.selection_by_species.items()})
             transports.append(bidirectional.transport)
         elif estimator == "adjoint":
             proposal_subset = (None if adjoint_proposals is None else {
@@ -278,7 +281,8 @@ def _evaluate_incident_current_3d(
         positive_face_current=positive_face_current,
         negative_face_current=negative_face_current,
         positive_node_current=positive_node_current,
-        negative_node_current=negative_node_current)
+        negative_node_current=negative_node_current,
+        bidirectional_method_hint=bidirectional_method_hint)
 
 
 def advance_dielectric_charging_3d(
@@ -546,6 +550,21 @@ def solve_dielectric_charging_steady_3d(
         phase_space_log2_samples=(-1 if estimator_level is None else int(estimator_level)),
         mean_surface_voltage_v=float(np.mean(
             evaluated["potential"][tuple(support_nodes.T)]))))
+    if evaluated["bidirectional_method_hint"]:
+        frozen_options = ({} if bidirectional_options is None
+                          else dict(bidirectional_options))
+        discovered_hint = evaluated["bidirectional_method_hint"]
+        if "method_hint" in frozen_options:
+            supplied_hint = dict(frozen_options["method_hint"])
+            if (set(supplied_hint) != set(discovered_hint)
+                    or any(not np.array_equal(supplied_hint[name], discovered_hint[name])
+                           for name in discovered_hint)):
+                raise RuntimeError(
+                    "supplied bidirectional method map differs from the certified initial map")
+        else:
+            frozen_options["method_hint"] = discovered_hint
+        frozen_options["require_certification"] = False
+        evaluate_arguments["bidirectional_options"] = frozen_options
     anderson_x_history = []; anderson_residual_history = []; cached_voltage_step = None
     while len(history) < int(max_iter) and not (
             len(history) >= int(min_iter)

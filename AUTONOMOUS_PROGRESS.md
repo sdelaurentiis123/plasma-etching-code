@@ -299,15 +299,38 @@ under-determined) -- an honest result that quantifies how many structures must b
   source-launched audit is unresolved. The real root and dipole gate remain unpromoted until that
   controller certifies every accepted field state and meets the unchanged 0.08 local-balance target.
 
+### Phase 2f deterministic root epochs and selective retracing
+
+- Adjoint gathering can now launch from an arbitrary subset of target triangles while retaining the
+  full mesh for collision queries. Refined events replace only those faces; unaffected sparse
+  energy-angle measures remain bitwise unchanged. This is phase-space estimator adaptation, not AMR:
+  the geometry, Poisson grid, and level-set `dx` do not change.
+- Charging discovery freezes the certified per-triangle forward/adjoint method map and fixed scrambled
+  Sobol rules before nonlinear iterations. The inner current map is therefore deterministic for a
+  given charge state. Certification failures reject sampled discovery trials; production root epochs
+  must be followed by an independent replicate audit rather than rediscovering methods every step.
+- On the coarse periodic trench, the frozen deterministic Picard map reduces RMS imbalance from 0.788
+  to 0.627 in 30 accepted steps, but the worst local imbalance remains 0.978. Maximum-residual trust
+  merit and inverse-Broyden secant experiments did not close the root and were removed. The remaining
+  blocker is now the strongly nonlocal/nonsmooth current-response solve, not global landing accuracy,
+  Poisson response, periodic trajectories, or ordinary Monte Carlo noise.
+
 ## Roadmap (remaining)
 
-1. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow
+1. Finish Phase 2 charging: batch the frozen replicate ensemble into an efficient deterministic root
+   rule; develop a nonlinear method that respects the nonlocal surface-current response; independently
+   audit the final root; only then promote the trench dipole/profile and deep-AR charging causality gate.
+2. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow
    IonEnergyTransverseMaxwellianDensity), replacing the reduced analytic ion model; sticking + ion IAD
    are DECLARED calibrated inputs with provenance/uncertainty; calibrate low-AR, predict held-out AR40;
    report grid/ray/digitization/model error separately. Add charging only if the AR40 residual exceeds
    the combined error budget.
-2. GPU: run the forward+QMC path with device="cuda" (already threaded); accuracy-matched speed report.
-3. Then Jeon SiO2 depth-transfer, then charging (only if it moves the profile above the error budget).
+3. Extend the exact transport adjoint through surface chemistry for full-chain calibration gradients;
+   then spike geometry/shape gradients with boundary reparameterization and an FD gate.
+4. AMR: add spatial mesh refinement only when 3-D/many-feature/shape-gradient scale requires it. It is
+   separate from adaptive trajectory quadrature and remains de-prioritized for the current AR40 regime.
+5. GPU: run the forward+QMC path with `device="cuda"` and report accuracy-matched speed on an A100.
+6. Jeon SiO2 held-out depth transfer, 3-D holes, and the second chemistry through unchanged contracts.
 
 ## Guardrails honored
 

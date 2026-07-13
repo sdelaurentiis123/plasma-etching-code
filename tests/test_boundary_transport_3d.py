@@ -346,6 +346,30 @@ def test_bidirectional_field_transport_certifies_and_preserves_barrier_event_mea
     assert result.transport.surface_fluxes.energetic_fluxes[0].event_energy_eV.size > 0
 
 
+def test_subset_adjoint_gather_matches_full_collision_mesh_measure_on_selected_face():
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    normals = np.broadcast_to([0.0, 0.0, 1.0], centroids.shape)
+    boundary = maxwellian_electron_boundary_state(
+        4.0, 2e19, n_transverse=3, n_normal=4, reference_plane_m=1e-6)
+    common = dict(
+        boundary=boundary, species_role={"electron": "charge_carrier"},
+        verts=verts, faces=faces, areas=areas, centroids=centroids, gas_normals=normals,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=np.zeros((2, 2, 2)), potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=1.0, mesh_length_unit_m=1e-6,
+        face_quadrature_points=4, face_position_seed=113,
+        fixed_dt=0.005, max_steps=1000, periodic_lateral=True, device="cpu")
+
+    full = gather_boundary_state_field_adjoint_3d(**common)
+    subset = gather_boundary_state_field_adjoint_3d(**common, gather_face_indices=[0])
+    full_flux = full.surface_fluxes.energetic_fluxes[0].flux_m2_s
+    subset_flux = subset.surface_fluxes.energetic_fluxes[0].flux_m2_s
+
+    assert subset_flux[0] == full_flux[0]
+    assert subset_flux[1] == 0.0
+
+
 def test_linear_nodal_potential_gives_exact_electrostatic_energy_gain_under_refinement():
     verts, faces, areas = _flat_unit_plane()
     ion = SpeciesBoundaryState(

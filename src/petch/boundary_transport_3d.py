@@ -292,7 +292,8 @@ class BidirectionalBoundaryTransport3DResult:
 def select_bidirectional_face_events_3d(
         forward_populations, adjoint_populations, *, forward_zero_upper_m2_s,
         absolute_tolerance_m2_s, relative_tolerance=0.05, consistency_sigma=5.0,
-        support_sigma=2.0, support_ratio=0.5, method_hint=None):
+        support_sigma=2.0, support_ratio=0.5, method_hint=None,
+        require_certification=True):
     """Select independently replicated forward or adjoint event measures per triangle.
 
     Selection uses measured standard error only. The direct forward estimator also audits adjoint
@@ -352,6 +353,9 @@ def select_bidirectional_face_events_3d(
             raise ValueError("method_hint must select forward or adjoint for every face")
         method = hint
     within = np.where(method == "forward", forward_ok, adjoint_ok)
+    if method_hint is not None and not require_certification:
+        within = np.ones(face_count, dtype=bool)
+        consistent = np.ones(face_count, dtype=bool)
     selected_events = []
     for populations, selected_method in ((forward, "forward"), (adjoint, "adjoint")):
         for population in populations:
@@ -372,6 +376,20 @@ def select_bidirectional_face_events_3d(
         population, selected_stderr, method,
         forward_mean, forward_stderr, adjoint_mean, adjoint_stderr,
         consistent, within, bool(np.all(consistent & within)))
+
+
+def _replace_population_face_events_3d(population, replacement, face_indices):
+    """Replace selected triangle events while preserving the untouched sparse measure."""
+    selected = np.zeros(population.face_count, dtype=bool)
+    selected[np.asarray(face_indices, dtype=int)] = True
+    keep = ~selected[population.event_face]
+    return FaceResolvedEnergeticFlux(
+        population.name, population.face_count,
+        np.concatenate((population.event_face[keep], replacement.event_face)),
+        np.concatenate((population.event_flux_m2_s[keep], replacement.event_flux_m2_s)),
+        np.concatenate((population.event_energy_eV[keep], replacement.event_energy_eV)),
+        np.concatenate((population.event_cosine_incidence[keep],
+                        replacement.event_cosine_incidence)))
 
 
 def merge_boundary_transport_results_3d(*results):
@@ -1010,7 +1028,8 @@ def gather_boundary_state_field_adjoint_3d(
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
         face_quadrature_points=3, ray_offset=1e-5, fixed_dt=0.01,
         max_steps=10000, periodic_lateral=False, proposal_by_species=None,
-        proposal_frame_by_species="surface_local", face_position_seed=None, device=None):
+        proposal_frame_by_species="surface_local", face_position_seed=None,
+        gather_face_indices=None, device=None):
     """Gather charged boundary flux on every triangle with a reversible Liouville adjoint.
 
     A boundary velocity proposal may be interpreted in the triangle's local two-tangent/inward-normal
@@ -1085,6 +1104,12 @@ def gather_boundary_state_field_adjoint_3d(
                    for value in proposal_frames.values())):
         raise ValueError(
             "proposal_frame_by_species must select surface_local or source_aligned for every species")
+    target_faces = (np.arange(len(faces), dtype=int) if gather_face_indices is None
+                    else np.asarray(gather_face_indices, dtype=int))
+    if (target_faces.ndim != 1 or target_faces.size == 0
+            or np.any(target_faces < 0) or np.any(target_faces >= len(faces))
+            or np.unique(target_faces).size != target_faces.size):
+        raise ValueError("gather_face_indices must select unique triangles from the collision mesh")
 
     if face_position_seed is not None:
         position_count = int(face_quadrature_points)
@@ -1150,9 +1175,9 @@ def gather_boundary_state_field_adjoint_3d(
             raise ValueError("adjoint proposals must preserve species name, charge, and density")
         base_velocity = np.asarray(proposal.velocity_sqrt_eV, dtype=float)
         sample_count = base_velocity.shape[0]; point_count = points.shape[1]
-        face_index = np.repeat(np.arange(len(faces)), point_count * sample_count)
-        point_index = np.tile(np.repeat(np.arange(point_count), sample_count), len(faces))
-        velocity_index = np.tile(np.arange(sample_count), len(faces) * point_count)
+        face_index = np.repeat(target_faces, point_count * sample_count)
+        point_index = np.tile(np.repeat(np.arange(point_count), sample_count), len(target_faces))
+        velocity_index = np.tile(np.arange(sample_count), len(target_faces) * point_count)
         launch_point = points[face_index, point_index] + float(ray_offset) * normals[face_index]
         sampled_velocity = base_velocity[velocity_index]
         if proposal_frames[species.name] == "source_aligned":
@@ -1241,9 +1266,12 @@ def trace_boundary_state_bidirectional_field_3d(
         nodal_potential_v, potential_origin, potential_spacing,
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
         forward_log2_samples=12, adjoint_log2_samples=10, n_replicates=4, seed=0,
+        max_forward_log2_samples=None, max_adjoint_log2_samples=None,
+        max_face_quadrature_points=None,
         element_absolute_tolerance=0.01, element_relative_tolerance=0.05,
         consistency_sigma=5.0, support_sigma=2.0, support_ratio=0.5,
         proposal_by_species=None, proposal_frame_by_species="surface_local", method_hint=None,
+        require_certification=True,
         face_quadrature_points=3, ray_offset=1e-5, fixed_dt=0.01, max_steps=10000,
         periodic_lateral=False, device=None):
     """Audit and select forward or adjoint charged transport independently on every triangle.
@@ -1258,6 +1286,16 @@ def trace_boundary_state_bidirectional_field_3d(
             or int(n_replicates) != n_replicates or n_replicates < 4
             or not np.isfinite(element_absolute_tolerance) or element_absolute_tolerance < 0.0):
         raise ValueError("invalid bidirectional sampling controls")
+    maximum_forward_level = (int(forward_log2_samples) if max_forward_log2_samples is None
+                             else int(max_forward_log2_samples))
+    maximum_adjoint_level = (int(adjoint_log2_samples) if max_adjoint_log2_samples is None
+                             else int(max_adjoint_log2_samples))
+    maximum_face_points = (int(face_quadrature_points) if max_face_quadrature_points is None
+                           else int(max_face_quadrature_points))
+    if (maximum_forward_level < int(forward_log2_samples)
+            or maximum_adjoint_level < int(adjoint_log2_samples)
+            or maximum_face_points < int(face_quadrature_points)):
+        raise ValueError("bidirectional refinement ceilings cannot be below base levels")
     names = {species.name for species in boundary.species}
     roles = dict(species_role)
     proposals = {} if proposal_by_species is None else dict(proposal_by_species)
@@ -1275,10 +1313,11 @@ def trace_boundary_state_bidirectional_field_3d(
         species_boundary = PlasmaBoundaryState(
             (species,), boundary.reference_plane_m, provenance=boundary.provenance)
         species_roles = {species.name: roles[species.name]}
-        forward_results = []; adjoint_results = []
+        forward_results = []; adjoint_results = []; replicate_seeds = []
         template = proposals.get(species.name, species)
         for replicate in range(int(n_replicates)):
             replicate_seed = int(seed) + 104729 * replicate + 15485863 * species_index
+            replicate_seeds.append(replicate_seed)
             forward_results.append(trace_boundary_state_field_3d(
                 species_boundary, species_roles, verts, faces, areas,
                 source_bounds=source_bounds, source_z=source_z,
@@ -1314,7 +1353,64 @@ def trace_boundary_state_bidirectional_field_3d(
             absolute_tolerance_m2_s=float(element_absolute_tolerance) * species.flux_m2_s,
             relative_tolerance=element_relative_tolerance,
             consistency_sigma=consistency_sigma, support_sigma=support_sigma,
-            support_ratio=support_ratio, method_hint=hints.get(species.name))
+            support_ratio=support_ratio, method_hint=hints.get(species.name),
+            require_certification=require_certification)
+        forward_level = int(forward_log2_samples)
+        adjoint_level = int(adjoint_log2_samples)
+        position_count = int(face_quadrature_points)
+        while not selection.converged:
+            unresolved = np.where(
+                ~(selection.estimator_consistent & selection.method_within_tolerance))[0]
+            refine_forward = forward_level < maximum_forward_level
+            refine_adjoint = (
+                adjoint_level < maximum_adjoint_level
+                or position_count < maximum_face_points)
+            if unresolved.size == 0 or not (refine_forward or refine_adjoint):
+                break
+            if refine_forward:
+                forward_level += 1
+                forward_results = [trace_boundary_state_field_3d(
+                    species_boundary, species_roles, verts, faces, areas,
+                    source_bounds=source_bounds, source_z=source_z,
+                    nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+                    potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
+                    mesh_origin_m=mesh_origin_m, seed=replicate_seed, fixed_dt=fixed_dt,
+                    max_steps=max_steps, phase_space_log2_samples=forward_level,
+                    periodic_lateral=periodic_lateral, device=device)
+                    for replicate_seed in replicate_seeds]
+                forward_populations = [item.surface_fluxes.energetic_fluxes[0]
+                                       for item in forward_results]
+            if refine_adjoint:
+                adjoint_level = min(adjoint_level + 1, maximum_adjoint_level)
+                position_count = min(2 * position_count, maximum_face_points)
+                for replicate, replicate_seed in enumerate(replicate_seeds):
+                    proposal = qmc_boundary_proposal(
+                        template, adjoint_level, replicate_seed, name=species.name)
+                    partial = gather_boundary_state_field_adjoint_3d(
+                        species_boundary, species_roles, verts, faces, areas,
+                        centroids, gas_normals, source_bounds=source_bounds, source_z=source_z,
+                        nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+                        potential_spacing=potential_spacing,
+                        mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
+                        face_quadrature_points=position_count, ray_offset=ray_offset,
+                        fixed_dt=fixed_dt, max_steps=max_steps, periodic_lateral=periodic_lateral,
+                        proposal_by_species={species.name: proposal},
+                        proposal_frame_by_species={species.name: frames[species.name]},
+                        face_position_seed=replicate_seed, gather_face_indices=unresolved,
+                        device=device).surface_fluxes.energetic_fluxes[0]
+                    adjoint_populations[replicate] = _replace_population_face_events_3d(
+                        adjoint_populations[replicate], partial, unresolved)
+            pooled_forward_samples = int(n_replicates) * 2 ** forward_level
+            zero_upper = (3.0 * species.flux_m2_s * source_area
+                          / (pooled_forward_samples * areas_array))
+            selection = select_bidirectional_face_events_3d(
+                forward_populations, adjoint_populations,
+                forward_zero_upper_m2_s=zero_upper,
+                absolute_tolerance_m2_s=float(element_absolute_tolerance) * species.flux_m2_s,
+                relative_tolerance=element_relative_tolerance,
+                consistency_sigma=consistency_sigma, support_sigma=support_sigma,
+                support_ratio=support_ratio, method_hint=hints.get(species.name),
+                require_certification=require_certification)
         selections[species.name] = selection; populations.append(selection.population)
         landing = float(np.dot(selection.population.flux_m2_s, areas_array)
                         / (species.flux_m2_s * source_area)) if species.flux_m2_s > 0.0 else 0.0
