@@ -1,0 +1,182 @@
+{
+  "schema": "petch.charging.coevolution.c3.audit.v1",
+  "run_manifest": {
+    "config_hash": "d3b5485aff03a950c82f6fb4a0161e76532b5120dc7f5a075bb340a7a4c444fc",
+    "config": {
+      "geometry": "4x4x8 planar dielectric manufactured gate",
+      "dx_mesh_units": 0.25,
+      "mesh_length_unit_m": 1e-06,
+      "patch_scales_m": [
+        2.5e-07,
+        1e-06
+      ],
+      "quasi_profile_duration_s": 0.1,
+      "waveform_segment_duration_s": [
+        1e-09,
+        1e-09
+      ],
+      "n_position": 256,
+      "seed": 71,
+      "trajectory_fixed_dt": 0.005,
+      "trajectory_max_steps": 1000,
+      "transport_device": "cpu",
+      "exact_visibility": true,
+      "convergence_contract_revision": "CCA-2026-07-13-R2"
+    },
+    "engine_git_revision": "63fa7399115609a2fd7c72a7c64e0f9dbced24de",
+    "source_sha256": {
+      "src/petch/charging_coevolution_3d.py": "34a8b3d6eccf4fd74ea9f449229a3664d02c0e0988438394980903ea34c5290c",
+      "src/petch/feature_step_3d.py": "4fd836f2abac114ec0da3bd57d2ef4686ae93cb50db74f0427502bbedee5e778",
+      "src/petch/surface_charge_remap_3d.py": "e24b2897050b430b32fb427894c8ee88f97f020e10273fc79656106cf5e8f9d6",
+      "src/petch/charged_surface_response_3d.py": "788ce3b575477e989332274deb4f31aec8a5e7a98d6d5cd265062395e170965a",
+      "scripts/audit_charging_coevolution_c3.py": "f01663724e717aa12e7178248252b7cd455eff5cb8519534dc0443a6855be9f3"
+    },
+    "hardware": "macOS-15.7.4-arm64-arm-64bit",
+    "python": "3.10.17"
+  },
+  "quasi_static": {
+    "mode": "quasi_static",
+    "step": {
+      "charging_converged": true,
+      "charging_accepted_steps": 0,
+      "charging_rejected_steps": 0,
+      "charging_physical_time_s": 0.0,
+      "charging_pseudo_time_s": 0.0,
+      "final_potential_rate_max_v_s": 0.0,
+      "retained_node_rms_relative_current_imbalance": 0.0,
+      "retained_node_max_relative_current_imbalance": 0.0,
+      "patch_scales_m": [
+        2.5e-07,
+        1e-06
+      ],
+      "patch_max_relative_imbalance": [
+        0.0,
+        0.0
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.0,
+        0.0
+      ],
+      "maximum_charge_conservation_relative_error": 0.0,
+      "maximum_surface_transfer_relative_charge_balance_error": 0.0,
+      "exact_transport_reused": true,
+      "remap_relative_charge_balance_error": 0.0,
+      "retained_positive_charge_c": 0.0,
+      "retained_negative_charge_c": 0.0,
+      "removed_positive_charge_c": 0.0,
+      "removed_negative_charge_c": 0.0,
+      "wall_clock_s": 0.02758125029504299
+    },
+    "reflection_manifest": {
+      "model": "weighted angle-dependent specular reflection with constant energy retention",
+      "material_id": 1,
+      "ion_species_name": "Ar+",
+      "parameters": {
+        "grazing_reflection_probability": 0.95,
+        "angular_exponent": 3.0,
+        "energy_retention_fraction": 0.9
+      },
+      "bounds": {
+        "grazing_reflection_probability": [
+          0.8,
+          1.0
+        ],
+        "angular_exponent": [
+          2.0,
+          8.0
+        ],
+        "energy_retention_fraction": [
+          0.5,
+          0.99
+        ]
+      },
+      "evidence": {
+        "grazing_reflection_probability": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008",
+        "angular_exponent": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008",
+        "energy_retention_fraction": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008"
+      },
+      "claim": "literature-bounded sensitivity; not material-calibrated prediction"
+    }
+  },
+  "waveform_resolved": {
+    "mode": "waveform_resolved",
+    "steps": [
+      {
+        "charging_converged": false,
+        "charging_accepted_steps": 1,
+        "charging_rejected_steps": 0,
+        "charging_physical_time_s": 1e-09,
+        "charging_pseudo_time_s": 0.0,
+        "final_potential_rate_max_v_s": 15186515.164681615,
+        "retained_node_rms_relative_current_imbalance": 0.3333333333333333,
+        "retained_node_max_relative_current_imbalance": 0.33333333333333337,
+        "patch_scales_m": [
+          2.5e-07,
+          1e-06
+        ],
+        "patch_max_relative_imbalance": [
+          0.5,
+          0.5
+        ],
+        "patch_symmetric_max_relative_imbalance": [
+          0.33333333333333337,
+          0.33333333333333337
+        ],
+        "maximum_charge_conservation_relative_error": 2.428426105993666e-16,
+        "maximum_surface_transfer_relative_charge_balance_error": 0.0,
+        "exact_transport_reused": true,
+        "remap_relative_charge_balance_error": 0.0,
+        "retained_positive_charge_c": 0.0,
+        "retained_negative_charge_c": 0.0,
+        "removed_positive_charge_c": 9.913467922874998e-20,
+        "removed_negative_charge_c": 0.0,
+        "wall_clock_s": 0.021728833205997944
+      },
+      {
+        "charging_converged": false,
+        "charging_accepted_steps": 1,
+        "charging_rejected_steps": 0,
+        "charging_physical_time_s": 1e-09,
+        "charging_pseudo_time_s": 0.0,
+        "final_potential_rate_max_v_s": 15191530.187444475,
+        "retained_node_rms_relative_current_imbalance": 0.3333333333333333,
+        "retained_node_max_relative_current_imbalance": 0.33333333333333337,
+        "patch_scales_m": [
+          2.5e-07,
+          1e-06
+        ],
+        "patch_max_relative_imbalance": [
+          1.0,
+          1.0
+        ],
+        "patch_symmetric_max_relative_imbalance": [
+          0.33333333333333337,
+          0.33333333333333337
+        ],
+        "maximum_charge_conservation_relative_error": 1.214213052996833e-16,
+        "maximum_surface_transfer_relative_charge_balance_error": 0.0,
+        "exact_transport_reused": true,
+        "remap_relative_charge_balance_error": 0.0,
+        "retained_positive_charge_c": 0.0,
+        "retained_negative_charge_c": 0.0,
+        "removed_positive_charge_c": 0.0,
+        "removed_negative_charge_c": 9.913467922874998e-20,
+        "wall_clock_s": 0.02203266602009535
+      }
+    ],
+    "saturation_required": [
+      false,
+      false
+    ]
+  },
+  "refusal_gates": {
+    "b3_tolerance_above_benchmark_uncertainty_refused": true,
+    "quasi_static_waveform_refused": true
+  },
+  "campaign_status": {
+    "manufactured_engine_integration": "pass",
+    "designated_trench_timestep_grid_sample_refinement": "pending",
+    "independent_high_sample_exact_operator_audit_b5": "pending",
+    "c3_scientific_closure": false
+  }
+}

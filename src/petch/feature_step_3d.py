@@ -674,6 +674,7 @@ def advance_feature_step_3d(
         field_periodic_lateral=False,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         initial_charge_node_c=None, charging_options=None,
+        precomputed_transport: BoundaryTransport3DResult | None = None,
         neutral_radiosity_options=None, ballistic_transport="forward",
         ballistic_face_quadrature_points=1, cfl_number=0.3, reinitialize=True,
         reinitialization_method="skfmm",
@@ -683,6 +684,8 @@ def advance_feature_step_3d(
     The chemistry is evaluated only on triangles whose nearest positive-phi material id is in
     ``etchable_material_ids``. Other labeled solids are pinned. The method refuses a supplied surface
     state whose shape does not match the current active mesh; it never silently remaps history.
+    ``precomputed_transport`` lets an orchestrating physical-time charging driver reuse its final
+    exact charged/re-impact measure for chemistry instead of retracing a second kinetic operator.
     """
     if not np.isfinite(duration_s) or duration_s < 0.0:
         raise ValueError("duration_s must be finite and nonnegative")
@@ -706,6 +709,13 @@ def advance_feature_step_3d(
     if charging_poisson_system is None and (
             initial_charge_node_c is not None or charging_options is not None):
         raise ValueError("charging state/options require charging_poisson_system")
+    if precomputed_transport is not None and not isinstance(
+            precomputed_transport, BoundaryTransport3DResult):
+        raise TypeError("precomputed_transport must be BoundaryTransport3DResult")
+    if precomputed_transport is not None and (
+            charging_poisson_system is not None or nodal_potential_v is not None):
+        raise ValueError(
+            "precomputed transport is exclusive with an internally evaluated charging/field path")
     if ballistic_transport not in ("forward", "face_gather"):
         raise ValueError("ballistic_transport must be 'forward' or 'face_gather'")
     if reinitialization_method not in ("skfmm", "fsm", "cr2"):
@@ -756,7 +766,26 @@ def advance_feature_step_3d(
         mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
         device=transport_device)
     charging = None
-    if charging_poisson_system is not None:
+    if precomputed_transport is not None:
+        transport = precomputed_transport
+        available = set(transport.surface_fluxes.neutral_flux_m2_s)
+        available.update(
+            population.name for population in transport.surface_fluxes.energetic_fluxes)
+        expected = {species.name for species in boundary.species}
+        if not expected.issubset(available):
+            raise ValueError(
+                "precomputed transport omits boundary species: "
+                + ", ".join(sorted(expected - available)))
+        for name, value in transport.surface_fluxes.neutral_flux_m2_s.items():
+            if np.asarray(value).shape != (len(faces),):
+                raise ValueError(
+                    f"precomputed neutral flux {name!r} does not match the current surface mesh")
+        for population in transport.surface_fluxes.energetic_fluxes:
+            if (isinstance(population, FaceResolvedEnergeticFlux)
+                    and population.face_count != len(faces)):
+                raise ValueError(
+                    f"precomputed energetic flux {population.name!r} uses another surface mesh")
+    elif charging_poisson_system is not None:
         if nodal_potential_v is not None:
             raise ValueError("self-consistent charging and a supplied nodal potential are exclusive")
         if potential_origin is None or potential_spacing is None or trajectory_fixed_dt is None:

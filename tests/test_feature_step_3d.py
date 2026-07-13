@@ -542,6 +542,38 @@ def test_feature_step_uses_supplied_3d_potential_for_ion_energy_and_surface_velo
     assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.02
 
 
+def test_feature_step_consumes_a_precomputed_exact_transport_without_retracing():
+    geometry, initial_height = _plane_geometry()
+    boundary = _boundary()
+    role = {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"}
+    verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
+    potential = np.zeros(geometry.phi.shape)
+    transport = trace_boundary_state_field_3d(
+        boundary, role, verts, faces, areas,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        nodal_potential_v=potential, potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=geometry.dx, mesh_length_unit_m=geometry.mesh_length_unit_m,
+        n_position=1024, seed=37, fixed_dt=0.005, max_steps=1000,
+        device="cpu")
+    mechanism = _mechanism()
+    result = advance_feature_step_3d(
+        geometry, boundary, role, mechanism,
+        etchable_material_ids=(1,), duration_s=1.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        precomputed_transport=transport, n_position=1, seed=999,
+        cfl_number=0.3, reinitialize=False, transport_device="cpu")
+
+    assert result.transport is transport
+    assert result.charging is None
+    ion = next(item for item in transport.surface_fluxes.energetic_fluxes
+               if item.name == "Ar+")
+    expected_velocity = (
+        ion.yield_rate_m2_s(mechanism.parameters.bare_sio2_yield)
+        [result.active_face_index] / mechanism.parameters.bulk_formula_density_m3)
+    assert np.allclose(result.surface.etch_velocity_m_s, expected_velocity, rtol=2e-13)
+    assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height
+
+
 def test_feature_step_solves_charge_reuses_ion_events_and_excludes_electron_from_chemistry():
     geometry, initial_height = _plane_geometry()
     mechanism = _mechanism()

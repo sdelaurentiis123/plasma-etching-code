@@ -50,6 +50,13 @@ from .charged_surface_cascade_3d import (
 from .surface_charge_remap_3d import (
     SurfaceChargeRemap3DResult, remap_surface_charge_3d,
 )
+from .charging_coevolution_3d import (
+    ChargingCoevolution3DResult, ChargingCoevolutionStep3DResult,
+    ExperimentalObservableTolerance3D, PhysicalPatchBalance3D, ResolvedBiasSegment3D,
+    SurfaceChargingSaturation3DResult, SurfaceChargingSaturationError,
+    integrate_surface_charging_to_saturation_3d, physical_surface_patch_groups_3d,
+    solve_charging_coevolution_3d,
+)
 from .surface_interaction_table import (
     InteractionAxis, SurfaceInteractionDomainError, SurfaceInteractionEvaluation,
     SurfaceInteractionInterpolationAudit, SurfaceInteractionTable,
@@ -128,6 +135,11 @@ __all__ = [
     "ChargedSurfaceCascade3DResult", "augment_transport_with_charged_reimpacts_3d",
     "solve_charged_surface_cascade_3d",
     "SurfaceChargeRemap3DResult", "remap_surface_charge_3d",
+    "ChargingCoevolution3DResult", "ChargingCoevolutionStep3DResult",
+    "ExperimentalObservableTolerance3D", "PhysicalPatchBalance3D",
+    "ResolvedBiasSegment3D", "SurfaceChargingSaturation3DResult",
+    "SurfaceChargingSaturationError", "integrate_surface_charging_to_saturation_3d",
+    "physical_surface_patch_groups_3d", "solve_charging_coevolution_3d",
     "InteractionAxis", "SurfaceInteractionDomainError", "SurfaceInteractionEvaluation",
     "SurfaceInteractionInterpolationAudit", "SurfaceInteractionTable",
     "KounisMelas2024Tables", "load_kounis_melas_2024_tables",

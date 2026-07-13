@@ -539,6 +539,41 @@ under-determined) -- an honest result that quantifies how many structures must b
   settings. No frozen-map root method, smoothing, volume Boltzmann term, altered visibility, or
   hidden bounce cutoff was introduced.
 
+### Charging co-evolution C3 unified-engine integration (2026-07-13)
+
+- **The signed C3 engine transaction is now implemented.** Authoritative face sheet charge projects
+  through the compatible Q1 operator, advances by the conservative kinetic current ODE, and is
+  checked against the independently updated nodal charge at roundoff. The final hard-visibility
+  charged/reflected transport object is passed directly to common surface chemistry; the profile
+  advances through the existing level-set/material path; C1 then remaps signed charge to the rebuilt
+  surface and warm-starts the next geometry. No root solver, smoothed operator, or volume Boltzmann
+  term was added.
+- **Fixed physical time and safeguarded SER are one operator.** SER uses the residual-ratio update with
+  declared timestep bounds, growth cap, and residual-growth rejection, and only activates in its
+  declared residual region. The exact current/deposition operator, compatible Q1 projection, and
+  final hard-visibility audit remain unchanged. Every evaluation records node RMS/worst, face
+  RMS/worst, two-scale patch metrics, potential rate, incident/deposited charge, and both projection
+  and surface-transfer conservation errors.
+- **Both signed riders are executable.** Runs require at least two physical patch scales. An
+  experimental profile-feature claim is refused unless one scale is no larger than its declared
+  physical extent. Experimental claims require explicit observable tolerances no larger than the
+  combined benchmark and digitization uncertainty. B2 gates the contract's exact
+  `abs(Ji-Je)/Ji` statistic; the historical symmetric node/patch diagnostics remain present but do
+  not gate acceptance. This distinction was corrected before any real-trench C3 claim.
+- **Pulsed bias uses resolved co-simulation, not a quasi-static label.** Quasi-static mode refuses a
+  waveform. `waveform_resolved` advances the same charge ODE once per explicit physical segment,
+  drives chemistry/profile motion with that segment's exact endpoint transport, then uses the same
+  signed remap/field rebuild. A two-segment 1 ns ion-rich/electron-rich smoke gate completes one
+  physical update per segment and closes deposition charge to `2.43e-16` and `1.21e-16`; saturation
+  is neither required nor claimed.
+- **Manufactured C3 integration passes; scientific C3 closure remains pending.** Config
+  `d3b5485aff03a950c82f6fb4a0161e76532b5120dc7f5a075bb340a7a4c444fc` gives planar B1 rate 0,
+  node RMS/worst 0/0, patch maxima 0/0 at 0.25/1.0 micrometers, exact transport reuse, and zero
+  deposition/remap ledger error. The full suite is 364 passed, 1 skipped. The real-trench cold/warm
+  branch, timestep/grid/sample refinement, observable invariance, and independent high-sample B5
+  audit remain required; C4 has not started. Evidence is in
+  `CHARGING_COEVOLUTION_C3_AUDIT_2026-07-13.md` and `results/charging_coevolution_c3/`.
+
 ## Roadmap (remaining)
 
 1. Finish Phase 2 charging through the unified engine: extend the now-validated material
