@@ -1,0 +1,167 @@
+{
+  "run_manifest": {
+    "config_hash": "b3df9406a4ac848dafa410eee924ca587217a39fef22065dfc70e6b998c1ed5d",
+    "config": {
+      "c1_cells": [
+        4,
+        8,
+        16,
+        32
+      ],
+      "c1_new_mesh_refinement": 2,
+      "c1_neighbor_count": 4,
+      "c1_translation_mesh_units": 0.1,
+      "c2_geometry": "interior straight wall/floor corner",
+      "c2_incident_energy_eV": 100.0,
+      "c2_incidence_cosine": 0.1,
+      "c2_event_count": 128,
+      "c2_fixed_dt": 0.005,
+      "c2_launch_offset": 1e-05,
+      "c2_max_steps": 1000,
+      "c2_field": "zero potential",
+      "device": "cpu",
+      "sampling_mode": "deterministic manufactured events",
+      "seed": null,
+      "visibility": "exact hard triangle intersections"
+    },
+    "engine_git_revision": "ed955e2a398a9d18400b8b3e329f343e37ae1316",
+    "source_sha256": {
+      "src/petch/surface_charge_remap_3d.py": "e24b2897050b430b32fb427894c8ee88f97f020e10273fc79656106cf5e8f9d6",
+      "src/petch/charged_surface_response_3d.py": "788ce3b575477e989332274deb4f31aec8a5e7a98d6d5cd265062395e170965a",
+      "src/petch/charged_surface_cascade_3d.py": "725451e87de5b33b361df25ae4d59b7bb3b5afd8e1c06b23b2b40170b7fa4e31",
+      "scripts/audit_charging_coevolution_c1_c2.py": "b2d7ebf5f12a86e5bfe2f4c294cc0cb1a5477658254c0a21be00188c11c18edc"
+    },
+    "hardware": "macOS-15.7.4-arm64-arm-64bit",
+    "python": "3.10.17"
+  },
+  "closure": "charge rides advancing material; etched charged layer is removed; newly exposed surface is uncharged",
+  "c1": [
+    {
+      "cells": 4,
+      "old_faces": 32,
+      "new_faces": 128,
+      "rms_sigma_error_c_m2": 6.788645984997737e-08,
+      "observed_order": null,
+      "relative_charge_balance_error": 2.1175823681357513e-16
+    },
+    {
+      "cells": 8,
+      "old_faces": 128,
+      "new_faces": 512,
+      "rms_sigma_error_c_m2": 3.1155272398393666e-08,
+      "observed_order": 1.1236475226746352,
+      "relative_charge_balance_error": 6.352747104407253e-16
+    },
+    {
+      "cells": 16,
+      "old_faces": 512,
+      "new_faces": 2048,
+      "rms_sigma_error_c_m2": 1.3519631873121917e-08,
+      "observed_order": 1.2044204618810288,
+      "relative_charge_balance_error": 1.2705494208814503e-15
+    },
+    {
+      "cells": 32,
+      "old_faces": 2048,
+      "new_faces": 8192,
+      "rms_sigma_error_c_m2": 5.9365977561136676e-09,
+      "observed_order": 1.1873475995542637,
+      "relative_charge_balance_error": 1.4823076576950254e-15
+    }
+  ],
+  "c2": {
+    "parameter_values": {
+      "grazing_reflection_probability": 0.95,
+      "angular_exponent": 3.0,
+      "energy_retention_fraction": 0.9
+    },
+    "parameter_bounds": {
+      "grazing_reflection_probability": [
+        0.8,
+        1.0
+      ],
+      "angular_exponent": [
+        2.0,
+        8.0
+      ],
+      "energy_retention_fraction": [
+        0.5,
+        0.99
+      ]
+    },
+    "provenance": {
+      "grazing_reflection_probability": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008",
+      "angular_exponent": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008",
+      "energy_retention_fraction": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008"
+    },
+    "corner_reimpact": {
+      "incident_event_count": 128,
+      "reflected_probability": 0.94905,
+      "landed_floor_event_count": 128,
+      "escaped_event_count": 0,
+      "minimum_corner_distance": 0.010060399770736694,
+      "maximum_corner_distance": 0.06533762812614441,
+      "incident_particle_rate_s": 128000000.0,
+      "reflected_particle_rate_s": 121478400.0,
+      "deposited_particle_rate_s": 6521600.0,
+      "relative_particle_balance_error": 0.0,
+      "relative_charge_balance_error": 2.3732149642405e-15,
+      "relative_kinetic_energy_balance_error": 0.0,
+      "reflected_flight_relative_particle_balance_error": 0.0,
+      "bin_left": [
+        0.0,
+        0.005,
+        0.01,
+        0.015,
+        0.02,
+        0.025,
+        0.03,
+        0.035,
+        0.04,
+        0.045,
+        0.05,
+        0.055,
+        0.06,
+        0.065,
+        0.07,
+        0.075
+      ],
+      "bin_right": [
+        0.005,
+        0.01,
+        0.015,
+        0.02,
+        0.025,
+        0.03,
+        0.035,
+        0.04,
+        0.045,
+        0.05,
+        0.055,
+        0.06,
+        0.065,
+        0.07,
+        0.075,
+        0.08
+      ],
+      "reflected_rate_by_bin_s": [
+        0.0,
+        0.0,
+        11388600.0,
+        10439550.0,
+        11388600.0,
+        10439550.0,
+        11388600.0,
+        10439550.0,
+        11388600.0,
+        10439550.0,
+        11388600.0,
+        10439550.0,
+        11388600.0,
+        949050.0,
+        0.0,
+        0.0
+      ]
+    }
+  }
+}

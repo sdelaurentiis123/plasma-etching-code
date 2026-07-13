@@ -507,6 +507,37 @@ under-determined) -- an honest result that quantifies how many structures must b
   for SiO2/conditioned layers. No curve digitization, PR constant, or guessed effective-Z model was
   admitted. Author-supplied coefficients or an independent plasma-exposed-SiO2 dataset are required.
 
+### Charging co-evolution C1/C2 pre-sign-off work (2026-07-13)
+
+- **The convergence-contract amendment is drafted but not active.** The draft preserves the old
+  per-node RMS/worst-node diagnostic forever while proposing potential saturation, fixed-physical-
+  patch balance under refinement, observable invariance, exact conservation, and an independent
+  hard-visibility final audit. No runtime threshold or `END_STATE_VERIFICATION.md` criterion was
+  weakened. C3 and all downstream work remain blocked on Stan's explicit signature.
+- **C1 moving-surface charge remap passes.** The declared closure carries charge with retained or
+  advancing material, removes and itemizes charge on an etched-away layer, and initializes newly
+  exposed material uncharged. No-op is bitwise identical; translation and signed removal ledgers
+  close; a 4/8/16/32-cell refinement ladder has observed RMS orders 1.124/1.204/1.187 with maximum
+  relative charge-ledger error `1.48e-15`. Positive and negative inventories are conserved
+  separately. The operator is solver-independent and deliberately not wired into C3 before sign-off.
+- **C2 bounded grazing reflection passes its common-engine certification.** Config
+  `b3df9406a4ac848dafa410eee924ca587217a39fef22065dfc70e6b998c1ed5d` uses exact hard triangle
+  visibility and deterministic manufactured 100 eV Ar+ events. The explicit literature-bounded
+  sensitivity (`p_grazing=0.95`, exponent `3`, retention `0.90`) gives `P=0.94905` at cosine `0.1`.
+  Particle and kinetic-energy ledgers close exactly, charge closes to `2.37e-15`, and a reflected
+  path reverses to its source face within the launch-offset bound.
+- **Reflection is now transport/chemistry physics, not a diagnostic-only bounce.** Every charged
+  re-impact is concatenated into the exact chemistry-facing energetic event measure with face,
+  position, energy, angle, and direction lineage. The manufactured straight-wall gate sends all
+  128 grazing reflected events to the floor within `0.0101--0.0653` mesh units of the corner; the
+  reflection-off case sends none. An incomplete bounce tail remains explicit and is refused. This
+  earns a qualitative microtrench flux mechanism, not a calibrated Si/SiO2 reflection prediction.
+- **Evidence is replayable.** `CHARGING_COEVOLUTION_C1_C2_AUDIT_2026-07-13.md` and
+  `results/charging_coevolution_c1_c2/` contain the gate table, plot, CSV, JSON manifest, base git
+  revision, implementation SHA-256 values, parameter sources/bounds, hardware, and numerical
+  settings. No frozen-map root method, smoothing, volume Boltzmann term, altered visibility, or
+  hidden bounce cutoff was introduced.
+
 ## Roadmap (remaining)
 
 1. Finish Phase 2 charging through the unified engine: extend the now-validated material
