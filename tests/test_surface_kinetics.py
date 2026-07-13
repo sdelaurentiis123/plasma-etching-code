@@ -76,6 +76,26 @@ def test_face_resolved_events_preserve_nonlinear_energy_angle_yield_without_aver
     assert np.allclose(events.yield_rate_m2_s(law), expected)
 
 
+def test_face_resolved_events_preserve_optional_impact_phase_space_immutably():
+    position = np.array([[0.25, 0.5, 0.0], [0.75, 0.5, 0.0]])
+    direction = np.array([[0.0, 0.0, -1.0], [0.6, 0.0, -0.8]])
+    events = FaceResolvedEnergeticFlux(
+        "electron", 2, event_face=[0, 1], event_flux_m2_s=[1e18, 2e18],
+        event_energy_eV=[4.0, 8.0], event_cosine_incidence=[1.0, 0.8],
+        event_position=position, event_incident_direction=direction)
+
+    position[:] = -1.0; direction[:] = 0.0
+    assert np.array_equal(events.event_position, [[0.25, 0.5, 0.0], [0.75, 0.5, 0.0]])
+    assert np.array_equal(
+        events.event_incident_direction, [[0.0, 0.0, -1.0], [0.6, 0.0, -0.8]])
+    assert not events.event_position.flags.writeable
+    assert not events.event_incident_direction.flags.writeable
+    with pytest.raises(ValueError, match="unit vectors"):
+        FaceResolvedEnergeticFlux(
+            "electron", 1, [0], [1.0], [4.0], [1.0],
+            event_incident_direction=[[0.0, 0.0, -2.0]])
+
+
 def test_no_flux_is_an_exact_identity_and_zero_velocity():
     state = SiO2SurfaceState([0.2, 0.8], [1e18, 2e18], [3e18, 4e18])
     result = _mechanism().advance(state, SurfaceFluxes({}), 10.0)

@@ -208,6 +208,14 @@ forward/adjoint event-provenance checks.
 
 Kill: any change to the present absorbing result beyond floating-point serialization differences.
 
+**Status: passed.** `FaceResolvedEnergeticFlux` now optionally preserves immutable impact position
+and unit incident direction. Full-field forward and adjoint transport populate both; deterministic
+first-hit/gather paths preserve direction; bidirectional selection, face replacement, and geometry
+filtering retain the richer event measure. The archived preflight summary, CSV, and PNG are bitwise
+unchanged after replay (git object ids `84a65d8a`, `23099578`, `f47d675e`). The absorber current law
+does not consume the new fields. Targeted transport/charging/surface tests pass 57/57 with one CUDA
+skip.
+
 ### P1 — conservative charged re-impact kernel
 
 Implement response-independent outgoing electron tracing and accounting. Test artificial responses:

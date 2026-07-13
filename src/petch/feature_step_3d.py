@@ -564,7 +564,12 @@ def _select_surface_fluxes(fluxes, selected_face, face_count, species_role=None)
             energetic.append(FaceResolvedEnergeticFlux(
                 population.name, selected_face.size, mapped[retained],
                 population.event_flux_m2_s[retained], population.event_energy_eV[retained],
-                population.event_cosine_incidence[retained]))
+                population.event_cosine_incidence[retained],
+                event_position=(None if population.event_position is None
+                                else population.event_position[retained]),
+                event_incident_direction=(
+                    None if population.event_incident_direction is None
+                    else population.event_incident_direction[retained])))
         elif isinstance(population, EnergeticFlux):
             flux = np.asarray(population.flux_m2_s)
             selected_flux = flux if flux.ndim == 0 else flux[selected_face]

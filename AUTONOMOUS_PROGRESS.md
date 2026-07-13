@@ -439,11 +439,17 @@ under-determined) -- an honest result that quantifies how many structures must b
   existing neutral-emission machinery supplies the conservation pattern but cannot replace charged
   field trajectories. Bulk leakage is held by a Maxwell-timescale screen; surface conduction is held
   for sourced material/surface-state conductivity. No new governing physics was applied.
+- **P0 impact preservation passes exact regression.** The shared sparse energetic event measure now
+  optionally carries immutable impact position and full unit incident direction. Forward/adjoint
+  field transport, bidirectional selection/replacement, and geometry filtering preserve it. The
+  absorbing-map preflight summary, CSV, and PNG retain identical git object hashes after replay;
+  57 targeted surface/transport/charging tests pass with one unavailable-CUDA skip. No response has
+  yet been applied.
 
 ## Roadmap (remaining)
 
-1. Finish Phase 2 charging through the unified engine: preserve full incident direction and certified
-   estimator provenance, add a material-tagged charged-surface response plus charge-conserving
+1. Finish Phase 2 charging through the unified engine: preserve certified estimator sampling-level
+   provenance, add a material-tagged charged-surface response plus charge-conserving
    full-field re-impact kernel, and exact-regress the present perfect absorber. Validate the sourced
    Ar+-SiO2 SEE slice first, then admit electron backscatter/true SEE only with recovered SiO2 data.
    Physical time remains the reference; independently audit any final state before promotion.

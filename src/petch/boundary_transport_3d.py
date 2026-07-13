@@ -375,13 +375,25 @@ def select_bidirectional_face_events_3d(
                 population.event_face[keep],
                 population.event_flux_m2_s[keep] / replicate_count,
                 population.event_energy_eV[keep],
-                population.event_cosine_incidence[keep]))
+                population.event_cosine_incidence[keep],
+                (None if population.event_position is None
+                 else population.event_position[keep]),
+                (None if population.event_incident_direction is None
+                 else population.event_incident_direction[keep])))
+    def concatenate_optional(index, name):
+        values = [item[index] for item in selected_events]
+        present = [value is not None for value in values]
+        if any(present) and not all(present):
+            raise ValueError(f"bidirectional event populations inconsistently preserve {name}")
+        return None if not any(present) else np.concatenate(values, axis=0)
     population = FaceResolvedEnergeticFlux(
         first.name, face_count,
         np.concatenate([item[0] for item in selected_events]),
         np.concatenate([item[1] for item in selected_events]),
         np.concatenate([item[2] for item in selected_events]),
-        np.concatenate([item[3] for item in selected_events]))
+        np.concatenate([item[3] for item in selected_events]),
+        event_position=concatenate_optional(4, "impact position"),
+        event_incident_direction=concatenate_optional(5, "incident direction"))
     selected_stderr = np.where(method == "forward", forward_stderr, adjoint_stderr)
     return BidirectionalFaceSelection3D(
         population, selected_stderr, method,
@@ -394,13 +406,23 @@ def _replace_population_face_events_3d(population, replacement, face_indices):
     selected = np.zeros(population.face_count, dtype=bool)
     selected[np.asarray(face_indices, dtype=int)] = True
     keep = ~selected[population.event_face]
+    def replace_optional(name):
+        original = getattr(population, name)
+        new = getattr(replacement, name)
+        if original is None and new is None:
+            return None
+        if original is None or new is None:
+            raise ValueError(f"replacement events inconsistently preserve {name}")
+        return np.concatenate((original[keep], new), axis=0)
     return FaceResolvedEnergeticFlux(
         population.name, population.face_count,
         np.concatenate((population.event_face[keep], replacement.event_face)),
         np.concatenate((population.event_flux_m2_s[keep], replacement.event_flux_m2_s)),
         np.concatenate((population.event_energy_eV[keep], replacement.event_energy_eV)),
         np.concatenate((population.event_cosine_incidence[keep],
-                        replacement.event_cosine_incidence)))
+                        replacement.event_cosine_incidence)),
+        event_position=replace_optional("event_position"),
+        event_incident_direction=replace_optional("event_incident_direction"))
 
 
 def merge_boundary_transport_results_3d(*results):
@@ -684,7 +706,8 @@ def gather_boundary_state_ballistic_3d(
                 species.name, face_count, event_face,
                 gathered[event_sample, event_face],
                 species.kinetic_energy_eV[event_sample],
-                incidence_cosine[event_sample, event_face]))
+                incidence_cosine[event_sample, event_face],
+                event_incident_direction=direction[event_sample]))
     return BoundaryTransport3DResult(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
         hit_probability=hit_probability, escape_probability=escape_probability,
@@ -839,7 +862,7 @@ def trace_boundary_state_first_hit_3d(
         else:
             energetic_flux.append(FaceResolvedEnergeticFlux(
                 species.name, faces.shape[0], hit_face[hit], event_flux, energy[hit],
-                hit_cosine[hit]))
+                hit_cosine[hit], event_incident_direction=direction[hit]))
 
     return BoundaryTransport3DResult(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
@@ -997,6 +1020,8 @@ def trace_boundary_state_field_3d(
         hit = termination == 1; escaped = termination == 2; truncated = termination == 0
         hit_cosine = hit_cosine_wp.numpy().astype(float)
         hit_energy = hit_energy_wp.numpy().astype(float)
+        terminal_position = terminal_position_wp.numpy().astype(float)
+        terminal_velocity = terminal_velocity_wp.numpy().astype(float)
         hit_probability[species.name] = float(physical_weight[hit].sum())
         escape_probability[species.name] = float(physical_weight[escaped].sum())
         truncation_probability[species.name] = float(physical_weight[truncated].sum())
@@ -1012,7 +1037,11 @@ def trace_boundary_state_field_3d(
         else:
             energetic_flux.append(FaceResolvedEnergeticFlux(
                 species.name, faces.shape[0], hit_face[hit], event_flux,
-                hit_energy[hit], hit_cosine[hit]))
+                hit_energy[hit], hit_cosine[hit],
+                event_position=terminal_position[hit],
+                event_incident_direction=(
+                    terminal_velocity[hit]
+                    / np.linalg.norm(terminal_velocity[hit], axis=1, keepdims=True))))
     return BoundaryTransport3DResult(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
         hit_probability=hit_probability, escape_probability=escape_probability,
@@ -1259,7 +1288,11 @@ def gather_boundary_state_field_adjoint_3d(
             surface_normal_speed[positive]
             / np.linalg.norm(forward_surface_velocity[positive], axis=1))
         energetic_flux.append(FaceResolvedEnergeticFlux(
-            species.name, len(faces), event_face, event_flux, event_energy, event_cosine))
+            species.name, len(faces), event_face, event_flux, event_energy, event_cosine,
+            event_position=points[face_index[positive], point_index[positive]],
+            event_incident_direction=(
+                forward_surface_velocity[positive]
+                / np.linalg.norm(forward_surface_velocity[positive], axis=1, keepdims=True))))
         normalized_landing = float(np.dot(
             np.bincount(event_face, weights=contribution[positive], minlength=len(faces)),
             areas) / source_area)
@@ -1379,7 +1412,8 @@ def trace_boundary_state_bidirectional_field_3d(
                     gather_face_indices=frozen_adjoint_faces, device=device))
         empty_population = FaceResolvedEnergeticFlux(
             species.name, len(faces), np.empty(0, dtype=int), np.empty(0),
-            np.empty(0), np.empty(0))
+            np.empty(0), np.empty(0), event_position=np.empty((0, 3)),
+            event_incident_direction=np.empty((0, 3)))
         forward_populations = (
             [item.surface_fluxes.energetic_fluxes[0] for item in forward_results]
             if frozen_forward_needed else [empty_population] * int(n_replicates))

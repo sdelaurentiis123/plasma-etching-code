@@ -152,6 +152,8 @@ class FaceResolvedEnergeticFlux:
     event_flux_m2_s: np.ndarray
     event_energy_eV: np.ndarray
     event_cosine_incidence: np.ndarray
+    event_position: np.ndarray | None = None
+    event_incident_direction: np.ndarray | None = None
 
     def __post_init__(self):
         if not self.name or int(self.face_count) <= 0:
@@ -172,6 +174,19 @@ class FaceResolvedEnergeticFlux:
         object.__setattr__(self, "event_flux_m2_s", flux)
         object.__setattr__(self, "event_energy_eV", energy)
         object.__setattr__(self, "event_cosine_incidence", cosine)
+        for name in ("event_position", "event_incident_direction"):
+            supplied = getattr(self, name)
+            if supplied is None:
+                continue
+            value = np.asarray(supplied, dtype=float).copy()
+            if value.shape != (face.size, 3) or np.any(~np.isfinite(value)):
+                raise ValueError(f"{name} must be a finite (event_count, 3) array")
+            if (name == "event_incident_direction" and value.size
+                    and not np.allclose(
+                        np.linalg.norm(value, axis=1), 1.0, rtol=0.0, atol=2e-6)):
+                raise ValueError("event incident directions must be unit vectors")
+            value.setflags(write=False)
+            object.__setattr__(self, name, value)
 
     @property
     def flux_m2_s(self):

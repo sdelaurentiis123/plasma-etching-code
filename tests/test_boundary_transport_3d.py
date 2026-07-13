@@ -238,6 +238,11 @@ def test_zero_nodal_field_reproduces_ballistic_3d_event_measure():
     assert np.allclose(field_events.event_energy_eV, ballistic_events.event_energy_eV, atol=2e-5)
     assert np.allclose(field_events.event_cosine_incidence,
                        ballistic_events.event_cosine_incidence, atol=2e-7)
+    assert field_events.event_position.shape == (field_events.event_face.size, 3)
+    assert np.allclose(field_events.event_position[:, 2], 0.0, atol=2e-6)
+    assert np.allclose(
+        field_events.event_incident_direction,
+        ballistic_events.event_incident_direction, atol=2e-6)
     assert np.allclose(field.surface_fluxes.neutral_flux_m2_s["CF2"],
                        ballistic.surface_fluxes.neutral_flux_m2_s["CF2"])
 
@@ -289,6 +294,12 @@ def test_periodic_adjoint_field_gather_reproduces_flat_maxwellian_flux_and_energ
     assert np.isclose(result.hit_probability["electron"], 1.0, rtol=2e-6)
     assert np.isclose(integrated_flux, 2e19, rtol=2e-6)
     assert np.isclose(integrated_energy_rate / integrated_flux, 8.0, rtol=2e-6)
+    assert population.event_position.shape == (population.event_face.size, 3)
+    assert np.allclose(population.event_position[:, 2], 0.0)
+    assert np.allclose(np.linalg.norm(population.event_incident_direction, axis=1), 1.0)
+    assert np.allclose(
+        -population.event_incident_direction[:, 2],
+        population.event_cosine_incidence)
 
 
 def test_adjoint_and_forward_field_transport_reproduce_maxwellian_barrier_tail():
@@ -344,6 +355,9 @@ def test_bidirectional_field_transport_certifies_and_preserves_barrier_event_mea
     assert np.all(selection.estimator_consistent)
     assert np.isclose(result.transport.hit_probability["electron"], expected, atol=0.035)
     assert result.transport.surface_fluxes.energetic_fluxes[0].event_energy_eV.size > 0
+    selected_events = result.transport.surface_fluxes.energetic_fluxes[0]
+    assert selected_events.event_position is not None
+    assert selected_events.event_incident_direction is not None
 
     frozen = trace_boundary_state_bidirectional_field_3d(
         boundary, {"electron": "charge_carrier"}, verts, faces, areas, centroids, normals,
@@ -525,6 +539,9 @@ def test_first_hit_3d_reports_geometric_oblique_incidence_without_angle_fit(devi
     assert result.hit_probability["ion"] == 1.0
     assert np.allclose(events.event_energy_eV, 1.25)
     assert np.allclose(events.event_cosine_incidence, 1.0 / np.sqrt(1.25), atol=2e-7)
+    assert np.allclose(
+        events.event_incident_direction,
+        np.array([0.5, 0.0, -1.0]) / np.sqrt(1.25), atol=2e-7)
     assert np.isclose(np.dot(events.flux_m2_s, areas), 1e19, rtol=1e-12)
 
 
