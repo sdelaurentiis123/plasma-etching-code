@@ -1,0 +1,739 @@
+{
+  "schema": "petch.charging.coevolution.c3.trench-pilot.v1",
+  "config_hash": "828d18f39cc3b2d5e40c2f982dab14d8997c6d03add79206a8e29849a3e50dff",
+  "config": {
+    "status": "bounded coarse real-trench pilot; not a convergence claim",
+    "geometry": {
+      "cell_width_um": 1.0,
+      "cell_length_um": 0.5,
+      "domain_height_um": 2.0,
+      "dx_um": 0.25,
+      "opening_width_um": 0.5,
+      "mask_thickness_um": 0.25,
+      "substrate_top_um": 1.25,
+      "etched_depth_um": 0.75
+    },
+    "timestep_s": 1.25e-07,
+    "maximum_steps": 10,
+    "timestep_policy": "fixed",
+    "maximum_timestep_s": 5e-07,
+    "minimum_timestep_s": 1e-11,
+    "ser_activation_rms": 0.5,
+    "ser_maximum_growth": 2.0,
+    "ser_allowed_residual_growth": 0.005,
+    "potential_rate_tolerance_v_s": 1000.0,
+    "patch_scales_um": [
+      0.25,
+      0.5
+    ],
+    "n_position": 256,
+    "seed": 779,
+    "scramble_mode": "fresh",
+    "sampling_seed_stride": 1000003,
+    "adjoint_proposal_seeds": {
+      "Ar+": 779,
+      "electron": 783
+    },
+    "trajectory_dt": 0.0003125,
+    "trajectory_max_steps": 128000,
+    "forward_level": 10,
+    "adjoint_level": 8,
+    "initial_face_state_sha256": "e49eb102d410983a89b48f6aecd710261dc80d01c202bc3c8bce1f8801c9955f",
+    "response_tail_tolerance": 1e-10,
+    "method_map_sha256": "444e7b53a4e750c7fb98f724e3c1e8099e4038dabe6def1c31b1faa30fa3b5f0",
+    "method_key": "refined_method_hint_Ar+",
+    "estimator_map_source": "separate pre-C3 pilot; estimator choice only, no nodal charge",
+    "exact_operator": "hard visibility with bounded grazing-ion reflection"
+  },
+  "run_manifest": {
+    "engine_git_revision": "f37b0ca5b30fd61ded77491aa1952bb03db3efa1",
+    "source_sha256": {
+      "src/petch/charging_coevolution_3d.py": "ae33c69624e6ab1e4d88067ef3120d2566a204de23aa7d566d5d24fcaee18ccc",
+      "src/petch/charging_coupled_3d.py": "d8c511489c747c862c9e4f4b345cf39cc57dc56ce7d65884627e4d3ca4381173",
+      "src/petch/boundary_transport_3d.py": "cfefbcf17b6846ccfd3cdddcf78f9c5719aeeac0dda0b40f232882fefd2868ba",
+      "src/petch/charged_surface_cascade_3d.py": "977c4c84e8a2f515286f863f80a745852a6cafd1b295a8468ba157b03d33ad33",
+      "src/petch/charged_surface_response_3d.py": "233aee07c5178ada37c5b465c7d94688eabcfd6f973f2e11c28ef1c66c732e4c",
+      "scripts/charging_coevolution_c3_trench.py": "4a7a287bff020629b6e008443fb3b3d945bf1e96a7ff5b268899a0ad76ec3a72"
+    },
+    "hardware": "macOS-15.7.4-arm64-arm-64bit",
+    "python": "3.10.17",
+    "wall_clock_s": 56.24191900063306,
+    "reflection_provenance": {
+      "model": "weighted angle-dependent specular reflection with constant energy retention",
+      "material_id": 1,
+      "ion_species_name": "Ar+",
+      "parameters": {
+        "grazing_reflection_probability": 0.95,
+        "angular_exponent": 3.0,
+        "energy_retention_fraction": 0.9
+      },
+      "bounds": {
+        "grazing_reflection_probability": [
+          0.8,
+          1.0
+        ],
+        "angular_exponent": [
+          2.0,
+          8.0
+        ],
+        "energy_retention_fraction": [
+          0.5,
+          0.99
+        ]
+      },
+      "evidence": {
+        "grazing_reflection_probability": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008",
+        "angular_exponent": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008",
+        "energy_retention_fraction": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008"
+      },
+      "claim": "literature-bounded sensitivity; not material-calibrated prediction"
+    }
+  },
+  "result": {
+    "converged": false,
+    "accepted_steps": 10,
+    "rejected_steps": 0,
+    "physical_time_s": 1.25e-06,
+    "pseudo_time_s": 0.0,
+    "retained_node_rms_relative_current_imbalance": 0.1853098806067336,
+    "retained_node_max_relative_current_imbalance": 0.46426297094509705,
+    "final_potential_rate_max_v_s": 2746452.2519512614,
+    "patch_scales_m": [
+      2.5e-07,
+      5e-07
+    ],
+    "patch_b2_max_ion_normalized": [
+      3.212975593562215,
+      2.8230110397927297
+    ],
+    "patch_symmetric_max": [
+      0.6163419597686381,
+      0.585321289232224
+    ],
+    "maximum_charge_conservation_relative_error": 5.5492466817018054e-17,
+    "maximum_surface_transfer_relative_charge_balance_error": 2.4306332346129423e-15,
+    "maximum_response_tail_closure_relative_absolute_charge_rate": 0.0,
+    "maximum_response_tail_closure_l1_current_error_bound_relative": 0.0,
+    "maximum_transport_lineage_replay_count": 0,
+    "maximum_transport_lineage_replay_fraction": 0.0,
+    "minimum_potential_v": -12.588755267987665,
+    "maximum_potential_v": 8.397268206817499
+  },
+  "history": [
+    {
+      "evaluation": 1,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 0,
+      "sampling_seed": 779,
+      "accepted_steps": 0,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 0.0,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 2713097.728040964,
+      "rms_relative_current_imbalance_node": 0.21635857769788114,
+      "max_relative_current_imbalance_node": 0.549012445812834,
+      "rms_relative_current_imbalance_face": 0.35926130204317447,
+      "max_relative_current_imbalance_face": 0.693862426096535,
+      "residual_current_norm_a": 7.1282346196113255e-12,
+      "maximum_patch_relative_imbalance": 3.8543870053768026,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.6762500438826076,
+        1.8665152931480484
+      ],
+      "patch_max_relative_imbalance": [
+        3.8543870053768026,
+        3.6353001470778454
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.33922742751072416,
+        0.3750794448770372
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6583758473494913,
+        0.6450943254482923
+      ],
+      "incident_charge_c": -2.545420717770292e-18,
+      "positive_incident_charge_c": 3.015107485572255e-17,
+      "negative_incident_charge_c": 3.2696495573492846e-17,
+      "absolute_incident_charge_c": 6.284757042921539e-17,
+      "deposited_charge_c": -2.5454207177702914e-18,
+      "charge_conservation_residual_c": 7.703719777548943e-34,
+      "charge_conservation_relative_error": 1.2257784549087013e-17,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9326,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 1.3664781648989164e-15,
+      "face_to_node_update_relative_error": 1.9197880670643246e-16
+    },
+    {
+      "evaluation": 2,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 1,
+      "sampling_seed": 1000782,
+      "accepted_steps": 1,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 1.25e-07,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 3510500.945049003,
+      "rms_relative_current_imbalance_node": 0.21157579432744836,
+      "max_relative_current_imbalance_node": 0.538399828150415,
+      "rms_relative_current_imbalance_face": 0.3419187195778974,
+      "max_relative_current_imbalance_face": 0.7139941300446635,
+      "residual_current_norm_a": 8.95113907023837e-12,
+      "maximum_patch_relative_imbalance": 4.02721263901713,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.5672424362465767,
+        1.700823805069346
+      ],
+      "patch_max_relative_imbalance": [
+        4.02721263901713,
+        3.320650250237353
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.3340054684873911,
+        0.3629190511493312
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6681716541651426,
+        0.6241060949437937
+      ],
+      "incident_charge_c": 1.5987362273018356e-18,
+      "positive_incident_charge_c": 3.007275438617256e-17,
+      "negative_incident_charge_c": 2.847401815887073e-17,
+      "absolute_incident_charge_c": 5.854677254504329e-17,
+      "deposited_charge_c": 1.5987362273018342e-18,
+      "charge_conservation_residual_c": -1.3481509610710651e-33,
+      "charge_conservation_relative_error": 2.3026904856862222e-17,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9307,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 5.136845383928685e-16,
+      "face_to_node_update_relative_error": 1.869083863108466e-16
+    },
+    {
+      "evaluation": 3,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 2,
+      "sampling_seed": 2000785,
+      "accepted_steps": 2,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 2.5e-07,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 2515675.134531719,
+      "rms_relative_current_imbalance_node": 0.20387411009998732,
+      "max_relative_current_imbalance_node": 0.5625658522267202,
+      "rms_relative_current_imbalance_face": 0.3522918106601396,
+      "max_relative_current_imbalance_face": 0.7104353255670639,
+      "residual_current_norm_a": 6.107930376559321e-12,
+      "maximum_patch_relative_imbalance": 3.655102655742309,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.616571164875706,
+        1.785104828192256
+      ],
+      "patch_max_relative_imbalance": [
+        3.655102655742309,
+        3.4424848804650994
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.3370175816716911,
+        0.3649688012202512
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6463371008890249,
+        0.6325207981415493
+      ],
+      "incident_charge_c": -2.2547447166260304e-18,
+      "positive_incident_charge_c": 3.010816373100973e-17,
+      "negative_incident_charge_c": 3.236290844763576e-17,
+      "absolute_incident_charge_c": 6.247107217864549e-17,
+      "deposited_charge_c": -2.254744716626034e-18,
+      "charge_conservation_residual_c": -3.4666738998970245e-33,
+      "charge_conservation_relative_error": 5.5492466817018054e-17,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9345,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 9.25781993138499e-16,
+      "face_to_node_update_relative_error": 2.144110179478082e-16
+    },
+    {
+      "evaluation": 4,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 3,
+      "sampling_seed": 3000788,
+      "accepted_steps": 3,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 3.75e-07,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 695141.6266385735,
+      "rms_relative_current_imbalance_node": 0.1994550405328839,
+      "max_relative_current_imbalance_node": 0.5265739196277749,
+      "rms_relative_current_imbalance_face": 0.34103004791675956,
+      "max_relative_current_imbalance_face": 0.6865859153772242,
+      "residual_current_norm_a": 5.867203456667765e-12,
+      "maximum_patch_relative_imbalance": 3.6676993708617225,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.5238475653668593,
+        1.6817808125704665
+      ],
+      "patch_max_relative_imbalance": [
+        3.6676993708617225,
+        3.2024242366376305
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.32467769552019066,
+        0.3571387519032827
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.647123132486133,
+        0.6155638392741657
+      ],
+      "incident_charge_c": -5.762411489422865e-19,
+      "positive_incident_charge_c": 3.007567747694434e-17,
+      "negative_incident_charge_c": 3.0651918625886624e-17,
+      "absolute_incident_charge_c": 6.072759610283096e-17,
+      "deposited_charge_c": -5.762411489422875e-19,
+      "charge_conservation_residual_c": -9.62964972193618e-34,
+      "charge_conservation_relative_error": 1.5857123186022623e-17,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9363,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 4.763744610235541e-16,
+      "face_to_node_update_relative_error": 1.342551174257837e-16
+    },
+    {
+      "evaluation": 5,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 4,
+      "sampling_seed": 4000791,
+      "accepted_steps": 4,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 5e-07,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 695059.243412004,
+      "rms_relative_current_imbalance_node": 0.18544308613451307,
+      "max_relative_current_imbalance_node": 0.49619235063960127,
+      "rms_relative_current_imbalance_face": 0.32878468936763006,
+      "max_relative_current_imbalance_face": 0.6721039452679411,
+      "residual_current_norm_a": 5.360464059385597e-12,
+      "maximum_patch_relative_imbalance": 3.187398282310858,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.4377083200122094,
+        1.5944791641583747
+      ],
+      "patch_max_relative_imbalance": [
+        3.187398282310858,
+        3.1477913527399703
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.32214497200089254,
+        0.34627592582017425
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6144502713778419,
+        0.6114838650297126
+      ],
+      "incident_charge_c": -5.432887930911366e-19,
+      "positive_incident_charge_c": 3.015158312439978e-17,
+      "negative_incident_charge_c": 3.069487191749092e-17,
+      "absolute_incident_charge_c": 6.08464550418907e-17,
+      "deposited_charge_c": -5.432887930911396e-19,
+      "charge_conservation_residual_c": -2.9851914138002156e-33,
+      "charge_conservation_relative_error": 4.906105724228328e-17,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9346,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 1.5086211120951554e-15,
+      "face_to_node_update_relative_error": 2.2116048768672396e-16
+    },
+    {
+      "evaluation": 6,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 5,
+      "sampling_seed": 5000794,
+      "accepted_steps": 5,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 6.249999999999999e-07,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 811122.8392085935,
+      "rms_relative_current_imbalance_node": 0.18839471823622966,
+      "max_relative_current_imbalance_node": 0.5156436776245438,
+      "rms_relative_current_imbalance_face": 0.3182652791967533,
+      "max_relative_current_imbalance_face": 0.683234980368207,
+      "residual_current_norm_a": 5.146648150328092e-12,
+      "maximum_patch_relative_imbalance": 3.0287202164721236,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.3605870681228913,
+        1.5112577922108295
+      ],
+      "patch_max_relative_imbalance": [
+        3.0287202164721236,
+        2.8926025224531626
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.30983167667989947,
+        0.3414316428667584
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6022844950791295,
+        0.5912196033048694
+      ],
+      "incident_charge_c": -6.228657874070199e-19,
+      "positive_incident_charge_c": 3.0136049230919934e-17,
+      "negative_incident_charge_c": 3.0758915018326956e-17,
+      "absolute_incident_charge_c": 6.089496424924689e-17,
+      "deposited_charge_c": -6.228657874070185e-19,
+      "charge_conservation_residual_c": 1.3481509610710651e-33,
+      "charge_conservation_relative_error": 2.2138956442325824e-17,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9315,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 3.3059479380510695e-16,
+      "face_to_node_update_relative_error": 2.371425063491366e-16
+    },
+    {
+      "evaluation": 7,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 6,
+      "sampling_seed": 6000797,
+      "accepted_steps": 6,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 7.499999999999999e-07,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 2715323.0860809432,
+      "rms_relative_current_imbalance_node": 0.19629043366539736,
+      "max_relative_current_imbalance_node": 0.5173730206239036,
+      "rms_relative_current_imbalance_face": 0.3294235499874886,
+      "max_relative_current_imbalance_face": 0.6898090861348342,
+      "residual_current_norm_a": 6.111223262627798e-12,
+      "maximum_patch_relative_imbalance": 3.3364286808927934,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.387418461640462,
+        1.5316467637617983
+      ],
+      "patch_max_relative_imbalance": [
+        3.3364286808927934,
+        2.931154617922252
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.31208313213065836,
+        0.345587473954652
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6252175153842033,
+        0.5944154756918365
+      ],
+      "incident_charge_c": -1.7690499204074774e-18,
+      "positive_incident_charge_c": 3.015043740974145e-17,
+      "negative_incident_charge_c": 3.191948733014893e-17,
+      "absolute_incident_charge_c": 6.206992473989038e-17,
+      "deposited_charge_c": -1.7690499204074782e-18,
+      "charge_conservation_residual_c": -7.703719777548943e-34,
+      "charge_conservation_relative_error": 1.2411356723617882e-17,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9332,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 1.5506087481453914e-15,
+      "face_to_node_update_relative_error": 2.6355322121313374e-16
+    },
+    {
+      "evaluation": 8,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 7,
+      "sampling_seed": 7000800,
+      "accepted_steps": 7,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 8.749999999999999e-07,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 1362346.2702156317,
+      "rms_relative_current_imbalance_node": 0.18534980405194518,
+      "max_relative_current_imbalance_node": 0.4996355574895556,
+      "rms_relative_current_imbalance_face": 0.31775407378393555,
+      "max_relative_current_imbalance_face": 0.6922680456758001,
+      "residual_current_norm_a": 6.023742411216793e-12,
+      "maximum_patch_relative_imbalance": 3.7336144720174733,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.3459172914909188,
+        1.4464348231259332
+      ],
+      "patch_max_relative_imbalance": [
+        3.7336144720174733,
+        2.9069476111556978
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.30486573298686503,
+        0.33492431173142717
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6511798953764911,
+        0.5924146417514015
+      ],
+      "incident_charge_c": 8.926958365987642e-19,
+      "positive_incident_charge_c": 3.0104272260119613e-17,
+      "negative_incident_charge_c": 2.9211576423520844e-17,
+      "absolute_incident_charge_c": 5.931584868364046e-17,
+      "deposited_charge_c": 8.926958365987636e-19,
+      "charge_conservation_residual_c": -5.7777898331617076e-34,
+      "charge_conservation_relative_error": 9.740718478087366e-18,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9347,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 2.4306332346129423e-15,
+      "face_to_node_update_relative_error": 1.9343864931790054e-16
+    },
+    {
+      "evaluation": 9,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 8,
+      "sampling_seed": 8000803,
+      "accepted_steps": 8,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 1e-06,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 3849970.932147656,
+      "rms_relative_current_imbalance_node": 0.18412704301568084,
+      "max_relative_current_imbalance_node": 0.5333022842535344,
+      "rms_relative_current_imbalance_face": 0.32101423967942644,
+      "max_relative_current_imbalance_face": 0.6824460528608626,
+      "residual_current_norm_a": 7.289231675677107e-12,
+      "maximum_patch_relative_imbalance": 3.10784493620873,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.2262244500504806,
+        1.327499395533142
+      ],
+      "patch_max_relative_imbalance": [
+        3.10784493620873,
+        2.804302567889485
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.3100182195233412,
+        0.32828656895634334
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6084454354081295,
+        0.5837064856473864
+      ],
+      "incident_charge_c": -2.2055464834762956e-18,
+      "positive_incident_charge_c": 3.012420649006676e-17,
+      "negative_incident_charge_c": 3.232975297354305e-17,
+      "absolute_incident_charge_c": 6.245395946360981e-17,
+      "deposited_charge_c": -2.205546483476296e-18,
+      "charge_conservation_residual_c": -3.851859888774472e-34,
+      "charge_conservation_relative_error": 6.167519116252099e-18,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9297,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 1.51164943279823e-15,
+      "face_to_node_update_relative_error": 1.8789092551358938e-16
+    },
+    {
+      "evaluation": 10,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 9,
+      "sampling_seed": 9000806,
+      "accepted_steps": 9,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 1.125e-06,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 2191757.09644,
+      "rms_relative_current_imbalance_node": 0.17751487243242434,
+      "max_relative_current_imbalance_node": 0.4953401140510057,
+      "rms_relative_current_imbalance_face": 0.3169749496957641,
+      "max_relative_current_imbalance_face": 0.6585457699724477,
+      "residual_current_norm_a": 6.97854323296787e-12,
+      "maximum_patch_relative_imbalance": 3.3249599968164483,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.2748716122214692,
+        1.3595129101103636
+      ],
+      "patch_max_relative_imbalance": [
+        3.3249599968164483,
+        2.684565425220857
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.30112870536676617,
+        0.32356884744980025
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6244103239844602,
+        0.5730660544877098
+      ],
+      "incident_charge_c": -9.183011809130413e-19,
+      "positive_incident_charge_c": 3.013085390098125e-17,
+      "negative_incident_charge_c": 3.10491550818943e-17,
+      "absolute_incident_charge_c": 6.118000898287555e-17,
+      "deposited_charge_c": -9.183011809130413e-19,
+      "charge_conservation_residual_c": 0.0,
+      "charge_conservation_relative_error": 0.0,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9334,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 6.175176749975511e-16,
+      "face_to_node_update_relative_error": 1.4356683995439143e-16
+    },
+    {
+      "evaluation": 11,
+      "accepted": true,
+      "scramble_mode": "fresh",
+      "sampling_epoch": 10,
+      "sampling_seed": 10000809,
+      "accepted_steps": 10,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 1.25e-06,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 2746452.2519512614,
+      "rms_relative_current_imbalance_node": 0.1853098806067336,
+      "max_relative_current_imbalance_node": 0.46426297094509705,
+      "rms_relative_current_imbalance_face": 0.32990755313011894,
+      "max_relative_current_imbalance_face": 0.6857970941709721,
+      "residual_current_norm_a": 7.107768829163116e-12,
+      "maximum_patch_relative_imbalance": 3.212975593562215,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.3356405091504662,
+        1.453916187251469
+      ],
+      "patch_max_relative_imbalance": [
+        3.212975593562215,
+        2.8230110397927297
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.317999865102522,
+        0.3375165659576804
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6163419597686381,
+        0.585321289232224
+      ],
+      "incident_charge_c": 2.0701367889663738e-18,
+      "positive_incident_charge_c": 3.0092097315996934e-17,
+      "negative_incident_charge_c": 2.8021960527030565e-17,
+      "absolute_incident_charge_c": 5.811405784302749e-17,
+      "deposited_charge_c": 2.0701367889663738e-18,
+      "charge_conservation_residual_c": 0.0,
+      "charge_conservation_relative_error": 0.0,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 0,
+      "transport_lineage_replay_eligible_count": 9321,
+      "transport_lineage_replay_fraction": 0.0,
+      "surface_transfer_relative_charge_balance_error": 6.033657786262023e-16
+    }
+  ],
+  "conclusion": "bounded pilot only; continue from face checkpoint with refinement evidence",
+  "artifacts": {
+    "face_checkpoint": {
+      "name": "face_checkpoint.npz",
+      "sha256": "3c60869a044dc14df610073d80db986f23ca09be70d2a073cce73f6b2fc54107"
+    },
+    "current_audit": {
+      "name": "current_audit.npz",
+      "sha256": "b07e7f4e91914accdb70e5a34081c50b83d1b97c5c936901ccd28a704051fbb2"
+    }
+  }
+}

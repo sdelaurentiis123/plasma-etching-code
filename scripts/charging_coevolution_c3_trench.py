@@ -83,6 +83,8 @@ def main():
     parser.add_argument("--adjoint-level", type=int, default=8)
     parser.add_argument("--n-position", type=int, default=256)
     parser.add_argument("--seed", type=int, default=79)
+    parser.add_argument("--scramble-mode", choices=("frozen", "fresh"), default="frozen")
+    parser.add_argument("--sampling-seed-stride", type=int, default=1000003)
     parser.add_argument("--trajectory-dt", type=float, default=0.0003125)
     parser.add_argument("--trajectory-max-steps", type=int, default=128000)
     parser.add_argument("--response-tail-tolerance", type=float, default=1e-10)
@@ -135,6 +137,8 @@ def main():
         potential_rate_tolerance_v_s=args.potential_rate_tolerance_v_s,
         patch_scales_um=list(args.patch_scales_um), n_position=args.n_position,
         seed=args.seed,
+        scramble_mode=args.scramble_mode,
+        sampling_seed_stride=args.sampling_seed_stride,
         adjoint_proposal_seeds={"Ar+": args.seed, "electron": args.seed + 4},
         trajectory_dt=args.trajectory_dt,
         trajectory_max_steps=args.trajectory_max_steps,
@@ -166,6 +170,13 @@ def main():
             reflection_provenance=json_value(reflection.provenance))
 
     started = perf_counter()
+    def proposal_factory(evaluation_seed):
+        return {
+            "Ar+": _ion_proposal(boundary, args.adjoint_level, evaluation_seed),
+            "electron": _electron_proposal(
+                boundary, args.adjoint_level, evaluation_seed + 4),
+        }
+
     try:
         result = integrate_surface_charging_to_saturation_3d(
             poisson, initial_sigma, boundary, vertices, faces, areas,
@@ -185,16 +196,17 @@ def main():
             mesh_length_unit_m=geometry.mesh_length_unit_m,
             mesh_origin_m=geometry.mesh_origin_m,
             n_position=args.n_position, seed=args.seed,
+            scramble_mode=args.scramble_mode,
+            sampling_seed_stride=args.sampling_seed_stride,
             trajectory_fixed_dt=args.trajectory_dt,
             trajectory_max_steps=args.trajectory_max_steps,
             phase_space_log2_samples=args.forward_level,
             periodic_lateral=True,
             transport_estimator={"Ar+": "bidirectional", "electron": "adjoint"},
             adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-4,
-            adjoint_proposals={
-                "Ar+": _ion_proposal(boundary, args.adjoint_level, args.seed),
-                "electron": _electron_proposal(
-                    boundary, args.adjoint_level, args.seed + 4)},
+            adjoint_proposals=proposal_factory(args.seed),
+            fresh_adjoint_proposal_factory=(
+                proposal_factory if args.scramble_mode == "fresh" else None),
             adjoint_proposal_frames={"Ar+": "source_aligned", "electron": "surface_local"},
             bidirectional_options=dict(
                 forward_log2_samples=args.forward_level,
@@ -328,6 +340,11 @@ def main():
         net_face_current_density_a_m2=result.final_step.face_current_density_a_m2,
         positive_current_node_a=result.final_step.positive_current_node_a,
         negative_current_node_a=result.final_step.negative_current_node_a,
+        potential_before_v=result.final_step.potential_before_v,
+        potential_after_v=result.final_step.potential_after_v,
+        potential_rate_v_s=(
+            result.final_step.potential_after_v - result.final_step.potential_before_v
+        ) / args.timestep_s,
         patch_scales_m=np.asarray(
             [item.patch_scale_m for item in result.patch_balance], dtype=float),
         patch_group_by_scale=np.stack(

@@ -402,6 +402,61 @@ Across the eight `11/9` audits, exact replay is used once among 145,269 eligible
 Machine-readable protocol, intervals, paired changes, patch localization, and decisions are in
 `results/charging_coevolution_c3_sample_audit/audit.json`.
 
+## Fixed versus fresh-scramble physical time
+
+The fixed level-10/8 reference was extended from 7.5 to 15 microseconds without a replay or ledger
+failure. Node RMS/worst fell to `0.2215 / 0.5697`, and B2 fell to `4.135 / 3.710`; the earlier fitted
+late-time floor was therefore a short-window artifact. Maximum potential rate did not fall
+monotonically and ended at `1.53e6 V/s`. A further 1.25-microsecond fixed continuation at 125 ns and
+62.5 ns agrees within `0.031%` in face sigma and `0.057%` in potential, so the sign-changing rate is
+not a global charging-timestep instability.
+
+Independent level-11/9 current audits reveal the more important issue. At 15 microseconds the
+ensemble-mean floor-center voltage rate is `-3.30e6 V/s`; at 16.25 microseconds it is still
+`-2.74e6 V/s`. The low-sample frozen trajectory instead drives floor potential from `9.65` to
+`11.28 V`. A finite frozen sample operator is therefore steering this interval opposite to the
+ensemble-expected current, even though every individual update is exactly conservative. Conservation
+prevents particle/charge loss; it does not make a finite-sample drift unbiased.
+
+The unified C3 integrator now supports an explicit `frozen` or `fresh` scramble mode. Fresh mode
+regenerates forward, Ar+ adjoint, and electron adjoint samples at every accepted physical update;
+records the seed epoch on every evaluation; and gives the final state a new, unused audit epoch.
+Fresh mode is restricted to fixed physical time. It refuses SER because residual changes between
+independent scrambles cannot safely control deterministic trial rollback. Frozen behavior and its
+default seed sequence are unchanged.
+
+Eight fresh-scramble realizations were advanced from the identical 15-microsecond checkpoint to
+16.25 microseconds:
+
+| Charge timestep | Mean node RMS | Mean B2, 0.25 / 0.50 micrometers | Mean floor potential (V) | Mean maximum rate (V/s) |
+| ---: | ---: | ---: | ---: | ---: |
+| 125 ns | 0.1892 +/- 0.0076 | 3.320 +/- 0.267 / 2.930 +/- 0.245 | 9.208 +/- 0.331 | `(1.686 +/- 0.767)e6` |
+| 62.5 ns | 0.1912 +/- 0.0045 | 3.404 +/- 0.450 / 2.927 +/- 0.278 | 9.386 +/- 0.309 | `(2.022 +/- 1.058)e6` |
+
+Intervals are two-sided 95% Student-t intervals on eight realization means. The timestep-halved
+ensemble means differ by `0.218%` in face sigma and `1.86%` in potential L2; the largest absolute
+potential difference is `0.185 V`. This bounded interval passes a statistical timestep check for the
+state trajectory. It remains far outside B1/B2, and maximum rate remains the least precise measure.
+
+Two proposed diagnostics were narrowed after code and literature review. First, `1/sqrt(N)`
+Richardson extrapolation is not a valid scrambled-Sobol law: scrambled-net variance is integrand- and
+resolution-dependent and can decrease faster than Monte Carlo, while B2 is a nonlinear maximum of
+ratios. Independent scrambles and nested powers of two remain the evidence contract; see
+[Owen 1997](https://epubs.siam.org/doi/10.1137/S0036142994277468). Second, the controlling mask ion
+faces use the separately frozen forward estimator, so selective *adjoint* retracing would not refine
+their B2 denominator without a new independent estimator-certification pilot.
+
+A diagonal pseudo-time scaling remains mathematically plausible but held. Kelley and Keyes permit a
+nonsingular, often diagonal scaling matrix to equilibrate local CFL numbers, but their convergence
+analysis assumes stable sufficiently regular dynamics; it does not supply a relaxation matrix for
+this noisy nonlocal Poisson/current operator or justify a claimed 10--50x speedup. Any future local
+face scaling must be built from ensemble-mean response, safeguarded, and reproduce the physical-time
+stationary state under refinement; see [Kelley and Keyes](https://repository.lib.ncsu.edu/bitstreams/339a4ac5-c0a2-48ad-b4a3-c4ec0085f0aa/download)
+and [Coffey, Kelley, and Keyes](https://doi.org/10.1137/S106482750241044X).
+
+Machine-readable trajectories, ensemble intervals, timestep differences, and method decisions are in
+`results/charging_coevolution_c3_stochastic_transient_audit/audit.json`.
+
 ## Evidence and provenance
 
 Audit config hash: `d3b5485aff03a950c82f6fb4a0161e76532b5120dc7f5a075bb340a7a4c444fc`.

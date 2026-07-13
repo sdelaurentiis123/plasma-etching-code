@@ -1,0 +1,130 @@
+{
+  "schema": "petch.charging.coevolution.c3.stochastic-transient-audit.v1",
+  "date": "2026-07-13",
+  "status": "bounded exact-operator transient and stochastic-mode audit; not a convergence claim",
+  "fixed_reference_extension": {
+    "initial_checkpoint_sha256": "91122190f3e306f119ffff62ba7b2140559a7ebf45555883a2219de0ddb2954e",
+    "final_checkpoint_sha256": "e49eb102d410983a89b48f6aecd710261dc80d01c202bc3c8bce1f8801c9955f",
+    "total_physical_time_s": 1.5e-05,
+    "additional_steps": 60,
+    "timestep_s": 1.25e-07,
+    "endpoint": {
+      "node_rms": 0.2215036295331226,
+      "node_worst": 0.5696670489184782,
+      "b2_0p25_um": 4.135287702579552,
+      "b2_0p50_um": 3.709752934532154,
+      "potential_rate_max_v_s": 1527338.6616832456,
+      "floor_potential_v": 9.645976344998251,
+      "upper_junction_potential_v": -11.232309038213
+    },
+    "maximum_charge_conservation_relative_error": 5.5499773023493754e-17,
+    "maximum_surface_transfer_relative_charge_balance_error": 2.84622749627177e-15,
+    "lineage_replays": 0,
+    "lineage_replay_eligible_count": 560665
+  },
+  "fixed_timestep_refinement_15_to_16p25_us": {
+    "coarse": {"timestep_s": 1.25e-07, "steps": 10, "checkpoint_sha256": "8689ba8b645b9c415f01b66ee3a577508581914563a889e6c2259821d3c0e64d"},
+    "fine": {"timestep_s": 6.25e-08, "steps": 20, "checkpoint_sha256": "3767fed9a9734d9531b8373f78dd246d620ee4c2da1ddc5411dbf7dc07e2e98f"},
+    "relative_difference": {
+      "face_sigma_l2": 0.0003130765605974669,
+      "nodal_charge_l2": 0.000184200967125312,
+      "potential_l2": 0.0005681611539773174,
+      "potential_linf": 0.0005416900224706462
+    },
+    "decision": "the sign-changing rate behavior is not a global charge-timestep instability"
+  },
+  "independent_current_audits": {
+    "protocol": "eight independent forward/adjoint level 11/9 scrambles; frozen method map; final-state evaluation only",
+    "at_15_us": {
+      "node_rms_mean": 0.21224025828176574,
+      "node_worst_mean": 0.5476668868018542,
+      "b2_0p25_um_mean": 3.7688521331574947,
+      "b2_0p50_um_mean": 3.4066941629973506,
+      "potential_rate_max_v_s_mean": 3408965.5166063313,
+      "potential_rate_max_v_s_sd": 1210217.4912677822,
+      "residual_current_norm_a_mean": 6.99735559e-12,
+      "mean_field_hot_node_index": [2, 0, 2],
+      "mean_floor_potential_rate_v_s": -3303505.270067845
+    },
+    "at_16p25_us": {
+      "node_rms_mean": 0.1968692965718828,
+      "node_worst_mean": 0.5099800165546625,
+      "b2_0p25_um_mean": 3.257251376122768,
+      "b2_0p50_um_mean": 2.9676135121699767,
+      "potential_rate_max_v_s_mean": 2912830.8879315536,
+      "potential_rate_max_v_s_sd": 1407699.66,
+      "residual_current_norm_a_mean": 6.500185075918473e-12,
+      "mean_field_hot_node_index": [2, 0, 2],
+      "mean_floor_potential_rate_v_s": -2743224.658928286
+    },
+    "interpretation": "balance and absolute current residual continue to fall, while the ensemble-mean floor voltage remains dynamically negative; maximum voltage rate is the least precise diagnostic"
+  },
+  "fresh_scramble_engine_contract": {
+    "modes": ["frozen", "fresh"],
+    "fresh_seed_formula": "base_seed + 1000003 * sampling_epoch",
+    "proposal_rule": "regenerate forward, Ar+ adjoint, and electron adjoint samples; electron proposal uses evaluation_seed+4",
+    "final_audit_rule": "the final state is scored at the next unused sampling epoch",
+    "refusal": "fresh-scramble SER is invalid because stochastic residual changes cannot control deterministic rollback",
+    "conservation": "unchanged exact signed face-charge and compatible-Q1 nodal ledgers"
+  },
+  "fresh_ensemble_15_to_16p25_us": {
+    "base_seeds": [79, 179, 279, 379, 479, 579, 679, 779],
+    "forward_level": 10,
+    "adjoint_level": 8,
+    "coarse_timestep": {
+      "timestep_s": 1.25e-07,
+      "steps": 10,
+      "node_rms_mean": 0.1891887614804354,
+      "node_rms_95_ci_half_width": 0.0075627969348478485,
+      "b2_0p25_um_mean": 3.3200219627967718,
+      "b2_0p25_um_95_ci_half_width": 0.2665242250240616,
+      "b2_0p50_um_mean": 2.929548323028999,
+      "b2_0p50_um_95_ci_half_width": 0.2445832757833791,
+      "potential_rate_max_v_s_mean": 1685957.785101931,
+      "potential_rate_max_v_s_95_ci_half_width": 766603.372596114,
+      "floor_potential_v_mean": 9.208116325430677,
+      "floor_potential_v_95_ci_half_width": 0.3313204708821086,
+      "upper_junction_potential_v_mean": -12.08075595953221,
+      "upper_junction_potential_v_95_ci_half_width": 0.20384789682896004
+    },
+    "fine_timestep": {
+      "timestep_s": 6.25e-08,
+      "steps": 20,
+      "node_rms_mean": 0.19118474276443748,
+      "node_rms_95_ci_half_width": 0.004541599762950988,
+      "b2_0p25_um_mean": 3.403991850583309,
+      "b2_0p25_um_95_ci_half_width": 0.4500113888519172,
+      "b2_0p50_um_mean": 2.9268955507725876,
+      "b2_0p50_um_95_ci_half_width": 0.2780179605080576,
+      "potential_rate_max_v_s_mean": 2021772.022861903,
+      "potential_rate_max_v_s_95_ci_half_width": 1058398.9987744908,
+      "floor_potential_v_mean": 9.385510792560247,
+      "floor_potential_v_95_ci_half_width": 0.30888320383036616,
+      "upper_junction_potential_v_mean": -11.983238446261762,
+      "upper_junction_potential_v_95_ci_half_width": 0.1716847537040662
+    },
+    "mean_state_timestep_difference": {
+      "face_sigma_relative_l2": 0.0021804301321340417,
+      "potential_relative_l2": 0.018634844489916456,
+      "potential_relative_linf": 0.015463928173916116,
+      "potential_absolute_linf_v": 0.18530793862390205
+    },
+    "frozen_comparator": {
+      "floor_potential_v": 11.276744928681717,
+      "floor_change_from_15_us_v": 1.630768583683466,
+      "fresh_coarse_mean_floor_change_from_15_us_v": -0.4378600149982507
+    }
+  },
+  "method_decisions": {
+    "one_over_sqrt_n_richardson": "rejected: scrambled-net error is not constrained to Monte Carlo scaling and B2 is a nonlinear maximum of ratios",
+    "selective_adjoint_retrace_for_b2": "rejected as stated: controlling ion faces 26, 27, 34, and 35 use the separately frozen forward estimator",
+    "local_patch_voltage_sweep": "reformulate as a globally consistent face-charge perturbation reachability diagnostic; it cannot prove full equilibrium nonexistence",
+    "diagonal_face_pseudo_time": "held until ensemble-mean response and a stable stationary state exist; nonsingular scaling preserves zeros algebraically but does not guarantee stable dynamics for this nonlocal noisy operator",
+    "next": "extend the timestep-refined fresh-scramble ensemble with checkpoint audits; keep high-sample audits independent and retain physical fixed-time reference comparisons"
+  },
+  "literature": [
+    "https://epubs.siam.org/doi/10.1137/S0036142994277468",
+    "https://repository.lib.ncsu.edu/bitstreams/339a4ac5-c0a2-48ad-b4a3-c4ec0085f0aa/download",
+    "https://epubs.siam.org/doi/10.1137/S106482750241044X"
+  ]
+}

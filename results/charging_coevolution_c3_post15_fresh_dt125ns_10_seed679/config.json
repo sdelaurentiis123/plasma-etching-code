@@ -1,0 +1,44 @@
+{
+  "status": "bounded coarse real-trench pilot; not a convergence claim",
+  "geometry": {
+    "cell_width_um": 1.0,
+    "cell_length_um": 0.5,
+    "domain_height_um": 2.0,
+    "dx_um": 0.25,
+    "opening_width_um": 0.5,
+    "mask_thickness_um": 0.25,
+    "substrate_top_um": 1.25,
+    "etched_depth_um": 0.75
+  },
+  "timestep_s": 1.25e-07,
+  "maximum_steps": 10,
+  "timestep_policy": "fixed",
+  "maximum_timestep_s": 5e-07,
+  "minimum_timestep_s": 1e-11,
+  "ser_activation_rms": 0.5,
+  "ser_maximum_growth": 2.0,
+  "ser_allowed_residual_growth": 0.005,
+  "potential_rate_tolerance_v_s": 1000.0,
+  "patch_scales_um": [
+    0.25,
+    0.5
+  ],
+  "n_position": 256,
+  "seed": 679,
+  "scramble_mode": "fresh",
+  "sampling_seed_stride": 1000003,
+  "adjoint_proposal_seeds": {
+    "Ar+": 679,
+    "electron": 683
+  },
+  "trajectory_dt": 0.0003125,
+  "trajectory_max_steps": 128000,
+  "forward_level": 10,
+  "adjoint_level": 8,
+  "initial_face_state_sha256": "e49eb102d410983a89b48f6aecd710261dc80d01c202bc3c8bce1f8801c9955f",
+  "response_tail_tolerance": 1e-10,
+  "method_map_sha256": "444e7b53a4e750c7fb98f724e3c1e8099e4038dabe6def1c31b1faa30fa3b5f0",
+  "method_key": "refined_method_hint_Ar+",
+  "estimator_map_source": "separate pre-C3 pilot; estimator choice only, no nodal charge",
+  "exact_operator": "hard visibility with bounded grazing-ion reflection"
+}

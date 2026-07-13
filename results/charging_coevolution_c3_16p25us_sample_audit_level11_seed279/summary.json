@@ -1,0 +1,184 @@
+{
+  "schema": "petch.charging.coevolution.c3.trench-pilot.v1",
+  "config_hash": "1010d6f588f5923b216480eb552609d3644490260278c4ca6885f7dc187d58b5",
+  "config": {
+    "status": "bounded coarse real-trench pilot; not a convergence claim",
+    "geometry": {
+      "cell_width_um": 1.0,
+      "cell_length_um": 0.5,
+      "domain_height_um": 2.0,
+      "dx_um": 0.25,
+      "opening_width_um": 0.5,
+      "mask_thickness_um": 0.25,
+      "substrate_top_um": 1.25,
+      "etched_depth_um": 0.75
+    },
+    "timestep_s": 1.25e-07,
+    "maximum_steps": 0,
+    "timestep_policy": "fixed",
+    "maximum_timestep_s": 5e-07,
+    "minimum_timestep_s": 1e-11,
+    "ser_activation_rms": 0.5,
+    "ser_maximum_growth": 2.0,
+    "ser_allowed_residual_growth": 0.005,
+    "potential_rate_tolerance_v_s": 1000.0,
+    "patch_scales_um": [
+      0.25,
+      0.5
+    ],
+    "n_position": 256,
+    "seed": 279,
+    "adjoint_proposal_seeds": {
+      "Ar+": 279,
+      "electron": 283
+    },
+    "trajectory_dt": 0.0003125,
+    "trajectory_max_steps": 128000,
+    "forward_level": 11,
+    "adjoint_level": 9,
+    "initial_face_state_sha256": "3767fed9a9734d9531b8373f78dd246d620ee4c2da1ddc5411dbf7dc07e2e98f",
+    "response_tail_tolerance": 1e-10,
+    "method_map_sha256": "444e7b53a4e750c7fb98f724e3c1e8099e4038dabe6def1c31b1faa30fa3b5f0",
+    "method_key": "refined_method_hint_Ar+",
+    "estimator_map_source": "separate pre-C3 pilot; estimator choice only, no nodal charge",
+    "exact_operator": "hard visibility with bounded grazing-ion reflection"
+  },
+  "run_manifest": {
+    "engine_git_revision": "f37b0ca5b30fd61ded77491aa1952bb03db3efa1",
+    "source_sha256": {
+      "src/petch/charging_coevolution_3d.py": "415f6fb5404f1f6d0f2acc70a13739f9f894c7ccedf2754e5b218d4d0e41bfca",
+      "src/petch/charging_coupled_3d.py": "d8c511489c747c862c9e4f4b345cf39cc57dc56ce7d65884627e4d3ca4381173",
+      "src/petch/boundary_transport_3d.py": "cfefbcf17b6846ccfd3cdddcf78f9c5719aeeac0dda0b40f232882fefd2868ba",
+      "src/petch/charged_surface_cascade_3d.py": "977c4c84e8a2f515286f863f80a745852a6cafd1b295a8468ba157b03d33ad33",
+      "src/petch/charged_surface_response_3d.py": "233aee07c5178ada37c5b465c7d94688eabcfd6f973f2e11c28ef1c66c732e4c",
+      "scripts/charging_coevolution_c3_trench.py": "bd8a54f7b1b4b413e35f694285e6550eb84a43eae418ed986c21e842d9c37738"
+    },
+    "hardware": "macOS-15.7.4-arm64-arm-64bit",
+    "python": "3.10.17",
+    "wall_clock_s": 11.31052262429148,
+    "reflection_provenance": {
+      "model": "weighted angle-dependent specular reflection with constant energy retention",
+      "material_id": 1,
+      "ion_species_name": "Ar+",
+      "parameters": {
+        "grazing_reflection_probability": 0.95,
+        "angular_exponent": 3.0,
+        "energy_retention_fraction": 0.9
+      },
+      "bounds": {
+        "grazing_reflection_probability": [
+          0.8,
+          1.0
+        ],
+        "angular_exponent": [
+          2.0,
+          8.0
+        ],
+        "energy_retention_fraction": [
+          0.5,
+          0.99
+        ]
+      },
+      "evidence": {
+        "grazing_reflection_probability": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008",
+        "angular_exponent": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008",
+        "energy_retention_fraction": "Helmer and Graves, JVST A 16, 3502 (1998), DOI 10.1116/1.580993; Hoekstra et al., JVST B 16, 2102 (1998); Du et al., JVST A 40, 053007 (2022), DOI 10.1116/6.0002008"
+      },
+      "claim": "literature-bounded sensitivity; not material-calibrated prediction"
+    }
+  },
+  "result": {
+    "converged": false,
+    "accepted_steps": 0,
+    "rejected_steps": 0,
+    "physical_time_s": 0.0,
+    "pseudo_time_s": 0.0,
+    "retained_node_rms_relative_current_imbalance": 0.19477343880716483,
+    "retained_node_max_relative_current_imbalance": 0.5009397780487509,
+    "final_potential_rate_max_v_s": 3702657.6943461862,
+    "patch_scales_m": [
+      2.5e-07,
+      5e-07
+    ],
+    "patch_b2_max_ion_normalized": [
+      3.205961484198502,
+      2.9373471280969436
+    ],
+    "patch_symmetric_max": [
+      0.6158250486350044,
+      0.5949241671466429
+    ],
+    "maximum_charge_conservation_relative_error": 1.2127397965045681e-17,
+    "maximum_surface_transfer_relative_charge_balance_error": 5.322489889823113e-15,
+    "maximum_response_tail_closure_relative_absolute_charge_rate": 0.0,
+    "maximum_response_tail_closure_l1_current_error_bound_relative": 0.0,
+    "maximum_transport_lineage_replay_count": 1,
+    "maximum_transport_lineage_replay_fraction": 5.3564732979806093e-05,
+    "minimum_potential_v": -11.24322696159772,
+    "maximum_potential_v": 11.281514123826339
+  },
+  "history": [
+    {
+      "evaluation": 1,
+      "accepted": true,
+      "accepted_steps": 0,
+      "rejected_steps": 0,
+      "timestep_s": 1.25e-07,
+      "physical_time_s": 0.0,
+      "pseudo_time_s": 0.0,
+      "ser_activated": false,
+      "rejection_reason": null,
+      "potential_rate_max_v_s": 3702657.6943461862,
+      "rms_relative_current_imbalance_node": 0.19477343880716483,
+      "max_relative_current_imbalance_node": 0.5009397780487509,
+      "rms_relative_current_imbalance_face": 0.32135229447063646,
+      "max_relative_current_imbalance_face": 0.6792669385384253,
+      "residual_current_norm_a": 5.977197259721868e-12,
+      "maximum_patch_relative_imbalance": 3.205961484198502,
+      "patch_scales_m": [
+        2.5e-07,
+        5e-07
+      ],
+      "patch_rms_relative_imbalance": [
+        1.3867781996504716,
+        1.5279150880423682
+      ],
+      "patch_max_relative_imbalance": [
+        3.205961484198502,
+        2.9373471280969436
+      ],
+      "patch_symmetric_rms_relative_imbalance": [
+        0.31138714640952303,
+        0.34514223691165435
+      ],
+      "patch_symmetric_max_relative_imbalance": [
+        0.6158250486350044,
+        0.5949241671466429
+      ],
+      "incident_charge_c": -3.06085593225281e-18,
+      "positive_incident_charge_c": 3.0231207133806286e-17,
+      "negative_incident_charge_c": 3.32920630660591e-17,
+      "absolute_incident_charge_c": 6.352327019986538e-17,
+      "deposited_charge_c": -3.0608559322528107e-18,
+      "charge_conservation_residual_c": -7.703719777548943e-34,
+      "charge_conservation_relative_error": 1.2127397965045681e-17,
+      "response_tail_closure_relative_absolute_charge_rate": 0.0,
+      "response_tail_closure_l1_current_error_bound_relative": 0.0,
+      "transport_lineage_replay_count": 1,
+      "transport_lineage_replay_eligible_count": 18669,
+      "transport_lineage_replay_fraction": 5.3564732979806093e-05,
+      "surface_transfer_relative_charge_balance_error": 5.322489889823113e-15
+    }
+  ],
+  "conclusion": "bounded pilot only; continue from face checkpoint with refinement evidence",
+  "artifacts": {
+    "face_checkpoint": {
+      "name": "face_checkpoint.npz",
+      "sha256": "3767fed9a9734d9531b8373f78dd246d620ee4c2da1ddc5411dbf7dc07e2e98f"
+    },
+    "current_audit": {
+      "name": "current_audit.npz",
+      "sha256": "a29e02e4b241446aa96538c714172ab19b2c0b8c0866d51f36d00683ed81285a"
+    }
+  }
+}

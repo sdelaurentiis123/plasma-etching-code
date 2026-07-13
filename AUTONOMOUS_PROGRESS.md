@@ -704,6 +704,27 @@ under-determined) -- an honest result that quantifies how many structures must b
   samples with `--seed` while silently retaining adjoint proposal seeds 79/83. It now records and
   applies Ar+ seed `s` and electron seed `s+4`; default seed 79 is unchanged. Evidence is in
   `results/charging_coevolution_c3_sample_audit/` and the C3 audit report.
+- **The apparent 7.5-microsecond floor was a short-window fit artifact.** Continuing the repaired
+  fixed transient to 15 microseconds lowers node RMS/worst to `0.222/0.570` and B2 to `4.135/3.710`.
+  A 125/62.5 ns comparison over the next 1.25 microseconds agrees within `0.031%` in face sigma and
+  `0.057%` in potential. Maximum potential rate remains nonmonotone and above `1e6 V/s`.
+- **A frozen low-sample map can steer physical time in the wrong mean direction.** From the common
+  15-microsecond state, the fixed level-10/8 path raises floor potential `9.65 -> 11.28 V`, while
+  independent level-11/9 audits predict a negative ensemble-mean floor rate. Eight fresh-scramble
+  paths instead end at `9.208 +/- 0.331 V`; exact conservation alone does not remove finite-sample
+  drift.
+- **Fresh-scramble physical time is now a first-class unified-engine mode.** Every accepted update
+  regenerates all forward/adjoint samples from a recorded seed epoch, and the final diagnostic uses
+  the next unused epoch. Fresh-scramble SER is refused because noise cannot drive deterministic
+  rollback. Halving 125 -> 62.5 ns changes the eight-path ensemble mean by `0.218%` in face sigma and
+  `1.86%` in potential, with overlapping floor-potential/B2 intervals. This earns continued bounded
+  stochastic integration, not C3 closure.
+- **The proposed acceleration memo was filtered through the actual estimator/operator contracts.**
+  `1/sqrt(N)` Richardson extrapolation is invalid for scrambled Sobol and nonlinear B2 maxima; the
+  controlling ion faces use the frozen forward estimator, not adjoint; and a local voltage offset
+  must be expressed as a globally consistent face-charge perturbation. Diagonal face pseudo-time is
+  held until an ensemble-mean response and stable stationary state exist. Evidence is in
+  `results/charging_coevolution_c3_stochastic_transient_audit/`.
 
 ## Roadmap (remaining)
 

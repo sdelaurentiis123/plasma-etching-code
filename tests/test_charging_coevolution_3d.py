@@ -183,6 +183,35 @@ def test_ser_safeguard_uses_absolute_ode_residual_not_b2_denominator():
     assert rejection_reason == "absolute_current_residual_growth"
 
 
+def test_fresh_scrambles_advance_reproducible_seed_epochs_in_fixed_physical_time():
+    flux = 2.0e15
+    _system, arguments = _flat_problem((_species("ion", 1, flux),))
+    arguments.update(
+        maximum_steps=2, stop_on_saturation=False, scramble_mode="fresh",
+        sampling_seed_stride=101)
+    result = integrate_surface_charging_to_saturation_3d(**arguments)
+
+    assert result.accepted_steps == 2
+    assert [item["sampling_epoch"] for item in result.history] == [0, 1, 2]
+    assert [item["sampling_seed"] for item in result.history] == [43, 144, 245]
+    assert all(item["scramble_mode"] == "fresh" for item in result.history)
+    assert result.diagnostics["scramble_mode"] == "fresh"
+    assert all(item["charge_conservation_relative_error"] < 3e-16
+               for item in result.history)
+
+
+def test_fresh_scrambles_refuse_ser_and_stale_adjoint_proposals():
+    flux = 2.0e15
+    _system, arguments = _flat_problem((_species("ion", 1, flux),))
+    arguments.update(scramble_mode="fresh", timestep_policy="ser")
+    with pytest.raises(ValueError, match="fresh-scramble"):
+        integrate_surface_charging_to_saturation_3d(**arguments)
+
+    arguments.update(timestep_policy="fixed", adjoint_proposals={"ion": object()})
+    with pytest.raises(ValueError, match="fresh-scramble"):
+        integrate_surface_charging_to_saturation_3d(**arguments)
+
+
 def test_saturation_failure_checkpoint_carries_its_exact_clocks():
     error = SurfaceChargingSaturationError(
         "manufactured failure", np.zeros(2), (), 3, 1, 2.5e-6, 4.0e-6)

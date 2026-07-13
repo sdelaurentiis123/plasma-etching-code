@@ -278,7 +278,8 @@ def integrate_surface_charging_to_saturation_3d(
         charged_surface_response=None, surface_material_state=None,
         response_launch_offset=1e-5, response_fixed_dt=None,
         response_max_bounces=16, response_relative_tail_tolerance=0.0,
-        stop_on_saturation=True):
+        stop_on_saturation=True, scramble_mode="frozen", sampling_seed_stride=1000003,
+        fresh_adjoint_proposal_factory=None):
     """Integrate one fixed geometry to B1/B2 saturation with fixed time or safeguarded SER.
 
     SER follows the residual-ratio rule ``dt[n+1] = dt[n] * ||F[n]||/||F[n+1]||`` with declared
@@ -286,7 +287,12 @@ def integrate_surface_charging_to_saturation_3d(
     ratio remains an acceptance gate for the final state, but cannot reject a dynamical step because
     its local ion denominator can change non-monotonically. SER changes only the explicit step size
     of the same conservative charge ODE. The returned current and all gates are evaluated on the
-    exact caller-supplied kinetic surface operator.
+    exact caller-supplied kinetic surface operator. ``fresh`` scrambling is restricted to fixed
+    physical time: each accepted update receives a reproducible independent seed epoch, while the
+    final state receives the next epoch for an honest current diagnostic. If adjoint proposals are
+    supplied, callers must also supply a factory that regenerates every proposal from that epoch's
+    seed. Fresh-scramble SER is deliberately refused because stochastic residual changes cannot
+    safely drive its accept/reject controller.
     """
     if not isinstance(poisson_system, NodalPoissonSystem3D):
         raise TypeError("poisson_system must be NodalPoissonSystem3D")
@@ -311,10 +317,20 @@ def integrate_surface_charging_to_saturation_3d(
             or not np.isfinite(timestep_s) or timestep_s <= 0.0
             or int(maximum_steps) != maximum_steps or maximum_steps < 0
             or timestep_policy not in {"fixed", "ser"}
+            or scramble_mode not in {"frozen", "fresh"}
+            or int(sampling_seed_stride) != sampling_seed_stride
+            or sampling_seed_stride <= 0
             or not np.isfinite(response_relative_tail_tolerance)
             or not 0.0 <= response_relative_tail_tolerance < 1.0
             or not isinstance(stop_on_saturation, (bool, np.bool_))):
         raise ValueError("invalid C3 surface-charging integration inputs")
+    if ((fresh_adjoint_proposal_factory is not None
+         and not callable(fresh_adjoint_proposal_factory))
+            or (scramble_mode == "frozen" and fresh_adjoint_proposal_factory is not None)
+            or (scramble_mode == "fresh" and timestep_policy != "fixed")
+            or (scramble_mode == "fresh" and adjoint_proposals is not None
+                and fresh_adjoint_proposal_factory is None)):
+        raise ValueError("invalid fresh-scramble proposal or timestep controls")
     if timestep_policy == "ser":
         maximum_timestep_s = (float(timestep_s) if maximum_timestep_s is None
                               else float(maximum_timestep_s))
@@ -376,6 +392,13 @@ def integrate_surface_charging_to_saturation_3d(
     attempt = 0
     while True:
         attempt += 1
+        sampling_epoch = int(
+            0 if scramble_mode == "frozen"
+            else accepted + (1 if pending_trial is not None else 0))
+        sampling_seed = int(seed) + int(sampling_seed_stride) * sampling_epoch
+        common["seed"] = sampling_seed
+        if fresh_adjoint_proposal_factory is not None:
+            common["adjoint_proposals"] = fresh_adjoint_proposal_factory(sampling_seed)
         try:
             step = advance_dielectric_charging_3d(
                 charge_node_c=charge, duration_s=dt, **common)
@@ -418,6 +441,8 @@ def integrate_surface_charging_to_saturation_3d(
             accepted + (1 if accept and pending_trial is not None else 0))
         item = dict(
             evaluation=int(attempt), accepted=bool(accept),
+            scramble_mode=scramble_mode, sampling_epoch=sampling_epoch,
+            sampling_seed=sampling_seed,
             accepted_steps=prospective_accepted_steps,
             rejected_steps=int(rejected), timestep_s=float(dt),
             physical_time_s=float(physical_time), pseudo_time_s=float(pseudo_time),
@@ -551,6 +576,8 @@ def integrate_surface_charging_to_saturation_3d(
         diagnostics=dict(
             potential_rate_tolerance_v_s=float(potential_rate_tolerance_v_s),
             current_balance_tolerance=float(current_balance_tolerance),
+            scramble_mode=scramble_mode,
+            sampling_seed_stride=int(sampling_seed_stride),
             patch_scales_m=scales,
             exact_operator_statement=(
                 "caller-supplied hard-visibility kinetic response; no smoothed residual; "
