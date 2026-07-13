@@ -198,9 +198,31 @@ under-determined) -- an honest result that quantifies how many structures must b
   `trace_boundary_state_field_3d` treats every lateral grid crossing as escape and exposes no periodic
   charged-trajectory option, unlike the periodic ballistic/radiosity paths.  Wide-angle half-Maxwellian
   electrons therefore leak from a periodic unit cell and the local current-balance solve does not
-  converge.  Do not promote a trench charging gate by loosening its residual.  The next bounded physics
-  task is a periodic, fixed-step charged trajectory map (with crossing-segment hit handling) plus a
-  compatible periodic Poisson operator, each independently gated before reconnecting Phase 2b.
+  converge.  Do not promote a trench charging gate by loosening its residual.  The immediate bounded
+  task is a periodic, fixed-step charged trajectory map with crossing-segment hit handling.  For the
+  centered translationally invariant slot, the existing natural lateral Poisson condition is the exact
+  symmetry condition; general asymmetric periodic features still require explicit periodic nodal
+  identification and retain that limitation.
+
+### Phase 2b engine work after the projection fix
+
+- The common fixed-step nodal-field tracer now wraps curved charged trajectories across lateral cell
+  boundaries and checks every split crossing segment for a surface hit.  A zero-field oblique-ion gate
+  proves open-cell escape becomes unit-probability periodic landing without changing kinetic energy.
+  The option is threaded through physical charging and the public feature-step/solve APIs.
+- The charging update now inverts the exact dense support-node response of the sparse Q1 Poisson
+  factorization.  A manufactured gate requests four coupled surface-voltage increments and reproduces
+  all four to ~3e-13; the old independent diagonal-capacitance approximation could not do this in a
+  trench.  The common solver also exposes the already-proven type-II Anderson accelerator from the
+  nodal lineage; it changes only nonlinear convergence, not the current-balance root.
+- **The real-trench gate is still not promoted.**  With the physical continuous ion/electron densities,
+  the total-current estimator is converged enough to expose the next architectural gap: forward QMC
+  gives sparse/noisy *local* triangle currents, and the nonlinear solve stalls well above the per-node
+  balance tolerance even though global current is resolved.  Finite-difference Newton was explicitly
+  not retained: the earlier fixed-map campaign already showed the hard hit/escape Jacobian is ill
+  conditioned.  Next is the known common-engine requirement, not parameter tuning: port the frozen,
+  reversible, bidirectional per-surface current estimator to arbitrary 3-D triangles, then re-run the
+  same trench gate with estimator uncertainty inside the current-balance budget.
 
 ## Roadmap (remaining)
 

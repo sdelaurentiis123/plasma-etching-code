@@ -107,7 +107,7 @@ def _field_hit_events_3d(
         mesh: wp.uint64, potential: wp.array3d(dtype=float), grid_origin: wp.vec3,
         grid_spacing: wp.vec3, grid_maximum: wp.vec3,
         origin: wp.array(dtype=wp.vec3), velocity: wp.array(dtype=wp.vec3),
-        charge_number: float, fixed_dt: float, max_steps: int,
+        charge_number: float, fixed_dt: float, max_steps: int, periodic_lateral: int,
         hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float),
         hit_energy: wp.array(dtype=float), termination: wp.array(dtype=wp.int8)):
     particle = wp.tid()
@@ -118,34 +118,99 @@ def _field_hit_events_3d(
             potential, position, grid_origin, grid_spacing)
         half_velocity = speed_vector + 0.25 * charge_number * fixed_dt * field0
         next_position = position + fixed_dt * half_velocity
+        if periodic_lateral != 0:
+            domain_x = grid_maximum[0] - grid_origin[0]
+            domain_y = grid_maximum[1] - grid_origin[1]
+            for _wrap in range(4):
+                if next_position[0] < grid_origin[0]:
+                    next_position = wp.vec3(
+                        next_position[0] + domain_x, next_position[1], next_position[2])
+                elif next_position[0] > grid_maximum[0]:
+                    next_position = wp.vec3(
+                        next_position[0] - domain_x, next_position[1], next_position[2])
+                if next_position[1] < grid_origin[1]:
+                    next_position = wp.vec3(
+                        next_position[0], next_position[1] + domain_y, next_position[2])
+                elif next_position[1] > grid_maximum[1]:
+                    next_position = wp.vec3(
+                        next_position[0], next_position[1] - domain_y, next_position[2])
         field1 = _trilinear_electric_field_3d(
             potential, next_position, grid_origin, grid_spacing)
         next_velocity = half_velocity + 0.25 * charge_number * fixed_dt * field1
-        segment = next_position - position
+        # The physical Verlet segment is straight in the covering space.  Under periodic lateral
+        # boundaries it may split into several in-cell ray segments; query each one so a wrap cannot
+        # tunnel through a surface near the opposite boundary.
+        segment = fixed_dt * half_velocity
         segment_length = wp.length(segment)
         if segment_length > 0.0:
             direction = segment / segment_length
-            ray = wp.mesh_query_ray(mesh, position, direction, segment_length * 1.000001)
-            if ray.result and ray.t <= segment_length * 1.000001:
-                fraction = wp.clamp(ray.t / segment_length, 0.0, 1.0)
-                impact_velocity = speed_vector + fraction * (next_velocity - speed_vector)
-                impact_speed = wp.length(impact_velocity)
-                normal = ray.normal
-                if wp.dot(normal, impact_velocity) > 0.0:
-                    normal = -normal
-                cosine = float(0.0)
-                if impact_speed > 0.0:
-                    cosine = -wp.dot(impact_velocity / impact_speed, normal)
-                hit_face[particle] = ray.face
-                hit_cosine[particle] = wp.clamp(cosine, 0.0, 1.0)
-                hit_energy[particle] = wp.dot(impact_velocity, impact_velocity)
-                termination[particle] = wp.int8(1)
+            query_origin = position
+            remaining = segment_length
+            travelled = float(0.0)
+            for _piece in range(8):
+                query_length = remaining
+                wrap_axis = wp.int32(-1)
+                if periodic_lateral != 0:
+                    if direction[0] > 1.0e-12:
+                        distance = (grid_maximum[0] - query_origin[0]) / direction[0]
+                        if distance >= 0.0 and distance < query_length:
+                            query_length = distance
+                            wrap_axis = wp.int32(0)
+                    elif direction[0] < -1.0e-12:
+                        distance = (grid_origin[0] - query_origin[0]) / direction[0]
+                        if distance >= 0.0 and distance < query_length:
+                            query_length = distance
+                            wrap_axis = wp.int32(0)
+                    if direction[1] > 1.0e-12:
+                        distance = (grid_maximum[1] - query_origin[1]) / direction[1]
+                        if distance >= 0.0 and distance < query_length:
+                            query_length = distance
+                            wrap_axis = wp.int32(1)
+                    elif direction[1] < -1.0e-12:
+                        distance = (grid_origin[1] - query_origin[1]) / direction[1]
+                        if distance >= 0.0 and distance < query_length:
+                            query_length = distance
+                            wrap_axis = wp.int32(1)
+                ray = wp.mesh_query_ray(
+                    mesh, query_origin, direction, query_length * 1.000001 + 1.0e-9)
+                if ray.result and ray.t <= query_length * 1.000001 + 1.0e-9:
+                    fraction = wp.clamp((travelled + ray.t) / segment_length, 0.0, 1.0)
+                    impact_velocity = speed_vector + fraction * (next_velocity - speed_vector)
+                    impact_speed = wp.length(impact_velocity)
+                    normal = ray.normal
+                    if wp.dot(normal, impact_velocity) > 0.0:
+                        normal = -normal
+                    cosine = float(0.0)
+                    if impact_speed > 0.0:
+                        cosine = -wp.dot(impact_velocity / impact_speed, normal)
+                    hit_face[particle] = ray.face
+                    hit_cosine[particle] = wp.clamp(cosine, 0.0, 1.0)
+                    hit_energy[particle] = wp.dot(impact_velocity, impact_velocity)
+                    termination[particle] = wp.int8(1)
+                    break
+                if wrap_axis < 0:
+                    break
+                remaining = remaining - query_length
+                travelled = travelled + query_length
+                boundary_point = query_origin + query_length * direction
+                if wrap_axis == 0:
+                    wrapped_x = grid_origin[0]
+                    if direction[0] < 0.0:
+                        wrapped_x = grid_maximum[0]
+                    query_origin = wp.vec3(wrapped_x, boundary_point[1], boundary_point[2])
+                else:
+                    wrapped_y = grid_origin[1]
+                    if direction[1] < 0.0:
+                        wrapped_y = grid_maximum[1]
+                    query_origin = wp.vec3(boundary_point[0], wrapped_y, boundary_point[2])
+            if termination[particle] == wp.int8(1):
                 break
         position = next_position
         speed_vector = next_velocity
-        outside = (position[0] < grid_origin[0] or position[1] < grid_origin[1]
-                   or position[2] < grid_origin[2] or position[0] > grid_maximum[0]
-                   or position[1] > grid_maximum[1] or position[2] > grid_maximum[2])
+        outside = (position[2] < grid_origin[2] or position[2] > grid_maximum[2])
+        if periodic_lateral == 0:
+            outside = (outside or position[0] < grid_origin[0] or position[1] < grid_origin[1]
+                       or position[0] > grid_maximum[0] or position[1] > grid_maximum[1])
         if outside:
             termination[particle] = wp.int8(2)
             break
@@ -626,7 +691,7 @@ def trace_boundary_state_field_3d(
         source_bounds, source_z, nodal_potential_v, potential_origin, potential_spacing,
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0), n_position=256,
         seed=0, fixed_dt=0.01, max_steps=10000, allow_truncation=False,
-        phase_space_log2_samples=None, device=None):
+        phase_space_log2_samples=None, periodic_lateral=False, device=None):
     """Trace collisionless species through a supplied 3-D nodal electrostatic potential.
 
     Velocity coordinates retain the ``sqrt(eV)`` convention of ``PlasmaBoundaryState``. With mesh
@@ -665,6 +730,11 @@ def trace_boundary_state_field_3d(
     tolerance = 1e-7 * max(float(np.max(grid_spacing)), 1.0)
     if np.any(points < grid_origin - tolerance) or np.any(points > grid_maximum + tolerance):
         raise ValueError("mesh and source plane must lie inside the nodal potential grid")
+    if periodic_lateral and not np.allclose(
+            bounds, (grid_origin[0], grid_maximum[0], grid_origin[1], grid_maximum[1]),
+            rtol=0.0, atol=tolerance):
+        raise ValueError(
+            "periodic field transport requires source bounds equal to the lateral potential domain")
     origin_m = np.asarray(mesh_origin_m, dtype=float)
     if (origin_m.shape != (3,) or np.any(~np.isfinite(origin_m))
             or not np.isfinite(mesh_length_unit_m) or mesh_length_unit_m <= 0.0):
@@ -747,6 +817,7 @@ def trace_boundary_state_field_3d(
                     wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
                     wp.array(velocity.astype(np.float32), dtype=wp.vec3, device=selected_device),
                     float(species.charge_number), float(fixed_dt), int(max_steps),
+                    int(bool(periodic_lateral)),
                     hit_face_wp, hit_cosine_wp, hit_energy_wp, termination_wp])
         hit_face = hit_face_wp.numpy().astype(int)
         termination = termination_wp.numpy().astype(int)
@@ -774,9 +845,10 @@ def trace_boundary_state_field_3d(
         hit_probability=hit_probability, escape_probability=escape_probability,
         truncation_probability=truncation_probability,
         transport_model=(
-            "collisionless_fixed_step_nodal_field_3d"
-            if phase_space_log2_samples is None
-            else "collisionless_fixed_step_nodal_field_joint_qmc_3d"),
+            ("collisionless_fixed_step_nodal_field_3d"
+             if phase_space_log2_samples is None
+             else "collisionless_fixed_step_nodal_field_joint_qmc_3d")
+            + ("_periodic_cell" if periodic_lateral else "")),
         known_limitations=(
             "nodal potential is supplied rather than self-consistently charged",
             "no surface reflection or neutral re-emission",

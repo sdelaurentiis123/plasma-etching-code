@@ -239,6 +239,29 @@ def test_zero_nodal_field_reproduces_ballistic_3d_event_measure():
                        ballistic.surface_fluxes.neutral_flux_m2_s["CF2"])
 
 
+def test_periodic_field_transport_wraps_lateral_crossings_without_energy_change():
+    verts, faces, areas = _flat_unit_plane()
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, 1e19, [[2.0, 0.0, 1.0]], [1.0])
+    boundary = PlasmaBoundaryState((ion,), reference_plane_m=1e-6)
+    arguments = dict(
+        boundary=boundary, species_role={"Ar+": "energetic_bombardment"},
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=np.zeros((2, 2, 2)), potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=1.0, mesh_length_unit_m=1e-6,
+        n_position=64, seed=31, fixed_dt=0.01, max_steps=300, device="cpu")
+
+    open_cell = trace_boundary_state_field_3d(**arguments)
+    periodic = trace_boundary_state_field_3d(**arguments, periodic_lateral=True)
+
+    events = periodic.surface_fluxes.energetic_fluxes[0]
+    assert open_cell.escape_probability["Ar+"] > 0.0
+    assert periodic.hit_probability["Ar+"] == 1.0
+    assert periodic.escape_probability["Ar+"] == 0.0
+    assert np.allclose(events.event_energy_eV, 5.0, atol=2e-5)
+
+
 def test_linear_nodal_potential_gives_exact_electrostatic_energy_gain_under_refinement():
     verts, faces, areas = _flat_unit_plane()
     ion = SpeciesBoundaryState(

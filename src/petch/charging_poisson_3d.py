@@ -152,22 +152,38 @@ class NodalPoissonSystem3D:
 
     def diagonal_capacitance(self, nodes):
         """Return exact diagonal nodal charge-to-voltage capacitances in farads."""
+        response = self.voltage_response(nodes)
+        diagonal = np.diag(response)
+        if np.any(diagonal <= 0.0) or not np.all(np.isfinite(diagonal)):
+            raise RuntimeError("Poisson response diagonal must be finite and positive")
+        return 1.0 / diagonal
+
+    def voltage_response(self, nodes):
+        """Return the exact support-node voltage response in volts per coulomb.
+
+        Column ``j`` is the voltage on every requested node after depositing one coulomb on node
+        ``j`` with all Dirichlet voltages held fixed.  The dense matrix is a nonlinear-solver
+        preconditioner for modest feature-surface supports; the volume Poisson operator remains sparse.
+        """
         nodes = np.asarray(nodes, dtype=int)
         if nodes.ndim != 2 or nodes.shape[1] != 3 or nodes.size == 0:
             raise ValueError("nodes must have shape (n,3)")
         if np.any(nodes < 0) or np.any(nodes >= np.asarray(self.shape)):
             raise ValueError("response nodes lie outside the nodal grid")
         flat = np.ravel_multi_index(nodes.T, self.shape)
+        if np.unique(flat).size != flat.size:
+            raise ValueError("response nodes must be unique")
         free_rows = self._free_lookup[flat]
         if np.any(free_rows < 0):
             raise ValueError("response is defined only for free nodes")
         right_hand_side = np.zeros((self.free.size, len(flat)))
         right_hand_side[free_rows, np.arange(len(flat))] = 1.0 / EPS0
         response = self._factor.solve(right_hand_side)
-        diagonal = response[free_rows, np.arange(len(flat))]
-        if np.any(diagonal <= 0.0) or not np.all(np.isfinite(diagonal)):
-            raise RuntimeError("Poisson response diagonal must be finite and positive")
-        return 1.0 / diagonal
+        support_response = response[free_rows]
+        if (not np.all(np.isfinite(support_response))
+                or not np.allclose(support_response, support_response.T, rtol=2e-10, atol=0.0)):
+            raise RuntimeError("Poisson support response must be finite and symmetric")
+        return support_response
 
 
 def lump_triangle_sheet_charge_3d(

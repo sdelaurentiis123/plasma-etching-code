@@ -137,15 +137,32 @@ def test_steady_3d_solver_refuses_to_label_an_unevaluated_proposal_converged():
 
 
 def test_steady_3d_solver_rejects_a_current_balance_worsening_trial():
-    system, arguments = _flat_dielectric_problem(_manufactured_floating_boundary())
+    ion = _species("ion", 1, 1e15, energy_eV=100.0)
+    electron = SpeciesBoundaryState(
+        "electron", -1, 5.4858e-4, 1e16,
+        [[0.0, 0.0, 1.0], [0.0, 0.0, np.sqrt(5.0)],
+         [0.0, 0.0, np.sqrt(20.0)]],
+        [0.8, 0.1, 0.1])
+    system, arguments = _flat_dielectric_problem((ion, electron))
     result = solve_dielectric_charging_steady_3d(
         initial_charge_node_c=np.zeros(system.shape), max_iter=10, min_iter=2,
         current_balance_tol=1e-12, beta=4.0, response_energy_eV=4.0,
-        maximum_voltage_step=8.0, **arguments)
+        maximum_voltage_step=30.0, **arguments)
 
     assert result.converged
     assert result.rejected_steps > 0
     assert result.history[-1]["rms_relative_current_imbalance"] == 0.0
+
+
+def test_anderson_update_converges_same_physical_floating_root():
+    system, arguments = _flat_dielectric_problem(_manufactured_floating_boundary())
+    result = solve_dielectric_charging_steady_3d(
+        initial_charge_node_c=np.zeros(system.shape), max_iter=8, min_iter=2,
+        current_balance_tol=1e-12, beta=1.0, nonlinear_update="anderson",
+        anderson_depth=3, **arguments)
+
+    assert result.converged
+    assert result.history[-1]["max_relative_current_imbalance"] == 0.0
 
 
 def _continuous_maxwellian_floating_problem():

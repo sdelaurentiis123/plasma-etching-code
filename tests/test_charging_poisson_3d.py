@@ -127,6 +127,21 @@ def test_q1_3d_diagonal_capacitance_is_positive_and_symmetric():
     assert np.allclose(capacitance[0], capacitance[1], rtol=1e-12)
 
 
+def test_support_response_inverse_reproduces_requested_voltage_step_exactly():
+    epsilon = np.ones((3, 3, 5))
+    fixed = np.zeros((4, 4, 6), dtype=bool); fixed[:, :, -1] = True
+    system = NodalPoissonSystem3D(epsilon, 20e-9, fixed)
+    nodes = np.array([[1, 1, 1], [2, 1, 1], [1, 2, 2], [2, 2, 2]])
+    requested = np.array([-3.0, 1.5, 2.0, -0.75])
+    response = system.voltage_response(nodes)
+    charge = np.zeros(system.shape)
+    charge[tuple(nodes.T)] = np.linalg.solve(response, requested)
+
+    voltage, _ = system.solve(charge)
+
+    assert np.allclose(voltage[tuple(nodes.T)], requested, rtol=3e-13, atol=3e-13)
+
+
 def test_solved_dielectric_sheet_potential_decelerates_ion_by_electrostatic_work():
     cell_shape = (1, 1, 10); spacing_m = np.full(3, 0.1e-6)
     fixed = np.zeros((2, 2, 11), dtype=bool); fixed[:, :, -1] = True

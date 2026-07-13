@@ -666,6 +666,7 @@ def advance_feature_step_3d(
         surface_state_mesh_fingerprint=None,
         nodal_potential_v=None, potential_origin=None, potential_spacing=None,
         trajectory_fixed_dt=None, trajectory_max_steps=10000,
+        field_periodic_lateral=False,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         initial_charge_node_c=None, charging_options=None,
         neutral_radiosity_options=None, ballistic_transport="forward",
@@ -736,8 +737,13 @@ def advance_feature_step_3d(
                          else dict(neutral_radiosity_options))
     periodic_neutral = bool(
         radiosity_options is not None and radiosity_options.get("periodic_lateral", False))
+    charging_periodic = bool(
+        charging_options is not None and charging_options.get("periodic_lateral", False))
     if periodic_neutral and (charging_poisson_system is not None or nodal_potential_v is not None):
-        raise ValueError("periodic neutral radiosity is not yet supported with field trajectories")
+        if not (charging_periodic if charging_poisson_system is not None
+                else bool(field_periodic_lateral)):
+            raise ValueError(
+                "periodic neutral radiosity with a field requires periodic charged trajectories")
     common_transport = dict(
         boundary=boundary, species_role=species_role, verts=verts, faces=faces, areas=areas,
         source_bounds=source_bounds, source_z=source_z,
@@ -784,6 +790,7 @@ def advance_feature_step_3d(
                 mesh_length_unit_m=geometry.mesh_length_unit_m,
                 mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
                 fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps,
+                periodic_lateral=charging_periodic,
                 device=transport_device)
             transport = merge_boundary_transport_results_3d(
                 charging.transport, uncharged_transport)
@@ -820,7 +827,8 @@ def advance_feature_step_3d(
         transport = trace_boundary_state_field_3d(
             **common_transport, nodal_potential_v=nodal_potential_v,
             potential_origin=potential_origin, potential_spacing=potential_spacing,
-            fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps)
+            fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps,
+            periodic_lateral=bool(field_periodic_lateral))
     neutral_radiosity_diagnostics = MappingProxyType({})
     if radiosity_options is not None:
         transport, neutral_radiosity_diagnostics = _apply_diffuse_neutral_transport(
@@ -1023,6 +1031,7 @@ def solve_feature_3d(
         n_position=256, seed=0, cfl_number=0.3, reinitialize=True,
         transport_device=None, nodal_potential_v=None, potential_origin=None,
         potential_spacing=None, trajectory_fixed_dt=None, trajectory_max_steps=10000,
+        field_periodic_lateral=False,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         charging_system_builder=None, initial_charge_node_c=None, charging_options=None,
         neutral_radiosity_options=None, ballistic_transport="forward",
@@ -1072,6 +1081,7 @@ def solve_feature_3d(
                 nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
                 potential_spacing=potential_spacing, trajectory_fixed_dt=trajectory_fixed_dt,
                 trajectory_max_steps=trajectory_max_steps,
+                field_periodic_lateral=field_periodic_lateral,
                 charging_poisson_system=step_poisson_system,
                 initial_charge_node_c=step_initial_charge,
                 charging_options=charging_options,

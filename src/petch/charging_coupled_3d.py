@@ -74,6 +74,29 @@ class DielectricChargingConvergenceError(RuntimeError):
         self.result = result
 
 
+def _anderson_step(x, residual, x_history, residual_history, gain, depth):
+    """Type-II Anderson acceleration for a preconditioned fixed-point residual."""
+    x = np.asarray(x, dtype=float); residual = np.asarray(residual, dtype=float)
+    if x.shape != residual.shape or x.ndim != 1:
+        raise ValueError("Anderson state and residual must be matching vectors")
+    if int(depth) != depth or depth <= 0 or not np.isfinite(gain) or gain <= 0.0:
+        raise ValueError("Anderson depth and gain must be positive")
+    x_history.append(x.copy()); residual_history.append(residual.copy())
+    if len(x_history) > int(depth) + 1:
+        x_history.pop(0); residual_history.pop(0)
+    step = float(gain) * residual
+    if len(residual_history) >= 2:
+        delta_residual = np.stack([
+            residual_history[index + 1] - residual_history[index]
+            for index in range(len(residual_history) - 1)], axis=1)
+        delta_x = np.stack([
+            x_history[index + 1] - x_history[index]
+            for index in range(len(x_history) - 1)], axis=1)
+        gamma, *_ = np.linalg.lstsq(delta_residual, residual, rcond=1e-8)
+        step = step - (delta_x + float(gain) * delta_residual) @ gamma
+    return step
+
+
 def _coupled_transport_limitations(transport):
     # The low-level trajectory call correctly says its voltage was supplied. At this coupling level
     # that voltage came from the current charge state, so retaining that line would misreport scope.
@@ -100,7 +123,7 @@ def _evaluate_incident_current_3d(
         poisson_system, charge, boundary, verts, faces, areas, *, source_bounds, source_z,
         potential_origin, coordinate_spacing, mesh_length_unit_m, mesh_origin_m,
         n_position, seed, trajectory_fixed_dt, trajectory_max_steps,
-        phase_space_log2_samples, transport_device):
+        phase_space_log2_samples, periodic_lateral, transport_device):
     charged_species = tuple(species for species in boundary.species if species.charge_number != 0)
     if not charged_species:
         raise ValueError("dielectric charging requires at least one charged boundary species")
@@ -117,6 +140,7 @@ def _evaluate_incident_current_3d(
         n_position=n_position, seed=seed, fixed_dt=trajectory_fixed_dt,
         max_steps=trajectory_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
+        periodic_lateral=periodic_lateral,
         device=transport_device)
 
     population_by_name = {
@@ -158,7 +182,7 @@ def advance_dielectric_charging_3d(
         potential_spacing, duration_s, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
         trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
-        phase_space_log2_samples=None, transport_device=None):
+        phase_space_log2_samples=None, periodic_lateral=False, transport_device=None):
     """Advance stored dielectric charge by the signed incident-particle current.
 
     The sequence is charge -> Q1 Poisson voltage -> collisionless charged-particle trajectories ->
@@ -188,6 +212,7 @@ def advance_dielectric_charging_3d(
         n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
         trajectory_max_steps=trajectory_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
+        periodic_lateral=periodic_lateral,
         transport_device=transport_device)
     face_current = evaluated["positive_face_current"] - evaluated["negative_face_current"]
     current_node = evaluated["positive_node_current"] - evaluated["negative_node_current"]
@@ -238,12 +263,13 @@ def solve_dielectric_charging_steady_3d(
         potential_origin, potential_spacing, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
         trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
-        phase_space_log2_samples=None, transport_device=None,
+        phase_space_log2_samples=None, periodic_lateral=False, transport_device=None,
         max_iter=30, min_iter=2, current_balance_tol=1e-3,
         beta=0.5, response_energy_eV=4.0, maximum_voltage_step=8.0,
         trust_growth_tolerance=0.02, minimum_beta=1e-4,
         phase_space_replicates=1, current_confidence_sigma=2.0,
         phase_space_max_log2_samples=None, current_estimator_relative_tol=None,
+        nonlinear_update="picard", anderson_depth=4,
         require_converged=True):
     """Solve local steady dielectric current balance on the compatible 3-D charge basis.
 
@@ -267,7 +293,9 @@ def solve_dielectric_charging_steady_3d(
             or not np.isfinite(minimum_beta) or minimum_beta <= 0.0 or minimum_beta > beta
             or int(phase_space_replicates) != phase_space_replicates
             or phase_space_replicates <= 0 or not np.isfinite(current_confidence_sigma)
-            or current_confidence_sigma <= 0.0):
+            or current_confidence_sigma <= 0.0
+            or nonlinear_update not in {"picard", "anderson"}
+            or int(anderson_depth) != anderson_depth or anderson_depth <= 0):
         raise ValueError("invalid steady charging solver controls")
     if phase_space_replicates > 1 and phase_space_log2_samples is None:
         raise ValueError(
@@ -298,7 +326,7 @@ def solve_dielectric_charging_steady_3d(
     support_nodes = np.column_stack(np.where(support_mask))
     if support_nodes.size == 0:
         raise ValueError("dielectric surface has no supported Poisson nodes")
-    capacitance = poisson_system.diagonal_capacitance(support_nodes)
+    voltage_response = poisson_system.voltage_response(support_nodes)
     evaluate_arguments = dict(
         poisson_system=poisson_system, boundary=boundary, verts=verts, faces=faces, areas=areas,
         source_bounds=source_bounds, source_z=source_z,
@@ -307,6 +335,7 @@ def solve_dielectric_charging_steady_3d(
         n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
         trajectory_max_steps=trajectory_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
+        periodic_lateral=periodic_lateral,
         transport_device=transport_device)
 
     beta_current = float(beta); rejected_steps = 0; history = []
@@ -376,27 +405,44 @@ def solve_dielectric_charging_steady_3d(
         phase_space_log2_samples=(-1 if estimator_level is None else int(estimator_level)),
         mean_surface_voltage_v=float(np.mean(
             evaluated["potential"][tuple(support_nodes.T)]))))
+    anderson_x_history = []; anderson_residual_history = []; cached_voltage_step = None
     while len(history) < int(max_iter) and not (
             len(history) >= int(min_iter)
             and estimator_converged
             and maximum_confidence <= float(current_balance_tol)):
+        if cached_voltage_step is None:
+            residual = float(response_energy_eV) * log_ratio
+            residual[~active] = 0.0
+            if nonlinear_update == "anderson":
+                surface_voltage = evaluated["potential"][tuple(support_nodes.T)]
+                cached_voltage_step = _anderson_step(
+                    surface_voltage, residual, anderson_x_history,
+                    anderson_residual_history, beta_current, int(anderson_depth))
+            else:
+                cached_voltage_step = beta_current * residual
         voltage_step = np.clip(
-            beta_current * float(response_energy_eV) * log_ratio,
+            cached_voltage_step,
             -float(maximum_voltage_step), float(maximum_voltage_step))
         voltage_step[~active] = 0.0
         trial_charge = charge.copy()
-        trial_charge[tuple(support_nodes.T)] += capacitance * voltage_step
+        # Invert the exact support-node Poisson response so the proposed charge increment produces
+        # the requested voltage step despite strong electrostatic coupling between trench surfaces.
+        # This is a preconditioner only: acceptance and convergence still use physical current balance.
+        charge_step = np.linalg.solve(voltage_response, voltage_step)
+        trial_charge[tuple(support_nodes.T)] += charge_step
         trial = assess(trial_charge)
         trial_merit = trial[6]
         if trial_merit > merit * (1.0 + float(trust_growth_tolerance)):
             beta_current *= 0.5; rejected_steps += 1
             if beta_current < float(minimum_beta):
                 break
+            cached_voltage_step *= 0.5
             continue
         accepted_beta = beta_current
         if trial_merit < 0.8 * merit:
             beta_current = min(float(beta), 1.2 * beta_current)
         charge = trial_charge
+        cached_voltage_step = None
         (evaluated, positive, negative, net_stderr, active, log_ratio,
          merit, maximum, maximum_confidence, maximum_uncertainty,
          estimator_converged, estimator_level) = trial
