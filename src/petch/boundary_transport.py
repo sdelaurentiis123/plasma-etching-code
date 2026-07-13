@@ -87,7 +87,8 @@ def trace_boundary_state_floor_flux(
 def forward_boundary_state_cell_flux_qmc(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, *,
         normals=None, proposal_species=None, log2_samples=12, seed=0, x_min=0.0, x_max=None,
-        max_steps=None, dt_cap=0.15, dt_field=0.10, fixed_dt=0.0, source_offset=1e-3):
+        max_steps=None, dt_cap=0.15, dt_field=0.10, fixed_dt=0.0, source_offset=1e-3,
+        return_trajectory_outcomes=False, return_trajectory_contributions=False):
     """Forward QMC current to arbitrary material cells from the same boundary-density contract.
 
     The score is total current to each unit-depth cell divided by incident current per unit horizontal
@@ -135,8 +136,10 @@ def forward_boundary_state_cell_flux_qmc(
         key = cell if normals is None else (cell, tuple(normals[index]))
         lookup.setdefault(key, []).append(index)
     valid = hit_x >= 0
-    for hx, hz, hnx, hnz, xpos, zpos, value in zip(
-            hit_x[valid], hit_z[valid], hit_nx[valid], hit_nz[valid],
+    scored_face_index = np.full(count, -1, dtype=np.int64)
+    scored_endpoint_u = np.full(count, np.nan)
+    for history, hx, hz, hnx, hnz, xpos, zpos, value in zip(
+            np.where(valid)[0], hit_x[valid], hit_z[valid], hit_nx[valid], hit_nz[valid],
             hit_x_position[valid], hit_z_position[valid], score[valid]):
         cell = (int(hx), int(hz))
         key = cell if normals is None else (cell, (int(hnx), int(hnz)))
@@ -145,15 +148,17 @@ def forward_boundary_state_cell_flux_qmc(
             # A cell current is stored once even when the cell owns multiple exposed faces.
             result[indices[0]] += value
             hit_count[indices[0]] += 1
+            scored_face_index[history] = indices[0]
             if endpoint_result is not None:
                 face_index = indices[0]
                 normal = tuple(normals[face_index])
                 u = ((float(zpos) - cells[face_index][1]) if normal[0] != 0
                      else (float(xpos) - cells[face_index][0]))
                 u = min(max(u, 0.0), 1.0)
+                scored_endpoint_u[history] = u
                 endpoint_result[face_index, 0] += value * (1.0 - u)
                 endpoint_result[face_index, 1] += value * u
-    return dict(
+    result = dict(
         per_cell=result, normalized_total=float(result.sum()),
         absolute_per_cell_m2_s=result * species.flux_m2_s,
         per_face_endpoint=endpoint_result,
@@ -161,13 +166,25 @@ def forward_boundary_state_cell_flux_qmc(
         equal_weight_sampling=bool(np.allclose(
             proposal.weight, np.full(count, 1.0 / count), rtol=1e-12, atol=1e-15)),
         seed=int(seed))
+    if return_trajectory_outcomes:
+        # Keep this opt-in: a production current evaluation needs only reduced moments, while
+        # response audits need to pair identical histories and count hard hit/escape switches.
+        status = np.where(hit_x >= 0, 0, 1).astype(np.int64)
+        result["trajectory_outcomes"] = np.column_stack((
+            status, hit_x, hit_z, hit_nx, hit_nz)).astype(np.int64, copy=False)
+    if return_trajectory_contributions:
+        result["trajectory_score"] = score.copy()
+        result["trajectory_face_index"] = scored_face_index
+        result["trajectory_endpoint_u"] = scored_endpoint_u
+    return result
 
 
 def adjoint_boundary_state_face_flux(
         boundary: PlasmaBoundaryState, species_name, nodal_potential, solid, cells, normals, *,
         proposal_species=None, n_face_position=8, max_steps=None, dt_cap=0.15, dt_field=0.10,
         want_energy=False, face_quadrature_offset=0.5, face_position_samples=None,
-        fixed_dt=0.0, face_offset=1e-3):
+        fixed_dt=0.0, face_offset=1e-3, return_trajectory_outcomes=False,
+        return_trajectory_contributions=False):
     """Generic Liouville adjoint gather on arbitrary axis-aligned material faces.
 
     This function contains no species source law. The supplied species quadrature is used as the surface
@@ -252,7 +269,9 @@ def adjoint_boundary_state_face_flux(
     traced = trace_nodal(
         nodal_potential, solid, x0, z0, vx0, vz0, float(species.charge_number),
         nx, nz, int(max_steps), dt_cap, dt_field, fixed_dt)
-    hit_x, survivor, exit_vx, exit_vz = traced[0], traced[4], traced[5], traced[6]
+    hit_x, hit_z, survivor, exit_vx, exit_vz = (
+        traced[0], traced[1], traced[4], traced[5], traced[6])
+    hit_nx, hit_nz = traced[7], traced[8]
     escaped = (hit_x < 0) & (survivor < 0.5) & (exit_vz < 0.0)
     tiled_sample_index = np.tile(sample_index, face_count)
     exit_forward = np.column_stack((
@@ -310,6 +329,16 @@ def adjoint_boundary_state_face_flux(
             energy_numerator, per_face, out=np.zeros_like(per_face), where=per_face > 0.0)
         result["mean_impact_energy_eV"] = (
             float(energy_numerator.sum() / per_face.sum()) if per_face.sum() > 0.0 else 0.0)
+    if return_trajectory_outcomes:
+        # 0=collision, 1=clean plasma-plane escape, 2=unresolved/step-exhausted. Including the
+        # collision face distinguishes a visibility-edge target switch from a simple hit/escape flip.
+        status = np.where(hit_x >= 0, 0, np.where(escaped, 1, 2)).astype(np.int64)
+        result["trajectory_outcomes"] = np.column_stack((
+            status, hit_x, hit_z, hit_nx, hit_nz)).reshape(
+                face_count, samples_per_face, 5).astype(np.int64, copy=False)
+    if return_trajectory_contributions:
+        result["trajectory_contribution"] = weighted_contribution.copy()
+        result["trajectory_face_u"] = sample_face_u.copy()
     return result
 
 

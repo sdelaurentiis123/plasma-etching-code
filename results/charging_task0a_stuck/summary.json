@@ -1,0 +1,17 @@
+{
+  "schema": "petch.charging.task0a.summary.v1",
+  "config_hash": "b0d263fbce2bf3f29946957b03145b4f204ef31cba09a39bcb886aa2745d2db7",
+  "complete": true,
+  "paired_jobs": 360,
+  "expected_paired_jobs": 360,
+  "exact_operator": "hard visibility; no smoothing",
+  "condition_scope": "declared 5-direction response subspace",
+  "frozen_ensemble_comparison": "same checkpoint, directions, radii, levels, and first scramble",
+  "checkpoint_residual_rms": 0.5979116658726594,
+  "highest_level": 13,
+  "minimum_high_level_signal_to_error": 0.5118416232367673,
+  "maximum_level_difference_sigma": 1.2748367499862414,
+  "precision_gate_pass": false,
+  "decision_gate": "increase paired-replicate precision; no solver promotion",
+  "switch_attribution": "signed projection and component energy; signed log(cond_total/cond_no_switch); no clamping"
+}

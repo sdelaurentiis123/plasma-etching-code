@@ -1,0 +1,40 @@
+{
+  "schema": "petch.charging.task0b.v1",
+  "checkpoint": "stuck_ar4_checkpoint.npz",
+  "checkpoint_sha256": "6e092bf7704d74e5da03a42493559a74f08de086f9c83e18d254b7a7f93fe65d",
+  "level": 10,
+  "seeds": [
+    401,
+    409,
+    419,
+    421,
+    431,
+    433,
+    439,
+    443
+  ],
+  "flat_voltages": [
+    -12.0,
+    -8.0,
+    -4.0,
+    -2.0,
+    0.0,
+    2.0,
+    4.0,
+    8.0
+  ],
+  "flat_max_steps": 25600,
+  "trench_target_voltages": [
+    -12.0,
+    -8.0,
+    -4.0,
+    -2.0,
+    0.0,
+    2.0,
+    4.0,
+    8.0
+  ],
+  "hard_visibility": true,
+  "electron_temperature_eV": 4.0,
+  "config_hash": "28f4887dc11ee0e7a34291637ee68e3de6e9902753babf1f9964a986cd9f0b8f"
+}

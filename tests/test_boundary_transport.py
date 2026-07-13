@@ -11,6 +11,7 @@ from petch.boundary_state import (
     SpeciesBoundaryState,
     instantaneous_sinusoidal_ion_boundary_state,
     maxwellian_electron_boundary_state,
+    qmc_boundary_proposal_with_auxiliary,
 )
 from petch.boundary_transport import (
     adaptive_adjoint_boundary_state_face_flux,
@@ -264,6 +265,38 @@ def test_bidirectional_frozen_estimator_refuses_instead_of_switching_map(monkeyp
     assert not result["cell_converged"][0]
     assert not result["converged"]
     assert np.isclose(result["per_face"][0], mean_adjoint)
+
+
+def test_forward_and_adjoint_can_expose_paired_trajectory_outcomes():
+    solid = np.zeros((4, 5), dtype=bool)
+    solid[:, 4] = True
+    potential = np.zeros((5, 6))
+    electron = maxwellian_electron_boundary_state(
+        4.0, 1e19, n_transverse=3, n_normal=4).get("electron")
+    boundary = PlasmaBoundaryState((electron,), reference_plane_m=0.0)
+    cells = [(index, 4) for index in range(4)]
+    normals = np.tile((0.0, -1.0), (4, 1))
+
+    forward = forward_boundary_state_cell_flux_qmc(
+        boundary, "electron", potential, solid, cells, normals=normals,
+        log2_samples=5, seed=17, fixed_dt=0.01,
+        return_trajectory_outcomes=True, return_trajectory_contributions=True)
+    proposal, auxiliary = qmc_boundary_proposal_with_auxiliary(
+        electron, 4, 1, 23, name="electron-audit")
+    adjoint = adjoint_boundary_state_face_flux(
+        boundary, "electron", potential, solid, cells, normals,
+        proposal_species=proposal, face_position_samples=auxiliary[:, 0],
+        fixed_dt=0.01, return_trajectory_outcomes=True,
+        return_trajectory_contributions=True)
+
+    assert forward["trajectory_outcomes"].shape == (2 ** 5, 5)
+    assert adjoint["trajectory_outcomes"].shape == (4, 2 ** 4, 5)
+    assert np.all(np.isin(forward["trajectory_outcomes"][:, 0], (0, 1)))
+    assert np.all(np.isin(adjoint["trajectory_outcomes"][:, :, 0], (0, 1, 2)))
+    assert forward["trajectory_score"].shape == (2 ** 5,)
+    assert forward["trajectory_face_index"].shape == (2 ** 5,)
+    assert adjoint["trajectory_contribution"].shape == (4, 2 ** 4)
+    assert adjoint["trajectory_face_u"].shape == (2 ** 4,)
 
 
 def test_bidirectional_adjoint_zero_is_not_exact_when_forward_sees_flux(monkeypatch):

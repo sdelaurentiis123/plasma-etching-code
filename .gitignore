@@ -12,8 +12,12 @@ env/
 *.swp
 .idea/
 .vscode/
+.codex/visualizations/
 
 # Build / sim artifacts (cached benchmark results are checked in explicitly)
 *.log
+# Superseded relaxed-checkpoint pilot; the canonical stuck-state audit below is retained.
+results/charging_task0a/
+results/charging_task0a_stuck/raw/
 /tmp/
 .gstack/

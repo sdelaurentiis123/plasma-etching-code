@@ -315,6 +315,33 @@ under-determined) -- an honest result that quantifies how many structures must b
   blocker is now the strongly nonlocal/nonsmooth current-response solve, not global landing accuracy,
   Poisson response, periodic trajectories, or ordinary Monte Carlo noise.
 
+### Charging solver campaign Task 0 decision gate (2026-07-13)
+
+- **Task 0A is complete but its precision gate is red.** Config
+  `b0d263fbce2bf3f29946957b03145b4f204ef31cba09a39bcb886aa2745d2db7` ran 360/360 exact
+  hard-visibility common-random-number pairs at nested levels 9/11/13, radii 0.1/0.05/0.025 V,
+  seeds 401/409/419/421/431/433/439/443, and five stuck-state worst/dominant directions. At level 13
+  the minimum signal/between-scramble-error is 0.512 (required 3); maximum nested-level difference is
+  1.275 sigma. The paired restricted ensemble conditions are 22.01, 17.10, and 12.49, but are not
+  decision-grade and are not dimensionally comparable to the archived full 47-by-47 Jacobian.
+- **The corrected switch evidence is mixed on conditioning but clear on geometry.** Signed
+  `log(cond_full/cond_no_switch)` replaces the invalid clamped attribution and is synthetic-gated in
+  both signs. Switch removal is not consistently helpful. Level-13 switch-fraction slopes are
+  0.851--0.950 (median 0.937), supporting a regular switching set over the measured radii. The result
+  is invariant to active thresholds `1e-5`/`1e-4`/`1e-3`.
+- **Task 0B rejects the proposed local planar electron split.** Config
+  `28f4887dc11ee0e7a34291637ee68e3de6e9902753babf1f9964a986cd9f0b8f` passes the refined flat
+  Maxwellian barrier gate (RMSE 0.000500, maximum error 0.001204, maximum unresolved trajectory
+  fraction 0.000488). A region-calibrated -12..8 V trench sweep passes the declared derivative gate in
+  0/4 regions, so Task 2b is not promoted.
+- **Decision:** the handoff's `response below estimator uncertainty` branch applies. Tasks 1--4 were
+  not coded or run; no convergence contract was changed. The unavailable RMS-0.627 coarse-3D state is
+  not silently substituted: the preserved audit checkpoint is the same-lineage 47-DOF stuck AR4 state
+  (RMS 0.597912), with input names and SHA-256 recorded in
+  `CHARGING_SOLVER_CAMPAIGN_2026-07-13.md`. Python ThreadPool execution is permanently prohibited for
+  these audits after the Numba workqueue abort; process workers pin all nested math runtimes to one
+  thread.
+
 ## Roadmap (remaining)
 
 1. Finish Phase 2 charging: batch the frozen replicate ensemble into an efficient deterministic root

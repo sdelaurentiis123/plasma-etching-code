@@ -1,0 +1,13 @@
+{
+  "schema": "petch.charging.task0b.summary.v1",
+  "config_hash": "28f4887dc11ee0e7a34291637ee68e3de6e9902753babf1f9964a986cd9f0b8f",
+  "flat_gate_pass": true,
+  "flat_rmse": 0.0004996631907278812,
+  "flat_max_abs_error": 0.0012037263054167635,
+  "flat_max_unresolved_fraction": 0.00048828125,
+  "trench_regions_passing": 0,
+  "trench_regions_total": 4,
+  "boundary_preconditioner_promoted": false,
+  "decision": "do not promote: planar term does not capture most trench stiffness",
+  "exact_operator": "hard visibility kinetic current; analytic curve is diagnostic only"
+}
