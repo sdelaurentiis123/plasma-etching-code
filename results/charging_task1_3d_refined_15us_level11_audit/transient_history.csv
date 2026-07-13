@@ -1,0 +1,3 @@
+variant,step,physical_time_s,rms_relative_current_imbalance_face,max_relative_current_imbalance_face,active_face_count,rms_relative_current_imbalance_node,max_relative_current_imbalance_node,active_node_count,minimum_potential_v,maximum_potential_v,mean_potential_v,total_stored_charge_c
+coarse,0,0.0,0.4397573245492547,1.0,176,0.29975359546999186,0.7717084716084319,135,-13.40261312251217,43.762994837443635,13.083758316300578,-8.246422405392827e-17
+refined,0,0.0,0.4397573245492547,1.0,176,0.29975359546999186,0.7717084716084319,135,-13.40261312251217,43.762994837443635,13.083758316300578,-8.246422405392827e-17

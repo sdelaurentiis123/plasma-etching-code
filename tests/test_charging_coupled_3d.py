@@ -8,8 +8,11 @@ from petch.boundary_state import (
     maxwellian_electron_boundary_state,
 )
 from petch.charging_coupled_3d import (
+    CurrentBalanceMetrics3D,
     DielectricChargingConvergenceError,
+    _freeze_certified_bidirectional_options,
     advance_dielectric_charging_3d,
+    current_balance_metrics_3d,
     integrate_dielectric_charging_transient_3d,
     solve_dielectric_charging_steady_3d,
 )
@@ -43,6 +46,57 @@ def _species(name, charge_number, flux_m2_s, energy_eV=20.0):
     return SpeciesBoundaryState(
         name, charge_number, 40.0 if charge_number > 0 else 5.4858e-4,
         flux_m2_s, [[0.0, 0.0, np.sqrt(energy_eV)]], [1.0])
+
+
+def test_current_balance_metrics_separate_local_low_throughput_and_patch_balance():
+    positive = np.array([1.0, 9.0, 4.0, 4.0])
+    negative = np.array([0.0, 9.0, 5.0, 3.0])
+    raw = current_balance_metrics_3d(positive, negative)
+    patches = current_balance_metrics_3d(
+        positive, negative, group=np.array([0, 0, 1, 1]))
+
+    assert isinstance(raw, CurrentBalanceMetrics3D)
+    assert raw.maximum_relative_imbalance == 1.0
+    assert raw.throughput_weighted_rms_relative_imbalance < raw.rms_relative_imbalance
+    assert np.array_equal(patches.group, [0, 1])
+    assert np.allclose(patches.positive_current_a, [10.0, 8.0])
+    assert np.allclose(patches.negative_current_a, [9.0, 8.0])
+    assert np.isclose(patches.maximum_relative_imbalance, 1.0 / 19.0)
+    assert np.isclose(patches.global_relative_imbalance, 1.0 / 35.0)
+    assert patches.positive_current_a.flags.writeable is False
+
+
+def test_current_balance_metrics_validate_integrated_current_patch_inputs():
+    with pytest.raises(ValueError, match="matching nonempty"):
+        current_balance_metrics_3d([1.0], [-1.0])
+    with pytest.raises(ValueError, match="integer array"):
+        current_balance_metrics_3d([1.0], [1.0], group=[0.0])
+    with pytest.raises(ValueError, match="retain"):
+        current_balance_metrics_3d([1.0], [1.0], group=np.array([-1]))
+
+
+def test_freezing_discovered_bidirectional_map_retains_certification_ceilings():
+    method = {"ion": np.array(["forward", "adjoint"])}
+    frozen = _freeze_certified_bidirectional_options(dict(
+        forward_log2_samples=8, max_forward_log2_samples=12,
+        adjoint_log2_samples=7, max_adjoint_log2_samples=11,
+        face_quadrature_points=3, max_face_quadrature_points=15), method)
+
+    assert frozen["forward_log2_samples"] == 12
+    assert frozen["adjoint_log2_samples"] == 11
+    assert frozen["face_quadrature_points"] == 15
+    assert not frozen["require_certification"]
+    assert np.array_equal(frozen["method_hint"]["ion"], method["ion"])
+
+
+def test_externally_frozen_bidirectional_map_keeps_explicit_scoring_levels():
+    method = {"ion": np.array(["forward", "adjoint"])}
+    frozen = _freeze_certified_bidirectional_options(dict(
+        method_hint=method, forward_log2_samples=9, max_forward_log2_samples=13,
+        adjoint_log2_samples=9, max_adjoint_log2_samples=13), method)
+
+    assert frozen["forward_log2_samples"] == 9
+    assert frozen["adjoint_log2_samples"] == 9
 
 
 def test_physical_3d_charging_step_conserves_incident_charge_and_capacitance():

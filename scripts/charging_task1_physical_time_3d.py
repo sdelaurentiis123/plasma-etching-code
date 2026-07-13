@@ -17,6 +17,7 @@ os.environ.setdefault("MPLCONFIGDIR", "/private/tmp/petch-matplotlib")
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.ndimage import map_coordinates
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -35,6 +36,7 @@ from petch.charging_coupled_3d import (  # noqa: E402
     integrate_dielectric_charging_transient_3d,
 )
 from petch.charging_poisson_3d import NodalPoissonSystem3D  # noqa: E402
+from petch.charging_poisson import EPS0  # noqa: E402
 from petch.feature_step_3d import (  # noqa: E402
     _surface_gas_normals,
     make_rectangular_trench_geometry_3d,
@@ -42,9 +44,9 @@ from petch.feature_step_3d import (  # noqa: E402
 from petch.threed import extract_mesh_3d  # noqa: E402
 
 
-def _geometry_and_poisson():
+def _geometry_and_poisson(dx=0.25):
     geometry = make_rectangular_trench_geometry_3d(
-        cell_width=1.0, cell_length=0.5, domain_height=2.0, dx=0.25,
+        cell_width=1.0, cell_length=0.5, domain_height=2.0, dx=dx,
         opening_width=0.5, mask_thickness=0.25,
         substrate_top=1.25, etched_depth=0.75)
     fixed = np.zeros(geometry.phi.shape, dtype=bool)
@@ -120,7 +122,7 @@ def _run(label, timestep_s, steps, initial_charge, common):
     return result
 
 
-def _plot(coarse, refined, output):
+def _plot(coarse, refined, output, spacing):
     coarse_history = coarse.history
     refined_history = refined.history
     fig, axes = plt.subplots(2, 2, figsize=(11.5, 8.0), constrained_layout=True)
@@ -151,7 +153,6 @@ def _plot(coarse, refined, output):
         axis.grid(alpha=0.25)
         axis.legend(fontsize=8)
 
-    spacing = 0.25
     z = np.arange(refined.charge_node_c.shape[2]) * spacing
     charge_z = refined.charge_node_c.sum(axis=(0, 1))
     axes[1, 1].bar(z, charge_z / max(np.max(np.abs(charge_z)), 1e-300), width=0.8 * spacing)
@@ -168,6 +169,7 @@ def _plot(coarse, refined, output):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results/charging_task1_3d")
+    parser.add_argument("--grid-dx", type=float, default=0.25)
     parser.add_argument("--timestep-s", type=float, default=2e-9)
     parser.add_argument("--steps", type=int, default=12)
     parser.add_argument("--forward-level", type=int, default=10)
@@ -188,11 +190,15 @@ def main():
     parser.add_argument("--bidirectional-relative-tolerance", type=float, default=0.1)
     parser.add_argument("--initial-state", type=Path)
     parser.add_argument("--initial-key", default="refined_charge_node_c")
+    parser.add_argument("--initial-kind", choices=("charge", "potential"), default="charge")
+    parser.add_argument("--initial-reference-dx", type=float, default=0.25)
+    parser.add_argument("--ion-method-map", type=Path)
+    parser.add_argument("--ion-method-key", default="method_hint_Ar")
     args = parser.parse_args()
     if args.steps < 0:
         parser.error("--steps must be nonnegative")
 
-    geometry, poisson = _geometry_and_poisson()
+    geometry, poisson = _geometry_and_poisson(args.grid_dx)
     verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
     normals = _surface_gas_normals(verts, faces, centroids, geometry)
     source_z = 2.0
@@ -207,13 +213,52 @@ def main():
         proposal_frames["Ar+"] = "source_aligned"
     initial_charge = np.zeros(poisson.shape)
     initial_state_sha256 = None
+    potential_recovery_relative_l2 = None
     if args.initial_state is not None:
         payload = args.initial_state.read_bytes()
         initial_state_sha256 = hashlib.sha256(payload).hexdigest()
         with np.load(args.initial_state) as archived:
-            initial_charge = np.asarray(archived[args.initial_key], dtype=float).copy()
-        if initial_charge.shape != poisson.shape:
-            parser.error("initial charge shape does not match the campaign Poisson grid")
+            initial = np.asarray(archived[args.initial_key], dtype=float).copy()
+        if args.initial_kind == "charge":
+            initial_charge = initial
+            if initial_charge.shape != poisson.shape:
+                parser.error("initial charge shape does not match the campaign Poisson grid")
+        else:
+            coordinates = np.meshgrid(
+                *(np.arange(size, dtype=float) * geometry.dx / args.initial_reference_dx
+                  for size in poisson.shape), indexing="ij")
+            potential = map_coordinates(
+                initial, coordinates, order=1, mode="nearest", prefilter=False)
+            initial_charge = (
+                EPS0 * (poisson.stiffness @ potential.ravel())).reshape(poisson.shape)
+            initial_charge[poisson.dirichlet_mask] = 0.0
+            recovered, _ = poisson.solve(initial_charge)
+            potential_recovery_relative_l2 = float(
+                np.linalg.norm(recovered - potential)
+                / max(np.linalg.norm(potential), 1e-300))
+    ion_method_map_sha256 = None
+    ion_method_hint = None
+    if args.ion_method_map is not None:
+        payload = args.ion_method_map.read_bytes()
+        ion_method_map_sha256 = hashlib.sha256(payload).hexdigest()
+        with np.load(args.ion_method_map) as archived:
+            ion_method_hint = np.asarray(archived[args.ion_method_key]).astype("U7")
+        if (ion_method_hint.shape != (len(faces),)
+                or np.any(~np.isin(ion_method_hint, ("forward", "adjoint")))):
+            parser.error("ion method map must select forward/adjoint for every campaign face")
+    bidirectional_options = dict(
+        forward_log2_samples=args.forward_level,
+        adjoint_log2_samples=args.ion_proposal_level,
+        n_replicates=args.bidirectional_replicates,
+        max_forward_log2_samples=args.bidirectional_max_level,
+        max_adjoint_log2_samples=args.bidirectional_max_level,
+        max_face_quadrature_points=args.bidirectional_max_face_points,
+        element_absolute_tolerance=args.bidirectional_absolute_tolerance,
+        element_relative_tolerance=args.bidirectional_relative_tolerance,
+        face_quadrature_points=args.adjoint_face_points)
+    if ion_method_hint is not None:
+        bidirectional_options.update(
+            method_hint={"Ar+": ion_method_hint}, require_certification=False)
     common = dict(
         poisson_system=poisson, boundary=boundary, verts=verts, faces=faces, areas=areas,
         source_bounds=(0.0, 1.0, 0.0, 0.5), source_z=source_z,
@@ -227,20 +272,11 @@ def main():
         adjoint_face_quadrature_points=args.adjoint_face_points,
         adjoint_ray_offset=1e-4, adjoint_proposals=proposals,
         adjoint_proposal_frames=proposal_frames,
-        bidirectional_options=dict(
-            forward_log2_samples=args.forward_level,
-            adjoint_log2_samples=args.ion_proposal_level,
-            n_replicates=args.bidirectional_replicates,
-            max_forward_log2_samples=args.bidirectional_max_level,
-            max_adjoint_log2_samples=args.bidirectional_max_level,
-            max_face_quadrature_points=args.bidirectional_max_face_points,
-            element_absolute_tolerance=args.bidirectional_absolute_tolerance,
-            element_relative_tolerance=args.bidirectional_relative_tolerance,
-            face_quadrature_points=args.adjoint_face_points),
+        bidirectional_options=bidirectional_options,
         transport_device="cpu")
     config = dict(
         model="exact_hard_visibility_3d_physical_time",
-        geometry=dict(cell_width=1.0, cell_length=0.5, domain_height=2.0, dx=0.25,
+        geometry=dict(cell_width=1.0, cell_length=0.5, domain_height=2.0, dx=geometry.dx,
                       opening_width=0.5, mask_thickness=0.25,
                       substrate_top=1.25, etched_depth=0.75),
         timestep_s=args.timestep_s, steps=args.steps,
@@ -261,6 +297,13 @@ def main():
         bidirectional_relative_tolerance=args.bidirectional_relative_tolerance,
         initial_state_sha256=initial_state_sha256,
         initial_key=(None if args.initial_state is None else args.initial_key),
+        initial_kind=(None if args.initial_state is None else args.initial_kind),
+        initial_reference_dx=(
+            None if args.initial_state is None or args.initial_kind != "potential"
+            else args.initial_reference_dx),
+        potential_recovery_relative_l2=potential_recovery_relative_l2,
+        ion_method_map_sha256=ion_method_map_sha256,
+        ion_method_key=(None if args.ion_method_map is None else args.ion_method_key),
         estimators={"Ar+": args.ion_estimator, "electron": "adjoint"})
     config_hash = _config_hash(config)
 
@@ -318,7 +361,7 @@ def main():
     history_path = args.output_dir / "transient_history.csv"
     with history_path.open("w", newline="") as handle:
         fields = ["variant", *coarse.history[0].keys()]
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for label, result in (("coarse", coarse), ("refined", refined)):
             for item in result.history:
@@ -379,7 +422,7 @@ def main():
         **{f"refined_method_hint_{name}": value
            for name, value in refined.bidirectional_method_hint.items()},
         vertices=verts, faces=faces, centroids=centroids, areas=areas)
-    _plot(coarse, refined, args.output_dir / "physical_time_transient.png")
+    _plot(coarse, refined, args.output_dir / "physical_time_transient.png", geometry.dx)
     print(json.dumps(summary, indent=2), flush=True)
 
 

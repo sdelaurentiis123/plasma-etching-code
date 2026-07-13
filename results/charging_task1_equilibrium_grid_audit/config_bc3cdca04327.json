@@ -1,0 +1,58 @@
+{
+  "model": "exact_hard_visibility_equilibrium_grid_audit",
+  "checkpoint_sha256": "d664979ba3416a9cb351eda40c3c0d62164a4eabc1d1505449c34ca545d9ca0e",
+  "checkpoint_name": "final_states.npz",
+  "checkpoint_key": "refined_potential_v",
+  "reference_dx_um": 0.25,
+  "grid_spacings_um": [
+    0.25,
+    0.125
+  ],
+  "patch_widths_um": [
+    0.25,
+    0.5,
+    1.0
+  ],
+  "replicates": 4,
+  "forward_level": 9,
+  "ion_proposal_level": 9,
+  "electron_proposal_level": 9,
+  "ion_seeds": [
+    1701,
+    1702,
+    1703,
+    1704
+  ],
+  "electron_seeds": [
+    2701,
+    2702,
+    2703,
+    2704
+  ],
+  "pilot": {
+    "forward_seed": 79,
+    "ion_seed": 83,
+    "electron_seed": 89,
+    "base_level": 8,
+    "max_level": 13,
+    "max_face_points": 15,
+    "absolute_tolerance": 0.02,
+    "relative_tolerance": 0.1
+  },
+  "trajectory_dt": 0.005,
+  "trajectory_max_steps": 50000,
+  "face_points": 3,
+  "geometry": {
+    "cell_width": 1.0,
+    "cell_length": 0.5,
+    "domain_height": 2.0,
+    "opening_width": 0.5,
+    "mask_thickness": 0.25,
+    "substrate_top": 1.25,
+    "etched_depth": 0.75
+  },
+  "estimator_map": {
+    "Ar+": "frozen_bidirectional_pilot",
+    "electron": "adjoint"
+  }
+}

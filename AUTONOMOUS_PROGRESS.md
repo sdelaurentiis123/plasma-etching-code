@@ -392,11 +392,37 @@ under-determined) -- an honest result that quantifies how many structures must b
   explicitly rejected in source-aligned frames; this prevents the slow-ray horizon failure exposed
   during Task 1 entry.
 
+### Charging equilibrium/discretization refinement (2026-07-13)
+
+- **The residual is not only a raw-mesh statistic.** Exact hard-visibility config
+  `d4ce71baa71c43f4d66e3c6af5533ddf58c43e6c2c1adf9a5c9b32a94b44905b` transfers the same voltage
+  state from `dx=0.25` to `0.125 um` with `2.19e-14` Poisson reproduction error. Global imbalance is
+  0.03862/0.03781, but fixed half-micron wall patches have RMS 0.162/0.173 and maximum 0.296/0.280.
+  Four wall patches remain independently resolved outside 0.08 with the same sign on both grids.
+- **Worst-node magnitude is sampling-sensitive; RMS and patches are much less so.** Forward level
+  9 -> 11 changes fine node RMS 0.3465 -> 0.3440 but worst node 0.8924 -> 0.8000. Half-micron patch
+  RMS changes 0.1648 -> 0.1735. A certified method map alone is therefore insufficient provenance on
+  small faces; its scoring sample/position levels matter.
+- **The refined transient is stable but still red.** Config
+  `5258cc6c59942d2e4b02558b0bd49cff90e0636319ddfcba45eab1a5687a7cc9` extends the accepted refined
+  trajectory to 15 microseconds. The final 10-microsecond timestep pair agrees to 0.0166% charge and
+  0.00559% potential. Level-11/13 endpoint audits give node RMS 0.29975/0.29888 and worst node
+  0.7717/0.7143. At level 13, half-micron patch RMS/max are 0.1287/0.2587 while global imbalance is
+  0.00058: upper-wall redistribution, not missing global current, is the surviving mode.
+- **Certified replay no longer drops back to base resolution.** Internally discovered estimator maps
+  now freeze at their declared adaptive sample and face-position ceilings. Externally supplied maps
+  keep their explicit scoring levels. The 0.08 contract and physical operator are unchanged.
+- **Bounded next action:** do not launch another root solver. Attach certified per-face sampling levels
+  to the method-map artifact or run the accuracy-matched fine transient on GPU before extending
+  physical time. In parallel, scope the currently absent surface-conduction, bulk-leakage, secondary-
+  electron, and reflection closures as physics-model questions, not numerical patches.
+
 ## Roadmap (remaining)
 
-1. Finish Phase 2 charging: batch the frozen replicate ensemble into an efficient deterministic root
-   rule; develop a nonlinear method that respects the nonlocal surface-current response; independently
-   audit the final root; only then promote the trench dipole/profile and deep-AR charging causality gate.
+1. Finish Phase 2 charging: preserve certified method *and sampling-level* provenance, then extend the
+   accuracy-matched refined physical transient (preferably on GPU). Audit whether surface conduction,
+   bulk leakage, secondary electrons, or reflection are required physical closures before any new
+   nonlinear root method; independently audit any final state before promotion.
 2. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow
    IonEnergyTransverseMaxwellianDensity), replacing the reduced analytic ion model; sticking + ion IAD
    are DECLARED calibrated inputs with provenance/uncertainty; calibrate low-AR, predict held-out AR40;

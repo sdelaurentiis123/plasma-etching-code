@@ -27,11 +27,12 @@ from .charging_poisson_3d import (
     lump_triangle_sheet_charge_3d,
 )
 from .charging_coupled_3d import (
+    CurrentBalanceMetrics3D,
     DielectricChargingConvergenceError, DielectricChargingStep3DResult,
     PhysicalTimeChargingIntegrationError, PhysicalTimeDielectricCharging3DResult,
     SteadyDielectricCharging3DResult,
-    advance_dielectric_charging_3d, integrate_dielectric_charging_transient_3d,
-    solve_dielectric_charging_steady_3d,
+    advance_dielectric_charging_3d, current_balance_metrics_3d,
+    integrate_dielectric_charging_transient_3d, solve_dielectric_charging_steady_3d,
 )
 from .surface_interaction_table import (
     InteractionAxis, SurfaceInteractionDomainError, SurfaceInteractionEvaluation,
@@ -96,11 +97,12 @@ __all__ = [
     "trace_boundary_state_first_hit_3d",
     "NodalPoissonSystem3D", "PoissonDiagnostics3D", "assemble_q1_stiffness_3d",
     "lump_triangle_sheet_charge_3d",
-    "DielectricChargingConvergenceError", "DielectricChargingStep3DResult",
+    "CurrentBalanceMetrics3D", "DielectricChargingConvergenceError",
+    "DielectricChargingStep3DResult",
     "PhysicalTimeChargingIntegrationError", "PhysicalTimeDielectricCharging3DResult",
     "SteadyDielectricCharging3DResult",
-    "advance_dielectric_charging_3d", "integrate_dielectric_charging_transient_3d",
-    "solve_dielectric_charging_steady_3d",
+    "advance_dielectric_charging_3d", "current_balance_metrics_3d",
+    "integrate_dielectric_charging_transient_3d", "solve_dielectric_charging_steady_3d",
     "InteractionAxis", "SurfaceInteractionDomainError", "SurfaceInteractionEvaluation",
     "SurfaceInteractionInterpolationAudit", "SurfaceInteractionTable",
     "KounisMelas2024Tables", "load_kounis_melas_2024_tables",

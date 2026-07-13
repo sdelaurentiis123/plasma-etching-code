@@ -34,5 +34,7 @@ results/charging_task1_3d_final_audit_strict8/
 results/charging_task1_3d_long/
 results/charging_task1_3d_strict_face32/
 results/charging_task1_3d_strict_failure/
+results/charging_task1_equilibrium_grid_audit/raw/
+results/charging_task1_3d_refined_transient_5us/
 /tmp/
 .gstack/

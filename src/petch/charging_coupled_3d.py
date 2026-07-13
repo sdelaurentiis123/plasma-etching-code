@@ -99,6 +99,35 @@ class PhysicalTimeDielectricCharging3DResult:
 
 
 @dataclass(frozen=True)
+class CurrentBalanceMetrics3D:
+    """Current balance on raw integration elements or declared aggregate patches.
+
+    Inputs to :func:`current_balance_metrics_3d` are integrated positive and negative currents in
+    amperes. This distinction matters for faces: current densities must be multiplied by physical
+    face area before aggregating unlike triangles into a patch.
+    """
+
+    group: np.ndarray
+    positive_current_a: np.ndarray
+    negative_current_a: np.ndarray
+    signed_relative_imbalance: np.ndarray
+    active: np.ndarray
+    rms_relative_imbalance: float
+    maximum_relative_imbalance: float
+    throughput_weighted_rms_relative_imbalance: float
+    global_relative_imbalance: float
+    active_count: int
+
+    def __post_init__(self):
+        for name in (
+                "group", "positive_current_a", "negative_current_a",
+                "signed_relative_imbalance", "active"):
+            array = np.asarray(getattr(self, name)).copy()
+            array.setflags(write=False)
+            object.__setattr__(self, name, array)
+
+
+@dataclass(frozen=True)
 class SteadyDielectricCharging3DResult:
     charge_node_c: np.ndarray
     potential_v: np.ndarray
@@ -148,6 +177,93 @@ class PhysicalTimeChargingIntegrationError(RuntimeError):
         self.charge_node_c = charge
         self.history = tuple(MappingProxyType(dict(item)) for item in history)
         self.step = int(step)
+
+
+def current_balance_metrics_3d(
+        positive_current_a, negative_current_a, *, group=None,
+        active_relative_floor=1e-15):
+    """Measure local and aggregate positive/negative current balance without changing the operator.
+
+    ``group`` may assign array entries to integer physical patches. Negative labels are excluded.
+    Without it, every entry is assessed independently. The unweighted RMS and maximum preserve the
+    established local-equation interpretation; throughput-weighted RMS and global balance expose
+    whether a large local ratio is confined to a low-current element.
+    """
+    positive_input = np.asarray(positive_current_a)
+    positive = np.asarray(positive_current_a, dtype=float)
+    negative = np.asarray(negative_current_a, dtype=float)
+    if (positive.shape != negative.shape or positive.size == 0
+            or np.any(~np.isfinite(positive)) or np.any(~np.isfinite(negative))
+            or np.any(positive < 0.0) or np.any(negative < 0.0)
+            or not np.isfinite(active_relative_floor)
+            or active_relative_floor < 0.0):
+        raise ValueError("currents must be matching nonempty finite nonnegative arrays")
+    positive = positive.ravel(); negative = negative.ravel()
+    if group is None:
+        labels = np.arange(positive.size, dtype=int)
+    else:
+        supplied = np.asarray(group)
+        if (supplied.shape != positive_input.shape
+                or not np.issubdtype(supplied.dtype, np.integer)):
+            raise ValueError("group must be an integer array matching the current arrays")
+        supplied = supplied.ravel().astype(int, copy=False)
+        selected = supplied >= 0
+        if not np.any(selected):
+            raise ValueError("group must retain at least one nonnegative patch")
+        labels = np.unique(supplied[selected])
+        compact = np.searchsorted(labels, supplied[selected])
+        positive = np.bincount(compact, weights=positive[selected], minlength=len(labels))
+        negative = np.bincount(compact, weights=negative[selected], minlength=len(labels))
+    total = positive + negative
+    scale = float(np.max(total)) if total.size else 0.0
+    active = total > max(float(active_relative_floor) * scale, 1e-300)
+    signed = np.divide(
+        positive - negative, total, out=np.zeros_like(total), where=total > 0.0)
+    if np.any(active):
+        rms = float(np.sqrt(np.mean(signed[active] ** 2)))
+        maximum = float(np.max(np.abs(signed[active])))
+        weighted_rms = float(np.sqrt(
+            np.sum(total[active] * signed[active] ** 2) / np.sum(total[active])))
+    else:
+        rms = maximum = weighted_rms = float("inf")
+    total_positive = float(np.sum(positive))
+    total_negative = float(np.sum(negative))
+    global_scale = total_positive + total_negative
+    global_relative = (abs(total_positive - total_negative) / global_scale
+                       if global_scale > 0.0 else float("inf"))
+    return CurrentBalanceMetrics3D(
+        group=labels, positive_current_a=positive, negative_current_a=negative,
+        signed_relative_imbalance=signed, active=active,
+        rms_relative_imbalance=rms, maximum_relative_imbalance=maximum,
+        throughput_weighted_rms_relative_imbalance=weighted_rms,
+        global_relative_imbalance=float(global_relative),
+        active_count=int(np.count_nonzero(active)))
+
+
+def _freeze_certified_bidirectional_options(options, discovered_hint):
+    """Freeze a certified map without dropping back below its audited refinement ceiling."""
+    frozen = {} if options is None else dict(options)
+    discovered = {name: np.asarray(value).copy() for name, value in discovered_hint.items()}
+    if "method_hint" in frozen:
+        supplied = dict(frozen["method_hint"])
+        if (set(supplied) != set(discovered)
+                or any(not np.array_equal(supplied[name], discovered[name])
+                       for name in discovered)):
+            raise RuntimeError("supplied bidirectional method map differs from the certified map")
+    else:
+        frozen["method_hint"] = discovered
+        # Certification may have adaptively raised a global sample or position level. The selection
+        # result does not yet retain its exact stopping levels, so freezing at the declared ceilings
+        # is the conservative replay rule. Reverting to the base levels can recreate zero-hit faces
+        # on a refined mesh even though the pilot map itself certified.
+        for base, maximum in (
+                ("forward_log2_samples", "max_forward_log2_samples"),
+                ("adjoint_log2_samples", "max_adjoint_log2_samples"),
+                ("face_quadrature_points", "max_face_quadrature_points")):
+            if frozen.get(maximum) is not None:
+                frozen[base] = frozen[maximum]
+    frozen["require_certification"] = False
+    return frozen
 
 
 def _anderson_step(x, residual, x_history, residual_history, gain, depth):
@@ -361,21 +477,10 @@ def _physical_current_balance_metrics(
     for label, positive, negative in (
             ("face", positive_face, negative_face),
             ("node", positive_node, negative_node)):
-        positive = np.asarray(positive, dtype=float)
-        negative = np.asarray(negative, dtype=float)
-        total = positive + negative
-        scale = float(np.max(total)) if total.size else 0.0
-        active = total > max(1e-15 * scale, 1e-300)
-        if np.any(active):
-            relative = np.abs(positive[active] - negative[active]) / total[active]
-            metrics[f"rms_relative_current_imbalance_{label}"] = float(
-                np.sqrt(np.mean(relative ** 2)))
-            metrics[f"max_relative_current_imbalance_{label}"] = float(np.max(relative))
-            metrics[f"active_{label}_count"] = int(np.count_nonzero(active))
-        else:
-            metrics[f"rms_relative_current_imbalance_{label}"] = float("inf")
-            metrics[f"max_relative_current_imbalance_{label}"] = float("inf")
-            metrics[f"active_{label}_count"] = 0
+        result = current_balance_metrics_3d(positive, negative)
+        metrics[f"rms_relative_current_imbalance_{label}"] = result.rms_relative_imbalance
+        metrics[f"max_relative_current_imbalance_{label}"] = result.maximum_relative_imbalance
+        metrics[f"active_{label}_count"] = result.active_count
     return metrics
 
 
@@ -561,21 +666,10 @@ def integrate_dielectric_charging_transient_3d(
                 f"physical-time charging failed before update {step_index}: {error}",
                 charge, history, step_index) from error
         if final_step.bidirectional_method_hint:
-            frozen_options = (
-                {} if common_arguments["bidirectional_options"] is None
-                else dict(common_arguments["bidirectional_options"]))
-            discovered_hint = dict(final_step.bidirectional_method_hint)
-            if "method_hint" in frozen_options:
-                supplied_hint = dict(frozen_options["method_hint"])
-                if (set(supplied_hint) != set(discovered_hint)
-                        or any(not np.array_equal(supplied_hint[name], discovered_hint[name])
-                               for name in discovered_hint)):
-                    raise RuntimeError(
-                        "supplied bidirectional method map differs from the certified initial map")
-            else:
-                frozen_options["method_hint"] = discovered_hint
-            frozen_options["require_certification"] = False
-            common_arguments["bidirectional_options"] = frozen_options
+            common_arguments["bidirectional_options"] = (
+                _freeze_certified_bidirectional_options(
+                    common_arguments["bidirectional_options"],
+                    final_step.bidirectional_method_hint))
         state = record(
             step_index, final_step.potential_before_v,
             final_step.positive_face_current_density_a_m2,

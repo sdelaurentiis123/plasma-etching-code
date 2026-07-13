@@ -200,3 +200,49 @@ audit (compatible nodal balance versus area-weighted faces and coarsened patches
 refinement). Preserve the 0.08 contract and flag any demonstrated discretization-scale mismatch for
 human review rather than changing it. The local planar electron preconditioner remains rejected;
 Tasks 3--4 remain held by the Task 0A precision gate.
+
+## Equilibrium/discretization audit: wall-scale imbalance survives refinement
+
+The engine now exposes `current_balance_metrics_3d` for integrated currents on raw elements or an
+explicit integer patch map. It reports the unchanged unweighted local RMS/maximum plus
+throughput-weighted RMS and global balance. Face current density must be multiplied by physical area
+before aggregation; this prevents unequal marching-cubes triangles from being averaged as peers.
+
+Configuration `d4ce71baa71c43f4d66e3c6af5533ddf58c43e6c2c1adf9a5c9b32a94b44905b`
+evaluated the same archived voltage field on `dx=0.25` and `0.125 um` grids. Trilinear voltage
+transfer is reproduced by the refined Poisson solve to `2.19e-14` relative L2. A separate pilot chose
+the ion forward/adjoint map (39/1 coarse, 164/12 fine); four independent scoring groups could not
+reselect it. Every result uses hard visibility and full kinetic currents.
+
+At forward level 11, coarse/fine global imbalance is 0.03862/0.03781. Raw-face RMS is 0.427/0.463;
+compatible-node RMS is 0.206/0.344. Fixed 0.5 um patches are substantially less sensitive: RMS
+0.162/0.173 and maximum 0.296/0.280. All four half-micron wall patches remain independently resolved
+outside 0.08 with the same sign on both grids. Their signed coarse/fine RMS difference is 0.064.
+Thus the current state contains a physical wall-scale redistribution mode; the floor is not solely a
+single-triangle or nodal-projection artifact. This is an operator-refinement statement, not a claim
+that the transferred voltage is a refined-grid equilibrium.
+
+The forward sample-level comparison is also diagnostic. Raising level 9 to 11 changes fine node RMS
+only 0.3465 to 0.3440 and half-micron patch RMS 0.1648 to 0.1735, but reduces the worst node from
+0.8924 to 0.8000. Small fine-grid faces therefore make the worst-node statistic more estimator-level
+sensitive than the RMS or physical patches. The contract is unchanged; the audit records both levels.
+
+The refined physical transient then advanced the mapped state for 15 microseconds. Its paired
+125/62.5 ns schedules agree to 0.0166% in charge and 0.00559% in potential over the final 10
+microseconds. At the integration level, node RMS falls from 0.3379 to 0.3020 while the worst node
+remains 0.8688. Independent frozen-map endpoint scoring at forward levels 11 and 13 gives stable RMS
+0.29975/0.29888; the worst node continues to move with sampling, 0.7717/0.7143, but remains far above
+0.08. At level 13, the half-micron patch RMS is 0.1287 and its maximum is 0.2587: the upper walls
+remain electron dominated while the floor, top, and lower-wall half patches are inside 0.08. Global
+imbalance is only 0.00058, demonstrating redistribution rather than missing total current.
+
+One engine replay defect was fixed from this evidence. After adaptive certification, the transient
+previously froze only the estimator method and silently returned to base sample/position levels.
+Internally discovered maps now replay at the declared certification ceilings; externally supplied
+maps retain their explicitly audited scoring levels. No solver or tolerance changed.
+
+Decision: do not reinterpret the present per-node failure as pure discretization, and do not loosen
+0.08. A longer refined transient is computationally justified only after attaching per-face certified
+sampling levels (rather than a method-only map) or moving this accuracy-matched campaign to the GPU.
+The missing physical closures—surface conduction, bulk leakage, secondary emission, and reflection—
+should be assessed as model-scope candidates before another root algorithm.
