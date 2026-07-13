@@ -8,7 +8,10 @@ from typing import Mapping
 import numpy as np
 
 from .boundary_state import PlasmaBoundaryState
-from .boundary_transport_3d import BoundaryTransport3DResult, trace_boundary_state_field_3d
+from .boundary_transport_3d import (
+    BoundaryTransport3DResult, gather_boundary_state_field_adjoint_3d,
+    merge_boundary_transport_results_3d, trace_boundary_state_field_3d,
+)
 from .charging_poisson_3d import (
     NodalPoissonSystem3D,
     PoissonDiagnostics3D,
@@ -119,11 +122,32 @@ def _coordinate_spacing_3d(poisson_system, potential_spacing, mesh_length_unit_m
     return coordinate_spacing
 
 
+def _validate_transport_estimators_3d(
+        boundary, faces, transport_estimator, face_centroids, face_gas_normals):
+    charged_names = {species.name for species in boundary.species if species.charge_number != 0}
+    estimator_by_name = (
+        {name: transport_estimator for name in charged_names}
+        if isinstance(transport_estimator, str) else dict(transport_estimator))
+    if (not charged_names or set(estimator_by_name) != charged_names
+            or any(value not in {"forward", "adjoint"}
+                   for value in estimator_by_name.values())):
+        raise ValueError("transport_estimator must select forward or adjoint for every charged species")
+    if "adjoint" in estimator_by_name.values():
+        centroids = np.asarray(face_centroids, dtype=float)
+        normals = np.asarray(face_gas_normals, dtype=float)
+        if (centroids.shape != (len(faces), 3) or normals.shape != centroids.shape
+                or np.any(~np.isfinite(centroids)) or np.any(~np.isfinite(normals))):
+            raise ValueError("adjoint charging requires finite centroid and gas-normal arrays per face")
+    return estimator_by_name
+
+
 def _evaluate_incident_current_3d(
         poisson_system, charge, boundary, verts, faces, areas, *, source_bounds, source_z,
         potential_origin, coordinate_spacing, mesh_length_unit_m, mesh_origin_m,
         n_position, seed, trajectory_fixed_dt, trajectory_max_steps,
-        phase_space_log2_samples, periodic_lateral, transport_device):
+        phase_space_log2_samples, periodic_lateral, transport_estimator,
+        face_centroids, face_gas_normals, adjoint_face_quadrature_points,
+        adjoint_ray_offset, adjoint_proposals, transport_device):
     charged_species = tuple(species for species in boundary.species if species.charge_number != 0)
     if not charged_species:
         raise ValueError("dielectric charging requires at least one charged boundary species")
@@ -131,17 +155,47 @@ def _evaluate_incident_current_3d(
         charged_species, boundary.reference_plane_m, provenance=boundary.provenance)
     species_role = {species.name: "energetic_bombardment" for species in charged_species}
     potential, poisson = poisson_system.solve(charge)
-    transport = trace_boundary_state_field_3d(
-        charged_boundary, species_role, verts, faces, areas,
-        source_bounds=source_bounds, source_z=source_z,
-        nodal_potential_v=potential, potential_origin=potential_origin,
-        potential_spacing=coordinate_spacing,
-        mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
-        n_position=n_position, seed=seed, fixed_dt=trajectory_fixed_dt,
-        max_steps=trajectory_max_steps,
-        phase_space_log2_samples=phase_space_log2_samples,
-        periodic_lateral=periodic_lateral,
-        device=transport_device)
+    estimator_by_name = (
+        {species.name: str(transport_estimator) for species in charged_species}
+        if isinstance(transport_estimator, str) else dict(transport_estimator))
+    transports = []
+    for estimator in ("forward", "adjoint"):
+        selected = tuple(
+            species for species in charged_species
+            if estimator_by_name.get(species.name) == estimator)
+        if not selected:
+            continue
+        selected_boundary = PlasmaBoundaryState(
+            selected, charged_boundary.reference_plane_m, provenance=boundary.provenance)
+        selected_role = {species.name: species_role[species.name] for species in selected}
+        if estimator == "adjoint":
+            proposal_subset = (None if adjoint_proposals is None else {
+                species.name: adjoint_proposals[species.name] for species in selected
+                if species.name in adjoint_proposals})
+            transports.append(gather_boundary_state_field_adjoint_3d(
+                selected_boundary, selected_role, verts, faces, areas,
+                face_centroids, face_gas_normals,
+                source_bounds=source_bounds, source_z=source_z,
+                nodal_potential_v=potential, potential_origin=potential_origin,
+                potential_spacing=coordinate_spacing,
+                mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
+                face_quadrature_points=adjoint_face_quadrature_points,
+                ray_offset=adjoint_ray_offset, fixed_dt=trajectory_fixed_dt,
+                max_steps=trajectory_max_steps, periodic_lateral=periodic_lateral,
+                proposal_by_species=proposal_subset, device=transport_device))
+        else:
+            transports.append(trace_boundary_state_field_3d(
+                selected_boundary, selected_role, verts, faces, areas,
+                source_bounds=source_bounds, source_z=source_z,
+                nodal_potential_v=potential, potential_origin=potential_origin,
+                potential_spacing=coordinate_spacing,
+                mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
+                n_position=n_position, seed=seed, fixed_dt=trajectory_fixed_dt,
+                max_steps=trajectory_max_steps,
+                phase_space_log2_samples=phase_space_log2_samples,
+                periodic_lateral=periodic_lateral, device=transport_device))
+    transport = (transports[0] if len(transports) == 1
+                 else merge_boundary_transport_results_3d(*transports))
 
     population_by_name = {
         population.name: population for population in transport.surface_fluxes.energetic_fluxes}
@@ -182,7 +236,11 @@ def advance_dielectric_charging_3d(
         potential_spacing, duration_s, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
         trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
-        phase_space_log2_samples=None, periodic_lateral=False, transport_device=None):
+        phase_space_log2_samples=None, periodic_lateral=False,
+        transport_estimator="forward", face_centroids=None, face_gas_normals=None,
+        adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
+        adjoint_proposals=None,
+        transport_device=None):
     """Advance stored dielectric charge by the signed incident-particle current.
 
     The sequence is charge -> Q1 Poisson voltage -> collisionless charged-particle trajectories ->
@@ -192,6 +250,8 @@ def advance_dielectric_charging_3d(
 
     This is a physical-time forward-Euler update, not the accelerated steady current-balance solve.
     ``duration_s`` must therefore resolve the charging transient selected by the caller.
+    ``transport_estimator`` may select ``"forward"`` or ``"adjoint"`` independently for each charged
+    species; adjoint species require per-face centroids and gas normals.
     """
     if not isinstance(poisson_system, NodalPoissonSystem3D):
         raise TypeError("poisson_system must be a NodalPoissonSystem3D")
@@ -204,6 +264,8 @@ def advance_dielectric_charging_3d(
         raise ValueError("stored dielectric charge cannot be assigned to Dirichlet reservoir nodes")
     coordinate_spacing = _coordinate_spacing_3d(
         poisson_system, potential_spacing, mesh_length_unit_m)
+    _validate_transport_estimators_3d(
+        boundary, faces, transport_estimator, face_centroids, face_gas_normals)
     evaluated = _evaluate_incident_current_3d(
         poisson_system, charge, boundary, verts, faces, areas,
         source_bounds=source_bounds, source_z=source_z,
@@ -213,6 +275,11 @@ def advance_dielectric_charging_3d(
         trajectory_max_steps=trajectory_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
         periodic_lateral=periodic_lateral,
+        transport_estimator=transport_estimator,
+        face_centroids=face_centroids, face_gas_normals=face_gas_normals,
+        adjoint_face_quadrature_points=adjoint_face_quadrature_points,
+        adjoint_ray_offset=adjoint_ray_offset,
+        adjoint_proposals=adjoint_proposals,
         transport_device=transport_device)
     face_current = evaluated["positive_face_current"] - evaluated["negative_face_current"]
     current_node = evaluated["positive_node_current"] - evaluated["negative_node_current"]
@@ -263,7 +330,11 @@ def solve_dielectric_charging_steady_3d(
         potential_origin, potential_spacing, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
         trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
-        phase_space_log2_samples=None, periodic_lateral=False, transport_device=None,
+        phase_space_log2_samples=None, periodic_lateral=False,
+        transport_estimator="forward", face_centroids=None, face_gas_normals=None,
+        adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
+        adjoint_proposals=None,
+        transport_device=None,
         max_iter=30, min_iter=2, current_balance_tol=1e-3,
         beta=0.5, response_energy_eV=4.0, maximum_voltage_step=8.0,
         trust_growth_tolerance=0.02, minimum_beta=1e-4,
@@ -273,9 +344,10 @@ def solve_dielectric_charging_steady_3d(
         require_converged=True):
     """Solve local steady dielectric current balance on the compatible 3-D charge basis.
 
-    The physical residual is ``abs(I+ - I-)/(I+ + I-)`` at every active surface node. Diagonal
-    capacitance, ``beta``, and ``response_energy_eV`` precondition the nonlinear solve but do not alter
-    that root. Trial steps that increase the RMS physical residual are rejected and retried at half gain.
+    The physical residual is ``abs(I+ - I-)/(I+ + I-)`` at every active surface node. The exact dense
+    support-node Poisson response, ``beta``, and ``response_energy_eV`` precondition the nonlinear solve
+    but do not alter that root. Trial steps that increase the RMS physical residual are rejected and
+    retried at half gain. Forward or reversible-adjoint transport can be selected per charged species.
     """
     if not isinstance(poisson_system, NodalPoissonSystem3D):
         raise TypeError("poisson_system must be a NodalPoissonSystem3D")
@@ -295,8 +367,12 @@ def solve_dielectric_charging_steady_3d(
             or phase_space_replicates <= 0 or not np.isfinite(current_confidence_sigma)
             or current_confidence_sigma <= 0.0
             or nonlinear_update not in {"picard", "anderson"}
-            or int(anderson_depth) != anderson_depth or anderson_depth <= 0):
+            or int(anderson_depth) != anderson_depth or anderson_depth <= 0
+            or int(adjoint_face_quadrature_points) not in {1, 3}
+            or not np.isfinite(adjoint_ray_offset) or adjoint_ray_offset <= 0.0):
         raise ValueError("invalid steady charging solver controls")
+    _validate_transport_estimators_3d(
+        boundary, faces, transport_estimator, face_centroids, face_gas_normals)
     if phase_space_replicates > 1 and phase_space_log2_samples is None:
         raise ValueError(
             "multiple current replicates require joint continuous-density phase-space sampling")
@@ -336,6 +412,11 @@ def solve_dielectric_charging_steady_3d(
         trajectory_max_steps=trajectory_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
         periodic_lateral=periodic_lateral,
+        transport_estimator=transport_estimator,
+        face_centroids=face_centroids, face_gas_normals=face_gas_normals,
+        adjoint_face_quadrature_points=adjoint_face_quadrature_points,
+        adjoint_ray_offset=adjoint_ray_offset,
+        adjoint_proposals=adjoint_proposals,
         transport_device=transport_device)
 
     beta_current = float(beta); rejected_steps = 0; history = []

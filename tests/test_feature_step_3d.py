@@ -5,7 +5,8 @@ import numpy as np
 import pytest
 
 from petch.boundary_state import (
-    PlasmaBoundaryState, SpeciesBoundaryState, maxwellian_electron_boundary_state,
+    IonEnergyTransverseMaxwellianDensity, PlasmaBoundaryState, SpeciesBoundaryState,
+    maxwellian_electron_boundary_state, mixture_boundary_proposal, qmc_boundary_proposal,
 )
 from petch.charging_poisson_3d import NodalPoissonSystem3D
 from petch.feature_step_3d import (
@@ -13,10 +14,14 @@ from petch.feature_step_3d import (
     _face_material_ids,
     _physical_volume_topology_signature,
     _remove_unresolved_subcell_solid_components,
+    _surface_gas_normals,
     advance_feature_step_3d,
     conservative_remap_surface_state,
     make_rectangular_trench_geometry_3d,
     solve_feature_3d,
+)
+from petch.boundary_transport_3d import (
+    gather_boundary_state_field_adjoint_3d, trace_boundary_state_field_3d,
 )
 from petch.interaction_data import load_kounis_melas_2024_tables
 from petch.physical_api import COMMON_FEATURE_ENGINE, PhysicalProcess
@@ -85,6 +90,38 @@ def _charging_boundary():
         "electron", -1, 5.4858e-4, 2.2e22,
         [[0.0, 0.0, 1.0], [0.0, 0.0, np.sqrt(20.0)]], [0.9, 0.1])
     return PlasmaBoundaryState((ion, electron), reference_plane_m=1.75e-6)
+
+
+def _continuous_trench_charging_boundary(reference_plane_m):
+    ion_flux = 2.2e21
+    ion = SpeciesBoundaryState(
+        "Ar+", 1, 40.0, ion_flux, [[0.0, 0.0, 10.0]], [1.0],
+        density_model=IonEnergyTransverseMaxwellianDensity(
+            np.array([99.0, 101.0]), np.array([1.0]), 0.05))
+    electron = maxwellian_electron_boundary_state(
+        4.0, 10.0 * ion_flux, n_transverse=5, n_normal=8,
+        reference_plane_m=reference_plane_m).species[0]
+    return PlasmaBoundaryState((ion, electron), reference_plane_m=reference_plane_m)
+
+
+def _trench_adjoint_proposals(boundary):
+    physical_ion = boundary.get("Ar+")
+    broad_ion = SpeciesBoundaryState(
+        "Ar+", 1, physical_ion.mass_amu, physical_ion.flux_m2_s,
+        [[0.0, 0.0, 10.0]], [1.0],
+        density_model=IonEnergyTransverseMaxwellianDensity(
+            np.array([1.0, 201.0]), np.array([1.0]), 2.0))
+    ion_mixture = mixture_boundary_proposal(
+        (physical_ion, broad_ion), (0.8, 0.2), name="Ar+")
+    ion_proposal = qmc_boundary_proposal(ion_mixture, 10, seed=79)
+    broad_electron = maxwellian_electron_boundary_state(
+        20.0, boundary.get("electron").flux_m2_s,
+        n_transverse=5, n_normal=8, electron_name="electron",
+        reference_plane_m=boundary.reference_plane_m).species[0]
+    electron_mixture = mixture_boundary_proposal(
+        (boundary.get("electron"), broad_electron), (0.8, 0.2), name="electron")
+    electron_proposal = qmc_boundary_proposal(electron_mixture, 10, seed=83)
+    return {"Ar+": ion_proposal, "electron": electron_proposal}
 
 
 def _si_cl_ar_boundary():
@@ -541,6 +578,50 @@ def test_feature_step_solves_charge_reuses_ion_events_and_excludes_electron_from
     assert result.diagnostics["self_consistent_charging"]
     assert result.diagnostics["charging_converged"]
     assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.02
+
+
+def test_periodic_trench_forward_and_adjoint_electron_currents_close_by_region():
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=1.0, cell_length=0.5, domain_height=2.0, dx=0.25,
+        opening_width=0.5, mask_thickness=0.25,
+        substrate_top=1.25, etched_depth=0.75)
+    source_z = 2.0
+    boundary = _continuous_trench_charging_boundary(
+        source_z * geometry.mesh_length_unit_m)
+    verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
+    normals = _surface_gas_normals(verts, faces, centroids, geometry)
+    electron_boundary = PlasmaBoundaryState(
+        (boundary.get("electron"),), boundary.reference_plane_m)
+    common = dict(
+        boundary=electron_boundary, species_role={"electron": "charge_carrier"},
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 0.5), source_z=source_z,
+        nodal_potential_v=np.zeros(geometry.phi.shape),
+        potential_origin=(0.0, 0.0, 0.0), potential_spacing=geometry.dx,
+        mesh_length_unit_m=geometry.mesh_length_unit_m,
+        fixed_dt=0.005, max_steps=50000, periodic_lateral=True, device="cpu")
+    forward = trace_boundary_state_field_3d(
+        **common, phase_space_log2_samples=14)
+    adjoint = gather_boundary_state_field_adjoint_3d(
+        **common, centroids=centroids, gas_normals=normals,
+        face_quadrature_points=3, ray_offset=1e-4,
+        proposal_by_species={"electron": _trench_adjoint_proposals(boundary)["electron"]})
+    physical_flux = boundary.get("electron").flux_m2_s
+    forward_flux = forward.surface_fluxes.energetic_fluxes[0].flux_m2_s / physical_flux
+    adjoint_flux = adjoint.surface_fluxes.energetic_fluxes[0].flux_m2_s / physical_flux
+    regions = (
+        centroids[:, 2] < 0.75,
+        (centroids[:, 2] >= 0.75) & (centroids[:, 2] < 1.25),
+        (centroids[:, 2] >= 1.25) & (centroids[:, 2] < 1.45),
+        centroids[:, 2] >= 1.45,
+    )
+
+    assert np.isclose(forward.hit_probability["electron"], 1.0, atol=1.0 / 2 ** 14)
+    assert np.isclose(adjoint.hit_probability["electron"], 1.0, rtol=2e-3)
+    for region in regions:
+        forward_measure = np.dot(forward_flux[region], areas[region]) / 0.5
+        adjoint_measure = np.dot(adjoint_flux[region], areas[region]) / 0.5
+        assert np.isclose(adjoint_measure, forward_measure, atol=0.012)
 
 
 def test_multistep_charged_profile_refuses_a_fixed_geometry_poisson_operator():

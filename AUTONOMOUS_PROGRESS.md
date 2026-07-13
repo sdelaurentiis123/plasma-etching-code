@@ -224,6 +224,28 @@ under-determined) -- an honest result that quantifies how many structures must b
   reversible, bidirectional per-surface current estimator to arbitrary 3-D triangles, then re-run the
   same trench gate with estimator uncertainty inside the current-balance budget.
 
+### Phase 2c reversible 3-D current gather
+
+- The arbitrary-triangle charged transport backend now has a reversible Liouville adjoint gather. It
+  launches the declared numerical velocity proposal from triangle quadrature points, reverses the same
+  fixed-step nodal Hamiltonian map used by forward transport, and scores the physical plasma-boundary
+  density with the exact normal-velocity Jacobian. Proposal density changes variance only. Periodic and
+  nonperiodic lateral source domains are classified explicitly.
+- Independent gates establish the estimator measure before it enters the nonlinear solver: a flat
+  zero-field Maxwellian returns unit landing and the exact `2*T_e` flux-weighted energy; a linear
+  electron barrier returns `exp(-DeltaV/T_e)` and agrees with forward QMC; and a periodic trench agrees
+  with independently launched forward QMC globally and across floor/lower-wall/upper-wall/top regions.
+- Charging now selects `forward` or `adjoint` per charged species and merges their exact event measures
+  before the unchanged signed-current projection and Poisson coupling. An end-to-end charging gate uses
+  forward transport for a directional ion and adjoint transport for a Maxwellian electron. This is a
+  reusable engine control, not a geometry or benchmark branch.
+- **The production trench current-balance gate remains red and is not weakened.** Forward directional
+  ions still sparsely resolve local wall support, while a broad local-frame adjoint ion proposal has
+  excessive importance variance on beveled arbitrary faces. The demonstrated hybrid reduces the worst
+  residual but does not meet the declared tolerance. The next bounded engine task is a face-oriented
+  ion proposal (then adaptive bidirectional selection/error accounting), followed by the same unchanged
+  convergence and charging-dipole gates.
+
 ## Roadmap (remaining)
 
 1. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow

@@ -78,6 +78,30 @@ def test_equal_positive_and_negative_incident_currents_leave_dielectric_uncharge
     assert np.allclose(result.potential_after_v, 0.0, atol=1e-14)
 
 
+def test_charging_step_routes_directional_ions_forward_and_maxwellian_electrons_adjoint():
+    flux = 3.0e15
+    ion = _species("ion", 1, flux)
+    electron = maxwellian_electron_boundary_state(
+        4.0, flux, n_transverse=3, n_normal=4,
+        reference_plane_m=1e-6).species[0]
+    system, arguments = _flat_dielectric_problem((ion, electron))
+    faces = arguments["faces"]
+    centroids = arguments["verts"][faces].mean(axis=1)
+    normals = np.broadcast_to([0.0, 0.0, 1.0], centroids.shape)
+
+    result = advance_dielectric_charging_3d(
+        charge_node_c=np.zeros(system.shape), duration_s=2e-3,
+        transport_estimator={"ion": "forward", "electron": "adjoint"},
+        face_centroids=centroids, face_gas_normals=normals,
+        periodic_lateral=True, **arguments)
+
+    assert set(result.transport.hit_probability) == {"ion", "electron"}
+    assert "field_adjoint_gather_3d" in result.transport.transport_model
+    assert "fixed_step_nodal_field_3d" in result.transport.transport_model
+    one_species_charge = ECHARGE * flux * 0.01e-12 * 2e-3
+    assert abs(result.charge_increment_node_c.sum()) < 1e-6 * one_species_charge
+
+
 def test_second_charging_step_uses_first_steps_self_consistent_field():
     flux = 1.0e15
     system, arguments = _flat_dielectric_problem((_species("ion", 1, flux),))

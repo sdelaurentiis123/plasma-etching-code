@@ -4,10 +4,12 @@ import warp as wp
 
 from petch.boundary_state import (
     PlasmaBoundaryState, SpeciesBoundaryState, maxwellian_electron_boundary_state,
+    qmc_boundary_proposal,
 )
 from petch.boundary_transport_3d import (
     estimate_diffuse_form_factors_3d,
     gather_boundary_state_ballistic_3d,
+    gather_boundary_state_field_adjoint_3d,
     merge_boundary_transport_results_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
@@ -260,6 +262,61 @@ def test_periodic_field_transport_wraps_lateral_crossings_without_energy_change(
     assert periodic.hit_probability["Ar+"] == 1.0
     assert periodic.escape_probability["Ar+"] == 0.0
     assert np.allclose(events.event_energy_eV, 5.0, atol=2e-5)
+
+
+def test_periodic_adjoint_field_gather_reproduces_flat_maxwellian_flux_and_energy():
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    normals = np.broadcast_to([0.0, 0.0, 1.0], centroids.shape)
+    boundary = maxwellian_electron_boundary_state(
+        4.0, 2e19, n_transverse=3, n_normal=4, reference_plane_m=1e-6)
+
+    result = gather_boundary_state_field_adjoint_3d(
+        boundary, {"electron": "charge_carrier"}, verts, faces, areas, centroids, normals,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=np.zeros((2, 2, 2)), potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=1.0, mesh_length_unit_m=1e-6,
+        face_quadrature_points=3, fixed_dt=0.005, max_steps=1000,
+        periodic_lateral=True, device="cpu")
+
+    population = result.surface_fluxes.energetic_fluxes[0]
+    integrated_flux = np.dot(population.flux_m2_s, areas)
+    integrated_energy_rate = np.dot(
+        np.bincount(population.event_face,
+                    weights=population.event_flux_m2_s * population.event_energy_eV,
+                    minlength=len(faces)), areas)
+    assert np.isclose(result.hit_probability["electron"], 1.0, rtol=2e-6)
+    assert np.isclose(integrated_flux, 2e19, rtol=2e-6)
+    assert np.isclose(integrated_energy_rate / integrated_flux, 8.0, rtol=2e-6)
+
+
+def test_adjoint_and_forward_field_transport_reproduce_maxwellian_barrier_tail():
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    normals = np.broadcast_to([0.0, 0.0, 1.0], centroids.shape)
+    boundary = maxwellian_electron_boundary_state(
+        4.0, 2e19, n_transverse=5, n_normal=8, reference_plane_m=1e-6)
+    proposal = qmc_boundary_proposal(boundary.species[0], 12, seed=37)
+    potential = np.zeros((2, 2, 2)); potential[:, :, 0] = -4.0
+    common = dict(
+        boundary=boundary, species_role={"electron": "charge_carrier"},
+        verts=verts, faces=faces, areas=areas,
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        nodal_potential_v=potential, potential_origin=(0.0, 0.0, 0.0),
+        potential_spacing=1.0, mesh_length_unit_m=1e-6,
+        fixed_dt=0.0025, max_steps=4000, periodic_lateral=True, device="cpu")
+
+    forward = trace_boundary_state_field_3d(
+        **common, phase_space_log2_samples=14)
+    adjoint = gather_boundary_state_field_adjoint_3d(
+        **common, centroids=centroids, gas_normals=normals,
+        face_quadrature_points=3, proposal_by_species={"electron": proposal})
+    expected = np.exp(-1.0)
+
+    assert np.isclose(forward.hit_probability["electron"], expected, atol=2.0 / 2 ** 14)
+    assert np.isclose(adjoint.hit_probability["electron"], expected, rtol=0.015)
+    assert np.isclose(
+        adjoint.hit_probability["electron"], forward.hit_probability["electron"], rtol=0.015)
 
 
 def test_linear_nodal_potential_gives_exact_electrostatic_energy_gain_under_refinement():

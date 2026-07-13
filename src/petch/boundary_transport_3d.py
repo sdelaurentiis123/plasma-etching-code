@@ -1,9 +1,9 @@
 """Species-resolved 3-D transport from ``PlasmaBoundaryState`` to an arbitrary triangle mesh.
 
 This module is the dimensional bridge between the common reactor/sheath boundary contract and surface
-kinetics.  The first backend is deliberately limited to collisionless, absorbing, first-hit transport.  It
-preserves the exact discrete boundary energy-angle measure at every hit and reports its limitations; it is
-not a replacement for the charged, reflecting, state-coupled production transport still under construction.
+kinetics.  Its forward and reversible-adjoint backends are deliberately limited to collisionless,
+absorbing, first-hit transport.  They preserve the declared boundary measure at every hit and report
+their limitations; reflection, re-emission, and collisional charged transport remain out of scope.
 """
 from __future__ import annotations
 
@@ -109,7 +109,8 @@ def _field_hit_events_3d(
         origin: wp.array(dtype=wp.vec3), velocity: wp.array(dtype=wp.vec3),
         charge_number: float, fixed_dt: float, max_steps: int, periodic_lateral: int,
         hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float),
-        hit_energy: wp.array(dtype=float), termination: wp.array(dtype=wp.int8)):
+        hit_energy: wp.array(dtype=float), termination: wp.array(dtype=wp.int8),
+        terminal_position: wp.array(dtype=wp.vec3), terminal_velocity: wp.array(dtype=wp.vec3)):
     particle = wp.tid()
     position = origin[particle]
     speed_vector = velocity[particle]
@@ -187,6 +188,8 @@ def _field_hit_events_3d(
                     hit_cosine[particle] = wp.clamp(cosine, 0.0, 1.0)
                     hit_energy[particle] = wp.dot(impact_velocity, impact_velocity)
                     termination[particle] = wp.int8(1)
+                    terminal_position[particle] = position + fraction * segment
+                    terminal_velocity[particle] = impact_velocity
                     break
                 if wrap_axis < 0:
                     break
@@ -207,6 +210,8 @@ def _field_hit_events_3d(
                 break
         position = next_position
         speed_vector = next_velocity
+        terminal_position[particle] = position
+        terminal_velocity[particle] = speed_vector
         outside = (position[2] < grid_origin[2] or position[2] > grid_maximum[2])
         if periodic_lateral == 0:
             outside = (outside or position[0] < grid_origin[0] or position[1] < grid_origin[1]
@@ -810,6 +815,8 @@ def trace_boundary_state_field_3d(
         hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
         hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
         termination_wp = wp.zeros(ray_count, dtype=wp.int8, device=selected_device)
+        terminal_position_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
+        terminal_velocity_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
         wp.launch(
             _field_hit_events_3d, dim=ray_count, device=selected_device,
             inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), wp.vec3(*grid_spacing),
@@ -818,7 +825,8 @@ def trace_boundary_state_field_3d(
                     wp.array(velocity.astype(np.float32), dtype=wp.vec3, device=selected_device),
                     float(species.charge_number), float(fixed_dt), int(max_steps),
                     int(bool(periodic_lateral)),
-                    hit_face_wp, hit_cosine_wp, hit_energy_wp, termination_wp])
+                    hit_face_wp, hit_cosine_wp, hit_energy_wp, termination_wp,
+                    terminal_position_wp, terminal_velocity_wp])
         hit_face = hit_face_wp.numpy().astype(int)
         termination = termination_wp.numpy().astype(int)
         hit = termination == 1; escaped = termination == 2; truncated = termination == 0
@@ -857,3 +865,186 @@ def trace_boundary_state_field_3d(
         ) + (() if phase_space_log2_samples is None else (
             "joint scrambled-Sobol phase-space quadrature requires replicate/refinement error control",
         )))
+
+
+def gather_boundary_state_field_adjoint_3d(
+        boundary: PlasmaBoundaryState, species_role: Mapping[str, str],
+        verts, faces, areas, centroids, gas_normals, *, source_bounds, source_z,
+        nodal_potential_v, potential_origin, potential_spacing,
+        mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
+        face_quadrature_points=3, ray_offset=1e-5, fixed_dt=0.01,
+        max_steps=10000, periodic_lateral=False, proposal_by_species=None, device=None):
+    """Gather charged boundary flux on every triangle with a reversible Liouville adjoint.
+
+    Each boundary velocity atom is interpreted as a numerical proposal in the triangle's local
+    two-tangent/inward-normal frame.  Its exact time reverse is integrated through the same fixed-step
+    nodal Hamiltonian map used by forward transport.  Trajectories that reach the plasma plane are
+    scored by the physical boundary density and ``v_normal_surface / v_normal_boundary`` Jacobian.
+    The proposal changes variance only; it does not replace the declared plasma density.
+    """
+    verts = np.asarray(verts, dtype=float); faces = np.asarray(faces, dtype=int)
+    areas = np.asarray(areas, dtype=float); centroids = np.asarray(centroids, dtype=float)
+    normals = np.asarray(gas_normals, dtype=float); potential = np.asarray(nodal_potential_v, dtype=float)
+    bounds = np.asarray(source_bounds, dtype=float); grid_origin = np.asarray(potential_origin, dtype=float)
+    grid_spacing = np.asarray(potential_spacing, dtype=float)
+    if grid_spacing.ndim == 0:
+        grid_spacing = np.full(3, float(grid_spacing))
+    if (verts.ndim != 2 or verts.shape[1] != 3 or faces.ndim != 2 or faces.shape[1] != 3
+            or areas.shape != (len(faces),) or centroids.shape != (len(faces), 3)
+            or normals.shape != centroids.shape or np.any(~np.isfinite(verts))
+            or np.any(~np.isfinite(centroids)) or np.any(~np.isfinite(normals))
+            or not np.allclose(np.linalg.norm(normals, axis=1), 1.0, rtol=0.0, atol=2e-6)
+            or np.any(~np.isfinite(areas)) or np.any(areas <= 0.0)
+            or potential.ndim != 3 or min(potential.shape) < 2
+            or grid_origin.shape != (3,) or grid_spacing.shape != (3,)
+            or np.any(grid_spacing <= 0.0) or np.any(~np.isfinite(potential))
+            or bounds.shape != (4,) or np.any(~np.isfinite(bounds))
+            or bounds[0] >= bounds[1] or bounds[2] >= bounds[3] or not np.isfinite(source_z)
+            or int(face_quadrature_points) != face_quadrature_points
+            or int(face_quadrature_points) not in (1, 3)
+            or not np.isfinite(ray_offset) or ray_offset <= 0.0
+            or not np.isfinite(fixed_dt) or fixed_dt <= 0.0
+            or int(max_steps) != max_steps or max_steps <= 0):
+        raise ValueError("invalid adjoint field-gather inputs")
+    geometric_areas = 0.5 * np.linalg.norm(np.cross(
+        verts[faces[:, 1]] - verts[faces[:, 0]],
+        verts[faces[:, 2]] - verts[faces[:, 0]]), axis=1)
+    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=0.0):
+        raise ValueError("triangle areas must match the supplied mesh geometry")
+    grid_maximum = grid_origin + (np.asarray(potential.shape) - 1) * grid_spacing
+    tolerance = 1e-7 * max(float(np.max(grid_spacing)), 1.0)
+    if not np.isclose(source_z, grid_maximum[2], rtol=0.0, atol=tolerance):
+        raise ValueError("adjoint field gather currently requires the source plane at the grid top")
+    if periodic_lateral and not np.allclose(
+            bounds, (grid_origin[0], grid_maximum[0], grid_origin[1], grid_maximum[1]),
+            rtol=0.0, atol=tolerance):
+        raise ValueError("periodic adjoint gather requires full lateral source bounds")
+    origin_m = np.asarray(mesh_origin_m, dtype=float)
+    if (origin_m.shape != (3,) or np.any(~np.isfinite(origin_m))
+            or not np.isfinite(mesh_length_unit_m) or mesh_length_unit_m <= 0.0):
+        raise ValueError("mesh origin and length unit must define a finite physical coordinate map")
+    mapped_reference = origin_m[2] + float(source_z) * float(mesh_length_unit_m)
+    if not np.isclose(mapped_reference, boundary.reference_plane_m, rtol=0.0,
+                      atol=max(1e-15, 1e-9 * float(mesh_length_unit_m))):
+        raise ValueError("mesh source plane does not match PlasmaBoundaryState.reference_plane_m")
+    role = dict(species_role); names = {item.name for item in boundary.species}
+    allowed_roles = {"energetic_bombardment", "charge_carrier"}
+    if set(role) != names or any(value not in allowed_roles for value in role.values()):
+        raise ValueError("adjoint field gather currently supports only charged energetic populations")
+    if any(item.charge_number == 0 or item.density_model is None for item in boundary.species):
+        raise ValueError("adjoint field gather requires charged continuous boundary densities")
+    proposals = {} if proposal_by_species is None else dict(proposal_by_species)
+    if set(proposals) - names:
+        raise ValueError("adjoint proposal names must belong to the physical boundary")
+
+    if int(face_quadrature_points) == 1:
+        points = centroids[:, None, :]
+        point_weight = np.ones(1)
+    else:
+        barycentric = np.array([
+            [2.0 / 3.0, 1.0 / 6.0, 1.0 / 6.0],
+            [1.0 / 6.0, 2.0 / 3.0, 1.0 / 6.0],
+            [1.0 / 6.0, 1.0 / 6.0, 2.0 / 3.0],
+        ])
+        points = np.einsum("qv,fvc->fqc", barycentric, verts[faces])
+        point_weight = np.full(3, 1.0 / 3.0)
+    reference = np.zeros_like(normals)
+    use_z = np.abs(normals[:, 2]) < 0.9
+    reference[use_z, 2] = 1.0; reference[~use_z, 0] = 1.0
+    tangent_a = np.cross(reference, normals)
+    tangent_a /= np.linalg.norm(tangent_a, axis=1)[:, None]
+    tangent_b = np.cross(normals, tangent_a)
+
+    selected_device = DEVICE if device is None else str(device)
+    if selected_device.startswith("warp:"):
+        selected_device = selected_device.split(":", 1)[1]
+    ensure_writable_warp_cache(wp)
+    mesh = wp.Mesh(
+        points=wp.array(verts.astype(np.float32), dtype=wp.vec3, device=selected_device),
+        indices=wp.array(faces.astype(np.int32).ravel(), dtype=wp.int32, device=selected_device))
+    potential_wp = wp.array(
+        np.ascontiguousarray(potential.astype(np.float32)), dtype=float, device=selected_device)
+    source_area = (bounds[1] - bounds[0]) * (bounds[3] - bounds[2])
+    energetic_flux = []; hit_probability = {}; escape_probability = {}; truncation_probability = {}
+    for species in boundary.species:
+        proposal = proposals.get(species.name, species)
+        if (proposal.name != species.name or proposal.charge_number != species.charge_number
+                or proposal.density_model is None):
+            raise ValueError("adjoint proposals must preserve species name, charge, and density")
+        base_velocity = np.asarray(proposal.velocity_sqrt_eV, dtype=float)
+        sample_count = base_velocity.shape[0]; point_count = points.shape[1]
+        face_index = np.repeat(np.arange(len(faces)), point_count * sample_count)
+        point_index = np.tile(np.repeat(np.arange(point_count), sample_count), len(faces))
+        velocity_index = np.tile(np.arange(sample_count), len(faces) * point_count)
+        launch_point = points[face_index, point_index] + float(ray_offset) * normals[face_index]
+        local = base_velocity[velocity_index]
+        forward_surface_velocity = (
+            local[:, 0, None] * tangent_a[face_index]
+            + local[:, 1, None] * tangent_b[face_index]
+            - local[:, 2, None] * normals[face_index])
+        reverse_velocity = -forward_surface_velocity
+        ray_count = launch_point.shape[0]
+        hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
+        hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
+        hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
+        termination_wp = wp.zeros(ray_count, dtype=wp.int8, device=selected_device)
+        terminal_position_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
+        terminal_velocity_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
+        wp.launch(
+            _field_hit_events_3d, dim=ray_count, device=selected_device,
+            inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), wp.vec3(*grid_spacing),
+                    wp.vec3(*grid_maximum),
+                    wp.array(launch_point.astype(np.float32), dtype=wp.vec3, device=selected_device),
+                    wp.array(reverse_velocity.astype(np.float32), dtype=wp.vec3,
+                             device=selected_device),
+                    float(species.charge_number), float(fixed_dt), int(max_steps),
+                    int(bool(periodic_lateral)), hit_face_wp, hit_cosine_wp, hit_energy_wp,
+                    termination_wp, terminal_position_wp, terminal_velocity_wp])
+        termination = termination_wp.numpy().astype(int)
+        terminal_position = terminal_position_wp.numpy().astype(float)
+        terminal_velocity = terminal_velocity_wp.numpy().astype(float)
+        reached_source = (termination == 2) & (terminal_position[:, 2] > grid_maximum[2])
+        if not periodic_lateral:
+            reached_source &= (
+                (terminal_position[:, 0] >= bounds[0])
+                & (terminal_position[:, 0] <= bounds[1])
+                & (terminal_position[:, 1] >= bounds[2])
+                & (terminal_position[:, 1] <= bounds[3]))
+        truncated = termination == 0
+        if np.any(truncated):
+            raise RuntimeError(
+                f"adjoint trajectories for {species.name!r} exhausted max_steps")
+        boundary_velocity = np.column_stack((
+            -terminal_velocity[:, 0], -terminal_velocity[:, 1], terminal_velocity[:, 2]))
+        log_physical = species.log_flux_density(boundary_velocity)
+        log_proposal = proposal.log_flux_density(base_velocity)[velocity_index]
+        surface_normal_speed = local[:, 2]
+        source_normal_speed = np.maximum(terminal_velocity[:, 2], 1e-300)
+        with np.errstate(over="ignore", invalid="ignore"):
+            density_ratio = np.exp(log_physical - log_proposal)
+        contribution = np.where(
+            reached_source & (surface_normal_speed > 0.0) & np.isfinite(log_physical),
+            proposal.weight[velocity_index] * point_weight[point_index]
+            * surface_normal_speed / source_normal_speed * density_ratio,
+            0.0)
+        positive = contribution > 0.0
+        event_face = face_index[positive]
+        event_flux = species.flux_m2_s * contribution[positive]
+        event_energy = np.sum(local[positive] ** 2, axis=1)
+        event_cosine = surface_normal_speed[positive] / np.linalg.norm(local[positive], axis=1)
+        energetic_flux.append(FaceResolvedEnergeticFlux(
+            species.name, len(faces), event_face, event_flux, event_energy, event_cosine))
+        normalized_landing = float(np.dot(
+            np.bincount(event_face, weights=contribution[positive], minlength=len(faces)),
+            areas) / source_area)
+        hit_probability[species.name] = normalized_landing
+        escape_probability[species.name] = max(0.0, 1.0 - normalized_landing)
+        truncation_probability[species.name] = 0.0
+    return BoundaryTransport3DResult(
+        SurfaceFluxes({}, tuple(energetic_flux)), hit_probability, escape_probability,
+        truncation_probability, "collisionless_fixed_step_nodal_field_adjoint_gather_3d"
+        + ("_periodic_cell" if periodic_lateral else ""),
+        ("reversible adjoint uses the supplied finite surface velocity quadrature",
+         "triangle position quadrature requires refinement at partial visibility",
+         "no surface reflection or re-emission",
+         "float32 field integration and triangle-ray intersection"))

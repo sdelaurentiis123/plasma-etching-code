@@ -772,6 +772,8 @@ def advance_feature_step_3d(
             mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
             trajectory_fixed_dt=trajectory_fixed_dt,
             trajectory_max_steps=trajectory_max_steps,
+            face_centroids=centroids,
+            face_gas_normals=_surface_gas_normals(verts, faces, centroids, geometry),
             transport_device=transport_device, **options)
         if not charging.converged:
             raise RuntimeError("feature evolution cannot consume a nonconverged charging field")
