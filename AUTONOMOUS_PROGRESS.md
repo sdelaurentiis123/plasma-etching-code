@@ -472,6 +472,15 @@ under-determined) -- an honest result that quantifies how many structures must b
   `4.9e-15`, and roughly 64.5% of emitted electrons escape. This does not approach 0.08. No full
   transient or convergence claim is promoted while the SiO2 emitted-energy spectrum remains a
   bounded input and electron-impact response remains data-gated.
+- **Charged-event lineage makes the nonlocal response visible.** Every emitted event now preserves
+  landed/escaped/truncated termination and its landed face; source-region routing rows independently
+  close to one. In the central 3 eV replay, top emission escapes entirely, upper-wall emission lands
+  mostly on the floor (61.9%), lower-wall emission is 91.0% self-recaptured, and floor emission lands
+  mostly on the lower wall (63.9%). The aggregate 64.5% escape statistic is therefore not a local
+  loss law: it mixes open-top escape with strong deep-feature recapture. The routing matrix is
+  committed beside its heatmap in `results/charging_ion_see_sensitivity_3d/`. This reinforces the
+  engine contract: surface response produces particles, shared field transport selects their
+  destinations, and only the central transfer ledger updates charge.
 - **P3 remains correctly data-blocked, not numerically blocked.** The 2026 paper's electron-TSE law
   refers its six material coefficients to NASA TM-79299 but does not publish the SiO2 values; the
   NASA memorandum derives and sensitivity-tests the NASCAP form while explicitly avoiding any
@@ -483,10 +492,10 @@ under-determined) -- an honest result that quantifies how many structures must b
 ## Roadmap (remaining)
 
 1. Finish Phase 2 charging through the unified engine: preserve certified estimator sampling-level
-   provenance, add a material-tagged charged-surface response plus charge-conserving
-   full-field re-impact kernel, and exact-regress the present perfect absorber. Validate the sourced
-   Ar+-SiO2 SEE slice first, then admit electron backscatter/true SEE only with recovered SiO2 data.
-   Physical time remains the reference; independently audit any final state before promotion.
+   provenance, then extend the now-validated material response/full-field cascade beyond the bounded
+   Ar+-SiO2 ion-SEE slice only when electron backscatter/true-SEE data or surface-transport data are
+   recovered for the declared material state. Physical time remains the reference and consumes the
+   same cascade/current operator; independently audit any final state before promotion.
 2. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow
    IonEnergyTransverseMaxwellianDensity), replacing the reduced analytic ion model; sticking + ion IAD
    are DECLARED calibrated inputs with provenance/uncertainty; calibrate low-AR, predict held-out AR40;

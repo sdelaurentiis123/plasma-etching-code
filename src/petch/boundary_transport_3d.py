@@ -259,6 +259,8 @@ class ChargedSurfaceReimpactPopulation3D:
 
     emitted: OutgoingChargedParticleEvents3D
     incident: FaceResolvedEnergeticFlux
+    termination: np.ndarray
+    hit_face: np.ndarray
     emitted_rate_s: float
     landed_rate_s: float
     escaped_rate_s: float
@@ -271,6 +273,14 @@ class ChargedSurfaceReimpactPopulation3D:
                 or self.incident.name != self.emitted.name
                 or self.incident.face_count != self.emitted.face_count):
             raise TypeError("re-impact populations require matching emitted and incident measures")
+        termination = np.asarray(self.termination, dtype=np.int8).copy()
+        hit_face = np.asarray(self.hit_face, dtype=int).copy()
+        if (termination.shape != self.emitted.event_rate_s.shape
+                or hit_face.shape != termination.shape
+                or np.any(~np.isin(termination, (0, 1, 2)))
+                or np.any((termination == 1) & ((hit_face < 0) | (hit_face >= self.emitted.face_count)))
+                or np.any((termination != 1) & (hit_face != -1))):
+            raise ValueError("invalid charged re-impact event lineage")
         rates = np.asarray([
             self.emitted_rate_s, self.landed_rate_s, self.escaped_rate_s,
             self.truncated_rate_s, self.relative_particle_balance_error], dtype=float)
@@ -281,6 +291,18 @@ class ChargedSurfaceReimpactPopulation3D:
             - self.escaped_rate_s - self.truncated_rate_s)
         if abs(residual) > 5e-15 * max(self.emitted_rate_s, np.finfo(float).tiny):
             raise ValueError("charged re-impact must classify the complete emitted particle rate")
+        classified = (
+            float(np.sum(self.emitted.event_rate_s[termination == 1])),
+            float(np.sum(self.emitted.event_rate_s[termination == 2])),
+            float(np.sum(self.emitted.event_rate_s[termination == 0])))
+        if not np.allclose(
+                classified, (self.landed_rate_s, self.escaped_rate_s, self.truncated_rate_s),
+                rtol=5e-15, atol=0.0):
+            raise ValueError("charged re-impact rates must match per-event termination lineage")
+        termination.setflags(write=False)
+        hit_face.setflags(write=False)
+        object.__setattr__(self, "termination", termination)
+        object.__setattr__(self, "hit_face", hit_face)
 
 
 def trace_charged_surface_events_field_3d(
@@ -365,7 +387,8 @@ def trace_charged_surface_events_field_3d(
                 np.empty(0), np.empty(0), event_position=np.empty((0, 3)),
                 event_incident_direction=np.empty((0, 3)))
             results.append(ChargedSurfaceReimpactPopulation3D(
-                population, incident, 0.0, 0.0, 0.0, 0.0, 0.0))
+                population, incident, np.empty(0, dtype=np.int8), np.empty(0, dtype=int),
+                0.0, 0.0, 0.0, 0.0, 0.0))
             continue
         hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
         hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
@@ -410,7 +433,8 @@ def trace_charged_surface_events_field_3d(
         truncated_rate = float(np.sum(event_rate[truncated]))
         residual = emitted_rate - landed_rate - escaped_rate - truncated_rate
         results.append(ChargedSurfaceReimpactPopulation3D(
-            population, incident, emitted_rate, landed_rate, escaped_rate, truncated_rate,
+            population, incident, termination, hit_face, emitted_rate, landed_rate,
+            escaped_rate, truncated_rate,
             abs(residual) / max(emitted_rate, np.finfo(float).tiny)))
     return tuple(results)
 

@@ -132,6 +132,8 @@ def test_surface_emitted_charge_reimpacts_with_particle_rate_conserved():
         fixed_dt=0.05, max_steps=40, device="cpu")
 
     assert result.incident.event_face.tolist() == [1]
+    assert result.termination.tolist() == [1]
+    assert result.hit_face.tolist() == [1]
     assert np.isclose(
         result.incident.event_flux_m2_s[0], emitted.event_rate_s[0] / (0.5e-12))
     assert result.emitted_rate_s == result.landed_rate_s
@@ -161,6 +163,8 @@ def test_surface_emitted_charge_truncation_is_explicit():
         potential_spacing=0.5, launch_offset=1e-4, fixed_dt=0.01, max_steps=1,
         allow_truncation=True, device="cpu")
     assert diagnostic.truncated_rate_s == emitted.event_rate_s[0]
+    assert diagnostic.termination.tolist() == [0]
+    assert diagnostic.hit_face.tolist() == [-1]
     assert diagnostic.relative_particle_balance_error == 0.0
 
 
@@ -183,6 +187,8 @@ def test_surface_emitted_charge_escape_is_explicit_and_conservative():
 
     assert result.landed_rate_s == 0.0
     assert result.escaped_rate_s == emitted.event_rate_s[0]
+    assert result.termination.tolist() == [2]
+    assert result.hit_face.tolist() == [-1]
     assert result.truncated_rate_s == 0.0
     assert result.relative_particle_balance_error == 0.0
 

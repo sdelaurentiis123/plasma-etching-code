@@ -181,5 +181,147 @@
       "cascade_relative_charge_error": 2.6726551902783488e-15
     }
   ],
+  "central_3eV_routing": [
+    {
+      "run": "energy_3eV",
+      "source_region": "top",
+      "target_region": "top",
+      "particle_rate_s": 0.0,
+      "source_fraction": 0.0
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "top",
+      "target_region": "upper_wall",
+      "particle_rate_s": 0.0,
+      "source_fraction": 0.0
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "top",
+      "target_region": "lower_wall",
+      "particle_rate_s": 0.0,
+      "source_fraction": 0.0
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "top",
+      "target_region": "floor",
+      "particle_rate_s": 0.0,
+      "source_fraction": 0.0
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "top",
+      "target_region": "escape",
+      "particle_rate_s": 36089507.7091186,
+      "source_fraction": 1.0
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "upper_wall",
+      "target_region": "top",
+      "particle_rate_s": 0.0,
+      "source_fraction": 0.0
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "upper_wall",
+      "target_region": "upper_wall",
+      "particle_rate_s": 576351.5076540655,
+      "source_fraction": 0.1641540080952246
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "upper_wall",
+      "target_region": "lower_wall",
+      "particle_rate_s": 653838.7660745566,
+      "source_fraction": 0.18622360256511308
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "upper_wall",
+      "target_region": "floor",
+      "particle_rate_s": 2174128.802573385,
+      "source_fraction": 0.619226205393921
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "upper_wall",
+      "target_region": "escape",
+      "particle_rate_s": 106722.25824602222,
+      "source_fraction": 0.030396183945741093
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "lower_wall",
+      "target_region": "top",
+      "particle_rate_s": 0.0,
+      "source_fraction": 0.0
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "lower_wall",
+      "target_region": "upper_wall",
+      "particle_rate_s": 158422.98608539422,
+      "source_fraction": 0.027623963944157785
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "lower_wall",
+      "target_region": "lower_wall",
+      "particle_rate_s": 5220316.848127172,
+      "source_fraction": 0.9102583403649115
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "lower_wall",
+      "target_region": "floor",
+      "particle_rate_s": 356243.9793215235,
+      "source_fraction": 0.06211769569093064
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "lower_wall",
+      "target_region": "escape",
+      "particle_rate_s": 0.0,
+      "source_fraction": 0.0
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "floor",
+      "target_region": "top",
+      "particle_rate_s": 0.0,
+      "source_fraction": 0.0
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "floor",
+      "target_region": "upper_wall",
+      "particle_rate_s": 3170861.9457923537,
+      "source_fraction": 0.2932946403035988
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "floor",
+      "target_region": "lower_wall",
+      "particle_rate_s": 6911704.942700453,
+      "source_fraction": 0.6393107141557925
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "floor",
+      "target_region": "floor",
+      "particle_rate_s": 728615.8269843373,
+      "source_fraction": 0.06739464554060867
+    },
+    {
+      "run": "energy_3eV",
+      "source_region": "floor",
+      "target_region": "escape",
+      "particle_rate_s": 0.0,
+      "source_fraction": 0.0
+    }
+  ],
   "conclusion": "bounded sensitivity only; convergence gate unchanged"
 }

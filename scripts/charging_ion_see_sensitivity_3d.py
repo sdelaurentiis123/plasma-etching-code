@@ -91,6 +91,7 @@ def _evaluate(charge, method, geometry, poisson, verts, faces, centroids, areas,
     row["landed_rate_s"] = 0.0
     row["escaped_rate_s"] = 0.0
     row["cascade_relative_charge_error"] = 0.0
+    routing = []
     if response is not None:
         cascade = result.surface_transfer
         first_transfer = cascade.transfers[0]
@@ -101,7 +102,23 @@ def _evaluate(charge, method, geometry, poisson, verts, faces, centroids, areas,
         row["escaped_rate_s"] = float(sum(
             item.escaped_rate_s for item in cascade.flights_by_bounce[0]))
         row["cascade_relative_charge_error"] = cascade.relative_charge_balance_error
-    return row
+        flight = cascade.flights_by_bounce[0][0]
+        source_region = regions[flight.emitted.source_face]
+        target_region = np.full(len(flight.hit_face), "escape", dtype="U16")
+        landed = flight.termination == 1
+        target_region[landed] = regions[flight.hit_face[landed]]
+        for source in ("top", "upper_wall", "lower_wall", "floor"):
+            selected_source = source_region == source
+            source_rate = float(np.sum(flight.emitted.event_rate_s[selected_source]))
+            if source_rate <= 0.0:
+                continue
+            for target in ("top", "upper_wall", "lower_wall", "floor", "escape"):
+                rate = float(np.sum(flight.emitted.event_rate_s[
+                    selected_source & (target_region == target)]))
+                routing.append(dict(
+                    run=run["name"], source_region=source, target_region=target,
+                    particle_rate_s=rate, source_fraction=rate / source_rate))
+    return row, routing
 
 
 def _plot(path, rows):
@@ -143,6 +160,32 @@ def _plot(path, rows):
     plt.close(figure)
 
 
+def _plot_routing(path, routing):
+    import matplotlib.pyplot as plt
+
+    source = ("top", "upper_wall", "lower_wall", "floor")
+    target = ("top", "upper_wall", "lower_wall", "floor", "escape")
+    by_key = {
+        (row["source_region"], row["target_region"]): row["source_fraction"]
+        for row in routing}
+    matrix = np.array([[by_key.get((item, destination), 0.0) for destination in target]
+                       for item in source])
+    figure, axis = plt.subplots(figsize=(8.0, 4.8), constrained_layout=True)
+    image = axis.imshow(matrix, vmin=0.0, vmax=1.0, cmap="Blues", aspect="auto")
+    for row in range(matrix.shape[0]):
+        for column in range(matrix.shape[1]):
+            axis.text(column, row, f"{100.0 * matrix[row, column]:.1f}%",
+                      ha="center", va="center",
+                      color=("white" if matrix[row, column] > 0.55 else "black"))
+    axis.set_xticks(np.arange(len(target)), target, rotation=25)
+    axis.set_yticks(np.arange(len(source)), source)
+    axis.set(xlabel="first-flight destination", ylabel="emission region",
+             title="3 eV Ar+ kinetic-SEE routing")
+    figure.colorbar(image, ax=axis, label="fraction of source emitted rate")
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--state", type=Path, default=DEFAULT_STATE)
@@ -170,9 +213,11 @@ def main():
         dict(name="refined_flight", emission_energy_eV=3.0, angular_log2_samples=4,
              trajectory_fixed_dt=0.005, response_fixed_dt=0.0025, response_launch_offset=5e-5),
     ]
-    rows = [
+    evaluations = [
         _evaluate(charge, method, geometry, poisson, verts, faces, centroids, areas, normals, run)
         for run in runs]
+    rows = [item[0] for item in evaluations]
+    routing = next(item[1] for item in evaluations if item[0]["run"] == "energy_3eV")
     config = dict(
         schema="petch.charging.ion_see_sensitivity.v1", state=args.state.name,
         state_sha256=_sha256(args.state), primary_forward_log2_samples=11,
@@ -186,6 +231,7 @@ def main():
     encoded = json.dumps(config, sort_keys=True, separators=(",", ":")).encode()
     config_hash = hashlib.sha256(encoded).hexdigest()
     summary = dict(config_hash=config_hash, config=config, rows=rows,
+                   central_3eV_routing=routing,
                    conclusion="bounded sensitivity only; convergence gate unchanged")
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "config.json").write_text(json.dumps(config, indent=2) + "\n")
@@ -193,7 +239,11 @@ def main():
     with (args.output_dir / "ion_see_sensitivity.csv").open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=tuple(rows[0]))
         writer.writeheader(); writer.writerows(rows)
+    with (args.output_dir / "ion_see_routing.csv").open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=tuple(routing[0]))
+        writer.writeheader(); writer.writerows(routing)
     _plot(args.output_dir / "ion_see_sensitivity.png", rows)
+    _plot_routing(args.output_dir / "ion_see_routing.png", routing)
     print(json.dumps(summary, indent=2))
 
 

@@ -267,7 +267,20 @@ and isolated re-impact `dt 0.005 -> 0.0025` plus launch offset halving change RM
 distribution is better specified; the present result is a bounded mechanism sensitivity, not a new
 converged charging state.
 
+The aggregate landing fraction hides a strongly nonlocal routing split. At 3 eV, all top-emitted
+events escape. Of upper-wall emission, 16.4% returns to the upper wall, 18.6% lands on the lower
+wall, 61.9% lands on the floor, and 3.0% escapes. Lower-wall emission is 91.0% self-recaptured.
+Floor emission is redistributed mainly to the lower wall (63.9%) and upper wall (29.3%). Every
+source row closes to unity from event lineage, independently of the signed charge ledger. This
+explains why the mechanism redistributes deep-feature charge but barely changes the worst-node
+contract: most emission by rate originates at the top and leaves, while deep emission largely
+remains inside the feature. Any later electron-impact response must remain inside the same
+full-field cascade; a local yield correction applied directly to residuals would miss the dominant
+target redistribution.
+
 ![Ion-SEE sensitivity](results/charging_ion_see_sensitivity_3d/ion_see_sensitivity.png)
+
+![Ion-SEE source-to-target routing](results/charging_ion_see_sensitivity_3d/ion_see_routing.png)
 
 ### P3 — electron backscatter + true SEE
 
