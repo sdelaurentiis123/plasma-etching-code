@@ -352,6 +352,7 @@ def test_bidirectional_field_transport_certifies_and_preserves_barrier_event_mea
         periodic_lateral=True, seed=97, device="cpu")
 
     selection = result.selection_by_species["electron"]
+    sampling = result.sampling_by_species["electron"]
     expected = np.exp(-1.0)
     assert selection.converged
     assert np.all(selection.estimator_consistent)
@@ -360,6 +361,11 @@ def test_bidirectional_field_transport_certifies_and_preserves_barrier_event_mea
     selected_events = result.transport.surface_fluxes.energetic_fluxes[0]
     assert selected_events.event_position is not None
     assert selected_events.event_incident_direction is not None
+    assert sampling.forward_log2_samples == 10
+    assert np.array_equal(sampling.adjoint_log2_samples_by_face, [8, 8])
+    assert np.array_equal(sampling.face_quadrature_points_by_face, [3, 3])
+    assert np.array_equal(sampling.replicate_seeds, [97, 104826, 209555, 314284])
+    assert not sampling.adjoint_log2_samples_by_face.flags.writeable
 
     frozen = trace_boundary_state_bidirectional_field_3d(
         boundary, {"electron": "charge_carrier"}, verts, faces, areas, centroids, normals,
@@ -372,6 +378,7 @@ def test_bidirectional_field_transport_certifies_and_preserves_barrier_event_mea
         periodic_lateral=True, seed=97, device="cpu",
         method_hint={"electron": selection.method}, require_certification=False)
     assert np.array_equal(frozen.selection_by_species["electron"].method, selection.method)
+    assert frozen.sampling_by_species["electron"].forward_log2_samples == 10
     assert np.allclose(
         frozen.transport.surface_fluxes.energetic_fluxes[0].flux_m2_s,
         result.transport.surface_fluxes.energetic_fluxes[0].flux_m2_s, rtol=0.0, atol=0.0)

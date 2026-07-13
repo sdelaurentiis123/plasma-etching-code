@@ -421,6 +421,16 @@ def main():
         refined_charge_history_node_c=refined.charge_history_node_c,
         **{f"refined_method_hint_{name}": value
            for name, value in refined.bidirectional_method_hint.items()},
+        **{f"refined_forward_log2_samples_{name}": value.forward_log2_samples
+           for name, value in refined.bidirectional_sampling_provenance.items()},
+        **{f"refined_adjoint_log2_samples_by_face_{name}":
+           value.adjoint_log2_samples_by_face
+           for name, value in refined.bidirectional_sampling_provenance.items()},
+        **{f"refined_face_quadrature_points_by_face_{name}":
+           value.face_quadrature_points_by_face
+           for name, value in refined.bidirectional_sampling_provenance.items()},
+        **{f"refined_replicate_seeds_{name}": value.replicate_seeds
+           for name, value in refined.bidirectional_sampling_provenance.items()},
         vertices=verts, faces=faces, centroids=centroids, areas=areas)
     _plot(coarse, refined, args.output_dir / "physical_time_transient.png", geometry.dx)
     print(json.dumps(summary, indent=2), flush=True)

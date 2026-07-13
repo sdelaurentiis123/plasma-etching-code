@@ -7,6 +7,7 @@ from petch.boundary_state import (
     SpeciesBoundaryState,
     maxwellian_electron_boundary_state,
 )
+from petch.boundary_transport_3d import BidirectionalSamplingProvenance3D
 from petch.charging_coupled_3d import (
     CurrentBalanceMetrics3D,
     DielectricChargingConvergenceError,
@@ -99,6 +100,21 @@ def test_externally_frozen_bidirectional_map_keeps_explicit_scoring_levels():
 
     assert frozen["forward_log2_samples"] == 9
     assert frozen["adjoint_log2_samples"] == 9
+
+
+def test_freezing_certified_map_uses_measured_sampling_levels_before_ceilings():
+    method = {"ion": np.array(["forward", "adjoint", "adjoint"])}
+    sampling = {"ion": BidirectionalSamplingProvenance3D(
+        10, np.array([7, 8, 9]), np.array([3, 6, 12]), np.arange(4))}
+    frozen = _freeze_certified_bidirectional_options(dict(
+        forward_log2_samples=8, max_forward_log2_samples=14,
+        adjoint_log2_samples=7, max_adjoint_log2_samples=13,
+        face_quadrature_points=3, max_face_quadrature_points=24), method, sampling)
+
+    assert frozen["forward_log2_samples"] == 10
+    assert frozen["adjoint_log2_samples"] == 9
+    assert frozen["face_quadrature_points"] == 12
+    assert not frozen["require_certification"]
 
 
 def test_physical_3d_charging_step_conserves_incident_charge_and_capacitance():
@@ -222,6 +238,7 @@ def test_charging_step_consumes_a_certified_bidirectional_face_event_measure():
 
     assert result.transport.transport_model.endswith("bidirectional_3d_periodic_cell")
     assert set(result.transport.hit_probability) == {"ion", "electron"}
+    assert set(result.bidirectional_sampling_provenance) == {"ion", "electron"}
     assert all(population.event_energy_eV.size > 0
                for population in result.transport.surface_fluxes.energetic_fluxes)
 

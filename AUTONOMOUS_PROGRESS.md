@@ -487,6 +487,13 @@ under-determined) -- an honest result that quantifies how many structures must b
   original bidirectional options instead of the map frozen during the trajectory. The final audit now
   receives the same response state and frozen estimator configuration; a zero-update regression
   requires the returned final transfer to be the explicit cascade, not an absorber transfer.
+- **Certified estimator provenance is now an engine result, not campaign folklore.** Every
+  bidirectional species result retains its actual forward sample level, per-face adjoint sample
+  level, per-face position-quadrature count, and replicate seeds. Physical time and the direct steady
+  diagnostic freeze a discovered method map at those measured stopping levels. The older
+  ceiling-based replay remains only as a conservative compatibility path for method-only archives.
+  New equilibrium pilot and physical-time checkpoints serialize the provenance beside the method
+  map, so later current audits can distinguish estimator selection from estimator accuracy.
 - **P3 remains correctly data-blocked, not numerically blocked.** The 2026 paper's electron-TSE law
   refers its six material coefficients to NASA TM-79299 but does not publish the SiO2 values; the
   NASA memorandum derives and sensitivity-tests the NASCAP form while explicitly avoiding any
@@ -497,9 +504,9 @@ under-determined) -- an honest result that quantifies how many structures must b
 
 ## Roadmap (remaining)
 
-1. Finish Phase 2 charging through the unified engine: preserve certified estimator sampling-level
-   provenance, then extend the now-validated material response/full-field cascade beyond the bounded
-   Ar+-SiO2 ion-SEE slice only when electron backscatter/true-SEE data or surface-transport data are
+1. Finish Phase 2 charging through the unified engine: extend the now-validated material
+   response/full-field cascade beyond the bounded Ar+-SiO2 ion-SEE slice only when electron
+   backscatter/true-SEE data or surface-transport data are
    recovered for the declared material state. Physical time remains the reference and consumes the
    same cascade/current operator; independently audit any final state before promotion.
 2. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow

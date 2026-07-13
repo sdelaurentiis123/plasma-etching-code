@@ -475,9 +475,38 @@ class BidirectionalFaceSelection3D:
 
 
 @dataclass(frozen=True)
+class BidirectionalSamplingProvenance3D:
+    """Sampling work that produced one certified face-estimator selection."""
+
+    forward_log2_samples: int
+    adjoint_log2_samples_by_face: np.ndarray
+    face_quadrature_points_by_face: np.ndarray
+    replicate_seeds: np.ndarray
+
+    def __post_init__(self):
+        if (int(self.forward_log2_samples) != self.forward_log2_samples
+                or self.forward_log2_samples < 0):
+            raise ValueError("forward sampling level must be a nonnegative integer")
+        adjoint = np.asarray(self.adjoint_log2_samples_by_face, dtype=int).copy()
+        position = np.asarray(self.face_quadrature_points_by_face, dtype=int).copy()
+        seeds = np.asarray(self.replicate_seeds, dtype=np.int64).copy()
+        if (adjoint.ndim != 1 or position.shape != adjoint.shape
+                or np.any(adjoint < 0) or np.any(position <= 0)
+                or seeds.ndim != 1 or len(seeds) < 4):
+            raise ValueError("invalid bidirectional sampling provenance")
+        for value in (adjoint, position, seeds):
+            value.setflags(write=False)
+        object.__setattr__(self, "forward_log2_samples", int(self.forward_log2_samples))
+        object.__setattr__(self, "adjoint_log2_samples_by_face", adjoint)
+        object.__setattr__(self, "face_quadrature_points_by_face", position)
+        object.__setattr__(self, "replicate_seeds", seeds)
+
+
+@dataclass(frozen=True)
 class BidirectionalBoundaryTransport3DResult:
     transport: BoundaryTransport3DResult
     selection_by_species: Mapping[str, BidirectionalFaceSelection3D]
+    sampling_by_species: Mapping[str, BidirectionalSamplingProvenance3D]
 
     def __post_init__(self):
         if not isinstance(self.transport, BoundaryTransport3DResult):
@@ -487,7 +516,15 @@ class BidirectionalBoundaryTransport3DResult:
                 or any(not isinstance(item, BidirectionalFaceSelection3D)
                        for item in selection.values())):
             raise ValueError("bidirectional selections must classify every transported species")
+        sampling = dict(self.sampling_by_species)
+        if (set(sampling) != set(selection)
+                or any(not isinstance(item, BidirectionalSamplingProvenance3D)
+                       for item in sampling.values())
+                or any(len(sampling[name].adjoint_log2_samples_by_face)
+                       != selection[name].population.face_count for name in selection)):
+            raise ValueError("sampling provenance must match every bidirectional selection")
         object.__setattr__(self, "selection_by_species", MappingProxyType(selection))
+        object.__setattr__(self, "sampling_by_species", MappingProxyType(sampling))
 
 
 def select_bidirectional_face_events_3d(
@@ -1547,7 +1584,7 @@ def trace_boundary_state_bidirectional_field_3d(
     areas_array = np.asarray(areas, dtype=float)
     bounds = np.asarray(source_bounds, dtype=float)
     source_area = (bounds[1] - bounds[0]) * (bounds[3] - bounds[2])
-    selections = {}; populations = []; hit = {}; escaped = {}; truncated = {}
+    selections = {}; sampling = {}; populations = []; hit = {}; escaped = {}; truncated = {}
     for species_index, species in enumerate(boundary.species):
         species_boundary = PlasmaBoundaryState(
             (species,), boundary.reference_plane_m, provenance=boundary.provenance)
@@ -1624,6 +1661,8 @@ def trace_boundary_state_bidirectional_field_3d(
         forward_level = int(forward_log2_samples)
         adjoint_level = int(adjoint_log2_samples)
         position_count = int(face_quadrature_points)
+        adjoint_level_by_face = np.full(len(faces), adjoint_level, dtype=int)
+        position_count_by_face = np.full(len(faces), position_count, dtype=int)
         while not selection.converged:
             unresolved = np.where(
                 ~(selection.estimator_consistent & selection.method_within_tolerance))[0]
@@ -1649,6 +1688,8 @@ def trace_boundary_state_bidirectional_field_3d(
             if refine_adjoint:
                 adjoint_level = min(adjoint_level + 1, maximum_adjoint_level)
                 position_count = min(2 * position_count, maximum_face_points)
+                adjoint_level_by_face[unresolved] = adjoint_level
+                position_count_by_face[unresolved] = position_count
                 for replicate, replicate_seed in enumerate(replicate_seeds):
                     proposal = qmc_boundary_proposal(
                         template, adjoint_level, replicate_seed, name=species.name)
@@ -1677,7 +1718,10 @@ def trace_boundary_state_bidirectional_field_3d(
                 consistency_sigma=consistency_sigma, support_sigma=support_sigma,
                 support_ratio=support_ratio, method_hint=hints.get(species.name),
                 require_certification=require_certification)
-        selections[species.name] = selection; populations.append(selection.population)
+        selections[species.name] = selection
+        sampling[species.name] = BidirectionalSamplingProvenance3D(
+            forward_level, adjoint_level_by_face, position_count_by_face, replicate_seeds)
+        populations.append(selection.population)
         landing = float(np.dot(selection.population.flux_m2_s, areas_array)
                         / (species.flux_m2_s * source_area)) if species.flux_m2_s > 0.0 else 0.0
         hit[species.name] = landing
@@ -1693,4 +1737,4 @@ def trace_boundary_state_bidirectional_field_3d(
         ("per-face estimator map must be frozen during a nonlinear-root epoch",
          "scrambled-QMC uncertainty requires independent replicate and level refinement",
          "no surface reflection or re-emission"))
-    return BidirectionalBoundaryTransport3DResult(transport, selections)
+    return BidirectionalBoundaryTransport3DResult(transport, selections, sampling)

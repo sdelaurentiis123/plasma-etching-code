@@ -226,7 +226,13 @@ def _pilot_method_map(
             json.dumps(diagnostic, indent=2) + "\n")
         raise
     method = np.asarray(result.bidirectional_method_hint["Ar+"])
-    np.savez_compressed(path, method_hint_Ar=method)
+    sampling = result.bidirectional_sampling_provenance["Ar+"]
+    np.savez_compressed(
+        path, method_hint_Ar=method,
+        forward_log2_samples_Ar=sampling.forward_log2_samples,
+        adjoint_log2_samples_by_face_Ar=sampling.adjoint_log2_samples_by_face,
+        face_quadrature_points_by_face_Ar=sampling.face_quadrature_points_by_face,
+        replicate_seeds_Ar=sampling.replicate_seeds)
     return method
 
 

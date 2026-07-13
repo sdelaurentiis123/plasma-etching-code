@@ -327,6 +327,13 @@ No uniform filters, tunable leak rates, or conductivity selected to close the ch
 - A future measured low-rank global preconditioner may accelerate PTC. It may not replace the full
   kinetic residual or reintroduce a local planar electron law that Task 0B rejected.
 
+Estimator selection and estimator accuracy now travel together in engine results. A certified
+bidirectional result records the actual global forward sample level, per-face adjoint sample and
+position-quadrature levels, and replicate seeds. Both physical time and the direct steady diagnostic
+use the same freeze policy: measured stopping levels for new results, declared ceilings only for
+legacy method-only artifacts. This changes no physical operator, but prevents an accepted method map
+from silently being replayed with less evidence than certified it.
+
 ## Product consequence
 
 This work is not a detour into a bespoke charging benchmark. The same response contract is required

@@ -9,7 +9,8 @@ import numpy as np
 
 from .boundary_state import PlasmaBoundaryState
 from .boundary_transport_3d import (
-    BoundaryTransport3DResult, gather_boundary_state_field_adjoint_3d,
+    BidirectionalSamplingProvenance3D, BoundaryTransport3DResult,
+    gather_boundary_state_field_adjoint_3d,
     merge_boundary_transport_results_3d, trace_boundary_state_bidirectional_field_3d,
     trace_boundary_state_field_3d,
 )
@@ -46,6 +47,7 @@ class DielectricChargingStep3DResult:
     poisson_before: PoissonDiagnostics3D
     poisson_after: PoissonDiagnostics3D
     bidirectional_method_hint: Mapping[str, np.ndarray]
+    bidirectional_sampling_provenance: Mapping[str, BidirectionalSamplingProvenance3D]
     diagnostics: Mapping[str, float]
     known_limitations: tuple[str, ...]
 
@@ -65,6 +67,13 @@ class DielectricChargingStep3DResult:
             array.setflags(write=False)
             method_hint[name] = array
         object.__setattr__(self, "bidirectional_method_hint", MappingProxyType(method_hint))
+        sampling = dict(self.bidirectional_sampling_provenance)
+        if (set(sampling) != set(method_hint)
+                or any(not isinstance(value, BidirectionalSamplingProvenance3D)
+                       for value in sampling.values())):
+            raise ValueError("bidirectional sampling provenance must match the method map")
+        object.__setattr__(
+            self, "bidirectional_sampling_provenance", MappingProxyType(sampling))
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
 
 
@@ -83,6 +92,7 @@ class PhysicalTimeDielectricCharging3DResult:
     transport: BoundaryTransport3DResult
     poisson: PoissonDiagnostics3D
     bidirectional_method_hint: Mapping[str, np.ndarray]
+    bidirectional_sampling_provenance: Mapping[str, BidirectionalSamplingProvenance3D]
     history: tuple[Mapping[str, float], ...]
     converged: bool
     diagnostics: Mapping[str, float]
@@ -104,6 +114,13 @@ class PhysicalTimeDielectricCharging3DResult:
             array.setflags(write=False)
             method_hint[name] = array
         object.__setattr__(self, "bidirectional_method_hint", MappingProxyType(method_hint))
+        sampling = dict(self.bidirectional_sampling_provenance)
+        if (set(sampling) != set(method_hint)
+                or any(not isinstance(value, BidirectionalSamplingProvenance3D)
+                       for value in sampling.values())):
+            raise ValueError("bidirectional sampling provenance must match the method map")
+        object.__setattr__(
+            self, "bidirectional_sampling_provenance", MappingProxyType(sampling))
         object.__setattr__(self, "diagnostics", MappingProxyType(dict(self.diagnostics)))
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
 
@@ -250,8 +267,9 @@ def current_balance_metrics_3d(
         active_count=int(np.count_nonzero(active)))
 
 
-def _freeze_certified_bidirectional_options(options, discovered_hint):
-    """Freeze a certified map without dropping back below its audited refinement ceiling."""
+def _freeze_certified_bidirectional_options(
+        options, discovered_hint, discovered_sampling=None):
+    """Freeze a certified map at measured levels, or legacy ceilings when unavailable."""
     frozen = {} if options is None else dict(options)
     discovered = {name: np.asarray(value).copy() for name, value in discovered_hint.items()}
     if "method_hint" in frozen:
@@ -262,16 +280,35 @@ def _freeze_certified_bidirectional_options(options, discovered_hint):
             raise RuntimeError("supplied bidirectional method map differs from the certified map")
     else:
         frozen["method_hint"] = discovered
-        # Certification may have adaptively raised a global sample or position level. The selection
-        # result does not yet retain its exact stopping levels, so freezing at the declared ceilings
-        # is the conservative replay rule. Reverting to the base levels can recreate zero-hit faces
-        # on a refined mesh even though the pilot map itself certified.
-        for base, maximum in (
-                ("forward_log2_samples", "max_forward_log2_samples"),
-                ("adjoint_log2_samples", "max_adjoint_log2_samples"),
-                ("face_quadrature_points", "max_face_quadrature_points")):
-            if frozen.get(maximum) is not None:
-                frozen[base] = frozen[maximum]
+        sampling = {} if discovered_sampling is None else dict(discovered_sampling)
+        if sampling:
+            if (set(sampling) != set(discovered)
+                    or any(not isinstance(value, BidirectionalSamplingProvenance3D)
+                           for value in sampling.values())):
+                raise ValueError("sampling provenance must match the certified method map")
+            frozen["forward_log2_samples"] = max(
+                value.forward_log2_samples for value in sampling.values())
+            selected_adjoint_levels = []
+            selected_position_counts = []
+            for name, value in sampling.items():
+                selected = discovered[name] == "adjoint"
+                if np.any(selected):
+                    selected_adjoint_levels.extend(
+                        value.adjoint_log2_samples_by_face[selected].tolist())
+                    selected_position_counts.extend(
+                        value.face_quadrature_points_by_face[selected].tolist())
+            if selected_adjoint_levels:
+                frozen["adjoint_log2_samples"] = max(selected_adjoint_levels)
+                frozen["face_quadrature_points"] = max(selected_position_counts)
+        else:
+            # Old artifacts contain only the method map. Replaying at declared ceilings is the
+            # conservative fallback; a base-level replay can recreate zero-hit refined faces.
+            for base, maximum in (
+                    ("forward_log2_samples", "max_forward_log2_samples"),
+                    ("adjoint_log2_samples", "max_adjoint_log2_samples"),
+                    ("face_quadrature_points", "max_face_quadrature_points")):
+                if frozen.get(maximum) is not None:
+                    frozen[base] = frozen[maximum]
     frozen["require_certification"] = False
     return frozen
 
@@ -385,7 +422,7 @@ def _evaluate_incident_current_3d(
     estimator_by_name = (
         {species.name: str(transport_estimator) for species in charged_species}
         if isinstance(transport_estimator, str) else dict(transport_estimator))
-    transports = []; bidirectional_method_hint = {}
+    transports = []; bidirectional_method_hint = {}; bidirectional_sampling_provenance = {}
     for estimator in ("forward", "adjoint", "bidirectional"):
         selected = tuple(
             species for species in charged_species
@@ -422,6 +459,7 @@ def _evaluate_incident_current_3d(
             bidirectional_method_hint.update({
                 name: item.method.copy()
                 for name, item in bidirectional.selection_by_species.items()})
+            bidirectional_sampling_provenance.update(bidirectional.sampling_by_species)
             transports.append(bidirectional.transport)
         elif estimator == "adjoint":
             proposal_subset = (None if adjoint_proposals is None else {
@@ -513,7 +551,8 @@ def _evaluate_incident_current_3d(
         positive_node_current=positive_node_current,
         negative_node_current=negative_node_current,
         surface_transfer=surface_transfer,
-        bidirectional_method_hint=bidirectional_method_hint)
+        bidirectional_method_hint=bidirectional_method_hint,
+        bidirectional_sampling_provenance=bidirectional_sampling_provenance)
 
 
 def _physical_current_balance_metrics(
@@ -630,6 +669,8 @@ def advance_dielectric_charging_3d(
         poisson_before=evaluated["poisson"],
         poisson_after=poisson_after,
         bidirectional_method_hint=evaluated["bidirectional_method_hint"],
+        bidirectional_sampling_provenance=evaluated[
+            "bidirectional_sampling_provenance"],
         diagnostics=dict(
             duration_s=float(duration_s),
             incident_charge_c=incident_charge,
@@ -751,7 +792,8 @@ def integrate_dielectric_charging_transient_3d(
             common_arguments["bidirectional_options"] = (
                 _freeze_certified_bidirectional_options(
                     common_arguments["bidirectional_options"],
-                    final_step.bidirectional_method_hint))
+                    final_step.bidirectional_method_hint,
+                    final_step.bidirectional_sampling_provenance))
         state = record(
             step_index, final_step.potential_before_v,
             final_step.positive_face_current_density_a_m2,
@@ -813,7 +855,9 @@ def integrate_dielectric_charging_transient_3d(
         charge_history_node_c=np.stack(charge_history),
         surface_transfer=final["surface_transfer"],
         transport=final["transport"], poisson=final["poisson"],
-        bidirectional_method_hint=final["bidirectional_method_hint"], history=tuple(history),
+        bidirectional_method_hint=final["bidirectional_method_hint"],
+        bidirectional_sampling_provenance=final[
+            "bidirectional_sampling_provenance"], history=tuple(history),
         converged=converged,
         diagnostics=dict(
             timestep_s=float(timestep_s), updates_completed=max(0, len(history) - 1),
@@ -1016,20 +1060,9 @@ def solve_dielectric_charging_steady_3d(
         mean_surface_voltage_v=float(np.mean(
             evaluated["potential"][tuple(support_nodes.T)]))))
     if evaluated["bidirectional_method_hint"]:
-        frozen_options = ({} if bidirectional_options is None
-                          else dict(bidirectional_options))
-        discovered_hint = evaluated["bidirectional_method_hint"]
-        if "method_hint" in frozen_options:
-            supplied_hint = dict(frozen_options["method_hint"])
-            if (set(supplied_hint) != set(discovered_hint)
-                    or any(not np.array_equal(supplied_hint[name], discovered_hint[name])
-                           for name in discovered_hint)):
-                raise RuntimeError(
-                    "supplied bidirectional method map differs from the certified initial map")
-        else:
-            frozen_options["method_hint"] = discovered_hint
-        frozen_options["require_certification"] = False
-        evaluate_arguments["bidirectional_options"] = frozen_options
+        evaluate_arguments["bidirectional_options"] = _freeze_certified_bidirectional_options(
+            bidirectional_options, evaluated["bidirectional_method_hint"],
+            evaluated["bidirectional_sampling_provenance"])
     anderson_x_history = []; anderson_residual_history = []; cached_voltage_step = None
     while len(history) < int(max_iter) and not (
             len(history) >= int(min_iter)
