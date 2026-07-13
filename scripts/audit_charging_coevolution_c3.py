@@ -124,6 +124,10 @@ def summarize_step(step):
             "patch_max_relative_imbalance"]),
         patch_symmetric_max_relative_imbalance=list(step.diagnostics[
             "patch_symmetric_max_relative_imbalance"]),
+        maximum_transport_lineage_replay_count=step.diagnostics[
+            "maximum_transport_lineage_replay_count"],
+        maximum_transport_lineage_replay_fraction=step.diagnostics[
+            "maximum_transport_lineage_replay_fraction"],
         maximum_charge_conservation_relative_error=max(
             item["charge_conservation_relative_error"] for item in history),
         maximum_surface_transfer_relative_charge_balance_error=max(

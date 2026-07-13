@@ -397,6 +397,7 @@ class BoundaryTransport3DResult:
     transport_model: str
     known_limitations: tuple[str, ...]
     lineage_replay_count: int = 0
+    lineage_replay_eligible_count: int = 0
 
     def __post_init__(self):
         object.__setattr__(self, "hit_probability", MappingProxyType(dict(self.hit_probability)))
@@ -406,7 +407,18 @@ class BoundaryTransport3DResult:
         object.__setattr__(self, "known_limitations", tuple(self.known_limitations))
         if int(self.lineage_replay_count) != self.lineage_replay_count or self.lineage_replay_count < 0:
             raise ValueError("lineage_replay_count must be a nonnegative integer")
+        if (int(self.lineage_replay_eligible_count) != self.lineage_replay_eligible_count
+                or self.lineage_replay_eligible_count < self.lineage_replay_count):
+            raise ValueError(
+                "lineage_replay_eligible_count must be an integer no smaller than replay count")
         object.__setattr__(self, "lineage_replay_count", int(self.lineage_replay_count))
+        object.__setattr__(
+            self, "lineage_replay_eligible_count", int(self.lineage_replay_eligible_count))
+
+    @property
+    def lineage_replay_fraction(self):
+        return (self.lineage_replay_count / self.lineage_replay_eligible_count
+                if self.lineage_replay_eligible_count else 0.0)
 
 
 @dataclass(frozen=True)
@@ -423,6 +435,7 @@ class ChargedSurfaceReimpactPopulation3D:
     truncated_rate_s: float
     relative_particle_balance_error: float
     lineage_replay_count: int = 0
+    lineage_replay_eligible_count: int = 0
 
     def __post_init__(self):
         if (not isinstance(self.emitted, OutgoingChargedParticleEvents3D)
@@ -445,6 +458,10 @@ class ChargedSurfaceReimpactPopulation3D:
             raise ValueError("invalid charged re-impact balance")
         if int(self.lineage_replay_count) != self.lineage_replay_count or self.lineage_replay_count < 0:
             raise ValueError("re-impact lineage_replay_count must be a nonnegative integer")
+        if (int(self.lineage_replay_eligible_count) != self.lineage_replay_eligible_count
+                or self.lineage_replay_eligible_count < self.lineage_replay_count):
+            raise ValueError(
+                "re-impact lineage_replay_eligible_count must be no smaller than replay count")
         residual = (
             self.emitted_rate_s - self.landed_rate_s
             - self.escaped_rate_s - self.truncated_rate_s)
@@ -463,6 +480,8 @@ class ChargedSurfaceReimpactPopulation3D:
         object.__setattr__(self, "termination", termination)
         object.__setattr__(self, "hit_face", hit_face)
         object.__setattr__(self, "lineage_replay_count", int(self.lineage_replay_count))
+        object.__setattr__(
+            self, "lineage_replay_eligible_count", int(self.lineage_replay_eligible_count))
 
 
 def _certify_field_hit_lineage_3d(
@@ -626,7 +645,7 @@ def trace_charged_surface_events_field_3d(
                 event_incident_direction=np.empty((0, 3)))
             results.append(ChargedSurfaceReimpactPopulation3D(
                 population, incident, np.empty(0, dtype=np.int8), np.empty(0, dtype=int),
-                0.0, 0.0, 0.0, 0.0, 0.0))
+                0.0, 0.0, 0.0, 0.0, 0.0, 0, 0))
             continue
         hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
         hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
@@ -686,7 +705,7 @@ def trace_charged_surface_events_field_3d(
             population, incident, termination, hit_face, emitted_rate, landed_rate,
             escaped_rate, truncated_rate,
             abs(residual) / max(emitted_rate, np.finfo(float).tiny),
-            lineage_replay_count))
+            lineage_replay_count, ray_count))
     return tuple(results)
 
 
@@ -909,7 +928,8 @@ def merge_boundary_transport_results_3d(*results):
     if not results or any(not isinstance(item, BoundaryTransport3DResult) for item in results):
         raise ValueError("one or more BoundaryTransport3DResult objects are required")
     neutral = {}; energetic = []; hit = {}; escaped = {}; truncated = {}
-    species_seen = set(); models = []; limitations = []; replay_count = 0
+    species_seen = set(); models = []; limitations = []
+    replay_count = 0; replay_eligible_count = 0
     for result in results:
         species = set(result.hit_probability)
         if (species != set(result.escape_probability)
@@ -927,6 +947,7 @@ def merge_boundary_transport_results_3d(*results):
         truncated.update(result.truncation_probability)
         models.append(result.transport_model); limitations.extend(result.known_limitations)
         replay_count += result.lineage_replay_count
+        replay_eligible_count += result.lineage_replay_eligible_count
     energetic_names = [item.name for item in energetic]
     if len(set(energetic_names)) != len(energetic_names):
         raise ValueError("merged energetic species names must be unique")
@@ -936,7 +957,8 @@ def merge_boundary_transport_results_3d(*results):
         truncation_probability=truncated,
         transport_model=" + ".join(dict.fromkeys(models)),
         known_limitations=tuple(dict.fromkeys(limitations)),
-        lineage_replay_count=replay_count)
+        lineage_replay_count=replay_count,
+        lineage_replay_eligible_count=replay_eligible_count)
 
 
 def estimate_diffuse_form_factors_3d(
@@ -1469,6 +1491,7 @@ def trace_boundary_state_field_3d(
     neutral_flux = {}; energetic_flux = []
     hit_probability = {}; escape_probability = {}; truncation_probability = {}
     float64_replay_count = 0
+    float64_replay_eligible_count = 0
     for species in boundary.species:
         if phase_space_log2_samples is None:
             sample_count = species.velocity_sqrt_eV.shape[0]
@@ -1491,6 +1514,7 @@ def trace_boundary_state_field_3d(
             velocity = species.sample_flux_velocity(phase_space[:, 2:])
             physical_weight = np.full(ray_count, 1.0 / ray_count)
         velocity[:, 2] *= -1.0
+        float64_replay_eligible_count += ray_count
         if np.any(np.linalg.norm(velocity, axis=1) <= 0.0):
             raise ValueError(f"species {species.name!r} contains a zero-speed incident sample")
         hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
@@ -1562,7 +1586,8 @@ def trace_boundary_state_field_3d(
         )) + (() if not float64_replay_count else (
             f"{float64_replay_count} gas-normal-invalid float32 hit(s) were replayed with the "
             "same Verlet path and edge-inclusive float64 hard-triangle visibility",
-        )), lineage_replay_count=float64_replay_count)
+        )), lineage_replay_count=float64_replay_count,
+        lineage_replay_eligible_count=float64_replay_eligible_count)
 
 
 def gather_boundary_state_field_adjoint_3d(
@@ -1863,6 +1888,7 @@ def trace_boundary_state_bidirectional_field_3d(
     source_area = (bounds[1] - bounds[0]) * (bounds[3] - bounds[2])
     selections = {}; sampling = {}; populations = []; hit = {}; escaped = {}; truncated = {}
     bidirectional_replay_count = 0
+    bidirectional_replay_eligible_count = 0
     for species_index, species in enumerate(boundary.species):
         species_boundary = PlasmaBoundaryState(
             (species,), boundary.reference_plane_m, provenance=boundary.provenance)
@@ -2012,6 +2038,8 @@ def trace_boundary_state_bidirectional_field_3d(
         truncated[species.name] = max(truncation) if truncation else 0.0
         bidirectional_replay_count += sum(
             item.lineage_replay_count for item in forward_results)
+        bidirectional_replay_eligible_count += sum(
+            item.lineage_replay_eligible_count for item in forward_results)
     transport = BoundaryTransport3DResult(
         SurfaceFluxes({}, tuple(populations)), hit, escaped, truncated,
         "collisionless_fixed_step_nodal_field_bidirectional_3d"
@@ -2019,5 +2047,6 @@ def trace_boundary_state_bidirectional_field_3d(
         ("per-face estimator map must be frozen during a nonlinear-root epoch",
          "scrambled-QMC uncertainty requires independent replicate and level refinement",
          "no surface reflection or re-emission"),
-        lineage_replay_count=bidirectional_replay_count)
+        lineage_replay_count=bidirectional_replay_count,
+        lineage_replay_eligible_count=bidirectional_replay_eligible_count)
     return BidirectionalBoundaryTransport3DResult(transport, selections, sampling)

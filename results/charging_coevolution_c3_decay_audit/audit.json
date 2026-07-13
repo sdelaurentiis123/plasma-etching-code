@@ -1,0 +1,135 @@
+{
+  "schema": "petch.charging.coevolution.c3.decay-audit.v1",
+  "date": "2026-07-13",
+  "status": "bounded repaired-operator transient/PTC evidence; not C3 convergence",
+  "exact_operator": "hard visibility with certified float64 replay only for invalid float32 field hits; bounded grazing-ion reflection; no smoothing",
+  "source_artifacts": {
+    "zero_charge_fixed_60": {
+      "summary": "../charging_coevolution_c3_decay_fixed_cold_dt125ns_60/summary.json",
+      "summary_sha256": "77de35528dd3f2644f7e52fd177fafcb33666259345d48092b87f5e5e2b32ff5",
+      "checkpoint_sha256": "91122190f3e306f119ffff62ba7b2140559a7ebf45555883a2219de0ddb2954e"
+    },
+    "checkpointed_fixed_20_plus_40": {
+      "base_summary": "../charging_coevolution_c3_trench_resolved_replay_counted_dt125ns_20/summary.json",
+      "base_summary_sha256": "9c5239d3bd2e011adce3c25d4c3149b41ae73ae633409b1ba94de3183764df61",
+      "continuation_summary": "../charging_coevolution_c3_decay_fixed_warm_dt125ns_40/summary.json",
+      "continuation_summary_sha256": "dcf1f1d1cc8fce1807059411bcd1422c12be60b28c136ef1b1bb2505a4a3fa1b",
+      "checkpoint_sha256": "91122190f3e306f119ffff62ba7b2140559a7ebf45555883a2219de0ddb2954e"
+    },
+    "ser_schedule_a_summary_sha256": "294cc9431bd12bd264ee11e2cb5e2196fed9554494462c62f0ce61d9548372cb",
+    "ser_schedule_b_summary_sha256": "00e54aae729400975478b8da78707a220ff8cedd62e966db1c58a8461b76eafb",
+    "failure_state_fraction_summary_sha256": "7437ab4d9f9f9db6242e020410d61eafb58f9b056ae937b7ccb700c258270010",
+    "final_state_fraction_summary_sha256": "87f411cb2663c6ab225ec975e47fa5f4ee7ca1983360e6096d9d6b781e567c30"
+  },
+  "fixed_physical_time_reference": {
+    "timestep_s": 1.25e-7,
+    "physical_time_s": 7.5e-6,
+    "accepted_steps": 60,
+    "node_rms": 0.2998873804166315,
+    "node_worst": 0.7229241356369721,
+    "patch_b2": [8.435885843641042, 7.523539700018609],
+    "potential_rate_max_v_s": 1026880.9749887927,
+    "maximum_charge_conservation_relative_error": 1.5102966175273856e-16,
+    "maximum_surface_transfer_relative_charge_balance_error": 4.513022244360654e-15,
+    "maximum_replays_in_one_evaluation": 1,
+    "replay_event_physical_times_s": [2.375e-6, 3.0e-6, 7.125e-6],
+    "convergence_statement": "B1 and B2 fail; B2 is a ratio, so 8.4359 means 843.59 percent while the gate is 0.08 or 8 percent"
+  },
+  "restart_invariance": {
+    "comparison": "uninterrupted zero-charge 60-step trajectory versus zero-charge 20 steps plus checkpoint reload and 40 steps",
+    "physical_time_s": 7.5e-6,
+    "all_checkpoint_arrays_bitwise_equal": true,
+    "checkpoint_files_byte_identical": true,
+    "maximum_absolute_state_difference": 0.0,
+    "claim_boundary": "checkpoint/restart invariance only; stationary cold-versus-remapped-warm branch invariance remains pending"
+  },
+  "late_window_exponential_fits": {
+    "window_s": [2.5e-6, 7.5e-6],
+    "model": "y(t) = asymptote + amplitude * exp(-(t-2.5 microseconds)/tau)",
+    "constraint": "all fitted parameters nonnegative",
+    "node_rms": {
+      "asymptote": 0.2399937660016195,
+      "amplitude": 0.15398822279986274,
+      "tau_s": 5.706182735018966e-6,
+      "r_squared": 0.9971312208292805
+    },
+    "node_worst": {
+      "asymptote": 0.714173420828459,
+      "amplitude": 0.17332086158229498,
+      "tau_s": 2.493594074951651e-6,
+      "r_squared": 0.9793177347104874
+    },
+    "patch_b2_0p25_um": {
+      "asymptote": 9.660449096080804,
+      "amplitude": 8.711026289722492,
+      "tau_s": 9.477060686503943e-7,
+      "r_squared": 0.9333049298368798
+    },
+    "patch_b2_0p50_um": {
+      "asymptote": 8.583340982542742,
+      "amplitude": 8.193109256889969,
+      "tau_s": 1.3081829768025612e-6,
+      "r_squared": 0.9473071412648507
+    },
+    "potential_rate": {
+      "asymptote_v_s": 2.058199731987527e-6,
+      "amplitude_v_s": 1574836.5321090987,
+      "tau_s": 2.5561758763549086e-5,
+      "r_squared": 0.3004537128348661
+    },
+    "decision": "no projected saturation time and no fit-and-jump: fitted B2 floors exceed the gate and potential rate is not described by a single exponential over this window"
+  },
+  "ser_schedule_refinement": {
+    "common_start": "the repaired fixed-time 2.5 microsecond face checkpoint",
+    "schedule_a": {
+      "allowed_residual_growth": 0.005,
+      "accepted_steps": 30,
+      "rejected_trials": 4,
+      "pseudo_time_s": 2.187716303966806e-6,
+      "minimum_timestep_s": 8.768047475469097e-9,
+      "wall_clock_s": 188.12412187550217,
+      "decision": "reject as accelerator; repeated safeguard halvings make it slower than fixed time"
+    },
+    "schedule_b": {
+      "allowed_residual_growth": 0.02,
+      "accepted_steps": 30,
+      "rejected_trials": 0,
+      "pseudo_time_s": 4.206067736691105e-6,
+      "minimum_timestep_s": 1.25e-7,
+      "wall_clock_s": 141.25549716688693,
+      "nearest_fixed_total_time_s": 6.75e-6,
+      "relative_time_mismatch": 0.006551121317866604,
+      "relative_diagnostic_difference": {
+        "node_rms": 0.000585965721403151,
+        "node_worst": 0.003786280506673431,
+        "patch_b2": [0.0005441292862321723, 0.0012794717521855353],
+        "potential_rate": 0.03269278636533432
+      },
+      "fixed_equivalent_steps": 33.64854189352884,
+      "accepted_step_reduction_fraction": 0.108429774887228,
+      "decision": "same-operator bounded accelerator at matched time; modest gain only and final schedule/state refinement remains required"
+    }
+  },
+  "lineage_replay_canary": {
+    "exact_failure_state": {
+      "replays": 1,
+      "eligible_field_lineages": 8653,
+      "fraction": 0.00011556685542586386,
+      "percent": 0.011556685542586386
+    },
+    "at_7p5_microseconds": {
+      "replays": 0,
+      "eligible_field_lineages": 9079,
+      "fraction": 0.0
+    },
+    "trend": "no monotone growth is observed; future runs permanently report the eligible denominator and fraction"
+  },
+  "accelerator_decisions": {
+    "potential_space_state": "do not implement: physical dV/dt already applies the exact Poisson response to conservative dQ/dt, while the authoritative face-charge to nodal-potential map is not invertible",
+    "matrix_pseudotime_preconditioner": "hold: requires an invertible face-charge mobility that preserves the compatible ledger and must be schedule-refined against physical time",
+    "fit_and_jump": "hold: potential-rate fit fails and fitted B2 floors exceed the gate",
+    "equilibrium_tracking": "retain: bitwise checkpoint/restart invariance supports continuation, but remapped-geometry stationary branch equality is still untested",
+    "machine_learning_proposal": "do not promote before a converged exact-operator state and held-out acceptance protocol exist"
+  },
+  "campaign_decision": "continue bounded physical-time/PTC work; do not declare saturation, do not start C4, and do not add a new root-solver family"
+}

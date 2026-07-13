@@ -659,7 +659,8 @@ def _apply_diffuse_neutral_transport(
         transport.hit_probability, transport.escape_probability,
         transport.truncation_probability,
         transport.transport_model + " + flux_conservative_diffuse_radiosity",
-        limitations, transport.lineage_replay_count)
+        limitations, transport.lineage_replay_count,
+        transport.lineage_replay_eligible_count)
     return updated, MappingProxyType(diagnostics)
 
 

@@ -7,6 +7,7 @@ from petch.boundary_state import (
     maxwellian_electron_boundary_state, qmc_boundary_proposal,
 )
 from petch.boundary_transport_3d import (
+    BoundaryTransport3DResult,
     _certify_field_hit_lineage_3d,
     _trace_field_events_float64_3d,
     estimate_diffuse_form_factors_3d,
@@ -23,6 +24,7 @@ from petch.surface_kinetics import (
     ReducedSiO2FluorocarbonMechanism,
     ReducedSiO2FluorocarbonParameters,
     SiO2SurfaceState,
+    SurfaceFluxes,
 )
 
 
@@ -64,6 +66,15 @@ def test_float64_field_replay_assigns_a_shared_triangle_edge():
     np.testing.assert_allclose(energy, [1.0])
     np.testing.assert_allclose(position, [[0.5, 0.5, 0.0]])
     np.testing.assert_allclose(velocity, [[0.0, 0.0, -1.0]])
+
+
+def test_transport_lineage_replay_fraction_requires_an_eligible_denominator():
+    empty = SurfaceFluxes({}, ())
+    result = BoundaryTransport3DResult(
+        empty, {}, {}, {}, "manufactured", (), 1, 100)
+    assert result.lineage_replay_fraction == 0.01
+    with pytest.raises(ValueError, match="no smaller"):
+        BoundaryTransport3DResult(empty, {}, {}, {}, "manufactured", (), 2, 1)
 
 
 def _flat_unit_plane():

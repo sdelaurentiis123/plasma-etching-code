@@ -23,16 +23,16 @@
       "exact_visibility": true,
       "convergence_contract_revision": "CCA-2026-07-13-R2"
     },
-    "engine_git_revision": "fa373a7154a9888d42b4e8ede677d63e8d946b2d",
+    "engine_git_revision": "8317f07ee4ed94cef410726213a59db77b288776",
     "source_sha256": {
-      "src/petch/charging_coevolution_3d.py": "5a8675ad18194e147a403f4ef1380c0c8daa406b5b011d968794ddda4e3850a1",
-      "src/petch/charging_coupled_3d.py": "583e4f4f5196b30dc17893f312a85fa51ce0fd0db0e9b1d431fe80b24b2e2c87",
-      "src/petch/boundary_transport_3d.py": "6b56c5f9c662c9c590f708960e1a060a194b7f6f0ecd25d2295fb3abf22a2548",
-      "src/petch/charged_surface_cascade_3d.py": "e702fee653a7041f738e07fecde8e9c246d21ca30c5e828837cb8405f45c78b9",
-      "src/petch/feature_step_3d.py": "93523f80b08e5edbe67730bebadaab312c944422f292d010c07784f37cbeda48",
+      "src/petch/charging_coevolution_3d.py": "415f6fb5404f1f6d0f2acc70a13739f9f894c7ccedf2754e5b218d4d0e41bfca",
+      "src/petch/charging_coupled_3d.py": "d8c511489c747c862c9e4f4b345cf39cc57dc56ce7d65884627e4d3ca4381173",
+      "src/petch/boundary_transport_3d.py": "cfefbcf17b6846ccfd3cdddcf78f9c5719aeeac0dda0b40f232882fefd2868ba",
+      "src/petch/charged_surface_cascade_3d.py": "977c4c84e8a2f515286f863f80a745852a6cafd1b295a8468ba157b03d33ad33",
+      "src/petch/feature_step_3d.py": "94b4cd4b6506ea0b59990282b40684eac4075eee1efb3efada1489ae1d845ff5",
       "src/petch/surface_charge_remap_3d.py": "e24b2897050b430b32fb427894c8ee88f97f020e10273fc79656106cf5e8f9d6",
       "src/petch/charged_surface_response_3d.py": "233aee07c5178ada37c5b465c7d94688eabcfd6f973f2e11c28ef1c66c732e4c",
-      "scripts/audit_charging_coevolution_c3.py": "2d6e8c72a1add23f692b549cc68f7f7ebf52ffd3423f79a68de744579ab95b30"
+      "scripts/audit_charging_coevolution_c3.py": "cf6f494d3926e01b18c857de35d47556b266be834b186a5c439cd3619ce39de5"
     },
     "hardware": "macOS-15.7.4-arm64-arm-64bit",
     "python": "3.10.17"
@@ -60,6 +60,8 @@
         0.0,
         0.0
       ],
+      "maximum_transport_lineage_replay_count": 0,
+      "maximum_transport_lineage_replay_fraction": 0.0,
       "maximum_charge_conservation_relative_error": 0.0,
       "maximum_surface_transfer_relative_charge_balance_error": 0.0,
       "exact_transport_reused": true,
@@ -68,7 +70,7 @@
       "retained_negative_charge_c": 0.0,
       "removed_positive_charge_c": 0.0,
       "removed_negative_charge_c": 0.0,
-      "wall_clock_s": 0.02585708349943161
+      "wall_clock_s": 0.025603708811104298
     },
     "reflection_manifest": {
       "model": "weighted angle-dependent specular reflection with constant energy retention",
@@ -125,6 +127,8 @@
           0.33333333333333337,
           0.33333333333333337
         ],
+        "maximum_transport_lineage_replay_count": 0,
+        "maximum_transport_lineage_replay_fraction": 0.0,
         "maximum_charge_conservation_relative_error": 8.094753686645555e-17,
         "maximum_surface_transfer_relative_charge_balance_error": 0.0,
         "exact_transport_reused": true,
@@ -133,7 +137,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 9.913467922874998e-20,
         "removed_negative_charge_c": 0.0,
-        "wall_clock_s": 0.022020083852112293
+        "wall_clock_s": 0.0229716245085001
       },
       {
         "charging_converged": false,
@@ -156,6 +160,8 @@
           0.33333333333333337,
           0.33333333333333337
         ],
+        "maximum_transport_lineage_replay_count": 0,
+        "maximum_transport_lineage_replay_fraction": 0.0,
         "maximum_charge_conservation_relative_error": 4.047376843322777e-17,
         "maximum_surface_transfer_relative_charge_balance_error": 0.0,
         "exact_transport_reused": true,
@@ -164,7 +170,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 0.0,
         "removed_negative_charge_c": 9.913467922874998e-20,
-        "wall_clock_s": 0.021844999864697456
+        "wall_clock_s": 0.022030582651495934
       }
     ],
     "saturation_required": [

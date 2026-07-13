@@ -243,6 +243,9 @@ def main():
                 maximum_transport_lineage_replay_count=max(
                     (item.get("transport_lineage_replay_count", 0) for item in history),
                     default=None),
+                maximum_transport_lineage_replay_fraction=max(
+                    (item.get("transport_lineage_replay_fraction", 0.0) for item in history),
+                    default=None),
                 minimum_potential_v=float(np.min(failure_potential)),
                 maximum_potential_v=float(np.max(failure_potential))),
             history=json_value(history),
@@ -293,6 +296,9 @@ def main():
                 for item in result.history),
             maximum_transport_lineage_replay_count=max(
                 item.get("transport_lineage_replay_count", 0) for item in result.history),
+            maximum_transport_lineage_replay_fraction=max(
+                item.get("transport_lineage_replay_fraction", 0.0)
+                for item in result.history),
             minimum_potential_v=float(np.min(result.potential_v)),
             maximum_potential_v=float(np.max(result.potential_v))),
         history=json_value(result.history),

@@ -98,7 +98,7 @@ saturated. Deposition conservation closes to `8.09e-17` and `4.05e-17`; signed c
 the two etched surface increments is itemized separately. This earns a tested co-simulation path,
 not pulsed-process validation.
 
-The full local regression suite after the trajectory-lineage integration is **371 passed, 1
+The full local regression suite after the trajectory-lineage integration is **372 passed, 1
 skipped**. The skip is the
 existing unavailable-CUDA condition on this CPU-only build.
 
@@ -297,6 +297,70 @@ from B1/B2; this is transport certification and bounded progress, not charging c
 Machine-readable hashes, the refusal/repair pair, horizon pair, failure-state refinement, replay
 counts, and decisions are in
 `results/charging_coevolution_c3_lineage_replay/audit.json`.
+
+Historical residual baselines (`0.788`, `0.627`, and the later approximately `0.30` values) are not
+used as quantitative comparators for this repaired C3 operator: face-authoritative charge, response
+physics, particle timestep, flight horizon, and hit certification differ. The shared-edge defect makes
+uncertified float32 histories potentially vulnerable to rare hit leakage, but this audit does not
+claim that every historical sample contained one. Likewise, the earlier stuck-map horizon audit found
+zero unresolved trajectories and no current change under 4x/8x horizon extension; the new horizon
+failure arose only when timestep was reduced without preserving total flight time. The post-repair
+baseline begins with the artifacts in this section.
+
+## Repaired-operator decay, restart, and PTC schedule audit
+
+The exact repaired operator was advanced from zero charge for 60 fixed 125 ns updates. A second path
+ran 20 updates, wrote the authoritative face checkpoint, reloaded it, and ran 40 more. At the common
+7.5 microsecond endpoint, every checkpoint array is bitwise equal and both NPZ files have SHA-256
+`91122190f3e306f119ffff62ba7b2140559a7ebf45555883a2219de0ddb2954e`. This certifies restart
+invariance. It is not yet the signed cold-versus-remapped-warm stationary-branch gate, because neither
+path is stationary and both originate from the same zero-charge trajectory.
+
+| Physical time (microseconds) | Node RMS / worst | B2 max, 0.25 / 0.50 micrometers | Maximum `abs(dV/dt)` (V/s) |
+| ---: | ---: | ---: | ---: |
+| 0 | 0.7600 / 0.9951 | 1111.05 / 662.87 | 2.217e8 |
+| 2.5 | 0.3970 / 0.8870 | 19.8109 / 17.4492 | 1.498e6 |
+| 5.0 | 0.3398 / 0.7712 | 10.1449 / 9.9566 | 1.410e6 |
+| 7.5 | 0.2999 / 0.7229 | 8.4359 / 7.5235 | 1.027e6 |
+
+B2 is a dimensionless ion-normalized ratio, not a percentage-valued column: `8.4359` means about
+`843.6%`, while the contract gate is `0.08` or `8%`. The endpoint is therefore about 105 times the
+strict B2 gate, and B1 is about 1027 times its `1000 V/s` pilot tolerance.
+
+Nonnegative fits of `c + A exp(-(t-2.5 microseconds)/tau)` over 2.5--7.5 microseconds describe node
+RMS well (`R^2=0.997`, `tau=5.71 microseconds`) but place its fitted floor at `0.240`. The two B2 fits
+place their floors at `9.66` and `8.58`. Most importantly, maximum potential rate is not described by
+a single exponential (`R^2=0.300`). These short-window fits are diagnostics, not asymptotic proofs;
+they do not support a saturation-time projection or a fit-and-jump proposal.
+
+Two safeguarded SER schedules started from the identical repaired 2.5 microsecond checkpoint:
+
+| Schedule | Allowed residual growth | Accepted / rejected | Pseudo-time advanced | Outcome |
+| --- | ---: | ---: | ---: | --- |
+| A | 0.5% | 30 / 4 | 2.188 microseconds | Repeated halvings collapse the step to 8.77 ns; slower than fixed time |
+| B | 2% | 30 / 0 | 4.206 microseconds | Modest same-operator acceleration; about 10.8% fewer accepted steps |
+
+At schedule B's 6.706 microsecond total equivalent time, the nearest fixed checkpoint is 6.75
+microseconds. RMS differs `0.059%`, worst node `0.379%`, B2 `0.054% / 0.128%`, and potential rate
+`3.27%`. Schedule B earns continued bounded use, but not final promotion: potential rate remains the
+least-refined diagnostic and a matched endpoint/state comparison is still required. Schedule A is
+rejected as an accelerator, not mistaken for a physical failure.
+
+The requested replay canary now records its denominator throughout primary and charged re-impact
+transport. At the exact failure state, one of 8653 eligible field lineages replays (`0.0116%`); at
+7.5 microseconds, zero of 9079 replay. The fixed trajectory has isolated one-lineage events at 2.375,
+3.0, and 7.125 microseconds, not monotone growth with charge.
+
+The proposed potential-space rewrite is not promoted. The physical engine already computes
+`dV/dt` by applying the exact Poisson charge-to-voltage response to conservative `dQ/dt`. Making
+voltage authoritative would require inverting the rank-deficient face-charge projection and would
+lose the unique signed surface ledger. PTC theory permits a nonsingular scaling/mass matrix, but a
+future matrix pseudo-time preconditioner must therefore be defined in authoritative face-charge
+space, remain easily invertible, and reproduce physical-time stationary states under schedule
+refinement; none is assumed here. See [Coffey, Kelley, and Keyes](https://doi.org/10.1137/S106482750241044X).
+
+Machine-readable fits, hashes, schedule comparisons, unit interpretation, replay fractions, and
+accelerator decisions are in `results/charging_coevolution_c3_decay_audit/audit.json`.
 
 ## Evidence and provenance
 

@@ -653,6 +653,41 @@ under-determined) -- an honest result that quantifies how many structures must b
   replay, closes deposition/transfer ledgers to `1.51e-16 / 4.51e-15`, and remains unconverged at
   node RMS/worst `0.3970/0.8870`, B2 `19.81/17.45`, and potential rate `1.50e6` V/s. Evidence is in
   `results/charging_coevolution_c3_lineage_replay/`; C3 remains open and C4 remains unauthorized.
+- **Pre- and post-repair residual numbers are not compared across operators.** The historical
+  `0.788/0.627/~0.30` values used different state authority, response content, trajectory controls,
+  and hit certification. Old float32 histories are potentially vulnerable to the now-demonstrated
+  rare edge miss, but no claim is made that every old sample contained one. The separate stuck-map
+  audit also showed that its historical residual was unchanged by 4x/8x horizon extension; the new
+  adjoint horizon failure resulted from reducing timestep without preserving total flight time.
+  Post-repair baselines therefore start at commit `8317f07`, without contradicting that prior audit.
+- **The repaired physical transient advances, but is not approaching every gate exponentially.** A
+  60-step, 7.5-microsecond zero-charge reference reduces node RMS/worst from `0.760/0.995` to
+  `0.300/0.723`, B2 from `1111/663` to `8.436/7.524`, and maximum potential rate from `2.22e8` to
+  `1.03e6 V/s`. B2 is a ratio: `8.436` is 843.6%, not 8.436%, versus the `0.08` gate. A late-window
+  exponential fits RMS well (`R^2=0.997`, tau 5.71 microseconds) but predicts a `0.240` floor; B2
+  fits also remain far above the gate, while potential rate has only `R^2=0.300`. No saturation-time
+  projection or fit-and-jump is earned.
+- **Checkpoint/restart is bitwise invariant.** The uninterrupted 60-step reference and a 20-step
+  checkpoint plus 40-step restart produce byte-identical checkpoint files and zero difference in
+  every stored state array at 7.5 microseconds. This clears restart mechanics, not the still-pending
+  cold-versus-remapped-warm stationary branch gate.
+- **PTC is schedule-sensitive and only modestly helpful.** A 0.5% residual-growth safeguard suffers
+  four rejections and collapses from about 142 ns to 8.77 ns, making it slower than fixed time. A 2%
+  schedule advances 4.206 microseconds in 30 steps with no rejection; at the nearest fixed checkpoint,
+  RMS and B2 agree within `0.059%` and `0.128%`, while potential rate differs `3.27%`. It saves about
+  10.8% accepted steps, not orders of magnitude. The first schedule is rejected; the second remains a
+  bounded same-operator accelerator pending matched endpoint and schedule refinement.
+- **Replay fraction is now a permanent engine diagnostic.** The transport, reflection cascade,
+  charging history, and run summary carry both replay count and eligible field-lineage denominator.
+  The exact failure state needs one replay among 8653 eligible paths (`0.0116%`); the 7.5-microsecond
+  endpoint needs zero among 9079. No monotone replay increase with accumulated charge is observed.
+- **Out-of-the-box accelerators were screened against the actual state contract.** Potential-space
+  physical evolution is already represented by the Poisson response applied to conservative current;
+  making voltage authoritative would require inverting the known rank-deficient face projection.
+  A matrix mobility remains a possible face-space pseudo-time preconditioner, not physical time, and
+  is held until it can preserve the ledger and pass schedule refinement. Fit-and-jump is rejected by
+  the decay evidence; ML proposals remain downstream of a converged exact-operator training target.
+  Evidence is in `results/charging_coevolution_c3_decay_audit/`.
 
 ## Roadmap (remaining)
 

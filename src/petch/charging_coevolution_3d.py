@@ -463,6 +463,10 @@ def integrate_surface_charging_to_saturation_3d(
                 "tail_closure_l1_current_error_bound_relative", 0.0)),
             transport_lineage_replay_count=int(
                 step.diagnostics["transport_lineage_replay_count"]),
+            transport_lineage_replay_eligible_count=int(
+                step.diagnostics["transport_lineage_replay_eligible_count"]),
+            transport_lineage_replay_fraction=float(
+                step.diagnostics["transport_lineage_replay_fraction"]),
             surface_transfer_relative_charge_balance_error=(
                 step.surface_transfer.relative_charge_balance_error))
         history.append(item)
@@ -561,7 +565,11 @@ def integrate_surface_charging_to_saturation_3d(
             final_potential_rate_max_v_s=(
                 history[-1]["potential_rate_max_v_s"]),
             final_maximum_patch_relative_imbalance=(
-                history[-1]["maximum_patch_relative_imbalance"])))
+                history[-1]["maximum_patch_relative_imbalance"]),
+            maximum_transport_lineage_replay_count=max(
+                item["transport_lineage_replay_count"] for item in history),
+            maximum_transport_lineage_replay_fraction=max(
+                item["transport_lineage_replay_fraction"] for item in history)))
 
 
 @dataclass(frozen=True)
@@ -929,6 +937,10 @@ def solve_charging_coevolution_3d(
                     for item in charging.patch_balance),
                 patch_symmetric_max_relative_imbalance=tuple(
                     item.maximum_relative_imbalance for item in charging.patch_balance),
+                maximum_transport_lineage_replay_count=charging.diagnostics[
+                    "maximum_transport_lineage_replay_count"],
+                maximum_transport_lineage_replay_fraction=charging.diagnostics[
+                    "maximum_transport_lineage_replay_fraction"],
                 remap_relative_charge_balance_error=remap.relative_charge_balance_error,
                 retained_positive_charge_c=remap.retained_positive_charge_c,
                 retained_negative_charge_c=remap.retained_negative_charge_c,
