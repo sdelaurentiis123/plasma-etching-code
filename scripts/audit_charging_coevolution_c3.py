@@ -17,7 +17,10 @@ from petch.charging_coevolution_3d import (
     ResolvedBiasSegment3D,
     solve_charging_coevolution_3d,
 )
-from petch.charging_poisson_3d import NodalPoissonSystem3D
+from petch.charging_poisson_3d import (
+    NodalPoissonSystem3D,
+    lump_triangle_sheet_charge_3d,
+)
 from petch.feature_step_3d import FeatureGeometry3D
 from petch.physical_sputtering import PhysicalSputterMechanism, PhysicalSputterParameters
 from petch.surface_kinetics import EnergeticYield, ParameterEvidence
@@ -134,6 +137,50 @@ def summarize_step(step):
         wall_clock_s=step.wall_clock_s)
 
 
+def legacy_checkpoint_migration_audit():
+    """Refuse a legacy nodal checkpoint unless its face-sheet inverse is unique and accurate."""
+    checkpoint = ROOT / "results/charging_task1_3d_refined_transient_15us/final_states.npz"
+    if not checkpoint.exists():
+        return dict(available=False, accepted=False, reason="legacy checkpoint is unavailable")
+    with np.load(checkpoint) as archived:
+        charge = np.asarray(archived["refined_charge_node_c"], dtype=float)
+        vertices = np.asarray(archived["vertices"], dtype=float)
+        faces = np.asarray(archived["faces"], dtype=int)
+    columns = []
+    for face_index in range(len(faces)):
+        sigma = np.zeros(len(faces))
+        sigma[face_index] = 1.0
+        columns.append(lump_triangle_sheet_charge_3d(
+            charge.shape, vertices, faces, sigma,
+            grid_origin=(0.0, 0.0, 0.0), grid_spacing=0.125,
+            coordinate_length_unit_m=1e-6).ravel())
+    projection = np.stack(columns, axis=1)
+    singular = np.linalg.svd(projection, compute_uv=False)
+    recovered_sigma, _residual, rank, _singular = np.linalg.lstsq(
+        projection, charge.ravel(), rcond=None)
+    reconstructed = projection @ recovered_sigma
+    relative_l2 = float(
+        np.linalg.norm(reconstructed - charge.ravel())
+        / max(np.linalg.norm(charge.ravel()), np.finfo(float).tiny))
+    relative_linf = float(
+        np.max(np.abs(reconstructed - charge.ravel()))
+        / max(np.max(np.abs(charge)), np.finfo(float).tiny))
+    condition = float(singular[0] / singular[-1])
+    accepted = bool(
+        rank == len(faces) and condition <= 1e10
+        and relative_l2 <= 1e-10 and relative_linf <= 1e-10)
+    return dict(
+        available=True, checkpoint=checkpoint.name,
+        checkpoint_sha256=sha256(checkpoint.read_bytes()).hexdigest(),
+        projection_shape=list(projection.shape), face_count=len(faces),
+        numerical_rank=int(rank), condition_number=condition,
+        reconstruction_relative_l2=relative_l2,
+        reconstruction_relative_linf=relative_linf,
+        accepted=accepted,
+        reason=("unique roundoff-accurate face-sheet state" if accepted else
+                "legacy nodal charge has no unique accurate face-sheet inverse; cold-start C3"))
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     feature = geometry()
@@ -199,7 +246,8 @@ def main():
                                  for step in pulsed.steps]),
         refusal_gates=dict(
             b3_tolerance_above_benchmark_uncertainty_refused=b3_anchor_refused,
-            quasi_static_waveform_refused=quasi_waveform_refused),
+            quasi_static_waveform_refused=quasi_waveform_refused,
+            legacy_nodal_checkpoint_migration=legacy_checkpoint_migration_audit()),
         campaign_status=dict(
             manufactured_engine_integration="pass",
             designated_trench_timestep_grid_sample_refinement="pending",

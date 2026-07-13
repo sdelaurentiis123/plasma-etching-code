@@ -23,13 +23,13 @@
       "exact_visibility": true,
       "convergence_contract_revision": "CCA-2026-07-13-R2"
     },
-    "engine_git_revision": "63fa7399115609a2fd7c72a7c64e0f9dbced24de",
+    "engine_git_revision": "e40cd45ba8927e4ca9ef41527ec8068c4a9f423b",
     "source_sha256": {
       "src/petch/charging_coevolution_3d.py": "34a8b3d6eccf4fd74ea9f449229a3664d02c0e0988438394980903ea34c5290c",
       "src/petch/feature_step_3d.py": "4fd836f2abac114ec0da3bd57d2ef4686ae93cb50db74f0427502bbedee5e778",
       "src/petch/surface_charge_remap_3d.py": "e24b2897050b430b32fb427894c8ee88f97f020e10273fc79656106cf5e8f9d6",
       "src/petch/charged_surface_response_3d.py": "788ce3b575477e989332274deb4f31aec8a5e7a98d6d5cd265062395e170965a",
-      "scripts/audit_charging_coevolution_c3.py": "f01663724e717aa12e7178248252b7cd455eff5cb8519534dc0443a6855be9f3"
+      "scripts/audit_charging_coevolution_c3.py": "51d4c136fec30d573accf27942f8806ab31934b5ce59391d24784aa3147fb8c4"
     },
     "hardware": "macOS-15.7.4-arm64-arm-64bit",
     "python": "3.10.17"
@@ -65,7 +65,7 @@
       "retained_negative_charge_c": 0.0,
       "removed_positive_charge_c": 0.0,
       "removed_negative_charge_c": 0.0,
-      "wall_clock_s": 0.02758125029504299
+      "wall_clock_s": 0.02645045891404152
     },
     "reflection_manifest": {
       "model": "weighted angle-dependent specular reflection with constant energy retention",
@@ -130,7 +130,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 9.913467922874998e-20,
         "removed_negative_charge_c": 0.0,
-        "wall_clock_s": 0.021728833205997944
+        "wall_clock_s": 0.020707542076706886
       },
       {
         "charging_converged": false,
@@ -161,7 +161,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 0.0,
         "removed_negative_charge_c": 9.913467922874998e-20,
-        "wall_clock_s": 0.02203266602009535
+        "wall_clock_s": 0.021084042266011238
       }
     ],
     "saturation_required": [
@@ -171,7 +171,23 @@
   },
   "refusal_gates": {
     "b3_tolerance_above_benchmark_uncertainty_refused": true,
-    "quasi_static_waveform_refused": true
+    "quasi_static_waveform_refused": true,
+    "legacy_nodal_checkpoint_migration": {
+      "available": true,
+      "checkpoint": "final_states.npz",
+      "checkpoint_sha256": "65bf3636e82de6eadb84098d3e2b747ebe84faf4715bd10331df5e554f36e4a3",
+      "projection_shape": [
+        765,
+        176
+      ],
+      "face_count": 176,
+      "numerical_rank": 121,
+      "condition_number": 1.4126451939771866e+18,
+      "reconstruction_relative_l2": 0.5844551787472837,
+      "reconstruction_relative_linf": 0.6813220939984186,
+      "accepted": false,
+      "reason": "legacy nodal charge has no unique accurate face-sheet inverse; cold-start C3"
+    }
   },
   "campaign_status": {
     "manufactured_engine_integration": "pass",

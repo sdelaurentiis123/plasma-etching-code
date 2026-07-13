@@ -573,6 +573,12 @@ under-determined) -- an honest result that quantifies how many structures must b
   branch, timestep/grid/sample refinement, observable invariance, and independent high-sample B5
   audit remain required; C4 has not started. Evidence is in
   `CHARGING_COEVOLUTION_C3_AUDIT_2026-07-13.md` and `results/charging_coevolution_c3/`.
+- **Legacy nodal charging checkpoints are not silently promoted to C3 face state.** On the identical
+  archived 176-face refined mesh, the compatible Q1 face-to-node map has numerical rank 121,
+  condition `1.41e18`, and a best reconstruction error of 0.584 relative L2 / 0.681 relative Linf.
+  The inverse is neither unique nor accurate, so migration is refused. The real C3 trajectory must
+  start from zero face charge or a face-authoritative checkpoint produced by C3 itself; no
+  minimum-norm or regularized sheet-charge guess is admitted.
 
 ## Roadmap (remaining)
 
