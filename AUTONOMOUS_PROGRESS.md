@@ -481,6 +481,12 @@ under-determined) -- an honest result that quantifies how many structures must b
   committed beside its heatmap in `results/charging_ion_see_sensitivity_3d/`. This reinforces the
   engine contract: surface response produces particles, shared field transport selects their
   destinations, and only the central transfer ledger updates charge.
+- **The physical-time final audit now uses exactly the integrated operator.** Review found that
+  response-enabled updates used the charged cascade but the final current evaluation omitted the
+  caller's response/material/cascade arguments and reverted to perfect absorption. It also used the
+  original bidirectional options instead of the map frozen during the trajectory. The final audit now
+  receives the same response state and frozen estimator configuration; a zero-update regression
+  requires the returned final transfer to be the explicit cascade, not an absorber transfer.
 - **P3 remains correctly data-blocked, not numerically blocked.** The 2026 paper's electron-TSE law
   refers its six material coefficients to NASA TM-79299 but does not publish the SiO2 values; the
   NASA memorandum derives and sensitivity-tests the NASCAP form while explicitly avoiding any

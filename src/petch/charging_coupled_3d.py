@@ -787,7 +787,14 @@ def integrate_dielectric_charging_transient_3d(
         adjoint_face_quadrature_points=adjoint_face_quadrature_points,
         adjoint_ray_offset=adjoint_ray_offset, adjoint_proposals=adjoint_proposals,
         adjoint_proposal_frames=adjoint_proposal_frames,
-        bidirectional_options=bidirectional_options, transport_device=transport_device)
+        bidirectional_options=common_arguments["bidirectional_options"],
+        transport_device=transport_device,
+        charged_surface_response=charged_surface_response,
+        face_material_id=face_material_id,
+        surface_material_state=surface_material_state,
+        response_launch_offset=response_launch_offset,
+        response_fixed_dt=response_fixed_dt,
+        response_max_bounces=response_max_bounces)
     if not converged:
         final_state = record(
             len(history), final["potential"], final["positive_face_current"],
