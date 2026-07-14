@@ -96,10 +96,13 @@ def main():
     parser.add_argument("--trajectory-max-steps", type=int, default=128000)
     parser.add_argument(
         "--transport-device", choices=("cpu", "cuda", "cuda:0"), default="cpu")
+    parser.add_argument("--response-max-bounces", type=int, default=16)
     parser.add_argument("--response-tail-tolerance", type=float, default=1e-10)
     args = parser.parse_args()
     if args.maximum_steps < 0:
         parser.error("--maximum-steps must be nonnegative")
+    if args.response_max_bounces <= 0:
+        parser.error("--response-max-bounces must be positive")
     if len(args.patch_scales_um) < 2:
         parser.error("at least two --patch-scales-um values are required")
 
@@ -192,6 +195,7 @@ def main():
         forward_level=args.forward_level, adjoint_level=args.adjoint_level,
         electron_estimator=args.electron_estimator,
         initial_face_state_sha256=initial_state_sha256,
+        response_max_bounces=args.response_max_bounces,
         response_tail_tolerance=args.response_tail_tolerance,
         method_map_sha256=file_hash(args.method_map), method_key=args.method_key,
         estimator_map_source="separate pre-C3 pilot; estimator choice only, no nodal charge",
@@ -271,7 +275,7 @@ def main():
                 element_absolute_tolerance=0.02, element_relative_tolerance=0.1,
                 face_quadrature_points=3),
             transport_device=args.transport_device, charged_surface_response=reflection,
-            response_launch_offset=1e-5, response_max_bounces=16,
+            response_launch_offset=1e-5, response_max_bounces=args.response_max_bounces,
             response_relative_tail_tolerance=args.response_tail_tolerance)
     except SurfaceChargingSaturationError as error:
         wall_clock_s = perf_counter() - started
