@@ -91,6 +91,8 @@ def main():
               "exists it is loaded automatically and an explicit value must agree"))
     parser.add_argument("--trajectory-dt", type=float, default=0.0003125)
     parser.add_argument("--trajectory-max-steps", type=int, default=128000)
+    parser.add_argument(
+        "--transport-device", choices=("cpu", "cuda", "cuda:0"), default="cpu")
     parser.add_argument("--response-tail-tolerance", type=float, default=1e-10)
     args = parser.parse_args()
     if args.maximum_steps < 0:
@@ -180,6 +182,7 @@ def main():
         adjoint_proposal_seeds={"Ar+": args.seed, "electron": args.seed + 4},
         trajectory_dt=args.trajectory_dt,
         trajectory_max_steps=args.trajectory_max_steps,
+        transport_device=args.transport_device,
         forward_level=args.forward_level, adjoint_level=args.adjoint_level,
         initial_face_state_sha256=initial_state_sha256,
         response_tail_tolerance=args.response_tail_tolerance,
@@ -253,7 +256,7 @@ def main():
                 method_hint={"Ar+": method_hint}, require_certification=False,
                 element_absolute_tolerance=0.02, element_relative_tolerance=0.1,
                 face_quadrature_points=3),
-            transport_device="cpu", charged_surface_response=reflection,
+            transport_device=args.transport_device, charged_surface_response=reflection,
             response_launch_offset=1e-5, response_max_bounces=16,
             response_relative_tail_tolerance=args.response_tail_tolerance)
     except SurfaceChargingSaturationError as error:
