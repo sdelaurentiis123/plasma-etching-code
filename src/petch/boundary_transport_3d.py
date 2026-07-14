@@ -388,6 +388,63 @@ def _field_hit_events_3d(
             break
 
 
+def _trace_field_events_with_horizon_3d(
+        mesh, potential_wp, grid_origin, grid_spacing, grid_maximum,
+        origin, velocity, charge_number, fixed_dt, max_steps, periodic_lateral,
+        selected_device, *, adaptive_horizon=False, emergency_max_steps=None):
+    """Run one field-flight population, extending only its deterministic work horizon.
+
+    Every extension replays the identical launch population from its original state at the same
+    fixed timestep. Therefore the physical operator, sample measure, and accepted charging state
+    are unchanged; only the maximum observable flight time grows. The returned arrays always
+    correspond to one complete replay at ``final_max_steps``.
+    """
+    initial_max_steps = int(max_steps)
+    if emergency_max_steps is None:
+        emergency_max_steps = initial_max_steps
+    if (not isinstance(adaptive_horizon, (bool, np.bool_))
+            or int(emergency_max_steps) != emergency_max_steps
+            or emergency_max_steps < initial_max_steps):
+        raise ValueError("invalid adaptive trajectory-horizon controls")
+    emergency_max_steps = int(emergency_max_steps)
+    ray_count = len(origin)
+    origin_wp = wp.array(
+        np.ascontiguousarray(np.asarray(origin, dtype=np.float32)),
+        dtype=wp.vec3, device=selected_device)
+    velocity_wp = wp.array(
+        np.ascontiguousarray(np.asarray(velocity, dtype=np.float32)),
+        dtype=wp.vec3, device=selected_device)
+    active_max_steps = initial_max_steps
+    extension_count = 0
+    while True:
+        hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
+        hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
+        hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
+        termination_wp = wp.zeros(ray_count, dtype=wp.int8, device=selected_device)
+        terminal_position_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
+        terminal_velocity_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
+        wp.launch(
+            _field_hit_events_3d, dim=ray_count, device=selected_device,
+            inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), wp.vec3(*grid_spacing),
+                    wp.vec3(*grid_maximum), origin_wp, velocity_wp,
+                    float(charge_number), float(fixed_dt), int(active_max_steps),
+                    int(bool(periodic_lateral)), hit_face_wp, hit_cosine_wp, hit_energy_wp,
+                    termination_wp, terminal_position_wp, terminal_velocity_wp])
+        result = (
+            hit_face_wp.numpy().astype(int),
+            hit_cosine_wp.numpy().astype(float),
+            hit_energy_wp.numpy().astype(float),
+            termination_wp.numpy().astype(int),
+            terminal_position_wp.numpy().astype(float),
+            terminal_velocity_wp.numpy().astype(float),
+        )
+        if (not np.any(result[3] == 0) or not adaptive_horizon
+                or active_max_steps >= emergency_max_steps):
+            return result + (active_max_steps, extension_count)
+        active_max_steps = min(2 * active_max_steps, emergency_max_steps)
+        extension_count += 1
+
+
 @dataclass(frozen=True)
 class BoundaryTransport3DResult:
     surface_fluxes: SurfaceFluxes
@@ -399,6 +456,10 @@ class BoundaryTransport3DResult:
     lineage_replay_count: int = 0
     lineage_replay_eligible_count: int = 0
     edge_launch_inset_count: int = 0
+    trajectory_horizon_extension_count: int = 0
+    trajectory_initial_max_steps: int = 0
+    trajectory_final_max_steps: int = 0
+    trajectory_emergency_max_steps: int = 0
 
     def __post_init__(self):
         object.__setattr__(self, "hit_probability", MappingProxyType(dict(self.hit_probability)))
@@ -420,6 +481,22 @@ class BoundaryTransport3DResult:
             raise ValueError("edge_launch_inset_count must be a nonnegative integer")
         object.__setattr__(
             self, "edge_launch_inset_count", int(self.edge_launch_inset_count))
+        horizon = (
+            self.trajectory_horizon_extension_count,
+            self.trajectory_initial_max_steps,
+            self.trajectory_final_max_steps,
+            self.trajectory_emergency_max_steps)
+        if (any(int(value) != value or value < 0 for value in horizon)
+                or (any(horizon[1:])
+                    and not 0 < self.trajectory_initial_max_steps
+                    <= self.trajectory_final_max_steps
+                    <= self.trajectory_emergency_max_steps)
+                or (not any(horizon[1:]) and any(horizon))):
+            raise ValueError("invalid trajectory-horizon diagnostics")
+        for name in (
+                "trajectory_horizon_extension_count", "trajectory_initial_max_steps",
+                "trajectory_final_max_steps", "trajectory_emergency_max_steps"):
+            object.__setattr__(self, name, int(getattr(self, name)))
 
     @property
     def lineage_replay_fraction(self):
@@ -443,6 +520,10 @@ class ChargedSurfaceReimpactPopulation3D:
     lineage_replay_count: int = 0
     lineage_replay_eligible_count: int = 0
     edge_launch_inset_count: int = 0
+    trajectory_horizon_extension_count: int = 0
+    trajectory_initial_max_steps: int = 0
+    trajectory_final_max_steps: int = 0
+    trajectory_emergency_max_steps: int = 0
 
     def __post_init__(self):
         if (not isinstance(self.emitted, OutgoingChargedParticleEvents3D)
@@ -495,6 +576,22 @@ class ChargedSurfaceReimpactPopulation3D:
             self, "lineage_replay_eligible_count", int(self.lineage_replay_eligible_count))
         object.__setattr__(
             self, "edge_launch_inset_count", int(self.edge_launch_inset_count))
+        horizon = (
+            self.trajectory_horizon_extension_count,
+            self.trajectory_initial_max_steps,
+            self.trajectory_final_max_steps,
+            self.trajectory_emergency_max_steps)
+        if (any(int(value) != value or value < 0 for value in horizon)
+                or (any(horizon[1:])
+                    and not 0 < self.trajectory_initial_max_steps
+                    <= self.trajectory_final_max_steps
+                    <= self.trajectory_emergency_max_steps)
+                or (not any(horizon[1:]) and any(horizon))):
+            raise ValueError("invalid re-impact trajectory-horizon diagnostics")
+        for name in (
+                "trajectory_horizon_extension_count", "trajectory_initial_max_steps",
+                "trajectory_final_max_steps", "trajectory_emergency_max_steps"):
+            object.__setattr__(self, name, int(getattr(self, name)))
 
 
 def _certify_field_hit_lineage_3d(
@@ -697,7 +794,8 @@ def trace_charged_surface_events_field_3d(
         outgoing_populations, verts, faces, areas, face_gas_normals, *,
         nodal_potential_v, potential_origin, potential_spacing,
         mesh_length_unit_m=1e-6, launch_offset=1e-5, fixed_dt=0.01,
-        max_steps=10000, periodic_lateral=False, allow_truncation=False, device=None):
+        max_steps=10000, periodic_lateral=False, allow_truncation=False, device=None,
+        adaptive_horizon=False, emergency_max_steps=None):
     """Trace sparse charged surface emissions through the shared nodal-field integrator.
 
     Particle rate is the invariant measure: a landed event is divided by its target's physical
@@ -740,6 +838,13 @@ def trace_charged_surface_events_field_3d(
             or not np.isfinite(fixed_dt) or fixed_dt <= 0.0
             or int(max_steps) != max_steps or max_steps <= 0):
         raise ValueError("invalid charged surface-emission field or integration controls")
+    if emergency_max_steps is None:
+        emergency_max_steps = int(max_steps)
+    if (not isinstance(adaptive_horizon, (bool, np.bool_))
+            or int(emergency_max_steps) != emergency_max_steps
+            or emergency_max_steps < max_steps):
+        raise ValueError("invalid charged surface-emission trajectory horizon")
+    emergency_max_steps = int(emergency_max_steps)
     grid_maximum = grid_origin + (np.asarray(potential.shape) - 1) * grid_spacing
     tolerance = 1e-7 * max(float(np.max(grid_spacing)), 1.0)
     if (np.any(verts < grid_origin - tolerance)
@@ -779,33 +884,22 @@ def trace_charged_surface_events_field_3d(
                 event_incident_direction=np.empty((0, 3)))
             results.append(ChargedSurfaceReimpactPopulation3D(
                 population, incident, np.empty(0, dtype=np.int8), np.empty(0, dtype=int),
-                0.0, 0.0, 0.0, 0.0, 0.0, 0, 0))
+                0.0, 0.0, 0.0, 0.0, 0.0, 0, 0,
+                trajectory_initial_max_steps=int(max_steps),
+                trajectory_final_max_steps=int(max_steps),
+                trajectory_emergency_max_steps=emergency_max_steps))
             continue
-        hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
-        hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
-        hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
-        termination_wp = wp.zeros(ray_count, dtype=wp.int8, device=selected_device)
-        terminal_position_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
-        terminal_velocity_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
-        wp.launch(
-            _field_hit_events_3d, dim=ray_count, device=selected_device,
-            inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), wp.vec3(*grid_spacing),
-                    wp.vec3(*grid_maximum),
-                    wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
-                    wp.array(velocity.astype(np.float32), dtype=wp.vec3, device=selected_device),
-                    float(population.charge_number), float(fixed_dt), int(max_steps),
-                    int(bool(periodic_lateral)), hit_face_wp, hit_cosine_wp, hit_energy_wp,
-                    termination_wp, terminal_position_wp, terminal_velocity_wp])
-        hit_face = hit_face_wp.numpy().astype(int)
-        hit_cosine = hit_cosine_wp.numpy().astype(float)
-        hit_energy = hit_energy_wp.numpy().astype(float)
-        termination = termination_wp.numpy().astype(int)
-        terminal_position = terminal_position_wp.numpy().astype(float)
-        terminal_velocity = terminal_velocity_wp.numpy().astype(float)
+        (hit_face, hit_cosine, hit_energy, termination,
+         terminal_position, terminal_velocity,
+         final_max_steps, horizon_extension_count) = _trace_field_events_with_horizon_3d(
+            mesh, potential_wp, grid_origin, grid_spacing, grid_maximum,
+            origin, velocity, population.charge_number, fixed_dt, max_steps,
+            periodic_lateral, selected_device, adaptive_horizon=adaptive_horizon,
+            emergency_max_steps=emergency_max_steps)
         lineage_replay_count = _repair_invalid_field_hits_float64_3d(
             population.name, origin, velocity, population.charge_number,
             potential, grid_origin, grid_spacing, verts, faces, normals,
-            fixed_dt, max_steps, periodic_lateral, hit_face, hit_cosine, hit_energy,
+            fixed_dt, final_max_steps, periodic_lateral, hit_face, hit_cosine, hit_energy,
             termination, terminal_position, terminal_velocity,
             source_face=population.source_face)
         hit = termination == 1
@@ -814,9 +908,11 @@ def trace_charged_surface_events_field_3d(
         if not np.all(hit | escaped | truncated):
             raise RuntimeError("charged field transport returned an unknown termination state")
         if np.any(truncated) and not allow_truncation:
+            qualifier = "emergency " if adaptive_horizon else ""
             raise RuntimeError(
-                f"surface-emitted trajectories for {population.name!r} exhausted max_steps; "
-                "increase the physical time horizon or explicitly allow diagnostic truncation")
+                f"surface-emitted trajectories for {population.name!r} exhausted "
+                f"{qualifier}max_steps={final_max_steps}; increase the physical time horizon "
+                "or explicitly allow diagnostic truncation")
         event_rate = population.event_rate_s
         incident_direction, incident_cosine = _certify_field_hit_lineage_3d(
             population.name, hit_face[hit], hit_cosine[hit],
@@ -837,7 +933,11 @@ def trace_charged_surface_events_field_3d(
             population, incident, termination, hit_face, emitted_rate, landed_rate,
             escaped_rate, truncated_rate,
             abs(residual) / max(emitted_rate, np.finfo(float).tiny),
-            lineage_replay_count, ray_count, edge_launch_inset_count))
+            lineage_replay_count, ray_count, edge_launch_inset_count,
+            trajectory_horizon_extension_count=horizon_extension_count,
+            trajectory_initial_max_steps=int(max_steps),
+            trajectory_final_max_steps=final_max_steps,
+            trajectory_emergency_max_steps=emergency_max_steps))
     return tuple(results)
 
 
@@ -1062,6 +1162,10 @@ def merge_boundary_transport_results_3d(*results):
     neutral = {}; energetic = []; hit = {}; escaped = {}; truncated = {}
     species_seen = set(); models = []; limitations = []
     replay_count = 0; replay_eligible_count = 0; edge_launch_inset_count = 0
+    horizon_extension_count = 0
+    horizon_initial_max_steps = 0
+    horizon_final_max_steps = 0
+    horizon_emergency_max_steps = 0
     for result in results:
         species = set(result.hit_probability)
         if (species != set(result.escape_probability)
@@ -1081,6 +1185,13 @@ def merge_boundary_transport_results_3d(*results):
         replay_count += result.lineage_replay_count
         replay_eligible_count += result.lineage_replay_eligible_count
         edge_launch_inset_count += result.edge_launch_inset_count
+        horizon_extension_count += result.trajectory_horizon_extension_count
+        horizon_initial_max_steps = max(
+            horizon_initial_max_steps, result.trajectory_initial_max_steps)
+        horizon_final_max_steps = max(
+            horizon_final_max_steps, result.trajectory_final_max_steps)
+        horizon_emergency_max_steps = max(
+            horizon_emergency_max_steps, result.trajectory_emergency_max_steps)
     energetic_names = [item.name for item in energetic]
     if len(set(energetic_names)) != len(energetic_names):
         raise ValueError("merged energetic species names must be unique")
@@ -1092,7 +1203,11 @@ def merge_boundary_transport_results_3d(*results):
         known_limitations=tuple(dict.fromkeys(limitations)),
         lineage_replay_count=replay_count,
         lineage_replay_eligible_count=replay_eligible_count,
-        edge_launch_inset_count=edge_launch_inset_count)
+        edge_launch_inset_count=edge_launch_inset_count,
+        trajectory_horizon_extension_count=horizon_extension_count,
+        trajectory_initial_max_steps=horizon_initial_max_steps,
+        trajectory_final_max_steps=horizon_final_max_steps,
+        trajectory_emergency_max_steps=horizon_emergency_max_steps)
 
 
 def estimate_diffuse_form_factors_3d(
@@ -1521,7 +1636,7 @@ def trace_boundary_state_field_3d(
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0), n_position=256,
         seed=0, fixed_dt=0.01, max_steps=10000, allow_truncation=False,
         phase_space_log2_samples=None, periodic_lateral=False, face_gas_normals=None,
-        device=None):
+        device=None, adaptive_horizon=False, emergency_max_steps=None):
     """Trace collisionless species through a supplied 3-D nodal electrostatic potential.
 
     Velocity coordinates retain the ``sqrt(eV)`` convention of ``PlasmaBoundaryState``. With mesh
@@ -1597,6 +1712,13 @@ def trace_boundary_state_field_3d(
         raise ValueError("phase_space_log2_samples must be a nonnegative integer")
     if not np.isfinite(fixed_dt) or fixed_dt <= 0.0 or int(max_steps) != max_steps or max_steps <= 0:
         raise ValueError("fixed_dt and max_steps must be positive")
+    if emergency_max_steps is None:
+        emergency_max_steps = int(max_steps)
+    if (not isinstance(adaptive_horizon, (bool, np.bool_))
+            or int(emergency_max_steps) != emergency_max_steps
+            or emergency_max_steps < max_steps):
+        raise ValueError("invalid field-transport trajectory horizon")
+    emergency_max_steps = int(emergency_max_steps)
     role = dict(species_role); names = {item.name for item in boundary.species}
     if set(role) != names:
         raise ValueError("species_role must classify every and only boundary species")
@@ -1626,6 +1748,8 @@ def trace_boundary_state_field_3d(
     hit_probability = {}; escape_probability = {}; truncation_probability = {}
     float64_replay_count = 0
     float64_replay_eligible_count = 0
+    horizon_extension_count = 0
+    final_max_steps_used = int(max_steps)
     for species in boundary.species:
         if phase_space_log2_samples is None:
             sample_count = species.velocity_sqrt_eV.shape[0]
@@ -1651,42 +1775,33 @@ def trace_boundary_state_field_3d(
         float64_replay_eligible_count += ray_count
         if np.any(np.linalg.norm(velocity, axis=1) <= 0.0):
             raise ValueError(f"species {species.name!r} contains a zero-speed incident sample")
-        hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
-        hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
-        hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
-        termination_wp = wp.zeros(ray_count, dtype=wp.int8, device=selected_device)
-        terminal_position_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
-        terminal_velocity_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
-        wp.launch(
-            _field_hit_events_3d, dim=ray_count, device=selected_device,
-            inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), wp.vec3(*grid_spacing),
-                    wp.vec3(*grid_maximum),
-                    wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
-                    wp.array(velocity.astype(np.float32), dtype=wp.vec3, device=selected_device),
-                    float(species.charge_number), float(fixed_dt), int(max_steps),
-                    int(bool(periodic_lateral)),
-                    hit_face_wp, hit_cosine_wp, hit_energy_wp, termination_wp,
-                    terminal_position_wp, terminal_velocity_wp])
-        hit_face = hit_face_wp.numpy().astype(int)
-        termination = termination_wp.numpy().astype(int)
+        (hit_face, hit_cosine, hit_energy, termination,
+         terminal_position, terminal_velocity,
+         species_final_max_steps, species_extension_count
+         ) = _trace_field_events_with_horizon_3d(
+            mesh, potential_wp, grid_origin, grid_spacing, grid_maximum,
+            origin, velocity, species.charge_number, fixed_dt, max_steps,
+            periodic_lateral, selected_device, adaptive_horizon=adaptive_horizon,
+            emergency_max_steps=emergency_max_steps)
+        horizon_extension_count += species_extension_count
+        final_max_steps_used = max(final_max_steps_used, species_final_max_steps)
         hit = termination == 1; escaped = termination == 2; truncated = termination == 0
-        hit_cosine = hit_cosine_wp.numpy().astype(float)
-        hit_energy = hit_energy_wp.numpy().astype(float)
-        terminal_position = terminal_position_wp.numpy().astype(float)
-        terminal_velocity = terminal_velocity_wp.numpy().astype(float)
         float64_replay_count += _repair_invalid_field_hits_float64_3d(
             species.name, origin, velocity, species.charge_number,
             potential, grid_origin, grid_spacing, verts, faces, normals,
-            fixed_dt, max_steps, periodic_lateral, hit_face, hit_cosine, hit_energy,
+            fixed_dt, species_final_max_steps, periodic_lateral,
+            hit_face, hit_cosine, hit_energy,
             termination, terminal_position, terminal_velocity)
         hit = termination == 1; escaped = termination == 2; truncated = termination == 0
         hit_probability[species.name] = float(physical_weight[hit].sum())
         escape_probability[species.name] = float(physical_weight[escaped].sum())
         truncation_probability[species.name] = float(physical_weight[truncated].sum())
         if truncation_probability[species.name] > 0.0 and not allow_truncation:
+            qualifier = "emergency " if adaptive_horizon else ""
             raise RuntimeError(
-                f"3-D trajectories for {species.name!r} exhausted max_steps; "
-                "increase the physical time horizon or explicitly allow diagnostic truncation")
+                f"3-D trajectories for {species.name!r} exhausted {qualifier}"
+                f"max_steps={species_final_max_steps}; increase the physical time horizon "
+                "or explicitly allow diagnostic truncation")
         event_flux = (species.flux_m2_s * source_area * physical_weight[hit]
                       / areas[hit_face[hit]])
         incident_direction, incident_cosine = _certify_field_hit_lineage_3d(
@@ -1721,7 +1836,11 @@ def trace_boundary_state_field_3d(
             f"{float64_replay_count} gas-normal-invalid float32 hit(s) were replayed with the "
             "same Verlet path and edge-inclusive float64 hard-triangle visibility",
         )), lineage_replay_count=float64_replay_count,
-        lineage_replay_eligible_count=float64_replay_eligible_count)
+        lineage_replay_eligible_count=float64_replay_eligible_count,
+        trajectory_horizon_extension_count=horizon_extension_count,
+        trajectory_initial_max_steps=int(max_steps),
+        trajectory_final_max_steps=final_max_steps_used,
+        trajectory_emergency_max_steps=emergency_max_steps)
 
 
 def gather_boundary_state_field_adjoint_3d(
@@ -1732,7 +1851,8 @@ def gather_boundary_state_field_adjoint_3d(
         face_quadrature_points=3, ray_offset=1e-5, fixed_dt=0.01,
         max_steps=10000, periodic_lateral=False, proposal_by_species=None,
         proposal_frame_by_species="surface_local", face_position_seed=None,
-        gather_face_indices=None, device=None):
+        gather_face_indices=None, device=None,
+        adaptive_horizon=False, emergency_max_steps=None):
     """Gather charged boundary flux on every triangle with a reversible Liouville adjoint.
 
     A boundary velocity proposal may be interpreted in the triangle's local two-tangent/inward-normal
@@ -1769,6 +1889,13 @@ def gather_boundary_state_field_adjoint_3d(
             or not np.isfinite(fixed_dt) or fixed_dt <= 0.0
             or int(max_steps) != max_steps or max_steps <= 0):
         raise ValueError("invalid adjoint field-gather inputs")
+    if emergency_max_steps is None:
+        emergency_max_steps = int(max_steps)
+    if (not isinstance(adaptive_horizon, (bool, np.bool_))
+            or int(emergency_max_steps) != emergency_max_steps
+            or emergency_max_steps < max_steps):
+        raise ValueError("invalid adjoint trajectory horizon")
+    emergency_max_steps = int(emergency_max_steps)
     geometric_areas = 0.5 * np.linalg.norm(np.cross(
         verts[faces[:, 1]] - verts[faces[:, 0]],
         verts[faces[:, 2]] - verts[faces[:, 0]]), axis=1)
@@ -1871,6 +1998,8 @@ def gather_boundary_state_field_adjoint_3d(
         np.ascontiguousarray(potential.astype(np.float32)), dtype=float, device=selected_device)
     source_area = (bounds[1] - bounds[0]) * (bounds[3] - bounds[2])
     energetic_flux = []; hit_probability = {}; escape_probability = {}; truncation_probability = {}
+    horizon_extension_count = 0
+    final_max_steps_used = int(max_steps)
     for species in boundary.species:
         proposal = proposals.get(species.name, species)
         if (proposal.name != species.name or proposal.charge_number != species.charge_number
@@ -1901,25 +2030,16 @@ def gather_boundary_state_field_adjoint_3d(
             surface_normal_speed = sampled_velocity[:, 2]
         reverse_velocity = -forward_surface_velocity
         ray_count = launch_point.shape[0]
-        hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
-        hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
-        hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
-        termination_wp = wp.zeros(ray_count, dtype=wp.int8, device=selected_device)
-        terminal_position_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
-        terminal_velocity_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
-        wp.launch(
-            _field_hit_events_3d, dim=ray_count, device=selected_device,
-            inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), wp.vec3(*grid_spacing),
-                    wp.vec3(*grid_maximum),
-                    wp.array(launch_point.astype(np.float32), dtype=wp.vec3, device=selected_device),
-                    wp.array(reverse_velocity.astype(np.float32), dtype=wp.vec3,
-                             device=selected_device),
-                    float(species.charge_number), float(fixed_dt), int(max_steps),
-                    int(bool(periodic_lateral)), hit_face_wp, hit_cosine_wp, hit_energy_wp,
-                    termination_wp, terminal_position_wp, terminal_velocity_wp])
-        termination = termination_wp.numpy().astype(int)
-        terminal_position = terminal_position_wp.numpy().astype(float)
-        terminal_velocity = terminal_velocity_wp.numpy().astype(float)
+        (_hit_face, _hit_cosine, _hit_energy, termination,
+         terminal_position, terminal_velocity,
+         species_final_max_steps, species_extension_count
+         ) = _trace_field_events_with_horizon_3d(
+            mesh, potential_wp, grid_origin, grid_spacing, grid_maximum,
+            launch_point, reverse_velocity, species.charge_number, fixed_dt, max_steps,
+            periodic_lateral, selected_device, adaptive_horizon=adaptive_horizon,
+            emergency_max_steps=emergency_max_steps)
+        horizon_extension_count += species_extension_count
+        final_max_steps_used = max(final_max_steps_used, species_final_max_steps)
         reached_source = (termination == 2) & (terminal_position[:, 2] > grid_maximum[2])
         if not periodic_lateral:
             reached_source &= (
@@ -1929,8 +2049,10 @@ def gather_boundary_state_field_adjoint_3d(
                 & (terminal_position[:, 1] <= bounds[3]))
         truncated = termination == 0
         if np.any(truncated):
+            qualifier = "emergency " if adaptive_horizon else ""
             raise RuntimeError(
-                f"adjoint trajectories for {species.name!r} exhausted max_steps")
+                f"adjoint trajectories for {species.name!r} exhausted {qualifier}"
+                f"max_steps={species_final_max_steps}")
         boundary_velocity = np.column_stack((
             -terminal_velocity[:, 0], -terminal_velocity[:, 1], terminal_velocity[:, 2]))
         log_physical = species.log_flux_density(boundary_velocity)
@@ -1969,7 +2091,11 @@ def gather_boundary_state_field_adjoint_3d(
         ("reversible adjoint uses the supplied finite surface velocity quadrature",
          "triangle position quadrature requires refinement at partial visibility",
          "no surface reflection or re-emission",
-         "float32 field integration and triangle-ray intersection"))
+         "float32 field integration and triangle-ray intersection"),
+        trajectory_horizon_extension_count=horizon_extension_count,
+        trajectory_initial_max_steps=int(max_steps),
+        trajectory_final_max_steps=final_max_steps_used,
+        trajectory_emergency_max_steps=emergency_max_steps)
 
 
 def trace_boundary_state_bidirectional_field_3d(
@@ -1985,7 +2111,8 @@ def trace_boundary_state_bidirectional_field_3d(
         proposal_by_species=None, proposal_frame_by_species="surface_local", method_hint=None,
         require_certification=True,
         face_quadrature_points=3, ray_offset=1e-5, fixed_dt=0.01, max_steps=10000,
-        periodic_lateral=False, device=None):
+        periodic_lateral=False, device=None,
+        adaptive_horizon=False, emergency_max_steps=None):
     """Audit and select forward or adjoint charged transport independently on every triangle.
 
     Four or more independent scrambled-QMC replicates supply per-face standard errors. A direct
@@ -2023,6 +2150,11 @@ def trace_boundary_state_bidirectional_field_3d(
     selections = {}; sampling = {}; populations = []; hit = {}; escaped = {}; truncated = {}
     bidirectional_replay_count = 0
     bidirectional_replay_eligible_count = 0
+    horizon_results = []
+
+    def record_horizon(result):
+        horizon_results.append(result)
+        return result
     for species_index, species in enumerate(boundary.species):
         species_boundary = PlasmaBoundaryState(
             (species,), boundary.reference_plane_m, provenance=boundary.provenance)
@@ -2051,7 +2183,7 @@ def trace_boundary_state_bidirectional_field_3d(
             replicate_seed = int(seed) + 104729 * replicate + 15485863 * species_index
             replicate_seeds.append(replicate_seed)
             if frozen_forward_needed:
-                forward_results.append(trace_boundary_state_field_3d(
+                forward_results.append(record_horizon(trace_boundary_state_field_3d(
                     species_boundary, species_roles, verts, faces, areas,
                     source_bounds=source_bounds, source_z=source_z,
                     nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
@@ -2059,12 +2191,13 @@ def trace_boundary_state_bidirectional_field_3d(
                     mesh_origin_m=mesh_origin_m, seed=replicate_seed, fixed_dt=fixed_dt,
                     max_steps=max_steps, phase_space_log2_samples=int(forward_log2_samples),
                     periodic_lateral=periodic_lateral, face_gas_normals=gas_normals,
-                    device=device))
+                    device=device, adaptive_horizon=adaptive_horizon,
+                    emergency_max_steps=emergency_max_steps)))
             if frozen_adjoint_needed:
                 proposal = qmc_boundary_proposal(
                     template, int(adjoint_log2_samples), replicate_seed,
                     name=species.name)
-                adjoint_results.append(gather_boundary_state_field_adjoint_3d(
+                adjoint_results.append(record_horizon(gather_boundary_state_field_adjoint_3d(
                     species_boundary, species_roles, verts, faces, areas, centroids, gas_normals,
                     source_bounds=source_bounds, source_z=source_z,
                     nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
@@ -2075,7 +2208,9 @@ def trace_boundary_state_bidirectional_field_3d(
                     proposal_by_species={species.name: proposal},
                     proposal_frame_by_species={species.name: frames[species.name]},
                     face_position_seed=replicate_seed,
-                    gather_face_indices=frozen_adjoint_faces, device=device))
+                    gather_face_indices=frozen_adjoint_faces, device=device,
+                    adaptive_horizon=adaptive_horizon,
+                    emergency_max_steps=emergency_max_steps)))
         empty_population = FaceResolvedEnergeticFlux(
             species.name, len(faces), np.empty(0, dtype=int), np.empty(0),
             np.empty(0), np.empty(0), event_position=np.empty((0, 3)),
@@ -2113,7 +2248,7 @@ def trace_boundary_state_bidirectional_field_3d(
                 break
             if refine_forward:
                 forward_level += 1
-                forward_results = [trace_boundary_state_field_3d(
+                forward_results = [record_horizon(trace_boundary_state_field_3d(
                     species_boundary, species_roles, verts, faces, areas,
                     source_bounds=source_bounds, source_z=source_z,
                     nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
@@ -2121,7 +2256,8 @@ def trace_boundary_state_bidirectional_field_3d(
                     mesh_origin_m=mesh_origin_m, seed=replicate_seed, fixed_dt=fixed_dt,
                     max_steps=max_steps, phase_space_log2_samples=forward_level,
                     periodic_lateral=periodic_lateral, face_gas_normals=gas_normals,
-                    device=device)
+                    device=device, adaptive_horizon=adaptive_horizon,
+                    emergency_max_steps=emergency_max_steps))
                     for replicate_seed in replicate_seeds]
                 forward_populations = [item.surface_fluxes.energetic_fluxes[0]
                                        for item in forward_results]
@@ -2133,7 +2269,7 @@ def trace_boundary_state_bidirectional_field_3d(
                 for replicate, replicate_seed in enumerate(replicate_seeds):
                     proposal = qmc_boundary_proposal(
                         template, adjoint_level, replicate_seed, name=species.name)
-                    partial = gather_boundary_state_field_adjoint_3d(
+                    partial_result = record_horizon(gather_boundary_state_field_adjoint_3d(
                         species_boundary, species_roles, verts, faces, areas,
                         centroids, gas_normals, source_bounds=source_bounds, source_z=source_z,
                         nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
@@ -2144,7 +2280,9 @@ def trace_boundary_state_bidirectional_field_3d(
                         proposal_by_species={species.name: proposal},
                         proposal_frame_by_species={species.name: frames[species.name]},
                         face_position_seed=replicate_seed, gather_face_indices=unresolved,
-                        device=device).surface_fluxes.energetic_fluxes[0]
+                        device=device, adaptive_horizon=adaptive_horizon,
+                        emergency_max_steps=emergency_max_steps))
+                    partial = partial_result.surface_fluxes.energetic_fluxes[0]
                     adjoint_populations[replicate] = _replace_population_face_events_3d(
                         adjoint_populations[replicate], partial, unresolved)
             pooled_forward_samples = int(n_replicates) * 2 ** forward_level
@@ -2182,5 +2320,13 @@ def trace_boundary_state_bidirectional_field_3d(
          "scrambled-QMC uncertainty requires independent replicate and level refinement",
          "no surface reflection or re-emission"),
         lineage_replay_count=bidirectional_replay_count,
-        lineage_replay_eligible_count=bidirectional_replay_eligible_count)
+        lineage_replay_eligible_count=bidirectional_replay_eligible_count,
+        trajectory_horizon_extension_count=sum(
+            item.trajectory_horizon_extension_count for item in horizon_results),
+        trajectory_initial_max_steps=max(
+            (item.trajectory_initial_max_steps for item in horizon_results), default=0),
+        trajectory_final_max_steps=max(
+            (item.trajectory_final_max_steps for item in horizon_results), default=0),
+        trajectory_emergency_max_steps=max(
+            (item.trajectory_emergency_max_steps for item in horizon_results), default=0))
     return BidirectionalBoundaryTransport3DResult(transport, selections, sampling)

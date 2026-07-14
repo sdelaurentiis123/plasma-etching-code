@@ -659,8 +659,14 @@ def _apply_diffuse_neutral_transport(
         transport.hit_probability, transport.escape_probability,
         transport.truncation_probability,
         transport.transport_model + " + flux_conservative_diffuse_radiosity",
-        limitations, transport.lineage_replay_count,
-        transport.lineage_replay_eligible_count)
+        limitations, lineage_replay_count=transport.lineage_replay_count,
+        lineage_replay_eligible_count=transport.lineage_replay_eligible_count,
+        edge_launch_inset_count=transport.edge_launch_inset_count,
+        trajectory_horizon_extension_count=(
+            transport.trajectory_horizon_extension_count),
+        trajectory_initial_max_steps=transport.trajectory_initial_max_steps,
+        trajectory_final_max_steps=transport.trajectory_final_max_steps,
+        trajectory_emergency_max_steps=transport.trajectory_emergency_max_steps)
     return updated, MappingProxyType(diagnostics)
 
 
@@ -672,6 +678,7 @@ def advance_feature_step_3d(
         surface_state_mesh_fingerprint=None,
         nodal_potential_v=None, potential_origin=None, potential_spacing=None,
         trajectory_fixed_dt=None, trajectory_max_steps=10000,
+        trajectory_adaptive_horizon=False, trajectory_emergency_max_steps=None,
         field_periodic_lateral=False,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         initial_charge_node_c=None, charging_options=None,
@@ -692,6 +699,13 @@ def advance_feature_step_3d(
         raise ValueError("duration_s must be finite and nonnegative")
     if not np.isfinite(cfl_number) or not 0.0 < cfl_number < 1.0:
         raise ValueError("cfl_number must lie strictly between zero and one")
+    if (int(trajectory_max_steps) != trajectory_max_steps or trajectory_max_steps <= 0
+            or not isinstance(trajectory_adaptive_horizon, (bool, np.bool_))
+            or (trajectory_emergency_max_steps is not None
+                and (int(trajectory_emergency_max_steps) != trajectory_emergency_max_steps
+                     or trajectory_emergency_max_steps < trajectory_max_steps))
+            or (trajectory_adaptive_horizon and trajectory_emergency_max_steps is None)):
+        raise ValueError("invalid feature-step trajectory-horizon controls")
     etchable = tuple(sorted({int(value) for value in etchable_material_ids}))
     if not etchable or any(value <= 0 for value in etchable):
         raise ValueError("etchable material ids must be positive")
@@ -808,6 +822,8 @@ def advance_feature_step_3d(
             mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
             trajectory_fixed_dt=trajectory_fixed_dt,
             trajectory_max_steps=trajectory_max_steps,
+            trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+            trajectory_emergency_max_steps=trajectory_emergency_max_steps,
             face_centroids=centroids,
             face_gas_normals=_surface_gas_normals(verts, faces, centroids, geometry),
             transport_device=transport_device, **options)
@@ -830,7 +846,9 @@ def advance_feature_step_3d(
                 fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps,
                 periodic_lateral=charging_periodic,
                 face_gas_normals=face_gas_normals,
-                device=transport_device)
+                device=transport_device,
+                adaptive_horizon=trajectory_adaptive_horizon,
+                emergency_max_steps=trajectory_emergency_max_steps)
             transport = merge_boundary_transport_results_3d(
                 charging.transport, uncharged_transport)
     elif nodal_potential_v is None:
@@ -868,7 +886,9 @@ def advance_feature_step_3d(
             potential_origin=potential_origin, potential_spacing=potential_spacing,
             fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps,
             periodic_lateral=bool(field_periodic_lateral),
-            face_gas_normals=face_gas_normals)
+            face_gas_normals=face_gas_normals,
+            adaptive_horizon=trajectory_adaptive_horizon,
+            emergency_max_steps=trajectory_emergency_max_steps)
     neutral_radiosity_diagnostics = MappingProxyType({})
     if radiosity_options is not None:
         transport, neutral_radiosity_diagnostics = _apply_diffuse_neutral_transport(

@@ -67,6 +67,33 @@ class ChargedSurfaceCascade3DResult:
             flight.edge_launch_inset_count
             for bounce in self.flights_by_bounce for flight in bounce)
 
+    @property
+    def trajectory_horizon_extension_count(self):
+        return sum(
+            flight.trajectory_horizon_extension_count
+            for bounce in self.flights_by_bounce for flight in bounce)
+
+    @property
+    def trajectory_initial_max_steps(self):
+        values = [
+            flight.trajectory_initial_max_steps
+            for bounce in self.flights_by_bounce for flight in bounce]
+        return max(values, default=0)
+
+    @property
+    def trajectory_final_max_steps(self):
+        values = [
+            flight.trajectory_final_max_steps
+            for bounce in self.flights_by_bounce for flight in bounce]
+        return max(values, default=0)
+
+    @property
+    def trajectory_emergency_max_steps(self):
+        values = [
+            flight.trajectory_emergency_max_steps
+            for bounce in self.flights_by_bounce for flight in bounce]
+        return max(values, default=0)
+
     def __post_init__(self):
         positive = np.asarray(
             self.positive_deposition_current_density_a_m2, dtype=float).copy()
@@ -197,6 +224,7 @@ def solve_charged_surface_cascade_3d(
         mesh_length_unit_m=1e-6, launch_offset=1e-5, fixed_dt=0.01,
         max_steps=10000, max_bounces=16, relative_tail_tolerance=0.0,
         adaptive_bounce_extension=False, emergency_max_bounces=None,
+        trajectory_adaptive_horizon=False, trajectory_emergency_max_steps=None,
         periodic_lateral=False, device=None):
     """Alternate material response and full-field flight without losing capped charge.
 
@@ -222,6 +250,10 @@ def solve_charged_surface_cascade_3d(
             or not hasattr(response, "evaluate")
             or int(max_bounces) != max_bounces or max_bounces <= 0
             or not isinstance(adaptive_bounce_extension, (bool, np.bool_))
+            or not isinstance(trajectory_adaptive_horizon, (bool, np.bool_))
+            or (trajectory_emergency_max_steps is not None
+                and (int(trajectory_emergency_max_steps) != trajectory_emergency_max_steps
+                     or trajectory_emergency_max_steps < max_steps))
             or not np.isfinite(relative_tail_tolerance)
             or not 0.0 <= relative_tail_tolerance < 1.0):
         raise ValueError("invalid charged surface-cascade inputs")
@@ -307,7 +339,9 @@ def solve_charged_surface_cascade_3d(
             nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
             potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
             launch_offset=launch_offset, fixed_dt=fixed_dt, max_steps=max_steps,
-            periodic_lateral=periodic_lateral, allow_truncation=False, device=device)
+            periodic_lateral=periodic_lateral, allow_truncation=False, device=device,
+            adaptive_horizon=trajectory_adaptive_horizon,
+            emergency_max_steps=trajectory_emergency_max_steps)
         flights_by_bounce.append(flights)
         for flight in flights:
             escaped_charge_rate += float(
@@ -440,4 +474,16 @@ def augment_transport_with_charged_reimpacts_3d(
         lineage_replay_eligible_count=(
             transport.lineage_replay_eligible_count + cascade.lineage_replay_eligible_count),
         edge_launch_inset_count=(
-            transport.edge_launch_inset_count + cascade.edge_launch_inset_count))
+            transport.edge_launch_inset_count + cascade.edge_launch_inset_count),
+        trajectory_horizon_extension_count=(
+            transport.trajectory_horizon_extension_count
+            + cascade.trajectory_horizon_extension_count),
+        trajectory_initial_max_steps=max(
+            transport.trajectory_initial_max_steps,
+            cascade.trajectory_initial_max_steps),
+        trajectory_final_max_steps=max(
+            transport.trajectory_final_max_steps,
+            cascade.trajectory_final_max_steps),
+        trajectory_emergency_max_steps=max(
+            transport.trajectory_emergency_max_steps,
+            cascade.trajectory_emergency_max_steps))

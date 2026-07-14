@@ -611,6 +611,29 @@ def test_field_3d_separates_time_horizon_truncation_from_physical_escape():
     assert diagnostic.escape_probability["Ar+"] == 0.0
     assert diagnostic.truncation_probability["Ar+"] == 1.0
 
+    with pytest.raises(RuntimeError, match="exhausted emergency max_steps=8"):
+        trace_boundary_state_field_3d(
+            **arguments, adaptive_horizon=True, emergency_max_steps=8)
+
+    adaptive = trace_boundary_state_field_3d(
+        **arguments, adaptive_horizon=True, emergency_max_steps=64)
+    strict = trace_boundary_state_field_3d(
+        **(arguments | {"max_steps": 64}))
+    assert adaptive.hit_probability == strict.hit_probability
+    assert adaptive.escape_probability == strict.escape_probability
+    assert adaptive.truncation_probability == strict.truncation_probability
+    assert adaptive.trajectory_horizon_extension_count == 6
+    assert adaptive.trajectory_initial_max_steps == 1
+    assert adaptive.trajectory_final_max_steps == 64
+    assert adaptive.trajectory_emergency_max_steps == 64
+    assert np.array_equal(
+        adaptive.surface_fluxes.energetic_fluxes[0].event_face,
+        strict.surface_fluxes.energetic_fluxes[0].event_face)
+    assert np.allclose(
+        adaptive.surface_fluxes.energetic_fluxes[0].event_energy_eV,
+        strict.surface_fluxes.energetic_fluxes[0].event_energy_eV,
+        rtol=0.0, atol=0.0)
+
 
 @pytest.mark.parametrize("device", DEVICES)
 def test_first_hit_3d_reports_geometric_oblique_incidence_without_angle_fit(device):

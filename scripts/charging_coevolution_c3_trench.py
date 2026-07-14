@@ -116,6 +116,14 @@ def main():
     parser.add_argument("--trajectory-dt", type=float, default=0.0003125)
     parser.add_argument("--trajectory-max-steps", type=int, default=128000)
     parser.add_argument(
+        "--trajectory-adaptive-horizon",
+        action=argparse.BooleanOptionalAction, default=True,
+        help=("replay incomplete flights inline at the same fixed dt with a doubled work "
+              "horizon; disable only for strict horizon-refinement audits"))
+    parser.add_argument(
+        "--trajectory-emergency-max-steps", type=int, default=32768000,
+        help="hard safety ceiling for a genuinely trapped or non-closing trajectory")
+    parser.add_argument(
         "--transport-device", choices=("cpu", "cuda", "cuda:0"), default="cpu")
     parser.add_argument("--response-max-bounces", type=int, default=16)
     parser.add_argument(
@@ -135,6 +143,12 @@ def main():
         parser.error("--maximum-steps must be nonnegative")
     if args.response_max_bounces <= 0:
         parser.error("--response-max-bounces must be positive")
+    if args.trajectory_max_steps <= 0:
+        parser.error("--trajectory-max-steps must be positive")
+    if args.trajectory_emergency_max_steps < args.trajectory_max_steps:
+        parser.error(
+            "--trajectory-emergency-max-steps must be no smaller than "
+            "--trajectory-max-steps")
     if args.response_emergency_max_bounces < args.response_max_bounces:
         parser.error(
             "--response-emergency-max-bounces must be no smaller than "
@@ -232,6 +246,8 @@ def main():
         adjoint_proposal_seeds=adjoint_proposal_seeds,
         trajectory_dt=args.trajectory_dt,
         trajectory_max_steps=args.trajectory_max_steps,
+        trajectory_adaptive_horizon=args.trajectory_adaptive_horizon,
+        trajectory_emergency_max_steps=args.trajectory_emergency_max_steps,
         transport_device=args.transport_device,
         forward_level=args.forward_level, adjoint_level=args.adjoint_level,
         electron_estimator=args.electron_estimator,
@@ -334,6 +350,10 @@ def main():
                 response_bounce_budget=item["response_final_bounce_budget"],
                 response_bounce_budget_extensions=item[
                     "response_bounce_budget_extension_count"],
+                trajectory_horizon_steps=item[
+                    "transport_trajectory_final_max_steps"],
+                trajectory_horizon_extensions=item[
+                    "transport_trajectory_horizon_extension_count"],
                 replay_fraction=item["transport_lineage_replay_fraction"],
                 checkpoint=(progress_checkpoint_path.name
                             if last_checkpointed_accepted_steps is not None else None),
@@ -364,6 +384,8 @@ def main():
             initial_sampling_epoch=args.initial_sampling_epoch,
             trajectory_fixed_dt=args.trajectory_dt,
             trajectory_max_steps=args.trajectory_max_steps,
+            trajectory_adaptive_horizon=args.trajectory_adaptive_horizon,
+            trajectory_emergency_max_steps=args.trajectory_emergency_max_steps,
             phase_space_log2_samples=args.forward_level,
             periodic_lateral=True,
             transport_estimator={
@@ -442,6 +464,12 @@ def main():
                 maximum_transport_edge_launch_inset_count=max(
                     (item.get("transport_edge_launch_inset_count", 0) for item in history),
                     default=None),
+                maximum_transport_trajectory_horizon_extension_count=max(
+                    (item.get("transport_trajectory_horizon_extension_count", 0)
+                     for item in history), default=None),
+                maximum_transport_trajectory_final_max_steps=max(
+                    (item.get("transport_trajectory_final_max_steps", 0)
+                     for item in history), default=None),
                 minimum_potential_v=float(np.min(failure_potential)),
                 maximum_potential_v=float(np.max(failure_potential))),
             history=json_value(history),
@@ -517,6 +545,12 @@ def main():
             maximum_transport_edge_launch_inset_count=max(
                 item.get("transport_edge_launch_inset_count", 0)
                 for item in result.history),
+            maximum_transport_trajectory_horizon_extension_count=max(
+                item.get("transport_trajectory_horizon_extension_count", 0)
+                for item in result.history),
+            maximum_transport_trajectory_final_max_steps=max(
+                item.get("transport_trajectory_final_max_steps", 0)
+                for item in result.history),
             minimum_potential_v=float(np.min(result.potential_v)),
             maximum_potential_v=float(np.max(result.potential_v))),
         history=json_value(result.history),
@@ -575,6 +609,10 @@ def main():
         potential_rate_max_v_s=result.diagnostics["final_potential_rate_max_v_s"],
         patch_b2_max=[
             item.b2_maximum_ion_normalized_imbalance for item in result.patch_balance],
+        maximum_trajectory_horizon_steps=result.diagnostics[
+            "maximum_transport_trajectory_final_max_steps"],
+        maximum_trajectory_horizon_extensions=result.diagnostics[
+            "maximum_transport_trajectory_horizon_extension_count"],
         checkpoint=checkpoint_path.name, checkpoint_sha256=file_hash(checkpoint_path),
         summary=summary_path.name, summary_sha256=file_hash(summary_path)))
     print(json.dumps(summary, indent=2), flush=True)

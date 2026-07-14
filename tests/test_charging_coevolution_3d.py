@@ -138,6 +138,29 @@ def test_face_charge_is_authoritative_and_matches_the_q1_nodal_update():
     assert result.diagnostics["retained_node_max_relative_current_imbalance"] == 1.0
 
 
+def test_c3_records_inline_trajectory_horizon_contract_without_changing_the_step():
+    flux = 2.0e15
+    _system, arguments = _flat_problem((_species("ion", 1, flux),))
+    arguments.update(
+        trajectory_adaptive_horizon=True,
+        trajectory_emergency_max_steps=4000)
+    result = integrate_surface_charging_to_saturation_3d(**arguments)
+
+    item = result.history[0]
+    assert item["transport_trajectory_horizon_extension_count"] == 0
+    assert item["transport_trajectory_initial_max_steps"] == 2000
+    assert item["transport_trajectory_final_max_steps"] == 2000
+    assert item["transport_trajectory_emergency_max_steps"] == 4000
+    assert result.diagnostics["trajectory_adaptive_horizon"]
+    assert result.diagnostics["trajectory_emergency_max_steps"] == 4000
+    assert result.diagnostics[
+        "maximum_transport_trajectory_horizon_extension_count"] == 0
+
+    with pytest.raises(ValueError, match="invalid C3"):
+        integrate_surface_charging_to_saturation_3d(**dict(
+            arguments, trajectory_emergency_max_steps=None))
+
+
 def test_equal_currents_pass_b1_b2_without_an_unnecessary_update():
     flux = 3.0e15
     system, arguments = _flat_problem((

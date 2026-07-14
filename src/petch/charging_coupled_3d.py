@@ -426,6 +426,7 @@ def _evaluate_incident_current_3d(
         poisson_system, charge, boundary, verts, faces, areas, *, source_bounds, source_z,
         potential_origin, coordinate_spacing, mesh_length_unit_m, mesh_origin_m,
         n_position, seed, trajectory_fixed_dt, trajectory_max_steps,
+        trajectory_adaptive_horizon, trajectory_emergency_max_steps,
         phase_space_log2_samples, periodic_lateral, transport_estimator,
         face_centroids, face_gas_normals, adjoint_face_quadrature_points,
         adjoint_ray_offset, adjoint_proposals, adjoint_proposal_frames,
@@ -472,7 +473,9 @@ def _evaluate_incident_current_3d(
                 mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
                 seed=seed, fixed_dt=trajectory_fixed_dt, max_steps=trajectory_max_steps,
                 periodic_lateral=periodic_lateral, proposal_by_species=proposal_subset,
-                proposal_frame_by_species=frame_subset, device=transport_device, **options)
+                proposal_frame_by_species=frame_subset, device=transport_device,
+                adaptive_horizon=trajectory_adaptive_horizon,
+                emergency_max_steps=trajectory_emergency_max_steps, **options)
             if not all(item.converged for item in bidirectional.selection_by_species.values()):
                 failed = [name for name, item in bidirectional.selection_by_species.items()
                           if not item.converged]
@@ -503,7 +506,9 @@ def _evaluate_incident_current_3d(
                     adjoint_proposal_frames if isinstance(adjoint_proposal_frames, str) else {
                         species.name: adjoint_proposal_frames[species.name]
                         for species in selected}),
-                device=transport_device))
+                device=transport_device,
+                adaptive_horizon=trajectory_adaptive_horizon,
+                emergency_max_steps=trajectory_emergency_max_steps))
         else:
             transports.append(trace_boundary_state_field_3d(
                 selected_boundary, selected_role, verts, faces, areas,
@@ -515,7 +520,9 @@ def _evaluate_incident_current_3d(
                 max_steps=trajectory_max_steps,
                 phase_space_log2_samples=phase_space_log2_samples,
                 periodic_lateral=periodic_lateral, face_gas_normals=face_gas_normals,
-                device=transport_device))
+                device=transport_device,
+                adaptive_horizon=trajectory_adaptive_horizon,
+                emergency_max_steps=trajectory_emergency_max_steps))
     transport = (transports[0] if len(transports) == 1
                  else merge_boundary_transport_results_3d(*transports))
 
@@ -556,6 +563,8 @@ def _evaluate_incident_current_3d(
             relative_tail_tolerance=response_relative_tail_tolerance,
             adaptive_bounce_extension=response_adaptive_bounce_extension,
             emergency_max_bounces=response_emergency_max_bounces,
+            trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+            trajectory_emergency_max_steps=trajectory_emergency_max_steps,
             periodic_lateral=periodic_lateral,
             device=transport_device)
         if not surface_transfer.completed:
@@ -610,6 +619,7 @@ def advance_dielectric_charging_3d(
         potential_spacing, duration_s, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
         trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
+        trajectory_adaptive_horizon=False, trajectory_emergency_max_steps=None,
         phase_space_log2_samples=None, periodic_lateral=False,
         transport_estimator="forward", face_centroids=None, face_gas_normals=None,
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
@@ -655,6 +665,8 @@ def advance_dielectric_charging_3d(
         mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
         n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
         trajectory_max_steps=trajectory_max_steps,
+        trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+        trajectory_emergency_max_steps=trajectory_emergency_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
         periodic_lateral=periodic_lateral,
         transport_estimator=transport_estimator,
@@ -758,6 +770,14 @@ def advance_dielectric_charging_3d(
                 evaluated["transport"].lineage_replay_fraction),
             transport_edge_launch_inset_count=(
                 evaluated["transport"].edge_launch_inset_count),
+            transport_trajectory_horizon_extension_count=(
+                evaluated["transport"].trajectory_horizon_extension_count),
+            transport_trajectory_initial_max_steps=(
+                evaluated["transport"].trajectory_initial_max_steps),
+            transport_trajectory_final_max_steps=(
+                evaluated["transport"].trajectory_final_max_steps),
+            transport_trajectory_emergency_max_steps=(
+                evaluated["transport"].trajectory_emergency_max_steps),
             maximum_abs_face_current_density_a_m2=float(np.max(np.abs(face_current)))),
         known_limitations=(
             "all supplied surface triangles are treated as charge-storing dielectric",
@@ -780,6 +800,7 @@ def integrate_dielectric_charging_transient_3d(
         current_balance_tol=None, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
         trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
+        trajectory_adaptive_horizon=False, trajectory_emergency_max_steps=None,
         phase_space_log2_samples=None, periodic_lateral=False,
         transport_estimator="forward", face_centroids=None, face_gas_normals=None,
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
@@ -817,6 +838,8 @@ def integrate_dielectric_charging_transient_3d(
         mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
         n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
         trajectory_max_steps=trajectory_max_steps,
+        trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+        trajectory_emergency_max_steps=trajectory_emergency_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
         periodic_lateral=periodic_lateral, transport_estimator=transport_estimator,
         face_centroids=face_centroids, face_gas_normals=face_gas_normals,
@@ -900,6 +923,8 @@ def integrate_dielectric_charging_transient_3d(
         mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
         n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
         trajectory_max_steps=trajectory_max_steps,
+        trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+        trajectory_emergency_max_steps=trajectory_emergency_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
         periodic_lateral=periodic_lateral, transport_estimator=transport_estimator,
         face_centroids=face_centroids, face_gas_normals=face_gas_normals,
@@ -971,6 +996,7 @@ def solve_dielectric_charging_steady_3d(
         potential_origin, potential_spacing, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), n_position=256, seed=0,
         trajectory_fixed_dt=0.01, trajectory_max_steps=10000,
+        trajectory_adaptive_horizon=False, trajectory_emergency_max_steps=None,
         phase_space_log2_samples=None, periodic_lateral=False,
         transport_estimator="forward", face_centroids=None, face_gas_normals=None,
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
@@ -1058,6 +1084,8 @@ def solve_dielectric_charging_steady_3d(
         mesh_length_unit_m=mesh_length_unit_m, mesh_origin_m=mesh_origin_m,
         n_position=n_position, seed=seed, trajectory_fixed_dt=trajectory_fixed_dt,
         trajectory_max_steps=trajectory_max_steps,
+        trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+        trajectory_emergency_max_steps=trajectory_emergency_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
         periodic_lateral=periodic_lateral,
         transport_estimator=transport_estimator,

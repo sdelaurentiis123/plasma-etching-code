@@ -4,10 +4,9 @@
 The physics runner remains the authority for each segment.  This supervisor only provides
 process-level durability: every completed or safely refused segment owns a face checkpoint,
 and ``campaign_status.json`` is atomically replaced after inspecting its provenance-bearing
-summary.  A charged-cascade work-horizon refusal is the sole auto-recovery currently classified;
-it doubles the initial bounce budget up to the declared emergency ceiling and resumes the exact
-saved state/epoch.  Conservation, geometry-certification, corrupt-state, and unknown failures
-remain hard stops.
+summary. Charged-cascade and trajectory work-horizon refusals are auto-recoverable: the relevant
+budget doubles up to its declared emergency ceiling and the exact saved state/epoch resumes.
+Conservation, geometry-certification, corrupt-state, and unknown failures remain hard stops.
 """
 from __future__ import annotations
 
@@ -24,6 +23,7 @@ import sys
 
 RECOVERABLE_BOUNCE_TEXT = (
     "charged surface-response cascade reached its bounce cap with explicit unresolved charge")
+RECOVERABLE_TRAJECTORY_TEXT = "exhausted max_steps"
 
 
 def _hash(path: Path) -> str:
@@ -50,12 +50,16 @@ def main() -> int:
     parser.add_argument("--maximum-segments", type=int, default=100)
     parser.add_argument("--initial-response-max-bounces", type=int, default=512)
     parser.add_argument("--emergency-response-max-bounces", type=int, default=1024)
+    parser.add_argument("--initial-trajectory-max-steps", type=int, default=4096000)
+    parser.add_argument("--emergency-trajectory-max-steps", type=int, default=32768000)
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--transport-device", default="cuda:0")
     args = parser.parse_args()
     if (args.steps_per_segment <= 0 or args.maximum_segments <= 0
             or args.initial_response_max_bounces <= 0
             or args.emergency_response_max_bounces < args.initial_response_max_bounces
+            or args.initial_trajectory_max_steps <= 0
+            or args.emergency_trajectory_max_steps < args.initial_trajectory_max_steps
             or args.base_physical_time_s < 0.0):
         parser.error("invalid campaign bounds")
 
@@ -67,6 +71,7 @@ def main() -> int:
     checkpoint = args.initial_face_state.resolve()
     method_map = args.method_map.resolve()
     bounce_budget = args.initial_response_max_bounces
+    trajectory_max_steps = args.initial_trajectory_max_steps
     cumulative_time = float(args.base_physical_time_s)
     records = []
     status = {
@@ -85,6 +90,8 @@ def main() -> int:
         "maximum_segments": args.maximum_segments,
         "initial_response_max_bounces": bounce_budget,
         "emergency_response_max_bounces": args.emergency_response_max_bounces,
+        "initial_trajectory_max_steps": trajectory_max_steps,
+        "emergency_trajectory_max_steps": args.emergency_trajectory_max_steps,
         "seed": args.seed,
         "transport_device": args.transport_device,
         "python": platform.python_version(),
@@ -103,16 +110,24 @@ def main() -> int:
             "--adjoint-level", "9", "--electron-estimator", "forward",
             "--n-position", "256", "--seed", str(args.seed),
             "--scramble-mode", "fresh", "--sampling-seed-stride", "1000003",
-            "--trajectory-dt", "0.000078125", "--trajectory-max-steps", "4096000",
+            "--trajectory-dt", "0.000078125",
+            "--trajectory-max-steps", str(trajectory_max_steps),
+            "--trajectory-adaptive-horizon",
+            "--trajectory-emergency-max-steps",
+            str(args.emergency_trajectory_max_steps),
             "--transport-device", args.transport_device,
             "--response-max-bounces", str(bounce_budget),
+            "--response-adaptive-bounce-extension",
+            "--response-emergency-max-bounces",
+            str(args.emergency_response_max_bounces),
             "--response-tail-tolerance", "1e-10",
             "--response-launch-offset", "5e-6",
         ]
         output.mkdir(parents=True, exist_ok=True)
         status.update(status="running", updated_utc=_utc_now(), active_segment=segment,
                       cumulative_physical_time_s=cumulative_time,
-                      active_response_max_bounces=bounce_budget)
+                      active_response_max_bounces=bounce_budget,
+                      active_trajectory_max_steps=trajectory_max_steps)
         _atomic_json(status_path, status)
         with (output / "process.log").open("w") as stream:
             completed = subprocess.run(
@@ -144,6 +159,7 @@ def main() -> int:
             "converged": bool(result.get("converged", False)),
             "failed": bool(result.get("failed", False)),
             "response_max_bounces": bounce_budget,
+            "trajectory_max_steps": trajectory_max_steps,
             "node_rms": result.get("retained_node_rms_relative_current_imbalance"),
             "node_worst": result.get("retained_node_max_relative_current_imbalance"),
             "potential_rate_max_v_s": result.get("final_potential_rate_max_v_s"),
@@ -173,6 +189,19 @@ def main() -> int:
                 status="recovering_bounce_budget", updated_utc=_utc_now(),
                 cumulative_physical_time_s=cumulative_time,
                 active_response_max_bounces=bounce_budget)
+            _atomic_json(status_path, status)
+            continue
+        if (RECOVERABLE_TRAJECTORY_TEXT in message
+                and trajectory_max_steps < args.emergency_trajectory_max_steps):
+            trajectory_max_steps = min(
+                2 * trajectory_max_steps, args.emergency_trajectory_max_steps)
+            record["recovery"] = (
+                "resume exact checkpoint/epoch with doubled trajectory horizon")
+            record["next_trajectory_max_steps"] = trajectory_max_steps
+            status.update(
+                status="recovering_trajectory_horizon", updated_utc=_utc_now(),
+                cumulative_physical_time_s=cumulative_time,
+                active_trajectory_max_steps=trajectory_max_steps)
             _atomic_json(status_path, status)
             continue
         status.update(

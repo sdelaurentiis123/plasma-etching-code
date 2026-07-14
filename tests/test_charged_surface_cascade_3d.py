@@ -407,11 +407,28 @@ def test_grazing_reflection_creates_floor_corner_flux_and_off_switch_removes_it(
     absorbed = _reflection_model(probability=0.0).evaluate(
         (incident,), {"Ar+": 1}, context)
 
+    short_horizon = dict(
+        outgoing_populations=reflected.outgoing, verts=verts, faces=faces, areas=areas,
+        face_gas_normals=normals, nodal_potential_v=np.zeros((3, 3, 3)),
+        potential_origin=(0.0, 0.0, 0.0), potential_spacing=0.5,
+        mesh_length_unit_m=1e-6, launch_offset=1e-4, fixed_dt=0.01,
+        max_steps=1, device="cpu")
+    with pytest.raises(RuntimeError, match="exhausted max_steps=1"):
+        trace_charged_surface_events_field_3d(**short_horizon)
+    adaptive, = trace_charged_surface_events_field_3d(
+        **short_horizon, adaptive_horizon=True, emergency_max_steps=128)
+
     flight = trace_charged_surface_events_field_3d(
         reflected.outgoing, verts, faces, areas, normals,
         nodal_potential_v=np.zeros((3, 3, 3)), potential_origin=(0.0, 0.0, 0.0),
         potential_spacing=0.5, mesh_length_unit_m=1e-6,
         launch_offset=1e-4, fixed_dt=0.01, max_steps=500, device="cpu")[0]
+    assert adaptive.termination.tolist() == flight.termination.tolist()
+    assert adaptive.hit_face.tolist() == flight.hit_face.tolist()
+    assert adaptive.trajectory_horizon_extension_count > 0
+    assert adaptive.trajectory_initial_max_steps == 1
+    assert adaptive.trajectory_final_max_steps <= 128
+    assert adaptive.trajectory_emergency_max_steps == 128
     assert flight.termination.tolist() == [1]
     assert flight.hit_face.tolist() == [1]
     assert flight.incident.event_position[0, 0] < 0.1

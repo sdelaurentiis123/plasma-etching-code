@@ -1,6 +1,6 @@
 # Unified engine runtime-failure policy
 
-Revision: 2026-07-14-r1
+Revision: 2026-07-14-r2
 
 Scope: production 3-D charged transport, surface response, physical-time charging, and charging
 co-evolution. Configuration validation is distinguished from failure during a valid run.
@@ -37,7 +37,8 @@ default in the B4-certified charging path because it conserves charge only in ex
 | Cascade remains explicit at the emergency ceiling, or response has no subunit contraction and does not close | C | Refuse the evaluation | Full unresolved signed/absolute charge and lineage; replayable pre-step state |
 | Float32 shared-edge or gas-side hit fails geometric certification | A | Replay only invalid lineages in float64; halve flight timestep up to the bounded ladder while preserving physical horizon | Replay eligible/count/fraction; edge-inset count; final gas-side certification |
 | Float64 replay still cannot certify a path after the ladder | C | Refuse; do not soften visibility or discard the path | Exact ray/face/origin/velocity diagnostics and last certified state |
-| Primary, adjoint, or re-impact trajectory exhausts its declared physical horizon | A target; C today | Current engine refuses incomplete transport. The next migration is deterministic horizon extension at fixed `dt`, bounded by a declared emergency horizon; diagnostic truncation remains non-production only | Truncated rate/weight, initial/final horizon, extension count, endpoint agreement with a larger strict horizon |
+| Primary, adjoint, or re-impact trajectory exhausts its initial work horizon | A | Replay the identical launch population and sample epoch from its original state at the same fixed `dt`; double only `max_steps` up to a declared emergency horizon | Initial/final/emergency horizon, extension count, zero production truncation, endpoint agreement with the same strict larger horizon |
+| Primary, adjoint, or re-impact trajectory remains incomplete at its emergency horizon | C | Refuse the evaluation; do not relabel truncation as escape or delete the particle | Truncated rate/weight, full lineage, and replayable pre-step state |
 | Unknown trajectory termination, zero impact speed, inward surface emission, or inconsistent event lineage | C | Refuse | Offending event lineage and state checkpoint |
 | Local surface-response charge/energy ledger fails | C | Refuse | Local and global signed inventories; offending response provenance |
 | Step charge deposition, face-to-node projection, or remap ledger exceeds roundoff contract | C | Refuse | Both inventories, residual, scale, mesh/config hashes |
@@ -57,7 +58,8 @@ Every C3 summary carries separate, non-interchangeable entries:
 - cascade tail absolute-charge fraction and spatial-current L1 bound;
 - float64 lineage replay count/fraction and edge-inset count;
 - initial/final/derived/emergency bounce budgets and extension count;
-- trajectory-horizon extension/truncation counts once that A-class migration lands;
+- trajectory initial/final/emergency horizons, inline extension count, and zero production
+  truncation;
 - timestep, sample, grid, and CPU/GPU refinement evidence;
 - retained per-node RMS/worst diagnostics and B1/B2 gate values.
 

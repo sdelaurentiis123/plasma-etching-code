@@ -276,7 +276,8 @@ def integrate_surface_charging_to_saturation_3d(
         ser_allowed_residual_growth=0.005,
         mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
         n_position=256, seed=0, trajectory_fixed_dt=0.01,
-        trajectory_max_steps=10000, phase_space_log2_samples=None,
+        trajectory_max_steps=10000, trajectory_adaptive_horizon=False,
+        trajectory_emergency_max_steps=None, phase_space_log2_samples=None,
         periodic_lateral=False, transport_estimator="forward",
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
         adjoint_proposals=None, adjoint_proposal_frames="surface_local",
@@ -304,6 +305,12 @@ def integrate_surface_charging_to_saturation_3d(
     supplied, callers must also supply a factory that regenerates every proposal from that epoch's
     seed. Fresh-scramble SER is deliberately refused because stochastic residual changes cannot
     safely drive its accept/reject controller.
+
+    When ``trajectory_adaptive_horizon`` is enabled, an incomplete primary, adjoint, or
+    surface-reimpact flight is replayed from its identical launch state and sample epoch at the
+    same fixed timestep with a doubled work horizon. This is inline numerical recovery, not a
+    changed physical operator. An explicit emergency horizon remains a hard integrity stop for
+    genuinely trapped or otherwise non-closing trajectories.
 
     ``progress_callback``, when supplied, is invoked after every fully certified current
     evaluation with read-only views of the current accepted state and a copy of its diagnostic
@@ -348,6 +355,12 @@ def integrate_surface_charging_to_saturation_3d(
                      or response_emergency_max_bounces <= 0))
             or (response_adaptive_bounce_extension
                 and response_emergency_max_bounces is None)
+            or not isinstance(trajectory_adaptive_horizon, (bool, np.bool_))
+            or (trajectory_emergency_max_steps is not None
+                and (int(trajectory_emergency_max_steps) != trajectory_emergency_max_steps
+                     or trajectory_emergency_max_steps < trajectory_max_steps))
+            or (trajectory_adaptive_horizon
+                and trajectory_emergency_max_steps is None)
             or not isinstance(stop_on_saturation, (bool, np.bool_))
             or (progress_callback is not None and not callable(progress_callback))):
         raise ValueError("invalid C3 surface-charging integration inputs")
@@ -400,6 +413,8 @@ def integrate_surface_charging_to_saturation_3d(
         potential_spacing=potential_spacing, mesh_length_unit_m=mesh_length_unit_m,
         mesh_origin_m=mesh_origin_m, n_position=n_position, seed=seed,
         trajectory_fixed_dt=trajectory_fixed_dt, trajectory_max_steps=trajectory_max_steps,
+        trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+        trajectory_emergency_max_steps=trajectory_emergency_max_steps,
         phase_space_log2_samples=phase_space_log2_samples,
         periodic_lateral=periodic_lateral, transport_estimator=transport_estimator,
         face_centroids=centroid, face_gas_normals=normal,
@@ -535,6 +550,14 @@ def integrate_surface_charging_to_saturation_3d(
                 step.diagnostics["transport_lineage_replay_fraction"]),
             transport_edge_launch_inset_count=int(
                 step.diagnostics["transport_edge_launch_inset_count"]),
+            transport_trajectory_horizon_extension_count=int(
+                step.diagnostics["transport_trajectory_horizon_extension_count"]),
+            transport_trajectory_initial_max_steps=int(
+                step.diagnostics["transport_trajectory_initial_max_steps"]),
+            transport_trajectory_final_max_steps=int(
+                step.diagnostics["transport_trajectory_final_max_steps"]),
+            transport_trajectory_emergency_max_steps=int(
+                step.diagnostics["transport_trajectory_emergency_max_steps"]),
             surface_transfer_relative_charge_balance_error=(
                 step.surface_transfer.relative_charge_balance_error))
         history.append(item)
@@ -663,6 +686,11 @@ def integrate_surface_charging_to_saturation_3d(
             response_emergency_max_bounces=(
                 None if response_emergency_max_bounces is None
                 else int(response_emergency_max_bounces)),
+            trajectory_adaptive_horizon=bool(trajectory_adaptive_horizon),
+            trajectory_initial_max_steps=int(trajectory_max_steps),
+            trajectory_emergency_max_steps=(
+                None if trajectory_emergency_max_steps is None
+                else int(trajectory_emergency_max_steps)),
             final_response_tail_closure_l1_current_error_bound_relative=float(
                 history[-1]["response_tail_closure_l1_current_error_bound_relative"]),
             maximum_response_bounce_budget=max(
@@ -682,7 +710,11 @@ def integrate_surface_charging_to_saturation_3d(
             maximum_transport_lineage_replay_fraction=max(
                 item["transport_lineage_replay_fraction"] for item in history),
             maximum_transport_edge_launch_inset_count=max(
-                item["transport_edge_launch_inset_count"] for item in history)))
+                item["transport_edge_launch_inset_count"] for item in history),
+            maximum_transport_trajectory_horizon_extension_count=max(
+                item["transport_trajectory_horizon_extension_count"] for item in history),
+            maximum_transport_trajectory_final_max_steps=max(
+                item["transport_trajectory_final_max_steps"] for item in history)))
 
 
 @dataclass(frozen=True)
@@ -812,6 +844,7 @@ def _merge_final_neutral_transport(
         face_gas_normals, potential_v, *,
         source_bounds, source_z, potential_origin, potential_spacing,
         n_position, seed, trajectory_fixed_dt, trajectory_max_steps,
+        trajectory_adaptive_horizon, trajectory_emergency_max_steps,
         periodic_lateral, transport_device):
     neutral_species = tuple(
         species for species in boundary.species if species.charge_number == 0)
@@ -829,7 +862,9 @@ def _merge_final_neutral_transport(
         mesh_origin_m=geometry.mesh_origin_m,
         n_position=n_position, seed=seed, fixed_dt=trajectory_fixed_dt,
         max_steps=trajectory_max_steps, periodic_lateral=periodic_lateral,
-        face_gas_normals=face_gas_normals, device=transport_device)
+        face_gas_normals=face_gas_normals, device=transport_device,
+        adaptive_horizon=trajectory_adaptive_horizon,
+        emergency_max_steps=trajectory_emergency_max_steps)
     return merge_boundary_transport_results_3d(charged_transport, neutral)
 
 
@@ -841,7 +876,8 @@ def solve_charging_coevolution_3d(
         potential_origin, potential_spacing, charging_options,
         charged_surface_response=None, initial_sigma_c_per_m2=None,
         n_position=256, seed=0, trajectory_fixed_dt=0.01,
-        trajectory_max_steps=10000, periodic_lateral=False,
+        trajectory_max_steps=10000, trajectory_adaptive_horizon=False,
+        trajectory_emergency_max_steps=None, periodic_lateral=False,
         neutral_radiosity_options=None, cfl_number=0.3, reinitialize=True,
         reinitialization_method="skfmm", transport_device=None,
         bias_mode="quasi_static", bias_waveform=None,
@@ -867,6 +903,13 @@ def solve_charging_coevolution_3d(
         raise ValueError("n_steps must be a positive integer")
     if not np.isfinite(duration_s) or duration_s < 0.0:
         raise ValueError("duration_s must be finite and nonnegative")
+    if (int(trajectory_max_steps) != trajectory_max_steps or trajectory_max_steps <= 0
+            or not isinstance(trajectory_adaptive_horizon, (bool, np.bool_))
+            or (trajectory_emergency_max_steps is not None
+                and (int(trajectory_emergency_max_steps) != trajectory_emergency_max_steps
+                     or trajectory_emergency_max_steps < trajectory_max_steps))
+            or (trajectory_adaptive_horizon and trajectory_emergency_max_steps is None)):
+        raise ValueError("invalid co-evolution trajectory-horizon controls")
     if bias_mode not in {"quasi_static", "waveform_resolved"}:
         raise ValueError("bias_mode must be 'quasi_static' or 'waveform_resolved'")
     if bias_mode == "quasi_static" and bias_waveform is not None:
@@ -935,6 +978,7 @@ def solve_charging_coevolution_3d(
         "face_centroids", "face_gas_normals", "face_material_id", "source_bounds", "source_z",
         "potential_origin", "potential_spacing", "mesh_length_unit_m", "mesh_origin_m",
         "n_position", "seed", "trajectory_fixed_dt", "trajectory_max_steps",
+        "trajectory_adaptive_horizon", "trajectory_emergency_max_steps",
         "periodic_lateral", "transport_device", "charged_surface_response",
         "stop_on_saturation"}
     overlap = set(options) & forbidden
@@ -982,6 +1026,8 @@ def solve_charging_coevolution_3d(
             n_position=n_position, seed=int(seed) + step_index,
             trajectory_fixed_dt=trajectory_fixed_dt,
             trajectory_max_steps=trajectory_max_steps,
+            trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+            trajectory_emergency_max_steps=trajectory_emergency_max_steps,
             periodic_lateral=periodic_lateral,
             transport_device=transport_device,
             charged_surface_response=charged_surface_response,
@@ -1001,6 +1047,8 @@ def solve_charging_coevolution_3d(
             n_position=n_position, seed=int(seed) + step_index,
             trajectory_fixed_dt=trajectory_fixed_dt,
             trajectory_max_steps=trajectory_max_steps,
+            trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+            trajectory_emergency_max_steps=trajectory_emergency_max_steps,
             periodic_lateral=periodic_lateral, transport_device=transport_device)
         feature = advance_feature_step_3d(
             current_geometry, step_boundary, role, mechanism,
@@ -1010,6 +1058,8 @@ def solve_charging_coevolution_3d(
             surface_state_mesh_fingerprint=current_fingerprint,
             n_position=n_position, seed=int(seed) + step_index,
             precomputed_transport=transport,
+            trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+            trajectory_emergency_max_steps=trajectory_emergency_max_steps,
             neutral_radiosity_options=neutral_radiosity_options,
             cfl_number=cfl_number, reinitialize=reinitialize,
             reinitialization_method=reinitialization_method,
@@ -1056,6 +1106,10 @@ def solve_charging_coevolution_3d(
                     "maximum_transport_lineage_replay_fraction"],
                 maximum_transport_edge_launch_inset_count=charging.diagnostics[
                     "maximum_transport_edge_launch_inset_count"],
+                maximum_transport_trajectory_horizon_extension_count=charging.diagnostics[
+                    "maximum_transport_trajectory_horizon_extension_count"],
+                maximum_transport_trajectory_final_max_steps=charging.diagnostics[
+                    "maximum_transport_trajectory_final_max_steps"],
                 remap_relative_charge_balance_error=remap.relative_charge_balance_error,
                 retained_positive_charge_c=remap.retained_positive_charge_c,
                 retained_negative_charge_c=remap.retained_negative_charge_c,
@@ -1088,6 +1142,10 @@ def solve_charging_coevolution_3d(
         seed=int(seed), n_position=int(n_position),
         trajectory_fixed_dt=float(trajectory_fixed_dt),
         trajectory_max_steps=int(trajectory_max_steps),
+        trajectory_adaptive_horizon=bool(trajectory_adaptive_horizon),
+        trajectory_emergency_max_steps=(
+            None if trajectory_emergency_max_steps is None
+            else int(trajectory_emergency_max_steps)),
         periodic_lateral=bool(periodic_lateral),
         charging_options=_manifest_value(options, path="charging_options"),
         boundary=_boundary_manifest(boundary),
