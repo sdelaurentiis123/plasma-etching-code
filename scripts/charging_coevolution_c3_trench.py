@@ -81,6 +81,9 @@ def main():
     parser.add_argument("--method-key", default="refined_method_hint_Ar+")
     parser.add_argument("--forward-level", type=int, default=10)
     parser.add_argument("--adjoint-level", type=int, default=8)
+    parser.add_argument(
+        "--electron-estimator", choices=("adjoint", "forward"), default="adjoint",
+        help="frozen per-run electron estimator selected by a separate pilot")
     parser.add_argument("--n-position", type=int, default=256)
     parser.add_argument("--seed", type=int, default=79)
     parser.add_argument("--scramble-mode", choices=("frozen", "fresh"), default="frozen")
@@ -160,6 +163,9 @@ def main():
         args.initial_sampling_epoch = 0
 
     reflection = GrazingSpecularIonReflection3D.literature_bounded_sensitivity(1, "Ar+")
+    adjoint_proposal_seeds = {"Ar+": args.seed}
+    if args.electron_estimator == "adjoint":
+        adjoint_proposal_seeds["electron"] = args.seed + 4
     config = dict(
         status="bounded coarse real-trench pilot; not a convergence claim",
         geometry=dict(
@@ -179,11 +185,12 @@ def main():
         scramble_mode=args.scramble_mode,
         sampling_seed_stride=args.sampling_seed_stride,
         initial_sampling_epoch=args.initial_sampling_epoch,
-        adjoint_proposal_seeds={"Ar+": args.seed, "electron": args.seed + 4},
+        adjoint_proposal_seeds=adjoint_proposal_seeds,
         trajectory_dt=args.trajectory_dt,
         trajectory_max_steps=args.trajectory_max_steps,
         transport_device=args.transport_device,
         forward_level=args.forward_level, adjoint_level=args.adjoint_level,
+        electron_estimator=args.electron_estimator,
         initial_face_state_sha256=initial_state_sha256,
         response_tail_tolerance=args.response_tail_tolerance,
         method_map_sha256=file_hash(args.method_map), method_key=args.method_key,
@@ -212,11 +219,17 @@ def main():
 
     started = perf_counter()
     def proposal_factory(evaluation_seed):
-        return {
+        proposals = {
             "Ar+": _ion_proposal(boundary, args.adjoint_level, evaluation_seed),
-            "electron": _electron_proposal(
-                boundary, args.adjoint_level, evaluation_seed + 4),
         }
+        if args.electron_estimator == "adjoint":
+            proposals["electron"] = _electron_proposal(
+                boundary, args.adjoint_level, evaluation_seed + 4)
+        return proposals
+
+    proposal_frames = {"Ar+": "source_aligned"}
+    if args.electron_estimator == "adjoint":
+        proposal_frames["electron"] = "surface_local"
 
     try:
         result = integrate_surface_charging_to_saturation_3d(
@@ -244,12 +257,13 @@ def main():
             trajectory_max_steps=args.trajectory_max_steps,
             phase_space_log2_samples=args.forward_level,
             periodic_lateral=True,
-            transport_estimator={"Ar+": "bidirectional", "electron": "adjoint"},
+            transport_estimator={
+                "Ar+": "bidirectional", "electron": args.electron_estimator},
             adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-4,
             adjoint_proposals=proposal_factory(args.seed),
             fresh_adjoint_proposal_factory=(
                 proposal_factory if args.scramble_mode == "fresh" else None),
-            adjoint_proposal_frames={"Ar+": "source_aligned", "electron": "surface_local"},
+            adjoint_proposal_frames=proposal_frames,
             bidirectional_options=dict(
                 forward_log2_samples=args.forward_level,
                 adjoint_log2_samples=args.adjoint_level, n_replicates=4,
