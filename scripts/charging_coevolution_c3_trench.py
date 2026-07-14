@@ -85,6 +85,10 @@ def main():
     parser.add_argument("--seed", type=int, default=79)
     parser.add_argument("--scramble-mode", choices=("frozen", "fresh"), default="frozen")
     parser.add_argument("--sampling-seed-stride", type=int, default=1000003)
+    parser.add_argument(
+        "--initial-sampling-epoch", type=int,
+        help=("fresh-scramble epoch attached to an input checkpoint; when checkpoint metadata "
+              "exists it is loaded automatically and an explicit value must agree"))
     parser.add_argument("--trajectory-dt", type=float, default=0.0003125)
     parser.add_argument("--trajectory-max-steps", type=int, default=128000)
     parser.add_argument("--response-tail-tolerance", type=float, default=1e-10)
@@ -110,15 +114,48 @@ def main():
 
     initial_sigma = np.zeros(len(faces))
     initial_state_sha256 = None
+    checkpoint_sampling = {}
     if args.initial_face_state is not None:
         initial_state_sha256 = file_hash(args.initial_face_state)
         with np.load(args.initial_face_state) as archived:
             initial_sigma = np.asarray(archived["sigma_c_per_m2"], dtype=float).copy()
             state_faces = np.asarray(archived["faces"], dtype=int)
             state_vertices = np.asarray(archived["vertices"], dtype=float)
+            for name in (
+                    "resume_sampling_epoch", "scramble_mode", "scramble_base_seed",
+                    "sampling_seed_stride"):
+                if name in archived:
+                    checkpoint_sampling[name] = np.asarray(archived[name]).item()
         if (initial_sigma.shape != (len(faces),) or not np.array_equal(faces, state_faces)
                 or not np.array_equal(vertices, state_vertices)):
             parser.error("initial face-charge checkpoint does not match this exact mesh")
+
+    if args.scramble_mode == "fresh":
+        checkpoint_epoch = checkpoint_sampling.get("resume_sampling_epoch")
+        if checkpoint_epoch is not None:
+            checkpoint_epoch = int(checkpoint_epoch)
+            if (args.initial_sampling_epoch is not None
+                    and args.initial_sampling_epoch != checkpoint_epoch):
+                parser.error("--initial-sampling-epoch conflicts with checkpoint metadata")
+            args.initial_sampling_epoch = checkpoint_epoch
+            if str(checkpoint_sampling.get("scramble_mode", "fresh")) != "fresh":
+                parser.error("fresh continuation requires a fresh-scramble checkpoint")
+            if ("scramble_base_seed" in checkpoint_sampling
+                    and int(checkpoint_sampling["scramble_base_seed"]) != args.seed):
+                parser.error("--seed conflicts with fresh checkpoint metadata")
+            if ("sampling_seed_stride" in checkpoint_sampling
+                    and int(checkpoint_sampling["sampling_seed_stride"])
+                    != args.sampling_seed_stride):
+                parser.error("--sampling-seed-stride conflicts with checkpoint metadata")
+        elif args.initial_face_state is not None and args.initial_sampling_epoch is None:
+            parser.error(
+                "fresh continuation from a legacy checkpoint requires --initial-sampling-epoch")
+        elif args.initial_sampling_epoch is None:
+            args.initial_sampling_epoch = 0
+    else:
+        if args.initial_sampling_epoch not in (None, 0):
+            parser.error("--initial-sampling-epoch is only valid in fresh mode")
+        args.initial_sampling_epoch = 0
 
     reflection = GrazingSpecularIonReflection3D.literature_bounded_sensitivity(1, "Ar+")
     config = dict(
@@ -139,6 +176,7 @@ def main():
         seed=args.seed,
         scramble_mode=args.scramble_mode,
         sampling_seed_stride=args.sampling_seed_stride,
+        initial_sampling_epoch=args.initial_sampling_epoch,
         adjoint_proposal_seeds={"Ar+": args.seed, "electron": args.seed + 4},
         trajectory_dt=args.trajectory_dt,
         trajectory_max_steps=args.trajectory_max_steps,
@@ -198,6 +236,7 @@ def main():
             n_position=args.n_position, seed=args.seed,
             scramble_mode=args.scramble_mode,
             sampling_seed_stride=args.sampling_seed_stride,
+            initial_sampling_epoch=args.initial_sampling_epoch,
             trajectory_fixed_dt=args.trajectory_dt,
             trajectory_max_steps=args.trajectory_max_steps,
             phase_space_log2_samples=args.forward_level,
@@ -236,6 +275,9 @@ def main():
                 rejected_steps=error.rejected_steps,
                 physical_time_s=error.physical_time_s,
                 pseudo_time_s=error.pseudo_time_s,
+                resume_sampling_epoch=(
+                    args.initial_sampling_epoch + error.accepted_steps
+                    if args.scramble_mode == "fresh" else 0),
                 retained_node_rms_relative_current_imbalance=last.get(
                     "rms_relative_current_imbalance_node"),
                 retained_node_max_relative_current_imbalance=last.get(
@@ -275,7 +317,13 @@ def main():
             face_charge_c=failure_sigma * areas * geometry.mesh_length_unit_m ** 2,
             charge_node_c=failure_charge, potential_v=failure_potential,
             vertices=vertices, faces=faces, centroids=centroids, areas=areas,
-            face_material_id=material, method_hint_Ar=method_hint)
+            face_material_id=material, method_hint_Ar=method_hint,
+            resume_sampling_epoch=np.asarray(
+                args.initial_sampling_epoch + error.accepted_steps
+                if args.scramble_mode == "fresh" else 0),
+            scramble_mode=np.asarray(args.scramble_mode),
+            scramble_base_seed=np.asarray(args.seed),
+            sampling_seed_stride=np.asarray(args.sampling_seed_stride))
         print(json.dumps(failure_summary, indent=2), flush=True)
         raise SystemExit(2) from error
     wall_clock_s = perf_counter() - started
@@ -287,6 +335,7 @@ def main():
             converged=result.converged, accepted_steps=result.accepted_steps,
             rejected_steps=result.rejected_steps, physical_time_s=result.physical_time_s,
             pseudo_time_s=result.pseudo_time_s,
+            resume_sampling_epoch=result.diagnostics["resume_sampling_epoch"],
             retained_node_rms_relative_current_imbalance=(
                 result.diagnostics["retained_node_rms_relative_current_imbalance"]),
             retained_node_max_relative_current_imbalance=(
@@ -330,7 +379,11 @@ def main():
         charge_node_c=result.charge_node_c,
         potential_v=result.potential_v,
         vertices=vertices, faces=faces, centroids=centroids, areas=areas,
-        face_material_id=material, method_hint_Ar=method_hint)
+        face_material_id=material, method_hint_Ar=method_hint,
+        resume_sampling_epoch=np.asarray(result.diagnostics["resume_sampling_epoch"]),
+        scramble_mode=np.asarray(args.scramble_mode),
+        scramble_base_seed=np.asarray(args.seed),
+        sampling_seed_stride=np.asarray(args.sampling_seed_stride))
     np.savez_compressed(
         current_audit_path,
         positive_face_current_density_a_m2=(

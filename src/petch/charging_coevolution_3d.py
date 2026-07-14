@@ -279,7 +279,7 @@ def integrate_surface_charging_to_saturation_3d(
         response_launch_offset=1e-5, response_fixed_dt=None,
         response_max_bounces=16, response_relative_tail_tolerance=0.0,
         stop_on_saturation=True, scramble_mode="frozen", sampling_seed_stride=1000003,
-        fresh_adjoint_proposal_factory=None):
+        initial_sampling_epoch=0, fresh_adjoint_proposal_factory=None):
     """Integrate one fixed geometry to B1/B2 saturation with fixed time or safeguarded SER.
 
     SER follows the residual-ratio rule ``dt[n+1] = dt[n] * ||F[n]||/||F[n+1]||`` with declared
@@ -289,7 +289,9 @@ def integrate_surface_charging_to_saturation_3d(
     of the same conservative charge ODE. The returned current and all gates are evaluated on the
     exact caller-supplied kinetic surface operator. ``fresh`` scrambling is restricted to fixed
     physical time: each accepted update receives a reproducible independent seed epoch, while the
-    final state receives the next epoch for an honest current diagnostic. If adjoint proposals are
+    final state receives the next epoch for an honest current diagnostic. A resumed run must pass
+    that final diagnostic epoch as ``initial_sampling_epoch``: it is reused for the first resumed
+    update because it scored, but did not create, the checkpoint state. If adjoint proposals are
     supplied, callers must also supply a factory that regenerates every proposal from that epoch's
     seed. Fresh-scramble SER is deliberately refused because stochastic residual changes cannot
     safely drive its accept/reject controller.
@@ -320,6 +322,9 @@ def integrate_surface_charging_to_saturation_3d(
             or scramble_mode not in {"frozen", "fresh"}
             or int(sampling_seed_stride) != sampling_seed_stride
             or sampling_seed_stride <= 0
+            or int(initial_sampling_epoch) != initial_sampling_epoch
+            or initial_sampling_epoch < 0
+            or (scramble_mode == "frozen" and initial_sampling_epoch != 0)
             or not np.isfinite(response_relative_tail_tolerance)
             or not 0.0 <= response_relative_tail_tolerance < 1.0
             or not isinstance(stop_on_saturation, (bool, np.bool_))):
@@ -394,7 +399,7 @@ def integrate_surface_charging_to_saturation_3d(
         attempt += 1
         sampling_epoch = int(
             0 if scramble_mode == "frozen"
-            else accepted + (1 if pending_trial is not None else 0))
+            else initial_sampling_epoch + accepted + (1 if pending_trial is not None else 0))
         sampling_seed = int(seed) + int(sampling_seed_stride) * sampling_epoch
         common["seed"] = sampling_seed
         if fresh_adjoint_proposal_factory is not None:
@@ -578,6 +583,8 @@ def integrate_surface_charging_to_saturation_3d(
             current_balance_tolerance=float(current_balance_tolerance),
             scramble_mode=scramble_mode,
             sampling_seed_stride=int(sampling_seed_stride),
+            initial_sampling_epoch=int(initial_sampling_epoch),
+            resume_sampling_epoch=int(history[-1]["sampling_epoch"]),
             patch_scales_m=scales,
             exact_operator_statement=(
                 "caller-supplied hard-visibility kinetic response; no smoothed residual; "

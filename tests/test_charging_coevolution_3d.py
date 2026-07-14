@@ -196,8 +196,35 @@ def test_fresh_scrambles_advance_reproducible_seed_epochs_in_fixed_physical_time
     assert [item["sampling_seed"] for item in result.history] == [43, 144, 245]
     assert all(item["scramble_mode"] == "fresh" for item in result.history)
     assert result.diagnostics["scramble_mode"] == "fresh"
+    assert result.diagnostics["initial_sampling_epoch"] == 0
+    assert result.diagnostics["resume_sampling_epoch"] == 2
     assert all(item["charge_conservation_relative_error"] < 3e-16
                for item in result.history)
+
+
+def test_fresh_scramble_restart_matches_an_uninterrupted_seed_sequence_bitwise():
+    flux = 2.0e15
+    _system, arguments = _flat_problem((_species("ion", 1, flux),))
+    arguments.update(
+        maximum_steps=2, stop_on_saturation=False, scramble_mode="fresh",
+        sampling_seed_stride=101)
+    uninterrupted = integrate_surface_charging_to_saturation_3d(**arguments)
+
+    first_arguments = dict(arguments, maximum_steps=1)
+    first = integrate_surface_charging_to_saturation_3d(**first_arguments)
+    resumed_arguments = dict(
+        first_arguments,
+        initial_sigma_c_per_m2=first.sigma_c_per_m2,
+        initial_sampling_epoch=first.diagnostics["resume_sampling_epoch"])
+    resumed = integrate_surface_charging_to_saturation_3d(**resumed_arguments)
+
+    assert [item["sampling_seed"] for item in uninterrupted.history] == [43, 144, 245]
+    assert [item["sampling_seed"] for item in first.history] == [43, 144]
+    assert [item["sampling_seed"] for item in resumed.history] == [144, 245]
+    assert resumed.diagnostics["resume_sampling_epoch"] == 2
+    assert np.array_equal(resumed.sigma_c_per_m2, uninterrupted.sigma_c_per_m2)
+    assert np.array_equal(resumed.charge_node_c, uninterrupted.charge_node_c)
+    assert np.array_equal(resumed.potential_v, uninterrupted.potential_v)
 
 
 def test_fresh_scrambles_refuse_ser_and_stale_adjoint_proposals():
