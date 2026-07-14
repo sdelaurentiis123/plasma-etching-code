@@ -131,12 +131,22 @@ class SurfaceChargingSaturation3DResult:
     pseudo_time_s: float
     timestep_policy: str
     diagnostics: Mapping[str, object]
+    terminal_window_positive_face_current_density_a_m2: np.ndarray | None = None
+    terminal_window_negative_face_current_density_a_m2: np.ndarray | None = None
 
     def __post_init__(self):
         sigma = np.asarray(self.sigma_c_per_m2, dtype=float).copy()
         face_charge = np.asarray(self.face_charge_c, dtype=float).copy()
         node = np.asarray(self.charge_node_c, dtype=float).copy()
         potential = np.asarray(self.potential_v, dtype=float).copy()
+        window_positive = (
+            None if self.terminal_window_positive_face_current_density_a_m2 is None
+            else np.asarray(
+                self.terminal_window_positive_face_current_density_a_m2, dtype=float).copy())
+        window_negative = (
+            None if self.terminal_window_negative_face_current_density_a_m2 is None
+            else np.asarray(
+                self.terminal_window_negative_face_current_density_a_m2, dtype=float).copy())
         if (sigma.ndim != 1 or face_charge.shape != sigma.shape
                 or node.shape != potential.shape
                 or np.any(~np.isfinite(sigma)) or np.any(~np.isfinite(face_charge))
@@ -148,12 +158,28 @@ class SurfaceChargingSaturation3DResult:
                 or not np.isfinite(self.physical_time_s) or self.physical_time_s < 0.0
                 or not np.isfinite(self.pseudo_time_s) or self.pseudo_time_s < 0.0):
             raise ValueError("invalid surface-charging saturation result")
+        if ((window_positive is None) != (window_negative is None)
+                or (window_positive is not None
+                    and (window_positive.shape != sigma.shape
+                         or window_negative.shape != sigma.shape
+                         or np.any(~np.isfinite(window_positive))
+                         or np.any(~np.isfinite(window_negative))
+                         or np.any(window_positive < 0.0)
+                         or np.any(window_negative < 0.0)))):
+            raise ValueError("invalid terminal-window face currents")
         for value in (sigma, face_charge, node, potential):
             value.setflags(write=False)
+        if window_positive is not None:
+            window_positive.setflags(write=False)
+            window_negative.setflags(write=False)
         object.__setattr__(self, "sigma_c_per_m2", sigma)
         object.__setattr__(self, "face_charge_c", face_charge)
         object.__setattr__(self, "charge_node_c", node)
         object.__setattr__(self, "potential_v", potential)
+        object.__setattr__(
+            self, "terminal_window_positive_face_current_density_a_m2", window_positive)
+        object.__setattr__(
+            self, "terminal_window_negative_face_current_density_a_m2", window_negative)
         object.__setattr__(self, "patch_balance", tuple(self.patch_balance))
         object.__setattr__(
             self, "history", tuple(MappingProxyType(dict(item)) for item in self.history))
@@ -287,6 +313,7 @@ def integrate_surface_charging_to_saturation_3d(
         response_max_bounces=16, response_relative_tail_tolerance=0.0,
         response_adaptive_bounce_extension=False,
         response_emergency_max_bounces=None,
+        terminal_window_s=None,
         stop_on_saturation=True, scramble_mode="frozen", sampling_seed_stride=1000003,
         initial_sampling_epoch=0, fresh_adjoint_proposal_factory=None,
         progress_callback=None):
@@ -305,6 +332,12 @@ def integrate_surface_charging_to_saturation_3d(
     supplied, callers must also supply a factory that regenerates every proposal from that epoch's
     seed. Fresh-scramble SER is deliberately refused because stochastic residual changes cannot
     safely drive its accept/reject controller.
+
+    ``terminal_window_s`` activates the signed CCA-R2 terminal-window gate for fixed physical
+    time. B1 is the exact endpoint potential drift divided by the declared window duration. B2
+    first time-integrates positive and negative patch currents over that same window and only then
+    forms the ion-normalized ratio. Instantaneous RMS, worst-node, B1, and B2 diagnostics remain
+    separate; a noisy single scramble can neither earn nor veto window saturation.
 
     When ``trajectory_adaptive_horizon`` is enabled, an incomplete primary, adjoint, or
     surface-reimpact flight is replayed from its identical launch state and sample epoch at the
@@ -361,6 +394,8 @@ def integrate_surface_charging_to_saturation_3d(
                      or trajectory_emergency_max_steps < trajectory_max_steps))
             or (trajectory_adaptive_horizon
                 and trajectory_emergency_max_steps is None)
+            or (terminal_window_s is not None
+                and (not np.isfinite(terminal_window_s) or terminal_window_s <= 0.0))
             or not isinstance(stop_on_saturation, (bool, np.bool_))
             or (progress_callback is not None and not callable(progress_callback))):
         raise ValueError("invalid C3 surface-charging integration inputs")
@@ -368,9 +403,20 @@ def integrate_surface_charging_to_saturation_3d(
          and not callable(fresh_adjoint_proposal_factory))
             or (scramble_mode == "frozen" and fresh_adjoint_proposal_factory is not None)
             or (scramble_mode == "fresh" and timestep_policy != "fixed")
+            or (terminal_window_s is not None and timestep_policy != "fixed")
             or (scramble_mode == "fresh" and adjoint_proposals is not None
                 and fresh_adjoint_proposal_factory is None)):
         raise ValueError("invalid fresh-scramble proposal or timestep controls")
+    terminal_window_steps = None
+    if terminal_window_s is not None:
+        terminal_window_ratio = float(terminal_window_s) / float(timestep_s)
+        terminal_window_steps = int(round(terminal_window_ratio))
+        if (terminal_window_steps <= 0
+                or not np.isclose(
+                    terminal_window_ratio, terminal_window_steps,
+                    rtol=2e-13, atol=2e-13)):
+            raise ValueError(
+                "terminal_window_s must be an integer multiple of the fixed physical timestep")
     if timestep_policy == "ser":
         maximum_timestep_s = (float(timestep_s) if maximum_timestep_s is None
                               else float(maximum_timestep_s))
@@ -400,6 +446,9 @@ def integrate_surface_charging_to_saturation_3d(
         raise ValueError("initial surface charge projects onto a Dirichlet reservoir")
     dt = float(timestep_s)
     history = []
+    terminal_samples = []
+    terminal_positive_current_sum = None
+    terminal_negative_current_sum = None
     accepted = 0
     rejected = 0
     physical_time = 0.0
@@ -432,6 +481,8 @@ def integrate_surface_charging_to_saturation_3d(
 
     final_step = None
     final_patch = None
+    final_window_positive_face_current = None
+    final_window_negative_face_current = None
     converged = False
     attempt = 0
     while True:
@@ -587,14 +638,81 @@ def integrate_surface_charging_to_saturation_3d(
         if pending_trial is not None:
             accepted += 1
             pending_trial = None
+        gate_patch = patch
+        gate_potential_rate = potential_rate
+        terminal_window_ready = False
+        if terminal_window_steps is not None:
+            sample = dict(
+                potential_v=np.asarray(step.potential_before_v, dtype=float).copy(),
+                positive_face_current_density_a_m2=np.asarray(
+                    step.positive_face_current_density_a_m2, dtype=float).copy(),
+                negative_face_current_density_a_m2=np.asarray(
+                    step.negative_face_current_density_a_m2, dtype=float).copy())
+            if terminal_samples:
+                if terminal_positive_current_sum is None:
+                    terminal_positive_current_sum = np.zeros_like(
+                        sample["positive_face_current_density_a_m2"])
+                    terminal_negative_current_sum = np.zeros_like(
+                        sample["negative_face_current_density_a_m2"])
+                terminal_positive_current_sum += terminal_samples[-1][
+                    "positive_face_current_density_a_m2"]
+                terminal_negative_current_sum += terminal_samples[-1][
+                    "negative_face_current_density_a_m2"]
+            terminal_samples.append(sample)
+            if len(terminal_samples) > terminal_window_steps + 1:
+                expired = terminal_samples.pop(0)
+                terminal_positive_current_sum -= expired[
+                    "positive_face_current_density_a_m2"]
+                terminal_negative_current_sum -= expired[
+                    "negative_face_current_density_a_m2"]
+            terminal_window_ready = len(terminal_samples) == terminal_window_steps + 1
+            if terminal_window_ready:
+                gate_potential_rate = float(np.max(np.abs(
+                    terminal_samples[-1]["potential_v"]
+                    - terminal_samples[0]["potential_v"])) / float(terminal_window_s))
+                positive_window_mean = (
+                    terminal_positive_current_sum / terminal_window_steps)
+                negative_window_mean = (
+                    terminal_negative_current_sum / terminal_window_steps)
+                final_window_positive_face_current = positive_window_mean
+                final_window_negative_face_current = negative_window_mean
+                gate_patch = _patch_balances(
+                    positive_window_mean, negative_window_mean,
+                    physical_area, patch_groups, scales)
+            else:
+                gate_potential_rate = None
+        gate_patch_maximum = max(
+            value.b2_maximum_ion_normalized_imbalance for value in gate_patch)
+        item.update(
+            gate_evaluation_mode=(
+                "terminal_window" if terminal_window_steps is not None else "instantaneous"),
+            gate_potential_rate_max_v_s=gate_potential_rate,
+            gate_maximum_patch_relative_imbalance=gate_patch_maximum,
+            gate_patch_rms_relative_imbalance=tuple(
+                value.b2_rms_ion_normalized_imbalance for value in gate_patch),
+            gate_patch_max_relative_imbalance=tuple(
+                value.b2_maximum_ion_normalized_imbalance for value in gate_patch),
+            terminal_window_ready=bool(terminal_window_ready),
+            terminal_window_duration_s=(
+                None if terminal_window_steps is None else float(terminal_window_s)),
+            terminal_window_state_count=(
+                0 if terminal_window_steps is None else len(terminal_samples)),
+            terminal_window_required_state_count=(
+                0 if terminal_window_steps is None else terminal_window_steps + 1))
         final_step = step
-        final_patch = patch
-        b1 = potential_rate <= float(potential_rate_tolerance_v_s)
-        b2 = all(value.b2_maximum_ion_normalized_imbalance <= current_balance_tolerance
-                 for value in patch)
+        final_patch = gate_patch
+        gate_ready = bool(
+            terminal_window_steps is None or terminal_window_ready)
+        b1 = bool(
+            gate_ready and gate_potential_rate <= float(potential_rate_tolerance_v_s))
+        b2 = bool(
+            gate_ready and all(
+                value.b2_maximum_ion_normalized_imbalance <= current_balance_tolerance
+                for value in gate_patch))
+        converged = bool(b1 and b2)
         item["b1_potential_saturation_satisfied"] = bool(b1)
         item["b2_patch_balance_satisfied"] = bool(b2)
-        item["saturation_gates_satisfied"] = bool(b1 and b2)
+        item["saturation_gates_satisfied"] = converged
         if progress_callback is not None:
             sigma_view = sigma.view()
             charge_view = charge.view()
@@ -618,8 +736,7 @@ def integrate_surface_charging_to_saturation_3d(
                     sigma, history, accepted, rejected, physical_time, pseudo_time,
                     state_updates=accepted,
                     resume_sampling_epoch=sampling_epoch) from error
-        if b1 and b2:
-            converged = True
+        if converged:
             if stop_on_saturation:
                 break
         if accepted >= int(maximum_steps):
@@ -677,9 +794,18 @@ def integrate_surface_charging_to_saturation_3d(
             initial_sampling_epoch=int(initial_sampling_epoch),
             resume_sampling_epoch=int(history[-1]["sampling_epoch"]),
             patch_scales_m=scales,
+            gate_evaluation_mode=history[-1]["gate_evaluation_mode"],
+            terminal_window_s=(
+                None if terminal_window_s is None else float(terminal_window_s)),
+            terminal_window_steps=(
+                None if terminal_window_steps is None else int(terminal_window_steps)),
+            terminal_window_ready=bool(history[-1]["terminal_window_ready"]),
+            terminal_window_state_count=int(history[-1]["terminal_window_state_count"]),
             exact_operator_statement=(
                 "caller-supplied hard-visibility kinetic response; no smoothed residual; "
-                f"response-tail tolerance={float(response_relative_tail_tolerance):.17g}"),
+                f"response-tail tolerance={float(response_relative_tail_tolerance):.17g}; "
+                "terminal-window gates, when enabled, integrate exact physical-time currents "
+                "without changing the kinetic operator"),
             response_relative_tail_tolerance=float(response_relative_tail_tolerance),
             response_adaptive_bounce_extension=bool(
                 response_adaptive_bounce_extension),
@@ -701,10 +827,14 @@ def integrate_surface_charging_to_saturation_3d(
                 history[-1]["rms_relative_current_imbalance_node"]),
             retained_node_max_relative_current_imbalance=(
                 history[-1]["max_relative_current_imbalance_node"]),
-            final_potential_rate_max_v_s=(
+            final_instantaneous_potential_rate_max_v_s=(
                 history[-1]["potential_rate_max_v_s"]),
-            final_maximum_patch_relative_imbalance=(
+            final_potential_rate_max_v_s=(
+                history[-1]["gate_potential_rate_max_v_s"]),
+            final_instantaneous_maximum_patch_relative_imbalance=(
                 history[-1]["maximum_patch_relative_imbalance"]),
+            final_maximum_patch_relative_imbalance=(
+                history[-1]["gate_maximum_patch_relative_imbalance"]),
             maximum_transport_lineage_replay_count=max(
                 item["transport_lineage_replay_count"] for item in history),
             maximum_transport_lineage_replay_fraction=max(
@@ -714,7 +844,11 @@ def integrate_surface_charging_to_saturation_3d(
             maximum_transport_trajectory_horizon_extension_count=max(
                 item["transport_trajectory_horizon_extension_count"] for item in history),
             maximum_transport_trajectory_final_max_steps=max(
-                item["transport_trajectory_final_max_steps"] for item in history)))
+                item["transport_trajectory_final_max_steps"] for item in history)),
+        terminal_window_positive_face_current_density_a_m2=(
+            final_window_positive_face_current),
+        terminal_window_negative_face_current_density_a_m2=(
+            final_window_negative_face_current))
 
 
 @dataclass(frozen=True)
@@ -1092,9 +1226,16 @@ def solve_charging_coevolution_3d(
                     charging.diagnostics["retained_node_rms_relative_current_imbalance"]),
                 retained_node_max_relative_current_imbalance=(
                     charging.diagnostics["retained_node_max_relative_current_imbalance"]),
+                instantaneous_potential_rate_max_v_s=(
+                    charging.diagnostics["final_instantaneous_potential_rate_max_v_s"]),
                 potential_rate_max_v_s=(
                     charging.diagnostics["final_potential_rate_max_v_s"]),
+                gate_evaluation_mode=charging.diagnostics["gate_evaluation_mode"],
+                terminal_window_s=charging.diagnostics["terminal_window_s"],
+                terminal_window_ready=charging.diagnostics["terminal_window_ready"],
                 patch_scales_m=charging.diagnostics["patch_scales_m"],
+                instantaneous_patch_max_relative_imbalance=tuple(
+                    charging.history[-1]["patch_max_relative_imbalance"]),
                 patch_max_relative_imbalance=tuple(
                     item.b2_maximum_ion_normalized_imbalance
                     for item in charging.patch_balance),

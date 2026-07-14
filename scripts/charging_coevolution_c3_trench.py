@@ -94,6 +94,10 @@ def main():
     parser.add_argument("--ser-maximum-growth", type=float, default=2.0)
     parser.add_argument("--ser-allowed-residual-growth", type=float, default=0.005)
     parser.add_argument("--potential-rate-tolerance-v-s", type=float, default=1e3)
+    parser.add_argument(
+        "--terminal-window-s", type=float, default=50e-6,
+        help=("declared CCA-R2 terminal window; B1 uses endpoint potential drift and B2 "
+              "uses time-integrated patch currents over this window"))
     parser.add_argument("--patch-scales-um", type=float, nargs="+", default=(0.25, 0.5))
     parser.add_argument("--initial-face-state", type=Path)
     parser.add_argument(
@@ -141,6 +145,8 @@ def main():
     args = parser.parse_args()
     if args.maximum_steps < 0:
         parser.error("--maximum-steps must be nonnegative")
+    if not np.isfinite(args.terminal_window_s) or args.terminal_window_s <= 0.0:
+        parser.error("--terminal-window-s must be positive and finite")
     if args.response_max_bounces <= 0:
         parser.error("--response-max-bounces must be positive")
     if args.trajectory_max_steps <= 0:
@@ -238,6 +244,7 @@ def main():
         ser_maximum_growth=args.ser_maximum_growth,
         ser_allowed_residual_growth=args.ser_allowed_residual_growth,
         potential_rate_tolerance_v_s=args.potential_rate_tolerance_v_s,
+        terminal_window_s=args.terminal_window_s,
         patch_scales_um=list(args.patch_scales_um), n_position=args.n_position,
         seed=args.seed,
         scramble_mode=args.scramble_mode,
@@ -343,8 +350,15 @@ def main():
                 resume_sampling_epoch=int(resume_sampling_epoch),
                 node_rms=item["rms_relative_current_imbalance_node"],
                 node_worst=item["max_relative_current_imbalance_node"],
-                potential_rate_max_v_s=item["potential_rate_max_v_s"],
-                patch_b2_max=item["patch_max_relative_imbalance"],
+                instantaneous_potential_rate_max_v_s=item["potential_rate_max_v_s"],
+                potential_rate_max_v_s=item["gate_potential_rate_max_v_s"],
+                instantaneous_patch_b2_max=item["patch_max_relative_imbalance"],
+                patch_b2_max=item["gate_patch_max_relative_imbalance"],
+                gate_evaluation_mode=item["gate_evaluation_mode"],
+                terminal_window_ready=item["terminal_window_ready"],
+                terminal_window_state_count=item["terminal_window_state_count"],
+                terminal_window_required_state_count=item[
+                    "terminal_window_required_state_count"],
                 b1_satisfied=item["b1_potential_saturation_satisfied"],
                 b2_satisfied=item["b2_patch_balance_satisfied"],
                 response_bounce_budget=item["response_final_bounce_budget"],
@@ -408,6 +422,7 @@ def main():
             response_adaptive_bounce_extension=(
                 args.response_adaptive_bounce_extension),
             response_emergency_max_bounces=args.response_emergency_max_bounces,
+            terminal_window_s=args.terminal_window_s,
             progress_callback=persist_progress)
     except SurfaceChargingSaturationError as error:
         wall_clock_s = perf_counter() - started
@@ -434,9 +449,17 @@ def main():
                     "rms_relative_current_imbalance_node"),
                 retained_node_max_relative_current_imbalance=last.get(
                     "max_relative_current_imbalance_node"),
-                final_potential_rate_max_v_s=last.get("potential_rate_max_v_s"),
+                final_instantaneous_potential_rate_max_v_s=last.get(
+                    "potential_rate_max_v_s"),
+                final_potential_rate_max_v_s=last.get("gate_potential_rate_max_v_s"),
+                gate_evaluation_mode=last.get("gate_evaluation_mode"),
+                terminal_window_ready=last.get("terminal_window_ready", False),
+                terminal_window_state_count=last.get("terminal_window_state_count", 0),
                 patch_scales_m=last.get("patch_scales_m", ()),
-                patch_b2_max_ion_normalized=last.get("patch_max_relative_imbalance", ()),
+                instantaneous_patch_b2_max_ion_normalized=last.get(
+                    "patch_max_relative_imbalance", ()),
+                patch_b2_max_ion_normalized=last.get(
+                    "gate_patch_max_relative_imbalance", ()),
                 maximum_charge_conservation_relative_error=max(
                     (item["charge_conservation_relative_error"] for item in history),
                     default=None),
@@ -513,9 +536,16 @@ def main():
                 result.diagnostics["retained_node_rms_relative_current_imbalance"]),
             retained_node_max_relative_current_imbalance=(
                 result.diagnostics["retained_node_max_relative_current_imbalance"]),
+            final_instantaneous_potential_rate_max_v_s=result.diagnostics[
+                "final_instantaneous_potential_rate_max_v_s"],
             final_potential_rate_max_v_s=result.diagnostics[
                 "final_potential_rate_max_v_s"],
+            gate_evaluation_mode=result.diagnostics["gate_evaluation_mode"],
+            terminal_window_ready=result.diagnostics["terminal_window_ready"],
+            terminal_window_state_count=result.diagnostics["terminal_window_state_count"],
             patch_scales_m=list(result.diagnostics["patch_scales_m"]),
+            instantaneous_patch_b2_max_ion_normalized=list(
+                result.history[-1]["patch_max_relative_imbalance"]),
             patch_b2_max_ion_normalized=[
                 item.b2_maximum_ion_normalized_imbalance for item in result.patch_balance],
             patch_symmetric_max=[
@@ -578,6 +608,14 @@ def main():
         negative_face_current_density_a_m2=(
             result.final_step.negative_face_current_density_a_m2),
         net_face_current_density_a_m2=result.final_step.face_current_density_a_m2,
+        terminal_window_positive_face_current_density_a_m2=(
+            np.empty(0) if result.terminal_window_positive_face_current_density_a_m2 is None
+            else result.terminal_window_positive_face_current_density_a_m2),
+        terminal_window_negative_face_current_density_a_m2=(
+            np.empty(0) if result.terminal_window_negative_face_current_density_a_m2 is None
+            else result.terminal_window_negative_face_current_density_a_m2),
+        terminal_window_ready=np.asarray(result.diagnostics["terminal_window_ready"]),
+        terminal_window_s=np.asarray(args.terminal_window_s),
         positive_current_node_a=result.final_step.positive_current_node_a,
         negative_current_node_a=result.final_step.negative_current_node_a,
         potential_before_v=result.final_step.potential_before_v,
@@ -585,6 +623,9 @@ def main():
         potential_rate_v_s=(
             result.final_step.potential_after_v - result.final_step.potential_before_v
         ) / args.timestep_s,
+        terminal_window_potential_rate_max_v_s=np.asarray(
+            np.nan if result.diagnostics["final_potential_rate_max_v_s"] is None
+            else result.diagnostics["final_potential_rate_max_v_s"]),
         patch_scales_m=np.asarray(
             [item.patch_scale_m for item in result.patch_balance], dtype=float),
         patch_group_by_scale=np.stack(
@@ -606,7 +647,14 @@ def main():
         resume_sampling_epoch=result.diagnostics["resume_sampling_epoch"],
         node_rms=result.diagnostics["retained_node_rms_relative_current_imbalance"],
         node_worst=result.diagnostics["retained_node_max_relative_current_imbalance"],
+        instantaneous_potential_rate_max_v_s=result.diagnostics[
+            "final_instantaneous_potential_rate_max_v_s"],
         potential_rate_max_v_s=result.diagnostics["final_potential_rate_max_v_s"],
+        gate_evaluation_mode=result.diagnostics["gate_evaluation_mode"],
+        terminal_window_ready=result.diagnostics["terminal_window_ready"],
+        terminal_window_state_count=result.diagnostics["terminal_window_state_count"],
+        instantaneous_patch_b2_max=list(
+            result.history[-1]["patch_max_relative_imbalance"]),
         patch_b2_max=[
             item.b2_maximum_ion_normalized_imbalance for item in result.patch_balance],
         maximum_trajectory_horizon_steps=result.diagnostics[

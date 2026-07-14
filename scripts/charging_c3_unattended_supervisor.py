@@ -14,6 +14,7 @@ import argparse
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -46,8 +47,9 @@ def main() -> int:
     parser.add_argument("--initial-face-state", type=Path, required=True)
     parser.add_argument("--method-map", type=Path, required=True)
     parser.add_argument("--base-physical-time-s", type=float, required=True)
-    parser.add_argument("--steps-per-segment", type=int, default=50)
+    parser.add_argument("--steps-per-segment", type=int, default=500)
     parser.add_argument("--maximum-segments", type=int, default=100)
+    parser.add_argument("--terminal-window-s", type=float, default=50e-6)
     parser.add_argument("--initial-response-max-bounces", type=int, default=512)
     parser.add_argument("--emergency-response-max-bounces", type=int, default=1024)
     parser.add_argument("--initial-trajectory-max-steps", type=int, default=4096000)
@@ -55,11 +57,18 @@ def main() -> int:
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--transport-device", default="cuda:0")
     args = parser.parse_args()
+    terminal_window_steps = int(round(args.terminal_window_s / 1.25e-7))
     if (args.steps_per_segment <= 0 or args.maximum_segments <= 0
             or args.initial_response_max_bounces <= 0
             or args.emergency_response_max_bounces < args.initial_response_max_bounces
             or args.initial_trajectory_max_steps <= 0
             or args.emergency_trajectory_max_steps < args.initial_trajectory_max_steps
+            or not math.isfinite(args.terminal_window_s)
+            or args.terminal_window_s <= 0.0
+            or not math.isclose(
+                args.terminal_window_s / 1.25e-7, terminal_window_steps,
+                rel_tol=2e-13, abs_tol=2e-13)
+            or args.steps_per_segment < terminal_window_steps
             or args.base_physical_time_s < 0.0):
         parser.error("invalid campaign bounds")
 
@@ -87,6 +96,7 @@ def main() -> int:
         "method_map_sha256": _hash(method_map),
         "base_physical_time_s": cumulative_time,
         "steps_per_segment": args.steps_per_segment,
+        "terminal_window_s": args.terminal_window_s,
         "maximum_segments": args.maximum_segments,
         "initial_response_max_bounces": bounce_budget,
         "emergency_response_max_bounces": args.emergency_response_max_bounces,
@@ -106,6 +116,7 @@ def main() -> int:
             "--initial-face-state", str(checkpoint),
             "--method-map", str(method_map), "--method-key", "refined_method_hint_Ar+",
             "--timestep-s", "1.25e-7", "--maximum-steps", str(args.steps_per_segment),
+            "--terminal-window-s", str(args.terminal_window_s),
             "--timestep-policy", "fixed", "--forward-level", "11",
             "--adjoint-level", "9", "--electron-estimator", "forward",
             "--n-position", "256", "--seed", str(args.seed),

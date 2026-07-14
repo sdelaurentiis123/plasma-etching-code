@@ -179,6 +179,65 @@ def test_equal_currents_pass_b1_b2_without_an_unnecessary_update():
                for item in result.patch_balance)
 
 
+def test_terminal_window_requires_elapsed_physical_time_and_gates_integrated_currents():
+    flux = 3.0e15
+    _system, arguments = _flat_problem((
+        _species("ion", 1, flux), _species("electron", -1, flux)))
+    arguments.update(
+        maximum_steps=2, terminal_window_s=2e-6,
+        stop_on_saturation=True)
+    result = integrate_surface_charging_to_saturation_3d(**arguments)
+
+    assert result.converged
+    assert result.accepted_steps == 2
+    assert [item["terminal_window_ready"] for item in result.history] == [False, False, True]
+    assert [item["saturation_gates_satisfied"] for item in result.history] == [
+        False, False, True]
+    assert result.diagnostics["gate_evaluation_mode"] == "terminal_window"
+    assert result.diagnostics["terminal_window_s"] == 2e-6
+    assert result.diagnostics["terminal_window_steps"] == 2
+    assert result.diagnostics["final_potential_rate_max_v_s"] == 0.0
+    assert result.diagnostics["final_instantaneous_potential_rate_max_v_s"] == 0.0
+    assert np.array_equal(
+        result.terminal_window_positive_face_current_density_a_m2,
+        result.final_step.positive_face_current_density_a_m2)
+    assert np.array_equal(
+        result.terminal_window_negative_face_current_density_a_m2,
+        result.final_step.negative_face_current_density_a_m2)
+    assert all(item.b2_maximum_ion_normalized_imbalance == 0.0
+               for item in result.patch_balance)
+
+
+def test_terminal_window_does_not_average_ratios_or_hide_systematic_drift():
+    flux = 2.0e15
+    _system, arguments = _flat_problem((_species("ion", 1, flux),))
+    arguments.update(
+        maximum_steps=2, terminal_window_s=2e-6,
+        stop_on_saturation=False)
+    result = integrate_surface_charging_to_saturation_3d(**arguments)
+
+    assert not result.converged
+    assert result.history[-1]["terminal_window_ready"]
+    assert result.diagnostics["final_potential_rate_max_v_s"] > 0.0
+    assert result.diagnostics["final_maximum_patch_relative_imbalance"] == 1.0
+    assert all(item.b2_maximum_ion_normalized_imbalance == 1.0
+               for item in result.patch_balance)
+    assert np.all(
+        result.terminal_window_negative_face_current_density_a_m2 == 0.0)
+
+
+def test_terminal_window_rejects_pseudo_time_and_nonintegral_fixed_windows():
+    flux = 2.0e15
+    _system, arguments = _flat_problem((_species("ion", 1, flux),))
+
+    with pytest.raises(ValueError, match="fresh-scramble proposal or timestep"):
+        integrate_surface_charging_to_saturation_3d(**dict(
+            arguments, terminal_window_s=2e-6, timestep_policy="ser"))
+    with pytest.raises(ValueError, match="integer multiple"):
+        integrate_surface_charging_to_saturation_3d(**dict(
+            arguments, terminal_window_s=1.5e-6))
+
+
 def test_ser_uses_the_same_conservative_ode_and_records_pseudo_time():
     flux = 3.0e15
     _system, arguments = _flat_problem((

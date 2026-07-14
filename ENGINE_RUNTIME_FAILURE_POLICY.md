@@ -1,6 +1,6 @@
 # Unified engine runtime-failure policy
 
-Revision: 2026-07-14-r2
+Revision: 2026-07-14-r3
 
 Scope: production 3-D charged transport, surface response, physical-time charging, and charging
 co-evolution. Configuration validation is distinguished from failure during a valid run.
@@ -62,6 +62,13 @@ Every C3 summary carries separate, non-interchangeable entries:
   truncation;
 - timestep, sample, grid, and CPU/GPU refinement evidence;
 - retained per-node RMS/worst diagnostics and B1/B2 gate values.
+
+Fresh-scramble fixed-time runs evaluate CCA-R2 saturation over a manifest-declared terminal
+window. B1 is the exact endpoint potential change divided by that window. B2 time-integrates the
+positive and negative face currents first, groups those integrated currents on both fixed physical
+patch scales, and only then forms the ion-normalized ratio. The final single-epoch rate, patch B2,
+node RMS, and worst-node values remain separate diagnostics. Averaging ratios, maxima, or absolute
+values is not an admissible substitute because it would bias the stationary-current test.
 
 Bounded numerical work is not a physics change. A run may claim the exact hard-visibility
 operator only when every B-class bound is below its declared tolerance and the independent B5
