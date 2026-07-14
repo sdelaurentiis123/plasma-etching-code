@@ -46,6 +46,11 @@ class ChargedSurfaceContext3D:
 class ChargedSurfaceResponse3D(Protocol):
     """Material response contract shared by transient, PTC, and steady current audits."""
 
+    @property
+    def absolute_charge_contraction_bound(self) -> float | None:
+        """Optional uniform bound on outgoing/incident absolute charge rate."""
+        ...
+
     def evaluate(
             self, incident_populations, charge_number_by_species,
             context: ChargedSurfaceContext3D) -> "ChargedSurfaceTransfer3D":
@@ -316,6 +321,10 @@ def perfect_absorber_surface_transfer_3d(
 class PerfectAbsorberChargedSurfaceResponse3D:
     """Material-independent identity response used by the historical charging operator."""
 
+    @property
+    def absolute_charge_contraction_bound(self):
+        return 0.0
+
     def evaluate(
             self, incident_populations, charge_number_by_species,
             context: ChargedSurfaceContext3D):
@@ -412,6 +421,11 @@ class GrazingSpecularIonReflection3D:
             raise ValueError("incidence cosine must lie in [0, 1]")
         return self.grazing_reflection_probability * (
             1.0 - cosine ** self.angular_exponent)
+
+    @property
+    def absolute_charge_contraction_bound(self):
+        """Uniform charge-rate contraction used to derive a safe cascade horizon."""
+        return float(self.grazing_reflection_probability)
 
     def evaluate(
             self, incident_populations, charge_number_by_species,

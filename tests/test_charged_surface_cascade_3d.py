@@ -7,6 +7,7 @@ from petch.boundary_transport_3d import (
 )
 from petch.charged_surface_cascade_3d import (
     augment_transport_with_charged_reimpacts_3d,
+    derived_tail_bounce_budget_3d,
     solve_charged_surface_cascade_3d,
 )
 from petch.charged_surface_response_3d import (
@@ -63,6 +64,8 @@ class _PerfectSpecularResponse:
 
 
 class _HalfWeightSpecularResponse:
+    absolute_charge_contraction_bound = 0.5
+
     def evaluate(self, incident_populations, charge_number_by_species, context):
         outgoing = []
         for population in incident_populations:
@@ -133,7 +136,8 @@ class _LambertianElectronPerIonResponse:
 
 def _solve(
         incident, charge, response, *, max_bounces=16, fixed_dt=0.05,
-        launch_offset=1e-4, relative_tail_tolerance=0.0):
+        launch_offset=1e-4, relative_tail_tolerance=0.0,
+        adaptive_bounce_extension=False, emergency_max_bounces=None):
     verts, faces, areas, context = _parallel_triangle_geometry()
     return solve_charged_surface_cascade_3d(
         (incident,), {incident.name: charge}, response, context, verts, faces, areas,
@@ -141,6 +145,8 @@ def _solve(
         potential_spacing=0.5, mesh_length_unit_m=1e-6,
         launch_offset=launch_offset, fixed_dt=fixed_dt, max_steps=200,
         max_bounces=max_bounces, relative_tail_tolerance=relative_tail_tolerance,
+        adaptive_bounce_extension=adaptive_bounce_extension,
+        emergency_max_bounces=emergency_max_bounces,
         device="cpu")
 
 
@@ -195,6 +201,46 @@ def test_declared_tail_closure_is_conservative_and_exposes_spatial_error_bound()
         closed.deposited_charge_rate_c_s,
         closed.initial_incident_charge_rate_c_s, rtol=5e-16)
     assert closed.relative_charge_balance_error < 5e-16
+
+
+def test_adaptive_bounce_budget_closes_without_process_level_retry():
+    _, _, _, context = _parallel_triangle_geometry()
+    incident = _impact("electron", 0, 2.5e7, context, [-1.0, 0.0, 0.0])
+    result = _solve(
+        incident, -1, _HalfWeightSpecularResponse(), max_bounces=2,
+        relative_tail_tolerance=0.1, adaptive_bounce_extension=True,
+        emergency_max_bounces=8)
+
+    assert result.completed
+    assert result.derived_bounce_budget == 5
+    assert result.initial_bounce_budget == 2
+    assert result.final_bounce_budget == 8
+    assert result.emergency_bounce_limit == 8
+    assert result.bounce_budget_extension_count == 2
+    assert np.isclose(result.tail_closure_relative_absolute_charge_rate, 0.0625)
+    assert result.relative_charge_balance_error < 5e-16
+
+
+def test_nondecaying_cascade_still_stops_at_emergency_ceiling():
+    _, _, _, context = _parallel_triangle_geometry()
+    incident = _impact("electron", 0, 2.5e7, context, [-1.0, 0.0, 0.0])
+    result = _solve(
+        incident, -1, _PerfectSpecularResponse(), max_bounces=2,
+        relative_tail_tolerance=1e-6, adaptive_bounce_extension=True,
+        emergency_max_bounces=8)
+
+    assert not result.completed
+    assert result.derived_bounce_budget is None
+    assert result.final_bounce_budget == 8
+    assert result.bounce_budget_extension_count == 2
+    assert result.unresolved_charge_rate_c_s == result.initial_incident_charge_rate_c_s
+
+
+def test_reflection_bound_derives_the_declared_tail_horizon():
+    response = _HalfWeightSpecularResponse()
+    assert derived_tail_bounce_budget_3d(response, 0.1) == 5
+    response.absolute_charge_contraction_bound = 0.95
+    assert derived_tail_bounce_budget_3d(response, 1e-10) == 450
 
 
 def test_tail_tolerance_never_closes_a_nondecaying_specular_cavity():

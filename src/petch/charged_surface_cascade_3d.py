@@ -43,6 +43,11 @@ class ChargedSurfaceCascade3DResult:
     charge_balance_residual_c_s: float
     relative_charge_balance_error: float
     completed: bool
+    initial_bounce_budget: int = 0
+    final_bounce_budget: int = 0
+    emergency_bounce_limit: int = 0
+    bounce_budget_extension_count: int = 0
+    derived_bounce_budget: int | None = None
 
     @property
     def lineage_replay_count(self):
@@ -105,6 +110,18 @@ class ChargedSurfaceCascade3DResult:
             raise ValueError("charged-cascade tail error bound is inconsistent")
         if self.relative_charge_balance_error > 5e-13:
             raise ValueError("charged surface cascade does not conserve signed charge")
+        budgets = (
+            self.initial_bounce_budget, self.final_bounce_budget,
+            self.emergency_bounce_limit, self.bounce_budget_extension_count)
+        if (any(int(value) != value or value < 0 for value in budgets)
+                or self.initial_bounce_budget <= 0
+                or not self.initial_bounce_budget <= self.final_bounce_budget
+                <= self.emergency_bounce_limit
+                or (self.derived_bounce_budget is not None
+                    and (int(self.derived_bounce_budget) != self.derived_bounce_budget
+                         or self.derived_bounce_budget <= 0
+                         or self.derived_bounce_budget > self.emergency_bounce_limit))):
+            raise ValueError("invalid charged-cascade bounce-horizon diagnostics")
         for value in (positive, negative, signed):
             value.setflags(write=False)
         object.__setattr__(self, "positive_deposition_current_density_a_m2", positive)
@@ -115,6 +132,13 @@ class ChargedSurfaceCascade3DResult:
         object.__setattr__(self, "unresolved_incident", unresolved)
         object.__setattr__(
             self, "unresolved_charge_number_by_species", MappingProxyType(charge))
+        for name in (
+                "initial_bounce_budget", "final_bounce_budget",
+                "emergency_bounce_limit", "bounce_budget_extension_count"):
+            object.__setattr__(self, name, int(getattr(self, name)))
+        if self.derived_bounce_budget is not None:
+            object.__setattr__(
+                self, "derived_bounce_budget", int(self.derived_bounce_budget))
 
 
 def _incident_charge_rate(populations, charge_number_by_species, face_area_m2):
@@ -139,19 +163,48 @@ def _incident_absolute_charge_rate(populations, charge_number_by_species, face_a
     return result
 
 
+def derived_tail_bounce_budget_3d(response, relative_tail_tolerance):
+    """Return a proven response-evaluation budget from a uniform charge contraction bound.
+
+    The tail test runs at the start of a response evaluation.  If each physical response emits at
+    most ``rho`` times its incident absolute charge, evaluation ``n`` sees at most ``rho**n`` of
+    the primary charge.  One additional evaluation is therefore included to perform deterministic
+    conservative closure once that bound reaches the declared tolerance.
+    """
+    tolerance = float(relative_tail_tolerance)
+    if not np.isfinite(tolerance) or not 0.0 < tolerance < 1.0:
+        return None
+    contraction = getattr(response, "absolute_charge_contraction_bound", None)
+    if contraction is None:
+        return None
+    contraction = float(contraction)
+    if not np.isfinite(contraction) or contraction < 0.0:
+        raise ValueError("surface-response charge contraction bound must be finite and nonnegative")
+    if contraction == 0.0:
+        return 1
+    if contraction >= 1.0:
+        return None
+    flights = int(np.ceil(np.log(tolerance) / np.log(contraction)))
+    while contraction ** flights > tolerance:
+        flights += 1
+    return flights + 1
+
+
 def solve_charged_surface_cascade_3d(
         incident_populations, charge_number_by_species, response: ChargedSurfaceResponse3D,
         context: ChargedSurfaceContext3D, verts, faces, areas, *,
         nodal_potential_v, potential_origin, potential_spacing,
         mesh_length_unit_m=1e-6, launch_offset=1e-5, fixed_dt=0.01,
         max_steps=10000, max_bounces=16, relative_tail_tolerance=0.0,
+        adaptive_bounce_extension=False, emergency_max_bounces=None,
         periodic_lateral=False, device=None):
     """Alternate material response and full-field flight without losing capped charge.
 
-    ``max_bounces`` caps response evaluations, not charge accounting.  If the cap is reached, the
-    landed-but-unprocessed population is returned in ``unresolved_incident`` and included explicitly
-    in the global charge ledger.  Production callers may refine the cap or apply an independently
-    justified unbiased roulette; they may not treat an incomplete cascade as closed.
+    ``max_bounces`` is the initial response-evaluation budget.  In strict mode it remains a hard
+    work limit and an incomplete population is returned explicitly.  With
+    ``adaptive_bounce_extension=True``, the budget doubles internally as needed up to the greater
+    proven requirement supplied by the response's absolute-charge contraction bound, while
+    ``emergency_max_bounces`` remains a hard guard against a genuinely non-decaying cavity.
 
     A positive ``relative_tail_tolerance`` enables a deterministic conservative tail closure once
     the absolute charge rate remaining after at least one flight is below that fraction of the
@@ -168,9 +221,28 @@ def solve_charged_surface_cascade_3d(
             or not isinstance(context, ChargedSurfaceContext3D)
             or not hasattr(response, "evaluate")
             or int(max_bounces) != max_bounces or max_bounces <= 0
+            or not isinstance(adaptive_bounce_extension, (bool, np.bool_))
             or not np.isfinite(relative_tail_tolerance)
             or not 0.0 <= relative_tail_tolerance < 1.0):
         raise ValueError("invalid charged surface-cascade inputs")
+    initial_bounce_budget = int(max_bounces)
+    derived_bounce_budget = derived_tail_bounce_budget_3d(
+        response, relative_tail_tolerance)
+    if emergency_max_bounces is None:
+        emergency_bounce_limit = (
+            max(initial_bounce_budget, derived_bounce_budget)
+            if adaptive_bounce_extension and derived_bounce_budget is not None
+            else initial_bounce_budget)
+    else:
+        if (int(emergency_max_bounces) != emergency_max_bounces
+                or emergency_max_bounces < initial_bounce_budget):
+            raise ValueError(
+                "emergency_max_bounces must be an integer no smaller than max_bounces")
+        emergency_bounce_limit = int(emergency_max_bounces)
+    if (adaptive_bounce_extension and derived_bounce_budget is not None
+            and emergency_bounce_limit < derived_bounce_budget):
+        raise ValueError(
+            "emergency_max_bounces is below the response-derived tail guarantee")
 
     positive = np.zeros_like(context.face_area_m2)
     negative = np.zeros_like(context.face_area_m2)
@@ -184,7 +256,15 @@ def solve_charged_surface_cascade_3d(
     initial_absolute_charge_rate = _incident_absolute_charge_rate(
         incident, charge, context.face_area_m2)
     tail_closure_absolute_charge_rate = 0.0
-    for _bounce in range(int(max_bounces)):
+    active_bounce_budget = initial_bounce_budget
+    bounce_budget_extension_count = 0
+    for _bounce in range(emergency_bounce_limit):
+        if _bounce >= active_bounce_budget:
+            if not adaptive_bounce_extension:
+                break
+            active_bounce_budget = min(
+                emergency_bounce_limit, max(active_bounce_budget + 1, 2 * active_bounce_budget))
+            bounce_budget_extension_count += 1
         expected_incident_charge_rate = _incident_charge_rate(
             current, current_charge, context.face_area_m2)
         expected_absolute_charge_rate = _incident_absolute_charge_rate(
@@ -266,7 +346,12 @@ def solve_charged_surface_cascade_3d(
         tail_closure_l1_current_error_bound_relative=2.0 * tail_relative,
         charge_balance_residual_c_s=float(residual),
         relative_charge_balance_error=float(abs(residual) / scale),
-        completed=not bool(current))
+        completed=not bool(current),
+        initial_bounce_budget=initial_bounce_budget,
+        final_bounce_budget=active_bounce_budget,
+        emergency_bounce_limit=emergency_bounce_limit,
+        bounce_budget_extension_count=bounce_budget_extension_count,
+        derived_bounce_budget=derived_bounce_budget)
 
 
 def _merge_face_resolved_populations_3d(populations):

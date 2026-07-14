@@ -203,6 +203,52 @@ def test_fresh_scrambles_advance_reproducible_seed_epochs_in_fixed_physical_time
                for item in result.history)
 
 
+def test_progress_callback_receives_each_certified_replayable_state_read_only():
+    flux = 2.0e15
+    _system, arguments = _flat_problem((_species("ion", 1, flux),))
+    observed = []
+
+    def record(**progress):
+        assert not progress["sigma_c_per_m2"].flags.writeable
+        assert not progress["charge_node_c"].flags.writeable
+        assert not progress["potential_v"].flags.writeable
+        observed.append(dict(
+            accepted=progress["accepted_steps"],
+            epoch=progress["resume_sampling_epoch"],
+            time=progress["physical_time_s"],
+            sigma=progress["sigma_c_per_m2"].copy(),
+            history=dict(progress["history_item"])))
+
+    arguments.update(
+        maximum_steps=2, stop_on_saturation=False, scramble_mode="fresh",
+        sampling_seed_stride=101, progress_callback=record)
+    result = integrate_surface_charging_to_saturation_3d(**arguments)
+
+    assert [item["accepted"] for item in observed] == [0, 1, 2]
+    assert [item["epoch"] for item in observed] == [0, 1, 2]
+    assert np.allclose(
+        [item["time"] for item in observed], [0.0, 1e-6, 2e-6], rtol=0.0, atol=0.0)
+    assert np.array_equal(observed[-1]["sigma"], result.sigma_c_per_m2)
+    assert all("saturation_gates_satisfied" in item["history"] for item in observed)
+
+
+def test_progress_callback_failure_returns_the_same_replayable_state():
+    flux = 2.0e15
+    _system, arguments = _flat_problem((_species("ion", 1, flux),))
+
+    def fail(**_progress):
+        raise OSError("manufactured durable-storage failure")
+
+    arguments.update(progress_callback=fail)
+    with pytest.raises(
+            SurfaceChargingSaturationError, match="progress persistence failed") as info:
+        integrate_surface_charging_to_saturation_3d(**arguments)
+
+    assert info.value.accepted_steps == 0
+    assert info.value.resume_sampling_epoch == 0
+    assert np.array_equal(info.value.sigma_c_per_m2, np.zeros(2))
+
+
 def test_fresh_scramble_restart_matches_an_uninterrupted_seed_sequence_bitwise():
     flux = 2.0e15
     _system, arguments = _flat_problem((_species("ion", 1, flux),))

@@ -45,7 +45,7 @@ from .charged_surface_response_3d import (
 )
 from .charged_surface_cascade_3d import (
     ChargedSurfaceCascade3DResult, augment_transport_with_charged_reimpacts_3d,
-    solve_charged_surface_cascade_3d,
+    derived_tail_bounce_budget_3d, solve_charged_surface_cascade_3d,
 )
 from .surface_charge_remap_3d import (
     SurfaceChargeRemap3DResult, remap_surface_charge_3d,
@@ -133,7 +133,7 @@ __all__ = [
     "account_charged_surface_transfer_3d", "perfect_absorber_surface_transfer_3d",
     "sobolewski_2021_ar_kinetic_see_yield",
     "ChargedSurfaceCascade3DResult", "augment_transport_with_charged_reimpacts_3d",
-    "solve_charged_surface_cascade_3d",
+    "derived_tail_bounce_budget_3d", "solve_charged_surface_cascade_3d",
     "SurfaceChargeRemap3DResult", "remap_surface_charge_3d",
     "ChargingCoevolution3DResult", "ChargingCoevolutionStep3DResult",
     "ExperimentalObservableTolerance3D", "PhysicalPatchBalance3D",

@@ -284,8 +284,11 @@ def integrate_surface_charging_to_saturation_3d(
         charged_surface_response=None, surface_material_state=None,
         response_launch_offset=1e-5, response_fixed_dt=None,
         response_max_bounces=16, response_relative_tail_tolerance=0.0,
+        response_adaptive_bounce_extension=False,
+        response_emergency_max_bounces=None,
         stop_on_saturation=True, scramble_mode="frozen", sampling_seed_stride=1000003,
-        initial_sampling_epoch=0, fresh_adjoint_proposal_factory=None):
+        initial_sampling_epoch=0, fresh_adjoint_proposal_factory=None,
+        progress_callback=None):
     """Integrate one fixed geometry to B1/B2 saturation with fixed time or safeguarded SER.
 
     SER follows the residual-ratio rule ``dt[n+1] = dt[n] * ||F[n]||/||F[n+1]||`` with declared
@@ -301,6 +304,12 @@ def integrate_surface_charging_to_saturation_3d(
     supplied, callers must also supply a factory that regenerates every proposal from that epoch's
     seed. Fresh-scramble SER is deliberately refused because stochastic residual changes cannot
     safely drive its accept/reject controller.
+
+    ``progress_callback``, when supplied, is invoked after every fully certified current
+    evaluation with read-only views of the current accepted state and a copy of its diagnostic
+    record. It is the durability hook for atomic heartbeats and periodic checkpoints; callback
+    failure stops with a replayable :class:`SurfaceChargingSaturationError` rather than allowing
+    an unattended run to continue without its declared persistence contract.
     """
     if not isinstance(poisson_system, NodalPoissonSystem3D):
         raise TypeError("poisson_system must be NodalPoissonSystem3D")
@@ -333,7 +342,14 @@ def integrate_surface_charging_to_saturation_3d(
             or (scramble_mode == "frozen" and initial_sampling_epoch != 0)
             or not np.isfinite(response_relative_tail_tolerance)
             or not 0.0 <= response_relative_tail_tolerance < 1.0
-            or not isinstance(stop_on_saturation, (bool, np.bool_))):
+            or not isinstance(response_adaptive_bounce_extension, (bool, np.bool_))
+            or (response_emergency_max_bounces is not None
+                and (int(response_emergency_max_bounces) != response_emergency_max_bounces
+                     or response_emergency_max_bounces <= 0))
+            or (response_adaptive_bounce_extension
+                and response_emergency_max_bounces is None)
+            or not isinstance(stop_on_saturation, (bool, np.bool_))
+            or (progress_callback is not None and not callable(progress_callback))):
         raise ValueError("invalid C3 surface-charging integration inputs")
     if ((fresh_adjoint_proposal_factory is not None
          and not callable(fresh_adjoint_proposal_factory))
@@ -395,7 +411,9 @@ def integrate_surface_charging_to_saturation_3d(
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset, response_fixed_dt=response_fixed_dt,
         response_max_bounces=response_max_bounces,
-        response_relative_tail_tolerance=response_relative_tail_tolerance)
+        response_relative_tail_tolerance=response_relative_tail_tolerance,
+        response_adaptive_bounce_extension=response_adaptive_bounce_extension,
+        response_emergency_max_bounces=response_emergency_max_bounces)
 
     final_step = None
     final_patch = None
@@ -499,6 +517,16 @@ def integrate_surface_charging_to_saturation_3d(
             response_tail_closure_l1_current_error_bound_relative=float(getattr(
                 step.surface_transfer,
                 "tail_closure_l1_current_error_bound_relative", 0.0)),
+            response_initial_bounce_budget=int(
+                step.diagnostics["response_initial_bounce_budget"]),
+            response_final_bounce_budget=int(
+                step.diagnostics["response_final_bounce_budget"]),
+            response_emergency_bounce_limit=int(
+                step.diagnostics["response_emergency_bounce_limit"]),
+            response_bounce_budget_extension_count=int(
+                step.diagnostics["response_bounce_budget_extension_count"]),
+            response_derived_bounce_budget=int(
+                step.diagnostics["response_derived_bounce_budget"]),
             transport_lineage_replay_count=int(
                 step.diagnostics["transport_lineage_replay_count"]),
             transport_lineage_replay_eligible_count=int(
@@ -541,6 +569,32 @@ def integrate_surface_charging_to_saturation_3d(
         b1 = potential_rate <= float(potential_rate_tolerance_v_s)
         b2 = all(value.b2_maximum_ion_normalized_imbalance <= current_balance_tolerance
                  for value in patch)
+        item["b1_potential_saturation_satisfied"] = bool(b1)
+        item["b2_patch_balance_satisfied"] = bool(b2)
+        item["saturation_gates_satisfied"] = bool(b1 and b2)
+        if progress_callback is not None:
+            sigma_view = sigma.view()
+            charge_view = charge.view()
+            potential_view = step.potential_before_v.view()
+            sigma_view.setflags(write=False)
+            charge_view.setflags(write=False)
+            potential_view.setflags(write=False)
+            try:
+                progress_callback(
+                    sigma_c_per_m2=sigma_view,
+                    charge_node_c=charge_view,
+                    potential_v=potential_view,
+                    history_item=MappingProxyType(dict(item)),
+                    accepted_steps=int(accepted), rejected_steps=int(rejected),
+                    physical_time_s=float(physical_time),
+                    pseudo_time_s=float(pseudo_time),
+                    resume_sampling_epoch=int(sampling_epoch))
+            except Exception as error:
+                raise SurfaceChargingSaturationError(
+                    f"C3 progress persistence failed after {accepted} accepted steps: {error}",
+                    sigma, history, accepted, rejected, physical_time, pseudo_time,
+                    state_updates=accepted,
+                    resume_sampling_epoch=sampling_epoch) from error
         if b1 and b2:
             converged = True
             if stop_on_saturation:
@@ -604,8 +658,17 @@ def integrate_surface_charging_to_saturation_3d(
                 "caller-supplied hard-visibility kinetic response; no smoothed residual; "
                 f"response-tail tolerance={float(response_relative_tail_tolerance):.17g}"),
             response_relative_tail_tolerance=float(response_relative_tail_tolerance),
+            response_adaptive_bounce_extension=bool(
+                response_adaptive_bounce_extension),
+            response_emergency_max_bounces=(
+                None if response_emergency_max_bounces is None
+                else int(response_emergency_max_bounces)),
             final_response_tail_closure_l1_current_error_bound_relative=float(
                 history[-1]["response_tail_closure_l1_current_error_bound_relative"]),
+            maximum_response_bounce_budget=max(
+                item["response_final_bounce_budget"] for item in history),
+            maximum_response_bounce_budget_extension_count=max(
+                item["response_bounce_budget_extension_count"] for item in history),
             retained_node_rms_relative_current_imbalance=(
                 history[-1]["rms_relative_current_imbalance_node"]),
             retained_node_max_relative_current_imbalance=(

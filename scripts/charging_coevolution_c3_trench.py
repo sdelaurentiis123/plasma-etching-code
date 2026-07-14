@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 from hashlib import sha256
+from importlib import metadata
 import json
 import os
 import platform
@@ -58,6 +60,25 @@ def file_hash(path):
     return sha256(Path(path).read_bytes()).hexdigest()
 
 
+def atomic_json(path, value):
+    path = Path(path)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2) + "\n")
+    os.replace(temporary, path)
+
+
+def atomic_npz(path, **arrays):
+    path = Path(path)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    with temporary.open("wb") as stream:
+        np.savez_compressed(stream, **arrays)
+    os.replace(temporary, path)
+
+
+def utc_now():
+    return datetime.now(timezone.utc).isoformat()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -97,13 +118,30 @@ def main():
     parser.add_argument(
         "--transport-device", choices=("cpu", "cuda", "cuda:0"), default="cpu")
     parser.add_argument("--response-max-bounces", type=int, default=16)
+    parser.add_argument(
+        "--response-adaptive-bounce-extension",
+        action=argparse.BooleanOptionalAction, default=True,
+        help=("extend the response budget inline when explicit charged lineage remains; "
+              "disable only for strict horizon-refinement audits"))
+    parser.add_argument(
+        "--response-emergency-max-bounces", type=int, default=1024,
+        help="hard safety ceiling for a genuinely non-closing charged cascade")
     parser.add_argument("--response-tail-tolerance", type=float, default=1e-10)
     parser.add_argument("--response-launch-offset", type=float, default=1e-5)
+    parser.add_argument("--heartbeat-every-evaluations", type=int, default=1)
+    parser.add_argument("--checkpoint-every-accepted-steps", type=int, default=25)
     args = parser.parse_args()
     if args.maximum_steps < 0:
         parser.error("--maximum-steps must be nonnegative")
     if args.response_max_bounces <= 0:
         parser.error("--response-max-bounces must be positive")
+    if args.response_emergency_max_bounces < args.response_max_bounces:
+        parser.error(
+            "--response-emergency-max-bounces must be no smaller than "
+            "--response-max-bounces")
+    if (args.heartbeat_every_evaluations <= 0
+            or args.checkpoint_every_accepted_steps <= 0):
+        parser.error("heartbeat and checkpoint intervals must be positive")
     if not np.isfinite(args.response_launch_offset) or args.response_launch_offset <= 0.0:
         parser.error("--response-launch-offset must be positive and finite")
     if len(args.patch_scales_um) < 2:
@@ -199,8 +237,12 @@ def main():
         electron_estimator=args.electron_estimator,
         initial_face_state_sha256=initial_state_sha256,
         response_max_bounces=args.response_max_bounces,
+        response_adaptive_bounce_extension=args.response_adaptive_bounce_extension,
+        response_emergency_max_bounces=args.response_emergency_max_bounces,
         response_launch_offset=args.response_launch_offset,
         response_tail_tolerance=args.response_tail_tolerance,
+        heartbeat_every_evaluations=args.heartbeat_every_evaluations,
+        checkpoint_every_accepted_steps=args.checkpoint_every_accepted_steps,
         method_map_sha256=file_hash(args.method_map), method_key=args.method_key,
         estimator_map_source="separate pre-C3 pilot; estimator choice only, no nodal charge",
         exact_operator=(
@@ -218,12 +260,15 @@ def main():
     )
 
     def run_manifest(wall_clock_s):
+        packages = (
+            "numpy", "scipy", "scikit-image", "scikit-fmm", "warp-lang", "numba")
         return dict(
             engine_git_revision=subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
             source_sha256={
                 path.relative_to(ROOT).as_posix(): file_hash(path) for path in source_paths},
             hardware=platform.platform(), python=platform.python_version(),
+            numerical_stack={name: metadata.version(name) for name in packages},
             wall_clock_s=wall_clock_s,
             reflection_provenance=json_value(reflection.provenance))
 
@@ -240,6 +285,60 @@ def main():
     proposal_frames = {"Ar+": "source_aligned"}
     if args.electron_estimator == "adjoint":
         proposal_frames["electron"] = "surface_local"
+
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    progress_checkpoint_path = args.output_dir / "progress_checkpoint.npz"
+    heartbeat_path = args.output_dir / "heartbeat.json"
+    last_checkpointed_accepted_steps = None
+
+    def persist_progress(*, sigma_c_per_m2, charge_node_c, potential_v,
+                         history_item, accepted_steps, rejected_steps,
+                         physical_time_s, pseudo_time_s, resume_sampling_epoch):
+        nonlocal last_checkpointed_accepted_steps
+        item = dict(history_item)
+        checkpoint_due = bool(
+            accepted_steps % args.checkpoint_every_accepted_steps == 0
+            and accepted_steps != last_checkpointed_accepted_steps)
+        if checkpoint_due:
+            atomic_npz(
+                progress_checkpoint_path,
+                sigma_c_per_m2=sigma_c_per_m2,
+                face_charge_c=(
+                    sigma_c_per_m2 * areas * geometry.mesh_length_unit_m ** 2),
+                charge_node_c=charge_node_c, potential_v=potential_v,
+                vertices=vertices, faces=faces, centroids=centroids, areas=areas,
+                face_material_id=material, method_hint_Ar=method_hint,
+                resume_sampling_epoch=np.asarray(resume_sampling_epoch),
+                scramble_mode=np.asarray(args.scramble_mode),
+                scramble_base_seed=np.asarray(args.seed),
+                sampling_seed_stride=np.asarray(args.sampling_seed_stride))
+            last_checkpointed_accepted_steps = accepted_steps
+        if (item["evaluation"] % args.heartbeat_every_evaluations == 0
+                or checkpoint_due):
+            heartbeat = dict(
+                schema="petch.charging.coevolution.c3.heartbeat.v1",
+                status="running", updated_utc=utc_now(), config_hash=config_hash,
+                engine_git_revision=subprocess.check_output(
+                    ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+                process_id=os.getpid(), evaluation=int(item["evaluation"]),
+                accepted_steps=int(accepted_steps), rejected_steps=int(rejected_steps),
+                physical_time_s=float(physical_time_s),
+                pseudo_time_s=float(pseudo_time_s),
+                resume_sampling_epoch=int(resume_sampling_epoch),
+                node_rms=item["rms_relative_current_imbalance_node"],
+                node_worst=item["max_relative_current_imbalance_node"],
+                potential_rate_max_v_s=item["potential_rate_max_v_s"],
+                patch_b2_max=item["patch_max_relative_imbalance"],
+                b1_satisfied=item["b1_potential_saturation_satisfied"],
+                b2_satisfied=item["b2_patch_balance_satisfied"],
+                response_bounce_budget=item["response_final_bounce_budget"],
+                response_bounce_budget_extensions=item[
+                    "response_bounce_budget_extension_count"],
+                replay_fraction=item["transport_lineage_replay_fraction"],
+                checkpoint=(progress_checkpoint_path.name
+                            if last_checkpointed_accepted_steps is not None else None),
+                checkpoint_accepted_steps=last_checkpointed_accepted_steps)
+            atomic_json(heartbeat_path, heartbeat)
 
     try:
         result = integrate_surface_charging_to_saturation_3d(
@@ -283,7 +382,11 @@ def main():
             transport_device=args.transport_device, charged_surface_response=reflection,
             response_launch_offset=args.response_launch_offset,
             response_max_bounces=args.response_max_bounces,
-            response_relative_tail_tolerance=args.response_tail_tolerance)
+            response_relative_tail_tolerance=args.response_tail_tolerance,
+            response_adaptive_bounce_extension=(
+                args.response_adaptive_bounce_extension),
+            response_emergency_max_bounces=args.response_emergency_max_bounces,
+            progress_callback=persist_progress)
     except SurfaceChargingSaturationError as error:
         wall_clock_s = perf_counter() - started
         history = tuple(dict(item) for item in error.history)
@@ -324,6 +427,12 @@ def main():
                 maximum_response_tail_closure_l1_current_error_bound_relative=max(
                     (item["response_tail_closure_l1_current_error_bound_relative"]
                      for item in history), default=None),
+                maximum_response_bounce_budget=max(
+                    (item.get("response_final_bounce_budget", 0) for item in history),
+                    default=None),
+                maximum_response_bounce_budget_extension_count=max(
+                    (item.get("response_bounce_budget_extension_count", 0)
+                     for item in history), default=None),
                 maximum_transport_lineage_replay_count=max(
                     (item.get("transport_lineage_replay_count", 0) for item in history),
                     default=None),
@@ -337,12 +446,9 @@ def main():
                 maximum_potential_v=float(np.max(failure_potential))),
             history=json_value(history),
             conclusion="solver refused; replayable face state and failure diagnostics retained")
-        args.output_dir.mkdir(parents=True, exist_ok=True)
-        (args.output_dir / "config.json").write_text(json.dumps(config, indent=2) + "\n")
-        (args.output_dir / "summary.json").write_text(
-            json.dumps(failure_summary, indent=2) + "\n")
-        np.savez_compressed(
-            args.output_dir / "face_checkpoint.npz",
+        failure_checkpoint_path = args.output_dir / "face_checkpoint.npz"
+        atomic_npz(
+            failure_checkpoint_path,
             sigma_c_per_m2=failure_sigma,
             face_charge_c=failure_sigma * areas * geometry.mesh_length_unit_m ** 2,
             charge_node_c=failure_charge, potential_v=failure_potential,
@@ -352,6 +458,17 @@ def main():
             scramble_mode=np.asarray(args.scramble_mode),
             scramble_base_seed=np.asarray(args.seed),
             sampling_seed_stride=np.asarray(args.sampling_seed_stride))
+        atomic_json(args.output_dir / "config.json", config)
+        atomic_json(args.output_dir / "summary.json", failure_summary)
+        atomic_json(heartbeat_path, dict(
+            schema="petch.charging.coevolution.c3.heartbeat.v1",
+            status="safely_refused", updated_utc=utc_now(), config_hash=config_hash,
+            process_id=os.getpid(), error_type=type(error).__name__,
+            error_message=str(error), accepted_steps=error.accepted_steps,
+            physical_time_s=error.physical_time_s,
+            resume_sampling_epoch=error.resume_sampling_epoch,
+            checkpoint=failure_checkpoint_path.name,
+            checkpoint_sha256=file_hash(failure_checkpoint_path)))
         print(json.dumps(failure_summary, indent=2), flush=True)
         raise SystemExit(2) from error
     wall_clock_s = perf_counter() - started
@@ -386,6 +503,12 @@ def main():
             maximum_response_tail_closure_l1_current_error_bound_relative=max(
                 item["response_tail_closure_l1_current_error_bound_relative"]
                 for item in result.history),
+            maximum_response_bounce_budget=max(
+                item.get("response_final_bounce_budget", 0)
+                for item in result.history),
+            maximum_response_bounce_budget_extension_count=max(
+                item.get("response_bounce_budget_extension_count", 0)
+                for item in result.history),
             maximum_transport_lineage_replay_count=max(
                 item.get("transport_lineage_replay_count", 0) for item in result.history),
             maximum_transport_lineage_replay_fraction=max(
@@ -399,11 +522,10 @@ def main():
         history=json_value(result.history),
         conclusion=("C3 saturation gates pass" if result.converged else
                     "bounded pilot only; continue from face checkpoint with refinement evidence"))
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    (args.output_dir / "config.json").write_text(json.dumps(config, indent=2) + "\n")
+    atomic_json(args.output_dir / "config.json", config)
     checkpoint_path = args.output_dir / "face_checkpoint.npz"
     current_audit_path = args.output_dir / "current_audit.npz"
-    np.savez_compressed(
+    atomic_npz(
         checkpoint_path,
         sigma_c_per_m2=result.sigma_c_per_m2,
         face_charge_c=result.face_charge_c,
@@ -415,7 +537,7 @@ def main():
         scramble_mode=np.asarray(args.scramble_mode),
         scramble_base_seed=np.asarray(args.seed),
         sampling_seed_stride=np.asarray(args.sampling_seed_stride))
-    np.savez_compressed(
+    atomic_npz(
         current_audit_path,
         positive_face_current_density_a_m2=(
             result.final_step.positive_face_current_density_a_m2),
@@ -440,7 +562,21 @@ def main():
         "current_audit": {
             "name": current_audit_path.name, "sha256": file_hash(current_audit_path)},
     }
-    (args.output_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    summary_path = args.output_dir / "summary.json"
+    atomic_json(summary_path, summary)
+    atomic_json(heartbeat_path, dict(
+        schema="petch.charging.coevolution.c3.heartbeat.v1",
+        status=("converged" if result.converged else "bounded_run_complete"),
+        updated_utc=utc_now(), config_hash=config_hash, process_id=os.getpid(),
+        accepted_steps=result.accepted_steps, physical_time_s=result.physical_time_s,
+        resume_sampling_epoch=result.diagnostics["resume_sampling_epoch"],
+        node_rms=result.diagnostics["retained_node_rms_relative_current_imbalance"],
+        node_worst=result.diagnostics["retained_node_max_relative_current_imbalance"],
+        potential_rate_max_v_s=result.diagnostics["final_potential_rate_max_v_s"],
+        patch_b2_max=[
+            item.b2_maximum_ion_normalized_imbalance for item in result.patch_balance],
+        checkpoint=checkpoint_path.name, checkpoint_sha256=file_hash(checkpoint_path),
+        summary=summary_path.name, summary_sha256=file_hash(summary_path)))
     print(json.dumps(summary, indent=2), flush=True)
 
 
