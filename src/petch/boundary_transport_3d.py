@@ -398,6 +398,7 @@ class BoundaryTransport3DResult:
     known_limitations: tuple[str, ...]
     lineage_replay_count: int = 0
     lineage_replay_eligible_count: int = 0
+    edge_launch_inset_count: int = 0
 
     def __post_init__(self):
         object.__setattr__(self, "hit_probability", MappingProxyType(dict(self.hit_probability)))
@@ -414,6 +415,11 @@ class BoundaryTransport3DResult:
         object.__setattr__(self, "lineage_replay_count", int(self.lineage_replay_count))
         object.__setattr__(
             self, "lineage_replay_eligible_count", int(self.lineage_replay_eligible_count))
+        if (int(self.edge_launch_inset_count) != self.edge_launch_inset_count
+                or self.edge_launch_inset_count < 0):
+            raise ValueError("edge_launch_inset_count must be a nonnegative integer")
+        object.__setattr__(
+            self, "edge_launch_inset_count", int(self.edge_launch_inset_count))
 
     @property
     def lineage_replay_fraction(self):
@@ -436,6 +442,7 @@ class ChargedSurfaceReimpactPopulation3D:
     relative_particle_balance_error: float
     lineage_replay_count: int = 0
     lineage_replay_eligible_count: int = 0
+    edge_launch_inset_count: int = 0
 
     def __post_init__(self):
         if (not isinstance(self.emitted, OutgoingChargedParticleEvents3D)
@@ -462,6 +469,10 @@ class ChargedSurfaceReimpactPopulation3D:
                 or self.lineage_replay_eligible_count < self.lineage_replay_count):
             raise ValueError(
                 "re-impact lineage_replay_eligible_count must be no smaller than replay count")
+        if (int(self.edge_launch_inset_count) != self.edge_launch_inset_count
+                or not 0 <= self.edge_launch_inset_count <= len(termination)):
+            raise ValueError(
+                "re-impact edge_launch_inset_count must count a subset of emitted events")
         residual = (
             self.emitted_rate_s - self.landed_rate_s
             - self.escaped_rate_s - self.truncated_rate_s)
@@ -482,6 +493,8 @@ class ChargedSurfaceReimpactPopulation3D:
         object.__setattr__(self, "lineage_replay_count", int(self.lineage_replay_count))
         object.__setattr__(
             self, "lineage_replay_eligible_count", int(self.lineage_replay_eligible_count))
+        object.__setattr__(
+            self, "edge_launch_inset_count", int(self.edge_launch_inset_count))
 
 
 def _certify_field_hit_lineage_3d(
@@ -530,7 +543,8 @@ def _invalid_field_hit_lineage_3d(hit_face, stored_cosine, terminal_velocity, no
 def _repair_invalid_field_hits_float64_3d(
         species_name, origin, velocity, charge_number, potential, grid_origin, grid_spacing,
         verts, faces, normals, fixed_dt, max_steps, periodic_lateral,
-        hit_face, hit_cosine, hit_energy, termination, terminal_position, terminal_velocity):
+        hit_face, hit_cosine, hit_energy, termination, terminal_position, terminal_velocity,
+        source_face=None):
     """Replay uncertified Warp hits in float64, refining only a still-invalid lineage.
 
     Shared-edge misses normally close on the first float64 replay.  Strong-field grazing paths can
@@ -547,6 +561,12 @@ def _repair_invalid_field_hits_float64_3d(
         return 0
     origin = np.asarray(origin, dtype=float)
     velocity = np.asarray(velocity, dtype=float)
+    if source_face is None:
+        launch_face = None
+    else:
+        launch_face = np.asarray(source_face, dtype=int)
+        if launch_face.shape != (len(origin),):
+            raise ValueError("source_face must identify every replay-eligible launch")
     unresolved = invalid_ray
     replay_dt = float(fixed_dt)
     replay_steps = int(max_steps)
@@ -584,10 +604,93 @@ def _repair_invalid_field_hits_float64_3d(
             replay_steps *= 2
 
     unresolved_truncated = int(np.count_nonzero(termination[unresolved] == 0))
+    event = int(unresolved[0])
+    final_face = int(hit_face[event])
+    final_speed = float(np.linalg.norm(terminal_velocity[event]))
+    final_direction = (
+        terminal_velocity[event] / final_speed
+        if final_speed > 0.0 else np.full(3, np.nan))
+    geometric = (
+        -float(np.dot(final_direction, normals[final_face]))
+        if final_face >= 0 and final_speed > 0.0 else float("nan"))
+    source_detail = (
+        "unknown" if launch_face is None else str(int(launch_face[event])))
     raise RuntimeError(
         f"float64 replay for {species_name!r} left {len(unresolved)} of "
         f"{invalid_ray.size} uncertified Warp hit(s) after {maximum_halvings} timestep "
-        f"halvings; truncated={unresolved_truncated}; refine the production flight step")
+        f"halvings; truncated={unresolved_truncated}; ray={event}; "
+        f"source_face={source_detail}; origin={origin[event].tolist()}; "
+        f"launch_velocity={velocity[event].tolist()}; final_face={final_face}; "
+        f"terminal_position={terminal_position[event].tolist()}; "
+        f"terminal_direction={final_direction.tolist()}; geometric={geometric:.9g}; "
+        f"last_dt={replay_dt:.9g}; refine the production flight step")
+
+
+def _inset_surface_launch_positions_3d(
+        event_position, source_face, verts, faces, launch_offset):
+    """Move edge/vertex events into the interior of their owning source primitive.
+
+    A ray-triangle hit on a shared edge is a measure-zero event whose primitive ownership has
+    already been fixed by the hard intersection tie-break.  Launching only along that primitive's
+    normal can leave the origin exactly on a differently oriented neighbor.  Define the robust
+    one-sided limit by first moving the integration origin within the owning triangle until its
+    distance from every source edge is at least ``launch_offset``; the usual gas-normal offset is
+    then applied by the caller.  Interior events remain bitwise unchanged.  The construction uses
+    no solid/gas half-space assumption, so it is valid at both convex and concave mesh features.
+    """
+    position = np.asarray(event_position, dtype=float)
+    source = np.asarray(source_face, dtype=int)
+    vertices = np.asarray(verts, dtype=float)
+    triangles = np.asarray(faces, dtype=int)
+    result = position.copy()
+    inset = np.zeros(len(position), dtype=bool)
+
+    for source_index in np.unique(source):
+        selected = np.flatnonzero(source == source_index)
+        triangle = triangles[source_index]
+        points = vertices[triangle]
+        a, b, c = points
+        edge0 = b - a
+        edge1 = c - a
+        relative = position[selected] - a
+        d00 = float(np.dot(edge0, edge0))
+        d01 = float(np.dot(edge0, edge1))
+        d11 = float(np.dot(edge1, edge1))
+        determinant = d00 * d11 - d01 * d01
+        if determinant <= 0.0:
+            raise ValueError("charged launch source face is degenerate")
+        d20 = relative @ edge0
+        d21 = relative @ edge1
+        weight_b = (d11 * d20 - d01 * d21) / determinant
+        weight_c = (d00 * d21 - d01 * d20) / determinant
+        barycentric = np.column_stack((1.0 - weight_b - weight_c, weight_b, weight_c))
+
+        opposite_edge_length = np.array((
+            np.linalg.norm(c - b), np.linalg.norm(c - a), np.linalg.norm(b - a)))
+        double_area = np.linalg.norm(np.cross(edge0, edge1))
+        altitude = double_area / opposite_edge_length
+        target = float(launch_offset) / altitude
+        if np.any(target >= 1.0 / 3.0):
+            raise ValueError(
+                "launch_offset is too large to define a source-triangle interior origin")
+
+        alpha = np.zeros(len(selected))
+        for coordinate in range(3):
+            below = barycentric[:, coordinate] < target[coordinate]
+            if np.any(below):
+                required = (
+                    (target[coordinate] - barycentric[below, coordinate])
+                    / (1.0 / 3.0 - barycentric[below, coordinate]))
+                alpha[below] = np.maximum(alpha[below], required)
+        moved = alpha > 0.0
+        if np.any(moved):
+            centroid = np.mean(points, axis=0)
+            local = selected[moved]
+            result[local] = (
+                (1.0 - alpha[moved, None]) * position[local]
+                + alpha[moved, None] * centroid)
+            inset[local] = True
+    return result, int(np.count_nonzero(inset))
 
 
 def trace_charged_surface_events_field_3d(
@@ -661,7 +764,10 @@ def trace_charged_surface_events_field_3d(
         if np.any(outward_speed <= 0.0):
             raise ValueError(
                 f"outgoing population {population.name!r} contains a non-outward launch")
-        origin = population.event_position + float(launch_offset) * normal
+        surface_origin, edge_launch_inset_count = _inset_surface_launch_positions_3d(
+            population.event_position, population.source_face, verts, faces,
+            float(launch_offset))
+        origin = surface_origin + float(launch_offset) * normal
         if (np.any(origin < grid_origin - tolerance)
                 or np.any(origin > grid_maximum + tolerance)):
             raise ValueError("offset charged-particle launch lies outside the potential grid")
@@ -691,7 +797,17 @@ def trace_charged_surface_events_field_3d(
                     int(bool(periodic_lateral)), hit_face_wp, hit_cosine_wp, hit_energy_wp,
                     termination_wp, terminal_position_wp, terminal_velocity_wp])
         hit_face = hit_face_wp.numpy().astype(int)
+        hit_cosine = hit_cosine_wp.numpy().astype(float)
+        hit_energy = hit_energy_wp.numpy().astype(float)
         termination = termination_wp.numpy().astype(int)
+        terminal_position = terminal_position_wp.numpy().astype(float)
+        terminal_velocity = terminal_velocity_wp.numpy().astype(float)
+        lineage_replay_count = _repair_invalid_field_hits_float64_3d(
+            population.name, origin, velocity, population.charge_number,
+            potential, grid_origin, grid_spacing, verts, faces, normals,
+            fixed_dt, max_steps, periodic_lateral, hit_face, hit_cosine, hit_energy,
+            termination, terminal_position, terminal_velocity,
+            source_face=population.source_face)
         hit = termination == 1
         escaped = termination == 2
         truncated = termination == 0
@@ -702,18 +818,6 @@ def trace_charged_surface_events_field_3d(
                 f"surface-emitted trajectories for {population.name!r} exhausted max_steps; "
                 "increase the physical time horizon or explicitly allow diagnostic truncation")
         event_rate = population.event_rate_s
-        hit_cosine = hit_cosine_wp.numpy().astype(float)
-        hit_energy = hit_energy_wp.numpy().astype(float)
-        terminal_position = terminal_position_wp.numpy().astype(float)
-        terminal_velocity = terminal_velocity_wp.numpy().astype(float)
-        lineage_replay_count = _repair_invalid_field_hits_float64_3d(
-            population.name, origin, velocity, population.charge_number,
-            potential, grid_origin, grid_spacing, verts, faces, normals,
-            fixed_dt, max_steps, periodic_lateral, hit_face, hit_cosine, hit_energy,
-            termination, terminal_position, terminal_velocity)
-        hit = termination == 1
-        escaped = termination == 2
-        truncated = termination == 0
         incident_direction, incident_cosine = _certify_field_hit_lineage_3d(
             population.name, hit_face[hit], hit_cosine[hit],
             terminal_velocity[hit], normals)
@@ -733,7 +837,7 @@ def trace_charged_surface_events_field_3d(
             population, incident, termination, hit_face, emitted_rate, landed_rate,
             escaped_rate, truncated_rate,
             abs(residual) / max(emitted_rate, np.finfo(float).tiny),
-            lineage_replay_count, ray_count))
+            lineage_replay_count, ray_count, edge_launch_inset_count))
     return tuple(results)
 
 
@@ -957,7 +1061,7 @@ def merge_boundary_transport_results_3d(*results):
         raise ValueError("one or more BoundaryTransport3DResult objects are required")
     neutral = {}; energetic = []; hit = {}; escaped = {}; truncated = {}
     species_seen = set(); models = []; limitations = []
-    replay_count = 0; replay_eligible_count = 0
+    replay_count = 0; replay_eligible_count = 0; edge_launch_inset_count = 0
     for result in results:
         species = set(result.hit_probability)
         if (species != set(result.escape_probability)
@@ -976,6 +1080,7 @@ def merge_boundary_transport_results_3d(*results):
         models.append(result.transport_model); limitations.extend(result.known_limitations)
         replay_count += result.lineage_replay_count
         replay_eligible_count += result.lineage_replay_eligible_count
+        edge_launch_inset_count += result.edge_launch_inset_count
     energetic_names = [item.name for item in energetic]
     if len(set(energetic_names)) != len(energetic_names):
         raise ValueError("merged energetic species names must be unique")
@@ -986,7 +1091,8 @@ def merge_boundary_transport_results_3d(*results):
         transport_model=" + ".join(dict.fromkeys(models)),
         known_limitations=tuple(dict.fromkeys(limitations)),
         lineage_replay_count=replay_count,
-        lineage_replay_eligible_count=replay_eligible_count)
+        lineage_replay_eligible_count=replay_eligible_count,
+        edge_launch_inset_count=edge_launch_inset_count)
 
 
 def estimate_diffuse_form_factors_3d(

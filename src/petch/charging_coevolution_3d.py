@@ -505,6 +505,8 @@ def integrate_surface_charging_to_saturation_3d(
                 step.diagnostics["transport_lineage_replay_eligible_count"]),
             transport_lineage_replay_fraction=float(
                 step.diagnostics["transport_lineage_replay_fraction"]),
+            transport_edge_launch_inset_count=int(
+                step.diagnostics["transport_edge_launch_inset_count"]),
             surface_transfer_relative_charge_balance_error=(
                 step.surface_transfer.relative_charge_balance_error))
         history.append(item)
@@ -615,7 +617,9 @@ def integrate_surface_charging_to_saturation_3d(
             maximum_transport_lineage_replay_count=max(
                 item["transport_lineage_replay_count"] for item in history),
             maximum_transport_lineage_replay_fraction=max(
-                item["transport_lineage_replay_fraction"] for item in history)))
+                item["transport_lineage_replay_fraction"] for item in history),
+            maximum_transport_edge_launch_inset_count=max(
+                item["transport_edge_launch_inset_count"] for item in history)))
 
 
 @dataclass(frozen=True)
@@ -987,6 +991,8 @@ def solve_charging_coevolution_3d(
                     "maximum_transport_lineage_replay_count"],
                 maximum_transport_lineage_replay_fraction=charging.diagnostics[
                     "maximum_transport_lineage_replay_fraction"],
+                maximum_transport_edge_launch_inset_count=charging.diagnostics[
+                    "maximum_transport_edge_launch_inset_count"],
                 remap_relative_charge_balance_error=remap.relative_charge_balance_error,
                 retained_positive_charge_c=remap.retained_positive_charge_c,
                 retained_negative_charge_c=remap.retained_negative_charge_c,

@@ -142,6 +142,45 @@ def test_surface_emitted_charge_reimpacts_with_particle_rate_conserved():
     assert result.relative_particle_balance_error == 0.0
 
 
+def test_shared_edge_launch_uses_source_primitive_interior_limit():
+    """An edge-owned reflection must not start on its differently oriented neighbor."""
+    vertices = np.array([
+        [0.5, 0.25, 0.5], [0.5, 0.5, 0.5],
+        [0.25, 0.5, 0.75], [0.75, 0.25, 0.75],
+    ])
+    faces = np.array([[0, 2, 1], [0, 1, 3]])
+    areas = 0.5 * np.linalg.norm(np.cross(
+        vertices[faces[:, 1]] - vertices[faces[:, 0]],
+        vertices[faces[:, 2]] - vertices[faces[:, 0]]), axis=1)
+    normals = np.array([
+        [1.0, 0.0, 1.0], [-1.0, 0.0, 1.0],
+    ]) / np.sqrt(2.0)
+    emitted = OutgoingChargedParticleEvents3D(
+        "Ar+", 1, 2, source_face=[0], event_rate_s=[2.5e7],
+        event_position=[[0.5, 0.375, 0.5]],
+        # Outward for the owning source face, inward for the edge neighbor.
+        event_velocity_sqrt_eV=[[1.0, 0.0, 0.0]])
+
+    results = []
+    for launch_offset in (1e-4, 5e-5):
+        result, = trace_charged_surface_events_field_3d(
+            (emitted,), vertices, faces, areas, normals,
+            nodal_potential_v=np.zeros((3, 3, 3)),
+            potential_origin=(0.0, 0.0, 0.0), potential_spacing=0.5,
+            mesh_length_unit_m=1e-6, launch_offset=launch_offset,
+            fixed_dt=0.01, max_steps=200, device="cpu")
+        results.append(result)
+
+    assert all(result.edge_launch_inset_count == 1 for result in results)
+    assert all(result.hit_face.tolist() == [1] for result in results)
+    assert all(result.termination.tolist() == [1] for result in results)
+    assert all(result.emitted_rate_s == result.landed_rate_s for result in results)
+    assert all(result.relative_particle_balance_error == 0.0 for result in results)
+    assert np.allclose(
+        results[0].incident.event_energy_eV,
+        results[1].incident.event_energy_eV, rtol=0.0, atol=2e-6)
+
+
 def test_surface_emitted_charge_truncation_is_explicit():
     verts, faces, areas, normals = _parallel_triangle_transport_geometry()
     emitted = OutgoingChargedParticleEvents3D(

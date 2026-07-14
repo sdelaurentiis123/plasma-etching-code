@@ -733,6 +733,8 @@ def advance_dielectric_charging_3d(
                 evaluated["transport"].lineage_replay_eligible_count),
             transport_lineage_replay_fraction=(
                 evaluated["transport"].lineage_replay_fraction),
+            transport_edge_launch_inset_count=(
+                evaluated["transport"].edge_launch_inset_count),
             maximum_abs_face_current_density_a_m2=float(np.max(np.abs(face_current)))),
         known_limitations=(
             "all supplied surface triangles are treated as charge-storing dielectric",
