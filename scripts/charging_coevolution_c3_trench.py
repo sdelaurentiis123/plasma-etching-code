@@ -275,12 +275,11 @@ def main():
             result=dict(
                 converged=False, failed=True, error_type=type(error).__name__,
                 error_message=str(error), accepted_steps=error.accepted_steps,
+                state_updates=error.state_updates,
                 rejected_steps=error.rejected_steps,
                 physical_time_s=error.physical_time_s,
                 pseudo_time_s=error.pseudo_time_s,
-                resume_sampling_epoch=(
-                    args.initial_sampling_epoch + error.accepted_steps
-                    if args.scramble_mode == "fresh" else 0),
+                resume_sampling_epoch=error.resume_sampling_epoch,
                 retained_node_rms_relative_current_imbalance=last.get(
                     "rms_relative_current_imbalance_node"),
                 retained_node_max_relative_current_imbalance=last.get(
@@ -321,9 +320,7 @@ def main():
             charge_node_c=failure_charge, potential_v=failure_potential,
             vertices=vertices, faces=faces, centroids=centroids, areas=areas,
             face_material_id=material, method_hint_Ar=method_hint,
-            resume_sampling_epoch=np.asarray(
-                args.initial_sampling_epoch + error.accepted_steps
-                if args.scramble_mode == "fresh" else 0),
+            resume_sampling_epoch=np.asarray(error.resume_sampling_epoch),
             scramble_mode=np.asarray(args.scramble_mode),
             scramble_base_seed=np.asarray(args.seed),
             sampling_seed_stride=np.asarray(args.sampling_seed_stride))

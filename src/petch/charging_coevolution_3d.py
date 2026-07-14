@@ -168,7 +168,8 @@ class SurfaceChargingSaturationError(RuntimeError):
 
     def __init__(
             self, message, sigma_c_per_m2, history, accepted_steps, rejected_steps,
-            physical_time_s=0.0, pseudo_time_s=0.0):
+            physical_time_s=0.0, pseudo_time_s=0.0, *, state_updates=None,
+            resume_sampling_epoch=0):
         super().__init__(message)
         sigma = np.asarray(sigma_c_per_m2, dtype=float).copy()
         clocks = np.asarray([physical_time_s, pseudo_time_s], dtype=float)
@@ -181,6 +182,11 @@ class SurfaceChargingSaturationError(RuntimeError):
         self.rejected_steps = int(rejected_steps)
         self.physical_time_s = float(physical_time_s)
         self.pseudo_time_s = float(pseudo_time_s)
+        self.state_updates = int(accepted_steps if state_updates is None else state_updates)
+        self.resume_sampling_epoch = int(resume_sampling_epoch)
+        if (self.state_updates < self.accepted_steps
+                or self.resume_sampling_epoch < 0):
+            raise ValueError("failure checkpoint restart metadata must be nonnegative and ordered")
 
 
 def physical_surface_patch_groups_3d(
@@ -410,7 +416,9 @@ def integrate_surface_charging_to_saturation_3d(
         except Exception as error:
             raise SurfaceChargingSaturationError(
                 f"C3 charging evaluation failed after {accepted} accepted steps: {error}",
-                sigma, history, accepted, rejected, physical_time, pseudo_time) from error
+                sigma, history, accepted, rejected, physical_time, pseudo_time,
+                state_updates=accepted + int(pending_trial is not None),
+                resume_sampling_epoch=sampling_epoch) from error
         if step.bidirectional_method_hint:
             # Freeze the separately certified method map at its measured sample levels. This is the
             # same replay contract used by the lower physical-time engine and prevents estimator
@@ -504,7 +512,9 @@ def integrate_surface_charging_to_saturation_3d(
                 or step.surface_transfer.relative_charge_balance_error > 5e-13):
             raise SurfaceChargingSaturationError(
                 "C3 charge-deposition ledger failed roundoff conservation",
-                sigma, history, accepted, rejected, physical_time, pseudo_time)
+                sigma, history, accepted, rejected, physical_time, pseudo_time,
+                state_updates=accepted + int(pending_trial is not None),
+                resume_sampling_epoch=sampling_epoch)
 
         if not accept:
             rejected += 1
@@ -517,7 +527,8 @@ def integrate_surface_charging_to_saturation_3d(
             if dt < float(minimum_timestep_s):
                 raise SurfaceChargingSaturationError(
                     "safeguarded SER exhausted its minimum timestep",
-                    sigma, history, accepted, rejected, physical_time, pseudo_time)
+                    sigma, history, accepted, rejected, physical_time, pseudo_time,
+                    state_updates=accepted, resume_sampling_epoch=sampling_epoch)
             continue
 
         if pending_trial is not None:
@@ -559,7 +570,8 @@ def integrate_surface_charging_to_saturation_3d(
         if consistency > 5e-13:
             raise SurfaceChargingSaturationError(
                 "face-charge and compatible-Q1 nodal updates diverged",
-                sigma, history, accepted, rejected, physical_time, pseudo_time)
+                sigma, history, accepted, rejected, physical_time, pseudo_time,
+                state_updates=accepted, resume_sampling_epoch=sampling_epoch)
         pending_trial = dict(
             sigma_c_per_m2=sigma.copy(), charge_node_c=charge.copy(),
             physical_time_s=float(physical_time), pseudo_time_s=float(pseudo_time),

@@ -2,6 +2,7 @@ import json
 
 import numpy as np
 import pytest
+import petch.charging_coevolution_3d as charging_coevolution_3d
 
 from petch.boundary_state import PlasmaBoundaryState, SpeciesBoundaryState
 from petch.charged_surface_response_3d import GrazingSpecularIonReflection3D
@@ -227,6 +228,43 @@ def test_fresh_scramble_restart_matches_an_uninterrupted_seed_sequence_bitwise()
     assert np.array_equal(resumed.potential_v, uninterrupted.potential_v)
 
 
+def test_failed_fresh_lookahead_checkpoint_preserves_updated_state_and_next_epoch(monkeypatch):
+    flux = 2.0e15
+    _system, arguments = _flat_problem((_species("ion", 1, flux),))
+    arguments.update(
+        maximum_steps=2, stop_on_saturation=False, scramble_mode="fresh",
+        sampling_seed_stride=101)
+    uninterrupted = integrate_surface_charging_to_saturation_3d(**arguments)
+    original = charging_coevolution_3d.advance_dielectric_charging_3d
+    calls = 0
+
+    def fail_second_evaluation(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise RuntimeError("manufactured lookahead failure")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(
+        charging_coevolution_3d, "advance_dielectric_charging_3d", fail_second_evaluation)
+    with pytest.raises(SurfaceChargingSaturationError, match="manufactured lookahead") as info:
+        integrate_surface_charging_to_saturation_3d(**arguments)
+    error = info.value
+
+    assert error.accepted_steps == 0
+    assert error.state_updates == 1
+    assert error.resume_sampling_epoch == 1
+    assert error.physical_time_s == arguments["timestep_s"]
+    monkeypatch.setattr(charging_coevolution_3d, "advance_dielectric_charging_3d", original)
+    resumed = integrate_surface_charging_to_saturation_3d(**dict(
+        arguments, maximum_steps=1,
+        initial_sigma_c_per_m2=error.sigma_c_per_m2,
+        initial_sampling_epoch=error.resume_sampling_epoch))
+    assert np.array_equal(resumed.sigma_c_per_m2, uninterrupted.sigma_c_per_m2)
+    assert np.array_equal(resumed.charge_node_c, uninterrupted.charge_node_c)
+    assert np.array_equal(resumed.potential_v, uninterrupted.potential_v)
+
+
 def test_fresh_scrambles_refuse_ser_and_stale_adjoint_proposals():
     flux = 2.0e15
     _system, arguments = _flat_problem((_species("ion", 1, flux),))
@@ -247,6 +285,8 @@ def test_saturation_failure_checkpoint_carries_its_exact_clocks():
     assert error.rejected_steps == 1
     assert error.physical_time_s == 2.5e-6
     assert error.pseudo_time_s == 4.0e-6
+    assert error.state_updates == 3
+    assert error.resume_sampling_epoch == 0
 
 
 def test_physical_patch_groups_separate_wall_and_floor_at_a_shared_corner():
