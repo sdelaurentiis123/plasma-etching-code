@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import warp as wp
+import petch.boundary_transport_3d as boundary_transport_3d
 
 from petch.boundary_state import (
     PlasmaBoundaryState, SpeciesBoundaryState, folded_normal_tangential_proposal,
@@ -66,6 +67,40 @@ def test_float64_field_replay_assigns_a_shared_triangle_edge():
     np.testing.assert_allclose(energy, [1.0])
     np.testing.assert_allclose(position, [[0.5, 0.5, 0.0]])
     np.testing.assert_allclose(velocity, [[0.0, 0.0, -1.0]])
+
+
+def test_float64_field_replay_halves_only_a_still_invalid_lineage(monkeypatch):
+    calls = []
+
+    def replay(origin, velocity, charge_number, potential, grid_origin, grid_spacing,
+               verts, faces, fixed_dt, max_steps, periodic_lateral):
+        calls.append((fixed_dt, max_steps, len(origin)))
+        valid = len(calls) > 1
+        return (
+            np.zeros(len(origin), dtype=int), np.ones(len(origin)), np.ones(len(origin)),
+            np.ones(len(origin), dtype=np.int8), np.zeros((len(origin), 3)),
+            np.tile([0.0, 0.0, -1.0 if valid else 1.0], (len(origin), 1)))
+
+    monkeypatch.setattr(
+        boundary_transport_3d, "_trace_field_events_float64_3d", replay)
+    hit_face = np.array([0])
+    hit_cosine = np.array([1.0])
+    hit_energy = np.array([1.0])
+    termination = np.array([1], dtype=np.int8)
+    terminal_position = np.zeros((1, 3))
+    terminal_velocity = np.array([[0.0, 0.0, 1.0]])
+    repaired = boundary_transport_3d._repair_invalid_field_hits_float64_3d(
+        "Ar+", np.array([[0.5, 0.5, 1.0]]), np.array([[0.0, 0.0, -1.0]]), 1,
+        np.zeros((2, 2, 2)), np.zeros(3), np.ones(3),
+        np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]),
+        np.array([[0, 1, 2]]), np.array([[0.0, 0.0, 1.0]]),
+        0.25, 8, False, hit_face, hit_cosine, hit_energy, termination,
+        terminal_position, terminal_velocity)
+
+    assert repaired == 1
+    assert calls == [(0.25, 8, 1), (0.125, 16, 1)]
+    np.testing.assert_array_equal(termination, [1])
+    np.testing.assert_allclose(terminal_velocity, [[0.0, 0.0, -1.0]])
 
 
 def test_transport_lineage_replay_fraction_requires_an_eligible_denominator():

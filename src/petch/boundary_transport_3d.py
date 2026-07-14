@@ -531,35 +531,63 @@ def _repair_invalid_field_hits_float64_3d(
         species_name, origin, velocity, charge_number, potential, grid_origin, grid_spacing,
         verts, faces, normals, fixed_dt, max_steps, periodic_lateral,
         hit_face, hit_cosine, hit_energy, termination, terminal_position, terminal_velocity):
-    """Replay only gas-normal-invalid Warp hits with the float64 edge-inclusive tracer."""
+    """Replay uncertified Warp hits in float64, refining only a still-invalid lineage.
+
+    Shared-edge misses normally close on the first float64 replay.  Strong-field grazing paths can
+    instead remain solid-facing because the flight timestep is too coarse.  Those rare rays are
+    replayed from their original launch with up to five timestep halvings while ``max_steps`` grows
+    by the same factor, preserving the declared physical horizon.  No invalid or truncated replay
+    is accepted after the bounded ladder.
+    """
     hit = termination == 1
     compressed_invalid = _invalid_field_hit_lineage_3d(
         hit_face[hit], hit_cosine[hit], terminal_velocity[hit], normals)
     invalid_ray = np.flatnonzero(hit)[compressed_invalid]
     if not invalid_ray.size:
         return 0
-    replay = _trace_field_events_float64_3d(
-        np.asarray(origin, dtype=float)[invalid_ray],
-        np.asarray(velocity, dtype=float)[invalid_ray], float(charge_number),
-        np.asarray(potential, dtype=float), np.asarray(grid_origin, dtype=float),
-        np.asarray(grid_spacing, dtype=float), np.asarray(verts, dtype=float),
-        np.asarray(faces, dtype=np.int64), float(fixed_dt), int(max_steps),
-        bool(periodic_lateral))
-    for target, repaired in zip(
-            (hit_face, hit_cosine, hit_energy, termination,
-             terminal_position, terminal_velocity), replay):
-        target[invalid_ray] = repaired
-    repaired_hit = termination[invalid_ray] == 1
-    if np.any(repaired_hit):
-        selected = invalid_ray[repaired_hit]
-        _certify_field_hit_lineage_3d(
-            species_name, hit_face[selected], hit_cosine[selected],
-            terminal_velocity[selected], normals)
-    if np.any(termination[invalid_ray] == 0):
-        raise RuntimeError(
-            f"float64 replay for {species_name!r} exhausted max_steps while repairing "
-            f"{invalid_ray.size} uncertified Warp hit(s)")
-    return int(invalid_ray.size)
+    origin = np.asarray(origin, dtype=float)
+    velocity = np.asarray(velocity, dtype=float)
+    unresolved = invalid_ray
+    replay_dt = float(fixed_dt)
+    replay_steps = int(max_steps)
+    maximum_halvings = 5
+    for refinement in range(maximum_halvings + 1):
+        replay = _trace_field_events_float64_3d(
+            origin[unresolved], velocity[unresolved], float(charge_number),
+            np.asarray(potential, dtype=float), np.asarray(grid_origin, dtype=float),
+            np.asarray(grid_spacing, dtype=float), np.asarray(verts, dtype=float),
+            np.asarray(faces, dtype=np.int64), replay_dt, replay_steps,
+            bool(periodic_lateral))
+        for target, repaired in zip(
+                (hit_face, hit_cosine, hit_energy, termination,
+                 terminal_position, terminal_velocity), replay):
+            target[unresolved] = repaired
+
+        replay_hit = termination[unresolved] == 1
+        invalid_replay = np.zeros(len(unresolved), dtype=bool)
+        if np.any(replay_hit):
+            invalid_replay[replay_hit] = _invalid_field_hit_lineage_3d(
+                hit_face[unresolved[replay_hit]], hit_cosine[unresolved[replay_hit]],
+                terminal_velocity[unresolved[replay_hit]], normals)
+        unresolved_replay = invalid_replay | (termination[unresolved] == 0)
+        if not np.any(unresolved_replay):
+            repaired_hit = termination[invalid_ray] == 1
+            if np.any(repaired_hit):
+                selected = invalid_ray[repaired_hit]
+                _certify_field_hit_lineage_3d(
+                    species_name, hit_face[selected], hit_cosine[selected],
+                    terminal_velocity[selected], normals)
+            return int(invalid_ray.size)
+        unresolved = unresolved[unresolved_replay]
+        if refinement < maximum_halvings:
+            replay_dt *= 0.5
+            replay_steps *= 2
+
+    unresolved_truncated = int(np.count_nonzero(termination[unresolved] == 0))
+    raise RuntimeError(
+        f"float64 replay for {species_name!r} left {len(unresolved)} of "
+        f"{invalid_ray.size} uncertified Warp hit(s) after {maximum_halvings} timestep "
+        f"halvings; truncated={unresolved_truncated}; refine the production flight step")
 
 
 def trace_charged_surface_events_field_3d(
