@@ -63,9 +63,10 @@ class OutgoingChargedParticleEvents3D:
 
     ``event_rate_s`` is a particle rate, not a flux density. ``event_position`` uses the same mesh
     coordinate system as the incident triangle mesh. ``event_velocity_sqrt_eV`` is the engine's
-    energy-coordinate velocity vector and must point from the surface into the gas when produced by
-    a response model; that geometric condition is checked by the later launch operator, which owns
-    the oriented face normals.
+    energy-coordinate velocity vector must not point into the solid when produced by a response
+    model.  An exactly tangent vector is the deterministic one-sided limit of a grazing launch;
+    the later launch operator starts it from the declared gas-side offset and owns the oriented
+    face normals used to check that condition.
     """
 
     name: str
@@ -469,11 +470,29 @@ class GrazingSpecularIonReflection3D:
             if np.any(selected):
                 normal = normal[selected]
                 incident_direction = selected_population.event_incident_direction[selected]
-                specular = incident_direction - 2.0 * np.einsum(
-                    "rc,rc->r", incident_direction, normal)[:, None] * normal
+                # Use the incidence cosine certified by boundary transport.  Rare float32
+                # shared-edge/grazing hits can have a raw direction whose gas-normal component is
+                # positive by at most the lineage tolerance; certification represents that
+                # one-sided grazing limit with cosine zero.  Recomputing the raw sign here would
+                # flip the already gas-facing direction into the solid.  Folding with the
+                # certified nonnegative cosine preserves ordinary specular reflection exactly and
+                # keeps the tolerated grazing limit on the gas side.
+                incidence_cosine = (
+                    selected_population.event_cosine_incidence[selected])
+                specular = (
+                    incident_direction + 2.0 * incidence_cosine[:, None] * normal)
                 specular /= np.linalg.norm(specular, axis=1)[:, None]
-                if np.any(np.einsum("rc,rc->r", specular, normal) <= 0.0):
-                    raise ValueError("specular ion response did not point into the gas")
+                outward_cosine = np.einsum("rc,rc->r", specular, normal)
+                if np.any(outward_cosine < 0.0):
+                    event = int(np.argmin(outward_cosine))
+                    raise ValueError(
+                        "specular ion response did not point into the gas: "
+                        f"event={event}, face={int(face[selected][event])}, "
+                        f"stored_cosine={selected_population.event_cosine_incidence[selected][event]:.9g}, "
+                        f"incident_dot_normal={float(np.dot(incident_direction[event], normal[event])):.9g}, "
+                        f"outward_cosine={outward_cosine[event]:.9g}, "
+                        f"direction={incident_direction[event].tolist()}, "
+                        f"normal={normal[event].tolist()}")
                 event_rate = (
                     selected_population.event_flux_m2_s[selected]
                     * context.face_area_m2[face[selected]] * probability[selected])

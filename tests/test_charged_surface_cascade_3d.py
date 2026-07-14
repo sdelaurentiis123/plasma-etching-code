@@ -387,6 +387,31 @@ def test_grazing_reflection_refuses_inconsistent_angle_direction_lineage():
         _reflection_model().evaluate((inconsistent,), {"Ar+": 1}, context)
 
 
+def test_grazing_reflection_uses_certified_zero_cosine_on_gas_side():
+    # Reproduce the production failure mode: float32 shared-edge lineage can leave the raw
+    # direction gas-facing by less than the accepted 2e-6 certification tolerance while the
+    # certified incidence cosine is exactly zero.  The one-sided specular limit must retain that
+    # gas-facing direction rather than recomputing its noisy sign and reflecting it into solid.
+    normal = np.array([-0.7071067690849304, 0.0, 0.7071067690849304])
+    direction = np.array([
+        -0.042131607648075275, -0.9982234525891459, -0.04212916255984473])
+    context = ChargedSurfaceContext3D(
+        np.array([0.5e-12]), normal[None, :], np.array(["Si"]))
+    incident = FaceResolvedEnergeticFlux(
+        "Ar+", 1, [0], [2.0e7 / context.face_area_m2[0]], [100.0], [0.0],
+        event_position=[[0.0, 0.2, 0.8]], event_incident_direction=[direction])
+
+    transfer = _reflection_model(probability=1.0).evaluate(
+        (incident,), {"Ar+": 1}, context)
+
+    reflected, = transfer.outgoing
+    reflected_direction = reflected.event_velocity_sqrt_eV[0] / np.sqrt(90.0)
+    assert np.dot(direction, normal) > 0.0
+    assert np.dot(reflected_direction, normal) > 0.0
+    assert np.allclose(reflected_direction, direction, rtol=0.0, atol=2e-16)
+    assert transfer.relative_charge_balance_error < 5e-15
+
+
 def test_grazing_reflection_creates_floor_corner_flux_and_off_switch_removes_it():
     # One vertical wall at x=0 and a floor at z=0. A grazing downward ion reflects from the wall
     # and reaches the floor close to their shared corner, the transport precursor of microtrenching.

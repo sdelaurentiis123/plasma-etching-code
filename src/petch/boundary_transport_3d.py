@@ -866,9 +866,12 @@ def trace_charged_surface_events_field_3d(
         velocity = population.event_velocity_sqrt_eV
         normal = normals[population.source_face]
         outward_speed = np.einsum("rc,rc->r", velocity, normal)
-        if np.any(outward_speed <= 0.0):
+        # A tangent vector is the exact one-sided limit of a grazing reflection.  Its origin is
+        # still displaced into the gas by ``launch_offset`` below, so only a genuinely solid-facing
+        # velocity is invalid here.
+        if np.any(outward_speed < 0.0):
             raise ValueError(
-                f"outgoing population {population.name!r} contains a non-outward launch")
+                f"outgoing population {population.name!r} contains a solid-facing launch")
         surface_origin, edge_launch_inset_count = _inset_surface_launch_positions_3d(
             population.event_position, population.source_face, verts, faces,
             float(launch_offset))
