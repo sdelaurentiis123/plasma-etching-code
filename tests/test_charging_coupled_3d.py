@@ -21,13 +21,16 @@ from petch.charging_poisson import EPS0
 from petch.charging_poisson_3d import NodalPoissonSystem3D
 from petch.charged_surface_cascade_3d import ChargedSurfaceCascade3DResult
 from petch.charged_surface_response_3d import PerfectAbsorberChargedSurfaceResponse3D
+from petch.conductor_terminal_3d import RemotePadElectronCollector3D
 from petch.sheath import ECHARGE
 
 
-def _flat_dielectric_problem(species):
+def _flat_dielectric_problem(species, *, periodic=False):
     cell_shape = (1, 1, 10); spacing_m = np.full(3, 0.1e-6)
     fixed = np.zeros((2, 2, 11), dtype=bool); fixed[:, :, -1] = True
-    system = NodalPoissonSystem3D(np.ones(cell_shape), spacing_m, fixed)
+    system = NodalPoissonSystem3D(
+        np.ones(cell_shape), spacing_m, fixed,
+        periodic_axes=((0, 1) if periodic else ()))
     vertices = np.array([
         [0.0, 0.0, 0.0], [0.1, 0.0, 0.0],
         [0.1, 0.1, 0.0], [0.0, 0.1, 0.0],
@@ -42,6 +45,18 @@ def _flat_dielectric_problem(species):
         mesh_length_unit_m=1e-6, n_position=16, seed=43,
         trajectory_fixed_dt=0.0025, trajectory_max_steps=2000,
         transport_device="cpu")
+    return system, arguments
+
+
+def _flat_floating_conductor_problem(species):
+    system, arguments = _flat_dielectric_problem(species)
+    conductor = np.zeros(system.shape, dtype=int)
+    conductor[:, :, 0] = 1
+    system = NodalPoissonSystem3D(
+        np.ones((1, 1, 10)), np.full(3, 0.1e-6), system.dirichlet_mask,
+        floating_conductor_node_ids=conductor)
+    arguments = dict(arguments, poisson_system=system,
+                     face_conductor_id=np.ones(2, dtype=int))
     return system, arguments
 
 
@@ -144,6 +159,99 @@ def test_physical_3d_charging_step_conserves_incident_charge_and_capacitance():
             < np.std(result.potential_after_v[:, :, 0]))
 
 
+def test_physical_time_floating_conductor_pools_charge_and_stays_equipotential():
+    flux = 2.0e15
+    duration = 1.0e-3
+    system, arguments = _flat_floating_conductor_problem(
+        (_species("ion", 1, flux),))
+
+    result = advance_dielectric_charging_3d(
+        charge_node_c=np.zeros(system.shape), duration_s=duration, **arguments)
+
+    expected_charge = ECHARGE * flux * 0.01e-12 * duration
+    conductor_mask = system.floating_conductor_node_ids == 1
+    assert np.isclose(result.charge_increment_node_c.sum(), expected_charge, rtol=1e-14)
+    assert np.isclose(
+        result.charge_node_c[conductor_mask].sum(), expected_charge, rtol=1e-14)
+    assert np.ptp(result.potential_after_v[conductor_mask]) < 1e-13
+    assert result.poisson_after.maximum_floating_conductor_voltage_spread_v < 1e-13
+    assert result.poisson_after.floating_conductor_ids == (1,)
+    assert np.isclose(
+        result.poisson_after.floating_conductor_charge_c[0], expected_charge, rtol=1e-14)
+    assert abs(result.diagnostics["charge_conservation_residual_c"]) < 1e-30
+
+
+def test_remote_terminal_closes_floating_conductor_current_without_fake_face_flux():
+    flux = 2.0e15
+    duration = 1.0e-3
+    system, arguments = _flat_floating_conductor_problem(
+        (_species("ion", 1, flux),))
+    physical_area_m2 = 0.01e-12
+    ion_current_a = ECHARGE * flux * physical_area_m2
+    terminal = RemotePadElectronCollector3D(
+        collector_perimeter_m_by_conductor={1: 1.0e-3},
+        electron_current_per_perimeter_a_m=ion_current_a / 1.0e-3,
+        coefficient_bounds_a_m=(
+            0.5 * ion_current_a / 1.0e-3,
+            1.5 * ion_current_a / 1.0e-3,
+        ),
+        source="manufactured exact-balance gate",
+        coefficient_evidence="manufactured conservation value",
+        topology_evidence="one remote pad attached to conductor 1",
+    )
+
+    result = advance_dielectric_charging_3d(
+        charge_node_c=np.zeros(system.shape),
+        duration_s=duration,
+        conductor_terminal=terminal,
+        **arguments,
+    )
+
+    assert result.diagnostics["conductor_terminal_active"]
+    assert result.diagnostics["conductor_terminal_face_patch_b2_exclusion"]
+    assert result.diagnostics["surface_incident_charge_c"] == pytest.approx(
+        ion_current_a * duration)
+    assert result.diagnostics["conductor_terminal_incident_charge_c"] == pytest.approx(
+        -ion_current_a * duration)
+    assert result.diagnostics["incident_charge_c"] == pytest.approx(0.0, abs=1e-32)
+    assert result.charge_increment_node_c.sum() == pytest.approx(0.0, abs=1e-32)
+    assert abs(result.diagnostics["charge_conservation_residual_c"]) < 1e-30
+    # The physical face current remains the kinetic ion deposition. The remote circuit closes at
+    # the conductor inventory rather than being smeared across a fictitious surface patch.
+    assert np.all(result.face_current_density_a_m2 > 0.0)
+    assert result.negative_face_current_density_a_m2.sum() == 0.0
+    assert result.negative_current_node_a.sum() == pytest.approx(ion_current_a)
+
+
+def test_frozen_map_root_solver_refuses_floating_conductor_problem():
+    flux = 2.0e15
+    species = (_species("ion", 1, flux), _species("electron", -1, flux))
+    system, arguments = _flat_floating_conductor_problem(species)
+
+    with pytest.raises(ValueError, match="frozen-map steady root solver is closed"):
+        solve_dielectric_charging_steady_3d(
+            initial_charge_node_c=np.zeros(system.shape), **arguments)
+
+
+def test_charging_step_poissonizes_dimensional_arrivals_and_keeps_exact_charge_ledger():
+    flux = 2.0e15
+    duration = 0.1
+    system, arguments = _flat_dielectric_problem((_species("ion", 1, flux),))
+    result = advance_dielectric_charging_3d(
+        charge_node_c=np.zeros(system.shape), duration_s=duration,
+        physical_arrival_statistics="poisson", physical_arrival_seed=817,
+        **arguments)
+
+    count = result.diagnostics["physical_arrival_realized_primary_count"]
+    assert isinstance(count, int)
+    assert result.diagnostics["physical_arrival_expected_primary_count"] == pytest.approx(2.0)
+    assert result.diagnostics["incident_charge_c"] == pytest.approx(count * ECHARGE)
+    assert result.charge_increment_node_c.sum() == pytest.approx(count * ECHARGE)
+    assert abs(result.diagnostics["charge_conservation_residual_c"]) < 1e-29
+    assert "poisson_physical_arrivals" in result.transport.transport_model
+    assert result.diagnostics["physical_arrival_seed"] == 817
+
+
 def test_explicit_perfect_absorber_uses_unified_response_path_without_changing_engine_result():
     flux = 2.0e15; duration = 1.0e-3
     system, arguments = _flat_dielectric_problem((_species("ion", 1, flux),))
@@ -190,13 +298,22 @@ def test_equal_positive_and_negative_incident_currents_leave_dielectric_uncharge
     assert np.allclose(result.potential_after_v, 0.0, atol=1e-14)
 
 
+def test_charging_refuses_particle_and_poisson_boundary_topology_mismatch():
+    system, arguments = _flat_dielectric_problem((_species("ion", 1, 3e15),))
+
+    with pytest.raises(ValueError, match="boundary topology disagree"):
+        advance_dielectric_charging_3d(
+            charge_node_c=np.zeros(system.shape), duration_s=2e-3,
+            periodic_lateral=True, **arguments)
+
+
 def test_charging_step_routes_directional_ions_forward_and_maxwellian_electrons_adjoint():
     flux = 3.0e15
     ion = _species("ion", 1, flux)
     electron = maxwellian_electron_boundary_state(
         4.0, flux, n_transverse=3, n_normal=4,
         reference_plane_m=1e-6).species[0]
-    system, arguments = _flat_dielectric_problem((ion, electron))
+    system, arguments = _flat_dielectric_problem((ion, electron), periodic=True)
     faces = arguments["faces"]
     centroids = arguments["verts"][faces].mean(axis=1)
     normals = np.broadcast_to([0.0, 0.0, 1.0], centroids.shape)
@@ -223,7 +340,7 @@ def test_charging_step_consumes_a_certified_bidirectional_face_event_measure():
     electron = maxwellian_electron_boundary_state(
         4.0, flux, n_transverse=3, n_normal=4,
         reference_plane_m=1e-6).species[0]
-    system, arguments = _flat_dielectric_problem((ion, electron))
+    system, arguments = _flat_dielectric_problem((ion, electron), periodic=True)
     arguments = dict(arguments); arguments["trajectory_max_steps"] = 100000
     faces = arguments["faces"]
     centroids = arguments["verts"][faces].mean(axis=1)

@@ -59,7 +59,7 @@ Warp runs on CPU (Apple Silicon included) and on NVIDIA CUDA. No GPU needed to t
 Verify the install:
 
 ```bash
-pytest tests/            # 4 smoke/regression tests (2D parity, 3D engine, high-level API)
+pytest tests/            # unit, conservation, operator, integration, and replay tests
 ```
 
 ## Quickstart
@@ -82,6 +82,36 @@ result.save("etch.vtk")                     # ParaView / ViennaPS-readable surfa
 For full control, the low-level `petch.run_etch_3d(...)`, `petch.Flags`, and `petch.PAR` stay public.
 See [`examples/`](examples/) for runnable scripts.
 
+## Run the Nozawa/Hwang notching experiment
+
+The installed package includes checksum-bound digitizations of the Nozawa notch curves and the
+Hwang--Giapis ion-energy distribution.  The user-facing replay uses the same common 3-D engine as
+ordinary profile evolution: hard-visibility kinetic transport, fresh-scramble physical-time surface
+charging, variable-dielectric Q1 Poisson, three independent floating poly-Si conductors, the published
+Cl+/poly-Si removal law, and the published neutralized-ion SiO2 forward-scatter law.
+
+```bash
+# Verify evidence, topology, parameters, and the frozen calibration split; no solve.
+petch-nozawa --mode preflight
+
+# Fast installation/operator check (one exact 1 ns physical-time update).
+petch-nozawa --mode smoke --n-position 4
+
+# Scientific run: profile motion is refused until the signed charging gates pass.
+petch-nozawa --mode experiment --n-position 16 --maximum-charging-steps 4000
+```
+
+Every invocation writes a provenance manifest and machine-readable summary under
+`results/nozawa_1995_user_replay/`.  A successful smoke also writes the final state and an overview
+plot.  An unconverged experiment exits with status 2, leaves the profile unmoved, and writes a
+restartable charging checkpoint instead of silently etching with a nonstationary field.
+
+`smoke` means the installed physical operator runs and conserves its ledgers; it is deliberately not
+a saturation or experimental-validation claim.  A validated notch prediction additionally requires
+the signed charging, grid, timestep, sample, uncertainty, and held-out gates.  The source paper does
+not report measurement uncertainty, so that last claim remains withheld even when an operational
+replay passes.
+
 ## How it works (and how to extend it)
 
 Each step is a swappable stage, so adding physics is local:
@@ -103,12 +133,12 @@ make_trench_3d → [ marching cubes → MC/radiosity flux → SF6O2 chemistry �
 petch includes physics ViennaPS omits, behind flags, **clearly marked experimental and not yet
 calibrated to wafer data**:
 - `redeposition` — etch-product redeposition → sidewall passivation/taper.
-- `surface_charging` — differential electron/ion charging (Hwang–Giapis). *Honest status: the reduced
-  differential-shadowing model (electrons more HARC-shadowed than ions) does NOT reproduce the HG
-  floor-current rolloff at any electron angular spread — it over-throttles. HG needs the self-consistent
-  floor potential re-deflecting ions (a PIC-class field solve), not geometric shadowing. The
-  infrastructure (electron trace, charge factor, `e_ang_sigma`) is in place for that future work. Off by
-  default; the effect direction is right (throttles the floor) but it is not quantitatively calibrated.*
+- `surface_charging` — the common Q1 physical-time engine co-evolves conservative ion/electron
+  arrivals, surface charge, variable-dielectric electrostatics, floating equipotential conductors,
+  hard-visibility trajectory response, and moving-surface charge remap.  Frozen-sample algebraic root
+  solving is intentionally not used.  The installed Nozawa/Hwang smoke passes; stationary C3 closure
+  and held-out C4 experimental validation remain open, so quantitative notch prediction is not yet a
+  released claim.
 - bimodal IEDF yield integration (`ied_mode`).
 
 ## Honest limitations

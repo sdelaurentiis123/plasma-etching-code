@@ -149,18 +149,25 @@ def remap_surface_charge_3d(
 
     if identical:
         output_sigma = old_sigma_input.copy()
-    elif (np.array_equal(np.asarray(old_faces), np.asarray(new_faces))
+    elif (np.asarray(old_vertices).shape == np.asarray(new_vertices).shape
+          and np.array_equal(np.asarray(old_faces), np.asarray(new_faces))
           and np.array_equal(old_material, new_material)
-          and old_area_m2.shape == new_area_m2.shape
-          and not np.any(removed_mask)):
+          and old_area_m2.shape == new_area_m2.shape):
         # Unchanged connectivity supplies an exact Lagrangian face correspondence.  Carry each
-        # face's charge directly; density changes only with its new physical area.
-        output_sigma = old_charge / new_area_m2
+        # retained face's charge directly; density changes only with its new physical area.  Faces
+        # whose old charged skin was etched are the newly exposed surface and remain uncharged.
+        output_sigma[retained_mask] = (
+            old_charge[retained_mask] / new_area_m2[retained_mask])
     else:
         for material in sorted(set(old_material.tolist()) | set(new_material.tolist())):
             source = np.where((old_material == material) & retained_mask)[0]
             target = np.where(new_material == material)[0]
             if source.size == 0:
+                continue
+            if not np.any(old_charge[source] != 0.0):
+                # There is no conserved quantity to interpolate for this material.  In particular,
+                # an uncharged newly exposed surface must not fail a geometric-distance gate merely
+                # because the old zero-valued faces are far away.
                 continue
             if target.size == 0:
                 raise ValueError(

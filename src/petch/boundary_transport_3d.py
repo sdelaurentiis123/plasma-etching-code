@@ -107,6 +107,158 @@ def _first_segment_triangle_hit_float64_3d(position, segment, verts, faces, doma
 
 
 @njit(cache=True)
+def _first_front_ray_hit_float64_3d(
+        position, direction, max_distance, verts, faces, gas_normals, domain, periodic):
+    """Return the first gas-side hard hit of a straight boundary ray.
+
+    A direct source-to-surface replay avoids the segment-boundary ambiguity of a zero-field
+    time integrator.  At a shared edge, a gas-facing primitive wins over a solid-facing primitive
+    at the same geometric distance.  A genuinely earlier back-face remains visible to the caller
+    through the negative returned cosine and is never silently skipped.
+    """
+    segment = max_distance * direction
+    best_any_fraction = 2.0
+    best_any_face = -1
+    best_any_position = np.zeros(3)
+    best_any_cosine = -2.0
+    best_front_fraction = 2.0
+    best_front_face = -1
+    best_front_position = np.zeros(3)
+    best_front_cosine = -2.0
+    shift_count = 3 if periodic else 1
+    for ix in range(shift_count):
+        shift_x = (ix - 1) * domain[0] if periodic else 0.0
+        for iy in range(shift_count):
+            shift_y = (iy - 1) * domain[1] if periodic else 0.0
+            for face_index in range(len(faces)):
+                triangle = faces[face_index]
+                a = verts[triangle[0]].copy()
+                b = verts[triangle[1]].copy()
+                c = verts[triangle[2]].copy()
+                a[0] += shift_x; b[0] += shift_x; c[0] += shift_x
+                a[1] += shift_y; b[1] += shift_y; c[1] += shift_y
+                edge0 = b - a
+                edge1 = c - a
+                normal = np.cross(edge0, edge1)
+                denominator = np.dot(segment, normal)
+                scale = np.linalg.norm(segment) * np.linalg.norm(normal)
+                if scale == 0.0 or abs(denominator) <= 2e-15 * scale:
+                    continue
+                fraction = np.dot(a - position, normal) / denominator
+                if fraction <= 2e-12 or fraction > 1.0 + 2e-12:
+                    continue
+                point = position + fraction * segment
+                relative = point - a
+                d00 = np.dot(edge0, edge0)
+                d01 = np.dot(edge0, edge1)
+                d11 = np.dot(edge1, edge1)
+                d20 = np.dot(relative, edge0)
+                d21 = np.dot(relative, edge1)
+                determinant = d00 * d11 - d01 * d01
+                if determinant <= 0.0:
+                    continue
+                u = (d11 * d20 - d01 * d21) / determinant
+                v = (d00 * d21 - d01 * d20) / determinant
+                if not (u >= -2e-12 and v >= -2e-12 and u + v <= 1.0 + 2e-12):
+                    continue
+                cosine = -np.dot(direction, gas_normals[face_index])
+                tie = abs(fraction - best_any_fraction) <= 2e-12
+                if fraction < best_any_fraction - 2e-12 or (tie and cosine > best_any_cosine):
+                    best_any_fraction = fraction
+                    best_any_face = face_index
+                    best_any_position = point
+                    best_any_cosine = cosine
+                if cosine >= -2e-6:
+                    front_tie = abs(fraction - best_front_fraction) <= 2e-12
+                    if (fraction < best_front_fraction - 2e-12
+                            or (front_tie and cosine > best_front_cosine)):
+                        best_front_fraction = fraction
+                        best_front_face = face_index
+                        best_front_position = point
+                        best_front_cosine = cosine
+    if (best_front_face >= 0
+            and (best_any_face < 0 or best_front_fraction <= best_any_fraction + 2e-12)):
+        best_any_face = best_front_face
+        best_any_position = best_front_position
+        best_any_cosine = best_front_cosine
+    if best_any_face >= 0 and periodic:
+        for axis in range(2):
+            while best_any_position[axis] < 0.0:
+                best_any_position[axis] += domain[axis]
+            while best_any_position[axis] > domain[axis]:
+                best_any_position[axis] -= domain[axis]
+    return best_any_face, best_any_position, best_any_cosine
+
+
+@njit(cache=True)
+def _trace_zero_field_events_float64_3d(
+        origin, velocity, verts, faces, gas_normals, grid_origin, grid_maximum,
+        fixed_dt, max_steps, periodic_lateral):
+    """Trace straight zero-field events continuously through periodic boundary wraps."""
+    count = len(origin)
+    hit_face = np.full(count, -1, dtype=np.int64)
+    hit_cosine = np.zeros(count)
+    hit_energy = np.zeros(count)
+    termination = np.zeros(count, dtype=np.int8)
+    terminal_position = origin.copy()
+    terminal_velocity = velocity.copy()
+    domain = grid_maximum - grid_origin
+    local_domain = np.ones(3)
+    tiny = 1e-11 * max(np.max(domain), 1.0)
+    for particle in range(count):
+        speed = np.linalg.norm(velocity[particle])
+        if speed <= 0.0:
+            continue
+        direction = velocity[particle] / speed
+        position = origin[particle].copy()
+        remaining = fixed_dt * max_steps * speed
+        for _piece in range(2048):
+            if remaining <= tiny:
+                break
+            boundary_distance = remaining
+            boundary_axis = -1
+            for axis in range(3):
+                if direction[axis] > 1e-14:
+                    distance = (grid_maximum[axis] - position[axis]) / direction[axis]
+                elif direction[axis] < -1e-14:
+                    distance = (grid_origin[axis] - position[axis]) / direction[axis]
+                else:
+                    distance = np.inf
+                if distance >= -tiny and distance < boundary_distance:
+                    boundary_distance = max(distance, 0.0)
+                    boundary_axis = axis
+            query_distance = min(remaining, boundary_distance)
+            # Include a boundary-owned triangle at the end of this covering-space piece.
+            extended_distance = query_distance * (1.0 + 2e-12) + 2e-12
+            face, impact, cosine = _first_front_ray_hit_float64_3d(
+                position, direction, extended_distance, verts, faces, gas_normals,
+                local_domain, False)
+            if face >= 0 and np.linalg.norm(impact - position) <= query_distance + 5e-10:
+                hit_face[particle] = face
+                hit_cosine[particle] = cosine
+                hit_energy[particle] = speed * speed
+                termination[particle] = 1
+                terminal_position[particle] = impact
+                break
+            position = position + query_distance * direction
+            remaining -= query_distance
+            if boundary_axis < 0 or remaining <= tiny:
+                terminal_position[particle] = position
+                break
+            if boundary_axis == 2 or not periodic_lateral:
+                termination[particle] = 2
+                terminal_position[particle] = position
+                break
+            if direction[boundary_axis] > 0.0:
+                position[boundary_axis] = grid_origin[boundary_axis] + tiny
+            else:
+                position[boundary_axis] = grid_maximum[boundary_axis] - tiny
+            terminal_position[particle] = position
+    return (hit_face, hit_cosine, hit_energy, termination,
+            terminal_position, terminal_velocity)
+
+
+@njit(cache=True)
 def _trace_field_events_float64_3d(
         origin, velocity, charge_number, potential, grid_origin, grid_spacing,
         verts, faces, fixed_dt, max_steps, periodic_lateral):
@@ -189,7 +341,8 @@ def _contains_surface_local_density(density):
 @wp.kernel
 def _first_hit_events_3d(
         mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), direction: wp.array(dtype=wp.vec3),
-        max_distance: float, hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float)):
+        max_distance: float, hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float),
+        hit_position: wp.array(dtype=wp.vec3)):
     particle = wp.tid()
     ray = wp.mesh_query_ray(mesh, origin[particle], direction[particle], max_distance)
     if ray.result:
@@ -199,6 +352,7 @@ def _first_hit_events_3d(
         cosine = -wp.dot(direction[particle], normal)
         hit_face[particle] = ray.face
         hit_cosine[particle] = wp.clamp(cosine, 0.0, 1.0)
+        hit_position[particle] = origin[particle] + ray.t * direction[particle]
 
 
 @wp.kernel
@@ -219,7 +373,8 @@ def _diffuse_form_factor_events_3d(
 def _periodic_first_hit_events_3d(
         mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), direction: wp.array(dtype=wp.vec3),
         domain_x: float, domain_y: float, domain_z: float,
-        hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float)):
+        hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float),
+        hit_position: wp.array(dtype=wp.vec3)):
     particle = wp.tid()
     boundary_ray = _apply_bc(
         mesh, origin[particle], direction[particle], domain_x, domain_y, domain_z, 1)
@@ -230,6 +385,7 @@ def _periodic_first_hit_events_3d(
             normal = -normal
         hit_face[particle] = ray.face
         hit_cosine[particle] = wp.clamp(-wp.dot(boundary_ray.d, normal), 0.0, 1.0)
+        hit_position[particle] = boundary_ray.o + ray.t * boundary_ray.d
 
 
 @wp.func
@@ -407,30 +563,42 @@ def _trace_field_events_with_horizon_3d(
             or emergency_max_steps < initial_max_steps):
         raise ValueError("invalid adaptive trajectory-horizon controls")
     emergency_max_steps = int(emergency_max_steps)
-    ray_count = len(origin)
-    origin_wp = wp.array(
-        np.ascontiguousarray(np.asarray(origin, dtype=np.float32)),
-        dtype=wp.vec3, device=selected_device)
-    velocity_wp = wp.array(
-        np.ascontiguousarray(np.asarray(velocity, dtype=np.float32)),
-        dtype=wp.vec3, device=selected_device)
+    original_origin = np.ascontiguousarray(np.asarray(origin, dtype=np.float32))
+    original_velocity = np.ascontiguousarray(np.asarray(velocity, dtype=np.float32))
+    ray_count = len(original_origin)
+    active_index = np.arange(ray_count, dtype=int)
+    full_result = (
+        np.full(ray_count, -1, dtype=int),
+        np.zeros(ray_count, dtype=float),
+        np.zeros(ray_count, dtype=float),
+        np.zeros(ray_count, dtype=int),
+        np.zeros((ray_count, 3), dtype=float),
+        np.zeros((ray_count, 3), dtype=float),
+    )
     active_max_steps = initial_max_steps
     extension_count = 0
     while True:
-        hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
-        hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
-        hit_energy_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
-        termination_wp = wp.zeros(ray_count, dtype=wp.int8, device=selected_device)
-        terminal_position_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
-        terminal_velocity_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
+        active_count = len(active_index)
+        origin_wp = wp.array(
+            np.ascontiguousarray(original_origin[active_index]),
+            dtype=wp.vec3, device=selected_device)
+        velocity_wp = wp.array(
+            np.ascontiguousarray(original_velocity[active_index]),
+            dtype=wp.vec3, device=selected_device)
+        hit_face_wp = wp.full(active_count, -1, dtype=wp.int32, device=selected_device)
+        hit_cosine_wp = wp.zeros(active_count, dtype=float, device=selected_device)
+        hit_energy_wp = wp.zeros(active_count, dtype=float, device=selected_device)
+        termination_wp = wp.zeros(active_count, dtype=wp.int8, device=selected_device)
+        terminal_position_wp = wp.zeros(active_count, dtype=wp.vec3, device=selected_device)
+        terminal_velocity_wp = wp.zeros(active_count, dtype=wp.vec3, device=selected_device)
         wp.launch(
-            _field_hit_events_3d, dim=ray_count, device=selected_device,
+            _field_hit_events_3d, dim=active_count, device=selected_device,
             inputs=[mesh.id, potential_wp, wp.vec3(*grid_origin), wp.vec3(*grid_spacing),
                     wp.vec3(*grid_maximum), origin_wp, velocity_wp,
                     float(charge_number), float(fixed_dt), int(active_max_steps),
                     int(bool(periodic_lateral)), hit_face_wp, hit_cosine_wp, hit_energy_wp,
                     termination_wp, terminal_position_wp, terminal_velocity_wp])
-        result = (
+        active_result = (
             hit_face_wp.numpy().astype(int),
             hit_cosine_wp.numpy().astype(float),
             hit_energy_wp.numpy().astype(float),
@@ -438,9 +606,17 @@ def _trace_field_events_with_horizon_3d(
             terminal_position_wp.numpy().astype(float),
             terminal_velocity_wp.numpy().astype(float),
         )
-        if (not np.any(result[3] == 0) or not adaptive_horizon
+        for destination, values in zip(full_result, active_result):
+            destination[active_index] = values
+        unresolved = active_result[3] == 0
+        if (not np.any(unresolved) or not adaptive_horizon
                 or active_max_steps >= emergency_max_steps):
-            return result + (active_max_steps, extension_count)
+            return full_result + (active_max_steps, extension_count)
+        # Resolved rays are final: a longer replay cannot change a first hit or a prior escape.
+        # Replay only the unresolved subset from its identical original state.  This is exactly
+        # equivalent to replaying the full Sobol population at the larger horizon while avoiding
+        # the old all-rays cost explosion caused by one rare grazing trajectory.
+        active_index = active_index[unresolved]
         active_max_steps = min(2 * active_max_steps, emergency_max_steps)
         extension_count += 1
 
@@ -665,6 +841,37 @@ def _repair_invalid_field_hits_float64_3d(
         if launch_face.shape != (len(origin),):
             raise ValueError("source_face must identify every replay-eligible launch")
     unresolved = invalid_ray
+    potential_array = np.asarray(potential, dtype=float)
+    if not np.any(potential_array):
+        grid_origin_array = np.asarray(grid_origin, dtype=float)
+        grid_spacing_array = np.asarray(grid_spacing, dtype=float)
+        grid_maximum = (
+            grid_origin_array + (np.asarray(potential_array.shape) - 1) * grid_spacing_array)
+        replay = _trace_zero_field_events_float64_3d(
+            origin[unresolved], velocity[unresolved], np.asarray(verts, dtype=float),
+            np.asarray(faces, dtype=np.int64), np.asarray(normals, dtype=float),
+            grid_origin_array, grid_maximum, float(fixed_dt), int(max_steps),
+            bool(periodic_lateral))
+        for target, repaired in zip(
+                (hit_face, hit_cosine, hit_energy, termination,
+                 terminal_position, terminal_velocity), replay):
+            target[unresolved] = repaired
+        direct_hit = termination[unresolved] == 1
+        direct_invalid = np.zeros(len(unresolved), dtype=bool)
+        if np.any(direct_hit):
+            direct_invalid[direct_hit] = _invalid_field_hit_lineage_3d(
+                hit_face[unresolved[direct_hit]], hit_cosine[unresolved[direct_hit]],
+                terminal_velocity[unresolved[direct_hit]], normals)
+        unresolved_direct = direct_invalid | (termination[unresolved] == 0)
+        if not np.any(unresolved_direct):
+            repaired_hit = termination[invalid_ray] == 1
+            if np.any(repaired_hit):
+                selected = invalid_ray[repaired_hit]
+                _certify_field_hit_lineage_3d(
+                    species_name, hit_face[selected], hit_cosine[selected],
+                    terminal_velocity[selected], normals)
+            return int(invalid_ray.size)
+        unresolved = unresolved[unresolved_direct]
     replay_dt = float(fixed_dt)
     replay_steps = int(max_steps)
     maximum_halvings = 5
@@ -876,6 +1083,12 @@ def trace_charged_surface_events_field_3d(
             population.event_position, population.source_face, verts, faces,
             float(launch_offset))
         origin = surface_origin + float(launch_offset) * normal
+        if periodic_lateral:
+            domain = grid_maximum - grid_origin
+            for axis in range(2):
+                origin[:, axis] = (
+                    grid_origin[axis]
+                    + np.mod(origin[:, axis] - grid_origin[axis], domain[axis]))
         if (np.any(origin < grid_origin - tolerance)
                 or np.any(origin > grid_maximum + tolerance)):
             raise ValueError("offset charged-particle launch lies outside the potential grid")
@@ -1213,6 +1426,109 @@ def merge_boundary_transport_results_3d(*results):
         trajectory_emergency_max_steps=horizon_emergency_max_steps)
 
 
+def average_boundary_transport_results_3d(*results):
+    """Average independent transports of the same species without binning hit events.
+
+    Every input must evaluate the same physical boundary/mesh/operator with an independent sample
+    realization.  Neutral face fluxes and hit/escape/truncation probabilities are averaged
+    arithmetically.  Sparse energetic events are concatenated with each event contribution divided
+    by the replicate count, preserving the full energy/angle/position measure consumed by surface
+    chemistry.  Replay and recovery counters are accumulated as work/integrity diagnostics; they do
+    not alter the averaged physical measure.
+    """
+    results = tuple(results)
+    if not results or any(not isinstance(item, BoundaryTransport3DResult) for item in results):
+        raise ValueError("one or more BoundaryTransport3DResult objects are required")
+    first = results[0]
+    species = set(first.hit_probability)
+    neutral_names = set(first.surface_fluxes.neutral_flux_m2_s)
+    energetic_by_result = []
+    first_energetic_names = None
+    for index, result in enumerate(results):
+        if (set(result.hit_probability) != species
+                or set(result.escape_probability) != species
+                or set(result.truncation_probability) != species):
+            raise ValueError("averaged transports must classify identical species")
+        if set(result.surface_fluxes.neutral_flux_m2_s) != neutral_names:
+            raise ValueError("averaged transports must contain identical neutral species")
+        populations = {item.name: item for item in result.surface_fluxes.energetic_fluxes}
+        if len(populations) != len(result.surface_fluxes.energetic_fluxes):
+            raise ValueError("averaged energetic species names must be unique")
+        if any(not isinstance(item, FaceResolvedEnergeticFlux)
+               for item in populations.values()):
+            raise TypeError("transport averaging requires face-resolved energetic event measures")
+        names = tuple(populations)
+        if first_energetic_names is None:
+            first_energetic_names = names
+        elif set(names) != set(first_energetic_names):
+            raise ValueError("averaged transports must contain identical energetic species")
+        if result.transport_model != first.transport_model:
+            raise ValueError("averaged transports must use the same transport model")
+        energetic_by_result.append(populations)
+
+    count = len(results)
+    neutral = {}
+    for name in sorted(neutral_names):
+        values = [np.asarray(item.surface_fluxes.neutral_flux_m2_s[name], dtype=float)
+                  for item in results]
+        if any(value.shape != values[0].shape for value in values[1:]):
+            raise ValueError(f"averaged neutral flux shape changed for {name!r}")
+        neutral[name] = np.mean(np.stack(values), axis=0)
+
+    energetic = []
+    for name in first_energetic_names or ():
+        populations = [item[name] for item in energetic_by_result]
+        face_count = populations[0].face_count
+        if any(item.face_count != face_count for item in populations[1:]):
+            raise ValueError(f"averaged face count changed for {name!r}")
+
+        def concatenate_optional(attribute):
+            values = [getattr(item, attribute) for item in populations]
+            present = [value is not None for value in values]
+            if any(present) and not all(present):
+                raise ValueError(
+                    f"averaged energetic events inconsistently preserve {attribute}")
+            return None if not any(present) else np.concatenate(values, axis=0)
+
+        energetic.append(FaceResolvedEnergeticFlux(
+            name, face_count,
+            np.concatenate([item.event_face for item in populations]),
+            np.concatenate([
+                item.event_flux_m2_s / count for item in populations]),
+            np.concatenate([item.event_energy_eV for item in populations]),
+            np.concatenate([item.event_cosine_incidence for item in populations]),
+            event_position=concatenate_optional("event_position"),
+            event_incident_direction=concatenate_optional(
+                "event_incident_direction")))
+
+    def mean_probability(attribute, name):
+        values = np.asarray([getattr(item, attribute)[name] for item in results], dtype=float)
+        return float(np.mean(values))
+
+    hit = {name: mean_probability("hit_probability", name) for name in species}
+    escaped = {name: mean_probability("escape_probability", name) for name in species}
+    truncated = {name: mean_probability("truncation_probability", name) for name in species}
+    return BoundaryTransport3DResult(
+        surface_fluxes=SurfaceFluxes(neutral, tuple(energetic)),
+        hit_probability=hit, escape_probability=escaped,
+        truncation_probability=truncated,
+        transport_model=f"independent_replicate_mean[{count}]({first.transport_model})",
+        known_limitations=tuple(dict.fromkeys(
+            limitation for item in results for limitation in item.known_limitations)),
+        lineage_replay_count=sum(item.lineage_replay_count for item in results),
+        lineage_replay_eligible_count=sum(
+            item.lineage_replay_eligible_count for item in results),
+        edge_launch_inset_count=sum(item.edge_launch_inset_count for item in results),
+        trajectory_horizon_extension_count=sum(
+            item.trajectory_horizon_extension_count for item in results),
+        trajectory_initial_max_steps=max(
+            item.trajectory_initial_max_steps for item in results),
+        trajectory_final_max_steps=max(
+            item.trajectory_final_max_steps for item in results),
+        trajectory_emergency_max_steps=max(
+            item.trajectory_emergency_max_steps for item in results))
+
+
 def estimate_diffuse_form_factors_3d(
         verts, faces, centroids, gas_normals, *, rays_per_face=64, seed=0,
         domain_size=None, periodic_lateral=False, ray_offset=1e-5, device=None):
@@ -1480,7 +1796,7 @@ def trace_boundary_state_first_hit_3d(
         boundary: PlasmaBoundaryState, species_role: Mapping[str, str], verts, faces, areas, *,
         source_bounds, source_z, mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0),
         n_position=256, seed=0, max_distance=None, periodic_lateral=False,
-        domain_size=None, device=None):
+        domain_size=None, face_gas_normals=None, device=None):
     """Transport a spatially uniform boundary state to exact triangle-hit events.
 
     ``species_role`` is a physical input mapping each boundary species to
@@ -1508,6 +1824,13 @@ def trace_boundary_state_first_hit_3d(
     if (np.any(geometric_areas <= 0.0)
             or not np.allclose(areas, geometric_areas, rtol=1e-7, atol=0.0)):
         raise ValueError("triangle areas must match the supplied mesh geometry")
+    normals = None
+    if face_gas_normals is not None:
+        normals = np.asarray(face_gas_normals, dtype=float)
+        if (normals.shape != (faces.shape[0], 3) or np.any(~np.isfinite(normals))
+                or not np.allclose(
+                    np.linalg.norm(normals, axis=1), 1.0, rtol=0.0, atol=2e-6)):
+            raise ValueError("face_gas_normals must contain one unit gas normal per face")
     bounds = np.asarray(source_bounds, dtype=float)
     if (bounds.shape != (4,) or np.any(~np.isfinite(bounds))
             or bounds[1] <= bounds[0] or bounds[3] <= bounds[2]):
@@ -1572,6 +1895,8 @@ def trace_boundary_state_first_hit_3d(
         domain = np.ones(3)
 
     neutral_flux = {}; energetic_flux = []; hit_probability = {}; escape_probability = {}
+    lineage_replay_count = 0
+    lineage_replay_eligible_count = 0
     for species in boundary.species:
         sample_count = species.velocity_sqrt_eV.shape[0]
         ray_count = sample_count * n_position
@@ -1590,6 +1915,7 @@ def trace_boundary_state_first_hit_3d(
 
         hit_face_wp = wp.full(ray_count, -1, dtype=wp.int32, device=selected_device)
         hit_cosine_wp = wp.zeros(ray_count, dtype=float, device=selected_device)
+        hit_position_wp = wp.zeros(ray_count, dtype=wp.vec3, device=selected_device)
         origin_wp = wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device)
         direction_wp = wp.array(direction.astype(np.float32), dtype=wp.vec3, device=selected_device)
         if periodic_lateral:
@@ -1597,15 +1923,45 @@ def trace_boundary_state_first_hit_3d(
                 _periodic_first_hit_events_3d, dim=ray_count, device=selected_device,
                 inputs=[mesh.id, origin_wp, direction_wp,
                         float(domain[0]), float(domain[1]), float(domain[2]),
-                        hit_face_wp, hit_cosine_wp])
+                        hit_face_wp, hit_cosine_wp, hit_position_wp])
         else:
             wp.launch(
                 _first_hit_events_3d, dim=ray_count, device=selected_device,
                 inputs=[mesh.id, origin_wp, direction_wp, float(max_distance),
-                        hit_face_wp, hit_cosine_wp])
+                        hit_face_wp, hit_cosine_wp, hit_position_wp])
         hit_face = hit_face_wp.numpy().astype(int)
         hit_cosine = hit_cosine_wp.numpy().astype(float)
+        hit_position = hit_position_wp.numpy().astype(float)
         hit = hit_face >= 0
+        if normals is not None:
+            lineage_replay_eligible_count += ray_count
+            hit_index = np.flatnonzero(hit)
+            geometric = -np.einsum(
+                "rc,rc->r", direction[hit_index], normals[hit_face[hit_index]])
+            invalid = hit_index[geometric < -2e-6]
+            for ray_index in invalid:
+                replay_face, replay_position, replay_cosine = (
+                    _first_front_ray_hit_float64_3d(
+                        origin[ray_index], direction[ray_index], float(max_distance),
+                        verts, faces, normals, domain, bool(periodic_lateral)))
+                hit_face[ray_index] = replay_face
+                hit_position[ray_index] = replay_position
+                hit_cosine[ray_index] = replay_cosine
+            lineage_replay_count += int(invalid.size)
+            hit = hit_face >= 0
+            if np.any(hit):
+                geometric = -np.einsum(
+                    "rc,rc->r", direction[hit], normals[hit_face[hit]])
+                invalid_after_replay = geometric < -2e-6
+                if np.any(invalid_after_replay):
+                    selected = np.flatnonzero(hit)[np.flatnonzero(invalid_after_replay)[0]]
+                    raise RuntimeError(
+                        f"straight first-hit replay for {species.name!r} remained solid-facing: "
+                        f"ray={int(selected)}, face={int(hit_face[selected])}, "
+                        f"position={hit_position[selected].tolist()}, "
+                        f"direction={direction[selected].tolist()}, "
+                        f"geometric={geometric[invalid_after_replay][0]:.9g}")
+                hit_cosine[hit] = np.clip(geometric, 0.0, 1.0)
         hit_probability[species.name] = float(physical_weight[hit].sum())
         escape_probability[species.name] = float(physical_weight[~hit].sum())
         event_flux = (species.flux_m2_s * source_area * physical_weight[hit]
@@ -1616,7 +1972,8 @@ def trace_boundary_state_first_hit_3d(
         else:
             energetic_flux.append(FaceResolvedEnergeticFlux(
                 species.name, faces.shape[0], hit_face[hit], event_flux, energy[hit],
-                hit_cosine[hit], event_incident_direction=direction[hit]))
+                hit_cosine[hit], event_position=hit_position[hit],
+                event_incident_direction=direction[hit]))
 
     return BoundaryTransport3DResult(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
@@ -1629,8 +1986,12 @@ def trace_boundary_state_first_hit_3d(
             "no intra-feature electric-field trajectory coupling",
             "no surface reflection or neutral re-emission",
             "no spatially varying boundary density",
-            "float32 triangle-ray intersection",
-        ))
+            ("float32 triangle-ray intersection"
+             if normals is None else
+             "float32 hard-hit fast path with selective float64 gas-side lineage replay"),
+        ),
+        lineage_replay_count=lineage_replay_count,
+        lineage_replay_eligible_count=lineage_replay_eligible_count)
 
 
 def trace_boundary_state_field_3d(

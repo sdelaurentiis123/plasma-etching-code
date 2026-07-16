@@ -6,7 +6,8 @@ from petch.boundary_transport_3d import (
     trace_charged_surface_events_field_3d,
 )
 from petch.charged_surface_cascade_3d import (
-    augment_transport_with_charged_reimpacts_3d,
+    _incident_charge_rate,
+    apply_charged_surface_response_to_transport_3d,
     derived_tail_bounce_budget_3d,
     solve_charged_surface_cascade_3d,
 )
@@ -316,18 +317,44 @@ def test_lambertian_surface_quadrature_refines_the_landing_escape_partition():
     assert level_9.relative_charge_balance_error < 5e-15
 
 
-def _reflection_model(*, probability=0.95, exponent=3.0, retention=0.9):
+def _reflection_model(*, probability=0.95, exponent=3.0, retention=0.9,
+                      material_id="Si"):
     names = (
         "grazing_reflection_probability", "angular_exponent",
         "energy_retention_fraction")
     return GrazingSpecularIonReflection3D(
-        material_id="Si", ion_species_name="Ar+",
+        material_id=material_id, ion_species_name="Ar+",
         grazing_reflection_probability=probability,
         angular_exponent=exponent, energy_retention_fraction=retention,
         parameter_evidence={
             name: ParameterEvidence("manufactured reflection gate", "analytic")
             for name in names},
         parameter_bounds={name: (0.0, 8.0) for name in names})
+
+
+def test_grazing_reflection_accepts_a_declared_material_collection():
+    _, _, _, context = _parallel_triangle_geometry()
+    context = ChargedSurfaceContext3D(
+        context.face_area_m2, context.face_gas_normal, np.array(["ACL", "SiO2"]))
+    tangent = np.sqrt(0.99)
+    incident = FaceResolvedEnergeticFlux(
+        "Ar+", 2, event_face=[0, 1],
+        event_flux_m2_s=[2.5e19, 1.0e19], event_energy_eV=[100.0, 100.0],
+        event_cosine_incidence=[0.1, 0.1],
+        event_position=[[0.25, 1.0 / 3.0, 1.0 / 3.0],
+                        [0.75, 1.0 / 3.0, 1.0 / 3.0]],
+        event_incident_direction=[[-0.1, 0.0, -tangent],
+                                  [0.1, 0.0, -tangent]])
+    model = _reflection_model(material_id=("ACL", "SiO2"))
+
+    transfer = model.evaluate((incident,), {"Ar+": 1}, context)
+
+    assert transfer.outgoing[0].source_face.tolist() == [0, 1]
+    expected = model.reflection_probability([0.1, 0.1])
+    assert np.allclose(
+        transfer.outgoing[0].event_rate_s,
+        incident.event_flux_m2_s * context.face_area_m2 * expected,
+        rtol=2e-16)
 
 
 def test_grazing_specular_reflection_closes_particle_charge_and_energy_ledgers():
@@ -369,6 +396,34 @@ def test_grazing_specular_reflection_closes_particle_charge_and_energy_ledgers()
     assert np.allclose(
         reflected_direction - np.dot(reflected_direction, normal) * normal,
         direction - np.dot(direction, normal) * normal, rtol=0.0, atol=2e-16)
+
+
+def test_large_event_response_uses_the_cascade_incident_reduction_order():
+    _, _, _, context = _parallel_triangle_geometry()
+    context = ChargedSurfaceContext3D(
+        context.face_area_m2, context.face_gas_normal, np.array(["Si", "Si"]))
+    count = 1 << 17
+    face = np.arange(count, dtype=int) & 1
+    transverse = np.sqrt(0.75)
+    direction = np.where(
+        face[:, None] == 0,
+        [-0.5, transverse, 0.0], [0.5, transverse, 0.0])
+    position = np.column_stack((
+        np.where(face == 0, 0.25, 0.75),
+        (np.arange(count) + 0.5) / count,
+        np.full(count, 0.25)))
+    incident = FaceResolvedEnergeticFlux(
+        "Ar+", 2, face,
+        np.linspace(1.0e18, 1.0e18 + 1.0e9, count),
+        np.full(count, 100.0), np.full(count, 0.5),
+        event_position=position, event_incident_direction=direction)
+
+    transfer = _reflection_model().evaluate((incident,), {"Ar+": 1}, context)
+    expected = _incident_charge_rate(
+        (incident,), {"Ar+": 1}, context.face_area_m2)
+
+    assert transfer.incident_charge_rate_c_s == expected
+    assert transfer.relative_charge_balance_error < 5e-13
 
 
 def test_grazing_reflection_refuses_inconsistent_angle_direction_lineage():
@@ -475,16 +530,15 @@ def test_reflected_reimpacts_are_in_the_chemistry_facing_surface_flux():
     incident = FaceResolvedEnergeticFlux(
         "Ar+", 2, [0], [2.0e7 / context.face_area_m2[0]], [100.0], [0.1],
         event_position=[[0.0, 0.2, 0.8]], event_incident_direction=[direction])
-    cascade = solve_charged_surface_cascade_3d(
-        (incident,), {"Ar+": 1}, _reflection_model(), context, verts, faces, areas,
+    primary = BoundaryTransport3DResult(
+        SurfaceFluxes({}, (incident,)), {"Ar+": 1.0}, {"Ar+": 0.0}, {"Ar+": 0.0},
+        "manufactured first hit", ("no surface reflection or neutral re-emission",))
+    effective, cascade = apply_charged_surface_response_to_transport_3d(
+        primary, {"Ar+": 1}, _reflection_model(), context, verts, faces, areas,
         nodal_potential_v=np.zeros((3, 3, 3)), potential_origin=(0.0, 0.0, 0.0),
         potential_spacing=0.5, mesh_length_unit_m=1e-6,
         launch_offset=1e-4, fixed_dt=0.01, max_steps=500,
         max_bounces=16, device="cpu")
-    primary = BoundaryTransport3DResult(
-        SurfaceFluxes({}, (incident,)), {"Ar+": 1.0}, {"Ar+": 0.0}, {"Ar+": 0.0},
-        "manufactured first hit", ("no surface reflection or neutral re-emission",))
-    effective = augment_transport_with_charged_reimpacts_3d(primary, cascade)
     impacts, = effective.surface_fluxes.energetic_fluxes
 
     assert cascade.completed
@@ -533,3 +587,28 @@ def test_reflected_flight_segment_is_reciprocal_under_path_reversal():
     # Two outward launch offsets accumulate geometrically; at this grazing angle their pathwise
     # displacement is bounded by 12 launch offsets and vanishes under offset refinement.
     assert np.linalg.norm(backward.incident.event_position[0] - source) < 12 * launch_offset
+
+
+def test_periodic_surface_launch_offset_wraps_into_the_neighboring_cell():
+    verts = np.array([
+        [0.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 0.0],
+        [0.5, 0.0, 0.0], [0.5, 1.0, 0.0], [0.5, 0.0, 1.0],
+    ])
+    faces = np.array([[0, 1, 2], [3, 4, 5]])
+    areas = np.full(2, 0.5)
+    normals = np.array([[-1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    emitted = OutgoingChargedParticleEvents3D(
+        "Ar+", 1, 2, source_face=[0], event_rate_s=[2.5e7],
+        event_position=[[0.0, 1.0 / 3.0, 1.0 / 3.0]],
+        event_velocity_sqrt_eV=[[-1.0, 0.0, 0.0]])
+
+    flight, = trace_charged_surface_events_field_3d(
+        (emitted,), verts, faces, areas, normals,
+        nodal_potential_v=np.zeros((3, 3, 3)),
+        potential_origin=(0.0, 0.0, 0.0), potential_spacing=0.5,
+        mesh_length_unit_m=1e-6, launch_offset=1e-4,
+        fixed_dt=0.05, max_steps=40, periodic_lateral=True, device="cpu")
+
+    assert flight.hit_face.tolist() == [1]
+    assert flight.termination.tolist() == [1]
+    assert flight.relative_particle_balance_error == 0.0

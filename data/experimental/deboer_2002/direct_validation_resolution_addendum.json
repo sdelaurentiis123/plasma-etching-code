@@ -1,0 +1,29 @@
+{
+  "addendum_id": "DEBOER-2002-FIG9-RESOLUTION-AUDIT-V1",
+  "parent_protocol_sha256": "4df3eb33b83c82f4e54d6f479d508cc7f7ce2bd8eb27cd191f6edf5ec197ca06",
+  "frozen_before_fine_grid_score": true,
+  "trigger": {
+    "observed": "The dx=0.02 versus dx=0.01 held-out prediction RMS delta was 2.9602 um, larger than the dx=0.01 held-out RMSE of 2.7851 um.",
+    "decision": "The primary result is not grid-closed; run one finer level before interpreting agreement with experiment."
+  },
+  "constraints": {
+    "selected_s_F": 0.08,
+    "selection_is_not_reopened": true,
+    "boundary_calibration_is_not_reopened": true,
+    "held_out_rows_remain_held_out": true
+  },
+  "fine_grid": {
+    "dx_um": 0.005,
+    "seed": 0,
+    "aspect_ratio_nodes": [0.0, 2.0, 4.0, 8.0, 12.0, 20.0]
+  },
+  "decision_rule": {
+    "grid_closed_if": "fine-vs-primary held-out prediction RMS delta <= primary-vs-coarse delta / 2",
+    "report": [
+      "fine-grid held-out error without refitting",
+      "three-level normalized rate curves",
+      "per-marker numerical envelope",
+      "observed convergence direction"
+    ]
+  }
+}

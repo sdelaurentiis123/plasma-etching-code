@@ -1,5 +1,11 @@
 # de Boer AR>20 divergence: characterization + charging-throttle test (2026-07-07)
 
+> **Evidence correction (2026-07-15):** this document treated the normalized
+> `1/.43/.29/.20` Blauw/Clausing calculated curve as measured de Boer data. That identification and
+> all experimental-pass language are withdrawn. The numerical mechanism study is retained as legacy
+> development history only; see `ARDE_LEGACY_UNIFIED_RECONCILIATION_2026-07-15.md` for the corrected
+> evidence map and common-engine migration result.
+
 Mission: characterize the de Boer deep-trench floor divergence precisely, then test ONE
 hypothesis (a charging-derived floor ion-flux throttle). Scripts:
 `scripts/deboer_divergence_arm.py` (runner) + `scripts/deboer_divergence_plot.py` (curves+figure).

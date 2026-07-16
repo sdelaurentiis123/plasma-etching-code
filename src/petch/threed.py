@@ -1258,10 +1258,40 @@ def mc_flux_3d_dda(mesh, verts, faces, centroids, areas, geo, par, n_ion=20000,
 
 
 # ----------------------------- 3D advection -----------------------------
-def advect_3d(phi, Fspeed, dx, dt):
-    """phi_t + F|grad phi| = 0, first-order upwind Godunov in 3D (F>=0 etch). NumPy reference."""
+def advect_3d(phi, Fspeed, dx, dt, periodic_axes=()):
+    """First-order upwind Godunov advection with optional nodal-periodic axes.
+
+    A periodic nodal grid stores the same physical plane at index zero and index ``-1``.  For such
+    an axis the unique interval is ``0:-1``; its backward/forward neighbors wrap within that core,
+    and the duplicate endpoint receives the index-zero update.  Treating the two endpoints as
+    unrelated one-sided boundaries creates a moving seam that hard-visibility trajectories can hit
+    from the nominal solid side.
+    """
+    phi = np.asarray(phi, dtype=float)
+    Fspeed = np.asarray(Fspeed, dtype=float)
+    axes = tuple(sorted({int(axis) for axis in periodic_axes}))
+    if (phi.ndim != 3 or Fspeed.shape != phi.shape
+            or any(axis < 0 or axis >= phi.ndim or phi.shape[axis] < 3 for axis in axes)):
+        raise ValueError("invalid periodic level-set advection inputs")
     g = np.zeros_like(phi)
     for ax in range(3):
+        if ax in axes:
+            core_index = np.arange(phi.shape[ax] - 1)
+            core = np.take(phi, core_index, axis=ax)
+            dm = (core - np.roll(core, 1, axis=ax)) / dx
+            dp = (np.roll(core, -1, axis=ax) - core) / dx
+            core_contribution = np.maximum(dm, 0)**2 + np.minimum(dp, 0)**2
+            contribution = np.zeros_like(phi)
+            target = [slice(None)] * phi.ndim
+            target[ax] = slice(0, -1)
+            contribution[tuple(target)] = core_contribution
+            endpoint = [slice(None)] * phi.ndim
+            endpoint[ax] = -1
+            first = [slice(None)] * phi.ndim
+            first[ax] = 0
+            contribution[tuple(endpoint)] = core_contribution[tuple(first)]
+            g += contribution
+            continue
         dm = np.zeros_like(phi); dp = np.zeros_like(phi)
         sl_m = [slice(None)] * 3; sl_mm = [slice(None)] * 3
         sl_m[ax] = slice(1, None); sl_mm[ax] = slice(0, -1)
@@ -1269,7 +1299,12 @@ def advect_3d(phi, Fspeed, dx, dt):
         dm[tuple(sl_m)] = diff
         dp[tuple(sl_mm)] = diff
         g += np.maximum(dm, 0)**2 + np.minimum(dp, 0)**2
-    return phi - dt * Fspeed * np.sqrt(g)
+    result = phi - dt * Fspeed * np.sqrt(g)
+    for ax in axes:
+        endpoint = [slice(None)] * phi.ndim; endpoint[ax] = -1
+        first = [slice(None)] * phi.ndim; first[ax] = 0
+        result[tuple(endpoint)] = result[tuple(first)]
+    return result
 
 
 @wp.kernel

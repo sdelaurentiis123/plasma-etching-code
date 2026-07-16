@@ -51,10 +51,10 @@
   <td>Monte-Carlo, reactor-coupled fluxes</td>
 </tr>
 <tr>
-  <td><strong>Real-wafer deep ARDE</strong> (held-out)</td>
-  <td class="tag-cell"><span class="tag win">predicts</span> de&nbsp;Boer AR&nbsp;40 it was never fit to: <strong>0.15–0.20 vs measured 0.20</strong> (curve RMSE 0.031–0.043)</td>
-  <td>ballistic — structurally misses the deep tail; validated to calibrated Belen SEMs</td>
-  <td>models it (gas-transport + charging), but CPU and closed</td>
+  <td><strong>Deep-AR experimental evidence</strong></td>
+  <td class="tag-cell"><span class="tag warn">development</span> direct de&nbsp;Boer Figure-9 common Belen + reflection: <strong>2.56&nbsp;µm RMSE</strong>; independent validation open</td>
+  <td>validated to separately calibrated Belen SEM cases</td>
+  <td>broader research validation, but CPU and closed</td>
 </tr>
 <tr>
   <td><strong>Surface charging</strong></td>
@@ -91,16 +91,16 @@
 
 <div class="callout warn">
 <span class="lab">Where petch is behind — stated plainly</span>
-<p>ViennaPS is <strong>mature and broadly validated</strong> across many chemistries and process conditions; petch's experimental validation is <strong>one wafer dataset, one chemistry</strong> (de&nbsp;Boer cryo SF<sub>6</sub>/O<sub>2</sub>) so far. petch's charging <strong>notch depth is not yet calibrated in absolute µm</strong> (~3–5× shallow of Hwang–Giapis; the <em>shape</em> and the on/off signature are what pass). The deterministic <strong>DDA transport is quarantined</strong> in the mirror-wall regime. Charging is <strong>insulating floors only</strong>, and the deep-AR electron supply (RF-phase trajectories) is an open item. Kushner's codes couple the reactor to the feature; petch takes incident fluxes as input (like ViennaPS). Nothing here is hidden — see <a href="experimental-validation.html">Experiments</a> and the repo's <code>RECONCILIATION.md</code> (retractions included).</p>
+<p>ViennaPS is <strong>mature and broadly validated</strong> across many chemistries and process conditions; petch has not yet passed an independent feature-profile validation. The direct de&nbsp;Boer pixels are development data, and the old Clausing-curve score is retired. petch's charging <strong>notch depth is not yet calibrated in absolute µm</strong>. The deterministic <strong>DDA transport is quarantined</strong> in the mirror-wall regime. Kushner's codes couple the reactor to the feature; petch takes incident fluxes as input (like ViennaPS). Nothing here is hidden — see <a href="experimental-validation.html">Experiments</a> and the repo's <code>RECONCILIATION.md</code> (retractions included).</p>
 </div>
 
 <h2>2. The killer plots</h2>
 
-<h3>#1 — Real wafer, held-out prediction</h3>
-<p>The accuracy claim that isn't circular: calibrate one transport knob on the de&nbsp;Boer knee (AR&nbsp;10/20), then <em>predict</em> the AR&nbsp;40 point. It lands on the measured wafer. Ballistic codes (ViennaPS included) roll off too fast in the deep tail.</p>
+<h3>#1 — Retired ARDE claim and current development result</h3>
+<p>The old chart replayed a calculated Blauw/Clausing curve and cannot support a wafer-validation claim. The direct Figure-9 audit is now authoritative: the common Belen mechanism plus certified grazing-ion reflection improves the twelve transfer-point RMSE from 3.54 to 2.56&nbsp;µm, but the exposed data remain development-only and the miss remains scientifically meaningful.</p>
 <figure>
-<img src="experiment_arde.png" alt="petch ARDE curve vs the de Boer measured wafer with the held-out AR40 point predicted, next to a ballistic curve that misses the deep tail" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
-<figcaption><strong>petch vs measured wafer.</strong> Held-out AR&nbsp;40 predicted 0.15–0.20 vs measured 0.20; full-curve RMSE 0.031–0.043 (gate 0.05). The deep floor is where ballistic transport structurally deviates from the wafer. <a href="experimental-validation.html">Experiments</a>.</figcaption>
+<img src="experiment_arde.png" alt="Retired historical ARDE model-curve comparison; not direct de Boer experimental validation" style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<figcaption><strong>Historical diagnostic only.</strong> The 1/0.43/0.29/0.20 sequence is a calculated Clausing curve, not direct Figure-9 measurements. Current direct-pixel results live in the common-engine development audit; a new independent experiment is required for validation. <a href="experimental-validation.html">Experiments</a>.</figcaption>
 </figure>
 
 <h3>#2 — Charging vs the published gate (ViennaPS has no charging at all)</h3>
@@ -126,7 +126,7 @@
 
 <div class="callout key">
 <span class="lab">Bottom line</span>
-<p>Against <strong>measured data</strong>, petch predicts a real wafer's deep ARDE tail it was never fit to, and reproduces the Hwang–Giapis charging curve with zero tuned constants. Against <strong>ViennaPS</strong>, it matches the transport numerics and runs ~8–15× faster, while adding two whole physics channels ViennaPS lacks — charging and charging-driven notching. Against the <strong>Kushner-group codes</strong>, it trades reactor coupling and decades of validation breadth for being open, GPU-resident, and differentiable. The honest gaps — absolute notch calibration, one dataset, DDA's mirror-wall regime — are on the table, not under it.</p>
+<p>Against <strong>ViennaPS</strong>, petch has strong like-for-like transport cross-checks and an ~8–15× CPU-dependent speed result. It also carries charging and charging-driven morphology machinery ViennaPS lacks. Against <strong>experiment</strong>, however, feature-profile validation remains open: de Boer is now development data, Nozawa C4 has not run, and absolute notch calibration remains unresolved. Against the <strong>Kushner-group codes</strong>, petch trades reactor coupling and validation breadth for being open, GPU-resident, and differentiable.</p>
 </div>
 
 <div class="pagenav">

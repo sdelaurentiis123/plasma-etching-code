@@ -23,11 +23,25 @@ dependencies = [
 # cupy gives the GPU edge-adjacency sort (a small extra speedup on big meshes); needs CUDA 12.x.
 gpu = ["cupy-cuda12x"]
 
+[project.scripts]
+petch-nozawa = "petch.nozawa_replay_3d:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
 "*" = ["*.json"]
+
+[tool.setuptools.data-files]
+"share/petch/data/experimental/nozawa_1995" = [
+    "data/experimental/nozawa_1995/digitized_notch_curves.csv",
+    "data/experimental/nozawa_1995/digitization_manifest.json",
+    "data/experimental/nozawa_1995/README.md",
+]
+"share/petch/data/experimental/hwang_giapis_1997" = [
+    "data/experimental/hwang_giapis_1997/fig4a_ion_energy_distribution.csv",
+    "data/experimental/hwang_giapis_1997/digitization_manifest.json",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

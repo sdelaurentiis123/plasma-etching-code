@@ -9,8 +9,10 @@ from petch.boundary_state import (
     maxwellian_electron_boundary_state, mixture_boundary_proposal, qmc_boundary_proposal,
 )
 from petch.charging_poisson_3d import NodalPoissonSystem3D
+from petch.charged_surface_response_3d import GrazingSpecularIonReflection3D
 from petch.feature_step_3d import (
     FeatureGeometry3D,
+    _apply_subcell_cleanup_to_material_levelsets,
     _face_material_ids,
     _physical_volume_topology_signature,
     _remove_unresolved_subcell_solid_components,
@@ -35,7 +37,7 @@ from petch.surface_kinetics import (
     ReducedSiO2FluorocarbonParameters,
 )
 from petch.tabulated_chemistry import TabulatedSiClArMechanism, TabulatedSiSurfaceState
-from petch.threed import extract_mesh_3d
+from petch.threed import advect_3d, extract_mesh_3d
 
 
 INTERACTION_DATA = (
@@ -220,6 +222,84 @@ def test_one_physical_3d_step_moves_a_uniform_sio2_plane_by_flux_yield_over_dens
     assert result.state_remap_diagnostics["new_topology"] == (1, 1)
 
 
+def test_ordinary_feature_step_reuses_certified_charged_response_lineage():
+    geometry, _ = _plane_geometry()
+    response = GrazingSpecularIonReflection3D.literature_bounded_sensitivity(
+        1, ion_species_name="Ar+")
+    result = advance_feature_step_3d(
+        geometry, _boundary(),
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=0.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        n_position=64, seed=3, reinitialize=False, transport_device="cpu",
+        charged_surface_response=response,
+        charged_surface_response_options={
+            "fixed_dt": 0.01, "max_steps": 256, "max_bounces": 16})
+
+    cascade = result.charged_surface_cascade
+    primary_ion = next(
+        population for population in result.transport.surface_fluxes.energetic_fluxes
+        if population.name == "Ar+")
+    assert cascade is not None and cascade.completed
+    assert np.array_equal(result.geometry.phi, geometry.phi)
+    assert np.array_equal(result.geometry.material_id, geometry.material_id)
+    assert primary_ion.event_position is not None
+    assert result.diagnostics["charged_surface_response_applied"] is True
+    assert result.diagnostics["charged_surface_response_field"] == "explicit_zero_field"
+    assert result.diagnostics["charged_surface_response_bounces"] == 1
+    assert cascade.relative_charge_balance_error < 5e-15
+    assert max(
+        transfer.relative_kinetic_energy_balance_error
+        for transfer in cascade.transfers) < 5e-15
+    assert "charged_surface_reimpact_cascade" in result.transport.transport_model
+    assert "no surface reflection or neutral re-emission" not in result.transport.known_limitations
+
+
+def test_periodic_godunov_advection_wraps_unique_nodal_core_and_closes_seam():
+    shape = (7, 6, 4)
+    x = 2.0 * np.pi * np.arange(shape[0] - 1) / (shape[0] - 1)
+    y = 2.0 * np.pi * np.arange(shape[1] - 1) / (shape[1] - 1)
+    core = (np.sin(x)[:, None, None] + 0.3 * np.cos(y)[None, :, None]
+            + 0.1 * np.arange(shape[2])[None, None, :])
+    phi = np.empty(shape)
+    phi[:-1, :-1] = core
+    phi[-1, :-1] = core[0]
+    phi[:-1, -1] = core[:, 0]
+    phi[-1, -1] = core[0, 0]
+    speed = np.ones(shape)
+
+    periodic = advect_3d(phi, speed, 1.0, 0.05, periodic_axes=(0, 1))
+    open_boundary = advect_3d(phi, speed, 1.0, 0.05)
+
+    assert np.array_equal(periodic[0], periodic[-1])
+    assert np.array_equal(periodic[:, 0], periodic[:, -1])
+    assert not np.array_equal(periodic[0, 2], open_boundary[0, 2])
+
+
+def test_multistep_periodic_profile_keeps_duplicate_endpoint_planes_identical():
+    geometry, _ = _plane_geometry()
+    response = GrazingSpecularIonReflection3D.literature_bounded_sensitivity(
+        1, ion_species_name="Ar+")
+    result = solve_feature_3d(
+        geometry, _boundary(),
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=1.0, n_steps=2,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        n_position=64, seed=3, reinitialize=True, reinitialization_method="cr2",
+        transport_device="cpu", charged_surface_response=response,
+        charged_surface_response_options={
+            "fixed_dt": 0.01, "max_steps": 256, "max_bounces": 16,
+            "periodic_lateral": True})
+
+    assert np.array_equal(result.geometry.phi[0], result.geometry.phi[-1])
+    assert np.array_equal(result.geometry.phi[:, 0], result.geometry.phi[:, -1])
+    for step in result.steps:
+        assert step.diagnostics["profile_periodic_lateral"] is True
+        assert (step.diagnostics["periodic_seam_projection_max_mesh_units"]
+                < 0.25 * geometry.dx)
+        assert step.charged_surface_cascade.completed
+
+
 def test_public_physical_process_uses_common_engine_and_exposes_validity():
     geometry, _ = _plane_geometry()
     process = PhysicalProcess(
@@ -236,6 +316,9 @@ def test_public_physical_process_uses_common_engine_and_exposes_validity():
 
     assert process.engine == COMMON_FEATURE_ENGINE
     assert result.engine == COMMON_FEATURE_ENGINE
+    assert result.run_manifest["engine"] == COMMON_FEATURE_ENGINE
+    assert result.run_manifest["initial_geometry"]["phi"]["sha256"]
+    assert result.run_manifest["surface_mechanism"]["type"]
     assert result.validity.within_declared_scope
     assert not result.validity.parameter_evidence_supports_prediction
     assert len(result.steps) == 1
@@ -406,11 +489,35 @@ def test_subcell_solid_component_is_removed_but_one_cell_support_is_preserved():
     phi[0:2, 0:2, 0:2] = 1.0
     phi[4, 4, 4] = 0.1
 
-    cleaned, removed = _remove_unresolved_subcell_solid_components(phi, material, (1,), 1.0)
+    cleaned, removed, removal_mask = _remove_unresolved_subcell_solid_components(
+        phi, material, (1,), 1.0)
 
     assert removed == 1
+    assert np.count_nonzero(removal_mask) == 1
+    assert removal_mask[4, 4, 4]
+    assert not np.any(removal_mask[0:2, 0:2, 0:2])
     assert np.all(cleaned[0:2, 0:2, 0:2] > 0.0)
     assert cleaned[4, 4, 4] < 0.0
+
+
+def test_subcell_cleanup_updates_the_authoritative_material_levelset():
+    oxide = -np.ones((7, 7, 7))
+    oxide[1:3, 1:3, 1:3] = 1.0
+    oxide[5, 5, 5] = 0.1
+    mask = -2.0 * np.ones_like(oxide)
+    combined = np.maximum(oxide, mask)
+    owner = np.where(combined >= 0.0, 1, 0)
+    _, removed, removal_mask = _remove_unresolved_subcell_solid_components(
+        combined, owner, (1,), 1.0)
+
+    layers, cleaned, cleaned_owner = _apply_subcell_cleanup_to_material_levelsets(
+        {1: oxide, 2: mask}, removal_mask, owner, (1,), 1.0, "cr2", False)
+
+    assert removed == 1
+    assert layers[1][5, 5, 5] < 0.0
+    assert cleaned[5, 5, 5] < 0.0
+    assert cleaned_owner[5, 5, 5] == 0
+    assert np.all(cleaned_owner[1:3, 1:3, 1:3] == 1)
 
 
 def test_diffuse_neutral_trench_floor_flux_converges_with_form_factor_rule():
@@ -459,7 +566,9 @@ def test_surface_remap_preserves_material_integrals_and_coverage_bounds():
     new_area = np.array([0.8, 2.2, 1.4, 0.6])
     material = np.array([1, 1, 2, 2])
     state = SiO2SurfaceState(
-        [0.1, 0.8, 0.3, 0.6], [1e18, 2e18, 3e18, 4e18], [2e17, 4e17, 6e17, 8e17])
+        [0.1, 0.8, 0.3, 0.6], [1e18, 2e18, 3e18, 4e18],
+        [2e17, 4e17, 6e17, 8e17], [0.05, 0.4, 0.1, 0.3],
+        [0.2, 0.6, 0.4, 0.8])
     remapped, diagnostics = conservative_remap_surface_state(
         state, old_centroid, old_area, material, new_centroid, new_area, material,
         dx=1.0, mesh_length_unit_m=1e-6)
@@ -469,7 +578,9 @@ def test_surface_remap_preserves_material_integrals_and_coverage_bounds():
         for before, after in (
                 (state.complex_fraction, remapped.complex_fraction),
                 (state.polymer_units_m2, remapped.polymer_units_m2),
-                (state.removed_formula_units_m2, remapped.removed_formula_units_m2)):
+                (state.removed_formula_units_m2, remapped.removed_formula_units_m2),
+                (state.activated_complex_fraction, remapped.activated_complex_fraction),
+                (state.activated_polymer_fraction, remapped.activated_polymer_fraction)):
             assert np.isclose(np.dot(before[old], old_area[old]),
                               np.dot(after[new], new_area[new]), rtol=2e-13)
     assert np.all((remapped.complex_fraction >= 0.0) & (remapped.complex_fraction <= 1.0))
@@ -486,7 +597,9 @@ def test_surface_remap_is_exact_identity_on_unchanged_heterogeneous_mesh():
     state = SiO2SurfaceState(
         [0.0, 0.2, 0.7, 1.0],
         [0.0, 2e18, 9e18, 4e19],
-        [1e16, 3e17, 2e18, 8e18])
+        [1e16, 3e17, 2e18, 8e18],
+        [0.0, 0.1, 0.35, 0.7],
+        [0.0, 0.2, 0.6, 1.0])
 
     remapped, diagnostics = conservative_remap_surface_state(
         state, centroid, area, material, centroid.copy(), area.copy(), material.copy(),
@@ -495,6 +608,10 @@ def test_surface_remap_is_exact_identity_on_unchanged_heterogeneous_mesh():
     assert np.array_equal(remapped.complex_fraction, state.complex_fraction)
     assert np.array_equal(remapped.polymer_units_m2, state.polymer_units_m2)
     assert np.array_equal(remapped.removed_formula_units_m2, state.removed_formula_units_m2)
+    assert np.array_equal(
+        remapped.activated_complex_fraction, state.activated_complex_fraction)
+    assert np.array_equal(
+        remapped.activated_polymer_fraction, state.activated_polymer_fraction)
     assert diagnostics["maximum_nearest_distance"] == 0.0
 
 

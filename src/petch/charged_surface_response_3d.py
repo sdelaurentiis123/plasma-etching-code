@@ -51,6 +51,16 @@ class ChargedSurfaceResponse3D(Protocol):
         """Optional uniform bound on outgoing/incident absolute charge rate."""
         ...
 
+
+def _select_declared_material(face_material_id, declared_material_id):
+    """Return the faces owned by one declared material or a declared material collection."""
+    if isinstance(declared_material_id, (tuple, list, set, frozenset, np.ndarray)):
+        material_ids = np.asarray(tuple(declared_material_id))
+        if material_ids.ndim != 1 or material_ids.size == 0:
+            raise ValueError("charged-surface material collection must be nonempty and one-dimensional")
+        return np.isin(face_material_id, material_ids)
+    return face_material_id == declared_material_id
+
     def evaluate(
             self, incident_populations, charge_number_by_species,
             context: ChargedSurfaceContext3D) -> "ChargedSurfaceTransfer3D":
@@ -201,6 +211,8 @@ def account_charged_surface_transfer_3d(
     incident_absolute_charge_rate = 0.0
     incident_energy_rate = 0.0
     for population in incident:
+        integrated_particle_rate = float(np.dot(
+            population.event_flux_m2_s, area[population.event_face]))
         event_current_density = (
             ECHARGE * int(charge[population.name]) * population.event_flux_m2_s)
         positive += np.bincount(
@@ -209,9 +221,13 @@ def account_charged_surface_transfer_3d(
         negative += np.bincount(
             population.event_face, weights=np.maximum(-event_current_density, 0.0),
             minlength=face_count)
-        incident_charge_rate += float(np.dot(event_current_density, area[population.event_face]))
-        incident_absolute_charge_rate += float(np.dot(
-            np.abs(event_current_density), area[population.event_face]))
+        # Match the cascade's authoritative reduction order exactly.  Multiplying every event by
+        # the elementary charge before a million-term dot product creates a sample-count-dependent
+        # roundoff discrepancy between two evaluations of the same incident measure.
+        incident_charge_rate += float(
+            ECHARGE * int(charge[population.name]) * integrated_particle_rate)
+        incident_absolute_charge_rate += float(
+            ECHARGE * abs(int(charge[population.name])) * integrated_particle_rate)
         incident_energy_rate += float(np.dot(
             population.event_flux_m2_s * population.event_energy_eV,
             area[population.event_face]))
@@ -463,7 +479,8 @@ class GrazingSpecularIonReflection3D:
                     f"difference={cosine_difference[event]:.9g}, "
                     f"direction={selected_population.event_incident_direction[event].tolist()}, "
                     f"normal={normal[event].tolist()}")
-            selected = context.face_material_id[face] == self.material_id
+            selected = _select_declared_material(
+                context.face_material_id[face], self.material_id)
             probability = self.reflection_probability(
                 selected_population.event_cosine_incidence)
             selected &= probability > 0.0

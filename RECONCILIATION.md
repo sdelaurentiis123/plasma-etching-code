@@ -1,5 +1,12 @@
 # Reconciling petch with Craig's plasma_sim (2026-06-29)
 
+> **Evidence correction (2026-07-15):** the normalized `1/.43/.29/.20` sequence used below is a
+> fitted Blauw/Clausing calculated curve, not a direct digitization of de Boer wafer measurements.
+> Every “wafer pass” and “held-out AR40” statement in this historical log is withdrawn. The
+> engineering experiments remain reproducible legacy development work; current direct-pixel status
+> is recorded in `EXPERIMENTAL_VALIDATION_MATRIX.md` and
+> `ARDE_LEGACY_UNIFIED_RECONCILIATION_2026-07-15.md`.
+
 Absorbed Craig Xu Chen's `plasma_sim` (Apple-Metal DDA solver) physics into petch, CUDA-first,
 then stress-tested where the two engines diverge and scored both against the de Boer wafer.
 

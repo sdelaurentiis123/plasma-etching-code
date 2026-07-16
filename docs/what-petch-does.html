@@ -31,7 +31,7 @@
 <h1>What petch does — one page</h1>
 <p class="subtitle">The whole project in one screen: what it is, what's validated, against what, and what isn't.</p>
 
-<p><strong>petch</strong> is a 3-D feature-scale plasma-etch simulator: level-set surface evolution + flux transport + SF<sub>6</sub>/O<sub>2</sub> surface chemistry, with the flux and level-set kernels in NVIDIA Warp — <strong>GPU-resident end-to-end</strong> (~1&nbsp;s per etch, CPU-independent; <strong>~8–15× faster than ViennaPS</strong>, whose level set is CPU-bound), <strong>differentiable by substrate</strong>, with a ViennaPS-shaped API: <code>petch.Process(Domain.trench(...), SF6O2(), duration).run()</code>.</p>
+<p><strong>petch</strong> is a developing 3-D feature-scale plasma-etch simulator: dimensional boundary distributions, conservative particle/radiosity transport, stateful surface mechanisms, charging, and level-set profile evolution. A common evidence-bearing engine now exists beside the older ViennaPS-shaped compatibility path. CPU and selected CUDA kernels run; an accuracy-matched end-to-end performance claim and feature-scale differentiability remain open.</p>
 
 <h2>The stack, with its receipts</h2>
 <table>
@@ -40,23 +40,23 @@
 <tr><td>Chemistry</td><td>Belen/Ertl SF<sub>6</sub>/O<sub>2</sub> coupled coverages (= ViennaPS's documented model)</td><td>cross-checked vs ViennaPS; constants cited (<a href="physics-grounding.html">grounding</a>)</td></tr>
 <tr><td>Ions</td><td>faithful ViennaPS reflection (coned-cosine, per-bounce energy loss) in <em>all</em> transport paths</td><td>the deep-AR ARDE term; its earlier silent omission in deterministic paths was found &amp; fixed via gating</td></tr>
 <tr><td>Neutrals: MC</td><td>Russian-roulette weighted rays (= ViennaRay's estimator)</td><td>tracks ViennaPS within ~0.1 in evolving etches (<a href="viennaps-validation.html">validation</a>)</td></tr>
-<tr><td>Neutrals: radiosity+GMRES</td><td>deterministic form-factor solve — <strong>solver of record</strong> for ballistic reference</td><td><strong>RMSE 0.043</strong> vs a <em>measured</em> ViennaPS static curve (<code>scripts/dda_static_gate.py</code>)</td></tr>
-<tr><td>Neutrals: Knudsen</td><td>molecular-flow conductance down the feature — the gas-transport physics ballistic codes lack</td><td><strong>the wafer result below</strong> (<code>scripts/evolving_vs_wafer.py</code>)</td></tr>
+<tr><td>Neutrals: radiosity</td><td>deterministic conservative form-factor solve with material/state reaction probabilities</td><td>source = reacted + escaped closes numerically; experimental profile transfer remains open</td></tr>
+<tr><td>Legacy Knudsen closures</td><td>historical molecular-flow reduced models</td><td>retained for replay only; AR-shaped closures are not the common-engine governing operator</td></tr>
 <tr><td>Neutrals: DDA grid-march</td><td>fast deterministic option (0.1&nbsp;s/eval CUDA)</td><td>valid at moderate sticking; <strong>quarantined</strong> at albedo≈0.99 (documented structural limit)</td></tr>
 <tr><td>Charging</td><td>2-D Hwang–Giapis solver (trace → per-segment current balance → Laplace), now with a poly-Si equipotential conductor + RF-burst electrons; <code>surface_charging="hg"</code> wires floor throttle + deflected-ion foot redistribution (the notch driver) into the flux path</td><td>closure config: floor-flux <strong>RMSE 0.039, nothing tuned</strong>; full-geometry config: poly-line potential <strong>PASS</strong> (6→44 vs 6→39&nbsp;V), foot flux PASS, flux 0.060 — a documented trade; foot-energy gate open (<code>scripts/charging_gate.py</code>, <code>scripts/notching_gate.py</code>)</td></tr>
 </tbody>
 </table>
 
-<h2>The three validated headlines</h2>
+<h2>Current evidence headlines</h2>
 <ol>
-<li><strong>It predicts a real wafer's deep tail it was never fitted to.</strong> Evolving petch, one transport knob calibrated on the de Boer knee (AR&nbsp;10/20) — the <strong>held-out AR&nbsp;40 point comes out 0.15–0.20 vs the measured 0.20</strong> (full-curve RMSE 0.031–0.043, gate 0.05). Ballistic codes, ViennaPS included, structurally miss this. <a href="experimental-validation.html">Experiments</a>.</li>
-<li><strong>Its charging solver reproduces the community reference with zero tuned constants.</strong> Floor ion flux vs AR: RMSE 0.039 vs Hwang–Giapis 1997 (closure config); the full-geometry build additionally lands the poly-line potential on HG's curve (6→44 vs 6→39&nbsp;V); 300&nbsp;eV ions correctly stay open at AR&nbsp;4 (Matsui). ViennaPS has no charging model. <a href="experimental-validation.html">Experiments</a>.</li>
-<li><strong>Its deterministic transport matches a measured ViennaPS reference</strong> (radiosity+GMRES, RMSE 0.043) — and the numerics agreement comes with a like-for-like speed result: <strong>~8–15× (CPU-dependent; petch ~1&nbsp;s, GPU-resident)</strong>. <a href="viennaps-validation.html">ViennaPS Validation</a>, <a href="performance.html">Performance</a>.</li>
-<li><strong>It grows a charging-driven notch that no open feature-scale code models.</strong> Multi-material etch-stop (poly on buried oxide) + Hwang–Giapis charging: during overetch the deflected-ion foot flux digs a sidewall notch at the poly/oxide junction that is <strong>exactly zero with charging off</strong> (perfectly anisotropic), rises monotonically with AR (Fujiwara), and tracks HG's measured shape (r&nbsp;=&nbsp;0.92). Absolute depth uncalibrated; a controlled A/B mechanism result. <a href="experimental-validation.html">Experiments</a>.</li>
+<li><strong>The common engine closes its internal ledgers.</strong> Charged-particle lineage, neutral source/react/escape balance, target-material exchange, moving-surface charge remap, and profile motion are explicit and tested.</li>
+<li><strong>The direct de Boer comparison falsified the old story.</strong> The historical 1/0.43/0.29/0.20 sequence is a calculated Clausing curve, not directly measured markers. Against 16 digitized Figure-9 points, the old common-engine adapter missed the twelve transfer points by 5.55&nbsp;µm RMSE on the finest completed grid. Those points are now development-only.</li>
+<li><strong>The reusable silicon path now runs end to end.</strong> Common-engine Belen chemistry, neutral radiosity, certified grazing-ion reflection, charge/energy lineage, and periodic moving-profile evolution run through one operator. On the exposed de Boer Figure-9 development data, reflection improves transfer RMSE from 3.54 to 2.56&nbsp;µm, but an independent experiment is still required for validation.</li>
+<li><strong>Charging/notching/twisting machinery exists, but the experimental milestone is open.</strong> Physical-time charging and stochastic ensemble/profile observables run through the common engine; the Nozawa held-out notch campaign and N≥30 twist campaign have not yet passed.</li>
 </ol>
 
 <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin:18px 0">
-  <a href="experiment_arde.png"><img src="experiment_arde.png" alt="ARDE vs the de Boer wafer with the held-out AR40 prediction" style="width:32%;min-width:260px;border:1px solid #e0ddd2;border-radius:8px"></a>
+  <a href="experiment_arde.png"><img src="experiment_arde.png" alt="Retired historical ARDE model-curve comparison" style="width:32%;min-width:260px;border:1px solid #e0ddd2;border-radius:8px"></a>
   <a href="charging_hg.png"><img src="charging_hg.png" alt="Charging gate vs Hwang-Giapis + potential map" style="width:32%;min-width:260px;border:1px solid #e0ddd2;border-radius:8px"></a>
   <a href="dda_vs_mc_arde.png"><img src="dda_vs_mc_arde.png" alt="Deterministic transports vs measured ViennaPS static reference" style="width:32%;min-width:260px;border:1px solid #e0ddd2;border-radius:8px"></a>
 </div>
@@ -66,7 +66,7 @@
 <table>
 <thead><tr><th style="width:22%">Axis</th><th style="width:30%">petch</th><th style="width:26%">ViennaPS</th><th style="width:22%">Kushner MC</th></tr></thead>
 <tbody>
-<tr><td>Real-wafer deep ARDE (held-out)</td><td><strong>predicts</strong> de&nbsp;Boer AR&nbsp;40 it was never fit to (0.15–0.20 vs 0.20; RMSE 0.031–0.043)</td><td>ballistic — misses the deep tail</td><td>models it (CPU, closed)</td></tr>
+<tr><td>Deep-AR experimental evidence</td><td><strong>development only</strong> — direct Figure-9 common Belen + reflection RMSE 2.56&nbsp;µm; independent validation remains open</td><td>validated to separately calibrated Belen SEM cases</td><td>broader research validation (CPU, closed)</td></tr>
 <tr><td>Surface charging</td><td><strong>yes</strong> — HG floor-flux RMSE&nbsp;0.039, nothing tuned</td><td><strong>none</strong></td><td>yes (the reference)</td></tr>
 <tr><td>Charging notching</td><td><strong>yes, gated</strong> — charging-specific, Fujiwara-monotone, HG shape r&nbsp;=&nbsp;0.92</td><td><strong>none</strong></td><td>yes (research)</td></tr>
 <tr><td>Differentiable / inverse design</td><td><strong>yes</strong> (autodiff, NVIDIA Warp)</td><td>no</td><td>no</td></tr>
@@ -81,7 +81,7 @@
 
 <div class="callout warn">
 <span class="lab">Honest limits</span>
-<p><strong>One wafer dataset, one chemistry</strong> (de Boer cryo SF<sub>6</sub>/O<sub>2</sub>; the Gomez yield gate and a second dataset are next). <strong>Two calibrated constants</strong>: the Knudsen floor-loss knob (fitted on the knee; the tail is then predicted) and one absolute-rate constant (1.3&nbsp;µm/min, consistent across features to 1.1%) — everything else is cited. <strong>DDA quarantined</strong> in the mirror-wall regime. <strong>Charging</strong>: insulating floors only (v1 table at Hwang–Giapis conditions). The conductor+RF-burst build gets the mechanism quantitatively right (poly-line potential and foot flux PASS; low-AR foot energies on-curve) but the deep floor still over-charges (44 vs 33&nbsp;V at AR&nbsp;4 with the physical −Te insulator bound, down from 54; flux gate 0.071) — one root cause (RF-burst electron under-supply) that also decays deep foot energies; both solver configs stay reachable, the wired path uses the published deflected-energy table. <strong>Notch depth</strong>: the multi-material etch-stop + charging notch gate now passes for <em>shape</em> (charging-specific, Fujiwara-monotone, HG shape r&nbsp;=&nbsp;0.92) but <strong>absolute depth is uncalibrated (~3–5× shallow)</strong> and AR&nbsp;1 sits below the dx&nbsp;=&nbsp;0.25 grid floor; sub-micron (HG-scale) grids destabilize sidewalls without charging — the finer-resolution frontier. Every number above has a reproducer script and a pass/fail gate in the repo (<code>RECONCILIATION.md</code> is the full log, retractions included).</p>
+<p><strong>No independent feature-profile validation has passed yet.</strong> The direct de Boer Figure-9 pixels are now exposed development data; the common Belen + reflection repair materially improves the miss but does not close it. The historical Knudsen/Clausing curve is retained for replay only, not scored as experiment. <strong>DDA is quarantined</strong> in the mirror-wall regime. <strong>Charging/notching</strong> has tested mechanism infrastructure, but the Nozawa held-out campaign and absolute notch-depth validation remain open. <strong>Twisting</strong> remains statistical machinery awaiting its N≥30 campaign. Every number above has a reproducer script and a pass/fail gate in the repo; <code>RECONCILIATION.md</code> contains the full audit trail and retractions.</p>
 </div>
 
 <div class="pagenav">

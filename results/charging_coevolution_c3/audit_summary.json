@@ -23,15 +23,15 @@
       "exact_visibility": true,
       "convergence_contract_revision": "CCA-2026-07-13-R2"
     },
-    "engine_git_revision": "8317f07ee4ed94cef410726213a59db77b288776",
+    "engine_git_revision": "6af7edb4e94b37e0e488901d1f8e413b93f96785",
     "source_sha256": {
-      "src/petch/charging_coevolution_3d.py": "415f6fb5404f1f6d0f2acc70a13739f9f894c7ccedf2754e5b218d4d0e41bfca",
-      "src/petch/charging_coupled_3d.py": "d8c511489c747c862c9e4f4b345cf39cc57dc56ce7d65884627e4d3ca4381173",
-      "src/petch/boundary_transport_3d.py": "cfefbcf17b6846ccfd3cdddcf78f9c5719aeeac0dda0b40f232882fefd2868ba",
-      "src/petch/charged_surface_cascade_3d.py": "977c4c84e8a2f515286f863f80a745852a6cafd1b295a8468ba157b03d33ad33",
-      "src/petch/feature_step_3d.py": "94b4cd4b6506ea0b59990282b40684eac4075eee1efb3efada1489ae1d845ff5",
-      "src/petch/surface_charge_remap_3d.py": "e24b2897050b430b32fb427894c8ee88f97f020e10273fc79656106cf5e8f9d6",
-      "src/petch/charged_surface_response_3d.py": "233aee07c5178ada37c5b465c7d94688eabcfd6f973f2e11c28ef1c66c732e4c",
+      "src/petch/charging_coevolution_3d.py": "8e54924daabe484909d701a8f53c0dc554ab6c81631f456805c5e33b24d4f99f",
+      "src/petch/charging_coupled_3d.py": "5e87c93becdb94fed2807e3c0be8246ac28874530a6d94945c4d2ae8d740cb91",
+      "src/petch/boundary_transport_3d.py": "238a44372c4c731690c731bf41ebb439a5ae70f808c86430d65cfee15f62b0b5",
+      "src/petch/charged_surface_cascade_3d.py": "3669c48410b3241649a7d02d0cdeefa93c44644e2ed15d35f1235a501e8e4ad7",
+      "src/petch/feature_step_3d.py": "66b2b4f6086ebcb4c31cae3cf957ce155db2a317146e386f635eb6fe8e2d36c2",
+      "src/petch/surface_charge_remap_3d.py": "5a13a6c355cdf1a0993120b5cca0933bf97cfedf44a0eef033791236067530a7",
+      "src/petch/charged_surface_response_3d.py": "b8fcf9be7e4241a4137e842431a4f44d435aa91aa06d11e9554109189362052f",
       "scripts/audit_charging_coevolution_c3.py": "cf6f494d3926e01b18c857de35d47556b266be834b186a5c439cd3619ce39de5"
     },
     "hardware": "macOS-15.7.4-arm64-arm-64bit",
@@ -70,7 +70,7 @@
       "retained_negative_charge_c": 0.0,
       "removed_positive_charge_c": 0.0,
       "removed_negative_charge_c": 0.0,
-      "wall_clock_s": 0.025603708811104298
+      "wall_clock_s": 0.03221174981445074
     },
     "reflection_manifest": {
       "model": "weighted angle-dependent specular reflection with constant energy retention",
@@ -137,7 +137,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 9.913467922874998e-20,
         "removed_negative_charge_c": 0.0,
-        "wall_clock_s": 0.0229716245085001
+        "wall_clock_s": 0.022471541538834572
       },
       {
         "charging_converged": false,
@@ -162,7 +162,7 @@
         ],
         "maximum_transport_lineage_replay_count": 0,
         "maximum_transport_lineage_replay_fraction": 0.0,
-        "maximum_charge_conservation_relative_error": 4.047376843322777e-17,
+        "maximum_charge_conservation_relative_error": 1.214213052996833e-16,
         "maximum_surface_transfer_relative_charge_balance_error": 0.0,
         "exact_transport_reused": true,
         "remap_relative_charge_balance_error": 0.0,
@@ -170,7 +170,7 @@
         "retained_negative_charge_c": 0.0,
         "removed_positive_charge_c": 0.0,
         "removed_negative_charge_c": 9.913467922874998e-20,
-        "wall_clock_s": 0.022030582651495934
+        "wall_clock_s": 0.023415417410433292
       }
     ],
     "saturation_required": [

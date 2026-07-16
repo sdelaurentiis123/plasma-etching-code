@@ -56,6 +56,9 @@ def main() -> int:
     parser.add_argument("--emergency-trajectory-max-steps", type=int, default=32768000)
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--transport-device", default="cuda:0")
+    parser.add_argument(
+        "--compatible-q1-charge-state",
+        action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
     terminal_window_steps = int(round(args.terminal_window_s / 1.25e-7))
     if (args.steps_per_segment <= 0 or args.maximum_segments <= 0
@@ -104,6 +107,7 @@ def main() -> int:
         "emergency_trajectory_max_steps": args.emergency_trajectory_max_steps,
         "seed": args.seed,
         "transport_device": args.transport_device,
+        "compatible_q1_charge_state": args.compatible_q1_charge_state,
         "python": platform.python_version(),
         "records": records,
     }
@@ -134,6 +138,8 @@ def main() -> int:
             "--response-tail-tolerance", "1e-10",
             "--response-launch-offset", "5e-6",
         ]
+        if args.compatible_q1_charge_state:
+            command.append("--compatible-q1-charge-state")
         output.mkdir(parents=True, exist_ok=True)
         status.update(status="running", updated_utc=_utc_now(), active_segment=segment,
                       cumulative_physical_time_s=cumulative_time,
@@ -175,6 +181,11 @@ def main() -> int:
             "node_worst": result.get("retained_node_max_relative_current_imbalance"),
             "potential_rate_max_v_s": result.get("final_potential_rate_max_v_s"),
             "patch_b2_max": result.get("patch_b2_max_ion_normalized"),
+            "compatible_q1_charge_state": result.get("compatible_q1_charge_state"),
+            "maximum_unresolved_face_current_fraction": result.get(
+                "maximum_unresolved_face_current_fraction"),
+            "q1_resolved_patch_b2_max": result.get("q1_resolved_patch_b2_max"),
+            "q1_unresolved_patch_b2_max": result.get("q1_unresolved_patch_b2_max"),
         }
         records.append(record)
         checkpoint = next_checkpoint

@@ -1,0 +1,76 @@
+{
+  "manifest_id": "NOZAWA-1995-PRIMARY-DIGITIZATION-R1",
+  "source": {
+    "doi": "10.1143/JJAP.34.2107",
+    "pdf_sha256": "87500f53f0286aae0597b14168b0991791db73138ee8d67a5e5e3bc56b329c67",
+    "pdf_vendored": false,
+    "extraction_command": "pdfimages -png Nozawa_1995_Jpn._J._Appl._Phys._34_2107.pdf page",
+    "page_image_shape_px": [4960, 7008]
+  },
+  "table": {
+    "path": "data/experimental/nozawa_1995/digitized_notch_curves.csv",
+    "sha256": "2e472385e002aebf94f2f0ec299f877180786b6095791ec3079a80fc48a22ec2",
+    "row_count": 17
+  },
+  "figures": {
+    "Fig. 8b": {
+      "pdf_page": 6,
+      "print_page": 2111,
+      "page_image_sha256": "efc83d088516a5b74869d2ed744d57062e57091153f1729c2d50514e21f71f61",
+      "axes_page_pixels": {
+        "x_zero": 798.5,
+        "x_five": 2319.5,
+        "y_0p3": 4812.0,
+        "y_zero": 5940.0
+      },
+      "series": "filled circles; L=0.8 um; connected lines share one pad",
+      "split": "held_out_transfer"
+    },
+    "Fig. 9b": {
+      "pdf_page": 6,
+      "print_page": 2111,
+      "page_image_sha256": "efc83d088516a5b74869d2ed744d57062e57091153f1729c2d50514e21f71f61",
+      "axes_page_pixels": {
+        "x_zero": 2972.5,
+        "x_five": 4494.0,
+        "y_0p3": 4838.0,
+        "y_zero": 5922.5
+      },
+      "series": "filled circles; L=0.8 um; each connected line group has its own pad",
+      "split": "held_out_transfer"
+    },
+    "Fig. 10b": {
+      "pdf_page": 7,
+      "print_page": 2112,
+      "page_image_sha256": "53f3b150e5d6d89fda0ef1f71a8b35097b464f60454d2d3052d72efda1b4ac7a",
+      "axes_page_pixels": {
+        "x_zero": 1852.0,
+        "x_twelve": 3323.0,
+        "y_0p3": 1882.0,
+        "y_zero": 3126.0
+      },
+      "series": "open circles; L=0.6 um; S=0.6 um",
+      "split": "calibration"
+    }
+  },
+  "uncertainty": {
+    "notch_depth_digitization_bound_um": 0.01,
+    "fig8_fig9_control_digitization_bound_um": 0.12,
+    "fig10_control_digitization_bound_um": 0.30,
+    "measurement_uncertainty": "not reported by the primary paper",
+    "claim_rule": "digitization-only agreement is not a validated experimental prediction"
+  },
+  "selection": {
+    "frozen_before_engine_score": true,
+    "calibration_family": "open_area_width",
+    "held_out_families": [
+      "shared_pad_space_width",
+      "individual_pad_space_width"
+    ],
+    "excluded_from_r1_numeric_score": [
+      "Fig. 3 pad perimeter",
+      "Fig. 7 perimeter ratio",
+      "Fig. 1 and Fig. 10 qualitative SEM topology"
+    ]
+  }
+}

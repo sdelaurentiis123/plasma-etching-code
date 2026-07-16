@@ -726,27 +726,341 @@ under-determined) -- an honest result that quantifies how many structures must b
   held until an ensemble-mean response and stable stationary state exist. Evidence is in
   `results/charging_coevolution_c3_stochastic_transient_audit/`.
 
+- **The C3 late-time obstruction is a discrete state-space incompatibility, not evidence of an
+  impossible kinetic equilibrium.** The declared 0.25 micrometer trench has 40 P0 face-charge
+  degrees of freedom but a rank-34 face-to-Q1 nodal coupling, leaving six exact field-null modes.
+  At segment 14, 96.8% of area-weighted stored face-charge norm and 95.3% of terminal-window
+  net-current norm lie in that null component. Fifteen independent windows remain at least 0.99496
+  cosine-aligned with their mean, so the component is systematic rather than sampling noise. Raw
+  patch functionals have up to 0.426 dual sensitivity to the null space; identical Q1 fields can
+  therefore report different raw B2 values. Evidence is in
+  `results/charging_c3_q1_compatibility_audit/` and
+  `CHARGING_C3_Q1_COMPATIBILITY_AUDIT_2026-07-14.md`.
+- **A compatible-Q1 charge state is implemented without changing the resolved operator.** The Q1
+  nodal load is authoritative and its unique area-weighted minimum-density-norm face
+  representative is retained for remap/ledger operations. Zero-update projection preserves nodal
+  charge to `4.46e-15` relative L1, potential to `4.29e-14` relative L2, and global charge to
+  `2.01e-29 C`. A paired 500-step fork agrees with the legacy resolved trajectory within 1.75% in
+  every audited field metric while reducing the face-state null fraction to `2.68e-15`. The runner,
+  checkpoints, heartbeats, and unattended supervisor declare the state choice; raw B2 and retained
+  node diagnostics remain reported.
+- **Batch projective PTC is rejected at the compatible segment-16 state.** A fixed-state direction
+  required 70 independent level-13 scrambles to reach signal/error 3.140. Exact paired scoring on
+  unused epochs shows 2.5/5/10 microsecond candidates increase current-residual L2 by
+  `2.058/5.161/10.898e-12 A`; physical-scale candidates are either inconclusive or worsen node
+  metrics, and cost more to construct than direct physical steps. The reference continuation
+  remains fresh-scramble compatible physical time. CCA-R2 is unchanged; the proposed separation of
+  field-compatible balance from unresolved-current grid error is recorded, unsigned, in
+  `CONVERGENCE_CONTRACT_R3_REVIEW_REQUEST.md`.
+- **The long C3 continuation exposed and stopped on a particle/field topology mismatch.** Particle
+  trajectories wrapped periodically in lateral x/y while the Q1 Poisson endpoints were independent
+  natural-Neumann nodes. The stopped checkpoint has seam jumps of `20.413 V` in x and `24.150 V` in
+  y; recomputing from its archived nodal charge reproduces those values to `2.90e-16` relative L2,
+  proving the mismatch is in the declared operator rather than checkpoint corruption. The GPU was
+  stopped after two completed compatible segments at `2.94875 ms`; it is idle and that archived time
+  is not credited to the corrected model.
+- **Periodic topology is now a shared engine invariant rather than a runner convention.** The Q1
+  system algebraically identifies endpoint nodes before factorization, reduces charge to independent
+  periodic DOFs, prolongs a bitwise-continuous voltage grid for transport, and constructs the
+  compatible face state against that same reduced space. Coupled transport refuses a mismatch before
+  tracing. The corrected seam is exactly zero in both axes; full tests pass (`401 passed, 1 skipped`).
+- **The stopped inventory was converted only into a corrected warm proposal.** The intended periodic
+  `72 x 40` face coupling has rank 22/nullity 18. Projection preserves its effective nodal load to
+  `2.65e-15`, global charge to `1.06e-29 C`, and Poisson balance to `8.48e-30 C`, while changing the
+  proposed field by 5.45% L2 (13.62 V maximum). Evidence and SHA-256 provenance are in
+  `results/charging_c3_periodic_topology_audit/`. The next compute is bounded cold/warm corrected-
+  operator verification, not a replay of the old millisecond march.
+- **The repaired periodic physical reference is valid and still slowly charging.** Four consecutive
+  400-step, 50 microsecond fresh-scramble CUDA windows complete with zero rejects, zero bounce or
+  trajectory-horizon extensions, exactly zero voltage seam, and charge/transfer ledgers at
+  `3.87e-15`--`4.95e-15` / `2.79e-15`--`2.84e-15`. Integrated B1 falls
+  `60,510 -> 20,580 -> 17,389 -> 13,962 V/s`; Q1-resolved B2 falls
+  `0.306 -> 0.200 -> 0.165 -> 0.151`, while raw B2 remains around 1.2--1.4 because it includes
+  exact Q1-null face content. Every window passes independent integrity replay and fails signed R2.
+- **The physical voltage motion separates into one collapsing coherent mode and late estimator
+  jitter.** SVD of the four archived fixed-window displacement vectors assigns 96.597% of their
+  energy to one direction. Its window projections are `-17.341/-2.990/-1.705/-0.374 V`, while the
+  orthogonal L2 motion is `0.536/1.873/1.937/1.863 V`. The final small projection alone does not
+  certify a stationary cloud because fixed-state endpoint audits at levels 11/12/13 cannot resolve
+  the declared `1,000 V/s` B1: global signal/standard-error is at most 1.211 and the selected
+  component intervals contain zero.
+- **A decreasing-gain fresh-scramble tail is implemented as a bounded warm-start accelerator, not a
+  convergence loophole.** The schedule `125 ns * (16/(16+k))^0.75` advances 400 conservative
+  pseudo-steps (`10.1224 us` pseudo-time, zero physical time), preserves its gain age through
+  restart, refuses frozen samples and stochastic SER, never self-certifies, and closes charge to
+  `4.42e-14`. Config
+  `2025866ccba91b4b8fc65af30b74b71b786f1056d6a3af535d82c21ce95c1e42` completes 400/400 with zero
+  rejects; independent levels 11/12/13 endpoint audits reduce aggregate Q1/node diagnostics but do
+  not establish a statistically decisive residual improvement. Full tests pass: 404 passed, 1
+  skipped.
+- **The fixed confirmation rejects overshoot and also rejects formal saturation.** From the tail
+  checkpoint, config `c919399966fe14254d58bdcdfceacab5715240abccbdc0d03777dc87652ff35d`
+  runs another 400 fixed physical steps/50 microseconds and moves `-2.272 V` along the archived
+  dominant direction (same sign as the tail's `-2.200 V`), rather than returning toward the 200
+  microsecond state. It is therefore the canonical warm checkpoint, SHA-256
+  `2ed2c604728481fe217ccaa73d405905f79ccf24ec0cbb7ac0daf173ef51ce64`, but not an equilibrium:
+  B1 is `17,748.6 V/s`, raw B2 `1.348/1.297`, Q1-resolved B2 `0.1681/0.1677`, and retained node
+  RMS/worst `0.0385/0.0743`. Independent audit passes every integrity check and reports
+  `contract_converged: false`.
+- **The bounded July 14 compute campaign is closed without pretending the contract passed.** The
+  exact operator, compatible state, fresh-scramble physical time, conservative restart, hard-hit
+  replay, GPU path, and stochastic warm-start machinery are operational. Remaining blockers are
+  continued resolved mean drift, an unaffordable pointwise stochastic B1 threshold, the raw/Q1
+  mixed-space B2 contract, and missing physical-grid/B3 refinement. These require evidence and
+  formal R3 review, not another frozen-map solver or unbounded march. Final evidence is in
+  `CHARGING_C3_CLOSURE_AUDIT_2026-07-14.md` and
+  `results/charging_c3_periodic_topology_audit/closure_mode_audit.json`. Vast instance `44895783`
+  was destroyed after artifact retrieval; the final instance listing was empty.
+
+## 2026-07-15 — unified charging product closure and finite-arrival ensemble wiring
+
+- **The historical signed-R2 path remains the default and no convergence claim was rewritten.** A
+  separate `CCA-PROFILE-STATIONARY-2026-07-15-DRAFT` contract now asks the profile-relevant question:
+  whether a second fresh physical-time block changes potential, independently scored kinetic current,
+  delivered species flux, profile velocity, or the predicted profile increment beyond declared
+  tolerances. Endpoint scores use disjoint independent epochs, uncertainty expands every stochastic
+  metric, hard visibility is mandatory, and the draft explicitly refuses experimental claims.
+- **Independent transport ensembles are now averaged in the engine rather than in campaign scripts.**
+  Sparse energy/angle/position/direction events are concatenated with replicate-scaled flux; neutral
+  fields and hit/escape probabilities are averaged; incompatible operators/species/lineage schemas
+  refuse. C3 can run two blocks, score both endpoint ensembles, reuse the accepted mean transport in
+  chemistry, and still reports signed-R2 RMS/worst/B2 diagnostics.
+- **The common charged path is public and restartable.** `PhysicalChargingProcess` invokes C3 directly;
+  in-memory continuation preserves geometry, remapped charge, conservative surface state, and mesh
+  fingerprint while deriving a new seed. `petch-charging-checkpoint-3d-v1` safely stores the same step
+  boundary in `allow_pickle=False` NPZ, rejects undeclared arrays/types, and binds the source manifest
+  by SHA-256. A zero retained-charge inventory also no longer fails C1 on an irrelevant geometric
+  correspondence.
+- **Physical shot noise is now distinct from quadrature noise.** For each sparse kinetic event the
+  engine draws `N ~ Poisson(event_flux * physical_face_area * physical_duration)` and returns the
+  exact compact flux `N/(area*duration)`. Perfect-absorber deposition is an integer multiple of
+  elementary charge and the existing global ledger remains roundoff-closed. Poisson C3 runs require
+  fresh sampling and cannot self-certify a stochastic snapshot. Surface-response branching is still
+  conditional-mean unless an explicitly stochastic response law is supplied and is reported as such.
+- **A true ensemble execution path and twist observables now exist.** Constant-boundary
+  `physical_time_resolved` C3 co-evolves charge and geometry without a quasi-static gate;
+  `PhysicalChargingEnsembleProcess` refuses non-Poisson/fake-shot-noise configurations and labels one
+  realization non-predictive. Geometry-native centerline, lateral displacement, equivalent diameter,
+  twist-onset depth/AR, ensemble variance, and systematic-direction z-score pass manufactured tilted
+  hole and symmetric +/- tilt gates. N>=30, N/sample doubling, isotropy, AR sweep, and dense/sparse
+  campaigns remain required before any twist claim.
+- **Verification:** the complete local suite passes `425 passed, 1 skipped`; `git diff --check` and
+  public-export smoke checks pass. Work is local only and nothing was pushed. Design and remaining
+  gates are in `UNIFIED_ENGINE_WIRING_PLAN_2026-07-15.md`.
+
+### Unified engine material/campaign completion increment
+
+- **Profile claims now have geometry-native measurements rather than hand-read contours.** The common
+  API measures left/right notch depth, notch asymmetry, bow width/expansion, hole centerline,
+  displacement, equivalent diameter, and onset AR from declared physical bands/ROIs. Manufactured
+  asymmetric trench and tilted-hole gates converge under refinement; ensembles carry componentwise
+  standard errors/confidence bounds.
+- **C4 and C5 are executable evidence protocols, not claims.** C4 now requires checksum-bound source
+  imagery, replayable pixel coordinates/transforms, digitization uncertainty, a committed one-family
+  calibration with at most two bounded parameters, exact held-out coverage, independent run-manifest
+  hashes, charging-off causality, and a decomposed uncertainty envelope. The legacy hard-coded Hwang
+  values are explicitly ineligible because they lack that provenance. C5 now executes nested N/2N and
+  paired sample-doubling comparisons, an isotropy control, and systematic-direction scoring, while
+  enforcing base N>=30 in a real campaign contract. Neither campaign has run, so no notch/twist
+  validation claim is made.
+- **Mask and substrate now share one engine without sharing one chemistry law.**
+  `MaterialMechanismRouter3D` dispatches exposed face material IDs to independent mechanisms,
+  namespaces and conservatively remaps their state, merges signed material/product ledgers, moves both
+  material level sets, recomputes ownership after motion, and safely round-trips its state through the
+  charged checkpoint. A non-routed mechanism is refused when multiple evolving materials are exposed.
+- **The first honest redeposition feedback loop is wired.** Explicit transport-ready product
+  populations can be assigned bounded, sourced sticking and density laws. Diffuse flight closes
+  emitted = deposited + escaped material, captured same-material inventory becomes signed interface
+  growth, and the next step can resputter that grown material through the same mechanism. Positive
+  cross-material capture or pinned-surface growth refuses because either needs a new evolving material
+  layer. Reactive SiO2 branching remains unresolved rather than guessed.
+- **Run provenance now binds the actual operator.** Versioned charged/uncharged manifests include
+  geometry/material array hashes, boundary distributions, species roles, mechanism/redeposition
+  provenance, source and electrostatic coordinates, numerical settings, device, and exact-operator
+  statement. C3 also itemizes float64 lineage replay, trajectory/bounce horizon recovery, the priced
+  cascade-tail bound, charge-remap conservation, and redeposition conservation. The existing durable
+  supervisor/heartbeat path remains the process-level recovery mechanism.
+- **Verification:** focused unified-engine gates pass `97 passed`; the complete local suite passes
+  `439 passed, 1 skipped in 129.94 s`; `git diff --check`, module compilation, and public-export/schema
+  smoke checks pass. No GPU/remote resource was launched and nothing was pushed.
+- **The assembled workflow was then executed outside pytest.**
+  `scripts/unified_engine_smoke.py` ran the public two-material mask/substrate path with both level sets
+  moving and same-material redeposition balance `1.16e-16`; ran public quasi-static C3 plus a safe
+  disk checkpoint/resume with zero charge-remap error and exact transport reuse; and ran two distinct
+  physical-Poisson finite-arrival realizations (seeds 81/182). The standalone C3 audit passed
+  quasi-static, waveform, conservation and refusal gates; the independent planar charging demo
+  converged in two iterations; a bounded unified Jeon step closed neutral balance to `1.14e-12` while
+  correctly reporting nonpredictive inputs; and the separate legacy facade completed its 40-step hole
+  example in `9.15 s`. These are operational smokes, not experimental C4/C5 validation.
+- **The distributable package was tested rather than assuming the checkout represented it.** The
+  first isolated-wheel import exposed a real release mismatch: wheel metadata declared `0.3.0` while
+  `petch.__version__` declared `0.2.0`. Runtime version is now `0.3.0`, a regression test binds it to
+  `pyproject.toml`, and rebuilt wheel SHA-256
+  `7bcc0b74fa1b25c85b4c0d01385fedb78fc41daf0ee2574c08fb3c2f65cc3ed0` installs and imports from a
+  fresh temporary environment with matching runtime/metadata versions. The installed wheel—not the
+  source checkout—then passed `scripts/unified_engine_smoke.py`. Final verification passes
+  `440 passed, 1 skipped in 129.91 s`, module compilation, and `git diff --check`.
+
 ## Roadmap (remaining)
 
-1. Finish Phase 2 charging through the unified engine: extend the now-validated material
-   response/full-field cascade beyond the bounded Ar+-SiO2 ion-SEE slice only when electron
-   backscatter/true-SEE data or surface-transport data are
-   recovered for the declared material state. Physical time remains the reference and consumes the
-   same cascade/current operator; independently audit any final state before promotion.
-2. de Boer: run the directional-ion channel THROUGH the validated engine transport (narrow
-   IonEnergyTransverseMaxwellianDensity), replacing the reduced analytic ion model; sticking + ion IAD
-   are DECLARED calibrated inputs with provenance/uncertainty; calibrate low-AR, predict held-out AR40;
-   report grid/ray/digitization/model error separately. Add charging only if the AR40 residual exceeds
-   the combined error budget.
-3. Extend the exact transport adjoint through surface chemistry for full-chain calibration gradients;
-   then spike geometry/shape gradients with boundary reparameterization and an FD gate.
-4. AMR: add spatial mesh refinement only when 3-D/many-feature/shape-gradient scale requires it. It is
-   separate from adaptive trajectory quadrature and remains de-prioritized for the current AR40 regime.
-5. GPU: run the forward+QMC path with `device="cuda"` and report accuracy-matched speed on an A100.
-6. Jeon SiO2 held-out depth transfer, 3-D holes, and the second chemistry through unchanged contracts.
+1. Acquire and checksum the exact Nozawa/Hwang figure asset, record pixel transforms and digitization
+   uncertainty, commit the C4 calibration split, then run the charging-off/on plus grid/time/sample
+   ladders once. No held-out retuning.
+2. Run C5 on a 3-D hole AR sweep with base N>=30, nested N doubling, paired transport-sample doubling,
+   and the zero-direction isotropy control. Report distributions, never one deterministic twist.
+3. Add production mask chemistry, reactive product branching, or a cross-material coating layer only
+   when C4/C5 morphology provides causal evidence and sourced parameter bounds. The current refusals
+   remain in force meanwhile.
+4. Replay one versioned manifest in a clean environment and publish accuracy-matched CPU/CUDA event,
+   conservation, and profile comparisons; batch independent realizations before optimizing kernels.
+5. Run de Boer and Jeon held-out transfers through the same explicit common APIs, with grid/ray/
+   digitization/model errors separated and charging enabled only by an observable causality test.
+6. Extend adjoints through chemistry and moving boundaries only after the forward validation gates;
+   add spatial AMR only when scale/refinement evidence earns its complexity.
 
 ## Guardrails honored
 
 Single writer. Local only. No benchmark/AR/region branch in governing physics. Sticking is the one
 declared physical surface input with provenance. Refinement is error-driven. Device-agnostic transport
-(Warp CUDA path ready for the GPU deployment).
+(Warp CUDA path exercised in the bounded C3 campaign; device-independent audit artifacts retained).
+
+## 2026-07-15 — ARDE history reconciliation and common moving-profile increment
+
+- **The old deep-AR experimental claim is withdrawn at its source.** Git history and all reachable
+  branches/reflogs were inspected. The normalized `1/.43/.29/.20` sequence came from an evaluated
+  Blauw/Clausing curve, not direct de Boer Figure-9 pixels; no missing photon implementation was found.
+  Direct Figure-9 pixels and their checksums are development data because they have now been scored.
+- **Charged reflection now has one reusable engine bridge.** Face-resolved charged arrivals pass
+  through the certified cascade, exact float64 shared-edge replay, lineage, and charge/energy/tail
+  ledgers before the identical resulting flux reaches chemistry. Incomplete cascades and transport
+  records without exact impact position are refused. A large-event reduction-order mismatch was fixed
+  at the authoritative integrated-particle-rate ledger, without loosening conservation tolerance.
+- **A real moving-profile defect was found and fixed.** Transport used periodic lateral topology while
+  level-set advection/redistancing evolved duplicate endpoint planes independently. The seam could
+  therefore open after motion and send a reflected particle into a shifted solid image. Godunov
+  advection now wraps the unique periodic core, endpoint planes are reconstructed bitwise-identically,
+  and redistancing uses wrapped padding. The feature and charging co-evolution paths share this rule.
+- **The direct common-engine development score improved, but did not validate.** With the one legal
+  `s_F=0.10` calibration unchanged, adding literature-bounded certified ion reflection improves the
+  twelve transfer-point de Boer RMSE from `3.5446` to `2.5568 um`; the calibration-marker error is
+  `0.0241 um`. The remaining miss is retained as evidence, not tuned away.
+- **The operator was exercised on an actually moving trench.** A three-level nested-sampling gate ran
+  common Belen chemistry + neutral radiosity + certified reflection for 150 s over five profile steps.
+  Final centerline depths were `0.218634`, `0.217613`, and `0.217393 um`; the latest sampling delta is
+  `-0.000220 um`, 4.6x smaller than the previous delta. The moving result differs from the identical
+  frozen-rate counterfactual by `-0.001184 um`, about 5.4x the latest sampling delta. Charge and energy
+  close at roundoff, the cascade tail remains bounded, and state remap conservation passes. This is a
+  bounded mechanism/history demonstration, not experimental validation.
+- **Verification:** the final complete suite passes `461 passed, 1 skipped in 134.60 s`; the
+  regenerated moving-profile audit passes its
+  conservation gate. Public evidence pages now label the legacy plot as a calculated-curve replay and
+  state that independent feature-profile validation remains open. Work remains local; nothing pushed.
+
+## 2026-07-15 — ViennaPS La Magna fluorocarbon chemistry in the common engine
+
+- **The ViennaPS-class generic fluorocarbon mechanism is now selectable, not hand-waved.**
+  `LaMagnaGarozzoFluorocarbonMechanism` implements the La Magna--Garozzo etchant, polymer, and
+  etchant-on-polymer coverages; chemical, ion-enhanced, and physical removal; polymer saturation,
+  deposition/removal, and finite film inventory; and signed material ledgers. Every transferred
+  parameter names the exact ViennaPS 4.6.1 source commit
+  `2956ed587984c6dc38be24c6e2390e10c9b2f0a7` and remains nonpredictive until experimental transfer
+  evidence exists.
+- **It uses the existing engine.** Mechanism-owned polymer growth is combined with recession in the
+  common face velocity, survives material-ID routing, uses the same level-set/profile path, and can
+  compose with the existing charged/reflected event measure. Safe checkpoints now register the state
+  and preserve material-router remap bounds/modes.
+- **A real state-remap type error was found by the end-to-end smoke.** Algebraic coverage fractions
+  had been treated as conserved areal inventory, so a saturated coverage could exceed an artificial
+  capacity when the triangulated surface contracted. The remapper now accepts explicit `intensive`
+  versus `conservative` field declarations; all legacy states retain conservative defaults. The new
+  model interpolates its three coverages while exactly conserving polymer-film and removed-material
+  inventories.
+- **Jeong radicals can now reach the chemistry without losing species roles.** The default archived
+  `FC_total` closure is unchanged. The explicit `heavy_light` mode maps CF/CF2/CF3 to `FC_etchant`
+  and C2F4/C3F6/C4F7 to `FC_polymer`; their one-way thermal fluxes sum back to `FC_total` at machine
+  precision. `scripts/jeong_2023_transfer.py --chemistry-model lamagna_garozzo` selects the split and
+  common neutral/surface fixed point; the old reduced law remains the default.
+- **The first transferred-parameter result is correctly a failed validation.** A deliberately coarse
+  80-step moving Jeong smoke completed in `19.66 s`, but predicted net deposition (`-82.0 nm` depth)
+  at the `1223 nm` calibration anchor. At that source condition the grouped polymer thermal flux is
+  about 59 times the grouped etchant flux, so raw Vienna defaults saturate polymer. No held-out datum
+  was tuned; this result narrows the next scientific question to the radical role/weight and parameter
+  transfer rather than engine execution.
+- **Verification:** analytic coverage/yield parity, ion-only/deposition/film-depletion limits,
+  conservative ledgers, growth advection, material routing, contracting-surface remap, checkpoints,
+  boundary partition, public imports, compilation, and focused legacy gates pass. The full snapshot
+  reports `514 passed, 1 skipped, 3 failed`; the same three unrelated failures reproduce at the exact
+  pre-increment snapshot commit `56ac284` (one obsolete zero-field replay monkeypatch expectation and
+  two Jeon-v1 data/split-count mismatches). They are not attributed to this increment and were not
+  folded into the chemistry patch. Full evidence and remaining parity/validation gaps are recorded in
+  `VIENNAPS_FLUOROCARBON_CHEMISTRY_AUDIT_2026-07-15.md`. Work remains local; nothing pushed.
+
+## 2026-07-15 — Jeon evidence correction and nominal-width transfer audit
+
+- The exact 20% CW development deck was recovered from the prior local Codex session and replayed
+  exactly: complex-formation probability `6.309573444801936e-4`, substrate polymer-deposition
+  probability `7.498942093324559e-5`, QMC level 10/seed 2017, and 4.25-degree component IADF. Every
+  archived predicted depth replayed identically.
+- The archived `open48` result did **not** score Jeon's nominal 60 nm marker. The 48 nm opening was an
+  unsupported development hypothesis, and the scorer silently omitted it because target matching was
+  exact. The earlier all-points calibration interpretation is withdrawn.
+- The Jeon runner now writes a complete canonical input deck and SHA-256, serializes all surface
+  probabilities and their bounds/sources, refuses unregistered simulated widths by default, and marks
+  registered-width coverage explicitly. Diagnostic nonregistered openings require an opt-in and can
+  never populate the calibration result.
+- With the actual 60/80/100/150/180/200 nm geometries and the frozen deck, non-anchor interval coverage
+  is `4/5` at 20% CW (`log-RMSE 0.14696`), `4/5` at the untouched 40% CW condition (`0.06281`), and
+  `2/5` at the untouched 80% CW condition (`0.07963`). The nominal 60/200 predictions are
+  `0.48175`, `0.48021`, and `0.48257`, versus experimental `0.34427`, `0.49578`, and `0.43000`.
+- These runs advance only about `0.07 nm` in one step. They are useful initial transport/rate
+  diagnostics, not replays of Jeon's roughly micrometre-scale evolved profiles. The experimental
+  claim remains open; Jeong 2023's reported 1200 s duration is the absolute-time transfer path once
+  its modeled radical densities are converted to reactive surface fluxes under an explicit closure.
+- Verification now passes end to end: `517 passed, 1 skipped in 132.18 s`; `git diff --check` passes,
+  the exact deck replay is deterministic, and the new geometry mismatch refusal fires before
+  transport. The regression also removed an import-time Numba thread-environment side effect and made
+  the legacy Jeon-v1 scorecard's common-wall-time development hypothesis explicit; neither change
+  alters the physical operator. Work remains local; nothing pushed.
+
+## 2026-07-16 — Jeong reactor-to-feature closure audit
+
+- **The Jeong ion boundary is no longer hard-coded to one implicit Ar population.**
+  `Jeong2023IonBoundaryClosure` accepts either a declared positive-ion density mixture with
+  species-specific Bohm fluxes or direct species-resolved fluxes from diagnostics/a validated
+  reactor model. The common feature engine already supported multiple energetic populations; the
+  experiment adapter now preserves that capability and reports species flux, energy, hit, and
+  escape diagnostics. Multispecies runs refuse the existing Ar-like reflection law until each ion
+  has a declared material response.
+- **A published Huang--Kushner channel missing from the reduced chemistry is now conservative.**
+  Fluorocarbon ions in the 5--70 eV window can deposit polymer directly on oxide-fluorocarbon
+  complexes with the Table-I `p0=0.1` law. Ar does not use this channel. Polymer deposition/removal
+  remains ledger-closed, and species/energy/complex controls have manufactured tests.
+- **The bounded test killed the channel as a Jeong slope closure.** Moving an intentionally generous
+  20% of total ion flux to 15 eV `CF+` reduced the zero-D 200 nm density-sweep endpoint gain from
+  `999.02` to `774.96 nm`; experiment is `451.47 nm`. It supplies only `40.9%` of the required
+  reduction. Collisionless virtual-sheath broadening previously supplied at most `6.68%` yield
+  flattening and no 5--70 eV population. No moving profile matrix was launched.
+- **Historical Jeong scores are now automatically labeled stale when the operator changes.**
+  `scripts/summarize_jeong_2023_validation.py` compares authoritative implementation SHA-256 values.
+  The archived five held-out 200 nm runs used the old implicit polymer projection and now report
+  `historical_stale_operator / historical_results_not_current_validation`; their numerical trends
+  remain historical evidence, not current validation.
+- **The missing response is quantified without pretending it is a model.** A diagnostic inversion
+  of the three already-scored 200 nm flux depths requires effective response multipliers
+  `1.2889 / 1.0543 / 0.7367`, equivalent to
+  `Gamma_effective proportional to n_e^0.463`. Because the scored data determine that curve, it is
+  explicitly development evidence and cannot certify prediction. The current zero-D anchor scale is
+  `1.526120494`, but no profile scale is frozen.
+- **Two cheap current-operator profile preflights refused safely.** At 90 and 180 steps the repaired
+  operator moved the interface farther per step than the conservative surface-remap radius allowed
+  (refusals at steps 3 and 6). This is a timestep/preflight result, not a physics failure. A finer
+  profile schedule is not worth purchasing until a reactor boundary is evidenced.
+- **Decision:** strict Jeong flux validation remains open on missing species-resolved ion flux/IEAD,
+  complete radical wall fluxes, and hot-neutral production. The engine-side interfaces needed to
+  consume those inputs now exist. Evidence is in
+  `JEONG_2023_REACTOR_CLOSURE_AUDIT_2026-07-16.md`,
+  `results/jeong_2023_reactor_closure_audit/audit.json`, and
+  `results/jeong_2023_reactor_closure_audit/closure_audit.png`.
+- **Verification:** focused boundary, surface, feature, and charged-cascade regressions pass
+  `110 passed`; compilation and `git diff --check` pass for the increment. Work remains local;
+  nothing pushed.

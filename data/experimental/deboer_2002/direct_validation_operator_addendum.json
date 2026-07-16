@@ -1,0 +1,36 @@
+{
+  "addendum_id": "DEBOER-2002-FIG9-OPERATOR-AUDIT-V1",
+  "parent_protocol_sha256": "4df3eb33b83c82f4e54d6f479d508cc7f7ce2bd8eb27cd191f6edf5ec197ca06",
+  "frozen_before_corrected_operator_score": true,
+  "trigger": {
+    "finding": "The first resolution audit failed because the sparse [0,2] interval placed all wide-opening anchors under the influence of an under-resolved AR=0 observable; the nominal dx=0.02 check also changed guarded physical cell dimensions.",
+    "diagnostic_evidence": "At fixed geometry the area-mean AR=0 rate was 1.35923e-10, 1.20644e-10, and 1.14238e-10 m/s for dx=0.01, 0.005, and 0.0025 um. Area versus equal-face weighting changed the rate by at most 1.5% and was not the dominant defect."
+  },
+  "operator_corrections": {
+    "floor_average": "triangle-area-weighted mean normal velocity",
+    "fixed_physical_geometry": true,
+    "maximum_dx_um": 0.01,
+    "aspect_ratio_nodes": [0.0, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 12.0, 20.0]
+  },
+  "selection_robustness": {
+    "candidate_values": [0.04, 0.08, 0.14, 0.22],
+    "grid": {"dx_um": 0.01, "seed": 0},
+    "rule": "The original 0.08 selection must remain best on the corrected operator; otherwise invalidate the parent selection and stop without selecting a replacement."
+  },
+  "selected_model_audit": {
+    "s_F": 0.08,
+    "medium": {"dx_um": 0.005, "seed": 0},
+    "fine": {"dx_um": 0.0025, "seed": 0},
+    "independent_scramble": {"dx_um": 0.005, "seed": 101}
+  },
+  "immutability": {
+    "boundary_calibration_is_not_reopened": true,
+    "held_out_rows_remain_held_out": true,
+    "chemistry_parameters_other_than_s_F_are_unchanged": true
+  },
+  "decision_rule": {
+    "grid_contraction_required": "fine-vs-medium held-out prediction RMS delta < medium-vs-coarse held-out prediction RMS delta",
+    "observable_invariance_required_for_experimental_claim_um": 0.5,
+    "note": "0.5 um is the digitization bound, not a substitute for the paper's unreported measurement uncertainty; the experimental validation gate remains non-evaluable regardless of numerical closure."
+  }
+}

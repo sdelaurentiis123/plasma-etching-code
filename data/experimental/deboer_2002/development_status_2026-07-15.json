@@ -1,0 +1,32 @@
+{
+  "status_id": "DEBOER-2002-FIG9-DEVELOPMENT-STATUS-2026-07-15",
+  "supersedes_claim_status_only": "DEBOER-2002-FIG9-DIRECT-V1",
+  "does_not_modify_frozen_protocol_or_evidence": true,
+  "data_status": "development_only_after_first_score",
+  "validation_status": "requires_a_different_preregistered_experiment",
+  "reported_boundary_inputs": {
+    "icp_power_W": 600.0,
+    "pressure_mtorr": 10.0,
+    "sf6_flow_sccm": 90.0,
+    "ccp_power_W": 3.0,
+    "self_bias_V": -30.0,
+    "mask_material": "SiO2",
+    "exposed_area_fraction": 0.05
+  },
+  "unreported_boundary_inputs": [
+    "oxygen_flow",
+    "electrode_temperature",
+    "mask_thickness_and_profile",
+    "ion_flux",
+    "ion_energy_distribution",
+    "ion_angular_distribution",
+    "statistical_depth_uncertainty"
+  ],
+  "mechanism_diagnosis": {
+    "source": "Jansen et al., Microelectronic Engineering 35, 45-50 (1997)",
+    "doi": "10.1016/S0167-9317(96)00142-6",
+    "earned_finding": "ion angular shadowing and electrostatic deflection dominate RIE lag; radical depletion was small and inhibitor depletion predicts inverse lag"
+  },
+  "photon_channel": "absent: no reported photon flux or photon-assisted yield",
+  "claim_boundary": "mechanism development and replay only; no held-out or predictive chemistry claim"
+}

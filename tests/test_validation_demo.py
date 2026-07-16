@@ -13,7 +13,11 @@ DATA = (Path(__file__).parents[1] / "data" / "experimental" / "jeon_2022"
 
 
 def _targets():
-    return build_jeon_2022_dimensionless_targets(load_jeon_2022_trench_depths(DATA))
+    # The v1 scorecard includes cross-exposure pulse/CW ratios.  Their exposure basis is not
+    # reported by Jeon, so production target construction withholds them by default.  Exercise the
+    # legacy v1 scorecard only under its explicit common-wall-time development hypothesis.
+    return build_jeon_2022_dimensionless_targets(
+        load_jeon_2022_trench_depths(DATA), pulse_exposure_basis="common_wall_time")
 
 
 def _predictions(targets, *, values=None, numerical_error=0.0, evidence=True, scope=True):

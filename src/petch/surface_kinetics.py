@@ -14,6 +14,11 @@ complex coverage and a finite polymer inventory, and it conservatively accounts 
 bare/complex energetic removal, polymer deposition, and O/energetic polymer removal.  Crosslinking,
 species-resolved complex stoichiometry, redeposition, and mask chemistry remain outside this reduced
 mechanism and are reported as model-form omissions rather than hidden in an effective rate scale.
+
+The optional second-order complex-removal activation follows the nearest-neighbour mixing-layer
+construction in W. Guo, MIT PhD thesis (2009), Sec. 4.3: the COF2-forming event probability contains a
+C--O factor and two C--F bond factors.  It reuses the same bounded complex state; it does not introduce an
+unobserved film state or alter transport.  Order one remains the default for backward compatibility.
 """
 from __future__ import annotations
 
@@ -44,6 +49,23 @@ class ParameterEvidence:
             raise ValueError("relative standard uncertainty must be finite and nonnegative")
         if not isinstance(self.supports_prediction_within_declared_domain, bool):
             raise TypeError("prediction-support flag must be boolean")
+
+
+def _angular_yield_factor(cosine, angular_model, angular_parameter):
+    """Shared, dimensionless incidence-angle factor for energetic surface yields."""
+    cosine = np.asarray(cosine, dtype=float)
+    if np.any(~np.isfinite(cosine)) or np.any((cosine < 0.0) | (cosine > 1.0)):
+        raise ValueError("incidence cosines must lie in [0, 1]")
+    if angular_model == "none":
+        return np.ones(cosine.shape)
+    if angular_model == "chang_sawin_1997":
+        theta = np.arccos(cosine)
+        return np.where(
+            cosine >= 0.5, 1.0, np.maximum(3.0 - 6.0 * theta / np.pi, 0.0))
+    if angular_model == "kress_1999":
+        return ((1.0 + float(angular_parameter) * (1.0 - cosine * cosine))
+                * cosine)
+    raise ValueError(f"unknown angular yield model: {angular_model}")
 
 
 @dataclass(frozen=True)
@@ -81,21 +103,99 @@ class EnergeticYield:
         cosine = np.asarray(cosine_incidence, dtype=float)
         if np.any(~np.isfinite(energy)) or np.any(energy < 0.0):
             raise ValueError("incident energies must be finite and nonnegative")
-        if np.any(~np.isfinite(cosine)) or np.any((cosine < 0.0) | (cosine > 1.0)):
-            raise ValueError("incidence cosines must lie in [0, 1]")
         scaled_energy = np.maximum(
             (energy - self.threshold_energy_eV)
             / (self.reference_energy_eV - self.threshold_energy_eV), 0.0)
-        if self.angular_model == "none":
-            angular = np.ones(np.broadcast_shapes(energy.shape, cosine.shape))
-        elif self.angular_model == "chang_sawin_1997":
-            theta = np.arccos(cosine)
-            angular = np.where(
-                cosine >= 0.5, 1.0, np.maximum(3.0 - 6.0 * theta / np.pi, 0.0))
-        else:
-            angular = ((1.0 + float(self.angular_parameter) * (1.0 - cosine * cosine))
-                       * cosine)
+        angular = _angular_yield_factor(
+            cosine, self.angular_model, self.angular_parameter)
         return self.reference_yield * scaled_energy ** self.energy_exponent * angular
+
+
+@dataclass(frozen=True)
+class LowEnergyActivationYield:
+    """Low-energy activation law used by Huang--Kushner surface states.
+
+    Huang et al. (JVST A 37, 031304, 2019), Eq. (2), use
+
+    ``p(E, theta) = p0 * max(0, 1 - E / E_max) * f(theta)``.
+
+    Their reaction table also lists a 5 eV lower cutoff: energetic partners below that
+    energy are reclassified as thermal neutrals and do not activate the surface.  Keeping
+    this law separate from :class:`EnergeticYield` prevents a high-energy sputter law from
+    being accidentally reused as a low-energy activation law.
+    """
+
+    zero_energy_yield: float
+    minimum_energy_eV: float
+    maximum_energy_eV: float
+    angular_model: str = "none"
+    angular_parameter: float | None = None
+
+    def __post_init__(self):
+        if (not np.isfinite(self.zero_energy_yield) or self.zero_energy_yield < 0.0
+                or not np.isfinite(self.minimum_energy_eV)
+                or self.minimum_energy_eV < 0.0
+                or not np.isfinite(self.maximum_energy_eV)
+                or self.maximum_energy_eV <= self.minimum_energy_eV):
+            raise ValueError("invalid low-energy activation-yield parameters")
+        if self.angular_model not in {"none", "chang_sawin_1997", "kress_1999"}:
+            raise ValueError(f"unknown angular yield model: {self.angular_model}")
+        if self.angular_model == "kress_1999" and (
+                self.angular_parameter is None
+                or not np.isfinite(self.angular_parameter)
+                or self.angular_parameter < 0.0):
+            raise ValueError("kress_1999 requires a nonnegative angular_parameter")
+
+    def evaluate(self, energy_eV, cosine_incidence):
+        energy = np.asarray(energy_eV, dtype=float)
+        cosine = np.asarray(cosine_incidence, dtype=float)
+        if np.any(~np.isfinite(energy)) or np.any(energy < 0.0):
+            raise ValueError("incident energies must be finite and nonnegative")
+        energy_factor = np.maximum(1.0 - energy / self.maximum_energy_eV, 0.0)
+        energy_factor = np.where(energy >= self.minimum_energy_eV, energy_factor, 0.0)
+        angular = _angular_yield_factor(
+            cosine, self.angular_model, self.angular_parameter)
+        return self.zero_energy_yield * energy_factor * angular
+
+
+@dataclass(frozen=True)
+class SteinbruchelYield:
+    """Square-root threshold yield used by the Belen/ViennaPS silicon model.
+
+    ``Y(E, theta) = A * max(sqrt(E) - sqrt(E_th), 0) * f(theta)``.
+    This is kept separate from :class:`EnergeticYield`: the two energy laws are not
+    algebraically interchangeable away from their reference energy.
+    """
+
+    prefactor_per_sqrt_eV: float
+    threshold_energy_eV: float
+    angular_model: str = "none"
+    angular_parameter: float | None = None
+
+    def __post_init__(self):
+        if (not np.isfinite(self.prefactor_per_sqrt_eV)
+                or self.prefactor_per_sqrt_eV < 0.0
+                or not np.isfinite(self.threshold_energy_eV)
+                or self.threshold_energy_eV < 0.0):
+            raise ValueError("invalid Steinbruchel-yield parameters")
+        if self.angular_model not in {"none", "chang_sawin_1997", "kress_1999"}:
+            raise ValueError(f"unknown angular yield model: {self.angular_model}")
+        if self.angular_model == "kress_1999" and (
+                self.angular_parameter is None
+                or not np.isfinite(self.angular_parameter)
+                or self.angular_parameter < 0.0):
+            raise ValueError("kress_1999 requires a nonnegative angular_parameter")
+
+    def evaluate(self, energy_eV, cosine_incidence):
+        energy = np.asarray(energy_eV, dtype=float)
+        cosine = np.asarray(cosine_incidence, dtype=float)
+        if np.any(~np.isfinite(energy)) or np.any(energy < 0.0):
+            raise ValueError("incident energies must be finite and nonnegative")
+        energy_factor = np.maximum(
+            np.sqrt(energy) - np.sqrt(self.threshold_energy_eV), 0.0)
+        angular = _angular_yield_factor(
+            cosine, self.angular_model, self.angular_parameter)
+        return self.prefactor_per_sqrt_eV * energy_factor * angular
 
 
 @dataclass(frozen=True)
@@ -232,37 +332,63 @@ class SiO2SurfaceState:
     ``complex_fraction`` is the fraction of accessible oxide sites converted to an
     oxide-fluorocarbon complex. ``polymer_units_m2`` is a physical areal inventory, not a coverage
     fit parameter. ``removed_formula_units_m2`` integrates removed SiO2 formula units.
+    ``activated_complex_fraction`` is the absolute fraction of oxide sites that are both
+    complexed and low-energy activated; it may not exceed ``complex_fraction``.
+    ``activated_polymer_fraction`` is the conditional activated fraction of the exposed
+    fluorocarbon-polymer surface.  The two states remain separate because Huang et al. assign
+    different activation energy windows to complex (5--70 eV) and polymer (5--30 eV) sites.
     """
 
     complex_fraction: np.ndarray | float
     polymer_units_m2: np.ndarray | float
     removed_formula_units_m2: np.ndarray | float = 0.0
+    activated_complex_fraction: np.ndarray | float = 0.0
+    activated_polymer_fraction: np.ndarray | float = 0.0
 
     def __post_init__(self):
         arrays = np.broadcast_arrays(
             np.asarray(self.complex_fraction, dtype=float),
             np.asarray(self.polymer_units_m2, dtype=float),
-            np.asarray(self.removed_formula_units_m2, dtype=float))
-        complex_fraction, polymer, removed = [np.array(item, copy=True) for item in arrays]
+            np.asarray(self.removed_formula_units_m2, dtype=float),
+            np.asarray(self.activated_complex_fraction, dtype=float),
+            np.asarray(self.activated_polymer_fraction, dtype=float))
+        complex_fraction, polymer, removed, activated_complex, activated_polymer = [
+            np.array(item, copy=True) for item in arrays]
         if (np.any(~np.isfinite(complex_fraction))
                 or np.any((complex_fraction < 0.0) | (complex_fraction > 1.0))
                 or np.any(~np.isfinite(polymer)) or np.any(polymer < 0.0)
-                or np.any(~np.isfinite(removed)) or np.any(removed < 0.0)):
+                or np.any(~np.isfinite(removed)) or np.any(removed < 0.0)
+                or np.any(~np.isfinite(activated_complex))
+                or np.any(activated_complex < 0.0)
+                or np.any(activated_complex > complex_fraction + 16.0 * np.finfo(float).eps)
+                or np.any(~np.isfinite(activated_polymer))
+                or np.any((activated_polymer < 0.0) | (activated_polymer > 1.0))):
             raise ValueError("invalid SiO2 surface state")
-        for array in (complex_fraction, polymer, removed): array.setflags(write=False)
+        # Erase only representational excursions at the dependent upper bound.
+        activated_complex = np.minimum(activated_complex, complex_fraction)
+        activated_polymer = np.where(polymer > 0.0, activated_polymer, 0.0)
+        for array in (
+                complex_fraction, polymer, removed,
+                activated_complex, activated_polymer):
+            array.setflags(write=False)
         object.__setattr__(self, "complex_fraction", complex_fraction)
         object.__setattr__(self, "polymer_units_m2", polymer)
         object.__setattr__(self, "removed_formula_units_m2", removed)
+        object.__setattr__(self, "activated_complex_fraction", activated_complex)
+        object.__setattr__(self, "activated_polymer_fraction", activated_polymer)
 
     @classmethod
     def bare(cls, shape=()):
-        return cls(np.zeros(shape), np.zeros(shape), np.zeros(shape))
+        zero = np.zeros(shape)
+        return cls(zero, zero, zero, zero, zero)
 
     def conservative_surface_fields(self):
         return {
             "complex_fraction": self.complex_fraction,
             "polymer_units_m2": self.polymer_units_m2,
             "removed_formula_units_m2": self.removed_formula_units_m2,
+            "activated_complex_fraction": self.activated_complex_fraction,
+            "activated_polymer_fraction": self.activated_polymer_fraction,
         }
 
     def conservative_surface_upper_bounds(self):
@@ -270,6 +396,8 @@ class SiO2SurfaceState:
             "complex_fraction": 1.0,
             "polymer_units_m2": None,
             "removed_formula_units_m2": None,
+            "activated_complex_fraction": 1.0,
+            "activated_polymer_fraction": 1.0,
         }
 
     def with_conservative_surface_fields(self, fields):
@@ -278,7 +406,12 @@ class SiO2SurfaceState:
             raise ValueError("SiO2 remap fields do not match its state contract")
         return type(self)(
             fields["complex_fraction"], fields["polymer_units_m2"],
-            fields["removed_formula_units_m2"])
+            fields["removed_formula_units_m2"],
+            np.minimum(
+                fields["activated_complex_fraction"], fields["complex_fraction"]),
+            np.where(
+                np.asarray(fields["polymer_units_m2"]) > 0.0,
+                fields["activated_polymer_fraction"], 0.0))
 
 
 @dataclass(frozen=True)
@@ -300,6 +433,16 @@ class ReducedSiO2FluorocarbonParameters:
     bare_sio2_yield: EnergeticYield
     complex_sio2_yield: EnergeticYield
     polymer_sputter_yield: EnergeticYield
+    complex_removal_reaction_order: int = 1
+    activated_polymer_deposition_probability_on_substrate: Mapping[str, float] = field(
+        default_factory=dict)
+    activated_polymer_deposition_probability_on_polymer: Mapping[str, float] = field(
+        default_factory=dict)
+    complex_activation_yield: LowEnergyActivationYield | None = None
+    polymer_activation_yield: LowEnergyActivationYield | None = None
+    activation_energetic_species: tuple[str, ...] = ()
+    energetic_polymer_deposition_yield: LowEnergyActivationYield | None = None
+    energetic_polymer_deposition_species: tuple[str, ...] = ()
     evidence: Mapping[str, ParameterEvidence] = field(default_factory=dict)
     known_omissions: tuple[str, ...] = (
         "polymer_crosslinking",
@@ -319,22 +462,206 @@ class ReducedSiO2FluorocarbonParameters:
         if (not self.oxygen_species or not np.isfinite(self.oxygen_polymer_etch_probability)
                 or not 0.0 <= self.oxygen_polymer_etch_probability <= 1.0):
             raise ValueError("invalid oxygen polymer-etch input")
+        if (int(self.complex_removal_reaction_order) != self.complex_removal_reaction_order
+                or int(self.complex_removal_reaction_order) not in {1, 2}):
+            raise ValueError("complex removal reaction order must be one or two")
+        object.__setattr__(
+            self, "complex_removal_reaction_order", int(self.complex_removal_reaction_order))
+        if (self.complex_activation_yield is not None
+                and not isinstance(self.complex_activation_yield, LowEnergyActivationYield)):
+            raise TypeError("complex_activation_yield must be LowEnergyActivationYield or None")
+        if (self.polymer_activation_yield is not None
+                and not isinstance(self.polymer_activation_yield, LowEnergyActivationYield)):
+            raise TypeError("polymer_activation_yield must be LowEnergyActivationYield or None")
+        if (self.energetic_polymer_deposition_yield is not None
+                and not isinstance(
+                    self.energetic_polymer_deposition_yield,
+                    LowEnergyActivationYield)):
+            raise TypeError(
+                "energetic_polymer_deposition_yield must be "
+                "LowEnergyActivationYield or None")
+        if (self.complex_activation_yield is not None
+                and self.complex_removal_reaction_order != 1):
+            raise ValueError(
+                "activated complex sites currently require first-order complex removal")
         maps = {}
         for name in (
                 "complex_formation_probability",
                 "polymer_deposition_probability_on_substrate",
-                "polymer_deposition_probability_on_polymer"):
+                "polymer_deposition_probability_on_polymer",
+                "activated_polymer_deposition_probability_on_substrate",
+                "activated_polymer_deposition_probability_on_polymer"):
             values = dict(getattr(self, name))
             if any((not species or not np.isfinite(value) or value < 0.0 or value > 1.0)
                    for species, value in values.items()):
                 raise ValueError(f"invalid probability map: {name}")
             maps[name] = MappingProxyType(values)
         for name, values in maps.items(): object.__setattr__(self, name, values)
+        if (maps["activated_polymer_deposition_probability_on_substrate"]
+                and self.complex_activation_yield is None):
+            raise ValueError(
+                "activated substrate deposition requires a complex activation yield")
+        if (maps["activated_polymer_deposition_probability_on_polymer"]
+                and self.polymer_activation_yield is None):
+            raise ValueError(
+                "activated polymer deposition requires a polymer activation yield")
+        activation_species = tuple(str(name) for name in self.activation_energetic_species)
+        if any(not name for name in activation_species) or len(set(activation_species)) != len(
+                activation_species):
+            raise ValueError("activation energetic species must be unique nonempty names")
+        deposition_species = tuple(
+            str(name) for name in self.energetic_polymer_deposition_species)
+        if (any(not name for name in deposition_species)
+                or len(set(deposition_species)) != len(deposition_species)
+                or bool(self.energetic_polymer_deposition_yield)
+                != bool(deposition_species)):
+            raise ValueError(
+                "energetic polymer deposition requires a nonempty unique species list "
+                "and a yield law")
+        object.__setattr__(self, "activation_energetic_species", activation_species)
+        object.__setattr__(
+            self, "energetic_polymer_deposition_species", deposition_species)
         evidence = dict(self.evidence)
         if any(not isinstance(item, ParameterEvidence) for item in evidence.values()):
             raise TypeError("parameter evidence values must be ParameterEvidence objects")
         object.__setattr__(self, "evidence", MappingProxyType(evidence))
         object.__setattr__(self, "known_omissions", tuple(self.known_omissions))
+
+    @classmethod
+    def huang_kushner_2019_reduced_projection(
+            cls, *, energetic_response_scale=1.0):
+        """Project the published MCFPM Ar/C4F8/O2 table onto this reduced state.
+
+        Huang et al. resolve activated sites and several oxide--fluorocarbon complexes.  This
+        common-engine mechanism has one bounded complex fraction and one polymer inventory, so the
+        constructor deliberately preserves only the reactions representable by those states:
+        CF/CF2/CF3 and reactive C3F6 passivate oxide; every plotted fluorocarbon radical can grow
+        polymer; ions remove bare oxide, complex, and polymer with the published threshold laws.
+
+        ``energetic_response_scale`` is not a new yield shape.  It is the single experiment-adapter
+        calibration allowed when the source reports electron density and self-bias but not the
+        species-resolved ion/hot-neutral flux or IEAD.  A held-out validation must report the scale
+        and may not retune it.  A value of one reproduces the published MCFPM p0 values exactly.
+        """
+        scale = float(energetic_response_scale)
+        if not np.isfinite(scale) or scale <= 0.0:
+            raise ValueError("energetic_response_scale must be positive and finite")
+        huang = "https://doi.org/10.1116/1.5090606"
+        kaler = "https://doi.org/10.1088/1361-6463/aa6f40"
+
+        def evidence(source, evidence_type, note="", *, supports=False):
+            return ParameterEvidence(
+                source, evidence_type, note=note,
+                supports_prediction_within_declared_domain=supports)
+
+        parameter_evidence = {
+            "site_density_m2": evidence(
+                kaler, "source_model_assumption",
+                "CF2 uptake site density 1e15 cm^-2; transferred to the reduced state."),
+            "bulk_formula_density_m3": evidence(
+                "fused SiO2 density 2200 kg/m3 and molar mass 60.0843 g/mol",
+                "material_constant_derived", supports=True),
+            "polymer_monolayer_density_m2": evidence(
+                kaler, "source_model_assumption",
+                "CF2 uptake site density 1e15 cm^-2; transferred to the reduced state."),
+            "complex_formation_probability": evidence(
+                huang, "published_model_reduced_projection",
+                "Table I p0 values; C3F6 uses the paper's reactive CxFy class."),
+            "polymer_deposition_probability_on_substrate": evidence(
+                huang, "published_model_reduced_projection",
+                "Table I activated-complex deposition projected onto accessible substrate."),
+            "polymer_deposition_probability_on_polymer": evidence(
+                huang, "published_model_parameter", "Table I polymer-growth p0 values."),
+            "activated_polymer_deposition_probability_on_substrate": evidence(
+                huang, "published_model_parameter",
+                "Table I polymer deposition on activated SiO2CmFn sites."),
+            "activated_polymer_deposition_probability_on_polymer": evidence(
+                huang, "published_model_parameter",
+                "Table I P* sticking probabilities, ten times the unactivated P values."),
+            "complex_activation_yield": evidence(
+                huang, "published_model_parameter",
+                "Table I and Eq. (2): p0=0.1, 5--70 eV low-energy window."),
+            "polymer_activation_yield": evidence(
+                huang, "published_model_parameter",
+                "Table I and Eq. (2): p0=0.3, 5--30 eV low-energy window."),
+            "activation_energetic_species": evidence(
+                huang, "published_model_scope",
+                "Empty tuple means every chemistry-facing ion/hot-neutral population; "
+                "feature transport filters out non-bombarding species before this kernel."),
+            "energetic_polymer_deposition_yield": evidence(
+                huang, "published_model_parameter",
+                "Table I p0=0.1, 5--70 eV for CFx+ and CxFy+ deposition on "
+                "oxide-fluorocarbon complexes."),
+            "energetic_polymer_deposition_species": evidence(
+                huang, "published_model_scope",
+                "Table I fluorocarbon positive-ion family; Ar+ and other non-FC ions "
+                "do not use the direct polymer-deposition channel."),
+            "oxygen_polymer_etch_probability": evidence(
+                huang, "declared_absent_channel",
+                "Jeong used Ar/C4F8 without an incident O channel; probability is zero."),
+            "bare_sio2_yield": evidence(
+                huang, "published_model_times_single_anchor_scale",
+                f"Table I p0=0.9, Eth=70 eV, Er=140 eV; common scale={scale:.17g}."),
+            "complex_sio2_yield": evidence(
+                huang, "published_model_times_single_anchor_scale",
+                f"Table I p0=0.75, Eth=35 eV, Er=140 eV; common scale={scale:.17g}."),
+            "polymer_sputter_yield": evidence(
+                huang, "published_model_times_single_anchor_scale",
+                f"Table I p0=0.3, Eth=30 eV, Er=140 eV; common scale={scale:.17g}."),
+        }
+        polymer_probability = {
+            "CF": 0.002, "CF2": 0.0015,
+            "FC_complex_02": 0.001, "FC_polymer_heavy": 0.001,
+        }
+        activated_polymer_probability = {
+            species: 10.0 * value for species, value in polymer_probability.items()}
+        return cls(
+            site_density_m2=1.0e19,
+            bulk_formula_density_m3=2.205e28,
+            polymer_monolayer_density_m2=1.0e19,
+            complex_formation_probability={
+                "CF": 0.4, "CF2": 0.3, "FC_complex_02": 0.2,
+            },
+            # Table I only deposits polymer on activated oxide-complex sites.  The previous
+            # projection applied that rate to every accessible substrate site.
+            polymer_deposition_probability_on_substrate={},
+            polymer_deposition_probability_on_polymer=polymer_probability,
+            oxygen_species="O", oxygen_polymer_etch_probability=0.0,
+            bare_sio2_yield=EnergeticYield(
+                0.9 * scale, 70.0, 140.0, energy_exponent=0.5,
+                angular_model="kress_1999", angular_parameter=9.3),
+            complex_sio2_yield=EnergeticYield(
+                0.75 * scale, 35.0, 140.0, energy_exponent=0.5,
+                angular_model="chang_sawin_1997"),
+            polymer_sputter_yield=EnergeticYield(
+                0.3 * scale, 30.0, 140.0, energy_exponent=0.5,
+                angular_model="kress_1999", angular_parameter=9.3),
+            activated_polymer_deposition_probability_on_substrate=polymer_probability,
+            activated_polymer_deposition_probability_on_polymer=(
+                activated_polymer_probability),
+            complex_activation_yield=LowEnergyActivationYield(
+                0.1, 5.0, 70.0,
+                angular_model="kress_1999", angular_parameter=9.3),
+            polymer_activation_yield=LowEnergyActivationYield(
+                0.3, 5.0, 30.0,
+                angular_model="kress_1999", angular_parameter=9.3),
+            activation_energetic_species=(),
+            energetic_polymer_deposition_yield=LowEnergyActivationYield(
+                0.1, 5.0, 70.0,
+                angular_model="kress_1999", angular_parameter=9.3),
+            energetic_polymer_deposition_species=(
+                "CF+", "CF2+", "CF3+", "C2F3+", "C2F4+", "C2F5+",
+                "C3F5+", "C3F6+", "C3F7+", "C4F7+"),
+            evidence=parameter_evidence,
+            known_omissions=(
+                "the published bare-SiO2 activated state is not yet resolved",
+                "species-resolved oxide-fluorocarbon complexes are collapsed",
+                "Jeong Figure 6 omits the atomic-F boundary flux",
+                "species-resolved positive-ion and hot-neutral boundary fluxes are unreported",
+                "etch-product redeposition is unresolved",
+                "amorphous-carbon-mask chemistry is unresolved",
+            ),
+        )
 
 
 @dataclass(frozen=True)
@@ -364,11 +691,102 @@ class ReducedSiO2FluorocarbonMechanism:
     """Vectorized conservative kernel for the declared reduced reaction network."""
 
     def __init__(self, parameters: ReducedSiO2FluorocarbonParameters):
+        if not isinstance(parameters, ReducedSiO2FluorocarbonParameters):
+            raise TypeError("parameters must be ReducedSiO2FluorocarbonParameters")
         self.parameters = parameters
+        par = parameters
+
+        def yield_manifest(law):
+            if law is None:
+                return None
+            if isinstance(law, LowEnergyActivationYield):
+                return {
+                    "type": type(law).__name__,
+                    "zero_energy_yield": float(law.zero_energy_yield),
+                    "minimum_energy_eV": float(law.minimum_energy_eV),
+                    "maximum_energy_eV": float(law.maximum_energy_eV),
+                    "angular_model": law.angular_model,
+                    "angular_parameter": (
+                        None if law.angular_parameter is None
+                        else float(law.angular_parameter)),
+                }
+            return {
+                "type": type(law).__name__,
+                "reference_yield": float(law.reference_yield),
+                "threshold_energy_eV": float(law.threshold_energy_eV),
+                "reference_energy_eV": float(law.reference_energy_eV),
+                "energy_exponent": float(law.energy_exponent),
+                "angular_model": law.angular_model,
+                "angular_parameter": (
+                    None if law.angular_parameter is None
+                    else float(law.angular_parameter)),
+            }
+
+        self.provenance = MappingProxyType({
+            "model": "reduced-sio2-fluorocarbon-common-engine-v1",
+            "parameters": {
+                "site_density_m2": float(par.site_density_m2),
+                "bulk_formula_density_m3": float(par.bulk_formula_density_m3),
+                "polymer_monolayer_density_m2": float(par.polymer_monolayer_density_m2),
+                "complex_formation_probability": dict(
+                    par.complex_formation_probability),
+                "polymer_deposition_probability_on_substrate": dict(
+                    par.polymer_deposition_probability_on_substrate),
+                "polymer_deposition_probability_on_polymer": dict(
+                    par.polymer_deposition_probability_on_polymer),
+                "activated_polymer_deposition_probability_on_substrate": dict(
+                    par.activated_polymer_deposition_probability_on_substrate),
+                "activated_polymer_deposition_probability_on_polymer": dict(
+                    par.activated_polymer_deposition_probability_on_polymer),
+                "oxygen_species": par.oxygen_species,
+                "oxygen_polymer_etch_probability": float(
+                    par.oxygen_polymer_etch_probability),
+                "complex_removal_reaction_order": int(
+                    par.complex_removal_reaction_order),
+                "bare_sio2_yield": yield_manifest(par.bare_sio2_yield),
+                "complex_sio2_yield": yield_manifest(par.complex_sio2_yield),
+                "polymer_sputter_yield": yield_manifest(par.polymer_sputter_yield),
+                "complex_activation_yield": yield_manifest(
+                    par.complex_activation_yield),
+                "polymer_activation_yield": yield_manifest(
+                    par.polymer_activation_yield),
+                "activation_energetic_species": list(
+                    par.activation_energetic_species),
+                "energetic_polymer_deposition_yield": yield_manifest(
+                    par.energetic_polymer_deposition_yield),
+                "energetic_polymer_deposition_species": list(
+                    par.energetic_polymer_deposition_species),
+            },
+            "sources": {
+                name: {
+                    "source": item.source,
+                    "evidence_type": item.evidence_type,
+                    "relative_standard_uncertainty": item.relative_standard_uncertainty,
+                    "note": item.note,
+                    "supports_prediction_within_declared_domain": (
+                        item.supports_prediction_within_declared_domain),
+                }
+                for name, item in par.evidence.items()
+            },
+            "known_omissions": list(par.known_omissions),
+        })
 
     @staticmethod
     def initial_state(shape=()):
         return SiO2SurfaceState.bare(shape)
+
+    @staticmethod
+    def _state_weighted_probability(base_probability, activated_probability, fraction):
+        """Interpolate an unactivated/activated probability at a bounded site fraction."""
+        base = dict(base_probability)
+        activated = dict(activated_probability)
+        return {
+            species: (
+                base.get(species, 0.0)
+                + (activated.get(species, base.get(species, 0.0))
+                   - base.get(species, 0.0)) * fraction)
+            for species in set(base) | set(activated)
+        }
 
     def neutral_reaction_probability(self, state: SiO2SurfaceState):
         """Per-collision probability that each neutral leaves the ballistic population.
@@ -389,14 +807,19 @@ class ReducedSiO2FluorocarbonMechanism:
 
         for species, value in par.complex_formation_probability.items():
             add(species, value * access * (1.0 - state.complex_fraction))
-        all_deposition_species = (
-            set(par.polymer_deposition_probability_on_substrate)
-            | set(par.polymer_deposition_probability_on_polymer))
+        substrate_probability = self._state_weighted_probability(
+            par.polymer_deposition_probability_on_substrate,
+            par.activated_polymer_deposition_probability_on_substrate,
+            state.activated_complex_fraction)
+        polymer_probability = self._state_weighted_probability(
+            par.polymer_deposition_probability_on_polymer,
+            par.activated_polymer_deposition_probability_on_polymer,
+            state.activated_polymer_fraction)
+        all_deposition_species = set(substrate_probability) | set(polymer_probability)
         for species in all_deposition_species:
             add(species,
-                par.polymer_deposition_probability_on_substrate.get(species, 0.0) * access
-                + par.polymer_deposition_probability_on_polymer.get(species, 0.0)
-                * polymer_coverage)
+                substrate_probability.get(species, 0.0) * access
+                + polymer_probability.get(species, 0.0) * polymer_coverage)
         add(par.oxygen_species, par.oxygen_polymer_etch_probability * polymer_coverage)
         if any(np.any(value > 1.0 + 5e-14) for value in probability.values()):
             raise ValueError(
@@ -410,6 +833,8 @@ class ReducedSiO2FluorocarbonMechanism:
         supported = (set(par.complex_formation_probability)
                      | set(par.polymer_deposition_probability_on_substrate)
                      | set(par.polymer_deposition_probability_on_polymer)
+                     | set(par.activated_polymer_deposition_probability_on_substrate)
+                     | set(par.activated_polymer_deposition_probability_on_polymer)
                      | {par.oxygen_species})
         unsupported = tuple(sorted(
             name for name, flux in fluxes.neutral_flux_m2_s.items()
@@ -420,6 +845,20 @@ class ReducedSiO2FluorocarbonMechanism:
             "polymer_deposition_probability_on_polymer", "oxygen_polymer_etch_probability",
             "bare_sio2_yield", "complex_sio2_yield", "polymer_sputter_yield",
         }
+        if par.complex_activation_yield is not None:
+            required_evidence.update({
+                "activated_polymer_deposition_probability_on_substrate",
+                "complex_activation_yield", "activation_energetic_species"})
+        if par.polymer_activation_yield is not None:
+            required_evidence.update({
+                "activated_polymer_deposition_probability_on_polymer",
+                "polymer_activation_yield", "activation_energetic_species"})
+        if par.energetic_polymer_deposition_yield is not None:
+            required_evidence.update({
+                "energetic_polymer_deposition_yield",
+                "energetic_polymer_deposition_species"})
+        if par.complex_removal_reaction_order != 1:
+            required_evidence.add("complex_removal_reaction_order")
         missing_evidence = tuple(sorted(required_evidence - set(par.evidence)))
         nonpredictive = tuple(sorted(
             name for name in required_evidence
@@ -456,20 +895,127 @@ class ReducedSiO2FluorocarbonMechanism:
             total = total + self._broadcast(population.yield_rate_m2_s(yield_law), shape)
         return total
 
-    def _polymer_step(self, inventory, fluxes, duration_s, shape):
+    def _activation_rate(self, fluxes, yield_law, shape):
+        if yield_law is None:
+            return np.zeros(shape)
+        selected_species = set(self.parameters.activation_energetic_species)
+        total = np.zeros(shape)
+        for population in fluxes.energetic_fluxes:
+            if selected_species and population.name not in selected_species:
+                continue
+            total = total + self._broadcast(
+                population.yield_rate_m2_s(yield_law), shape)
+        return total
+
+    def _energetic_polymer_deposition_rate(self, fluxes, shape):
+        law = self.parameters.energetic_polymer_deposition_yield
+        if law is None:
+            return np.zeros(shape)
+        selected_species = set(
+            self.parameters.energetic_polymer_deposition_species)
+        total = np.zeros(shape)
+        for population in fluxes.energetic_fluxes:
+            if population.name not in selected_species:
+                continue
+            total = total + self._broadcast(
+                population.yield_rate_m2_s(law), shape)
+        return total
+
+    def _activation_step(
+            self, activated_complex, activated_polymer, complex_fraction,
+            polymer_inventory, fluxes, duration_s, shape):
+        """Exact bounded activation update at fixed complex/polymer inventories."""
+        if duration_s == 0.0:
+            return (
+                np.array(activated_complex, copy=True),
+                np.array(activated_polymer, copy=True))
+        par = self.parameters
+        complex_hazard = (
+            self._activation_rate(fluxes, par.complex_activation_yield, shape)
+            / par.site_density_m2)
+        polymer_hazard = (
+            self._activation_rate(fluxes, par.polymer_activation_yield, shape)
+            / par.polymer_monolayer_density_m2)
+        complex_updated = (
+            complex_fraction
+            - (complex_fraction - activated_complex)
+            * np.exp(-complex_hazard * duration_s))
+        polymer_present = polymer_inventory > 0.0
+        polymer_updated = np.where(
+            polymer_present,
+            1.0 - (1.0 - activated_polymer)
+            * np.exp(-polymer_hazard * duration_s),
+            0.0)
+        # Preserve exact identity where the corresponding activation channel is absent.
+        complex_updated = np.where(
+            complex_hazard > 0.0, complex_updated, activated_complex)
+        polymer_updated = np.where(
+            polymer_present & (polymer_hazard > 0.0),
+            polymer_updated, np.where(polymer_present, activated_polymer, 0.0))
+        tolerance = 32.0 * np.finfo(float).eps
+        if (np.any(complex_updated < -tolerance)
+                or np.any(complex_updated > complex_fraction + tolerance)
+                or np.any(polymer_updated < -tolerance)
+                or np.any(polymer_updated > 1.0 + tolerance)):
+            raise RuntimeError("low-energy activation update violated boundedness")
+        return (
+            np.minimum(np.maximum(complex_updated, 0.0), complex_fraction),
+            np.minimum(np.maximum(polymer_updated, 0.0), 1.0))
+
+    def _polymer_step(
+            self, inventory, complex_fraction, activated_complex, activated_polymer,
+            fluxes, duration_s, shape):
         """Exact constant-flux solution and exact integrated deposition/removal bookkeeping."""
         par = self.parameters; monolayer = par.polymer_monolayer_density_m2
+        substrate_probability = self._state_weighted_probability(
+            par.polymer_deposition_probability_on_substrate,
+            par.activated_polymer_deposition_probability_on_substrate,
+            activated_complex)
+        polymer_probability = self._state_weighted_probability(
+            par.polymer_deposition_probability_on_polymer,
+            par.activated_polymer_deposition_probability_on_polymer,
+            activated_polymer)
         deposit_substrate = self._neutral_weighted_rate(
-            fluxes, par.polymer_deposition_probability_on_substrate, shape)
+            fluxes, substrate_probability, shape)
+        # Huang--Kushner Table I also permits a low-energy fluorocarbon ion
+        # to deposit one polymer unit directly on an oxide-fluorocarbon
+        # complex.  This is distinct from activation: it consumes no thermal
+        # neutral and therefore must enter the conservative polymer source
+        # explicitly.  ``complex_fraction`` is the accessible substrate-site
+        # fraction; the analytic polymer ODE applies the overlayer coverage.
+        deposit_substrate = (
+            deposit_substrate
+            + self._energetic_polymer_deposition_rate(fluxes, shape)
+            * complex_fraction)
         deposit_polymer = self._neutral_weighted_rate(
-            fluxes, par.polymer_deposition_probability_on_polymer, shape)
+            fluxes, polymer_probability, shape)
         oxygen_flux = self._broadcast(
             fluxes.neutral_flux_m2_s.get(par.oxygen_species, 0.0), shape)
         removal_capacity = (oxygen_flux * par.oxygen_polymer_etch_probability
                             + self._energetic_rate(fluxes, par.polymer_sputter_yield, shape))
         active_reaction = deposit_substrate + deposit_polymer + removal_capacity > 0.0
+        # N=0 with no substrate-nucleation channel is an exact invariant.  Polymer-growth and
+        # removal rates are multiplied by the polymer coverage, which is identically zero there;
+        # evaluating the transformed analytic solution can otherwise manufacture an O(ULP)
+        # inventory when its large growth/removal coefficients nearly cancel.
+        active_reaction &= (deposit_substrate > 0.0) | (inventory > 0.0)
+        # A float64 inventory cannot represent a change below O(eps*N_mono).  On nearly dark
+        # faces, evaluating the exact log solution below that floor can turn a sub-unit physical
+        # change into an O(10--100) cancellation artifact and then fail its own ledger.  Price that
+        # representational limit explicitly: if even the sum of all incident reaction capacities
+        # over this substep is below the same 32-eps surface-unit floor used by the complex-state
+        # integrator, the authoritative state and every associated ledger remain exactly unchanged.
+        roundoff_floor = (
+            32.0 * np.finfo(float).eps * monolayer
+            * np.maximum(np.abs(np.asarray(inventory, dtype=float)) / monolayer, 1.0))
+        throughput_bound = duration_s * (
+            deposit_substrate + deposit_polymer + removal_capacity)
+        active_reaction &= throughput_bound > roundoff_floor
         if not np.any(active_reaction):
             return np.array(inventory, copy=True), np.zeros(shape), np.zeros(shape)
+        deposit_substrate = np.where(active_reaction, deposit_substrate, 0.0)
+        deposit_polymer = np.where(active_reaction, deposit_polymer, 0.0)
+        removal_capacity = np.where(active_reaction, removal_capacity, 0.0)
 
         # dN/dt = D_sub + (D_poly-D_sub-R) * (1-exp(-N/N_mono)).  With y=exp(N/N_mono)
         # this is a linear ODE, so positivity and the N=0 boundary are preserved without clipping.
@@ -516,14 +1062,39 @@ class ReducedSiO2FluorocarbonMechanism:
                 nonnegative = local_difference >= 0.0
                 negative_delta = np.empty(local_difference.shape)
                 if np.any(nonnegative):
-                    log_first = np.where(
-                        local_difference[nonnegative] > 0.0,
-                        selected_exponent[~growing][nonnegative]
-                        + np.log(np.maximum(
-                            local_difference[nonnegative], np.finfo(float).tiny)),
-                        -np.inf)
-                    log_second = np.log(local_a[nonnegative]) - local_log_y0[nonnegative]
-                    negative_delta[nonnegative] = np.logaddexp(log_first, log_second)
+                    # y1/y0 = exp(x)*(1-a/y0) + a/y0.  Factoring exp(x) gives
+                    # x + log1p((a/y0)*expm1(-x)).  This preserves the small positive
+                    # correction to x when a thick film is removed slowly.  A direct logaddexp
+                    # can round to the wrong side of x at N/M~30, which then makes the implied
+                    # coverage exceed the step duration and creates a false ledger failure.
+                    local_x = selected_exponent[~growing][nonnegative]
+                    a_over_y0 = (
+                        local_a[nonnegative] * np.exp(-local_log_y0[nonnegative]))
+                    mild_decay = local_x > -1.0
+                    local_negative_delta = np.empty(local_x.shape)
+                    if np.any(mild_decay):
+                        local_negative_delta[mild_decay] = (
+                            local_x[mild_decay]
+                            + np.log1p(
+                                a_over_y0[mild_decay]
+                                * np.expm1(-local_x[mild_decay])))
+                    if np.any(~mild_decay):
+                        # For a large negative exponent the factored expm1 can overflow and its
+                        # logarithm nearly cancels x.  The original log-sum representation is
+                        # well-conditioned in that floor-reaching regime.
+                        strong_difference = local_difference[nonnegative][~mild_decay]
+                        log_first = np.where(
+                            strong_difference > 0.0,
+                            local_x[~mild_decay]
+                            + np.log(np.maximum(
+                                strong_difference, np.finfo(float).tiny)),
+                            -np.inf)
+                        log_second = (
+                            np.log(local_a[nonnegative][~mild_decay])
+                            - local_log_y0[nonnegative][~mild_decay])
+                        local_negative_delta[~mild_decay] = np.logaddexp(
+                            log_first, log_second)
+                    negative_delta[nonnegative] = local_negative_delta
                 if np.any(~nonnegative):
                     log_b = np.log(local_a[~nonnegative]) - local_log_y0[~nonnegative]
                     subtract_fraction = (
@@ -601,22 +1172,44 @@ class ReducedSiO2FluorocarbonMechanism:
             fluxes, par.bare_sio2_yield, shape) * access
         formation_hazard = formation_event_rate / par.site_density_m2
         removal_hazard = complex_removal_event_rate / par.site_density_m2
+        if par.complex_removal_reaction_order == 2:
+            return self._quadratic_substrate_step(
+                complex_fraction, formation_event_rate, complex_removal_event_rate,
+                bare_removal_event_rate, formation_hazard, removal_hazard,
+                duration_s, shape)
         total_hazard = formation_hazard + removal_hazard
         equilibrium = np.divide(
             formation_hazard, total_hazard, out=np.zeros(shape), where=total_hazard > 0.0)
+        bare_equilibrium = np.divide(
+            removal_hazard, total_hazard, out=np.zeros(shape), where=total_hazard > 0.0)
         decay = np.exp(-total_hazard * duration_s)
-        updated = equilibrium + (complex_fraction - equilibrium) * decay
         active = total_hazard > 0.0
+        # Evolve both complementary coverages analytically.  Near theta=1, forming the
+        # bare-site exposure as ``duration - integral(theta)`` catastrophically cancels;
+        # near theta=0 the converse is true.  Direct theta/q solutions and integrals retain
+        # the small physical channel on both limits while describing the identical ODE.
+        bare_fraction = 1.0 - complex_fraction
+        updated_complex = equilibrium + (complex_fraction - equilibrium) * decay
+        updated_bare = bare_equilibrium + (bare_fraction - bare_equilibrium) * decay
+        updated = np.where(updated_complex >= 0.5, 1.0 - updated_bare, updated_complex)
         updated = np.where(active, updated, complex_fraction)
+        integral_kernel = np.empty(shape)
+        integral_kernel[active] = (
+            -np.expm1(-total_hazard[active] * duration_s) / total_hazard[active])
+        integral_kernel[~active] = duration_s
         integral_complex = np.empty(shape)
+        integral_bare = np.empty(shape)
         integral_complex[active] = (
             equilibrium[active] * duration_s
-            + (complex_fraction[active] - equilibrium[active])
-            * (-np.expm1(-total_hazard[active] * duration_s)) / total_hazard[active])
+            + (complex_fraction[active] - equilibrium[active]) * integral_kernel[active])
+        integral_bare[active] = (
+            bare_equilibrium[active] * duration_s
+            + (bare_fraction[active] - bare_equilibrium[active]) * integral_kernel[active])
         integral_complex[~active] = complex_fraction[~active] * duration_s
+        integral_bare[~active] = bare_fraction[~active] * duration_s
         removed_complex = complex_removal_event_rate * integral_complex
-        formed_from_rate = formation_event_rate * (duration_s - integral_complex)
-        removed_bare = bare_removal_event_rate * (duration_s - integral_complex)
+        formed_from_rate = formation_event_rate * integral_bare
+        removed_bare = bare_removal_event_rate * integral_bare
         site_change = (updated - complex_fraction) * par.site_density_m2
         # This identity is the conservative state equation and is better conditioned near saturation
         # than subtracting two large rate integrals. Keep the independent rate integral as an audit.
@@ -646,6 +1239,83 @@ class ReducedSiO2FluorocarbonMechanism:
                 f"removed={float(removed_complex[failed]):.6e}")
         return updated, formed_complex, removed_complex, removed_bare
 
+    def _quadratic_substrate_step(
+            self, complex_fraction, formation_event_rate, complex_removal_event_rate,
+            bare_removal_event_rate, formation_hazard, removal_hazard, duration_s, shape):
+        """Exact constant-flux update for ``dtheta/dt=a(1-theta)-b theta**2``.
+
+        The positive and negative roots of the Riccati equation give a closed-form state update.
+        Its analytic time integral supplies both bare-site exposure and the formation ledger; the
+        complex-removal ledger follows from the conserved site equation.  Thus the nonlinear
+        activation changes the physical rate law without weakening any bookkeeping identity.
+        """
+        theta0 = np.asarray(complex_fraction, dtype=float)
+        a = np.asarray(formation_hazard, dtype=float)
+        b = np.asarray(removal_hazard, dtype=float)
+        updated = np.array(theta0, copy=True)
+        integral_theta = np.array(theta0 * duration_s, copy=True)
+
+        formation_only = (a > 0.0) & (b == 0.0)
+        if np.any(formation_only):
+            local_a = a[formation_only]
+            change = ((1.0 - theta0[formation_only])
+                      * (-np.expm1(-local_a * duration_s)))
+            updated[formation_only] = theta0[formation_only] + change
+            integral_theta[formation_only] = duration_s - change / local_a
+
+        removal_only = (a == 0.0) & (b > 0.0)
+        if np.any(removal_only):
+            local_b = b[removal_only]
+            scaled = local_b * theta0[removal_only] * duration_s
+            updated[removal_only] = theta0[removal_only] / (1.0 + scaled)
+            integral_theta[removal_only] = np.log1p(scaled) / local_b
+
+        coupled = (a > 0.0) & (b > 0.0)
+        if np.any(coupled):
+            local_a = a[coupled]
+            local_b = b[coupled]
+            local_theta0 = theta0[coupled]
+            discriminant = np.sqrt(local_a * local_a + 4.0 * local_a * local_b)
+            positive_root = 2.0 * local_a / (local_a + discriminant)
+            negative_root = -local_a / (local_b * positive_root)
+            root_ratio = ((local_theta0 - positive_root)
+                          / (local_theta0 - negative_root))
+            evolved_ratio = root_ratio * np.exp(-discriminant * duration_s)
+            local_updated = ((positive_root - evolved_ratio * negative_root)
+                             / (1.0 - evolved_ratio))
+            updated[coupled] = local_updated
+            log_ratio = np.log1p(
+                (local_theta0 - local_updated) / (local_updated - negative_root))
+            integral_theta[coupled] = (
+                positive_root * duration_s + log_ratio / local_b)
+
+        state_tolerance = 32.0 * np.finfo(float).eps
+        if (np.any(updated < -state_tolerance) or np.any(updated > 1.0 + state_tolerance)
+                or np.any(integral_theta < -state_tolerance * max(duration_s, 1.0))
+                or np.any(integral_theta > duration_s * (1.0 + state_tolerance))):
+            raise RuntimeError("quadratic oxide-complex integrator violated boundedness")
+        # Only erase representational excursions at an exact physical boundary.
+        updated = np.where(updated < 0.0, 0.0, np.where(updated > 1.0, 1.0, updated))
+        integral_theta = np.where(
+            integral_theta < 0.0, 0.0,
+            np.where(integral_theta > duration_s, duration_s, integral_theta))
+
+        formed_complex = formation_event_rate * (duration_s - integral_theta)
+        site_change = (updated - theta0) * self.parameters.site_density_m2
+        removed_complex = formed_complex - site_change
+        removed_bare = bare_removal_event_rate * (duration_s - integral_theta)
+        scale = np.maximum.reduce((
+            np.abs(formed_complex), np.abs(removed_complex), np.abs(site_change),
+            np.ones(shape)))
+        tolerance = np.maximum(
+            5e-12 * scale,
+            32.0 * np.finfo(float).eps * self.parameters.site_density_m2)
+        if (np.any(formed_complex < -tolerance)
+                or np.any(removed_complex < -tolerance)
+                or np.any(np.abs(site_change - (formed_complex - removed_complex)) > tolerance)):
+            raise RuntimeError("quadratic oxide-complex bookkeeping failed conservation")
+        return updated, formed_complex, removed_complex, removed_bare
+
     def advance(self, state: SiO2SurfaceState, fluxes: SurfaceFluxes, duration_s: float, *,
                 max_step_s: float | None = None, strict=True):
         """Advance constant incident fluxes using conservative Strang-split exact sub-operators."""
@@ -663,21 +1333,47 @@ class ReducedSiO2FluorocarbonMechanism:
         complex_fraction = np.array(state.complex_fraction, copy=True)
         polymer = np.array(state.polymer_units_m2, copy=True)
         removed_total = np.array(state.removed_formula_units_m2, copy=True)
+        activated_complex = np.array(state.activated_complex_fraction, copy=True)
+        activated_polymer = np.array(state.activated_polymer_fraction, copy=True)
         formed_complex = np.zeros(shape); removed_complex = np.zeros(shape)
         removed_bare = np.zeros(shape); deposited_polymer = np.zeros(shape)
         removed_polymer = np.zeros(shape)
         for _ in range(n_steps):
-            polymer, deposited, removed = self._polymer_step(
+            activated_complex, activated_polymer = self._activation_step(
+                activated_complex, activated_polymer, complex_fraction,
                 polymer, fluxes, 0.5 * step, shape)
+            polymer, deposited, removed = self._polymer_step(
+                polymer, complex_fraction, activated_complex, activated_polymer,
+                fluxes, 0.5 * step, shape)
             deposited_polymer += deposited; removed_polymer += removed
+            activated_polymer *= np.exp(
+                -removed / self.parameters.polymer_monolayer_density_m2)
+            activated_polymer = np.where(polymer > 0.0, activated_polymer, 0.0)
+            access = np.exp(
+                -polymer / self.parameters.polymer_monolayer_density_m2)
+            complex_removal_hazard = (
+                self._energetic_rate(
+                    fluxes, self.parameters.complex_sio2_yield, shape)
+                * access / self.parameters.site_density_m2)
             complex_fraction, formed, removed_c, removed_b = self._substrate_step(
                 complex_fraction, polymer, fluxes, step, shape)
+            activated_complex *= np.exp(-complex_removal_hazard * step)
+            activated_complex = np.minimum(activated_complex, complex_fraction)
             formed_complex += formed; removed_complex += removed_c; removed_bare += removed_b
             removed_total += removed_c + removed_b
             polymer, deposited, removed = self._polymer_step(
-                polymer, fluxes, 0.5 * step, shape)
+                polymer, complex_fraction, activated_complex, activated_polymer,
+                fluxes, 0.5 * step, shape)
             deposited_polymer += deposited; removed_polymer += removed
-        new_state = SiO2SurfaceState(complex_fraction, polymer, removed_total)
+            activated_polymer *= np.exp(
+                -removed / self.parameters.polymer_monolayer_density_m2)
+            activated_polymer = np.where(polymer > 0.0, activated_polymer, 0.0)
+            activated_complex, activated_polymer = self._activation_step(
+                activated_complex, activated_polymer, complex_fraction,
+                polymer, fluxes, 0.5 * step, shape)
+        new_state = SiO2SurfaceState(
+            complex_fraction, polymer, removed_total,
+            activated_complex, activated_polymer)
         velocity = ((removed_complex + removed_bare)
                     / self.parameters.bulk_formula_density_m3
                     / duration_s if duration_s > 0.0 else np.zeros(shape))

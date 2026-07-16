@@ -318,7 +318,13 @@ def solve_charged_surface_cascade_3d(
         if (abs(transfer.incident_charge_rate_c_s - expected_incident_charge_rate)
                     > 5e-13 * local_scale
                 or transfer.relative_charge_balance_error > 5e-13):
-            raise ValueError("charged surface response violated its local charge ledger")
+            raise ValueError(
+                "charged surface response violated its local charge ledger: "
+                f"bounce={_bounce}, expected_incident_c_s={expected_incident_charge_rate:.17g}, "
+                f"reported_incident_c_s={transfer.incident_charge_rate_c_s:.17g}, "
+                f"incident_delta_relative="
+                f"{abs(transfer.incident_charge_rate_c_s - expected_incident_charge_rate) / local_scale:.9g}, "
+                f"transfer_balance_relative={transfer.relative_charge_balance_error:.9g}")
         transfers.append(transfer)
         positive += transfer.positive_deposition_current_density_a_m2
         negative += transfer.negative_deposition_current_density_a_m2
@@ -437,8 +443,6 @@ def augment_transport_with_charged_reimpacts_3d(
         for bounce in cascade.flights_by_bounce
         for flight in bounce
         if flight.landed_rate_s > 0.0]
-    if not reimpacts:
-        return transport
 
     ordered_names = []
     grouped = {}
@@ -457,9 +461,15 @@ def augment_transport_with_charged_reimpacts_3d(
         "charged cascade tail was absorbed on its current faces with normalized spatial-current "
         f"L1 error bounded by {cascade.tail_closure_l1_current_error_bound_relative:.6g}",
     ))
-    limitations = tuple(transport.known_limitations) + (
+    limitations = tuple(
+        limitation for limitation in transport.known_limitations
+        if limitation not in {
+            "no surface reflection or neutral re-emission",
+            "no surface reflection or re-emission",
+        }) + (
         "energetic surface flux includes conservative charged-particle re-impacts",
         "boundary hit/escape probabilities exclude subsequent surface-response flights",
+        "neutral re-emission is not part of the charged-particle response cascade",
     ) + tail_limitation
     return BoundaryTransport3DResult(
         SurfaceFluxes(
@@ -487,3 +497,64 @@ def augment_transport_with_charged_reimpacts_3d(
         trajectory_emergency_max_steps=max(
             transport.trajectory_emergency_max_steps,
             cascade.trajectory_emergency_max_steps))
+
+
+def apply_charged_surface_response_to_transport_3d(
+        transport: BoundaryTransport3DResult, charge_number_by_species,
+        response: ChargedSurfaceResponse3D, context: ChargedSurfaceContext3D,
+        verts, faces, areas, *, nodal_potential_v, potential_origin,
+        potential_spacing, mesh_length_unit_m=1e-6, launch_offset=1e-5,
+        fixed_dt=0.01, max_steps=10000, max_bounces=16,
+        relative_tail_tolerance=0.0, adaptive_bounce_extension=False,
+        emergency_max_bounces=None, trajectory_adaptive_horizon=False,
+        trajectory_emergency_max_steps=None, periodic_lateral=False, device=None):
+    """Apply one declared charged response to an existing primary transport measure.
+
+    This is the shared bridge between boundary transport and chemistry-facing energetic flux.  It
+    deliberately accepts a completed primary transport result rather than launching another boundary
+    estimator, so charging and ordinary profile evolution can consume the same impact lineage.  Every
+    charged boundary species must appear exactly once as a face-resolved energetic population.  An
+    incomplete response/re-impact cascade is refused; callers never receive a chemistry flux with a
+    silently discarded energetic tail.
+
+    Returns ``(augmented_transport, cascade)``.  The first item contains primary plus re-impact events;
+    the second preserves the charge, energy, horizon, replay, and tail-closure audit.
+    """
+    if not isinstance(transport, BoundaryTransport3DResult):
+        raise TypeError("transport must be BoundaryTransport3DResult")
+    charge = {str(name): int(value) for name, value in dict(
+        charge_number_by_species).items()}
+    if (not charge or any(not name or value == 0 for name, value in charge.items())):
+        raise ValueError(
+            "charge_number_by_species must contain one nonzero charge per response species")
+    incident = tuple(
+        population for population in transport.surface_fluxes.energetic_fluxes
+        if isinstance(population, FaceResolvedEnergeticFlux)
+        and population.name in charge)
+    names = [population.name for population in incident]
+    if len(names) != len(set(names)) or set(names) != set(charge):
+        missing = sorted(set(charge) - set(names))
+        duplicate = sorted({name for name in names if names.count(name) > 1})
+        raise ValueError(
+            "charged response requires exactly one face-resolved incident population per species; "
+            f"missing={missing}, duplicate={duplicate}")
+    cascade = solve_charged_surface_cascade_3d(
+        incident, charge, response, context, verts, faces, areas,
+        nodal_potential_v=nodal_potential_v,
+        potential_origin=potential_origin, potential_spacing=potential_spacing,
+        mesh_length_unit_m=mesh_length_unit_m, launch_offset=launch_offset,
+        fixed_dt=fixed_dt, max_steps=max_steps, max_bounces=max_bounces,
+        relative_tail_tolerance=relative_tail_tolerance,
+        adaptive_bounce_extension=adaptive_bounce_extension,
+        emergency_max_bounces=emergency_max_bounces,
+        trajectory_adaptive_horizon=trajectory_adaptive_horizon,
+        trajectory_emergency_max_steps=trajectory_emergency_max_steps,
+        periodic_lateral=periodic_lateral, device=device)
+    if not cascade.completed:
+        qualifier = (
+            "emergency bounce ceiling" if adaptive_bounce_extension
+            else "bounce cap")
+        raise RuntimeError(
+            "charged surface-response cascade reached its " + qualifier
+            + " with explicit unresolved charge; refine the declared cascade horizon")
+    return augment_transport_with_charged_reimpacts_3d(transport, cascade), cascade

@@ -29,6 +29,22 @@ JEON_2022_CONTROL_SHA256 = (
     "2c4e28cd4b3cbf34f356a5a7dd292a3a93ecdcbfbad291c44bba1b5f91c4ee8a")
 JEON_2022_ELECTRON_BIAS_SHA256 = (
     "f775e240914a8f874990596876e504e28fde331793453a405b45f4ac2945bae8")
+JEONG_2023_DEPTH_SHA256 = (
+    "27c170c6e2ccd2ef1c2c12f2fe641a8310c1757919d62d4e79475c39b271642d")
+JEONG_2023_RADICAL_SHA256 = (
+    "f923dc387070f72273817ef3302b585ae0d6005a6a73b5a5ae76aed654789d41")
+JEONG_2023_XML_SHA256 = (
+    "249045f4e77a47fd4e01fe77e7beb05b413d3468051f780600d4a8dbef86507c")
+JEONG_2023_FIGURE6_SHA256 = (
+    "3e4ea56418343dbc13bf3109e778a852181f2a473d169d35ad5ccfef0baf6d53")
+JEONG_2023_FIGURE7_SHA256 = (
+    "9c8acd0e9a7219ea5f99e097f7977fcb3ed490635fca3a0f9f69cb0a15a6508c")
+DEBOER_2002_FIGURE9_SHA256 = (
+    "ed0b72235887df70552356838e376540b26234a9084ce5c886fab45ed40d7b1b")
+DEBOER_2002_PDF_SHA256 = (
+    "45c245a9b19671f532945155dc16c3e00d35464eb8e49480a09f90a90498ff6c")
+DEBOER_2002_FIGURE9_IMAGE_SHA256 = (
+    "0f78ae30e5cc2e128f4fdb84217551fe350bd7696966c6ea40233f70a9a765c4")
 
 
 @dataclass(frozen=True)
@@ -163,6 +179,81 @@ class Jeon2022DimensionlessTarget:
     cancellation_assumption: str
 
 
+@dataclass(frozen=True)
+class Jeong2023EtchDepth:
+    """One fixed-duration experimental marker from Jeong et al. Figure 7."""
+
+    source_figure: str
+    control_mode: str
+    trench_width_nm: float
+    self_bias_magnitude_v: float
+    electron_density_m3: float
+    variation_percent: float
+    etch_depth_nm: float
+    etch_duration_s: float
+    marker_pixel_x: float
+    marker_pixel_y: float
+    x_axis_slope_percent_per_pixel: float
+    x_axis_intercept_percent: float
+    y_axis_slope_nm_per_pixel: float
+    y_axis_intercept_nm: float
+    digitization_uncertainty_nm: float
+    measurement_uncertainty_semantics: str
+    evidence_type: str
+    split: str
+    role: str
+    source_xml_sha256: str
+    source_image_sha256: str
+    source_location: str
+
+
+@dataclass(frozen=True)
+class Jeong2023RadicalDensity:
+    """One nonexperimental radical-density bar from the source's plasma model."""
+
+    source_figure: str
+    species: str
+    radical_class: str
+    electron_density_m3: float
+    particle_density_cm3: float
+    bar_top_pixel_y: float
+    axis_transform: str
+    axis_slope_per_pixel: float
+    axis_intercept: float
+    digitization_uncertainty_log10: float
+    evidence_type: str
+    role: str
+    source_xml_sha256: str
+    source_image_sha256: str
+    source_location: str
+
+
+@dataclass(frozen=True)
+class DeBoer2002Figure9Depth:
+    """One replayable marker from the directly digitized de Boer Figure 9."""
+
+    series_time_min: float
+    mask_opening_um: float
+    etch_depth_um: float
+    marker_pixel_x: float
+    marker_pixel_y: float
+    x_axis_slope_um_per_pixel: float
+    x_axis_intercept_um: float
+    y_axis_slope_um_per_pixel: float
+    y_axis_intercept_um: float
+    digitization_uncertainty_x_um: float
+    digitization_uncertainty_y_um: float
+    measurement_uncertainty_um: float | None
+    measurement_uncertainty_semantics: str
+    evidence_type: str
+    split: str
+    role: str
+    source_figure: str
+    source_pdf_sha256: str
+    source_image_sha256: str
+    source_location: str
+
+
 def _verified_csv_rows(path, expected_fields, expected_sha256, verify_checksum):
     path = Path(path)
     payload = path.read_bytes()
@@ -266,6 +357,202 @@ def load_jeon_2022_trench_depths(path, *, verify_checksum=True):
             or any(item.source_figure != "4b" or item.c4f8_fraction != 0.2
                    or item.pulse_off_ms != 0.0 for item in calibration)):
         raise ValueError("Jeon 2022 evidence violates its digitization or split contract")
+    return rows
+
+
+def load_jeong_2023_etch_depths(path, *, verify_checksum=True):
+    """Load the fixed-20-minute energy/flux transfer matrix from Jeong Figure 7.
+
+    Only one marker is a magnitude-calibration anchor.  Energy response, ion-flux response,
+    width transfer, and the 60 nm etch-stop behavior remain held out.  The publication does not
+    define a statistical measurement uncertainty, so the stored 35 nm bound remains explicitly a
+    digitization interval rather than a substitute error bar.
+    """
+    expected = [
+        "source_figure", "control_mode", "trench_width_nm", "self_bias_magnitude_v",
+        "electron_density_m3", "variation_percent", "etch_depth_nm", "etch_duration_s",
+        "marker_pixel_x", "marker_pixel_y", "x_axis_slope_percent_per_pixel",
+        "x_axis_intercept_percent", "y_axis_slope_nm_per_pixel", "y_axis_intercept_nm",
+        "digitization_uncertainty_nm", "measurement_uncertainty_semantics", "evidence_type",
+        "split", "role", "source_xml_sha256", "source_image_sha256", "source_location",
+    ]
+    raw = _verified_csv_rows(path, expected, JEONG_2023_DEPTH_SHA256, verify_checksum)
+    rows = tuple(Jeong2023EtchDepth(
+        source_figure=row["source_figure"], control_mode=row["control_mode"],
+        trench_width_nm=float(row["trench_width_nm"]),
+        self_bias_magnitude_v=float(row["self_bias_magnitude_v"]),
+        electron_density_m3=float(row["electron_density_m3"]),
+        variation_percent=float(row["variation_percent"]),
+        etch_depth_nm=float(row["etch_depth_nm"]),
+        etch_duration_s=float(row["etch_duration_s"]),
+        marker_pixel_x=float(row["marker_pixel_x"]),
+        marker_pixel_y=float(row["marker_pixel_y"]),
+        x_axis_slope_percent_per_pixel=float(row["x_axis_slope_percent_per_pixel"]),
+        x_axis_intercept_percent=float(row["x_axis_intercept_percent"]),
+        y_axis_slope_nm_per_pixel=float(row["y_axis_slope_nm_per_pixel"]),
+        y_axis_intercept_nm=float(row["y_axis_intercept_nm"]),
+        digitization_uncertainty_nm=float(row["digitization_uncertainty_nm"]),
+        measurement_uncertainty_semantics=row["measurement_uncertainty_semantics"],
+        evidence_type=row["evidence_type"], split=row["split"], role=row["role"],
+        source_xml_sha256=row["source_xml_sha256"],
+        source_image_sha256=row["source_image_sha256"],
+        source_location=row["source_location"]) for row in raw)
+    x_replay = np.asarray([
+        item.x_axis_slope_percent_per_pixel * item.marker_pixel_x
+        + item.x_axis_intercept_percent for item in rows])
+    y_replay = np.asarray([
+        item.y_axis_slope_nm_per_pixel * item.marker_pixel_y
+        + item.y_axis_intercept_nm for item in rows])
+    calibration = [item for item in rows if item.split == "calibration"]
+    keys = {(item.control_mode, item.trench_width_nm, item.self_bias_magnitude_v,
+             item.electron_density_m3) for item in rows}
+    energy = [item for item in rows if item.control_mode == "ion_energy"]
+    flux = [item for item in rows if item.control_mode == "ion_flux"]
+    if (len(rows) != 18 or len(keys) != len(rows)
+            or np.max(np.abs(x_replay - np.asarray(
+                [item.variation_percent for item in rows]))) > 2e-6
+            or np.max(np.abs(y_replay - np.asarray(
+                [item.etch_depth_nm for item in rows]))) > 1e-3
+            or {item.trench_width_nm for item in rows} != {60.0, 100.0, 200.0}
+            or len(energy) != 9 or len(flux) != 9 or len(calibration) != 1
+            or (calibration[0].control_mode, calibration[0].trench_width_nm,
+                calibration[0].self_bias_magnitude_v) != ("ion_energy", 200.0, 890.0)
+            or calibration[0].role != "magnitude_calibration"
+            or any(item.role != "held_out_prediction" for item in rows
+                   if item.split == "held_out_transfer")
+            or {item.self_bias_magnitude_v for item in energy} != {450.0, 890.0, 1270.0}
+            or {item.electron_density_m3 for item in energy} != {2.0e15}
+            or {item.self_bias_magnitude_v for item in flux} != {740.0}
+            or {item.electron_density_m3 for item in flux} != {1.1e15, 1.9e15, 3.1e15}
+            or any(item.etch_duration_s != 1200.0 or item.etch_depth_nm <= 0.0
+                   or item.trench_width_nm <= 0.0 or item.digitization_uncertainty_nm != 35.0
+                   or item.measurement_uncertainty_semantics != "not_reported"
+                   or item.evidence_type != "experiment_digitized"
+                   or item.source_xml_sha256 != JEONG_2023_XML_SHA256
+                   or item.source_image_sha256 != JEONG_2023_FIGURE7_SHA256 for item in rows)):
+        raise ValueError("Jeong 2023 depth evidence violates pixel replay or frozen split")
+    return rows
+
+
+def load_jeong_2023_radical_densities(path, *, verify_checksum=True):
+    """Load Figure-6 plasma-model outputs without promoting them to measurements."""
+    expected = [
+        "source_figure", "species", "radical_class", "electron_density_m3",
+        "particle_density_cm3", "bar_top_pixel_y", "axis_transform",
+        "axis_slope_per_pixel", "axis_intercept", "digitization_uncertainty_log10",
+        "evidence_type", "role", "source_xml_sha256", "source_image_sha256",
+        "source_location",
+    ]
+    raw = _verified_csv_rows(path, expected, JEONG_2023_RADICAL_SHA256, verify_checksum)
+    rows = tuple(Jeong2023RadicalDensity(
+        source_figure=row["source_figure"], species=row["species"],
+        radical_class=row["radical_class"],
+        electron_density_m3=float(row["electron_density_m3"]),
+        particle_density_cm3=float(row["particle_density_cm3"]),
+        bar_top_pixel_y=float(row["bar_top_pixel_y"]),
+        axis_transform=row["axis_transform"],
+        axis_slope_per_pixel=float(row["axis_slope_per_pixel"]),
+        axis_intercept=float(row["axis_intercept"]),
+        digitization_uncertainty_log10=float(row["digitization_uncertainty_log10"]),
+        evidence_type=row["evidence_type"], role=row["role"],
+        source_xml_sha256=row["source_xml_sha256"],
+        source_image_sha256=row["source_image_sha256"],
+        source_location=row["source_location"]) for row in raw)
+    replay_log10 = np.asarray([
+        item.axis_slope_per_pixel * item.bar_top_pixel_y + item.axis_intercept
+        for item in rows])
+    expected_classes = {
+        "C4F7": "heavy", "C3F6": "heavy", "C2F4": "heavy",
+        "CF3": "light", "CF2": "light", "CF": "light",
+    }
+    keys = {(item.species, item.electron_density_m3) for item in rows}
+    if (len(rows) != 18 or len(keys) != len(rows)
+            or set(item.species for item in rows) != set(expected_classes)
+            or {item.electron_density_m3 for item in rows} != {1.1e15, 1.9e15, 3.1e15}
+            or np.max(np.abs(replay_log10 - np.log10(np.asarray(
+        [item.particle_density_cm3 for item in rows])))) > 1e-12
+            or any(item.radical_class != expected_classes[item.species]
+                   or item.particle_density_cm3 <= 0.0
+                   or item.axis_transform != "log10"
+                   or item.digitization_uncertainty_log10 != 0.05
+                   or item.evidence_type != "source_plasma_model_digitized"
+                   or item.role != "nonexperimental_boundary_input"
+                   or item.source_xml_sha256 != JEONG_2023_XML_SHA256
+                   or item.source_image_sha256 != JEONG_2023_FIGURE6_SHA256 for item in rows)):
+        raise ValueError("Jeong 2023 radical evidence violates replay or evidence class")
+    return rows
+
+
+def load_deboer_2002_figure9_depths(path, *, verify_checksum=True):
+    """Load the direct de Boer Figure-9 pixels without substituting a transport-model curve."""
+    expected = [
+        "series_time_min", "mask_opening_um", "etch_depth_um",
+        "marker_pixel_x", "marker_pixel_y", "x_axis_slope_um_per_pixel",
+        "x_axis_intercept_um", "y_axis_slope_um_per_pixel", "y_axis_intercept_um",
+        "digitization_uncertainty_x_um", "digitization_uncertainty_y_um",
+        "measurement_uncertainty_um", "measurement_uncertainty_semantics",
+        "evidence_type", "split", "role", "source_figure", "source_pdf_sha256",
+        "source_image_sha256", "source_location",
+    ]
+    raw = _verified_csv_rows(
+        path, expected, DEBOER_2002_FIGURE9_SHA256, verify_checksum)
+    rows = tuple(DeBoer2002Figure9Depth(
+        series_time_min=float(row["series_time_min"]),
+        mask_opening_um=float(row["mask_opening_um"]),
+        etch_depth_um=float(row["etch_depth_um"]),
+        marker_pixel_x=float(row["marker_pixel_x"]),
+        marker_pixel_y=float(row["marker_pixel_y"]),
+        x_axis_slope_um_per_pixel=float(row["x_axis_slope_um_per_pixel"]),
+        x_axis_intercept_um=float(row["x_axis_intercept_um"]),
+        y_axis_slope_um_per_pixel=float(row["y_axis_slope_um_per_pixel"]),
+        y_axis_intercept_um=float(row["y_axis_intercept_um"]),
+        digitization_uncertainty_x_um=float(row["digitization_uncertainty_x_um"]),
+        digitization_uncertainty_y_um=float(row["digitization_uncertainty_y_um"]),
+        measurement_uncertainty_um=(
+            None if row["measurement_uncertainty_um"] == ""
+            else float(row["measurement_uncertainty_um"])),
+        measurement_uncertainty_semantics=row["measurement_uncertainty_semantics"],
+        evidence_type=row["evidence_type"], split=row["split"], role=row["role"],
+        source_figure=row["source_figure"], source_pdf_sha256=row["source_pdf_sha256"],
+        source_image_sha256=row["source_image_sha256"],
+        source_location=row["source_location"]) for row in raw)
+    x_replay = np.asarray([
+        item.x_axis_slope_um_per_pixel * item.marker_pixel_x
+        + item.x_axis_intercept_um for item in rows])
+    y_replay = np.asarray([
+        item.y_axis_slope_um_per_pixel * item.marker_pixel_y
+        + item.y_axis_intercept_um for item in rows])
+    keys = {(item.series_time_min, item.mask_opening_um) for item in rows}
+    boundary = [item for item in rows if item.split == "boundary_input"]
+    calibration = [item for item in rows if item.split == "calibration"]
+    held_out = [item for item in rows if item.split == "held_out_transfer"]
+    if (len(rows) != 16 or len(keys) != len(rows)
+            # Reported coordinates are rounded to 1e-6 um while the linear axis
+            # maps retain full precision, so replay closes to 0.002 um rather
+            # than machine precision.  This remains over 100x tighter than the
+            # declared digitization bounds (0.30/0.50 um).
+            or np.max(np.abs(x_replay - np.asarray(
+                [item.mask_opening_um for item in rows]))) > 2e-3
+            or np.max(np.abs(y_replay - np.asarray(
+                [item.etch_depth_um for item in rows]))) > 2e-3
+            or {item.series_time_min for item in rows} != {5.5, 12.5, 25.0}
+            or len(boundary) != 3 or len(calibration) != 1 or len(held_out) != 12
+            or calibration[0].series_time_min != 12.5
+            or any(item.role != "open_rate_anchor" for item in boundary)
+            or calibration[0].role != "sticking_calibration"
+            or any(item.role != "held_out_prediction" for item in held_out)
+            or any(item.series_time_min <= 0.0 or item.mask_opening_um <= 0.0
+                   or item.etch_depth_um <= 0.0
+                   or item.digitization_uncertainty_x_um <= 0.0
+                   or item.digitization_uncertainty_y_um <= 0.0 for item in rows)
+            or any(item.measurement_uncertainty_um is not None
+                   or item.measurement_uncertainty_semantics != "not_reported"
+                   or item.evidence_type != "experiment_digitized"
+                   or item.source_figure != "Fig. 9"
+                   or item.source_pdf_sha256 != DEBOER_2002_PDF_SHA256
+                   or item.source_image_sha256 != DEBOER_2002_FIGURE9_IMAGE_SHA256
+                   for item in rows)):
+        raise ValueError("de Boer Figure 9 evidence violates pixel replay or split provenance")
     return rows
 
 
@@ -388,6 +675,30 @@ def jeon_2022_bohm_ion_flux_m2_s(
     return float(control.electron_density_m3 * bohm_velocity_m_s)
 
 
+def jeon_2022_condition_wall_duration_s(
+        reference_duration_s, wall_time_duty, exposure_basis):
+    """Resolve wall duration without hiding Jeon's unreported pulse-exposure protocol.
+
+    ``reference_duration_s`` is either a directly declared wall duration or a cumulative RF-on
+    duration. Jeon et al. did not state which quantity was held fixed across their pulse sweep, so a
+    nontrivial duty factor requires an explicit hypothesis. Continuous-wave runs are identical under
+    both hypotheses.
+    """
+    duration = float(reference_duration_s)
+    duty = float(wall_time_duty)
+    if not np.isfinite(duration) or duration <= 0.0:
+        raise ValueError("reference duration must be positive and finite")
+    if not np.isfinite(duty) or not 0.0 < duty <= 1.0:
+        raise ValueError("wall-time duty factor must lie in (0, 1]")
+    if exposure_basis not in {"unspecified", "wall_time", "rf_on_time"}:
+        raise ValueError("unknown pulse exposure basis")
+    if duty < 1.0 and exposure_basis == "unspecified":
+        raise ValueError(
+            "pulsed Jeon runs require --pulse-exposure-basis wall_time or rf_on_time; "
+            "the source does not report which exposure was held fixed")
+    return duration / duty if exposure_basis == "rf_on_time" else duration
+
+
 def _positive_ratio_interval(numerator, numerator_budget, denominator, denominator_budget):
     """Worst-case positive ratio interval; budgets are bounds, not standard deviations."""
     denominator_lower = denominator - denominator_budget
@@ -399,14 +710,15 @@ def _positive_ratio_interval(numerator, numerator_budget, denominator, denominat
     )
 
 
-def build_jeon_2022_dimensionless_targets(rows):
-    """Build ARDE-shape and pulse-response targets that do not require reported etch time.
+def build_jeon_2022_dimensionless_targets(rows, *, pulse_exposure_basis=None):
+    """Build ARDE-shape targets and, only by opt-in, cross-exposure pulse ratios.
 
     Width-shape targets divide each depth by the 200 nm trench depth under the same plasma
-    condition. Pulse-response targets divide a pulsed depth by the continuous-wave depth at the
-    same width within the same source panel. The latter cancellation relies on the paper's statement
-    that coupons in each pulse series were etched under the same conditions; the assumption remains
-    explicit because an absolute etch duration was not reported.
+    condition, so their unknown exposure cancels.  Jeon et al. do not report whether pulse coupons
+    shared wall-clock duration or cumulative RF-on duration.  Those choices differ by the inverse
+    duty factor and therefore do *not* cancel in a pulsed/CW depth ratio.  Cross-exposure targets are
+    consequently omitted unless the caller explicitly chooses ``common_wall_time`` or
+    ``common_rf_on_time``; the unverified choice is retained in every returned target.
 
     Returned intervals propagate only the stored digitization budgets as worst-case bounds. They do
     not stand in for the publication's statistically unspecified experimental error bars.
@@ -414,6 +726,10 @@ def build_jeon_2022_dimensionless_targets(rows):
     rows = tuple(rows)
     if not rows or any(not isinstance(item, Jeon2022TrenchDepth) for item in rows):
         raise TypeError("dimensionless Jeon targets require Jeon2022TrenchDepth rows")
+    allowed_exposure_basis = {None, "common_wall_time", "common_rf_on_time"}
+    if pulse_exposure_basis not in allowed_exposure_basis:
+        raise ValueError(
+            "pulse_exposure_basis must be None, common_wall_time, or common_rf_on_time")
     by_condition = {}
     for item in rows:
         key = (item.source_figure, item.condition_family,
@@ -449,6 +765,13 @@ def build_jeon_2022_dimensionless_targets(rows):
                 denominator="same_condition_200nm_trench_depth",
                 cancellation_assumption="same_coupon_exposure_within_width_series"))
 
+    if pulse_exposure_basis is None:
+        return tuple(targets)
+
+    pulse_assumption = (
+        "explicit_common_wall_time_hypothesis_not_reported_by_source"
+        if pulse_exposure_basis == "common_wall_time"
+        else "explicit_common_rf_on_time_hypothesis_not_reported_by_source")
     for family in ("pulse_off_20pct", "pulse_off_80pct"):
         family_conditions = {
             key: by_width for key, by_width in by_condition.items() if key[1] == family}
@@ -481,7 +804,7 @@ def build_jeon_2022_dimensionless_targets(rows):
                     digitization_upper=upper,
                     split="held_out_transfer",
                     denominator="same_width_continuous_wave_depth",
-                    cancellation_assumption="common_etch_duration_within_pulse_series"))
+                    cancellation_assumption=pulse_assumption))
     return tuple(targets)
 
 

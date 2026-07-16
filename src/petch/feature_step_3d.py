@@ -27,6 +27,20 @@ from .boundary_transport_3d import (
     trace_boundary_state_first_hit_3d,
 )
 from .neutral_radiosity_3d import solve_diffuse_neutral_radiosity_3d
+from .charged_surface_cascade_3d import (
+    ChargedSurfaceCascade3DResult,
+    apply_charged_surface_response_to_transport_3d,
+)
+from .charged_surface_response_3d import ChargedSurfaceContext3D
+from .hwang_giapis_scatter_3d import (
+    HwangGiapisForwardScatter3DResult, HwangGiapisSiO2ForwardScatter3D,
+    apply_hwang_giapis_forward_scatter_to_transport_3d,
+)
+from .surface_exchange import SurfaceProductPopulation
+from .surface_product_redeposition_3d import (
+    SurfaceProductRedepositionContract3D,
+    transport_surface_product_redeposition_3d,
+)
 from .charging_coupled_3d import (
     SteadyDielectricCharging3DResult, solve_dielectric_charging_steady_3d,
 )
@@ -182,6 +196,9 @@ class FeatureStep3DResult:
     state_remap_diagnostics: Mapping[str, object]
     face_material_id: np.ndarray
     face_velocity_mesh_units_s: np.ndarray
+    charged_surface_cascade: ChargedSurfaceCascade3DResult | None
+    neutral_forward_scatter: HwangGiapisForwardScatter3DResult | None
+    surface_product_redeposition: object | None
     diagnostics: Mapping[str, object]
     validity: FeatureStepValidity
 
@@ -263,14 +280,42 @@ def _surface_gas_normals(verts, faces, centroids, geometry):
     triangle = np.asarray(verts)[np.asarray(faces)]
     normal = np.cross(triangle[:, 1] - triangle[:, 0], triangle[:, 2] - triangle[:, 0])
     normal /= np.linalg.norm(normal, axis=1, keepdims=True)
-    gradient = np.gradient(geometry.phi, geometry.dx)
-    index = np.rint(np.asarray(centroids) / geometry.dx).astype(int)
-    for axis in range(3):
-        index[:, axis] = np.clip(index[:, axis], 0, geometry.phi.shape[axis] - 1)
-    # phi is positive in solid, so -grad(phi) points into gas.
-    into_gas = -np.column_stack([
-        component[tuple(index.T)] for component in gradient])
-    flip = np.einsum("ij,ij->i", normal, into_gas) < 0.0
+
+    def trilinear(field, point):
+        coordinate = np.asarray(point, dtype=float) / geometry.dx
+        lower = np.floor(coordinate).astype(int)
+        for axis in range(3):
+            lower[:, axis] = np.clip(lower[:, axis], 0, field.shape[axis] - 2)
+        fraction = np.clip(coordinate - lower, 0.0, 1.0)
+        value = np.zeros(len(point))
+        for ox in (0, 1):
+            wx = fraction[:, 0] if ox else 1.0 - fraction[:, 0]
+            for oy in (0, 1):
+                wy = fraction[:, 1] if oy else 1.0 - fraction[:, 1]
+                for oz in (0, 1):
+                    wz = fraction[:, 2] if oz else 1.0 - fraction[:, 2]
+                    index = lower + np.array([ox, oy, oz])
+                    value += wx * wy * wz * field[tuple(index.T)]
+        return value
+
+    centroid = np.asarray(centroids, dtype=float)
+    probe_distance = 0.25 * geometry.dx
+    domain_maximum = (np.asarray(geometry.phi.shape) - 1) * geometry.dx
+    plus = np.clip(centroid + probe_distance * normal, 0.0, domain_maximum)
+    minus = np.clip(centroid - probe_distance * normal, 0.0, domain_maximum)
+    signed_difference = trilinear(geometry.phi, plus) - trilinear(geometry.phi, minus)
+    # phi is positive in solid.  A positive signed difference means ``normal`` points into solid.
+    flip = signed_difference > 0.0
+    ambiguous = np.abs(signed_difference) <= 64.0 * np.finfo(float).eps * geometry.dx
+    if np.any(ambiguous):
+        gradient = np.gradient(geometry.phi, geometry.dx)
+        index = np.rint(centroid[ambiguous] / geometry.dx).astype(int)
+        for axis in range(3):
+            index[:, axis] = np.clip(index[:, axis], 0, geometry.phi.shape[axis] - 1)
+        into_gas = -np.column_stack([
+            component[tuple(index.T)] for component in gradient])
+        flip[ambiguous] = (
+            np.einsum("ij,ij->i", normal[ambiguous], into_gas) < 0.0)
     normal[flip] *= -1.0
     return normal
 
@@ -367,21 +412,106 @@ def _remove_unresolved_subcell_solid_components(
     solid = (updated > 0.0) & np.isin(material_id, tuple(etchable_material_ids))
     component, count = label(solid)
     if count == 0:
-        return updated, 0
+        return updated, 0, np.zeros(updated.shape, dtype=bool)
     sizes = np.bincount(component.ravel())
     # Eight corner nodes are the minimum support of one resolved hexahedral volume cell.
     unresolved_label = np.flatnonzero(sizes < 8)
     unresolved_label = unresolved_label[unresolved_label != 0]
     if unresolved_label.size == 0:
-        return updated, 0
+        return updated, 0, np.zeros(updated.shape, dtype=bool)
     unresolved = np.isin(component, unresolved_label)
     # A subcell component has no resolved 3-D volume. Give it an unambiguous gas sign,
     # then let the signed-distance reconstruction restore a consistent neighborhood.
     updated[unresolved] = -np.maximum(np.abs(updated[unresolved]), float(dx))
-    return updated, int(np.count_nonzero(unresolved))
+    return updated, int(np.count_nonzero(unresolved)), unresolved
 
 
-def _redistance_feature_field(phi, dx, method):
+def _apply_subcell_cleanup_to_material_levelsets(
+        material_levelsets, removal_mask, owner_material_id, etchable_material_ids,
+        dx, reinitialization_method, periodic_lateral):
+    """Apply a combined-surface subcell removal to its authoritative material layers."""
+    removal = np.asarray(removal_mask, dtype=bool)
+    owner = np.asarray(owner_material_id)
+    if removal.shape != owner.shape or not np.any(removal):
+        raise ValueError("material-layer cleanup requires a nonempty owning removal mask")
+    updated = {int(material_id): np.asarray(levelset, dtype=float).copy()
+               for material_id, levelset in material_levelsets.items()}
+    etchable = tuple(int(value) for value in etchable_material_ids)
+    if any(levelset.shape != owner.shape for levelset in updated.values()):
+        raise ValueError("material level sets must share the combined surface shape")
+    accounted = np.zeros(removal.shape, dtype=bool)
+    for material_id in etchable:
+        selected = removal & (owner == material_id)
+        if not np.any(selected):
+            continue
+        if material_id not in updated:
+            raise ValueError("subcell removal references a missing material level set")
+        levelset = updated[material_id]
+        levelset[selected] = -np.maximum(np.abs(levelset[selected]), float(dx))
+        updated[material_id] = _redistance_feature_field(
+            levelset, dx, reinitialization_method,
+            periodic_lateral=periodic_lateral)
+        accounted |= selected
+    if not np.array_equal(accounted, removal):
+        raise RuntimeError("subcell removal includes a non-etchable or unowned material node")
+    if periodic_lateral:
+        updated = {
+            material_id: _project_periodic_lateral_endpoints(levelset)[0]
+            for material_id, levelset in updated.items()}
+    combined = np.maximum.reduce(tuple(updated.values()))
+    combined = _redistance_feature_field(
+        combined, dx, reinitialization_method,
+        periodic_lateral=periodic_lateral)
+    material_ids = np.asarray(sorted(updated), dtype=int)
+    material_stack = np.stack([updated[int(material_id)] for material_id in material_ids])
+    combined_owner = material_ids[np.argmax(material_stack, axis=0)]
+    combined_owner = np.where(combined >= 0.0, combined_owner, 0)
+    return updated, combined, combined_owner
+
+
+def _project_periodic_lateral_endpoints(field):
+    """Project duplicate x/y endpoint planes onto one nodal-periodic field."""
+    output = np.asarray(field, dtype=float).copy()
+    maximum_correction = 0.0
+    for axis in (0, 1):
+        first = [slice(None)] * output.ndim; first[axis] = 0
+        last = [slice(None)] * output.ndim; last[axis] = -1
+        first = tuple(first); last = tuple(last)
+        seam = 0.5 * (output[first] + output[last])
+        maximum_correction = max(
+            maximum_correction,
+            float(np.max(np.abs(output[first] - seam))),
+            float(np.max(np.abs(output[last] - seam))))
+        output[first] = seam
+        output[last] = seam
+    return output, maximum_correction
+
+
+def _periodic_lateral_redistance(phi, dx, method):
+    """Redistance a duplicate-endpoint periodic field through wrapped lateral padding."""
+    field, projection = _project_periodic_lateral_endpoints(phi)
+    core = field[:-1, :-1, :]
+    padding = int(np.ceil(4.0 * dx / dx)) + 2
+    padded = np.pad(core, ((padding, padding), (padding, padding), (0, 0)), mode="wrap")
+    if method == "fsm":
+        redistanced = reinit_fsm(padded, dx, 4.0 * dx)
+    elif method == "cr2":
+        redistanced = reinit_cr2(padded, dx, 4.0 * dx)
+    else:
+        redistanced = reinit_narrow(padded, dx, 4.0 * dx)
+    cropped = redistanced[padding:-padding, padding:-padding, :]
+    output = np.empty_like(field)
+    output[:-1, :-1, :] = cropped
+    output[-1, :-1, :] = cropped[0, :, :]
+    output[:-1, -1, :] = cropped[:, 0, :]
+    output[-1, -1, :] = cropped[0, 0, :]
+    output, final_projection = _project_periodic_lateral_endpoints(output)
+    return output, max(projection, final_projection)
+
+
+def _redistance_feature_field(phi, dx, method, *, periodic_lateral=False):
+    if periodic_lateral:
+        return _periodic_lateral_redistance(phi, dx, method)[0]
     if method == "fsm":
         return reinit_fsm(phi, dx, 4.0 * dx)
     if method == "cr2":
@@ -391,11 +521,14 @@ def _redistance_feature_field(phi, dx, method):
 
 def _advect_exposed_material_levelsets(
         material_levelsets, etchable_material_ids, extended_velocity,
-        dx, duration_s, substeps):
+        dx, duration_s, substeps, *, periodic_lateral=False):
     """Move each material only where its level set is the exposed union boundary."""
-    current = {
-        int(material_id): np.asarray(levelset, dtype=float).copy()
-        for material_id, levelset in material_levelsets.items()}
+    current = {}
+    for material_id, levelset in material_levelsets.items():
+        value = np.asarray(levelset, dtype=float).copy()
+        if periodic_lateral:
+            value = _project_periodic_lateral_endpoints(value)[0]
+        current[int(material_id)] = value
     etchable = set(int(value) for value in etchable_material_ids)
     step_duration = float(duration_s) / int(substeps)
     for _ in range(int(substeps)):
@@ -411,7 +544,11 @@ def _advect_exposed_material_levelsets(
                        else levelset >= np.maximum.reduce(other_fields))
             current[material_id] = advect_3d(
                 levelset, np.where(exposed, extended_velocity, 0.0),
-                dx, step_duration)
+                dx, step_duration,
+                periodic_axes=((0, 1) if periodic_lateral else ()))
+            if periodic_lateral:
+                current[material_id] = _project_periodic_lateral_endpoints(
+                    current[material_id])[0]
     return current
 
 
@@ -455,10 +592,12 @@ def _conserve_nonnegative_surface_field(raw, target_integral, new_area, *, upper
 def conservative_remap_surface_state(
         state, old_centroid, old_area, old_material, new_centroid, new_area, new_material, *,
         dx, mesh_length_unit_m, neighbor_count=4, maximum_distance=None):
-    """First-order material-local remap with exact area-integrated state conservation.
+    """First-order material-local remap with declared intensive/conservative semantics.
 
     The state declares named nonnegative fields, optional upper bounds, and reconstruction. Interpolation
-    supplies spatial locality; a constrained correction then preserves every material/field area integral.
+    supplies spatial locality. A constrained correction preserves each field marked ``conservative``;
+    algebraic coverage fractions may explicitly declare ``intensive`` remap and are interpolated without
+    inventing an area-integral conservation law. The default remains conservative for legacy states.
     This operator does not authorize topology change; the caller must gate topology separately.
     """
     old_centroid = np.asarray(old_centroid, dtype=float)
@@ -472,7 +611,14 @@ def conservative_remap_surface_state(
         raise TypeError("surface state does not implement the conservative remap contract")
     old_values = dict(state.conservative_surface_fields())
     upper_bounds = dict(state.conservative_surface_upper_bounds())
-    if not old_values or set(upper_bounds) != set(old_values):
+    remap_modes = (
+        dict(state.surface_field_remap_modes())
+        if hasattr(state, "surface_field_remap_modes")
+        else {name: "conservative" for name in old_values})
+    if (not old_values or set(upper_bounds) != set(old_values)
+            or set(remap_modes) != set(old_values)
+            or any(mode not in {"conservative", "intensive"}
+                   for mode in remap_modes.values())):
         raise ValueError("surface-state remap fields and upper bounds must match")
     old_values = {name: np.asarray(value, dtype=float) for name, value in old_values.items()}
     if (old_centroid.ndim != 2 or old_centroid.shape[1] != 3
@@ -521,22 +667,31 @@ def conservative_remap_surface_state(
             weight[exact] = 0.0
             weight[exact, 0] = 1.0
         weight /= weight.sum(axis=1, keepdims=True)
-        targets = {}; residuals = []
+        targets = {}; residuals = []; remapped_integrals = {}
         for field_name, old_value in old_values.items():
             raw = np.sum(weight * old_value[source_index], axis=1)
             target = float(np.dot(old_value[old_index], old_area[old_index]))
-            remapped = _conserve_nonnegative_surface_field(
-                raw, target, new_area[new_index], upper=upper_bounds[field_name])
+            if remap_modes[field_name] == "conservative":
+                remapped = _conserve_nonnegative_surface_field(
+                    raw, target, new_area[new_index], upper=upper_bounds[field_name])
+            else:
+                remapped = np.maximum(raw, 0.0)
+                if upper_bounds[field_name] is not None:
+                    remapped = np.minimum(remapped, upper_bounds[field_name])
             output[field_name][new_index] = remapped
             achieved = float(np.dot(remapped, new_area[new_index]))
-            residuals.append(abs(achieved - target) / max(abs(target), 1.0))
-            targets[field_name] = target * physical_area_scale
+            if remap_modes[field_name] == "conservative":
+                residuals.append(abs(achieved - target) / max(abs(target), 1.0))
+                targets[field_name] = target * physical_area_scale
+            remapped_integrals[field_name] = achieved * physical_area_scale
         material_diagnostics[int(material)] = dict(
             old_face_count=int(old_index.size), new_face_count=int(new_index.size),
             old_area_m2=float(old_area[old_index].sum() * physical_area_scale),
             new_area_m2=float(new_area[new_index].sum() * physical_area_scale),
             target_field_integrals=targets,
-            max_relative_conservation_residual=float(max(residuals)))
+            remapped_field_integrals=remapped_integrals,
+            field_remap_modes=dict(remap_modes),
+            max_relative_conservation_residual=float(max(residuals, default=0.0)))
     remapped_state = state.with_conservative_surface_fields(output)
     return remapped_state, dict(
         method="material_local_area_conservative_knn",
@@ -605,9 +760,14 @@ def _apply_diffuse_neutral_transport(
         verts, faces, centroids, _surface_gas_normals(
             verts, faces, centroids, geometry),
         device=transport_device, **options)
-    if not hasattr(mechanism, "neutral_reaction_probability"):
-        raise TypeError("diffuse neutral transport requires a mechanism reaction-probability contract")
-    active_probability = dict(mechanism.neutral_reaction_probability(surface_state))
+    if hasattr(mechanism, "neutral_reaction_probability_by_material"):
+        active_probability = dict(mechanism.neutral_reaction_probability_by_material(
+            surface_state, face_material[active_face]))
+    elif hasattr(mechanism, "neutral_reaction_probability"):
+        active_probability = dict(mechanism.neutral_reaction_probability(surface_state))
+    else:
+        raise TypeError(
+            "diffuse neutral transport requires a mechanism reaction-probability contract")
     neutral_names = [
         name for name, value in species_role.items() if value == "neutral_reactant"]
     reaction_probability = {}
@@ -670,6 +830,55 @@ def _apply_diffuse_neutral_transport(
     return updated, MappingProxyType(diagnostics)
 
 
+def _apply_surface_product_redeposition(
+        populations, geometry, verts, faces, centroids, areas, face_material,
+        active_face, duration_s, options, transport_device):
+    """Run the opt-in same-material product return path on the complete surface mesh."""
+    options = dict(options)
+    allowed = {
+        "contract", "rays_per_face", "seed", "periodic_lateral", "domain_size",
+        "ray_offset", "relative_tolerance", "maximum_iterations",
+    }
+    unknown = set(options) - allowed
+    if unknown:
+        raise ValueError(
+            "unknown surface-product redeposition options: " + ", ".join(sorted(unknown)))
+    contract = options.pop("contract", None)
+    if not isinstance(contract, SurfaceProductRedepositionContract3D):
+        raise TypeError("surface-product redeposition requires an explicit contract")
+    relative_tolerance = float(options.pop("relative_tolerance", 1e-10))
+    maximum_iterations = int(options.pop("maximum_iterations", 500))
+    if "domain_size" not in options:
+        options["domain_size"] = (np.asarray(geometry.phi.shape) - 1) * geometry.dx
+    if "ray_offset" not in options:
+        options["ray_offset"] = 1e-3 * geometry.dx
+    factors = estimate_diffuse_form_factors_3d(
+        verts, faces, centroids, _surface_gas_normals(
+            verts, faces, centroids, geometry),
+        device=transport_device, **options)
+    full_populations = []
+    for population in tuple(populations):
+        local_count = np.asarray(population.integrated_particle_count_m2, dtype=float)
+        if local_count.shape != (active_face.size,):
+            raise ValueError(
+                f"surface product {population.name!r} does not match the active surface")
+        count = np.zeros(len(faces))
+        count[active_face] = local_count
+        full_populations.append(SurfaceProductPopulation(
+            population.name, population.source_inventory, count,
+            population.material_units_per_particle, population.mass_amu,
+            angular_model=population.angular_model, energy_model=population.energy_model,
+            energy_parameters=population.energy_parameters, provenance=population.provenance,
+            relative_standard_uncertainty=population.relative_standard_uncertainty))
+    evolving = np.zeros(len(faces), dtype=bool)
+    evolving[active_face] = True
+    physical_area = np.asarray(areas) * geometry.mesh_length_unit_m ** 2
+    return transport_surface_product_redeposition_3d(
+        full_populations, float(duration_s), physical_area, factors, face_material, evolving,
+        contract, relative_tolerance=relative_tolerance,
+        maximum_iterations=maximum_iterations)
+
+
 def advance_feature_step_3d(
         geometry: FeatureGeometry3D, boundary: PlasmaBoundaryState,
         species_role: Mapping[str, str], mechanism, *,
@@ -679,21 +888,33 @@ def advance_feature_step_3d(
         nodal_potential_v=None, potential_origin=None, potential_spacing=None,
         trajectory_fixed_dt=None, trajectory_max_steps=10000,
         trajectory_adaptive_horizon=False, trajectory_emergency_max_steps=None,
-        field_periodic_lateral=False,
+        field_periodic_lateral=False, profile_periodic_lateral=None,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         initial_charge_node_c=None, charging_options=None,
         precomputed_transport: BoundaryTransport3DResult | None = None,
-        neutral_radiosity_options=None, ballistic_transport="forward",
+        charged_surface_response=None, charged_surface_response_options=None,
+        neutral_forward_scatter=None, neutral_forward_scatter_options=None,
+        neutral_radiosity_options=None,
+        neutral_surface_fixed_point_tolerance=None,
+        neutral_surface_fixed_point_max_iterations=20,
+        surface_product_redeposition_options=None,
+        ballistic_transport="forward",
         ballistic_face_quadrature_points=1, cfl_number=0.3, reinitialize=True,
         reinitialization_method="skfmm",
         transport_device=None):
     """Advance one stateful, dimensional feature step.
 
     The chemistry is evaluated only on triangles whose nearest positive-phi material id is in
-    ``etchable_material_ids``. Other labeled solids are pinned. The method refuses a supplied surface
-    state whose shape does not match the current active mesh; it never silently remaps history.
+    ``etchable_material_ids``. Other labeled solids are pinned. Multiple evolving materials require a
+    material-resolved mechanism router; one substrate law is never silently applied to a mask. The
+    method refuses a supplied surface state whose shape does not match the current active mesh; it never
+    silently remaps history.
     ``precomputed_transport`` lets an orchestrating physical-time charging driver reuse its final
     exact charged/re-impact measure for chemistry instead of retracing a second kinetic operator.
+    ``charged_surface_response`` applies the same certified common-engine response/re-impact cascade
+    to an ordinary supplied-field or explicitly field-free feature step.  It is exclusive with
+    precomputed and self-consistent charging transports so the energetic lineage cannot be applied
+    twice.
     """
     if not np.isfinite(duration_s) or duration_s < 0.0:
         raise ValueError("duration_s must be finite and nonnegative")
@@ -706,6 +927,22 @@ def advance_feature_step_3d(
                      or trajectory_emergency_max_steps < trajectory_max_steps))
             or (trajectory_adaptive_horizon and trajectory_emergency_max_steps is None)):
         raise ValueError("invalid feature-step trajectory-horizon controls")
+    if (profile_periodic_lateral is not None
+            and not isinstance(profile_periodic_lateral, (bool, np.bool_))):
+        raise ValueError("profile_periodic_lateral must be boolean or None")
+    if neutral_surface_fixed_point_tolerance is not None:
+        if (not np.isfinite(neutral_surface_fixed_point_tolerance)
+                or not 0.0 < neutral_surface_fixed_point_tolerance < 1.0
+                or int(neutral_surface_fixed_point_max_iterations)
+                != neutral_surface_fixed_point_max_iterations
+                or neutral_surface_fixed_point_max_iterations <= 0):
+            raise ValueError("invalid neutral/surface fixed-point controls")
+        if neutral_radiosity_options is None:
+            raise ValueError(
+                "neutral/surface fixed point requires diffuse neutral radiosity")
+        if not getattr(mechanism, "quasi_steady_surface_state", False):
+            raise ValueError(
+                "surface mechanism does not declare a quasi-steady neutral/surface state")
     etchable = tuple(sorted({int(value) for value in etchable_material_ids}))
     if not etchable or any(value <= 0 for value in etchable):
         raise ValueError("etchable material ids must be positive")
@@ -731,6 +968,14 @@ def advance_feature_step_3d(
             charging_poisson_system is not None or nodal_potential_v is not None):
         raise ValueError(
             "precomputed transport is exclusive with an internally evaluated charging/field path")
+    if charged_surface_response is None and charged_surface_response_options is not None:
+        raise ValueError(
+            "charged_surface_response_options require a charged_surface_response")
+    if charged_surface_response is not None and (
+            precomputed_transport is not None or charging_poisson_system is not None):
+        raise ValueError(
+            "ordinary feature-step charged response is exclusive with precomputed or "
+            "self-consistent charging transport")
     if ballistic_transport not in ("forward", "face_gather"):
         raise ValueError("ballistic_transport must be 'forward' or 'face_gather'")
     if reinitialization_method not in ("skfmm", "fsm", "cr2"):
@@ -738,20 +983,34 @@ def advance_feature_step_3d(
     if ballistic_transport == "face_gather" and (
             charging_poisson_system is not None or nodal_potential_v is not None):
         raise ValueError("deterministic ballistic face gather does not yet trace electric fields")
+    if charged_surface_response is not None and ballistic_transport == "face_gather":
+        raise ValueError(
+            "charged surface response requires forward impact-position lineage; "
+            "face_gather currently preserves direction but not impact position")
 
     verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
     face_material = _face_material_ids(centroids, geometry)
     active_face = np.where(np.isin(face_material, etchable))[0]
     if active_face.size == 0:
         raise ValueError("current interface contains no requested etchable material")
+    active_material = face_material[active_face]
+    material_resolved_mechanism = hasattr(mechanism, "advance_by_material")
+    if len(np.unique(active_material)) > 1 and not material_resolved_mechanism:
+        raise ValueError(
+            "multiple evolving materials require a material-resolved mechanism router")
     mesh_fingerprint = _surface_mesh_fingerprint(
         verts, faces, active_face, face_material, geometry)
     if surface_state is None:
         if surface_state_mesh_fingerprint is not None:
             raise ValueError("surface_state_mesh_fingerprint requires a supplied surface_state")
-        if not hasattr(mechanism, "initial_state"):
-            raise TypeError("surface mechanism must provide initial_state(shape)")
-        surface_state = mechanism.initial_state((active_face.size,))
+        if material_resolved_mechanism:
+            if not hasattr(mechanism, "initial_state_by_material"):
+                raise TypeError("material-resolved mechanism must initialize by material id")
+            surface_state = mechanism.initial_state_by_material(active_material)
+        else:
+            if not hasattr(mechanism, "initial_state"):
+                raise TypeError("surface mechanism must provide initial_state(shape)")
+            surface_state = mechanism.initial_state((active_face.size,))
     else:
         if surface_state_mesh_fingerprint != mesh_fingerprint:
             raise ValueError(
@@ -765,10 +1024,62 @@ def advance_feature_step_3d(
                 "surface_state does not match the current active mesh; conservative remap is required")
     radiosity_options = (None if neutral_radiosity_options is None
                          else dict(neutral_radiosity_options))
+    scatter_options = (None if neutral_forward_scatter_options is None
+                       else dict(neutral_forward_scatter_options))
+    if neutral_forward_scatter is None and scatter_options is not None:
+        raise ValueError("neutral_forward_scatter_options require a scatter model")
+    if (neutral_forward_scatter is not None
+            and not isinstance(neutral_forward_scatter, HwangGiapisSiO2ForwardScatter3D)):
+        raise TypeError("neutral_forward_scatter must be HwangGiapisSiO2ForwardScatter3D")
+    scatter_options = {} if scatter_options is None else scatter_options
+    allowed_scatter_options = {
+        "launch_offset", "periodic_lateral", "maximum_periodic_wraps"}
+    unknown = set(scatter_options) - allowed_scatter_options
+    if unknown:
+        raise ValueError(
+            "unknown neutral-forward-scatter options: " + ", ".join(sorted(unknown)))
+    scatter_periodic = bool(scatter_options.get("periodic_lateral", False))
     periodic_neutral = bool(
         radiosity_options is not None and radiosity_options.get("periodic_lateral", False))
+    response_options = None
+    response_fixed_dt = None
+    response_periodic = False
+    if charged_surface_response is not None:
+        response_options = ({} if charged_surface_response_options is None
+                            else dict(charged_surface_response_options))
+        allowed_response_options = {
+            "launch_offset", "fixed_dt", "max_steps", "max_bounces",
+            "relative_tail_tolerance", "adaptive_bounce_extension",
+            "emergency_max_bounces", "trajectory_adaptive_horizon",
+            "trajectory_emergency_max_steps", "periodic_lateral",
+        }
+        unknown = set(response_options) - allowed_response_options
+        if unknown:
+            raise ValueError(
+                "unknown charged-surface response options: "
+                + ", ".join(sorted(unknown)))
+        response_fixed_dt = response_options.get("fixed_dt", trajectory_fixed_dt)
+        if response_fixed_dt is None:
+            raise ValueError(
+                "charged surface response requires an explicit fixed_dt either in "
+                "charged_surface_response_options or trajectory_fixed_dt")
+        response_periodic = bool(response_options.get(
+            "periodic_lateral",
+            bool(field_periodic_lateral) if nodal_potential_v is not None else periodic_neutral))
+        if periodic_neutral and not response_periodic:
+            raise ValueError(
+                "periodic neutral radiosity requires periodic response-enabled trajectories")
     charging_periodic = bool(
         charging_options is not None and charging_options.get("periodic_lateral", False))
+    transport_periodic_lateral = bool(
+        periodic_neutral or response_periodic or bool(field_periodic_lateral)
+        or charging_periodic or scatter_periodic)
+    if profile_periodic_lateral is None:
+        profile_periodic_lateral = transport_periodic_lateral
+    profile_periodic_lateral = bool(profile_periodic_lateral)
+    if transport_periodic_lateral and not profile_periodic_lateral:
+        raise ValueError(
+            "periodic transport requires periodic lateral profile evolution")
     if periodic_neutral and (charging_poisson_system is not None or nodal_potential_v is not None):
         if not (charging_periodic if charging_poisson_system is not None
                 else bool(field_periodic_lateral)):
@@ -854,8 +1165,9 @@ def advance_feature_step_3d(
     elif nodal_potential_v is None:
         if initial_charge_node_c is not None or charging_options is not None:
             raise ValueError("charging state/options require charging_poisson_system")
-        if any(value is not None for value in (
-                potential_origin, potential_spacing, trajectory_fixed_dt)):
+        if (potential_origin is not None or potential_spacing is not None
+                or (trajectory_fixed_dt is not None
+                    and charged_surface_response is None)):
             raise ValueError("field trajectory options require nodal_potential_v")
         first_hit_options = {}
         if periodic_neutral:
@@ -874,6 +1186,51 @@ def advance_feature_step_3d(
                 periodic_lateral=periodic_neutral,
                 domain_size=first_hit_options.get("domain_size"),
                 ray_offset=1e-3 * geometry.dx, device=transport_device)
+        elif charged_surface_response is not None:
+            # A reflected/emitted flight must start from the exact primary impact position.
+            # Field-free primaries are straight rays, so use the certified one-query hard-hit
+            # tracer rather than approximating that ray with a zero-field time integrator.  The
+            # latter can place an exact surface crossing on a step boundary and later report the
+            # corresponding exit back-face.  Reflected/emitted flights still use the common field
+            # cascade below because they launch from an arbitrary surface point.
+            charged_species = tuple(
+                species for species in boundary.species if species.charge_number != 0)
+            if not charged_species:
+                raise ValueError(
+                    "charged surface response requires at least one charged boundary species")
+            charged_boundary = PlasmaBoundaryState(
+                charged_species, boundary.reference_plane_m, provenance=boundary.provenance)
+            charged_role = {species.name: role[species.name] for species in charged_species}
+            charged_first_hit_options = {}
+            if response_periodic:
+                charged_first_hit_options = {
+                    "periodic_lateral": True,
+                    "domain_size": (np.asarray(geometry.phi.shape) - 1) * geometry.dx,
+                }
+            transport = trace_boundary_state_first_hit_3d(
+                charged_boundary, charged_role, verts, faces, areas,
+                source_bounds=source_bounds, source_z=source_z,
+                mesh_length_unit_m=geometry.mesh_length_unit_m,
+                mesh_origin_m=geometry.mesh_origin_m, n_position=n_position, seed=seed,
+                face_gas_normals=face_gas_normals,
+                device=transport_device, **charged_first_hit_options)
+            uncharged_species = tuple(
+                species for species in boundary.species if species.charge_number == 0)
+            if uncharged_species:
+                uncharged_boundary = PlasmaBoundaryState(
+                    uncharged_species, boundary.reference_plane_m,
+                    provenance=boundary.provenance)
+                uncharged_role = {
+                    species.name: role[species.name] for species in uncharged_species}
+                uncharged_transport = trace_boundary_state_first_hit_3d(
+                    uncharged_boundary, uncharged_role, verts, faces, areas,
+                    source_bounds=source_bounds, source_z=source_z,
+                    mesh_length_unit_m=geometry.mesh_length_unit_m,
+                    mesh_origin_m=geometry.mesh_origin_m,
+                    n_position=n_position, seed=seed, device=transport_device,
+                    **first_hit_options)
+                transport = merge_boundary_transport_results_3d(
+                    transport, uncharged_transport)
         else:
             transport = trace_boundary_state_first_hit_3d(
                 **common_transport, **first_hit_options)
@@ -889,22 +1246,163 @@ def advance_feature_step_3d(
             face_gas_normals=face_gas_normals,
             adaptive_horizon=trajectory_adaptive_horizon,
             emergency_max_steps=trajectory_emergency_max_steps)
+    charged_surface_cascade = None
+    if charged_surface_response is not None:
+        response_options = dict(response_options)
+        response_fixed_dt = response_options.pop("fixed_dt", response_fixed_dt)
+        response_potential = (
+            np.zeros(geometry.phi.shape, dtype=float)
+            if nodal_potential_v is None else np.asarray(nodal_potential_v, dtype=float))
+        response_origin = (
+            np.zeros(3, dtype=float)
+            if nodal_potential_v is None else np.asarray(potential_origin, dtype=float))
+        response_spacing = (
+            float(geometry.dx) if nodal_potential_v is None else potential_spacing)
+        charged_names = {
+            species.name: int(species.charge_number)
+            for species in boundary.species if species.charge_number != 0}
+        response_context = ChargedSurfaceContext3D(
+            np.asarray(areas, dtype=float) * geometry.mesh_length_unit_m ** 2,
+            face_gas_normals, face_material, None)
+        transport, charged_surface_cascade = (
+            apply_charged_surface_response_to_transport_3d(
+                transport, charged_names, charged_surface_response,
+                response_context, verts, faces, areas,
+                nodal_potential_v=response_potential,
+                potential_origin=response_origin,
+                potential_spacing=response_spacing,
+                mesh_length_unit_m=geometry.mesh_length_unit_m,
+                launch_offset=response_options.pop("launch_offset", 1e-5),
+                fixed_dt=response_fixed_dt,
+                max_steps=response_options.pop("max_steps", trajectory_max_steps),
+                max_bounces=response_options.pop("max_bounces", 16),
+                relative_tail_tolerance=response_options.pop(
+                    "relative_tail_tolerance", 0.0),
+                adaptive_bounce_extension=response_options.pop(
+                    "adaptive_bounce_extension", False),
+                emergency_max_bounces=response_options.pop(
+                    "emergency_max_bounces", None),
+                trajectory_adaptive_horizon=response_options.pop(
+                    "trajectory_adaptive_horizon", trajectory_adaptive_horizon),
+                trajectory_emergency_max_steps=response_options.pop(
+                    "trajectory_emergency_max_steps", trajectory_emergency_max_steps),
+                periodic_lateral=response_options.pop(
+                    "periodic_lateral", response_periodic),
+                device=transport_device))
+    neutral_forward_scatter_result = None
+    chemistry_role = dict(role)
+    if neutral_forward_scatter is not None:
+        scatter_context = ChargedSurfaceContext3D(
+            np.asarray(areas, dtype=float) * geometry.mesh_length_unit_m ** 2,
+            face_gas_normals, face_material, None)
+        transport, neutral_forward_scatter_result = (
+            apply_hwang_giapis_forward_scatter_to_transport_3d(
+                transport, neutral_forward_scatter, scatter_context,
+                verts, faces, areas,
+                domain_minimum=np.zeros(3),
+                domain_maximum=(np.asarray(geometry.phi.shape) - 1) * geometry.dx,
+                mesh_length_unit_m=geometry.mesh_length_unit_m,
+                launch_offset=float(scatter_options.get("launch_offset", 1e-5)),
+                periodic_lateral=scatter_periodic,
+                maximum_periodic_wraps=int(scatter_options.get(
+                    "maximum_periodic_wraps", 10000))))
+        chemistry_role[neutral_forward_scatter.neutral_species_name] = (
+            "energetic_bombardment")
+    base_transport = transport
     neutral_radiosity_diagnostics = MappingProxyType({})
-    if radiosity_options is not None:
-        transport, neutral_radiosity_diagnostics = _apply_diffuse_neutral_transport(
-            transport, geometry, verts, faces, centroids, areas, face_material, active_face,
-            surface_state, mechanism, role, radiosity_options, transport_device)
-    active_flux = _select_surface_fluxes(
-        transport.surface_fluxes, active_face, len(faces), role)
-    surface = mechanism.advance(surface_state, active_flux, float(duration_s))
+    neutral_surface_iterations = 0
+    neutral_surface_residual = None
+    if neutral_surface_fixed_point_tolerance is not None:
+        if material_resolved_mechanism:
+            raise ValueError(
+                "neutral/surface fixed point requires a directly inspectable mechanism result")
+        working_state = surface_state
+        for iteration in range(int(neutral_surface_fixed_point_max_iterations)):
+            transport, neutral_radiosity_diagnostics = _apply_diffuse_neutral_transport(
+                base_transport, geometry, verts, faces, centroids, areas, face_material,
+                active_face, working_state, mechanism, role, radiosity_options,
+                transport_device)
+            active_flux = _select_surface_fluxes(
+                transport.surface_fluxes, active_face, len(faces), chemistry_role)
+            trial = mechanism.advance(working_state, active_flux, 0.0)
+            change = getattr(trial, "transport_fixed_point_change", None)
+            if change is None:
+                raise TypeError(
+                    "quasi-steady mechanism must report transport_fixed_point_change")
+            neutral_surface_residual = float(np.max(np.abs(np.asarray(change, dtype=float))))
+            neutral_surface_iterations = iteration + 1
+            working_state = trial.state
+            if neutral_surface_residual <= float(neutral_surface_fixed_point_tolerance):
+                break
+        else:
+            raise RuntimeError(
+                "neutral/surface fixed point did not converge: "
+                f"residual={neutral_surface_residual:.6g}, "
+                f"tolerance={float(neutral_surface_fixed_point_tolerance):.6g}, "
+                f"iterations={int(neutral_surface_fixed_point_max_iterations)}")
+        surface_state = working_state
+        surface = mechanism.advance(surface_state, active_flux, float(duration_s))
+    else:
+        if radiosity_options is not None:
+            transport, neutral_radiosity_diagnostics = _apply_diffuse_neutral_transport(
+                base_transport, geometry, verts, faces, centroids, areas, face_material,
+                active_face, surface_state, mechanism, role, radiosity_options,
+                transport_device)
+        active_flux = _select_surface_fluxes(
+            transport.surface_fluxes, active_face, len(faces), chemistry_role)
+        surface = (mechanism.advance_by_material(
+            surface_state, active_flux, float(duration_s), active_material)
+            if material_resolved_mechanism
+            else mechanism.advance(surface_state, active_flux, float(duration_s)))
 
+    product_populations = tuple(getattr(surface, "product_populations", ()))
+    product_redeposition = None
+    if surface_product_redeposition_options is not None:
+        if duration_s <= 0.0:
+            raise ValueError("surface-product redeposition requires a positive feature duration")
+        if not product_populations:
+            raise ValueError(
+                "surface-product redeposition is enabled but the mechanism emits no populations")
+        product_redeposition = _apply_surface_product_redeposition(
+            product_populations, geometry, verts, faces, centroids, areas, face_material,
+            active_face, duration_s, surface_product_redeposition_options, transport_device)
+
+    surface_etch_velocity = np.asarray(surface.etch_velocity_m_s, dtype=float)
+    surface_growth_velocity = np.asarray(
+        getattr(surface, "normal_growth_velocity_m_s", 0.0), dtype=float)
+    try:
+        surface_etch_velocity = np.broadcast_to(
+            surface_etch_velocity, (len(active_face),))
+        surface_growth_velocity = np.broadcast_to(
+            surface_growth_velocity, (len(active_face),))
+    except ValueError as error:
+        raise ValueError(
+            "surface recession/growth velocity does not match the active-face mesh") from error
+    if (np.any(~np.isfinite(surface_etch_velocity))
+            or np.any(surface_etch_velocity < 0.0)
+            or np.any(~np.isfinite(surface_growth_velocity))
+            or np.any(surface_growth_velocity < 0.0)):
+        raise ValueError("surface recession/growth velocities must be finite and nonnegative")
     face_velocity = np.zeros(len(faces))
     face_velocity[active_face] = (
-        surface.etch_velocity_m_s / geometry.mesh_length_unit_m)
-    maximum_velocity = float(np.max(face_velocity)) if face_velocity.size else 0.0
-    displacement = maximum_velocity * float(duration_s)
+        (surface_etch_velocity - surface_growth_velocity)
+        / geometry.mesh_length_unit_m)
+    if product_redeposition is not None:
+        face_velocity -= (
+            product_redeposition.normal_growth_velocity_m_s
+            / geometry.mesh_length_unit_m)
+    maximum_speed = float(np.max(np.abs(face_velocity))) if face_velocity.size else 0.0
+    maximum_recession = max(
+        float(np.max(face_velocity)) if face_velocity.size else 0.0, 0.0)
+    maximum_growth = max(
+        float(np.max(-face_velocity)) if face_velocity.size else 0.0, 0.0)
+    displacement = maximum_speed * float(duration_s)
     substeps = max(1, int(np.ceil(displacement / (float(cfl_number) * geometry.dx))))
     phi = np.array(geometry.phi, copy=True)
+    periodic_seam_projection = 0.0
+    if profile_periodic_lateral:
+        phi, correction = _project_periodic_lateral_endpoints(phi)
+        periodic_seam_projection = max(periodic_seam_projection, correction)
     xs, ys, zs = geometry.coordinate_arrays
     extension_geometry = dict(phi=phi, dx=geometry.dx, xs=xs, ys=ys, zs=zs)
     # Extend only from the material surface that is actually evolving.  Including pinned mask
@@ -913,6 +1411,14 @@ def advance_feature_step_3d(
     extended_velocity = extend_velocity_3d(
         face_velocity[active_face], centroids[active_face],
         extension_geometry, 4.0 * geometry.dx)
+    if profile_periodic_lateral:
+        extended_velocity, correction = _project_periodic_lateral_endpoints(
+            extended_velocity)
+        periodic_seam_projection = max(periodic_seam_projection, correction)
+        if periodic_seam_projection > 0.25 * geometry.dx:
+            raise RuntimeError(
+                "periodic profile seam projection exceeds one quarter cell; input geometry or "
+                "surface velocity is not a resolved periodic field")
     center = (geometry.phi.shape[0] // 2, geometry.phi.shape[1] // 2)
     centerline = geometry.phi[center]
     center_crossing = np.flatnonzero(
@@ -931,15 +1437,30 @@ def advance_feature_step_3d(
             centerline_phi_upper_before=float(centerline[lower + 1]))
     pinned = (geometry.material_id > 0) & ~np.isin(geometry.material_id, etchable)
     material_levelsets = None
-    if geometry.material_levelsets is None:
+    if duration_s == 0.0:
+        # A zero-duration transport/chemistry audit is an exact geometry no-op.
+        # Reconstructing the union from independently redistanced material fields can
+        # otherwise change marching-cubes connectivity even though no material moved.
+        # Preserve the authoritative combined level set and material ownership bitwise.
+        material_levelsets = (
+            None if geometry.material_levelsets is None else {
+                material_id: np.array(levelset, copy=True)
+                for material_id, levelset in geometry.material_levelsets.items()})
+        phi = np.array(geometry.phi, copy=True)
+    elif geometry.material_levelsets is None:
         for _ in range(substeps):
             phi = advect_3d(
-                phi, extended_velocity, geometry.dx, float(duration_s) / substeps)
+                phi, extended_velocity, geometry.dx, float(duration_s) / substeps,
+                periodic_axes=((0, 1) if profile_periodic_lateral else ()))
             phi[pinned] = geometry.phi[pinned]
+            if profile_periodic_lateral:
+                phi, correction = _project_periodic_lateral_endpoints(phi)
+                periodic_seam_projection = max(periodic_seam_projection, correction)
     else:
         material_levelsets = _advect_exposed_material_levelsets(
             geometry.material_levelsets, etchable, extended_velocity,
-            geometry.dx, duration_s, substeps)
+            geometry.dx, duration_s, substeps,
+            periodic_lateral=profile_periodic_lateral)
         phi = np.maximum.reduce(tuple(material_levelsets.values()))
     advected_centerline = phi[center]
     advected_crossing = np.flatnonzero(
@@ -953,13 +1474,24 @@ def advance_feature_step_3d(
         if material_levelsets is not None:
             material_levelsets = {
                 material_id: (
-                    _redistance_feature_field(levelset, geometry.dx, reinitialization_method)
+                    _redistance_feature_field(
+                        levelset, geometry.dx, reinitialization_method,
+                        periodic_lateral=profile_periodic_lateral)
                     if material_id in etchable else levelset)
                 for material_id, levelset in material_levelsets.items()}
+            if profile_periodic_lateral:
+                material_levelsets = {
+                    material_id: _project_periodic_lateral_endpoints(levelset)[0]
+                    for material_id, levelset in material_levelsets.items()}
             phi = np.maximum.reduce(tuple(material_levelsets.values()))
-        phi = _redistance_feature_field(phi, geometry.dx, reinitialization_method)
+        phi = _redistance_feature_field(
+            phi, geometry.dx, reinitialization_method,
+            periodic_lateral=profile_periodic_lateral)
         if material_levelsets is None:
             phi[pinned] = geometry.phi[pinned]
+            if profile_periodic_lateral:
+                phi, correction = _project_periodic_lateral_endpoints(phi)
+                periodic_seam_projection = max(periodic_seam_projection, correction)
     reinitialized_centerline = phi[center]
     reinitialized_crossing = np.flatnonzero(
         (reinitialized_centerline[:-1] >= 0.0) & (reinitialized_centerline[1:] < 0.0))
@@ -968,17 +1500,45 @@ def advance_feature_step_3d(
         center_diagnostics["centerline_reinitialized_interface_fraction"] = float(
             reinitialized_centerline[lower]
             / (reinitialized_centerline[lower] - reinitialized_centerline[lower + 1]))
-    phi, removed_unresolved_solid_cells = _remove_unresolved_subcell_solid_components(
-        phi, geometry.material_id, etchable, geometry.dx)
+    output_material_id = np.array(geometry.material_id, copy=True)
+    if material_levelsets is not None:
+        material_ids = np.asarray(sorted(material_levelsets), dtype=int)
+        material_stack = np.stack([
+            material_levelsets[int(material_id)] for material_id in material_ids])
+        owner = material_ids[np.argmax(material_stack, axis=0)]
+        output_material_id = np.where(phi >= 0.0, owner, 0)
+    if duration_s == 0.0:
+        removed_unresolved_solid_cells = 0
+        unresolved_solid_mask = np.zeros_like(output_material_id, dtype=bool)
+    else:
+        phi, removed_unresolved_solid_cells, unresolved_solid_mask = (
+            _remove_unresolved_subcell_solid_components(
+            phi, output_material_id, etchable, geometry.dx)
+        )
     if removed_unresolved_solid_cells:
         if material_levelsets is not None:
-            raise RuntimeError(
-                "subcell cleanup requires an explicit material-layer topology update")
-        phi = _redistance_feature_field(phi, geometry.dx, reinitialization_method)
-        phi[pinned] = geometry.phi[pinned]
+            material_levelsets, phi, output_material_id = (
+                _apply_subcell_cleanup_to_material_levelsets(
+                    material_levelsets, unresolved_solid_mask, output_material_id,
+                    etchable, geometry.dx, reinitialization_method,
+                    profile_periodic_lateral))
+            _, remaining_unresolved_cells, _ = (
+                _remove_unresolved_subcell_solid_components(
+                    phi, output_material_id, etchable, geometry.dx))
+            if remaining_unresolved_cells:
+                raise RuntimeError(
+                    "material-layer topology update left an unresolved subcell component")
+        else:
+            phi = _redistance_feature_field(
+                phi, geometry.dx, reinitialization_method,
+                periodic_lateral=profile_periodic_lateral)
+            phi[pinned] = geometry.phi[pinned]
+    if profile_periodic_lateral:
+        phi, correction = _project_periodic_lateral_endpoints(phi)
+        periodic_seam_projection = max(periodic_seam_projection, correction)
 
     output_geometry = FeatureGeometry3D(
-        phi, geometry.material_id, geometry.dx, geometry.mesh_length_unit_m,
+        phi, output_material_id, geometry.dx, geometry.mesh_length_unit_m,
         geometry.mesh_origin_m, material_levelsets=material_levelsets)
     next_verts, next_faces, next_centroids, next_areas = extract_mesh_3d(
         output_geometry.phi, output_geometry.dx)
@@ -1028,7 +1588,6 @@ def advance_feature_step_3d(
     else:
         exchange_limitations = tuple(material_exchange.known_limitations)
         product_routing_complete = bool(material_exchange.product_routing_complete)
-    product_populations = tuple(getattr(surface, "product_populations", ()))
     outgoing_material = bool(
         material_exchange is not None
         and any(np.any(value > 0.0) for value in material_exchange.outgoing_units_m2.values()))
@@ -1043,17 +1602,29 @@ def advance_feature_step_3d(
         if not product_transport_ready:
             exchange_limitations += (
                 "surface-product populations lack a complete energy/angular launch model",)
+    if product_redeposition is not None:
+        exchange_limitations = tuple(
+            item for item in exchange_limitations
+            if item != "outgoing physical-sputter material is not redeposited unless product "
+            "transport is enabled") + (
+                "redeposition v1 permits same-material growth only; cross-material films are refused",
+            )
     validity = FeatureStepValidity(
         within_declared_scope=not reasons,
         reasons=tuple(reasons),
         known_limitations=tuple(dict.fromkeys(transport_limitations)) + (
-            "first-order material-local conservative surface-state remap",
+            "first-order material-local conservative surface-state remap with declared intensive-field exceptions",
             "physical volume-topology-changing surface steps are refused",
             "first-order Godunov interface advection",
         ) + tuple(surface.validity.known_model_form_omissions) + exchange_limitations,
         parameter_evidence_supports_prediction=(
-            surface.validity.parameter_evidence_supports_prediction),
-        nonpredictive_parameters=surface.validity.nonpredictive_parameters)
+            surface.validity.parameter_evidence_supports_prediction
+            and neutral_forward_scatter_result is None),
+        nonpredictive_parameters=(
+            surface.validity.nonpredictive_parameters + ((
+                "neutral_forward_scatter.critical_angle_deg",
+                "neutral_forward_scatter.gas_to_effective_surface_mass_ratio",
+            ) if neutral_forward_scatter_result is not None else ())))
     return FeatureStep3DResult(
         geometry=output_geometry, transport=transport, charging=charging, surface=surface,
         active_face_index=active_face, active_face_centroid=centroids[active_face],
@@ -1066,20 +1637,83 @@ def advance_feature_step_3d(
         state_remap_diagnostics=remap_diagnostics,
         face_material_id=face_material,
         face_velocity_mesh_units_s=face_velocity,
+        charged_surface_cascade=charged_surface_cascade,
+        neutral_forward_scatter=neutral_forward_scatter_result,
+        surface_product_redeposition=product_redeposition,
         diagnostics=dict(
             face_count=int(len(faces)), active_face_count=int(active_face.size),
-            max_velocity_m_s=maximum_velocity * geometry.mesh_length_unit_m,
+            max_velocity_m_s=maximum_speed * geometry.mesh_length_unit_m,
+            max_recession_velocity_m_s=maximum_recession * geometry.mesh_length_unit_m,
+            max_growth_velocity_m_s=maximum_growth * geometry.mesh_length_unit_m,
+            max_surface_mechanism_growth_velocity_m_s=(
+                float(np.max(surface_growth_velocity))
+                if surface_growth_velocity.size else 0.0),
             max_displacement_mesh_units=displacement, cfl_substeps=int(substeps),
             cfl_number=float(cfl_number), reinitialized=bool(reinitialize),
             reinitialization_method=(reinitialization_method if reinitialize else None),
+            profile_periodic_lateral=profile_periodic_lateral,
+            periodic_seam_projection_max_mesh_units=periodic_seam_projection,
             removed_unresolved_solid_cells=removed_unresolved_solid_cells,
             self_consistent_charging=charging is not None,
             charging_iterations=(0 if charging is None else len(charging.history)),
             charging_converged=(None if charging is None else charging.converged),
+            charged_surface_response_applied=charged_surface_cascade is not None,
+            charged_surface_response_field=(
+                None if charged_surface_cascade is None
+                else ("supplied_nodal_potential" if nodal_potential_v is not None
+                      else "explicit_zero_field")),
+            charged_surface_response_bounces=(
+                0 if charged_surface_cascade is None
+                else len(charged_surface_cascade.transfers)),
+            charged_surface_response_reimpact_events=(
+                0 if charged_surface_cascade is None else sum(
+                    flight.incident.event_face.size
+                    for bounce in charged_surface_cascade.flights_by_bounce
+                    for flight in bounce)),
+            charged_surface_response_relative_charge_error=(
+                None if charged_surface_cascade is None
+                else charged_surface_cascade.relative_charge_balance_error),
+            charged_surface_response_maximum_energy_error=(
+                None if charged_surface_cascade is None else max(
+                    transfer.relative_kinetic_energy_balance_error
+                    for transfer in charged_surface_cascade.transfers)),
+            charged_surface_response_tail_l1_error_bound=(
+                None if charged_surface_cascade is None else
+                charged_surface_cascade.tail_closure_l1_current_error_bound_relative),
+            charged_surface_response_bounce_budget_extensions=(
+                0 if charged_surface_cascade is None else
+                charged_surface_cascade.bounce_budget_extension_count),
+            neutral_forward_scatter_applied=(
+                neutral_forward_scatter_result is not None),
+            neutral_forward_scatter_rate_s=(
+                0.0 if neutral_forward_scatter_result is None else
+                neutral_forward_scatter_result.scattered_rate_s),
+            neutral_forward_scatter_landed_rate_s=(
+                0.0 if neutral_forward_scatter_result is None else
+                neutral_forward_scatter_result.flight.landed_rate_s),
+            neutral_forward_scatter_escaped_rate_s=(
+                0.0 if neutral_forward_scatter_result is None else
+                neutral_forward_scatter_result.flight.escaped_rate_s),
+            neutral_forward_scatter_particle_balance_error=(
+                None if neutral_forward_scatter_result is None else max(
+                    neutral_forward_scatter_result.relative_surface_particle_balance_error,
+                    neutral_forward_scatter_result.flight.relative_particle_balance_error)),
+            neutral_forward_scatter_energy_balance_error=(
+                None if neutral_forward_scatter_result is None else
+                neutral_forward_scatter_result.relative_surface_energy_balance_error),
             product_routing_complete=product_routing_complete,
             product_population_count=len(product_populations),
             product_transport_ready=product_transport_ready,
+            product_redeposition_enabled=product_redeposition is not None,
+            product_redeposition_relative_balance_error=(
+                None if product_redeposition is None
+                else product_redeposition.maximum_relative_balance_error),
             neutral_radiosity=neutral_radiosity_diagnostics,
+            neutral_surface_fixed_point_iterations=neutral_surface_iterations,
+            neutral_surface_fixed_point_residual=neutral_surface_residual,
+            neutral_surface_fixed_point_tolerance=(
+                None if neutral_surface_fixed_point_tolerance is None
+                else float(neutral_surface_fixed_point_tolerance)),
             **center_diagnostics),
         validity=validity)
 
@@ -1091,10 +1725,16 @@ def solve_feature_3d(
         n_position=256, seed=0, cfl_number=0.3, reinitialize=True,
         transport_device=None, nodal_potential_v=None, potential_origin=None,
         potential_spacing=None, trajectory_fixed_dt=None, trajectory_max_steps=10000,
-        field_periodic_lateral=False,
+        field_periodic_lateral=False, profile_periodic_lateral=None,
         charging_poisson_system: NodalPoissonSystem3D | None = None,
         charging_system_builder=None, initial_charge_node_c=None, charging_options=None,
-        neutral_radiosity_options=None, ballistic_transport="forward",
+        charged_surface_response=None, charged_surface_response_options=None,
+        neutral_forward_scatter=None, neutral_forward_scatter_options=None,
+        neutral_radiosity_options=None,
+        neutral_surface_fixed_point_tolerance=None,
+        neutral_surface_fixed_point_max_iterations=20,
+        surface_product_redeposition_options=None,
+        ballistic_transport="forward",
         ballistic_face_quadrature_points=1, reinitialization_method="skfmm"):
     """Run verified feature steps with conserved surface state and optional quasi-static charging.
 
@@ -1109,6 +1749,11 @@ def solve_feature_3d(
         raise ValueError("duration_s must be finite and nonnegative")
     if charging_poisson_system is not None and charging_system_builder is not None:
         raise ValueError("supply either a fixed charging system or a geometry-dependent builder")
+    if charged_surface_response is not None and (
+            charging_poisson_system is not None or charging_system_builder is not None):
+        raise ValueError(
+            "ordinary feature response cannot be combined with a self-consistent charging solve; "
+            "use the charging co-evolution response path")
     if charging_poisson_system is not None and int(n_steps) > 1:
         raise ValueError(
             "multi-step charged profile evolution requires a geometry-dependent Poisson builder")
@@ -1142,10 +1787,20 @@ def solve_feature_3d(
                 potential_spacing=potential_spacing, trajectory_fixed_dt=trajectory_fixed_dt,
                 trajectory_max_steps=trajectory_max_steps,
                 field_periodic_lateral=field_periodic_lateral,
+                profile_periodic_lateral=profile_periodic_lateral,
                 charging_poisson_system=step_poisson_system,
                 initial_charge_node_c=step_initial_charge,
                 charging_options=charging_options,
+                charged_surface_response=charged_surface_response,
+                charged_surface_response_options=charged_surface_response_options,
+                neutral_forward_scatter=neutral_forward_scatter,
+                neutral_forward_scatter_options=neutral_forward_scatter_options,
                 neutral_radiosity_options=neutral_radiosity_options,
+                neutral_surface_fixed_point_tolerance=(
+                    neutral_surface_fixed_point_tolerance),
+                neutral_surface_fixed_point_max_iterations=(
+                    neutral_surface_fixed_point_max_iterations),
+                surface_product_redeposition_options=surface_product_redeposition_options,
                 ballistic_transport=ballistic_transport,
                 ballistic_face_quadrature_points=ballistic_face_quadrature_points,
                 reinitialization_method=reinitialization_method,

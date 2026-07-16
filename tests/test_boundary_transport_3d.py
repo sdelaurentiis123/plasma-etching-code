@@ -11,6 +11,7 @@ from petch.boundary_transport_3d import (
     BoundaryTransport3DResult,
     _certify_field_hit_lineage_3d,
     _trace_field_events_float64_3d,
+    average_boundary_transport_results_3d,
     estimate_diffuse_form_factors_3d,
     gather_boundary_state_ballistic_3d,
     gather_boundary_state_field_adjoint_3d,
@@ -21,6 +22,7 @@ from petch.boundary_transport_3d import (
 )
 from petch.surface_kinetics import (
     EnergeticYield,
+    FaceResolvedEnergeticFlux,
     ParameterEvidence,
     ReducedSiO2FluorocarbonMechanism,
     ReducedSiO2FluorocarbonParameters,
@@ -30,6 +32,55 @@ from petch.surface_kinetics import (
 
 
 DEVICES = ["cpu"] + (["cuda:0"] if wp.is_cuda_available() else [])
+
+
+def _replicate_transport(scale, *, model="certified-field", position=True):
+    event_position = np.array([[0.2, 0.3, 0.0]]) if position else None
+    event_direction = np.array([[0.0, 0.0, -1.0]]) if position else None
+    population = FaceResolvedEnergeticFlux(
+        "Ar+", 2, np.array([0]), np.array([2.0 * scale]), np.array([20.0]),
+        np.array([1.0]), event_position=event_position,
+        event_incident_direction=event_direction)
+    return BoundaryTransport3DResult(
+        SurfaceFluxes({"CF2": np.array([scale, 3.0 * scale])}, (population,)),
+        {"Ar+": 0.4 * scale, "CF2": 0.5 * scale},
+        {"Ar+": 1.0 - 0.4 * scale, "CF2": 1.0 - 0.5 * scale},
+        {"Ar+": 0.0, "CF2": 0.0}, model, ("declared limitation",),
+        lineage_replay_count=int(scale), lineage_replay_eligible_count=10,
+        edge_launch_inset_count=int(scale), trajectory_horizon_extension_count=int(scale),
+        trajectory_initial_max_steps=8, trajectory_final_max_steps=16,
+        trajectory_emergency_max_steps=32)
+
+
+def test_independent_transport_average_preserves_sparse_measure_and_diagnostics():
+    first = _replicate_transport(1.0)
+    second = _replicate_transport(2.0)
+
+    averaged = average_boundary_transport_results_3d(first, second)
+    population = averaged.surface_fluxes.energetic_fluxes[0]
+
+    np.testing.assert_allclose(
+        averaged.surface_fluxes.neutral_flux_m2_s["CF2"], [1.5, 4.5])
+    np.testing.assert_array_equal(population.event_face, [0, 0])
+    np.testing.assert_allclose(population.event_flux_m2_s, [1.0, 2.0])
+    np.testing.assert_allclose(population.flux_m2_s, [3.0, 0.0])
+    np.testing.assert_allclose(population.event_energy_eV, [20.0, 20.0])
+    np.testing.assert_allclose(population.event_position, [[0.2, 0.3, 0.0]] * 2)
+    assert averaged.hit_probability["Ar+"] == pytest.approx(0.6)
+    assert averaged.lineage_replay_count == 3
+    assert averaged.lineage_replay_eligible_count == 20
+    assert averaged.edge_launch_inset_count == 3
+    assert averaged.trajectory_horizon_extension_count == 3
+    assert averaged.transport_model == "independent_replicate_mean[2](certified-field)"
+
+
+def test_independent_transport_average_refuses_incompatible_replicates():
+    with pytest.raises(ValueError, match="same transport model"):
+        average_boundary_transport_results_3d(
+            _replicate_transport(1.0), _replicate_transport(1.0, model="other"))
+    with pytest.raises(ValueError, match="inconsistently preserve event_position"):
+        average_boundary_transport_results_3d(
+            _replicate_transport(1.0), _replicate_transport(1.0, position=False))
 
 
 def test_field_hit_lineage_uses_declared_gas_normal():
@@ -91,7 +142,9 @@ def test_float64_field_replay_halves_only_a_still_invalid_lineage(monkeypatch):
     terminal_velocity = np.array([[0.0, 0.0, 1.0]])
     repaired = boundary_transport_3d._repair_invalid_field_hits_float64_3d(
         "Ar+", np.array([[0.5, 0.5, 1.0]]), np.array([[0.0, 0.0, -1.0]]), 1,
-        np.zeros((2, 2, 2)), np.zeros(3), np.ones(3),
+        # A nonzero (constant) potential selects the field-replay branch exercised below; the
+        # zero-potential branch correctly uses the dedicated straight-line float64 replay.
+        np.ones((2, 2, 2)), np.zeros(3), np.ones(3),
         np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]),
         np.array([[0, 1, 2]]), np.array([[0.0, 0.0, 1.0]]),
         0.25, 8, False, hit_face, hit_cosine, hit_energy, termination,

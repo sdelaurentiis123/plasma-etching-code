@@ -81,7 +81,7 @@
 <tr><td>Differentiability</td><td>autodiff, inverse design, learned operators</td><td><a href="differentiable-ml.html">Differentiable &amp; ML</a></td></tr>
 </tbody>
 </table>
-<p>Five further pages complete the picture: <a href="multiscale.html">Multiscale</a> (reactor&nbsp;→&nbsp;feature coupling), <a href="physics-grounding.html">Physics Grounding</a> (every constant traced to experiment), <a href="performance.html">Performance</a> (the ~8–15× CPU-dependent speed vs ViennaPS), <a href="experimental-validation.html">Experiments</a> (ARDE vs the real de Boer wafer), and <a href="viennaps-validation.html">ViennaPS Validation</a> (the like-for-like cross-check, including petch's deterministic S<sub>n</sub> neutral transport). <a href="references.html">References</a> closes the set.</p>
+<p>Five further pages complete the picture: <a href="multiscale.html">Multiscale</a> (reactor&nbsp;→&nbsp;feature coupling), <a href="physics-grounding.html">Physics Grounding</a> (every constant traced to experiment), <a href="performance.html">Performance</a> (the ~8–15× CPU-dependent speed vs ViennaPS), <a href="experimental-validation.html">Experiments</a> (direct de Boer development audit and evidence corrections), and <a href="viennaps-validation.html">ViennaPS Validation</a> (the like-for-like numerical cross-check). <a href="references.html">References</a> closes the set.</p>
 
 <h2>The honest thesis</h2>
 <p>The incumbent open-source tool (<a href="sota-and-plan.html">ViennaPS</a>) already has a maturing GPU/OptiX ray tracer. The industry tool (Sentaurus) already solves re-emission by radiosity, by default. So "we ray-trace faster on the same algorithm" is <strong>not</strong> a win &mdash; RT cores are RT cores. The three things nobody ships together, and that this project can:</p>
@@ -107,7 +107,7 @@
 
 <div class="callout warn">
 <span class="lab">Status of the reference code</span>
-<p>The original proof-of-concept (<code>feature_etch.py</code>) is a 2D simulator that matches ViennaPS in <em>shape</em> and <em>ARDE trend</em> parameter-free, needing only a single global <code>rate_scale</code> (≈0.29 in that 2D PoC) for absolute depth — an absolute-units constant, the analog of ViennaPS's <code>unitConversion</code>, whose value tracks the flux-normalization convention (see <a href="physics-grounding.html">Physics Grounding</a>), not a fudge. The 3D engine (<strong>petch</strong>) now replicates ViennaPS's ballistic model directly — matching on holes, ~0.06–0.1 gentler on trenches (<a href="viennaps-validation.html">ViennaPS Validation</a>) — so the six historical bias contributors are now <em>second-order</em>; the first-order residual is the structural ballistic-vs-wafer gap (gas conductance / charging). The <a href="sota-and-plan.html">plan page</a> tracks them.</p>
+<p>The original proof-of-concept (<code>feature_etch.py</code>) is a 2D ViennaPS-oriented reference. The 3D engine (<strong>petch</strong>) now reproduces the documented ballistic/Belen operator through common APIs and adds certified reflection, charging, and moving multi-material surfaces. The legacy ARDE curve was subsequently identified as a calculated Clausing replay rather than direct wafer evidence; the authoritative direct-pixel development audit now exposes the remaining model gap, and independent feature-profile validation is still open. The <a href="sota-and-plan.html">plan page</a> tracks the remaining gates.</p>
 </div>
 
 <div class="pagenav">

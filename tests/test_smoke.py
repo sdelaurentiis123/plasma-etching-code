@@ -3,11 +3,22 @@
 Covers: the 2D reference path (parity anchor), the 3D production engine (the real simulator),
 and the high-level ViennaPS-shaped API (Domain/Process/Result). All run CPU-only (slower) or GPU.
 """
+from pathlib import Path
+import re
+
 import numpy as np
 import petch
 
 
 POC = petch.Flags(chemistry="langmuir", yield_angular="cosine")   # original 2D proof-of-concept config
+
+
+def test_runtime_version_matches_project_metadata():
+    """The import-visible version must agree with the version stamped into built wheels."""
+    project_text = (Path(__file__).parents[1] / "pyproject.toml").read_text(encoding="utf-8")
+    match = re.search(r'^version\s*=\s*"([^"]+)"', project_text, flags=re.MULTILINE)
+    assert match is not None, "pyproject.toml has no declared project version"
+    assert petch.__version__ == match.group(1)
 
 
 # ----------------------------- 2D reference path (legacy parity anchor) -----------------------------

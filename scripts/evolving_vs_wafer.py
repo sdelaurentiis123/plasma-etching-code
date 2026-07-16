@@ -1,5 +1,9 @@
-"""HELD-OUT prediction: wls=2.9 calibrated on wafer AR10/20 -> predict the AR30/40 tail.
-Two seeds for MC robustness. Deep domain (80um)."""
+"""Legacy replay against the fitted Blauw/Clausing AR curve; not experimental validation.
+
+The historical 1/.43/.29/.20 sequence was mislabeled as direct de Boer wafer data.  It is a
+calculated model curve and every point is exposed.  This script remains only to reproduce the old
+Knudsen calibration behavior; use the checksummed Figure-9 development runners for direct pixels.
+"""
 import os; os.environ.setdefault("PETCH_DEVICE", "cpu")
 import time, numpy as np
 from scipy.ndimage import uniform_filter1d
@@ -7,7 +11,7 @@ import petch
 from petch import threed as t3
 W, MASK = 2.0, 0.5
 FIELD = 57.6 * 0.0226
-WAFER = {10.0: 0.43, 20.0: 0.29, 40.0: 0.20}
+MODEL_CURVE = {10.0: 0.43, 20.0: 0.29, 40.0: 0.20}
 for seed in (0, 101):
     par = dict(petch.PAR); par['periodic_y'] = 1; par['rate_scale'] = 0.0226
     par['knudsen_wall_loss_scale'] = 2.9
@@ -23,7 +27,8 @@ for seed in (0, 101):
     dd_s = uniform_filter1d(dd, 21, mode="nearest")
     rate = uniform_filter1d(np.gradient(dd_s, tm), 21, mode="nearest")
     ar_eff = (dd_s + MASK) / W
-    vals = {A: (float(np.interp(A, ar_eff, rate)) / FIELD if A <= ar_eff.max() - 0.5 else np.nan) for A in WAFER}
-    tag = " | ".join(f"AR{int(A)}={vals[A]:.3f}(w {WAFER[A]})" for A in WAFER)
+    vals = {A: (float(np.interp(A, ar_eff, rate)) / FIELD if A <= ar_eff.max() - 0.5 else np.nan) for A in MODEL_CURVE}
+    tag = " | ".join(
+        f"AR{int(A)}={vals[A]:.3f}(model {MODEL_CURVE[A]})" for A in MODEL_CURVE)
     print(f"seed{seed}: {tag}  maxAR={ar_eff.max():.1f}  ({time.time()-t0:.0f}s)", flush=True)
 print("DONE", flush=True)

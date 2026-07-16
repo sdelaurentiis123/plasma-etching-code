@@ -77,6 +77,40 @@ def test_uniform_recession_removes_all_charge_and_itemizes_both_signs():
     assert result.relative_charge_balance_error < 3e-16
 
 
+def test_same_connectivity_partial_recession_retains_only_stationary_face_charge():
+    old_vertices, faces = _plane_mesh(2, z=0.0)
+    new_vertices = old_vertices.copy()
+    new_vertices[:, 2] = 0.01
+    sigma = np.linspace(1.0e-6, 8.0e-6, len(faces))
+    displacement = np.zeros(len(faces))
+    displacement[::2] = -0.01
+    material = np.ones(len(faces), dtype=int)
+
+    result = remap_surface_charge_3d(
+        old_vertices, faces, sigma, material, displacement,
+        new_vertices, faces.copy(), material, mesh_length_unit_m=1.0,
+        maximum_distance=1e-6)
+
+    assert np.array_equal(result.sigma_c_per_m2[::2], np.zeros(len(faces[::2])))
+    assert np.allclose(result.sigma_c_per_m2[1::2], sigma[1::2], rtol=2e-16)
+    assert np.count_nonzero(result.removed_charge_by_old_face_c) == len(faces[::2])
+    assert result.relative_charge_balance_error < 3e-16
+
+
+def test_zero_retained_charge_needs_no_geometric_correspondence():
+    old_vertices, old_faces = _plane_mesh(3, z=0.0)
+    new_vertices, new_faces = _plane_mesh(4, z=10.0)
+    result = remap_surface_charge_3d(
+        old_vertices, old_faces, np.zeros(len(old_faces)),
+        np.ones(len(old_faces), dtype=int), np.zeros(len(old_faces)),
+        new_vertices, new_faces, np.ones(len(new_faces), dtype=int),
+        mesh_length_unit_m=1.0, maximum_distance=0.01)
+
+    assert np.array_equal(result.sigma_c_per_m2, np.zeros(len(new_faces)))
+    assert result.relative_charge_balance_error == 0.0
+    assert result.diagnostics["maximum_nearest_distance"] == 0.0
+
+
 def test_advancing_plane_remap_converges_under_surface_refinement():
     errors = []
     for cells in (4, 8, 16):

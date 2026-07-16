@@ -57,7 +57,8 @@ def _geometry_and_poisson(dx=0.25):
         for i in (0, 1) for j in (0, 1) for k in (0, 1)) / 8.0
     epsilon_r = np.where(phi_center > 0.0, 3.9, 1.0)
     poisson = NodalPoissonSystem3D(
-        epsilon_r, geometry.dx * geometry.mesh_length_unit_m, fixed)
+        epsilon_r, geometry.dx * geometry.mesh_length_unit_m, fixed,
+        periodic_axes=(0, 1))
     return geometry, poisson
 
 

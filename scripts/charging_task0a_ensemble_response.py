@@ -23,9 +23,13 @@ from pathlib import Path
 
 # Four independent processes are the supported local parallel path. Numba's workqueue layer aborts
 # under concurrent Python threads, so ThreadPoolExecutor must not be used for this campaign.
-for variable in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
-                 "NUMEXPR_NUM_THREADS", "NUMBA_NUM_THREADS"):
-    os.environ[variable] = "1"
+# Thread-count environment variables must be fixed before Numba is imported.  Do that only for
+# direct campaign execution: importing this module for its audit helpers must not mutate the host
+# test process after another module has already initialized Numba's worker pool.
+if __name__ == "__main__":
+    for variable in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+                     "NUMEXPR_NUM_THREADS", "NUMBA_NUM_THREADS"):
+        os.environ[variable] = "1"
 
 import numpy as np
 

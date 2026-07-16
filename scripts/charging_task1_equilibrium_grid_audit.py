@@ -70,7 +70,8 @@ def _geometry_and_poisson(dx):
         for i in (0, 1) for j in (0, 1) for k in (0, 1)) / 8.0
     epsilon_r = np.where(phi_center > 0.0, 3.9, 1.0)
     poisson = NodalPoissonSystem3D(
-        epsilon_r, geometry.dx * geometry.mesh_length_unit_m, fixed)
+        epsilon_r, geometry.dx * geometry.mesh_length_unit_m, fixed,
+        periodic_axes=(0, 1))
     verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
     normals = _surface_gas_normals(verts, faces, centroids, geometry)
     return geometry, poisson, verts, faces, centroids, areas, normals

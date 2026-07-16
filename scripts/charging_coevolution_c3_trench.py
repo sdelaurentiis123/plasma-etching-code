@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bounded fixed-geometry C3 trench trajectory with face-authoritative checkpoints."""
+"""Bounded fixed-geometry C3 trench trajectory with compatible-Q1 checkpoints."""
 from __future__ import annotations
 
 import argparse
@@ -87,9 +87,14 @@ def main():
     parser.add_argument("--grid-dx", type=float, default=0.25)
     parser.add_argument("--timestep-s", type=float, default=1.25e-7)
     parser.add_argument("--maximum-steps", type=int, default=2)
-    parser.add_argument("--timestep-policy", choices=("fixed", "ser"), default="fixed")
+    parser.add_argument(
+        "--timestep-policy", choices=("fixed", "ser", "decreasing_gain"),
+        default="fixed")
     parser.add_argument("--maximum-timestep-s", type=float, default=5e-7)
     parser.add_argument("--minimum-timestep-s", type=float, default=1e-11)
+    parser.add_argument("--stochastic-gain-exponent", type=float, default=0.75)
+    parser.add_argument("--stochastic-gain-offset-steps", type=int, default=16)
+    parser.add_argument("--initial-stochastic-gain-age-steps", type=int)
     parser.add_argument("--ser-activation-rms", type=float, default=0.5)
     parser.add_argument("--ser-maximum-growth", type=float, default=2.0)
     parser.add_argument("--ser-allowed-residual-growth", type=float, default=0.005)
@@ -98,6 +103,9 @@ def main():
         "--terminal-window-s", type=float, default=50e-6,
         help=("declared CCA-R2 terminal window; B1 uses endpoint potential drift and B2 "
               "uses time-integrated patch currents over this window"))
+    parser.add_argument(
+        "--no-terminal-window", action="store_true",
+        help="proposal-only mode; disables B1/B2 window certification")
     parser.add_argument("--patch-scales-um", type=float, nargs="+", default=(0.25, 0.5))
     parser.add_argument("--initial-face-state", type=Path)
     parser.add_argument(
@@ -112,6 +120,11 @@ def main():
     parser.add_argument("--n-position", type=int, default=256)
     parser.add_argument("--seed", type=int, default=79)
     parser.add_argument("--scramble-mode", choices=("frozen", "fresh"), default="frozen")
+    parser.add_argument(
+        "--compatible-q1-charge-state",
+        action=argparse.BooleanOptionalAction, default=False,
+        help=("store the unique minimum-density face representative of the authoritative Q1 "
+              "nodal charge; legacy raw-face replay remains the default"))
     parser.add_argument("--sampling-seed-stride", type=int, default=1000003)
     parser.add_argument(
         "--initial-sampling-epoch", type=int,
@@ -145,8 +158,16 @@ def main():
     args = parser.parse_args()
     if args.maximum_steps < 0:
         parser.error("--maximum-steps must be nonnegative")
-    if not np.isfinite(args.terminal_window_s) or args.terminal_window_s <= 0.0:
+    if args.no_terminal_window:
+        args.terminal_window_s = None
+    elif not np.isfinite(args.terminal_window_s) or args.terminal_window_s <= 0.0:
         parser.error("--terminal-window-s must be positive and finite")
+    if args.timestep_policy == "decreasing_gain" and args.terminal_window_s is not None:
+        parser.error("decreasing-gain proposals require --no-terminal-window")
+    if (not np.isfinite(args.stochastic_gain_exponent)
+            or not 0.5 < args.stochastic_gain_exponent <= 1.0
+            or args.stochastic_gain_offset_steps <= 0):
+        parser.error("invalid decreasing-gain schedule")
     if args.response_max_bounces <= 0:
         parser.error("--response-max-bounces must be positive")
     if args.trajectory_max_steps <= 0:
@@ -192,12 +213,26 @@ def main():
             state_vertices = np.asarray(archived["vertices"], dtype=float)
             for name in (
                     "resume_sampling_epoch", "scramble_mode", "scramble_base_seed",
-                    "sampling_seed_stride"):
+                    "sampling_seed_stride", "compatible_q1_charge_state",
+                    "poisson_periodic_axes", "resume_stochastic_gain_age_steps"):
                 if name in archived:
-                    checkpoint_sampling[name] = np.asarray(archived[name]).item()
+                    value = np.asarray(archived[name])
+                    checkpoint_sampling[name] = (
+                        value.item() if value.ndim == 0 else value.copy())
         if (initial_sigma.shape != (len(faces),) or not np.array_equal(faces, state_faces)
                 or not np.array_equal(vertices, state_vertices)):
             parser.error("initial face-charge checkpoint does not match this exact mesh")
+
+    checkpoint_compatible = checkpoint_sampling.get("compatible_q1_charge_state")
+    if (checkpoint_compatible is not None
+            and bool(checkpoint_compatible) != args.compatible_q1_charge_state):
+        parser.error(
+            "--compatible-q1-charge-state conflicts with checkpoint metadata")
+    checkpoint_periodic_axes = checkpoint_sampling.get("poisson_periodic_axes")
+    if (checkpoint_periodic_axes is not None
+            and tuple(int(axis) for axis in np.ravel(checkpoint_periodic_axes))
+            != tuple(poisson.periodic_axes)):
+        parser.error("checkpoint Poisson topology conflicts with this run")
 
     if args.scramble_mode == "fresh":
         checkpoint_epoch = checkpoint_sampling.get("resume_sampling_epoch")
@@ -226,6 +261,23 @@ def main():
             parser.error("--initial-sampling-epoch is only valid in fresh mode")
         args.initial_sampling_epoch = 0
 
+    checkpoint_gain_age = checkpoint_sampling.get("resume_stochastic_gain_age_steps")
+    if args.timestep_policy == "decreasing_gain":
+        if checkpoint_gain_age is not None:
+            checkpoint_gain_age = int(checkpoint_gain_age)
+            if (args.initial_stochastic_gain_age_steps is not None
+                    and args.initial_stochastic_gain_age_steps != checkpoint_gain_age):
+                parser.error(
+                    "--initial-stochastic-gain-age-steps conflicts with checkpoint metadata")
+            args.initial_stochastic_gain_age_steps = checkpoint_gain_age
+        elif args.initial_stochastic_gain_age_steps is None:
+            args.initial_stochastic_gain_age_steps = 0
+    else:
+        if args.initial_stochastic_gain_age_steps not in (None, 0):
+            parser.error(
+                "--initial-stochastic-gain-age-steps requires decreasing_gain")
+        args.initial_stochastic_gain_age_steps = 0
+
     reflection = GrazingSpecularIonReflection3D.literature_bounded_sensitivity(1, "Ar+")
     adjoint_proposal_seeds = {"Ar+": args.seed}
     if args.electron_estimator == "adjoint":
@@ -240,6 +292,9 @@ def main():
         timestep_policy=args.timestep_policy,
         maximum_timestep_s=args.maximum_timestep_s,
         minimum_timestep_s=args.minimum_timestep_s,
+        stochastic_gain_exponent=args.stochastic_gain_exponent,
+        stochastic_gain_offset_steps=args.stochastic_gain_offset_steps,
+        initial_stochastic_gain_age_steps=args.initial_stochastic_gain_age_steps,
         ser_activation_rms=args.ser_activation_rms,
         ser_maximum_growth=args.ser_maximum_growth,
         ser_allowed_residual_growth=args.ser_allowed_residual_growth,
@@ -248,6 +303,10 @@ def main():
         patch_scales_um=list(args.patch_scales_um), n_position=args.n_position,
         seed=args.seed,
         scramble_mode=args.scramble_mode,
+        compatible_q1_charge_state=args.compatible_q1_charge_state,
+        particle_periodic_lateral=True,
+        poisson_periodic_axes=list(poisson.periodic_axes),
+        poisson_independent_node_shape=list(poisson.reduced_shape),
         sampling_seed_stride=args.sampling_seed_stride,
         initial_sampling_epoch=args.initial_sampling_epoch,
         adjoint_proposal_seeds=adjoint_proposal_seeds,
@@ -275,6 +334,7 @@ def main():
     config_hash = sha256(encoded).hexdigest()
     source_paths = (
         ROOT / "src/petch/charging_coevolution_3d.py",
+        ROOT / "src/petch/charging_poisson_3d.py",
         ROOT / "src/petch/charging_coupled_3d.py",
         ROOT / "src/petch/boundary_transport_3d.py",
         ROOT / "src/petch/charged_surface_cascade_3d.py",
@@ -334,7 +394,14 @@ def main():
                 resume_sampling_epoch=np.asarray(resume_sampling_epoch),
                 scramble_mode=np.asarray(args.scramble_mode),
                 scramble_base_seed=np.asarray(args.seed),
-                sampling_seed_stride=np.asarray(args.sampling_seed_stride))
+                sampling_seed_stride=np.asarray(args.sampling_seed_stride),
+                resume_stochastic_gain_age_steps=np.asarray(
+                    item["stochastic_gain_age_steps"]),
+                compatible_q1_charge_state=np.asarray(
+                    args.compatible_q1_charge_state),
+                poisson_periodic_axes=np.asarray(poisson.periodic_axes, dtype=int),
+                poisson_independent_node_shape=np.asarray(
+                    poisson.reduced_shape, dtype=int))
             last_checkpointed_accepted_steps = accepted_steps
         if (item["evaluation"] % args.heartbeat_every_evaluations == 0
                 or checkpoint_due):
@@ -348,6 +415,7 @@ def main():
                 physical_time_s=float(physical_time_s),
                 pseudo_time_s=float(pseudo_time_s),
                 resume_sampling_epoch=int(resume_sampling_epoch),
+                stochastic_gain_age_steps=int(item["stochastic_gain_age_steps"]),
                 node_rms=item["rms_relative_current_imbalance_node"],
                 node_worst=item["max_relative_current_imbalance_node"],
                 instantaneous_potential_rate_max_v_s=item["potential_rate_max_v_s"],
@@ -369,6 +437,13 @@ def main():
                 trajectory_horizon_extensions=item[
                     "transport_trajectory_horizon_extension_count"],
                 replay_fraction=item["transport_lineage_replay_fraction"],
+                compatible_q1_charge_state=item["compatible_q1_charge_state"],
+                unresolved_face_current_fraction=item[
+                    "unresolved_face_current_fraction"],
+                q1_resolved_patch_b2_max=item[
+                    "gate_patch_q1_resolved_max_ion_normalized_imbalance"],
+                q1_unresolved_patch_b2_max=item[
+                    "gate_patch_q1_unresolved_max_ion_normalized_imbalance"],
                 checkpoint=(progress_checkpoint_path.name
                             if last_checkpointed_accepted_steps is not None else None),
                 checkpoint_accepted_steps=last_checkpointed_accepted_steps)
@@ -387,6 +462,10 @@ def main():
             current_balance_tolerance=0.08, timestep_policy=args.timestep_policy,
             maximum_timestep_s=args.maximum_timestep_s,
             minimum_timestep_s=args.minimum_timestep_s,
+            stochastic_gain_exponent=args.stochastic_gain_exponent,
+            stochastic_gain_offset_steps=args.stochastic_gain_offset_steps,
+            initial_stochastic_gain_age_steps=(
+                args.initial_stochastic_gain_age_steps),
             ser_activation_rms=args.ser_activation_rms,
             ser_maximum_growth=args.ser_maximum_growth,
             ser_allowed_residual_growth=args.ser_allowed_residual_growth,
@@ -423,16 +502,18 @@ def main():
                 args.response_adaptive_bounce_extension),
             response_emergency_max_bounces=args.response_emergency_max_bounces,
             terminal_window_s=args.terminal_window_s,
+            stop_on_saturation=(args.timestep_policy != "decreasing_gain"),
+            compatible_q1_charge_state=args.compatible_q1_charge_state,
             progress_callback=persist_progress)
     except SurfaceChargingSaturationError as error:
         wall_clock_s = perf_counter() - started
         history = tuple(dict(item) for item in error.history)
         last = history[-1] if history else {}
         failure_sigma = np.asarray(error.sigma_c_per_m2)
-        failure_charge = lump_triangle_sheet_charge_3d(
+        failure_charge = poisson.canonicalize_charge(lump_triangle_sheet_charge_3d(
             poisson.shape, vertices, faces, failure_sigma,
             grid_origin=(0.0, 0.0, 0.0), grid_spacing=geometry.dx,
-            coordinate_length_unit_m=geometry.mesh_length_unit_m)
+            coordinate_length_unit_m=geometry.mesh_length_unit_m))
         failure_potential, _ = poisson.solve(failure_charge)
         failure_summary = dict(
             schema="petch.charging.coevolution.c3.trench-pilot.v1",
@@ -445,6 +526,16 @@ def main():
                 physical_time_s=error.physical_time_s,
                 pseudo_time_s=error.pseudo_time_s,
                 resume_sampling_epoch=error.resume_sampling_epoch,
+                resume_stochastic_gain_age_steps=int(
+                    args.initial_stochastic_gain_age_steps + error.accepted_steps),
+                compatible_q1_charge_state=args.compatible_q1_charge_state,
+                maximum_unresolved_face_current_fraction=max(
+                    (item.get("unresolved_face_current_fraction", 0.0)
+                     for item in history), default=None),
+                q1_resolved_patch_b2_max=last.get(
+                    "gate_patch_q1_resolved_max_ion_normalized_imbalance"),
+                q1_unresolved_patch_b2_max=last.get(
+                    "gate_patch_q1_unresolved_max_ion_normalized_imbalance"),
                 retained_node_rms_relative_current_imbalance=last.get(
                     "rms_relative_current_imbalance_node"),
                 retained_node_max_relative_current_imbalance=last.get(
@@ -508,7 +599,14 @@ def main():
             resume_sampling_epoch=np.asarray(error.resume_sampling_epoch),
             scramble_mode=np.asarray(args.scramble_mode),
             scramble_base_seed=np.asarray(args.seed),
-            sampling_seed_stride=np.asarray(args.sampling_seed_stride))
+            sampling_seed_stride=np.asarray(args.sampling_seed_stride),
+            resume_stochastic_gain_age_steps=np.asarray(
+                args.initial_stochastic_gain_age_steps + error.accepted_steps),
+            compatible_q1_charge_state=np.asarray(
+                args.compatible_q1_charge_state),
+            poisson_periodic_axes=np.asarray(poisson.periodic_axes, dtype=int),
+            poisson_independent_node_shape=np.asarray(
+                poisson.reduced_shape, dtype=int))
         atomic_json(args.output_dir / "config.json", config)
         atomic_json(args.output_dir / "summary.json", failure_summary)
         atomic_json(heartbeat_path, dict(
@@ -518,6 +616,8 @@ def main():
             error_message=str(error), accepted_steps=error.accepted_steps,
             physical_time_s=error.physical_time_s,
             resume_sampling_epoch=error.resume_sampling_epoch,
+            resume_stochastic_gain_age_steps=(
+                args.initial_stochastic_gain_age_steps + error.accepted_steps),
             checkpoint=failure_checkpoint_path.name,
             checkpoint_sha256=file_hash(failure_checkpoint_path)))
         print(json.dumps(failure_summary, indent=2), flush=True)
@@ -532,6 +632,30 @@ def main():
             rejected_steps=result.rejected_steps, physical_time_s=result.physical_time_s,
             pseudo_time_s=result.pseudo_time_s,
             resume_sampling_epoch=result.diagnostics["resume_sampling_epoch"],
+            resume_stochastic_gain_age_steps=result.diagnostics[
+                "resume_stochastic_gain_age_steps"],
+            compatible_q1_charge_state=result.diagnostics[
+                "compatible_q1_charge_state"],
+            q1_face_coupling_rank=result.diagnostics["q1_face_coupling_rank"],
+            q1_face_coupling_nullity=result.diagnostics["q1_face_coupling_nullity"],
+            q1_face_coupling_condition_number=result.diagnostics[
+                "q1_face_coupling_condition_number"],
+            initial_unresolved_face_charge_fraction=result.diagnostics[
+                "initial_unresolved_face_charge_fraction"],
+            maximum_unresolved_face_current_fraction=result.diagnostics[
+                "maximum_unresolved_face_current_fraction"],
+            cumulative_unresolved_face_current_projection_l1_c=result.diagnostics[
+                "cumulative_unresolved_face_current_projection_l1_c"],
+            q1_resolved_patch_b2_rms=result.diagnostics[
+                "final_patch_q1_resolved_rms_ion_normalized_imbalance"],
+            q1_resolved_patch_b2_max=result.diagnostics[
+                "final_patch_q1_resolved_max_ion_normalized_imbalance"],
+            q1_unresolved_patch_b2_rms=result.diagnostics[
+                "final_patch_q1_unresolved_rms_ion_normalized_imbalance"],
+            q1_unresolved_patch_b2_max=result.diagnostics[
+                "final_patch_q1_unresolved_max_ion_normalized_imbalance"],
+            q1_patch_functional_null_sensitivity_max=result.diagnostics[
+                "patch_q1_functional_null_sensitivity_max"],
             retained_node_rms_relative_current_imbalance=(
                 result.diagnostics["retained_node_rms_relative_current_imbalance"]),
             retained_node_max_relative_current_imbalance=(
@@ -600,7 +724,14 @@ def main():
         resume_sampling_epoch=np.asarray(result.diagnostics["resume_sampling_epoch"]),
         scramble_mode=np.asarray(args.scramble_mode),
         scramble_base_seed=np.asarray(args.seed),
-        sampling_seed_stride=np.asarray(args.sampling_seed_stride))
+        sampling_seed_stride=np.asarray(args.sampling_seed_stride),
+        resume_stochastic_gain_age_steps=np.asarray(result.diagnostics[
+            "resume_stochastic_gain_age_steps"]),
+        compatible_q1_charge_state=np.asarray(
+            args.compatible_q1_charge_state),
+        poisson_periodic_axes=np.asarray(poisson.periodic_axes, dtype=int),
+        poisson_independent_node_shape=np.asarray(
+            poisson.reduced_shape, dtype=int))
     atomic_npz(
         current_audit_path,
         positive_face_current_density_a_m2=(
@@ -615,14 +746,29 @@ def main():
             np.empty(0) if result.terminal_window_negative_face_current_density_a_m2 is None
             else result.terminal_window_negative_face_current_density_a_m2),
         terminal_window_ready=np.asarray(result.diagnostics["terminal_window_ready"]),
-        terminal_window_s=np.asarray(args.terminal_window_s),
+        terminal_window_s=np.asarray(
+            np.nan if args.terminal_window_s is None else args.terminal_window_s),
+        compatible_q1_charge_state=np.asarray(
+            result.diagnostics["compatible_q1_charge_state"]),
+        q1_face_coupling_rank=np.asarray(result.diagnostics["q1_face_coupling_rank"]),
+        q1_face_coupling_nullity=np.asarray(result.diagnostics["q1_face_coupling_nullity"]),
+        q1_resolved_patch_b2_rms=np.asarray(result.diagnostics[
+            "final_patch_q1_resolved_rms_ion_normalized_imbalance"]),
+        q1_resolved_patch_b2_max=np.asarray(result.diagnostics[
+            "final_patch_q1_resolved_max_ion_normalized_imbalance"]),
+        q1_unresolved_patch_b2_rms=np.asarray(result.diagnostics[
+            "final_patch_q1_unresolved_rms_ion_normalized_imbalance"]),
+        q1_unresolved_patch_b2_max=np.asarray(result.diagnostics[
+            "final_patch_q1_unresolved_max_ion_normalized_imbalance"]),
+        q1_patch_functional_null_sensitivity_max=np.asarray(result.diagnostics[
+            "patch_q1_functional_null_sensitivity_max"]),
         positive_current_node_a=result.final_step.positive_current_node_a,
         negative_current_node_a=result.final_step.negative_current_node_a,
         potential_before_v=result.final_step.potential_before_v,
         potential_after_v=result.final_step.potential_after_v,
         potential_rate_v_s=(
             result.final_step.potential_after_v - result.final_step.potential_before_v
-        ) / args.timestep_s,
+        ) / result.history[-1]["timestep_s"],
         terminal_window_potential_rate_max_v_s=np.asarray(
             np.nan if result.diagnostics["final_potential_rate_max_v_s"] is None
             else result.diagnostics["final_potential_rate_max_v_s"]),
@@ -644,7 +790,18 @@ def main():
         status=("converged" if result.converged else "bounded_run_complete"),
         updated_utc=utc_now(), config_hash=config_hash, process_id=os.getpid(),
         accepted_steps=result.accepted_steps, physical_time_s=result.physical_time_s,
+        pseudo_time_s=result.pseudo_time_s,
         resume_sampling_epoch=result.diagnostics["resume_sampling_epoch"],
+        resume_stochastic_gain_age_steps=result.diagnostics[
+            "resume_stochastic_gain_age_steps"],
+        compatible_q1_charge_state=result.diagnostics[
+            "compatible_q1_charge_state"],
+        maximum_unresolved_face_current_fraction=result.diagnostics[
+            "maximum_unresolved_face_current_fraction"],
+        q1_resolved_patch_b2_max=result.diagnostics[
+            "final_patch_q1_resolved_max_ion_normalized_imbalance"],
+        q1_unresolved_patch_b2_max=result.diagnostics[
+            "final_patch_q1_unresolved_max_ion_normalized_imbalance"],
         node_rms=result.diagnostics["retained_node_rms_relative_current_imbalance"],
         node_worst=result.diagnostics["retained_node_max_relative_current_imbalance"],
         instantaneous_potential_rate_max_v_s=result.diagnostics[

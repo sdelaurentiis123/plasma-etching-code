@@ -69,9 +69,9 @@
 <tr><td>Narrow-feature lag</td><td>narrowest features etch ~32% shallower than the open field</td></tr>
 </tbody>
 </table>
-<p>The mechanistic backbone for this curve is the <strong>Blauw Knudsen/Clausing transport model</strong> <span class="eqn-note">(Blauw et al., <em>JVST B</em> <strong>18</strong>, 3453, 2000)</span>, in which the bottom-to-top etch-rate ratio is set by aperture conductance:</p>
+<p>The mechanistic backbone commonly used to interpret this curve is the <strong>Blauw Knudsen/Clausing transport model</strong> <span class="eqn-note">(Blauw et al., <em>JVST B</em> <strong>18</strong>, 3453, 2000)</span>, in which the bottom-to-top etch-rate ratio is set by aperture conductance:</p>
 $$R_E \;\approx\; \frac{K^{\rm AR}}{K^{\rm AR} + S_F - K^{\rm AR}\,S_F},$$
-<p>where \(K^{\rm AR}\) is the aspect-ratio-dependent Clausing transmission probability and \(S_F\) is the fluorine reaction (sticking) probability at the floor, measured here as \(S_F \approx 0.47\) cryogenic / \(0.32\) for the ICP condition. The corresponding normalized etch rate falls steeply with aspect ratio:</p>
+<p>where \(K^{\rm AR}\) is the aspect-ratio-dependent Clausing transmission probability and \(S_F\) is an effective fluorine reaction probability. The often-repeated normalized sequence below is the <strong>evaluated Blauw/Clausing model curve</strong>, not a set of directly measured de Boer Figure-9 markers:</p>
 <table>
 <thead><tr><th>Aspect ratio (AR)</th><th>0</th><th>10</th><th>20</th><th>40</th></tr></thead>
 <tbody>
@@ -79,12 +79,12 @@ $$R_E \;\approx\; \frac{K^{\rm AR}}{K^{\rm AR} + S_F - K^{\rm AR}\,S_F},$$
 </tbody>
 </table>
 <div class="callout deriv">
-<span class="lab">Why this dataset matters</span>
-<p>The form above contains the entire reaction- vs. transport-limited story. At <strong>low ion flux</strong> the floor is reaction-limited and the etch is nearly AR-independent (flat ARDE). At <strong>high ion flux</strong> the floor consumes fluorine faster than conductance can deliver it, so the etch becomes F-transport-limited and ARDE turns steep. Note the limit \(S_F\to0 \Rightarrow R_E\to 1/K^{\rm AR}\): lower floor sticking gives a <em>flatter</em> ARDE. This is the quantitative version of the "neutral-limited vs. F-saturated" diagnosis that runs through our whole calibration story — and a dataset like this, which sweeps opening width at known \(S_F\), is the only way to test that we land in the right regime rather than just matching one depth.</p>
+<span class="lab">Evidence correction — 2026-07-15</span>
+<p>petch now ingests the actual Figure-9 pixels: 16 depth-vs-opening markers at 5.5, 12.5, and 25 minutes, with source/image checksums and pixel replay. The first common-engine score exposed a model miss: the old generic SiO<sub>2</sub>-derived adapter overpredicted the twelve transfer depths by 5.55&nbsp;µm RMSE on its finest completed grid (0/12 inside the digitization interval). Those twelve points have now been seen and are development data forever. They cannot be advertised as held out again; a different experiment is required for validation.</p>
 </div>
 <figure>
-<img src="experiment_arde.png" alt="ARDE vs aspect ratio: de Boer measured wafer, pure ViennaPS, petch's ballistic Sn reference, and petch's Knudsen+reflected-ion transport passing the 0.05 gate." style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
-<figcaption>The measured de Boer/Blauw cryo SF<sub>6</sub>/O<sub>2</sub> wafer (stars) versus <strong>pure <a href="viennaps-validation.html">ViennaPS</a></strong> on the same W&nbsp;=&nbsp;2&nbsp;µm trench (red, GPU), <strong>petch's ballistic radiosity transport</strong> (blue dashed, reference — the deterministic solver that passes the measured-ViennaPS gate, RMSE 0.043), and <strong>petch's Knudsen-conductance tail + faithful reflected ion</strong> (green). The ballistic engines sit well above the wafer through the knee (AR&nbsp;10: ViennaPS 0.60, petch radiosity 0.66, measured 0.43) — ballistic transport omits gas-phase conductance by construction. The green curve adds the two cited mechanisms the literature assigns to this wafer's shape: <strong>molecular-flow (Knudsen) conductance</strong> down the feature (Coburn–Winters) and an <strong>~AR-independent ion-limited floor</strong> sustained by ion reflection funneling (Blauw 2000: "ion-limited etching is aspect-ratio independent"). The headline is the purple points: <strong>petch's production <em>evolving</em> mode</strong> (the same provenance as the wafer data), with its one transport knob calibrated on the AR&nbsp;10/20 knee only — <strong>the never-fitted AR&nbsp;40 tail is then <em>predicted</em> at 0.15–0.20 vs the measured 0.20</strong> (two MC seeds; full-curve RMSE 0.031–0.043, gate 0.05). The historically "collapsing" deep tail is predicted from the knee. Honest labels: one calibrated transport knob + one absolute-rate constant (Gomez 1.3&nbsp;µm/min); every other constant is the documented Belen/ViennaPS set; one wafer dataset; a spontaneous-F floor channel was considered and <em>rejected</em> on the literature (de Boer's floor rate is temperature-independent → ion-assisted; Flamm's law collapses at cryo). (An earlier version of this figure showed a "petch-cryo" curve built on the since-removed <code>cal_F</code> flux normalization — retired.)</figcaption>
+<img src="experiment_arde.png" alt="Retired historical ARDE model-curve comparison; not direct de Boer experimental validation." style="max-width:100%;border:1px solid #e0ddd2;border-radius:8px">
+<figcaption><strong>Retired historical diagnostic.</strong> This image mixed the calculated 1/0.43/0.29/0.20 Clausing curve with direct experimental language and therefore cannot support an experimental score. It remains visible only so old reports are auditable. The authoritative comparison is generated from <code>data/experimental/deboer_2002/digitized_figure9.csv</code> and the common-engine development audit.</figcaption>
 </figure>
 
 <h3>Feature charging — gated against Hwang–Giapis (closure passes; conductor build gets the mechanism)</h3>
@@ -138,14 +138,14 @@ $$R \;=\; \big(2.91\times10^{-12}\big)\,T^{1/2}\,n_F\,\exp\!\Big(\frac{-0.108\ \
 <h2>3. What we can — and cannot — claim</h2>
 <div class="callout key">
 <span class="lab">Honest scorecard</span>
-<p><strong>What matching #1 + #2 lets us claim, validated against real wafer SEMs and profilometry:</strong></p>
+<p><strong>What the current evidence supports:</strong></p>
 <ul>
-<li><strong>Profile-shape response to chemistry</strong> — SF<sub>6</sub>:O<sub>2</sub> ratio driving tapered → vertical → bowed sidewalls (target #1, Fig. 9).</li>
-<li><strong>Correct ARDE / RIE-lag trend</strong> — Knudsen F-transport with the reaction-limited vs. transport-limited crossover (target #2).</li>
-<li><strong>Ion-reflection microtrenching morphology</strong> — the bottom-corner carving from specular grazing reflection (target #3).</li>
-<li><strong>Reasonable absolute etch rate and yield</strong> — chemical term anchored to Flamm 1981, ion-enhanced term to the measured 7&ndash;14 atoms/ion.</li>
+<li><strong>Mechanism anchors</strong> — measured Si/F yields, spontaneous-F kinetics, and grazing-ion reflection bounds constrain the common mechanism.</li>
+<li><strong>Direct ARDE development evidence</strong> — common Belen chemistry plus certified reflection improves the de Boer transfer RMSE from 3.54 to 2.56&nbsp;µm, but the remaining miss and already-seen points preclude a validation claim.</li>
+<li><strong>Numerical integrity</strong> — the same charged cascade closes number, charge, energy, and tail ledgers while feeding a periodic moving profile; its three-level depth sequence contracts under sample refinement.</li>
+<li><strong>Open validation target</strong> — a different, checksum-bound experiment must be reserved before any predictive feature-profile claim.</li>
 </ul>
-<p>That is as good as, or better than, what ViennaPS itself demonstrates — and crucially it is measured against <em>experiment</em>, not against another simulator.</p>
+<p>These are meaningful development and mechanism results, but they are not equivalent to an independent experimental validation.</p>
 <p><strong>What still deviates from real wafers — and is also missing from ViennaPS:</strong></p>
 <ol>
 <li><strong>Charging</strong> — notching and aspect-ratio-dependent ion deflection. <em>No longer absent from petch</em>: the floor-flux closure passes the HG gate (0.039) and the wired notch reproduces the measured notch's charging-on/off signature and monotone-with-AR shape (r&nbsp;=&nbsp;0.92, above). Still absent from ViennaPS entirely. Open in petch: absolute notch depth calibration and the deep-AR electron supply (RF-phase trajectories).</li>
@@ -154,7 +154,7 @@ $$R \;=\; \big(2.91\times10^{-12}\big)\,T^{1/2}\,n_F\,\exp\!\Big(\frac{-0.108\ \
 <li><strong>Flux-dependent reaction probability</strong> — the Donnelly curve above; both models use an effective constant sticking instead.</li>
 <li><strong>Absolute fluxes are fit, not predicted</strong> — this is a feature-scale profile simulator, not a plasma-to-wafer model. The incident fluxes come from calibration, not from solving the reactor.</li>
 </ol>
-<p><strong>Bottom line:</strong> matching targets #1 and #2 means we are validated against real wafer SEMs and ARDE data for <em>shape, rate, yield, and aspect-ratio behavior</em> — as good as or better than ViennaPS demonstrates, and against experiment rather than against a calibrated model. To go further and beat real production wafers, the additions are clear and ranked: <strong>charging first, then the real IEDF</strong>.</p>
+<p><strong>Bottom line:</strong> the common engine now contains the right classes of transport, chemistry, reflection, charging, and moving-surface machinery, but independent feature-profile validation is still open. The next claim-bearing step is not another fit to de Boer; it is a preregistered transfer to a different experiment with grid, timestep, sampling, and digitization uncertainties reported separately.</p>
 </div>
 
 <div class="pagenav">

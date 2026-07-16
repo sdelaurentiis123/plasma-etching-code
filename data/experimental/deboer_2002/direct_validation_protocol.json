@@ -1,0 +1,62 @@
+{
+  "protocol_id": "DEBOER-2002-FIG9-DIRECT-V1",
+  "frozen_before_first_engine_score": true,
+  "source": {
+    "csv": "data/experimental/deboer_2002/digitized_figure9.csv",
+    "csv_sha256": "ed0b72235887df70552356838e376540b26234a9084ce5c886fab45ed40d7b1b",
+    "paper_doi": "10.1109/JMEMS.2002.800928",
+    "figure": "Fig. 9"
+  },
+  "claim_boundary": {
+    "claim": "calibrated transfer demonstration of common-engine ARDE shape",
+    "not_claimed": [
+      "predictive SF6/O2 chemistry",
+      "absolute etch-rate prediction",
+      "charging validation",
+      "measurement-uncertainty coverage"
+    ],
+    "reason": "One sticking parameter and one open-feature rate per time curve are inferred from the experiment; remaining chemistry parameters are calibration closures."
+  },
+  "boundary_inputs": [
+    {"series_time_min": 5.5, "mask_opening_um": 115.866702, "role": "open_rate_anchor"},
+    {"series_time_min": 12.5, "mask_opening_um": 105.374732, "role": "open_rate_anchor"},
+    {"series_time_min": 25.0, "mask_opening_um": 74.571734, "role": "open_rate_anchor"}
+  ],
+  "calibration": {
+    "row": {"series_time_min": 12.5, "mask_opening_um": 2.847966},
+    "parameter": "s_F",
+    "candidate_values": [0.04, 0.08, 0.14, 0.22],
+    "selection_metric": "squared_depth_error_um2",
+    "tie_break": "smallest_candidate_value"
+  },
+  "held_out_rows": [
+    {"series_time_min": 5.5, "mask_opening_um": 7.194861},
+    {"series_time_min": 5.5, "mask_opening_um": 12.740899},
+    {"series_time_min": 5.5, "mask_opening_um": 22.633833},
+    {"series_time_min": 5.5, "mask_opening_um": 58.608137},
+    {"series_time_min": 12.5, "mask_opening_um": 6.745182},
+    {"series_time_min": 12.5, "mask_opening_um": 11.841542},
+    {"series_time_min": 12.5, "mask_opening_um": 23.683084},
+    {"series_time_min": 12.5, "mask_opening_um": 53.286938},
+    {"series_time_min": 25.0, "mask_opening_um": 6.370450},
+    {"series_time_min": 25.0, "mask_opening_um": 9.743041},
+    {"series_time_min": 25.0, "mask_opening_um": 18.736617},
+    {"series_time_min": 25.0, "mask_opening_um": 42.494647}
+  ],
+  "engine": {
+    "operator": "scripts.deboer_feature3d.floor_rate",
+    "aspect_ratio_nodes": [0.0, 2.0, 4.0, 8.0, 12.0, 20.0],
+    "iad_sigma_deg": 1.0,
+    "primary": {"dx_um": 0.01, "seed": 0},
+    "grid_check": {"dx_um": 0.02, "seed": 0},
+    "sampling_check": {"dx_um": 0.01, "seed": 101},
+    "interpolation": "shape-preserving cubic interpolation of log normalized floor rate",
+    "profile_evolution": "integral solution of d(depth)/dt = v_open * f(depth/opening)"
+  },
+  "scoring": {
+    "primary_metrics": ["held_out_rmse_um", "held_out_mae_um", "held_out_relative_rmse"],
+    "digitization_coverage": "prediction inside depth +/- 0.50 um; diagnostic only",
+    "numerical_checks": ["grid_check", "sampling_check"],
+    "measurement_uncertainty": "not_reported"
+  }
+}

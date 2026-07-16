@@ -33,10 +33,9 @@ PAR = dict(
     # --- ported from Craig's plasma_sim (neutral_transport != "mc") ---
     radiosity_solver='jacobi',                  # 'jacobi' | 'gmres' (matrix-free, better-conditioned at low s)
     knudsen_wall_loss_scale=2.9,                # floor reaction-loss scale in the 1-D Knudsen conductance tail.
-                                                # PRODUCTION (EVOLVING-mode) calibration: 1 knob fitted to the
-                                                # de Boer wafer knee (AR10/20) in evolving etches -- the same
-                                                # provenance as the wafer data -- then the HELD-OUT AR40 tail is
-                                                # predicted within ~0.03 (2 seeds, RMSE 0.031-0.043, gate 0.05).
+                                                # LEGACY replay-only calibration: 1 knob was fitted to the
+                                                # Blauw/Clausing calculated curve at AR10/20. The former de Boer
+                                                # wafer/held-out AR40 label is withdrawn; this is not evidence.
                                                 # For the STATIC characterization harness (ideal vertical-wall
                                                 # carved trench) use ~1.4: the idealized geometry lacks the real
                                                 # evolving taper, so its effective loss requirement is lower

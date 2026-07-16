@@ -8,6 +8,9 @@ from petch.experimental_data import (
     jeon_2022_bohm_ion_flux_m2_s,
     load_bosch_wafer_measurements,
     load_bosch_wafer_measurements_89pt,
+    load_deboer_2002_figure9_depths,
+    load_jeong_2023_etch_depths,
+    load_jeong_2023_radical_densities,
     load_jeon_2022_electron_bias_controls,
     load_jeon_2022_plasma_controls,
     load_jeon_2022_trench_depths,
@@ -29,6 +32,11 @@ JEON_DATA = (
     / "digitized_trench_depths.csv")
 JEON_CONTROLS = JEON_DATA.with_name("digitized_plasma_controls.csv")
 JEON_ELECTRON_BIAS = JEON_DATA.with_name("digitized_electron_bias_controls.csv")
+DEBOER_DATA = (
+    Path(__file__).parents[1] / "data" / "experimental" / "deboer_2002"
+    / "digitized_figure9.csv")
+JEONG_2023_DATA = (
+    Path(__file__).parents[1] / "data" / "experimental" / "jeong_2023")
 
 
 def test_bosch_wafer_measurements_have_verified_provenance_and_units():
@@ -110,6 +118,76 @@ def test_krueger_2024_rejects_unverified_transcription(tmp_path):
 
     with pytest.raises(ValueError, match="checksum mismatch"):
         load_krueger_2024_evidence(target)
+
+
+def test_deboer_2002_direct_pixels_replay_and_freeze_the_transfer_split():
+    rows = load_deboer_2002_figure9_depths(DEBOER_DATA)
+
+    assert len(rows) == 16
+    assert sum(item.split == "boundary_input" for item in rows) == 3
+    assert sum(item.split == "calibration" for item in rows) == 1
+    assert sum(item.split == "held_out_transfer" for item in rows) == 12
+    calibration = next(item for item in rows if item.split == "calibration")
+    assert calibration.series_time_min == 12.5
+    assert calibration.mask_opening_um == min(
+        item.mask_opening_um for item in rows if item.series_time_min == 12.5)
+    assert all(item.measurement_uncertainty_um is None for item in rows)
+    assert max(abs(
+        item.x_axis_slope_um_per_pixel * item.marker_pixel_x
+        + item.x_axis_intercept_um - item.mask_opening_um) for item in rows) < 0.002
+    assert max(abs(
+        item.y_axis_slope_um_per_pixel * item.marker_pixel_y
+        + item.y_axis_intercept_um - item.etch_depth_um) for item in rows) < 0.002
+
+
+def test_jeong_2023_fixed_duration_depths_freeze_one_anchor_and_17_predictions():
+    rows = load_jeong_2023_etch_depths(
+        JEONG_2023_DATA / "digitized_figure7_depths.csv")
+
+    assert len(rows) == 18
+    assert {item.etch_duration_s for item in rows} == {1200.0}
+    assert sum(item.split == "calibration" for item in rows) == 1
+    assert sum(item.split == "held_out_transfer" for item in rows) == 17
+    anchor = next(item for item in rows if item.split == "calibration")
+    assert (anchor.control_mode, anchor.trench_width_nm,
+            anchor.self_bias_magnitude_v) == ("ion_energy", 200.0, 890.0)
+    energy_60 = sorted(
+        (item.self_bias_magnitude_v, item.etch_depth_nm) for item in rows
+        if item.control_mode == "ion_energy" and item.trench_width_nm == 60.0)
+    flux_60 = sorted(
+        (item.electron_density_m3, item.etch_depth_nm) for item in rows
+        if item.control_mode == "ion_flux" and item.trench_width_nm == 60.0)
+    assert energy_60[-1][1] - energy_60[1][1] < 35.0
+    assert flux_60[-1][1] > flux_60[1][1]
+    assert all(item.measurement_uncertainty_semantics == "not_reported" for item in rows)
+
+
+def test_jeong_2023_radicals_remain_source_model_boundary_inputs():
+    rows = load_jeong_2023_radical_densities(
+        JEONG_2023_DATA / "digitized_figure6_radicals.csv")
+
+    assert len(rows) == 18
+    assert all(item.evidence_type == "source_plasma_model_digitized" for item in rows)
+    heavy = {
+        density: sum(item.particle_density_cm3 for item in rows
+                     if item.electron_density_m3 == density
+                     and item.radical_class == "heavy")
+        for density in {1.1e15, 1.9e15, 3.1e15}}
+    light = {
+        density: sum(item.particle_density_cm3 for item in rows
+                     if item.electron_density_m3 == density
+                     and item.radical_class == "light")
+        for density in {1.1e15, 1.9e15, 3.1e15}}
+    assert heavy[3.1e15] > heavy[1.9e15] > heavy[1.1e15]
+    assert light[3.1e15] > light[1.9e15] > light[1.1e15]
+    assert min(heavy[density] / light[density] for density in heavy) > 50.0
+
+
+def test_deboer_2002_rejects_unverified_figure_transcription(tmp_path):
+    altered = tmp_path / "deboer.csv"
+    altered.write_bytes(DEBOER_DATA.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        load_deboer_2002_figure9_depths(altered)
 
 
 def test_jeon_2022_preserves_digitization_error_and_preregistered_transfer_split():
@@ -235,7 +313,7 @@ def test_jeon_dimensionless_targets_remove_rate_scale_without_split_leakage():
     pulse = [item for item in targets if item.observable == "pulse_depth_over_cw"]
 
     assert len(shapes) == 54
-    assert len(pulse) == 24
+    assert len(pulse) == 0
     assert sum(item.split == "calibration" for item in targets) == 6
     assert all(item.observable == "width_shape_depth_over_200nm"
                for item in targets if item.split == "calibration")
@@ -246,9 +324,12 @@ def test_jeon_dimensionless_targets_remove_rate_scale_without_split_leakage():
                for item in targets)
 
 
-def test_jeon_held_out_dimensionless_pulse_gate_preserves_regime_reversal():
+@pytest.mark.parametrize("exposure_basis", ["common_wall_time", "common_rf_on_time"])
+def test_jeon_pulse_gate_requires_and_preserves_explicit_exposure_hypothesis(
+        exposure_basis):
     targets = build_jeon_2022_dimensionless_targets(
-        load_jeon_2022_trench_depths(JEON_DATA))
+        load_jeon_2022_trench_depths(JEON_DATA),
+        pulse_exposure_basis=exposure_basis)
     pulse_1ms = [item for item in targets
                  if item.observable == "pulse_depth_over_cw" and item.pulse_off_ms == 1.0]
     low_radical = [item for item in pulse_1ms if item.c4f8_fraction == 0.2]
@@ -257,5 +338,15 @@ def test_jeon_held_out_dimensionless_pulse_gate_preserves_regime_reversal():
     assert len(low_radical) == len(high_radical) == 6
     assert all(item.value > 1.0 for item in low_radical)
     assert all(item.value < 1.0 for item in high_radical)
-    assert all(item.cancellation_assumption == "common_etch_duration_within_pulse_series"
-               for item in pulse_1ms)
+    expected = (
+        "explicit_common_wall_time_hypothesis_not_reported_by_source"
+        if exposure_basis == "common_wall_time"
+        else "explicit_common_rf_on_time_hypothesis_not_reported_by_source")
+    assert all(item.cancellation_assumption == expected for item in pulse_1ms)
+
+
+def test_jeon_pulse_gate_rejects_unknown_exposure_basis():
+    with pytest.raises(ValueError, match="pulse_exposure_basis"):
+        build_jeon_2022_dimensionless_targets(
+            load_jeon_2022_trench_depths(JEON_DATA),
+            pulse_exposure_basis="assumed_same_conditions")

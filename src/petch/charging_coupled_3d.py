@@ -17,8 +17,10 @@ from .boundary_transport_3d import (
 from .charging_poisson_3d import (
     NodalPoissonSystem3D,
     PoissonDiagnostics3D,
+    lump_mixed_surface_density_3d,
     lump_triangle_sheet_charge_3d,
 )
+from .physical_arrivals_3d import sample_physical_poisson_arrivals_3d
 from .charged_surface_cascade_3d import (
     ChargedSurfaceCascade3DResult,
     augment_transport_with_charged_reimpacts_3d,
@@ -29,7 +31,8 @@ from .charged_surface_response_3d import (
     ChargedSurfaceTransfer3D,
     perfect_absorber_surface_transfer_3d,
 )
-from .surface_kinetics import FaceResolvedEnergeticFlux
+from .conductor_terminal_3d import ConductorTerminalCurrent3D
+from .surface_kinetics import FaceResolvedEnergeticFlux, SurfaceFluxes
 
 
 @dataclass(frozen=True)
@@ -387,6 +390,16 @@ def _coordinate_spacing_3d(poisson_system, potential_spacing, mesh_length_unit_m
     return coordinate_spacing
 
 
+def _validate_periodic_topology_3d(poisson_system, periodic_lateral):
+    """Require particle wrapping and field topology to describe the same physical cell."""
+    expected = (0, 1) if bool(periodic_lateral) else ()
+    actual = tuple(poisson_system.periodic_axes)
+    if actual != expected:
+        raise ValueError(
+            "particle and Poisson boundary topology disagree: periodic_lateral="
+            f"{bool(periodic_lateral)} requires Poisson periodic_axes={expected}, got {actual}")
+
+
 def _validate_transport_estimators_3d(
         boundary, faces, transport_estimator, face_centroids, face_gas_normals):
     charged_names = {species.name for species in boundary.species if species.charge_number != 0}
@@ -431,11 +444,15 @@ def _evaluate_incident_current_3d(
         face_centroids, face_gas_normals, adjoint_face_quadrature_points,
         adjoint_ray_offset, adjoint_proposals, adjoint_proposal_frames,
         bidirectional_options, transport_device, charged_surface_response=None,
-        face_material_id=None, surface_material_state=None,
+        face_material_id=None, face_conductor_id=None, surface_material_state=None,
         response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16,
         response_relative_tail_tolerance=0.0,
         response_adaptive_bounce_extension=False,
-        response_emergency_max_bounces=None):
+        response_emergency_max_bounces=None,
+        conductor_terminal=None,
+        physical_arrival_statistics="mean_flux", physical_arrival_duration_s=None,
+        physical_arrival_seed=None):
+    _validate_periodic_topology_3d(poisson_system, periodic_lateral)
     charged_species = tuple(species for species in boundary.species if species.charge_number != 0)
     if not charged_species:
         raise ValueError("dielectric charging requires at least one charged boundary species")
@@ -539,6 +556,49 @@ def _evaluate_incident_current_3d(
     charge_number_by_species = {
         species.name: species.charge_number for species in charged_species}
     physical_face_area = np.asarray(areas, dtype=float) * float(mesh_length_unit_m) ** 2
+    arrival_samples = ()
+    if physical_arrival_statistics == "poisson":
+        if (physical_arrival_duration_s is None
+                or not np.isfinite(physical_arrival_duration_s)
+                or physical_arrival_duration_s <= 0.0):
+            raise ValueError("Poisson physical arrivals require a positive physical duration")
+        seed_base = int(seed if physical_arrival_seed is None else physical_arrival_seed)
+        samples = []
+        sampled_populations = []
+        for species_index, population in enumerate(incident_populations):
+            arrival_seed = int(
+                (seed_base * 6364136223846793005
+                 + (species_index + 1) * 1442695040888963407) % (2 ** 63 - 1))
+            sampled = sample_physical_poisson_arrivals_3d(
+                population, physical_face_area, float(physical_arrival_duration_s),
+                seed=arrival_seed)
+            samples.append(sampled)
+            sampled_populations.append(sampled.population)
+        arrival_samples = tuple(samples)
+        incident_populations = tuple(sampled_populations)
+        transport = BoundaryTransport3DResult(
+            surface_fluxes=SurfaceFluxes(
+                transport.surface_fluxes.neutral_flux_m2_s, incident_populations),
+            hit_probability=transport.hit_probability,
+            escape_probability=transport.escape_probability,
+            truncation_probability=transport.truncation_probability,
+            transport_model=(
+                f"{transport.transport_model}+poisson_physical_arrivals"
+                f"[dt={float(physical_arrival_duration_s):.17g}s]"),
+            known_limitations=transport.known_limitations + (
+                "charged primary arrivals are finite-count Poisson samples; response branching "
+                "uses the supplied response law",
+            ),
+            lineage_replay_count=transport.lineage_replay_count,
+            lineage_replay_eligible_count=transport.lineage_replay_eligible_count,
+            edge_launch_inset_count=transport.edge_launch_inset_count,
+            trajectory_horizon_extension_count=(
+                transport.trajectory_horizon_extension_count),
+            trajectory_initial_max_steps=transport.trajectory_initial_max_steps,
+            trajectory_final_max_steps=transport.trajectory_final_max_steps,
+            trajectory_emergency_max_steps=transport.trajectory_emergency_max_steps)
+    elif physical_arrival_statistics != "mean_flux":
+        raise ValueError("physical_arrival_statistics must be 'mean_flux' or 'poisson'")
     if charged_surface_response is None:
         surface_transfer = perfect_absorber_surface_transfer_3d(
             incident_populations, charge_number_by_species, physical_face_area)
@@ -580,21 +640,76 @@ def _evaluate_incident_current_3d(
             transport, surface_transfer)
     positive_face_current = surface_transfer.positive_deposition_current_density_a_m2
     negative_face_current = surface_transfer.negative_deposition_current_density_a_m2
-    projection_arguments = dict(
-        shape=poisson_system.shape, vertices=verts, faces=faces,
-        grid_origin=potential_origin, grid_spacing=coordinate_spacing,
-        coordinate_length_unit_m=mesh_length_unit_m)
-    positive_node_current = lump_triangle_sheet_charge_3d(
-        sigma_c_per_m2=positive_face_current, **projection_arguments)
-    negative_node_current = lump_triangle_sheet_charge_3d(
-        sigma_c_per_m2=negative_face_current, **projection_arguments)
+    if poisson_system.has_floating_conductors:
+        if face_conductor_id is None:
+            if face_centroids is None or face_gas_normals is None:
+                raise ValueError(
+                    "floating-conductor charging requires face centroids/normals or explicit "
+                    "face_conductor_id")
+            face_conductor_id = poisson_system.classify_surface_floating_conductors(
+                face_centroids, face_gas_normals, grid_origin=potential_origin,
+                grid_spacing=coordinate_spacing)
+        positive_physical_node_current = lump_mixed_surface_density_3d(
+            poisson_system, verts, faces, positive_face_current, face_conductor_id,
+            grid_origin=potential_origin, grid_spacing=coordinate_spacing,
+            coordinate_length_unit_m=mesh_length_unit_m, canonicalize=False)
+        negative_physical_node_current = lump_mixed_surface_density_3d(
+            poisson_system, verts, faces, negative_face_current, face_conductor_id,
+            grid_origin=potential_origin, grid_spacing=coordinate_spacing,
+            coordinate_length_unit_m=mesh_length_unit_m, canonicalize=False)
+        positive_electrostatic_node_current = poisson_system.canonicalize_charge(
+            positive_physical_node_current)
+        negative_electrostatic_node_current = poisson_system.canonicalize_charge(
+            negative_physical_node_current)
+    else:
+        if face_conductor_id is not None and np.any(np.asarray(face_conductor_id) != 0):
+            raise ValueError(
+                "face_conductor_id names components absent from the Poisson system")
+        projection_arguments = dict(
+            shape=poisson_system.shape, vertices=verts, faces=faces,
+            grid_origin=potential_origin, grid_spacing=coordinate_spacing,
+            coordinate_length_unit_m=mesh_length_unit_m)
+        positive_physical_node_current = poisson_system.canonicalize_charge(
+            lump_triangle_sheet_charge_3d(
+                sigma_c_per_m2=positive_face_current, **projection_arguments))
+        negative_physical_node_current = poisson_system.canonicalize_charge(
+            lump_triangle_sheet_charge_3d(
+                sigma_c_per_m2=negative_face_current, **projection_arguments))
+        positive_electrostatic_node_current = positive_physical_node_current
+        negative_electrostatic_node_current = negative_physical_node_current
+    terminal_current = None
+    if conductor_terminal is not None:
+        if not poisson_system.has_floating_conductors:
+            raise ValueError(
+                "an external conductor terminal requires floating conductors in Poisson")
+        if not hasattr(conductor_terminal, "current_contribution"):
+            raise TypeError(
+                "conductor_terminal must provide current_contribution(poisson_system)")
+        terminal_current = conductor_terminal.current_contribution(poisson_system)
+        if not isinstance(terminal_current, ConductorTerminalCurrent3D):
+            raise TypeError(
+                "conductor terminal returned an invalid current contribution")
+        if terminal_current.positive_node_current_a.shape != poisson_system.shape:
+            raise ValueError("conductor-terminal current grid does not match Poisson")
+        positive_physical_node_current = (
+            positive_physical_node_current + terminal_current.positive_node_current_a)
+        negative_physical_node_current = (
+            negative_physical_node_current + terminal_current.negative_node_current_a)
+        positive_electrostatic_node_current = poisson_system.canonicalize_charge(
+            positive_physical_node_current)
+        negative_electrostatic_node_current = poisson_system.canonicalize_charge(
+            negative_physical_node_current)
     return dict(
         potential=potential, poisson=poisson, transport=transport,
         positive_face_current=positive_face_current,
         negative_face_current=negative_face_current,
-        positive_node_current=positive_node_current,
-        negative_node_current=negative_node_current,
+        positive_node_current=positive_physical_node_current,
+        negative_node_current=negative_physical_node_current,
+        positive_electrostatic_node_current=positive_electrostatic_node_current,
+        negative_electrostatic_node_current=negative_electrostatic_node_current,
+        conductor_terminal_current=terminal_current,
         surface_transfer=surface_transfer,
+        physical_arrival_samples=arrival_samples,
         bidirectional_method_hint=bidirectional_method_hint,
         bidirectional_sampling_provenance=bidirectional_sampling_provenance)
 
@@ -626,17 +741,20 @@ def advance_dielectric_charging_3d(
         adjoint_proposals=None, adjoint_proposal_frames="surface_local",
         bidirectional_options=None,
         transport_device=None, charged_surface_response=None,
-        face_material_id=None, surface_material_state=None,
+        face_material_id=None, face_conductor_id=None, surface_material_state=None,
         response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16,
         response_relative_tail_tolerance=0.0,
         response_adaptive_bounce_extension=False,
-        response_emergency_max_bounces=None):
+        response_emergency_max_bounces=None,
+        conductor_terminal=None,
+        physical_arrival_statistics="mean_flux", physical_arrival_seed=None):
     """Advance stored dielectric charge by the signed incident-particle current.
 
     The sequence is charge -> Q1 Poisson voltage -> collisionless charged-particle trajectories ->
     signed face current -> compatible Q1 charge projection -> updated Poisson voltage. Every supplied
-    triangle is treated as a charge-storing dielectric surface. Dirichlet nodes are external reservoirs,
-    so depositing surface charge onto one is refused instead of silently discarding it.
+    triangle is treated as charge-storing unless ``face_conductor_id`` routes it into one of the
+    Poisson system's declared floating equipotential components. Dirichlet nodes are external
+    reservoirs, so depositing surface charge onto one is refused instead of silently discarding it.
 
     This is a physical-time forward-Euler update, not the accelerated steady current-balance solve.
     ``duration_s`` must therefore resolve the charging transient selected by the caller.
@@ -648,11 +766,17 @@ def advance_dielectric_charging_3d(
         raise TypeError("poisson_system must be a NodalPoissonSystem3D")
     if not np.isfinite(duration_s) or duration_s <= 0.0:
         raise ValueError("duration_s must be finite and positive")
+    if (physical_arrival_statistics not in {"mean_flux", "poisson"}
+            or (physical_arrival_seed is not None
+                and (int(physical_arrival_seed) != physical_arrival_seed
+                     or physical_arrival_seed < 0))):
+        raise ValueError("invalid physical-arrival statistics or seed")
     charge = np.asarray(charge_node_c, dtype=float)
     if charge.shape != poisson_system.shape or not np.all(np.isfinite(charge)):
         raise ValueError("charge_node_c must be a finite grid matching poisson_system")
     if np.any(np.abs(charge[poisson_system.dirichlet_mask]) > 0.0):
         raise ValueError("stored dielectric charge cannot be assigned to Dirichlet reservoir nodes")
+    charge = poisson_system.canonicalize_charge(charge)
     coordinate_spacing = _coordinate_spacing_3d(
         poisson_system, potential_spacing, mesh_length_unit_m)
     estimator_by_name = _validate_transport_estimators_3d(
@@ -679,16 +803,22 @@ def advance_dielectric_charging_3d(
         transport_device=transport_device,
         charged_surface_response=charged_surface_response,
         face_material_id=face_material_id,
+        face_conductor_id=face_conductor_id,
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset,
         response_fixed_dt=response_fixed_dt,
         response_max_bounces=response_max_bounces,
         response_relative_tail_tolerance=response_relative_tail_tolerance,
         response_adaptive_bounce_extension=response_adaptive_bounce_extension,
-        response_emergency_max_bounces=response_emergency_max_bounces)
+        response_emergency_max_bounces=response_emergency_max_bounces,
+        conductor_terminal=conductor_terminal,
+        physical_arrival_statistics=physical_arrival_statistics,
+        physical_arrival_duration_s=float(duration_s),
+        physical_arrival_seed=physical_arrival_seed)
     surface_transfer = evaluated["surface_transfer"]
     face_current = surface_transfer.face_current_density_a_m2
-    current_node = evaluated["positive_node_current"] - evaluated["negative_node_current"]
+    current_node = (evaluated["positive_electrostatic_node_current"]
+                    - evaluated["negative_electrostatic_node_current"])
     charge_increment = current_node * float(duration_s)
     incident_node_current = (
         evaluated["positive_node_current"] + evaluated["negative_node_current"])
@@ -699,20 +829,40 @@ def advance_dielectric_charging_3d(
         raise ValueError(
             "incident charge projects onto a Dirichlet reservoir; mixed dielectric/conductor "
             "surface handling must be specified explicitly")
-    updated_charge = charge + charge_increment
+    updated_charge = poisson_system.canonicalize_charge(charge + charge_increment)
+    charge_increment = updated_charge - charge
     potential_after, poisson_after = poisson_system.solve(updated_charge)
 
     areas = np.asarray(areas, dtype=float)
     physical_face_area = areas * float(mesh_length_unit_m) ** 2
-    positive_incident_charge = float(np.dot(
+    surface_positive_incident_charge = float(np.dot(
         evaluated["positive_face_current"], physical_face_area) * float(duration_s))
-    negative_incident_charge = float(np.dot(
+    surface_negative_incident_charge = float(np.dot(
         evaluated["negative_face_current"], physical_face_area) * float(duration_s))
+    terminal_current = evaluated["conductor_terminal_current"]
+    terminal_positive_incident_charge = (
+        0.0 if terminal_current is None else
+        float(np.sum(terminal_current.positive_node_current_a) * float(duration_s)))
+    terminal_negative_incident_charge = (
+        0.0 if terminal_current is None else
+        float(np.sum(terminal_current.negative_node_current_a) * float(duration_s)))
+    positive_incident_charge = (
+        surface_positive_incident_charge + terminal_positive_incident_charge)
+    negative_incident_charge = (
+        surface_negative_incident_charge + terminal_negative_incident_charge)
     absolute_incident_charge = positive_incident_charge + negative_incident_charge
-    incident_charge = float(np.dot(
+    surface_incident_charge = float(np.dot(
         face_current, physical_face_area) * float(duration_s))
+    terminal_incident_charge = (
+        terminal_positive_incident_charge - terminal_negative_incident_charge)
+    incident_charge = surface_incident_charge + terminal_incident_charge
     deposited_charge = float(np.sum(charge_increment))
     conservation_residual = deposited_charge - incident_charge
+    arrival_samples = tuple(evaluated["physical_arrival_samples"])
+    expected_primary_arrivals = float(sum(
+        item.expected_particle_count for item in arrival_samples))
+    realized_primary_arrivals = int(sum(
+        item.realized_particle_count for item in arrival_samples))
     return DielectricChargingStep3DResult(
         charge_node_c=updated_charge,
         charge_increment_node_c=charge_increment,
@@ -733,8 +883,24 @@ def advance_dielectric_charging_3d(
         diagnostics=dict(
             duration_s=float(duration_s),
             incident_charge_c=incident_charge,
+            surface_incident_charge_c=surface_incident_charge,
+            conductor_terminal_incident_charge_c=terminal_incident_charge,
             positive_incident_charge_c=positive_incident_charge,
             negative_incident_charge_c=negative_incident_charge,
+            surface_positive_incident_charge_c=surface_positive_incident_charge,
+            surface_negative_incident_charge_c=surface_negative_incident_charge,
+            conductor_terminal_positive_incident_charge_c=(
+                terminal_positive_incident_charge),
+            conductor_terminal_negative_incident_charge_c=(
+                terminal_negative_incident_charge),
+            conductor_terminal_active=terminal_current is not None,
+            conductor_terminal_signed_current_a=(
+                0.0 if terminal_current is None
+                else terminal_current.signed_total_current_a),
+            conductor_terminal_absolute_current_a=(
+                0.0 if terminal_current is None
+                else terminal_current.absolute_total_current_a),
+            conductor_terminal_face_patch_b2_exclusion=terminal_current is not None,
             absolute_incident_charge_c=absolute_incident_charge,
             primary_incident_charge_c=(
                 surface_transfer.initial_incident_charge_rate_c_s * float(duration_s)
@@ -778,18 +944,35 @@ def advance_dielectric_charging_3d(
                 evaluated["transport"].trajectory_final_max_steps),
             transport_trajectory_emergency_max_steps=(
                 evaluated["transport"].trajectory_emergency_max_steps),
+            physical_arrival_statistics=physical_arrival_statistics,
+            physical_arrival_expected_primary_count=expected_primary_arrivals,
+            physical_arrival_realized_primary_count=realized_primary_arrivals,
+            physical_arrival_seed=(
+                int(seed if physical_arrival_seed is None else physical_arrival_seed)
+                if physical_arrival_statistics == "poisson" else None),
             maximum_abs_face_current_density_a_m2=float(np.max(np.abs(face_current)))),
-        known_limitations=(
+        known_limitations=((
+            "floating conductors are exact equipotentials with component-total physical-time charge; "
+            "external pad capacitance outside the modeled electrostatic domain is not represented",
+        ) if poisson_system.has_floating_conductors and conductor_terminal is None else (
+            "external conductor current is included in conductor/node balance but remains "
+            "excluded from local kinetic face-patch B2",
+            "external pad capacitance and resolved line resistance remain outside the feature domain",
+        ) if conductor_terminal is not None else (
             "all supplied surface triangles are treated as charge-storing dielectric",
+        )) + (
             "physical-time forward-Euler charge update requires timestep convergence",
         ) + ((
             "no secondary-electron emission, reflection, leakage, or surface conduction",
         ) if charged_surface_response is None else (
             "caller-supplied charged surface response requires material-data and cascade refinement",
             "no surface conduction or bulk leakage",
-        )) + (
+        )) + ((
             "no floating-conductor circuit equations",
-        ) + _coupled_transport_limitations(
+        ) if not poisson_system.has_floating_conductors else ()) + ((
+            "physical Poisson statistics currently sample primary charged arrivals; stochastic "
+            "surface-response branching requires an explicitly stochastic response law",
+        ) if physical_arrival_statistics == "poisson" else ()) + _coupled_transport_limitations(
             evaluated["transport"], charged_surface_response is not None))
 
 
@@ -806,12 +989,13 @@ def integrate_dielectric_charging_transient_3d(
         adjoint_face_quadrature_points=3, adjoint_ray_offset=1e-5,
         adjoint_proposals=None, adjoint_proposal_frames="surface_local",
         bidirectional_options=None, transport_device=None,
-        charged_surface_response=None, face_material_id=None,
+        charged_surface_response=None, face_material_id=None, face_conductor_id=None,
         surface_material_state=None, response_launch_offset=1e-5,
         response_fixed_dt=None, response_max_bounces=16,
         response_relative_tail_tolerance=0.0,
         response_adaptive_bounce_extension=False,
-        response_emergency_max_bounces=None):
+        response_emergency_max_bounces=None,
+        conductor_terminal=None):
     """Integrate the conservative dielectric charge ODE with fixed physical timesteps.
 
     ``n_steps`` is the maximum number of forward-Euler charge updates. History contains the initial
@@ -830,7 +1014,8 @@ def integrate_dielectric_charging_transient_3d(
             and (not np.isfinite(current_balance_tol) or current_balance_tol <= 0.0)):
         raise ValueError("current_balance_tol must be finite and positive when supplied")
 
-    charge = np.asarray(initial_charge_node_c, dtype=float).copy()
+    _validate_periodic_topology_3d(poisson_system, periodic_lateral)
+    charge = poisson_system.canonicalize_charge(initial_charge_node_c)
     common_arguments = dict(
         poisson_system=poisson_system, boundary=boundary, verts=verts, faces=faces, areas=areas,
         source_bounds=source_bounds, source_z=source_z,
@@ -849,13 +1034,15 @@ def integrate_dielectric_charging_transient_3d(
         bidirectional_options=bidirectional_options, transport_device=transport_device,
         charged_surface_response=charged_surface_response,
         face_material_id=face_material_id,
+        face_conductor_id=face_conductor_id,
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset,
         response_fixed_dt=response_fixed_dt,
         response_max_bounces=response_max_bounces,
         response_relative_tail_tolerance=response_relative_tail_tolerance,
         response_adaptive_bounce_extension=response_adaptive_bounce_extension,
-        response_emergency_max_bounces=response_emergency_max_bounces)
+        response_emergency_max_bounces=response_emergency_max_bounces,
+        conductor_terminal=conductor_terminal)
     history = []
     total_incident_charge = 0.0
     total_absolute_incident_charge = 0.0
@@ -868,7 +1055,9 @@ def integrate_dielectric_charging_transient_3d(
     def record(step_index, potential, positive_face, negative_face, positive_node, negative_node):
         item = dict(step=int(step_index), physical_time_s=float(step_index) * float(timestep_s))
         item.update(_physical_current_balance_metrics(
-            positive_face, negative_face, positive_node, negative_node))
+            positive_face, negative_face,
+            poisson_system.reduce_charge(positive_node),
+            poisson_system.reduce_charge(negative_node)))
         item.update(
             minimum_potential_v=float(np.min(potential)),
             maximum_potential_v=float(np.max(potential)),
@@ -935,13 +1124,15 @@ def integrate_dielectric_charging_transient_3d(
         transport_device=transport_device,
         charged_surface_response=charged_surface_response,
         face_material_id=face_material_id,
+        face_conductor_id=face_conductor_id,
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset,
         response_fixed_dt=response_fixed_dt,
         response_max_bounces=response_max_bounces,
         response_relative_tail_tolerance=response_relative_tail_tolerance,
         response_adaptive_bounce_extension=response_adaptive_bounce_extension,
-        response_emergency_max_bounces=response_emergency_max_bounces)
+        response_emergency_max_bounces=response_emergency_max_bounces,
+        conductor_terminal=conductor_terminal)
     if not converged:
         final_state = record(
             len(history), final["potential"], final["positive_face_current"],
@@ -984,9 +1175,15 @@ def integrate_dielectric_charging_transient_3d(
         ) if charged_surface_response is None else (
             "caller-supplied charged surface response requires material-data and cascade refinement",
             "no surface conduction or bulk leakage",
-        )) + (
+        )) + ((
             "no floating-conductor circuit equations",
-        ) + _coupled_transport_limitations(
+        ) if not poisson_system.has_floating_conductors else (
+            "floating conductors omit external pad capacitance outside the modeled domain",
+        ) if conductor_terminal is None else (
+            "external conductor current is included in node balance; local face balance "
+            "remains the kinetic surface current only",
+            "external pad capacitance and resolved line resistance remain outside the feature domain",
+        )) + _coupled_transport_limitations(
             final["transport"], charged_surface_response is not None))
 
 
@@ -1003,7 +1200,7 @@ def solve_dielectric_charging_steady_3d(
         adjoint_proposals=None, adjoint_proposal_frames="surface_local",
         bidirectional_options=None,
         transport_device=None, charged_surface_response=None,
-        face_material_id=None, surface_material_state=None,
+        face_material_id=None, face_conductor_id=None, surface_material_state=None,
         response_launch_offset=1e-5, response_fixed_dt=None, response_max_bounces=16,
         response_relative_tail_tolerance=0.0,
         response_adaptive_bounce_extension=False,
@@ -1024,6 +1221,10 @@ def solve_dielectric_charging_steady_3d(
     """
     if not isinstance(poisson_system, NodalPoissonSystem3D):
         raise TypeError("poisson_system must be a NodalPoissonSystem3D")
+    if poisson_system.has_floating_conductors:
+        raise ValueError(
+            "the frozen-map steady root solver is closed for floating conductors; "
+            "use physical-time charging with equipotential redistribution")
     charge = np.asarray(initial_charge_node_c, dtype=float).copy()
     if charge.shape != poisson_system.shape or not np.all(np.isfinite(charge)):
         raise ValueError("initial_charge_node_c must be a finite grid matching poisson_system")
@@ -1098,6 +1299,7 @@ def solve_dielectric_charging_steady_3d(
         transport_device=transport_device,
         charged_surface_response=charged_surface_response,
         face_material_id=face_material_id,
+        face_conductor_id=face_conductor_id,
         surface_material_state=surface_material_state,
         response_launch_offset=response_launch_offset,
         response_fixed_dt=response_fixed_dt,

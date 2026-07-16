@@ -63,16 +63,24 @@ slope, and intercept so the reported depth can be replayed rather than trusted a
 - The paper does not report etch duration, a measured IEDF, or species-resolved surface fluxes.
   Consequently these observations constrain relative depth/profile transfer, not absolute etch rate
   from a complete physical boundary state.
-- Two dimensionless comparisons remain usable without inventing the missing duration. The loader builds
-  depth-versus-width shape ratios using the 200 nm trench under the same condition, and pulsed/CW depth
-  ratios at the same width within Figures 7 and 9. The first shares one coupon exposure; the paper says
-  each pulse series used the same etch conditions, so the second records a common-duration assumption
-  explicitly. Their intervals propagate digitization budgets only and are not mislabeled as total
-  experimental uncertainty.
+- Depth-versus-width shape ratios remain usable without inventing the missing duration because every
+  width within one plotted condition shares one coupon exposure.  Pulsed/CW depth ratios do **not**
+  enjoy that cancellation: the paper does not report whether conditions shared wall-clock duration or
+  cumulative RF-on duration.  At 1 ms on / 1 ms off those hypotheses differ by a factor of two in wall
+  time and neutral fluence.  The related experiment from the same group (Cho et al., *Materials* 14,
+  5036 (2021), DOI 10.3390/ma14175036) used 10 min for CW and 20 min for a 50%-duty pulse, demonstrating
+  why “same etch conditions” cannot establish Jeon's exposure protocol.  It is context, not evidence
+  that Jeon used the same schedule.
+- The loader therefore omits cross-exposure pulse/CW targets by default.  A development analysis may
+  request `common_wall_time` or `common_rf_on_time` explicitly; every resulting target records that the
+  hypothesis was not reported by the source.  Neither hypothesis supports a validation claim without
+  author data or another primary record.  All intervals propagate digitization budgets only and are not
+  mislabeled as total experimental uncertainty.
 
 ## Preregistered split
 
 Only Figure 4b at 20% C4F8 continuous wave is marked `calibration`. The 40% and 80% gas-fraction
-curves and all pulse-modulated curves are `held_out_transfer`. In particular, the 1 ms pulse-off
-condition increases depth at 20% C4F8 but decreases it at 80% C4F8. A mechanism calibrated on the
-20% continuous-wave curve must predict that regime reversal without refitting to the held-out rows.
+curves remain held-out transfer observations.  The raw pulse rows retain their originally registered
+labels, but their cross-condition use is blocked on the unresolved exposure protocol.  Within-condition
+width shapes remain usable development evidence.  The observed 1 ms regime reversal—greater depth at
+20% and smaller depth at 80%—must not be scored as a predictive pulse/CW ratio until exposure is known.

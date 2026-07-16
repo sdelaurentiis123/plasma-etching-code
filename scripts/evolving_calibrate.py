@@ -1,4 +1,8 @@
-"""Calibrate the ONE knob (wls) on the EVOLVING harness vs the wafer (like-for-like provenance)."""
+"""Legacy calibration to the fitted Blauw/Clausing model curve, not de Boer pixels.
+
+Retained for reproducibility only.  The 1/.43/.29 sequence is exposed calculated-model output and
+cannot support a wafer-validation or held-out claim.
+"""
 import os; os.environ.setdefault("PETCH_DEVICE", "cpu")
 import numpy as np
 from scipy.ndimage import uniform_filter1d
@@ -6,7 +10,7 @@ import petch
 from petch import threed as t3
 W, MASK = 2.0, 0.5
 FIELD = 57.6 * 0.0226
-WAFER = {10.0: 0.43, 20.0: 0.29}
+MODEL_CURVE = {10.0: 0.43, 20.0: 0.29}
 for wls in [1.9, 2.4, 2.9]:
     par = dict(petch.PAR); par['periodic_y'] = 1; par['rate_scale'] = 0.0226
     par['knudsen_wall_loss_scale'] = wls
@@ -22,10 +26,10 @@ for wls in [1.9, 2.4, 2.9]:
     rate = uniform_filter1d(np.gradient(dd_s, tm), 15, mode="nearest")
     ar_eff = (dd_s + MASK) / W
     out = {}
-    for A, wnr in WAFER.items():
+    for A, wnr in MODEL_CURVE.items():
         out[A] = float(np.interp(A, ar_eff, rate)) / FIELD if A <= ar_eff.max() - 0.5 else np.nan
-    errs = [out[a] - WAFER[a] for a in WAFER if np.isfinite(out[a])]
+    errs = [out[a] - MODEL_CURVE[a] for a in MODEL_CURVE if np.isfinite(out[a])]
     rmse = float(np.sqrt(np.mean(np.array(errs) ** 2))) if errs else np.nan
     gate = "PASS" if rmse <= 0.05 else "fail"
-    print(f"wls={wls}: nr@10={out[10.0]:.3f} (wafer .43) nr@20={out[20.0]:.3f} (wafer .29)  RMSE={rmse:.3f} [{gate}]  (max AR {ar_eff.max():.1f})", flush=True)
+    print(f"wls={wls}: nr@10={out[10.0]:.3f} (model .43) nr@20={out[20.0]:.3f} (model .29)  legacy-RMSE={rmse:.3f} [{gate}]  (max AR {ar_eff.max():.1f})", flush=True)
 print("DONE", flush=True)

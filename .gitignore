@@ -15,7 +15,16 @@ env/
 .codex/visualizations/
 
 # Build / sim artifacts (cached benchmark results are checked in explicitly)
+/build/
+dist/
+**/.plot-cache/
 *.log
+# Result directories are runtime artifacts by default. Existing tracked evidence remains tracked;
+# new evidence is promoted deliberately under results/curated after an audit names its exact files.
+results/**
+!results/README.md
+!results/curated/
+!results/curated/**
 # Superseded relaxed-checkpoint pilot; the canonical stuck-state audit below is retained.
 results/charging_task0a/
 results/charging_task0a_stuck/raw/
