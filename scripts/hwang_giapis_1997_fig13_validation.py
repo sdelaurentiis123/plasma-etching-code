@@ -259,6 +259,17 @@ def _save_global_boundary(output, config, result, elapsed_s):
         hit_vz_sqrt_eV=lineage["hit_vz_sqrt_eV"])
     metadata = {
         "schema": GLOBAL_SCHEMA,
+        "git_revision": _git_revision(),
+        "engine_source_sha256": {
+            "scripts/hwang_giapis_1997_fig13_validation.py": (
+                _file_sha256(Path(__file__))),
+            "src/petch/charging2d.py": _file_sha256(
+                ROOT / "src" / "petch" / "charging2d.py"),
+            "src/petch/boundary_state.py": _file_sha256(
+                ROOT / "src" / "petch" / "boundary_state.py"),
+            "src/petch/experimental_boundary.py": _file_sha256(
+                ROOT / "src" / "petch" / "experimental_boundary.py"),
+        },
         "config": config,
         "config_sha256": _stable_hash(config),
         "elapsed_s": float(elapsed_s),
