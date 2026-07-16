@@ -396,6 +396,8 @@ def _save_global_boundary(
                 result["diag"]["region_current_balance"]),
             "potential_stationarity": (
                 result["diag"]["potential_stationarity"]),
+            "potential_guard_contact": (
+                result["diag"]["potential_guard_contact"]),
             "stochastic_gain": result["diag"]["stochastic_gain"],
             "potential_history": result["diag"]["potential_history"],
             "trace": result["diag"]["trace"],
