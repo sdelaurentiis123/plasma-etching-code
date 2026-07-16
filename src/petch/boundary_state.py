@@ -10,6 +10,7 @@ from types import MappingProxyType
 from typing import Mapping, Protocol
 
 import numpy as np
+from scipy.special import betaincinv
 from scipy.stats import norm, qmc
 
 from .sheath import CollisionlessRFSheath, ECHARGE
@@ -21,6 +22,13 @@ class BoundaryDensityModel(Protocol):
     @property
     def sampling_dimension(self): ...
     def sample_flux_velocity(self, unit_interval): ...
+
+
+class BoundaryDensityModel2D(Protocol):
+    """Normalized incident density projected into a declared 2-D model plane."""
+    @property
+    def sampling_dimension(self): ...
+    def sample_flux_velocity_2d(self, unit_interval): ...
 
 
 def _unit_interval_samples(value, dimension):
@@ -159,6 +167,102 @@ class IonEnergyTransverseMaxwellianDensity:
                              - self.normal_energy_edges_eV[index]))
         velocity[:, 2] = np.sqrt(np.maximum(energy, 0.0))
         return velocity
+
+
+def _sample_histogram_energy(unit, edges, probability_mass):
+    cumulative = np.cumsum(probability_mass)
+    index = np.searchsorted(cumulative, unit, side="right")
+    index = np.minimum(index, probability_mass.size - 1)
+    previous = np.where(index > 0, cumulative[np.maximum(index - 1, 0)], 0.0)
+    local = (unit - previous) / probability_mass[index]
+    return (edges[index]
+            + local * (edges[index + 1] - edges[index]))
+
+
+@dataclass(frozen=True)
+class IonEnergyTransverseDensity2D:
+    """A 2-D ion projection with one transverse thermal degree of freedom.
+
+    This is the direct representation of a two-dimensional source model:
+    normal energy is sampled from the declared histogram and the single
+    in-plane transverse velocity is Maxwellian.  It avoids folding an
+    unmodeled out-of-plane energy component back into the 2-D trajectory.
+    """
+    normal_energy_edges_eV: np.ndarray
+    probability_mass: np.ndarray
+    tangential_temperature_eV: float
+
+    def __post_init__(self):
+        edge = np.asarray(self.normal_energy_edges_eV, dtype=float).copy()
+        mass = np.asarray(self.probability_mass, dtype=float).copy()
+        if (edge.ndim != 1 or edge.size < 2 or np.any(np.diff(edge) <= 0.0)
+                or edge[0] < 0.0
+                or mass.shape != (edge.size - 1,) or np.any(mass < 0.0)
+                or mass.sum() <= 0.0
+                or not np.isfinite(self.tangential_temperature_eV)
+                or self.tangential_temperature_eV <= 0.0):
+            raise ValueError("invalid 2-D ion energy/transverse density")
+        mass /= mass.sum()
+        edge.setflags(write=False); mass.setflags(write=False)
+        object.__setattr__(self, "normal_energy_edges_eV", edge)
+        object.__setattr__(self, "probability_mass", mass)
+
+    @property
+    def sampling_dimension(self):
+        return 2
+
+    def sample_flux_velocity_2d(self, unit_interval):
+        samples = _unit_interval_samples(unit_interval, self.sampling_dimension)
+        energy = _sample_histogram_energy(
+            samples[:, 1], self.normal_energy_edges_eV, self.probability_mass)
+        transverse = (
+            np.sqrt(float(self.tangential_temperature_eV) / 2.0)
+            * norm.ppf(samples[:, 0]))
+        return np.column_stack((
+            transverse, np.sqrt(np.maximum(energy, 0.0))))
+
+
+@dataclass(frozen=True)
+class EnergyCosineAngleDensity2D:
+    """Factorized 2-D energy and signed-angle incident distribution.
+
+    The angle probability density is proportional to ``cos(theta)**p`` on
+    ``[-pi/2, pi/2]``.  The beta inverse below samples that law exactly after
+    the change of variables ``x=(sin(theta)+1)/2``.
+    """
+    energy_edges_eV: np.ndarray
+    probability_mass: np.ndarray
+    cosine_power: float
+
+    def __post_init__(self):
+        edge = np.asarray(self.energy_edges_eV, dtype=float).copy()
+        mass = np.asarray(self.probability_mass, dtype=float).copy()
+        if (edge.ndim != 1 or edge.size < 2 or np.any(np.diff(edge) <= 0.0)
+                or edge[0] < 0.0
+                or mass.shape != (edge.size - 1,) or np.any(mass < 0.0)
+                or mass.sum() <= 0.0 or not np.isfinite(self.cosine_power)
+                or self.cosine_power <= -1.0):
+            raise ValueError("invalid 2-D energy/cosine-angle density")
+        mass /= mass.sum()
+        edge.setflags(write=False); mass.setflags(write=False)
+        object.__setattr__(self, "energy_edges_eV", edge)
+        object.__setattr__(self, "probability_mass", mass)
+
+    @property
+    def sampling_dimension(self):
+        return 2
+
+    def sample_flux_velocity_2d(self, unit_interval):
+        samples = _unit_interval_samples(unit_interval, self.sampling_dimension)
+        energy = _sample_histogram_energy(
+            samples[:, 0], self.energy_edges_eV, self.probability_mass)
+        beta_shape = 0.5 * (float(self.cosine_power) + 1.0)
+        sine = 2.0 * betaincinv(
+            beta_shape, beta_shape, samples[:, 1]) - 1.0
+        sine = np.clip(sine, -1.0, 1.0)
+        cosine = np.sqrt(np.maximum(1.0 - sine * sine, 0.0))
+        speed = np.sqrt(np.maximum(energy, 0.0))
+        return np.column_stack((speed * sine, speed * cosine))
 
 
 @dataclass(frozen=True)
@@ -334,6 +438,7 @@ class SpeciesBoundaryState:
     position_m: np.ndarray | None = None
     density_model: BoundaryDensityModel | None = None
     provenance: Mapping[str, object] = field(default_factory=dict)
+    density_model_2d: BoundaryDensityModel2D | None = None
 
     def __post_init__(self):
         if not self.name:
@@ -356,6 +461,10 @@ class SpeciesBoundaryState:
             raise ValueError("phase must match sample count")
         if position is not None and position.shape[0] != velocity.shape[0]:
             raise ValueError("position must match sample count")
+        if (self.density_model_2d is not None
+                and (not hasattr(self.density_model_2d, "sampling_dimension")
+                     or not hasattr(self.density_model_2d, "sample_flux_velocity_2d"))):
+            raise ValueError("2-D density model must provide sampling dimension and sampler")
         object.__setattr__(self, "velocity_sqrt_eV", velocity)
         object.__setattr__(self, "weight", weight)
         object.__setattr__(self, "phase_rad", phase)
@@ -388,6 +497,35 @@ class SpeciesBoundaryState:
         if (velocity.ndim != 2 or velocity.shape[1] != 3 or np.any(~np.isfinite(velocity))
                 or np.any(velocity[:, 2] < 0.0)):
             raise RuntimeError("boundary density sampler returned invalid incident velocities")
+        return velocity
+
+    @property
+    def flux_sampling_dimension_2d(self):
+        model = (
+            self.density_model
+            if self.density_model_2d is None else self.density_model_2d)
+        if model is None or not hasattr(model, "sampling_dimension"):
+            raise ValueError(f"species {self.name!r} has no deterministic 2-D density sampler")
+        return int(model.sampling_dimension)
+
+    def sample_flux_velocity_2d(self, unit_interval):
+        if self.density_model_2d is not None:
+            velocity = np.asarray(
+                self.density_model_2d.sample_flux_velocity_2d(unit_interval),
+                dtype=float)
+        else:
+            velocity_3d = self.sample_flux_velocity(unit_interval)
+            # Default projection for genuinely 3-D sources: retain the sampled
+            # x/z direction while preserving total kinetic energy.
+            energy = np.einsum("rc,rc->r", velocity_3d, velocity_3d)
+            theta = np.arctan2(velocity_3d[:, 0], velocity_3d[:, 2])
+            speed = np.sqrt(np.maximum(energy, 0.0))
+            velocity = np.column_stack((
+                speed * np.sin(theta), speed * np.cos(theta)))
+        if (velocity.ndim != 2 or velocity.shape[1] != 2
+                or np.any(~np.isfinite(velocity))
+                or np.any(velocity[:, 1] < 0.0)):
+            raise RuntimeError("2-D boundary density sampler returned invalid velocities")
         return velocity
 
 

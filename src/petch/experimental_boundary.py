@@ -6,19 +6,218 @@ to a species-resolved flux vector.
 """
 from __future__ import annotations
 
+import csv
 from dataclasses import dataclass
+from hashlib import sha256
+from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping
 
 import numpy as np
 
 from .boundary_state import (
-    MaxwellianFluxVelocityDensity, PlasmaBoundaryState, SpeciesBoundaryState,
+    EnergyCosineAngleDensity2D, IonEnergyTransverseDensity2D,
+    IonEnergyTransverseMaxwellianDensity, MaxwellianFluxVelocityDensity,
+    PlasmaBoundaryState, SpeciesBoundaryState,
+    maxwellian_electron_boundary_state,
 )
 from .experimental_data import (
     Jeon2022ElectronBiasControl, Jeon2022PlasmaControl,
     jeon_2022_bohm_ion_flux_m2_s,
 )
+from .sheath import bohm_speed
+
+
+HWANG_GIAPIS_1997_IEDF_SHA256 = (
+    "540601fc95bc85e5c906d9d3e5d566f966e2761d4c65fc8a8167aaaf4c28adea")
+HWANG_GIAPIS_1997_EEDF_SHA256 = (
+    "17ae2728a0e3d5561fdd7b898d1d69a1b9a7267fa1c65a645daac25916119af6")
+HWANG_GIAPIS_1997_PDF_SHA256 = (
+    "30a6871d6416f27e8dbbb45e9eabbca79cddf7632872f8ed185a9e193832f63d")
+
+
+def _load_hwang_giapis_1997_iedf(path, *, verify_checksum=True):
+    path = Path(path)
+    payload = path.read_bytes()
+    digest = sha256(payload).hexdigest()
+    if verify_checksum and digest != HWANG_GIAPIS_1997_IEDF_SHA256:
+        raise ValueError("Hwang--Giapis Fig. 4(a) IEDF checksum mismatch")
+    with path.open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    required = {
+        "normal_energy_lower_eV", "normal_energy_upper_eV", "probability_mass",
+        "digitized_curve_height_px", "source_pdf_sha256", "source_pdf_page",
+        "source_figure"}
+    if not rows or set(rows[0]) != required:
+        raise ValueError("unexpected Hwang--Giapis IEDF schema")
+    lower = np.asarray([float(row["normal_energy_lower_eV"]) for row in rows])
+    upper = np.asarray([float(row["normal_energy_upper_eV"]) for row in rows])
+    mass = np.asarray([float(row["probability_mass"]) for row in rows])
+    if (np.any(~np.isfinite(lower)) or np.any(~np.isfinite(upper))
+            or np.any(~np.isfinite(mass)) or np.any(mass < 0.0)
+            or not np.allclose(lower[1:], upper[:-1], rtol=0.0, atol=1e-12)
+            or np.any(upper <= lower) or not np.isclose(mass.sum(), 1.0, atol=2e-10)
+            or {row["source_pdf_sha256"] for row in rows}
+            != {HWANG_GIAPIS_1997_PDF_SHA256}
+            or {row["source_pdf_page"] for row in rows} != {"4"}
+            or {row["source_figure"] for row in rows} != {"Fig. 4(a)"}):
+        raise ValueError("invalid Hwang--Giapis digitized IEDF rows")
+    return np.concatenate((lower[:1], upper)), mass / mass.sum(), digest
+
+
+def _load_hwang_giapis_1997_eedf(path, *, verify_checksum=True):
+    path = Path(path)
+    payload = path.read_bytes()
+    digest = sha256(payload).hexdigest()
+    if verify_checksum and digest != HWANG_GIAPIS_1997_EEDF_SHA256:
+        raise ValueError("Hwang--Giapis Fig. 4(b) EEDF checksum mismatch")
+    with path.open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    required = {
+        "energy_lower_eV", "energy_upper_eV", "probability_mass",
+        "digitized_curve_height_px", "source_pdf_sha256", "source_pdf_page",
+        "source_figure"}
+    if not rows or set(rows[0]) != required:
+        raise ValueError("unexpected Hwang--Giapis EEDF schema")
+    lower = np.asarray([float(row["energy_lower_eV"]) for row in rows])
+    upper = np.asarray([float(row["energy_upper_eV"]) for row in rows])
+    mass = np.asarray([float(row["probability_mass"]) for row in rows])
+    if (np.any(~np.isfinite(lower)) or np.any(~np.isfinite(upper))
+            or np.any(~np.isfinite(mass)) or np.any(mass < 0.0)
+            or not np.allclose(lower[1:], upper[:-1], rtol=0.0, atol=1e-12)
+            or np.any(upper <= lower) or not np.isclose(mass.sum(), 1.0, atol=2e-10)
+            or {row["source_pdf_sha256"] for row in rows}
+            != {HWANG_GIAPIS_1997_PDF_SHA256}
+            or {row["source_pdf_page"] for row in rows} != {"4"}
+            or {row["source_figure"] for row in rows} != {"Fig. 4(b)"}):
+        raise ValueError("invalid Hwang--Giapis digitized EEDF rows")
+    return np.concatenate((lower[:1], upper)), mass / mass.sum(), digest
+
+
+def build_hwang_giapis_1997_boundary_state(
+        iedf_csv_path, eedf_csv_path=None, *, reference_plane_m,
+        plasma_density_m3=1.0e18,
+        electron_temperature_eV=4.0, ion_tangential_temperature_eV=0.5,
+        ion_mass_amu=35.45, n_transverse_ion=3,
+        n_transverse_electron=5, n_normal_electron=8,
+        verify_checksum=True):
+    """Build the primary-source boundary used for the Nozawa notch replay.
+
+    The ion normal-energy mass is digitized from Hwang--Giapis Fig. 4(a),
+    rather than regenerated with the adjacent symmetric Child-sheath model.
+    A 0.5 eV transverse Maxwellian makes the 2-D IADF energy-dependent (the
+    low-energy wings are broader), as stated in Sec. III B.  When
+    ``eedf_csv_path`` is supplied, the paper's Fig. 4(b) EEDF and explicit
+    Fig. 5(b) ``cos(theta)**0.6`` EADF fit define the 2-D electron source.
+
+    The ordinary three-dimensional density models remain explicit closures for
+    three-dimensional consumers; a 2-D solver consumes ``density_model_2d``
+    directly and never folds an unmodeled out-of-plane energy into its plane.
+    Ion and electron particle fluxes are equal, with their absolute value
+    derived from the declared density and Bohm speed.
+    """
+    values = np.asarray([
+        reference_plane_m, plasma_density_m3, electron_temperature_eV,
+        ion_tangential_temperature_eV, ion_mass_amu], dtype=float)
+    if (np.any(~np.isfinite(values)) or reference_plane_m < 0.0
+            or plasma_density_m3 <= 0.0 or electron_temperature_eV <= 0.0
+            or ion_tangential_temperature_eV <= 0.0 or ion_mass_amu <= 0.0
+            or int(n_transverse_ion) != n_transverse_ion or n_transverse_ion <= 0
+            or int(n_transverse_electron) != n_transverse_electron
+            or n_transverse_electron <= 0
+            or int(n_normal_electron) != n_normal_electron
+            or n_normal_electron <= 0):
+        raise ValueError("invalid Hwang--Giapis boundary controls")
+    edges, energy_mass, iedf_digest = _load_hwang_giapis_1997_iedf(
+        iedf_csv_path, verify_checksum=verify_checksum)
+    eedf_edges = None
+    eedf_mass = None
+    eedf_digest = None
+    if eedf_csv_path is not None:
+        eedf_edges, eedf_mass, eedf_digest = _load_hwang_giapis_1997_eedf(
+            eedf_csv_path, verify_checksum=verify_checksum)
+    node, node_weight = np.polynomial.hermite.hermgauss(int(n_transverse_ion))
+    transverse = np.sqrt(float(ion_tangential_temperature_eV)) * node
+    transverse_weight = node_weight / np.sqrt(np.pi)
+    energy = 0.5 * (edges[:-1] + edges[1:])
+    ix, iy, iz = np.meshgrid(
+        np.arange(node.size), np.arange(node.size), np.arange(energy.size),
+        indexing="ij")
+    velocity = np.column_stack((
+        transverse[ix.ravel()], transverse[iy.ravel()],
+        np.sqrt(energy[iz.ravel()])))
+    weight = (transverse_weight[ix.ravel()] * transverse_weight[iy.ravel()]
+              * energy_mass[iz.ravel()])
+    flux = float(plasma_density_m3) * bohm_speed(
+        electron_temperature_eV, ion_mass_amu)
+    shared_source = {
+        "source": "Hwang & Giapis, JVST B 15, 70 (1997)",
+        "doi": "10.1116/1.589258",
+        "pressure_mTorr": 3.0,
+        "rf_frequency_hz": 4.0e5,
+        "rf_bias_peak_to_peak_v": 60.0,
+        "mean_sheath_voltage_v": 37.0,
+        "plasma_density_m3": float(plasma_density_m3),
+        "electron_temperature_eV": float(electron_temperature_eV),
+    }
+    ion = SpeciesBoundaryState(
+        "Cl+", 1, float(ion_mass_amu), flux, velocity, weight,
+        density_model=IonEnergyTransverseMaxwellianDensity(
+            edges, energy_mass, float(ion_tangential_temperature_eV)),
+        provenance=dict(
+            shared_source, role="digitized_nonlinear_sheath_iedf",
+            iedf_csv_sha256=iedf_digest,
+            source_pdf_sha256=HWANG_GIAPIS_1997_PDF_SHA256,
+            source_figure="Fig. 4(a)", source_pdf_page=4,
+            ion_tangential_temperature_eV=float(ion_tangential_temperature_eV),
+            reported_iadf_hwhm_deg=4.3,
+            energy_dependent_iadf=True,
+            two_dimensional_projection=(
+                "one in-plane Maxwellian tangent plus digitized normal energy"),
+            supports_prediction_within_declared_benchmark=True),
+        density_model_2d=IonEnergyTransverseDensity2D(
+            edges, energy_mass, float(ion_tangential_temperature_eV)))
+    electron = maxwellian_electron_boundary_state(
+        electron_temperature_eV, flux,
+        n_transverse=int(n_transverse_electron), n_normal=int(n_normal_electron),
+        electron_name="electron", reference_plane_m=reference_plane_m).get("electron")
+    electron_density_2d = (
+        None if eedf_edges is None
+        else EnergyCosineAngleDensity2D(eedf_edges, eedf_mass, 0.6))
+    electron = SpeciesBoundaryState(
+        electron.name, electron.charge_number, electron.mass_amu, electron.flux_m2_s,
+        electron.velocity_sqrt_eV, electron.weight,
+        density_model=electron.density_model,
+        provenance=dict(
+            shared_source,
+            role=(
+                "digitized_eedf_and_analytic_eadf_in_2d"
+                if electron_density_2d is not None
+                else "analytic_half_maxwellian_closure"),
+            source_figure=(
+                ["Fig. 4(b)", "Fig. 5(b)"]
+                if electron_density_2d is not None else None),
+            eedf_csv_sha256=eedf_digest,
+            eadf_cosine_power=(0.6 if electron_density_2d is not None else None),
+            three_dimensional_density_model="analytic_half_maxwellian_closure",
+            two_dimensional_density_model=(
+                "digitized_energy_times_cosine_power_angle"
+                if electron_density_2d is not None else "legacy_3d_projection"),
+            equal_particle_flux_to_ions=True,
+            supports_prediction_within_declared_benchmark=(
+                electron_density_2d is not None)),
+        density_model_2d=electron_density_2d)
+    return PlasmaBoundaryState(
+        (ion, electron), float(reference_plane_m),
+        provenance=dict(
+            shared_source, model="Hwang--Giapis 1997 plasma-to-feature boundary",
+            equal_ion_electron_particle_flux=True,
+            ion_flux_m2_s=flux, iedf_csv_sha256=iedf_digest,
+            eedf_csv_sha256=eedf_digest,
+            two_dimensional_source_is_source_faithful=(
+                electron_density_2d is not None),
+            reference_plane_height_above_sio2_m=float(reference_plane_m),
+            declared_reference_height_in_paper_m=3.7e-6))
 
 
 @dataclass(frozen=True)

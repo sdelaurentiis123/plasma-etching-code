@@ -1,0 +1,61 @@
+{
+  "manifest_id": "HWANG-GIAPIS-1997-FIG13-NOTCH-PROFILE-R1",
+  "source": {
+    "citation": "Hwang & Giapis, JVST B 15, 70 (1997)",
+    "doi": "10.1116/1.589258",
+    "pdf_sha256": "30a6871d6416f27e8dbbb45e9eabbca79cddf7632872f8ed185a9e193832f63d",
+    "pdf_page": 12,
+    "print_page": 81,
+    "figure": "Fig. 13",
+    "series": "open circles; Nozawa experiment",
+    "source_page_image_shape_px": [
+      2040,
+      2640
+    ],
+    "source_page_image_sha256": "94e76479f33c754d43332067bb332cc0f7bdb473407efd18d0b23f12347350b3",
+    "profile_crop_shape_px": [
+      2160,
+      1350
+    ],
+    "profile_crop_sha256": "abe6d851259c4b6f27bb8632ddfa86dd7127e586373462509ffa182fcaf82167"
+  },
+  "pixel_calibration": {
+    "x_axis": {
+      "pixel_at_zero_notch_depth": 756.0,
+      "pixel_at_0p5_um_line_width": 1744.0,
+      "slope_um_per_pixel": 0.0005060728744939271,
+      "intercept_um": -0.3825910931174089
+    },
+    "y_axis": {
+      "pixel_at_0p3_um_poly_top": 604.0,
+      "pixel_at_zero_height_oxide_interface": 1204.0,
+      "slope_um_per_pixel": -0.0005,
+      "intercept_um": 0.602
+    }
+  },
+  "marker_extraction": {
+    "row_count": 22,
+    "method": "connected dark-ring candidates followed by visual reconciliation against the source crop",
+    "manual_reconciliations": [
+      "point 7 overlaps the printed simulation curve and is centered at (875.0, 956.0)",
+      "the uppermost open circle overlaps the top interface and is centered at y=604.0"
+    ],
+    "profile_data_used_for_engine_tuning": false
+  },
+  "uncertainty": {
+    "digitization_bound_um_each_axis": 0.005,
+    "basis": "one source local-grid cell; conservative relative to marker-center ambiguity",
+    "measurement_uncertainty": "not reported by the source",
+    "claim_rule": "quantitative source reproduction may be reported; strict uncertainty-based experimental validation cannot be claimed from this contour alone",
+    "evidence_split": "development_replay_not_held_out"
+  },
+  "derived_checks": {
+    "maximum_notch_depth_um": 0.215688259,
+    "maximum_notch_depth_cross_check": "agrees with the independently digitized Nozawa large-open-area value near the same width ratio",
+    "coordinate_replay_tolerance_um": 5e-06
+  },
+  "output": {
+    "path": "data/experimental/hwang_giapis_1997/fig13_notch_profile.csv",
+    "sha256": "6cec65637bfe85dd619b82c4a17a1ab82730fe23ef6d5b35b567bb252bf6f462"
+  }
+}

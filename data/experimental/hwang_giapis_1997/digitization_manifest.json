@@ -1,0 +1,41 @@
+{
+  "manifest_id": "HWANG-GIAPIS-1997-FIG4A-IEDF-R1",
+  "source": {
+    "citation": "Hwang & Giapis, JVST B 15, 70 (1997)",
+    "doi": "10.1116/1.589258",
+    "pdf_sha256": "30a6871d6416f27e8dbbb45e9eabbca79cddf7632872f8ed185a9e193832f63d",
+    "pdf_page": 4,
+    "print_page": 73,
+    "figure": "Fig. 4(a)",
+    "render_dpi": 240,
+    "rendered_page_sha256": "38cedcdbad1acc1470c09807b9970d3482fd64d3bf9493fd40a763be2921db47"
+  },
+  "pixel_calibration": {
+    "x_at_0_eV": 1301.6,
+    "x_at_80_eV": 1731.0,
+    "y_at_zero_iedf": 709.5,
+    "curve_y_search": [
+      275,
+      708
+    ],
+    "dark_threshold": 180,
+    "maximum_column_step_px": 35.0,
+    "energy_bin_width_eV": 1.0,
+    "smoothing": "three-bin centered moving average with endpoint replication"
+  },
+  "digitization_uncertainty": {
+    "energy_eV": 0.5,
+    "curve_vertical_px": 2.0,
+    "note": "curve mass is normalized after extraction; original paper reports no numerical table"
+  },
+  "derived_checks": {
+    "probability_mass_sum": 1.0,
+    "mean_normal_energy_eV": 32.90013895999222,
+    "low_energy_mass_below_39_eV": 0.5960852082714635,
+    "low_to_high_peak_height_ratio": 1.8650652577640718
+  },
+  "output": {
+    "path": "data/experimental/hwang_giapis_1997/fig4a_ion_energy_distribution.csv",
+    "sha256": "540601fc95bc85e5c906d9d3e5d566f966e2761d4c65fc8a8167aaaf4c28adea"
+  }
+}

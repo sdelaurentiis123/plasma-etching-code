@@ -1,0 +1,53 @@
+{
+  "manifest_id": "HWANG-GIAPIS-1997-FIG4B-EEDF-R1",
+  "source": {
+    "citation": "Hwang & Giapis, JVST B 15, 70 (1997)",
+    "doi": "10.1116/1.589258",
+    "pdf_sha256": "30a6871d6416f27e8dbbb45e9eabbca79cddf7632872f8ed185a9e193832f63d",
+    "pdf_page": 4,
+    "print_page": 73,
+    "figure": "Fig. 4(b)",
+    "render_dpi": 240,
+    "rendered_page_sha256": "38cedcdbad1acc1470c09807b9970d3482fd64d3bf9493fd40a763be2921db47"
+  },
+  "pixel_calibration": {
+    "x_at_0_eV": 1247.0,
+    "x_at_20_eV": 1783.0,
+    "y_at_zero_eedf": 1416.5,
+    "curve_x_search": [
+      1254,
+      1784
+    ],
+    "curve_y_search": [
+      900,
+      1408
+    ],
+    "dark_threshold": 170,
+    "maximum_column_step_px": 35.0,
+    "minimum_resolved_height_px": 15.0,
+    "energy_bin_width_eV": 0.25,
+    "smoothing": "five-bin centered moving average with endpoint replication",
+    "tail_policy": "curve heights below the declared pixel-resolution threshold are zero; no tail law is invented"
+  },
+  "digitization_uncertainty": {
+    "energy_eV": 0.125,
+    "curve_vertical_px": 3.0,
+    "note": "curve mass is normalized after extraction; the original paper reports no numerical EEDF table"
+  },
+  "derived_checks": {
+    "probability_mass_sum": 1.0,
+    "mean_energy_eV": 3.5999861565274163,
+    "probability_mass_below_5_eV": 0.7453325639276992,
+    "highest_resolved_energy_eV": 12.0
+  },
+  "angular_companion": {
+    "source_figure": "Fig. 5(b)",
+    "declared_fit": "cos(theta)**0.6",
+    "digitized": false,
+    "reason": "the paper provides the analytic fit explicitly"
+  },
+  "output": {
+    "path": "data/experimental/hwang_giapis_1997/fig4b_electron_energy_distribution.csv",
+    "sha256": "17ae2728a0e3d5561fdd7b898d1d69a1b9a7267fa1c65a645daac25916119af6"
+  }
+}
