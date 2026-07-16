@@ -50,12 +50,13 @@ IEDF_EVIDENCE = (
 EEDF_EVIDENCE = (
     ROOT / "data" / "experimental" / "hwang_giapis_1997"
     / "fig4b_electron_energy_distribution.csv")
-GLOBAL_SCHEMA = "petch-hwang-giapis-fig13-global-boundary-v9"
+GLOBAL_SCHEMA = "petch-hwang-giapis-fig13-global-boundary-v10"
 LEGACY_GLOBAL_SCHEMAS = {
     "petch-hwang-giapis-fig13-global-boundary-v5",
     "petch-hwang-giapis-fig13-global-boundary-v6",
     "petch-hwang-giapis-fig13-global-boundary-v7",
     "petch-hwang-giapis-fig13-global-boundary-v8",
+    "petch-hwang-giapis-fig13-global-boundary-v9",
     GLOBAL_SCHEMA,
 }
 AUDIT_SCHEMA = "petch-hwang-giapis-fig13-profile-audit-v1"
@@ -75,6 +76,8 @@ _CONTINUATION_NUMERICAL_KEYS = {
     "trace_emergency_step_cap_factor",
     "trace_relative_tail_tolerance",
     "allow_trajectory_truncation",
+    "potential_guard_policy",
+    "potential_emergency_abs_v",
     "continuation_source",
     "continuation_compatibility_sha256",
 }
@@ -109,6 +112,15 @@ def _continuation_compatibility_payload(config):
 
 def _continuation_compatibility_hash(config):
     return _stable_hash(_continuation_compatibility_payload(config))
+
+
+def _potential_guard_transition_allowed(source_policy, target_policy):
+    source = str(source_policy or "legacy_clip")
+    target = str(target_policy or "legacy_clip")
+    return bool(
+        source == target
+        or (source == "legacy_clip"
+            and target == "source_faithful_refuse"))
 
 
 def _file_sha256(path):
@@ -197,6 +209,11 @@ def _load_continuation_state(config):
     observables = metadata.get("global_observables", {})
     gain = observables.get("stochastic_gain", {})
     source_config = metadata.get("config", {})
+    if not _potential_guard_transition_allowed(
+            source_config.get("potential_guard_policy", "legacy_clip"),
+            config.get("potential_guard_policy", "legacy_clip")):
+        raise ValueError(
+            "global warm start uses a disallowed potential-guard transition")
     source_compatibility = source_config.get(
         "continuation_compatibility_sha256",
         _continuation_compatibility_hash(source_config))
@@ -268,6 +285,10 @@ def _global_config(args):
         "trace_relative_tail_tolerance": float(
             args.global_trace_tail_tolerance),
         "allow_trajectory_truncation": False,
+        "potential_guard_policy": str(
+            args.global_potential_guard_policy),
+        "potential_emergency_abs_v": float(
+            args.global_potential_emergency_abs_v),
         "open_width_um": 2.0,
         "right_buffer_um": 0.5,
         "domain_model": "hwang_mirror_cell",
@@ -364,6 +385,10 @@ def _save_global_boundary(
                 "unresolved rays replayed from identical launch states with "
                 "doubling horizons; any emergency-tail closure is separately "
                 "bounded and reported, otherwise the run refuses"),
+            "potential_guard": (
+                "source-faithful mode does not clip voltage; a broad emergency "
+                "bound refuses numerical runaway without changing accepted "
+                "states"),
         },
         "poly_potential_v": float(result["V_poly_edge"]),
         "continuation_state": {
@@ -627,6 +652,18 @@ def main():
             "maximum unresolved source fraction eligible for a separately "
             "reported nonlanding tail closure after the emergency horizon; "
             "zero keeps strict refusal"))
+    parser.add_argument(
+        "--global-potential-guard-policy",
+        choices=("source_faithful_refuse", "legacy_clip"),
+        default="source_faithful_refuse",
+        help=(
+            "source-faithful mode never clips accepted voltages; legacy mode "
+            "retains the historical Vdc+Vrf clip for forensic replay"))
+    parser.add_argument(
+        "--global-potential-emergency-abs-v", type=float, default=500.0,
+        help=(
+            "broad absolute-voltage runaway refusal used only by the "
+            "source-faithful no-clip policy"))
     parser.add_argument(
         "--global-final-samples", type=int,
         help=(

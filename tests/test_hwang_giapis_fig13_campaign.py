@@ -1,5 +1,6 @@
 from scripts.hwang_giapis_1997_fig13_validation import (
     _continuation_compatibility_hash,
+    _potential_guard_transition_allowed,
 )
 
 
@@ -18,6 +19,8 @@ def test_fig13_continuation_compatibility_ignores_sampling_controls():
         "trace_emergency_step_cap_factor": 1280.0,
         "trace_relative_tail_tolerance": 0.0,
         "allow_trajectory_truncation": False,
+        "potential_guard_policy": "legacy_clip",
+        "potential_emergency_abs_v": 250.0,
     }
     second = {
         **first,
@@ -30,11 +33,24 @@ def test_fig13_continuation_compatibility_ignores_sampling_controls():
         "trace_emergency_step_cap_factor": 2560.0,
         "trace_relative_tail_tolerance": 1.0e-4,
         "allow_trajectory_truncation": True,
+        "potential_guard_policy": "source_faithful_refuse",
+        "potential_emergency_abs_v": 500.0,
     }
     assert (
         _continuation_compatibility_hash(first)
         == _continuation_compatibility_hash(second)
     )
+
+
+def test_fig13_continuation_allows_only_legacy_to_source_faithful_guard_upgrade():
+    assert _potential_guard_transition_allowed(
+        "legacy_clip", "source_faithful_refuse")
+    assert _potential_guard_transition_allowed(
+        "source_faithful_refuse", "source_faithful_refuse")
+    assert not _potential_guard_transition_allowed(
+        "source_faithful_refuse", "legacy_clip")
+    assert not _potential_guard_transition_allowed(
+        "unknown", "source_faithful_refuse")
 
 
 def test_fig13_continuation_compatibility_separates_launch_operators():

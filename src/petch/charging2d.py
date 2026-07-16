@@ -1222,6 +1222,8 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                               final_audit_samples=None, final_audit_seed=None,
                               stochastic_gain_exponent=None,
                               stochastic_gain_offset=25.0,
+                              potential_guard_policy="legacy_clip",
+                              potential_emergency_abs_v=500.0,
                               initial_surface_potential_v=None,
                               initial_edge_potential_v=None,
                               initial_neighbor_potential_v=None,
@@ -1242,6 +1244,12 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     is omitted from surface deposition and reported as a worst-case L1 surface-current error
     bound.  It is neither relabeled as a physical escape nor hidden as a completed trajectory.
     Zero retains strict refusal.
+
+    ``source_faithful_refuse`` does not clip a surface or conductor voltage: the kinetic currents
+    alone determine the stationary state, as in the source charge-accumulation calculation.  Its
+    broad ``potential_emergency_abs_v`` limit is only a numerical-runaway refusal.
+    ``legacy_clip`` preserves the historical ``V_dc + V_rf`` and ``-3 Te`` clips for explicit
+    forensic replay.
     """
     if see_model not in ("none", None):
         raise NotImplementedError("solve_edge_array_charging does not yet include SEE cascades")
@@ -1263,6 +1271,11 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         raise ValueError(
             "source_launch_plane must be 'sheath_lower_boundary' or "
             "'feature_mouth_legacy'")
+    if (potential_guard_policy not in (
+            "legacy_clip", "source_faithful_refuse")
+            or not np.isfinite(potential_emergency_abs_v)
+            or potential_emergency_abs_v <= 0.0):
+        raise ValueError("invalid edge-array potential guard policy")
     if final_audit_samples is not None:
         if (isinstance(final_audit_samples, (bool, np.bool_))
                 or int(final_audit_samples) != final_audit_samples
@@ -1347,11 +1360,10 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     open_frac = W / nx
     if relax is None:
         relax = 2.0 * Te
-    # Floating-insulator numerical guard. An insulator charges until local net current -> 0; the
-    # only bound is that it cannot charge past the incident particle energy, i.e. the sheath
-    # potential scale (V_dc + V_rf). None -> that physical guard (tracks the bias); a number sets
-    # a tighter guard in Te units for diagnostics. The old default 1*Te pinned the electron-
-    # collecting upper-sidewall PR cells and broke charge conservation (pr residual -0.14..-0.33).
+    # Legacy clipping support.  This is not a source-faithful physical bound:
+    # the digitized IEDF extends beyond V_dc + V_rf and its transverse
+    # Maxwellian has unbounded support.  It remains only for explicit replay of
+    # historical artifacts.
     pr_vguard = (V_dc + V_rf) if insul_vmin_Te is None else float(insul_vmin_Te) * Te
 
     V = np.zeros((nx, nz))
@@ -1368,13 +1380,22 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                 "matching the charging geometry")
         floor_initial = initial_surface[floor_mask]
         pr_initial = initial_surface[pr_mask]
-        if (np.any(floor_initial < -1.0e-12)
-                or np.any(floor_initial > V_dc + V_rf + 1.0e-12)
-                or np.any(pr_initial < -pr_vguard - 1.0e-12)
-                or np.any(pr_initial > V_dc + V_rf + 1.0e-12)):
+        if potential_guard_policy == "legacy_clip":
+            if (np.any(floor_initial < -1.0e-12)
+                    or np.any(
+                        floor_initial > V_dc + V_rf + 1.0e-12)
+                    or np.any(pr_initial < -pr_vguard - 1.0e-12)
+                    or np.any(
+                        pr_initial > V_dc + V_rf + 1.0e-12)):
+                raise ValueError(
+                    "initial_surface_potential_v violates the declared "
+                    "legacy potential clips")
+        elif np.max(np.abs(initial_surface[
+                floor_mask | pr_mask]), initial=0.0) > (
+                    potential_emergency_abs_v + 1.0e-12):
             raise ValueError(
-                "initial_surface_potential_v violates the declared "
-                "physical potential guards")
+                "initial_surface_potential_v exceeds the emergency "
+                "runaway guard")
         Vsolid[floor_mask | pr_mask] = initial_surface[
             floor_mask | pr_mask]
     if initial_edge_potential_v is not None:
@@ -1384,11 +1405,18 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     for name, value in (
             ("initial_edge_potential_v", Vedge),
             ("initial_neighbor_potential_v", Vneighbor)):
-        if (not np.isfinite(value)
-                or value < -3.0 * Te - 1.0e-12
-                or value > V_dc + V_rf + 1.0e-12):
+        if not np.isfinite(value):
+            raise ValueError(f"{name} must be finite")
+        if potential_guard_policy == "legacy_clip":
+            invalid = bool(
+                value < -3.0 * Te - 1.0e-12
+                or value > V_dc + V_rf + 1.0e-12)
+        else:
+            invalid = bool(
+                abs(value) > potential_emergency_abs_v + 1.0e-12)
+        if invalid:
             raise ValueError(
-                f"{name} violates the declared conductor potential guards")
+                f"{name} violates the declared potential guard policy")
     edge_outer_gross_flux = _hg_edge_outer_electron_gross_flux(AR)
     edge_open_samples = int(edge_open_samples or max(32768, 4 * n_per_iter))
     edge_aux = dict(model=edge_open_model, electron_gross=0.0, ion_gross=0.0,
@@ -1742,10 +1770,26 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         ))
         Vedge += scale * edge_conductor_net / max(geom["edge_exposed_area"], 1)
         Vneighbor += scale * net[cond == 2].sum() / max(geom["neighbor_exposed_area"], 1)
-        Vedge = float(np.clip(Vedge, -3.0 * Te, V_dc + V_rf))
-        Vneighbor = float(np.clip(Vneighbor, -3.0 * Te, V_dc + V_rf))
-        Vsolid[floor_mask] = np.clip(Vsolid[floor_mask], 0.0, V_dc + V_rf)
-        Vsolid[pr_mask] = np.clip(Vsolid[pr_mask], -pr_vguard, V_dc + V_rf)
+        if potential_guard_policy == "legacy_clip":
+            Vedge = float(np.clip(
+                Vedge, -3.0 * Te, V_dc + V_rf))
+            Vneighbor = float(np.clip(
+                Vneighbor, -3.0 * Te, V_dc + V_rf))
+            Vsolid[floor_mask] = np.clip(
+                Vsolid[floor_mask], 0.0, V_dc + V_rf)
+            Vsolid[pr_mask] = np.clip(
+                Vsolid[pr_mask], -pr_vguard, V_dc + V_rf)
+        else:
+            active_values = Vsolid[floor_mask | pr_mask]
+            maximum_abs_potential = max(
+                float(np.max(np.abs(active_values), initial=0.0)),
+                abs(float(Vedge)), abs(float(Vneighbor)))
+            if (not np.isfinite(maximum_abs_potential)
+                    or maximum_abs_potential
+                    > potential_emergency_abs_v):
+                raise RuntimeError(
+                    "edge-array potential exceeded the declared emergency "
+                    f"runaway guard of {potential_emergency_abs_v:.9g} V")
         floor_flux_iteration = float((hti == 1).sum() / n_per_iter)
         if it >= tail_start:
             vsolid_tail_sum += Vsolid
@@ -2059,21 +2103,82 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                 np.sum(net[contact]) / trench_norm),
         )
 
+    floor_indices = np.argwhere(floor_trench_mask)
+    floor_maximum_position = int(np.argmax(
+        Vsolid[floor_trench_mask]))
+    floor_maximum_ix, floor_maximum_iz = (
+        int(value)
+        for value in floor_indices[floor_maximum_position])
+
+    def target_floor_patch_record(nominal_width_cells):
+        half_width = int(nominal_width_cells) // 2
+        ix_start = max(
+            int(geom["trench0"]), floor_maximum_ix - half_width)
+        ix_stop = min(
+            int(geom["trench1"]), floor_maximum_ix + half_width + 1)
+        patch = np.zeros_like(floor_trench_mask)
+        patch[ix_start:ix_stop, floor_maximum_iz] = True
+        record = current_balance_record(
+            ci[patch].sum(), ce[patch].sum())
+        record.update(
+            nominal_width_cells=int(nominal_width_cells),
+            actual_width_cells=int(ix_stop - ix_start),
+            physical_extent_um=float(
+                (ix_stop - ix_start) * feature_w_um / W),
+            ix_start=int(ix_start),
+            ix_stop_exclusive=int(ix_stop),
+            iz=int(floor_maximum_iz),
+        )
+        return record
+
     potential_guard_contact = dict(
-        target_floor_upper=guard_contact_record(
-            floor_trench_mask, V_dc + V_rf),
-        photoresist_upper=guard_contact_record(
-            pr_mask, V_dc + V_rf),
-        photoresist_lower=guard_contact_record(
-            pr_mask, -pr_vguard),
-        edge_upper=bool(np.isclose(
-            Vedge, V_dc + V_rf, rtol=0.0, atol=1.0e-10)),
-        edge_lower=bool(np.isclose(
-            Vedge, -3.0 * Te, rtol=0.0, atol=1.0e-10)),
-        neighbor_upper=bool(np.isclose(
-            Vneighbor, V_dc + V_rf, rtol=0.0, atol=1.0e-10)),
-        neighbor_lower=bool(np.isclose(
-            Vneighbor, -3.0 * Te, rtol=0.0, atol=1.0e-10)),
+        policy=str(potential_guard_policy),
+        emergency_abs_v=float(potential_emergency_abs_v),
+        maximum_surface_abs_v=float(np.max(np.abs(
+            Vsolid[floor_mask | pr_mask]), initial=0.0)),
+        maximum_conductor_abs_v=float(max(
+            abs(Vedge), abs(Vneighbor))),
+        target_floor_maximum=dict(
+            ix=int(floor_maximum_ix),
+            iz=int(floor_maximum_iz),
+            potential_v=float(
+                Vsolid[floor_maximum_ix, floor_maximum_iz]),
+            ion_count=float(ci[
+                floor_maximum_ix, floor_maximum_iz]),
+            electron_count=float(ce[
+                floor_maximum_ix, floor_maximum_iz]),
+            signed_count=float(net[
+                floor_maximum_ix, floor_maximum_iz]),
+        ),
+        target_floor_maximum_patches={
+            str(width): target_floor_patch_record(width)
+            for width in (1, 3, 5)
+        },
+        target_floor_upper=(
+            guard_contact_record(floor_trench_mask, V_dc + V_rf)
+            if potential_guard_policy == "legacy_clip" else None),
+        photoresist_upper=(
+            guard_contact_record(pr_mask, V_dc + V_rf)
+            if potential_guard_policy == "legacy_clip" else None),
+        photoresist_lower=(
+            guard_contact_record(pr_mask, -pr_vguard)
+            if potential_guard_policy == "legacy_clip" else None),
+        edge_upper=bool(
+            potential_guard_policy == "legacy_clip"
+            and np.isclose(
+                Vedge, V_dc + V_rf, rtol=0.0, atol=1.0e-10)),
+        edge_lower=bool(
+            potential_guard_policy == "legacy_clip"
+            and np.isclose(
+                Vedge, -3.0 * Te, rtol=0.0, atol=1.0e-10)),
+        neighbor_upper=bool(
+            potential_guard_policy == "legacy_clip"
+            and np.isclose(
+                Vneighbor, V_dc + V_rf, rtol=0.0, atol=1.0e-10)),
+        neighbor_lower=bool(
+            potential_guard_policy == "legacy_clip"
+            and np.isclose(
+                Vneighbor, -3.0 * Te, rtol=0.0, atol=1.0e-10)),
     )
 
     def horizon_summary(kind):
@@ -2202,6 +2307,17 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
             initial=float(potential_history[0]["gain"]),
             final=float(potential_history[-1]["gain"]),
         ),
+        potential_guard=dict(
+            policy=str(potential_guard_policy),
+            emergency_abs_v=float(potential_emergency_abs_v),
+            legacy_upper_clip_v=(
+                float(V_dc + V_rf)
+                if potential_guard_policy == "legacy_clip" else None),
+            legacy_conductor_lower_clip_v=(
+                float(-3.0 * Te)
+                if potential_guard_policy == "legacy_clip" else None),
+            active_clip=bool(
+                potential_guard_policy == "legacy_clip")),
         potential_history=potential_history,
         see=dict(model=see_model, generations=int(see_generations), last=None),
     )

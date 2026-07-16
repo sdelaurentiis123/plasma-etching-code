@@ -243,6 +243,52 @@ def test_edge_array_decreasing_gain_reports_state_stationarity():
     assert continuation["stochastic_gain_age"] == 12
 
 
+def test_edge_array_source_faithful_policy_does_not_clip_voltage():
+    geometry = _build_edge_array_geometry(
+        1.2, W=8, mouth=20, open_width_um=1.0)
+    initial = np.zeros_like(geometry["solid"], dtype=float)
+    floor_ix, floor_iz = np.argwhere(
+        geometry["floor_trench_mask"])[0]
+    initial[floor_ix, floor_iz] = 70.0
+    controls = dict(
+        AR=1.2, W=8, mouth=20, n_per_iter=80, n_iter=1,
+        seed=30, open_width_um=1.0, rf_bursts=False,
+        relax=1.0e-6,
+        initial_surface_potential_v=initial,
+        final_audit_samples=320, final_audit_seed=130)
+
+    result = solve_edge_array_charging(
+        **controls, potential_guard_policy="source_faithful_refuse",
+        potential_emergency_abs_v=200.0)
+    assert result["diag"]["potential_guard"]["active_clip"] is False
+    assert result["diag"]["potential_history"][0]["floor_peak_v"] > 67.0
+    patches = result["diag"]["potential_guard_contact"][
+        "target_floor_maximum_patches"]
+    assert set(patches) == {"1", "3", "5"}
+    assert patches["5"]["physical_extent_um"] > (
+        patches["1"]["physical_extent_um"])
+
+    with pytest.raises(ValueError, match="legacy potential clips"):
+        solve_edge_array_charging(
+            **controls, potential_guard_policy="legacy_clip")
+
+
+def test_edge_array_source_faithful_policy_refuses_runaway_initial_state():
+    geometry = _build_edge_array_geometry(
+        1.2, W=8, mouth=20, open_width_um=1.0)
+    initial = np.zeros_like(geometry["solid"], dtype=float)
+    floor_ix, floor_iz = np.argwhere(
+        geometry["floor_trench_mask"])[0]
+    initial[floor_ix, floor_iz] = 201.0
+    with pytest.raises(ValueError, match="emergency runaway guard"):
+        solve_edge_array_charging(
+            1.2, W=8, mouth=20, n_per_iter=80, n_iter=1,
+            seed=30, open_width_um=1.0, rf_bursts=False,
+            initial_surface_potential_v=initial,
+            potential_guard_policy="source_faithful_refuse",
+            potential_emergency_abs_v=200.0)
+
+
 def test_edge_array_continuation_preserves_gain_age_and_accepts_saved_state():
     first = solve_edge_array_charging(
         1.2, W=10, mouth=30, n_per_iter=160, n_iter=8,
