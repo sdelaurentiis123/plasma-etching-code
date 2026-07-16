@@ -54,7 +54,7 @@ def test_edge_array_line_of_sight_tops_up_gross_species_not_net_current(
 
 def test_edge_array_accepts_the_unified_hwang_boundary_state():
     boundary = build_hwang_giapis_1997_boundary_state(
-        IEDF, EEDF, reference_plane_m=0.8e-6)
+        IEDF, EEDF, reference_plane_m=1.4e-6)
     coarse = solve_edge_array_charging(
         1.2, W=10, mouth=16, n_per_iter=160, n_iter=3, seed=14,
         feature_w_um=0.5, open_width_um=1.0, rf_bursts=False,
@@ -68,6 +68,11 @@ def test_edge_array_accepts_the_unified_hwang_boundary_state():
         return_final_ion_lineage=True, final_audit_samples=640,
         final_audit_seed=99)
     assert coarse["diag"]["trace"]["source_model"] == "PlasmaBoundaryState"
+    assert coarse["diag"]["trace"]["source_launch_plane"] == (
+        "sheath_lower_boundary")
+    assert coarse["diag"]["trace"]["source_z_grid"] == pytest.approx(1.0)
+    assert coarse["diag"]["trace"]["nominal_reference_height_m"] == (
+        pytest.approx(1.4e-6))
     assert coarse["diag"]["trace"]["explicit_2d_source_projection"] is True
     assert coarse["diag"]["trace"]["final_sampling_protocol"] == (
         "dedicated_nested_boundary_units_v1")
@@ -82,6 +87,30 @@ def test_edge_array_accepts_the_unified_hwang_boundary_state():
             refined["final_ion_lineage"][name][:320])
     assert np.all(
         refined["final_ion_lineage"]["impact_energy_eV"] >= 0.0)
+
+
+def test_edge_array_legacy_mouth_launch_is_explicit_and_reported():
+    result = solve_edge_array_charging(
+        1.2, W=10, mouth=16, n_per_iter=80, n_iter=2, seed=15,
+        feature_w_um=0.5, open_width_um=1.0, rf_bursts=False,
+        source_launch_plane="feature_mouth_legacy")
+    assert result["diag"]["trace"]["source_launch_plane"] == (
+        "feature_mouth_legacy")
+    assert result["diag"]["trace"]["source_z_grid"] == pytest.approx(15.5)
+    assert result["geom"]["source_launch_plane"] == (
+        "feature_mouth_legacy")
+
+
+def test_edge_array_refuses_the_old_mouth_height_as_boundary_reference():
+    boundary = build_hwang_giapis_1997_boundary_state(
+        IEDF, EEDF, reference_plane_m=0.8e-6)
+    with pytest.raises(
+            ValueError,
+            match="sheath-boundary-to-SiO2 height"):
+        solve_edge_array_charging(
+            1.2, W=10, mouth=16, n_per_iter=80, n_iter=2, seed=16,
+            feature_w_um=0.5, open_width_um=1.0, rf_bursts=False,
+            plasma_boundary=boundary, source_model="boundary_state")
 
 
 def test_edge_array_geometry_labels_conductors_and_trench():
@@ -198,3 +227,10 @@ def test_edge_array_refuses_invalid_stochastic_gain_age(gain_age):
             1.2, W=8, mouth=20, n_per_iter=80, n_iter=3,
             stochastic_gain_exponent=0.75,
             stochastic_gain_age=gain_age)
+
+
+def test_edge_array_refuses_unknown_source_launch_plane():
+    with pytest.raises(ValueError, match="source_launch_plane"):
+        solve_edge_array_charging(
+            1.2, W=8, mouth=20, n_per_iter=80, n_iter=3,
+            source_launch_plane="near_the_feature")

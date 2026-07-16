@@ -50,12 +50,27 @@ IEDF_EVIDENCE = (
 EEDF_EVIDENCE = (
     ROOT / "data" / "experimental" / "hwang_giapis_1997"
     / "fig4b_electron_energy_distribution.csv")
-GLOBAL_SCHEMA = "petch-hwang-giapis-fig13-global-boundary-v6"
+GLOBAL_SCHEMA = "petch-hwang-giapis-fig13-global-boundary-v7"
 LEGACY_GLOBAL_SCHEMAS = {
     "petch-hwang-giapis-fig13-global-boundary-v5",
+    "petch-hwang-giapis-fig13-global-boundary-v6",
     GLOBAL_SCHEMA,
 }
 AUDIT_SCHEMA = "petch-hwang-giapis-fig13-profile-audit-v1"
+
+_CONTINUATION_NUMERICAL_KEYS = {
+    "n_per_iter",
+    "n_iter",
+    "seed",
+    "relax",
+    "stochastic_gain_exponent",
+    "stochastic_gain_offset",
+    "return_final_ion_lineage",
+    "final_audit_samples",
+    "final_audit_seed",
+    "continuation_source",
+    "continuation_compatibility_sha256",
+}
 
 
 def _git_revision():
@@ -69,6 +84,24 @@ def _stable_hash(value):
     encoded = json.dumps(
         value, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return sha256(encoded).hexdigest()
+
+
+def _continuation_compatibility_payload(config):
+    payload = {
+        key: value for key, value in config.items()
+        if key not in _CONTINUATION_NUMERICAL_KEYS
+    }
+    # Version 5/6 artifacts predate an explicit launch-plane declaration and
+    # were generated at the feature mouth.  Naming that implicit legacy
+    # operator here lets legacy-to-legacy forensic continuation remain
+    # possible while guaranteeing that it cannot warm-start the corrected
+    # sheath-boundary operator.
+    payload.setdefault("source_launch_plane", "feature_mouth_legacy")
+    return payload
+
+
+def _continuation_compatibility_hash(config):
+    return _stable_hash(_continuation_compatibility_payload(config))
 
 
 def _file_sha256(path):
@@ -140,6 +173,16 @@ def _load_continuation_state(config):
     observables = metadata.get("global_observables", {})
     gain = observables.get("stochastic_gain", {})
     source_config = metadata.get("config", {})
+    source_compatibility = source_config.get(
+        "continuation_compatibility_sha256",
+        _continuation_compatibility_hash(source_config))
+    target_compatibility = config.get(
+        "continuation_compatibility_sha256",
+        _continuation_compatibility_hash(config))
+    if source_compatibility != target_compatibility:
+        raise ValueError(
+            "global warm start uses a physically incompatible charging "
+            "operator or geometry")
     age = continuation.get(
         "stochastic_gain_age",
         gain.get(
@@ -174,7 +217,10 @@ def _global_config(args):
     config = {
         "AR": 2.6,
         "W": 25,
-        "mouth": 185,
+        # Figure 3 places the sheath lower boundary 3.7 um above the
+        # SiO2 surface.  The 1.3 um PR/poly stack occupies 65 cells, leaving
+        # 120 empty 20 nm cells above the feature in the 185-cell domain.
+        "mouth": 120,
         "Te": 4.0,
         "V_dc": 37.0,
         "V_rf": 30.0,
@@ -189,6 +235,7 @@ def _global_config(args):
         "boundary_um": 3.7,
         "ion_angle_energy_corr": "anticorrelated",
         "source_model": "primary_digitized_PlasmaBoundaryState",
+        "source_launch_plane": "sheath_lower_boundary",
         "open_width_um": 2.0,
         "right_buffer_um": 0.5,
         "domain_model": "hwang_mirror_cell",
@@ -216,6 +263,8 @@ def _global_config(args):
     if args.ion_tangential_temperature_eV is not None:
         config["plasma_boundary_ion_tangential_temperature_eV"] = float(
             args.ion_tangential_temperature_eV)
+    config["continuation_compatibility_sha256"] = (
+        _continuation_compatibility_hash(config))
     if args.global_warm_start is not None:
         config["continuation_source"] = _continuation_provenance(
             args.global_warm_start)
@@ -274,6 +323,16 @@ def _save_global_boundary(output, config, result, elapsed_s):
         "config_sha256": _stable_hash(config),
         "elapsed_s": float(elapsed_s),
         "geometry": result["geom"],
+        "operator_statement": {
+            "source_launch_plane": result["diag"]["trace"][
+                "source_launch_plane"],
+            "reference_plane_definition": (
+                "nominal distance from the zero-potential sheath lower "
+                "boundary to the SiO2 surface"),
+            "pre_v7_checkpoint_status": (
+                "incompatible unless feature_mouth_legacy is explicitly "
+                "selected"),
+        },
         "poly_potential_v": float(result["V_poly_edge"]),
         "continuation_state": {
             key: value

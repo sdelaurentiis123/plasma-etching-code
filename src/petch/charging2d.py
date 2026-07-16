@@ -1141,7 +1141,9 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                               trace_integrator="adaptive_numba", trace_step_cap_factor=40.0,
                               see_model="none", see_generations=1,
                               ion_angle_energy_corr="anticorrelated",
-                              source_model="analytic", plasma_boundary=None,
+                              source_model="analytic",
+                              source_launch_plane="sheath_lower_boundary",
+                              plasma_boundary=None,
                               open_width_um=3.7, right_buffer_um=0.5,
                               domain_model="extended_open",
                               edge_open_model="none", edge_open_electron_flux=None,
@@ -1159,6 +1161,11 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
 
     This is the next-step mechanism solver: open area + edge poly line + edge trench +
     neighboring line. It intentionally leaves the original periodic `solve_trench_charging` intact.
+
+    Particles are launched at the zero-potential sheath lower boundary by default and traverse
+    the full approach field before reaching the feature.  This is the Hwang--Giapis source
+    operator.  ``feature_mouth_legacy`` is retained only for explicit forensic replay of
+    pre-correction artifacts; it skips the approach field and must never be selected implicitly.
     """
     if see_model not in ("none", None):
         raise NotImplementedError("solve_edge_array_charging does not yet include SEE cascades")
@@ -1166,6 +1173,11 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         raise TypeError("progress_callback must be callable")
     if not isinstance(return_final_ion_lineage, (bool, np.bool_)):
         raise TypeError("return_final_ion_lineage must be boolean")
+    if source_launch_plane not in (
+            "sheath_lower_boundary", "feature_mouth_legacy"):
+        raise ValueError(
+            "source_launch_plane must be 'sheath_lower_boundary' or "
+            "'feature_mouth_legacy'")
     if final_audit_samples is not None:
         if (isinstance(final_audit_samples, (bool, np.bool_))
                 or int(final_audit_samples) != final_audit_samples
@@ -1193,6 +1205,18 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
             or stochastic_gain_age < 0):
         raise ValueError("stochastic_gain_age must be a nonnegative integer")
     stochastic_gain_age = int(stochastic_gain_age)
+    geom = _build_edge_array_geometry(
+        AR, W=W, mouth=mouth, poly_um=poly_um,
+        feature_w_um=feature_w_um,
+        open_width_um=open_width_um,
+        right_buffer_um=right_buffer_um,
+        domain_model=domain_model)
+    source_z_grid = (
+        1.0
+        if source_launch_plane == "sheath_lower_boundary"
+        else max(1.0, float(mouth) - 0.5))
+    nominal_reference_height_m = (
+        float(geom["nz"]) * float(feature_w_um) / float(W) * 1e-6)
     ion_boundary = None
     electron_boundary = None
     if plasma_boundary is not None:
@@ -1213,14 +1237,14 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
             raise ValueError(
                 "2-D charging requires one positive and one negative "
                 "continuous-density species with equal particle flux")
-        expected_reference_m = (
-            float(mouth) * float(feature_w_um) / float(W) * 1e-6)
         if not np.isclose(
-                plasma_boundary.reference_plane_m, expected_reference_m,
+                plasma_boundary.reference_plane_m,
+                nominal_reference_height_m,
                 rtol=0.0,
                 atol=0.51 * float(feature_w_um) / float(W) * 1e-6):
             raise ValueError(
-                "plasma_boundary reference plane does not match the 2-D source plane")
+                "plasma_boundary reference plane does not match the nominal "
+                "sheath-boundary-to-SiO2 height of the 2-D domain")
         ion_boundary = positive[0]
         electron_boundary = negative[0]
     if trace_integrator not in ("adaptive_numba", "adaptive"):
@@ -1229,11 +1253,6 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         raise RuntimeError("numba edge tracer is unavailable")
 
     rng = np.random.default_rng(seed)
-    geom = _build_edge_array_geometry(AR, W=W, mouth=mouth, poly_um=poly_um,
-                                      feature_w_um=feature_w_um,
-                                      open_width_um=open_width_um,
-                                      right_buffer_um=right_buffer_um,
-                                      domain_model=domain_model)
     solid = geom["solid"]
     cond = geom["cond"]
     floor_mask = geom["floor_mask"]
@@ -1433,7 +1452,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
             source_rng.uniform(0.0, float(nx - 1), n)
             if source_x_unit is None
             else source_x_unit * float(nx - 1))
-        z = np.ones(n) * max(1.0, float(mouth) - 0.5)
+        z = np.full(n, source_z_grid)
         return x, z, vx, vz, sB, q
 
     trace_stats = []
@@ -1899,6 +1918,10 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                    source_model=(
                        "PlasmaBoundaryState"
                        if plasma_boundary is not None else source_model),
+                   source_launch_plane=str(source_launch_plane),
+                   source_z_grid=float(source_z_grid),
+                   nominal_reference_height_m=float(
+                       nominal_reference_height_m),
                    poly_mode="edge_array",
                    edge_open_model=edge_open_model,
                    edge_outer_electron_gross_flux=edge_outer_gross_flux,
@@ -1973,6 +1996,10 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
             "source_particle_count": int(ntot),
             "cell_size_um": float(feature_w_um) / int(W),
             "source_width_um": float(nx) * float(feature_w_um) / int(W),
+            "source_launch_plane": str(source_launch_plane),
+            "source_z_grid": float(source_z_grid),
+            "nominal_reference_height_m": float(
+                nominal_reference_height_m),
             "edge_inner_poly_hit_type": 4,
             "coordinate_convention": (
                 "x increases from the open area through the edge line into the "
@@ -2006,7 +2033,11 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                   right_trench1=int(geom["right_trench1"]),
                   next0=int(geom["next0"]),
                   domain_model=str(geom["domain_model"]),
-                  mirror_x=bool(geom["mirror_x"])),
+                  mirror_x=bool(geom["mirror_x"]),
+                  source_launch_plane=str(source_launch_plane),
+                  source_z_grid=float(source_z_grid),
+                  nominal_reference_height_m=float(
+                      nominal_reference_height_m)),
         Vprwall_mean=float(pr_vals.mean()) if pr_vals.size else 0.0,
         Vprwall_min=float(pr_vals.min()) if pr_vals.size else 0.0,
         continuation_state=dict(
