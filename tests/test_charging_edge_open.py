@@ -81,12 +81,13 @@ def test_edge_array_accepts_the_unified_hwang_boundary_state():
     for name in (
             "hit_type", "hit_ix", "hit_iz", "impact_energy_eV",
             "hit_x_grid", "hit_z_grid", "hit_vx_sqrt_eV",
-            "hit_vz_sqrt_eV"):
+            "hit_vz_sqrt_eV", "termination"):
         assert np.array_equal(
             coarse["final_ion_lineage"][name],
             refined["final_ion_lineage"][name][:320])
     assert np.all(
         refined["final_ion_lineage"]["impact_energy_eV"] >= 0.0)
+    assert refined["final_ion_lineage"]["truncation_count"] == 0
 
 
 def test_edge_array_legacy_mouth_launch_is_explicit_and_reported():
@@ -145,6 +146,7 @@ def test_edge_array_tiny_solve_reports_edge_observables():
     assert "V_poly_edge" in r and "V_poly_neighbor" in r
     assert r["diag"]["edge_open"]["model"] == "explicit_geometry"
     assert r["diag"]["trace"]["last_ion"]["survivor_frac"] < 0.05
+    assert r["diag"]["trace"]["last_ion"]["truncation_frac"] == 0.0
     lineage = r["final_ion_lineage"]
     assert lineage["source_particle_count"] == 777
     assert lineage["hit_type"].shape == (777,)
@@ -152,6 +154,70 @@ def test_edge_array_tiny_solve_reports_edge_observables():
     assert np.allclose(
         lineage["impact_energy_eV"],
         lineage["hit_vx_sqrt_eV"] ** 2 + lineage["hit_vz_sqrt_eV"] ** 2)
+    assert np.all(np.isin(lineage["termination"], (1, 2)))
+
+
+def test_edge_array_adaptive_horizon_matches_one_shot_long_horizon():
+    controls = dict(
+        AR=1.2, W=8, mouth=20, n_per_iter=80, n_iter=2,
+        seed=25, open_width_um=1.0, rf_bursts=False,
+        return_final_ion_lineage=True, final_audit_samples=320,
+        final_audit_seed=125)
+    adaptive = solve_edge_array_charging(
+        **controls, trace_step_cap_factor=1.0,
+        trace_adaptive_horizon=True,
+        trace_emergency_step_cap_factor=32.0)
+    one_shot = solve_edge_array_charging(
+        **controls, trace_step_cap_factor=32.0,
+        trace_adaptive_horizon=False,
+        trace_emergency_step_cap_factor=32.0)
+
+    assert (
+        adaptive["diag"]["trace"]["last_ion"]["horizon_extension_count"]
+        > 0)
+    assert adaptive["diag"]["trace"]["last_ion"]["truncated"] == 0
+    assert adaptive["diag"]["trace"]["last_electron"]["truncated"] == 0
+    for name in (
+            "hit_type", "hit_ix", "hit_iz", "impact_energy_eV",
+            "hit_x_grid", "hit_z_grid", "hit_vx_sqrt_eV",
+            "hit_vz_sqrt_eV", "termination"):
+        assert np.array_equal(
+            adaptive["final_ion_lineage"][name],
+            one_shot["final_ion_lineage"][name])
+    assert adaptive["diag"]["residual_snapshot"] == pytest.approx(
+        one_shot["diag"]["residual_snapshot"])
+
+
+def test_edge_array_refuses_unresolved_trajectory_without_adaptive_horizon():
+    with pytest.raises(RuntimeError, match="exhausted max_steps"):
+        solve_edge_array_charging(
+            1.2, W=8, mouth=20, n_per_iter=80, n_iter=2,
+            seed=26, open_width_um=1.0, rf_bursts=False,
+            trace_step_cap_factor=0.1,
+            trace_adaptive_horizon=False,
+            trace_emergency_step_cap_factor=0.1)
+
+
+def test_edge_array_closes_only_a_declared_bounded_trajectory_tail():
+    result = solve_edge_array_charging(
+        1.2, W=8, mouth=20, n_per_iter=80, n_iter=2,
+        seed=26, open_width_um=1.0, rf_bursts=False,
+        trace_step_cap_factor=4.0,
+        trace_adaptive_horizon=False,
+        trace_emergency_step_cap_factor=4.0,
+        trace_relative_tail_tolerance=0.05,
+        return_final_ion_lineage=True,
+        final_audit_samples=320, final_audit_seed=126)
+
+    horizon = result["diag"]["trace"]["campaign_horizon"]
+    assert horizon["ion"]["tail_closure_evaluation_count"] > 0
+    assert horizon["electron"]["tail_closure_evaluation_count"] > 0
+    for species in horizon.values():
+        assert (
+            species[
+                "maximum_tail_closure_l1_surface_current_error_bound_relative"]
+            <= 0.05)
+    assert result["final_ion_lineage"]["tail_closure_count"] > 0
 
 
 def test_edge_array_decreasing_gain_reports_state_stationarity():

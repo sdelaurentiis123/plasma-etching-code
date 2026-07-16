@@ -237,7 +237,10 @@ if njit is not None:
         hit_z = np.zeros(n)
         hit_vx = np.zeros(n)
         hit_vz = np.zeros(n)
-        survivor = np.zeros(n, np.uint8)
+        # 0 = unresolved at the numerical horizon, 1 = landed, 2 = escaped.
+        # Keeping these states distinct is essential: an unresolved slow or
+        # grazing electron is not a physical return to the plasma.
+        termination = np.zeros(n, np.int8)
         steps = np.zeros(n, np.int64)
 
         for p in range(n):
@@ -309,6 +312,7 @@ if njit is not None:
                 if z < 0.5 or (
                         not mirror_x
                         and (x < 0.0 or x >= nx - 1.0)):
+                    termination[p] = 2
                     alive = False
                     break
 
@@ -349,17 +353,79 @@ if njit is not None:
                             hit_type[p] = 5
                         else:
                             hit_type[p] = 6
+                    termination[p] = 1
                     alive = False
                     break
-            if alive:
-                survivor[p] = 1
             steps[p] = last_step
         return (
             hit_type, hit_ix, hit_iz, impact_E, hit_x, hit_z,
-            hit_vx, hit_vz, survivor, steps)
+            hit_vx, hit_vz, termination, steps)
 else:
     _trace_particles_adaptive = None
     _trace_edge_particles_adaptive = None
+
+
+def _trace_edge_particles_with_horizon(
+        Ex, Ez, ExB, EzB, solid, cond, x0, z0, vx0, vz0, sB, q,
+        nx, nz, mouth, edge0, edge1, trench0, trench1,
+        neigh0, neigh1, z_poly0, max_steps, mirror_x, *,
+        adaptive_horizon=False, emergency_max_steps=None):
+    """Trace one fixed launch population with bounded horizon refinement.
+
+    A longer horizon is a numerical refinement of the identical trajectory,
+    not a new particle sample or altered physical operator.  Resolved first
+    hits and escapes are final, so only unresolved rays are replayed from
+    their original launch state when the horizon doubles.
+    """
+    if _trace_edge_particles_adaptive is None:
+        raise RuntimeError("numba edge tracer is unavailable")
+    initial_max_steps = int(max_steps)
+    if emergency_max_steps is None:
+        emergency_max_steps = initial_max_steps
+    if (not isinstance(adaptive_horizon, (bool, np.bool_))
+            or int(emergency_max_steps) != emergency_max_steps
+            or emergency_max_steps < initial_max_steps):
+        raise ValueError("invalid adaptive edge-trajectory horizon controls")
+    emergency_max_steps = int(emergency_max_steps)
+    launch_arrays = tuple(np.asarray(item) for item in (
+        x0, z0, vx0, vz0, sB))
+    ray_count = len(launch_arrays[0])
+    if any(item.shape != (ray_count,) for item in launch_arrays):
+        raise ValueError("edge-trajectory launch arrays must have one shared length")
+    active_index = np.arange(ray_count, dtype=int)
+    full_result = (
+        np.zeros(ray_count, dtype=np.int8),
+        np.full(ray_count, -1, dtype=np.int64),
+        np.full(ray_count, -1, dtype=np.int64),
+        np.zeros(ray_count, dtype=float),
+        np.zeros(ray_count, dtype=float),
+        np.zeros(ray_count, dtype=float),
+        np.zeros(ray_count, dtype=float),
+        np.zeros(ray_count, dtype=float),
+        np.zeros(ray_count, dtype=np.int8),
+        np.zeros(ray_count, dtype=np.int64),
+    )
+    active_max_steps = initial_max_steps
+    extension_count = 0
+    while True:
+        active_result = _trace_edge_particles_adaptive(
+            Ex, Ez, ExB, EzB, solid, cond,
+            launch_arrays[0][active_index],
+            launch_arrays[1][active_index],
+            launch_arrays[2][active_index],
+            launch_arrays[3][active_index],
+            launch_arrays[4][active_index],
+            q, nx, nz, mouth, edge0, edge1, trench0, trench1,
+            neigh0, neigh1, z_poly0, active_max_steps, mirror_x)
+        for destination, values in zip(full_result, active_result):
+            destination[active_index] = values
+        unresolved = active_result[8] == 0
+        if (not np.any(unresolved) or not adaptive_horizon
+                or active_max_steps >= emergency_max_steps):
+            return full_result + (active_max_steps, extension_count)
+        active_index = active_index[unresolved]
+        active_max_steps = min(2 * active_max_steps, emergency_max_steps)
+        extension_count += 1
 
 
 _PMMA_SIGMA_E_E = np.array([0.0, 5.0, 10.0, 16.0, 20.0, 30.0, 40.0, 50.0, 60.0, 80.0, 100.0])
@@ -1139,6 +1205,10 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                               poly_um=0.3, feature_w_um=0.5, rf_bursts=True,
                               sheath_um=89.0, boundary_um=3.7, insul_vmin_Te=None,
                               trace_integrator="adaptive_numba", trace_step_cap_factor=40.0,
+                              trace_adaptive_horizon=True,
+                              trace_emergency_step_cap_factor=1280.0,
+                              trace_relative_tail_tolerance=0.0,
+                              allow_trajectory_truncation=False,
                               see_model="none", see_generations=1,
                               ion_angle_energy_corr="anticorrelated",
                               source_model="analytic",
@@ -1166,11 +1236,26 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     the full approach field before reaching the feature.  This is the Hwang--Giapis source
     operator.  ``feature_mouth_legacy`` is retained only for explicit forensic replay of
     pre-correction artifacts; it skips the approach field and must never be selected implicitly.
+
+    A positive ``trace_relative_tail_tolerance`` permits a bounded nonlanding closure only after
+    adaptive horizon refinement reaches its emergency ceiling.  The unresolved source fraction
+    is omitted from surface deposition and reported as a worst-case L1 surface-current error
+    bound.  It is neither relabeled as a physical escape nor hidden as a completed trajectory.
+    Zero retains strict refusal.
     """
     if see_model not in ("none", None):
         raise NotImplementedError("solve_edge_array_charging does not yet include SEE cascades")
     if progress_callback is not None and not callable(progress_callback):
         raise TypeError("progress_callback must be callable")
+    if (not np.isfinite(trace_step_cap_factor)
+            or trace_step_cap_factor <= 0.0
+            or not isinstance(trace_adaptive_horizon, (bool, np.bool_))
+            or not np.isfinite(trace_emergency_step_cap_factor)
+            or trace_emergency_step_cap_factor < trace_step_cap_factor
+            or not np.isfinite(trace_relative_tail_tolerance)
+            or not 0.0 <= trace_relative_tail_tolerance < 1.0
+            or not isinstance(allow_trajectory_truncation, (bool, np.bool_))):
+        raise ValueError("invalid edge-trajectory horizon controls")
     if not isinstance(return_final_ion_lineage, (bool, np.bool_)):
         raise TypeError("return_final_ion_lineage must be boolean")
     if source_launch_plane not in (
@@ -1462,12 +1547,34 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
             kind, n, unit_override=unit_override,
             random_source=random_source)
         max_steps = int(float(trace_step_cap_factor) * nz)
+        emergency_max_steps = int(
+            float(trace_emergency_step_cap_factor) * nz)
         (ht, hix, hiz, impact_E, hit_x, hit_z, hit_vx, hit_vz,
-         survivor, steps) = _trace_edge_particles_adaptive(
+         termination, steps, final_max_steps,
+         horizon_extension_count) = _trace_edge_particles_with_horizon(
             Ex, Ez, ExB, EzB, solid, cond, x, z, vx, vz, sB, q,
             nx, nz, mouth, geom["edge0"], geom["edge1"], geom["trench0"], geom["trench1"],
             geom["neigh0"], geom["neigh1"], geom["z_poly0"], max_steps,
-            geom["mirror_x"])
+            geom["mirror_x"],
+            adaptive_horizon=bool(trace_adaptive_horizon),
+            emergency_max_steps=emergency_max_steps)
+        truncated = termination == 0
+        escaped = termination == 2
+        truncation_fraction = float(truncated.sum() / max(n, 1))
+        tail_closed = bool(
+            np.any(truncated)
+            and trace_relative_tail_tolerance > 0.0
+            and truncation_fraction <= trace_relative_tail_tolerance)
+        if (np.any(truncated) and not tail_closed
+                and not allow_trajectory_truncation):
+            qualifier = "emergency " if trace_adaptive_horizon else ""
+            raise RuntimeError(
+                f"{kind} edge trajectories exhausted {qualifier}"
+                f"max_steps={final_max_steps} with "
+                f"{int(truncated.sum())}/{int(n)} unresolved "
+                f"(fraction={truncation_fraction:.9g}); increase the physical "
+                "flight horizon, declare a bounded tail tolerance, or "
+                "explicitly allow diagnostic truncation")
         counts = np.zeros((nx, nz))
         m = ht > 0
         if m.any():
@@ -1480,15 +1587,41 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         neigh_n = float(neigh.sum())
         neigh_E = float(impact_E[neigh].sum())
         edge_outer = ht == 3
-        trace_stats.append(dict(kind=kind, n=int(n), survivors=int(survivor.sum()),
-                                survivor_frac=float(survivor.sum() / max(n, 1)),
+        trace_stats.append(dict(
+                                evaluation_index=int(len(trace_stats)),
+                                kind=kind, n=int(n),
+                                escaped=int(escaped.sum()),
+                                escape_frac=float(escaped.sum() / max(n, 1)),
+                                truncated=int(truncated.sum()),
+                                truncation_frac=truncation_fraction,
+                                tail_closure_applied=tail_closed,
+                                tail_closed=int(
+                                    truncated.sum() if tail_closed else 0),
+                                tail_closure_fraction=float(
+                                    truncation_fraction if tail_closed else 0.0),
+                                tail_closure_l1_surface_current_error_bound_relative=float(
+                                    truncation_fraction if tail_closed else 0.0),
+                                # Backward-compatible alias.  Historical
+                                # "survivor" meant numerically unresolved,
+                                # never a certified physical escape.
+                                survivors=int(truncated.sum()),
+                                survivor_frac=float(
+                                    truncated.sum() / max(n, 1)),
+                                survivor_semantics=(
+                                    "legacy_alias_for_trajectory_truncation"),
                                 steps=int(steps.max()) if steps.size else 0,
-                                cap=int(max_steps), integrator="edge_adaptive_numba",
+                                cap=int(final_max_steps),
+                                initial_cap=int(max_steps),
+                                emergency_cap=int(emergency_max_steps),
+                                horizon_extension_count=int(
+                                    horizon_extension_count),
+                                integrator="edge_adaptive_numba",
                                 foot_n=foot_n, foot_E=foot_E, foot_En=foot_En,
                                 neighbor_n=neigh_n, neighbor_E=neigh_E,
                                 edge_outer_n=float(edge_outer.sum())))
         lineage = (
-            ht, hix, hiz, impact_E, hit_x, hit_z, hit_vx, hit_vz)
+            ht, hix, hiz, impact_E, hit_x, hit_z, hit_vx, hit_vz,
+            termination)
         return counts, lineage
 
     # W2 isotropic electron source: precompute the sky view factor per exposed surface cell ONCE
@@ -1716,7 +1849,8 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
     ci, ion_lineage = trace(
         "ion", ntot, Ex, Ez, unit_override=final_ion_unit,
         random_source=final_ion_rng)
-    hti, hixi, hizi, Ei, hit_xi, hit_zi, vxi, vzi = ion_lineage
+    (hti, hixi, hizi, Ei, hit_xi, hit_zi, vxi, vzi,
+     ion_termination) = ion_lineage
     if electron_model == "viewfactor":
         Vcell = Vsolid.copy(); Vcell[cond == 1] = Vedge; Vcell[cond == 2] = Vneighbor
         throttle = np.where(Vcell >= 0.0, 1.0, np.exp(np.clip(Vcell / max(Te, 1e-9), -40.0, 0.0)))
@@ -1902,6 +2036,92 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         neighbor_drift_v=float(
             Vneighbor_tail_second - Vneighbor_tail_first),
     )
+
+    def guard_contact_record(mask, guard_v):
+        contact = mask & np.isclose(
+            Vsolid, float(guard_v), rtol=0.0, atol=1.0e-10)
+        indices = np.argwhere(contact)
+        cells = []
+        for ix, iz in indices[:16]:
+            cells.append(dict(
+                ix=int(ix),
+                iz=int(iz),
+                potential_v=float(Vsolid[ix, iz]),
+                ion_count=float(ci[ix, iz]),
+                electron_count=float(ce[ix, iz]),
+                signed_count=float(net[ix, iz]),
+            ))
+        return dict(
+            contact_cell_count=int(len(indices)),
+            reported_cell_count=int(len(cells)),
+            independent_audit_cells=cells,
+            signed_source_normalized=float(
+                np.sum(net[contact]) / trench_norm),
+        )
+
+    potential_guard_contact = dict(
+        target_floor_upper=guard_contact_record(
+            floor_trench_mask, V_dc + V_rf),
+        photoresist_upper=guard_contact_record(
+            pr_mask, V_dc + V_rf),
+        photoresist_lower=guard_contact_record(
+            pr_mask, -pr_vguard),
+        edge_upper=bool(np.isclose(
+            Vedge, V_dc + V_rf, rtol=0.0, atol=1.0e-10)),
+        edge_lower=bool(np.isclose(
+            Vedge, -3.0 * Te, rtol=0.0, atol=1.0e-10)),
+        neighbor_upper=bool(np.isclose(
+            Vneighbor, V_dc + V_rf, rtol=0.0, atol=1.0e-10)),
+        neighbor_lower=bool(np.isclose(
+            Vneighbor, -3.0 * Te, rtol=0.0, atol=1.0e-10)),
+    )
+
+    def horizon_summary(kind):
+        records = [item for item in trace_stats if item["kind"] == kind]
+        if not records:
+            return dict(
+                evaluation_count=0,
+                extended_evaluation_count=0,
+                maximum_horizon_extension_count=0,
+                maximum_final_cap=0,
+                maximum_steps_observed=0,
+                worst_evaluation_index=None,
+                total_truncated=0,
+                tail_closure_evaluation_count=0,
+                total_tail_closed=0,
+                maximum_tail_closure_fraction=0.0,
+                maximum_tail_closure_l1_surface_current_error_bound_relative=0.0,
+            )
+        worst = max(
+            records,
+            key=lambda item: (
+                item["cap"], item["steps"],
+                item["horizon_extension_count"]))
+        return dict(
+            evaluation_count=int(len(records)),
+            extended_evaluation_count=int(sum(
+                item["horizon_extension_count"] > 0
+                for item in records)),
+            maximum_horizon_extension_count=int(max(
+                item["horizon_extension_count"] for item in records)),
+            maximum_final_cap=int(max(item["cap"] for item in records)),
+            maximum_steps_observed=int(max(
+                item["steps"] for item in records)),
+            worst_evaluation_index=int(worst["evaluation_index"]),
+            total_truncated=int(sum(
+                item["truncated"] for item in records)),
+            tail_closure_evaluation_count=int(sum(
+                item["tail_closure_applied"] for item in records)),
+            total_tail_closed=int(sum(
+                item["tail_closed"] for item in records)),
+            maximum_tail_closure_fraction=float(max(
+                item["tail_closure_fraction"] for item in records)),
+            maximum_tail_closure_l1_surface_current_error_bound_relative=float(max(
+                item[
+                    "tail_closure_l1_surface_current_error_bound_relative"]
+                for item in records)),
+        )
+
     diag = dict(
         ion=dict(floor=float((hti == 1).sum() / trench_norm),
                  edge_outer_poly=float(edge_outer_i.sum() / trench_norm),
@@ -1914,6 +2134,13 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         trace=dict(last_ion=next((s for s in reversed(trace_stats) if s["kind"] == "ion"), None),
                    last_electron=next((s for s in reversed(trace_stats) if s["kind"] == "electron"), None),
                    cap_factor=float(trace_step_cap_factor),
+                   adaptive_horizon=bool(trace_adaptive_horizon),
+                   emergency_cap_factor=float(
+                       trace_emergency_step_cap_factor),
+                   relative_tail_tolerance=float(
+                       trace_relative_tail_tolerance),
+                   allow_trajectory_truncation=bool(
+                       allow_trajectory_truncation),
                    integrator="edge_adaptive_numba",
                    source_model=(
                        "PlasmaBoundaryState"
@@ -1937,7 +2164,10 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
                    explicit_2d_source_projection=(
                        bool(plasma_boundary is not None and (
                            ion_boundary.density_model_2d is not None
-                           or electron_boundary.density_model_2d is not None)))),
+                           or electron_boundary.density_model_2d is not None))),
+                   campaign_horizon=dict(
+                       ion=horizon_summary("ion"),
+                       electron=horizon_summary("electron"))),
         edge_open=dict(model="explicit_geometry",
                        electron_gross=float(explicit_e_gross + boundary_e_gross),
                        ion_gross=float(explicit_i_gross + boundary_i_gross),
@@ -1959,6 +2189,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         residual_snapshot=residual_snapshot,
         region_current_balance=region_current_balance,
         potential_stationarity=potential_stationarity,
+        potential_guard_contact=potential_guard_contact,
         stochastic_gain=dict(
             mode=(
                 "legacy_finite_floor"
@@ -1986,6 +2217,7 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
             "impact_energy_eV": Ei, "hit_x_grid": hit_xi,
             "hit_z_grid": hit_zi, "hit_vx_sqrt_eV": vxi,
             "hit_vz_sqrt_eV": vzi,
+            "termination": ion_termination,
         }
         for name, value in arrays.items():
             value = np.asarray(value).copy()
@@ -1994,6 +2226,16 @@ def solve_edge_array_charging(AR, W=32, mouth=237, Te=4.0, V_dc=37.0, V_rf=30.0,
         final_ion_lineage = {
             **arrays,
             "source_particle_count": int(ntot),
+            "escape_count": int(np.count_nonzero(
+                ion_termination == 2)),
+            "truncation_count": int(np.count_nonzero(
+                ion_termination == 0)),
+            "tail_closure_count": int(
+                np.count_nonzero(ion_termination == 0)
+                if trace_relative_tail_tolerance > 0.0
+                and np.count_nonzero(ion_termination == 0) / max(ntot, 1)
+                <= trace_relative_tail_tolerance
+                else 0),
             "cell_size_um": float(feature_w_um) / int(W),
             "source_width_um": float(nx) * float(feature_w_um) / int(W),
             "source_launch_plane": str(source_launch_plane),

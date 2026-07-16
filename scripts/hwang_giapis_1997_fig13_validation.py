@@ -50,10 +50,12 @@ IEDF_EVIDENCE = (
 EEDF_EVIDENCE = (
     ROOT / "data" / "experimental" / "hwang_giapis_1997"
     / "fig4b_electron_energy_distribution.csv")
-GLOBAL_SCHEMA = "petch-hwang-giapis-fig13-global-boundary-v7"
+GLOBAL_SCHEMA = "petch-hwang-giapis-fig13-global-boundary-v9"
 LEGACY_GLOBAL_SCHEMAS = {
     "petch-hwang-giapis-fig13-global-boundary-v5",
     "petch-hwang-giapis-fig13-global-boundary-v6",
+    "petch-hwang-giapis-fig13-global-boundary-v7",
+    "petch-hwang-giapis-fig13-global-boundary-v8",
     GLOBAL_SCHEMA,
 }
 AUDIT_SCHEMA = "petch-hwang-giapis-fig13-profile-audit-v1"
@@ -68,6 +70,11 @@ _CONTINUATION_NUMERICAL_KEYS = {
     "return_final_ion_lineage",
     "final_audit_samples",
     "final_audit_seed",
+    "trace_step_cap_factor",
+    "trace_adaptive_horizon",
+    "trace_emergency_step_cap_factor",
+    "trace_relative_tail_tolerance",
+    "allow_trajectory_truncation",
     "continuation_source",
     "continuation_compatibility_sha256",
 }
@@ -110,6 +117,23 @@ def _file_sha256(path):
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _runtime_engine_provenance():
+    sources = {
+        "scripts/hwang_giapis_1997_fig13_validation.py": Path(__file__),
+        "src/petch/charging2d.py": ROOT / "src" / "petch" / "charging2d.py",
+        "src/petch/boundary_state.py": ROOT / "src" / "petch" / "boundary_state.py",
+        "src/petch/experimental_boundary.py": (
+            ROOT / "src" / "petch" / "experimental_boundary.py"),
+    }
+    return {
+        "git_revision": _git_revision(),
+        "captured_unix_s": time.time(),
+        "engine_source_sha256": {
+            name: _file_sha256(path) for name, path in sources.items()
+        },
+    }
 
 
 def _relative_or_name(path):
@@ -236,6 +260,14 @@ def _global_config(args):
         "ion_angle_energy_corr": "anticorrelated",
         "source_model": "primary_digitized_PlasmaBoundaryState",
         "source_launch_plane": "sheath_lower_boundary",
+        "trace_step_cap_factor": float(
+            args.global_trace_step_cap_factor),
+        "trace_adaptive_horizon": True,
+        "trace_emergency_step_cap_factor": float(
+            args.global_trace_emergency_step_cap_factor),
+        "trace_relative_tail_tolerance": float(
+            args.global_trace_tail_tolerance),
+        "allow_trajectory_truncation": False,
         "open_width_um": 2.0,
         "right_buffer_um": 0.5,
         "domain_model": "hwang_mirror_cell",
@@ -287,7 +319,8 @@ def _global_solver_kwargs(config, *, progress_callback=None):
     return kwargs
 
 
-def _save_global_boundary(output, config, result, elapsed_s):
+def _save_global_boundary(
+        output, config, result, elapsed_s, runtime_engine_provenance):
     lineage = result["final_ion_lineage"]
     floor_line = np.asarray(result["Vfloor"], dtype=float)
     edge_exclusion = max(1, floor_line.size // 5)
@@ -305,20 +338,15 @@ def _save_global_boundary(output, config, result, elapsed_s):
         hit_x_grid=lineage["hit_x_grid"],
         hit_z_grid=lineage["hit_z_grid"],
         hit_vx_sqrt_eV=lineage["hit_vx_sqrt_eV"],
-        hit_vz_sqrt_eV=lineage["hit_vz_sqrt_eV"])
+        hit_vz_sqrt_eV=lineage["hit_vz_sqrt_eV"],
+        termination=lineage["termination"])
     metadata = {
         "schema": GLOBAL_SCHEMA,
-        "git_revision": _git_revision(),
-        "engine_source_sha256": {
-            "scripts/hwang_giapis_1997_fig13_validation.py": (
-                _file_sha256(Path(__file__))),
-            "src/petch/charging2d.py": _file_sha256(
-                ROOT / "src" / "petch" / "charging2d.py"),
-            "src/petch/boundary_state.py": _file_sha256(
-                ROOT / "src" / "petch" / "boundary_state.py"),
-            "src/petch/experimental_boundary.py": _file_sha256(
-                ROOT / "src" / "petch" / "experimental_boundary.py"),
-        },
+        "git_revision": runtime_engine_provenance["git_revision"],
+        "engine_source_sha256": (
+            runtime_engine_provenance["engine_source_sha256"]),
+        "engine_source_provenance_captured_unix_s": (
+            runtime_engine_provenance["captured_unix_s"]),
         "config": config,
         "config_sha256": _stable_hash(config),
         "elapsed_s": float(elapsed_s),
@@ -332,6 +360,10 @@ def _save_global_boundary(output, config, result, elapsed_s):
             "pre_v7_checkpoint_status": (
                 "incompatible unless feature_mouth_legacy is explicitly "
                 "selected"),
+            "trajectory_horizon": (
+                "unresolved rays replayed from identical launch states with "
+                "doubling horizons; any emergency-tail closure is separately "
+                "bounded and reported, otherwise the run refuses"),
         },
         "poly_potential_v": float(result["V_poly_edge"]),
         "continuation_state": {
@@ -387,7 +419,7 @@ def _load_global_boundary(output, config):
         name: arrays[name] for name in (
             "hit_type", "hit_ix", "hit_iz", "impact_energy_eV",
             "hit_x_grid", "hit_z_grid", "hit_vx_sqrt_eV",
-            "hit_vz_sqrt_eV")
+            "hit_vz_sqrt_eV", "termination")
     }
     lineage.update(metadata["lineage"])
     return {
@@ -577,6 +609,23 @@ def main():
         "--global-gain-offset", type=float, default=25.0,
         help="positive early-iteration offset for the decreasing gain")
     parser.add_argument(
+        "--global-trace-step-cap-factor", type=float, default=40.0,
+        help=(
+            "initial charged-particle substep budget per vertical grid cell; "
+            "unresolved rays are replayed from the identical launch state"))
+    parser.add_argument(
+        "--global-trace-emergency-step-cap-factor", type=float,
+        default=1280.0,
+        help=(
+            "hard adaptive-horizon ceiling per vertical grid cell; unresolved "
+            "weight above the declared tail tolerance refuses the run"))
+    parser.add_argument(
+        "--global-trace-tail-tolerance", type=float, default=0.0,
+        help=(
+            "maximum unresolved source fraction eligible for a separately "
+            "reported nonlanding tail closure after the emergency horizon; "
+            "zero keeps strict refusal"))
+    parser.add_argument(
         "--global-final-samples", type=int,
         help=(
             "independent final ion/electron audit population; defaults to "
@@ -645,11 +694,14 @@ def main():
             heartbeat_temporary.replace(heartbeat_path)
 
         start = time.perf_counter()
+        runtime_engine_provenance = _runtime_engine_provenance()
         global_result = solve_edge_array_charging(
             **_global_solver_kwargs(
                 config, progress_callback=global_progress))
         global_elapsed = time.perf_counter() - start
-        _save_global_boundary(output, config, global_result, global_elapsed)
+        _save_global_boundary(
+            output, config, global_result, global_elapsed,
+            runtime_engine_provenance)
         global_metadata = json.loads(
             (output / "global_boundary.json").read_text(encoding="utf-8"))
         print(f"global: complete in {global_elapsed:.1f} s", flush=True)

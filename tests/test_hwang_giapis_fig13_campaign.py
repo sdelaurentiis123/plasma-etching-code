@@ -13,6 +13,11 @@ def test_fig13_continuation_compatibility_ignores_sampling_controls():
         "n_iter": 2000,
         "seed": 1,
         "relax": 8.0,
+        "trace_step_cap_factor": 40.0,
+        "trace_adaptive_horizon": True,
+        "trace_emergency_step_cap_factor": 1280.0,
+        "trace_relative_tail_tolerance": 0.0,
+        "allow_trajectory_truncation": False,
     }
     second = {
         **first,
@@ -20,6 +25,11 @@ def test_fig13_continuation_compatibility_ignores_sampling_controls():
         "n_iter": 500,
         "seed": 2,
         "relax": 4.0,
+        "trace_step_cap_factor": 80.0,
+        "trace_adaptive_horizon": False,
+        "trace_emergency_step_cap_factor": 2560.0,
+        "trace_relative_tail_tolerance": 1.0e-4,
+        "allow_trajectory_truncation": True,
     }
     assert (
         _continuation_compatibility_hash(first)
