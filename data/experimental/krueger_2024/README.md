@@ -62,5 +62,5 @@ source correction:
 - `base_case_boundary_fluxes.csv`: `ad50b6099a52d2c2cc00eb4eade496b9d75c41d19881c5fec9e905f9dfd3808b`
 - `transfer_observations.csv`: `85cef607f20ab5e56e606666aa7e0e6241abb546d0369277b21833542e04d425`
 - source author-manuscript PDF: `65b7750b2b773c3725d8f09f778b5b728ce9974a4548a5d522d19256f6bf9a51`
-- `digitized_figure4_iead.csv`: `783f7084b5ba6dc71eb89efeb70871cabdb7378f87db44f8fa9dcb1f3adb6ce4`
+- `digitized_figure4_iead.csv`: `913d31be623ec5d52d226c8cea499e7f014cf4f5a27e017b519633c96e5e3ee3`
 - `digitized_figure4_iead_metadata.json`: `7904a700afdcd116c6f57ef35aeb5555661ffed0d004304d815d20f79840ca55`
