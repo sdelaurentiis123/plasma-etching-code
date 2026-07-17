@@ -103,6 +103,10 @@ from .neutral_radiosity_3d import (
     solve_diffuse_neutral_radiosity_3d, transport_diffuse_surface_emission_3d,
     transport_surface_product_population_3d,
 )
+from .deterministic_exchange_2d import (
+    DeterministicLineExchange2D, build_deterministic_line_exchange_2d,
+    unobstructed_crossed_string_exchange_2d,
+)
 from .experimental_boundary import (
     HWANG_GIAPIS_1997_EEDF_SHA256, HWANG_GIAPIS_1997_IEDF_SHA256,
     HWANG_GIAPIS_1997_PDF_SHA256,
@@ -317,6 +321,8 @@ __all__ = [
     "DiffuseFormFactors3D", "DiffuseNeutralSolve3D", "DiffuseSurfaceEmissionSolve3D",
     "solve_diffuse_neutral_radiosity_3d", "transport_diffuse_surface_emission_3d",
     "transport_surface_product_population_3d",
+    "DeterministicLineExchange2D", "build_deterministic_line_exchange_2d",
+    "unobstructed_crossed_string_exchange_2d",
     "Jeon2022BoundaryClosure", "Jeong2023IonBoundaryClosure",
     "build_jeon_2022_boundary_state",
     "build_jeong_2023_boundary_state",
