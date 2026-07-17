@@ -297,34 +297,52 @@ def build_surface_common_refinement_transfer_3d(
     new_ratio = new_covered / new_surface.face_area
     maximum_old_ratio = float(np.max(old_ratio, initial=0.0))
     maximum_new_ratio = float(np.max(new_ratio, initial=0.0))
-    # Curvature and periodic seam splitting can make either directed chart cover a face more than
-    # once.  Project the geometric first guess onto both capacity constraints below.  The angular
-    # support gives a non-arbitrary conditioning bound: no accepted chart may amplify area by more
-    # than 1/min(dot).  Anything worse is a folded/multiple-sheet correspondence and refuses.
-    maximum_conditioned_ratio = 1.0 / minimum_normal_dot + 1e-10
-    if (maximum_old_ratio > maximum_conditioned_ratio
-            or maximum_new_ratio > maximum_conditioned_ratio):
-        raise RuntimeError(
-            "moving-surface common refinement is multiply covered; reduce the step or "
-            f"refine the surface; old_ratio={maximum_old_ratio:.9g}, "
-            f"new_ratio={maximum_new_ratio:.9g}, "
-            f"condition_bound={maximum_conditioned_ratio:.9g}")
     raw_overlap_area = float(np.sum(combined_area))
-    # Project the geometric first guess onto source/target area capacity.  Source scaling removes
-    # roundoff only; target scaling resolves the ordinary curved-mortar case where several source
-    # charts cover one target face.  Scaling only decreases weights, so it cannot create inventory.
+    # Curvature and periodic seam splitting can make either directed chart cover a face more than
+    # once.  Project the geometric first guess symmetrically onto both capacity constraints.  Hard
+    # support was already fixed by distance, material, and normal alignment; this projection only
+    # decreases those local weights and therefore cannot create or teleport inventory.
+    projection_iterations = 0
     if combined_area.size:
-        column_scale = np.minimum(
+        for projection_iterations in range(65):
+            old_covered = np.bincount(
+                combined_old, weights=combined_area,
+                minlength=len(old_surface.faces)).astype(float)
+            new_covered = np.bincount(
+                combined_new, weights=combined_area,
+                minlength=len(new_surface.faces)).astype(float)
+            maximum_capacity_ratio = max(
+                float(np.max(old_covered / old_surface.face_area, initial=0.0)),
+                float(np.max(new_covered / new_surface.face_area, initial=0.0)))
+            if maximum_capacity_ratio <= 1.0 + 2e-14:
+                break
+            old_scale = np.minimum(
+                1.0,
+                np.sqrt(old_surface.face_area / np.maximum(
+                    old_covered, np.finfo(float).tiny)))
+            new_scale = np.minimum(
+                1.0,
+                np.sqrt(new_surface.face_area / np.maximum(
+                    new_covered, np.finfo(float).tiny)))
+            combined_area *= old_scale[combined_old] * new_scale[combined_new]
+        else:  # pragma: no cover - monotone positive scaling must contract
+            raise RuntimeError("common-refinement capacity projection did not contract")
+        # Close any remaining representational excess exactly; each pass can only decrease the
+        # opposite partition's sum, so one column/row pass preserves both constraints.
+        old_covered = np.bincount(
+            combined_old, weights=combined_area,
+            minlength=len(old_surface.faces)).astype(float)
+        combined_area *= np.minimum(
             1.0,
-            old_surface.face_area / np.maximum(old_covered, np.finfo(float).tiny))
-        combined_area *= column_scale[combined_old]
+            old_surface.face_area / np.maximum(
+                old_covered, np.finfo(float).tiny))[combined_old]
         new_covered = np.bincount(
             combined_new, weights=combined_area,
             minlength=len(new_surface.faces)).astype(float)
-        row_scale = np.minimum(
+        combined_area *= np.minimum(
             1.0,
-            new_surface.face_area / np.maximum(new_covered, np.finfo(float).tiny))
-        combined_area *= row_scale[combined_new]
+            new_surface.face_area / np.maximum(
+                new_covered, np.finfo(float).tiny))[combined_new]
         old_covered = np.bincount(
             combined_old, weights=combined_area,
             minlength=len(old_surface.faces)).astype(float)
@@ -360,6 +378,7 @@ def build_surface_common_refinement_transfer_3d(
         "raw_overlap_area": raw_overlap_area,
         "capacity_projection_area_reduction": (
             raw_overlap_area - float(np.sum(combined_area))),
+        "capacity_projection_iterations": projection_iterations,
         "old_matched_area_fraction": (
             float(np.sum(old_covered)) / total_old_area if total_old_area else 1.0),
         "new_matched_area_fraction": (
