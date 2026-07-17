@@ -1,8 +1,8 @@
 # ViennaPS topology conformance: pinch-off, enclosed cavities, and reopening
 
 Date: 2026-07-17
-Status: upstream source audit, bounded ViennaLS manufactured run, and bounded three-grid petch
-close/seal/reopen audit complete; matched black-box Vienna adapter remains open
+Status: upstream source audit, bounded directional petch audit, and pinned three-grid matched
+Petch/ViennaLS event-time comparator complete; profile-distance and T2--T7 extensions remain open
 
 Related documents:
 
@@ -211,7 +211,7 @@ cycle using the conservative common-refinement remapper. The public fixture was 
 straight trench to a real keyhole: a narrow upper neck sits above a wider cell-resolved chamber, so
 conformal growth encloses physical gas volume rather than erasing a subcell slit.
 
-### 4.4 Three-grid petch common-refinement result
+### 4.4 Three-grid petch directional hard-visibility result
 
 The reproducible driver is
 [`scripts/topology_common_refinement_audit.py`](scripts/topology_common_refinement_audit.py). It uses
@@ -246,9 +246,51 @@ accepted overlap weights until neither partition exceeds its physical face area.
 inventory. The maximum projection-area reduction fell from `9.70%` at 50 nm to `4.16%` at 12.5 nm,
 while every extensive-field ledger closed exactly.
 
-This closes the petch-side T1 numerical proof and the core T2/T3/T4 engine mechanisms. It is a
-manufactured numerical conformance result, **not** experimental chemistry validation. A matched
-Vienna black-box run on the identical fixture remains required for the strict paired comparator.
+This closes the petch-side directional close/visibility/reopen mechanism and the conservative remap
+ledger on this fixture. It is a manufactured numerical conformance result, **not** experimental
+chemistry validation and not an apples-to-apples comparison with Vienna's uniform normal motion.
+
+### 4.5 Pinned matched Petch/ViennaLS T1 event comparator
+
+The reproducible adapter is
+[`scripts/viennals_topology_comparator.py`](scripts/viennals_topology_comparator.py); its original
+API-only upstream driver is
+[`comparators/viennals_keyhole_probe.cpp`](comparators/viennals_keyhole_probe.cpp). The adapter
+refuses a revision mismatch or dirty upstream checkout, compiles against the exact revisions in
+Section 2, applies hard process timeouts, and records source hashes and compiler provenance.
+
+The matched fixture is an analytic rounded chamber of radius `0.18 um` centered at
+`(x,z)=(0.30,0.35) um`, joined to a `0.10 um` open neck. Both engines apply `0.025 um/s` uniform
+normal growth with `dt = 5 dx`. The reverse branch is a second independent initial-value problem:
+both engines start from the same analytic `0.10 um` solid cap and apply `0.050 um/s` uniform normal
+etch. That definition matters. Reversing each engine from its own first grid-snapped closure compared
+different subcell cap thicknesses and produced nonconvergent reopening times; it was a broken test,
+not evidence of broken etch physics.
+
+| dx | Petch closure | ViennaLS closure | Petch reopening | ViennaLS reopening |
+| ---: | ---: | ---: | ---: | ---: |
+| 50 nm | 3.0000 s | 1.7500 s | 1.0000 s | 1.0000 s |
+| 25 nm | 2.8750 s | 1.8750 s | 1.0000 s | 1.0000 s |
+| 12.5 nm | 2.5625 s | 1.9375 s | 1.0000 s | 1.0000 s |
+| Analytic | 2.0000 s | 2.0000 s | 1.0000 s | 1.0000 s |
+
+The closure sequences approach the analytic event from opposite sides. At the authoritative 12.5 nm
+level, ViennaLS is `0.0625 s` from the analytic result and petch is `0.5625 s` away. Petch's error is
+exactly its declared event-localization budget of one grid-cell crossing plus one checkpoint interval
+(`0.50 + 0.0625 s`); it is therefore a bounded first-order bias, not exact agreement. Both engines
+reopen the prescribed cap at the analytic `1.0 s` on every grid. Adjacent-grid event differences pass
+the same dimensional cell-crossing criterion in each engine, and the complete paired receipt passes
+in `39.47 s` on local CPU.
+
+Committed evidence:
+
+- [`results/topology_petch_viennals_t1/audit.json`](results/topology_petch_viennals_t1/audit.json);
+- [`results/topology_petch_viennals_t1/petch_viennals_topology.png`](results/topology_petch_viennals_t1/petch_viennals_topology.png).
+
+This closes the event-time portion of T1 and confirms that routine enclosure/reopening is not a
+terminal geometry failure in either engine. It does not certify chemistry, grant Vienna authority
+over petch's surface inventory, or complete the profile-Chamfer, material-junction, and periodic-seam
+parts of T1/T5/T6. Petch's source-state ledger remains independently roundoff-exact in its audit.
 
 ## 5. Surface-state and coverage semantics
 
@@ -409,11 +451,13 @@ CPU reference cases close and uses the same fixed geometries and observables.
 
 ## 9. Ordered implementation/conformance decision
 
-1. Retain the now-passing petch T1--T4 engine gates and `continue_gas_cavity` refusal taxonomy.
-2. Run the pinned ViennaLS/ViennaPS black-box adapter on the identical petch keyhole fixture; compare
-   event times, geometry, and hard visibility without treating Vienna coverage drift as truth.
+1. Retain the now-passing petch directional topology/remap gates and `continue_gas_cavity` refusal
+   taxonomy.
+2. Retain the pinned matched T1 event comparator as a fast regression; extend it with matched profile
+   distances when the sparse/AMR backend is evaluated.
 3. Add T5/T6 material-junction and periodic-translation cases to the same bounded driver.
-4. Keep T1--T4 mandatory for every conservative moving-surface backend.
+4. Keep the topology, visibility, and conservative-ledger gates mandatory for every moving-surface
+   backend.
 5. Use the suite again for sparse narrow bands and later AMR; AMR must reproduce the uniform-grid
    result rather than redefine it.
 6. Resume the archived Krüger state only under the bounded preflight/wall budget already specified.

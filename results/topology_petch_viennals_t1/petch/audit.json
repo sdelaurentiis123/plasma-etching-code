@@ -1,0 +1,2909 @@
+{
+  "ceilings": {
+    "maximum_coat_time_s": 8.0,
+    "maximum_etch_time_s": 12.0
+  },
+  "git_revision": "8edfc4d65df6bd7fc83d3d271b718bd4b8921b4b",
+  "levels": [
+    {
+      "closure_time_s": 3.0,
+      "dt_s": 0.25,
+      "dx_um": 0.05,
+      "history": [
+        {
+          "active_face_count": 192,
+          "capacity_projection_area_reduction": 0.00192288933378007,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.08888888888888896,
+          "new_matched_area_fraction": 0.9842749694308397,
+          "old_matched_area_fraction": 0.987417250860472,
+          "phase": "coat",
+          "phase_time_s": 0.25,
+          "physical_time_s": 0.25,
+          "raw_overlap_area": 0.19491158336908884,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 192,
+          "capacity_projection_area_reduction": 0.0037249130674330833,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.07882497988376286,
+          "new_matched_area_fraction": 0.9755791897296776,
+          "old_matched_area_fraction": 0.9778158925695926,
+          "phase": "coat",
+          "phase_time_s": 0.5,
+          "physical_time_s": 0.5,
+          "raw_overlap_area": 0.19544716342913449,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 192,
+          "capacity_projection_area_reduction": 0.0036737007352593554,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.06964903329024891,
+          "new_matched_area_fraction": 0.977125324022125,
+          "old_matched_area_fraction": 0.978037711996408,
+          "phase": "coat",
+          "phase_time_s": 0.75,
+          "physical_time_s": 0.75,
+          "raw_overlap_area": 0.19587910349146037,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 192,
+          "capacity_projection_area_reduction": 0.0036512430972016063,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.06139642096087933,
+          "new_matched_area_fraction": 0.978610703351514,
+          "old_matched_area_fraction": 0.9782545777115528,
+          "phase": "coat",
+          "phase_time_s": 1.0,
+          "physical_time_s": 1.0,
+          "raw_overlap_area": 0.19607877566096604,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 168,
+          "capacity_projection_area_reduction": 0.006007425305840808,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.05410033029997191,
+          "new_matched_area_fraction": 0.9751454703529383,
+          "old_matched_area_fraction": 0.9732633554787775,
+          "phase": "coat",
+          "phase_time_s": 1.25,
+          "physical_time_s": 1.25,
+          "raw_overlap_area": 0.19738349077100642,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 168,
+          "capacity_projection_area_reduction": 0.007125210184360131,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.047788364664473504,
+          "new_matched_area_fraction": 0.9727600590244807,
+          "old_matched_area_fraction": 0.9701101700028556,
+          "phase": "coat",
+          "phase_time_s": 1.5,
+          "physical_time_s": 1.5,
+          "raw_overlap_area": 0.19751307850486238,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 168,
+          "capacity_projection_area_reduction": 0.0074489682096107734,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.042434428455934425,
+          "new_matched_area_fraction": 0.9727867898834092,
+          "old_matched_area_fraction": 0.969495500199965,
+          "phase": "coat",
+          "phase_time_s": 1.75,
+          "physical_time_s": 1.75,
+          "raw_overlap_area": 0.19719789952828987,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 184,
+          "capacity_projection_area_reduction": 0.005987674070479648,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.03771178486395915,
+          "new_matched_area_fraction": 0.9724816350035334,
+          "old_matched_area_fraction": 0.9710188996009809,
+          "phase": "coat",
+          "phase_time_s": 2.0,
+          "physical_time_s": 2.0,
+          "raw_overlap_area": 0.19539176590812543,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 176,
+          "capacity_projection_area_reduction": 0.0033018051101491586,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.033506980326454106,
+          "new_matched_area_fraction": 0.9697587192579767,
+          "old_matched_area_fraction": 0.9737186992192781,
+          "phase": "coat",
+          "phase_time_s": 2.25,
+          "physical_time_s": 2.25,
+          "raw_overlap_area": 0.19294683211396607,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 176,
+          "capacity_projection_area_reduction": 0.0077712565233167,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.029759432852581036,
+          "new_matched_area_fraction": 0.9580978325560456,
+          "old_matched_area_fraction": 0.9685904366397032,
+          "phase": "coat",
+          "phase_time_s": 2.5,
+          "physical_time_s": 2.5,
+          "raw_overlap_area": 0.19718781536872393,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 192,
+          "capacity_projection_area_reduction": 0.00555606784582191,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.026424988468505217,
+          "new_matched_area_fraction": 0.9452122860879739,
+          "old_matched_area_fraction": 0.971818229924077,
+          "phase": "coat",
+          "phase_time_s": 2.75,
+          "physical_time_s": 2.75,
+          "raw_overlap_area": 0.19768515809160897,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 192,
+          "capacity_projection_area_reduction": 0.005238015719426642,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.023461706689922368,
+          "new_matched_area_fraction": 0.963454753425346,
+          "old_matched_area_fraction": 0.9683099435660766,
+          "phase": "coat",
+          "phase_time_s": 3.0,
+          "physical_time_s": 3.0,
+          "raw_overlap_area": 0.20206206389518672,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": "gas_cavity_enclosed"
+        },
+        {
+          "active_face_count": 168,
+          "capacity_projection_area_reduction": 0.0,
+          "capacity_projection_iterations": 0,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.0,
+          "new_matched_area_fraction": 1.0,
+          "old_matched_area_fraction": 1.0,
+          "phase": "sealed_reference",
+          "phase_time_s": 0.0,
+          "physical_time_s": 0.0,
+          "raw_overlap_area": 0.18959009940211272,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 184,
+          "capacity_projection_area_reduction": 5.551115123125783e-17,
+          "capacity_projection_iterations": 0,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.04546014676048843,
+          "new_matched_area_fraction": 0.9495544163578474,
+          "old_matched_area_fraction": 0.9803083868794794,
+          "phase": "etch",
+          "phase_time_s": 0.25,
+          "physical_time_s": 0.25,
+          "raw_overlap_area": 0.18585676451320532,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 208,
+          "capacity_projection_area_reduction": 0.0021489096335527147,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.084856168000987,
+          "new_matched_area_fraction": 0.9444728100642056,
+          "old_matched_area_fraction": 0.9768654336825235,
+          "phase": "etch",
+          "phase_time_s": 0.5,
+          "physical_time_s": 0.5,
+          "raw_overlap_area": 0.19335127333316152,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 208,
+          "capacity_projection_area_reduction": 0.0034777642953660592,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.10613759618704272,
+          "new_matched_area_fraction": 0.9436502229265282,
+          "old_matched_area_fraction": 0.9770418661765587,
+          "phase": "etch",
+          "phase_time_s": 0.75,
+          "physical_time_s": 0.75,
+          "raw_overlap_area": 0.20127352109829116,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 208,
+          "capacity_projection_area_reduction": 0.004853846255419292,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.1385900517677162,
+          "new_matched_area_fraction": 0.9189130622176834,
+          "old_matched_area_fraction": 0.9073630930134474,
+          "phase": "etch",
+          "phase_time_s": 1.0,
+          "physical_time_s": 1.0,
+          "raw_overlap_area": 0.19504356413737156,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": "gas_cavity_opened"
+        }
+      ],
+      "maximum_capacity_projection_reduction_fraction": 0.03941042963930166,
+      "maximum_relative_conservation_residual": 0.0,
+      "minimum_matched_area_fraction": 0.9073630930134474,
+      "passed": true,
+      "reopening_initial_condition": "analytic_100_nm_sealed_cap",
+      "reopening_time_s": 1.0,
+      "sealed_external_flux_exactly_zero": true,
+      "wall_time_s": 0.7209177073091269
+    },
+    {
+      "closure_time_s": 2.875,
+      "dt_s": 0.125,
+      "dx_um": 0.025,
+      "history": [
+        {
+          "active_face_count": 768,
+          "capacity_projection_area_reduction": 0.002080888504617573,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.09375000017462282,
+          "new_matched_area_fraction": 0.9859340210230023,
+          "old_matched_area_fraction": 0.9882339137427286,
+          "phase": "coat",
+          "phase_time_s": 0.125,
+          "physical_time_s": 0.125,
+          "raw_overlap_area": 0.1976375153309075,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0020653181460735803,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.08750000162981358,
+          "new_matched_area_fraction": 0.9869526709950891,
+          "old_matched_area_fraction": 0.9886120193869687,
+          "phase": "coat",
+          "phase_time_s": 0.25,
+          "physical_time_s": 0.25,
+          "raw_overlap_area": 0.1981531167501263,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.002044391167236842,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.08125000419094969,
+          "new_matched_area_fraction": 0.9876671828288605,
+          "old_matched_area_fraction": 0.9886197001232017,
+          "phase": "coat",
+          "phase_time_s": 0.375,
+          "physical_time_s": 0.375,
+          "raw_overlap_area": 0.1984633951892868,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0020400440235568973,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.07500000558793457,
+          "new_matched_area_fraction": 0.9881524235727117,
+          "old_matched_area_fraction": 0.9883376195968597,
+          "phase": "coat",
+          "phase_time_s": 0.5,
+          "physical_time_s": 0.5,
+          "raw_overlap_area": 0.1985923789130485,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.002245210028683553,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.06875000768341027,
+          "new_matched_area_fraction": 0.9885423452575312,
+          "old_matched_area_fraction": 0.9885272301361411,
+          "phase": "coat",
+          "phase_time_s": 0.625,
+          "physical_time_s": 0.625,
+          "raw_overlap_area": 0.1988720972882514,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0025330554000934924,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.0625000086147332,
+          "new_matched_area_fraction": 0.987963761915892,
+          "old_matched_area_fraction": 0.9879760296556875,
+          "phase": "coat",
+          "phase_time_s": 0.75,
+          "physical_time_s": 0.75,
+          "raw_overlap_area": 0.19904729915528213,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 752,
+          "capacity_projection_area_reduction": 0.0031403159201630892,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.056250008323694145,
+          "new_matched_area_fraction": 0.9876906466107419,
+          "old_matched_area_fraction": 0.9857689697473823,
+          "phase": "coat",
+          "phase_time_s": 0.875,
+          "physical_time_s": 0.875,
+          "raw_overlap_area": 0.19921799718204927,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 768,
+          "capacity_projection_area_reduction": 0.0021823527393273756,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.05000000861634818,
+          "new_matched_area_fraction": 0.9885845494233059,
+          "old_matched_area_fraction": 0.9873310145001296,
+          "phase": "coat",
+          "phase_time_s": 1.0,
+          "physical_time_s": 1.0,
+          "raw_overlap_area": 0.19818863934885134,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 768,
+          "capacity_projection_area_reduction": 0.0018309975513134125,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.044444286693422874,
+          "new_matched_area_fraction": 0.9859261098317398,
+          "old_matched_area_fraction": 0.9869221992349428,
+          "phase": "coat",
+          "phase_time_s": 1.125,
+          "physical_time_s": 1.125,
+          "raw_overlap_area": 0.19750769061453347,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0017869112130627363,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.03950601253834757,
+          "new_matched_area_fraction": 0.9835730384432771,
+          "old_matched_area_fraction": 0.9860587206519853,
+          "phase": "coat",
+          "phase_time_s": 1.25,
+          "physical_time_s": 1.25,
+          "raw_overlap_area": 0.1974899235374437,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0017600191406721144,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.035116438006841555,
+          "new_matched_area_fraction": 0.985306993048728,
+          "old_matched_area_fraction": 0.986560704764525,
+          "phase": "coat",
+          "phase_time_s": 1.375,
+          "physical_time_s": 1.375,
+          "raw_overlap_area": 0.1980574919433656,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0017972219697915404,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.031214596599649147,
+          "new_matched_area_fraction": 0.9861098611114765,
+          "old_matched_area_fraction": 0.9867706059470593,
+          "phase": "coat",
+          "phase_time_s": 1.5,
+          "physical_time_s": 1.5,
+          "raw_overlap_area": 0.19838628258738,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0017522424252807423,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.027746210625841317,
+          "new_matched_area_fraction": 0.9869823202661959,
+          "old_matched_area_fraction": 0.987377756315198,
+          "phase": "coat",
+          "phase_time_s": 1.625,
+          "physical_time_s": 1.625,
+          "raw_overlap_area": 0.19859406831466175,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0016757225637504258,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.024663137113762945,
+          "new_matched_area_fraction": 0.9867408322389292,
+          "old_matched_area_fraction": 0.9873387384988527,
+          "phase": "coat",
+          "phase_time_s": 1.75,
+          "physical_time_s": 1.75,
+          "raw_overlap_area": 0.1985886318091915,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.001581289757264237,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.02192258815016096,
+          "new_matched_area_fraction": 0.9858911613910059,
+          "old_matched_area_fraction": 0.987240360402245,
+          "phase": "coat",
+          "phase_time_s": 1.875,
+          "physical_time_s": 1.875,
+          "raw_overlap_area": 0.19859388429054867,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 736,
+          "capacity_projection_area_reduction": 0.001591280057449851,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.019486523581159598,
+          "new_matched_area_fraction": 0.9860883171199285,
+          "old_matched_area_fraction": 0.9868901876997582,
+          "phase": "coat",
+          "phase_time_s": 2.0,
+          "physical_time_s": 2.0,
+          "raw_overlap_area": 0.19880351200792812,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 736,
+          "capacity_projection_area_reduction": 0.0017614177336881531,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.017321121391356498,
+          "new_matched_area_fraction": 0.9852905860481335,
+          "old_matched_area_fraction": 0.9870751103762619,
+          "phase": "coat",
+          "phase_time_s": 2.125,
+          "physical_time_s": 2.125,
+          "raw_overlap_area": 0.19917100290007672,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 688,
+          "capacity_projection_area_reduction": 0.0019863201774822647,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.015396313588625754,
+          "new_matched_area_fraction": 0.988536296612043,
+          "old_matched_area_fraction": 0.9878874493019743,
+          "phase": "coat",
+          "phase_time_s": 2.25,
+          "physical_time_s": 2.25,
+          "raw_overlap_area": 0.19991620433478144,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 688,
+          "capacity_projection_area_reduction": 0.002271969378795341,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.01368536879696286,
+          "new_matched_area_fraction": 0.9881759929183929,
+          "old_matched_area_fraction": 0.9865027092628346,
+          "phase": "coat",
+          "phase_time_s": 2.375,
+          "physical_time_s": 2.375,
+          "raw_overlap_area": 0.19979467808909063,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 688,
+          "capacity_projection_area_reduction": 0.0020744458199398186,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.012164525949425131,
+          "new_matched_area_fraction": 0.9889652918940285,
+          "old_matched_area_fraction": 0.987866599519365,
+          "phase": "coat",
+          "phase_time_s": 2.5,
+          "physical_time_s": 2.5,
+          "raw_overlap_area": 0.19953531107049616,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 688,
+          "capacity_projection_area_reduction": 0.0018499380914841768,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.010812661945913071,
+          "new_matched_area_fraction": 0.9894403608169718,
+          "old_matched_area_fraction": 0.9886008010295735,
+          "phase": "coat",
+          "phase_time_s": 2.625,
+          "physical_time_s": 2.625,
+          "raw_overlap_area": 0.1992380276015154,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0019189563803543863,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.009611001899522853,
+          "new_matched_area_fraction": 0.9879679183764444,
+          "old_matched_area_fraction": 0.9877512150206755,
+          "phase": "coat",
+          "phase_time_s": 2.75,
+          "physical_time_s": 2.75,
+          "raw_overlap_area": 0.19897007028797586,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 688,
+          "capacity_projection_area_reduction": 0.0017476179446236917,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.008542854155782098,
+          "new_matched_area_fraction": 0.9865896338690436,
+          "old_matched_area_fraction": 0.9634950480845337,
+          "phase": "coat",
+          "phase_time_s": 2.875,
+          "physical_time_s": 2.875,
+          "raw_overlap_area": 0.19391759526689684,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": "gas_cavity_enclosed"
+        },
+        {
+          "active_face_count": 720,
+          "capacity_projection_area_reduction": 0.0,
+          "capacity_projection_iterations": 0,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.0,
+          "new_matched_area_fraction": 1.0,
+          "old_matched_area_fraction": 1.0,
+          "phase": "sealed_reference",
+          "phase_time_s": 0.0,
+          "physical_time_s": 0.0,
+          "raw_overlap_area": 0.19495602121370892,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 752,
+          "capacity_projection_area_reduction": 0.001753012825758793,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.06822744508421769,
+          "new_matched_area_fraction": 0.9654783784486881,
+          "old_matched_area_fraction": 0.9772382116157146,
+          "phase": "etch",
+          "phase_time_s": 0.125,
+          "physical_time_s": 0.125,
+          "raw_overlap_area": 0.192271486340359,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 752,
+          "capacity_projection_area_reduction": 0.0024040397993527196,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.08550108857197197,
+          "new_matched_area_fraction": 0.9666440622348047,
+          "old_matched_area_fraction": 0.9818702845071161,
+          "phase": "etch",
+          "phase_time_s": 0.25,
+          "physical_time_s": 0.25,
+          "raw_overlap_area": 0.19615713874934004,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 752,
+          "capacity_projection_area_reduction": 0.0023217716179499415,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.10254165054207401,
+          "new_matched_area_fraction": 0.9664880311498938,
+          "old_matched_area_fraction": 0.9826514188736274,
+          "phase": "etch",
+          "phase_time_s": 0.375,
+          "physical_time_s": 0.375,
+          "raw_overlap_area": 0.1992833679621065,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 816,
+          "capacity_projection_area_reduction": 0.002339088095612424,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.11815668867897461,
+          "new_matched_area_fraction": 0.9677698666179704,
+          "old_matched_area_fraction": 0.9839677151469803,
+          "phase": "etch",
+          "phase_time_s": 0.5,
+          "physical_time_s": 0.5,
+          "raw_overlap_area": 0.20286288733592006,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 816,
+          "capacity_projection_area_reduction": 0.0022392435756162787,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.13121277570470175,
+          "new_matched_area_fraction": 0.9666858065936017,
+          "old_matched_area_fraction": 0.9831714546836832,
+          "phase": "etch",
+          "phase_time_s": 0.625,
+          "physical_time_s": 0.625,
+          "raw_overlap_area": 0.20595428182821496,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 816,
+          "capacity_projection_area_reduction": 0.0022858820457292983,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.1449303999050084,
+          "new_matched_area_fraction": 0.9660214788951521,
+          "old_matched_area_fraction": 0.9826214318267749,
+          "phase": "etch",
+          "phase_time_s": 0.75,
+          "physical_time_s": 0.75,
+          "raw_overlap_area": 0.2093591226033709,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 816,
+          "capacity_projection_area_reduction": 0.0031479452282022757,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.16083629287288698,
+          "new_matched_area_fraction": 0.9643164588973266,
+          "old_matched_area_fraction": 0.9805980242483807,
+          "phase": "etch",
+          "phase_time_s": 0.875,
+          "physical_time_s": 0.875,
+          "raw_overlap_area": 0.21334576691408197,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 848,
+          "capacity_projection_area_reduction": 0.002345458227662023,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.1734756020180403,
+          "new_matched_area_fraction": 0.9612163140673681,
+          "old_matched_area_fraction": 0.914283268052909,
+          "phase": "etch",
+          "phase_time_s": 1.0,
+          "physical_time_s": 1.0,
+          "raw_overlap_area": 0.20163724628686663,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": "gas_cavity_opened"
+        }
+      ],
+      "maximum_capacity_projection_reduction_fraction": 0.015763213989614642,
+      "maximum_relative_conservation_residual": 0.0,
+      "minimum_matched_area_fraction": 0.914283268052909,
+      "passed": true,
+      "reopening_initial_condition": "analytic_100_nm_sealed_cap",
+      "reopening_time_s": 1.0,
+      "sealed_external_flux_exactly_zero": true,
+      "wall_time_s": 3.8398267086595297
+    },
+    {
+      "closure_time_s": 2.5625,
+      "dt_s": 0.0625,
+      "dx_um": 0.0125,
+      "history": [
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0010987388707233148,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.09687499988358467,
+          "new_matched_area_fraction": 0.9920697749891356,
+          "old_matched_area_fraction": 0.9930696529333212,
+          "phase": "coat",
+          "phase_time_s": 0.0625,
+          "physical_time_s": 0.0625,
+          "raw_overlap_area": 0.19780324461557236,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.001147085664278541,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.09375000000000006,
+          "new_matched_area_fraction": 0.9924087746059775,
+          "old_matched_area_fraction": 0.9932094768053157,
+          "phase": "coat",
+          "phase_time_s": 0.125,
+          "physical_time_s": 0.125,
+          "raw_overlap_area": 0.1980775679362833,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.001191680187013655,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.09062500034924598,
+          "new_matched_area_fraction": 0.9927569462053143,
+          "old_matched_area_fraction": 0.9932261812488585,
+          "phase": "coat",
+          "phase_time_s": 0.1875,
+          "physical_time_s": 0.1875,
+          "raw_overlap_area": 0.19828436606756555,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0011940080475706383,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.08750000046566125,
+          "new_matched_area_fraction": 0.9929915089784421,
+          "old_matched_area_fraction": 0.9931810793242501,
+          "phase": "coat",
+          "phase_time_s": 0.25,
+          "physical_time_s": 0.25,
+          "raw_overlap_area": 0.19837089735364527,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0013466984027054318,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.084375000349246,
+          "new_matched_area_fraction": 0.9926381803192046,
+          "old_matched_area_fraction": 0.9928025959009802,
+          "phase": "coat",
+          "phase_time_s": 0.3125,
+          "physical_time_s": 0.3125,
+          "raw_overlap_area": 0.19848607551192202,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0015759294572214866,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.08124999988358467,
+          "new_matched_area_fraction": 0.9919814086190659,
+          "old_matched_area_fraction": 0.9923375116963682,
+          "phase": "coat",
+          "phase_time_s": 0.375,
+          "physical_time_s": 0.375,
+          "raw_overlap_area": 0.19865559334343555,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2944,
+          "capacity_projection_area_reduction": 0.0012976720060451086,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.07812499970896175,
+          "new_matched_area_fraction": 0.9927895852691571,
+          "old_matched_area_fraction": 0.9924931125213213,
+          "phase": "coat",
+          "phase_time_s": 0.4375,
+          "physical_time_s": 0.4375,
+          "raw_overlap_area": 0.19847899750828293,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3040,
+          "capacity_projection_area_reduction": 0.0022466211594142638,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.07499999935971574,
+          "new_matched_area_fraction": 0.9875713590180857,
+          "old_matched_area_fraction": 0.986817745172344,
+          "phase": "coat",
+          "phase_time_s": 0.5,
+          "physical_time_s": 0.5,
+          "raw_overlap_area": 0.19824185913268416,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0019357568634970068,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.07187499930150804,
+          "new_matched_area_fraction": 0.988262149867989,
+          "old_matched_area_fraction": 0.9878743690428998,
+          "phase": "coat",
+          "phase_time_s": 0.5625,
+          "physical_time_s": 0.5625,
+          "raw_overlap_area": 0.19799113076657027,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0019313400644747347,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.06874999941792342,
+          "new_matched_area_fraction": 0.9868419660665098,
+          "old_matched_area_fraction": 0.9874811216577403,
+          "phase": "coat",
+          "phase_time_s": 0.625,
+          "physical_time_s": 0.625,
+          "raw_overlap_area": 0.19783177048639816,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0019314187589929976,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.06562499918509274,
+          "new_matched_area_fraction": 0.9872399773725072,
+          "old_matched_area_fraction": 0.9875662751293389,
+          "phase": "coat",
+          "phase_time_s": 0.6875,
+          "physical_time_s": 0.6875,
+          "raw_overlap_area": 0.19797563355779324,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.002000561781434651,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.06249999953433877,
+          "new_matched_area_fraction": 0.9875860230104916,
+          "old_matched_area_fraction": 0.9875898192477112,
+          "phase": "coat",
+          "phase_time_s": 0.75,
+          "physical_time_s": 0.75,
+          "raw_overlap_area": 0.19811424750655476,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0020326628598034135,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.059374999534338724,
+          "new_matched_area_fraction": 0.9867693553807446,
+          "old_matched_area_fraction": 0.9865160966534722,
+          "phase": "coat",
+          "phase_time_s": 0.8125,
+          "physical_time_s": 0.8125,
+          "raw_overlap_area": 0.19793388385127947,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0020316989144190944,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.05624999953433868,
+          "new_matched_area_fraction": 0.9858017418761184,
+          "old_matched_area_fraction": 0.9858908782349698,
+          "phase": "coat",
+          "phase_time_s": 0.875,
+          "physical_time_s": 0.875,
+          "raw_overlap_area": 0.19775851770690916,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2944,
+          "capacity_projection_area_reduction": 0.0019667104650073486,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.05312499965075407,
+          "new_matched_area_fraction": 0.9828029407358359,
+          "old_matched_area_fraction": 0.9851126032564432,
+          "phase": "coat",
+          "phase_time_s": 0.9375,
+          "physical_time_s": 0.9375,
+          "raw_overlap_area": 0.19755670366264771,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3168,
+          "capacity_projection_area_reduction": 0.0018957716190365903,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.04999999988358467,
+          "new_matched_area_fraction": 0.9844567332738434,
+          "old_matched_area_fraction": 0.9863951994873069,
+          "phase": "coat",
+          "phase_time_s": 1.0,
+          "physical_time_s": 1.0,
+          "raw_overlap_area": 0.19820066892984367,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.00181159918033158,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.046874999883584734,
+          "new_matched_area_fraction": 0.9850192932366965,
+          "old_matched_area_fraction": 0.9871959446306133,
+          "phase": "coat",
+          "phase_time_s": 1.0625,
+          "physical_time_s": 1.0625,
+          "raw_overlap_area": 0.19866270699072575,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0017149314789897119,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.04375000000000001,
+          "new_matched_area_fraction": 0.986895849197171,
+          "old_matched_area_fraction": 0.9882541973849702,
+          "phase": "coat",
+          "phase_time_s": 1.125,
+          "physical_time_s": 1.125,
+          "raw_overlap_area": 0.19921251846966026,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0016956158049049042,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.04062500034924593,
+          "new_matched_area_fraction": 0.9876366608426347,
+          "old_matched_area_fraction": 0.9884912771835476,
+          "phase": "coat",
+          "phase_time_s": 1.1875,
+          "physical_time_s": 1.1875,
+          "raw_overlap_area": 0.19951247982747614,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0017088288483732006,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.03750000046566132,
+          "new_matched_area_fraction": 0.987575089168176,
+          "old_matched_area_fraction": 0.9885266539806026,
+          "phase": "coat",
+          "phase_time_s": 1.25,
+          "physical_time_s": 1.25,
+          "raw_overlap_area": 0.19970395240558358,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0017652865851765231,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.034375000349245954,
+          "new_matched_area_fraction": 0.9876125409812839,
+          "old_matched_area_fraction": 0.9877905119474428,
+          "phase": "coat",
+          "phase_time_s": 1.3125,
+          "physical_time_s": 1.3125,
+          "raw_overlap_area": 0.1998035994251724,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2944,
+          "capacity_projection_area_reduction": 0.0017616130036386124,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.031249999883584734,
+          "new_matched_area_fraction": 0.9871225213839949,
+          "old_matched_area_fraction": 0.987108254847047,
+          "phase": "coat",
+          "phase_time_s": 1.375,
+          "physical_time_s": 1.375,
+          "raw_overlap_area": 0.19969880524110176,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2944,
+          "capacity_projection_area_reduction": 0.0018468010972169935,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.028124999708961707,
+          "new_matched_area_fraction": 0.9863594268875335,
+          "old_matched_area_fraction": 0.9864914209894632,
+          "phase": "coat",
+          "phase_time_s": 1.4375,
+          "physical_time_s": 1.4375,
+          "raw_overlap_area": 0.1996574454772385,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3040,
+          "capacity_projection_area_reduction": 0.0018334818983080925,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.024999999430858344,
+          "new_matched_area_fraction": 0.9845760203460958,
+          "old_matched_area_fraction": 0.9857783709773058,
+          "phase": "coat",
+          "phase_time_s": 1.5,
+          "physical_time_s": 1.5,
+          "raw_overlap_area": 0.1995275977179592,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.001726605086293187,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.022222221627210603,
+          "new_matched_area_fraction": 0.9840899903925713,
+          "old_matched_area_fraction": 0.9859904003735299,
+          "phase": "coat",
+          "phase_time_s": 1.5625,
+          "physical_time_s": 1.5625,
+          "raw_overlap_area": 0.19970471584709504,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.001577819208047615,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.01975308589468655,
+          "new_matched_area_fraction": 0.9853142408389489,
+          "old_matched_area_fraction": 0.9871012086795533,
+          "phase": "coat",
+          "phase_time_s": 1.625,
+          "physical_time_s": 1.625,
+          "raw_overlap_area": 0.20016172345660482,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0015484785011778968,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.017558298712811615,
+          "new_matched_area_fraction": 0.9857771032098119,
+          "old_matched_area_fraction": 0.9879146019580912,
+          "phase": "coat",
+          "phase_time_s": 1.6875,
+          "physical_time_s": 1.6875,
+          "raw_overlap_area": 0.200656469220926,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0016264730669229288,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.01560737623148506,
+          "new_matched_area_fraction": 0.9867892163079736,
+          "old_matched_area_fraction": 0.9879394772704325,
+          "phase": "coat",
+          "phase_time_s": 1.75,
+          "physical_time_s": 1.75,
+          "raw_overlap_area": 0.20117122170384394,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.001581192988433927,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.013873223701181214,
+          "new_matched_area_fraction": 0.9875571381603733,
+          "old_matched_area_fraction": 0.9881388299633126,
+          "phase": "coat",
+          "phase_time_s": 1.8125,
+          "physical_time_s": 1.8125,
+          "raw_overlap_area": 0.20139885534711127,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0016722796513226057,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.012331754449336374,
+          "new_matched_area_fraction": 0.9871496026740831,
+          "old_matched_area_fraction": 0.9870638899783235,
+          "phase": "coat",
+          "phase_time_s": 1.875,
+          "physical_time_s": 1.875,
+          "raw_overlap_area": 0.20139014049483547,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.002140845767122146,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.010961559468086579,
+          "new_matched_area_fraction": 0.984722804178515,
+          "old_matched_area_fraction": 0.9859821974662907,
+          "phase": "coat",
+          "phase_time_s": 1.9375,
+          "physical_time_s": 1.9375,
+          "raw_overlap_area": 0.2016225198460288,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3040,
+          "capacity_projection_area_reduction": 0.0016837445640617843,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.009743608650020275,
+          "new_matched_area_fraction": 0.9860604870534193,
+          "old_matched_area_fraction": 0.9878908970250777,
+          "phase": "coat",
+          "phase_time_s": 2.0,
+          "physical_time_s": 2.0,
+          "raw_overlap_area": 0.20180719972287037,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0020908359181526504,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.008660985492282947,
+          "new_matched_area_fraction": 0.9850749640001462,
+          "old_matched_area_fraction": 0.9872027804136451,
+          "phase": "coat",
+          "phase_time_s": 2.0625,
+          "physical_time_s": 2.0625,
+          "raw_overlap_area": 0.2024461223865561,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0026311130595465526,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.007698653521057641,
+          "new_matched_area_fraction": 0.9839354364503793,
+          "old_matched_area_fraction": 0.9862953960333987,
+          "phase": "coat",
+          "phase_time_s": 2.125,
+          "physical_time_s": 2.125,
+          "raw_overlap_area": 0.20323462430126532,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0032804961092715856,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.006843247398830743,
+          "new_matched_area_fraction": 0.9834725814108607,
+          "old_matched_area_fraction": 0.9852692474723687,
+          "phase": "coat",
+          "phase_time_s": 2.1875,
+          "physical_time_s": 2.1875,
+          "raw_overlap_area": 0.20415594305371212,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2816,
+          "capacity_projection_area_reduction": 0.00320947149448797,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.0060828869479455094,
+          "new_matched_area_fraction": 0.9842382922162838,
+          "old_matched_area_fraction": 0.9846359645162013,
+          "phase": "coat",
+          "phase_time_s": 2.25,
+          "physical_time_s": 2.25,
+          "raw_overlap_area": 0.2043225408248192,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2816,
+          "capacity_projection_area_reduction": 0.0027517206767541103,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.005407010268668688,
+          "new_matched_area_fraction": 0.9859128684975035,
+          "old_matched_area_fraction": 0.9854070165147389,
+          "phase": "coat",
+          "phase_time_s": 2.3125,
+          "physical_time_s": 2.3125,
+          "raw_overlap_area": 0.2041035997879302,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2816,
+          "capacity_projection_area_reduction": 0.003104484525236234,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.004806231521699955,
+          "new_matched_area_fraction": 0.982875364236688,
+          "old_matched_area_fraction": 0.9842571345000437,
+          "phase": "coat",
+          "phase_time_s": 2.375,
+          "physical_time_s": 2.375,
+          "raw_overlap_area": 0.2041182149395555,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2816,
+          "capacity_projection_area_reduction": 0.001775286373893542,
+          "capacity_projection_iterations": 43,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.004272205670223406,
+          "new_matched_area_fraction": 0.9862606564936476,
+          "old_matched_area_fraction": 0.9901759793407451,
+          "phase": "coat",
+          "phase_time_s": 2.4375,
+          "physical_time_s": 2.4375,
+          "raw_overlap_area": 0.20428210933054686,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3168,
+          "capacity_projection_area_reduction": 0.0027156745168091245,
+          "capacity_projection_iterations": 46,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.0037975160300445787,
+          "new_matched_area_fraction": 0.985596653065381,
+          "old_matched_area_fraction": 0.9918338850684363,
+          "phase": "coat",
+          "phase_time_s": 2.5,
+          "physical_time_s": 2.5,
+          "raw_overlap_area": 0.20636683675624815,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2976,
+          "capacity_projection_area_reduction": 0.0037197600122714503,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.003375569847462734,
+          "new_matched_area_fraction": 0.9843686846044795,
+          "old_matched_area_fraction": 0.9863802631882761,
+          "phase": "coat",
+          "phase_time_s": 2.5625,
+          "physical_time_s": 2.5625,
+          "raw_overlap_area": 0.20753283748526352,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": "gas_cavity_enclosed"
+        },
+        {
+          "active_face_count": 2880,
+          "capacity_projection_area_reduction": 0.0,
+          "capacity_projection_iterations": 0,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.0,
+          "new_matched_area_fraction": 1.0,
+          "old_matched_area_fraction": 1.0,
+          "phase": "sealed_reference",
+          "phase_time_s": 0.0,
+          "physical_time_s": 0.0,
+          "raw_overlap_area": 0.19661277917429137,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2944,
+          "capacity_projection_area_reduction": 0.0008438858009714723,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.08397311502798405,
+          "new_matched_area_fraction": 0.9814419999844358,
+          "old_matched_area_fraction": 0.9876116140707163,
+          "phase": "etch",
+          "phase_time_s": 0.0625,
+          "physical_time_s": 0.0625,
+          "raw_overlap_area": 0.19502094998822272,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 2944,
+          "capacity_projection_area_reduction": 0.0012035264445645621,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.09254960013013108,
+          "new_matched_area_fraction": 0.9821228394955529,
+          "old_matched_area_fraction": 0.9899551790451536,
+          "phase": "etch",
+          "phase_time_s": 0.125,
+          "physical_time_s": 0.125,
+          "raw_overlap_area": 0.1970649123919777,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3040,
+          "capacity_projection_area_reduction": 0.0011641520518436699,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.10092425780571154,
+          "new_matched_area_fraction": 0.9826582952358436,
+          "old_matched_area_fraction": 0.9908976384767317,
+          "phase": "etch",
+          "phase_time_s": 0.1875,
+          "physical_time_s": 0.1875,
+          "raw_overlap_area": 0.19877546603345908,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3104,
+          "capacity_projection_area_reduction": 0.001191394514053007,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.10758540602817174,
+          "new_matched_area_fraction": 0.9832104152409088,
+          "old_matched_area_fraction": 0.9914364283688345,
+          "phase": "etch",
+          "phase_time_s": 0.25,
+          "physical_time_s": 0.25,
+          "raw_overlap_area": 0.20056797973097565,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3072,
+          "capacity_projection_area_reduction": 0.000809274133937693,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.11465978791567649,
+          "new_matched_area_fraction": 0.9830872837888679,
+          "old_matched_area_fraction": 0.9915752690027825,
+          "phase": "etch",
+          "phase_time_s": 0.3125,
+          "physical_time_s": 0.3125,
+          "raw_overlap_area": 0.20188209441207322,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3072,
+          "capacity_projection_area_reduction": 0.0011814531656870186,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.12182753029903975,
+          "new_matched_area_fraction": 0.982975752394306,
+          "old_matched_area_fraction": 0.9915081063670937,
+          "phase": "etch",
+          "phase_time_s": 0.375,
+          "physical_time_s": 0.375,
+          "raw_overlap_area": 0.20397660122975425,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3168,
+          "capacity_projection_area_reduction": 0.001184487035116255,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.1284677134158188,
+          "new_matched_area_fraction": 0.98314562950394,
+          "old_matched_area_fraction": 0.9914079599756886,
+          "phase": "etch",
+          "phase_time_s": 0.4375,
+          "physical_time_s": 0.4375,
+          "raw_overlap_area": 0.20571926171846502,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3168,
+          "capacity_projection_area_reduction": 0.0011560036497447745,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.1349375607983819,
+          "new_matched_area_fraction": 0.9832769487260905,
+          "old_matched_area_fraction": 0.9915607479129149,
+          "phase": "etch",
+          "phase_time_s": 0.5,
+          "physical_time_s": 0.5,
+          "raw_overlap_area": 0.2074414694779871,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3200,
+          "capacity_projection_area_reduction": 0.001116757190922829,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.14165219220591746,
+          "new_matched_area_fraction": 0.9831463841293138,
+          "old_matched_area_fraction": 0.9916985680819622,
+          "phase": "etch",
+          "phase_time_s": 0.5625,
+          "physical_time_s": 0.5625,
+          "raw_overlap_area": 0.20916902704534,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3200,
+          "capacity_projection_area_reduction": 0.001101218942496679,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.1485081472126276,
+          "new_matched_area_fraction": 0.9834721358788787,
+          "old_matched_area_fraction": 0.9918703160194653,
+          "phase": "etch",
+          "phase_time_s": 0.625,
+          "physical_time_s": 0.625,
+          "raw_overlap_area": 0.21099963689967965,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3296,
+          "capacity_projection_area_reduction": 0.0011191130855125186,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.15489082316408326,
+          "new_matched_area_fraction": 0.9831325993397195,
+          "old_matched_area_fraction": 0.9914918905130246,
+          "phase": "etch",
+          "phase_time_s": 0.6875,
+          "physical_time_s": 0.6875,
+          "raw_overlap_area": 0.21272915432992537,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3328,
+          "capacity_projection_area_reduction": 0.0011749547387549242,
+          "capacity_projection_iterations": 44,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.16131624589727087,
+          "new_matched_area_fraction": 0.9830824648356454,
+          "old_matched_area_fraction": 0.9910641458635008,
+          "phase": "etch",
+          "phase_time_s": 0.75,
+          "physical_time_s": 0.75,
+          "raw_overlap_area": 0.21449218674070802,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3328,
+          "capacity_projection_area_reduction": 0.0011717126710053538,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.16788441825483685,
+          "new_matched_area_fraction": 0.9829303008065043,
+          "old_matched_area_fraction": 0.9912420786926809,
+          "phase": "etch",
+          "phase_time_s": 0.8125,
+          "physical_time_s": 0.8125,
+          "raw_overlap_area": 0.2162594840777871,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3328,
+          "capacity_projection_area_reduction": 0.0011486524738408832,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.17458242616283765,
+          "new_matched_area_fraction": 0.9828113321108141,
+          "old_matched_area_fraction": 0.9912238746046536,
+          "phase": "etch",
+          "phase_time_s": 0.875,
+          "physical_time_s": 0.875,
+          "raw_overlap_area": 0.2180512486996133,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3424,
+          "capacity_projection_area_reduction": 0.0014106529694210002,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.18092561958132586,
+          "new_matched_area_fraction": 0.9829128420014756,
+          "old_matched_area_fraction": 0.9909051568965509,
+          "phase": "etch",
+          "phase_time_s": 0.9375,
+          "physical_time_s": 0.9375,
+          "raw_overlap_area": 0.22009952449754702,
+          "topology": [
+            1,
+            1,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": null
+        },
+        {
+          "active_face_count": 3264,
+          "capacity_projection_area_reduction": 0.001151556590129721,
+          "capacity_projection_iterations": 45,
+          "filled_zero_volume_gas_nodes": 0,
+          "maximum_relative_conservation_residual": 0.0,
+          "neck_width_um": 0.18730612418259257,
+          "new_matched_area_fraction": 0.9800548047831945,
+          "old_matched_area_fraction": 0.9154769514205797,
+          "phase": "etch",
+          "phase_time_s": 1.0,
+          "physical_time_s": 1.0,
+          "raw_overlap_area": 0.20483657611689166,
+          "topology": [
+            1,
+            0,
+            false,
+            [
+              [
+                1,
+                1
+              ]
+            ]
+          ],
+          "topology_event": "gas_cavity_opened"
+        }
+      ],
+      "maximum_capacity_projection_reduction_fraction": 0.017923717794951763,
+      "maximum_relative_conservation_residual": 0.0,
+      "minimum_matched_area_fraction": 0.9154769514205797,
+      "passed": true,
+      "reopening_initial_condition": "analytic_100_nm_sealed_cap",
+      "reopening_time_s": 1.0,
+      "sealed_external_flux_exactly_zero": true,
+      "wall_time_s": 29.01745583396405
+    }
+  ],
+  "operator": {
+    "ballistic_face_quadrature_points": 1,
+    "ballistic_transport": "face_gather",
+    "etch_law": "uniform_normal",
+    "fixture": "rounded_keyhole",
+    "n_position": 4,
+    "profile_periodic_lateral": true,
+    "reinitialization_method": "cr2",
+    "seed": 29,
+    "surface_state_remap_backend": "common_refinement",
+    "timestep_rule": "dt_s = 5 * dx_um",
+    "topology_change_policy": "continue_gas_cavity"
+  },
+  "passed": true,
+  "physical_geometry": {
+    "cell_length_um": 0.1,
+    "cell_width_um": 0.6,
+    "chamber_center_um": [
+      0.3,
+      0.35
+    ],
+    "chamber_radius_um": 0.18,
+    "domain_height_um": 1.0,
+    "neck_base_um": 0.35,
+    "neck_x_bounds_um": [
+      0.25,
+      0.35
+    ],
+    "sealed_cap_bottom_um": 0.65,
+    "sealed_cap_thickness_um": 0.1,
+    "top_um": 0.75
+  },
+  "refinement": {
+    "adjacent_pairs": [
+      {
+        "closure_one_coarse_cell_crossing_time_s": 2.0,
+        "closure_time_difference_s": 0.125,
+        "coarser_dx_um": 0.05,
+        "finer_dx_um": 0.025,
+        "passed": true,
+        "reopening_one_coarse_cell_crossing_time_s": 1.0,
+        "reopening_time_difference_s": 0.0
+      },
+      {
+        "closure_one_coarse_cell_crossing_time_s": 1.0,
+        "closure_time_difference_s": 0.3125,
+        "coarser_dx_um": 0.025,
+        "finer_dx_um": 0.0125,
+        "passed": true,
+        "reopening_one_coarse_cell_crossing_time_s": 0.5,
+        "reopening_time_difference_s": 0.0
+      }
+    ],
+    "all_adjacent_pairs_passed": true,
+    "authoritative_pair": {
+      "closure_one_coarse_cell_crossing_time_s": 1.0,
+      "closure_time_difference_s": 0.3125,
+      "coarser_dx_um": 0.025,
+      "finer_dx_um": 0.0125,
+      "passed": true,
+      "reopening_one_coarse_cell_crossing_time_s": 0.5,
+      "reopening_time_difference_s": 0.0
+    },
+    "coarsest_level_is_diagnostic_only": false,
+    "coat_velocity_um_s": 0.025,
+    "criterion": "adjacent event times agree within one coarser-grid cell crossing at the declared maximum phase normal velocity",
+    "etch_velocity_um_s": 0.05,
+    "passed": true
+  },
+  "schema": "petch.topology_common_refinement_audit.v1",
+  "scope": "manufactured_numerical_conformance_not_chemistry_validation",
+  "script_sha256": "37d1bd4f0b8187e2e0242fb3d295338f879116b2416e76718d93911843eb66c2",
+  "total_wall_time_s": 33.578200249932706
+}

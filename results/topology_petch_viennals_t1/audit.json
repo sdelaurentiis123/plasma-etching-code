@@ -1,0 +1,198 @@
+{
+  "comparison": {
+    "authoritative_level": {
+      "analytic_closure_time_s": 2.0,
+      "analytic_reopening_time_s": 1.0,
+      "dt_s": 0.0625,
+      "dx_um": 0.0125,
+      "paired_closure_bound_s": 1.125,
+      "paired_closure_difference_s": 0.625,
+      "paired_reopening_bound_s": 0.625,
+      "paired_reopening_difference_s": 0.0,
+      "passed": true,
+      "petch_closure_error_s": 0.5625,
+      "petch_closure_time_s": 2.5625,
+      "petch_reopening_error_s": 0.0,
+      "petch_reopening_time_s": 1.0,
+      "single_engine_closure_bound_s": 0.5625,
+      "single_engine_reopening_bound_s": 0.3125,
+      "viennals_closure_error_s": 0.0625,
+      "viennals_closure_time_s": 1.9375,
+      "viennals_reopening_error_s": 0.0,
+      "viennals_reopening_time_s": 1.0
+    },
+    "criterion": "each event agrees with the analytic fixture within one cell crossing plus one checkpoint interval; independent Petch/ViennaLS budgets add",
+    "levels": [
+      {
+        "analytic_closure_time_s": 2.0,
+        "analytic_reopening_time_s": 1.0,
+        "dt_s": 0.25,
+        "dx_um": 0.05,
+        "paired_closure_bound_s": 4.5,
+        "paired_closure_difference_s": 1.25,
+        "paired_reopening_bound_s": 2.5,
+        "paired_reopening_difference_s": 0.0,
+        "passed": true,
+        "petch_closure_error_s": 1.0,
+        "petch_closure_time_s": 3.0,
+        "petch_reopening_error_s": 0.0,
+        "petch_reopening_time_s": 1.0,
+        "single_engine_closure_bound_s": 2.25,
+        "single_engine_reopening_bound_s": 1.25,
+        "viennals_closure_error_s": 0.25,
+        "viennals_closure_time_s": 1.75,
+        "viennals_reopening_error_s": 0.0,
+        "viennals_reopening_time_s": 1.0
+      },
+      {
+        "analytic_closure_time_s": 2.0,
+        "analytic_reopening_time_s": 1.0,
+        "dt_s": 0.125,
+        "dx_um": 0.025,
+        "paired_closure_bound_s": 2.25,
+        "paired_closure_difference_s": 1.0,
+        "paired_reopening_bound_s": 1.25,
+        "paired_reopening_difference_s": 0.0,
+        "passed": true,
+        "petch_closure_error_s": 0.875,
+        "petch_closure_time_s": 2.875,
+        "petch_reopening_error_s": 0.0,
+        "petch_reopening_time_s": 1.0,
+        "single_engine_closure_bound_s": 1.125,
+        "single_engine_reopening_bound_s": 0.625,
+        "viennals_closure_error_s": 0.125,
+        "viennals_closure_time_s": 1.875,
+        "viennals_reopening_error_s": 0.0,
+        "viennals_reopening_time_s": 1.0
+      },
+      {
+        "analytic_closure_time_s": 2.0,
+        "analytic_reopening_time_s": 1.0,
+        "dt_s": 0.0625,
+        "dx_um": 0.0125,
+        "paired_closure_bound_s": 1.125,
+        "paired_closure_difference_s": 0.625,
+        "paired_reopening_bound_s": 0.625,
+        "paired_reopening_difference_s": 0.0,
+        "passed": true,
+        "petch_closure_error_s": 0.5625,
+        "petch_closure_time_s": 2.5625,
+        "petch_reopening_error_s": 0.0,
+        "petch_reopening_time_s": 1.0,
+        "single_engine_closure_bound_s": 0.5625,
+        "single_engine_reopening_bound_s": 0.3125,
+        "viennals_closure_error_s": 0.0625,
+        "viennals_closure_time_s": 1.9375,
+        "viennals_reopening_error_s": 0.0,
+        "viennals_reopening_time_s": 1.0
+      }
+    ],
+    "passed": true,
+    "petch_refinement": {
+      "criterion": "adjacent event times differ by no more than one coarse-cell crossing",
+      "pairs": [
+        {
+          "closure_bound_s": 2.0,
+          "closure_difference_s": 0.125,
+          "coarser_dx_um": 0.05,
+          "finer_dx_um": 0.025,
+          "passed": true,
+          "reopening_bound_s": 1.0,
+          "reopening_difference_s": 0.0
+        },
+        {
+          "closure_bound_s": 1.0,
+          "closure_difference_s": 0.3125,
+          "coarser_dx_um": 0.025,
+          "finer_dx_um": 0.0125,
+          "passed": true,
+          "reopening_bound_s": 0.5,
+          "reopening_difference_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    "viennals_refinement": {
+      "criterion": "adjacent event times differ by no more than one coarse-cell crossing",
+      "pairs": [
+        {
+          "closure_bound_s": 2.0,
+          "closure_difference_s": 0.125,
+          "coarser_dx_um": 0.05,
+          "finer_dx_um": 0.025,
+          "passed": true,
+          "reopening_bound_s": 1.0,
+          "reopening_difference_s": 0.0
+        },
+        {
+          "closure_bound_s": 1.0,
+          "closure_difference_s": 0.0625,
+          "coarser_dx_um": 0.025,
+          "finer_dx_um": 0.0125,
+          "passed": true,
+          "reopening_bound_s": 0.5,
+          "reopening_difference_s": 0.0
+        }
+      ],
+      "passed": true
+    }
+  },
+  "operator": {
+    "closure_initial_condition": "open neck",
+    "geometry": "analytic rounded chamber plus 100 nm neck",
+    "normal_etch_speed_um_s": 0.05,
+    "normal_growth_speed_um_s": 0.025,
+    "reopening_initial_condition": "independent analytic 100 nm sealed cap",
+    "timestep_rule": "dt_s = 5 * dx_um"
+  },
+  "passed": true,
+  "petch": {
+    "audit_relative_path": "petch/audit.json",
+    "audit_script_sha256": "37d1bd4f0b8187e2e0242fb3d295338f879116b2416e76718d93911843eb66c2",
+    "conservation_authority": true,
+    "git_revision": "8edfc4d65df6bd7fc83d3d271b718bd4b8921b4b"
+  },
+  "runtime": {
+    "compile_timeout_s": 120.0,
+    "engine_timeout_s": 600.0,
+    "platform": "macOS-15.7.4-arm64-arm-64bit",
+    "python": "3.10.17",
+    "wall_time_s": 39.47182200010866
+  },
+  "schema": "petch.viennals_topology_comparator.v1",
+  "scope": "manufactured_geometry_conformance_not_chemistry_validation",
+  "vienna": {
+    "compiler": "clang++",
+    "compiler_flags": [
+      "-std=c++17",
+      "-O2",
+      "-DNDEBUG"
+    ],
+    "compiler_version": "Apple clang version 17.0.0 (clang-1700.6.4.2)",
+    "geometry_comparator_only": true,
+    "probe_sha256": "a686a2751f8181435489d439c9ddfec9c05b7966f5a45a30e3db389985b127f5",
+    "surface_state_conservation_authority": false,
+    "upstream": {
+      "ViennaCore": {
+        "path": "ViennaCore-v2.2.1",
+        "revision": "640411618bef44717487f25ec7417b4f6daaabf7",
+        "worktree_clean": true
+      },
+      "ViennaHRLE": {
+        "path": "ViennaHRLE-v1.1.2",
+        "revision": "8aa4aa7ac4a72d101bee8a140dbf64e20963e305",
+        "worktree_clean": true
+      },
+      "ViennaLS": {
+        "path": "ViennaLS-v5.8.3",
+        "revision": "c3a1a2ad5bb0b05f75cd4beb71b540f6c544a287",
+        "worktree_clean": true
+      },
+      "ViennaPS": {
+        "path": "ViennaPS-audit",
+        "revision": "2956ed587984c6dc38be24c6e2390e10c9b2f0a7",
+        "worktree_clean": true
+      }
+    }
+  }
+}

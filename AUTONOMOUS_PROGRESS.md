@@ -1512,3 +1512,23 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   Curved, nonparallel, folded, and large-normal-motion surfaces refuse; no `feature_step_3d`, charging,
   AMR, or profile path was rewired. The next remap task is orientation-local patch grouping and
   corner/topology ownership, not pretending one plane is a trench.
+
+### Matched ViennaLS topology conformance separates a bad reverse test from a real first-order lag
+
+- **The original reverse-time comparison was ill-posed.** Reversing each engine from its own first
+  grid-snapped closure compared different subcell cap thicknesses and produced nonconvergent petch
+  reopening times (`0.125--3.125 s`). T1 now contains two independent analytic initial-value
+  problems: close the same open rounded keyhole, then reopen the same prescribed 100 nm solid cap.
+  The production directional hard-visibility audit is unchanged.
+- **The pinned black-box receipt passes without claiming identity.** The adapter verifies clean exact
+  ViennaLS/ViennaHRLE/ViennaCore/ViennaPS revisions, compiles an original API-only probe, applies hard
+  timeouts, and runs 50/25/12.5 nm grids. At 12.5 nm, ViennaLS closes at `1.9375 s`, petch at
+  `2.5625 s`, and the analytic event is `2.0 s`; petch's `0.5625 s` lag is exactly its declared one
+  cell-crossing plus one-checkpoint localization budget. Both engines reopen the prescribed cap at
+  the analytic `1.0 s` on all grids. The paired run passes in `39.47 s`; petch's conservative state
+  ledger remains roundoff-exact. The event-time result is numerical conformance, not chemistry
+  validation, and the visible petch closure bias remains a target for sparse/AMR comparison.
+- **Verification is bounded and reproducible.** The topology/remap cluster passes `94` tests. Receipt
+  and plot: `results/topology_petch_viennals_t1/audit.json` and
+  `results/topology_petch_viennals_t1/petch_viennals_topology.png`. Profile-distance, multi-material,
+  and periodic-translation extensions remain open; no Krueger endpoint or held-out data was run.

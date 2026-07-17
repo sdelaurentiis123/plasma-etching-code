@@ -1,0 +1,14 @@
+phase,phase_time_s,physical_time_s,components,void_points,active_points
+initial,0,0,2,0,66
+coat,0.25,0.25,2,0,68
+coat,0.5,0.5,2,0,69
+coat,0.75,0.75,2,0,69
+coat,1,1,2,0,69
+coat,1.25,1.25,2,0,72
+coat,1.5,1.5,2,0,64
+coat,1.75,1.75,3,28,57
+sealed_reference,0,0,3,40,66
+etch,0.25,0.25,3,47,73
+etch,0.5,0.5,3,48,74
+etch,0.75,0.75,3,48,74
+etch,1,1,2,0,63

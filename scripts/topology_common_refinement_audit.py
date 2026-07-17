@@ -2,9 +2,11 @@
 """Bounded close/seal/reopen audit for the conservative moving-surface engine.
 
 The fixture is a periodic, extruded keyhole with a narrow neck above a wider
-cell-resolved chamber.  A declared conformal normal-growth law closes the neck;
-an externally visible directional strip law reopens it.  This is a numerical
-conformance audit, not a chemistry validation or parameter calibration.
+cell-resolved chamber.  A declared conformal normal-growth law closes the neck.
+The production-oriented path reopens it with an externally visible directional
+strip law; the ViennaLS T1 path uses two matched, independent uniform-normal
+initial-value problems.  This is numerical conformance, not chemistry
+validation or parameter calibration.
 
 Every grid uses the same physical geometry and a timestep proportional to dx.
 Runs have hard physical-time ceilings and write a compact JSON receipt plus a
@@ -59,6 +61,19 @@ PHYSICAL_GEOMETRY = {
     "top_um": 0.75,
     "chamber_half_width_um": 0.20,
     "neck_half_width_um": 0.075,
+}
+
+ROUNDED_PHYSICAL_GEOMETRY = {
+    "cell_width_um": 0.60,
+    "cell_length_um": 0.10,
+    "domain_height_um": 1.00,
+    "top_um": 0.75,
+    "chamber_center_um": (0.30, 0.35),
+    "chamber_radius_um": 0.18,
+    "neck_x_bounds_um": (0.25, 0.35),
+    "neck_base_um": 0.35,
+    "sealed_cap_bottom_um": 0.65,
+    "sealed_cap_thickness_um": 0.10,
 }
 
 
@@ -129,6 +144,45 @@ def build_keyhole_geometry(dx_um):
         phi, material, dx, 1.0e-6, material_levelsets={1: phi})
 
 
+def build_rounded_keyhole_geometry(dx_um, *, sealed=False):
+    """Build the analytic rounded chamber/neck used by the ViennaLS comparator.
+
+    ``sealed=False`` joins the neck to the external gas above the material top.
+    ``sealed=True`` terminates it at 0.65 um, leaving the same analytic 0.10 um
+    solid cap at every grid level.  The latter is the independent reverse-motion
+    initial condition: reversing each solver from its own first discrete closure
+    would compare different, grid-dependent cap thicknesses.
+    """
+    dx = float(dx_um)
+    extents = np.asarray((0.60, 0.10, 1.00), dtype=float)
+    intervals = np.rint(extents / dx).astype(int)
+    if (np.any(intervals < 2)
+            or not np.allclose(intervals * dx, extents, rtol=0.0, atol=1e-13)):
+        raise ValueError("dx must divide every physical extent with at least two intervals")
+    shape = tuple(int(value) + 1 for value in intervals)
+    x, y, z = (np.arange(size, dtype=float) * dx for size in shape)
+    X, _, Z = np.meshgrid(x, y, z, indexing="ij")
+    center_x, center_z = ROUNDED_PHYSICAL_GEOMETRY["chamber_center_um"]
+    radius = ROUNDED_PHYSICAL_GEOMETRY["chamber_radius_um"]
+    neck_left, neck_right = ROUNDED_PHYSICAL_GEOMETRY["neck_x_bounds_um"]
+    chamber = radius - np.hypot(X - center_x, Z - center_z)
+    neck_top = (
+        ROUNDED_PHYSICAL_GEOMETRY["sealed_cap_bottom_um"]
+        if sealed else 1.0 + dx)
+    neck = np.minimum.reduce((
+        X - neck_left,
+        neck_right - X,
+        Z - ROUNDED_PHYSICAL_GEOMETRY["neck_base_um"],
+        np.full_like(X, neck_top) - Z,
+    ))
+    gas_keyhole = np.maximum(chamber, neck)
+    phi = reinit_narrow(np.minimum(
+        ROUNDED_PHYSICAL_GEOMETRY["top_um"] - Z, -gas_keyhole), dx, 2.0)
+    material = np.where(phi > 0.0, 1, 0)
+    return FeatureGeometry3D(
+        phi, material, dx, 1.0e-6, material_levelsets={1: phi})
+
+
 def boundary(mode):
     if mode == "coat":
         species = (
@@ -152,18 +206,22 @@ class ManufacturedReversibleMotion:
     coat_velocity_m_s = 2.5e-8
     etch_velocity_m_s = 5.0e-8
 
+    def __init__(self, etch_law="directional_visibility"):
+        if etch_law not in ("directional_visibility", "uniform_normal"):
+            raise ValueError("unsupported manufactured etch law")
+        self.etch_law = str(etch_law)
+
     @staticmethod
     def initial_state(shape=()):
         return SiO2SurfaceState.bare(shape)
 
-    @staticmethod
-    def _validity():
+    def _validity(self):
         return MechanismValidity(
             within_declared_scope=True,
             reasons=(),
             unsupported_neutral_species=(),
             known_model_form_omissions=(
-                "manufactured conformal-coat/directional-strip certification law",),
+                f"manufactured conformal-coat/{self.etch_law} certification law",),
             parameter_evidence_supports_prediction=False,
             nonpredictive_parameters=("manufactured_normal_velocity",),
         )
@@ -173,6 +231,9 @@ class ManufacturedReversibleMotion:
         if "coat" in fluxes.neutral_flux_m2_s:
             growth = np.full(shape, self.coat_velocity_m_s)
             etch = np.zeros(shape)
+        elif self.etch_law == "uniform_normal":
+            etch = np.full(shape, self.etch_velocity_m_s)
+            growth = np.zeros(shape)
         else:
             population = next(
                 item for item in fluxes.energetic_fluxes if item.name == "etch+")
@@ -254,9 +315,14 @@ def _record(step, phase, phase_time_s, physical_time_s):
     }
 
 
-def run_level(dx_um, *, maximum_coat_time_s, maximum_etch_time_s):
-    geometry = build_keyhole_geometry(dx_um)
-    mechanism = ManufacturedReversibleMotion()
+def run_level(dx_um, *, maximum_coat_time_s, maximum_etch_time_s,
+              etch_law="directional_visibility", fixture="rectangular_keyhole"):
+    geometry_builder = {
+        "rectangular_keyhole": build_keyhole_geometry,
+        "rounded_keyhole": build_rounded_keyhole_geometry,
+    }[fixture]
+    geometry = geometry_builder(dx_um)
+    mechanism = ManufacturedReversibleMotion(etch_law=etch_law)
     state = None
     fingerprint = None
     physical_time = 0.0
@@ -318,8 +384,26 @@ def run_level(dx_um, *, maximum_coat_time_s, maximum_etch_time_s):
 
     sealed_flux_is_zero = None
     reopening_time = None
+    reopening_initial_condition = "none"
     if closure_time is not None:
-        sealed = take_step("coat", 0.4 * dt)
+        if etch_law == "uniform_normal" and fixture == "rounded_keyhole":
+            # T1 compares two independent initial-value problems.  The closure
+            # branch starts open; the reverse branch starts from the same
+            # analytic cap in petch and ViennaLS.  A just-closed nodal state is
+            # deliberately not reversible: its subcell cap thickness depends
+            # on each engine's event localization rule.
+            geometry = build_rounded_keyhole_geometry(dx_um, sealed=True)
+            state = None
+            fingerprint = None
+            physical_time = 0.0
+            sealed_duration = 0.0
+            sealed_phase = "sealed_reference"
+            reopening_initial_condition = "analytic_100_nm_sealed_cap"
+        else:
+            sealed_duration = 0.4 * dt
+            sealed_phase = "sealed_hold"
+            reopening_initial_condition = "continued_from_detected_closure"
+        sealed = take_step("coat", sealed_duration)
         centroid = sealed.active_face_centroid
         cavity = (
             (np.abs(centroid[:, 0] - PHYSICAL_GEOMETRY["center_um"]) < 0.12)
@@ -333,7 +417,7 @@ def run_level(dx_um, *, maximum_coat_time_s, maximum_etch_time_s):
             and np.all(sealed.transport.surface_fluxes.neutral_flux_m2_s[
                 "coat"][cavity] == 0.0))
         history.append(_record(
-            sealed, "sealed_hold", 0.4 * dt, physical_time))
+            sealed, sealed_phase, sealed_duration, physical_time))
 
         phase_time = 0.0
         etch_steps = int(np.ceil(float(maximum_etch_time_s) / dt))
@@ -367,6 +451,7 @@ def run_level(dx_um, *, maximum_coat_time_s, maximum_etch_time_s):
         "dt_s": dt,
         "closure_time_s": closure_time,
         "reopening_time_s": reopening_time,
+        "reopening_initial_condition": reopening_initial_condition,
         "sealed_external_flux_exactly_zero": sealed_flux_is_zero,
         "maximum_relative_conservation_residual": maximum_conservation_residual,
         "minimum_matched_area_fraction": minimum_matched_area_fraction,
@@ -477,6 +562,15 @@ def main():
     parser.add_argument("--maximum-coat-time-s", type=float, default=8.0)
     parser.add_argument("--maximum-etch-time-s", type=float, default=12.0)
     parser.add_argument(
+        "--etch-law",
+        choices=("directional_visibility", "uniform_normal"),
+        default="directional_visibility",
+        help="directional T2/T3 path or uniform T1 ViennaLS comparator path")
+    parser.add_argument(
+        "--fixture",
+        choices=("rectangular_keyhole", "rounded_keyhole"),
+        default="rectangular_keyhole")
+    parser.add_argument(
         "--output-dir", type=Path,
         default=ROOT / "results" / "topology_common_refinement_audit")
     parser.add_argument(
@@ -507,7 +601,9 @@ def main():
         "scope": "manufactured_numerical_conformance_not_chemistry_validation",
         "git_revision": _git_revision(),
         "script_sha256": _source_sha256(),
-        "physical_geometry": PHYSICAL_GEOMETRY,
+        "physical_geometry": (
+            PHYSICAL_GEOMETRY if args.fixture == "rectangular_keyhole"
+            else ROUNDED_PHYSICAL_GEOMETRY),
         "operator": {
             "surface_state_remap_backend": "common_refinement",
             "topology_change_policy": "continue_gas_cavity",
@@ -517,6 +613,8 @@ def main():
             "ballistic_face_quadrature_points": 1,
             "n_position": 4,
             "seed": 29,
+            "etch_law": args.etch_law,
+            "fixture": args.fixture,
             "timestep_rule": "dt_s = 5 * dx_um",
         },
         "ceilings": {
@@ -530,6 +628,8 @@ def main():
             dx,
             maximum_coat_time_s=args.maximum_coat_time_s,
             maximum_etch_time_s=args.maximum_etch_time_s,
+            etch_law=args.etch_law,
+            fixture=args.fixture,
         )
         audit["levels"].append(level)
         _write_json(output / "audit.json", audit)

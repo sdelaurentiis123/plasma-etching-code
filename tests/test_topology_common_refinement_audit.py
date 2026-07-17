@@ -23,6 +23,17 @@ def test_keyhole_fixture_preserves_declared_physical_domain_and_open_topology():
         audit.build_keyhole_geometry(0.03)
 
 
+def test_rounded_comparator_fixtures_separate_open_and_prescribed_sealed_states():
+    open_geometry = audit.build_rounded_keyhole_geometry(0.025)
+    sealed_geometry = audit.build_rounded_keyhole_geometry(0.025, sealed=True)
+
+    assert _periodic_physical_volume_topology_signature(
+        open_geometry, (1,)) == (1, 0, False, ((1, 1),))
+    assert _periodic_physical_volume_topology_signature(
+        sealed_geometry, (1,)) == (1, 1, False, ((1, 1),))
+    assert audit.ROUNDED_PHYSICAL_GEOMETRY["sealed_cap_thickness_um"] == 0.10
+
+
 def test_refinement_gate_uses_physical_cell_crossing_not_arbitrary_percentage():
     levels = [
         {"dx_um": 0.05, "closure_time_s": 4.25, "reopening_time_s": 0.75},
