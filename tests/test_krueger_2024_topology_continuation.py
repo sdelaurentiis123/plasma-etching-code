@@ -84,6 +84,35 @@ def test_pilot_cli_accepts_explicit_surface_state_remap_backend(monkeypatch):
     assert args.surface_state_remap_backend == "common_refinement"
 
 
+def test_visibility_history_summary_preserves_shared_recovery_canary():
+    diagnostics = {
+        "CF2": {
+            "visibility_float64_evaluated_count": 2,
+            "visibility_recovered_hit_count": 1,
+            "visibility_derived_horizon_extension_count": 1,
+            "visibility_maximum_wrap_count": 1110,
+            "visibility_final_maximum_wraps": 12556,
+        },
+        # The sampled form-factor operator is shared by species.  Maxima preserve its one receipt;
+        # summing would falsely report two independent recoveries.
+        "CF": {
+            "visibility_float64_evaluated_count": 2,
+            "visibility_recovered_hit_count": 1,
+            "visibility_derived_horizon_extension_count": 1,
+            "visibility_maximum_wrap_count": 1110,
+            "visibility_final_maximum_wraps": 12556,
+        },
+    }
+
+    assert PILOT._visibility_history_summary(diagnostics) == {
+        "maximum_visibility_float64_evaluated_count": 2,
+        "maximum_visibility_recovered_hit_count": 1,
+        "maximum_visibility_derived_horizon_extension_count": 1,
+        "maximum_visibility_wrap_count": 1110,
+        "maximum_visibility_final_horizon_wraps": 12556,
+    }
+
+
 def test_resume_retains_prior_refusal_and_accepted_event_time_provenance_once():
     terminal = {
         "geometry_event_kind": "gas_cavity_enclosed",

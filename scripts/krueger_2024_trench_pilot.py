@@ -601,6 +601,27 @@ def _accepted_topology_event(event, *, physical_time_s, step_duration_s, step):
         source="accepted_feature_step")
 
 
+def _visibility_history_summary(neutral_radiosity_diagnostics):
+    """Collapse one shared form-factor receipt without multiplying it by species count."""
+    diagnostics = tuple(neutral_radiosity_diagnostics.values())
+
+    def maximum(name):
+        return max((int(item.get(name, 0)) for item in diagnostics), default=0)
+
+    return {
+        "maximum_visibility_float64_evaluated_count": maximum(
+            "visibility_float64_evaluated_count"),
+        "maximum_visibility_recovered_hit_count": maximum(
+            "visibility_recovered_hit_count"),
+        "maximum_visibility_derived_horizon_extension_count": maximum(
+            "visibility_derived_horizon_extension_count"),
+        "maximum_visibility_wrap_count": maximum(
+            "visibility_maximum_wrap_count"),
+        "maximum_visibility_final_horizon_wraps": maximum(
+            "visibility_final_maximum_wraps"),
+    }
+
+
 def run(args):
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
@@ -882,6 +903,8 @@ def run(args):
             (int(item["form_factor_refinement_count"])
              for item in result.diagnostics["neutral_radiosity"].values()),
             default=0)
+        visibility_summary = _visibility_history_summary(
+            result.diagnostics["neutral_radiosity"])
         history.append({
             "step": int(accepted_step),
             "physical_time_s": float(physical_time),
@@ -911,6 +934,7 @@ def run(args):
             "maximum_neutral_radiosity_relative_balance_error": radiosity_balance,
             "maximum_neutral_radiosity_rays_per_face": radiosity_rays,
             "maximum_neutral_radiosity_refinement_count": radiosity_refinements,
+            **visibility_summary,
             "neutral_radiosity_solver_methods": {
                 name: item["solver_method"]
                 for name, item in result.diagnostics["neutral_radiosity"].items()},
