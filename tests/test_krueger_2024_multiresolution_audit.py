@@ -153,6 +153,7 @@ def test_worker_command_replays_fine_schedule(tmp_path):
     assert command[command.index("--worker-schedule") + 1] == str(schedule)
     assert command[command.index("--worker-dx-nm") + 1] == "10"
     assert command[command.index("--topology-policy") + 1] == "refuse"
+    assert command[command.index("--surface-state-remap-backend") + 1] == "legacy_knn"
 
 
 def test_worker_environment_unifies_transport_and_level_set_device():
@@ -160,3 +161,12 @@ def test_worker_environment_unifies_transport_and_level_set_device():
 
     assert environment["PETCH_DEVICE"] == "cuda:0"
     assert environment["OMP_NUM_THREADS"] == "1"
+
+
+def test_plan_records_the_explicit_surface_state_remap_backend(tmp_path):
+    plan = AUDIT.build_plan(
+        tmp_path / "missing-checkpoint.npz",
+        surface_state_remap_backend="common_refinement")
+
+    assert plan["pairing_contract"]["boundary"][
+        "surface_state_remap_backend"] == "common_refinement"

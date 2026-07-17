@@ -87,6 +87,15 @@ OPERATOR = {
     "profile_periodic_lateral": True,
     "charging": "disabled_for_Krueger_2024_calibration_and_transfer",
 }
+REMAP_BACKENDS = (
+    "legacy_knn", "indexed_knn", "partitioned_overlap", "common_refinement")
+
+
+def operator_contract(surface_state_remap_backend):
+    backend = str(surface_state_remap_backend)
+    if backend not in REMAP_BACKENDS:
+        raise ValueError("unknown surface-state remap backend")
+    return dict(OPERATOR, surface_state_remap_backend=backend)
 
 
 def _jsonable(value):
@@ -207,7 +216,8 @@ def grid_contract(dx_um, extents_um=CELL_EXTENT_UM):
 
 
 def build_plan(source_checkpoint, *, levels_nm=(20.0, 10.0, 5.0),
-               initial_duration_s=0.5, late_duration_s=0.1, seed=241):
+               initial_duration_s=0.5, late_duration_s=0.1, seed=241,
+               surface_state_remap_backend="legacy_knn"):
     source = Path(source_checkpoint)
     levels = []
     for value in levels_nm:
@@ -280,7 +290,7 @@ def build_plan(source_checkpoint, *, levels_nm=(20.0, 10.0, 5.0),
             },
         },
         "pairing_contract": {
-            "boundary": OPERATOR,
+            "boundary": operator_contract(surface_state_remap_backend),
             "calibration_parameters": CALIBRATION,
             "seed": int(seed),
             "schedule_owner": "5 nm",
@@ -453,7 +463,7 @@ def _operator(geometry, seed, device):
 
 
 def _advance(geometry, state, fingerprint, *, duration_s, seed, device,
-             topology_policy):
+             topology_policy, remap_backend="legacy_knn"):
     boundary, mechanism, role, radiosity, domain, source_z = _operator(
         geometry, seed, device
     )
@@ -475,6 +485,7 @@ def _advance(geometry, state, fingerprint, *, duration_s, seed, device,
         reinitialization_method="cr2",
         profile_periodic_lateral=True,
         topology_change_policy=str(topology_policy),
+        surface_state_remap_backend=str(remap_backend),
         transport_device=str(device),
         neutral_radiosity_options=radiosity,
         ballistic_transport="face_gather",
@@ -641,6 +652,7 @@ def _worker(args):
         seed=int(args.seed) + source_step,
         device=args.device,
         topology_policy=args.topology_policy,
+        remap_backend=args.surface_state_remap_backend,
     )
     frozen_summary = _operator_summary(frozen)
     if state is None:
@@ -687,6 +699,7 @@ def _worker(args):
                     seed=int(args.seed) + source_step + len(accepted),
                     device=args.device,
                     topology_policy=args.topology_policy,
+                    remap_backend=args.surface_state_remap_backend,
                 )
             except SurfaceTopologyChangeError as error:
                 topology_event = {
@@ -776,6 +789,7 @@ def _worker(args):
             seed=int(args.seed) + source_step + len(accepted),
             device=args.device,
             topology_policy=args.topology_policy,
+            remap_backend=args.surface_state_remap_backend,
         )
         frozen_end_summary = _operator_summary(frozen_end)
     increments = {
@@ -795,7 +809,7 @@ def _worker(args):
         "state": args.worker_state,
         "dx_nm": float(args.worker_dx_nm),
         "grid_contract": contract,
-        "operator": OPERATOR,
+        "operator": operator_contract(args.surface_state_remap_backend),
         "calibration_parameters": CALIBRATION,
         "seed_epoch_start": int(args.seed) + source_step,
         "source_checkpoint": (
@@ -857,6 +871,7 @@ def _worker_command(args, state, dx_nm, case_output, schedule=None):
         "--seed", str(int(args.seed)),
         "--device", str(args.device),
         "--topology-policy", str(args.topology_policy),
+        "--surface-state-remap-backend", str(args.surface_state_remap_backend),
     ]
     if schedule is not None:
         command.extend(("--worker-schedule", str(schedule)))
@@ -958,6 +973,7 @@ def run(args):
         initial_duration_s=args.initial_duration_s,
         late_duration_s=args.late_duration_s,
         seed=args.seed,
+        surface_state_remap_backend=args.surface_state_remap_backend,
     )
     _write_json(output / "plan.json", plan)
     if not args.execute:
@@ -1058,6 +1074,12 @@ def parse_args(argv=None):
         "--topology-policy",
         choices=("refuse", "continue_gas_cavity"),
         default="refuse",
+    )
+    parser.add_argument(
+        "--surface-state-remap-backend",
+        choices=REMAP_BACKENDS,
+        default="legacy_knn",
+        help="explicit state-transfer operator; recorded in every plan and worker receipt",
     )
     parser.add_argument("--worker-state", choices=("initial", "late"), help=argparse.SUPPRESS)
     parser.add_argument("--worker-dx-nm", type=float, help=argparse.SUPPRESS)

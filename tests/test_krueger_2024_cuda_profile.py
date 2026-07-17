@@ -42,3 +42,13 @@ def test_profiler_cli_refuses_an_unbounded_physical_run():
     assert (
         (accepted.positive_warmup_steps + accepted.profile_steps)
         * accepted.step_duration_s) == pytest.approx(0.075)
+    assert accepted.surface_state_remap_backend == "legacy_knn"
+
+
+def test_profiler_cli_accepts_explicit_common_refinement():
+    accepted = profile.parse_args((
+        "--positive-warmup-steps", "1", "--profile-steps", "1",
+        "--step-duration-s", "0.025",
+        "--surface-state-remap-backend", "common_refinement"))
+
+    assert accepted.surface_state_remap_backend == "common_refinement"

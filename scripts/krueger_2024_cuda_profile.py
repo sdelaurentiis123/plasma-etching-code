@@ -136,6 +136,7 @@ def run(args):
         seed=int(args.seed),
         device=args.device,
         topology_policy="refuse",
+        remap_backend=args.surface_state_remap_backend,
     )
     wp.synchronize_device(args.device)
     wp.synchronize_device(threed.DEVICE)
@@ -155,6 +156,7 @@ def run(args):
             seed=int(args.seed) + index,
             device=args.device,
             topology_policy="refuse",
+            remap_backend=args.surface_state_remap_backend,
         )
         wp.synchronize_device(args.device)
         wp.synchronize_device(threed.DEVICE)
@@ -179,6 +181,7 @@ def run(args):
             seed=int(args.seed) + int(args.positive_warmup_steps) + index,
             device=args.device,
             topology_policy="refuse",
+            remap_backend=args.surface_state_remap_backend,
         )
         wp.synchronize_device(args.device)
         wp.synchronize_device(threed.DEVICE)
@@ -237,6 +240,7 @@ def run(args):
             "seed": int(args.seed),
             "device": str(args.device),
             "operator": multires.OPERATOR,
+            "surface_state_remap_backend": str(args.surface_state_remap_backend),
             "calibration_parameters": multires.CALIBRATION,
         },
         "hardware": {
@@ -281,6 +285,10 @@ def parse_args(argv=None):
     parser.add_argument("--step-duration-s", type=float, default=0.025)
     parser.add_argument("--seed", type=int, default=241)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument(
+        "--surface-state-remap-backend",
+        choices=multires.REMAP_BACKENDS,
+        default="legacy_knn")
     parser.add_argument("--max-wall-s", type=float, default=300.0)
     parser.add_argument("--text-rows", type=int, default=80)
     args = parser.parse_args(argv)
