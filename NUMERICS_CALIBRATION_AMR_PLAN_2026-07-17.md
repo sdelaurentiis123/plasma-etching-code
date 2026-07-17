@@ -274,11 +274,13 @@ Current honest positioning:
 2. run the initial paired 10/5 nm short burst — complete; late topology-equivalent evidence remains open;
 3. quantify the 10-to-5 nm difference — complete for the initial state: global depth/opening/mask
    thickness are close, while local maximum/top width differs by 71.235%;
-4. explicitly select and short-test the indexed/common-refinement remap in the Krüger worker; the
-   bounded CUDA profile proved the current worker still inherited legacy KNN;
+4. explicitly select and short-test the indexed/common-refinement remap in the Krüger worker —
+   complete at 10 nm: common refinement is the production candidate after a paired two-step gate;
+   one bounded 5 nm confirmation remains before the backend is frozen;
 5. implement the calibration trust-region/discrepancy artifact without reading held-outs — complete;
    the real readiness receipt blocks a proposal until remap selection and a current-epoch fine anchor;
-6. benchmark sparse narrow-band storage;
+6. benchmark sparse narrow-band storage — next local implementation increment while the 5 nm remap
+   confirmation waits for a cached/ready GPU rather than an unbounded infrastructure startup;
 7. prototype AMR on manufactured translation, junction, and late Krüger bursts;
 8. certify AMR against uniform 5 nm short tests;
 9. perform one clean authoritative fine/AMR base confirmation;

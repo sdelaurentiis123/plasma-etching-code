@@ -1,7 +1,8 @@
 # AMR and sparse narrow-band implementation audit
 
 Date: 2026-07-17
-Status: implementation design only; no simulation was run and no held-out Krüger outcome was read
+Status: active implementation; uniform-backend parity and standalone common-refinement transfer pass;
+no AMR simulation or held-out Krueger outcome has been run
 Scope: the common 3-D feature engine in `src/petch`, not the legacy 2-D or benchmark-only solvers
 
 Related documents:
@@ -575,10 +576,13 @@ short certification             compatibility
 one authoritative base run     Nozawa/notching AMR eligibility
 ```
 
-The immediate implementation milestone is **WP-AMR1 plus the standalone half of WP-AMR2**. That is
-bounded, reversible engineering and directly addresses the operator-drift risk. Sparse storage should
-not enter `advance_feature_step_3d` until the uniform backend is exactly identical and the shared
-surface transfer passes its manufactured matrix.
+WP-AMR1 and the standalone half of WP-AMR2 now pass. The uniform backend remains the exact reference;
+the common-refinement transfer passes its manufactured matrix and a paired two-step real-Krueger
+10 nm gate with a maximum relative ledger residual of `1.04e-15`. The simpler planar-overlap backend
+correctly refuses the real nonparallel surface. Common refinement remains a candidate until one
+bounded 5 nm confirmation closes. The immediate local milestone is therefore standalone WP-AMR3
+block classification and deterministic halo packing; sparse storage still must not enter
+`advance_feature_step_3d` until its manufactured gates pass.
 
 ## 9. Definition of done for the first AMR release
 

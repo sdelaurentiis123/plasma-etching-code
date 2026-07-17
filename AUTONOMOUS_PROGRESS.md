@@ -1580,3 +1580,27 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   receipt: `KRUEGER_2024_MULTIFIDELITY_READINESS_2026-07-17.md` and
   `results/krueger_2024_multifidelity_readiness/audit.json`; the complete related cluster passes
   `31` tests.
+
+### Real Krueger state-transfer gate selects common refinement at 10 nm
+
+- **The remap choice is now an explicit part of the unified operator.** The Krueger multiresolution
+  worker and CUDA profiler accept and record `legacy_knn`, `indexed_knn`, `partitioned_overlap`, or
+  `common_refinement`; no campaign can silently inherit the old default.
+- **A bounded same-state comparison ran exactly two 0.025 s steps per backend.** Every completing
+  case began from identical analytic geometry/state and produced an identical first-step geometry,
+  so the second step isolates the first physical consequence of remapped chemistry. Legacy and
+  indexed KNN completed; planar overlap issued a certified nonparallel-face refusal; common
+  refinement completed with no topology event, zero material-exchange residual, and maximum relative
+  remap residual `1.04e-15`.
+- **The global response is stable while the local shape remains appropriately diagnostic.** Relative
+  to legacy after step two, common refinement changes depth by `+1.4729e-5 nm` (`21.6 ppm`), opening
+  by `+2.1564e-4 nm` (`2.41 ppm`), remaining mask thickness by `-2.2756e-4 nm` (`-0.268 ppm`), and
+  top width by `-0.19698 nm` (`-0.227%`). This promotes common refinement as the production candidate;
+  it does not yet freeze it or authorize a long endpoint.
+- **The next confirmation remains bounded.** A fresh RTX 5090 rental was destroyed after spending
+  nearly eight minutes pulling its container without starting the simulation. No GPU remains
+  running. The pending action is one paired 5 nm common-versus-indexed confirmation on a cached/ready
+  GPU; local work proceeds to standalone sparse-band classification and halo packing rather than
+  blind rerental. The remap cluster passes `93` tests. Report, plot, and machine receipts:
+  `KRUEGER_2024_REMAP_BACKEND_AUDIT_2026-07-17.md` and
+  `results/krueger_2024_remap_backend_audit/`.
