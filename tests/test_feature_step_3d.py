@@ -1,4 +1,4 @@
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -175,7 +175,8 @@ def test_cavity_continue_policy_still_refuses_solid_component_change(monkeypatch
         "solid_component_change", "material_component_change"}
 
 
-def test_public_engine_physically_closes_continues_and_reopens_keyhole():
+@pytest.mark.parametrize("remap_backend", ["legacy_knn", "common_refinement"])
+def test_public_engine_physically_closes_continues_and_reopens_keyhole(remap_backend):
     geometry = _public_keyhole_geometry()
     mechanism = _ManufacturedReversibleMotion()
     state = None
@@ -202,6 +203,7 @@ def test_public_engine_physically_closes_continues_and_reopens_keyhole():
             profile_periodic_lateral=True, transport_device="cpu",
             ballistic_transport="face_gather",
             ballistic_face_quadrature_points=1,
+            surface_state_remap_backend=remap_backend,
             topology_change_policy="continue_gas_cavity")
         geometry = result.geometry
         state = result.next_surface_state
@@ -268,6 +270,97 @@ def test_public_engine_physically_closes_continues_and_reopens_keyhole():
     assert all(
         np.all(step.surface.material_exchange.residual_units_m2("solid_unit") == 0.0)
         for step in trajectory)
+
+
+def test_common_refinement_carries_bounded_stripe_and_finite_inventory_through_topology():
+    geometry = _public_keyhole_geometry()
+    mechanism = _ManufacturedReversibleStateMotion()
+
+    def boundary_and_role(mode):
+        boundary = _public_keyhole_boundary(mode, 1.0e-6)
+        role = {
+            species.name: (
+                "neutral_reactant" if species.charge_number == 0
+                else "energetic_bombardment")
+            for species in boundary.species}
+        return boundary, role
+
+    boundary, role = boundary_and_role("coat")
+    bootstrap = advance_feature_step_3d(
+        geometry, boundary, role, mechanism,
+        etchable_material_ids=(1,), duration_s=0.0,
+        source_bounds=(-0.005, 0.605, -0.005, 0.105), source_z=1.0,
+        n_position=4, seed=31, cfl_number=0.25,
+        reinitialize=True, reinitialization_method="cr2",
+        profile_periodic_lateral=True, transport_device="cpu",
+        ballistic_transport="face_gather", ballistic_face_quadrature_points=1,
+        surface_state_remap_backend="common_refinement",
+        topology_change_policy="continue_gas_cavity")
+    centroid = bootstrap.next_active_face_centroid
+    stripe = (
+        (centroid[:, 0] < 0.27) & (centroid[:, 2] > 0.25)
+        & (centroid[:, 2] < 0.60))
+    assert np.any(stripe)
+    state = _TopologyRemapState(
+        np.where(stripe, 0.8, 0.0), np.where(stripe, 4.0, 0.0))
+    geometry = bootstrap.geometry
+    fingerprint = bootstrap.next_surface_state_mesh_fingerprint
+    initial_inventory = float(np.dot(
+        state.polymer_units_m2, bootstrap.next_active_face_area))
+    trajectory = []
+
+    def take_step(mode, duration_s):
+        nonlocal geometry, state, fingerprint
+        boundary, role = boundary_and_role(mode)
+        result = advance_feature_step_3d(
+            geometry, boundary, role, mechanism,
+            etchable_material_ids=(1,), duration_s=duration_s,
+            source_bounds=(-0.005, 0.605, -0.005, 0.105), source_z=1.0,
+            surface_state=state, surface_state_mesh_fingerprint=fingerprint,
+            n_position=4, seed=31, cfl_number=0.25,
+            reinitialize=True, reinitialization_method="cr2",
+            profile_periodic_lateral=True, transport_device="cpu",
+            ballistic_transport="face_gather", ballistic_face_quadrature_points=1,
+            surface_state_remap_backend="common_refinement",
+            topology_change_policy="continue_gas_cavity")
+        geometry = result.geometry
+        state = result.next_surface_state
+        fingerprint = result.next_surface_state_mesh_fingerprint
+        trajectory.append(result)
+        return result
+
+    closed = False
+    for _ in range(20):
+        step = take_step("coat", 0.25)
+        if step.diagnostics["topology_event"] is not None:
+            assert step.diagnostics["topology_event"]["kind"] == "gas_cavity_enclosed"
+            closed = True
+            break
+    assert closed
+    take_step("coat", 0.10)
+    reopened = False
+    for _ in range(12):
+        step = take_step("etch", 0.25)
+        if step.diagnostics["topology_event"] is not None:
+            assert step.diagnostics["topology_event"]["kind"] == "gas_cavity_opened"
+            reopened = True
+            break
+    assert reopened
+
+    for step in trajectory:
+        fields = step.next_surface_state.conservative_surface_fields()
+        assert np.all((fields["stripe_coverage"] >= 0.0)
+                      & (fields["stripe_coverage"] <= 1.0))
+        assert np.all(fields["polymer_units_m2"] >= 0.0)
+        material = step.state_remap_diagnostics["materials"][1]
+        assert material["max_relative_conservation_residual"] < 3e-14
+        assert step.state_remap_diagnostics["fresh_surface_closure"] == (
+            "mechanism_declared_initial_state")
+        receipt = step.state_remap_diagnostics["geometry_receipt"]
+        assert receipt["capacity_projection_area_reduction"] >= -3e-15
+    final_inventory = float(np.dot(
+        state.polymer_units_m2, trajectory[-1].next_active_face_area))
+    assert final_inventory <= initial_inventory + 3e-14
 
 
 def test_subcell_material_cleanup_selects_only_new_unresolved_components():
@@ -450,6 +543,51 @@ class _ManufacturedReversibleMotion:
             material_exchange=exchange,
             product_populations=(),
             validity=self._validity())
+
+
+@dataclass(frozen=True)
+class _TopologyRemapState:
+    """One intensive stripe and one finite inventory for topology-transfer gates."""
+
+    stripe_coverage: np.ndarray
+    polymer_units_m2: np.ndarray
+
+    def __post_init__(self):
+        coverage, inventory = [
+            np.array(value, dtype=float, copy=True)
+            for value in np.broadcast_arrays(
+                np.asarray(self.stripe_coverage), np.asarray(self.polymer_units_m2))]
+        if (np.any(~np.isfinite(coverage)) or np.any(coverage < 0.0)
+                or np.any(coverage > 1.0) or np.any(~np.isfinite(inventory))
+                or np.any(inventory < 0.0)):
+            raise ValueError("invalid topology-remap test state")
+        coverage.setflags(write=False)
+        inventory.setflags(write=False)
+        object.__setattr__(self, "stripe_coverage", coverage)
+        object.__setattr__(self, "polymer_units_m2", inventory)
+
+    def conservative_surface_fields(self):
+        return {
+            "stripe_coverage": self.stripe_coverage,
+            "polymer_units_m2": self.polymer_units_m2,
+        }
+
+    @staticmethod
+    def conservative_surface_upper_bounds():
+        return {"stripe_coverage": 1.0, "polymer_units_m2": None}
+
+    @staticmethod
+    def surface_field_remap_modes():
+        return {"stripe_coverage": "intensive", "polymer_units_m2": "conservative"}
+
+    def with_conservative_surface_fields(self, fields):
+        return type(self)(fields["stripe_coverage"], fields["polymer_units_m2"])
+
+
+class _ManufacturedReversibleStateMotion(_ManufacturedReversibleMotion):
+    @staticmethod
+    def initial_state(shape=()):
+        return _TopologyRemapState(np.zeros(shape), np.zeros(shape))
 
 
 def _boundary():

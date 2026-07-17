@@ -114,6 +114,10 @@ from .surface_partitioned_overlap_3d import (
     PartitionedSurfaceOverlapTransfer3D,
     build_partitioned_surface_overlap_transfer_3d,
 )
+from .surface_common_refinement_3d import (
+    SurfaceCommonRefinementTransfer3D,
+    build_surface_common_refinement_transfer_3d,
+)
 from .experimental_boundary import (
     HWANG_GIAPIS_1997_EEDF_SHA256, HWANG_GIAPIS_1997_IEDF_SHA256,
     HWANG_GIAPIS_1997_PDF_SHA256,
@@ -333,6 +337,8 @@ __all__ = [
     "ExtrudedTriangleExchange3D", "build_extruded_triangle_exchange_3d",
     "PartitionedSurfaceOverlapTransfer3D",
     "build_partitioned_surface_overlap_transfer_3d",
+    "SurfaceCommonRefinementTransfer3D",
+    "build_surface_common_refinement_transfer_3d",
     "Jeon2022BoundaryClosure", "Jeong2023IonBoundaryClosure",
     "build_jeon_2022_boundary_state",
     "build_jeong_2023_boundary_state",
