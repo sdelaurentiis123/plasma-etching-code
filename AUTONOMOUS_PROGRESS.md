@@ -1622,3 +1622,22 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   with full 3-D retained for holes/twisting/asymmetry. Report, plot, and receipt:
   `BLOCK_SPARSE_KRUEGER_NO_GO_2026-07-17.md` and
   `results/block_levelset_manufactured_audit_3d/`.
+
+### Surface-work preflight preserves full 3-D and removes duplicate event work
+
+- **The existing exact extrusion path passes physics but does not earn a speed promotion.** On the
+  zero-motion 10 nm Krueger base surface it certifies 724 triangles as 181 physical cross-section
+  segments over two identical strips and closes diffuse balance to `5.73e-15`. Its local wall time is
+  `30.262 s`, versus `28.085 s` for the current eight-ray 3-D path, so production remains unchanged.
+  This bounded comparison read no held-out data and evolved no profile.
+- **The accepted optimization changes bookkeeping, not the operator.** Already-validated immutable
+  energetic events now survive active/material face selection without repeating direction and
+  finiteness validation, and built-in frozen yield laws memoize the exact per-face reduction. Cache
+  state is excluded from dataclass equality and serialization. A one-million-event manufactured
+  comparison is bitwise identical, with `1.50x` subset and `4.03x` repeated-yield speedups.
+- **The whole engine remains green.** The targeted surface/material/feature suite passes 119 tests;
+  the repository-wide suite passes 955 with one expected skip. The next expensive action remains the
+  bounded paired 5 nm remap confirmation, followed by one current-epoch fine base anchor—no endpoint
+  sweep and no held-out reveal yet. Report and receipt:
+  `KRUEGER_2024_SURFACE_WORK_PREFLIGHT_2026-07-17.md` and
+  `results/krueger_2024_surface_work_preflight/audit.json`.

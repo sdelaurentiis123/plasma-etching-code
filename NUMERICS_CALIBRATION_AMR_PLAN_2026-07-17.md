@@ -282,10 +282,11 @@ Current honest positioning:
 6. benchmark sparse narrow-band storage — complete with a bounded Krüger-specific no-go: at 900 nm
    depth the best safe 5 nm core/indexed reductions are 1.415x/1.148x and the optimistic work ceiling
    is 1.921x, below the predeclared 3x/2x gates;
-7. hold fixed-`dx` sparse evolution and one-level Krüger volume AMR; first cost a symmetry-aware
-   extruded surface/transport path because the measured runtime is surface-dominated;
-8. revisit AMR on a larger genuinely volume-dominated geometry, or if the symmetry path cannot carry
-   the required validation physics;
+7. hold fixed-`dx` sparse evolution and one-level Krüger volume AMR; the existing exact extruded
+   diffuse path has now been costed on the real 10 nm base surface and is `7.75%` slower in the paired
+   local timing, so it remains a deterministic reference rather than replacing production transport;
+8. remove repeated immutable full-3-D event validation/yield work, then revisit AMR only on a larger
+   genuinely volume-dominated geometry or after a cost model earns it;
 9. perform one clean authoritative fine/AMR base confirmation;
 10. freeze parameters, run held-outs once, and compare the overlapping cases with ViennaPS.
 

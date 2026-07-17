@@ -589,8 +589,12 @@ but fail the Krueger performance gate before evolution kernels are built. At 5 n
 the best safe core/indexed memory reductions are only `1.415x/1.148x`; the optimistic unique-node
 work ceiling is `1.921x`. Fixed-`dx` sparse evolution is therefore stopped for Krueger. WP-AMR4 is
 held until a 10/5 hierarchy cost model demonstrates that it escapes the same fine-surface occupancy.
-The next Krueger scaling target is its surface/transport work, including declared line-extrusion
-symmetry, not volume storage.
+The next Krueger scaling target is its measured surface/transport work, not volume storage. The
+already-implemented exact line-extrusion diffuse operator subsequently certified the real 10 nm
+surface but took `30.262 s` versus `28.085 s` for the current sampled path. It remains a deterministic
+reference rather than a production speed backend. The first accepted surface optimization instead
+removes repeated validation and repeated immutable yield evaluation from the unchanged full-3-D
+event measure.
 
 ## 9. Definition of done for the first AMR release
 

@@ -1,0 +1,53 @@
+{
+  "calibration_performed": false,
+  "date": "2026-07-17",
+  "held_out_profile_data_read": false,
+  "kinetics_event_work": {
+    "bitwise_subset_equal": true,
+    "bitwise_yield_rates_equal": true,
+    "event_count": 1000000,
+    "git_revision": "57304db4a97737abdc2e489f6a288ac6d0138f99",
+    "new_four_identical_yield_calls_s": 0.012253457680344582,
+    "new_validated_subset_s": 0.020988999865949154,
+    "old_four_identical_yield_calls_s": 0.049428584054112434,
+    "old_reconstructing_subset_s": 0.03158470802009106,
+    "retained_event_count": 500000,
+    "subset_speedup": 1.5048219649251378,
+    "yield_speedup": 4.033847861032679
+  },
+  "platform": {
+    "machine": "arm64",
+    "numpy": "1.24.4",
+    "operating_system": "macOS-15.7.4-arm64-arm-64bit",
+    "python": "3.10.17",
+    "transport_device": "cpu"
+  },
+  "schema": "petch.krueger_2024_surface_work_preflight.v1",
+  "scope": "base calibration geometry only; zero profile motion for diffuse comparison; synthetic immutable-event microbenchmark for shared kinetics primitive",
+  "symmetry_diffuse_comparison": {
+    "active_face_count": 724,
+    "decision": "do_not_promote_exact_extruded_diffuse_as_a_runtime_backend_on_this_evidence",
+    "duration_s": 0.0,
+    "dx_nm": 10.0,
+    "exact_extruded": {
+      "group_count": 181,
+      "maximum_radiosity_relative_balance_error": 5.730149769411862e-15,
+      "strip_count": 2,
+      "wall_time_s": 30.26158620789647
+    },
+    "exact_to_sampled_wall_ratio": 1.077503103210873,
+    "face_count": 724,
+    "git_revision": "cd03920",
+    "sampled_3d": {
+      "maximum_radiosity_relative_balance_error": 1.0260965866156121e-13,
+      "rays_per_face": 8,
+      "wall_time_s": 28.084917915984988
+    },
+    "timing_caveat": "one paired local timing per backend; sufficient to reject an immediate speed claim, not to claim a universal slowdown",
+    "wall_penalty_percent": 7.750310321087306
+  },
+  "tests": {
+    "full_suite": "955 passed, 1 skipped in 177.49 s",
+    "targeted_suite": "119 passed"
+  }
+}
