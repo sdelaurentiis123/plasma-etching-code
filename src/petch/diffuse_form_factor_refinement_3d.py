@@ -200,7 +200,7 @@ def diffuse_form_factor_operator_identity_3d(
         "ray_offset": float(ray_offset),
         "maximum_visibility_wraps": wraps,
         "maximum_visibility_replay_wraps": replay_wraps,
-        "exact_replay_horizon_policy": "configured_then_geometry_derived_open_top_v1",
+        "exact_replay_horizon_policy": "configured_then_geometry_derived_vertical_domain_v2",
         "derived_replay_emergency_maximum_wraps": (
             DIFFUSE_VISIBILITY_EMERGENCY_MAXIMUM_WRAPS),
         "device": "engine_default" if device is None else str(device),

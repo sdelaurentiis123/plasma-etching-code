@@ -308,8 +308,48 @@ def test_cellwise_certified_path_derives_open_top_horizon_for_grazing_ray(
         0.020309919291093343, 0.007027431235114469, 2.6508378871010123])
     production_direction = np.asarray([
         0.9363883881477437, -0.3509498266169299, 0.0033174899574309746])
-    assert boundary_transport_3d._derived_open_top_wrap_horizon_3d(
+    assert boundary_transport_3d._derived_vertical_domain_wrap_horizon_3d(
         production_origin, production_direction, np.asarray([0.13, 0.02, 2.8])) == 1117
+
+
+def test_cellwise_certified_path_derives_lower_domain_horizon_for_grazing_ray(
+        monkeypatch):
+    verts, faces, _ = _shared_square()
+    normals = np.tile([0.0, 0.0, 1.0], (2, 1))
+    monkeypatch.setattr(
+        boundary_transport_3d,
+        "trace_diffuse_form_factor_events_warp_cellwise_3d",
+        lambda *args, **kwargs:
+        boundary_transport_3d.DiffuseFormFactorEventsWarpCellwise3D(
+            [-1], [3], [4]))
+    direction = np.asarray([[1.0, 0.0, -1.0e-3]])
+    direction /= np.linalg.norm(direction, axis=1, keepdims=True)
+
+    result = (
+        boundary_transport_3d
+        .trace_diffuse_form_factor_events_cellwise_certified_3d(
+            [[0.1, 0.5, 0.6]], direction, verts, faces, normals,
+            domain_size=(1.0, 1.0, 1.0), periodic_lateral=True,
+            maximum_wraps=3, device="cpu"))
+
+    assert np.array_equal(result.termination, [1])
+    assert result.hit_face[0] in (0, 1)
+    assert result.replay_count == 1
+    assert result.derived_horizon_extension_count == 1
+    assert result.maximum_wrap_count == 100
+    assert result.initial_maximum_wraps == 3
+    assert result.final_maximum_wraps == 604
+
+    # Preserve the second production lineage.  Its exact replay hit a real face after 1110 wraps;
+    # the conservative lower-domain integrity horizon is finite and therefore recoverable.
+    production_origin = np.asarray([
+        0.108438417364833, 0.004037909820028365, 2.134689932283348])
+    production_direction = np.asarray([
+        -0.00391740694902086, -0.9999561259207863, -0.008508828138368412])
+    horizon = boundary_transport_3d._derived_vertical_domain_wrap_horizon_3d(
+        production_origin, production_direction, np.asarray([0.13, 0.02, 2.8]))
+    assert horizon == 12556
+    assert horizon > 1110
 
 
 def test_float64_authority_exposes_solid_facing_intersection_as_refusal():

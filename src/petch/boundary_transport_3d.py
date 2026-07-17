@@ -27,12 +27,12 @@ from .threed import DEVICE, _apply_bc
 from .warp_runtime import ensure_writable_warp_cache
 
 
-# A cosine-weighted diffuse sample can be arbitrarily close to horizontal.  For an upward ray in
-# a finite periodic cell, however, the number of lateral seam crossings before the open top is
-# geometrically bounded.  The production fast path retains its small fixed horizon; only exhausted
-# float64 replays use that derived bound.  This emergency ceiling is therefore not a physics
-# truncation: reaching it is an explicit refusal to spend an unbounded amount of work on one
-# effectively non-progressing ray.
+# A cosine-weighted diffuse sample can be arbitrarily close to horizontal.  For any ray with
+# nonzero vertical velocity in a finite periodic cell, however, the number of lateral seam
+# crossings before a vertical domain boundary is geometrically bounded.  The production fast path
+# retains its small fixed horizon; only exhausted float64 replays use that derived bound.  This
+# emergency ceiling is therefore not a physics truncation: reaching it is an explicit refusal to
+# spend unbounded work on one effectively non-progressing ray.
 DIFFUSE_VISIBILITY_EMERGENCY_MAXIMUM_WRAPS = 1 << 20
 
 
@@ -339,13 +339,15 @@ class DiffuseFormFactorEstimateReceipt3D:
             object.__setattr__(self, name, int(getattr(self, name)))
 
 
-def _derived_open_top_wrap_horizon_3d(origin, direction, domain):
-    """Return a conservative seam-crossing bound for upward periodic rays.
+def _derived_vertical_domain_wrap_horizon_3d(origin, direction, domain):
+    """Return a conservative seam-crossing bound for vertically progressing periodic rays.
 
-    Before reaching ``z = domain[2]``, a straight ray travels a known lateral distance.  The
-    number of x/y seam crossings cannot exceed the sum of the corresponding whole-cell counts,
-    plus a small integer allowance for the initial partial cells and simultaneous-boundary ties.
-    Non-upward rays have no finite open-top bound and deliberately return ``None``.
+    Upward rays are bounded by the open top at ``z = domain[2]``.  Downward rays are bounded by
+    ``z = 0``: a conforming material/gas surface must be hit before that lower solid boundary, so
+    exhausting the derived horizon remains a mesh-integrity refusal rather than an escape.  The
+    x/y seam count cannot exceed the sum of the corresponding whole-cell counts, plus a small
+    integer allowance for initial partial cells and simultaneous-boundary ties.  Exactly
+    horizontal rays have no such proof and deliberately return ``None``.
     """
     origin = np.asarray(origin, dtype=float)
     direction = np.asarray(direction, dtype=float)
@@ -353,11 +355,14 @@ def _derived_open_top_wrap_horizon_3d(origin, direction, domain):
     if (origin.shape != (3,) or direction.shape != (3,) or domain.shape != (3,)
             or np.any(~np.isfinite(origin)) or np.any(~np.isfinite(direction))
             or np.any(~np.isfinite(domain)) or np.any(domain <= 0.0)):
-        raise ValueError("invalid open-top wrap-horizon inputs")
+        raise ValueError("invalid vertical-domain wrap-horizon inputs")
     vertical_speed = float(direction[2])
-    if vertical_speed <= 1.0e-14:
+    if abs(vertical_speed) <= 1.0e-14:
         return None
-    flight_distance = max(float(domain[2] - origin[2]), 0.0) / vertical_speed
+    vertical_distance = (
+        max(float(domain[2] - origin[2]), 0.0)
+        if vertical_speed > 0.0 else max(float(origin[2]), 0.0))
+    flight_distance = vertical_distance / abs(vertical_speed)
     x_crossings = int(np.ceil(abs(float(direction[0])) * flight_distance / domain[0]))
     y_crossings = int(np.ceil(abs(float(direction[1])) * flight_distance / domain[1]))
     return x_crossings + y_crossings + 4
@@ -2272,10 +2277,11 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
         reference_cosine = reference.hit_cosine.copy()
         reference_wrap_count = reference.wrap_count.copy()
 
-        # Exhaustion is recoverable only when geometry proves that the ray reaches the open top
-        # after a finite number of periodic seam crossings.  Replay just those rays with their
-        # derived horizon.  Horizontal trajectories and solid-facing intersections remain hard
-        # refusals; neither is silently reclassified as escape.
+        # Exhaustion is recoverable only when geometry proves that the ray reaches a vertical
+        # domain boundary after finitely many periodic seam crossings.  Upward rays may escape at
+        # the open top.  Downward rays must hit the material/gas surface before the lower boundary;
+        # otherwise the replay still refuses.  Horizontal trajectories and solid-facing
+        # intersections remain hard refusals; neither is silently reclassified as escape.
         exhausted = reference_termination == 3
         if np.any(exhausted) and periodic_lateral:
             exhausted_local = np.flatnonzero(exhausted)
@@ -2284,7 +2290,7 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
             horizons = []
             extend_local = []
             for local in exhausted_local:
-                horizon = _derived_open_top_wrap_horizon_3d(
+                horizon = _derived_vertical_domain_wrap_horizon_3d(
                     replay_origin[local], replay_direction[local], domain)
                 if horizon is not None and horizon > exact_wraps:
                     horizons.append(horizon)
