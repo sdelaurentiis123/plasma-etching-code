@@ -119,6 +119,34 @@ def test_sparse_fingerprint_and_packing_are_deterministic_and_read_only():
         packed.combined_phi.flat[0] = 1.0
 
 
+def test_indexed_halo_pool_exactly_gathers_the_replicated_reference():
+    geometry = _periodic_plane()
+    sparse = build_block_sparse_levelset_3d(
+        geometry, block_cell_shape=(4, 2, 4), band_width_cells=2,
+        periodic_axes=(0, 1))
+    replicated = sparse.pack_active_halos(1)
+    indexed = sparse.pack_active_indexed_halos(1)
+    valid = indexed.valid_node
+    gather = indexed.node_index[valid]
+
+    assert np.array_equal(valid, replicated.valid_node)
+    assert np.array_equal(
+        indexed.global_node_index[gather],
+        replicated.global_node_index[replicated.valid_node])
+    assert np.array_equal(
+        indexed.combined_phi[gather],
+        replicated.combined_phi[replicated.valid_node])
+    assert np.array_equal(
+        indexed.material_owner[gather],
+        replicated.material_owner[replicated.valid_node])
+    assert all(np.array_equal(
+        indexed.material_phi[material_id][gather],
+        replicated.material_phi[material_id][replicated.valid_node])
+        for material_id in sparse.material_ids)
+    assert tuple(map(tuple, indexed.global_node_index)) == tuple(sorted(
+        map(tuple, indexed.global_node_index)))
+
+
 def test_multimaterial_krueger_band_preserves_junction_and_reports_storage():
     geometry = make_rectangular_trench_geometry_3d(
         cell_width=0.13, cell_length=0.02, domain_height=2.8,

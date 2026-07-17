@@ -249,6 +249,59 @@ class PackedSparseLevelSetBlocks3D:
 
 
 @dataclass(frozen=True)
+class IndexedSparseLevelSetBlocks3D:
+    """Unique canonical node pool plus fixed block-to-node stencil indices."""
+
+    keys: np.ndarray
+    cell_start: np.ndarray
+    cell_stop: np.ndarray
+    node_index: np.ndarray
+    global_node_index: np.ndarray
+    combined_phi: np.ndarray
+    material_phi: object
+    material_owner: np.ndarray
+    halo_cells: int
+
+    def __post_init__(self):
+        keys = _readonly(self.keys, np.int32)
+        start = _readonly(self.cell_start, np.int32)
+        stop = _readonly(self.cell_stop, np.int32)
+        node_index = _readonly(self.node_index, np.int32)
+        global_index = _readonly(self.global_node_index, np.int32)
+        combined = _readonly(self.combined_phi, float)
+        owner = _readonly(self.material_owner, int)
+        fields = {
+            int(material_id): _readonly(field, float)
+            for material_id, field in dict(self.material_phi).items()}
+        block_count = len(keys)
+        node_count = len(global_index)
+        if (keys.shape != (block_count, 3) or start.shape != (block_count, 3)
+                or stop.shape != (block_count, 3)
+                or node_index.shape[0] != block_count
+                or global_index.shape != (node_count, 3)
+                or combined.shape != (node_count,) or owner.shape != (node_count,)
+                or any(field.shape != (node_count,) for field in fields.values())
+                or not fields or int(self.halo_cells) < 0
+                or np.any(node_index < -1) or np.any(node_index >= node_count)
+                or np.any(~np.isfinite(combined))
+                or any(np.any(~np.isfinite(field)) for field in fields.values())):
+            raise ValueError("invalid indexed sparse-block payload")
+        object.__setattr__(self, "keys", keys)
+        object.__setattr__(self, "cell_start", start)
+        object.__setattr__(self, "cell_stop", stop)
+        object.__setattr__(self, "node_index", node_index)
+        object.__setattr__(self, "global_node_index", global_index)
+        object.__setattr__(self, "combined_phi", combined)
+        object.__setattr__(self, "material_phi", MappingProxyType(fields))
+        object.__setattr__(self, "material_owner", owner)
+        object.__setattr__(self, "halo_cells", int(self.halo_cells))
+
+    @property
+    def valid_node(self):
+        return self.node_index >= 0
+
+
+@dataclass(frozen=True)
 class BlockSparseLevelSet3D:
     """Immutable active/far block decomposition at one global spacing."""
 
@@ -471,6 +524,99 @@ class BlockSparseLevelSet3D:
         return PackedSparseLevelSetBlocks3D(
             keys, start, stop, index, valid, combined, fields, owner, halo)
 
+    def pack_active_indexed_halos(self, halo_cells=1):
+        """Pack halos through one sorted unique-node pool instead of replicated values."""
+        if (isinstance(halo_cells, (bool, np.bool_))
+                or int(halo_cells) != halo_cells or int(halo_cells) < 0
+                or int(halo_cells) > self.band_width_cells):
+            raise ValueError("halo_cells must be an integer inside the stored band")
+        halo = int(halo_cells)
+        active = self.active_blocks
+        local_shape = tuple(value + 1 + 2 * halo for value in self.block_cell_shape)
+        keys = np.asarray([block.key for block in active], dtype=np.int32)
+        start = np.asarray([block.cell_start for block in active], dtype=np.int32)
+        stop = np.asarray([block.cell_stop for block in active], dtype=np.int32)
+        interval = np.asarray(self.shape) - 1
+
+        exact_node = {}
+        for block in active:
+            for local in np.ndindex(block.node_shape):
+                node = np.asarray(block.cell_start) + np.asarray(local)
+                for axis in self.periodic_axes:
+                    node[axis] %= interval[axis]
+                key = tuple(int(value) for value in node)
+                value = (
+                    float(block.combined_phi[local]),
+                    int(block.material_owner[local]),
+                    tuple(float(block.material_phi[material_id][local])
+                          for material_id in self.material_ids),
+                )
+                previous = exact_node.setdefault(key, value)
+                if previous != value:
+                    raise RuntimeError(
+                        "shared active-block node has inconsistent exact payload")
+        block_by_key = {block.key: block for block in self.blocks}
+
+        def canonical_source(block, local):
+            offset = np.asarray(local) - halo
+            if np.any(offset > np.asarray(block.cell_shape) + halo):
+                return None
+            node = np.asarray(block.cell_start) + offset
+            for axis in range(3):
+                if axis in self.periodic_axes:
+                    node[axis] %= interval[axis]
+                elif node[axis] < 0 or node[axis] >= self.shape[axis]:
+                    return None
+            return tuple(int(value) for value in node)
+
+        sources = set()
+        for block in active:
+            for local in np.ndindex(local_shape):
+                source = canonical_source(block, local)
+                if source is not None:
+                    sources.add(source)
+        ordered_source = tuple(sorted(sources))
+        source_index = {source: index for index, source in enumerate(ordered_source)}
+        node_index = np.full((len(active), *local_shape), -1, dtype=np.int32)
+        for block_index, block in enumerate(active):
+            for local in np.ndindex(local_shape):
+                source = canonical_source(block, local)
+                if source is not None:
+                    node_index[(block_index, *local)] = source_index[source]
+
+        combined = np.empty(len(ordered_source), dtype=float)
+        owner = np.empty(len(ordered_source), dtype=int)
+        fields = {
+            material_id: np.empty(len(ordered_source), dtype=float)
+            for material_id in self.material_ids}
+        for pool_index, source in enumerate(ordered_source):
+            if source in exact_node:
+                value_combined, value_owner, value_material = exact_node[source]
+            else:
+                cell = np.minimum(np.asarray(source), interval - 1)
+                block_key = tuple(
+                    int(cell[axis] // self.block_cell_shape[axis])
+                    for axis in range(3))
+                far = block_by_key[block_key]
+                if far.active:
+                    raise RuntimeError("active indexed node lacks exact sparse payload")
+                value_combined = (
+                    self.truncation_distance if far.label > 0
+                    else -self.truncation_distance)
+                value_owner = far.label
+                value_material = tuple(
+                    self.truncation_distance
+                    if far.label == material_id else -self.truncation_distance
+                    for material_id in self.material_ids)
+            combined[pool_index] = value_combined
+            owner[pool_index] = value_owner
+            for material_index, material_id in enumerate(self.material_ids):
+                fields[material_id][pool_index] = value_material[material_index]
+        return IndexedSparseLevelSetBlocks3D(
+            keys, start, stop, node_index,
+            np.asarray(ordered_source, dtype=np.int32),
+            combined, fields, owner, halo)
+
     def storage_receipt(self, *, halo_cells=None):
         """Report stored bytes and node fractions without claiming kernel speed."""
         dense_field_count = 2 + len(self.material_ids)  # owner + combined + each material
@@ -507,6 +653,17 @@ class BlockSparseLevelSet3D:
             payload["packed_halo_bytes"] = int(halo_bytes)
             payload["memory_reduction_with_packed_halo"] = float(
                 dense_bytes / (sparse_bytes + halo_bytes))
+            indexed = self.pack_active_indexed_halos(halo_cells)
+            indexed_bytes = (
+                indexed.node_index.nbytes + indexed.global_node_index.nbytes
+                + indexed.combined_phi.nbytes + indexed.material_owner.nbytes
+                + sum(field.nbytes for field in indexed.material_phi.values()))
+            payload["indexed_unique_node_count"] = len(indexed.global_node_index)
+            payload["indexed_halo_bytes"] = int(indexed_bytes)
+            payload["indexed_halo_only_memory_reduction"] = float(
+                dense_bytes / indexed_bytes)
+            payload["memory_reduction_with_indexed_halo"] = float(
+                dense_bytes / (sparse_bytes + indexed_bytes))
         return payload
 
 
