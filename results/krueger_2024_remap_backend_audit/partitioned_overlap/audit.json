@@ -1,0 +1,98 @@
+{
+  "backend": "partitioned_overlap",
+  "configuration": {
+    "calibration_parameters": {
+      "effective_mask_crosslinked_growth_fraction": 0.8934059741411972,
+      "oxide_etch_yield_scale": 0.5667632723491973
+    },
+    "device": "cpu",
+    "dx_nm": 10.0,
+    "operator": {
+      "ballistic_face_quadrature_points": 3,
+      "ballistic_transport": "face_gather",
+      "boundary_case": "base_calibration_only",
+      "charging": "disabled_for_Krueger_2024_calibration_and_transfer",
+      "ion_angle_bin_deg": 0.25,
+      "ion_azimuthal_order": 16,
+      "ion_energy_bin_eV": 250.0,
+      "n_position": 16,
+      "neutral_direction_azimuthal_order": 16,
+      "neutral_direction_polar_order": 8,
+      "neutral_speed_quadrature": "analytic_speed_marginal",
+      "neutral_tensor_velocity_quadrature_active": false,
+      "profile_periodic_lateral": true,
+      "profile_reinitialization": "cr2",
+      "radiosity_maximum_iterations": 2000,
+      "radiosity_rays_per_face": 8,
+      "radiosity_relative_tolerance": 1e-12,
+      "surface_state_remap_backend": "partitioned_overlap"
+    },
+    "seed": 241,
+    "step_duration_s": 0.025,
+    "steps": 2
+  },
+  "exception": {
+    "message": "nearby nonparallel surface requires a refinement-convergent curved overlap operator; new_face=4, old_face=4",
+    "type": "ValueError"
+  },
+  "initial_geometry_sha256": "876e972839d8661941ffe288223611f935db6cc2d0114d53b617dabd36c63669",
+  "initial_state": {
+    "fields": {
+      "m1__activated_complex_fraction": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m1__activated_polymer_fraction": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m1__complex_fraction": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m1__polymer_units_m2": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m1__removed_formula_units_m2": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m2__polymer_units_m2": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m2__removed_carbon_atoms_m2": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      }
+    },
+    "sha256": "97912a01a3e618ec5d53dedc5f70e78a1a68b8c0171cc3beaafaf8bd00de21be"
+  },
+  "schema": "petch.krueger_2024_remap_backend_worker.v1",
+  "scientific_scope": "base boundary only; no held-out outcomes read; operator selection only",
+  "status": "refused",
+  "steps": [],
+  "wall_time_s": 56.11026908271015
+}

@@ -1,0 +1,615 @@
+{
+  "backend": "indexed_knn",
+  "configuration": {
+    "calibration_parameters": {
+      "effective_mask_crosslinked_growth_fraction": 0.8934059741411972,
+      "oxide_etch_yield_scale": 0.5667632723491973
+    },
+    "device": "cpu",
+    "dx_nm": 10.0,
+    "operator": {
+      "ballistic_face_quadrature_points": 3,
+      "ballistic_transport": "face_gather",
+      "boundary_case": "base_calibration_only",
+      "charging": "disabled_for_Krueger_2024_calibration_and_transfer",
+      "ion_angle_bin_deg": 0.25,
+      "ion_azimuthal_order": 16,
+      "ion_energy_bin_eV": 250.0,
+      "n_position": 16,
+      "neutral_direction_azimuthal_order": 16,
+      "neutral_direction_polar_order": 8,
+      "neutral_speed_quadrature": "analytic_speed_marginal",
+      "neutral_tensor_velocity_quadrature_active": false,
+      "profile_periodic_lateral": true,
+      "profile_reinitialization": "cr2",
+      "radiosity_maximum_iterations": 2000,
+      "radiosity_rays_per_face": 8,
+      "radiosity_relative_tolerance": 1e-12,
+      "surface_state_remap_backend": "indexed_knn"
+    },
+    "seed": 241,
+    "step_duration_s": 0.025,
+    "steps": 2
+  },
+  "initial_geometry_sha256": "876e972839d8661941ffe288223611f935db6cc2d0114d53b617dabd36c63669",
+  "initial_state": {
+    "fields": {
+      "m1__activated_complex_fraction": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m1__activated_polymer_fraction": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m1__complex_fraction": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m1__polymer_units_m2": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m1__removed_formula_units_m2": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m2__polymer_units_m2": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      },
+      "m2__removed_carbon_atoms_m2": {
+        "area_integral_mesh_units2": 0.0,
+        "area_weighted_mean": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "mode": "conservative"
+      }
+    },
+    "sha256": "97912a01a3e618ec5d53dedc5f70e78a1a68b8c0171cc3beaafaf8bd00de21be"
+  },
+  "schema": "petch.krueger_2024_remap_backend_worker.v1",
+  "scientific_scope": "base boundary only; no held-out outcomes read; operator selection only",
+  "status": "complete",
+  "steps": [
+    {
+      "geometry_sha256": "f2fe1879d5963b43dccadbaaf60aec6784dae1890c3895ce844e5d5947d0b86c",
+      "maximum_remap_relative_conservation_residual": 4.013408748991944e-16,
+      "metrics": {
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 0.34125683506758264,
+        "floor_z_um": 1.7996587431649325,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 89.6789377518507,
+        "mask_opening_per_y_widths_nm": [
+          89.6789377518507
+        ],
+        "mask_opening_throat_z_um": 2.63,
+        "mask_pocket_width_nm": 89.6789377518507,
+        "mask_top_z_um": 2.6501406538939847,
+        "maximum_feature_width_nm": 86.70013197479544,
+        "remaining_mask_thickness_nm": 850.1406538939847,
+        "top_feature_width_nm": 86.70013197479544
+      },
+      "next_state": {
+        "fields": {
+          "m1__activated_complex_fraction": {
+            "area_integral_mesh_units2": 0.0,
+            "area_weighted_mean": 0.0,
+            "maximum": 0.0,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m1__activated_polymer_fraction": {
+            "area_integral_mesh_units2": 0.0,
+            "area_weighted_mean": 0.0,
+            "maximum": 0.0,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m1__complex_fraction": {
+            "area_integral_mesh_units2": 0.00037444384683700635,
+            "area_weighted_mean": 0.010245605490879559,
+            "maximum": 0.28999672872187837,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m1__polymer_units_m2": {
+            "area_integral_mesh_units2": 25129485410131.19,
+            "area_weighted_mean": 687597875825402.4,
+            "maximum": 2.2571419247558924e+16,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m1__removed_formula_units_m2": {
+            "area_integral_mesh_units2": 1.4763634229957608e+16,
+            "area_weighted_mean": 4.039654362317105e+17,
+            "maximum": 1.3987273179753808e+19,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m2__polymer_units_m2": {
+            "area_integral_mesh_units2": 4.247314438046778e+16,
+            "area_weighted_mean": 1.1621584516753065e+18,
+            "maximum": 4.1404732505463854e+18,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m2__removed_carbon_atoms_m2": {
+            "area_integral_mesh_units2": 19465996335315.406,
+            "area_weighted_mean": 532632384330151.9,
+            "maximum": 2.3629507845690772e+16,
+            "minimum": 0.0,
+            "mode": "conservative"
+          }
+        },
+        "sha256": "fda34b9470109a2da74e7c2680da17f32ac68054b92fa1e0de54310246e2ed1e"
+      },
+      "operator": {
+        "active_face_count": 724,
+        "energetic_flux": {
+          "ions": {
+            "area_weighted_mean_m2_s": 8.579515385975625e+18,
+            "incident_rate_s": 311999.99999999756
+          }
+        },
+        "hit_probability": {
+          "C2F3": 1.0,
+          "C3F4": 1.0,
+          "CF": 1.0,
+          "CF2": 1.0,
+          "CF3": 1.0,
+          "O": 1.0,
+          "ions": 1.0
+        },
+        "maximum_material_ledger_residual_units_m2": 0.0,
+        "maximum_radiosity_relative_balance_error": 7.811830106226407e-15,
+        "maximum_velocity_m_s": 2.8949294692540346e-08,
+        "neutral_flux": {
+          "C2F3": {
+            "area_weighted_mean_m2_s": 2.051921301625774e+20,
+            "incident_rate_s": 7461953.47063232
+          },
+          "C3F4": {
+            "area_weighted_mean_m2_s": 6.792116347230717e+19,
+            "incident_rate_s": 2469999.9999999986
+          },
+          "CF": {
+            "area_weighted_mean_m2_s": 1.2915929288950297e+20,
+            "incident_rate_s": 4696966.852859426
+          },
+          "CF2": {
+            "area_weighted_mean_m2_s": 2.7598071637076384e+20,
+            "incident_rate_s": 10036229.277988154
+          },
+          "CF3": {
+            "area_weighted_mean_m2_s": 2.5347263137730142e+19,
+            "incident_rate_s": 921770.7228428156
+          },
+          "O": {
+            "area_weighted_mean_m2_s": 5.505189039334356e+19,
+            "incident_rate_s": 2002000.0000000014
+          }
+        },
+        "raw_maximum_face_velocity_m_s": 2.8949294692540346e-08,
+        "state": {
+          "1": {
+            "m1__activated_complex_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__activated_polymer_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__complex_fraction": {
+              "area_integral_physical": 3.7444384683700636e-16,
+              "mode": "conservative"
+            },
+            "m1__polymer_units_m2": {
+              "area_integral_physical": 25.129485410131196,
+              "mode": "conservative"
+            },
+            "m1__removed_formula_units_m2": {
+              "area_integral_physical": 14763.634229957608,
+              "mode": "conservative"
+            },
+            "m2__polymer_units_m2": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m2__removed_carbon_atoms_m2": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            }
+          },
+          "2": {
+            "m1__activated_complex_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__activated_polymer_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__complex_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__polymer_units_m2": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__removed_formula_units_m2": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m2__polymer_units_m2": {
+              "area_integral_physical": 42473.14438046776,
+              "mode": "conservative"
+            },
+            "m2__removed_carbon_atoms_m2": {
+              "area_integral_physical": 19.465996335315413,
+              "mode": "conservative"
+            }
+          }
+        },
+        "velocity_by_material": {
+          "1": {
+            "area_weighted_absolute_velocity_m_s": 1.5914800016779663e-08,
+            "area_weighted_signed_velocity_m_s": 1.5914800016779663e-08,
+            "maximum_absolute_velocity_m_s": 2.8949294692540346e-08,
+            "surface_area_m2": 1.6828425668717292e-15
+          },
+          "2": {
+            "area_weighted_absolute_velocity_m_s": 2.4489818842563716e-09,
+            "area_weighted_signed_velocity_m_s": -2.4489818842563716e-09,
+            "maximum_absolute_velocity_m_s": 8.309160898314514e-09,
+            "surface_area_m2": 3.4682847797179174e-14
+          }
+        }
+      },
+      "physical_time_s": 0.025,
+      "remap": {
+        "aligned_pair_count": null,
+        "candidate_pair_count": null,
+        "combined_pair_count": null,
+        "fresh_surface_closure": null,
+        "geometry_receipt": {},
+        "materials": {
+          "1": {
+            "max_relative_conservation_residual": 1.5544488620627137e-16,
+            "new_area_m2": 1.729654297826425e-15,
+            "old_area_m2": 1.6828425668717292e-15
+          },
+          "2": {
+            "max_relative_conservation_residual": 4.013408748991944e-16,
+            "new_area_m2": 3.481712150476807e-14,
+            "old_area_m2": 3.4682847797179174e-14
+          }
+        },
+        "method": "material_local_indexed_exact_surface_knn",
+        "minimum_normal_dot": null,
+        "new_topology": [
+          1,
+          0,
+          false,
+          [
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        ],
+        "old_topology": [
+          1,
+          0,
+          false,
+          [
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        ],
+        "positive_pair_image_count": null,
+        "surface_state_remap_backend": "indexed_knn",
+        "topology_event": null,
+        "total_newly_exposed_area_m2": null,
+        "total_removed_area_m2": null
+      },
+      "step": 1,
+      "topology_event": null,
+      "wall_time_s": 28.0234587918967
+    },
+    {
+      "geometry_sha256": "b5161a0d40fa5926fb986a2a543fdf20b9453a6c8795b54b3e8dc38743fc1bbb",
+      "maximum_remap_relative_conservation_residual": 4.1573490860574456e-16,
+      "metrics": {
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 0.6832802605987176,
+        "floor_z_um": 1.7993167197394013,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 89.4668343055166,
+        "mask_opening_per_y_widths_nm": [
+          89.4668343055166
+        ],
+        "mask_opening_throat_z_um": 2.63,
+        "mask_pocket_width_nm": 89.4668343055166,
+        "mask_top_z_um": 2.650198656020004,
+        "maximum_feature_width_nm": 86.75686096570675,
+        "remaining_mask_thickness_nm": 850.1986560200041,
+        "top_feature_width_nm": 86.75686096570675
+      },
+      "next_state": {
+        "fields": {
+          "m1__activated_complex_fraction": {
+            "area_integral_mesh_units2": 0.0,
+            "area_weighted_mean": 0.0,
+            "maximum": 0.0,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m1__activated_polymer_fraction": {
+            "area_integral_mesh_units2": 0.0,
+            "area_weighted_mean": 0.0,
+            "maximum": 0.0,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m1__complex_fraction": {
+            "area_integral_mesh_units2": 0.0005295680898533377,
+            "area_weighted_mean": 0.014491356720632847,
+            "maximum": 0.39937883544530156,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m1__polymer_units_m2": {
+            "area_integral_mesh_units2": 41564591797036.02,
+            "area_weighted_mean": 1137393544322415.0,
+            "maximum": 3.4149241255395984e+16,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m1__removed_formula_units_m2": {
+            "area_integral_mesh_units2": 2.7103139283726796e+16,
+            "area_weighted_mean": 7.416633802808182e+17,
+            "maximum": 1.9631222440754156e+19,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m2__polymer_units_m2": {
+            "area_integral_mesh_units2": 7.697212655852938e+16,
+            "area_weighted_mean": 2.106302409222319e+18,
+            "maximum": 6.22763507406531e+18,
+            "minimum": 0.0,
+            "mode": "conservative"
+          },
+          "m2__removed_carbon_atoms_m2": {
+            "area_integral_mesh_units2": 34540696740409.832,
+            "area_weighted_mean": 945188291052624.8,
+            "maximum": 4.3008033427380456e+16,
+            "minimum": 0.0,
+            "mode": "conservative"
+          }
+        },
+        "sha256": "786296492a78ab0de4e683255b242620473e0e83caa6cf074431205de348b506"
+      },
+      "operator": {
+        "active_face_count": 740,
+        "energetic_flux": {
+          "ions": {
+            "area_weighted_mean_m2_s": 8.537004787652179e+18,
+            "incident_rate_s": 312000.00000000023
+          }
+        },
+        "hit_probability": {
+          "C2F3": 1.0,
+          "C3F4": 1.0,
+          "CF": 1.0,
+          "CF2": 1.0,
+          "CF3": 1.0,
+          "O": 1.0,
+          "ions": 1.0
+        },
+        "maximum_material_ledger_residual_units_m2": 0.0,
+        "maximum_radiosity_relative_balance_error": 5.935902123922832e-13,
+        "maximum_velocity_m_s": 1.368422357835523e-08,
+        "neutral_flux": {
+          "C2F3": {
+            "area_weighted_mean_m2_s": 2.1394102328325217e+20,
+            "incident_rate_s": 7818854.612910662
+          },
+          "C3F4": {
+            "area_weighted_mean_m2_s": 6.758462123557982e+19,
+            "incident_rate_s": 2469999.9999999995
+          },
+          "CF": {
+            "area_weighted_mean_m2_s": 1.3443342031133214e+20,
+            "incident_rate_s": 4913108.072494209
+          },
+          "CF2": {
+            "area_weighted_mean_m2_s": 2.8725501592229308e+20,
+            "incident_rate_s": 10498244.665082755
+          },
+          "CF3": {
+            "area_weighted_mean_m2_s": 2.6278242662807446e+19,
+            "incident_rate_s": 960385.0430837979
+          },
+          "O": {
+            "area_weighted_mean_m2_s": 6.394255444846109e+20,
+            "incident_rate_s": 23368942.01673095
+          }
+        },
+        "raw_maximum_face_velocity_m_s": 1.368422357835523e-08,
+        "state": {
+          "1": {
+            "m1__activated_complex_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__activated_polymer_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__complex_fraction": {
+              "area_integral_physical": 5.295680898533376e-16,
+              "mode": "conservative"
+            },
+            "m1__polymer_units_m2": {
+              "area_integral_physical": 41.56459179703602,
+              "mode": "conservative"
+            },
+            "m1__removed_formula_units_m2": {
+              "area_integral_physical": 27103.1392837268,
+              "mode": "conservative"
+            },
+            "m2__polymer_units_m2": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m2__removed_carbon_atoms_m2": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            }
+          },
+          "2": {
+            "m1__activated_complex_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__activated_polymer_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__complex_fraction": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__polymer_units_m2": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m1__removed_formula_units_m2": {
+              "area_integral_physical": 0.0,
+              "mode": "conservative"
+            },
+            "m2__polymer_units_m2": {
+              "area_integral_physical": 76972.12655852934,
+              "mode": "conservative"
+            },
+            "m2__removed_carbon_atoms_m2": {
+              "area_integral_physical": 34.540696740409835,
+              "mode": "conservative"
+            }
+          }
+        },
+        "velocity_by_material": {
+          "1": {
+            "area_weighted_absolute_velocity_m_s": 1.2941655274600915e-08,
+            "area_weighted_signed_velocity_m_s": 1.2941655274600915e-08,
+            "maximum_absolute_velocity_m_s": 1.368422357835523e-08,
+            "surface_area_m2": 1.729654297826425e-15
+          },
+          "2": {
+            "area_weighted_absolute_velocity_m_s": 1.982633006264452e-09,
+            "area_weighted_signed_velocity_m_s": -1.981533330907963e-09,
+            "maximum_absolute_velocity_m_s": 6.183794157605642e-09,
+            "surface_area_m2": 3.481712150476807e-14
+          }
+        }
+      },
+      "physical_time_s": 0.05,
+      "remap": {
+        "aligned_pair_count": null,
+        "candidate_pair_count": null,
+        "combined_pair_count": null,
+        "fresh_surface_closure": null,
+        "geometry_receipt": {},
+        "materials": {
+          "1": {
+            "max_relative_conservation_residual": 1.4758437973278135e-16,
+            "new_area_m2": 1.7301611865984163e-15,
+            "old_area_m2": 1.729654297826425e-15
+          },
+          "2": {
+            "max_relative_conservation_residual": 4.1573490860574456e-16,
+            "new_area_m2": 3.481355932642551e-14,
+            "old_area_m2": 3.481712150476807e-14
+          }
+        },
+        "method": "material_local_indexed_exact_surface_knn",
+        "minimum_normal_dot": null,
+        "new_topology": [
+          1,
+          0,
+          false,
+          [
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        ],
+        "old_topology": [
+          1,
+          0,
+          false,
+          [
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        ],
+        "positive_pair_image_count": null,
+        "surface_state_remap_backend": "indexed_knn",
+        "topology_event": null,
+        "total_newly_exposed_area_m2": null,
+        "total_removed_area_m2": null
+      },
+      "step": 2,
+      "topology_event": null,
+      "wall_time_s": 26.217941832728684
+    }
+  ],
+  "wall_time_s": 82.23486212454736
+}
