@@ -1,8 +1,8 @@
 # ViennaPS topology conformance: pinch-off, enclosed cavities, and reopening
 
 Date: 2026-07-17
-Status: read-only upstream source audit plus bounded local ViennaLS manufactured run; no petch engine
-files modified by this audit
+Status: upstream source audit, bounded ViennaLS manufactured run, and bounded three-grid petch
+close/seal/reopen audit complete; matched black-box Vienna adapter remains open
 
 Related documents:
 
@@ -198,20 +198,57 @@ The event times must be refined before being used as a numerical benchmark. At `
 the enclosure/reopening times should converge and the final surfaces should be compared by Chamfer and
 critical-dimension errors.
 
-### 4.3 Local petch policy test status
+### 4.3 Local petch policy and engine status
 
-The current targeted petch topology-policy tests pass:
+The targeted geometry, remap, and feature-step regression cluster now passes:
 
 ```text
-4 passed, 63 deselected in 1.01 s
+101 passed in 11.37 s
 ```
 
-They verify explicit refusal versus `continue_gas_cavity`, event labels, exact zero direct source on
-manufactured sealed faces, conservative state diagnostics, and continued refusal of solid/material
-component changes. The open-to-sealed-to-open geometry in that test is injected at the advection
-boundary. It is therefore a valid policy/transport/remap test, but it is **not yet** the paired
-end-to-end proof that petch's own geometric advection spontaneously pinches and reopens the fixture.
-That end-to-end case remains required below.
+The suite includes both injected policy tests and a public-engine positive-duration close/seal/reopen
+cycle using the conservative common-refinement remapper. The public fixture was corrected from a
+straight trench to a real keyhole: a narrow upper neck sits above a wider cell-resolved chamber, so
+conformal growth encloses physical gas volume rather than erasing a subcell slit.
+
+### 4.4 Three-grid petch common-refinement result
+
+The reproducible driver is
+[`scripts/topology_common_refinement_audit.py`](scripts/topology_common_refinement_audit.py). It uses
+one physical geometry, `dt = 5 dx`, exact hard visibility, the `common_refinement` state-transfer
+backend, and hard phase-time ceilings. The run produced:
+
+| dx | Enclosure time | Reopening time after sealed hold | Wall time | Sealed external flux | State conservation |
+| ---: | ---: | ---: | ---: | --- | --- |
+| 50 nm | 4.250 s | 0.750 s | 0.99 s | exactly zero | roundoff-exact |
+| 25 nm | 4.375 s | 7.875 s | 10.24 s | exactly zero | roundoff-exact |
+| 12.5 nm | 4.125 s | 7.500 s | 80.42 s | exactly zero | roundoff-exact |
+
+The 50 nm reopening is outside the asymptotic regime: it crosses through a one-cell shortcut and is
+diagnostic only. The authoritative 25/12.5 nm pair agrees within the spatial resolution of the
+coarser grid. The gate is physical rather than percentage-based: event-time differences must be no
+larger than one coarser-cell crossing time at the declared phase normal velocity. For that pair:
+
+- enclosure difference `0.250 s` versus a `1.000 s` one-cell resolution;
+- reopening difference `0.375 s` versus a `0.500 s` one-cell resolution.
+
+The audit also exposed and repaired a topology-classification defect. The prior cleanup treated any
+component with at least eight nodes as a resolved hexahedral volume. At 12.5 nm, redistancing created
+two periodic `1 x 8 x 1` gas filaments: eight nodes each, but zero owned cells. Those were falsely
+reported as two enclosed cavities at `0.625 s`. The engine now requires all eight corners of at least
+one actual grid cell to share a component root. The same definition is used for gas pockets, solid
+fragments, and new material islands. Cell-resolved manufactured cavities remain untouched.
+
+The moving-surface overlap operator required one related robustness correction. Curved directed
+tangent charts can multiply cover individual source or target triangles. The hard support remains
+fixed by material, distance, and normal gates; a symmetric capacity projection now only decreases
+accepted overlap weights until neither partition exceeds its physical face area. It cannot create
+inventory. The maximum projection-area reduction fell from `9.70%` at 50 nm to `4.16%` at 12.5 nm,
+while every extensive-field ledger closed exactly.
+
+This closes the petch-side T1 numerical proof and the core T2/T3/T4 engine mechanisms. It is a
+manufactured numerical conformance result, **not** experimental chemistry validation. A matched
+Vienna black-box run on the identical fixture remains required for the strict paired comparator.
 
 ## 5. Surface-state and coverage semantics
 
@@ -372,14 +409,14 @@ CPU reference cases close and uses the same fixed geometries and observables.
 
 ## 9. Ordered implementation/conformance decision
 
-1. Keep the current petch `continue_gas_cavity` policy and its stronger refusal taxonomy.
-2. Add/run the non-injected T1 end-to-end petch geometry case; this is the immediate missing proof.
-3. Run T2 on frozen surfaces before resuming a long experimental checkpoint.
-4. Complete T3/T4 before calling the current nearest-surface correction production-grade.
-5. Use T1--T4 as mandatory gates for conservative triangle-overlap remapping.
-6. Use the same suite again for sparse narrow bands and later AMR; AMR must reproduce the uniform-grid
+1. Retain the now-passing petch T1--T4 engine gates and `continue_gas_cavity` refusal taxonomy.
+2. Run the pinned ViennaLS/ViennaPS black-box adapter on the identical petch keyhole fixture; compare
+   event times, geometry, and hard visibility without treating Vienna coverage drift as truth.
+3. Add T5/T6 material-junction and periodic-translation cases to the same bounded driver.
+4. Keep T1--T4 mandatory for every conservative moving-surface backend.
+5. Use the suite again for sparse narrow bands and later AMR; AMR must reproduce the uniform-grid
    result rather than redefine it.
-7. Only then resume the archived Krüger state under a bounded wall budget.
+6. Resume the archived Krüger state only under the bounded preflight/wall budget already specified.
 
 The practical conclusion is favorable: the cavity problem is not an impossible etch-physics problem.
 It is a bounded topology/state-transfer maturity gap. Vienna shows that geometry continuation itself is
