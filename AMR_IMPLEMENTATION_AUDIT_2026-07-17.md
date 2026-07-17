@@ -1,7 +1,7 @@
 # AMR and sparse narrow-band implementation audit
 
 Date: 2026-07-17
-Status: active implementation; uniform-backend parity and standalone common-refinement transfer pass;
+Status: fixed-dx sparse storage audited and stopped for Krueger by its predeclared no-go gate;
 no AMR simulation or held-out Krueger outcome has been run
 Scope: the common 3-D feature engine in `src/petch`, not the legacy 2-D or benchmark-only solvers
 
@@ -583,6 +583,14 @@ correctly refuses the real nonparallel surface. Common refinement remains a cand
 bounded 5 nm confirmation closes. The immediate local milestone is therefore standalone WP-AMR3
 block classification and deterministic halo packing; sparse storage still must not enter
 `advance_feature_step_3d` until its manufactured gates pass.
+
+WP-AMR3 storage classification and indexed halo packing now pass their 72 analytic integrity cases,
+but fail the Krueger performance gate before evolution kernels are built. At 5 nm and 900 nm depth,
+the best safe core/indexed memory reductions are only `1.415x/1.148x`; the optimistic unique-node
+work ceiling is `1.921x`. Fixed-`dx` sparse evolution is therefore stopped for Krueger. WP-AMR4 is
+held until a 10/5 hierarchy cost model demonstrates that it escapes the same fine-surface occupancy.
+The next Krueger scaling target is its surface/transport work, including declared line-extrusion
+symmetry, not volume storage.
 
 ## 9. Definition of done for the first AMR release
 

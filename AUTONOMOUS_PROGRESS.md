@@ -1604,3 +1604,21 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   blind rerental. The remap cluster passes `93` tests. Report, plot, and machine receipts:
   `KRUEGER_2024_REMAP_BACKEND_AUDIT_2026-07-17.md` and
   `results/krueger_2024_remap_backend_audit/`.
+
+### Fixed-dx sparse volume fails its Krueger cost gate before live integration
+
+- **The standalone sparse authority is real and bounded.** It stores deterministic active/far blocks,
+  partial boundaries, periodic neighbors, exact interface/material-junction payloads, and either
+  replicated or sorted unique-node halos. All 72 analytic 10/5 nm shallow/mid/deep cases preserve the
+  declared band and material ownership; the 5 nm endpoint canonicalization is only `5.724e-10` cells.
+- **The geometry-specific performance hypothesis is rejected.** At the required safe 8-cell band and
+  a 900 nm-deep 5 nm trench, best core storage is `1.415x` smaller, indexed halo storage is `1.148x`
+  smaller, simultaneous storage is `0.634x`, and even the zero-overhead unique-node work ceiling is
+  `1.921x`. These miss the predeclared 3x memory and 2x work gates.
+- **No sparse solver rabbit hole follows.** The dense state is only 75,735 nodes/2.42 MB, while the
+  live 5 nm profile spends 0.8% in redistance and most time in surface chemistry, ballistic transport,
+  diffuse exchange, and remap. Fixed-dx sparse evolution is not wired; Krueger volume AMR is held
+  pending a cost model. The earned next scaling work is symmetry-aware surface/transport reduction,
+  with full 3-D retained for holes/twisting/asymmetry. Report, plot, and receipt:
+  `BLOCK_SPARSE_KRUEGER_NO_GO_2026-07-17.md` and
+  `results/block_levelset_manufactured_audit_3d/`.

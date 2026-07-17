@@ -279,10 +279,13 @@ Current honest positioning:
    one bounded 5 nm confirmation remains before the backend is frozen;
 5. implement the calibration trust-region/discrepancy artifact without reading held-outs — complete;
    the real readiness receipt blocks a proposal until remap selection and a current-epoch fine anchor;
-6. benchmark sparse narrow-band storage — next local implementation increment while the 5 nm remap
-   confirmation waits for a cached/ready GPU rather than an unbounded infrastructure startup;
-7. prototype AMR on manufactured translation, junction, and late Krüger bursts;
-8. certify AMR against uniform 5 nm short tests;
+6. benchmark sparse narrow-band storage — complete with a bounded Krüger-specific no-go: at 900 nm
+   depth the best safe 5 nm core/indexed reductions are 1.415x/1.148x and the optimistic work ceiling
+   is 1.921x, below the predeclared 3x/2x gates;
+7. hold fixed-`dx` sparse evolution and one-level Krüger volume AMR; first cost a symmetry-aware
+   extruded surface/transport path because the measured runtime is surface-dominated;
+8. revisit AMR on a larger genuinely volume-dominated geometry, or if the symmetry path cannot carry
+   the required validation physics;
 9. perform one clean authoritative fine/AMR base confirmation;
 10. freeze parameters, run held-outs once, and compare the overlapping cases with ViennaPS.
 
