@@ -1511,6 +1511,7 @@ def _apply_diffuse_neutral_transport(
     deterministic_exchange = None
     deterministic_field_relative_tolerance = None
     deterministic_field_absolute_tolerance = None
+    visibility_receipt = None
     refinement = []
     if backend == "scrambled_qmc_3d":
         if deterministic_options:
@@ -1611,10 +1612,12 @@ def _apply_diffuse_neutral_transport(
     physical_area = np.asarray(areas) * geometry.mesh_length_unit_m ** 2
     while True:
         if backend == "scrambled_qmc_3d":
-            factors = estimate_diffuse_form_factors_3d(
+            visibility_receipt = estimate_diffuse_form_factors_3d(
                 verts, faces, centroids, _surface_gas_normals(
                     verts, faces, centroids, geometry),
-                rays_per_face=rays_per_face, device=transport_device, **options)
+                rays_per_face=rays_per_face, device=transport_device,
+                return_visibility_receipt=True, **options)
+            factors = visibility_receipt.form_factors
         neutral_flux = {}
         diagnostics = {}
         try:
@@ -1642,6 +1645,28 @@ def _apply_diffuse_neutral_transport(
                     form_factor_rays_per_face=int(rays_per_face),
                     form_factor_refinement_count=len(refinement),
                     form_factor_refinement=tuple(refinement))
+                if visibility_receipt is not None:
+                    factor_diagnostics.update(
+                        visibility_mode=visibility_receipt.visibility_mode,
+                        visibility_ray_count=visibility_receipt.ray_count,
+                        visibility_float64_evaluated_count=(
+                            visibility_receipt.float64_evaluated_count),
+                        visibility_recovered_hit_count=(
+                            visibility_receipt.float64_recovered_hit_count),
+                        visibility_open_escape_count=(
+                            visibility_receipt.open_escape_count),
+                        visibility_maximum_wrap_count=(
+                            visibility_receipt.maximum_wrap_count),
+                        visibility_derived_horizon_extension_count=(
+                            visibility_receipt.derived_horizon_extension_count),
+                        visibility_initial_maximum_wraps=(
+                            visibility_receipt.initial_maximum_wraps),
+                        visibility_final_maximum_wraps=(
+                            visibility_receipt.final_maximum_wraps),
+                        visibility_launch_inset_count=(
+                            visibility_receipt.launch_inset_count),
+                        visibility_centroid_limit_count=(
+                            visibility_receipt.centroid_limit_count))
                 if deterministic_exchange is not None:
                     factor_diagnostics.update(
                         form_factor_fingerprint=deterministic_exchange.fingerprint,

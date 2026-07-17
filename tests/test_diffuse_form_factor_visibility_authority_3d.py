@@ -264,6 +264,52 @@ def test_cellwise_certified_path_uses_a_separate_bounded_exact_replay_horizon(
     assert np.array_equal(result.hit_face, [-1])
     assert result.replay_count == 1
     assert result.maximum_wrap_count == 2
+    assert result.derived_horizon_extension_count == 0
+    assert result.initial_maximum_wraps == 1
+    assert result.final_maximum_wraps == 8
+
+
+def test_cellwise_certified_path_derives_open_top_horizon_for_grazing_ray(
+        monkeypatch):
+    verts = np.asarray([
+        [0.0, 0.0, 0.25],
+        [0.1, 0.0, 0.25],
+        [0.0, 0.1, 0.25],
+    ])
+    faces = np.asarray([[0, 1, 2]])
+    normals = np.asarray([[0.0, 0.0, -1.0]])
+    monkeypatch.setattr(
+        boundary_transport_3d,
+        "trace_diffuse_form_factor_events_warp_cellwise_3d",
+        lambda *args, **kwargs:
+        boundary_transport_3d.DiffuseFormFactorEventsWarpCellwise3D(
+            [-1], [3], [4]))
+    direction = np.asarray([[1.0, 0.0, 1.0e-3]])
+    direction /= np.linalg.norm(direction, axis=1, keepdims=True)
+
+    result = (
+        boundary_transport_3d
+        .trace_diffuse_form_factor_events_cellwise_certified_3d(
+            [[0.1, 0.5, 0.5]], direction, verts, faces, normals,
+            domain_size=(1.0, 1.0, 1.0), periodic_lateral=True,
+            maximum_wraps=3, device="cpu"))
+
+    assert np.array_equal(result.termination, [2])
+    assert np.array_equal(result.hit_face, [-1])
+    assert result.replay_count == 1
+    assert result.derived_horizon_extension_count == 1
+    assert result.maximum_wrap_count == 500
+    assert result.initial_maximum_wraps == 3
+    assert result.final_maximum_wraps == 504
+
+    # Preserve the exact production lineage that exposed the former guessed 1024-wrap cap.  Its
+    # true float64 trace escaped after 1113 wraps; the conservative geometric authority is 1117.
+    production_origin = np.asarray([
+        0.020309919291093343, 0.007027431235114469, 2.6508378871010123])
+    production_direction = np.asarray([
+        0.9363883881477437, -0.3509498266169299, 0.0033174899574309746])
+    assert boundary_transport_3d._derived_open_top_wrap_horizon_3d(
+        production_origin, production_direction, np.asarray([0.13, 0.02, 2.8])) == 1117
 
 
 def test_float64_authority_exposes_solid_facing_intersection_as_refusal():

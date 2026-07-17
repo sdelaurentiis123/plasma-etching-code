@@ -27,6 +27,15 @@ from .threed import DEVICE, _apply_bc
 from .warp_runtime import ensure_writable_warp_cache
 
 
+# A cosine-weighted diffuse sample can be arbitrarily close to horizontal.  For an upward ray in
+# a finite periodic cell, however, the number of lateral seam crossings before the open top is
+# geometrically bounded.  The production fast path retains its small fixed horizon; only exhausted
+# float64 replays use that derived bound.  This emergency ceiling is therefore not a physics
+# truncation: reaching it is an explicit refusal to spend an unbounded amount of work on one
+# effectively non-progressing ray.
+DIFFUSE_VISIBILITY_EMERGENCY_MAXIMUM_WRAPS = 1 << 20
+
+
 @njit(cache=True)
 def _electric_field_float64_3d(potential, position, origin, spacing):
     coordinate = (position - origin) / spacing
@@ -248,6 +257,9 @@ class DiffuseFormFactorEventsReplayHardened3D:
     recovered_hit_count: int
     open_escape_count: int
     maximum_wrap_count: int
+    derived_horizon_extension_count: int = 0
+    initial_maximum_wraps: int = 0
+    final_maximum_wraps: int = 0
 
     def __post_init__(self):
         face = np.asarray(self.hit_face, dtype=int).copy()
@@ -255,13 +267,16 @@ class DiffuseFormFactorEventsReplayHardened3D:
         values = (
             self.replay_count, self.replay_eligible_count,
             self.recovered_hit_count, self.open_escape_count,
-            self.maximum_wrap_count)
+            self.maximum_wrap_count, self.derived_horizon_extension_count,
+            self.initial_maximum_wraps, self.final_maximum_wraps)
         if (face.ndim != 1 or termination.shape != face.shape
                 or np.any(~np.isin(termination, (1, 2)))
                 or np.any((termination == 1) != (face >= 0))
                 or any(int(value) != value or value < 0 for value in values)
                 or self.replay_count > self.replay_eligible_count
                 or self.recovered_hit_count > self.replay_count
+                or self.derived_horizon_extension_count > self.replay_count
+                or self.final_maximum_wraps < self.initial_maximum_wraps
                 or self.open_escape_count != int(np.sum(termination == 2))):
             raise ValueError("invalid replay-hardened form-factor event receipt")
         face.setflags(write=False)
@@ -270,7 +285,9 @@ class DiffuseFormFactorEventsReplayHardened3D:
         object.__setattr__(self, "termination", termination)
         for name in (
                 "replay_count", "replay_eligible_count", "recovered_hit_count",
-                "open_escape_count", "maximum_wrap_count"):
+                "open_escape_count", "maximum_wrap_count",
+                "derived_horizon_extension_count", "initial_maximum_wraps",
+                "final_maximum_wraps"):
             object.__setattr__(self, name, int(getattr(self, name)))
 
 
@@ -287,6 +304,9 @@ class DiffuseFormFactorEstimateReceipt3D:
     maximum_wrap_count: int
     launch_inset_count: int = 0
     centroid_limit_count: int = 0
+    derived_horizon_extension_count: int = 0
+    initial_maximum_wraps: int = 0
+    final_maximum_wraps: int = 0
 
     def __post_init__(self):
         if not isinstance(self.form_factors, DiffuseFormFactors3D):
@@ -298,21 +318,49 @@ class DiffuseFormFactorEstimateReceipt3D:
             self.ray_count, self.float64_evaluated_count,
             self.float64_recovered_hit_count, self.open_escape_count,
             self.maximum_wrap_count, self.launch_inset_count,
-            self.centroid_limit_count)
+            self.centroid_limit_count, self.derived_horizon_extension_count,
+            self.initial_maximum_wraps, self.final_maximum_wraps)
         if (self.visibility_mode not in allowed
                 or any(int(value) != value or value < 0 for value in values)
                 or self.float64_evaluated_count > self.ray_count
                 or self.float64_recovered_hit_count > self.float64_evaluated_count
                 or self.open_escape_count > self.ray_count
                 or self.launch_inset_count > self.ray_count
-                or self.centroid_limit_count > self.launch_inset_count):
+                or self.centroid_limit_count > self.launch_inset_count
+                or self.derived_horizon_extension_count > self.float64_evaluated_count
+                or self.final_maximum_wraps < self.initial_maximum_wraps):
             raise ValueError("invalid diffuse form-factor estimate receipt")
         for name in (
                 "ray_count", "float64_evaluated_count",
                 "float64_recovered_hit_count", "open_escape_count",
                 "maximum_wrap_count", "launch_inset_count",
-                "centroid_limit_count"):
+                "centroid_limit_count", "derived_horizon_extension_count",
+                "initial_maximum_wraps", "final_maximum_wraps"):
             object.__setattr__(self, name, int(getattr(self, name)))
+
+
+def _derived_open_top_wrap_horizon_3d(origin, direction, domain):
+    """Return a conservative seam-crossing bound for upward periodic rays.
+
+    Before reaching ``z = domain[2]``, a straight ray travels a known lateral distance.  The
+    number of x/y seam crossings cannot exceed the sum of the corresponding whole-cell counts,
+    plus a small integer allowance for the initial partial cells and simultaneous-boundary ties.
+    Non-upward rays have no finite open-top bound and deliberately return ``None``.
+    """
+    origin = np.asarray(origin, dtype=float)
+    direction = np.asarray(direction, dtype=float)
+    domain = np.asarray(domain, dtype=float)
+    if (origin.shape != (3,) or direction.shape != (3,) or domain.shape != (3,)
+            or np.any(~np.isfinite(origin)) or np.any(~np.isfinite(direction))
+            or np.any(~np.isfinite(domain)) or np.any(domain <= 0.0)):
+        raise ValueError("invalid open-top wrap-horizon inputs")
+    vertical_speed = float(direction[2])
+    if vertical_speed <= 1.0e-14:
+        return None
+    flight_distance = max(float(domain[2] - origin[2]), 0.0) / vertical_speed
+    x_crossings = int(np.ceil(abs(float(direction[0])) * flight_distance / domain[0]))
+    y_crossings = int(np.ceil(abs(float(direction[1])) * flight_distance / domain[1]))
+    return x_crossings + y_crossings + 4
 
 
 @njit(cache=True)
@@ -2195,10 +2243,11 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
     faces = np.asarray(faces, dtype=int)
     normals = np.asarray(gas_normals, dtype=float)
     domain = np.asarray(domain_size, dtype=float)
+    fast_wraps = int(maximum_wraps)
     exact_wraps = (
         int(maximum_wraps) if maximum_exact_replay_wraps is None
         else int(maximum_exact_replay_wraps))
-    if exact_wraps < int(maximum_wraps):
+    if exact_wraps < fast_wraps:
         raise ValueError("maximum_exact_replay_wraps must cover the fast wrap budget")
     fast = trace_diffuse_form_factor_events_warp_cellwise_3d(
         origin, direction, verts, faces, normals, domain_size=domain,
@@ -2210,40 +2259,90 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
     maximum_wrap_count = int(np.max(
         fast.wrap_count[~replay_mask], initial=0))
     recovered_hit_count = 0
+    derived_horizon_extension_count = 0
+    final_exact_wraps = exact_wraps
     if np.any(replay_mask):
         reference = trace_diffuse_form_factor_events_float64_3d(
             origin[replay_mask], direction[replay_mask], verts, faces, normals,
             domain_size=domain, periodic_lateral=periodic_lateral,
             maximum_wraps=exact_wraps)
-        refusal = np.isin(reference.termination, (3, 4))
+        reference_face = reference.hit_face.copy()
+        reference_termination = reference.termination.copy()
+        reference_position = reference.hit_position.copy()
+        reference_cosine = reference.hit_cosine.copy()
+        reference_wrap_count = reference.wrap_count.copy()
+
+        # Exhaustion is recoverable only when geometry proves that the ray reaches the open top
+        # after a finite number of periodic seam crossings.  Replay just those rays with their
+        # derived horizon.  Horizontal trajectories and solid-facing intersections remain hard
+        # refusals; neither is silently reclassified as escape.
+        exhausted = reference_termination == 3
+        if np.any(exhausted) and periodic_lateral:
+            exhausted_local = np.flatnonzero(exhausted)
+            replay_origin = origin[replay_mask]
+            replay_direction = direction[replay_mask]
+            horizons = []
+            extend_local = []
+            for local in exhausted_local:
+                horizon = _derived_open_top_wrap_horizon_3d(
+                    replay_origin[local], replay_direction[local], domain)
+                if horizon is not None and horizon > exact_wraps:
+                    horizons.append(horizon)
+                    extend_local.append(int(local))
+            if extend_local:
+                derived_wraps = max(horizons)
+                if derived_wraps > DIFFUSE_VISIBILITY_EMERGENCY_MAXIMUM_WRAPS:
+                    selected = np.flatnonzero(replay_mask)[extend_local]
+                    raise RuntimeError(
+                        "derived exact replay of cellwise diffuse visibility exceeds the "
+                        f"emergency horizon for {len(selected)} of {len(origin)} rays; "
+                        f"first_ray={int(selected[0])}; derived_maximum_wraps={derived_wraps}; "
+                        "classification=effectively_nonprogressing")
+                extend_local = np.asarray(extend_local, dtype=int)
+                extended = trace_diffuse_form_factor_events_float64_3d(
+                    replay_origin[extend_local], replay_direction[extend_local],
+                    verts, faces, normals, domain_size=domain,
+                    periodic_lateral=True, maximum_wraps=derived_wraps)
+                reference_face[extend_local] = extended.hit_face
+                reference_termination[extend_local] = extended.termination
+                reference_position[extend_local] = extended.hit_position
+                reference_cosine[extend_local] = extended.hit_cosine
+                reference_wrap_count[extend_local] = extended.wrap_count
+                derived_horizon_extension_count = len(extend_local)
+                final_exact_wraps = derived_wraps
+
+        refusal = np.isin(reference_termination, (3, 4))
         if np.any(refusal):
             local = np.flatnonzero(refusal)
             selected = np.flatnonzero(replay_mask)[local]
-            code = int(reference.termination[local[0]])
+            code = int(reference_termination[local[0]])
             reason = (
                 "periodic-wrap budget exhaustion" if code == 3
                 else "solid-facing hard intersection")
             raise RuntimeError(
                 f"exact replay of cellwise diffuse visibility encountered {reason} for "
                 f"{len(selected)} of {len(origin)} rays; first_ray={int(selected[0])}; "
-                f"maximum_wraps={exact_wraps}")
+                f"maximum_wraps={final_exact_wraps}")
         original_face = final_face[replay_mask].copy()
         original_termination = termination[replay_mask].copy()
-        final_face[replay_mask] = reference.hit_face
-        termination[replay_mask] = reference.termination
+        final_face[replay_mask] = reference_face
+        termination[replay_mask] = reference_termination
         recovered_hit_count = int(np.sum(
-            (reference.termination == 1)
+            (reference_termination == 1)
             & ((original_termination != 1)
-               | (reference.hit_face != original_face))))
+               | (reference_face != original_face))))
         maximum_wrap_count = max(
             maximum_wrap_count,
-            int(np.max(reference.wrap_count, initial=0)))
+            int(np.max(reference_wrap_count, initial=0)))
     return DiffuseFormFactorEventsReplayHardened3D(
         hit_face=final_face, termination=termination,
         replay_count=int(np.sum(replay_mask)), replay_eligible_count=len(origin),
         recovered_hit_count=recovered_hit_count,
         open_escape_count=int(np.sum(termination == 2)),
-        maximum_wrap_count=maximum_wrap_count)
+        maximum_wrap_count=maximum_wrap_count,
+        derived_horizon_extension_count=derived_horizon_extension_count,
+        initial_maximum_wraps=fast_wraps,
+        final_maximum_wraps=final_exact_wraps)
 
 
 def trace_diffuse_form_factor_events_replay_hardened_3d(
@@ -2321,7 +2420,9 @@ def trace_diffuse_form_factor_events_replay_hardened_3d(
         replay_count=int(np.sum(replay_mask)), replay_eligible_count=len(origin),
         recovered_hit_count=recovered_hit_count,
         open_escape_count=int(np.sum(termination == 2)),
-        maximum_wrap_count=maximum_wrap_count)
+        maximum_wrap_count=maximum_wrap_count,
+        initial_maximum_wraps=int(maximum_wraps),
+        final_maximum_wraps=int(maximum_wraps))
 
 
 def estimate_diffuse_form_factors_3d(
@@ -2394,6 +2495,9 @@ def estimate_diffuse_form_factors_3d(
     float64_evaluated_count = 0
     recovered_hit_count = 0
     maximum_wrap_count = 0
+    derived_horizon_extension_count = 0
+    initial_maximum_wraps = int(maximum_visibility_wraps)
+    final_maximum_wraps = int(maximum_visibility_wraps)
     if visibility_mode == "legacy_float32":
         hit = _trace_diffuse_form_factor_events_warp_3d(
             verts, faces, origin, direction, domain, periodic_lateral, device)
@@ -2406,6 +2510,9 @@ def estimate_diffuse_form_factors_3d(
         float64_evaluated_count = events.replay_count
         recovered_hit_count = events.recovered_hit_count
         maximum_wrap_count = events.maximum_wrap_count
+        derived_horizon_extension_count = events.derived_horizon_extension_count
+        initial_maximum_wraps = events.initial_maximum_wraps
+        final_maximum_wraps = events.final_maximum_wraps
     elif visibility_mode == "cellwise_certified":
         events = trace_diffuse_form_factor_events_cellwise_certified_3d(
             origin, direction, verts, faces, authority_normals, domain_size=domain,
@@ -2417,6 +2524,9 @@ def estimate_diffuse_form_factors_3d(
         float64_evaluated_count = events.replay_count
         recovered_hit_count = events.recovered_hit_count
         maximum_wrap_count = events.maximum_wrap_count
+        derived_horizon_extension_count = events.derived_horizon_extension_count
+        initial_maximum_wraps = events.initial_maximum_wraps
+        final_maximum_wraps = events.final_maximum_wraps
     else:
         events = trace_diffuse_form_factor_events_float64_3d(
             origin, direction, verts, faces, authority_normals, domain_size=domain,
@@ -2457,7 +2567,10 @@ def estimate_diffuse_form_factors_3d(
         open_escape_count=int(np.sum(escaped)),
         maximum_wrap_count=maximum_wrap_count,
         launch_inset_count=launch_diagnostics["launch_inset_count"],
-        centroid_limit_count=launch_diagnostics["centroid_limit_count"])
+        centroid_limit_count=launch_diagnostics["centroid_limit_count"],
+        derived_horizon_extension_count=derived_horizon_extension_count,
+        initial_maximum_wraps=initial_maximum_wraps,
+        final_maximum_wraps=final_maximum_wraps)
 
 
 def gather_boundary_state_ballistic_3d(

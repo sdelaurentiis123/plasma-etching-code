@@ -1202,6 +1202,10 @@ def test_feature_step_diffusely_reemits_unreacted_neutrals_with_global_balance()
     assert audit["relative_balance_error"] < 1e-12
     assert audit["solver_method"] == "analytic_zero_reaction_elision"
     assert audit["repeated_incident_flux_elided"] is True
+    assert audit["visibility_mode"] == "cellwise_certified"
+    assert audit["visibility_ray_count"] > 0
+    assert audit["visibility_derived_horizon_extension_count"] == 0
+    assert audit["visibility_final_maximum_wraps"] == 1024
     direct = result.transport.surface_fluxes.neutral_flux_m2_s["CF2"]
     assert np.all(np.isfinite(direct))
     assert "flux_conservative_diffuse_radiosity" in result.transport.transport_model

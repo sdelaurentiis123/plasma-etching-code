@@ -329,6 +329,12 @@ def estimate_replicated_diffuse_form_factors_3d(
             item.open_escape_count for item in receipts),
         "visibility_maximum_wrap_count": max(
             item.maximum_wrap_count for item in receipts),
+        "visibility_derived_horizon_extension_count": sum(
+            item.derived_horizon_extension_count for item in receipts),
+        "visibility_initial_maximum_wraps": max(
+            item.initial_maximum_wraps for item in receipts),
+        "visibility_final_maximum_wraps": max(
+            item.final_maximum_wraps for item in receipts),
         "visibility_launch_inset_count": sum(
             item.launch_inset_count for item in receipts),
         "visibility_centroid_limit_count": sum(

@@ -23,6 +23,7 @@ from typing import Mapping
 import numpy as np
 
 from .boundary_transport_3d import (
+    DIFFUSE_VISIBILITY_EMERGENCY_MAXIMUM_WRAPS,
     _diffuse_form_factor_ray_sample_block_3d,
     trace_diffuse_form_factor_events_cellwise_certified_3d,
 )
@@ -199,6 +200,9 @@ def diffuse_form_factor_operator_identity_3d(
         "ray_offset": float(ray_offset),
         "maximum_visibility_wraps": wraps,
         "maximum_visibility_replay_wraps": replay_wraps,
+        "exact_replay_horizon_policy": "configured_then_geometry_derived_open_top_v1",
+        "derived_replay_emergency_maximum_wraps": (
+            DIFFUSE_VISIBILITY_EMERGENCY_MAXIMUM_WRAPS),
         "device": "engine_default" if device is None else str(device),
         "caller_operator_identity": caller,
     })
