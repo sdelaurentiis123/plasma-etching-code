@@ -47,7 +47,9 @@ def _write_json(path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(
-        json.dumps(multires._jsonable(payload), indent=2, sort_keys=True) + "\n",
+        json.dumps(
+            multires._jsonable(payload), indent=2, sort_keys=True,
+            allow_nan=False) + "\n",
         encoding="utf-8",
     )
     temporary.replace(path)
@@ -267,12 +269,14 @@ def _comparison(cases, requested_backends):
     for backend in requested_backends:
         case = cases.get(backend, {})
         steps = case.get("steps", ())
-        residual = max((
+        residual_values = [
             float(step["maximum_remap_relative_conservation_residual"])
-            for step in steps), default=float("inf"))
-        ledger = max((
+            for step in steps]
+        ledger_values = [
             float(step["operator"]["maximum_material_ledger_residual_units_m2"])
-            for step in steps), default=float("inf"))
+            for step in steps]
+        residual = max(residual_values) if residual_values else None
+        ledger = max(ledger_values) if ledger_values else None
         backend_gates[backend] = {
             "complete": case.get("status") == "complete",
             "step_count": len(steps),
@@ -280,7 +284,9 @@ def _comparison(cases, requested_backends):
                 step.get("topology_event") is None for step in steps),
             "maximum_remap_relative_conservation_residual": residual,
             "maximum_material_ledger_residual_units_m2": ledger,
-            "conservation_pass": residual <= 1.0e-12 and ledger <= 1.0e-20,
+            "conservation_pass": bool(
+                residual is not None and ledger is not None
+                and residual <= 1.0e-12 and ledger <= 1.0e-20),
         }
     common = backend_gates.get("common_refinement", {})
     common_pass = bool(
@@ -312,6 +318,12 @@ def run(args):
     cases = {}
     for backend in args.backends:
         case_output = output / backend
+        audit_path = case_output / "audit.json"
+        if args.reuse_worker_audits and audit_path.is_file():
+            case = json.loads(audit_path.read_text(encoding="utf-8"))
+            case["worker"] = {"reused_existing_audit": True}
+            cases[backend] = case
+            continue
         command = build_worker_command(args, backend, case_output)
         environment = dict(os.environ)
         environment["PETCH_DEVICE"] = str(args.device)
@@ -320,7 +332,6 @@ def run(args):
             completed = subprocess.run(
                 command, cwd=ROOT, env=environment, capture_output=True,
                 text=True, timeout=float(args.max_wall_s), check=False)
-            audit_path = case_output / "audit.json"
             if audit_path.is_file():
                 case = json.loads(audit_path.read_text(encoding="utf-8"))
             else:
@@ -378,6 +389,9 @@ def parse_args(argv=None):
     parser.add_argument(
         "--backends", nargs="+", choices=multires.REMAP_BACKENDS,
         default=list(multires.REMAP_BACKENDS))
+    parser.add_argument(
+        "--reuse-worker-audits", action="store_true",
+        help="rebuild only the aggregate receipt from existing backend audits")
     parser.add_argument(
         "--worker-backend", choices=multires.REMAP_BACKENDS,
         help=argparse.SUPPRESS)

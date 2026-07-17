@@ -17,6 +17,7 @@ def test_cli_is_hard_bounded_and_defaults_to_all_backends():
     assert args.steps == 2
     assert args.steps * args.step_duration_s == pytest.approx(0.05)
     assert tuple(args.backends) == AUDIT.multires.REMAP_BACKENDS
+    assert not args.reuse_worker_audits
 
     with pytest.raises(SystemExit):
         AUDIT.parse_args(("--steps", "3"))
