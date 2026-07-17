@@ -16,10 +16,12 @@ DEFAULT_OUTPUT = (
     ROOT / "results" / "krueger_2024_remap_backend_audit" / "comparison.png")
 
 
-def build_summary(audit):
+def build_summary(audit, reference_backend=None, candidate_backend="common_refinement"):
     cases = dict(audit["cases"])
-    legacy = cases["legacy_knn"]["steps"][-1]["metrics"]
-    common = cases["common_refinement"]["steps"][-1]["metrics"]
+    if reference_backend is None:
+        reference_backend = "legacy_knn" if "legacy_knn" in cases else "indexed_knn"
+    reference = cases[reference_backend]["steps"][-1]["metrics"]
+    candidate = cases[candidate_backend]["steps"][-1]["metrics"]
     metrics = (
         ("Depth", "etch_depth_nm"),
         ("Opening", "mask_opening_nm"),
@@ -29,12 +31,14 @@ def build_summary(audit):
     relative_ppm = []
     absolute_nm = []
     for label, name in metrics:
-        reference = float(legacy[name])
-        delta = float(common[name]) - reference
-        relative_ppm.append((label, 1.0e6 * delta / reference))
+        reference_value = float(reference[name])
+        delta = float(candidate[name]) - reference_value
+        relative_ppm.append((label, 1.0e6 * delta / reference_value))
         absolute_nm.append((label, delta))
     residuals = []
     for backend in ("legacy_knn", "indexed_knn", "common_refinement"):
+        if backend not in cases or cases[backend].get("status") != "complete":
+            continue
         residuals.append((
             backend,
             max(float(step["maximum_remap_relative_conservation_residual"])
@@ -44,9 +48,13 @@ def build_summary(audit):
         "relative_change_ppm": relative_ppm,
         "absolute_change_nm": absolute_nm,
         "maximum_conservation_residual": residuals,
-        "partitioned_overlap_status": cases["partitioned_overlap"]["status"],
-        "partitioned_overlap_message": cases["partitioned_overlap"][
-            "exception"]["message"],
+        "reference_backend": reference_backend,
+        "candidate_backend": candidate_backend,
+        "configuration": dict(audit.get("configuration", {})),
+        "partitioned_overlap_status": cases.get(
+            "partitioned_overlap", {}).get("status"),
+        "partitioned_overlap_message": cases.get(
+            "partitioned_overlap", {}).get("exception", {}).get("message"),
     }
 
 
@@ -57,8 +65,12 @@ def render(summary, output):
         "axes.labelsize": 10,
     })
     figure, axes = plt.subplots(1, 2, figsize=(10.5, 4.3))
+    configuration = summary["configuration"]
     figure.suptitle(
-        "Krueger remap gate — two paired 10 nm steps (0.05 s)",
+        "Krueger remap gate — "
+        f"{int(configuration.get('steps', 2))} paired "
+        f"{configuration.get('dx_nm', 10):g} nm steps "
+        f"({configuration.get('total_physical_time_s', 0.05):g} s)",
         fontsize=13, fontweight="bold")
 
     labels = [item[0] for item in summary["relative_change_ppm"]]
@@ -66,7 +78,9 @@ def render(summary, output):
     colors = ["#2878B5" if value >= 0.0 else "#D95F02" for value in values]
     bars = axes[0].barh(labels, values, color=colors, alpha=0.88)
     axes[0].axvline(0.0, color="#333333", linewidth=0.8)
-    axes[0].set_xlabel("Common refinement − legacy (ppm of legacy)")
+    axes[0].set_xlabel(
+        f"{summary['candidate_backend']} − {summary['reference_backend']} "
+        f"(ppm of {summary['reference_backend']})")
     axes[0].set_title("Second-step profile response")
     axes[0].grid(axis="x", alpha=0.25)
     for bar, value in zip(bars, values):
@@ -96,15 +110,19 @@ def render(summary, output):
     axes[1].legend(frameon=False, loc="upper left")
     for index, value in enumerate(residual):
         axes[1].text(index, value * 1.6, f"{value:.2e}", ha="center")
-    axes[1].text(
-        0.5, -0.23,
-        "Partitioned planar overlap: certified refusal on nonparallel faces",
-        transform=axes[1].transAxes, ha="center", va="top", color="#B23A48")
+    if summary["partitioned_overlap_status"] == "refused":
+        axes[1].text(
+            0.5, -0.23,
+            "Partitioned planar overlap: certified refusal on nonparallel faces",
+            transform=axes[1].transAxes, ha="center", va="top", color="#B23A48")
 
+    relative = dict(summary["relative_change_ppm"])
     figure.text(
         0.5, 0.01,
-        "Common refinement changes global depth/opening by only 21.6/2.41 ppm; "
-        "the local top-width diagnostic is more sensitive (−0.227%).",
+        "Common refinement changes global depth/opening by "
+        f"{relative['Depth']:+.3g}/{relative['Opening']:+.3g} ppm; "
+        "the local top-width diagnostic changes by "
+        f"{relative['Top width'] / 1.0e4:+.3g}%.",
         ha="center", fontsize=9)
     figure.tight_layout(rect=(0.02, 0.08, 0.98, 0.93))
     output = Path(output)
@@ -117,13 +135,17 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--audit", type=Path, default=DEFAULT_AUDIT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--reference-backend")
+    parser.add_argument("--candidate-backend", default="common_refinement")
     return parser.parse_args(argv)
 
 
 def main(argv=None):
     args = parse_args(argv)
     audit = json.loads(args.audit.read_text(encoding="utf-8"))
-    render(build_summary(audit), args.output)
+    render(build_summary(
+        audit, reference_backend=args.reference_backend,
+        candidate_backend=args.candidate_backend), args.output)
 
 
 if __name__ == "__main__":

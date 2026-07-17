@@ -72,3 +72,7 @@ def test_comparison_requires_common_refinement_and_paired_first_step():
     failed = AUDIT._comparison(cases, backends)
     assert not failed["common_refinement_candidate_pass"]
     assert not failed["identical_first_step_geometry"]
+
+    cases = {"common_refinement": case("common_refinement")}
+    unpaired = AUDIT._comparison(cases, ("indexed_knn", "common_refinement"))
+    assert not unpaired["common_refinement_candidate_pass"]

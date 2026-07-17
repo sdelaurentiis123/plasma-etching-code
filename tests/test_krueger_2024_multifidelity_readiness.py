@@ -93,6 +93,50 @@ def _inputs(tmp_path):
     return launch_path, evaluation_path, run_path, multires_path, summary_path
 
 
+def _remap_receipt(tmp_path):
+    def case(backend):
+        return {
+            "status": "complete",
+            "initial_geometry_sha256": "geometry-initial",
+            "initial_state": {"sha256": "state-initial"},
+            "steps": [
+                {
+                    "geometry_sha256": "geometry-first",
+                    "topology_event": None,
+                    "remap": {"surface_state_remap_backend": backend},
+                    "maximum_remap_relative_conservation_residual": 1e-15,
+                    "operator": {
+                        "maximum_material_ledger_residual_units_m2": 0.0},
+                },
+                {
+                    "geometry_sha256": f"geometry-second-{backend}",
+                    "topology_event": None,
+                    "remap": {"surface_state_remap_backend": backend},
+                    "maximum_remap_relative_conservation_residual": 2e-15,
+                    "operator": {
+                        "maximum_material_ledger_residual_units_m2": 0.0},
+                },
+            ],
+        }
+
+    return _write(tmp_path / "remap.json", {
+        "schema": "petch.krueger_2024_remap_backend_audit.v1",
+        "held_out_profile_data_read": False,
+        "scientific_scope": (
+            "bounded base-boundary operator selection; no experimental outcomes read"),
+        "configuration": {
+            "dx_nm": 5.0,
+            "steps": 2,
+            "total_physical_time_s": 0.05,
+            "backends": ["indexed_knn", "common_refinement"],
+        },
+        "cases": {
+            "indexed_knn": case("indexed_knn"),
+            "common_refinement": case("common_refinement"),
+        },
+    })
+
+
 def test_readiness_blocks_stale_epoch_and_short_rate_substitution(tmp_path):
     inputs = _inputs(tmp_path)
     result = _MODULE.derive(
@@ -124,3 +168,37 @@ def test_readiness_refuses_tampered_evaluation(tmp_path):
         _MODULE.derive(
             *inputs, current_revision="abc123",
             current_sources={"src/petch/feature_step_3d.py": "new"})
+
+
+def test_readiness_clears_only_remap_blocker_from_paired_5nm_receipt(tmp_path):
+    inputs = _inputs(tmp_path)
+    remap = _remap_receipt(tmp_path)
+
+    result = _MODULE.derive(
+        *inputs, current_revision="abc123", current_sources={
+            "src/petch/feature_step_3d.py": "new-feature",
+            "src/petch/material_mechanism_3d.py": "same-material",
+            "src/petch/surface_mesh_3d.py": "new-surface",
+        }, remap_audit_path=remap)
+
+    codes = {item["code"] for item in result["blockers"]}
+    assert "remap_backend_not_selected" not in codes
+    assert "no_current_epoch_high_fidelity_endpoint_anchor" in codes
+    assert result["remap_operator_selection"]["selected_backend"] == (
+        "common_refinement")
+    assert result["inputs"]["remap_audit"]["sha256"] == _MODULE._sha(remap)
+    assert result["next_bounded_sequence"][0].startswith("run one clean")
+
+
+def test_readiness_refuses_unpaired_remap_timeout(tmp_path):
+    inputs = _inputs(tmp_path)
+    remap = _remap_receipt(tmp_path)
+    payload = json.loads(remap.read_text(encoding="utf-8"))
+    payload["cases"]["indexed_knn"] = {"status": "wall_timeout", "steps": []}
+    remap.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="did not complete"):
+        _MODULE.derive(
+            *inputs, current_revision="abc123",
+            current_sources={"src/petch/feature_step_3d.py": "new"},
+            remap_audit_path=remap)

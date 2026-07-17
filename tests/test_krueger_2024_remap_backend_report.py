@@ -39,3 +39,28 @@ def test_summary_separates_global_and_local_remap_sensitivity():
     assert relative["Depth"] > relative["Opening"] > 0.0
     assert relative["Top width"] < 0.0
     assert summary["partitioned_overlap_status"] == "refused"
+
+
+def test_summary_defaults_to_indexed_for_the_two_backend_5nm_gate():
+    def case(width, residual):
+        return {"status": "complete", "steps": [{
+            "metrics": {
+                "etch_depth_nm": 0.68,
+                "mask_opening_nm": 89.47,
+                "top_feature_width_nm": width,
+                "remaining_mask_thickness_nm": 850.2,
+            },
+            "maximum_remap_relative_conservation_residual": residual,
+        }]}
+
+    summary = REPORT.build_summary({
+        "configuration": {"dx_nm": 5.0, "steps": 2},
+        "cases": {
+            "indexed_knn": case(88.13, 2e-16),
+            "common_refinement": case(87.99, 7e-16),
+        },
+    })
+
+    assert summary["reference_backend"] == "indexed_knn"
+    assert summary["candidate_backend"] == "common_refinement"
+    assert summary["partitioned_overlap_status"] is None

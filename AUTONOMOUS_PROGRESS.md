@@ -1641,3 +1641,32 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   sweep and no held-out reveal yet. Report and receipt:
   `KRUEGER_2024_SURFACE_WORK_PREFLIGHT_2026-07-17.md` and
   `results/krueger_2024_surface_work_preflight/audit.json`.
+
+### Paired 5 nm CUDA gate selects and seals common-refinement surface transfer
+
+- **The CPU slowness was measured rather than tolerated.** Identical local 5 nm indexed and common
+  workers each reached the predeclared `600 s` timeout without completing a receipt. Both preserved
+  Vast instances were destroyed. A fresh RTX 4090/32-effective-core instance (`45195298`) ran the
+  same checksum-bound source archive (`12aee41`, archive SHA-256
+  `21889b138f333c618f6fceb189d3618a84c4425b03f2630e9eed41879f30a795`).
+- **The GPU comparison is genuinely paired.** Indexed and common refinement start from identical
+  analytic 5 nm geometry and surface state, use seed `241`, and produce byte-identical first-step
+  geometry before remap feedback can enter. Both complete two `0.025 s` steps without topology
+  events, close the material ledger exactly, and keep maximum relative remap residual below
+  `6.61e-16`.
+- **Common refinement wins on physics and cost.** At step two, common minus indexed changes depth by
+  `-4.48e-6 nm` (`-6.55 ppm`), opening by `+1.96e-4 nm` (`+2.19 ppm`), remaining mask thickness by
+  `-1.60e-4 nm`, and maximum width by `-0.13485 nm` (`-0.153%`, 2.70% of one cell). Worker wall time
+  is `14.56 s` versus `21.18 s`, a `31.3%` reduction. Common refinement is selected for the clean
+  anchor; held-out profiles remain unread.
+- **The selection now reaches the real campaign.** Commit `12aee41` records the backend in the
+  pilot fingerprint, refuses backend changes on resume, requires one nonlegacy backend across the
+  10/5 endpoints, and replays the frozen value into every blind transfer case. The aggregate bug
+  that could treat a lone completing backend as paired is fixed; readiness accepts only two complete
+  conservative 5 nm receipts. The remap/readiness/report cluster passes `25` focused tests before
+  the report extension; the repository-wide suite remains pending after these final changes.
+- **Next:** regenerate the checksum-bound readiness receipt with the paired audit, then run one clean
+  current-epoch uniform-5-nm base anchor at the fixed R1.9 pair. No optimizer sweep and no held-out
+  reveal precede that endpoint. Report, static plot, raw receipt, and environment manifest:
+  `KRUEGER_2024_REMAP_SELECTION_2026-07-17.md` and
+  `results/krueger_2024_remap_backend_audit_5nm_gpu/`.

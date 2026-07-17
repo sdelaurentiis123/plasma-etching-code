@@ -275,8 +275,8 @@ Current honest positioning:
 3. quantify the 10-to-5 nm difference — complete for the initial state: global depth/opening/mask
    thickness are close, while local maximum/top width differs by 71.235%;
 4. explicitly select and short-test the indexed/common-refinement remap in the Krüger worker —
-   complete at 10 nm: common refinement is the production candidate after a paired two-step gate;
-   one bounded 5 nm confirmation remains before the backend is frozen;
+   complete: the paired 5 nm CUDA gate selected common refinement with exact material ledgers,
+   `6.61e-16` maximum remap residual, and sub-cell agreement with indexed transfer;
 5. implement the calibration trust-region/discrepancy artifact without reading held-outs — complete;
    the real readiness receipt blocks a proposal until remap selection and a current-epoch fine anchor;
 6. benchmark sparse narrow-band storage — complete with a bounded Krüger-specific no-go: at 900 nm
@@ -287,7 +287,8 @@ Current honest positioning:
    local timing, so it remains a deterministic reference rather than replacing production transport;
 8. remove repeated immutable full-3-D event validation/yield work, then revisit AMR only on a larger
    genuinely volume-dominated geometry or after a cost model earns it;
-9. perform one clean authoritative fine/AMR base confirmation;
+9. perform one clean authoritative uniform-5-nm base confirmation at the fixed R1.9 pair, with
+   common refinement sealed from `t=0` (AMR remains optional until it earns its cost gate);
 10. freeze parameters, run held-outs once, and compare the overlapping cases with ViennaPS.
 
 The corrected unified-device CUDA preflight takes 7.780 s per warmed 5 nm step. Chemistry/material

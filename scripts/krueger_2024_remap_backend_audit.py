@@ -192,6 +192,7 @@ def _worker(args):
         },
         "scientific_scope": (
             "base boundary only; no held-out outcomes read; operator selection only"),
+        "held_out_profile_data_read": False,
         "steps": [],
     }
     try:
@@ -288,9 +289,14 @@ def _comparison(cases, requested_backends):
                 residual is not None and ledger is not None
                 and residual <= 1.0e-12 and ledger <= 1.0e-20),
         }
+    indexed = backend_gates.get("indexed_knn", {})
     common = backend_gates.get("common_refinement", {})
     common_pass = bool(
-        common.get("complete")
+        indexed.get("complete")
+        and indexed.get("step_count") == 2
+        and indexed.get("topology_clean")
+        and indexed.get("conservation_pass")
+        and common.get("complete")
         and common.get("step_count") == 2
         and common.get("topology_clean")
         and common.get("conservation_pass")
@@ -370,6 +376,7 @@ def run(args):
         },
         "scientific_scope": (
             "bounded base-boundary operator selection; no experimental outcomes read"),
+        "held_out_profile_data_read": False,
         "cases": cases,
         "comparison": comparison,
     }

@@ -89,8 +89,66 @@ def _git_revision_and_clean() -> tuple[str, bool]:
     return revision, not bool(dirty)
 
 
+def _verified_remap_selection(remap_audit_path):
+    """Return a selected remapper only from a paired, complete 5 nm base-only receipt."""
+    remap_audit_path, audit = _read(remap_audit_path)
+    configuration = audit.get("configuration", {})
+    if (audit.get("schema") != "petch.krueger_2024_remap_backend_audit.v1"
+            or audit.get("held_out_profile_data_read") is not False
+            or audit.get("scientific_scope")
+            != "bounded base-boundary operator selection; no experimental outcomes read"
+            or not np.isclose(float(configuration.get("dx_nm", np.nan)), 5.0)
+            or int(configuration.get("steps", -1)) != 2
+            or not np.isclose(
+                float(configuration.get("total_physical_time_s", np.nan)), 0.05)):
+        raise ValueError("remap receipt is not the bounded 5 nm base-only comparison")
+    required = ("indexed_knn", "common_refinement")
+    if not set(required).issubset(configuration.get("backends", ())):
+        raise ValueError("remap receipt does not contain both required paired backends")
+    cases = audit.get("cases", {})
+    initial_geometry = set()
+    initial_state = set()
+    first_geometry = set()
+    maximum_residual = {}
+    maximum_ledger = {}
+    for backend in required:
+        case = cases.get(backend, {})
+        steps = case.get("steps", ())
+        if case.get("status") != "complete" or len(steps) != 2:
+            raise ValueError(f"remap backend did not complete its paired receipt: {backend}")
+        initial_geometry.add(case.get("initial_geometry_sha256"))
+        initial_state.add(case.get("initial_state", {}).get("sha256"))
+        first_geometry.add(steps[0].get("geometry_sha256"))
+        if any(step.get("topology_event") is not None for step in steps):
+            raise ValueError(f"remap receipt crossed a topology event: {backend}")
+        if any(step.get("remap", {}).get("surface_state_remap_backend") != backend
+               for step in steps):
+            raise ValueError(f"remap receipt mislabeled its operator: {backend}")
+        maximum_residual[backend] = max(float(
+            step["maximum_remap_relative_conservation_residual"])
+            for step in steps)
+        maximum_ledger[backend] = max(abs(float(
+            step["operator"]["maximum_material_ledger_residual_units_m2"]))
+            for step in steps)
+        if maximum_residual[backend] > 1e-12 or maximum_ledger[backend] > 1e-20:
+            raise ValueError(f"remap receipt does not close conservation: {backend}")
+    if (len(initial_geometry) != 1 or None in initial_geometry
+            or len(initial_state) != 1 or None in initial_state
+            or len(first_geometry) != 1 or None in first_geometry):
+        raise ValueError("remap comparison is not paired through the first profile step")
+    return remap_audit_path, {
+        "selected_backend": "common_refinement",
+        "selection_basis": (
+            "paired 5 nm completion against indexed nearest-surface transfer; common "
+            "refinement retained as the conservative geometric authority"),
+        "maximum_remap_relative_conservation_residual": maximum_residual,
+        "maximum_material_ledger_residual_units_m2": maximum_ledger,
+    }
+
+
 def derive(launch_path, evaluation_path, run_audit_path, multiresolution_path,
-           cuda_summary_path, *, current_revision, current_sources):
+           cuda_summary_path, *, current_revision, current_sources,
+           remap_audit_path=None):
     launch_path, launch = _read(launch_path)
     evaluation_path, evaluation = _read(evaluation_path)
     run_audit_path, run_audit = _read(run_audit_path)
@@ -161,6 +219,11 @@ def derive(launch_path, evaluation_path, run_audit_path, multiresolution_path,
         current_sources, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
     remap_backend = cuda_summary["operator_receipts"]["surface_state_remap_backend"]
+    remap_selection = None
+    remap_audit = None
+    if remap_audit_path is not None:
+        remap_audit, remap_selection = _verified_remap_selection(remap_audit_path)
+        remap_backend = remap_selection["selected_backend"]
     blockers = []
     if "legacy_knn" in remap_backend:
         blockers.append({
@@ -260,9 +323,15 @@ def derive(launch_path, evaluation_path, run_audit_path, multiresolution_path,
             "stale_operator_response_reuse": "refused",
             "short_rate_as_endpoint_discrepancy": "refused",
         },
+        "remap_operator_selection": (
+            remap_selection if remap_selection is not None else {
+                "selected_backend": None,
+                "status": "awaiting paired bounded 5 nm receipt",
+            }),
         "blockers": blockers,
-        "next_bounded_sequence": [
+        "next_bounded_sequence": ([
             "explicitly select the remap backend with a same-state short comparison",
+        ] if remap_selection is None else []) + [
             "run one clean current-epoch high-fidelity base anchor at the fixed R1.9 pair",
             "if the anchor meets base tolerances, freeze without another parameter step",
             "if it misses, update the discrepancy receipt and earn a current-epoch direction "
@@ -277,6 +346,9 @@ def derive(launch_path, evaluation_path, run_audit_path, multiresolution_path,
                 "path_name": multiresolution_path.name, "sha256": _sha(multiresolution_path)},
             "cuda_summary": {
                 "path_name": cuda_summary_path.name, "sha256": _sha(cuda_summary_path)},
+            **({"remap_audit": {
+                "path_name": remap_audit.name, "sha256": _sha(remap_audit)}}
+               if remap_audit is not None else {}),
         },
     }
     payload["readiness_sha256"] = _canonical_sha(payload, "readiness_sha256")
@@ -290,6 +362,7 @@ def main() -> None:
     parser.add_argument("--r19-run", required=True)
     parser.add_argument("--multiresolution", required=True)
     parser.add_argument("--cuda-summary", required=True)
+    parser.add_argument("--remap-audit")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     revision, clean = _git_revision_and_clean()
@@ -298,7 +371,8 @@ def main() -> None:
     payload = derive(
         args.launch, args.evaluation, args.r19_run, args.multiresolution,
         args.cuda_summary, current_revision=revision,
-        current_sources=current_source_manifest())
+        current_sources=current_source_manifest(),
+        remap_audit_path=args.remap_audit)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + ".tmp")
