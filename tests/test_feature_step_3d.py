@@ -251,16 +251,19 @@ def test_public_engine_physically_closes_continues_and_reopens_keyhole(remap_bac
             break
     assert reopened is not None
 
+    # Reopening restores external access to the upper cavity.  The overhanging
+    # shoulder can still shadow the floor from a vertical ballistic beam; that is
+    # physical keyhole transport, not a failed topology transition.
     access = take_step("etch", 0.0)
     centroid = access.active_face_centroid
-    floor_face = (
-        (np.abs(centroid[:, 0] - 0.3) < 0.10)
-        & (centroid[:, 2] < 0.30))
-    assert np.any(floor_face)
+    reopened_cavity_face = (
+        (np.abs(centroid[:, 0] - 0.3) < 0.12)
+        & (centroid[:, 2] < 0.68))
+    assert np.any(reopened_cavity_face)
     etchant = next(
         item for item in access.transport.surface_fluxes.energetic_fluxes
         if item.name == "etch+")
-    assert np.any(etchant.flux_m2_s[floor_face] > 0.0)
+    assert np.any(etchant.flux_m2_s[reopened_cavity_face] > 0.0)
     assert all(
         max(
             material["max_relative_conservation_residual"]
@@ -454,18 +457,26 @@ def _pinchoff_boundary(reference_plane_m):
 
 
 def _public_keyhole_geometry():
-    """One resolved periodic trench for a real level-set close/reopen cycle."""
+    """One resolved periodic keyhole for a real level-set close/reopen cycle.
+
+    The upper neck is deliberately narrower than the lower chamber.  Conformal
+    growth therefore seals a cell-resolved cavity instead of merely erasing a
+    straight, subcell-width trench.
+    """
     dx = 0.05
     shape = (13, 3, 21)
     x, y, z = (np.arange(size) * dx for size in shape)
     X, _, Z = np.meshgrid(x, y, z, indexing="ij")
     center = 0.3
-    half_width = 0.075
     floor = 0.15
     top = 0.75
-    wall_slab = np.minimum(Z - floor, top - Z)
-    wall = np.minimum(wall_slab, np.abs(X - center) - half_width)
-    phi = reinit_narrow(np.maximum(floor - Z, wall), dx, 2.0)
+    shoulder = 0.55
+    wide_wall = np.minimum.reduce((
+        Z - floor, top - Z, np.abs(X - center) - 0.20))
+    narrow_neck = np.minimum.reduce((
+        Z - shoulder, top - Z, np.abs(X - center) - 0.075))
+    phi = reinit_narrow(
+        np.maximum.reduce((floor - Z, wide_wall, narrow_neck)), dx, 2.0)
     material = np.where(phi > 0.0, 1, 0)
     return FeatureGeometry3D(
         phi, material, dx, 1e-6, material_levelsets={1: phi})
@@ -875,6 +886,37 @@ def test_periodic_subcell_gas_cleanup_selects_only_unresolved_cavities():
         resolved, periodic_lateral=True)
     assert resolved_count == 0
     assert not np.any(resolved_mask)
+
+
+def test_periodic_subcell_gas_cleanup_rejects_node_count_as_volume_proxy():
+    phi = np.ones((6, 9, 7))
+    phi[:, :, -1] = -1.0
+    # Eight unique periodic-y nodes, but only one x node and one z node: this
+    # extruded filament owns no hexahedral gas cell and has zero resolved volume.
+    phi[2, :-1, 2] = -1e-4
+    phi[2, -1, 2] = phi[2, 0, 2]
+
+    mask, count = _unresolved_subcell_gas_cavity_mask(
+        phi, periodic_lateral=True)
+
+    assert count == 8
+    assert np.all(mask[2, :, 2])
+    assert np.count_nonzero(mask) == 9
+
+
+def test_subcell_solid_cleanup_requires_one_actual_volume_cell():
+    phi = -np.ones((5, 9, 5))
+    material = np.zeros(phi.shape, dtype=int)
+    phi[2, :-1, 2] = 1.0
+    phi[2, -1, 2] = phi[2, 0, 2]
+    material[phi > 0.0] = 1
+
+    cleaned, removed, removal_mask = _remove_unresolved_subcell_solid_components(
+        phi, material, (1,), 0.25, periodic_lateral=True)
+
+    assert removed == 8
+    assert np.all(removal_mask[2, :, 2])
+    assert np.all(cleaned[removal_mask] < 0.0)
 
 
 def test_ordinary_feature_step_reuses_certified_charged_response_lineage():

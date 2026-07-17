@@ -385,6 +385,48 @@ def _periodic_component_sizes(field):
     ))
 
 
+def _component_roots_with_resolved_volume_cells(rooted_labels, *, periodic_lateral):
+    """Return component roots that own at least one physical hexahedral cell.
+
+    Eight arbitrary nodes are not sufficient support for a 3-D volume cell.  In
+    particular, an extruded ``1 x N x 1`` filament can contain many nodes while
+    remaining zero cells thick in two directions.  A component is resolved only
+    when the eight corners of at least one grid cell all carry the same root.
+
+    Periodic x/y fields contain only their unique nodal core here.  Their last
+    physical cells therefore wrap to node zero; z remains bounded.
+    """
+    rooted = np.asarray(rooted_labels, dtype=int)
+    if rooted.ndim != 3:
+        raise ValueError("volume-cell support requires a 3-D component-label field")
+    nx, ny, nz = rooted.shape
+    if nz < 2 or (not periodic_lateral and (nx < 2 or ny < 2)):
+        return set()
+
+    if periodic_lateral:
+        x_next = np.roll(rooted, -1, axis=0)
+        y_next = np.roll(rooted, -1, axis=1)
+        xy_next = np.roll(x_next, -1, axis=1)
+        corners = (
+            rooted[:, :, :-1], x_next[:, :, :-1],
+            y_next[:, :, :-1], xy_next[:, :, :-1],
+            rooted[:, :, 1:], x_next[:, :, 1:],
+            y_next[:, :, 1:], xy_next[:, :, 1:],
+        )
+    else:
+        corners = (
+            rooted[:-1, :-1, :-1], rooted[1:, :-1, :-1],
+            rooted[:-1, 1:, :-1], rooted[1:, 1:, :-1],
+            rooted[:-1, :-1, 1:], rooted[1:, :-1, 1:],
+            rooted[:-1, 1:, 1:], rooted[1:, 1:, 1:],
+        )
+    owner = corners[0]
+    resolved = owner > 0
+    for corner in corners[1:]:
+        resolved &= corner == owner
+    return {int(value) for value in np.unique(owner[resolved]) if value > 0}
+
+
 def _periodic_material_component_sizes(geometry, etchable_material_ids):
     materials = tuple(sorted({int(value) for value in etchable_material_ids}))
     solid = ((geometry.phi > 0.0)
@@ -479,9 +521,9 @@ def _remove_unresolved_subcell_solid_components(
     if periodic_lateral:
         core_solid = solid[:-1, :-1, :]
         rooted, roots = _periodic_component_roots(core_solid)
-        unresolved_roots = tuple(
-            root for root in roots
-            if 0 < int(np.count_nonzero(rooted == root)) < 8)
+        resolved_roots = _component_roots_with_resolved_volume_cells(
+            rooted, periodic_lateral=True)
+        unresolved_roots = tuple(roots - resolved_roots)
         core_mask = np.isin(rooted, unresolved_roots)
         unresolved = np.zeros(updated.shape, dtype=bool)
         unresolved[:-1, :-1, :] = core_mask
@@ -496,11 +538,12 @@ def _remove_unresolved_subcell_solid_components(
     component, count = label(solid)
     if count == 0:
         return updated, 0, np.zeros(updated.shape, dtype=bool)
-    sizes = np.bincount(component.ravel())
-    # Eight corner nodes are the minimum support of one resolved hexahedral volume cell.
-    unresolved_label = np.flatnonzero(sizes < 8)
-    unresolved_label = unresolved_label[unresolved_label != 0]
-    if unresolved_label.size == 0:
+    resolved_labels = _component_roots_with_resolved_volume_cells(
+        component, periodic_lateral=False)
+    unresolved_label = tuple(
+        index for index in range(1, int(count) + 1)
+        if index not in resolved_labels)
+    if not unresolved_label:
         return updated, 0, np.zeros(updated.shape, dtype=bool)
     unresolved = np.isin(component, unresolved_label)
     # A subcell component has no resolved 3-D volume. Give it an unambiguous gas sign,
@@ -540,17 +583,20 @@ def _new_unresolved_subcell_material_component_mask(
         occupied = core_solid & (core_owner == material)
         if periodic_lateral:
             rooted, roots = _periodic_component_roots(occupied)
+            resolved_roots = _component_roots_with_resolved_volume_cells(
+                rooted, periodic_lateral=True)
             for root in roots:
                 selected = rooted == root
-                if (0 < int(np.count_nonzero(selected)) < 8
+                if (root not in resolved_roots
                         and np.all(core_previous[selected] != material)):
                     core_mask |= selected
         else:
             component, count = label(occupied)
-            sizes = np.bincount(component.ravel())
+            resolved_labels = _component_roots_with_resolved_volume_cells(
+                component, periodic_lateral=False)
             for index in range(1, int(count) + 1):
                 selected = component == index
-                if (0 < int(sizes[index]) < 8
+                if (index not in resolved_labels
                         and np.all(core_previous[selected] != material)):
                     core_mask |= selected
 
@@ -625,12 +671,13 @@ def _restore_unresolved_material_ownership(
 def _unresolved_subcell_gas_cavity_mask(phi, *, periodic_lateral):
     """Find enclosed gas components too small to occupy one resolved volume cell.
 
-    A hexahedral cell needs eight corner nodes.  Fewer than eight gas-sign nodes can make marching
-    cubes report a closed bubble, but do not define one resolved gas volume.  Such bubbles arise when
-    redistancing crosses zero by a tiny amount near a depositing/re-entrant surface.  The returned
-    mask includes duplicate periodic endpoint nodes, while the count is measured on the unique
-    periodic core.  Components with eight or more nodes are physical-grid topology and are never
-    selected here.
+    A gas component is resolved only if it owns all eight corners of at least one
+    hexahedral cell.  Counting nodes is insufficient: a periodic, translationally
+    extruded ``1 x N x 1`` component may contain eight or more nodes but enclose no
+    cell volume.  Such pockets arise when redistancing crosses zero by a tiny
+    amount near a depositing/re-entrant surface.  The returned mask includes
+    duplicate periodic endpoint nodes, while the count is measured on the unique
+    periodic core.
     """
     field = np.asarray(phi, dtype=float)
     if field.ndim != 3 or np.any(~np.isfinite(field)):
@@ -643,10 +690,11 @@ def _unresolved_subcell_gas_cavity_mask(phi, *, periodic_lateral):
             int(value) for value in np.unique(np.concatenate((
                 rooted[:, :, 0].ravel(), rooted[:, :, -1].ravel())))
             if value > 0}
-        size = np.bincount(rooted.ravel())
+        resolved_roots = _component_roots_with_resolved_volume_cells(
+            rooted, periodic_lateral=True)
         unresolved_roots = {
             root for root in roots - open_roots
-            if root < size.size and 0 < int(size[root]) < 8}
+            if root not in resolved_roots}
         core_mask = np.isin(rooted, tuple(unresolved_roots))
         mask = np.zeros(field.shape, dtype=bool)
         mask[:-1, :-1, :] = core_mask
@@ -664,10 +712,11 @@ def _unresolved_subcell_gas_cavity_mask(phi, *, periodic_lateral):
         component[:, :, 0].ravel(), component[:, :, -1].ravel(),
     ))
     open_component = {int(value) for value in np.unique(boundary) if value > 0}
-    size = np.bincount(component.ravel())
+    resolved_components = _component_roots_with_resolved_volume_cells(
+        component, periodic_lateral=False)
     unresolved = tuple(
         index for index in range(1, int(count) + 1)
-        if index not in open_component and 0 < int(size[index]) < 8)
+        if index not in open_component and index not in resolved_components)
     mask = np.isin(component, unresolved)
     return mask, int(np.count_nonzero(mask))
 
