@@ -62,6 +62,8 @@ def _load_complete(path, expected_dx):
             or int(config.get("ion_azimuthal_order", -1)) != 16
             or config.get("ballistic_transport") != "face_gather"
             or int(config.get("ballistic_face_quadrature_points", -1)) != 3
+            or config.get("surface_state_remap_backend") not in (
+                "indexed_knn", "common_refinement")
             or not config.get("compressed_boundary_quadrature", False)
             or not config.get("radiosity_enabled", False)
             or not config.get("adaptive_profile_timestep", False)):
@@ -153,6 +155,7 @@ def freeze(base_10nm_path, base_5nm_path, calibration_path, azimuth_path,
         "maximum_displacement_cells", "adaptive_shrink_factor",
         "adaptive_growth_factor", "adaptive_safety_factor",
         "maximum_accepted_steps", "profile_reinitialization",
+        "surface_state_remap_backend",
     )
     inconsistent = {
         key: {"10nm": config_10.get(key), "5nm": config_5.get(key)}

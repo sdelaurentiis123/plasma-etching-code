@@ -61,6 +61,7 @@ def _base(path, dx):
             "maximum_accepted_steps": 10000,
             "profile_reinitialization": "cr2",
             "topology_change_policy": "continue_gas_cavity",
+            "surface_state_remap_backend": "common_refinement",
             "geometry": {
                 "cell_width_um": 0.13,
                 "cell_length_um": 0.02,
@@ -253,6 +254,24 @@ def test_krueger_freeze_refuses_mixed_refinement_operator(tmp_path):
         FREEZE.freeze(base10, base5, calibration, azimuth, charging)
 
 
+def test_krueger_freeze_refuses_legacy_or_mixed_remap_operator(tmp_path):
+    base10 = _base(tmp_path / "base10.json", 0.01)
+    base5 = _base(tmp_path / "base5.json", 0.005)
+    calibration = _calibration(tmp_path / "calibration.json")
+    azimuth, charging = _supporting_evidence(tmp_path)
+    payload = json.loads(base5.read_text(encoding="utf-8"))
+    payload["configuration"]["surface_state_remap_backend"] = "legacy_knn"
+    base5.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="R1.9 operator"):
+        FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+
+    payload["configuration"]["surface_state_remap_backend"] = "indexed_knn"
+    base5.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="one numerical operator"):
+        FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+
+
 def test_krueger_freeze_accepts_only_monotone_fine_grid_timestep_refinement(tmp_path):
     base10 = _base(tmp_path / "base10.json", 0.01)
     base5 = _base(tmp_path / "base5.json", 0.005)
@@ -272,6 +291,8 @@ def test_krueger_freeze_accepts_only_monotone_fine_grid_timestep_refinement(tmp_
     assert result["authority_numerics"]["dx_um"] == 0.005
     assert result["authority_numerics"]["minimum_timestep_ratio_to_proposal"] == 0.25
     assert result["authority_numerics"]["topology_change_policy"] == "continue_gas_cavity"
+    assert result["authority_numerics"][
+        "surface_state_remap_backend"] == "common_refinement"
     assert result["base_endpoints"]["5nm"][
         "reassigned_unresolved_material_node_count"] == 1
 
@@ -385,3 +406,38 @@ def test_krueger_transfer_supervisor_refuses_mutated_reveal_before_subprocess(tm
 
     with pytest.raises(ValueError, match="checksum"):
         CAMPAIGN.run(args)
+
+
+def test_krueger_transfer_replays_the_sealed_remap_backend(tmp_path, monkeypatch):
+    base10 = _base(tmp_path / "base10.json", 0.01)
+    base5 = _base(tmp_path / "base5.json", 0.005)
+    calibration = _calibration(tmp_path / "calibration.json")
+    azimuth, charging = _supporting_evidence(tmp_path)
+    frozen = FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+    freeze_path = tmp_path / "freeze.json"
+    freeze_path.write_text(json.dumps(frozen), encoding="utf-8")
+    commands = []
+
+    def fake_run(command, cwd, check):
+        commands.append(command)
+        output = Path(command[command.index("--output") + 1])
+        output.mkdir(parents=True, exist_ok=True)
+        (output / "audit.json").write_text(json.dumps({
+            "status": "complete",
+            "config_hash": "b" * 64,
+            "final_metrics": {},
+        }), encoding="utf-8")
+
+    monkeypatch.setattr(CAMPAIGN, "_selected", lambda _: (("base", ()),))
+    monkeypatch.setattr(CAMPAIGN.subprocess, "run", fake_run)
+    args = SimpleNamespace(
+        freeze=str(freeze_path), output_root=str(tmp_path / "runs"),
+        case_set="all", transport_device="cuda:0", max_wall_s=1.0,
+        maximum_resume_count=0)
+
+    CAMPAIGN.run(args)
+
+    command = commands[0]
+    assert command[command.index("--transport-device") + 1] == "cuda:0"
+    assert command[command.index("--surface-state-remap-backend") + 1] == (
+        "common_refinement")

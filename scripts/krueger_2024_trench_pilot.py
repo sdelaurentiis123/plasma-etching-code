@@ -488,6 +488,7 @@ def _configuration(args):
         "adaptive_safety_factor": float(args.adaptive_safety_factor),
         "maximum_accepted_steps": int(args.maximum_accepted_steps),
         "topology_change_policy": str(args.topology_change_policy),
+        "surface_state_remap_backend": str(args.surface_state_remap_backend),
         "geometry": {
             "cell_width_um": 0.13,
             "cell_length_um": 0.02,
@@ -518,6 +519,24 @@ def _monotone_resume_refinement(previous, current):
     previous = json.loads(json.dumps(previous))
     current = json.loads(json.dumps(current))
     changes = {}
+    old_remap_declared = "surface_state_remap_backend" in previous
+    new_remap_declared = "surface_state_remap_backend" in current
+    old_remap_backend = str(previous.pop(
+        "surface_state_remap_backend", "legacy_knn"))
+    new_remap_backend = str(current.pop(
+        "surface_state_remap_backend", "legacy_knn"))
+    if old_remap_backend != new_remap_backend:
+        # A remap backend is part of the physical/numerical evolution operator.  Never splice
+        # two such operators into one trajectory, even if both conserve their own ledgers.
+        return False, {}
+    if not old_remap_declared and new_remap_declared:
+        changes["surface_state_remap_backend_declaration"] = {
+            "old": "implicit legacy_knn",
+            "new": "explicit legacy_knn",
+            "classification": "provenance_only_operator_declaration",
+        }
+    elif old_remap_declared != new_remap_declared:
+        return False, {}
     old_topology_policy = str(previous.pop(
         "topology_change_policy", "refuse"))
     new_topology_policy = str(current.pop(
@@ -640,8 +659,11 @@ def run(args):
                     "gas-cavity continuation scope; boundary, chemistry, geometry state, and "
                     "surface inventories are unchanged"
                     if "topology_change_policy" in changes else
-                    "resume from the exact accepted checkpoint after a numerical safety "
-                    "limit was reached; physical operator and state are unchanged"),
+                    "resume from the exact accepted checkpoint with the historical implicit "
+                    "legacy remap operator made explicit; operator and state are unchanged"
+                    if "surface_state_remap_backend_declaration" in changes else
+                    "resume from the exact accepted checkpoint after a numerical safety limit "
+                    "was reached; physical operator and state are unchanged"),
             })
         start_step = int(metadata["step"])
         physical_time = float(metadata["physical_time_s"])
@@ -751,7 +773,9 @@ def run(args):
                     neutral_radiosity_options=radiosity,
                     ballistic_transport=args.ballistic_transport,
                     ballistic_face_quadrature_points=int(args.face_quadrature_points),
-                    topology_change_policy=str(args.topology_change_policy))
+                    topology_change_policy=str(args.topology_change_policy),
+                    surface_state_remap_backend=str(
+                        args.surface_state_remap_backend))
             except (ValueError, RuntimeError) as error:
                 message = str(error)
                 retryable = (
@@ -1053,6 +1077,15 @@ def parse_args():
         help=(
             "refuse every resolved topology change, or explicitly continue only periodic "
             "gas-cavity enclosure/opening with conservative surface-state remap"))
+    parser.add_argument(
+        "--surface-state-remap-backend",
+        choices=(
+            "legacy_knn", "indexed_knn", "partitioned_overlap",
+            "common_refinement"),
+        default="legacy_knn",
+        help=(
+            "declared conservative surface-state transfer operator; it is fingerprinted and "
+            "cannot change when resuming a trajectory"))
     parser.add_argument("--benchmark-only", action="store_true")
     parser.add_argument("--no-radiosity", action="store_true")
     parser.add_argument("--resume", action="store_true")

@@ -1,6 +1,7 @@
 import importlib.util
 from hashlib import sha256
 from pathlib import Path
+import sys
 
 import numpy as np
 
@@ -22,7 +23,7 @@ def _pilot_module():
 PILOT = _pilot_module()
 
 
-def _resume_configuration(policy=None):
+def _resume_configuration(policy=None, remap_backend=None):
     result = {
         "minimum_step_duration_s": 0.001,
         "maximum_accepted_steps": 10000,
@@ -30,6 +31,8 @@ def _resume_configuration(policy=None):
     }
     if policy is not None:
         result["topology_change_policy"] = policy
+    if remap_backend is not None:
+        result["surface_state_remap_backend"] = remap_backend
     return result
 
 
@@ -50,6 +53,35 @@ def test_resume_may_only_promote_refusal_to_declared_gas_cavity_continuation():
     incompatible, _ = PILOT._monotone_resume_refinement(
         continued, _resume_configuration("refuse"))
     assert not incompatible
+
+
+def test_resume_makes_historical_legacy_remap_explicit_but_never_changes_backend():
+    compatible, changes = PILOT._monotone_resume_refinement(
+        _resume_configuration(),
+        _resume_configuration(remap_backend="legacy_knn"))
+
+    assert compatible
+    assert changes == {
+        "surface_state_remap_backend_declaration": {
+            "old": "implicit legacy_knn",
+            "new": "explicit legacy_knn",
+            "classification": "provenance_only_operator_declaration",
+        }}
+    incompatible, _ = PILOT._monotone_resume_refinement(
+        _resume_configuration(remap_backend="indexed_knn"),
+        _resume_configuration(remap_backend="common_refinement"))
+    assert not incompatible
+
+
+def test_pilot_cli_accepts_explicit_surface_state_remap_backend(monkeypatch):
+    monkeypatch.setattr(sys, "argv", [
+        "krueger_2024_trench_pilot.py",
+        "--surface-state-remap-backend", "common_refinement",
+    ])
+
+    args = PILOT.parse_args()
+
+    assert args.surface_state_remap_backend == "common_refinement"
 
 
 def test_resume_retains_prior_refusal_and_accepted_event_time_provenance_once():

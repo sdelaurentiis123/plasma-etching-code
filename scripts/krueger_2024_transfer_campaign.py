@@ -81,7 +81,9 @@ def run(args):
     physics = freeze["frozen_physics"]
     numerics = freeze["authority_numerics"]
     if (not abs(float(numerics.get("dx_um", 0.0)) - 0.005) <= 1e-15
-            or numerics.get("topology_change_policy") != "continue_gas_cavity"):
+            or numerics.get("topology_change_policy") != "continue_gas_cavity"
+            or numerics.get("surface_state_remap_backend") not in (
+                "indexed_knn", "common_refinement")):
         raise ValueError("held-out execution requires the sealed R1.9 authority operator")
     output_root = Path(args.output_root)
     output_root.mkdir(parents=True, exist_ok=True)
@@ -139,6 +141,8 @@ def run(args):
         "--adaptive-safety-factor", str(numerics["adaptive_safety_factor"]),
         "--maximum-accepted-steps", str(numerics["maximum_accepted_steps"]),
         "--topology-change-policy", str(numerics["topology_change_policy"]),
+        "--surface-state-remap-backend",
+        str(numerics["surface_state_remap_backend"]),
         "--max-wall-s", str(args.max_wall_s),
     ]
     for case_name, case_args in _selected(args.case_set):
