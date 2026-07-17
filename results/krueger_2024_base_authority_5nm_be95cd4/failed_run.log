@@ -1,0 +1,50 @@
+Warp 1.15.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.0
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 4090" (24 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.15.0
+Module petch.boundary_transport_3d 640f97c load on device 'cuda:0' took 1.96 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 5474.62 ms  (compiled)
+step=1 t=0.185s dt=0.1851s depth=2.496nm mask_opening=88.468nm wall=18.29s
+step=2 t=0.278s dt=0.09255s depth=3.744nm mask_opening=88.188nm wall=3.50s
+step=3 t=0.391s dt=0.1134s depth=5.272nm mask_opening=87.910nm wall=3.65s
+step=4 t=0.483s dt=0.09232s depth=6.516nm mask_opening=87.704nm wall=3.62s
+step=5 t=0.580s dt=0.09655s depth=7.815nm mask_opening=87.527nm wall=9.18s
+step=6 t=0.643s dt=0.06302s depth=8.663nm mask_opening=87.409nm wall=3.60s
+step=7 t=0.713s dt=0.06984s depth=9.603nm mask_opening=87.302nm wall=3.67s
+step=8 t=0.799s dt=0.08611s depth=10.762nm mask_opening=87.176nm wall=3.57s
+step=9 t=0.902s dt=0.1035s depth=12.155nm mask_opening=87.016nm wall=3.69s
+step=10 t=0.966s dt=0.06336s depth=13.009nm mask_opening=86.930nm wall=3.57s
+step=11 t=1.028s dt=0.06235s depth=13.849nm mask_opening=86.849nm wall=3.61s
+step=12 t=1.095s dt=0.06701s depth=14.751nm mask_opening=86.770nm wall=3.61s
+step=13 t=1.180s dt=0.08473s depth=15.892nm mask_opening=86.649nm wall=3.56s
+step=14 t=1.277s dt=0.09756s depth=17.206nm mask_opening=86.512nm wall=3.63s
+step=15 t=1.355s dt=0.07795s depth=18.256nm mask_opening=86.405nm wall=3.64s
+step=16 t=1.420s dt=0.06492s depth=19.130nm mask_opening=86.333nm wall=3.68s
+step=17 t=1.485s dt=0.06432s depth=19.996nm mask_opening=86.262nm wall=3.64s
+step=18 t=1.553s dt=0.06854s depth=20.919nm mask_opening=86.181nm wall=3.68s
+step=19 t=1.641s dt=0.08756s depth=22.099nm mask_opening=86.083nm wall=3.59s
+step=20 t=1.734s dt=0.09372s depth=23.361nm mask_opening=85.974nm wall=3.60s
+step=21 t=1.830s dt=0.09545s depth=24.647nm mask_opening=85.857nm wall=5.78s
+step=22 t=1.896s dt=0.06646s depth=25.542nm mask_opening=85.772nm wall=3.60s
+step=23 t=1.964s dt=0.06766s depth=26.454nm mask_opening=85.692nm wall=3.68s
+Traceback (most recent call last):
+  File "/root/petch-be95cd4/scripts/krueger_2024_trench_pilot.py", line 1096, in <module>
+    run(parse_args())
+  File "/root/petch-be95cd4/scripts/krueger_2024_trench_pilot.py", line 762, in run
+    result = advance_feature_step_3d(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/petch-be95cd4/src/petch/feature_step_3d.py", line 2333, in advance_feature_step_3d
+    transport, neutral_radiosity_diagnostics = _apply_diffuse_neutral_transport(
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/petch-be95cd4/src/petch/feature_step_3d.py", line 1615, in _apply_diffuse_neutral_transport
+    visibility_receipt = estimate_diffuse_form_factors_3d(
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/petch-be95cd4/src/petch/boundary_transport_3d.py", line 2517, in estimate_diffuse_form_factors_3d
+    events = trace_diffuse_form_factor_events_cellwise_certified_3d(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/petch-be95cd4/src/petch/boundary_transport_3d.py", line 2322, in trace_diffuse_form_factor_events_cellwise_certified_3d
+    raise RuntimeError(
+RuntimeError: exact replay of cellwise diffuse visibility encountered periodic-wrap budget exhaustion for 1 of 24192 rays; first_ray=13812; maximum_wraps=1024
