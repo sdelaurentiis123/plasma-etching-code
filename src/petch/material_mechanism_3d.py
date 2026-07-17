@@ -149,17 +149,7 @@ def _subset_fluxes(fluxes, selected, face_count):
     energetic = []
     for population in fluxes.energetic_fluxes:
         if isinstance(population, FaceResolvedEnergeticFlux):
-            mapped = old_to_new[population.event_face]
-            retained = mapped >= 0
-            energetic.append(FaceResolvedEnergeticFlux(
-                population.name, len(selected), mapped[retained],
-                population.event_flux_m2_s[retained], population.event_energy_eV[retained],
-                population.event_cosine_incidence[retained],
-                event_position=(None if population.event_position is None
-                                else population.event_position[retained]),
-                event_incident_direction=(
-                    None if population.event_incident_direction is None
-                    else population.event_incident_direction[retained])))
+            energetic.append(population.remap_faces(old_to_new, len(selected)))
         elif isinstance(population, EnergeticFlux):
             flux = np.asarray(population.flux_m2_s)
             energetic.append(EnergeticFlux(

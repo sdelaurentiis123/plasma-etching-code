@@ -1472,17 +1472,8 @@ def _select_surface_fluxes(fluxes, selected_face, face_count, species_role=None)
         if role is not None and role.get(population.name) != "energetic_bombardment":
             continue
         if isinstance(population, FaceResolvedEnergeticFlux):
-            mapped = old_to_new[population.event_face]
-            retained = mapped >= 0
-            energetic.append(FaceResolvedEnergeticFlux(
-                population.name, selected_face.size, mapped[retained],
-                population.event_flux_m2_s[retained], population.event_energy_eV[retained],
-                population.event_cosine_incidence[retained],
-                event_position=(None if population.event_position is None
-                                else population.event_position[retained]),
-                event_incident_direction=(
-                    None if population.event_incident_direction is None
-                    else population.event_incident_direction[retained])))
+            energetic.append(population.remap_faces(
+                old_to_new, selected_face.size))
         elif isinstance(population, EnergeticFlux):
             flux = np.asarray(population.flux_m2_s)
             selected_flux = flux if flux.ndim == 0 else flux[selected_face]

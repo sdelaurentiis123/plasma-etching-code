@@ -274,6 +274,9 @@ class FaceResolvedEnergeticFlux:
         object.__setattr__(self, "event_flux_m2_s", flux)
         object.__setattr__(self, "event_energy_eV", energy)
         object.__setattr__(self, "event_cosine_incidence", cosine)
+        # Operational memoization is deliberately not a dataclass field: checkpoint serializers,
+        # equality, and the physical event contract must never observe cache state.
+        object.__setattr__(self, "_yield_rate_cache", {})
         for name in ("event_position", "event_incident_direction"):
             supplied = getattr(self, name)
             if supplied is None:
@@ -294,10 +297,73 @@ class FaceResolvedEnergeticFlux:
             self.event_face, weights=self.event_flux_m2_s, minlength=self.face_count)
 
     def yield_rate_m2_s(self, yield_law: EnergeticYield):
+        # Built-in yield laws are frozen value objects. A surface mechanism often asks for the
+        # same law several times during one conservative split step; recomputing its energy/angle
+        # factor and face reduction is pure duplicate work. Keep the immutable reduction on the
+        # immutable event measure. Unknown user laws retain evaluate-every-call behavior rather
+        # than being assumed immutable.
+        cacheable = isinstance(
+            yield_law, (EnergeticYield, LowEnergyActivationYield, SteinbruchelYield))
+        if cacheable:
+            cached = self._yield_rate_cache.get(yield_law)
+            if cached is not None:
+                return cached
         event_yield = yield_law.evaluate(self.event_energy_eV, self.event_cosine_incidence)
-        return np.bincount(
+        result = np.bincount(
             self.event_face, weights=self.event_flux_m2_s * event_yield,
             minlength=self.face_count)
+        if cacheable:
+            result.setflags(write=False)
+            self._yield_rate_cache[yield_law] = result
+        return result
+
+    def remap_faces(self, old_to_new, new_face_count):
+        """Return an exact selected/reindexed event measure without revalidating payloads.
+
+        ``self`` already owns finite, bounded, read-only event arrays. Material routing and the
+        active-surface selector only discard events and replace their face indices; repeating the
+        expensive energy/direction validation on every subset cannot discover new invalid physics.
+        This method validates the complete index map, copies retained payload once, and constructs
+        another read-only authoritative measure.
+        """
+        supplied = np.asarray(old_to_new)
+        count = int(new_face_count)
+        if (supplied.shape != (self.face_count,)
+                or not np.issubdtype(supplied.dtype, np.integer)
+                or int(new_face_count) != new_face_count or count <= 0):
+            raise ValueError("face remap requires one integer destination per source face")
+        mapping = np.asarray(supplied, dtype=int)
+        if np.any(mapping < -1) or np.any(mapping >= count):
+            raise ValueError("face remap destinations must be -1 or a valid new face")
+        used = np.unique(mapping[mapping >= 0])
+        if not np.array_equal(used, np.arange(count)):
+            raise ValueError("face remap must cover every destination face exactly by index")
+        mapped = mapping[self.event_face]
+        retained = mapped >= 0
+
+        result = object.__new__(type(self))
+        object.__setattr__(result, "name", self.name)
+        object.__setattr__(result, "face_count", count)
+        payload = {
+            "event_face": mapped[retained],
+            "event_flux_m2_s": self.event_flux_m2_s[retained],
+            "event_energy_eV": self.event_energy_eV[retained],
+            "event_cosine_incidence": self.event_cosine_incidence[retained],
+        }
+        for name, value in payload.items():
+            copied = np.asarray(value).copy()
+            copied.setflags(write=False)
+            object.__setattr__(result, name, copied)
+        for name in ("event_position", "event_incident_direction"):
+            value = getattr(self, name)
+            if value is None:
+                object.__setattr__(result, name, None)
+            else:
+                copied = np.asarray(value[retained], dtype=float).copy()
+                copied.setflags(write=False)
+                object.__setattr__(result, name, copied)
+        object.__setattr__(result, "_yield_rate_cache", {})
+        return result
 
 
 @dataclass(frozen=True)

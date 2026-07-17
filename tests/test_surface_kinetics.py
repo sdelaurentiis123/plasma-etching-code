@@ -289,6 +289,43 @@ def test_face_resolved_events_preserve_optional_impact_phase_space_immutably():
             event_incident_direction=[[0.0, 0.0, -2.0]])
 
 
+def test_face_resolved_event_remap_is_exact_read_only_and_caches_builtin_yield():
+    events = FaceResolvedEnergeticFlux(
+        "Ar+", 4, [0, 1, 2, 3], [1.0, 2.0, 3.0, 4.0],
+        [40.0, 60.0, 80.0, 100.0], [1.0, 0.8, 0.6, 0.4],
+        event_position=np.arange(12, dtype=float).reshape(4, 3),
+        event_incident_direction=np.tile([0.0, 0.0, -1.0], (4, 1)))
+    mapping = np.array([-1, 1, -1, 0])
+    selected = events.remap_faces(mapping, 2)
+
+    assert selected.face_count == 2
+    assert np.array_equal(selected.event_face, [1, 0])
+    assert np.array_equal(selected.event_flux_m2_s, [2.0, 4.0])
+    assert np.array_equal(selected.event_energy_eV, [60.0, 100.0])
+    assert np.array_equal(
+        selected.event_position, [[3.0, 4.0, 5.0], [9.0, 10.0, 11.0]])
+    assert not selected.event_face.flags.writeable
+    assert not selected.event_incident_direction.flags.writeable
+
+    law = EnergeticYield(
+        0.5, 20.0, 100.0, angular_model="chang_sawin_1997")
+    first = selected.yield_rate_m2_s(law)
+    second = selected.yield_rate_m2_s(law)
+    assert first is second
+    assert not first.flags.writeable
+    expected = law.evaluate(
+        selected.event_energy_eV, selected.event_cosine_incidence)
+    assert np.array_equal(
+        first,
+        np.bincount(
+            selected.event_face,
+            weights=selected.event_flux_m2_s * expected,
+            minlength=selected.face_count))
+
+    with pytest.raises(ValueError, match="cover every destination"):
+        events.remap_faces(np.array([-1, 1, -1, -1]), 2)
+
+
 def test_no_flux_is_an_exact_identity_and_zero_velocity():
     state = SiO2SurfaceState(
         [0.2, 0.8], [1e18, 2e18], [3e18, 4e18],
