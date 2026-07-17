@@ -51,6 +51,7 @@ from .feature_step_3d import (
 )
 from .surface_charge_remap_3d import SurfaceChargeRemap3DResult, remap_surface_charge_3d
 from .surface_kinetics import FaceResolvedEnergeticFlux
+from .surface_patch_convergence_3d import physical_surface_patch_groups_3d
 from .threed import extract_mesh_3d
 
 
@@ -270,39 +271,6 @@ class SurfaceChargingSaturationError(RuntimeError):
                 or self.resume_sampling_epoch < 0
                 or self.resume_stochastic_gain_age_steps < 0):
             raise ValueError("failure checkpoint restart metadata must be nonnegative and ordered")
-
-
-def physical_surface_patch_groups_3d(
-        face_centroids, face_gas_normals, face_material_id, patch_scale_m, *,
-        mesh_length_unit_m=1e-6, mesh_origin_m=(0.0, 0.0, 0.0), patch_origin_m=None):
-    """Assign fixed physical surface patches independent of triangle/grid indices.
-
-    Patches are physical Cartesian boxes anchored at ``patch_origin_m`` and split by material and
-    dominant oriented surface-normal class. The latter prevents a wall and floor sharing one spatial
-    box from being silently merged into a single balance equation.
-    """
-    centroid = np.asarray(face_centroids, dtype=float)
-    normal = np.asarray(face_gas_normals, dtype=float)
-    material = np.asarray(face_material_id, dtype=int)
-    origin = np.asarray(mesh_origin_m, dtype=float)
-    patch_origin = origin if patch_origin_m is None else np.asarray(patch_origin_m, dtype=float)
-    if (centroid.ndim != 2 or centroid.shape[1] != 3
-            or normal.shape != centroid.shape or material.shape != (len(centroid),)
-            or len(centroid) == 0 or np.any(~np.isfinite(centroid))
-            or np.any(~np.isfinite(normal)) or np.any(material <= 0)
-            or not np.allclose(np.linalg.norm(normal, axis=1), 1.0, rtol=0.0, atol=2e-6)
-            or not np.isfinite(patch_scale_m) or patch_scale_m <= 0.0
-            or origin.shape != (3,) or patch_origin.shape != (3,)
-            or np.any(~np.isfinite(origin)) or np.any(~np.isfinite(patch_origin))
-            or not np.isfinite(mesh_length_unit_m) or mesh_length_unit_m <= 0.0):
-        raise ValueError("invalid physical surface-patch inputs")
-    physical = origin + centroid * float(mesh_length_unit_m)
-    cell = np.floor((physical - patch_origin) / float(patch_scale_m) + 1e-12).astype(int)
-    dominant_axis = np.argmax(np.abs(normal), axis=1)
-    dominant_sign = (normal[np.arange(len(normal)), dominant_axis] >= 0.0).astype(int)
-    key = np.column_stack((material, dominant_axis, dominant_sign, cell))
-    _, group = np.unique(key, axis=0, return_inverse=True)
-    return group.astype(int)
 
 
 def propose_compatible_q1_pseudo_time_step_3d(

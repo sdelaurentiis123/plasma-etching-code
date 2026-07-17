@@ -1,0 +1,239 @@
+{
+  "checkpoint": {
+    "path_name": "checkpoint.npz",
+    "sha256": "8c5ca2200e35f68410a6195d0156ce34f2b319f1bcc7da96b533684a29772cd5",
+    "source_audit_sha256": "b06c07aae21d26b52dd111866c0a381f8f61ad044e330e5ed826d88f3140765f"
+  },
+  "mesh_identity": {
+    "arrays": {
+      "face_area_m2": "de15bd32da5c9a50f99517188bfb83b6849ebfe9f8f84f9a9fa97dc8cb909c71",
+      "face_material_id": "540c8e8517ebf2dbc32e10e2a6e2d6fff53ef25b4f64e95ddfe55e0d2f1986ff",
+      "faces": "4c4055f4b080012c1abf0a56da4363f64cb56fab04226b54e6af4868401fb3dc",
+      "gas_normals": "f94d0ec72c1f4d816281439eff74ea457b8febd47d714cc62866a4c62312dd51",
+      "verts": "b5adc56c236bfcf0154b573175ba432df74dda1633bf8ffc20c4faa8fe0f6512"
+    },
+    "combined_sha256": "0c8a988597660ae3fd67173770fec60ad68d0551410e297085061016ee93d316"
+  },
+  "patch_scales": [
+    {
+      "patch_count": 272,
+      "patch_scale_m": 2e-08,
+      "projected_support_fraction": {
+        "maximum": 1.00000200784534,
+        "median": 0.9996712793320527,
+        "minimum": 1.4824530661553072e-08
+      },
+      "represented_nominal_projected_area_m2": {
+        "maximum": 4.0000000000000004e-16,
+        "minimum": 4.0000000000000004e-16,
+        "total": 1.0880000000000003e-13
+      },
+      "scheme_sha256": "4f57e8e6f4b6240b6cbe0426aeac39a05e4d8311c4e574d96f4058f3f32316fd",
+      "surface_area_inventory_relative_error": 0.0,
+      "thresholds": [
+        {
+          "eligible_mean_patch_count": 203,
+          "excluded_mean_patch_count": 69,
+          "excluded_projected_support_area_m2": 8.858642894099103e-17,
+          "excluded_projected_support_fraction": 0.0012779384036003805,
+          "excluded_surface_area_fraction": 0.0015513044797530525,
+          "excluded_surface_area_m2": 1.1449787177998952e-16,
+          "minimum_mean_support_fraction": 0.05
+        },
+        {
+          "eligible_mean_patch_count": 200,
+          "excluded_mean_patch_count": 72,
+          "excluded_projected_support_area_m2": 1.6089879266376553e-16,
+          "excluded_projected_support_fraction": 0.0023211088729508146,
+          "excluded_surface_area_fraction": 0.0027533180148954996,
+          "excluded_surface_area_m2": 2.0321545973310396e-16,
+          "minimum_mean_support_fraction": 0.075
+        },
+        {
+          "eligible_mean_patch_count": 196,
+          "excluded_mean_patch_count": 76,
+          "excluded_projected_support_area_m2": 2.889062771062854e-16,
+          "excluded_projected_support_fraction": 0.004167731231171639,
+          "excluded_surface_area_fraction": 0.005042499139243045,
+          "excluded_surface_area_m2": 3.7217414597272686e-16,
+          "minimum_mean_support_fraction": 0.1
+        },
+        {
+          "eligible_mean_patch_count": 183,
+          "excluded_mean_patch_count": 89,
+          "excluded_projected_support_area_m2": 1.041101759234985e-15,
+          "excluded_projected_support_fraction": 0.015018823267710108,
+          "excluded_surface_area_fraction": 0.01813038849957178,
+          "excluded_surface_area_m2": 1.3381582563829258e-15,
+          "minimum_mean_support_fraction": 0.25
+        },
+        {
+          "eligible_mean_patch_count": 170,
+          "excluded_mean_patch_count": 102,
+          "excluded_projected_support_area_m2": 2.9821071550331262e-15,
+          "excluded_projected_support_fraction": 0.04301956070050916,
+          "excluded_surface_area_fraction": 0.050930064010193295,
+          "excluded_surface_area_m2": 3.7590195960202805e-15,
+          "minimum_mean_support_fraction": 0.5
+        },
+        {
+          "eligible_mean_patch_count": 162,
+          "excluded_mean_patch_count": 110,
+          "excluded_projected_support_area_m2": 4.9882254525101675e-15,
+          "excluded_projected_support_fraction": 0.07195960992880626,
+          "excluded_surface_area_fraction": 0.08368101725818589,
+          "excluded_surface_area_m2": 6.1762848683142304e-15,
+          "minimum_mean_support_fraction": 0.75
+        }
+      ],
+      "total_projected_support_area_m2": 6.931979561097264e-14,
+      "total_surface_area_m2": 7.380747833475998e-14
+    },
+    {
+      "patch_count": 151,
+      "patch_scale_m": 4e-08,
+      "projected_support_fraction": {
+        "maximum": 1.0000009495030724,
+        "median": 0.91690868527814,
+        "minimum": 3.706132665388268e-09
+      },
+      "represented_nominal_projected_area_m2": {
+        "maximum": 1.6000000000000002e-15,
+        "minimum": 8.000000000000001e-16,
+        "total": 1.4879999999999998e-13
+      },
+      "scheme_sha256": "f917b59b4366910399a9b0e7a2c73670a915e3858c222a3af1e0c948eff894d2",
+      "surface_area_inventory_relative_error": 1.710094257154956e-16,
+      "thresholds": [
+        {
+          "eligible_mean_patch_count": 99,
+          "excluded_mean_patch_count": 52,
+          "excluded_projected_support_area_m2": 4.2454931716150693e-16,
+          "excluded_projected_support_fraction": 0.006124503302694462,
+          "excluded_surface_area_fraction": 0.008157928086754732,
+          "excluded_surface_area_m2": 6.021161005196799e-16,
+          "minimum_mean_support_fraction": 0.05
+        },
+        {
+          "eligible_mean_patch_count": 98,
+          "excluded_mean_patch_count": 53,
+          "excluded_projected_support_area_m2": 4.67063832339306e-16,
+          "excluded_projected_support_fraction": 0.006737813177645528,
+          "excluded_surface_area_fraction": 0.008746781895147389,
+          "excluded_surface_area_m2": 6.455779152249618e-16,
+          "minimum_mean_support_fraction": 0.075
+        },
+        {
+          "eligible_mean_patch_count": 96,
+          "excluded_mean_patch_count": 55,
+          "excluded_projected_support_area_m2": 7.518147998170747e-16,
+          "excluded_projected_support_fraction": 0.010845600353992822,
+          "excluded_surface_area_fraction": 0.014005602753302865,
+          "excluded_surface_area_m2": 1.033718221779656e-15,
+          "minimum_mean_support_fraction": 0.1
+        },
+        {
+          "eligible_mean_patch_count": 89,
+          "excluded_mean_patch_count": 62,
+          "excluded_projected_support_area_m2": 1.7604316022696968e-15,
+          "excluded_projected_support_fraction": 0.025395799089618754,
+          "excluded_surface_area_fraction": 0.0316204274268452,
+          "excluded_surface_area_m2": 2.3338240122427274e-15,
+          "minimum_mean_support_fraction": 0.25
+        },
+        {
+          "eligible_mean_patch_count": 85,
+          "excluded_mean_patch_count": 66,
+          "excluded_projected_support_area_m2": 3.2037394625374125e-15,
+          "excluded_projected_support_fraction": 0.04621680480013263,
+          "excluded_surface_area_fraction": 0.05327581751711164,
+          "excluded_surface_area_m2": 3.9321537471608446e-15,
+          "minimum_mean_support_fraction": 0.5
+        },
+        {
+          "eligible_mean_patch_count": 82,
+          "excluded_mean_patch_count": 69,
+          "excluded_projected_support_area_m2": 4.5597963429745266e-15,
+          "excluded_projected_support_fraction": 0.06577913715390062,
+          "excluded_surface_area_fraction": 0.07359267264806413,
+          "excluded_surface_area_m2": 5.431689592069078e-15,
+          "minimum_mean_support_fraction": 0.75
+        }
+      ],
+      "total_projected_support_area_m2": 6.931979561097263e-14,
+      "total_surface_area_m2": 7.380747833476e-14
+    }
+  ],
+  "physical_patch_operator": {
+    "checkpoint_domain_lengths_m": [
+      1.3e-07,
+      2e-08,
+      2.8000000000000003e-06
+    ],
+    "integrated_gate_area_scale": "represented nominal projected footprint; every patch",
+    "mean_gate_domain": "support-eligible patches only; all-patch mean retained diagnostic",
+    "mesh_origin_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "minimum_mean_support_fraction": 0.1,
+    "patch_scales_m": [
+      2e-08,
+      4e-08
+    ],
+    "periodic_axes_xyz": [
+      false,
+      true,
+      false
+    ],
+    "periodic_domain_lengths_m": [
+      0.0,
+      2e-08,
+      0.0
+    ],
+    "periodic_domain_origin_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "projected_support_measure": "dominant-axis projected triangle overlap",
+    "represented_nominal_footprint": "tangential Cartesian patch footprint intersected with the represented periodic fundamental domain",
+    "schema": "petch.physical-patch-support-operator.v1",
+    "selected_source_allocator_artifact_role": "historical diagnostic only; recomputation required under this operator",
+    "support_sensitivity_thresholds": [
+      0.05,
+      0.075,
+      0.1,
+      0.25,
+      0.5,
+      0.75
+    ]
+  },
+  "primary_threshold_binding": {
+    "integrated_all_patch_gate_unchanged": true,
+    "minimum_mean_support_fraction": 0.1,
+    "old_selected_source_allocator_threshold_0p10_is_executable_input": false,
+    "selected_before_any_transport_or_chemistry_score": true,
+    "selection": "predeclared geometry-independent round fraction"
+  },
+  "schema": "petch.krueger-2024.physical-patch-support-sensitivity.v1",
+  "scope": "sealed base checkpoint geometry only; no transport/chemistry/profile/heldout",
+  "sensitivity_thresholds": [
+    0.05,
+    0.075,
+    0.1,
+    0.25,
+    0.5,
+    0.75
+  ],
+  "source_manifest": {
+    "aggregate_sha256": "51d8b9a843cf832367069ed8249c2cebc807d278ac8fd1aed6e47f7527e14396",
+    "files": {
+      "scripts/krueger_2024_patch_support_sensitivity.py": "44798bf4265a23a5a0198d5e843bfe946d79b21c3f1ad9aa5724704c0c4f0fbd",
+      "scripts/krueger_2024_replicated_form_factor_closure.py": "4a6b0eba6c211924fff769079c7d524a3eb71dde077e747329908abe5da7a403",
+      "src/petch/surface_patch_convergence_3d.py": "141bf758ba27dac1066fda72402cd5336e7160853a014d6935ecf707361d10a1"
+    }
+  },
+  "status": "complete"
+}

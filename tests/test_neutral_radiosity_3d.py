@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+import petch.neutral_radiosity_3d as radiosity_module
 
 from petch.neutral_radiosity_3d import (
     DiffuseFormFactors3D,
@@ -40,6 +41,41 @@ def test_unequal_area_cavity_uses_reciprocity_factor_and_conserves_projectiles()
     assert result.relative_linear_residual < 1e-12
 
 
+def test_rate_space_direct_fallback_preserves_the_certified_operator(monkeypatch):
+    def exhausted_gmres(operator, right_hand_side, **kwargs):
+        return np.zeros_like(right_hand_side), 7
+
+    monkeypatch.setattr(radiosity_module, "gmres", exhausted_gmres)
+    result = solve_diffuse_neutral_radiosity_3d(
+        direct_flux_m2_s=[0.6, 0.8], face_area_m2=[1.0, 2.0],
+        source_face=[0, 1], target_face=[1, 0], transfer_fraction=[0.4, 0.2],
+        escape_fraction=[0.6, 0.8], reaction_probability=[0.3, 0.7])
+
+    expected_h0 = 0.696 / 0.9832
+    expected_h1 = 0.8 + 0.14 * expected_h0
+    assert np.allclose(result.incident_flux_m2_s, [expected_h0, expected_h1])
+    assert result.solver_method == (
+        "sparse_direct_rate_space_reachable_subspace_fallback")
+    assert not result.iterations_converged
+    assert result.relative_linear_residual < 1e-12
+    assert result.relative_balance_error < 2e-12
+
+
+def test_unilluminated_reflecting_nullspace_gets_zero_minimal_causal_solution():
+    # Face 0 is illuminated and open. Faces 1/2 are a perfectly reflecting closed cycle, but no
+    # source or transport path feeds them. Their physical causal solution is zero rather than an
+    # arbitrary circulation from the singular full matrix.
+    result = solve_diffuse_neutral_radiosity_3d(
+        direct_flux_m2_s=[2.0, 0.0, 0.0], face_area_m2=[1.0, 1.0, 1.0],
+        source_face=[1, 2], target_face=[2, 1], transfer_fraction=[1.0, 1.0],
+        escape_fraction=[1.0, 0.0, 0.0], reaction_probability=[0.0, 0.0, 0.0])
+
+    assert np.allclose(result.incident_flux_m2_s, [2.0, 0.0, 0.0])
+    assert result.inactive_face_count == 2
+    assert np.isclose(result.escaped_rate_s, result.source_rate_s)
+    assert result.relative_balance_error < 1e-14
+
+
 def test_form_factor_rows_must_close_projectile_balance_before_solving():
     with pytest.raises(ValueError, match="sum to one"):
         solve_diffuse_neutral_radiosity_3d(
@@ -47,7 +83,7 @@ def test_form_factor_rows_must_close_projectile_balance_before_solving():
 
 
 def test_perfectly_reflecting_closed_cavity_refuses_singular_steady_state():
-    with pytest.raises(RuntimeError, match="did not converge"):
+    with pytest.raises(RuntimeError, match="closed nonreacting class"):
         solve_diffuse_neutral_radiosity_3d(
             [1.0, 0.0], [1.0, 1.0], [0, 1], [1, 0], [1.0, 1.0],
             [0.0, 0.0], [0.0, 0.0], maximum_iterations=20)

@@ -1,0 +1,349 @@
+{
+  "evidence_kind": "published_HPEM_reactor_model_output",
+  "flux_digitization": {
+    "article_text_constraints": {
+      "O_ratio_0p5_cm2_s": 4.1e+16,
+      "O_ratio_2p5_cm2_s": 1.5e+17,
+      "source_location": "Section IX.A immediately following Figure 16"
+    },
+    "pixel_calibration": {
+      "line_and_calibration_half_interval_pixels": 2.0,
+      "log10_flux_tick_anchors": [
+        [
+          407.0,
+          17.0
+        ],
+        [
+          606.0,
+          16.0
+        ],
+        [
+          804.0,
+          15.0
+        ]
+      ],
+      "trace_half_width_pixels": 10,
+      "x_ratio_0p5_pixel": 280.0,
+      "x_ratio_2p5_pixel": 882.0
+    },
+    "trace_records": [
+      {
+        "median_y_pixel": 375.0,
+        "nominal_x_pixel": 280.0,
+        "oxygen_to_fluorocarbon_ratio": 0.5,
+        "sample_center_x_pixel": 286,
+        "selected_colored_pixel_count": 44,
+        "species": "CF2"
+      },
+      {
+        "median_y_pixel": 401.0,
+        "nominal_x_pixel": 280.0,
+        "oxygen_to_fluorocarbon_ratio": 0.5,
+        "sample_center_x_pixel": 286,
+        "selected_colored_pixel_count": 33,
+        "species": "C3F4"
+      },
+      {
+        "median_y_pixel": 424.0,
+        "nominal_x_pixel": 280.0,
+        "oxygen_to_fluorocarbon_ratio": 0.5,
+        "sample_center_x_pixel": 286,
+        "selected_colored_pixel_count": 42,
+        "species": "C2F3"
+      },
+      {
+        "median_y_pixel": 475.0,
+        "nominal_x_pixel": 280.0,
+        "oxygen_to_fluorocarbon_ratio": 0.5,
+        "sample_center_x_pixel": 286,
+        "selected_colored_pixel_count": 204,
+        "species": "CF"
+      },
+      {
+        "median_y_pixel": 478.0,
+        "nominal_x_pixel": 280.0,
+        "oxygen_to_fluorocarbon_ratio": 0.5,
+        "sample_center_x_pixel": 286,
+        "selected_colored_pixel_count": 45,
+        "species": "O"
+      },
+      {
+        "median_y_pixel": 609.0,
+        "nominal_x_pixel": 280.0,
+        "oxygen_to_fluorocarbon_ratio": 0.5,
+        "sample_center_x_pixel": 286,
+        "selected_colored_pixel_count": 15,
+        "species": "ions"
+      },
+      {
+        "median_y_pixel": 598.0,
+        "nominal_x_pixel": 280.0,
+        "oxygen_to_fluorocarbon_ratio": 0.5,
+        "sample_center_x_pixel": 286,
+        "selected_colored_pixel_count": 37,
+        "species": "CF3"
+      },
+      {
+        "median_y_pixel": 386.0,
+        "nominal_x_pixel": 430.5,
+        "oxygen_to_fluorocarbon_ratio": 1.0,
+        "sample_center_x_pixel": 430,
+        "selected_colored_pixel_count": 57,
+        "species": "CF2"
+      },
+      {
+        "median_y_pixel": 413.0,
+        "nominal_x_pixel": 430.5,
+        "oxygen_to_fluorocarbon_ratio": 1.0,
+        "sample_center_x_pixel": 430,
+        "selected_colored_pixel_count": 53,
+        "species": "C3F4"
+      },
+      {
+        "median_y_pixel": 433.0,
+        "nominal_x_pixel": 430.5,
+        "oxygen_to_fluorocarbon_ratio": 1.0,
+        "sample_center_x_pixel": 430,
+        "selected_colored_pixel_count": 31,
+        "species": "C2F3"
+      },
+      {
+        "median_y_pixel": 483.0,
+        "nominal_x_pixel": 430.5,
+        "oxygen_to_fluorocarbon_ratio": 1.0,
+        "sample_center_x_pixel": 430,
+        "selected_colored_pixel_count": 57,
+        "species": "CF"
+      },
+      {
+        "median_y_pixel": 437.0,
+        "nominal_x_pixel": 430.5,
+        "oxygen_to_fluorocarbon_ratio": 1.0,
+        "sample_center_x_pixel": 430,
+        "selected_colored_pixel_count": 62,
+        "species": "O"
+      },
+      {
+        "median_y_pixel": 608.0,
+        "nominal_x_pixel": 430.5,
+        "oxygen_to_fluorocarbon_ratio": 1.0,
+        "sample_center_x_pixel": 430,
+        "selected_colored_pixel_count": 58,
+        "species": "ions"
+      },
+      {
+        "median_y_pixel": 610.0,
+        "nominal_x_pixel": 430.5,
+        "oxygen_to_fluorocarbon_ratio": 1.0,
+        "sample_center_x_pixel": 430,
+        "selected_colored_pixel_count": 9,
+        "species": "CF3"
+      },
+      {
+        "median_y_pixel": 385.0,
+        "nominal_x_pixel": 581.0,
+        "oxygen_to_fluorocarbon_ratio": 1.5,
+        "sample_center_x_pixel": 581,
+        "selected_colored_pixel_count": 63,
+        "species": "CF2"
+      },
+      {
+        "median_y_pixel": 413.0,
+        "nominal_x_pixel": 581.0,
+        "oxygen_to_fluorocarbon_ratio": 1.5,
+        "sample_center_x_pixel": 581,
+        "selected_colored_pixel_count": 48,
+        "species": "C3F4"
+      },
+      {
+        "median_y_pixel": 436.0,
+        "nominal_x_pixel": 581.0,
+        "oxygen_to_fluorocarbon_ratio": 1.5,
+        "sample_center_x_pixel": 581,
+        "selected_colored_pixel_count": 63,
+        "species": "C2F3"
+      },
+      {
+        "median_y_pixel": 481.5,
+        "nominal_x_pixel": 581.0,
+        "oxygen_to_fluorocarbon_ratio": 1.5,
+        "sample_center_x_pixel": 581,
+        "selected_colored_pixel_count": 42,
+        "species": "CF"
+      },
+      {
+        "median_y_pixel": 402.0,
+        "nominal_x_pixel": 581.0,
+        "oxygen_to_fluorocarbon_ratio": 1.5,
+        "sample_center_x_pixel": 581,
+        "selected_colored_pixel_count": 67,
+        "species": "O"
+      },
+      {
+        "median_y_pixel": 597.0,
+        "nominal_x_pixel": 581.0,
+        "oxygen_to_fluorocarbon_ratio": 1.5,
+        "sample_center_x_pixel": 581,
+        "selected_colored_pixel_count": 64,
+        "species": "ions"
+      },
+      {
+        "median_y_pixel": 608.0,
+        "nominal_x_pixel": 581.0,
+        "oxygen_to_fluorocarbon_ratio": 1.5,
+        "sample_center_x_pixel": 581,
+        "selected_colored_pixel_count": 63,
+        "species": "CF3"
+      },
+      {
+        "median_y_pixel": 387.0,
+        "nominal_x_pixel": 882.0,
+        "oxygen_to_fluorocarbon_ratio": 2.5,
+        "sample_center_x_pixel": 876,
+        "selected_colored_pixel_count": 45,
+        "species": "CF2"
+      },
+      {
+        "median_y_pixel": 419.0,
+        "nominal_x_pixel": 882.0,
+        "oxygen_to_fluorocarbon_ratio": 2.5,
+        "sample_center_x_pixel": 876,
+        "selected_colored_pixel_count": 18,
+        "species": "C3F4"
+      },
+      {
+        "median_y_pixel": 441.0,
+        "nominal_x_pixel": 882.0,
+        "oxygen_to_fluorocarbon_ratio": 2.5,
+        "sample_center_x_pixel": 876,
+        "selected_colored_pixel_count": 49,
+        "species": "C2F3"
+      },
+      {
+        "median_y_pixel": 485.0,
+        "nominal_x_pixel": 882.0,
+        "oxygen_to_fluorocarbon_ratio": 2.5,
+        "sample_center_x_pixel": 876,
+        "selected_colored_pixel_count": 182,
+        "species": "CF"
+      },
+      {
+        "median_y_pixel": 380.0,
+        "nominal_x_pixel": 882.0,
+        "oxygen_to_fluorocarbon_ratio": 2.5,
+        "sample_center_x_pixel": 876,
+        "selected_colored_pixel_count": 52,
+        "species": "O"
+      },
+      {
+        "median_y_pixel": 594.0,
+        "nominal_x_pixel": 882.0,
+        "oxygen_to_fluorocarbon_ratio": 2.5,
+        "sample_center_x_pixel": 876,
+        "selected_colored_pixel_count": 54,
+        "species": "ions"
+      },
+      {
+        "median_y_pixel": 612.5,
+        "nominal_x_pixel": 882.0,
+        "oxygen_to_fluorocarbon_ratio": 2.5,
+        "sample_center_x_pixel": 876,
+        "selected_colored_pixel_count": 30,
+        "species": "CF3"
+      }
+    ],
+    "units": "cm^-2 s^-1"
+  },
+  "iead_digitization": {
+    "angle_five_degree_pixel_offset": 55.0,
+    "colorfulness_threshold": 15.0,
+    "joint_bins": {
+      "angle_deg": 0.25,
+      "energy_eV": 250.0
+    },
+    "legend_log10_density": [
+      -2.0,
+      0.0
+    ],
+    "legend_x_pixels": [
+      486,
+      722
+    ],
+    "legend_y_pixel": 1660,
+    "panel_angle_zero_pixels": [
+      344.0,
+      505.0,
+      665.0,
+      826.0
+    ],
+    "panel_powers_kw": [
+      0.0,
+      4.0,
+      6.0,
+      8.0
+    ],
+    "plot_y_energy_5000eV_pixel": 967.0,
+    "plot_y_energy_zero_pixel": 1576.0,
+    "source_summaries": {
+      "0": {
+        "angle_standard_deviation_deg": 1.1303904165637473,
+        "energy_quantile_eV": {
+          "q05": 476.1904761904762,
+          "q50": 517.2413793103449,
+          "q95": 566.5024630541872
+        },
+        "mean_energy_eV": 519.0875778311236,
+        "mean_signed_angle_deg": -0.01281995701785001,
+        "source_pixel_count": 1605
+      },
+      "4": {
+        "angle_standard_deviation_deg": 0.6565665983103166,
+        "energy_quantile_eV": {
+          "q05": 853.8587848932676,
+          "q50": 2824.3021346469623,
+          "q95": 3275.862068965517
+        },
+        "mean_energy_eV": 2551.1952316392994,
+        "mean_signed_angle_deg": -0.043364257400025766,
+        "source_pixel_count": 16076
+      },
+      "6": {
+        "angle_standard_deviation_deg": 0.6546223479552254,
+        "energy_quantile_eV": {
+          "q05": 1026.2725779967159,
+          "q50": 3316.9129720853857,
+          "q95": 3817.733990147783
+        },
+        "mean_energy_eV": 2998.1216812951934,
+        "mean_signed_angle_deg": -0.001694331541993874,
+        "source_pixel_count": 18626
+      },
+      "8": {
+        "angle_standard_deviation_deg": 0.7362349212430377,
+        "energy_quantile_eV": {
+          "q05": 1231.527093596059,
+          "q50": 3965.5172413793102,
+          "q95": 4605.911330049261
+        },
+        "mean_energy_eV": 3592.855024183382,
+        "mean_signed_angle_deg": -0.009819186707822215,
+        "source_pixel_count": 26092
+      }
+    }
+  },
+  "limitations": [
+    "all Figure-16 boundary values are HPEM predictions, not measured wafer fluxes",
+    "normalized IEAD density below 1e-2 of panel maximum is clipped by the figure",
+    "combined positive-ion composition is unresolved",
+    "the plotted signed-angle plane does not determine a 3-D azimuthal law",
+    "rendered line/color thickness defines digitization uncertainty but not HPEM model error"
+  ],
+  "rendered_page_sha256": "f944841595bbdcdfe1851753fc4028830470181afcbcc6ab888f139558ff55cd",
+  "rendered_page_shape": [
+    2475,
+    1870,
+    3
+  ],
+  "source": "Kr\u00fcger et al., JVST A 42, 043008 (2024), Figure 16, https://doi.org/10.1116/6.0003554",
+  "source_pdf_sha256": "65b7750b2b773c3725d8f09f778b5b728ce9974a4548a5d522d19256f6bf9a51"
+}

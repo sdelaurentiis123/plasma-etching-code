@@ -8,12 +8,24 @@ form-factor reciprocity. Omitting that ratio conserves neither particles nor the
 from __future__ import annotations
 
 from dataclasses import dataclass
+import warnings
 
 import numpy as np
 from scipy import sparse
-from scipy.sparse.linalg import gmres
+from scipy.sparse.csgraph import connected_components
+from scipy.sparse.linalg import MatrixRankWarning, gmres, spsolve
 
 from .surface_exchange import SurfaceProductPopulation
+
+
+class DiffuseNeutralNoSinkError(RuntimeError):
+    """The sampled transport graph contains a source-reachable class with no sink."""
+
+    def __init__(self, face_count):
+        self.face_count = int(face_count)
+        super().__init__(
+            "diffuse-neutral sampled transport contains a source-reachable closed "
+            f"nonreacting class ({self.face_count} faces)")
 
 
 @dataclass(frozen=True)
@@ -63,6 +75,9 @@ class DiffuseNeutralSolve3D:
     relative_balance_error: float
     relative_linear_residual: float
     iterations_converged: bool
+    solver_method: str = "gmres_rate_space"
+    iteration_count: int = 0
+    inactive_face_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -124,33 +139,102 @@ def solve_diffuse_neutral_radiosity_3d(
     if not np.allclose(outgoing_fraction, 1.0, rtol=0.0, atol=5e-13):
         raise ValueError("each face's transfer and escape fractions must sum to one")
 
+    # Solve in particle-rate space q_i=A_i H_i.  The flux-density equation contains
+    # A_source/A_target and becomes badly scaled when marching cubes creates triangles of very
+    # different areas.  Multiplying each row by target area gives the diagonally similar system
+    # q = A D + F^T (1-s) q, whose nonnegative transfer columns are directly bounded by unity.
+    # The operator and fixed point are identical; only the numerical coordinates change.
     exchange = sparse.coo_matrix(
-        (fraction * area[source] / area[target], (target, source)),
-        shape=(n_face, n_face)).tocsr()
+        (fraction, (target, source)), shape=(n_face, n_face)).tocsr()
     reflection = 1.0 - reaction
-    transport = exchange @ sparse.diags(reflection)
-    operator = sparse.eye(n_face, format="csr") - transport
+    transport = (exchange @ sparse.diags(reflection)).tocsr()
+    transport.eliminate_zeros()
+    direct_rate = area * direct
+    # A closed, perfectly reflecting face class that cannot be reached from the direct source has
+    # an arbitrary circulation nullspace but physically contains no projectiles.  Solve the minimal
+    # causal solution by setting those unreachable rates to zero.  A source-reachable closed class
+    # remains in the operator and therefore still refuses as a genuine missing-sink condition.
+    outgoing_graph = transport.transpose().tocsr()
+    reachable = np.zeros(n_face, dtype=bool)
+    stack = list(np.flatnonzero(direct_rate > 0.0))
+    reachable[stack] = True
+    while stack:
+        face = int(stack.pop())
+        targets = outgoing_graph.indices[
+            outgoing_graph.indptr[face]:outgoing_graph.indptr[face + 1]]
+        for target_index in targets:
+            target_index = int(target_index)
+            if not reachable[target_index]:
+                reachable[target_index] = True
+                stack.append(target_index)
+    active = np.flatnonzero(reachable)
+    active_transport = transport[active][:, active]
+    if active.size:
+        component_count, component_label = connected_components(
+            active_transport.transpose(), directed=True, connection="strong")
+        column_sum = np.asarray(active_transport.sum(axis=0)).ravel()
+        for component_index in range(int(component_count)):
+            member = np.flatnonzero(component_label == component_index)
+            total_outgoing = float(active_transport[:, member].sum())
+            internal_outgoing = float(active_transport[member][:, member].sum())
+            if (abs(total_outgoing - internal_outgoing) <= 5e-13
+                    and np.allclose(
+                        column_sum[member], 1.0, rtol=0.0, atol=5e-13)):
+                raise DiffuseNeutralNoSinkError(member.size)
+    operator = sparse.eye(active.size, format="csr") - active_transport
+    active_direct_rate = direct_rate[active]
     callback_count = [0]
 
     def count_iteration(_):
         callback_count[0] += 1
 
-    try:
-        incident, info = gmres(
-            operator, direct, rtol=relative_tolerance, atol=0.0,
-            maxiter=int(maximum_iterations), callback=count_iteration,
-            callback_type="pr_norm")
-    except TypeError:  # scipy before callback_type/rtol
-        incident, info = gmres(
-            operator, direct, tol=relative_tolerance,
-            maxiter=int(maximum_iterations), callback=count_iteration)
-    incident = np.asarray(incident, dtype=float)
-    scale = max(float(np.linalg.norm(direct)), np.finfo(float).tiny)
-    residual = float(np.linalg.norm(operator @ incident - direct) / scale)
-    if info != 0 or np.any(incident < -1e-12 * max(float(np.max(incident)), 1.0)):
+    if active.size:
+        try:
+            active_incident_rate, info = gmres(
+                operator, active_direct_rate, rtol=relative_tolerance, atol=0.0,
+                maxiter=int(maximum_iterations), callback=count_iteration,
+                callback_type="pr_norm")
+        except TypeError:  # scipy before callback_type/rtol
+            active_incident_rate, info = gmres(
+                operator, active_direct_rate, tol=relative_tolerance,
+                maxiter=int(maximum_iterations), callback=count_iteration)
+        active_incident_rate = np.asarray(active_incident_rate, dtype=float)
+        method = "gmres_rate_space_reachable_subspace"
+    else:
+        active_incident_rate = np.zeros(0)
+        info = 0
+        method = "zero_source_reachable_subspace"
+    negative_tolerance = 1e-12 * max(
+        float(np.max(active_incident_rate, initial=0.0)), 1.0)
+    invalid_iterative = (
+        info != 0 or np.any(~np.isfinite(active_incident_rate))
+        or np.any(active_incident_rate < -negative_tolerance))
+    if invalid_iterative:
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", MatrixRankWarning)
+                active_incident_rate = np.asarray(
+                    spsolve(operator.tocsc(), active_direct_rate), dtype=float)
+            method = "sparse_direct_rate_space_reachable_subspace_fallback"
+        except (MatrixRankWarning, RuntimeError, ValueError) as error:
+            raise RuntimeError(
+                "diffuse-neutral radiosity did not converge to a nonnegative solution: "
+                f"gmres_info={info}; direct fallback failed") from error
+    incident_rate = np.zeros(n_face)
+    incident_rate[active] = active_incident_rate
+    scale = max(float(np.linalg.norm(direct_rate)), np.finfo(float).tiny)
+    residual = float(
+        np.linalg.norm(incident_rate - transport @ incident_rate - direct_rate) / scale)
+    negative_tolerance = 1e-12 * max(
+        float(np.max(incident_rate, initial=0.0)), 1.0)
+    if (np.any(~np.isfinite(incident_rate))
+            or np.any(incident_rate < -negative_tolerance)
+            or residual > max(20.0 * relative_tolerance, 2e-12)):
         raise RuntimeError(
-            f"diffuse-neutral radiosity did not converge to a nonnegative solution: info={info}")
-    incident = np.maximum(incident, 0.0)
+            "diffuse-neutral radiosity did not converge to a certified nonnegative solution: "
+            f"gmres_info={info}, method={method}, residual={residual:.3e}")
+    incident_rate = np.maximum(incident_rate, 0.0)
+    incident = incident_rate / area
     reacted = reaction * incident
     reflected = reflection * incident
     source_rate = float(np.dot(area, direct))
@@ -164,7 +248,8 @@ def solve_diffuse_neutral_radiosity_3d(
         value.setflags(write=False)
     return DiffuseNeutralSolve3D(
         incident, reacted, reflected, source_rate, reacted_rate, escaped_rate,
-        balance, residual, info == 0)
+        balance, residual, info == 0, method, int(callback_count[0]),
+        int(n_face - active.size))
 
 
 def transport_diffuse_surface_emission_3d(

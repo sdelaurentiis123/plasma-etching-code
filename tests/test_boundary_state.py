@@ -3,6 +3,8 @@ import pytest
 from scipy.stats import qmc
 
 from petch.boundary_state import (
+    DiscreteEnergyAngleDensity2D,
+    DiscreteEnergyPolarAzimuthDensity3D,
     FoldedNormalTangentialDensity,
     PlasmaBoundaryState,
     IonEnergyTransverseMaxwellianDensity,
@@ -31,6 +33,41 @@ def test_species_boundary_normalizes_weights_and_energy():
     assert np.isclose(species.mean_energy_eV, 0.25 * 14.0 + 0.75 * 16.0)
     with pytest.raises(ValueError, match="nonnegative"):
         SpeciesBoundaryState("bad", 1, 1.0, 1.0, [[0, 0, -1]], [1])
+
+
+def test_discrete_joint_energy_angle_density_preserves_correlation_and_nodes():
+    density = DiscreteEnergyAngleDensity2D(
+        [100.0, 400.0], [-30.0, 60.0], [0.25, 0.75])
+    samples = np.array([[0.1], [0.249999], [0.25], [0.9]])
+
+    velocity = density.sample_flux_velocity_2d(samples)
+
+    assert density.sampling_dimension == 1
+    assert np.allclose(np.sum(velocity ** 2, axis=1), [100.0, 100.0, 400.0, 400.0])
+    assert np.allclose(
+        np.rad2deg(np.arctan2(velocity[:, 0], velocity[:, 1])),
+        [-30.0, -30.0, 60.0, 60.0])
+    with pytest.raises(ValueError, match="invalid discrete"):
+        DiscreteEnergyAngleDensity2D([1.0], [100.0], [1.0])
+
+
+def test_discrete_energy_polar_measure_lifts_to_uniform_3d_azimuth():
+    density = DiscreteEnergyPolarAzimuthDensity3D(
+        [100.0, 400.0], [30.0, 60.0], [0.25, 0.75])
+    samples = np.array([
+        [0.1, 0.0], [0.1, 0.25], [0.9, 0.5], [0.9, 0.75]])
+
+    velocity = density.sample_flux_velocity(samples)
+
+    assert density.sampling_dimension == 2
+    assert np.allclose(np.sum(velocity ** 2, axis=1), [100.0, 100.0, 400.0, 400.0])
+    assert np.allclose(
+        np.rad2deg(np.arccos(velocity[:, 2] / np.linalg.norm(velocity, axis=1))),
+        [30.0, 30.0, 60.0, 60.0])
+    assert np.allclose(velocity[0, 0], velocity[1, 1])
+    assert np.all(velocity[:, 2] > 0.0)
+    with pytest.raises(ValueError, match="no continuous density"):
+        density.log_flux_density(velocity)
 
 
 def test_plasma_boundary_current_uses_signed_species_fluxes():

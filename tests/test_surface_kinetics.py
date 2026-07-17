@@ -96,6 +96,65 @@ def test_huang_2019_reduced_projection_preserves_published_reaction_table_and_on
             energetic_response_scale=0.0)
 
 
+def test_krueger_2024_projection_preserves_calibrated_values_and_absent_c3f4_channel():
+    parameters = ReducedSiO2FluorocarbonParameters.krueger_2024_reduced_projection()
+    mechanism = ReducedSiO2FluorocarbonMechanism(parameters)
+
+    assert parameters.complex_formation_probability["CF"] == 0.2729
+    assert parameters.complex_formation_probability["CF2"] == 0.2729
+    assert parameters.complex_formation_probability["CF3"] == 0.2
+    assert parameters.polymer_deposition_probability_on_polymer["CF"] == 0.1
+    assert parameters.polymer_deposition_probability_on_polymer["C2F3"] == 0.03
+    assert parameters.oxygen_polymer_etch_probability == 0.0628
+    assert parameters.bare_sio2_yield.reference_yield == 0.0909
+    assert parameters.bare_sio2_yield.threshold_energy_eV == 70.0
+    assert parameters.bare_sio2_yield.energy_exponent == 1.0
+    assert parameters.complex_sio2_yield.reference_yield == 0.1384
+    assert parameters.complex_sio2_yield.angular_model == "chang_sawin_1997"
+    assert parameters.polymer_sputter_yield.reference_yield == 0.9
+    assert parameters.polymer_sputter_yield.threshold_energy_eV == 20.0
+    assert parameters.polymer_sputter_yield.energy_exponent == 0.5
+    assert parameters.declared_inert_neutral_species == ("C3F4",)
+    assert mechanism.provenance["parameters"]["declared_inert_neutral_species"] == [
+        "C3F4"]
+
+    initial = SiO2SurfaceState.bare()
+    fluxes = SurfaceFluxes({"C3F4": 9.5e20})
+    validity = mechanism.validity(fluxes)
+    result = mechanism.advance(initial, fluxes, 60.0)
+
+    assert validity.within_declared_scope
+    assert validity.unsupported_neutral_species == ()
+    assert not validity.parameter_evidence_supports_prediction
+    assert mechanism.neutral_reaction_probability(initial)["C3F4"] == 0.0
+    assert result.state.polymer_units_m2 == 0.0
+    assert result.state.removed_formula_units_m2 == 0.0
+
+
+def test_krueger_base_depth_scale_changes_only_oxide_yield_amplitudes():
+    base = ReducedSiO2FluorocarbonParameters.krueger_2024_reduced_projection()
+    scaled = ReducedSiO2FluorocarbonParameters.krueger_2024_reduced_projection(
+        oxide_etch_yield_scale=0.625)
+    mechanism = ReducedSiO2FluorocarbonMechanism(scaled)
+
+    assert np.isclose(
+        scaled.bare_sio2_yield.reference_yield,
+        0.625 * base.bare_sio2_yield.reference_yield)
+    assert np.isclose(
+        scaled.complex_sio2_yield.reference_yield,
+        0.625 * base.complex_sio2_yield.reference_yield)
+    assert scaled.bare_sio2_yield.threshold_energy_eV == (
+        base.bare_sio2_yield.threshold_energy_eV)
+    assert scaled.complex_sio2_yield.angular_model == (
+        base.complex_sio2_yield.angular_model)
+    assert scaled.polymer_sputter_yield == base.polymer_sputter_yield
+    assert "base scale=0.625" in mechanism.provenance["sources"][
+        "complex_sio2_yield"]["note"]
+    with pytest.raises(ValueError, match="oxide_etch_yield_scale"):
+        ReducedSiO2FluorocarbonParameters.krueger_2024_reduced_projection(
+            oxide_etch_yield_scale=0.0)
+
+
 def test_energetic_yield_reproduces_threshold_reference_and_angular_limits():
     law = EnergeticYield(
         0.2, 20.0, 100.0, energy_exponent=1.0, angular_model="chang_sawin_1997")

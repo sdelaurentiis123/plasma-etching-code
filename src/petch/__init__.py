@@ -90,6 +90,7 @@ from .tabulated_chemistry import (
 )
 from .feature_step_3d import (
     FeatureGeometry3D, FeatureSolve3DResult, FeatureStep3DResult, FeatureStepValidity,
+    SurfaceTopologyChangeError,
     advance_feature_step_3d, conservative_remap_surface_state,
     make_rectangular_trench_geometry_3d, solve_feature_3d,
 )
@@ -110,9 +111,30 @@ from .experimental_boundary import (
     build_jeon_2022_boundary_state, build_jeong_2023_boundary_state,
 )
 from .reactor_boundary import (
+    KRUEGER_2024_IEAD_CSV_SHA256, KRUEGER_2024_IEAD_METADATA_SHA256,
+    KRUEGER_2024_TRANSFER_FLUX_SHA256, KRUEGER_2024_TRANSFER_IEAD_SHA256,
+    KRUEGER_2024_TRANSFER_METADATA_SHA256,
+    Krueger2024DigitizedIEAD, Krueger2024TransferBoundaryData,
     PlasmaDiagnosticState, ReactorSpeciesFlux, TabulatedReactorFluxDeck,
+    append_global_current_balance_maxwellian_electrons,
     build_diagnostic_virtual_sheath_boundary, build_tabulated_reactor_boundary,
-    load_krueger_2024_reactor_flux_deck,
+    build_krueger_2024_development_boundary, build_krueger_2024_transfer_boundary,
+    load_krueger_2024_digitized_iead, load_krueger_2024_reactor_flux_deck,
+    load_krueger_2024_transfer_boundary_data,
+)
+from .krueger_replay_3d import (
+    KRUEGER_AMORPHOUS_CARBON_MATERIAL_ID, KRUEGER_SIO2_MATERIAL_ID,
+    make_krueger_2024_poisson_system_3d,
+)
+from .reactor_coupling import (
+    BoundReactorBoundaryProvider, ReactorBoundaryPrediction,
+    ReactorBoundaryProvider, ReactorBoundaryQuery, SurfaceFeedbackState,
+    resolve_reactor_boundary,
+)
+from .validation_contract import (
+    CalibrationReveal, HeldOutPrediction, ValidationObservation,
+    ValidationParameter, ValidationProtocol, ValidationScore,
+    score_held_out_predictions,
 )
 from .physical_api import (
     COMMON_CHARGING_ENGINE, COMMON_CHARGING_ENSEMBLE_ENGINE, COMMON_FEATURE_ENGINE,
@@ -148,6 +170,11 @@ from .silicon_sf6o2 import (
 )
 from .material_mechanism_3d import (
     MaterialMechanismRouter3D, MaterialSurfaceState3D, MaterialSurfaceStepResult3D,
+)
+from .amorphous_carbon_mask import (
+    AmorphousCarbonMaskMechanism, AmorphousCarbonMaskParameters,
+    AmorphousCarbonMaskState, AmorphousCarbonMaskStepResult,
+    build_krueger_2024_material_router_3d,
 )
 from .physical_arrivals_3d import (
     PhysicalArrivalSample3D, sample_physical_poisson_arrivals_3d,
@@ -192,6 +219,9 @@ __all__ = [
     "BelenSiliconStepResult",
     "MaterialMechanismRouter3D", "MaterialSurfaceState3D",
     "MaterialSurfaceStepResult3D",
+    "AmorphousCarbonMaskMechanism", "AmorphousCarbonMaskParameters",
+    "AmorphousCarbonMaskState", "AmorphousCarbonMaskStepResult",
+    "build_krueger_2024_material_router_3d",
     "PhysicalArrivalSample3D", "sample_physical_poisson_arrivals_3d",
     "EnsembleScalarEstimate3D", "FeatureCenterline3D", "FeatureCenterlineEnsemble3D",
     "TrenchProfileEnsemble3D", "TrenchProfileObservables3D",
@@ -208,8 +238,23 @@ __all__ = [
     "NotchingCalibrationReveal3D", "NotchingHeldOutPrediction3D",
     "load_nozawa_1995_notch_observations", "score_notching_benchmark_3d",
     "PlasmaDiagnosticState", "ReactorSpeciesFlux", "TabulatedReactorFluxDeck",
+    "Krueger2024DigitizedIEAD", "Krueger2024TransferBoundaryData",
+    "KRUEGER_2024_IEAD_CSV_SHA256", "KRUEGER_2024_IEAD_METADATA_SHA256",
+    "KRUEGER_2024_TRANSFER_FLUX_SHA256", "KRUEGER_2024_TRANSFER_IEAD_SHA256",
+    "KRUEGER_2024_TRANSFER_METADATA_SHA256",
+    "append_global_current_balance_maxwellian_electrons",
     "build_diagnostic_virtual_sheath_boundary", "build_tabulated_reactor_boundary",
-    "load_krueger_2024_reactor_flux_deck",
+    "build_krueger_2024_development_boundary", "build_krueger_2024_transfer_boundary",
+    "load_krueger_2024_digitized_iead", "load_krueger_2024_reactor_flux_deck",
+    "load_krueger_2024_transfer_boundary_data",
+    "KRUEGER_AMORPHOUS_CARBON_MATERIAL_ID", "KRUEGER_SIO2_MATERIAL_ID",
+    "make_krueger_2024_poisson_system_3d",
+    "BoundReactorBoundaryProvider", "ReactorBoundaryPrediction",
+    "ReactorBoundaryProvider", "ReactorBoundaryQuery", "SurfaceFeedbackState",
+    "resolve_reactor_boundary",
+    "CalibrationReveal", "HeldOutPrediction", "ValidationObservation",
+    "ValidationParameter", "ValidationProtocol", "ValidationScore",
+    "score_held_out_predictions",
     "Domain", "SF6O2", "Process", "Result",
     # config + low-level (full control)
     "PAR", "Flags", "DEFAULT_FLAGS", "run_etch",
@@ -264,6 +309,7 @@ __all__ = [
     "TabulatedSiPhysicalSputterStepResult", "TabulatedSiSurfaceState",
     "TabulatedSiSurfaceStepResult",
     "FeatureGeometry3D", "FeatureSolve3DResult", "FeatureStep3DResult", "FeatureStepValidity",
+    "SurfaceTopologyChangeError",
     "advance_feature_step_3d", "conservative_remap_surface_state", "solve_feature_3d",
     "make_rectangular_trench_geometry_3d",
     "JEON_2022_DEMO_VERSION", "Jeon2022DemoScore", "Jeon2022DemoThresholds",

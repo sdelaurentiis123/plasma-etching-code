@@ -266,6 +266,110 @@ class EnergyCosineAngleDensity2D:
 
 
 @dataclass(frozen=True)
+class DiscreteEnergyAngleDensity2D:
+    """A provenance-bound discrete joint energy/signed-angle flux measure.
+
+    This is appropriate for digitized or directly tabulated reactor output whose joint
+    energy-angle correlation must not be factorized. Sampling returns the declared quadrature
+    nodes exactly. It is a discrete forward measure, not a continuous density for adjoint scoring.
+    """
+
+    energy_eV: np.ndarray
+    signed_angle_deg: np.ndarray
+    probability_weight: np.ndarray
+
+    def __post_init__(self):
+        energy = np.asarray(self.energy_eV, dtype=float).copy()
+        angle = np.asarray(self.signed_angle_deg, dtype=float).copy()
+        weight = np.asarray(self.probability_weight, dtype=float).copy()
+        if (energy.ndim != 1 or angle.shape != energy.shape or weight.shape != energy.shape
+                or energy.size == 0 or np.any(~np.isfinite(energy))
+                or np.any(energy < 0.0) or np.any(~np.isfinite(angle))
+                or np.any(np.abs(angle) > 90.0) or np.any(~np.isfinite(weight))
+                or np.any(weight < 0.0) or weight.sum() <= 0.0):
+            raise ValueError("invalid discrete energy-angle density")
+        weight /= weight.sum()
+        for value in (energy, angle, weight):
+            value.setflags(write=False)
+        object.__setattr__(self, "energy_eV", energy)
+        object.__setattr__(self, "signed_angle_deg", angle)
+        object.__setattr__(self, "probability_weight", weight)
+
+    @property
+    def sampling_dimension(self):
+        return 1
+
+    def sample_flux_velocity_2d(self, unit_interval):
+        samples = _unit_interval_samples(unit_interval, self.sampling_dimension)
+        cumulative = np.cumsum(self.probability_weight)
+        index = np.searchsorted(cumulative, samples[:, 0], side="right")
+        index = np.minimum(index, len(cumulative) - 1)
+        speed = np.sqrt(self.energy_eV[index])
+        angle = np.deg2rad(self.signed_angle_deg[index])
+        return np.column_stack((speed * np.sin(angle), speed * np.cos(angle)))
+
+
+@dataclass(frozen=True)
+class DiscreteEnergyPolarAzimuthDensity3D:
+    """Axisymmetric 3-D lift of a discrete joint energy/polar-angle flux measure.
+
+    Digitized reactor IEADs are commonly published in one signed-angle plane.  A 3-D feature
+    calculation needs one additional statement about azimuth.  This class implements the explicit
+    axisymmetric closure: it preserves every published energy/absolute-polar-angle node and its
+    probability, then samples azimuth uniformly.  It is a forward discrete measure, not a
+    Lebesgue-continuous velocity density and therefore deliberately refuses adjoint-density
+    scoring.  The closure must be recorded by the boundary provider; it is never inferred by the
+    transport engine.
+    """
+
+    energy_eV: np.ndarray
+    polar_angle_deg: np.ndarray
+    probability_weight: np.ndarray
+
+    def __post_init__(self):
+        energy = np.asarray(self.energy_eV, dtype=float).copy()
+        angle = np.asarray(self.polar_angle_deg, dtype=float).copy()
+        weight = np.asarray(self.probability_weight, dtype=float).copy()
+        if (energy.ndim != 1 or angle.shape != energy.shape or weight.shape != energy.shape
+                or energy.size == 0 or np.any(~np.isfinite(energy))
+                or np.any(energy < 0.0) or np.any(~np.isfinite(angle))
+                or np.any(angle < 0.0) or np.any(angle > 90.0)
+                or np.any(~np.isfinite(weight)) or np.any(weight < 0.0)
+                or weight.sum() <= 0.0):
+            raise ValueError("invalid discrete energy-polar-angle density")
+        weight /= weight.sum()
+        for value in (energy, angle, weight):
+            value.setflags(write=False)
+        object.__setattr__(self, "energy_eV", energy)
+        object.__setattr__(self, "polar_angle_deg", angle)
+        object.__setattr__(self, "probability_weight", weight)
+
+    @property
+    def sampling_dimension(self):
+        # One inverse-CDF coordinate for the published joint measure and one for azimuth.
+        return 2
+
+    def sample_flux_velocity(self, unit_interval):
+        samples = _unit_interval_samples(unit_interval, self.sampling_dimension)
+        cumulative = np.cumsum(self.probability_weight)
+        index = np.searchsorted(cumulative, samples[:, 0], side="right")
+        index = np.minimum(index, len(cumulative) - 1)
+        speed = np.sqrt(self.energy_eV[index])
+        polar = np.deg2rad(self.polar_angle_deg[index])
+        azimuth = 2.0 * np.pi * samples[:, 1]
+        transverse = speed * np.sin(polar)
+        return np.column_stack((
+            transverse * np.cos(azimuth),
+            transverse * np.sin(azimuth),
+            speed * np.cos(polar),
+        ))
+
+    def log_flux_density(self, velocity_sqrt_eV, phase_rad=None, position_m=None):
+        raise ValueError(
+            "a discrete energy/polar-angle measure has no continuous density for adjoint scoring")
+
+
+@dataclass(frozen=True)
 class MaxwellianFluxVelocityDensity:
     """Normalized half-space Maxwellian flux density in energy-scaled velocity coordinates.
 

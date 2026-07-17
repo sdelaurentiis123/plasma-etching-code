@@ -1,19 +1,22 @@
 """Dimensional feature evolution through the new physical contracts.
 
 Each step transfers surface state material-by-material with an area-conservative, bounded remap. Smooth
-CFL-limited motion can be iterated; topology changes, material appearance/disappearance, excessive remap
-distance, and impossible coverage compression are refused. This makes the multi-step loop explicit about
-the domain in which surface history is numerically supported.
+CFL-limited motion can be iterated. By default every topology change is refused; an explicit policy may
+continue only periodic gas-cavity enclosure/opening while solid/material component counts and domain
+breakthrough remain unchanged. Material appearance/disappearance, excessive remap distance, impossible
+coverage compression, and every other topology event remain refusals. This makes the multi-step loop
+explicit about the domain in which surface history is numerically supported.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from hashlib import sha256
+from itertools import product
 from types import MappingProxyType
 from typing import Mapping
 
 import numpy as np
-from scipy.ndimage import label, map_coordinates
+from scipy.ndimage import label
 from scipy.spatial import cKDTree
 from skimage.measure import euler_number
 
@@ -26,7 +29,10 @@ from .boundary_transport_3d import (
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
 )
-from .neutral_radiosity_3d import solve_diffuse_neutral_radiosity_3d
+from .neutral_radiosity_3d import (
+    DiffuseNeutralNoSinkError,
+    solve_diffuse_neutral_radiosity_3d,
+)
 from .charged_surface_cascade_3d import (
     ChargedSurfaceCascade3DResult,
     apply_charged_surface_response_to_transport_3d,
@@ -50,59 +56,52 @@ from .surface_kinetics import (
     FaceResolvedEnergeticFlux,
     SurfaceFluxes,
 )
-from .threed import advect_3d, extend_velocity_3d, extract_mesh_3d, reinit_cr2, reinit_fsm, reinit_narrow
+from .feature_geometry_state_3d import (
+    FeatureGeometry3D,
+    face_material_ids_3d as _face_material_ids,
+)
+from .feature_geometry_backend_3d import UniformFeatureGeometryBackend3D
+from .threed import advect_3d, extend_velocity_3d, reinit_cr2, reinit_fsm, reinit_narrow
 
 
-@dataclass(frozen=True)
-class FeatureGeometry3D:
-    """Eulerian material geometry in declared mesh units; material id zero is gas."""
+class SurfaceTopologyChangeError(ValueError):
+    """Structured refusal when conservative surface-state remap needs a topology event.
 
-    phi: np.ndarray
-    material_id: np.ndarray
-    dx: float
-    mesh_length_unit_m: float
-    mesh_origin_m: tuple[float, float, float] = (0.0, 0.0, 0.0)
-    material_levelsets: Mapping[int, np.ndarray] | None = None
+    The exception remains a :class:`ValueError` for backwards compatibility, while exposing the
+    old/new physical-volume signatures so a campaign driver can distinguish a resolved feature
+    closure from computational-domain breakthrough.  It never authorizes an implicit remap.
+    """
 
-    def __post_init__(self):
-        phi = np.asarray(self.phi, dtype=float).copy()
-        material = np.asarray(self.material_id, dtype=int).copy()
-        origin = tuple(float(value) for value in self.mesh_origin_m)
-        layers = (None if self.material_levelsets is None
-                  else {int(key): np.asarray(value, dtype=float).copy()
-                        for key, value in self.material_levelsets.items()})
-        if (phi.ndim != 3 or min(phi.shape) < 2 or material.shape != phi.shape
-                or np.any(~np.isfinite(phi)) or np.any(material < 0)
-                or not np.isfinite(self.dx) or self.dx <= 0.0
-                or not np.isfinite(self.mesh_length_unit_m) or self.mesh_length_unit_m <= 0.0
-                or len(origin) != 3 or np.any(~np.isfinite(origin))):
-            raise ValueError("invalid 3-D feature geometry")
-        if not np.any(phi < 0.0) or not np.any(phi > 0.0):
-            raise ValueError("phi must contain both gas and solid")
-        if layers is not None:
-            material_ids = set(np.unique(material)) - {0}
-            if (not layers or set(layers) != material_ids or any(key <= 0 for key in layers)
-                    or any(value.shape != phi.shape or np.any(~np.isfinite(value))
-                           for value in layers.values())):
-                raise ValueError("invalid material level-set fields")
-            union = np.maximum.reduce(tuple(layers.values()))
-            if np.any((union >= 0.0) != (phi >= 0.0)):
-                raise ValueError("material level sets do not reconstruct the combined solid")
-            for value in layers.values():
-                value.setflags(write=False)
-        phi.setflags(write=False); material.setflags(write=False)
-        object.__setattr__(self, "phi", phi)
-        object.__setattr__(self, "material_id", material)
-        object.__setattr__(self, "dx", float(self.dx))
-        object.__setattr__(self, "mesh_length_unit_m", float(self.mesh_length_unit_m))
-        object.__setattr__(self, "mesh_origin_m", origin)
-        object.__setattr__(
-            self, "material_levelsets",
-            None if layers is None else MappingProxyType(layers))
+    def __init__(
+            self, message, *, method, old_topology, new_topology,
+            old_mesh_topology, new_mesh_topology, changed_slice_topology):
+        super().__init__(str(message))
+        self.method = str(method)
+        self.old_topology = tuple(old_topology)
+        self.new_topology = tuple(new_topology)
+        self.old_mesh_topology = tuple(old_mesh_topology)
+        self.new_mesh_topology = tuple(new_mesh_topology)
+        self.changed_slice_topology = MappingProxyType(
+            dict(changed_slice_topology))
 
     @property
-    def coordinate_arrays(self):
-        return tuple(np.arange(size) * self.dx for size in self.phi.shape)
+    def event_kind(self):
+        """Return a geometry-only classification without assigning process semantics."""
+        old_solid, old_cavity, old_breakthrough, old_material = self.old_topology
+        new_solid, new_cavity, new_breakthrough, new_material = self.new_topology
+        if new_solid != old_solid:
+            return "solid_component_change"
+        if new_material != old_material:
+            return "material_component_change"
+        if bool(new_breakthrough) != bool(old_breakthrough):
+            return (
+                "domain_gas_breakthrough" if new_breakthrough
+                else "domain_gas_disconnect")
+        if new_cavity > old_cavity:
+            return "gas_cavity_enclosed"
+        if new_cavity < old_cavity:
+            return "gas_cavity_opened"
+        return "other_topology_change"
 
 
 def make_rectangular_trench_geometry_3d(
@@ -218,64 +217,6 @@ class FeatureSolve3DResult:
     validity: FeatureStepValidity
 
 
-def _face_material_ids(centroids, geometry):
-    """Assign each interface triangle by probing locally into its positive-phi solid.
-
-    A global nearest-solid lookup is ambiguous at a material junction: an unetched substrate face
-    inside a mask opening can be closer to the mask corner than to the next substrate grid node.
-    The signed-distance gradient gives the physical solid-side normal and therefore the local owner.
-    A nearest-solid search remains only as a fallback at degenerate zero-gradient CSG corners.
-    """
-    centroids = np.asarray(centroids, dtype=float)
-    if geometry.material_levelsets is not None:
-        material_ids = np.asarray(tuple(geometry.material_levelsets), dtype=int)
-        coordinates = (centroids / geometry.dx).T
-        values = np.vstack([
-            map_coordinates(
-                geometry.material_levelsets[int(material_id)], coordinates,
-                order=1, mode="nearest", prefilter=False)
-            for material_id in material_ids])
-        return material_ids[np.argmax(values, axis=0)]
-    solid = (geometry.phi > 0.0) & (geometry.material_id > 0)
-    index = np.column_stack(np.where(solid))
-    if index.size == 0:
-        raise ValueError("geometry contains no labeled solid material")
-    gradient = np.gradient(geometry.phi, geometry.dx)
-    nearest_grid = np.rint(centroids / geometry.dx).astype(int)
-    for axis in range(3):
-        nearest_grid[:, axis] = np.clip(
-            nearest_grid[:, axis], 0, geometry.phi.shape[axis] - 1)
-    solid_normal = np.column_stack([
-        component[tuple(nearest_grid.T)] for component in gradient])
-    magnitude = np.linalg.norm(solid_normal, axis=1)
-    valid_normal = magnitude > 1e-12
-    solid_normal[valid_normal] /= magnitude[valid_normal, None]
-
-    material = np.zeros(centroids.shape[0], dtype=int)
-    unresolved = np.ones(centroids.shape[0], dtype=bool)
-    for distance in (0.35, 0.75, 1.25):
-        selected = np.where(unresolved & valid_normal)[0]
-        if not selected.size:
-            break
-        probe = centroids[selected] + distance * geometry.dx * solid_normal[selected]
-        probe_index = np.rint(probe / geometry.dx).astype(int)
-        for axis in range(3):
-            probe_index[:, axis] = np.clip(
-                probe_index[:, axis], 0, geometry.phi.shape[axis] - 1)
-        local_solid = geometry.phi[tuple(probe_index.T)] > 0.0
-        local_material = geometry.material_id[tuple(probe_index.T)]
-        accepted = local_solid & (local_material > 0)
-        material[selected[accepted]] = local_material[accepted]
-        unresolved[selected[accepted]] = False
-
-    if np.any(unresolved):
-        points = index * geometry.dx
-        _, nearest = cKDTree(points).query(centroids[unresolved])
-        chosen = index[np.asarray(nearest, dtype=int)]
-        material[unresolved] = geometry.material_id[tuple(chosen.T)]
-    return material
-
-
 def _surface_gas_normals(verts, faces, centroids, geometry):
     triangle = np.asarray(verts)[np.asarray(faces)]
     normal = np.cross(triangle[:, 1] - triangle[:, 0], triangle[:, 2] - triangle[:, 0])
@@ -332,6 +273,22 @@ def _surface_mesh_fingerprint(verts, faces, active_face, face_material, geometry
     return digest.hexdigest()
 
 
+def _extract_uniform_surface_arrays(geometry):
+    """Bridge the read-only backend surface to the legacy writable array contract.
+
+    This is deliberately a behavior-neutral seam.  The existing mesh/state fingerprint remains
+    authoritative; backend fingerprints are not substituted into checkpoint or remap semantics.
+    """
+    surface = UniformFeatureGeometryBackend3D(geometry).extract_surface()
+    return tuple(np.array(value, copy=True, order="C") for value in (
+        surface.vertices_mesh,
+        surface.faces,
+        surface.centroids_mesh,
+        surface.areas_mesh2,
+        surface.face_material_id,
+    ))
+
+
 def _surface_topology_signature(faces, active_face):
     active = np.asarray(faces, dtype=int)[np.asarray(active_face, dtype=int)]
     if active.size == 0:
@@ -373,6 +330,106 @@ def _physical_volume_topology_signature(geometry, etchable_material_ids):
     return int(components), int(euler_number(solid, connectivity=1))
 
 
+def _periodic_component_roots(field):
+    """Return 6-connected component roots after wrapping x/y neighbor pairs."""
+    occupied = np.asarray(field, dtype=bool)
+    component, count = label(occupied)
+    parent = np.arange(int(count) + 1)
+
+    def find(index):
+        index = int(index)
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = int(parent[index])
+        return index
+
+    def union(left, right):
+        left = find(left); right = find(right)
+        if left and right and left != right:
+            parent[right] = left
+
+    for axis in (0, 1):
+        first = np.take(component, 0, axis=axis)
+        last = np.take(component, -1, axis=axis)
+        selected = (first > 0) & (last > 0)
+        for left, right in zip(first[selected], last[selected]):
+            union(left, right)
+    roots = np.zeros(int(count) + 1, dtype=int)
+    for index in range(1, int(count) + 1):
+        roots[index] = find(index)
+    rooted = roots[component]
+    return rooted, {int(value) for value in np.unique(rooted) if value > 0}
+
+
+def _periodic_component_sizes(field):
+    """Return periodic 6-connected component sizes, largest first.
+
+    This is diagnostic rather than a topology decision: unlike a bounded-label
+    histogram it merges components touching opposite x/y faces before counting.
+    Keeping the sizes in refusals distinguishes a resolved material separation
+    from a one-cell material-ownership flicker at an interface.
+    """
+    rooted, roots = _periodic_component_roots(field)
+    return tuple(sorted(
+        (int(np.count_nonzero(rooted == root)) for root in roots),
+        reverse=True,
+    ))
+
+
+def _periodic_material_component_sizes(geometry, etchable_material_ids):
+    materials = tuple(sorted({int(value) for value in etchable_material_ids}))
+    solid = ((geometry.phi > 0.0)
+             & np.isin(geometry.material_id, materials))[:-1, :-1, :]
+    core_material = np.asarray(geometry.material_id)[:-1, :-1, :]
+    return tuple(
+        (material, _periodic_component_sizes(
+            solid & (core_material == material)))
+        for material in materials
+    )
+
+
+def _periodic_physical_volume_topology_signature(
+        geometry, etchable_material_ids):
+    """Topology gate for duplicate-endpoint x/y-periodic feature cells.
+
+    A bounded-grid Euler number treats the two stored copies of each periodic
+    endpoint as distinct boundaries. As an etched groove becomes resolved, that
+    representation can manufacture a handle even though the physical periodic
+    surface deforms smoothly. The periodic gate instead audits the events that
+    invalidate material-local remapping: solid component creation/destruction,
+    enclosed gas-cavity creation/destruction, gas breakthrough between the two
+    open z boundaries, and per-material component changes.
+    """
+    materials = tuple(sorted({int(value) for value in etchable_material_ids}))
+    if not materials or any(value <= 0 for value in materials):
+        raise ValueError("periodic topology requires positive material ids")
+    # Drop the duplicate x/y endpoint planes. Adjacency across each remaining
+    # first/last pair is then added explicitly by ``_periodic_component_roots``.
+    solid = ((geometry.phi > 0.0)
+             & np.isin(geometry.material_id, materials))[:-1, :-1, :]
+    solid_labels, solid_roots = _periodic_component_roots(solid)
+    gas_labels, gas_roots = _periodic_component_roots(~solid)
+    open_boundary_roots = {
+        int(value) for value in np.unique(
+            np.concatenate((gas_labels[:, :, 0].ravel(),
+                            gas_labels[:, :, -1].ravel())))
+        if value > 0}
+    enclosed_gas = gas_roots - open_boundary_roots
+    lower = {int(value) for value in np.unique(gas_labels[:, :, 0]) if value > 0}
+    upper = {int(value) for value in np.unique(gas_labels[:, :, -1]) if value > 0}
+    material_components = []
+    core_material = np.asarray(geometry.material_id)[:-1, :-1, :]
+    for material in materials:
+        _, roots = _periodic_component_roots(solid & (core_material == material))
+        material_components.append((material, len(roots)))
+    return (
+        int(len(solid_roots)),
+        int(len(enclosed_gas)),
+        bool(lower & upper),
+        tuple(material_components),
+    )
+
+
 def _physical_volume_component_sizes(geometry, etchable_material_ids):
     solid = (geometry.phi > 0.0) & np.isin(
         geometry.material_id, tuple(etchable_material_ids))
@@ -407,9 +464,26 @@ def _changed_physical_slice_topology(old_geometry, new_geometry, etchable_materi
 
 
 def _remove_unresolved_subcell_solid_components(
-        phi, material_id, etchable_material_ids, dx):
+        phi, material_id, etchable_material_ids, dx, *, periodic_lateral=False):
     updated = np.array(phi, copy=True)
     solid = (updated > 0.0) & np.isin(material_id, tuple(etchable_material_ids))
+    if periodic_lateral:
+        core_solid = solid[:-1, :-1, :]
+        rooted, roots = _periodic_component_roots(core_solid)
+        unresolved_roots = tuple(
+            root for root in roots
+            if 0 < int(np.count_nonzero(rooted == root)) < 8)
+        core_mask = np.isin(rooted, unresolved_roots)
+        unresolved = np.zeros(updated.shape, dtype=bool)
+        unresolved[:-1, :-1, :] = core_mask
+        unresolved[-1, :-1, :] = core_mask[0, :, :]
+        unresolved[:-1, -1, :] = core_mask[:, 0, :]
+        unresolved[-1, -1, :] = core_mask[0, 0, :]
+        if not np.any(core_mask):
+            return updated, 0, unresolved
+        updated[unresolved] = -np.maximum(
+            np.abs(updated[unresolved]), float(dx))
+        return updated, int(np.count_nonzero(core_mask)), unresolved
     component, count = label(solid)
     if count == 0:
         return updated, 0, np.zeros(updated.shape, dtype=bool)
@@ -424,6 +498,169 @@ def _remove_unresolved_subcell_solid_components(
     # then let the signed-distance reconstruction restore a consistent neighborhood.
     updated[unresolved] = -np.maximum(np.abs(updated[unresolved]), float(dx))
     return updated, int(np.count_nonzero(unresolved)), unresolved
+
+
+def _new_unresolved_subcell_material_component_mask(
+        phi, material_id, previous_material_id, etchable_material_ids, *,
+        periodic_lateral):
+    """Locate newly born material islands too small to own one volume cell.
+
+    A material component supported by fewer than eight corner nodes has no
+    resolved hexahedral volume.  It is eligible for cleanup only when *every*
+    node changed owner in the candidate step.  A component that existed before
+    the step and became disconnected is therefore a real topology event and is
+    still refused.
+    """
+    field = np.asarray(phi, dtype=float)
+    owner = np.asarray(material_id)
+    previous = np.asarray(previous_material_id)
+    if (field.ndim != 3 or owner.shape != field.shape
+            or previous.shape != field.shape
+            or np.any(~np.isfinite(field))):
+        raise ValueError("material-island cleanup requires matching finite 3-D fields")
+    materials = tuple(sorted({int(value) for value in etchable_material_ids}))
+    if not materials or any(value <= 0 for value in materials):
+        raise ValueError("material-island cleanup requires positive material ids")
+
+    core_slice = (slice(None, -1), slice(None, -1), slice(None))
+    core_solid = field[core_slice] > 0.0 if periodic_lateral else field > 0.0
+    core_owner = owner[core_slice] if periodic_lateral else owner
+    core_previous = previous[core_slice] if periodic_lateral else previous
+    core_mask = np.zeros(core_solid.shape, dtype=bool)
+    for material in materials:
+        occupied = core_solid & (core_owner == material)
+        if periodic_lateral:
+            rooted, roots = _periodic_component_roots(occupied)
+            for root in roots:
+                selected = rooted == root
+                if (0 < int(np.count_nonzero(selected)) < 8
+                        and np.all(core_previous[selected] != material)):
+                    core_mask |= selected
+        else:
+            component, count = label(occupied)
+            sizes = np.bincount(component.ravel())
+            for index in range(1, int(count) + 1):
+                selected = component == index
+                if (0 < int(sizes[index]) < 8
+                        and np.all(core_previous[selected] != material)):
+                    core_mask |= selected
+
+    if not periodic_lateral:
+        return core_mask, int(np.count_nonzero(core_mask))
+    mask = np.zeros(field.shape, dtype=bool)
+    mask[:-1, :-1, :] = core_mask
+    mask[-1, :-1, :] = core_mask[0, :, :]
+    mask[:-1, -1, :] = core_mask[:, 0, :]
+    mask[-1, -1, :] = core_mask[0, 0, :]
+    return mask, int(np.count_nonzero(core_mask))
+
+
+def _restore_unresolved_material_ownership(
+        material_levelsets, repair_mask, candidate_material_id,
+        previous_material_id, dx, reinitialization_method, periodic_lateral):
+    """Suppress a newly born subcell material island using prior ownership.
+
+    This changes no resolved material volume: the selected component has fewer
+    than the eight nodes required to bound one hexahedral cell.  Previous gas
+    ownership retires the spurious layer sign; previous solid ownership restores
+    that layer before all affected distance fields are reconstructed.
+    """
+    repair = np.asarray(repair_mask, dtype=bool)
+    candidate = np.asarray(candidate_material_id)
+    previous = np.asarray(previous_material_id)
+    updated = {int(material_id): np.asarray(levelset, dtype=float).copy()
+               for material_id, levelset in material_levelsets.items()}
+    if (repair.shape != candidate.shape or previous.shape != candidate.shape
+            or not np.any(repair)
+            or any(levelset.shape != repair.shape for levelset in updated.values())):
+        raise ValueError("material ownership repair requires matching nonempty fields")
+    affected = set()
+    for material in sorted(int(value) for value in np.unique(candidate[repair])):
+        if material <= 0 or material not in updated:
+            raise RuntimeError("subcell material island has no authoritative level set")
+        selected = repair & (candidate == material)
+        layer = updated[material]
+        layer[selected] = -np.maximum(np.abs(layer[selected]), float(dx))
+        affected.add(material)
+        for prior in sorted(int(value) for value in np.unique(previous[selected])):
+            if prior <= 0:
+                continue
+            if prior not in updated:
+                raise RuntimeError("prior material owner has no authoritative level set")
+            restore = selected & (previous == prior)
+            prior_layer = updated[prior]
+            prior_layer[restore] = np.maximum(
+                np.abs(prior_layer[restore]), float(dx))
+            affected.add(prior)
+    for material in sorted(affected):
+        updated[material] = _redistance_feature_field(
+            updated[material], dx, reinitialization_method,
+            periodic_lateral=periodic_lateral)
+    if periodic_lateral:
+        updated = {
+            material: _project_periodic_lateral_endpoints(levelset)[0]
+            for material, levelset in updated.items()}
+    combined = np.maximum.reduce(tuple(updated.values()))
+    combined = _redistance_feature_field(
+        combined, dx, reinitialization_method,
+        periodic_lateral=periodic_lateral)
+    material_ids = np.asarray(sorted(updated), dtype=int)
+    stack = np.stack([updated[int(material)] for material in material_ids])
+    owner = material_ids[np.argmax(stack, axis=0)]
+    owner = np.where(combined >= 0.0, owner, 0)
+    if np.any(repair & (owner == candidate)):
+        raise RuntimeError("subcell material ownership repair did not retire the island")
+    return updated, combined, owner
+
+
+def _unresolved_subcell_gas_cavity_mask(phi, *, periodic_lateral):
+    """Find enclosed gas components too small to occupy one resolved volume cell.
+
+    A hexahedral cell needs eight corner nodes.  Fewer than eight gas-sign nodes can make marching
+    cubes report a closed bubble, but do not define one resolved gas volume.  Such bubbles arise when
+    redistancing crosses zero by a tiny amount near a depositing/re-entrant surface.  The returned
+    mask includes duplicate periodic endpoint nodes, while the count is measured on the unique
+    periodic core.  Components with eight or more nodes are physical-grid topology and are never
+    selected here.
+    """
+    field = np.asarray(phi, dtype=float)
+    if field.ndim != 3 or np.any(~np.isfinite(field)):
+        raise ValueError("gas-cavity cleanup requires one finite 3-D level-set field")
+    gas = field <= 0.0
+    if periodic_lateral:
+        core_gas = gas[:-1, :-1, :]
+        rooted, roots = _periodic_component_roots(core_gas)
+        open_roots = {
+            int(value) for value in np.unique(np.concatenate((
+                rooted[:, :, 0].ravel(), rooted[:, :, -1].ravel())))
+            if value > 0}
+        size = np.bincount(rooted.ravel())
+        unresolved_roots = {
+            root for root in roots - open_roots
+            if root < size.size and 0 < int(size[root]) < 8}
+        core_mask = np.isin(rooted, tuple(unresolved_roots))
+        mask = np.zeros(field.shape, dtype=bool)
+        mask[:-1, :-1, :] = core_mask
+        mask[-1, :-1, :] = core_mask[0, :, :]
+        mask[:-1, -1, :] = core_mask[:, 0, :]
+        mask[-1, -1, :] = core_mask[0, 0, :]
+        return mask, int(np.count_nonzero(core_mask))
+
+    component, count = label(gas)
+    if count == 0:
+        return np.zeros(field.shape, dtype=bool), 0
+    boundary = np.concatenate((
+        component[0, :, :].ravel(), component[-1, :, :].ravel(),
+        component[:, 0, :].ravel(), component[:, -1, :].ravel(),
+        component[:, :, 0].ravel(), component[:, :, -1].ravel(),
+    ))
+    open_component = {int(value) for value in np.unique(boundary) if value > 0}
+    size = np.bincount(component.ravel())
+    unresolved = tuple(
+        index for index in range(1, int(count) + 1)
+        if index not in open_component and 0 < int(size[index]) < 8)
+    mask = np.isin(component, unresolved)
+    return mask, int(np.count_nonzero(mask))
 
 
 def _apply_subcell_cleanup_to_material_levelsets(
@@ -469,6 +706,47 @@ def _apply_subcell_cleanup_to_material_levelsets(
     return updated, combined, combined_owner
 
 
+def _apply_subcell_gas_fill_to_material_levelsets(
+        material_levelsets, fill_mask, etchable_material_ids, dx,
+        reinitialization_method, periodic_lateral):
+    """Heal an unresolved gas bubble in its nearest authoritative material layer."""
+    fill = np.asarray(fill_mask, dtype=bool)
+    updated = {int(material_id): np.asarray(levelset, dtype=float).copy()
+               for material_id, levelset in material_levelsets.items()}
+    if not updated or any(levelset.shape != fill.shape for levelset in updated.values()):
+        raise ValueError("gas fill requires matching authoritative material level sets")
+    material_ids = np.asarray(sorted(updated), dtype=int)
+    material_stack = np.stack([updated[int(material_id)] for material_id in material_ids])
+    owner = material_ids[np.argmax(material_stack, axis=0)]
+    etchable = {int(value) for value in etchable_material_ids}
+    selected_owner = set(int(value) for value in np.unique(owner[fill]))
+    if not selected_owner or not selected_owner.issubset(etchable):
+        raise RuntimeError("unresolved gas cavity is not bounded by an evolving material")
+    accounted = np.zeros(fill.shape, dtype=bool)
+    for material_id in sorted(selected_owner):
+        selected = fill & (owner == material_id)
+        levelset = updated[material_id]
+        levelset[selected] = np.maximum(np.abs(levelset[selected]), float(dx))
+        updated[material_id] = _redistance_feature_field(
+            levelset, dx, reinitialization_method,
+            periodic_lateral=periodic_lateral)
+        accounted |= selected
+    if not np.array_equal(accounted, fill):
+        raise RuntimeError("subcell gas fill did not assign every selected node")
+    if periodic_lateral:
+        updated = {
+            material_id: _project_periodic_lateral_endpoints(levelset)[0]
+            for material_id, levelset in updated.items()}
+    combined = np.maximum.reduce(tuple(updated.values()))
+    combined = _redistance_feature_field(
+        combined, dx, reinitialization_method,
+        periodic_lateral=periodic_lateral)
+    material_stack = np.stack([updated[int(material_id)] for material_id in material_ids])
+    combined_owner = material_ids[np.argmax(material_stack, axis=0)]
+    combined_owner = np.where(combined >= 0.0, combined_owner, 0)
+    return updated, combined, combined_owner
+
+
 def _project_periodic_lateral_endpoints(field):
     """Project duplicate x/y endpoint planes onto one nodal-periodic field."""
     output = np.asarray(field, dtype=float).copy()
@@ -485,6 +763,31 @@ def _project_periodic_lateral_endpoints(field):
         output[first] = seam
         output[last] = seam
     return output, maximum_correction
+
+
+def _periodic_lateral_surface_images(values, centroids, domain_size):
+    """Wrap face samples into the eight neighboring lateral periodic cells.
+
+    ``extend_velocity_3d`` is an ordinary nearest-surface extension. Without wrapped
+    images, nodes near a periodic seam see only the faces on their stored side of the
+    duplicate endpoint and can acquire a nonperiodic velocity even when the physical
+    boundary condition is periodic.
+    """
+    values = np.asarray(values, dtype=float)
+    centroids = np.asarray(centroids, dtype=float)
+    domain = np.asarray(domain_size, dtype=float)
+    if (values.ndim != 1 or centroids.shape != (len(values), 3)
+            or domain.shape != (3,) or np.any(~np.isfinite(values))
+            or np.any(~np.isfinite(centroids)) or np.any(~np.isfinite(domain))
+            or np.any(domain[:2] <= 0.0)):
+        raise ValueError("invalid periodic surface-image inputs")
+    shifts = np.asarray([
+        (ix * domain[0], iy * domain[1], 0.0)
+        for ix in (-1, 0, 1) for iy in (-1, 0, 1)], dtype=float)
+    return (
+        np.tile(values, len(shifts)),
+        np.concatenate([centroids + shift for shift in shifts], axis=0),
+    )
 
 
 def _periodic_lateral_redistance(phi, dx, method):
@@ -589,9 +892,162 @@ def _conserve_nonnegative_surface_field(raw, target_integral, new_area, *, upper
     return np.minimum(upper_multiplier * seed, upper)
 
 
+def _point_to_triangles_distance(point, triangles):
+    """Return exact Euclidean distance from one point to each triangle.
+
+    The plane projection is used when it lies inside the triangle; otherwise the closest point is
+    on one of the three closed edges.  This is deliberately independent of triangle centroids:
+    marching-cubes can retriangulate an almost stationary interface and move its centroids by
+    multiple cells even though the represented material surface has barely moved.
+    """
+    point = np.asarray(point, dtype=float)
+    triangle = np.asarray(triangles, dtype=float)
+    if (point.shape != (3,) or triangle.ndim != 3 or triangle.shape[1:] != (3, 3)
+            or np.any(~np.isfinite(point)) or np.any(~np.isfinite(triangle))):
+        raise ValueError("point-to-triangle distance requires finite 3-D geometry")
+    a = triangle[:, 0]
+    b = triangle[:, 1]
+    c = triangle[:, 2]
+    ab = b - a
+    ac = c - a
+    normal = np.cross(ab, ac)
+    normal_squared = np.einsum("ij,ij->i", normal, normal)
+    coordinate_scale = max(
+        float(np.max(np.abs(triangle))), float(np.max(np.abs(point))), 1.0)
+    degeneracy_floor = (64.0 * np.finfo(float).eps * coordinate_scale) ** 4
+    if np.any(normal_squared <= degeneracy_floor):
+        raise ValueError("surface remap requires nondegenerate old triangles")
+
+    ap = point[None, :] - a
+    plane_parameter = np.einsum("ij,ij->i", ap, normal) / normal_squared
+    projection = point[None, :] - plane_parameter[:, None] * normal
+    projected = projection - a
+    d00 = np.einsum("ij,ij->i", ab, ab)
+    d01 = np.einsum("ij,ij->i", ab, ac)
+    d11 = np.einsum("ij,ij->i", ac, ac)
+    d20 = np.einsum("ij,ij->i", projected, ab)
+    d21 = np.einsum("ij,ij->i", projected, ac)
+    denominator = d00 * d11 - d01 * d01
+    barycentric_b = (d11 * d20 - d01 * d21) / denominator
+    barycentric_c = (d00 * d21 - d01 * d20) / denominator
+    barycentric_a = 1.0 - barycentric_b - barycentric_c
+    barycentric_tolerance = 256.0 * np.finfo(float).eps
+    inside = ((barycentric_a >= -barycentric_tolerance)
+              & (barycentric_b >= -barycentric_tolerance)
+              & (barycentric_c >= -barycentric_tolerance))
+    plane_distance_squared = plane_parameter * plane_parameter * normal_squared
+
+    def segment_distance_squared(start, end):
+        edge = end - start
+        edge_squared = np.einsum("ij,ij->i", edge, edge)
+        parameter = np.einsum(
+            "ij,ij->i", point[None, :] - start, edge) / edge_squared
+        parameter = np.clip(parameter, 0.0, 1.0)
+        delta = point[None, :] - (start + parameter[:, None] * edge)
+        return np.einsum("ij,ij->i", delta, delta)
+
+    edge_distance_squared = np.minimum.reduce((
+        segment_distance_squared(a, b),
+        segment_distance_squared(b, c),
+        segment_distance_squared(c, a),
+    ))
+    return np.sqrt(np.maximum(
+        np.where(inside, plane_distance_squared, edge_distance_squared), 0.0))
+
+
+def _maximum_point_to_surface_distance(points, triangles, maximum_distance):
+    """Certify each point against nearby triangles without an all-pairs allocation."""
+    points = np.asarray(points, dtype=float)
+    triangles = np.asarray(triangles, dtype=float)
+    if (points.ndim != 2 or points.shape[1] != 3
+            or triangles.ndim != 3 or triangles.shape[1:] != (3, 3)
+            or triangles.shape[0] == 0 or np.any(~np.isfinite(points))
+            or np.any(~np.isfinite(triangles))):
+        raise ValueError("surface-distance certification requires finite nonempty geometry")
+    center = np.mean(triangles, axis=1)
+    radius = np.max(
+        np.linalg.norm(triangles - center[:, None, :], axis=2), axis=1)
+    maximum_radius = float(np.max(radius))
+    coordinate_scale = max(
+        float(np.max(np.abs(points))) if points.size else 0.0,
+        float(np.max(np.abs(triangles))), 1.0)
+    roundoff = 256.0 * np.finfo(float).eps * coordinate_scale
+    tree = cKDTree(center)
+    candidates = tree.query_ball_point(
+        points, r=float(maximum_distance) + maximum_radius + roundoff)
+    maximum_nearest = 0.0
+    for point, local in zip(points, candidates):
+        if not local:
+            return np.inf
+        distance = _point_to_triangles_distance(
+            point, triangles[np.asarray(local, dtype=int)])
+        nearest = float(np.min(distance))
+        maximum_nearest = max(maximum_nearest, nearest)
+        if nearest > float(maximum_distance) + roundoff:
+            return nearest
+    return maximum_nearest
+
+
+def _periodic_remap_shifts(periodic_lengths):
+    """Return the nearest-image shifts for zero or more declared periodic axes."""
+    if periodic_lengths is None:
+        return np.zeros((1, 3), dtype=float), (None, None, None)
+    if len(periodic_lengths) != 3:
+        raise ValueError("surface remap periodic lengths must have three entries")
+    normalized = []
+    choices = []
+    for length in periodic_lengths:
+        if length is None or float(length) == 0.0:
+            normalized.append(None)
+            choices.append((0.0,))
+        else:
+            value = float(length)
+            if not np.isfinite(value) or value <= 0.0:
+                raise ValueError("surface remap periodic lengths must be positive")
+            normalized.append(value)
+            choices.append((-value, 0.0, value))
+    return np.asarray(tuple(product(*choices)), dtype=float), tuple(normalized)
+
+
+def _periodic_images(values, shifts):
+    values = np.asarray(values, dtype=float)
+    shift_shape = (shifts.shape[0],) + (1,) * (values.ndim - 1) + (3,)
+    images = values[None, ...] + shifts.reshape(shift_shape)
+    source = np.tile(np.arange(values.shape[0], dtype=int), shifts.shape[0])
+    return images.reshape((-1,) + values.shape[1:]), source
+
+
+def _periodic_unique_neighbors(old_points, new_points, count, shifts):
+    """Query wrapped images while returning each physical source face at most once."""
+    images, source = _periodic_images(old_points, shifts)
+    raw_count = min(images.shape[0], int(count) * shifts.shape[0])
+    distance, image_index = cKDTree(images).query(new_points, k=raw_count)
+    if raw_count == 1:
+        distance = np.asarray(distance)[:, None]
+        image_index = np.asarray(image_index)[:, None]
+    selected_distance = np.empty((len(new_points), int(count)), dtype=float)
+    selected_source = np.empty((len(new_points), int(count)), dtype=int)
+    for row in range(len(new_points)):
+        used = set(); output = 0
+        for candidate_distance, candidate_image in zip(distance[row], image_index[row]):
+            candidate_source = int(source[int(candidate_image)])
+            if candidate_source in used:
+                continue
+            selected_distance[row, output] = float(candidate_distance)
+            selected_source[row, output] = candidate_source
+            used.add(candidate_source)
+            output += 1
+            if output == int(count):
+                break
+        if output != int(count):
+            raise RuntimeError("periodic remap neighbor query lost physical source faces")
+    return selected_distance, selected_source
+
+
 def conservative_remap_surface_state(
         state, old_centroid, old_area, old_material, new_centroid, new_area, new_material, *,
-        dx, mesh_length_unit_m, neighbor_count=4, maximum_distance=None):
+        dx, mesh_length_unit_m, neighbor_count=4, maximum_distance=None,
+        old_triangles=None, periodic_lengths=None):
     """First-order material-local remap with declared intensive/conservative semantics.
 
     The state declares named nonnegative fields, optional upper bounds, and reconstruction. Interpolation
@@ -621,20 +1077,31 @@ def conservative_remap_surface_state(
                    for mode in remap_modes.values())):
         raise ValueError("surface-state remap fields and upper bounds must match")
     old_values = {name: np.asarray(value, dtype=float) for name, value in old_values.items()}
+    old_triangles = (
+        None if old_triangles is None else np.asarray(old_triangles, dtype=float))
     if (old_centroid.ndim != 2 or old_centroid.shape[1] != 3
             or new_centroid.ndim != 2 or new_centroid.shape[1] != 3
             or old_area.shape != (old_centroid.shape[0],)
             or new_area.shape != (new_centroid.shape[0],)
             or old_material.shape != old_area.shape or new_material.shape != new_area.shape
             or any(value.shape != old_area.shape for value in old_values.values())
-            or np.any(old_area <= 0.0) or np.any(new_area <= 0.0)):
+            or np.any(old_area <= 0.0) or np.any(new_area <= 0.0)
+            or (old_triangles is not None
+                and (old_triangles.shape != (old_centroid.shape[0], 3, 3)
+                     or np.any(~np.isfinite(old_triangles))))):
         raise ValueError("invalid surface-state remap geometry")
     if maximum_distance is None:
         maximum_distance = 2.0 * float(dx)
     if not np.isfinite(maximum_distance) or maximum_distance <= 0.0:
         raise ValueError("maximum remap distance must be positive")
+    periodic_shifts, normalized_periodic_lengths = _periodic_remap_shifts(
+        periodic_lengths)
+    union_triangle_images = (
+        None if old_triangles is None else
+        _periodic_images(old_triangles, periodic_shifts)[0])
     output = {name: np.zeros(new_area.shape) for name in old_values}
-    maximum_nearest = 0.0; material_diagnostics = {}
+    maximum_nearest = 0.0; maximum_centroid_nearest = 0.0
+    material_diagnostics = {}
     physical_area_scale = float(mesh_length_unit_m) ** 2
     for material in sorted(set(old_material) | set(new_material)):
         old_index = np.where(old_material == material)[0]
@@ -643,14 +1110,27 @@ def conservative_remap_surface_state(
             raise ValueError(
                 "material surface appeared or disappeared; initialize/retire state explicitly")
         count = min(int(neighbor_count), old_index.size)
-        distance, local = cKDTree(old_centroid[old_index]).query(
-            new_centroid[new_index], k=count)
-        if count == 1:
-            distance = np.asarray(distance)[:, None]; local = np.asarray(local)[:, None]
-        nearest = float(np.max(distance[:, 0])); maximum_nearest = max(maximum_nearest, nearest)
+        distance, local = _periodic_unique_neighbors(
+            old_centroid[old_index], new_centroid[new_index], count, periodic_shifts)
+        centroid_nearest = float(np.max(distance[:, 0]))
+        maximum_centroid_nearest = max(maximum_centroid_nearest, centroid_nearest)
+        material_triangle_images = (
+            None if old_triangles is None else
+            _periodic_images(old_triangles[old_index], periodic_shifts)[0])
+        nearest = (
+            centroid_nearest if old_triangles is None else
+            _maximum_point_to_surface_distance(
+                new_centroid[new_index], material_triangle_images, maximum_distance))
+        maximum_nearest = max(maximum_nearest, nearest)
         if nearest > maximum_distance:
+            union_nearest = (
+                nearest if old_triangles is None else
+                _maximum_point_to_surface_distance(
+                    new_centroid[new_index], union_triangle_images, maximum_distance))
             raise ValueError(
-                f"surface remap distance {nearest:g} exceeds {maximum_distance:g}")
+                f"surface remap distance {nearest:g} exceeds {maximum_distance:g} "
+                f"using {'centroid' if old_triangles is None else 'point-to-triangle'} metric "
+                f"for material {int(material)}; union-surface distance={union_nearest:g}")
         source_index = old_index[np.asarray(local, dtype=int)]
         # A fixed O(dx) denominator regularization makes every remap smooth neighboring states by
         # O(1), even as the interface displacement tends to zero.  Repeating smaller time steps then
@@ -696,6 +1176,10 @@ def conservative_remap_surface_state(
     return remapped_state, dict(
         method="material_local_area_conservative_knn",
         neighbor_count=int(neighbor_count), maximum_nearest_distance=float(maximum_nearest),
+        maximum_nearest_centroid_distance=float(maximum_centroid_nearest),
+        distance_metric=(
+            "centroid" if old_triangles is None else "point_to_material_triangle"),
+        periodic_lengths=normalized_periodic_lengths,
         maximum_allowed_distance=float(maximum_distance),
         materials=material_diagnostics)
 
@@ -743,7 +1227,7 @@ def _apply_diffuse_neutral_transport(
     allowed = {
         "rays_per_face", "seed", "periodic_lateral", "domain_size", "ray_offset",
         "nonetchable_reaction_probability_by_material", "relative_tolerance",
-        "maximum_iterations",
+        "maximum_iterations", "maximum_rays_per_face", "source_sampling",
     }
     unknown = set(options) - allowed
     if unknown:
@@ -752,14 +1236,19 @@ def _apply_diffuse_neutral_transport(
         "nonetchable_reaction_probability_by_material", {}))
     solver_tolerance = float(options.pop("relative_tolerance", 1e-10))
     maximum_iterations = int(options.pop("maximum_iterations", 500))
+    initial_rays_per_face = int(options.pop("rays_per_face", 64))
+    maximum_rays_per_face = int(options.pop(
+        "maximum_rays_per_face", 8 * initial_rays_per_face))
+    if (initial_rays_per_face <= 0
+            or initial_rays_per_face & (initial_rays_per_face - 1)
+            or maximum_rays_per_face < initial_rays_per_face
+            or maximum_rays_per_face & (maximum_rays_per_face - 1)):
+        raise ValueError(
+            "neutral radiosity initial/maximum rays must be positive powers of two")
     if "domain_size" not in options:
         options["domain_size"] = (np.asarray(geometry.phi.shape) - 1) * geometry.dx
     if "ray_offset" not in options:
         options["ray_offset"] = 1e-3 * geometry.dx
-    factors = estimate_diffuse_form_factors_3d(
-        verts, faces, centroids, _surface_gas_normals(
-            verts, faces, centroids, geometry),
-        device=transport_device, **options)
     if hasattr(mechanism, "neutral_reaction_probability_by_material"):
         active_probability = dict(mechanism.neutral_reaction_probability_by_material(
             surface_state, face_material[active_face]))
@@ -790,30 +1279,92 @@ def _apply_diffuse_neutral_transport(
             raise ValueError("material neutral reaction probabilities must lie in [0,1]")
         reaction_probability[name] = probability
 
-    neutral_flux = {}
-    diagnostics = {}
     physical_area = np.asarray(areas) * geometry.mesh_length_unit_m ** 2
-    for name, direct in transport.surface_fluxes.neutral_flux_m2_s.items():
-        if name not in reaction_probability:
-            neutral_flux[name] = direct
+    rays_per_face = initial_rays_per_face
+    refinement = []
+    while True:
+        factors = estimate_diffuse_form_factors_3d(
+            verts, faces, centroids, _surface_gas_normals(
+                verts, faces, centroids, geometry),
+            rays_per_face=rays_per_face, device=transport_device, **options)
+        neutral_flux = {}
+        diagnostics = {}
+        try:
+            for name, direct in transport.surface_fluxes.neutral_flux_m2_s.items():
+                if name not in reaction_probability:
+                    neutral_flux[name] = direct
+                    continue
+                # A globally inert population is causally disconnected from every surface-state
+                # and profile equation.  Its repeated diffuse collision count can be arbitrarily
+                # large in a high-AR, nearly pinched feature, and a finite form-factor sample can
+                # manufacture a singular closed class when the true escape cone is merely tiny.
+                # Analytically marginalize that null channel: preserve the first-hit diagnostic,
+                # account every launched particle as eventually escaping, and solve radiosity only
+                # for species with a nonzero chance to modify the modeled surface.
+                if not np.any(reaction_probability[name] > 0.0):
+                    direct = np.asarray(direct, dtype=float)
+                    source_rate = float(np.sum(direct * physical_area))
+                    neutral_flux[name] = direct
+                    diagnostics[name] = dict(
+                        source_rate_s=source_rate,
+                        reacted_rate_s=0.0,
+                        escaped_rate_s=source_rate,
+                        relative_balance_error=0.0,
+                        relative_linear_residual=0.0,
+                        solver_method="analytic_zero_reaction_elision",
+                        iteration_count=0,
+                        inactive_face_count=int(len(faces)),
+                        form_factor_rays_per_face=int(rays_per_face),
+                        form_factor_refinement_count=len(refinement),
+                        form_factor_refinement=tuple(refinement),
+                        repeated_incident_flux_elided=True,
+                    )
+                    continue
+                solution = solve_diffuse_neutral_radiosity_3d(
+                    direct, physical_area, factors.source_face, factors.target_face,
+                    factors.transfer_fraction, factors.escape_fraction,
+                    reaction_probability[name], relative_tolerance=solver_tolerance,
+                    maximum_iterations=maximum_iterations)
+                neutral_flux[name] = solution.incident_flux_m2_s
+                diagnostics[name] = dict(
+                    source_rate_s=solution.source_rate_s,
+                    reacted_rate_s=solution.reacted_rate_s,
+                    escaped_rate_s=solution.escaped_rate_s,
+                    relative_balance_error=solution.relative_balance_error,
+                    relative_linear_residual=solution.relative_linear_residual,
+                    solver_method=solution.solver_method,
+                    iteration_count=solution.iteration_count,
+                    inactive_face_count=solution.inactive_face_count,
+                    form_factor_rays_per_face=int(rays_per_face),
+                    form_factor_refinement_count=len(refinement),
+                    form_factor_refinement=tuple(refinement),
+                    repeated_incident_flux_elided=False)
+        except DiffuseNeutralNoSinkError as error:
+            if rays_per_face >= maximum_rays_per_face:
+                raise RuntimeError(
+                    f"neutral radiosity for {name!r} retained a source-fed no-sink "
+                    f"class through {rays_per_face} rays/face") from error
+            next_rays = min(2 * rays_per_face, maximum_rays_per_face)
+            refinement.append({
+                "species": str(name),
+                "from_rays_per_face": int(rays_per_face),
+                "to_rays_per_face": int(next_rays),
+                "closed_class_face_count": int(error.face_count),
+                "classification": "nested_form_factor_refinement",
+            })
+            rays_per_face = next_rays
             continue
-        solution = solve_diffuse_neutral_radiosity_3d(
-            direct, physical_area, factors.source_face, factors.target_face,
-            factors.transfer_fraction, factors.escape_fraction,
-            reaction_probability[name], relative_tolerance=solver_tolerance,
-            maximum_iterations=maximum_iterations)
-        neutral_flux[name] = solution.incident_flux_m2_s
-        diagnostics[name] = dict(
-            source_rate_s=solution.source_rate_s,
-            reacted_rate_s=solution.reacted_rate_s,
-            escaped_rate_s=solution.escaped_rate_s,
-            relative_balance_error=solution.relative_balance_error,
-            relative_linear_residual=solution.relative_linear_residual)
+        break
     limitations = tuple(
         item for item in transport.known_limitations
         if item != "no surface reflection or neutral re-emission") + (
         "neutral re-emission is diffuse with material/state reaction probabilities",
-    )
+    ) + ((
+        "globally zero-reaction neutral populations retain first-hit flux only; "
+        "their chemically irrelevant repeated collision count is analytically elided",
+    ) if any(
+        item.get("repeated_incident_flux_elided", False)
+        for item in diagnostics.values()) else ())
     updated = BoundaryTransport3DResult(
         SurfaceFluxes(neutral_flux, transport.surface_fluxes.energetic_fluxes),
         transport.hit_probability, transport.escape_probability,
@@ -837,7 +1388,7 @@ def _apply_surface_product_redeposition(
     options = dict(options)
     allowed = {
         "contract", "rays_per_face", "seed", "periodic_lateral", "domain_size",
-        "ray_offset", "relative_tolerance", "maximum_iterations",
+        "ray_offset", "relative_tolerance", "maximum_iterations", "source_sampling",
     }
     unknown = set(options) - allowed
     if unknown:
@@ -898,9 +1449,10 @@ def advance_feature_step_3d(
         neutral_surface_fixed_point_tolerance=None,
         neutral_surface_fixed_point_max_iterations=20,
         surface_product_redeposition_options=None,
-        ballistic_transport="forward",
+        ballistic_transport="forward", ballistic_periodic_lateral=None,
         ballistic_face_quadrature_points=1, cfl_number=0.3, reinitialize=True,
         reinitialization_method="skfmm",
+        topology_change_policy="refuse",
         transport_device=None):
     """Advance one stateful, dimensional feature step.
 
@@ -915,6 +1467,13 @@ def advance_feature_step_3d(
     to an ordinary supplied-field or explicitly field-free feature step.  It is exclusive with
     precomputed and self-consistent charging transports so the energetic lineage cannot be applied
     twice.
+    ``ballistic_periodic_lateral`` declares periodic field-free first-hit transport independently
+    of diffuse neutral radiosity.  ``None`` preserves the historical behavior by inheriting the
+    radiosity periodic setting; an explicit boolean is the preferred production declaration.
+    ``topology_change_policy='continue_gas_cavity'`` is deliberately narrow: only the periodic
+    physical-volume signature's gas-cavity count may change. The existing material-local conservative
+    remap then transfers surface history; solid components, per-material components, and domain
+    breakthrough must remain invariant.
     """
     if not np.isfinite(duration_s) or duration_s < 0.0:
         raise ValueError("duration_s must be finite and nonnegative")
@@ -930,6 +1489,9 @@ def advance_feature_step_3d(
     if (profile_periodic_lateral is not None
             and not isinstance(profile_periodic_lateral, (bool, np.bool_))):
         raise ValueError("profile_periodic_lateral must be boolean or None")
+    if (ballistic_periodic_lateral is not None
+            and not isinstance(ballistic_periodic_lateral, (bool, np.bool_))):
+        raise ValueError("ballistic_periodic_lateral must be boolean or None")
     if neutral_surface_fixed_point_tolerance is not None:
         if (not np.isfinite(neutral_surface_fixed_point_tolerance)
                 or not 0.0 < neutral_surface_fixed_point_tolerance < 1.0
@@ -968,6 +1530,12 @@ def advance_feature_step_3d(
             charging_poisson_system is not None or nodal_potential_v is not None):
         raise ValueError(
             "precomputed transport is exclusive with an internally evaluated charging/field path")
+    if ballistic_periodic_lateral is not None and (
+            precomputed_transport is not None or charging_poisson_system is not None
+            or nodal_potential_v is not None):
+        raise ValueError(
+            "ballistic_periodic_lateral controls only field-free first-hit transport; "
+            "use the field, charging, or precomputed transport periodic contract")
     if charged_surface_response is None and charged_surface_response_options is not None:
         raise ValueError(
             "charged_surface_response_options require a charged_surface_response")
@@ -980,6 +1548,9 @@ def advance_feature_step_3d(
         raise ValueError("ballistic_transport must be 'forward' or 'face_gather'")
     if reinitialization_method not in ("skfmm", "fsm", "cr2"):
         raise ValueError("reinitialization_method must be 'skfmm', 'fsm', or 'cr2'")
+    if topology_change_policy not in ("refuse", "continue_gas_cavity"):
+        raise ValueError(
+            "topology_change_policy must be 'refuse' or 'continue_gas_cavity'")
     if ballistic_transport == "face_gather" and (
             charging_poisson_system is not None or nodal_potential_v is not None):
         raise ValueError("deterministic ballistic face gather does not yet trace electric fields")
@@ -988,8 +1559,8 @@ def advance_feature_step_3d(
             "charged surface response requires forward impact-position lineage; "
             "face_gather currently preserves direction but not impact position")
 
-    verts, faces, centroids, areas = extract_mesh_3d(geometry.phi, geometry.dx)
-    face_material = _face_material_ids(centroids, geometry)
+    verts, faces, centroids, areas, face_material = (
+        _extract_uniform_surface_arrays(geometry))
     active_face = np.where(np.isin(face_material, etchable))[0]
     if active_face.size == 0:
         raise ValueError("current interface contains no requested etchable material")
@@ -1041,6 +1612,12 @@ def advance_feature_step_3d(
     scatter_periodic = bool(scatter_options.get("periodic_lateral", False))
     periodic_neutral = bool(
         radiosity_options is not None and radiosity_options.get("periodic_lateral", False))
+    periodic_ballistic = (
+        periodic_neutral if ballistic_periodic_lateral is None
+        else bool(ballistic_periodic_lateral))
+    if periodic_neutral and not periodic_ballistic:
+        raise ValueError(
+            "periodic neutral radiosity requires periodic ballistic first-hit transport")
     response_options = None
     response_fixed_dt = None
     response_periodic = False
@@ -1065,14 +1642,14 @@ def advance_feature_step_3d(
                 "charged_surface_response_options or trajectory_fixed_dt")
         response_periodic = bool(response_options.get(
             "periodic_lateral",
-            bool(field_periodic_lateral) if nodal_potential_v is not None else periodic_neutral))
+            bool(field_periodic_lateral) if nodal_potential_v is not None else periodic_ballistic))
         if periodic_neutral and not response_periodic:
             raise ValueError(
                 "periodic neutral radiosity requires periodic response-enabled trajectories")
     charging_periodic = bool(
         charging_options is not None and charging_options.get("periodic_lateral", False))
     transport_periodic_lateral = bool(
-        periodic_neutral or response_periodic or bool(field_periodic_lateral)
+        periodic_ballistic or response_periodic or bool(field_periodic_lateral)
         or charging_periodic or scatter_periodic)
     if profile_periodic_lateral is None:
         profile_periodic_lateral = transport_periodic_lateral
@@ -1170,11 +1747,15 @@ def advance_feature_step_3d(
                     and charged_surface_response is None)):
             raise ValueError("field trajectory options require nodal_potential_v")
         first_hit_options = {}
-        if periodic_neutral:
+        if periodic_ballistic:
             first_hit_options = dict(
                 periodic_lateral=True,
-                domain_size=radiosity_options.get(
-                    "domain_size", (np.asarray(geometry.phi.shape) - 1) * geometry.dx))
+                domain_size=(
+                    (np.asarray(geometry.phi.shape) - 1) * geometry.dx
+                    if radiosity_options is None
+                    else radiosity_options.get(
+                        "domain_size",
+                        (np.asarray(geometry.phi.shape) - 1) * geometry.dx)))
         if ballistic_transport == "face_gather":
             transport = gather_boundary_state_ballistic_3d(
                 boundary, species_role, verts, faces, areas, centroids,
@@ -1183,7 +1764,7 @@ def advance_feature_step_3d(
                 mesh_length_unit_m=geometry.mesh_length_unit_m,
                 mesh_origin_m=geometry.mesh_origin_m,
                 face_quadrature_points=ballistic_face_quadrature_points,
-                periodic_lateral=periodic_neutral,
+                periodic_lateral=periodic_ballistic,
                 domain_size=first_hit_options.get("domain_size"),
                 ray_offset=1e-3 * geometry.dx, device=transport_device)
         elif charged_surface_response is not None:
@@ -1391,15 +1972,11 @@ def advance_feature_step_3d(
         face_velocity -= (
             product_redeposition.normal_growth_velocity_m_s
             / geometry.mesh_length_unit_m)
-    maximum_speed = float(np.max(np.abs(face_velocity))) if face_velocity.size else 0.0
-    maximum_recession = max(
-        float(np.max(face_velocity)) if face_velocity.size else 0.0, 0.0)
-    maximum_growth = max(
-        float(np.max(-face_velocity)) if face_velocity.size else 0.0, 0.0)
-    displacement = maximum_speed * float(duration_s)
-    substeps = max(1, int(np.ceil(displacement / (float(cfl_number) * geometry.dx))))
+    raw_maximum_face_speed = (
+        float(np.max(np.abs(face_velocity))) if face_velocity.size else 0.0)
     phi = np.array(geometry.phi, copy=True)
     periodic_seam_projection = 0.0
+    periodic_seam_velocity_projection = 0.0
     if profile_periodic_lateral:
         phi, correction = _project_periodic_lateral_endpoints(phi)
         periodic_seam_projection = max(periodic_seam_projection, correction)
@@ -1408,17 +1985,43 @@ def advance_feature_step_3d(
     # Extend only from the material surface that is actually evolving.  Including pinned mask
     # triangles with zero velocity lets them win the nearest-face query below a narrow opening and
     # numerically pins a physically bombarded floor after roughly one grid cell of motion.
+    extension_velocity = face_velocity[active_face]
+    extension_centroid = centroids[active_face]
+    if profile_periodic_lateral:
+        extension_velocity, extension_centroid = _periodic_lateral_surface_images(
+            extension_velocity, extension_centroid,
+            (np.asarray(geometry.phi.shape) - 1) * geometry.dx)
     extended_velocity = extend_velocity_3d(
-        face_velocity[active_face], centroids[active_face],
+        extension_velocity, extension_centroid,
         extension_geometry, 4.0 * geometry.dx)
     if profile_periodic_lateral:
         extended_velocity, correction = _project_periodic_lateral_endpoints(
             extended_velocity)
-        periodic_seam_projection = max(periodic_seam_projection, correction)
+        periodic_seam_velocity_projection = max(
+            periodic_seam_velocity_projection, correction)
+        # The physical boundary condition declares the duplicate endpoints to be
+        # one location, so projecting their two finite-sample velocity estimates is
+        # the authoritative periodic operation. Report its implied displacement,
+        # but do not mix a velocity estimator discrepancy into the geometry gate.
+        # CFL substepping independently resolves the accepted projected velocity.
         if periodic_seam_projection > 0.25 * geometry.dx:
             raise RuntimeError(
-                "periodic profile seam projection exceeds one quarter cell; input geometry or "
-                "surface velocity is not a resolved periodic field")
+                "periodic input-geometry seam projection exceeds one quarter cell; "
+                f"geometry projection={periodic_seam_projection:.8g} mesh units; "
+                "the stored input is not a resolved periodic field")
+    # The level set consumes the grid-resolved extended field, not individual marching-cubes face
+    # values. A vanishing-area sliver can carry an extreme flux density yet be nearest to no grid
+    # node; letting that auxiliary quadrature atom set CFL or the outer coupling step makes the
+    # timestep chase subgrid geometry that never enters the evolution operator.
+    maximum_speed = (
+        float(np.max(np.abs(extended_velocity))) if extended_velocity.size else 0.0)
+    maximum_recession = max(
+        float(np.max(extended_velocity)) if extended_velocity.size else 0.0, 0.0)
+    maximum_growth = max(
+        float(np.max(-extended_velocity)) if extended_velocity.size else 0.0, 0.0)
+    displacement = maximum_speed * float(duration_s)
+    substeps = max(
+        1, int(np.ceil(displacement / (float(cfl_number) * geometry.dx))))
     center = (geometry.phi.shape[0] // 2, geometry.phi.shape[1] // 2)
     centerline = geometry.phi[center]
     center_crossing = np.flatnonzero(
@@ -1507,13 +2110,27 @@ def advance_feature_step_3d(
             material_levelsets[int(material_id)] for material_id in material_ids])
         owner = material_ids[np.argmax(material_stack, axis=0)]
         output_material_id = np.where(phi >= 0.0, owner, 0)
+    if duration_s == 0.0 or material_levelsets is None:
+        reassigned_unresolved_material_nodes = 0
+    else:
+        unresolved_material_mask, reassigned_unresolved_material_nodes = (
+            _new_unresolved_subcell_material_component_mask(
+                phi, output_material_id, geometry.material_id, etchable,
+                periodic_lateral=profile_periodic_lateral))
+        if reassigned_unresolved_material_nodes:
+            material_levelsets, phi, output_material_id = (
+                _restore_unresolved_material_ownership(
+                    material_levelsets, unresolved_material_mask,
+                    output_material_id, geometry.material_id, geometry.dx,
+                    reinitialization_method, profile_periodic_lateral))
     if duration_s == 0.0:
         removed_unresolved_solid_cells = 0
         unresolved_solid_mask = np.zeros_like(output_material_id, dtype=bool)
     else:
         phi, removed_unresolved_solid_cells, unresolved_solid_mask = (
             _remove_unresolved_subcell_solid_components(
-            phi, output_material_id, etchable, geometry.dx)
+                phi, output_material_id, etchable, geometry.dx,
+                periodic_lateral=profile_periodic_lateral)
         )
     if removed_unresolved_solid_cells:
         if material_levelsets is not None:
@@ -1522,17 +2139,61 @@ def advance_feature_step_3d(
                     material_levelsets, unresolved_solid_mask, output_material_id,
                     etchable, geometry.dx, reinitialization_method,
                     profile_periodic_lateral))
-            _, remaining_unresolved_cells, _ = (
+            _, remaining_unresolved_cells, remaining_unresolved_mask = (
                 _remove_unresolved_subcell_solid_components(
-                    phi, output_material_id, etchable, geometry.dx))
+                    phi, output_material_id, etchable, geometry.dx,
+                    periodic_lateral=profile_periodic_lateral))
             if remaining_unresolved_cells:
+                remaining_coordinates = tuple(
+                    tuple(int(value) for value in index)
+                    for index in np.argwhere(remaining_unresolved_mask)[:12])
+                remaining_owners = tuple(sorted(
+                    int(value) for value in np.unique(
+                        output_material_id[remaining_unresolved_mask])))
                 raise RuntimeError(
-                    "material-layer topology update left an unresolved subcell component")
+                    "material-layer topology update left an unresolved subcell component; "
+                    f"node_count={remaining_unresolved_cells}; "
+                    f"owners={remaining_owners}; coordinates={remaining_coordinates}")
         else:
             phi = _redistance_feature_field(
                 phi, geometry.dx, reinitialization_method,
                 periodic_lateral=profile_periodic_lateral)
             phi[pinned] = geometry.phi[pinned]
+    if duration_s == 0.0:
+        unresolved_gas_mask = np.zeros_like(phi, dtype=bool)
+        filled_unresolved_gas_cavity_cells = 0
+    else:
+        unresolved_gas_mask, filled_unresolved_gas_cavity_cells = (
+            _unresolved_subcell_gas_cavity_mask(
+                phi, periodic_lateral=profile_periodic_lateral))
+    if filled_unresolved_gas_cavity_cells:
+        if material_levelsets is not None:
+            material_levelsets, phi, output_material_id = (
+                _apply_subcell_gas_fill_to_material_levelsets(
+                    material_levelsets, unresolved_gas_mask, etchable,
+                    geometry.dx, reinitialization_method,
+                    profile_periodic_lateral))
+        else:
+            solid_material = tuple(sorted({
+                int(value) for value in np.unique(output_material_id[phi > 0.0])
+                if int(value) > 0}))
+            if len(solid_material) != 1 or solid_material[0] not in etchable:
+                raise RuntimeError(
+                    "subcell gas-cavity fill without material level sets requires one "
+                    "evolving solid material")
+            phi = np.asarray(phi, dtype=float).copy()
+            phi[unresolved_gas_mask] = np.maximum(
+                np.abs(phi[unresolved_gas_mask]), float(geometry.dx))
+            phi = _redistance_feature_field(
+                phi, geometry.dx, reinitialization_method,
+                periodic_lateral=profile_periodic_lateral)
+            output_material_id = np.where(phi >= 0.0, solid_material[0], 0)
+        _, remaining_unresolved_gas_cells = (
+            _unresolved_subcell_gas_cavity_mask(
+                phi, periodic_lateral=profile_periodic_lateral))
+        if remaining_unresolved_gas_cells:
+            raise RuntimeError(
+                "subcell gas-cavity cleanup did not restore resolved topology")
     if profile_periodic_lateral:
         phi, correction = _project_periodic_lateral_endpoints(phi)
         periodic_seam_projection = max(periodic_seam_projection, correction)
@@ -1540,37 +2201,83 @@ def advance_feature_step_3d(
     output_geometry = FeatureGeometry3D(
         phi, output_material_id, geometry.dx, geometry.mesh_length_unit_m,
         geometry.mesh_origin_m, material_levelsets=material_levelsets)
-    next_verts, next_faces, next_centroids, next_areas = extract_mesh_3d(
-        output_geometry.phi, output_geometry.dx)
-    next_face_material = _face_material_ids(next_centroids, output_geometry)
+    (next_verts, next_faces, next_centroids, next_areas,
+     next_face_material) = _extract_uniform_surface_arrays(output_geometry)
     next_active_face = np.where(np.isin(next_face_material, etchable))[0]
     if next_active_face.size == 0:
         raise ValueError("etch step removed every requested material surface")
     old_mesh_topology = _surface_topology_signature(faces, active_face)
     next_mesh_topology = _surface_topology_signature(next_faces, next_active_face)
-    old_topology = _physical_volume_topology_signature(geometry, etchable)
-    next_topology = _physical_volume_topology_signature(output_geometry, etchable)
+    topology_method = (
+        "periodic_xy_component_cavity_breakthrough_v1"
+        if profile_periodic_lateral else "bounded_volume_euler_v1")
+    topology_operator = (
+        _periodic_physical_volume_topology_signature
+        if profile_periodic_lateral else _physical_volume_topology_signature)
+    old_topology = topology_operator(geometry, etchable)
+    next_topology = topology_operator(output_geometry, etchable)
+    topology_event = None
     if old_topology != next_topology:
-        raise ValueError(
-            f"surface topology changed from {old_topology} to {next_topology}; "
+        changed_slice_topology = _changed_physical_slice_topology(
+            geometry, output_geometry, etchable)
+        message = (
+            f"surface topology changed under {topology_method} from "
+            f"{old_topology} to {next_topology}; "
+            f"marching-cubes topology changed from {old_mesh_topology} "
+            f"to {next_mesh_topology}; "
             f"component sizes changed from "
             f"{_physical_volume_component_sizes(geometry, etchable)} to "
             f"{_physical_volume_component_sizes(output_geometry, etchable)}; "
+            f"periodic material-component sizes changed from "
+            f"{_periodic_material_component_sizes(geometry, etchable)} to "
+            f"{_periodic_material_component_sizes(output_geometry, etchable)}; "
             f"changed slice topology="
-            f"{_changed_physical_slice_topology(geometry, output_geometry, etchable)}; "
+            f"{changed_slice_topology}; "
             "state transfer requires an explicit topology event")
+        topology_error = SurfaceTopologyChangeError(
+            message, method=topology_method,
+            old_topology=old_topology, new_topology=next_topology,
+            old_mesh_topology=old_mesh_topology,
+            new_mesh_topology=next_mesh_topology,
+            changed_slice_topology=changed_slice_topology)
+        permitted_event = (
+            topology_change_policy == "continue_gas_cavity"
+            and profile_periodic_lateral
+            and topology_error.event_kind in (
+                "gas_cavity_enclosed", "gas_cavity_opened"))
+        if not permitted_event:
+            raise topology_error
+        topology_event = {
+            "accepted": True,
+            "policy": str(topology_change_policy),
+            "kind": topology_error.event_kind,
+            "method": str(topology_method),
+            "old_topology": tuple(old_topology),
+            "new_topology": tuple(next_topology),
+            "old_mesh_topology": tuple(old_mesh_topology),
+            "new_mesh_topology": tuple(next_mesh_topology),
+            "changed_slice_topology": dict(changed_slice_topology),
+            "conservative_surface_state_remap_required": True,
+        }
     next_surface_state, remap_diagnostics = conservative_remap_surface_state(
         surface.state, centroids[active_face], areas[active_face], face_material[active_face],
         next_centroids[next_active_face], next_areas[next_active_face],
         next_face_material[next_active_face], dx=geometry.dx,
         mesh_length_unit_m=geometry.mesh_length_unit_m,
-        maximum_distance=displacement + 1.5 * geometry.dx)
+        maximum_distance=displacement + 1.5 * geometry.dx,
+        old_triangles=verts[faces[active_face]],
+        periodic_lengths=(
+            tuple(((np.asarray(geometry.phi.shape) - 1) * geometry.dx)[:2]) + (None,)
+            if profile_periodic_lateral else None))
     next_mesh_fingerprint = _surface_mesh_fingerprint(
         next_verts, next_faces, next_active_face, next_face_material, output_geometry)
     remap_diagnostics = dict(
         remap_diagnostics, old_topology=old_topology, new_topology=next_topology,
+        topology_method=topology_method,
         old_mesh_topology=old_mesh_topology, new_mesh_topology=next_mesh_topology,
-        next_active_face_count=int(next_active_face.size))
+        next_active_face_count=int(next_active_face.size),
+        topology_change_policy=str(topology_change_policy),
+        topology_event=topology_event)
     reasons = []
     if not surface.validity.within_declared_scope:
         reasons.extend(surface.validity.reasons)
@@ -1609,12 +2316,18 @@ def advance_feature_step_3d(
             "transport is enabled") + (
                 "redeposition v1 permits same-material growth only; cross-material films are refused",
             )
+    topology_limitation = (
+        "physical volume-topology-changing surface steps are refused"
+        if topology_change_policy == "refuse" else
+        "only periodic gas-cavity enclosure/opening may continue through an explicit "
+        "conservative state remap; all other physical volume-topology changes are refused")
     validity = FeatureStepValidity(
         within_declared_scope=not reasons,
         reasons=tuple(reasons),
         known_limitations=tuple(dict.fromkeys(transport_limitations)) + (
             "first-order material-local conservative surface-state remap with declared intensive-field exceptions",
-            "physical volume-topology-changing surface steps are refused",
+            "new subcell material-label components below one resolved volume cell are suppressed and bounded",
+            topology_limitation,
             "first-order Godunov interface advection",
         ) + tuple(surface.validity.known_model_form_omissions) + exchange_limitations,
         parameter_evidence_supports_prediction=(
@@ -1643,6 +2356,8 @@ def advance_feature_step_3d(
         diagnostics=dict(
             face_count=int(len(faces)), active_face_count=int(active_face.size),
             max_velocity_m_s=maximum_speed * geometry.mesh_length_unit_m,
+            raw_maximum_face_velocity_m_s=(
+                raw_maximum_face_speed * geometry.mesh_length_unit_m),
             max_recession_velocity_m_s=maximum_recession * geometry.mesh_length_unit_m,
             max_growth_velocity_m_s=maximum_growth * geometry.mesh_length_unit_m,
             max_surface_mechanism_growth_velocity_m_s=(
@@ -1651,9 +2366,26 @@ def advance_feature_step_3d(
             max_displacement_mesh_units=displacement, cfl_substeps=int(substeps),
             cfl_number=float(cfl_number), reinitialized=bool(reinitialize),
             reinitialization_method=(reinitialization_method if reinitialize else None),
+            topology_change_policy=str(topology_change_policy),
+            topology_event=topology_event,
+            ballistic_periodic_lateral=periodic_ballistic,
             profile_periodic_lateral=profile_periodic_lateral,
             periodic_seam_projection_max_mesh_units=periodic_seam_projection,
+            periodic_seam_velocity_projection_max_mesh_units_s=(
+                periodic_seam_velocity_projection),
+            periodic_seam_velocity_projection_displacement_mesh_units=(
+                periodic_seam_velocity_projection * float(duration_s)),
             removed_unresolved_solid_cells=removed_unresolved_solid_cells,
+            reassigned_unresolved_material_nodes=(
+                reassigned_unresolved_material_nodes),
+            unresolved_material_volume_upper_bound_m3=(
+                reassigned_unresolved_material_nodes
+                * (geometry.dx * geometry.mesh_length_unit_m) ** 3),
+            filled_unresolved_gas_cavity_cells=(
+                filled_unresolved_gas_cavity_cells),
+            unresolved_gas_cavity_volume_upper_bound_m3=(
+                filled_unresolved_gas_cavity_cells
+                * (geometry.dx * geometry.mesh_length_unit_m) ** 3),
             self_consistent_charging=charging is not None,
             charging_iterations=(0 if charging is None else len(charging.history)),
             charging_converged=(None if charging is None else charging.converged),
@@ -1734,14 +2466,23 @@ def solve_feature_3d(
         neutral_surface_fixed_point_tolerance=None,
         neutral_surface_fixed_point_max_iterations=20,
         surface_product_redeposition_options=None,
-        ballistic_transport="forward",
-        ballistic_face_quadrature_points=1, reinitialization_method="skfmm"):
+        ballistic_transport="forward", ballistic_periodic_lateral=None,
+        ballistic_face_quadrature_points=1, reinitialization_method="skfmm",
+        topology_change_policy="refuse",
+        adaptive_timestep_options=None):
     """Run verified feature steps with conserved surface state and optional quasi-static charging.
 
     A fixed ``charging_poisson_system`` is valid for one geometry only. Repeated charged evolution
     instead requires ``charging_system_builder(geometry)`` to rebuild the physical material operator
     after every interface update. Each geometry is independently converged from zero stored charge;
     this is the quasi-static charging limit, not a claim that transient surface charge was remapped.
+
+    ``adaptive_timestep_options`` controls the outer transport/chemistry/profile coupling step, not
+    merely the internal level-set CFL substeps. A trial is rejected without changing state when its
+    maximum interface displacement exceeds the declared cell fraction or when a smaller step may
+    resolve a topology/remap refusal. The identical state and sampling seed are replayed after
+    shrinking ``dt``; accepted steps may then grow toward the displacement target. This preserves the
+    physical operator while preventing a stable advection kernel from moving under stale fluxes.
     """
     if int(n_steps) != n_steps or int(n_steps) <= 0:
         raise ValueError("n_steps must be a positive integer")
@@ -1754,64 +2495,238 @@ def solve_feature_3d(
         raise ValueError(
             "ordinary feature response cannot be combined with a self-consistent charging solve; "
             "use the charging co-evolution response path")
-    if charging_poisson_system is not None and int(n_steps) > 1:
+    adaptive = (
+        None if adaptive_timestep_options is None
+        else dict(adaptive_timestep_options))
+    if charging_poisson_system is not None and (
+            int(n_steps) > 1 or adaptive is not None):
         raise ValueError(
             "multi-step charged profile evolution requires a geometry-dependent Poisson builder")
     if charging_system_builder is not None and not callable(charging_system_builder):
         raise TypeError("charging_system_builder must be callable")
-    step_duration = float(duration_s) / int(n_steps)
+    nominal_step_duration = float(duration_s) / int(n_steps)
+    if adaptive is not None:
+        allowed = {
+            "initial_step_duration_s", "minimum_step_duration_s",
+            "maximum_step_duration_s", "target_displacement_cells",
+            "maximum_displacement_cells", "shrink_factor", "growth_factor",
+            "safety_factor", "maximum_retries_per_step",
+            "maximum_accepted_steps",
+        }
+        unknown = set(adaptive) - allowed
+        if unknown:
+            raise ValueError(
+                "unknown adaptive profile-timestep options: "
+                + ", ".join(sorted(unknown)))
+        if duration_s <= 0.0:
+            raise ValueError("adaptive profile stepping requires positive duration_s")
+        initial_step = float(adaptive.get(
+            "initial_step_duration_s", nominal_step_duration))
+        minimum_step = float(adaptive.get(
+            "minimum_step_duration_s", max(
+                np.finfo(float).eps * duration_s,
+                nominal_step_duration / 128.0)))
+        maximum_step = float(adaptive.get(
+            "maximum_step_duration_s", nominal_step_duration))
+        target_cells = float(adaptive.get("target_displacement_cells", 0.35))
+        maximum_cells = float(adaptive.get("maximum_displacement_cells", 0.75))
+        shrink_factor = float(adaptive.get("shrink_factor", 0.5))
+        growth_factor = float(adaptive.get("growth_factor", 1.5))
+        safety_factor = float(adaptive.get("safety_factor", 0.9))
+        maximum_retries = int(adaptive.get("maximum_retries_per_step", 20))
+        maximum_accepted_steps = int(adaptive.get(
+            "maximum_accepted_steps", max(1000, 20 * int(n_steps))))
+        numeric = np.asarray([
+            initial_step, minimum_step, maximum_step, target_cells,
+            maximum_cells, shrink_factor, growth_factor, safety_factor], dtype=float)
+        if (np.any(~np.isfinite(numeric)) or np.any(numeric[:5] <= 0.0)
+                or minimum_step > initial_step or initial_step > maximum_step
+                or target_cells >= maximum_cells
+                or not 0.0 < shrink_factor < 1.0 or growth_factor <= 1.0
+                or not 0.0 < safety_factor <= 1.0
+                or maximum_retries <= 0 or maximum_accepted_steps <= 0):
+            raise ValueError("invalid adaptive profile-timestep controls")
+        controller = {
+            "initial_step_duration_s": initial_step,
+            "minimum_step_duration_s": minimum_step,
+            "maximum_step_duration_s": maximum_step,
+            "target_displacement_cells": target_cells,
+            "maximum_displacement_cells": maximum_cells,
+            "shrink_factor": shrink_factor,
+            "growth_factor": growth_factor,
+            "safety_factor": safety_factor,
+            "maximum_retries_per_step": maximum_retries,
+            "maximum_accepted_steps": maximum_accepted_steps,
+        }
+    else:
+        controller = None
     current_geometry = geometry; current_state = None; current_fingerprint = None
-    results = []
-    for step_index in range(int(n_steps)):
-        step_poisson_system = charging_poisson_system
-        step_initial_charge = initial_charge_node_c
-        if charging_system_builder is not None:
-            step_poisson_system = charging_system_builder(current_geometry)
-            if not isinstance(step_poisson_system, NodalPoissonSystem3D):
-                raise TypeError("charging_system_builder must return NodalPoissonSystem3D")
-            if step_poisson_system.shape != current_geometry.phi.shape:
-                raise ValueError("rebuilt Poisson nodal grid must match the feature geometry")
-            # A previous nodal charge grid is not a conservative representation on the moved surface.
-            # In the quasi-static limit the new geometry owns a new independently converged root.
-            if step_index > 0:
-                step_initial_charge = np.zeros(step_poisson_system.shape)
-        try:
-            result = advance_feature_step_3d(
-                current_geometry, boundary, species_role, mechanism,
-                etchable_material_ids=etchable_material_ids, duration_s=step_duration,
-                source_bounds=source_bounds, source_z=source_z,
-                surface_state=current_state,
-                surface_state_mesh_fingerprint=current_fingerprint,
-                n_position=n_position, seed=int(seed) + step_index,
-                nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
-                potential_spacing=potential_spacing, trajectory_fixed_dt=trajectory_fixed_dt,
-                trajectory_max_steps=trajectory_max_steps,
-                field_periodic_lateral=field_periodic_lateral,
-                profile_periodic_lateral=profile_periodic_lateral,
-                charging_poisson_system=step_poisson_system,
-                initial_charge_node_c=step_initial_charge,
-                charging_options=charging_options,
-                charged_surface_response=charged_surface_response,
-                charged_surface_response_options=charged_surface_response_options,
-                neutral_forward_scatter=neutral_forward_scatter,
-                neutral_forward_scatter_options=neutral_forward_scatter_options,
-                neutral_radiosity_options=neutral_radiosity_options,
-                neutral_surface_fixed_point_tolerance=(
-                    neutral_surface_fixed_point_tolerance),
-                neutral_surface_fixed_point_max_iterations=(
-                    neutral_surface_fixed_point_max_iterations),
-                surface_product_redeposition_options=surface_product_redeposition_options,
-                ballistic_transport=ballistic_transport,
-                ballistic_face_quadrature_points=ballistic_face_quadrature_points,
-                reinitialization_method=reinitialization_method,
-                cfl_number=cfl_number, reinitialize=reinitialize,
-                transport_device=transport_device)
-        except (ValueError, RuntimeError) as error:
-            raise type(error)(f"feature step {step_index + 1}/{int(n_steps)}: {error}") from error
+    results = []; physical_time_s = 0.0; step_index = 0
+    next_step_duration = (
+        nominal_step_duration if controller is None
+        else controller["initial_step_duration_s"])
+    while (
+            step_index < int(n_steps) if controller is None
+            else physical_time_s < float(duration_s)):
+        if controller is not None and step_index >= controller["maximum_accepted_steps"]:
+            raise RuntimeError(
+                "adaptive profile stepping exhausted maximum_accepted_steps at "
+                f"t={physical_time_s:.8g}/{float(duration_s):.8g} s")
+        step_duration = (
+            nominal_step_duration if controller is None
+            else min(next_step_duration, float(duration_s) - physical_time_s))
+        rejected_trials = []
+        retry_count = 0
+        while True:
+            if controller is not None and retry_count > controller["maximum_retries_per_step"]:
+                raise RuntimeError(
+                    "adaptive profile stepping exhausted its retry budget at "
+                    f"t={physical_time_s:.8g} s")
+            step_poisson_system = charging_poisson_system
+            step_initial_charge = initial_charge_node_c
+            if charging_system_builder is not None:
+                step_poisson_system = charging_system_builder(current_geometry)
+                if not isinstance(step_poisson_system, NodalPoissonSystem3D):
+                    raise TypeError("charging_system_builder must return NodalPoissonSystem3D")
+                if step_poisson_system.shape != current_geometry.phi.shape:
+                    raise ValueError("rebuilt Poisson nodal grid must match the feature geometry")
+                # A previous nodal charge grid is not a conservative representation on the moved
+                # surface. In the quasi-static limit each geometry owns an independently converged
+                # root. Adaptive retries remain on the same geometry and replay this same input.
+                if step_index > 0:
+                    step_initial_charge = np.zeros(step_poisson_system.shape)
+            try:
+                result = advance_feature_step_3d(
+                    current_geometry, boundary, species_role, mechanism,
+                    etchable_material_ids=etchable_material_ids, duration_s=step_duration,
+                    source_bounds=source_bounds, source_z=source_z,
+                    surface_state=current_state,
+                    surface_state_mesh_fingerprint=current_fingerprint,
+                    n_position=n_position, seed=int(seed) + step_index,
+                    nodal_potential_v=nodal_potential_v, potential_origin=potential_origin,
+                    potential_spacing=potential_spacing, trajectory_fixed_dt=trajectory_fixed_dt,
+                    trajectory_max_steps=trajectory_max_steps,
+                    field_periodic_lateral=field_periodic_lateral,
+                    profile_periodic_lateral=profile_periodic_lateral,
+                    charging_poisson_system=step_poisson_system,
+                    initial_charge_node_c=step_initial_charge,
+                    charging_options=charging_options,
+                    charged_surface_response=charged_surface_response,
+                    charged_surface_response_options=charged_surface_response_options,
+                    neutral_forward_scatter=neutral_forward_scatter,
+                    neutral_forward_scatter_options=neutral_forward_scatter_options,
+                    neutral_radiosity_options=neutral_radiosity_options,
+                    neutral_surface_fixed_point_tolerance=(
+                        neutral_surface_fixed_point_tolerance),
+                    neutral_surface_fixed_point_max_iterations=(
+                        neutral_surface_fixed_point_max_iterations),
+                    surface_product_redeposition_options=surface_product_redeposition_options,
+                    ballistic_transport=ballistic_transport,
+                    ballistic_periodic_lateral=ballistic_periodic_lateral,
+                    ballistic_face_quadrature_points=ballistic_face_quadrature_points,
+                    reinitialization_method=reinitialization_method,
+                    topology_change_policy=topology_change_policy,
+                    cfl_number=cfl_number, reinitialize=reinitialize,
+                    transport_device=transport_device)
+            except (ValueError, RuntimeError) as error:
+                message = str(error)
+                retryable = (
+                    message.startswith("surface topology changed under ")
+                    or message.startswith("surface remap distance ")
+                    or message.startswith("material surface appeared or disappeared")
+                    or message.startswith("surface contraction exceeds bounded coverage capacity"))
+                proposed = step_duration * (
+                    controller["shrink_factor"] if controller is not None else 1.0)
+                at_minimum = (
+                    controller is not None
+                    and step_duration <= controller["minimum_step_duration_s"])
+                if (controller is None or not retryable
+                        or at_minimum):
+                    denominator = (
+                        int(n_steps) if controller is None
+                        else controller["maximum_accepted_steps"])
+                    contextual_message = (
+                        f"feature step {step_index + 1}/{denominator} at "
+                        f"t={physical_time_s:.8g} s, dt={step_duration:.8g} s: "
+                        f"{error}")
+                    if isinstance(error, SurfaceTopologyChangeError):
+                        raise SurfaceTopologyChangeError(
+                            contextual_message, method=error.method,
+                            old_topology=error.old_topology,
+                            new_topology=error.new_topology,
+                            old_mesh_topology=error.old_mesh_topology,
+                            new_mesh_topology=error.new_mesh_topology,
+                            changed_slice_topology=error.changed_slice_topology) from error
+                    raise type(error)(
+                        contextual_message) from error
+                rejected_trials.append({
+                    "duration_s": float(step_duration),
+                    "reason": message,
+                    "classification": "inline_recovery_retry",
+                })
+                step_duration = max(
+                    controller["minimum_step_duration_s"], proposed)
+                retry_count += 1
+                continue
+            if controller is not None:
+                displacement = float(
+                    result.diagnostics["max_displacement_mesh_units"])
+                limit = controller["maximum_displacement_cells"] * current_geometry.dx
+                if displacement > limit:
+                    proposed = (
+                        step_duration * controller["safety_factor"] * limit
+                        / displacement)
+                    at_minimum = (
+                        step_duration <= controller["minimum_step_duration_s"])
+                    if at_minimum:
+                        raise RuntimeError(
+                            "adaptive profile coupling displacement remains unresolved at "
+                            f"minimum dt={controller['minimum_step_duration_s']:.8g} s: "
+                            f"displacement={displacement:.8g}, limit={limit:.8g} mesh units")
+                    rejected_trials.append({
+                        "duration_s": float(step_duration),
+                        "reason": (
+                            f"coupling displacement {displacement:.8g} exceeds "
+                            f"{limit:.8g} mesh units"),
+                        "classification": "inline_recovery_retry",
+                    })
+                    step_duration = max(
+                        controller["minimum_step_duration_s"],
+                        min(step_duration * controller["shrink_factor"], proposed))
+                    retry_count += 1
+                    continue
+            break
+
+        physical_time_s += step_duration
+        if controller is not None:
+            diagnostics = dict(
+                result.diagnostics,
+                adaptive_profile_timestep=True,
+                accepted_step_duration_s=float(step_duration),
+                accepted_physical_time_s=float(physical_time_s),
+                adaptive_rejected_trials=tuple(rejected_trials),
+                adaptive_retry_count=int(retry_count),
+                adaptive_controller=dict(controller),
+            )
+            result = replace(result, diagnostics=diagnostics)
         results.append(result)
         current_geometry = result.geometry
         current_state = result.next_surface_state
         current_fingerprint = result.next_surface_state_mesh_fingerprint
+        step_index += 1
+        if controller is not None:
+            displacement = float(result.diagnostics["max_displacement_mesh_units"])
+            target = controller["target_displacement_cells"] * current_geometry.dx
+            if displacement > 0.0:
+                factor = controller["safety_factor"] * target / displacement
+                factor = float(np.clip(
+                    factor, controller["shrink_factor"], controller["growth_factor"]))
+            else:
+                factor = controller["growth_factor"]
+            next_step_duration = float(np.clip(
+                step_duration * factor,
+                controller["minimum_step_duration_s"],
+                controller["maximum_step_duration_s"]))
     reasons = tuple(reason for result in results for reason in result.validity.reasons)
     limitations = tuple(dict.fromkeys(
         limitation for result in results for limitation in result.validity.known_limitations))

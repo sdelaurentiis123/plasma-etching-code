@@ -688,9 +688,13 @@ class CompatibleQ1SurfaceChargeProjector3D:
     * is idempotent; and
     * removes no field-resolved information.
 
-    The dense SVD is constructed once per modest feature surface.  It is deliberately diagnostic
-    and explicit: rank, nullity, and the smallest resolved singular value are available to run
-    manifests instead of allowing a hidden discretization null space.
+    The rank-revealing SVD is constructed once on only the *active* Q1 trace rows.  A feature
+    surface touches a thin subset of a 3-D volume grid, so materializing all of the identically
+    zero volume rows would turn a surface diagnostic into a volume-sized dense calculation.  The
+    full sparse coupling is retained for field loads and reconstruction; removing zero rows from
+    the factorization changes neither its row space nor any singular value associated with a
+    resolved mode.  Rank, nullity, and the smallest resolved singular value remain available to
+    run manifests instead of allowing a hidden discretization null space.
     """
 
     def __init__(self, coupling, physical_face_area_m2, *, relative_rank_tolerance=None):
@@ -700,7 +704,11 @@ class CompatibleQ1SurfaceChargeProjector3D:
                 or area.shape != (coupling.shape[1],)
                 or np.any(~np.isfinite(area)) or np.any(area <= 0.0)):
             raise ValueError("invalid compatible-Q1 surface-charge projector inputs")
-        dense = coupling.toarray()
+        active_rows = np.flatnonzero(coupling.getnnz(axis=1))
+        if active_rows.size == 0:
+            raise ValueError("surface-charge coupling has no resolved Q1 mode")
+        active_coupling = coupling[active_rows]
+        dense = active_coupling.toarray()
         if np.any(~np.isfinite(dense)):
             raise ValueError("surface-charge coupling must be finite")
         square_root_area = np.sqrt(area)
@@ -709,7 +717,10 @@ class CompatibleQ1SurfaceChargeProjector3D:
         if singular.size == 0 or singular[0] <= 0.0:
             raise ValueError("surface-charge coupling has no resolved Q1 mode")
         if relative_rank_tolerance is None:
-            relative_rank_tolerance = max(scaled.shape) * np.finfo(float).eps
+            # Retain the historical full-operator tolerance even though exactly-zero rows are
+            # omitted from the dense factorization.  This makes the scalable construction
+            # numerically identical to the original full dense SVD's rank decision.
+            relative_rank_tolerance = max(coupling.shape) * np.finfo(float).eps
         if (not np.isfinite(relative_rank_tolerance)
                 or not 0.0 < relative_rank_tolerance < 1.0):
             raise ValueError("relative_rank_tolerance must lie strictly between zero and one")
@@ -720,6 +731,8 @@ class CompatibleQ1SurfaceChargeProjector3D:
 
         self.coupling = coupling
         self.physical_face_area_m2 = area.copy()
+        self.active_row_count = int(active_rows.size)
+        self.inactive_row_count = int(coupling.shape[0] - active_rows.size)
         self.rank = rank
         self.nullity = int(coupling.shape[1] - rank)
         self.relative_rank_tolerance = float(relative_rank_tolerance)
@@ -730,6 +743,7 @@ class CompatibleQ1SurfaceChargeProjector3D:
         self._resolved_right = right_transpose[:rank].T.copy()
         self._resolved_left = left[:, :rank].copy()
         self._resolved_singular = singular[:rank].copy()
+        self._active_rows = active_rows.copy()
         self._field_coupling = coupling
         self._inventory_constraint_count = 0
 
@@ -882,7 +896,8 @@ class CompatibleQ1SurfaceChargeProjector3D:
                 or not np.isfinite(relative_residual_tolerance)
                 or relative_residual_tolerance <= 0.0):
             raise ValueError("invalid nodal charge reconstruction inputs")
-        coefficient = (self._resolved_left.T @ node) / self._resolved_singular
+        active_node = node[self._active_rows]
+        coefficient = (self._resolved_left.T @ active_node) / self._resolved_singular
         face_charge = self._sqrt_area * (self._resolved_right @ coefficient)
         reconstructed = np.asarray(self.coupling @ face_charge).ravel()
         scale = max(float(np.linalg.norm(node)), np.finfo(float).tiny)

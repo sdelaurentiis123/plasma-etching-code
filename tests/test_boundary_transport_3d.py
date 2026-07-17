@@ -19,6 +19,7 @@ from petch.boundary_transport_3d import (
     trace_boundary_state_bidirectional_field_3d,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
+    trace_diffuse_form_factor_events_float64_3d,
 )
 from petch.surface_kinetics import (
     EnergeticYield,
@@ -796,6 +797,248 @@ def test_diffuse_form_factor_estimator_replays_cavity_exchange_deterministically
     outgoing = first.escape_fraction + np.bincount(
         first.source_face, weights=first.transfer_fraction, minlength=4)
     assert np.array_equal(outgoing, np.ones(4))
+
+
+def test_diffuse_form_factor_triangle_area_mode_is_the_default():
+    bottom, faces, _ = _flat_unit_plane()
+    top = bottom + [0.0, 0.0, 1.0]
+    verts = np.vstack((bottom, top))
+    faces = np.vstack((faces, faces + 4))
+    centroids = verts[faces].mean(axis=1)
+    normals = np.vstack((
+        np.tile([0.0, 0.0, 1.0], (2, 1)),
+        np.tile([0.0, 0.0, -1.0], (2, 1))))
+    common = dict(
+        verts=verts, faces=faces, centroids=centroids, gas_normals=normals,
+        rays_per_face=16, seed=21, domain_size=(1.0, 1.0, 2.0), device="cpu")
+
+    implicit = estimate_diffuse_form_factors_3d(**common)
+    explicit = estimate_diffuse_form_factors_3d(
+        **common, source_sampling="triangle_area")
+
+    assert np.array_equal(implicit.source_face, explicit.source_face)
+    assert np.array_equal(implicit.target_face, explicit.target_face)
+    assert np.array_equal(implicit.transfer_fraction, explicit.transfer_fraction)
+    assert np.array_equal(implicit.escape_fraction, explicit.escape_fraction)
+
+
+def test_replay_hardened_form_factor_receipt_matches_full_float64_open_plane():
+    verts, faces, _ = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    normals = np.tile([0.0, 0.0, 1.0], (2, 1))
+    common = dict(
+        verts=verts, faces=faces, centroids=centroids, gas_normals=normals,
+        rays_per_face=8, seed=23, domain_size=(1.0, 1.0, 1.0),
+        source_sampling="triangle_area", return_visibility_receipt=True,
+        device="cpu")
+
+    hardened = estimate_diffuse_form_factors_3d(
+        **common, visibility_mode="replay_hardened")
+    authority = estimate_diffuse_form_factors_3d(
+        **common, visibility_mode="float64_reference")
+    certified = estimate_diffuse_form_factors_3d(
+        **common, visibility_mode="cellwise_certified")
+
+    assert np.array_equal(
+        hardened.form_factors.escape_fraction,
+        authority.form_factors.escape_fraction)
+    assert np.array_equal(hardened.form_factors.escape_fraction, [1.0, 1.0])
+    assert hardened.ray_count == authority.ray_count == 16
+    assert hardened.float64_evaluated_count == 16
+    assert authority.float64_evaluated_count == 16
+    assert hardened.open_escape_count == authority.open_escape_count == 16
+    assert hardened.float64_recovered_hit_count == 0
+    assert certified.visibility_mode == "cellwise_certified"
+    assert certified.float64_evaluated_count == 0
+    assert np.array_equal(
+        certified.form_factors.escape_fraction,
+        authority.form_factors.escape_fraction)
+
+
+def test_triangle_area_diffuse_rule_is_inside_uniform_and_nested():
+    verts = np.asarray([
+        [0.0, 0.0, 0.0],
+        [2.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+    ])
+    faces = np.asarray([[0, 1, 2]])
+    centroids = verts[faces].mean(axis=1)
+    normals = np.asarray([[0.0, 0.0, 1.0]])
+    common = dict(
+        verts=verts, faces=faces, centroids=centroids,
+        gas_normals=normals, seed=31, ray_offset=1.0e-5,
+        source_sampling="triangle_area")
+    _, origin8, direction8 = boundary_transport_3d._diffuse_form_factor_ray_samples_3d(
+        **common, rays_per_face=8)
+    _, origin16, direction16 = boundary_transport_3d._diffuse_form_factor_ray_samples_3d(
+        **common, rays_per_face=16)
+    _, origin1024, direction1024 = (
+        boundary_transport_3d._diffuse_form_factor_ray_samples_3d(
+        **common, rays_per_face=1024)
+    )
+
+    assert np.array_equal(origin8, origin16[:8])
+    assert np.array_equal(direction8, direction16[:8])
+    surface = origin1024 - 1.0e-5 * normals[0]
+    assert np.all(surface[:, 0] >= 0.0)
+    assert np.all(surface[:, 1] >= 0.0)
+    assert np.all(surface[:, 0] / 2.0 + surface[:, 1] <= 1.0 + 1.0e-14)
+    assert np.allclose(surface.mean(axis=0), centroids[0], atol=2.0e-3)
+    assert np.allclose(np.linalg.norm(direction1024, axis=1), 1.0)
+    assert np.all(direction1024[:, 2] > 0.0)
+
+
+def test_triangle_area_diffuse_rule_uses_centroid_limit_for_suboffset_sliver():
+    verts = np.asarray([
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.5, 1.0e-6, 0.0],
+    ])
+    faces = np.asarray([[0, 1, 2]])
+    centroids = verts[faces].mean(axis=1)
+    normals = np.asarray([[0.0, 0.0, 1.0]])
+
+    _, origin, _, diagnostics = (
+        boundary_transport_3d._diffuse_form_factor_ray_samples_3d(
+            verts, faces, centroids, normals, rays_per_face=8, seed=37,
+            ray_offset=1.0e-5, source_sampling="triangle_area",
+            return_launch_diagnostics=True))
+
+    surface = origin - 1.0e-5 * normals[0]
+    assert np.array_equal(surface, np.repeat(centroids, 8, axis=0))
+    assert diagnostics == {"launch_inset_count": 8, "centroid_limit_count": 8}
+
+
+def test_triangle_area_rule_removes_close_half_receiver_centroid_bias():
+    def source_grid(cell_count):
+        vertices = np.asarray([
+            (i / cell_count, j / cell_count, 0.0)
+            for i in range(cell_count + 1)
+            for j in range(cell_count + 1)
+        ])
+
+        def index(i, j):
+            return i * (cell_count + 1) + j
+
+        triangles = []
+        for i in range(cell_count):
+            for j in range(cell_count):
+                triangles.extend((
+                    (index(i, j), index(i + 1, j), index(i + 1, j + 1)),
+                    (index(i, j), index(i + 1, j + 1), index(i, j + 1)),
+                ))
+        triangles = np.asarray(triangles, dtype=int)
+        centroids = vertices[triangles].mean(axis=1)
+        normals = np.tile([0.0, 0.0, 1.0], (len(triangles), 1))
+        return vertices, triangles, centroids, normals
+
+    def half_receiver_fraction(cell_count, rays, mode):
+        vertices, triangles, centroids, normals = source_grid(cell_count)
+        _, origin, direction = (
+            boundary_transport_3d._diffuse_form_factor_ray_samples_3d(
+                vertices, triangles, centroids, normals,
+                rays_per_face=rays, seed=43, ray_offset=1.0e-7,
+                source_sampling=mode))
+        distance = (0.1 - origin[:, 2]) / direction[:, 2]
+        impact = origin + distance[:, None] * direction
+        hit = (
+            (impact[:, 0] >= 0.0) & (impact[:, 0] <= 0.5)
+            & (impact[:, 1] >= 0.0) & (impact[:, 1] <= 1.0))
+        return float(hit.reshape(len(triangles), rays).mean())
+
+    coarse_centroid = half_receiver_fraction(1, 8192, "legacy_centroid")
+    coarse_area = half_receiver_fraction(1, 8192, "triangle_area")
+    refined_centroid = half_receiver_fraction(8, 128, "legacy_centroid")
+
+    assert abs(coarse_area - refined_centroid) < 0.01
+    assert abs(coarse_centroid - coarse_area) / coarse_area > 0.10
+
+
+def test_float64_form_factor_reference_assigns_shared_edge_once():
+    verts = np.asarray([
+        [0.0, 0.0, 0.5],
+        [1.0, 0.0, 0.5],
+        [1.0, 1.0, 0.5],
+        [0.0, 1.0, 0.5],
+    ])
+    faces = np.asarray([[0, 1, 2], [0, 2, 3]])
+    normals = np.tile([0.0, 0.0, -1.0], (2, 1))
+    result = trace_diffuse_form_factor_events_float64_3d(
+        [[0.5, 0.5, 0.1]], [[0.0, 0.0, 1.0]], verts, faces, normals,
+        domain_size=(1.0, 1.0, 1.0))
+
+    assert np.array_equal(result.termination, [1])
+    assert result.hit_face[0] in (0, 1)
+    assert result.hit_cosine[0] == pytest.approx(1.0)
+    assert np.allclose(result.hit_position[0], [0.5, 0.5, 0.5])
+
+
+def test_float64_form_factor_reference_wraps_then_hits_and_refuses_wrap_exhaustion():
+    verts = np.asarray([
+        [0.0, 0.0, 0.3],
+        [0.35, 0.0, 0.3],
+        [0.35, 1.0, 0.3],
+        [0.0, 1.0, 0.3],
+    ])
+    faces = np.asarray([[0, 1, 2], [0, 2, 3]])
+    normals = np.tile([0.0, 0.0, -1.0], (2, 1))
+    direction = np.asarray([[1.0, 0.0, 1.0]])
+    direction /= np.linalg.norm(direction, axis=1, keepdims=True)
+    hit = trace_diffuse_form_factor_events_float64_3d(
+        [[0.9, 0.5, 0.1]], direction, verts, faces, normals,
+        domain_size=(1.0, 1.0, 1.0), periodic_lateral=True,
+        maximum_wraps=8)
+
+    assert np.array_equal(hit.termination, [1])
+    assert hit.wrap_count[0] == 1
+    assert hit.hit_face[0] >= 0
+
+    exhausted = trace_diffuse_form_factor_events_float64_3d(
+        [[0.5, 0.5, 0.5]], [[1.0, 0.0, 0.0]],
+        np.zeros((0, 3)), np.zeros((0, 3), dtype=int), np.zeros((0, 3)),
+        domain_size=(1.0, 1.0, 1.0), periodic_lateral=True,
+        maximum_wraps=3)
+    assert np.array_equal(exhausted.termination, [3])
+    assert exhausted.wrap_count[0] == 4
+
+
+def test_float64_form_factor_reference_classifies_open_escape():
+    escaped = trace_diffuse_form_factor_events_float64_3d(
+        [[0.5, 0.5, 0.2]], [[0.0, 0.0, 1.0]],
+        np.zeros((0, 3)), np.zeros((0, 3), dtype=int), np.zeros((0, 3)),
+        domain_size=(1.0, 1.0, 1.0), periodic_lateral=True)
+
+    assert np.array_equal(escaped.termination, [2])
+    assert np.array_equal(escaped.hit_face, [-1])
+    assert escaped.hit_position[0, 2] == pytest.approx(1.0)
+
+
+def test_warp_form_factor_fast_path_matches_float64_manufactured_events():
+    verts = np.asarray([
+        [0.0, 0.0, 0.5],
+        [1.0, 0.0, 0.5],
+        [1.0, 1.0, 0.5],
+        [0.0, 1.0, 0.5],
+    ])
+    faces = np.asarray([[0, 1, 2], [0, 2, 3]])
+    normals = np.tile([0.0, 0.0, -1.0], (2, 1))
+    origin = np.asarray([
+        [0.5, 0.5, 0.1],
+        [0.25, 0.75, 0.1],
+        [0.75, 0.25, 0.1],
+        [1.25, 0.5, 0.1],
+    ])
+    direction = np.tile([0.0, 0.0, 1.0], (len(origin), 1))
+    domain = np.asarray([2.0, 2.0, 1.0])
+
+    fast = boundary_transport_3d._trace_diffuse_form_factor_events_warp_3d(
+        verts, faces, origin, direction, domain, False, "cpu")
+    reference = trace_diffuse_form_factor_events_float64_3d(
+        origin, direction, verts, faces, normals,
+        domain_size=domain, periodic_lateral=False)
+
+    assert np.array_equal(fast >= 0, reference.termination == 1)
+    assert np.array_equal(fast, reference.hit_face)
 
 
 @pytest.mark.skipif(not wp.is_cuda_available(), reason="CUDA device unavailable")

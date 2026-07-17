@@ -1,0 +1,124 @@
+{
+  "central_pixel_calibration": {
+    "angle_plus5_x": 384.0,
+    "angle_zero_x": 294.0,
+    "colorfulness_threshold": 15.0,
+    "energy_5000_y": 46.0,
+    "energy_zero_y": 1072.0,
+    "legend_log10_density": [
+      -2.0,
+      0.0
+    ],
+    "legend_x": [
+      122,
+      444
+    ],
+    "legend_y": 1205,
+    "plot_region_x": [
+      203,
+      384
+    ],
+    "plot_region_y": [
+      46,
+      1072
+    ]
+  },
+  "digitization_method": "nearest RGB point on the published log10 colorbar, followed by deterministic systematic weighted resampling",
+  "digitization_sensitivity": {
+    "angle_standard_deviation_deg": {
+      "maximum": 0.8600496478395017,
+      "minimum": 0.8218501689541969
+    },
+    "bare_sio2_mean_yield": {
+      "maximum": 4.425650375878302,
+      "minimum": 4.4067448705269925
+    },
+    "complex_sio2_mean_yield": {
+      "maximum": 4.52990709905475,
+      "minimum": 4.510620837774069
+    },
+    "mean_energy_eV": {
+      "maximum": 3471.7069754389363,
+      "minimum": 3457.0750575598063
+    },
+    "polymer_sputter_mean_yield": {
+      "maximum": 2.3755898578864016,
+      "minimum": 2.3688357098454644
+    },
+    "q05_energy_eV": {
+      "maximum": 1004.8543689320388,
+      "minimum": 964.9122807017544
+    },
+    "q50_energy_eV": {
+      "maximum": 3864.0776699029125,
+      "minimum": 3850.293542074364
+    },
+    "q95_energy_eV": {
+      "maximum": 4623.287671232877,
+      "minimum": 4606.796116504855
+    }
+  },
+  "embedded_image_sha256": "99ac8dd2f916071b51de67c729e131a6e20d3b92688d92693d1a467cd0782f9c",
+  "embedded_image_shape": [
+    1253,
+    1000,
+    3
+  ],
+  "joint_binning": {
+    "angle_bin_deg": 0.25,
+    "energy_bin_eV": 100.0,
+    "representative": "probability-weighted energy/angle centroid"
+  },
+  "limitations": [
+    "the published density is normalized and clipped below 1e-2 of its maximum",
+    "the combined positive-ion distribution has no species-resolved composition",
+    "the signed-angle plot is a two-dimensional boundary; a 3-D azimuthal law requires a separately declared closure",
+    "the HPEM distribution is reactor-model output, not a wafer measurement"
+  ],
+  "resampled_node_count": 878,
+  "resampled_summary": {
+    "angle_standard_deviation_deg": 0.8332245172423626,
+    "energy_quantile_eV": {
+      "q01": 550.6139222034044,
+      "q05": 949.1514573899575,
+      "q50": 3850.970828686612,
+      "q95": 4641.321852276577,
+      "q99": 4735.958075734789
+    },
+    "mean_cosine_incidence": 0.9998942181649835,
+    "mean_energy_eV": 3465.110787140924,
+    "mean_signed_angle_deg": -0.017318057053571728,
+    "normal_and_oblique_mean_yield": {
+      "bare_sio2": 4.416716801788799,
+      "complex_sio2": 4.521212694669559,
+      "polymer_sputter": 2.3722257505903417
+    },
+    "source_pixel_count": 878
+  },
+  "resampling_error": {
+    "angle_standard_deviation_relative": 0.0036421290649699283,
+    "bare_sio2_mean_yield_relative": 1.3595141541489053e-05,
+    "mean_energy_relative": 1.312360206704034e-16
+  },
+  "source": "Kr\u00fcger et al., JVST A 42, 043008 (2024), Figure 4(a), https://doi.org/10.1116/6.0003554",
+  "source_density_summary": {
+    "angle_standard_deviation_deg": 0.8362703216871511,
+    "energy_quantile_eV": {
+      "q01": 579.9220272904483,
+      "q05": 984.4054580896686,
+      "q50": 3854.775828460039,
+      "q95": 4615.009746588694,
+      "q99": 4717.348927875244
+    },
+    "mean_cosine_incidence": 0.9998934437626862,
+    "mean_energy_eV": 3465.1107871409245,
+    "mean_signed_angle_deg": -0.017318057053571742,
+    "normal_and_oblique_mean_yield": {
+      "bare_sio2": 4.4167768484952115,
+      "complex_sio2": 4.52121269466956,
+      "polymer_sputter": 2.3722226220045353
+    },
+    "source_pixel_count": 74607
+  },
+  "source_pdf_sha256": "65b7750b2b773c3725d8f09f778b5b728ce9974a4548a5d522d19256f6bf9a51"
+}

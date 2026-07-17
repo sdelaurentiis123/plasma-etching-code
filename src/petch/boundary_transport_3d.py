@@ -190,6 +190,253 @@ def _first_front_ray_hit_float64_3d(
     return best_any_face, best_any_position, best_any_cosine
 
 
+@dataclass(frozen=True)
+class DiffuseFormFactorEventsFloat64_3D:
+    """Certified straight-ray events for a bounded periodic cell.
+
+    Termination codes are 1=hard surface hit, 2=open-domain escape, and
+    3=periodic-wrap budget exhausted, 4=an earlier solid-facing hard
+    intersection. Codes 3 and 4 are refusal conditions, never escape estimates.
+    """
+
+    hit_face: np.ndarray
+    termination: np.ndarray
+    hit_position: np.ndarray
+    hit_cosine: np.ndarray
+    wrap_count: np.ndarray
+
+    def __post_init__(self):
+        face = np.asarray(self.hit_face, dtype=int).copy()
+        termination = np.asarray(self.termination, dtype=np.int8).copy()
+        position = np.asarray(self.hit_position, dtype=float).copy()
+        cosine = np.asarray(self.hit_cosine, dtype=float).copy()
+        wraps = np.asarray(self.wrap_count, dtype=int).copy()
+        count = face.size
+        if (face.ndim != 1 or termination.shape != (count,)
+                or position.shape != (count, 3) or cosine.shape != (count,)
+                or wraps.shape != (count,) or np.any(~np.isfinite(position))
+                or np.any(~np.isfinite(cosine)) or np.any(wraps < 0)
+                or np.any(~np.isin(termination, (1, 2, 3, 4)))
+                or np.any(np.isin(termination, (1, 4)) != (face >= 0))
+                or np.any(np.isin(termination, (2, 3)) & (face != -1))
+                or np.any((cosine < -1.0 - 2.0e-6) | (cosine > 1.0 + 2.0e-6))):
+            raise ValueError("invalid float64 diffuse form-factor event receipt")
+        for value in (face, termination, position, cosine, wraps):
+            value.setflags(write=False)
+        object.__setattr__(self, "hit_face", face)
+        object.__setattr__(self, "termination", termination)
+        object.__setattr__(self, "hit_position", position)
+        object.__setattr__(self, "hit_cosine", cosine)
+        object.__setattr__(self, "wrap_count", wraps)
+
+
+@dataclass(frozen=True)
+class DiffuseFormFactorEventsReplayHardened3D:
+    """Fast visibility events with every ambiguous lineage resolved in float64.
+
+    The legacy Warp classifier returns only a face index, so a negative result cannot distinguish a
+    real open-top escape from periodic-wrap exhaustion or a float32 shared-edge miss.  This receipt
+    replays every fast miss and every gas-normal-invalid fast hit with the cell-by-cell float64
+    authority.  Apparently valid fast hits remain fast-path results and require the separate bounded
+    full-event parity audit before production promotion.
+    """
+
+    hit_face: np.ndarray
+    termination: np.ndarray
+    replay_count: int
+    replay_eligible_count: int
+    recovered_hit_count: int
+    open_escape_count: int
+    maximum_wrap_count: int
+
+    def __post_init__(self):
+        face = np.asarray(self.hit_face, dtype=int).copy()
+        termination = np.asarray(self.termination, dtype=np.int8).copy()
+        values = (
+            self.replay_count, self.replay_eligible_count,
+            self.recovered_hit_count, self.open_escape_count,
+            self.maximum_wrap_count)
+        if (face.ndim != 1 or termination.shape != face.shape
+                or np.any(~np.isin(termination, (1, 2)))
+                or np.any((termination == 1) != (face >= 0))
+                or any(int(value) != value or value < 0 for value in values)
+                or self.replay_count > self.replay_eligible_count
+                or self.recovered_hit_count > self.replay_count
+                or self.open_escape_count != int(np.sum(termination == 2))):
+            raise ValueError("invalid replay-hardened form-factor event receipt")
+        face.setflags(write=False)
+        termination.setflags(write=False)
+        object.__setattr__(self, "hit_face", face)
+        object.__setattr__(self, "termination", termination)
+        for name in (
+                "replay_count", "replay_eligible_count", "recovered_hit_count",
+                "open_escape_count", "maximum_wrap_count"):
+            object.__setattr__(self, name, int(getattr(self, name)))
+
+
+@dataclass(frozen=True)
+class DiffuseFormFactorEstimateReceipt3D:
+    """Conservative form factors plus explicit hard-visibility provenance."""
+
+    form_factors: DiffuseFormFactors3D
+    visibility_mode: str
+    ray_count: int
+    float64_evaluated_count: int
+    float64_recovered_hit_count: int
+    open_escape_count: int
+    maximum_wrap_count: int
+    launch_inset_count: int = 0
+    centroid_limit_count: int = 0
+
+    def __post_init__(self):
+        if not isinstance(self.form_factors, DiffuseFormFactors3D):
+            raise TypeError("form_factors must be DiffuseFormFactors3D")
+        allowed = {
+            "legacy_float32", "replay_hardened", "cellwise_certified",
+            "float64_reference"}
+        values = (
+            self.ray_count, self.float64_evaluated_count,
+            self.float64_recovered_hit_count, self.open_escape_count,
+            self.maximum_wrap_count, self.launch_inset_count,
+            self.centroid_limit_count)
+        if (self.visibility_mode not in allowed
+                or any(int(value) != value or value < 0 for value in values)
+                or self.float64_evaluated_count > self.ray_count
+                or self.float64_recovered_hit_count > self.float64_evaluated_count
+                or self.open_escape_count > self.ray_count
+                or self.launch_inset_count > self.ray_count
+                or self.centroid_limit_count > self.launch_inset_count):
+            raise ValueError("invalid diffuse form-factor estimate receipt")
+        for name in (
+                "ray_count", "float64_evaluated_count",
+                "float64_recovered_hit_count", "open_escape_count",
+                "maximum_wrap_count", "launch_inset_count",
+                "centroid_limit_count"):
+            object.__setattr__(self, name, int(getattr(self, name)))
+
+
+@njit(cache=True)
+def _trace_diffuse_form_factor_events_float64_3d(
+        origin, direction, verts, faces, gas_normals, domain,
+        periodic_lateral, maximum_wraps):
+    count = len(origin)
+    hit_face = np.full(count, -1, dtype=np.int64)
+    termination = np.full(count, 2, dtype=np.int8)
+    hit_position = origin.copy()
+    hit_cosine = np.zeros(count)
+    wrap_count = np.zeros(count, dtype=np.int64)
+    scale = max(domain[0], domain[1], domain[2], 1.0)
+    tiny = 1.0e-11 * scale
+    far = 1.0e6 * scale
+    local_domain = np.ones(3)
+    for ray_index in range(count):
+        position = origin[ray_index].copy()
+        ray_direction = direction[ray_index]
+        if not periodic_lateral:
+            face, impact, cosine = _first_front_ray_hit_float64_3d(
+                position, ray_direction, far, verts, faces, gas_normals,
+                local_domain, False)
+            if face >= 0:
+                hit_face[ray_index] = face
+                termination[ray_index] = 1 if cosine >= -2.0e-6 else 4
+                hit_position[ray_index] = impact
+                hit_cosine[ray_index] = cosine
+            continue
+
+        completed = False
+        for wrap_index in range(maximum_wraps + 1):
+            tx = far
+            ty = far
+            tz = far
+            if ray_direction[0] > 1.0e-14:
+                tx = (domain[0] - position[0]) / ray_direction[0]
+            elif ray_direction[0] < -1.0e-14:
+                tx = (0.0 - position[0]) / ray_direction[0]
+            if ray_direction[1] > 1.0e-14:
+                ty = (domain[1] - position[1]) / ray_direction[1]
+            elif ray_direction[1] < -1.0e-14:
+                ty = (0.0 - position[1]) / ray_direction[1]
+            if ray_direction[2] > 1.0e-14:
+                tz = (domain[2] - position[2]) / ray_direction[2]
+            tx = tx if tx > tiny else far
+            ty = ty if ty > tiny else far
+            tz = tz if tz > tiny else 0.0
+            boundary_distance = min(tx, ty, tz, far)
+            query_distance = boundary_distance
+            extended = query_distance * (1.0 + 2.0e-12) + 2.0e-12 * scale
+            face, impact, cosine = _first_front_ray_hit_float64_3d(
+                position, ray_direction, extended, verts, faces, gas_normals,
+                local_domain, False)
+            if (face >= 0
+                    and np.linalg.norm(impact - position)
+                    <= query_distance + 5.0e-10 * scale):
+                hit_face[ray_index] = face
+                termination[ray_index] = 1 if cosine >= -2.0e-6 else 4
+                hit_position[ray_index] = impact
+                hit_cosine[ray_index] = cosine
+                completed = True
+                break
+            if tz <= tx + tiny and tz <= ty + tiny:
+                termination[ray_index] = 2
+                hit_position[ray_index] = position + max(tz, 0.0) * ray_direction
+                completed = True
+                break
+            if boundary_distance >= far:
+                termination[ray_index] = 2
+                hit_position[ray_index] = position
+                completed = True
+                break
+            boundary_point = position + boundary_distance * ray_direction
+            wrap_x = tx <= boundary_distance + tiny
+            wrap_y = ty <= boundary_distance + tiny
+            if wrap_x:
+                boundary_point[0] = tiny if ray_direction[0] > 0.0 else domain[0] - tiny
+            if wrap_y:
+                boundary_point[1] = tiny if ray_direction[1] > 0.0 else domain[1] - tiny
+            position = boundary_point
+            wrap_count[ray_index] = wrap_index + 1
+        if not completed:
+            termination[ray_index] = 3
+            hit_position[ray_index] = position
+    return hit_face, termination, hit_position, hit_cosine, wrap_count
+
+
+def trace_diffuse_form_factor_events_float64_3d(
+        origin, direction, verts, faces, gas_normals, *, domain_size,
+        periodic_lateral=False, maximum_wraps=1024):
+    """Trace a complete float64 straight-ray reference through a periodic cell."""
+    origin = np.asarray(origin, dtype=float)
+    direction = np.asarray(direction, dtype=float)
+    verts = np.asarray(verts, dtype=float)
+    faces = np.asarray(faces, dtype=int)
+    normals = np.asarray(gas_normals, dtype=float)
+    domain = np.asarray(domain_size, dtype=float)
+    wraps = int(maximum_wraps)
+    if (origin.ndim != 2 or origin.shape[1:] != (3,)
+            or direction.shape != origin.shape or np.any(~np.isfinite(origin))
+            or np.any(~np.isfinite(direction))
+            or not np.allclose(
+                np.linalg.norm(direction, axis=1), 1.0, rtol=0.0, atol=2.0e-12)
+            or verts.ndim != 2 or verts.shape[1:] != (3,)
+            or faces.ndim != 2 or faces.shape[1:] != (3,)
+            or np.any(faces < 0) or np.any(faces >= len(verts))
+            or normals.shape != (len(faces), 3)
+            or np.any(~np.isfinite(verts)) or np.any(~np.isfinite(normals))
+            or (len(faces) and not np.allclose(
+                np.linalg.norm(normals, axis=1), 1.0, rtol=0.0, atol=2.0e-12))
+            or domain.shape != (3,) or np.any(~np.isfinite(domain))
+            or np.any(domain <= 0.0) or wraps <= 0):
+        raise ValueError("invalid float64 diffuse form-factor trace inputs")
+    origin = origin.copy()
+    if periodic_lateral:
+        origin[:, 0] = np.mod(origin[:, 0], domain[0])
+        origin[:, 1] = np.mod(origin[:, 1], domain[1])
+    return DiffuseFormFactorEventsFloat64_3D(
+        *_trace_diffuse_form_factor_events_float64_3d(
+            origin, direction, verts, faces, normals, domain,
+            bool(periodic_lateral), wraps))
+
+
 @njit(cache=True)
 def _trace_zero_field_events_float64_3d(
         origin, velocity, verts, faces, gas_normals, grid_origin, grid_maximum,
@@ -367,6 +614,105 @@ def _diffuse_form_factor_events_3d(
     ray = wp.mesh_query_ray(mesh, boundary_ray.o, boundary_ray.d, 1.0e6)
     if ray.result:
         hit_face[ray_index] = ray.face
+
+
+@wp.kernel
+def _diffuse_form_factor_events_cellwise_3d(
+        mesh: wp.uint64, origin: wp.array(dtype=wp.vec3),
+        direction: wp.array(dtype=wp.vec3), gas_normal: wp.array(dtype=wp.vec3),
+        domain_x: float, domain_y: float, domain_z: float, periodic_lateral: int,
+        maximum_wraps: int, hit_face: wp.array(dtype=int),
+        termination: wp.array(dtype=int), wrap_count: wp.array(dtype=int)):
+    """Trace one periodic cell at a time without the legacy wrap-position drift."""
+    ray_index = wp.tid()
+    position = origin[ray_index]
+    ray_direction = direction[ray_index]
+    if periodic_lateral == 0:
+        ray = wp.mesh_query_ray(mesh, position, ray_direction, 1.0e6)
+        if ray.result:
+            hit_face[ray_index] = ray.face
+            cosine = -wp.dot(ray_direction, gas_normal[ray.face])
+            if cosine >= -2.0e-6:
+                termination[ray_index] = 1
+            else:
+                termination[ray_index] = 4
+        else:
+            termination[ray_index] = 2
+        return
+
+    lateral_scale = float(domain_x)
+    if domain_y > lateral_scale:
+        lateral_scale = domain_y
+    if lateral_scale < 1.0e-3:
+        lateral_scale = 1.0e-3
+    # ``boundary_tolerance`` is used only to compare distances represented in float32.  It must
+    # never be added to the wrapped position: doing so translates the ray at every periodic seam
+    # and turns a long, grazing trajectory into a different physical line.  Exact 0/domain
+    # remapping is well posed because the outgoing direction makes the next distance to the same
+    # seam one full cell rather than zero.
+    boundary_tolerance = float(2.0e-6 * lateral_scale)
+    far = float(1.0e6)
+    completed = int(0)
+    for piece in range(4096):
+        if piece > maximum_wraps:
+            break
+        tx = far
+        ty = far
+        tz = far
+        if ray_direction[0] > 1.0e-9:
+            tx = (domain_x - position[0]) / ray_direction[0]
+        elif ray_direction[0] < -1.0e-9:
+            tx = (0.0 - position[0]) / ray_direction[0]
+        if ray_direction[1] > 1.0e-9:
+            ty = (domain_y - position[1]) / ray_direction[1]
+        elif ray_direction[1] < -1.0e-9:
+            ty = (0.0 - position[1]) / ray_direction[1]
+        if ray_direction[2] > 1.0e-9:
+            tz = (domain_z - position[2]) / ray_direction[2]
+        if tx <= boundary_tolerance:
+            tx = far
+        if ty <= boundary_tolerance:
+            ty = far
+        if tz <= boundary_tolerance:
+            tz = 0.0
+        boundary_distance = tx
+        if ty < boundary_distance:
+            boundary_distance = ty
+        if tz < boundary_distance:
+            boundary_distance = tz
+        query_distance = boundary_distance + 4.0 * boundary_tolerance
+        ray = wp.mesh_query_ray(mesh, position, ray_direction, query_distance)
+        if ray.result and ray.t <= query_distance:
+            hit_face[ray_index] = ray.face
+            cosine = -wp.dot(ray_direction, gas_normal[ray.face])
+            if cosine >= -2.0e-6:
+                termination[ray_index] = 1
+            else:
+                termination[ray_index] = 4
+            completed = 1
+            break
+        if (tz <= tx + boundary_tolerance
+                and tz <= ty + boundary_tolerance):
+            termination[ray_index] = 2
+            completed = 1
+            break
+        if boundary_distance >= 0.5 * far:
+            break
+        boundary_point = position + boundary_distance * ray_direction
+        if tx <= boundary_distance + boundary_tolerance:
+            if ray_direction[0] > 0.0:
+                boundary_point[0] = 0.0
+            else:
+                boundary_point[0] = domain_x
+        if ty <= boundary_distance + boundary_tolerance:
+            if ray_direction[1] > 0.0:
+                boundary_point[1] = 0.0
+            else:
+                boundary_point[1] = domain_y
+        position = boundary_point
+        wrap_count[ray_index] = piece + 1
+    if completed == 0:
+        termination[ray_index] = 3
 
 
 @wp.kernel
@@ -1529,15 +1875,478 @@ def average_boundary_transport_results_3d(*results):
             item.trajectory_emergency_max_steps for item in results))
 
 
+def _inset_diffuse_source_positions_3d(
+        event_position, source_face, verts, faces, launch_offset):
+    """Define a robust finite-area one-sided limit on every source triangle.
+
+    A Sobol point can lie closer to an edge than the normal launch offset.  On a faceted
+    marching-cubes surface, applying that offset can cross the plane of an adjacent triangle and
+    manufacture an immediate back-face event.  Move only those points toward the owning
+    triangle's centroid until the edge clearance equals ``launch_offset``.  If an ultra-thin
+    triangle cannot contain that clearance, its centroid is the unique symmetric finite-area
+    limit; the face and its area remain in the transport integral and its ray is not discarded.
+    """
+    position = np.asarray(event_position, dtype=float)
+    source = np.asarray(source_face, dtype=int)
+    vertices = np.asarray(verts, dtype=float)
+    triangles = np.asarray(faces, dtype=int)
+    offset = float(launch_offset)
+    if (position.ndim != 2 or position.shape[1:] != (3,)
+            or source.shape != (len(position),)
+            or vertices.ndim != 2 or vertices.shape[1:] != (3,)
+            or triangles.ndim != 2 or triangles.shape[1:] != (3,)
+            or np.any(source < 0) or np.any(source >= len(triangles))
+            or np.any(triangles < 0) or np.any(triangles >= len(vertices))
+            or not np.isfinite(offset) or offset <= 0.0):
+        raise ValueError("invalid diffuse source launch geometry")
+    result = position.copy()
+    moved_count = 0
+    centroid_limit_count = 0
+    for source_index in np.unique(source):
+        selected = np.flatnonzero(source == source_index)
+        points = vertices[triangles[source_index]]
+        a, b, c = points
+        edge0 = b - a
+        edge1 = c - a
+        relative = position[selected] - a
+        d00 = float(np.dot(edge0, edge0))
+        d01 = float(np.dot(edge0, edge1))
+        d11 = float(np.dot(edge1, edge1))
+        determinant = d00 * d11 - d01 * d01
+        opposite_edge_length = np.array((
+            np.linalg.norm(c - b), np.linalg.norm(c - a), np.linalg.norm(b - a)))
+        double_area = np.linalg.norm(np.cross(edge0, edge1))
+        if (determinant <= 0.0 or double_area <= 0.0
+                or np.any(opposite_edge_length <= 0.0)):
+            raise ValueError("diffuse launch source face is degenerate")
+        altitude = double_area / opposite_edge_length
+        target = offset / altitude
+        centroid = np.mean(points, axis=0)
+        if np.any(target >= 1.0 / 3.0):
+            result[selected] = centroid
+            moved_count += len(selected)
+            centroid_limit_count += len(selected)
+            continue
+
+        d20 = relative @ edge0
+        d21 = relative @ edge1
+        weight_b = (d11 * d20 - d01 * d21) / determinant
+        weight_c = (d00 * d21 - d01 * d20) / determinant
+        barycentric = np.column_stack((1.0 - weight_b - weight_c, weight_b, weight_c))
+        if np.any(barycentric < -2.0e-10) or np.any(barycentric > 1.0 + 2.0e-10):
+            raise ValueError("diffuse launch point does not belong to its source face")
+        alpha = np.zeros(len(selected))
+        for coordinate in range(3):
+            below = barycentric[:, coordinate] < target[coordinate]
+            if np.any(below):
+                required = (
+                    (target[coordinate] - barycentric[below, coordinate])
+                    / (1.0 / 3.0 - barycentric[below, coordinate]))
+                alpha[below] = np.maximum(alpha[below], required)
+        moved = alpha > 0.0
+        if np.any(moved):
+            local = selected[moved]
+            result[local] = (
+                (1.0 - alpha[moved, None]) * position[local]
+                + alpha[moved, None] * centroid)
+            moved_count += int(np.count_nonzero(moved))
+    return result, moved_count, centroid_limit_count
+
+
+def _diffuse_form_factor_ray_sample_block_3d(
+        verts, faces, centroids, gas_normals, *, source_faces,
+        sobol_index_start, sobol_index_stop, seed, ray_offset,
+        source_sampling, return_launch_diagnostics=False):
+    """Construct a source-row subset of one nested diffuse-ray rule.
+
+    The scrambled Sobol population is generated through ``sobol_index_stop`` before
+    slicing ``[sobol_index_start, sobol_index_stop)``.  Consequently a selected source
+    face receives exactly the same points, face-dependent Cranley shift, finite-area
+    launch positions, and directions as the corresponding rows of a global rule at the
+    stop level.  This is the sampling primitive used by bounded row-selective refinement;
+    it traces no rays and changes no estimator authority.
+    """
+    face_count = len(faces)
+    if source_sampling not in {"legacy_centroid", "triangle_area"}:
+        raise ValueError(
+            "source_sampling must be 'legacy_centroid' or 'triangle_area'")
+    selected_source = np.asarray(source_faces, dtype=int)
+    start = int(sobol_index_start)
+    stop = int(sobol_index_stop)
+    if (selected_source.ndim != 1 or selected_source.size == 0
+            or np.any(selected_source < 0) or np.any(selected_source >= face_count)
+            or len(np.unique(selected_source)) != len(selected_source)
+            or int(sobol_index_start) != sobol_index_start
+            or int(sobol_index_stop) != sobol_index_stop
+            or start < 0 or stop <= start or stop & (stop - 1)):
+        raise ValueError("invalid source-row Sobol block")
+    dimension = 2 if source_sampling == "legacy_centroid" else 4
+    constants = np.asarray([
+        0.6180339887498949,
+        0.4142135623730950,
+        0.7320508075688772,
+        0.2360679774997898,
+    ])[:dimension]
+    base = qmc.Sobol(dimension, scramble=True, seed=int(seed)).random_base2(
+        int(np.log2(stop)))[start:stop]
+    rays_per_source = stop - start
+    face_index = selected_source.astype(float)[:, None]
+    shift = np.mod(face_index * constants[None, :], 1.0)
+    sample = np.mod(base[None, :, :] + shift[:, None, :], 1.0)
+    launch_inset_count = 0
+    centroid_limit_count = 0
+    if source_sampling == "legacy_centroid":
+        direction_sample = sample
+        source_position = np.repeat(
+            np.asarray(centroids)[selected_source, None, :],
+            rays_per_source, axis=1)
+    else:
+        root = np.sqrt(sample[:, :, 0])
+        barycentric = np.stack((
+            1.0 - root,
+            root * (1.0 - sample[:, :, 1]),
+            root * sample[:, :, 1],
+        ), axis=2)
+        source_position = np.einsum(
+            "frv,fvc->frc", barycentric,
+            np.asarray(verts)[np.asarray(faces)[selected_source]])
+        source = np.repeat(selected_source, rays_per_source)
+        prepared, launch_inset_count, centroid_limit_count = (
+            _inset_diffuse_source_positions_3d(
+                source_position.reshape(-1, 3), source, verts, faces, ray_offset))
+        source_position = prepared.reshape(
+            len(selected_source), rays_per_source, 3)
+        direction_sample = sample[:, :, 2:]
+    normal = np.repeat(
+        np.asarray(gas_normals)[selected_source], rays_per_source, axis=0)
+    direction_sample = direction_sample.reshape(-1, 2)
+    tangent_seed = np.where(
+        np.abs(normal[:, :1]) > 0.9,
+        np.array([0.0, 1.0, 0.0]), np.array([1.0, 0.0, 0.0]))
+    tangent = np.cross(tangent_seed, normal)
+    tangent /= np.linalg.norm(tangent, axis=1, keepdims=True)
+    bitangent = np.cross(normal, tangent)
+    cosine = np.sqrt(direction_sample[:, 0])
+    sine = np.sqrt(1.0 - direction_sample[:, 0])
+    azimuth = 2.0 * np.pi * direction_sample[:, 1]
+    direction = (
+        (sine * np.cos(azimuth))[:, None] * tangent
+        + (sine * np.sin(azimuth))[:, None] * bitangent
+        + cosine[:, None] * normal)
+    source = np.repeat(selected_source, rays_per_source)
+    origin = source_position.reshape(-1, 3) + float(ray_offset) * normal
+    result = (source, origin, direction)
+    if return_launch_diagnostics:
+        return result + ({
+            "launch_inset_count": int(launch_inset_count),
+            "centroid_limit_count": int(centroid_limit_count),
+        },)
+    return result
+
+
+def _diffuse_form_factor_ray_samples_3d(
+        verts, faces, centroids, gas_normals, *, rays_per_face, seed,
+        ray_offset, source_sampling, return_launch_diagnostics=False):
+    """Construct one complete nested diffuse-ray rule without tracing it.
+
+    ``triangle_area`` integrates the finite source patch using two Sobol
+    coordinates and the cosine hemisphere using two more. ``legacy_centroid`` retains
+    the historical point-patch operator byte-for-byte for audit replay only.
+    """
+    return _diffuse_form_factor_ray_sample_block_3d(
+        verts, faces, centroids, gas_normals,
+        source_faces=np.arange(len(faces), dtype=int),
+        sobol_index_start=0, sobol_index_stop=rays_per_face, seed=seed,
+        ray_offset=ray_offset, source_sampling=source_sampling,
+        return_launch_diagnostics=return_launch_diagnostics)
+
+
+def _trace_diffuse_form_factor_events_warp_3d(
+        verts, faces, origin, direction, domain, periodic_lateral, device):
+    """Run the legacy float32 Warp event classifier as a testable fast path."""
+    selected_device = DEVICE if device is None else str(device)
+    if selected_device.startswith("warp:"):
+        selected_device = selected_device.split(":", 1)[1]
+    ensure_writable_warp_cache(wp)
+    mesh = wp.Mesh(
+        points=wp.array(
+            np.asarray(verts, dtype=np.float32), dtype=wp.vec3,
+            device=selected_device),
+        indices=wp.array(
+            np.asarray(faces, dtype=np.int32).ravel(), dtype=wp.int32,
+            device=selected_device))
+    hit_wp = wp.full(len(origin), -1, dtype=wp.int32, device=selected_device)
+    wp.launch(
+        _diffuse_form_factor_events_3d, dim=len(origin), device=selected_device,
+        inputs=[
+            mesh.id,
+            wp.array(
+                np.asarray(origin, dtype=np.float32), dtype=wp.vec3,
+                device=selected_device),
+            wp.array(
+                np.asarray(direction, dtype=np.float32), dtype=wp.vec3,
+                device=selected_device),
+            float(domain[0]), float(domain[1]), float(domain[2]),
+            int(bool(periodic_lateral)), hit_wp,
+        ])
+    return hit_wp.numpy().astype(int)
+
+
+@dataclass(frozen=True)
+class DiffuseFormFactorEventsWarpCellwise3D:
+    """Explicit event receipt from the candidate cell-by-cell Warp tracer."""
+
+    hit_face: np.ndarray
+    termination: np.ndarray
+    wrap_count: np.ndarray
+
+    def __post_init__(self):
+        face = np.asarray(self.hit_face, dtype=int).copy()
+        termination = np.asarray(self.termination, dtype=np.int8).copy()
+        wraps = np.asarray(self.wrap_count, dtype=int).copy()
+        if (face.ndim != 1 or termination.shape != face.shape or wraps.shape != face.shape
+                or np.any(~np.isin(termination, (1, 2, 3, 4)))
+                or np.any(np.isin(termination, (1, 4)) != (face >= 0))
+                or np.any(np.isin(termination, (2, 3)) & (face != -1))
+                or np.any(wraps < 0)):
+            raise ValueError("invalid cell-by-cell Warp form-factor events")
+        for value in (face, termination, wraps):
+            value.setflags(write=False)
+        object.__setattr__(self, "hit_face", face)
+        object.__setattr__(self, "termination", termination)
+        object.__setattr__(self, "wrap_count", wraps)
+
+
+def trace_diffuse_form_factor_events_warp_cellwise_3d(
+        origin, direction, verts, faces, gas_normals, *, domain_size,
+        periodic_lateral=False, maximum_wraps=1024, device=None):
+    """Run the candidate explicit-event periodic Warp tracer."""
+    origin = np.asarray(origin, dtype=float)
+    direction = np.asarray(direction, dtype=float)
+    verts = np.asarray(verts, dtype=float)
+    faces = np.asarray(faces, dtype=int)
+    normals = np.asarray(gas_normals, dtype=float)
+    domain = np.asarray(domain_size, dtype=float)
+    wraps = int(maximum_wraps)
+    if (origin.ndim != 2 or origin.shape[1:] != (3,)
+            or direction.shape != origin.shape or np.any(~np.isfinite(origin))
+            or np.any(~np.isfinite(direction))
+            or not np.allclose(
+                np.linalg.norm(direction, axis=1), 1.0, rtol=0.0, atol=2e-6)
+            or verts.ndim != 2 or verts.shape[1:] != (3,)
+            or faces.ndim != 2 or faces.shape[1:] != (3,)
+            or np.any(faces < 0) or np.any(faces >= len(verts))
+            or normals.shape != (len(faces), 3)
+            or np.any(~np.isfinite(verts)) or np.any(~np.isfinite(normals))
+            or (len(faces) and not np.allclose(
+                np.linalg.norm(normals, axis=1), 1.0, rtol=0.0, atol=2e-6))
+            or domain.shape != (3,) or np.any(~np.isfinite(domain))
+            or np.any(domain <= 0.0) or wraps <= 0 or wraps > 4095):
+        raise ValueError("invalid cell-by-cell Warp form-factor inputs")
+    origin = origin.copy()
+    if periodic_lateral:
+        origin[:, 0] = np.mod(origin[:, 0], domain[0])
+        origin[:, 1] = np.mod(origin[:, 1], domain[1])
+    selected_device = DEVICE if device is None else str(device)
+    if selected_device.startswith("warp:"):
+        selected_device = selected_device.split(":", 1)[1]
+    ensure_writable_warp_cache(wp)
+    mesh = wp.Mesh(
+        points=wp.array(verts.astype(np.float32), dtype=wp.vec3, device=selected_device),
+        indices=wp.array(
+            faces.astype(np.int32).ravel(), dtype=wp.int32, device=selected_device))
+    hit_wp = wp.full(len(origin), -1, dtype=wp.int32, device=selected_device)
+    termination_wp = wp.full(len(origin), 3, dtype=wp.int32, device=selected_device)
+    wrap_wp = wp.zeros(len(origin), dtype=wp.int32, device=selected_device)
+    wp.launch(
+        _diffuse_form_factor_events_cellwise_3d, dim=len(origin), device=selected_device,
+        inputs=[
+            mesh.id,
+            wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
+            wp.array(direction.astype(np.float32), dtype=wp.vec3, device=selected_device),
+            wp.array(normals.astype(np.float32), dtype=wp.vec3, device=selected_device),
+            float(domain[0]), float(domain[1]), float(domain[2]),
+            int(bool(periodic_lateral)), wraps,
+            hit_wp, termination_wp, wrap_wp,
+        ])
+    return DiffuseFormFactorEventsWarpCellwise3D(
+        hit_wp.numpy(), termination_wp.numpy(), wrap_wp.numpy())
+
+
+def trace_diffuse_form_factor_events_cellwise_certified_3d(
+        origin, direction, verts, faces, gas_normals, *, domain_size,
+        periodic_lateral=False, maximum_wraps=1024,
+        maximum_exact_replay_wraps=None, device=None):
+    """Certify ambiguous cellwise events with an exact float64 replay.
+
+    The cellwise Warp trace is authoritative for ordinary completed events only after the bounded
+    full-event parity gate.  Float32 triangle queries can nevertheless miss a new shared-edge event
+    for a later sample and then exhaust the periodic-cell budget.  Exhausted and solid-facing events
+    are therefore recovery triggers, never physical escape classifications: replay only those rays
+    against the exact triangle data, accept a completed hard hit or open-top escape, and refuse if
+    the exact lineage is still incomplete.
+
+    This keeps the fast path for almost every ray while making the wrap budget a recovery threshold
+    rather than a sample-dependent failure threshold.
+    """
+    origin = np.asarray(origin, dtype=float)
+    direction = np.asarray(direction, dtype=float)
+    verts = np.asarray(verts, dtype=float)
+    faces = np.asarray(faces, dtype=int)
+    normals = np.asarray(gas_normals, dtype=float)
+    domain = np.asarray(domain_size, dtype=float)
+    exact_wraps = (
+        int(maximum_wraps) if maximum_exact_replay_wraps is None
+        else int(maximum_exact_replay_wraps))
+    if exact_wraps < int(maximum_wraps):
+        raise ValueError("maximum_exact_replay_wraps must cover the fast wrap budget")
+    fast = trace_diffuse_form_factor_events_warp_cellwise_3d(
+        origin, direction, verts, faces, normals, domain_size=domain,
+        periodic_lateral=periodic_lateral, maximum_wraps=maximum_wraps,
+        device=device)
+    replay_mask = np.isin(fast.termination, (3, 4))
+    final_face = fast.hit_face.copy()
+    termination = fast.termination.copy()
+    maximum_wrap_count = int(np.max(
+        fast.wrap_count[~replay_mask], initial=0))
+    recovered_hit_count = 0
+    if np.any(replay_mask):
+        reference = trace_diffuse_form_factor_events_float64_3d(
+            origin[replay_mask], direction[replay_mask], verts, faces, normals,
+            domain_size=domain, periodic_lateral=periodic_lateral,
+            maximum_wraps=exact_wraps)
+        refusal = np.isin(reference.termination, (3, 4))
+        if np.any(refusal):
+            local = np.flatnonzero(refusal)
+            selected = np.flatnonzero(replay_mask)[local]
+            code = int(reference.termination[local[0]])
+            reason = (
+                "periodic-wrap budget exhaustion" if code == 3
+                else "solid-facing hard intersection")
+            raise RuntimeError(
+                f"exact replay of cellwise diffuse visibility encountered {reason} for "
+                f"{len(selected)} of {len(origin)} rays; first_ray={int(selected[0])}; "
+                f"maximum_wraps={exact_wraps}")
+        original_face = final_face[replay_mask].copy()
+        original_termination = termination[replay_mask].copy()
+        final_face[replay_mask] = reference.hit_face
+        termination[replay_mask] = reference.termination
+        recovered_hit_count = int(np.sum(
+            (reference.termination == 1)
+            & ((original_termination != 1)
+               | (reference.hit_face != original_face))))
+        maximum_wrap_count = max(
+            maximum_wrap_count,
+            int(np.max(reference.wrap_count, initial=0)))
+    return DiffuseFormFactorEventsReplayHardened3D(
+        hit_face=final_face, termination=termination,
+        replay_count=int(np.sum(replay_mask)), replay_eligible_count=len(origin),
+        recovered_hit_count=recovered_hit_count,
+        open_escape_count=int(np.sum(termination == 2)),
+        maximum_wrap_count=maximum_wrap_count)
+
+
+def trace_diffuse_form_factor_events_replay_hardened_3d(
+        origin, direction, verts, faces, gas_normals, *, domain_size,
+        periodic_lateral=False, maximum_wraps=1024, device=None):
+    """Resolve all ambiguous fast misses and gas-normal-invalid hits in float64.
+
+    Periodic-wrap exhaustion raises instead of becoming an escape fraction.  This is the lasting
+    selective-recovery path; full fast/reference event parity on a bounded real checkpoint remains
+    the promotion gate for apparently valid float32 hits.
+    """
+    origin = np.asarray(origin, dtype=float)
+    direction = np.asarray(direction, dtype=float)
+    verts = np.asarray(verts, dtype=float)
+    faces = np.asarray(faces, dtype=int)
+    normals = np.asarray(gas_normals, dtype=float)
+    domain = np.asarray(domain_size, dtype=float)
+    if (origin.ndim != 2 or origin.shape[1:] != (3,)
+            or direction.shape != origin.shape or np.any(~np.isfinite(origin))
+            or np.any(~np.isfinite(direction))
+            or not np.allclose(
+                np.linalg.norm(direction, axis=1), 1.0, rtol=0.0, atol=2e-12)
+            or verts.ndim != 2 or verts.shape[1:] != (3,)
+            or faces.ndim != 2 or faces.shape[1:] != (3,)
+            or np.any(faces < 0) or np.any(faces >= len(verts))
+            or normals.shape != (len(faces), 3)
+            or np.any(~np.isfinite(verts)) or np.any(~np.isfinite(normals))
+            or (len(faces) and not np.allclose(
+                np.linalg.norm(normals, axis=1), 1.0, rtol=0.0, atol=2e-12))
+            or domain.shape != (3,) or np.any(~np.isfinite(domain))
+            or np.any(domain <= 0.0)):
+        raise ValueError("invalid replay-hardened diffuse form-factor inputs")
+    origin = origin.copy()
+    if periodic_lateral:
+        origin[:, 0] = np.mod(origin[:, 0], domain[0])
+        origin[:, 1] = np.mod(origin[:, 1], domain[1])
+    fast = _trace_diffuse_form_factor_events_warp_3d(
+        verts, faces, origin, direction, domain, periodic_lateral, device)
+    invalid_hit = np.zeros(len(fast), dtype=bool)
+    hit = fast >= 0
+    if np.any(hit):
+        cosine = -np.einsum("ij,ij->i", direction[hit], normals[fast[hit]])
+        invalid_hit[hit] = cosine < -2e-6
+    replay_mask = (fast < 0) | invalid_hit
+    final_face = fast.copy()
+    termination = np.where(hit, 1, 2).astype(np.int8)
+    maximum_wrap_count = 0
+    recovered_hit_count = 0
+    if np.any(replay_mask):
+        reference = trace_diffuse_form_factor_events_float64_3d(
+            origin[replay_mask], direction[replay_mask], verts, faces, normals,
+            domain_size=domain, periodic_lateral=periodic_lateral,
+            maximum_wraps=maximum_wraps)
+        refusal = np.isin(reference.termination, (3, 4))
+        if np.any(refusal):
+            local = np.flatnonzero(refusal)
+            selected = np.flatnonzero(replay_mask)[local]
+            code = int(reference.termination[local[0]])
+            reason = (
+                "periodic-wrap budget exhaustion" if code == 3
+                else "solid-facing hard intersection")
+            raise RuntimeError(
+                f"float64 diffuse visibility encountered {reason} for "
+                f"{len(selected)} of {len(origin)} rays; first_ray={int(selected[0])}; "
+                f"maximum_wraps={int(maximum_wraps)}")
+        original_replayed_face = final_face[replay_mask].copy()
+        final_face[replay_mask] = reference.hit_face
+        termination[replay_mask] = reference.termination
+        recovered_hit_count = int(np.sum(
+            (reference.termination == 1)
+            & (reference.hit_face != original_replayed_face)))
+        maximum_wrap_count = int(np.max(reference.wrap_count, initial=0))
+    return DiffuseFormFactorEventsReplayHardened3D(
+        hit_face=final_face, termination=termination,
+        replay_count=int(np.sum(replay_mask)), replay_eligible_count=len(origin),
+        recovered_hit_count=recovered_hit_count,
+        open_escape_count=int(np.sum(termination == 2)),
+        maximum_wrap_count=maximum_wrap_count)
+
+
 def estimate_diffuse_form_factors_3d(
         verts, faces, centroids, gas_normals, *, rays_per_face=64, seed=0,
-        domain_size=None, periodic_lateral=False, ray_offset=1e-5, device=None):
+        domain_size=None, periodic_lateral=False, ray_offset=1e-5,
+        source_sampling="triangle_area", visibility_mode="cellwise_certified",
+        maximum_visibility_wraps=1024, maximum_visibility_replay_wraps=None,
+        return_visibility_receipt=False,
+        device=None):
     """Estimate deterministic diffuse face exchange and classify every emitted ray.
 
-    A scrambled Sobol hemisphere rule is Cranley-shifted per source face. The estimator produces
-    geometric form factors only; sticking and chemistry enter the separate conservative radiosity
-    solve. ``periodic_lateral`` uses the same periodic-cell ray geometry as the legacy trench engine,
-    with the top remaining an open escape boundary.
+    A scrambled Sobol rule is Cranley-shifted per source face. ``triangle_area``
+    uses the physical four-dimensional source-area/cosine-direction integral and is the
+    production default; ``legacy_centroid`` retains the historical two-dimensional point-patch
+    approximation for exact replay. The estimator produces geometric form factors only; sticking
+    and chemistry enter the separate conservative radiosity solve.
+    ``periodic_lateral`` uses the same periodic-cell ray geometry as the legacy
+    trench engine, with the top remaining an open escape boundary.
+
+    ``legacy_float32`` is retained for exact historical replay. ``replay_hardened``
+    resolves every ambiguous fast miss and gas-normal-invalid hit with the float64
+    cell-by-cell authority. ``cellwise_certified`` is the production periodic tracer: it
+    advances one exact periodic cell at a time and was promoted only after full-event parity
+    against the float64 authority on a bounded real checkpoint. ``float64_reference`` evaluates
+    every event with that authority and is intended for bounded audits rather than long runs.
     """
     verts = np.asarray(verts, dtype=float)
     faces = np.asarray(faces, dtype=int)
@@ -1547,11 +2356,18 @@ def estimate_diffuse_form_factors_3d(
             or centroids.shape != (faces.shape[0], 3) or normals.shape != centroids.shape
             or np.any(~np.isfinite(verts)) or np.any(~np.isfinite(centroids))
             or np.any(~np.isfinite(normals)) or np.any(faces < 0)
-            or np.any(faces >= len(verts)) or ray_offset <= 0.0):
+            or np.any(faces >= len(verts)) or ray_offset <= 0.0
+            or visibility_mode not in {
+                "legacy_float32", "replay_hardened", "cellwise_certified",
+                "float64_reference"}
+            or int(maximum_visibility_wraps) != maximum_visibility_wraps
+            or maximum_visibility_wraps <= 0
+            or not isinstance(return_visibility_receipt, (bool, np.bool_))):
         raise ValueError("invalid mesh or gas-normal input for diffuse form factors")
     normal_length = np.linalg.norm(normals, axis=1)
     if not np.allclose(normal_length, 1.0, rtol=0.0, atol=2e-6):
         raise ValueError("gas normals must be unit length")
+    authority_normals = normals / normal_length[:, None]
     if int(rays_per_face) != rays_per_face:
         raise ValueError("rays_per_face must be an integer")
     rays_per_face = int(rays_per_face)
@@ -1569,44 +2385,57 @@ def estimate_diffuse_form_factors_3d(
             or np.max(verts[:, 2]) > domain[2] + 1e-7):
         raise ValueError("periodic mesh must lie inside [0, domain_size]")
 
-    base = qmc.Sobol(2, scramble=True, seed=int(seed)).random_base2(
-        int(np.log2(rays_per_face)))
-    face_index = np.arange(faces.shape[0], dtype=float)[:, None]
-    shift = np.mod(face_index * np.array([[0.6180339887498949, 0.4142135623730950]]), 1.0)
-    sample = np.mod(base[None, :, :] + shift[:, None, :], 1.0)
-    normal = np.repeat(normals, rays_per_face, axis=0)
-    sample = sample.reshape(-1, 2)
-    tangent_seed = np.where(
-        np.abs(normal[:, :1]) > 0.9,
-        np.array([0.0, 1.0, 0.0]), np.array([1.0, 0.0, 0.0]))
-    tangent = np.cross(tangent_seed, normal)
-    tangent /= np.linalg.norm(tangent, axis=1, keepdims=True)
-    bitangent = np.cross(normal, tangent)
-    cosine = np.sqrt(sample[:, 0])
-    sine = np.sqrt(1.0 - sample[:, 0])
-    azimuth = 2.0 * np.pi * sample[:, 1]
-    direction = ((sine * np.cos(azimuth))[:, None] * tangent
-                 + (sine * np.sin(azimuth))[:, None] * bitangent
-                 + cosine[:, None] * normal)
-    source = np.repeat(np.arange(faces.shape[0]), rays_per_face)
-    origin = centroids[source] + float(ray_offset) * normal
+    sampling_normals = normals if visibility_mode == "legacy_float32" else authority_normals
+    source, origin, direction, launch_diagnostics = _diffuse_form_factor_ray_samples_3d(
+        verts, faces, centroids, sampling_normals, rays_per_face=rays_per_face,
+        seed=seed, ray_offset=ray_offset, source_sampling=source_sampling,
+        return_launch_diagnostics=True)
 
-    selected_device = DEVICE if device is None else str(device)
-    if selected_device.startswith("warp:"):
-        selected_device = selected_device.split(":", 1)[1]
-    ensure_writable_warp_cache(wp)
-    mesh = wp.Mesh(
-        points=wp.array(verts.astype(np.float32), dtype=wp.vec3, device=selected_device),
-        indices=wp.array(faces.astype(np.int32).ravel(), dtype=wp.int32, device=selected_device))
-    hit_wp = wp.full(source.size, -1, dtype=wp.int32, device=selected_device)
-    wp.launch(
-        _diffuse_form_factor_events_3d, dim=source.size, device=selected_device,
-        inputs=[mesh.id,
-                wp.array(origin.astype(np.float32), dtype=wp.vec3, device=selected_device),
-                wp.array(direction.astype(np.float32), dtype=wp.vec3, device=selected_device),
-                float(domain[0]), float(domain[1]), float(domain[2]),
-                int(bool(periodic_lateral)), hit_wp])
-    hit = hit_wp.numpy().astype(int)
+    float64_evaluated_count = 0
+    recovered_hit_count = 0
+    maximum_wrap_count = 0
+    if visibility_mode == "legacy_float32":
+        hit = _trace_diffuse_form_factor_events_warp_3d(
+            verts, faces, origin, direction, domain, periodic_lateral, device)
+    elif visibility_mode == "replay_hardened":
+        events = trace_diffuse_form_factor_events_replay_hardened_3d(
+            origin, direction, verts, faces, authority_normals, domain_size=domain,
+            periodic_lateral=periodic_lateral,
+            maximum_wraps=int(maximum_visibility_wraps), device=device)
+        hit = events.hit_face
+        float64_evaluated_count = events.replay_count
+        recovered_hit_count = events.recovered_hit_count
+        maximum_wrap_count = events.maximum_wrap_count
+    elif visibility_mode == "cellwise_certified":
+        events = trace_diffuse_form_factor_events_cellwise_certified_3d(
+            origin, direction, verts, faces, authority_normals, domain_size=domain,
+            periodic_lateral=periodic_lateral,
+            maximum_wraps=int(maximum_visibility_wraps),
+            maximum_exact_replay_wraps=maximum_visibility_replay_wraps,
+            device=device)
+        hit = events.hit_face
+        float64_evaluated_count = events.replay_count
+        recovered_hit_count = events.recovered_hit_count
+        maximum_wrap_count = events.maximum_wrap_count
+    else:
+        events = trace_diffuse_form_factor_events_float64_3d(
+            origin, direction, verts, faces, authority_normals, domain_size=domain,
+            periodic_lateral=periodic_lateral,
+            maximum_wraps=int(maximum_visibility_wraps))
+        refusal = np.isin(events.termination, (3, 4))
+        if np.any(refusal):
+            selected = np.flatnonzero(refusal)
+            code = int(events.termination[selected[0]])
+            reason = (
+                "periodic-wrap budget exhaustion" if code == 3
+                else "solid-facing hard intersection")
+            raise RuntimeError(
+                f"float64 diffuse visibility encountered {reason} for "
+                f"{len(selected)} of {len(origin)} rays; first_ray={int(selected[0])}; "
+                f"maximum_wraps={int(maximum_visibility_wraps)}")
+        hit = events.hit_face
+        float64_evaluated_count = len(origin)
+        maximum_wrap_count = int(np.max(events.wrap_count, initial=0))
     escaped = hit < 0
     escape_fraction = np.bincount(
         source[escaped], minlength=faces.shape[0]).astype(float) / rays_per_face
@@ -1616,9 +2445,19 @@ def estimate_diffuse_form_factors_3d(
     unique, count = np.unique(pair, return_counts=True)
     source_face = (unique // faces.shape[0]).astype(int)
     target_face = (unique % faces.shape[0]).astype(int)
-    return DiffuseFormFactors3D(
+    factors = DiffuseFormFactors3D(
         faces.shape[0], source_face, target_face, count.astype(float) / rays_per_face,
         escape_fraction, rays_per_face)
+    if not return_visibility_receipt:
+        return factors
+    return DiffuseFormFactorEstimateReceipt3D(
+        form_factors=factors, visibility_mode=str(visibility_mode),
+        ray_count=len(origin), float64_evaluated_count=float64_evaluated_count,
+        float64_recovered_hit_count=recovered_hit_count,
+        open_escape_count=int(np.sum(escaped)),
+        maximum_wrap_count=maximum_wrap_count,
+        launch_inset_count=launch_diagnostics["launch_inset_count"],
+        centroid_limit_count=launch_diagnostics["centroid_limit_count"])
 
 
 def gather_boundary_state_ballistic_3d(
@@ -1714,11 +2553,21 @@ def gather_boundary_state_ballistic_3d(
             -np.einsum("sd,fd->sf", direction, normals), 0.0, 1.0)
         projection = incidence_cosine / (-direction[:, 2, None])
         normalized_gathered = np.zeros((direction.shape[0], face_count))
-        for sample_index, incident_direction in enumerate(direction):
-            reverse = -incident_direction
-            origin = points.reshape(-1, 3) + np.repeat(
-                float(ray_offset) * normals, point_count, axis=0)
-            ray_direction = np.broadcast_to(reverse, origin.shape).copy()
+        origin_per_direction = points.reshape(-1, 3) + np.repeat(
+            float(ray_offset) * normals, point_count, axis=0)
+        rays_per_direction = origin_per_direction.shape[0]
+        # A kernel launch and device-to-host copy per phase-space atom made strict angular
+        # quadrature needlessly serial, especially on CUDA.  Batch independent directions while
+        # retaining exactly the same float32 origins, directions, hard visibility test, and
+        # per-direction conservation normalization.  The fixed cap bounds temporary memory on
+        # deep meshes; it is a scheduling choice and does not enter the numerical operator.
+        direction_batch_size = 128
+        for first in range(0, direction.shape[0], direction_batch_size):
+            last = min(first + direction_batch_size, direction.shape[0])
+            reverse = -direction[first:last]
+            batch_count = last - first
+            origin = np.tile(origin_per_direction, (batch_count, 1))
+            ray_direction = np.repeat(reverse, rays_per_direction, axis=0)
             hit_wp = wp.full(origin.shape[0], -1, dtype=wp.int32, device=selected_device)
             wp.launch(
                 _diffuse_form_factor_events_3d, dim=origin.shape[0], device=selected_device,
@@ -1727,18 +2576,23 @@ def gather_boundary_state_ballistic_3d(
                         wp.array(ray_direction.astype(np.float32), dtype=wp.vec3, device=selected_device),
                         float(domain[0]), float(domain[1]), float(domain[2]),
                         int(bool(periodic_lateral)), hit_wp])
-            visible = hit_wp.numpy().reshape(face_count, point_count) < 0
+            visible = hit_wp.numpy().reshape(
+                batch_count, face_count, point_count) < 0
             if not periodic_lateral:
-                travel = (float(source_z) - points[:, :, 2]) / reverse[2]
-                source_point = points[:, :, :2] + travel[:, :, None] * reverse[None, None, :2]
+                travel = (
+                    (float(source_z) - points[None, :, :, 2])
+                    / reverse[:, None, None, 2])
+                source_point = (
+                    points[None, :, :, :2]
+                    + travel[:, :, :, None] * reverse[:, None, None, :2])
                 visible &= ((travel >= 0.0)
-                            & (source_point[:, :, 0] >= bounds[0])
-                            & (source_point[:, :, 0] <= bounds[1])
-                            & (source_point[:, :, 1] >= bounds[2])
-                            & (source_point[:, :, 1] <= bounds[3]))
-            normalized_gathered[sample_index] = (
-                species.weight[sample_index] * projection[sample_index]
-                * visible.mean(axis=1))
+                            & (source_point[:, :, :, 0] >= bounds[0])
+                            & (source_point[:, :, :, 0] <= bounds[1])
+                            & (source_point[:, :, :, 1] >= bounds[2])
+                            & (source_point[:, :, :, 1] <= bounds[3]))
+            normalized_gathered[first:last] = (
+                species.weight[first:last, None] * projection[first:last]
+                * visible.mean(axis=2))
         sample_probability = np.einsum("sf,f->s", normalized_gathered, areas) / source_area
         probability = float(sample_probability.sum())
         if periodic_lateral:

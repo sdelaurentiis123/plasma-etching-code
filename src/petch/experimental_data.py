@@ -269,6 +269,28 @@ def _verified_csv_rows(path, expected_fields, expected_sha256, verify_checksum):
     return rows
 
 
+def load_krueger_2024_base_boundary_fluxes(directory, *, verify_checksum=True):
+    """Load only the published base-case boundary flux table.
+
+    This narrow loader is the calibration-time data firewall. A base transport run has no reason
+    to open calibration-profile metrics or held-out transfer observations, so it must not call the
+    aggregate evidence loader merely to obtain Table-I HPEM fluxes.
+    """
+    directory = Path(directory)
+    flux_rows = _verified_csv_rows(
+        directory / "base_case_boundary_fluxes.csv",
+        ["species", "value", "unit", "evidence_type", "split", "source_location"],
+        KRUEGER_2024_SHA256["base_case_boundary_fluxes.csv"], verify_checksum)
+    fluxes = tuple(BoundaryFluxReference(
+        species=row["species"], value_cm2_s=float(row["value"]),
+        evidence_type=row["evidence_type"], split=row["split"],
+        source_location=row["source_location"])
+        for row in flux_rows)
+    if any(item.evidence_type != "HPEM_simulation" for item in fluxes):
+        raise ValueError("base-case boundary fluxes must remain labeled as HPEM simulation outputs")
+    return fluxes
+
+
 def load_krueger_2024_evidence(directory, *, verify_checksum=True):
     """Load the Krüger 2024 calibration/transfer facts without conflating evidence types.
 
@@ -280,10 +302,8 @@ def load_krueger_2024_evidence(directory, *, verify_checksum=True):
         directory / "base_case_metrics.csv",
         ["metric", "symbol", "value", "unit", "evidence_type", "split", "source_location"],
         KRUEGER_2024_SHA256["base_case_metrics.csv"], verify_checksum)
-    flux_rows = _verified_csv_rows(
-        directory / "base_case_boundary_fluxes.csv",
-        ["species", "value", "unit", "evidence_type", "split", "source_location"],
-        KRUEGER_2024_SHA256["base_case_boundary_fluxes.csv"], verify_checksum)
+    fluxes = load_krueger_2024_base_boundary_fluxes(
+        directory, verify_checksum=verify_checksum)
     transfer_rows = _verified_csv_rows(
         directory / "transfer_observations.csv",
         ["family", "control", "observable", "value", "unit", "evidence_type", "split",
@@ -295,11 +315,6 @@ def load_krueger_2024_evidence(directory, *, verify_checksum=True):
         evidence_type=row["evidence_type"], split=row["split"],
         source_location=row["source_location"])
         for row in metric_rows)
-    fluxes = tuple(BoundaryFluxReference(
-        species=row["species"], value_cm2_s=float(row["value"]),
-        evidence_type=row["evidence_type"], split=row["split"],
-        source_location=row["source_location"])
-        for row in flux_rows)
     observations = tuple(TransferObservation(
         family=row["family"], control=row["control"], observable=row["observable"],
         value=row["value"], unit=row["unit"], evidence_type=row["evidence_type"],
@@ -308,8 +323,6 @@ def load_krueger_2024_evidence(directory, *, verify_checksum=True):
 
     if any(item.evidence_type != "experiment" or item.split != "calibration" for item in metrics):
         raise ValueError("base-case metrics must be experimental calibration evidence")
-    if any(item.evidence_type != "HPEM_simulation" for item in fluxes):
-        raise ValueError("base-case boundary fluxes must remain labeled as HPEM simulation outputs")
     if any(item.split == "calibration" for item in observations):
         raise ValueError("transfer observations must not leak into the calibration split")
     return Krueger2024Evidence(metrics, fluxes, observations)

@@ -21,6 +21,10 @@ of numerical facts and qualitative findings needed to define reproducible valida
 - `transfer_observations.csv` contains only claims stated in Sections IX.A–B. Experimental trends are
   **held out** from calibration. Three MCFPM etch depths are retained only as `reference_only` values and
   can never be scored as experimental validation.
+- `digitized_figure4_iead.csv` is a probability-weighted numerical projection of the combined positive-ion
+  energy/angular distribution in Figure 4(a). `digitized_figure4_iead_metadata.json` records the source
+  checksum, pixel calibration, logarithmic color mapping, binning error, and digitization sensitivity.
+  The copyrighted raster is not redistributed.
 
 The profile images themselves are not numerically recoverable from the paper without digitization. These
 tables therefore gate scalar/trend validation only. Pixel- or contour-level matching requires source SEMs,
@@ -29,11 +33,18 @@ an explicit digitization uncertainty, or new measurements; it must not silently 
 The paper's Table V probabilities are **experiment-calibrated mechanism inputs**, not first-principles
 constants. The four-feature optimization reports 0.0909 for bare-SiO2 sputtering, 0.1384 for
 SiO2-fluorocarbon-complex sputtering, 0.2729 for complex formation, 0.0628 for O-based polymer etching,
-and 0.0842 for polymer deposition on the amorphous-carbon mask. They cannot be copied wholesale into
-petch's current reduced SiO2 kernel: Krueger's mechanism also resolves species-specific complexes,
-SiO2 redeposition, polymer crosslinking/bond breaking, mask chemistry, and a measured/simulated IEAD up
-to 4.8 keV. Until those state channels and the complete reaction table are represented, the values are
-comparison evidence rather than an executable petch parameter package.
+and 0.0842 for polymer deposition on the amorphous-carbon mask. Petch now exposes these values through
+`krueger_2024_reduced_projection()` factories for oxide and mask, but only as a **development replay**.
+Krüger's source mechanism additionally resolves species-specific complexes, SiO2 redeposition, excited
+sites, polymer identities, crosslinking/bond breaking, and a species-resolved ion/hot-neutral mixture.
+Those omissions and the assumed amorphous-carbon density remain in machine-readable provenance; the
+projection cannot earn a predictive claim merely by reproducing the calibration case.
+
+The Figure 4(a) IEAD is HPEM output, not a measured wafer distribution. Its digitized mean energy is
+approximately 3.465 keV, its central 90% interval is approximately 0.98--4.62 keV, and the signed-angle
+standard deviation is approximately 0.84 degrees. Reasonable pixel/colorbar perturbations move the mean
+by less than 15 eV peak-to-peak. The table retains the joint energy-angle correlation; it is not replaced
+by a monoenergetic or factorized closure.
 
 ## Base process context
 
@@ -50,3 +61,6 @@ source correction:
 - `base_case_metrics.csv`: `5d51d124a93e1f942a9b999649b8adcf217662967d9ea2a40089f72940992351`
 - `base_case_boundary_fluxes.csv`: `ad50b6099a52d2c2cc00eb4eade496b9d75c41d19881c5fec9e905f9dfd3808b`
 - `transfer_observations.csv`: `85cef607f20ab5e56e606666aa7e0e6241abb546d0369277b21833542e04d425`
+- source author-manuscript PDF: `65b7750b2b773c3725d8f09f778b5b728ce9974a4548a5d522d19256f6bf9a51`
+- `digitized_figure4_iead.csv`: `783f7084b5ba6dc71eb89efeb70871cabdb7378f87db44f8fa9dcb1f3adb6ce4`
+- `digitized_figure4_iead_metadata.json`: `7904a700afdcd116c6f57ef35aeb5555661ffed0d004304d815d20f79840ca55`

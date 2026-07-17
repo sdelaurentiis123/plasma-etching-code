@@ -443,6 +443,7 @@ class ReducedSiO2FluorocarbonParameters:
     activation_energetic_species: tuple[str, ...] = ()
     energetic_polymer_deposition_yield: LowEnergyActivationYield | None = None
     energetic_polymer_deposition_species: tuple[str, ...] = ()
+    declared_inert_neutral_species: tuple[str, ...] = ()
     evidence: Mapping[str, ParameterEvidence] = field(default_factory=dict)
     known_omissions: tuple[str, ...] = (
         "polymer_crosslinking",
@@ -521,6 +522,16 @@ class ReducedSiO2FluorocarbonParameters:
         object.__setattr__(self, "activation_energetic_species", activation_species)
         object.__setattr__(
             self, "energetic_polymer_deposition_species", deposition_species)
+        inert_species = tuple(str(name) for name in self.declared_inert_neutral_species)
+        reactive_species = (
+            set().union(*(set(values) for values in maps.values()))
+            | {self.oxygen_species})
+        if (any(not name for name in inert_species)
+                or len(set(inert_species)) != len(inert_species)
+                or set(inert_species) & reactive_species):
+            raise ValueError(
+                "declared inert neutral species must be unique, nonempty, and nonreactive")
+        object.__setattr__(self, "declared_inert_neutral_species", inert_species)
         evidence = dict(self.evidence)
         if any(not isinstance(item, ParameterEvidence) for item in evidence.values()):
             raise TypeError("parameter evidence values must be ParameterEvidence objects")
@@ -663,6 +674,121 @@ class ReducedSiO2FluorocarbonParameters:
             ),
         )
 
+    @classmethod
+    def krueger_2024_reduced_projection(cls, *, oxide_etch_yield_scale=1.0):
+        """Project Krüger's calibrated MCFPM mechanism onto the reduced oxide state.
+
+        This package is intentionally a *development replay*, not a predictive parameter set.
+        The four optimized probabilities come from the four-feature calibration in Table V of
+        Krüger et al. (2024). Fixed energy/angle laws and untuned sticking probabilities come
+        from Appendix B of Krüger's thesis. The source model resolves multiple complexes,
+        excited sites, polymer identities, crosslinks, redeposition, and a material-resolved
+        ion/hot-neutral mixture; this projection collapses those states explicitly.
+
+        ``C3F4`` is present in the published HPEM wafer-flux table but absent from the complete
+        Appendix-B surface mechanism. It is therefore declared nonreactive in this projection
+        rather than silently discarded or assigned an invented sticking coefficient.
+
+        ``oxide_etch_yield_scale`` multiplies only the published bare/complex SiO2 yield
+        amplitudes.  It is the one absolute-rate calibration assigned to the base etch depth after
+        projection into this reduced state; it changes neither thresholds nor angular/energy
+        shapes and must be frozen for every held-out transfer case.
+        """
+        scale = float(oxide_etch_yield_scale)
+        if not np.isfinite(scale) or scale <= 0.0:
+            raise ValueError("oxide_etch_yield_scale must be positive and finite")
+        article = "https://doi.org/10.1116/6.0003554"
+        thesis = "https://doi.org/10.7302/23106"
+        site_source = "https://doi.org/10.1088/1361-6463/aa6f40"
+
+        def evidence(source, evidence_type, note, *, supports=False):
+            return ParameterEvidence(
+                source, evidence_type, note=note,
+                supports_prediction_within_declared_domain=supports)
+
+        parameter_evidence = {
+            "site_density_m2": evidence(
+                site_source, "transferred_surface_site_density",
+                "1e15 cm^-2 reduced-state site density; Krüger's voxel mechanism "
+                "does not publish a continuum site density."),
+            "bulk_formula_density_m3": evidence(
+                "fused SiO2 density 2200 kg/m3 and molar mass 60.0843 g/mol",
+                "material_constant_derived",
+                "Bulk SiO2 formula-unit density.", supports=True),
+            "polymer_monolayer_density_m2": evidence(
+                site_source, "transferred_surface_site_density",
+                "1e15 cm^-2 converts the voxel polymer state into an areal inventory."),
+            "complex_formation_probability": evidence(
+                article, "published_calibrated_parameter_and_reduced_projection",
+                "Table V four-feature pp,SiO2=0.2729 for CF/CF2; Appendix B "
+                "retains 0.2 for CF3/C2F3 and 0.001 for heavier listed complexes."),
+            "polymer_deposition_probability_on_substrate": evidence(
+                thesis, "published_model_reduced_projection",
+                "Appendix-B deposition on excited oxide-complex states is collapsed "
+                "onto accessible substrate in the reduced one-complex state."),
+            "polymer_deposition_probability_on_polymer": evidence(
+                thesis, "published_model_reduced_projection",
+                "Appendix-B un-crosslinked film growth: 0.1 for CF/CF2/CF3 and "
+                "0.03 for C2F3; deposited-polymer identity is collapsed."),
+            "oxygen_polymer_etch_probability": evidence(
+                article, "published_calibrated_parameter",
+                "Table V four-feature pe,poly=0.0628."),
+            "bare_sio2_yield": evidence(
+                article, "published_parameter_times_single_base_anchor_scale",
+                "Table V p0=0.0909; Appendix B Eth=70 eV, n=1, Er=140 eV, "
+                f"Kress angular response; reduced-engine base scale={scale:.17g}."),
+            "complex_sio2_yield": evidence(
+                article, "published_parameter_times_single_base_anchor_scale",
+                "Table V p0=0.1384; Appendix B Eth=35 eV, n=1, Er=140 eV, "
+                f"Chang-Sawin angular response; reduced-engine base scale={scale:.17g}."),
+            "polymer_sputter_yield": evidence(
+                thesis, "published_model_parameter",
+                "Appendix-B un-crosslinked polymer p0=0.9, Eth=20 eV, n=0.5, "
+                "Er=500 eV, Kress angular response."),
+            "declared_inert_neutral_species": evidence(
+                thesis, "published_absent_channel",
+                "C3F4 is listed in the HPEM flux table but nowhere in the complete "
+                "Appendix-B surface reaction mechanism."),
+        }
+        return cls(
+            site_density_m2=1.0e19,
+            bulk_formula_density_m3=2.205e28,
+            polymer_monolayer_density_m2=1.0e19,
+            complex_formation_probability={
+                "CF": 0.2729, "CF2": 0.2729,
+                "CF3": 0.2, "C2F3": 0.2,
+                "C2F4": 0.001, "C3F5": 0.001, "C3F6": 0.001,
+            },
+            polymer_deposition_probability_on_substrate={
+                "CF": 0.002, "CF2": 0.0015, "CF3": 0.001, "C2F3": 0.001,
+            },
+            polymer_deposition_probability_on_polymer={
+                "CF": 0.1, "CF2": 0.1, "CF3": 0.1, "C2F3": 0.03,
+            },
+            oxygen_species="O",
+            oxygen_polymer_etch_probability=0.0628,
+            bare_sio2_yield=EnergeticYield(
+                0.0909 * scale, 70.0, 140.0, energy_exponent=1.0,
+                angular_model="kress_1999", angular_parameter=9.3),
+            complex_sio2_yield=EnergeticYield(
+                0.1384 * scale, 35.0, 140.0, energy_exponent=1.0,
+                angular_model="chang_sawin_1997"),
+            polymer_sputter_yield=EnergeticYield(
+                0.9, 20.0, 500.0, energy_exponent=0.5,
+                angular_model="kress_1999", angular_parameter=9.3),
+            declared_inert_neutral_species=("C3F4",),
+            evidence=parameter_evidence,
+            known_omissions=(
+                "species-resolved oxide-fluorocarbon complexes are collapsed",
+                "energetically excited oxide and complex states are not resolved",
+                "polymer identities, crosslinking, scission, and carbonization are not resolved",
+                "atomic-F surface reactions are absent because the wafer F flux is unpublished",
+                "SiO2 and fluorocarbon-product redeposition are unresolved",
+                "the aggregate ion/hot-neutral composition and full IEAD require a boundary closure",
+                "amorphous-carbon-mask chemistry is supplied by a separate material mechanism",
+            ),
+        )
+
 
 @dataclass(frozen=True)
 class MechanismValidity:
@@ -756,6 +882,8 @@ class ReducedSiO2FluorocarbonMechanism:
                     par.energetic_polymer_deposition_yield),
                 "energetic_polymer_deposition_species": list(
                     par.energetic_polymer_deposition_species),
+                "declared_inert_neutral_species": list(
+                    par.declared_inert_neutral_species),
             },
             "sources": {
                 name: {
@@ -821,6 +949,11 @@ class ReducedSiO2FluorocarbonMechanism:
                 substrate_probability.get(species, 0.0) * access
                 + polymer_probability.get(species, 0.0) * polymer_coverage)
         add(par.oxygen_species, par.oxygen_polymer_etch_probability * polymer_coverage)
+        # An inert declaration is still a transport closure and must be visible to the common
+        # radiosity operator. Returning an explicit zero distinguishes "known not to react" from
+        # an accidentally missing species route.
+        for species in par.declared_inert_neutral_species:
+            add(species, np.zeros_like(access))
         if any(np.any(value > 1.0 + 5e-14) for value in probability.values()):
             raise ValueError(
                 "competing neutral reaction probabilities exceed one; chemistry inputs are invalid")
@@ -835,7 +968,8 @@ class ReducedSiO2FluorocarbonMechanism:
                      | set(par.polymer_deposition_probability_on_polymer)
                      | set(par.activated_polymer_deposition_probability_on_substrate)
                      | set(par.activated_polymer_deposition_probability_on_polymer)
-                     | {par.oxygen_species})
+                     | {par.oxygen_species}
+                     | set(par.declared_inert_neutral_species))
         unsupported = tuple(sorted(
             name for name, flux in fluxes.neutral_flux_m2_s.items()
             if np.any(np.asarray(flux) > 0.0) and name not in supported))
@@ -859,6 +993,8 @@ class ReducedSiO2FluorocarbonMechanism:
                 "energetic_polymer_deposition_species"})
         if par.complex_removal_reaction_order != 1:
             required_evidence.add("complex_removal_reaction_order")
+        if par.declared_inert_neutral_species:
+            required_evidence.add("declared_inert_neutral_species")
         missing_evidence = tuple(sorted(required_evidence - set(par.evidence)))
         nonpredictive = tuple(sorted(
             name for name in required_evidence
