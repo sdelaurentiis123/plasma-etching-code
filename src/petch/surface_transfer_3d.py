@@ -1,9 +1,10 @@
 """Sparse material-local transfer weights between immutable triangle surfaces.
 
-This module packages the current inverse-distance/K-nearest-predecessor rule as
-an explicit, auditable contract.  It intentionally does *not* implement
-triangle-overlap remapping and is not wired into feature evolution, charge
-transfer, or public exports.
+This module packages the inverse-distance/K-nearest-predecessor rule as an
+explicit, auditable contract.  Feature evolution can select it explicitly as
+the indexed reference backend; the historical inline implementation remains
+the default until overlap transfer passes the moving-surface promotion gates.
+It does not implement triangle-overlap remapping or signed charge transfer.
 """
 
 from __future__ import annotations

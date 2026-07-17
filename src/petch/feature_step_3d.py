@@ -62,6 +62,8 @@ from .feature_geometry_state_3d import (
     face_material_ids_3d as _face_material_ids,
 )
 from .feature_geometry_backend_3d import UniformFeatureGeometryBackend3D
+from .surface_mesh_3d import TriangleSurface3D
+from .surface_transfer_3d import build_surface_transfer_3d
 from .threed import advect_3d, extend_velocity_3d, reinit_cr2, reinit_fsm, reinit_narrow
 
 
@@ -1185,6 +1187,78 @@ def conservative_remap_surface_state(
         materials=material_diagnostics)
 
 
+def _remap_surface_state_with_indexed_transfer(
+        state, old_surface, new_surface, *, neighbor_count, maximum_distance,
+        mesh_length_unit_m):
+    """Apply the shared exact-distance/indexed predecessor operator to one state."""
+    if (not hasattr(state, "conservative_surface_fields")
+            or not hasattr(state, "conservative_surface_upper_bounds")
+            or not hasattr(state, "with_conservative_surface_fields")):
+        raise TypeError("surface state does not implement the conservative remap contract")
+    fields = {
+        str(name): np.asarray(value, dtype=float)
+        for name, value in state.conservative_surface_fields().items()}
+    upper = dict(state.conservative_surface_upper_bounds())
+    modes = (
+        dict(state.surface_field_remap_modes())
+        if hasattr(state, "surface_field_remap_modes")
+        else {name: "conservative" for name in fields})
+    if (not fields or set(upper) != set(fields) or set(modes) != set(fields)
+            or any(mode not in {"conservative", "intensive"} for mode in modes.values())
+            or any(value.shape != (len(old_surface.faces),) for value in fields.values())):
+        raise ValueError("surface-state remap fields and upper bounds must match")
+    transfer = build_surface_transfer_3d(
+        old_surface, new_surface, neighbor_count=neighbor_count,
+        maximum_distance=maximum_distance)
+    output = {}
+    applications = {}
+    for name, value in fields.items():
+        if modes[name] == "conservative":
+            application = transfer.apply_extensive(value, upper_bound=upper[name])
+        else:
+            application = transfer.apply_intensive(
+                value, lower_bound=0.0, upper_bound=upper[name])
+        output[name] = application.values
+        applications[name] = application
+
+    physical_area_scale = float(mesh_length_unit_m) ** 2
+    material_diagnostics = {}
+    for material in sorted(set(old_surface.face_material_id.tolist())):
+        old_selected = old_surface.face_material_id == material
+        new_selected = new_surface.face_material_id == material
+        targets = {}
+        achieved = {}
+        residuals = []
+        for name, application in applications.items():
+            receipt = application.material_integrals[int(material)]
+            if modes[name] == "conservative":
+                targets[name] = receipt["old_area_integral"] * physical_area_scale
+                residuals.append(receipt["relative_difference"])
+            achieved[name] = receipt["new_area_integral"] * physical_area_scale
+        material_diagnostics[int(material)] = dict(
+            old_face_count=int(np.count_nonzero(old_selected)),
+            new_face_count=int(np.count_nonzero(new_selected)),
+            old_area_m2=float(
+                np.sum(old_surface.face_area[old_selected]) * physical_area_scale),
+            new_area_m2=float(
+                np.sum(new_surface.face_area[new_selected]) * physical_area_scale),
+            target_field_integrals=targets,
+            remapped_field_integrals=achieved,
+            field_remap_modes=dict(modes),
+            max_relative_conservation_residual=float(max(residuals, default=0.0)))
+    return state.with_conservative_surface_fields(output), dict(
+        method="material_local_indexed_exact_surface_knn",
+        transfer_fingerprint=transfer.fingerprint,
+        neighbor_count=int(neighbor_count),
+        maximum_nearest_distance=float(transfer.maximum_exact_surface_distance),
+        maximum_nearest_centroid_distance=float(
+            transfer.maximum_nearest_centroid_distance),
+        distance_metric="indexed_exact_point_to_material_triangle",
+        periodic_lengths=old_surface.periodic_lengths,
+        maximum_allowed_distance=float(maximum_distance),
+        materials=material_diagnostics)
+
+
 def _select_surface_fluxes(fluxes, selected_face, face_count, species_role=None):
     selected_face = np.asarray(selected_face, dtype=int)
     role = None if species_role is None else dict(species_role)
@@ -1563,6 +1637,7 @@ def advance_feature_step_3d(
         ballistic_face_quadrature_points=1, cfl_number=0.3, reinitialize=True,
         reinitialization_method="skfmm",
         topology_change_policy="refuse",
+        surface_state_remap_backend="legacy_knn",
         transport_device=None):
     """Advance one stateful, dimensional feature step.
 
@@ -1661,6 +1736,9 @@ def advance_feature_step_3d(
     if topology_change_policy not in ("refuse", "continue_gas_cavity"):
         raise ValueError(
             "topology_change_policy must be 'refuse' or 'continue_gas_cavity'")
+    if surface_state_remap_backend not in ("legacy_knn", "indexed_knn"):
+        raise ValueError(
+            "surface_state_remap_backend must be 'legacy_knn' or 'indexed_knn'")
     if ballistic_transport == "face_gather" and (
             charging_poisson_system is not None or nodal_potential_v is not None):
         raise ValueError("deterministic ballistic face gather does not yet trace electric fields")
@@ -2369,16 +2447,31 @@ def advance_feature_step_3d(
             "changed_slice_topology": dict(changed_slice_topology),
             "conservative_surface_state_remap_required": True,
         }
-    next_surface_state, remap_diagnostics = conservative_remap_surface_state(
-        surface.state, centroids[active_face], areas[active_face], face_material[active_face],
-        next_centroids[next_active_face], next_areas[next_active_face],
-        next_face_material[next_active_face], dx=geometry.dx,
-        mesh_length_unit_m=geometry.mesh_length_unit_m,
-        maximum_distance=displacement + 1.5 * geometry.dx,
-        old_triangles=verts[faces[active_face]],
-        periodic_lengths=(
-            tuple(((np.asarray(geometry.phi.shape) - 1) * geometry.dx)[:2]) + (None,)
-            if profile_periodic_lateral else None))
+    remap_maximum_distance = displacement + 1.5 * geometry.dx
+    remap_periodic_lengths = (
+        tuple(((np.asarray(geometry.phi.shape) - 1) * geometry.dx)[:2]) + (None,)
+        if profile_periodic_lateral else (None, None, None))
+    if surface_state_remap_backend == "indexed_knn":
+        old_surface = TriangleSurface3D(
+            verts, faces[active_face], face_material[active_face],
+            periodic_lengths=remap_periodic_lengths)
+        new_surface = TriangleSurface3D(
+            next_verts, next_faces[next_active_face], next_face_material[next_active_face],
+            periodic_lengths=remap_periodic_lengths)
+        next_surface_state, remap_diagnostics = _remap_surface_state_with_indexed_transfer(
+            surface.state, old_surface, new_surface, neighbor_count=4,
+            maximum_distance=remap_maximum_distance,
+            mesh_length_unit_m=geometry.mesh_length_unit_m)
+    else:
+        next_surface_state, remap_diagnostics = conservative_remap_surface_state(
+            surface.state, centroids[active_face], areas[active_face],
+            face_material[active_face], next_centroids[next_active_face],
+            next_areas[next_active_face], next_face_material[next_active_face],
+            dx=geometry.dx, mesh_length_unit_m=geometry.mesh_length_unit_m,
+            maximum_distance=remap_maximum_distance,
+            old_triangles=verts[faces[active_face]],
+            periodic_lengths=(
+                remap_periodic_lengths if profile_periodic_lateral else None))
     next_mesh_fingerprint = _surface_mesh_fingerprint(
         next_verts, next_faces, next_active_face, next_face_material, output_geometry)
     remap_diagnostics = dict(
@@ -2386,6 +2479,7 @@ def advance_feature_step_3d(
         topology_method=topology_method,
         old_mesh_topology=old_mesh_topology, new_mesh_topology=next_mesh_topology,
         next_active_face_count=int(next_active_face.size),
+        surface_state_remap_backend=str(surface_state_remap_backend),
         topology_change_policy=str(topology_change_policy),
         topology_event=topology_event)
     reasons = []
@@ -2579,6 +2673,7 @@ def solve_feature_3d(
         ballistic_transport="forward", ballistic_periodic_lateral=None,
         ballistic_face_quadrature_points=1, reinitialization_method="skfmm",
         topology_change_policy="refuse",
+        surface_state_remap_backend="legacy_knn",
         adaptive_timestep_options=None):
     """Run verified feature steps with conserved surface state and optional quasi-static charging.
 
@@ -2736,6 +2831,7 @@ def solve_feature_3d(
                     ballistic_face_quadrature_points=ballistic_face_quadrature_points,
                     reinitialization_method=reinitialization_method,
                     topology_change_policy=topology_change_policy,
+                    surface_state_remap_backend=surface_state_remap_backend,
                     cfl_number=cfl_number, reinitialize=reinitialize,
                     transport_device=transport_device)
             except (ValueError, RuntimeError) as error:

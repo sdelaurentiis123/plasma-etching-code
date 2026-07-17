@@ -937,6 +937,28 @@ def test_deterministic_face_gather_moves_plane_by_same_dimensional_flux_law():
     assert result.transport.transport_model == "collisionless_deterministic_face_gather_3d"
 
 
+def test_feature_step_explicit_indexed_remap_preserves_noop_state_bitwise():
+    geometry, _ = _plane_geometry()
+    common = dict(
+        geometry=geometry, boundary=_boundary(),
+        species_role={"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        mechanism=_mechanism(), etchable_material_ids=(1,), duration_s=0.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        ballistic_transport="face_gather", ballistic_face_quadrature_points=3,
+        n_position=1, seed=3, reinitialize=False, transport_device="cpu")
+    legacy = advance_feature_step_3d(**common)
+    indexed = advance_feature_step_3d(
+        **common, surface_state_remap_backend="indexed_knn")
+
+    for name, value in legacy.next_surface_state.conservative_surface_fields().items():
+        np.testing.assert_array_equal(
+            indexed.next_surface_state.conservative_surface_fields()[name], value)
+    assert indexed.state_remap_diagnostics["method"] == (
+        "material_local_indexed_exact_surface_knn")
+    assert indexed.state_remap_diagnostics["surface_state_remap_backend"] == "indexed_knn"
+    assert len(indexed.state_remap_diagnostics["transfer_fingerprint"]) == 64
+
+
 def test_feature_step_diffusely_reemits_unreacted_neutrals_with_global_balance():
     geometry, _ = _plane_geometry()
     ion = SpeciesBoundaryState(
