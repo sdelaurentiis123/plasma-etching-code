@@ -33,6 +33,7 @@ from .neutral_radiosity_3d import (
     DiffuseNeutralNoSinkError,
     solve_diffuse_neutral_radiosity_3d,
 )
+from .extruded_exchange_3d import build_extruded_triangle_exchange_3d
 from .charged_surface_cascade_3d import (
     ChargedSurfaceCascade3DResult,
     apply_charged_surface_response_to_transport_3d,
@@ -1228,6 +1229,7 @@ def _apply_diffuse_neutral_transport(
         "rays_per_face", "seed", "periodic_lateral", "domain_size", "ray_offset",
         "nonetchable_reaction_probability_by_material", "relative_tolerance",
         "maximum_iterations", "maximum_rays_per_face", "source_sampling",
+        "form_factor_backend", "deterministic_extruded_options",
     }
     unknown = set(options) - allowed
     if unknown:
@@ -1236,19 +1238,82 @@ def _apply_diffuse_neutral_transport(
         "nonetchable_reaction_probability_by_material", {}))
     solver_tolerance = float(options.pop("relative_tolerance", 1e-10))
     maximum_iterations = int(options.pop("maximum_iterations", 500))
-    initial_rays_per_face = int(options.pop("rays_per_face", 64))
-    maximum_rays_per_face = int(options.pop(
-        "maximum_rays_per_face", 8 * initial_rays_per_face))
-    if (initial_rays_per_face <= 0
-            or initial_rays_per_face & (initial_rays_per_face - 1)
-            or maximum_rays_per_face < initial_rays_per_face
-            or maximum_rays_per_face & (maximum_rays_per_face - 1)):
+    backend = str(options.pop("form_factor_backend", "scrambled_qmc_3d"))
+    deterministic_options = dict(options.pop("deterministic_extruded_options", {}))
+    if backend not in ("scrambled_qmc_3d", "deterministic_extruded_2d"):
         raise ValueError(
-            "neutral radiosity initial/maximum rays must be positive powers of two")
-    if "domain_size" not in options:
-        options["domain_size"] = (np.asarray(geometry.phi.shape) - 1) * geometry.dx
-    if "ray_offset" not in options:
-        options["ray_offset"] = 1e-3 * geometry.dx
+            "neutral radiosity form_factor_backend must be 'scrambled_qmc_3d' or "
+            "'deterministic_extruded_2d'")
+    deterministic_exchange = None
+    deterministic_field_relative_tolerance = None
+    deterministic_field_absolute_tolerance = None
+    refinement = []
+    if backend == "scrambled_qmc_3d":
+        if deterministic_options:
+            raise ValueError(
+                "deterministic_extruded_options require the deterministic_extruded_2d backend")
+        initial_rays_per_face = int(options.pop("rays_per_face", 64))
+        maximum_rays_per_face = int(options.pop(
+            "maximum_rays_per_face", 8 * initial_rays_per_face))
+        if (initial_rays_per_face <= 0
+                or initial_rays_per_face & (initial_rays_per_face - 1)
+                or maximum_rays_per_face < initial_rays_per_face
+                or maximum_rays_per_face & (maximum_rays_per_face - 1)):
+            raise ValueError(
+                "neutral radiosity initial/maximum rays must be positive powers of two")
+        if "domain_size" not in options:
+            options["domain_size"] = (np.asarray(geometry.phi.shape) - 1) * geometry.dx
+        if "ray_offset" not in options:
+            options["ray_offset"] = 1e-3 * geometry.dx
+        rays_per_face = initial_rays_per_face
+    else:
+        incompatible = set(options) & {
+            "rays_per_face", "maximum_rays_per_face", "seed", "ray_offset",
+            "source_sampling",
+        }
+        if incompatible:
+            raise ValueError(
+                "deterministic extruded exchange does not accept sampling controls: "
+                + ", ".join(sorted(incompatible)))
+        if not bool(options.pop("periodic_lateral", False)):
+            raise ValueError(
+                "deterministic extruded exchange requires periodic_lateral=True")
+        domain_size = np.asarray(options.pop(
+            "domain_size", (np.asarray(geometry.phi.shape) - 1) * geometry.dx), dtype=float)
+        if domain_size.shape != (3,) or np.any(~np.isfinite(domain_size)):
+            raise ValueError("deterministic extruded exchange requires a three-axis domain_size")
+        deterministic_allowed = {
+            "extrusion_axis", "extrusion_length", "geometry_tolerance",
+            "normal_tolerance", "area_relative_tolerance",
+            "exchange_relative_tolerance", "exchange_absolute_tolerance",
+            "minimum_refinement_level", "maximum_refinement_level",
+            "field_relative_tolerance", "field_absolute_tolerance",
+        }
+        deterministic_unknown = set(deterministic_options) - deterministic_allowed
+        if deterministic_unknown:
+            raise ValueError(
+                "unknown deterministic extruded exchange options: "
+                + ", ".join(sorted(deterministic_unknown)))
+        extrusion_axis = int(deterministic_options.pop("extrusion_axis", 1))
+        deterministic_field_relative_tolerance = float(
+            deterministic_options.pop("field_relative_tolerance", 1e-8))
+        deterministic_field_absolute_tolerance = float(
+            deterministic_options.pop("field_absolute_tolerance", 0.0))
+        if (deterministic_field_relative_tolerance < 0.0
+                or deterministic_field_absolute_tolerance < 0.0):
+            raise ValueError("deterministic extrusion field tolerances must be nonnegative")
+        deterministic_options.setdefault("extrusion_axis", extrusion_axis)
+        deterministic_options.setdefault("extrusion_length", float(domain_size[extrusion_axis]))
+        deterministic_exchange = build_extruded_triangle_exchange_3d(
+            verts, faces, _surface_gas_normals(verts, faces, centroids, geometry),
+            **deterministic_options)
+        factors = deterministic_exchange.form_factors
+        rays_per_face = 0
+        maximum_rays_per_face = 0
+        if options:
+            raise ValueError(
+                "unused deterministic neutral radiosity options: "
+                + ", ".join(sorted(options)))
     if hasattr(mechanism, "neutral_reaction_probability_by_material"):
         active_probability = dict(mechanism.neutral_reaction_probability_by_material(
             surface_state, face_material[active_face]))
@@ -1280,13 +1345,12 @@ def _apply_diffuse_neutral_transport(
         reaction_probability[name] = probability
 
     physical_area = np.asarray(areas) * geometry.mesh_length_unit_m ** 2
-    rays_per_face = initial_rays_per_face
-    refinement = []
     while True:
-        factors = estimate_diffuse_form_factors_3d(
-            verts, faces, centroids, _surface_gas_normals(
-                verts, faces, centroids, geometry),
-            rays_per_face=rays_per_face, device=transport_device, **options)
+        if backend == "scrambled_qmc_3d":
+            factors = estimate_diffuse_form_factors_3d(
+                verts, faces, centroids, _surface_gas_normals(
+                    verts, faces, centroids, geometry),
+                rays_per_face=rays_per_face, device=transport_device, **options)
         neutral_flux = {}
         diagnostics = {}
         try:
@@ -1294,6 +1358,44 @@ def _apply_diffuse_neutral_transport(
                 if name not in reaction_probability:
                     neutral_flux[name] = direct
                     continue
+                direct_for_solve = np.asarray(direct, dtype=float)
+                probability_for_solve = reaction_probability[name]
+                if deterministic_exchange is not None:
+                    direct_group = deterministic_exchange.certify_face_field(
+                        direct_for_solve,
+                        relative_tolerance=deterministic_field_relative_tolerance,
+                        absolute_tolerance=deterministic_field_absolute_tolerance)
+                    probability_group = deterministic_exchange.certify_face_field(
+                        probability_for_solve,
+                        relative_tolerance=deterministic_field_relative_tolerance,
+                        absolute_tolerance=deterministic_field_absolute_tolerance)
+                    direct_for_solve = direct_group[
+                        deterministic_exchange.face_group_index]
+                    probability_for_solve = probability_group[
+                        deterministic_exchange.face_group_index]
+                factor_diagnostics = dict(
+                    form_factor_backend=backend,
+                    form_factor_rays_per_face=int(rays_per_face),
+                    form_factor_refinement_count=len(refinement),
+                    form_factor_refinement=tuple(refinement))
+                if deterministic_exchange is not None:
+                    factor_diagnostics.update(
+                        form_factor_fingerprint=deterministic_exchange.fingerprint,
+                        form_factor_group_count=deterministic_exchange.group_count,
+                        form_factor_strip_count=deterministic_exchange.strip_count,
+                        form_factor_maximum_group_area_relative_error=(
+                            deterministic_exchange.maximum_group_area_relative_error),
+                        form_factor_maximum_area_reciprocity_error=(
+                            deterministic_exchange.maximum_area_reciprocity_error),
+                        form_factor_maximum_estimated_exchange_error=(
+                            deterministic_exchange.line_exchange.
+                            maximum_estimated_absolute_error),
+                        form_factor_maximum_refinement_level=int(
+                            np.max(deterministic_exchange.line_exchange.refinement_level)),
+                        extrusion_field_relative_tolerance=(
+                            deterministic_field_relative_tolerance),
+                        extrusion_field_absolute_tolerance=(
+                            deterministic_field_absolute_tolerance))
                 # A globally inert population is causally disconnected from every surface-state
                 # and profile equation.  Its repeated diffuse collision count can be arbitrarily
                 # large in a high-AR, nearly pinched feature, and a finite form-factor sample can
@@ -1301,10 +1403,9 @@ def _apply_diffuse_neutral_transport(
                 # Analytically marginalize that null channel: preserve the first-hit diagnostic,
                 # account every launched particle as eventually escaping, and solve radiosity only
                 # for species with a nonzero chance to modify the modeled surface.
-                if not np.any(reaction_probability[name] > 0.0):
-                    direct = np.asarray(direct, dtype=float)
-                    source_rate = float(np.sum(direct * physical_area))
-                    neutral_flux[name] = direct
+                if not np.any(probability_for_solve > 0.0):
+                    source_rate = float(np.sum(direct_for_solve * physical_area))
+                    neutral_flux[name] = direct_for_solve
                     diagnostics[name] = dict(
                         source_rate_s=source_rate,
                         reacted_rate_s=0.0,
@@ -1314,18 +1415,21 @@ def _apply_diffuse_neutral_transport(
                         solver_method="analytic_zero_reaction_elision",
                         iteration_count=0,
                         inactive_face_count=int(len(faces)),
-                        form_factor_rays_per_face=int(rays_per_face),
-                        form_factor_refinement_count=len(refinement),
-                        form_factor_refinement=tuple(refinement),
                         repeated_incident_flux_elided=True,
+                        **factor_diagnostics,
                     )
                     continue
                 solution = solve_diffuse_neutral_radiosity_3d(
-                    direct, physical_area, factors.source_face, factors.target_face,
+                    direct_for_solve, physical_area,
+                    factors.source_face, factors.target_face,
                     factors.transfer_fraction, factors.escape_fraction,
-                    reaction_probability[name], relative_tolerance=solver_tolerance,
+                    probability_for_solve, relative_tolerance=solver_tolerance,
                     maximum_iterations=maximum_iterations)
-                neutral_flux[name] = solution.incident_flux_m2_s
+                incident = solution.incident_flux_m2_s
+                if deterministic_exchange is not None:
+                    incident = deterministic_exchange.area_weighted_group_mean(incident)[
+                        deterministic_exchange.face_group_index]
+                neutral_flux[name] = incident
                 diagnostics[name] = dict(
                     source_rate_s=solution.source_rate_s,
                     reacted_rate_s=solution.reacted_rate_s,
@@ -1335,11 +1439,14 @@ def _apply_diffuse_neutral_transport(
                     solver_method=solution.solver_method,
                     iteration_count=solution.iteration_count,
                     inactive_face_count=solution.inactive_face_count,
-                    form_factor_rays_per_face=int(rays_per_face),
-                    form_factor_refinement_count=len(refinement),
-                    form_factor_refinement=tuple(refinement),
-                    repeated_incident_flux_elided=False)
+                    repeated_incident_flux_elided=False,
+                    **factor_diagnostics)
         except DiffuseNeutralNoSinkError as error:
+            if backend == "deterministic_extruded_2d":
+                raise RuntimeError(
+                    f"deterministic neutral radiosity for {name!r} contains a "
+                    "source-fed no-sink class; sampling refinement cannot repair an exact "
+                    "closed transport class") from error
             if rays_per_face >= maximum_rays_per_face:
                 raise RuntimeError(
                     f"neutral radiosity for {name!r} retained a source-fed no-sink "
@@ -1364,12 +1471,15 @@ def _apply_diffuse_neutral_transport(
         "their chemically irrelevant repeated collision count is analytically elided",
     ) if any(
         item.get("repeated_incident_flux_elided", False)
-        for item in diagnostics.values()) else ())
+        for item in diagnostics.values()) else ()) + ((
+        "deterministic diffuse exchange assumes exact translational invariance along the "
+        "declared periodic extrusion axis",
+    ) if backend == "deterministic_extruded_2d" else ())
     updated = BoundaryTransport3DResult(
         SurfaceFluxes(neutral_flux, transport.surface_fluxes.energetic_fluxes),
         transport.hit_probability, transport.escape_probability,
         transport.truncation_probability,
-        transport.transport_model + " + flux_conservative_diffuse_radiosity",
+        transport.transport_model + f" + flux_conservative_diffuse_radiosity[{backend}]",
         limitations, lineage_replay_count=transport.lineage_replay_count,
         lineage_replay_eligible_count=transport.lineage_replay_eligible_count,
         edge_launch_inset_count=transport.edge_launch_inset_count,

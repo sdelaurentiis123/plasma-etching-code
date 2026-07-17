@@ -964,6 +964,55 @@ def test_feature_step_diffusely_reemits_unreacted_neutrals_with_global_balance()
     assert "flux_conservative_diffuse_radiosity" in result.transport.transport_model
 
 
+def test_feature_step_routes_exactly_extruded_radiosity_through_common_engine():
+    geometry, _ = _plane_geometry()
+    result = advance_feature_step_3d(
+        geometry, _boundary(),
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=0.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        n_position=1, seed=3, reinitialize=False, transport_device="cpu",
+        ballistic_transport="face_gather", ballistic_face_quadrature_points=3,
+        ballistic_periodic_lateral=True, profile_periodic_lateral=True,
+        neutral_radiosity_options={
+            "form_factor_backend": "deterministic_extruded_2d",
+            "periodic_lateral": True,
+            "deterministic_extruded_options": {
+                "extrusion_axis": 1,
+                "field_relative_tolerance": 1e-12,
+                "field_absolute_tolerance": 1e-12,
+            },
+        })
+
+    audit = result.diagnostics["neutral_radiosity"]["CF2"]
+    assert audit["form_factor_backend"] == "deterministic_extruded_2d"
+    assert audit["form_factor_rays_per_face"] == 0
+    assert audit["form_factor_refinement_count"] == 0
+    assert len(audit["form_factor_fingerprint"]) == 64
+    assert audit["form_factor_group_count"] > 0
+    assert audit["form_factor_strip_count"] > 1
+    assert audit["relative_balance_error"] < 1e-12
+    assert "deterministic_extruded_2d" in result.transport.transport_model
+
+
+def test_deterministic_extruded_radiosity_refuses_sampling_controls():
+    geometry, _ = _plane_geometry()
+    with pytest.raises(ValueError, match="does not accept sampling controls"):
+        advance_feature_step_3d(
+            geometry, _boundary(),
+            {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+            _mechanism(), etchable_material_ids=(1,), duration_s=0.0,
+            source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+            n_position=1, seed=3, reinitialize=False, transport_device="cpu",
+            ballistic_transport="face_gather", ballistic_face_quadrature_points=3,
+            ballistic_periodic_lateral=True, profile_periodic_lateral=True,
+            neutral_radiosity_options={
+                "form_factor_backend": "deterministic_extruded_2d",
+                "periodic_lateral": True,
+                "rays_per_face": 8,
+            })
+
+
 def test_periodic_ballistic_first_hit_is_independent_of_radiosity(monkeypatch):
     geometry, _ = _plane_geometry()
     original = feature_step_module.trace_boundary_state_first_hit_3d

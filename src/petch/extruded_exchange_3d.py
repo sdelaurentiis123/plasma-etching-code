@@ -65,7 +65,9 @@ class ExtrudedTriangleExchange3D:
     extrusion_length: float
     face_area: np.ndarray
     face_group_index: np.ndarray
+    face_strip_index: np.ndarray
     group_area: np.ndarray
+    strip_bounds: np.ndarray
     group_segments_2d: np.ndarray
     group_gas_normals_2d: np.ndarray
     line_exchange: DeterministicLineExchange2D
@@ -77,16 +79,23 @@ class ExtrudedTriangleExchange3D:
     def __post_init__(self):
         face_area = _readonly(self.face_area)
         face_group = _readonly(self.face_group_index, int)
+        face_strip = _readonly(self.face_strip_index, int)
         group_area = _readonly(self.group_area)
+        strip_bounds = _readonly(self.strip_bounds)
         group_segment = _readonly(self.group_segments_2d)
         group_normal = _readonly(self.group_gas_normals_2d)
         face_count = len(face_area)
         group_count = len(group_area)
+        strip_count = len(strip_bounds)
         if (self.extrusion_axis not in (0, 1, 2)
                 or not np.isfinite(self.extrusion_length) or self.extrusion_length <= 0.0
                 or face_area.shape != (face_count,) or np.any(face_area <= 0.0)
                 or face_group.shape != (face_count,)
                 or np.any(face_group < 0) or np.any(face_group >= group_count)
+                or face_strip.shape != (face_count,)
+                or np.any(face_strip < 0) or np.any(face_strip >= strip_count)
+                or strip_bounds.shape != (strip_count, 2)
+                or np.any(strip_bounds[:, 1] <= strip_bounds[:, 0])
                 or group_segment.shape != (group_count, 2, 2)
                 or group_normal.shape != (group_count, 2)
                 or self.form_factors.face_count != face_count
@@ -94,7 +103,8 @@ class ExtrudedTriangleExchange3D:
             raise ValueError("invalid extruded triangle-exchange result")
         for name, value in (
                 ("face_area", face_area), ("face_group_index", face_group),
-                ("group_area", group_area), ("group_segments_2d", group_segment),
+                ("face_strip_index", face_strip), ("group_area", group_area),
+                ("strip_bounds", strip_bounds), ("group_segments_2d", group_segment),
                 ("group_gas_normals_2d", group_normal)):
             object.__setattr__(self, name, value)
 
@@ -106,6 +116,10 @@ class ExtrudedTriangleExchange3D:
     def group_count(self):
         return len(self.group_area)
 
+    @property
+    def strip_count(self):
+        return len(self.strip_bounds)
+
     def area_weighted_group_mean(self, face_field):
         value = np.asarray(face_field, dtype=float)
         if value.shape != (self.face_count,):
@@ -116,21 +130,36 @@ class ExtrudedTriangleExchange3D:
         return weighted / self.group_area
 
     def certify_face_field(self, face_field, *, relative_tolerance, absolute_tolerance):
-        """Return group means or refuse variation along the declared extrusion axis."""
+        """Return group means or refuse strip-mean variation along the extrusion axis.
+
+        The triangles within one strip are merely a partition of a physical line element, so
+        their area-weighted mean is the correct finite-volume value.  Means from different
+        extrusion strips must agree; otherwise the state is genuinely three-dimensional and
+        cannot use the reduced operator.
+        """
         value = np.asarray(face_field, dtype=float)
         mean = self.area_weighted_group_mean(value)
-        difference = np.abs(value - mean[self.face_group_index])
-        tolerance = (
-            float(absolute_tolerance)
-            + float(relative_tolerance) * np.abs(mean[self.face_group_index]))
         if (not np.all(np.isfinite(value)) or relative_tolerance < 0.0
                 or absolute_tolerance < 0.0):
             raise ValueError("invalid extrusion-invariance certification inputs")
-        if np.any(difference > tolerance):
-            worst = int(np.argmax(difference - tolerance))
+        joint = self.face_group_index * self.strip_count + self.face_strip_index
+        joint_count = self.group_count * self.strip_count
+        strip_area = np.bincount(joint, weights=self.face_area, minlength=joint_count)
+        strip_integral = np.bincount(
+            joint, weights=self.face_area * value, minlength=joint_count)
+        populated = strip_area > 0.0
+        strip_mean = np.zeros(joint_count)
+        strip_mean[populated] = strip_integral[populated] / strip_area[populated]
+        group_mean = np.repeat(mean, self.strip_count)
+        difference = np.abs(strip_mean - group_mean)
+        tolerance = float(absolute_tolerance) + float(relative_tolerance) * np.abs(group_mean)
+        failure = populated & (difference > tolerance)
+        if np.any(failure):
+            worst = int(np.argmax(np.where(failure, difference - tolerance, -np.inf)))
+            group, strip = divmod(worst, self.strip_count)
             raise ValueError(
                 "face field violates the declared extrusion invariance; "
-                f"face={worst}, group={int(self.face_group_index[worst])}, "
+                f"group={group}, strip={strip}, "
                 f"difference={difference[worst]:.6g}, tolerance={tolerance[worst]:.6g}")
         return mean
 
@@ -182,6 +211,27 @@ def build_extruded_triangle_exchange_3d(
     keys = sorted(set(key_by_face))
     key_to_group = {key: index for index, key in enumerate(keys)}
     face_group = np.asarray([key_to_group[key] for key in key_by_face], dtype=int)
+    face_axis_bounds = np.stack((
+        np.min(triangle[:, :, axis], axis=1),
+        np.max(triangle[:, :, axis], axis=1)), axis=1)
+    strip_key_by_face = [
+        tuple(np.rint(item / tolerance).astype(np.int64))
+        for item in face_axis_bounds]
+    strip_keys = sorted(set(strip_key_by_face))
+    strip_to_index = {key: index for index, key in enumerate(strip_keys)}
+    face_strip = np.asarray(
+        [strip_to_index[key] for key in strip_key_by_face], dtype=int)
+    strip_bounds = np.stack([
+        np.mean(face_axis_bounds[
+            np.asarray([key == current for current in strip_key_by_face], dtype=bool)], axis=0)
+        for key in strip_keys])
+    ordered_bounds = strip_bounds[np.argsort(strip_bounds[:, 0])]
+    if (abs(float(ordered_bounds[0, 0] - np.min(vertex[:, axis]))) > tolerance
+            or abs(float(ordered_bounds[-1, 1] - np.max(vertex[:, axis]))) > tolerance
+            or np.any(np.abs(ordered_bounds[1:, 0] - ordered_bounds[:-1, 1]) > tolerance)
+            or abs(float(np.sum(ordered_bounds[:, 1] - ordered_bounds[:, 0]) - length))
+            > tolerance):
+        raise ValueError("extrusion strips do not cover one contiguous declared period")
     group_count = len(keys)
     group_segment = np.empty((group_count, 2, 2), dtype=float)
     group_normal = np.empty((group_count, 2), dtype=float)
@@ -209,6 +259,18 @@ def build_extruded_triangle_exchange_3d(
             raise ValueError(
                 "triangle strip does not cover exactly one extrusion period; "
                 f"group={group}, relative_area_error={relative_error:.6g}")
+        for strip in range(len(strip_bounds)):
+            strip_member = member[face_strip[member] == strip]
+            strip_length = float(strip_bounds[strip, 1] - strip_bounds[strip, 0])
+            expected_strip_area = float(
+                np.linalg.norm(representative[1] - representative[0]) * strip_length)
+            actual_strip_area = float(np.sum(face_area[strip_member]))
+            strip_error = abs(actual_strip_area - expected_strip_area) / expected_strip_area
+            maximum_area_error = max(maximum_area_error, strip_error)
+            if strip_error > area_relative_tolerance:
+                raise ValueError(
+                    "triangle strip does not completely partition a cross-section element; "
+                    f"group={group}, strip={strip}, relative_area_error={strip_error:.6g}")
 
     line_exchange = build_deterministic_line_exchange_2d(
         group_segment, group_normal,
@@ -256,7 +318,7 @@ def build_extruded_triangle_exchange_3d(
     for name, value, dtype in (
             ("vertices", vertex, "<f8"), ("faces", face, "<i8"),
             ("gas_normals", unit_normal, "<f8"),
-            ("face_group", face_group, "<i8")):
+            ("face_group", face_group, "<i8"), ("face_strip", face_strip, "<i8")):
         array = np.ascontiguousarray(value, dtype=dtype)
         digest.update(name.encode("ascii") + b"\0")
         digest.update(np.asarray(array.shape, dtype="<i8").tobytes())
@@ -265,8 +327,9 @@ def build_extruded_triangle_exchange_3d(
     digest.update(np.asarray([axis, length, tolerance], dtype="<f8").tobytes())
     return ExtrudedTriangleExchange3D(
         extrusion_axis=axis, extrusion_length=length,
-        face_area=face_area, face_group_index=face_group,
-        group_area=group_area, group_segments_2d=group_segment,
+        face_area=face_area, face_group_index=face_group, face_strip_index=face_strip,
+        group_area=group_area, strip_bounds=strip_bounds,
+        group_segments_2d=group_segment,
         group_gas_normals_2d=group_normal, line_exchange=line_exchange,
         form_factors=factors,
         maximum_group_area_relative_error=maximum_area_error,

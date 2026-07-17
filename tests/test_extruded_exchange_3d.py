@@ -50,6 +50,7 @@ def test_extruded_rectangle_groups_triangle_strips_and_closes_enclosure():
         vertices, faces, face_normals, extrusion_length=1.0,
         exchange_relative_tolerance=1e-8)
     assert result.group_count == 4
+    assert result.strip_count == 2
     assert result.face_count == 16
     assert result.maximum_group_area_relative_error < 2e-15
     assert result.maximum_area_reciprocity_error < 2e-15
@@ -110,7 +111,26 @@ def test_extrusion_field_certification_is_area_weighted_and_fail_closed():
     mean = result.certify_face_field(
         value, relative_tolerance=0.0, absolute_tolerance=0.0)
     assert np.array_equal(mean, np.arange(2.0, 6.0))
-    value[0] += 1e-3
+    first_group = np.flatnonzero(result.face_group_index == 0)
+    first_strip = first_group[
+        result.face_strip_index[first_group] == result.face_strip_index[first_group[0]]]
+    value[first_strip] += 1e-3
     with pytest.raises(ValueError, match="violates the declared extrusion invariance"):
         result.certify_face_field(
             value, relative_tolerance=1e-6, absolute_tolerance=1e-9)
+
+
+def test_triangle_partition_variation_is_averaged_without_hiding_strip_variation():
+    segments, normals = _rectangle()
+    result = build_extruded_triangle_exchange_3d(
+        *_extrude_segments(segments, normals, y_planes=(0.0, 0.5, 1.0)),
+        extrusion_length=1.0)
+    value = 2.0 + result.face_group_index.astype(float)
+    member = np.flatnonzero(
+        (result.face_group_index == 0) & (result.face_strip_index == 0))
+    assert member.size == 2
+    value[member[0]] -= 0.2
+    value[member[1]] += 0.2
+    mean = result.certify_face_field(
+        value, relative_tolerance=0.0, absolute_tolerance=1e-14)
+    assert mean[0] == pytest.approx(2.0, abs=1e-15)
