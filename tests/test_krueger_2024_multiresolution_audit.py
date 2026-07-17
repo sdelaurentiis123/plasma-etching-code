@@ -153,3 +153,10 @@ def test_worker_command_replays_fine_schedule(tmp_path):
     assert command[command.index("--worker-schedule") + 1] == str(schedule)
     assert command[command.index("--worker-dx-nm") + 1] == "10"
     assert command[command.index("--topology-policy") + 1] == "refuse"
+
+
+def test_worker_environment_unifies_transport_and_level_set_device():
+    environment = AUDIT._worker_environment("cuda:0")
+
+    assert environment["PETCH_DEVICE"] == "cuda:0"
+    assert environment["OMP_NUM_THREADS"] == "1"

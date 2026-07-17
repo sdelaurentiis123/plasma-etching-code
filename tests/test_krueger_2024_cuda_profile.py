@@ -33,8 +33,12 @@ def test_top_profile_rows_are_sorted_and_json_ready():
 def test_profiler_cli_refuses_an_unbounded_physical_run():
     with pytest.raises(SystemExit):
         profile.parse_args((
-            "--profile-steps", "4", "--step-duration-s", "0.03"))
+            "--positive-warmup-steps", "1",
+            "--profile-steps", "4", "--step-duration-s", "0.025"))
 
     accepted = profile.parse_args((
-        "--profile-steps", "4", "--step-duration-s", "0.025"))
-    assert accepted.profile_steps * accepted.step_duration_s == pytest.approx(0.1)
+        "--positive-warmup-steps", "1",
+        "--profile-steps", "2", "--step-duration-s", "0.025"))
+    assert (
+        (accepted.positive_warmup_steps + accepted.profile_steps)
+        * accepted.step_duration_s) == pytest.approx(0.075)

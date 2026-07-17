@@ -939,6 +939,17 @@ def _aggregate(output, plan):
     return payload
 
 
+def _worker_environment(device):
+    environment = dict(os.environ)
+    environment["OMP_NUM_THREADS"] = "1"
+    # ``transport_device`` controls Warp trajectory kernels, while the level-set
+    # kernels select their device at module import from PETCH_DEVICE.  A worker
+    # subprocess must bind both to the one declared campaign device; otherwise
+    # a nominal CUDA run quietly traces on GPU and redistances on CPU.
+    environment["PETCH_DEVICE"] = str(device)
+    return environment
+
+
 def run(args):
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
@@ -955,8 +966,7 @@ def run(args):
         raise ValueError("late audit requires the archived 5 nm checkpoint")
 
     states = ("initial", "late") if args.phase == "all" else (args.phase,)
-    environment = dict(os.environ)
-    environment["OMP_NUM_THREADS"] = "1"
+    environment = _worker_environment(args.device)
     execution = []
     for state in states:
         planned_levels = {item["dx_nm"]: item for item in plan["levels"]}
