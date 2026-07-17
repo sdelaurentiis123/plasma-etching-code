@@ -1,0 +1,229 @@
+# Krüger 2024 calibration and transfer protocol
+
+Protocol ID: `K24-PETCH-R1`
+Preregistered: 2026-07-16, before inspecting either crosslink-bracket endpoint or any held-out
+oxygen/power result.
+
+Revision: `K24-PETCH-R1.1` (numerical-domain amendment, before any completed 60 s bracket endpoint
+or any held-out profile run).  The initial 1.0 µm substrate slab was discovered to be too shallow:
+the two endpoint pilots reached the lower computational boundary at 52.88 s and 41.41 s.  Their
+topology refusals were finite-domain gas breakthrough, not profile closure.  The strict runs
+therefore translate the physically identical mask/interface upward by 0.8 µm, providing 1.8 µm of
+inert substrate and retaining the same 0.15 µm source headspace.  No surface law, flux, fitted
+parameter, initial mask/trench dimension, target, or split changes.  The two truncated pilots are
+excluded from calibration and retained only as numerical-domain diagnostics.
+
+Revision: `K24-PETCH-R1.2` (source-physics amendment, before the 10 nm secant confirmation
+completed and before any held-out profile was run).  A primary-source audit of Krüger's thesis
+Sections 2.2 and 6.4 established that the MCFPM path used for this campaign transports charged
+particles through the self-consistent feature field, globally balances the time-averaged charged
+flux with electrons, accumulates charge locally, and solves Poisson.  The R1.1 pilot explicitly
+disabled charging.  Consequently, its two complete endpoints and its secant proposal remain valid
+diagnostics of the reduced mask chemistry but cannot by themselves authorize a calibration reveal
+or an experimental prediction.
+
+The R1.2 charging boundary uses the published aggregate positive-ion flux and joint IEAD.  The
+electron number flux is set by global charge-current neutrality, while local balance remains an
+output of kinetic trajectories and Q1 Poisson.  The source-reported base electron-temperature range
+is 3.4--3.8 eV; 3.6 eV is the central development case and the endpoints are a required sensitivity.
+The electron source is a flux half-Maxwellian with its Lambertian angular marginal, following the
+MCFPM closure documented by Wang and Kushner, J. Appl. Phys. 107, 023309 (2010).  No Boltzmann
+electron density is inserted in the feature volume.  The chapter-6 wafer EEAD/high-energy-electron
+fraction and hard-mask electrical properties are unpublished; thermal-only electrons, zero charge
+mobility, and bounded amorphous-carbon permittivity are therefore declared sensitivity closures,
+not fitted parameters.
+
+Revision: `K24-PETCH-R1.3` (two-observable base-calibration amendment, before the first coupled
+mask/yield endpoint completed and before any held-out profile was run or inspected).  The complete
+R1.1 endpoints showed that the reduced projection cannot match both the base SEM mask opening and
+base SEM etch depth with the mask-film closure alone: the opening bracketed 45 nm, while the depth
+spanned 981--1421 nm against 825 nm.  R1.3 therefore promotes the already-declared base depth from a
+diagnostic to a second calibration observable and permits exactly one additional physical scalar,
+`oxide_etch_yield_scale`.  It multiplies only the published bare/complex SiO2 yield amplitudes;
+thresholds, energy exponents, angular laws, reactor fluxes, transport, polymer sputtering, and mask
+chemistry remain unchanged.  This amendment reduces the claim from the original one-parameter
+preregistered test to a transparently two-observable-calibrated held-out transfer test.  No held-out
+quantity may select either scalar or any further closure.
+
+Revision: `K24-PETCH-R1.4` (three-dimensional ion-azimuth amendment, after the first R1.3 coupled
+development endpoint completed but before any axisymmetric endpoint or held-out profile was run or
+inspected).  The published feature-scale IEAD resolves ion energy and polar angle but does not
+publish a preferred wafer-plane azimuth.  The source MCFPM calculation is three-dimensional and the
+base trench/process boundary is laterally symmetric.  The legacy deterministic replay placed every
+ion's tangential velocity in one coordinate plane; that is a numerical closure, not a source-backed
+physical asymmetry.  Production therefore uses a uniform deterministic azimuth ring with eight
+nodes for every published energy/polar bin.  An otherwise identical 16-node ring is the required
+endpoint-operator refinement.  Mean transverse source velocity must vanish to roundoff, and the
+eight-to-sixteen-node instantaneous profile-velocity difference must pass the existing endpoint
+operator tolerances.  All completed single-plane endpoints remain development/calibration
+diagnostics only.  If plane-to-axisymmetric transport materially changes either fitted base
+observable, the one R1.3 correction is performed on axisymmetric base data only; held-out data
+remain sealed and may not choose the azimuth rule or either fitted scalar.
+
+Revision: `K24-PETCH-R1.5` (ion-azimuth quadrature refinement, after the preregistered R1.4 frozen
+endpoint audit but before any axisymmetric profile endpoint or held-out profile was run or
+inspected).  The eight-to-sixteen-node ring changed instantaneous profile velocity by 0.94%
+area-L1 but 3.48% area-RMS, failing the unchanged 2% RMS gate.  Eight nodes are therefore rejected.
+The production candidate is promoted to 16 uniform azimuth nodes and must pass the same four gates
+against a 32-node ring on the same frozen endpoint before any new profile run.  This is numerical
+refinement of the R1.4 physical closure; it changes no parameter, mechanism, target, or data split.
+
+Revision: `K24-PETCH-R1.6` (path-resolved two-observable calibration, after the first complete R1.5
+axisymmetric endpoint but before any held-out profile was run or inspected).  The R1.5 endpoint-rate
+correction assumed that the plane-to-axisymmetric *final-state* substrate-rate ratio represented the
+entire 60 s path.  The completed axisymmetric endpoint falsified that approximation: it produced
+750.2 nm depth and 50.3 nm opening against the two base targets 825 and 45 nm, while conserving all
+material exactly.  This is a calibration-map error, not a new-physics or numerical failure.  The
+arbitrary one-correction cap is therefore replaced by a bounded two-dimensional secant correction:
+at most two further 10 nm axisymmetric base endpoints may update only the same two R1.3 scalars,
+using only the same two base observables.  Stop when both errors are no greater than one 10 nm grid
+cell, or after the second endpoint regardless of outcome.  No third parameter, response-shape
+change, or held-out quantity is permitted.  The 5 nm refinement and its one base-only grid
+correction remain mandatory before the calibration reveal is frozen.
+
+Editorial consolidation, 2026-07-16: calibration-procedure items 3--5 below now restate the R1.6
+sequence instead of the superseded R1.3 one-correction wording. This changes no parameter, data
+split, run allowance, stopping rule, or gate.
+
+Revision: `K24-PETCH-R1.7` (fine-grid subcell-material refinement, after the partial 5 nm path
+refused at 18.993 s but before a completed 5 nm endpoint or any held-out profile was run or
+inspected).  Timestep refinement from a 1 ms to 0.25 ms minimum reproduced the same event: the
+resolved mask component retained 7,352 unique periodic nodes while one newly owned mask node formed
+a second component at the mask/oxide interface.  Fewer than eight corner nodes cannot bound one
+hexahedral volume cell.  The engine therefore suppresses only a newly born per-material component
+with fewer than eight unique nodes when every selected node changed material owner in that candidate
+step.  Prior ownership supplies the subcell closure; the event count and a one-cell-per-event volume
+upper bound are recorded.  An existing fragment that becomes disconnected, or any component with
+eight or more nodes, remains a hard topology refusal.  The 5 nm minimum timestep may be tightened
+below the 10 nm production minimum and must never be larger.  The exact accepted checkpoint is
+resumed; all preceding steps had no eligible material-label event, so the added branch was a no-op
+on their states.  This amendment changes no physical parameter, boundary input, calibration target,
+held-out gate, or resolved-volume conservation rule.
+
+Revision: `K24-PETCH-R1.8` (topology-continuation and authoritative-operator amendment, after the
+development 5 nm path first enclosed an internal gas cavity at 56.920695 s but before any clean
+5 nm endpoint, frozen reveal, or held-out profile was run or inspected).  The first cavity
+enclosure is a geometry event, not the end of the 60 s process.  Externally exposed surfaces must
+continue evolving; sealed interior surfaces receive zero direct external source under exact hard
+visibility; and a later reopening must restore access.  The engine may continue only a gas-cavity
+enclosure or reopening for which the solid-component count, every material-component count, and
+open-domain breakthrough state are unchanged and the surface-state remap passes its distance,
+boundedness, and conservation gates.  All other topology changes remain structured refusals.  A
+`terminal_feature_clogged` status cannot satisfy a completed calibration or held-out endpoint.
+
+The trajectory that received the periodic remap repair at 56.482184 s is retained only as
+mixed-operator development evidence.  Every authoritative endpoint must start at t=0 and reach the
+declared final time with one checksum-bound operator.  The 10 nm engine is henceforth a proposal
+and discrepancy-estimation fidelity only.  The final calibrated pair and every held-out prediction
+must use the same authoritative uniform-5-nm operator, or an AMR operator separately certified to
+reproduce the uniform-5-nm short-burst observables inside their numerical uncertainty.  This
+amendment changes no physical parameter, calibration target, reactor boundary, held-out split, or
+reaction mechanism; it removes an invalid possibility in which a 5 nm parameter correction could
+be judged on a different 10 nm held-out operator.
+
+Revision: `K24-PETCH-R1.9` (single response-model-check amendment, after the R1.8 mixed-operator
+development path completed to 60 s and the initial 10/5 nm audit completed, but before any clean
+5 nm authority endpoint, frozen reveal, or held-out profile was run or inspected).  The two extra
+10 nm endpoints allowed by R1.6 were consumed by R16 and R17; R1.8's classification of 10 nm as a
+proposal fidelity did not reset that count.  The complete 5 nm development response exposed a
+large late coarse/fine discrepancy, while a retrospective audit of the three same-operator
+axisymmetric 10 nm endpoints showed that the R16 response direction was useful but quantitatively
+inaccurate.  Before purchasing a clean fine-grid trajectory, R1.9 permits exactly one additional
+60 s, base-only 10 nm response-model check at the already checksum-bound safeguarded point:
+
+    effective_mask_crosslinked_growth_fraction = 0.9004722559883319
+    oxide_etch_yield_scale                      = 0.5586489665864749
+
+The run must start at `t=0`, use the axisymmetric order-16 source, the R1.8 hard gas-cavity
+continuation and conservative remap, and the reviewed mask-material/throat-qualified opening
+observable.  It is proposal evidence only.  Its committed response envelopes are opening
+`43.774--44.151 nm` and depth `822.930--825.189 nm`; model-error gates are `2.153 nm` and
+`12.905 nm`, respectively.  Regardless of outcome, no second 10 nm candidate is authorized: a pass
+closes 10 nm calibration and promotes the previously declared fine/AMR decision; a miss stops the
+10 nm sequence and returns to numerical-response/discrepancy diagnosis.  The one R1.8 fine-grid
+correction allowance is unchanged.  This amendment adds no parameter, mechanism, target, fitted
+datum, or authority to 10 nm, and no held-out observation selected the point or any gate.
+
+Before the calibration reveal:
+
+1. Run a bounded, restartable, fresh-scramble charging-on/off audit on the 10 nm secant-confirmation
+   morphology, with paired unused-sample scoring and exact hard visibility.
+2. Refine the charge timestep and electron temperature; bracket the unreported mask permittivity.
+3. If charging materially changes floor ion delivery or the predicted profile increment, rerun the
+   base confirmation on the charged common-engine path before freezing the one mask-film parameter.
+   The uncharged secant value may initialize that run but receives no experimental authority.
+4. If charging is negligible within the declared numerical and boundary uncertainty, retain the
+   R1.1 result only with the paired null-effect evidence attached.
+5. Freeze every charging boundary/material closure before constructing held-out predictions.  A
+   held-out miss cannot be used to select electron temperature, permittivity, conductivity, SEE, or
+   any charging schedule.
+
+## Claim and split
+
+The common petch boundary → transport → radiosity → surface-state → level-set path is used
+for every run.  The 60 s base-case SEM is calibration data.  Oxygen-ratio and low-frequency-power
+observations in `data/experimental/krueger_2024/transfer_observations.csv` are held out.  The three
+published MCFPM depths are comparison-to-prior-model values, not experimental validation targets.
+
+The fitted data are the base-case 45 nm mask opening and 825 nm etch depth.  Top width, maximum
+width, mask height, and asymmetry remain calibration-case diagnostics and cannot influence either
+fitted parameter.  Held-out rows may not influence a parameter or reaction law.
+
+## Two permitted physical closures
+
+`effective_mask_crosslinked_growth_fraction` is bounded to `[0, 1]`. It linearly blends the
+published Appendix-B radical-attachment probabilities on fresh versus crosslinked mask polymer; it
+does not scale an output, flux, etch rate, or profile velocity.
+
+`oxide_etch_yield_scale` is strictly positive and multiplies only the reference-yield amplitudes of
+the published bare-SiO2 and oxide-complex energetic removal laws. It does not scale an output,
+reactor flux, level-set velocity, threshold, energy exponent, angular response, polymer sputter law,
+or mask law. It is the reduced-state absolute-rate adapter assigned only to the base etch depth.
+No third parameter is permitted.
+
+Calibration procedure:
+
+1. Run fractions 0 and 1 on the base process at 10 nm grid spacing.
+2. If mask opening does not bracket 45 nm, stop: the reduced mechanism is structurally inadequate.
+3. Otherwise initialize the fraction from the completed opening bracket and initialize the oxide
+   scale from the corresponding base-depth ratio; use the certified axisymmetric transport closure
+   for every 10 nm proposal endpoint.
+4. As specified by R1.6, after the first complete axisymmetric endpoint, at most two further 10 nm
+   axisymmetric base endpoints may update only the same two scalars from only the two base
+   observables. Stop once both errors are within one 10 nm cell, or after the second endpoint
+   regardless. These are proposal-fidelity endpoints under R1.8. No new parameter, state, response
+   shape, or held-out quantity is permitted.
+5. Re-run the resulting fixed pair at 5 nm. One grid-correction update is allowed using only the
+   same two base observables. Confirm that final pair in a clean, single-operator 5 nm base run,
+   then freeze and checksum that same operator for every held-out profile. A certified AMR operator
+   may replace uniform 5 nm only under the R1.8 equivalence gate; 10 nm remains a proposal fidelity.
+
+## Numerical operator
+
+Production transport uses hard visibility, three triangle points, an analytically speed-marginalized
+half-Maxwellian electron angular rule (8 polar by 16 azimuthal nodes), joint ion-IEAD bins of 250 eV
+by 0.25 degrees, and the R1.5 16-node uniform ion-azimuth ring, certified against 32 nodes.  The prior single-plane ion
+closure passed all predeclared instantaneous profile-velocity gates against a 12 by 24
+angular/exact-IEAD reference on the completed base morphology: normalized net 0.0642%, area-L1
+1.4212%, RMS 1.0841%, and maximum 0.5700%.  That evidence certifies quadrature compression but does
+not replace the R1.5 16-versus-32 ion-azimuth gate.  CPU/CUDA profile geometry is bitwise
+identical after a physical update; conservative inventories agree to at worst `4e-14` relative.
+
+Every final result retains exact material ledgers, timestep/refusal history, boundary and mechanism
+provenance, grid/sample controls, and the endpoint-operator audit.  A 10 nm result is development
+or proposal evidence only. Validation language requires one clean uniform-5-nm (or certified
+AMR-equivalent) operator for both the final base confirmation and held-out execution, plus numerical
+uncertainty accounting.
+
+## Held-out execution gate
+
+Held-out runs require condition-specific reactor boundary inputs.  A base-flux oxygen multiplier or
+power-to-energy guess is not an experimental test.  Each oxygen/power boundary must come from a
+checksum-bound digitization of the paper's reported HPEM flux/IEAD outputs or from a separately
+validated reactor model.  If the paper does not identify enough boundary information, the result is
+reported as boundary-underdetermined rather than tuned.
+
+The held-out categorical gates are, verbatim in meaning: low-O and zero-low-frequency-power clogging;
+essentially absent necking at high O; maximum depth at the stated intermediate O ratio; no depth
+increase from the intermediate to high-O range; and only small final-profile differences between the
+4 and 8 kW cases.  No held-out retuning is allowed.

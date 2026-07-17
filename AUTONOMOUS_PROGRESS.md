@@ -1064,3 +1064,451 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
 - **Verification:** focused boundary, surface, feature, and charged-cascade regressions pass
   `110 passed`; compilation and `git diff --check` pass for the increment. Work remains local;
   nothing pushed.
+
+## 2026-07-17 — Krüger 5 nm fixed-pair terminal and periodic remap diagnosis
+
+- **The 10 nm-calibrated pair did not transfer unchanged to the 5 nm operator.** The development
+  trajectory reached a resolved internal pinch-off at `56.920695 s`, before the declared `60 s`
+  endpoint. The pre-event state had depth `852.4593 nm`, top/mask opening `40.7589 nm`, maximum and
+  top feature width `86.9869 nm`, remaining mask thickness `850.1051 nm`, and asymmetry
+  `0.8006` cells. The topology gate observed one new enclosed gas cavity while solid and both
+  material component counts remained unchanged. The candidate closing step was not remapped or
+  accepted.
+- **A numerical remap defect was isolated before that terminal.** At `56.482184 s`, reducing the
+  candidate timestep by 8x left an apparent approximately `10.2 nm` remap jump unchanged. The old
+  surface-state search used ordinary Euclidean coordinates even though x/y geometry and transport
+  were periodic. A face adjacent through the `20 nm` periodic lateral seam therefore looked
+  nonlocal. The repair certifies exact point-to-triangle distance after local candidate culling and
+  uses periodic images for state interpolation. It still refuses a truly separated surface.
+- **The repair was regression-tested before resume.** A cloned exact checkpoint accepted the next
+  step with zero material-ledger residual and only one bounded subcell gas-node closure
+  (`1.25e-25 m3`). The feature/remap/Krüger contract suite passes `84 passed`. The original run was
+  then resumed from its exact checkpoint with an explicit operator-transition sidecar.
+- **Claim restriction:** because steps `0--1814` used the old nonperiodic lookup, the terminal is a
+  development-only mixed-operator result. It may diagnose the fine-grid response and propose a
+  calibration trust-region direction, but it cannot support validation. An authoritative 5 nm/AMR
+  confirmation must start at `t=0` with one checksum-bound operator.
+- **The existing base-only response matrix gives a useful direction, not an endpoint solution.** At
+  the pre-clog state, increasing the crosslinked-film fraction reduces mask-film growth and reducing
+  the oxide-yield scale reduces excessive depth. A direct local solve suggests approximately
+  `f=0.923`, `s=0.546`, but the censored `56.92 s` state is not a true `60 s` response, so this may
+  seed only a bounded multi-fidelity trust-region step.
+- **Evidence is preserved locally** under
+  `results/krueger_2024_base_calibration_r17/fine_fixed_pair_development/`: complete `audit.json`,
+  exact `checkpoint.npz`, profile/trajectory plots, and the numerical-operator transition receipt.
+  SHA-256 for the audit is
+  `18b5c81acbe69c95ba5dd276048641719b6e1e12ce12c036611fce7429199f81`.
+- **The forward plan is now explicit.** `NUMERICS_CALIBRATION_AMR_PLAN_2026-07-17.md` defines
+  triangle-overlap remap gates, initial/late short multiresolution bursts, sparse-narrow-band and AMR
+  gates, and multi-fidelity calibration. `VIENNAPS_CODEBASE_AUDIT_2026-07-17.md` records the upstream
+  4.6.1 architecture and a truth-first conformance suite. No held-out Krüger profile was opened.
+
+## 2026-07-17 — Krüger gas-cavity continuation and complete 5 nm development response
+
+- **The missing topology branch is implemented without weakening the default refusal.** The public
+  feature engine defaults to `topology_change_policy="refuse"`. The explicit
+  `continue_gas_cavity` mode accepts only periodic gas-cavity enclosure/opening when solid count,
+  every per-material component count, and open-domain breakthrough are invariant. All other
+  topology changes remain structured refusals. Accepted events and resume policy transitions are
+  recorded in run history.
+- **Manufactured and public-engine certification pass.** A genuine, non-injected keyhole evolved
+  through closure, a positive-duration sealed interval, and reopening using the public transport,
+  chemistry-result, level-set, CR2, topology, and conservative-remap path. Sealed faces received
+  exactly zero external neutral and ion first-hit flux; access returned after reopening; remap
+  residuals were at most `1e-14`; material ledgers were exact. The complete local suite passes
+  `686 passed, 1 skipped in 143.98 s`.
+- **The exact real checkpoint completed to 60 s.** Resume began from the accepted
+  `56.92069539342471 s` checkpoint, accepted cavity enclosure at `56.9398350487125 s`, continued
+  exposed-surface evolution, reopened the cavity at `58.66367366309934 s`, and reached exactly
+  `60.0 s` in `828.75 s` wall time on Vast instance `45134431`. There was no second refusal.
+- **The complete development endpoint is depth `900.8570 nm` and minimum mask opening
+  `39.4664 nm`.** Relative to the two base calibration targets this is `+75.8570 nm` too deep and
+  `-5.5336 nm` too narrow. Maximum/top feature width is `87.0097 nm`; remaining mask thickness is
+  `850.0965 nm`; asymmetry is `0.9055` cells. This complete response supersedes the censored
+  `56.92 s` value for proposal construction.
+- **Conservation and solver evidence remained closed:** maximum material-ledger residual `0`,
+  maximum neutral-radiosity balance error `2.91e-12`, maximum bounded unresolved material volume
+  `1.25e-25 m3`. Six copied remote files match local SHA-256 exactly; `audit.json` is
+  `98506d4b94fbdd48ed00baee254088c6e49fbd02321dcc2d799c2b0e7e5caa30`.
+- **Claim restriction remains binding.** This path is mixed-operator development evidence because
+  the periodic remap repair entered at `56.482184 s` and topology policy entered at resume. It can
+  diagnose and propose, but cannot validate. The receipt and full artifacts are under
+  `results/krueger_2024_base_calibration_r18/mixed_operator_topology_continuation/`.
+- **Multiresolution preflight refused two invalid comparisons before compute.** Nominal 20 nm
+  changes the published `130 x 20 nm` periodic cell into `120 x 40 nm`; aligned restriction of
+  either available late 5 nm checkpoint to 10 nm changes physical topology. The valid next
+  refinement experiment is the initial 10/5 nm paired short burst, followed by an earlier
+  common-topology late checkpoint or verified AMR transfer. No held-out outcome was read.
+
+## 2026-07-17 — Bounded 10/5 nm audit and calibration decision artifacts
+
+- **The valid initial 10/5 nm pair completed without opening held-out data.** Both grids evolved the
+  same physical `130 x 20 nm` periodic cell for `0.5 s`; the 10 nm case replayed the exact 20-step
+  physical-time schedule accepted by the 5 nm case. On the RTX 4090 the 5 nm and 10 nm workers took
+  `73.72 s` and `16.79 s` respectively and both returned `complete`.
+- **The fitted early-time observables agree under refinement.** Depth rates are
+  `13.66725/13.65726 nm/s` (10 nm minus 5 nm relative difference `-0.0730%`), opening rates are
+  `-4.36593/-4.42851 nm/s` (`-1.4333%` relative to 5 nm), and remaining-mask-thickness rates are
+  `0.49719/0.50233 nm/s` (`+1.0329%`). Integrated ion arrival is identical to roundoff; neutral
+  arrival and area-weighted material velocity are close. A face-local maximum-width/maximum-velocity
+  diagnostic is grid-sensitive and is not promoted to a calibration observable.
+- **This passes shallow proposal fidelity, not late-profile equivalence.** The large 10-to-5 nm
+  difference at 60 s develops after necking/accessibility/topology become nonlinear. The archived
+  late checkpoint cannot be restricted to 10 nm without changing topology, so no late pair was
+  fabricated. Continuous minimum-opening certification and an earlier common-topology checkpoint or
+  verified AMR transfer remain required.
+- **Artifacts were preserved and external compute stopped.** Ten remote files copied locally match
+  SHA-256 byte-for-byte. Aggregate audit SHA-256 is
+  `d211d8d2c24b94e5d65400c04e0d21203b8ae150cc0760428dc08d4fbfc5eeb4`; artifacts are under
+  `results/krueger_2024_multiresolution_audit/initial_gpu_r18_20260717/`. Vast instance `45134431`
+  is `exited/stopped`; the other instance was already stopped.
+- **The next parameter direction is explicit and R1.9 authorizes exactly one bounded check.**
+  `scripts/krueger_2024_development_trust_proposal.py` binds the complete mixed-operator response,
+  base targets, old 10 nm Jacobian, R1.9 protocol, campaign, and continuation receipt. The full local
+  candidate is `f=0.9355590084, s=0.5183583805`; a conservative last-step-scaled trust box yields
+  `f=0.9004722560, s=0.5586489666`. Both remain development proposals. The ignored artifact SHA-256
+  is `e1a7a97fd79054a3f01511ac4fa41db7fb78db2668bc0385da45e76713689ad7` after binding the
+  current campaign revision. R1.9 permits only the
+  safeguarded 10 nm, 60 s base response-model check and closes the 10 nm candidate sequence after
+  that evaluation, regardless of outcome.
+- **The paper-defined mask opening is now certified before the next run.** The final reopened R1.8
+  checkpoint gives `w_m=39.46998 nm` from the mask material level set. A sealed throat now reports
+  exactly zero while its internal pocket width remains a separate diagnostic. The wrong-reference
+  `38.89991 nm` value came from applying a 1.0 um substrate default to the translated 1.8 um mesh;
+  the production interface now requires the physical reference explicitly. The primary receipt is
+  `results/krueger_2024_base_calibration_r18/mixed_operator_topology_continuation/opening_certification.json`,
+  SHA-256 `9bdd11a0fd71e0dbe093f6a2076b9144e6e6c99cbe6a4cbb3a6f3eed48305956`.
+- **The response model has been cross-examined rather than trusted.** The old R16-to-R17 direction
+  was directionally useful but had `77.5%` vector error. A same-operator affine model through
+  R15/R16/R17 is well enough conditioned for one local check and places the target inside their
+  parameter triangle. Both models predict the safeguarded point near the base target
+  (`43.774--44.151 nm` opening, `822.930--825.189 nm` depth). The exact acceptance envelope and
+  stop rules are fixed in `KRUEGER_2024_RESPONSE_MODEL_AUDIT_2026-07-17.md` before execution.
+- **The large-scale program is now consolidated.**
+  `UNIFIED_ENGINE_VALIDATION_EXECUTION_PROGRAM_2026-07-17.md` organizes geometry/AMR, reactor
+  boundaries, Krüger blind transfer, charged Nozawa/Hwang validation, independent HAR validation,
+  Vienna conformance, speed/surrogates, and partner release into gated work packages. The immediate
+  queue remains narrow: exactly one earned 10 nm response check, then a fine/AMR-versus-discrepancy
+  decision before any long clean endpoint. Focused campaign regressions pass `38 passed`; the most
+  recent complete suite passed `703 passed, 1 skipped` before the R1.9 identifier-only edits;
+  no held-out outcome was read and nothing was pushed.
+
+## 2026-07-17 — R1.9 response check closes 10 nm candidate sequence
+
+- **The precommitted repaired-operator run completed cleanly.** The single R1.9 point
+  `f=0.9004722559883319, s=0.5586489665864749` reached exactly `60 s` in `436` accepted adaptive
+  steps and `467.55 s` wall time on the RTX 4090. It recorded no topology event or terminal
+  refusal, exact material-ledger closure, and maximum neutral-radiosity balance error `2.75e-12`.
+  Both Vast workers are stopped.
+- **The coarse-grid mask opening is excellent; the depth response model is rejected.** Final
+  opening is `45.0854 nm` against `45 nm`; depth is `853.2188 nm` against `825 nm`. The local
+  response predicted `44.1514/822.9295 nm`, so actual-minus-predicted is `+0.9340/+30.2893 nm`.
+  Scaled merit worsened from `2.6167` to `5.6438`, giving `rho=-1.3955`. The precommitted decision
+  is `reject_response_model`; R1.9 closes the 10 nm candidate sequence and no second candidate is
+  authorized.
+- **Artifacts are local and byte-verified.** Remote audit SHA-256 is
+  `b06c07aae21d26b52dd111866c0a381f8f61ad044e330e5ed826d88f3140765f`; launch manifest SHA-256
+  is `821301496f133a16498e5051fe491827e5bdf2fd430f562cbf8e0ecf2d9e7aa5`; evaluation file SHA-256
+  is `15047f554ca9d96a6efab4973e1433f552913a3656850ba08c26244b2c87dd77`. Evidence, profile, and
+  comparison plots are under `results/krueger_2024_r19_response_check/`.
+- **The failure mechanism is now evidence-backed.** The candidate begins shallower, reaches a
+  `-4.952 nm` depth difference at `11.77 s`, crosses R17 at `14.89 s`, and ends `+15.314 nm`
+  deeper. This is nonlinear geometry/access/state feedback, not a constant scale response. The
+  stopped R17 worker also preserved the old source: chemistry, material mechanism, radiosity, and
+  boundary transport are byte-identical, while `feature_step_3d.py` changed from `a1e8d02f...` to
+  `61dbef70...` to repair periodic state remap and surface-distance certification. The old endpoint
+  Jacobian therefore belonged to a pre-repair operator epoch.
+- **The calibration data firewall is now executable.** Base Krüger transport uses the narrow
+  `load_krueger_2024_base_boundary_fluxes` path and succeeds when held-out transfer observations are
+  physically absent. Calibration reveals and held-out predictions now checksum-bind the same
+  operator epoch. After the operator-epoch scoring contract and base-boundary data-firewall test,
+  the full local suite passes `709 passed, 1 skipped`.
+
+### Bounded frozen-checkpoint decomposition after R1.9
+
+- **The no-evolution access screen completed under a real wall budget.** A first exact-CPU attempt
+  was stopped when its post-return timer proved nonbinding. The replacement uses hard per-cell and
+  total deadlines, atomic partial output, and an explicitly diagnostic reduced quadrature. The full
+  R17/R19 checkpoint-by-parameter matrix completed in `49.37 s`; all four cells close the material
+  ledger exactly and keep radiosity error below `2.62e-12`.
+- **Accumulated geometry/state dominates the mask response.** At fixed mechanism parameters the net
+  mask-rate magnitude drops by about `55--59%` between the R17 and R19 checkpoints. The parameter
+  change itself moves that rate by only `7.45%` at R17 and `15.70%` at R19. The R19 state receives
+  about `5.98%` more ion rate on SiO2 and `2.87%` less on the mask. Receipt SHA-256:
+  `9eba876f153c9acc1881edc6d4894f6626682f8b251bac9b8bca975ced4e4237`.
+- **`dt=0` cannot diagnose the oxide-yield direction.** A selected q3 evaluation also returns zero
+  instantaneous SiO2 removal despite nonzero SiO2 ion arrival. Every saved oxide face is film-covered;
+  the conservative mechanism exposes oxide only while advancing a positive duration. The next cheap
+  test is therefore a frozen-geometry chemistry micro-step, bounded by the already-authorized next
+  timestep, displacement, reaction-probability drift, and N/2N chemistry refinement—not a new profile.
+- **The AMR path begins with a behavior-neutral seam.** `FeatureGeometry3D` and face ownership now
+  live in dependency-neutral geometry state; a read-only uniform backend adds SI/mesh sampling,
+  exact surface extraction, periodic metadata, and deterministic fingerprints without routing the
+  engine through new storage. Backend/feature/checkpoint focused verification passes `86` tests.
+- **Adaptive branch:** do not tune chemistry against this 10 nm miss. The unclosed late grid error
+  is larger than the `28.2 nm` depth miss. Next are frozen no-evolution checkpoint diagnostics and
+  sparse-band/AMR authority tests; held-out oxygen/power outcomes remain sealed.
+
+### Positive-horizon chemistry exposes the next common-engine coupling error
+
+- **The bounded positive-time diagnostic passed transport and conservation, then stopped at its
+  predeclared chemistry gate.** Two q3 checkpoint transports completed in `62.54 s` total with exact
+  material ledgers and maximum neutral-radiosity balance error `1.088e-12`. At
+  `dt_next/16 = 0.00779536 s`, oxide removal is finite (`2796.75695` formula units,
+  `1.26837e-25 m3`), N/2N removal agrees to `0.1312%`, and gross predicted motion is only
+  `0.0210 dx`. The immutable audit is
+  `results/krueger_2024_r19_response_check/frozen_surface_chemistry/audit.json`, SHA-256
+  `694319374b4bd0067f88ca73678561120fed574e8c2fefac3fdc873f91bfa278`.
+- **The failed quantity is surface-state/radiosity splitting, not a material ledger or geometry
+  failure.** Flux-weighted reaction-probability drift is `0.2465%`, but the maximum local change is
+  `5.961%`, above the declared `1%` cap. The production path currently estimates diffuse radiosity
+  once and advances chemistry across a roughly `0.1247 s` profile step. Since polymer state controls
+  neutral sticking, this can freeze the wrong redistributed neutral flux while the film evolves.
+- **The lasting repair has been scoped without rewriting the engine.** On fixed geometry, direct
+  transport and the diffuse form-factor operator are geometry/boundary quantities and may be cached;
+  radiosity must be re-solved as state changes. `SURFACE_STATE_RADIOSITY_COUPLING_PLAN_2026-07-17.md`
+  defines stable SC0--SC5 tasks. The required controller uses embedded step-doubling—one full
+  chemistry step versus two half steps with a midpoint radiosity re-solve—and accepts the fine path
+  only after every state increment, exchange inventory, per-face recession/growth, balance,
+  conservation, and displacement gate passes. Local probability change remains a safety cap, not an
+  error estimator.
+- **Literature and independent review agree on the structure.** Established feature models describe
+  coverage-dependent sticking and re-emitted neutral flux as a recursive problem and solve it
+  iteratively or under a demonstrated timescale separation. Cached geometry is therefore sound;
+  frozen state-dependent radiosity is not. A bounded diagnostic is authorized. Engine wiring, a long
+  profile, GPU use, and held-out reveal remain held until cache identity, manufactured DAE, coupling-
+  step refinement, and nested form-factor refinement pass.
+
+### Coupled frozen-state result and first uniform-backend routing
+
+- **The production cache identity gate passes exactly.** A first attempt correctly refused because
+  disabling radiosity had also disabled periodic first-hit wrapping, losing `25--76%` of integrated
+  incident rate. The repaired diagnostic captures direct transport inside the exact production
+  periodic call. Its 1,833-face production and cached neutral fluxes are byte/hash identical, and
+  the regenerated q3 receipt now records transport seed `241` and radiosity seed `10241`.
+- **Two positive horizons give a stable physical direction.** At `7.795/15.591 ms`, the nominal
+  R17 oxide removals are `2794.390/5405.351` formula units and R19 gives
+  `2753.804/5325.748`, ratios `0.985476/0.985273`. All embedded, probability, ledger, radiosity,
+  displacement, and tolerance-halving gates pass; gross motion is `0.02104/0.03991 dx` and
+  tight/nominal disagreement is below `0.01%`. The `31.181 ms` cell hit the predeclared `480 s`
+  total budget, classified as implementation/controller evidence only. Audit SHA-256:
+  `0f337c8516542f4603926cc8b1d28d156abba19859d68ac2d6b6b6231a97706e`.
+- **The first backend seam is now on the live uniform path without changing numerical values.** Both
+  old and post-advection surface extraction plus face ownership route through
+  `UniformFeatureGeometryBackend3D.extract_surface()`, then copy back into the legacy writable
+  arrays. The legacy active-surface fingerprint remains unchanged; backend fingerprints are not
+  substituted. Exact value/dtype/order/writeability tests and the feature/checkpoint/replay cluster
+  pass `90` tests. This earns only a read-side seam; evolution remains dense and no AMR claim is made.
+- **Periodic first-hit transport is no longer coupled to radiosity enablement.** The common feature
+  API now has an explicit, backward-compatible `ballistic_periodic_lateral` declaration. A focused
+  parity test proves periodic field-free first-hit transport runs without diffuse radiosity; an
+  inconsistent request for periodic radiosity with nonperiodic first hit refuses. This closes the
+  API defect that the first cache attempt exposed without changing old callers.
+- **The bounded evidence is human-auditable.** The static figure
+  `results/krueger_2024_r19_response_check/krueger_bounded_endpoint_diagnostics.png` is generated
+  only from the three checksummed base-only JSON audits. Its sidecar records every plotted value and
+  source hash; it labels the `31.181 ms` timeout as implementation/controller evidence only.
+- **The reusable SC1 operator passes its standalone manufactured contract.** New module
+  `src/petch/surface_radiosity_coupling_3d.py` binds immutable direct flux, form factors, face areas,
+  material/species routing, solver controls, and an exact operator identity. Its embedded controller
+  compares one full step with two half steps and a midpoint radiosity solve, accepts only the fine
+  path, checks every state increment, all four exchange inventories, and per-face recession/growth,
+  and keeps rejected trials transactionally invisible. Open, constant-probability, reflective-cavity,
+  nonmonotone, replay, identity, minimum-step, incomplete-routing, product-refusal, and zero-duration
+  tests pass; `22` SC1 plus adjacent radiosity/router tests complete in `5.01 s`. A `4x` accepted-step
+  refinement contracts the manufactured cavity error by about `5.15x`. The module is not wired into
+  profile evolution, and no combined neutral-to-material stoichiometric ledger is claimed because the
+  mechanism API does not expose that mapping.
+- **WP-AMR2 now has a shared exact surface primitive, still isolated from the live engine.**
+  `src/petch/surface_mesh_3d.py` adds immutable `TriangleSurface3D` geometry with order-sensitive
+  fingerprints, exact plane/edge/vertex nearest points, whole-triangle periodic images, strict
+  material restriction, deterministic ties, and a certified bounded candidate path. Eleven focused
+  tests pass, including bounded-versus-brute-force equivalence. It is not yet a BVH, does not yet
+  compute overlap weights, and is not wired into state or charge remap; no AMR/performance claim is
+  made.
+
+### Full-state form-factor refinement preserves the global direction but blocks local profile authority
+
+- **The audit receipt now contains the quantities its internal controller was already checking.**
+  Every nominal/tight R17/R19 integration persists all seven final surface-state fields, every named
+  per-face removed/outgoing/unresolved/deposited inventory, per-face recession/growth, and exact
+  deterministic hashes. The old default seedless q3 certificate was replaced by the already-earned
+  seed-241/10241 receipt, preventing an otherwise valid unattended 8-ray run from refusing at startup.
+  Eleven focused audit tests and seven independent cross-ray receipt tests pass.
+- **Three bounded levels separate global convergence from local ray-level sensitivity.** The 8/16/32-ray
+  `dt_next/16 = 7.795 ms` runs all pass their coupling-step, probability, ledger, radiosity,
+  displacement, and tight/nominal gates in `158.8/117.9/183.5 s`. From 16 -> 32 rays, integrated oxide
+  changes by at most `0.024%` and the paired R19-R17 effect by only `0.0066%`; R19 remains about
+  `1.45%` lower. But the maximum local fluorocarbon deposition/growth normalized L1 changes by about
+  `18%` and the worst face by about `58%`. The global causal direction is earned; local moving-profile
+  authority is not.
+- **The response is a categorical view-factor sensitivity problem, not solver roulette.** One source
+  triangle currently distributes 8--32 centroid-launched hard rays among 1,833 possible
+  targets/escape. Spatially integrated oxide averages the observed level difference; local film
+  growth does not. This is not yet a stochastic error bar: independent scrambles are still required,
+  and the finite-triangle operator must integrate source area rather than use a centroid point source.
+  No 60 s endpoint, held-out reveal, or SC3 wiring follows.
+  `FORM_FACTOR_ACCURACY_AUDIT_2026-07-17.md` defines the lasting FF0--FF5 path:
+  correctness/area-sampling/visibility/reciprocity gates, independent replicated scrambled-Sobol uncertainty,
+  prospective integrated and fixed-physical-patch tolerances, adaptive allocation, and hierarchical
+  refinement only if needed.
+
+### Finite-area form factors and physical-patch scoring replace two mesh-sensitive instruments
+
+- **The emitting-surface measure is now correct in the production-target mode.** The old Krueger
+  receipts launched all diffuse rays from each triangle centroid; increasing angular rays could not
+  remove that point-source bias. `triangle_area` now uses one nested four-dimensional scrambled Sobol
+  rule for uniform source-triangle position plus cosine direction, while `legacy_centroid` preserves
+  exact historical replay. On a close half-receiver, the old coarse centroid result differs from the
+  finite-area result by more than `10%`; the finite-area result agrees with an `8x` surface-refined
+  centroid reference within `1%`.
+- **Independent scrambles are a first-class numerical object, not an afterthought.** The new immutable
+  replicated form-factor controller requires distinct equal-level seeds, builds an exactly
+  row-closing mean operator, hashes the mesh/domain/sampling/caller identity, measures raw area
+  reciprocity without altering the operator, and reports Student-t downstream radiosity intervals.
+  Its API minimum is four replicates; the first checkpoint coverage audit still requires eight.
+- **Visibility ambiguity is explicit.** A float64 cell-by-cell periodic reference reports hard hit,
+  open-top escape, or wrap-budget exhaustion. Manufactured Warp/reference parity passes exact and
+  near shared edges, the preserved production grazing case, one periodic wrap, and open escape. The
+  fast API's former `-1` ambiguity is closed by replaying every miss and gas-normal-invalid hit in
+  float64; exhaustion refuses rather than becoming escape. Apparently valid fast hits still require
+  one bounded full-event checkpoint parity audit before production promotion.
+- **Physical patches no longer inherit centroid/remeshing noise.** The new convergence instrument
+  clips every triangle against fixed SI patch boxes and transfers exact overlap area, split by
+  material and oriented surface class. It conserves face and patch area, reproduces constant-field
+  integrals under `1x -> 4x` retriangulation at two scales, uses a mixed absolute/relative norm near
+  zero, and keeps worst-face values separate. The triangle operator is unchanged; patches score it,
+  never smooth it.
+- **Verification remains bounded.** The surface/form-factor/feature/coupling cluster passes
+  `142 passed, 1 skipped`; charging plus the new patch utility passes `41` tests. No long profile,
+  GPU worker, endpoint, held-out reveal, or chemistry retune was run. SC2 remains partial pending one
+  real-checkpoint event-parity receipt and one replicated patch-scored shortest-horizon audit.
+
+### Exact-periodic visibility closes FF1; replicated physical-patch scoring is now generic
+
+- **The legacy periodic form-factor tracer failed its real-geometry cross-examination.** On the
+  sealed base-only R1.9 checkpoint, eight finite-area rays from each of `1,833` triangles produced
+  `14,664` events. The historical `_apply_bc` path disagreed with the cell-by-cell float64 authority
+  on `991` events (`19` classifications and `972` target faces) and shifted `5.6463%` of the
+  area-weighted source-row measure. Its seam inset accumulated a nonphysical translation on long
+  grazing paths; this is a geometry-operator defect, not chemistry or sampling noise.
+- **The repaired common path matches float64 exactly.** The candidate now advances one periodic cell
+  at a time, maps seams to exact `0/domain` coordinates, and uses a tolerance only for float32
+  distance comparisons. Finite-area source points use an owning-triangle interior limit; `911` of
+  `14,664` points moved inward and `224` ultra-thin source events used the triangle centroid rather
+  than being discarded. Fast and float64 receipts then match on every target, termination class,
+  and wrap count, including rays with `320` wraps. There are zero false hits/escapes, wrap
+  exhaustions, or solid-facing refusals. Audit SHA-256:
+  `3c233b3c8861ece1c82dcf1edc4712ed8109d6cc1ec50bc9367371e78deb8d56`; identical event SHA-256:
+  `6e357c6793dbf0d3e0300d785afb127101198c5846512caed48af0bb808054ad`.
+- **The operator is promoted once, in the shared estimator.** `cellwise_certified` is now the default
+  visibility mode for the ordinary and replicated form-factor APIs. Legacy float32, selective replay,
+  and full-float64 modes remain named audit/replay options. The full local regression passes
+  `820 passed, 1 skipped in 155.46 s`; no profile, held-out observation, parameter fit, GPU worker,
+  or endpoint was run.
+- **Replicate intervals now score physical fields, not triangle IDs.** The shared patch module maps
+  an authority field and at least four independent replicate fields through one exact triangle/box
+  overlap operator, reports Student-t intervals, separates mean-operator/nonlinear bias from sampling
+  uncertainty, and gates their conservative sum at two or more fixed SI scales. Focused patch,
+  form-factor, and boundary tests pass `56 passed, 1 skipped`. FF1 is complete; FF2/FF3 remain open
+  only for the bounded eight-scramble, patch-scored shortest-horizon checkpoint receipt.
+
+### The first replicated closure attempt stopped on compute authority, not physics
+
+- **The physical-patch sliver instrument is repaired on the real mesh.** Boundary-plane coordinates
+  retain input precision; only whole coplanar coordinates snap, intersected cells on both sides are
+  enumerated, and roundoff-only pieces are removed before the retained pieces are renormalized to the
+  authoritative triangle area. Exact-boundary, +/-1 ULP, float32-quantized, no-op, and inventory
+  tests pass. On the `1,833`-face checkpoint, the smallest numerical patch area moved from about
+  `1e-32 m2` to `6.11e-24 m2`; 20/40 nm scoring produces `272/151` physical patches and closes
+  inventory to roundoff.
+- **The Stage-A harness is scientifically ready but the direct preflight exceeded its first budget.**
+  An independent review cleared the paired nested confidence gates, exact operator/artifact identity,
+  physical normalizations, two-scale receipts, raw reciprocity, and paired R19-R17 sign contract.
+  Two ordinary CLI launches then stopped at exactly the declared `60 s` zero-duration
+  direct-transport limit, including one with warm JIT caches. No form-factor replicate ran and no
+  scientific conclusion is permitted by either artifact. The active bounded repair is a persistent
+  hash-bound direct-transport artifact with a one-time `<=120 s` construction allowance inside the
+  unchanged `300 s` Stage-A ceiling; no ray escalation, held-out access, Stage B, or long profile is
+  authorized.
+
+### Replicated Stage A completes and localizes the remaining surface-transport error
+
+- **The common hard-visibility operator now recovers new shared-edge misses inline.** The first
+  replicate exposed a float32 event that looked like more than `1,024` periodic wraps; float64 hit the
+  exact triangle after one wrap. `cellwise_certified` now replays only exhausted/solid-facing events
+  with exact triangle data and retains a separately declared `4,096`-wrap exact emergency horizon.
+  Across the complete 8/16-ray, eight-scramble screen, the operator replayed one/six events by level,
+  recovered six shared-edge hits in total, and certified one real open-top escape after `1,077`
+  wraps. Focused visibility/boundary tests pass `77 passed, 1 skipped`.
+- **Boundary/mechanism species routing is unified rather than benchmark patched.** Mechanisms may
+  advertise channels absent from a boundary deck; those zero-measure extras are projected out.
+  Every supplied boundary species must still be covered, and declared-inert `C3F4` is now routed as
+  an explicit zero probability instead of being indistinguishable from an omitted channel. The
+  chemistry/router/coupling cluster passes `68` focused tests.
+- **The sealed Stage-A receipt is a bounded precision hold.** It completed in `295.408 s`; the exact
+  direct capture took `104.390 s` and is now stored in a checkpoint/operator/config/seed-bound
+  artifact. Row closure, radiosity balance, material ledgers, nested samples, physical patch-scale
+  eligibility, integrated SiO2/mask observables, and the paired R19-R17 direction pass. R19 remains
+  lower by `5.35367e-14 m` at level 16 with a `1.22607e-17 m` paired 95% half-width. Local 20/40 nm
+  flux/film receipts fail, with the worst level-16 patch about `48.5x` tolerance, and the tested
+  horizon predicts `0.729--0.733 dx` motion versus the `0.05 dx` frozen limit. Stage B and global
+  32-ray escalation remain held; the next task is a shorter frozen horizon and selected-source row
+  allocation from the persisted artifacts. Audit SHA-256:
+  `4e28066dcd0257feffac8983a462045b9fb5686eeaa762b3dce096422b3732b0`.
+- **WP1-AMR2a's spatial index passes but is not silently wired.** Exact periodic nearest-triangle
+  face/image/tie queries match brute force. The shared mixed-state transfer runs at `0.877x` the
+  legacy time on `2,048` faces (gate `<=1.5x`); `30` focused geometry/remap tests pass. Live
+  `feature_step_3d` promotion waits on one explicit regular-grid Kth-neighbor tie-authority test,
+  because the legacy cKDTree chose such ties by traversal order while the new authority chooses the
+  lower physical face id.
+
+### Physical patch authority and the next estimator rung are now explicit
+
+- **The patch statistic no longer lets an almost-empty Cartesian corner define a local mean.** The
+  shared instrument records dominant-axis projected support and the represented nominal footprint,
+  including the 20 nm periodic-y fundamental cell under a 40 nm requested patch. Every patch remains
+  in the fixed-footprint integrated gate; a mean is gated only above the predeclared, geometry-wide
+  `0.10` support fraction, and the all-patch mean remains a diagnostic. An all-ineligible comparison
+  refuses. Stage-A schema is now v2, passes this contract through replicated, nested, and paired
+  paths, serializes `0.05/0.075/0.10/0.25/0.50/0.75` sensitivity, and structurally prevents an old or
+  incomplete receipt from authorizing Stage B. The focused controller/patch/charging cluster passes
+  `76` tests.
+- **The threshold has a durable geometry-only receipt, not a benchmark-score justification.** On the
+  sealed 1,833-face base mesh, primary `0.10` support excludes `76/272` 20 nm patches but only
+  `0.50425%` of actual area (`0.41677%` projected); at 40 nm it excludes `55/151` patches,
+  `1.40056%` actual (`1.08456%` projected). Excluded area is still integrated and gated. The artifact
+  read no transport, chemistry, profile, held-out observation, or GPU result:
+  `results/curated/krueger_2024_physical_patch_support_sensitivity_2026-07-17.json`, SHA-256
+  `6b61b10c74b7baf7280a7dfa03ec063d7a02ae6b19b46e6f832f3ebaec3ce148`.
+- **The selected-source hypothesis failed its own cap.** Exact signed adjoint row decomposition closes
+  to `2.96e-15`. All-patch scoring misleadingly placed 90% of its ranking mass in `234/1833` source
+  rows (`12.77%`), while physically supported patches require `758/1833` (`41.35%`). The allowed
+  458-row/25% plan captures only `78.99%`, so the persisted allocator reports
+  `diffuse_source_error_blocker` and is historical diagnostic evidence only. Artifact SHA-256:
+  `317cd1770b4abba8e36cc8d8ac98e137491e6a6414a06f055873a071824fe6f4`.
+- **A reusable selective nested-RQMC primitive passes but is intentionally unpromoted.** It appends
+  the identical Sobol indices to explicit source rows, merges integer hit/escape counts, leaves
+  untouched rows bitwise identical, propagates certified-visibility refusals, and binds mesh,
+  operator, seed, levels, and rows in an immutable receipt. The boundary/control/visibility cluster
+  passes `75 passed, 1 skipped`. On a 200-face manufactured case it reduces the trace portion to
+  `0.328x`, but tracing is already seconds while response scoring dominates; no Krueger wiring or run
+  follows.
+- **The simplest next scientific rung is uniform nested 16->32 at a verified short horizon.** A
+  source-method audit found that all-row refinement adds only `234,624` events across eight scrambles,
+  preserves paired uncertainty and equal reciprocal precision, and avoids same-data row-selection
+  bias. Reciprocity/closure projection is retained only as a later manufactured control-variate
+  experiment: fixed affine projection can remain unbiased, whereas nonnegative smoothing or
+  constrained likelihood introduces finite-sample bias and its iid multinomial likelihood does not
+  describe scrambled Sobol dependence. No Stage A, Stage B, profile, held-out, charging, or GPU run
+  was launched by these increments.
+- **Exact planar overlap remap is now a fast standalone authority, not yet a live-engine claim.** A
+  new immutable sparse operator uses the deterministic periodic candidate index and exact float64
+  triangle clipping, combines periodic images by physical face pair, never crosses materials or
+  orientation, closes retained/removed/newly exposed extensive ledgers, and keeps intensive transfer
+  convex with an explicit fill requirement for new area. Identity, retriangulation, subdivision,
+  shifted-periodic, mixed-material, linear-convergence, and refusal gates pass (`33` focused tests).
+  On a 2,048-face planar case it runs in `0.055661 s` versus `0.228537 s` for indexed KNN (`0.244x`).
+  Curved, nonparallel, folded, and large-normal-motion surfaces refuse; no `feature_step_3d`, charging,
+  AMR, or profile path was rewired. The next remap task is orientation-local patch grouping and
+  corner/topology ownership, not pretending one plane is a trench.
