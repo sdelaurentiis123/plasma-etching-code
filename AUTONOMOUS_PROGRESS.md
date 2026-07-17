@@ -1556,3 +1556,27 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   `KRUEGER_2024_CUDA_PROFILE_REPORT_2026-07-17.md` and
   `results/krueger_2024_cuda_profile_summary/audit.json`. The postprocessor/profiler/multiresolution
   cluster passes `13` tests.
+
+### Multi-fidelity model management is implemented and refuses stale Krüger evidence
+
+- **The reusable controller keeps high fidelity in the loop.** It fits rank/condition-checked affine
+  low responses, anchors high-minus-low discrepancy exactly at the current center, distinguishes a
+  center-only receipt from an identified first-order correction, proposes physical-box trust steps,
+  and accepts/grows or rejects/shrinks only from actual/predicted high-fidelity merit reduction.
+  Synthetic value/gradient, rank-refusal, bounds, and trust-ratio tests pass.
+- **The old grid-correction shortcut is not silently reused.** R1.9's proposed improvement produced
+  `rho=-1.3955`, and its `feature_step_3d.py` hash differs from the current operator. The readiness
+  scorer therefore treats every old endpoint derivative as historical, even though its parameter
+  location remains the fixed location for the first clean fine anchor.
+- **Short refinement evidence is classified correctly.** The `0.5 s` depth/opening rate differences
+  (`0.073%/1.433%`) size shallow numerical error; the `71.235%` local width difference blocks shape
+  authority. None is multiplied into a 60 s endpoint discrepancy. The real readiness status is
+  `blocked_before_parameter_proposal` on five named blockers: remap backend, operator epoch, fine
+  anchor, paired endpoint discrepancy, and current first-order response.
+- **The next expensive action is one anchor, not an optimizer sweep.** After a bounded remap-backend
+  comparison, run one clean current-epoch uniform-5-nm or certified-AMR base at the fixed R1.9 pair.
+  A pass freezes calibration; a miss must first earn a current response direction before one
+  safeguarded correction. No simulation, GPU, new pair, or held-out read occurred. Report and
+  receipt: `KRUEGER_2024_MULTIFIDELITY_READINESS_2026-07-17.md` and
+  `results/krueger_2024_multifidelity_readiness/audit.json`; the complete related cluster passes
+  `31` tests.

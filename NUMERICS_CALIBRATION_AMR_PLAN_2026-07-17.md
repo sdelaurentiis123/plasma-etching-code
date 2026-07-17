@@ -276,7 +276,8 @@ Current honest positioning:
    thickness are close, while local maximum/top width differs by 71.235%;
 4. explicitly select and short-test the indexed/common-refinement remap in the Krüger worker; the
    bounded CUDA profile proved the current worker still inherited legacy KNN;
-5. implement the calibration trust-region/discrepancy artifact without reading held-outs;
+5. implement the calibration trust-region/discrepancy artifact without reading held-outs — complete;
+   the real readiness receipt blocks a proposal until remap selection and a current-epoch fine anchor;
 6. benchmark sparse narrow-band storage;
 7. prototype AMR on manufactured translation, junction, and late Krüger bursts;
 8. certify AMR against uniform 5 nm short tests;
