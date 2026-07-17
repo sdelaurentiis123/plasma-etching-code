@@ -1,0 +1,73 @@
+{
+  "schema": "petch.krueger-2024.base-authority-retry.v1",
+  "launch_sha256": "d15cc63239b5da7f820912373f79281c210662482783ad56f1f67e1109858388",
+  "protocol_id": "K24-PETCH-R1.9",
+  "authority_candidate": true,
+  "held_out_profile_data_read": false,
+  "calibration_performed_by_this_launch": false,
+  "parent_launch_manifest_sha256": "344d20d2669ea1ce1b200170f3b77385960596ce7e35b915dfc38612a64b2f6c",
+  "parent_numerical_operator_inherited_exactly": true,
+  "restart_policy": "restart from zero under one clean operator epoch; no failed checkpoint is resumed",
+  "predecessor_failure_classification": {
+    "scientific_result": false,
+    "physical_time_s": 1.963905945869131,
+    "accepted_steps": 23,
+    "cause": "one slightly downward diffuse-neutral ray hit a real face after 1110 periodic wraps, beyond the former upward-only recovery rule",
+    "resolution": "derive a finite lateral-wrap integrity horizon to the appropriate vertical domain boundary for every non-horizontal ray",
+    "horizontal_ray_policy": "refuse because no finite vertical-progress proof exists",
+    "downward_exhaustion_policy": "refuse unless a hard material/gas-surface hit occurs before the lower-domain integrity horizon"
+  },
+  "source_epoch": {
+    "git_revision": "a15634fe0fba2d68684dbe899e01865b2c57a55f",
+    "git_dirty": false,
+    "archive_sha256": "96d087353d1d06f61a0f097bccbcb0493f4988b08f5519b4be8173a8ab078b27"
+  },
+  "fixed_parameters": {
+    "effective_mask_crosslinked_growth_fraction": 0.9004722559883319,
+    "oxide_etch_yield_scale": 0.5586489665864749,
+    "source": "last checksum-bound R1.9 location; not refit from the current operator"
+  },
+  "diffuse_visibility_operator": {
+    "fast_cellwise_maximum_wraps": 1024,
+    "exact_replay_initial_maximum_wraps": 1024,
+    "derived_horizon_policy": "configured_then_geometry_derived_vertical_domain_v2",
+    "emergency_maximum_wraps": 1048576,
+    "upward_terminal": "hard hit or open-top escape",
+    "downward_terminal": "hard hit only",
+    "exact_horizontal_terminal": "explicit refusal"
+  },
+  "command_argv": [
+    "python", "/root/petch-a15634f/scripts/krueger_2024_trench_pilot.py",
+    "--output", "/root/petch-results/krueger-base-authority-5nm-a15634f",
+    "--duration-s", "60", "--n-steps", "60", "--dx-um", "0.005",
+    "--substrate-top-um", "1.8", "--domain-height-um", "2.8",
+    "--n-position", "16", "--boundary-case", "base",
+    "--compress-boundary-quadrature",
+    "--neutral-transverse-order", "5", "--neutral-normal-order", "2",
+    "--neutral-direction-polar-order", "8",
+    "--neutral-direction-azimuthal-order", "16",
+    "--ion-energy-bin-eV", "250", "--ion-angle-bin-deg", "0.25",
+    "--ion-azimuthal-order", "16",
+    "--effective-mask-crosslinked-growth-fraction", "0.9004722559883319",
+    "--oxide-etch-yield-scale", "0.5586489665864749",
+    "--ballistic-transport", "face_gather", "--transport-device", "cuda:0",
+    "--face-quadrature-points", "3", "--radiosity-rays", "8",
+    "--radiosity-tolerance", "1e-12", "--radiosity-max-iterations", "2000",
+    "--seed", "241", "--max-wall-s", "14400",
+    "--adaptive-profile-timestep", "--minimum-step-s", "0.00025",
+    "--target-displacement-cells", "0.35", "--maximum-displacement-cells", "0.75",
+    "--adaptive-shrink-factor", "0.5", "--adaptive-growth-factor", "1.5",
+    "--adaptive-safety-factor", "0.9", "--maximum-accepted-steps", "10000",
+    "--topology-change-policy", "continue_gas_cavity",
+    "--surface-state-remap-backend", "common_refinement"
+  ],
+  "executable_source_sha256": {
+    "scripts/krueger_2024_trench_pilot.py": "7fc09986807eda21da2677d2542f5bb51afc9b93e4b542b6502abbe33ccaf6c1",
+    "src/petch/boundary_transport_3d.py": "dd06481cf1794e37d5623cb48cf7dec35dc74e6de433af5e08f79e0a9a640878",
+    "src/petch/feature_step_3d.py": "db9911343d7923791b9eb59dae6834db764dec0bafc46714dbcd953edbee99e5"
+  },
+  "data_firewall": {
+    "allowed": "base_case_boundary_fluxes.csv, digitized_figure4_iead.csv, digitized_figure4_iead_metadata.json, base_case_metrics.csv",
+    "forbidden": "transfer_observations.csv and every held-out oxygen/power profile"
+  }
+}
