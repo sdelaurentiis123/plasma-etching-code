@@ -1,0 +1,850 @@
+{
+  "artifacts": {
+    "pstats": "profile.pstats",
+    "text": "profile.txt"
+  },
+  "calibration_performed": false,
+  "configuration": {
+    "calibration_parameters": {
+      "effective_mask_crosslinked_growth_fraction": 0.8934059741411972,
+      "oxide_etch_yield_scale": 0.5667632723491973
+    },
+    "device": "cuda:0",
+    "dx_nm": 5.0,
+    "operator": {
+      "ballistic_face_quadrature_points": 3,
+      "ballistic_transport": "face_gather",
+      "boundary_case": "base_calibration_only",
+      "charging": "disabled_for_Krueger_2024_calibration_and_transfer",
+      "ion_angle_bin_deg": 0.25,
+      "ion_azimuthal_order": 16,
+      "ion_energy_bin_eV": 250.0,
+      "n_position": 16,
+      "neutral_direction_azimuthal_order": 16,
+      "neutral_direction_polar_order": 8,
+      "neutral_speed_quadrature": "analytic_speed_marginal",
+      "neutral_tensor_velocity_quadrature_active": false,
+      "profile_periodic_lateral": true,
+      "profile_reinitialization": "cr2",
+      "radiosity_maximum_iterations": 2000,
+      "radiosity_rays_per_face": 8,
+      "radiosity_relative_tolerance": 1e-12
+    },
+    "positive_warmup_steps": 1,
+    "profile_steps": 1,
+    "seed": 241,
+    "step_duration_s": 0.025,
+    "total_executed_physical_time_s": 0.05,
+    "total_profiled_physical_time_s": 0.025
+  },
+  "end_metrics": {
+    "asymmetry_cell_count": 0.0,
+    "etch_depth_nm": 0.6828897955812874,
+    "floor_z_um": 1.7993171102044188,
+    "mask_exit_z_um": 1.805,
+    "mask_opening_connected_to_exterior": true,
+    "mask_opening_cross_y_span_nm": 0.07086029833661134,
+    "mask_opening_nm": 89.47115296565099,
+    "mask_opening_per_y_widths_nm": [
+      89.4337681601176,
+      89.47506227838115,
+      89.5046284584542
+    ],
+    "mask_opening_throat_z_um": 2.6350000000000002,
+    "mask_pocket_width_nm": 89.47115296565099,
+    "mask_top_z_um": 2.650198897897403,
+    "maximum_feature_width_nm": 88.12833291472649,
+    "remaining_mask_thickness_nm": 850.1988978974031,
+    "top_feature_width_nm": 88.12833291472649
+  },
+  "git_revision": "477946e9dccc314c8fe4c4e5562c7220c0c1fb58",
+  "hardware": {
+    "device": "cuda:0",
+    "device_architecture": "89",
+    "device_name": "NVIDIA GeForce RTX 4090",
+    "level_set_device": "cuda:0",
+    "transport_device": "cuda:0",
+    "unified_device_selection": true,
+    "warp_version": "1.15.0"
+  },
+  "held_out_profile_data_read": false,
+  "initial_metric_completion": {
+    "completed_fields": [
+      "top_feature_width_nm",
+      "maximum_feature_width_nm"
+    ],
+    "method": "analytic_rectangular_CSG_at_exact_zero_depth",
+    "source_field": "mask_opening_nm"
+  },
+  "runtime": {
+    "internal_wall_limit_s": 240.0,
+    "mean_profiled_step_wall_time_s": 7.780155196785927,
+    "operator_initialization_wall_time_s": 12.537323696538806,
+    "overall_wall_time_s": 35.01909668371081,
+    "positive_warmup_step_wall_time_s": [
+      14.649575733579695
+    ],
+    "profiled_wall_time_s": 7.780155196785927
+  },
+  "schema": "petch.krueger_2024_cuda_profile.v1",
+  "scope": "bounded_base_geometry_performance_profile_no_held_out_data",
+  "source_sha256": {
+    "multiresolution_worker": "ebc6ee40c6b84b90d5ea3e7c75ca2c5b0c79339068dc1067e87e2c54c9f583f5",
+    "profiler": "b7e7b73c4d47334de7cfbd667f19d3039156cb41f701c77494dc99baf5d7f9de"
+  },
+  "start_metrics": {
+    "asymmetry_cell_count": 0.0,
+    "etch_depth_nm": 0.0,
+    "floor_z_um": 1.8000000000000511,
+    "mask_exit_z_um": 1.805,
+    "mask_opening_connected_to_exterior": true,
+    "mask_opening_cross_y_span_nm": 0.0,
+    "mask_opening_nm": 89.99999999994884,
+    "mask_opening_per_y_widths_nm": [
+      89.99999999994884,
+      89.99999999994884,
+      89.99999999994884
+    ],
+    "mask_opening_throat_z_um": 1.805,
+    "mask_pocket_width_nm": 89.99999999994884,
+    "mask_top_z_um": 2.6500000000000257,
+    "maximum_feature_width_nm": 89.99999999994884,
+    "remaining_mask_thickness_nm": 850.0000000000256,
+    "top_feature_width_nm": 89.99999999994884
+  },
+  "status": "complete",
+  "step_receipts": [
+    {
+      "active_face_count": 2944,
+      "maximum_displacement_cells": 0.06834238796529235,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_radiosity_relative_balance_error": 1.8969533609581764e-12,
+      "step": 1,
+      "topology_event": null,
+      "wall_time_s": 7.780002040788531
+    }
+  ],
+  "top_cumulative_functions": [
+    {
+      "cumulative_time_s": 7.779563272000001,
+      "function": "_advance",
+      "line": 455,
+      "path": "scripts/krueger_2024_multiresolution_audit.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.00454987,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 7.762015041000001,
+      "function": "advance_feature_step_3d",
+      "line": 1816,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.023466716000000002,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 2.291635996,
+      "function": "advance_by_material",
+      "line": 277,
+      "path": "src/petch/material_mechanism_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.006698068000000001,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 2.232933038,
+      "function": "gather_boundary_state_ballistic_3d",
+      "line": 2463,
+      "path": "src/petch/boundary_transport_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.591883797,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 1.592402024,
+      "function": "yield_rate_m2_s",
+      "line": 296,
+      "path": "src/petch/surface_kinetics.py",
+      "primitive_calls": 16,
+      "self_time_s": 0.440590902,
+      "total_calls": 16
+    },
+    {
+      "cumulative_time_s": 1.5449168720000002,
+      "function": "advance",
+      "line": 534,
+      "path": "src/petch/amorphous_carbon_mask.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.00015769500000000001,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 1.333041249,
+      "function": "advance",
+      "line": 1455,
+      "path": "src/petch/surface_kinetics.py",
+      "primitive_calls": 3,
+      "self_time_s": 0.0007778590000000001,
+      "total_calls": 3
+    },
+    {
+      "cumulative_time_s": 1.3227637520000002,
+      "function": "_energetic_rate",
+      "line": 1028,
+      "path": "src/petch/surface_kinetics.py",
+      "primitive_calls": 15,
+      "self_time_s": 0.0063513910000000005,
+      "total_calls": 15
+    },
+    {
+      "cumulative_time_s": 1.183787503,
+      "function": "_apply_diffuse_neutral_transport",
+      "line": 1497,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.000502952,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 1.151789661,
+      "function": "evaluate",
+      "line": 101,
+      "path": "src/petch/surface_kinetics.py",
+      "primitive_calls": 16,
+      "self_time_s": 0.768228413,
+      "total_calls": 16
+    },
+    {
+      "cumulative_time_s": 1.064422194,
+      "function": "conservative_remap_surface_state",
+      "line": 1105,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.004178168,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 1.044504501,
+      "function": "__post_init__",
+      "line": 258,
+      "path": "src/petch/surface_kinetics.py",
+      "primitive_calls": 4,
+      "self_time_s": 0.164538537,
+      "total_calls": 4
+    },
+    {
+      "cumulative_time_s": 1.007682701,
+      "function": "_maximum_point_to_surface_distance",
+      "line": 1016,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 2,
+      "self_time_s": 0.054333127,
+      "total_calls": 2
+    },
+    {
+      "cumulative_time_s": 0.9397408970000001,
+      "function": "<method 'reduce' of 'numpy.ufunc' objects>",
+      "line": 0,
+      "path": "~",
+      "primitive_calls": 52079,
+      "self_time_s": 0.938987046,
+      "total_calls": 52079
+    },
+    {
+      "cumulative_time_s": 0.9167179870000001,
+      "function": "_point_to_triangles_distance",
+      "line": 953,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 2944,
+      "self_time_s": 0.235094561,
+      "total_calls": 2944
+    },
+    {
+      "cumulative_time_s": 0.7861221340000001,
+      "function": "estimate_diffuse_form_factors_3d",
+      "line": 2327,
+      "path": "src/petch/boundary_transport_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.00046142100000000005,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 0.780375934,
+      "function": "_diffuse_form_factor_ray_samples_3d",
+      "line": 2047,
+      "path": "src/petch/boundary_transport_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 2.2791000000000003e-05,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 0.7803482530000001,
+      "function": "_diffuse_form_factor_ray_sample_block_3d",
+      "line": 1956,
+      "path": "src/petch/boundary_transport_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.003471336,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 0.772546068,
+      "function": "_inset_diffuse_source_positions_3d",
+      "line": 1878,
+      "path": "src/petch/boundary_transport_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.26505421700000004,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 0.670429277,
+      "function": "_subset_fluxes",
+      "line": 142,
+      "path": "src/petch/material_mechanism_3d.py",
+      "primitive_calls": 2,
+      "self_time_s": 0.32757773900000003,
+      "total_calls": 2
+    },
+    {
+      "cumulative_time_s": 0.598432709,
+      "function": "_select_surface_fluxes",
+      "line": 1461,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.24928277000000001,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 0.590269561,
+      "function": "_polymer_step",
+      "line": 1101,
+      "path": "src/petch/surface_kinetics.py",
+      "primitive_calls": 6,
+      "self_time_s": 0.0029138280000000003,
+      "total_calls": 6
+    },
+    {
+      "cumulative_time_s": 0.587800351,
+      "function": "norm",
+      "line": 2624,
+      "path": "_linalg.py",
+      "primitive_calls": 12261,
+      "self_time_s": 0.192892519,
+      "total_calls": 12261
+    },
+    {
+      "cumulative_time_s": 0.493805292,
+      "function": "_substrate_step",
+      "line": 1300,
+      "path": "src/petch/surface_kinetics.py",
+      "primitive_calls": 3,
+      "self_time_s": 0.000990931,
+      "total_calls": 3
+    },
+    {
+      "cumulative_time_s": 0.47608828300000006,
+      "function": "_mean",
+      "line": 119,
+      "path": "_methods.py",
+      "primitive_calls": 3001,
+      "self_time_s": 0.032819983000000004,
+      "total_calls": 3001
+    },
+    {
+      "cumulative_time_s": 0.40938349,
+      "function": "<method 'mean' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "path": "~",
+      "primitive_calls": 55,
+      "self_time_s": 0.000172448,
+      "total_calls": 55
+    },
+    {
+      "cumulative_time_s": 0.39289336900000005,
+      "function": "solve_diffuse_neutral_radiosity_3d",
+      "line": 108,
+      "path": "src/petch/neutral_radiosity_3d.py",
+      "primitive_calls": 5,
+      "self_time_s": 0.062704278,
+      "total_calls": 5
+    },
+    {
+      "cumulative_time_s": 0.375181121,
+      "function": "_angular_yield_factor",
+      "line": 54,
+      "path": "src/petch/surface_kinetics.py",
+      "primitive_calls": 16,
+      "self_time_s": 0.318561395,
+      "total_calls": 16
+    },
+    {
+      "cumulative_time_s": 0.355049806,
+      "function": "cross",
+      "line": 1528,
+      "path": "numeric.py",
+      "primitive_calls": 5896,
+      "self_time_s": 0.12905649,
+      "total_calls": 5896
+    },
+    {
+      "cumulative_time_s": 0.312066616,
+      "function": "segment_distance_squared",
+      "line": 998,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 8832,
+      "self_time_s": 0.17238693000000002,
+      "total_calls": 8832
+    },
+    {
+      "cumulative_time_s": 0.287999064,
+      "function": "einsum",
+      "line": 1057,
+      "path": "einsumfunc.py",
+      "primitive_calls": 47132,
+      "self_time_s": 0.02035468,
+      "total_calls": 47132
+    },
+    {
+      "cumulative_time_s": 0.281767694,
+      "function": "<method 'repeat' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "path": "~",
+      "primitive_calls": 130,
+      "self_time_s": 0.281767694,
+      "total_calls": 130
+    },
+    {
+      "cumulative_time_s": 0.277745266,
+      "function": "_energetic_rate",
+      "line": 462,
+      "path": "src/petch/amorphous_carbon_mask.py",
+      "primitive_calls": 1,
+      "self_time_s": 0.00073689,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 0.267644384,
+      "function": "<built-in method numpy._core._multiarray_umath.c_einsum>",
+      "line": 0,
+      "path": "~",
+      "primitive_calls": 47132,
+      "self_time_s": 0.267644384,
+      "total_calls": 47132
+    },
+    {
+      "cumulative_time_s": 0.255194853,
+      "function": "_wrapfunc",
+      "line": 51,
+      "path": "fromnumeric.py",
+      "primitive_calls": 13644,
+      "self_time_s": 0.010890934000000001,
+      "total_calls": 13644
+    },
+    {
+      "cumulative_time_s": 0.23441456900000002,
+      "function": "<method 'copy' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "path": "~",
+      "primitive_calls": 220,
+      "self_time_s": 0.23441456900000002,
+      "total_calls": 220
+    },
+    {
+      "cumulative_time_s": 0.20867641,
+      "function": "<method 'astype' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "path": "~",
+      "primitive_calls": 15388,
+      "self_time_s": 0.20867641,
+      "total_calls": 15388
+    },
+    {
+      "cumulative_time_s": 0.20545211700000002,
+      "function": "__getitem__",
+      "line": 29,
+      "path": "_index.py",
+      "primitive_calls": 1255,
+      "self_time_s": 0.006906624,
+      "total_calls": 1255
+    },
+    {
+      "cumulative_time_s": 0.201302696,
+      "function": "any",
+      "line": 2496,
+      "path": "fromnumeric.py",
+      "primitive_calls": 33235,
+      "self_time_s": 0.029503236000000002,
+      "total_calls": 33235
+    },
+    {
+      "cumulative_time_s": 0.199046154,
+      "function": "moveaxis",
+      "line": 1452,
+      "path": "numeric.py",
+      "primitive_calls": 17706,
+      "self_time_s": 0.066908302,
+      "total_calls": 17706
+    },
+    {
+      "cumulative_time_s": 0.18028517600000002,
+      "function": "_periodic_component_roots",
+      "line": 342,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 12,
+      "self_time_s": 0.039641626,
+      "total_calls": 12
+    },
+    {
+      "cumulative_time_s": 0.175090969,
+      "function": "_wrapreduction_any_all",
+      "line": 89,
+      "path": "fromnumeric.py",
+      "primitive_calls": 33611,
+      "self_time_s": 0.050288894,
+      "total_calls": 33611
+    },
+    {
+      "cumulative_time_s": 0.170099099,
+      "function": "copy",
+      "line": 12526,
+      "path": "context.py",
+      "primitive_calls": 184,
+      "self_time_s": 0.167960923,
+      "total_calls": 184
+    },
+    {
+      "cumulative_time_s": 0.16958139500000002,
+      "function": "repeat",
+      "line": 467,
+      "path": "fromnumeric.py",
+      "primitive_calls": 71,
+      "self_time_s": 0.000332889,
+      "total_calls": 71
+    },
+    {
+      "cumulative_time_s": 0.143657475,
+      "function": "__init__",
+      "line": 3185,
+      "path": "types.py",
+      "primitive_calls": 254,
+      "self_time_s": 0.002719202,
+      "total_calls": 376
+    },
+    {
+      "cumulative_time_s": 0.134722055,
+      "function": "_init_from_data",
+      "line": 3309,
+      "path": "types.py",
+      "primitive_calls": 122,
+      "self_time_s": 0.005374178,
+      "total_calls": 122
+    },
+    {
+      "cumulative_time_s": 0.132075254,
+      "function": "union",
+      "line": 355,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 89559,
+      "self_time_s": 0.054680575,
+      "total_calls": 89559
+    },
+    {
+      "cumulative_time_s": 0.129886522,
+      "function": "allclose",
+      "line": 2253,
+      "path": "numeric.py",
+      "primitive_calls": 350,
+      "self_time_s": 0.001142198,
+      "total_calls": 350
+    },
+    {
+      "cumulative_time_s": 0.12505216,
+      "function": "isclose",
+      "line": 2349,
+      "path": "numeric.py",
+      "primitive_calls": 352,
+      "self_time_s": 0.087239522,
+      "total_calls": 352
+    },
+    {
+      "cumulative_time_s": 0.121852624,
+      "function": "_periodic_physical_volume_topology_signature",
+      "line": 442,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 2,
+      "self_time_s": 0.000467389,
+      "total_calls": 2
+    },
+    {
+      "cumulative_time_s": 0.11478723,
+      "function": "tile",
+      "line": 1216,
+      "path": "_shape_base_impl.py",
+      "primitive_calls": 59,
+      "self_time_s": 0.0013147900000000001,
+      "total_calls": 59
+    },
+    {
+      "cumulative_time_s": 0.10991945800000001,
+      "function": "_get_sliceXarray",
+      "line": 274,
+      "path": "_csr.py",
+      "primitive_calls": 835,
+      "self_time_s": 0.0013265540000000002,
+      "total_calls": 835
+    },
+    {
+      "cumulative_time_s": 0.10798470700000001,
+      "function": "_minor_index_fancy",
+      "line": 651,
+      "path": "_compressed.py",
+      "primitive_calls": 835,
+      "self_time_s": 0.010140528000000001,
+      "total_calls": 835
+    },
+    {
+      "cumulative_time_s": 0.10358452200000001,
+      "function": "normalize_axis_tuple",
+      "line": 1388,
+      "path": "numeric.py",
+      "primitive_calls": 35432,
+      "self_time_s": 0.06903558600000001,
+      "total_calls": 35432
+    },
+    {
+      "cumulative_time_s": 0.077404389,
+      "function": "find",
+      "line": 348,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 179133,
+      "self_time_s": 0.077404389,
+      "total_calls": 179133
+    },
+    {
+      "cumulative_time_s": 0.074480156,
+      "function": "clip",
+      "line": 2250,
+      "path": "fromnumeric.py",
+      "primitive_calls": 8875,
+      "self_time_s": 0.011778440000000001,
+      "total_calls": 8875
+    },
+    {
+      "cumulative_time_s": 0.07412724600000001,
+      "function": "_surface_topology_signature",
+      "line": 301,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 2,
+      "self_time_s": 0.014315161000000002,
+      "total_calls": 2
+    },
+    {
+      "cumulative_time_s": 0.072700005,
+      "function": "mean",
+      "line": 3783,
+      "path": "fromnumeric.py",
+      "primitive_calls": 2946,
+      "self_time_s": 0.005822764,
+      "total_calls": 2946
+    },
+    {
+      "cumulative_time_s": 0.066793407,
+      "function": "_wrapreduction",
+      "line": 69,
+      "path": "fromnumeric.py",
+      "primitive_calls": 9833,
+      "self_time_s": 0.017295241,
+      "total_calls": 9833
+    },
+    {
+      "cumulative_time_s": 0.066172874,
+      "function": "__init__",
+      "line": 30,
+      "path": "_compressed.py",
+      "primitive_calls": 1310,
+      "self_time_s": 0.008051392000000001,
+      "total_calls": 1315
+    },
+    {
+      "cumulative_time_s": 0.061093409,
+      "function": "numpy",
+      "line": 4304,
+      "path": "types.py",
+      "primitive_calls": 62,
+      "self_time_s": 0.000613419,
+      "total_calls": 62
+    },
+    {
+      "cumulative_time_s": 0.058633382000000005,
+      "function": "_redistance_feature_field",
+      "line": 873,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 3,
+      "self_time_s": 2.2242e-05,
+      "total_calls": 3
+    },
+    {
+      "cumulative_time_s": 0.058611140000000006,
+      "function": "_periodic_lateral_redistance",
+      "line": 851,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 3,
+      "self_time_s": 0.000350332,
+      "total_calls": 3
+    },
+    {
+      "cumulative_time_s": 0.056996223000000006,
+      "function": "to",
+      "line": 4411,
+      "path": "types.py",
+      "primitive_calls": 62,
+      "self_time_s": 0.000147565,
+      "total_calls": 62
+    },
+    {
+      "cumulative_time_s": 0.056558718,
+      "function": "clone",
+      "line": 8809,
+      "path": "context.py",
+      "primitive_calls": 62,
+      "self_time_s": 0.00015886600000000002,
+      "total_calls": 62
+    },
+    {
+      "cumulative_time_s": 0.055301602000000005,
+      "function": "gmres",
+      "line": 587,
+      "path": "iterative.py",
+      "primitive_calls": 5,
+      "self_time_s": 0.034705724,
+      "total_calls": 5
+    },
+    {
+      "cumulative_time_s": 0.055260342000000004,
+      "function": "reinit_cr2",
+      "line": 1603,
+      "path": "src/petch/threed.py",
+      "primitive_calls": 3,
+      "self_time_s": 0.034693597,
+      "total_calls": 3
+    },
+    {
+      "cumulative_time_s": 0.054620578,
+      "function": "<method 'clip' of 'numpy.ndarray' objects>",
+      "line": 0,
+      "path": "~",
+      "primitive_calls": 8875,
+      "self_time_s": 0.005302944,
+      "total_calls": 8875
+    },
+    {
+      "cumulative_time_s": 0.050450693000000005,
+      "function": "ones",
+      "line": 144,
+      "path": "numeric.py",
+      "primitive_calls": 38,
+      "self_time_s": 0.050095076,
+      "total_calls": 38
+    },
+    {
+      "cumulative_time_s": 0.049317634000000006,
+      "function": "_clip",
+      "line": 100,
+      "path": "_methods.py",
+      "primitive_calls": 8875,
+      "self_time_s": 0.049253133000000004,
+      "total_calls": 8875
+    },
+    {
+      "cumulative_time_s": 0.048354774,
+      "function": "_periodic_unique_neighbors",
+      "line": 1078,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 2,
+      "self_time_s": 0.045547161,
+      "total_calls": 2
+    },
+    {
+      "cumulative_time_s": 0.047252956000000006,
+      "function": "_get_arrayXslice",
+      "line": 283,
+      "path": "_csr.py",
+      "primitive_calls": 420,
+      "self_time_s": 0.0008180840000000001,
+      "total_calls": 420
+    },
+    {
+      "cumulative_time_s": 0.045573586000000006,
+      "function": "_get_index_dtype",
+      "line": 1525,
+      "path": "_base.py",
+      "primitive_calls": 2615,
+      "self_time_s": 0.0078115300000000006,
+      "total_calls": 2615
+    },
+    {
+      "cumulative_time_s": 0.044240881,
+      "function": "_major_index_fancy",
+      "line": 576,
+      "path": "_compressed.py",
+      "primitive_calls": 420,
+      "self_time_s": 0.008463938,
+      "total_calls": 420
+    },
+    {
+      "cumulative_time_s": 0.042052471,
+      "function": "<dictcomp>",
+      "line": 2467,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 1,
+      "self_time_s": 1.1200000000000001e-05,
+      "total_calls": 1
+    },
+    {
+      "cumulative_time_s": 0.039053367000000005,
+      "function": "_validate_indices",
+      "line": 298,
+      "path": "_index.py",
+      "primitive_calls": 1255,
+      "self_time_s": 0.016340757,
+      "total_calls": 1255
+    },
+    {
+      "cumulative_time_s": 0.038922889,
+      "function": "max",
+      "line": 3080,
+      "path": "fromnumeric.py",
+      "primitive_calls": 6010,
+      "self_time_s": 0.006559022,
+      "total_calls": 6010
+    },
+    {
+      "cumulative_time_s": 0.037180223000000005,
+      "function": "sum",
+      "line": 492,
+      "path": "_compressed.py",
+      "primitive_calls": 835,
+      "self_time_s": 0.001899559,
+      "total_calls": 835
+    },
+    {
+      "cumulative_time_s": 0.03703656,
+      "function": "find",
+      "line": 311,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 33836,
+      "self_time_s": 0.03703656,
+      "total_calls": 33836
+    },
+    {
+      "cumulative_time_s": 0.03516157,
+      "function": "union",
+      "line": 317,
+      "path": "src/petch/feature_step_3d.py",
+      "primitive_calls": 13974,
+      "self_time_s": 0.008435350000000001,
+      "total_calls": 13974
+    }
+  ],
+  "worktree_clean": true
+}

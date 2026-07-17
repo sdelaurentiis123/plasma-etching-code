@@ -1,0 +1,190 @@
+{
+  "calibration_performed": false,
+  "generator": {
+    "path_name": "krueger_2024_cuda_profile_report.py",
+    "sha256": "cd21bf1384b7cc62033efccefffb693173d0bfd13dad85fb237dc39a9db0d0ec"
+  },
+  "held_out_profile_data_read": false,
+  "inputs": {
+    "mixed_device_parity_reference": {
+      "path_name": "audit.json",
+      "sha256": "9c298b9fb8fac7bca095ac91917aba9f29da67f54ef5ebbc80b1aae98b714830"
+    },
+    "paired_10nm_5nm_initial_audit": {
+      "path_name": "audit.json",
+      "sha256": "d211d8d2c24b94e5d65400c04e0d21203b8ae150cc0760428dc08d4fbfc5eeb4"
+    },
+    "unified_cuda_timing_profile": {
+      "path_name": "audit.json",
+      "sha256": "4f88827bf6e16242a2ccd131e0569b05f98cc4cd19a1fc63354ff96fbf039b94"
+    }
+  },
+  "operator_receipts": {
+    "maximum_material_ledger_residual_units_m2": 0.0,
+    "maximum_radiosity_relative_balance_error": 1.8969533609581764e-12,
+    "surface_state_remap_backend": "legacy_knn (engine default used by this worker)",
+    "topology_events": [
+      null
+    ]
+  },
+  "paired_10nm_5nm_initial_refinement": {
+    "duration_s": 0.5,
+    "interpretation": "depth, definition-correct opening, and mask-thickness rates agree within 1.5 percent; maximum/top feature-width rates differ by 71.2 percent, so local profile shape is not spatially authoritative",
+    "metrics": {
+      "etch_depth_nm_s": {
+        "absolute_relative_percent": 0.07303515474191405,
+        "coarse_10nm": 13.657264910638567,
+        "fine_5nm": 13.667246805491917,
+        "relative_to_fine": -0.0007303515474191405
+      },
+      "mask_opening_nm_s": {
+        "absolute_relative_percent": 1.433296820301116,
+        "coarse_10nm": -4.42850832365761,
+        "fine_5nm": -4.365931565354856,
+        "relative_to_fine": -0.01433296820301116
+      },
+      "maximum_feature_width_nm_s": {
+        "absolute_relative_percent": 71.23511233680277,
+        "coarse_10nm": -4.449296929580612,
+        "fine_5nm": -15.46780568614281,
+        "relative_to_fine": 0.7123511233680277
+      },
+      "remaining_mask_thickness_nm_s": {
+        "absolute_relative_percent": 1.0329264169457562,
+        "coarse_10nm": 0.5023300576515339,
+        "fine_5nm": 0.4971944052956587,
+        "relative_to_fine": 0.010329264169457562
+      },
+      "top_feature_width_nm_s": {
+        "absolute_relative_percent": 71.23511233680277,
+        "coarse_10nm": -4.449296929580612,
+        "fine_5nm": -15.46780568614281,
+        "relative_to_fine": 0.7123511233680277
+      }
+    },
+    "wall_time_s": {
+      "coarse_10nm": 16.7917269510217,
+      "fine_5nm": 73.71874237060547
+    }
+  },
+  "paired_cuda_parity": {
+    "maximum_dimensional_difference_nm": 1.0192907495820691e-07,
+    "maximum_per_y_opening_difference_nm": 2.5301105210928654e-08,
+    "metrics": {
+      "etch_depth_nm": {
+        "absolute_difference": 0.0,
+        "mixed": 0.6828897955812874,
+        "relative_difference": 0.0,
+        "unified": 0.6828897955812874
+      },
+      "floor_z_um": {
+        "absolute_difference": 0.0,
+        "mixed": 1.7993171102044188,
+        "relative_difference": 0.0,
+        "unified": 1.7993171102044188
+      },
+      "mask_opening_nm": {
+        "absolute_difference": 8.591939604229992e-09,
+        "mixed": 89.47115295705905,
+        "relative_difference": 9.603027702519519e-11,
+        "unified": 89.47115296565099
+      },
+      "mask_top_z_um": {
+        "absolute_difference": 9.422240765388779e-12,
+        "mixed": 2.650198897887981,
+        "relative_difference": 3.5552957073892193e-12,
+        "unified": 2.650198897897403
+      },
+      "maximum_feature_width_nm": {
+        "absolute_difference": 1.0192907495820691e-07,
+        "mixed": 88.12833281279741,
+        "relative_difference": 1.156598243776211e-09,
+        "unified": 88.12833291472649
+      },
+      "remaining_mask_thickness_nm": {
+        "absolute_difference": 9.422251423529815e-09,
+        "mixed": 850.1988978879808,
+        "relative_difference": 1.1082408418707757e-11,
+        "unified": 850.1988978974031
+      },
+      "top_feature_width_nm": {
+        "absolute_difference": 1.0192907495820691e-07,
+        "mixed": 88.12833281279741,
+        "relative_difference": 1.156598243776211e-09,
+        "unified": 88.12833291472649
+      }
+    },
+    "same_seed_operator_and_executed_physical_time": true,
+    "within_1e_6_nm": true
+  },
+  "schema": "petch.krueger_2024_cuda_profile_summary.v1",
+  "scientific_status": "bounded base-only performance and numerical preflight; no endpoint calibration authority and no held-out validation claim",
+  "summary_sha256": "9d67116e0635df25b19702bd5161581b0191efc39cb9b725c38894d5863efda6",
+  "unified_cuda_runtime": {
+    "hardware": {
+      "device": "cuda:0",
+      "device_architecture": "89",
+      "device_name": "NVIDIA GeForce RTX 4090",
+      "level_set_device": "cuda:0",
+      "transport_device": "cuda:0",
+      "unified_device_selection": true,
+      "warp_version": "1.15.0"
+    },
+    "initialization_wall_time_s": 12.537323696538806,
+    "naive_fixed_0p025s_step_projection_for_60s": {
+      "steps": 2400,
+      "wall_time_h": 5.186770131190618,
+      "wall_time_s": 18672.372472286224,
+      "warning": "arithmetic projection only; one warmed short step is not an endpoint benchmark and geometry/operator cost changes with process time"
+    },
+    "positive_warmup_step_wall_time_s": [
+      14.649575733579695
+    ],
+    "profiled_feature_step_cumulative_time_s": 7.762015041000001,
+    "steady_profiled_step_wall_time_s": 7.780155196785927,
+    "timing_budget": [
+      {
+        "fraction": 0.29523725268442186,
+        "function": "advance_by_material",
+        "label": "chemistry and material routing",
+        "path": "src/petch/material_mechanism_3d.py",
+        "time_s": 2.291635996
+      },
+      {
+        "fraction": 0.28767440235626307,
+        "function": "gather_boundary_state_ballistic_3d",
+        "label": "ballistic boundary transport",
+        "path": "src/petch/boundary_transport_3d.py",
+        "time_s": 2.232933038
+      },
+      {
+        "fraction": 0.15251033355991664,
+        "function": "_apply_diffuse_neutral_transport",
+        "label": "diffuse neutral exchange",
+        "path": "src/petch/feature_step_3d.py",
+        "time_s": 1.183787503
+      },
+      {
+        "fraction": 0.13713219935513907,
+        "function": "conservative_remap_surface_state",
+        "label": "surface-state remap",
+        "path": "src/petch/feature_step_3d.py",
+        "time_s": 1.064422194
+      },
+      {
+        "fraction": 0.007553886676370845,
+        "function": "_redistance_feature_field",
+        "label": "level-set redistance",
+        "path": "src/petch/feature_step_3d.py",
+        "time_s": 0.058633382000000005
+      },
+      {
+        "fraction": 0.11989192536788848,
+        "function": null,
+        "label": "remaining extraction, advection, topology, and overhead",
+        "path": null,
+        "time_s": 0.9306029279999999
+      }
+    ]
+  }
+}

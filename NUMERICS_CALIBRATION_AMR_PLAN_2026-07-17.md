@@ -1,7 +1,7 @@
 # Numerical geometry, multi-fidelity calibration, and AMR plan
 
 Date: 2026-07-17
-Status: scoped plan; the active Krüger endpoint continues unchanged
+Status: active plan; bounded topology/remap/refinement/CUDA prerequisites are closing before any new endpoint
 
 Related documents:
 
@@ -268,18 +268,26 @@ Current honest positioning:
 - neither statement proves better experimental prediction;
 - the held-out league decides that claim.
 
-## 11. Ordered execution after the live endpoint
+## 11. Current bounded execution order
 
-1. preserve and classify the completed mixed-operator endpoint as development evidence;
-2. run initial and late-state short multiresolution operator/burst tests;
-3. quantify whether the 10-to-5 nm difference is rate, geometry, remap, or surface-state driven;
-4. freeze the corrected periodic remap and complete its full verification matrix;
+1. preserve and classify the completed mixed-operator endpoint as development evidence — complete;
+2. run the initial paired 10/5 nm short burst — complete; late topology-equivalent evidence remains open;
+3. quantify the 10-to-5 nm difference — complete for the initial state: global depth/opening/mask
+   thickness are close, while local maximum/top width differs by 71.235%;
+4. explicitly select and short-test the indexed/common-refinement remap in the Krüger worker; the
+   bounded CUDA profile proved the current worker still inherited legacy KNN;
 5. implement the calibration trust-region/discrepancy artifact without reading held-outs;
 6. benchmark sparse narrow-band storage;
 7. prototype AMR on manufactured translation, junction, and late Krüger bursts;
 8. certify AMR against uniform 5 nm short tests;
 9. perform one clean authoritative fine/AMR base confirmation;
 10. freeze parameters, run held-outs once, and compare the overlapping cases with ViennaPS.
+
+The corrected unified-device CUDA preflight takes 7.780 s per warmed 5 nm step. Chemistry/material
+routing (29.5%), ballistic transport (28.8%), diffuse exchange (15.3%), and legacy remap (13.7%)
+dominate; level-set redistance is only 0.8%. `KRUEGER_2024_CUDA_PROFILE_REPORT_2026-07-17.md`
+therefore sets the speed work order. A one-step arithmetic 60 s projection is 5.19 h and is not an
+endpoint prediction; no blind long run follows from it.
 
 This sequence attacks both costs: fewer runs and cheaper runs, while keeping the experimental judge
 independent.

@@ -1532,3 +1532,27 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   and plot: `results/topology_petch_viennals_t1/audit.json` and
   `results/topology_petch_viennals_t1/petch_viennals_topology.png`. Profile-distance, multi-material,
   and periodic-translation extensions remain open; no Krueger endpoint or held-out data was run.
+
+### Unified CUDA parity passes and the real Krüger step bottlenecks are localized
+
+- **The device declaration is now unified and self-refusing.** The first bounded CUDA profile traced
+  particles on `cuda:0` while the level-set module followed an unset `PETCH_DEVICE` onto CPU. The
+  subprocess worker now binds both declarations to one input, and the profiler refuses a mixed
+  device receipt. A corrected RTX 4090 run used one positive warm-up and one profiled step; it
+  conserves material exactly, closes radiosity to `1.90e-12`, and has no topology event.
+- **The correction changes no measured answer.** At identical seed, operator, grid, and 0.05 s
+  physical duration, mixed versus unified CUDA differs by `0 nm` in depth, `8.59e-9 nm` in opening,
+  and at most `1.02e-7 nm` over every common-unit endpoint measurement. This passes the explicit
+  `1e-6 nm` bounded parity check.
+- **The steady cost is not level-set reinitialization.** One warmed 5 nm step takes `7.780 s`:
+  chemistry/material routing is `29.5%`, ballistic transport `28.8%`, diffuse exchange `15.3%`,
+  legacy remap `13.7%`, other work `12.0%`, and redistance only `0.8%`. The Krüger worker inherited
+  `legacy_knn`; the newer transfer operators were not silently credited. The naive fixed-step 60 s
+  arithmetic is `5.19 h`, explicitly not an endpoint benchmark.
+- **The paired 10/5 evidence supports calibration modeling, not local shape authority.** Initial
+  depth/opening/mask-thickness rates differ by `0.073%/1.433%/1.033%`; maximum and top feature-width
+  rates differ by `71.235%`. The latter is plotted rather than averaged away. No endpoint or held-out
+  data was run. Report and machine receipt:
+  `KRUEGER_2024_CUDA_PROFILE_REPORT_2026-07-17.md` and
+  `results/krueger_2024_cuda_profile_summary/audit.json`. The postprocessor/profiler/multiresolution
+  cluster passes `13` tests.

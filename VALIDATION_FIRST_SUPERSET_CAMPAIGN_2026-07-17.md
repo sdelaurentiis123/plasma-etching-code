@@ -81,13 +81,13 @@ manufactured case, or existing checkpoint can answer.
 | --- | --- | --- |
 | WP0 evidence | active/pass | Prior archives and the new 10/5 audit were copied with byte-identical SHA-256; both Vast instances are stopped. |
 | WP1 topology | implementation and real-checkpoint pass | Public-engine keyhole closes/continues/reopens without injected geometry. Real Krüger path enclosed at 56.9398 s, reopened at 58.6637 s, and completed at 60 s with exact material ledger. |
-| WP2 remap | R0 pass; R1/R2 open | Periodic exact point-to-triangle certification passes; BVH and overlap-conservative remap remain. |
-| WP3 multiresolution | initial pair and opening-definition pass; late evidence open | At 0.5 s, 10/5 depth and opening rates agree within 0.1% and 1.5%. The paper-qualified opening is integrated and certified. 20 nm changes the cell; current late restriction changes topology. A clean fine/AMR authority path remains required. |
+| WP2 remap | indexed/planar/common-refinement primitives pass; production selection open | Indexed exact transfer, planar overlap, and orientation-partitioned common refinement pass manufactured gates. The Krüger worker still inherited legacy KNN in the bounded profile, so an explicit backend-selection short pair remains before authority. |
+| WP3 multiresolution | initial pair, opening definition, and CUDA profile pass; late evidence open | At 0.5 s, 10/5 depth/opening/mask-thickness rates differ by 0.073%/1.433%/1.033%, while maximum/top width differs by 71.235%; global calibration observables may guide discrepancy modeling, but local shape is not authoritative. Unified CUDA matches the mixed-device reference to 1.02e-7 nm. |
 | WP4 AMR | promoted by R1.9 response rejection | First target is a hierarchy preserving the exact 130 × 20 nm periodic cell and reproducing uniform-5-nm short operators. No 60 s AMR run precedes manufactured transfer and 0.5 s equivalence. |
-| WP5 calibration | 10 nm sequence closed; response rejected | R19 matches coarse opening but misses depth by 28.2 nm. Old response data crossed the periodic-remap operator epoch. No more coarse candidates; wait for current-operator numerical authority. |
+| WP5 calibration | 10 nm sequence closed; controller implementation next | R19 matches coarse opening but misses depth by 28.2 nm. Old response data crossed the periodic-remap operator epoch. No more blind endpoint candidates; construct the base-only multi-fidelity trust-region controller while backend/authority gates remain explicit. |
 | WP6 authority | blocked by WP1--WP5 | Must start at t=0 with one operator and use R1.9 uniform-5-nm/AMR authority. |
 | WP7 held-out | sealed | No held-out profile has been opened. |
-| WP8 Vienna | source/manufactured audit pass; paired suite open | Vienna naturally crosses pinch-off/reopening; petch adds conservative inventory/event evidence. |
+| WP8 Vienna | T1 matched topology pass; paired suite open | At 12.5 nm ViennaLS closes at 1.9375 s, petch at 2.5625 s inside its one-cell-plus-checkpoint bound, and both reopen the prescribed cap at analytic 1.0 s. Profile-distance and multi-material cases remain. |
 
 ## 4. Dependency graph
 
