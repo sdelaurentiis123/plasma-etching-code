@@ -293,3 +293,23 @@ def test_certified_image_candidate_rows_match_exhaustive_sphere_bound():
         np.testing.assert_allclose(
             result.centroid_distance[start:stop], distance[expected],
             rtol=0.0, atol=2e-15)
+
+
+def test_periodic_float32_endpoint_roundoff_is_canonical_but_real_excursion_refuses():
+    epsilon = 5.0e-10
+    rounded = TriangleSurface3D(
+        np.asarray([
+            [-epsilon, 0.0, 0.0], [1.0 + epsilon, 0.0, 0.0],
+            [0.0, 0.5, 0.0],
+        ]),
+        np.asarray([[0, 1, 2]]), np.asarray([1]),
+        periodic_lengths=(1.0, None, None))
+    np.testing.assert_array_equal(rounded.vertices[:, 0], [0.0, 1.0, 0.0])
+
+    with pytest.raises(ValueError, match="primary cell"):
+        TriangleSurface3D(
+            np.asarray([
+                [-1e-3, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.5, 0.0],
+            ]),
+            np.asarray([[0, 1, 2]]), np.asarray([1]),
+            periodic_lengths=(1.0, None, None))

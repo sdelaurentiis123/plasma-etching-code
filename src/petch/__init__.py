@@ -110,6 +110,10 @@ from .deterministic_exchange_2d import (
 from .extruded_exchange_3d import (
     ExtrudedTriangleExchange3D, build_extruded_triangle_exchange_3d,
 )
+from .surface_partitioned_overlap_3d import (
+    PartitionedSurfaceOverlapTransfer3D,
+    build_partitioned_surface_overlap_transfer_3d,
+)
 from .experimental_boundary import (
     HWANG_GIAPIS_1997_EEDF_SHA256, HWANG_GIAPIS_1997_IEDF_SHA256,
     HWANG_GIAPIS_1997_PDF_SHA256,
@@ -327,6 +331,8 @@ __all__ = [
     "DeterministicLineExchange2D", "build_deterministic_line_exchange_2d",
     "unobstructed_crossed_string_exchange_2d",
     "ExtrudedTriangleExchange3D", "build_extruded_triangle_exchange_3d",
+    "PartitionedSurfaceOverlapTransfer3D",
+    "build_partitioned_surface_overlap_transfer_3d",
     "Jeon2022BoundaryClosure", "Jeong2023IonBoundaryClosure",
     "build_jeon_2022_boundary_state",
     "build_jeong_2023_boundary_state",

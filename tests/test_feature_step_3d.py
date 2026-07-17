@@ -959,6 +959,47 @@ def test_feature_step_explicit_indexed_remap_preserves_noop_state_bitwise():
     assert len(indexed.state_remap_diagnostics["transfer_fingerprint"]) == 64
 
 
+def test_feature_step_partitioned_overlap_preserves_noop_and_declares_fresh_surface():
+    geometry, _ = _plane_geometry()
+    result = advance_feature_step_3d(
+        geometry, _boundary(),
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=0.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        ballistic_transport="face_gather", ballistic_face_quadrature_points=3,
+        n_position=1, seed=3, reinitialize=False, transport_device="cpu",
+        surface_state_remap_backend="partitioned_overlap")
+
+    for name, value in result.surface.state.conservative_surface_fields().items():
+        np.testing.assert_array_equal(
+            result.next_surface_state.conservative_surface_fields()[name], value)
+    audit = result.state_remap_diagnostics
+    assert audit["method"] == "material_local_partitioned_exact_overlap"
+    assert audit["surface_state_remap_backend"] == "partitioned_overlap"
+    assert audit["fresh_surface_closure"] == "mechanism_declared_initial_state"
+    assert audit["total_removed_area_m2"] == 0.0
+    assert audit["total_newly_exposed_area_m2"] == 0.0
+
+
+def test_feature_step_partitioned_overlap_advances_translating_plane_with_closed_ledgers():
+    geometry, initial_height = _plane_geometry()
+    result = advance_feature_step_3d(
+        geometry, _boundary(),
+        {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        _mechanism(), etchable_material_ids=(1,), duration_s=1.0,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        ballistic_transport="face_gather", ballistic_face_quadrature_points=3,
+        n_position=1, seed=3, reinitialize=False, transport_device="cpu",
+        surface_state_remap_backend="partitioned_overlap")
+
+    final_height = _area_weighted_height(result.geometry.phi, geometry.dx)
+    assert np.isclose(initial_height - final_height, 0.02, atol=0.002)
+    for material in result.state_remap_diagnostics["materials"].values():
+        assert material["max_relative_conservation_residual"] < 1e-14
+    assert result.state_remap_diagnostics["geometry_receipt"][
+        "row_column_area_residual"] == 0.0
+
+
 def test_feature_step_diffusely_reemits_unreacted_neutrals_with_global_balance():
     geometry, _ = _plane_geometry()
     ion = SpeciesBoundaryState(

@@ -1,7 +1,7 @@
 """Immutable deterministic triangle-surface geometry for 3-D feature models.
 
-The surface is a deliberately standalone geometry primitive.  It is not wired
-into feature evolution, surface-state remapping, charging, or the public API.
+The surface is the immutable geometry authority shared by feature evolution and
+surface-state remapping.  It deliberately contains no process physics itself.
 All coordinates use one caller-declared unit; returned distances and closest
 points use that same unit.
 
@@ -284,10 +284,20 @@ class TriangleSurface3D:
                 raise ValueError("periodic lengths must be positive finite values")
             scale = max(abs(origin[axis]), abs(origin[axis] + length),
                         float(np.max(np.abs(vertices[:, axis]))), 1.0)
-            tolerance = 256.0 * np.finfo(float).eps * scale
+            # Marching-cubes and Warp geometry are float32 producers even though this immutable
+            # authority stores float64.  Accept only their roundoff-sized boundary overshoot, then
+            # canonicalize it to the exact primary-cell endpoint.  Interior vertices are never
+            # snapped, and a geometrically meaningful excursion still refuses.
+            tolerance = max(
+                256.0 * np.finfo(float).eps * scale,
+                16.0 * np.finfo(np.float32).eps * scale)
             if (np.any(vertices[:, axis] < origin[axis] - tolerance)
                     or np.any(vertices[:, axis] > origin[axis] + length + tolerance)):
                 raise ValueError("periodic surface vertices must lie in the primary cell")
+            below = vertices[:, axis] < origin[axis]
+            above = vertices[:, axis] > origin[axis] + length
+            vertices[below, axis] = origin[axis]
+            vertices[above, axis] = origin[axis] + length
             lengths.append(length)
             choices.append((-length, 0.0, length))
         lengths = tuple(lengths)

@@ -64,6 +64,9 @@ from .feature_geometry_state_3d import (
 from .feature_geometry_backend_3d import UniformFeatureGeometryBackend3D
 from .surface_mesh_3d import TriangleSurface3D
 from .surface_transfer_3d import build_surface_transfer_3d
+from .surface_partitioned_overlap_3d import (
+    build_partitioned_surface_overlap_transfer_3d,
+)
 from .threed import advect_3d, extend_velocity_3d, reinit_cr2, reinit_fsm, reinit_narrow
 
 
@@ -1259,6 +1262,115 @@ def _remap_surface_state_with_indexed_transfer(
         materials=material_diagnostics)
 
 
+def _remap_surface_state_with_partitioned_overlap(
+        state, newly_exposed_state, old_surface, new_surface, *, maximum_distance,
+        mesh_length_unit_m):
+    """Apply piecewise-planar exact overlap with explicit fresh-surface closures."""
+    required = (
+        "conservative_surface_fields", "conservative_surface_upper_bounds",
+        "with_conservative_surface_fields")
+    if any(not hasattr(state, name) for name in required):
+        raise TypeError("surface state does not implement the conservative remap contract")
+    if any(not hasattr(newly_exposed_state, name) for name in required):
+        raise TypeError("newly exposed surface state does not implement the remap contract")
+    fields = {
+        str(name): np.asarray(value, dtype=float)
+        for name, value in state.conservative_surface_fields().items()}
+    fresh = {
+        str(name): np.asarray(value, dtype=float)
+        for name, value in newly_exposed_state.conservative_surface_fields().items()}
+    upper = dict(state.conservative_surface_upper_bounds())
+    modes = (
+        dict(state.surface_field_remap_modes())
+        if hasattr(state, "surface_field_remap_modes")
+        else {name: "conservative" for name in fields})
+    if (not fields or set(fresh) != set(fields) or set(upper) != set(fields)
+            or set(modes) != set(fields)
+            or any(mode not in {"conservative", "intensive"} for mode in modes.values())
+            or any(value.shape != (len(old_surface.faces),) for value in fields.values())
+            or any(value.shape != (len(new_surface.faces),) for value in fresh.values())):
+        raise ValueError("surface-state overlap fields and fresh-surface closure must match")
+    transfer = build_partitioned_surface_overlap_transfer_3d(
+        old_surface, new_surface, maximum_normal_distance=maximum_distance)
+    output = {}
+    applications = {}
+    for name, value in fields.items():
+        if modes[name] == "conservative":
+            application = transfer.apply_extensive(
+                value, newly_exposed_density=fresh[name])
+        else:
+            application = transfer.apply_intensive(
+                value, uncovered_fill=fresh[name])
+        result = application.values
+        tolerance = 128.0 * np.finfo(float).eps * max(
+            float(np.max(np.abs(result), initial=0.0)), 1.0)
+        if np.any(result < -tolerance):
+            raise RuntimeError("surface overlap produced a negative state density")
+        if upper[name] is not None and np.any(result > float(upper[name]) + tolerance):
+            raise ValueError("surface contraction exceeds bounded extensive capacity")
+        output[name] = np.maximum(result, 0.0)
+        applications[name] = application
+
+    physical_area_scale = float(mesh_length_unit_m) ** 2
+    material_diagnostics = {}
+    for material in sorted(set(old_surface.face_material_id.tolist())):
+        old_selected = old_surface.face_material_id == material
+        new_selected = new_surface.face_material_id == material
+        targets = {}
+        achieved = {}
+        removed = {}
+        exposed = {}
+        residuals = []
+        for name, application in applications.items():
+            if modes[name] == "conservative":
+                ledger = application.material_ledger[int(material)]
+                targets[name] = ledger["old_inventory"] * physical_area_scale
+                achieved[name] = ledger["new_inventory"] * physical_area_scale
+                removed[name] = ledger["removed_inventory"] * physical_area_scale
+                exposed[name] = ledger["newly_exposed_inventory"] * physical_area_scale
+                residuals.append(ledger["relative_balance_error"])
+            else:
+                achieved[name] = float(np.dot(
+                    output[name][new_selected],
+                    new_surface.face_area[new_selected])) * physical_area_scale
+        material_diagnostics[int(material)] = dict(
+            old_face_count=int(np.count_nonzero(old_selected)),
+            new_face_count=int(np.count_nonzero(new_selected)),
+            old_area_m2=float(
+                np.sum(old_surface.face_area[old_selected]) * physical_area_scale),
+            new_area_m2=float(
+                np.sum(new_surface.face_area[new_selected]) * physical_area_scale),
+            target_field_integrals=targets,
+            remapped_field_integrals=achieved,
+            removed_field_integrals=removed,
+            newly_exposed_field_integrals=exposed,
+            removed_area_m2=float(
+                np.sum(transfer.old_uncovered_area[old_selected]) * physical_area_scale),
+            newly_exposed_area_m2=float(
+                np.sum(transfer.new_uncovered_area[new_selected]) * physical_area_scale),
+            field_remap_modes=dict(modes),
+            max_relative_conservation_residual=float(max(residuals, default=0.0)))
+    return state.with_conservative_surface_fields(output), dict(
+        method="material_local_partitioned_exact_overlap",
+        transfer_fingerprint=transfer.fingerprint,
+        old_patch_count=transfer.old_patch_count,
+        new_patch_count=transfer.new_patch_count,
+        candidate_patch_pair_count=transfer.candidate_patch_pair_count,
+        positive_patch_pair_count=transfer.positive_patch_pair_count,
+        total_overlap_area_m2=float(
+            np.sum(transfer.overlap_area) * physical_area_scale),
+        total_removed_area_m2=float(
+            np.sum(transfer.old_uncovered_area) * physical_area_scale),
+        total_newly_exposed_area_m2=float(
+            np.sum(transfer.new_uncovered_area) * physical_area_scale),
+        maximum_allowed_distance=float(maximum_distance),
+        periodic_lengths=old_surface.periodic_lengths,
+        fresh_surface_closure="mechanism_declared_initial_state",
+        geometry_receipt=dict(transfer.geometry_receipt),
+        patch_receipts=tuple(dict(item) for item in transfer.patch_receipts),
+        materials=material_diagnostics)
+
+
 def _select_surface_fluxes(fluxes, selected_face, face_count, species_role=None):
     selected_face = np.asarray(selected_face, dtype=int)
     role = None if species_role is None else dict(species_role)
@@ -1736,9 +1848,11 @@ def advance_feature_step_3d(
     if topology_change_policy not in ("refuse", "continue_gas_cavity"):
         raise ValueError(
             "topology_change_policy must be 'refuse' or 'continue_gas_cavity'")
-    if surface_state_remap_backend not in ("legacy_knn", "indexed_knn"):
+    if surface_state_remap_backend not in (
+            "legacy_knn", "indexed_knn", "partitioned_overlap"):
         raise ValueError(
-            "surface_state_remap_backend must be 'legacy_knn' or 'indexed_knn'")
+            "surface_state_remap_backend must be 'legacy_knn', 'indexed_knn', or "
+            "'partitioned_overlap'")
     if ballistic_transport == "face_gather" and (
             charging_poisson_system is not None or nodal_potential_v is not None):
         raise ValueError("deterministic ballistic face gather does not yet trace electric fields")
@@ -2451,17 +2565,29 @@ def advance_feature_step_3d(
     remap_periodic_lengths = (
         tuple(((np.asarray(geometry.phi.shape) - 1) * geometry.dx)[:2]) + (None,)
         if profile_periodic_lateral else (None, None, None))
-    if surface_state_remap_backend == "indexed_knn":
+    if surface_state_remap_backend in ("indexed_knn", "partitioned_overlap"):
         old_surface = TriangleSurface3D(
             verts, faces[active_face], face_material[active_face],
             periodic_lengths=remap_periodic_lengths)
         new_surface = TriangleSurface3D(
             next_verts, next_faces[next_active_face], next_face_material[next_active_face],
             periodic_lengths=remap_periodic_lengths)
-        next_surface_state, remap_diagnostics = _remap_surface_state_with_indexed_transfer(
-            surface.state, old_surface, new_surface, neighbor_count=4,
-            maximum_distance=remap_maximum_distance,
-            mesh_length_unit_m=geometry.mesh_length_unit_m)
+        if surface_state_remap_backend == "indexed_knn":
+            next_surface_state, remap_diagnostics = _remap_surface_state_with_indexed_transfer(
+                surface.state, old_surface, new_surface, neighbor_count=4,
+                maximum_distance=remap_maximum_distance,
+                mesh_length_unit_m=geometry.mesh_length_unit_m)
+        else:
+            if material_resolved_mechanism:
+                newly_exposed_state = mechanism.initial_state_by_material(
+                    next_face_material[next_active_face])
+            else:
+                newly_exposed_state = mechanism.initial_state((next_active_face.size,))
+            next_surface_state, remap_diagnostics = (
+                _remap_surface_state_with_partitioned_overlap(
+                    surface.state, newly_exposed_state, old_surface, new_surface,
+                    maximum_distance=remap_maximum_distance,
+                    mesh_length_unit_m=geometry.mesh_length_unit_m))
     else:
         next_surface_state, remap_diagnostics = conservative_remap_surface_state(
             surface.state, centroids[active_face], areas[active_face],
