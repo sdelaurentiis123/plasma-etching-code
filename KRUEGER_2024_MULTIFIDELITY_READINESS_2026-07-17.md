@@ -2,7 +2,7 @@
 
 Date: 2026-07-17
 
-Status: controller implemented; real campaign correctly blocked before another parameter proposal
+Status: remap selected; one clean fine-grid anchor required before another parameter proposal
 
 ## Result
 
@@ -43,32 +43,29 @@ No benchmark values are embedded in it.
 
 `scripts/krueger_2024_multifidelity_readiness.py` applies the evidence rules to Krüger without
 opening the oxygen/power transfer table. It verifies hashes linking the pre-run R1.9 manifest, the
-completed run, the rejected response evaluation, the paired 10/5 preflight, the CUDA summary, and
-the two-row base calibration table.
+completed run, the rejected response evaluation, the paired 10/5 preflight, the CUDA summary, the
+paired 5 nm remap selection, and the two-row base calibration table.
 
 ## Why the real campaign is blocked
 
-The machine receipt reports five concrete blockers.
+The machine receipt now reports four concrete blockers. The former remap blocker is closed:
+`common_refinement` completed the paired 5 nm gate with exact material ledgers and a maximum
+relative remap residual of `6.61e-16`; commit `12aee41` sealed the backend through the pilot,
+checkpoint resume, freeze, and transfer supervisor.
 
-### 1. The production remap backend is not frozen
-
-The paired 10/5 and CUDA preflights inherited `legacy_knn`. Indexed, overlap, and common-refinement
-operators now exist, but their Krüger same-state answer/cost comparison has not yet been run. A
-long authority endpoint cannot silently choose a different state-transfer operator.
-
-### 2. R1.9 belongs to a prior operator epoch
+### 1. R1.9 belongs to a prior operator epoch
 
 The R1.9 manifest hashes `feature_step_3d.py` as
-`61dbef70...`; the current file hashes as `ca9c4bf0...`, and the current epoch additionally includes
+`61dbef70...`; the current file hashes as `c47671e5...`, and the current epoch additionally includes
 the separately checksummed shared surface/transport/mechanism modules. The old response remains
 historical development evidence, not a current derivative.
 
-### 3. There is no current-epoch high-fidelity endpoint anchor
+### 2. There is no current-epoch high-fidelity endpoint anchor
 
 No clean uniform-5-nm or certified-AMR 60 s endpoint exists under the current operator. Therefore
 the high-minus-low discrepancy at the proposed center is unknown.
 
-### 4. The 0.5 s pair is not an endpoint discrepancy
+### 3. The 0.5 s pair is not an endpoint discrepancy
 
 The initial 10/5 pair is informative:
 
@@ -80,7 +77,7 @@ It sizes shallow numerical error and identifies a local-shape problem. It cannot
 60 s or substituted for an endpoint correction because the completed R17/R19 trajectories already
 showed access, polymer state, mask geometry, and oxide removal feeding back nonlinearly over time.
 
-### 5. A current first-order response is not identified
+### 4. A current first-order response is not identified
 
 For two parameters, an unconstrained affine low-fidelity response needs at least three spanning
 current-epoch endpoint observations. A fully identified affine discrepancy correction likewise needs
@@ -91,8 +88,7 @@ selected future operator. The generic controller reports this rather than invent
 
 ```mermaid
 flowchart LR
-    A[Bounded remap-backend comparison] --> B[Freeze one operator epoch]
-    B --> C[One clean 5 nm or certified-AMR base anchor at fixed R1.9 pair]
+    C[One clean uniform-5-nm base anchor at fixed R1.9 pair]
     C -->|opening and depth pass| D[Freeze calibration; prepare blind reveal]
     C -->|base miss| E[Anchor high-minus-low discrepancy]
     E --> F[Earn current-epoch response direction]
@@ -117,5 +113,7 @@ direction must then be earned before the one permitted fine correction.
 Machine receipt:
 `results/krueger_2024_multifidelity_readiness/audit.json`.
 
-Focused multi-fidelity, readiness, calibration, seal, and R1.9 evaluation tests pass: `31 passed`.
-No simulation, GPU instance, parameter proposal, held-out read, or reveal was performed.
+The remap/readiness/report/seal focused cluster passes: `27 passed`. The paired base-only remap
+simulation used the checksum-bound RTX 4090 receipt documented in
+`KRUEGER_2024_REMAP_SELECTION_2026-07-17.md`; no parameter proposal, held-out read, or reveal was
+performed.

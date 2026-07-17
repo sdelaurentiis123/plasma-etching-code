@@ -1663,8 +1663,8 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   pilot fingerprint, refuses backend changes on resume, requires one nonlegacy backend across the
   10/5 endpoints, and replays the frozen value into every blind transfer case. The aggregate bug
   that could treat a lone completing backend as paired is fixed; readiness accepts only two complete
-  conservative 5 nm receipts. The remap/readiness/report cluster passes `25` focused tests before
-  the report extension; the repository-wide suite remains pending after these final changes.
+  conservative 5 nm receipts. The remap/readiness/report cluster passes `27` focused tests, and the
+  repository-wide suite passes `962` with one expected skip in `181.39 s`.
 - **Next:** regenerate the checksum-bound readiness receipt with the paired audit, then run one clean
   current-epoch uniform-5-nm base anchor at the fixed R1.9 pair. No optimizer sweep and no held-out
   reveal precede that endpoint. Report, static plot, raw receipt, and environment manifest:

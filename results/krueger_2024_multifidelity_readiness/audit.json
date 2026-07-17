@@ -11,16 +11,11 @@
   },
   "blockers": [
     {
-      "code": "remap_backend_not_selected",
-      "evidence": "legacy_knn (engine default used by this worker)",
-      "required_resolution": "run one bounded, same-state legacy/indexed/common-refinement comparison and freeze the chosen backend in every operator manifest"
-    },
-    {
       "code": "r19_response_belongs_to_prior_operator_epoch",
       "evidence": {
         "changed_shared_sources": {
           "src/petch/feature_step_3d.py": {
-            "current": "ca9c4bf0b5c2a20f4711737641da1201db82af0bebd24201863a5eb2fcbee417",
+            "current": "c47671e52153b9d4c6664a7b07b2dcf51e3ba59d41597dc3741a2a0da46fd614",
             "r19": "61dbef70d20c5d9d59b2be732690cc7ba50e812e638b87a8f8461418f19b7cdc"
           }
         },
@@ -76,7 +71,7 @@
   },
   "generator": {
     "path_name": "krueger_2024_multifidelity_readiness.py",
-    "sha256": "116dcc4e2bbbc8a9d0f8cff2043016c37937071f664694c0e05de504d73b3992"
+    "sha256": "45ea96cebf9c949872a412f092ee6cb60643e50cfa77c4a555f54eaa5cde0360"
   },
   "held_out_profile_data_read": false,
   "inputs": {
@@ -99,6 +94,10 @@
     "r19_run": {
       "path_name": "audit.json",
       "sha256": "b06c07aae21d26b52dd111866c0a381f8f61ad044e330e5ed826d88f3140765f"
+    },
+    "remap_audit": {
+      "path_name": "audit.json",
+      "sha256": "45a4b60fa3a69dfd735d7af4edfb1299493f1b0a3e657cc339b31315d8b80dcb"
     }
   },
   "model_management_contract": {
@@ -110,7 +109,6 @@
     "trial_acceptance": "actual/predicted high-fidelity merit reduction ratio"
   },
   "next_bounded_sequence": [
-    "explicitly select the remap backend with a same-state short comparison",
     "run one clean current-epoch high-fidelity base anchor at the fixed R1.9 pair",
     "if the anchor meets base tolerances, freeze without another parameter step",
     "if it misses, update the discrepancy receipt and earn a current-epoch direction before one safeguarded high-fidelity correction"
@@ -118,20 +116,20 @@
   "operator_epochs": {
     "changed_shared_sources": {
       "src/petch/feature_step_3d.py": {
-        "current": "ca9c4bf0b5c2a20f4711737641da1201db82af0bebd24201863a5eb2fcbee417",
+        "current": "c47671e52153b9d4c6664a7b07b2dcf51e3ba59d41597dc3741a2a0da46fd614",
         "r19": "61dbef70d20c5d9d59b2be732690cc7ba50e812e638b87a8f8461418f19b7cdc"
       }
     },
     "compatible": false,
     "current": {
-      "git_revision": "fc43a5f25ce825e599c64bacf83481e9ca1eee11",
-      "sha256": "2c50a367a1f122dace066e1e9f5ee8cff4ad6c9632489e12e3b9c03e209733ba",
+      "git_revision": "c44434f096621a62d9b14548ab9f6b0b1d3fb504",
+      "sha256": "4cc6dbdf7416bb310ebd8d92e6e87d557fa83ff9dde6b6b84a3517bd0160973c",
       "sources": {
         "src/petch/amorphous_carbon_mask.py": "17e8f5cc238bdc4b066a699775e228a0a5883e92550a87c641a40c3eed5c2a77",
         "src/petch/boundary_transport_3d.py": "b46b07375aef971434de2fdbe86fdc94d839556216205eb5a1e90e2f3537f483",
-        "src/petch/feature_step_3d.py": "ca9c4bf0b5c2a20f4711737641da1201db82af0bebd24201863a5eb2fcbee417",
-        "src/petch/material_mechanism_3d.py": "4f24f6af79cfcc1533b5cd47008ace5831ed5fb2d9496c4ce5e29aeb63b4be39",
-        "src/petch/surface_kinetics.py": "f5f8487d59a91c77b718fd4a481b626cf4f80353134bcc254de350cccfdcf869",
+        "src/petch/feature_step_3d.py": "c47671e52153b9d4c6664a7b07b2dcf51e3ba59d41597dc3741a2a0da46fd614",
+        "src/petch/material_mechanism_3d.py": "ca94a524f60a56ba62108c1414b1e7e376667f6edde186ce74c673776bd4dfff",
+        "src/petch/surface_kinetics.py": "340e0d2d26a70ced67055a67fdfa307d96a5370c33140636b64c63d1cee69c15",
         "src/petch/surface_mesh_3d.py": "9432ae558a5f10c76d1e521dee188bdcdfb76e0fc50768aaf33cd6ee7abe4347"
       }
     },
@@ -153,7 +151,19 @@
       }
     }
   },
-  "readiness_sha256": "0ba65ec9917da80caf17372353ac6d6a5fecf01ec22923af2ecf15f7c02d986e",
+  "readiness_sha256": "2df067fc623e7c44525cc6e6685889f46b693286d6707fc4e0c403bdd2571cc7",
+  "remap_operator_selection": {
+    "maximum_material_ledger_residual_units_m2": {
+      "common_refinement": 0.0,
+      "indexed_knn": 0.0
+    },
+    "maximum_remap_relative_conservation_residual": {
+      "common_refinement": 6.607841520475957e-16,
+      "indexed_knn": 2.6431366081903827e-16
+    },
+    "selected_backend": "common_refinement",
+    "selection_basis": "paired 5 nm completion against indexed nearest-surface transfer; common refinement retained as the conservative geometric authority"
+  },
   "schema": "petch.krueger_2024_multifidelity_readiness.v1",
   "scientific_status": "base-only model-management readiness audit; no simulation, parameter proposal, calibration authority, or held-out reveal",
   "short_refinement_evidence": {
