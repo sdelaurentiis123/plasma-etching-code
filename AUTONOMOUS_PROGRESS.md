@@ -1720,3 +1720,24 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   `results/krueger_2024_base_authority_5nm_efaa070_remap_forensic/audit.json`. The next action is the
   single preregistered clean `t=0 -> 60 s` base anchor under commit `efaa070`; only a passing base
   endpoint can freeze the operator and authorize the untouched oxygen/power predictions.
+
+### Local level-set gradients close both late Krüger visibility refusals
+
+- **The apparent launch failure was a target-normal defect.** At the preserved 5 nm and 10 nm
+  checkpoints, the failing origins were in gas and exact rays reached real gas-to-solid crossings.
+  Five triangles in each mesh were oriented backward because the old quarter-cell level-set probe
+  crossed a neighboring interface in a thin fold. This produced 12 of 36,064 and 20 of 12,928
+  solid-facing classifications, respectively.
+- **Revision `c986d2a` makes orientation local and first-principles.** The engine retains each
+  geometric triangle normal and aligns it with `-grad(phi)`, using the exact derivative of the
+  trilinear nodal level set at the triangle centroid. A manufactured thin-fold regression binds the
+  failure; a true level-set critical point refuses rather than guessing.
+- **Both real failure states now pass and advance.** Full corrected visibility passes in 0.436 s
+  (5 nm) and 2.047 s (10 nm) on CPU. One exact next engine step then completes at each resolution
+  with zero material-ledger residual and bounded motion: step 204 at 5 nm (0.0556 cells) and step
+  316 at 10 nm (0.2933 cells). The repository suite passes 974 tests with one expected skip.
+- **Claim boundary:** no held-out profile was read, and the CPU candidates are not replacement
+  authority endpoints. Compute stops here. The next expensive action remains one checksum-bound
+  base completion, followed by the preregistered freeze-or-one-correction gate. Report and receipt:
+  `KRUEGER_2024_NORMAL_ORIENTATION_CLOSURE_2026-07-18.md` and
+  `results/curated/krueger_2024_normal_orientation_closure_2026-07-18.json`.

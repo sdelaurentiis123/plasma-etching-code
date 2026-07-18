@@ -1,0 +1,85 @@
+{
+  "schema": "petch.krueger-2024.normal-orientation-closure.v1",
+  "date": "2026-07-18",
+  "status": "real_checkpoint_failure_closed",
+  "scientific_result": false,
+  "held_out_profile_data_read": false,
+  "source_revision": "9a579fe0aa6591c0f11ef34539383cf386450275",
+  "fix_revision": "c986d2a",
+  "root_cause": {
+    "classification": "nonlocal_level_set_normal_orientation",
+    "old_rule": "orient each marching-cubes triangle from phi at centroid plus/minus 0.25 dx",
+    "failure": "a probe crossed a neighboring interface in a thin fold, so a valid gas-to-solid crossing was labeled solid-facing",
+    "new_rule": "retain the geometric triangle normal and orient it toward -grad(phi), using the exact local derivative of the trilinear nodal level set at the face centroid"
+  },
+  "checkpoints": {
+    "uniform_5_nm": {
+      "checkpoint_sha256": "de399f7f1877e20cb1e6d067b0f452725eb68fa823d841a3bf9d5ae50e852c2a",
+      "input_step": 203,
+      "input_physical_time_s": 12.443006309981675,
+      "face_count": 4508,
+      "old_misoriented_face_count": 5,
+      "old_solid_facing_ray_count": 12,
+      "ray_count": 36064,
+      "corrected_visibility": {
+        "status": "pass",
+        "wall_time_s": 0.436,
+        "float64_evaluated_count": 0,
+        "open_escape_count": 1936,
+        "maximum_wrap_count": 384,
+        "final_horizon_wraps": 1024
+      },
+      "one_step_cpu_closure": {
+        "status": "accepted_candidate",
+        "output_step": 204,
+        "output_physical_time_s": 12.45882545248166,
+        "step_duration_s": 0.01581914249998464,
+        "wall_time_s": 483.297,
+        "maximum_displacement_cells": 0.055602914556800324,
+        "maximum_material_ledger_residual_units_m2": 0.0,
+        "etch_depth_nm": 167.66618324403183,
+        "mask_opening_nm": 75.43395883281734
+      }
+    },
+    "uniform_10_nm": {
+      "checkpoint_sha256": "41b98d624d510c6fd7213a5d8eb9aa44939d69e1d44f3e002c295b0889b9ec33",
+      "input_step": 315,
+      "input_physical_time_s": 43.60689990030307,
+      "face_count": 1616,
+      "old_misoriented_face_count": 5,
+      "old_solid_facing_ray_count": 20,
+      "ray_count": 12928,
+      "corrected_visibility": {
+        "status": "pass",
+        "wall_time_s": 2.047,
+        "float64_evaluated_count": 1,
+        "float64_recovered_hit_count": 0,
+        "open_escape_count": 503,
+        "maximum_wrap_count": 1681,
+        "final_horizon_wraps": 1686
+      },
+      "one_step_cpu_closure": {
+        "status": "accepted_candidate",
+        "output_step": 316,
+        "output_physical_time_s": 43.71711565309293,
+        "step_duration_s": 0.11021575278985686,
+        "wall_time_s": 92.351,
+        "maximum_displacement_cells": 0.29330388673213614,
+        "maximum_material_ledger_residual_units_m2": 0.0,
+        "etch_depth_nm": 614.2375468423029,
+        "mask_opening_nm": 47.24070871301502
+      }
+    }
+  },
+  "verification": {
+    "manufactured_thin_fold_regression": "pass",
+    "repository_test_suite": {
+      "passed": 974,
+      "skipped": 1,
+      "wall_time_s": 177.06
+    },
+    "source_sha256": "da085b8431c8dccabc2e64b4eb08d9c5e2be126199020277695b975d0c4b303e",
+    "test_sha256": "1e57587d56d21959512e9ba094c36d483dadab1de6c9ec5c09bce614873f424d"
+  },
+  "claim_boundary": "This closes the two preserved transport refusals. The CPU one-step candidates are diagnostic cross-device continuations and are not authoritative calibration endpoints or held-out predictions."
+}
