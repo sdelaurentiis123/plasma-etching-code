@@ -60,9 +60,81 @@ def make_trench_3d(Lx, Ly, Lz, dx, trench_width, mask_th, sub_top, hole=False):
                 trench_width=trench_width, hole=hole)
 
 
+def _cancel_duplicate_marching_cubes_faces_3d(verts, faces):
+    """Reduce coincident indexed faces as an oriented surface chain.
+
+    Marching cubes can emit the same tiny face twice with opposite winding at an exact ambiguous
+    grid crossing.  Those two faces have zero net oriented surface and must both disappear.  Same-
+    orientation duplicates are redundant copies of one surface and collapse to one deterministic
+    representative.  Geometrically distinct positive-area slivers are never area-filtered here.
+    """
+    vertices = np.asarray(verts, dtype=float)
+    triangles = np.asarray(faces, dtype=int)
+    if triangles.ndim != 2 or triangles.shape[1:] != (3,):
+        raise ValueError("duplicate-face cancellation requires triangle indices")
+    if not len(triangles):
+        return triangles.copy()
+    canonical = np.sort(triangles, axis=1)
+    _unique, inverse, count = np.unique(
+        canonical, axis=0, return_inverse=True, return_counts=True)
+    keep = np.ones(len(triangles), dtype=bool)
+    for group in np.flatnonzero(count > 1):
+        selected = np.flatnonzero(inverse == group)
+        tri = vertices[triangles[selected]]
+        normal = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+        reference = normal[0]
+        alignment = normal @ reference
+        positive = selected[alignment > 0.0]
+        negative = selected[alignment < 0.0]
+        if len(positive) == len(negative):
+            keep[selected] = False
+            continue
+        majority = positive if len(positive) > len(negative) else negative
+        keep[selected] = False
+        keep[int(majority[0])] = True
+    return triangles[keep]
+
+
+def _certify_extracted_surface_topology_3d(verts, faces, domain_size):
+    """Refuse a marching-cubes surface with an interior hole or nonmanifold edge."""
+    vertices = np.asarray(verts, dtype=float)
+    triangles = np.asarray(faces, dtype=int)
+    domain = np.asarray(domain_size, dtype=float)
+    if (vertices.ndim != 2 or vertices.shape[1:] != (3,)
+            or triangles.ndim != 2 or triangles.shape[1:] != (3,)
+            or domain.shape != (3,) or np.any(domain <= 0.0)):
+        raise ValueError("invalid extracted-surface topology inputs")
+    edge = np.sort(
+        triangles[:, [[0, 1], [1, 2], [2, 0]]].reshape(-1, 2), axis=1)
+    unique, count = np.unique(edge, axis=0, return_counts=True)
+    nonmanifold = unique[count > 2]
+    if len(nonmanifold):
+        raise RuntimeError(
+            f"marching-cubes surface contains {len(nonmanifold)} nonmanifold edges")
+    unmatched = unique[count == 1]
+    if not len(unmatched):
+        return
+    endpoint = vertices[unmatched]
+    scale = max(float(np.max(domain)), float(np.max(np.abs(vertices))), 1.0)
+    tolerance = 16.0 * np.finfo(np.float32).eps * scale
+    on_domain_boundary = np.zeros(len(unmatched), dtype=bool)
+    for axis in range(3):
+        on_domain_boundary |= np.all(
+            np.abs(endpoint[:, :, axis]) <= tolerance, axis=1)
+        on_domain_boundary |= np.all(
+            np.abs(endpoint[:, :, axis] - domain[axis]) <= tolerance, axis=1)
+    interior_count = int(np.sum(~on_domain_boundary))
+    if interior_count:
+        raise RuntimeError(
+            "marching-cubes surface contains "
+            f"{interior_count} unmatched interior edges")
+
+
 def extract_mesh_3d(phi, dx):
-    """Marching cubes -> triangle mesh. Returns verts (physical), faces, centroids, areas."""
-    verts, faces, _, _ = measure.marching_cubes(phi, level=0.0, spacing=(dx, dx, dx))
+    """Marching cubes -> topology-certified triangle mesh and derived geometry."""
+    field = np.asarray(phi, dtype=float)
+    verts, faces, _, _ = measure.marching_cubes(
+        field, level=0.0, spacing=(dx, dx, dx), allow_degenerate=False)
     # Warp consumes float32 vertices. Recompute every derived geometric quantity from those exact
     # returned vertices; retaining areas from the pre-cast marching-cubes coordinates breaks the
     # mesh/area conservation contract by O(float32 epsilon) on small physical cells.
@@ -72,13 +144,19 @@ def extract_mesh_3d(phi, dx):
     centroids = v.mean(axis=1)
     cross = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
     areas = 0.5 * np.linalg.norm(cross, axis=1)
-    # Exact grid-aligned CSG intersections can make marching cubes emit duplicate-vertex,
-    # zero-measure triangles. They contain no surface and cannot carry flux; retain every triangle
-    # above a float32 scale-aware roundoff floor and refuse no physical geometry downstream.
-    nondegenerate = areas > 32.0 * np.finfo(np.float32).eps * dx * dx
-    faces = faces[nondegenerate]
-    centroids = centroids[nondegenerate]
-    areas = areas[nondegenerate]
+    # Retain every representable positive-area triangle.  An earlier float32-scaled area floor
+    # removed topologically necessary slivers from otherwise watertight level-set surfaces, opening
+    # ray-sized interior holes.  Skimage removes true degeneracies above; this strict final guard
+    # handles only a triangle that becomes exactly zero-area after the required float32 cast.
+    nondegenerate = areas > 0.0
+    faces = _cancel_duplicate_marching_cubes_faces_3d(
+        verts, faces[nondegenerate]).astype(np.int32, copy=False)
+    v = verts.astype(np.float64)[faces]
+    centroids = v.mean(axis=1)
+    cross = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
+    areas = 0.5 * np.linalg.norm(cross, axis=1)
+    _certify_extracted_surface_topology_3d(
+        verts, faces, (np.asarray(field.shape) - 1) * float(dx))
     return verts, faces, centroids, areas
 
 
@@ -99,18 +177,29 @@ def extract_mesh_3d_gpu(phi, dx):
             _mc_cache[(nx, ny, nz)] = mc
         fwp = wp.array(phi.astype(np.float32), dtype=float, device=DEVICE)
         mc.surface(fwp, 0.0)
-        verts = mc.verts.numpy().astype(np.float64) * dx      # node-index coords -> physical
-        faces = mc.indices.numpy().reshape(-1, 3)
+        verts = (mc.verts.numpy() * dx).astype(np.float32)  # node-index coords -> physical
+        faces = mc.indices.numpy().reshape(-1, 3).astype(np.int32)
         if len(faces) == 0:
             raise RuntimeError("GPU MC produced no faces")
     except Exception:
         # Warp MarchingCubes can fail on thin dims / certain Warp versions -> CPU skimage (reliable).
         return extract_mesh_3d(phi, dx)
-    v = verts[faces]
+    # Match the CPU authority: all derived geometry comes from the exact float32 vertices consumed
+    # by Warp, true zero-area faces alone are removed, and an interior hole refuses.
+    v = verts.astype(np.float64)[faces]
     centroids = v.mean(axis=1)
     cross = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
     areas = 0.5 * np.linalg.norm(cross, axis=1)
-    return verts.astype(np.float32), faces.astype(np.int32), centroids, areas
+    positive = areas > 0.0
+    faces = _cancel_duplicate_marching_cubes_faces_3d(
+        verts, faces[positive]).astype(np.int32, copy=False)
+    v = verts.astype(np.float64)[faces]
+    centroids = v.mean(axis=1)
+    cross = np.cross(v[:, 1] - v[:, 0], v[:, 2] - v[:, 0])
+    areas = 0.5 * np.linalg.norm(cross, axis=1)
+    _certify_extracted_surface_topology_3d(
+        verts, faces, (np.asarray(phi.shape) - 1) * float(dx))
+    return verts, faces, centroids, areas
 
 
 def _edge_adjacency(faces):

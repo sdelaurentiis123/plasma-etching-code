@@ -18,7 +18,11 @@ from petch.feature_step_3d import (
     _face_material_ids,
     make_rectangular_trench_geometry_3d,
 )
-from petch.threed import extract_mesh_3d
+from petch.threed import (
+    _cancel_duplicate_marching_cubes_faces_3d,
+    _certify_extracted_surface_topology_3d,
+    extract_mesh_3d,
+)
 
 
 def test_feature_step_reexports_exact_dependency_neutral_authorities():
@@ -160,6 +164,59 @@ def test_uniform_backend_surface_extraction_is_exact_reference_parity():
         surface.areas_m2, expected[3] * geometry.mesh_length_unit_m ** 2)
     assert not surface.vertices_mesh.flags.writeable
     assert not surface.faces.flags.writeable
+
+
+def test_extract_mesh_retains_positive_slivers_needed_for_topological_closure():
+    # One barely positive interior node creates a closed subcell octahedron.  Every face is much
+    # smaller than the former float32-scaled area floor, but all eight faces are representable and
+    # topologically necessary.  Removing them converts a closed scalar-field contour into a hole.
+    phi = -np.ones((3, 3, 3))
+    phi[1, 1, 1] = 1.0e-3
+
+    vertices, faces, _centroids, areas = extract_mesh_3d(phi, 1.0)
+    edge = np.sort(
+        faces[:, [[0, 1], [1, 2], [2, 0]]].reshape(-1, 2), axis=1)
+    _unique, count = np.unique(edge, axis=0, return_counts=True)
+    former_floor = 32.0 * np.finfo(np.float32).eps
+
+    assert len(faces) == 8
+    assert np.all((areas > 0.0) & (areas < former_floor))
+    assert np.array_equal(count, np.full_like(count, 2))
+    _certify_extracted_surface_topology_3d(vertices, faces, (2.0, 2.0, 2.0))
+
+
+def test_extracted_surface_topology_refuses_an_interior_hole():
+    vertices = np.asarray([
+        [0.8, 0.8, 0.8],
+        [1.2, 0.8, 0.8],
+        [1.0, 1.2, 0.8],
+        [1.0, 1.0, 1.2],
+    ])
+    # A closed tetrahedron with one missing face has three unmatched interior edges.
+    faces = np.asarray([[0, 1, 2], [0, 3, 1], [1, 3, 2]])
+
+    with pytest.raises(RuntimeError, match="3 unmatched interior edges"):
+        _certify_extracted_surface_topology_3d(
+            vertices, faces, (2.0, 2.0, 2.0))
+
+
+def test_marching_cubes_duplicate_faces_reduce_as_an_oriented_surface_chain():
+    vertices = np.asarray([
+        [0.5, 0.5, 0.5],
+        [1.0, 0.5, 0.5],
+        [0.5, 1.0, 0.5],
+        [0.5, 0.5, 1.0],
+    ])
+    faces = np.asarray([
+        [0, 1, 2],
+        [0, 2, 1],  # opposite-winding duplicate pair: both cancel
+        [0, 1, 3],
+        [0, 1, 3],  # same-winding duplicate pair: one remains
+    ])
+
+    reduced = _cancel_duplicate_marching_cubes_faces_3d(vertices, faces)
+
+    assert np.array_equal(reduced, np.asarray([[0, 1, 3]]))
 
 
 def test_uniform_surface_bridge_preserves_exact_legacy_writable_array_contract():
