@@ -1741,3 +1741,20 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   base completion, followed by the preregistered freeze-or-one-correction gate. Report and receipt:
   `KRUEGER_2024_NORMAL_ORIENTATION_CLOSURE_2026-07-18.md` and
   `results/curated/krueger_2024_normal_orientation_closure_2026-07-18.json`.
+
+### The Krüger reveal gate now binds the actual R1.9 proposal and clean launch epoch
+
+- **A stale handoff seam was closed before it could contaminate validation.** The freeze utility
+  understood the superseded axisymmetric-secant schema but not the current R1.9 trust proposal, and
+  it did not require the 10/5 launch manifests. The archived proposal also carried a transient
+  protocol hash. It was regenerated from the same sealed base-only inputs against the committed
+  protocol; the physical pair is byte-for-byte unchanged.
+- **Revision `28ffd45` makes source lineage executable.** Freeze now requires paired checksum-valid
+  10/5 launch manifests, one clean revision/archive, the declared 5/10 nm refinement relationship,
+  common-refinement remap, exact R1.9 parameters, and launched executable hashes matching the code
+  being frozen. These receipts are embedded in the reveal.
+- **The old partial launches refuse for the right reason.** Their `feature_step_3d.py` hash predates
+  the local-gradient normal repair, so they remain diagnostics and cannot authorize held-out work.
+  A new clean `t=0` authority epoch is mechanically required. No held-out data, simulation, or GPU
+  was used in this preflight. The suite passes 976 tests with one expected skip. Report:
+  `KRUEGER_2024_REVEAL_GATE_PREFLIGHT_2026-07-18.md`.
