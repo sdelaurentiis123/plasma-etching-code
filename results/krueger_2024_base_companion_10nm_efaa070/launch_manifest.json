@@ -1,0 +1,68 @@
+{
+  "schema": "petch.krueger-2024.base-refinement-companion.v1",
+  "launch_sha256": "e94f1d7a321c15328ee2fe177be8821d2d30f6c8f3b7029e16575445c7c0b0d6",
+  "protocol_id": "K24-PETCH-R1.9",
+  "scientific_status": "same-operator 10-nm numerical companion for the clean 5-nm base anchor; no parameter search and no held-out outcome access",
+  "authority_candidate": false,
+  "held_out_profile_data_read": false,
+  "calibration_performed_by_this_launch": false,
+  "source_epoch": {
+    "git_revision": "efaa070c1809d25e3f95c538e8499d82a38d3a8b",
+    "git_dirty": false,
+    "archive_sha256": "c441de4f7339f3651e6847b089dd1e963ac3dea9851ad1b42b154d8eb715f27c"
+  },
+  "paired_authority_launch_sha256": "f5ca59c10fb05c48636fddf484390b56030e09b332d5c532985455a260b7c634",
+  "fixed_parameters": {
+    "effective_mask_crosslinked_growth_fraction": 0.9004722559883319,
+    "oxide_etch_yield_scale": 0.5586489665864749
+  },
+  "numerical_difference_from_authority": {
+    "dx_um": 0.01,
+    "minimum_step_duration_s": 0.001,
+    "all_other_physical_and_numerical_controls": "identical to the paired 5-nm launch"
+  },
+  "command_argv": [
+    "python",
+    "/root/petch-efaa070/scripts/krueger_2024_trench_pilot.py",
+    "--output", "/root/petch-results/krueger-base-companion-10nm-efaa070",
+    "--duration-s", "60",
+    "--n-steps", "60",
+    "--dx-um", "0.01",
+    "--substrate-top-um", "1.8",
+    "--domain-height-um", "2.8",
+    "--n-position", "16",
+    "--boundary-case", "base",
+    "--compress-boundary-quadrature",
+    "--neutral-transverse-order", "5",
+    "--neutral-normal-order", "2",
+    "--neutral-direction-polar-order", "8",
+    "--neutral-direction-azimuthal-order", "16",
+    "--ion-energy-bin-eV", "250",
+    "--ion-angle-bin-deg", "0.25",
+    "--ion-azimuthal-order", "16",
+    "--effective-mask-crosslinked-growth-fraction", "0.9004722559883319",
+    "--oxide-etch-yield-scale", "0.5586489665864749",
+    "--ballistic-transport", "face_gather",
+    "--transport-device", "cuda:0",
+    "--face-quadrature-points", "3",
+    "--radiosity-rays", "8",
+    "--radiosity-tolerance", "1e-12",
+    "--radiosity-max-iterations", "2000",
+    "--seed", "241",
+    "--max-wall-s", "14400",
+    "--adaptive-profile-timestep",
+    "--minimum-step-s", "0.001",
+    "--target-displacement-cells", "0.35",
+    "--maximum-displacement-cells", "0.75",
+    "--adaptive-shrink-factor", "0.5",
+    "--adaptive-growth-factor", "1.5",
+    "--adaptive-safety-factor", "0.9",
+    "--maximum-accepted-steps", "10000",
+    "--topology-change-policy", "continue_gas_cavity",
+    "--surface-state-remap-backend", "common_refinement"
+  ],
+  "data_firewall": {
+    "allowed": "base_case_boundary_fluxes.csv, digitized_figure4_iead.csv, digitized_figure4_iead_metadata.json, base_case_metrics.csv",
+    "forbidden": "transfer_observations.csv and every held-out oxygen/power profile"
+  }
+}
