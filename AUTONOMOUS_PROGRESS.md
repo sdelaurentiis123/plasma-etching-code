@@ -1692,3 +1692,31 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   `results/krueger_2024_base_authority_5nm_a15634f_topology_refusal/`.
 - **Next:** restart the base authority case from zero on a clean descendant of `418fb28`; passing the
   old step-168 state is a required canary, not permission to reveal or tune against held-out data.
+
+### Topology-complete meshes require separate quadrature support, and the real checkpoint passes
+
+- **Retaining watertight slivers exposed a distinct source-discretization limit.** A clean descendant
+  of `418fb28` reached step 113 / `8.961859 s` before 16 neutral quadrature rays launched from the two
+  smallest retained faces into solid. Those faces are required for hard-visibility watertightness,
+  but their minimum altitude is smaller than the declared launch inset and they cannot independently
+  support a three-point source rule. Deleting them would reopen the mesh; moving every ray would
+  change resolved transport.
+- **Revision `f7f1df4` separates visibility geometry from quadrature support.** Every positive-area
+  face remains in the collision mesh, material ledger, and state inventory. Only launch position and
+  normal are inherited from the nearest edge-connected face that satisfies the declared inset,
+  chosen by deterministic multi-source graph distance. At the failed state this affects 29 faces,
+  `8.3764e-6` of total surface area, with maximum support distance `0.003336 um` (`0.667 dx`). All
+  34,624 rays then classify with no replay or refusal. A bounded real-engine continuation advances
+  steps 114--116 with exact material ledgers and radiosity error at approximately `1e-12`.
+- **The continuation exposed one remap roundoff ghost, not lost inventory.** Two target triangles
+  were exactly edge-on in the source-authoritative chart. Their true projected area was zero, while
+  translated float64 clipping returned `2.7756e-17` mesh-area slivers and divided by a zero chart
+  factor. Revision `efaa070` rejects charts below the standard `sqrt(eps)` numerical-rank threshold;
+  the unmatched area remains in the existing removed/newly-exposed ledgers. The exact checkpoint
+  replay records two rejected chart pairs among 439,498 aligned candidates, zero material-ledger
+  residual, no visibility recovery, and unchanged step-114 profile observables.
+- **This is preflight verification, not held-out validation.** The forensic replay explicitly records
+  `held_out_profile_data_read=false` and `scientific_result=false`. Receipt:
+  `results/krueger_2024_base_authority_5nm_efaa070_remap_forensic/audit.json`. The next action is the
+  single preregistered clean `t=0 -> 60 s` base anchor under commit `efaa070`; only a passing base
+  endpoint can freeze the operator and authorize the untouched oxygen/power predictions.

@@ -1,0 +1,141 @@
+{
+  "schema": "petch.krueger-2024.source-support-forensic-continuation.v1",
+  "scientific_result": false,
+  "purpose": "bounded operator-change replay only; not an authority endpoint",
+  "source_revision": "efaa070",
+  "source_archive_sha256": "c441de4f7339f3651e6847b089dd1e963ac3dea9851ad1b42b154d8eb715f27c",
+  "checkpoint_sha256": "c22ac3a03acf40cb2f67cf3fb4652f6ca811f9974edaf9deeb0aec8d416d5df7",
+  "initial_step": 113,
+  "initial_physical_time_s": 8.96185911773593,
+  "held_out_profile_data_read": false,
+  "wall_time_s": 4.10075596801471,
+  "degenerate_projection_events": [
+    {
+      "reported_overlap_area": 2.7755575615628914e-17,
+      "subject_projected_twice_area": 2.698343770646261e-07,
+      "target_projected_twice_area": 0.0,
+      "subject_triangle": [
+        [
+          0.10499999672174454,
+          2.449831008911133
+        ],
+        [
+          0.10340370982885361,
+          2.444999933242798
+        ],
+        [
+          0.10499999672174454,
+          2.450000047683716
+        ]
+      ],
+      "target_triangle": [
+        [
+          0.10499999672174454,
+          2.444999933242798
+        ],
+        [
+          0.10424637049436569,
+          2.450000047683716
+        ],
+        [
+          0.10499999672174454,
+          2.444999933242798
+        ]
+      ]
+    },
+    {
+      "reported_overlap_area": 2.7755575615628914e-17,
+      "subject_projected_twice_area": 2.698343770646261e-07,
+      "target_projected_twice_area": 0.0,
+      "subject_triangle": [
+        [
+          0.10499999672174454,
+          2.449831008911133
+        ],
+        [
+          0.10340370982885361,
+          2.444999933242798
+        ],
+        [
+          0.10499999672174454,
+          2.450000047683716
+        ]
+      ],
+      "target_triangle": [
+        [
+          0.10499999672174454,
+          2.444999933242798
+        ],
+        [
+          0.10424637049436569,
+          2.450000047683716
+        ],
+        [
+          0.10499999672174454,
+          2.444999933242798
+        ]
+      ]
+    }
+  ],
+  "history": [
+    {
+      "step": 114,
+      "physical_time_s": 8.994708343685863,
+      "accepted_step_duration_s": 0.03284922594993267,
+      "rejected_trials": [],
+      "metrics": {
+        "mask_opening_nm": 78.03707041440548,
+        "mask_pocket_width_nm": 78.03707041440548,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_throat_z_um": 2.45,
+        "mask_opening_cross_y_span_nm": 2.5046060344465078,
+        "mask_opening_per_y_widths_nm": [
+          76.37959071237196,
+          78.88419674681847,
+          78.847423784026
+        ],
+        "mask_exit_z_um": 1.805,
+        "top_feature_width_nm": 86.91468091409108,
+        "maximum_feature_width_nm": 86.91468091409108,
+        "etch_depth_nm": 121.06403067553684,
+        "remaining_mask_thickness_nm": 850.2118340387492,
+        "asymmetry_cell_count": 0.05609837728727529,
+        "floor_z_um": 1.6789359693244632,
+        "mask_top_z_um": 2.6502118340387493
+      },
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.1822958658267927e-12,
+      "surface_state_remap_geometry_receipt": {
+        "operator": "indexed_pairwise_tangent_common_refinement",
+        "nonzero_authority": "float64_convex_polygon_clipping",
+        "candidate_pair_count": 442830,
+        "aligned_pair_count": 439498,
+        "positive_pair_image_count": 6348,
+        "combined_pair_count": 6343,
+        "degenerate_chart_pair_count": 2,
+        "minimum_chart_factor": 1.4901161193847656e-08,
+        "minimum_normal_dot": 0.5,
+        "maximum_normal_distance": 0.008523169939028501,
+        "maximum_raw_old_coverage_ratio": 2.5953115095891586,
+        "maximum_raw_new_coverage_ratio": 1.3127001267008118,
+        "raw_overlap_area": 0.04143964026333005,
+        "capacity_projection_area_reduction": 8.920022629629876e-07,
+        "capacity_projection_iterations": 46,
+        "old_matched_area_fraction": 0.9996177873779256,
+        "new_matched_area_fraction": 0.9992670986388821,
+        "total_overlap_area": 0.04143874826106709,
+        "total_old_uncovered_area": 1.5844468584228473e-05,
+        "total_new_uncovered_area": 3.0392789920669392e-05,
+        "limitation": "first-order nearby similarly oriented surfaces; large motion, opposite sheets, and multiply covered correspondence refuse"
+      },
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_wrap_count": 405,
+      "maximum_visibility_final_horizon_wraps": 1024,
+      "maximum_visibility_source_support_face_count": 29,
+      "maximum_visibility_source_support_area_fraction": 8.376382098419646e-06,
+      "maximum_visibility_source_support_distance_um": 0.003336283096308754
+    }
+  ]
+}
