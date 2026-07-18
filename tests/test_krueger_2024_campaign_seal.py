@@ -23,7 +23,11 @@ CAMPAIGN = _module("krueger_2024_transfer_campaign")
 GRID = _module("krueger_2024_grid_correction")
 
 
-def _base(path, dx):
+def _base(path, dx, pair=None):
+    pair = ({
+        "effective_mask_crosslinked_growth_fraction": 0.92,
+        "oxide_etch_yield_scale": 0.575,
+    } if pair is None else dict(pair))
     payload = {
         "status": "complete",
         "config_hash": "a" * 64,
@@ -71,8 +75,7 @@ def _base(path, dx):
                 "substrate_top_um": 1.8,
                 "initial_etched_depth_um": 0.0,
             },
-            "effective_mask_crosslinked_growth_fraction": 0.92,
-            "oxide_etch_yield_scale": 0.575,
+            **pair,
         },
         "final_metrics": {
             "mask_opening_nm": 45.0,
@@ -109,6 +112,105 @@ def _calibration(path):
         payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
+
+
+def _trust_calibration(path):
+    payload = {
+        "schema": "petch.krueger-2024.development-trust-region-proposal.v1",
+        "protocol_id": "K24-PETCH-R1.9",
+        "protocol_sha256": FREEZE._sha(FREEZE.PROTOCOL),
+        "authority": False,
+        "held_out_profile_data_read": False,
+        "calibration_targets": {
+            "sha256": FREEZE._sha(FREEZE.BASE_TARGETS),
+            "selection": "experiment rows with split=calibration; held-out table not opened",
+        },
+        "next_evaluation_contract": {"count": 1},
+        "proposed_configuration": {
+            **FREEZE.R19_FIXED_PAIR,
+            "topology_change_policy": "continue_gas_cavity",
+        },
+    }
+    payload["proposal_sha256"] = sha256(json.dumps(
+        payload, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return path
+
+
+def _seal(payload, field):
+    canonical = dict(payload)
+    canonical.pop(field, None)
+    payload[field] = sha256(json.dumps(
+        canonical, sort_keys=True,
+        separators=(",", ":")).encode("utf-8")).hexdigest()
+    return payload
+
+
+def _launches(tmp_path, pair):
+    source_epoch = {
+        "git_revision": "1" * 40,
+        "git_dirty": False,
+        "archive_sha256": "2" * 64,
+    }
+    executable = {
+        name: FREEZE._sha(ROOT / name)
+        for name in (
+            "scripts/krueger_2024_trench_pilot.py",
+            "src/petch/boundary_transport_3d.py",
+            "src/petch/feature_step_3d.py",
+            "src/petch/surface_common_refinement_3d.py",
+        )
+    }
+    authority = _seal({
+        "schema": "petch.krueger-2024.base-authority-retry.v2",
+        "protocol_id": "K24-PETCH-R1.9",
+        "authority_candidate": True,
+        "held_out_profile_data_read": False,
+        "calibration_performed_by_this_launch": False,
+        "source_epoch": source_epoch,
+        "fixed_parameters": pair,
+        "executable_source_sha256": executable,
+        "numerical_operator": {
+            "duration_s": 60.0,
+            "n_steps": 60,
+            "dx_um": 0.005,
+            "surface_state_remap_backend": "common_refinement",
+        },
+    }, "launch_sha256")
+    authority_path = tmp_path / "authority_launch.json"
+    authority_path.write_text(json.dumps(authority), encoding="utf-8")
+    companion = _seal({
+        "schema": "petch.krueger-2024.base-refinement-companion.v1",
+        "protocol_id": "K24-PETCH-R1.9",
+        "authority_candidate": False,
+        "held_out_profile_data_read": False,
+        "calibration_performed_by_this_launch": False,
+        "source_epoch": source_epoch,
+        "paired_authority_launch_sha256": authority["launch_sha256"],
+        "fixed_parameters": pair,
+        "numerical_difference_from_authority": {
+            "dx_um": 0.01,
+            "all_other_physical_and_numerical_controls": (
+                "identical to the paired 5-nm launch"),
+        },
+    }, "launch_sha256")
+    companion_path = tmp_path / "companion_launch.json"
+    companion_path.write_text(json.dumps(companion), encoding="utf-8")
+    return companion_path, authority_path
+
+
+def _freeze(base10, base5, calibration, azimuth, charging, grid=None,
+            launches=None):
+    config = json.loads(Path(base10).read_text(encoding="utf-8"))["configuration"]
+    pair = {
+        name: config[name] for name in FREEZE.R19_FIXED_PAIR
+    }
+    if launches is None:
+        launches = _launches(Path(base10).parent, pair)
+    launch10, launch5 = launches
+    return FREEZE.freeze(
+        base10, base5, calibration, azimuth, charging, grid,
+        launch_10nm_path=launch10, launch_5nm_path=launch5)
 
 
 def test_krueger_grid_correction_is_r17_base_only_and_checksum_bound(tmp_path):
@@ -188,7 +290,7 @@ def test_krueger_freeze_binds_refinement_and_causal_evidence_without_heldout(tmp
             "charged_over_zero_floor_ion_flux": 0.995},
     }), encoding="utf-8")
 
-    result = FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+    result = _freeze(base10, base5, calibration, azimuth, charging)
 
     assert result["frozen_physics"]["ion_azimuthal_order"] == 16
     assert result["base_grid_difference"]["etch_depth_nm"] == 0.0
@@ -198,6 +300,61 @@ def test_krueger_freeze_binds_refinement_and_causal_evidence_without_heldout(tmp
     assert result["source_sha256"]
     assert result["boundary_data_sha256"]
     assert len(result["reveal_sha256"]) == 64
+
+
+def test_krueger_freeze_accepts_current_r19_trust_proposal_and_paired_launches(
+        tmp_path):
+    pair = FREEZE.R19_FIXED_PAIR
+    base10 = _base(tmp_path / "base10.json", 0.01, pair)
+    base5 = _base(tmp_path / "base5.json", 0.005, pair)
+    calibration = _trust_calibration(tmp_path / "calibration.json")
+    azimuth, charging = _supporting_evidence(tmp_path)
+
+    result = _freeze(base10, base5, calibration, azimuth, charging)
+
+    assert result["base_calibration_derivation"]["schema"] == (
+        "petch.krueger-2024.development-trust-region-proposal.v1")
+    assert result["frozen_physics"][
+        "effective_mask_crosslinked_growth_fraction"] == pair[
+            "effective_mask_crosslinked_growth_fraction"]
+    assert result["base_launch_manifests"]["10nm"][
+        "launch_sha256"] != result["base_launch_manifests"]["5nm"][
+            "launch_sha256"]
+    assert result["base_launch_manifests"]["shared_source_epoch"][
+        "git_dirty"] is False
+
+
+def test_krueger_freeze_refuses_mixed_or_unreplayable_launch_source(tmp_path):
+    pair = FREEZE.R19_FIXED_PAIR
+    base10 = _base(tmp_path / "base10.json", 0.01, pair)
+    base5 = _base(tmp_path / "base5.json", 0.005, pair)
+    calibration = _trust_calibration(tmp_path / "calibration.json")
+    azimuth, charging = _supporting_evidence(tmp_path)
+    launch10, launch5 = _launches(tmp_path, pair)
+
+    companion = json.loads(launch10.read_text(encoding="utf-8"))
+    companion["source_epoch"]["git_revision"] = "3" * 40
+    _seal(companion, "launch_sha256")
+    launch10.write_text(json.dumps(companion), encoding="utf-8")
+    with pytest.raises(ValueError, match="one clean source epoch"):
+        _freeze(
+            base10, base5, calibration, azimuth, charging,
+            launches=(launch10, launch5))
+
+    launch10, launch5 = _launches(tmp_path, pair)
+    authority = json.loads(launch5.read_text(encoding="utf-8"))
+    authority["executable_source_sha256"][
+        "src/petch/feature_step_3d.py"] = "4" * 64
+    _seal(authority, "launch_sha256")
+    launch5.write_text(json.dumps(authority), encoding="utf-8")
+    companion = json.loads(launch10.read_text(encoding="utf-8"))
+    companion["paired_authority_launch_sha256"] = authority["launch_sha256"]
+    _seal(companion, "launch_sha256")
+    launch10.write_text(json.dumps(companion), encoding="utf-8")
+    with pytest.raises(ValueError, match="current executable source"):
+        _freeze(
+            base10, base5, calibration, azimuth, charging,
+            launches=(launch10, launch5))
 
 
 def test_krueger_freeze_refuses_nonconservative_base_endpoint(tmp_path):
@@ -224,7 +381,7 @@ def test_krueger_freeze_refuses_nonconservative_base_endpoint(tmp_path):
     }), encoding="utf-8")
 
     with pytest.raises(ValueError, match="exactly closed"):
-        FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+        _freeze(base10, base5, calibration, azimuth, charging)
 
 
 def test_krueger_freeze_refuses_mixed_refinement_operator(tmp_path):
@@ -251,7 +408,7 @@ def test_krueger_freeze_refuses_mixed_refinement_operator(tmp_path):
     }), encoding="utf-8")
 
     with pytest.raises(ValueError, match="one numerical operator"):
-        FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+        _freeze(base10, base5, calibration, azimuth, charging)
 
 
 def test_krueger_freeze_refuses_legacy_or_mixed_remap_operator(tmp_path):
@@ -264,12 +421,12 @@ def test_krueger_freeze_refuses_legacy_or_mixed_remap_operator(tmp_path):
     base5.write_text(json.dumps(payload), encoding="utf-8")
 
     with pytest.raises(ValueError, match="R1.9 operator"):
-        FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+        _freeze(base10, base5, calibration, azimuth, charging)
 
     payload["configuration"]["surface_state_remap_backend"] = "indexed_knn"
     base5.write_text(json.dumps(payload), encoding="utf-8")
     with pytest.raises(ValueError, match="one numerical operator"):
-        FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+        _freeze(base10, base5, calibration, azimuth, charging)
 
 
 def test_krueger_freeze_accepts_only_monotone_fine_grid_timestep_refinement(tmp_path):
@@ -285,7 +442,7 @@ def test_krueger_freeze_accepts_only_monotone_fine_grid_timestep_refinement(tmp_
     calibration = _calibration(tmp_path / "calibration.json")
     azimuth, charging = _supporting_evidence(tmp_path)
 
-    result = FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+    result = _freeze(base10, base5, calibration, azimuth, charging)
 
     assert result["protocol_id"] == "K24-PETCH-R1.9"
     assert result["authority_numerics"]["dx_um"] == 0.005
@@ -299,7 +456,7 @@ def test_krueger_freeze_accepts_only_monotone_fine_grid_timestep_refinement(tmp_
     payload["configuration"]["minimum_step_duration_s"] = 0.002
     base5.write_text(json.dumps(payload), encoding="utf-8")
     with pytest.raises(ValueError, match="monotonically refine"):
-        FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+        _freeze(base10, base5, calibration, azimuth, charging)
 
 
 def test_krueger_freeze_refuses_underpriced_subcell_material_closure(tmp_path):
@@ -315,7 +472,7 @@ def test_krueger_freeze_refuses_underpriced_subcell_material_closure(tmp_path):
     azimuth, charging = _supporting_evidence(tmp_path)
 
     with pytest.raises(ValueError, match="subcell-material bound"):
-        FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+        _freeze(base10, base5, calibration, azimuth, charging)
 
 
 def test_krueger_freeze_binds_the_single_fine_grid_correction(tmp_path):
@@ -359,7 +516,7 @@ def test_krueger_freeze_binds_the_single_fine_grid_correction(tmp_path):
             "charged_over_zero_floor_ion_flux": 1.0},
     }), encoding="utf-8")
 
-    result = FREEZE.freeze(
+    result = _freeze(
         base10, base5, calibration, azimuth, charging, grid)
 
     assert result["frozen_physics"][
@@ -413,7 +570,7 @@ def test_krueger_transfer_replays_the_sealed_remap_backend(tmp_path, monkeypatch
     base5 = _base(tmp_path / "base5.json", 0.005)
     calibration = _calibration(tmp_path / "calibration.json")
     azimuth, charging = _supporting_evidence(tmp_path)
-    frozen = FREEZE.freeze(base10, base5, calibration, azimuth, charging)
+    frozen = _freeze(base10, base5, calibration, azimuth, charging)
     freeze_path = tmp_path / "freeze.json"
     freeze_path.write_text(json.dumps(frozen), encoding="utf-8")
     commands = []

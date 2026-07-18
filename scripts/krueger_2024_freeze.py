@@ -35,6 +35,10 @@ FROZEN_BOUNDARY_DATA = tuple(
         "digitized_figure4_iead_metadata.json",
     )
 )
+R19_FIXED_PAIR = {
+    "effective_mask_crosslinked_growth_fraction": 0.9004722559883319,
+    "oxide_etch_yield_scale": 0.5586489665864749,
+}
 
 
 def _sha(path):
@@ -48,6 +52,129 @@ def _verify_embedded_sha256(payload, field):
         canonical, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
     if claimed != actual:
         raise ValueError(f"{field} does not match its artifact content")
+
+
+def _same_parameter_pair(candidate, expected):
+    names = tuple(R19_FIXED_PAIR)
+    try:
+        return all(float(candidate[name]) == float(expected[name]) for name in names)
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
+def _load_calibration_derivation(path, endpoint_pair):
+    path = Path(path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    _verify_embedded_sha256(payload, "proposal_sha256")
+    schema = payload.get("schema")
+    proposed = payload.get("proposed_configuration", {})
+    common_valid = (
+        payload.get("protocol_sha256") == _sha(PROTOCOL)
+        and payload.get("held_out_profile_data_read") is False
+        and _same_parameter_pair(proposed, endpoint_pair))
+    if schema == "petch.krueger-2024.base-axisymmetric-secant.v1":
+        valid = common_valid
+    elif schema == "petch.krueger-2024.development-trust-region-proposal.v1":
+        targets = payload.get("calibration_targets", {})
+        contract = payload.get("next_evaluation_contract", {})
+        valid = (
+            common_valid
+            and payload.get("protocol_id") == "K24-PETCH-R1.9"
+            and payload.get("authority") is False
+            and targets.get("sha256") == _sha(BASE_TARGETS)
+            and int(contract.get("count", -1)) == 1
+            and proposed.get("topology_change_policy") == "continue_gas_cavity"
+            and _same_parameter_pair(proposed, R19_FIXED_PAIR))
+    else:
+        valid = False
+    if not valid:
+        raise ValueError(
+            "10 nm endpoint is not bound to its final base-only derivation")
+    return path, payload
+
+
+def _load_launch_manifest(path, *, expected_schema, authority_candidate,
+                          endpoint_pair):
+    path = Path(path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    _verify_embedded_sha256(payload, "launch_sha256")
+    source = payload.get("source_epoch", {})
+    if (payload.get("schema") != expected_schema
+            or payload.get("protocol_id") != "K24-PETCH-R1.9"
+            or payload.get("authority_candidate") is not authority_candidate
+            or payload.get("held_out_profile_data_read") is not False
+            or payload.get("calibration_performed_by_this_launch") is not False
+            or source.get("git_dirty") is not False
+            or not source.get("git_revision")
+            or not source.get("archive_sha256")
+            or not _same_parameter_pair(
+                payload.get("fixed_parameters", {}), endpoint_pair)):
+        raise ValueError(f"invalid checksum-bound base launch manifest: {path}")
+    return path, payload
+
+
+def _bind_launch_manifests(launch_10nm_path, launch_5nm_path, endpoint_pair):
+    path_5, launch_5 = _load_launch_manifest(
+        launch_5nm_path,
+        expected_schema="petch.krueger-2024.base-authority-retry.v2",
+        authority_candidate=True, endpoint_pair=endpoint_pair)
+    path_10, launch_10 = _load_launch_manifest(
+        launch_10nm_path,
+        expected_schema="petch.krueger-2024.base-refinement-companion.v1",
+        authority_candidate=False, endpoint_pair=endpoint_pair)
+    source_5 = launch_5["source_epoch"]
+    source_10 = launch_10["source_epoch"]
+    source_keys = ("git_revision", "git_dirty", "archive_sha256")
+    if any(source_5.get(key) != source_10.get(key) for key in source_keys):
+        raise ValueError("10/5 nm launch manifests do not share one clean source epoch")
+    if (launch_10.get("paired_authority_launch_sha256")
+            != launch_5["launch_sha256"]):
+        raise ValueError("10 nm launch is not paired to the 5 nm authority launch")
+    authority_operator = launch_5.get("numerical_operator", {})
+    companion_difference = launch_10.get("numerical_difference_from_authority", {})
+    if (float(authority_operator.get("duration_s", np.nan)) != 60.0
+            or int(authority_operator.get("n_steps", -1)) != 60
+            or float(authority_operator.get("dx_um", np.nan)) != 0.005
+            or authority_operator.get("surface_state_remap_backend")
+            != "common_refinement"
+            or float(companion_difference.get("dx_um", np.nan)) != 0.01
+            or companion_difference.get("all_other_physical_and_numerical_controls")
+            != "identical to the paired 5-nm launch"):
+        raise ValueError("paired launch manifests do not declare the R1.9 refinement operator")
+
+    executable = launch_5.get("executable_source_sha256", {})
+    required = {
+        "scripts/krueger_2024_trench_pilot.py",
+        "src/petch/boundary_transport_3d.py",
+        "src/petch/feature_step_3d.py",
+        "src/petch/surface_common_refinement_3d.py",
+    }
+    if not required.issubset(executable):
+        raise ValueError("5 nm launch manifest omits executable operator checksums")
+    mismatch = {}
+    for name, digest in executable.items():
+        source_path = ROOT / name
+        current = _sha(source_path) if source_path.is_file() else None
+        if current != digest:
+            mismatch[name] = {"launch": digest, "current": current}
+    if mismatch:
+        raise ValueError(
+            f"current executable source does not match the base launch: {mismatch}")
+    return {
+        "10nm": {
+            "path_name": path_10.name,
+            "sha256": _sha(path_10),
+            "launch_sha256": launch_10["launch_sha256"],
+        },
+        "5nm": {
+            "path_name": path_5.name,
+            "sha256": _sha(path_5),
+            "launch_sha256": launch_5["launch_sha256"],
+        },
+        "shared_source_epoch": {
+            key: source_5[key] for key in source_keys
+        },
+    }
 
 
 def _load_complete(path, expected_dx):
@@ -118,7 +245,8 @@ def _load_complete(path, expected_dx):
 
 
 def freeze(base_10nm_path, base_5nm_path, calibration_path, azimuth_path,
-           charging_path, grid_correction_path=None):
+           charging_path, grid_correction_path=None, *, launch_10nm_path,
+           launch_5nm_path):
     base_10, summary_10 = _load_complete(base_10nm_path, 0.01)
     base_5, summary_5 = _load_complete(base_5nm_path, 0.005)
     config_10 = base_10["configuration"]
@@ -130,17 +258,10 @@ def freeze(base_10nm_path, base_5nm_path, calibration_path, azimuth_path,
         "effective_mask_crosslinked_growth_fraction", "oxide_etch_yield_scale")
     pair_10 = {name: float(config_10[name]) for name in parameter_names}
     pair_5 = {name: float(config_5[name]) for name in parameter_names}
-    calibration_path = Path(calibration_path)
-    calibration = json.loads(calibration_path.read_text(encoding="utf-8"))
-    _verify_embedded_sha256(calibration, "proposal_sha256")
-    calibrated_pair = calibration.get("proposed_configuration", {})
-    if (calibration.get("schema")
-            != "petch.krueger-2024.base-axisymmetric-secant.v1"
-            or calibration.get("protocol_sha256") != _sha(PROTOCOL)
-            or calibration.get("held_out_profile_data_read") is not False
-            or any(not np.isclose(float(calibrated_pair.get(name, np.nan)), pair_10[name])
-                   for name in parameter_names)):
-        raise ValueError("10 nm endpoint is not bound to its final base-only derivation")
+    calibration_path, calibration = _load_calibration_derivation(
+        calibration_path, pair_10)
+    launch_manifests = _bind_launch_manifests(
+        launch_10nm_path, launch_5nm_path, pair_10)
     operator_keys = (
         "duration_s", "n_steps", "n_position", "compressed_boundary_quadrature",
         "neutral_speed_quadrature", "neutral_tensor_velocity_quadrature_active",
@@ -269,7 +390,9 @@ def freeze(base_10nm_path, base_5nm_path, calibration_path, azimuth_path,
             "topology_change_policy": config_5["topology_change_policy"],
         },
         "base_endpoints": {"10nm": summary_10, "5nm": summary_5},
+        "base_launch_manifests": launch_manifests,
         "base_calibration_derivation": {
+            "schema": calibration["schema"],
             "path_name": calibration_path.name,
             "sha256": _sha(calibration_path),
             "proposal_sha256": calibration["proposal_sha256"],
@@ -323,12 +446,16 @@ def main():
     parser.add_argument("--calibration-derivation", required=True)
     parser.add_argument("--azimuth-audit", required=True)
     parser.add_argument("--charging-audit", required=True)
+    parser.add_argument("--launch-10nm", required=True)
+    parser.add_argument("--launch-5nm", required=True)
     parser.add_argument("--grid-correction")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     payload = freeze(
         args.base_10nm, args.base_5nm, args.calibration_derivation,
-        args.azimuth_audit, args.charging_audit, args.grid_correction)
+        args.azimuth_audit, args.charging_audit, args.grid_correction,
+        launch_10nm_path=args.launch_10nm,
+        launch_5nm_path=args.launch_5nm)
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + ".tmp")

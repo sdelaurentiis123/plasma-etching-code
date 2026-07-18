@@ -1,0 +1,159 @@
+{
+  "authority": false,
+  "calibration_targets": {
+    "path_name": "base_case_metrics.csv",
+    "selection": "experiment rows with split=calibration; held-out table not opened",
+    "sha256": "5d51d124a93e1f942a9b999649b8adcf217662967d9ea2a40089f72940992351",
+    "values": {
+      "etch_depth_nm": 825.0,
+      "mask_opening_nm": 45.0
+    }
+  },
+  "campaign_sha256": "7e853439f5a8adc998fa9ebfbc6f8043d7478dfa33c31590cffd308239dd1b78",
+  "derivation": {
+    "condition_number": 12.848402652865474,
+    "current_parameters": {
+      "effective_mask_crosslinked_growth_fraction": 0.8934059741411972,
+      "oxide_etch_yield_scale": 0.5667632723491973
+    },
+    "current_response": {
+      "etch_depth_nm": 900.8570308260097,
+      "mask_opening_nm": 39.466366780154374
+    },
+    "current_scaled_l2_merit": 15.211719458825112,
+    "fine_cell_tolerance_nm": {
+      "etch_depth_nm": 5.0,
+      "mask_opening_nm": 5.0
+    },
+    "frozen_jacobian": [
+      [
+        167.787546434111,
+        31.79680622625161
+      ],
+      [
+        448.0473443662092,
+        1957.31427715989
+      ]
+    ],
+    "full_newton_secant_step": {
+      "effective_mask_crosslinked_growth_fraction": 0.04215303421546874,
+      "oxide_etch_yield_scale": -0.04840489182999453
+    },
+    "full_predicted_response": {
+      "etch_depth_nm": 825.0,
+      "mask_opening_nm": 45.0
+    },
+    "full_unclipped_candidate": {
+      "effective_mask_crosslinked_growth_fraction": 0.9355590083566659,
+      "oxide_etch_yield_scale": 0.5183583805192028
+    },
+    "method": "frozen-10nm-response/full-step-plus-scaled-linf-safeguard",
+    "preceding_evaluated_parameter_update": {
+      "effective_mask_crosslinked_growth_fraction": -0.027611078244628235,
+      "oxide_etch_yield_scale": -0.008114305762722413
+    },
+    "predicted_scaled_l2_reduction": 2.550001419260994,
+    "safeguarded_candidate": {
+      "effective_mask_crosslinked_growth_fraction": 0.9004722559883319,
+      "oxide_etch_yield_scale": 0.5586489665864749
+    },
+    "safeguarded_predicted_response": {
+      "etch_depth_nm": 888.1408131235443,
+      "mask_opening_nm": 40.39399186569918
+    },
+    "safeguarded_predicted_scaled_l2_merit": 12.661718039564118,
+    "safeguarded_step": {
+      "effective_mask_crosslinked_growth_fraction": 0.007066281847134781,
+      "oxide_etch_yield_scale": -0.008114305762722413
+    },
+    "target_error_response_minus_target": {
+      "etch_depth_nm": 75.85703082600969,
+      "mask_opening_nm": -5.533633219845626
+    }
+  },
+  "generator": {
+    "path_name": "krueger_2024_development_trust_proposal.py",
+    "sha256": "62fcadc07c7865e22b14614082a1e5781b2953ccb861d62fe8eb1c29a4ceec2c"
+  },
+  "held_out_profile_data_read": false,
+  "inputs": {
+    "development_endpoint": {
+      "config_hash": "194306d67e40045d5a2019b036957eb345ed6ea59b879f11d516020d506631c9",
+      "operator_class": "mixed-operator 5 nm development trajectory",
+      "path_name": "audit.json",
+      "receipt_path_name": "continuation_receipt.json",
+      "receipt_sha256": "28b54bfdc6a8c3ab393fe01ac12003eeb62e0e6bd6d829f60c33b302f1681eb9",
+      "sha256": "98506d4b94fbdd48ed00baee254088c6e49fbd02321dcc2d799c2b0e7e5caa30"
+    },
+    "response_model": {
+      "condition_number": 12.848402652865474,
+      "path_name": "final_10nm_correction.json",
+      "proposal_sha256": "cbf4540225a82af836d5b0662b56d7b7b718fe7f201f107e665db35991127928",
+      "sha256": "fd000190aa9cb56735711d94d2fd4b1c18d94778865d593a56833176bbeaed87",
+      "source_protocol_id": "K24-PETCH-R1.6",
+      "source_protocol_sha256": "7a481a8fd831d3da5c12f4c7d543332c3f4612ca7acb575329e37fe01ba9fd7b"
+    }
+  },
+  "next_evaluation_contract": {
+    "acceptance_state": "pending actual response",
+    "authority_path": "any eventual final pair requires a clean t=0 authoritative 5 nm or certified-AMR base confirmation before the sealed held-out reveal",
+    "count": 1,
+    "operator_status": "development proposal only until WP3/WP4 numerical gates pass",
+    "required_comparison": "record actual versus predicted base-only merit reduction; accept, shrink, or grow only under an explicitly recorded policy; do not inspect held-out outcomes",
+    "ten_nm_sequence_closes_after_this_evaluation": true
+  },
+  "orders": {
+    "parameters": [
+      "effective_mask_crosslinked_growth_fraction",
+      "oxide_etch_yield_scale"
+    ],
+    "responses": [
+      "mask_opening_nm",
+      "etch_depth_nm"
+    ]
+  },
+  "parameter_bounds": {
+    "effective_mask_crosslinked_growth_fraction": {
+      "lower": 0.0,
+      "source": "R1.9 protocol",
+      "upper": 1.0
+    },
+    "oxide_etch_yield_scale": {
+      "lower_exclusive": 0.0,
+      "source": "R1.9 protocol",
+      "upper": null
+    }
+  },
+  "proposal_sha256": "e7d10d9d2497c7abbc350073d4a01f70b78c56cf3df8a898e04f6d375a08309f",
+  "proposed_configuration": {
+    "effective_mask_crosslinked_growth_fraction": 0.9004722559883319,
+    "ion_azimuthal_closure": "axisymmetric_uniform",
+    "ion_azimuthal_order": 16,
+    "oxide_etch_yield_scale": 0.5586489665864749,
+    "topology_change_policy": "continue_gas_cavity"
+  },
+  "protocol_id": "K24-PETCH-R1.9",
+  "protocol_sha256": "3a747be530efe9370e21803d0a6aed7417901db982f97ca44b265d9e04333bec",
+  "schema": "petch.krueger-2024.development-trust-region-proposal.v1",
+  "scientific_status": "development-only safeguarded proposal from a mixed-operator 5 nm endpoint; not a parameter freeze, authoritative calibration, or validation result",
+  "trust_region": {
+    "applied_direction_scale": 0.16763400259670264,
+    "clipped": true,
+    "coordinate_scale": {
+      "effective_mask_crosslinked_growth_fraction": 0.027611078244628235,
+      "oxide_etch_yield_scale": 0.008114305762722413
+    },
+    "direction_preserved": true,
+    "full_step_normalized_coordinates": {
+      "effective_mask_crosslinked_growth_fraction": 1.5266710644909225,
+      "oxide_etch_yield_scale": 5.965376859764071
+    },
+    "full_step_scaled_linf_norm": 5.965376859764071,
+    "normalized_radius": 1.0,
+    "physical_bound_direction_scale": 1.0,
+    "policy_basis": "R1.9/WP5 require a bounded local step and one proposal at a time but declare no numeric radius; using the last evaluated move is an explicit numerical safeguard, not a new physical closure",
+    "scale_source": "absolute parameter update of the sealed R1.6 proposal, verified to be the pair evaluated by the completed 5 nm development endpoint",
+    "shape": "previous-evaluated-step-scaled-linf",
+    "trust_direction_scale": 0.16763400259670264
+  }
+}
