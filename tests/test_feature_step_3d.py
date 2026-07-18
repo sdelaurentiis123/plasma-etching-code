@@ -434,6 +434,44 @@ def _plane_geometry():
     return FeatureGeometry3D(phi, material, dx, 1e-6), top
 
 
+def test_surface_gas_normals_use_local_trilinear_gradient_on_a_thin_fold():
+    # This one-cell trilinear saddle contains a thin fold. A quarter-cell probe crosses the
+    # neighboring interface for one triangle and used to orient that triangle into solid.
+    phi = np.asarray([
+        [[-0.5, 0.2], [2.0, -0.5]],
+        [[-0.05, -0.1], [-0.1, 0.1]],
+    ])
+    geometry = FeatureGeometry3D(phi, np.where(phi > 0.0, 1, 0), 1.0, 1e-6)
+    verts, faces, centroids, _ = extract_mesh_3d(phi, geometry.dx)
+    normals = _surface_gas_normals(verts, faces, centroids, geometry)
+
+    def trilinear_gradient(point):
+        x, y, z = point
+        coordinate = (x, y, z)
+        gradient = np.zeros(3)
+        for axis in range(3):
+            transverse = tuple(item for item in range(3) if item != axis)
+            for first in (0, 1):
+                for second in (0, 1):
+                    negative = [0, 0, 0]
+                    positive = [0, 0, 0]
+                    positive[axis] = 1
+                    negative[transverse[0]] = positive[transverse[0]] = first
+                    negative[transverse[1]] = positive[transverse[1]] = second
+                    weight = (
+                        (coordinate[transverse[0]] if first
+                         else 1.0 - coordinate[transverse[0]])
+                        * (coordinate[transverse[1]] if second
+                           else 1.0 - coordinate[transverse[1]]))
+                    gradient[axis] += weight * (
+                        phi[tuple(positive)] - phi[tuple(negative)])
+
+        return gradient
+
+    into_solid = np.asarray([trilinear_gradient(point) for point in centroids])
+    assert np.all(np.einsum("ij,ij->i", normals, into_solid) < 0.0)
+
+
 def _periodic_pinchoff_geometry(*, sealed):
     """Resolved translational cavity used to certify enclosure and reopening."""
     dx = 0.2

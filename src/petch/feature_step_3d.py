@@ -227,45 +227,62 @@ class FeatureSolve3DResult:
 
 
 def _surface_gas_normals(verts, faces, centroids, geometry):
+    """Orient geometric face normals toward gas using the local level-set gradient.
+
+    ``geometry.phi`` is positive in solid, so ``-grad(phi)`` is the gas direction at a
+    regular interface.  The orientation decision must be local.  A finite probe a sizeable
+    fraction of one cell away can cross a second interface in a thin sheet or narrow pocket;
+    both probes then sample the same phase and can reverse an otherwise valid marching-cubes
+    face.  Evaluating the exact derivative of the trilinear nodal interpolant at the triangle
+    centroid avoids that nonlocal ambiguity while retaining the geometric triangle normal used
+    by the hard-visibility operator.
+    """
     triangle = np.asarray(verts)[np.asarray(faces)]
     normal = np.cross(triangle[:, 1] - triangle[:, 0], triangle[:, 2] - triangle[:, 0])
     normal /= np.linalg.norm(normal, axis=1, keepdims=True)
 
-    def trilinear(field, point):
+    def trilinear_gradient(field, point):
         coordinate = np.asarray(point, dtype=float) / geometry.dx
         lower = np.floor(coordinate).astype(int)
         for axis in range(3):
             lower[:, axis] = np.clip(lower[:, axis], 0, field.shape[axis] - 2)
         fraction = np.clip(coordinate - lower, 0.0, 1.0)
-        value = np.zeros(len(point))
-        for ox in (0, 1):
-            wx = fraction[:, 0] if ox else 1.0 - fraction[:, 0]
-            for oy in (0, 1):
-                wy = fraction[:, 1] if oy else 1.0 - fraction[:, 1]
-                for oz in (0, 1):
-                    wz = fraction[:, 2] if oz else 1.0 - fraction[:, 2]
-                    index = lower + np.array([ox, oy, oz])
-                    value += wx * wy * wz * field[tuple(index.T)]
-        return value
+        gradient = np.zeros((len(point), 3))
+        for axis in range(3):
+            transverse = tuple(item for item in range(3) if item != axis)
+            for first in (0, 1):
+                first_weight = (
+                    fraction[:, transverse[0]]
+                    if first else 1.0 - fraction[:, transverse[0]])
+                for second in (0, 1):
+                    second_weight = (
+                        fraction[:, transverse[1]]
+                        if second else 1.0 - fraction[:, transverse[1]])
+                    negative = lower.copy()
+                    positive = lower.copy()
+                    positive[:, axis] += 1
+                    negative[:, transverse[0]] += first
+                    positive[:, transverse[0]] += first
+                    negative[:, transverse[1]] += second
+                    positive[:, transverse[1]] += second
+                    gradient[:, axis] += (
+                        first_weight * second_weight
+                        * (field[tuple(positive.T)] - field[tuple(negative.T)])
+                        / geometry.dx)
+        return gradient
 
     centroid = np.asarray(centroids, dtype=float)
-    probe_distance = 0.25 * geometry.dx
-    domain_maximum = (np.asarray(geometry.phi.shape) - 1) * geometry.dx
-    plus = np.clip(centroid + probe_distance * normal, 0.0, domain_maximum)
-    minus = np.clip(centroid - probe_distance * normal, 0.0, domain_maximum)
-    signed_difference = trilinear(geometry.phi, plus) - trilinear(geometry.phi, minus)
-    # phi is positive in solid.  A positive signed difference means ``normal`` points into solid.
-    flip = signed_difference > 0.0
-    ambiguous = np.abs(signed_difference) <= 64.0 * np.finfo(float).eps * geometry.dx
+    gradient = trilinear_gradient(geometry.phi, centroid)
+    directional_derivative = np.einsum("ij,ij->i", normal, gradient)
+    gradient_scale = np.linalg.norm(gradient, axis=1)
+    ambiguous = np.abs(directional_derivative) <= (
+        64.0 * np.finfo(float).eps * np.maximum(gradient_scale, 1.0))
     if np.any(ambiguous):
-        gradient = np.gradient(geometry.phi, geometry.dx)
-        index = np.rint(centroid[ambiguous] / geometry.dx).astype(int)
-        for axis in range(3):
-            index[:, axis] = np.clip(index[:, axis], 0, geometry.phi.shape[axis] - 1)
-        into_gas = -np.column_stack([
-            component[tuple(index.T)] for component in gradient])
-        flip[ambiguous] = (
-            np.einsum("ij,ij->i", normal[ambiguous], into_gas) < 0.0)
+        raise RuntimeError(
+            "surface normal is undefined at a level-set critical point for "
+            f"{int(np.count_nonzero(ambiguous))} of {len(normal)} faces")
+    # phi is positive in solid.  A positive derivative means ``normal`` points into solid.
+    flip = directional_derivative > 0.0
     normal[flip] *= -1.0
     return normal
 
