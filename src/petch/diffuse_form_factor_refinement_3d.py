@@ -25,6 +25,7 @@ import numpy as np
 from .boundary_transport_3d import (
     DIFFUSE_VISIBILITY_EMERGENCY_MAXIMUM_WRAPS,
     _diffuse_form_factor_ray_sample_block_3d,
+    _diffuse_source_support_map_3d,
     trace_diffuse_form_factor_events_cellwise_certified_3d,
 )
 from .neutral_radiosity_3d import DiffuseFormFactors3D
@@ -113,7 +114,7 @@ class DiffuseFormFactorOperatorIdentity3D:
 
     def __post_init__(self):
         payload, encoding = _encode_identity(dict(self.payload))
-        if payload.get("schema") != "petch.diffuse-form-factor-operator.v1":
+        if payload.get("schema") != "petch.diffuse-form-factor-operator.v2":
             raise ValueError("invalid diffuse form-factor operator identity schema")
         object.__setattr__(self, "payload", _freeze(payload))
         object.__setattr__(self, "_encoding", encoding)
@@ -169,6 +170,10 @@ def diffuse_form_factor_operator_identity_3d(
             ("verts", vertices), ("faces", triangles),
             ("centroids", centers), ("gas_normals", normals)):
         _digest_array(mesh_digest, name, value)
+    source_support_face, source_support_diagnostics = _diffuse_source_support_map_3d(
+        vertices, triangles, centers, ray_offset)
+    source_support_digest = sha256(b"petch.diffuse-source-support-map.v1\0")
+    _digest_array(source_support_digest, "source_support_face", source_support_face)
     sampled_digest = None
     if form_factors is not None:
         if (not isinstance(form_factors, DiffuseFormFactors3D)
@@ -185,7 +190,7 @@ def diffuse_form_factor_operator_identity_3d(
     caller, _encoding = _encode_identity(
         {} if operator_identity is None else operator_identity)
     return DiffuseFormFactorOperatorIdentity3D({
-        "schema": "petch.diffuse-form-factor-operator.v1",
+        "schema": "petch.diffuse-form-factor-operator.v2",
         "estimator": "petch.diffuse-form-factor-area-direction-rqmc.v1",
         "mesh_sha256": mesh_digest.hexdigest(),
         "sampled_form_factors_sha256": sampled_digest,
@@ -198,6 +203,9 @@ def diffuse_form_factor_operator_identity_3d(
         "periodic_lateral": bool(periodic_lateral),
         "domain_size": domain.tolist(),
         "ray_offset": float(ray_offset),
+        "source_support_policy": "nearest_edge_connected_launch_supported_face_v1",
+        "source_support_map_sha256": source_support_digest.hexdigest(),
+        **source_support_diagnostics,
         "maximum_visibility_wraps": wraps,
         "maximum_visibility_replay_wraps": replay_wraps,
         "exact_replay_horizon_policy": "configured_then_geometry_derived_vertical_domain_v2",
@@ -419,12 +427,15 @@ def refine_diffuse_form_factor_rows_nested_3d(
     centers = np.asarray(centroids, dtype=float)
     normals = np.asarray(gas_normals, dtype=float)
     authority_normals = normals / np.linalg.norm(normals, axis=1)[:, None]
+    source_support_face, _support_diagnostics = _diffuse_source_support_map_3d(
+        vertices, triangles, centers, payload["ray_offset"])
     source, origin, direction, launch = _diffuse_form_factor_ray_sample_block_3d(
         vertices, triangles, centers, authority_normals,
         source_faces=selected, sobol_index_start=base_rays,
         sobol_index_stop=refined_rays, seed=payload["seed"],
         ray_offset=payload["ray_offset"],
         source_sampling=payload["source_sampling"],
+        source_support_face=source_support_face,
         return_launch_diagnostics=True)
     events = trace_diffuse_form_factor_events_cellwise_certified_3d(
         origin, direction, vertices, triangles, authority_normals,
@@ -506,6 +517,8 @@ def refine_diffuse_form_factor_rows_nested_3d(
         "untouched_row_contract": "bitwise_equal_fraction_rows",
         "source_sampling": payload["source_sampling"],
         "visibility_mode": payload["visibility_mode"],
+        "source_support_policy": payload["source_support_policy"],
+        "source_support_map_sha256": payload["source_support_map_sha256"],
     }
     return NestedRowDiffuseFormFactorReceipt3D(
         form_factors=factors, selected_source_face=selected,

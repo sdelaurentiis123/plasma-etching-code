@@ -1666,7 +1666,13 @@ def _apply_diffuse_neutral_transport(
                         visibility_launch_inset_count=(
                             visibility_receipt.launch_inset_count),
                         visibility_centroid_limit_count=(
-                            visibility_receipt.centroid_limit_count))
+                            visibility_receipt.centroid_limit_count),
+                        visibility_source_support_face_count=(
+                            visibility_receipt.source_support_face_count),
+                        visibility_source_support_area_fraction=(
+                            visibility_receipt.source_support_area_fraction),
+                        visibility_maximum_source_support_distance=(
+                            visibility_receipt.maximum_source_support_distance))
                 if deterministic_exchange is not None:
                     factor_diagnostics.update(
                         form_factor_fingerprint=deterministic_exchange.fingerprint,

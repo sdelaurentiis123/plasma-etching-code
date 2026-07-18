@@ -909,6 +909,65 @@ def test_triangle_area_diffuse_rule_uses_centroid_limit_for_suboffset_sliver():
     assert diagnostics == {"launch_inset_count": 8, "centroid_limit_count": 8}
 
 
+def _supported_sliver_surface():
+    vertices = np.asarray([
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [1.0e-8, 1.0e-8, 0.0],
+        [0.0, 1.0, 0.0],
+    ])
+    # Face zero has altitude O(1e-8), but shares its long edge with a resolved face.
+    faces = np.asarray([[0, 1, 2], [0, 3, 1]])
+    centroids = vertices[faces].mean(axis=1)
+    return vertices, faces, centroids
+
+
+def test_subresolution_source_support_is_derived_from_the_launch_offset():
+    vertices, faces, centroids = _supported_sliver_surface()
+
+    owner, diagnostics = boundary_transport_3d._diffuse_source_support_map_3d(
+        vertices, faces, centroids, 1.0e-5)
+
+    np.testing.assert_array_equal(owner, [1, 1])
+    assert diagnostics["source_support_face_count"] == 1
+    assert 0.0 < diagnostics["source_support_area_fraction"] < 2.0e-8
+    assert diagnostics["maximum_source_support_distance"] > 0.0
+
+
+def test_subresolution_source_keeps_its_row_and_uses_resolved_neighbor_geometry():
+    vertices, faces, centroids = _supported_sliver_surface()
+    normals = np.asarray([[0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+    owner, _diagnostics = boundary_transport_3d._diffuse_source_support_map_3d(
+        vertices, faces, centroids, 1.0e-5)
+
+    source, origin, direction = boundary_transport_3d._diffuse_form_factor_ray_samples_3d(
+        vertices, faces, centroids, normals, rays_per_face=8, seed=37,
+        ray_offset=1.0e-5, source_sampling="triangle_area",
+        source_support_face=owner)
+
+    np.testing.assert_array_equal(source, np.repeat([0, 1], 8))
+    assert np.allclose(origin[:8, 2], 1.0e-5)
+    assert np.all(direction[:8, 2] > 0.0)
+
+
+def test_form_factor_receipt_prices_subresolution_source_support():
+    vertices, faces, centroids = _supported_sliver_surface()
+    normals = np.repeat([[0.0, 0.0, 1.0]], 2, axis=0)
+
+    receipt = estimate_diffuse_form_factors_3d(
+        vertices, faces, centroids, normals, rays_per_face=8, seed=37,
+        domain_size=(1.0, 1.0, 1.0), periodic_lateral=False,
+        ray_offset=1.0e-5, source_sampling="triangle_area",
+        visibility_mode="cellwise_certified", device="cpu",
+        return_visibility_receipt=True)
+
+    assert receipt.source_support_face_count == 1
+    assert 0.0 < receipt.source_support_area_fraction < 2.0e-8
+    assert receipt.maximum_source_support_distance > 0.0
+    assert receipt.float64_evaluated_count == 0
+    np.testing.assert_allclose(receipt.form_factors.escape_fraction, 1.0)
+
+
 def test_triangle_area_rule_removes_close_half_receiver_centroid_bias():
     def source_grid(cell_count):
         vertices = np.asarray([

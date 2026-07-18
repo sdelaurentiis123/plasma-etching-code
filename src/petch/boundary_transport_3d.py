@@ -8,6 +8,7 @@ their limitations; reflection, re-emission, and collisional charged transport re
 from __future__ import annotations
 
 from dataclasses import dataclass
+import heapq
 from types import MappingProxyType
 from typing import Mapping
 
@@ -304,6 +305,9 @@ class DiffuseFormFactorEstimateReceipt3D:
     maximum_wrap_count: int
     launch_inset_count: int = 0
     centroid_limit_count: int = 0
+    source_support_face_count: int = 0
+    source_support_area_fraction: float = 0.0
+    maximum_source_support_distance: float = 0.0
     derived_horizon_extension_count: int = 0
     initial_maximum_wraps: int = 0
     final_maximum_wraps: int = 0
@@ -318,15 +322,23 @@ class DiffuseFormFactorEstimateReceipt3D:
             self.ray_count, self.float64_evaluated_count,
             self.float64_recovered_hit_count, self.open_escape_count,
             self.maximum_wrap_count, self.launch_inset_count,
-            self.centroid_limit_count, self.derived_horizon_extension_count,
+            self.centroid_limit_count, self.source_support_face_count,
+            self.derived_horizon_extension_count,
             self.initial_maximum_wraps, self.final_maximum_wraps)
+        support = np.asarray((
+            self.source_support_area_fraction,
+            self.maximum_source_support_distance), dtype=float)
         if (self.visibility_mode not in allowed
                 or any(int(value) != value or value < 0 for value in values)
+                or np.any(~np.isfinite(support))
+                or not 0.0 <= self.source_support_area_fraction <= 1.0
+                or self.maximum_source_support_distance < 0.0
                 or self.float64_evaluated_count > self.ray_count
                 or self.float64_recovered_hit_count > self.float64_evaluated_count
                 or self.open_escape_count > self.ray_count
                 or self.launch_inset_count > self.ray_count
                 or self.centroid_limit_count > self.launch_inset_count
+                or self.source_support_face_count > self.form_factors.face_count
                 or self.derived_horizon_extension_count > self.float64_evaluated_count
                 or self.final_maximum_wraps < self.initial_maximum_wraps):
             raise ValueError("invalid diffuse form-factor estimate receipt")
@@ -334,9 +346,16 @@ class DiffuseFormFactorEstimateReceipt3D:
                 "ray_count", "float64_evaluated_count",
                 "float64_recovered_hit_count", "open_escape_count",
                 "maximum_wrap_count", "launch_inset_count",
-                "centroid_limit_count", "derived_horizon_extension_count",
+                "centroid_limit_count", "source_support_face_count",
+                "derived_horizon_extension_count",
                 "initial_maximum_wraps", "final_maximum_wraps"):
             object.__setattr__(self, name, int(getattr(self, name)))
+        object.__setattr__(
+            self, "source_support_area_fraction",
+            float(self.source_support_area_fraction))
+        object.__setattr__(
+            self, "maximum_source_support_distance",
+            float(self.maximum_source_support_distance))
 
 
 def _derived_vertical_domain_wrap_horizon_3d(origin, direction, domain):
@@ -2006,10 +2025,124 @@ def _inset_diffuse_source_positions_3d(
     return result, moved_count, centroid_limit_count
 
 
+def _diffuse_source_support_map_3d(verts, faces, centroids, ray_offset):
+    """Map quadrature-unsupported slivers to the nearest resolved adjacent face.
+
+    The hard-visibility mesh retains every positive-area triangle so its topology stays closed.
+    A vanishing sliver can nevertheless be too narrow to contain a launch point one declared
+    ``ray_offset`` from all three edges.  Its geometric normal is then an ill-conditioned artifact
+    of triangulating an otherwise regular implicit surface.  Treating that sliver as an independent
+    diffuse source can launch a complete QMC row into solid even though its integrated area tends
+    to zero.
+
+    A triangle supports the one-sided quadrature exactly when its centroid lies more than
+    ``ray_offset`` from every edge, equivalently when every altitude exceeds
+    ``3 * ray_offset``. Unsupported faces keep their own area, state, source label, and role as hard
+    occluders, but evaluate outgoing positions and directions on the nearest supported face in the
+    same edge-connected surface. The map is a conservative P0 control-volume agglomeration: every
+    source row still classifies unit probability and the rate-space ledger continues to use the
+    original face area. The returned area fraction and displacement price the approximation.
+    """
+    vertices = np.asarray(verts, dtype=float)
+    triangles = np.asarray(faces, dtype=int)
+    centers = np.asarray(centroids, dtype=float)
+    offset = float(ray_offset)
+    if (vertices.ndim != 2 or vertices.shape[1:] != (3,)
+            or triangles.ndim != 2 or triangles.shape[1:] != (3,)
+            or centers.shape != (len(triangles), 3)
+            or np.any(~np.isfinite(vertices)) or np.any(~np.isfinite(centers))
+            or np.any(triangles < 0) or np.any(triangles >= len(vertices))
+            or not np.isfinite(offset) or offset <= 0.0):
+        raise ValueError("invalid diffuse source-support geometry")
+    face_vertex = vertices[triangles]
+    edge_length = np.stack((
+        np.linalg.norm(face_vertex[:, 1] - face_vertex[:, 0], axis=1),
+        np.linalg.norm(face_vertex[:, 2] - face_vertex[:, 1], axis=1),
+        np.linalg.norm(face_vertex[:, 0] - face_vertex[:, 2], axis=1),
+    ), axis=1)
+    area = 0.5 * np.linalg.norm(np.cross(
+        face_vertex[:, 1] - face_vertex[:, 0],
+        face_vertex[:, 2] - face_vertex[:, 0]), axis=1)
+    if np.any(edge_length <= 0.0) or np.any(area <= 0.0):
+        raise ValueError("diffuse source-support mesh contains a degenerate face")
+    altitude = 2.0 * area[:, None] / edge_length
+    unsupported = np.min(altitude, axis=1) <= 3.0 * offset
+    owner = np.arange(len(triangles), dtype=int)
+    if not np.any(unsupported):
+        owner.setflags(write=False)
+        return owner, {
+            "source_support_face_count": 0,
+            "source_support_area_fraction": 0.0,
+            "maximum_source_support_distance": 0.0,
+        }
+    if np.all(unsupported):
+        raise RuntimeError(
+            "diffuse source surface has no face that supports the declared launch offset")
+
+    edge_owner = {}
+    for face_index, face in enumerate(triangles):
+        for left, right in ((face[0], face[1]), (face[1], face[2]), (face[2], face[0])):
+            edge_owner.setdefault(
+                tuple(sorted((int(left), int(right)))), []).append(int(face_index))
+    neighbor = [set() for _ in range(len(triangles))]
+    for members in edge_owner.values():
+        if len(members) > 2:
+            raise RuntimeError("diffuse source-support mesh contains a nonmanifold edge")
+        if len(members) == 2:
+            left, right = members
+            neighbor[left].add(right)
+            neighbor[right].add(left)
+
+    distance = np.full(len(triangles), np.inf)
+    queue = []
+    for face_index in np.flatnonzero(~unsupported):
+        index = int(face_index)
+        distance[index] = 0.0
+        heapq.heappush(queue, (0.0, index, index))
+    scale = max(float(np.ptp(vertices, axis=0).max(initial=0.0)), offset, 1.0)
+    tie_tolerance = 64.0 * np.finfo(float).eps * scale
+    while queue:
+        path_distance, support_face, face_index = heapq.heappop(queue)
+        if (path_distance > distance[face_index] + tie_tolerance
+                or (abs(path_distance - distance[face_index]) <= tie_tolerance
+                    and support_face != owner[face_index])):
+            continue
+        for adjacent in sorted(neighbor[face_index]):
+            if not unsupported[adjacent]:
+                continue
+            candidate = path_distance + float(np.linalg.norm(
+                centers[adjacent] - centers[face_index]))
+            better = candidate < distance[adjacent] - tie_tolerance
+            tied = (
+                abs(candidate - distance[adjacent]) <= tie_tolerance
+                and support_face < owner[adjacent])
+            if better or tied:
+                distance[adjacent] = candidate
+                owner[adjacent] = support_face
+                heapq.heappush(queue, (candidate, support_face, adjacent))
+    if np.any(owner[unsupported] == np.flatnonzero(unsupported)) or np.any(
+            ~np.isfinite(distance[unsupported])):
+        raise RuntimeError(
+            "quadrature-unsupported surface component has no resolved adjacent face")
+    represented_area = float(np.sum(area))
+    support_distance = np.linalg.norm(
+        centers[unsupported] - centers[owner[unsupported]], axis=1)
+    diagnostics = {
+        "source_support_face_count": int(np.count_nonzero(unsupported)),
+        "source_support_area_fraction": float(
+            np.sum(area[unsupported]) / represented_area),
+        "maximum_source_support_distance": float(
+            np.max(support_distance, initial=0.0)),
+    }
+    owner.setflags(write=False)
+    return owner, diagnostics
+
+
 def _diffuse_form_factor_ray_sample_block_3d(
         verts, faces, centroids, gas_normals, *, source_faces,
         sobol_index_start, sobol_index_stop, seed, ray_offset,
-        source_sampling, return_launch_diagnostics=False):
+        source_sampling, source_support_face=None,
+        return_launch_diagnostics=False):
     """Construct a source-row subset of one nested diffuse-ray rule.
 
     The scrambled Sobol population is generated through ``sobol_index_stop`` before
@@ -2024,11 +2157,16 @@ def _diffuse_form_factor_ray_sample_block_3d(
         raise ValueError(
             "source_sampling must be 'legacy_centroid' or 'triangle_area'")
     selected_source = np.asarray(source_faces, dtype=int)
+    support_map = (
+        np.arange(face_count, dtype=int) if source_support_face is None
+        else np.asarray(source_support_face, dtype=int))
     start = int(sobol_index_start)
     stop = int(sobol_index_stop)
     if (selected_source.ndim != 1 or selected_source.size == 0
             or np.any(selected_source < 0) or np.any(selected_source >= face_count)
             or len(np.unique(selected_source)) != len(selected_source)
+            or support_map.shape != (face_count,)
+            or np.any(support_map < 0) or np.any(support_map >= face_count)
             or int(sobol_index_start) != sobol_index_start
             or int(sobol_index_stop) != sobol_index_stop
             or start < 0 or stop <= start or stop & (stop - 1)):
@@ -2046,12 +2184,13 @@ def _diffuse_form_factor_ray_sample_block_3d(
     face_index = selected_source.astype(float)[:, None]
     shift = np.mod(face_index * constants[None, :], 1.0)
     sample = np.mod(base[None, :, :] + shift[:, None, :], 1.0)
+    selected_support = support_map[selected_source]
     launch_inset_count = 0
     centroid_limit_count = 0
     if source_sampling == "legacy_centroid":
         direction_sample = sample
         source_position = np.repeat(
-            np.asarray(centroids)[selected_source, None, :],
+            np.asarray(centroids)[selected_support, None, :],
             rays_per_source, axis=1)
     else:
         root = np.sqrt(sample[:, :, 0])
@@ -2062,8 +2201,8 @@ def _diffuse_form_factor_ray_sample_block_3d(
         ), axis=2)
         source_position = np.einsum(
             "frv,fvc->frc", barycentric,
-            np.asarray(verts)[np.asarray(faces)[selected_source]])
-        source = np.repeat(selected_source, rays_per_source)
+            np.asarray(verts)[np.asarray(faces)[selected_support]])
+        source = np.repeat(selected_support, rays_per_source)
         prepared, launch_inset_count, centroid_limit_count = (
             _inset_diffuse_source_positions_3d(
                 source_position.reshape(-1, 3), source, verts, faces, ray_offset))
@@ -2071,7 +2210,7 @@ def _diffuse_form_factor_ray_sample_block_3d(
             len(selected_source), rays_per_source, 3)
         direction_sample = sample[:, :, 2:]
     normal = np.repeat(
-        np.asarray(gas_normals)[selected_source], rays_per_source, axis=0)
+        np.asarray(gas_normals)[selected_support], rays_per_source, axis=0)
     direction_sample = direction_sample.reshape(-1, 2)
     tangent_seed = np.where(
         np.abs(normal[:, :1]) > 0.9,
@@ -2099,7 +2238,8 @@ def _diffuse_form_factor_ray_sample_block_3d(
 
 def _diffuse_form_factor_ray_samples_3d(
         verts, faces, centroids, gas_normals, *, rays_per_face, seed,
-        ray_offset, source_sampling, return_launch_diagnostics=False):
+        ray_offset, source_sampling, source_support_face=None,
+        return_launch_diagnostics=False):
     """Construct one complete nested diffuse-ray rule without tracing it.
 
     ``triangle_area`` integrates the finite source patch using two Sobol
@@ -2111,6 +2251,7 @@ def _diffuse_form_factor_ray_samples_3d(
         source_faces=np.arange(len(faces), dtype=int),
         sobol_index_start=0, sobol_index_stop=rays_per_face, seed=seed,
         ray_offset=ray_offset, source_sampling=source_sampling,
+        source_support_face=source_support_face,
         return_launch_diagnostics=return_launch_diagnostics)
 
 
@@ -2492,10 +2633,21 @@ def estimate_diffuse_form_factors_3d(
             or np.max(verts[:, 2]) > domain[2] + 1e-7):
         raise ValueError("periodic mesh must lie inside [0, domain_size]")
 
+    if visibility_mode == "legacy_float32" or source_sampling == "legacy_centroid":
+        source_support_face = np.arange(len(faces), dtype=int)
+        support_diagnostics = {
+            "source_support_face_count": 0,
+            "source_support_area_fraction": 0.0,
+            "maximum_source_support_distance": 0.0,
+        }
+    else:
+        source_support_face, support_diagnostics = _diffuse_source_support_map_3d(
+            verts, faces, centroids, ray_offset)
     sampling_normals = normals if visibility_mode == "legacy_float32" else authority_normals
     source, origin, direction, launch_diagnostics = _diffuse_form_factor_ray_samples_3d(
         verts, faces, centroids, sampling_normals, rays_per_face=rays_per_face,
         seed=seed, ray_offset=ray_offset, source_sampling=source_sampling,
+        source_support_face=source_support_face,
         return_launch_diagnostics=True)
 
     float64_evaluated_count = 0
@@ -2574,6 +2726,12 @@ def estimate_diffuse_form_factors_3d(
         maximum_wrap_count=maximum_wrap_count,
         launch_inset_count=launch_diagnostics["launch_inset_count"],
         centroid_limit_count=launch_diagnostics["centroid_limit_count"],
+        source_support_face_count=support_diagnostics[
+            "source_support_face_count"],
+        source_support_area_fraction=support_diagnostics[
+            "source_support_area_fraction"],
+        maximum_source_support_distance=support_diagnostics[
+            "maximum_source_support_distance"],
         derived_horizon_extension_count=derived_horizon_extension_count,
         initial_maximum_wraps=initial_maximum_wraps,
         final_maximum_wraps=final_maximum_wraps)

@@ -29,6 +29,19 @@ def _mixed_escape_geometry():
     return vertices, faces, centroids, normals
 
 
+def _supported_sliver_geometry():
+    vertices = np.asarray([
+        [0.0, 0.0, 0.0], [1.0, 0.0, 0.0],
+        [1.0e-8, 1.0e-8, 0.0], [0.0, 1.0, 0.0],
+        [0.7, 0.7, 0.0], [0.8, 0.7, 0.0], [0.7, 0.8, 0.0],
+        [0.8, 0.8, 0.0], [0.9, 0.8, 0.0], [0.8, 0.9, 0.0],
+    ])
+    faces = np.asarray([[0, 1, 2], [0, 3, 1], [4, 5, 6], [7, 8, 9]])
+    centroids = vertices[faces].mean(axis=1)
+    normals = np.repeat([[0.0, 0.0, 1.0]], 4, axis=0)
+    return vertices, faces, centroids, normals
+
+
 def _options(*, periodic=False):
     return {
         "domain_size": (1.0, 1.0, 1.0),
@@ -89,6 +102,22 @@ def test_selected_sample_block_is_exact_slice_of_global_nested_rule():
     assert np.array_equal(origin.reshape(2, 8, 3), full_origin[[0, 2], 8:])
     assert np.array_equal(direction.reshape(2, 8, 3), full_direction[[0, 2], 8:])
     assert np.array_equal(full_source.reshape(4, 16)[0], np.zeros(16, dtype=int))
+
+
+def test_nested_refinement_reuses_the_bound_subresolution_source_support_map():
+    geometry = _supported_sliver_geometry()
+    base = _estimate(geometry, 8, 29)
+    identity = _identity(geometry, base, 29)
+
+    receipt = _refine(
+        geometry, base, identity, selected=(0,), refined=16)
+
+    assert identity.payload["source_support_face_count"] == 1
+    assert identity.payload["source_support_policy"] == (
+        "nearest_edge_connected_launch_supported_face_v1")
+    assert receipt.row_ray_count.tolist() == [16, 8, 8, 8]
+    assert receipt.construction_identity["source_support_map_sha256"] == (
+        identity.payload["source_support_map_sha256"])
 
 
 @pytest.mark.parametrize("seed", (3, 5))

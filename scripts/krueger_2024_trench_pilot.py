@@ -608,6 +608,9 @@ def _visibility_history_summary(neutral_radiosity_diagnostics):
     def maximum(name):
         return max((int(item.get(name, 0)) for item in diagnostics), default=0)
 
+    def maximum_float(name):
+        return max((float(item.get(name, 0.0)) for item in diagnostics), default=0.0)
+
     return {
         "maximum_visibility_float64_evaluated_count": maximum(
             "visibility_float64_evaluated_count"),
@@ -619,6 +622,12 @@ def _visibility_history_summary(neutral_radiosity_diagnostics):
             "visibility_maximum_wrap_count"),
         "maximum_visibility_final_horizon_wraps": maximum(
             "visibility_final_maximum_wraps"),
+        "maximum_visibility_source_support_face_count": maximum(
+            "visibility_source_support_face_count"),
+        "maximum_visibility_source_support_area_fraction": maximum_float(
+            "visibility_source_support_area_fraction"),
+        "maximum_visibility_source_support_distance_um": maximum_float(
+            "visibility_maximum_source_support_distance"),
     }
 
 
