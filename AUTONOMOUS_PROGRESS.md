@@ -1670,3 +1670,25 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   reveal precede that endpoint. Report, static plot, raw receipt, and environment manifest:
   `KRUEGER_2024_REMAP_SELECTION_2026-07-17.md` and
   `results/krueger_2024_remap_backend_audit_5nm_gpu/`.
+
+### The 5 nm authority run exposes and closes a marching-cubes topology defect
+
+- **The sealed `a15634f` run is a failed receipt, not an endpoint.** Seed `241`, config hash
+  `32ca232d849e6e34f5378ddb2d5987c3ae826f8691b6ff3b8cb329fa366321fa`, hard visibility,
+  common-refinement remap, and CUDA face-gather transport reached step 168 / 11.376815 s with
+  155.697 nm depth and 76.709 nm opening. The material ledger remained exact and no topology event
+  occurred, but one of 36,856 rays refused after a 1,024-wrap solid-facing exact replay. No held-out
+  profile was read and the checkpoint is not resumable across the operator repair.
+- **Exact replay found a mesh hole, not an undersized trajectory horizon.** The ray entered solid
+  after 15.02 nm of path and reached the far surface with incoming cosine `-0.2699`. The old
+  float32-scaled area cutoff had deleted 29 real sliver triangles: the raw 4,636-face contour had
+  zero unmatched interior edges, while the filtered 4,607-face mesh had 56. Keeping every
+  positive-area face makes the same ray hit its near-side face with cosine `+0.7698` and zero wraps.
+- **Revision `418fb28` makes topology part of the operator contract.** CPU and GPU extraction retain
+  all representable positive-area faces, cancel exact duplicate facets by orientation, and refuse
+  unmatched interior or non-manifold edges. Manufactured sliver, missing-face, duplicate-facet,
+  multi-material, transport, scattering, and Nozawa regressions pass; the repository-wide suite is
+  green with 968 passed and one expected skip. Forensic receipt:
+  `results/krueger_2024_base_authority_5nm_a15634f_topology_refusal/`.
+- **Next:** restart the base authority case from zero on a clean descendant of `418fb28`; passing the
+  old step-168 state is a required canary, not permission to reveal or tune against held-out data.

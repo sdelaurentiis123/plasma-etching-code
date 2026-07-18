@@ -1,0 +1,195 @@
+Warp 1.15.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.0
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 4090" (24 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.15.0
+Module petch.boundary_transport_3d 640f97c load on device 'cuda:0' took 2.29 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 1.23 ms  (cached)
+step=1 t=0.185s dt=0.1851s depth=2.496nm mask_opening=88.468nm wall=12.77s
+step=2 t=0.278s dt=0.09255s depth=3.744nm mask_opening=88.188nm wall=3.52s
+step=3 t=0.391s dt=0.1134s depth=5.272nm mask_opening=87.910nm wall=3.60s
+step=4 t=0.483s dt=0.09232s depth=6.516nm mask_opening=87.704nm wall=3.61s
+step=5 t=0.580s dt=0.09655s depth=7.815nm mask_opening=87.527nm wall=9.07s
+step=6 t=0.643s dt=0.06302s depth=8.663nm mask_opening=87.409nm wall=3.62s
+step=7 t=0.713s dt=0.06984s depth=9.603nm mask_opening=87.302nm wall=3.54s
+step=8 t=0.799s dt=0.08611s depth=10.762nm mask_opening=87.176nm wall=3.61s
+step=9 t=0.902s dt=0.1035s depth=12.155nm mask_opening=87.016nm wall=3.65s
+step=10 t=0.966s dt=0.06336s depth=13.009nm mask_opening=86.930nm wall=3.59s
+step=11 t=1.028s dt=0.06235s depth=13.849nm mask_opening=86.849nm wall=3.57s
+step=12 t=1.095s dt=0.06701s depth=14.751nm mask_opening=86.770nm wall=3.57s
+step=13 t=1.180s dt=0.08473s depth=15.892nm mask_opening=86.649nm wall=3.68s
+step=14 t=1.277s dt=0.09756s depth=17.206nm mask_opening=86.512nm wall=3.64s
+step=15 t=1.355s dt=0.07795s depth=18.256nm mask_opening=86.405nm wall=3.63s
+step=16 t=1.420s dt=0.06492s depth=19.130nm mask_opening=86.333nm wall=3.58s
+step=17 t=1.485s dt=0.06432s depth=19.996nm mask_opening=86.262nm wall=3.67s
+step=18 t=1.553s dt=0.06854s depth=20.919nm mask_opening=86.181nm wall=3.59s
+step=19 t=1.641s dt=0.08756s depth=22.099nm mask_opening=86.083nm wall=3.65s
+step=20 t=1.734s dt=0.09372s depth=23.361nm mask_opening=85.974nm wall=3.63s
+step=21 t=1.830s dt=0.09545s depth=24.647nm mask_opening=85.857nm wall=6.14s
+step=22 t=1.896s dt=0.06646s depth=25.542nm mask_opening=85.772nm wall=3.68s
+step=23 t=1.964s dt=0.06766s depth=26.454nm mask_opening=85.692nm wall=3.65s
+step=24 t=2.045s dt=0.08068s depth=27.541nm mask_opening=85.588nm wall=6.11s
+step=25 t=2.140s dt=0.09587s depth=28.831nm mask_opening=85.480nm wall=3.66s
+step=26 t=2.236s dt=0.09547s depth=30.117nm mask_opening=85.373nm wall=3.69s
+step=27 t=2.303s dt=0.06678s depth=31.015nm mask_opening=85.308nm wall=3.73s
+step=28 t=2.376s dt=0.07303s depth=31.998nm mask_opening=85.232nm wall=3.71s
+step=29 t=2.467s dt=0.09144s depth=33.228nm mask_opening=85.125nm wall=3.70s
+step=30 t=2.556s dt=0.08857s depth=34.421nm mask_opening=85.017nm wall=3.67s
+step=31 t=2.638s dt=0.08189s depth=35.523nm mask_opening=84.949nm wall=3.66s
+step=32 t=2.706s dt=0.06808s depth=36.439nm mask_opening=84.884nm wall=3.69s
+step=33 t=2.785s dt=0.07905s depth=37.502nm mask_opening=84.810nm wall=3.73s
+step=34 t=2.879s dt=0.09418s depth=38.770nm mask_opening=84.719nm wall=3.70s
+step=35 t=2.966s dt=0.08743s depth=39.947nm mask_opening=84.647nm wall=3.73s
+step=36 t=3.034s dt=0.06806s depth=40.863nm mask_opening=84.580nm wall=3.72s
+step=37 t=3.105s dt=0.07033s depth=41.809nm mask_opening=84.518nm wall=3.73s
+step=38 t=3.197s dt=0.09198s depth=43.047nm mask_opening=84.439nm wall=3.71s
+step=39 t=3.289s dt=0.09207s depth=44.286nm mask_opening=84.352nm wall=3.67s
+step=40 t=3.376s dt=0.08713s depth=45.458nm mask_opening=84.274nm wall=3.72s
+step=41 t=3.444s dt=0.06817s depth=46.375nm mask_opening=84.213nm wall=3.73s
+step=42 t=3.528s dt=0.08391s depth=47.505nm mask_opening=84.141nm wall=3.82s
+step=43 t=3.618s dt=0.09011s depth=48.717nm mask_opening=84.063nm wall=3.68s
+step=44 t=3.710s dt=0.09201s depth=49.956nm mask_opening=83.993nm wall=3.75s
+step=45 t=3.792s dt=0.08226s depth=51.063nm mask_opening=83.928nm wall=3.72s
+step=46 t=3.866s dt=0.07321s depth=52.048nm mask_opening=83.853nm wall=6.79s
+step=47 t=3.950s dt=0.08477s depth=53.188nm mask_opening=83.759nm wall=6.37s
+step=48 t=4.035s dt=0.08488s depth=54.331nm mask_opening=83.668nm wall=6.48s
+step=49 t=4.125s dt=0.09004s depth=55.543nm mask_opening=83.583nm wall=3.74s
+step=50 t=4.211s dt=0.08549s depth=56.693nm mask_opening=83.484nm wall=3.81s
+step=51 t=4.287s dt=0.07649s depth=57.722nm mask_opening=83.393nm wall=3.75s
+step=52 t=4.374s dt=0.08697s depth=58.892nm mask_opening=83.291nm wall=3.80s
+step=53 t=4.462s dt=0.08766s depth=60.071nm mask_opening=83.195nm wall=3.71s
+step=54 t=4.546s dt=0.08382s depth=61.199nm mask_opening=83.111nm wall=3.81s
+step=55 t=4.623s dt=0.07744s depth=62.240nm mask_opening=83.043nm wall=3.80s
+step=56 t=4.699s dt=0.07576s depth=63.260nm mask_opening=82.952nm wall=3.94s
+step=57 t=4.791s dt=0.09234s depth=64.503nm mask_opening=82.837nm wall=6.72s
+step=58 t=4.878s dt=0.08697s depth=65.673nm mask_opening=82.736nm wall=3.68s
+step=59 t=4.969s dt=0.09064s depth=66.892nm mask_opening=82.660nm wall=3.76s
+step=60 t=5.053s dt=0.08456s depth=68.029nm mask_opening=82.573nm wall=3.78s
+step=61 t=5.143s dt=0.08945s depth=69.234nm mask_opening=82.486nm wall=3.74s
+step=62 t=5.232s dt=0.08912s depth=70.433nm mask_opening=82.395nm wall=3.78s
+step=63 t=5.318s dt=0.0857s depth=71.586nm mask_opening=82.301nm wall=4.03s
+step=64 t=5.401s dt=0.08313s depth=72.705nm mask_opening=82.217nm wall=4.03s
+step=65 t=5.498s dt=0.09724s depth=74.014nm mask_opening=82.134nm wall=7.41s
+step=66 t=5.584s dt=0.08575s depth=75.169nm mask_opening=82.056nm wall=4.29s
+step=67 t=5.668s dt=0.08376s depth=76.297nm mask_opening=81.954nm wall=4.35s
+step=68 t=5.754s dt=0.08649s depth=77.461nm mask_opening=81.870nm wall=4.37s
+step=69 t=5.836s dt=0.08225s depth=78.568nm mask_opening=81.780nm wall=4.36s
+step=70 t=5.915s dt=0.07888s depth=79.628nm mask_opening=81.705nm wall=4.27s
+step=71 t=6.001s dt=0.08624s depth=80.787nm mask_opening=81.615nm wall=4.35s
+step=72 t=6.089s dt=0.08738s depth=81.962nm mask_opening=81.507nm wall=4.34s
+step=73 t=6.180s dt=0.09099s depth=83.187nm mask_opening=81.417nm wall=4.40s
+step=74 t=6.274s dt=0.09404s depth=84.452nm mask_opening=81.322nm wall=4.33s
+step=75 t=6.362s dt=0.08857s depth=85.642nm mask_opening=81.222nm wall=4.30s
+step=76 t=6.456s dt=0.09389s depth=86.905nm mask_opening=81.138nm wall=4.32s
+step=77 t=6.547s dt=0.09081s depth=88.127nm mask_opening=81.046nm wall=4.32s
+step=78 t=6.633s dt=0.0855s depth=89.277nm mask_opening=80.961nm wall=4.29s
+step=79 t=6.715s dt=0.08263s depth=90.388nm mask_opening=80.879nm wall=4.26s
+step=80 t=6.802s dt=0.08709s depth=91.560nm mask_opening=80.796nm wall=4.35s
+step=81 t=6.896s dt=0.09409s depth=92.826nm mask_opening=80.698nm wall=13.24s
+step=82 t=6.989s dt=0.09249s depth=94.070nm mask_opening=80.591nm wall=7.83s
+step=83 t=7.071s dt=0.08214s depth=95.175nm mask_opening=80.475nm wall=4.37s
+step=84 t=7.159s dt=0.08826s depth=96.362nm mask_opening=80.397nm wall=8.47s
+step=85 t=7.251s dt=0.09208s depth=97.602nm mask_opening=80.286nm wall=4.51s
+step=86 t=7.337s dt=0.08575s depth=98.757nm mask_opening=80.226nm wall=4.48s
+step=87 t=7.415s dt=0.07762s depth=99.802nm mask_opening=80.148nm wall=4.56s
+step=88 t=7.504s dt=0.08955s depth=101.009nm mask_opening=80.070nm wall=7.65s
+step=89 t=7.598s dt=0.09412s depth=102.277nm mask_opening=79.977nm wall=5.00s
+step=90 t=7.685s dt=0.08662s depth=103.444nm mask_opening=80.074nm wall=5.12s
+step=91 t=7.765s dt=0.07969s depth=104.519nm mask_opening=79.372nm wall=9.58s
+step=92 t=7.813s dt=0.04814s depth=105.168nm mask_opening=79.077nm wall=5.90s
+step=93 t=7.840s dt=0.02748s depth=105.539nm mask_opening=79.271nm wall=5.76s
+step=94 t=7.882s dt=0.04122s depth=106.096nm mask_opening=79.553nm wall=6.18s
+step=95 t=7.910s dt=0.02853s depth=106.481nm mask_opening=79.684nm wall=6.19s
+step=96 t=7.950s dt=0.04001s depth=107.022nm mask_opening=79.808nm wall=6.32s
+step=97 t=8.010s dt=0.06001s depth=107.834nm mask_opening=79.162nm wall=6.68s
+step=98 t=8.043s dt=0.03297s depth=108.280nm mask_opening=79.135nm wall=6.81s
+step=99 t=8.093s dt=0.04946s depth=108.950nm mask_opening=79.620nm wall=6.29s
+step=100 t=8.167s dt=0.07419s depth=109.955nm mask_opening=79.800nm wall=6.65s
+step=101 t=8.251s dt=0.08411s depth=111.111nm mask_opening=79.699nm wall=6.47s
+step=102 t=8.330s dt=0.07955s depth=112.193nm mask_opening=79.252nm wall=6.64s
+step=103 t=8.389s dt=0.05882s depth=112.996nm mask_opening=79.207nm wall=6.70s
+step=104 t=8.462s dt=0.0729s depth=113.993nm mask_opening=79.127nm wall=7.14s
+step=105 t=8.509s dt=0.04671s depth=114.636nm mask_opening=79.079nm wall=6.60s
+step=106 t=8.579s dt=0.07006s depth=115.624nm mask_opening=79.010nm wall=6.85s
+step=107 t=8.643s dt=0.06382s depth=116.535nm mask_opening=78.926nm wall=6.50s
+step=108 t=8.725s dt=0.08229s depth=117.720nm mask_opening=78.867nm wall=6.73s
+step=109 t=8.814s dt=0.08934s depth=119.040nm mask_opening=78.794nm wall=6.70s
+step=110 t=8.907s dt=0.093s depth=120.475nm mask_opening=78.787nm wall=6.67s
+step=111 t=8.982s dt=0.07491s depth=121.598nm mask_opening=78.742nm wall=6.58s
+step=112 t=9.067s dt=0.08501s depth=122.911nm mask_opening=78.671nm wall=7.17s
+step=113 t=9.124s dt=0.05639s depth=123.811nm mask_opening=78.625nm wall=6.45s
+step=114 t=9.208s dt=0.08458s depth=125.168nm mask_opening=78.561nm wall=6.91s
+step=115 t=9.303s dt=0.095s depth=126.629nm mask_opening=78.502nm wall=6.89s
+step=116 t=9.331s dt=0.02799s depth=127.056nm mask_opening=78.479nm wall=13.45s
+step=117 t=9.354s dt=0.02244s depth=127.400nm mask_opening=78.466nm wall=6.92s
+step=118 t=9.387s dt=0.03366s depth=127.914nm mask_opening=78.444nm wall=14.99s
+step=119 t=9.438s dt=0.05048s depth=128.676nm mask_opening=78.393nm wall=6.83s
+step=120 t=9.514s dt=0.07573s depth=129.818nm mask_opening=78.337nm wall=6.88s
+step=121 t=9.558s dt=0.04466s depth=130.439nm mask_opening=78.300nm wall=14.65s
+step=122 t=9.589s dt=0.03038s depth=130.884nm mask_opening=78.275nm wall=6.96s
+step=123 t=9.603s dt=0.01407s depth=131.089nm mask_opening=78.263nm wall=15.04s
+step=124 t=9.610s dt=0.007037s depth=131.189nm mask_opening=78.257nm wall=7.09s
+step=125 t=9.619s dt=0.009041s depth=131.318nm mask_opening=78.250nm wall=6.84s
+step=126 t=9.632s dt=0.01356s depth=131.511nm mask_opening=78.241nm wall=6.13s
+step=127 t=9.653s dt=0.02034s depth=131.800nm mask_opening=78.218nm wall=6.06s
+step=128 t=9.683s dt=0.03051s depth=132.229nm mask_opening=78.192nm wall=6.07s
+step=129 t=9.729s dt=0.04577s depth=132.869nm mask_opening=78.137nm wall=6.09s
+step=130 t=9.781s dt=0.05249s depth=133.597nm mask_opening=78.078nm wall=6.01s
+step=131 t=9.860s dt=0.07873s depth=134.683nm mask_opening=78.022nm wall=9.44s
+step=132 t=9.904s dt=0.04433s depth=135.300nm mask_opening=77.963nm wall=13.67s
+step=133 t=9.927s dt=0.02217s depth=135.609nm mask_opening=77.940nm wall=6.50s
+step=134 t=9.944s dt=0.01762s depth=135.853nm mask_opening=77.926nm wall=6.68s
+step=135 t=9.971s dt=0.02642s depth=136.220nm mask_opening=77.889nm wall=6.84s
+step=136 t=10.010s dt=0.03963s depth=136.771nm mask_opening=77.858nm wall=6.68s
+step=137 t=10.040s dt=0.02973s depth=137.184nm mask_opening=77.831nm wall=13.84s
+step=138 t=10.060s dt=0.01973s depth=137.459nm mask_opening=77.807nm wall=6.50s
+step=139 t=10.089s dt=0.0296s depth=137.870nm mask_opening=77.773nm wall=11.91s
+step=140 t=10.134s dt=0.0444s depth=138.487nm mask_opening=77.745nm wall=6.02s
+step=141 t=10.167s dt=0.0333s depth=138.950nm mask_opening=77.713nm wall=20.34s
+step=142 t=10.191s dt=0.02424s depth=139.288nm mask_opening=77.690nm wall=10.03s
+step=143 t=10.228s dt=0.03636s depth=139.794nm mask_opening=77.663nm wall=6.26s
+step=144 t=10.282s dt=0.05453s depth=140.553nm mask_opening=77.619nm wall=6.39s
+step=145 t=10.343s dt=0.06125s depth=141.405nm mask_opening=77.576nm wall=9.78s
+step=146 t=10.367s dt=0.02331s depth=141.730nm mask_opening=77.555nm wall=13.25s
+step=147 t=10.378s dt=0.01165s depth=141.893nm mask_opening=77.545nm wall=6.03s
+step=148 t=10.396s dt=0.01748s depth=142.137nm mask_opening=77.528nm wall=6.13s
+step=149 t=10.418s dt=0.02247s depth=142.451nm mask_opening=77.538nm wall=6.00s
+step=150 t=10.452s dt=0.0337s depth=142.921nm mask_opening=77.527nm wall=6.00s
+step=151 t=10.503s dt=0.05055s depth=143.627nm mask_opening=77.479nm wall=6.12s
+step=152 t=10.546s dt=0.04354s depth=144.235nm mask_opening=77.443nm wall=6.09s
+step=153 t=10.604s dt=0.05758s depth=145.035nm mask_opening=77.396nm wall=6.03s
+step=154 t=10.662s dt=0.05784s depth=145.850nm mask_opening=77.335nm wall=6.13s
+step=155 t=10.728s dt=0.0663s depth=146.779nm mask_opening=77.271nm wall=6.10s
+step=156 t=10.782s dt=0.05384s depth=147.536nm mask_opening=77.224nm wall=6.06s
+step=157 t=10.804s dt=0.02229s depth=147.851nm mask_opening=77.200nm wall=12.55s
+step=158 t=10.821s dt=0.01716s depth=148.093nm mask_opening=77.186nm wall=10.89s
+step=159 t=10.847s dt=0.02575s depth=148.455nm mask_opening=77.165nm wall=5.88s
+step=160 t=10.886s dt=0.03862s depth=148.998nm mask_opening=77.132nm wall=5.99s
+step=161 t=10.943s dt=0.05793s depth=149.793nm mask_opening=77.080nm wall=6.09s
+step=162 t=11.020s dt=0.07645s depth=150.823nm mask_opening=77.023nm wall=6.15s
+step=163 t=11.058s dt=0.03823s depth=151.341nm mask_opening=76.990nm wall=6.37s
+step=164 t=11.113s dt=0.05534s depth=152.090nm mask_opening=76.956nm wall=5.95s
+step=165 t=11.193s dt=0.07913s depth=153.163nm mask_opening=76.860nm wall=6.14s
+step=166 t=11.257s dt=0.06395s depth=154.033nm mask_opening=76.816nm wall=12.75s
+step=167 t=11.313s dt=0.05651s depth=154.808nm mask_opening=76.764nm wall=11.57s
+step=168 t=11.377s dt=0.06376s depth=155.697nm mask_opening=76.709nm wall=6.31s
+Traceback (most recent call last):
+  File "/root/petch-a15634f/scripts/krueger_2024_trench_pilot.py", line 1096, in <module>
+    run(parse_args())
+  File "/root/petch-a15634f/scripts/krueger_2024_trench_pilot.py", line 762, in run
+    result = advance_feature_step_3d(
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/petch-a15634f/src/petch/feature_step_3d.py", line 2333, in advance_feature_step_3d
+    transport, neutral_radiosity_diagnostics = _apply_diffuse_neutral_transport(
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/petch-a15634f/src/petch/feature_step_3d.py", line 1615, in _apply_diffuse_neutral_transport
+    visibility_receipt = estimate_diffuse_form_factors_3d(
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/petch-a15634f/src/petch/boundary_transport_3d.py", line 2523, in estimate_diffuse_form_factors_3d
+    events = trace_diffuse_form_factor_events_cellwise_certified_3d(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/petch-a15634f/src/petch/boundary_transport_3d.py", line 2328, in trace_diffuse_form_factor_events_cellwise_certified_3d
+    raise RuntimeError(
+RuntimeError: exact replay of cellwise diffuse visibility encountered solid-facing hard intersection for 1 of 36856 rays; first_ray=1872; maximum_wraps=1024
