@@ -27,7 +27,8 @@ from .surface_overlap_remap_3d import (
 )
 
 
-_SCHEMA = b"petch-moving-surface-common-refinement-3d-v1"
+_SCHEMA = b"petch-moving-surface-common-refinement-3d-v2"
+_MINIMUM_CHART_FACTOR = np.sqrt(np.finfo(float).eps)
 
 
 def _digest_array(digest, name, value, dtype):
@@ -191,6 +192,7 @@ def build_surface_common_refinement_transfer_3d(
 
     old_normal = _unit_normals(old_surface)
     new_normal = _unit_normals(new_surface)
+    degenerate_chart_pair_count = 0
     if old_surface.fingerprint == new_surface.fingerprint:
         combined_new = np.arange(len(new_surface.faces), dtype=int)
         combined_old = np.arange(len(old_surface.faces), dtype=int)
@@ -252,7 +254,18 @@ def build_surface_common_refinement_transfer_3d(
                 shifted_old[:, :, tangent_axis], target[:, :, tangent_axis])
             old_factor = np.abs(old_normal[old_index, projection_axis])
             new_factor = np.abs(new_normal[new_index, projection_axis])
-            positive = projected > 0.0
+            # A triangle that is edge-on in this source-authoritative chart has zero projected
+            # area.  Convex clipping can nevertheless return a machine-epsilon polygon when the
+            # coordinates are translated far from the origin.  Dividing that ghost area by the
+            # zero target factor used to emit ``inf`` and retain a microscopic false coupling.
+            # Treat numerically rank-deficient charts as unsupported correspondence: their old
+            # and new areas remain in the explicit removal/fresh-surface ledgers below.
+            chart_supported = (
+                (old_factor > _MINIMUM_CHART_FACTOR)
+                & (new_factor > _MINIMUM_CHART_FACTOR))
+            degenerate_chart_pair_count += int(np.count_nonzero(
+                (projected > 0.0) & ~chart_supported))
+            positive = (projected > 0.0) & chart_supported
             if not np.any(positive):
                 continue
             old_equivalent = projected[positive] / old_factor[positive]
@@ -282,7 +295,6 @@ def build_surface_common_refinement_transfer_3d(
             combined_new = np.empty(0, dtype=int)
             combined_old = np.empty(0, dtype=int)
             combined_area = np.empty(0, dtype=float)
-
     offsets = np.zeros(len(new_surface.faces) + 1, dtype=int)
     if combined_new.size:
         offsets[1:] = np.cumsum(np.bincount(
@@ -371,6 +383,8 @@ def build_surface_common_refinement_transfer_3d(
         "aligned_pair_count": aligned_count,
         "positive_pair_image_count": positive_image_count,
         "combined_pair_count": len(combined_area),
+        "degenerate_chart_pair_count": degenerate_chart_pair_count,
+        "minimum_chart_factor": float(_MINIMUM_CHART_FACTOR),
         "minimum_normal_dot": minimum_normal_dot,
         "maximum_normal_distance": maximum_normal_distance,
         "maximum_raw_old_coverage_ratio": maximum_old_ratio,

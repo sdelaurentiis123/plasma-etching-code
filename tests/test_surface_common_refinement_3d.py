@@ -115,3 +115,30 @@ def test_periodic_normal_translation_uses_one_nearest_image():
     np.testing.assert_allclose(transfer.old_covered_area, old.face_area, atol=3e-15)
     np.testing.assert_allclose(transfer.new_covered_area, new.face_area, atol=3e-15)
     assert transfer.geometry_receipt["total_overlap_area"] == pytest.approx(1.0)
+
+
+def test_edge_on_target_chart_rejects_roundoff_overlap_without_division():
+    # This is the translated, nearly degenerate chart that emitted a divide-by-zero warning in
+    # the authoritative Krueger step-114 replay.  Its target projection is exactly a line, while
+    # float64 clipping reports a ~4e-17 area from coordinate-cancellation roundoff.
+    old_vertex = np.asarray([
+        [0.0, 0.10499999672174454, 2.449831008911133],
+        [-0.0002, 0.10340370982885361, 2.444999933242798],
+        [-0.0000475, 0.10499999672174454, 2.450000047683716],
+    ])
+    new_vertex = np.asarray([
+        [0.0, 0.10499999672174454, 2.444999933242798],
+        [0.005, 0.10424637049436569, 2.450000047683716],
+        [0.01, 0.10499999672174454, 2.444999933242798],
+    ])
+    face = np.asarray([[0, 1, 2]], dtype=int)
+    old = TriangleSurface3D(old_vertex, face, np.ones(1, dtype=int))
+    new = TriangleSurface3D(new_vertex, face, np.ones(1, dtype=int))
+
+    with np.errstate(divide="raise", invalid="raise"):
+        transfer = build_surface_common_refinement_transfer_3d(
+            old, new, maximum_normal_distance=0.1)
+
+    assert transfer.overlap_area.size == 0
+    assert transfer.geometry_receipt["degenerate_chart_pair_count"] == 1
+    assert transfer.geometry_receipt["total_overlap_area"] == 0.0
