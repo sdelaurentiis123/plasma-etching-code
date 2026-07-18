@@ -1,6 +1,6 @@
 {
   "schema": "petch.krueger-2024.base-refinement-companion.v1",
-  "launch_sha256": "e94f1d7a321c15328ee2fe177be8821d2d30f6c8f3b7029e16575445c7c0b0d6",
+  "launch_sha256": "661ea9421c52a379d9d9ca1414078457490fefbf9550bcd194177d9c29f1e921",
   "protocol_id": "K24-PETCH-R1.9",
   "scientific_status": "same-operator 10-nm numerical companion for the clean 5-nm base anchor; no parameter search and no held-out outcome access",
   "authority_candidate": false,
@@ -11,7 +11,7 @@
     "git_dirty": false,
     "archive_sha256": "c441de4f7339f3651e6847b089dd1e963ac3dea9851ad1b42b154d8eb715f27c"
   },
-  "paired_authority_launch_sha256": "f5ca59c10fb05c48636fddf484390b56030e09b332d5c532985455a260b7c634",
+  "paired_authority_launch_sha256": "3baf44df1cc9b681666988b8d5caf9edcef66b0bcdb9b17e05b8e4dd2dcc0208",
   "fixed_parameters": {
     "effective_mask_crosslinked_growth_fraction": 0.9004722559883319,
     "oxide_etch_yield_scale": 0.5586489665864749

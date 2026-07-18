@@ -1,6 +1,6 @@
 {
   "schema": "petch.krueger-2024.base-authority-retry.v2",
-  "launch_sha256": "f5ca59c10fb05c48636fddf484390b56030e09b332d5c532985455a260b7c634",
+  "launch_sha256": "3baf44df1cc9b681666988b8d5caf9edcef66b0bcdb9b17e05b8e4dd2dcc0208",
   "protocol_id": "K24-PETCH-R1.9",
   "scientific_status": "single clean uniform-5-nm base anchor at the fixed R1.9 pair; no parameter search and no held-out outcome access",
   "authority_candidate": true,
