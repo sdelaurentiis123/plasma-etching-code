@@ -1785,3 +1785,29 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   numba) were installed before launch; no repository source was modified.
 - **Claim boundary:** nothing scientific is earned by launching. No held-out observation has been
   read. The endpoint alone decides freeze-or-one-correction per R1.8/R1.9.
+
+### The fifth latent defect: launches inside the piecewise-linear artifact zone (2026-07-20)
+
+- **Both clean-epoch authority runs refused deterministically** (5 nm step 289, 16/37920 rays;
+  10 nm step 328, 9/13344): exact replay met solid-facing hard intersections at the mask necking
+  region. The half-finished uncommitted relaunch found at re-entry was completed, gated, and
+  proved insufficient on the preserved state (2/16 recovered) -- the pathology is deeper than a
+  mis-launched quadrature point.
+- **Forensics, in order, each on the real failing checkpoint:** an exhaustive brute-force
+  crossing audit proved the float64 tracer sound (zero missed front crossings, so no seam bug);
+  per-face authority sampling showed refusing launches lie within 0.32 dx of the trilinear
+  surface while sitting inside neighboring piecewise-linear solid; grazing rays traverse
+  extended contact slabs (up to ~90 dx of path) where exactly coincident facets correctly cancel
+  as interior surface. Path-length and crossed-plane-perpendicular admission rules were each
+  implemented, measured, and refuted before the final criterion was selected from data.
+- **The operator recovery (`6789dc2`):** a ray whose first intersection is a back face never
+  crossed a front face, so its launch is inside the discretization artifact zone; if the launch
+  lies within 0.5 dx of the authority (trilinear) surface -- sampled by a vectorized closure the
+  engine now passes into the visibility estimate -- it may exit through consecutive back-face
+  crossings. A launch farther from the authority surface still refuses hard. Receipts count
+  overlap exits and record exit depth through the estimate receipt, engine diagnostics, and
+  pilot summary; manufactured regressions bind recovery, grazing admission, authority admission,
+  and the still-fatal deep refusal. All four seeds on the failing state classify completely.
+  Suite: 981 passed, 1 expected skip.
+- **Claim boundary:** flux carried by recovered rays is <=0.1% of the quadrature with row weight
+  1/8 -- below every stated error budget -- and every recovery is receipted, never silent.
