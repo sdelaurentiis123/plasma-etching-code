@@ -1758,3 +1758,30 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   A new clean `t=0` authority epoch is mechanically required. No held-out data, simulation, or GPU
   was used in this preflight. The suite passes 976 tests with one expected skip. Report:
   `KRUEGER_2024_REVEAL_GATE_PREFLIGHT_2026-07-18.md`.
+
+### The clean-epoch base authority pair is launched (2026-07-20)
+
+- **Re-orientation after handoff.** The uncommitted visibility source-relaunch instrumentation
+  found on top of `5ac9458` was judged speculative: no documented open refusal motivates it, it
+  softens the hard-visibility refuse-rather-than-guess contract, and the pilot summary canary test
+  fails with its new keys. It is preserved unmodified on the side branch
+  `wip/visibility-source-relaunch` (`9a59b0c`) and removed from the campaign branch. The campaign
+  tree is clean at `5ac9458`; the full suite passes 976 with one expected skip on that tree.
+- **New-epoch launch manifests authored and gate-validated before spending compute.** Paired
+  10/5 nm manifests for source epoch `5ac9458bc419cff48ff95b35a11fd3f90b7eee1f` (archive SHA-256
+  `75f25d599fe219ba278270c981ad2972d40219191968c9030d7244788cc8e462`) carry the same R1.9 fixed
+  pair, operator, and data firewall as the sealed efaa070 manifests; only `feature_step_3d.py`
+  changed (`c986d2a` local-gradient normal orientation). The pair was validated against
+  `krueger_2024_freeze.py::_bind_launch_manifests` (including executable-hash-vs-current-source)
+  before commit (`e3322dc`). The freeze gate binds azimuth/charging evidence by content, not by
+  source epoch, so the sealed receipts remain valid and were not regenerated.
+- **Both runs are live on checksum-verified boxes.** The archive SHA was re-verified on each box
+  before extraction, and the four executable source hashes were recomputed on-box and match the
+  manifests. 5 nm authority: Vast instance 45402811 (RTX 4090, 48 effective cores). 10 nm
+  companion: Vast instance 45402814 (RTX 4090, 16 cores). Each runs under an unattended
+  supervisor that resumes across `wall_budget_checkpoint` exits and stops after three consecutive
+  process failures so a deterministic refusal is preserved as evidence rather than retried
+  indefinitely. Missing wheels on the boxes (scikit-fmm built from source with g++, scikit-image,
+  numba) were installed before launch; no repository source was modified.
+- **Claim boundary:** nothing scientific is earned by launching. No held-out observation has been
+  read. The endpoint alone decides freeze-or-one-correction per R1.8/R1.9.
