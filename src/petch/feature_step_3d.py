@@ -1584,8 +1584,13 @@ def _apply_diffuse_neutral_transport(
             # Bounded disposition of rays that survive every proof-based recovery
             # unclassified: ledger the weight as lost, refuse only when the per-row or
             # global unclassified fraction exceeds these declared budgets (the signature
-            # of a structural defect rather than a numerical-tail straggler).
-            options["unclassified_ray_budget"] = (0.01, 0.001)
+            # of a structural defect rather than a numerical-tail straggler).  The row cap
+            # is a fraction of ONE face's emitted weight (a quarter of its rays): a single
+            # pathological fold can launch a couple of co-located stragglers from the same
+            # face, and losing <=25% of one face among thousands bounds the global bias at
+            # the global cap times that fraction.  The 5 nm production lineage that set
+            # this: two solid-facing rays from one face at step ~443, t=19.7 s.
+            options["unclassified_ray_budget"] = (0.25, 0.001)
         rays_per_face = initial_rays_per_face
     else:
         incompatible = set(options) & {
