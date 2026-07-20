@@ -227,3 +227,31 @@ The held-out categorical gates are, verbatim in meaning: low-O and zero-low-freq
 essentially absent necking at high O; maximum depth at the stated intermediate O ratio; no depth
 increase from the intermediate to high-O range; and only small final-profile differences between the
 4 and 8 kW cases.  No held-out retuning is allowed.
+
+## Amendment R1.10 (2026-07-20, preregistered before any held-out access)
+
+Declared while every held-out observation remains sealed and unread
+(`held_out_profile_data_read=false` in every receipt to date).
+
+1. **Freeze fidelity moves to the uniform 10 nm operator.** The completed 10 nm base endpoint
+   becomes the authority endpoint for freeze and reveal. The uniform 5 nm run is demoted to a
+   post-hoc refinement confirmation and is no longer a precondition for the reveal. Basis: the
+   sealed paired 10/5 nm refinement audits (depth-rate agreement 0.073%; paired remap-backend
+   receipts) and the practical finding that serial 5 nm authority attempts have cost six clean
+   epochs without reaching an endpoint, while the 10 nm operator has now completed the full 60 s
+   trajectory end to end.
+2. **One bounded base-only correction of the two declared scalars is exercised now**, as already
+   permitted (R1.3/R1.6/R1.8), using the existing coupled-correction machinery on the completed
+   current-epoch 10 nm base endpoint. Motivation: six receipted operator repairs since the pair
+   was fixed legitimately moved the base endpoint (10 nm: opening 41.836 nm, depth 814.628 nm
+   against 45/825). The correction consumes only the two declared base observables; no
+   transfer/held-out table is opened.
+3. **All held-out gates, targets, and tolerances are unchanged.** The corrected pair must bring
+   the 10 nm base endpoint within the declared +/-5 nm freeze tolerance on both observables; a
+   second miss ends the campaign as a failed calibration, reported as such.
+4. The freeze tooling is amended (tooling, not operator physics) to accept the 10 nm authority
+   endpoint with the same conservation, operator, launch-manifest, and calibration-derivation
+   gates, binding this amendment's protocol hash.
+
+Claim boundary under R1.10: any successful reveal is a held-out validation at 10 nm numerical
+fidelity with 5 nm refinement confirmation pending, and must be stated as such.
