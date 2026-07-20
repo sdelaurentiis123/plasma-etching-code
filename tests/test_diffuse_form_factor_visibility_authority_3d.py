@@ -300,7 +300,7 @@ def test_cellwise_certified_path_derives_open_top_horizon_for_grazing_ray(
     assert result.derived_horizon_extension_count == 1
     assert result.maximum_wrap_count == 500
     assert result.initial_maximum_wraps == 3
-    assert result.final_maximum_wraps == 504
+    assert result.final_maximum_wraps == 504 + 64 + 504 // 16
 
     # Preserve the exact production lineage that exposed the former guessed 1024-wrap cap.  Its
     # true float64 trace escaped after 1113 wraps; the conservative geometric authority is 1117.
@@ -338,7 +338,7 @@ def test_cellwise_certified_path_derives_lower_domain_horizon_for_grazing_ray(
     assert result.derived_horizon_extension_count == 1
     assert result.maximum_wrap_count == 100
     assert result.initial_maximum_wraps == 3
-    assert result.final_maximum_wraps == 604
+    assert result.final_maximum_wraps == 604 + 64 + 604 // 16
 
     # Preserve the second production lineage.  Its exact replay hit a real face after 1110 wraps;
     # the conservative lower-domain integrity horizon is finite and therefore recoverable.
@@ -492,3 +492,44 @@ def test_cellwise_certified_overlap_exit_admits_by_authority_surface_distance():
             origin, direction, verts, faces, solid_facing_normals,
             domain_size=(1.0, 1.0, 1.0), overlap_skip_depth_limit=0.05,
             overlap_exit_authority_distance=np.asarray([0.2]), device="cpu")
+
+
+def test_cellwise_certified_retries_exhaustion_when_horizon_undercounts(monkeypatch):
+    # The derived horizon's whole-cell seam count carries only a small tie allowance, so a
+    # near-grazing ray can exhaust a budget at or above its derived bound by a handful of
+    # crossings.  The retry budget is the proof bound plus an explicit margin; the ray must
+    # then classify.  (Production lineage: 10 nm base step 362, one ray of 14656 exhausted
+    # 1024 wraps with a derived horizon just below the budget.)
+    verts = np.asarray([
+        [0.0, 0.0, 0.25],
+        [0.1, 0.0, 0.25],
+        [0.0, 0.1, 0.25],
+    ])
+    faces = np.asarray([[0, 1, 2]])
+    normals = np.asarray([[0.0, 0.0, -1.0]])
+    monkeypatch.setattr(
+        boundary_transport_3d,
+        "trace_diffuse_form_factor_events_warp_cellwise_3d",
+        lambda *args, **kwargs:
+        boundary_transport_3d.DiffuseFormFactorEventsWarpCellwise3D(
+            [-1], [3], [4]))
+    # Undercount the horizon: report fewer wraps than the ray truly needs (~500).
+    monkeypatch.setattr(
+        boundary_transport_3d,
+        "_derived_vertical_domain_wrap_horizon_3d",
+        lambda origin, direction, domain: 470)
+    direction = np.asarray([[1.0, 0.0, 1.0e-3]])
+    direction /= np.linalg.norm(direction, axis=1, keepdims=True)
+
+    result = (
+        boundary_transport_3d
+        .trace_diffuse_form_factor_events_cellwise_certified_3d(
+            [[0.1, 0.5, 0.5]], direction, verts, faces, normals,
+            domain_size=(1.0, 1.0, 1.0), periodic_lateral=True,
+            maximum_wraps=480, device="cpu"))
+
+    # Old behavior refused: horizon (470) <= budget (480) meant no retry.  The margin
+    # retry (470 -> 480 + 64 + 30) lets the true ~500-wrap escape classify.
+    assert np.array_equal(result.termination, [2])
+    assert result.derived_horizon_extension_count == 1
+    assert result.final_maximum_wraps == 480 + 64 + 480 // 16

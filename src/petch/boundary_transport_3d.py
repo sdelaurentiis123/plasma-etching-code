@@ -2472,6 +2472,10 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
         # the open top.  Downward rays must hit the material/gas surface before the lower boundary;
         # otherwise the replay still refuses.  Horizontal trajectories and solid-facing
         # intersections remain hard refusals; neither is silently reclassified as escape.
+        # A derived horizon at or below the exhausted budget still triggers one retry: the
+        # horizon's whole-cell seam count carries only a small tie/partial-cell allowance, and a
+        # near-grazing ray can legitimately need a handful more crossings than the bound, so the
+        # retry budget is the proof bound plus an explicit margin (never past the emergency cap).
         exhausted = reference_termination == 3
         if np.any(exhausted) and periodic_lateral:
             exhausted_local = np.flatnonzero(exhausted)
@@ -2482,11 +2486,11 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
             for local in exhausted_local:
                 horizon = _derived_vertical_domain_wrap_horizon_3d(
                     replay_origin[local], replay_direction[local], domain)
-                if horizon is not None and horizon > exact_wraps:
-                    horizons.append(horizon)
+                if horizon is not None:
+                    horizons.append(max(int(horizon), exact_wraps))
                     extend_local.append(int(local))
             if extend_local:
-                derived_wraps = max(horizons)
+                derived_wraps = max(horizons) + 64 + max(horizons) // 16
                 if derived_wraps > DIFFUSE_VISIBILITY_EMERGENCY_MAXIMUM_WRAPS:
                     selected = np.flatnonzero(replay_mask)[extend_local]
                     raise RuntimeError(
