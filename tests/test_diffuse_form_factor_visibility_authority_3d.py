@@ -435,3 +435,60 @@ def test_cellwise_certified_second_solid_facing_refusal_remains_fatal():
             origin, direction, verts, faces, solid_facing_normals,
             domain_size=(1.0, 1.0, 1.0), source_relaunch_origin=still_solid,
             device="cpu")
+
+
+def test_cellwise_certified_overlap_skip_admits_grazing_exit_by_perpendicular_depth():
+    # The interpenetration overlap is a thin slab: a grazing ray can travel many cells
+    # ALONG the skin while its launch sits only a fraction of a cell BEHIND the crossed
+    # face's plane.  Admission is therefore by perpendicular depth, not path length.
+    verts, faces, _ = _shared_square()
+    solid_facing_normals = np.tile([0.0, 0.0, 1.0], (2, 1))
+    origin = np.asarray([[0.1, 0.5, 0.4999]])
+    direction = np.asarray([[1.0, 0.0, 1e-3]])
+    direction /= np.linalg.norm(direction)
+
+    events = boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+        origin, direction, verts, faces, solid_facing_normals,
+        domain_size=(1.0, 1.0, 1.0), overlap_skip_depth_limit=1e-3, device="cpu")
+    assert np.array_equal(events.termination, [2])
+    assert events.overlap_skip_count == 1
+    # perpendicular depth is the 1e-4 skin, far below the ~0.1 path length to the crossing
+    assert events.maximum_overlap_skip_depth == pytest.approx(1e-4, rel=1e-6)
+
+
+def test_cellwise_certified_overlap_skip_refuses_deep_back_face():
+    # A back face whose plane lies deeper behind the launch than the declared limit is
+    # not an interpenetration artifact; the operator still refuses.
+    verts, faces, _ = _shared_square()
+    solid_facing_normals = np.tile([0.0, 0.0, 1.0], (2, 1))
+    origin = np.asarray([[0.5, 0.5, 0.1]])
+    direction = np.asarray([[0.0, 0.0, 1.0]])
+
+    with pytest.raises(RuntimeError, match="solid-facing hard intersection"):
+        boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+            origin, direction, verts, faces, solid_facing_normals,
+            domain_size=(1.0, 1.0, 1.0), overlap_skip_depth_limit=0.05, device="cpu")
+
+
+def test_cellwise_certified_overlap_exit_admits_by_authority_surface_distance():
+    # When the caller supplies the launch's distance from the authority (trilinear)
+    # surface, admission uses it directly: a launch within the declared discretization
+    # skin exits the artifact even when the crossed plane lies deep along the ray
+    # (extended contact slabs traversed at grazing incidence).
+    verts, faces, _ = _shared_square()
+    solid_facing_normals = np.tile([0.0, 0.0, 1.0], (2, 1))
+    origin = np.asarray([[0.5, 0.5, 0.1]])
+    direction = np.asarray([[0.0, 0.0, 1.0]])
+
+    events = boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+        origin, direction, verts, faces, solid_facing_normals,
+        domain_size=(1.0, 1.0, 1.0), overlap_skip_depth_limit=0.05,
+        overlap_exit_authority_distance=np.asarray([0.01]), device="cpu")
+    assert np.array_equal(events.termination, [2])
+    assert events.overlap_skip_count == 1
+
+    with pytest.raises(RuntimeError, match="solid-facing hard intersection"):
+        boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+            origin, direction, verts, faces, solid_facing_normals,
+            domain_size=(1.0, 1.0, 1.0), overlap_skip_depth_limit=0.05,
+            overlap_exit_authority_distance=np.asarray([0.2]), device="cpu")

@@ -1511,6 +1511,7 @@ def _apply_diffuse_neutral_transport(
         "nonetchable_reaction_probability_by_material", "relative_tolerance",
         "maximum_iterations", "maximum_rays_per_face", "source_sampling",
         "form_factor_backend", "deterministic_extruded_options",
+        "overlap_skip_depth_limit", "launch_surface_distance",
     }
     unknown = set(options) - allowed
     if unknown:
@@ -1547,6 +1548,37 @@ def _apply_diffuse_neutral_transport(
             options["domain_size"] = (np.asarray(geometry.phi.shape) - 1) * geometry.dx
         if "ray_offset" not in options:
             options["ray_offset"] = 1e-3 * geometry.dx
+        if "overlap_skip_depth_limit" not in options:
+            # Bounded exit from piecewise-linear sheet interpenetration: marching-cubes facets
+            # deviate from the trilinear isosurface by O(dx^2), so an artifact-zone launch lies
+            # strictly sub-cell from the authority surface; half a cell bounds it with margin.
+            options["overlap_skip_depth_limit"] = 0.5 * geometry.dx
+        if "launch_surface_distance" not in options:
+            # The trilinear level set is the authority surface (normals are already oriented
+            # by its exact gradient); |phi| at a launch point measures how far the
+            # piecewise-linear facet strays from it.
+            phi_grid = np.asarray(geometry.phi, dtype=float)
+            grid_shape = np.asarray(phi_grid.shape)
+            dx_local = float(geometry.dx)
+
+            def _trilinear_surface_distance(points, _phi=phi_grid, _shape=grid_shape,
+                                            _dx=dx_local):
+                q = np.asarray(points, dtype=float) / _dx
+                base = np.clip(np.floor(q).astype(int), 0, _shape - 2)
+                frac = q - base
+                value = np.zeros(len(q))
+                for a in (0, 1):
+                    for b in (0, 1):
+                        for c in (0, 1):
+                            weight = (
+                                (frac[:, 0] if a else 1.0 - frac[:, 0])
+                                * (frac[:, 1] if b else 1.0 - frac[:, 1])
+                                * (frac[:, 2] if c else 1.0 - frac[:, 2]))
+                            value += weight * _phi[
+                                base[:, 0] + a, base[:, 1] + b, base[:, 2] + c]
+                return np.abs(value)
+
+            options["launch_surface_distance"] = _trilinear_surface_distance
         rays_per_face = initial_rays_per_face
     else:
         incompatible = set(options) & {
@@ -1688,6 +1720,10 @@ def _apply_diffuse_neutral_transport(
                             visibility_receipt.source_relaunch_count),
                         visibility_maximum_source_relaunch_distance=(
                             visibility_receipt.maximum_source_relaunch_distance),
+                        visibility_overlap_skip_count=(
+                            visibility_receipt.overlap_skip_count),
+                        visibility_maximum_overlap_skip_depth=(
+                            visibility_receipt.maximum_overlap_skip_depth),
                         visibility_source_support_face_count=(
                             visibility_receipt.source_support_face_count),
                         visibility_source_support_area_fraction=(

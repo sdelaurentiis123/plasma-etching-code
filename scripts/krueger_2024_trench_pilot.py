@@ -620,6 +620,10 @@ def _visibility_history_summary(neutral_radiosity_diagnostics):
             "visibility_source_relaunch_count"),
         "maximum_visibility_source_relaunch_distance_um": maximum_float(
             "visibility_maximum_source_relaunch_distance"),
+        "maximum_visibility_overlap_skip_count": maximum(
+            "visibility_overlap_skip_count"),
+        "maximum_visibility_overlap_skip_depth_um": maximum_float(
+            "visibility_maximum_overlap_skip_depth"),
         "maximum_visibility_derived_horizon_extension_count": maximum(
             "visibility_derived_horizon_extension_count"),
         "maximum_visibility_wrap_count": maximum(

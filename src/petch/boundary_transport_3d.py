@@ -263,6 +263,8 @@ class DiffuseFormFactorEventsReplayHardened3D:
     final_maximum_wraps: int = 0
     source_relaunch_count: int = 0
     maximum_source_relaunch_distance: float = 0.0
+    overlap_skip_count: int = 0
+    maximum_overlap_skip_depth: float = 0.0
 
     def __post_init__(self):
         face = np.asarray(self.hit_face, dtype=int).copy()
@@ -272,7 +274,7 @@ class DiffuseFormFactorEventsReplayHardened3D:
             self.recovered_hit_count, self.open_escape_count,
             self.maximum_wrap_count, self.derived_horizon_extension_count,
             self.initial_maximum_wraps, self.final_maximum_wraps,
-            self.source_relaunch_count)
+            self.source_relaunch_count, self.overlap_skip_count)
         if (face.ndim != 1 or termination.shape != face.shape
                 or np.any(~np.isin(termination, (1, 2)))
                 or np.any((termination == 1) != (face >= 0))
@@ -281,9 +283,12 @@ class DiffuseFormFactorEventsReplayHardened3D:
                 or self.recovered_hit_count > self.replay_count
                 or self.derived_horizon_extension_count > self.replay_count
                 or self.source_relaunch_count > self.replay_count
+                or self.overlap_skip_count > self.replay_count
                 or self.final_maximum_wraps < self.initial_maximum_wraps
                 or not np.isfinite(self.maximum_source_relaunch_distance)
                 or self.maximum_source_relaunch_distance < 0.0
+                or not np.isfinite(self.maximum_overlap_skip_depth)
+                or self.maximum_overlap_skip_depth < 0.0
                 or self.open_escape_count != int(np.sum(termination == 2))):
             raise ValueError("invalid replay-hardened form-factor event receipt")
         face.setflags(write=False)
@@ -294,11 +299,15 @@ class DiffuseFormFactorEventsReplayHardened3D:
                 "replay_count", "replay_eligible_count", "recovered_hit_count",
                 "open_escape_count", "maximum_wrap_count",
                 "derived_horizon_extension_count", "initial_maximum_wraps",
-                "final_maximum_wraps", "source_relaunch_count"):
+                "final_maximum_wraps", "source_relaunch_count",
+                "overlap_skip_count"):
             object.__setattr__(self, name, int(getattr(self, name)))
         object.__setattr__(
             self, "maximum_source_relaunch_distance",
             float(self.maximum_source_relaunch_distance))
+        object.__setattr__(
+            self, "maximum_overlap_skip_depth",
+            float(self.maximum_overlap_skip_depth))
 
 
 @dataclass(frozen=True)
@@ -322,6 +331,8 @@ class DiffuseFormFactorEstimateReceipt3D:
     final_maximum_wraps: int = 0
     source_relaunch_count: int = 0
     maximum_source_relaunch_distance: float = 0.0
+    overlap_skip_count: int = 0
+    maximum_overlap_skip_depth: float = 0.0
 
     def __post_init__(self):
         if not isinstance(self.form_factors, DiffuseFormFactors3D):
@@ -336,17 +347,19 @@ class DiffuseFormFactorEstimateReceipt3D:
             self.centroid_limit_count, self.source_support_face_count,
             self.derived_horizon_extension_count,
             self.initial_maximum_wraps, self.final_maximum_wraps,
-            self.source_relaunch_count)
+            self.source_relaunch_count, self.overlap_skip_count)
         support = np.asarray((
             self.source_support_area_fraction,
             self.maximum_source_support_distance,
-            self.maximum_source_relaunch_distance), dtype=float)
+            self.maximum_source_relaunch_distance,
+            self.maximum_overlap_skip_depth), dtype=float)
         if (self.visibility_mode not in allowed
                 or any(int(value) != value or value < 0 for value in values)
                 or np.any(~np.isfinite(support))
                 or not 0.0 <= self.source_support_area_fraction <= 1.0
                 or self.maximum_source_support_distance < 0.0
                 or self.maximum_source_relaunch_distance < 0.0
+                or self.maximum_overlap_skip_depth < 0.0
                 or self.float64_evaluated_count > self.ray_count
                 or self.float64_recovered_hit_count > self.float64_evaluated_count
                 or self.open_escape_count > self.ray_count
@@ -355,6 +368,7 @@ class DiffuseFormFactorEstimateReceipt3D:
                 or self.source_support_face_count > self.form_factors.face_count
                 or self.derived_horizon_extension_count > self.float64_evaluated_count
                 or self.source_relaunch_count > self.float64_evaluated_count
+                or self.overlap_skip_count > self.float64_evaluated_count
                 or self.final_maximum_wraps < self.initial_maximum_wraps):
             raise ValueError("invalid diffuse form-factor estimate receipt")
         for name in (
@@ -364,7 +378,7 @@ class DiffuseFormFactorEstimateReceipt3D:
                 "centroid_limit_count", "source_support_face_count",
                 "derived_horizon_extension_count",
                 "initial_maximum_wraps", "final_maximum_wraps",
-                "source_relaunch_count"):
+                "source_relaunch_count", "overlap_skip_count"):
             object.__setattr__(self, name, int(getattr(self, name)))
         object.__setattr__(
             self, "source_support_area_fraction",
@@ -375,6 +389,9 @@ class DiffuseFormFactorEstimateReceipt3D:
         object.__setattr__(
             self, "maximum_source_relaunch_distance",
             float(self.maximum_source_relaunch_distance))
+        object.__setattr__(
+            self, "maximum_overlap_skip_depth",
+            float(self.maximum_overlap_skip_depth))
 
 
 def _derived_vertical_domain_wrap_horizon_3d(origin, direction, domain):
@@ -2390,6 +2407,7 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
         origin, direction, verts, faces, gas_normals, *, domain_size,
         periodic_lateral=False, maximum_wraps=1024,
         maximum_exact_replay_wraps=None, source_relaunch_origin=None,
+        overlap_skip_depth_limit=None, overlap_exit_authority_distance=None,
         device=None):
     """Certify ambiguous cellwise events with an exact float64 replay.
 
@@ -2436,6 +2454,8 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
     final_exact_wraps = exact_wraps
     source_relaunch_count = 0
     maximum_source_relaunch_distance = 0.0
+    overlap_skip_count = 0
+    maximum_overlap_skip_depth = 0.0
     if np.any(replay_mask):
         reference = trace_diffuse_form_factor_events_float64_3d(
             origin[replay_mask], direction[replay_mask], verts, faces, normals,
@@ -2514,6 +2534,74 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
                     relaunch_origin[recovered_global] - origin[recovered_global], axis=1),
                     initial=0.0))
 
+        # Marching-cubes facets deviate from the trilinear isosurface by O(dx^2*curvature), so
+        # near-touching sheets interpenetrate by a sub-cell skin near necking, and exactly
+        # coincident contact facets cancel as interior surface.  A ray whose FIRST intersection
+        # is a back face never crossed a gas-to-solid front face (verified by exhaustive
+        # crossing audit on the failing 5 nm state): its launch sits inside that
+        # piecewise-linear artifact zone, and crossing consecutive back faces EXITS it into
+        # genuine gas.  Admission is by the launch point's distance from the authority
+        # (trilinear) surface when the caller provides it -- the launch must lie within the
+        # declared discretization skin -- with the crossed plane's perpendicular launch depth
+        # as the pure-mesh fallback.  An inadmissible back face remains a hard refusal.
+        solid_facing = reference_termination == 4
+        if np.any(solid_facing) and overlap_skip_depth_limit is not None:
+            limit = float(overlap_skip_depth_limit)
+            if not np.isfinite(limit) or limit <= 0.0:
+                raise ValueError("overlap_skip_depth_limit must be a positive length")
+            authority = None
+            if overlap_exit_authority_distance is not None:
+                authority = np.asarray(overlap_exit_authority_distance, dtype=float)
+                if (authority.shape != (len(origin),)
+                        or np.any(~np.isfinite(authority)) or np.any(authority < 0.0)):
+                    raise ValueError(
+                        "overlap_exit_authority_distance must be one nonnegative finite "
+                        "distance per traced ray")
+            replay_global = np.flatnonzero(replay_mask)
+            for local in np.flatnonzero(solid_facing):
+                launch_origin = origin[replay_mask][local]
+                current_hit = reference_position[local]
+                current_hit_face = int(reference_face[local])
+                ray_direction = direction[replay_mask][local]
+                if authority is not None:
+                    admissible = authority[replay_global[local]] <= limit
+                else:
+                    delta = current_hit - launch_origin
+                    if periodic_lateral:
+                        delta[:2] -= domain[:2] * np.round(delta[:2] / domain[:2])
+                    perpendicular = float(np.dot(delta, normals[current_hit_face]))
+                    admissible = 0.0 <= perpendicular <= limit
+                if not admissible:
+                    continue
+                skips = 0
+                exit_depth = 0.0
+                while skips < 8:
+                    delta = current_hit - launch_origin
+                    if periodic_lateral:
+                        delta[:2] -= domain[:2] * np.round(delta[:2] / domain[:2])
+                    exit_depth = abs(float(np.dot(delta, normals[current_hit_face])))
+                    skips += 1
+                    retry_origin = current_hit + 1e-9 * ray_direction
+                    retry = trace_diffuse_form_factor_events_float64_3d(
+                        retry_origin[None], ray_direction[None], verts, faces, normals,
+                        domain_size=domain, periodic_lateral=periodic_lateral,
+                        maximum_wraps=final_exact_wraps)
+                    term = int(retry.termination[0])
+                    if term in (1, 2):
+                        reference_face[local] = retry.hit_face[0]
+                        reference_termination[local] = term
+                        reference_position[local] = retry.hit_position[0]
+                        reference_cosine[local] = retry.hit_cosine[0]
+                        reference_wrap_count[local] = retry.wrap_count[0]
+                        overlap_skip_count += 1
+                        maximum_overlap_skip_depth = max(
+                            maximum_overlap_skip_depth, exit_depth)
+                        break
+                    if term != 4:
+                        break
+                    current_hit = retry.hit_position[0]
+                    current_hit_face = int(retry.hit_face[0])
+
         refusal = np.isin(reference_termination, (3, 4))
         if np.any(refusal):
             local = np.flatnonzero(refusal)
@@ -2547,7 +2635,9 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
         initial_maximum_wraps=fast_wraps,
         final_maximum_wraps=final_exact_wraps,
         source_relaunch_count=source_relaunch_count,
-        maximum_source_relaunch_distance=maximum_source_relaunch_distance)
+        maximum_source_relaunch_distance=maximum_source_relaunch_distance,
+        overlap_skip_count=overlap_skip_count,
+        maximum_overlap_skip_depth=maximum_overlap_skip_depth)
 
 
 def trace_diffuse_form_factor_events_replay_hardened_3d(
@@ -2635,6 +2725,7 @@ def estimate_diffuse_form_factors_3d(
         domain_size=None, periodic_lateral=False, ray_offset=1e-5,
         source_sampling="triangle_area", visibility_mode="cellwise_certified",
         maximum_visibility_wraps=1024, maximum_visibility_replay_wraps=None,
+        overlap_skip_depth_limit=None, launch_surface_distance=None,
         return_visibility_receipt=False,
         device=None):
     """Estimate deterministic diffuse face exchange and classify every emitted ray.
@@ -2711,6 +2802,9 @@ def estimate_diffuse_form_factors_3d(
     source_relaunch_origin = (
         centroids[relaunch_support]
         + float(ray_offset) * sampling_normals[relaunch_support])
+    overlap_exit_authority_distance = (
+        None if launch_surface_distance is None
+        else np.asarray(launch_surface_distance(origin), dtype=float))
 
     float64_evaluated_count = 0
     recovered_hit_count = 0
@@ -2720,6 +2814,8 @@ def estimate_diffuse_form_factors_3d(
     final_maximum_wraps = int(maximum_visibility_wraps)
     source_relaunch_count = 0
     maximum_source_relaunch_distance = 0.0
+    overlap_skip_count = 0
+    maximum_overlap_skip_depth = 0.0
     if visibility_mode == "legacy_float32":
         hit = _trace_diffuse_form_factor_events_warp_3d(
             verts, faces, origin, direction, domain, periodic_lateral, device)
@@ -2742,6 +2838,8 @@ def estimate_diffuse_form_factors_3d(
             maximum_wraps=int(maximum_visibility_wraps),
             maximum_exact_replay_wraps=maximum_visibility_replay_wraps,
             source_relaunch_origin=source_relaunch_origin,
+            overlap_skip_depth_limit=overlap_skip_depth_limit,
+            overlap_exit_authority_distance=overlap_exit_authority_distance,
             device=device)
         hit = events.hit_face
         float64_evaluated_count = events.replay_count
@@ -2752,6 +2850,8 @@ def estimate_diffuse_form_factors_3d(
         final_maximum_wraps = events.final_maximum_wraps
         source_relaunch_count = events.source_relaunch_count
         maximum_source_relaunch_distance = events.maximum_source_relaunch_distance
+        overlap_skip_count = events.overlap_skip_count
+        maximum_overlap_skip_depth = events.maximum_overlap_skip_depth
     else:
         events = trace_diffuse_form_factor_events_float64_3d(
             origin, direction, verts, faces, authority_normals, domain_size=domain,
@@ -2803,7 +2903,9 @@ def estimate_diffuse_form_factors_3d(
         initial_maximum_wraps=initial_maximum_wraps,
         final_maximum_wraps=final_maximum_wraps,
         source_relaunch_count=source_relaunch_count,
-        maximum_source_relaunch_distance=maximum_source_relaunch_distance)
+        maximum_source_relaunch_distance=maximum_source_relaunch_distance,
+        overlap_skip_count=overlap_skip_count,
+        maximum_overlap_skip_depth=maximum_overlap_skip_depth)
 
 
 def gather_boundary_state_ballistic_3d(

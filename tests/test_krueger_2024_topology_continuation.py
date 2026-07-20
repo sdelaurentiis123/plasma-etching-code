@@ -97,6 +97,8 @@ def test_visibility_history_summary_preserves_shared_recovery_canary():
             "visibility_maximum_source_support_distance": 0.0034,
             "visibility_source_relaunch_count": 3,
             "visibility_maximum_source_relaunch_distance": 0.0021,
+            "visibility_overlap_skip_count": 5,
+            "visibility_maximum_overlap_skip_depth": 0.0016,
         },
         # The sampled form-factor operator is shared by species.  Maxima preserve its one receipt;
         # summing would falsely report two independent recoveries.
@@ -111,6 +113,8 @@ def test_visibility_history_summary_preserves_shared_recovery_canary():
             "visibility_maximum_source_support_distance": 0.0034,
             "visibility_source_relaunch_count": 3,
             "visibility_maximum_source_relaunch_distance": 0.0021,
+            "visibility_overlap_skip_count": 5,
+            "visibility_maximum_overlap_skip_depth": 0.0016,
         },
     }
 
@@ -125,6 +129,8 @@ def test_visibility_history_summary_preserves_shared_recovery_canary():
         "maximum_visibility_source_support_distance_um": 0.0034,
         "maximum_visibility_source_relaunch_count": 3,
         "maximum_visibility_source_relaunch_distance_um": 0.0021,
+        "maximum_visibility_overlap_skip_count": 5,
+        "maximum_visibility_overlap_skip_depth_um": 0.0016,
     }
 
 

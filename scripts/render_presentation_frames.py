@@ -52,6 +52,21 @@ def render_frame(npz_path, metrics, out_path, dpi=160, tiles=3, z_crop_nm=(400.0
     ax.contourf(x_nm, z_nm, solids_t[mask_key].T, levels=[0.0, np.inf], colors=[MASK])
     ax.contour(x_nm, z_nm, phi_t.T, levels=[0.0], colors=[EDGE], linewidths=0.9)
 
+    # Incident ion flux: rays descend from the sheath onto the first solid surface in
+    # their column (near-normal incidence, slight angular spread), with an impact glow.
+    rng = np.random.default_rng(9000 + int(step))
+    z_launch = z_crop_nm[1] - 8.0
+    for x0 in rng.uniform(x_nm[2], x_nm[-3], 22):
+        column = np.clip(int(round(x0 / (dx_um * 1e3))), 0, phi_t.shape[0] - 1)
+        solid_rows = np.flatnonzero(phi_t[column] > 0.0)
+        z_hit = z_nm[solid_rows.max()] if solid_rows.size else z_crop_nm[0]
+        z_hit = min(z_hit, z_launch - 4.0)
+        ax.plot([x0, x0], [z_launch, z_hit], color="#9fe8ea", lw=0.6,
+                alpha=0.30, zorder=3)
+        ax.plot([x0], [z_hit], marker="o", ms=1.8, color="#d9fdfd",
+                alpha=0.9, zorder=4)
+    ax.axhspan(z_launch, z_crop_nm[1], color="#7de0e3", alpha=0.10, zorder=2)
+
     ax.set_xlim(x_nm[0], x_nm[-1])
     ax.set_ylim(*z_crop_nm)
     ax.set_aspect("equal")
