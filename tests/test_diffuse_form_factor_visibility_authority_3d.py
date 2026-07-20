@@ -393,3 +393,45 @@ def test_cellwise_warp_candidate_matches_explicit_float64_event_codes():
             origin[:1], direction[:1], verts, faces, solid_normals,
             domain_size=(2.0, 2.0, 1.0), device="cpu"))
     assert np.array_equal(solid_candidate.termination, [4])
+
+
+def test_cellwise_certified_recovers_solid_facing_replay_from_source_relaunch():
+    # A quadrature point shifted by the declared normal offset can land across an adjacent
+    # facet at a sharp concave fold: the exact replay then sees a back-face and refuses.
+    # The bounded recovery relaunches only that ray from its support-face centroid origin
+    # with the direction unchanged; the receipt records the count and distance.
+    verts, faces, _ = _shared_square()
+    solid_facing_normals = np.tile([0.0, 0.0, 1.0], (2, 1))
+    origin = np.asarray([[0.5, 0.5, 0.1]])
+    direction = np.asarray([[0.0, 0.0, 1.0]])
+    relaunch = np.asarray([[0.5, 0.5, 0.6]])
+
+    with pytest.raises(RuntimeError, match="solid-facing hard intersection"):
+        boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+            origin, direction, verts, faces, solid_facing_normals,
+            domain_size=(1.0, 1.0, 1.0), device="cpu")
+
+    events = boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+        origin, direction, verts, faces, solid_facing_normals,
+        domain_size=(1.0, 1.0, 1.0), source_relaunch_origin=relaunch, device="cpu")
+    assert np.array_equal(events.termination, [2])
+    assert events.open_escape_count == 1
+    assert events.source_relaunch_count == 1
+    assert events.maximum_source_relaunch_distance == pytest.approx(0.5)
+
+
+def test_cellwise_certified_second_solid_facing_refusal_remains_fatal():
+    # The relaunch is a single bounded correction of the launch point, not a search:
+    # if the support-centroid origin also produces a solid-facing intersection, the
+    # operator still refuses rather than guessing.
+    verts, faces, _ = _shared_square()
+    solid_facing_normals = np.tile([0.0, 0.0, 1.0], (2, 1))
+    origin = np.asarray([[0.5, 0.5, 0.1]])
+    direction = np.asarray([[0.0, 0.0, 1.0]])
+    still_solid = np.asarray([[0.5, 0.5, 0.05]])
+
+    with pytest.raises(RuntimeError, match="solid-facing hard intersection"):
+        boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+            origin, direction, verts, faces, solid_facing_normals,
+            domain_size=(1.0, 1.0, 1.0), source_relaunch_origin=still_solid,
+            device="cpu")

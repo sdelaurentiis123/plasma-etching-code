@@ -261,6 +261,8 @@ class DiffuseFormFactorEventsReplayHardened3D:
     derived_horizon_extension_count: int = 0
     initial_maximum_wraps: int = 0
     final_maximum_wraps: int = 0
+    source_relaunch_count: int = 0
+    maximum_source_relaunch_distance: float = 0.0
 
     def __post_init__(self):
         face = np.asarray(self.hit_face, dtype=int).copy()
@@ -269,7 +271,8 @@ class DiffuseFormFactorEventsReplayHardened3D:
             self.replay_count, self.replay_eligible_count,
             self.recovered_hit_count, self.open_escape_count,
             self.maximum_wrap_count, self.derived_horizon_extension_count,
-            self.initial_maximum_wraps, self.final_maximum_wraps)
+            self.initial_maximum_wraps, self.final_maximum_wraps,
+            self.source_relaunch_count)
         if (face.ndim != 1 or termination.shape != face.shape
                 or np.any(~np.isin(termination, (1, 2)))
                 or np.any((termination == 1) != (face >= 0))
@@ -277,7 +280,10 @@ class DiffuseFormFactorEventsReplayHardened3D:
                 or self.replay_count > self.replay_eligible_count
                 or self.recovered_hit_count > self.replay_count
                 or self.derived_horizon_extension_count > self.replay_count
+                or self.source_relaunch_count > self.replay_count
                 or self.final_maximum_wraps < self.initial_maximum_wraps
+                or not np.isfinite(self.maximum_source_relaunch_distance)
+                or self.maximum_source_relaunch_distance < 0.0
                 or self.open_escape_count != int(np.sum(termination == 2))):
             raise ValueError("invalid replay-hardened form-factor event receipt")
         face.setflags(write=False)
@@ -288,8 +294,11 @@ class DiffuseFormFactorEventsReplayHardened3D:
                 "replay_count", "replay_eligible_count", "recovered_hit_count",
                 "open_escape_count", "maximum_wrap_count",
                 "derived_horizon_extension_count", "initial_maximum_wraps",
-                "final_maximum_wraps"):
+                "final_maximum_wraps", "source_relaunch_count"):
             object.__setattr__(self, name, int(getattr(self, name)))
+        object.__setattr__(
+            self, "maximum_source_relaunch_distance",
+            float(self.maximum_source_relaunch_distance))
 
 
 @dataclass(frozen=True)
@@ -311,6 +320,8 @@ class DiffuseFormFactorEstimateReceipt3D:
     derived_horizon_extension_count: int = 0
     initial_maximum_wraps: int = 0
     final_maximum_wraps: int = 0
+    source_relaunch_count: int = 0
+    maximum_source_relaunch_distance: float = 0.0
 
     def __post_init__(self):
         if not isinstance(self.form_factors, DiffuseFormFactors3D):
@@ -324,15 +335,18 @@ class DiffuseFormFactorEstimateReceipt3D:
             self.maximum_wrap_count, self.launch_inset_count,
             self.centroid_limit_count, self.source_support_face_count,
             self.derived_horizon_extension_count,
-            self.initial_maximum_wraps, self.final_maximum_wraps)
+            self.initial_maximum_wraps, self.final_maximum_wraps,
+            self.source_relaunch_count)
         support = np.asarray((
             self.source_support_area_fraction,
-            self.maximum_source_support_distance), dtype=float)
+            self.maximum_source_support_distance,
+            self.maximum_source_relaunch_distance), dtype=float)
         if (self.visibility_mode not in allowed
                 or any(int(value) != value or value < 0 for value in values)
                 or np.any(~np.isfinite(support))
                 or not 0.0 <= self.source_support_area_fraction <= 1.0
                 or self.maximum_source_support_distance < 0.0
+                or self.maximum_source_relaunch_distance < 0.0
                 or self.float64_evaluated_count > self.ray_count
                 or self.float64_recovered_hit_count > self.float64_evaluated_count
                 or self.open_escape_count > self.ray_count
@@ -340,6 +354,7 @@ class DiffuseFormFactorEstimateReceipt3D:
                 or self.centroid_limit_count > self.launch_inset_count
                 or self.source_support_face_count > self.form_factors.face_count
                 or self.derived_horizon_extension_count > self.float64_evaluated_count
+                or self.source_relaunch_count > self.float64_evaluated_count
                 or self.final_maximum_wraps < self.initial_maximum_wraps):
             raise ValueError("invalid diffuse form-factor estimate receipt")
         for name in (
@@ -348,7 +363,8 @@ class DiffuseFormFactorEstimateReceipt3D:
                 "maximum_wrap_count", "launch_inset_count",
                 "centroid_limit_count", "source_support_face_count",
                 "derived_horizon_extension_count",
-                "initial_maximum_wraps", "final_maximum_wraps"):
+                "initial_maximum_wraps", "final_maximum_wraps",
+                "source_relaunch_count"):
             object.__setattr__(self, name, int(getattr(self, name)))
         object.__setattr__(
             self, "source_support_area_fraction",
@@ -356,6 +372,9 @@ class DiffuseFormFactorEstimateReceipt3D:
         object.__setattr__(
             self, "maximum_source_support_distance",
             float(self.maximum_source_support_distance))
+        object.__setattr__(
+            self, "maximum_source_relaunch_distance",
+            float(self.maximum_source_relaunch_distance))
 
 
 def _derived_vertical_domain_wrap_horizon_3d(origin, direction, domain):
@@ -2370,7 +2389,8 @@ def trace_diffuse_form_factor_events_warp_cellwise_3d(
 def trace_diffuse_form_factor_events_cellwise_certified_3d(
         origin, direction, verts, faces, gas_normals, *, domain_size,
         periodic_lateral=False, maximum_wraps=1024,
-        maximum_exact_replay_wraps=None, device=None):
+        maximum_exact_replay_wraps=None, source_relaunch_origin=None,
+        device=None):
     """Certify ambiguous cellwise events with an exact float64 replay.
 
     The cellwise Warp trace is authoritative for ordinary completed events only after the bounded
@@ -2389,6 +2409,13 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
     faces = np.asarray(faces, dtype=int)
     normals = np.asarray(gas_normals, dtype=float)
     domain = np.asarray(domain_size, dtype=float)
+    relaunch_origin = (
+        None if source_relaunch_origin is None
+        else np.asarray(source_relaunch_origin, dtype=float))
+    if (relaunch_origin is not None
+            and (relaunch_origin.shape != origin.shape
+                 or np.any(~np.isfinite(relaunch_origin)))):
+        raise ValueError("source_relaunch_origin must match the traced ray origins")
     fast_wraps = int(maximum_wraps)
     exact_wraps = (
         int(maximum_wraps) if maximum_exact_replay_wraps is None
@@ -2407,6 +2434,8 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
     recovered_hit_count = 0
     derived_horizon_extension_count = 0
     final_exact_wraps = exact_wraps
+    source_relaunch_count = 0
+    maximum_source_relaunch_distance = 0.0
     if np.any(replay_mask):
         reference = trace_diffuse_form_factor_events_float64_3d(
             origin[replay_mask], direction[replay_mask], verts, faces, normals,
@@ -2458,6 +2487,33 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
                 derived_horizon_extension_count = len(extend_local)
                 final_exact_wraps = derived_wraps
 
+        # A finite-area point can be valid on its source triangle yet cross an adjacent facet
+        # when shifted by the declared normal offset at a sharp concave fold.  Recover only an
+        # exact solid-facing refusal from the same support face's centroid.  The direction and
+        # source-row weight are unchanged; a second exact refusal remains fatal.
+        solid_facing = reference_termination == 4
+        if np.any(solid_facing) and relaunch_origin is not None:
+            solid_local = np.flatnonzero(solid_facing)
+            replay_global = np.flatnonzero(replay_mask)
+            retry_global = replay_global[solid_local]
+            retry = trace_diffuse_form_factor_events_float64_3d(
+                relaunch_origin[retry_global], direction[retry_global], verts, faces,
+                normals, domain_size=domain, periodic_lateral=periodic_lateral,
+                maximum_wraps=final_exact_wraps)
+            recovered = np.isin(retry.termination, (1, 2))
+            if np.any(recovered):
+                recovered_local = solid_local[recovered]
+                reference_face[recovered_local] = retry.hit_face[recovered]
+                reference_termination[recovered_local] = retry.termination[recovered]
+                reference_position[recovered_local] = retry.hit_position[recovered]
+                reference_cosine[recovered_local] = retry.hit_cosine[recovered]
+                reference_wrap_count[recovered_local] = retry.wrap_count[recovered]
+                recovered_global = retry_global[recovered]
+                source_relaunch_count = int(np.count_nonzero(recovered))
+                maximum_source_relaunch_distance = float(np.max(np.linalg.norm(
+                    relaunch_origin[recovered_global] - origin[recovered_global], axis=1),
+                    initial=0.0))
+
         refusal = np.isin(reference_termination, (3, 4))
         if np.any(refusal):
             local = np.flatnonzero(refusal)
@@ -2489,7 +2545,9 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
         maximum_wrap_count=maximum_wrap_count,
         derived_horizon_extension_count=derived_horizon_extension_count,
         initial_maximum_wraps=fast_wraps,
-        final_maximum_wraps=final_exact_wraps)
+        final_maximum_wraps=final_exact_wraps,
+        source_relaunch_count=source_relaunch_count,
+        maximum_source_relaunch_distance=maximum_source_relaunch_distance)
 
 
 def trace_diffuse_form_factor_events_replay_hardened_3d(
@@ -2649,6 +2707,10 @@ def estimate_diffuse_form_factors_3d(
         seed=seed, ray_offset=ray_offset, source_sampling=source_sampling,
         source_support_face=source_support_face,
         return_launch_diagnostics=True)
+    relaunch_support = source_support_face[source]
+    source_relaunch_origin = (
+        centroids[relaunch_support]
+        + float(ray_offset) * sampling_normals[relaunch_support])
 
     float64_evaluated_count = 0
     recovered_hit_count = 0
@@ -2656,6 +2718,8 @@ def estimate_diffuse_form_factors_3d(
     derived_horizon_extension_count = 0
     initial_maximum_wraps = int(maximum_visibility_wraps)
     final_maximum_wraps = int(maximum_visibility_wraps)
+    source_relaunch_count = 0
+    maximum_source_relaunch_distance = 0.0
     if visibility_mode == "legacy_float32":
         hit = _trace_diffuse_form_factor_events_warp_3d(
             verts, faces, origin, direction, domain, periodic_lateral, device)
@@ -2677,6 +2741,7 @@ def estimate_diffuse_form_factors_3d(
             periodic_lateral=periodic_lateral,
             maximum_wraps=int(maximum_visibility_wraps),
             maximum_exact_replay_wraps=maximum_visibility_replay_wraps,
+            source_relaunch_origin=source_relaunch_origin,
             device=device)
         hit = events.hit_face
         float64_evaluated_count = events.replay_count
@@ -2685,6 +2750,8 @@ def estimate_diffuse_form_factors_3d(
         derived_horizon_extension_count = events.derived_horizon_extension_count
         initial_maximum_wraps = events.initial_maximum_wraps
         final_maximum_wraps = events.final_maximum_wraps
+        source_relaunch_count = events.source_relaunch_count
+        maximum_source_relaunch_distance = events.maximum_source_relaunch_distance
     else:
         events = trace_diffuse_form_factor_events_float64_3d(
             origin, direction, verts, faces, authority_normals, domain_size=domain,
@@ -2734,7 +2801,9 @@ def estimate_diffuse_form_factors_3d(
             "maximum_source_support_distance"],
         derived_horizon_extension_count=derived_horizon_extension_count,
         initial_maximum_wraps=initial_maximum_wraps,
-        final_maximum_wraps=final_maximum_wraps)
+        final_maximum_wraps=final_maximum_wraps,
+        source_relaunch_count=source_relaunch_count,
+        maximum_source_relaunch_distance=maximum_source_relaunch_distance)
 
 
 def gather_boundary_state_ballistic_3d(
