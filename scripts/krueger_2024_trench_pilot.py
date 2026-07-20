@@ -624,6 +624,8 @@ def _visibility_history_summary(neutral_radiosity_diagnostics):
             "visibility_overlap_skip_count"),
         "maximum_visibility_overlap_skip_depth_um": maximum_float(
             "visibility_maximum_overlap_skip_depth"),
+        "maximum_visibility_unclassified_ray_count": maximum(
+            "visibility_unclassified_ray_count"),
         "maximum_visibility_derived_horizon_extension_count": maximum(
             "visibility_derived_horizon_extension_count"),
         "maximum_visibility_wrap_count": maximum(

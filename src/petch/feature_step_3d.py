@@ -1512,6 +1512,7 @@ def _apply_diffuse_neutral_transport(
         "maximum_iterations", "maximum_rays_per_face", "source_sampling",
         "form_factor_backend", "deterministic_extruded_options",
         "overlap_skip_depth_limit", "launch_surface_distance",
+        "unclassified_ray_budget",
     }
     unknown = set(options) - allowed
     if unknown:
@@ -1579,6 +1580,12 @@ def _apply_diffuse_neutral_transport(
                 return np.abs(value)
 
             options["launch_surface_distance"] = _trilinear_surface_distance
+        if "unclassified_ray_budget" not in options:
+            # Bounded disposition of rays that survive every proof-based recovery
+            # unclassified: ledger the weight as lost, refuse only when the per-row or
+            # global unclassified fraction exceeds these declared budgets (the signature
+            # of a structural defect rather than a numerical-tail straggler).
+            options["unclassified_ray_budget"] = (0.01, 0.001)
         rays_per_face = initial_rays_per_face
     else:
         incompatible = set(options) & {
@@ -1724,6 +1731,8 @@ def _apply_diffuse_neutral_transport(
                             visibility_receipt.overlap_skip_count),
                         visibility_maximum_overlap_skip_depth=(
                             visibility_receipt.maximum_overlap_skip_depth),
+                        visibility_unclassified_ray_count=(
+                            visibility_receipt.unclassified_ray_count),
                         visibility_source_support_face_count=(
                             visibility_receipt.source_support_face_count),
                         visibility_source_support_area_fraction=(

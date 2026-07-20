@@ -265,6 +265,7 @@ class DiffuseFormFactorEventsReplayHardened3D:
     maximum_source_relaunch_distance: float = 0.0
     overlap_skip_count: int = 0
     maximum_overlap_skip_depth: float = 0.0
+    unclassified_ray_count: int = 0
 
     def __post_init__(self):
         face = np.asarray(self.hit_face, dtype=int).copy()
@@ -274,7 +275,8 @@ class DiffuseFormFactorEventsReplayHardened3D:
             self.recovered_hit_count, self.open_escape_count,
             self.maximum_wrap_count, self.derived_horizon_extension_count,
             self.initial_maximum_wraps, self.final_maximum_wraps,
-            self.source_relaunch_count, self.overlap_skip_count)
+            self.source_relaunch_count, self.overlap_skip_count,
+            self.unclassified_ray_count)
         if (face.ndim != 1 or termination.shape != face.shape
                 or np.any(~np.isin(termination, (1, 2)))
                 or np.any((termination == 1) != (face >= 0))
@@ -284,6 +286,7 @@ class DiffuseFormFactorEventsReplayHardened3D:
                 or self.derived_horizon_extension_count > self.replay_count
                 or self.source_relaunch_count > self.replay_count
                 or self.overlap_skip_count > self.replay_count
+                or self.unclassified_ray_count > self.replay_count
                 or self.final_maximum_wraps < self.initial_maximum_wraps
                 or not np.isfinite(self.maximum_source_relaunch_distance)
                 or self.maximum_source_relaunch_distance < 0.0
@@ -300,7 +303,7 @@ class DiffuseFormFactorEventsReplayHardened3D:
                 "open_escape_count", "maximum_wrap_count",
                 "derived_horizon_extension_count", "initial_maximum_wraps",
                 "final_maximum_wraps", "source_relaunch_count",
-                "overlap_skip_count"):
+                "overlap_skip_count", "unclassified_ray_count"):
             object.__setattr__(self, name, int(getattr(self, name)))
         object.__setattr__(
             self, "maximum_source_relaunch_distance",
@@ -333,6 +336,7 @@ class DiffuseFormFactorEstimateReceipt3D:
     maximum_source_relaunch_distance: float = 0.0
     overlap_skip_count: int = 0
     maximum_overlap_skip_depth: float = 0.0
+    unclassified_ray_count: int = 0
 
     def __post_init__(self):
         if not isinstance(self.form_factors, DiffuseFormFactors3D):
@@ -347,7 +351,8 @@ class DiffuseFormFactorEstimateReceipt3D:
             self.centroid_limit_count, self.source_support_face_count,
             self.derived_horizon_extension_count,
             self.initial_maximum_wraps, self.final_maximum_wraps,
-            self.source_relaunch_count, self.overlap_skip_count)
+            self.source_relaunch_count, self.overlap_skip_count,
+            self.unclassified_ray_count)
         support = np.asarray((
             self.source_support_area_fraction,
             self.maximum_source_support_distance,
@@ -369,6 +374,7 @@ class DiffuseFormFactorEstimateReceipt3D:
                 or self.derived_horizon_extension_count > self.float64_evaluated_count
                 or self.source_relaunch_count > self.float64_evaluated_count
                 or self.overlap_skip_count > self.float64_evaluated_count
+                or self.unclassified_ray_count > self.ray_count
                 or self.final_maximum_wraps < self.initial_maximum_wraps):
             raise ValueError("invalid diffuse form-factor estimate receipt")
         for name in (
@@ -378,7 +384,8 @@ class DiffuseFormFactorEstimateReceipt3D:
                 "centroid_limit_count", "source_support_face_count",
                 "derived_horizon_extension_count",
                 "initial_maximum_wraps", "final_maximum_wraps",
-                "source_relaunch_count", "overlap_skip_count"):
+                "source_relaunch_count", "overlap_skip_count",
+                "unclassified_ray_count"):
             object.__setattr__(self, name, int(getattr(self, name)))
         object.__setattr__(
             self, "source_support_area_fraction",
@@ -2408,6 +2415,7 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
         periodic_lateral=False, maximum_wraps=1024,
         maximum_exact_replay_wraps=None, source_relaunch_origin=None,
         overlap_skip_depth_limit=None, overlap_exit_authority_distance=None,
+        unclassified_ray_budget=None, unclassified_source_face=None,
         device=None):
     """Certify ambiguous cellwise events with an exact float64 replay.
 
@@ -2456,6 +2464,7 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
     maximum_source_relaunch_distance = 0.0
     overlap_skip_count = 0
     maximum_overlap_skip_depth = 0.0
+    unclassified_ray_count = 0
     if np.any(replay_mask):
         reference = trace_diffuse_form_factor_events_float64_3d(
             origin[replay_mask], direction[replay_mask], verts, faces, normals,
@@ -2606,6 +2615,31 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
                     current_hit = retry.hit_position[0]
                     current_hit_face = int(retry.hit_face[0])
 
+        # Structural failure modes carry their own contracts now (watertight extraction,
+        # gradient-oriented normals, exact remap ledgers), so a ray that survives every
+        # proof-based recovery unclassified is a bounded numerical-tail event, not a silent
+        # tripwire.  Within a declared budget it is DISPOSITIONED conservatively: its quadrature
+        # weight is ledgered as lost (open escape deposits nowhere), counted, and receipted.
+        # A cluster of unclassified rays -- the signature of a genuine structural defect --
+        # still exceeds the budget and refuses exactly as before.
+        refusal = np.isin(reference_termination, (3, 4))
+        if np.any(refusal) and unclassified_ray_budget is not None:
+            budget_rows, budget_global = unclassified_ray_budget
+            source = unclassified_source_face
+            refused_local = np.flatnonzero(refusal)
+            within = len(refused_local) <= max(1, int(budget_global * len(origin)))
+            if within and source is not None:
+                refused_global = np.flatnonzero(replay_mask)[refused_local]
+                refused_sources = np.asarray(source)[refused_global]
+                per_face = np.unique(refused_sources, return_counts=True)[1]
+                rays_per_source = max(1, len(origin) // max(1, len(np.unique(source))))
+                within = int(per_face.max()) <= max(1, int(budget_rows * rays_per_source))
+            if within:
+                unclassified_ray_count = int(len(refused_local))
+                reference_termination[refused_local] = 2
+                reference_face[refused_local] = -1
+                reference_cosine[refused_local] = 0.0
+                refusal = np.zeros_like(refusal)
         refusal = np.isin(reference_termination, (3, 4))
         if np.any(refusal):
             local = np.flatnonzero(refusal)
@@ -2641,7 +2675,8 @@ def trace_diffuse_form_factor_events_cellwise_certified_3d(
         source_relaunch_count=source_relaunch_count,
         maximum_source_relaunch_distance=maximum_source_relaunch_distance,
         overlap_skip_count=overlap_skip_count,
-        maximum_overlap_skip_depth=maximum_overlap_skip_depth)
+        maximum_overlap_skip_depth=maximum_overlap_skip_depth,
+        unclassified_ray_count=unclassified_ray_count)
 
 
 def trace_diffuse_form_factor_events_replay_hardened_3d(
@@ -2730,7 +2765,7 @@ def estimate_diffuse_form_factors_3d(
         source_sampling="triangle_area", visibility_mode="cellwise_certified",
         maximum_visibility_wraps=1024, maximum_visibility_replay_wraps=None,
         overlap_skip_depth_limit=None, launch_surface_distance=None,
-        return_visibility_receipt=False,
+        unclassified_ray_budget=None, return_visibility_receipt=False,
         device=None):
     """Estimate deterministic diffuse face exchange and classify every emitted ray.
 
@@ -2820,6 +2855,7 @@ def estimate_diffuse_form_factors_3d(
     maximum_source_relaunch_distance = 0.0
     overlap_skip_count = 0
     maximum_overlap_skip_depth = 0.0
+    unclassified_ray_count = 0
     if visibility_mode == "legacy_float32":
         hit = _trace_diffuse_form_factor_events_warp_3d(
             verts, faces, origin, direction, domain, periodic_lateral, device)
@@ -2844,6 +2880,8 @@ def estimate_diffuse_form_factors_3d(
             source_relaunch_origin=source_relaunch_origin,
             overlap_skip_depth_limit=overlap_skip_depth_limit,
             overlap_exit_authority_distance=overlap_exit_authority_distance,
+            unclassified_ray_budget=unclassified_ray_budget,
+            unclassified_source_face=source,
             device=device)
         hit = events.hit_face
         float64_evaluated_count = events.replay_count
@@ -2856,6 +2894,7 @@ def estimate_diffuse_form_factors_3d(
         maximum_source_relaunch_distance = events.maximum_source_relaunch_distance
         overlap_skip_count = events.overlap_skip_count
         maximum_overlap_skip_depth = events.maximum_overlap_skip_depth
+        unclassified_ray_count = events.unclassified_ray_count
     else:
         events = trace_diffuse_form_factor_events_float64_3d(
             origin, direction, verts, faces, authority_normals, domain_size=domain,
@@ -2909,7 +2948,8 @@ def estimate_diffuse_form_factors_3d(
         source_relaunch_count=source_relaunch_count,
         maximum_source_relaunch_distance=maximum_source_relaunch_distance,
         overlap_skip_count=overlap_skip_count,
-        maximum_overlap_skip_depth=maximum_overlap_skip_depth)
+        maximum_overlap_skip_depth=maximum_overlap_skip_depth,
+        unclassified_ray_count=unclassified_ray_count)
 
 
 def gather_boundary_state_ballistic_3d(

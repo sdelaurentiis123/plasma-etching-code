@@ -533,3 +533,68 @@ def test_cellwise_certified_retries_exhaustion_when_horizon_undercounts(monkeypa
     assert np.array_equal(result.termination, [2])
     assert result.derived_horizon_extension_count == 1
     assert result.final_maximum_wraps == 480 + 64 + 480 // 16
+
+
+def test_cellwise_certified_dispositions_unclassified_ray_within_budget(monkeypatch):
+    # A ray that survives every proof-based recovery unclassified (production lineage:
+    # 5 nm step 317 ray 4413 -- a near-vertical ray stuck wrapping in place at a periodic
+    # seam junction, exhausting >1e6 wraps against a correct 19-wrap horizon) is
+    # dispositioned within the declared budget: weight ledgered as lost, counted, no hit
+    # invented, no refusal.
+    verts, faces, _ = _shared_square()
+    normals = np.asarray([[0.0, 0.0, -1.0], [0.0, 0.0, -1.0]])
+    monkeypatch.setattr(
+        boundary_transport_3d,
+        "trace_diffuse_form_factor_events_warp_cellwise_3d",
+        lambda *args, **kwargs:
+        boundary_transport_3d.DiffuseFormFactorEventsWarpCellwise3D(
+            [-1], [3], [4]))
+    monkeypatch.setattr(
+        boundary_transport_3d,
+        "_derived_vertical_domain_wrap_horizon_3d",
+        lambda origin, direction, domain: None)
+    direction = np.asarray([[1.0, 0.0, 1.0e-9]])
+    direction /= np.linalg.norm(direction, axis=1, keepdims=True)
+
+    events = boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+        [[0.1, 0.5, 0.1]], direction, verts, faces, normals,
+        domain_size=(1.0, 1.0, 1.0), periodic_lateral=True, maximum_wraps=3,
+        unclassified_ray_budget=(0.01, 0.001),
+        unclassified_source_face=np.asarray([0]), device="cpu")
+    assert np.array_equal(events.termination, [2])
+    assert np.array_equal(events.hit_face, [-1])
+    assert events.unclassified_ray_count == 1
+
+    # Without the budget the same ray still refuses -- the disposition is opt-in.
+    with pytest.raises(RuntimeError, match="periodic-wrap budget exhaustion"):
+        boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+            [[0.1, 0.5, 0.1]], direction, verts, faces, normals,
+            domain_size=(1.0, 1.0, 1.0), periodic_lateral=True, maximum_wraps=3,
+            device="cpu")
+
+
+def test_cellwise_certified_unclassified_cluster_still_refuses(monkeypatch):
+    # Many unclassified rays are the signature of a structural defect, not a numerical
+    # tail: the aggregate budget trips and the operator refuses exactly as before.
+    verts, faces, _ = _shared_square()
+    normals = np.asarray([[0.0, 0.0, -1.0], [0.0, 0.0, -1.0]])
+    count = 8
+    monkeypatch.setattr(
+        boundary_transport_3d,
+        "trace_diffuse_form_factor_events_warp_cellwise_3d",
+        lambda *args, **kwargs:
+        boundary_transport_3d.DiffuseFormFactorEventsWarpCellwise3D(
+            [-1] * count, [3] * count, [4] * count))
+    monkeypatch.setattr(
+        boundary_transport_3d,
+        "_derived_vertical_domain_wrap_horizon_3d",
+        lambda origin, direction, domain: None)
+    direction = np.tile([1.0, 0.0, 1.0e-9], (count, 1))
+    direction /= np.linalg.norm(direction, axis=1, keepdims=True)
+
+    with pytest.raises(RuntimeError, match="periodic-wrap budget exhaustion"):
+        boundary_transport_3d.trace_diffuse_form_factor_events_cellwise_certified_3d(
+            np.tile([0.1, 0.5, 0.1], (count, 1)), direction, verts, faces, normals,
+            domain_size=(1.0, 1.0, 1.0), periodic_lateral=True, maximum_wraps=3,
+            unclassified_ray_budget=(0.01, 0.001),
+            unclassified_source_face=np.zeros(count, dtype=int), device="cpu")
