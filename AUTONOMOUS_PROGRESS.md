@@ -1811,3 +1811,17 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   Suite: 981 passed, 1 expected skip.
 - **Claim boundary:** flux carried by recovered rays is <=0.1% of the quadrature with row weight
   1/8 -- below every stated error budget -- and every recovery is receipted, never silent.
+
+### The sixth latent defect: near-grazing wrap exhaustion at the horizon bound (2026-07-20)
+
+- Both a12c9e4 clean runs advanced past their previous failure states (5 nm to step 316 from 289;
+  10 nm to step 361 from 328) with the artifact-zone recovery visibly working in flight, then each
+  refused on exactly one near-grazing ray exhausting the 1024-wrap replay budget. Forensics on the
+  preserved 10 nm state: the rays have small finite vertical speed and finite derived horizons
+  clustered at 1048-1616 wraps -- the proof machinery is sound, but extension required the horizon
+  to exceed the exhausted budget, and the seam bound's tie allowance can undercount a grazing
+  trajectory by a few crossings.
+- `c3274eb`: any exhausted ray with a finite derived horizon retries once at the proof bound plus
+  an explicit margin, still capped by the emergency horizon; horizontal rays without a derivable
+  bound remain hard refusals. Manufactured undercount regression added; all six seeds on the
+  preserved 10 nm state classify completely. Suite: 982 passed, 1 expected skip.
