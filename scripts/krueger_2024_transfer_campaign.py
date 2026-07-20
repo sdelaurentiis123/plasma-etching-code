@@ -80,11 +80,21 @@ def run(args):
     _verify_frozen_files(freeze)
     physics = freeze["frozen_physics"]
     numerics = freeze["authority_numerics"]
-    if (not abs(float(numerics.get("dx_um", 0.0)) - 0.005) <= 1e-15
+    amendment = freeze.get("protocol_amendment") or {}
+    r110 = (
+        amendment.get("id") == "R1.10"
+        and freeze.get("protocol_id") == "K24-PETCH-R1.10"
+        and freeze.get("protocol_sha256") == _sha(ROOT / (
+            "KRUEGER_2024_VALIDATION_PROTOCOL_2026-07-16.md"))
+        and abs(float(amendment.get("authority_fidelity_dx_um", 0.0)) - 0.01) <= 1e-15)
+    expected_dx = 0.01 if r110 else 0.005
+    if (not abs(float(numerics.get("dx_um", 0.0)) - expected_dx) <= 1e-15
             or numerics.get("topology_change_policy") != "continue_gas_cavity"
             or numerics.get("surface_state_remap_backend") not in (
                 "indexed_knn", "common_refinement")):
-        raise ValueError("held-out execution requires the sealed R1.9 authority operator")
+        raise ValueError(
+            "held-out execution requires the sealed authority operator "
+            "(R1.9 at 5 nm, or R1.10 at 10 nm bound to the amended protocol)")
     output_root = Path(args.output_root)
     output_root.mkdir(parents=True, exist_ok=True)
     campaign_path = output_root / "campaign.json"

@@ -1,0 +1,61 @@
+{
+  "azimuth_audit_sha256": "7a71c1e5296cef1b60166c7d25db7ca608cc5977da85adce384ea191b8390a83",
+  "base_target_table_sha256": "5d51d124a93e1f942a9b999649b8adcf217662967d9ea2a40089f72940992351",
+  "calibration_targets": {
+    "etch_depth_nm": 825.0,
+    "mask_opening_nm": 45.0
+  },
+  "coupled_endpoint": {
+    "etch_depth_nm": 814.6282499144745,
+    "fraction": 0.9004722559883319,
+    "mask_opening_nm": 41.8361897373457,
+    "oxide_etch_yield_scale": 0.5586489665864749,
+    "path_name": "base_endpoint_2c8ed1a.json",
+    "sha256": "7fcdf96dd5493f9fa3df611d3c26572f282215df932ab25e018de14d01cd9927"
+  },
+  "derivation": {
+    "axisymmetric_to_plane_substrate_net_rate_factor": 1.0597910976792588,
+    "depth_fraction_factor": 1.01187982146066,
+    "opening_local_slope_nm_per_fraction": 160.07548661327718,
+    "opening_response": "quadratic-through-three-completed-unit-yield-base-endpoints",
+    "oxide_scale_rule": "multiplicative energetic-SiO2 rate adapter, adjusted by the measured base fraction response and frozen-endpoint azimuth rate ratio"
+  },
+  "held_out_profile_data_read": false,
+  "proposal_sha256": "125ecc1aaaedee89c4df82905ed08436bbff24a13fba1b10194aa19cbf4547a1",
+  "proposed_configuration": {
+    "effective_mask_crosslinked_growth_fraction": 0.9202367454151089,
+    "ion_azimuthal_closure": "axisymmetric_uniform",
+    "ion_azimuthal_order": 16,
+    "oxide_etch_yield_scale": 0.5275750868837833
+  },
+  "protocol_id": "K24-PETCH-R1.5",
+  "protocol_sha256": "7bc721583ec8143ef647a03212e159325f0eaf06ff2d9edc6de768e741e55c4d",
+  "schema": "petch.krueger-2024.base-coupled-correction.v1",
+  "scientific_status": "single permitted base-only coupled correction; not validation",
+  "unit_yield_fraction_endpoints": [
+    {
+      "etch_depth_nm": 980.9334849160871,
+      "fraction": 0.0,
+      "mask_opening_nm": 13.166933706472351,
+      "oxide_etch_yield_scale": 1.0,
+      "path_name": "audit.json",
+      "sha256": "8091daeebb027eef72a774cca3b73ba42ecc10ecb649b57107bc671da18fbc65"
+    },
+    {
+      "etch_depth_nm": 1191.4700190614096,
+      "fraction": 0.6931393199962746,
+      "mask_opening_nm": 14.686674232177635,
+      "oxide_etch_yield_scale": 1.0,
+      "path_name": "audit.json",
+      "sha256": "efe63f087f4989c8217dcc27a104df916746c204b2775c8d79ca980dec9c913f"
+    },
+    {
+      "etch_depth_nm": 1420.756574690071,
+      "fraction": 1.0,
+      "mask_opening_nm": 59.09286140265144,
+      "oxide_etch_yield_scale": 1.0,
+      "path_name": "audit.json",
+      "sha256": "669bca08157462172cd4041eb815866e1c09e6c6482adfddc4097dfd5a82c497"
+    }
+  ]
+}
