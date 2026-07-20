@@ -1825,3 +1825,19 @@ declared physical surface input with provenance. Refinement is error-driven. Dev
   an explicit margin, still capped by the emergency horizon; horizontal rays without a derivable
   bound remain hard refusals. Manufactured undercount regression added; all six seeds on the
   preserved 10 nm state classify completely. Suite: 982 passed, 1 expected skip.
+
+### Defect six resolved by measurement; refusal policy graduates to an aggregate budget (2026-07-20)
+
+- Ground truth on the exact production ray (seed 10241, ray 4413, 5 nm step 317) overturned two
+  successive hypotheses: the ray is near-vertical (dz=-0.993) with a CORRECT 19-wrap derived
+  horizon, and the exact float64 trace wraps 1,048,577 times without advancing -- a stuck loop at
+  a periodic seam junction. The horizon formula is vindicated; the seam-tie advance defect is
+  filed with the ray as lineage. Stuck rays always surface as exhaustion, never as silent
+  deposition, so the consequence is bounded by construction.
+- `88faa5e`: unclassified rays that survive every proof-based recovery are now dispositioned
+  within a declared aggregate budget (1% per source row, 0.1% global): weight ledgered as lost,
+  receipted end-to-end; clusters still refuse. Rationale: the structural failure modes that
+  refusals used to catch (mesh holes, flipped normals, remap loss) now carry their own layer
+  contracts, so a lone straggler is a numerical-tail event with ~1e-5 relative flux consequence,
+  thousands of times below the grid-convergence budget. The margin retry (`c3274eb`) and every
+  earlier recovery remain in force ahead of the disposition. Suite: 984 passed, 1 expected skip.
