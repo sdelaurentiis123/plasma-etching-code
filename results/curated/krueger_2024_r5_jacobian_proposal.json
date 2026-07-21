@@ -1,0 +1,65 @@
+{
+  "candidate": {
+    "fraction": 0.8804722559883319,
+    "yield_scale": 0.5786489665864749
+  },
+  "damping": 1.0,
+  "engine_commit": "",
+  "held_out_profile_data_read": false,
+  "inputs": [
+    {
+      "config_hash": "efeb0ae02bd83569e110d40ab1e73487ad643115cf5501a3e1d9a51aaf92b1e7",
+      "etch_depth_nm": 791.2941325750385,
+      "fraction": 0.9004722559883319,
+      "mask_opening_nm": 47.95541218585041,
+      "path_name": "analytic-base-r19-audit.json",
+      "sha256": "4ef45a70eba49a97120223c4d71e0eeb608ae5f67fba1862bf27c8b5a2693363",
+      "yield_scale": 0.5586489665864749
+    },
+    {
+      "config_hash": "987707b14a868b0d455cfc1a682f44c50ccf7a917fc1f2ab61f24e840f81327a",
+      "etch_depth_nm": 793.2221897969328,
+      "fraction": 0.9104722559883319,
+      "mask_opening_nm": 50.48176974835057,
+      "path_name": "probe-fraction-audit.json",
+      "sha256": "3fa11d100f5c1ac4bce0e6ce880e43101e23a4efa70d09d7c7c5de47c67c076e",
+      "yield_scale": 0.5586489665864749
+    },
+    {
+      "config_hash": "4d254d6d3bd0d11b3b5f659412fa0b741743e878ab3cb7ff03518ec06dc1eca8",
+      "etch_depth_nm": 818.0417206992051,
+      "fraction": 0.9004722559883319,
+      "mask_opening_nm": 49.70945183165018,
+      "path_name": "probe-yield-audit.json",
+      "sha256": "7bbd6193dbcbc6c329ec19900ce7d2a3198678885c840cb30dff26bf4dd18404",
+      "yield_scale": 0.5786489665864749
+    }
+  ],
+  "jacobian": [
+    [
+      252.6357562500157,
+      87.70198228998815
+    ],
+    [
+      192.80572218942763,
+      1337.3794062083323
+    ]
+  ],
+  "jacobian_condition": 5.7369312497005955,
+  "newton_step": [
+    -0.02,
+    0.02
+  ],
+  "proposal_sha256": "b4fbf48d81df5fbcab8b862c16b2cf7a0e07a849e3725053b75aecb8afd85884",
+  "protocol_id": "K24-PETCH-R5",
+  "protocol_sha256": "c526e7bc3f93050567dfeaeab9b3affce31ec135bcc6b6052534ee7e766ffd4e",
+  "residual_nm": [
+    -2.955412185850413,
+    33.705867424961525
+  ],
+  "schema": "petch.krueger-2024.r5-jacobian.v1",
+  "targets": {
+    "etch_depth_nm": 825.0,
+    "mask_opening_nm": 45.0
+  }
+}
