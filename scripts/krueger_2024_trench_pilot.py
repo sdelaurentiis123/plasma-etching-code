@@ -785,6 +785,11 @@ def run(args):
                     # Headroom so a rare grazing fallback pair cannot exhaust the shared
                     # refinement budget at depth; declared and fingerprinted.
                     "maximum_refinement_level": 24,
+                    # Section meshes are float64-exact after the extrusion projection;
+                    # the float32-era default (128*eps32*scale ~ 1.5e-5) lets per-pair
+                    # visibility slivers accumulate past the row-closure gate at depth
+                    # (3.4e-4 measured at step 79). Declared and fingerprinted.
+                    "geometry_tolerance": float(args.exchange_geometry_tolerance),
                 },
             }
         else:
@@ -1135,6 +1140,11 @@ def parse_args():
              "occlusion with certified outer quadrature (per-pair fallback to adaptive "
              "refinement), or refinement everywhere (cross-check mode); recorded in the "
              "operator fingerprint")
+    parser.add_argument(
+        "--exchange-geometry-tolerance", type=float, default=1.0e-9,
+        help="geometric predicate tolerance (mesh units) for the deterministic extruded "
+             "exchange; float64 section meshes support 1e-9, and looser values leak "
+             "per-pair visibility slivers that accumulate against the row-closure gate")
     parser.add_argument(
         "--exchange-relative-tolerance", type=float, default=1.0e-5,
         help="declared per-pair shadow-refinement budget for adaptive-refinement and "
