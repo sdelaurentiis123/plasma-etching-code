@@ -443,3 +443,14 @@ extends to `087f871` (mean-field projection guard scale floored at 1e-3 of the f
 after the step-100+ shadowed-group refusal; forensics: the refusing group carried 3.8e-4 of
 peak direct flux). The freeze manifest binds the executables' current source hashes, so the
 frozen epoch is whatever lineage head passes the base gate.
+
+R5 procedural note (2026-07-21, before the second and final Newton candidate; held-out still
+sealed): candidate 1 (0.8804722559883319, 0.5786489665864749) landed opening 49.463 nm
+(+4.46, within gate) / depth 815.334 nm (-9.67, outside gate). Depth followed the measured
+Jacobian to 1.1 nm over a 24 nm move; the opening response shows a strong knob interaction
+(+4.8 nm versus the linear prediction, concentrated in the final ~5 s). Because exactly one
+candidate remains and linear-vs-bilinear response models disagree about reachability of the
+gate, a THIRD sensitivity probe is added at candidate 1's fraction
+(0.8804722559883319, 0.5986489665864749) to measure the local yield column of the Jacobian
+before proposing candidate 2. This is a base-side sensitivity measurement, not a candidate;
+no held-out observation is involved.
