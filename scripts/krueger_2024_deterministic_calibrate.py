@@ -17,6 +17,9 @@ from pathlib import Path
 
 import numpy as np
 
+PROTOCOL = Path(__file__).resolve().parent.parent / (
+    "KRUEGER_2024_VALIDATION_PROTOCOL_2026-07-16.md")
+
 BOUNDS = {"fraction": (0.84, 0.93), "yield_scale": (0.50, 0.60)}
 TARGETS = {"mask_opening_nm": 45.0, "etch_depth_nm": 825.0}
 MAXIMUM_CONDITION = 1.0e4
@@ -76,6 +79,10 @@ def propose(base, probe_fraction, probe_yield, damping):
             base["yield_scale"] + step[1], *BOUNDS["yield_scale"])),
     }
     return {
+        "schema": "petch.krueger-2024.r5-jacobian.v1",
+        "protocol_id": "K24-PETCH-R5",
+        "protocol_sha256": sha256(PROTOCOL.read_bytes()).hexdigest(),
+        "held_out_profile_data_read": False,
         "candidate": candidate,
         "jacobian": jacobian.tolist(),
         "jacobian_condition": condition,
@@ -103,6 +110,8 @@ def main():
     proposal = propose(
         endpoint(args.base_audit), endpoint(args.probe_fraction_audit),
         endpoint(args.probe_yield_audit), args.damping)
+    canonical = json.dumps(proposal, sort_keys=True, separators=(",", ":"))
+    proposal["proposal_sha256"] = sha256(canonical.encode("utf-8")).hexdigest()
     payload = json.dumps(proposal, indent=2, sort_keys=True)
     Path(args.output).write_text(payload + "\n", encoding="utf-8")
     print(payload)

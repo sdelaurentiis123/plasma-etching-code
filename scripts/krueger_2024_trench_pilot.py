@@ -479,6 +479,7 @@ def _configuration(args):
         "radiosity_maximum_iterations": int(args.radiosity_max_iterations),
         "radiosity_enabled": not args.no_radiosity,
         "seed": int(args.seed),
+        "radiosity_backend": str(args.radiosity_backend),
         "adaptive_profile_timestep": bool(args.adaptive_profile_timestep),
         "minimum_step_duration_s": float(args.minimum_step_s),
         "target_displacement_cells": float(args.target_displacement_cells),
@@ -511,6 +512,14 @@ def _configuration(args):
     if float(args.oxide_etch_yield_scale) != 1.0:
         configuration["oxide_etch_yield_scale"] = float(
             args.oxide_etch_yield_scale)
+    if args.radiosity_backend == "deterministic_extruded_2d":
+        configuration["deterministic_exchange"] = {
+            "exchange_method": str(args.exchange_method),
+            "exchange_relative_tolerance": float(args.exchange_relative_tolerance),
+            "exchange_geometry_tolerance": float(args.exchange_geometry_tolerance),
+            "maximum_refinement_level": 24,
+            "extrusion_projection_guard_cells": 0.01,
+        }
     return configuration
 
 

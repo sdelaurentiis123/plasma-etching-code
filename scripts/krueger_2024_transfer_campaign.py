@@ -67,7 +67,9 @@ def _verify_frozen_files(freeze):
 def run(args):
     freeze_path = Path(args.freeze)
     freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
-    if (freeze.get("schema") != "petch.krueger-2024.frozen-physics-reveal.v2"
+    if (freeze.get("schema") not in (
+            "petch.krueger-2024.frozen-physics-reveal.v2",
+            "petch.krueger-2024.frozen-physics-reveal.v3")
             or freeze.get("held_out_profile_data_read") is not False
             or not isinstance(freeze.get("reveal_sha256"), str)):
         raise ValueError("transfer campaign requires a sealed Krueger physics reveal")
@@ -81,20 +83,27 @@ def run(args):
     physics = freeze["frozen_physics"]
     numerics = freeze["authority_numerics"]
     amendment = freeze.get("protocol_amendment") or {}
-    r110 = (
-        amendment.get("id") == "R4"
-        and freeze.get("protocol_id") == "K24-PETCH-R4"
+    ten_nm_authority = (
+        (amendment.get("id") == "R4"
+         and freeze.get("protocol_id") == "K24-PETCH-R4")
+        or (amendment.get("id") == "R5"
+            and freeze.get("protocol_id") == "K24-PETCH-R5"
+            and freeze.get("schema") == "petch.krueger-2024.frozen-physics-reveal.v3"
+            and numerics.get("radiosity_backend") == "deterministic_extruded_2d"))
+    ten_nm_authority = (
+        ten_nm_authority
         and freeze.get("protocol_sha256") == _sha(ROOT / (
             "KRUEGER_2024_VALIDATION_PROTOCOL_2026-07-16.md"))
         and abs(float(amendment.get("authority_fidelity_dx_um", 0.0)) - 0.01) <= 1e-15)
-    expected_dx = 0.01 if r110 else 0.005
+    expected_dx = 0.01 if ten_nm_authority else 0.005
     if (not abs(float(numerics.get("dx_um", 0.0)) - expected_dx) <= 1e-15
             or numerics.get("topology_change_policy") != "continue_gas_cavity"
             or numerics.get("surface_state_remap_backend") not in (
                 "indexed_knn", "common_refinement")):
         raise ValueError(
             "held-out execution requires the sealed authority operator "
-            "(R1.9 at 5 nm, or R1.10 at 10 nm bound to the amended protocol)")
+            "(R1.9 at 5 nm, or the amended 10 nm authorities R1.10/R5 bound to "
+            "the current protocol)")
     output_root = Path(args.output_root)
     output_root.mkdir(parents=True, exist_ok=True)
     campaign_path = output_root / "campaign.json"
