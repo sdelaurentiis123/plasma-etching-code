@@ -62,15 +62,19 @@ def propose(endpoints, batch):
     grid_axis = np.linspace(0.0, 1.0, 61)
     gx, gy = np.meshgrid(grid_axis, grid_axis, indexing="ij")
     candidates = np.column_stack([gx.ravel(), gy.ravel()])
-    feasibility = np.ones(len(candidates))
+    log_feasibility = np.zeros(len(candidates))
     for name, gp in models.items():
         mean, std = gp.predict(candidates, return_std=True)
         std = np.maximum(std, 1e-6)
         target = TARGETS[name]
-        feasibility *= (norm.cdf((target + TOLERANCE_NM - mean) / std)
-                        - norm.cdf((target - TOLERANCE_NM - mean) / std))
+        prob = (norm.cdf((target + TOLERANCE_NM - mean) / std)
+                - norm.cdf((target - TOLERANCE_NM - mean) / std))
+        log_feasibility += np.log(np.clip(prob, 1e-300, 1.0))
+    feasibility = np.exp(log_feasibility - log_feasibility.max()) * np.exp(
+        min(log_feasibility.max(), 0.0))
+    score = log_feasibility
 
-    order = np.argsort(-feasibility)
+    order = np.argsort(-score)
     chosen = []
     for index in order:
         point = candidates[index]
