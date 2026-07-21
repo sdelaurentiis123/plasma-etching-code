@@ -362,3 +362,29 @@ median-of-5 smoothing, categorical gates. Declared changes:
    +/-5 nm freezes under the R2/R3 authority machinery rebound to K24-PETCH-R4.
 3. The rays=8 arms of the noise experiment (control and reseed) are documentation of the
    unconverged operator's seed sensitivity and take no further part in calibration.
+
+## R4 outcome: endpoint chaos established; pointwise calibration ill-posed (2026-07-21 morning)
+
+The R4 convergence ladder and paired reseeds at the fixed R1.9 pair (10 nm, epoch 0a49b99):
+
+    rays=8   seed 241 -> (41.84, 814.63)     rays=8   seed 941 -> (44.59, 816.43)
+    rays=32  seed 241 -> (45.91, 794.90)
+    rays=64  seed 241 -> (30.38, 806.41)     rays=64  seed 941 -> (34.52, 781.57)
+    rays=128 seed 241 -> (39.15, 787.99)
+
+No convergence in ray count (64-vs-128 shifts: +8.8 nm opening, -18.4 nm depth) and seed
+scatter does not shrink with refinement (4.1 nm opening / 24.8 nm depth at rays=64). The
+endpoint observables of the 0.02 um-thick periodic cell are deterministically chaotic under
+any sampling perturbation: the cell carries a single realization of neck roughness, whereas a
+physical trench line self-averages over microns of length. Pointwise single-run endpoint
+calibration to +/-5 nm is therefore ill-posed at this cell size, independent of quadrature.
+R4 ends by its own ladder rule without a frozen operator. No held-out observation was read.
+
+Successor options recorded for decision (not yet preregistered):
+- R5-ensemble: calibration/validation observables become the MEDIAN over a declared ensemble
+  (>=5 sampling seeds per candidate) at a declared ray count; emulates line self-averaging;
+  ~5x run cost per candidate, parallelizable.
+- R5-wide-cell: physically self-average by widening the periodic cell along the line
+  (0.02 -> 0.1+ um); linear cost in width; higher fidelity, less parallel.
+The current-pair ensemble statistics (median approx 39 nm opening, 797 nm depth) do not meet
+the targets, so either route implies recalibration under the new observable definition.
