@@ -388,3 +388,52 @@ Successor options recorded for decision (not yet preregistered):
   (0.02 -> 0.1+ um); linear cost in width; higher fidelity, less parallel.
 The current-pair ensemble statistics (median approx 39 nm opening, 797 nm depth) do not meet
 the targets, so either route implies recalibration under the new observable definition.
+
+## Successor protocol K24-PETCH-R5: sampling-free deterministic operator (2026-07-21 evening, held-out still sealed)
+
+Amendment id: `R5`. Protocol id: `K24-PETCH-R5`. Preregistered before any calibration
+consumption of the R5 base endpoint and before any held-out access.
+
+Decision: neither R4 successor option is adopted. The R4 chaos verdict established that the
+endpoint observables are deterministically chaotic UNDER SAMPLING PERTURBATION (rays/seeds);
+R5 removes the sampling itself. Diffuse neutral exchange is computed by the deterministic
+analytic-occlusion operator (exact per-source-point projective shadow intervals classified by
+the connector predicate; closed-form point-to-segment factors; certified adaptive outer
+quadrature; per-pair conservative-refinement fallback), with the extruded mean-field closure
+as the declared 2-D authority. There are no rays and no transport seeds; the knob-to-endpoint
+map is bit-reproducible, so pointwise base calibration is well-posed. The single 0.02 um line
+realization (versus a self-averaging physical trench line) remains a declared model-form
+limitation, unchanged from R1-R4 and to be assessed post-reveal (wide-cell / line-averaging
+study pinned in NEXT_STEPS.md).
+
+Engine epoch: git `cee7ff9` (lineage this round: `99d90c2` analytic-occlusion operator, 54x
+and corrects an unreceipted grazing-shadow overcount in the refinement cross-check;
+`37ca22d` cancellation clamp; `063a55d` extrusion projection (superseded placement);
+`3d19ed3` in-step projection + closure repair + fallback headroom; `cee7ff9` float64-grade
+geometry tolerance 1e-9 after row-closure forensics at step 79). Full suite 989 green at
+`cee7ff9`.
+
+Declared operator inputs (all recorded in the operator fingerprint and run audits):
+`exchange_method=analytic_occlusion`, `geometry_tolerance=1e-9`,
+`exchange_relative_tolerance=1e-5` (governs fallback pairs only),
+`maximum_refinement_level=24`, extrusion-projection guard `1e-2` cells with per-step
+deviation receipt (`extrusion_projection_max_deviation_mesh_units` in audit.json).
+`PETCH_DETERMINISTIC_EXCHANGE_WORKERS` is performance-only and output-identical.
+
+Calibration procedure (base side only; targets and +/-5 nm tolerances unchanged):
+1. Base run at the R1.9 pair (fraction 0.9004722559883319, yield 0.5586489665864749),
+   dx 0.01 um authority per Amendment R1.10, full t=60 s.
+2. Two probe runs measuring the endpoint Jacobian exactly:
+   fraction probe at (base fraction + 0.01, base yield); yield probe at
+   (base fraction, base yield + 0.02).
+3. Damped Newton proposal via `scripts/krueger_2024_deterministic_calibrate.py`
+   (receipts: input audit hashes, Jacobian, condition number, step; refuses mixed epochs
+   and condition > 1e4; step caps 0.02/knob; damping 1.0 unless the first candidate
+   overshoots, then 0.5).
+4. At most TWO Newton candidates. If neither lands both base observables within +/-5 nm,
+   R5 ends without a freeze and the failure is recorded.
+5. Freeze on the first candidate meeting both base targets: regenerate the launch manifest
+   binding `cee7ff9`-lineage executables, rebind `krueger_2024_freeze_r110.py` and
+   `krueger_2024_transfer_campaign.py` amendment/protocol ids from `R4`/`K24-PETCH-R4` to
+   `R5`/`K24-PETCH-R5`, then run the sealed held-out conditions unchanged. Held-out data
+   remains sealed until a valid freeze; nothing in R5 has read it.
