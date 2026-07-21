@@ -437,3 +437,9 @@ Calibration procedure (base side only; targets and +/-5 nm tolerances unchanged)
    `krueger_2024_transfer_campaign.py` amendment/protocol ids from `R4`/`K24-PETCH-R4` to
    `R5`/`K24-PETCH-R5`, then run the sealed held-out conditions unchanged. Held-out data
    remains sealed until a valid freeze; nothing in R5 has read it.
+
+R5 lineage note (2026-07-21, before any calibration consumption): the declared engine epoch
+extends to `087f871` (mean-field projection guard scale floored at 1e-3 of the field peak,
+after the step-100+ shadowed-group refusal; forensics: the refusing group carried 3.8e-4 of
+peak direct flux). The freeze manifest binds the executables' current source hashes, so the
+frozen epoch is whatever lineage head passes the base gate.
