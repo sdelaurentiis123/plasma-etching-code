@@ -771,14 +771,23 @@ def run(args):
         for species in boundary.species}
     radiosity = None
     if not args.no_radiosity:
-        radiosity = {
-            "rays_per_face": int(args.radiosity_rays),
-            "seed": int(args.seed) + 10000,
-            "periodic_lateral": True,
-            "domain_size": realized_domain,
-            "relative_tolerance": float(args.radiosity_tolerance),
-            "maximum_iterations": int(args.radiosity_max_iterations),
-        }
+        if args.radiosity_backend == "deterministic_extruded_2d":
+            radiosity = {
+                "form_factor_backend": "deterministic_extruded_2d",
+                "periodic_lateral": True,
+                "domain_size": realized_domain,
+                "relative_tolerance": float(args.radiosity_tolerance),
+                "maximum_iterations": int(args.radiosity_max_iterations),
+            }
+        else:
+            radiosity = {
+                "rays_per_face": int(args.radiosity_rays),
+                "seed": int(args.seed) + 10000,
+                "periodic_lateral": True,
+                "domain_size": realized_domain,
+                "relative_tolerance": float(args.radiosity_tolerance),
+                "maximum_iterations": int(args.radiosity_max_iterations),
+            }
 
     benchmark_only = bool(args.benchmark_only)
     accepted_step = int(start_step)
@@ -1100,6 +1109,9 @@ def parse_args():
         help="Warp transport device (for example cpu or cuda:0); recorded in the run hash")
     parser.add_argument("--face-quadrature-points", type=int, default=3)
     parser.add_argument("--radiosity-rays", type=int, default=8)
+    parser.add_argument(
+        "--radiosity-backend", default="scrambled_qmc_3d",
+        choices=("scrambled_qmc_3d", "deterministic_extruded_2d"))
     parser.add_argument("--radiosity-tolerance", type=float, default=1e-12)
     parser.add_argument("--radiosity-max-iterations", type=int, default=2000)
     parser.add_argument("--seed", type=int, default=241)
