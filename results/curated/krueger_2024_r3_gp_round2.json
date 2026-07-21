@@ -1,0 +1,73 @@
+{
+  "bounds": {
+    "fraction": [
+      0.84,
+      0.93
+    ],
+    "yield_scale": [
+      0.52,
+      0.58
+    ]
+  },
+  "held_out_profile_data_read": false,
+  "inputs": [
+    {
+      "etch_depth_nm": 809.7043302741838,
+      "fraction": 0.9004722559883319,
+      "mask_opening_nm": 42.14881059150958,
+      "path_name": "base_endpoint_2c8ed1a.json",
+      "sha256": "7fcdf96dd5493f9fa3df611d3c26572f282215df932ab25e018de14d01cd9927",
+      "yield_scale": 0.5586489665864749
+    },
+    {
+      "etch_depth_nm": 774.7804235070719,
+      "fraction": 0.9202367454151089,
+      "mask_opening_nm": 41.74743158166872,
+      "path_name": "corrected_endpoint_c2ef382.json",
+      "sha256": "17bd69aac5685dd909a2fbb1fd047776541d71efde3ee9392195739ea69abad8",
+      "yield_scale": 0.5275750868837833
+    },
+    {
+      "etch_depth_nm": 859.7112756020102,
+      "fraction": 0.9004722559883319,
+      "mask_opening_nm": 26.72841576600186,
+      "path_name": "r2_endpoint.json",
+      "sha256": "4af366aaf492d1917680619d36887ebc17ec9e1468543f233e10d091c1d351dc",
+      "yield_scale": 0.5657617924179401
+    },
+    {
+      "etch_depth_nm": 800.6483640314844,
+      "fraction": 0.9,
+      "mask_opening_nm": 33.34479365352258,
+      "path_name": "r3b_endpoint.json",
+      "sha256": "2fdd7be32593068c4c03babbfede7d64c2291911f96d3c59c531c612d982987f",
+      "yield_scale": 0.5519999999999999
+    }
+  ],
+  "noise_nm": {
+    "etch_depth_nm": 3.0,
+    "mask_opening_nm": 1.5
+  },
+  "proposal_sha256": "50f16329f9629dc0ffa45d68f6421d74cc1d4cc262bd7204c900bb0400a82b70",
+  "proposals": [
+    {
+      "effective_mask_crosslinked_growth_fraction": 0.84,
+      "joint_feasibility": 0.0,
+      "oxide_etch_yield_scale": 0.52
+    },
+    {
+      "effective_mask_crosslinked_growth_fraction": 0.9,
+      "joint_feasibility": 0.0,
+      "oxide_etch_yield_scale": 0.5539999999999999
+    }
+  ],
+  "protocol_id": "K24-PETCH-R3",
+  "schema": "petch.krueger-2024.r3-gp-proposal.v1",
+  "seed": 241,
+  "smoothing_last_steps": 5,
+  "targets": {
+    "etch_depth_nm": 825.0,
+    "mask_opening_nm": 45.0
+  },
+  "tolerance_nm": 5.0
+}
