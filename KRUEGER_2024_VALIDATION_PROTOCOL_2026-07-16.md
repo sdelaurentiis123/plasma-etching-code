@@ -312,3 +312,32 @@ the committed deterministic Gaussian-process feasibility proposer
 (scripts/krueger_2024_bo_calibrate.py, fixed seed, observation noise set from the measured neck
 jitter), budget unchanged at <= 9 base runs, gate and smoothing unchanged. The proposer consumes
 only completed base endpoints; no held-out access.
+
+## R3 outcome (2026-07-21 ~00:30, held-out still sealed and unread)
+
+**R3 verdict: calibration infeasible under the two-parameter closure — the finding is the
+deliverable.** Seven completed current-operator endpoints (five inside the R3 exploration):
+
+    (0.9005, 0.5586) -> (41.84, 814.63)   [best; the original R1.9 pair]
+    (0.9202, 0.5276) -> (41.73, 776.89)
+    (0.9005, 0.5658) -> (26.58, 863.35)
+    (0.9000, 0.5520) -> (35.89, 802.65)
+    (0.8400, 0.5200) -> (33.53, 739.08)
+    (0.9000, 0.5540) -> (28.54, 767.34)
+    (0.9000, 0.5620) -> (26.25, 810.96)
+
+The mask-opening endpoint never exceeds 41.84 nm against the 45 nm target anywhere in the
+declared domain, including the maximal-opening corner; near (0.90, 0.55-0.566) it scatters
+26-42 nm non-monotonically under 0.2-1% knob changes, with a byproduct-feedback necking
+runaway visible in the trajectories after t~45 s and +/-3 nm step jitter at the neck. A
+calibration this sensitive could not support blind transfer even if one sample landed in
+band: robustness, not luck, is the requirement. Remaining budget is therefore not spent.
+
+Interpretation, stated plainly: the pre-repair operator that reproduced (45.085, 853.2)
+leaked flux through mesh defects that the six receipted repairs closed; the repaired
+transport necks harder, and the two-parameter closure lacks a mechanism that widens or
+stabilizes the neck (candidates: byproduct redeposition/sticking on the mask throat, mask
+faceting yield-angle dependence). Adding any such closure is NEW PHYSICS and exits the
+present preregistration: it requires its own declared protocol (K24-PETCH-R4) with the
+mechanism, its literature basis, and its calibration budget stated before further base runs.
+No held-out observation was read at any point in R1-R3.
