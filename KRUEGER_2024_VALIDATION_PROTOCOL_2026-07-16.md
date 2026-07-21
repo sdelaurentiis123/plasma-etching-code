@@ -255,3 +255,27 @@ Declared while every held-out observation remains sealed and unread
 
 Claim boundary under R1.10: any successful reveal is a held-out validation at 10 nm numerical
 fidelity with 5 nm refinement confirmation pending, and must be stated as such.
+
+## R1 campaign outcome and successor protocol K24-PETCH-R2 (2026-07-20, held-out still sealed)
+
+**R1 outcome: failed calibration, reported as such.** The single permitted R1.10 base-only
+correction (fraction 0.9005->0.9202, yield 0.5586->0.5276, from the r11-era response surfaces)
+completed at 10 nm with opening 41.733 nm (within tolerance) and depth 776.894 nm (48.1 nm below
+target, outside tolerance). The response surfaces predate six receipted operator repairs and
+mispredicted both sensitivities. Under R1.10's own rule this second miss ends the R1 campaign.
+No held-out observation was read at any point.
+
+**K24-PETCH-R2, preregistered now.** Same engine, same sealed held-out data, same targets,
+tolerances, and categorical gates. Calibration methodology replaces stale response surfaces with
+the two completed current-operator endpoints:
+
+1. Empirical findings bound into R2: at fixed fraction, depth/yield is constant to 0.5% across
+   both endpoints (yield's declared multiplicative role, confirmed on the current operator);
+   opening is insensitive (41.84 vs 41.73 nm) across both parameter sets and lies within the
+   +/-5 nm tolerance as-is.
+2. The R2 pair: fraction retained at the R1.9 value 0.9004722559883319; yield rescaled once by
+   the measured depth ratio at that same fraction:
+   0.5586489665864749 x 825 / 814.628 = 0.5656628... .
+3. One confirmation run at 10 nm decides: both observables within +/-5 nm -> freeze under the
+   R1.10 authority machinery (rebound to protocol id K24-PETCH-R2) -> blind transfer. Any miss
+   ends R2 as failed calibration with no further correction.
