@@ -1,24 +1,51 @@
 """Deterministic diffuse exchange for surfaces extruded normal to a 2-D section.
 
 For an infinitely extruded diffuse surface, Hottel's crossed-string relation gives the
-unobstructed exchange length between two line elements exactly.  This module combines that
-relation with deterministic visibility refinement when third line elements may block only part
-of the exchange.  It is an authority/cross-check for line-trench mean profiles; it is not a
-replacement for the genuinely three-dimensional hard-visibility operator.
+unobstructed exchange length between two line elements exactly.  Obstructed pairs are
+resolved by the ``analytic_occlusion`` method: for each source point, every visibility
+transition along the target is a projective image of a blocker endpoint (or a facing-clip
+root), each elementary target interval is classified once by the exact connector predicate,
+and visible intervals contribute the closed-form two-dimensional point-to-segment factor.
+Only the outer source integral is numerical -- certified adaptive Simpson panels split at
+the analytic visibility events -- so shadow boundaries are never located by bisection and
+grazing shadows cost the same as transversal ones.  This module is an authority/cross-check
+for line-trench mean profiles; it is not a replacement for the genuinely three-dimensional
+hard-visibility operator.
+
+The older ``adaptive_refinement`` method (two-dimensional cell bisection with Gauss-sampled
+visibility classification) remains as the per-pair fallback and cross-check.  Its receipt
+covers unresolved mixed cells but NOT blocked slivers that evade all Gauss samples inside a
+cell it classifies visible, so on grazing-shadow geometry it overcounts by up to a few
+tenths of a percent (see the module tests, which document the gap against dense references);
+the analytic method has no such term.
 
 The primary stored quantity is the symmetric exchange length ``H_ij``.  Form factors are derived
 as ``F_ij = H_ij / L_i``, so reciprocity is true by construction rather than repaired after the
 fact.  Open-boundary escape is the unassigned part of each source row.
+
+The geometry kernels operate on scalar floats (with a vectorized candidate prefilter for the
+full-surface scan).  A production trench section visits hundreds of thousands of evaluation
+points, so per-point work must not pay array-dispatch overhead on two-element vectors.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 from hashlib import sha256
+from math import sqrt
 import heapq
+import multiprocessing
+import os
+import sys
 
 import numpy as np
 
 from .neutral_radiosity_3d import DiffuseFormFactors3D
+
+# Interior Gauss abscissae for connector visibility sampling.  Endpoint strings have zero
+# measure in the exchange integral and, in a closed polygon, lie exactly along adjacent
+# opaque walls.
+_GAUSS_OFFSET = sqrt(3.0 / 5.0) / 2.0
+_GAUSS_PARAMETERS = (0.5 - _GAUSS_OFFSET, 0.5, 0.5 + _GAUSS_OFFSET)
 
 
 def _readonly(value, dtype=float):
@@ -27,315 +54,279 @@ def _readonly(value, dtype=float):
     return result
 
 
-def _cross_2d(left, right):
-    return left[..., 0] * right[..., 1] - left[..., 1] * right[..., 0]
+def _endpoint_hull(fax, fay, fbx, fby, sax, say, sbx, sby):
+    """Convex hull (counterclockwise monotone chain) of the four cell endpoints."""
+    return _hull_points(((fax, fay), (fbx, fby), (sax, say), (sbx, sby)))
 
 
-def _point_on_segment(point, start, stop, tolerance):
-    direction = stop - start
-    offset = point - start
-    scale = max(float(np.linalg.norm(direction)), 1.0)
-    if abs(float(_cross_2d(direction, offset))) > tolerance * scale:
-        return False
-    return bool(
-        np.dot(offset, direction) >= -tolerance * scale
-        and np.dot(point - stop, direction) <= tolerance * scale)
-
-
-def _proper_segment_intersection(first_start, first_stop, second_start, second_stop,
-                                 tolerance):
-    """Whether a blocker crosses the open interior of the first segment."""
-    first_direction = first_stop - first_start
-    second_direction = second_stop - second_start
-    denominator = float(_cross_2d(first_direction, second_direction))
-    scale = max(
-        float(np.linalg.norm(first_direction)),
-        float(np.linalg.norm(second_direction)), 1.0)
-    if abs(denominator) <= tolerance * scale:
-        # Collinear overlap blocks only when it occupies a nonzero open interval of the
-        # connector. Merely sharing a surface endpoint is not an obstruction.
-        if abs(float(_cross_2d(second_start - first_start, first_direction))) > tolerance * scale:
-            return False
-        length2 = float(np.dot(first_direction, first_direction))
-        if length2 <= tolerance * tolerance:
-            return False
-        lo, hi = sorted((
-            float(np.dot(second_start - first_start, first_direction) / length2),
-            float(np.dot(second_stop - first_start, first_direction) / length2)))
-        return max(lo, tolerance) < min(hi, 1.0 - tolerance)
-    delta = second_start - first_start
-    first_parameter = float(_cross_2d(delta, second_direction) / denominator)
-    second_parameter = float(_cross_2d(delta, first_direction) / denominator)
-    return bool(
-        tolerance < first_parameter < 1.0 - tolerance
-        and -tolerance <= second_parameter <= 1.0 + tolerance)
-
-
-def _convex_hull(points):
-    unique = sorted(set(map(tuple, np.asarray(points, dtype=float))))
-    if len(unique) <= 1:
-        return np.asarray(unique, dtype=float)
+def _hull_points(points):
+    unique = sorted(set(points))
+    if len(unique) <= 2:
+        return unique
 
     def half(sequence):
         output = []
         for point in sequence:
-            point = np.asarray(point, dtype=float)
-            while (len(output) >= 2
-                   and _cross_2d(output[-1] - output[-2], point - output[-1]) <= 0.0):
-                output.pop()
+            while len(output) >= 2:
+                bx, by = output[-2]
+                cx, cy = output[-1]
+                if (cx - bx) * (point[1] - cy) - (cy - by) * (point[0] - cx) <= 0.0:
+                    output.pop()
+                else:
+                    break
             output.append(point)
         return output
 
     lower = half(unique)
-    upper = half(reversed(unique))
-    return np.asarray(lower[:-1] + upper[:-1], dtype=float)
+    upper = half(unique[::-1])
+    return lower[:-1] + upper[:-1]
 
 
-def _point_in_convex_polygon(point, polygon, tolerance):
-    if len(polygon) < 3:
-        return any(_point_on_segment(point, polygon[index], polygon[(index + 1) % len(polygon)],
-                                     tolerance)
-                   for index in range(len(polygon)))
-    sign = []
-    for index in range(len(polygon)):
-        value = float(_cross_2d(
-            polygon[(index + 1) % len(polygon)] - polygon[index],
-            point - polygon[index]))
-        if abs(value) > tolerance:
-            sign.append(np.sign(value))
-    return not sign or all(value == sign[0] for value in sign)
-
-
-def _point_strictly_in_convex_polygon(point, polygon, tolerance):
-    if len(polygon) < 3:
+def _proper_connector_hit(px, py, qx, qy, bx0, by0, bx1, by1, tolerance):
+    """Whether a blocker crosses the open interior of the connector (p, q)."""
+    fdx = qx - px
+    fdy = qy - py
+    sdx = bx1 - bx0
+    sdy = by1 - by0
+    denominator = fdx * sdy - fdy * sdx
+    scale = max(sqrt(fdx * fdx + fdy * fdy), sqrt(sdx * sdx + sdy * sdy), 1.0)
+    if abs(denominator) <= tolerance * scale:
+        # Collinear overlap blocks only when it occupies a nonzero open interval of the
+        # connector. Merely sharing a surface endpoint is not an obstruction.
+        if abs((bx0 - px) * fdy - (by0 - py) * fdx) > tolerance * scale:
+            return False
+        length2 = fdx * fdx + fdy * fdy
+        if length2 <= tolerance * tolerance:
+            return False
+        start = ((bx0 - px) * fdx + (by0 - py) * fdy) / length2
+        stop = ((bx1 - px) * fdx + (by1 - py) * fdy) / length2
+        low, high = (start, stop) if start <= stop else (stop, start)
+        return max(low, tolerance) < min(high, 1.0 - tolerance)
+    dx0 = bx0 - px
+    dy0 = by0 - py
+    first_parameter = (dx0 * sdy - dy0 * sdx) / denominator
+    if not tolerance < first_parameter < 1.0 - tolerance:
         return False
-    values = np.asarray([
-        _cross_2d(
-            polygon[(index + 1) % len(polygon)] - polygon[index],
-            point - polygon[index])
-        for index in range(len(polygon))], dtype=float)
-    return bool(
-        np.all(values > tolerance) or np.all(values < -tolerance))
+    second_parameter = (dx0 * fdy - dy0 * fdx) / denominator
+    return -tolerance <= second_parameter <= 1.0 + tolerance
 
 
-def _transverse_segment_intersection(first_start, first_stop, second_start, second_stop,
-                                     tolerance):
-    first_direction = first_stop - first_start
-    second_direction = second_stop - second_start
-    denominator = float(_cross_2d(first_direction, second_direction))
-    scale = max(
-        float(np.linalg.norm(first_direction)),
-        float(np.linalg.norm(second_direction)), 1.0)
+def _transverse_edge_hit(bx0, by0, bx1, by1, ex0, ey0, ex1, ey1, tolerance):
+    fdx = bx1 - bx0
+    fdy = by1 - by0
+    sdx = ex1 - ex0
+    sdy = ey1 - ey0
+    denominator = fdx * sdy - fdy * sdx
+    scale = max(sqrt(fdx * fdx + fdy * fdy), sqrt(sdx * sdx + sdy * sdy), 1.0)
     if abs(denominator) <= tolerance * scale:
         return False
-    delta = second_start - first_start
-    first_parameter = float(_cross_2d(delta, second_direction) / denominator)
-    second_parameter = float(_cross_2d(delta, first_direction) / denominator)
-    return bool(
-        tolerance < first_parameter < 1.0 - tolerance
-        and tolerance < second_parameter < 1.0 - tolerance)
-
-
-def _blocker_may_cross_connector_hull(hull, lower, upper, blocker_start, blocker_stop,
-                                      tolerance):
-    """Whether a blocker can cross any connector contained by a precomputed hull."""
-    blocker_lower = np.minimum(blocker_start, blocker_stop)
-    blocker_upper = np.maximum(blocker_start, blocker_stop)
-    if np.any(blocker_upper < lower) or np.any(blocker_lower > upper):
+    dx0 = ex0 - bx0
+    dy0 = ey0 - by0
+    first_parameter = (dx0 * sdy - dy0 * sdx) / denominator
+    if not tolerance < first_parameter < 1.0 - tolerance:
         return False
-    midpoint = 0.5 * (blocker_start + blocker_stop)
-    if (_point_strictly_in_convex_polygon(blocker_start, hull, tolerance)
-            or _point_strictly_in_convex_polygon(blocker_stop, hull, tolerance)
-            or _point_strictly_in_convex_polygon(midpoint, hull, tolerance)):
-        return True
-    return any(
-        _transverse_segment_intersection(
-            blocker_start, blocker_stop, hull[index], hull[(index + 1) % len(hull)], tolerance)
-        for index in range(len(hull)))
+    second_parameter = (dx0 * fdy - dy0 * fdx) / denominator
+    return tolerance < second_parameter < 1.0 - tolerance
 
 
-def _candidate_blockers(first, second, segments, excluded, tolerance, *, candidates=None,
-                        segment_lower=None, segment_upper=None):
+def _blocker_intersects_hull(hull, bx0, by0, bx1, by1, tolerance):
+    """Strict-interior or transverse-boundary test of one blocker against a hull."""
+    if len(hull) >= 3:
+        mx = 0.5 * (bx0 + bx1)
+        my = 0.5 * (by0 + by1)
+        for px, py in ((bx0, by0), (bx1, by1), (mx, my)):
+            positive = True
+            negative = True
+            for index in range(len(hull)):
+                ex0, ey0 = hull[index]
+                ex1, ey1 = hull[(index + 1) % len(hull)]
+                signed = (ex1 - ex0) * (py - ey0) - (ey1 - ey0) * (px - ex0)
+                if signed <= tolerance:
+                    positive = False
+                if signed >= -tolerance:
+                    negative = False
+                if not positive and not negative:
+                    break
+            if positive or negative:
+                return True
+    for index in range(len(hull)):
+        ex0, ey0 = hull[index]
+        ex1, ey1 = hull[(index + 1) % len(hull)]
+        if _transverse_edge_hit(bx0, by0, bx1, by1, ex0, ey0, ex1, ey1, tolerance):
+            return True
+    return False
+
+
+def _candidate_blockers(cell_first, cell_second, geometry, tolerance, candidates):
     """Return the blockers that can intersect the convex connector family.
 
     Descendant exchange cells inherit their parent's candidate set.  A blocker excluded by a
     parent hull cannot re-enter a child hull, which makes adaptive shadow refinement scale with
-    the local occluders instead of repeatedly scanning the entire surface.
+    the local occluders instead of repeatedly scanning the entire surface.  The full-surface
+    scan (``candidates is None``) is vectorized; inherited sets are small and stay scalar.
     """
-    hull = _convex_hull([first[0], first[1], second[0], second[1]])
+    fax, fay, fbx, fby = cell_first
+    sax, say, sbx, sby = cell_second
+    hull = _endpoint_hull(fax, fay, fbx, fby, sax, say, sbx, sby)
     if len(hull) == 0:
         return ()
-    lower = np.min(hull, axis=0) - tolerance
-    upper = np.max(hull, axis=0) + tolerance
-    if segment_lower is None:
-        segment_lower = np.min(segments, axis=1)
-    if segment_upper is None:
-        segment_upper = np.max(segments, axis=1)
+    return _segment_hull_candidates(hull, geometry, tolerance, candidates)
+
+
+def _segment_hull_candidates(hull, geometry, tolerance, candidates):
+    lower_x = min(point[0] for point in hull) - tolerance
+    lower_y = min(point[1] for point in hull) - tolerance
+    upper_x = max(point[0] for point in hull) + tolerance
+    upper_y = max(point[1] for point in hull) + tolerance
+    segments_f = geometry.segments_f
+    bounds_f = geometry.bounds_f
     if candidates is None:
-        candidate = np.arange(len(segments), dtype=int)
+        overlap = (
+            (geometry.segment_upper[:, 0] >= lower_x)
+            & (geometry.segment_upper[:, 1] >= lower_y)
+            & (geometry.segment_lower[:, 0] <= upper_x)
+            & (geometry.segment_lower[:, 1] <= upper_y))
+        overlap[geometry.excluded_first] = False
+        overlap[geometry.excluded_second] = False
+        pool = np.flatnonzero(overlap)
     else:
-        candidate = np.asarray(candidates, dtype=int)
-    if candidate.size:
-        overlap = np.all(
-            (segment_upper[candidate] >= lower)
-            & (segment_lower[candidate] <= upper), axis=1)
-        candidate = candidate[overlap]
-    if excluded:
-        candidate = candidate[
-            ~np.isin(candidate, np.fromiter(excluded, dtype=int))]
-    if candidate.size == 0:
-        return ()
-
-    # Test every candidate against the same connector hull in one vectorized batch.  This is the
-    # dominant production path: a trench contains O(N^2) surface pairs, so invoking Python once
-    # per possible blocker would turn an inexpensive geometry build into an accidental O(N^3)
-    # interpreter loop.
-    blocker_start = segments[candidate, 0]
-    blocker_stop = segments[candidate, 1]
-    point = np.stack((blocker_start, blocker_stop, 0.5 * (blocker_start + blocker_stop)), axis=1)
-    inside = np.zeros(candidate.size, dtype=bool)
-    if len(hull) >= 3:
-        edge_start = hull
-        edge_direction = np.roll(hull, -1, axis=0) - hull
-        offset = point[:, :, None, :] - edge_start[None, None, :, :]
-        signed = (
-            edge_direction[None, None, :, 0] * offset[..., 1]
-            - edge_direction[None, None, :, 1] * offset[..., 0])
-        point_inside = (
-            np.all(signed > tolerance, axis=2)
-            | np.all(signed < -tolerance, axis=2))
-        inside = np.any(point_inside, axis=1)
-
-    edge_start = hull
-    edge_direction = np.roll(hull, -1, axis=0) - hull
-    blocker_direction = blocker_stop - blocker_start
-    denominator = (
-        blocker_direction[:, None, 0] * edge_direction[None, :, 1]
-        - blocker_direction[:, None, 1] * edge_direction[None, :, 0])
-    scale = np.maximum(
-        np.maximum(
-            np.linalg.norm(blocker_direction, axis=1)[:, None],
-            np.linalg.norm(edge_direction, axis=1)[None, :]),
-        1.0)
-    transverse = np.abs(denominator) > tolerance * scale
-    safe_denominator = np.where(transverse, denominator, 1.0)
-    delta = edge_start[None, :, :] - blocker_start[:, None, :]
-    blocker_parameter = (
-        delta[..., 0] * edge_direction[None, :, 1]
-        - delta[..., 1] * edge_direction[None, :, 0]) / safe_denominator
-    edge_parameter = (
-        delta[..., 0] * blocker_direction[:, None, 1]
-        - delta[..., 1] * blocker_direction[:, None, 0]) / safe_denominator
-    crosses_boundary = np.any(
-        transverse
-        & (blocker_parameter > tolerance)
-        & (blocker_parameter < 1.0 - tolerance)
-        & (edge_parameter > tolerance)
-        & (edge_parameter < 1.0 - tolerance),
-        axis=1)
-    return tuple(map(int, candidate[inside | crosses_boundary]))
-
-
-def _connection_visible(start, stop, blockers, excluded, tolerance, candidates=None):
-    return _connection_blocker(
-        start, stop, blockers, excluded, tolerance, candidates) is None
-
-
-def _connection_blocker(start, stop, blockers, excluded, tolerance, candidates=None):
-    iterator = range(len(blockers)) if candidates is None else candidates
-    for index in iterator:
+        pool = candidates
+    result = []
+    for index in pool:
         index = int(index)
-        if index in excluded:
-            continue
-        blocker = blockers[index]
-        if _proper_segment_intersection(start, stop, blocker[0], blocker[1], tolerance):
-            return int(index)
-    return None
+        if candidates is not None:
+            if index == geometry.excluded_first or index == geometry.excluded_second:
+                continue
+            blx, bly, bux, buy = bounds_f[index]
+            if bux < lower_x or buy < lower_y or blx > upper_x or bly > upper_y:
+                continue
+        bx0, by0, bx1, by1 = segments_f[index]
+        if _blocker_intersects_hull(hull, bx0, by0, bx1, by1, tolerance):
+            result.append(index)
+    return tuple(result)
 
 
-def unobstructed_crossed_string_exchange_2d(first, second):
-    """Return the exact symmetric exchange length for two unobstructed line elements."""
-    first = np.asarray(first, dtype=float)
-    second = np.asarray(second, dtype=float)
-    if first.shape != (2, 2) or second.shape != (2, 2):
-        raise ValueError("crossed-string elements must each contain two 2-D endpoints")
-    distances = (
-        np.linalg.norm(first[0] - second[1])
-        + np.linalg.norm(first[1] - second[0])
-        - np.linalg.norm(first[0] - second[0])
-        - np.linalg.norm(first[1] - second[1]))
-    # Endpoint orientation changes only the sign of the named crossed/uncrossed strings.
-    return 0.5 * abs(float(distances))
-
-
-def _subdivide(segment, count):
-    parameter = np.linspace(0.0, 1.0, count + 1)
-    points = ((1.0 - parameter[:, None]) * segment[0]
-              + parameter[:, None] * segment[1])
-    return np.stack((points[:-1], points[1:]), axis=1)
-
-
-def _facing(first, second, first_normal, second_normal, tolerance):
-    direction = np.mean(second, axis=0) - np.mean(first, axis=0)
-    distance = float(np.linalg.norm(direction))
-    if distance <= tolerance:
-        return False
-    unit = direction / distance
-    return bool(
-        np.dot(first_normal, unit) > tolerance
-        and np.dot(second_normal, -unit) > tolerance)
-
-
-def _classify_exchange_cell(first, second, segments, excluded, tolerance, *, candidates=None,
-                            segment_lower=None, segment_upper=None):
-    possible = _candidate_blockers(
-        first, second, segments, excluded, tolerance, candidates=candidates,
-        segment_lower=segment_lower, segment_upper=segment_upper)
+def _classify_exchange_cell(cell_first, cell_second, geometry, tolerance, candidates):
+    possible = _candidate_blockers(cell_first, cell_second, geometry, tolerance, candidates)
     if not possible:
         return "visible", 1.0, possible
 
-    # Use interior Gauss abscissae. Endpoint strings have zero measure in the exchange
-    # integral and, in a closed polygon, lie exactly along adjacent opaque walls.
-    offset = np.sqrt(3.0 / 5.0) / 2.0
-    parameters = (0.5 - offset, 0.5, 0.5 + offset)
-    blockers = []
-    for first_parameter in parameters:
-        first_point = ((1.0 - first_parameter) * first[0]
-                       + first_parameter * first[1])
-        for second_parameter in parameters:
-            second_point = ((1.0 - second_parameter) * second[0]
-                            + second_parameter * second[1])
-            blockers.append(_connection_blocker(
-                first_point, second_point, segments, excluded, tolerance, possible))
-    if all(blocker is None for blocker in blockers):
+    fax, fay, fbx, fby = cell_first
+    sax, say, sbx, sby = cell_second
+    segments_f = geometry.segments_f
+    first_blocker = None
+    uniform = True
+    visible_count = 0
+    blocked_count = 0
+    for first_parameter in _GAUSS_PARAMETERS:
+        px = (1.0 - first_parameter) * fax + first_parameter * fbx
+        py = (1.0 - first_parameter) * fay + first_parameter * fby
+        for second_parameter in _GAUSS_PARAMETERS:
+            qx = (1.0 - second_parameter) * sax + second_parameter * sbx
+            qy = (1.0 - second_parameter) * say + second_parameter * sby
+            hit = None
+            for index in possible:
+                bx0, by0, bx1, by1 = segments_f[index]
+                if _proper_connector_hit(px, py, qx, qy, bx0, by0, bx1, by1, tolerance):
+                    hit = index
+                    break
+            if hit is None:
+                visible_count += 1
+                uniform = False
+            else:
+                blocked_count += 1
+                if first_blocker is None:
+                    if visible_count:
+                        uniform = False
+                    first_blocker = hit
+                elif hit != first_blocker:
+                    uniform = False
+    if blocked_count == 0:
         return "visible", 1.0, possible
-    if blockers[0] is not None and all(blocker == blockers[0] for blocker in blockers):
+    if uniform and first_blocker is not None and visible_count == 0:
         # A single straight opaque segment intercepts all extreme and interior connector
         # samples. On this convex connector cell it separates the two elements completely.
         return "blocked", 0.0, possible
-    return (
-        "mixed", float(sum(blocker is None for blocker in blockers) / len(blockers)),
-        possible)
+    return "mixed", float(visible_count / (visible_count + blocked_count)), possible
 
 
-def _adaptive_pair_exchange(segments, normals, first_index, second_index, *,
+def _facing_cells(cell_first, cell_second, first_normal, second_normal, tolerance):
+    fax, fay, fbx, fby = cell_first
+    sax, say, sbx, sby = cell_second
+    dx = 0.5 * (sax + sbx) - 0.5 * (fax + fbx)
+    dy = 0.5 * (say + sby) - 0.5 * (fay + fby)
+    distance = sqrt(dx * dx + dy * dy)
+    if distance <= tolerance:
+        return False
+    ux = dx / distance
+    uy = dy / distance
+    return (first_normal[0] * ux + first_normal[1] * uy > tolerance
+            and second_normal[0] * (-ux) + second_normal[1] * (-uy) > tolerance)
+
+
+def _crossed_string_cells(cell_first, cell_second):
+    fax, fay, fbx, fby = cell_first
+    sax, say, sbx, sby = cell_second
+    dx = fax - sbx
+    dy = fay - sby
+    total = sqrt(dx * dx + dy * dy)
+    dx = fbx - sax
+    dy = fby - say
+    total += sqrt(dx * dx + dy * dy)
+    dx = fax - sax
+    dy = fay - say
+    total -= sqrt(dx * dx + dy * dy)
+    dx = fbx - sbx
+    dy = fby - sby
+    total -= sqrt(dx * dx + dy * dy)
+    # Endpoint orientation changes only the sign of the named crossed/uncrossed strings.
+    return 0.5 * abs(total)
+
+
+def _split_cell(cell):
+    ax, ay, bx, by = cell
+    mx = (1.0 - 0.5) * ax + 0.5 * bx
+    my = (1.0 - 0.5) * ay + 0.5 * by
+    return ((ax, ay, mx, my), (mx, my, bx, by))
+
+
+class _PairGeometry:
+    """Shared per-build scalar geometry plus the vectorized prefilter arrays."""
+
+    __slots__ = ("segments_f", "bounds_f", "segment_lower", "segment_upper",
+                 "excluded_first", "excluded_second")
+
+    def __init__(self, segments, segment_lower, segment_upper):
+        self.segments_f = [
+            (float(item[0][0]), float(item[0][1]), float(item[1][0]), float(item[1][1]))
+            for item in segments]
+        self.bounds_f = [
+            (float(low[0]), float(low[1]), float(high[0]), float(high[1]))
+            for low, high in zip(segment_lower, segment_upper)]
+        self.segment_lower = segment_lower
+        self.segment_upper = segment_upper
+        self.excluded_first = -1
+        self.excluded_second = -1
+
+
+def _adaptive_pair_exchange(geometry, normals_f, first_index, second_index, *,
                             relative_tolerance, absolute_tolerance,
                             minimum_refinement_level, maximum_refinement_level,
-                            geometry_tolerance, segment_lower, segment_upper):
-    first = segments[first_index]
-    second = segments[second_index]
-    if not _facing(
-            first, second, normals[first_index], normals[second_index],
-            geometry_tolerance):
+                            geometry_tolerance):
+    first = geometry.segments_f[first_index]
+    second = geometry.segments_f[second_index]
+    first_normal = normals_f[first_index]
+    second_normal = normals_f[second_index]
+    if not _facing_cells(first, second, first_normal, second_normal, geometry_tolerance):
         return 0.0, 0.0, 0
-    unobstructed = unobstructed_crossed_string_exchange_2d(first, second)
+    unobstructed = _crossed_string_cells(first, second)
     if unobstructed <= absolute_tolerance:
         return unobstructed, 0.0, 0
 
-    excluded = {first_index, second_index}
+    geometry.excluded_first = first_index
+    geometry.excluded_second = second_index
     status, visible_fraction, possible = _classify_exchange_cell(
-        first, second, segments, excluded, geometry_tolerance,
-        segment_lower=segment_lower, segment_upper=segment_upper)
+        first, second, geometry, geometry_tolerance, None)
     if status == "visible":
         return unobstructed, 0.0, 0
     if status == "blocked" and minimum_refinement_level == 0:
@@ -361,24 +352,22 @@ def _adaptive_pair_exchange(segments, normals, first_index, second_index, *,
             raise RuntimeError(
                 "deterministic line exchange did not close its shadow-boundary error budget; "
                 f"pair=({first_index},{second_index}), unresolved={unresolved + cell_exchange:.6g}")
-        first_children = _subdivide(first_cell, 2)
-        second_children = _subdivide(second_cell, 2)
+        first_children = _split_cell(first_cell)
+        second_children = _split_cell(second_cell)
         child_depth = depth + 1
         maximum_used = max(maximum_used, child_depth)
         for first_child in first_children:
             for second_child in second_children:
-                if not _facing(
-                        first_child, second_child,
-                        normals[first_index], normals[second_index], geometry_tolerance):
+                if not _facing_cells(
+                        first_child, second_child, first_normal, second_normal,
+                        geometry_tolerance):
                     continue
-                child_exchange = unobstructed_crossed_string_exchange_2d(
-                    first_child, second_child)
+                child_exchange = _crossed_string_cells(first_child, second_child)
                 if child_exchange <= 0.0:
                     continue
                 child_status, child_fraction, child_candidates = _classify_exchange_cell(
-                    first_child, second_child, segments, excluded, geometry_tolerance,
-                    candidates=cell_candidates, segment_lower=segment_lower,
-                    segment_upper=segment_upper)
+                    first_child, second_child, geometry, geometry_tolerance,
+                    cell_candidates)
                 if child_status == "visible":
                     estimate += child_exchange
                 elif child_status == "blocked" and child_depth >= minimum_refinement_level:
@@ -391,6 +380,268 @@ def _adaptive_pair_exchange(segments, normals, first_index, second_index, *,
                         -child_exchange, serial, first_child, second_child,
                         child_depth, child_fraction, child_status, child_candidates))
     return float(estimate), float(max(unresolved, 0.0)), int(maximum_used)
+
+
+def _point_segment_exchange(px, py, source_normal, target, target_normal, blockers_f,
+                            tolerance):
+    """Exact per-source-point exchange factor to the visible parts of the target segment.
+
+    Every visibility transition along the target parameter is a projective image of a
+    blocker endpoint (or a facing-clip root), so the parameter axis is cut at those points
+    and each elementary interval is classified once, at its midpoint, by the authoritative
+    connector predicate.  Visible intervals contribute the exact two-dimensional
+    point-to-segment factor 0.5 * |sin(theta_hi) - sin(theta_lo)|.
+    """
+    tax, tay, tbx, tby = target
+    dbx = tbx - tax
+    dby = tby - tay
+    target_length = sqrt(dbx * dbx + dby * dby)
+    if abs(dbx * (py - tay) - dby * (px - tax)) <= tolerance * target_length:
+        return 0.0
+    npx, npy = source_normal
+    ntx, nty = target_normal
+    cuts = [0.0, 1.0]
+    # Facing clips are linear in the target parameter.
+    for constant, slope in (
+            (npx * (tax - px) + npy * (tay - py), npx * dbx + npy * dby),
+            (ntx * (px - tax) + nty * (py - tay), -(ntx * dbx + nty * dby))):
+        if slope != 0.0:
+            root = -constant / slope
+            if 0.0 < root < 1.0:
+                cuts.append(root)
+    rx = tax - px
+    ry = tay - py
+    for bx0, by0, bx1, by1 in blockers_f:
+        for ex, ey in ((bx0, by0), (bx1, by1)):
+            dx = ex - px
+            dy = ey - py
+            denominator = dx * dby - dy * dbx
+            if denominator == 0.0:
+                continue
+            forward = (rx * dby - ry * dbx) / denominator
+            if forward <= 0.0:
+                continue
+            root = (rx * dy - ry * dx) / denominator
+            if 0.0 < root < 1.0:
+                cuts.append(root)
+    cuts.sort()
+    factor = 0.0
+    for index in range(len(cuts) - 1):
+        low = cuts[index]
+        high = cuts[index + 1]
+        if high - low <= 1.0e-14:
+            continue
+        middle = 0.5 * (low + high)
+        qx = tax + middle * dbx
+        qy = tay + middle * dby
+        dx = qx - px
+        dy = qy - py
+        if npx * dx + npy * dy <= 0.0:
+            continue
+        if ntx * (px - qx) + nty * (py - qy) <= 0.0:
+            continue
+        blocked = False
+        for blocker in blockers_f:
+            if _proper_connector_hit(
+                    px, py, qx, qy, blocker[0], blocker[1], blocker[2], blocker[3],
+                    tolerance):
+                blocked = True
+                break
+        if blocked:
+            continue
+        lx = tax + low * dbx - px
+        ly = tay + low * dby - py
+        hx = tax + high * dbx - px
+        hy = tay + high * dby - py
+        sine_low = (npx * ly - npy * lx) / sqrt(lx * lx + ly * ly)
+        sine_high = (npx * hy - npy * hx) / sqrt(hx * hx + hy * hy)
+        factor += 0.5 * abs(sine_high - sine_low)
+    return factor
+
+
+def _panel_events(first, second, first_normal, second_normal, blockers_f):
+    """Source parameters where the target visibility-interval structure can change.
+
+    Interval births and deaths happen exactly when the source point becomes collinear with
+    a blocker endpoint and a target endpoint, or when a facing clip crosses a target
+    endpoint; each such condition is linear in the source parameter.
+    """
+    fax, fay, fbx, fby = first
+    dax = fbx - fax
+    day = fby - fay
+    sax, say, sbx, sby = second
+    npx, npy = first_normal
+    ntx, nty = second_normal
+    events = []
+
+    def add_root(constant, slope):
+        if slope != 0.0:
+            root = -constant / slope
+            if 0.0 < root < 1.0:
+                events.append(root)
+
+    for qx, qy in ((sax, say), (sbx, sby)):
+        # cross(e - p(s), q - p(s)) = 0 is linear in s for every blocker endpoint e.
+        for blocker in blockers_f:
+            for ex, ey in ((blocker[0], blocker[1]), (blocker[2], blocker[3])):
+                constant = (ex - fax) * (qy - fay) - (ey - fay) * (qx - fax)
+                slope = ((ey - qy) * dax - (ex - qx) * day)
+                add_root(constant, slope)
+        add_root(npx * (qx - fax) + npy * (qy - fay), -(npx * dax + npy * day))
+        add_root(ntx * (fax - qx) + nty * (fay - qy), ntx * dax + nty * day)
+    return sorted(set(events))
+
+
+def _analytic_pair_exchange(geometry, normals_f, first_index, second_index, *,
+                            relative_tolerance, absolute_tolerance,
+                            minimum_refinement_level, maximum_refinement_level,
+                            geometry_tolerance):
+    """Deterministic obstructed exchange: exact inner occlusion, adaptive outer quadrature.
+
+    The inner integral over the target is evaluated exactly per source point (projective
+    shadow intervals classified by the connector predicate).  Only the outer integral over
+    the source runs adaptive Simpson panels split at the analytic visibility events, so
+    the shadow boundary never has to be located by bisection.  Exhausting the quadrature
+    depth falls back to the conservative adaptive shadow refinement.
+    """
+    first = geometry.segments_f[first_index]
+    second = geometry.segments_f[second_index]
+    first_normal = normals_f[first_index]
+    second_normal = normals_f[second_index]
+    if not _facing_cells(first, second, first_normal, second_normal, geometry_tolerance):
+        return 0.0, 0.0, 0
+    unobstructed = _crossed_string_cells(first, second)
+    if unobstructed <= absolute_tolerance:
+        return unobstructed, 0.0, 0
+    geometry.excluded_first = first_index
+    geometry.excluded_second = second_index
+    candidates = _candidate_blockers(first, second, geometry, geometry_tolerance, None)
+    if not candidates:
+        return unobstructed, 0.0, 0
+    blockers_f = [geometry.segments_f[index] for index in candidates]
+
+    fax, fay, fbx, fby = first
+    dax = fbx - fax
+    day = fby - fay
+    source_length = sqrt(dax * dax + day * day)
+
+    def integrand(parameter):
+        return _point_segment_exchange(
+            fax + parameter * dax, fay + parameter * day, first_normal, second,
+            second_normal, blockers_f, geometry_tolerance)
+
+    threshold = absolute_tolerance + relative_tolerance * unobstructed
+    panels = [0.0] + _panel_events(
+        first, second, first_normal, second_normal, blockers_f) + [1.0]
+    panel_budget = threshold / (source_length * max(len(panels) - 1, 1))
+    total = 0.0
+    error_estimate = 0.0
+    deepest = 0
+    for index in range(len(panels) - 1):
+        low = panels[index]
+        high = panels[index + 1]
+        if high - low <= 1.0e-14:
+            continue
+        stack = [(low, high, integrand(low), integrand(0.5 * (low + high)),
+                  integrand(high), 0)]
+        while stack:
+            left, right, f_left, f_middle, f_right, depth = stack.pop()
+            width = right - left
+            coarse = width / 6.0 * (f_left + 4.0 * f_middle + f_right)
+            middle = 0.5 * (left + right)
+            f_lq = integrand(0.5 * (left + middle))
+            f_rq = integrand(0.5 * (middle + right))
+            fine = width / 12.0 * (
+                f_left + 4.0 * f_lq + 2.0 * f_middle + 4.0 * f_rq + f_right)
+            difference = abs(fine - coarse)
+            deepest = max(deepest, depth + 1)
+            if (difference <= panel_budget * width / max(high - low, 1.0e-300)
+                    and depth >= minimum_refinement_level):
+                total += fine
+                error_estimate += difference
+                continue
+            if depth >= maximum_refinement_level:
+                # The outer quadrature refused to certify; only the shadow-refinement
+                # bound is safe for this pair.
+                return _adaptive_pair_exchange(
+                    geometry, normals_f, first_index, second_index,
+                    relative_tolerance=relative_tolerance,
+                    absolute_tolerance=absolute_tolerance,
+                    minimum_refinement_level=minimum_refinement_level,
+                    maximum_refinement_level=maximum_refinement_level,
+                    geometry_tolerance=geometry_tolerance)
+            stack.append((left, middle, f_left, f_lq, f_middle, depth + 1))
+            stack.append((middle, right, f_middle, f_rq, f_right, depth + 1))
+    exchange = min(max(total * source_length, 0.0), unobstructed)
+    return float(exchange), float(error_estimate * source_length), int(deepest)
+
+
+_PAIR_METHODS = ("analytic_occlusion", "adaptive_refinement")
+
+
+def _pair_kernel(method):
+    return _analytic_pair_exchange if method == "analytic_occlusion" else _adaptive_pair_exchange
+
+
+def _pair_rows_task(payload):
+    """Compute the adaptive exchange for a batch of matrix rows in a worker process.
+
+    Each pair is computed independently by the identical serial kernel, so the assembled
+    matrix does not depend on the worker count or on scheduling order.
+    """
+    (segment, segment_lower, segment_upper, normals_f, rows, count, method,
+     relative_tolerance, absolute_tolerance, minimum, maximum,
+     geometry_tolerance) = payload
+    geometry = _PairGeometry(segment, segment_lower, segment_upper)
+    kernel = _pair_kernel(method)
+    results = []
+    for first in rows:
+        for second in range(first + 1, count):
+            results.append((first, second) + kernel(
+                geometry, normals_f, first, second,
+                relative_tolerance=relative_tolerance,
+                absolute_tolerance=absolute_tolerance,
+                minimum_refinement_level=minimum,
+                maximum_refinement_level=maximum,
+                geometry_tolerance=geometry_tolerance))
+    return results
+
+
+_PAIR_POOL = {}
+
+
+def _pair_pool(workers):
+    pool = _PAIR_POOL.get(workers)
+    if pool is None:
+        context = multiprocessing.get_context(
+            "fork" if sys.platform.startswith("linux") else "spawn")
+        pool = context.Pool(processes=workers)
+        _PAIR_POOL[workers] = pool
+    return pool
+
+
+def _configured_worker_count():
+    """Opt-in process parallelism for the pair loop; performance-only, output-identical."""
+    raw = os.environ.get("PETCH_DETERMINISTIC_EXCHANGE_WORKERS", "").strip()
+    if not raw:
+        return 1
+    workers = int(raw)
+    if workers < 1:
+        raise ValueError("PETCH_DETERMINISTIC_EXCHANGE_WORKERS must be a positive integer")
+    if multiprocessing.current_process().daemon:
+        return 1
+    return workers
+
+
+def unobstructed_crossed_string_exchange_2d(first, second):
+    """Return the exact symmetric exchange length for two unobstructed line elements."""
+    first = np.asarray(first, dtype=float)
+    second = np.asarray(second, dtype=float)
+    if first.shape != (2, 2) or second.shape != (2, 2):
+        raise ValueError("crossed-string elements must each contain two 2-D endpoints")
+    return _crossed_string_cells(
+        (float(first[0][0]), float(first[0][1]), float(first[1][0]), float(first[1][1])),
+        (float(second[0][0]), float(second[0][1]), float(second[1][0]), float(second[1][1])))
 
 
 @dataclass(frozen=True)
@@ -407,9 +658,12 @@ class DeterministicLineExchange2D:
     relative_tolerance: float
     absolute_tolerance: float
     maximum_refinement_level: int
+    method: str
     fingerprint: str
 
     def __post_init__(self):
+        if self.method not in _PAIR_METHODS:
+            raise ValueError("unknown deterministic line-exchange method")
         segments = _readonly(self.segments)
         normals = _readonly(self.gas_normals)
         exchange = _readonly(self.exchange_length)
@@ -459,10 +713,20 @@ class DeterministicLineExchange2D:
 
 
 def build_deterministic_line_exchange_2d(
-        segments, gas_normals, *, relative_tolerance=1.0e-5,
+        segments, gas_normals, *, method="analytic_occlusion", relative_tolerance=1.0e-5,
         absolute_tolerance=1.0e-12, minimum_refinement_level=2,
         maximum_refinement_level=18, geometry_tolerance=1.0e-12):
-    """Build a reciprocal crossed-string operator with deterministic blocking refinement."""
+    """Build a reciprocal crossed-string operator with deterministic blocking resolution.
+
+    ``analytic_occlusion`` resolves blocking exactly in the inner (target) integral via
+    projective shadow intervals and runs only a one-dimensional certified quadrature over
+    the source, falling back per pair to the conservative adaptive shadow refinement if
+    that quadrature cannot certify; ``adaptive_refinement`` uses the two-dimensional
+    shadow refinement for every pair and serves as the independent cross-check.  The
+    tolerances govern both the quadrature certification and the refinement.
+    """
+    if method not in _PAIR_METHODS:
+        raise ValueError("unknown deterministic line-exchange method")
     segment = np.asarray(segments, dtype=float)
     normal = np.asarray(gas_normals, dtype=float)
     count = len(segment)
@@ -482,23 +746,39 @@ def build_deterministic_line_exchange_2d(
     normal = normal / normal_length[:, None]
     segment_lower = np.min(segment, axis=1)
     segment_upper = np.max(segment, axis=1)
+    geometry = _PairGeometry(segment, segment_lower, segment_upper)
+    normals_f = [(float(item[0]), float(item[1])) for item in normal]
 
     exchange = np.zeros((count, count), dtype=float)
     level_used = np.zeros((count, count), dtype=int)
     error = np.zeros((count, count), dtype=float)
-    for first in range(count):
-        for second in range(first + 1, count):
-            current, uncertainty, level = _adaptive_pair_exchange(
-                segment, normal, first, second,
-                relative_tolerance=relative_tolerance,
-                absolute_tolerance=absolute_tolerance,
-                minimum_refinement_level=minimum,
-                maximum_refinement_level=maximum,
-                geometry_tolerance=geometry_tolerance,
-                segment_lower=segment_lower, segment_upper=segment_upper)
-            exchange[first, second] = exchange[second, first] = current
-            level_used[first, second] = level_used[second, first] = level
-            error[first, second] = error[second, first] = uncertainty
+    workers = _configured_worker_count()
+    if workers > 1 and count >= 64:
+        # Interleaved row batches balance the triangular pair workload across processes.
+        batches = [range(start, count, 4 * workers) for start in range(4 * workers)]
+        payloads = [(
+            segment, segment_lower, segment_upper, normals_f, tuple(rows), count, method,
+            relative_tolerance, absolute_tolerance, minimum, maximum,
+            geometry_tolerance) for rows in batches if len(rows)]
+        for results in _pair_pool(workers).map(_pair_rows_task, payloads):
+            for first, second, current, uncertainty, level in results:
+                exchange[first, second] = exchange[second, first] = current
+                level_used[first, second] = level_used[second, first] = level
+                error[first, second] = error[second, first] = uncertainty
+    else:
+        kernel = _pair_kernel(method)
+        for first in range(count):
+            for second in range(first + 1, count):
+                current, uncertainty, level = kernel(
+                    geometry, normals_f, first, second,
+                    relative_tolerance=relative_tolerance,
+                    absolute_tolerance=absolute_tolerance,
+                    minimum_refinement_level=minimum,
+                    maximum_refinement_level=maximum,
+                    geometry_tolerance=geometry_tolerance)
+                exchange[first, second] = exchange[second, first] = current
+                level_used[first, second] = level_used[second, first] = level
+                error[first, second] = error[second, first] = uncertainty
 
     transfer = exchange / length[:, None]
     outgoing = np.sum(transfer, axis=1)
@@ -515,7 +795,8 @@ def build_deterministic_line_exchange_2d(
     escape += 1.0 - row_total
 
     digest = sha256()
-    digest.update(b"petch.deterministic-line-exchange-2d.v1\0")
+    digest.update(b"petch.deterministic-line-exchange-2d.v2\0")
+    digest.update(method.encode("ascii") + b"\0")
     for name, value, dtype in (
             ("segments", segment, "<f8"), ("gas_normals", normal, "<f8"),
             ("exchange_length", exchange, "<f8"),
@@ -532,4 +813,5 @@ def build_deterministic_line_exchange_2d(
         transfer_fraction=transfer, escape_fraction=escape,
         refinement_level=level_used, estimated_absolute_error=error,
         relative_tolerance=relative_tolerance, absolute_tolerance=absolute_tolerance,
-        maximum_refinement_level=maximum, fingerprint=digest.hexdigest())
+        maximum_refinement_level=maximum, method=method,
+        fingerprint=digest.hexdigest())

@@ -1629,6 +1629,7 @@ def _apply_diffuse_neutral_transport(
         deterministic_allowed = {
             "extrusion_axis", "extrusion_length", "geometry_tolerance",
             "normal_tolerance", "area_relative_tolerance",
+            "exchange_method",
             "exchange_relative_tolerance", "exchange_absolute_tolerance",
             "minimum_refinement_level", "maximum_refinement_level",
             "field_relative_tolerance", "field_absolute_tolerance",

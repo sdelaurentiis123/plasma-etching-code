@@ -778,6 +778,11 @@ def run(args):
                 "domain_size": realized_domain,
                 "relative_tolerance": float(args.radiosity_tolerance),
                 "maximum_iterations": int(args.radiosity_max_iterations),
+                "deterministic_extruded_options": {
+                    "exchange_method": str(args.exchange_method),
+                    "exchange_relative_tolerance": float(
+                        args.exchange_relative_tolerance),
+                },
             }
         else:
             radiosity = {
@@ -1113,6 +1118,18 @@ def parse_args():
         "--radiosity-backend", default="scrambled_qmc_3d",
         choices=("scrambled_qmc_3d", "deterministic_extruded_2d"))
     parser.add_argument("--radiosity-tolerance", type=float, default=1e-12)
+    parser.add_argument(
+        "--exchange-method", default="analytic_occlusion",
+        choices=("analytic_occlusion", "adaptive_refinement"),
+        help="deterministic extruded exchange construction: exact projective-interval "
+             "occlusion with certified outer quadrature (per-pair fallback to adaptive "
+             "refinement), or refinement everywhere (cross-check mode); recorded in the "
+             "operator fingerprint")
+    parser.add_argument(
+        "--exchange-relative-tolerance", type=float, default=1.0e-5,
+        help="declared per-pair shadow-refinement budget for adaptive-refinement and "
+             "taut-string fallback pairs; recorded in the operator fingerprint and the "
+             "per-pair estimated_absolute_error receipt")
     parser.add_argument("--radiosity-max-iterations", type=int, default=2000)
     parser.add_argument("--seed", type=int, default=241)
     parser.add_argument("--max-wall-s", type=float, default=900.0)

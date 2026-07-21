@@ -204,7 +204,8 @@ class ExtrudedTriangleExchange3D:
 def build_extruded_triangle_exchange_3d(
         vertices, faces, gas_normals, *, extrusion_axis=1, extrusion_length=None,
         geometry_tolerance=None, normal_tolerance=2.0e-6,
-        area_relative_tolerance=2.0e-6, exchange_relative_tolerance=1.0e-5,
+        area_relative_tolerance=2.0e-6, exchange_method="analytic_occlusion",
+        exchange_relative_tolerance=1.0e-5,
         exchange_absolute_tolerance=1.0e-12,
         minimum_refinement_level=2, maximum_refinement_level=18):
     """Construct deterministic face-level exchange for an exactly extruded triangle mesh."""
@@ -311,6 +312,7 @@ def build_extruded_triangle_exchange_3d(
 
     line_exchange = build_deterministic_line_exchange_2d(
         group_segment, group_normal,
+        method=exchange_method,
         relative_tolerance=exchange_relative_tolerance,
         absolute_tolerance=exchange_absolute_tolerance,
         minimum_refinement_level=minimum_refinement_level,
