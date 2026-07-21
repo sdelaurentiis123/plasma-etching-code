@@ -282,3 +282,26 @@ the two completed current-operator endpoints:
 
 Erratum (2026-07-20, pre-freeze): the R2 yield truncation above misprints the product; the
 formula is authoritative and evaluates to 0.5657617924179401. No other change.
+
+## R2 outcome and successor protocol K24-PETCH-R3 (2026-07-20 late, held-out still sealed)
+
+**R2 outcome: failed calibration, reported as such.** The preregistered yield rescale produced
+depth 863.349 nm (+38.3) and mask opening 26.579 nm (-18.4): the fixed-fraction linearity
+assumption fails in this regime. Trajectory comparison of the two fixed-fraction endpoints shows
+a byproduct-feedback necking runaway diverging after t~45 s, plus +/-3 nm step-to-step jitter in
+the minimum-opening metric near the neck. Both are substantive findings about the system, not
+bookkeeping errors. No held-out observation was read.
+
+**K24-PETCH-R3, preregistered now.** Same engine, sealed data, targets, tolerances, categorical
+gates. Changes, declared before any further run:
+
+1. **Calibration by declared exploration:** a 3x3 grid around endpoint A, fraction in
+   {0.86, 0.88, 0.9004722559883319} x yield in {0.5586489665864749, 0.5622, 0.5657617924179401},
+   budget <= 9 base runs at 10 nm, executed in any order, no held-out access. The first pair
+   whose smoothed endpoint lies within +/-5 nm on BOTH observables freezes; if the grid is
+   exhausted without a pass, R3 ends as failed calibration and the finding is the deliverable.
+2. **Endpoint smoothing, declared:** base gate observables are the MEDIAN over the final five
+   accepted steps (counters the measured +/-3 nm neck jitter; applies to base gating only, and
+   identically to any future held-out scoring of the same observables).
+3. Freeze machinery: the R2 authority tooling rebound to protocol id K24-PETCH-R3 with the
+   winning grid pair; the derivation receipt records the full grid with all completed endpoints.
