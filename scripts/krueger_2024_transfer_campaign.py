@@ -82,8 +82,8 @@ def run(args):
     numerics = freeze["authority_numerics"]
     amendment = freeze.get("protocol_amendment") or {}
     r110 = (
-        amendment.get("id") == "R1.10"
-        and freeze.get("protocol_id") == "K24-PETCH-R1.10"
+        amendment.get("id") == "R2"
+        and freeze.get("protocol_id") == "K24-PETCH-R2"
         and freeze.get("protocol_sha256") == _sha(ROOT / (
             "KRUEGER_2024_VALIDATION_PROTOCOL_2026-07-16.md"))
         and abs(float(amendment.get("authority_fidelity_dx_um", 0.0)) - 0.01) <= 1e-15)

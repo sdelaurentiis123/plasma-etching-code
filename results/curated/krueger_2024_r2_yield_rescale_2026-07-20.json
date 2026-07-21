@@ -1,0 +1,29 @@
+{
+  "base_target_table_sha256": "5d51d124a93e1f942a9b999649b8adcf217662967d9ea2a40089f72940992351",
+  "derivation": {
+    "cross_check_endpoint": {
+      "depth_over_yield_consistency": "1458.3 vs 1472.5 mesh-nm per unit yield (0.97%)",
+      "etch_depth_nm": 776.894,
+      "mask_opening_nm": 41.733,
+      "path": "krueger-base-corrected-10nm-c2ef382 audit",
+      "sha256": "17bd69aac5685dd909a2fbb1fd047776541d71efde3ee9392195739ea69abad8"
+    },
+    "fixed_fraction_endpoint": {
+      "etch_depth_nm": 814.628,
+      "mask_opening_nm": 41.836,
+      "path": "krueger-base-companion-10nm-2c8ed1a audit",
+      "sha256": "7fcdf96dd5493f9fa3df611d3c26572f282215df932ab25e018de14d01cd9927"
+    },
+    "formula": "yield = 0.5586489665864749 * 825 / 814.628"
+  },
+  "held_out_profile_data_read": false,
+  "proposal_sha256": "df8822147a80f81da4733bcdaca57fd8f1232147059d44ca7d783a939b48b5a8",
+  "proposed_configuration": {
+    "effective_mask_crosslinked_growth_fraction": 0.9004722559883319,
+    "oxide_etch_yield_scale": 0.5657617924179401
+  },
+  "protocol_id": "K24-PETCH-R2",
+  "protocol_sha256": "13cdd5b8289e62bd96594074092fde020cd41364a9355d85ce5b2745bc72359b",
+  "schema": "petch.krueger-2024.r2-yield-rescale.v1",
+  "scientific_status": "single preregistered yield rescale on the current operator; no parameter search and no held-out outcome access"
+}
