@@ -341,3 +341,24 @@ faceting yield-angle dependence). Adding any such closure is NEW PHYSICS and exi
 present preregistration: it requires its own declared protocol (K24-PETCH-R4) with the
 mechanism, its literature basis, and its calibration budget stated before further base runs.
 No held-out observation was read at any point in R1-R3.
+
+## Quadrature finding and successor protocol K24-PETCH-R4 (2026-07-21, held-out still sealed)
+
+**Finding that supersedes the R3 interpretation:** at the fixed R1.9 pair, refining the diffuse
+form-factor quadrature from 8 to 32 rays per face (same seed, same epoch 0a49b99) moves the
+endpoint from (41.84, 814.63) to (45.91, 794.90): the mask-opening deficit and the R3 scatter
+cloud were measured on a numerically unconverged operator whose coarse quadrature systematically
+over-drove neck closure. The two-parameter closure was never given a converged trial; the R3
+missing-mechanism interpretation is withdrawn pending converged-operator calibration.
+
+**K24-PETCH-R4, preregistered now.** Same physics, sealed data, targets, +/-5 nm tolerances,
+median-of-5 smoothing, categorical gates. Declared changes:
+
+1. **Operator numerics:** radiosity-rays = 32, conditional on a 32-vs-64 convergence check at
+   the R1.9 pair (both observables' 32-to-64 shift must be < 2.5 nm, half the tolerance;
+   otherwise 64 becomes the operator and the check repeats at 128).
+2. **Calibration budget:** <= 6 base runs at the converged ray count, driven by the committed
+   GP proposer or declared secant steps; first pair with both smoothed observables within
+   +/-5 nm freezes under the R2/R3 authority machinery rebound to K24-PETCH-R4.
+3. The rays=8 arms of the noise experiment (control and reseed) are documentation of the
+   unconverged operator's seed sensitivity and take no further part in calibration.
