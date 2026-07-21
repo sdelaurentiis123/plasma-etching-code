@@ -1495,7 +1495,7 @@ def trace_charged_surface_events_field_3d(
     geometric_areas = 0.5 * np.linalg.norm(np.cross(
         verts[faces[:, 1]] - verts[faces[:, 0]],
         verts[faces[:, 2]] - verts[faces[:, 0]]), axis=1)
-    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=0.0):
+    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=1e-11):
         raise ValueError("triangle areas must match the supplied mesh geometry")
     if (potential.ndim != 3 or min(potential.shape) < 2 or np.any(~np.isfinite(potential))
             or grid_origin.shape != (3,) or np.any(~np.isfinite(grid_origin))
@@ -2984,7 +2984,7 @@ def gather_boundary_state_ballistic_3d(
     geometric_areas = 0.5 * np.linalg.norm(np.cross(
         verts[faces[:, 1]] - verts[faces[:, 0]],
         verts[faces[:, 2]] - verts[faces[:, 0]]), axis=1)
-    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=0.0):
+    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=1e-11):
         raise ValueError("triangle areas must match the supplied mesh geometry")
     if not np.allclose(np.linalg.norm(normals, axis=1), 1.0, rtol=0.0, atol=2e-6):
         raise ValueError("gas normals must be unit length")
@@ -3365,7 +3365,7 @@ def trace_boundary_state_field_3d(
     edge_b = verts[faces[:, 2]] - verts[faces[:, 0]]
     triangle_cross = np.cross(edge_a, edge_b)
     geometric_areas = 0.5 * np.linalg.norm(triangle_cross, axis=1)
-    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=0.0):
+    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=1e-11):
         raise ValueError("triangle areas must match the supplied mesh geometry")
     if face_gas_normals is None:
         # Compatibility path for consistently oriented manufactured/legacy meshes. Production
@@ -3609,7 +3609,7 @@ def gather_boundary_state_field_adjoint_3d(
     geometric_areas = 0.5 * np.linalg.norm(np.cross(
         verts[faces[:, 1]] - verts[faces[:, 0]],
         verts[faces[:, 2]] - verts[faces[:, 0]]), axis=1)
-    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=0.0):
+    if not np.allclose(areas, geometric_areas, rtol=1e-7, atol=1e-11):
         raise ValueError("triangle areas must match the supplied mesh geometry")
     grid_maximum = grid_origin + (np.asarray(potential.shape) - 1) * grid_spacing
     tolerance = 1e-7 * max(float(np.max(grid_spacing)), 1.0)

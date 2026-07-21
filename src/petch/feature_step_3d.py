@@ -239,7 +239,11 @@ def _surface_gas_normals(verts, faces, centroids, geometry):
     """
     triangle = np.asarray(verts)[np.asarray(faces)]
     normal = np.cross(triangle[:, 1] - triangle[:, 0], triangle[:, 2] - triangle[:, 0])
-    normal /= np.linalg.norm(normal, axis=1, keepdims=True)
+    cross_magnitude = np.linalg.norm(normal, axis=1, keepdims=True)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        normal = normal / cross_magnitude
+
+    degenerate = ~np.isfinite(normal).all(axis=1)
 
     def trilinear_gradient(field, point):
         coordinate = np.asarray(point, dtype=float) / geometry.dx
@@ -273,6 +277,20 @@ def _surface_gas_normals(verts, faces, centroids, geometry):
 
     centroid = np.asarray(centroids, dtype=float)
     gradient = trilinear_gradient(geometry.phi, centroid)
+    gradient_norm = np.linalg.norm(gradient, axis=1)
+    if np.any(degenerate):
+        # An exactly collinear (cross-degenerate) retained facet has no geometric normal;
+        # the authority surface direction -grad(phi) at its centroid defines it, exactly as
+        # orientation is already authority-decided.  A degenerate facet at a level-set
+        # critical point still refuses.
+        unresolvable = degenerate & (
+            gradient_norm <= 64.0 * np.finfo(float).eps)
+        if np.any(unresolvable):
+            raise RuntimeError(
+                "surface normal is undefined for a degenerate facet at a level-set "
+                f"critical point for {int(np.count_nonzero(unresolvable))} faces")
+        normal[degenerate] = (
+            -gradient[degenerate] / gradient_norm[degenerate, None])
     directional_derivative = np.einsum("ij,ij->i", normal, gradient)
     gradient_scale = np.linalg.norm(gradient, axis=1)
     ambiguous = np.abs(directional_derivative) <= (
