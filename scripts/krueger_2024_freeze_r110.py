@@ -34,14 +34,14 @@ def _load_correction_derivation(path, endpoint_pair):
     payload = json.loads(path.read_text(encoding="utf-8"))
     _verify_embedded_sha256(payload, "proposal_sha256")
     proposed = payload.get("proposed_configuration", {})
-    if (payload.get("schema") != "petch.krueger-2024.r2-yield-rescale.v1"
+    if (payload.get("schema") != "petch.krueger-2024.r4-secant.v1"
             or payload.get("protocol_sha256") != _sha(PROTOCOL)
             or payload.get("held_out_profile_data_read") is not False
             or any(not np.isclose(float(proposed.get(name, np.nan)),
                                   endpoint_pair[name])
                    for name in PARAMETER_NAMES)):
         raise ValueError(
-            "10 nm endpoint is not bound to its R2 yield-rescale derivation")
+            "10 nm endpoint is not bound to its R4 secant derivation")
     return path, payload
 
 
@@ -51,8 +51,8 @@ def _load_r110_launch_manifest(path, endpoint_pair):
     _verify_embedded_sha256(payload, "launch_sha256")
     source = payload.get("source_epoch", {})
     operator = payload.get("numerical_operator", {})
-    if (payload.get("schema") != "petch.krueger-2024.r2-base-authority.v1"
-            or payload.get("protocol_id") != "K24-PETCH-R2"
+    if (payload.get("schema") != "petch.krueger-2024.r4-base-authority.v1"
+            or payload.get("protocol_id") != "K24-PETCH-R4"
             or payload.get("authority_candidate") is not True
             or payload.get("held_out_profile_data_read") is not False
             or payload.get("calibration_performed_by_this_launch") is not False
@@ -152,10 +152,10 @@ def freeze_r110(base_10nm_path, calibration_path, azimuth_path, charging_path, *
 
     payload = {
         "schema": "petch.krueger-2024.frozen-physics-reveal.v2",
-        "protocol_id": "K24-PETCH-R2",
+        "protocol_id": "K24-PETCH-R4",
         "protocol_sha256": _sha(PROTOCOL),
         "protocol_amendment": {
-            "id": "R2",
+            "id": "R4",
             "authority_fidelity_dx_um": 0.01,
             "five_nm_status": "post-hoc refinement confirmation pending",
             "parameter_note": (
