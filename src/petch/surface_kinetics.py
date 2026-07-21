@@ -1362,7 +1362,10 @@ class ReducedSiO2FluorocarbonMechanism:
             excursion = np.abs(raw_coverage_integral - coverage_integral) * np.abs(
                 transition)
             reconcile = clipped_face & (excursion <= 1e-4 * flux_scale)
-            deposited = np.where(reconcile, delta + removed, deposited)
+            into_deposited = reconcile & (delta + removed >= 0.0)
+            into_removed = reconcile & ~into_deposited & (deposited - delta >= 0.0)
+            deposited = np.where(into_deposited, delta + removed, deposited)
+            removed = np.where(into_removed, deposited - delta, removed)
         polymer_balance = delta - (deposited - removed)
         polymer_scale = np.maximum.reduce((
             np.abs(delta), np.abs(deposited), np.abs(removed), np.ones(shape)))
