@@ -182,3 +182,19 @@ def test_common_radiosity_adapter_preserves_particle_balance():
     assert solution.relative_balance_error < 1e-13
     assert solution.source_rate_s == pytest.approx(
         solution.reacted_rate_s + solution.escaped_rate_s, rel=2e-14)
+
+
+def test_near_closed_channel_keeps_escape_physical_and_rows_closed():
+    # Two long plates at close spacing: enclosed rows approach unit outgoing transfer;
+    # any roundoff excess must be removed proportionally, never as negative escape.
+    segments = np.array([
+        [[0.0, 0.0], [10.0, 0.0]],
+        [[0.0, 0.05], [10.0, 0.05]],
+    ])
+    normals = np.array([[0.0, 1.0], [0.0, -1.0]])
+    result = build_deterministic_line_exchange_2d(segments, normals)
+    assert np.all(result.escape_fraction >= 0.0)
+    assert np.allclose(
+        result.transfer_fraction.sum(axis=1) + result.escape_fraction, 1.0,
+        rtol=0.0, atol=5e-13)
+    assert result.transfer_fraction[0, 1] > 0.99

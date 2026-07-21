@@ -793,9 +793,21 @@ def build_deterministic_line_exchange_2d(
         raise RuntimeError(
             f"deterministic line exchange exceeds unit row closure on segment {worst}")
     escape = np.maximum(1.0 - outgoing, 0.0)
-    # Roundoff-scale closure excess is assigned to escape, never redistributed among receivers.
+    # Deep enclosed rows approach unit outgoing transfer; quadrature roundoff can push a
+    # row over 1 within the closure tolerance gated above, which would drive its escape
+    # negative.  Remove the excess proportionally from that row's receivers (a bounded
+    # reciprocity concession of at most the closure tolerance; the symmetric
+    # exchange_length keeps the raw values).  Sub-unity deficits still go to escape,
+    # never redistributed.
+    excess = outgoing > 1.0
+    if np.any(excess):
+        transfer[excess] = transfer[excess] / outgoing[excess, None]
+        outgoing = np.sum(transfer, axis=1)
     row_total = outgoing + escape
     escape += 1.0 - row_total
+    # A rescaled row can still sum one ulp above unity; the closure check tolerates the
+    # ulp, a negative escape would not.
+    escape = np.maximum(escape, 0.0)
 
     digest = sha256()
     digest.update(b"petch.deterministic-line-exchange-2d.v2\0")

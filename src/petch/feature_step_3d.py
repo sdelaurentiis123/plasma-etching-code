@@ -33,7 +33,9 @@ from .neutral_radiosity_3d import (
     DiffuseNeutralNoSinkError,
     solve_diffuse_neutral_radiosity_3d,
 )
-from .extruded_exchange_3d import build_extruded_triangle_exchange_3d
+from .extruded_exchange_3d import (
+    build_extruded_triangle_exchange_3d, project_geometry_to_extrusion,
+)
 from .charged_surface_cascade_3d import (
     ChargedSurfaceCascade3DResult,
     apply_charged_surface_response_to_transport_3d,
@@ -2708,6 +2710,20 @@ def advance_feature_step_3d(
     output_geometry = FeatureGeometry3D(
         phi, output_material_id, geometry.dx, geometry.mesh_length_unit_m,
         geometry.mesh_origin_m, material_levelsets=material_levelsets)
+    extrusion_projection_deviation = None
+    if (neutral_radiosity_options is not None
+            and str(neutral_radiosity_options.get("form_factor_backend", ""))
+            == "deterministic_extruded_2d"):
+        # The declared extruded closure flattens roundoff-scale drift along the symmetry
+        # axis HERE, before the next mesh, state remap, and fingerprint are derived, so
+        # the surface state always lands on the projected mesh and the next step's strict
+        # extrusion certification never meets accumulated float noise.  Genuinely
+        # three-dimensional variation still refuses inside the projector.
+        projection_options = dict(
+            neutral_radiosity_options.get("deterministic_extruded_options", {}) or {})
+        output_geometry, extrusion_projection_deviation = project_geometry_to_extrusion(
+            output_geometry,
+            extrusion_axis=int(projection_options.get("extrusion_axis", 1)))
     (next_verts, next_faces, next_centroids, next_areas,
      next_face_material) = _extract_uniform_surface_arrays(output_geometry)
     next_active_face = np.where(np.isin(next_face_material, etchable))[0]
@@ -2812,6 +2828,7 @@ def advance_feature_step_3d(
         next_verts, next_faces, next_active_face, next_face_material, output_geometry)
     remap_diagnostics = dict(
         remap_diagnostics, old_topology=old_topology, new_topology=next_topology,
+        extrusion_projection_deviation_mesh_units=extrusion_projection_deviation,
         topology_method=topology_method,
         old_mesh_topology=old_mesh_topology, new_mesh_topology=next_mesh_topology,
         next_active_face_count=int(next_active_face.size),

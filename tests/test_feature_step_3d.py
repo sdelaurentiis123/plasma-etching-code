@@ -1280,6 +1280,54 @@ def test_feature_step_routes_exactly_extruded_radiosity_through_common_engine():
     assert "deterministic_extruded_2d" in result.transport.transport_model
 
 
+def test_extruded_backend_projects_axis_drift_inside_the_step_chain():
+    # Sub-tolerance y-noise on the entry state must be flattened by the in-step
+    # projection so the result geometry is exactly extruded, the surface state lands on
+    # the projected mesh, and the next step accepts the fingerprint chain unchanged.
+    dx = 0.25
+    shape = (4, 4, 8)
+    z = np.arange(shape[2]) * dx
+    phi = np.broadcast_to(0.95 - z, shape).copy()
+    rng = np.random.default_rng(5)
+    phi += 1e-8 * rng.standard_normal(shape)
+    geometry = FeatureGeometry3D(phi, np.where(phi > 0.0, 1, 0), dx, 1e-6)
+    options = {
+        "form_factor_backend": "deterministic_extruded_2d",
+        "periodic_lateral": True,
+        "deterministic_extruded_options": {
+            "extrusion_axis": 1,
+            "field_relative_tolerance": 1e-8,
+            "field_absolute_tolerance": 1e-9,
+        },
+    }
+    role = {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"}
+    first = advance_feature_step_3d(
+        geometry, _boundary(), role, _mechanism(),
+        etchable_material_ids=(1,), duration_s=1e-4,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        n_position=1, seed=3, reinitialize=True, reinitialization_method="cr2",
+        transport_device="cpu", ballistic_transport="face_gather",
+        ballistic_face_quadrature_points=3, ballistic_periodic_lateral=True,
+        profile_periodic_lateral=True, neutral_radiosity_options=options)
+    deviation = first.state_remap_diagnostics[
+        "extrusion_projection_deviation_mesh_units"]
+    assert deviation is not None and 0.0 < deviation < 1e-6
+    result_phi = np.asarray(first.geometry.phi)
+    assert np.max(np.abs(result_phi - result_phi[:, :1, :])) == 0.0
+    second = advance_feature_step_3d(
+        first.geometry, _boundary(), role, _mechanism(),
+        etchable_material_ids=(1,), duration_s=1e-4,
+        source_bounds=(0.0, 0.75, 0.0, 0.75), source_z=1.75,
+        surface_state=first.next_surface_state,
+        surface_state_mesh_fingerprint=first.next_surface_state_mesh_fingerprint,
+        n_position=1, seed=4, reinitialize=True, reinitialization_method="cr2",
+        transport_device="cpu", ballistic_transport="face_gather",
+        ballistic_face_quadrature_points=3, ballistic_periodic_lateral=True,
+        profile_periodic_lateral=True, neutral_radiosity_options=options)
+    second_phi = np.asarray(second.geometry.phi)
+    assert np.max(np.abs(second_phi - second_phi[:, :1, :])) == 0.0
+
+
 def test_deterministic_extruded_radiosity_refuses_sampling_controls():
     geometry, _ = _plane_geometry()
     with pytest.raises(ValueError, match="does not accept sampling controls"):

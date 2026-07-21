@@ -33,7 +33,6 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
 from petch.amorphous_carbon_mask import build_krueger_2024_material_router_3d
-from petch.extruded_exchange_3d import project_geometry_to_extrusion
 from petch.feature_step_3d import (
     FeatureGeometry3D,
     SurfaceTopologyChangeError,
@@ -783,6 +782,9 @@ def run(args):
                     "exchange_method": str(args.exchange_method),
                     "exchange_relative_tolerance": float(
                         args.exchange_relative_tolerance),
+                    # Headroom so a rare grazing fallback pair cannot exhaust the shared
+                    # refinement budget at depth; declared and fingerprinted.
+                    "maximum_refinement_level": 24,
                 },
             }
         else:
@@ -812,13 +814,6 @@ def run(args):
             0.0 if benchmark_only else min(
                 next_step_duration, float(args.duration_s) - physical_time))
         step_started = perf_counter()
-        if args.radiosity_backend == "deterministic_extruded_2d":
-            # Declared extruded closure: flatten roundoff-scale drift along the symmetry
-            # axis before each step so the strict certification never meets accumulated
-            # float noise; genuinely 3-D variation still refuses inside the projector.
-            geometry, projection_deviation = project_geometry_to_extrusion(geometry)
-            maximum_projection_deviation = max(
-                maximum_projection_deviation, float(projection_deviation))
         rejected_trials = []
         while True:
             try:
@@ -914,6 +909,11 @@ def run(args):
         geometry = result.geometry
         state = result.next_surface_state
         fingerprint = result.next_surface_state_mesh_fingerprint
+        step_projection = result.state_remap_diagnostics.get(
+            "extrusion_projection_deviation_mesh_units")
+        if step_projection is not None:
+            maximum_projection_deviation = max(
+                maximum_projection_deviation, float(step_projection))
         if not benchmark_only:
             physical_time += step_duration
         accepted_step += 1
