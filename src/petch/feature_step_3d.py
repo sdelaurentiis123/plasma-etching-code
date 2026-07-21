@@ -1707,14 +1707,17 @@ def _apply_diffuse_neutral_transport(
                 direct_for_solve = np.asarray(direct, dtype=float)
                 probability_for_solve = reaction_probability[name]
                 if deterministic_exchange is not None:
-                    direct_group = deterministic_exchange.certify_face_field(
-                        direct_for_solve,
-                        relative_tolerance=deterministic_field_relative_tolerance,
-                        absolute_tolerance=deterministic_field_absolute_tolerance)
-                    probability_group = deterministic_exchange.certify_face_field(
-                        probability_for_solve,
-                        relative_tolerance=deterministic_field_relative_tolerance,
-                        absolute_tolerance=deterministic_field_absolute_tolerance)
+                    # Declared extruded mean-field closure: strip variation up to the guard is
+                    # projected onto group means and receipted; beyond it, refuse (genuinely
+                    # three-dimensional state cannot use the reduced operator).
+                    direct_group, direct_variation = (
+                        deterministic_exchange.project_face_field(
+                            direct_for_solve, relative_guard=0.05))
+                    probability_group, probability_variation = (
+                        deterministic_exchange.project_face_field(
+                            probability_for_solve, relative_guard=0.05))
+                    factor_extruded_variation = max(
+                        direct_variation, probability_variation)
                     direct_for_solve = direct_group[
                         deterministic_exchange.face_group_index]
                     probability_for_solve = probability_group[
@@ -1724,6 +1727,9 @@ def _apply_diffuse_neutral_transport(
                     form_factor_rays_per_face=int(rays_per_face),
                     form_factor_refinement_count=len(refinement),
                     form_factor_refinement=tuple(refinement))
+                if deterministic_exchange is not None:
+                    factor_diagnostics["extruded_projection_max_relative_variation"] = (
+                        factor_extruded_variation)
                 if visibility_receipt is not None:
                     factor_diagnostics.update(
                         visibility_mode=visibility_receipt.visibility_mode,

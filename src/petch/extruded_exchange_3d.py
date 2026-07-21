@@ -163,6 +163,43 @@ class ExtrudedTriangleExchange3D:
                 f"difference={difference[worst]:.6g}, tolerance={tolerance[worst]:.6g}")
         return mean
 
+    def project_face_field(self, face_field, *, relative_guard):
+        """Declared mean-field closure: project onto strip means, refuse only past a guard.
+
+        The strict certification treats any strip-mean disagreement as a refusal.  Under the
+        declared extruded mean-field mode, sub-guard variation along the extrusion axis (from
+        remap partitioning and ballistic round-off) is PROJECTED onto the area-weighted group
+        mean -- the closure the reduced operator represents -- and the maximum relative
+        variation is returned for the receipt.  Genuinely three-dimensional variation beyond
+        the guard still refuses.
+        """
+        value = np.asarray(face_field, dtype=float)
+        if not np.all(np.isfinite(value)) or not 0.0 < float(relative_guard) <= 1.0:
+            raise ValueError("invalid mean-field projection inputs")
+        mean = self.area_weighted_group_mean(value)
+        joint = self.face_group_index * self.strip_count + self.face_strip_index
+        joint_count = self.group_count * self.strip_count
+        strip_area = np.bincount(joint, weights=self.face_area, minlength=joint_count)
+        strip_integral = np.bincount(
+            joint, weights=self.face_area * value, minlength=joint_count)
+        populated = strip_area > 0.0
+        strip_mean = np.zeros(joint_count)
+        strip_mean[populated] = strip_integral[populated] / strip_area[populated]
+        group_mean = np.repeat(mean, self.strip_count)
+        scale = np.maximum(np.abs(group_mean), np.max(np.abs(value), initial=0.0) * 1e-12)
+        relative = np.zeros(joint_count)
+        relative[populated] = np.abs(strip_mean - group_mean)[populated] / np.maximum(
+            scale[populated], 1e-300)
+        maximum_relative = float(relative.max(initial=0.0))
+        if maximum_relative > float(relative_guard):
+            worst = int(np.argmax(relative))
+            group, strip = divmod(worst, self.strip_count)
+            raise ValueError(
+                "face field variation exceeds the mean-field projection guard; "
+                f"group={group}, strip={strip}, relative={maximum_relative:.6g}, "
+                f"guard={float(relative_guard):.6g}")
+        return mean, maximum_relative
+
 
 def build_extruded_triangle_exchange_3d(
         vertices, faces, gas_normals, *, extrusion_axis=1, extrusion_length=None,
