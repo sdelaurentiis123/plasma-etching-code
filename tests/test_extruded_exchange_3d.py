@@ -134,3 +134,33 @@ def test_triangle_partition_variation_is_averaged_without_hiding_strip_variation
     mean = result.certify_face_field(
         value, relative_tolerance=0.0, absolute_tolerance=1e-14)
     assert mean[0] == pytest.approx(2.0, abs=1e-15)
+
+
+def test_geometry_extrusion_projection_flattens_noise_and_guards_3d():
+    from petch.extruded_exchange_3d import project_geometry_to_extrusion
+    from petch.feature_geometry_state_3d import FeatureGeometry3D
+
+    x = np.arange(8) * 0.01
+    z = np.arange(10) * 0.01
+    phi0 = (0.05 - z)[None, None, :] + 0.0 * x[:, None, None]
+    phi = np.repeat(np.repeat(phi0, 3, axis=1), 8, axis=0)[:8, :3, :]
+    rng = np.random.default_rng(11)
+    noise = 1e-7 * rng.standard_normal(phi.shape)
+    noisy = phi + noise
+    levels = {1: noisy.copy()}
+    material = np.where(noisy >= 0.0, 1, 0)
+    geometry = FeatureGeometry3D(noisy, material, 0.01, 1e-6, material_levelsets=levels)
+    projected, deviation = project_geometry_to_extrusion(geometry)
+    assert 0.0 < deviation < 1e-6
+    projected_phi = np.asarray(projected.phi)
+    assert np.max(np.abs(projected_phi - projected_phi[:, :1, :])) == 0.0
+    union = np.asarray(projected.material_levelsets[1])
+    assert not np.any((union >= 0.0) != (projected_phi >= 0.0))
+
+    coarse = phi + 0.5 * 0.01 * np.sin(
+        np.arange(3)[None, :, None] * 2.0)  # genuine 3-D variation
+    material3d = np.where(coarse >= 0.0, 1, 0)
+    geometry3d = FeatureGeometry3D(
+        coarse, material3d, 0.01, 1e-6, material_levelsets={1: coarse.copy()})
+    with pytest.raises(ValueError, match="exceeds the projection guard"):
+        project_geometry_to_extrusion(geometry3d)

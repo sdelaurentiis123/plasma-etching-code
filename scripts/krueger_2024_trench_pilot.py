@@ -33,6 +33,7 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
 from petch.amorphous_carbon_mask import build_krueger_2024_material_router_3d
+from petch.extruded_exchange_3d import project_geometry_to_extrusion
 from petch.feature_step_3d import (
     FeatureGeometry3D,
     SurfaceTopologyChangeError,
@@ -799,6 +800,7 @@ def run(args):
     run_started = perf_counter()
     status = "running"
     terminal_event = None
+    maximum_projection_deviation = 0.0
     while (
             accepted_step < start_step + 1 if benchmark_only
             else physical_time < float(args.duration_s)):
@@ -810,6 +812,13 @@ def run(args):
             0.0 if benchmark_only else min(
                 next_step_duration, float(args.duration_s) - physical_time))
         step_started = perf_counter()
+        if args.radiosity_backend == "deterministic_extruded_2d":
+            # Declared extruded closure: flatten roundoff-scale drift along the symmetry
+            # axis before each step so the strict certification never meets accumulated
+            # float noise; genuinely 3-D variation still refuses inside the projector.
+            geometry, projection_deviation = project_geometry_to_extrusion(geometry)
+            maximum_projection_deviation = max(
+                maximum_projection_deviation, float(projection_deviation))
         rejected_trials = []
         while True:
             try:
@@ -1008,6 +1017,7 @@ def run(args):
             "mechanism_provenance": mechanism.provenance,
             "git": _git_state(),
             "wall_time_s": elapsed,
+            "extrusion_projection_max_deviation_mesh_units": maximum_projection_deviation,
             "scientific_status": (
                 "calibrated development transfer only; the aggregate energetic ion mixture "
                 "is unresolved, 3-D ion azimuth uses the R1.5 axisymmetric closure certified "

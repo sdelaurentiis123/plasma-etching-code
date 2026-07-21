@@ -201,6 +201,69 @@ class ExtrudedTriangleExchange3D:
         return mean, maximum_relative
 
 
+def project_geometry_to_extrusion(geometry, *, extrusion_axis=1, guard_cells=0.01):
+    """Project geometry fields onto their extrusion-axis mean under a declared guard.
+
+    A numerically three-dimensional evolution of a declared extruded state accumulates
+    roundoff-scale variation along the symmetry axis; left alone it eventually trips the
+    strict extrusion certification.  Under the declared extruded mean-field closure the
+    correct state is the axis mean, exactly as face fields are projected onto strip
+    means.  Variation beyond ``guard_cells * dx`` is genuinely three-dimensional and
+    refuses instead of being silently flattened.  Returns the projected geometry and the
+    maximum absolute deviation (mesh units) as the receipt.
+    """
+    from .feature_geometry_state_3d import FeatureGeometry3D
+
+    axis = int(extrusion_axis)
+    guard = float(guard_cells) * float(geometry.dx)
+    if axis not in (0, 1, 2) or guard <= 0.0:
+        raise ValueError("invalid extrusion projection inputs")
+    phi = np.asarray(geometry.phi, dtype=float)
+
+    def axis_mean(field):
+        mean = field.mean(axis=axis, keepdims=True)
+        deviation = float(np.max(np.abs(field - mean)))
+        return np.broadcast_to(mean, field.shape).copy(), deviation
+
+    if geometry.material_levelsets is None:
+        projected_phi, deviation = axis_mean(phi)
+        levels = None
+        material = np.where(
+            projected_phi >= 0.0,
+            np.broadcast_to(
+                np.take(geometry.material_id, (0,), axis=axis), phi.shape).copy(),
+            0)
+    else:
+        projected_phi, deviation = axis_mean(phi)
+        levels = {}
+        for key, value in geometry.material_levelsets.items():
+            projected_level, level_deviation = axis_mean(np.asarray(value, dtype=float))
+            levels[int(key)] = projected_level
+            deviation = max(deviation, level_deviation)
+        # phi and the material union agree in sign pointwise, not in value; averaging
+        # them independently can flip marginal nodes whose column straddles zero.  There
+        # both means are bounded by the column spread, so adopting the union value
+        # restores the sign invariant with a noise-scale adjustment.
+        union = np.maximum.reduce(tuple(levels.values()))
+        mismatch = (union >= 0.0) != (projected_phi >= 0.0)
+        if np.any(mismatch):
+            deviation = max(deviation, float(np.max(
+                np.abs(union[mismatch] - projected_phi[mismatch]))))
+            projected_phi = np.where(mismatch, union, projected_phi)
+        ordered = sorted(levels)
+        stack = np.stack([levels[key] for key in ordered])
+        owner = np.asarray(ordered, dtype=int)[np.argmax(stack, axis=0)]
+        material = np.where(projected_phi >= 0.0, owner, 0)
+    if deviation > guard:
+        raise ValueError(
+            "geometry variation along the declared extrusion axis exceeds the "
+            f"projection guard; deviation={deviation:.6g}, guard={guard:.6g}")
+    projected = FeatureGeometry3D(
+        projected_phi, material, geometry.dx, geometry.mesh_length_unit_m,
+        mesh_origin_m=geometry.mesh_origin_m, material_levelsets=levels)
+    return projected, deviation
+
+
 def build_extruded_triangle_exchange_3d(
         vertices, faces, gas_normals, *, extrusion_axis=1, extrusion_length=None,
         geometry_tolerance=None, normal_tolerance=2.0e-6,
