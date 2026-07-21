@@ -164,3 +164,27 @@ def test_geometry_extrusion_projection_flattens_noise_and_guards_3d():
         coarse, material3d, 0.01, 1e-6, material_levelsets={1: coarse.copy()})
     with pytest.raises(ValueError, match="exceeds the projection guard"):
         project_geometry_to_extrusion(geometry3d)
+
+
+def test_field_projection_floors_shadowed_group_scale_but_guards_bright_groups():
+    segments, normals = _rectangle()
+    result = build_extruded_triangle_exchange_3d(
+        *_extrude_segments(segments, normals, y_planes=(0.0, 0.5, 1.0)),
+        extrusion_length=1.0)
+    value = np.full(result.face_count, 100.0)
+    member = np.flatnonzero(
+        (result.face_group_index == 0) & (result.face_strip_index == 0))
+    other = np.flatnonzero(
+        (result.face_group_index == 0) & (result.face_strip_index == 1))
+    assert member.size and other.size
+    # Deeply shadowed group: ~1e-4 of peak with 50% strip-to-strip spread passes under
+    # the floored scale (absolute noise is negligible against the field).
+    value[member] = 0.012
+    value[other] = 0.008
+    mean, variation = result.project_face_field(value, relative_guard=0.05)
+    assert variation < 0.05
+    # The same 50% spread at significant flux still refuses.
+    value[member] = 150.0
+    value[other] = 50.0
+    with pytest.raises(ValueError, match="mean-field projection guard"):
+        result.project_face_field(value, relative_guard=0.05)

@@ -163,7 +163,8 @@ class ExtrudedTriangleExchange3D:
                 f"difference={difference[worst]:.6g}, tolerance={tolerance[worst]:.6g}")
         return mean
 
-    def project_face_field(self, face_field, *, relative_guard):
+    def project_face_field(self, face_field, *, relative_guard,
+                           scale_floor_fraction=1.0e-3):
         """Declared mean-field closure: project onto strip means, refuse only past a guard.
 
         The strict certification treats any strip-mean disagreement as a refusal.  Under the
@@ -172,9 +173,16 @@ class ExtrudedTriangleExchange3D:
         mean -- the closure the reduced operator represents -- and the maximum relative
         variation is returned for the receipt.  Genuinely three-dimensional variation beyond
         the guard still refuses.
+
+        Variation is measured against ``max(|group mean|, scale_floor_fraction * peak)``:
+        deeply shadowed groups carry a vanishing share of the field (3.8e-4 of peak on the
+        step-100 Krueger section) where quadrature-scale absolute noise is a large fraction
+        of the group's own mean but physically negligible; the floor keeps the guard aimed
+        at three-dimensional structure in groups that actually influence the evolution.
         """
         value = np.asarray(face_field, dtype=float)
-        if not np.all(np.isfinite(value)) or not 0.0 < float(relative_guard) <= 1.0:
+        if (not np.all(np.isfinite(value)) or not 0.0 < float(relative_guard) <= 1.0
+                or not 0.0 < float(scale_floor_fraction) <= 1.0):
             raise ValueError("invalid mean-field projection inputs")
         mean = self.area_weighted_group_mean(value)
         joint = self.face_group_index * self.strip_count + self.face_strip_index
@@ -186,7 +194,9 @@ class ExtrudedTriangleExchange3D:
         strip_mean = np.zeros(joint_count)
         strip_mean[populated] = strip_integral[populated] / strip_area[populated]
         group_mean = np.repeat(mean, self.strip_count)
-        scale = np.maximum(np.abs(group_mean), np.max(np.abs(value), initial=0.0) * 1e-12)
+        scale = np.maximum(
+            np.abs(group_mean),
+            np.max(np.abs(value), initial=0.0) * float(scale_floor_fraction))
         relative = np.zeros(joint_count)
         relative[populated] = np.abs(strip_mean - group_mean)[populated] / np.maximum(
             scale[populated], 1e-300)
