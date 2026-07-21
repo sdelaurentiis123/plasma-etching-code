@@ -279,3 +279,6 @@ the two completed current-operator endpoints:
 3. One confirmation run at 10 nm decides: both observables within +/-5 nm -> freeze under the
    R1.10 authority machinery (rebound to protocol id K24-PETCH-R2) -> blind transfer. Any miss
    ends R2 as failed calibration with no further correction.
+
+Erratum (2026-07-20, pre-freeze): the R2 yield truncation above misprints the product; the
+formula is authoritative and evaluates to 0.5657617924179401. No other change.
