@@ -379,7 +379,10 @@ def _adaptive_pair_exchange(geometry, normals_f, first_index, second_index, *,
                     heapq.heappush(heap, (
                         -child_exchange, serial, first_child, second_child,
                         child_depth, child_fraction, child_status, child_candidates))
-    return float(estimate), float(max(unresolved, 0.0)), int(maximum_used)
+    # The heap bookkeeping subtracts parent estimates before adding children, so a
+    # fully-blocked pair can land at a cancellation-scale negative; the physical value
+    # is nonnegative by construction.
+    return float(max(estimate, 0.0)), float(max(unresolved, 0.0)), int(maximum_used)
 
 
 def _point_segment_exchange(px, py, source_normal, target, target_normal, blockers_f,
