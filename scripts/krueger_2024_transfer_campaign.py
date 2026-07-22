@@ -164,6 +164,22 @@ def run(args):
         str(numerics["surface_state_remap_backend"]),
         "--max-wall-s", str(args.max_wall_s),
     ]
+    if freeze.get("schema") == "petch.krueger-2024.frozen-physics-reveal.v3":
+        # The R5 authority is the deterministic extruded operator; running the sealed
+        # cases on any other backend would silently unfreeze the physics.
+        exchange = numerics.get("deterministic_exchange") or {}
+        if (numerics.get("radiosity_backend") != "deterministic_extruded_2d"
+                or exchange.get("exchange_method") != "analytic_occlusion"):
+            raise ValueError(
+                "v3 reveal does not declare the deterministic extruded operator")
+        common += [
+            "--radiosity-backend", "deterministic_extruded_2d",
+            "--exchange-method", str(exchange["exchange_method"]),
+            "--exchange-relative-tolerance",
+            str(exchange["exchange_relative_tolerance"]),
+            "--exchange-geometry-tolerance",
+            str(exchange["exchange_geometry_tolerance"]),
+        ]
     for case_name, case_args in _selected(args.case_set):
         output = output_root / case_name
         audit_path = output / "audit.json"
