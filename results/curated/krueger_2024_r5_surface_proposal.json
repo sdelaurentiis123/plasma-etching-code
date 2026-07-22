@@ -60,9 +60,9 @@
     }
   ],
   "method": "response_surface_max_margin_with_deterministic_preview",
-  "proposal_sha256": "81c0475b9554f7422ad9f5fb074fb44adb4571a2d320ebcc2d335063c4a918ee",
+  "proposal_sha256": "07d1ceac21ba58b5b0a90cd42dae3445eca0717d907785c58cb76db4f24914e0",
   "protocol_id": "K24-PETCH-R5",
-  "protocol_sha256": "f7cd00f7867e1d3bb886e397201f81d0428808ec179ceeeec7e1c70f966d2d30",
+  "protocol_sha256": "742d8182fc9c5cfc5939b18ebacf515cbf4ae7991d9107b5ea229e8d8e22144e",
   "schema": "petch.krueger-2024.r5-surface.v1",
   "surface_models": {
     "etch_depth_nm": {
