@@ -470,3 +470,24 @@ rerun is bit-identical). If no base-side point within the declared knob bounds p
 gates, R5 ends without a freeze and the fitted surface is recorded as the failure evidence.
 Base-side evaluations are unlimited under this protocol and touch no sealed observation;
 this note is appended before any such evaluation completes.
+
+## R5 outcome: calibration frozen (2026-07-21 night, held-out still sealed and unread)
+
+The freeze pre-flight exposed that all exploratory R5 runs had executed under the pilot's
+default remap/topology declarations (legacy_knn, refuse) rather than the declared authority
+operator (common_refinement, continue_gas_cavity); re-evaluating the working pair under the
+declared operator shifted the endpoint by (-3.8, -12.5) nm, confirming the remap backend as
+a physics-grade operator component (as this protocol has always held) and voiding the
+legacy-operator response surface as anything but search guidance. Under the declared
+operator, three base-side evaluations at fraction 0.8765 along the yield line
+(y = 0.582043 -> (40.145, 814.032); y = 0.5903 -> (41.284, 832.741); bracketing secant
+y = 0.586849 -> (43.550, 826.297)) produced a bracketed interpolation whose endpoint lies
+inside both gates with margins 3.55 nm (opening) and 3.70 nm (depth).
+
+CANDIDATE 2 (final): fraction 0.8765, oxide yield scale 0.586849, evaluated as
+candidate-2c-preview (bit-identical rerun equivalence per procedural note 2; the evaluated
+audit IS the candidate audit). Errors: opening -1.45 nm, depth +1.30 nm. Both Newton-
+candidate slots are accounted: candidate 1 missed depth (-9.67); candidate 2 passes. The
+r5-surface.v1 receipt binds the declared-operator evaluations; the launch manifest binds
+epoch and executables; the frozen-physics-reveal.v3 follows. Held-out observations remain
+sealed; the transfer campaign executes next.
