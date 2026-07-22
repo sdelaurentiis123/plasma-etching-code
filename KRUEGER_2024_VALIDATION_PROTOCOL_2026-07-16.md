@@ -454,3 +454,19 @@ gate, a THIRD sensitivity probe is added at candidate 1's fraction
 (0.8804722559883319, 0.5986489665864749) to measure the local yield column of the Jacobian
 before proposing candidate 2. This is a base-side sensitivity measurement, not a candidate;
 no held-out observation is involved.
+
+R5 procedural note 2 (2026-07-21, before the final candidate; held-out still sealed):
+probe 3 measured the local yield column at fraction 0.8805 as (+174.9, +1503.5) per unit --
+the opening/yield coupling doubles versus base fraction, confirming a bilinear interaction.
+Response-surface fits (bilinear and pure-linear) to all base-side endpoints agree that the
+knob-reachable surface passes within ~0.2 nm of the joint gate corner (opening <= 50 nm,
+depth >= 820 nm): both targets are reachable only marginally at this operator, an honest
+model-form finding (near-collinear observable responses; centering depth costs opening).
+Because the engine is deterministic, a candidate proposal is informationally equivalent to
+a base-side evaluation: the max-worst-case-margin point from the joint fit is therefore
+EVALUATED as a base-side run first ("candidate-2 preview"); only if its endpoint lies
+inside both gates is that exact pair proposed as the second and final candidate (whose
+rerun is bit-identical). If no base-side point within the declared knob bounds passes both
+gates, R5 ends without a freeze and the fitted surface is recorded as the failure evidence.
+Base-side evaluations are unlimited under this protocol and touch no sealed observation;
+this note is appended before any such evaluation completes.
