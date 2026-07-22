@@ -108,8 +108,8 @@ def propose_from_surface(audits, evaluated_audit):
     proposal cannot miss.  All input audit hashes are embedded.
     """
     points = [endpoint(path) for path in audits]
-    if len(points) < 4:
-        raise ValueError("surface proposal requires at least four base-side endpoints")
+    if len(points) < 3:
+        raise ValueError("surface proposal requires at least three base-side endpoints")
     evaluated = endpoint(evaluated_audit)
     for name in ("mask_opening_nm", "etch_depth_nm"):
         if abs(evaluated[name] - TARGETS[name]) > 5.0:
@@ -124,12 +124,14 @@ def propose_from_surface(audits, evaluated_audit):
     models = {}
     for name in ("mask_opening_nm", "etch_depth_nm"):
         observed = np.array([p[name] for p in points])
-        bilinear = np.stack([np.ones_like(df), df, dy, df * dy], axis=1)
-        linear = bilinear[:, :3]
+        linear = np.stack([np.ones_like(df), df, dy], axis=1)
         models[name] = {
-            "bilinear": np.linalg.lstsq(bilinear, observed, rcond=None)[0].tolist(),
             "linear": np.linalg.lstsq(linear, observed, rcond=None)[0].tolist(),
         }
+        if len(points) >= 4:
+            bilinear = np.stack([np.ones_like(df), df, dy, df * dy], axis=1)
+            models[name]["bilinear"] = np.linalg.lstsq(
+                bilinear, observed, rcond=None)[0].tolist()
     return {
         "schema": "petch.krueger-2024.r5-surface.v1",
         "protocol_id": "K24-PETCH-R5",

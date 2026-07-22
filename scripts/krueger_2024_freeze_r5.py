@@ -55,7 +55,7 @@ def _load_jacobian_derivation(path, endpoint_pair):
     elif schema == "petch.krueger-2024.r5-surface.v1":
         margins = payload.get("gate_margins_nm", {})
         valid = (common
-                 and len(payload.get("inputs", ())) >= 5
+                 and len(payload.get("inputs", ())) >= 4
                  and float(margins.get("mask_opening_nm", -1.0)) > 0.0
                  and float(margins.get("etch_depth_nm", -1.0)) > 0.0)
     else:

@@ -1,0 +1,87 @@
+{
+  "anchor": {
+    "fraction": 0.8765,
+    "yield_scale": 0.582043
+  },
+  "candidate": {
+    "fraction": 0.8765,
+    "yield_scale": 0.586849
+  },
+  "engine_commits": [
+    ""
+  ],
+  "evaluated_endpoint": {
+    "etch_depth_nm": 826.2965239377949,
+    "mask_opening_nm": 43.54990769493256,
+    "path_name": "candidate-2c-preview-audit.json",
+    "sha256": "004fcb35b5f007847589e1ad939d71bd6ff559eaea42378442010db12e4fc7eb"
+  },
+  "gate_margins_nm": {
+    "etch_depth_nm": 3.703476062205141,
+    "mask_opening_nm": 3.549907694932557
+  },
+  "held_out_profile_data_read": false,
+  "inputs": [
+    {
+      "config_hash": "f8faff402d2a9c311f597526fefee15e54c7910f1675919764dbceb2526910cd",
+      "etch_depth_nm": 814.0321915503209,
+      "fraction": 0.8765,
+      "mask_opening_nm": 40.14520402840934,
+      "path_name": "candidate-2-audit.json",
+      "sha256": "9391817e82584c87f0e2fd70268dcc6ad5e746a4131504fe9adca5adecb0b259",
+      "yield_scale": 0.582043
+    },
+    {
+      "config_hash": "a0739251a64532ace5a42ebe3ca10b0bf7fa8ac6ecfcf49561151c1d4ef84b53",
+      "etch_depth_nm": 832.7414779353384,
+      "fraction": 0.8765,
+      "mask_opening_nm": 41.283976060618656,
+      "path_name": "candidate-2b-preview-audit.json",
+      "sha256": "bb89994b5ee3b17eda1fef956fc54ba7ddef289f63e1755c8ab0f9988be79958",
+      "yield_scale": 0.5903
+    },
+    {
+      "config_hash": "73fbbf5ef9669a176b503244908237ba0940a7ff8ac4b16ebc304cc1292e1820",
+      "etch_depth_nm": 826.2965239377949,
+      "fraction": 0.8765,
+      "mask_opening_nm": 43.54990769493256,
+      "path_name": "candidate-2c-preview-audit.json",
+      "sha256": "004fcb35b5f007847589e1ad939d71bd6ff559eaea42378442010db12e4fc7eb",
+      "yield_scale": 0.586849
+    },
+    {
+      "config_hash": "73fbbf5ef9669a176b503244908237ba0940a7ff8ac4b16ebc304cc1292e1820",
+      "etch_depth_nm": 826.2965239377949,
+      "fraction": 0.8765,
+      "mask_opening_nm": 43.54990769493256,
+      "path_name": "candidate-2c-preview-audit.json",
+      "sha256": "004fcb35b5f007847589e1ad939d71bd6ff559eaea42378442010db12e4fc7eb",
+      "yield_scale": 0.586849
+    }
+  ],
+  "method": "response_surface_max_margin_with_deterministic_preview",
+  "proposal_sha256": "81c0475b9554f7422ad9f5fb074fb44adb4571a2d320ebcc2d335063c4a918ee",
+  "protocol_id": "K24-PETCH-R5",
+  "protocol_sha256": "f7cd00f7867e1d3bb886e397201f81d0428808ec179ceeeec7e1c70f966d2d30",
+  "schema": "petch.krueger-2024.r5-surface.v1",
+  "surface_models": {
+    "etch_depth_nm": {
+      "linear": [
+        814.4117815736671,
+        0.0,
+        2283.9201333883675
+      ]
+    },
+    "mask_opening_nm": {
+      "linear": [
+        40.90238325843197,
+        0.0,
+        173.92161131934523
+      ]
+    }
+  },
+  "targets": {
+    "etch_depth_nm": 825.0,
+    "mask_opening_nm": 45.0
+  }
+}
