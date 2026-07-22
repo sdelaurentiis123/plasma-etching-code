@@ -147,10 +147,8 @@ def run(args):
         "--ballistic-transport", "face_gather",
         "--transport-device", str(args.transport_device),
         "--face-quadrature-points", str(numerics["ballistic_face_quadrature_points"]),
-        "--radiosity-rays", str(numerics["radiosity_rays_per_face"]),
         "--radiosity-tolerance", str(numerics["radiosity_relative_tolerance"]),
         "--radiosity-max-iterations", str(numerics["radiosity_maximum_iterations"]),
-        "--seed", str(numerics["seed"]),
         "--adaptive-profile-timestep",
         "--minimum-step-s", str(numerics["minimum_step_duration_s"]),
         "--target-displacement-cells", str(numerics["target_displacement_cells"]),
@@ -164,6 +162,12 @@ def run(args):
         str(numerics["surface_state_remap_backend"]),
         "--max-wall-s", str(args.max_wall_s),
     ]
+    # QMC-era sampling declarations exist only in v2 reveals; the deterministic v3
+    # authority carries neither rays nor a transport seed.
+    if "radiosity_rays_per_face" in numerics:
+        common += ["--radiosity-rays", str(numerics["radiosity_rays_per_face"])]
+    if "seed" in numerics:
+        common += ["--seed", str(numerics["seed"])]
     if freeze.get("schema") == "petch.krueger-2024.frozen-physics-reveal.v3":
         # The R5 authority is the deterministic extruded operator; running the sealed
         # cases on any other backend would silently unfreeze the physics.
