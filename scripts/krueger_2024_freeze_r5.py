@@ -37,19 +37,31 @@ def _load_jacobian_derivation(path, endpoint_pair):
     payload = json.loads(path.read_text(encoding="utf-8"))
     _verify_embedded_sha256(payload, "proposal_sha256")
     candidate = payload.get("candidate", {})
-    if (payload.get("schema") != "petch.krueger-2024.r5-jacobian.v1"
-            or payload.get("protocol_id") != "K24-PETCH-R5"
-            or payload.get("protocol_sha256") != _sha(PROTOCOL)
-            or payload.get("held_out_profile_data_read") is not False
-            or not np.isclose(
-                float(candidate.get("fraction", np.nan)),
-                endpoint_pair["effective_mask_crosslinked_growth_fraction"])
-            or not np.isclose(
-                float(candidate.get("yield_scale", np.nan)),
-                endpoint_pair["oxide_etch_yield_scale"])
-            or float(payload.get("jacobian_condition", np.inf)) > 1.0e4
-            or len(payload.get("inputs", ())) != 3):
-        raise ValueError("10 nm endpoint is not bound to its R5 Jacobian derivation")
+    schema = payload.get("schema")
+    common = (
+        payload.get("protocol_id") == "K24-PETCH-R5"
+        and payload.get("protocol_sha256") == _sha(PROTOCOL)
+        and payload.get("held_out_profile_data_read") is False
+        and np.isclose(
+            float(candidate.get("fraction", np.nan)),
+            endpoint_pair["effective_mask_crosslinked_growth_fraction"])
+        and np.isclose(
+            float(candidate.get("yield_scale", np.nan)),
+            endpoint_pair["oxide_etch_yield_scale"]))
+    if schema == "petch.krueger-2024.r5-jacobian.v1":
+        valid = (common
+                 and float(payload.get("jacobian_condition", np.inf)) <= 1.0e4
+                 and len(payload.get("inputs", ())) == 3)
+    elif schema == "petch.krueger-2024.r5-surface.v1":
+        margins = payload.get("gate_margins_nm", {})
+        valid = (common
+                 and len(payload.get("inputs", ())) >= 5
+                 and float(margins.get("mask_opening_nm", -1.0)) > 0.0
+                 and float(margins.get("etch_depth_nm", -1.0)) > 0.0)
+    else:
+        valid = False
+    if not valid:
+        raise ValueError("10 nm endpoint is not bound to its R5 calibration derivation")
     return path, payload
 
 
