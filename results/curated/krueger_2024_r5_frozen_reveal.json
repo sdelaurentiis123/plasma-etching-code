@@ -56,9 +56,9 @@
   },
   "base_calibration_derivation": {
     "path_name": "krueger_2024_r5_surface_proposal.json",
-    "proposal_sha256": "81c0475b9554f7422ad9f5fb074fb44adb4571a2d320ebcc2d335063c4a918ee",
+    "proposal_sha256": "07d1ceac21ba58b5b0a90cd42dae3445eca0717d907785c58cb76db4f24914e0",
     "schema": "petch.krueger-2024.r5-surface.v1",
-    "sha256": "ea24dbb173f0917bd7444028506915073ae7c465da0f45106ed2dab4bcef95a5"
+    "sha256": "0141c9791c942e20959aa85ccb5d9046d1a11ae4068ca9aff9aa8e206405dd83"
   },
   "base_endpoints": {
     "10nm": {
@@ -82,15 +82,15 @@
   },
   "base_launch_manifests": {
     "10nm_authority": {
-      "launch_sha256": "938a8f00adb34a77fb8e849e43ae03f40d61c447a46ce27149519049406a121f",
+      "launch_sha256": "0fd323a8f18783adad02dfef259365091627cdfbb4f23a93f22c84354591ceef",
       "path_name": "krueger_2024_r5_launch_manifest.json",
-      "sha256": "d8925dd4bea1e57289e21b0171c60f1581cd00966eda7b080eb3b7b51b709e27"
+      "sha256": "314037aba4089ac38f3256ae2d92abc4593e107f7ff17b5d99ef1f80abc91049"
     },
     "shared_source_epoch": {
       "archive_name": "petch-9bff772.tar.gz",
       "archive_sha256": "4786360963a98ce2e09981681628868e3c1ff15d97a437871c31cb4d3b18baae",
       "git_dirty": false,
-      "git_revision": "d4a3c19cf0de8eb617267d749218c3dd85a915b3"
+      "git_revision": "22dd45f86594f02b0de4932ab4d8ca85ea6e915d"
     }
   },
   "base_target_error_nm": {
@@ -127,8 +127,8 @@
     "parameter_note": "the frozen pair is declared operator-relative at 10 nm fidelity under the sampling-free deterministic exchange; grid-relative effective-parameter compensation is acknowledged and tested post hoc by the 5 nm confirmation under the frozen pair"
   },
   "protocol_id": "K24-PETCH-R5",
-  "protocol_sha256": "f7cd00f7867e1d3bb886e397201f81d0428808ec179ceeeec7e1c70f966d2d30",
-  "reveal_sha256": "0c3fc9e4dedfea9449e4c5bdecc2ae3460bb64031d602596f6d536a429a6d2ea",
+  "protocol_sha256": "742d8182fc9c5cfc5939b18ebacf515cbf4ae7991d9107b5ea229e8d8e22144e",
+  "reveal_sha256": "3170cbaf61769538344b0ce828fa20dbfd1022e6398de44355df28d1254a86f7",
   "schema": "petch.krueger-2024.frozen-physics-reveal.v3",
   "scientific_status": "frozen two-observable calibration reveal for held-out transfer at 10 nm numerical fidelity under protocol R5; formal predictive validation remains conditional on boundary/mechanism evidence and uncertainty",
   "source_sha256": {
@@ -179,7 +179,7 @@
     "src/petch/driver.py": "c48d904237067c1e7343b12a7c987d5308f4acccf4c12e8fb580bb1f64083379",
     "src/petch/experimental_boundary.py": "419b36318d706b8e944974fb28fc2d55e48b8deb2e0a2debc9b3bd6432e3ffd1",
     "src/petch/experimental_data.py": "56b81a808258d313d16fc7f29875d46a809a61b7f8e5ed208af8faa5abad9c9f",
-    "src/petch/extruded_exchange_3d.py": "f08d51fab8da79c8cd1b35d7464be9b21815dbfcfa48e15ab359ef6eaec9a454",
+    "src/petch/extruded_exchange_3d.py": "688d65cce30ec962c281ead46cd1e7ee48cca52829194beac20d9ca3a6b07397",
     "src/petch/feature_geometry_backend_3d.py": "1092b36d8a61f264e5e8d6ee5b3486581ccc9e2c66f3873c97c0ed896dd15d49",
     "src/petch/feature_geometry_state_3d.py": "0a0a51cf195b857875b78b8c3665375e315866da35002eff8f56a80baca573ff",
     "src/petch/feature_step_3d.py": "f439de11baec84769e9d7a949371b5ff1c3758fa181997812cd02896b45ddc56",
