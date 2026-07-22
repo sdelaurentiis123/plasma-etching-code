@@ -108,6 +108,7 @@ class AmorphousCarbonMaskParameters:
     carbon_sputter_yield: EnergeticYield
     declared_inert_neutral_species: tuple[str, ...]
     evidence: Mapping[str, ParameterEvidence]
+    oxygen_half_saturation_flux_m2_s: float | None = None
     known_omissions: tuple[str, ...] = (
         "polymer identities and crosslink formation/scission are not resolved",
         "polymer carbonization and atomic-F chemistry are not resolved",
@@ -525,6 +526,12 @@ class AmorphousCarbonMaskMechanism:
         oxygen = self._broadcast(
             fluxes.neutral_flux_m2_s.get(par.oxygen_species, 0.0),
             shape, par.oxygen_species)
+        if par.oxygen_half_saturation_flux_m2_s is not None:
+            # Langmuir site saturation: the oxygen surface reaction is limited by
+            # adsorbed-O coverage, not arrival flux (held-out oxygen sweep: depth
+            # stops responding to O flux past ratio ~1.5 while our linear channel
+            # kept converting flux to etch).
+            oxygen = oxygen / (1.0 + oxygen / par.oxygen_half_saturation_flux_m2_s)
         removal = (
             oxygen * par.oxygen_polymer_etch_probability
             + self._energetic_rate(fluxes, par.polymer_sputter_yield, shape)

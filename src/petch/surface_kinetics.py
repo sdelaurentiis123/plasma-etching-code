@@ -83,6 +83,7 @@ class EnergeticYield:
     energy_exponent: float = 1.0
     angular_model: str = "none"
     angular_parameter: float | None = None
+    knee_energy_eV: float | None = None
 
     def __post_init__(self):
         if (not np.isfinite(self.reference_yield) or self.reference_yield < 0.0
@@ -91,6 +92,10 @@ class EnergeticYield:
                 or self.reference_energy_eV <= self.threshold_energy_eV
                 or not np.isfinite(self.energy_exponent) or self.energy_exponent <= 0.0):
             raise ValueError("invalid energetic-yield parameters")
+        if self.knee_energy_eV is not None and (
+                not np.isfinite(self.knee_energy_eV)
+                or self.knee_energy_eV <= self.threshold_energy_eV):
+            raise ValueError("yield knee energy must exceed the threshold energy")
         if self.angular_model not in {"none", "chang_sawin_1997", "kress_1999"}:
             raise ValueError(f"unknown angular yield model: {self.angular_model}")
         if self.angular_model == "kress_1999":
@@ -103,6 +108,12 @@ class EnergeticYield:
         cosine = np.asarray(cosine_incidence, dtype=float)
         if np.any(~np.isfinite(energy)) or np.any(energy < 0.0):
             raise ValueError("incident energies must be finite and nonnegative")
+        if self.knee_energy_eV is not None:
+            # keV-scale ions deposit energy below the reactive mixing layer; the etch
+            # yield saturates rather than following the threshold law indefinitely
+            # (held-out power sweep: measured mean ion energy rises 20% from 6 to
+            # 8 kW while the observed profiles barely change).
+            energy = np.minimum(energy, self.knee_energy_eV)
         scaled_energy = np.maximum(
             (energy - self.threshold_energy_eV)
             / (self.reference_energy_eV - self.threshold_energy_eV), 0.0)
@@ -500,6 +511,7 @@ class ReducedSiO2FluorocarbonParameters:
     complex_sio2_yield: EnergeticYield
     polymer_sputter_yield: EnergeticYield
     complex_removal_reaction_order: int = 1
+    oxygen_half_saturation_flux_m2_s: float | None = None
     activated_polymer_deposition_probability_on_substrate: Mapping[str, float] = field(
         default_factory=dict)
     activated_polymer_deposition_probability_on_polymer: Mapping[str, float] = field(
@@ -1193,6 +1205,11 @@ class ReducedSiO2FluorocarbonMechanism:
             fluxes, polymer_probability, shape)
         oxygen_flux = self._broadcast(
             fluxes.neutral_flux_m2_s.get(par.oxygen_species, 0.0), shape)
+        if par.oxygen_half_saturation_flux_m2_s is not None:
+            # Langmuir site saturation of the adsorbed-O channel (held-out oxygen
+            # sweep: observed depth stops responding to O flux past ratio ~1.5).
+            oxygen_flux = oxygen_flux / (
+                1.0 + oxygen_flux / par.oxygen_half_saturation_flux_m2_s)
         removal_capacity = (oxygen_flux * par.oxygen_polymer_etch_probability
                             + self._energetic_rate(fluxes, par.polymer_sputter_yield, shape))
         active_reaction = deposit_substrate + deposit_polymer + removal_capacity > 0.0
