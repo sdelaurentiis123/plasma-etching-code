@@ -501,3 +501,26 @@ all other groups <= 0.0014 relative). The scale floor rises 1e-3 -> 3e-3 of peak
 affects only refusal thresholds on sub-floor groups, never projected values: every completed
 run, including the frozen candidate, is numerically bit-identical. The reveal is re-emitted
 for the executable hash; no sealed observation has been read.
+
+## R5 REVEAL (2026-07-22, seal broken AFTER all eight held-out cases completed)
+
+transfer_observations.csv was read for the first time after campaign execution_sha256
+35c09631… completed all cases under reveal 3170cbaf…. Blind scorecard against the
+held-out experimental claims (Sections IX.A-B):
+
+- O2 0.5 feature_clogged=true: PREDICTED (opening 0.000 nm, etch stop 322.98 nm). HIT.
+- O2 2.5 necking_essentially_absent=true: PREDICTED (79.87 of 90 nm). HIT.
+- O2 1.5 etch_depth_rank=maximum: MISSED by rank flip (671 at 1.5 vs 698 at 2.5; 4%).
+- O2 1.5->2.5 etch_depth_increase=false: MISSED (+27 nm predicted); same mechanism.
+- 0 kW feature_clogged=true: PARTIAL (collapse predicted: depth 110 nm, opening
+  stalled 30 nm; literal seal not reproduced).
+- 4->8 kW few_profile_differences: openings agree (42/40/44 nm); depths miss at 8 kW
+  (875 vs saturation). MCFPM reference depths (reference_only, unscored): 635/715/720 vs
+  petch 614/723/875 — 6 kW within 1% of MCFPM, blind.
+
+Residual localization: (1) oxygen-driven depth enhancement lacks saturation past ratio
+~1.5 (reduced-chemistry oxygen channels); (2) power->ion-energy delivery lacks 6->8 kW
+saturation (check the digitized figure-16b IEADs against the transfer boundary model).
+These two mechanisms account for every miss. First preregistered blind transfer of the
+campaign: 2 hits (including the clog boolean), 1 partial, misses tracing to 2 named
+mechanisms, mid-range depth parity with the hand-calibrated MCFPM reference.

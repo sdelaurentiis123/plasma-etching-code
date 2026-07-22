@@ -1,0 +1,688 @@
+{
+  "case_set": "all",
+  "cases": {
+    "oxygen_o05": {
+      "audit_path_name": "oxygen_o05/audit.json",
+      "audit_sha256": "298ba5aa28c5dc565c93589bfaa22c721f65b988fd77ada328693253497a1a95",
+      "boundary_provenance": {
+        "claim_mode": "held_out_development_transfer",
+        "effective_ion_mass_amu": 39.948,
+        "figure16_flux_table_sha256": "716a416335a10a2b8a80ea971be2f1a99af41b09eca973d9f9549c60c6fdf9f3",
+        "figure16_iead_table_sha256": "0b5e665031bb3c41fb35ff73a0c1213ba6c355f69f7730c54a9d02a1dc915e35",
+        "figure16_metadata_sha256": "44e85ee74d11c9cfe95ceb3781bfe122b3d6b5992bf4739dcfaf0b24561476b2",
+        "flux_digitization_interval_m2_s": {
+          "C2F3": [
+            8.037478647111373e+20,
+            8.419201873381771e+20
+          ],
+          "C3F4": [
+            1.0495148905257701e+21,
+            1.0993594036647635e+21
+          ],
+          "CF": [
+            4.4482933870891526e+20,
+            4.6595557714349215e+20
+          ],
+          "CF2": [
+            1.4189617723633377e+21,
+            1.4863523919198156e+21
+          ],
+          "CF3": [
+            1.0679412917501883e+20,
+            1.1186609282497228e+20
+          ],
+          "O": [
+            4.1e+20,
+            4.5001935837824346e+20
+          ],
+          "ions": [
+            9.400087123538343e+19,
+            9.846524587519595e+19
+          ]
+        },
+        "flux_source": "Figure 16(a), O2/C4F6=0.5",
+        "held_out_profiles_used_to_construct_boundary": false,
+        "ion_azimuthal_closure": "axisymmetric_uniform",
+        "ion_azimuthal_order": 16,
+        "ion_mixture_closure": "singly charged aggregate uses Ar mass for trajectory time scaling; electrostatic path at fixed energy/charge is mass independent",
+        "ion_quadrature": {
+          "angle_bin_deg": 0.25,
+          "compressed_quadrature_sha256": "b4ccb336532694e75395fd3d549990a659ba65809a02ff3c132f07449c93bcf2",
+          "energy_bin_eV": 250.0,
+          "mean_direction_maximum_absolute_error": 1.0842021724855044e-19,
+          "mean_energy_relative_error": 0.0,
+          "mode": "joint_probability_weighted_centroid_quadrature",
+          "node_count": 263,
+          "probability_error": 0.0,
+          "second_energy_moment_relative_error": 0.0,
+          "source_node_count": 263
+        },
+        "low_frequency_power_kw": 6.0,
+        "neutral_quadrature": {
+          "azimuthal_order": 16,
+          "method": "analytic_speed_marginal_plus_angular_quadrature",
+          "nodes_per_species": 128,
+          "polar_order": 8
+        },
+        "neutral_temperature_K": 300.0,
+        "oxygen_to_fluorocarbon_ratio": 0.5,
+        "power_sweep_constant_flux_closure": false,
+        "predictive_blockers": [
+          "Figure-16 boundary values are HPEM outputs, not measurements",
+          "species-resolved positive-ion/hot-neutral composition is unpublished",
+          "3-D ion azimuth is a symmetry closure rather than a measured distribution",
+          "Figure-16 flux digitization and HPEM model uncertainty remain"
+        ],
+        "provider": "krueger_2024_figure16_transfer_boundary",
+        "supports_prediction": false,
+        "total_boundary_quadrature_nodes": 4976
+      },
+      "config_hash": "187851165fa2948773c5166be3e537886d31d96e053407b3e19977c6ce77a46d",
+      "final_metrics": {
+        "asymmetry_cell_count": 0.11347844552434955,
+        "etch_depth_nm": 322.9788238241562,
+        "floor_z_um": 1.4770211761758438,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": false,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 0.0,
+        "mask_opening_per_y_widths_nm": [
+          3.8242658045226503
+        ],
+        "mask_opening_throat_z_um": 2.56,
+        "mask_pocket_width_nm": 3.8242658045226503,
+        "mask_top_z_um": 2.650326353977189,
+        "maximum_feature_width_nm": 81.00216544682604,
+        "remaining_mask_thickness_nm": 850.326353977189,
+        "top_feature_width_nm": 81.00216544682604
+      },
+      "resume_invocations_this_call": 1,
+      "status": "complete",
+      "terminal_event": null
+    },
+    "oxygen_o10": {
+      "audit_path_name": "oxygen_o10/audit.json",
+      "audit_sha256": "b05c91c3a48516c84f1a5ec1194bf9622302775ced777345fbe6a6dd2ba16de0",
+      "boundary_provenance": {
+        "claim_mode": "held_out_development_transfer",
+        "effective_ion_mass_amu": 39.948,
+        "figure16_flux_table_sha256": "716a416335a10a2b8a80ea971be2f1a99af41b09eca973d9f9549c60c6fdf9f3",
+        "figure16_iead_table_sha256": "0b5e665031bb3c41fb35ff73a0c1213ba6c355f69f7730c54a9d02a1dc915e35",
+        "figure16_metadata_sha256": "44e85ee74d11c9cfe95ceb3781bfe122b3d6b5992bf4739dcfaf0b24561476b2",
+        "flux_digitization_interval_m2_s": {
+          "C2F3": [
+            7.240688724627788e+20,
+            7.584570081174589e+20
+          ],
+          "C3F4": [
+            9.131357205527356e+20,
+            9.565031904492072e+20
+          ],
+          "CF": [
+            4.054069985298995e+20,
+            4.246609554268204e+20
+          ],
+          "CF2": [
+            1.248979170318086e+21,
+            1.308296821956216e+21
+          ],
+          "CF3": [
+            9.291677038158104e+19,
+            9.73296579203152e+19
+          ],
+          "O": [
+            6.912398810458768e+20,
+            7.240688724627788e+20
+          ],
+          "ions": [
+            9.5097620770973e+19,
+            9.96140832345315e+19
+          ]
+        },
+        "flux_source": "Figure 16(a), O2/C4F6=1",
+        "held_out_profiles_used_to_construct_boundary": false,
+        "ion_azimuthal_closure": "axisymmetric_uniform",
+        "ion_azimuthal_order": 16,
+        "ion_mixture_closure": "singly charged aggregate uses Ar mass for trajectory time scaling; electrostatic path at fixed energy/charge is mass independent",
+        "ion_quadrature": {
+          "angle_bin_deg": 0.25,
+          "compressed_quadrature_sha256": "b4ccb336532694e75395fd3d549990a659ba65809a02ff3c132f07449c93bcf2",
+          "energy_bin_eV": 250.0,
+          "mean_direction_maximum_absolute_error": 1.0842021724855044e-19,
+          "mean_energy_relative_error": 0.0,
+          "mode": "joint_probability_weighted_centroid_quadrature",
+          "node_count": 263,
+          "probability_error": 0.0,
+          "second_energy_moment_relative_error": 0.0,
+          "source_node_count": 263
+        },
+        "low_frequency_power_kw": 6.0,
+        "neutral_quadrature": {
+          "azimuthal_order": 16,
+          "method": "analytic_speed_marginal_plus_angular_quadrature",
+          "nodes_per_species": 128,
+          "polar_order": 8
+        },
+        "neutral_temperature_K": 300.0,
+        "oxygen_to_fluorocarbon_ratio": 1.0,
+        "power_sweep_constant_flux_closure": false,
+        "predictive_blockers": [
+          "Figure-16 boundary values are HPEM outputs, not measurements",
+          "species-resolved positive-ion/hot-neutral composition is unpublished",
+          "3-D ion azimuth is a symmetry closure rather than a measured distribution",
+          "Figure-16 flux digitization and HPEM model uncertainty remain"
+        ],
+        "provider": "krueger_2024_figure16_transfer_boundary",
+        "supports_prediction": false,
+        "total_boundary_quadrature_nodes": 4976
+      },
+      "config_hash": "a2e90787ca5b4779d32e898a97773dcae0035dcce545c97f45d340687be8ee7d",
+      "final_metrics": {
+        "asymmetry_cell_count": 0.0484194769709477,
+        "etch_depth_nm": 544.5118466258712,
+        "floor_z_um": 1.255488153374129,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 20.963999898127575,
+        "mask_opening_per_y_widths_nm": [
+          20.963999898127575
+        ],
+        "mask_opening_throat_z_um": 2.29,
+        "mask_pocket_width_nm": 20.963999898127575,
+        "mask_top_z_um": 2.650222994133175,
+        "maximum_feature_width_nm": 82.63769336811215,
+        "remaining_mask_thickness_nm": 850.2229941331751,
+        "top_feature_width_nm": 82.63769336811215
+      },
+      "resume_invocations_this_call": 1,
+      "status": "complete",
+      "terminal_event": null
+    },
+    "oxygen_o15": {
+      "audit_path_name": "oxygen_o15/audit.json",
+      "audit_sha256": "f8c1812ce99da98273c1cc99bcb7aca38d8e3560f09eecebced590194b6434cd",
+      "boundary_provenance": {
+        "claim_mode": "held_out_development_transfer",
+        "effective_ion_mass_amu": 39.948,
+        "figure16_flux_table_sha256": "716a416335a10a2b8a80ea971be2f1a99af41b09eca973d9f9549c60c6fdf9f3",
+        "figure16_iead_table_sha256": "0b5e665031bb3c41fb35ff73a0c1213ba6c355f69f7730c54a9d02a1dc915e35",
+        "figure16_metadata_sha256": "44e85ee74d11c9cfe95ceb3781bfe122b3d6b5992bf4739dcfaf0b24561476b2",
+        "flux_digitization_interval_m2_s": {
+          "C2F3": [
+            6.993048809608155e+20,
+            7.325169026690084e+20
+          ],
+          "C3F4": [
+            9.131357205527356e+20,
+            9.565031904492072e+20
+          ],
+          "CF": [
+            4.1252274666820875e+20,
+            4.321146511300241e+20
+          ],
+          "CF2": [
+            1.2635515599885642e+21,
+            1.323561296774761e+21
+          ],
+          "CF3": [
+            9.5097620770973e+19,
+            9.96140832345315e+19
+          ],
+          "O": [
+            1.0374109602755e+21,
+            1.0866806225802276e+21
+          ],
+          "ions": [
+            1.0804014328145306e+20,
+            1.1317128376354031e+20
+          ]
+        },
+        "flux_source": "Figure 16(a), O2/C4F6=1.5",
+        "held_out_profiles_used_to_construct_boundary": false,
+        "ion_azimuthal_closure": "axisymmetric_uniform",
+        "ion_azimuthal_order": 16,
+        "ion_mixture_closure": "singly charged aggregate uses Ar mass for trajectory time scaling; electrostatic path at fixed energy/charge is mass independent",
+        "ion_quadrature": {
+          "angle_bin_deg": 0.25,
+          "compressed_quadrature_sha256": "b4ccb336532694e75395fd3d549990a659ba65809a02ff3c132f07449c93bcf2",
+          "energy_bin_eV": 250.0,
+          "mean_direction_maximum_absolute_error": 1.0842021724855044e-19,
+          "mean_energy_relative_error": 0.0,
+          "mode": "joint_probability_weighted_centroid_quadrature",
+          "node_count": 263,
+          "probability_error": 0.0,
+          "second_energy_moment_relative_error": 0.0,
+          "source_node_count": 263
+        },
+        "low_frequency_power_kw": 6.0,
+        "neutral_quadrature": {
+          "azimuthal_order": 16,
+          "method": "analytic_speed_marginal_plus_angular_quadrature",
+          "nodes_per_species": 128,
+          "polar_order": 8
+        },
+        "neutral_temperature_K": 300.0,
+        "oxygen_to_fluorocarbon_ratio": 1.5,
+        "power_sweep_constant_flux_closure": false,
+        "predictive_blockers": [
+          "Figure-16 boundary values are HPEM outputs, not measurements",
+          "species-resolved positive-ion/hot-neutral composition is unpublished",
+          "3-D ion azimuth is a symmetry closure rather than a measured distribution",
+          "Figure-16 flux digitization and HPEM model uncertainty remain"
+        ],
+        "provider": "krueger_2024_figure16_transfer_boundary",
+        "supports_prediction": false,
+        "total_boundary_quadrature_nodes": 4976
+      },
+      "config_hash": "3b3734eaef4952383e72ed1c1498bd99e7f5d7ba63751200696fbe2edb2f937a",
+      "final_metrics": {
+        "asymmetry_cell_count": 0.11062283324522193,
+        "etch_depth_nm": 670.6793219183231,
+        "floor_z_um": 1.129320678081677,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 46.19022961446236,
+        "mask_opening_per_y_widths_nm": [
+          46.19022961446236
+        ],
+        "mask_opening_throat_z_um": 2.16,
+        "mask_pocket_width_nm": 46.19022961446236,
+        "mask_top_z_um": 2.650118734994448,
+        "maximum_feature_width_nm": 83.90043909304786,
+        "remaining_mask_thickness_nm": 850.1187349944479,
+        "top_feature_width_nm": 83.90043909304786
+      },
+      "resume_invocations_this_call": 1,
+      "status": "complete",
+      "terminal_event": null
+    },
+    "oxygen_o25": {
+      "audit_path_name": "oxygen_o25/audit.json",
+      "audit_sha256": "1dc7c2c4cd143a839a49d0a0f4e8fb193ce1e5d14f55b5ca1fe0ef43f8da8810",
+      "boundary_provenance": {
+        "claim_mode": "held_out_development_transfer",
+        "effective_ion_mass_amu": 39.948,
+        "figure16_flux_table_sha256": "716a416335a10a2b8a80ea971be2f1a99af41b09eca973d9f9549c60c6fdf9f3",
+        "figure16_iead_table_sha256": "0b5e665031bb3c41fb35ff73a0c1213ba6c355f69f7730c54a9d02a1dc915e35",
+        "figure16_metadata_sha256": "44e85ee74d11c9cfe95ceb3781bfe122b3d6b5992bf4739dcfaf0b24561476b2",
+        "flux_digitization_interval_m2_s": {
+          "C2F3": [
+            6.598993428941751e+20,
+            6.912398810458768e+20
+          ],
+          "C3F4": [
+            8.517432407027975e+20,
+            8.921950032604408e+20
+          ],
+          "CF": [
+            3.9610989936549875e+20,
+            4.14922309996012e+20
+          ],
+          "CF2": [
+            1.2345748422823049e+21,
+            1.2932083905079838e+21
+          ],
+          "CF3": [
+            9.026090305576534e+19,
+            9.45476557344684e+19
+          ],
+          "O": [
+            1.3390038689390776e+21,
+            1.5e+21
+          ],
+          "ions": [
+            1.1186609282497228e+20,
+            1.1717893877309204e+20
+          ]
+        },
+        "flux_source": "Figure 16(a), O2/C4F6=2.5",
+        "held_out_profiles_used_to_construct_boundary": false,
+        "ion_azimuthal_closure": "axisymmetric_uniform",
+        "ion_azimuthal_order": 16,
+        "ion_mixture_closure": "singly charged aggregate uses Ar mass for trajectory time scaling; electrostatic path at fixed energy/charge is mass independent",
+        "ion_quadrature": {
+          "angle_bin_deg": 0.25,
+          "compressed_quadrature_sha256": "b4ccb336532694e75395fd3d549990a659ba65809a02ff3c132f07449c93bcf2",
+          "energy_bin_eV": 250.0,
+          "mean_direction_maximum_absolute_error": 1.0842021724855044e-19,
+          "mean_energy_relative_error": 0.0,
+          "mode": "joint_probability_weighted_centroid_quadrature",
+          "node_count": 263,
+          "probability_error": 0.0,
+          "second_energy_moment_relative_error": 0.0,
+          "source_node_count": 263
+        },
+        "low_frequency_power_kw": 6.0,
+        "neutral_quadrature": {
+          "azimuthal_order": 16,
+          "method": "analytic_speed_marginal_plus_angular_quadrature",
+          "nodes_per_species": 128,
+          "polar_order": 8
+        },
+        "neutral_temperature_K": 300.0,
+        "oxygen_to_fluorocarbon_ratio": 2.5,
+        "power_sweep_constant_flux_closure": false,
+        "predictive_blockers": [
+          "Figure-16 boundary values are HPEM outputs, not measurements",
+          "species-resolved positive-ion/hot-neutral composition is unpublished",
+          "3-D ion azimuth is a symmetry closure rather than a measured distribution",
+          "Figure-16 flux digitization and HPEM model uncertainty remain"
+        ],
+        "provider": "krueger_2024_figure16_transfer_boundary",
+        "supports_prediction": false,
+        "total_boundary_quadrature_nodes": 4976
+      },
+      "config_hash": "6c31714b12447f5aa882b4f560611003f82b484d7da032b377787caf929ce476",
+      "final_metrics": {
+        "asymmetry_cell_count": 0.01900851270285886,
+        "etch_depth_nm": 698.0753097661872,
+        "floor_z_um": 1.101924690233813,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 79.86956073589882,
+        "mask_opening_per_y_widths_nm": [
+          79.86956073589882
+        ],
+        "mask_opening_throat_z_um": 2.12,
+        "mask_pocket_width_nm": 79.86956073589882,
+        "mask_top_z_um": 2.6500516824306413,
+        "maximum_feature_width_nm": 85.28918167020603,
+        "remaining_mask_thickness_nm": 850.0516824306412,
+        "top_feature_width_nm": 85.28918167020603
+      },
+      "resume_invocations_this_call": 1,
+      "status": "complete",
+      "terminal_event": null
+    },
+    "power_0kw": {
+      "audit_path_name": "power_0kw/audit.json",
+      "audit_sha256": "1663d82531a16b7ba3a7ef5303ae3f3b9e15e707a03569caf4dc60b54a4f57b0",
+      "boundary_provenance": {
+        "claim_mode": "held_out_development_transfer",
+        "effective_ion_mass_amu": 39.948,
+        "figure16_flux_table_sha256": "716a416335a10a2b8a80ea971be2f1a99af41b09eca973d9f9549c60c6fdf9f3",
+        "figure16_iead_table_sha256": "0b5e665031bb3c41fb35ff73a0c1213ba6c355f69f7730c54a9d02a1dc915e35",
+        "figure16_metadata_sha256": "44e85ee74d11c9cfe95ceb3781bfe122b3d6b5992bf4739dcfaf0b24561476b2",
+        "flux_digitization_interval_m2_s": null,
+        "flux_source": "Table I base fluxes held constant across the power sweep",
+        "held_out_profiles_used_to_construct_boundary": false,
+        "ion_azimuthal_closure": "axisymmetric_uniform",
+        "ion_azimuthal_order": 16,
+        "ion_mixture_closure": "singly charged aggregate uses Ar mass for trajectory time scaling; electrostatic path at fixed energy/charge is mass independent",
+        "ion_quadrature": {
+          "angle_bin_deg": 0.25,
+          "compressed_quadrature_sha256": "86cd0038433e13d1c5c9700a8bdf8b812b656a644a15d023703577ab6ac61dda",
+          "energy_bin_eV": 250.0,
+          "mean_direction_maximum_absolute_error": 2.168404344971009e-19,
+          "mean_energy_relative_error": 0.0,
+          "mode": "joint_probability_weighted_centroid_quadrature",
+          "node_count": 76,
+          "probability_error": 0.0,
+          "second_energy_moment_relative_error": 0.0,
+          "source_node_count": 76
+        },
+        "low_frequency_power_kw": 0.0,
+        "neutral_quadrature": {
+          "azimuthal_order": 16,
+          "method": "analytic_speed_marginal_plus_angular_quadrature",
+          "nodes_per_species": 128,
+          "polar_order": 8
+        },
+        "neutral_temperature_K": 300.0,
+        "oxygen_to_fluorocarbon_ratio": null,
+        "power_sweep_constant_flux_closure": true,
+        "predictive_blockers": [
+          "Figure-16 boundary values are HPEM outputs, not measurements",
+          "species-resolved positive-ion/hot-neutral composition is unpublished",
+          "3-D ion azimuth is a symmetry closure rather than a measured distribution",
+          "power-dependent wafer fluxes are unpublished and held at Table-I values"
+        ],
+        "provider": "krueger_2024_figure16_transfer_boundary",
+        "supports_prediction": false,
+        "total_boundary_quadrature_nodes": 1984
+      },
+      "config_hash": "e663292d66ed5dd0af40a11b9d66dba5167bc375347a2dfea4a5c7aaad5136ea",
+      "final_metrics": {
+        "asymmetry_cell_count": 0.011292111560214091,
+        "etch_depth_nm": 109.77311871748951,
+        "floor_z_um": 1.6902268812825105,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 30.192163201392063,
+        "mask_opening_per_y_widths_nm": [
+          30.192163201392063
+        ],
+        "mask_opening_throat_z_um": 2.21,
+        "mask_pocket_width_nm": 30.192163201392063,
+        "mask_top_z_um": 2.650448880236918,
+        "maximum_feature_width_nm": 73.01648046962208,
+        "remaining_mask_thickness_nm": 850.448880236918,
+        "top_feature_width_nm": 73.01648046962208
+      },
+      "resume_invocations_this_call": 1,
+      "status": "complete",
+      "terminal_event": null
+    },
+    "power_4kw": {
+      "audit_path_name": "power_4kw/audit.json",
+      "audit_sha256": "a38a492be955f6b9bcbf0ff00b6d9e854a71f8523419476d74a27f1530378d62",
+      "boundary_provenance": {
+        "claim_mode": "held_out_development_transfer",
+        "effective_ion_mass_amu": 39.948,
+        "figure16_flux_table_sha256": "716a416335a10a2b8a80ea971be2f1a99af41b09eca973d9f9549c60c6fdf9f3",
+        "figure16_iead_table_sha256": "0b5e665031bb3c41fb35ff73a0c1213ba6c355f69f7730c54a9d02a1dc915e35",
+        "figure16_metadata_sha256": "44e85ee74d11c9cfe95ceb3781bfe122b3d6b5992bf4739dcfaf0b24561476b2",
+        "flux_digitization_interval_m2_s": null,
+        "flux_source": "Table I base fluxes held constant across the power sweep",
+        "held_out_profiles_used_to_construct_boundary": false,
+        "ion_azimuthal_closure": "axisymmetric_uniform",
+        "ion_azimuthal_order": 16,
+        "ion_mixture_closure": "singly charged aggregate uses Ar mass for trajectory time scaling; electrostatic path at fixed energy/charge is mass independent",
+        "ion_quadrature": {
+          "angle_bin_deg": 0.25,
+          "compressed_quadrature_sha256": "c28a4c9adb1f8a1cf7963b18888b05b9b760723771f20901c897b2260e6e5918",
+          "energy_bin_eV": 250.0,
+          "mean_direction_maximum_absolute_error": 2.168404344971009e-19,
+          "mean_energy_relative_error": 0.0,
+          "mode": "joint_probability_weighted_centroid_quadrature",
+          "node_count": 228,
+          "probability_error": 0.0,
+          "second_energy_moment_relative_error": 0.0,
+          "source_node_count": 228
+        },
+        "low_frequency_power_kw": 4.0,
+        "neutral_quadrature": {
+          "azimuthal_order": 16,
+          "method": "analytic_speed_marginal_plus_angular_quadrature",
+          "nodes_per_species": 128,
+          "polar_order": 8
+        },
+        "neutral_temperature_K": 300.0,
+        "oxygen_to_fluorocarbon_ratio": null,
+        "power_sweep_constant_flux_closure": true,
+        "predictive_blockers": [
+          "Figure-16 boundary values are HPEM outputs, not measurements",
+          "species-resolved positive-ion/hot-neutral composition is unpublished",
+          "3-D ion azimuth is a symmetry closure rather than a measured distribution",
+          "power-dependent wafer fluxes are unpublished and held at Table-I values"
+        ],
+        "provider": "krueger_2024_figure16_transfer_boundary",
+        "supports_prediction": false,
+        "total_boundary_quadrature_nodes": 4416
+      },
+      "config_hash": "2361a9bfeb6972641e29b5e89d509d14d08442a47af38b60ad8056783e3db269",
+      "final_metrics": {
+        "asymmetry_cell_count": 0.7336350876142317,
+        "etch_depth_nm": 614.0244255048406,
+        "floor_z_um": 1.1859755744951594,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 41.88918145591088,
+        "mask_opening_per_y_widths_nm": [
+          41.88918145591088
+        ],
+        "mask_opening_throat_z_um": 2.23,
+        "mask_pocket_width_nm": 41.88918145591088,
+        "mask_top_z_um": 2.6500752080619603,
+        "maximum_feature_width_nm": 83.86062589413065,
+        "remaining_mask_thickness_nm": 850.0752080619602,
+        "top_feature_width_nm": 83.86062589413065
+      },
+      "resume_invocations_this_call": 1,
+      "status": "complete",
+      "terminal_event": null
+    },
+    "power_6kw": {
+      "audit_path_name": "power_6kw/audit.json",
+      "audit_sha256": "256040ed1171e8b7664876959efd7927ff8281fc755effe0fa968b462f028db6",
+      "boundary_provenance": {
+        "claim_mode": "held_out_development_transfer",
+        "effective_ion_mass_amu": 39.948,
+        "figure16_flux_table_sha256": "716a416335a10a2b8a80ea971be2f1a99af41b09eca973d9f9549c60c6fdf9f3",
+        "figure16_iead_table_sha256": "0b5e665031bb3c41fb35ff73a0c1213ba6c355f69f7730c54a9d02a1dc915e35",
+        "figure16_metadata_sha256": "44e85ee74d11c9cfe95ceb3781bfe122b3d6b5992bf4739dcfaf0b24561476b2",
+        "flux_digitization_interval_m2_s": null,
+        "flux_source": "Table I base fluxes held constant across the power sweep",
+        "held_out_profiles_used_to_construct_boundary": false,
+        "ion_azimuthal_closure": "axisymmetric_uniform",
+        "ion_azimuthal_order": 16,
+        "ion_mixture_closure": "singly charged aggregate uses Ar mass for trajectory time scaling; electrostatic path at fixed energy/charge is mass independent",
+        "ion_quadrature": {
+          "angle_bin_deg": 0.25,
+          "compressed_quadrature_sha256": "b4ccb336532694e75395fd3d549990a659ba65809a02ff3c132f07449c93bcf2",
+          "energy_bin_eV": 250.0,
+          "mean_direction_maximum_absolute_error": 1.0842021724855044e-19,
+          "mean_energy_relative_error": 0.0,
+          "mode": "joint_probability_weighted_centroid_quadrature",
+          "node_count": 263,
+          "probability_error": 0.0,
+          "second_energy_moment_relative_error": 0.0,
+          "source_node_count": 263
+        },
+        "low_frequency_power_kw": 6.0,
+        "neutral_quadrature": {
+          "azimuthal_order": 16,
+          "method": "analytic_speed_marginal_plus_angular_quadrature",
+          "nodes_per_species": 128,
+          "polar_order": 8
+        },
+        "neutral_temperature_K": 300.0,
+        "oxygen_to_fluorocarbon_ratio": null,
+        "power_sweep_constant_flux_closure": true,
+        "predictive_blockers": [
+          "Figure-16 boundary values are HPEM outputs, not measurements",
+          "species-resolved positive-ion/hot-neutral composition is unpublished",
+          "3-D ion azimuth is a symmetry closure rather than a measured distribution",
+          "power-dependent wafer fluxes are unpublished and held at Table-I values"
+        ],
+        "provider": "krueger_2024_figure16_transfer_boundary",
+        "supports_prediction": false,
+        "total_boundary_quadrature_nodes": 4976
+      },
+      "config_hash": "3e8bf1f2ed990a3427fca0e89aed121de59a996842dfadaf95040855a91c599f",
+      "final_metrics": {
+        "asymmetry_cell_count": 0.0934033873216493,
+        "etch_depth_nm": 722.673180760918,
+        "floor_z_um": 1.0773268192390821,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 40.097038235634436,
+        "mask_opening_per_y_widths_nm": [
+          40.097038235634436
+        ],
+        "mask_opening_throat_z_um": 2.2,
+        "mask_pocket_width_nm": 40.097038235634436,
+        "mask_top_z_um": 2.650033836954545,
+        "maximum_feature_width_nm": 84.2513162177633,
+        "remaining_mask_thickness_nm": 850.0338369545448,
+        "top_feature_width_nm": 84.2513162177633
+      },
+      "resume_invocations_this_call": 1,
+      "status": "complete",
+      "terminal_event": null
+    },
+    "power_8kw": {
+      "audit_path_name": "power_8kw/audit.json",
+      "audit_sha256": "ec10669ce2dbcb16750d4cf1c09024e63529ceefc32fe675e716e0633fbfe7ac",
+      "boundary_provenance": {
+        "claim_mode": "held_out_development_transfer",
+        "effective_ion_mass_amu": 39.948,
+        "figure16_flux_table_sha256": "716a416335a10a2b8a80ea971be2f1a99af41b09eca973d9f9549c60c6fdf9f3",
+        "figure16_iead_table_sha256": "0b5e665031bb3c41fb35ff73a0c1213ba6c355f69f7730c54a9d02a1dc915e35",
+        "figure16_metadata_sha256": "44e85ee74d11c9cfe95ceb3781bfe122b3d6b5992bf4739dcfaf0b24561476b2",
+        "flux_digitization_interval_m2_s": null,
+        "flux_source": "Table I base fluxes held constant across the power sweep",
+        "held_out_profiles_used_to_construct_boundary": false,
+        "ion_azimuthal_closure": "axisymmetric_uniform",
+        "ion_azimuthal_order": 16,
+        "ion_mixture_closure": "singly charged aggregate uses Ar mass for trajectory time scaling; electrostatic path at fixed energy/charge is mass independent",
+        "ion_quadrature": {
+          "angle_bin_deg": 0.25,
+          "compressed_quadrature_sha256": "85db4731669e77d101f7d8c04289f9559c0360655d7fdde4973f952c74686350",
+          "energy_bin_eV": 250.0,
+          "mean_direction_maximum_absolute_error": 2.168404344971009e-19,
+          "mean_energy_relative_error": 0.0,
+          "mode": "joint_probability_weighted_centroid_quadrature",
+          "node_count": 364,
+          "probability_error": 0.0,
+          "second_energy_moment_relative_error": 0.0,
+          "source_node_count": 364
+        },
+        "low_frequency_power_kw": 8.0,
+        "neutral_quadrature": {
+          "azimuthal_order": 16,
+          "method": "analytic_speed_marginal_plus_angular_quadrature",
+          "nodes_per_species": 128,
+          "polar_order": 8
+        },
+        "neutral_temperature_K": 300.0,
+        "oxygen_to_fluorocarbon_ratio": null,
+        "power_sweep_constant_flux_closure": true,
+        "predictive_blockers": [
+          "Figure-16 boundary values are HPEM outputs, not measurements",
+          "species-resolved positive-ion/hot-neutral composition is unpublished",
+          "3-D ion azimuth is a symmetry closure rather than a measured distribution",
+          "power-dependent wafer fluxes are unpublished and held at Table-I values"
+        ],
+        "provider": "krueger_2024_figure16_transfer_boundary",
+        "supports_prediction": false,
+        "total_boundary_quadrature_nodes": 6592
+      },
+      "config_hash": "16497237b1372672c20706a4b115c77a8e49ae009408f493534f0aa210c9beb4",
+      "final_metrics": {
+        "asymmetry_cell_count": 0.2449109933582702,
+        "etch_depth_nm": 875.302428318778,
+        "floor_z_um": 0.9246975716812221,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 43.96913082070989,
+        "mask_opening_per_y_widths_nm": [
+          43.96913082070989
+        ],
+        "mask_opening_throat_z_um": 2.16,
+        "mask_pocket_width_nm": 43.96913082070989,
+        "mask_top_z_um": 2.649989948550506,
+        "maximum_feature_width_nm": 84.70845206668463,
+        "remaining_mask_thickness_nm": 849.9899485505058,
+        "top_feature_width_nm": 84.70845206668463
+      },
+      "resume_invocations_this_call": 1,
+      "status": "complete",
+      "terminal_event": null
+    }
+  },
+  "execution_sha256": "35c09631534a624441f3da68f07a356ffe5e7fbd24735b5e2aaa7c2551469c37",
+  "freeze_file_sha256": "5aae3d43b8e38241b1fcd386389f1355b0e1403f0580014542ae9dabc56819b3",
+  "frozen_reveal_sha256": "3170cbaf61769538344b0ce828fa20dbfd1022e6398de44355df28d1254a86f7",
+  "held_out_profile_data_read": false,
+  "schema": "petch.krueger-2024.held-out-transfer-execution.v1",
+  "scientific_status": "blind transfer execution; experimental outcomes not yet revealed",
+  "transport_device": "cuda:0"
+}
