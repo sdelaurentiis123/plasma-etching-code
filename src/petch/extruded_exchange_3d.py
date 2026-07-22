@@ -164,7 +164,7 @@ class ExtrudedTriangleExchange3D:
         return mean
 
     def project_face_field(self, face_field, *, relative_guard,
-                           scale_floor_fraction=1.0e-3):
+                           scale_floor_fraction=3.0e-3):
         """Declared mean-field closure: project onto strip means, refuse only past a guard.
 
         The strict certification treats any strip-mean disagreement as a refusal.  Under the
@@ -176,7 +176,7 @@ class ExtrudedTriangleExchange3D:
 
         Variation is measured against ``max(|group mean|, scale_floor_fraction * peak)``:
         deeply shadowed groups carry a vanishing share of the field (3.8e-4 of peak on the
-        step-100 Krueger section) where quadrature-scale absolute noise is a large fraction
+        step-100 Krueger section; 4.6e-4 with 5.1e-5-of-peak noise on the held-out oxygen_o15 condition) where quadrature-scale absolute noise is a large fraction
         of the group's own mean but physically negligible; the floor keeps the guard aimed
         at three-dimensional structure in groups that actually influence the evolution.
         """

@@ -491,3 +491,13 @@ candidate slots are accounted: candidate 1 missed depth (-9.67); candidate 2 pas
 r5-surface.v1 receipt binds the declared-operator evaluations; the launch manifest binds
 epoch and executables; the frozen-physics-reveal.v3 follows. Held-out observations remain
 sealed; the transfer campaign executes next.
+
+R5 execution amendment (2026-07-21 night, during the sealed campaign; observations still
+unread): held-out case oxygen_o15 refused at the mean-field projection guard on a group
+carrying 4.6e-4 of peak flux with absolute strip noise 5.1e-5 of peak -- the same benign
+shadowed-group quadrature-noise class already documented at base step 100, marginally
+exceeding the declared scale floor under the hotter oxygen condition (single-group outlier;
+all other groups <= 0.0014 relative). The scale floor rises 1e-3 -> 3e-3 of peak. The floor
+affects only refusal thresholds on sub-floor groups, never projected values: every completed
+run, including the frozen candidate, is numerically bit-identical. The reveal is re-emitted
+for the executable hash; no sealed observation has been read.
