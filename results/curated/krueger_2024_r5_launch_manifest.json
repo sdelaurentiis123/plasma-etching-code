@@ -10,7 +10,7 @@
     "scripts/krueger_2024_trench_pilot.py": "5d9fcae3de3ef274436db0052e0fe0a0984cdd491e23ecc6ef3042cce13d94d1",
     "src/petch/boundary_transport_3d.py": "945cd842c2f68192d956e10a31b811b7429069ab6972cb8991d13bcdbdb1e62e",
     "src/petch/deterministic_exchange_2d.py": "4254ce33b5d51e35ad0de9551142e9c67d60fbe37757181327eb796eff16f10c",
-    "src/petch/extruded_exchange_3d.py": "f08d51fab8da79c8cd1b35d7464be9b21815dbfcfa48e15ab359ef6eaec9a454",
+    "src/petch/extruded_exchange_3d.py": "688d65cce30ec962c281ead46cd1e7ee48cca52829194beac20d9ca3a6b07397",
     "src/petch/feature_step_3d.py": "f439de11baec84769e9d7a949371b5ff1c3758fa181997812cd02896b45ddc56",
     "src/petch/surface_common_refinement_3d.py": "8467394dc37412d4e0b72bf5a89d5eca939b11f28c5891826cf178a347165f0b"
   },
@@ -19,7 +19,7 @@
     "oxide_etch_yield_scale": 0.586849
   },
   "held_out_profile_data_read": false,
-  "launch_sha256": "938a8f00adb34a77fb8e849e43ae03f40d61c447a46ce27149519049406a121f",
+  "launch_sha256": "0fd323a8f18783adad02dfef259365091627cdfbb4f23a93f22c84354591ceef",
   "numerical_operator": {
     "deterministic_exchange": {
       "exchange_geometry_tolerance": 1e-09,
@@ -39,6 +39,6 @@
     "archive_name": "petch-9bff772.tar.gz",
     "archive_sha256": "4786360963a98ce2e09981681628868e3c1ff15d97a437871c31cb4d3b18baae",
     "git_dirty": false,
-    "git_revision": "d4a3c19cf0de8eb617267d749218c3dd85a915b3"
+    "git_revision": "22dd45f86594f02b0de4932ab4d8ca85ea6e915d"
   }
 }
