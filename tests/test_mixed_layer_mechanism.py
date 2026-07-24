@@ -100,6 +100,42 @@ def test_spectrum_compression_uses_flux_weighted_mean():
         (3e18 * 400.0 + 1e18 * 2000.0) / 4e18)
 
 
+def test_krueger_species_stoichiometry_carries_carbon_and_fluorine():
+    from petch.mixed_layer_mechanism import (
+        KRUEGER_2024_PRECURSOR_STOICHIOMETRY,
+        build_krueger_2024_mixed_layer_mechanisms,
+    )
+    oxide, mask = build_krueger_2024_mixed_layer_mechanisms()
+    assert oxide.parameters.substrate == "sio2"
+    assert mask.parameters.substrate == "carbon"
+    fluxes = SurfaceFluxes(
+        neutral_flux_m2_s={"CF2": 1.0e19, "C2F3": 2.0e19, "O": 0.0,
+                           "C3F4": 5.0e18},
+        energetic_fluxes=(_ion(1e18, 800.0),))
+    module = oxide._module_fluxes(fluxes, ())
+    # carbon flux = 1*1e19 + 2*2e19; bound F = 2*1e19 + 3*2e19
+    assert float(module.precursor_flux) == pytest.approx(5.0e19)
+    assert float(module.precursor_fc_ratio) == pytest.approx(8.0e19 / 5.0e19)
+    assert oxide.validity(fluxes).within_declared_scope  # C3F4 declared inert
+    assert set(KRUEGER_2024_PRECURSOR_STOICHIOMETRY) == {
+        "CF", "CF2", "CF3", "C2F3", "C2F4", "C3F5", "C3F6"}
+
+
+def test_router_mixed_layer_option():
+    from petch.amorphous_carbon_mask import build_krueger_2024_material_router_3d
+    from petch.mixed_layer_mechanism import MixedLayerMechanism
+
+    router = build_krueger_2024_material_router_3d(surface_model="mixed_layer")
+    mechanisms = getattr(router, "mechanisms", None) or getattr(
+        router, "_mechanisms", None)
+    if mechanisms is None:
+        pytest.skip("router does not expose its mechanism map")
+    assert all(isinstance(m, MixedLayerMechanism) for m in dict(mechanisms).values())
+    with pytest.raises(ValueError):
+        build_krueger_2024_material_router_3d(
+            surface_model="mixed_layer", oxide_etch_yield_scale=0.5)
+
+
 def test_duration_zero_is_identity():
     mech = MixedLayerMechanism(MixedLayerParams())
     state = mech.initial_state((2,))

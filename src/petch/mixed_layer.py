@@ -82,6 +82,9 @@ class SurfaceFluxes:
     ion_flux: float
     ion_energy_eV: float
     cosine_incidence: float = 1.0
+    # Optional per-face F/C ratio of the carbon-carrying precursor flux;
+    # None falls back to params.precursor_fc_ratio (single-species case).
+    precursor_fc_ratio: object = None
 
 
 @dataclass
@@ -201,8 +204,10 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     x_f = _guarded_ratio(state.n_f_film, film_total, 1.0)
 
     # --- film gains ---
+    fc_ratio = (params.precursor_fc_ratio if fluxes.precursor_fc_ratio is None
+                else fluxes.precursor_fc_ratio)
     dep_c = params.sticking_probability * fluxes.precursor_flux
-    dep_f = dep_c * params.precursor_fc_ratio
+    dep_f = dep_c * fc_ratio
     absorb_f = params.fluorine_film_sticking * fluxes.fluorine_flux * theta_film
 
     # --- film losses (proposed rates, atoms/m^2/s) ---

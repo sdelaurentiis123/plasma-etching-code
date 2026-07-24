@@ -624,12 +624,45 @@ def build_krueger_2024_material_router_3d(
         oxide_etch_yield_scale=1.0,
         yield_energy_model="threshold_power",
         deposition_layer_depth_nm=1.5,
-        oxygen_half_saturation_flux_m2_s=None):
-    """Build one material router for the reduced Krüger oxide/mask development replay."""
+        oxygen_half_saturation_flux_m2_s=None,
+        surface_model="reduced"):
+    """Build one material router for the reduced Krüger oxide/mask development replay.
+
+    ``surface_model`` selects the chemistry family: ``"reduced"`` (the
+    coverage/site-balance mechanisms) or ``"mixed_layer"`` (the element-resolved
+    two-reservoir chemistry, `petch.mixed_layer_mechanism`; the reduced-model
+    knob arguments do not apply there and are refused if set).
+    """
     oxide_id = int(oxide_material_id)
     mask_id = int(mask_material_id)
     if oxide_id <= 0 or mask_id <= 0 or oxide_id == mask_id:
         raise ValueError("Krüger oxide and mask material ids must be distinct and positive")
+    if surface_model == "mixed_layer":
+        if (float(oxide_etch_yield_scale) != 1.0
+                or float(effective_mask_crosslinked_growth_fraction) != 0.0
+                or oxygen_half_saturation_flux_m2_s is not None):
+            raise ValueError(
+                "mixed_layer surface model has no yield-scale/crosslink/"
+                "oxygen-saturation knobs; do not pass them")
+        from petch.mixed_layer_mechanism import (
+            build_krueger_2024_mixed_layer_mechanisms)
+        oxide, mask = build_krueger_2024_mixed_layer_mechanisms()
+        return MaterialMechanismRouter3D(
+            {oxide_id: oxide, mask_id: mask},
+            provenance={
+                oxide_id: {
+                    "role": "SiO2 substrate",
+                    "model": dict(oxide.provenance),
+                    "claim_status": "development_replay",
+                },
+                mask_id: {
+                    "role": "amorphous-carbon mask",
+                    "model": dict(mask.provenance),
+                    "claim_status": "development_replay",
+                },
+            })
+    if surface_model != "reduced":
+        raise ValueError(f"unknown surface_model: {surface_model!r}")
     oxide = ReducedSiO2FluorocarbonMechanism(
         ReducedSiO2FluorocarbonParameters.krueger_2024_reduced_projection(
             oxide_etch_yield_scale=oxide_etch_yield_scale,

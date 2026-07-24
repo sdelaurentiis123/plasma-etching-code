@@ -99,7 +99,18 @@ class MixedLayerMechanism:
         if not isinstance(parameters, MixedLayerParams):
             raise TypeError("parameters must be MixedLayerParams")
         self.parameters = parameters
-        self.precursor_species = tuple(precursor_species)
+        # precursor_species: iterable of names (1 C, params ratio F each) or a
+        # mapping {name: (carbon_atoms, fluorine_atoms)} for stoichiometric
+        # multi-species chemistries (e.g. Krueger's CF/CF2/CF3/C2F3/...).
+        if isinstance(precursor_species, dict):
+            self.precursor_stoichiometry = {
+                str(name): (float(c), float(f))
+                for name, (c, f) in precursor_species.items()}
+        else:
+            self.precursor_stoichiometry = {
+                str(name): (1.0, float(parameters.precursor_fc_ratio))
+                for name in precursor_species}
+        self.precursor_species = tuple(self.precursor_stoichiometry)
         self.fluorine_species = tuple(fluorine_species)
         self.oxygen_species = tuple(oxygen_species)
         self.inert_species = tuple(inert_species)
@@ -237,7 +248,7 @@ class MixedLayerMechanism:
             removed = removed + np.asarray(result.substrate_removal_rate) * dt
             dep_rate = (self.parameters.sticking_probability
                         * np.asarray(module_fluxes.precursor_flux)
-                        * (1.0 + self.parameters.precursor_fc_ratio))
+                        * (1.0 + np.asarray(module_fluxes.precursor_fc_ratio)))
             deposited_total = deposited_total + dep_rate * dt
             module_state = result.state
         film_after = np.asarray(
@@ -333,10 +344,49 @@ class MixedLayerMechanism:
             safe = np.maximum(ion_flux, 1e-300)
             mean_energy = np.where(ion_flux > 0.0, energy_weighted / safe, 0.0)
             mean_cosine = np.where(ion_flux > 0.0, cosine_weighted / safe, 1.0)
+        carbon_flux = np.zeros(shape)
+        fluorine_bound = np.zeros(shape)
+        for name, (c_atoms, f_atoms) in self.precursor_stoichiometry.items():
+            value = fluxes.neutral_flux_m2_s.get(name)
+            if value is None:
+                continue
+            base = np.broadcast_to(np.asarray(value, dtype=float), shape)
+            carbon_flux = carbon_flux + base * c_atoms
+            fluorine_bound = fluorine_bound + base * f_atoms
+        with np.errstate(divide="ignore", invalid="ignore"):
+            fc_ratio = np.where(
+                carbon_flux > 0.0,
+                fluorine_bound / np.maximum(carbon_flux, 1e-300),
+                self.parameters.precursor_fc_ratio)
         return ModuleFluxes(
-            precursor_flux=channel(self.precursor_species),
+            precursor_flux=carbon_flux,
             fluorine_flux=channel(self.fluorine_species),
             oxygen_flux=channel(self.oxygen_species),
             ion_flux=ion_flux,
             ion_energy_eV=mean_energy,
-            cosine_incidence=np.clip(mean_cosine, 0.0, 1.0))
+            cosine_incidence=np.clip(mean_cosine, 0.0, 1.0),
+            precursor_fc_ratio=fc_ratio)
+
+
+# Krueger 2024 species channels: fluorocarbon radicals with explicit C/F
+# stoichiometry (the boundary publishes NO atomic-F flux — fluorine reaches
+# the substrate only through the film, which is the Standaert mechanism).
+KRUEGER_2024_PRECURSOR_STOICHIOMETRY = {
+    "CF": (1.0, 1.0), "CF2": (1.0, 2.0), "CF3": (1.0, 3.0),
+    "C2F3": (2.0, 3.0), "C2F4": (2.0, 4.0),
+    "C3F5": (3.0, 5.0), "C3F6": (3.0, 6.0),
+}
+
+
+def build_krueger_2024_mixed_layer_mechanisms(
+        *, oxide_parameters=None, mask_parameters=None):
+    """Oxide + mask mixed-layer mechanisms wired to the Krueger species set."""
+    oxide_parameters = oxide_parameters or MixedLayerParams(substrate="sio2")
+    mask_parameters = mask_parameters or MixedLayerParams(substrate="carbon")
+    common = dict(
+        precursor_species=dict(KRUEGER_2024_PRECURSOR_STOICHIOMETRY),
+        fluorine_species=(),
+        oxygen_species=("O",),
+        inert_species=("C3F4",))
+    return (MixedLayerMechanism(oxide_parameters, **common),
+            MixedLayerMechanism(mask_parameters, **common))
