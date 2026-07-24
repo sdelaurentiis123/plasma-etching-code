@@ -153,7 +153,25 @@ def test_rate_follows_derived_energy_law():
     for energy in (300.0, 3000.0):
         expected = (_deposited_energy(energy, 1.0, params)[0]
                     / _deposited_energy(1000.0, 1.0, params)[0])
-        assert rates[energy] / rates[1000.0] == pytest.approx(expected, rel=1e-6)
+        assert rates[energy] / rates[1000.0] == pytest.approx(expected, rel=5e-3)
+
+
+def test_rung0_degenerate_matches_langmuir_closed_form():
+    """Rung 0 (design doc 5.5): with no carbon anywhere, the layer must
+    reduce to the Belen/ViennaPS coverage structure exactly — steady state
+    theta_F = J/(J + 4*capacity), rate = capacity * theta_F, with capacity
+    from the derived deposited-energy factor (nothing fitted)."""
+    from petch.mixed_layer import _deposited_energy
+
+    params = MixedLayerParams()
+    for j_f, energy in ((5.0e19, 400.0), (2.0e20, 1000.0), (1.0e21, 2000.0)):
+        fluxes = SurfaceFluxes(0.0, j_f, 0.0, 6.0e18, energy)
+        result = steady_state(fluxes, params)
+        eps_dep = _deposited_energy(energy, 1.0, params)[0]
+        capacity = (params.volatilization_yield * fluxes.ion_flux
+                    * eps_dep / params.reference_energy_eV)
+        theta = j_f / (j_f + 4.0 * capacity)
+        assert result.sif4_rate == pytest.approx(capacity * theta, rel=1e-5)
 
 
 def test_bitwise_determinism():

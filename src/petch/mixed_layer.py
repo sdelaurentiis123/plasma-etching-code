@@ -225,22 +225,29 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     sput_f *= scale_film; ox_f *= scale_film; mix_f *= scale_film
 
     # --- mixed layer ---
-    # F entering the layer: mixing + direct F where film is open.
-    f_direct = fluxes.fluorine_flux * (1.0 - theta_film)
+    # Layer fluorine coverage (site fraction of a saturated monolayer). The
+    # volatilization rate is coverage-proportional — the same Langmuir kinetics
+    # as the Belen/ViennaPS coupled-coverage model (rate = capacity * theta_F),
+    # so the degenerate no-carbon limit reproduces that structure exactly
+    # (Rung 0) instead of a sharp supply/capacity switch.
+    theta_f_layer = min(state.n_f / _MONOLAYER_AREAL_M2, 1.0)
+    # Direct F where the film is open, Langmuir (1 - theta) sticking; the
+    # reflected remainder never enters the ledger.
+    f_direct = (fluxes.fluorine_flux * (1.0 - theta_film)
+                * (1.0 - theta_f_layer))
     # Ion capacity for substrate volatilization (derived energy factor; no
     # fitted law). SiO2 leaves as SiF4 (4 F per Si); an amorphous-carbon mask
     # leaves as CFx (2 F per C, the F-costly channel) with no lattice oxygen —
     # selectivity must emerge from the film/energy/F budgets, never a parameter.
     volat_capacity = params.volatilization_yield * fluxes.ion_flux * energy_ratio * (
         1.0 - theta_film if theta_film < 1.0 else 0.0)
-    f_available_rate = state.n_f / max(dt, 1e-30) + mix_f + f_direct
     if params.substrate == "carbon":
         f_per_unit = 2.0
         sif4 = 0.0
-        substrate_removal = min(volat_capacity, f_available_rate / f_per_unit)
+        substrate_removal = volat_capacity * theta_f_layer
     else:
         f_per_unit = 4.0
-        sif4 = min(volat_capacity, f_available_rate / f_per_unit)
+        sif4 = volat_capacity * theta_f_layer
         substrate_removal = sif4
     # Layer oxidation of mixed C by layer O (same probability channel);
     # clamp to available layer carbon first.
