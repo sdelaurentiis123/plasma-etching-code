@@ -166,11 +166,12 @@ def test_film_growth_moves_boundary_negative_velocity():
         neutral_flux_m2_s={"CFx": 5.0e20, "F": 0.0, "O": 0.0},
         energetic_fluxes=(_ion(1.0e17, 200.0),))
     result = mask.advance(mask.initial_state(()), fluxes, 2.0)
-    assert float(result.etch_velocity_m_s) < 0.0
+    assert float(result.etch_velocity_m_s) == 0.0
+    assert float(result.normal_growth_velocity_m_s) > 0.0
     grown_nm = float(np.asarray(
         result.state.n_c_film + result.state.n_f_film)) / 7.5e28 * 1e9
-    assert float(result.etch_velocity_m_s) == pytest.approx(
-        -float(grown_nm) * 1e-9 / 2.0, rel=1e-6)
+    assert float(result.normal_growth_velocity_m_s) == pytest.approx(
+        float(grown_nm) * 1e-9 / 2.0, rel=1e-6)
 
 
 def test_duration_zero_is_identity():

@@ -931,6 +931,9 @@ class SurfaceStepResult:
     removed_polymer_units_m2: np.ndarray
     material_exchange: SurfaceMaterialExchange
     validity: MechanismValidity
+    # Outward surface motion from net film/deposit thickening (m/s, >= 0).
+    # Mechanisms without a resolved growing film leave the default.
+    normal_growth_velocity_m_s: np.ndarray | float = 0.0
 
 
 class ReducedSiO2FluorocarbonMechanism:

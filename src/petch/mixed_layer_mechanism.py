@@ -287,8 +287,10 @@ class MixedLayerMechanism:
         bulk_density = (_CARBON_ATOM_DENSITY_M3
                         if self.parameters.substrate == "carbon"
                         else _SIO2_FORMULA_DENSITY_M3)
-        velocity = (removed / bulk_density
-                    - film_thickness_change_m) / duration_s
+        signed = (removed / bulk_density
+                  - film_thickness_change_m) / duration_s
+        velocity = np.maximum(signed, 0.0)
+        growth_velocity = np.maximum(-signed, 0.0)
         zeros = np.zeros(shape)
         def representational_floor(value):
             array = np.asarray(value, dtype=float)
@@ -322,7 +324,8 @@ class MixedLayerMechanism:
             deposited_polymer_units_m2=film_deposited,
             removed_polymer_units_m2=film_removed,
             material_exchange=exchange,
-            validity=validity)
+            validity=validity,
+            normal_growth_velocity_m_s=growth_velocity)
 
     # -- helpers ---------------------------------------------------------
 
