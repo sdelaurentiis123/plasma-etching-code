@@ -266,11 +266,18 @@ class MixedLayerMechanism:
         film_deposited = deposited_total
         film_removed = np.maximum(
             film_removed_before + deposited_total - film_after, 0.0)
+        # The resolved surface sits at substrate front + film top: net film
+        # thickening moves the boundary outward (growth, negative etch
+        # velocity), thinning recedes it. Pure ledger bookkeeping — the
+        # narrowing of a mask mouth by deposition IS this term.
+        film_thickness_change_m = ((film_after - film_removed_before)
+                                   / 7.5e28)
 
         bulk_density = (_CARBON_ATOM_DENSITY_M3
                         if self.parameters.substrate == "carbon"
                         else _SIO2_FORMULA_DENSITY_M3)
-        velocity = removed / bulk_density / duration_s
+        velocity = (removed / bulk_density
+                    - film_thickness_change_m) / duration_s
         zeros = np.zeros(shape)
         def representational_floor(value):
             array = np.asarray(value, dtype=float)
