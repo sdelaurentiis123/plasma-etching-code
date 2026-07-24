@@ -21,6 +21,8 @@ from math import cos, log, radians, sqrt
 
 import numpy as np
 
+_trapezoid = getattr(np, "trapezoid", None) or np.trapz
+
 # eV cm^2 (per atom) conversion prefactor of the ZBL reduced nuclear stopping.
 _ZBL_PREFACTOR_EV_CM2 = 8.462e-15
 
@@ -110,7 +112,7 @@ def csda_path_nm(energy_eV, z1, m1, target, *, minimum_energy_eV=10.0, steps=400
     grid = np.geomspace(minimum_energy_eV, energy, int(steps))
     nuclear, electronic = stopping_cross_sections_eV_cm2(grid, z1, m1, target)
     total = (nuclear + electronic) * (target.atom_density_m3 * 1e-6)  # eV/cm
-    path_cm = np.trapz(1.0 / total, grid)
+    path_cm = _trapezoid(1.0 / total, grid)
     return float(path_cm * 1e7)
 
 

@@ -18,6 +18,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+_trapezoid = getattr(np, "trapezoid", None) or np.trapz
+
 
 @dataclass(frozen=True)
 class EdgeStatistics:
@@ -117,7 +119,7 @@ def averaged_psd_nm3(edges_nm, *, spacing_nm: float):
 
 def sigma_from_psd_nm(frequencies_per_nm, psd_nm3):
     """sigma = sqrt(integral PSD df) by trapezoid; inverse of the synthesis norm."""
-    return float(np.sqrt(np.trapz(np.asarray(psd_nm3, dtype=float),
+    return float(np.sqrt(_trapezoid(np.asarray(psd_nm3, dtype=float),
                                   np.asarray(frequencies_per_nm, dtype=float))))
 
 
@@ -168,7 +170,7 @@ def fit_edge_statistics(frequencies_per_nm, psd_nm3) -> EdgeStatistics:
     psd = psd[positive]
     if frequencies.size < 8:
         raise ValueError("edge-statistics fit requires >= 8 positive PSD points")
-    sigma = float(np.sqrt(np.trapz(psd, frequencies)))
+    sigma = float(np.sqrt(_trapezoid(psd, frequencies)))
     # High-frequency slope over the top decade.
     high = frequencies >= frequencies.max() / 10.0
     slope = np.polyfit(np.log(frequencies[high]), np.log(psd[high]), 1)[0]
