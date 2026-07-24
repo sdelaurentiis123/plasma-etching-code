@@ -95,6 +95,7 @@ class MixedLayerMechanism:
     def __init__(self, parameters: MixedLayerParams, *,
                  precursor_species=("CFx",), fluorine_species=("F",),
                  oxygen_species=("O",), inert_species=(),
+                 chemisorption_probability=None,
                  default_max_step_s=0.01):
         if not isinstance(parameters, MixedLayerParams):
             raise TypeError("parameters must be MixedLayerParams")
@@ -111,6 +112,13 @@ class MixedLayerMechanism:
                 str(name): (1.0, float(parameters.precursor_fc_ratio))
                 for name in precursor_species}
         self.precursor_species = tuple(self.precursor_stoichiometry)
+        self.chemisorption_probability = {
+            str(name): float(value)
+            for name, value in dict(chemisorption_probability or {}).items()}
+        unknown = set(self.chemisorption_probability) - set(self.precursor_species)
+        if unknown:
+            raise ValueError(
+                f"chemisorption probabilities for unmapped species: {sorted(unknown)}")
         self.fluorine_species = tuple(fluorine_species)
         self.oxygen_species = tuple(oxygen_species)
         self.inert_species = tuple(inert_species)
@@ -136,6 +144,7 @@ class MixedLayerMechanism:
                         float(parameters.ion_mass_amu)],
             },
             "energy_model": "zbl-deposited-in-layer (stopping tables, no fitted law)",
+            "chemisorption_probability": dict(self.chemisorption_probability),
             "species_channels": {
                 "precursor": list(self.precursor_species),
                 "fluorine": list(self.fluorine_species),
@@ -165,6 +174,7 @@ class MixedLayerMechanism:
             known_model_form_omissions=(
                 "ion spectrum compressed to flux-weighted mean energy/cosine",
                 "no spontaneous (ion-free) chemical etch channel",
+                "chemisorption channel uses substrate-agnostic published probabilities",
                 "single projectile species for stopping tables",
                 "product routing unresolved (SiF4/CO/COF2 emission laws undeclared)",
             ),
@@ -346,6 +356,8 @@ class MixedLayerMechanism:
             mean_cosine = np.where(ion_flux > 0.0, cosine_weighted / safe, 1.0)
         carbon_flux = np.zeros(shape)
         fluorine_bound = np.zeros(shape)
+        chem_c = np.zeros(shape)
+        chem_f = np.zeros(shape)
         for name, (c_atoms, f_atoms) in self.precursor_stoichiometry.items():
             value = fluxes.neutral_flux_m2_s.get(name)
             if value is None:
@@ -353,6 +365,9 @@ class MixedLayerMechanism:
             base = np.broadcast_to(np.asarray(value, dtype=float), shape)
             carbon_flux = carbon_flux + base * c_atoms
             fluorine_bound = fluorine_bound + base * f_atoms
+            probability = self.chemisorption_probability.get(name, 0.0)
+            chem_c = chem_c + probability * base * c_atoms
+            chem_f = chem_f + probability * base * f_atoms
         with np.errstate(divide="ignore", invalid="ignore"):
             fc_ratio = np.where(
                 carbon_flux > 0.0,
@@ -365,16 +380,26 @@ class MixedLayerMechanism:
             ion_flux=ion_flux,
             ion_energy_eV=mean_energy,
             cosine_incidence=np.clip(mean_cosine, 0.0, 1.0),
-            precursor_fc_ratio=fc_ratio)
+            precursor_fc_ratio=fc_ratio,
+            chemisorption_carbon_flux=chem_c,
+            chemisorption_fluorine_flux=chem_f)
 
 
 # Krueger 2024 species channels: fluorocarbon radicals with explicit C/F
 # stoichiometry (the boundary publishes NO atomic-F flux — fluorine reaches
-# the substrate only through the film, which is the Standaert mechanism).
+# the layer through the film AND by direct complex-formation chemisorption).
 KRUEGER_2024_PRECURSOR_STOICHIOMETRY = {
     "CF": (1.0, 1.0), "CF2": (1.0, 2.0), "CF3": (1.0, 3.0),
     "C2F3": (2.0, 3.0), "C2F4": (2.0, 4.0),
     "C3F5": (3.0, 5.0), "C3F6": (3.0, 6.0),
+}
+
+# Krueger's published complex-formation probabilities (thesis Appendix B):
+# the direct-chemisorption channel delivering bound fluorine into the mixed
+# layer on open oxide. Published constants — data, not knobs.
+KRUEGER_2024_CHEMISORPTION_PROBABILITY = {
+    "CF": 0.2729, "CF2": 0.2729, "CF3": 0.2, "C2F3": 0.2,
+    "C2F4": 0.001, "C3F5": 0.001, "C3F6": 0.001,
 }
 
 
@@ -395,6 +420,7 @@ def build_krueger_2024_mixed_layer_mechanisms(
         precursor_species=dict(KRUEGER_2024_PRECURSOR_STOICHIOMETRY),
         fluorine_species=(),
         oxygen_species=("O",),
-        inert_species=("C3F4",))
+        inert_species=("C3F4",),
+        chemisorption_probability=dict(KRUEGER_2024_CHEMISORPTION_PROBABILITY))
     return (MixedLayerMechanism(oxide_parameters, **common),
             MixedLayerMechanism(mask_parameters, **common))

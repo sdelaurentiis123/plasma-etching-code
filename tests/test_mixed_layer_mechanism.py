@@ -136,6 +136,27 @@ def test_router_mixed_layer_option():
             surface_model="mixed_layer", oxide_etch_yield_scale=0.5)
 
 
+def test_chemisorption_channel_lifts_supply_ceiling():
+    """With Krueger's published complex-formation probabilities the bound-F
+    supply into the layer must rise several-fold over film-only delivery —
+    the arithmetic that closes the 0.85 vs 13.75 nm/s starvation gap."""
+    from petch.mixed_layer_mechanism import (
+        build_krueger_2024_mixed_layer_mechanisms,
+    )
+    oxide, _ = build_krueger_2024_mixed_layer_mechanisms()
+    bare = MixedLayerMechanism(
+        MixedLayerParams(),
+        precursor_species=dict(oxide.precursor_stoichiometry),
+        fluorine_species=(), oxygen_species=("O",), inert_species=("C3F4",))
+    fluxes = SurfaceFluxes(
+        neutral_flux_m2_s={"CF": 4.4e20, "CF2": 9.4e20, "C2F3": 6.8e20,
+                           "CF3": 8.4e19, "O": 7.7e20, "C3F4": 9.5e20},
+        energetic_fluxes=(_ion(9.6e19, 1500.0),))
+    with_chem = oxide.advance(oxide.initial_state(()), fluxes, 2.0)
+    without = bare.advance(bare.initial_state(()), fluxes, 2.0)
+    assert float(with_chem.etch_velocity_m_s) > 3.0 * float(without.etch_velocity_m_s)
+
+
 def test_duration_zero_is_identity():
     mech = MixedLayerMechanism(MixedLayerParams())
     state = mech.initial_state((2,))

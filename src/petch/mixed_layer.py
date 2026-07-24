@@ -85,6 +85,11 @@ class SurfaceFluxes:
     # Optional per-face F/C ratio of the carbon-carrying precursor flux;
     # None falls back to params.precursor_fc_ratio (single-species case).
     precursor_fc_ratio: object = None
+    # Direct chemisorption into the mixed layer where the film is open
+    # (Krueger complex-formation channel; per-species published
+    # probabilities are applied by the adapter). Atoms/m^2/s of C and F.
+    chemisorption_carbon_flux: object = 0.0
+    chemisorption_fluorine_flux: object = 0.0
 
 
 @dataclass
@@ -245,6 +250,13 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # reflected remainder never enters the ledger.
     f_direct = (fluxes.fluorine_flux * (1.0 - theta_film)
                 * (1.0 - theta_f_layer))
+    # Direct precursor chemisorption into the layer where the film is open
+    # (the Krueger complex-formation channel): fluorine arrives bound to
+    # carbon and both enter the layer ledgers, site-limited like f_direct.
+    chem_c = (np.asarray(fluxes.chemisorption_carbon_flux, dtype=float)
+              * (1.0 - theta_film) * (1.0 - theta_f_layer))
+    chem_f = (np.asarray(fluxes.chemisorption_fluorine_flux, dtype=float)
+              * (1.0 - theta_film) * (1.0 - theta_f_layer))
     # Ion capacity for substrate volatilization (derived energy factor; no
     # fitted law). SiO2 leaves as SiF4 (4 F per Si); an amorphous-carbon mask
     # leaves as CFx (2 F per C, the F-costly channel) with no lattice oxygen —
@@ -263,7 +275,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # clamp to available layer carbon first.
     layer_ox = params.oxidation_probability * fluxes.oxygen_flux * (1.0 - theta_film) * (
         state.n_c / (state.n_c + _MONOLAYER_AREAL_M2))
-    layer_ox = layer_ox * _overdraw_scale(state.n_c + mix_c * dt, layer_ox, dt)
+    layer_ox = layer_ox * _overdraw_scale(
+        state.n_c + (mix_c + chem_c) * dt, layer_ox, dt)
     f_per_layer_c = _guarded_ratio(state.n_f, state.n_c, 2.0)
     # COF2 branch consumes layer F; the CO branch does not — an F-starved
     # clamp below shifts oxidized carbon from COF2 to CO rather than dropping it.
@@ -271,7 +284,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
 
     # Clamp the fluorine-consuming channels to layer F availability.
     layer_f_loss = f_per_unit * substrate_removal + 2.0 * cof2
-    scale_lf = _overdraw_scale(state.n_f + (mix_f + f_direct) * dt, layer_f_loss, dt)
+    scale_lf = _overdraw_scale(
+        state.n_f + (mix_f + f_direct + chem_f) * dt, layer_f_loss, dt)
     substrate_removal = substrate_removal * scale_lf
     sif4 = sif4 * scale_lf
     cof2 = cof2 * scale_lf
@@ -322,8 +336,10 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     n_o_raw = state.n_o + dt * (o_to_layer - layer_side_o)
     o_desorb = np.maximum(n_o_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
     # Layer fluorine saturates at coverage too; the excess recombines/reflects.
-    n_f_raw = state.n_f + dt * (mix_f + f_direct - layer_f_loss)
+    n_f_raw = state.n_f + dt * (mix_f + f_direct + chem_f - layer_f_loss)
     f_desorb = np.maximum(n_f_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
+    n_c_raw = state.n_c + dt * (mix_c + chem_c - layer_ox)
+    c_desorb = np.maximum(n_c_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
 
     new_state = MixedLayerState(
         n_c_film=state.n_c_film + dt * (dep_c - sput_c - ox_c - mix_c - bottom_c),
@@ -331,14 +347,15 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
                                         - bottom_f),
         n_si=state.n_si + dt * (si_in - sif4),
         n_o=n_o_raw - dt * o_desorb,
-        n_c=state.n_c + dt * (mix_c - layer_ox),
+        n_c=n_c_raw - dt * c_desorb,
         n_f=n_f_raw - dt * f_desorb,
     )
 
-    residuals = _ledger_residuals(state, new_state, dt, dep_c, dep_f, absorb_f,
+    residuals = _ledger_residuals(state, new_state, dt,
+                                  dep_c + chem_c, dep_f + chem_f, absorb_f,
                                   f_direct, si_in, o_in, sput_c, sput_f,
                                   ox_c + bottom_c, ox_f + bottom_f, mix_c, mix_f,
-                                  sif4, layer_ox,
+                                  sif4, layer_ox + c_desorb,
                                   layer_side_o + o_desorb + bottom_c,
                                   layer_f_loss + f_desorb)
     return StepResult(
