@@ -32,3 +32,32 @@ discipline is the DECLARED SUCCESS CRITERIA below, written before execution.
 Any criterion missed is recorded as-is; the yield-scale knob is NOT reintroduced --
 the miss becomes the mixed-layer v1 target (RESEARCH_MIXED_LAYER_DESIGN_2026-07-23.md).
 Blind credit for any of this requires a fresh preregistered campaign on new sealed data.
+
+## Execution log
+
+### Stage 1 — Lambda ladder (box 45653143, epoch d23190f, complete 2026-07-24 ~06:30 UTC)
+
+All runs at fraction 0.8765 (R5 frozen value), declared operator, 10 nm grid:
+
+| Lambda | opening (nm) | depth (nm) |
+|--------|--------------|------------|
+| 1.0    | 62.30        | 233.40     |
+| 2.5    | 69.33        | 522.08     |
+| 3.0    | 74.01        | 612.63     |
+| 3.5    | 74.35        | 700.55     |
+
+Depth is linear in Lambda (local slope 175.8 nm/unit at 3.0-3.5). Opening rises then
+plateaus at ~74.3 nm. The base opening target is 45 +/- 5 nm; the fraction constant can
+move opening by only ~-2.4 nm at its lower bound (probe column ~67 nm/unit, bound
+0.84 vs 0.8765). **The base opening gate is therefore unreachable under the derived
+law with the two permitted constants — recorded as a criterion miss per the failure
+disposition (mixed-layer v1 target). The yield-scale knob stays retired.**
+
+### Stage 2 — declared calibration (recorded 2026-07-24 ~06:50 UTC, BEFORE any stage-2 run completed)
+
+Receipted-Jacobian solve for the depth gate with fraction at its opening-minimizing
+bound: **fraction = 0.84, Lambda = 4.272** (predicted base ~(72.5, 825.0)). Queue:
+dk-final (base), power 4/8 kW, oxygen 0.5/1.5/2.5 — all at this single calibration.
+The power depth-ratios r(4/6) and r(8/6) are computed against dk-final and are the
+decisive parameter-free prediction; the oxygen claims are scored per the declared
+criteria above. Results to be appended verbatim when the queue drains.
