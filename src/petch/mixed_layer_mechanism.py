@@ -379,10 +379,18 @@ KRUEGER_2024_PRECURSOR_STOICHIOMETRY = {
 
 
 def build_krueger_2024_mixed_layer_mechanisms(
-        *, oxide_parameters=None, mask_parameters=None):
-    """Oxide + mask mixed-layer mechanisms wired to the Krueger species set."""
-    oxide_parameters = oxide_parameters or MixedLayerParams(substrate="sio2")
-    mask_parameters = mask_parameters or MixedLayerParams(substrate="carbon")
+        *, oxide_parameters=None, mask_parameters=None,
+        volatilization_yield=1.0):
+    """Oxide + mask mixed-layer mechanisms wired to the Krueger species set.
+
+    ``volatilization_yield`` is the single base-condition-anchored absolute
+    rate constant (per-channel reference yield), the same one-constant-on-base
+    discipline the K24-DEKNOB-1 study declared for Lambda.
+    """
+    oxide_parameters = oxide_parameters or MixedLayerParams(
+        substrate="sio2", volatilization_yield=float(volatilization_yield))
+    mask_parameters = mask_parameters or MixedLayerParams(
+        substrate="carbon", volatilization_yield=float(volatilization_yield))
     common = dict(
         precursor_species=dict(KRUEGER_2024_PRECURSOR_STOICHIOMETRY),
         fluorine_species=(),

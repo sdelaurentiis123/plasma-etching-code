@@ -625,7 +625,8 @@ def build_krueger_2024_material_router_3d(
         yield_energy_model="threshold_power",
         deposition_layer_depth_nm=1.5,
         oxygen_half_saturation_flux_m2_s=None,
-        surface_model="reduced"):
+        surface_model="reduced",
+        mixed_layer_volatilization_yield=1.0):
     """Build one material router for the reduced Krüger oxide/mask development replay.
 
     ``surface_model`` selects the chemistry family: ``"reduced"`` (the
@@ -646,7 +647,8 @@ def build_krueger_2024_material_router_3d(
                 "oxygen-saturation knobs; do not pass them")
         from petch.mixed_layer_mechanism import (
             build_krueger_2024_mixed_layer_mechanisms)
-        oxide, mask = build_krueger_2024_mixed_layer_mechanisms()
+        oxide, mask = build_krueger_2024_mixed_layer_mechanisms(
+            volatilization_yield=float(mixed_layer_volatilization_yield))
         return MaterialMechanismRouter3D(
             {oxide_id: oxide, mask_id: mask},
             provenance={

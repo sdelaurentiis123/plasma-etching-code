@@ -504,6 +504,8 @@ def _configuration(args):
         "charging": "disabled_for_Krueger_2024_calibration_and_transfer",
         "profile_reinitialization": "cr2",
         "surface_model": str(args.surface_model),
+        "mixed_layer_volatilization_yield": float(
+            args.mixed_layer_volatilization_yield),
         "yield_energy_model": str(args.yield_energy_model),
         "deposition_layer_depth_nm": float(args.deposition_layer_depth_nm),
         "oxygen_half_saturation_flux_m2_s": float(
@@ -776,7 +778,9 @@ def run(args):
         raise ValueError("unknown Krüger boundary case")
     if str(args.surface_model) == "mixed_layer":
         mechanism = build_krueger_2024_material_router_3d(
-            surface_model="mixed_layer")
+            surface_model="mixed_layer",
+            mixed_layer_volatilization_yield=float(
+                args.mixed_layer_volatilization_yield))
     else:
         mechanism = build_krueger_2024_material_router_3d(
             effective_mask_crosslinked_growth_fraction=float(
@@ -1144,6 +1148,12 @@ def parse_args():
         help=(
             "positive base-depth calibration multiplier on the published bare/complex SiO2 "
             "yield amplitudes; held-out runs must reuse it"))
+    parser.add_argument(
+        "--mixed-layer-volatilization-yield", type=float, default=1.0,
+        help=(
+            "mixed-layer absolute rate constant k_v (substrate removals per "
+            "ion at the reference deposited energy); the single "
+            "base-condition-anchored constant of the mixed-layer chemistry"))
     parser.add_argument(
         "--surface-model", default="reduced",
         choices=("reduced", "mixed_layer"),
