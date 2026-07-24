@@ -503,6 +503,10 @@ def _configuration(args):
             f"collisionless_{args.ballistic_transport}_joint_IEAD"),
         "charging": "disabled_for_Krueger_2024_calibration_and_transfer",
         "profile_reinitialization": "cr2",
+        "yield_energy_model": str(args.yield_energy_model),
+        "deposition_layer_depth_nm": float(args.deposition_layer_depth_nm),
+        "oxygen_half_saturation_flux_m2_s": float(
+            args.oxygen_half_saturation_flux_m2_s),
     }
     # Preserve byte-for-byte compatibility with the already-running all-fresh checkpoint.  The
     # calibration closure enters the fingerprint only when promoted away from its historical zero.
@@ -772,7 +776,12 @@ def run(args):
     mechanism = build_krueger_2024_material_router_3d(
         effective_mask_crosslinked_growth_fraction=float(
             args.effective_mask_crosslinked_growth_fraction),
-        oxide_etch_yield_scale=float(args.oxide_etch_yield_scale))
+        oxide_etch_yield_scale=float(args.oxide_etch_yield_scale),
+        yield_energy_model=str(args.yield_energy_model),
+        deposition_layer_depth_nm=float(args.deposition_layer_depth_nm),
+        oxygen_half_saturation_flux_m2_s=(
+            None if float(args.oxygen_half_saturation_flux_m2_s) <= 0.0
+            else float(args.oxygen_half_saturation_flux_m2_s)))
     role = {
         species.name: (
             "energetic_bombardment"
@@ -1130,6 +1139,16 @@ def parse_args():
         help=(
             "positive base-depth calibration multiplier on the published bare/complex SiO2 "
             "yield amplitudes; held-out runs must reuse it"))
+    parser.add_argument(
+        "--yield-energy-model", default="threshold_power",
+        choices=("threshold_power", "deposited_in_layer"),
+        help=(
+            "ion yield energy law: the published threshold power law, or the derived "
+            "ZBL deposited-in-layer (Sigmund) form anchored at the reference energy"))
+    parser.add_argument("--deposition-layer-depth-nm", type=float, default=1.5)
+    parser.add_argument(
+        "--oxygen-half-saturation-flux-m2-s", type=float, default=0.0,
+        help="Langmuir half-saturation of the adsorbed-O channel; <=0 disables")
     parser.add_argument(
         "--ballistic-transport", choices=("forward", "face_gather"),
         default="face_gather")

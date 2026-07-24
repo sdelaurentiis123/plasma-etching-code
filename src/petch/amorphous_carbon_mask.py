@@ -185,7 +185,10 @@ class AmorphousCarbonMaskParameters:
     @classmethod
     def krueger_2024_reduced_projection(
             cls, *, projectile_species=("ions",),
-            effective_crosslinked_growth_fraction=0.0):
+            effective_crosslinked_growth_fraction=0.0,
+            yield_energy_model="threshold_power",
+            deposition_layer_depth_nm=1.5,
+            oxygen_half_saturation_flux_m2_s=None):
         """Return the four-feature calibrated Krüger mask projection.
 
         ``projectile_species`` names the explicit kinetic population used to represent the
@@ -278,10 +281,17 @@ class AmorphousCarbonMaskParameters:
             projectile_species=tuple(projectile_species),
             polymer_sputter_yield=EnergeticYield(
                 0.9, 20.0, 500.0, energy_exponent=0.5,
-                angular_model="kress_1999", angular_parameter=9.3),
+                angular_model="kress_1999", angular_parameter=9.3,
+                energy_model=yield_energy_model,
+                deposition_layer_depth_nm=deposition_layer_depth_nm,
+                deposition_target="fluorocarbon_film"),
             carbon_sputter_yield=EnergeticYield(
                 0.001, 200.0, 250.0, energy_exponent=0.4,
-                angular_model="kress_1999", angular_parameter=9.3),
+                angular_model="kress_1999", angular_parameter=9.3,
+                energy_model=yield_energy_model,
+                deposition_layer_depth_nm=deposition_layer_depth_nm,
+                deposition_target="amorphous_carbon"),
+            oxygen_half_saturation_flux_m2_s=oxygen_half_saturation_flux_m2_s,
             declared_inert_neutral_species=("C3F4",),
             evidence=parameter_evidence,
             known_omissions=(
@@ -611,7 +621,10 @@ class AmorphousCarbonMaskMechanism:
 def build_krueger_2024_material_router_3d(
         *, oxide_material_id=1, mask_material_id=2, projectile_species=("ions",),
         effective_mask_crosslinked_growth_fraction=0.0,
-        oxide_etch_yield_scale=1.0):
+        oxide_etch_yield_scale=1.0,
+        yield_energy_model="threshold_power",
+        deposition_layer_depth_nm=1.5,
+        oxygen_half_saturation_flux_m2_s=None):
     """Build one material router for the reduced Krüger oxide/mask development replay."""
     oxide_id = int(oxide_material_id)
     mask_id = int(mask_material_id)
@@ -619,10 +632,16 @@ def build_krueger_2024_material_router_3d(
         raise ValueError("Krüger oxide and mask material ids must be distinct and positive")
     oxide = ReducedSiO2FluorocarbonMechanism(
         ReducedSiO2FluorocarbonParameters.krueger_2024_reduced_projection(
-            oxide_etch_yield_scale=oxide_etch_yield_scale))
+            oxide_etch_yield_scale=oxide_etch_yield_scale,
+            yield_energy_model=yield_energy_model,
+            deposition_layer_depth_nm=deposition_layer_depth_nm,
+            oxygen_half_saturation_flux_m2_s=oxygen_half_saturation_flux_m2_s))
     mask = AmorphousCarbonMaskMechanism(
         AmorphousCarbonMaskParameters.krueger_2024_reduced_projection(
             projectile_species=projectile_species,
+            yield_energy_model=yield_energy_model,
+            deposition_layer_depth_nm=deposition_layer_depth_nm,
+            oxygen_half_saturation_flux_m2_s=oxygen_half_saturation_flux_m2_s,
             effective_crosslinked_growth_fraction=(
                 effective_mask_crosslinked_growth_fraction)))
     return MaterialMechanismRouter3D(

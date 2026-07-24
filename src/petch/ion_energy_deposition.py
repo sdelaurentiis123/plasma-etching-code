@@ -179,3 +179,53 @@ def derived_yield_energy_factor(energy_eV, cosine_incidence, *, layer_depth_nm,
     value = nuclear_energy_in_layer_eV(
         energy_eV, cosine_incidence, layer_depth_nm, z1, m1, target)
     return float(value / reference)
+
+
+_TARGETS = {
+    "sio2": SIO2,
+    "amorphous_carbon": AMORPHOUS_CARBON,
+    "fluorocarbon_film": FLUOROCARBON_FILM,
+}
+_FACTOR_CACHE = {}
+
+
+def cached_layer_factor(energy_eV, cosine_incidence, layer_depth_nm,
+                        reference_energy_eV, threshold_energy_eV, target_name,
+                        z1, m1):
+    """Vectorized, memoized derived yield factor for fixed boundary energy bins.
+
+    Boundary distributions use a fixed set of (energy, angle) bins per run, so the
+    scalar deposition integrals are computed once per distinct bin and reused for
+    every surface batch and time step.
+    """
+    target = _TARGETS[str(target_name)]
+    energy = np.asarray(energy_eV, dtype=float)
+    cosine = np.asarray(cosine_incidence, dtype=float)
+    energy_b, cosine_b = np.broadcast_arrays(energy, cosine)
+    flat_e = energy_b.ravel()
+    flat_c = cosine_b.ravel()
+    result = np.empty(flat_e.shape, dtype=float)
+    base_key = (float(layer_depth_nm), float(reference_energy_eV),
+                float(threshold_energy_eV), str(target_name), int(z1), float(m1))
+    reference_key = base_key + ("__reference__",)
+    reference = _FACTOR_CACHE.get(reference_key)
+    if reference is None:
+        reference = nuclear_energy_in_layer_eV(
+            reference_energy_eV, 1.0, layer_depth_nm, z1, m1, target)
+        if reference <= 0.0:
+            raise ValueError("reference energy deposits nothing in the layer")
+        _FACTOR_CACHE[reference_key] = reference
+    for index in range(flat_e.size):
+        e = float(flat_e[index])
+        mu = float(np.clip(flat_c[index], 1e-3, 1.0))
+        if threshold_energy_eV and e <= threshold_energy_eV:
+            result[index] = 0.0
+            continue
+        key = base_key + (round(e, 6), round(mu, 6))
+        value = _FACTOR_CACHE.get(key)
+        if value is None:
+            value = nuclear_energy_in_layer_eV(
+                e, mu, layer_depth_nm, z1, m1, target) / reference
+            _FACTOR_CACHE[key] = value
+        result[index] = value
+    return result.reshape(energy_b.shape)

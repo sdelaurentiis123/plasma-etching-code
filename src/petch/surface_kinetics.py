@@ -84,6 +84,11 @@ class EnergeticYield:
     angular_model: str = "none"
     angular_parameter: float | None = None
     knee_energy_eV: float | None = None
+    energy_model: str = "threshold_power"
+    deposition_layer_depth_nm: float | None = None
+    deposition_target: str = "sio2"
+    projectile_atomic_number: int = 18
+    projectile_mass_amu: float = 39.948
 
     def __post_init__(self):
         if (not np.isfinite(self.reference_yield) or self.reference_yield < 0.0
@@ -96,6 +101,17 @@ class EnergeticYield:
                 not np.isfinite(self.knee_energy_eV)
                 or self.knee_energy_eV <= self.threshold_energy_eV):
             raise ValueError("yield knee energy must exceed the threshold energy")
+        if self.energy_model not in ("threshold_power", "deposited_in_layer"):
+            raise ValueError(f"unknown yield energy model: {self.energy_model}")
+        if self.energy_model == "deposited_in_layer":
+            if self.knee_energy_eV is not None:
+                raise ValueError(
+                    "the deposited-in-layer model supersedes the fitted knee")
+            if (self.deposition_layer_depth_nm is None
+                    or not np.isfinite(self.deposition_layer_depth_nm)
+                    or self.deposition_layer_depth_nm <= 0.0):
+                raise ValueError(
+                    "deposited-in-layer model requires a positive layer depth")
         if self.angular_model not in {"none", "chang_sawin_1997", "kress_1999"}:
             raise ValueError(f"unknown angular yield model: {self.angular_model}")
         if self.angular_model == "kress_1999":
@@ -108,6 +124,19 @@ class EnergeticYield:
         cosine = np.asarray(cosine_incidence, dtype=float)
         if np.any(~np.isfinite(energy)) or np.any(energy < 0.0):
             raise ValueError("incident energies must be finite and nonnegative")
+        if self.energy_model == "deposited_in_layer":
+            # Derived energy-angle factor: nuclear energy deposited within the reactive
+            # layer (ZBL stopping; no fitted energy parameters), anchored to unity at the
+            # reference energy and normal incidence so the calibrated absolute yield
+            # table is preserved and only the extrapolation shape is replaced.  The
+            # angular shape is emergent, so the empirical angular model is bypassed.
+            from .ion_energy_deposition import cached_layer_factor
+            factor = cached_layer_factor(
+                energy, cosine, self.deposition_layer_depth_nm,
+                self.reference_energy_eV, self.threshold_energy_eV,
+                self.deposition_target, self.projectile_atomic_number,
+                self.projectile_mass_amu)
+            return self.reference_yield * factor
         if self.knee_energy_eV is not None:
             # keV-scale ions deposit energy below the reactive mixing layer; the etch
             # yield saturates rather than following the threshold law indefinitely
@@ -753,7 +782,10 @@ class ReducedSiO2FluorocarbonParameters:
         )
 
     @classmethod
-    def krueger_2024_reduced_projection(cls, *, oxide_etch_yield_scale=1.0):
+    def krueger_2024_reduced_projection(cls, *, oxide_etch_yield_scale=1.0,
+                                        yield_energy_model="threshold_power",
+                                        deposition_layer_depth_nm=1.5,
+                                        oxygen_half_saturation_flux_m2_s=None):
         """Project Krüger's calibrated MCFPM mechanism onto the reduced oxide state.
 
         This package is intentionally a *development replay*, not a predictive parameter set.
@@ -847,13 +879,23 @@ class ReducedSiO2FluorocarbonParameters:
             oxygen_polymer_etch_probability=0.0628,
             bare_sio2_yield=EnergeticYield(
                 0.0909 * scale, 70.0, 140.0, energy_exponent=1.0,
-                angular_model="kress_1999", angular_parameter=9.3),
+                angular_model="kress_1999", angular_parameter=9.3,
+                energy_model=yield_energy_model,
+                deposition_layer_depth_nm=deposition_layer_depth_nm,
+                deposition_target="sio2"),
             complex_sio2_yield=EnergeticYield(
                 0.1384 * scale, 35.0, 140.0, energy_exponent=1.0,
-                angular_model="chang_sawin_1997"),
+                angular_model="chang_sawin_1997",
+                energy_model=yield_energy_model,
+                deposition_layer_depth_nm=deposition_layer_depth_nm,
+                deposition_target="sio2"),
             polymer_sputter_yield=EnergeticYield(
                 0.9, 20.0, 500.0, energy_exponent=0.5,
-                angular_model="kress_1999", angular_parameter=9.3),
+                angular_model="kress_1999", angular_parameter=9.3,
+                energy_model=yield_energy_model,
+                deposition_layer_depth_nm=deposition_layer_depth_nm,
+                deposition_target="fluorocarbon_film"),
+            oxygen_half_saturation_flux_m2_s=oxygen_half_saturation_flux_m2_s,
             declared_inert_neutral_species=("C3F4",),
             evidence=parameter_evidence,
             known_omissions=(
