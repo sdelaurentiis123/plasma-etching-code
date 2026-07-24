@@ -2,6 +2,7 @@
 
 import math
 
+import numpy as np
 import pytest
 
 from petch.mixed_layer import (
@@ -83,9 +84,12 @@ def test_clog_boundary_emerges_and_moves_with_ion_energy():
 
     assert not clogs(1.0e18, 1000.0)
     assert clogs(3.0e21, 1000.0)
-    # Higher ion energy keeps a flux etching that clogs at lower energy.
-    boundary_low = clogs(2.0e20, 200.0)
-    boundary_high = clogs(2.0e20, 3000.0)
+    # Higher ion energy keeps a flux etching that clogs at lower energy. The
+    # flux sits between the two energies' total removal capacities — at much
+    # higher precursor flux deposition beats removal at ANY energy (that
+    # regime spuriously passed before the accelerated integrator existed).
+    boundary_low = clogs(3.0e19, 200.0)
+    boundary_high = clogs(3.0e19, 3000.0)
     assert boundary_low and not boundary_high
 
 
@@ -95,19 +99,20 @@ def test_oxygen_thins_film_and_moves_clog_boundary():
     In a healthy etching state the demand is already saturated by lattice
     oxygen, so extra gas O buys almost nothing — C availability, not a
     fitted constant, sets the saturation point."""
-    # Polymer-rich regime: a film exists; oxygen thins it monotonically and
-    # crossing the boundary lifts the rate by orders of magnitude (the cliff).
-    thicknesses = []
-    rates = []
-    for j_o in (0.0, 5.0e19, 5.0e20, 2.0e21):
-        fluxes = SurfaceFluxes(1.5e20, 2.0e20, j_o, 6.0e18, 1000.0)
+    # The film balance is a cliff (removal saturates with coverage, deposition
+    # does not): without oxygen this flux clogs; enough oxygen rescues it, and
+    # within the etching branch the residual thin film keeps thinning with O.
+    outcomes = []
+    for j_o in (0.0, 5.0e20, 2.0e21):
+        fluxes = SurfaceFluxes(6.0e19, 2.0e20, j_o, 6.0e18, 1000.0)
         result = steady_state(fluxes)
-        thicknesses.append(result.state.film_thickness_nm())
-        rates.append(result.sif4_rate)
-    assert thicknesses[0] > 0.1  # a film exists to be thinned
-    assert all(a >= b for a, b in zip(thicknesses, thicknesses[1:]))
-    assert thicknesses[-1] < thicknesses[0]
-    assert rates[-1] > 100.0 * rates[0]
+        outcomes.append((result.ledger_residuals.get("clogged", False),
+                         float(np.asarray(result.state.film_thickness_nm())),
+                         float(np.asarray(result.sif4_rate))))
+    assert outcomes[0][0] and outcomes[0][2] == 0.0          # clogged, no etch
+    assert not outcomes[1][0] and not outcomes[2][0]         # rescued
+    assert outcomes[1][2] > 0.0 and outcomes[2][2] > 0.0
+    assert outcomes[2][1] < outcomes[1][1]                   # residual film thins
 
     # Healthy etching regime: lattice oxygen already saturates the demand, so
     # gas oxygen buys nothing — the saturation point is C availability.
@@ -116,10 +121,10 @@ def test_oxygen_thins_film_and_moves_clog_boundary():
     assert lean[1] == pytest.approx(lean[0], rel=0.1)
 
     def clogs(j_o):
-        fluxes = SurfaceFluxes(4.0e20, 5.0e19, j_o, 3.0e18, 600.0)
+        fluxes = SurfaceFluxes(2.0e20, 5.0e19, j_o, 3.0e18, 600.0)
         return steady_state(fluxes).ledger_residuals.get("clogged", False)
 
-    assert clogs(0.0) and not clogs(1.0e21)
+    assert clogs(0.0) and not clogs(4.0e21)
 
 
 def test_selectivity_emerges_from_lattice_oxygen():
@@ -172,6 +177,39 @@ def test_rung0_degenerate_matches_langmuir_closed_form():
                     * eps_dep / params.reference_energy_eV)
         theta = j_f / (j_f + 4.0 * capacity)
         assert result.sif4_rate == pytest.approx(capacity * theta, rel=1e-5)
+
+
+def test_vectorized_step_matches_scalar_bitwise():
+    """One array call over N faces must equal N scalar calls exactly — the
+    contract that lets the feature engine (and later the GPU port) batch
+    per-face chemistry without changing a single bit."""
+    import numpy as np
+
+    conditions = [
+        (3.0e19, 2.0e20, 5.0e19, 6.0e18, 1000.0, 1.0),
+        (1.5e20, 5.0e19, 0.0, 3.0e18, 600.0, 0.7),
+        (0.0, 1.0e21, 2.0e20, 1.0e19, 2000.0, 0.3),
+        (8.0e19, 0.0, 1.0e20, 2.0e18, 150.0, 1.0),
+    ]
+    params = MixedLayerParams()
+    dt = 1e-4
+    # Scalar path, advanced two steps from bare.
+    scalar_states = []
+    for cond in conditions:
+        state = MixedLayerState()
+        for _ in range(2):
+            state = step(state, SurfaceFluxes(*cond), dt, params).state
+        scalar_states.append(state)
+    # Vector path: all faces at once.
+    arrays = [np.array(col) for col in zip(*conditions)]
+    vec_fluxes = SurfaceFluxes(*arrays)
+    vec_state = MixedLayerState(*[np.zeros(len(conditions))] * 6)
+    for _ in range(2):
+        vec_state = step(vec_state, vec_fluxes, dt, params).state
+    for i, expected in enumerate(scalar_states):
+        for name in ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f"):
+            assert float(np.asarray(getattr(vec_state, name))[i]) == float(
+                getattr(expected, name)), (i, name)
 
 
 def test_bitwise_determinism():

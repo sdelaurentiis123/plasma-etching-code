@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 
+import numpy as np
+
 from petch.ion_energy_deposition import (
     FLUOROCARBON_FILM,
     SIO2,
@@ -134,45 +136,48 @@ def _stopping_tables(params: MixedLayerParams):
     return tables
 
 
-def _table_lookup(energy_eV: float, column) -> float:
-    import math
-    if energy_eV <= _TABLE_ENERGY_MIN_EV:
-        return column[0] * (energy_eV / _TABLE_ENERGY_MIN_EV)
-    if energy_eV >= _TABLE_ENERGY_MAX_EV:
-        return column[-1]
-    log_lo = math.log(_TABLE_ENERGY_MIN_EV)
-    log_hi = math.log(_TABLE_ENERGY_MAX_EV)
-    n = len(column)
-    pos = (math.log(energy_eV) - log_lo) / (log_hi - log_lo) * (n - 1)
-    i = min(int(pos), n - 2)
+def _table_lookup(energy_eV, column):
+    """Vectorized log-energy interpolation; linear roll-off below the table."""
+    energy = np.asarray(energy_eV, dtype=float)
+    column = np.asarray(column, dtype=float)
+    log_lo = np.log(_TABLE_ENERGY_MIN_EV)
+    log_hi = np.log(_TABLE_ENERGY_MAX_EV)
+    n = column.shape[0]
+    clipped = np.clip(energy, _TABLE_ENERGY_MIN_EV, _TABLE_ENERGY_MAX_EV)
+    pos = (np.log(clipped) - log_lo) / (log_hi - log_lo) * (n - 1)
+    i = np.minimum(pos.astype(int), n - 2)
     frac = pos - i
-    return column[i] * (1.0 - frac) + column[i + 1] * frac
+    interior = column[i] * (1.0 - frac) + column[i + 1] * frac
+    low = column[0] * (energy / _TABLE_ENERGY_MIN_EV)
+    return np.where(energy <= _TABLE_ENERGY_MIN_EV, low, interior)
 
 
-def interface_energy_eV(ion_energy_eV: float, film_thickness_nm: float,
-                        params: MixedLayerParams) -> float:
+def interface_energy_eV(ion_energy_eV, film_thickness_nm,
+                        params: MixedLayerParams):
     """Standaert defluorination law: E_iface = E * exp(-d_FC / lambda_FC)."""
-    if ion_energy_eV <= 0.0:
-        return 0.0
+    energy = np.asarray(ion_energy_eV, dtype=float)
+    thickness = np.asarray(film_thickness_nm, dtype=float)
     _, _, _, lam_fc, _, _ = _stopping_tables(params)
-    lam = _table_lookup(ion_energy_eV, lam_fc)
-    if lam <= 0.0:
-        return 0.0
-    import math
-    return ion_energy_eV * math.exp(-film_thickness_nm / lam)
+    lam = _table_lookup(np.maximum(energy, _TABLE_ENERGY_MIN_EV * 1e-3), lam_fc)
+    safe_lam = np.maximum(lam, 1e-300)
+    result = energy * np.exp(-np.minimum(thickness / safe_lam, 700.0))
+    return np.where((energy > 0.0) & (lam > 0.0), result, 0.0)
 
 
-def _deposited_energy(e_iface: float, cosine: float,
-                      params: MixedLayerParams) -> tuple[float, float]:
+def _deposited_energy(e_iface, cosine, params: MixedLayerParams):
     """Nuclear energy deposited in the mixed layer; layer depth from range."""
-    if e_iface <= 0.0:
-        return 0.0, params.minimum_layer_depth_nm
+    e_iface = np.asarray(e_iface, dtype=float)
+    cosine = np.asarray(cosine, dtype=float)
     _, _, _, _, depth_col, dep_col = _stopping_tables(params)
-    depth = _table_lookup(e_iface, depth_col)
-    energy = _table_lookup(e_iface, dep_col)
+    depth = _table_lookup(np.maximum(e_iface, _TABLE_ENERGY_MIN_EV * 1e-3),
+                          depth_col)
+    energy = _table_lookup(np.maximum(e_iface, _TABLE_ENERGY_MIN_EV * 1e-3),
+                           dep_col)
     # Slant path deposits more of the ion's energy in the layer, capped at E.
-    if 0.0 < cosine < 1.0:
-        energy = min(e_iface, energy / max(cosine, 0.05))
+    slant = np.minimum(e_iface, energy / np.maximum(cosine, 0.05))
+    energy = np.where((cosine > 0.0) & (cosine < 1.0), slant, energy)
+    energy = np.where(e_iface > 0.0, energy, 0.0)
+    depth = np.where(e_iface > 0.0, depth, params.minimum_layer_depth_nm)
     return energy, depth
 
 
@@ -191,9 +196,9 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     eps_dep, _depth = _deposited_energy(e_iface, fluxes.cosine_incidence, params)
     energy_ratio = eps_dep / params.reference_energy_eV
 
-    film_total = state.n_c_film + state.n_f_film
-    x_c = state.n_c_film / film_total if film_total > 0.0 else 0.0
-    x_f = state.n_f_film / film_total if film_total > 0.0 else 0.0
+    film_total = np.asarray(state.n_c_film + state.n_f_film, dtype=float)
+    x_c = _guarded_ratio(state.n_c_film, film_total, 1.0)
+    x_f = _guarded_ratio(state.n_f_film, film_total, 1.0)
 
     # --- film gains ---
     dep_c = params.sticking_probability * fluxes.precursor_flux
@@ -206,9 +211,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     sput_f = sputter_total * x_f
     # O oxidation of film carbon: each oxidized C carries along the local film
     # F/C ratio (capped at 2, the COF2 stoichiometry); remainder leaves as CO.
-    ox_c = params.oxidation_probability * fluxes.oxygen_flux * theta_film * (
-        x_c if film_total > 0.0 else 0.0)
-    f_per_ox_c = min(2.0, state.n_f_film / state.n_c_film) if state.n_c_film > 0.0 else 0.0
+    ox_c = params.oxidation_probability * fluxes.oxygen_flux * theta_film * x_c
+    f_per_ox_c = _guarded_ratio(state.n_f_film, state.n_c_film, 2.0)
     ox_f = ox_c * f_per_ox_c
     # Ion-driven mixing of film content into the layer (Humbird-Graves).
     mix_total = params.mixing_efficiency * fluxes.ion_flux * energy_ratio * theta_film
@@ -220,9 +224,9 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     loss_f = sput_f + ox_f + mix_f
     scale_c = _overdraw_scale(state.n_c_film + dep_c * dt, loss_c, dt)
     scale_f = _overdraw_scale(state.n_f_film + (dep_f + absorb_f) * dt, loss_f, dt)
-    scale_film = min(scale_c, scale_f)  # keep C/F branches consistent
-    sput_c *= scale_film; ox_c *= scale_film; mix_c *= scale_film
-    sput_f *= scale_film; ox_f *= scale_film; mix_f *= scale_film
+    scale_film = np.minimum(scale_c, scale_f)  # keep C/F branches consistent
+    sput_c = sput_c * scale_film; ox_c = ox_c * scale_film; mix_c = mix_c * scale_film
+    sput_f = sput_f * scale_film; ox_f = ox_f * scale_film; mix_f = mix_f * scale_film
 
     # --- mixed layer ---
     # Layer fluorine coverage (site fraction of a saturated monolayer). The
@@ -230,7 +234,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # as the Belen/ViennaPS coupled-coverage model (rate = capacity * theta_F),
     # so the degenerate no-carbon limit reproduces that structure exactly
     # (Rung 0) instead of a sharp supply/capacity switch.
-    theta_f_layer = min(state.n_f / _MONOLAYER_AREAL_M2, 1.0)
+    theta_f_layer = np.minimum(
+        np.asarray(state.n_f, dtype=float) / _MONOLAYER_AREAL_M2, 1.0)
     # Direct F where the film is open, Langmuir (1 - theta) sticking; the
     # reflected remainder never enters the ledger.
     f_direct = (fluxes.fluorine_flux * (1.0 - theta_film)
@@ -239,11 +244,11 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # fitted law). SiO2 leaves as SiF4 (4 F per Si); an amorphous-carbon mask
     # leaves as CFx (2 F per C, the F-costly channel) with no lattice oxygen —
     # selectivity must emerge from the film/energy/F budgets, never a parameter.
-    volat_capacity = params.volatilization_yield * fluxes.ion_flux * energy_ratio * (
-        1.0 - theta_film if theta_film < 1.0 else 0.0)
+    volat_capacity = (params.volatilization_yield * fluxes.ion_flux
+                      * energy_ratio * np.maximum(1.0 - theta_film, 0.0))
     if params.substrate == "carbon":
         f_per_unit = 2.0
-        sif4 = 0.0
+        sif4 = np.zeros_like(volat_capacity * theta_f_layer)
         substrate_removal = volat_capacity * theta_f_layer
     else:
         f_per_unit = 4.0
@@ -253,8 +258,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # clamp to available layer carbon first.
     layer_ox = params.oxidation_probability * fluxes.oxygen_flux * (1.0 - theta_film) * (
         state.n_c / (state.n_c + _MONOLAYER_AREAL_M2))
-    layer_ox *= _overdraw_scale(state.n_c + mix_c * dt, layer_ox, dt)
-    f_per_layer_c = min(2.0, state.n_f / state.n_c) if state.n_c > 0.0 else 0.0
+    layer_ox = layer_ox * _overdraw_scale(state.n_c + mix_c * dt, layer_ox, dt)
+    f_per_layer_c = _guarded_ratio(state.n_f, state.n_c, 2.0)
     # COF2 branch consumes layer F; the CO branch does not — an F-starved
     # clamp below shifts oxidized carbon from COF2 to CO rather than dropping it.
     cof2 = layer_ox * (f_per_layer_c / 2.0)
@@ -262,9 +267,9 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # Clamp the fluorine-consuming channels to layer F availability.
     layer_f_loss = f_per_unit * substrate_removal + 2.0 * cof2
     scale_lf = _overdraw_scale(state.n_f + (mix_f + f_direct) * dt, layer_f_loss, dt)
-    substrate_removal *= scale_lf
-    sif4 *= scale_lf
-    cof2 *= scale_lf
+    substrate_removal = substrate_removal * scale_lf
+    sif4 = sif4 * scale_lf
+    cof2 = cof2 * scale_lf
 
     # Recession; for SiO2 it liberates lattice Si and O into the layer
     # (1 Si : 2 O per SiF4). Carbon lattice leaves directly as CFx product.
@@ -286,9 +291,11 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # grows a thick protective film.
     rem_c_film = state.n_c_film + dt * (dep_c - sput_c - ox_c - mix_c)
     rem_f_film = state.n_f_film + dt * (dep_f + absorb_f - sput_f - ox_f - mix_f)
-    bottom_c = min(0.5 * o_in, max(rem_c_film, 0.0) / max(dt, 1e-30))
-    f_carry = min(2.0, rem_f_film / rem_c_film) if rem_c_film > 0.0 else 0.0
-    bottom_f = min(bottom_c * f_carry, max(rem_f_film, 0.0) / max(dt, 1e-30))
+    bottom_c = np.minimum(0.5 * o_in,
+                          np.maximum(rem_c_film, 0.0) / max(dt, 1e-30))
+    f_carry = _guarded_ratio(rem_f_film, rem_c_film, 2.0)
+    bottom_f = np.minimum(bottom_c * f_carry,
+                          np.maximum(rem_f_film, 0.0) / max(dt, 1e-30))
     o_to_layer = o_in - bottom_c
 
     # Layer-side product oxygen (one O per oxidized layer C, CO or COF2 alike);
@@ -296,8 +303,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # layer O availability, shifting the shortfall out of both product branches.
     layer_side_o = layer_ox
     scale_lo = _overdraw_scale(state.n_o + o_to_layer * dt, layer_side_o, dt)
-    layer_ox *= scale_lo
-    cof2 *= scale_lo
+    layer_ox = layer_ox * scale_lo
+    cof2 = cof2 * scale_lo
     layer_side_o = layer_ox
     layer_f_loss = f_per_unit * substrate_removal + 2.0 * cof2
 
@@ -308,10 +315,10 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # (O2) — surfaces cannot hold more than saturation coverage. Accounted as
     # outflow so the O ledger still closes exactly.
     n_o_raw = state.n_o + dt * (o_to_layer - layer_side_o)
-    o_desorb = max(n_o_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
+    o_desorb = np.maximum(n_o_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
     # Layer fluorine saturates at coverage too; the excess recombines/reflects.
     n_f_raw = state.n_f + dt * (mix_f + f_direct - layer_f_loss)
-    f_desorb = max(n_f_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
+    f_desorb = np.maximum(n_f_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
 
     new_state = MixedLayerState(
         n_c_film=state.n_c_film + dt * (dep_c - sput_c - ox_c - mix_c - bottom_c),
@@ -347,11 +354,40 @@ def steady_state(fluxes: SurfaceFluxes, params: MixedLayerParams = MixedLayerPar
                  relative_tolerance: float = 1e-10) -> StepResult:
     """Integrate to steady state or report clog (unbounded film growth)."""
     state = MixedLayerState()
+    # Explicit-integrator stability bound: the fastest reservoir timescale is
+    # a monolayer against the largest total flux. Beyond it the map goes
+    # oscillatory and settles off the true fixed point, so the acceleration
+    # ramp is capped here — declarations below the bound are trustworthy.
+    fastest_flux = max(
+        float(np.max(np.asarray(fluxes.fluorine_flux, dtype=float))),
+        float(np.max(np.asarray(fluxes.precursor_flux, dtype=float)))
+        * (1.0 + params.precursor_fc_ratio),
+        float(np.max(np.asarray(fluxes.oxygen_flux, dtype=float))),
+        4.0 * params.volatilization_yield
+        * float(np.max(np.asarray(fluxes.ion_flux, dtype=float))),
+        1.0)
+    dt_stable = 0.25 * _MONOLAYER_AREAL_M2 / fastest_flux
+    base_dt = dt
     result = step(state, fluxes, dt, params)
     for _ in range(max_steps):
         nxt = step(result.state, fluxes, dt, params)
         thickness = nxt.state.film_thickness_nm()
         growing = thickness > result.state.film_thickness_nm()
+        # Trajectory-faithful adaptive ramp: the system is bistable, so which
+        # basin a transient lands in depends on integration accuracy. Grow the
+        # step only while per-step relative change stays small; shrink it when
+        # the dynamics are fast. Always within the explicit stability bound.
+        change = 0.0
+        for name in ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f"):
+            va = np.asarray(getattr(result.state, name), dtype=float)
+            vb = np.asarray(getattr(nxt.state, name), dtype=float)
+            scale = np.maximum(np.maximum(np.abs(va), np.abs(vb)),
+                               _MONOLAYER_AREAL_M2)
+            change = max(change, float(np.max(np.abs(vb - va) / scale)))
+        if change > 0.02:
+            dt = max(dt * 0.5, base_dt)
+        else:
+            dt = min(dt * 1.02, max(dt_stable, base_dt))
         if thickness > params.clog_film_thickness_nm:
             nxt.ledger_residuals["clogged"] = True
             return nxt
@@ -371,17 +407,26 @@ def steady_state(fluxes: SurfaceFluxes, params: MixedLayerParams = MixedLayerPar
     return result
 
 
-def _exp_neg(x: float) -> float:
-    import math
-    return math.exp(-min(x, 700.0))
+def _exp_neg(x):
+    return np.exp(-np.minimum(x, 700.0))
 
 
-def _overdraw_scale(available_plus_gain: float, loss_rate: float, dt: float) -> float:
-    if loss_rate <= 0.0:
-        return 1.0
-    drawable = max(available_plus_gain, 0.0)
-    needed = loss_rate * dt
-    return 1.0 if needed <= drawable else drawable / needed
+def _guarded_ratio(numerator, denominator, cap):
+    """min(cap, num/den) where den > 0, else 0 — overflow-safe on the discarded branch."""
+    den = np.asarray(denominator, dtype=float)
+    with np.errstate(over="ignore", divide="ignore", invalid="ignore"):
+        ratio = np.asarray(numerator, dtype=float) / np.maximum(den, 1e-300)
+    return np.where(den > 0.0, np.minimum(cap, ratio), 0.0)
+
+
+def _overdraw_scale(available_plus_gain, loss_rate, dt):
+    drawable = np.maximum(available_plus_gain, 0.0)
+    needed = np.asarray(loss_rate, dtype=float) * dt
+    safe = np.maximum(needed, 1e-300)
+    with np.errstate(over="ignore", divide="ignore", invalid="ignore"):
+        ratio = drawable / safe
+    return np.where(needed <= drawable, 1.0,
+                    np.where(needed > 0.0, ratio, 1.0))
 
 
 def _converged(a: MixedLayerState, b: MixedLayerState, dt: float, tol: float) -> bool:
@@ -406,7 +451,10 @@ def _ledger_residuals(old, new, dt, dep_c, dep_f, absorb_f, f_direct, si_in,
     c_res = c_in - c_out - (store("n_c_film") + store("n_c"))
     si_res = si_in - sif4 - store("n_si")
     o_res = o_in - layer_side_o - store("n_o")
-    norm = max(f_in, c_in, si_in, o_in, _MONOLAYER_AREAL_M2)
+    norm = np.maximum.reduce([
+        np.asarray(f_in, dtype=float), np.asarray(c_in, dtype=float),
+        np.asarray(si_in, dtype=float), np.asarray(o_in, dtype=float),
+        np.full_like(np.asarray(f_in, dtype=float), _MONOLAYER_AREAL_M2)])
     return {
         "fluorine": f_res / norm,
         "carbon": c_res / norm,
