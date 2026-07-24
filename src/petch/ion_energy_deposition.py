@@ -186,46 +186,62 @@ _TARGETS = {
     "amorphous_carbon": AMORPHOUS_CARBON,
     "fluorocarbon_film": FLUOROCARBON_FILM,
 }
-_FACTOR_CACHE = {}
+_TABLE_CACHE = {}
+_TABLE_ENERGY_POINTS = 72
+_TABLE_COSINE_POINTS = 40
+_TABLE_MAXIMUM_ENERGY_EV = 2.0e4
+
+
+def _factor_table(layer_depth_nm, reference_energy_eV, target_name, z1, m1):
+    """Dense (log-energy x cosine) table of the deposition factor, built once.
+
+    The deposited-energy factor is smooth in both arguments, so bilinear
+    interpolation on this grid is far below the quadrature receipts; building the
+    table costs a few thousand scalar integrals exactly once per configuration.
+    """
+    key = (float(layer_depth_nm), float(reference_energy_eV), str(target_name),
+           int(z1), float(m1))
+    cached = _TABLE_CACHE.get(key)
+    if cached is not None:
+        return cached
+    target = _TARGETS[str(target_name)]
+    reference = nuclear_energy_in_layer_eV(
+        reference_energy_eV, 1.0, layer_depth_nm, z1, m1, target)
+    if reference <= 0.0:
+        raise ValueError("reference energy deposits nothing in the layer")
+    energies = np.geomspace(12.0, _TABLE_MAXIMUM_ENERGY_EV, _TABLE_ENERGY_POINTS)
+    cosines = np.linspace(1e-3, 1.0, _TABLE_COSINE_POINTS)
+    table = np.empty((_TABLE_ENERGY_POINTS, _TABLE_COSINE_POINTS))
+    for i, energy in enumerate(energies):
+        for j, mu in enumerate(cosines):
+            table[i, j] = nuclear_energy_in_layer_eV(
+                energy, mu, layer_depth_nm, z1, m1, target) / reference
+    cached = (np.log(energies), cosines, table)
+    _TABLE_CACHE[key] = cached
+    return cached
 
 
 def cached_layer_factor(energy_eV, cosine_incidence, layer_depth_nm,
                         reference_energy_eV, threshold_energy_eV, target_name,
                         z1, m1):
-    """Vectorized, memoized derived yield factor for fixed boundary energy bins.
-
-    Boundary distributions use a fixed set of (energy, angle) bins per run, so the
-    scalar deposition integrals are computed once per distinct bin and reused for
-    every surface batch and time step.
-    """
-    target = _TARGETS[str(target_name)]
+    """Vectorized deposition factor via bilinear interpolation of the dense table."""
+    log_e_grid, mu_grid, table = _factor_table(
+        layer_depth_nm, reference_energy_eV, target_name, z1, m1)
     energy = np.asarray(energy_eV, dtype=float)
     cosine = np.asarray(cosine_incidence, dtype=float)
     energy_b, cosine_b = np.broadcast_arrays(energy, cosine)
-    flat_e = energy_b.ravel()
-    flat_c = cosine_b.ravel()
-    result = np.empty(flat_e.shape, dtype=float)
-    base_key = (float(layer_depth_nm), float(reference_energy_eV),
-                float(threshold_energy_eV), str(target_name), int(z1), float(m1))
-    reference_key = base_key + ("__reference__",)
-    reference = _FACTOR_CACHE.get(reference_key)
-    if reference is None:
-        reference = nuclear_energy_in_layer_eV(
-            reference_energy_eV, 1.0, layer_depth_nm, z1, m1, target)
-        if reference <= 0.0:
-            raise ValueError("reference energy deposits nothing in the layer")
-        _FACTOR_CACHE[reference_key] = reference
-    for index in range(flat_e.size):
-        e = float(flat_e[index])
-        mu = float(np.clip(flat_c[index], 1e-3, 1.0))
-        if threshold_energy_eV and e <= threshold_energy_eV:
-            result[index] = 0.0
-            continue
-        key = base_key + (round(e, 6), round(mu, 6))
-        value = _FACTOR_CACHE.get(key)
-        if value is None:
-            value = nuclear_energy_in_layer_eV(
-                e, mu, layer_depth_nm, z1, m1, target) / reference
-            _FACTOR_CACHE[key] = value
-        result[index] = value
-    return result.reshape(energy_b.shape)
+    log_e = np.log(np.clip(energy_b, 12.0, _TABLE_MAXIMUM_ENERGY_EV))
+    mu = np.clip(cosine_b, mu_grid[0], 1.0)
+    ei = np.clip(np.searchsorted(log_e_grid, log_e) - 1, 0, len(log_e_grid) - 2)
+    mj = np.clip(np.searchsorted(mu_grid, mu) - 1, 0, len(mu_grid) - 2)
+    te = (log_e - log_e_grid[ei]) / (log_e_grid[ei + 1] - log_e_grid[ei])
+    tm = (mu - mu_grid[mj]) / (mu_grid[mj + 1] - mu_grid[mj])
+    te = np.clip(te, 0.0, 1.0)
+    tm = np.clip(tm, 0.0, 1.0)
+    value = ((1 - te) * (1 - tm) * table[ei, mj]
+             + te * (1 - tm) * table[ei + 1, mj]
+             + (1 - te) * tm * table[ei, mj + 1]
+             + te * tm * table[ei + 1, mj + 1])
+    if threshold_energy_eV:
+        value = np.where(energy_b <= threshold_energy_eV, 0.0, value)
+    return value.reshape(energy_b.shape)
