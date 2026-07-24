@@ -991,6 +991,9 @@ def run(args):
             "raw_maximum_face_velocity_m_s": float(
                 result.diagnostics["raw_maximum_face_velocity_m_s"]),
             "cfl_substeps": int(result.diagnostics["cfl_substeps"]),
+            "interior_gas_nucleation_suppressed_cells": int(
+                result.diagnostics.get(
+                    "interior_gas_nucleation_suppressed_cells", 0)),
             "removed_unresolved_solid_cells": int(
                 result.diagnostics["removed_unresolved_solid_cells"]),
             "reassigned_unresolved_material_nodes": int(

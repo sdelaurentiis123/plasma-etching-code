@@ -158,6 +158,13 @@ def test_cavity_continue_policy_still_refuses_solid_component_change(monkeypatch
     monkeypatch.setattr(
         feature_step_module, "_advect_exposed_material_levelsets",
         lambda *args, **kwargs: {1: split.copy()})
+    # The injected one-step interior cut is exactly what the nucleation guard
+    # heals (a physical split's final pinch is gas-adjacent and passes it);
+    # disable the guard here to test the topology policy in isolation.
+    monkeypatch.setattr(
+        feature_step_module, "_suppress_interior_gas_nucleation",
+        lambda prev, prev_materials, phi, materials, **kwargs: (
+            phi, materials, 0))
 
     with pytest.raises(SurfaceTopologyChangeError) as info:
         solve_feature_3d(

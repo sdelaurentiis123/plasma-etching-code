@@ -917,6 +917,67 @@ def _redistance_feature_field(phi, dx, method, *, periodic_lateral=False):
     return reinit_narrow(phi, dx, 4.0 * dx)
 
 
+def _neighbor_or_along_axis(field, axis, *, periodic):
+    """6-neighborhood OR along one axis; duplicate-endpoint periodic aware."""
+    result = np.zeros_like(field)
+    if periodic:
+        core = np.take(field, range(field.shape[axis] - 1), axis=axis)
+        shifted = np.roll(core, 1, axis=axis) | np.roll(core, -1, axis=axis)
+        target = [slice(None)] * field.ndim
+        target[axis] = slice(0, -1)
+        result[tuple(target)] = shifted
+        endpoint = [slice(None)] * field.ndim
+        endpoint[axis] = -1
+        result[tuple(endpoint)] = np.take(shifted, 0, axis=axis)
+        return result
+    src = [slice(None)] * field.ndim
+    dst = [slice(None)] * field.ndim
+    src[axis] = slice(1, None)
+    dst[axis] = slice(0, -1)
+    result[tuple(dst)] |= field[tuple(src)]
+    result[tuple(src)] |= field[tuple(dst)]
+    return result
+
+
+def _suppress_interior_gas_nucleation(
+        previous_phi, previous_material_levelsets, phi, material_levelsets, *,
+        periodic_lateral=False):
+    """Restore solid at cells where gas nucleated with no prior gas adjacency.
+
+    Gas cannot appear in the interior of solid material: every physically new
+    gas cell is adjacent to pre-step gas (cavity pinch-off included — pinched
+    cells keep their prior gas neighbors). A cell that flips solid->gas with
+    no 6-neighbor prior gas is a numerical artifact of a material-material
+    seam lying exactly on a grid plane (both signed distances exactly zero,
+    advected by velocity extended from an unrelated surface). Restore the
+    pre-step values of every field at those cells and report the count.
+    """
+    previous = np.asarray(previous_phi, dtype=float)
+    old_gas = previous <= 0.0
+    adjacent = np.zeros_like(old_gas)
+    for axis in range(3):
+        adjacent |= _neighbor_or_along_axis(
+            old_gas, axis, periodic=periodic_lateral and axis in (0, 1))
+    artifact = (np.asarray(phi) <= 0.0) & ~old_gas & ~adjacent
+    count = int(np.count_nonzero(artifact))
+    if count:
+        phi = np.array(phi, copy=True)
+        phi[artifact] = previous[artifact]
+        if material_levelsets is not None and previous_material_levelsets is not None:
+            material_levelsets = {
+                material_id: _restore_at(levelset,
+                                         previous_material_levelsets[material_id],
+                                         artifact)
+                for material_id, levelset in material_levelsets.items()}
+    return phi, material_levelsets, count
+
+
+def _restore_at(field, previous_field, where):
+    field = np.array(field, copy=True)
+    field[where] = np.asarray(previous_field, dtype=float)[where]
+    return field
+
+
 def _advect_exposed_material_levelsets(
         material_levelsets, etchable_material_ids, extended_velocity,
         dx, duration_s, substeps, *, periodic_lateral=False):
@@ -2549,6 +2610,7 @@ def advance_feature_step_3d(
             centerline_phi_upper_before=float(centerline[lower + 1]))
     pinned = (geometry.material_id > 0) & ~np.isin(geometry.material_id, etchable)
     material_levelsets = None
+    nucleation_suppressed = 0
     if duration_s == 0.0:
         # A zero-duration transport/chemistry audit is an exact geometry no-op.
         # Reconstructing the union from independently redistanced material fields can
@@ -2574,6 +2636,11 @@ def advance_feature_step_3d(
             geometry.dx, duration_s, substeps,
             periodic_lateral=profile_periodic_lateral)
         phi = np.maximum.reduce(tuple(material_levelsets.values()))
+        phi, material_levelsets, nucleation_suppressed = (
+            _suppress_interior_gas_nucleation(
+                geometry.phi, geometry.material_levelsets, phi,
+                material_levelsets,
+                periodic_lateral=profile_periodic_lateral))
     advected_centerline = phi[center]
     advected_crossing = np.flatnonzero(
         (advected_centerline[:-1] >= 0.0) & (advected_centerline[1:] < 0.0))
@@ -2596,6 +2663,12 @@ def advance_feature_step_3d(
                     material_id: _project_periodic_lateral_endpoints(levelset)[0]
                     for material_id, levelset in material_levelsets.items()}
             phi = np.maximum.reduce(tuple(material_levelsets.values()))
+            phi, material_levelsets, redistance_suppressed = (
+                _suppress_interior_gas_nucleation(
+                    geometry.phi, geometry.material_levelsets, phi,
+                    material_levelsets,
+                    periodic_lateral=profile_periodic_lateral))
+            nucleation_suppressed += redistance_suppressed
         phi = _redistance_feature_field(
             phi, geometry.dx, reinitialization_method,
             periodic_lateral=profile_periodic_lateral)
@@ -2921,6 +2994,7 @@ def advance_feature_step_3d(
                 float(np.max(surface_growth_velocity))
                 if surface_growth_velocity.size else 0.0),
             max_displacement_mesh_units=displacement, cfl_substeps=int(substeps),
+            interior_gas_nucleation_suppressed_cells=int(nucleation_suppressed),
             cfl_number=float(cfl_number), reinitialized=bool(reinitialize),
             reinitialization_method=(reinitialization_method if reinitialize else None),
             topology_change_policy=str(topology_change_policy),
