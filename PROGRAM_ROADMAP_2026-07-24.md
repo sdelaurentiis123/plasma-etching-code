@@ -59,6 +59,17 @@ flight (Opus agent).
 Gate: reproduce the published Krüger HPEM wafer fluxes from his recipe within a
 declared band; then one TEL-recipe blind attempt.
 
+Reactor tiers are a ladder to a full HPEM-class stack, not a substitute:
+Tier-1 (0-D global, above) → Tier-2 (1-D/2-D axisymmetric fluid + EM power
+deposition, GPU-native and differentiable from day one) → Tier-3 (kinetic
+electron/ion MC modules, reusing the feature-side GPU tracing machinery).
+Identical boundary contract at every tier; each tier gates against the one
+below plus measured densities before it earns trust. Tier-1-first is a
+measurement, not a compromise: Gate 1 against Krüger's known boundary
+separates input error (cross sections, wall coefficients — shared by all
+tiers) from dimensionality error (what Tier-2 buys), and that decides how
+much full-solver to build.
+
 ### Stage F — differentiability + speed endgame
 1. CUDA port of the analytic-occlusion exchange (10-50x expected).
 2. Dual-number forward mode through transport+chemistry (boundary terms vanish
