@@ -96,6 +96,8 @@ class MixedLayerMechanism:
                  precursor_species=("CFx",), fluorine_species=("F",),
                  oxygen_species=("O",), inert_species=(),
                  chemisorption_probability=None,
+                 deposition_probability_on_film=None,
+                 deposition_probability_on_substrate=None,
                  default_max_step_s=0.01):
         if not isinstance(parameters, MixedLayerParams):
             raise TypeError("parameters must be MixedLayerParams")
@@ -119,6 +121,17 @@ class MixedLayerMechanism:
         if unknown:
             raise ValueError(
                 f"chemisorption probabilities for unmapped species: {sorted(unknown)}")
+        self.deposition_probability_on_film = (
+            None if deposition_probability_on_film is None
+            else {str(k): float(v)
+                  for k, v in dict(deposition_probability_on_film).items()})
+        self.deposition_probability_on_substrate = (
+            None if deposition_probability_on_substrate is None
+            else {str(k): float(v)
+                  for k, v in dict(deposition_probability_on_substrate).items()})
+        if (self.deposition_probability_on_film is None) != (
+                self.deposition_probability_on_substrate is None):
+            raise ValueError("deposition splits must be provided together")
         self.fluorine_species = tuple(fluorine_species)
         self.oxygen_species = tuple(oxygen_species)
         self.inert_species = tuple(inert_species)
@@ -256,10 +269,8 @@ class MixedLayerMechanism:
             result = mixed_layer_step(module_state, module_fluxes, dt,
                                       self.parameters)
             removed = removed + np.asarray(result.substrate_removal_rate) * dt
-            dep_rate = (self.parameters.sticking_probability
-                        * np.asarray(module_fluxes.precursor_flux)
-                        * (1.0 + np.asarray(module_fluxes.precursor_fc_ratio)))
-            deposited_total = deposited_total + dep_rate * dt
+            deposited_total = (deposited_total
+                               + np.asarray(result.film_deposition_rate) * dt)
             module_state = result.state
         film_after = np.asarray(
             module_state.n_c_film + module_state.n_f_film, dtype=float)
@@ -365,6 +376,10 @@ class MixedLayerMechanism:
         fluorine_bound = np.zeros(shape)
         chem_c = np.zeros(shape)
         chem_f = np.zeros(shape)
+        film_dep_c = np.zeros(shape)
+        film_dep_f = np.zeros(shape)
+        sub_dep_c = np.zeros(shape)
+        sub_dep_f = np.zeros(shape)
         for name, (c_atoms, f_atoms) in self.precursor_stoichiometry.items():
             value = fluxes.neutral_flux_m2_s.get(name)
             if value is None:
@@ -375,6 +390,13 @@ class MixedLayerMechanism:
             probability = self.chemisorption_probability.get(name, 0.0)
             chem_c = chem_c + probability * base * c_atoms
             chem_f = chem_f + probability * base * f_atoms
+            if self.deposition_probability_on_film is not None:
+                p_film = self.deposition_probability_on_film.get(name, 0.0)
+                p_sub = self.deposition_probability_on_substrate.get(name, 0.0)
+                film_dep_c = film_dep_c + p_film * base * c_atoms
+                film_dep_f = film_dep_f + p_film * base * f_atoms
+                sub_dep_c = sub_dep_c + p_sub * base * c_atoms
+                sub_dep_f = sub_dep_f + p_sub * base * f_atoms
         with np.errstate(divide="ignore", invalid="ignore"):
             fc_ratio = np.where(
                 carbon_flux > 0.0,
@@ -389,7 +411,19 @@ class MixedLayerMechanism:
             cosine_incidence=np.clip(mean_cosine, 0.0, 1.0),
             precursor_fc_ratio=fc_ratio,
             chemisorption_carbon_flux=chem_c,
-            chemisorption_fluorine_flux=chem_f)
+            chemisorption_fluorine_flux=chem_f,
+            film_deposition_carbon_flux=(
+                film_dep_c if self.deposition_probability_on_film is not None
+                else None),
+            film_deposition_fluorine_flux=(
+                film_dep_f if self.deposition_probability_on_film is not None
+                else None),
+            substrate_deposition_carbon_flux=(
+                sub_dep_c if self.deposition_probability_on_film is not None
+                else None),
+            substrate_deposition_fluorine_flux=(
+                sub_dep_f if self.deposition_probability_on_film is not None
+                else None))
 
 
 # Krueger 2024 species channels: fluorocarbon radicals with explicit C/F
@@ -407,6 +441,17 @@ KRUEGER_2024_PRECURSOR_STOICHIOMETRY = {
 KRUEGER_2024_CHEMISORPTION_PROBABILITY = {
     "CF": 0.2729, "CF2": 0.2729, "CF3": 0.2, "C2F3": 0.2,
     "C2F4": 0.001, "C3F5": 0.001, "C3F6": 0.001,
+}
+
+# Krueger's published substrate-dependent polymer deposition probabilities:
+# sticking on existing polymer is ~100x sticking on bare oxide — radicals on
+# open oxide chemisorb (complex) instead of polymerizing. Both maps are in
+# the reduced-projection factory (surface_kinetics.py), lifted verbatim.
+KRUEGER_2024_DEPOSITION_ON_POLYMER = {
+    "CF": 0.1, "CF2": 0.1, "CF3": 0.1, "C2F3": 0.03,
+}
+KRUEGER_2024_DEPOSITION_ON_SUBSTRATE = {
+    "CF": 0.002, "CF2": 0.0015, "CF3": 0.001, "C2F3": 0.001,
 }
 
 
@@ -428,6 +473,9 @@ def build_krueger_2024_mixed_layer_mechanisms(
         fluorine_species=(),
         oxygen_species=("O",),
         inert_species=("C3F4",),
-        chemisorption_probability=dict(KRUEGER_2024_CHEMISORPTION_PROBABILITY))
+        chemisorption_probability=dict(KRUEGER_2024_CHEMISORPTION_PROBABILITY),
+        deposition_probability_on_film=dict(KRUEGER_2024_DEPOSITION_ON_POLYMER),
+        deposition_probability_on_substrate=dict(
+            KRUEGER_2024_DEPOSITION_ON_SUBSTRATE))
     return (MixedLayerMechanism(oxide_parameters, **common),
             MixedLayerMechanism(mask_parameters, **common))

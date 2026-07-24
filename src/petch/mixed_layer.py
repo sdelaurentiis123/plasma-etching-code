@@ -90,6 +90,13 @@ class SurfaceFluxes:
     # probabilities are applied by the adapter). Atoms/m^2/s of C and F.
     chemisorption_carbon_flux: object = 0.0
     chemisorption_fluorine_flux: object = 0.0
+    # Substrate-dependent deposition (Krueger: sticking on polymer ~0.1 vs
+    # on bare substrate ~0.001-0.002). When provided, these override the
+    # single sticking_probability path: deposition blends with theta_film.
+    film_deposition_carbon_flux: object = None
+    film_deposition_fluorine_flux: object = None
+    substrate_deposition_carbon_flux: object = None
+    substrate_deposition_fluorine_flux: object = None
 
 
 @dataclass
@@ -102,6 +109,7 @@ class StepResult:
     cof2_rate: float
     interface_energy_eV: float
     deposited_energy_eV: float
+    film_deposition_rate: float = 0.0
     ledger_residuals: dict = field(default_factory=dict)
 
 
@@ -209,10 +217,25 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     x_f = _guarded_ratio(state.n_f_film, film_total, 1.0)
 
     # --- film gains ---
-    fc_ratio = (params.precursor_fc_ratio if fluxes.precursor_fc_ratio is None
-                else fluxes.precursor_fc_ratio)
-    dep_c = params.sticking_probability * fluxes.precursor_flux
-    dep_f = dep_c * fc_ratio
+    if fluxes.film_deposition_carbon_flux is not None:
+        # Substrate-dependent sticking (published on-polymer vs on-substrate
+        # probabilities): deposition rate blends with film coverage.
+        dep_c = (theta_film * np.asarray(fluxes.film_deposition_carbon_flux,
+                                         dtype=float)
+                 + (1.0 - theta_film)
+                 * np.asarray(fluxes.substrate_deposition_carbon_flux,
+                              dtype=float))
+        dep_f = (theta_film * np.asarray(fluxes.film_deposition_fluorine_flux,
+                                         dtype=float)
+                 + (1.0 - theta_film)
+                 * np.asarray(fluxes.substrate_deposition_fluorine_flux,
+                              dtype=float))
+    else:
+        fc_ratio = (params.precursor_fc_ratio
+                    if fluxes.precursor_fc_ratio is None
+                    else fluxes.precursor_fc_ratio)
+        dep_c = params.sticking_probability * fluxes.precursor_flux
+        dep_f = dep_c * fc_ratio
     absorb_f = params.fluorine_film_sticking * fluxes.fluorine_flux * theta_film
 
     # --- film losses (proposed rates, atoms/m^2/s) ---
@@ -367,6 +390,7 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         cof2_rate=cof2_total,
         interface_energy_eV=e_iface,
         deposited_energy_eV=eps_dep,
+        film_deposition_rate=dep_c + dep_f,
         ledger_residuals=residuals,
     )
 
