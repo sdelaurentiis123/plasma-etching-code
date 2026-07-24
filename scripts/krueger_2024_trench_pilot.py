@@ -503,6 +503,7 @@ def _configuration(args):
             f"collisionless_{args.ballistic_transport}_joint_IEAD"),
         "charging": "disabled_for_Krueger_2024_calibration_and_transfer",
         "profile_reinitialization": "cr2",
+        "surface_model": str(args.surface_model),
         "yield_energy_model": str(args.yield_energy_model),
         "deposition_layer_depth_nm": float(args.deposition_layer_depth_nm),
         "oxygen_half_saturation_flux_m2_s": float(
@@ -773,15 +774,19 @@ def run(args):
             **common_boundary)
     else:  # argparse constrains this, but keep direct-call behavior fail-closed.
         raise ValueError("unknown Krüger boundary case")
-    mechanism = build_krueger_2024_material_router_3d(
-        effective_mask_crosslinked_growth_fraction=float(
-            args.effective_mask_crosslinked_growth_fraction),
-        oxide_etch_yield_scale=float(args.oxide_etch_yield_scale),
-        yield_energy_model=str(args.yield_energy_model),
-        deposition_layer_depth_nm=float(args.deposition_layer_depth_nm),
-        oxygen_half_saturation_flux_m2_s=(
-            None if float(args.oxygen_half_saturation_flux_m2_s) <= 0.0
-            else float(args.oxygen_half_saturation_flux_m2_s)))
+    if str(args.surface_model) == "mixed_layer":
+        mechanism = build_krueger_2024_material_router_3d(
+            surface_model="mixed_layer")
+    else:
+        mechanism = build_krueger_2024_material_router_3d(
+            effective_mask_crosslinked_growth_fraction=float(
+                args.effective_mask_crosslinked_growth_fraction),
+            oxide_etch_yield_scale=float(args.oxide_etch_yield_scale),
+            yield_energy_model=str(args.yield_energy_model),
+            deposition_layer_depth_nm=float(args.deposition_layer_depth_nm),
+            oxygen_half_saturation_flux_m2_s=(
+                None if float(args.oxygen_half_saturation_flux_m2_s) <= 0.0
+                else float(args.oxygen_half_saturation_flux_m2_s)))
     role = {
         species.name: (
             "energetic_bombardment"
@@ -1139,6 +1144,13 @@ def parse_args():
         help=(
             "positive base-depth calibration multiplier on the published bare/complex SiO2 "
             "yield amplitudes; held-out runs must reuse it"))
+    parser.add_argument(
+        "--surface-model", default="reduced",
+        choices=("reduced", "mixed_layer"),
+        help=(
+            "surface chemistry family: the reduced coverage/site-balance "
+            "mechanisms, or the element-resolved mixed-layer chemistry "
+            "(knob-free; refuses the reduced-model calibration flags)"))
     parser.add_argument(
         "--yield-energy-model", default="threshold_power",
         choices=("threshold_power", "deposited_in_layer"),

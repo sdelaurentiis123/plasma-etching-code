@@ -456,10 +456,10 @@ def _ledger_residuals(old, new, dt, dep_c, dep_f, absorb_f, f_direct, si_in,
     c_res = c_in - c_out - (store("n_c_film") + store("n_c"))
     si_res = si_in - sif4 - store("n_si")
     o_res = o_in - layer_side_o - store("n_o")
-    norm = np.maximum.reduce([
-        np.asarray(f_in, dtype=float), np.asarray(c_in, dtype=float),
-        np.asarray(si_in, dtype=float), np.asarray(o_in, dtype=float),
-        np.full_like(np.asarray(f_in, dtype=float), _MONOLAYER_AREAL_M2)])
+    norm = np.maximum(
+        np.maximum(np.asarray(f_in, dtype=float), np.asarray(c_in, dtype=float)),
+        np.maximum(np.asarray(si_in, dtype=float), np.asarray(o_in, dtype=float)))
+    norm = np.maximum(norm, _MONOLAYER_AREAL_M2)
     return {
         "fluorine": f_res / norm,
         "carbon": c_res / norm,
