@@ -89,20 +89,71 @@ def test_clog_boundary_emerges_and_moves_with_ion_energy():
     assert boundary_low and not boundary_high
 
 
-def test_oxygen_thins_film_and_rate_saturates():
+def test_oxygen_thins_film_and_moves_clog_boundary():
+    """Gas oxygen's role: thin the film monotonically, and rescue a flux
+    combination that clogs without it (the Krueger O2-sweep mechanism).
+    In a healthy etching state the demand is already saturated by lattice
+    oxygen, so extra gas O buys almost nothing — C availability, not a
+    fitted constant, sets the saturation point."""
+    # Polymer-rich regime: a film exists; oxygen thins it monotonically and
+    # crossing the boundary lifts the rate by orders of magnitude (the cliff).
     thicknesses = []
     rates = []
-    for j_o in (0.0, 5.0e19, 5.0e20, 2.0e21, 4.0e21):
-        fluxes = SurfaceFluxes(3.0e19, 2.0e20, j_o, 6.0e18, 1000.0)
+    for j_o in (0.0, 5.0e19, 5.0e20, 2.0e21):
+        fluxes = SurfaceFluxes(1.5e20, 2.0e20, j_o, 6.0e18, 1000.0)
         result = steady_state(fluxes)
         thicknesses.append(result.state.film_thickness_nm())
         rates.append(result.sif4_rate)
+    assert thicknesses[0] > 0.1  # a film exists to be thinned
     assert all(a >= b for a, b in zip(thicknesses, thicknesses[1:]))
-    assert rates[-2] > rates[0]  # oxygen enables etching through the film
-    # Once the film is consumed, additional oxygen buys almost nothing:
-    # the saturation point is C availability, not a fitted constant.
-    assert thicknesses[-1] < 0.1
-    assert rates[-1] == pytest.approx(rates[-2], rel=0.1)
+    assert thicknesses[-1] < thicknesses[0]
+    assert rates[-1] > 100.0 * rates[0]
+
+    # Healthy etching regime: lattice oxygen already saturates the demand, so
+    # gas oxygen buys nothing — the saturation point is C availability.
+    lean = [steady_state(SurfaceFluxes(3.0e19, 2.0e20, j_o, 6.0e18, 1000.0)).sif4_rate
+            for j_o in (0.0, 2.0e21)]
+    assert lean[1] == pytest.approx(lean[0], rel=0.1)
+
+    def clogs(j_o):
+        fluxes = SurfaceFluxes(4.0e20, 5.0e19, j_o, 3.0e18, 600.0)
+        return steady_state(fluxes).ledger_residuals.get("clogged", False)
+
+    assert clogs(0.0) and not clogs(1.0e21)
+
+
+def test_selectivity_emerges_from_lattice_oxygen():
+    """Same plasma over SiO2 vs an a-C mask: the mask must grow the thicker
+    film, see less interface energy, and etch much slower — with no
+    selectivity parameter anywhere (Standaert/Oehrlein mechanism)."""
+    oxide = steady_state(_BASE, MixedLayerParams(substrate="sio2"))
+    mask = steady_state(_BASE, MixedLayerParams(substrate="carbon"))
+    assert mask.state.film_thickness_nm() > 2.0 * oxide.state.film_thickness_nm()
+    assert mask.interface_energy_eV < oxide.interface_energy_eV
+    assert oxide.recession_velocity_m_s > 3.0 * mask.recession_velocity_m_s
+
+
+def test_carbon_substrate_ledger_closes():
+    params = MixedLayerParams(substrate="carbon")
+    _, worst = _integrate(_BASE, n_steps=1000, params=params)
+    assert worst < 1e-9
+
+
+def test_rate_follows_derived_energy_law():
+    """In the capacity-limited film-free regime, the substrate removal rate
+    must scale exactly as the ZBL deposited-in-layer factor — the same law
+    the K24-DEKNOB-1 study validated. No fitted energy dependence."""
+    from petch.mixed_layer import _deposited_energy
+
+    params = MixedLayerParams()
+    rates = {}
+    for energy in (300.0, 1000.0, 3000.0):
+        fluxes = SurfaceFluxes(0.0, 1.0e22, 0.0, 6.0e18, energy)
+        rates[energy] = steady_state(fluxes, params).sif4_rate
+    for energy in (300.0, 3000.0):
+        expected = (_deposited_energy(energy, 1.0, params)[0]
+                    / _deposited_energy(1000.0, 1.0, params)[0])
+        assert rates[energy] / rates[1000.0] == pytest.approx(expected, rel=1e-6)
 
 
 def test_bitwise_determinism():

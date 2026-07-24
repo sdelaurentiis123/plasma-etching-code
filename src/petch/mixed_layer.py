@@ -48,6 +48,7 @@ class MixedLayerParams:
     oxidation_probability: float = 0.0628  # p_ox: Krueger O-driven polymer etch
     mixing_efficiency: float = 1.0       # eta_mix: Humbird-Graves, O(1)
     volatilization_yield: float = 1.0    # k_v: SiF4 per ion at reference deposition
+    substrate: str = "sio2"              # "sio2" | "carbon" (a-C mask, no lattice O)
     reference_energy_eV: float = 1000.0  # E_ref for the deposited-energy ratio
     film_sputter_yield: float = 0.1384   # film atoms per ion at reference deposition
     minimum_layer_depth_nm: float = 0.5
@@ -86,6 +87,7 @@ class StepResult:
     state: MixedLayerState
     recession_velocity_m_s: float
     sif4_rate: float
+    substrate_removal_rate: float
     co_rate: float
     cof2_rate: float
     interface_energy_eV: float
@@ -225,12 +227,21 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # --- mixed layer ---
     # F entering the layer: mixing + direct F where film is open.
     f_direct = fluxes.fluorine_flux * (1.0 - theta_film)
-    # Ion capacity for SiF4 (derived energy factor; no fitted law).
-    sif4_capacity = params.volatilization_yield * fluxes.ion_flux * energy_ratio * (
+    # Ion capacity for substrate volatilization (derived energy factor; no
+    # fitted law). SiO2 leaves as SiF4 (4 F per Si); an amorphous-carbon mask
+    # leaves as CFx (2 F per C, the F-costly channel) with no lattice oxygen —
+    # selectivity must emerge from the film/energy/F budgets, never a parameter.
+    volat_capacity = params.volatilization_yield * fluxes.ion_flux * energy_ratio * (
         1.0 - theta_film if theta_film < 1.0 else 0.0)
-    # F supply limit: available layer F (plus this step's inflow) / 4.
     f_available_rate = state.n_f / max(dt, 1e-30) + mix_f + f_direct
-    sif4 = min(sif4_capacity, 0.25 * f_available_rate)
+    if params.substrate == "carbon":
+        f_per_unit = 2.0
+        sif4 = 0.0
+        substrate_removal = min(volat_capacity, f_available_rate / f_per_unit)
+    else:
+        f_per_unit = 4.0
+        sif4 = min(volat_capacity, f_available_rate / f_per_unit)
+        substrate_removal = sif4
     # Layer oxidation of mixed C by layer O (same probability channel);
     # clamp to available layer carbon first.
     layer_ox = params.oxidation_probability * fluxes.oxygen_flux * (1.0 - theta_film) * (
@@ -242,46 +253,80 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     cof2 = layer_ox * (f_per_layer_c / 2.0)
 
     # Clamp the fluorine-consuming channels to layer F availability.
-    layer_f_loss = 4.0 * sif4 + 2.0 * cof2
+    layer_f_loss = f_per_unit * substrate_removal + 2.0 * cof2
     scale_lf = _overdraw_scale(state.n_f + (mix_f + f_direct) * dt, layer_f_loss, dt)
+    substrate_removal *= scale_lf
     sif4 *= scale_lf
     cof2 *= scale_lf
 
-    # Recession liberates lattice Si and O into the layer (1 Si : 2 O per SiF4).
-    recession = sif4 / _SIO2_FORMULA_DENSITY_M3  # m/s
-    si_in = sif4
-    o_in = 2.0 * sif4
+    # Recession; for SiO2 it liberates lattice Si and O into the layer
+    # (1 Si : 2 O per SiF4). Carbon lattice leaves directly as CFx product.
+    if params.substrate == "carbon":
+        recession = substrate_removal / 1.0e29  # a-C atomic density
+        si_in = 0.0
+        o_in = 0.0
+    else:
+        recession = sif4 / _SIO2_FORMULA_DENSITY_M3  # m/s
+        si_in = sif4
+        o_in = 2.0 * sif4
+
+    # Interfacial oxidation (the Standaert/Oehrlein selectivity mechanism):
+    # lattice oxygen liberated by recession attacks the film carbon from below
+    # as CO, carrying film F along as COF2. Efficiency is fixed by the etch
+    # complex stoichiometry (SiO2-C: two lattice O consume one film C per
+    # etched Si) — a chemistry ratio, not a rate constant. This is the term
+    # that keeps the film thin on SiO2 while a carbon substrate (no lattice O)
+    # grows a thick protective film.
+    rem_c_film = state.n_c_film + dt * (dep_c - sput_c - ox_c - mix_c)
+    rem_f_film = state.n_f_film + dt * (dep_f + absorb_f - sput_f - ox_f - mix_f)
+    bottom_c = min(0.5 * o_in, max(rem_c_film, 0.0) / max(dt, 1e-30))
+    f_carry = min(2.0, rem_f_film / rem_c_film) if rem_c_film > 0.0 else 0.0
+    bottom_f = min(bottom_c * f_carry, max(rem_f_film, 0.0) / max(dt, 1e-30))
+    o_to_layer = o_in - bottom_c
 
     # Layer-side product oxygen (one O per oxidized layer C, CO or COF2 alike);
     # film-side CO/COF2 oxygen comes from the incident O flux directly. Clamp to
     # layer O availability, shifting the shortfall out of both product branches.
     layer_side_o = layer_ox
-    scale_lo = _overdraw_scale(state.n_o + o_in * dt, layer_side_o, dt)
+    scale_lo = _overdraw_scale(state.n_o + o_to_layer * dt, layer_side_o, dt)
     layer_ox *= scale_lo
     cof2 *= scale_lo
     layer_side_o = layer_ox
-    layer_f_loss = 4.0 * sif4 + 2.0 * cof2
+    layer_f_loss = f_per_unit * substrate_removal + 2.0 * cof2
 
-    co = (ox_c - 0.5 * ox_f) + (layer_ox - cof2)
-    cof2_total = cof2 + 0.5 * ox_f
+    co = (ox_c - 0.5 * ox_f) + (layer_ox - cof2) + (bottom_c - 0.5 * bottom_f)
+    cof2_total = cof2 + 0.5 * ox_f + 0.5 * bottom_f
+
+    # Excess layer oxygen beyond a saturated monolayer desorbs recombinatively
+    # (O2) — surfaces cannot hold more than saturation coverage. Accounted as
+    # outflow so the O ledger still closes exactly.
+    n_o_raw = state.n_o + dt * (o_to_layer - layer_side_o)
+    o_desorb = max(n_o_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
+    # Layer fluorine saturates at coverage too; the excess recombines/reflects.
+    n_f_raw = state.n_f + dt * (mix_f + f_direct - layer_f_loss)
+    f_desorb = max(n_f_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
 
     new_state = MixedLayerState(
-        n_c_film=state.n_c_film + dt * (dep_c - sput_c - ox_c - mix_c),
-        n_f_film=state.n_f_film + dt * (dep_f + absorb_f - sput_f - ox_f - mix_f),
+        n_c_film=state.n_c_film + dt * (dep_c - sput_c - ox_c - mix_c - bottom_c),
+        n_f_film=state.n_f_film + dt * (dep_f + absorb_f - sput_f - ox_f - mix_f
+                                        - bottom_f),
         n_si=state.n_si + dt * (si_in - sif4),
-        n_o=state.n_o + dt * (o_in - layer_side_o),
+        n_o=n_o_raw - dt * o_desorb,
         n_c=state.n_c + dt * (mix_c - layer_ox),
-        n_f=state.n_f + dt * (mix_f + f_direct - layer_f_loss),
+        n_f=n_f_raw - dt * f_desorb,
     )
 
     residuals = _ledger_residuals(state, new_state, dt, dep_c, dep_f, absorb_f,
-                                  f_direct, si_in, o_in, sput_c, sput_f, ox_c,
-                                  ox_f, mix_c, mix_f, sif4, layer_ox,
-                                  layer_side_o, layer_f_loss)
+                                  f_direct, si_in, o_in, sput_c, sput_f,
+                                  ox_c + bottom_c, ox_f + bottom_f, mix_c, mix_f,
+                                  sif4, layer_ox,
+                                  layer_side_o + o_desorb + bottom_c,
+                                  layer_f_loss + f_desorb)
     return StepResult(
         state=new_state,
         recession_velocity_m_s=recession,
         sif4_rate=sif4,
+        substrate_removal_rate=substrate_removal,
         co_rate=co,
         cof2_rate=cof2_total,
         interface_energy_eV=e_iface,
