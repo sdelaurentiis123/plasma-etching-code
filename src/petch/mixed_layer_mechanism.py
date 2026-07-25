@@ -41,7 +41,7 @@ _SIO2_FORMULA_DENSITY_M3 = 2.2e28
 _CARBON_ATOM_DENSITY_M3 = 1.0e29
 
 _STATE_FIELDS = ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f",
-                 "removed_formula_units_m2")
+                 "n_xl_film", "removed_formula_units_m2")
 
 
 @dataclass(frozen=True)
@@ -54,6 +54,7 @@ class MixedLayerSurfaceState:
     n_o: np.ndarray | float
     n_c: np.ndarray | float
     n_f: np.ndarray | float
+    n_xl_film: np.ndarray | float = 0.0
     removed_formula_units_m2: np.ndarray | float = 0.0
 
     def __post_init__(self):
@@ -70,7 +71,7 @@ class MixedLayerSurfaceState:
     @classmethod
     def bare(cls, shape=()):
         zero = np.zeros(shape)
-        return cls(zero, zero, zero, zero, zero, zero, zero)
+        return cls(zero, zero, zero, zero, zero, zero, zero, zero)
 
     def conservative_surface_fields(self):
         return {name: getattr(self, name) for name in _STATE_FIELDS}
@@ -86,7 +87,8 @@ class MixedLayerSurfaceState:
 
     def _module_state(self):
         return MixedLayerState(self.n_c_film, self.n_f_film, self.n_si,
-                               self.n_o, self.n_c, self.n_f)
+                               self.n_o, self.n_c, self.n_f,
+                               n_xl_film=self.n_xl_film)
 
 
 class MixedLayerMechanism:
@@ -98,6 +100,7 @@ class MixedLayerMechanism:
                  chemisorption_probability=None,
                  deposition_probability_on_film=None,
                  deposition_probability_on_substrate=None,
+                 deposition_probability_on_crosslinked=None,
                  default_max_step_s=0.01):
         if not isinstance(parameters, MixedLayerParams):
             raise TypeError("parameters must be MixedLayerParams")
@@ -132,6 +135,10 @@ class MixedLayerMechanism:
         if (self.deposition_probability_on_film is None) != (
                 self.deposition_probability_on_substrate is None):
             raise ValueError("deposition splits must be provided together")
+        self.deposition_probability_on_crosslinked = (
+            None if deposition_probability_on_crosslinked is None
+            else {str(k): float(v)
+                  for k, v in dict(deposition_probability_on_crosslinked).items()})
         self.fluorine_species = tuple(fluorine_species)
         self.oxygen_species = tuple(oxygen_species)
         self.inert_species = tuple(inert_species)
@@ -292,6 +299,9 @@ class MixedLayerMechanism:
         velocity = np.maximum(signed, 0.0)
         growth_velocity = np.maximum(-signed, 0.0)
         zeros = np.zeros(shape)
+        module_state_fields = ("n_c_film", "n_f_film", "n_si", "n_o",
+                               "n_c", "n_f", "n_xl_film")
+
         def representational_floor(value):
             array = np.asarray(value, dtype=float)
             floor = -1e-6 * _MONOLAYER_AREAL_M2
@@ -307,6 +317,7 @@ class MixedLayerMechanism:
             representational_floor(module_state.n_o),
             representational_floor(module_state.n_c),
             representational_floor(module_state.n_f),
+            representational_floor(module_state.n_xl_film),
             np.asarray(state.removed_formula_units_m2) + removed)
         inventory_name = ("carbon_atom" if self.parameters.substrate == "carbon"
                           else "sio2_formula")
@@ -383,6 +394,8 @@ class MixedLayerMechanism:
         film_dep_f = np.zeros(shape)
         sub_dep_c = np.zeros(shape)
         sub_dep_f = np.zeros(shape)
+        xl_dep_c = np.zeros(shape)
+        xl_dep_f = np.zeros(shape)
         for name, (c_atoms, f_atoms) in self.precursor_stoichiometry.items():
             value = fluxes.neutral_flux_m2_s.get(name)
             if value is None:
@@ -400,6 +413,10 @@ class MixedLayerMechanism:
                 film_dep_f = film_dep_f + p_film * base * f_atoms
                 sub_dep_c = sub_dep_c + p_sub * base * c_atoms
                 sub_dep_f = sub_dep_f + p_sub * base * f_atoms
+                if self.deposition_probability_on_crosslinked is not None:
+                    p_xl = self.deposition_probability_on_crosslinked.get(name, 0.0)
+                    xl_dep_c = xl_dep_c + p_xl * base * c_atoms
+                    xl_dep_f = xl_dep_f + p_xl * base * f_atoms
         with np.errstate(divide="ignore", invalid="ignore"):
             fc_ratio = np.where(
                 carbon_flux > 0.0,
@@ -426,6 +443,12 @@ class MixedLayerMechanism:
                 else None),
             substrate_deposition_fluorine_flux=(
                 sub_dep_f if self.deposition_probability_on_film is not None
+                else None),
+            crosslinked_deposition_carbon_flux=(
+                xl_dep_c if self.deposition_probability_on_crosslinked is not None
+                else None),
+            crosslinked_deposition_fluorine_flux=(
+                xl_dep_f if self.deposition_probability_on_crosslinked is not None
                 else None))
 
 
@@ -456,6 +479,10 @@ KRUEGER_2024_DEPOSITION_ON_POLYMER = {
 KRUEGER_2024_DEPOSITION_ON_SUBSTRATE = {
     "CF": 0.002, "CF2": 0.0015, "CF3": 0.001, "C2F3": 0.001,
 }
+# Appendix-B growth on crosslinked CF/CF2/CF3/C2F3 sites (ion-processed skin).
+KRUEGER_2024_DEPOSITION_ON_CROSSLINKED = {
+    "CF": 0.02, "CF2": 0.02, "CF3": 0.02, "C2F3": 0.02,
+}
 
 
 def build_krueger_2024_mixed_layer_mechanisms(
@@ -479,6 +506,8 @@ def build_krueger_2024_mixed_layer_mechanisms(
         chemisorption_probability=dict(KRUEGER_2024_CHEMISORPTION_PROBABILITY),
         deposition_probability_on_film=dict(KRUEGER_2024_DEPOSITION_ON_POLYMER),
         deposition_probability_on_substrate=dict(
-            KRUEGER_2024_DEPOSITION_ON_SUBSTRATE))
+            KRUEGER_2024_DEPOSITION_ON_SUBSTRATE),
+        deposition_probability_on_crosslinked=dict(
+            KRUEGER_2024_DEPOSITION_ON_CROSSLINKED))
     return (MixedLayerMechanism(oxide_parameters, **common),
             MixedLayerMechanism(mask_parameters, **common))

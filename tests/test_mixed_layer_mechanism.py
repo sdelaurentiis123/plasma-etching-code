@@ -174,6 +174,34 @@ def test_film_growth_moves_boundary_negative_velocity():
         float(grown_nm) * 1e-9 / 2.0, rel=1e-6)
 
 
+def test_crosslink_brake_is_ion_dose_differential():
+    """Ion-processed-skin crosslinking (zero-knob conversion, published 0.02
+    crosslinked attachment): full ion dose must crosslink the film and slow
+    growth several-fold versus an ion-shadowed surface — the differential
+    that makes the mask mouth an equilibrium instead of a runaway clog."""
+    from petch.mixed_layer_mechanism import (
+        build_krueger_2024_mixed_layer_mechanisms,
+    )
+    _, mask = build_krueger_2024_mixed_layer_mechanisms()
+    neutrals = {"CF": 4.4e20, "CF2": 9.4e20, "C2F3": 6.8e20,
+                "CF3": 8.4e19, "O": 7.7e20, "C3F4": 9.5e20}
+    lip = mask.advance(mask.initial_state(()), SurfaceFluxes(
+        neutral_flux_m2_s=neutrals,
+        energetic_fluxes=(_ion(9.6e19, 1500.0),)), 10.0)
+    shadowed = mask.advance(mask.initial_state(()), SurfaceFluxes(
+        neutral_flux_m2_s=neutrals,
+        energetic_fluxes=(_ion(9.6e17, 1500.0),)), 10.0)
+    x_lip = (float(np.asarray(lip.state.n_xl_film))
+             / float(np.asarray(lip.state.n_c_film + lip.state.n_f_film)))
+    x_shadow = (float(np.asarray(shadowed.state.n_xl_film))
+                / float(np.asarray(shadowed.state.n_c_film
+                                   + shadowed.state.n_f_film)))
+    assert x_lip > 0.9
+    assert x_shadow < 0.3
+    assert (float(shadowed.normal_growth_velocity_m_s)
+            > 5.0 * float(lip.normal_growth_velocity_m_s))
+
+
 def test_duration_zero_is_identity():
     mech = MixedLayerMechanism(MixedLayerParams())
     state = mech.initial_state((2,))

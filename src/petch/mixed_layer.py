@@ -42,6 +42,7 @@ class MixedLayerParams:
     literature anchor; everything energetic is derived from stopping curves.
     """
 
+    displacement_energy_eV: float = 25.0  # polymer displacement energy (literature band 10-80)
     ion_atomic_number: int = 18          # Ar+ projectile
     ion_mass_amu: float = 39.948
     precursor_fc_ratio: float = 1.5      # y: F per C in CxFy precursor (C4F6)
@@ -67,6 +68,9 @@ class MixedLayerState:
     n_o: float = 0.0
     n_c: float = 0.0
     n_f: float = 0.0
+    # Crosslinked film atoms (subset of n_c_film + n_f_film): ion-processed
+    # skin with reduced radical attachment (Krueger Appendix B: 0.02).
+    n_xl_film: float = 0.0
 
     def film_thickness_nm(self) -> float:
         return ((self.n_c_film + self.n_f_film) / _FC_FILM_ATOM_DENSITY_M3) * 1e9
@@ -97,6 +101,8 @@ class SurfaceFluxes:
     film_deposition_fluorine_flux: object = None
     substrate_deposition_carbon_flux: object = None
     substrate_deposition_fluorine_flux: object = None
+    crosslinked_deposition_carbon_flux: object = None
+    crosslinked_deposition_fluorine_flux: object = None
 
 
 @dataclass
@@ -219,14 +225,26 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # --- film gains ---
     if fluxes.film_deposition_carbon_flux is not None:
         # Substrate-dependent sticking (published on-polymer vs on-substrate
-        # probabilities): deposition rate blends with film coverage.
-        dep_c = (theta_film * np.asarray(fluxes.film_deposition_carbon_flux,
-                                         dtype=float)
+        # probabilities): deposition rate blends with film coverage, and the
+        # film-covered share further blends fresh vs crosslinked attachment
+        # by the crosslinked fraction of the film (ion-processed skin).
+        x_frac = _guarded_ratio(state.n_xl_film, film_total, 1.0)
+        film_dep_c = np.asarray(fluxes.film_deposition_carbon_flux, dtype=float)
+        film_dep_f = np.asarray(fluxes.film_deposition_fluorine_flux, dtype=float)
+        if fluxes.crosslinked_deposition_carbon_flux is not None:
+            film_dep_c = ((1.0 - x_frac) * film_dep_c
+                          + x_frac * np.asarray(
+                              fluxes.crosslinked_deposition_carbon_flux,
+                              dtype=float))
+            film_dep_f = ((1.0 - x_frac) * film_dep_f
+                          + x_frac * np.asarray(
+                              fluxes.crosslinked_deposition_fluorine_flux,
+                              dtype=float))
+        dep_c = (theta_film * film_dep_c
                  + (1.0 - theta_film)
                  * np.asarray(fluxes.substrate_deposition_carbon_flux,
                               dtype=float))
-        dep_f = (theta_film * np.asarray(fluxes.film_deposition_fluorine_flux,
-                                         dtype=float)
+        dep_f = (theta_film * film_dep_f
                  + (1.0 - theta_film)
                  * np.asarray(fluxes.substrate_deposition_fluorine_flux,
                               dtype=float))
@@ -364,10 +382,33 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     n_c_raw = state.n_c + dt * (mix_c + chem_c - layer_ox)
     c_desorb = np.maximum(n_c_raw - _MONOLAYER_AREAL_M2, 0.0) / max(dt, 1e-30)
 
+    # Ion-processed-skin crosslinking (zero-knob): every ion converts fresh
+    # film atoms at (energy absorbed in the film)/E_displacement per ion;
+    # removal channels draw down crosslinked atoms in proportion to their
+    # share, so n_xl stays a subset of the film inventory exactly.
+    film_energy = np.maximum(
+        np.asarray(fluxes.ion_energy_eV, dtype=float) - e_iface, 0.0)
+    xl_rate = (fluxes.ion_flux * film_energy / params.displacement_energy_eV
+               * np.maximum(1.0 - _guarded_ratio(state.n_xl_film, film_total, 1.0),
+                            0.0))
+    fresh_available = np.maximum(
+        np.asarray(film_total, dtype=float) - state.n_xl_film, 0.0)
+    xl_rate = xl_rate * _overdraw_scale(fresh_available, xl_rate, dt)
+    film_loss_total = sput_c + sput_f + ox_c + ox_f + mix_c + mix_f + bottom_c + bottom_f
+    xl_share = _guarded_ratio(state.n_xl_film, film_total, 1.0)
+    n_xl_new = np.maximum(
+        state.n_xl_film + dt * (xl_rate - film_loss_total * xl_share), 0.0)
+
     new_state = MixedLayerState(
         n_c_film=state.n_c_film + dt * (dep_c - sput_c - ox_c - mix_c - bottom_c),
         n_f_film=state.n_f_film + dt * (dep_f + absorb_f - sput_f - ox_f - mix_f
                                         - bottom_f),
+        n_xl_film=np.minimum(
+            n_xl_new,
+            np.maximum(
+                state.n_c_film + dt * (dep_c - sput_c - ox_c - mix_c - bottom_c)
+                + state.n_f_film + dt * (dep_f + absorb_f - sput_f - ox_f - mix_f
+                                         - bottom_f), 0.0)),
         n_si=state.n_si + dt * (si_in - sif4),
         n_o=n_o_raw - dt * o_desorb,
         n_c=n_c_raw - dt * c_desorb,
@@ -424,7 +465,8 @@ def steady_state(fluxes: SurfaceFluxes, params: MixedLayerParams = MixedLayerPar
         # step only while per-step relative change stays small; shrink it when
         # the dynamics are fast. Always within the explicit stability bound.
         change = 0.0
-        for name in ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f"):
+        for name in ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f",
+                     "n_xl_film"):
             va = np.asarray(getattr(result.state, name), dtype=float)
             vb = np.asarray(getattr(nxt.state, name), dtype=float)
             scale = np.maximum(np.maximum(np.abs(va), np.abs(vb)),
@@ -476,7 +518,8 @@ def _overdraw_scale(available_plus_gain, loss_rate, dt):
 
 
 def _converged(a: MixedLayerState, b: MixedLayerState, dt: float, tol: float) -> bool:
-    for name in ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f"):
+    for name in ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f",
+                 "n_xl_film"):
         va, vb = getattr(a, name), getattr(b, name)
         scale = max(abs(va), abs(vb), _MONOLAYER_AREAL_M2 * 1e-6)
         if abs(vb - va) > tol * scale * max(dt, 1e-30) / dt:
