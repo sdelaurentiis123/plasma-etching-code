@@ -504,6 +504,7 @@ def _configuration(args):
         "charging": "disabled_for_Krueger_2024_calibration_and_transfer",
         "profile_reinitialization": "cr2",
         "surface_model": str(args.surface_model),
+        "grazing_ion_reflection": str(args.grazing_ion_reflection),
         "mixed_layer_volatilization_yield": float(
             args.mixed_layer_volatilization_yield),
         "yield_energy_model": str(args.yield_energy_model),
@@ -862,6 +863,9 @@ def run(args):
                     transport_device=str(args.transport_device),
                     neutral_radiosity_options=radiosity,
                     ballistic_transport=args.ballistic_transport,
+                    grazing_ion_reflection=(
+                        {} if str(args.grazing_ion_reflection) == "literature_v1"
+                        else None),
                     ballistic_face_quadrature_points=int(args.face_quadrature_points),
                     topology_change_policy=str(args.topology_change_policy),
                     surface_state_remap_backend=str(
@@ -1157,6 +1161,13 @@ def parse_args():
             "mixed-layer absolute rate constant k_v (substrate removals per "
             "ion at the reference deposited energy); the single "
             "base-condition-anchored constant of the mixed-layer chemistry"))
+    parser.add_argument(
+        "--grazing-ion-reflection", default="off",
+        choices=("off", "literature_v1"),
+        help=(
+            "split grazing-incidence ion weight into single-bounce specular "
+            "hot neutrals (P=0.95(1-cos^3), 0.90 energy retention; "
+            "Helmer/Graves-bounded)"))
     parser.add_argument(
         "--surface-model", default="reduced",
         choices=("reduced", "mixed_layer"),

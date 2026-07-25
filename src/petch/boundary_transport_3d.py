@@ -701,6 +701,112 @@ def _contains_surface_local_density(density):
 
 
 @wp.kernel
+def _specular_secondary_hits_3d(
+        mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), direction: wp.array(dtype=wp.vec3),
+        domain_x: float, domain_y: float, domain_z: float, periodic_lateral: int,
+        hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float)):
+    ray_index = wp.tid()
+    boundary_ray = _apply_bc(
+        mesh, origin[ray_index], direction[ray_index],
+        domain_x, domain_y, domain_z, periodic_lateral)
+    ray = wp.mesh_query_ray(mesh, boundary_ray.o, boundary_ray.d, 1.0e6)
+    if ray.result:
+        normal = ray.normal
+        if wp.dot(normal, boundary_ray.d) > 0.0:
+            normal = -normal
+        hit_face[ray_index] = ray.face
+        hit_cosine[ray_index] = wp.clamp(
+            -wp.dot(boundary_ray.d, normal), 0.0, 1.0)
+
+
+def split_grazing_ion_reflection(
+        population, verts, faces, areas, centroids, normals, *,
+        domain_size, periodic_lateral, device=None,
+        grazing_reflection_probability=0.95, angular_exponent=3.0,
+        energy_retention_fraction=0.90, launch_offset=1e-4):
+    """Split grazing-incidence weight off a primary ion population as a
+    single-bounce specular hot-neutral population (audit P0.2).
+
+    P_reflect = p0 * (1 - cos^m); the reflected share leaves the primary event
+    (its flux is scaled down in place) and is re-cast from the face centroid
+    along the specular direction with ``energy_retention_fraction`` of the
+    incident energy. Secondary hits land as a new charge-neutral population
+    named ``"<name>:hot_neutral"``; rays exiting the open top escape and are
+    reported. Particle rate is conserved exactly:
+    primary' + secondary + escaped == primary.
+    """
+    from .surface_kinetics import FaceResolvedEnergeticFlux as _Population
+
+    direction = population.event_incident_direction
+    if direction is None:
+        raise ValueError("grazing reflection requires event incident directions")
+    face = np.asarray(population.event_face, dtype=int)
+    flux = np.asarray(population.event_flux_m2_s, dtype=float)
+    energy = np.asarray(population.event_energy_eV, dtype=float)
+    cosine = np.asarray(population.event_cosine_incidence, dtype=float)
+    direction = np.asarray(direction, dtype=float)
+    weight = (grazing_reflection_probability
+              * (1.0 - np.clip(cosine, 0.0, 1.0) ** angular_exponent))
+    primary = _Population(
+        population.name, population.face_count, face, flux * (1.0 - weight),
+        energy, cosine, event_position=population.event_position,
+        event_incident_direction=population.event_incident_direction)
+    reflected_rate = weight * flux * np.asarray(areas, dtype=float)[face]
+    active = reflected_rate > 0.0
+    diagnostics = {
+        "reflected_rate": float(reflected_rate.sum()),
+        "escaped_rate": 0.0,
+        "secondary_events": 0,
+    }
+    if not np.any(active):
+        return primary, None, diagnostics
+    face_a = face[active]
+    normal_a = np.asarray(normals, dtype=float)[face_a]
+    dir_a = direction[active]
+    dir_a = dir_a / np.linalg.norm(dir_a, axis=1, keepdims=True)
+    specular = dir_a - 2.0 * np.einsum("rc,rc->r", dir_a, normal_a)[:, None] * normal_a
+    specular /= np.linalg.norm(specular, axis=1, keepdims=True)
+    origin = (np.asarray(centroids, dtype=float)[face_a]
+              + launch_offset * normal_a)
+    selected_device = DEVICE if device is None else str(device)
+    mesh = wp.Mesh(
+        points=wp.array(np.asarray(verts, dtype=np.float32), dtype=wp.vec3,
+                        device=selected_device),
+        indices=wp.array(np.asarray(faces, dtype=np.int32).ravel(),
+                         dtype=wp.int32, device=selected_device))
+    count = len(face_a)
+    hit_face = wp.full(count, -1, dtype=int, device=selected_device)
+    hit_cos = wp.zeros(count, dtype=float, device=selected_device)
+    domain = np.asarray(domain_size, dtype=float)
+    wp.launch(
+        _specular_secondary_hits_3d, dim=count,
+        inputs=[mesh.id,
+                wp.array(origin.astype(np.float32), dtype=wp.vec3,
+                         device=selected_device),
+                wp.array(specular.astype(np.float32), dtype=wp.vec3,
+                         device=selected_device),
+                float(domain[0]), float(domain[1]), float(domain[2]),
+                int(bool(periodic_lateral)), hit_face, hit_cos],
+        device=selected_device)
+    hit_face_np = hit_face.numpy()
+    hit_cos_np = hit_cos.numpy()
+    landed = hit_face_np >= 0
+    rate_a = reflected_rate[active]
+    diagnostics["escaped_rate"] = float(rate_a[~landed].sum())
+    diagnostics["secondary_events"] = int(np.count_nonzero(landed))
+    if not np.any(landed):
+        return primary, None, diagnostics
+    dst = hit_face_np[landed]
+    secondary = _Population(
+        f"{population.name}:hot_neutral", population.face_count, dst,
+        rate_a[landed] / np.asarray(areas, dtype=float)[dst],
+        energy_retention_fraction * energy[active][landed],
+        hit_cos_np[landed],
+        event_incident_direction=specular[landed])
+    return primary, secondary, diagnostics
+
+
+@wp.kernel
 def _first_hit_events_3d(
         mesh: wp.uint64, origin: wp.array(dtype=wp.vec3), direction: wp.array(dtype=wp.vec3),
         max_distance: float, hit_face: wp.array(dtype=int), hit_cosine: wp.array(dtype=float),
@@ -2956,7 +3062,8 @@ def gather_boundary_state_ballistic_3d(
         boundary: PlasmaBoundaryState, species_role: Mapping[str, str], verts, faces, areas,
         centroids, gas_normals, *, source_bounds, source_z, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), face_quadrature_points=1,
-        periodic_lateral=False, domain_size=None, ray_offset=1e-5, device=None):
+        periodic_lateral=False, domain_size=None, ray_offset=1e-5, device=None,
+        grazing_ion_reflection=None):
     """Deterministically gather collisionless boundary flux onto every visible triangle.
 
     For boundary direction ``d`` (pointing from the horizontal source plane toward the surface),
@@ -3135,12 +3242,26 @@ def gather_boundary_state_ballistic_3d(
             neutral_flux[species.name] = gathered.sum(axis=0)
         else:
             event_sample, event_face = np.where(gathered > 0.0)
-            energetic_flux.append(FaceResolvedEnergeticFlux(
+            primary = FaceResolvedEnergeticFlux(
                 species.name, face_count, event_face,
                 gathered[event_sample, event_face],
                 species.kinetic_energy_eV[event_sample],
                 incidence_cosine[event_sample, event_face],
-                event_incident_direction=direction[event_sample]))
+                event_incident_direction=direction[event_sample])
+            if grazing_ion_reflection:
+                options = (dict(grazing_ion_reflection)
+                           if isinstance(grazing_ion_reflection, Mapping) else {})
+                primary, secondary, reflection_diag = split_grazing_ion_reflection(
+                    primary, verts, faces, areas, centroids, normals,
+                    domain_size=(domain_size if domain_size is not None
+                                 else (bounds[1] - bounds[0],
+                                       bounds[3] - bounds[2],
+                                       float(source_z))),
+                    periodic_lateral=periodic_lateral, device=device, **options)
+                hit_probability[f"{species.name}:hot_neutral"] = reflection_diag
+                if secondary is not None:
+                    energetic_flux.append(secondary)
+            energetic_flux.append(primary)
     return BoundaryTransport3DResult(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
         hit_probability=hit_probability, escape_probability=escape_probability,
