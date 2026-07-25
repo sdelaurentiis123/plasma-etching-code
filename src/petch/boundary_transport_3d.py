@@ -3248,7 +3248,7 @@ def gather_boundary_state_ballistic_3d(
                 species.kinetic_energy_eV[event_sample],
                 incidence_cosine[event_sample, event_face],
                 event_incident_direction=direction[event_sample])
-            if grazing_ion_reflection:
+            if grazing_ion_reflection is not None:
                 options = (dict(grazing_ion_reflection)
                            if isinstance(grazing_ion_reflection, Mapping) else {})
                 primary, secondary, reflection_diag = split_grazing_ion_reflection(

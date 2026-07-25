@@ -109,3 +109,25 @@ def test_reflected_weight_follows_declared_angular_law():
         original = float(population.event_flux_m2_s[0] * areas[0])
         reflected = diag["reflected_rate"]
         assert reflected == pytest.approx(expected_weight * original, rel=1e-12)
+
+
+def test_empty_options_dict_activates_reflection_in_gather():
+    """Regression: the pilot passes {} for default options; {} is falsy, and
+    an `if options:` gate silently disabled reflection for a whole campaign
+    run. Empty options MUST mean 'on with defaults'."""
+    from tests.test_boundary_transport_3d import _boundary, _flat_unit_plane
+    from petch.boundary_transport_3d import gather_boundary_state_ballistic_3d
+
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    result = gather_boundary_state_ballistic_3d(
+        _boundary(), {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"},
+        verts, faces, areas, centroids, np.tile([0.0, 0.0, 1.0], (2, 1)),
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, face_quadrature_points=3, device="cpu",
+        grazing_ion_reflection={})
+    # Normal incidence on a flat plane: reflection runs but reflects ~nothing;
+    # the diagnostic entry proves the code path executed.
+    assert "Ar+:hot_neutral" in result.hit_probability
+    diag = result.hit_probability["Ar+:hot_neutral"]
+    assert diag["reflected_rate"] >= 0.0
