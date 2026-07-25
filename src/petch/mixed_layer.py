@@ -50,7 +50,7 @@ class MixedLayerParams:
     fluorine_film_sticking: float = 0.05  # s_f: F absorption into film (Gogolides band)
     oxidation_probability: float = 0.0628  # p_ox: Krueger O-driven polymer etch
     mixing_efficiency: float = 1.0       # eta_mix: Humbird-Graves, O(1)
-    volatilization_yield: float = 1.0    # k_v: SiF4 per ion at reference deposition
+    volatilization_yield: float = 1.0    # multiplier on published yields (1.0 = no anchor)
     substrate: str = "sio2"              # "sio2" | "carbon" (a-C mask, no lattice O)
     reference_energy_eV: float = 1000.0  # E_ref for the deposited-energy ratio
     film_sputter_yield: float = 0.1384   # film atoms per ion at reference deposition
@@ -158,6 +158,14 @@ def _stopping_tables(params: MixedLayerParams):
     return tables
 
 
+def _threshold_power_yield(energy_eV, p0, threshold_eV, reference_eV, exponent):
+    """Krueger Eq-2 threshold power law: p0*(E^q - Eth^q)/(E0^q - Eth^q), >= 0."""
+    energy = np.asarray(energy_eV, dtype=float)
+    numerator = np.maximum(energy, 0.0) ** exponent - threshold_eV ** exponent
+    denominator = reference_eV ** exponent - threshold_eV ** exponent
+    return p0 * np.maximum(numerator, 0.0) / denominator
+
+
 def _table_lookup(energy_eV, column):
     """Vectorized log-energy interpolation; linear roll-off below the table."""
     energy = np.asarray(energy_eV, dtype=float)
@@ -257,13 +265,17 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     absorb_f = params.fluorine_film_sticking * fluxes.fluorine_flux * theta_film
 
     # --- film losses (proposed rates, atoms/m^2/s) ---
-    # Kress angular sputter response (B=9.3, the repo's published form):
-    # yield peaks near 45-70 degrees — the factor that erodes mouth-lip film.
+    # Film sputter: Krueger's PUBLISHED polymer sputter law (p0=0.9,
+    # eth=20 eV, q=0.5, e0=500 eV; Kress B=9.3) at the INCIDENT ion energy
+    # (the ion strikes the film top before any attenuation). The previous
+    # 0.1384 constant was the complex sputter probability — a mis-lift the
+    # completeness audit caught (film eroded ~6.5x too weakly).
     cos_inc = np.clip(np.asarray(fluxes.cosine_incidence, dtype=float), 0.0, 1.0)
     angular_sputter = np.maximum(
         (1.0 + 9.3 * (1.0 - cos_inc ** 2)) * cos_inc, 0.0)
-    sputter_total = (params.film_sputter_yield * fluxes.ion_flux
-                     * energy_ratio * angular_sputter * theta_film)
+    sputter_total = (_threshold_power_yield(fluxes.ion_energy_eV, 0.9, 20.0,
+                                            500.0, 0.5)
+                     * fluxes.ion_flux * angular_sputter * theta_film)
     sput_c = sputter_total * x_c
     sput_f = sputter_total * x_f
     # O oxidation of film carbon: each oxidized C carries along the local film
@@ -304,20 +316,35 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
               * (1.0 - theta_film) * (1.0 - theta_f_layer))
     chem_f = (np.asarray(fluxes.chemisorption_fluorine_flux, dtype=float)
               * (1.0 - theta_film) * (1.0 - theta_f_layer))
-    # Ion capacity for substrate volatilization (derived energy factor; no
-    # fitted law). SiO2 leaves as SiF4 (4 F per Si); an amorphous-carbon mask
-    # leaves as CFx (2 F per C, the F-costly channel) with no lattice oxygen —
-    # selectivity must emerge from the film/energy/F budgets, never a parameter.
-    volat_capacity = (params.volatilization_yield * fluxes.ion_flux
-                      * energy_ratio * np.maximum(1.0 - theta_film, 0.0))
+    # Two-state oxide removal at PUBLISHED magnitudes, anchored to the
+    # DEKNOB-validated ZBL deposited-energy shape at Krueger's reference
+    # energy (140 eV): complex channel 0.1384 (F-covered sites, costs 4F as
+    # SiF4) + bare-SiO2 physical sputter 0.0909 @ 70 eV threshold (no F
+    # cost — formula units leave as ejecta). volatilization_yield is a
+    # multiplier defaulting to 1.0: published magnitude, no anchor constant.
+    ref_dep, _ = _deposited_energy(np.asarray(140.0), np.asarray(1.0), params)
+    shape = np.asarray(eps_dep, dtype=float) / np.maximum(float(ref_dep), 1e-300)
+    open_area = np.maximum(1.0 - theta_film, 0.0)
     if params.substrate == "carbon":
         f_per_unit = 2.0
-        sif4 = np.zeros_like(volat_capacity * theta_f_layer)
-        substrate_removal = volat_capacity * theta_f_layer
+        capacity = (params.volatilization_yield * 0.1384 * shape
+                    * fluxes.ion_flux * open_area)
+        sif4 = np.zeros_like(capacity * theta_f_layer)
+        substrate_removal = capacity * theta_f_layer
+        bare_removal = np.zeros_like(substrate_removal)
+        f_costed_removal = substrate_removal
     else:
         f_per_unit = 4.0
-        sif4 = volat_capacity * theta_f_layer
-        substrate_removal = sif4
+        capacity = (params.volatilization_yield * 0.1384 * shape
+                    * fluxes.ion_flux * open_area)
+        sif4 = capacity * theta_f_layer
+        bare_shape = np.asarray(
+            _threshold_power_yield(e_iface, 0.0909, 70.0, 140.0, 1.0))
+        bare_removal = (params.volatilization_yield * bare_shape
+                        * fluxes.ion_flux * open_area
+                        * np.maximum(1.0 - theta_f_layer, 0.0))
+        substrate_removal = sif4 + bare_removal
+        f_costed_removal = sif4
     # Layer oxidation of mixed C by layer O (same probability channel);
     # clamp to available layer carbon first.
     layer_ox = params.oxidation_probability * fluxes.oxygen_flux * (1.0 - theta_film) * (
@@ -330,12 +357,14 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     cof2 = layer_ox * (f_per_layer_c / 2.0)
 
     # Clamp the fluorine-consuming channels to layer F availability.
-    layer_f_loss = f_per_unit * substrate_removal + 2.0 * cof2
+    layer_f_loss = f_per_unit * f_costed_removal + 2.0 * cof2
     scale_lf = _overdraw_scale(
         state.n_f + (mix_f + f_direct + chem_f) * dt, layer_f_loss, dt)
-    substrate_removal = substrate_removal * scale_lf
+    f_costed_removal = f_costed_removal * scale_lf
     sif4 = sif4 * scale_lf
     cof2 = cof2 * scale_lf
+    substrate_removal = f_costed_removal + (
+        bare_removal if params.substrate != "carbon" else 0.0)
 
     # Recession; for SiO2 it liberates lattice Si and O into the layer
     # (1 Si : 2 O per SiF4). Carbon lattice leaves directly as CFx product.
@@ -344,7 +373,7 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         si_in = 0.0
         o_in = 0.0
     else:
-        recession = sif4 / _SIO2_FORMULA_DENSITY_M3  # m/s
+        recession = (sif4 + bare_removal) / _SIO2_FORMULA_DENSITY_M3  # m/s
         si_in = sif4
         o_in = 2.0 * sif4
 
@@ -372,7 +401,7 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     layer_ox = layer_ox * scale_lo
     cof2 = cof2 * scale_lo
     layer_side_o = layer_ox
-    layer_f_loss = f_per_unit * substrate_removal + 2.0 * cof2
+    layer_f_loss = f_per_unit * f_costed_removal + 2.0 * cof2
 
     co = (ox_c - 0.5 * ox_f) + (layer_ox - cof2) + (bottom_c - 0.5 * bottom_f)
     cof2_total = cof2 + 0.5 * ox_f + 0.5 * bottom_f
