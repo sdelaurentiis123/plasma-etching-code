@@ -53,3 +53,28 @@ Experimental base (Krüger fig. 7, 60 s): opening 45, depth 825.
    60 s. Then k_v Newton on depth, then the 8-condition scorecard.
 3. If the mouth still misbehaves, the declared suspect is the ion-spectrum
    compression omission (grazing sputter enhancement at the lip).
+
+## Campaign 2 (2026-07-25, box 45757468) — audit-corrected published-constant runs
+
+Method change (user directive): stopped one-mechanism-at-a-time iteration; an Opus
+completeness audit (RESEARCH_MECHANISM_COMPLETENESS_2026-07-25.md) tabled Krüger's
+full mechanism against the implementation and caught a mis-lifted constant — film
+sputter used 0.1384 (the COMPLEX sputter probability); the published polymer law is
+p0=0.9, eth=20 eV, q=0.5, e0=500 eV, Kress B=9.3, at incident energy.
+
+| run | mechanism state | 60 s endpoint |
+|---|---|---|
+| ml4 | + crosslinking (weak 0.1384 film sputter) | depth 66.7, opening 30.2, OPEN |
+| ml5 | + Kress angular on the weak law | depth 59.2, opening 0.0 (reclogged) |
+| ml6 | audit-corrected: published film law + two-state oxide, volatilization_yield=1.0 | **depth 811.1, opening 18.8, OPEN** |
+
+**ml6 is the headline: depth within 1.7% of experiment (825) with ZERO anchored
+constants** — every chemistry number as-published (the R5 campaign needed a fitted
+0.587 yield scale + calibrated mask fraction for the same observable). Remaining
+misses localize to the mouth-region energy budget: opening 18.8 vs 45, mask-top
+erosion 133 nm vs ~0. The audit's P0.2 names the unwired mechanism: grazing-ion
+specular reflection into hot neutrals (0.95 reflection, 0.90 energy retention) —
+reflected flux bombards the opposite lip/upper sidewalls (opens the mouth, spares
+the mask top by removing normal-incidence overkill... to be verified), and its
+absence also currently overfeeds lip-face energy. Next single change: wire
+GrazingSpecularIonReflection3D into the pilot ion path; then the scorecard.
