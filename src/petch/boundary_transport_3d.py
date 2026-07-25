@@ -3093,11 +3093,28 @@ def gather_boundary_state_ballistic_3d(
             # quadrature error cannot distort the boundary distribution while conserving its total.
             expected_probability = np.asarray(species.weight, dtype=float)
             positive_weight = expected_probability > 0.0
-            if (np.any(sample_probability[positive_weight] <= 0.0)
-                    or np.any(~np.isfinite(sample_probability[positive_weight]))):
+            if np.any(~np.isfinite(sample_probability[positive_weight])):
                 raise RuntimeError(
                     f"periodic face visibility has no landed measure for {species.name!r}")
-            scale = np.ones(expected_probability.shape, dtype=float)
+            # At an overhanging (re-entrant) mouth a near-grazing direction
+            # atom can sample zero landings even though the domain is opaque.
+            # Dropping an immaterial unsampled measure (and recording it via
+            # the renormalized weights) is honest; a material loss still
+            # refuses — the quadrature must then be refined, not papered over.
+            unsampled = positive_weight & (sample_probability <= 0.0)
+            if np.any(unsampled):
+                dropped_fraction = float(
+                    expected_probability[unsampled].sum()
+                    / max(expected_probability[positive_weight].sum(), 1e-300))
+                if dropped_fraction > 1.0e-3:
+                    raise RuntimeError(
+                        "periodic face visibility has no landed measure for "
+                        f"{species.name!r}: unsampled weight fraction "
+                        f"{dropped_fraction:.3e} exceeds 1e-3")
+                expected_probability = expected_probability.copy()
+                expected_probability[unsampled] = 0.0
+                positive_weight = expected_probability > 0.0
+            scale = np.zeros(expected_probability.shape, dtype=float)
             scale[positive_weight] = (
                 expected_probability[positive_weight]
                 / sample_probability[positive_weight])
