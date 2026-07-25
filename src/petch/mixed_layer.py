@@ -257,7 +257,13 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     absorb_f = params.fluorine_film_sticking * fluxes.fluorine_flux * theta_film
 
     # --- film losses (proposed rates, atoms/m^2/s) ---
-    sputter_total = params.film_sputter_yield * fluxes.ion_flux * energy_ratio * theta_film
+    # Kress angular sputter response (B=9.3, the repo's published form):
+    # yield peaks near 45-70 degrees — the factor that erodes mouth-lip film.
+    cos_inc = np.clip(np.asarray(fluxes.cosine_incidence, dtype=float), 0.0, 1.0)
+    angular_sputter = np.maximum(
+        (1.0 + 9.3 * (1.0 - cos_inc ** 2)) * cos_inc, 0.0)
+    sputter_total = (params.film_sputter_yield * fluxes.ion_flux
+                     * energy_ratio * angular_sputter * theta_film)
     sput_c = sputter_total * x_c
     sput_f = sputter_total * x_f
     # O oxidation of film carbon: each oxidized C carries along the local film
