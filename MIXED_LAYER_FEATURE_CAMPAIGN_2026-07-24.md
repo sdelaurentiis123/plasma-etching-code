@@ -102,3 +102,32 @@ reflection's angular threshold applying differently on polymer. Next step is
 receipt-level analysis of the archived checkpoints (ml9a vs ml9b per-face
 energy budgets at the mouth), not further mechanism guessing. Reflection
 stays OFF; ml9a is the new checkpoint of record.
+
+## Scorecard 1 (2026-07-26, box 45918618) — ml9a config, 8 conditions, zero anchors
+
+All runs: atoms, reflection off, volatilization_yield=1.0 (pure published).
+Audits: results/curated/mixed_layer_scorecard_1/.
+
+| condition | depth (nm) | opening (nm) | criterion | verdict |
+|---|---|---|---|---|
+| base (6 kW, O2 1.0) | 790.8 | 22.5 | depth 825±5% / opening 45±5 | depth **PASS** (−4.1%) / opening MISS |
+| O2 0.5 | 243.1 | **0.000 sealed** | clog preserved | **HIT (exact)** |
+| O2 1.5 | 475.7 | 15.2 | depth rank max at 1.5 | MISS (dip; mouth-starved) |
+| O2 2.5 | 672.8 | 17.5 | necking absent (open) | **HIT** |
+| 4 kW | 531.3 | 18.4 | r(4/6) ∈ [0.84, 0.94] | 0.672 — MISS |
+| 8 kW | 858.0 | 22.4 | r(8/6) ∈ [0.97, 1.06] | 1.085 — near-miss (blind R5 was 1.21) |
+
+Reading: the zero-anchor chemistry wins the absolutes and the topology
+(base depth −4.1% with NO calibration; clog and necking-absent both emerge
+from element ledgers with the O-saturation knob refused by construction) and
+loses the graded transfers — and every graded miss carries the same
+signature: the over-narrowed mouth (22.5 vs 45) modulates feature flux, so
+depth trends inherit mouth error on top of true chemistry response (4 kW:
+softer ions → even narrower mouth → double-counted depth loss; O2 1.5:
+narrowest mouth of the sweep → dip). One residual, five symptoms.
+Comparison: K24-DEKNOB-1 (reduced + derived law, 2 calibrated constants) won
+the power ratios (0.928/1.019) but needed the calibrated base pair and a
+declared O-saturation constant. The two models fail in complementary ways
+that both point at mouth-region physics (activation states / FC-ion polymer
+sputter / polymer reflection threshold — audit P1/P2 queue) as the next
+mechanism, with receipt-level checkpoint analysis (ml9a vs ml9b) first.
