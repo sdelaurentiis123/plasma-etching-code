@@ -78,3 +78,27 @@ reflected flux bombards the opposite lip/upper sidewalls (opens the mouth, spare
 the mask top by removing normal-incidence overkill... to be verified), and its
 absence also currently overfeeds lip-face energy. Next single change: wire
 GrazingSpecularIonReflection3D into the pilot ion path; then the scorecard.
+
+## Campaign 3 (2026-07-26, box 45874720) — atom-resolved chemistry
+
+| run | config | 60 s endpoint |
+|---|---|---|
+| ml9a | atoms, no reflection | depth 790.8, opening 22.5, OPEN — **checkpoint gate [780,870] PASSES** |
+| ml9b | atoms + reflection | depth 170.9, opening 0.00 (sealed) ≈ ml8 |
+
+Findings: (1) per-event chemistry preserves the zero-anchor depth result
+(Jensen correction 811→791, −2.5%, physically sensible) and slightly improves
+the opening (18.8→22.5). (2) The reflection regression is NOT a compression
+artifact — two independent formulations agree. The redistribution itself
+seals the mouth: P=0.95 at grazing strips ~all sputter from the mouth film
+while secondaries fly deep. Pattern across ml4 (no kress, full grazing
+sputter, mouth 30) / ml5+ml9b (grazing sputter suppressed, sealed) / ml9a
+(kress only, 22.5): mouth survival is governed by near-grazing wall-film
+sputter. Krüger holds 45 nm with BOTH kress and reflection active, so a
+compensating mouth-region removal channel is still missing — candidates from
+the audit queue: low-energy activation states (P2 #5: activated polymer
+5-30 eV, p0=0.3), energetic FC-ion polymer sputter contribution, or
+reflection's angular threshold applying differently on polymer. Next step is
+receipt-level analysis of the archived checkpoints (ml9a vs ml9b per-face
+energy budgets at the mouth), not further mechanism guessing. Reflection
+stays OFF; ml9a is the new checkpoint of record.
