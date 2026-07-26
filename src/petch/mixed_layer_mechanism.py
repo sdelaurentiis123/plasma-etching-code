@@ -192,7 +192,6 @@ class MixedLayerMechanism:
             reasons=reasons,
             unsupported_neutral_species=unsupported,
             known_model_form_omissions=(
-                "ion spectrum compressed to flux-weighted mean energy/cosine",
                 "no spontaneous (ion-free) chemical etch channel",
                 "chemisorption channel uses substrate-agnostic published probabilities",
                 "single projectile species for stopping tables",
@@ -386,6 +385,43 @@ class MixedLayerMechanism:
             safe = np.maximum(ion_flux, 1e-300)
             mean_energy = np.where(ion_flux > 0.0, energy_weighted / safe, 0.0)
             mean_cosine = np.where(ion_flux > 0.0, cosine_weighted / safe, 1.0)
+        # Atom-resolved spectrum: every energetic event becomes an atom so the
+        # module evaluates nonlinear laws per event (never at the mean).
+        atom_face = []
+        atom_flux = []
+        atom_energy = []
+        atom_cosine = []
+        flat_faces = int(np.prod(shape)) if shape else 1
+        for population in fluxes.energetic_fluxes:
+            if isinstance(population, FaceResolvedEnergeticFlux):
+                atom_face.append(np.asarray(population.event_face, dtype=int))
+                atom_flux.append(np.asarray(population.event_flux_m2_s,
+                                            dtype=float))
+                atom_energy.append(np.asarray(population.event_energy_eV,
+                                              dtype=float))
+                atom_cosine.append(np.asarray(
+                    population.event_cosine_incidence, dtype=float))
+            else:
+                base = np.broadcast_to(np.asarray(
+                    population.flux_m2_s, dtype=float), shape).ravel()
+                for row in range(population.energy_eV.shape[0]):
+                    weight = float(population.weight[row])
+                    if weight <= 0.0:
+                        continue
+                    atom_face.append(np.arange(flat_faces))
+                    atom_flux.append(base * weight)
+                    atom_energy.append(np.full(
+                        flat_faces, float(population.energy_eV[row])))
+                    atom_cosine.append(np.full(
+                        flat_faces, float(population.cosine_incidence[row])))
+        if atom_face:
+            atoms = dict(
+                ion_atom_face=np.concatenate(atom_face),
+                ion_atom_flux=np.concatenate(atom_flux),
+                ion_atom_energy_eV=np.concatenate(atom_energy),
+                ion_atom_cosine=np.concatenate(atom_cosine))
+        else:
+            atoms = dict()
         carbon_flux = np.zeros(shape)
         fluorine_bound = np.zeros(shape)
         chem_c = np.zeros(shape)
@@ -430,6 +466,7 @@ class MixedLayerMechanism:
             ion_energy_eV=mean_energy,
             cosine_incidence=np.clip(mean_cosine, 0.0, 1.0),
             precursor_fc_ratio=fc_ratio,
+            **atoms,
             chemisorption_carbon_flux=chem_c,
             chemisorption_fluorine_flux=chem_f,
             film_deposition_carbon_flux=(

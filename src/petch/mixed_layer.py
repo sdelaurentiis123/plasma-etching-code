@@ -103,6 +103,14 @@ class SurfaceFluxes:
     substrate_deposition_fluorine_flux: object = None
     crosslinked_deposition_carbon_flux: object = None
     crosslinked_deposition_fluorine_flux: object = None
+    # Atom-resolved ion spectrum (per-event): sparse (face, flux, E, cos)
+    # arrays. When present, EVERY ion-driven term is evaluated per atom
+    # against the live face state and segment-summed (research doc
+    # RESEARCH_EVENT_RESOLVED_CHEMISTRY: clamps stay at face level).
+    ion_atom_face: object = None
+    ion_atom_flux: object = None
+    ion_atom_energy_eV: object = None
+    ion_atom_cosine: object = None
 
 
 @dataclass
@@ -222,9 +230,63 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     d_fc = state.film_thickness_nm()
     theta_film = 1.0 - _exp_neg(d_fc * 1e-9 * _FC_FILM_ATOM_DENSITY_M3
                                 / _MONOLAYER_AREAL_M2)
-    e_iface = interface_energy_eV(fluxes.ion_energy_eV, d_fc, params)
-    eps_dep, _depth = _deposited_energy(e_iface, fluxes.cosine_incidence, params)
-    energy_ratio = eps_dep / params.reference_energy_eV
+    ref_dep_140, _ = _deposited_energy(np.asarray(140.0), np.asarray(1.0), params)
+    ref_dep_140 = np.maximum(float(ref_dep_140), 1e-300)
+    if fluxes.ion_atom_face is not None:
+        atom_face = np.asarray(fluxes.ion_atom_face, dtype=int)
+        atom_flux = np.asarray(fluxes.ion_atom_flux, dtype=float)
+        atom_energy = np.asarray(fluxes.ion_atom_energy_eV, dtype=float)
+        atom_cos = np.clip(np.asarray(fluxes.ion_atom_cosine, dtype=float), 0.0, 1.0)
+        shape = np.broadcast(np.asarray(d_fc), np.asarray(state.n_f)).shape
+        d_fc_arr = np.broadcast_to(np.asarray(d_fc, dtype=float), shape)
+        atom_e_iface = np.asarray(interface_energy_eV(
+            atom_energy, d_fc_arr.ravel()[atom_face] if shape else d_fc_arr,
+            params))
+        atom_eps, _ = _deposited_energy(atom_e_iface, atom_cos, params)
+        atom_kress = np.maximum(
+            (1.0 + 9.3 * (1.0 - atom_cos ** 2)) * atom_cos, 0.0)
+
+        def _segment(values):
+            out = np.zeros(shape if shape else (1,))
+            np.add.at(out.ravel(), atom_face, values)
+            return out if shape else out[0]
+
+        kernel_sputter = _segment(
+            atom_flux * np.asarray(_threshold_power_yield(
+                atom_energy, 0.9, 20.0, 500.0, 0.5)) * atom_kress)
+        kernel_mix = _segment(atom_flux * atom_eps
+                              / params.reference_energy_eV)
+        kernel_xl = _segment(
+            atom_flux * np.maximum(atom_energy - atom_e_iface, 0.0))
+        kernel_complex = _segment(
+            0.1384 * atom_flux * atom_eps / ref_dep_140)
+        kernel_bare = _segment(atom_flux * np.asarray(_threshold_power_yield(
+            atom_e_iface, 0.0909, 70.0, 140.0, 1.0)))
+        # Flux-weighted diagnostics for receipts and clog logic.
+        total_atom_flux = _segment(atom_flux)
+        safe_total = np.maximum(total_atom_flux, 1e-300)
+        e_iface = _segment(atom_flux * atom_e_iface) / safe_total
+        eps_dep = _segment(atom_flux * atom_eps) / safe_total
+        energy_ratio = eps_dep / params.reference_energy_eV
+    else:
+        e_iface = interface_energy_eV(fluxes.ion_energy_eV, d_fc, params)
+        eps_dep, _depth = _deposited_energy(
+            e_iface, fluxes.cosine_incidence, params)
+        energy_ratio = eps_dep / params.reference_energy_eV
+        cos_scalar = np.clip(
+            np.asarray(fluxes.cosine_incidence, dtype=float), 0.0, 1.0)
+        kress_scalar = np.maximum(
+            (1.0 + 9.3 * (1.0 - cos_scalar ** 2)) * cos_scalar, 0.0)
+        kernel_sputter = (np.asarray(_threshold_power_yield(
+            fluxes.ion_energy_eV, 0.9, 20.0, 500.0, 0.5))
+            * kress_scalar * fluxes.ion_flux)
+        kernel_mix = fluxes.ion_flux * energy_ratio
+        kernel_xl = fluxes.ion_flux * np.maximum(
+            np.asarray(fluxes.ion_energy_eV, dtype=float) - e_iface, 0.0)
+        kernel_complex = 0.1384 * fluxes.ion_flux * np.asarray(
+            eps_dep, dtype=float) / ref_dep_140
+        kernel_bare = fluxes.ion_flux * np.asarray(_threshold_power_yield(
+            e_iface, 0.0909, 70.0, 140.0, 1.0))
 
     film_total = np.asarray(state.n_c_film + state.n_f_film, dtype=float)
     x_c = _guarded_ratio(state.n_c_film, film_total, 1.0)
@@ -266,16 +328,9 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
 
     # --- film losses (proposed rates, atoms/m^2/s) ---
     # Film sputter: Krueger's PUBLISHED polymer sputter law (p0=0.9,
-    # eth=20 eV, q=0.5, e0=500 eV; Kress B=9.3) at the INCIDENT ion energy
-    # (the ion strikes the film top before any attenuation). The previous
-    # 0.1384 constant was the complex sputter probability — a mis-lift the
-    # completeness audit caught (film eroded ~6.5x too weakly).
-    cos_inc = np.clip(np.asarray(fluxes.cosine_incidence, dtype=float), 0.0, 1.0)
-    angular_sputter = np.maximum(
-        (1.0 + 9.3 * (1.0 - cos_inc ** 2)) * cos_inc, 0.0)
-    sputter_total = (_threshold_power_yield(fluxes.ion_energy_eV, 0.9, 20.0,
-                                            500.0, 0.5)
-                     * fluxes.ion_flux * angular_sputter * theta_film)
+    # eth=20 eV, q=0.5, e0=500 eV; Kress B=9.3) at the INCIDENT ion energy,
+    # evaluated per atom when the spectrum is atom-resolved.
+    sputter_total = kernel_sputter * theta_film
     sput_c = sputter_total * x_c
     sput_f = sputter_total * x_f
     # O oxidation of film carbon: each oxidized C carries along the local film
@@ -284,7 +339,7 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     f_per_ox_c = _guarded_ratio(state.n_f_film, state.n_c_film, 2.0)
     ox_f = ox_c * f_per_ox_c
     # Ion-driven mixing of film content into the layer (Humbird-Graves).
-    mix_total = params.mixing_efficiency * fluxes.ion_flux * energy_ratio * theta_film
+    mix_total = params.mixing_efficiency * kernel_mix * theta_film
     mix_c = mix_total * x_c
     mix_f = mix_total * x_f
 
@@ -322,26 +377,19 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # SiF4) + bare-SiO2 physical sputter 0.0909 @ 70 eV threshold (no F
     # cost — formula units leave as ejecta). volatilization_yield is a
     # multiplier defaulting to 1.0: published magnitude, no anchor constant.
-    ref_dep, _ = _deposited_energy(np.asarray(140.0), np.asarray(1.0), params)
-    shape = np.asarray(eps_dep, dtype=float) / np.maximum(float(ref_dep), 1e-300)
     open_area = np.maximum(1.0 - theta_film, 0.0)
     if params.substrate == "carbon":
         f_per_unit = 2.0
-        capacity = (params.volatilization_yield * 0.1384 * shape
-                    * fluxes.ion_flux * open_area)
+        capacity = (params.volatilization_yield * kernel_complex * open_area)
         sif4 = np.zeros_like(capacity * theta_f_layer)
         substrate_removal = capacity * theta_f_layer
         bare_removal = np.zeros_like(substrate_removal)
         f_costed_removal = substrate_removal
     else:
         f_per_unit = 4.0
-        capacity = (params.volatilization_yield * 0.1384 * shape
-                    * fluxes.ion_flux * open_area)
+        capacity = (params.volatilization_yield * kernel_complex * open_area)
         sif4 = capacity * theta_f_layer
-        bare_shape = np.asarray(
-            _threshold_power_yield(e_iface, 0.0909, 70.0, 140.0, 1.0))
-        bare_removal = (params.volatilization_yield * bare_shape
-                        * fluxes.ion_flux * open_area
+        bare_removal = (params.volatilization_yield * kernel_bare * open_area
                         * np.maximum(1.0 - theta_f_layer, 0.0))
         substrate_removal = sif4 + bare_removal
         f_costed_removal = sif4
@@ -421,9 +469,7 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # film atoms at (energy absorbed in the film)/E_displacement per ion;
     # removal channels draw down crosslinked atoms in proportion to their
     # share, so n_xl stays a subset of the film inventory exactly.
-    film_energy = np.maximum(
-        np.asarray(fluxes.ion_energy_eV, dtype=float) - e_iface, 0.0)
-    xl_rate = (fluxes.ion_flux * film_energy / params.displacement_energy_eV
+    xl_rate = (kernel_xl / params.displacement_energy_eV
                * np.maximum(1.0 - _guarded_ratio(state.n_xl_film, film_total, 1.0),
                             0.0))
     fresh_available = np.maximum(
