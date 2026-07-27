@@ -51,7 +51,7 @@ def test_normal_incidence_is_a_bitwise_noop():
         domain_size=(1.0, 1.0, 1.0), periodic_lateral=False)
     assert secondary is None
     assert diag["reflected_rate"] == 0.0
-    assert np.array_equal(primary.event_flux_m2_s, population.event_flux_m2_s)
+    assert primary is population  # collision weight untouched
 
 
 def test_grazing_wall_event_reflects_to_facing_wall_with_conservation():
@@ -65,13 +65,16 @@ def test_grazing_wall_event_reflects_to_facing_wall_with_conservation():
         population, verts, faces, areas, centroids, normals,
         domain_size=(1.0, 1.0, 1.0), periodic_lateral=False)
     assert secondary is not None
-    # Conservation: primary' + secondary + escaped == original rate
+    # ADDITIVE: the collision keeps full weight; the continuing hot neutral
+    # carries the reflected measure exactly (spawned + escaped == reflected).
+    assert primary is population
     original = float(population.event_flux_m2_s[0] * areas[0])
-    kept = float(primary.event_flux_m2_s[0] * areas[0])
+    expected_reflected = 0.95 * (1.0 - population.event_cosine_incidence[0] ** 3) * original
     landed = float((secondary.event_flux_m2_s
                     * areas[secondary.event_face]).sum())
-    assert kept + landed + diag["escaped_rate"] == pytest.approx(
-        original, rel=1e-12)
+    assert landed + diag["escaped_rate"] == pytest.approx(
+        expected_reflected, rel=1e-12)
+    assert diag["reflected_rate"] == pytest.approx(expected_reflected, rel=1e-12)
     # Energy retention is exactly the declared fraction
     assert secondary.event_energy_eV[0] == pytest.approx(0.90 * 1500.0)
     # The specular partner of a wall-grazing downward ray continues downward:

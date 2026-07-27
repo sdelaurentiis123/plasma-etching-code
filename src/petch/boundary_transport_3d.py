@@ -727,13 +727,14 @@ def split_grazing_ion_reflection(
     """Split grazing-incidence weight off a primary ion population as a
     single-bounce specular hot-neutral population (audit P0.2).
 
-    P_reflect = p0 * (1 - cos^m); the reflected share leaves the primary event
-    (its flux is scaled down in place) and is re-cast from the face centroid
-    along the specular direction with ``energy_retention_fraction`` of the
-    incident energy. Secondary hits land as a new charge-neutral population
-    named ``"<name>:hot_neutral"``; rays exiting the open top escape and are
-    reported. Particle rate is conserved exactly:
-    primary' + secondary + escaped == primary.
+    P_reflect = p0 * (1 - cos^m). ADDITIVE formulation (Krueger): the grazing
+    collision itself still sputters with the full event weight — the Kress
+    grazing enhancement in the yield laws encodes that partial energy
+    transfer — and the particle then CONTINUES as a hot neutral carrying
+    ``energy_retention_fraction`` of its energy, re-cast specularly from the
+    face centroid. Chemistry counts collisions (primary weight unchanged);
+    particle conservation follows the continuing neutral: spawned + escaped
+    == reflected measure, gated exactly.
     """
     from .surface_kinetics import FaceResolvedEnergeticFlux as _Population
 
@@ -747,10 +748,7 @@ def split_grazing_ion_reflection(
     direction = np.asarray(direction, dtype=float)
     weight = (grazing_reflection_probability
               * (1.0 - np.clip(cosine, 0.0, 1.0) ** angular_exponent))
-    primary = _Population(
-        population.name, population.face_count, face, flux * (1.0 - weight),
-        energy, cosine, event_position=population.event_position,
-        event_incident_direction=population.event_incident_direction)
+    primary = population
     reflected_rate = weight * flux * np.asarray(areas, dtype=float)[face]
     active = reflected_rate > 0.0
     diagnostics = {
