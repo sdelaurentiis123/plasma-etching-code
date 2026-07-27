@@ -134,3 +134,27 @@ def test_empty_options_dict_activates_reflection_in_gather():
     assert "Ar+:hot_neutral" in result.hit_probability
     diag = result.hit_probability["Ar+:hot_neutral"]
     assert diag["reflected_rate"] >= 0.0
+
+
+def test_role_selection_keeps_hot_neutrals():
+    """Regression: 'ions:hot_neutral' is not a declared boundary species, so
+    the role filter silently dropped the entire reflected population (ml10
+    ran bitwise-identical to no-reflection despite 2e6 secondary events per
+    step in the receipts). Hot neutrals inherit the parent ion's role."""
+    from petch.feature_step_3d import _select_surface_fluxes
+    from petch.surface_kinetics import (
+        FaceResolvedEnergeticFlux, SurfaceFluxes as EngineFluxes)
+
+    ions = FaceResolvedEnergeticFlux(
+        "ions", 4, np.array([0, 2]), np.array([1e19, 2e19]),
+        np.array([1000.0, 1200.0]), np.array([1.0, 0.5]))
+    hot = FaceResolvedEnergeticFlux(
+        "ions:hot_neutral", 4, np.array([1]), np.array([5e18]),
+        np.array([900.0]), np.array([0.3]))
+    fluxes = EngineFluxes({"CF2": np.full(4, 1e19)}, (ions, hot))
+    selected = _select_surface_fluxes(
+        fluxes, np.arange(4), 4,
+        species_role={"ions": "energetic_bombardment",
+                      "CF2": "neutral_reactant"})
+    names = {p.name for p in selected.energetic_fluxes}
+    assert names == {"ions", "ions:hot_neutral"}

@@ -1567,7 +1567,12 @@ def _select_surface_fluxes(fluxes, selected_face, face_count, species_role=None)
         if role is None or role.get(name) == "neutral_reactant"}
     energetic = []
     for population in fluxes.energetic_fluxes:
-        if role is not None and role.get(population.name) != "energetic_bombardment":
+        # A reflected hot neutral inherits its parent ion's chemistry role
+        # (thesis: hot neutrals "behave identically to their ion counterpart").
+        base_name = (population.name.rsplit(":hot_neutral", 1)[0]
+                     if population.name.endswith(":hot_neutral")
+                     else population.name)
+        if role is not None and role.get(base_name) != "energetic_bombardment":
             continue
         if isinstance(population, FaceResolvedEnergeticFlux):
             energetic.append(population.remap_faces(
