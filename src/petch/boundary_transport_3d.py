@@ -7,7 +7,7 @@ their limitations; reflection, re-emission, and collisional charged transport re
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import heapq
 from types import MappingProxyType
 from typing import Mapping
@@ -22,7 +22,8 @@ from .boundary_state import (
     qmc_boundary_proposal,
 )
 from .charged_surface_response_3d import OutgoingChargedParticleEvents3D
-from .surface_kinetics import FaceResolvedEnergeticFlux, SurfaceFluxes
+from .surface_kinetics import (
+    EnergeticFlux, FaceResolvedEnergeticFlux, SurfaceFluxes)
 from .neutral_radiosity_3d import DiffuseFormFactors3D
 from .threed import DEVICE, _apply_bc
 from .warp_runtime import ensure_writable_warp_cache
@@ -879,6 +880,117 @@ def split_grazing_ion_reflection(
         all_energy, all_cos,
         event_incident_direction=all_dir)
     return population, secondary, diagnostics
+
+
+def _extrusion_strip_groups(centroids, normals):
+    """Group faces into y-strips: geometrically equivalent up to the extruded
+    (y) coordinate, i.e. matching quantized (centroid_x, centroid_z, normal).
+
+    Returns (keys, groups) where ``keys[i]`` is face i's group key and
+    ``groups[key]`` is the sorted list of member face indices. This is the
+    single definition of strip equivalence shared by the reflection splitter
+    and the transport symmetrizer.
+    """
+    centroids = np.asarray(centroids, dtype=float)
+    normals = np.asarray(normals, dtype=float)
+    scale = max(float(np.max(np.abs(centroids))), 1.0)
+    quant = 1e-6 * scale
+    keys = np.round(
+        np.column_stack((centroids[:, 0], centroids[:, 2], normals))
+        / quant).astype(np.int64)
+    groups = {}
+    for index, key in enumerate(map(tuple, keys)):
+        groups.setdefault(key, []).append(index)
+    return keys, groups
+
+
+def symmetrize_transport_across_strips(transport, verts, faces, centroids, normals):
+    """Project a transport result onto the extruded (y-invariant) symmetry.
+
+    In the quasi-2D extruded contract the problem is invariant along y, so
+    every y-strip of geometrically equivalent faces must carry identical
+    incident flux. Discrete ballistic launches (especially reflected
+    hot-neutral cascades) deposit slightly unevenly across strips, which the
+    downstream extrusion guard then rejects. This makes the symmetry exact at
+    the source: neutral and per-face energetic fluxes become their
+    area-weighted strip mean, and sparse energetic events are redistributed
+    equally across their strip. Total incident rate is conserved per strip.
+
+    The extrusion guard remains the independent certifier of this invariant.
+    """
+    areas = 0.5 * np.linalg.norm(np.cross(
+        verts[faces[:, 1]] - verts[faces[:, 0]],
+        verts[faces[:, 2]] - verts[faces[:, 0]]), axis=1)
+    _keys, groups = _extrusion_strip_groups(centroids, normals)
+    member_lists = list(groups.values())
+
+    def strip_mean(values):
+        values = np.asarray(values, dtype=float)
+        result = np.array(values, copy=True)
+        for members in member_lists:
+            if len(members) < 2:
+                continue
+            member_area = areas[members]
+            total_area = member_area.sum()
+            if total_area <= 0.0:
+                continue
+            result[members] = float(np.dot(values[members], member_area) / total_area)
+        return result
+
+    fluxes = transport.surface_fluxes
+    neutral = {name: strip_mean(value)
+               for name, value in fluxes.neutral_flux_m2_s.items()}
+
+    energetic = []
+    for population in fluxes.energetic_fluxes:
+        if isinstance(population, FaceResolvedEnergeticFlux):
+            energetic.append(_symmetrize_face_resolved(population, areas, groups))
+        elif isinstance(population, EnergeticFlux):
+            flux = np.asarray(population.flux_m2_s, dtype=float)
+            if flux.ndim == 0:
+                energetic.append(population)          # already uniform
+            else:
+                energetic.append(EnergeticFlux(
+                    population.name, strip_mean(flux), population.energy_eV,
+                    population.cosine_incidence, population.weight))
+        else:  # pragma: no cover - SurfaceFluxes validates membership
+            raise TypeError(type(population).__name__)
+
+    new_fluxes = SurfaceFluxes(neutral, tuple(energetic))
+    return replace(transport, surface_fluxes=new_fluxes)
+
+
+def _symmetrize_face_resolved(population, areas, groups):
+    """Redistribute each sparse event's rate equally across its strip faces."""
+    face = np.asarray(population.event_face, dtype=int)
+    rate = np.asarray(population.event_flux_m2_s, dtype=float) * areas[face]
+    energy = np.asarray(population.event_energy_eV, dtype=float)
+    cosine = np.asarray(population.event_cosine_incidence, dtype=float)
+    direction = population.event_incident_direction
+    key_of_face = {}
+    for members in groups.values():
+        for member in members:
+            key_of_face[member] = members
+    new_face, new_rate, new_energy, new_cos = [], [], [], []
+    new_dir = [] if direction is not None else None
+    for i in range(face.size):
+        members = key_of_face[int(face[i])]
+        share = rate[i] / len(members)
+        for member in members:
+            new_face.append(member)
+            new_rate.append(share)
+            new_energy.append(energy[i])
+            new_cos.append(cosine[i])
+            if new_dir is not None:
+                new_dir.append(direction[i])
+    new_face = np.asarray(new_face, dtype=int)
+    new_areas = areas[new_face]
+    return FaceResolvedEnergeticFlux(
+        population.name, population.face_count, new_face,
+        np.asarray(new_rate, dtype=float) / new_areas,
+        np.asarray(new_energy, dtype=float), np.asarray(new_cos, dtype=float),
+        event_incident_direction=(None if new_dir is None
+                                  else np.asarray(new_dir, dtype=float)))
 
 
 @wp.kernel

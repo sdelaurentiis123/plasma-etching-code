@@ -26,6 +26,7 @@ from .boundary_transport_3d import (
     gather_boundary_state_ballistic_3d,
     estimate_diffuse_form_factors_3d,
     merge_boundary_transport_results_3d,
+    symmetrize_transport_across_strips,
     trace_boundary_state_field_3d,
     trace_boundary_state_first_hit_3d,
 )
@@ -2466,6 +2467,12 @@ def advance_feature_step_3d(
                     "maximum_periodic_wraps", 10000))))
         chemistry_role[neutral_forward_scatter.neutral_species_name] = (
             "energetic_bombardment")
+    if profile_periodic_lateral:
+        # Quasi-2D extruded contract: enforce y-invariance at the source so
+        # discrete ballistic/cascade launches cannot deposit unevenly across
+        # strips (the extrusion guard remains the independent certifier).
+        transport = symmetrize_transport_across_strips(
+            transport, verts, faces, centroids, face_gas_normals)
     base_transport = transport
     neutral_radiosity_diagnostics = MappingProxyType({})
     neutral_surface_iterations = 0
