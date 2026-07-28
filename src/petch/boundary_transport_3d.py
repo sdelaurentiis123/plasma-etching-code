@@ -722,98 +722,132 @@ def _specular_secondary_hits_3d(
 def split_grazing_ion_reflection(
         population, verts, faces, areas, centroids, normals, *,
         domain_size, periodic_lateral, device=None,
-        grazing_reflection_probability=0.95, angular_exponent=3.0,
-        energy_retention_fraction=0.90, launch_offset=1e-4):
-    """Split grazing-incidence weight off a primary ion population as a
-    single-bounce specular hot-neutral population (audit P0.2).
+        grazing_reflection_probability=None, angular_exponent=None,
+        energy_retention_fraction=None, launch_offset=1e-4,
+        specular_threshold_eV=100.0, diffusive_cutoff_eV=10.0,
+        specular_cutoff_angle_deg=70.0, max_bounces=8,
+        minimum_weight=1e-4, extruded_symmetrize=True):
+    """Exact MCFPM reflection cascade (Huang thesis Eq. 2.34 + leftover rule).
 
-    P_reflect = p0 * (1 - cos^m). ADDITIVE formulation (Krueger): the grazing
-    collision itself still sputters with the full event weight — the Kress
-    grazing enhancement in the yield laws encodes that partial energy
-    transfer — and the particle then CONTINUES as a hot neutral carrying
-    ``energy_retention_fraction`` of its energy, re-cast specularly from the
-    face centroid. Chemistry counts collisions (primary weight unchanged);
-    particle conservation follows the continuing neutral: spawned + escaped
-    == reflected measure, gated exactly.
+    Per collision the continuing weight is the leftover reaction probability
+    1 - clip(p0_film * kress(cos), 0, 1) (selection interpretation B': the
+    energy function scales removal, not selection). The continuing particle
+    is specular with FULL energy when E > 100 eV and incidence is beyond 70
+    degrees from normal; between 10 and 100 eV the retained energy follows
+    the Eq. 2.34 interpolation; below cutoffs the particle scatters
+    diffusively and is dropped from the energetic cascade (its energy is
+    thermalized). The cascade iterates to ``max_bounces``. Legacy kwargs
+    (probability/exponent/retention) are accepted and ignored for
+    compatibility; the published constants carry provenance.
     """
     from .surface_kinetics import FaceResolvedEnergeticFlux as _Population
 
     direction = population.event_incident_direction
     if direction is None:
         raise ValueError("grazing reflection requires event incident directions")
-    face = np.asarray(population.event_face, dtype=int)
-    flux = np.asarray(population.event_flux_m2_s, dtype=float)
-    energy = np.asarray(population.event_energy_eV, dtype=float)
-    cosine = np.asarray(population.event_cosine_incidence, dtype=float)
-    direction = np.asarray(direction, dtype=float)
-    cos_clipped = np.clip(cosine, 0.0, 1.0)
-    # Expectation form of Krueger's per-collision MC (react with probability
-    # Y, ELSE continue): the continuing measure is P_reflect * (1 - Y). The
-    # reacting-surface closure uses the published film sputter law (walls in
-    # this regime are polymer-lined): p0=0.9, eth=20 eV, q=0.5, e0=500,
-    # Kress B=9.3 — all published constants, no knobs. The additive (ml11)
-    # and subtractive (ml9b) limits bracket this form experimentally.
-    kress = np.maximum((1.0 + 9.3 * (1.0 - cos_clipped ** 2)) * cos_clipped, 0.0)
-    react_probability = np.clip(
-        0.9 * (np.maximum(energy, 0.0) ** 0.5 - 20.0 ** 0.5)
-        / (500.0 ** 0.5 - 20.0 ** 0.5) * kress, 0.0, 1.0)
-    weight = (grazing_reflection_probability
-              * (1.0 - cos_clipped ** angular_exponent)
-              * (1.0 - react_probability))
-    primary = population
-    reflected_rate = weight * flux * np.asarray(areas, dtype=float)[face]
-    active = reflected_rate > 0.0
-    diagnostics = {
-        "reflected_rate": float(reflected_rate.sum()),
-        "escaped_rate": 0.0,
-        "secondary_events": 0,
-    }
-    if not np.any(active):
-        return primary, None, diagnostics
-    face_a = face[active]
-    normal_a = np.asarray(normals, dtype=float)[face_a]
-    dir_a = direction[active]
-    dir_a = dir_a / np.linalg.norm(dir_a, axis=1, keepdims=True)
-    specular = dir_a - 2.0 * np.einsum("rc,rc->r", dir_a, normal_a)[:, None] * normal_a
-    specular /= np.linalg.norm(specular, axis=1, keepdims=True)
-    origin = (np.asarray(centroids, dtype=float)[face_a]
-              + launch_offset * normal_a)
+    areas = np.asarray(areas, dtype=float)
+    centroids = np.asarray(centroids, dtype=float)
+    normals = np.asarray(normals, dtype=float)
     selected_device = DEVICE if device is None else str(device)
     mesh = wp.Mesh(
         points=wp.array(np.asarray(verts, dtype=np.float32), dtype=wp.vec3,
                         device=selected_device),
         indices=wp.array(np.asarray(faces, dtype=np.int32).ravel(),
                          dtype=wp.int32, device=selected_device))
-    count = len(face_a)
-    hit_face = wp.full(count, -1, dtype=int, device=selected_device)
-    hit_cos = wp.zeros(count, dtype=float, device=selected_device)
     domain = np.asarray(domain_size, dtype=float)
-    wp.launch(
-        _specular_secondary_hits_3d, dim=count,
-        inputs=[mesh.id,
-                wp.array(origin.astype(np.float32), dtype=wp.vec3,
-                         device=selected_device),
-                wp.array(specular.astype(np.float32), dtype=wp.vec3,
-                         device=selected_device),
-                float(domain[0]), float(domain[1]), float(domain[2]),
-                int(bool(periodic_lateral)), hit_face, hit_cos],
-        device=selected_device)
-    hit_face_np = hit_face.numpy()
-    hit_cos_np = hit_cos.numpy()
-    landed = hit_face_np >= 0
-    rate_a = reflected_rate[active]
-    diagnostics["escaped_rate"] = float(rate_a[~landed].sum())
-    diagnostics["secondary_events"] = int(np.count_nonzero(landed))
-    if not np.any(landed):
-        return primary, None, diagnostics
-    dst = hit_face_np[landed]
+    cos_cutoff = float(np.cos(np.radians(specular_cutoff_angle_deg)))
+
+    face = np.asarray(population.event_face, dtype=int)
+    rate = (np.asarray(population.event_flux_m2_s, dtype=float) * areas[face])
+    energy = np.asarray(population.event_energy_eV, dtype=float)
+    cosine = np.clip(np.asarray(population.event_cosine_incidence, dtype=float),
+                     0.0, 1.0)
+    dirs = np.asarray(direction, dtype=float)
+    dirs = dirs / np.maximum(np.linalg.norm(dirs, axis=1, keepdims=True), 1e-300)
+
+    diagnostics = {"reflected_rate": 0.0, "escaped_rate": 0.0,
+                   "secondary_events": 0, "thermalized_rate": 0.0,
+                   "bounce_generations": 0}
+    out_face, out_rate, out_energy, out_cos, out_dir = [], [], [], [], []
+
+    for bounce in range(int(max_bounces)):
+        kress = np.maximum((1.0 + 9.3 * (1.0 - cosine ** 2)) * cosine, 0.0)
+        react = np.clip(0.9 * kress, 0.0, 1.0)
+        continue_weight = 1.0 - react
+        # Eq. 2.34 retention.
+        theta_ok = cosine < cos_cutoff          # beyond 70 deg from normal
+        fast = energy > specular_threshold_eV
+        slow = energy < diffusive_cutoff_eV
+        retained = np.where(
+            fast & theta_ok, energy,
+            np.where(slow | ~theta_ok, 0.0,
+                     energy
+                     * ((np.degrees(np.arccos(np.clip(cosine, -1.0, 1.0)))
+                         - specular_cutoff_angle_deg)
+                        / (90.0 - specular_cutoff_angle_deg))
+                     * ((energy - diffusive_cutoff_eV)
+                        / (specular_threshold_eV - diffusive_cutoff_eV))))
+        new_rate = rate * continue_weight
+        alive = (new_rate > minimum_weight * np.maximum(rate, 1e-300))             & (retained > diffusive_cutoff_eV)
+        diagnostics["thermalized_rate"] += float(
+            (rate * continue_weight)[~alive].sum())
+        if not np.any(alive):
+            break
+        diagnostics["bounce_generations"] = bounce + 1
+        face_a = face[alive]
+        normal_a = normals[face_a]
+        dir_a = dirs[alive]
+        specular = dir_a - 2.0 * np.einsum(
+            "rc,rc->r", dir_a, normal_a)[:, None] * normal_a
+        if extruded_symmetrize and specular.shape[0]:
+            specular[:, 1] = 0.0
+        specular /= np.maximum(
+            np.linalg.norm(specular, axis=1, keepdims=True), 1e-300)
+        origin = centroids[face_a] + launch_offset * normal_a
+        count = len(face_a)
+        hit_face = wp.full(count, -1, dtype=int, device=selected_device)
+        hit_cos = wp.zeros(count, dtype=float, device=selected_device)
+        wp.launch(
+            _specular_secondary_hits_3d, dim=count,
+            inputs=[mesh.id,
+                    wp.array(origin.astype(np.float32), dtype=wp.vec3,
+                             device=selected_device),
+                    wp.array(specular.astype(np.float32), dtype=wp.vec3,
+                             device=selected_device),
+                    float(domain[0]), float(domain[1]), float(domain[2]),
+                    int(bool(periodic_lateral)), hit_face, hit_cos],
+            device=selected_device)
+        hit_face_np = hit_face.numpy()
+        hit_cos_np = np.clip(hit_cos.numpy(), 0.0, 1.0)
+        landed = hit_face_np >= 0
+        rate_alive = new_rate[alive]
+        energy_alive = retained[alive]
+        diagnostics["escaped_rate"] += float(rate_alive[~landed].sum())
+        if not np.any(landed):
+            break
+        face = hit_face_np[landed]
+        rate = rate_alive[landed]
+        energy = energy_alive[landed]
+        cosine = hit_cos_np[landed]
+        dirs = specular[landed]
+        diagnostics["reflected_rate"] += float(rate.sum())
+        diagnostics["secondary_events"] += int(landed.sum())
+        out_face.append(face.copy())
+        out_rate.append(rate.copy())
+        out_energy.append(energy.copy())
+        out_cos.append(cosine.copy())
+        out_dir.append(dirs.copy())
+
+    if not out_face:
+        return population, None, diagnostics
+    all_face = np.concatenate(out_face)
+    all_rate = np.concatenate(out_rate)
     secondary = _Population(
-        f"{population.name}:hot_neutral", population.face_count, dst,
-        rate_a[landed] / np.asarray(areas, dtype=float)[dst],
-        energy_retention_fraction * energy[active][landed],
-        hit_cos_np[landed],
-        event_incident_direction=specular[landed])
-    return primary, secondary, diagnostics
+        f"{population.name}:hot_neutral", population.face_count, all_face,
+        all_rate / areas[all_face],
+        np.concatenate(out_energy), np.concatenate(out_cos),
+        event_incident_direction=np.concatenate(out_dir))
+    return population, secondary, diagnostics
 
 
 @wp.kernel
