@@ -746,8 +746,20 @@ def split_grazing_ion_reflection(
     energy = np.asarray(population.event_energy_eV, dtype=float)
     cosine = np.asarray(population.event_cosine_incidence, dtype=float)
     direction = np.asarray(direction, dtype=float)
+    cos_clipped = np.clip(cosine, 0.0, 1.0)
+    # Expectation form of Krueger's per-collision MC (react with probability
+    # Y, ELSE continue): the continuing measure is P_reflect * (1 - Y). The
+    # reacting-surface closure uses the published film sputter law (walls in
+    # this regime are polymer-lined): p0=0.9, eth=20 eV, q=0.5, e0=500,
+    # Kress B=9.3 — all published constants, no knobs. The additive (ml11)
+    # and subtractive (ml9b) limits bracket this form experimentally.
+    kress = np.maximum((1.0 + 9.3 * (1.0 - cos_clipped ** 2)) * cos_clipped, 0.0)
+    react_probability = np.clip(
+        0.9 * (np.maximum(energy, 0.0) ** 0.5 - 20.0 ** 0.5)
+        / (500.0 ** 0.5 - 20.0 ** 0.5) * kress, 0.0, 1.0)
     weight = (grazing_reflection_probability
-              * (1.0 - np.clip(cosine, 0.0, 1.0) ** angular_exponent))
+              * (1.0 - cos_clipped ** angular_exponent)
+              * (1.0 - react_probability))
     primary = population
     reflected_rate = weight * flux * np.asarray(areas, dtype=float)[face]
     active = reflected_rate > 0.0

@@ -57,7 +57,8 @@ def test_normal_incidence_is_a_bitwise_noop():
 def test_grazing_wall_event_reflects_to_facing_wall_with_conservation():
     verts, faces, areas, centroids, normals = _box_trench_mesh()
     # Ion nearly parallel to the left wall: mostly -z, slight -x INTO the wall
-    direction = np.array([[-0.1, 0.0, -0.995]])
+    # (cos=0.02: truly grazing, where the expectation form keeps continuation)
+    direction = np.array([[-0.02, 0.0, -0.9998]])
     direction /= np.linalg.norm(direction)
     cosine = float(abs(direction[0] @ np.array([1.0, 0.0, 0.0])))
     population = _population([0], [2.0e19], [1500.0], [cosine], direction)
@@ -69,7 +70,12 @@ def test_grazing_wall_event_reflects_to_facing_wall_with_conservation():
     # carries the reflected measure exactly (spawned + escaped == reflected).
     assert primary is population
     original = float(population.event_flux_m2_s[0] * areas[0])
-    expected_reflected = 0.95 * (1.0 - population.event_cosine_incidence[0] ** 3) * original
+    cos0 = float(population.event_cosine_incidence[0])
+    kress = max((1.0 + 9.3 * (1.0 - cos0 ** 2)) * cos0, 0.0)
+    y_react = min(max(0.9 * (1500.0 ** 0.5 - 20.0 ** 0.5)
+                      / (500.0 ** 0.5 - 20.0 ** 0.5) * kress, 0.0), 1.0)
+    expected_reflected = (0.95 * (1.0 - cos0 ** 3)
+                          * (1.0 - y_react) * original)
     landed = float((secondary.event_flux_m2_s
                     * areas[secondary.event_face]).sum())
     assert landed + diag["escaped_rate"] == pytest.approx(
@@ -85,10 +91,10 @@ def test_grazing_wall_event_reflects_to_facing_wall_with_conservation():
 
 def test_specular_direction_reverses_normal_component_only():
     verts, faces, areas, centroids, normals = _box_trench_mesh()
-    direction = np.array([[-0.3, 0.0, -0.954]])
+    direction = np.array([[-0.08, 0.0, -0.9968]])
     direction /= np.linalg.norm(direction)
     population = _population(
-        [0], [1.0e19], [800.0],
+        [0], [1.0e19], [120.0],
         [float(abs(direction[0] @ np.array([1.0, 0.0, 0.0])))], direction)
     _, secondary, _ = split_grazing_ion_reflection(
         population, verts, faces, areas, centroids, normals,
@@ -108,7 +114,10 @@ def test_reflected_weight_follows_declared_angular_law():
         primary, secondary, diag = split_grazing_ion_reflection(
             population, verts, faces, areas, centroids, normals,
             domain_size=(1.0, 1.0, 1.0), periodic_lateral=False)
-        expected_weight = 0.95 * (1.0 - cosine ** 3)
+        kress = max((1.0 + 9.3 * (1.0 - cosine ** 2)) * cosine, 0.0)
+        y_react = min(max(0.9 * (1000.0 ** 0.5 - 20.0 ** 0.5)
+                          / (500.0 ** 0.5 - 20.0 ** 0.5) * kress, 0.0), 1.0)
+        expected_weight = 0.95 * (1.0 - cosine ** 3) * (1.0 - y_react)
         original = float(population.event_flux_m2_s[0] * areas[0])
         reflected = diag["reflected_rate"]
         assert reflected == pytest.approx(expected_weight * original, rel=1e-12)
@@ -158,3 +167,21 @@ def test_role_selection_keeps_hot_neutrals():
                       "CF2": "neutral_reactant"})
     names = {p.name for p in selected.energetic_fluxes}
     assert names == {"ions", "ions:hot_neutral"}
+
+
+def test_reacting_fraction_suppresses_continuation_at_high_yield():
+    """Expectation form: where the published film law reacts strongly the
+    continuation collapses (Krueger MC either-or, in expectation). A grazing
+    low-energy event continues near-fully; a mid-angle high-energy one
+    (kress peak, yield ~1) continues barely."""
+    verts, faces, areas, centroids, normals = _box_trench_mesh()
+    def continued(cosine, energy):
+        d = np.array([[-cosine, 0.0, -np.sqrt(max(1 - cosine ** 2, 1e-9))]])
+        d /= np.linalg.norm(d)
+        pop = _population([0], [1.0e19], [energy], [cosine], d)
+        _, _, diag = split_grazing_ion_reflection(
+            pop, verts, faces, areas, centroids, normals,
+            domain_size=(1.0, 1.0, 1.0), periodic_lateral=False)
+        return diag["reflected_rate"] / (1.0e19 * areas[0])
+    assert continued(0.05, 100.0) > 0.5      # grazing, low E: funnel survives
+    assert continued(0.6, 1500.0) < 0.05     # kress peak, high E: consumed
