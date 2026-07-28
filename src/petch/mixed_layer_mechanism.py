@@ -520,6 +520,12 @@ KRUEGER_2024_DEPOSITION_ON_SUBSTRATE = {
 KRUEGER_2024_DEPOSITION_ON_CROSSLINKED = {
     "CF": 0.02, "CF2": 0.02, "CF3": 0.02, "C2F3": 0.02,
 }
+# Deposition on bare AC mask: paper-optimized Table-V value (declared set
+# choice: the optimized set is what produced fig-7; appendix-converged 0.2
+# is the alternative, documented).
+KRUEGER_2024_DEPOSITION_ON_MASK = {
+    "CF": 0.0842, "CF2": 0.0842, "CF3": 0.0842, "C2F3": 0.0842,
+}
 
 
 def build_krueger_2024_mixed_layer_mechanisms(
@@ -535,6 +541,7 @@ def build_krueger_2024_mixed_layer_mechanisms(
         substrate="sio2", volatilization_yield=float(volatilization_yield))
     mask_parameters = mask_parameters or MixedLayerParams(
         substrate="carbon", volatilization_yield=float(volatilization_yield))
+    mask_substrate_deposition = dict(KRUEGER_2024_DEPOSITION_ON_MASK)
     common = dict(
         precursor_species=dict(KRUEGER_2024_PRECURSOR_STOICHIOMETRY),
         fluorine_species=(),
@@ -546,5 +553,7 @@ def build_krueger_2024_mixed_layer_mechanisms(
             KRUEGER_2024_DEPOSITION_ON_SUBSTRATE),
         deposition_probability_on_crosslinked=dict(
             KRUEGER_2024_DEPOSITION_ON_CROSSLINKED))
+    mask_kwargs = dict(common)
+    mask_kwargs["deposition_probability_on_substrate"] = mask_substrate_deposition
     return (MixedLayerMechanism(oxide_parameters, **common),
-            MixedLayerMechanism(mask_parameters, **common))
+            MixedLayerMechanism(mask_parameters, **mask_kwargs))

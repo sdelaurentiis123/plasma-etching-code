@@ -262,6 +262,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
             0.1384 * atom_flux * atom_eps / ref_dep_140)
         kernel_bare = _segment(atom_flux * np.asarray(_threshold_power_yield(
             atom_e_iface, 0.0909, 70.0, 140.0, 1.0)))
+        kernel_ac = _segment(atom_flux * np.asarray(_threshold_power_yield(
+            atom_e_iface, 0.001, 200.0, 250.0, 0.4)))
         # Flux-weighted diagnostics for receipts and clog logic.
         total_atom_flux = _segment(atom_flux)
         safe_total = np.maximum(total_atom_flux, 1e-300)
@@ -287,6 +289,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
             eps_dep, dtype=float) / ref_dep_140
         kernel_bare = fluxes.ion_flux * np.asarray(_threshold_power_yield(
             e_iface, 0.0909, 70.0, 140.0, 1.0))
+        kernel_ac = fluxes.ion_flux * np.asarray(_threshold_power_yield(
+            e_iface, 0.001, 200.0, 250.0, 0.4))
 
     film_total = np.asarray(state.n_c_film + state.n_f_film, dtype=float)
     x_c = _guarded_ratio(state.n_c_film, film_total, 1.0)
@@ -379,12 +383,15 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # multiplier defaulting to 1.0: published magnitude, no anchor constant.
     open_area = np.maximum(1.0 - theta_film, 0.0)
     if params.substrate == "carbon":
+        # Krueger AC mask: pure physical sputter, 0.001 @ 200 eV threshold
+        # (q=0.4, e0=250), NO chemical F channel, O-inert (1e-5, declared
+        # omitted). The mask erodes only where the film exposes it.
         f_per_unit = 2.0
-        capacity = (params.volatilization_yield * kernel_complex * open_area)
-        sif4 = np.zeros_like(capacity * theta_f_layer)
-        substrate_removal = capacity * theta_f_layer
+        sif4 = np.zeros_like(kernel_ac * open_area)
+        substrate_removal = (params.volatilization_yield * kernel_ac
+                             * open_area)
         bare_removal = np.zeros_like(substrate_removal)
-        f_costed_removal = substrate_removal
+        f_costed_removal = np.zeros_like(substrate_removal)
     else:
         f_per_unit = 4.0
         capacity = (params.volatilization_yield * kernel_complex * open_area)
