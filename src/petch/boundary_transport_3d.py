@@ -842,11 +842,42 @@ def split_grazing_ion_reflection(
         return population, None, diagnostics
     all_face = np.concatenate(out_face)
     all_rate = np.concatenate(out_rate)
+    all_energy = np.concatenate(out_energy)
+    all_cos = np.concatenate(out_cos)
+    all_dir = np.concatenate(out_dir)
+    if extruded_symmetrize:
+        # Distribute each landed event equally across the geometrically
+        # equivalent faces of every y-strip (same x,z centroid and normal):
+        # the quasi-2D problem is y-invariant, and discrete centroid launches
+        # otherwise deposit unevenly across strips (extrusion-guard trips).
+        scale = max(float(np.max(np.abs(centroids))), 1.0)
+        quant = 1e-6 * scale
+        keys = np.round(
+            np.column_stack((centroids[:, 0], centroids[:, 2],
+                             np.asarray(normals))) / quant).astype(np.int64)
+        groups = {}
+        for index, key in enumerate(map(tuple, keys)):
+            groups.setdefault(key, []).append(index)
+        new_face, new_rate, new_energy, new_cos, new_dir = [], [], [], [], []
+        for i in range(len(all_face)):
+            members = groups[tuple(keys[all_face[i]])]
+            share = all_rate[i] / len(members)
+            for member in members:
+                new_face.append(member)
+                new_rate.append(share)
+                new_energy.append(all_energy[i])
+                new_cos.append(all_cos[i])
+                new_dir.append(all_dir[i])
+        all_face = np.asarray(new_face, dtype=int)
+        all_rate = np.asarray(new_rate, dtype=float)
+        all_energy = np.asarray(new_energy, dtype=float)
+        all_cos = np.asarray(new_cos, dtype=float)
+        all_dir = np.asarray(new_dir, dtype=float)
     secondary = _Population(
         f"{population.name}:hot_neutral", population.face_count, all_face,
         all_rate / areas[all_face],
-        np.concatenate(out_energy), np.concatenate(out_cos),
-        event_incident_direction=np.concatenate(out_dir))
+        all_energy, all_cos,
+        event_incident_direction=all_dir)
     return population, secondary, diagnostics
 
 
