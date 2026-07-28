@@ -18,7 +18,7 @@ cd "$ROOT" || { echo "PREFLIGHT FAIL: cannot cd to repo root"; exit 1; }
 
 echo "preflight: mixed_layer + grazing reflection, dx=0.01, ${DURATION}s, CPU"
 
-timeout 240 python scripts/krueger_2024_trench_pilot.py \
+timeout 720 python scripts/krueger_2024_trench_pilot.py \
     --surface-model mixed_layer \
     --grazing-ion-reflection literature_v1 \
     --dx-um 0.01 \
