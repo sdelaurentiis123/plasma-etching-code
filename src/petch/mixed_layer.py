@@ -528,8 +528,16 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         n_act_new = np.zeros_like(np.asarray(state.n_act, dtype=float))
     else:
         act_formation = kernel_act * open_area * (1.0 - theta_act)
-        act_consumption = (theta_act * chem_c
-                           + substrate_removal * theta_act)
+        # Exact site balance: activated sites are consumed by chemisorption
+        # THROUGH THE ACTIVATED CHANNEL (theta_act x activated-probability
+        # flux), not by the blended total, plus removal of activated surface.
+        if fluxes.chemisorption_activated_carbon_flux is not None:
+            activated_chem_c = (theta_act * np.asarray(
+                fluxes.chemisorption_activated_carbon_flux, dtype=float)
+                * site_open)
+        else:
+            activated_chem_c = theta_act * chem_c
+        act_consumption = activated_chem_c + substrate_removal * theta_act
         n_act_new = np.clip(
             state.n_act + dt * (act_formation - act_consumption),
             0.0, _SITE_DENSITY_M2)

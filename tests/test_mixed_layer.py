@@ -224,3 +224,27 @@ def test_bitwise_determinism():
     b, _ = _integrate(_BASE, n_steps=500)
     assert a.state == b.state
     assert a.sif4_rate == b.sif4_rate
+
+
+def test_activated_site_balance_is_exact():
+    """theta_act equilibrium must satisfy formation == activated-channel
+    consumption + removal share (exact site bookkeeping, not the blend)."""
+    fluxes = SurfaceFluxes(
+        precursor_flux=0.0, fluorine_flux=0.0, oxygen_flux=0.0,
+        ion_flux=6.0e18, ion_energy_eV=1000.0,
+        chemisorption_carbon_flux=5.0e19, chemisorption_fluorine_flux=1.0e20,
+        chemisorption_activated_carbon_flux=1.5e20,
+        chemisorption_activated_fluorine_flux=3.0e20)
+    result = steady_state(fluxes)
+    state = result.state
+    theta = float(np.asarray(state.n_act)) / 1.0e19
+    assert 0.0 < theta < 1.0
+    # Reconstruct the code's own site balance from the converged state:
+    # formation on open oxide == activated-channel consumption + removal.
+    from petch.mixed_layer import _MONOLAYER_AREAL_M2
+    theta_f_layer = min(float(np.asarray(state.n_f)) / _MONOLAYER_AREAL_M2, 1.0)
+    site_open = 1.0 - theta_f_layer          # film-free case
+    formation = 0.9 * 6.0e18 * (1.0 - theta)
+    consumption = (theta * 1.5e20 * site_open
+                   + float(np.asarray(result.substrate_removal_rate)) * theta)
+    assert formation == pytest.approx(consumption, rel=0.15)
