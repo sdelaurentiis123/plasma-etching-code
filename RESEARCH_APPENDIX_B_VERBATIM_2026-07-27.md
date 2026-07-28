@@ -54,3 +54,39 @@ X+ = ion, X# = hot neutral. All previously [VERIFY] items now resolved.
 5. Reconcile appendix-converged vs paper-optimized values (0.2 vs 0.0842 AC
    deposition; 0.0423 vs 0.0628 O-etch; 0.0852 vs 0.0909 bare) — the fig-7
    base case likely uses the OPTIMIZED set; declare which set petch targets.
+
+## Huang thesis (local, 372 pp) — MCFPM scattering semantics VERBATIM (2026-07-28)
+
+Selection rule (§2.3, verbatim): per collision the process is randomly
+selected from a probability array; "if the cumulative yield of non-reflective
+processes is less than unity, then the elastic scattering yield is increased
+so that the cumulative yield is unity. If the cumulative yield is greater
+than unity, the elastic yield is reduced so that the cumulative yield is
+unity" (then all scaled if still >1). => reflection weight = max(0, 1 - sum
+of reaction probabilities) per event; particle consumed when reactions
+saturate.
+
+Eq. 2.34 energy retention with **E_ts = 100 eV, E_c = 10 eV, theta_c = 70
+deg**: E_i > 100 eV AND theta > 70deg (from normal) => PURE SPECULAR, retain
+ALL energy; theta < 70deg or E_i < 10 eV => diffusive scatter (random
+direction, interpolated loss per Eq. 2.34); between => interpolation.
+Multi-bounce until consumed. ("specularly reflected ions to as low as a few
+eV" survive after charging deceleration; "majority of the energy is
+maintained" on sidewalls.)
+
+Open interpretation question: the appendix angular-form column ("1") for
+polymer rows vs the paper's Kress attribution — whether the SELECTION
+probability carries the angular yield factor decides wall transmission at
+78-87 deg. DISCRIMINATOR (no feature run needed): Huang reports hot-neutral
+vs ion flux fractions at the etch front vs AR (thesis chs. 4-5 text around
+lines 5089-5445 of extraction) — implement the 2-3 candidate interpretations
+as a 1-D wall-cascade model and pick the one reproducing HIS reported
+funneling efficiency; that is a published-observable calibration of the
+semantics, not a knob.
+
+Implementation (exact, replaces the three tested variants):
+1. reflection_weight = max(0, 1 - sum(reaction probabilities at E, theta))
+2. specular full-E when E>100 & theta>70; Eq-2.34 interpolated loss else;
+   diffusive random direction below cutoffs
+3. multi-bounce (iterate splitter on secondaries until weight < epsilon)
+4. y-symmetrize secondary launches (extrusion-guard fix, ml12 trip)
