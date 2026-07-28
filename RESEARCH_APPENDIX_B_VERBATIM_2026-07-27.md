@@ -90,3 +90,26 @@ Implementation (exact, replaces the three tested variants):
    diffusive random direction below cutoffs
 3. multi-bounce (iterate splitter on secondaries until weight < epsilon)
 4. y-symmetrize secondary launches (extrusion-guard fix, ml12 trip)
+
+## Huang's published funneling numbers (the cascade answer key, verbatim)
+
+Ar/C4F8/O2 HAR oxide etch (thesis ch. 5): ion flux to etch front 2.0e15 ->
+0.3e15 cm-2 s-1 (AR 0 -> 40); hot-neutral flux 3.1e15 (AR 0) -> PEAK 8.0e15
+(AR 4) -> 1.1e15 (AR 40); hot neutrals surpass thermal radicals at AR ~ 8 and
+are the dominant etch-front species beyond; decay at high AR attributed to
+diffusive scattering + thermalization over several collisions ("mostly
+specular reflection" at conversion).
+
+Interpretation test (cascade discriminator):
+- A (reaction consumes regardless of angle at high E): predicts ~zero
+  funneling — REFUTED by 8.0e15 @ AR 4. Dead.
+- B (selection = p0 * f(E) * kress, capped): survival only within ~4 deg of
+  parallel at 1500 eV (f(E)=1.91 doubles everything) — ml12's collapse
+  consistent; marginal vs the AR-4 peak.
+- B' (selection = p0 * kress only; f(E) scales REMOVAL not selection):
+  reflect = 1 - 0.9*kress at grazing -> 0.5-0.9 survival per bounce at
+  cos 0.02-0.05, e-folding over ~5-15 bounces — matches 8.0 -> 1.1 decay
+  scale. FAVORED a priori; 1-D cascade vs the three flux numbers decides.
+Cascade model: trench AR sweep, IEAD angular spread ~1-4 deg, walls =
+leftover-probability + Eq-2.34 (100 eV/10 eV/70 deg), multi-bounce; fit
+nothing — compare predicted front fluxes vs the three published values.
