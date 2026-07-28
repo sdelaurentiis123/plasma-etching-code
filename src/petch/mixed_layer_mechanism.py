@@ -41,7 +41,7 @@ _SIO2_FORMULA_DENSITY_M3 = 2.2e28
 _CARBON_ATOM_DENSITY_M3 = 1.0e29
 
 _STATE_FIELDS = ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f",
-                 "n_xl_film", "removed_formula_units_m2")
+                 "n_xl_film", "n_act", "removed_formula_units_m2")
 
 
 @dataclass(frozen=True)
@@ -55,6 +55,7 @@ class MixedLayerSurfaceState:
     n_c: np.ndarray | float
     n_f: np.ndarray | float
     n_xl_film: np.ndarray | float = 0.0
+    n_act: np.ndarray | float = 0.0
     removed_formula_units_m2: np.ndarray | float = 0.0
 
     def __post_init__(self):
@@ -71,7 +72,7 @@ class MixedLayerSurfaceState:
     @classmethod
     def bare(cls, shape=()):
         zero = np.zeros(shape)
-        return cls(zero, zero, zero, zero, zero, zero, zero, zero)
+        return cls(zero, zero, zero, zero, zero, zero, zero, zero, zero)
 
     def conservative_surface_fields(self):
         return {name: getattr(self, name) for name in _STATE_FIELDS}
@@ -88,7 +89,7 @@ class MixedLayerSurfaceState:
     def _module_state(self):
         return MixedLayerState(self.n_c_film, self.n_f_film, self.n_si,
                                self.n_o, self.n_c, self.n_f,
-                               n_xl_film=self.n_xl_film)
+                               n_xl_film=self.n_xl_film, n_act=self.n_act)
 
 
 class MixedLayerMechanism:
@@ -98,6 +99,7 @@ class MixedLayerMechanism:
                  precursor_species=("CFx",), fluorine_species=("F",),
                  oxygen_species=("O",), inert_species=(),
                  chemisorption_probability=None,
+                 chemisorption_activated_probability=None,
                  deposition_probability_on_film=None,
                  deposition_probability_on_substrate=None,
                  deposition_probability_on_crosslinked=None,
@@ -124,6 +126,9 @@ class MixedLayerMechanism:
         if unknown:
             raise ValueError(
                 f"chemisorption probabilities for unmapped species: {sorted(unknown)}")
+        self.chemisorption_activated_probability = {
+            str(name): float(value)
+            for name, value in dict(chemisorption_activated_probability or {}).items()}
         self.deposition_probability_on_film = (
             None if deposition_probability_on_film is None
             else {str(k): float(v)
@@ -299,7 +304,7 @@ class MixedLayerMechanism:
         growth_velocity = np.maximum(-signed, 0.0)
         zeros = np.zeros(shape)
         module_state_fields = ("n_c_film", "n_f_film", "n_si", "n_o",
-                               "n_c", "n_f", "n_xl_film")
+                               "n_c", "n_f", "n_xl_film", "n_act")
 
         def representational_floor(value):
             array = np.asarray(value, dtype=float)
@@ -317,6 +322,7 @@ class MixedLayerMechanism:
             representational_floor(module_state.n_c),
             representational_floor(module_state.n_f),
             representational_floor(module_state.n_xl_film),
+            representational_floor(module_state.n_act),
             np.asarray(state.removed_formula_units_m2) + removed)
         inventory_name = ("carbon_atom" if self.parameters.substrate == "carbon"
                           else "sio2_formula")
@@ -426,6 +432,8 @@ class MixedLayerMechanism:
         fluorine_bound = np.zeros(shape)
         chem_c = np.zeros(shape)
         chem_f = np.zeros(shape)
+        chem_act_c = np.zeros(shape)
+        chem_act_f = np.zeros(shape)
         film_dep_c = np.zeros(shape)
         film_dep_f = np.zeros(shape)
         sub_dep_c = np.zeros(shape)
@@ -442,6 +450,9 @@ class MixedLayerMechanism:
             probability = self.chemisorption_probability.get(name, 0.0)
             chem_c = chem_c + probability * base * c_atoms
             chem_f = chem_f + probability * base * f_atoms
+            activated = self.chemisorption_activated_probability.get(name, 0.0)
+            chem_act_c = chem_act_c + activated * base * c_atoms
+            chem_act_f = chem_act_f + activated * base * f_atoms
             if self.deposition_probability_on_film is not None:
                 p_film = self.deposition_probability_on_film.get(name, 0.0)
                 p_sub = self.deposition_probability_on_substrate.get(name, 0.0)
@@ -469,6 +480,10 @@ class MixedLayerMechanism:
             **atoms,
             chemisorption_carbon_flux=chem_c,
             chemisorption_fluorine_flux=chem_f,
+            chemisorption_activated_carbon_flux=(
+                chem_act_c if self.chemisorption_activated_probability else None),
+            chemisorption_activated_fluorine_flux=(
+                chem_act_f if self.chemisorption_activated_probability else None),
             film_deposition_carbon_flux=(
                 film_dep_c if self.deposition_probability_on_film is not None
                 else None),
@@ -502,7 +517,13 @@ KRUEGER_2024_PRECURSOR_STOICHIOMETRY = {
 # the direct-chemisorption channel delivering bound fluorine into the mixed
 # layer on open oxide. Published constants — data, not knobs.
 KRUEGER_2024_CHEMISORPTION_PROBABILITY = {
-    "CF": 0.2729, "CF2": 0.2729, "CF3": 0.2, "C2F3": 0.2,
+    "CF": 0.278, "CF2": 0.278, "CF3": 0.2, "C2F3": 0.2,
+    "C2F4": 0.001, "C3F5": 0.001, "C3F6": 0.001,
+}
+# Chemisorption on ION-ACTIVATED SiO2* (Appendix CH2): the dominant complex
+# channel; C2F3 assigned the CF3 value (declared, appendix row group).
+KRUEGER_2024_CHEMISORPTION_ACTIVATED = {
+    "CF": 0.8, "CF2": 0.85, "CF3": 0.9, "C2F3": 0.9,
     "C2F4": 0.001, "C3F5": 0.001, "C3F6": 0.001,
 }
 
@@ -524,7 +545,7 @@ KRUEGER_2024_DEPOSITION_ON_CROSSLINKED = {
 # choice: the optimized set is what produced fig-7; appendix-converged 0.2
 # is the alternative, documented).
 KRUEGER_2024_DEPOSITION_ON_MASK = {
-    "CF": 0.0842, "CF2": 0.0842, "CF3": 0.0842, "C2F3": 0.0842,
+    "CF": 0.094, "CF2": 0.094, "CF3": 0.094, "C2F3": 0.094,
 }
 
 
@@ -548,6 +569,8 @@ def build_krueger_2024_mixed_layer_mechanisms(
         oxygen_species=("O",),
         inert_species=("C3F4",),
         chemisorption_probability=dict(KRUEGER_2024_CHEMISORPTION_PROBABILITY),
+        chemisorption_activated_probability=dict(
+            KRUEGER_2024_CHEMISORPTION_ACTIVATED),
         deposition_probability_on_film=dict(KRUEGER_2024_DEPOSITION_ON_POLYMER),
         deposition_probability_on_substrate=dict(
             KRUEGER_2024_DEPOSITION_ON_SUBSTRATE),

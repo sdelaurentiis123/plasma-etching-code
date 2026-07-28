@@ -32,6 +32,8 @@ _SIO2_FORMULA_DENSITY_M3 = 2.2e28
 _FC_FILM_ATOM_DENSITY_M3 = FLUOROCARBON_FILM.atom_density_m3
 # One-monolayer areal density used for coverage saturation (atoms/m^2).
 _MONOLAYER_AREAL_M2 = _FC_FILM_ATOM_DENSITY_M3 ** (2.0 / 3.0)
+# Krueger oxide site density (site_density_m2 in the reduced projection).
+_SITE_DENSITY_M2 = 1.0e19
 
 
 @dataclass(frozen=True)
@@ -48,7 +50,7 @@ class MixedLayerParams:
     precursor_fc_ratio: float = 1.5      # y: F per C in CxFy precursor (C4F6)
     sticking_probability: float = 0.0842  # s_p: Krueger polymer deposition
     fluorine_film_sticking: float = 0.05  # s_f: F absorption into film (Gogolides band)
-    oxidation_probability: float = 0.0628  # p_ox: Krueger O-driven polymer etch
+    oxidation_probability: float = 0.0423  # p_ox: Table-6.5 converged O polymer etch
     mixing_efficiency: float = 1.0       # eta_mix: Humbird-Graves, O(1)
     volatilization_yield: float = 1.0    # multiplier on published yields (1.0 = no anchor)
     substrate: str = "sio2"              # "sio2" | "carbon" (a-C mask, no lattice O)
@@ -71,6 +73,10 @@ class MixedLayerState:
     # Crosslinked film atoms (subset of n_c_film + n_f_film): ion-processed
     # skin with reduced radical attachment (Krueger Appendix B: 0.02).
     n_xl_film: float = 0.0
+    # Ion-activated oxide sites (Appendix A1: SiO2+ion->SiO2* at 0.9/ion);
+    # chemisorption on activated sites runs at 0.8-0.9 vs 0.278 bare (CH2).
+    # Mass-neutral surface state, capped at the site density.
+    n_act: float = 0.0
 
     def film_thickness_nm(self) -> float:
         return ((self.n_c_film + self.n_f_film) / _FC_FILM_ATOM_DENSITY_M3) * 1e9
@@ -103,6 +109,10 @@ class SurfaceFluxes:
     substrate_deposition_fluorine_flux: object = None
     crosslinked_deposition_carbon_flux: object = None
     crosslinked_deposition_fluorine_flux: object = None
+    # Chemisorption aggregates at the ACTIVATED-site probabilities (CH2:
+    # 0.8/0.85/0.9); None disables the two-state blend.
+    chemisorption_activated_carbon_flux: object = None
+    chemisorption_activated_fluorine_flux: object = None
     # Atom-resolved ion spectrum (per-event): sparse (face, flux, E, cos)
     # arrays. When present, EVERY ion-driven term is evaluated per atom
     # against the live face state and segment-summed (research doc
@@ -259,11 +269,14 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         kernel_xl = _segment(
             atom_flux * np.maximum(atom_energy - atom_e_iface, 0.0))
         kernel_complex = _segment(
-            0.1384 * atom_flux * atom_eps / ref_dep_140)
+            0.1471 * atom_flux * atom_eps / ref_dep_140)
         kernel_bare = _segment(atom_flux * np.asarray(_threshold_power_yield(
-            atom_e_iface, 0.0909, 70.0, 140.0, 1.0)))
+            atom_e_iface, 0.0852, 70.0, 140.0, 1.0)))
         kernel_ac = _segment(atom_flux * np.asarray(_threshold_power_yield(
             atom_e_iface, 0.001, 200.0, 250.0, 0.4)))
+        kernel_dexl = _segment(atom_flux * np.asarray(_threshold_power_yield(
+            atom_energy, 0.3, 8.0, 500.0, 0.5)))
+        kernel_act = _segment(atom_flux) * 0.9
         # Flux-weighted diagnostics for receipts and clog logic.
         total_atom_flux = _segment(atom_flux)
         safe_total = np.maximum(total_atom_flux, 1e-300)
@@ -285,12 +298,15 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         kernel_mix = fluxes.ion_flux * energy_ratio
         kernel_xl = fluxes.ion_flux * np.maximum(
             np.asarray(fluxes.ion_energy_eV, dtype=float) - e_iface, 0.0)
-        kernel_complex = 0.1384 * fluxes.ion_flux * np.asarray(
+        kernel_complex = 0.1471 * fluxes.ion_flux * np.asarray(
             eps_dep, dtype=float) / ref_dep_140
         kernel_bare = fluxes.ion_flux * np.asarray(_threshold_power_yield(
-            e_iface, 0.0909, 70.0, 140.0, 1.0))
+            e_iface, 0.0852, 70.0, 140.0, 1.0))
         kernel_ac = fluxes.ion_flux * np.asarray(_threshold_power_yield(
             e_iface, 0.001, 200.0, 250.0, 0.4))
+        kernel_dexl = fluxes.ion_flux * np.asarray(_threshold_power_yield(
+            fluxes.ion_energy_eV, 0.3, 8.0, 500.0, 0.5))
+        kernel_act = fluxes.ion_flux * 0.9
 
     film_total = np.asarray(state.n_c_film + state.n_f_film, dtype=float)
     x_c = _guarded_ratio(state.n_c_film, film_total, 1.0)
@@ -371,10 +387,27 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # Direct precursor chemisorption into the layer where the film is open
     # (the Krueger complex-formation channel): fluorine arrives bound to
     # carbon and both enter the layer ledgers, site-limited like f_direct.
-    chem_c = (np.asarray(fluxes.chemisorption_carbon_flux, dtype=float)
-              * (1.0 - theta_film) * (1.0 - theta_f_layer))
-    chem_f = (np.asarray(fluxes.chemisorption_fluorine_flux, dtype=float)
-              * (1.0 - theta_film) * (1.0 - theta_f_layer))
+    # Two-state oxide (Appendix A1/CH2): activated sites chemisorb ~3x the
+    # bare rate; the blend follows the activated fraction theta_act.
+    theta_act = np.minimum(
+        np.asarray(state.n_act, dtype=float) / _SITE_DENSITY_M2, 1.0)
+    site_open = (1.0 - theta_film) * (1.0 - theta_f_layer)
+    if fluxes.chemisorption_activated_carbon_flux is not None:
+        chem_c = ((1.0 - theta_act)
+                  * np.asarray(fluxes.chemisorption_carbon_flux, dtype=float)
+                  + theta_act * np.asarray(
+                      fluxes.chemisorption_activated_carbon_flux, dtype=float)
+                  ) * site_open
+        chem_f = ((1.0 - theta_act)
+                  * np.asarray(fluxes.chemisorption_fluorine_flux, dtype=float)
+                  + theta_act * np.asarray(
+                      fluxes.chemisorption_activated_fluorine_flux, dtype=float)
+                  ) * site_open
+    else:
+        chem_c = (np.asarray(fluxes.chemisorption_carbon_flux, dtype=float)
+                  * site_open)
+        chem_f = (np.asarray(fluxes.chemisorption_fluorine_flux, dtype=float)
+                  * site_open)
     # Two-state oxide removal at PUBLISHED magnitudes, anchored to the
     # DEKNOB-validated ZBL deposited-energy shape at Krueger's reference
     # energy (140 eV): complex channel 0.1384 (F-covered sites, costs 4F as
@@ -479,14 +512,27 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     xl_rate = (kernel_xl / params.displacement_energy_eV
                * np.maximum(1.0 - _guarded_ratio(state.n_xl_film, film_total, 1.0),
                             0.0))
+    # Ion de-crosslinking (Appendix S3d: 0.3 @ 8 eV, q=0.5, e0=500): converts
+    # crosslinked film back to fresh — mass-neutral within the film.
+    dexl_rate = kernel_dexl * _guarded_ratio(state.n_xl_film, film_total, 1.0)
     fresh_available = np.maximum(
         np.asarray(film_total, dtype=float) - state.n_xl_film, 0.0)
     xl_rate = xl_rate * _overdraw_scale(fresh_available, xl_rate, dt)
     film_loss_total = sput_c + sput_f + ox_c + ox_f + mix_c + mix_f + bottom_c + bottom_f
     xl_share = _guarded_ratio(state.n_xl_film, film_total, 1.0)
     n_xl_new = np.maximum(
-        state.n_xl_film + dt * (xl_rate - film_loss_total * xl_share), 0.0)
+        state.n_xl_film + dt * (xl_rate - dexl_rate
+                                - film_loss_total * xl_share), 0.0)
 
+    if params.substrate == "carbon":
+        n_act_new = np.zeros_like(np.asarray(state.n_act, dtype=float))
+    else:
+        act_formation = kernel_act * open_area * (1.0 - theta_act)
+        act_consumption = (theta_act * chem_c
+                           + substrate_removal * theta_act)
+        n_act_new = np.clip(
+            state.n_act + dt * (act_formation - act_consumption),
+            0.0, _SITE_DENSITY_M2)
     new_state = MixedLayerState(
         n_c_film=state.n_c_film + dt * (dep_c - sput_c - ox_c - mix_c - bottom_c),
         n_f_film=state.n_f_film + dt * (dep_f + absorb_f - sput_f - ox_f - mix_f
@@ -501,6 +547,7 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         n_o=n_o_raw - dt * o_desorb,
         n_c=n_c_raw - dt * c_desorb,
         n_f=n_f_raw - dt * f_desorb,
+        n_act=n_act_new,
     )
 
     residuals = _ledger_residuals(state, new_state, dt,
@@ -554,7 +601,7 @@ def steady_state(fluxes: SurfaceFluxes, params: MixedLayerParams = MixedLayerPar
         # the dynamics are fast. Always within the explicit stability bound.
         change = 0.0
         for name in ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f",
-                     "n_xl_film"):
+                     "n_xl_film", "n_act"):
             va = np.asarray(getattr(result.state, name), dtype=float)
             vb = np.asarray(getattr(nxt.state, name), dtype=float)
             scale = np.maximum(np.maximum(np.abs(va), np.abs(vb)),
@@ -607,7 +654,7 @@ def _overdraw_scale(available_plus_gain, loss_rate, dt):
 
 def _converged(a: MixedLayerState, b: MixedLayerState, dt: float, tol: float) -> bool:
     for name in ("n_c_film", "n_f_film", "n_si", "n_o", "n_c", "n_f",
-                 "n_xl_film"):
+                 "n_xl_film", "n_act"):
         va, vb = getattr(a, name), getattr(b, name)
         scale = max(abs(va), abs(vb), _MONOLAYER_AREAL_M2 * 1e-6)
         if abs(vb - va) > tol * scale * max(dt, 1e-30) / dt:

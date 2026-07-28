@@ -180,7 +180,7 @@ def test_rung0_degenerate_matches_langmuir_closed_form():
         result = steady_state(fluxes, params)
         eps_dep = _deposited_energy(energy, 1.0, params)[0]
         eps_ref = _deposited_energy(140.0, 1.0, params)[0]
-        capacity = (params.volatilization_yield * 0.1384
+        capacity = (params.volatilization_yield * 0.1471
                     * fluxes.ion_flux * eps_dep / eps_ref)
         theta = j_f / (j_f + 4.0 * capacity)
         assert result.sif4_rate == pytest.approx(capacity * theta, rel=1e-5)
