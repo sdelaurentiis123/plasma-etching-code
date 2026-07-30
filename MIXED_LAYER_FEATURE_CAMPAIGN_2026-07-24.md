@@ -131,3 +131,23 @@ declared O-saturation constant. The two models fail in complementary ways
 that both point at mouth-region physics (activation states / FC-ion polymer
 sputter / polymer reflection threshold — audit P1/P2 queue) as the next
 mechanism, with receipt-level checkpoint analysis (ml9a vs ml9b) first.
+
+## Campaign 4 close (2026-07-29) — verbatim-complete run and the honest verdict
+
+| run | config | 60 s endpoint |
+|---|---|---|
+| ml13 | exact cascade, paper-set constants | **depth 852.1 (IN GATE), opening 24.8** |
+| ml14 (partial, t=40) | + mask-AC armor | mouth ~19-20 trajectory; mask-armor != mouth lever |
+| ml15 | COMPLETE verbatim converged set + activated-SiO2 + de-crosslink | depth 648.6 (below gate), opening 7.2 |
+
+Verdict: with every Appendix-B row implemented and the thesis's own converged
+constants, our engine UNDERPERFORMS our best partial configuration. The
+chemistry transcription is now closed (nothing absent); the residual is
+engine-fidelity class: per-particle MC with fully resolved IEAD azimuth and
+voxel surfaces (his) vs deterministic compressed-azimuth level-set (ours),
+plus declared omissions (activation energy windows, EX1 angular form).
+CONFIGURATION OF RECORD: ml13 (depth in gate with reflection active, zero
+added constants; mouth 24.8 vs 45 = documented known limitation). The mouth
+gap moves from "missing chemistry" to "transport/representation fidelity" —
+a categorically different problem, to be attacked with engine-level work
+(azimuth resolution, voxel-vs-levelset comparison), not more constants.
