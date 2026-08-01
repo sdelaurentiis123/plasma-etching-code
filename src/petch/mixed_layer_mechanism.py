@@ -554,29 +554,16 @@ def build_krueger_2024_mixed_layer_mechanisms(
         volatilization_yield=1.0):
     """Oxide + mask mixed-layer mechanisms wired to the Krueger species set.
 
-    ``volatilization_yield`` is the single base-condition-anchored absolute
-    rate constant (per-channel reference yield), the same one-constant-on-base
-    discipline the K24-DEKNOB-1 study declared for Lambda.
+    Thin wrapper over the chemistry-deck factory: every constant lives in
+    ``chemistry_deck.KRUEGER_2024_DECK`` (a data file with provenance), and
+    this signature is preserved for existing callers. ``volatilization_yield``
+    is the single base-condition-anchored absolute rate constant (per-channel
+    reference yield), the same one-constant-on-base discipline the K24-DEKNOB-1
+    study declared for Lambda.
     """
-    oxide_parameters = oxide_parameters or MixedLayerParams(
-        substrate="sio2", volatilization_yield=float(volatilization_yield))
-    mask_parameters = mask_parameters or MixedLayerParams(
-        substrate="carbon", volatilization_yield=float(volatilization_yield))
-    mask_substrate_deposition = dict(KRUEGER_2024_DEPOSITION_ON_MASK)
-    common = dict(
-        precursor_species=dict(KRUEGER_2024_PRECURSOR_STOICHIOMETRY),
-        fluorine_species=(),
-        oxygen_species=("O",),
-        inert_species=("C3F4",),
-        chemisorption_probability=dict(KRUEGER_2024_CHEMISORPTION_PROBABILITY),
-        chemisorption_activated_probability=dict(
-            KRUEGER_2024_CHEMISORPTION_ACTIVATED),
-        deposition_probability_on_film=dict(KRUEGER_2024_DEPOSITION_ON_POLYMER),
-        deposition_probability_on_substrate=dict(
-            KRUEGER_2024_DEPOSITION_ON_SUBSTRATE),
-        deposition_probability_on_crosslinked=dict(
-            KRUEGER_2024_DEPOSITION_ON_CROSSLINKED))
-    mask_kwargs = dict(common)
-    mask_kwargs["deposition_probability_on_substrate"] = mask_substrate_deposition
-    return (MixedLayerMechanism(oxide_parameters, **common),
-            MixedLayerMechanism(mask_parameters, **mask_kwargs))
+    # Imported lazily: the deck module builds MixedLayerMechanism objects.
+    from petch.chemistry_deck import build_mixed_layer_mechanisms_from_deck
+
+    return build_mixed_layer_mechanisms_from_deck(
+        oxide_parameters=oxide_parameters, mask_parameters=mask_parameters,
+        volatilization_yield=float(volatilization_yield))
