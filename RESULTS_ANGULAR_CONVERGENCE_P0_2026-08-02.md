@@ -189,13 +189,82 @@ alone inflates bottom delivery by **33%** (1/0.749).
   converged at 16 nodes, so refinement effort belongs entirely in the polar
   variable inside the acceptance cone — which is what S3 proposed.
 
+---
+
+## P1a landed (2026-08-02)
+
+`src/petch/angular_lift.py` replaces the identity closure with an **onion-peel
+Abel inversion** of the published planar marginal, wired into
+`Krueger2024DigitizedIEAD.development_species` and receipted in species
+provenance (`three_dimensional_polar_inversion*`). Gates:
+`tests/test_angular_lift.py` (8).
+
+| quantity | before | after |
+|---|---|---|
+| lifted planar rms (production path) | 0.5893° | **0.8233°** (band 0.822–0.860) |
+| published / lifted deficit | ×1.4141 | **×1.0124** |
+| E[tan²θ] / E[tan²θ_x] | 1.000 | **2.000 (exact, 0 ulp)** |
+
+Three results worth recording beyond the fix itself.
+
+1. **The √2 is not a Gaussian result.** Squaring `tan θ_x = tan θ · cos φ` and
+   averaging over uniform azimuth gives `E[tan²θ] = E[tan²θ]/2` for *any*
+   axisymmetric measure. The P0 text called it "for Gaussian transverse
+   components"; it is in fact shape-independent, which is why the digitized
+   (non-Gaussian) data reproduced 1.4141 so precisely. The discrete lift
+   honours it to 0 ulp because a uniform azimuthal ring averages cos² to ½
+   exactly for order ≥ 3 — so the gate is machine-precision, not statistical.
+2. **The inversion is exact but ill-posed, and 0.25° is not a convention —
+   it is the resolution the data carries.** Onion peeling is exact
+   back-substitution (round-trip reproduces the planar histogram to 2.8e-17,
+   no regularization parameter). But peeling *finer* than the source grid
+   diverges into negative shells: clamped mass fraction is 0.00 at 0.25°,
+   0.28 at 0.20°, and 2.3 (i.e. divergence) at 0.10°. The lift now **refuses**
+   above a 5% clamp guard rather than returning a manufactured answer. This
+   independently confirms A3's finding that 0.25° is the hard data ceiling —
+   from the inversion side rather than the transport side.
+3. **The correction is ×1.397 in width, not the full ×1.414.** The
+   EXP C diagnostic scaled all polar angles by √2 uniformly; the true
+   inversion redistributes weight shape-dependently and lands at 0.8233 rather
+   than 0.8334 (1.2% low, inside the digitization band). Expected AR-9 sidewall
+   gain is therefore ≈×1.40, marginally below the diagnostic's ×1.414.
+
+**Preregistered ml16.** Pilot flags (add `--resume` for restart):
+
+```
+python scripts/krueger_2024_trench_pilot.py \
+  --dx-um 0.01 --radiosity-backend deterministic_extruded_2d \
+  --transport-device cuda:0 --surface-state-remap-backend common_refinement \
+  --topology-change-policy continue_gas_cavity --surface-model mixed_layer \
+  --max-wall-s 86400 --duration-s 60 \
+  --mixed-layer-volatilization-yield 1.0 \
+  --grazing-ion-reflection literature_v1 --output <OUT>
+```
+
+**Scope note the runner must resolve before launching.** These flags at current
+HEAD do *not* reproduce ml13's chemistry: the closure batch (`82c223b`,
+`23fe6de`) moved the constants to the Table-6.5 converged set with the
+activated-SiO₂ and de-crosslink channels — that is the **ml15** configuration.
+So as written this is "ml15 constants + corrected lift". Running "ml13
+constants + corrected lift" (the literal preregistration) requires reverting
+those two commits' constant changes first. Both are defensible experiments and
+the choice is a physics decision, not a flag: ml13-constants isolates the lift
+against the config of record, ml15-constants tests whether the corrected wall
+flux was the missing ingredient that made the verbatim-complete set
+underperform. Recommend ml15-constants first, since the P0 finding predicts the
+lift supplies exactly the mouth-region flux whose absence ml15 was blamed on.
+
 ### Declared limitations of this pass
 
 - Ideal straight-wall geometry; no evolving profile, no chemistry, no
   redeposition. These are transport ratios, not predicted CDs.
-- The √2 correction implemented here is a **diagnostic scaling**, valid exactly
-  for Gaussian transverse components; the principled fix (P1a) should invert the
-  planar marginal properly and will differ in the far tail.
+- The √2 correction implemented in EXP C is a **diagnostic scaling**; the
+  principled inversion landed in P1a above and does differ in the far tail
+  (0.8233° vs the diagnostic's 0.8334°).
+- P1a lifts the angular **marginal** with a per-bin weight multiplier, so the
+  inversion is uniform in energy. The digitization is a point cloud with 1–4
+  angle nodes per energy row, which cannot support a per-energy peel; an
+  energy-resolved lift needs the S1 two-component distribution, not this data.
 - The AR-9 "mouth band" is defined as the upper quarter of the sidewall; the
   ratio is insensitive to that choice at the reported precision but the
   definition is arbitrary.

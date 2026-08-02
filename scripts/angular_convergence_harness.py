@@ -415,6 +415,34 @@ def experiment_c(aspects=(9.0, 30.0, 100.0, 200.0)):
     return rows
 
 
+def closure_regression():
+    """P1a regression: the production lift must carry the published width.
+
+    EXP C measured the production lift discarding exactly sqrt(2) of the
+    published planar width (0.5893 deg lifted vs 0.8334 deg published).  This
+    is the cheap standing check that the fix stays in — beam statistics only,
+    no transport gather.
+    """
+    iead = load_krueger_2024_digitized_iead(_DEFAULT_DATA)
+    tangent = np.tan(np.deg2rad(iead.signed_angle_deg))
+    published = np.degrees(np.arctan(np.sqrt(np.average(
+        tangent ** 2, weights=iead.probability_weight))))
+    production = krueger_iead_species(
+        azimuthal_order=16, angle_bin_deg=0.25, energy_bin_eV=250.0)
+    velocity = np.asarray(production.velocity_sqrt_eV, dtype=float)
+    weight = np.asarray(production.weight, dtype=float)
+    weight = weight / weight.sum()
+    lifted = np.degrees(np.arctan(np.sqrt(np.average(
+        (velocity[:, 0] / velocity[:, 2]) ** 2, weights=weight))))
+    row = {"published_planar_deg": float(published),
+           "lifted_planar_deg": float(lifted),
+           "deficit_ratio": float(published / lifted),
+           "pre_fix_deficit_ratio": 1.4141}
+    print(f"  published planar {published:.4f} deg; lifted planar {lifted:.4f} deg;"
+          f" deficit x{row['deficit_ratio']:.4f} (was x1.4141)", flush=True)
+    return row
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", default="results/curated/angular_convergence_p0")
@@ -439,6 +467,8 @@ def main():
     payload["experiment_b"] = experiment_b()
     print("EXP C azimuthal-closure error vs AR:", flush=True)
     payload["experiment_c"] = experiment_c()
+    print("P1a closure regression:", flush=True)
+    payload["closure_regression"] = closure_regression()
 
     with open(os.path.join(args.out, "angular_convergence.json"), "w") as handle:
         json.dump(payload, handle, indent=2, default=float)

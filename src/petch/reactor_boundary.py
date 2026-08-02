@@ -26,6 +26,7 @@ from .boundary_state import (
     collisionless_sheath_boundary_state,
     maxwellian_electron_boundary_state,
 )
+from .angular_lift import axisymmetric_polar_weights
 from .experimental_data import load_krueger_2024_base_boundary_fluxes
 from .surface_kinetics import EnergeticFlux
 from .sheath import (
@@ -33,6 +34,11 @@ from .sheath import (
     PeriodicSheathVoltage,
     bohm_speed,
 )
+
+# Angular resolution the Krüger Figure-4 digitization actually carries; the
+# axisymmetric polar inversion is peeled on this grid when the caller has not
+# compressed the quadrature to a coarser one.
+_AXISYMMETRIC_LIFT_BIN_DEG = 0.25
 
 
 _EVIDENCE_KINDS = {
@@ -357,7 +363,17 @@ class Krueger2024DigitizedIEAD:
             ))
             quadrature_weight = weight
         else:
-            polar = np.deg2rad(np.abs(signed_angle))
+            # The published signed angle is the PROJECTION of the ion direction
+            # into one plane, so the axisymmetric lift must invert that
+            # marginalization rather than relabel it as the polar angle.  See
+            # petch.angular_lift: identifying the two discards exactly sqrt(2)
+            # of the angular width (RESULTS_ANGULAR_CONVERGENCE_P0_2026-08-02).
+            lift_bin_deg = (
+                _AXISYMMETRIC_LIFT_BIN_DEG if angle_bin_deg is None
+                else float(angle_bin_deg))
+            polar_deg, polar_weight, lift = axisymmetric_polar_weights(
+                signed_angle, weight, bin_deg=lift_bin_deg)
+            polar = np.deg2rad(polar_deg)
             azimuth = 2.0 * np.pi * (
                 np.arange(int(azimuthal_order), dtype=float) + 0.5
             ) / int(azimuthal_order)
@@ -368,7 +384,7 @@ class Krueger2024DigitizedIEAD:
                 np.repeat(speed * np.cos(polar), int(azimuthal_order)),
             ))
             quadrature_weight = np.repeat(
-                weight / int(azimuthal_order), int(azimuthal_order))
+                polar_weight / int(azimuthal_order), int(azimuthal_order))
         return SpeciesBoundaryState(
             name=name, charge_number=1, mass_amu=float(effective_mass_amu),
             flux_m2_s=float(flux_m2_s), velocity_sqrt_eV=velocity,
@@ -376,7 +392,7 @@ class Krueger2024DigitizedIEAD:
             density_model=(
                 None if azimuthal_closure is None else
                 DiscreteEnergyPolarAzimuthDensity3D(
-                    energy, np.abs(signed_angle), weight)),
+                    energy, polar_deg, polar_weight)),
             density_model_2d=DiscreteEnergyAngleDensity2D(
                 energy, signed_angle, weight),
             provenance={
@@ -397,6 +413,13 @@ class Krueger2024DigitizedIEAD:
                     "published IEAD supplies only one signed-angle plane"),
                 "three_dimensional_azimuthal_order": (
                     None if azimuthal_closure is None else int(azimuthal_order)),
+                "three_dimensional_polar_inversion": (
+                    None if azimuthal_closure is None else
+                    "onion-peel Abel inversion of the published planar marginal "
+                    "(petch.angular_lift); the polar rms exceeds the planar rms "
+                    "by sqrt(2) for any axisymmetric measure"),
+                "three_dimensional_polar_inversion_diagnostics": (
+                    None if azimuthal_closure is None else dict(lift)),
             })
 
 
