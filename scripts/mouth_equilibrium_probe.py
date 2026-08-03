@@ -361,10 +361,15 @@ def main(argv=None):
     parser.add_argument("--relax-s", type=float, default=0.4)
     parser.add_argument("--rounds", type=int, default=5)
     parser.add_argument("--skip-resolution", action="store_true")
+    parser.add_argument("--depth-profile-nm", type=float, default=None,
+                        help="run a single geometry and dump net velocity versus "
+                             "depth for every mask face (locates the closure)")
     args = parser.parse_args(argv)
 
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
+    if args.depth_profile_nm is not None:
+        return depth_profile(args, output)
     payload = {"sweep": [], "budget": None, "resolution": None}
     detail_by_neck = {}
 
@@ -410,6 +415,65 @@ def main(argv=None):
         json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
     write_plots(output, payload, detail_by_neck, reference)
     print(f"equilibrium aperture: {payload['equilibrium_aperture_nm']}")
+    return payload
+
+
+def depth_profile(args, output):
+    """Net normal velocity versus depth for every mask face at one aperture.
+
+    The sweep shows the neck band never reverses sign; this locates where the
+    closure actually happens, which the single ``mask_opening`` metric hides.
+    """
+    neck = float(args.depth_profile_nm)
+    record, detail = evaluate_geometry(
+        neck, dx=args.dx_um, transport_device=args.transport_device,
+        relax_s=args.relax_s, rounds=args.rounds)
+    material = detail["material"]
+    z = np.asarray(detail["z_face"], dtype=float)
+    mask_top = SUBSTRATE_TOP_UM + MASK_THICKNESS_UM
+    depth_nm = (mask_top - z) * 1e3
+    is_mask = material == 2
+    net_nm_s = detail["net"] * 1e9
+    growth_nm_s = detail["growth"] * 1e9
+    ion = detail["ion_flux"]
+    cosine = detail["mean_cos"]
+    order = np.argsort(depth_nm[is_mask])
+    rows = []
+    for index in order:
+        selection = np.where(is_mask)[0][index]
+        rows.append({
+            "depth_nm": float(depth_nm[selection]),
+            "net_nm_s": float(net_nm_s[selection]),
+            "growth_nm_s": float(growth_nm_s[selection]),
+            "ion_flux_m2_s": float(ion[selection]),
+            "incidence_cos": float(cosine[selection]),
+        })
+    # Bin by depth for a readable profile.
+    edges = np.arange(0.0, 860.0, 50.0)
+    binned = []
+    depths = np.asarray([row["depth_nm"] for row in rows])
+    values = np.asarray([row["net_nm_s"] for row in rows])
+    fluxes = np.asarray([row["ion_flux_m2_s"] for row in rows])
+    for low, high in zip(edges, edges[1:]):
+        keep = (depths >= low) & (depths < high)
+        if not np.any(keep):
+            continue
+        binned.append({
+            "depth_lo_nm": float(low), "depth_hi_nm": float(high),
+            "faces": int(np.count_nonzero(keep)),
+            "mean_net_nm_s": float(np.mean(values[keep])),
+            "min_net_nm_s": float(np.min(values[keep])),
+            "mean_ion_flux_m2_s": float(np.mean(fluxes[keep])),
+        })
+    payload = {"aperture_nm": neck, "record": record, "binned": binned,
+               "faces": rows}
+    (output / f"depth_profile_{int(neck)}nm.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    for item in binned:
+        print(f"depth {item['depth_lo_nm']:5.0f}-{item['depth_hi_nm']:5.0f} nm  "
+              f"faces {item['faces']:3d}  mean net {item['mean_net_nm_s']:+.5f} "
+              f"min {item['min_net_nm_s']:+.5f} nm/s  "
+              f"ion {item['mean_ion_flux_m2_s']:.3e}", flush=True)
     return payload
 
 
