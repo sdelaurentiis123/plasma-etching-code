@@ -151,3 +151,26 @@ added constants; mouth 24.8 vs 45 = documented known limitation). The mouth
 gap moves from "missing chemistry" to "transport/representation fidelity" —
 a categorically different problem, to be attacked with engine-level work
 (azimuth resolution, voxel-vs-levelset comparison), not more constants.
+
+## Campaign 5 (2026-08-02) — corrected beam (P1a sqrt-2 lift): the deconfounding
+
+| run | config | 60 s endpoint |
+|---|---|---|
+| ml16a | fig-7 single-feature constants + corrected lift, dx 10nm | depth 590.5, opening 11.1, mask 850.25 (**mask exact**) |
+| ml16b | ml13 paper-set constants + corrected lift, dx 10nm | depth 638.8, opening 12.25, mask 850.2 |
+| ml16c | fig-7 constants at dx 5nm | OOM-killed on 62GB box (needs bigger RAM or domain redesign) |
+
+Honest verdict: the geometrically-exact sqrt-2 beam correction REGRESSES both
+headline metrics for every constant set — ml13's depth 852 was partly riding the
+too-narrow beam (over-delivered floor flux), and the wider beam feeds the lip
+film cascade more than it sputters it (mouth seals late). TRUE state at correct
+transport: depth ~640 vs 825, mouth seals vs 39-45 neck. Mask physics exact.
+Research verdicts (committed bd58ffb): mouth = polymer dep/removal balance at
+lip (facet/charging/redep refuted); measured NER runs ABOVE cosine to 50-60 deg
+(You 2023) where our lip apparently nets deposition from added flux; Izawa
+sidewall CFx sticking 0.004 vs our ~0.1 class [VERIFY]; Krueger's 45 was a
+FITTED optimizer target, his sim/SEM NECK minima 38.8/39.0 nearly agree; his
+1nm voxels vs our 10nm remains open (ml16c redo needed). NEXT (in order): lip
+removal-vs-angle audit against the cosine reference (local, free); sidewall
+sticking definitions check; 5nm rerun on high-RAM box; adopt Top/Neck/z_neck
+metrics.
