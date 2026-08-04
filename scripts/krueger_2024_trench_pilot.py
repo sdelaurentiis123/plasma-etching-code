@@ -565,7 +565,7 @@ def _configuration(args):
             "exchange_relative_tolerance": float(args.exchange_relative_tolerance),
             "exchange_geometry_tolerance": float(args.exchange_geometry_tolerance),
             "maximum_refinement_level": 24,
-            "extrusion_projection_guard_cells": 0.01,
+            "extrusion_projection_guard_cells": 0.02,
         }
     return configuration
 
