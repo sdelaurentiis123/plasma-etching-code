@@ -172,7 +172,7 @@ def _mask_throat_connectivity(
 
 def measure_krueger_metrics(
         geometry, *, substrate_top_um, opening_center_um=0.065,
-        opening_width_um=0.09):
+        opening_width_um=0.09, aperture_profile_points=64):
     """Measure the six Fig. 7 scalars from the resolved center cross-section."""
     unit_to_nm = geometry.mesh_length_unit_m * 1.0e9
     x, y, z = geometry.coordinate_arrays
@@ -216,6 +216,7 @@ def measure_krueger_metrics(
 
     mask_widths = []
     feature_widths = []
+    feature_profile = []
     top_widths = []
     left_offsets = []
     right_offsets = []
@@ -252,6 +253,7 @@ def measure_krueger_metrics(
                 and floor + 0.25 * geometry.dx
                 <= z_value <= substrate_top_um - 0.25 * geometry.dx):
             feature_widths.append(width)
+            feature_profile.append({"width": width, "z": float(z_value)})
             left_offsets.append(float(opening_center_um) - left)
             right_offsets.append(right - float(opening_center_um))
             if z_value >= substrate_top_um - 1.5 * geometry.dx:
@@ -269,6 +271,8 @@ def measure_krueger_metrics(
             feature_widths = [
                 float(np.mean([item[1] - item[0] for item in intervals]))]
             top_widths = list(feature_widths)
+            feature_profile = [
+                {"width": feature_widths[0], "z": float(z[k])}]
 
     asymmetry_cells = (
         float(np.max(np.abs(np.asarray(left_offsets) - np.asarray(right_offsets)))
@@ -287,6 +291,36 @@ def measure_krueger_metrics(
     paper_opening_nm = (
         pocket_width_nm
         if connectivity["exterior_to_mask_exit_open"] else 0.0)
+
+    # Community-standard CD triple (Top CD / Necking CD / neck depth). The
+    # legacy mask_opening_nm minimises over the MASK band only, so a pinch at
+    # the mask top and a mid-mask neck collapse into one number; the frozen-
+    # geometry probe (RESULTS_MOUTH_EQUILIBRIUM_PROBE_2026-08-02) measured
+    # closure 30-50x faster at the mask top than at the 200-250 nm band where
+    # the SEM and MCFPM neck, so size and location must be reported apart.
+    aperture_profile = [
+        {"z_um": float(item["z"]),
+         "width_nm": float(item["width"]) * unit_to_nm}
+        for item in (list(mask_widths) + list(feature_profile))]
+    aperture_profile.sort(key=lambda item: item["z_um"], reverse=True)
+    top_cd_nm = np.nan
+    if mask_widths:
+        top_cd_nm = (
+            float(max(mask_widths, key=lambda item: item["z"])["width"])
+            * unit_to_nm)
+    elif aperture_profile:
+        top_cd_nm = float(aperture_profile[0]["width_nm"])
+    neck_cd_nm = neck_z_um = neck_depth_nm = np.nan
+    if aperture_profile:
+        neck = min(aperture_profile, key=lambda item: item["width_nm"])
+        neck_cd_nm = float(neck["width_nm"])
+        neck_z_um = float(neck["z_um"])
+        if np.isfinite(mask_top):
+            neck_depth_nm = (float(mask_top) - neck_z_um) * unit_to_nm
+    # The audit keeps a coarse trace; diagnostics pass None for every plane.
+    stride = (
+        1 if aperture_profile_points is None
+        else max(1, len(aperture_profile) // int(aperture_profile_points)))
     return {
         "mask_opening_nm": paper_opening_nm,
         "mask_pocket_width_nm": pocket_width_nm,
@@ -305,6 +339,11 @@ def measure_krueger_metrics(
             float(np.mean(top_widths)) * unit_to_nm if top_widths else np.nan),
         "maximum_feature_width_nm": (
             float(np.max(feature_widths)) * unit_to_nm if feature_widths else np.nan),
+        "top_cd_nm": top_cd_nm,
+        "neck_cd_nm": neck_cd_nm,
+        "neck_z_um": neck_z_um,
+        "neck_depth_from_mask_top_nm": neck_depth_nm,
+        "aperture_profile": aperture_profile[::stride],
         "etch_depth_nm": float(etch_depth) * unit_to_nm,
         "remaining_mask_thickness_nm": float(mask_height) * unit_to_nm,
         "asymmetry_cell_count": asymmetry_cells,
