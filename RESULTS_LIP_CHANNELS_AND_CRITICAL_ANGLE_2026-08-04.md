@@ -111,6 +111,68 @@ honest remaining item. It is not reachable by changing a chemistry constant:
 every constant is depth-uniform, and a depth-uniform change moves the matched
 100-270 nm bands out of agreement (they currently sit at 0.88-0.99).
 
+## Measurement 3: the energetic populations per band (candidate (i) closed)
+
+One corrected-transport gather, energetic flux and flux-weighted mean incidence
+cosine split by population on the lateral mask faces:
+
+| band (nm) | tilt | ion flux (m^-2 s^-1) | hot-neutral flux | hot/ion | cos ion | cos hot |
+|---|---|---|---|---|---|---|
+| 0-50 | 0.47 | 1.285e18 | 1.538e15 | **0.001** | 0.0226 | 0.0083 |
+| 50-100 | 2.24 | 4.491e18 | 6.720e17 | 0.150 | 0.0516 | 0.0275 |
+| 100-150 | 6.78 | 1.407e19 | 2.621e18 | 0.186 | 0.1268 | 0.0498 |
+| 200-270 | 4.79 | 8.497e18 | 1.538e16 | 0.002 | 0.1262 | 0.0132 |
+
+* **Hot neutrals cannot be the missing remover.** They are 0.1 % of the ion flux
+  at the mask top and 15-19 % mid-mask -- and they are already counted in the
+  removal the probe reports. Their distribution is physically sensible: the
+  cascade creates them where ions graze the upper wall and they travel *down*,
+  so they land at 50-150 nm rather than at the top. Candidate (i) is closed.
+* **The mask top receives the least ion flux of any band, by 11x.** This is not
+  a transport defect, it is the same cos(incidence) projection that drives the
+  critical angle: a wall at 0.47 deg presents sin(0.47 deg) = 0.008 of its area
+  to a vertical beam. Together with `cos ion` tracking tilt across the bands
+  (0.023 -> 0.127), the transport is behaving exactly as the geometry demands.
+
+The mask top is therefore *structurally* unable to clean itself: a vertical wall
+receives no ion flux, and only the taper propagating down from the eroding
+convex corner can lift it above the critical angle.
+
+## What this makes the remaining item
+
+Taper *propagation rate*, and there is a suggestive correlation in the archived
+runs. Wall tilt at 100-150 nm, the band whose margin decides where the neck
+lands:
+
+| run | beam | tilt 0-50 | tilt 50-100 | tilt 100-150 | neck depth |
+|---|---|---|---|---|---|
+| ml13 | pre-P1a (narrow) | 14.28 | 11.99 | 4.64 | 228 nm |
+| ml16a | post-P1a (sqrt-2 wider) | 17.31 | 10.56 | 2.20 | 130 nm |
+| Krüger | his own IEAD | 7.29 | 9.59 | 5.96 | 271 nm |
+
+The wider beam eroded the top *more* (17.3 vs 14.3 deg) and left the 100-150 nm
+band *less* tilted (2.2 vs 4.6 deg), moving the neck up from 228 to 130 nm and
+away from Krüger's 271 nm. Krüger's profile is the least front-loaded of the
+three.
+
+This is a correlation across two runs, not a demonstration, and it points at a
+question P1a's own gate could not settle: the lift assumes the published IEAD
+angle is a *planar marginal* of an axisymmetric distribution (in which case the
+polar spread must exceed it by sqrt(2)). If the published angle is already the
+polar angle with respect to the wafer normal, the lift is over-wide by that same
+sqrt(2). P1a gated self-consistency -- the lifted planar marginal reproduces the
+published width -- which holds under either reading, so it does not discriminate.
+Settling it needs the HPEM convention, not another feature run -- and the
+digitised source settles it **against** the over-wide reading: the published
+table is `signed_angle_deg` spanning **-2.86 to +2.85 deg**, symmetric about
+zero (`data/experimental/krueger_2024/digitized_figure4_iead.csv`, 878 rows,
+438 negative). A polar angle with respect to the wafer normal is unsigned by
+construction; a signed angle symmetric about zero is a planar projection. P1a's
+reading is therefore supported by the data's own convention, the sqrt(2) lift
+stands, and the front-loaded taper needs a different explanation than beam
+width. The correlation above is recorded because it is real, not because it
+survives this check.
+
 ## Initial geometry: settled
 
 Krüger's initial feature is vertical-walled, so "initialise the shoulder from
