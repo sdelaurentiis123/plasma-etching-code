@@ -1,0 +1,25 @@
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 2.84 ms  (cached)
+depth     0-   50 nm  faces  56  mean net -1.26274 min -2.31350 nm/s  ion 3.517e+19
+depth    50-  100 nm  faces  40  mean net -0.47863 min -0.97245 nm/s  ion 5.162e+18
+depth   100-  150 nm  faces  40  mean net -0.00579 min -0.02488 nm/s  ion 1.668e+19
+depth   150-  200 nm  faces  48  mean net -0.00000 min -0.00001 nm/s  ion 2.278e+19
+depth   200-  250 nm  faces  48  mean net -0.01320 min -0.06948 nm/s  ion 1.259e+19
+depth   250-  300 nm  faces  48  mean net -0.03297 min -0.08759 nm/s  ion 8.767e+15
+depth   300-  350 nm  faces  48  mean net -0.00557 min -0.00812 nm/s  ion 0.000e+00
+depth   350-  400 nm  faces  40  mean net -0.01399 min -0.02025 nm/s  ion 0.000e+00
+depth   400-  450 nm  faces  40  mean net -0.03552 min -0.04726 nm/s  ion 2.809e+14
+depth   450-  500 nm  faces  40  mean net -0.02817 min -0.03274 nm/s  ion 3.181e+17
+depth   500-  550 nm  faces  40  mean net -0.02465 min -0.03033 nm/s  ion 7.936e+17
+depth   550-  600 nm  faces  40  mean net -0.02440 min -0.02765 nm/s  ion 6.663e+17
+depth   600-  650 nm  faces  40  mean net -0.02972 min -0.03332 nm/s  ion 3.404e+17
+depth   650-  700 nm  faces  40  mean net -0.01974 min -0.03126 nm/s  ion 1.641e+17
+depth   700-  750 nm  faces  40  mean net -0.01456 min -0.01526 nm/s  ion 2.028e+17
+depth   750-  800 nm  faces  40  mean net -0.01170 min -0.01471 nm/s  ion 2.066e+17
+depth   800-  850 nm  faces  40  mean net -0.01164 min -0.01200 nm/s  ion 1.046e+17

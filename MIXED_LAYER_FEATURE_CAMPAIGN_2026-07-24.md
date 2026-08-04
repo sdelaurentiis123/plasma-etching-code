@@ -174,3 +174,32 @@ FITTED optimizer target, his sim/SEM NECK minima 38.8/39.0 nearly agree; his
 removal-vs-angle audit against the cosine reference (local, free); sidewall
 sticking definitions check; 5nm rerun on high-RAM box; adopt Top/Neck/z_neck
 metrics.
+
+## Campaign 6 (2026-08-04) — dx=5nm resolution verdict
+
+| run | config | result |
+|---|---|---|
+| ml17a-dx5-short | fig-7 constants + corrected lift, **dx 5nm** | reached t=0.386s (500s/step); graded by matched-simulated-time vs ml16a |
+
+Verdict (RESULTS_DX5_RESOLUTION_VERDICT_2026-08-04.md): **resolution is not the
+driver of the top-band defect.** Floor etch rate grid-converged to 0.05%
+(22.0 nm/s both grids); mouth closure only 8-11% slower at 5nm, Richardson
+dx->0 limit 15-22% below the 10nm value, against a 10.8x (+980%) discrepancy —
+refinement recovers under 3% of the gap. Throat pins at the mask top on both
+grids from step 1. Krueger's 1 nm voxels are therefore acquitted as the
+explanation. The ml16 depth undershoot is likewise not resolution: the floor
+rate agrees to 0.05%, so depth is inherited from the throttled aperture.
+
+Remaining unexplained: the late-time **throat reversal** — the 10nm reference
+descends normally to 180 nm by t=30 s (opening 23.5) and then reverses to
+130 nm while the aperture collapses to 11.1. At t=12 s petch reads 38.4 nm vs
+the experimental 39.0 nm neck, i.e. the early trajectory is correct and the
+defect is a late-time takeover by a second, higher constriction. That is a
+profile-evolution question, not a per-face budget question.
+
+Deployment lesson: three prior 5nm launches died on the extrusion guard *after*
+it was fixed — stale module on the box from patching files onto a live tree.
+Clean `git archive` deploy passed on the first attempt. Never patch a live tree.
+
+Method: matched-simulated-time comparison against an archived trajectory cost
+~2.5 h box time (~$0.50) for what a 12 s endpoint would have needed 17 h.
