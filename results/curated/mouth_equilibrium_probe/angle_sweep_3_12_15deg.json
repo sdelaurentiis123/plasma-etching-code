@@ -1,0 +1,57 @@
+{
+  "angle_sweep": [
+    {
+      "band_aperture_nm": 44.99999999994316,
+      "band_face_count": 32,
+      "band_ion_flux_m2_s": 4.975718043767919e+18,
+      "band_mean_incidence_cos": 0.05614938398622132,
+      "dx_um": 0.01,
+      "etch_band_nm_s": 0.0,
+      "gather_wall_s": 68.7251740419888,
+      "growth_band_nm_s": 0.0024335516165775485,
+      "net_band_velocity_nm_s": -0.0024335516165775485,
+      "realised_wall_angle_deg": 3.0000000000000004,
+      "reference_aperture_nm": 45.0,
+      "relaxation_trace": [
+        0.0031648381187554626
+      ],
+      "wall_angle_deg": 3.0
+    },
+    {
+      "band_aperture_nm": 45.0126599467372,
+      "band_face_count": 40,
+      "band_ion_flux_m2_s": 1.973446622044099e+19,
+      "band_mean_incidence_cos": 0.20703010450230414,
+      "dx_um": 0.01,
+      "etch_band_nm_s": 0.0,
+      "gather_wall_s": 46.01620791599271,
+      "growth_band_nm_s": 3.9411167838787125e-05,
+      "net_band_velocity_nm_s": -3.9411167838787125e-05,
+      "realised_wall_angle_deg": 11.984001365445609,
+      "reference_aperture_nm": 45.0,
+      "relaxation_trace": [
+        0.002879059964867438
+      ],
+      "wall_angle_deg": 12.0
+    },
+    {
+      "band_aperture_nm": 44.991230628210346,
+      "band_face_count": 40,
+      "band_ion_flux_m2_s": 2.4562446662386156e+19,
+      "band_mean_incidence_cos": 0.2563934193254994,
+      "dx_um": 0.01,
+      "etch_band_nm_s": 0.0,
+      "gather_wall_s": 49.567004416981945,
+      "growth_band_nm_s": 5.393642629108359e-06,
+      "net_band_velocity_nm_s": -5.393642629108359e-06,
+      "realised_wall_angle_deg": 14.89987378567517,
+      "reference_aperture_nm": 45.0,
+      "relaxation_trace": [
+        0.0030606167110553864
+      ],
+      "wall_angle_deg": 15.0
+    }
+  ],
+  "reference_aperture_nm": 45.0,
+  "zero_cross_deg": null
+}

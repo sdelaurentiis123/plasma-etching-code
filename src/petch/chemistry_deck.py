@@ -110,6 +110,18 @@ KRUEGER_2024_DECK = {
             "substrate / on crosslinked skin) + Table 6.5 mask row 0.094"),
         # Sticking on existing polymer is ~100x sticking on bare oxide:
         # radicals on open oxide chemisorb (complex) instead of polymerizing.
+        # [VERIFY] ORDERING: the fab literature reports sticking that DECREASES
+        # with the radical F/C ratio ("the sticking coefficient of F-rich CFx
+        # radicals such as CF2 is lower than that of C-rich radicals", Hiwasa
+        # et al., Appl. Phys. Express 15, 106002 (2022), whose ref. 12 is Izawa
+        # et al., Jpn. J. Appl. Phys. 46, 7870 (2007)).  This row inverts that
+        # ordering: CF3 (F/C = 3) sticks at 0.1 while C2F3 (F/C = 1.5) sticks at
+        # 0.03.  NOT changed here: Izawa's 0.004 is a model-inverted effective
+        # coefficient spanning a ~125x F-rich/C-rich axis, not a per-site rate
+        # commensurate with these rows, and no published magnitude pair maps
+        # onto this species set.  Krueger's values are kept as a validated,
+        # internally consistent set; retiring them needs beam-measured
+        # per-species sticking (RESEARCH_LIP_CERTAINTY_2026-08-04.md Q1).
         "on_polymer": {"CF": 0.1, "CF2": 0.1, "CF3": 0.1, "C2F3": 0.03},
         "on_substrate": {"CF": 0.002, "CF2": 0.0015, "CF3": 0.001,
                          "C2F3": 0.001},

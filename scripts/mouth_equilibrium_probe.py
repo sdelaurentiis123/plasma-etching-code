@@ -140,6 +140,76 @@ def make_necked_trench_geometry_3d(
         })
 
 
+ANGLE_BAND_LO_UM = 0.015      # measurement band above the apex (excludes it)
+ANGLE_BAND_HI_UM = 0.055
+ANGLE_BAND_MID_UM = 0.035     # aperture is pinned to the reference width here
+
+
+def make_sloped_wall_geometry_3d(
+        *, wall_angle_deg, aperture_nm, dx, cell_width=CELL_WIDTH_UM,
+        cell_length=CELL_LENGTH_UM, opening_width=OPEN_WIDTH_UM,
+        mask_thickness=MASK_THICKNESS_UM, substrate_top=SUBSTRATE_TOP_UM,
+        etched_depth=ETCHED_DEPTH_UM, neck_depth=NECK_DEPTH_UM,
+        headspace=HEADSPACE_UM, mesh_length_unit_m=1e-6,
+        substrate_material_id=1, mask_material_id=2):
+    """Trench whose mask wall is a STRAIGHT taper of prescribed angle.
+
+    The Gaussian constriction of :func:`make_necked_trench_geometry_3d` pins the
+    wall vertical at its own minimum -- any smooth minimum has zero slope, so a
+    sweep over aperture cannot vary the wall angle independently.  Here the wall
+    is a straight wedge of half-angle ``wall_angle_deg`` from vertical, and the
+    apex aperture is chosen so that the aperture at the band midpoint equals
+    ``aperture_nm`` for every angle.  Angle is then a controlled variable at
+    fixed local aperture.
+    """
+    tan_alpha = float(np.tan(np.deg2rad(float(wall_angle_deg))))
+    apex_half = 0.5 * float(aperture_nm) * 1e-3 - ANGLE_BAND_MID_UM * tan_alpha
+    if apex_half <= 0.5 * dx:
+        raise ValueError("wall angle too steep for the reference aperture")
+    domain_height = substrate_top + mask_thickness + headspace
+    shape = tuple(max(3, int(round(length / dx)) + 1)
+                  for length in (cell_width, cell_length, domain_height))
+    x, y, z = (np.arange(size) * dx for size in shape)
+    X, _, Z = np.meshgrid(x, y, z, indexing="ij")
+    radius = np.abs(X - 0.5 * cell_width)
+    floor = substrate_top - etched_depth
+    mask_top = substrate_top + mask_thickness
+    z_apex = mask_top - neck_depth
+
+    base = floor - Z
+    substrate_wall_slab = np.minimum(Z - floor, substrate_top - Z)
+    substrate_wall = np.minimum(substrate_wall_slab, radius - 0.5 * opening_width)
+    substrate_levelset = np.maximum(base, substrate_wall)
+
+    half_width = np.minimum(apex_half + np.abs(Z - z_apex) * tan_alpha,
+                            0.5 * opening_width)
+    mask_slab = np.minimum(Z - substrate_top, mask_top - Z)
+    mask_levelset = np.minimum(mask_slab, radius - half_width)
+
+    substrate_phi = reinit_narrow(substrate_levelset, dx, domain_height + cell_width)
+    mask_phi = reinit_narrow(mask_levelset, dx, domain_height + cell_width)
+    phi = reinit_narrow(np.maximum(substrate_phi, mask_phi), dx,
+                        domain_height + cell_width)
+
+    substrate_solid = (Z < substrate_top) & ~(
+        (Z > floor) & (radius < 0.5 * opening_width))
+    mask_solid = (Z >= substrate_top) & (Z < mask_top) & (radius >= half_width)
+    material = np.zeros(shape, dtype=int)
+    material[substrate_solid] = int(substrate_material_id)
+    material[mask_solid] = int(mask_material_id)
+    unlabeled_solid = (phi > 0.0) & (material == 0)
+    substrate_owner = substrate_levelset >= mask_levelset
+    material[unlabeled_solid] = np.where(
+        substrate_owner[unlabeled_solid],
+        int(substrate_material_id), int(mask_material_id))
+    return FeatureGeometry3D(
+        phi, material, dx, mesh_length_unit_m,
+        material_levelsets={
+            int(substrate_material_id): substrate_phi,
+            int(mask_material_id): mask_phi,
+        })
+
+
 def measure_aperture_profile(geometry, *, substrate_top=SUBSTRATE_TOP_UM,
                              mask_thickness=MASK_THICKNESS_UM):
     """Aperture (nm) versus depth into the mask, from the nodal level set."""
@@ -337,6 +407,105 @@ def evaluate_geometry(neck_nm, *, dx, transport_device="cpu", relax_s=0.4,
             depths=depths, apertures=apertures, material=material)
 
 
+def sloped_band_mask(result, geometry, *, substrate_top=SUBSTRATE_TOP_UM,
+                     mask_thickness=MASK_THICKNESS_UM, neck_depth=NECK_DEPTH_UM):
+    """Mask sidewall faces inside the straight-taper measurement band."""
+    active = np.asarray(result.active_face_index, dtype=int)
+    centroid = np.asarray(result.active_face_centroid, dtype=float)
+    material = np.asarray(result.face_material_id, dtype=int)[active]
+    z_apex = substrate_top + mask_thickness - neck_depth
+    z = centroid[:, 2] * geometry.dx if centroid.max() > 10.0 else centroid[:, 2]
+    above = z - z_apex
+    in_band = (above >= ANGLE_BAND_LO_UM) & (above <= ANGLE_BAND_HI_UM)
+    return (material == 2) & in_band, z
+
+
+def evaluate_wall_angle(wall_angle_deg, *, aperture_nm, dx,
+                        transport_device="cpu", relax_s=0.4, rounds=5):
+    """Frozen-geometry evaluation at a prescribed WALL ANGLE, fixed aperture."""
+    geometry = make_sloped_wall_geometry_3d(
+        wall_angle_deg=float(wall_angle_deg), aperture_nm=float(aperture_nm),
+        dx=float(dx))
+    depths, apertures = measure_aperture_profile(geometry)
+    mask_top = SUBSTRATE_TOP_UM + MASK_THICKNESS_UM
+    apex_depth_nm = NECK_DEPTH_UM * 1e3
+    band = ((depths >= apex_depth_nm - ANGLE_BAND_HI_UM * 1e3)
+            & (depths <= apex_depth_nm - ANGLE_BAND_LO_UM * 1e3))
+    band_aperture = float(np.mean(apertures[band])) if band.any() else float("nan")
+    if band.sum() >= 2:
+        fit = np.polyfit(depths[band], apertures[band] / 2.0, 1)
+        realised_angle = float(np.degrees(np.arctan(abs(fit[0]))))
+    else:
+        realised_angle = float("nan")
+    result, mechanism, role, gather_s = gather_transport(
+        geometry, transport_device=transport_device)
+    step, flux, active, material, trace = relax_chemistry(
+        result, mechanism, role, relax_s=relax_s, rounds=rounds)
+    etch = np.asarray(step.etch_velocity_m_s, dtype=float)
+    growth = np.asarray(step.normal_growth_velocity_m_s, dtype=float)
+    net = etch - growth
+    is_band, z_face = sloped_band_mask(result, geometry)
+    area = np.asarray(result.active_face_area, dtype=float)
+    if not np.any(is_band):
+        raise RuntimeError(f"no band faces at alpha={wall_angle_deg} deg")
+    weights = area[is_band]
+    ion_flux, mean_cos, mean_energy = face_incidence(result)
+    return {
+        "wall_angle_deg": float(wall_angle_deg),
+        "realised_wall_angle_deg": realised_angle,
+        "reference_aperture_nm": float(aperture_nm),
+        "band_aperture_nm": band_aperture,
+        "dx_um": float(dx),
+        "net_band_velocity_nm_s": float(
+            np.average(net[is_band], weights=weights)) * 1e9,
+        "etch_band_nm_s": float(
+            np.average(etch[is_band], weights=weights)) * 1e9,
+        "growth_band_nm_s": float(
+            np.average(growth[is_band], weights=weights)) * 1e9,
+        "band_face_count": int(np.count_nonzero(is_band)),
+        "band_mean_incidence_cos": float(np.nanmean(mean_cos[is_band])),
+        "band_ion_flux_m2_s": float(np.average(ion_flux[is_band], weights=weights)),
+        "gather_wall_s": float(gather_s),
+        "relaxation_trace": [float(item) for item in trace],
+    }
+
+
+def angle_sweep(args, output):
+    """Check (c): net velocity versus WALL ANGLE at fixed local aperture."""
+    records = []
+    for angle in args.angle_deg:
+        try:
+            record = evaluate_wall_angle(
+                angle, aperture_nm=args.angle_aperture_nm, dx=args.dx_um,
+                transport_device=args.transport_device, relax_s=args.relax_s,
+                rounds=args.rounds)
+        except ValueError as error:
+            print(f"alpha {angle:5.2f} deg: SKIPPED ({error})", flush=True)
+            continue
+        records.append(record)
+        print(f"alpha {angle:5.2f} deg (realised {record['realised_wall_angle_deg']:5.2f}, "
+              f"aperture {record['band_aperture_nm']:6.2f} nm) net "
+              f"{record['net_band_velocity_nm_s']:+10.5f} nm/s "
+              f"(etch {record['etch_band_nm_s']:.5f} / growth "
+              f"{record['growth_band_nm_s']:.5f}) cos {record['band_mean_incidence_cos']:.4f} "
+              f"[{record['gather_wall_s']:.0f}s]", flush=True)
+    zero_cross = None
+    ordered = sorted(records, key=lambda item: item["wall_angle_deg"])
+    for lower, upper in zip(ordered, ordered[1:]):
+        a, b = lower["net_band_velocity_nm_s"], upper["net_band_velocity_nm_s"]
+        if a * b < 0.0:
+            span = upper["wall_angle_deg"] - lower["wall_angle_deg"]
+            zero_cross = lower["wall_angle_deg"] + span * (0.0 - a) / (b - a)
+            break
+    payload = {"angle_sweep": ordered, "zero_cross_deg": zero_cross,
+               "reference_aperture_nm": args.angle_aperture_nm}
+    (output / "angle_sweep.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    print(f"\nnet-velocity zero crossing: {zero_cross} deg "
+          f"(None = no sign change in the swept range)")
+    return payload
+
+
 def bisect_equilibrium(records):
     """Linear interpolation of the aperture where net neck velocity changes sign."""
     ordered = sorted(records, key=lambda item: item["realised_neck_nm"])
@@ -361,6 +530,9 @@ def main(argv=None):
     parser.add_argument("--relax-s", type=float, default=0.4)
     parser.add_argument("--rounds", type=int, default=5)
     parser.add_argument("--skip-resolution", action="store_true")
+    parser.add_argument("--angle-deg", type=float, nargs="*", default=None,
+                        help="check (c): sweep WALL ANGLE at fixed aperture")
+    parser.add_argument("--angle-aperture-nm", type=float, default=45.0)
     parser.add_argument("--depth-profile-nm", type=float, default=None,
                         help="run a single geometry and dump net velocity versus "
                              "depth for every mask face (locates the closure)")
@@ -368,6 +540,8 @@ def main(argv=None):
 
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
+    if args.angle_deg:
+        return angle_sweep(args, output)
     if args.depth_profile_nm is not None:
         return depth_profile(args, output)
     payload = {"sweep": [], "budget": None, "resolution": None}
