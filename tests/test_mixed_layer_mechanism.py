@@ -175,10 +175,19 @@ def test_film_growth_moves_boundary_negative_velocity():
 
 
 def test_crosslink_brake_is_ion_dose_differential():
-    """Ion-processed-skin crosslinking (zero-knob conversion, published 0.02
-    crosslinked attachment): full ion dose must crosslink the film and slow
-    growth several-fold versus an ion-shadowed surface — the differential
-    that makes the mask mouth an equilibrium instead of a runaway clog."""
+    """Crosslinked-film brake (published 0.02 crosslinked attachment): an
+    ion-shadowed surface must still crosslink, and must grow far slower than
+    an ion-bombarded one — the differential that keeps the mask mouth an
+    equilibrium instead of a runaway clog.
+
+    The crosslink DIRECTION was corrected on 2026-08-04: Krueger creates PC
+    during deposition (thesis sec. 2.2.3, Table 6.2 `P(s)+P(s)->PC(s)+PC(s)`)
+    and ions only BREAK it (`CF(xs)+M->CF(s)+M`, 0.3 @ 8 eV).  The original
+    form of this gate asserted the opposite — that ion dose is what crosslinks,
+    so an ion-rich surface carries 2x the crosslinked fraction of a shadowed
+    one.  That claim is falsified by his own mechanism and by the feature runs
+    (the ion-shadowed lip measured x_xl = 0.163 where ~0.9 is required to
+    reproduce his closure rate).  See RESULTS_LIP_CROSSLINK_2026-08-04.md."""
     from petch.mixed_layer_mechanism import (
         build_krueger_2024_mixed_layer_mechanisms,
     )
@@ -196,9 +205,12 @@ def test_crosslink_brake_is_ion_dose_differential():
     x_shadow = (float(np.asarray(shadowed.state.n_xl_film))
                 / float(np.asarray(shadowed.state.n_c_film
                                    + shadowed.state.n_f_film)))
-    # With the published film sputter law the lip film is BOTH crosslinked
-    # and heavily sputtered; the physical claim is the growth differential.
-    assert x_lip > 2.0 * x_shadow
+    # The ion-shadowed surface — the lip — must be substantially crosslinked:
+    # creation rides on deposition, which grazing incidence does not suppress.
+    assert x_shadow > 0.6
+    # Ions break bonds, so bombardment cannot leave a MORE crosslinked film
+    # than shadowing does by any meaningful margin.
+    assert x_lip < 1.15 * x_shadow
     assert (float(shadowed.normal_growth_velocity_m_s)
             > 5.0 * max(float(lip.normal_growth_velocity_m_s), 0.0) or
             float(lip.normal_growth_velocity_m_s) == 0.0)

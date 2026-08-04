@@ -522,9 +522,26 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # film atoms at (energy absorbed in the film)/E_displacement per ion;
     # removal channels draw down crosslinked atoms in proportion to their
     # share, so n_xl stays a subset of the film inventory exactly.
-    xl_rate = (kernel_xl / params.displacement_energy_eV
-               * np.maximum(1.0 - _guarded_ratio(state.n_xl_film, film_total, 1.0),
-                            0.0))
+    fresh_fraction = np.maximum(
+        1.0 - _guarded_ratio(state.n_xl_film, film_total, 1.0), 0.0)
+    xl_rate = kernel_xl / params.displacement_energy_eV * fresh_fraction
+    # Deposition-driven crosslinking (Krueger Table 6.2 row
+    # `P(s) + P(s) -> PC(s) + PC(s)`, module described verbatim in thesis
+    # sec. 2.2.3: "Crosslinking occurs during the deposition of eligible
+    # materials... During deposition bonds to random eligible cell neighbors
+    # can be formed"). Creation is a property of the DEPOSITION event, not of
+    # ion dose; ions only break crosslinks (`CF(xs)+M -> CF(s)+M`, 0.3 @ 8 eV,
+    # already implemented as dexl). The published row converts BOTH partners,
+    # so each deposited unit converts itself plus one eligible fresh neighbour:
+    # rate = 2 x (deposited atoms) x (fresh fraction) x (film present).
+    # No constant is introduced: the 2 is the row's own stoichiometry and the
+    # gates are the eligibility conditions the module states.
+    # This channel does not collapse on near-vertical walls (deposition is
+    # isotropic) whereas ion-driven creation does by ~200x through the double
+    # cosine -- which is why the lip film crosslinks in his model and did not
+    # in ours (x_xl = 0.163 measured against ~0.9 required).
+    # See RESULTS_LIP_CROSSLINK_2026-08-04.md.
+    xl_rate = xl_rate + (2.0 * (dep_c + dep_f) * fresh_fraction * theta_film)
     # Ion de-crosslinking (Appendix S3d: 0.3 @ 8 eV, q=0.5, e0=500): converts
     # crosslinked film back to fresh — mass-neutral within the film.
     dexl_rate = kernel_dexl * _guarded_ratio(state.n_xl_film, film_total, 1.0)
