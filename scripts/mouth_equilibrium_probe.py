@@ -277,7 +277,17 @@ def gather_transport(geometry, *, transport_device="cpu", ion_azimuthal_order=16
         duration_s=0.0, source_bounds=(0.0, realized[0], 0.0, realized[1]),
         source_z=source_z, n_position=1, seed=1, cfl_number=0.25,
         reinitialize=True, reinitialization_method="cr2",
-        profile_periodic_lateral=True, transport_device=str(transport_device),
+        profile_periodic_lateral=True,
+        # The feature cell is periodic in x and y, so the ballistic first-hit
+        # gather must be too.  Without this the gather keeps only the rays whose
+        # back-projection lands inside the 0.13 x 0.02 um source rectangle,
+        # which discards broad-angle thermal neutrals ~36x harder than the
+        # near-vertical ion beam and silently distorts every removal/deposition
+        # ratio (RESULTS_LIP_DEPOSITION_AUDIT_2026-08-04.md).  The production
+        # pilot never had this defect: --radiosity-backend
+        # deterministic_extruded_2d sets periodic neutral transport itself.
+        ballistic_periodic_lateral=True,
+        transport_device=str(transport_device),
         ballistic_transport="face_gather", grazing_ion_reflection={},
         ballistic_face_quadrature_points=int(face_quadrature_points),
         topology_change_policy="continue_gas_cavity",

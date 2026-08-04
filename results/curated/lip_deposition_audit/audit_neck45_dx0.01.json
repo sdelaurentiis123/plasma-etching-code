@@ -1,0 +1,126 @@
+{
+  "neck_nm": 45.0,
+  "dx_um": 0.01,
+  "gather_seconds": 98.08981479200884,
+  "relax_trace": [
+    0.029410432113576284,
+    0.008436651102725547,
+    0.004635242066647415
+  ],
+  "source_flux_m2_s": {
+    "depositors": 3.094e+21,
+    "oxygen": 7.7e+20
+  },
+  "depositor_species": [
+    "C3F4",
+    "C2F3",
+    "CF",
+    "CF2",
+    "CF3"
+  ],
+  "sticking_rows": {
+    "on_fresh_polymer": 0.1,
+    "on_crosslinked_polymer": 0.02,
+    "on_bare_mask": 0.094
+  },
+  "controls": {
+    "mask_top": {
+      "face_count": 16,
+      "delivered_over_source_depositor": 1.0021067146939646,
+      "unobstructed_arrival_A": 0.9999999999999998,
+      "visibility_fraction": 1.0021067146939648
+    },
+    "trench_floor": {
+      "face_count": 32,
+      "delivered_over_source_depositor": 0.04689485036409462,
+      "unobstructed_arrival_A": 0.9753462763420763,
+      "visibility_fraction": 0.04705054918752584
+    }
+  },
+  "bands": [
+    {
+      "band_nm": [
+        0.0,
+        50.0
+      ],
+      "face_count": 40,
+      "wall_tilt_deg_mean": 0.4722228422825369,
+      "delivered_over_source_depositor": 0.37189910507849583,
+      "unobstructed_arrival_A": 0.5016330585806131,
+      "visibility_fraction": 0.7417599287854645,
+      "visibility_max": 0.9517862868017765,
+      "analytic_slot_delivered_over_source": 0.3231791477331819,
+      "measured_over_analytic_slot": 1.1507521685326596,
+      "isotropy_ratio_O_over_depositor": 1.0000000000000002,
+      "effective_sticking": 0.05859536119050578,
+      "crosslinked_fraction": 0.1632481091978817,
+      "deposited_units_m2_s": 6.767516878922796e+19,
+      "removed_polymer_units_m2_s": 1.4640568776149574e+19,
+      "removal_over_deposition": 0.21633590337612799,
+      "net_velocity_nm_s": -1.7678200004359463
+    },
+    {
+      "band_nm": [
+        50.0,
+        100.0
+      ],
+      "face_count": 40,
+      "wall_tilt_deg_mean": 2.244145046097711,
+      "delivered_over_source_depositor": 0.19383189589360292,
+      "unobstructed_arrival_A": 0.5179887503252981,
+      "visibility_fraction": 0.37530171732060497,
+      "visibility_max": 0.49169107111259863,
+      "analytic_slot_delivered_over_source": 0.18042624928652864,
+      "measured_over_analytic_slot": 1.074299868561726,
+      "isotropy_ratio_O_over_depositor": 1.0,
+      "effective_sticking": 0.04872888379639797,
+      "crosslinked_fraction": 0.427321890221902,
+      "deposited_units_m2_s": 2.9470217805951836e+19,
+      "removed_polymer_units_m2_s": 1.511714293680276e+19,
+      "removal_over_deposition": 0.5129633936315763,
+      "net_velocity_nm_s": -0.4784358289716357
+    },
+    {
+      "band_nm": [
+        100.0,
+        150.0
+      ],
+      "face_count": 40,
+      "wall_tilt_deg_mean": 6.782979405679395,
+      "delivered_over_source_depositor": 0.12467801655192808,
+      "unobstructed_arrival_A": 0.558534083927329,
+      "visibility_fraction": 0.2238478037092698,
+      "visibility_max": 0.27420463013570145,
+      "analytic_slot_delivered_over_source": 0.11105793309846718,
+      "measured_over_analytic_slot": 1.1226394465795158,
+      "isotropy_ratio_O_over_depositor": 1.0000000000000002,
+      "effective_sticking": 0.06535444350485298,
+      "crosslinked_fraction": 0.4072028652448844,
+      "deposited_units_m2_s": 2.4907869290334667e+19,
+      "removed_polymer_units_m2_s": 2.4734938919258243e+19,
+      "removal_over_deposition": 0.9930571993509084,
+      "net_velocity_nm_s": -0.005764345702547602
+    },
+    {
+      "band_nm": [
+        200.0,
+        270.0
+      ],
+      "face_count": 64,
+      "wall_tilt_deg_mean": 4.7850068868012405,
+      "delivered_over_source_depositor": 0.0313020580306153,
+      "unobstructed_arrival_A": 0.5280973317653961,
+      "visibility_fraction": 0.05694220128678645,
+      "visibility_max": 0.09954230182365355,
+      "analytic_slot_delivered_over_source": 0.015026743397690542,
+      "measured_over_analytic_slot": 2.0830899418583346,
+      "isotropy_ratio_O_over_depositor": 1.0,
+      "effective_sticking": 0.07862947450949026,
+      "crosslinked_fraction": 0.2277700037325469,
+      "deposited_units_m2_s": 7.616343377976556e+18,
+      "removed_polymer_units_m2_s": 6.729424287595901e+18,
+      "removal_over_deposition": 0.8835505377888722,
+      "net_velocity_nm_s": -0.029563969679355234
+    }
+  ]
+}
