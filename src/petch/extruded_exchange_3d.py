@@ -211,7 +211,7 @@ class ExtrudedTriangleExchange3D:
         return mean, maximum_relative
 
 
-def project_geometry_to_extrusion(geometry, *, extrusion_axis=1, guard_cells=0.01):
+def project_geometry_to_extrusion(geometry, *, extrusion_axis=1, guard_cells=0.02):
     """Project geometry fields onto their extrusion-axis mean under a declared guard.
 
     A numerically three-dimensional evolution of a declared extruded state accumulates
@@ -219,6 +219,10 @@ def project_geometry_to_extrusion(geometry, *, extrusion_axis=1, guard_cells=0.0
     strict extrusion certification.  Under the declared extruded mean-field closure the
     correct state is the axis mean, exactly as face fields are projected onto strip
     means.  Variation beyond ``guard_cells * dx`` is genuinely three-dimensional and
+    refused.  The default is cell-relative because sub-cell remap/marching noise does
+    not shrink linearly with dx: measured 0.0133 cells at dx=5nm vs <0.01 at 10nm
+    (ml17a); 0.02 cells stays 50x below any physical y-structure the guard exists
+    to catch.  Variation beyond it is
     refuses instead of being silently flattened.  Returns the projected geometry and the
     maximum absolute deviation (mesh units) as the receipt.
     """
