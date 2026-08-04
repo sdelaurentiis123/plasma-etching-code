@@ -357,9 +357,18 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     sputter_total = kernel_sputter * theta_film
     sput_c = sputter_total * x_c
     sput_f = sputter_total * x_f
-    # O oxidation of film carbon: each oxidized C carries along the local film
-    # F/C ratio (capped at 2, the COF2 stoichiometry); remainder leaves as CO.
-    ox_c = params.oxidation_probability * fluxes.oxygen_flux * theta_film * x_c
+    # O oxidation of the film. Krueger's published row is per collision with
+    # EXPOSED POLYMER -- O(g) + P(s) -> products at p_ox -- so the reacting
+    # fraction is the film coverage theta_film alone, and each reaction removes
+    # one polymer unit: one carbon plus the local film F/C ratio (capped at 2,
+    # the COF2 stoichiometry; the remainder leaves as CO). Scaling the carbon by
+    # the film composition x_c as well double-counts the composition: p_ox is a
+    # per-cell probability that already subsumes which atom the O lands on. That
+    # spurious factor throttled the channel by 1/x_c = 2.7x at the film
+    # composition the evolution runs actually reach (F/C = 1.69), which is why
+    # a +48% change in p_ox moved the neck only +11%.
+    # See RESULTS_O_CHANNEL_2026-08-04.md.
+    ox_c = params.oxidation_probability * fluxes.oxygen_flux * theta_film
     f_per_ox_c = _guarded_ratio(state.n_f_film, state.n_c_film, 2.0)
     ox_f = ox_c * f_per_ox_c
     # Ion-driven mixing of film content into the layer (Humbird-Graves).

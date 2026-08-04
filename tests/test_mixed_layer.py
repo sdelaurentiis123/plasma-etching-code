@@ -123,8 +123,15 @@ def test_oxygen_thins_film_and_moves_clog_boundary():
             for j_o in (0.0, 2.0e21)]
     assert lean[1] == pytest.approx(lean[0], rel=0.1)
 
+    # Probe flux raised 1.0e21 -> 2.0e21 when the O channel was un-throttled:
+    # Krueger's p_ox row is per collision with exposed polymer, so removing the
+    # spurious composition factor strengthened O etching by 1/x_c = 2.69x and
+    # moved the clog boundary up by the same factor in precursor flux. The
+    # asserted physics is unchanged (a boundary exists; more O rescues it) —
+    # only the probe point tracks the corrected channel. See
+    # RESULTS_O_CHANNEL_2026-08-04.md and tests/test_o_channel_budget.py.
     def clogs(j_o):
-        fluxes = SurfaceFluxes(1.0e21, 2.0e20, j_o, 6.0e18, 1000.0)
+        fluxes = SurfaceFluxes(2.0e21, 2.0e20, j_o, 6.0e18, 1000.0)
         return steady_state(fluxes).ledger_residuals.get("clogged", False)
 
     assert clogs(2.0e21) and not clogs(8.0e21)

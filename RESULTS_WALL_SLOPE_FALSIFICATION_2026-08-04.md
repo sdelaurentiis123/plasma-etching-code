@@ -151,3 +151,15 @@ face, and compare O-removal / deposition against the 0.195 implied by his
 Table-I fluxes.  A ratio far below 0.195 confirms a throttled O channel — the
 single mechanism that matches both the depth signature and Krüger's own
 statement about what controls necking.  This needs one probe extension, no box.
+
+## Outcome of that test (2026-08-04)
+
+Run and answered in `RESULTS_O_CHANNEL_2026-08-04.md`.  The O channel *was*
+throttled — by 2.69×, from a per-cell probability applied per atom — and the fix
+is a one-line removal of a spurious composition factor, with no constant
+changed.  But the budget arithmetic that the corrected ratio makes possible also
+bounds it: the fix closes **15 %** of the top-band excess (10.8× → 9.4×), and
+Krüger's top-band removal must be ~91 % of his deposition against our ~20 %.
+The remaining ~0.71 × deposition of unexplained removal sits at the grazing
+ion-removal law on the 86-89° lip faces — the [VERIFY] this document already
+carried.  The graded box run should wait for that audit.
