@@ -243,6 +243,15 @@ def _threshold_power_yield(energy_eV, p0, threshold_eV, reference_eV, exponent):
 _KRUEGER_CLASS1_B = 9.3
 _OXIDE_CLASS1_B = 1.7
 
+# Sticking of THERMAL atomic F into the bare mixed layer.  Krueger's mechanism
+# has no thermal-F-on-bare-oxide row at all: every `SiO2(s) + F` entry is the
+# ion F+ (L5905-5909), and thermal F only fluorinates an already-complexed site
+# at p = 0.1 (L6548-6555).  Inert for his gas mix (Table 6.1 has no atomic F),
+# so this constant is a no-op on every Krueger result; isolated here because it
+# is the lever on the Gray-1993 half-rise position for F-bearing chemistries
+# (RESULTS_ANGULAR_CONVENTION_2026-08-05 §7).
+_THERMAL_F_STICKING = 1.0
+
 
 def _class1_shape(cosine, b):
     cos_t = np.clip(np.asarray(cosine, dtype=float), 0.0, 1.0)
@@ -257,6 +266,19 @@ def _angular_physical_sputter(cosine):
 def _angular_oxide_sputter(cosine):
     """Class 1 on the oxide/mask rows, bounded by in-chemistry measurement."""
     return _class1_shape(cosine, _OXIDE_CLASS1_B)
+
+
+def _complex_energy_factor(e_iface, eps_dep, ref_dep_140):
+    """Energy scaling of the complex (chemically-enhanced) removal channel.
+
+    Default is the ZBL deposited-energy shape eps(E)/eps(140) -- the K24-DEKNOB
+    result that retired the fitted yield-scale knob and is validated against the
+    power sweeps.  Krueger's own row reads `0.1471 35 1 140 2`, i.e. the
+    threshold-power form (E-35)/(140-35) with n=1; both are sourced, and
+    RESULTS_LIMITING_REGIME_2026-08-05 §3 records the choice as open.  Isolated
+    here so a model-space solve can swap it without touching the call sites.
+    """
+    return np.asarray(eps_dep, dtype=float) / ref_dep_140
 
 
 def _angular_chemical_sputter(cosine):
@@ -368,7 +390,9 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         # Appendix-B angular classes: SiO2CF(s)+Ar+ is class 2, SiO2(s)+Ar+ and
         # AC(s)+Ar+ are class 1 (RESULTS_LIP_REMOVAL_AUDIT_2026-08-04).
         kernel_complex = _segment(
-            0.1471 * atom_flux * atom_eps / ref_dep_140 * atom_chem_ang)
+            0.1471 * atom_flux
+            * _complex_energy_factor(atom_e_iface, atom_eps, ref_dep_140)
+            * atom_chem_ang)
         atom_kress_ox = _angular_oxide_sputter(atom_cos)
         kernel_bare = _segment(atom_flux * np.asarray(_threshold_power_yield(
             atom_e_iface, 0.0852, 70.0, 140.0, 1.0)) * atom_kress_ox)
@@ -398,8 +422,10 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         kernel_mix = fluxes.ion_flux * energy_ratio
         kernel_xl = fluxes.ion_flux * np.maximum(
             np.asarray(fluxes.ion_energy_eV, dtype=float) - e_iface, 0.0)
-        kernel_complex = (0.1471 * fluxes.ion_flux * np.asarray(
-            eps_dep, dtype=float) / ref_dep_140 * chem_ang_scalar)
+        kernel_complex = (0.1471 * fluxes.ion_flux
+                          * _complex_energy_factor(e_iface, eps_dep,
+                                                   ref_dep_140)
+                          * chem_ang_scalar)
         kress_ox_scalar = _angular_oxide_sputter(cos_scalar)
         kernel_bare = fluxes.ion_flux * np.asarray(_threshold_power_yield(
             e_iface, 0.0852, 70.0, 140.0, 1.0)) * kress_ox_scalar
@@ -492,8 +518,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         np.asarray(state.n_f, dtype=float) / _MONOLAYER_AREAL_M2, 1.0)
     # Direct F where the film is open, Langmuir (1 - theta) sticking; the
     # reflected remainder never enters the ledger.
-    f_direct = (fluxes.fluorine_flux * (1.0 - theta_film)
-                * (1.0 - theta_f_layer))
+    f_direct = (_THERMAL_F_STICKING * fluxes.fluorine_flux
+                * (1.0 - theta_film) * (1.0 - theta_f_layer))
     # Direct precursor chemisorption into the layer where the film is open
     # (the Krueger complex-formation channel): fluorine arrives bound to
     # carbon and both enter the layer ledgers, site-limited like f_direct.
