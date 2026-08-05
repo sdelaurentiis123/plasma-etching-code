@@ -77,10 +77,14 @@ closure.  The mouth residual shrinks by the same factor it predicted.
 ## Still open
 
 - Floor energetic delivery (above) — the depth gate.
-- The ∠=2 roll-off *shape* stays `[VERIFY]`: Huang (`huang_thesis.txt`
-  L2295-2296) and Huard (`huard_chad_phd_thesis.txt` L3020) state only
-  "unity for normal incidence and angles up to 45°, with a monotonic roll-off
-  to zero probability at grazing incidence"; no source reprints the table.
+- The ∠=2 roll-off *shape* is downgraded from `[VERIFY]` to a quantified
+  approximation: the Chang & Sawin curve has since been digitized and our
+  class-2 form tracks it within **0.065 absolute** (see
+  RESEARCH_VERIFY_HUNT_2026-08-05.md).  No change needed.  The stated
+  properties remain sourced — Huang (`huang_thesis.txt` L2295-2296) and Huard
+  (`huard_chad_phd_thesis.txt` L3020): "unity for normal incidence and angles
+  up to 45°, with a monotonic roll-off to zero probability at grazing
+  incidence".
 - 60 s runs at dx = 10 nm stop on a 2-cell mask sliver (remeshing artifact,
   ml19 at t = 46.2 s); a sub-resolution fragment reabsorption rule is needed
   before an endpoint run can complete.
