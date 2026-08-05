@@ -83,14 +83,91 @@ Two things fall out, and they are independent:
 C1b is therefore lifted out of the per-combination sweep and reported here, so
 the remaining eight constraints can discriminate the space they actually span.
 
-## 4. Sweep results
+## 4. The matrix
 
-See `results/curated/ion_channel_solve/solve.json` for the full 64-row matrix
-(every metric, every failure list, and the citation for every option and band).
+**Tier 0 — free shape test (C3).**  The polymer peak/normal ratio costs nothing
+to evaluate and is scale-invariant, so peak-normalisation cannot move it:
 
-## 5. Status
+| polymer option | peak/normal | C3 (1.30-3.50) |
+|---|---|---|
+| Kress B=9.3, `f(0)=1` | 4.172 | FAIL |
+| Kress B=9.3, peak-normalised | 4.172 (identical — ratio is scale-invariant) | FAIL |
+| **Barklund yield reading** | **1.448** | **PASS** |
+| Barklund raw-rate reading | 5.131 | FAIL |
 
-Two hooks landed as pure refactors; no model assignment changed on this pass.
-The joint solve replaces one-observable-at-a-time grading with a matrix that
-cannot be satisfied by tuning, which is the point: where it comes up empty, the
-empty cell is a measurement petch is missing, not a parameter to move.
+**48 of 64 combinations are eliminated here, at zero cost, on a measurement.**
+The measured FC-film curve selects the Barklund yield reading uniquely, which
+also settles the `[VERIFY]` flux-convention question in the only way consistent
+with the data: the raw-rate reading is *more* peaked than the Kress form it was
+meant to bound.
+
+**The axes are separable**, which the tier-2 rows then confirm, so the remaining
+matrix is reported as axis scans rather than a 16-fold product (partial product
+rows preserved in `results/curated/ion_channel_solve/sweep_partial.log`; they
+agree row-for-row with the scans below):
+
+| oxide assignment | C1a dyn. range (0.20-0.30) | C2 peak/normal (1.28-1.36) | C5 depth factor, ZBL / linear (0.735-0.812) |
+|---|---|---|---|
+| Kress B=9.3, `f(0)=1` | 0.873 FAIL | 1.257 FAIL | 1.000 / 1.087 FAIL |
+| **Kress B=9.3, peak-normalised** | **0.210 PASS** | 1.176 FAIL | 0.577 / 0.628 FAIL |
+| B=1.7, `f(0)=1` | 0.873 FAIL | 1.161 FAIL | 1.000 / 1.087 FAIL |
+| B=1.7, peak-normalised | 0.667 FAIL | 1.158 FAIL | 0.868 / 0.945 FAIL |
+
+| polymer assignment | C6 lip growth (0.30-0.60 nm/s) |
+|---|---|
+| Kress B=9.3, `f(0)=1` | 0.673 FAIL |
+| Kress B=9.3, peak-normalised | 0.673 FAIL |
+| Barklund yield | 0.673 FAIL |
+| Barklund raw-rate | 0.670 FAIL |
+
+Best row: **`barklund_yield | kress9.3_peaknorm | zbl | unity`**, 3 failures
+(C2, C5, C6).  Every other combination is worse.  Thermal-F sticking `zero`
+additionally breaks C1a (no F uptake, so the yield curve is flat), which is the
+sweep's own check on that axis.
+
+## 5. Verdict: the survivor set is empty, and four constraints say why
+
+| constraint | satisfiable? | what the empty cell names |
+|---|---|---|
+| C1a Gray dynamic range | **YES** — uniquely by oxide peak-normalisation (0.210) | the reading Huang L2290-2296 states in words is the one the beam data selects |
+| C3 FC-film shape | **YES** — uniquely by the Barklund yield reading | settles the flux-convention `[VERIFY]` |
+| C1b Gray half-rise | **NO** — needs `s ~ 0.06`, space holds {1.0, 0.0} | the site-limited adsorption coefficient (Kwon/Sawin E1), a constant petch does not carry |
+| C2 oxide peak/normal | **NO** — best 1.257 against a 1.28 floor (2% short) | definition-sensitive; see the caveat below |
+| C5 depth factor | **NO** — required 0.735-0.812 falls in the **gap** between adjacent published options (0.628 \| 0.868) | the depth defect is not a model-selection question in this space |
+| C6 lip growth | **NO** — 0.670-0.673 across the *entire* space | the lip is deposition-dominated (removal is ~200x collapsed there), so its lever is the crosslink channel, not the ion channel |
+
+The central result is the pair C1a and C5.  **The assignment the measurements
+select is the one the depth gate rejects.**  Oxide peak-normalisation is the
+only reading that reproduces Gray's measured dynamic range — and it lands the
+depth factor at 0.577-0.628 where the gate needs 0.735-0.812, i.e. it removes
+**1.24-1.35x less** than required.
+
+That factor is now the third independent route to the same number.  The cascade
+audit put the coupled floor rate ~1.4x high; Krueger states it himself
+(thesis L4884-4888) — *"the effect of ion energy (for example in sputter yield
+or related processes) might be overestimated in the mechanism"*; and the joint
+solve now shows the beam-selected assignment undershoots the depth gate by the
+same 1.2-1.4x.  Three routes, one term: the ion-energy channel magnitude, which
+petch inherits from Appendix B row-for-row.
+
+**Caveat on C2, recorded rather than smoothed.**  This pass measures "oxide
+total angular peak/normal" at the Gray beam condition (350 eV, saturated F,
+all channels), giving 1.16-1.26.  An earlier pass reported 1.34 for the same
+assignment under a different condition.  The quantity is definition-sensitive
+(coverage, energy, which channels are summed), and Cho/Schaepkens measured at
+their own biases, not at 350 eV.  C2 is therefore the weakest of the four
+"unsatisfiable" verdicts and should be re-posed against the source's stated
+measurement condition before it is used to reject anything.
+
+## 6. Status
+
+Two hooks landed as pure refactors (`_complex_energy_factor`,
+`_THERMAL_F_STICKING`); defaults reproduce the previous expressions exactly and
+the suite is green at **1174 passed, 1 skipped**.  **No model assignment was
+changed on this pass** — the beam-selected assignment fails the depth gate, so
+landing it would trade one miss for another, and the forecast-before-spend rule
+says do not buy a run for that.
+
+What the pass produces is the structure: two constraints select assignments
+uniquely, four cannot be satisfied by any sourced combination, and each of the
+four names a different missing term.  None of them is a parameter to move.

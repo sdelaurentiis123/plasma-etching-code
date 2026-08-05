@@ -1,0 +1,21 @@
+Warp 1.14.0 initialized:
+   CUDA not enabled in this build
+   Devices:
+     "cpu"      : "arm"
+   Kernel cache:
+     /Users/stanislavdelaurentiis/Library/Caches/warp/1.14.0
+model space: 64 sourced combinations
+
+baseline front rate 17.379 nm/s (= 60 s depth ~1066 nm, +29%)
+
+tier 0 (free shape test, C3): 48 eliminated, 16 advance to the coupled evaluation
+
+[ 1/16] barklund_yield|kress9.3_f0=1|zbl|unity                         fails=4 C1a,C2,C5,C6
+[ 2/16] barklund_yield|kress9.3_f0=1|zbl|zero                          fails=4 C1a,C2,C5,C6
+[ 3/16] barklund_yield|kress9.3_f0=1|linear_n1|unity                   fails=4 C1a,C2,C5,C6
+[ 4/16] barklund_yield|kress9.3_f0=1|linear_n1|zero                    fails=4 C1a,C2,C5,C6
+[ 5/16] barklund_yield|kress9.3_peaknorm|zbl|unity                     fails=3 C2,C5,C6
+[ 6/16] barklund_yield|kress9.3_peaknorm|zbl|zero                      fails=4 C1a,C2,C5,C6
+[ 7/16] barklund_yield|kress9.3_peaknorm|linear_n1|unity               fails=4 C1a,C2,C5,C6
+[ 8/16] barklund_yield|kress9.3_peaknorm|linear_n1|zero                fails=4 C1a,C2,C5,C6
+[ 9/16] barklund_yield|b1.7_f0=1|zbl|unity                             fails=4 C1a,C2,C5,C6
