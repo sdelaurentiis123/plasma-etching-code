@@ -1,0 +1,2063 @@
+# Gray, D.C., 'Beam simulation studies of plasma-surface interactions in fluorocarbon etching of Si and SiO2', PhD thesis, MIT Dept of Chemical Engineering (1993). MIT DSpace handle 1721.1/13187, bitstream 26680838-MIT.pdf (32.3 MB, 618 pages, image-only).
+# OCR (tesseract --psm 6, pdftoppm -r 250 -gray) of selected pages. PRINTED page number == PDF page number in the body.
+# Sections captured: 5.1 Ar+ Sputtering of Si and SiO2 (155-163); 5.3 Yield Studies of Ar+/F Etching (163-190); 5.6 'Site' Models (229-256); 6.4 'Site' Models of CF2 Radical Interactions (300-312).
+
+===== PRINTED/PDF PAGE 155
+4.4 Summary
+
+Two ion sources were characterized and utilized in this thesis work for the production of
+high current, broad ion beams over an energy range of 20-500 eV. A 1-cm Kaufman ion source
+was employed for most of this thesis work, but was unable to produce reasonable ion fluxes at
+energies below 100 eV. Filaments in the Kaufman source required replacement after every
+experimental set, greatly limiting the amount of data which could be taken. A CECR source was
+used for production of 20 eV ions for near-threshold etching studies, and for the production of
+CF,’ ions from a CF, discharge. A differential pumping system was constructed to reduce main
+chamber gas loads due to these ion sources, either of which is compatible for use in the
+differentially pumped mode. Difficulty was encountered in transporting CECR ions out of the
+collimating orifice.
+
+155
+
+===== PRINTED/PDF PAGE 156
+Chapter 5
+Ion-Enhanced F Etching of Si and SiO,
+
+In the set of experiments discussed in this chapter, we have studied the Ar* ion-enhanced
+
+etching of Si and SiO, by atomic fluorine (F), as a function of the relative fluxes of neutral-to-
+
+| ionic species, and the incident ion energy. Although it is well established that atomic fluorine is
+| the primary etchant species in the fluorocarbon etching of silicon, F interactions with SiO,
+| surfaces have been less well studied, and some researchers have contended that CF, type radicals
+are the dominant etchants for SiO, in fluorocarbon plasma processes (see Chapter 7), Coburn and
+
+Winters (1979, 1985, 1987] have conducted a number of studies of inert ion-enhanced XeF,
+
+etching of Si and SiO, in an effort to understand the fundamental mechanisms by which high
+
+energy ions (>500 eV) enhance F-surface chemistry, and the types of products which are evolved.
+
+Other studies of this system [Haring et al., 1982; Houle, 1987] have sought to measure the energy
+
+distribution of products evolved at KeV ion bombardment energies. At the start of this thesis
+
+work, very little information was available conceming ion-enhanced surface kinetics at low ion
+bombardment (20-500 eV) energies representative of plasma processes. Harper et al. [1981] and
+
+Steinbrukel [1989] have made observations of surface etching kinetics of low energy reactive ions
+
+such as CF," and F’, but these studies do not allow deconvolution of the neutral flux effects from
+
+the ion bombardment effects. The goal of this thesis work was to measure Ar‘ enhanced F-Si and
+
+F-SiO, steady-state surface kinetics using F and ion fluxes representative of the plasma processing
+
+environment and in the energy range of interest to plasma processing (20-500 eV). This kinetic
+
+data, together with studies reported in the literature, were used to construct simple models of the
+ion-enhanced F chemistry which capture the functional dependence of the major variables.
+
+Models of physical sputtering and thermal F etching of Si and SiO, available in the literature were
+
+156
+
+===== PRINTED/PDF PAGE 157
+|
+incorporated self-consistently, to capture the correct limiting behaviors. Product distributions in
+these systems were studied mass spectrometrically, to determine the qualitative effect of relative
+| species fluxes and energies on the product spectrum. XPS studies were conducted to determine
+the chemical nature of the etching surfaces, and to allow model verification.
+a
+5.1 Ar* Sputtering of Si and SiO,
+In the effort to develop quantitative models of ion-enhanced F etching, it was necessary
+to incorporate models for the limiting processes of F atoms alone, or Ar‘ ions alone impinging
+on the Si and SiO, surfaces. We first consider the case of Ar* ion etching alone (F/Ar* --> 0),
+or "physical sputtering", of the substrate material. Sigmund [1969] has developed analytical
+solutions to the problem of sputtering of amorphous or polycrystalline homogeneous materials in
+the medium (0.1-1 KeV) and high (>1 KeV) energy ranges through approximate solution to the
+Boltzmann equation. In this theory, the binary collision cascade which results from a high energy
+particle (ion) impinging upon the surface results in the momentum transfer back toward the
+surface, and the "sputter removal" of particles which can overcome their local binding energies.
+When the incoming particle energies are <1 KeV, the binary particle interactions are well
+described by a Bom-Mayer potential, and sputtering yield is found to be linear in the incoming
+" particle energy, E,. In this "linear cascade regime", the sputtering yield, S, is most simply
+expressed as:
+S(E) = C,, 5,(E) (5-1)
+where C,, is a constant which depends on the relative masses of the projectile (p) and target (t)
+and is inversely proportional to the surface binding energy, U,, according to,
+157
+
+===== PRINTED/PDF PAGE 158
+C, = at (5-2)
+4n’U,
+a is determined as a function of the relative masses as summarized by Winters [1976]. S,(E) is
+the nuclear stopping power as determined from the Bom-Mayer interaction potential,
+4M.M, E
+SE) = 4MM, E (5-3)
+(M,+M,?
+It is common to express the nuclear stopping potential in terms of a reduced bombardment energy,
+e=E/E,,, as described by Zalm [1984]. Details concerning the linear-cascade regime theory may
+be found in several sputtering treatises [Winters, 1976; Behrisch, 1981], In regards to this thesis
+work, what is most important to note is that the linear cascade theory does not accurately reflect
+measured physical sputtering yields when the incoming ion energies fall below 200 eV or so.
+This shortcoming is due to the lack of treatment of sputtering "threshold" effects when the
+incoming particle energies become comparable to target-surface binding energies.
+
+In the regime of interest to plasma processing, the physical sputtering yield of polysilicon
+is observed to be linear in Ar’ flux, and ihe energy scaling has been predicted through extension
+of the Sigmund model to the low energy regime as suggested by Steinbrukel [1989],
+
+V(E) = C, $=) fEyE) (5-4)
+P pen Ey th’
+In this expression, the parameter C,, is the same function of the ion mass and incidence angle, and
+of target physical parameters such as atomic density, target atom mass, and surface binding
+158
+
+===== PRINTED/PDF PAGE 159
+energy. Steinbrukel recognized that using the approximations for S,(E/E,,) and f(E,,, E) suggested
+by Wilson et al.[22] and Mitsunami et al.[23] respectively for low energy sputtering, gives a linear
+proportional relationship between ion flux and Si etching rate,
+E
+S,(—) « EPS (5-5)
+E,,
+E 0.5
+KE wE) = 1 - (4) (5-6)
+E,
+
+Ry Yq = A (Ep-Ey) I (5-7)
+This expression describes our total sputtering rate of silicon by normally incident Ar* ions as a
+function of ion flux, ion energy, and the sputtering threshold energy. In the case of amorphous
+and polysilicon etching, available data is well fit by the parameters shown in Table 5-1. Zalm
+
+Table 5.1 Si and SiO, Low Energy Sputtering Model Parameters
+A Ey
+Si 0.0337 ~20 eV
+SiO, 0.0139 ~18 eV [ref. Chapman, 1980]
+[1984] has derived a similar expression for the low energy sputtering regime, and notes that
+sputtering yield in this regime is to within 20% a function of particle energy only, and not particte
+type (i.e. atomic number, Z), Comparison of several recent sets of data for Ar* sputtering of
+polysilicon are compared to the functionalities predicted by equation (5-7) versus the linear
+cascade theory of Sigmund [1969] in Figure 5-1. It is readily apparent that the available data is
+159
+
+===== PRINTED/PDF PAGE 160
+3
+a)
+Gray, 1992
+2.5 F fin Chaprpan, 1980
+a Oostra ft 986]
+< 2 Steinbrukel [1989]
+Q
+2
+15
+2
+rs
+8 fa
+~ * A :
+0.5 * A 0. |(CO
+O
+% AoQ
+0 Ls A Oo
+0 200 400 600 800 1,000 1,200
+Ar+ Ion Energy (eV)
+b) 3
+Gray, 1992 A=0.0337
+2.5 Fin Chaprpan, 1980 Eth= 20 eV
+Z ; Oostrg $1986]
+teinbrukel [1989
+< inbrafgl (1985)
+2
+ao]
+2 1.5
+~
+i
+= 1
+a
+on *
+. up VN
+0.5 x D5 0 0
+0 oO
+0 5 10 15 20 25 30 35
+EiA0.5 .
+Figure 5-1. Comparison of the a) Sigmund [1969] and b) Steinbrukel
+[1989] models for the low energy Ar+ sputtering of silicon.
+160
+
+===== PRINTED/PDF PAGE 161
+more accurately represented by equation (5-7), although the experimental spread is still appreciable
+due to inaccuracies in the various sputtering yield measurement methods, Some data points from
+our experiments are shown for comparison, where the measurement of reasonable sputter yields
+demonstrates the accuracy of our ion flux measurement technique.
+Variations in sputtering yield or reactivity of single crystal Si <100> versus polysilicon
+were not measurable within the sensitivity of our methods, and are generally important only in
+high energy sputtering with light ions where channeling and implantation effects become
+important, In our sputtering regime (>10'* cm?s"') we expect rapid amorphization of the single
+crystal under ion bomba:dment, washing out the crystallographic effects. Extension of the
+Sigmund theory to the physical sputtering of composite materials such as SiO, is not rigorous,
+However, for lack of a better model, we have applied an expression analogous to equation (5-7)
+to describe SiO, etching yield as a function of Ar’ ion flux anu energy over the limited range
+studied, as described by the parameters in Table 5-1. As demonstrated in Figure 5-2, equation |
+(5-7) was again found to give a much more accurate representation of SiO, sputtering yields as
+a function of incoming Ar’ ion energy. Agreement of our sputtering data with that found in the
+literature is excellent. Based on these observations, equation (5-7) was employed as our working
+model for the physical sputtering component of Ar* enhanced F etching, where the appropriate
+parameters in Table 5-1 were employed for the silicon and SiO, systems,
+Even in the relatively low ion energy regime investigated in this thesis work, 20-500 eV,
+the bombardment energies are 1-2 orders of magnitude larger than the thermal activation barrier
+to Si-F, bond formation, typically 0.1-leV. Consequently, it is appropriate to think of the
+incoming ions as providing the "activation energy" which promote surface bond formation, and
+drive the etching chemistry. Mechanistically, the bombarding ions are thought to enhance Si-F
+bond formation through the ballistic "mixing" action of the collision cascade induced by the
+161
+
+===== PRINTED/PDF PAGE 162
+a) 1
+Gray, 1992
+0.8 in Chapman, 1980
++ Oostra [1986]
+) < (Kea [1989]
+OQ 06
+a
+3
+2
+0.4 A
+2 ray
+=
+a *o “A
+? 0.2 yee
+o yy B ?
+@ Los
+o eet
+0 200 400 600 800 1,000 1,200
+Ar+ Ion Energy (eV)
+b) 1
+Gray, 1992 A= 0.0139
+08 Hin Chapman, 1980 Eth= 18 eV
+os
+Oostra [1986]
+< fot
+8 os | teinbrukel [1989]
+3°
+ae
+> 04 A
+= '
+2 a
+2 *
+B. roe
+4 02 a
+le : ‘ A
+£\
+o O o A 7
+0 =! exh Or)
+0 5 10 15 20 25 30 35 ‘
+EiA0.5
+Figure 5-2. Comparison of the a) Sigmund [1969] and b) Steinbrukel
+[1989] models for the low energy Ar+ sputtering of SiO2.
+162
+
+===== PRINTED/PDF PAGE 163
+bombarding ions as suggested by Winters [1988]. This "ion mixing" action prevents the formation
+: of a thick SiF, overlayer on the substrate surfaces, and facilitates the rapid transport of surface F
+into the lattice via direct knock-on collisions, or damage-enhanced diffusion (Mitzutani et al.,
+1985]. The depth over which 200-1000 eV ion bombardment can cause appreciable lattice |
+disturbance, or substrate damage, has been empirically correlated by Kaufman et al. [1982],
+l- 1g, + 24) (5-8)
+P,
+where E is the ion energy in eV, W, and p, are the atomic weight and specific gravity of the
+target, and Z represents the atomic numbers. This length scale, /, roughly defines the "ion mixing
+zone" as shown schematically in Figure 5-3, and determines the length scale over which the ion-
+enhanced chemistry is operative, For Ar’ bombardment of silicon and SiO, in the energy range
+of 20-500 eV, damage depth estimates range from 1 to 15 A, and 5 to 35 A respectively.
+Mitzutani [1985] has shown that 1 keV Ar*/Cl, etching of Si<100> results in significant Ar and
+Cl incorporation (>10'* mols/cm?) up to about 100 A in depth. Based in these observations, a
+good rule of thumb is that the "mixing zone" depth increases about | monolayer (~5 A) per 50
+eV increase in ion energy in this regime. At ECR ion energies of =20 eV, application of the "ion-
+mixing" concept is tenuous since the ion energies are on the order of the Si lattice displacement
+energy (=13 eV), and little lattice displacement damage is expected, lon-enhancement
+mechanisms in this regime have not yet been investigated.
+5.2 Thermal F Etching of Si and SiO,
+The second limiting process we must consider is that of F atoms alone impinging on a
+silicon or SiO, substrate (F/Ar+ -->e°), where only thermal or "spontaneous" etching by fluorine
+163
+
+===== PRINTED/PDF PAGE 163
+bombarding ions as suggested by Winters [1988]. This "ion mixing" action prevents the formation
+: of a thick SiF, overlayer on the substrate surfaces, and facilitates the rapid transport of surface F
+into the lattice via direct knock-on collisions, or damage-enhanced diffusion (Mitzutani et al.,
+1985]. The depth over which 200-1000 eV ion bombardment can cause appreciable lattice |
+disturbance, or substrate damage, has been empirically correlated by Kaufman et al. [1982],
+l- 1g, + 24) (5-8)
+P,
+where E is the ion energy in eV, W, and p, are the atomic weight and specific gravity of the
+target, and Z represents the atomic numbers. This length scale, /, roughly defines the "ion mixing
+zone" as shown schematically in Figure 5-3, and determines the length scale over which the ion-
+enhanced chemistry is operative, For Ar’ bombardment of silicon and SiO, in the energy range
+of 20-500 eV, damage depth estimates range from 1 to 15 A, and 5 to 35 A respectively.
+Mitzutani [1985] has shown that 1 keV Ar*/Cl, etching of Si<100> results in significant Ar and
+Cl incorporation (>10'* mols/cm?) up to about 100 A in depth. Based in these observations, a
+good rule of thumb is that the "mixing zone" depth increases about | monolayer (~5 A) per 50
+eV increase in ion energy in this regime. At ECR ion energies of =20 eV, application of the "ion-
+mixing" concept is tenuous since the ion energies are on the order of the Si lattice displacement
+energy (=13 eV), and little lattice displacement damage is expected, lon-enhancement
+mechanisms in this regime have not yet been investigated.
+5.2 Thermal F Etching of Si and SiO,
+The second limiting process we must consider is that of F atoms alone impinging on a
+silicon or SiO, substrate (F/Ar+ -->e°), where only thermal or "spontaneous" etching by fluorine
+163
+
+===== PRINTED/PDF PAGE 164
+Ar ( 0,<Ei>)
+F
+F F
+F
+F F_F
+on F xP) F RY F - PX yt
+Mixing Zone Saad OF RY P EF RS x Surface "Proper"
+O Vo, Ax R 7% oO |
+IN (SA)*EIS0O GO OFO 09 0 CO OF OArO
+O oArO O O O OFO O
+rr 0000 0 0 0 C0
+(@) (0) (2) 1 (@) ©) ©) (@) @ ©
+BukLatiee O O O O 0 0 0.0 0 0
+} OoO00060C0C0DWUCUCUOOUCUCOODUCOLCO
+0000 00 00 0 0
+000060€~Cc0d6Um0DUUCOUCON CO
+f (
+(*): Si* dangling bond
+F: gas phase atomic F
+F(p): physisorbed F
+Ar+; bombarding Ar ions
+Ar: implanted argon
+O: silicon lattice atom
+Figure 5-3. Schematic description of the "ion-mixing zone" created
+at the near-surface due to the ballistic mixing action of the
+bombarding ions. 164
+
+===== PRINTED/PDF PAGE 165
+atoms can occur. Several groups have measured reaction rates of atomic ground state ?P) F atoms
+with silicon [Flamm et al., 1981; Vasile and Stevie, 1982, Ninomiya et al., 1985], but the
+measured reaction probabilities vary due to inaccuracies in etching rate measurement and
+calculation of F atom fluxes at the sample surfaces. As recently reviewed by Kojima et al. [1991],
+the etching rate of lightly doped silicon (<10'? dopant atoms/cm’) is well described by the
+Arrhenius form
+R, ~ k,T"Q, exp(—"2) (5-9)
+k,T
+where Q, is the atomic fluorine flux (mols/cm?-s) at the substrate surface. Neither the range of
+data nor the resolution of available measurements is sufficient to determine the exponent, n, which
+is taken as zero for our purposes. It is also important to note that atomic F etching shows no
+preference to crystallographic orientation since the mechanism involves the formation of a thick
+SiF, overlayer (5-10 monolayers), which obscures the crystallographic planes on single crystal Si.
+The Arrhenius rate parameters extracted from the three major studies cited are given in Table 5-2,
+where the F flux range investigated is also cited. Within the accuracy of the methods employed,
+Table 5.2 Arrhenius Rate Parameters for F Etching of Si and SiO,
+Reference Q, range reported __ k, E,
+Flamm et al. [1981] 2.3x10'9-1.1x10" 3,59x10" -0,108+0,005
+Vasile et al. [1982] 2.5x10"*-5,0x10" 1.65x10"% -0,09 to -0.15
+Ninomiya et al. [1985] 1.6x10'%-5.2x10"8 2.01x10"4 not measured
+an activation energy of 0.1 eV is observed in the F-Si etching rate expression. Kojima [1991]
+165
+
+===== PRINTED/PDF PAGE 166
+points out that this activation energy is probably indicative of the barrier to F diffusion through
+the SiF, overlayer. Houle [1983, 1984] has shown that F diffusion through the SiF, layer may
+be driven by Coulombic forces on F anions work which described the influence of large n* and
+p’ dopant concentrations, and the effects of UV-light stimulation.
+
+. The pre-exponential factors reported in Table 5-2 vary over an order of magnitude, and
+reflect uncertainties in measured F atom fluxes and etching rates. The pre-exponential factor
+reported from the studies of Ninomiya et al. [1985] was back-calculated from a plot of measured
+silicon etching yield versus F atom flux using the activation energy reported by Flamm et al.
+[1981], and is subject to large uncertainty. It is important to consider that measurement of F atom
+reaction probabilities on silicon involve the convolution of the F atom physisorption/desorption
+problem with the F-Si reaction chemistry. It is typical in these reaction rate studies to define an
+apparent Si-F reaction probability, n, assuming the production of SiF, as,
+
+ny
+
+SUF4 QO,
+where Ng, is the observed silicon etching rate in mols/cm?-s. The actual surface physisorption
+concentration, n,{p), on the SiF, surface can be estimated using the Langmuir form to relate the
+"coverage fraction to the impingement flux, J,.
+I
+MAP) Qe (5-11)
+ny 1 + b/Q,
+where n,, is the monolayer saturation coverage, and b’ is determined by the F physisorption
+energy [Adamson, 1982]. The F physisorption energy on an SiF, surface is expected to be very
+166
+
+===== PRINTED/PDF PAGE 167
+low (<5 kcal/mole), such that the parameter h’ is on the order of 10% cm?-s/mol. As a result,
+surface F physisorption coverages are expected <10% at Q,Si0" mols/cm?-s, under which
+conditions we are in the low pressure limit and n,(p)=n,, b’Q,. Substituting into equation (5-10),
+we find that the apparent Si-F reaction probability and F surface covcrage are related by
+nn b! :
+sure * Tp) (5-12)
+In this low pressure limit, Arrhenius parameters can be safely regressed from the apparent reaction
+probability data without the convolution of surface coverage effects. However, it is obvious that
+at high Q, fluxes, n,(p) and Q, are not longer linearly related, such that surface coverage effects
+and possible F atom recombination reactions will convolute the apparent reaction probability
+calculated according to equation (5-10), In the extreme limit of near saturation F(p) coverage, the
+apparent reaction probability with appear to fall-off as 1/Q, since increasing F impingement flux
+can no longer increase surface coverage. Such effects could explain the discrepancy in pre-
+exponential factors reported by Vasile and Stevie [1982] versus Fiamm et al. [1981] who worked
+at much higher F concentrations, and need to be considered in future studies. For lack of better
+information, we have used the Arthenius parameters reported by Flamm et al. [1981] for
+calculation of spontaneous F-Si etching rates in our work, since the flux range studied was
+representative of plasma processing conditions. Product distributions observed in the thermal
+etching of silicon by F are discussed in Section 5.4.
+Little information was available concerning the spontaneous interaction of atomic F with
+SiO,. Flamm et al. [1979] also performed studies of spontaneous interaction of F with SiO,, and
+found an activation energy of 0.163 eV, and a pre-exponential factor of 7.4x10"*, No other
+167
+
+===== PRINTED/PDF PAGE 168
+quantitative studies of the F-SiO, reaction system are known to us, so the data of Flamm was
+employed for calculation of F-SiO, spontaneous etching rates. Nordine and LeGrange (1976]
+measured F atom loss coefficients on F-passivated SiO, surfaces from which the importance of
+F atom desorption versus recombination may be assessed.
+
+5.3 Yield Studies of Ar‘/F Etching
+
+Ar*/F Etching of Polysilicon
+
+Studies of ion-enhanced etching of silicon and silicon dioxide by fluorine have been
+examined in ihe past with XeF, as a fluorine source, but at much higher ion energies and lower
+ion fluxes than are typical of commercial plasma processes as discussed in Chapter 1. At the start
+of this thesis work, the necessary scaling information to allow the extrapolation of this data into
+higher flux and lower energy regimes was not available. In addition, some controversy has
+evolved conceming the ability of XeF, to emulate the surface flux of atomic fluorine generated
+in a plasma etching process as discussed below. We have avoided this issue by using a well
+characterized flux of microwave-discharge-produced atomic fluorine. Simple two beam
+experiments have been conducted where the F and Ar* fluxes, as well as the ion bombardment
+energy were varied to ascertain their effects on silicon and SiO, etching yield. For the
+
+. experiments described herein, the Ar* ions were always normally incident upon the sample face,
+with the radical beams incident at a 45° angle.
+
+Experimental results conceming the Ar‘/F etching of polysilicon are summarized in
+Figures 5-4 and 5-5, where solid lines represent the results of kinetic models discussed in Section
+5.6. The low flux ratio regime, F/Ar’=0 to 200, is first considered in Figure 5-4 where the
+experimental yield curves show an initial sharp rise in etching yield with the F/Ar* flux ratio, In
+this regime, the Ar’/F etching of silicon is essentially mass-transfer-limited, in the sense that the
+
+168
+
+===== PRINTED/PDF PAGE 169
+a 250-6V
+a A Aoaee
+; 350eV we
+Xs oe 150 eV
+< Qs
+2 oe)
+cB
+a lA
+— 0
+0 40 80 120 160 200
+Flux Ratio (F/Ar+)
+Figure 5-4. Silicon etching yield (Si removed per Ar+) versus F/Ar+
+ratio in the mass-transfer-limited etching regime.
+169
+
+===== PRINTED/PDF PAGE 170
+30
+So = 0.20
+25 1000 eV
+A
+Gerlach-Meyer{1981] 4
+20
+>
+bs] 500 eV
+<
+& Tu etal. [1981]
+ko]
+7 15 a 4
+Re a 350 eV
+oN) 2 >
+R=| 4
+3 250 eV
+aa)
+10 A . 4
+a
+iA . 150 eV
+Uy a
+5 ¥ : 20 eV
+a
+0 &
+0 500 1,000 1,500 2,000
+F/Ar+ Ratio
+Figure 5-5, Silicon etching yield versus F/Ar+ ratio showing the ion-
+flux-limited etching regime at large F/Ar+. Lines shown are fits of
+the surface kinetic model discussed in Section 5.6.
+170
+
+===== PRINTED/PDF PAGE 171
+rate of F atom transport to the substrate is limiting the etching yield per ion. In the fluorocarbon
+plasma processing environment, operation in this regime would be characterized by observation
+of rapid increase in film etching rates with plasma (e.g. CF,) pressure at constant power input.
+As is shown in Figure 5-4, etching yield increase per 100 eV increase in incoming ion energy in
+this regime is insignificant due to the fact that excess surface fluorine is not available to
+participate in ion-enhanced etching reactions. Increase in the yield of physically sputtered silicon
+per 100 eV increase in ion energy is insignificant on this scale. The pure Ar*-silicon physical
+sputtering yields are indicated by the regression of the yield curves to F/Ar*=0, and are in the
+range of 0.1 to 0.4 (Si/Ar*) in the 150 eV to 350 eV energy range.
+
+At sufficiently high F/Ar* ratio, a discrete saturation level is expected for all ion energy
+levels since the number of etching reactions induced by a single ion impacting a fluorine saturated
+surface is finite. The high F/Ar* flux ratio regime (F/Ar*=0-2000) is considered in Figure 5-5,
+where the results of Ar’/XeF, yield studies reported in the literature are shown for comparison,
+XeF,, as discussed below, acts as an equivalent source of 2 F atoms in Ar‘/XeF, silicon etching.
+However, the XeF,/Ar* ratios reported by Tu et al. [1981] and Gerlach-Meyer [1981] were not
+corrected by this factor in Figure 5-5 because of the large uncertainty in their XeF, flux
+measurements. At sufficiently high F/Ar*, the etching yield curves saturate in what we have
+termed the ion-flux-limited regime, Since the ions are providing the activating energy which
+drives the F-Si etching chemistry, this is essentially a reaction-rate-limited regime by analogy to
+the well known Langmuir-Hinshelwood surface kinetic model, where the reaction chemistry is
+thermally driven. The data presented in Figure 5-5 suggests that the transition between the mass-
+transfer-limited and ion-flux-limited regime is a strong function of ion energy due to the increased
+ability of high energy ions to promote surface reactions and enhance F chemisorption through the
+creation of Si” dangling bonds, At high F/Ar*, each 100 eV increment in ion energy greatly
+
+171
+
+===== PRINTED/PDF PAGE 172
+influences the number of etching reactions induced by a single ion because the near-surface region
+
+is highly fluorinated, allowing the excess bombardment energy to be translated directly into F-Si
+bond formation events. It is also interesting to note that in the 20-1000 eV energy range,
+saturation yields (Si per incoming Ar’) are at least an order of magnitude higher than the baseline |
+Ar’ sputtering yields at a given energy. This information is plotted in Figure 5-6, where some
+early researchers in the field defined this ratio as the "chemical enhancement factor". This ratio
+essentially goes to infinity at 20 eV bombardment energies, which is near the silicon physical
+sputtering threshold.
+
+In the fluorocarbon plasma processing environment, operation in the ion-flux-limited
+regime would be characterized by insensitivity of film etching rates to plasma pressure increase
+at constant power input. Conversely, sharp increase in substrate etching rates would be expected
+with increasing input power. The determination of conditions under which these ion-enhanced
+etching systems are mass-transfer versus ion-flux-limited is extremely important to matching the
+appropriate control and response variables in plasma process modeling. In addition, due to the
+wide distribution of ion energies developed in RF diode reactors (Lui et al.,1990), topography
+evolution simulators must incorporate accurate models of F surface coverage effects to ascertain
+whether an incoming ion of given energy can achieve its saturation yield.
+
+A limited number of experiments were performed using XeF, as a fluorine source rather
+than microwave generated atomic F, in order to compare the relative reactivity of these two
+species. The main question was whether XeF, is stoichiometrically equivalent to 2 F atoms
+impinging upon a substrate surface, or is more or less reactive than the stoichiometric equivalent
+F atom flux. This information was necessary to allow comparison to older literature studies of
+Ar’/XeF, etching. Some studies have suggested that XeF, is more reactive than the equivalent 2
+F atoms on clean silicon surfaces due possibly to long surface residence time of an XeF,(p)
+
+172
+
+===== PRINTED/PDF PAGE 173
+100 -—-
+
+so - :
+) :
+5) :
+oS .
+re :
+q Or }
+vo o.,
+
+0
+0 200 400 600 800 1,000 1,200
+Ion Energy (eV)
+
+Figure 5-6. The "Chemical Enhancement Factor" for Ar+/F etching of
+
+silicon relative to Ar+ physical sputtering. Saturation Ar+/F
+
+etching yields were used in the ratio.
+
+173
+
+===== PRINTED/PDF PAGE 174
+physisorbed precursor (Joyce, 1987]. Comparison of Ar*/F and Ar*/XeF, etching of silicon are
+shown in Figure 5-7 for 150 eV and 350 eV energy levels, where XeF, has been assumed to be
+the stoichiometric equivalent of 2 F atoms impinging on the substrate. Within the error bars on
+our yield measurements, this stoichiometric equivalent representation of XeF, is found to be valid.
+Higher flux ratios could not be easily obtained with the solid XeF, source since the room
+temperature vapor pressure is only 4 torr, and the effect of cylinder heating on XeF, stability is
+unknown to us. Figure 5-8 shows another interesting comparison between Ar*/F, Ar’/XeF,, and
+Ar/F, etching of silicon at 250 eV, demonstrating that the XeF, is much more representative of
+the ion-enhanced atomic chemistry than the parent molecular chemistry. The work of Engstrom
+et al. [1988] suggests that the chemisorption of F, on silicon is second order with respect to Si”
+sites, whereas the F chemisorption is obviously first order. As a result, the Ar*/F, etching yields
+at a given energy saturate very rapidly as the availability of adjacent Si” "sites" falls off with
+fluorine surface coverage. The wide separation between the Ar*/F and Ar*/F, yield curves at high
+flux ratios allows us to neglect the parent molecular chemistry in the modeling of fluorocarbon
+plasma processes, where the effective free radical sticking coefficients at high fluorine coverages
+are orders of magnitude higher than those of the parent molecular species. This effect is observed
+all the way down to ECR (=20 eV) energies as shown in Figure 5-9,
+We also studied the effect of substrate temperature and absolute ion flux (at constant
+F/Ar* ratios) in this system. Varying substrate temperature from 25 to 200°C (Figure 5-10)
+revealed no changes in the ion-enhanced silicon etching yield, as expected, The enhancement in
+spontaneous etch rate is too small to be seen in the resolution of this data and the surface Si-F
+bond (~150 kcal/mole) is too strong to allow coverage variations in this temperature range. The
+ion flux dependency experiments (Figure 5-11) also showed no effect on etching yield over a 3x
+increase in ion flux at constant F/Ar* ratios, validating the use of this ratio as dimensionless
+174
+
+===== PRINTED/PDF PAGE 175
+10
+XeF2 F
+Oo A
+8 XeF2 F
+" =A 350eV A
+ico 150eV
+@ y eay,\
+a ween
+SS co” ae
+B 4 poe
+And
+2 Lo
+‘a
+LS |
+of
+0 20 40 60 80 100
+F/Ar+ Ratio
+Figure 5-7. Art+/XeF2 versus Ar+/F etching of silicon at 150 eV and '
+350 eV ion energy levels.
+175
+
+===== PRINTED/PDF PAGE 176
+|
+| |
+|
+10
+F2  XeF2 F
+[e) oO A
+|
+é
+< 6
+w
+3 Apdo
+a Oe A
+4 fo.
+5 ua
+. eA
+aw
+aoe
+2 go"
+OF
+0 : \
+0 10 20 30 Mi 50
+F/Ar+ Ratio
+|
+|
+Figure 5-8. Comparison of 250 eV Art-enhanced etching by F, XeF2 and F2.
+176
+
+===== PRINTED/PDF PAGE 177
+|
+10
+8
+on
+< 6
+3
+2
+|
+|
+. 4
+|
+_ A
+Art/F
+? AG ee ee
+roe a
+go
+o&
+" 0 100 150 700
+F/Ar+ Ratio
+. Figure 5-9. Comparison of Ar+/F versus Ar+/F2 etching of silicon at 20 eV.
+177
+
+===== PRINTED/PDF PAGE 178
+5
+4
+>
+<3
+ey
+=
+2
+~
+> Si F/Ar+=20
+q=| 22 oO
+3 ee ee eee le oe A
+ea)
+1
+SiO2, F/Ar+=20
+cecceesce Qecccscccccscccecsncsecscecescascesse QheecsesetecsasecesanecssesQ)iesecses
+0
+0 50 100 150 200 250
+Substrate Temp (C)
+Figure 5-10. Effect of surface temperature, Ts, on Ar+/F etching of
+silicon and SiO2.
+178
+
+===== PRINTED/PDF PAGE 179
+10
+8
+F/Ar+=50
+m 6 ,
+& o
+aI a ae cae
+2 |
+2
+mo 4 :
+D |
+0
+1E+15 1.5E+15 2E+15 2.5E+15 2E+15 3.5E+15
+Ar+ Flux (ions/cm/2-s) .
+Figure 5-11, Dependence of silicon Ar+/F etching yield on absolute Ar+
+ion flux at constant F/Ar+.
+179
+
+===== PRINTED/PDF PAGE 180
+system parameter. Implications of these observations for mechanistic modeling of this system
+are discussed in Section 5.6.
+Ar*/F Etching of SiO,
+
+Experimental yield measurements in the Ar‘/F etching of SiO, are summarized in Figures
+5-12 and 5-13, where the low (F/Ar*<200) and high flux ratio regimes are explored, respectively,
+The measured yield curves are qualitatively similar to those found in the Ar*/F etching of silicon,
+however, several contrasting points are worthy of note. In Figure 5-12 it is readily apparent that
+ion-flux-limited regime is attained at much low F/Ar* ratios for a given ion energy, in comparison
+to silicon etching. Apparently, the available "sites" for F sorption on the oxide surface are either
+much more easily saturated, or less readily available that in the case of ion-bombarded silicon.
+This observation is consistent with the hypothesis that F chemisorption occurs primarily on Si”
+sites, whereas many of the surface sites on SiO, are O" terminated. In addition, it is apparent that
+100 eV increments in ion energy are much more significant in their relative effect on initial SiO,
+etching yields (SiO, per incoming Ar’) than in the case of silicon etching. In fact, the initial slope
+of the yield curves was found to increase significantly with Ar* ion energy. As discussed in
+Section 5.6, the initial slope of the yield curves is related to the sticking probability of F on the
+ion-bombarded silicon or SiO, surface, suggesting that the SiO, surface becomes substantially
+"stickier" to fluorine with increasing bombardment energy. This is thought to be the result of both
+increased dangling Si* bond production with increasing ion energy, and increasing Si-to-O surface
+elemental ratio due to the preferential sputtering of surface oxygen, resulting in the densification
+of Si* surface sites. These contentions are discussed more in conjunction with the XPS data
+(Section 5.5).
+
+The rapid onset of yield saturation is apparent in Figure 5-13, where higher flux ratios are
+
+180 |
+
+===== PRINTED/PDF PAGE 181
+350 eV
+1 a
+a 250 eV
+i Pe 150 eV
+S i Dl ccesessseeceabeeseeessesstesssee
+30.6 Bo “
+a=} io 4
+Cc} OQ” FA
+~ : : “
+oD oo _
+Boa cP A
+0.2 o:
+o
+0
+0 40 120 200 260
+F/Ar+ Flux Ratio
+Figure 5-12. SiO2 etching yield (SiO2 removed per Art) versus F/Ar+
+ratio in the mass-transfer-limited etching regime.
+181
+
+===== PRINTED/PDF PAGE 182
+5
+So = 0.02
+4
+E
+aor
+-
+Bh
+3 oe eV 4 A
+a Tuet al.[1981]
+A 2
+a
+3
+aa)
+a
+1 "4 350eV
+‘A a ; 150 eV
+Si 20eV
+0 GS
+0 200 400 600 800 1,000
+F/Ar+ Ratio
+Figure 5-13. SiO2 etching yield versus F/Ar+ ratio showing the ion-
+flux-limited etching regime at large F/Ar+. Lines shown are fits of
+the surface kinetic model discussed in Section 5.6.
+182
+
+===== PRINTED/PDF PAGE 183
+investigated, and comparison is made to available literature data at 2 keV (Tu et al., 1981}. At
+the ECR ion energy level (=20 eV), the saturation in the Ar*/F etching yield is almost immediate,
+It is also apparent from this data that the physical sputtering component of SiO, etching is much
+more important relative to the measured saturation etching yields, This results in a much lower
+average "chemical enhancement factor" (Figure 5-14) for oxide etching. These features are in
+agreement with the general industry observation that SiO, fluorocarbon plasma processes are much
+more "physical" or "ion-driven", e.g. SiO, etching rates correlate strongly with plasma power
+input. In general, the ion-enhanced reactivity of SiO, at saturation fluorine coverages is an order
+of magnitude lower than that observed in Ar‘/F etching of silicon. This same reactivity ratio is
+observed in thermal F etching, indicating that the effect of ion bombardment on the F-Si and F-
+SiO, chemistries is simply one of providing energy to surmount "thermal" activation barriers, as
+opposed to the creation of new mechanistic pathways.
+A limited number of experiments were performed using XeF, to allow comparison of the
+XeF, and F ion-enhanced reactivity on SiO,. Comparison of Ar*/XeF, and Ar*/F etching is shown
+in Figure 5-15 at 150 eV and 350 eV energy levels, where XeF, has been assumed to donate the
+stoichiometric 2 F atoms. This assumption does not appears to be valid on the SiO, substrate for
+low XeF, and F fluxes, where the XeF, appears to be more reactive initially, The yield curves
+seem to converge, however, at high neutral-to-ion flux ratios, suggesting that these are equivalent
+sources when the reactions are ion-flux-limited. Ar*/F, Ar*/XeF,, and Ar*/F, etching are compared
+in Figure 5-16, where it is once again apparent that the XeF, exhibits greater initial reactivity than
+either the atomic or the parent molecular gas. As expected, we found no effect of substrate
+temperature on SiO, etching in the range of 20° to 200°C (Figure 5-10) since the contribution of
+thermal etching mechanisms to the overall etching yield is 0.01% for the F atom fluxes employed,
+Flux dependencies in the Ar’/F etching of SiO., were investigated in Figure 5-17, where etching
+183
+
+===== PRINTED/PDF PAGE 184
+a :
+ge 6 °
+a O.,
+tea 7
+E
+O
+2
+0
+0 500 1,000 1,500 2,000
+Ion Energy (eV)
+Figure 5-14. The "Chemical Enhancement Factor" for Ar+/F etching of
+SiO2 relative to Ar+ physical sputtering, Saturation Ar+/F
+etching yields were used in the ratio.
+184
+
+===== PRINTED/PDF PAGE 185
+1.4 —
+12 —
+" 350eV = A
+.
+; 7
+350 eV
+3 vec eee seen een een seers e
+2 os wooo
+- eortd
+g aa ; .
+Hoot .
+* ay ee cere
+cae eB
+ms
+02 F 4"
+0
+, 0 a rm 2. n i}
+F/Ar+ Ratio
+Figure 5-15. Ar+/eF2 versus Ar+/F etching of S102 at 150 eV and 350 eV
+ion energy levels.
+185
+
+===== PRINTED/PDF PAGE 186
+1.4 F2 = XeF2 F
+fe) Oo A
+1.2
+1
+x
+2
+DQ 0.6 poe
+i
+04 - Pane
+iA
+0.2
+0
+0 20 40 60 80 100
+: F/Ar+ Ratio
+Figure 5-16. Comparison of 250 eV Ar+-enhanced etching of SiO2 by F,
+XeF2, and F2,
+186
+
+===== PRINTED/PDF PAGE 187
+1.4
+2
+1
+=
+&
+> 0.8
+el
+8 F/Ar+= 50
+rsa] oo
+0.6 naaannes = Sennen SSE EEO
+ene a
+0.4 F/Art = 15
+. 0.2
+0
+0 SE+14 1E+15 15E+15 2E+15 2.5E+15 3E+15 3.5E+15
+Ar+ Flux (ions/cm42-s)
+Figure 5-17. Dependence of SiO2 Ar+/F etching yield on absolute Ar+ ion
+flux at constant F/Ar+.
+187
+
+===== PRINTED/PDF PAGE 188
+yields were measured as a function of Ar‘ flux at constant F/Ar*, Within the accuracy of our data,
+SiO, etching yield is found to be a function only of the F/Ar* flux ratio in this regime, and not
+on the absolute Ar+ flux. Similar behavior was observed using XeF, as a fluorine source in both
+Si and SiO, etching.
+5.4 Mass Spectrometric Studies of Product Distributions
+Several sets of experiments were conducted to ascertain the nature of the etching products
+evolved from the silicon surface during these fluorocarbon beam simulation studies, A number
+of researchers have applied mass spectrometry to the study of product distributions in the
+spontaneous etching of silicon by atomic fluorine [Flamm et al. 1981, Vasile and Stevie, 1982,
+Winters and Plumb, 1991] or xenon difluoride (Vasile, 1983, Houle, 1986] and in the ion-
+enhanced etching of silicon by Ar* and XeF, or F [Winters and Plumb, 1991, Winters and Houle,
+1983; Cobum and Winters, 1987}. The etching of silicon dioxide has been investigated in similar
+studies but in much less detail (Winters, 1983]. In general, these types of studies have been done
+in very clean UHV environments to eliminate the presence of coincidental background peaks in
+the product spectra and to eliminate effects of surface contaminants. Modulated beam mass
+spectrometry (MMS) has been universally employed as a method to discriminate line-of-sight
+products from those which experience wall collisions and possible recombination events, or
+cracking on the hot ionizer filaments, The major shortcoming of the studies to date has been the
+use of very low atom and ion fluxes, sometimes 2-3 orders of magnitude below those encountered
+in fluorocarbon plasma processes, requiring a dangerous extrapolation of the etching product
+information into the relevant regime, In addition, various authors have attempted the cross
+comparison of data taken at different ion energies, and varying neutral-ion flux ratio regimes,
+without recognition of the fact that product distributions are likely to change as a function of these
+188
+
+===== PRINTED/PDF PAGE 189
+parameters. The goal of our mass spectrometric studies was to qualitatively demonstrate the shift
+in etching product distributions with F/Ar* ratio and ion energy, and to assimilate available
+quantitative data from the literature.
+
+The details of the mass spectrometer and its differential pumping system are described in
+Chapter 2. The line-of-sight product stream to the ionizer is not modulated at present, however,
+a shudder is available for discrimination of line-of-sight products from chamber background. This
+technique is useful for product identification, but is non-quantitative because reaction products
+which interact with the mass spectrometer housing or which crack on the ionizer filaments can
+still be detected. In addition, the pumping speed of the various product species in the mass
+spectrometer housing may vary, creating ambiguity in the measurement of background levels.
+Accordingly, we have limited our analysis to the identification of product peaks, and the
+determination of trends in product distributions with changes in neutral-ion flux ratio and ion
+energy.
+
+Product Distributions in Thermal Etching of Si and SiO, by Atomic Fluorine
+It was not the intent of this thesis to study product distributions in the spontaneous etching
+of silicon by fluorine atoms since the product distributions and kinetics in this system have been
+Studied in detail in the past, However, a limited amount of work was necessary fo: comparison
+of cracking pattems with and without ion bombardment. While most studies of the thermal
+etching system contend that SiF, is the major etching product, investigators have debated the
+importance of SiF, as a product, with estimates ranging from trace quantities up to 30% of the
+total product. Flamm and Donneily [1981] initially implieu that SiF, was a major silicon(100)
+etch product which subsequently recombined with gas phase F to produce the chemiluminescent
+species SiF,", They based this supposition on the fact that the chemiluminescence signal and
+189
+
+===== PRINTED/PDF PAGE 190
+silicon etching rate had identical activation energies. To reconcile these chemiluminescence
+experiments, the a'.thors concluded that the activation energy of this process and the total etch rate
+could be identical only under two circumstances: (1) if the fraction of SiF, relative to all the
+etching products remained constant with temperature or (2) if the chemiluminescence and etching
+were associated with the same rate limiting process. Item (1) has been shown to be untrue over
+a wide temperature range through the recent work of Winters and Plumb [1991] which indicates
+that SiF, production is negligible at room temperature, but increases rapidly at surface
+temperatures above 300°C. It should be noted, however, that the investigation of Flamm and
+Donnelly [1981] extended only over a narrow temperature range (223-403K) where the SiF,* peak
+growth is much less sensitive to temperature. Matsumi et al. [1986] saw a direct proportionality
+between SiF, LIF signals and etching rate in downstream CF, plasma etching of polysilicon, in
+support of item (2) above. Vanhaelemeersch et al. [1991] have also used LIF to show significant
+SiF, concentrations in the presence of Si<100> etching by F atoms, while SiF fragments were not
+observed. Rapid F-SiF, gas phase recombination rates were measured in this same study, and the
+authors suggested that large SiF, concentrations may not have been noted in some earlier studies
+due to rapid recombination with background fluorine. Vasile and Stevie [1982] concluded from
+an appearance potential study that while SiF, was the dominant reaction procluct, SiF, may
+comprise 10-30% of the total etching product stream. It must be noted that they did not consider
+possible contributions from higher fluorosilanes in this study. Ad initio calculations of Jenichen
+and Johansen [1988] resulted in a binding energy of only 13 kcal/mole for SiF, on silicon clusters,
+suggesting that it has a high probability of thermal desorption. Early studies of Coburm and
+Winters [1979] which employed XeF, as a fluorine source also supported SiF, as the predominant
+reaction product, with lesser amounts of SiF, type product species hypothesized. Winters and
+Plumb [1991] recently contended that the presence of the SiF,* peak in observed in room
+190
+
+===== PRINTED/PDF PAGE 229
+versus F/Ar* at a 250 eV bombardment energy, where it is evident that the surface is fluorine
+saturated a very low F/Ar*. It is assumed in our surface kinetic modeling that fluorine is
+exclusively Si-F bonded on the oxide surface. The presence of this bond appears as a low energy
+tail in the Si-O, (2p) feature as shown in Figure 5-38. A tail toward the low binding energy side
+of the O-1s feature was also observed which may indicate some O-F bonding. These trends were
+also noted by Joyce [1987] in an XPS system with much better energy resolution. The F-to-Si
+elemental ratio on the SiO, etched surfaces is investigated in Figure 5-39, where the trend of
+increasing F-to-Si with F/Ar* is observed, similar to the case of silicon etching. However, the
+SiO, surface stoichiometry might suggest a more "SiF,-like" surface, except that we have not
+accounted for the presence of oxygen-bound fluorine in this analysis. We know of no studies
+where the relative population of SiF, and O-F, states on the oxide surface has been resolved to
+allow comparison. Finally, the effect of ion bombardment energy in Ar*/F etching of SiO, at
+constant F/Ar* is investigated in Figure 5-40. A slight trend toward increasing surface fluorine
+with increasing energy is noted, and may be a result of the net increase in the ratio of surface Si
+to oxygen sites with the selective sputtering of oxygen. The effect of bombardment energy on
+O (1s) supports this contention. The dominaut effect may therefore be the increased "stickiness"
+of the SiO, surface with increasing bombardment energy as noted in the etching yield studies,
+, resulting in the surface F increase.
+5.6 "Site" Models of Ton-Enhanced Etching
+As discussed in Chapter 1, comprehensive models of the ion-enhanced surface kinetics
+described above would require complete knowledge of product distributions, species concentrations
+and spacial gradients in the "near-surface" region, and radical sticking coefficients in the presence
+of energetic ion bombardment. All of these issues have been discussed above to some degree,
+229
+
+===== PRINTED/PDF PAGE 230
+|
+XPS _BEST FIT File: 10703A_1 of 23
+|
+|
+3
+2 “a
+Ms \
+2 28 :
+$ , ; \
+26 i ene = SA ee fe oo
+105 +400 95 +90 85 40
+Gnd Enemy eV
+Figure 5-38. Si(2p) XPS spectra for Ar+/F etched SiO2 showing low binding
+energy tail due to Si-Fx bonding.
+230
+
+===== PRINTED/PDF PAGE 231
+oD
+F Etching
+iteseterenenateenaseiseaientat .
+g 2.0 (os © Ff © 8€
+9 es EE Ree MN Sd Ma CE Ma .
+0 12.1 23.2 50.2 99.7 139.7
+F/Ar+ Ratio
+Figure 5-39. F(1s)-to-Si(2p) elemental ratios from corrected XPS data
+’ :
+for Ar+/F etched SiO2 at 250 eV ion bombardment energy.
+
+===== PRINTED/PDF PAGE 232
+6 Z
+F/Ar+=120
+O
+F/Ar+=550
+5 A
+4
+bal
+§ 4 5 A
+; 3 oO A 4
+8 A
+S
+°
+oO
+2
+O(1s) .
+0
+100 150 200 250 300 350 400 450 500
+Ion Energy
+Figure 5-40. Behavior of the F(1s) peak versus ion energy at constant
+F/Ar+ for Ar+/F etching of SiO2. O(1s) peak behavior is also shown.
+232
+
+===== PRINTED/PDF PAGE 233
+however, the exact mechanistic details by which silicon and its oxide are converted to volatile
+fluorides are still not well understood. In order to quantify our data for use in simulation of
+etching profile evolution, we have constructed simplified mechanistic models which decouple
+radical adsorption/recombination effects from the ion-driven reaction and mixing steps, in a
+manner analogous to the well known Langmuir-Hinshelwood mechanism. We have represented
+the complex process of "ion-enhanced etching" with simplified global reaction models with which
+we can capture the correct functional dependencies, but do not treat the elementary surface
+reaction steps. Conceptually, we have applied the "well-mixed" or CSTR assumption to the near
+surface region as shown in Figure 5-41, where reactant and product concentrations are replaced
+by average concentrations in the ion "mixing zone". The concept of the ion mixing depth, 1, in
+Section 5.1 allows conversion of surface species concentrations into volumetric concentrations to
+complete the CSTR reactor analogy.
+
+The basic requirements of an effective etching profile simulator necessitate knowledge of
+the total etching rate on any differential surface segment as a function of arriving species fluxes,
+energies, chemical types, and as a function of surface properties such as temperature, composition,
+and structure (e.g. bond strengths). In the simplified case of Ar*/F etching of Si and SiO,, we
+have reduced the parameter space of the problem to:
+
+ER,, = f(N, I*, E, Ey, T, (5-13)
+N =F atom flux (0-10'%cm7s")
+It =Ar ion flux (0-10'%cm?s"')
+E, =Ion energy (20-500 eV)
+E,,=Surface process energy threshold
+T, =Surface temperature (25-300 C)
+233
+
+===== PRINTED/PDF PAGE 234
+a) ions
+sputtering desorption
+: SiPx SiFx
+adsorption oa fh
+F~q t }
+depth * ~ ke“
+F- S(d)
+Dj Ve} 4
+t ballistic mixing Dj Voj
+ci (d) _ R(e(d)) ej (d)
+reactants Sik + F -> SiF ,, products
+(50 A) «n-ne nen nen Senne eee = = Surface layer
+pure Si
+; b)
+Inputs Outputs
+F ions Si SiF2 SiF4
+©, It (CSTR)
+Ox
+Global Reactions
+Si*+ 2F ---> SiF (5)
+SiF,(s) + 2F -AS SiF 4+ 2Si *
+. Si*-AStSi(g) + Si *
+SiF,(s) A'S SiF + 2Si
+virgin Si
+Figure 5-41. Conceptual comparison of a) a mechanistic Ar+/F surface
+kinetic model and b) the CSTR-"site" model.
+234
+
+===== PRINTED/PDF PAGE 235
+In these studies ion were normally incident on the substrates, so the effect of ion incidence angle
+; on yield is not considered. In general, the observed etching rates are well represented as a
+combination of three components, including 1) physical sputtering, ER,, 2) ion-enhanced
+chemical reaction, ER,, 3) and spontaneous thermal etching by ER,, i.e. |
+ER,,,= ER, + ER, + ER,. (5-14)
+This sum is not directly linear, but must be solved self-consistently based on conservation of free
+surface "sites" versus the fluorinated surface fraction. From here on in we take the term "surface"
+to represent the entire near-surface volume as suggested by our CSTR approximation, The
+mechanistic framework of our Ar*/F-Si surface kinetic models is shown in Figure 5-42, where
+three pathways exist for the volatilization of silicon and SiO, as suggested by equation (5-14)
+above. In the discussion to follow, we reduce these mechanistic models of Ar/F etching to
+simpler "semi-empirical" models based on reasonable assumptions, allowing us to reduce the
+number of fitted parameters. Much less is understood conceming the mechanistic pathways in
+Ar/F-SiO, etching, especially concerning the F-Si versus-F-O surface chemical interactions. For
+the sake of simplicity, we neglect the O-F chemistry in O,-Si etching entirely. We first consider
+the problem of F physisorption on the SiF, and O,-SiF, surfaces, and the subsequent
+chemisorption of F(p) to active Si* sites
+F Atom Physisorption and Recombination
+A treatment of recombination behavior in Ar */XeF, etching models has been largely
+neglected in the past, without justification. This aspect of the surface model is important if one
+considers the feedback between surface reactions products, including potential recombination
+235
+
+===== PRINTED/PDF PAGE 236
+a
+WF
+& +
+=i OD
+oOo =
+=| 9 8
+7?) 5 Oo
+a 3
+8 3 9
+2 3 g
+é| | 3
+7 a
+gS e
+}
+a
+; ie =|
+~~ GO : OD ® lo}
+G6? B+ 4 2
+” fo + 2 oS A
+@Saee
+i a” Bow © Rs S
+fd > 4 DD 0 on
+=| 25 oO Fy a
+8/23 “% FS 3
+£/, 0 w ux = 1
+4 «| 2 a] & A oe
+§ 3 g Re
+8 E = £
+2 5 5 a ¥
+s e| = el oe ic Ss 5
+= £ Bees Be 3 8
+re o a o@ z 3&8
+2 a2
+6 a wou ig Ba
+2\,ar ~ ao Nn 2) 5 o
+Oia N a2 re
+> in 2
+£ — oS
+a. + a i 7 B'S
+* G “ q
+us =— ~~ + fo}
+a x = = es 8 A f=] om
++ ¢ a - § 7) 8 2
+” ee fe. ££ s cy
+a) g¢é& 56968 ¢$ 2 5
+F — + A +
+= Go Oo So a & =: SB y 8
+& os = © = Oy
+Pow f £ BR ux ” «
+3/8 + HG 29 2s GH p
+no]
+8) 8= E z & 8
+? o| 2 So i+ + © iz p
+c| < P| 3 fy
+eG =~ @ c& 3 oq t
+sia = ct 2 al<
+“IEPs § i]
+g > 8s 2 §
+@® +A AE = 4 oD .
+=2e2 24 wo Le = *
+a = oO °
+ux us n 79) i
+ae, es nu o 6
+236
+
+===== PRINTED/PDF PAGE 237
+products, and the gas-phase chemistry in a self-consistent etching model. In addition, the fitted
+surface kinetic parameters lose physical significance when important loss processes are not
+considered as separate reactions. F atom-metal chemistry is unusual, as pointed out by Nordine
+and Lagrange [1976], in that the metal-F chemisorption bond is very strong (~150 kcal/mole for
+Si-F), while the F, dissociation energy is small (~38 kcal/mole). As a result, the recombination
+of surface fluorine from surface chemisorption sites is generally thermodynamically unfavorable,
+and atomic fluorine tends to quickly fluorinate metal surface chemisorption sites, passivating it
+toward further rapid uptake of fluorine. Thermal reaction of atomic fluorine with such a
+passivated surface is generally slow and, as is shown below, physisorption coverages are too low
+at typical gas pressures to make recombination a likely event. As a result, total loss coefficients
+for atomic fluorine on many fluorine-passivated metal surfaces, and particularly on SiO,, are
+extremely low in the pure fluorine system. F surface loss coefficients in the fluorocarbon plasma
+environment, however, are notably larger (~0.01) due to large physisorption coverages of CF, type
+radicals which readily recombine with unbound fluorine (see Chapter 7).
+
+Data of Nordine and Lagrange [1976] and Flamm et al. [1981] allow derivation of an
+approximate F, recombination rate constant for atomic fluorine on quartz, based on a measured
+total loss coefficient of 1.5x10* for atomic F on room temperature quartz at approximately 15 Pa
+F, (The loss coefficient on pyrex at steady-state was found to be identical to that of quartz within
+the experimental accuracy). The data of Flamm et al. [1981] predict a thermal reaction rate
+coefficient of about 5x10 under these conditions, leaving the F recombination loss coefficient,
+Y-. ON fluorinated quartz at 10“ (15 Pa F, 300 K). Using this data, the recombination rate
+constant, k, , may be estimated from the definition
+
+237
+
+===== PRINTED/PDF PAGE 238
+1+ 04 rama, (5-15)
+F ;
+where n,, represents monolayer physisorption density, 0, is the fractional surface coverage, and
+| Q, is the F atom flux at 15 Pa. A classical Langmuir physisorption model, using an adsorption
+energy of 5 kcal/mole and an oscillator period of 10"? s, reveals extremely low fractional
+physisorption surface coverage (~ 10°*), even at this moderate F pressure, due to the short surface
+residence time. Using this value places the recombination rate constant, k,, at 7x10? cm?/mole-s
+at 300 K. This analysis indicates that recombination processes in the Ar*/F etching of silicon are
+negligible compared to atom desorption rates at low to moderate F pressures. Surface
+| recombination should not become the dominant F atom loss process until the F atom pressures
+exceed 1 torr. Recombination rates for F on fluorinated silicon surfaces (SiF,) have not been
+reported to our knowledge. However, the data of Nordine would suggest an upper limit of 10°
+for the F total loss coefficient on the thick SiF,-like overlayer which forms at large F atom
+exposures. Accordingly, F atom physisorption coverages would not exceed 0.01 (surface fraction)
+until F atom fluxes (Q,) exceed 10°'/cm?-s or about 10 mtorr equivalent pressure.
+
+: Given these observations, we neglect F atom surface recombination effects in our Ar’/F
+etching models and assume that physisorbed F(p) atoms either find a reactive Si* site resulting in
+chemisorption, or hop back off the surface as F(g). Accordingly, we can make an estimate of the
+F(p) via a Langmuir type model
+
+F(p)/T,, = b’QW/(1+b’Q,) (5-16)
+where I°,, is monolayer F(p) coverage and b’ is the Langmuir parameter [Adarason, 1985]. As
+238
+
+===== PRINTED/PDF PAGE 239
+we discussed above, the F(p) surface coverages in our flux regime are very low such that we can
+apply the iow pressure limit approximation,
+F(p) = I,,b’Q,. (5-17)
+F(p) Atom Chemisorption
+
+Because the reaction probability of the F atoms with an atomically clean metal surface is
+effectively unity, an F(p) atom physisorbed in the vicinity (within 1 atomic radius) of an Si
+dangling bond is assumed to react to form an Si-F bond instantaneously. However, the hopping
+of physisorbed F(p) from passivated SiF, areas to active Si” sites is not probable due to the small
+physisorption energy and subsequent short surface residence time (~10"" sec). This hopping
+mechanism would also lead to a strong temperature dependence of etching yield which is not
+observed experimentally. In theory, a chemisorption rate constant for F(p) on clean Si* sites could
+be calculated based on initial rate studies of F atom sorption on Si and SiO, if we had a method
+for quantifying the Si” "sites" via
+
+-d[Si*}/dt = k, [F(p)] [Si*] = [sp Qrluo (5-18)
+
+, where s, is the apparent F atom sticking coefficient. Loudiana and Schmidt [1984] provide initial
+rate data for the sorption of atomic F on a clean, sputtered SiO, surface, where they calculate an
+initial F sticking coefficient of 0.14 for F fluxes of 7x10'*/cm?-s (Q,). Given our simple Langmuir
+model for physisorption, F(p) concentrations of 10’ cm? are expected at this flux. If we make the
+gross assumption that 10'°/cm? active Si* sites (1% of the clean SiO, surface) exist, k, is on the
+order of 10° cm/s. The density of active sites on clean, ion-bombarded silicon is expected to be
+much higher, but given an initial F sticking coefficient of unity, a similar k, value might be
+
+239
+
+===== PRINTED/PDF PAGE 240
+expected. Detailed mechanistic studies of thermal F etching of silicon suggest that F ion states
+may exist in these systems (Houle 1983, 1984] with appreciable lifetimes which are not
+represented in our analysis. It is clear from the Ar*/F silicon and SiO, etching yield data that at
+low F/Ar* ratios, the process of F atom chemisorption or "sticking" becomes rate limiting. For
+lack of better information, we lump the F(p) surface coverage and chemisorption rate parameters
+together into an apparent F atom sticking coefficient on clean Si* sites, s,, based on the total F
+atom flux, Q,,
+-d[Si"/dt = k, [T,, b’ Qe } [Si’] = s, Qe. (5-19)
+
+Jon-induced desorption of F from both chemisorption and physisorption sites is neglected.
+Calculations below indicate that F(p) physisorption coverages are extremely low at the flux levels
+used here, making an ion-induced desorption event from the physisorption state very unlikely.
+Moreover, fluorine is bound to Si very tightly (~150 kcal/mole) in its chemisorption state, making
+an ion-induced cleavage of this bond more unlikely than the release of an SiF, unsaturate species
+which have binding energies on the order of 90 Kcal/mole [Jenichen and Johansen, 1988).
+Therefore, in the approximation of our simple model, ion bombardment has no effect on the F
+atom sorption kinetics other than the creation of active Si’ sites, allowing the strong chemisorption
+of physisorbed F(p).
+
+Reaction Pathways to SiF, Products
+We now consider three mechanisms by which the SiF, and O,-SiF, surfaces may be
+volatilized or "etched". To begin with, Flamm et al. [1981] hypothesized a sequential thermal
+fluorination mechanism for the production of volatile products such as SiF,, SiF, via F atom attack
+240
+
+===== PRINTED/PDF PAGE 241
+of silicon as shown in Figure 5-42. However, as discussed in Section 5.2, it is the barrier to F
+atom diffusion through the top SiF,-layer which is the rate-limiting step in this reaction network.
+Mechanistic details conceming the F atom etching of SiO, have not been proposed to our
+knowledge. We have taken the Arthenius parameters suggested by Flamm et al. [1981] in
+calculation of thermal (ER,) rates of silicon and SiO, etching, suggesting that even in the presence
+of ion bombardment, a small probability exists for an F atom to “hop” over the diffusional energy
+barrier and react with a near surface SiF, species without the aid of an ion impact event.
+
+ER, s, = 3.59x10* Q, exp(-0.108/k,T) (5-20)
+
+ER, soz = 7-37x10" Q, exp(-0.163/k,T) (5-21)
+
+The functional form used in calculation of the physical sputtering yields is given in
+equation (5-7), where the required parameters for bare silicon and SiO, sputtering are provided
+in Table 5-1. Any of the SiF, species, where we limit our consideration to x=0-3, may be
+released as the result of a collision cascade, as demonstrated in the time-of-flight mass spectral
+studies of Haring et al. [1982] and Houle [1987]. SiF, is assumed to desorb instantaneously via
+thermal mechanisms upon its production. The "physical sputtering" component of our model is
+
+) the zeroth order reaction of the family of collision-cascade-induced processes, which may take
+place only on bare "sites" i.e. regions where Si° species are bound only to other Si or O, but not
+to F. Since we are considering the steady-state only, not net production or loss of Si* active sites
+is allowed in the regions which are physically sputtered, thus
+
+Si‘(s) --P,, Ar*--> Si(g) + Si’(s) (5-22)
+O,-Si'(s) --P,, Ar*--> Si(g) + 20(g) + O,-Si"(s), (5-23)
+241
+
+===== PRINTED/PDF PAGE 242
+where by definition p, = Y,. It has been shown by Cobum [in Chapman, 1980] that up to 10%
+of SiO, sputtered in the energy range of interest may be liberated as SiO(g), and others have
+observed O, as an SiO, sputtering product, such that equation (5-23) describes only the dominant
+oxide sputtering pathway.
+Application of the pure thermal F etching model of Flamm et al. [1981] and the pure
+physical sputtering model of Steinbrukel { 1989] allows us to capture the correct limiting behaviors
+in our Ar’/F etching model. In the intermediate regimes, application of these forms is a
+conceptual division, in which we are essentially making the definition
+ER, = ER,,, - ER, - ER,. (5-24)
+Although the work of Cobum and Winters [1985] as well as others have eliminated many of the
+potential mechanisms by which ions enhance F-Si and F-SiO, chemistry, several important
+pathways warrant consideration. To begin with, the time-of-flight mass spectral studies of Haring
+et al. [1982] and Houle [1987] suggest that a large proportion of the Ar*/F etching products may
+be evolved as the result of collision cascades, especially under conditions of low F coverage and
+high bombardment energy. These collision cascade induced processes are considered in the form
+: |
+SiF,(s) --P,, Ar*--> SiF,(g) + (4-x) Si (5-25) |
+O,-SiF,(s) --P,, Ar*--> SiF,(g) + O,(g) + 2° (5-26) |
+where p, describes the probability or "yield" for releasing a surface SiF, species via collision
+cascade and etc.,.. The net number of Si* active sites produces in these collision cascade-induced
+etching events is somewhat arbitrary since the bonding environment of a given SiF, surface
+242
+
+===== PRINTED/PDF PAGE 243
+species will vary. For the case of silicon etching we might consider the production of a maximum
+of (4-x) new Si* dangling bonds, given that any unfluorinated site is bonded to another silicon
+at sufficiently high fluorine coverage. In the case of SiO, etching, although four Si-O bonds must
+be muptured on average to release a silicon, Si’ and O° are not equivalent "sites" for fluorine
+sorption. For lack of better information, we make the arbitrary assumption of the net production
+of two new Si* sites per cascade-induced etching event. Two other general families of ion-
+induced etching reactions may be considered. The first are termed “disproportionation" reactions
+as suggested in the simple mechanism of Winters {1985], and basically involved the
+interconversion of SiF, species upon ion bombardment to produce a certain yield of SiF,,, more
+volatile products, while reducing a stoichiometric equivalent of products to SiF,.,. The most
+interesting feature of these reactions is that they suggest a higher order dependence with respect
+to SiF, or SiF, coverage, since the occurrence of highly fluorinated nearest neighbors would
+increase the rate of this pathway. Since we have no mechanistic evidence to confirm or refute the
+importance of "disporportionation", we consider instead a more general class of reactions which
+we refer to as the "ballistic mixing" pathways as shown in Figure 5-42. This reaction pathway
+allows the incorporation of surface fluorine e.g. F(p) into the SiF, or O,-SiF, layer via knock-on
+implantation and/or F(p) diffusion enhanced via ion collision thermal spikes or lattice damage.
+Reaction of the interstitial F(i) then proceeds as a results of the ballistic mixing action of the ions,
+resulting in Si-F subsurface bond formation. Such a mechanism incorporates both the
+observations of Mizutani et al. [1985] and Winters [1988]. The net conversion of SiF, species
+to the final SiF,(g) volatile product via this pathway is described by a yield per incoming ion, §,.
+
+Consideration of the full blow mechanistic description of these systems is beyond the
+scope of this thesis, and could not be verified due to lack of in situ studies of SiF, species
+concentrations as a function of energy and flux regimes. We do however have some knowledge
+
+243
+
+===== PRINTED/PDF PAGE 244
+of the product distributions in this system, and the surface "condition" in this regime as discussed
+above. Based on studies of the ratio of unsaturated fragments to SiF,, SSiF,/SiF, from mass
+spectral studies, we know that although SiF, is the major Ar’/F silicon and SiO, etching product,
+fragment production increases as a function of ion bombardment energy. In addition, based on
+our XPS data , it is not unreasonable to assume that the silicon surface is stoichiometrically "SiF,-
+like" over a wide range of F/Ar* ratios. We therefore made the gross simplification that SiF,(s)
+is the only prevalent SiF, unsaturate in the "mixing zone CSTR" in both the case of silicon and
+SiO, etching. Production of an SiF,(g) gas phase product via a collision-cascade mechanism is
+allowed in both cases. The branching ratios, b= 2SiF,/SiF, for the collision-cascade product versus
+the thermal SiF, product are defined by the semi-quantitative observations of Figures 5-29 and 5-
+30,
+
+bs, = 9x10° (E,)"? (5-27)
+
+Dgion = 7x10? (L,)” (5-28)
+Finally, the correct functional dependencies of the ion-enhanced etching yields (Y=ER,/1*) on F
+atom-to-ion flux ratios are found to be well represented when the ion-enhanced reaction rates are
+assumed to be first order in ion flux and fluorine near-surface site occupation, in the form:
+
+Y, = B,(1*)'(6,)' (5-29)
+
+The result of these assumptions and simplifications are the semi-empirical models for the
+Ar‘/F etching of silicon and SiO, shown in Tables 5-7 and 5-8. Although it is certain that the
+244
+
+===== PRINTED/PDF PAGE 245
+Table 5-7, Ar*/F-Si Phenomenological Surface Kinetic Model
+F(g) <--k,.k,.,--> F(p)
+: 2 F(p) + Si’ --k,--> Si-F,(s)
+2 F(p) + Si-F,(s) --B,,Ar*--> SiF,(g) + 2 Si
+Si-F,(s) --p,,Ar*--> SiF,(g) + 2 Si”
+Si° --p,,Ar*--> Si(g) + Si
+2 F(p) + Si-F,(s) --kp,;--> SiF,(g)
+Table 5-8, Ar*/F-SiO, Phenomenological Surface Kinetic Model
+F(g) <--k,,k,..--> F(p)
+2 F(p) + O,-Si® --k,--> O,-Si-F,(s)
+2 F(p) + O,-Si-F,(s) --B,,Ar*--> SiF,(g) + O,(g) + 2 O,-Si"
+O,-Si-F,(s) --p,,At*--> SiF,(g) + O,(g) + 2 0,-Si”
+O,-Si* --p,,Ar*--> Si(g) + 2 O(g) + O,-Si*
+2 F(p) + O,-Si-F,(s) --ky,--> SiF,(g) + 0,(g)
+stoichiometric production of Si* sites per volatile product formed is not the same for silicon and
+SiO,, we make this gross approximation such that the difference in the Si and SiO, chemistries
+are reflected entirely in the fitted model parameters. Since we are only considering one type of
+near-surface species, that being SiF,, we can do a "site balance" on the fraction of fluorinated, 0,,
+versus unfluorinated, @*, surface sites resulting in,
+245
+
+===== PRINTED/PDF PAGE 246
+e, - ——*_ (5-30)
+sR + 2B,(1+b)
+where R is the neutral-to-ion flux ratio, Q,/Ar*. Equation (5-14) may then be expanded through
+appropriate substitutions to derive the etching yield per ion coming ion, as a function of the
+unknown parameters s, and B,,
+-E, + + 5-31
+Ry * k,Qex(77) + p{1 - 6,)* + B,(1+b)0 1 (5-31)
+b
+These forms may be rewritten in the following form which allows determination of the unknown
+parameters from a linear regression of the etching yield data,
+1+b)-
+C= ¥,,-¥,-p, - Palit) Pals (5-32)
+sR + 2B,(1+5)
+2B,(1+5
+1/C = __2B,0+5) up a a Se (5-33)
+[B,(1+b)-p,]s, (B,(1+b)-p,]
+
+"where B, is regressed from the intercept of a plot of 1/C versus 1/R, and s, is derived from the
+slope. Parameters regressed from available yield data are presented in Tables 5-9 and 5-10. We
+found that to a good approximation, the available etching yield data could be well represented by
+allowing B, to vary, while setting s,=0.2 and 0.02 for the cases of silicon and SiO, etching
+respectively, "Best fit” values of B, using this constant initial sticking coefficient approximation
+are also provided in Tables 5-9 and 5-10. Fits of this model to the etching yield data are
+presented in Figures 5-5 and 5-13. Only data with R>15 was used because the 1/R regression
+
+246
+
+===== PRINTED/PDF PAGE 247
+form statistically overweights data taken in the low flux ration regime, where the relative error
+in flux measurements is largest. The fact that these yield expressions are a function only of the
+F/Ar* flux ratio (R), and not on the absolute fluxes of these species is consistent with the
+behaviors shown in Figures 5-11 and 5-17.
+Table 5-9. Ar*/F-Si Model Parameters
+
+E, b Sy B.
+
+20 0.040 0.216 (0.2) 2.46 (2.5)*
+
+150 0.110 0.203 (0.2) 6.95 (7.0)
+
+250 0.142 0.308 (0.2) 7.71 (8.5)
+
+350 0.168 0.231 (0.2) = 9.58 (11.0)
+
+500 0.201 0.126 (0.2) 15.20 (14.0)
+
+1000 0.284 0.177 (0.2) 21.19 (21.0)
+, f, values in parentheses were adjusted to fit based on the constant sticking coefficient of 0.2
+
+Table 5-10. Ar*/F-SiO, Model Parameters
+E, b S, B,
+20 0.031 0.013 (0.02) 0.143 (0.13)
+150 0.086 0.017 (0.02) 0.587 (0.55)
+
+250 0.111 0.022 (0.02) 0.536 (0.6)
+
+350 0.131 0.033 (0.02) 0.740 (0.85)
+
+500 0.157 0.045 (0.02) 0.892 (1.10)
+
+2000 0.313 0.013 (0.02) 2.845 (2,25)
+
+247
+
+===== PRINTED/PDF PAGE 248
+Interpretation of Model Results
+Consideration of the total silicon and SiO, etching yields as the sum of ion-enhanced
+etching, spontaneous F atom etching, and physical sputtering allows an illustrative graphical
+decomposition of the etching yield data. Figure 5-43 demonstrates the relative importance of these
+three mechanisms in the case of Ar’/F etching of SiO, at 150 eV, versus the 20 eV Ar’/F etching
+of polysilicon. The oxide etching mechanism is almost entirely “enhanced”, while at low ion
+energies and high F/Ar+ ratio, there is a significant contribution of thermal F etching in the
+removal of silicon. This observation is consistent with the fact that significant undercut is seen
+in SF, ECR etching of polysilicon Tachi et al. [1991]. Taking the high and low flux ratio limits
+of the yield equation (5-31), reveals that the parameter f, is related to the saturation etching yield,
+while the initial apparent sticking coefficient, s,, is directly proportional to the initial slope of the
+yield curve. In the simplest interpretation, B, is the number of SiF, molecules removed from
+fluorine saturated surface regions per incoming ion and is a strong function of ion energy. Bh, may
+also be expected to vary within a factor of two or so over ion incidence angles of 0-60", and with
+incoming ion mass. Extension of this concept to reactive ion systems is not straight-forward and
+is beyond the present scope of our modeling effort. The effect of incident ion energy on the
+etching yield parameter, B,, must be quantified in order to assess the etching yield of a given
+. plasma ion striking a fluorinated surface. Given that we have employed a “ballistic mixing"
+mechanism leading to the production of the primary SiF, product, one might expect B, to scale
+in the same manner as the ion-sputtering process, which is also ballistically driven. Plots of B,
+versus (E,)'? are shown in Figures 5-44 and 5-45 for the case of silicon and SiO, etching
+respectively. In the case of silicon etching, B, is found to scale well with root ion energy from
+1 keV down to a threshold value near 4 eV. It is significant that the Ar‘/F etching threshold
+values predicted are on the order of Si-F bond energies, versus physical sputtering thresholds
+
+248
+
+===== PRINTED/PDF PAGE 249
+a
+—— ola
+- —  — ion-enhanced
+*- 7-7 thermal
+08 ssee8+ sputtering
+:
+<
+H0.6
+3 ee ee ee
+a) ee
+> or
+20.4 7
+6 o/
+Q (
+0.2 H/
+fy
+0 200 400 600 800 1,000
+F/Ar+ Ratio
+b)
+10
+—— total
+— —  ion-enhanced
+*-- > thermal
+~ 8 seseee* sputtering
++
+<
+A 6
+a
+2
+: Pal
+oo 4 :
+w Fe i coal cenell celal
+2 =
+: i eee
+7 0 500 1,000 | 1,500 2,000
+F/Ar+ Ratio
+Figure 5-43, Graphical decomposition of Ar+/F etching yield data for
+the a) 150 eV etching of SiO2, and b) the 20 eV etching of silicon
+showing the relative contributions of physical sputtering, thermal etching,
+and ion-enhanced etching to ae total measured yields.
+
+===== PRINTED/PDF PAGE 250
+30
+25
+20
+Bo
+15
+10
+Oo
+5
+0
+0 10 20 30 40 50
+EiA1/2
+Figure 5-44, Behavior of the fitted, parameter versus root ion energy
+for the Ar+/F etching of silicon.
+250
+
+===== PRINTED/PDF PAGE 251
+| 5
+|
+|
+|
+| 3
+| Bo
+id
+| 2
+a
+%
+0 z
+0 10 20 30 40 50
+EiA1/2
+Figure 5-45. Behavior of the fittedB. parameter versus root ion energy
+for the Ar+/F etching of SiO2.
+251
+
+===== PRINTED/PDF PAGE 252
+which are on the order of Si lattice displacement energies (~13 eV). The E, '” scaling is also
+observed in the case of SiO, etching over the range of 20 eV to 2000 eV. Best fit lines to this
+data give the following energy dependencies,
+
+B25, = 0.687 (Ei'?- 4") (5-34)
+
+Bs, sioz = 0.053 (Kil? - 4 ') (5-35)
+
+The initial sticking probabilities calculated for this data are three orders of magnitude
+higher than those found absence of ion bombardment. We propose that this effect is due to the
+presence of “dangling bonds", or free adsorption sites, which are constantly renewed on the ion-
+bombarded surface. In the case of silicon etching, the apparent sticking coefficient does not
+change significantly over the ion energy range investigated, and a value of 0.2 was found to fit
+the entire set of data. It was shown in Figure 5-12, that in the case of SiO, etching, F adsorbs
+more readily as the energy of the ions bombarding the SiO, surface increases and the surface
+becomes "stickier". This effect leads to an energy dependence of the regressed sticking coefficient
+s, aS discussed by Butterbaugh et al. [1991] in a similar type of model, where low F/Ar* data was
+used in the regression, This effect is not obvious in the high F/Ar* ratio studies due to problems
+of F contamination when high F fluxes are employed.
+
+While the initial sticking coefficient, s,, for F on clean Si* sites is constant to a good
+approximation, the apparent sticking coefficient for F on the Si-F, surface falls off with surface
+fluorination in this model,
+
+Sp = S, (1-8,) (5-36)
+The behavior of the sticking coefficient, s,, with increasing F/Ar* for 150 eV silicon etching is
+shown in Figure 5-46 where the surface coverage behavior is also shown. This behavior is in
+qualitative agreement with the observations Winters and Coburm [1985]. Implications of this type
+252
+
+===== PRINTED/PDF PAGE 253
+1.2
+1
+0.8 |
+g
+2
+2
+2 0.6
+s
+0.4
+0.2
+0
+0 500 1,000 1,500 2,000
+F/Ar+ Ratio
+Figure 5-46. Predicted behavior of the near-surface fluorination®, ,
+and the relative F atom sticking coefficient, S: /So, versus F/Ar+ ratio
+for the 150 eV Ar+/F etching of silicon.
+253
+
+===== PRINTED/PDF PAGE 254
+1.6E+16
+ee SIFA
+__1.2E+16 i
+& iBt+i6 a
+@  8E+15 .
+3 ei
+=| E
+le} a
+3 6E+15 :
+4E+15 -
+2E+15 7 ___. SIF2...---------
+ee Si
+0 100 200 300 400 500
+F/Ar+ Ratio
+Figure 5-47. Predicted product distribution behavior in the Ar+/F etching
+of silicon as a function of F/Ar+ ratio at 200 eV
+254
+
+===== PRINTED/PDF PAGE 255
+1.4E+15
+1.2E+15 02 ee
+@ 1E+15 Ot
+Oo 8E+i4 fue
+= je
+6E+14 re
+2 i
+a = 4E+14 i
+2E+14
+KL ° SiF2
+1 j ~~ ee
+» ea Ep ee
+0 100 200 300 400 500
+F/Ar+ Ratio
+Figure 5-48. Predicted product distribution behavior in the Ar+/F etching
+of SiO2 as a function of F/Ar+ ratio at 200 eV.
+255
+
+===== PRINTED/PDF PAGE 256
+of surface kinetic model for product distribution behavior in Ar+/F etching of silicon and SiO, are
+shown in Figures 5-47 and 5-48 as function of F/Ar+ ratio and ion energy respectively. These
+behaviors are discussed in detail in Chapter 8.
+5.7 Summary
+
+Silicon and SiO, etching yields were measured as a function of F/Ar* flux ratio,
+bombarding ion energy, and surface temperature. The steady-state etching kinetics were found
+to exhibit both mass-transfer-limited and reaction-rate (ion-flux) limited etching regimes in the
+flux range of interest. Mass spectral studies of ion-enhanced etching in these systems indicate that
+although SiF, is the major reaction product of Ar‘/F silicon and SiO, etching, substantial amounts
+of SiF, unstaturates are produced in regimes of low fluorine coverage, or high ion bombardment
+energy. XPS studies of Ar*/F etched surfaces showed that fluorination of near-surface "sites"
+increase in a Langmuir fashion with increasing F/Ar*, consistent with model predictions. The F-
+to-Si surface stoichiometry was shown to increase with increasing F/Ar* for both substrates,
+indicating the change in surface “condition” which can alter the relative product distribution.
+
+Simple site-occupation models of Ar*/F etching were developed which incorporated the
+correct limiting behaviors of F atom thermal etching, and low energy Ar’ physical sputtering. The
+conceptual basis of our ion-enhancement mechanism involves both an enhanced adsorption of
+fluorine on silicon dangling bonds (free valences) generated by ion bombardment, and subsequent
+"ion-mixing" of the surface chemisorbed fluorine with the lattice, which in a global sense leads
+to production of the volatile SiF, product. This mechanism is consistent with the observations of
+Joyce [1987], in which fluorine uptake by SiO, was enhanced after ion bombardment of the
+surface, and with the experiments of Winters [1988], which show that ion-mixing must be present
+for reaction of the fluorinated oxide to proceed to completion.
+
+256
+
+===== PRINTED/PDF PAGE 300
+In comparison to the case of spontaneous CF, interaction, it is clear that simultaneous ion
+' bombardment enhances the uptake of CF, radicals. The F(1s)-to-Si(2p) ratio is examined in
+Figure 6-27, where the general trend of increasing surface fluorine with CF,/Ar, ratio is observed.
+From comparison of 6-26 and 6-27 we see that the effective C-to-F ratio in the presence of ion
+bombardment is 2:1, suggesting that fluorine is readily liberated from the surface in the form of
+SiF, products. The fact that this ratio is reversed in the case of CF, only interacting with SiO,
+demonstrates the role of ion bombardment in inducing dissociation of the otherwise inert CF,.
+The role of increasing ion energy in the Ar*/CF, etching of SiO, was also investigated.
+Figure 6-28 shows the behavior of the C(1s) peak with increasing ion‘energy, at constant CF,/Ar*,
+It appears from these data that the relative amount of undissociated CF, (higher binding energy
+peak) is decreasing as the ion energy is increasing. This would indicate that the major effect of
+the increasing ion bombardment energy is the increase in adsorption sites, allowing dissociative
+chemisorption of CF,. Figure 6-29 shows the behavior of the C-to-Si and F-to-Si elemental ratios
+with ion energy. As energy is increased in this case, the surface concentration of both species
+increase with the F-to-C ratio remaining constant at about 2:1, in contrast to the silicon surface
+where defluorination of the surface film is observed. This observation is consistent with the
+hypothesis that the main effect of increasing ion energy is to increase the density of CF, sorption
+sites, while relative reaction probabilities of the F versus carbon remain approximately constant
+in this energy regime. The role of an atomic fluorine flux concurrent with the CF,/Ar* etching
+in this system is discussed in Chapter 7.
+6.4 "Site" Models of CF, Radical Interactions
+The application of simple surface kinetic models based on the concept of reactive
+"sites" to ion-enhanced etching was discussed in detail in Chapter 5. Ion-enhancement in the
+300
+
+===== PRINTED/PDF PAGE 301
+3.5
+3
+io} — Pores
+
+0.5 eB BB Be
+
+0 10.1 24.2 41.2
+CF2/Ar+
+Figure 6-27. Calculated F-to-Si elemental ratios from XPS studies of
+| Ar+/CF2 exposed SiO2.
+301
+
+===== PRINTED/PDF PAGE 302
+f\
+N\
+foe".
+y roN ,
+/\ MK a \\
+500 V f p Y u / ‘ *
+¢ /\ , eK W : 7 7h fi " \
+wave n A Dy Y Vv . oe “ys oe i - \ ‘N
+é \
+f\ fh u ’
+250 eV ra pryer....’ ‘\
+af, A NA Se yy , aN ha ,_fv\
+WT eee’ nd } Waerony | —
+p "\
+WW; \
+150eV path. / \
+Wal mati ne Aaa we oes. ae: ns
+DAT \
+(] 4
+Lat
+294 292 290 288 286 284 282 280
+BINDING ENERGY (eV)
+Figure 6-28. Comparison of C(1s) spectra of SiO2 with increasing Ar+ energy,
+at constant CE /Art =41,2
+302
+
+===== PRINTED/PDF PAGE 303
+3
+oO
+2.5
+Oo
+, Oo
+A
+g
+a
+pa
+3 15 4
+|
+E
+3] A
+1
+05 A F4o-Si
+O C-to-Si
+0
+| 100 200 300 400 500 600
+| Ion Energy (eV)
+Figure 6-29. Calculated (-to-Si and F-to-Si elemental ratios from XPS
+studies of Art+/CF2 expc sed SiO2 with increasing Ar+ energy, at constant
+CF2/Ar+ = 41,2 303
+
+===== PRINTED/PDF PAGE 304
+Ar/CF, etching of SiO, was modeled using similar concepts, but with some important differences
+
+in the chemical nature of the radical sorption "sites". As mentioned above, there is evidence that
+
+the CF, bonds preferentially to O" sites at the SiO, surface by a C-O bond, which makes necessary
+
+the transfer of fluorine from carbon to silicon in the mixing process. Based on mass spectral
+studies of fluorocarbon plasma etching of SiO, [Butterbaugh, 1990], it is clear that CO and COF,
+
+are evolved as products of the etching reaction in addition to O,, while the importance of oxy-
+
+fluoride species is not clear. SiF, has been identified as the dominant plasma etching reaction
+
+product, but unsaturated SiF, species may be more important in the Ar*/CF, etching of SiO, due
+
+to the limited availability of fluorine. Due to the limitations discussed above in characterizing
+
+major reaction products in this system, we have assumed that SiF, and CO are the major reaction
+
+products of the ion-enhanced reaction pathway, allowing us to close an overall material balance.
+
+Subsequent modification of this type of model to include multiple reaction pathways will change
+
+the quantitative values of the regressed parameters, but not the qualitative features of the model.
+
+The overall reaction network applied to the Ar*/CF, etching of SiO, is as follows,
+CF,(g) <----> CF,(p)
+CF,(p) + O° ----> CF,(s)
+; O,-Si(s) + 2CF,(s) -- fl" --> SiF,(g) + 2CO(g) + 20°
+O,"-Si -- p,I* --> Si(g) + 20(g) + O,"-Si
+
+where most of the assumptions discussed in Chapter 5 have been applied. No evidence for CF,
+
+radical self-recombination has been found in the presence of ion bombardment, and XPS results.
+
+show that non-dissociatively sorbed radicals are rapidly resputtered, suggesting that this
+
+recombination is negligible. Also based on XPS observations, this model contends that oxygen
+
+304
+
+===== PRINTED/PDF PAGE 305
+dangling bonds are the major sorption "sites" for CF, 01 SiO,. Physical sputtering of the SiO,
+; surface occurs in parallel with the ion-enhanced "mixing" mechanism, but results in no net
+increase in surface sites in steady-state. No spontaneous etching of SiO, by CF, is observed,
+allowing us to write the total SiO, etching rate as,
+Rw = (Y¥, + Y,) I* = p,(1-6,)I* + BOI* (6-1)
+resulting in a two-parameter model for the total etching yield of SiO, per incoming Ar* ion used,
+s.R
+Y.- - ee (6-2)
+tot p, + (B, PTR,
+In this case, R, is the ratio of CF, flux to Ar* flux. The lines in Fig 6-14 are the model results
+at each energy level and the fitted parameter values are listed in Table 6-1, as previously reported
+in the thesis work of Butterbaugh (1990).
+Table 6-1. Ar*/CF, SiO, Etching Model Parameters
+S, B
+Ion Energy
+150 eV 0.19 0.41
+250 eV 0.66 0.45
+350 eV 1,50 0,52
+The values for the apparent sticking probability of CF, in Table 6-1 are significantly
+higher than the total loss coefficient of 0.04 on a non-bombarded surface reported by Booth et al.
+[1989], or the value of 0.02 reported by Kiss [1991]. Both researchers made their measurements
+305
+
+===== PRINTED/PDF PAGE 306
+via in situ LIF in a parallel plate CF, plasma reactor. These measured values are total observed
+surface loss coefficients for CF, on reactor surfaces and include recombination effects as well as
+loss due to radical "sticking". Based on the fact that CF, was not observed to grow thick
+polymeric layers on either silicon or its oxide, we feel that it is very unlikely that substantial CF,
+is lost in steady-state due to "sticking" on non-bombarded reactor surfaces, Rather, results
+presented in Chapter 7 suggest that surface recombination of CF, with F is the dominant loss
+process. In addition, XPS data discussed above show definitive increase in CF, radical sorption
+with ion bombardment, so it is not surprising that the sticking coefficients regressed from our
+model are substantially higher than loss coefficients on passive surfaces. It is evident that the
+value of s, for the 350 eV data is unphysical and indicates over-simplification of the model and
+lack of complete knowledge of product distributions, which affect the value of s, extracted from
+the fitted data. Butterbaugh et al. [1991] note that if SiF, and CO, are assumed to be the etching
+products instead of SiF, and CO, then the values for s, would be one half cf the values in Table
+6-1. Furthermore, it may be that CF, chemisorbs with high probability to Si” sites as well as to
+O°, in which case each SiF, product liberated results in the production of 4 new “sites" instead
+of two, since 4 bonds must be broken for every silicon removed. This likelihood of multiple
+sorption sites also reduces the calculated sticking coefficient by a factor of 2. The dependence
+| of the apparent sticking probability on ion energy for CF, is much stronger than that observed for
+atomic fluorine. As was the case with F, it appears that CF, adsorbs more readily as the energy
+of the ions bombarding the SiO, surface increases. Again, we propose that this trend is due to
+the creation of more adsorption sites by the higher energy ions, which may be dangling bonds at
+surface oxygen sites. The exact nature of these "sites", or how their production correlates with
+
+ion energy is difficult to quantify.
+The values of B, for the Ar */CF, system are only weakly dependent on the ion energy,
+
+306
+
+===== PRINTED/PDF PAGE 307
+much less so than in the case of Ar‘/F etching. Due to the size of the CF, radical as compared
+to F, it has a much lower mobility in the "mixing zone" created by the bombarding ions, reducing
+the apparent reactivity of the fluorine it carries. Consequently, the increase in the "mixing zone"
+thickness with ion energy cannot be sampled by the surface CF, radicals, and the main effect of
+increasing ion energy is to increase surface sorption through dangling bond production. In fact,
+the physical sputtering yield, p,, (Ar* only) shows a stronger dependence on ion energy than does
+the parameter B,. Therefore, as the ion energy increases, the etching process becomes less
+chemical and more pnysical. This is consistent with observations made by Mayer et al. [1981]
+in the ion-enhanced etching of SiO, by CF,* ions. Mayer et al. found that the angular dependence
+of the sputtering yield was peaked at normal incidence for ion energies less than 400 eV, but
+became peaked at an increasing angle off normal for energies greater than 400 eV, which could
+be an indication of the increased importance of physical sputtering.
+
+A simple model was also developed to explain the silicon sputtering rate suppression due
+to the formation of a fluorocarbon overlayer, as given by the lines in Figure 6-10. The model
+basically assumes that CF, radicals which stick to available silicon surface sites form strong
+silicon-carbon bonds, effectively burying the Si species. The only etching mechanism considered
+is physical sputtering, where the probability of sputtering a "buried" silicon species is considered
+negligible. Neglecting the production of volatile products via fluorine transfer from the film to
+the underlying virgin silicon, we considered the following "site poisoning" model where ph‘ sical
+Sputtering is the only material removal mechanism,
+
+CF,(g) <----> CF,(p)
+CF,(p) + Si® ----> CF,(s)
+Si-(CF,); + CF,(p) --ky--> Si-(CF))j1
+307
+
+===== PRINTED/PDF PAGE 308
+Si-(CF,),,1 --By,11” --> Si-(CF,), + CF,(g)
+Si’ --p,,I* --> Si(g) + Si?
+Obviously this mechanism is oversimplified because we have qualitative mass spectral evidence,
+at least, that some SiF, species are formed. Also sputtering of Si-CF, is not considered as silicon
+removal mechanism; only removal of single CF, species to decrease the fluorocarbon layer
+thickness, or the sputtering of bare Si” sites is allowed. Since we saw no evidence for multilayer
+polymerization in the Ar*/CF, etching of silicon, we considered only the j=1 process. Total silicon:
+Sputter etch rate may then be written,
+Ria = Po I* (1-8,) (6-3)
+or in terms of total etching yield,
+Y, - _ PB. (6-4)
+B, + sR,
+where the silicon sputter yield p, is known. Unfortunately, the regression form of this model does
+not give s, and B, independently, but only their ratio, We have therefore assumed a reasonable
+sticking coefficient of 0.15 for CF, on Si’, resulting in the regressed fh, values shown in Table 6-2.
+Table 6-2 Ar*/CF, Silicon Etching Model Parameters
+s. B
+lon Energy
+150 eV 0.15 0.14
+250 eV 0.15 0.22
+350 eV 0.15 0.39
+308
+
+===== PRINTED/PDF PAGE 309
+Although oversimplified, the model gives reasonable CF, fragment sputtering yields, which
+increase with incoming Ar* energy, capturing the dynamic equilibrium between site "poisoning"
+and CF, resputtering. Qualitatively, the increasing ion energy is reducing the thickness and/or
+coverage of the fluorocarbon overlayer as contended earlier, Additional complexities in this model
+| such as multilayer growth, F transfer and diffusion, and SiF, product formation were considered,
+but cannot be supported by available data.
+6.5 Summary
+The nature of the spontaneous and ion-enhanced interactions of CF, radicals with Si and
+SiO, surfaces has been studied. It was found that CF, enhances the Ar* etching yield of SiO, in
+the presence of Ar* ion bombardment, while it suppresses the etching yield of polysilicon through
+the formation of a thin fluorocarbon overlayer. XPS studies of CF, exposed silicon and SiO,
+surfaces showed limited chemisorption and formation of multi-layers on ion-bombarded silicon,
+whereas little dissociation is observed on the SiO, surface. Ion bombardment was found to
+enhance radical sorption, as well as F-Si and C-Si bonding in both cases due to the ballistic
+“mixing” action of the ions. A simple model involving adsorption and ion-induced surface
+reaction was developed which captures the trends in the data and indicates that the sticking
+; probability of CF, on SiO, increases with the energy of ion bombardment. Suppression of silicon
+Sputtering can be modeled as a simple site "poisoning" effect where non-volatile Si-CF, species
+are formed, reducing the net sputter rate of silicon.
+309
+
+===== PRINTED/PDF PAGE 310
+Chapter 7
+Plasma-Surface Interactions in Fluorocarbon Etching
+
+In the studies presented in this chapter, we have considered the competitive interaction
+of the carbonaceous species present in the fluorocarbon etching environment with the ion-
+enhanced F-Si and F-SiO, chemistries discussed in Chapter 5, With the addition of competing
+carbon chemistries, these studies are a much more realistic model for thie dominant plasma-surface
+interactions in fluorocarbon plasmas. Steady-state etching kinetics in Ar*/F/CF, etching of silicon
+and SiO, were measured in three-beam studies to assess the competitive interaction between the
+F etchant, and the carbonaceous radicals. XPS spectra of Ar*/F/CF, etched surfaces were
+compared to the case of Ar’/CF, etching alone in order to compare the relative incorporation of
+surface carbon and fluorine. Evidence for effective surface carbon removal by the large F atom
+flux is presented. A CF, discharge was used in the CECR source to allow comparison of low
+energy CF,*/F and Ar/F etching.
+7.1 Influence of CF, radicals on Ar*/F etching
+
+The results of full three-beam studies of F-CF, interactions in Ar*/F/CF, etching of silicon
+under 250 eV ion bombardment are plotted in Figure 7-1. Data used to construct this plot were
+taktai along the Ar*/F and Ar*/CF, axes, and along constant F/Ar* isolines at approximate flux
+ratios of 15, 50 and 70. One might expect a large poisoning effect of the silicon-fluorine
+chemistry by CF, based on the complete suppression of silicon etching observed in CF,/H,
+plasmas at large H, mole fractions [Cobum and Winters, 1979], Instead, we measured at most
+a 20-30% suppression in silicon etching yields with large simultaneous F and CF, fluxes, and 250
+eV Ar’ ions. We initially hypothesized that the silicon etching suppression might become much
+
+310
+
+===== PRINTED/PDF PAGE 311
+, </
+; OM
+7 SM
+Z ERK
+BIASES
+Z SSSA II
+4 1. suoroen OSS SSS SSO
+Film Effect SSS
+OK
+ESE AY
+0 TT)
+SAS? ase os () Artphysical
+Flux Rati an eetgantt ness
+| ux Ratio (F/Ar+) Wasi 0
+0°20 ° ;
+Flux Ratio (CF2/Ar+)
+Fe vine senha Mei? interactions on silicon
+311
+
+===== PRINTED/PDF PAGE 312
+more efficient at lower ion energies more representative of mean ion energies in CF, plasma
+processes (e.g. 50 eV) where the sputter removal of CF, surface species is reduced. However,
+similar studies at a 20 eV Ar* energy shown in Figure 7-2 showed no measurable suppression of
+the Ar’/F silicon etching, indicating that the mixing action of the high energy ions is necessary
+to promote carbon incorporation and Si-C bond formation in the silicon near-surface. The
+importance of the mixing action of the high energy ions is further illustrated in Figure 7-3 where
+the Ar'/F etching rate suppression by CF, is examined at 20 eV, 250 eV, 500 eV. It would appear
+that surface carbon which is not "ion-mixed" into the lattice or dissociatively chemisorbed at the
+surface can be rapidly removed by: i) preferential sputtering of undissociated sorbed CF, as
+discussed in Chapter 6, and/or ii) rapid surface recombination of CF, with F atoms as discussed
+below. As a result of these removal mechanisms, thick fluorocarbon overlayer growth as has been
+reported in studies of Oehrlein et al. [1989], is prevented in Ar’ /F/CF, etching, suggesting that the
+CF," ions play a critical role in this film growth. The slight etching rate suppression shown in
+Figure 6-1 can be quantified in terms of a competitive adsorption model [Butterbaugh et al.,
+1991], where the effect of CF, is to poison a limited number of Si” sites to F sorption.
+
+Results of Ar*/F/CF, etching of SiO, in Figure 7-4 show complete dominance of the Ar*/F
+etching kinetics, suggesting that the F and CF, radicals were sorbing on different sites
+{Butterbaugh et al., 1991], or that the F was passivating the majority of sites to CF, sorption. The
+work of McFeely et al. [1988] suggests, in agreement with our work, that adsorbed CF, species
+may preferentially bond to oxygen at the surface which would keep it from interfering with F
+adsorption on Si adsorption sites. The XPS data presented in Chapter 6 is in agreement with this
+hypothesis where no evidence of Si-C bonding was observed in Ar‘/CF, etched SiO, surfaces.
+In addition, the ab initio calculations of Jenichen and Johansen [1988] show that the Si-OCF,
+bond dissociation energy on SiO, clusters is very weak, suggesting that COF, may be the
+
+312
+
