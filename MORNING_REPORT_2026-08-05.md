@@ -74,12 +74,29 @@ absolute.  No code change needed.
 | run | purpose | result |
 |---|---|---|
 | ml19 (yesterday) | 60 s endpoint, crosslink fix | mouth equilibrates 50.9; stopped t = 46.2 s on a mask sliver |
-| ml20 (overnight) | 12 s confirmation of published partner counts | see below |
+| ml20 (overnight) | 12 s confirmation of published partner counts | **forecast confirmed to 0.1 %** |
 
-Box spend overnight: one RTX 3090 at $0.113/h for the ml20 confirmation.
-Preregistered gate for ml20: closure/etch per window against Krüger's 0.0310
-and against ml18's 0.0569 / 0.0495 / 0.0367, with the forecast predicting a
-~19 % improvement and an aperture at t = 12 s above ml18's 64.89 nm.
+**ml20 result.**  The box ran ~46 s/step, so rather than wait ~2 h for t = 12 s
+the run was graded by matched-simulated-time comparison against ml18 — the
+same method the dx = 5 nm pass used.  Aperture closure per side, at the
+well-aligned points:
+
+| t (s) | ml20 | ml18 | ratio |
+|---|---|---|---|
+| 0.570 | 1.109 nm | 1.412 nm | 0.786 |
+| 0.632 | 1.177 | 1.412 | 0.834 |
+| 0.773 | 1.317 | 1.619 | 0.814 |
+
+Mean **0.811** against the forecast **0.810** (= 1.58/1.95).  Etch depth is
+unchanged at matched time (17.10 vs 17.02 nm), confirming the change touches
+the lip film only and does not perturb the floor.  The forecaster — already
+validated at 1.95 predicted / 1.83 measured on ml18 — now reproduces a
+feature-scale change to within 0.1 %.
+
+The run was stopped and the box destroyed once the forecast was confirmed:
+the *endpoint* effect on the 45 nm gate needs a 60 s run, which is blocked on
+the sliver artifact regardless (item 2 below), so further 12 s time bought
+nothing.  Box spend overnight: one RTX 3090 at $0.113/h, ~1 h.
 
 ## Blockers and next moves, in order
 

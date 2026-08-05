@@ -1,0 +1,5813 @@
+{
+  "boundary_provenance": {
+    "aggregate_ion_mixture_unresolved": true,
+    "claim_mode": "development",
+    "complete_published_flux_table_used": true,
+    "digitization_metadata_sha256": "7904a700afdcd116c6f57ef35aeb5555661ffed0d004304d815d20f79840ca55",
+    "digitized_iead_table_sha256": "913d31be623ec5d52d226c8cea499e7f014cf4f5a27e017b519633c96e5e3ee3",
+    "effective_ion_mass_amu": 39.948,
+    "ion_azimuthal_closure": "axisymmetric_uniform",
+    "ion_azimuthal_order": 16,
+    "ion_mixture_closure": "singly charged aggregate uses Ar mass for trajectory time scaling; electrostatic path at fixed energy/charge is mass independent",
+    "ion_quadrature": {
+      "angle_bin_deg": 0.25,
+      "compressed_quadrature_sha256": "958edf48d49fd151616ed4347f31d21bfb372740b20fb699ea187d5a0815f272",
+      "energy_bin_eV": 250.0,
+      "mean_direction_maximum_absolute_error": 5.896643173741722e-10,
+      "mean_energy_relative_error": 1.3123602067040342e-16,
+      "mode": "joint_probability_weighted_centroid_quadrature",
+      "node_count": 372,
+      "probability_error": 0.0,
+      "second_energy_moment_relative_error": 0.00036722644188751276,
+      "source_node_count": 878
+    },
+    "neutral_quadrature": {
+      "azimuthal_order": 16,
+      "method": "analytic_speed_marginal_plus_angular_quadrature",
+      "nodes_per_species": 128,
+      "polar_order": 8,
+      "validity_domain": "field-free neutral transport with energy-independent neutral surface laws"
+    },
+    "neutral_temperature_K": 300.0,
+    "predictive_blockers": [
+      "species-resolved positive-ion/hot-neutral composition is unpublished",
+      "the IEAD is HPEM output rather than a measured wafer distribution",
+      "3-D ion azimuth is a symmetry closure rather than a measured distribution"
+    ],
+    "provider": "krueger_2024_published_flux_and_digitized_iead",
+    "selected_species": [
+      "C3F4",
+      "C2F3",
+      "CF",
+      "CF2",
+      "CF3",
+      "O",
+      "ions"
+    ],
+    "source": "Kr\u00fcger et al., JVST A 42, 043008 (2024), HPEM Table I",
+    "source_sha256": "ad50b6099a52d2c2cc00eb4eade496b9d75c41d19881c5fec9e905f9dfd3808b",
+    "supports_prediction": false,
+    "total_boundary_quadrature_nodes": 6720
+  },
+  "config_hash": "7bce919a3580cd5e2656364be415b8182083352a5ae8850a8c11915d23881ece",
+  "configuration": {
+    "adaptive_growth_factor": 1.5,
+    "adaptive_profile_timestep": true,
+    "adaptive_safety_factor": 0.9,
+    "adaptive_shrink_factor": 0.5,
+    "ballistic_face_quadrature_points": 3,
+    "ballistic_transport": "face_gather",
+    "boundary_case": "base",
+    "charging": "disabled_for_Krueger_2024_calibration_and_transfer",
+    "compressed_boundary_quadrature": true,
+    "deposition_layer_depth_nm": 1.5,
+    "deterministic_exchange": {
+      "exchange_geometry_tolerance": 1e-09,
+      "exchange_method": "analytic_occlusion",
+      "exchange_relative_tolerance": 1e-05,
+      "extrusion_projection_guard_cells": 0.02,
+      "maximum_refinement_level": 24
+    },
+    "duration_s": 12.0,
+    "dx_um": 0.01,
+    "geometry": {
+      "cell_length_um": 0.02,
+      "cell_width_um": 0.13,
+      "domain_height_um": 2.8,
+      "initial_etched_depth_um": 0.0,
+      "mask_thickness_um": 0.85,
+      "opening_width_um": 0.09,
+      "substrate_top_um": 1.8
+    },
+    "grazing_ion_reflection": "literature_v1",
+    "ion_angle_bin_deg": 0.25,
+    "ion_azimuthal_closure": "axisymmetric_uniform",
+    "ion_azimuthal_order": 16,
+    "ion_energy_bin_eV": 250.0,
+    "low_frequency_power_kw": null,
+    "maximum_accepted_steps": 10000,
+    "maximum_displacement_cells": 0.75,
+    "minimum_step_duration_s": 1e-05,
+    "mixed_layer_volatilization_yield": 1.0,
+    "n_position": 16,
+    "n_steps": 60,
+    "neutral_direction_azimuthal_order": 16,
+    "neutral_direction_polar_order": 8,
+    "neutral_normal_order": 2,
+    "neutral_speed_quadrature": "analytic_speed_marginal",
+    "neutral_tensor_velocity_quadrature_active": false,
+    "neutral_transverse_order": 5,
+    "oxygen_half_saturation_flux_m2_s": 0.0,
+    "oxygen_to_fluorocarbon_ratio": null,
+    "profile_reinitialization": "cr2",
+    "radiosity_backend": "deterministic_extruded_2d",
+    "radiosity_enabled": true,
+    "radiosity_maximum_iterations": 2000,
+    "radiosity_rays_per_face": 8,
+    "radiosity_relative_tolerance": 1e-12,
+    "seed": 241,
+    "surface_model": "mixed_layer",
+    "surface_state_remap_backend": "common_refinement",
+    "target_displacement_cells": 0.35,
+    "topology_change_policy": "continue_gas_cavity",
+    "transport": "collisionless_face_gather_joint_IEAD",
+    "transport_device": "cuda:0",
+    "yield_energy_model": "threshold_power"
+  },
+  "extrusion_projection_max_deviation_mesh_units": 6.938893903907228e-18,
+  "git": {
+    "dirty": null,
+    "revision": null
+  },
+  "history": [
+    {
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.99999999994884,
+            "z_um": 1.81
+          }
+        ],
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 0.0,
+        "floor_z_um": 1.8000000000000511,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 89.99999999994884,
+        "mask_opening_per_y_widths_nm": [
+          89.99999999994884
+        ],
+        "mask_opening_throat_z_um": 1.81,
+        "mask_pocket_width_nm": 89.99999999994884,
+        "mask_top_z_um": 2.6500000000000257,
+        "maximum_feature_width_nm": NaN,
+        "neck_cd_nm": 89.99999999994884,
+        "neck_depth_from_mask_top_nm": 10.000000000025544,
+        "neck_z_um": 2.64,
+        "remaining_mask_thickness_nm": 850.0000000000256,
+        "top_cd_nm": 89.99999999994884,
+        "top_feature_width_nm": NaN
+      },
+      "physical_time_s": 0.0,
+      "step": 0,
+      "step_wall_s": 0.0
+    },
+    {
+      "accepted_step_duration_s": 0.1,
+      "cfl_substeps": 3,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 1,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.883491944843959e+16,
+          "secondary_events": 1999872,
+          "thermalized_rate": 2.5420477825877788e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 5.101952479846277e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 724,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 5.189843892634328e-15,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 89.15155617595532,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 89.16204827137611,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 89.16204815920668,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 89.18822398414667,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 89.20561553948403,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 89.2222096496857,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 89.24731198192582,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 89.28079337531426,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 89.27913785301263,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 89.29120791305623,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 89.31844530201091,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 89.34699760353388,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 89.36370160728147,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 89.37016345022221,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 89.40286705636655,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 89.4110795707666,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 89.42908859554704,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 89.44583315515719,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 89.4579112861742,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 89.47892953498481,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 89.4878579796256,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 89.4966862475039,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 89.50538491532204,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 89.51393174347625,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 89.52230542634551,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 89.54043080290488,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 89.55225615402435,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 89.55225612557207,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 89.56776205275801,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 89.57533896336655,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 89.5826055126041,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 89.58955091745949,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 89.59617459771692,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.60248458347577,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.60849471149376,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.61422245919206,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.6196868819233,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.62490736232651,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.62990280518416,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.63928821165436,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.64370864044346,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.64796358407618,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.65206048452707,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.65682542050621,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.66143939272739,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.66506066102681,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.6684977565297,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.68113554755841,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.68417354943894,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.68696319031238,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.68948856436431,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.69173935628494,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.69173935628494,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.69371046473714,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.69540091542343,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.69681242781249,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.69794795390673,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.6988106446742,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.69940290913839,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.69972592006553,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.69977881946953,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.69955848267134,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.69905940843833,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.70071756397604,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.69824460123205,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.6965400516961,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.6945111442403,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.69214896628527,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.68944440553506,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.68638774755752,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.68296821838993,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.68296821838993,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.67917363702186,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.67499047962765,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.67040378643651,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.66539805735275,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.65995847235223,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.64773805683853,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.64095943802134,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.63376025109073,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.62618369744082,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.61833298748012,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.61078622781606,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.61519274151088,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 88.92993468924429,
+            "z_um": 1.8
+          }
+        ],
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 2.210497905548614,
+        "floor_z_um": 1.7977895020944514,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 89.15155617595532,
+        "mask_opening_per_y_widths_nm": [
+          89.15155617595532
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 89.15155617595532,
+        "mask_top_z_um": 2.6502032351842955,
+        "maximum_feature_width_nm": 88.92993468924429,
+        "neck_cd_nm": 88.92993468924429,
+        "neck_depth_from_mask_top_nm": 850.2032351842954,
+        "neck_z_um": 1.8,
+        "remaining_mask_thickness_nm": 850.2032351842954,
+        "top_cd_nm": 89.15155617595532,
+        "top_feature_width_nm": 88.92993468924429
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "analytic_zero_reaction_elision"
+      },
+      "physical_time_s": 0.1,
+      "raw_maximum_face_velocity_m_s": 5.101952479846277e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [
+        {
+          "classification": "inline_recovery_retry",
+          "duration_s": 0.2,
+          "reason": "coupling displacement 0.010106196 exceeds 0.0075 mesh units"
+        }
+      ],
+      "removed_unresolved_solid_cells": 0,
+      "step": 1,
+      "step_wall_s": 161.36789960897295,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.0617410689817893,
+      "cfl_substeps": 1,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 3,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.8853227470362204e+16,
+          "secondary_events": 1964688,
+          "thermalized_rate": 2.466802042399617e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 2.873722700647296e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 740,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 7.554784521356329e-13,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 88.89936005159026,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 88.92071380014876,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 88.92553873441345,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 88.9605649415098,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 88.98484410433444,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 89.00659683716196,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 89.04060454843943,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 89.075842346717,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 89.07955485122787,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 89.09691201899875,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 89.13118250523452,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 89.16436384566407,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 89.18336760627284,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 89.19184793715608,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 89.2306194770445,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 89.24119275338067,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 89.26557809421675,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 89.28487327668681,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 89.30110920614007,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 89.32537777089901,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 89.33657072918896,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 89.34758820261746,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 89.35843397158328,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 89.3690646951763,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 89.38085354485835,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 89.40176335661482,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 89.4173208676374,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 89.4199955119804,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 89.43744254818483,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 89.44507532749218,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 89.45413277061154,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 89.4627918519591,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 89.47106854115721,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.4804305282903,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.48789742417534,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.49502530426685,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.50183799433678,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.50836114540961,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.51457237255134,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.5252041713353,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.53079842540647,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.53618663753865,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.54137629952153,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.54778407669906,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.55325909101974,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.55786242462192,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.56361923391447,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.57809415363776,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.58200264861962,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.58558267616793,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.58883456646531,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.59176258876211,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.59177638015062,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.59432100970342,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.59653753109136,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.59840871351535,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.59993841447088,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.6011303795148,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.60198743049187,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.60251062974376,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.60270032217292,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.60256008552068,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.60264330303514,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.60424532252502,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.60166894650956,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.59974315749685,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.59708095561716,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.5942875690278,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.59107706068123,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.58743676519016,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.583317564186,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.58330293385124,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.57880300925991,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.57380019416969,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.56831301309226,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.56232445815073,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.55581938569637,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.54251423189814,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.5344316827838,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.52589528680454,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.51685637668682,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.50746339647033,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.49602899013574,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.49784227015597,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 88.06376540766882,
+            "z_um": 1.8
+          }
+        ],
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 3.571276038367266,
+        "floor_z_um": 1.7964287239616328,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 88.89936005159026,
+        "mask_opening_per_y_widths_nm": [
+          88.89936005159026
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 88.89936005159026,
+        "mask_top_z_um": 2.650205669595443,
+        "maximum_feature_width_nm": 88.06376540766882,
+        "neck_cd_nm": 88.06376540766882,
+        "neck_depth_from_mask_top_nm": 850.2056695954427,
+        "neck_z_um": 1.8,
+        "remaining_mask_thickness_nm": 850.2056695954427,
+        "top_cd_nm": 88.89936005159026,
+        "top_feature_width_nm": 88.06376540766882
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.1617410689817893,
+      "raw_maximum_face_velocity_m_s": 2.873722700647296e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 2,
+      "step_wall_s": 48.59671137999976,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.09261160347268395,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 4,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.8743396807822572e+16,
+          "secondary_events": 2085220,
+          "thermalized_rate": 2.4034715998099636e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 3.987136900100806e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 740,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 2.814436351859962e-14,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 88.59477985592243,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 88.62701443732627,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 88.63997195984476,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 88.68657968907561,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 88.72022975235345,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 88.74975014434148,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 88.79591151602449,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 88.8336941685314,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 88.84415694863563,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 88.86902233100183,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.91265586493776,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.95207607923197,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.97424014076542,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.98837153582642,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 89.03222207298079,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 89.04570850510429,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 89.07762571210878,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 89.10052831501888,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 89.121639232184,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 89.15032139495281,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 89.1643532346518,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 89.17807888000603,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 89.19154512320468,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 89.20470775709624,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 89.22026810252954,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 89.24472305802439,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 89.26456188622977,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 89.27043273615377,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 89.29021479239985,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 89.29991220735454,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 89.31097173794899,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 89.32153781512278,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 89.33162026391653,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.34274772347624,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.35188821092443,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.36061767589486,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.3689620500146,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.37696157741406,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.38454165692356,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.3966014490988,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.40352765126646,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.41019759578136,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.41660402019974,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.42480278973477,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.4312987824769,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.436977027832,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.44600642436548,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.46178265035373,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.46664025694268,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.47109480722908,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.47514956997804,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.4788429136775,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.47887877596668,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.48203882031864,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.48483900551184,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.48722223479325,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.48919344054454,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.49075659528278,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.49191559577137,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.49267097785987,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.49302561900899,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.49297298365477,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.49390281317983,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.4952527571457,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.49259221597504,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.49043771812826,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.48748639674994,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.4843128786179,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.48011925447786,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.47585675613331,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.47095710655212,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.47092396189969,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.46568502742014,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.45979267727839,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.45332221100229,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.44625464859595,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.43857366017502,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.42408292801528,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.41452084764798,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.40448884706618,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.39380962152491,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.38267772438493,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.36936894053004,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.36817353765079,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 88.31033420893993,
+            "z_um": 1.8
+          }
+        ],
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 5.613042550249414,
+        "floor_z_um": 1.7943869574497506,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 88.59477985592243,
+        "mask_opening_per_y_widths_nm": [
+          88.59477985592243
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 88.59477985592243,
+        "mask_top_z_um": 2.6502057527186533,
+        "maximum_feature_width_nm": 88.31033420893993,
+        "neck_cd_nm": 88.31033420893993,
+        "neck_depth_from_mask_top_nm": 850.2057527186532,
+        "neck_z_um": 1.8,
+        "remaining_mask_thickness_nm": 850.2057527186532,
+        "top_cd_nm": 88.59477985592243,
+        "top_feature_width_nm": 88.31033420893993
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.25435267245447324,
+      "raw_maximum_face_velocity_m_s": 3.987136900100806e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 3,
+      "step_wall_s": 60.009343353973236,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.0790040592767296,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 4,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.900617255276833e+16,
+          "secondary_events": 2107598,
+          "thermalized_rate": 2.246403202947917e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 5.3202224335211735e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 740,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.8805551987427936e-13,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 88.36998723887139,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 88.40903547818287,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 88.42908189208786,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 88.48519329464807,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 88.52667350496014,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 88.56298892904115,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 88.61945289671593,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 88.65953666968647,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 88.67531787516819,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 88.70654889825582,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.75949182473008,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.8027847896917,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.82749955017749,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.84567588903413,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 88.89417890384307,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 88.90999584376709,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 88.94767572452896,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 88.97454396184655,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 88.99934041572585,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 89.03088514079856,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 89.04710966104646,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 89.06292723274771,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 89.07841655599239,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 89.0934990693454,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 89.11174075664469,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 89.13898786204551,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 89.16196213378035,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 89.17025465983298,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 89.19178056594183,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 89.20300041380553,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 89.21551881337987,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 89.22748537923273,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 89.23887340745127,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.25128053669631,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.2616231096394,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.27150440218153,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.28094779448807,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.29000091361789,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.29854017859816,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.31162607239322,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.31949335771093,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.32705646842153,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.33431037481914,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.34373965301303,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.35096851173914,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.3573651733768,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.3684632805041,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.38532052858258,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.39084775041708,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.39590750930732,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.40052406118676,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.40476374961465,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.40481271548043,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.40838364967061,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.41159440453379,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.41433845140322,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.41662122407257,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.41845508537732,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.41984083445746,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.42076530251894,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.42123116711092,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.42125575752736,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.4227013077782,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.42396500048172,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.4212657641575,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.41897790497013,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.41586189323917,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.41244225251953,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.4079612291563,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.4033423787508,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.39751991985005,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.39747543294828,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.3917759774791,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.38529125752778,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.37817077071598,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.37037321986111,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.36190651966908,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.34661369164502,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.33603262094145,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.32496293356598,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.31314891210047,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.3008170790817,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.28623152114105,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.28349806528641,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 88.64970454719698,
+            "z_um": 1.8
+          }
+        ],
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 7.35633199953134,
+        "floor_z_um": 1.7926436680004687,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 88.36998723887139,
+        "mask_opening_per_y_widths_nm": [
+          88.36998723887139
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 88.36998723887139,
+        "mask_top_z_um": 2.650205768522294,
+        "maximum_feature_width_nm": 88.64970454719698,
+        "neck_cd_nm": 88.36998723887139,
+        "neck_depth_from_mask_top_nm": 10.205768522293823,
+        "neck_z_um": 2.64,
+        "remaining_mask_thickness_nm": 850.2057685222939,
+        "top_cd_nm": 88.36998723887139,
+        "top_feature_width_nm": 88.64970454719698
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.33335673173120284,
+      "raw_maximum_face_velocity_m_s": 5.3202224335211735e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 4,
+      "step_wall_s": 54.95871164900018,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.059208050779094606,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 5,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.8830660465761644e+16,
+          "secondary_events": 2059904,
+          "thermalized_rate": 2.04597809601844e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 5.529214856702902e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 740,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.8846256645409374e-12,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 88.21327763709067,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 88.2566062500277,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 88.28189602691089,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 88.34546925694727,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 88.3928861844584,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 88.43443271262996,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 88.49883944164432,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 88.54069663995726,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 88.56040016904268,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 88.59648106653546,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.65629307800629,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.70269898495644,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.72934036802027,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.75034434196392,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 88.80248627455964,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 88.820016573964,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 88.86185839030999,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 88.89161395815142,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 88.91906228828057,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 88.95285967944704,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 88.97069988273917,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 88.98805105159215,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 89.00500356315447,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 89.02146624353955,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 89.04205686312052,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 89.07089009315416,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 89.09604564011242,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 89.10607119707142,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 89.12882734339642,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 89.1411158994892,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 89.15465756159882,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 89.16759470936076,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 89.17990196556455,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.19319680211335,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.2043697753154,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.2150517211124,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.22525161120831,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.23503197447339,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.24421668123702,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.25800520232457,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.26651151814394,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.27469110973419,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.28251499531022,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.29276629794879,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.30051258430797,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.30737421439771,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.31978652970892,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.33745402797473,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.34342454516562,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.34889630649946,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.3538939111017,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.35851720808687,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.35856774675126,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.36241315305368,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.36590430871111,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.36890103398906,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.3713977217199,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.37341318331717,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.37495223732853,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.37600165469514,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.37656564968249,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.3766534362447,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.37840072182722,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.37965940099821,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.37694454834366,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.374575246423,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.37135272909164,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.36778758691487,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.36313678427119,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.35828639784519,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.3522117791458,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.35181085586514,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.34581904013969,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.33895695066786,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.33141512901089,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.32314805076155,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.31416644959694,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.2983594507292,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.28709160315822,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.27532900729834,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.26276858500728,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.24963083833384,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.23418906599223,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.23031186056507,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 88.9509124798066,
+            "z_um": 1.8
+          }
+        ],
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 8.663015345761194,
+        "floor_z_um": 1.7913369846542389,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 88.21327763709067,
+        "mask_opening_per_y_widths_nm": [
+          88.21327763709067
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 88.21327763709067,
+        "mask_top_z_um": 2.650205716109751,
+        "maximum_feature_width_nm": 88.9509124798066,
+        "neck_cd_nm": 88.21327763709067,
+        "neck_depth_from_mask_top_nm": 10.205716109751073,
+        "neck_z_um": 2.64,
+        "remaining_mask_thickness_nm": 850.2057161097512,
+        "top_cd_nm": 88.21327763709067,
+        "top_feature_width_nm": 88.9509124798066
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.39256478251029747,
+      "raw_maximum_face_velocity_m_s": 5.529214856702902e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 5,
+      "step_wall_s": 48.14628303400241,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.05697011387035085,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 4,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.8550785694212892e+16,
+          "secondary_events": 1947108,
+          "thermalized_rate": 2.0362053520389532e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 5.283883895281782e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 740,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.8279880404353266e-12,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 88.06624195831283,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 88.11577947676024,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 88.14633301338506,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 88.21713336060104,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 88.27038562989722,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 88.31710243035805,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 88.38934730129156,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 88.4329598650218,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 88.45644464933412,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 88.49727617807967,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.56371930258418,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.61325394501294,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.64177322221865,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.66542364174326,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 88.72116915070607,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 88.7403490607251,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 88.78614112171583,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 88.81866293866229,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 88.84861719108488,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 88.88464616646522,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 88.9040307261728,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 88.92283137558115,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 88.94118156381602,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 88.95894256137046,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 88.98166301771805,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 89.01204071113742,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 89.03922461976623,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 89.05087376239027,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 89.07479552034862,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 89.08807981871195,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 89.1025774249442,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 89.11640905268581,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 89.12955322188432,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.14366930455984,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.1556090800405,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.16703095077332,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.17791250393958,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.18835739493593,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.19813953351107,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.21256873448819,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.22166789661782,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.23039461170984,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.23873352534734,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.24972611395083,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.257939423076,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.2652188733224,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.27876423409899,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.29719838152133,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.30357749533196,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.30942075847508,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.31476461308223,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.31972609420585,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.31978490846474,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.32387352853986,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.32761964288696,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.33083929794124,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.33353089009255,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.33571403528818,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.33739596217971,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.33856371430565,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.33921814890786,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.33936634581453,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.34139248008351,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.34263994012257,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.33993042648302,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.33749013638146,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.33418187791757,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.33049635471573,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.32569696581466,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.3206583190614,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.31437006944549,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.31365406254218,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.30741659194875,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.3002203736421,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.29230831805617,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.28362617032973,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.27419510712895,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.25793490810202,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.24606864593831,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.2336934263844,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.22045767216916,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.20661087664612,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.1904162854723,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.18543621541824,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 89.24103011615811,
+            "z_um": 1.8
+          }
+        ],
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 9.921722529125043,
+        "floor_z_um": 1.790078277470875,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 88.06624195831283,
+        "mask_opening_per_y_widths_nm": [
+          88.06624195831283
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 88.06624195831283,
+        "mask_top_z_um": 2.650205730718712,
+        "maximum_feature_width_nm": 89.24103011615811,
+        "neck_cd_nm": 88.06624195831283,
+        "neck_depth_from_mask_top_nm": 10.20573071871178,
+        "neck_z_um": 2.64,
+        "remaining_mask_thickness_nm": 850.2057307187118,
+        "top_cd_nm": 88.06624195831283,
+        "top_feature_width_nm": 89.24103011615811
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.4495348963806483,
+      "raw_maximum_face_velocity_m_s": 5.283883895281782e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 6,
+      "step_wall_s": 45.93578570301179,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.05961523876050297,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 4,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.8390093568828188e+16,
+          "secondary_events": 1921376,
+          "thermalized_rate": 1.9989445669083468e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 5.194116458293395e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 756,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 5.923109231414375e-13,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 87.92079757385196,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 87.97272485981014,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 88.00899815976678,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 88.08745566267905,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 88.14696475428829,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 88.19923358363101,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 88.27990500839148,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 88.3254255472447,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 88.3528954549873,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 88.39879643775119,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.4722535191195,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.52520553952796,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.55572345654295,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.58210284791619,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 88.64172283165249,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 88.66264476696001,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 88.71254957574135,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 88.74795850783653,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 88.78052486981008,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 88.8189618667988,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 88.83997298803048,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 88.86028559062142,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 88.88009726542003,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 88.89919282136213,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 88.92404744788415,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 88.9560750864273,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 88.98533796102464,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 88.99866479507713,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 89.02379195996268,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 89.03808382064993,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 89.0535641965342,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 89.06829706211431,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 89.08230515040057,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.09725351803002,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.10997730301987,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.12212650598114,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.13371183204461,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.14483185101756,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.15520793723242,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.17027737618768,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.17996287241736,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.18926084147753,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.19810245131966,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.2098203367883,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.21851290647922,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.22620998512726,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.24083666940628,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.26006720824331,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.26685892421378,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.27306494799191,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.27874239095888,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.28405683178045,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.28412572551653,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.2884546122382,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.29244945590192,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.29589628419198,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.29878554166409,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.30114563349747,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.30297087769655,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.30425025889092,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.30501180659314,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.30522744263556,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.30753413598573,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.30876615130946,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.3060651352423,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.3035648311173,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.30017990205074,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.29639050994305,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.2914500142401,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.28624240838931,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.27976023946867,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.27874815086514,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.27227468557926,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.2647567791455,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.25649404119906,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.24741943129283,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.23754393012912,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.22084596374808,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.20839604425797,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.19542734662151,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.18154408829265,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.1669932188265,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.1500625248973,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.12415165174171,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 89.25914977850259,
+            "z_um": 1.8
+          }
+        ],
+        "asymmetry_cell_count": 0.0,
+        "etch_depth_nm": 11.246297107399883,
+        "floor_z_um": 1.7887537028926002,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 87.92079757385196,
+        "mask_opening_per_y_widths_nm": [
+          87.92079757385196
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 87.92079757385196,
+        "mask_top_z_um": 2.6502054014068643,
+        "maximum_feature_width_nm": 89.25914977850259,
+        "neck_cd_nm": 87.92079757385196,
+        "neck_depth_from_mask_top_nm": 10.205401406864212,
+        "neck_z_um": 2.64,
+        "remaining_mask_thickness_nm": 850.2054014068643,
+        "top_cd_nm": 87.92079757385196,
+        "top_feature_width_nm": 89.25914977850259
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.5091501351411513,
+      "raw_maximum_face_velocity_m_s": 5.194116458293395e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 7,
+      "step_wall_s": 45.65277667500777,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.060645540493618026,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 3,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.842791128522689e+16,
+          "secondary_events": 1901180,
+          "thermalized_rate": 1.957566837308572e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 5.061104967373797e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 748,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.7412289694234446e-12,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 87.78114742535482,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 87.83042770406834,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 87.87272277968188,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 87.95908931479357,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 88.02512916095623,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 88.08319755653282,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 88.17267890064673,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 88.22022914185258,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 88.25180275549826,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 88.3036200832794,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.38377563821417,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.44029951844416,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.47289184197233,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.5020249793674,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 88.56570835690275,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 88.5884164121906,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 88.6425215142824,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 88.68088161437637,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 88.7161075273046,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 88.7570592861375,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 88.7797247386401,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 88.80159706135751,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 88.82289332511644,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 88.84334489225587,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 88.87031567643628,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 88.90405027268342,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 88.93566808486531,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 88.9504565188215,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 88.97678954209152,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 88.99209204810931,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 89.00853667353978,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 89.02418701591708,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 89.03905517654506,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.05484241602832,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.06833662348029,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.08121299106853,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.09349317604551,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.10528694582813,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.11626217027111,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.13196720214208,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.14223254058314,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.152102295418,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.16144079834883,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.17388109748404,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.18304328542243,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.1911401866496,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.20680089995638,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.22684894408553,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.23405309940244,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.24061627297993,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.24663790984175,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.25230553840099,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.25239056904782,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.2569668765737,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.26122742437128,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.2648924690623,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.26799265505383,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.27053112670397,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.2725149336101,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.27393495739047,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.27480277442848,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.27509965576752,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.2777232815847,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.27895596322034,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.2762804915134,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.27375633384167,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.27032247536668,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.26645037212305,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.26140770493474,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.25605991309921,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.24941339034118,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.24815118880602,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.24149028550809,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.23371578685038,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.22513501001636,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.2157197258302,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.20546391066522,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.1883911995312,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.17541048877206,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.16190055634502,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.1474258381699,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.13221229185082,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.11459834007943,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.07042208347927,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 82.92372502905094,
+            "z_um": 1.79
+          }
+        ],
+        "asymmetry_cell_count": 0.00016367211556483907,
+        "etch_depth_nm": 12.59671722437794,
+        "floor_z_um": 1.787403282775622,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 87.78114742535482,
+        "mask_opening_per_y_widths_nm": [
+          87.78114742535482
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 87.78114742535482,
+        "mask_top_z_um": 2.6502056141932493,
+        "maximum_feature_width_nm": 82.92372502905094,
+        "neck_cd_nm": 82.92372502905094,
+        "neck_depth_from_mask_top_nm": 860.2056141932493,
+        "neck_z_um": 1.79,
+        "remaining_mask_thickness_nm": 850.2056141932493,
+        "top_cd_nm": 87.78114742535482,
+        "top_feature_width_nm": 82.92372502905094
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.5697956756347693,
+      "raw_maximum_face_velocity_m_s": 5.061104967373797e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 8,
+      "step_wall_s": 46.11101785599021,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.062239373028347436,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 4,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.8501799482559984e+16,
+          "secondary_events": 1886364,
+          "thermalized_rate": 1.9116475589425412e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 4.6520470813514735e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 748,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.6740081342426566e-12,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 87.64591928384955,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 87.6867107292143,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 87.73535267639454,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 87.82995174027576,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 87.90284569013448,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 87.96699639305635,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 88.06575789542852,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 88.11544674341167,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 88.15127668861925,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 88.20924445631698,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.29643061584066,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.35674726544815,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.39152401644884,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.423466764954,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 88.49143571335885,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 88.51598782421065,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 88.57444148137303,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 88.61584778647021,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 88.65382653627829,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 88.69740349613555,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 88.72179391441854,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 88.74529311722667,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 88.768086821417,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 88.78993114085998,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 88.81901933517402,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 88.85453571062611,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 88.88877383736067,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 88.90485142396639,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 88.93239629586854,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 88.94872712442927,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 88.96615364630297,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 88.98273932916665,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 88.99847298076291,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 89.01508936147947,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 89.02939810123375,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.04299001211284,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.05598491990226,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.0684349792939,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.08001128547097,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.09635583168507,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.10720696908089,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.1176334215753,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.1274776504361,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.14063951756499,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.15028758473343,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.15878057547772,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.17545261155738,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.19634407170194,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.20397636399926,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.21090768967589,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.21726887794166,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.22330487820587,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.22339886303673,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.22823064199152,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.23275293514907,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.23666556213475,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.23998578396952,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.24272459147201,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.24487936312573,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.24644609349679,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.24743954919745,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.24785247082553,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.25082655512509,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.25205571248554,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.24943822188085,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.24692400366402,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.24346006383291,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.23953299660944,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.23442373578807,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.22897316740878,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.22219209813082,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.22070646581271,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.21389159049671,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.20589489731407,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.19704873649708,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.18734604411594,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.17673497366364,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.15931827875113,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.14586421098313,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.1318526375757,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.11684319929154,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.10099902395957,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.08274708256603,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 89.02287603289408,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 84.87867935252916,
+            "z_um": 1.79
+          }
+        ],
+        "asymmetry_cell_count": 0.00010321498469731405,
+        "etch_depth_nm": 13.981098761122412,
+        "floor_z_um": 1.7860189012388776,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 87.64591928384955,
+        "mask_opening_per_y_widths_nm": [
+          87.64591928384955
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 87.64591928384955,
+        "mask_top_z_um": 2.650205872695554,
+        "maximum_feature_width_nm": 84.87867935252916,
+        "neck_cd_nm": 84.87867935252916,
+        "neck_depth_from_mask_top_nm": 860.2058726955541,
+        "neck_z_um": 1.79,
+        "remaining_mask_thickness_nm": 850.2058726955541,
+        "top_cd_nm": 87.64591928384955,
+        "top_feature_width_nm": 84.87867935252916
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.6320350486631168,
+      "raw_maximum_face_velocity_m_s": 4.6520470813514735e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 9,
+      "step_wall_s": 45.847384734021034,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.06771212640188688,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 3,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.853971743989971e+16,
+          "secondary_events": 1878796,
+          "thermalized_rate": 1.5284159514129564e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 4.285339058222175e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 748,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.083209098397673e-12,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 87.5072986954957,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 87.53206474604978,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 87.5877712000734,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 87.6914640763014,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 87.77199374446279,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 87.84291085907877,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 87.95202810432302,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 88.00414799992582,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 88.04693900088411,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 88.10981504531927,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.2046145323723,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.26920166610913,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.30638860561679,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.34138934954854,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 88.41411545452665,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 88.44069136251112,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 88.50390247384804,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 88.54866662022626,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 88.58963406324703,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 88.63615294942538,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 88.66242238290236,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 88.68763823717832,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 88.71210167858362,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 88.73543243749116,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 88.76679767806411,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 88.80427131478409,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 88.84130140015506,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 88.858796318186,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 88.88764420377709,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 88.90507389253432,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 88.9235666690892,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 88.94113582563884,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 88.95779120116093,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 88.97530629807999,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 88.99045685630956,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 89.00482543748312,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 89.01857147979192,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 89.03173338986664,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.04393410042832,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.06096378347038,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.07243902564562,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.0834544802069,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.0938278109564,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.107757550286,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.11792427071953,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.12682071915188,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.14453439595,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.16633808699943,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.17441848263257,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.18174996310833,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.18848058413225,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.19489499826571,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.19500149794749,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.20010709131813,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.2049043578313,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.20906989097573,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.21262577610652,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.21556954408335,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.21791527434617,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.21965076283114,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.2207755658107,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.22172942464182,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.2246774394763,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.2259082456543,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.22336170777307,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.22085052374615,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.21737991371148,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.21341966415916,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.20824019285298,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.20268126795969,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.19577216090191,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.1940937932891,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.18712045980436,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.17889885456812,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.16983118154114,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.15981545534869,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.14890960165292,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.13113229844983,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.11720041235826,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.1027157649578,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.08715487877586,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.07068123502906,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.05172315559282,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 88.97753444211139,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 85.74683913090338,
+            "z_um": 1.79
+          }
+        ],
+        "asymmetry_cell_count": 5.764848635264608e-05,
+        "etch_depth_nm": 15.477551219875485,
+        "floor_z_um": 1.7845224487801246,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 87.5072986954957,
+        "mask_opening_per_y_widths_nm": [
+          87.5072986954957
+        ],
+        "mask_opening_throat_z_um": 2.64,
+        "mask_pocket_width_nm": 87.5072986954957,
+        "mask_top_z_um": 2.6502061011720244,
+        "maximum_feature_width_nm": 85.74683913090338,
+        "neck_cd_nm": 85.74683913090338,
+        "neck_depth_from_mask_top_nm": 860.2061011720243,
+        "neck_z_um": 1.79,
+        "remaining_mask_thickness_nm": 850.2061011720243,
+        "top_cd_nm": 87.5072986954957,
+        "top_feature_width_nm": 85.74683913090338
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.6997471750650036,
+      "raw_maximum_face_velocity_m_s": 4.285339058222175e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 10,
+      "step_wall_s": 45.754841748974286,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.07350643571495635,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 4,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.853504636254267e+16,
+          "secondary_events": 1862700,
+          "thermalized_rate": 1.4985705134421802e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 5.222524491805013e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 764,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.7337034534894943e-12,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 87.36678449378043,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 87.3659759933518,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 87.42950641506243,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 87.54323529462712,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 87.63225174300892,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 87.71067977453124,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 87.83134053084079,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 87.88617329991247,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 87.93655402784614,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 88.00497704949045,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.10825595266681,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.17767011020581,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.21754390842892,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.25588353723268,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 88.33393062070513,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 88.36273624503414,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 88.43116910422721,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 88.47966772137835,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 88.52390537142921,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 88.57366544270573,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 88.60206439587712,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 88.62915982601969,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 88.65544647087965,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 88.68041252428583,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 88.71421975038596,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 88.75382478841297,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 88.79385481401849,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 88.81294586677602,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 88.84322143119084,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 88.86182245784552,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 88.88146396926616,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 88.90009784071998,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 88.91777227121483,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 88.93622736107358,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 88.95225583849911,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 88.96748300000918,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 88.98203046565133,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 88.99597403668251,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 89.00883577196197,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.02660439270075,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.0387391757177,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.05037401106202,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.06131437496964,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.07604614713408,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.0867619653043,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.09609820382089,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.11487573503742,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.13765022017009,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.14621784343811,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.15396401912761,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.16106328420555,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.16790387356511,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.16802541685558,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.17340040507663,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.17849018780855,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.18293650724337,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.18673099258714,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.18991428294082,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.19246497359009,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.19437925722401,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.19564883885434,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.1971475596473,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.20010098309346,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.2013477496503,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.19887146059743,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.196366611961,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.1929395116313,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.18891354032255,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.18377369170956,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.1780600009988,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.17109570691198,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.1692033054207,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.16208465950172,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.1538329831624,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.14442115085232,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.13401034702429,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.12321679457811,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.10468380053338,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.09028619346775,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.07584800720113,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.05915923386145,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.04251293769177,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.02329959265943,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 88.9352784770025,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 86.1902895514846,
+            "z_um": 1.79
+          }
+        ],
+        "asymmetry_cell_count": 2.9923046575286438e-05,
+        "etch_depth_nm": 17.098895765493836,
+        "floor_z_um": 1.7829011042345062,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 87.3659759933518,
+        "mask_opening_per_y_widths_nm": [
+          87.3659759933518
+        ],
+        "mask_opening_throat_z_um": 2.63,
+        "mask_pocket_width_nm": 87.3659759933518,
+        "mask_top_z_um": 2.650206009511741,
+        "maximum_feature_width_nm": 86.1902895514846,
+        "neck_cd_nm": 86.1902895514846,
+        "neck_depth_from_mask_top_nm": 860.206009511741,
+        "neck_z_um": 1.79,
+        "remaining_mask_thickness_nm": 850.206009511741,
+        "top_cd_nm": 87.36678449378043,
+        "top_feature_width_nm": 86.1902895514846
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.7732536107799599,
+      "raw_maximum_face_velocity_m_s": 5.222524491805013e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 11,
+      "step_wall_s": 48.18074759596493,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    },
+    {
+      "accepted_step_duration_s": 0.06031565778088469,
+      "cfl_substeps": 2,
+      "filled_unresolved_gas_cavity_cells": 0,
+      "hit_probability": {
+        "C2F3": 1.0,
+        "C3F4": 1.0,
+        "CF": 1.0,
+        "CF2": 1.0,
+        "CF3": 1.0,
+        "O": 1.0,
+        "ions": 1.0,
+        "ions:hot_neutral": {
+          "bounce_generations": 4,
+          "escaped_rate": 0.0,
+          "reflected_rate": 1.8534322454678412e+16,
+          "secondary_events": 1854780,
+          "thermalized_rate": 1.4126823486362558e+16
+        }
+      },
+      "interior_gas_nucleation_suppressed_cells": 0,
+      "max_velocity_m_s": 4.921322507050187e-08,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_inactive_face_count": 764,
+      "maximum_neutral_radiosity_rays_per_face": 0,
+      "maximum_neutral_radiosity_refinement_count": 0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.591136419929186e-12,
+      "maximum_visibility_derived_horizon_extension_count": 0,
+      "maximum_visibility_final_horizon_wraps": 0,
+      "maximum_visibility_float64_evaluated_count": 0,
+      "maximum_visibility_overlap_skip_count": 0,
+      "maximum_visibility_overlap_skip_depth_um": 0.0,
+      "maximum_visibility_recovered_hit_count": 0,
+      "maximum_visibility_source_relaunch_count": 0,
+      "maximum_visibility_source_relaunch_distance_um": 0.0,
+      "maximum_visibility_source_support_area_fraction": 0.0,
+      "maximum_visibility_source_support_distance_um": 0.0,
+      "maximum_visibility_source_support_face_count": 0,
+      "maximum_visibility_unclassified_ray_count": 0,
+      "maximum_visibility_wrap_count": 0,
+      "metrics": {
+        "aperture_profile": [
+          {
+            "width_nm": 87.25966760779427,
+            "z_um": 2.64
+          },
+          {
+            "width_nm": 87.2306897751067,
+            "z_um": 2.63
+          },
+          {
+            "width_nm": 87.3007049073265,
+            "z_um": 2.62
+          },
+          {
+            "width_nm": 87.42278211734565,
+            "z_um": 2.61
+          },
+          {
+            "width_nm": 87.51890770490486,
+            "z_um": 2.6
+          },
+          {
+            "width_nm": 87.60360701362968,
+            "z_um": 2.59
+          },
+          {
+            "width_nm": 87.73396454067507,
+            "z_um": 2.58
+          },
+          {
+            "width_nm": 87.79108923340968,
+            "z_um": 2.57
+          },
+          {
+            "width_nm": 87.84771702735263,
+            "z_um": 2.56
+          },
+          {
+            "width_nm": 87.92084055535318,
+            "z_um": 2.5500000000000003
+          },
+          {
+            "width_nm": 88.03123989814897,
+            "z_um": 2.54
+          },
+          {
+            "width_nm": 88.10473332647567,
+            "z_um": 2.5300000000000002
+          },
+          {
+            "width_nm": 88.14686528931828,
+            "z_um": 2.52
+          },
+          {
+            "width_nm": 88.1879764335421,
+            "z_um": 2.5100000000000002
+          },
+          {
+            "width_nm": 88.27049869692944,
+            "z_um": 2.5
+          },
+          {
+            "width_nm": 88.30117606503023,
+            "z_um": 2.49
+          },
+          {
+            "width_nm": 88.37395756065771,
+            "z_um": 2.48
+          },
+          {
+            "width_nm": 88.42556267057479,
+            "z_um": 2.47
+          },
+          {
+            "width_nm": 88.47253452904292,
+            "z_um": 2.46
+          },
+          {
+            "width_nm": 88.52502523315732,
+            "z_um": 2.45
+          },
+          {
+            "width_nm": 88.55516960656502,
+            "z_um": 2.44
+          },
+          {
+            "width_nm": 88.5838284351358,
+            "z_um": 2.43
+          },
+          {
+            "width_nm": 88.61164054790494,
+            "z_um": 2.42
+          },
+          {
+            "width_nm": 88.63795753553575,
+            "z_um": 2.41
+          },
+          {
+            "width_nm": 88.67376092246057,
+            "z_um": 2.4
+          },
+          {
+            "width_nm": 88.7151285214306,
+            "z_um": 2.39
+          },
+          {
+            "width_nm": 88.75760412208716,
+            "z_um": 2.38
+          },
+          {
+            "width_nm": 88.77805427971256,
+            "z_um": 2.37
+          },
+          {
+            "width_nm": 88.80947716699654,
+            "z_um": 2.36
+          },
+          {
+            "width_nm": 88.82904641976903,
+            "z_um": 2.35
+          },
+          {
+            "width_nm": 88.84963791334305,
+            "z_um": 2.34
+          },
+          {
+            "width_nm": 88.86915920426752,
+            "z_um": 2.33
+          },
+          {
+            "width_nm": 88.88763647979532,
+            "z_um": 2.32
+          },
+          {
+            "width_nm": 88.90685709964252,
+            "z_um": 2.31
+          },
+          {
+            "width_nm": 88.92362179285017,
+            "z_um": 2.3000000000000003
+          },
+          {
+            "width_nm": 88.93953352707955,
+            "z_um": 2.29
+          },
+          {
+            "width_nm": 88.95473970455758,
+            "z_um": 2.2800000000000002
+          },
+          {
+            "width_nm": 88.96928352718918,
+            "z_um": 2.27
+          },
+          {
+            "width_nm": 88.98270021768978,
+            "z_um": 2.2600000000000002
+          },
+          {
+            "width_nm": 89.00106739536707,
+            "z_um": 2.25
+          },
+          {
+            "width_nm": 89.01372269724176,
+            "z_um": 2.24
+          },
+          {
+            "width_nm": 89.02586307262445,
+            "z_um": 2.23
+          },
+          {
+            "width_nm": 89.03727786931817,
+            "z_um": 2.22
+          },
+          {
+            "width_nm": 89.05267603115676,
+            "z_um": 2.21
+          },
+          {
+            "width_nm": 89.06383372266095,
+            "z_um": 2.2
+          },
+          {
+            "width_nm": 89.07348915629238,
+            "z_um": 2.19
+          },
+          {
+            "width_nm": 89.0931059898133,
+            "z_um": 2.18
+          },
+          {
+            "width_nm": 89.11667237727947,
+            "z_um": 2.17
+          },
+          {
+            "width_nm": 89.12561533017087,
+            "z_um": 2.16
+          },
+          {
+            "width_nm": 89.13370421071907,
+            "z_um": 2.15
+          },
+          {
+            "width_nm": 89.14113405730734,
+            "z_um": 2.14
+          },
+          {
+            "width_nm": 89.14831867796289,
+            "z_um": 2.13
+          },
+          {
+            "width_nm": 89.14847037316684,
+            "z_um": 2.12
+          },
+          {
+            "width_nm": 89.15425476121524,
+            "z_um": 2.11
+          },
+          {
+            "width_nm": 89.15958635304469,
+            "z_um": 2.1
+          },
+          {
+            "width_nm": 89.16404462769667,
+            "z_um": 2.09
+          },
+          {
+            "width_nm": 89.16804320004371,
+            "z_um": 2.08
+          },
+          {
+            "width_nm": 89.17139749535319,
+            "z_um": 2.07
+          },
+          {
+            "width_nm": 89.17411903304067,
+            "z_um": 2.06
+          },
+          {
+            "width_nm": 89.17620033752199,
+            "z_um": 2.05
+          },
+          {
+            "width_nm": 89.17759959605482,
+            "z_um": 2.04
+          },
+          {
+            "width_nm": 89.17958112166387,
+            "z_um": 2.0300000000000002
+          },
+          {
+            "width_nm": 89.18252105042868,
+            "z_um": 2.02
+          },
+          {
+            "width_nm": 89.18383708577697,
+            "z_um": 2.0100000000000002
+          },
+          {
+            "width_nm": 89.18141236060464,
+            "z_um": 2.0
+          },
+          {
+            "width_nm": 89.17902328045567,
+            "z_um": 1.99
+          },
+          {
+            "width_nm": 89.17555984167383,
+            "z_um": 1.98
+          },
+          {
+            "width_nm": 89.1715195553609,
+            "z_um": 1.97
+          },
+          {
+            "width_nm": 89.16650351020857,
+            "z_um": 1.96
+          },
+          {
+            "width_nm": 89.16055175727018,
+            "z_um": 1.95
+          },
+          {
+            "width_nm": 89.15400263704238,
+            "z_um": 1.94
+          },
+          {
+            "width_nm": 89.15148203041676,
+            "z_um": 1.93
+          },
+          {
+            "width_nm": 89.14495035709834,
+            "z_um": 1.92
+          },
+          {
+            "width_nm": 89.13602031200737,
+            "z_um": 1.9100000000000001
+          },
+          {
+            "width_nm": 89.12680809729417,
+            "z_um": 1.9000000000000001
+          },
+          {
+            "width_nm": 89.1165499218505,
+            "z_um": 1.8900000000000001
+          },
+          {
+            "width_nm": 89.10533673994277,
+            "z_um": 1.8800000000000001
+          },
+          {
+            "width_nm": 89.0861816583625,
+            "z_um": 1.87
+          },
+          {
+            "width_nm": 89.07217613457222,
+            "z_um": 1.86
+          },
+          {
+            "width_nm": 89.05766154361986,
+            "z_um": 1.85
+          },
+          {
+            "width_nm": 89.03953289533854,
+            "z_um": 1.84
+          },
+          {
+            "width_nm": 89.02352737577563,
+            "z_um": 1.83
+          },
+          {
+            "width_nm": 89.00335708238048,
+            "z_um": 1.82
+          },
+          {
+            "width_nm": 88.90641690547172,
+            "z_um": 1.81
+          },
+          {
+            "width_nm": 86.3796120442236,
+            "z_um": 1.79
+          }
+        ],
+        "asymmetry_cell_count": 2.3572603473354103e-05,
+        "etch_depth_nm": 18.448783360754952,
+        "floor_z_um": 1.781551216639245,
+        "mask_exit_z_um": 1.81,
+        "mask_opening_connected_to_exterior": true,
+        "mask_opening_cross_y_span_nm": 0.0,
+        "mask_opening_nm": 87.2306897751067,
+        "mask_opening_per_y_widths_nm": [
+          87.2306897751067
+        ],
+        "mask_opening_throat_z_um": 2.63,
+        "mask_pocket_width_nm": 87.2306897751067,
+        "mask_top_z_um": 2.6502058148670558,
+        "maximum_feature_width_nm": 86.3796120442236,
+        "neck_cd_nm": 86.3796120442236,
+        "neck_depth_from_mask_top_nm": 860.2058148670557,
+        "neck_z_um": 1.79,
+        "remaining_mask_thickness_nm": 850.2058148670557,
+        "top_cd_nm": 87.25966760779427,
+        "top_feature_width_nm": 86.3796120442236
+      },
+      "neutral_radiosity_solver_methods": {
+        "C2F3": "gmres_rate_space_reachable_subspace",
+        "C3F4": "analytic_zero_reaction_elision",
+        "CF": "gmres_rate_space_reachable_subspace",
+        "CF2": "gmres_rate_space_reachable_subspace",
+        "CF3": "gmres_rate_space_reachable_subspace",
+        "O": "gmres_rate_space_reachable_subspace"
+      },
+      "physical_time_s": 0.8335692685608446,
+      "raw_maximum_face_velocity_m_s": 4.921322507050187e-08,
+      "reassigned_unresolved_material_nodes": 0,
+      "rejected_trials": [],
+      "removed_unresolved_solid_cells": 0,
+      "step": 12,
+      "step_wall_s": 45.42073257599259,
+      "topology_event": null,
+      "unresolved_gas_cavity_volume_upper_bound_m3": 0.0,
+      "unresolved_material_volume_upper_bound_m3": 0.0,
+      "validity": {
+        "nonpredictive_parameters": [
+          "material_1.sticking_probability",
+          "material_1.fluorine_film_sticking",
+          "material_1.oxidation_probability",
+          "material_1.mixing_efficiency",
+          "material_1.volatilization_yield",
+          "material_1.film_sputter_yield",
+          "material_2.sticking_probability",
+          "material_2.fluorine_film_sticking",
+          "material_2.oxidation_probability",
+          "material_2.mixing_efficiency",
+          "material_2.volatilization_yield",
+          "material_2.film_sputter_yield"
+        ],
+        "parameter_evidence_supports_prediction": false,
+        "reasons": [],
+        "within_declared_scope": true
+      }
+    }
+  ],
+  "mechanism_provenance": "{'model': 'material-mechanism-router-3d-v1', 'materials': {'1': {'mechanism': 'MixedLayerMechanism', 'evidence': {'role': 'SiO2 substrate', 'model': {'model': 'mixed-layer-two-reservoir-v1', 'substrate': 'sio2', 'parameters': {'sticking_probability': 0.0842, 'fluorine_film_sticking': 0.05, 'oxidation_probability': 0.0423, 'mixing_efficiency': 1.0, 'volatilization_yield': 1.0, 'film_sputter_yield': 0.1384, 'reference_energy_eV': 1000.0, 'precursor_fc_ratio': 1.5, 'ion': [18, 39.948]}, 'energy_model': 'zbl-deposited-in-layer (stopping tables, no fitted law)', 'chemisorption_probability': {'CF': 0.278, 'CF2': 0.278, 'CF3': 0.2, 'C2F3': 0.2, 'C2F4': 0.001, 'C3F5': 0.001, 'C3F6': 0.001}, 'species_channels': {'precursor': ['CF', 'CF2', 'CF3', 'C2F3', 'C2F4', 'C3F5', 'C3F6'], 'fluorine': [], 'oxygen': ['O'], 'inert': ['C3F4']}}, 'claim_status': 'development_replay'}}, '2': {'mechanism': 'MixedLayerMechanism', 'evidence': {'role': 'amorphous-carbon mask', 'model': {'model': 'mixed-layer-two-reservoir-v1', 'substrate': 'carbon', 'parameters': {'sticking_probability': 0.0842, 'fluorine_film_sticking': 0.05, 'oxidation_probability': 0.0423, 'mixing_efficiency': 1.0, 'volatilization_yield': 1.0, 'film_sputter_yield': 0.1384, 'reference_energy_eV': 1000.0, 'precursor_fc_ratio': 1.5, 'ion': [18, 39.948]}, 'energy_model': 'zbl-deposited-in-layer (stopping tables, no fitted law)', 'chemisorption_probability': {'CF': 0.278, 'CF2': 0.278, 'CF3': 0.2, 'C2F3': 0.2, 'C2F4': 0.001, 'C3F5': 0.001, 'C3F6': 0.001}, 'species_channels': {'precursor': ['CF', 'CF2', 'CF3', 'C2F3', 'C2F4', 'C3F5', 'C3F6'], 'fluorine': [], 'oxygen': ['O'], 'inert': ['C3F4']}}, 'claim_status': 'development_replay'}}}}",
+  "resume_configuration_transitions": [],
+  "scientific_status": "calibrated development transfer only; the aggregate energetic ion mixture is unresolved, 3-D ion azimuth uses the R1.5 axisymmetric closure certified at 16 versus 32 nodes, and reduced chemistry omits explicit species-resolved crosslinking/redeposition channels",
+  "status": "running",
+  "target": {
+    "asymmetry_cell_count": 0.0,
+    "etch_depth_nm": 825.0,
+    "mask_opening_nm": 45.0,
+    "maximum_feature_width_nm": 90.0,
+    "remaining_mask_thickness_nm": 850.0,
+    "top_feature_width_nm": 90.0
+  },
+  "topology_events": [],
+  "wall_time_s": 696.2491200040095
+}
