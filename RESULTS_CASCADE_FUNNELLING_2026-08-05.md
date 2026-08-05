@@ -30,10 +30,35 @@ ion flux at AR 0 falling to 0.61× at AR 8, plus a hot-neutral component that
 rises from 0.066× to 0.123×. Total energetic delivery is *flat to −1 %* across
 AR 0→8.
 
-Feeding those measured fluxes into the mixed layer (0-D, per-atom path,
-1500 eV): **6.46 nm/s at AR 0 and 5.81 nm/s at AR 8** — against ml19's observed
-21.9 → 16.7 nm/s. The measured delivery cannot produce the observed rate; the
-factor ≈ 3.4 is *not* in the transport.
+### The over-delivery claim is refuted, and so was my first reading of it
+
+Feeding those measured fluxes into a **1500 eV, normal-incidence** 0-D
+evaluation gives 6.46 nm/s at AR 0 — far below ml19's 21.9 nm/s, which looks
+like a factor ≈ 3.4 unaccounted for. That reading is wrong, and the reference
+energy is why.
+
+Relaxing the mixed layer on the *same gather* through the engine's own
+per-atom path returns **19.15 nm/s at AR 0** — consistent with ml19. The
+etch-front population measured on that band has **mean energy 3406 eV and mean
+incidence cosine 0.768**, not 1500 eV at normal incidence: the published IEAD
+carries substantial flux well above its nominal energy, and the band mixes the
+flat floor with the corner fillet. 0-D checks against a single nominal energy
+are therefore not a valid reference for this feature, and the overnight
+inference of "2.9× the source ion flux" — which used exactly that reference —
+does not survive.
+
+| evaluation | rate at AR 0 |
+|---|---|
+| 0-D, 1500 eV, cos 1.0 (the overnight reference) | 6.46 nm/s |
+| 0-D, measured E and cos (3406 eV, 0.768) | 53.5 nm/s |
+| engine per-atom relaxation on the measured gather | **19.15 nm/s** |
+| ml19 feature run | ~20–22 nm/s |
+
+**Transport and chemistry are mutually consistent.** There is no missing factor
+and no internal contradiction: the delivery we measure, run through the
+chemistry we ship, reproduces the rate the feature runs produce. (The 0-D
+single-energy columns bracket it, as Jensen requires — the per-atom path is the
+one with the validated contract.)
 
 ## Grade against Huang's published funnelling numbers
 
@@ -84,16 +109,23 @@ Krüger's own assessment of his mechanism, verbatim
 > mechanism.**"
 
 Our floor is **ion-limited** (rate ∝ ion flux, flat across 50× neutral
-delivery). The experiment he describes is **neutral-transport limited**. A model
-that is ion-limited where the experiment is neutral-limited will not attenuate
-with aspect ratio the way the data does — which is the +29 % depth overshoot,
-and is the same over-estimation of the ion-energy channel that the mechanism's
-own author flags.
+delivery). The experiment he describes is **neutral-transport limited**.
 
-That is a **chemistry-side** conclusion reached by eliminating transport, and it
-is consistent with every measurement in this pass: delivery is faithful, the
-cascade is faithful to its own published rule, and the rate per delivered ion is
-too high.
+With the internal inconsistency removed, the depth gate decomposes into two
+measured statements, neither of which is a transport defect:
+
+1. **Absolute rate.** We etch ≈ 19 nm/s at low AR where his experiment averages
+   825 nm / 60 s ≈ 13.8 nm/s including all attenuation — roughly 1.4× high, in
+   the channel his own text says is likely over-estimated.
+2. **Too little attenuation.** Our total energetic delivery is flat to −1 % over
+   AR 0→8 because the beam we consume is ±2.86° and is barely shadowed at these
+   aspect ratios. A process that is ion-limited (ours) with an unshadowed beam
+   produces almost no ARDE; the experiment he describes is neutral-limited,
+   where conductance falls with AR.
+
+Both are **chemistry- and source-side**, reached by eliminating transport:
+delivery is faithful, the cascade is faithful to its own published rule, and the
+engine's chemistry reproduces its own feature runs from the measured delivery.
 
 ## Standing [VERIFY]
 
@@ -114,3 +146,7 @@ too high.
    flux ratios Krüger's Table I implies. If our crossover sits far from his, the
    ion-energy channel magnitude is the depth gate's owner, as his own text
    suggests.
+3. Retire 0-D single-energy reference checks from the diagnostic toolkit, or
+   force them to consume the measured (E, cos) population. The 1500 eV reference
+   produced a 3.4x phantom in this pass and a "2.9x over-delivery" conclusion in
+   the previous one.
