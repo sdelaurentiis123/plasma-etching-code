@@ -1,0 +1,29 @@
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 6185.70 ms  (compiled)
+Module petch.threed 43d4494 load on device 'cpu' took 7776.65 ms  (compiled)
+step=1 t=0.135s dt=0.1346s depth=2.975nm mask_opening=88.974nm wall=562.81s
+step=2 t=0.202s dt=0.06731s depth=4.458nm mask_opening=88.734nm wall=52.54s
+step=3 t=0.300s dt=0.09798s depth=6.619nm mask_opening=88.438nm wall=58.90s
+step=4 t=0.369s dt=0.06881s depth=8.137nm mask_opening=88.252nm wall=49.54s
+step=5 t=0.426s dt=0.05735s depth=9.402nm mask_opening=88.105nm wall=46.84s
+step=6 t=0.484s dt=0.05802s depth=10.682nm mask_opening=87.960nm wall=52.38s
+step=7 t=0.547s dt=0.06258s depth=12.062nm mask_opening=87.806nm wall=71.13s
+step=8 t=0.607s dt=0.06069s depth=13.407nm mask_opening=87.663nm wall=46.30s
+step=9 t=0.672s dt=0.06496s depth=14.855nm mask_opening=87.518nm wall=54.24s
+step=10 t=0.743s dt=0.071s depth=16.434nm mask_opening=87.368nm wall=54.25s
+step=11 t=0.806s dt=0.06247s depth=17.817nm mask_opening=87.244nm wall=46.24s
+step=12 t=0.870s dt=0.06381s depth=19.337nm mask_opening=87.124nm wall=62.65s
+step=13 t=0.939s dt=0.06924s depth=21.388nm mask_opening=86.975nm wall=57.59s
+step=14 t=1.002s dt=0.06335s depth=23.046nm mask_opening=86.834nm wall=52.57s
+step=15 t=1.063s dt=0.06103s depth=25.057nm mask_opening=86.699nm wall=70.15s
+step=16 t=1.127s dt=0.06339s depth=27.729nm mask_opening=86.555nm wall=59.74s
+step=17 t=1.198s dt=0.07127s depth=31.107nm mask_opening=86.394nm wall=59.73s
+step=18 t=1.268s dt=0.06982s depth=33.290nm mask_opening=86.239nm wall=54.51s
+step=19 t=1.331s dt=0.06376s depth=35.691nm mask_opening=86.099nm wall=64.08s
+step=20 t=1.388s dt=0.05688s depth=37.950nm mask_opening=85.976nm wall=51.32s

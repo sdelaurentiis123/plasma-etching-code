@@ -255,3 +255,48 @@ is the newly exposed, independent next target (normal-incidence oxide removal).
 Follow-up: material-component sliver policy — a 2-cell mask fragment stalls the
 adaptive controller (dt → 7.6e-05 s, time frozen). 60 s runs at dx = 10 nm are
 not reliably completable until fragments below a declared size are reabsorbed.
+
+## Campaign 9 (2026-08-05) — ml21, the full final mechanism: runs clean, endpoint not bought
+
+First run carrying every landed mechanism: deposition-driven crosslinking with
+the published per-material bond multiplicity (`914bb8d`, `924cc04`), the
+Appendix-B angular classes on the oxide/mask ion rows (`4c66df1`), sub-resolution
+sliver dissolution (`a467fe3`), and the sqrt-2 axisymmetric lift (`6e97ef3`).
+Box 46904015, clean `git archive` deploy with all fixes verified post-extraction.
+
+**Robustness: passes.** Zero errors, **zero topology events**, extrusion
+projection max deviation **6.9e-18 mesh units**. The stall modes that ended ml19
+(t = 46.2 s sliver) and blocked every 5 nm attempt (guard) are both gone.
+
+**Matched-simulated-time vs ml19** (the only comparison a partial run supports):
+
+| t (s) | opening ml21 | opening ml19 | Δ | depth ml21 | depth ml19 |
+|---|---|---|---|---|---|
+| 0.5 | 87.81 | 87.15 | **+0.66** | 12.06 | 13.27 |
+| 1.0 | 86.83 | 85.91 | **+0.92** | 23.05 | 22.74 |
+
+Less mouth closure at equal time, depth unchanged — the direction the bond
+multiplicity predicts (harder lip), though the magnitude at t ≤ 1.4 s is small
+and not yet a gate.
+
+**Endpoint NOT obtained, deliberately.** ml21 integrates at **dt ≈ 0.057 s
+against ml19's 0.15 s** — a 2.4× smaller stable timestep that persists past the
+startup transient (still 0.057 at step 20). A 60 s endpoint therefore needs
+~1000 steps ≈ 14–17 h, against ml19's 305. Two reasons not to spend it:
+
+1. The timestep collapse is most likely *caused by* the angular classes, whose
+   class-1 form (Kress B = 9.3) is **3–4× more peaked than the only in-chemistry
+   measurements** (peak/normal 4.17 vs Cho 2000 / Schaepkens 1998 ≈ 1.3) and now
+   drives the depth-setting SiO₂ row —
+   `RESULTS_CASCADE_FIRST_PRINCIPLES_2026-08-05.md` §7.
+2. Independently, ARDE is structurally impossible in the current configuration
+   (ibid. §5): an exactly ion-limited chemistry fed by an AR-flat energetic
+   supply cannot produce it, so a 60 s endpoint would re-measure the known +29 %
+   depth miss at 14 h of box time.
+
+**Next, in order:** (a) free frozen-geometry discrimination of B = 9.3 vs a
+measurement-bounded B ≈ 1.7 on the oxide rows; (b) the limiting-regime question
+(ion-limited vs neutral-limited), which owns both the missing ARDE and the depth
+overshoot; (c) only then the 60 s endpoint and the 8-condition scorecard.
+
+Box destroyed; `vastai show instances` returns NONE. Spend this pass ≈ $0.14.
