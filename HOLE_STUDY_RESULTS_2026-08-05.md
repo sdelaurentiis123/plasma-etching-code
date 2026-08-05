@@ -147,6 +147,38 @@ diagnosed. Only the tail-bearing configurations pass this gate.
 - Cascade bookkeeping: flux closure to 2e-14; production reaction rule reused
   verbatim rather than re-derived.
 
+**The ARDE number in section 5 is transport-only, and is a LOWER BOUND on
+etch-rate ARDE.**  Added after the first-principles cascade audit
+(`RESULTS_CASCADE_FIRST_PRINCIPLES_2026-08-05.md`, `fd61bb7`); it corrects a
+reading this document previously invited.
+
+- What the 30.8 % decline *is*: the fall in delivered **energetic** flux to the
+  front, from shadowing plus cascade attenuation. Independently cross-checked —
+  the 1-D analytic cascade law reproduces the 3-D gather to ~2 % at AR 200
+  (0.679 vs 0.690 at tail 0.65), two different implementations and geometries.
+- What it is **not**: a predicted etch-rate ARDE. Converting delivery to rate
+  requires the surface model, and that model is currently *exactly ion-limited*
+  (rate linear in ion flux, <1 % sensitivity across a 50× neutral range —
+  `RESULTS_FLOOR_DELIVERY_2026-08-05.md`). An ion-limited rate law fed by a
+  nearly AR-flat energetic supply cannot produce much ARDE by construction.
+- The magnitude of what is missing: the one clean literature anchor in the local
+  corpus is Huang's MCFPM, whose **etch rate falls 80 % by AR 40**
+  (`huang_thesis.txt` L5578-5580) under his conditions. Our transport-only
+  decline at AR 40 is ≈10 % (tail 0.65). The gap is not a transport error — the
+  transport is graded against exact theory — it is everything that converts
+  delivery into rate at depth: neutral conductance collapse (we *measure*
+  thermal delivery at 0.656 % of source at AR 200, a ~150× starvation, which an
+  ion-limited chemistry ignores), redeposition, tapering, and charging.
+- Consequence for use: quote section 5 as **energetic delivery vs aspect ratio**,
+  not as etch-rate ARDE. An etch-rate prediction at high AR is blocked on the
+  limiting-regime question, which is the single defect that also owns the
+  validation case's +29 % depth overshoot.
+- Caveat on Huang's numbers as a reference at all: his published *ion* decay
+  (2.0→0.3e15) sits below the fixed-beam straight-wall acceptance bound
+  (13/53 = 0.245 vs his 0.150), so his curve embeds profile evolution, mask
+  erosion, via geometry and re-arrival counting. It anchors an order of
+  magnitude here, nothing finer.
+
 **Extrapolated.**
 - Surface chemistry beyond AR ≈ 17, where no matched profile data exists. The
   validation case additionally runs +29 % on depth, located in the ion-energy
