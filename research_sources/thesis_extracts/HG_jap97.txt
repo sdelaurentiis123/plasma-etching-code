@@ -1,0 +1,335 @@
+Aspect-ratio-dependent charging in high-density plasmas
+            Gyeong S. Hwang and Konstantinos P. Giapisa)
+            Division of Chemistry and Chemical Engineering, California Institute of Technology, Pasadena,
+            California 91125
+            ~Received 18 December 1996; accepted 18 April 1997!
+            The effect of aspect ratio ~depth/width! on charge buildup in trenches during plasma etching of
+            polysilicon-on-insulator structures is studied by Monte Carlo simulations. Increased electron
+            shadowing at larger aspect ratios reduces the electron current to the trench bottom. To reach a new
+            charging steady state, the bottom potential must increase, significantly perturbing the local ion
+            dynamics in the trench: the deflected ions bombard the sidewall with larger energies resulting in
+            severe notching. The results capture reported experimental trends and reveal why the increase in
+            aspect ratio that follows the reduction in critical device dimensions will cause more problems unless
+            the geometry is scaled to maintain a constant aspect ratio. © 1997 American Institute of Physics.
+            @S0021-8979~97!06414-1#
+
+
+
+I. INTRODUCTION                                                        side of the edge gate of a dense line-and-space pattern be-
+                                                                       cause its potential can be maintained low by electrons arriv-
+     The incessant reduction in the lateral dimensions of in-          ing at its outer sidewall from the open area. Geometric shad-
+tegrated circuits has significantly increased the aspect ratio         owing prohibits the latter from occurring at intermediate
+~AR! of device features which, in turn, has created serious            lines. Enhanced bombardment of the poly-Si sidewall foot
+new problems for semiconductor processing technology. In               leads to the so-called ‘‘notching’’ effect,3,4 describing a
+reactive ion etching of gate electrodes and contact windows,           wedgelike profile irregularity, whose location and shape are
+for example, it was soon discovered that the etch rate de-
+                                                                       depicted in Fig. 1. Since the poly-Si gate is isolated, the ion
+creases with the AR.1 High AR trenches did not clear as fast
+                                                                       accumulation increases its potential. If the potential differ-
+as more open areas, thus requiring an overetch step that ex-
+                                                                       ence between gate electrode and substrate becomes exces-
+posed the cleared layers longer to a potentially damaging
+plasma. Moreover, linewidth loss in the smaller devices be-            sive, large electric fields in the gate oxide may induce
+came intolerable, requiring operation at lower pressures to            Fowler–Nordheim ~F–N! tunneling currents, which can
+improve anisotropy. Since conventional rf plasmas did not              cause oxide degradation or even breakdown.5 Both, F–N
+operate efficiently at low pressures, new high-density plasma          tunneling currents and notching constitute charging damage,
+sources were introduced,2 enabling the etching of high AR              a problem that has puzzled the etching community for many
+features without compromising anisotropy or etch rate. High            years and is feared to become a show stopper at critical di-
+throughput was achieved by the ability of high-density plas-           mensions of 0.18 m m and beyond.
+mas to deliver large ion fluxes to the wafer. However, the                  Understanding charging damage requires comprehensive
+advantageous larger ion and electron current densities to the          modeling and simulation of ion and electron dynamics in
+wafer, when combined with high AR structures, brought                  plasmas, through sheaths, and as they impinge at various
+about the possibility of significant microstructure charging           microstructure surfaces where they cause charging, physical
+and a new form of plasma process-induced damage.3–5                    sputtering, and chemical reactions, or undergo inelastic scat-
+     When bombarded by unequal fluxes of ions and elec-                tering. A predictive feature-scale simulation that discusses
+trons, insulating surfaces will charge up. Such surfaces are           these phenomena and simplified models to describe them
+ubiquitous on wafers during plasma etching. In gate elec-              have been presented elsewhere.7 In this article, we expand
+trode definition, for example, gate oxide, polycrystalline sili-       our simulation to reveal the influence of the aspect ratio on
+con ~poly-Si gate!, and photoresist may all be exposed to the
+                                                                       pattern-dependent charging and related profile distortion ef-
+plasma simultaneously. The directionality difference be-
+                                                                       fects. In previous experimental work, Hashimoto5 has shown
+tween ions ~anisotropic! and electrons ~isotropic! at the wafer
+                                                                       that the catastrophic breakdown of metal-oxide-
+surface, created as they cross the sheath, will then cause
+enhanced electron accumulation at the upper photoresist                semiconductor ~MOS! capacitors ~antenna structures! in-
+sidewalls confining a narrow trench, while ions bombard the            creases with the photoresist AR. Kamata and Arimoto8 mea-
+exposed SiO2 surface at the trench bottom. The repulsive               sured a decrease in electron current to the substrate following
+entrance potential reduces the flux of electrons to the trench         an increase in the AR of a SiO2 mask. Fujiwara et al.4 have
+bottom, thus forcing the SiO2 surface potential to increase,           also shown a monotonic but complex increase in notch depth
+until enough ions are deflected so that the ion and electron           ~a signature of charging damage! with an increase of the AR
+fluxes are balanced.6,7 More deflected ions bombard the inner          in the regime between 0.7:1 and 2.8:1. While it is anticipated
+                                                                       that notching will further worsen at higher aspect ratios, no
+a!
+ To whom correspondence should be addressed. Electronic mail:          modeling study has appeared to provide insight into why and
+ giapis@cheme.caltech.edu                                              how charging in the trench is affected by the aspect ratio.
+
+566         J. Appl. Phys. 82 (2), 15 July 1997          0021-8979/97/82(2)/566/6/$10.00             © 1997 American Institute of Physics
+
+     Downloaded¬30¬Apr¬2006¬to¬131.215.240.9.¬Redistribution¬subject¬to¬AIP¬license¬or¬copyright,¬see¬http://jap.aip.org/jap/copyright.jsp
+FIG. 1. Schematic depiction of the line-and-space structure considered in
+the simulation. The location of the notch is also shown. The photoresist
+thickness is varied from 0.2 to 1.7 m m to change the aspect ratio. The case
+depicted corresponds to an aspect ratio of 4:1.
+
+
+
+II. PLASMA CONDITIONS AND MICROSTRUCTURE
+                                                                               FIG. 2. The potential distribution along the line connecting the top corners
+DESCRIPTION                                                                    of the photoresist sidewalls that border the trench by the edge line, as indi-
+                                                                               cated at the inset ~arrow!. The distance has been normalized by the trench
+     The plasma properties influence microstructure charging
+                                                                               width ~0.5 m m!.
+profoundly. Here, we employ a typical chlorine plasma with
+a density of 131012 cm23 . The wafer electrode is biased
+and the sheath voltage, V s , is determined from
+V s 537130 sin vt V, where v 5 400 kHz is the rf bias fre-                     charge. Charge deposition creates local electric fields which,
+quency. The ion and electron temperatures are assumed to be                    in turn, alter ion trajectories. The Laplace equation is solved
+0.5 and 4 eV, respectively. The pressure is taken to be low                    iteratively in the microstructure spaces to account for the
+enough (,10 mTorr! to allow for ballistic transport through                    evolution of the electric fields as more charge accumulates,
+the sheath and in the microstructure spaces. The chlorine is                   until steady state is reached. Reactions at the sidewalls dur-
+assumed to be 100% dissociated at the relatively high plasma                   ing the charging process are neglected, which is a reasonable
+density considered here.                                                       assumption in view of the rapid charge buildup. The mobility
+     The dense structure of Fig. 1 borders a widely open area                  of charges in conductive materials ~doped poly-Si! influences
+and consists of gratings with 0.5 m m lines separated by 0.5                   the charging process critically. All surfaces of such materials
+m m spaces ~trenches!; the lines are not electrically con-                     must reach equipotential; in the presence of strong local elec-
+nected. The simulation starts with a perfectly etched pattern                  tric fields, this condition requires redistribution of charge
+of lines, each consisting of insulating photoresist onto 0.3                   from the points of accumulation to all surfaces. Steady state
+m m poly-Si; the features are formed on top of a uniform                       is established when the potential distribution along the bot-
+layer of SiO2 , thick enough (.100 nm! to prevent tunneling                    tom SiO2 surface no longer changes. The potential steady
+currents to the Si substrate. The height of the photoresist will               state requires a significantly longer charging time than that
+be varied so that the AR spans the regime from 1:1 to 4:1.                     needed to balance the electron and ion currents at the bottom
+The height of the poly-Si remains constant. When the                           SiO2 surface.7 For the present calculation, surface currents
+AR54, the features consist of a 1.7 m m photoresist onto 0.3                   and secondary electron emission are both neglected. As dis-
+m m poly-Si, clearly not representative of current device                      cussed earlier, tunneling currents through the thick gate ox-
+manufacturing technology. However, in addition to being in-                    ide are also disregarded; thus, the present study focuses on a
+structive, consideration of such a case may not be as extreme                  worst-case scenario, aiming to reveal where breakdown is
+at smaller critical dimensions; for the 0.18 m m device rule,                  most likely to occur from excessive charging.
+for example, a very reasonable photoresist thickness of 0.54                        For a given design rule, a larger aspect ratio implies that
+m m on top of a 0.18 m m poly-Si would produce an AR54.                        the negatively charged upper photoresist sidewalls are fur-
+The poly-Si is assumed to be heavily doped ~electrically con-                  ther removed from the positively charged bottom SiO2 sur-
+ductive!. The profile evolution of the inner sidewall of the                   face. Increasing the distance between the two charged sur-
+edge line during overetching will be simulated.                                face segments weakens the dipole field in the trench. The
+                                                                               entrance potential distribution becomes more negative—by
+                                                                               about half a volt when increasing the AR from 1 to 4—thus
+III. SIMULATION OF MICROSTRUCTURE CHARGING
+                                                                               increasing the number of low energy electrons that are re-
+    Microstructure charging is performed by a Monte Carlo                      pelled back into the plasma. This is demonstrated by plotting
+simulation of ion and electron transport first through a colli-                the potential between the photoresist sidewalls along the line
+sionless sheath and then through the microstructure spaces,                    that connects the top corners, as shown in Fig. 2. Thus, the
+as described elsewhere.7 Briefly, realistic ion and electron                   electron current into the trench is reduced. The longer side-
+energy and angular distributions at the wafer are calculated                   walls at the larger AR also attract electrons, further depleting
+from sheath theory.9 Then, charged particles are followed as                   the electron flux to the trench bottom. This result is illus-
+they impinge on various surfaces, where they transfer their                    trated in Fig. 3, where the normalized electron fluxes to vari-
+
+J. Appl. Phys., Vol. 82, No. 2, 15 July 1997                                                                   G. S. Hwang and K. P. Giapis             567
+
+ Downloaded¬30¬Apr¬2006¬to¬131.215.240.9.¬Redistribution¬subject¬to¬AIP¬license¬or¬copyright,¬see¬http://jap.aip.org/jap/copyright.jsp
+                                                                                 FIG. 4. The normalized flux of ions arriving at the trench bottom and at the
+                                                                                 inner poly-Si sidewall of the edge line after steady-state charging has been
+                                                                                 reached, as a function of the aspect ratio. The average incident energy of the
+FIG. 3. The normalized electron flux into the trench by the edge line ~total!,   ions impinging at the inner poly-Si sidewall of the edge line is also shown.
+to both photoresist ~PR! sidewalls that border the trench, to the bottom
+SiO2 surface, and to the inner and outer poly-Si sidewalls of the edge line,
+after steady-state charging has been reached, as a function of the aspect
+ratio.                                                                           balance this current at steady state, a significant ion flux is
+                                                                                 required, which is supplied by the deflected ions from the
+                                                                                 trench bottom. The equipotential of the neighboring poly-Si
+ous surfaces in the trench are plotted as a function of the AR.                  line must increase simultaneously with the bottom potential
+Clearly, the electron flux to the bottom SiO2 surface de-                        in order to assist in the process of ion deflection towards the
+creases much more than the flux of electrons entering the                        photoresist sidewalls above it. Note that some ions must
+trench, as a result of the presence of the longer insulating                     even be deflected out of the trench to balance the reduced
+sidewalls. This form of shadowing is not strictly geometric,                     influx of electrons ~vide supra!.
+since the reduction in electron current to the trench bottom is                       In spite of the relatively constant ion flux to the inner
+calculated to be significantly smaller than that predicted by                    poly-Si sidewall of the edge line, notching will worsen with
+the decrease in the solid angle that ‘‘views’’ the plasma from                   increasing AR, provided that the translational energy of the
+the trench bottom. Electrostatics plays a vital role in decreas-                 deflected ions becomes larger. Indeed, our calculations con-
+ing the geometric shadowing, as explained in the following                       firm the latter, as shown in Fig. 4. Even for an AR51, the
+paragraph. Remarkably, both the electron flux to the inner                       average energy is larger than the threshold for a reaction with
+and outer poly-Si sidewall of the edge line change only                          a chlorinated poly-Si surface ~10 eV!.10 The average energy
+slightly with the AR, an observation with important implica-                     clearly increases with the AR, thus increasing the etch yield.
+tions for inner sidewall distortion ~notching!.                                  Note that the rate of increase does not appear to saturate even
+     The reduction in electron current to the trench bottom at                   for an AR54. However, sidewall distortion should not
+a larger AR leads to a larger surface potential on that surface,                 worsen indefinitely as the AR increases; electron shadowing
+which causes more ions to be deflected towards the side-                         stops increasing beyond a certain value of the AR, as new
+walls. These results are quantified in Fig. 4, where the nor-                    mechanisms for ion and electron transport through long
+malized ion flux to both the trench bottom and the inner                         holes with insulating walls take over.11 To understand why
+poly-Si sidewall of the edge line are plotted as a function of                   the average energy of the deflected ions increases, we must
+the AR. Indeed, the ion current to the trench bottom de-                         first elucidate how the ion dynamics in the trench are modi-
+creases by about 60%, when the AR is increased from 1 to 4.                      fied when the AR increases.
+As expected, this curve is identical to the one of Fig. 3 that                        The steady-state charging potential distribution in the
+describes the electron current to the trench bottom. Surpris-                    ‘‘edge’’ trench reveals the perturbation in the local ion dy-
+ingly, the flux of deflected ions that impinge on the inner                      namics occurring as a result of surface charging ~Fig. 5!.
+poly-Si sidewall of the edge line does not change                                Gradients on this potential surface are a measure of the elec-
+significantly—in fact, it decreases slightly! This result is                     tric field that influences ion motion. The asymmetric poten-
+consistent with the calculated electron fluxes to the inner and                  tial distribution at the trench bottom, with the pronounced
+outer poly-Si sidewalls of the edge line, which were also not                    peak near the inner sidewall foot of the outermost line, is a
+significantly affected by the increase in the aspect ratio. So,                  sine qua non for the formation of the notch.12 Notice the
+where do the deflected ions go and why does notching be-                         appearance of a second smaller peak in the potential distri-
+come more severe for larger aspect ratios?                                       bution near the sidewall foot of the neighboring line, most
+     It was found earlier that the flux of electrons to the pho-                 obvious for an AR51 @Fig. 5~a!#. This peak appears because
+toresist sidewalls increases substantially with the AR. To                       of the low equipotential of the corresponding poly-Si line for
+
+568        J. Appl. Phys., Vol. 82, No. 2, 15 July 1997                                                                     G. S. Hwang and K. P. Giapis
+
+ Downloaded¬30¬Apr¬2006¬to¬131.215.240.9.¬Redistribution¬subject¬to¬AIP¬license¬or¬copyright,¬see¬http://jap.aip.org/jap/copyright.jsp
+FIG. 5. Three-dimensional charging potential distributions in the trench area bordered by the poly-Si sidewalls, for structures with an aspect ratio of ~a! 1:1,
+~b! 2:1, ~c! 3:1, and ~d! 4:1, after steady-state charging has been reached. The inset in ~a! illustrates the area of interest and defines the origin for the potential
+surface ~aspect ratio not to scale!. The microstructure has been rotated to allow for a more convenient description of ion motion in the trench. The arrow shows
+the direction of ions as they approach the potential surface.
+
+
+
+an AR51; however, it is not expected to cause a significant                           steeper potential gradient. It becomes obvious now why pro-
+profile distortion in view of the weak local electric field it                        file distortion and notching will worsen with an increasing
+creates. The magnitude of the maximum in the potential by                             aspect ratio.4
+the edge line depends weakly on the AR and only for an                                     The perturbation in the ion dynamics in the trench cul-
+AR<2; it is affected mainly by the rf bias and frequency.                             minates into an increase in the poly-Si equipotential of both
+However, the charging potential distribution in the trench                            the edge line and the neighboring line, following an increase
+space away from the peak value increases significantly with                           in the AR. The outer sidewall of the edge line is supplied by
+increasing AR. For example, the potential at the center of the                        electrons from the open space, which help prevent a signifi-
+bottom surface increases from approximately 8 to 33 V,                                cant increase in the corresponding potential. The same is not
+when the AR is increased from 1 to 4, respectively @Fig.                              possible for the poly-Si sidewalls of the neighboring line,
+5~d!#. As discussed earlier, this behavior is necessary to bal-                       whose potential should increase much more than that of the
+ance the ion and electron currents to the bottom surface. The                         edge line. Figure 6 illustrates the dependence of the equipo-
+sidewall potentials also increase, in such a way that the tilt of                     tentials of both lines as a function of the AR. Indeed, the
+the potential surface in the trench space towards the outer-                          poly-Si equipotential of the neighboring line exhibits a
+most line actually increases. Thus, the ions that are deflected                       steeper and much more significant rise with the AR than that
+towards the inner side of the outermost poly-Si line will                             of the edge line. The difference between the two equipoten-
+acquire a larger translational energy as they fall down a                             tials is a measure of the electric field that accelerates ions
+
+J. Appl. Phys., Vol. 82, No. 2, 15 July 1997                                                                           G. S. Hwang and K. P. Giapis               569
+
+ Downloaded¬30¬Apr¬2006¬to¬131.215.240.9.¬Redistribution¬subject¬to¬AIP¬license¬or¬copyright,¬see¬http://jap.aip.org/jap/copyright.jsp
+FIG. 6. The steady-state equipotentials of the poly-Si edge line and its
+neighboring line, as a function of the aspect ratio. For definitions, see Fig. 1.
+
+                                                                                    FIG. 7. Notch profiles of the inner sidewall of the edge line, predicted for
+towards the inner sidewall of the edge line; this difference                        100% overetching of structures with increasing aspect ratio, as indicated.
+                                                                                    The shaded rectangles are the photoresist, the profiled area underneath is the
+increases with the AR, an observation consistent with the                           poly-Si, and the thin double line represents the SiO2 . The aspect ratio has
+increase in the average energy of ions impinging onto the                           been preserved to give a perspective of the structure. The evolution of the
+same sidewall, shown in Fig. 4. Note that Fig. 6 also sug-                          outer sidewall is not simulated.
+gests that catastrophic F–N tunneling currents are more
+likely to occur under the gate electrode of the neighboring
+line, should thinner oxides be used. When the AR54, for                             cal sputtering mechanism is the prevalent mode by which
+example, a 5-nm-thick oxide layer will withstand the 5 V                            material is removed from the surface.14 There is an energy
+potential difference between the poly-Si edge line and the                          threshold of 10 eV for the reaction of Cl1 with poly-Si,10
+substrate,13 since the magnitude of the electric field in the                       which influences sidewall evolution profoundly as it prevents
+oxide is smaller than the breakdown threshold ~1–1.2 V/nm!.                         a large number of low energy ions from contributing to the
+However, the potential difference across the gate oxide of the                      etching. The etch yield does not depend on the angle of
+neighboring line is more than sixfold the threshold value,                          incidence ( u i ) up to 45°; for larger u i , it decreases as
+which implies that catastrophic failure of the oxide would                          cos ui .7 Inelastic scattering on poly-Si is neglected as most
+have occurred long before this potential difference could be                        of the scattered atoms impinge subsequently on SiO2 . How-
+established.                                                                        ever, direct inelastic scattering on the Cl-covered SiO2 sur-
+                                                                                    face must be included as all of the scattered atoms impinge
+                                                                                    subsequently on poly-Si. Only specular reflection is consid-
+IV. SIMULATION OF SIDEWALL PROFILE EVOLUTION
+                                                                                    ered and the energy transfer is presumed to follow hard-
+     The steady-state charging potentials determine the ion                         sphere collision kinematics14 with a gas atom to surface mass
+dynamics in the microstructure. Reactions at the poly-Si                            ratio of 1.0.
+sidewalls and scattering at the SiO2 surface must be consid-                             Profile evolution simulations for line-and-space struc-
+ered for the profile evolution simulation, which is based on a                      tures next to an open area have been performed, and the
+cell-removal algorithm and is performed as described                                profiles obtained for 100% overetching are shown in Fig. 7
+elsewhere.7 As etching of the sidewall proceeds, charging of                        for various aspect ratios. As expected, increasing the AR
+the exposed SiO2 leads to significant forward deflection of                         leads to significantly deeper and wider notches. The profile
+energetic ions that can contribute to etching. Thus, the etch-                      for an AR54 exhibits the broadest and deepest notch, while
+ing simulation becomes coupled to transient charging in the                         it simultaneously shows substantial undercutting under the
+etched area, further complicating the calculation. The prob-                        mask, a consequence of the increased energy of ions de-
+lem becomes tractable by solving the Laplace equation each                          flected towards the upper poly-Si sidewall. The undercutting
+time the notch apex is advanced to the next cell layer and                          is considerably reduced for an AR<2; for even smaller AR,
+then using the calculated electrostatic force field to deter-                       the notch gets narrower and more typical of the plasma con-
+mine the ion trajectories for etching of the sidewall and                           ditions employed.3 Remarkably, a minuscule notch still ex-
+charging of the bottom SiO2 surface. Etching of the poly-Si                         ists for an AR51. Since 100% overetching is rather exces-
+is assumed to be ion-limited while spontaneous etching by Cl                        sive at such low AR values, notching is not expected to be a
+atoms is neglected. Sputtering and chemical etching of                              serious problem in this case. Thus, decreasing the aspect ra-
+SiO2 are presumed to be insignificant at the ion energies                           tio should help minimize plasma-induced charging problems.
+considered. A simple ~square root! ion energy dependence of                         The current state-of-the-art fabrication technology, however,
+the poly-Si etch yield is assumed, which implies that a physi-                      requires etching of larger AR features as devices get smaller;
+
+570        J. Appl. Phys., Vol. 82, No. 2, 15 July 1997                                                                        G. S. Hwang and K. P. Giapis
+
+ Downloaded¬30¬Apr¬2006¬to¬131.215.240.9.¬Redistribution¬subject¬to¬AIP¬license¬or¬copyright,¬see¬http://jap.aip.org/jap/copyright.jsp
+                                                                             shadowing, which leads to a reduction in the electron current
+                                                                             density to the trench bottom. To balance this current, the
+                                                                             charging potential at the bottom SiO2 surface must increase
+                                                                             so that the ion current density is reduced by the same
+                                                                             amount. A larger repulsive potential at the trench bottom
+                                                                             causes more low energy ions to be deflected; these ions are
+                                                                             attracted by the upper photoresist sidewalls, where they bal-
+                                                                             ance the increased electron flux. Remarkably, the deflected
+                                                                             ion flux towards the inner sidewall of the edge line in a
+                                                                             line-and-space pattern remains approximately constant as the
+                                                                             aspect ratio increases. However, the electric field towards the
+                                                                             inner sidewall increases significantly, accelerating the de-
+                                                                             flected ions to larger translational energies which, in turn,
+                                                                             cause the formation of a wider and deeper notch at that lo-
+                                                                             cation. Although the results presented here were based on 0.5
+                                                                             m m design rule, they are also applicable to smaller design
+                                                                             rules, as charging effects scale with aspect ratio. Thus, low
+FIG. 8. Predicted notch depth dependence on aspect ratio. Some of the data   aspect ratio structures are preferable from the standpoint of
+were obtained from the profiles of Fig. 7.                                   plasma-induced charging damage, albeit not practical at very
+                                                                             small critical dimensions (<0.25 m m!, where gate and pho-
+                                                                             toresist thickness limitations exist. For example, at a 0.18
+therefore, solutions to the notching effect are needed, capable              m m device rule, aspect ratios smaller than two seem unreal-
+of alleviating the problem even for larger AR values.                        istic, even with a hard mask. Charging damage will persist in
+     The results of Fig. 7, together with calculations for ad-               the next generations of devices, unless a way is found to
+ditional structures, are summarized in Fig. 8, where the notch               reduce the charging potential at the trench bottom.
+depth is plotted as a function of the AR. Whereas initially the                   This work was partially supported by an NSF Career
+dependence on the AR is weak, since electron shadowing is                    Award to K.P.G. ~CTS-9623450!.
+relatively unimportant, the rate of notch deepening increases
+                                                                             1
+significantly for an AR.2. The notch depth is expected to                       R. A. Gottscho, C. W. Jurgensen, and D. J. Vitkavage, J. Vac. Sci. Tech-
+approach a constant value for some AR.4 as electron and                         nol. B 10, 2133 ~1992!, and references therein.
+                                                                              2
+                                                                                M. A. Lieberman and R. A. Gottscho, Design of High-Density Plasma
+ion transport through the trench become independent of as-                      Sources for Materials Processing, Physics of Thin Films Vol. 18, edited
+pect ratio.11 These results are in good agreement with experi-                  by M. H. Francombe and J. L. Vossen ~Academic, New York, 1994!.
+mental trends observed in the work of Fujiwara et al.4                        3
+                                                                                T. Nozawa, T. Kinoshita, T. Nishizuka, A. Narai, T. Inoue, and A. Na-
+     Finally, we wish to point out an important difference                      kaue, Jpn. J. Appl. Phys. 34, 2107 ~1995!.
+                                                                              4
+                                                                                N. Fujiwara, T. Maruyama, and M. Yoneda, Jpn. J. Appl. Phys. 34, 2095
+between the influence of aspect ratio versus electron tem-                      ~1995!; 35, 2450 ~1996!.
+perature on notching. When both of these parameters are                       5
+                                                                                K. Hashimoto, Jpn. J. Appl. Phys. 32, 6109 ~1993!; 33, 6013 ~1994!.
+                                                                              6
+increased independently, the trench entrance potential gets                     T. Kinoshita, M. Hane, and J. P. McVittie, J. Vac. Sci. Technol. B 14, 560
+more negative causing the bottom potential to increase.15                       ~1996!.
+                                                                              7
+                                                                                G. S. Hwang and K. P. Giapis, J. Vac. Sci. Technol. B 15, 70 ~1997!.
+Notching worsens in both cases.4 When the aspect ratio in-                    8
+                                                                                T. Kamata and H. Arimoto, J. Appl. Phys. 80, 2637 ~1996!.
+creases, the average energy of the deflected ions that bom-                   9
+                                                                                M. A. Lieberman and A. J. Lichtenberg, Principles of Plasma Discharges
+bard the poly-Si sidewall of the edge line increases while the                  and Materials Processing ~Wiley Interscience, New York, 1994!.
+                                                                             10
+                                                                                J. P. Chang and H. H. Sawin, J. Vac. Sci. Technol. A ~to be published!.
+ion flux remains approximately constant. When the electron                   11
+                                                                                G. S. Hwang and K. P. Giapis ~unpublished!.
+temperature increases—for constant, but high aspect ratio                    12
+                                                                                The difference between the potentials of the edge line ~low! and the neigh-
+features, the average ion energy remains approximately con-                     boring line ~high! steers the ions approaching the trench bottom towards
+stant while the deflected ion flux arriving at the sidewall                     the low equipotential. Since more ions impinge on the bottom surface near
+                                                                                the sidewall foot of the edge line, a larger positive potential builds up at
+increases.15                                                                    that location, resulting in an asymmetric potential distribution at the trench
+                                                                                bottom. The symmetric potential distribution calculated by Kinoshita
+V. SUMMARY AND CONCLUSIONS                                                      et al. ~Ref. 6! is not physical and suggests that notching should occur at
+                                                                                both sidewalls confining the edge trench, contrary to experimental evi-
+     Detailed results from the Monte Carlo simulations of                       dence ~Refs. 3 and 4!.
+                                                                             13
+pattern-dependent charging and etching show that the aspect                     This conjecture is based on maintaining the substrate potential close to
+                                                                                0 V.
+ratio critically influences charging damage during overetch-                 14
+                                                                                G. S. Hwang, C. M. Anderson, M. J. Gordon, T. A. Moore, T. K. Minton,
+ing of polysilicon-on-insulator structures in uniform high-                     and K. P. Giapis, Phys. Rev. Lett. 77, 3049 ~1996!.
+density plasmas. Increasing the aspect ratio worsens electron                15
+                                                                                G. S. Hwang and K. P. Giapis, J. Appl. Phys. 81, 3433 ~1997!.
+
+
+
+
+J. Appl. Phys., Vol. 82, No. 2, 15 July 1997                                                                  G. S. Hwang and K. P. Giapis               571
+
+ Downloaded¬30¬Apr¬2006¬to¬131.215.240.9.¬Redistribution¬subject¬to¬AIP¬license¬or¬copyright,¬see¬http://jap.aip.org/jap/copyright.jsp
+

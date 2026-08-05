@@ -1,0 +1,703 @@
+Japanese Journal of
+Applied Physics
+
+PROGRESS REVIEW • OPEN ACCESS
+
+You may also like
+
+Progress report on high aspect ratio patterning for
+memory devices
+
+- First demonstration of phase-controlled
+etching for high aspect ratio silicon
+structures using triode-type capacitively
+coupled plasmas
+Haewook Park, Hyunjoo Lee, Sungyoung
+Yoon et al.
+
+To cite this article: Meihua Shen et al 2023 Jpn. J. Appl. Phys. 62 SI0801
+
+- Embedding human annoyance rate
+models in wireless smart sensors for
+assessing the influence of subway traininduced ambient vibration
+Ke Sun, Wei Zhang, Huaping Ding et al.
+
+View the article online for updates and enhancements.
+
+- Enabling 3D NAND bit cost scaling with
+merged etches
+John Hoang, George Matamis, Calvin
+Pham et al.
+
+This content was downloaded from IP address 174.166.11.46 on 02/08/2026 at 22:11
+
+PROGRESS REVIEW
+
+Japanese Journal of Applied Physics 62, SI0801 (2023)
+https://doi.org/10.35848/1347-4065/accbc7
+
+Progress report on high aspect ratio patterning for memory devices
+Meihua Shen, Thorsten Lill, John Hoang*, Hao Chi, Aaron Routzahn, Jonathan Church, Pramod Subramonium,
+Ragesh Puthenkovilakam, Sirish Reddy, Sonal Bhadauriya, Sloan Roberts, and Gowri Kamarthy
+Lam Research Corporation 4650 Cushing Pkwy, Fremont, CA 93538, United States of America
+*
+
+E-mail: john.hoang@lamresearch.com
+
+Received December 12, 2022; revised March 11, 2023; accepted April 10, 2023; published online May 19, 2023
+High aspect ratio (HAR) silicon nitride and silicon oxide (ONON) channel hole patterning in 3D NAND flash presents great challenges. This report
+summarizes some of the recent progress in patterning from the perspective of HAR etching and deposition-etch co-optimization (DECO). HAR
+etching mechanisms will be discussed, with a focus on how to reduce the aspect ratio-dependent etching (ARDE) effect. Highlights of the new lowtemperature etch process will be presented, with significant improvement in the ARDE being observed. New simulation results from a Monte Carlo
+feature-scale model provide insights into ion scattering and mask interactions on the control of the channel hole profile. DECO is a new frontier to
+enable better control of the channel hole shape at HAR. Film tier optimization and carbon liner insertion results show improvement in channel hole
+profile control. © 2023 The Author(s). Published on behalf of The Japan Society of Applied Physics by IOP Publishing Ltd
+
+1. Introduction
+
+Over the past decade, demands for ﬂash memory devices
+have increased tremendously due to the ever-growing digital
+economy in consumer electronics, data centers, the Internet
+of Things, healthcare, and the automotive industry. Growth
+has further accelerated during recent years with remote
+working environments. Three-dimensional (3D) NAND ﬂash
+memory has become the dominant non-volatile memory
+device since its ﬁrst introduction in 2007.1) 3D NAND
+technology is based on forming memory cells on the sidewall, and cells are stacked vertically. With this 3D stacked
+architecture, the device scaling roadmap is supported by
+adding more memory cell layers vertically to reach a high bit
+density at reduced cost per gigabyte. Since the ﬁrst volume
+production device with 24 layers in 2013,2) the industry
+has advanced one technological node approximately every
+1.5 years, and major IC vendors provided products with more
+than 150 layers in 2022.3) Forecasts show that 500 to 1000
+layers are on the horizon with double- or triple-deck
+architectures.
+One of the critical steps in 3D stacking is forming word
+line channel holes in multiple layers of silicon nitride and
+silicon oxide (ONON) ﬁlms. Typical channel hole formation
+process ﬂows are outlined in Fig. 1. Hundreds of layers of
+alternating oxide and nitride ﬁlms were deposited in a
+dielectric deposition chamber, followed by multi-layer
+mask ﬁlm deposition. After lithographic patterning, the
+hard mask is opened, and the ONON channel hole is formed
+in a high aspect ratio (HAR) dielectric etching system.
+The deposition of hundreds of layers of ONON ﬁlm faces
+multiple challenges.4) Control of angstrom-level thickness
+uniformity within the layers from top to bottom and across
+the wafer is required. Mechanical and thermal stabilities must
+be maintained to ensure stack stability. Low ﬁlm shrinkage
+and stress control are essential to ensure successful overall
+process integration ﬂow. High-volume production systems
+also demand stringent control of defects and productivity.
+On the patterning side, hundreds of layers of ONON ﬁlms
+are patterned to about 100 nm hole size, and this pushes the
+etch aspect ratio (depth/width) above 100:1. At such a HAR,
+the formation of billions of perfect circular holes from top to
+bottom and across the whole wafer faces great challenges.
+SI0801-1
+
+Among the many steps in the ﬂow, HAR channel hole etch
+remains the most critical step and requires the most advanced
+hardware and process technology innovations. The ability to
+deliver ion bombardment with high peak power at narrow ion
+angular and energy distributions to the bottom of the hole is
+the holy grail of HAR etching. In this paper, we will review
+and brieﬂy discuss the important elements of HAR plasma
+etch systems. On the etch process side, etch chemistry and
+polymer management play an important role in controlling
+the channel hole shape from top to bottom. There are
+extensive research studies in the literature on typical carbon
+ﬂuorine chemistry systems5–9) for dielectric etching.
+Recently, there has been renewed interest in low-temperature
+processing for channel hole etching due to enhanced etch
+rates and proﬁle improvements.10,11) In this article, we will
+brieﬂy review some of the fundamental aspects of lowtemperature process regimes in the context of HAR etching
+and discuss the beneﬁts of the new process, whereby
+signiﬁcant improvement in HAR etching have recently
+been achieved.
+Computational simulations can provide valuable insight to
+aid hardware and process development. Feature-scale modeling coupled with reactor-scale modeling has been an active
+research area over the past decades and has helped to
+elucidate the effect of aspect ratio dependence based on
+ion/neutral transport and the potential origins of feature hole
+distortions such as striation and twisting.12–15) We will
+present and discuss the new ﬁndings on the latest featurescale modeling based on a semi-empirical Monte Carlo
+method developed at Lam Research.
+Deposition and etch co-optimization (DECO) is a new area
+that has only been reported recently.16,17) In the 3D NAND
+ﬂow, the nitride in the ONON stack is a sacriﬁcial layer and
+is replaced with tungsten to form the word line.3,4) In HAR
+etch, maintaining a vertical proﬁle from top to bottom is most
+difﬁcult. HAR etching proﬁles in general are tapered at
+deeper etch depths, while the top of the hole becomes
+enlarged. With SiN being a replacement ﬁlm, we can explore
+SiN tier optimization for proﬁle control to reduce the top bow
+while enlarging the bottom hole critical dimension (CD) for
+the HAR etch. The optimization requires close collaboration
+between teams for both the HAR etch and ONON stack
+deposition modules to realize the full beneﬁts.
+
+© 2023 The Author(s). Published on behalf of The Japan Society of Applied Physics by IOP Publishing Ltd
+Content from this work may be used under the terms of the Creative Commons Attribution 4.0 license. Any further distribution of this
+work must maintain attribution to the author(s) and the title of the work, journal citation and DOI.
+
+PROGRESS REVIEW
+
+Jpn. J. Appl. Phys. 62, SI0801 (2023)
+
+Fig. 1. Typical ONON channel hole ﬂow.
+
+A sacriﬁcial liner approach is another novel DECO scheme
+to prevent CD enlargement of bow holes at deeper etch
+depths. With ever-increasing numbers of ONON layers,
+opening the bottom CD at deeper etch depths becomes
+more difﬁcult without blowing up the top bow CD. We
+introduce a sacriﬁcial carbon liner that is inserted after
+reaching a certain depth, and then continue the remaining
+etch until full depth is reached. This concept provides a new
+process window for overall control of channel hole shape to
+support future roadmaps. These results and some of the
+interactions between etch and liner will also be discussed.
+2. HAR etch mechanisms
+
+Several HAR etches are required to pattern, isolate, and
+connect vertically integrated 3D memory devices. The most
+critical etch process in the manufacturing of 3D ﬂash devices
+is the formation of cylindrical holes inside the ﬁlms which
+house the storage devices. This process etches alternating
+ONON layers. These materials were etched originally with
+hydroﬂuorocarbon gases such as CF4 and CHF3. Increasing
+selectivity requirements led to the use of hydrogen and
+carbon-rich gases such as CH2F2, CH3F, C4F8 and
+C4F6,5–9) and the mask was changed from photoresist to
+CVD deposited carbon. Oxygen and noble gases were added
+to control the deposition rate of ﬂuorocarbon polymers on the
+mask and inside the etched feature. Etching proceeds when
+ions can traverse this polymer layer and mix with the etching
+material. In the case of silicon oxide, the reaction products
+are COx and SiFx.
+This etching mechanism encounters challenges for HARs
+because the ﬂux of neutral precursors for polymer formation
+attenuates rapidly as the aspect ratio increases.13,14) The
+aspect ratio for a hole or trench in general is deﬁned as the
+ratio of the depth to the width of the hole or trench. The
+transport of neutrals inside the etch feature can be described
+by Knudsen transport. For a cylinder with an aspect ratio of
+50:1, only 2.5% of the incoming ﬂux reaches the other end of
+the cylinder due to diffuse collisions with the sidewall.18) The
+reason for this loss of neutrals is that they don’t have a
+preferred direction of movement. Ions are accelerated in the
+normal direction to the wafer surface when they pass the
+plasma sheath. Therefore, the etching mechanism for aspect
+ratios beyond 40 or 50 is dominated by fast, chemically
+active species which carry the mechanical energy and possess
+the chemical composition to initiate etching. These species
+can be ions or neutrals, which originate from ions that were
+
+neutralized in collisions with the feature sidewall. The
+mechanisms can be described as more akin to chemical
+sputtering rather than synergistic neutral–ion etching.
+Attenuation of ion and neutral ﬂuxes as a function of
+aspect ratio reduces the etching rate. This undesired effect is
+called aspect ratio-dependent etching (ARDE). To reduce
+ARDE, the transport of neutrals and ions must be enhanced.
+For ions, this can be achieved by increasing the ion energy.5)
+To etch HAR features, the plasma chemistry must be
+adjusted. High deposition rates of passivating species may
+cause clogging at the top of the structures at low temperatures. Therefore, low-temperature processes must have a
+“leaner” plasma chemistry with higher ﬂuorine and hydrogen
+concentrations. This results in the absence of a measurable
+polymer ﬁlm on the surface of SiO2 for low-temperature
+HAR etching processes versus conventional processes. This
+effect is illustrated in Fig. 2.
+One of the beneﬁts of a low-temperature process is a
+higher etch rate. The blanket silicon oxide and nitride etching
+rates increase by about 20% for a lean HAR etch process
+when lowering the temperature from 60 °C to −20 °C. This
+can be attributed to increased adsorption of reactive species.
+Figure 3 shows the etching rate for a conventional temperature and a lean, low-temperature process as a function of
+depth.
+The etching rate diminishes much more quickly for the
+high-temperature process than for the low-temperature process. One possible explanation is that chemical reactions are
+suppressed at lower temperatures. Coburn and Winters
+predicted a lower ARDE when the reactive sticking coefﬁcient is reduced.19) An additional explanation for the improved ARDE performance at lower temperatures is potentially surface diffusion of neutrals.20) Knudsen transport and
+surface diffusion can be viewed as separate, independent
+ﬂuxes or as synergistic, interdependent modes of neutral
+transport.20,21)
+Another beneﬁt of the leaner chemistry used in lowtemperature etching is an improved mask morphology, which
+translates into improved circularity and sidewall roughness of
+the etched holes, as shown in Fig. 4. Polymer deposition on
+the sidewalls of the mask, so-called necking, is considered
+the main root cause of sidewall roughness.22,23) For the
+
+Fig. 2. X-ray photoelectron spectroscopy (XPS) surface composition of a
+blanket SiO2 ﬁlm before etching and after etching with a low-temperature
+process and a conventional HAR etching process.
+
+SI0801-2
+
+© 2023 The Japan Society of Applied Physics
+
+PROGRESS REVIEW
+
+Jpn. J. Appl. Phys. 62, SI0801 (2023)
+
+Fig. 3. Normalized etching rate versus depth for conventional (solid
+circles) and low-temperature etching processes (open circles) of circular
+holes with a diameter of 100 nm.
+
+Fig. 5. Simulated HAR hole etch with signiﬁcant bow formation from a
+broader IAD. Ion ﬂuxes with a wide IAD give HAR hole etches a
+characteristic bowed proﬁle with a bottom taper. HM, hard mask.
+
+Fig. 4. Cross section and mask morphology for 6 μm deep holes etched
+with conventional and low-temperature processes.
+
+conventional etch process, the polymer necking morphology
+can be irregular, resulting in uneven species ﬂuxes to the hole
+that can lead to sidewall roughness. This mechanism is
+suppressed for lean, low-temperature processes as the mask
+morphology and necking are more consistent from hole to
+hole.
+3. Feature-scale model
+
+Various feature-scale models have been developed in the past
+a few decades as powerful tools for understanding the etch
+proﬁle and processes.12–15) Lam developed a semi-empirical
+Monte Carlo model that captures the physics of the ion and
+neutral transport effect as well as the surface-level general
+chemistry dependences in feature proﬁle evolution. Key
+inputs from plasma were based on a reactor-scale model
+and molecular dynamic models. Some of the other parameters, such as ion angular distribution (IAD), angular etch
+yields, reactive sticking coefﬁcients, and ion scattering
+distributions, were empirically derived based on experimental
+results. The Monte Carlo method is used to solve the ion ﬂux
+dependences within features during evolution.
+
+One of the main advantages of the semi-empirical featurescale model is to be able to capture the etch proﬁle as a
+function of etch time, thus revealing how the proﬁle evolves
+continuously. Figure 5 shows the simulated proﬁle evolution
+during a memory hole etch. In this example, the time
+evolution of the hard mask shape and the proﬁle (top CD,
+bow CD, and taper) can be tracked. Parameters can be
+adjusted to match the simulated proﬁle to experimental
+results at ﬁxed time intervals. Upon establishing the model,
+we can visualize the impact of varying IAD, ion scattering,
+ion enhanced chemical etch components, chemisorption,
+desorption, etc. The model results provide a better understanding of ion and neutral transport and reactivity for
+channel hole etching at different aspect ratios, thus helping
+process development for HAR features. A few key learning
+points will be highlighted.
+ARDE was simulated for the lean, low-temperature
+process. The aspect ratio is deﬁned as the total height of
+the hole, including the mask, to the narrowest mask open CD.
+Figure 6(a) shows the etch rate of the channel hole ONON
+layer and the carbon hard mask plotted against aspect ratio.
+Since the carbon hard mask is mainly eroded from the top,
+the hard mask etch rate stays relatively constant. The ONON
+channel hole layer, on the other hand, exhibits a ﬂat etch rate
+up to an aspect ratio of ~60 and decreases at higher aspect
+ratios. Figure 6(b) shows the simulated normalized ion ﬂux to
+the etch front for perfect cylinder-shaped hole evolution for
+different IADs, where the IAD value is 1σ based on a
+Gaussian distribution. The ﬂat etch rate at lower aspect ratios
+can be partially attributed to very low IADs (<0.5° 1σ).
+Similar curves have been reported by Huang et al.13) In
+Huang’s SiOx feature-scale model, the SiOx etch rate at
+relatively lower aspect ratios reaches a maximum before
+decreasing. The initial ﬂatter etch rate in our model can be
+attributed to a smaller IAD (e.g. a more broadened peak etch
+
+SI0801-3
+
+© 2023 The Japan Society of Applied Physics
+
+PROGRESS REVIEW
+
+Jpn. J. Appl. Phys. 62, SI0801 (2023)
+(a)
+
+(b)
+Fig. 7. Normalized selectivity against aspect ratio. Selectivity is reduced
+by 50% going from an aspect ratio of 40 to 140.
+
+Fig. 6. (a) Simulated channel hole etch rate and hard mask etch rate with
+hole aspect ratio. The channel hole etch rate is ﬂat at low aspect ratios and
+then decreases gradually. (b) Simulated normalized ion ﬂuxes at the etch
+front ﬂux for the evolution of a perfect cylinder proﬁle shows comparable ion
+ﬂuxes at lower aspect ratios at lower IADs. IADs are assumed to follow a
+Gaussian distribution with 1σ speciﬁed.
+
+rate) and modeling the impact of the hard mask polymer neck
+on proﬁle evolution. Improving the ARDE effect is key to
+enabling ever-increasing stack thicknesses for 3D NAND
+ﬂash. As mentioned previously, our low-temperature process
+has signiﬁcantly improved ARDE behavior with respect to
+etches run at conventional temperatures.
+Using the ARDE curve, we also looked at the impact on
+bulk hard mask selectivity, which is deﬁned as the ONON
+depth etched divided by the hard mask consumed at a
+speciﬁed time. Figure 7 shows the normalized selectivity
+against aspect ratio. The normalized bulk selectivity is
+reduced by roughly 50%, going from an aspect ratio of 40
+to 140. Such a decrease in selectivity at increasing ONON
+thicknesses is also a challenge.
+In addition to capturing ARDE, the feature-scale model
+was able to capture hole shape distortion and twisting.
+Figure 8 shows some examples of non-ideal hole shapes
+compared with an ideal hole shape. An ideal hole is perfectly
+circular and centered through the hole etch depth.
+Undesirable hole artifacts come in many forms. The hole
+can twist, resulting in the center of the hole shifting. The hole
+
+Fig. 8. The ideal hole shape (on the left) is perfectly circular and centered
+from top to bottom of the HAR channel hole. Channel holes at very HARs
+can exhibit non-ideal hole behavior such as twisting (off center), roughness
+(striations), and distortion (deviation from circle shape).
+
+can have a roughness around the edges, sometimes referred to
+as striations. Lastly, the hole can be distorted. In the example
+in the ﬁgure, the hole is distorted to look more like an ellipse.
+Understanding how these non-ideal hole shapes are formed in
+a HAR etch is important if 3D NAND is to be enabled.
+Experiments show that mask shape can affect the hole
+shape and centering. Figure 9 shows a comparison of a mask
+
+Fig. 9. Hard mask (HM) shape can affect hole shape. In this ﬁgure, the top
+images represent the top of the HM while the bottom image is the
+corresponding hole shape near the bottom of the channel hole layer. An
+irregular mask hole shape from heavy polymer deposition can potentially
+lead to hole shape distortion and twisting.
+
+SI0801-4
+
+© 2023 The Japan Society of Applied Physics
+
+PROGRESS REVIEW
+
+Jpn. J. Appl. Phys. 62, SI0801 (2023)
+
+that shows little distortion compared with signiﬁcant distortion due to heavy polymer deposition. The corresponding
+hole shape that is transferred to the bottom of the ONON
+stack is shown below the respective mask. For the less
+distorted mask shape, the holes tend to be circular and
+centered. In contrast, the mask with the heavy polymer
+deposition results in a distorted bottom ONON hole shape
+with some twisting.
+These results suggest that hole shape distortion and
+twisting can be affected by the mask shape and morphology.
+An uneven build-up of polymer on the hard mask can lead to
+uneven hard mask shape morphology and be transferred to
+the hole feature. The low-temperature and lean HAR ONON
+hole etch process that was developed shows good mask
+morphology, leading to good hole circularity, as shown in
+Fig. 4.
+Experimental results conﬁrmed that mask morphology
+plays a role in hole shape, but a literature survey suggests
+that stochastic ion scattering can also affect the hole
+shape.12–15,24) Figure 10 shows a simpliﬁed HAR etch
+simulation where the hard mask shape stays constant. That
+is, the hard mask is perfectly circular, and hard mask
+shadowing species should not contribute to any hole distortions. In this comparison, the number of ion scatters is varied
+from 2× to 0×. In the case of 2× scatters, all ion interactions
+up to 2× ion scatters are included in the proﬁle evolution.
+The top-down view at different etch depths is shown on the
+right side of each panel. The “top down” section is a view
+from the top of the mask, while other cross sections were
+taken at speciﬁed etch depth locations. The ﬁrst location is at
+an etch depth of 2000 nm, while the second and third
+locations are at 4000 nm and 5500 nm, respectively.
+In the absence of ion scattering with a circular hard mask
+shape (0× ion scatter), the hole is perfectly centered and
+circular. At 1× and 2× ion scatters, hole shape distortion is
+apparent at etch depths equal to or deeper than 4000 nm. The
+feature-scale model data suggest that ion scattering within the
+hole could cause hole distortions. In the absence of hard
+
+mask evolution and for the etch depth studied, no signiﬁcant
+twisting of the hole feature was observed.
+To capture the effects of a hard mask in addition to ion
+scattering, a HAR ONON etch feature-scale model was
+developed that captured both the hard mask shape evolution
+and the ARDE for the low-temperature etch. Figure 11 shows
+the results for the feature proﬁle simulator showing proﬁle
+twisting. The ﬁnal proﬁle is shown on the left, while the time
+evolution of the hole shape at the hard mask neck and at
+different locations in the ONON proﬁle are shown on the
+right. Near the top of the hole, the hole proﬁle maintains its
+circular shape. Early in the etch, the bottom of the hole shows
+a triangular shape that eventually expands in size to become
+more circular as the etch progresses. The very bottom of the
+hole at longer times is elliptical and off-centered. The
+simulation results show the time evolution of a distorted
+hole can become more circular with time at the same depth.
+Also, early hole shape distortion can lead to hole distortion
+transfer deeper in the etch, probably due to uneven ion
+scattering.
+
+Fig. 10. Feature proﬁle model with a non-evolving hard mask (no hard
+mask etch or polymer deposition) to study the effect of ion scattering on hole
+shape irregularity. Hole shape distortion is apparent only when ions scatter.
+
+Fig. 11. Feature proﬁle simulator modeling both hard mask (HM)
+evolution and the channel hole etch. When HM evolution and ion scattering
+are modeled, hole shape distortion and twisting can be captured.
+
+4. DECO silicon nitride tier optimization
+
+While HAR etching plays the most signiﬁcant role in
+patterning channel holes, dielectric ONON ﬁlm deposition
+is another crucial area of focus. Since the nitride ﬁlm (SiN) in
+the ONON pair is a sacriﬁcial layer that is eventually
+replaced with W at a later stage, it provides opportunities
+to look at possibilities of optimizing nitride ﬁlms at different
+tiers to enable better control of channel hole shape during
+etching. After HAR etching, the proﬁle in general shows a
+bottom pinch-off, with the upper/middle region showing a
+bowing proﬁle. Figure 12 illustrates the tier optimization
+strategy with DECO to reach a more vertical proﬁle
+throughout. For the bowing proﬁle, the nitride ﬁlm at the
+bow location can be replaced with a nitride with less lateral
+etch component, and the proﬁle bow can be improved. For
+
+SI0801-5
+
+© 2023 The Japan Society of Applied Physics
+
+PROGRESS REVIEW
+
+Jpn. J. Appl. Phys. 62, SI0801 (2023)
+
+Fig. 14. Top tier SiN ﬁlm change impact on BB bias (largest bow CD –
+bottom CD) reduction.
+
+Fig. 12. Film tier optimization strategy in DECO to enlarge the bottom CD
+and reduce the bowing proﬁle near the middle region.
+
+the bottom narrow hole CD, one can explore nitride ﬁlms
+with a higher lateral etch rate as well as more bottom tiers to
+enlarge the bottom CD. The co-optimization between HAR
+etching and a ONON ﬁlm provides new opportunities to
+enable ever-increasing numbers of ONON layers.
+Although the silicon nitride ﬁlm is a sacriﬁcial layer,
+maintaining the material properties of the ﬁlm for the overall
+integration ﬂow presents new challenges during tier optimization. Film modulus and stress correlate with the mechanical
+and thermal stability of the overall structure. Film composition, such as hydrogen content, could inﬂuence the overall
+stack integrity during the subsequent steps in the ﬂow. The
+wet clean removal rate is another element to be considered,
+such that the proﬁle is not negatively impacted during the
+subsequent carbon mask strip and wet clean steps. Overall,
+tier co-optimization should show little to no impact on
+upstream and downstream integration ﬂows to ensure no
+negative impact on device performance.
+For the silicon oxide ﬁlm, since the ﬁlm is part of the
+memory cell, tier optimization has additional constraints
+besides the elements mentioned above for silicon nitride.
+Additional components, such as dielectric breakdown voltage, should also be taken into consideration. We also need to
+pay attention to the potential interactions between nitride and
+oxide ﬁlms at later stages of the integration ﬂow. Examples
+of silicon nitride ﬁlm tier optimization for bow proﬁle
+reduction are shown in Figs. 13 and 14.
+
+Fig. 13. Bottom tier SiN ﬁlm change impact on BB bias (largest bow CD –
+bottom CD) reduction.
+
+For HAR proﬁle control, BB bias, deﬁned as the difference
+between the largest bow CD and the bottom CD, is often used
+as the key metric to deﬁne how vertical a hole proﬁle is. A
+near zero BB bias indicates a perfectly vertical proﬁle. There
+are two ways to reduce the BB bias, either by enlarging the
+bottom CD while keeping the bow CD from increasing or by
+reducing the bow CD while keeping the bottom CD from
+decreasing. To enlarge the bottom CD, nitride ﬁlms with
+higher lateral etch rates were placed at the bottom tiers. As
+indicated in Fig. 13, when the bottom 10% of SiN tiers are
+replaced with softer ﬁlms, BB bias is improved by 35%
+compared with the baseline. When 20% of the bottom tiers
+are replaced with softer ﬁlm, a BB bias reduction of up to
+53% is achieved. In this experiment, the top portion of the
+proﬁle was unchanged, and only the portion of the altered
+tiers was enlarged. The replaced SiN ﬁlm was tuned so that
+all other metrics could be maintained while the lateral etch
+rate was enhanced.
+Alternatively, BB bias reduction can also focus on reducing the bow CD near the top while keeping the bottom CD
+unchanged. Figure 14 shows the results of a bow CD
+reduction of 18% compared with baseline when the top
+portion of the SiN tiers is replaced with lower lateral etch rate
+ﬁlms compared to baseline. Ideally, combining both top tier
+and bottom tier optimization could bring further proﬁle
+improvement to reach a more vertical hole proﬁle.
+5. DECO carbon liner approach
+
+For HAR proﬁle control, managing polymer passivation on
+the sidewalls for proﬁle control is one of the most challenging aspects during HAR etching. For a HAR Si etch, for
+example, etch and deposition or cycling schemes have been
+used in the past to manage lateral CD growth while
+maintaining deep etch depths. A deposition and etch cycling
+process for deep Si etching is one such example, where
+reactive SF6 and C4F8 are cycled alternately to balance the
+etch rate and proﬁle.25,26) For HAR dielectric ﬁlms, however,
+this kind of cycling process does not work well due to the
+extremely narrow window between etching and deposition
+for proﬁle control. In situ carbon ﬁlm deposition as passivation in the etch chamber often results in mask clogging for
+the hole dimensions of concern. In addition, polymer buildup on the mask and proﬁle can lead to striation of the proﬁle
+sidewalls due to uneven polymer build-up under the subsequent high-power HAR etch step.24) Recently, Kumakura
+et al.27) reported applying coverage-controlled atomic layer
+deposition (ALD) silicon oxide ﬁlm to reduce the proﬁle
+
+SI0801-6
+
+© 2023 The Japan Society of Applied Physics
+
+PROGRESS REVIEW
+
+Jpn. J. Appl. Phys. 62, SI0801 (2023)
+
+Fig. 15. Carbon liner scheme and hole impact on CD with and without a
+carbon liner.
+
+bowing in HAR contact hole etching. While the use of ALD
+SiO2 ﬁlm to protect sidewalls is effective in some process
+regions, the low selectivity of sidewall passivation to the
+dielectric ﬁlm may present some limitations in HAR ONON
+channel hole applications.
+Depositing a carbon liner in a high-temperature deposition
+chamber, however, provides a new process window for HAR
+etching. The carbon liner can reach a similar etch resistance
+to the carbon mask material, and the conformality of the
+liners can be tailored to protect the bow CD location of the
+channel hole. The general concept of a carbon liner scheme is
+illustrated in Fig. 15 in the left panel. Bow CD in general is
+increased with a longer etch time at deeper etch depths. A
+carbon liner is inserted after the initial partial etching (before
+the bow CD is enlarged too much). Then the last partial etch
+is continued to full etch depth. The carbon liner provides
+extra protection to prevent bow CD growth during the last
+partial etch. As shown in Fig. 14 in the right panel, liner
+insertion effectively prevented the growth of the top CD bow
+while allowing more room to enlarge the bottom CD. BB bias
+reduction of 30% is achieved comparing the with and without
+liner approaches.
+While the liner approach is attractive, co-optimization of
+etching and liner is necessary to fully realize the value of
+liner insertion. There could be strong interactions between the
+liner and the HAR process, especially during the opening of
+the bottom CD after liner insertion. Liner material conformality needs to be tailored so that sidewall protection is placed
+in the bow location with less sidewall deposition near the
+bottom to allow more room to open the bottom CD.
+Throughput and productivity also need to be balanced to
+reach high-volume production. Overall, a carbon liner is a
+novel approach to enable more tiers for next-generation
+nodes.
+6. Conclusions
+
+Due to attenuation in ion and neutral ﬂuxes reaching the
+bottom of features, ARDE is the major bottleneck for ONON
+HAR channel hole etching. A new etch process operating at
+low temperature showed an improved etch rate. Low
+temperature coupled with lean chemistry open the process
+window to a regime with less polymer deposition, thus
+improving ARDE and hole shape control. XPS surface
+analysis showed that the new process had signiﬁcantly less
+
+polymer formation, leading to more circular hole shapes,
+while typical CxFy chemistry showed a high CxFy polymer on
+top of the etching ﬁlm, resulting in more irregular hole
+shapes.
+A semi-empirical Monte Carlo feature-scale model was
+developed, and the simulated etch proﬁle progression and
+aspect ratio dependence matched the experimental data. The
+model data revealed that ion scattering within the hole could
+cause hole distortions in the absence of mask shape evolution. Combining mask shape evolution and ion scattering in
+the hole in the model revealed that hole distortion and
+twisting could occur and were magniﬁed at deeper etch
+depths.
+DECO tier ﬁlm modulation can provide an additional
+window for channel hole proﬁle control. Replacing bottom
+tier silicon nitride with a higher lateral etch rate resulted in an
+improvement of >50% in BB bias, while varying top tier
+resulted in a BB bias improvement of 18%. Combining both
+top and bottom tier optimization could lead to further
+improvement.
+Liner insertion is another highly effective way to prevent
+top CD bow growth while enlarging the bottom CD. An
+improvement of up to 30% in BB bias can be achieved when
+comparing the with and without liner approaches. Detailed
+process mapping between the ﬁrst partial etch, liners, and the
+ﬁnal partial etch could provide further improvement.
+Acknowledgments
+
+We would like to express thanks to Professor Chang’s group
+from UCLA for the XPS analysis results.
+
+1) H. Tanaka et al., “Bit cost scalable technology with punch and plug process
+for ultra high density ﬂash memory,” 2007 IEEE Symp. on VLSI
+Technology, 2007, p. 14, 10.1109/VLSIT.2007.4339708.
+2) Ki-Tae Park, D. K. Byeon, and D.-H. Kim, “A world's ﬁrst product of threedimensional vertical NAND Flash memory and beyond,” 4th Annual NonVolatile Memory Technology Symp. (NVMTS), 2014, p. 1, doi:10.1109/
+NVMTS.2014.7060840.
+3) J. Choe, eBook: 2022 and Beyond for Memory Technology (TechInsights,
+Otawa, ON Canada, 2022), https://www.techinsights.com/ebook/memory/
+ebook-2022-and-beyond-memory-technology.
+4) H. Singh, Overcoming challenges in 3D NAND volume manufacturing
+Semiconductor Digest (2017), https://sst.semiconductor-digest.com/2017/07/
+overcoming-challenges-in-3d-nand-volume-manufacturing/.
+5) K. Ishikawa, K. Karahashi, T. Ishijima, S. I. Cho, S. Elliott, D. Hausmann,
+D. Mocuta, A. Wilson, and K. Kinoshita, “Progress in nanoscale dry
+processes for fabrication of high-aspect-ratio features: how can we control
+critical dimension uniformity at the bottom?,” Jpn. J. Appl. Phys. 57, 6S2
+(2018).
+6) T. E. F. M. Standaert, C. Hedlund, E. A. Joseph, and G. S. Oehrlein, J. Vac.
+Sci. Technol. A 22, 53 (2004).
+7) T. Iwase, Y. Kamaji, S. Y. Kang, K. Koga, N. Kuboi, M. Nakamua,
+N. Negishi, T. Nozaki, S. Nunomura, and D. Ogawa, Jpn. J. Appl. Phys. 58,
+SE0802 (2019).
+8) V. M. Donnelly and A. Kornblit, J. Vac. Sci. Technol. A 31, 050825 (2013).
+9) D. Zhang and M. J. Kushner, J. Vac. Sci. Technol. A 19, 524 (2001).
+10) M. Matsui, T. Usui, and T. Ono, Jpn. J. Appl. Phys. 56, 06HB03 (2017).
+11) T. Iwase, K. Yokogawa, and M. Mori, Jpn. J. Appl. Phys. 56, 06HB04 (2017).
+12) C. M. Huard, Y. Zhang, S. Sriraman, A. Paterson, K. J. Kanarik, and
+M. J. Kushner, J. Vac. Sci. Technol. A 35, 031306 (2017).
+13) S. Huang, C. Huard, S. Shim, S. K. Nam, I.-C. Song, S. Lu, and
+M. J. Kushner, J. Vac. Sci. Technol. A 37, 031304 (2019).
+14) S. Huang, S. Shim, S. K. Nam, and M. J. Kushner, J. Vac. Sci. Technol. A
+38, 023001 (2020).
+15) Y. G. Yook, H. S. You, J. H. Park, W. S. Chang, D. C. Kwon, J. S. Yoon,
+K. H. Yoon, S. S. Shin, D. H. Yu, and Y. H. Im, J. Phys. D: Appl. Phys. 55,
+255202 (2022).
+
+SI0801-7
+
+© 2023 The Japan Society of Applied Physics
+
+PROGRESS REVIEW
+
+Jpn. J. Appl. Phys. 62, SI0801 (2023)
+16) M. Shen et al., Proc. SPIE 11615, 1161501 (2021).
+17) M. Shen et al., SEMICON2022, https://www.semiconkorea.org/en/node/
+5246.
+18) J. F. O’Hanlon, A User’s Guide to Vacuum Technology (Wiley-Interscience,
+New Jersey, 2003).
+19) J. W. Coburn and H. F. Winters, Appl. Phys. Lett. 55, 2730 (1989).
+20) T. Lill, I. L. Berry, M. Shen, J. Hoang, A. Fischer, T. Panagopoulos,
+J. P. Chang, and V. Vahedi, J. Vac. Sci. Technol. A 41, 023005 (2023).
+21) A. Argönül and F. J. Keil, Period. Polytech. Chem. Eng. 52, 37 (2008).
+22) M. Miyake, N. Negishi, M. Izawa, Ke Yokogawa, M. Oyama, and
+T. Kanekiyo, Jpn. J. Appl. Phys. 48, 08HE01 (2009).
+
+23) N. Negishi, M. Miyake, K. Yokogawa, M. Oyama, T. Kanekiyo, and
+M. Izawa, J. Vac. Sci. Technol. B 35, 051205 (2017).
+24) M. Omura, J. Hashimoto, T. Adachi, Y. Kondo, M. Ishikawa, J. Abe,
+I. Sakai, H. Hayashi, M. Sekine, and M. Hori, Jpn. J. Appl. Phys. 58,
+SEEB02 (2019).
+25) G. H. Lee, S. Hwang, J. Yu, and H. Kim, Appl. Sci. 11, 6703
+(2021).
+26) B. Wu, A. Kumar, and S. Pamarthy, J. Appl. Phys. 108, 051101
+(2010).
+27) S. Kumakura, H. Sasagawa, T. Nishizuka, Y. Kihara, and M. Honda, Jpn. J.
+Appl. Phys. 61, SI1015 (2022).
+
+SI0801-8
+
+© 2023 The Japan Society of Applied Physics
+
+

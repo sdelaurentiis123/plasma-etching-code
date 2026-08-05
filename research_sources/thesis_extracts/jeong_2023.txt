@@ -1,0 +1,1243 @@
+             materials
+Article
+Contribution of Ion Energy and Flux on High-Aspect Ratio
+SiO2 Etching Characteristics in a Dual-Frequency Capacitively
+Coupled Ar/C4F8 Plasma: Individual Ion Energy and
+Flux Controlled
+Wonnyoung Jeong 1 , Sijun Kim 1,2, * , Youngseok Lee 1,2 , Chulhee Cho 1 , Inho Seong 1 , Yebin You 1 ,
+Minsu Choi 1 , Jangjae Lee 3 , Youbin Seol 1,2 and Shinjae You 1,2
+
+                                          1   Applied Physics Lab for PLasma Engineering (APPLE), Department of Physics, Chungnam National
+                                              University, Daejeon 34134, Republic of Korea
+                                          2   Institute of Quantum Systems (IQS), Chungnam National University, Daejeon 34134, Republic of Korea
+                                          3   Samsung Electronics, Hwaseong-si 18448, Republic of Korea
+                                          *   Correspondence: sj_kim@cnu.ac.kr
+
+
+                                          Abstract: As the process complexity has been increased to overcome challenges in plasma etching,
+                                          individual control of internal plasma parameters for process optimization has attracted attention. This
+                                          study investigated the individual contribution of internal parameters, the ion energy and flux, on high-
+                                          aspect ratio SiO2 etching characteristics for various trench widths in a dual-frequency capacitively
+                                          coupled plasma system with Ar/C4 F8 gases. We established an individual control window of ion
+                                          flux and energy by adjusting dual-frequency power sources and measuring the electron density and
+                                          self-bias voltage. We separately varied the ion flux and energy with the same ratio from the reference
+                                          condition and found that the increase in ion energy shows higher etching rate enhancement than that
+                                          in the ion flux with the same increase ratio in a 200 nm pattern width. Based on a volume-averaged
+                                          plasma model analysis, the weak contribution of the ion flux results from the increase in heavy
+Citation: Jeong, W.; Kim, S.; Lee, Y.;    radicals, which is inevitably accompanied with the increase in the ion flux and forms a fluorocarbon
+Cho, C.; Seong, I.; You, Y.; Choi, M.;
+                                          film, preventing etching. At the 60 nm pattern width, the etching stops at the reference condition and
+Lee, J.; Seol, Y.; You, S. Contribution
+                                          it remains despite increasing ion energy, which implies the surface charging-induced etching stops.
+of Ion Energy and Flux on
+                                          The etching, however, slightly increased with the increasing ion flux from the reference condition,
+High-Aspect Ratio SiO2 Etching
+                                          revealing the surface charge removal accompanied with conducting fluorocarbon film formation by
+Characteristics in a Dual-Frequency
+Capacitively Coupled Ar/C4 F8
+                                          heavy radicals. In addition, the entrance width of an amorphous carbon layer (ACL) mask enlarges
+Plasma: Individual Ion Energy and         with increasing ion energy, whereas it relatively remains constant with that of ion energy. These
+Flux Controlled. Materials 2023, 16,      findings can be utilized to optimize the SiO2 etching process in high-aspect ratio etching applications.
+3820. https://doi.org/10.3390/
+ma16103820                                Keywords: plasma processing; plasma etching; high-aspect ratio SiO2 etching; etching rate; individual
+                                          plasma internal parameter control; ion flux; ion energy
+Academic Editor: Alenka Vesel
+
+Received: 29 March 2023
+Revised: 13 May 2023
+Accepted: 15 May 2023                     1. Introduction
+Published: 18 May 2023
+                                               Plasma, which is composed of charged and neutral particles, has been widely used in
+                                          material processing due to its chemically reactive species and energetic ions, which can
+                                          activate and modify the surface of materials [1]. These characteristics have made plasma
+Copyright: © 2023 by the authors.
+                                          processing a significant tool in semiconductor fabrication, particularly in high-aspect ratio
+Licensee MDPI, Basel, Switzerland.        (HAR) etching for creating three-dimensional transistor structures and improving transistor
+This article is an open access article    stacking [2–4].
+distributed under the terms and                As the feature size shrinks to nano and atomic scales, and the layer stacking increases,
+conditions of the Creative Commons        severe challenges emerge in HAR etching, including notching, bowing, twisting, and taper-
+Attribution (CC BY) license (https://     ing, and aspect ratio-dependent etching [4,5]. To overcome these issues, multi-frequency
+creativecommons.org/licenses/by/          modulation, voltage wave tailoring, and pulse-modulated methods have been developed
+4.0/).                                    for precise control of ion energy and ion-to-neutral flux [6–9]. Furthermore, processing
+
+
+
+Materials 2023, 16, 3820. https://doi.org/10.3390/ma16103820                                              https://www.mdpi.com/journal/materials
+Materials 2023, 16, 3820                                                                                            2 of 23
+
+
+
+
+                           has become more complicated; the number of processing steps increases and complex gas
+                           mixtures are employed. Due to its complexity, the exact etching mechanism has yet to be
+                           clearly understood; etching depends on various internal parameters of plasma and chemical
+                           species, which are difficult to measure and control due to the complex nature of plasma. As
+                           a result, most experimental studies have analyzed the effects of external parameters such
+                           as gas composition, bias voltage, and power on HAR etching characteristics [2,3,10–12].
+                                 Alternatively, several computational studies have investigated the etching mechanism
+                           in HAR features, considering internal parameters. For instance, Huang et al. [13] inves-
+                           tigated HAR etching with a C4 F8 /Ar/O2 mixture based on a hybrid plasma equipment
+                           model (HPEM) and Monte Carlo feature profile model (MCFPM). They found that hot
+                           neutrals formed by the charge neutralization process of energetic ions with the side wall
+                           inside the HAR trench can reach the deep etch front through the Knudsen transport and
+                           become the main etchant. On the other hand, radical species entering the trench entrance
+                           cannot reach the deep etch front due to its isotropic nature and their high reactivity with the
+                           side wall. Wang et al. [14] found an etching mechanism transition from fluorocarbon (FC)
+                           film deposition to chemical sputtering in a C4 F6 /Ar/O2 gas mixture environment through
+                           HPEM and MCFPM simulation. Kwon et al. [15] investigated the role of heavy ion impact
+                           on the feature-to-feature profile of SiO2 by using a multi-scale computer simulation. They
+                           found that heavy ion sputtering reduces the feature-to-feature distortion. Recently, Jeong
+                           et al. [16] experimentally established well-controlled regimes of ion and radicals fluxes in
+                           C4 F8 /Ar plasma by varying the C4 F8 fraction and using pulse-modulated radio-frequency
+                           power, and they investigated etching characteristics at each regime. They found that the
+                           neutral-to-ion flux ratio is the key factor for etching dynamics. At a low neutral-to-ion
+                           flux ratio, the etching rate increases with the increasing of the flux ratio due to enhanced
+                           chemical reactions on the etch front, whereas at a high neutral-to-ion flux ratio, the etching
+                           rate decreases with the increasing of the flux ratio due to the thick FC film formation.
+                           Furthermore, their results exhibited that ion transport toward the etch front inside the HAR
+                           feature is a significant factor for understanding the etching mechanism.
+                                 Because experimental and computational studies have revealed that ions inside the
+                           HAR feature play a significant role in HAR SiO2 etching [13–16], most simulation studies
+                           have focused on the validation of technologies for individual control of ion flux and energy.
+                           For instance, Kim et al. [17] proved the capability of the individual control of ion flux
+                           and energy distribution by varying dual-frequency voltages through a two-dimensional
+                           particle-in-cell Monte Carlo collisions (PIC-MCC) simulation. Schulze et al. [18] proved the
+                           voltage pulse wave tailoring technology for individual control of the ion flux and energy
+                           through a two-dimensional PIC-MCC simulation in dual-frequency voltage sources. In
+                           addition, most experimental studies analyzed the coupled influence of ion flux and energy
+                           for etching based on the ion parameter measurement [3,10,19]. However, the detailed
+                           analysis on the separate influence of ion flux and energy on SiO2 etching in the HAR
+                           feature based on the individual control and measurement of ion parameters has yet to
+                           be investigated. In this study, we established control regimes for ion parameters, the ion
+                           energy and flux, at dual-frequency capacitively coupled C4 F8 /Ar plasma and elucidated
+                           their contribution on HAR SiO2 etching characteristics.
+                                 This paper is organized as follows: In Section 2, we describe the experimental setup
+                           and the individual control regime of ion energy and flux. Section 3 provides the experimen-
+                           tal results and detailed analysis. In Section 4, we summarize the findings of this study.
+
+                           2. Experiment Setup, Measurement Methods, and Volume-Ag Plasma Model
+                           2.1. Dual-Frequency Capacitively Coupled Plasma Source
+                                We employed a dual-frequency capacitively coupled Ar/C4 F8 plasma source as shown
+                           in Figure 1. The experimental setup is the same as that in [16] except the additional power
+                           source. Discharge power from 13.56 MHz (AE paramount, Advanced energy Inc., Denver,
+                           CO, USA) and 400 kHz power sources (AE paramount, Advanced energy Inc., Denver,
+                           CO, USA) is applied to the powered electrode with a diameter of 200 mm through a dual-
+Materials 2023, 16, 3820                                                                                             3 of 23
+
+
+
+
+                           frequency matcher (Pathfinder Dual, Plasmart, Daejeon, Republic of Korea). The discharge
+                           gap is 120 mm. Processing gases, C4 F8 and Ar, are injected into a vacuum chamber with
+                           radius of 400 mm through a shower head. The flow rate of C4 F8 and Argon is 80 and
+                           20 standard cubic centimeter per minute (sccm), respectively, controlled by a mass flow
+                           controller (MFC) (Linetech, Daejeon, Republic of Korea). A turbomolecular pump (TG1003,
+                           Osaka vacuum, Ltd., Osaka, Japan) accompanied with a dry pump (ADP122, Alcatel, Aβlar,
+                           Germany) draw the gases. The chamber pressure is maintained as 20 mTorr, which is
+                           regulated by adjusting a throttle valve (Atovac, Gyeonggi-do, Republic of Korea).
+
+
+
+
+                           Figure 1. Schematic diagram of a dual-frequency capacitively coupled Ar/C4 F8 plasma source.
+
+                                The powered electrode consists of top and bottom parts. As the high power is applied
+                           in the whole powered electrode, coolant flows through the bottom of the powered electrode.
+                           Furthermore, high-pressure helium gas is injected to the electrode for improving thermal
+                           contact between the top and bottom of the powered electrode. Here, a wafer sample is
+                           located on the top of the powered electrode.
+
+                           2.2. Wafer Sample
+                                A coupon wafer with 12 mm × 7 mm is located at the center of the electrode through
+                           a vacuum load-lock chamber. Figure 2 shows scanning electron microscope (SEM) images
+                           of a cross section of the wafer before etching. There is a patterned amorphous carbon
+                           layer (ACL) mask with thickness of 1400 nm, which is widely used in HAR etching as a
+                           mask [16,20]. It has a trench pattern with various line widths ranging from 60 nm to 200 nm.
+                           At the top of the ACL mask, there is a thin SiON layer with thickness of 50 nm. At the
+                           bottom of the ACL mask, there is a SiO2 layer with thickness of 2400 nm deposited through
+                           plasma-enhanced tetra ethylene ortho silicate (PE-TEOS) processing. At the bottom of the
+                           SiO2 layer, there is a Si substrate.
+Materials 2023, 16, 3820                                                                                                        4 of 23
+
+
+
+
+                           Figure 2. Scanning electron microscope (SEM) images of a cross-sectional view of a patterned wafer
+                           sample for (a) 200 nm and (b) 60 nm line widths.
+
+                                After etching, the sample is extracted from the chamber and then moved to SEM
+                           instrument.
+
+                           2.3. Ion Flux and Energy Measurement Method
+                                 In plasma diagnostics, ion parameters such as ion flux (Γion ) and energy (Eion ) can be
+                           determined with a retarded-field energy analyzer (RFEA) by measuring ion conduction
+                           current and deriving ion energy distribution function. However, in processing plasma, the
+                           RFEA is not applicable due to polymeric film deposition, leading to block the conduction
+                           current. Furthermore, measuring ion parameters incident on the powered electrode (PE)
+                           with the RFEA suffers from huge noises induced by the PE. Alternatively, we estimate the
+                           ion flux incident on the PE (ΓPE
+                                                         ion ), where a wafer sample locates, by measuring bulk electron
+                           density (ne ) [2,3].
+                                 Following is an explanation of this method to estimate the ΓPE  ion with the ne . In elec-
+                           tronegative plasma as with C4 F8 plasma, the ne is the same with the sum of positive ion
+                           densities at the plasma–sheath boundary (PSB) due to quasi-neutral character of plasma as
+
+                                                                                      ∑ nion
+                                                                                               species
+                                                                           ne =                          .                         (1)
+                                                                                     species
+
+                           Here, the sheath is the space-charge region covering plasma where ions are accelerated
+                           to the material surface. Negative ions are not taken into account in Equation (1) because
+                           the electronegative core where negative ions are confined is restricted inside the plasma
+                           bulk [21]. Specifically, the negative ions are under Maxwellian distribution with an ion
+                           temperature of Ti , which can be assumed as room temperature (Ti = 0.026 eV) in low-
+                           temperature plasma [22], and thus, most negative ions cannot escape the plasma bulk
+                           because the ambipolar potential in the bulk is in the order of a few eV. Hence, only electrons
+                           and positive ions exist at the PSB, and Equation (1) is valid. The ΓPSB
+                                                                                                 ion is defined as
+
+
+                                                                                  ∑ nion
+                                                                                           species species
+                                                                    ΓPSB
+                                                                     ion =                        uB                               (2)
+                                                                               species
+
+                                                    q
+                                     species                  species
+                           where uB            (=       eTe /Mion       ) is the Bohm velocity of ion, e is the elementary charge, Te
+                                                                           species
+                           is the electron temperature, and Mion                     is the mass of the ion [21]. As the Bohm velocity
+                                                       species
+                           has a root power for the Mion       and the mass of dominant ion species varies from 40 amu
+                           (Ar) to 131 amu (C3 F5 ) [13], where amu is atomic mass unit (1 amu = 1.66 × 10−27 kg), it
+                           can be assumed as a constant and we can take the Bohm velocity out of the summation
+                           in Equation (2). Then, the ΓPSB
+                                                       ion is proportional to the sum of the positive ion densities
+                               species
+                           (∑ nion       ), and therefore to the ne as
+
+                                                                                 ΓPSB
+                                                                                  ion ∝ ne                                         (3)
+Materials 2023, 16, 3820                                                                                              5 of 23
+
+
+
+
+                           Furthermore, the sheath in 20 mTorr can be assumed as a collisionless environment, and
+                           the ion flux is conserved, ensuring that the ion flux at the PSB is the same as that on the
+                           PE as
+                                                                  ΓPSB     PE
+                                                                   ion = Γion ,                                     (4)
+                           and thus,
+                                                                           ΓPE
+                                                                            ion ∝ ne .                                   (5)
+                                We measured the ne with the cutoff probe at the chamber center, which is a precise
+                           tool for electron density measurement applicable to plasma processing [23,24]. The de-
+                           tailed principle is well-described elsewhere [23]. The cutoff probe utilizes small-power
+                           microwaves ranging from a few MHz to GHz and measures the cutoff frequency ( f cutoff ) in
+                           a transmission microwave frequency spectrum. In a low-pressure condition, the f cutoff has
+                           a relationship with the ne as [23]
+                                                                                     s
+                                                                                         e2 ne
+                                                                     f cutoff =                                          (6)
+                                                                                         e0 m e
+
+                           where e0 is the permittivity in vacuum and me is the electron mass. Here, we measure
+                           the transmission microwave frequency spectrum with a vector network analyzer (E5071B,
+                           Agilent technologies Inc., Santa Clara, CA, USA).
+                                In addition to the ne , we can estimate the Eion by measuring the self-bias voltage (Vself ).
+                           Following is the explanation of this method. The ions are accelerated by the electric field in
+                           the sheath and strike the wafer sample with kinetic energy, Eion . As the sheath oscillates,
+                           the Eion is proportional to the time-averaged value of the voltage difference between the
+                           plasma potential (Vp (t)) and the powered electrode voltage (VPE (t)) [21], that is,
+                                                                     Z T
+                                                                 1
+                                                          Eion ∝            e(Vp (t) − VPE (t))dt,                       (7)
+                                                                 T     0
+
+                           where T is the period of the low-deriving frequency. In this system, the peak to peak of the
+                           VPE (t) is a few kV and that of the Vp (t) is to the order of ten volts in a capacitively coupled
+                           plasma [21], and thus, we can neglect the Vp (t) in Equation (7). The Vself is defined as the
+                           time-averaged value of the powered electrode voltage, that is,
+                                                                                Z T
+                                                                            1
+                                                                Vself =               VPE (t)dt.                         (8)
+                                                                            T    0
+
+                           Thus, the Eion is proportional to the Vself [25,26], that is,
+
+                                                                       Eion ∝ Vself .                                    (9)
+
+                           To derive the Vself , we measured a voltage waveform with a high-voltage probe (P5100A,
+                           Tektronix Inc., Beaverton, OR, USA) and an oscilloscope (TDS3052B, Tektronix Inc., Beaver-
+                           ton, OR, USA) as shown in Figure 1.
+
+                           2.4. Ion Energy and Flux-Controlled Regimes
+                                To control the ion energy and flux, we adjusted the dual-frequency powers. For the ion
+                           flux-controlled condition, we adjust 13.56 MHz powers for controlling the ne and 400 kHz
+                           powers for fixing the Vself . Similarly, for the ion energy-controlled condition, we adjust
+                           400 kHz powers for controlling the Vself and 13.56 MHz power for fixing the ne .
+                                Figure 3 shows the variation in the ne at fixed Vself , indicating the ion flux-controlled
+                           regime, and the variation in Vself at the fixed ne , indicating the ion energy-controlled regime.
+                           Hence, we established the ion flux- and the ion energy-controlled regimes.
+Materials 2023, 16, 3820                                                                                                      6 of 23
+
+
+
+
+                           Figure 3. Measured self-bias voltages (Vself s) and electron densities (ne ) for ion flux- and ion energy-
+                           controlled regimes.
+
+                           2.5. Volume-Averaged Plasma Model
+                                As the electron density increases, the radicals density inevitably changes because
+                           electrons dominate the radicals’ production reactions [2,3,16,21]. The precise measurement
+                           of the radicals density is a great challenge in plasma processing. Several studies used optical
+                           emission spectroscopy [27,28] and a quadrupole mass spectrometer [2,29] for estimating
+                           radicals densities, but its accuracy remains questionable. Alternatively, a volume-averaged
+                           model was used for analyzing plasma chemistry in a complex gas mixture [30–32]. We
+                           developed an in-house volume-averaged model code for C4 F8 /Ar plasma.
+                                The model solves particle and power balance equations. The particle balance equation
+                           for each particle besides electrons, shown in Table 1, is as [33]
+
+                                                     dn j    Q    1                          Γ j Aeff
+                                                          =      − n j + ∑ Ki,k (Te )ni nk −                                    (10)
+                                                     dt     Vvol  τ      i,k
+                                                                                              Vvol
+
+                           where n j is the particle density for j species, Vvol is the plasma volume, and Q is the input
+                           flow rate of feedstock gas, for instance, as for CFx and Cx Fy species, Q is the flow rate of
+                           C4 F8 , 80 sccm, and as for Ar species, Q is that of Ar, 20 sccm, τ is the residence time, Ki,k (Te )
+                           is the reaction rate constant, Γ j is the particle flux to the wall, and Aeff is the effective area
+                           of plasma. The τ is defined as [21]
+
+                                                                      τ = pVvol /Qtot                                           (11)
+
+                           where Tg is the gas temperature, p is the chamber pressure, Qtot is the total flow rate, and
+                           the Aeff is defined as
+                                                          Aeff = 2πR2 h L + 2πRLh R                                 (12)
+                           where R is the plasma radius, and L is the discharge gap. Here, h L and h R are the edge-to-
+                           center ratio defined as [21]                        
+                                                                    0.86 1 + 3α
+                                                                              γ
+                                                           hL =           q       ,                               (13)
+                                                                  (1 + α) 3 + 2λL              i
+
+                           and                                                     
+                                                                        0.80 1 + 3α
+                                                                                 γ
+                                                                  hR =        q       ,                                         (14)
+                                                                       (1 + α) 4 + λR      i
+Materials 2023, 16, 3820                                                                                                       7 of 23
+
+
+
+
+                           where α(=∑ n− /ne ) is the electronegativity, ∑ n− is the total negative ion density, γ(=Te /Ti )
+                           is the temperature ratio, Ti is the ion temperature, and λi is the mean-free path. It is noted
+                           that electron density is governed not by the particle balance equations but by the quasi-
+                           neutrality condition of plasma as
+
+                                                                    ne = ∑ n l − ∑ n m                                          (15)
+                                                                           l        m
+
+                           where l and m mean the positive and negative ion species, respectively.
+
+                           Table 1. Species included in the volume-averaged plasma model, besides the electron. Here, CF* and
+                           CF2 * mean the excited species of CF and CF2 , respectively.
+
+                           Type                                        Species
+                           C species                                   C, C+
+                           F species                                   F, F+ , F− , F2 , F2+ , F2−
+                           CFa species                                 CF, CF*, CF+ , CF2 , CF2 *, CF2+ , CF3 , CF3+ , CF3− , CF4
+                           C2 Fb species                               C2 F3 , C2 F3+ , C2 F4 , C2 F4+ , C2 F5 , C2 F5+ , C2 F6
+                           C3 Fc species                               C3 F5 , C3 F5+ , C3 F6 , C3 F6+ , C3 F7 , C3 F7+
+                           C4 Fd species                               C4 F7 , C4 F7+ , C4 F8 , C4 F8−
+                           Ar species                                  Ar, Arm , Arr , Ar(4p), Ar+
+
+
+                                To calculate the reaction rate, we referred to various reactions for C4 F8 reactions [32–34],
+                           Argon [35], and C4 F8 -Ar reactions [36] combined into this model. Detailed reaction tables
+                           are represented in Tables A1–A8.
+                                The model solves the power balance equation for electrons as
+                                                                     
+                                                          d 3                1
+                                                                ene Te =        ( P − Ploss )                           (16)
+                                                         dt 2              Vvol abs
+
+                           where Pabs is the input power and Ploss is the loss power of electrons, defined as
+
+                                                                      Ploss = Pc + Pei                                          (17)
+
+                           where Pc is the electron–ion pair creation loss, defined as
+                                                                                                                      !
+                                                                                                              kB Tg
+                                                                                                     
+                                                                                               3me
+                                      Pc = ene Vvol ∑ n j   ∑                  ∑
+                                                                  j,i j,i         j,k j,k
+                                                                 Kdis Edis +     Kiz Eiz + Kel           Te −              ,    (18)
+                                                     j       i                 k
+                                                                                                Mj              e
+
+                           and Pei is the ion and electron kinetic power losses, defined as
+
+                                                            Pei = e( Eion + Ee ) Aeff ∑ n j u j                                 (19)
+                                                                                        j=ion
+
+                           where Eion (=Vf + Te /(2(1 + α)(1 + αγ)) is the ion kinetic energy and Ee (=2Te ) is the
+                           average kinetic energy of electrons coming out of the plasma. The Vf is the floating
+                           potential derived as the floating condition as
+                                                                                      
+                                                                                    Vf
+                                                          ∑ l l ∑ m m
+                                                            n u =     n   v exp   −
+                                                                                    Tm
+                                                                                                               (20)
+                                                          l         m
+                                                                                                        p
+                           where l and m mean the positive and negative ion species, respectively, vm (= 8eTm /(πMm ))
+                           is the thermal velocity, Tm is the negative ion temperature, and Mm is the negative ion mass.
+Materials 2023, 16, 3820                                                                                                          8 of 23
+
+
+
+
+                           3. Results and Discussion
+                           3.1. Ion Energy Contribution on Etching Characteristics
+                                At first, we investigated the contribution of ion energy on etching characteristics.
+                           Figure 4a–c and Figure 4d–f represent SEM images at the 200 nm and 60 nm line widths,
+                           respectively, with various Vself s. Here, the etching time was fixed as 20 min for all cases. In
+                           these conditions, the electron density was fixed as shown in Figure 4g. At the 200 nm line
+                           width, the etch depth, marked as the arrow and dashed line in the SEM images, deepens
+                           with the Vself . Because the ion flux is fixed, the result ensures that the ion energy can
+                           enhance the etching process.
+
+
+
+
+                           Figure 4. Scanning electron microscope (SEM) images for (a–c) 200 nm and (d–f) 60 nm line widths
+                           at self-bias voltages (Vself ) of (a,d) 450 V, (b,e) 890 V, and (c,f) 1270 V with fixed electron density (ne )
+                           about 2.0 × 109 cm−3 . (g) Measured Vself and electron densities at each condition ((a,d), (b,e), and
+                           (c,f)), and (h) measured etch depth over Vself . Here, the tilted profiles and stripe patterns are caused
+                           by the set-up and charge-up during SEM image capture, respectively.
+
+                                 However, it is noted that this enhancement deteriorates with the narrowing of the line
+                           width as shown in Figure 4h; the slope decreases as the line width narrows. There are two
+                           possible causes of the decrease in the ion bombardment effect: thick FC film formation
+                           by C4 F8 fragments, such as Cx Fy , and ion angle distribution. The FC film plays a role in
+                           protecting the SiO2 from energetic ions [37,38]. However, a thin FC film (a few nano-meters)
+                           would be maintained during the etching process in this Vself range; as the ion energy is high
+                           enough to make a high sputtering yield, this compensates the FC film deposition rate and
+                           a thin FC film forms [38,39]. In addition, the amount of Cx Fy species entering the trench
+                           decreases with the narrowing of the line width due to the shrinking of the trench entrance.
+                           It leads to the drop in the etch depth at the same ion energy shown in Figure 4h. Hence, the
+                           thick FC film formation is not realistic in this condition. Then, the ion angle distribution,
+                           the second reason, dominates the decrease in the enhancement. Ions accelerated in the
+                           sheath are able to collide with background gases, and their incident angle to the trench
+                           has an angle distribution depending on the pressure and sheath width [21]. Ions with a
+                           large incident angle are transported to the etch front inside the trench through multiple
+                           reflections on the side wall and then strike the etch front with lower kinetic energy, causing
+                           the decrease in the ion bombardment enhancement [40].
+                                 In addition, the etch stop occurs at the 60 nm line width despite the ion energy
+                           elevation as shown in Figure 4h. It implies that the increase in ion energy is not a perfect
+Materials 2023, 16, 3820                                                                                            9 of 23
+
+
+
+
+                           solution for the optimization of the HAR SiO2 etching process. The etch stop in the HAR
+                           structure results from the charge accumulation on the narrow SiO2 structure, leading to
+                           ion repelling and insufficient radicals provision. As the trench depth deepens, the charge
+                           accumulation on the SiO2 surface increases. Moreover, the electric conductivity of the FC
+                           film decreases, which enhances the charge accumulation on the trench surface [41]. As for
+                           radicals provision, in this experiment, sufficient radicals species enter the trench because
+                           the trench width widens with increasing ion energy, as shown in Figure 4d–f. Furthermore,
+                           the radicals compositions remain unchanged due to constant ne with increasing ion energy.
+                           Hence, it is noted that ion energy enhances the etching process with C4 F8 /Ar, but in the
+                           HAR structure, the charge accumulation restricts its effect even in a sufficient radicals
+                           environment.
+                                 The trench entrance width enlarges with increasing ion energy regardless of the trench
+                           width. This entrance opening results from the angular dependence of the sputtering yield
+                           of the ACL. The sputtering yield has a peak near 70◦ of the incidence angle; it is formed by
+                           the balance between the increase in energy deposited on the surface by the incident ion and
+                           the decrease in the depth traveled by the sputtered atom [42]. As the edge of the trench
+                           entrance is rounded as shown in Figure 2, the etching rate of the entrance edge is larger
+                           than that of the side wall, leading to the entrance opening. Furthermore, the etching rate of
+                           the ACL mask abruptly elevates at 1270 V, whereas that of SiO2 monotonically increases.
+                           The elevation differs with the general trend of etching yield dependence on incident ion
+                           energy; the etching yield is proportional to a square root of the ion energy [43]. As it is
+                           beyond the scope of this study, we retain it as future work. In summary, increasing ion
+                           energy in high Vself allows to enlarge the feature size through the ACL mask opening and
+                           to lower the etching selectivity.
+
+                           3.2. Ion Flux Contribution on Etching Characteristics
+                                As for the ion flux contribution on the etching characteristics, Figure 5a–c and Figure
+                           5d–f represent SEM images at 200 nm and 60 nm line widths, respectively, with various ne s.
+                           Here, the etching time was fixed as 20 min for all cases. In this condition, the Vself was fixed
+                           as shown in Figure 5g. As shown in Figure 5h, the etch depth increases with increasing
+                           ion flux. Because the ion energy is fixed, the result ensures that the increase in the ion
+                           flux enhances the etching process. However, the slope drops over the ion flux. It results
+                           from the FC film formation due to the increase in the radicals density. Figure 6 shows the
+                           calculated radicals densities at various electron densities in the same pressure and gas
+                           mixture condition. Here, the electron density was adjusted with increasing discharge power.
+                           In SiO2 etching with FC plasma, heavy radicals (Cx Fy ) play a role in the formation of a thick
+                           FC film [38,39]. As shown in Figure 6, heavy radicals are larger than light radicals (CFx ),
+                           and thus, a thick FC film deposition would be formed with increasing electron density.
+Materials 2023, 16, 3820                                                                                                       10 of 23
+
+
+
+
+                           Figure 5. Scanning electron microscope (SEM) images for (a–c) 200 nm and (d–f) 60 nm line widths
+                           at (a,d) 1.1 × 1009 cm−3 , (b,e) 1.9 × 1009 cm−3 , and (c,f) 3.1 × 1009 cm−3 , with the fixed self-bias
+                           voltage about 740 V. (g) Measured Vself and electron densities at each condition ((a,d), (b,e), and (c,f)),
+                           and (h) measured etch depth over ne . Here, the tilted profiles and stripe patterns are caused by the
+                           set-up and charge-up during SEM image capture, respectively.
+
+
+
+
+                           Figure 6. Radicals densities (C4 F7 , C3 F6 , C2 F4 , CF3 , CF2 , CF) at different electron densities (ne s)
+                           calculated by an in-house volume-averaged plasma model.
+
+                                Moreover, it is noted that the etch stop deteriorates; the etch stop occurs at a 500
+                           nm etch depth in the ion energy-controlled regime, but the etch depth slightly increases
+                           with the increasing of the ion flux as shown in Figure 5h. The etch stop relaxation could
+                           correspond to the reduction in charge accumulation. The thicker FC film would prohibit
+                           charge accumulation inside the trench because it has conductivity, and thus, the etch stop
+                           can be moderated.
+                                As for the trench width, it remains preserved with the increasing of the ion flux
+                           compared to the case of the ion energy increase. It results from the increase in the FC
+                           film, which plays a role in a passivation layer for the ACL. Furthermore, because the
+Materials 2023, 16, 3820                                                                                                   11 of 23
+
+
+
+
+                           increase in the etching rate is monotonic, the etching selectivity remains constant. Hence,
+                           we can conclude that the increase in the ion flux allows to elevate the etching rate with
+                           preserving both the feature size and etching selectivity by providing a passivation layer on
+                           the ACL mask.
+
+                           3.3. Comparison of Individual Contributions of Ion Flux and Energy on SiO2 Etching Rate
+                                To compare the contributions of the ion energy and flux, the etch depth over the
+                           parameter variation rate based on Figures 4 and 5 is represented in Figure 7. Here, the zero
+                           in each condition is the reference condition shown in Figure 3. At 200 nm and 100 nm trench
+                           widths, one can find that the increase in the ion energy enhances the etching rate more than
+                           that in the ion flux with the same variation rates; the slope of the ion energy-controlled
+                           regimes is larger than that of the ion flux-controlled regime.
+
+
+
+
+                           Figure 7. Etch depth over variation rate of ion flux and energy in ion flux- and energy-controlled
+                           regimes at (a) 200 nm, (b) 100 nm, and (c) 60 nm line widths.
+
+                                 In addition, based on Figure 7, one can figure out the FC film effect. There is a clear gap
+                           between the etch depth of the ion energy and ion flux controlled at about a 40% variation
+                           rate for the 200 nm and 100 nm trench widths, as shown in Figure 7a,b. It implies the FC
+                           film effect is formed by heavy radicals. As the FC film plays a role in a passivation layer, it
+                           allows the decrease in the etch depth. Specifically, because the line width is proportional to
+                           the entrance area of the trench, the amount of radicals entering the trench is larger at the
+                           200 nm width than the 100 nm width. As a result, it leads to the increase in the difference
+                           in the etch depth at the 200 nm width.
+                                 Moreover, the etch stop at the reference condition at the 60 nm trench width and
+                           its relaxation by increasing the ion flux can be clearly observed in Figure 7c. It implies
+                           that the increase in heavy radicals production is more effective to moderate the etch stop
+                           phenomenon than the increase in the ion energy in FC plasma.
+
+                           4. Conclusions
+                                This study investigated the contribution of ion energy and flux on HAR SiO2 etching
+                           characteristics. We established the process window where the ion flux and energy are
+                           individually controlled. As a result, ion energy enhances the etching process, but in a
+                           high-aspect ratio structure, charge accumulation restricts its effect even in a sufficient
+                           radicals environment. We found that this charge accumulation can be released with
+                           increasing radicals species, leading to the slight increase in FC film formation having
+                           conductivity. Here, we estimated the density of radicals species such as Cx Fy and CFx with
+                           an in-house volume-averaged plasma model. The model exhibits the increase in radicals
+                           density, implying the increase in the FC film thickness. Furthermore, we found that the
+                           increase in the ion energy enhances the etching more than that in the ion flux with the same
+                           variation rate.
+
+                           Author Contributions: Conceptualization, W.J.; validation, W.J., S.Y. and S.K.; formal analysis, W.J.,
+                           Y.L., I.S., W.J., Y.Y., Y.S., J.L. and M.C.; writing—original draft preparation, C.C. and S.K.; writing—
+                           review and editing, S.Y., Y.L. and S.K.; supervision, S.Y. and S.K. All authors have read and agreed to
+                           the published version of the manuscript.
+Materials 2023, 16, 3820                                                                                                   12 of 23
+
+
+
+
+                           Funding: This research was supported by a National Research Council of Science & Technology (NST)
+                           grant funded by the Korean government (MSIP) (CRF-20-01-NFRI) by the Next-Generation Intelli-
+                           gence Semiconductor R&D Program through the Korea Evaluation Institute of Industrial Technology
+                           (KEIT) funded by the Korean government (MOTIE), by the Korea Institute of Energy Technology
+                           Evaluation and Planning (KETEP) and the MOTIE of the Republic of Korea (20202010100020), by the
+                           MOTIE (1415179040, 1415179069, 1415181071, 1415180221) and KSRC (Korea Semiconductor Research
+                           Consortium) (20009818, 20010420, 20019500, 20019473) support program for the development of
+                           future semiconductor devices, by a Korea Institute for Advancement of Technology (KIAT) grant
+                           funded by the Korean Government (MOTIE) (P0008458, HRD Program for Industrial Innovation),
+                           by the Basic Science Research Program through the National Research Foundation of Korea (NRF)
+                           funded by the Ministry of Education (NRF-2020R1A6A1A03047771), by the KIMM Institutional Pro-
+                           gram (NK236F) and NST/KIMM, and by “Regional Innovation Strategy (RIS)” through the National
+                           Research Foundation of Korea(NRF) funded by the Ministry of Education(MOE)(2021RIS-004).
+                           Institutional Review Board Statement: Not applicable.
+                           Informed Consent Statement: Not applicable.
+                           Data Availability Statement: The data presented in this study are available on request from the
+                           corresponding author.
+                           Conflicts of Interest: The authors declare no conflict of interest.
+
+                           Appendix A
+                                Reactions used in a volume-averaged plasma model are in Tables A1–A8.
+
+                           Table A1. Argon-electron and Argon-Argon reaction set included in a volume-averaged plasma
+                           model.
+
+                                     Reaction                        Rate Constant                           Unit       Reference
+                            (R1)     e+Ar→e+Arm                      9.90 × 10−16 Te−0.08 exp (−11.72/Te )   m3 s − 1   [35]
+                            (R2)     e+Ar→e+Arr                      4.03 × 10−15 Te0.45 exp (−12.12/Te )    m3 s − 1   [35]
+                            (R3)     e+Ar→e+Ar(4p)                   9.26 × 10−15 Te−0.06 exp (−14.24/Te )   m3 s − 1   [35]
+                            (R4)     e+Ar→2e+Ar+                     2.39 × 10−14 Te0.57 exp (−17.43/Te )    m3 s − 1   [35]
+                            (R5)     e+Arm →e+Ar                     2.25 × 10−16 Te−0.17 exp (−1.65/Te )    m3 s − 1   [35]
+                            (R6)     e+Arm →e+Ars                    3.70 × 10−13                            m3 s − 1   [35]
+                            (R7)     e+Arm →e+Ar(4p)                 2.48 × 10−12 Te−0.16 exp (−1.88/Te )    m3 s − 1   [35]
+                            (R8)     e+Arm →2e+Ar+                   2.99 × 10−13 Te0.22 exp (−4.73/Te )     m3 s − 1   [35]
+                            (R9)     e+Arr →e+Ar                     6.82 × 10−16 Te0.44 exp (−0.43/Te )     m3 s − 1   [35]
+                            (R10)    e+Arr →e+Arm                    9.10 × 10−13                            m3 s − 1   [35]
+                            (R11)    e+Arr →e+Ar(4p)                 2.48 × 10−12 Te−0.16 exp (−1.79/Te )    m3 s − 1   [35]
+                            (R12)    e+Arr →2e+Ar+                   3.28 × 10−13 Te0.21 exp (−4.51/Te )     m3 s − 1   [35]
+                            (R13)    e+Ar(4p)→e+Ar                   2.97 × 10−16 Te−0.11 exp (−1.38/Te )    m3 s − 1   [35]
+                            (R14)    e+Ar(4p)→e+Arm                  4.16 × 10−13 Te−0.17 exp (−0.32/Te )    m3 s − 1   [35]
+                            (R15)    e+Ar(4p)→e+Arr                  4.16 × 10−13 Te−0.17 exp (−0.32/Te )    m3 s − 1   [35]
+                            (R16)    e+Ar(4p)→2e+Ar+                 1.23 × 10−12 Te0.25 exp (−3.71/Te )     m3 s − 1   [35]
+                            (R17)    Arm +Arm →e+Ar+ +Ar             6.40 × 10−16                            m3 s − 1   [35]
+                            (R18)    Arm +Arr →e+Ar+ +Ar             2.10 × 10−15                            m3 s − 1   [35]
+                            (R19)    Arr +Arr →e+Ar+ +Ar             5.00 × 10−16                            m3 s − 1   [35]
+                            (R20)    Ar(4p)+Ar(4p)→e+Ar+ +Ar         5.00 × 10−16                            m3 s − 1   [35]
+                            (R21)    Ar(4p)+Arm →e+Ar+ +Ar           5.00 × 10−16                            m3 s − 1   [35]
+                            (R22)    Ar(4p)+Arr →e+Ar+ +Ar           5.00 × 10−16                            m3 s − 1   [35]
+                            (R22)    Arr → Ar+hν                     1.00 × 105                              s−1        [35]
+                            (R23)    Ar(4p)→ Ar+hν                   3.20 × 107                              s−1        [35]
+                            (R24)    Ar(4p)→ Arm +hν                 3.00 × 107                              s−1        [35]
+                            (R25)    Ar(4p)→ Arr +hν                 3.00 × 107                              s−1        [35]
+                            (R26)    Arm +Arm → Ar+Ar                2.00 × 10−13                            m3 s − 1   [35]
+                            (R27)    Arm +Ar→ Ar+Ar                  2.10 × 10−21                            m3 s − 1   [35]
+Materials 2023, 16, 3820                                                                                           13 of 23
+
+
+
+
+                           Table A2. Argon-Cx Fy reaction set included in a volume-averaged plasma model.
+
+                                            Reaction                        Rate Constant   Unit            Reference
+
+                            (R28)           Arm +CF2 → Ar+CF+F              6.00 × 10−17    m3 s − 1        [36]
+                            (R29)           Arr +CF2 → Ar+CF+F              6.00 × 10−17    m3 s − 1        [36]
+                            (R30)           Arm +CF3 → Ar+CF2 +F            6.00 × 10−17    m3 s−1          [36]
+                            (R31)           Arr +CF3 → Ar+CF2 +F            6.00 × 10−17    m3 s−1          [36]
+                            (R32)           Arm +CF4 → Ar+CF2 +2F           6.00 × 10−17    m3 s−1          [36]
+                            (R33)           Arr +CF4 → Ar+CF2 +2F           6.00 × 10−17    m3 s−1          [36]
+                            (R34)           Arm +C2 F4 → Ar+2CF2            4.00 × 10−17    m3 s−1          [36]
+                            (R35)           Arr +C2 F4 → Ar+2CF2            4.00 × 10−17    m3 s−1          [36]
+                            (R36)           Arm +C2 F5 → Ar+C2 F5           4.00 × 10−17    m3 s−1          [36]
+                            (R37)           Arr +C2 F5 → Ar+C2 F5           4.00 × 10−17    m3 s−1          [36]
+                            (R38)           Arm +C2 F6 → Ar+2CF3            4.00 × 10−17    m3 s−1          [36]
+                            (R39)           Arr +C2 F6 → Ar+2CF3            4.00 × 10−17    m3 s−1          [36]
+                            (R40)           Arm +C3 F5 → Ar+C3 F5           4.00 × 10−17    m3 s−1          [36]
+                            (R41)           Arr +C3 F5 → Ar+C3 F5           4.00 × 10−17    m3 s−1          [36]
+                            (R42)           Arm +C3 F6 → Ar+C3 F6           4.00 × 10−17    m3 s−1          [36]
+                            (R43)           Arr +C3 F6 → Ar+C3 F6           4.00 × 10−17    m3 s−1          [36]
+                            (R44)           Arm +C3 F7 → Ar+C3 F7           4.00 × 10−17    m3 s−1          [36]
+                            (R45)           Arr +C3 F7 → Ar+C3 F7           4.00 × 10−17    m3 s−1          [36]
+                            (R46)           Arm +C4 F8 → Ar+2C2 F4          9.00 × 10−16    m3 s−1          [36]
+                            (R47)           Arr +C4 F8 → Ar+2C2 F4          9.00 × 10−16    m3 s−1          [36]
+                            (R48)           Ar+ +CF2 → Ar+CF+ +F            5.00 × 10−16    m3 s−1          [36]
+                            (R49)           Ar+ +CF3 → Ar+CF2+ +F           5.00 × 10−16    m3 s−1          [36]
+                            (R50)           Ar+ +CF4 → Ar+CF3+ +F           4.80 × 10−16    m3 s−1          [36]
+                            (R51)           Ar+ +C2 F6 → Ar+CF3+ +CF3       5.00 × 10−16    m3 s−1          [36]
+                            (R52)           Ar+ +C4 F8 → Ar+CF3+ +C3 F5     3.00 × 10−16    m3 s−1          [36]
+                            (R53)           Ar+ +C4 F8 → Ar+C2 F4+ +C2 F4   3.00 × 10−16    m3 s−1          [36]
+                            (R54)           Ar+ +C4 F8 → Ar+CF+ +C3 F7      1.00 × 10−16    m3 s−1          [36]
+                            (R55)           Ar+ +CF3− → Ar+CF3              2.00 × 10−13    m3 s−1          [36]
+                            (R56)           Ar+ +C4 F8− → Ar+C4 F8          9.00 × 10−14    m3 s−1          [36]
+                            (R57)           Ar+ +F− → Ar+F                  2.00 × 10−13    m3 s−1          [36]
+Materials 2023, 16, 3820                                                                                                               14 of 23
+
+
+
+
+                                      Table A3. Cx Fy electron impact dissociation reaction set included in a volume-averaged plasma
+                                      model.
+
+                           Reaction                   Rate Constant                                          Unit         Reference
+
+ (R58)                     e+C4 F8 → e+2C2 F4         0.9×9.580 × 10−14 T0.04153
+                                                                         e       exp (−8.572/Te )            m3 s − 1     [34]
+ (R59)                     e+C4 F8 → e+C3 F6 +CF2     0.1×9.580 × 10−14 T0.04153
+                                                                         e       exp (−8.572/Te )            m3 s − 1     [34]
+ (R60)                     e+C4 F7 → e+C2 F4 +C2 F3   5.70 × 10−14 T0.28
+                                                                      e    exp (−8.0/Te )                    m3 s−1       [34]
+ (R61)                     e+C3 F7 → e+C2 F4 +CF3             − 14  0.52
+                                                      1.8 × 10 Te exp (−12.3/Te )                            m3 s−1       [34]
+ (R62)                     e+C3 F6 → e+C2 F3 +CF3     1.8 × 10−14 T0.52
+                                                                    e     exp (−12.3/Te )                    m3 s−1       [34]
+ (R63)                     e+C3 F6 → e+C2 F4 +CF2              − 14   0.23
+                                                      1.07 × 10 Te exp (−7.451/Te )                          m3 s−1       [34]
+ (R64)                     e+C3 F5 → e+C2 F3 +CF2     1.707 × 10−14 T0.23
+                                                                        e    exp (−7.451/Te )                m3 s−1       [34]
+ (R65)                     e+C3 F5 → e+C2 F4 +CF              − 14  0.52
+                                                      1.8 × 10 Te exp (−12.3/Te )                            m3 s−1       [34]
+ (R66)                     e+C2 F6 → e+2CF3           8.55 × 10−14 T0.45
+                                                                      e    exp (−19.4/Te )                   m3 s−1       [34]
+ (R67)                     e+C2 F5 → e+CF3 +CF2                − 14   0.45
+                                                      8.55 × 10 Te exp (−19.4/Te )                           m3 s−1       [34]
+ (R68)                     e+C2 F4 → e+2CF2           5.22 × 10−12 Te−1.3815 exp (−14.27/Te )                m3 s−1       [34]
+ (R69)                     e+C2 F3 → e+CF2 +CF        1.00 × 10−14 T0.91
+                                                                      e    exp (−5.0/Te )                    m3 s−1       [34]
+ (R70)                     e+CF4 → e+CF+F2 +F                  − 16   0.84
+                                                      4.40 × 10 Te exp (−24.65/Te )                          m3 s−1       [34]
+ (R71)                     e+CF4 → e+CF3 +F           1.369 × 10−16 T2.048
+                                                                        e     exp (−7.557/Te )               m3 s−1       [34]
+ (R72)                     e+CF4 → e+CF2 +2F                     −
+                                                      1.359 × 10 Te18   1.693 exp (−13.104/Te )              m3 s−1       [33]
+ (R73)                     e+CF4 → e+CF+3F            8.215 × 10−17 T0.277
+                                                                        e     exp (−27.151/Te )              m3 s−1       [33]
+ (R74)                     e+CF3 → e+CF2 +F                      −
+                                                      3.257 × 10 Te15   0.6906 exp (−3.65/Te )               m3 s−1       [33]
+ (R75)                     e+CF2 → e+CF+F             3.257 × 10−15 T0.6906
+                                                                        e      exp (−5.39/Te )               m3 s−1       [33]
+ (R76)                     e+CF2 (s)→ e+CF+F                     −
+                                                      19.12 × 10 Te16   − 1.496 exp (−7.238/Te )             m3 s−1       [33]
+ (R77)                     e+CF2 → e+C+2F             1.39 × 10−14 Te−1.164 exp (−49.873/Te )                m3 s−1       [34]
+ (R78)                     e+CF→ e+C+F                5.633 × 10−14 Te−1.318 exp (−7.158/Te )                m3 s−1       [33]
+ (R79)                     e+CF(s)→ e+C+F             5.633 × 10−14 Te−1.318 exp (−4.248/Te )                m3 s−1       [33]
+ (R80)                     e+F2 → e+F+F               4.983 × 10−15 T0.4e exp (−3.947/Te )                   m3 s−1       [33]
+ (R81)                     e+F2− → e+F+F−                        −
+                                                      5.812 × 10 Te15   0.062 exp (−11.498/Te )              m3 s−1       [33]
+
+
+                                      Table A4. Cx Fy electron impact ionization reaction set included in a volume-averaged plasma model.
+
+                       Reaction                         Rate Constant                                          Unit        Reference
+
+ (R82)                 e+C4 F8 → 2e+C3 F5+ +CF3         6.655 × 10−14 T0.4095
+                                                                       e      exp (−18.71/Te )                 m3 s−1      [34]
+ (R83)                 e+C4 F8 → 2e+C3 F5+ +CF2 +F      6.655 × 10−14 T0.4095
+                                                                          e       exp (−18.71/Te )             m3 s−1      [34]
+ (R84)                 e+C4 F8 → 2e+C2 F4+ +C2 F4                   −
+                                                        5.698 × 10 Te 14  0.470  exp (−17.48/Te )              m3 s − 1    [34]
+ (R85)                 e+C4 F8 → 2e+CF3+ +C3 F5         2.688 × 10−14 T0.379
+                                                                          e      exp (−22.30/Te )              m3 s − 1    [34]
+ (R86)                 e+C4 F8 → 2e+CF2+ +C3 F6                     −
+                                                        4.840 × 10 Te 14  − 0.02637  exp (−27.03/Te )          m3 s − 1    [34]
+ (R87)                 e+C4 F8 → 2e+CF+ +C3 F7          0.5 × 1.279 × 10−14 T0.654e      exp (−20.61/Te )      m3 s − 1    [34]
+ (R88)                 e+C4 F8 → 2e+CF+ +C3 F6 +F       0.5 × 1.279 × 10 Te − 14  0.654  exp (−20.61/Te )      m3 s − 1    [34]
+ (R89)                 e+C4 F8 → 2e+F+ +C4 F7           2.23 × 1.279 × 10 Te − 14   − 1.34 exp (−38.6/Te )     m3 s − 1    [34]
+ (R90)                 e+C4 F7 → 2e+C4 F7+              1.4 × 10−14 T0.68
+                                                                       e    exp   (− 10.6/T   e)               m3 s − 1    [34]
+ (R91)                 e+C3 F6 → 2e+C3 F6+                       − 14  0.68
+                                                        1.4 × 10 Te exp (−10.6/Te )                            m3 s − 1    [34]
+ (R92)                 e+C3 F6 → 2e+C3 F5+ +F           3.025 × 10−15 T0.874
+                                                                          e      exp (−16.41/Te )              m3 s − 1    [34]
+Materials 2023, 16, 3820                                                                                                  15 of 23
+
+
+
+
+                                      Table A4. Cont.
+
+                           Reaction                     Rate Constant                                Unit     Reference
+
+ (R93)                     e+C3 F5 → 2e+C3 F6+          3.583 × 10−15 T0.661
+                                                                       e     exp (−11.06/Te )        m3 s−1   [34]
+ (R94)                     e+C2 F6 → 2e+CF3+ +CF3       4.83 × 10−14 T0.61
+                                                                       e    exp (−19.47/Te )         m3 s−1   [34]
+ (R95)                     e+C2 F5 → 2e+C2 F5+                    − 14   0.39
+                                                        1.435 × 10 Te exp (−15.38/Te )               m3 s−1   [34]
+ (R96)                     e+C2 F5 → 2e+CF3+ +CF2       6.01 × 10−14 T0.30
+                                                                       e    exp (−19.15/Te )         m3 s−1   [34]
+ (R97)                     e+C2 F4 → 2e+C2 F4+                    − 15
+                                                        3.583 × 10 Te    0.661 exp (−11.06/Te )      m3 s−1   [34]
+ (R98)                     e+C2 F4 → 2e+C2 F3+ +F       3.025 × 10−15 T0.874
+                                                                         e     exp (−16.41/Te )      m3 s−1   [34]
+ (R99)                     e+C2 F4 → 2e+CF2+ +CF2                 − 16
+                                                        1.253 × 10 Te    1.514 exp (−9.053/Te )      m3 s−1   [34]
+ (R100)                    e+C2 F4 → 2e+CF+ +CF3                  − 15
+                                                        5.874 × 10 Te    0.619 exp (−19.29/Te )      m3 s−1   [34]
+ (R101)                    e+C2 F3 → 2e+C2 F3+          3.583 × 10−15 T0.661
+                                                                         e     exp (−11.06/Te )      m3 s−1   [34]
+ (R102)                    e+CF4 → 2e+CF3+ +F                     − 14
+                                                        1.083 × 10 Te    0.969 exp (−17.803/Te )     m3 s−1   [33]
+ (R103)                    e+CF4 → 2e+CF2+ +2F          3.310 × 10−16 T1.365
+                                                                         e     exp (−18.373/Te )     m3 s−1   [33]
+ (R104)                    e+CF4 → 2e+CF+ +3F                     − 19
+                                                        7.171 × 10 Te    3.453 exp (−14.244/Te )     m3 s−1   [33]
+ (R105)                    e+CF4 → 2e+F+ +CF3           1.297 × 10−18 T2.786
+                                                                         e     exp (−18.557/Te )     m3 s−1   [33]
+ (R106)                    e+CF4 → 2e+C+ +4F                      − 20
+                                                        9.154 × 10 Te    3.847 exp (−12.082/Te )     m3 s−1   [33]
+ (R107)                    e+CF4 → 3e+CF3+ +F+          5.611 × 10−17 T1.157
+                                                                         e     exp (−37.455/Te )     m3 s−1   [33]
+ (R108)                    e+CF4 → 3e+CF2+ +F+ +F                 − 17
+                                                        8.207 × 10 Te    1.163 exp (−42.737/Te )     m3 s−1   [33]
+ (R109)                    e+CF4 → 3e+CF+ +F+ +2F                 − 17   1.52
+                                                        5.217 × 10 Te exp (−47.145/Te )              m3 s−1   [33]
+ (R110)                    e+CF4 → 3e+C+ +F+ +3F        4.075 × 10−17 T1.353
+                                                                         e     exp (−61.618/Te )     m3 s−1   [33]
+ (R111)                    e+CF3 → 2e+CF3+                        − 15
+                                                        1.427 × 10 Te    0.838 exp (−9.549/Te )      m3 s−1   [33]
+ (R112)                    e+CF3 → 2e+CF2+ +F           8.362 × 10−15 T0.444
+                                                                         e     exp (−17.368/Te )     m3 s−1   [33]
+ (R113)                    e+CF3 → 2e+CF+ +2F                     − 15
+                                                        5.257 × 10 Te    0.555 exp (−21.232/Te )     m3 s−1   [33]
+ (R114)                    e+CF3 → 2e+F+ +CF2           2.669 × 10−15 T0.820
+                                                                         e     exp (−27.018/Te )     m3 s−1   [33]
+ (R115)                    e+CF2 → 2e+CF2+                        − 15
+                                                        4.330 × 10 Te    0.775 exp (−9.485/Te )      m3 s−1   [33]
+ (R116)                    e+CF2 → 2e+CF+ +F                      − 15
+                                                        6.032 × 10 Te    0.497 exp (−14.539/Te )     m3 s−1   [33]
+ (R117)                    e+CF2 → 3e+CF+ +F+           3.176 × 10−14 Te−0.111 exp (−31.314/Te )     m3 s−1   [33]
+ (R118)                    e+CF2 → 2e+CF+F+             1.588 × 10−14 Te−0.111 exp (−31.314/Te )     m3 s−1   [33]
+ (R119)                    e+CF→ 2e+CF+                 4.295 × 10−15 Te−0.80 exp (−11.541/Te )      m3 s−1   [33]
+ (R120)                    e+CF→ 2e+C+ +F+              1.985 × 10−14 Te−0.111 exp (−31.314/Te )     m3 s−1   [33]
+ (R121)                    e+F2 → 2e+F2+                6.710 × 10−16 T1.24
+                                                                         e    exp (−16.822/Te )      m3 s−1   [33]
+ (R122)                    e+C→ 2e+C+                             − 15
+                                                        3.692 × 10 Te    1.182 exp (−9.332/Te )      m3 s−1   [33]
+ (R123)                    e+CF2 (3 B1 )→ 2e+CF2+       4.330 × 10−15 T0.775
+                                                                         e     exp (−7.235/Te )      m3 s−1   [33]
+ (R124)                    e+CF2 (3 B1 )→ 2e+CF+ +F               − 15
+                                                        6.032 × 10 Te    0.497 exp (−12.289/Te )     m3 s−1   [33]
+ (R125)                    e+CF2 (3 B1 )→ 3e+CF+ +F+              − 14
+                                                        3.176 × 10 Te    − 0.111 exp (−29.064/Te )   m3 s−1   [33]
+ (R126)                    e+CF2 (3 B1 )→ 2e+CF+F+      1.588 × 10−14 Te−0.111 exp (−29.064/Te )     m3 s−1   [33]
+ (R127)                    e+CF( a4 Σ− )→ 2e+CF+        4.295 × 10−15 T0.8
+                                                                         e exp (−8.631/Te )          m3 s−1   [33]
+ (R128)                    e+CF( a4 Σ− )→ 2e+C+F+       1.985 × 10−14 Te−0.111 exp (−28.404/Te )     m3 s−1   [33]
+ (R129)                    e+F2 → e+F+ +F−              9.432 × 10−17 T1.341
+                                                                         e     exp (−17.322/Te )     m3 s−1   [33]
+ (R130)                    e+F→ e+F+                    4.711 × 10−16 T1.411
+                                                                         e     exp (−12.618/Te )     m3 s−1   [33]
+Materials 2023, 16, 3820                                                                                                    16 of 23
+
+
+
+
+                                      Table A5. Cx Fy attachment and detachment reaction sets included in a volume-averaged plasma
+                                      model.
+
+                           Reaction                 Rate Constant                                 Unit          Reference
+
+ (R131)                    e+C4 F8 → C4 F8−         2.960 × 10−17 Te−1.328 exp (−0.2344/Te )      m3 s − 1      [34]
+ (R132)                    e+C4 F8 → F− +C4 F7      0.5×2.789 × 10−15 Te−1.277 exp (−5.392/Te )   m3 s−1        [34]
+ (R133)                    e+C4 F8 → F− +C3 F6 +F   0.5×2.789 × 10−15 Te−1.277 exp (−5.392/Te )   m3 s−1        [34]
+ (R134)                    e+C2 F6 → CF3− +CF3      0.8×6.82 × 10−15 Te−1.41 exp (−4.05/Te )      m3 s−1        [34]
+ (R135)                    e+C2 F6 → CF− +C2 F5     0.2×6.82 × 10−15 Te−1.41 exp (−4.05/Te )      m3 s−1        [34]
+ (R136)                    e+C2 F5 → CF3− +CF2      6.82 × 10−15 Te−1.41 exp (−4.05/Te )          m3 s−1        [34]
+ (R137)                    e+CF4 → CF3 +F−          1.086 × 10−15 Te−1.336 exp (−6.691/Te )       m3 s−1        [33]
+ (R138)                    e+CF4 → CF2 +F2−         1.960 × 10−17 Te−1.300 exp (−6.247/Te )       m3 s−1        [33]
+ (R139)                    e+CF4 → CF3− +F          2.545 × 10−16 Te−1.374 exp (−7.12/Te )        m3 s−1        [33]
+ (R140)                    e+CF4 → e+CF3+ +F−       4.086 × 10−19 T0.65
+                                                                    e    exp (−16.738/Te )        m3 s−1        [33]
+ (R141)                    e+CF4 → e+CF2+ +F− +F    2.567 × 10−19 T0.412
+                                                                    e     exp (−21.866/Te )       m3 s−1        [33]
+ (R142)                    e+CF4 → e+CF+ +F− +2F              − 19
+                                                    8.439 × 10 Te   0.723 exp (−21.994/Te )       m3 s−1        [33]
+ (R143)                    e+CF4 → e+F+ +F− +CF2              − 19
+                                                    5.087 × 10 Te   0.636 exp (−27.714/Te )       m3 s−1        [33]
+ (R144)                    e+CF4 → e+C+ +F− +3F     2.395 × 10−18 T0.42
+                                                                    e    exp (−28.416/Te )        m3 s−1        [33]
+ (R145)                    e+CF4 → e+CF2+ +F2−                − 19
+                                                    3.691 × 10 Te   0.051 exp (−10.163/Te )       m3 s−1        [33]
+ (R146)                    e+CF3 → e+CF2 +F−        1.603 × 10−16 Te−0.4289 exp (−0.18/Te )       m3 s−1        [44]
+ (R147)                    e+CF2 → F− +CF           3.0 × 10−17                                   m3 s−1        [34]
+ (R148)                    e+CF→ F− +C              3.0 × 10−17                                   m3 s−1        [34]
+ (R149)                    e+F2− → 2e+F2            6.186 × 10−16 Te−0.535 exp (−11.092/Te )      m3 s−1        [44]
+ (R150)                    e+F2 → F+F−              1.124 × 10−15 Te−1.475 exp (−0.535/Te )       m3 s−1        [33]
+ (R151)                    e+F− → 2e+F              3.047 × 10−14 T0.413
+                                                                   e     exp (−11.167/Te )        m3 s−1        [44]
+ (R152)                    C4 F8− → e+C4 F8         2.0 × 10 − 6                                  s−1           [34]
+ (R153)                    CF3− +CF3 → e+C2 F6      1.0 × 10−16                                   m3 s−1        [34]
+ (R154)                    F− +CF4 → e+CF4          2.132 × 10−14 × Ti 1.131 exp (−1.448/Ti )     m3 s−1        [33]
+ (R155)                    F− +CF3 → e+CF4          5.0 × 10−16                                   m3 s−1        [33]
+ (R156)                    F− +CF2 → e+CF3          5.0 × 10−16                                   m3 s−1        [33]
+ (R157)                    F− +CF→ e+CF2            5.0 × 10−16                                   m3 s−1        [33]
+ (R158)                    F− +C→ e+CF              1.0 × 10−16                                   m3 s−1        [33]
+ (R159)                    F− +F→ e+F   2           1.0 × 10−16                                   m3 s−1        [33]
+ (R160)                    F− +F→ e+2F              1.0 × 10−16                                   m3 s−1        [33]
+ (R161)                    F2− +CF4 → e+F2 +CF4     5.0 × 10−16                                   m3 s−1        [33]
+ (R162)                    F2− +CF3 → e+F2 +CF3     5.0 × 10−16                                   m3 s−1        [33]
+ (R163)                    F2− +F→ e+F2 +F          1.0 × 10−16                                   m3 s−1        [33]
+Materials 2023, 16, 3820                                                                                                          17 of 23
+
+
+
+
+                                        Table A6. Cx Fy recombination reaction sets included in a volume-averaged plasma model.
+
+                           Reaction                        Rate Constant                             Unit            Reference
+
+ (R164)                    e+C4 F7+ → C2 F4 +C2 F3         8.0 × 10−14 Te−0.5                        m3 s − 1        [34]
+ (R165)                    e+C3 F7+ → C2 F4 +CF3           8.0 × 10−14 Te−0.5                        m3 s − 1        [34]
+ (R166)                    e+C3 F6+ → C2 F4 +CF2           8.0 × 10−14 Te−0.5                        m3 s − 1        [34]
+ (R167)                    e+C3 F5+ → C2 F3 +CF2           8.0 × 10−14 Te−0.5                        m3 s−1          [34]
+ (R168)                    e+C2 F5+ → CF3 +CF2             8.0 × 10−14 Te−0.5                        m3 s−1          [34]
+ (R169)                    e+C2 F4+ → 2CF2                 8.0 × 10−14 Te−0.5                        m3 s−1          [34]
+ (R170)                    e+C2 F3+ → CF2 +CF              8.0 × 10−14 Te−0.5                        m3 s−1          [34]
+ (R171)                    e+CF3+ → CF3                    3.95 × 10−15 Te−0.5 Ti−1.0                m3 s−1          [33]
+ (R172)                    e+CF3+ → CF2 +F                 4.475 × 10−15 Te−1.441 exp (−0.41/Te )    m3 s−1          [33]
+ (R173)                    e+CF3+ → CF+2F                  1.119 × 10−15 Te−1.441 exp (−0.41/Te )    m3 s−1          [33]
+ (R174)                    e+CF2+ → CF2                    6.00 × 10−14                              m3 s−1          [33]
+ (R175)                    e+CF2+ → CF+F                   8.376 × 10−15 Te−1.496 exp (−0.172/Te )   m3 s−1          [33]
+ (R176)                    e+CF2+ → C+2F                   3.421 × 10−15 Te−1.496 exp (−0.172/Te )   m3 s−1          [33]
+ (R177)                    e+CF+ → CF                      5.20 × 10−14 (Te /0.026)−0.8              m3 s−1          [33]
+ (R178)                    e+F2+ → 2F                      3.21 × 10−14 Te−0.5                       m3 s−1          [33]
+ (R179)                    e+F2− → 2e+2F                   1.354 × 10−14 T0.484
+                                                                          e     exp (−0.2.178/Te )   m3 s−1          [33]
+ (R180)                    C4 F7 +F→ 2C2 F4                1.0 × 10−17                               m3 s−1          [34]
+ (R181)                    C3 F6 +F2 → C3 F7 +F            3.5 × 10−22                               m3 s−1          [34]
+ (R182)                    C3 F6 +F→ C3 F7                 1.0 × 10−18                               m3 s−1          [34]
+ (R183)                    C2 F5 +F→ 2CF3                  1.0 × 10−17                               m3 s−1          [34]
+ (R184)                    C2 F4 +F2 → C2 F5 +F            3.5 × 10−22                               m3 s−1          [34]
+ (R185)                    C2 F4 +F→ CF3 +CF2              4.8 × 10−17                               m3 s−1          [34]
+ (R186)                    C2 F4 +C→ C2 F3 +CF             1.91 × 10−16                              m3 s−1          [34]
+ (R187)                    C2 F3 +F→ C2 FF                 1.0 × 10−18                               m3 s−1          [34]
+ (R188)                    CF3 +CF3 +M→ C2 F6 +M           3.94 × 10−41                              m6 s−1          [34]
+ (R189)                    CF3 +CF3 → C2 F6                8.30 × 10−18                              m3 s−1          [34]
+ (R190)                    CF3 +CF2 → C2 F5                1.00 × 10−18                              m3 s−1          [34]
+ (R191)                    CF3 +F2 → CF4 +F                1.90 × 10−20                              m3 s−1          [34]
+ (R192)                    CF3 +F→ CF4                     2.00 × 10−17                              m3 s−1          [34]
+ (R193)                    CF2 +CF2 → C2 F4                7.21 × 10−20                              m3 s−1          [34]
+ (R194)                    CF2 +F2 → CF3 +F                8.30 × 10−20                              m3 s−1          [34]
+ (R195)                    CF2 +F→ CF3                     1.80 × 10−17                              m3 s−1          [34]
+ (R196)                    CF+F→ CF2                       9.96 × 10−17                              m3 s−1          [34]
+ (R197)                    C4 F7+ +C4 F8− → C4 F7 +C4 F8   1.0 × 10−13                               m3 s−1          [34]
+ (R198)                    C3 F7+ +C4 F8− → C3 F7 +C4 F8   1.0 × 10−13                               m3 s−1          [34]
+ (R199)                    C3 F6+ +C4 F8− → C3 F6 +C4 F8   1.0 × 10−13                               m3 s−1          [34]
+ (R200)                    C3 F5+ +C4 F8− → C3 F5 +C4 F8   1.0 × 10−13                               m3 s−1          [34]
+ (R201)                    C2 F5+ +C4 F8− → C2 F5 +C4 F8   1.0 × 10−13                               m3 s − 1        [34]
+ (R202)                    C2 F4+ +C4 F8− → C2 F4 +C4 F8   1.0 × 10−13                               m3 s − 1        [34]
+ (R203)                    C2 F3+ +C4 F8− → C2 F3 +C4 F8   1.0 × 10−13                               m3 s − 1        [34]
+ (R204)                    CF3+ +C4 F8− → CF3 +C4 F8       1.0 × 10−13                               m3 s−1          [34]
+ (R205)                    CF2+ +C4 F8− → CF2 +C4 F8       1.0 × 10−13                               m3 s−1          [34]
+Materials 2023, 16, 3820                                                                      18 of 23
+
+
+
+
+                             Table A6. Cont.
+
+                           Reaction                    Rate Constant   Unit       Reference
+
+ (R206)                    F2+ +C4 F8− → F2 +C4 F8     1.0 × 10−13     m3 s−1     [34]
+ (R207)                    F+ +C4 F8− → F+C4 F8        1.0 × 10−13     m3 s−1     [34]
+ (R208)                    C+ +C4 F8− → C+C4 F8        1.0 × 10−13     m3 s−1     [34]
+ (R209)                    C4 F7+ +CF3− → C4 F7 +CF3   1.0 × 10−13     m3 s−1     [34]
+ (R210)                    C3 F7+ +CF3− → C3 F7 +CF3   1.0 × 10−13     m3 s−1     [34]
+ (R211)                    C3 F6+ +CF3− → C3 F6 +CF3   1.0 × 10−13     m3 s−1     [34]
+ (R212)                    C3 F6+ +CF3− → C3 F6 +CF3   1.0 × 10−13     m3 s−1     [34]
+ (R213)                    C2 F5+ +CF3− → C2 F5 +CF3   1.0 × 10−13     m3 s−1     [34]
+ (R214)                    C2 F4+ +CF3− → C2 F4 +CF3   1.0 × 10−13     m3 s−1     [34]
+ (R215)                    C2 F3+ +CF3− → C2 F3 +CF3   1.0 × 10−13     m3 s−1     [34]
+ (R216)                    C4 F7+ +F2− → C4 F7 +F2     1.0 × 10−13     m3 s−1     [34]
+ (R217)                    C3 F7+ +F2− → C3 F7 +F2     1.0 × 10−13     m3 s−1     [34]
+ (R218)                    C3 F6+ +F2− → C3 F6 +F2     1.0 × 10−13     m3 s−1     [34]
+ (R219)                    C3 F5+ +F2− → C3 F5 +F2     1.0 × 10−13     m3 s−1     [34]
+ (R220)                    C2 F5+ +F2− → C2 F5 +F2     1.0 × 10−13     m3 s−1     [34]
+ (R221)                    C2 F4+ +F2− → C2 F4 +F2     1.0 × 10−13     m3 s−1     [34]
+ (R222)                    C2 F3+ +F2− → C2 F3 +F2     1.0 × 10−13     m3 s−1     [34]
+ (R223)                    CF2+ +F2− → CF2 +F2         1.0 × 10−13     m3 s−1     [34]
+ (R224)                    CF+ +F2− → CF+F2            1.0 × 10−13     m3 s−1     [34]
+ (R225)                    F2+ +F2− → 2F2              1.0 × 10−13     m3 s−1     [34]
+ (R226)                    F+ +F2− → F+F2              1.0 × 10−13     m3 s−1     [34]
+ (R227)                    C+ +F2− → C+F2              1.0 × 10−13     m3 s−1     [34]
+ (R228)                    C4 F7+ +F− → C4 F7 +F       1.0 × 10−13     m3 s−1     [34]
+ (R229)                    C3 F7+ +F− → C3 F7 +F       1.0 × 10−13     m3 s − 1   [34]
+ (R230)                    C3 F6+ +F− → C3 F6 +F       1.0 × 10−13     m3 s − 1   [34]
+ (R231)                    C3 F5+ +F− → C3 F5 +F       1.0 × 10−13     m3 s − 1   [34]
+ (R232)                    C2 F5+ +F− → C2 F5 +F       1.0 × 10−13     m3 s − 1   [34]
+ (R233)                    C2 F4+ +F− → C2 F4 +F       1.0 × 10−13     m3 s − 1   [34]
+ (R234)                    C2 F3+ +F− → C2 F3 +F       1.0 × 10−13     m3 s − 1   [34]
+ (R235)                    C4 F7+ +F− → C3 F5 +CF3     1.0 × 10−13     m3 s−1     [34]
+ (R236)                    C3 F7+ +F− → C2 F6 +CF2     1.0 × 10−13     m3 s−1     [34]
+ (R237)                    C3 F6+ +F− → C2 F4 +CF3     1.0 × 10−13     m3 s−1     [34]
+ (R238)                    C3 F5+ +F− → C2 F4 +CF2     1.0 × 10−13     m3 s−1     [34]
+ (R239)                    C2 F4+ +F− → CF2 +CF+F2     1.0 × 10−13     m3 s−1     [34]
+ (R240)                    CF3+ +F− → CF2 +2F          1.0 × 10−13     m3 s−1     [34]
+ (R241)                    CF3− +CF3+ → 2CF3           1.0 × 10−13     m3 s−1     [33]
+ (R242)                    CF3− +CF2+ → CF3 +CF2       5.0 × 10−13     m3 s−1     [33]
+ (R243)                    CF3− +CF+ → CF3 +CF         2.0 × 10−13     m3 s−1     [33]
+ (R244)                    CF3− +C+ → CF3 +C           3.0 × 10−13     m3 s−1     [33]
+ (R245)                    CF3− +F2+ → CF3 +F2         2.0 × 10−13     m3 s−1     [33]
+ (R246)                    CF3− +F+ → CF3 +F           2.5 × 10−13     m3 s−1     [33]
+ (R247)                    F− +CF3+ → CF4              5.0 × 10−14     m3 s−1     [33]
+ (R248)                    F− +CF3+ → CF3 +F           1.0 × 10−14     m3 s−1     [33]
+ (R249)                    F− +CF3+ → CF2 +F2          8.7 × 10−14     m3 s−1     [33]
+Materials 2023, 16, 3820                                                                                                               19 of 23
+
+
+
+
+                                      Table A6. Cont.
+
+                                      Reaction               Rate Constant      Unit                           Reference
+
+ (R250)                               F− +CF2+ → CF+F2       9.1 × 10−14        m3 s − 1                       [33]
+ (R251)                               F− +CF2+ → CF2 +F      5.0 × 10−13        m3 s − 1                       [33]
+ (R252)                               F− +CF+ → CF+F         4.0 × 10−13        m3 s − 1                       [33]
+ (R253)                               F− +C+ → CF            1.2 × 10−13        m3 s − 1                       [33]
+ (R254)                               F− +F2+ → F+F2         9.4 × 10−14        m3 s − 1                       [33]
+ (R255)                               F− +F+ → 2F            1.1 × 10−13        m3 s − 1                       [33]
+ (R256)                               F2− +CF3+ → F2 +CF3    1.0 × 10−13        m3 s − 1                       [33]
+
+
+                                      Table A7. Cx Fy excitation reaction sets included in a volume-averaged plasma model.
+
+                           Reaction                       Rate Constant                               Unit                 Reference
+
+ (R257)                    e+CF2 → e+CF2 (3 B1 )          6.231 × 10−14 Te−1.037 exp (−3.964/Te )     m3 s−1               [33]
+ (R258)                    e+CF2 (3 B1 )→ e+CF2 (1 B1 )   3.528 × 10−13 Te−0.877 exp (−8.044/Te )     m3 s−1               [33]
+ (R259)                    e+CF2 → e+CF2 (1 B1 )          3.528 × 10−13 Te−0.877 exp (−10.254/Te )    m3 s−1               [33]
+ (R260)                    e+CF→ e+CF( a4 Σ− )            6.132 × 10−14 Te−1.173 exp (−4.896/Te )     m3 s−1               [33]
+ (R261)                    e+F2 → e+F2 (v)                2.586 × 10−13 Te−1.446 exp (−0.889/Te )     m3 s−1               [33]
+ (R262)                    e+F2 → e+F2 (C1 Σu )           3.929 × 10−15 T0.665
+                                                                         e      exp (−11.842/Te )     m3 s−1               [33]
+ (R263)                    e+F2 → e+F2 (H1 Πu )           9.616 × 10−16 T0.344
+                                                                         e      exp (−17.274/Te )     m3 s−1               [33]
+ (R264)                    e+F→ e+F(3s 4 P)                         − 15
+                                                          1.667 × 10 Te   − 0.581 exp (−12.851/Te )   m3 s−1               [33]
+ (R265)                    e+F→ e+F(3s 2 P)               8.522 × 10−16 Te−0.386 exp (−12.351/Te )    m3 s−1               [33]
+ (R266)                    e+F→ e+F(3p 4 P)               4.113 × 10−16 Te−0.42 exp (−14.261/Te )     m3 s−1               [33]
+ (R267)                    e+F→ e+F(3p 4 D)               4.014 × 10−16 Te−0.372 exp (−14.629/Te )    m3 s−1               [33]
+ (R268)                    e+F→ e+F(3p 4 D)               3.305 × 10−16 Te−0.014 exp (−14.062/Te )    m3 s−1               [33]
+ (R269)                    e+F→ e+F(3p 2 S)               2.080 × 10−16 Te−0.859 exp (−15.269/Te )    m3 s−1               [33]
+ (R270)                    e+F→ e+F(3p 4 S)               6.323 × 10−17 Te−0.25 exp (−14.703/Te )     m3 s−1               [33]
+ (R271)                    e+F→ e+F(3s 2 P)               6.192 × 10−16 Te−0.133 exp (−14.31/Te )     m3 s−1               [33]
+ (R272)                    e+F→ e+F(3s 2 D)               5.479 × 10−16 Te−0.181 exp (−14.558/Te )    m3 s−1               [33]
+ (R273)                    e+F→ e+F(4s 2 D)               2.212 × 10−16 Te−0.387 exp (−15.625/Te )    m3 s−1               [33]
+ (R274)                    e+F→ e+F(4s 2 P)               1.052 × 10−16 T0.42
+                                                                         e     exp (−14.83/Te )       m3 s−1               [33]
+ (R275)                    e+F→ e+F(3d 4 D)                         − 17
+                                                          7.268 × 10 Te   − 0.475 exp (−15.634/Te )   m3 s−1               [33]
+ (R276)                    e+F→ e+F(3d 2 D)               5.733 × 10−17 Te−0.474 exp (−14.599/Te )    m3 s−1               [33]
+ (R277)                    e+F→ e+F(3d 4 F)               7.340 × 10−17 Te−0.556 exp (−15.986/Te )    m3 s−1               [33]
+ (R278)                    e+F→ e+F(3d 2 F)               7.253 × 10−17 Te−0.252 exp (−15.543/Te )    m3 s−1               [33]
+ (R279)                    e+F→ e+F(3d 4 P)               4.668 × 10−17 Te−0.819 exp (−16.014/Te )    m3 s−1               [33]
+ (R280)                    e+F→ e+F(3d 2 P)               2.008 × 10−17 T0.297
+                                                                         e      exp (−14.749/Te )     m3 s−1               [33]
+Materials 2023, 16, 3820                                                                                                  20 of 23
+
+
+
+
+                                      Table A7. Cont.
+
+                           Reaction                     Rate Constant                              Unit       Reference
+
+ (R281)                    e+F→ e+F(4p 4 P)             1.101 × 10−16 Te−0.412 exp (−16.132/Te )   m3 s − 1   [33]
+ (R282)                    e+F→ e+F(4p 4 D)             1.514 × 10−16 Te−0.467 exp (−16.207/Te )   m3 s − 1   [33]
+ (R283)                    e+F→ e+F(4p 2 D)             1.068 × 10−16 Te−0.052 exp (−15.789/Te )   m3 s − 1   [33]
+ (R284)                    e+F→ e+F(4p 2 S)             8.102 × 10−17 Te−0.906 exp (−16.669/Te )   m3 s − 1   [33]
+ (R285)                    e+F→ e+F(4p 4 S)             2.723 × 10−17 Te−0.246 exp (−16.014/Te )   m3 s − 1   [33]
+ (R286)                    e+F→ e+F(4p 2 P)             2.333 × 10−16 Te−0.033 exp (−15.86/Te )    m3 s−1     [33]
+ (R287)                    e+F→ e+F(5s 4 P)             2.923 × 10−16 Te−0.656 exp (−17.789/Te )   m3 s−1     [33]
+ (R288)                    e+F→ e+F(5s 4 P)             9.073 × 10−17 T0.249
+                                                                       e     exp (−16.566/Te )     m3 s−1     [33]
+ (R289)                    e+C→ e+C(2s2 2p2 1 D)        3.315 × 10−14 Te−0.498 exp (−1.995/Te )    m3 s−1     [33]
+ (R290)                    e+C→ e+C(2s2 2p2 1 S)        4.900 × 10−15 Te−0.584 exp (−3.462/Te )    m3 s−1     [33]
+ (R291)                    e+C→ e+C(2s2 2p3 5 So )      3.831 × 10−14 Te−0.813 exp (−5.057/Te )    m3 s−1     [33]
+ (R292)                    e+C→ e+C(2s2 2p3 s 3 Po )    4.751 × 10−15 T0.303
+                                                                       e     exp (−6.984/Te )      m3 s−1     [33]
+ (R293)                    e+C→ e+C(2s2 2p3 s 1 Po )    1.952 × 10−15 Te−0.682 exp (−8.019/Te )    m3 s − 1   [33]
+ (R294)                    e+C→ e+C(2s2 2p3 3 Do )      1.577 × 10−14 T0.036
+                                                                       e     exp (−8.038/Te )      m3 s−1     [33]
+ (R295)                    e+C→ e+C(2s2 2p3 p 1 P)      1.158 × 10−15 Te−0.52 exp (−9.008/Te )     m3 s−1     [33]
+ (R296)                    e+C→ e+C(2s2 2p3 p 3 D)      3.160 × 10−15 Te−0.176 exp (−8.537/Te )    m3 s − 1   [33]
+ (R297)                    e+C→ e+C(2s2 2p3 p 3 S)      8.294 × 10−16 Te−0.534 exp (−8.762/Te )    m3 s − 1   [33]
+ (R298)                    e+C→ e+C(2s2 2p3 p 3 P)      3.872 × 10−15 Te−0.026 exp (−8.691/Te )    m3 s − 1   [33]
+ (R299)                    e+C→ e+C(2s2 2p3 p 1 D)      1.022 × 10−15 Te−0.469 exp (−9.391/Te )    m3 s − 1   [33]
+ (R300)                    e+C→ e+C(2s2 2p3 p 1 S)      1.043 × 10−16 Te−0.45 exp (−9.048/Te )     m3 s − 1   [33]
+ (R301)                    e+C→ e+C(2s2 2p3 p 3 Po )    8.132 × 10−15 T0.036
+                                                                       e     exp (−9.942/Te )      m3 s − 1   [33]
+ (R302)                    e+C→ e+C(2s2 2p3 p 1 Do )    2.119 × 10−16 Te−0.295 exp (−9.836/Te )    m3 s − 1   [33]
+ (R303)                    e+C→ e+C(2s2 2p4 s 3 Po )    1.248 × 10−15 Te−0.106 exp (−9.574/Te )    m3 s − 1   [33]
+ (R304)                    e+C→ e+C(2s2 2p3 d 3 Fo )    7.560 × 10−16 Te−0.208 exp (−9.620/Te )    m3 s − 1   [33]
+ (R305)                    e+C→ e+C(2s2 2p3 d 3 Do )    6.876 × 10−16 T0.578
+                                                                       e     exp (−8.874/Te )      m3 s − 1   [33]
+ (R306)                    e+C→ e+C(2s2 2p4 s 1 Po )              − 16
+                                                        3.275 × 10 Te  0.589 exp (−9.982/Te )      m3 s − 1   [33]
+ (R307)                    e+C→ e+C(2s2 2p3 d 1 Fo )    2.141 × 10−16 Te−0.504 exp (−10.083/Te )   m3 s − 1   [33]
+ (R308)                    e+C→ e+C(2s2 2p3 d 1 Po )    2.396 × 10−16 Te−0.687 exp (−9.973/Te )    m3 s − 1   [33]
+ (R309)                    e+C→ e+C(2s2 2p3 1 D)        1.315 × 10−16 Te−0.594 exp (−10.517/Te )   m3 s − 1   [33]
+ (R310)                    e+C→ e+C(2s2 2p3 3 S)        3.495 × 10−16 Te−0.324 exp (−10.193/Te )   m3 s − 1   [33]
+ (R311)                    e+C→ e+C(2s2 2p3 1 P)        7.857 × 10−17 Te−0.458 exp (−10.141/Te )   m3 s − 1   [33]
+ (R312)                    e+C→ e+C(2s2 2p3 3 P)        4.134 × 10−16 Te−0.112 exp (−10.168/Te )   m3 s − 1   [33]
+ (R313)                    e+C→ e+C(2s2 2p3 1 D)        1.388 × 10−16 Te−0.567 exp (−10.703/Te )   m3 s − 1   [33]
+ (R314)                    e+C→ e+C(2s2 2p3 1 S)        1.628 × 10−17 Te−0.538 exp (−10.681/Te )   m3 s − 1   [33]
+Materials 2023, 16, 3820                                                                                              21 of 23
+
+
+
+
+                           Table A8. Cx Fy charge exchange reaction set included in a volume-averaged plasma model.
+
+                                            Reaction                         Rate Constant   Unit          Reference
+
+                            (R315)          C3 F7+ +C2 F4 → CF3+ +C4 F8      2.0 × 10−17     m3 s−1        [34]
+                            (R316)          C2 F4+ +C2 F4 → C3 F5+ +CF3      2.0 × 10−17     m3 s−1        [34]
+                            (R317)          CF3+ +C3 F7 → C3 F7+ +CF3        7.04 × 10−16    m3 s−1        [34]
+                            (R318)          CF3+ +C3 F5 → C3 F5+ +CF3        7.04 × 10−16    m3 s−1        [34]
+                            (R319)          CF3+ +C2 F6 → C2 F5+ +CF4        2.50 × 10−18    m3 s−1        [34]
+                            (R320)          CF3+ +C2 F4 → C3 F7+             3.30 × 10−17    m3 s−1        [34]
+                            (R321)          CF2+ +C4 F8 → C3 F5+ +C2 F4 +F   2.10 × 10−17    m3 s−1        [34]
+                            (R322)          CF2+ +C2 F6 → C2 F5+ +CF3        3.50 × 10−17    m3 s−1        [34]
+                            (R323)          CF2+ +C2 F4 → C2 F4+ +CF2        1.00 × 10−15    m3 s−1        [34]
+                            (R324)          CF+ +C2 F6 → CF3+ +C2 F4         2.00 × 10−16    m3 s−1        [34]
+                            (R325)          CF+ +C2 F4 → C3 F5+              1.30 × 10−16    m3 s−1        [34]
+                            (R326)          CF+ +C2 F4 → CF3+ +2CF           2.60 × 10−16    m3 s−1        [34]
+                            (R327)          F2+ +C2 F5 → C2 F5+ +F2          1.00 × 10−16    m3 s−1        [34]
+                            (R328)          F2+ +C2 F4 → C2 F4+ +F2          1.00 × 10−16    m3 s−1        [34]
+                            (R329)          F+ +C2 F6 → C2 F5+ +F2           1.00 × 10−15    m3 s−1        [34]
+                            (R330)          F+ +C2 F5 → C2 F4+ +F2           1.00 × 10−15    m3 s−1        [34]
+                            (R331)          F+ +C2 F4 → C2 F3+ +F2           1.00 × 10−15    m3 s−1        [34]
+                            (R332)          C4 F8− +F→ F− +C4 F8             1.00 × 10−15    m3 s−1        [34]
+                            (R333)          CF2+ +CF4 → CF3+ +CF3            4.00 × 10−16    m3 s−1        [33]
+                            (R334)          CF2+ +CF3 → CF3+ +CF2            1.48 × 10−15    m3 s−1        [33]
+                            (R335)          CF2+ +CF→ CF3+ +C                2.06 × 10−15    m3 s−1        [33]
+                            (R336)          CF2+ +C→ CF+ +CF                 1.04 × 10−15    m3 s−1        [33]
+                            (R337)          CF+ +CF4 → CF3+ +CF2             1.80 × 10−16    m3 s−1        [33]
+                            (R338)          CF+ +CF3 → CF3+ +CF              1.71 × 10−15    m3 s−1        [33]
+                            (R339)          CF+ +CF2 → CF2+ +CF              1.00 × 10−15    m3 s−1        [33]
+                            (R340)          C+ +CF3 → CF3+ +C                5.00 × 10−16    m3 s−1        [33]
+                            (R341)          C+ +CF3 → CF2+ +CF               2.48 × 10−15    m3 s−1        [33]
+                            (R342)          C+ +CF2 → CF2+ +C                5.00 × 10−16    m3 s−1        [33]
+                            (R343)          C+ +CF→ CF+ +C                   3.18 × 10−15    m3 s−1        [33]
+                            (R344)          F2+ +CF4 → CF3+ +F+F2            1.00 × 10−16    m3 s−1        [33]
+                            (R345)          F2+ +CF3 → CF3+ +F2              1.00 × 10−16    m3 s−1        [33]
+                            (R346)          F2+ +CF3 → CF3+ +2F              1.60 × 10−15    m3 s−1        [33]
+                            (R347)          F2+ +CF2 → CF2+ +F2              1.00 × 10−15    m3 s−1        [33]
+                            (R348)          F2+ +CF2 → CF3+ +F               1.79 × 10−15    m3 s−1        [33]
+                            (R349)          F2+ +CF→ CF+ +F                  2.18 × 10−15    m3 s−1        [33]
+                            (R350)          F2+ +C→ CF+ +F                   1.04 × 10−15    m3 s−1        [33]
+                            (R351)          F2+ +CF4 → CF3+ +F2              1.00 × 10−15    m3 s−1        [33]
+                            (R352)          F+ +CF3 → CF3+ +F                1.00 × 10−15    m3 s−1        [33]
+                            (R353)          F+ +CF3 → CF2+ +F2               1.00 × 10−15    m3 s−1        [33]
+                            (R354)          F+ +CF2 → CF+ +F2                2.28 × 10−15    m3 s−1        [33]
+                            (R355)          F+ +CF→ CF+ +F                   5.00 × 10−16    m3 s−1        [33]
+                            (R356)          F+ +CF→ C+ +F2                   2.71 × 10−15    m3 s−1        [33]
+                            (R357)          F+ +C→ C+ +F                     1.17 × 10−15    m3 s−1        [33]
+                            (R358)          F+ +F2 → F2+ +F                  7.94 × 10−16    m3 s−1        [33]
+                            (R359)          CF3− +F→ CF3 +F−                 5.00 × 10−14    m3 s−1        [33]
+Materials 2023, 16, 3820                                                                                                               22 of 23
+
+
+
+
+References
+1.    Racka-Szmidt, K.; Stonio, B.; Żelazko, J.; Filipiak, M.; Sochacki, M. A Review: Inductively Coupled Plasma Reactive Ion Etching
+      of Silicon Carbide. Materials 2022, 15,123. [CrossRef] [PubMed]
+2.    Cho, C.; You, K.; Kim, S.; Lee, Y.; Lee, J.; You, S. Characterization of SiO2 Etching Profiles in Pulse-Modulated Capacitively
+      Coupled Plasmas. Materials 2021, 14, 5036. [CrossRef] [PubMed]
+3.    Seong, I.H.; Lee, J.J.; Cho, C.H.; Lee, Y.S.; Kim, S.J.; You, S.J. Characterization of SiO2 Over Poly-Si Mask Etching in Ar/C4F8
+      Capacitively Coupled Plasma. Appl. Sci. Converg. Technol. 2021, 30, 176–182. [CrossRef]
+4.    Kim, S.S.; Yong, S.K.; Kim, W.; Kang, S.; Park, H.W.; Yoon, K.J.; Sheen, D.S.; Lee, S.; Hwang, C.S. Review of semiconductor flash
+      memory devices for material and process issues. Adv. Mater. 2022, 2200659. [CrossRef]
+5.    Ishikawa, K.; Karahashi, K.; Ishijima, T.; Cho, S.I.; Elliott, S.; Hausmann, D.; Mocuta, D.; Wilson, A.; Kinoshita, K. Progress in
+      nanoscale dry processes for fabrication of high-aspect-ratio features: How can we control critical dimension uniformity at the
+      bottom? Jpn. J. Appl. Phys. 2018, 57, 06JA01. [CrossRef]
+6.    Rauf, S.; Balakrishna, A. SiO2 etching in an Ar/c-C4 F8 /O2 dual frequency capacitively coupled plasma. J. Vac. Sci. Technol. A Vac.
+      Surfaces Films 2017, 35, 021308. [CrossRef]
+7.    Kwon, B.; Kim, J.; Lee, N.E.; Shon, J. Ultrahigh selective etching of SiO2 using an amorphous carbon mask in dual-frequency
+      capacitively coupled C4 F8 /CH2 F2 /O2 /Ar plasmas. J. Electrochem. Soc. 2010, 157, D135. [CrossRef]
+8.    Krüger, F.; Wilczek, S.; Mussenbrock, T.; Schulze, J. Voltage waveform tailoring in radio frequency plasmas for surface charge
+      neutralization inside etch trenches. Plasma Sources Sci. Technol. 2019, 28, 075017. [CrossRef]
+9.    Krüger, F.; Lee, H.; Nam, S.K.; Kushner, M.J. Voltage waveform tailoring for high aspect ratio plasma etching of SiO2 using
+      Ar/CF4 /O2 mixtures: Consequences of ion and electron distributions on etch profiles. J. Vac. Sci. Technol. A Vac. Surfaces Films
+      2023, 41, 013006. [CrossRef]
+10.   Chun, I.; Efremov, A.; Yeom, G.Y.; Kwon, K.H. A comparative study of CF4 /O2 /Ar and C4 F8 /O2 /Ar plasmas for dry etching
+      applications. Thin Solid Films 2015, 579, 136–143. [CrossRef]
+11.   Lim, N.; Efremov, A.; Kwon, K.H. A Comparison of CF4 , CHF3 and C4 F8 + Ar/O2 Inductively Coupled Plasmas for Dry Etching
+      Applications. Plasma Chem. Plasma Process. 2021, 41, 1671–1689. [CrossRef]
+12.   Li, X.; Hua, X.; Ling, L.; Oehrlein, G.S.; Barela, M.; Anderson, H.M. Fluorocarbon-based plasma etching of SiO2 : Comparison of
+      C4 F6 /Ar and C4 F8 /Ar discharges. J. Vac. Sci. Technol. A Vac. Surfaces Films 2002, 20, 2052–2061. [CrossRef]
+13.   Huang, S.; Huard, C.; Shim, S.; Nam, S.K.; Song, I.C.; Lu, S.; Kushner, M.J. Plasma etching of high aspect ratio features in SiO2
+      using Ar/C4 F8 /O2 mixtures: A computational investigation. J. Vac. Sci. Technol. A Vac. Surfaces Films 2019, 37, 031304. [CrossRef]
+14.   Wang, M.; Ventzek, P.L.; Ranjan, A. Quasiatomic layer etching of silicon oxide selective to silicon nitride in topographic structures
+      using fluorocarbon plasmas. J. Vac. Sci. Technol. A Vac. Surfaces Films 2017, 35, 031301. [CrossRef]
+15.   Kwon, H.; Won, I.; Han, S.; Yu, D.H.; Kwon, D.C.; Im, Y.H.; Iza, F.; Oh, D.; Park, S.K.; Cha, S. Effect of heavy inert ion strikes on
+      cell density-dependent profile variation and distortion during the etching process for high-aspect ratio features. Phys. Plasmas
+      2022, 29, 093510. [CrossRef]
+16.   Jeong, W.n.; Lee, Y.s.; Cho, C.h.; Seong, I.h.; You, S.j. Investigation into SiO2 Etching Characteristics Using Fluorocarbon
+      Capacitively Coupled Plasmas: Etching with Radical/Ion Flux-Controlled. Nanomaterials 2022, 12, 4457. [CrossRef] [PubMed]
+17.   Kim, H.H.; Shin, J.H.; Lee, H.J. Control of the ion flux and energy distribution of dual-frequency capacitive RF plasmas by the
+      variation of the driving voltagesss. J. Vac. Sci. Technol. A 2023, 41, 023004. [CrossRef]
+18.   Hartmann, P.; Korolov, I.; Escandón-López, J.; van Gennip, W.; Buskes, K.; Schulze, J. Control of ion flux-energy distribution at
+      dielectric wafer surfaces by low frequency tailored voltage waveforms in capacitively coupled plasmas. J. Phys. D Appl. Phys.
+      2023, 56, 055202. [CrossRef]
+19.   Lee, J.; Efremov, A.; Yeom, G.Y.; Lim, N.; Kwon, K.H. Application of Si and SiO2 etching mechanisms in CF4/C4F8/Ar inductively
+      coupled plasmas for nanoscale patterns. J. Nanosci. Nanotechnol. 2015, 15, 8340–8347. [CrossRef]
+20.   Kim, J.K.; Cho, S.I.; Kim, N.G.; Jhon, M.S.; Min, K.S.; Kim, C.K.; Yeom, G.Y. Study on the etching characteristics of amorphous
+      carbon layer in oxygen plasma with carbonyl sulfide. J. Vac. Sci. Technol. A Vac. Surfaces Films 2013, 31, 021301. [CrossRef]
+21.   Lieberman, M.A.; Lichtenberg, A.J. Principles of Plasma Discharges and Materials Processing; John Wiley & Sons: Hoboken, NJ,
+      USA, 2005.
+22.   Chabert, P.; Braithwaite, N. Physics of Radio-Frequency Plasmas; Cambridge University Press: Cambridge, UK, 2011.
+23.   Kim, S.; Lee, J.; Kim, D.; Kim, J.; You, S. A transmission line model of the cutoff probe. Plasma Sources Sci. Technol. 2019, 28, 055014.
+      [CrossRef]
+24.   Kim, J.H.; Choi, S.C.; Shin, Y.H.; Chung, K.H. Wave cutoff method to measure absolute electron density in cold plasma. Rev. Sci.
+      Instruments 2004, 75, 2706–2710. [CrossRef]
+25.   Kim, Y.H.; Kim, J.S.; Kim, D.C.; Kim, Y.W.; Park, J.B.; Han, D.S.; Song, M.Y. Ion and Radical Characteristics (Mass/Energy
+      Distribution) of a Capacitively Coupled Plasma Source Using Plasma Process Gases (CxFy). Coatings 2021, 11, 993. [CrossRef]
+26.   Savas, S. Estimation of ion impact energies and electrode self-bias voltage in capacitive RF discharges. MRS Online Proc. Libr.
+      (OPL) 1987, 98, 35. [CrossRef]
+27.   Kim, G.H. Study of Surface Reaction and Gas Phase Chemistries in High Density C4 F8 /O2 /Ar and C4 F8 /O2 /Ar/CH2 F2 Plasma
+      for Contact Hole Etching. Trans. Electr. Electron. Mater. 2015, 16, 90–94. [CrossRef]
+Materials 2023, 16, 3820                                                                                                              23 of 23
+
+
+
+
+28.   You, S.; Lee, Y.J.; Chae, H.; Kim, C.K. Plasma Etching of SiO2 Contact Holes Using Hexafluoroisopropanol and C4 F8 . Coatings
+      2022, 12, 679. [CrossRef]
+29.   Lee, Y.; Oh, S.; Lee, J.; Cho, C.; Kim, S.; You, S. A Quantification Method in Quadrupole Mass Spectrometer Measurement. Appl.
+      Sci. Converg. Technol. 2021, 30, 50–53. [CrossRef]
+30.   Lim, N.; Efremov, A.; Yeom, G.Y.; Choi, B.G.; Kwon, K.H. Etching characteristics and mechanisms of Mo thin films in Cl2 /Ar and
+      CF4 /Ar inductively coupled plasmas. Jpn. J. Appl. Phys. 2014, 53, 116201. [CrossRef]
+31.   Hahn, Y.B.; Pearton, S.J. A unified global self-consistent model of a capacitively and inductively coupled plasma etching system.
+      Korean J. Chem. Eng. 2000, 17, 304–309. [CrossRef]
+32.   Kokkoris, G.; Goodyear, A.; Cooke, M.; Gogolides, E. A global model for C4F8 plasmas coupling gas phase and wall surface
+      reaction kinetics. J. Phys. D Appl. Phys. 2008, 41, 195211. [CrossRef]
+33.   Toneli, D.; Pessoa, R.; Roberto, M.; Gudmundsson, J.T. A global model study of low pressure high density CF4 discharge. Plasma
+      Sources Sci. Technol. 2019, 28, 025007. [CrossRef]
+34.   Haidar, Y.; Pateau, A.; Rhallabi, A.; Fernandez, M.C.; Mokrani, A.; Taher, F.; Roqueta, F.; Boufnichel, M. SF6 and C4 F8 global
+      kinetic models coupled to sheath models. Plasma Sources Sci. Technol. 2014, 23, 065037. [CrossRef]
+35.   Hjartarson, A.; Thorsteinsson, E.; Gudmundsson, J. Low pressure hydrogen discharges diluted with argon explored using a
+      global model. Plasma Sources Sci. Technol. 2010, 19, 065008. [CrossRef]
+36.   Vasenkov, A.V.; Li, X.; Oehrlein, G.S.; Kushner, M.J. Properties of c-C4 F8 inductively coupled plasmas. II. Plasma chemistry
+      and reaction mechanism for modeling of Ar/c-C4 F8 /O2 discharges. J. Vac. Sci. Technol. A Vac. Surfaces Films 2004, 22, 511–530.
+      [CrossRef]
+37.   Lee, Y.; Kim, S.; Lee, J.; Cho, C.; Seong, I.; You, S. Purgeless atomic layer etching of SiO2 . J. Phys. D Appl. Phys. 2022, 55, 365203.
+      [CrossRef]
+38.   Matsui, M.; Usui, T.; Yasunami, H.; Ono, T. Relationship between formation of surface-reaction layers and flux of dissociated
+      species in C4 F8 /Ar plasma for SiO2 etching using pulsed-microwave plasma. J. Vac. Sci. Technol. B Nanotechnol. Microelectron.
+      Mater. Process. Meas. Phenom. 2016, 34, 051204. [CrossRef]
+39.   Rueger, N.; Beulens, J.; Schaepkens, M.; Doemling, M.; Mirza, J.; Standaert, T.; Oehrlein, G. Role of steady state fluorocarbon films
+      in the etching of silicon dioxide using CHF3 in an inductively coupled plasma reactor. J. Vac. Sci. Technol. A Vac. Surfaces Films
+      1997, 15, 1881–1889. [CrossRef]
+40.   Huard, C.M.; Zhang, Y.; Sriraman, S.; Paterson, A.; Kushner, M.J. Role of neutral transport in aspect ratio dependent plasma
+      etching of three-dimensional features. J. Vac. Sci. Technol. A Vac. Surfaces Films 2017, 35, 05C301. [CrossRef]
+41.   Jinnai, B.; Orita, T.; Konishi, M.; Hashimoto, J.; Ichihashi, Y.; Nishitani, A.; Kadomura, S.; Ohtake, H.; Samukawa, S. On-wafer
+      monitoring of charge accumulation and sidewall conductivity in high-aspect-ratio contact holes during SiO2 etching process. J.
+      Vac. Sci. Technol. B Microelectron. Nanometer Struct. Process. Meas. Phenom. 2007, 25, 1808–1813. [CrossRef]
+42.   Wei, Q.; Li, K.D.; Lian, J.; Wang, L. Angular dependence of sputtering yield of amorphous and polycrystalline materials. J. Phys.
+      D Appl. Phys. 2008, 41, 172002. [CrossRef]
+43.   Marchack, N.; Chang, J.P. Perspectives in nanoscale plasma etching: What are the ultimate limits? J. Phys. D Appl. Phys. 2011,
+      44, 174011. [CrossRef]
+44.   Hash, D.; Bose, D.; Rao, M.; Cruden, B.; Meyyappan, M.; Sharma, S. Impact of gas heating in inductively coupled plasmas. J.
+      Appl. Phys. 2001, 90, 2148–2157. [CrossRef]
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.
+

@@ -1,0 +1,1108 @@
+On the origin of the notching effect during etching in uniform high density
+plasmas
+          Gyeong S. Hwang and Konstantinos P. Giapisa)
+          Division of Chemistry and Chemical Engineering, California Institute of Technology, Pasadena,
+          California 91125
+          ~Received 14 June 1996; accepted 15 November 1996!
+          We present a two-dimensional Monte Carlo simulation of profile evolution during the overetching
+          step of polysilicon-on-insulator structures, which considers explicitly ~a! electric field effects during
+          the charging transient, ~b! etching reactions of energetic ions impinging on the poly-Si, and ~c!
+          forward inelastic scattering effects. Realistic energy and angular distributions for ions and electrons
+          are used in trajectory calculations through local electric fields near and in the microstructure.
+          Transient charging of exposed insulator surfaces is found to profoundly affect local sidewall etching
+          ~notching!. Ion scattering contributions are small but important in matching experimental notch
+          profiles. The model is validated by capturing quantitatively the notch characteristics and also the
+          effects of the line connectivity and open area width on the notch depth, which have been observed
+          experimentally by Nozawa et al. @Jpn. J. Appl. Phys. 34, 2107 ~1995!#. Elucidation of the
+          mechanisms responsible for the effect facilitates the prediction of ways to minimize or eliminate
+          notching. © 1997 American Vacuum Society. @S0734-211X~97!02501-8#
+
+
+I. INTRODUCTION                                                      ing have been proposed in the literature; all are based on the
+                                                                     difference between the potential of the poly-Si line, which
+    Topography evolution during etching of semiconductor             attracts excess electrons at the side facing the open area, and
+devices is critically important in the manufacture of large          the potential at the trench bottom ~SiO2!, which charges up
+scale integrated circuits. However, the understanding of the         positively. One school of thought suggests that this potential
+origin of profile peculiarities has lagged behind in the race        difference causes ion migration to the sidewall foot of the
+for ultralarge-scale integration ~ULSI!. While process recipe        outermost poly-Si line,2,3 where they cause localized etching.
+development for modern etchers has thus far overcome                 However, evidence for such surface ion migration on adsor-
+pattern-dependent etching effects, trial-and-error solutions         bate ~e.g., Cl! covered SiO2 is hard to find; furthermore, this
+cannot be relied upon to solve new problems that will arise          mechanism fails to explain the wide notches frequently seen
+as targeted device dimensions extend below 200 nm and as-            experimentally. A more plausible explanation has been
+pect ratios exceed 10:1. The ‘‘notching’’ effect1,2 is a beau-       proposed,5,6 which attributes notching to electric-field-
+tiful example of the unexpected obstacles that could slow            induced distortion of ion trajectories. Local electric fields
+down the progress towards realizing ULSI unless fundamen-            form as a result of microstructure charging brought about by
+tal understanding of the mechanisms that affect profile evo-         the directionality difference between ions and electrons at the
+lution is obtained. Interestingly, the notching effect could         wafer surface, a mechanism first proposed by Arnold and
+have been predicted: a case study that serves to exemplify           Sawin.4 Ootera et al.5 considered the energy distribution of
+the power and promise of modeling.                                   electrons arriving at the microstructure but neglected the ion
+    The notching phenomenon1–3 describes the opening of a            energy distribution and the effect of the oscillating sheath.
+long narrow groove ~the ‘‘notch’’! in a conductive material          Furthermore, they also neglected the conductivity of the
+at the interface with an underlying insulator. The notch oc-         poly-Si, thereby ‘‘overestimating the local electric field and
+curs perpendicularly to the normal ion direction and appears         the ion trajectory deflection.’’ Steep trajectory bending at the
+during the overetching step in high density plasma tools.            sidewall foot was predicted only for the unrealistic case of
+Even more peculiar is the location of the notch: it typically        zero ion-drift velocity. Kinoshita et al.6 improved this pic-
+forms at the inner sidewall foot of the outermost feature in a       ture by assuming a linear sheath model that led to a bimodal
+grating-type structure neighboring an open area, as depicted         ion energy distribution, and by allowing charge redistribu-
+schematically in Fig. 1. The extent of notching depends on           tion to occur so that the sidewalls of the poly-Si feature reach
+the width of the open area between grating structures as well        the same potential. However, the charge was equidistributed
+as on the duty cycle of the grating and whether the poly-Si          along the poly-Si sidewall surface ~a physically unrealistic
+lines are electrically connected. It is also affected by the ion     distribution in the presence of the strong positive potential at
+energy distribution, electron temperature, and electron den-         the trench bottom! which led to the inaccurate calculation of
+sity in the high density plasma employed during the                  charging potentials and local electric fields. Despite the un-
+overetching step. Finally, a higher poly-Si conductivity re-         derestimation of potentials, these authors were the first to
+sults in more severe notching.3 Various scenarios for notch-         point out that the potential difference between the trench
+                                                                     space and the poly-Si lines is a maximum for the outermost
+a!
+ Electronic mail: giapis@macpost.caltech.edu                         line. The calculated ion flux distribution at the inner side of
+
+70      J. Vac. Sci. Technol. B 15(1), Jan/Feb 1997     0734-211X/97/15(1)/70/18/$10.00     ©1997 American Vacuum Society         70
+71         G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                              71
+
+
+
+
+FIG. 1. Schematic depiction of the location of the notch and the mechanisms
+proposed to contribute to its formation: ~a! Ion trajectory bending due to
+open area charging and direct bombardment of the poly-Si, ~b! forward ion
+deflection due to SiO2 charging under the etched area, and ~c! near grazing
+ion-SiO2 surface collision, followed up by forward scattering and bombard-
+ment of the notch apex.
+
+
+
+the outermost line was found to peak at the poly-Si/SiO2
+interface; this was suggested to be the reason for notching
+enhancement at that location. These studies stop short from
+combining the ion trajectory calculations with a profile evo-
+lution simulation to capture the notch formation. Moreover,
+the calculations pertain to the initial stages of notching and
+cannot explain why and how the notch can evolve into the
+narrow wedge, frequently seen in experimental profiles.
+    We present here a true profile evolution simulation of the
+notching effect which considers explicitly ~a! electric field
+effects during the charging transient, ~b! etching reactions of
+energetic ions impinging on the poly-Si, and ~c! forward                      FIG. 2. A schematic flow chart of the simulation steps undertaken in this
+scattering effects. Our simulation predicts that notching be-                 study.
+gins as etching of the poly-Si sidewall foot by energetic ions
+that get deflected and accelerated towards it. As the notch
+deepens, more SiO2 surface is exposed and becomes avail-
+able for forward scattering of ions. In addition, the exposed
+SiO2 surface charges up causing forward deflection of ions.                   II. THE EXPERIMENT OF NOZAWA et al.
+The contribution of thus scattered or deflected ions becomes
+increasingly important in defining the notch channel and                          Notching depends on the plasma conditions. In this ar-
+maintaining the etch rate deep inside the wedge. The pro-                     ticle, we model the experimental results of Nozawa et al.1
+posed mechanisms are schematically depicted in Fig. 1. The                    They have presented an extensive study of notching in an
+significant ion trajectory bending is induced by local electric               electron cyclotron resonance ~ECR! system using a Cl2
+fields, which form when the microstructure surfaces charge                    plasma. Their structures consisted of gratings of nominally
+up as a result of the directionality difference between ions                  0.5 mm lines separated by 0.5 mm spaces ~trenches!; the lines
+and electrons, created by the oscillating electric field in the               were not electrically connected. The gratings were separated
+sheath. The accurate calculation of local electric fields in the              by open areas with a width that varied between 0.5 and 10
+microstructure is essential to the modeling of notch profile                  mm. At the onset of overetching, each grating feature con-
+evolution. The problem is thus divided into three major seg-                  sisted of 1 mm photoresist onto 0.3 mm poly-Si; the features
+ments that must be addressed sequentially: ~1! A sheath                       were formed on top of a 0.1 mm uniform layer of SiO2 on a
+simulation to produce accurate ion and electron energy and
+                                                                              Si substrate. All structures were 200% overetched at 3.0
+angular distribution functions at the microstructure. ~2! A
+                                                                              mTorr. The mean sheath voltage was estimated to be 37 V,
+charging simulation to determine the steady-state electro-
+static force field in and near the microstructure. ~3! A notch-               while an rf bias of 60 V ~peak-to-peak! was applied at a rf
+ing simulation where ions get deflected and impinge onto                      frequency of 400 kHz. In their modeling study of the same
+poly-Si or SiO2 , followed up by reaction ~etching! or for-                   problem, Kinoshita et al.6 have assumed an electron tem-
+ward inelastic scattering. These calculations are briefly out-                perature of 4.0 eV and plasma density of 131012 cm23. We
+lined in the flow chart of Fig. 2 and will be addressed in this               will use these reported and estimated values for a direct com-
+article.                                                                      parison with the experimental1 and modeling results.6
+
+JVST B - Microelectronics and Nanometer Structures
+72          G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                        72
+
+
+                                                                                   nm side along the surface. The mask ~photoresist! and the
+                                                                                   gate oxide ~SiO2! are both insulators; charge will continue to
+                                                                                   accumulate in each cell as long as there are particles imping-
+                                                                                   ing there. Surface ~and bulk! charge mobility is not allowed.
+                                                                                   On the contrary, the poly-Si has a conductivity high enough
+                                                                                   to permit charge redistribution or recombination at a times-
+                                                                                   cale shorter than the simulation step. Secondary electron
+                                                                                   emission is neglected on all surfaces. The SiO2 is assumed to
+                                                                                   be thick enough to prevent any tunneling current to the sub-
+                                                                                   strate. As Kinoshita et al.6 have shown, there will be tran-
+                                                                                   sient charge accumulation at all surfaces until steady state is
+                                                                                   reached by redirecting ion and electron trajectories. The
+                                                                                   steady-state potential contour map is essential for ion trajec-
+                                                                                   tory calculations during notching and must be determined
+                                                                                   first.
+FIG. 3. Schematic depiction of the simulation domain, which is defined by
+the mirror axes, the sheath lower boundary, and the SiO2 upper surface.
+Mirror images of the microstructure in the domain are used in calculating
+the redistribution of charge in the polysilicon lines. The grating lines are 0.5   B. Sheath model
+mm wide, are separated by 0.5 mm spaces, and consist of 1 mm photoresist
+onto 0.3 mm polysilicon. The width W of the open area is varied in the                 Ion and electron transport through the sheath must be
+simulation from 0.5 to 10 mm. The scale corresponds to the case when               solved explicitly to determine realistic energy and angular-
+W52.0 mm. The sheath lower boundary is 3.7 mm above the SiO2 surface.
+                                                                                   flux distributions of ions and electrons arriving at the micro-
+                                                                                   structure. The energy distributions depend not only on the dc
+                                                                                   sheath voltage but also on the applied rf bias and rf fre-
+III. PLASMA SHEATH AND MICROSTRUCTURE                                              quency. The rf electric field in the sheath must be combined
+CHARGING SIMULATION                                                                with the equation of motion for ions and electrons. Based on
+                                                                                   a comparison of sheath models,7 we have selected the non-
+A. Charging simulation domain
+                                                                                   linear model of Lieberman8 as the most appropriate for the
+    We begin by defining the two-dimensional ~2D! simula-                          self-consistent treatment of ion and electron dynamics within
+tion domain as shown in Fig. 3. It occupies a rectangular                          the sheath. Using the measured and estimated values for the
+area, which is 3.7 mm in height ~sheath lower boundary! and                        plasma parameters and bias given in Sec. II, we calculated
+has a variable width between 2 and 12 mm. The two 0.5 mm                           the average sheath thickness to be 89 mm. The sheath is
+features ~X and Y ! in close proximity represent the edge of                       assumed to be collisionless in view of the low pressure ~3.0
+the grating, while the width of the open area to the next                          mTorr! used in the ECR plasma. At the aforementioned
+feature (Z) will be varied in order to simulate the effect of                      plasma density, the majority of the ions in the plasma are
+larger charge accumulation at the outermost line (Y ) of the                       assumed to be Cl1.
+grating. The notch is expected to appear at the inner side of                          Potentials associated with surface charging are expected
+feature Y , just above the poly-Si/SiO2 interface. Ion and                         to influence the region just above the microstructure. The
+electron motion in the simulation domain will be influenced                        electric dipole field, formed between the positively charged
+by local electric fields that result from charging of features in                  trench bottom and the negatively charged upper sidewalls,
+the microstructure. Since the charge distribution at the mi-                       decays very fast with distance. Thus, the electrons and ions
+crostructure surfaces uniquely determines the electric field, it                   crossing the sheath will feel this field only very close to the
+is very important to consider the effect of charging potentials                    microstructure. This observation greatly simplifies the simu-
+outside the simulation domain in determining the charge re-                        lation because it permits to separately address the problem of
+distribution in the conductive poly-Si features within the                         ion and electron sheath crossing from the problem of micro-
+simulation domain. This is accomplished by allowing mirror                         structure charging. We will thus solve for the ion and elec-
+images of the simulation domain about the left and right                           tron energy and angular flux distributions at a plane located a
+boundaries with the same charge distribution.                                      short distance above the microstructure ~defined here as the
+    The simulation domain is discretized by a 2D grid, which                       ‘‘sheath lower boundary’’! and then use these distributions
+divides the space into a matrix of square cells. The cell di-                      to model the surface charging transient. The distance used
+mensions must be small enough to allow for a smooth de-                            was 3.7 mm above the SiO2 surface; at this height, the sur-
+scription of the potential variation in the microstructure. It                     face charging potential decays to zero ~vide infra!. This dis-
+was found that a resolution of 50350 square cells/mm2 was                          tance is indeed very small compared with the calculated
+adequate. The grid extends into the dielectric materials and                       sheath thickness of 89 mm.
+defines a surface layer of cells, where charges will be depos-                         The Monte Carlo ~MC! simulation of electron and ion
+ited upon impact of an electron or ion. Thus, the photoresist                      transport through the sheath is based on a stochastic genera-
+sidewall surface is divided into 50 cells, while the poly-Si                       tion of electrons and ions at the ion sheath-plasma boundary
+sidewall surface is discretized by 15 cells; each cell has a 20                    ~sheath edge!. Both are treated as particles and their trajec-
+
+J. Vac. Sci. Technol. B, Vol. 15, No. 1, Jan/Feb 1997
+73           G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                      73
+
+
+tories are followed by numerically integrating the equations
+of motion in the 2D plane (x,y):
+
+         ]2y                     ] 2x
+     M       5qE y ~ t ! ,   M        5qE x ~ t ! ,           ~3.1!
+         ]t2                     ]t2
+
+where M and q are the mass and the charge of the particle,
+and E y (t) and E x (t) are the parallel and transverse compo-
+nents of the electric field, defined with respect to the wafer
+surface normal. While there is no transverse electric field in
+the sheath, these equations are also used for trajectory tracing
+near and within the microstructure, where E x is significant.
+The plasma is assumed to be uniform. The electrons are in-
+ertialess and respond to the instantaneous electric field. Elec-
+trons enter the sheath upper boundary with an isotropic flux
+distribution and are assumed to have a Maxwellian velocity
+distribution with k B T e 54.0 eV, where k B is the Boltzmann
+constant and T e is the electron temperature. The ion sheath-
+plasma boundary is stationary and ions enter the sheath with
+initial parallel velocity determined from a Gaussian with a
+mean equal to the Bohm velocity, (k B T e /M i ) 1/2, and a vari-
+ance equal to (k B T i /M i ) 1/2, where M i is the ion mass and T i
+is the ion temperature. Values of k B T i between 0.2 and 0.5
+eV have no observable effect on microstructure charging. In
+the present simulation, we assume k B T i 50.5 eV; this high
+value alludes to a collisional broadening of the ion angular
+distribution as the ions pass through the presheath region and
+is consistent with recent experimental measurements in simi-
+lar high density plasmas.9 The ions thus enter the sheath with
+a ratio of directed energy to transverse temperature of 8.
+    As a result of the rf oscillation, ions entering the sheath at
+different phases of the rf cycle will gain different energy as
+they cross the sheath. At 400 kHz, we obtained a bimodal ion
+energy distribution function ~IEDF! for the ions arriving at
+the sheath lower boundary, shown in Fig. 4~a!. The splitting
+of the ion energy distribution is typical when the sheath              FIG. 4. ~a! Ion energy distribution function of Cl1 arriving at the sheath
+thickness is small because ions can cross the sheath in less           lower boundary as predicted by a nonlinear sheath model. ~b! The corre-
+than one rf cycle. The high energy peak has lower intensity            sponding electron energy distribution function. The plasma parameters
+                                                                       were: pressure 3.0 mTorr, rf frequency 0.4 MHz, rf bias 60 V ~peak-to-
+than the low energy peak, as expected from the self-                   peak!, dc sheath voltage 37 V, electron temperature 4.0 eV, and plasma
+consistent treatment of the sheath at the low rf bias                  density 131012 cm3.
+frequency.7 The low energy peak of the IEDF is essential for
+reaching steady-state charging at the sidewalls. The calcu-
+lated electron energy distribution function ~EEDF! at the              be kept in mind that the IADF is energy dependent, that is,
+sheath lower boundary, shown in Fig. 4~b!, is in good agree-           the ions that reach the sheath lower boundary at the greatest
+ment with analytic estimates based on the Vlasov equation.5            angles with respect to the etching direction have the least
+The respective ion angular distribution function ~IADF! and            energy.
+electron angular distribution function ~EADF! are shown in
+Figs. 5~a! and 5~b!. It is apparent that the IADF is almost
+                                                                       C. Charging transient
+unidirectional ~the calculated half-width at half-maximum of
+4.3° is consistent with the experimental measurements of                   Electrons and ions in equal numbers ~fluxes! are gener-
+Woodworth et al.!9 while the EADF is more isotropic at the             ated sequentially at the sheath lower boundary having trans-
+sheath lower boundary. This directionality difference is criti-        lational energies determined by randomly sampling the cor-
+cal in facilitating differential charging of the microstructure.4      responding energy distribution functions. Their direction of
+For example, the upper sidewalls of each feature will be               motion is also determined by random sampling of the corre-
+preferentially bombarded by electrons, thus developing a               sponding angular distribution functions. Care is taken to ac-
+negative charging potential. Ions from the ‘‘wings’’ of the            count for the energy dependence of the IADF. No etching
+IADF are also important because they contribute to the re-             reactions are considered during the charging transient. Each
+duction of the negative sidewall potential. However, it must           particle is tracked down through the electrostatic force field
+
+JVST B - Microelectronics and Nanometer Structures
+74          G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                      74
+
+
+                                                                                differences method ~FDM! is employed, with the following
+                                                                                boundary conditions: V50 along the sheath lower boundary,
+                                                                                “V50 at the left and right boundaries ~centerlines!; the ac-
+                                                                                tual charging potential distributions at the end of each charg-
+                                                                                ing step are used for the various microstructure surfaces.
+                                                                                   The size of the simulation domain requires a very large
+                                                                                number of charging steps before a uniform charge distribu-
+                                                                                tion can be obtained. The process is slowed down consider-
+                                                                                ably because a nonuniform charge distribution, typically oc-
+                                                                                curring at the initial stages of charging, results in a
+                                                                                ‘‘bumpy’’ electric force field which further affects the distri-
+                                                                                bution of new charges and impedes convergence.
+
+                                                                                D. Charge redistribution in the poly-Si
+                                                                                    To obtain the correct surface charging potentials, it was
+                                                                                found that the contributions from features in areas neighbor-
+                                                                                ing the simulation domain ~Fig. 3! are very significant and
+                                                                                must be included in the simulation. In particular, charges on
+                                                                                the low dielectric constant ~e51.6! photoresist can influence
+                                                                                the charge distribution on the conductive poly-Si even if the
+                                                                                photoresist surface is not in direct view of the poly-Si ~e.g.,
+                                                                                top of photoresist, sidewalls above poly-Si, etc.!. This re-
+                                                                                quires accounting for electric field effects through dielectric
+                                                                                materials. The charges on insulating surfaces are stagnant
+                                                                                which simplifies the calculation of their contribution to sur-
+                                                                                face potentials at other surface cells. However, the mobility
+                                                                                of charges in the poly-Si line requires a separate treatment of
+                                                                                charging at its surfaces. The key condition is that the poly-Si
+                                                                                line must be equipotential. Kinoshita et al.6 considered the
+                                                                                total net charge in the poly-Si ~divided by a constant! as a
+                                                                                measure of the surface potential and assumed that the charge
+                                                                                is equidistributed along the sidewall surfaces. This assump-
+                                                                                tion is not physical in the presence of strong charging poten-
+                                                                                tials at neighboring insulating surfaces. The surface charge
+FIG. 5. ~a! Ion angular distribution function of Cl1 arriving at the sheath
+                                                                                on the poly-Si sidewalls must be unevenly distributed in or-
+lower boundary as predicted by a nonlinear sheath model. ~b! The corre-         der to make the surface equipotential. Electron accumulation
+sponding electron angular distribution function; the dotted line represents a   is enhanced near the poly-Si/SiO2 interface, a condition that
+fit by the function cos0.6 u. The plasma conditions are given in Fig. 4.        is critically important for the appearance of the notching ef-
+                                                                                fect because it affects the potential at the poly-Si and at the
+                                                                                trench bottom. The charge redistribution is performed at the
+until it impinges onto a surface, where it transfers its charge                 end of each charging step in the following manner.
+with 100% probability. The process by which this charge
+                                                                                ~1! The potential at each surface cell of a poly-Si line is
+transfer occurs is not important for the model. The ions prob-
+                                                                                    calculated by considering contributions from all charged
+ably undergo Auger neutralization before impacting the sur-
+                                                                                    surface cells, including those at all photoresist and SiO2
+face, but the net result is the same as if the ion collided
+                                                                                    surfaces of the simulation domain and its mirror images.
+directly with the surface: the surface charge increases by a
+                                                                                ~2! The arithmetic mean of these potentials for both side-
+unit of positive charge. In the initial stages of charging, the
+                                                                                    walls of the poly-Si line establishes a deviation from the
+electrostatic potentials on the microstructure surfaces are
+                                                                                    equipotential for each cell.
+small resulting in weak local electric fields. As more and
+                                                                                ~3! An amount of the total surface charge on the poly-Si line
+more particles arrive at different surfaces, charging potentials
+                                                                                    proportional to the deviation ~normalized by the equipo-
+increase and the electrostatic force field becomes significant
+                                                                                    tential! is added to each cell.
+enough to alter ion and electron trajectories. For every 50
+                                                                                ~4! Steps ~1!–~3! are repeated until all poly-Si surface cells
+ions and 50 electrons ~the ‘‘charging step,’’ corresponding
+                                                                                    reach the equipotential value.
+approximately to one-half rf cycle! impacting the microstruc-
+ture surfaces, the Laplace equation, “2V50, is solved in the                       It can be easily inferred that the poly-Si surface charge
+entire simulation domain, taking into consideration the modi-                   distribution peaks near the poly-Si/SiO2 interface as a result
+fied surface charge distribution along the pattern. The finite                  of the large positive potential at the trench bottom. This im-
+
+J. Vac. Sci. Technol. B, Vol. 15, No. 1, Jan/Feb 1997
+75          G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                                     75
+
+
+
+
+FIG. 6. Distribution of net charge accumulated in each cell ~1 cell[20 nm!
+along the surface of various polysilicon sidewalls ~as indicated in the inset!
+after steady-state charging of the microstructure has been reached. The po-
+sition of 0 mm corresponds to the poly-Si/SiO2 interface.
+
+
+
+portant result is illustrated in Fig. 6 by plotting the net charge
+accumulated along four poly-Si sidewall surfaces after
+steady-state charging has been reached in a manner to be
+described below. Notice the pronounced increase in negative
+charge in the first cell ~1 cell[20 nm! along the inner poly-Si
+sidewall of feature Y ~curve C! as compared to the positive
+charge in the corresponding cell along the outer sidewall
+~curve D!. The charge redistribution that makes this differ-
+ence possible is required to make the poly-Si line equipoten-
+tial. Furthermore, this calculation determines the accurate
+boundary conditions needed to solve the Laplace equation
+for the correct 2D potential distribution. At the end, one                       FIG. 7. ~a! Normalized ion and electron current densities to all surfaces of
+obtains the modified electrostatic force field at the grid nodes                 the microstructure within the calculation domain and also to the bottom SiO2
+in the space between features and above the microstructure.                      surface of the trench nearest to the open area ~indicated by the thin arrow!,
+                                                                                 as a function of the charging step. ~b! Charging potential distribution along
+This field is used to alter particle trajectories as they ap-                    the bottom SiO2 surface of the trench nearest to the open area as a function
+proach the microstructure during the next charging step.                         of the distance along the trench for various counts of charging steps, as
+                                                                                 indicated. A ‘‘charging step’’ consists of 50 ions plus 50 electrons generated
+                                                                                 at the lower sheath boundary.
+E. Charging steady state
+    The charge redistribution in the poly-Si lines and the so-
+lution of the Laplace equation are repeated at the end of each                   steps. However, equality of the current densities alone does
+and every charging step until steady state is reached as moni-                   not guarantee that charging has reached steady state. This
+tored by surface potential distributions that no longer change.                  fact is demonstrated in Fig. 7~b!, where the potential distri-
+This condition corresponds to equal fluxes of ions and elec-                     bution along the bottom SiO2 surface of the last trench is
+trons impinging at all points along the microstructure sur-                      plotted at the end of the indicated cumulative numbers of
+faces.                                                                           charging steps. The potential distribution becomes progres-
+    It is instructive to begin the discussion of the charging                    sively very asymmetric, developing a pronounced peak in the
+steady state by monitoring the cumulative electron and ion                       vicinity of the inner sidewall foot of the outermost poly-Si
+current density to the combined surfaces of the microstruc-                      line. Clearly, and despite the fact that the ion and electron
+ture in the calculation domain, as well as to the SiO2 surface                   currents to the bottom SiO2 surface are perfectly balanced
+at the bottom of the last trench before the open area. These                     @Fig. 7~a!#, a dramatic charge redistribution occurs which
+current densities are plotted in Fig. 7~a! as a function of the                  establishes the electrostatic condition required for ion trajec-
+charging step. The ion and electron current densities to all                     tory bending and acceleration towards the poly-Si sidewall
+surfaces become equal at a value of 0.965 after about 1500                       foot. About 7000 charging steps ~or 3500 rf cycles! are
+charging steps ~or 750 rf cycles!. The currents to the bottom                    needed for the potential distribution to reach steady state.
+SiO2 surface also balance after the same number of charging                         Figure 7 offers insight into how the microstructure
+
+JVST B - Microelectronics and Nanometer Structures
+76          G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                                   76
+
+
+
+
+FIG. 8. Potential contour map at steady-state charging. The negative poten-
+tial above the photoresist decays very fast away from the microstructure due   FIG. 9. The 2D potential distribution in the trench area bordered by the
+to the electric dipole field formed between the upper photoresist sidewalls    poly-Si sidewalls. The inset illustrates the area of interest and defines the
+and the trench bottom. The curves indicate equipotential lines and the num-    origin for the potential surface. The microstructure has been rotated to allow
+bers give the values of these potentials in volts.                             for a more convenient description of ion motion in the trench. The arrows
+                                                                               show the direction of ions as they approach the potential surface.
+
+charges up. At the initial stages of charging and as a result of
+the directionality difference between electrons and ions, the                  the most dramatic manifestation of the difference between
+bottom SiO2 surfaces charge up positively, while the upper                     the two studies. Our calculations indicate that the steady-
+sidewalls charge up negatively. As the positive potential at                   state potential distribution has a pronounced maximum of
+the trench bottom increases, ions with energies at the low                     58.7 V very close to the sidewall foot of the outermost
+end of the IEDF begin to be deflected towards the sidewalls                    poly-Si line ~about 40 nm away!; in contrast, Kinoshita et al.
+or even out of the trench. The upper sidewall potential be-                    show a potential maximum of about 37 V near the trench
+comes less negative allowing more electrons to enter the                       centerline @see Fig. 7~a! of Ref. 6#. Given the large potential
+trench, increasing the electron current to the bottom surface.                 difference between the two poly-Si lines bordering the trench
+Electrons that hit the highly conductive poly-Si get redistrib-                ~19.8 V vs 7.8 V!, a symmetric potential distribution at the
+uted quickly and unevenly to maintain the line at equipoten-                   trench bottom is not physical. Electrostatics requires that
+tial. The outermost poly-Si line collects more electrons from                  ions be steered towards the lower equipotential line; the en-
+the open area side which are transferred to the inner side,                    suing larger ion flux closer to the outermost poly-Si line
+attracted by the large positive potential at the trench bottom.                leads to a potential maximum significantly removed from the
+As the potential difference between the trench bottom and                      trench centerline.
+the outermost poly-Si line increases, more ions are steered                       A clearer picture of why the notch will appear at the foot
+towards the lower potential, causing a nonuniform potential                    of the inner sidewall of the outermost poly-Si line emerges
+distribution at the bottom SiO2 surface. The charging steady                   from the 2D potential distribution in the trench space be-
+state corresponds to a dynamic equilibrium where equal                         tween the poly-Si lines, shown in Fig. 9. An easy way to
+positive and negative currents reach all surface segments of                   visualize the influence of this potential surface on ion motion
+the microstructure. Note that, at steady state, about 3.5% of                  is by analogy to the motion of a marble on an identical
+all ions and electrons that cross the lower sheath boundary                    topographic terrain within a gravitational field. The peak in
+never hit the microstructure.                                                  the potential distribution thus resembles a sharp ‘‘moun-
+    The steady-state charging potential distribution in the mi-                tain’’, while the low potential of the poly-Si generates a
+crostructure spaces is shown in Fig. 8. This potential contour                 steep ‘‘canyon’’. A marble ~ion! with high initial velocity
+map is substantially different from the one obtained by Ki-                    will reach the end of the terrain ~trench bottom!. Signifi-
+noshita et al.6 for two reasons: ~a! The potential of the                      cantly larger velocities are required to make it uphill. Should
+poly-Si lines is calculated by allowing electrostatics to deter-               an ion approach nearer to the canyon axis ~Y -axis at x50!
+mine the charge redistribution in the poly-Si lines; thus, the                 with inadequate velocity to reach the top of the mountain, it
+correct boundary conditions are used in the calculation of the                 will fall downhill into the canyon. The higher uphill it stops
+electrostatic force field that affects ion and electron trajecto-              in its initial motion, the larger the kinetic energy it will ac-
+ries. ~b! We use a nonlinear self-consistent sheath model that                 quire by the time it falls into the canyon ~poly-Si sidewall
+results in a quantitatively different IEDF. The asymmetric                     foot!. Ions with lower velocity ‘‘feel’’ the slope of the terrain
+potential distribution along the SiO2 surface at the bottom of                 ~potential difference between the two poly-Si lines! much
+the last trench before the open area @see Fig. 7~b!# is perhaps                earlier and will be diverted towards the front part of the
+
+J. Vac. Sci. Technol. B, Vol. 15, No. 1, Jan/Feb 1997
+77          G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                                       77
+
+
+
+
+FIG. 10. Calculated trajectories for ~a! E e 53.0 and ~b! E e 55.0 eV electrons
+starting at the sheath lower boundary, after steady-state charging has been
+reached. Some electrons are deflected back into the plasma. Notice the ab-
+sence of electron trajectories to the inner sidewall of the outermost poly-Si
+line. The electron angular distribution has been considered for this calcula-
+tion.
+
+
+
+canyon ~upper poly-Si sidewall!. Thus, the ions that impinge
+on the poly-Si sidewall foot will typically have larger energy
+than ions impinging higher up. Ions that fall on the other side
+of the ‘‘mountain’’ towards the opposing poly-Si sidewall
+acquire significantly reduced kinetic energy.
+   Finally, we briefly discuss what happens at the open area
+side of the outermost poly-Si line. The poly-Si line acquires
+a larger potential ~17.8 V! than the SiO2 surface at the bot-
+tom of the open area, an essential condition for electron ac-                     FIG. 11. Calculated trajectories for ions starting with translational energy of
+cumulation at the former. Electrons that approach near the                        ~a! E 1515, ~b! E 1530, and ~c! E 1545 eV at the sheath lower boundary,
+strong repulsive potential of the upper photoresist sidewall                      after steady-state charging of the microstructure has been reached. Notice
+get deflected away from the poly-Si sidewall towards the                          the deflection of lower energy ions to the sidewalls and out of the trench.
+                                                                                  Only ions approaching perpendicularly to the wafer are shown.
+bottom surface. Electrons approaching at oblique angles and
+at a greater distance from the photoresist stand a better
+chance of arriving in the vicinity of the poly-Si sidewall,
+where the higher potential will prevail in attracting them.                       the calculated trajectories of ions with initial kinetic energies
+This establishes a limited window for approaching electrons                       of 15, 30, and 45 eV at the steady-state charging potential.
+to reach the poly-Si sidewall. At steady state, the electron                      Many low energy ~3.0 eV! electrons get deflected at the top
+current to the outer sidewall is balanced by the ion current to                   of the microstructure; few make it to the bottom of the
+the inner sidewall.                                                               trenches and more arrive at the bottom of the open area @Fig.
+   To further validate how steady-state charging affects elec-                    10~a!#. On the contrary, more of the higher energy ~5.0 eV!
+tron and ion dynamics, we have plotted in Fig. 10 the calcu-                      electrons make it to the trench bottom and the poly-Si outer
+lated trajectories for 3.0 and 5.0 eV electrons and in Fig. 11                    sidewall @Fig. 10~b!#. Notice how the electron trajectories get
+
+JVST B - Microelectronics and Nanometer Structures
+78          G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                             78
+
+
+deflected from the poly-Si inner sidewall towards the trench          E th : a high value generates a miniscule notch or precludes it
+bottom. The low energy part of the IEDF is responsible for            from occurring and a low value increases the notch shape
+reaching steady state at the sidewalls. The outermost poly-Si         beyond what is observed experimentally. A value of E th510
+line acquires a larger potential than the neighboring open            eV has been recently reported12 for the Cl1, etching of Si
+area ~see Fig. 8!. Thus, the 15 eV ions get repelled away             under high Cl/Cl1 flux ratio; thus, E th is not an adjustable
+from the outer sidewall @Fig. 11~a!#. Even higher energy ions         parameter in our model. The etch yield is independent of ui
+are steered away from this surface @Fig. 11~b!#. On the con-          up to a critical angle of incidence û cr , typically between 30°
+trary, the larger positive potential at the trench bottom can         and 60°, beyond which the yield decreases rapidly as for-
+slow down energetic ions so that they can be deflected and            ward scattering becomes more important. We hypothesize
+accelerated towards the lower part of the inner poly-Si side-         that such an angle exists for the Cl1 etching of Si, based on
+wall @Figs. 11~b! and 11~c!#. The ions that impinge high up           our results for fluorine scattering at fluorosilyl layers.10 How-
+along the poly-Si inner surface have reduced translational            ever, the notch characteristics were found to be insensitive to
+energy and, thus, will not contribute significantly to etching.       the value of û cr ~between 30° and 60°! as a result of the
+Higher energy ions ~E i >30 eV!, however, fall down a                 nature of scattering on the chlorinated poly-Si surface: be-
+steeper potential gradient as their trajectories are bent to-         yond the initial stages of notching and excluding the apex of
+wards the foot of the inner poly-Si sidewall, acquiring a             the notch, most of the ions impinge at large incident angles,
+larger transverse energy. There is also some trajectory bend-         typically >50°, where forward scattering is already signifi-
+ing toward the neighboring feature facing the same trench.            cant. For the results presented here, we set û cr545°. The
+The key difference between the two sidewalls lies in their            proportionality constant C affects only the relative rate of
+charging potential ~see Fig. 8!. There is a steeper potential         notch formation and is not significant for the simulation, as
+gradient of 150.9 V over 40 nm ~i.e., 1270 V/mm!, mea-                long as it is not excessively large or small. To speed up the
+sured from the potential maximum of 58.7 V at the trench              calculation, this parameter can be selected so that the most
+bottom to the 7.8 V of the poly-Si line, contrasted with the          energetic ions of a given IEDF will etch with probability one
+138.9 V over 460 nm ~i.e., 84.5 V/mm! gradient towards the            on normal incidence. For improved importance sampling of
+neighboring feature; thus, more energetic ions bombard the            the IEDF, all of the results presented here were obtained with
+former. Significantly, the steeper potential gradient can ac-         C50.1, corresponding to a reaction probability of one for
+celerate ions to transverse energies larger than the threshold
+                                                                      ions with incident energy of 177 eV. Negative values of Y
+for reaction at the poly-Si sidewall ~vide infra!. Our simula-
+                                                                      signify no reaction. Neither reaction nor sputtering are con-
+tion will reveal that these deflected ions, which impinge di-
+                                                                      sidered for the photoresist or the SiO2 .
+rectly on the poly-Si sidewall, are responsible only for the
+                                                                          Since the poly-Si is heavily n-doped ~.1019 cm23!, there
+initial stages of notch formation.
+                                                                      is an appreciable spontaneous etch rate, as high as 5 nm/
+                                                                      min mTorr for etching of poly-Si by Cl atoms at 0 °C.13 The
+IV. NOTCH EVOLUTION SIMULATION                                        spontaneous etching will contribute to sidewall etching dur-
+                                                                      ing both the regular etch and the overetch. Based on the data
+A. Etching reactions and forward inelastic scattering                 of Sec. II, we estimated that the sidewall could be etched
+    When an energetic ion collides with the poly-Si, physical         spontaneously up to 60 nm by the end of the overetch. Since
+and/or chemical sputtering may take place resulting in mate-          our simulation does not consider profile evolution during the
+rials removal. Collisions with the poly-Si and SiO2 surfaces          regular etch, it becomes somewhat arbitrary to include spon-
+may also result in inelastic scattering. Reactions and direct         taneous etching only during the overetch. We will thus ne-
+inelastic scattering are essential for notching and must be           glect spontaneous etching, expecting a mismatch between
+included in the simulation. We employ a simple model of               the calculated and the experimental profiles. The mismatch
+sputtering and scattering, based on previous simulations of           should be more pronounced at the upper poly-Si sidewalls
+profile evolution during neutral beam etching.10 When a hy-           ~exposed to neutrals for a longer time! and in the notch area,
+perthermal Cl1 impinges on the SiClx salvage layer, it will           where neutrals get trapped.
+etch with a yield Y that depends on the incident energy E i               Scattering occurs at both the chlorinated poly-Si and the
+and angle ui , as described by the simple formula                     SiO2 surface. Scattering on the photoresist surfaces is not
+                                                                      important for notching. Among the different modes of
+     Y 5C ~ AE i 2 AE th!     when u i , û cr ,
+                                                                      scattering,10 only direct inelastic ~or single-bounce! scatter-
+                                                             ~4.1!    ing is important for notching as a result of the large transla-
+                            cos u i
+     Y 5C ~ AE i 2 AE th!               when u i > û cr ,            tional energy of the emerging particles. In spite of the large
+                            cos û cr                                 numbers of ions that undergo multiple-bounce scattering and
+where E th ~eV! is a translational energy threshold for Cl1           trapping desorption, these ions do not have large enough
+etching of Si under high Cl/Cl1 flux conditions, û cr is a           energy to induce physical or chemical sputtering in a subse-
+critical angle, and C is a proportionality constant. The square       quent collision event and are therefore neglected. Direct in-
+root dependence has been proposed by Steinbrüchel11 for              elastic scattering is particularly important at large angles of
+physical and ion-enhanced-chemical etch yields at low ion             incidence when the energy transfer to the surface is small.
+energies. The notching effect is very sensitive to the value of       This situation is frequently encountered at the sloping
+
+J. Vac. Sci. Technol. B, Vol. 15, No. 1, Jan/Feb 1997
+79            G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                           79
+
+
+poly-Si surface that defines the upper notch boundary, when-
+ever deflected ions impinge directly onto the poly-Si surface.
+However, only grazing collisions will result in projectiles
+that subsequently impinge on poly-Si; the vast majority of
+the directly scattered projectiles will reach the SiO2 surface,
+where they must scatter again to be able to reach the poly-Si
+surface. Energy losses in such double bounces reduce the
+significance of the corresponding scattered projectiles for
+notching. Thus, direct inelastic scattering on poly-Si ~SiClx
+layer! need not be considered in a notching simulation.
+   Direct inelastic scattering on the SiO2 surface can, how-
+                                                                        FIG. 12. Definition of the potential distributions in the etched area ~cross-
+ever, be important as all the ejected projectiles will arrive at        hatched region! needed for the solution of the Laplace equation to determine
+the poly-Si surface. Although initially very small, the num-            the local electric field. The cells depict schematically the discrete nature of
+ber of ions that scatter directly on the SiO2 surface increases         the potentials along the bottom surface [V(i)] and along the initial position
+concomitant with the increase in exposed SiO2 as the notch              of the poly-Si sidewall [V s (k)]. The discretization along the moving notch
+                                                                        boundary is not shown. The Laplace equation is solved for every new cell
+evolves. Scattering contributes to the notch characteristics            position (i51, n) reached by the notch boundary along the bottom surface
+and must be included in the simulation. However, it will be             as the notch evolves. The photoresist ~PR! is not to scale.
+shown later that charging of the exposed SiO2 leads to for-
+ward deflection of ions without contact with the SiO2 ,
+thereby reducing the significance of scattering. In the ab-             B. Forward ion deflection
+sence of experimental information on Cl1 scattering on a
+chlorinated SiO2 surface, only specular scattering at incident             As the notch evolves, more SiO2 surface is exposed to ion
+angles ui >ucr ~forward reflection! will be considered in our           bombardment resulting in charge accumulation there. The
+simulation, with a scattering probability P d given by                  charging alters the local electric field in the etched area
+                                                                        ~crosshatched region of Fig. 12! and will affect ion motion in
+                                                                        the vicinity of the notch. It will be shown later that this local
+             u i 2 u cr
+     P d5               ,                                     ~4.2!     electric field perturbation has a profound effect on the notch
+            p /22 u cr                                                  shape and depth. However, its inclusion in the simulation
+                                                                        poses a formidable challenge, because it requires coupling of
+where ucr is a critical angle, corresponding to the onset of            the charging and etching calculations. Moreover, charging
+direct inelastic scattering on Cl-covered SiO2 , which takes a          will not necessarily reach steady state in the vicinity of the
+value between 30° and 60°. When ui <ucr , only multiple-                notch as the notch boundary evolution is time dependent.
+bounce scattering and trapping desorption are possible, re-                To simplify the calculation, we model this transient
+sulting in scattered projectiles with low translational energy          charging of the SiO2 surface by assuming that the perturba-
+~unimportant for notching!. We assume that the charge of the            tion is local and does not affect significantly the steady-state
+ion is transferred to and remains at the surface upon impact,           electric field in the trench area or the equipotential of the
+so that the scattered particle is neutral; thus, its motion is no       poly-Si line. Thus, the potential boundary conditions at the
+longer affected by electric fields. We shall also assume that           moving poly-Si boundary ~V p 5const.! and the imaginary
+the direct inelastic scattering of Cl1 on the Cl-covered SiO2           line that defines the initial position of the poly-Si sidewall
+surface closely follows hard-sphere collision kinematics.               prior to notch formation @V s (k), k51, 60# can be both ob-
+Thus, the translational energy E f of the specularly scattered          tained from the steady-state charging calculation. The
+atom will be determined from the equation                               Laplace equation can now be solved for the notch region to
+                                                                        determine the modified local electric field, provided that the
+     DE     2m                                                          potential boundary condition at the exposed SiO2 surface is
+        5          @ 11cos 2u i A12 m 2 sin2 2u i                       specified. The potential distribution at this surface is depen-
+     Ei    m
+          ~ 11 ! 2
+                                                                        dent on the net charge accumulation. Since the notch is small
+              1 m sin2 2u i # ,                               ~4.3!     and shadowed from the plasma, the number of electrons ar-
+                                                                        riving at the exposed SiO2 surface must be small and will be
+where DE5(E i 2E f ), and m is the ratio of the mass of the             neglected in our calculation. Thus, we shall assume that the
+gas atom over the effective mass of the surface. Equation               potential along the exposed SiO2 surface is proportional to
+~4.3! represents the hard-sphere model prediction14 for                 the cumulative ion density there. If N(i) is the total number
+specular scattering and does not take into consideration                of ions impinging at cell i, where i51, n and n denotes the
+surface-atom motion or the gas-surface attractive potential;            cell under the moving poly-Si edge ~see Fig. 12!, then the
+however, these effects should be negligible for the high in-            boundary condition can be written as
+cident energies considered here. The notch depth is sensitive                                N~ i !
+to the value of m, as it will be shown later. For a Cl-covered              V ~ i ! 5V p 1          @ V 2V p # ,                                ~4.4!
+                                                                                             N~ 1 ! 0
+SiO2 surface, a value of m51.0 or slightly lower can be
+justified.                                                              where V(i) is the discrete value of the potential at cell i,
+
+JVST B - Microelectronics and Nanometer Structures
+80        G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                             80
+
+
+V 0 5[V s (0)1V p #/2 is the potential at the initial position of    at the point of impact. The latter is inferred from the surface
+the poly-Si sidewall, V p is the potential of the poly-Si, and       slope, which is calculated by a least-squares fitting of the
+V s ~0! is the potential at the cell just before the poly-Si side-   positions of five surface cells about and including the cell
+wall. V s ~0! and V p are fixed at the final values obtained in      where the impact occurs. If reaction does not take place, the
+the steady-state charging calculation.                               Cl ion will undergo some kind of inelastic scattering. As
+     As a result of the positive charge accumulation at the the      discussed earlier, these scattered atoms are relatively unim-
+exposed SiO2 , lower energy ions approaching its surface get         portant for notching since the majority of them impinge sub-
+slightly deflected in the forward direction rather than im-          sequently on the SiO2 surface. Thus, all scattered Cl atoms
+pinge on the SiO2 . This effect on one hand reduces the con-         from the SiClx layer could be neglected for the notch evolu-
+tribution of scattering to notching but on the other hand al-        tion.
+lows the forward deflected ions to preserve their translational          Forward scattering on the SiO2 surface is accounted for;
+energy by avoiding contact with the surface ~an energy loss          its influence on the notching effect is relatively small but
+mechanism!; thus, the probability for etching upon subse-            important. Few energetic ions impinge on the bottom SiO2
+quent impingement on the poly-Si surface is significantly            surface at large angles of incidence @Figs. 11~b! and 11~c!#
+increased.                                                           during the initial stages of notching. However, the evolution
+                                                                     of the notch exposes more SiO2 surface area, thereby in-
+                                                                     creasing inelastic scattering. As a result of the large incident
+C. Profile evolution methodology
+                                                                     angles involved, such collisions at the SiO2 surface lead to
+    The etching simulation begins after charging of the mi-          the ejection of Cl atoms with large translational energies in
+crostructure has reached steady state. All results reported in       the forward direction. Scattered Cl atoms impinge on the
+this section are for the electrostatic force field corresponding     evolving surfaces of the notch at incident angles smaller than
+to the potential contour map of Fig. 8; this field is used to        those of ions that directly bombard the same surfaces. Thus,
+alter the trajectories of ions generated at the sheath lower         in spite of the energy loss during the scattering event, scat-
+boundary in identical fashion to the charging simulation. The        tered Cl atoms can still contribute to etching of the notch
+part of the charging simulation domain that extends from the         surfaces.
+sheath lower boundary to the photoresist/poly-Si interface is            Charging of the exposed SiO2 surface causes forward ion
+also used for ion trajectory determination, which is per-            deflection which contributes profoundly to notching. The lo-
+formed by integrating Eqs. ~3.1!. The space below between            cal electric field distribution in the notch region is deter-
+the poly-Si lines is discretized with a refined 2D grid of           mined by solving the Laplace equation subject to the bound-
+square cells, which extends into the poly-Si lines. Smaller          ary conditions outlined in Sec. IV B. This procedure is
+cell dimensions are required to delineate the steep profile          repeated for every new cell position reached along the SiO2
+characteristics; in the limit, each cell can contain a few sur-      surface by the evolving notch apex. Since the bottom surface
+face atoms but at a substantial cost to the computational            is discretized by 100 cells, this implies that the Laplace equa-
+time. We use a resolution of 603100 square cells to dis-             tion, subject to the changing boundary condition described
+cretize each poly-Si feature, which corresponds to an area of        by Eq. ~4.4!, will be solved 50 times to reach a depth of 50%
+25 nm2/cell. Note that even this denser grid will result in          of the poly-Si line thickness. The new electrostatic force
+contours that show statistical roughness; however, the pro-          field obtained at each step is used for ion trajectory calcula-
+files can still be captured in reasonable detail. A surface cell     tions to advance the notch boundary to the next cell layer.
+is removed when it has been bombarded by a sufficient num-               In the following subsections, notch profiles are presented
+ber of energetic particles ~ions and scattered neutrals!. For        as a function of three parameters: E th , m, and ucr . The scat-
+the present calculation, we use 50 reactive collisions to re-        tering parameters refer only to the interaction of Cl1 with the
+move each cell; very small numbers ~e.g., less than 10! pro-         SiO2 surface. Comparisons will reveal how these parameters
+duce rougher surfaces, an artifact of the stochastic nature of       influence the notch shape and depth.
+the Monte Carlo technique. This procedure corresponds to
+removing clusters of surface atoms after adequate bombard-
+ment, which greatly speeds up the computation.                       D. Notch evolution and the importance of forward ion
+                                                                     deflection and scattering
+    Ions are generated at the sheath lower boundary with
+translational energies determined by randomly sampling the               We start by comparing an experimental profile to the
+calculated IEDF of Fig. 4~a! and angles of approach that are         simulated notch profile obtained by using the measured
+obtained from the corresponding IADF of Fig. 5~a!. Ions              E th510 eV,12 while fixing the scattering parameters at rea-
+with initial energy larger than 60 eV do not get bent towards        sonable values ~m51.0 and ucr545°!. The experimental
+the sidewall; these ions could be neglected to speed up the          notch profile published in the work of Nozawa et al. @see
+calculation. When a Cl1 impinges at a poly-Si surface, its           their Fig. 10~c!# for an open area width of 2 mm, is digitized
+translational energy and angle of incidence must be known            and shown by the open circles in Fig. 13. The result of the
+before Eq. ~4.1! can be used to determine if reaction will           simulation with full forward ion deflection and scattering is
+occur. The incident energy is easily obtained from the charg-        shown by the superimposed continuous line. 18.73106 ions
+ing simulation. The incident angle is defined as the angle           per 0.5 mm along the lower sheath boundary were required
+between the incident trajectory and the normal to the surface        for this calculation; this number corresponds to the experi-
+
+J. Vac. Sci. Technol. B, Vol. 15, No. 1, Jan/Feb 1997
+81          G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                                 81
+
+
+
+
+                                                                                FIG. 14. Comparison of sidewall profiles when various contributing mecha-
+                                                                                nisms to etching are considered. ~A! Profiles generated for 200% overetch-
+                                                                                ing time and ~B! profiles allowed to reach the same depth as the experimen-
+                                                                                tal notch profile, thus requiring different overetching times. ~a! Only
+FIG. 13. Comparison between experimental and simulated notch profiles.          deflection due to open area charging is allowed, ~b! forward ion deflection
+The circles represent the digitized experimental profile of Nozawa et al.       due to charging of the exposed SiO2 is included, and ~c! forward scattering
+~Ref. 1! for an open area of 2 mm, etched under the plasma conditions given     on the exposed SiO2 is also included. The PR is not to scale.
+in Sec. II. The notch region has been expanded to facilitate clearer compari-
+son. The poly-Si dimensions in the expanded region are to scale, unlike the
+PR dimensions.
+                                                                                the expanded notch profiles for a fixed overetching time and
+                                                                                for a fixed notch depth, respectively. All profiles are gener-
+mental 200% overetching time for the purposes of the simu-                      ated for E th510 eV. When neither forward ion deflection nor
+lation. All essential features are captured with no parameter                   forward scattering on the SiO2 surface are considered, only
+adjustment. The contribution of scattering to reactive colli-                   ions that get deflected in the trench area and actually impact
+sions is only 8.6%. It will be shown later that better matching                 the poly-Si sidewall may react with a probability given by
+of the notch apex is possible by reducing the values of m and                   Eq. ~4.1!. These ions cause inward tapering of the sidewall,
+ucr . However, lower values of these parameters do not seem                     as illustrated by the profile ~a! of Fig. 14~A!. If this profile
+to be physical and would detract from the appeal of compar-                     were allowed to evolve to the experimental notch depth @Fig.
+ing a fixed model prediction to the complex notch profile.                      14~B!, profile ~a!# by increasing the overetching time, a
+Moreover, it must be noted that spontaneous etching, which                      shape significantly different from the experimental profile
+has been neglected in this calculation, could easily account                    would develop. When forward ion deflection is included
+for the small mismatch. Deep notching occurs at the inner                       ~forward scattering is still excluded!, the notch shape is more
+side of the outermost feature, while only inward tapering is                    reasonable @see profile ~b! in Figs. 14~A! and 14~B!#. Reac-
+seen for the neighboring poly-Si sidewall. The outer poly-Si                    tive collisions increase significantly ~55%! from profile ~a! to
+sidewall does not develop a notch during overetching; ions                      ~b! of Fig. 14~A!. Clearly, the effect of local charging of the
+get repelled from the sidewall towards the bottom surface                       exposed SiO2 surface is dramatic. However, matching of the
+because of a repulsive potential condition for ions. the                        experimental profile is still not satisfactory. Direct inelastic
+poly-Si line is at a higher potential ~17.8 V! than that of the                 scattering on the SiO2 surface compensates for the small de-
+neighboring open area ~as low as 13 V near the center, see                      viation in depth, as shown by profile ~c! in Figs. 14~A! and
+Fig. 8!. The tapered profile of the outer sidewall, seen in the                 14~B! ~identical to the profile of Fig. 13!. This profile was
+experimental micrograph @Fig. 10~c! of Ref. 1#, is believed to                  generated by setting m51.0 and ucr545°. For the same num-
+form during the standard etch. When poly-Si is still present                    ber of impacting ions, the notch is deeper and, overall, the
+~uncleared! in the open area, the sidewalls are at the same                     profile is a better depiction of the observed notch. Scattering
+potential with the open area; therefore, the potential condi-                   increases the number of reactive collisions by an additional
+tion that steers ions away from the sidewall does not yet                       8.6%. Note that the scattering contribution is limited to the
+exist. Ions get bent towards and bombard the outer poly-Si                      notch apex. This result is not surprising in view of the inef-
+sidewall as they cross the strong negative potential near the                   ficient energy transfer for wide angle scattering. Thus, near-
+upper photoresist sidewall.                                                     grazing collisions yield the most energetic scattered projec-
+    To better delineate the contribution of the different                       tiles, which predominantly bombard the notch apex. But
+mechanisms to notching, we present in Figs. 14~a! and 14~b!                     where do the ions that scatter on the SiO2 surface come
+
+JVST B - Microelectronics and Nanometer Structures
+82        G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                            82
+
+
+from? Ions that approach the bottom at a small distance from
+the poly-Si sidewall encounter a strong repulsive potential
+~see Fig. 9! and will get deflected. There is a variety of bent
+trajectories from a few degrees all the way to right angles,
+guaranteeing a supply of ions that will bombard every newly
+exposed SiO2 surface segment at progressively increasing
+angles of incidence. The latter condition is further enhanced
+by the significant positive charging of the SiO2 surface that
+gets exposed early in the etching process. Notching does not
+occur at other sidewalls of the microstructure because of the
+lack of a steep potential gradient that could impart large
+translational energy to the deflected ions.
+    Ion trajectory bending due to local electric fields and the
+resulting direct bombardment of the poly-Si sidewall foot is
+clearly the dominant mechanism by which notching devel-
+ops. However, when scattering effects are considered, the
+significant notch depth and shape are predicted with greater
+precision, which suggests that direct inelastic scattering is an
+important mechanism for notching. Direct inelastic scattering
+was found to be uniquely responsible for microtrenching in
+hyperthermal neutral beam etching.10 A notch is indeed
+reminiscent of a sharp microtrench ~with a 90° clockwise
+rotation! and both phenomena have a common origin in the
+forward scattering of energetic particles, albeit the contribu-
+tion to notching is smaller. Thus, no new mechanism is re-
+quired to explain notching. All profiles presented in the fol-
+lowing sections will include scattering effects.
+
+
+E. Parameter sensitivity analysis
+                                                                    FIG. 15. Notch profile dependence on the energy threshold for reaction
+                                                                    shown for ~a! E th510 eV; ~b! E th515 eV; ~c! E th520 eV. The profile
+1. Notching dependence on E th                                      sequences correspond to increments in depth of 10% of the poly-Si line-
+                                                                    width. An exponentially increasing overetching time was required to reach
+    The energy threshold for reaction influences profoundly         the same notch depth for larger E th ; that is, in the overetching time required
+both the shape and extent of the notch. A value of E th larger      to obtain the deepest notch for E th510 eV, only a minute notch ~approx. the
+                                                                    first profile! would develop for E th520 eV. All profiles were generated by
+than the maximum translational energy that can be gained by         including all three contributing mechanisms described in Fig. 1. The scat-
+ions as they cross the charging potential gradient between the      tering parameters were m51.0, ucr545°. The PR is not to scale.
+trench bottom and the poly-Si line, will produce minimal or
+no notching. Some inward tapering of the sidewall foot is,
+however, still expected to occur as this phenomenon is              shown! can be formed, requiring a significantly increased
+caused by the more energetic ions that arrive near the poly-Si      overetching time. Very few scattering collisions contribute to
+sidewall and their trajectories get only slightly bent. The         etching at these large threshold energies.
+threshold dependence is systematically investigated in Fig.
+15, where we plot notch profile sequences as a function of          2. Notching dependence on m
+E th while keeping the scattering parameters constant at                The ratio m of the ion mass to the effective mass of the
+m51.0 and ucr545°. The five profiles of each sequence cor-          surface ~Cl-covered SiO2! affects critically the energy trans-
+respond to specific notch depths in increments of 10%, up to        fer during a collision event. Small values of m lead to inef-
+50% of the poly-Si line thickness, so that the notch shape          ficient energy transfer, thereby producing scattered projec-
+evolution can be compared. It is noted that an exponentially        tiles with large final energy. Thus, decreasing values of m
+increasing overetching time is required to reach the same           make the scattering contributions to notching more signifi-
+notch depth as E th increases. The width of the notch opening       cant. However, the relatively small number of ions that pen-
+decreases with E th , a result of the diminishing ion deflection    etrate the repulsive electrostatic potential to impinge on the
+contributions to etching. Indeed, for reaction to occur at          exposed SiO2 , where they may undergo scattering, reduces
+larger E th , the ions must be accelerated to larger final ener-    the influence of m on the notch profile. This result is illus-
+gies which can only be attained closer to the bottom of the         trated in Fig. 16, where profiles, generated by the same num-
+trench, where the potential gradient to the sidewall foot is the    ber of ions ~18.73106!, are compared for three different val-
+largest. Notice that for E th520 eV, the notch is significantly     ues of m. The other parameters were: E th510 eV and
+narrower. At even larger values of E th , very thin notches ~not    ucr545°. There are small changes to the notch depth and
+
+J. Vac. Sci. Technol. B, Vol. 15, No. 1, Jan/Feb 1997
+83          G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                                      83
+
+
+
+
+FIG. 16. Notch profile dependence on m. The profiles shown were generated
+with the same number of ions ~18.73106!, E th510 eV and ucr545°. The
+numbers in the figure correspond to the different values of m. The PR is not
+to scale.
+
+
+shape for a decrease in the value of m from 2.0 to 0.25,
+which corresponds to a dramatic change in the nature of the
+scattering surface. The changes in the profile are bearly dis-
+cernible for m between 0.5 and 1.0; these values are believed
+                                                                               FIG. 17. Dependence of the calculated and experimental notch depth on the
+to be more realistic for a Cl-covered SiO2 surface. The value                  open space width ~see Fig. 3 for definitions!. The points are reproduced
+of m51.0, used in the scattering model, corresponds to bi-                     from the work of Nozawa et al. ~Ref. 1! and describe measurements of
+nary collisions of Cl1 with chemisorbed Cl atoms. The lack                     notch depth as a function of open space width for experiments with different
+of sensitivity can easily be explained by the fact that mostly                 line-and-space structures ~L5linewidth, S5spacewidth!, etched under the
+                                                                               plasma conditions described in Sec. II. Also shown is the difference between
+grazing collisions are contributing to etching of the notch                    the calculated maximum of the steady-state potential distribution at the
+apex; for such collisions, energy transfer is small and only                   trench bottom surface (V m ) and the equipotential of the outermost polysili-
+weakly dependent on m. Interestingly, improved fitting of the                  con line (V p ). The inset figures illustrate the notch profile for the indicated
+experimental notch apex ~see Fig. 13! can be obtained for                      open area widths obtained for the same 200% overetching time.
+m50.25. However, such a low value of m is believed not to
+be physical for the system under study.
+                                                                               ing more electrons. It is easily inferred from Fig. 8 that, as
+3. Notching dependence on ucr                                                  the width of the open area decreases, the potential at its
+                                                                               entrance becomes slightly more negative. The electron flux
+    The critical angle ucr corresponds to the onset of direct
+                                                                               towards the bottom decreases as more electrons are repelled
+inelastic scattering and affects notching by changing the
+                                                                               back into the plasma. Moreover, electron shadowing in-
+number of projectiles that scatter forward. For example, de-
+                                                                               creases. Fewer electrons arrive at the poly-Si sidewall, which
+creasing the value of ucr from 60° to 30° allows more ions
+                                                                               leads to a larger potential there and less directional bending
+~those that impinge at ui between 30° and 60°! to undergo
+                                                                               of the ion trajectories in the trench. Thus, the notching effect
+direct inelastic scattering. However, these ions result in re-
+                                                                               should decrease with the width of the open area and become
+flected projectiles with lower energy, a consequence of the
+                                                                               insignificant when the width becomes equal to the space be-
+smaller incident/reflection angles involved. Thus, the influ-
+                                                                               tween lines for the given electron temperature. On the other
+ence of ucr on notching will be negligible for large values of
+                                                                               hand, as the open area width increases beyond 2 mm ~see
+E th and m and more important at smaller values of these
+                                                                               Fig. 8!, more electrons penetrate towards the bottom. These
+parameters. However, even in the latter case, the relatively
+                                                                               electrons cannot be attracted to the sidewall because the lat-
+small number of ions undergoing scattering makes the notch-
+                                                                               ter is now located further away from the centerline. Most of
+ing dependence on ucr insignificant. For the case of Fig. 13,
+                                                                               the electrons go towards the bottom to neutralize the larger
+where E th510 eV and m51.0, the total number of reactive
+                                                                               flux of ions there, rather than towards the sidewalls. The
+collisions due to scattering increased from 6.3% to 9.3%
+                                                                               reduction in the potential of the poly-Si line will cease, thus
+when decreasing ucr from 60° to 30°, respectively. The dif-
+                                                                               quenching the rate of notch deepening.
+ferences in notch shape and depth were imperceptible @a mi-
+                                                                                  To quantify this effect, we have calculated the potential
+nuscule increase in notch depth is expected for small ucr due
+                                                                               contour maps and performed full notching simulations for
+to the increased scattering probability, see Eq. ~4.2!#. The
+                                                                               various open area widths (W). The model parameters re-
+notch profile’s lack of sensitivity to ucr combined with the
+                                                                               mained unchanged at E th510 eV, m51.0, and ucr545°. In all
+weak dependence on m render our simulation virtually pa-
+                                                                               cases, the notch depth was calculated for the same ~200%!
+rameter independent.
+                                                                               overetching time. The results are plotted in Fig. 17 ~continu-
+                                                                               ous solid line! as a function of the open area width. Four sets
+F. Notching dependence on the open area width
+                                                                               of experimental data obtained by Nozawa et al.1 are repro-
+   We have seen that the outermost poly-Si line acquires a                     duced in the same figure. Although the points were obtained
+larger potential than the neighboring open area, thus attract-                 for various line and space widths, they show the same de-
+
+JVST B - Microelectronics and Nanometer Structures
+84        G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                              84
+
+
+pendence on open area width. The simulation captures al-
+most quantitatively the observed behavior, an accomplish-
+ment that further supports the soundness of the mechanisms
+and effects considered. We have also plotted the difference,
+DV5V m 2V p , between the maximum value (V m ) of the po-
+tential distribution along the trench bottom and the equipo-
+tential of the outermost poly-Si line (V p ) for the various
+open area widths, appropriately scaled on the right axis of
+Fig. 17. This potential difference tracks the experimental re-
+sults remarkably well. This observation is perhaps not sur-
+prising. Not only is the potential difference largely respon-
+sible for ion deflection near the poly-Si sidewall foot but it
+also determines the energy of the deflected ions. Thus, a
+correlation between this potential difference and the notch
+depth is expected to exist. We note that the potential distri-
+bution in the trench region remains unchanged for open area
+widths greater than 5 mm. Thus, the notch profile for W510
+mm is identical to the one obtained for W55 mm. Our find-
+ings discredit the conjecture that electron accumulation at the       FIG. 18. The 2D potential distribution in the trench area bordered by the
+outermost line is determined solely by the solid angle avail-         poly-Si sidewalls for the case of electrically connected lines next to a 10 mm
+able to electrons to reach the poly-Si sidewall,16 which pre-         open area. The inset illustrates the area of interest and defines the origin for
+                                                                      the potential surface. The arrows show the direction of ions as they approach
+dicts that the notch depth should increase continuously with          the potential surface. Note the differences with the potential surface for the
+the open space width.                                                 case of nonconnected lines ~Fig. 9!.
+
+
+G. Notching in electrically connected poly-Si lines                   W510 mm! for the same overetching time. In addition, the
+    When the poly-Si conductivity is high and the lines are           upper poly-Si sidewalls should etch less given the smaller
+electrically connected, notches form at all lines.1,16 The            inclination of the potential surface.
+notch depth depends weakly on the total poly-Si perimeter                 The predicted profile, plotted in Fig. 19, has been ob-
+bordering the open area; a three order-of-magnitude change            tained for 200% overetching time by following the proce-
+in the perimeter doubles the notch depth under identical etch-        dures of Sec. IV C with the fixed parameters ~E th510 eV,
+ing conditions.1 Our 2D simulation cannot be used to predict          m51.0, and ucr545°!. The notches are fairly symmetric and
+quantitatively the effect of the perimeter, unless the lines are      the predictions for their depth and shape hold. The digitized
+connected through the substrate. However, it is instructive to        experimental profile obtained by Nozawa et al. @Fig. 1~c! of
+extend the simulation to describe the electron redistribution         Ref. 1# is also plotted on the same figure. The matching is
+over connected lines and investigate why the notch forms on           impressive, considering that the exact experimental overetch-
+both sides of the trench. Assuming that all four lines of the         ing time was used for the simulation rather than letting the
+grating to the left of a 10 mm open area ~see Fig. 3! are             simulated profile evolve to the experimental notch depth.
+connected, the charge redistribution must occur along all             This observation suggests that the differences in the geom-
+poly-Si surfaces so that all lines reach the same potential.          etry between the experimental and simulated structures are
+This task is easily performed by the technique presented in           not very important for notching. Indeed, the notch depth de-
+Sec. III D. In all other respects, the microstructure charging        pendence on perimeter is weak (vide supra), and the poten-
+proceeds in identical fashion to the case of nonconnected             tial distribution in the trench for a simulated open area width
+lines. When steady-state charging is reached, the potential
+distribution in the trench is found to be bimodal, as shown in
+Fig. 18. The potential maxima appear near the sidewall foot
+of both poly-Si lines. A small difference between the left
+~55.4 V! and right ~54.3 V! peak potentials is believed to be
+a result of statistical fluctuations. Since both the left and right
+poly-Si lines are at equipotential ~9.5 V!, the potential gra-
+dient towards either of the poly-Si sidewalls is virtually iden-
+tical.
+                                                                      FIG. 19. Comparison between experimental and simulated notch profiles for
+    The symmetric potential distribution predicts symmetric           the case of electrically connected lines. The circles represent the digitized
+notches at both lines. Since the difference between the SiO2          experimental profile of Nozawa et al. ~Ref. 1! for the last trench before a
+peak potential and the poly-Si equipotential ~55.429.5545.9           large open area, etched under the plasma conditions given in Sec. II. The
+                                                                      simulated profile was generated for 200% overetching time with the poten-
+V! is smaller than in the nonconnected case ~6026.3553.7
+                                                                      tial distribution of Fig. 18. The notch region has been expanded to facilitate
+V! for equal open area width, the notch should be more                clearer comparison. The poly-Si and trench dimensions are to scale; the PR
+shallow than the one observed in Fig. 18 ~inset profile for           has been truncated.
+
+
+J. Vac. Sci. Technol. B, Vol. 15, No. 1, Jan/Feb 1997
+85        G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                               85
+
+
+of 10 mm is not expected to differ significantly from that for      rectly bombard the uncleared poly-Si at the trench bottom,
+a widely open area ~see Sec. IV F!. The ability of the simu-        continue to etch at an acceptable rate.
+lation to capture quantitatively the experimental notch char-          It is interesting to note that a less dense chlorine plasma
+acteristics in the case of connected lines increases our confi-     should result in more Cl1  2 . A larger E th of about 25 eV has
+dence that the dominant notching mechanisms have been               been reported for etching and sputtering of a chlorinated Si
+considered and that the simple models used to describe them         surface with a mixed beam of Cl1      2 :Cl
+                                                                                                                1
+                                                                                                                   of approximately
+                                                                        15                  1
+are sound.                                                          7:1. In addition, Cl2 scattering on the Cl-covered SiO2
+                                                                    should almost double the value of m. These two observations
+                                                                    strongly suggest that a reduction in notching is possible
+V. IS REDUCTION OF NOTCHING POSSIBLE?                               when the molecular ion content of the plasma increases. De-
+                                                                    creasing the plasma power should be an easy way to accom-
+    There are two ways to approach the question of notching         plish the latter, although the effect may not be unambiguous
+reduction in high density plasmas. First, the plasma charac-        given the simultaneous reduction in plasma density. Notice
+teristics ~rf bias and frequency, electron temperature, plasma      again that clearing of the poly-Si at the bottom of narrow
+density! may be changed so that the ion flux and/or the mag-        trenches should still be feasible with the higher energy ions
+nitude of the ion trajectory bending towards the sidewall foot      of the IEDF, albeit at a lower etch rate. This model predic-
+are reduced. For example, Fujiwara et al.2 demonstrated that        tion could help reduce the notching problem in chlorine-
+a reduction in the electron temperature reduces notching,           based poly-Si etch processes.
+which they attributed to a diminishing supply of electrons to          The results on the threshold energy dependence also de-
+the outer poly-Si sidewall. They have also found that, for a        scribe the consequences of using different ions to etch. For
+given ~and not too large! electron temperature, plasma power        example, Ar1 has an energy threshold of about 45 eV15 and
+and rf bias, there exists a window of rf frequencies where          an atomic mass not very different from that of Cl1. If the
+notching can be eliminated. Increasing the rf frequency ~up         SiO2 surface continues to be covered by chlorine ~separate
+to a point! shifts the IEDF to a larger average energy;7 thus,      gas feed?!, then the value of m will not be significantly dif-
+Fujiwara et al. conjectured that this effect was similar to that    ferent. Thus, our calculations suggest that notching will not
+achieved by increasing the rf bias, namely, the incident ions       evolve beyond the initial inward tapering, if an Ar plasma
+become more energetic which enhances their ‘‘surface                with similar characteristics ~density, bias, rf frequency, T e ! is
+charge neutralization’’ properties ~?!. However, such solu-         used and provisions are made to saturate the wafer surface
+tions may compromise etch rate ~former! or selectivity ~lat-        with chlorine. Notice that an IEDF for Ar1, similar to the
+ter! and may be undesirable. Moreover, the proposed expla-          one in Fig. 4~a!, guarantees etching during the overetching
+nations of the influence of the plasma parameters on                step to clear the trench bottom surfaces, since ions with en-
+notching should be considered with caution; for example, the        ergy larger than threshold are still available.
+reduction of the notch depth with increasing rf bias can be            Finally, the lower reactivity of heavier halogen atoms to-
+simply explained by the increase in the vertical etch rate,         ward poly-Si suggests that switching, for example, to a
+which reduces the overetching time.                                 Br1-containing plasma during overetching should reduce
+    Second, the chemistry of etching and/or the scattering dy-      notching, mainly because of the larger energy threshold, but
+namics may be modified to reduce the reactivity of the ions         also because of less energetic scattered atoms in view of their
+and atoms impinging on the sidewall foot. Based on the elu-         larger atomic mass ~m↑!.
+cidation of the notching mechanisms accomplished in the
+present study, several variations of this approach can be de-
+                                                                    VI. CRITICAL EVALUATION OF KEY ASSUMPTIONS
+vised.
+    The threshold energy dependence suggests at least two               Perhaps the most severe assumption in this simulation is
+ways to minimize notching: ~a! by changing the nature of the        the use of the potential boundary condition expressed by Eq.
+etched surface, and ~b! by decreasing the surface tempera-          ~4.4!, which is based only on ion accumulation at the ex-
+ture. For example, addition of O2 to the plasma leads to the        posed SiO2 surface. Electrons could also be attracted to the
+formation of SiOx Cly species on the surface, which are im-         same surface, reducing the net charge accumulation there.
+portant in suppressing the etching of Si ~E th↑!.17 Lowering        The deviation is expected to be more significant near the
+the surface temperature decreases the volatility of reaction by     initial position of the sidewall, because it is more difficult for
+products and could also change the mechanism by which               electrons to reach deep into the notch. A reduction in the
+etching proceeds, again decreasing the etch rate. In spite of       potential would lead to a narrower notch as it has been found
+the fact that these effects also occur at the uncleared poly-Si     for the extreme case of a constant potential equal to V p ~in-
+at the bottom of narrow trenches, etching of these surfaces         dependent of the position along the SiO2 surface!. However,
+can be accomplished by the higher energy ions of the IEDF,          the very large positive potential of the trench bottom, with a
+whose trajectories are not altered by the local electric fields.    maximum of 58.7 V only 40 nm away from the initial side-
+An optimum O2 percentage ~in the reactor gas feed! and an           wall foot, is expected to significantly hinder the penetration
+optimum wafer temperature may exist such that the deflected         of electrons into the etched area. Therefore, we believe that
+low energy ions etch the poly-Si sidewall foot at a negligible      the exponential decrease in potential with distance into the
+rate, whereas the undeflected higher energy ions, that di-          notch, expressed by the proportionality to N(i), is very rea-
+
+JVST B - Microelectronics and Nanometer Structures
+86        G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                           86
+
+
+sonable; it certainly does a good job in predicting the notch       through by the more energetic ions that impinge at that lo-
+depth and shape and the open area dependence.                       cation. This situation could lead to narrow thin notches,
+    Charging of the microstructure surfaces is essential to the     which evolve parallel to the SiO2 surface mainly due to for-
+appearance of the notching effect. Surface and tunneling cur-       ward inelastic scattering.
+rents and secondary electron emission can reduce the charge             Considering only specular direct inelastic scattering ~re-
+on insulator surfaces, thereby altering the electrostatic force     flection! at the SiO2 surface may lead to underestimating the
+field responsible for trajectory bending. In the absence of any     notch depth and width. In modeling microtrenching, we have
+measurements reported in the literature on the mobility of          used a Gaussian function to describe forward scattering with
+electrons and ions on photoresist and adsorbate-covered SiO2        an incident-angle-dependent variance.10 Such broad forward
+surfaces, these currents have been neglected. Tunneling             scattering would result in more energetic atoms ejected at
+through the SiO2 is known to occur for relatively thin oxide        super-specular angles, thus enhancing notching very close to
+layers,18 but a thick layer should prevent such a current. Ar-      the poly-Si/SiO2 interface. In the absence of angularly re-
+nold and Sawin4 suggested the use of 1000 V/mm as a rea-            solved Cl-atom flux distributions for the inelastic scattering
+sonable upper bound for the sustainable potential difference        of Cl1 on Cl-covered SiO2 , consideration of the broad scat-
+along the surface of SiO2 . Our maximum steady-state poten-         tering requires a new adjustable parameter, limiting the
+tial gradient was calculated to be slightly larger at 1270          scope of our simple model.
+V/mm. However, this value is based on the original position             As it has been presented, our simulation captures several
+of the sidewall. As the notch begins to evolve, the poly-Si         observations relating to the notching effect while keeping the
+sidewall gets further away from the position of the potential       number of parameters to a minimum. In fact, we have exam-
+maximum at the SiO2 surface, thus yielding considerably             ined the effects of plasma characteristics ~rf bias, rf fre-
+smaller surface potential gradients. Nevertheless, larger           quency, electron temperature, and plasma density! on notch-
+charging potentials will be calculated for the surfaces of          ing and predicted the experimental trends without changing
+thick insulator layers by neglecting surface currents and sec-      the model parameters. These results will be published else-
+ondary electron emission. A reduced surface charge on the           where.
+SiO2 will allow lower energy ions to make it further into the
+trench before their trajectories are bent towards the side-
+walls. Because the IEDF is broad with a large number of             VII. SUMMARY AND CONCLUSIONS
+ions at intermediate energies @between the two peaks, see
+                                                                       We have presented a 2D numerical simulation of micro-
+Fig. 4~a!#, there will always be ions whose trajectories will
+                                                                    structure charging, ion trajectory bending, scattering, and re-
+be bent to directly bombard the poly-Si sidewall foot and to
+                                                                    actions occurring during the overetching step of silicon-on-
+impact the SiO2 surface at large angles of incidence. If the
+                                                                    insulator structures. The simulation offers insight into the
+resulting translational energies are still above E th , notching    plausible mechanisms responsible for the ‘‘notching’’ effect.
+will develop, but it may not be as severe as in the full charg-     Notching was found to have its origin in local electric-field-
+ing case. In this respect, our simulation may overestimate the      induced trajectory bending of energetic ions that ~a! bombard
+extent of notching.                                                 directly and etch the poly-Si sidewall foot, and ~b! first un-
+    While ions enter the sheath during all phases of the rf         dergo forward scattering or electrostatic deflection at the
+cycle, electrons penetrate in bursts and only during the            newly exposed SiO2 surface under the notch, resulting in
+sheath potential minimum. This results in surface potentials        energetic projectiles that subsequently impinge onto and etch
+that vary periodically with the rf frequency. Our assumption        the notch surfaces. Nonuniform local electric fields capable
+that ions and electrons impinge on the microstructure se-           of deflecting ions form as a result of differential charging in
+quentially yields the average surface charging potentials.          high aspect ratio structures, which is induced by the direc-
+While this procedure does not reflect the realistic process, the    tionality difference between ions and electrons. Notching de-
+time-varying component is small and does not significantly          pends strongly on the magnitude of the potential gradient
+change the steady-state average potentials which required           that develops in the vicinity of the inner side of the outer-
+3500 rf cycles to develop. The notch evolution calculation is       most poly-Si line. When the poly-Si lines are electrically
+only slightly sensitive to this small potential variation.          connected, similar potential gradients develop by the side-
+    We also have omitted the possible deposition of etch in-        wall foot of all grating lines, leading to notching everywhere.
+hibitors that may protect the sidewalls. From the point of          The elucidation of the mechanisms responsible for notching
+view of our simulation, inhibitor deposition corresponds to         allowed prediction of new ways to reduce or eliminate the
+an increase in the effective energy threshold for reaction. We      effect, based on a modification of the chemistry of etching
+have found that the upper portion of the poly-Si sidewalls is       and/or the scattering dynamics.
+bombarded by ions which have been decelerated signifi-                 As these results were based on simple electrostatics and
+cantly by the positive potential of the bottom surface. Thus,       scattering dynamics, one could argue that the notching effect
+any inhibitor deposition in the poly-Si sidewalls should re-        could have been predicted before it was ever seen in experi-
+duce sidewall etching. However, if there is an angular depen-       ments. This realization bears promise for the potential impact
+dence to the inhibitor deposition, then the sidewall foot may       of feature-scale modeling on alleviating the problems of fu-
+have a thinner inhibitor layer that can easily be broken            ture generations of devices.
+
+J. Vac. Sci. Technol. B, Vol. 15, No. 1, Jan/Feb 1997
+87         G. S. Hwang and K. P. Giapis: Origin of the notching effect                                                                                   87
+
+                                                                                7
+ACKNOWLEDGMENTS                                                                    M. S. Barnes, J. C. Foster, and J. H. Keller, IEEE Trans. Plasma Sci. 19,
+                                                                                   240 ~1991!.
+   The authors are grateful to J. W. Coburn and V. M. Don-                       8
+                                                                                   M. A. Lieberman, IEEE Trans. Plasma Sci. 16, 638 ~1988!.
+nelly for insightful suggestions and a critical review of the                    9
+                                                                                   J. R. Woodworth, M. E. Riley, D. C. Meister, B. P. Aragon, M. S. Le, and
+manuscript. They would also like to thank V. Vahedi for                            H. H. Sawin, J. Appl. Phys. 80, 1304 ~1996!.
+                                                                                10
+sharing his knowledge of plasma sheaths and proposing the                          G. S. Hwang, C. M. Anderson, M. J. Gordon, T. A. Moore, T. K. Minton,
+decaying dipole field explanation. This work was partially                         and K. P. Giapis, Phys. Rev. Lett. 77, 3049 ~1996!.
+                                                                                11
+                                                                                   C. Steinbrüchel, Appl. Phys. Lett. 55, 1960 ~1989!.
+supported by Caltech start-up funds and by a NSF Career                         12
+                                                                                   J. P. Chang and H. H. Sawin, J. Vac. Sci. Technol. A ~submitted!.
+Award to K. P. G. ~CTS-9623450!.                                                13
+                                                                                   E. A. Ogryzlo, D. E. Ibbotson, D. L. Flamm, and J. A. Mucha, J. Appl.
+                                                                                   Phys. 67, 3115 ~1990!.
+ 1
+   T. Nozawa, T. Kinoshita, T. Nishizuka, A. Narai, T. Inoue, and A. Na-        14
+                                                                                   J. Harris, in Dynamics of Gas-Surface Interactions, edited by C. T. Rett-
+   kaue, Jpn. J. Appl. Phys. 34, 2107 ~1995!.                                      ner and M. N. Ashfold ~Royal Society of Chemistry, Cambridge, 1991!,
+ 2
+   N. Fujiwara, T. Maruyama, and M. Yoneda, Jpn. J. Appl. Phys. 34, 2095          Chap. 1.
+   ~1995!; 35, 2450 ~1996!.                                                     15
+ 3                                                                                 M. Balooch, M. Moalem, W. E. Wang, and A. V. Hamza, J. Vac. Sci.
+   K. K. Chi, H. S. Shin, W. J. Yoo, C. O. Jung, Y. B. Koh, and M. Y. Lee,
+                                                                                   Technol. A 14, 229 ~1996!.
+   Jpn. J. Appl. Phys. 35, 2440 ~1996!.                                         16
+ 4
+   J. C. Arnold and H. H. Sawin, J. Appl. Phys. 70, 5314 ~1991!.                   S. Ogino, N. Fujiwara, H. Miyatake, and M. Yoneda, Jpn. J. Appl. Phys.
+ 5
+   H. Ootera, T. Oomori, M. Tuda, and K. Namba, Jpn. J. Appl. Phys. 33,            35, 2445 ~1996!.
+                                                                                17
+   4276 ~1994!.                                                                    C. C. Cheng, K. V. Guinn, V. M. Donnelly, and P. I. Herman, J. Vac. Sci.
+ 6
+   T. Kinoshita, M. Hane, and J. P. McVittie, J. Vac. Sci. Technol. B 14, 560      Technol. A 12, 2630 ~1994!.
+   ~1996!.                                                                      18
+                                                                                   K. Hashimoto, Jpn. J. Appl. Phys. 33, 6013 ~1994!.
+
+
+
+
+JVST B - Microelectronics and Nanometer Structures
+

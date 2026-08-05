@@ -1,0 +1,861 @@
+JOURNAL OF MICROELECTROMECHANICAL SYSTEMS, VOL. 11, NO. 4, AUGUST 2002                                                                            385
+
+
+
+
+   Guidelines for Etching Silicon MEMS Structures
+  Using Fluorine High-Density Plasmas at Cryogenic
+                     Temperatures
+  Meint J. de Boer, J. G. E. (Han) Gardeniers, Henri V. Jansen, Edwin Smulders, Melis-Jan Gilde, Gerard Roelofs,
+                          Jay N. Sasserath, and Miko Elwenspoek, Associate Member, IEEE
+
+
+    Abstract—This paper presents guidelines for the deep reactive                                         I. INTRODUCTION
+ion etching (DRIE) of silicon MEMS structures, employing
+SF6 O2 -based high-density plasmas at cryogenic temperatures.
+Procedures of how to tune the equipment for optimal results with
+respect to etch rate and profile control are described. Profile
+                                                                                   T      HE last decades have seen an ever-increasing use of
+                                                                                          plasma etching techniques, in particular for the fabrica-
+                                                                                   tion of miniaturized devices based on silicon. Traditionally
+control is a delicate balance between the respective etching and
+deposition rates of a SiO F passivation layer on the sidewalls and                 this development has been driven by the road maps in micro-
+bottom of an etched structure in relation to the silicon removal                   electronics industry, but during the last few years the focus of
+rate from unpassivated areas. Any parameter that affects the                       the field is shifting toward the fabrication of microelectrome-
+relative rates of these processes has an effect on profile control.                chanical systems (MEMS). The main difference between the
+The deposition of the SiO F layer is mainly determined by the
+oxygen content in the SF6 gas flow and the electrode temperature.
+                                                                                   requirements of Integrated Circuit (IC) and MEMS fabrication
+Removal of the SiO F layer is mainly determined by the kinetic                     is the desired structural definition: present and future IC’s rely
+energy (self-bias) of ions in the SF6 O2 plasma. Diagrams for                      on submicron features, while most structures in MEMS are for
+profile control are given as a function of parameter settings,                     the time being at least a few microns wide. However, compared
+employing the previously published “black silicon method”.                         to structure depths of only microns in conventional ICs, MEMS
+Parameter settings for high rate silicon bulk etching, and the
+etching of micro needles and micro moulds are discussed, which
+                                                                                   structures may be several hundred microns deep, even up to
+demonstrate the usefulness of the diagrams for optimal design of                   the thickness of a silicon wafer. Additionally, typical mask
+etched features. Furthermore it is demonstrated that in order to                   layouts of MEMS contain a large variety in feature size, shape
+use the oxygen flow as a control parameter for cryogenic DRIE, it                  and spacing, while IC fabrication, being a much more mature
+is necessary to avoid or at least restrict the presence of fused silica            technology, generally relies on well-defined design rules with
+as a dome material, because this material may release oxygen
+due to corrosion during operation of the plasma source. When
+                                                                                   respect to feature definition. One could argue even that future
+inert dome materials like alumina are used, etching recipes can                    MEMS technology will have to live with similarly strict design
+be defined for a broad variety of microstructures in the cryogenic                 rules, and in fact several MEMS foundries are doing exactly
+temperature regime. Recipes with relatively low oxygen content                     that.
+(1–10% of the total gas volume) and ions with low kinetic energy                      Nevertheless, for the time being the limits of the available
+can now be applied to observe a low lateral etch rate beneath the
+mask, and a high selectivity (more than 500) of silicon etching                    plasma etching methods, and in particular the details of the
+with respect to polymers and oxide mask materials is obtained.                     etching mechanisms, have not been completely established. For
+Crystallographic preference etching of silicon is observed at                      that reason one can still observe extensive world-wide research
+low wafer temperature ( 120 C). This effect is enhanced by                         efforts to find and optimize processes that ensure a well-defined
+increasing the process pressure above 10 mtorr or for low ion                      high aspect ratio of etched features, while at the same time main-
+energies (below 20 eV).                                          [720]
+                                                                                   taining high etch rates (up to 10 m/min, for an exposed sil-
+   Index Terms—Cryogenic etching, profile control, reactive ion                    icon area of less than 10% of the wafer surface) and high selec-
+etching (RIE).
+                                                                                   tivity with respect to masking material (silicon versus photore-
+                                                                                   sist: more than 500, silicon versus silicon dioxide: more than
+   Manuscript received July 18, 2001; revised November 28, 2001. This work         1000) or other layers (e.g., an embedded silicon dioxide layer in
+was supported by the Dutch Technology Foundation (STW), the applied divi-
+sion of NWO and the technology program of the Ministry of Economic Affairs.        a silicon-on-insulator, SOI, substrate, on which etching should
+The ”DEEMO” project ESPRIT nr. 20342 was supported by the European Com-            stop without undercutting or notching of the silicon top layer
+mission. Subject Editor R. T. Howe.                                                exposed to the etchingmedium). In order to satisfy all the re-
+   M. J. de Boer, H. Jansen, E. Smulders, G. Roelofs, and M. Elwenspoek
+are with the Micromechanical Transducers group, MESA Research Institute,           quirements generally a trade-off must be made Ultimately pre-
+University of Twente, 7500 AE, Enschede, The Netherlands (e-mail: M.J.de-          cise control of the profile of side walls (within 2 ) can lead to
+boer@el.utwente.nl).                                                               fine-tuned structures that can be applied for special purposes.
+   J. G. E. Gardeniers is with the Micronit Microfluidics B.V., 7500 AM En-
+schede, The Netherlands.                                                           An example of the latter, which will be discussed in more detail
+   M.-J. Gilde is with the Alcatel Optronics Netherlands, 7500 AH Enschede,        below, is the development of trenches with side-walls having a
+The Netherlands.                                                                   slightly positive taper (ca. 5 between trench sidewall and sur-
+   J. N. Sasserath is with the Market Quest Consulting, St. Petersburg, FL 33703
+USA.                                                                               face normal; positive taper means that the trench narrows at a
+   Publisher Item Identifier 10.1109/JMEMS.2002.800928.                            greater depth) and a smooth surface (average roughness less
+                                                               1057-7157/02$17.00 © 2002 IEEE
+386                                                             JOURNAL OF MICROELECTROMECHANICAL SYSTEMS, VOL. 11, NO. 4, AUGUST 2002
+
+
+
+than 200 nm), particularly suitable for moulds used in polymer         sequently, although DRIE technology is continuously being im-
+hot embossing processes [1] or for needle structures used, e.g.,       proved, the optimization of the process for a special mask layout
+for the introduction of biological material in animal or plant         is still a rather time consuming affair and strongly depends on
+tissue [2].                                                            the skills and experience of the engineer. Our experience is that
+   The basic idea of all of the anisotropic reactive ion etching       a great number of test runs (more than 10) have to be carried
+efforts today is to find a balance between trench side-wall pas-       out in order to find the ideal parameter setting for a desired
+sivation and trench bottom etching, the latter being activated         mask layout. This paper intends to illustrate a method that can
+through the bombardment of ions from the plasma discharge.             be used to find optimized conditions with a limited number (5)
+Two main approaches can be distinguished. The first is a method        of test runs. The method is based on our previous work on the
+developed by Laermer and Schilp [3]. It became known as the            so-called Black Silicon Method, BSM, an experimentation algo-
+“Bosch Process” and is a room temperature process based on             rithm which consists of the following two primary steps: i) for
+continuous cycling of subsequent passivation and etching steps,        the desired mask layout and a certain combination of parameters
+therewith achieving high aspect ratio microstructures. Based on        (e.g., oxygen flow and wafer temperature) that are varied contin-
+this generic approach, Surface Technology Systems [4] has de-          uously with all other parameters fixed, the conditions at which
+veloped its advanced silicon etch (ASE) technology. The aspect         black silicon is observed are identified; ii) next, a small adjust-
+ratio can be over 20 and etching depths may be up to 500 m.            ment in the parameters is made toward conditions where a little
+A typical etch rate is 2 m/min, the selectivity to resist is 75:1      more mask undercut occurs. For more details on this method
+and to silicon dioxide 250:1 [5].                                      and the basic principles behind it, we refer to [10].
+   The second method was introduced by Tachi et al. [6] and               In this paper, guidelines for profile control (“how to …”) of
+is based on etching at cryogenic temperatures for low-bias fluo-       the Cryo-DRIE process are presented. The main parameters of
+rine-based high-density plasmas. The sidewall protection mech-         the process will be evaluated and their impact on the profile
+anism is a combination of formation of a blocking (inhibitor)          result will be discussed. The treatment of the parameter influ-
+layer and reduction of the reaction probability of radicals (the       ence will in general be only qualitative, i.e., we will be con-
+chemical contribution to etching) at the silicon surface. The          cerned more with trends than with exact modeling of the rela-
+latter heavily depends on temperature, in particular in the cryo-      tions between process result and parameters. This makes our
+genic regime. Although initially not recognized by Tachi and his       work more generally applicable, since the exact quantitative de-
+co-workers, the addition of O gas to the plasma is required for        scription of the relations is highly dependent on the exact con-
+deposition of SiO F as inhibitor layer to achieve directional          figuration of the etching equipment, however the trends will be
+etching.                                                               the same for most apparatus. Parameter settings of high-rate sil-
+   Several workers [7]–[9] have demonstrated that the addition         icon bulk etching and etching structures with a sidewall with a
+of O to SF using this cryogenic method is a very sensitive             positive taper will be given. Also equipment demands and cali-
+control parameter for the anisotropy of Si etching. The shape of       bration methods of this equipment will be discussed. Finally, a
+the profile can easily be changed from a negative to a positive        number of application examples will be given, which corrobo-
+taper [10]. In this paper we shall restrict ourselves to the latter    rate the feasibility of parameter fine-tuning for optimal design
+method, i.e., cryogenically controlled deep reactive ion etching       of etched features.
+or Cryo-DRIE.
+   Tachi et al. exploit SF O high-density plasma chemistry                                      II. EQUIPMENT
+to create directional etching. In such plasma, decomposition              The guidelines were accomplished by evaluating, respec-
+of SF produces F radicals that etch silicon spontaneously              tively, the Plasma-Therm SLR770 ICP Shuttlelock system of
+(isotropically) by formation of volatile SiF . The inhibitor layer     Unaxis USA, Inc. [13], and the Plasmalab 100 plus system
+is created by oxygen radicals from the plasma via the formation        of Oxford Instruments [14]. In these systems the silicon
+of a SiO F deposit [9]. Cooling the wafer to cryogenic temper-         wafers are mechanically clamped to a liquid nitrogen-cooled
+atures enhances passivation by reducing the chemical reactivity,       substrate electrode. Helium backside cooling is incorporated
+which can be explained by a reduction in the volatility of reaction    to allow efficient temperature control of the wafer, which is
+product SiF [11], [12]. However, SF decomposition also                 indispensable for Cryo-DRIE processes. A high conductance
+produces ions like SF that enhance etching of the SiO F                pumping system has been installed in these systems to allow
+layer locally as they strike the surface with relatively low kinetic   high gas flows of SF at relatively low operating pressures [see
+energies. The sidewalls of the etched structures are much less         Fig. 1(a)], thereby achieving a high etch rate (5–10 m/min)
+exposed to ion bombardment and will be covered by the blocking         and profiles with straight side walls (control within 5 ). All the
+layer. The bottom of the structure is exposed, and etching can         systems are equipped with double-powered plasma sources.
+proceed there, leading to anisotropic features.                        One is a high-density source to create a high radical and ion
+   In a SF –O plasma with a cryogenically cooled silicon sub-          density. The other is a capacitively coupled plasma source
+strate, as was described above, the processes of formation of the      (CCP) to direct the ions from the plasma glow region toward
+passivation layer, its removal from the bottom of a trench, and        the wafer surface. This enables us to control independently the
+the etching of unpassivated silicon surface all occur simultane-       flux of radicals and ionic species of the SF plasma. The high
+ously and are in delicate balance when directional etching is es-      density source of Plasmalab 100 plus system uses a helicoil
+tablished. To complicate the matter even more, the optimal bal-        design and is power controlled, and the Plasma-Therm SLR770
+ance in conditions is different for different mask layouts. Con-       ICP Shuttlelock system is equipped with a true ICP (inductively
+DE BOER et al.: GUIDELINES FOR ETCHING SILICON MEMS STRUCTURES USING FLUORINE HIGH-DENSITY PLASMAS                                                      387
+
+
+
+
+                                                                             (a)
+
+
+
+
+                                                                             (b)
+Fig. 1. (a) Operating pressure as a function of gas flow, used to determine the maximum gas flow at a pressure of 10 mtorr for the Plasmalab 100 plus system
+and the Plasma-Therm SLR 770 ICP system at 1000 W ICP power and fully opened throttle valve. (b) Etch rate of silicon as a function of SF flow for the
+Plasma-Therm SLR770 ICP Shuttlelock system. Parameters settings: electrode temperature 25 C, exposed area 100% of 4-in Si-wafer, 0 W CCP power.
+
+coupled plasma source) design, which is current controlled                     of the dome material on the etch process the fused silica dome
+[15]. High-density plasma sources are generally constructed                    of the Prototech ICP source of the Plasmalab 100 system was
+either with a fused silica or an alumina dome. A disadvantage                  replaced with an alumina dome.
+of a fused silica dome is that the plasma etches the dome                         The optimization rules for tuning the equipment and guide-
+slightly, during which emission of oxygen takes place, that                    lines for profile control were carried out at the Plasma-Therm
+changes the plasma SF chemistry during anisotropic etching                     SLR770 ICP Shuttlelock of Unaxis USA, Inc., with an alu-
+of silicon. Alumina domes are chemically inert and are only                    mina dome. Furthermore the Plasmalab 100 plus system with
+etched by ion bombardment which may create black silicon                       fused silica dome was used to verify the results of Plasma-
+on the wafer by redeposition of sputtered alumina particles.                   Therm system by etching a number of MEMS structures (see
+This phenomenon is only observed in the Plasmalab 100 plus                     Section IV), which demonstrate the usefulness of the guidelines.
+system using a Prototech Helicoil high-density source. In this
+system we have observed a relatively high erosion rate of the                  A. Limits of the Equipment With Respect to the Maximum
+fused silica at the bottom of the dome (100 nm/min), for 10                    Etch Rate
+mtorr, 120 sccm SF and 600 W ICP power. This indicates that                       For optimal performance of the etching process it is necessary
+high electric fields are present in the dome, which increase                   to know the limits in the etch rates that can be achieved with a
+the flux and energy of ions that move toward the wall of the                   particular etching setup. These limits are in our case determined
+dome. Such a mechanism may also explain the sputtering of                      by the number of reactive species that can be generated by the
+alumina particles as mentioned above. To study the influence                   high-density plasma source and the efficiency of the vacuum
+388                                                                     JOURNAL OF MICROELECTROMECHANICAL SYSTEMS, VOL. 11, NO. 4, AUGUST 2002
+
+
+
+
+                                                                              (c)
+Fig. 1. (Continued.) (c) Etch rate of silicon as a function of ICP power for the Plasma-Therm SLR770 ICP Shuttlelock system. Parameters settings: electrode
+temperature 25 C, exposed area 100% of 4-in Si-wafer, 0 W CCP power.
+
+
+system. The efficiency of the vacuum system was studied by                         In which        and        are the SF flow and the ICP power,
+measuring the relation between pressure and SF gas flow [see                    respectively. To obtain optimal performance the next rules
+Fig. 1(a)]. This was realized by opening the throttle valve com-                should be noted: When the etch rate is independent of power,
+pletely. The pump rate of the vacuum system controls the now                    but a still higher etch rate is desired, this may be achieved by
+maximum gas flow at a certain process pressure. The SF gas                      setting a higher gas flow. However, it has to be kept in mind
+flow measured at 10 mtorr is defined as the maximum gas flow.                   that the maximum adjustable gas flow should preferably not
+This is because a demand of anisotropic etching of silicon is that              exceed the optimal process pressure of 10 mtorr.
+ions should pass the dark sheath nearly without collisions and                     For the Plasma-Therm SLR770 ICP Shuttlelock system, an
+bombard the silicon surface perpendicularly, i.e., with a small                 optimal performance is observed at a flow of 150 SCCM and
+Ion Angular Distribution (IAD). At 10 mtorr or lower pressures                  ICP power of 750W for a pressure of 10 mtorr, giving an etch
+the mean free path of the ions is larger than the thickness of the              rate of 1.25 m/min for an exposed area of 100% of a 4-in sil-
+dark sheath [16]. Process pressures above 10 mtorr will make                    icon wafer.
+the ion bombardment less directional (larger IAD), which ren-
+ders sidewall etching effects like bottling more pronounced [17].
+   To study the limits of silicon etching the maximum etch rate                 B. Survey of “Black Silicon” and Anisotropic Etching
+was determined as a function of SF flow for different ICP                       Conditions
+power settings, using the Plasma-Therm SLR770 ICP Shuttle-                         To find the settings for anisotropic etching of silicon for any
+lock system. The etch rate of silicon was measured at bare 4 inch               etching set-up we previously described an experimental proce-
+wafers by weight measurements on a Sartorius weighing scale                     dure that was named “Black Silicon Method” [10], [18], since it
+with an accuracy of 0.1 mg.                                                     is based on finding the conditions for which black silicon (BS)
+   In Fig. 1(b) it can be seen that for relatively low SF flow,                 forms on a bare silicon wafer, when e.g., at different electrode
+in particular for the higher ICP powers, the etch rate increases                temperatures oxygen is added to a defined SF etching recipe.
+linearly with the SF flow and does not depend so much on                        The amount of oxygen required to form black silicon is a func-
+the ICP power. This can also be seen in Fig. 1(c), where the                    tion of all parameter settings (see Table I), of the design of the
+curves as a function of ICP power approach a saturation value,                  system (e.g., the type of dome material) and the exposed area
+in particular for the lower SF flows. The slope of the dashed                   of silicon (the loading) on the substrate. The procedure uses
+line in Fig. 1(b) is approximately 0.0192 m min sccm .                          the fact that the parameter settings found for the formation of
+In case of low ICP power or high SF flow, the etch rate in-                     black silicon are close to those of anisotropic etching of silicon,
+creases linearly with power and is almost independent of the                    where directional etching with a low lateral etching rate of less
+SF flow. The slope of the dashed line in Fig. 1(c) is 0.0027                    than 100 nm/min occurs. This easy and generally applicable pro-
+   m min W . In general, the etch rate                 can be ex-               cedure can be applied to find the anisotropic process window
+pressed as a function of ICP power and SF flow using the em-                    for etching any kind of microstructure on any type of etching
+pirical expression [18]                                                         set-up, without the need to carry out an extensive amount of
+                                                                                experiments or complex calculations. Furthermore, the method
+                                                                        (1)     is useful as a calibration tool, e.g., after maintenance or repair
+DE BOER et al.: GUIDELINES FOR ETCHING SILICON MEMS STRUCTURES USING FLUORINE HIGH-DENSITY PLASMAS                                                389
+
+
+
+                                                               TABLE I
+RESULTS OF CENTERPOINT PROCESS FOR PLASMA-THERM SLR770 ICP SHUTTLELOCK SYSTEM WITH ALUMINA DOME. THE CENTER POINT PROCESS IS DEPICTED
+IN THE DARK SHADED COLUMN WITH THE DIRECTIONAL PROFILE. THE INFLUENCE OF A PARAMETER CHANGE ON THE PROFILE IS DEPICTED IN THE ROWS OF THE
+ TABLE. FOR INSTANCE, WHEN THE OXYGEN FLOW OF THE CENTER POINT PROCESS IS DECREASED TO 6 SCCM O THE PROFILE WILL SHOW A NEGATIVE TAPER
+
+
+
+
+Fig. 2. Black Silicon line measured for the OXFORD Plasmalab 100 system for a fused silica dome and an alumina dome. Parameter settings: 600 W ICP, 30
+sccm SF , 0 W CCP, 10 mtorr, exposed area 100% of 3-in Si-wafer.
+
+
+operations on the system or as a trouble-shooting tool to char-             totech Source, equipped with either an alumina or fused silica
+acterize improper functioning of the system.                                dome. In this paper the oxygen content is defined as the per-
+  Later, we will use the black silicon method (BSM) just                    centage of oxygen gas (in sccm) that is intentionally added to
+described, to evaluate the relevance of several parameters for              the SF gas flow into the etching chamber. For the BS line de-
+anisotropic etching of silicon, by locating the line at which BS            termined for etching in the presence of a fused silica dome a
+appears in a certain parameter setting frame.                               lower oxygen content was required than in the presence of an
+                                                                            alumina dome, which indicates that erosion of the fused silica
+C. Dome Material                                                            dome gives significant emission of oxygen, sufficient to seri-
+   We will start with an investigation of the influence of the ma-          ously influence the etching result, as was previously suggested
+terial of the dome present in the high-density plasma source.               by Bartha et al. [8]. This assumption was verified by etching
+In Fig. 2 in a graph of oxygen content versus electrode tem-                anisotropic profiles in silicon using a test mask with lines and
+perature the BS-line is shown for experiments on bare silicon               spacings ranging from 1 m to 128 m, that lead to the forma-
+substrates performed in a Plasmalab 100-plus system with Pro-               tion of deep trenches with a varying area of silicon exposed to
+390                                                                      JOURNAL OF MICROELECTROMECHANICAL SYSTEMS, VOL. 11, NO. 4, AUGUST 2002
+
+
+
+
+                                                                              (a)
+
+
+
+
+                                                                              (b)
+Fig. 3. (a) Silicon etch rate as a function of electrode temperature measured for a fused silica dome and an alumina dome for the OXFORD Plasmalab 100 system.
+Parameter settings: 600 W ICP, 10 mtorr, 0 W CCP, 0 sccm O , exposed area 100% of 3 inch Si-wafer. (b) Silicon etch rate as a function of CCP power and SF6
+                                                                                                                                        0
+gas flow for the OXFORD Plasmalab 100 system with fused silica dome. Parameter settings: 600 W ICP, 10 mtorr, electrode temperature 130 C, 0 sccm O ,
+exposed area 100% of 3-in Si-wafer.
+
+the etching medium. It was observed that, in agreement with the                 Under such conditions, the etching process becomes very sensi-
+results of Fig. 2, in the cryogenic temperature regime the oxygen               tive to the formation of black silicon, because the selectivity in
+content in the SF6 gas flow for the alumina dome had to be 10%                  etching between the silicon substrate and particles (originating
+higher than with the fused silica dome.                                         from the fused silica or the alumina dome) redeposited on its
+   Besides the anisotropy and therewith the trench profile, also                surface is increased.
+the etch rate of silicon is influenced by the dome material. In                    The etch rate of silicon at horizontal surfaces, i.e., at the top
+Fig. 3(a) the etch rate, determined from weight measurements                    surface of the wafer and on the bottom surface of trenches, with
+on bare 3-in low-boron-doped            -oriented silicon wafers is             the alumina dome present is independent of the electrode tem-
+depicted as a function of electrode temperature. Before each ex-                perature, which indicates that the etch rate is not controlled by
+periment, the substrate surface was cleaned from native oxide                   (spontaneous) thermally activated reactions, but by ion-assisted
+by immersing the wafer for 60 s in 1% HF-solution. The CCP                      reactions. Identical results have been observed by Tsujimoto
+setting was reduced to zero watts to minimize the ion energy.                   [19] and Francou [7]. According to Tsujimoto [19] the so-called
+DE BOER et al.: GUIDELINES FOR ETCHING SILICON MEMS STRUCTURES USING FLUORINE HIGH-DENSITY PLASMAS                                     391
+
+
+
+“reactive spot model” [20] should be used to explain the temper-        the BS line in Fig. 2. For higher SF flows the relative oxygen
+ature independence of the etch rate: At low temperatures, inci-         content decreases and lower temperatures are required to find
+dent F atoms adsorb on the Si surface but do not react with Si          BS. This is only valid when the ICP power is not altered and
+atoms without ion incidence because of the low “reaction prob-          the emission of oxygen is constant. For example, for a flow
+ability”, by which they obviously mean, in chemical terms, that         of 90 sccm SF the BS point was located at 120 C [see
+the rate of the thermally activated reaction is insignificantly low     Fig. 3(a)].
+at such low temperatures. Only through ion collisions a reaction           It is, therefore, concluded that to use the oxygen flow as con-
+between F atoms and Si atoms is initiated, probably through a           trol parameter for cryogenic DRIE it is necessary to avoid or at
+surface atom excitation process, the so-called “reactive spot”.         least restrict the presence of fused silica as dome material. For
+Therefore, the reaction rate at horizontal surfaces does not de-        example, when low SF gas flows or low CCP power settings are
+pend on electrode temperature. The plasma potential (of the             needed in order to increase the selectivity of etching of silicon
+order of 10 V) created by the ICP source now is responsible for         versus mask material, black silicon may occur due to oxygen
+the acceleration of ions, which gives them the kinetic energy to        from the dome. An alumina dome is indispensable to be able to
+allow the generation of reactive spots.                                 define etching recipes for a broad variety of microstructures in
+   We observed that the shiny surface of bare silicon wafers            the cryogenic temperature regime ( 90 C down to 140 C).
+was hardly changed during etching, when the electrode tem-              Recipes with relatively low oxygen content and ions with low
+perature was lowered to cryogenic temperatures. Only at cryo-           kinetic energy (low self-bias) can now be applied to observe a
+genic temperatures below 100 C the surface became milky,                low lateral etch rate beneath the mask, and a high selectivity
+which is thought to be caused by re-deposition of alumina par-          with respect to polymers and oxide mask materials.
+ticles. In the Plasma-Therm SLR770 ICP Shuttlelock no milky
+surfaces were observed, which indicates that alumina sputtering         D. Mask Material
+depends on the design of the high-density source chamber. With             In Fig. 4(a), two etch lines with the same anisotropy are
+the fused silica dome, at 60 C the etching rate of silicon at           depicted, for chromium and photoresist as mask materials.
+horizontal surfaces shows a strong reduction, the surface of the        The samples are etched in the Plasma-Therm SLR770 ICP
+blank wafers now becomes partly black. At even lower temper-
+                                                                        Shuttlelock system with an alumina dome. The etch line shows
+atures the wafer surface becomes gray and the etch rate drops to
+                                                                        anisotropic etching of the 2, 4, and 8 m trenches, without
+almost zero, indicating that the wafer is covered by some oxygen        black silicon. The fixed settings are: 750 W ICP, 7 mtorr
+containing blocking layer, e.g., SiO F , caused by the emission         process pressure, 100 sccm SF gas flow, 2 W CCP, and a
+of oxygen from the eroding fused silica dome [8]. Also at tem-          silicon load of 60% (on a 4-in substrate). In Fig. 4(a), it can be
+peratures above 60 C it is observed that the etch rate is re-           seen that at temperatures above 90 C for Olin907 resist a
+duced in presence of the fused silica dome, indicating the pres-        lower oxygen content is required than for the chromium mask,
+ence of an oxygen containing blocking layer.                            indicating that polymer species originating from the photoresist
+   To verify that the silicon substrate is covered with a SiO F         are deposited on the side-walls of the trenches and contribute to
+layer, the CCP power was increased, thereby increasing the en-          the blocking layer. This effect can be explained by the erosion
+ergy of the ions. For removal of the SiO F layer an energy              rate of photoresist, which increases above 90 C. An erosion
+threshold around 10–30 eV exists, which is in the same range            rate of 100 nm/min was measured at 0 C. In the temperature
+as that of SiO [9]. In Fig. 3(b) the etching rate measured at           regime lower than 90 C no difference is observed between
+  130 C for different CCP settings and gas flows for a fused            chromium and photoresist due to a very low erosion rate (2–10
+silica dome is shown. For CCP settings above 5 W the etching            nm/min) of photoresist.
+rate is independent of the CCP setting. Ion bombardment is                 Identical results have been observed by Tsujimoto et al. [19],
+now severe enough to remove the SiO F layer completely and              who compared the lateral etch rate under a photoresist mask
+therewith avoid black silicon. The dc-bias setting is ca. 15 V.         and a SiO mask. They concluded that the lateral etch rate is
+The actual ion energy is larger than expected on the basis of           decreased by the presence of photoresist, and that the lateral
+the dc-bias value alone, because ions are accelerated from the          etch rate was identical (i.e., low) for both mask materials at
+positive plasma potential region, which has a potential of ca.            120 C.
+  10 V. The same dc-bias values were observed with the alu-                In Fig. 4(b), 4 and 8 m trenches, for chromium and pho-
+mina dome ICP of the Plasma-Therm SLR770 ICP Shuttlelock                toresist as mask materials, at 120 C show identical profiles.
+system when oxygen was added to SF .                                    In Fig. 4(b) the chromium mask shows extreme bottling, while
+   Furthermore we observed that for higher SF flows the CCP             the photoresist mask shows a little bottling at a temperature of
+power required to remove the passivation layer on the bottom              80 C. To make the chromium profile identical to the photore-
+of the trench was lower, indicating that the composition and            sist profile, the relative oxygen content had to be increased by
+therewith the passivation quality of the SiO F layer is changed         4%.
+by oxygen in the plasma [9], [21] (i.e., oxygen emitted from the
+ICP dome). For a flow of 90 sccm SF the required CCP value
+was of the order of 2 W [see Fig. 3(b)].                                                  III. CENTERPOINT PROCESS
+   In Fig. 3(a) it can be seen that the strong reduction in etch rate      The relationship between the different parameters on profile
+(at the BS point) at 60 C can be altered to lower temperatures          control were studied by      cm boron doped 4 (100) oriented
+by increasing the SF gas flow, which is in agreement with               silicon wafers etching with a special chromium test mask with
+392                                                                      JOURNAL OF MICROELECTROMECHANICAL SYSTEMS, VOL. 11, NO. 4, AUGUST 2002
+
+
+
+
+                                                                              (a)
+
+
+
+
+                                                                              (b)
+Fig. 4. (a) Influences of Olin907-12 resist and chromium as mask materials on directional etching of silicon for the Plasma-Therm SLR770 ICP Shuttlelock
+system with alumina dome. The depicted curves are determined for 8 m trenches [see Fig. 4(b)]. Parameter settings: 750 W ICP, 7 mtorr, 100 sccm SF , 2 W
+CCP, exposed area 60% of 4-in Si-wafer. (b) Cross section of 8-m-etched trenches, showing profile shape as a function of mask material, oxygen percentage and
+electrode temperature for the Plasma-Therm SLR770 ICP Shuttlelock system with alumina dome [parameter settings, see Fig. 4(a)].
+
+
+trenches that were 1, 2, 4, 8, 16, 32, 64, or 128 m in width.                   the study of the influence of electrode temperature (which is
+Etching is performed in the Plasma-Therm SLR770 ICP Shut-                       practically the same as the wafer temperature), helium pressure
+tlelock system with an alumina dome. A “center point process”                   of He-backside cooling, SF flow, O flow, operating pressure,
+was defined as that process in which an anisotropic profile is                  ICP power, CCP power, etching time, and wafer clamping pres-
+obtained for the trench with a width of 8 m. The settings of                    sure, where in each experiment all parameters but one are fixed.
+the centerpoint process (CP) are: 750 W ICP, 7 mtorr process                    After each etching experiment the wafer was broken and a pic-
+pressure, 100 sccm SF gas flow, 130 C electrode tempera-                        ture was made of the profile of the cross section with an op-
+ture, 2 W CCP, and for all experiments a silicon load of 60%                    tical microscope. The result was compared with the center point
+was used. This center point process was used as a reference in                  process. The anisotropy can be characterized by the angle be-
+DE BOER et al.: GUIDELINES FOR ETCHING SILICON MEMS STRUCTURES USING FLUORINE HIGH-DENSITY PLASMAS                                         393
+
+
+
+tween trench sidewall and top surface, and the type and relative            In general, crystallographic orientation dependent etching
+rate of lateral undercut.                                                can occur only if the surface reaction rate plays a significant
+   In Table I the impact of parameter settings on the etch re-           role in the overall rate, as noticed by Blauw [22]. So it might be
+sult is depicted. The CP process is the dark gray column with            that the removal rate of atoms is dependent on the orientation
+a directional profile. The oxygen content is the most important          of the crystal surface, but masked by relatively slow transport
+parameter for the control of the shape of the profile. It deter-         of active species and etching products to and from the surface.
+mines mainly the passivation quality (either thickness or com-           The presence of a thin film makes this interpretation doubt full
+position [21]–[23]) of the SiO F layer on the sidewalls. For             because it would hinder any transport at the surface.
+zero oxygen content spontaneous (chemical) etching of silicon               It is now established that in wet etching the anisotropy of the
+was observed, which was expressed by isotropic profiles for all          rate is related to the fact that atoms are removed from edges
+trench dimens. For an oxygen content of 5%, bottling with a neg-         of steps on otherwise flat surfaces [27]–[31]. The removal rate
+ative taper was observed for all trenches. Bottling, i.e., a local       of an atom from a             terrace must be must then be slower
+increase in lateral etching, mostly observed directly underneath         than from a step edge. Additionally, the slowly etching orien-
+the mask, is caused by removal of a too thin blocking layer in           tation must be a facet below its roughening transition temper-
+those areas where increased impact of ions occurs due to disper-         ature [32]. So the etch rate might become anisotropic because
+sion in the directionality of the ion trajectories, the so-called Ion    of a change of the surface characteristics of the            faces: a
+Angular Distribution, IAD [17]. The negative taper of the side-          roughening transition, mediated by temperature, the surface ad-
+walls, which is caused by a lateral etching rate which increases         sorption of SiF or surface reconstruction. The presence of an
+with the depth of the trench, can be caused by a decreasing passi-       adsorbed thick film would rather decrease the roughening tran-
+vation quality of the layer with the depth of the trench (e.g., due      sition temperature, so this also seems an improbable option.
+to oxygen depletion), by an increased sidewall impact by ions,              We are left with the chemical mechanism which might have
+which can either be the result of ion deflection due to mirror           a change. The film certainly decreases the kinetic energy of the
+charges on the sidewall [24] or of ion back-scattering from the          impinging molecules, so the physical component of the etching
+trench bottom [25]. Our experiments do not lead to definitive            process might essentially be eliminated by the film. At high
+conclusions on which of the two mechanisms is responsible for            enough energy ion may penetrate the film still with enough ki-
+the negative taper. For an oxygen content of 9–10%, directional          netic energy to induce the chemical reaction at the surface. This
+etching was observed for the 8- m trenches, a positive taper for         picture points to an idea that the etching in RIE is independent of
+smaller dimensions and a negative taper for wider trenches. For          crystallographic orientation mainly due to the impact energy of
+a content of 12% of oxygen black silicon shows up and all the            the ions. Only in cases were the ion energy is sufficient low, the
+profiles have a positive taper, demonstrating that the blocking          impact is not able to create sides (possibly just dangling bonds,
+process is now dominating profile control.                               but also possibly kink sites on any             terraces) where the
+   When the SF flow is increased with all other parameters kept          chemical reaction readily can take place; i.e., crystal-oriented
+constant, the passivation quality of the layer becomes less. If          etching.
+the ICP power is increased, with all other parameters fixed, a              With respect to the negative to positive profile change, it was
+similar effect is observed. Both results indicate that due to an         observed that in order to achieve a directional profile at tempera-
+increased SF flow or ICP power, the Fluor-concentration is               tures below 130 C, a higher oxygen content is needed. It was
+enhanced. Therefore, the percentage oxygen is decreasing and,            speculated by Zijlstra that this is due to a higher fluoride content
+the passivation is lowered (see Table I).                                in the passivation layer, by which the passivation layer becomes
+   A remarkable result is observed for the experiments in                less resistant to ion impact, although in our view it can not be
+which the electrode temperature is varied. Compared to the               concluded whether this effect is caused by ion deflection or ion
+directional center point process, negatively tapered profiles            backscattering (see above). Furthermore, bottling may show up
+with crystallographic preference are observed (see Fig. 5) when          at higher temperatures due to the reasons discussed above. In
+the temperature is lowered, while for a higher temperature               order to find the optimal etching recipe, the temperature should
+positively tapered profiles appear. This demonstrates that under         preferably be fixed (e.g., at 110 C) and only be used to per-
+circumstances the etch rate is dependent on the crystallographic         form fine-tuning of the etched profile.
+orientation. The crystallographic preference of etching in                  The helium pressure controls the heat transfer between the
+deep trenches has been reported earlier [9], [18], [22], and is          wafer and the cryogenically cooled electrode, while the applied
+enhanced at higher process pressure or lower ion energies.               clamping pressure controls the sealing of the helium backside
+McFeely [26] observed that the silicon surface is covered by             chamber. A small negative taper is observed for high clamping
+many mono layers thick SiF films. He reports a tendency that             pressures, which can be explained by a better sealing of the he-
+at Si         more SiF species evolve compared to Si                 .   lium backside chamber, and is in accordance with the effects
+SiF is considered to be the essential intermediate etching               of the temperature discussed before. The heat transfer between
+species to form the SiF end product. McFeely concluded that              wafer and electrode is also enhanced by a higher He pressure,
+for etching of Si          via the SiF intermediate state a Si–Si        which also causes a small negatively tapered profile. Both pa-
+bond should be broken, with inherently a higher activation               rameters should be fixed and not used to optimize recipes.
+energy and thus a lower etching rate than on Si                . This       The CCP parameter controls the removal of the SiO F layer
+situation seems to be similar to etching silicon in wet etching          on the walls of the trench. For relatively high CCP values (i.e.,
+using HO- containing solutions.                                          higher ion energies) a negative profile with bottling is observed,
+394                                                                          JOURNAL OF MICROELECTROMECHANICAL SYSTEMS, VOL. 11, NO. 4, AUGUST 2002
+
+
+
+
+                                       (a)                                                                                   (b)
+
+
+
+
+                                       (c)                                                                                   (d)
+
+
+
+
+                                                                                  (e)
+
+
+                                                                            f g                          f g
+Fig. 5. Examples of crystallographically determined etching in 10 cm 100 -oriented wafers. (a) 111 planes at the bottom of a trench with aspect ratio 8,
+                                                                                                                              0
+etched with OXFORD Plasmalab 100 system equipped with fused silica dome. Parameter settings: electrode temperature 120 C, 600 W ICP, 10 mtorr, 2 W
+             0
+CCP (V = 15 V), 90 sccm SF , 2 sccm O , exposed area 10% of 3-in wafer. (b) Trench with square bottom, after etching of a circular hole with aspect ratio
+4 with OXFORD Plasmalab 100 system equipped with fused silica dome for a relatively high process pressure and low CCP settings. Parameter settings: electrode
+            0                                                    0
+temperature 120 C, 600 W ICP, 20 mtorr, 1 W CCP (V = 10 V), 90 sccm SF 2 sccm O , exposed area 10% of 3-in wafer. (c) Etch pit with 111 planes         f g
+after etching through circular mask openings, at relatively high pressure (30 mtorr) and zero or low CCP values. See Fig. 5(b) for other parameter settings. (d) Under
+                                                                                                   f g        f g                                       0
+etching at outside corners of freestanding structure (possibly due to differences in passivation of 111 and 100 planes) at cryogenic temperatures ( 130 C).
+                                                                                                                                                        0
+See Fig. 5(a) for other parameter settings. (e) Crystallographic planes of undetermined orientation after needle etching, which form at low temperatures ( 130 C)
+                              0
+and low CCP (2.5 W, V = 10 V); see Table III, recipe D for other parameter setting.
+DE BOER et al.: GUIDELINES FOR ETCHING SILICON MEMS STRUCTURES USING FLUORINE HIGH-DENSITY PLASMAS                                                         395
+
+
+
+
+                                                                               (a)
+
+
+
+
+                                                                               (b)
+Fig. 6. (a) and (b). Trend diagrams for optimization of etched silicon profiles. The diagrams are based on the parameter ranges mentioned in Table I for the
+Plasma-Therm SLR770 ICP Shuttlelock system with alumina dome. In (a), diagram I is used to find the black silicon line and therewith the anisotropic region; II
+is used to adjust the selectivity with respect to the mask; and III to adjust the etching rate. The diagrams in (b) are used to fine-tune the profile.
+
+                                                              TABLE II
+PARAMETER SETTINGS FOR HIGH RATE ETCHING OF SILICON FOR PLASMALAB 100 PLUS SYSTEM WITH FUSED SILICA DOME. RECIPE A: BLACK SILICON AT THE
+      BOTTOM OF THE WELL AT DEPTH 370 m. RECIPE C: VERTICAL WELLS ARE ETCHED IN A DUMMY WAFER (SCALE 1000 m). THE OPENING
+                                   WINDOW WIDTH IS 700 m AND THE WIDTH OF THE SIDEWALL IS 200 m
+
+
+
+
+and for relatively low values a positively tapered profile                          The pressure was discussed in the section on the limits of the
+is observed. This is in accordance with the observations                         equipment, and is found to introduce bottling at pressures above
+on the negative to positive profile change described above.                      10 mtorr.
+Black Silicon is found when the CCP is adjusted to too                              In conclusion, profile control is a delicate balance between
+low values.                                                                      etching and deposition of a SiO F layer. The passivation
+396                                                            JOURNAL OF MICROELECTROMECHANICAL SYSTEMS, VOL. 11, NO. 4, AUGUST 2002
+
+
+
+                                                            TABLE III
+ PARAMETER SETTINGS FOR NEEDLE ETCHING OF SILICON FOR OXFORD PLASMALAB 100 SYSTEM WITH FUSED SILICA DOME [SEE ALSO FIG. 7(a) AND (b)]
+
+
+
+
+blocking of SiO F is mainly determined by the oxygen
+content in the SF gas and the electrode temperature. Removal
+of the SiO F layer is mainly determined by the settings of the
+CCP, which adjusts the energy of the ions that bombard the
+etched surface.
+
+A. Diagrams for Profile Control
+   Based on the results of the CP process as explained above
+and in Table I, guidelines for profile control were determined
+and put into the trend diagrams shown in Fig. 6(a) and (b). The
+diagrams in Fig. 6(a) show the relations between different pa-
+rameter settings for trench profile control and the conditions
+were anisotropic etching of silicon occurs. This is determined
+by locating the line of conditions at which black silicon is ob-                                             (a)
+served for a special mask design with a specific loading. The di-
+agrams given in Fig. 6(b) can subsequently be used to optimize
+the profile of the etched structure. The ranges of the parameter
+settings mentioned in the diagrams are given in Table I. From
+the diagram oxygen-flow versus cryogenic-temperature and the
+diagram SF -flow versus cryogenic- temperature it can be con-
+cluded that for high oxygen concentrations the shape of the pro-
+file is not influenced by the cryogenic temperature. Another im-
+portant result is that the ratio between SF flow-and oxygen flow
+and the parameter ICP and CCP give identical trends for profile
+control.
+   As was indicated in Section II-A, the ICP power can be used
+to change the number of fluorine species in the plasma, provided
+that the SF flow is not at such a value that it limits the etching
+rate, and the other way around.
+                                                                                                             (b)
+   Crystal-oriented etching is only observed in the diagram CCP
+versus cryogenic temperature, using low cryogenic tempera-           Fig. 7. (a) Scanning electron micrograph (SEM) of etched needle using recipe
+                                                                     D (see Table III). After thermal oxidation and stripping of the oxide film a
+tures and CCP values.                                                smooth and sharp (curvature less than 500 nm) needle is obtained. Angle of
+                                                                     positive taper is ca. 105 . (b) Array of needles with a height of 50 m and a
+                                                                     distance between the needles of 5 m. The negative tapering at the edge of the
+                                                                     needle array is caused by incoming ions. Parameter settings: seeTable III, recipe
+                                                                     D.
+                       IV. APPLICATIONS
+
+   In this section, a couple of examples will be given to demon-     A. High-Rate Etching of Silicon
+strate the usefulness of the guidelines that were given in Sec-
+tion III. The OXFORD Plasma-lab 100-plus system with fused             In this section the fabrication of a matrix of 700 m wide
+silica dome will be used to demonstrate the usefulness of the        wells, separated by vertical silicon sidewalls are etched 500
+guidelines for certain illustrative applications.                     m deep into a silicon-on-insulator (SOI) wafer [33]. The
+DE BOER et al.: GUIDELINES FOR ETCHING SILICON MEMS STRUCTURES USING FLUORINE HIGH-DENSITY PLASMAS                                                                397
+
+
+
+
+Fig. 8. Profile angle of trenches as a function of mask opening for different oxygen % in SF for the OXFORD Plasmalab 100 system with fused silica dome. The
+angle is determined at a depth of 75 m in the trench. A value of zero at the y-axis corresponds to a perfect directional profile and a positive value to a positively
+                                                                                               0
+tapered profile. Parameter settings: 600 W ICP, 10 mtorr, 90 sccm SF , 7.5 W CCP (V = 42 V), mask material SiO .
+
+
+
+
+Fig. 9. Depth of etched trenches as a function of mask opening in m for the OXFORD Plasmalab 100 system with fused silica dome. Parameter settings: 600
+                                                      0
+W ICP, 10 mtorr, 90 sccm SF , 3.0 W CCP (V = 30 V), mask material SiO . Exposed area 5% of 3-in Si-wafer.
+
+
+consequence of the requirement for an etching process that                             Defining Recipe A: To find the parameter settings for the Plas-
+should lead to steep sidewalls which are as close as possible to                    malab 100-plus-system the procedure given in Section II was
+the normal to the substrate, and an as low as possible undercut,                    applied. First, the SF gas flow was set to 100 sccm and the
+is the risk of the formation of black silicon, which will retard                    ICP power to 600 W to achieve a high etch rate of 5 m/min.
+or even stop the etching. To avoid black silicon at the bottom of                   The pressure has been set to a value of 10 mtorr, resulting in a
+the trench, we decided to start with an semi-isotropic etching                      small IAD, which will make the ion bombardment directional
+process and etched completely through the wafer until the                           and will reduce side wall etching effects like bottling. The elec-
+oxygen layer was reached, without the formation of black                            trode temperature was fixed at 110 C., because for temper-
+silicon. Subsequently the recipe for through-the-wafer etching                      atures lower than 130 C gas condensation of SF will take
+was tuned in order to obtain a perfect anisotropic profile. This                    place and crystallographic oriented etching of silicon may com-
+was realized by increasing the oxygen content. This consists                        plicate profile control. The electrode temperature should only
+in fixing the parameters close to the ’black silicon region’                        be used for fine-tuning of the profile of the microstructure. The
+as depicted in Fig. 6(a). A secondary criterion that has to be                      parameters oxygen content and CCP power are used to tune the
+considered is the selectivity with respect to the oxide mask,                       profile and the mask selectivity. The O gas flow has been set to
+which is 1:750.                                                                     0 in order to prevent the formation of black silicon. The oxygen
+398                                                             JOURNAL OF MICROELECTROMECHANICAL SYSTEMS, VOL. 11, NO. 4, AUGUST 2002
+
+
+
+is now only a function of the emission of oxygen from the fused
+silica dome ICP, which is determined by the power settings of
+the ICP. The CCP power has been set to 2 W, creating a self-bias
+voltage of 16 V, to obtain a large etching selectivity (more than
+750) between silicon and SiO . With recipe A (Table II) we ob-
+served that the process stopped at a depth of 370 m due to
+the formation of black silicon. To avoid black silicon, the CCP
+parameter should be increased or the oxygen content of the gas
+mixture should be decreased. The CCP setting is no option here,
+because higher CCP settings create a higher erosion rate of the
+mask material and thereby reduce the required high selectivity.
+Because the flow of oxygen was already set to zero, the SF pa-
+rameter is now used to decrease the oxygen content of the gas
+mixture. By increasing the SF flow from 120 to 150, 175, and
+200 sccm, the etching depth reached respectively 400 m, 475                                                   (a)
+  m and ca. 500 m, the latter being through the wafer (i.e., until
+the embedded oxygen layer of the SOI substrate is reached). As
+a result of the relatively large gas flow of 200 sccm, the pressure
+in the wafer chamber increased to 14 mtorr and consequently the
+IAD was affected, which makes sidewall etching in the form of
+bottling more pronounced (recipe B).
+   To reduce the lateral etch rate, the oxygen flow was
+now increased up to 2 sccm (recipe C), which resulted in
+through-the-wafer etching with a directional profile. The
+final process showed an average etch rate of 5 m/min and a
+selectivity of more than 1000 for PECVD SiO as the mask
+material. The under etch is less than 10 m for an etch depth of
+500 m. The under etch is defined here as the maximum lateral
+deviation in the etch profile. The surfaces of the sidewalls are
+relatively smooth (average roughness less than 500 nm) and the
+profiles of the wells show a positive tapering. These results are                                             (b)
+depicted in Table II, recipe C.
+
+B. Fabrication of Micro Needles
+   For medical applications [2] small needles were fabricated
+with a height of 25 m and base length of 20 m, the distance
+between the needles was of the order of 200 m [see Fig. 7(a)].
+The needle was required to be mechanically robust and have
+positive taper (100 –105 ) with a smooth surface. The posi-
+tively tapered profile of the needle was achieved by optimization
+of the profile by etching and adjusting the selectivity between
+the photoresist and silicon. Photoresist dots with a diameter of 2
+micron and a thickness of 0.5 micron were hard baked at 150 C,
+thereby creating a positive taper by re-flow of the photoresist
+during etching. The selectivity between photoresist and silicon
+was adjusted at 100, which was done by controlling the oxygen                                                 (c)
+content and the CCP power. After etching, the needles were ox-
+                                                                       Fig. 10. (a) Etch result of recipe A (Table IV), showing a small undercut at
+idized to increase the sharpness and the surface smoothness of         convex corner. (b) Optimized honeycomb structure, showing positive taper for
+the needle. In Table III the process development is summarized,        all corners (recipe D Table IV). (c) Metal mould after electroplating of Ni and
+which resulted in a perfect result with the final recipe. To find      stripping of Si mould.
+the settings of the directional etching of silicon for a load of 95%
+on a 3-in wafer, we started with recipe A in Table III and varied      duced to decrease the energy of the ions (recipe D in Table III).
+the oxygen content. With 10 sccm oxygen a gray surface area            For all needles crystallographic preference during etching was
+was observed with strongly tapered micrograss with a height of         observed [see Fig. 5(e)], caused by the relatively low electrode
+a few microns. Decreasing the oxygen flow to 3 sccm, a neg-            temperature 130 C and low CCP setting.
+atively tapered profile was observed (recipe B in Table III), an          We observed that for arrays with a needle distance of 200
+oxygen flow of 7 sccm seems to be the right value for this ap-           m the height of the needles is limited to 50 m, for higher
+plication. To increase the base of the needle, the CCP was re-         needles the positively tapered profile changes to directional or
+DE BOER et al.: GUIDELINES FOR ETCHING SILICON MEMS STRUCTURES USING FLUORINE HIGH-DENSITY PLASMAS                                     399
+
+
+
+                                                           TABLE IV
+  PARAMETER SETTINGS FOR SILICON MOULD ETCHING FOR OXFORD PLASMALAB 100 SYSTEM WITH FUSED SILICA DOME [SEE ALSO FIG. 10(a) AND (b)]
+
+
+
+
+negatively tapered. The reason for this effect probably is ion        be clear from the discussion before that the range of different
+bowing. Ion bowing is caused by the diffraction of ions while         mask openings in a single mask design should be minimized
+entering a trench/needle or by the negative potential of trench       to ensure positively tapered etching over the complete range of
+walls (needle wall) with respect to the plasma glow resulting in      dimensions in the mask design. For recipes with high oxygen
+a deflection of these ions to the wall [17], [24], [34]. In a wider   content the smallest deviations in the angle of the profile are
+needle array, ions are deflected to the walls during their trajec-    observed (see Fig. 8).
+tory resulting in a parabolic curvature of the etched wall (i.e.,        Another limiting effect is the observed difference in etch
+negatively tapered). For a smaller distance between the needles       depth for different mask openings, called RIE-lag. The etch rate
+(less than 10 m) this phenomenon was only observed at the             decreases with increasing aspect ratio; large mask openings are
+edge of the array [see Fig. 7(b)].                                    etched deeper and faster than smaller mask openings [35] (see
+                                                                      Fig. 9). To eliminate the RIE-lag problem, silicon-on-metal
+C. Fabrication of Micromolds                                          (SOM) or SOI wafers can be used, where the buried metal
+                                                                      layer of the SOM substrate or the buried insulator of the SOI
+   Dry etching, electroplating, molding (DEEMO) is a fast and         wafer is used as a planarizing etch-stop. The advantage of the
+flexible production process for polymer microstructure products       use of a SOM substrate is that the buried metal layer can also
+based on a sequence of process steps, one of which is a DRIE          be used as the contact and seed layer for electroplating and
+step [1]. The high aspect ratios, directional freedom, low rough-     that the undercut (the so-called “notching”) near the etch stop
+ness, high etch rates and high selectivity with respect to the        layer is smaller in SOM wafers. Availability of SOM wafers
+mask material of DRIE allow a versatile fabrication process of        is a problem though, such substrates are to our knowledge not
+micro moulds for subsequent electroplating and embossing. The         commercially available.
+feasibility of the DEEMO process has been demonstrated for               Another limiting effect is that etching at cryogenic temper-
+feature sizes of several micrometers up to tens of micrometers        atures (below 120 C) with very low self-bias (i.e., low ion
+[see Fig. 10(c)]. The layout of the mould inserts are etched by       energy) may give the crystallographically determined etching in
+Cryo-DRIE into silicon, the etched structures are electroplated       silicon, which means that circular mould shapes become impos-
+creating a replica of the silicon mould, and this metal replica       sible. This is convincingly shown in Fig. 5(b). During etching
+is subsequently used for polymer embossing. In the following,         of a circular mask opening, the etched geometry has changed
+design-limiting aspects of silicon mould etching will be treated      completely into a square.
+by discussing examples of the DEEMO process. An important                Another example is shown in Fig. 10(a). The etched profile
+design-limiting aspect is the control over the lateral etch rate,     of the honeycomb structure tends to be more negative close to
+the tapering and the depth of the structures when the mask de-        the convex corners than elsewhere in the etched structure. In
+sign includes a large range of mask openings. The profile of the      this case, the local negative tapering means that demolding of
+mould should have a slightly positive taper and no undercut to        plastic parts from the metal mould will become impossible. In
+facilitate the release of the embossed microstructure. As can be      Table IV the development of the process is summarized, which
+seen from the profile optimization diagrams, recipes with a high      results in the desired result for 150 m high honeycomb struc-
+oxygen content and/or low CCP settings and/or a relative high         tures. First the settings to obtain directional etching are defined
+electrode temperature and/or relative low ICP power values are        (recipe A, Table IV) for the BSM method as described before.
+favored to etch profiles with a positive taper.                       The process pressure should be as low as possible and below 10
+   In Fig. 8, it is shown how the angle of the etched profiles        mtorr to reduce lateral etching and to facilitate the release of the
+changes with the dimension of the etched mask opening. It may         embossed microstructure. To create a positively tapered profile
+400                                                           JOURNAL OF MICROELECTROMECHANICAL SYSTEMS, VOL. 11, NO. 4, AUGUST 2002
+
+
+
+the temperature was increased to 90 C (recipe B, Table IV).                                        REFERENCES
+For etching times longer than 30 min the photo resist mask            [1] J. Elders and H. V. Jansen, “DEEMO: A new technology for the fabrica-
+(S1813) was etched away. To decrease the etch rate of photore-            tion of microstructures,” in Proc. IEEE Workshop Micro Electro Mech.
+sist, the ion density was lowered by decreasing the ICP power.            Syst., Amsterdam, The Netherlands, 1995, pp. 238–243.
+                                                                      [2] S. Henry, D. V. McAllister, M. G. Allen, and M. R. Prausnitz, “Micro-
+Also the concentration of fluorine and oxygen species are low-            machined needles for the transdermal delivery of drugs,” in Proc. IEEE
+ered by the new ICP setting thereby changing the profile to a             Workshop Micro Electro Mech. Syst., Heidelberg, Germany, 1998, pp.
+more negative taper. The required etch depth of 150 m could               464–498.
+                                                                      [3] F. Laermer and D. Schilp, “Method of anisotropically etching silicon,”
+now easily be achieved, but the etched profile of the honeycomb           U.S. Pat. 5 501 893.
+structure tended to be more positive close to the concave cor-        [4] [Online]. Available: http://www.stsystems.com
+ners than elsewhere in the etched structure. To reduce the dif-       [5] J. K. Bhardwaj and H. Ashraf, “Advanced silicon etching using high
+                                                                          density plasmas,” in Proc. SPIE-Micromachining Microfabrication
+ferences in etch profile the oxygen content was increased (recipe         Process Technology, vol. 2639, Austin, TX, 1995, pp. 224–233.
+D, Table IV), thereby increasing the passivation quality of the       [6] Tachi, K. Tsujimoto, and S. Okudaira, “Low temperature reactive ion
+SiO F layer [see Fig. 10(b)].                                             etching and microwave plasma etching of silicon,” Appl. Phys.Lett., vol.
+                                                                          52, pp. 616–618, 1988.
+                                                                      [7] M. Francou, J. S. Danel, and L. Pecoud, “Deep and fast plasma etching
+                                                                          for silicon micromachining,” Sens. Actuators, Phys. A, vol. 46–47, pp.
+                                                                          17–21, 1991.
+                       V. CONCLUSION                                  [8] J. W. Bartha, J. Greschner, M. Puech, and P. Maquin, “Low temperature
+                                                                          etching of Si in high density plasma using SF =O ,” Micro and Nano
+                                                                          Engineering, vol. 27, pp. 453–456, 1995.
+   Guidelines for the etching of a broad variety of MEMS struc-       [9] T. Zijlstra and E. van der Drift, “Fabrication of two-dimensional pho-
+tures for high-density plasmas equipment at cryogenic temper-             tonic crystal wave guides for 1.5 m in silicon by deep anisotropic dry
+atures were developed, using the black silicon method (BSM).              etching,” J. Vac. Sci Technol. B, vol. 17, pp. 2734–2739, 1999.
+                                                                     [10] H. V. Jansen, M. J. de Boer, R. Legtenberg, and M. C. Elwenspoek,
+It was demonstrated that profile control is a delicate balance            “The black silicon method: A universal method for determining the pa-
+between etching and deposition of an oxygen containing pas-               rameter setting of a fluorine based reactive ion etcher in deep silicon
+sivation layer, probably composed of SiO F . The passivation              trench etching with profile control,” J. Micromech. Microeng., vol. 5,
+                                                                          pp. 115–120, 1995.
+quality of SiO F is mainly determined by the oxygen content          [11] M. J. M. Vugts, “Reaction Layer Dynamics in Silicon Etching,” Ph.D.,
+in the gas and the electrode temperature. Removal of the SiO F            Physics Department, Eindhoven University of Technology, The Nether-
+layer is mainly determined by the energy and flux of ions which           lands.
+                                                                     [12] M. J. M. Vugts, L. J. F. Hermans, and H. C. W. Beijerinck, “Ion-assisted
+bombard the surface, which can be adjusted by choosing the                Si-XeF etching: Temperature dependence in the range 100–1000 K,”
+proper CCP settings. Parameter settings for high rate silicon             J. Vac. Sci. Technol. A, vol. 14, pp. 2820–2820, 1996.
+bulk etching, and the fabrication of microneedles and micro-         [13] , Unaxis USA, Inc., Petersburg, FL.
+                                                                     [14] [Online]. Available: http://www.oxford-instruments.com/
+moulds were given, which demonstrate the usefulness of trend         [15] J. T. C. Lee, N. Layadi, K. V. Guinn, H. L. Maynard, F. P. Klemens, D. E.
+diagrams for an optimal design of etched features. Also equip-            Ibbotson, and I. Tepermeister, “Comparison of advanced plasma sources
+ment limitations with respect to the maximum etch rate and                for etching applications,” J. Vac. Sci. Technol. B, vol. 14, pp. 2510–2518,
+                                                                          1996.
+anisotropic etching conditions were evaluated. It is concluded       [16] A. Manenschijn and W. J. Goedheer, “Angular ion and neutral energy
+that to make use of the oxygen flow as a control parameter for            distribution in a collisional rf sheath,” J. Appl. Phys., vol. 69, pp.
+cryogenic DRIE, it is necessary to avoid or restrict the presence         2923–2930, 1991.
+                                                                     [17] H. V. Jansen and M. J. de Boer, “High aspect ratio trench etching for
+of fused silica as the ICP dome material. For example, when low           MEMS applications,” in Proc. IEEE, The Ninth Ann. Int. Workshop
+SF gas flows or low CCP power settings are needed in order to             Micro Elec. Mech. Syst., San Diego, CA, 1996, pp. 250–257.
+increase the selectivity of etching of silicon versus mask mate-     [18] H. Jansen, M. de Boer, H. Wensink, B. Kloeck, and M. Elwenspoek, “A
+                                                                          study of the performance of etching silicon using SF =O -based chem-
+rial, black silicon may occur. An alumina dome allows etching             istry with cryogenically wafer cooling and a high density ICP source,”
+recipes for a broad variety of microstructures in the cryogenic           Microelectron. J., vol. 31, pp. 769–778, 2001.
+temperature regime (         C down to 140 C). Recipes with          [19] K. Tsujimoto, S. Okudaira, and S. Tachi, “Low temperature microwave
+relatively low oxygen content and ions with low energy (i.e.,             plasma etching of crystalline silicon,” Jpn. J. Appl. Phys., vol. 30, pp.
+                                                                          3319–3319, 1991.
+low self-bias) can now be applied to observe a low lateral etch      [20] U. Gerlach-meyer, J. W. Coburn, and E. Kay, “Ion-enhanced gas-sur-
+rate under a mask, and a high selectivity (above 500) with re-            face chemistry of the mass of the incident ion,” Surf. Sci., vol. 103, pp.
+spect to polymers and silicon oxide mask materials.                       177–177, 1981.
+                                                                     [21] G. S. Oehrlein, S. W. Robey, and J. L. Linström, “Surface processes
+   Preferential crystallographic etching of silicon was observed,         in CF =O reactive etching of silicon,” Appl. Phys. Lett, vol. 52, pp.
+and became more prominent when a low wafer temperature was                1170–1172, 1998.
+used, an effect that was enhance even more when the process          [22] M. A. Blauw, T. Zijlstra, R. A. Bakker, and E. van der Drift, “Kinetics
+                                                                          and crystal orientation dependence in high aspect ratio silicon dry
+pressure was increased above 10 mtorr or when lower ion ener-             etching,” J. Vac. Sci. Technol. B, vol. 18, pp. 3453–3461, 2000.
+gies (ca. 20 eV) were adjusted.                                      [23] G. Craciun, M. A. Blauw, E. van der Drift, and P. J. French, “Aspect ratio
+                                                                          and crystallographic orientation dependence in deep dry silicon etching
+                                                                          at cryogenic temperatures,” in Proc. The 11th Int. Conf. Solid-State Sen-
+                                                                          sors Actuators, Munich, Germany, June 10–14, 2001, pp. 612–615.
+                                                                     [24] J. C. Arnold and H. H. Sawin, “Charging of pattern features during
+                      ACKNOWLEDGMENT                                      plasma etching,” J. Appl. Phys., vol. 70, pp. 5314–5314, 1991.
+                                                                     [25] K. Tsutsui, E. L. Hu, and C. D. W. Wilkinson, “Controlling the profile
+   The authors would like to thank J. Viotty and J. Bijen, both           of nano structures,” J. Vac. Sci. Technol. B, vol. 11, p. 2233, 1993.
+                                                                     [26] F. R. McFeely, J. F. Morar, and F. J. Himpsel, “Soft X-ray photo-emis-
+of Alcatel Optronics Netherlands, and the staff of the MESA               sion study of the silicon-fluorine etching reaction,” Surface Sci., vol.
+clean room for assistance.                                                165, pp. 277–287, 1986.
+DE BOER et al.: GUIDELINES FOR ETCHING SILICON MEMS STRUCTURES USING FLUORINE HIGH-DENSITY PLASMAS                                                              401
+
+
+
+ [27] P. Allongue, V. Costa-Kieling, and H. Gerischer, “Etching of silicon in                                Edwin Smulders was born in 1966 in Tilburg,
+      NaOH solutions,” J. Electrochem. Soc., vol. 140, pp. 1009–1018, 1993.                                  The Netherlands. He received the M.Sc. degree in
+ [28] R. A. Wind and M. A. Hines, “Macroscopic etch anisotropies and micro-                                  experimental physics at Utrecht State University,
+      scopic reaction mechanisms: A micro machined structure for the rapid                                   The Netherlands, in 1991 and became fascinated by
+      assay of etchant anisotropy,” Surface Sci., vol. 460, pp. 21–38, 2000.                                 microsystems during a postgraduate course at the
+ [29] F. C. Frank, Growth and Perfection of Crystals, R. H. Doremus, B. W.                                   University of Twente, The Netherlands, in 1994.
+      Roberts, and D. Turnbull, Eds. New York: Wiley, 1958, p. 411.                                             After a number of years as a scientific worker
+ [30] M. Elwenspoek, “On the mechanism of anisotropic etching of silicon,”                                   at this university, he has continued his career in
+      J. Electrochem. Soc., vol. 140, p. 2075, 1993.                                                         commercial companies and currently works at JDS
+ [31] E. van Veenendaal, A. J. Nijdam, J. van Suchtelen, K. Sato, J. G. E.                                   Uniphase (Eindhoven, NL) on the manufacturing
+      Gardeniers, W. J. P. van Enckevort, and M. Elwenspoek, “Simulation of                                  automation of optical network components.
+      anisotropic wet chemical etching using a physical model,” Sens. Actua-
+      tors, vol. 84, pp. 324–329, 2000.
+ [32] E. van Veenendaal, “From an Atomistic to a continuum Description of
+                                                                                                           Melis-Jan Gilde was born in 1968 and received the
+      Crystal Growth,” Ph.D., University of Nijmegen, 2001.
+                                                                                                           degree in chemical process technology from Utrecht
+ [33] C. P. Allier, R. W. Hollander, C. W. E van Eijk, P. M. Sarro, M. de Boer,
+                                                                                                           Polytechnic, The Netherlands.
+      J. B. Czirr, J. P. Chaminade, and C. Fouassier, “Thin photodiodes for
+                                                                                                              From 1992 to 1998, he worked as Technical
+      a neutron scintillator-silicon well detector,” IEEE Trans. Nuclear Sci.,
+                                                                                                           Assistant for different research groups in the fields
+      vol. 48, pp. 1154–1157, 2001.
+                                                                                                           of inorganic materials science, integrated optics,
+ [34] M. Elwenspoek and H. Jansen, Silicon Micromachining. Cambridge,
+                                                                                                           and microsystem technology. These groups were
+      U.K.: Cambridge University Press, 1998.
+ [35] H. V. Jansen, M. J. de Boer, R. Wiegerink, N. Tas, E. Smulders, C.
+                                                                                                                                      +
+                                                                                                           all related to the MESA Research Institute of the
+                                                                                                           Twente University. In 1997, he joined Twente Micro
+      Neagu, and M. Elwenspoek, “RIE lag in high aspect ratio trench etching
+                                                                                                           Products, which in 2000, was acquired by Kymata,
+      of silicon,” Microelectron. Eng., vol. 35, pp. 45–50, 1997.
+                                                                                                           Ltd., of Scotland and in 2001 by Alcatel Optronics,
+                                                                                  where he is a Senior Process Engineer.
+
+
+                          Meint J. de Boer joined the Company SENTRON in          Gerard Roelofs was born in June 1959. He studied chemical technology at the
+                          1982 as a Process Engineer, where he worked in the      polytechnic in Enschede and graduated in 1985.
+                          field of pH-sensors and pressure sensors for medical       From 1985 to 1987, he worked at Philips Eindhoven as a Technical Assistant.
+                          applications. In 1988, he joined the University of      Since 1987, he has been employed at the University of Twente, first as a Tech-
+                          Groningen at the Department of Applied Physics.                                                    +
+                                                                                  nical Assistant, and since 1998, as MESA Clean Room Lab Coordinator. He
+                          He focused on nano-engineering for fundamental          is responsible for the technical part of the dry-etch equipment of MESA . +
+                          research on superconductivity. In 1992, he joined
+                          the Transducer Science Technology Group at
+                          the University of Twente, The Netherlands. His          Jay N. Sasserath received the B.S. degree in chemical engineering, Rensselaer
+                          current research interests include micromachining       Polytechnic Institute, Troy, NY, in May 1984 and the M.S. and Ph.D. degrees
+                          fabrication technology and dry-etching techniques.      in materials science, SUNY Stony Brook, Stony Brook, NY, in May 1987 and
+                                                                                  May 1990, respectively.
+                                                                                     He is a Principal with Market Quest Consulting, a marketing consulting firm
+                                                                                  that focuses on strategic and tactical marketing issues related to high-technology
+                                                                                  products. Prior to this, he was Vice President and Business Unit Director for Un-
+                         J. G. E. (“Han”) Gardeniers was born on October          axis’ MEMS and Compound Semiconductor Business Unit. Here, he had profit
+                         15, 1960, in Valkenburg aan de Geul, The Nether-         and loss responsibility for this Business Unit, which has operations in the United
+                         lands. He received the B.Sc. and M.Sc. degrees in        States and Europe. Previously, he held management positions in Marketing, En-
+                         chemistry and the Ph.D. degree in physics from the       gineering, Customer Service, and Process Applications at Materials Research
+                         University of Nijmegen, The Netherlands, in 1982,        Corporation. Prior to Materials Research Corporation, he worked in various
+                         1985, and 1990, respectively.                            semiconductor fabrication facilities as a process engineer at both Hypres, Inc.,
+                            In 1990, he joined the Department of Electrical En-   and Standard Microsystems Corporation.
+                         gineering at the University of Twente, The Nether-
+                         lands, as an Assistant Professor. After a short period
+                         as a Project Leader of MEMS at Kymata Netherlands
+                         B.V. (currently, Alcatel Optronics Netherlands), he                                 Miko Elwenspoek (M’94–A’95) was born on
+joined Micronit Microfluidics B.V. in September 2001, where he is responsible                                December 9, 1948 in Eutin, Germany. He received
+for R&D projects related to miniaturized chemical analysis and synthesis sys-                                the degree in physics from the Free University of
+tems.                                                                                                        Berlin (West), Germany. His Master thesis dealt with
+                                                                                                             Raleigh scattering from liquid glycerol using light
+                                                                                                             coming from a Mössbauer source. From 1977 to
+                                                                                                             1979, he worked with Prof. Helfrich on lipid double
+                                                                                                             layers. In 1979, he began his Ph.D. work with Prof.
+                           Henri V. Jansen received the M.Sc. and Ph.D. de-                                  Quitmann on the subject: relaxation measurements
+                           grees in electronic engineering from the University                               on liquid metals and alloys, in particular alkali metal
+                           of Twente, The Netherlands, in 1991 and 1996, re-                                 alloys. In 1983, he received the Ph.D. degree from
+                           spectively.                                            the Freie Universität Berlin.
+                              After working for half a year at CSEM, Neuchâtel,      In the same year, he moved to Nijmegen, The Netherlands, to study crystal
+                           Switzerland, as a Plasma Engineer, he rejoined         growth of organic crystals in the group of Prof. Bennema of the University of
+                           the Department of Electrical Engineering at the        Nijmegen. In 1987, he went to the University of Twente, to take charge of the
+                           University of Twente, The Netherlands, as a Post-      micromechanics group of the Sensors and Actuators lab, now called the MESA
+                           doctoral Fellow. In 2000, he joined IMEC in Leuven,    Research Institute. Since then, his research focused on microelectromechanical
+                           Belgium, to assist in the development of RF MEMS       systems, such as design and modeling of micropumps, resonant sensors, and
+                           to be used in cellular phones. Since September 2001,   electrostatic microactuators for microrobots. Fabrication techniques such as the
+he has been an Assistant Professor at the Department of Electrical Engineering    physical chemistry of wet chemical anisotropic etching, reactive ion etching,
+at the University of Twente, The Netherlands. His main research expertise         wafer bonding, chemical–mechanical polishing, and the materials science of
+is in silicon-based micromachining, in general, and plasma engineering, in        various thin films have his special attention. Since 1996, he has been a Full
+particular, with applications in the field of miniaturized sensor and actuator    Professor at the Transducer Technology group at the Faculty of Electrical engi-
+systems.                                                                          neering of the University of Twente.
+

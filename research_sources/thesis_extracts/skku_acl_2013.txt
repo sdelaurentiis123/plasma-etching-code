@@ -1,0 +1,528 @@
+Study on the etching characteristics of amorphous carbon layer in oxygen
+plasma with carbonyl sulfide
+Jong Kyu Kim, Sung Il Cho, Nam Gun Kim, Myung S. Jhon, Kyung Suk Min et al.
+Citation: J. Vac. Sci. Technol. A 31, 021301 (2013); doi: 10.1116/1.4780122
+View online: http://dx.doi.org/10.1116/1.4780122
+View Table of Contents: http://avspublications.org/resource/1/JVTAD6/v31/i2
+Published by the AVS: Science & Technology of Materials, Interfaces, and Processing
+
+Related Articles
+Wet etching silicon nanofins with (111)-oriented sidewalls
+J. Vac. Sci. Technol. B 31, 021801 (2013)
+Residue-free plasma etching of polyimide coatings for small pitch vias with improved step coverage
+J. Vac. Sci. Technol. B 31, 021201 (2013)
+Nanometer scale high-aspect-ratio trench etching at controllable angles using ballistic reactive ion etching
+J. Vac. Sci. Technol. B 31, 010604 (2013)
+Plasma-assisted cleaning by metastable-atom neutralization
+J. Vac. Sci. Technol. B 31, 011603 (2013)
+Fabrication of indium tin oxide bump/pit structures on GaN-based light emitting diodes
+J. Vac. Sci. Technol. B 31, 011804 (2013)
+
+Additional information on J. Vac. Sci. Technol. A
+Journal Homepage: http://avspublications.org/jvsta
+Journal Information: http://avspublications.org/jvsta/about/about_the_journal
+Top downloads: http://avspublications.org/jvsta/top_20_most_downloaded
+Information for Authors: http://avspublications.org/jvsta/authors/information_for_contributors
+
+Downloaded 12 Feb 2013 to 115.145.196.106. Redistribution subject to AVS license or copyright; see http://avspublications.org/jvsta/about/rights_and_permissions
+
+Study on the etching characteristics of amorphous carbon layer in oxygen
+plasma with carbonyl sulfide
+Jong Kyu Kim
+Memory Division Semiconductor Business, Samsung Electronics, San No. 16 Banwol-Ri, Taean-Eup,
+Hwasung-City, Gyeonggi-Do 449-711, South Korea and Department of Advanced Materials Science
+and Engineering, Sungkyunkwan University, Suwon, Gyeonggi-do 440-746, South Korea
+
+Sung Il Cho and Nam Gun Kim
+Memory Division Semiconductor Business, Samsung Electronics, San No. 16 Banwol-Ri, Taean-Eup,
+Hwasung-City, Gyeonggi-Do 449-711, South Korea
+
+Myung S. Jhon
+Department of Chemical Engineering and Data Storage Systems Center, Carnegie Mellon University,
+Pittsburgh, Pennsylvania 15213
+
+Kyung Suk Min, Chan Kyu Kim, and Geun Young Yeoma)
+Department of Advanced Materials Science and Engineering, Sungkyunkwan University, Suwon,
+Gyeonggi-do 440-746, South Korea
+
+(Received 27 August 2012; accepted 27 December 2012; published 28 January 2013)
+Carbonyl sulfide (COS) was added to oxygen as the additive etch gas for etching of amorphous
+carbon layers (ACL), and its effect on the etching characteristics of ACLs as the etch mask for high
+aspect ratio contact SiO2 etching was investigated. When a 50 nm amorphous carbon hole was
+etched in a gas mixture of O2 þ 5% COS, not only did the etch profile of the ACL change more
+anisotropically but also the top/bottom opening ratio of the etch profile was improved by about
+37% compared to those etched without COS. The improved ACL etch characteristics were related
+to the sidewall passivation of the amorphous carbon hole by the carbon sulfide related layer during
+the etching of the ACL. The distortion of the amorphous carbon hole was also reduced by about
+6% due to the uniform deposition of the carbon sulfide related layer on the sidewall of the
+amorphous carbon hole. This uniform deposition improved the etch profile and opening ratio of the
+amorphous carbon hole, ultimately resulting in the enhanced contact oxide etching characteristics
+as evidenced by 5% improvement in the contact oxide opening and 20% improvement in the mask
+C 2013 American
+etch selectivity during the etching of an oxide having 20:1 high aspect ratio. V
+Vacuum Society. [http://dx.doi.org/10.1116/1.4780122]
+I. INTRODUCTION
+With miniaturization of semiconductor devices and
+increasing pattern density of the very large scale integrated
+(VLSI) circuit, a single photoresist mask is no longer applicable for fine line patterning and contact patterning.1,2 Although
+the single photoresist mask process is considered as simple
+process in device manufacturing, it has low etch selectivity of
+oxide over the photoresist mask layer during contact oxide
+etching.3 Especially, as the wavelength of the light source for
+the lithography is changed from 365 nm I-line and 248 nm
+KrF to 193 nm ArF and 13.56 nm extreme ultraviolet
+(EUV),4,5 to increase the transmittance of the photoresist, the
+backbone structure of the photoresist material had to be
+changed from a hard aromatic structure to a soft aliphatic
+structure, which has lower light absorption,6,7 and this soft
+structure further decreases the etch selectivity of oxide over
+the photoresist.8 In addition, in the case of the aliphatic photoresist, the patterned photoresist is easily deformed during
+the extended exposure to plasma due to the its softness, creating problems such as wiggling and notching.9,10
+To overcome these problems, a multimask process, where
+thin, hard mask materials are patterned using a photoresist
+a)
+
+Electronic mail: gyyeom@skku.edu
+
+021301-1 J. Vac. Sci. Technol. A 31(2), Mar/Apr 2013
+
+(soft mask), followed by the etching of underlying materials
+using the patterned hardmask materials, has been investigated and commercially applied as an alternative to the single photomask process.11–15 Among the various hardmask
+materials, the ACL has been investigated widely due to its
+advantages such as a high etch selectivity over a photoresist,
+high optical transmittance, easy deposition, and removability
+by oxygen plasma, similar to that of a remaining photoresist,
+after etching.11,16–22 However, during the patterning of an
+ACL using oxygen plasma in a reactive ion etcher, oxygen
+radicals existing in the oxygen plasma tend to cause
+unwanted sidewall etching of the patterned ACL, which
+leads to a bow-like etch profile and increased top pattern
+opening.23
+To improve the etch profile of an ACL more anisotropically, etching using different gases such as N2, H2, etc., has
+been investigated.16,24,25 However, the uses of N2 and H2
+instead of oxygen as the main etchant have caused another
+problem such as low etch rates due to the low reactivities of
+the gases with the carbon in the ACL. The uses of N2, HBr,
+SO2, etc., as additive gases to oxygen to form a passivation
+layer on the sidewall of the ACL to protect the sidewall of
+the ACL from isotropic etching have shown problems such
+as nonuniform deposition of the passivation layer, excessive
+sidewall deposition, decreased etch rates, etc.17,22,23
+
+0734-2101/2013/31(2)/021301/7/$30.00
+
+C
+V
+
+2013 American Vacuum Society 021301-1
+
+Downloaded 12 Feb 2013 to 115.145.196.106. Redistribution subject to AVS license or copyright; see http://avspublications.org/jvsta/about/rights_and_permissions
+
+021301-2 Kim et al.: Study on the etching characteristics of ACL in oxygen plasma
+
+In this study, as a novel additive gas to oxygen, COS is
+introduced to form an effective sidewall passivation layer during the etching of an ACL without a significant change of
+ACL etch rate. The variations in the ACL hardmask etch profile and the etch mechanism, by the introduction of COS as
+the additive gas to oxygen plasma, have been studied, and the
+etch characteristics of HARC SiO2 due to the improved 50 nm
+size ACL contact hardmask have been also investigated.
+II. EXPERIMENT
+As the samples, SiO2 1.5 lm, ACL 0.5 lm, and 600 Å
+SiON were sequentially deposited on p-type silicon wafers
+and a 50 nm contact pattern was formed by photolithography
+(193 nm ArF, ASML Inc.). The SiON layer was used as the
+mask layer for the ACL etching, and the SiON layer was
+etched with a commercial 300 mm reactive ion etcher
+(FLEX 3X, LAM Research Inc.) (60 MHz 350 rf power,
+35 mTorr of CF4 (100 sccm)/CHF3 (20 sccm), O2 (8 sccm),
+and 300 K).
+For the etching of an ACL, the same reactive ion etcher
+was used at the process condition of 900 W 60 MHz rf
+power, 20 mTorr of O2/(0–15%) COS, and 300 K. COS was
+added to 200 sccm of O2 as the sidewall passivation gas. To
+compare with COS as the additive gas, HBr (0–15%) was
+also used instead of COS at the same process condition. HBr
+additive gas was investigated in addition to COS because it
+is conventionally used as the additive gas to oxygen plasma
+for the sidewall passivation during the ACL etching.
+After the etching of ACL with and without COS, 1.5 lm
+thick HARC SiO2 layer was etched using the patterned ACL
+as the mask layer to investigate the change of patterned ACL
+profile during the HARC SiO2 etching and to study the effect
+on SiO2 etching characteristics.
+To etch a HARC SiO2 layer using the patterned ACL as
+the mask layer, a different commercial 300 mm reactive ion
+etcher (VIGUS, TEL Inc.) was used at the process condition
+of 1500 W of 40.68 MHz source power, 7800 W of 3.2 MHz
+bias power, 15 mTorr of Ar (100 sccm)/C4F6 (100 sccm)/O2
+(100 sccm), and 300 K. SiO2 etch selectivity was measured
+by taking the ratio of SiO2 layer etch rate to the ACL etch
+rate. In addition, the opening of the top SiO2 contact profile
+
+021301-2
+
+was measured by taking the ratio of bottom hole size to the
+top hole size.
+Optical emission spectroscopy (OES) and Vdc (self-dc
+bias voltage on the substrate) monitoring were used to monitor the plasma change due to the addition of the additive gas
+to O2 during the etching of ACL. The change of ACL surface during the O2/COS etching was investigated by x-ray
+photoelectron spectroscopy (XPS) and atomic force microscopy (AFM). The hole profiles and top hole shapes of the
+patterned ACL were observed by scanning electron microscopy (SEM).
+III. RESULTS AND DISCUSSION
+Figure 1 shows the SEM pictures of (a) the hole profile
+and (b) the top hole shape of the ACL etched using O2 only
+without any additive gas. The process condition was 900 W
+60 MHz rf power, 20 mTorr of O2 (200 sccm), and 300 K.
+When ACL was etched using O2 only, a tapered amorphous
+carbon hole etch profile having a wide top hole size and a
+narrow bottom hole size was obtained. Also, near the top
+hole area, a bow-like amorphous carbon hole profile was
+also observed. During the reactive ion etching, due to the
+sheath potential formed near the substrate, oxygen ions were
+attracted vertically to the wafer surface, and they etched the
+ACL anisotropically. However, the oxygen radicals in the
+oxygen plasma and the oxygen ions scattered by the SiON
+mask tended to enhance the sidewall etching near the top
+contact area, resulting in a bow-like and tapered amorphous
+carbon hole etch profile through the isotropic etching of the
+ACL, which decreases with increasing etch depth. And, as
+shown in Fig. 1(b), as the etch time is increased to (b) 50%
+overetching and (c) 100% overetching, where the overetching percentage was defined as total etching time/just etching
+time of 0.5 lm thick ACL) x 100%, the holes are finally
+merged by excessive opening of the hole top side. As the
+etch depth and the aspect ratio of the amorphous carbon hole
+increased, the tapering and bowing, observed in Fig. 1(a),
+became more serious, and, as shown in Fig. 1(b), the etching
+amount increased with increasing etching time. Then, the
+holes finally merged by the excessive opening of the hole
+top side.
+
+FIG. 1. SEM pictures of the hole profile (a) and the top–down view of the hole shape of the ACL etched using pure O2 for 50% overetching (b) and 100% overetching (c). The process condition was 900 W 60 MHz rf power, 20 mTorr of O2 (200 sccm), and 300 K of process temperature. The thickness of ACL was
+0.5 lm.
+J. Vac. Sci. Technol. A, Vol. 31, No. 2, Mar/Apr 2013
+
+Downloaded 12 Feb 2013 to 115.145.196.106. Redistribution subject to AVS license or copyright; see http://avspublications.org/jvsta/about/rights_and_permissions
+
+021301-3 Kim et al.: Study on the etching characteristics of ACL in oxygen plasma
+
+021301-3
+
+FIG. 2. (a) Variation of the amorphous carbon hole bottom size and (b) the distortion of amorphous carbon hole bottom during etching using oxygen plasma
+for the condition in Fig. 1.
+
+In addition, the contact bottom area was not uniformly
+etched when the ACL was etched using O2 plasma only.
+Figure 2 shows (a) the variation of the amorphous carbon
+hole bottom open size and (b) the distortion of amorphous
+carbon hole bottom during the etching using O2 plasma with
+the etching condition shown in Fig. 1. The SiON mask pattern shape was not transferred exactly to the hole bottom
+area, and the hole bottom size was varied.
+To improve the tapered etching and pattern distortion and
+to decrease the bow-like etching near the top side of the
+amorphous carbon hole, COS was added to the oxygen as an
+additive gas. Figure 3 shows the differences of the OES signals measured with and without COS (10 sccm) added to the
+O2 plasma while generating plasma for the condition shown
+in Fig. 1. As shown in the figure, when COS was added to
+the O2 plasma, a broadband molecular peak ranging from
+290 to 540 nm caused by sulfur transition in COS was
+
+FIG. 3. Differences of the OES signals measured for O2 plasma with and
+without COS (10 sccm) in the condition shown in Fig. 1.
+
+observed and the increase of optical emission signals at
+257 nm, which is related to carbon sulfide, was observed
+with decreases of the oxygen atomic peaks (777 nm, 844 nm,
+etc.) and CO peaks (483, 519, 561, 662 nm, etc.) The
+decreases of the OES peaks related to the oxygen atom is
+related to the decreased partial pressure of the oxygen molecule in the plasma; however, the decreases of the CO related
+OES peaks appear to be related to the decrease of the ACL
+etch rate with the addition of COS in oxygen plasma at the
+total constant pressure of 20 mTorr.
+The variation of the ACL etch rate with addition of COS
+in oxygen plasma was measured, and the result is shown in
+Fig. 4. As comparison, the variation of the ACL etch rate
+with the addition of HBr, which is conventionally used as
+the additive gas to oxygen plasma for sidewall passivation
+during ACL etching, was included. The process conditions
+were the same as those in Fig. 1 except for the added gas. As
+shown in the figure, the addition of COS to O2 plasma
+decreased the etch rate of ACL as suggested in Fig. 3
+because of the decrease of the CO related OES peak. However, the decreased etch rate was smaller than that with HBr
+addition for 15% additive gas, the decrease of the ACL etch
+rate with HBr addition was 26% while that with COS addition was 8%. Therefore, the addition of COS would be more
+beneficial in ACL etching if there is sufficient passivation
+during the ACL etching.
+The changes of dc-bias voltage measured on the substrate
+electrode with increases of the additive gases are also shown
+in Fig. 4 for the same process condition. The energy of the
+oxygen ions bombarding the surface is related to the dc-bias
+voltage measured at the substrate electrode. As shown, the
+dc-bias voltage was slightly decreased with the increases of
+additive gases from about 210 V to about 190 V for COS
+and to about 194 V for HBr, respectively, possibly due to
+the increased ionization of additive gases in the plasma.
+Therefore, the addition of COS to the O2 plasma up to 15%
+
+JVST A - Vacuum, Surfaces, and Films
+
+Downloaded 12 Feb 2013 to 115.145.196.106. Redistribution subject to AVS license or copyright; see http://avspublications.org/jvsta/about/rights_and_permissions
+
+021301-4 Kim et al.: Study on the etching characteristics of ACL in oxygen plasma
+
+FIG. 4. Variations of (a) the ACL etch rates and (b) DC-bias voltage with
+addition of COS or HBr in the O2 plasma. The process conditions were the
+same as those in Fig. 1 except for the addition/nonaddition of the additive
+gases HBr/COS, respectively.
+
+did not significantly change the ACL etch rate and oxygen
+ion bombardment energy while the addition of HBr up to
+15% changed the ACL etch rate significantly.
+The surfaces of the ACL during etching in O2 plasma
+with and without COS (10 sccm) were investigated, respectively, by XPS. The peaks related to C1s, O1s, and S2p before
+etching, without COS and with COS are shown, respectively.
+The other etching conditions are the same as those in Fig. 1.
+As shown in Fig. 5, when the ACL was etched using pure O2
+plasma, the surface of ACL was covered with oxygen, which
+caused the isotropic etching of ACL during the etching.
+However, with the addition of COS to the oxygen plasma,
+
+021301-4
+
+the ACL surface became less covered by oxygen but significantly more covered by the sulfur atoms. The sulfur coverage on the ACL surface during the etching possibly by the
+formation of a carbon sulfide related layer on the ACL surface may suppress the ACL etching, acting as a passivation
+layer, especially for the sidewall of the amorphous carbon
+hole, which is etched isotropically by oxygen radicals and
+scattered oxygen ions.
+The surface roughness of the ACL etched in the oxygen
+plasma with COS (10 sccm) as the additive gas was measured by AFM. Figure 6 shows the AFM images of the ACL
+surfaces (a) before etching, (b) after etching with HBr as the
+additive gas, and (c) after etching with COS as the additive
+gas. Because HBr is conventionally used as a passivation gas
+that is added to oxygen plasma during amorphous carbon
+patterning and causes more severe distortion of the ACL pattern, the AFM image of the ACL surface roughness after the
+etching with HBr as the additive gas was also compared with
+that of the ACL surface etched with COS as the additive gas.
+The process conditions were the same as those in Fig. 5. As
+shown in the figure, after the etching with HBr, the ACL surface became a little rougher compared to that before etching.
+However, the ACL surface became smoother with 5  8%
+improved, lower roughness by etching with COS than those
+before and after etching with HBr, respectively. The change
+of surface roughness after etching may be partially related to
+the uniformity of the passivation layer (or residue layer)
+formed on the etched ACL surface. Therefore, the higher
+surface roughness observed for the etching with HBr may
+indicate a nonuniform passivation layer on the ACL surface
+while the improved, lower surface roughness for the etching
+with COS may be related to a uniform formation of a carbon
+sulfide related layer on the etched ACL. If a uniform carbon
+sulfide related layer is formed on the sidewall of the amorphous carbon hole during etching with COS, it is believed
+that the distortion of an amorphous carbon hole can also be
+improved, thereby improving the distortion of a HARC SiO2
+contact hole.
+Figure 7 shows the SEM images of (a) top-down hole
+shapes and (b) hole etch profiles for 50 nm amorphous carbon
+holes etched with 5% COS addition. The process conditions
+
+FIG. 5. (Color online) XPS narrow scan peaks of C1s, O1s, and S2p of the ACL surface etched in the oxygen plasma with and without COS (10 sccm). The etching conditions are the same as those in Fig. 1 except for the addition/nonaddition of the additive gases HBr/COS, respectively.
+J. Vac. Sci. Technol. A, Vol. 31, No. 2, Mar/Apr 2013
+
+Downloaded 12 Feb 2013 to 115.145.196.106. Redistribution subject to AVS license or copyright; see http://avspublications.org/jvsta/about/rights_and_permissions
+
+021301-5 Kim et al.: Study on the etching characteristics of ACL in oxygen plasma
+
+021301-5
+
+FIG. 8. Etch mechanism of amorphous carbon holes masked by SiON for
+etching in oxygen plasma with and without COS.
+
+FIG. 6. (Color online) AFM images of ACL surfaces (a) before etching, (b)
+after ACL etching with HBr, and (c) after ACL etching with COS. The process conditions are the same as those in Fig. 5.
+
+are the same as those in Fig. 5. The SEM images for amorphous carbon hole etched with COS addition in Fig. 7, when
+compared with those without COS shown in Fig. 1, show that
+the size of the bow-like etch profile was decreased by about
+
+10% possibly due to the decrease of isotropic sidewall etching of the amorphous carbon hole and, also, that the hole bottom size was also increased about 20%, resulting in 37%
+improvement of the overall etch profile ratio (the ratio of top
+hole size/bottom hole size). The amorphous carbon hole distortion caused by a nonuniform sidewall passivation layer
+deposition was also improved by about 6% after the addition
+of 5% COS because of the improved ellipticity, which is
+100% for a circular shape, from 85% to 91% by the addition
+of 5% COS to the oxygen plasma (not shown).
+The etch mechanism of amorphous carbon holes masked
+by SiON was investigated based on the ACL etching results
+obtained above for oxygen-plasma etching with and without
+COS, and the cartoonized result is shown in Fig. 8. The
+oxygen-plasma etching with COS passivated the sidewall of
+the amorphous carbon hole (as suggested in Fig. 5). When
+the COS in the plasma dissociated the carbon sulfide (as
+shown in Fig. 3), decreasing the bow-like isotropic etching
+near the top amorphous carbon contact area. Also, due to the
+decreased sidewall etching of the top hole area by the passivation, the remaining oxygen radicals as well as the energetic oxygen ions can diffuse further down to the contact
+hole bottom and assist in the etching of the amorphous carbon hole at the bottom area to increase the opening of the
+hole bottom area. The uniform formation of the carbon sulfide related layer on the sidewall of the amorphous carbon
+hole (as suggested in Fig. 6) may have also improved the
+amorphous carbon hole distortion.
+
+FIG. 7. SEM images of (a) top–down hole shapes and (b) hole etch profiles of 50 nm amorphous carbon hole etched in oxygen plasma with 5% COS. The process conditions are the same as those in Fig. 5.
+JVST A - Vacuum, Surfaces, and Films
+
+Downloaded 12 Feb 2013 to 115.145.196.106. Redistribution subject to AVS license or copyright; see http://avspublications.org/jvsta/about/rights_and_permissions
+
+021301-6 Kim et al.: Study on the etching characteristics of ACL in oxygen plasma
+
+FIG. 9. (Color online) Top portions of the amorphous carbon mask before
+and after the 1.5 lm thick HARC SiO2 etching for the 50 nm amorphous carbon hole patterns formed with and without COS.
+
+The amorphous carbon hole patterns formed using the O2
+plasmas with and without COS were used as etch masks in
+the etching of 50 nm HARC SiO2. The HARC SiO2 was
+etched using a different reactive ion etcher with the etching
+condition used in the experimental etching. The top portions
+of the amorphous carbon mask before and after the 1.5 lm
+thick HARC SiO2 etching are shown in Fig. 9 for the 50 nm
+amorphous carbon hole patterns formed with and without
+COS. When HARC SiO2 was etched, the amorphous carbon
+mask with a narrow bottle-neck like profile due to the bowlike and tapered sidewall etching (Pictures in Fig. 9 left top
+or Fig. 1 left) was etched faster than the mask with the
+improved profile formed after COS addition (Pictures in Fig.
+9 left bottom or Fig. 7 bottom) because of the enhanced
+mask layer removal by the physical bombardment at slant
+angles. After the etching of 1.5 lm thick HARC SiO2, the
+remaining amorphous carbon layer was thicker for the amorphous carbon mask formed with COS, and this thick layer
+improved the SiO2 etch selectivity (the ratio of etching rate
+of mask layer/etching rate of SiO2 layer) by about 20% from
+that achieved by the remaining amorphous carbon layer for
+the amorphous carbon mask layer without COS. In addition,
+the opening ratio of the SiO2 contact profile (the ratio of top
+hole size/bottom hole size) was improved by about 5% due
+to the improved amorphous carbon bottom opening with
+COS addition.
+IV. CONCLUSION
+To improve the etching characteristics of ACL used as
+the etch mask for HARC SiO2 etching, COS, a new additive
+gas, was added to O2 plasma, and its effect on the etch characteristics of amorphous carbon hole was investigated.
+When the ACL covered with a 50 nm SiON mask was etched
+using oxygen plasmas without COS in a reactive ion etcher,
+a bow-like etch profile and a tapered etch profile of the
+amorphous carbon hole were obtained. Also, the distortion
+of the amorphous carbon hole shapes were observed. However, when 5% COS was added to the O2 plasma, even
+though the etch rates of ACL were decreased slightly by
+about 8%, the amorphous carbon etch profiles showed
+improvement; that is, with 5% COS addition, about 10%
+decrease in the sidewall bowing width, about 20% increase
+in the bottom hole opening, and therefore, 37% improvement
+
+021301-6
+
+of the overall etch profile ratio (the ratio of top hole size/bottom hole size) could be obtained due to the deposition of a
+carbon sulfide related passivation layer on the sidewall of
+the etched amorphous carbon hole. The distortion of the
+amorphous carbon hole was also improved about 6% possibly due to the uniform deposition of the carbon sulfide
+related layer on the sidewall of the amorphous carbon
+hole. When HARC SiO2 was etched using the amorphous
+carbon mask formed in the O2 plasma with COS, due to the
+improved amorphous carbon mask profile, about 20%
+improvement of SiO2 etch selectivity over the mask layer, as
+well as improved opening of the top SiO2 contact profile
+could be observed, compared to that etched using the amorphous carbon mask formed in pure oxygen plasma. The etch
+characteristics of ACL using the oxygen plasma with COS
+were better than those etched using the oxygen plasma with
+HBr, which has been conventionally used as the additive gas
+for sidewall passivation in amorphous carbon hole etching.
+Therefore, it is believed that COS can be used widely as an
+additive gas for the patterning of the amorphous carbon
+mask, which can be applied in the etching of high aspect ratio and high density patterns in areas such as next generation,
+deep submicron device processing.
+ACKNOWLEDGMENTS
+This work was supported by the National Research Foundation of Korea Grant funded by the Korean Government
+(MEST) (NRF-2010-M1AWA001-2010-0026248) and was
+supported in part by the World Class University program of
+National Research Foundation of Korea (Grant No. R3210124) and was financially supported by the Ministry of
+Knowledge Economy (MKE) and Korea Institute for
+Advancement of Technology (KIAT) through the Workforce
+Development Program in Strategic Technology.
+1
+
+H. Namatsu, K. Yamazaki, and K. Kurihara, Microelectron. Eng. 46, 129
+(1999).
+2
+J. P. Simons, D. L. Goldfarb, M. Angelopoulos, S. Messick, W. M. Moreau, C. Robinson, J. J. de Pablo, and P. F. Nealey, Proc. SPIE 4345, 19
+(2001).
+3
+M. Kakuchi, M. Hikita, and T. Tamamura, Appl. Phys. Lett. 48, 835 (1986).
+4
+Y. Yang et al., J. Photopolym. Sci. Technol. 23, 259 (2010).
+5
+Y. R. Park, B. S. Kwon, C. Y. Jung, W. Heo, N. E. Lee, and J. W. Shon,
+Thin Solid Films 519, 6755 (2011).
+6
+O. Nalamasu et al., J. Vac. Sci. Technol. B 16, 3716 (1998).
+7
+T. Hattori, Y. Yokoyama, K. Kimura, R. Yamanaka, T. Tanaka, and H.
+Fukuda, J. Photopolym. Sci. Technol. 16, 489 (2003).
+8
+K. N. Kim and J. D. Choi, Non-Volatile Semiconductor Memory Workshop
+IEEE NVSMW (2006), p. 9.
+9
+J. Kim, Y. S. Chae, W. S. Lee, J. W. Shon, C. J. Kang, W. S. Han, and
+J. T. Moon, J. Vac. Sci. Technol. B 21, 790 (2003).
+10
+Y. S. Chae, H. W. Choi, J. W. Sun, J. Hong, C. H. Shin, G. J. Min, C. J.
+Kang, H. K. Cho, and J. T. Moon, Proc. Int. Symp. Dry Process 4, 13
+(2004).
+11
+K. Romero et al., IEEE Trans. Semicond. Manufac. 18, 539 (2005).
+12
+H. T. Kim, B. S. Kwon, N. E. Lee, Y. S. Park, H. J. Cho, and B. Hong,
+J. Vac. Sci. Technol. A 26, 861 (2008).
+13
+Y. S. Park, H. S. Myung, J. G. Han, and B. Y. Hong, Surf. Coat. Technol.
+180–181, 218 (2004).
+14
+S. J. Choi, J. Vac. Sci. Technol. B 25, 868 (2007).
+15
+C. L. Lu, L. Y. Hsia, T. H. Cheng, S. C. Chang, W. C. Wang, H. J. Lee
+and Y. C. Ku, Proc. SPIE 6607, 66070E (2007).
+16
+K. A. Pears, Microelectron. Eng. 77, 255 (2005).
+
+J. Vac. Sci. Technol. A, Vol. 31, No. 2, Mar/Apr 2013
+
+Downloaded 12 Feb 2013 to 115.145.196.106. Redistribution subject to AVS license or copyright; see http://avspublications.org/jvsta/about/rights_and_permissions
+
+021301-7 Kim et al.: Study on the etching characteristics of ACL in oxygen plasma
+17
+
+K. A. Pears, M. Stavrev, A. Scire, R. Koepe, M. Markert, U. Egger, and L.
+Donohue, Microelectron. Eng. 81, 156 (2005).
+18
+A. C. Ferrari and J. Robertson, Phys. Rev. B 61, 14095 (2000).
+19
+Y. S. Park, H. S. Myung, J. G. Han, and B. Y. Hong, Thin Solid Films
+482, 275 (2005).
+20
+B. S. Kwon, J. S. Kim, N. E. Lee, and J. W. Shon, J. Electrochem. Soc.
+157, D135 (2010).
+
+21
+
+021301-7
+
+B. S. Kwon, J. S. Kim, H. K. Moon, and N. E. Lee, Thin Solid Films 518,
+6451 (2010).
+K. A. Pears and J. Stolze, Microelectron. Eng. 81, 7 (2005).
+23
+M. Pons, J. Pelletier, and O. Joubert, J. Appl. Phys. 75, 4709 (1994).
+24
+A. S. Kovalev et al., J. Appl. Phys. 111, 093304 (2012).
+25
+H. J. Lee, B. S. Kwon, Y. R. Park, J. S. Kim, J. H. Ahn, J. W. Shon, and
+N. E. Lee, Jpn. J. Appl. Phys. 48, 8HD05 (2009).
+22
+
+JVST A - Vacuum, Surfaces, and Films
+
+Downloaded 12 Feb 2013 to 115.145.196.106. Redistribution subject to AVS license or copyright; see http://avspublications.org/jvsta/about/rights_and_permissions
+
+

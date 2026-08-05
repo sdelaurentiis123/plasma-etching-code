@@ -1,0 +1,535 @@
+Article
+
+Controlling Bowing and Narrowing in SiO2 Contact-Hole Etch
+Profiles Using Heptafluoropropyl Methyl Ether as an Etchant
+with Low Global Warming Potential
+Sanghyun You 1, Hyun Seok Yang 1, Dongjun Jeon 1, Heeyeop Chae 2,* and Chang-Koo Kim 1,*
+Department of Chemical Engineering and Department of Energy Systems Research, Ajou University,
+Suwon 16499, Republic of Korea; you15717@ajou.ac.kr (S.Y.); abe1547@ajou.ac.kr (H.S.Y.);
+dkdiaz220@ajou.ac.kr (D.J.)
+2 SKKU Advanced Institute of Nanotechnology (SAINT) and School of Chemical Engineering,
+Sungkyunkwan University (SKKU), Suwon 16419, Republic of Korea
+* Correspondence: hchae@skku.edu (H.C.); changkoo@ajou.ac.kr (C.-K.K.);
+Tel.: +82-31-290-7342 (H.C.); +82-31-219-2389 (C.-K.K.)
+1
+
+Abstract: Heptafluoropropyl methyl ether (HFE-347mcc3), as a lower-GWP (global warming potential) alternative to PFCs (perfluorocarbons), was used to etch SiO2 contact holes. The etch profiles of
+the SiO2 contact holes in HFE-347mcc3/O2/Ar plasmas showed more bowing at lower flow rate ratios
+of HFE-347mcc3 to Ar, whereas more narrowing occurred at higher ratios. The measurements of the
+angular dependences of the deposition rates of fluorocarbon films on the surface of SiO2 and the
+etch rates of SiO2 showed that the shape evolution of contact-hole etch profiles at different HFE347mcc3/Ar ratios was attributed to an increase in etch resistance and a decrease in etch ability of
+the sidewalls of the contact hole with the increasing HFE-347mcc3/Ar ratio. This resulted in determining the optimum ratio of HFE-347mcc3 to Ar to achieve the maximum anisotropy of the contact
+hole etched in HFE-347mcc3/O2/Ar plasmas. By carefully selecting the specific flow rates of HFE347mcc3/O2/Ar (9/2/19 sccm), a highly anisotropic and bowing-free SiO2 contact hole, with a 100 nm
+diameter and an aspect ratio of 24, was successfully achieved.
+Citation: You, S.; Yang, H.S.;
+Jeon, D.; Chae, H.; Kim, C.-K.
+Controlling Bowing and Narrowing
+
+Keywords: plasma etching; contact-hole etching; heptafluoropropyl methyl ether; perfluorocarbon;
+global warming potential
+
+in SiO2 Contact-Hole Etch Profiles
+Using Heptafluoropropyl Methyl
+Ether as an Etchant with Low Global
+Warming Potential. Coatings 2023,
+13, 1452. https://doi.org/10.3390/
+coatings13081452
+Academic Editor: Olga Krysina
+Received: 22 July 2023
+Revised: 13 August 2023
+Accepted: 16 August 2023
+Published: 17 August 2023
+
+Copyright: © 2023 by the authors. Licensee MDPI, Basel, Switzerland.
+This article is an open access article
+distributed under the terms and conditions of the Creative Commons Attribution (CC BY) license (https://creativecommons.org/licenses/by/4.0/).
+
+1. Introduction
+As the size of ultra-large-scale integrated circuit (ULSI) devices becomes smaller and
+the degree of circuit integration increases, the critical dimension of the devices keeps
+shrinking. This necessitates the need for high-aspect-ratio SiO2 contact-hole etching,
+which has become more important than ever [1–3]. During high aspect ratio contact-hole
+etching, high-energy ions are subjected to colliding with a mask such as photoresists and
+amorphous carbon layers (ACLs), causing damage and corrosion to the mask. This results
+in various pattern deformations such as bowing, necking, and tilting [4]. These deformations lead to defects in the ULSI devices and reduce the degree of circuit integration
+by decreasing the margin between holes. Therefore, minimizing pattern deformation is
+crucial.
+Etching of SiO2 contact holes is mainly performed using fluorocarbon plasmas such
+as tetrafluoromethane (CF4) and octafluorocyclobutane (c-C4F8) plasmas [5–7]. When a
+substrate is exposed to the fluorocarbon plasmas, a passivating fluorocarbon film is
+formed on the surface of the substrate. The fluorocarbon film protects the mask and the
+sidewalls of contact holes from etching, thus increasing etch selectivity (with respect to
+the mask) and enabling anisotropic profiles with high aspect ratios. The etch selectivity
+
+Coatings 2023, 13, 1452. https://doi.org/10.3390/coatings13081452
+
+www.mdpi.com/journal/coatings
+
+Coatings 2023, 13, 1452
+
+2 of 11
+
+and anisotropy of the contact holes depend on the amount or thickness of the fluorocarbon
+films formed on the surface of the mask and the sidewalls of the contact holes, respectively. A low degree of fluorocarbon-film formation (or thin fluorocarbon films) reduces
+the etch selectivity, whereas a high degree of fluorocarbon-film formation (or thick fluorocarbon films) causes aspect-ratio-dependent etching [8]. Therefore, to obtain an anisotropic contact-hole etching, controlling the thickness of the fluorocarbon film by adjusting
+the ratio of radicals and ions generated in the plasma is important.
+The thickness of the fluorocarbon film can also be controlled by adding gases such as
+oxygen and hydrogen to the fluorocarbon plasma. Oxygen reduces the thickness of the
+fluorocarbon film by forming volatile reaction products such as carbon monoxide (CO),
+carbon dioxide (CO2), and carbonyl fluoride (COF2) [9]. Hydrogen reacts with fluorine
+from the fluorocarbon plasmas and fluorocarbon films to form hydrogen fluoride (HF)
+[10]. Fluorine scavenging by hydrogen reduces the fluorine-to-carbon ratio of the fluorocarbon film, leading to more cross-linked films.
+Fluorocarbon gases such as CF4 and c-C4F8, which are widely used for etching of SiO2
+contact holes, are perfluorocarbons (PFCs) with a high global warming potential (GWP)
+and a long lifetime that adversely affect global warming. According to the 6th Assessment
+Report of the Intergovernmental Panel on Climate Change (IPCC), the GWP100s of PFC
+gases are thousands to tens of thousands of times higher than that of CO2 [11]. Thus, the
+use of PFC gases causes more serious environmental problems than CO2.
+Various compounds such as unsaturated fluorocarbons [2,12,13], iodofluorocarbons
+[14,15], fluorinated ethers [16–19], and fluorinated alcohols [3,20] have been explored as
+lower-GWP alternatives to PFCs to develop an environmentally friendly etching process.
+Among them, fluorinated ethers are attracting attention because they have low GWPs and
+contain an oxygen atom. The presence of oxygen atoms in fluorinated ethers may provide
+oxygen radicals and ions in the plasma, contributing to SiO2 etching. Higher etch rates of
+SiO2 using fluorinated ethers than those using c-C4F8 were found in previous studies [17].
+Although several fluorinated ethers have been tested and found to be promising alternatives to PFCs for plasma etching of SiO2, few studies on SiO2 contact-hole etching using
+fluorinated ethers have been reported.
+In this study, SiO2 contact holes were etched using heptafluoropropyl methyl ether
+(HFE-347mcc3)/oxygen (O2)/argon (Ar) plasmas, and the etch profiles were investigated
+at various ratios of HFE-347mcc3 to Ar. HFE-347mcc3 is a fluorinated ether with a GWP100
+of ~530, which is significantly lower than that of PFCs. The angular dependences of the
+deposition rates of fluorocarbon films on the surface of SiO2 and the etch rate of SiO2 were
+also investigated to explain the shape evolution of SiO2 contact holes etched in HFE347mcc3/O2/Ar plasmas.
+2. Materials and Methods
+2.1. Etching Method
+SiO2 contact-hole etching was conducted in an inductively coupled plasma (ICP)
+(Samhan Vacuum, Gwangmyung, Republic of Korea) system as shown in Figure 1. A
+quartz window in a stainless-steel reaction chamber accommodated the planarly shaped
+induction coil. Two separate radio-frequency (RF) powers of 13.56 MHz were used: one
+as the source power and the other as bias power. The source power was applied to ignite
+a plasma inside the chamber, whereas the bias power was applied to bias a sample.
+
+Coatings 2023, 13, 1452
+
+3 of 11
+
+Figure 1. Schematic diagram of an inductively coupled plasma system.
+
+The discharge gas was a mixture of HFE-347mcc3/O2/Ar. The boiling point of HFE347mcc3 is 34 °C, and hence, it remains a liquid at room temperature. To introduce HFE347mcc3 to the ICP chamber in a gaseous phase, the canister containing HFE-347mcc3 was
+heated to 75 °C. The flow rate of vaporized HFE-347mcc3 was precisely controlled using
+a mass flow controller (MFC) placed prior to the reaction chamber. The flow rates of O2
+and Ar gases were independently controlled using separate MFCs.
+The shape evolution of the contact-hole etch profiles was analyzed using a patterned
+sample. Figure 2 shows the top and cross-sectional scanning electron microscopy (SEM)
+(Hitachi, S-4800, Tokyo, Japan) images of the patterned sample. A 2400-nm-thick SiO2 film
+for contact-hole etching was on a Si substrate. A 1350-nm-thick amorphous carbon layer
+(ACL) with a hole diameter of 200 nm was used as a mask.
+SiO2 contact-hole etching was conducted in an HFE-347mcc3/O2/Ar plasma. The total
+flow rate of HFE-347mcc3/O2/Ar was 30 sccm (standard cubic centimeters per minute).
+The flow rate of O2 was fixed at 2 sccm while the flow rate of HFE-347mcc3 was varied
+from 8 to 12 sccm. The flow rate of Ar was manipulated to maintain the total flow rate of
+30 sccm. Thus, the ratio of HFE-347mcc3 to Ar was in the range of 0.40–0.75. The source
+power and the direct current (DC) bias voltage were 250 W and −1200 V, respectively. The
+pressure in the ICP chamber was 1.33 Pa, and the electrode temperature was set at 15 °C.
+
+Coatings 2023, 13, 1452
+
+4 of 11
+
+Figure 2. Top and cross-sectional SEM images of the 200-nm-diameter hole-patterned sample.
+
+2.2. Faraday Cage System
+A Faraday cage system fixed to the ICP chamber electrode was used to measure the
+deposition rate of fluorocarbon films formed on the surface of SiO2 and the etch rate of
+SiO2 at various ion-incident angles. The Faraday cage utilized here is a closed box comprising a cylindrical sidewall made of stainless steel (with a height of 20 mm) and a stainless-steel cover grid. The grid had a diameter of 0.025 mm and a pitch of 0.229 mm. The
+upper surface of the Faraday cage was constructed using a conductive grid, allowing ions
+to enter the cage perpendicular to the sheath formed along the upper plane. The electric
+potential within the cage remained uniform and unaffected by external electric fields.
+Consequently, the ions traversing within the cage maintained their original trajectory. The
+term “ion-incident angle” in this context denotes the angle between the ion-incident direction and the surface normal to the sample.
+Given that the inside of the cage is devoid of electric fields, precise control over the
+angle at which ions strike a sample substrate was achieved by adjusting the angle of the
+sample holder, situated within the cage [16,17]. In this investigation, the angles at which
+ions impacted were systematically varied in the range of 0 to 90 degrees. The angular
+dependences of the deposition rates of fluorocarbon films formed on SiO2 and the etch
+rates of SiO2 were measured using a blanket sample, which was a 500-nm-thick SiO2 film
+on a Si substrate.
+2.3. Materials Characterization
+The etch profiles, which depict the shape and characteristics of the etched holes in
+the patterned samples, were obtained using field-emission scanning electron microscopy
+(FE-SEM; Hitachi, S-4800, Tokyo, Japan). The deposition rate of fluorocarbon films and
+the etch rates of SiO2 at various ion-incident angles were obtained using a thickness meter
+(model SpectraThick 2000-Deluxe, Daejeon, Republic of Korea), which measures the thickness of either the fluorocarbon film on SiO2 or the SiO2 film on Si.
+
+Coatings 2023, 13, 1452
+
+5 of 11
+
+3. Results and Discussion
+Figure 3 shows SEM images of SiO2 holes etched in the HFE-347mcc3/O2/Ar plasmas
+at various flow rates of HFE-347mcc3/O2/Ar. In the SEM images, “Mcc3” denotes HFE347mcc3. The vertical position at the interface between the ACL mask and the SiO2 was
+set to zero. The downward direction was designated with a negative sign. When the HFE347mcc3/Ar ratio was 0.40 (i.e., HFE-347mcc3/O2/Ar = 8/2/20 sccm), the top diameter of
+the SiO2 hole slightly decreased to 197 nm (from 200 nm before etching) and bowing of
+the hole was observed. Moreover, the top diameter remained constant even when the
+HFE-347mcc3/Ar ratio was increased to 0.47 (HFE-347mcc3/O2/Ar = 9/2/19 sccm). However, narrowing rather than bowing occurred, and the etch profile appeared more anisotropic than that at 0.40 of HFE-347mcc3/Ar. As the HFE-347mcc3/Ar ratio further increased, the top diameter of the SiO2 hole decreased, and the narrowing of the SiO2 hole
+became more pronounced. Severe narrowing with the increasing HFE-347mcc3/Ar ratio
+eventually resulted in an etch stop at the HFE-347mcc3/Ar ratios of 0.65 and 0.75.
+
+Figure 3. SEM images of 200 nm-diameter-SiO2 holes etched in the HFE-347mcc3/O2/Ar plasmas at
+various flow rates for HFE-347mcc3/O2/Ar.
+
+To quantitatively analyze the shape evolution of contact-hole etch profiles at different HFE-347mcc3/Ar ratios, the hole diameters are plotted as a function of the vertical
+position, as shown in Figure 4. When the HFE-347mcc3/Ar ratio was 0.40 (HFE347mcc3/O2/Ar = 8/2/20 sccm), the hole diameter increased from its top diameter (zero
+
+Coatings 2023, 13, 1452
+
+6 of 11
+
+vertical position) as the vertical position deepened, implying that the bowing of the hole
+occurred. Moreover, at this flow rate for HFE-347mcc3/O2/Ar, the top diameter of the hole
+reached a maximum value of 221 nm at a vertical position of −661 nm and gradually diminished with the deepening of the vertical position until the bottom diameter of the hole
+finally reached 130 nm.
+
+HFE-347mcc3/O2/Ar
+8/2/20
+9/2/19
+10/2/18
+11/2/17
+12/2/16
+
+Vertical position (nm)
+
+0
+-500
+-1000
+-1500
+-2000
+-2500
+300
+
+250
+
+200
+
+150
+
+100
+
+50
+
+0
+
+Hole diameter (nm)
+Figure 4. Changes in the diameters of contact holes as a function of the vertical position. The vertical
+position at the interface between the ACL mask and the SiO2 was set to zero and designated with a
+negative sign to denote downward direction.
+
+When the HFE-347mcc3/Ar ratio was 0.47 (HFE-347mcc3/O2/Ar = 9/2/19 sccm), narrowing of the hole instead of bowing was observed. At this HFE-347mcc3/Ar ratio, the
+hole diameter decreased from 197 nm at zero vertical position to 178 nm at a vertical position of −661 nm and then it increased to 194 nm at a vertical position of −1094 nm. Although the top and bottom diameters of the contact holes are similar at the HFE347mcc3/Ar ratios of 0.40 and 0.47, respectively, the variation of the hole diameter with
+the vertical position was significantly weaker at the HFE-347mcc3/Ar ratio of 0.47 than at
+0.40. This indicates that contact holes with higher anisotropy were obtained at the HFE347mcc3/Ar ratio of 0.47. However, the anisotropy of the contact holes deteriorated with
+a further increase in the ratio of HFE-347mcc3 to Ar.
+When the HFE-347mcc3/Ar ratio was 0.56 (HFE-347mcc3/O2/Ar = 10/2/18 sccm), the
+hole diameter shrank to 144 nm at the vertical position of −661 nm. Although the hole
+diameter increased to 187 nm at the vertical position of −1094 nm, it decreased again rapidly with the deepening of the vertical position, resulting in a bottom diameter of only 75
+nm.
+When the HFE-347mcc3/Ar ratios were higher than 0.65 (HFE-347mcc3/O2/Ar =
+11/2/17 or 12/2/16 sccm), the hole diameter kept decreasing with the vertical position. The
+continuous narrowing inhibits the contact hole from reaching the bottom, ultimately resulting in an etch stop at HFE-347mcc3/Ar ratios higher than 0.65. The plot of the hole
+diameter versus vertical position clearly reveals that there exists an optimum HFE-
+
+Coatings 2023, 13, 1452
+
+7 of 11
+
+347mcc3/Ar ratio for obtaining the maximum anisotropy of the contact hole etched in
+HFE-347mcc3/O2/Ar plasmas.
+The shape evolution of contact-hole etch profiles with increasing HFE-347mcc3/Ar
+ratios may simply be attributed to two factors: increased etch resistance and/or decreased
+etch ability of the sidewalls of contact holes. To support this argument, the angular dependences of the deposition rate of fluorocarbon films on the surface of SiO2 and the etch
+rate of SiO2 at various flow rates of HFE-347mcc3/O2/Ar were measured using a Faraday
+cage. The degree of deposition of the fluorocarbon films on the surface of SiO2 is regarded
+as the degree of etch resistance to the SiO2 because the ions and radicals generated in the
+plasma must penetrate this film to reach and react with SiO2.
+Figure 5a shows the change in the deposition rates of the fluorocarbon films on SiO 2
+with the ion-incident angles at various flow rates of HFE-347mcc3/O2/Ar. The process conditions for fluorocarbon film deposition were the same as those for SiO2 contact hole etching, except that no DC bias voltage was applied to the SiO2 substrate during fluorocarbon
+film deposition (source power = 250 W, DC bias voltage = 0 V, chamber pressure = 1.33 Pa,
+electrode temperature = 15 °C). The deposition rates of fluorocarbon films determined in
+this study decreased monotonically with increasing the ion-incident angle under all conditions and agreed well with the previous reports on the etching of Si-based substrates
+using fluorocarbon plasma [21]. Although the deposition rates of the fluorocarbon film
+decreased with increasing the ion-incident angle, the degree to which the deposition rate
+was reduced depended on the HFE-347mcc3/Ar ratio.
+In order to clarify the angular dependence of the change in the deposition rate with
+the HFE-347mcc3/Ar ratio, the normalized deposition rate (NDR) was plotted at various
+HFE-347mcc3/Ar ratios in Figure 5b. The NDR is defined as the deposition rate at a specific angle normalized with respect to the deposition rate on the horizontal surface. The
+dotted line in the NDR plot represents a cosine curve. The NDRs presented in Figure 5b
+clearly demonstrated that the extent of reduction in the deposition rate of the fluorocarbon
+film with ion-incident angle decreased as the HFE-347mcc3/Ar ratio increased. This implies the etch resistance of SiO2 contact holes on the slanted sidewalls increased with increasing HFE-347mcc3/Ar ratio. Therefore, the contact holes were less etched on the
+slanted sidewalls at higher HFE-347mcc3/Ar ratios, leading to the narrowing of the holes.
+
+Normalized deposition rate
+
+1.2
+1.0
+0.8
+0.6
+
+HFE-347mcc3/O2/Ar
+8/2/20
+9/2/19
+10/2/18
+11/2/17
+
+0.4
+0.2
+0.0
+
+0
+
+10
+
+20
+
+30
+
+40
+
+50
+
+60
+
+70
+
+80
+
+90
+
+Ion-incident angle (Degree)
+
+(a)
+
+(b)
+
+Figure 5. Change in (a) the deposition rate and (b) the normalized deposition rate of the fluorocarbon films on the surface of SiO2 with the ion-incident angle at various flow rates for HFE347mcc3/O2/Ar.
+
+Figure 6a shows the change in the etch rates of SiO2 with the ion-incident angle at
+various flow rates of HFE-347mcc3/O2/Ar. Under all conditions, the etch rates monotonically decreased with increasing ion-incident angles, which can also be typically observed
+in the etching of Si-based substrates using fluorocarbon plasmas [22,23]. When the ionincident angles were greater than 80°, the etch rates exhibited negative values, indicating
+
+Coatings 2023, 13, 1452
+
+8 of 11
+
+a net deposition at these angles. A net fluorocarbon-film deposition instead of substrate
+etching occurred at ion-incident angles greater than 80° because the flux of ions at high
+incident angles is negligible.
+
+Etch rate (nm/min)
+
+400
+300
+HFE-347mcc3/O2/Ar
+8/2/20
+9/2/19
+10/2/18
+11/2/17
+12/2/16
+
+200
+100
+0
+-100
+
+0
+
+10
+
+20
+
+30
+
+40
+
+50
+
+60
+
+70
+
+80
+
+90
+
+Ion-incident angle (Degree)
+
+(a)
+
+(b)
+
+Figure 6. Change in (a) the etch rate and (b) the normalized etch rate of SiO2 with the ion-incident
+angle at various flow rates for HFE-347mcc3/O2/Ar.
+
+The etch rates of SiO2 at an ion-incident angle of zero (ions incident vertically on the
+surface) were nearly the same at all HFE-347mcc3/Ar ratios employed in this study. However, the etch rates of SiO2 at slanted ion-incident angles decreased with increasing HFE347mcc3/Ar ratios. This is visualized more clearly through the normalized etch rate
+(NER).
+Figure 6b shows the change in the NERs of SiO2 with the ion-incident angle at various
+flow rates of HFE-347mcc3/O2/Ar. Similar to the definition of the NDR, the NER represents the etch rate at a specific angle normalized to the etch rate on the horizontal surface.
+In all conditions, the NERs are above the cosine curve until the ion-incident angle reaches
+50–60 degrees. This indicates that physical sputtering plays an important role during etching.
+As the HFE-347mcc3/Ar ratio increased, the NER decreased more rapidly with increasing the ion-incident angle. The difference in the NERs at low and high ratios of HFE347mcc3 to Ar increased with the ion-incident angle and reached a maximum value at 60°.
+This implies that changes in the HFE-347mcc3/Ar ratio primarily impact the etch capability of SiO2 contact holes on the slanted sidewalls rather than the bottom plane.
+The results of the angular dependences of the deposition rates of fluorocarbon films
+on SiO2 and the etch rates of SiO2 at various HFE-347mcc3/Ar ratios in HFE347mcc3/O2/Ar plasmas show that the surface of the SiO2 contact hole, particularly its
+sidewall rather than its bottom, becomes more etch-resistant and/or less etchable as the
+HFE-347mcc3/Ar ratio increases. This implies that the SiO2 contact hole exhibited more
+bowing at lower HFE-347mcc3/Ar ratios and more narrowing at higher HFE-347mcc3/Ar
+ratios. Therefore, the optimum ratio of HFE-347mcc3 to Ar should be selected to obtain
+the maximum anisotropy of the contact holes etched in HFE-347mcc3/O2/Ar plasmas.
+As shown in Figures 3 and 4, the best anisotropic etch profile of the 200-nm-diameter
+contact hole in this study was obtained when the flow rate for HFE-347mcc3/O2/Ar was
+set at 9/2/19 sccm. Note that a more anisotropic etch profile would be achieved when the
+flow rates for HFE-347mcc3/O2/Ar were controlled more precisely, for example, HFE347mcc3/O2/Ar = 8.9/2/19.1 sccm.
+Under these specific conditions of HFE-347mcc3/O2/Ar = 9/2/19 sccm, a 100-nm-diameter contact hole was etched. Figure 7 shows the SEM image of the contact hole with a
+diameter of 100 nm and an aspect ratio of 24 etched in an HFE-347mcc3/O2/Ar plasma. A
+highly anisotropic and bowing-free 100-nm-diameter contact hole profile was successfully
+obtained when the flow rate for HFE-347mcc3/O2/Ar was 9/2/19 sccm.
+
+Coatings 2023, 13, 1452
+
+9 of 11
+
+Figure 7. SEM image of a 100 nm-diameter-SiO2 hole etched in the HFE-347mcc3/O2/Ar plasma. The
+flow rates of HFE-347mcc3/O2/Ar were 9/2/19 sccm.
+
+4. Conclusions
+The effect of the flow rate ratio of HFE-347mcc3/Ar on the etch profiles was investigated during the etching of a SiO2 contact hole in an HFE-347mcc3/O2/Ar plasma. When
+the ratio of HFE-347mcc3 to Ar was 0.40 (i.e., HFE-347mcc3/O2/Ar = 8/2/20 sccm), bowing
+of the hole was observed. When the HFE-347mcc3/Ar ratio was increased from 0.40 to 0.47
+(HFE-347mcc3/O2/Ar = 9/2/19 sccm), narrowing of the hole occurred rather than bowing,
+and the etch profile appeared more anisotropic. As the ratio of HFE-347mcc3 to Ar was
+further increased, the narrowing of the contact hole worsened. Severe narrowing caused
+by increasing the HFE-347mcc3/Ar ratio eventually resulted in an etch stop at the HFE347mcc3/Ar ratios of 0.65 and 0.75.
+The angular dependence of the deposition rate of fluorocarbon films on the surface
+of SiO2, which was measured using a Faraday cage, showed that the extent of reduction
+in the deposition rate of the fluorocarbon film with ion-incident angle decreased as the
+HFE-347mcc3/Ar ratio increased. In addition, the measurement of the change in the etch
+rates of SiO2 with the ion-incident angle revealed that the etch rates of SiO2 at slanted ionincident angles decreased with increasing the HFE-347mcc3/Ar ratio. These results imply
+that the surface of the SiO2 contact hole, particularly its sidewall rather than its bottom,
+becomes more etch-resistant and/or less etchable with an increasing HFE-347mcc3/Ar ratio. Therefore, the SiO2 contact hole exhibited more bowing at lower HFE-347mcc3/Ar ratios and more narrowing at higher HFE-347mcc3/Ar ratios in the HFE-347mcc3/O2/Ar
+plasma.
+Finally, by selecting the optimum flow rate ratio of HFE-347mcc3 to Ar, a highly anisotropic and bowing-free profile of the contact hole (diameter = 100 nm and aspect ratio
+= 24) was successfully obtained in the HFE-347mcc3/O2/Ar plasma. This work highlights
+
+Coatings 2023, 13, 1452
+
+10 of 11
+
+the potential of using HFE-347mcc3 as a lower-GWP alternative to PFCs for etching SiO2
+contact holes.
+Author Contributions: Conceptualization, H.C. and C.-K.K.; methodology, H.C. and C.-K.K.; software, S.Y. and H.S.Y.; validation, S.Y. and D.J.; formal analysis, C.-K.K.; investigation, C.-K.K.; resources, C.-K.K.; data curation, C.-K.K.; writing—original draft preparation, C.-K.K.; writing—review and editing, C.-K.K.; visualization, S.Y. and H.S.Y.; supervision, C.-K.K.; project administration, C.-K.K.; funding acquisition, C.-K.K. All authors have read and agreed to the published version
+of the manuscript.
+Funding: This work was supported by the National Research Foundation of Republic of Korea
+(NRF) grant funded by the Korean Government (MEST) (grant No. 2021R1A2B5B01001836) and the
+Korea Evaluation Institute of Industrial Technology grant funded by the Korean Government Ministry of Trade, Industry and Energy (grant Nos. 20017456 and RS-2022-00155706).
+Institutional Review Board Statement: Not applicable.
+Informed Consent Statement: Not applicable.
+Data Availability Statement: No new data were created or analyzed in this study. Data sharing is
+not applicable to this article.
+Conflicts of Interest: The authors declare no conflicts of interest.
+
+References
+1.
+2.
+
+3.
+
+4.
+5.
+6.
+7.
+8.
+9.
+10.
+
+11.
+12.
+13.
+
+14.
+
+15.
+
+Cho, C.; You, K.; Kim, S.; Lee, Y.; Lee, J.; You, S. Characterization of SiO2 etching profiles in pulse-modulated capacitively
+coupled plasmas. Materials 2021, 14, 5036. https://doi.org/10.3390/ma14175036.
+Chang, W.S.; Yook, Y.G.; You, H.S.; Park, J.H.; Kwon, D.C.; Song, M.Y.; Yoon, J.S.; Kim, D.W.; You, S.J.; Yue, D.H.; et al. A
+unified semi-global surface reaction model of polymer deposition and SiO2. Appl. Surf. Sci. 2020, 515, 145975–C129.
+https://doi.org/10.1016/j.apsusc.2020.145975.
+Izawa, M.; Negishi, N.; Yokogawa, K.; Momonoi, Y. Investigation of bowing reduction in SiO2 etching taking into account radical sticking in a hole. Jpn. J. Appl. Phys. Part 1—Regul. Pap. Short Notes Rev. Pap. 2007, 46, 7870–7874.
+https://doi.org/10.1143/JJAP.46.7870.
+Lee, J.-K.; Jang, I.-Y.; Lee, S.-H.; Kim, C.-K.; Moon, S.H. Mechanism of sidewall necking and bowing in the plasma etching of
+high aspect-ratio contact holes. J. Electrochem. Soc. 2010, 157, D142–D146. https://doi.org/10.1149/1.3276511.
+Oshio, H.; Ichiki, T.; Horiike, Y. Run-to-run evolution of fluorocarbon radicals in C4F8 plasmas interacting with cold and hot
+inner walls. J. Electrochem. Soc. 2000, 147, 4273–4278. https://doi.org/10.1149/1.1394052.
+Cho, B.-O.; Hwang, S.-W.; Lee, G.-R.; Moon, S.H. Angular dependence of SiO2 etching in a fluorocarbon plasma. J. Vac. Sci.
+Technol. A 2000, 18, 2791–2798. https://doi.org/10.1116/1.1318193.
+Lee, J.-K.; Lee, G.-R.; Min, J.-H.; Moon, S.H. Angular dependence of Si3N4 etch rates and the etch selectivity of SiO2 to Si3N4 at
+different bias voltages in a high-density C4F8 plasma. J. Vac. Sci. Technol. A 2007, 25, 1395–1401. https://doi.org/10.1116/1.2757180.
+Samukawa, S.; Mukai, T. High-performance silicon dioxide etching for less than 0.1-m-high-aspect contact holes. J. Vac. Sci.
+Technol. B 2000, 18, 166–171. https://doi.org/10.1116/1.591169.
+Coburn, J.W.; Kay, E. Some chemical aspects of the fluorocarbon plasma etching of silicon and its compounds. IBM J. Res.
+Develop. 1979, 23, 33–41. https://doi.org/10.1147/rd.231.0033.
+Schaepkens, M.; Standaert, T.E.F.M.; Rueger, N.R.; Sebel, P.G.M.; Oehrlein, G.S. Study of the SiO2-to-Si3N4 etch selectivity mechanism in inductively coupled fluorocarbon plasmas and a comparison with the SiO2-to-Si mechanism. J. Vac. Sci. Technol. A
+1999, 17, 26–37. https://doi.org/10.1116/1.582108.
+IPCC 6th Assessment Report. Available online: https://www.ipcc.ch/report/sixth-assessment-report-cycle (accessed on 14 September 2022).
+Chatterjee, R.; Karecki, S.; Reif, R.; Vartanian, V.; Sparks, T. The use of unsaturated fluorocarbons for dielectric etch applications.
+J. Electrochem. Soc. 2002, 149, G276–G285. https://doi.org/10.1149/1.1457988.
+Sung, D.; Wen,L.; Tak, H.; Lee, H.; Kim, D.; Yeom, G. Investigation of SiO2 etch characteristics by C6F6/Ar/O2 plasmas generated
+using
+inductively
+coupled
+plasma
+and
+capacitively
+coupled
+plasma.
+Materials
+2022,
+15,
+1300.
+https://doi.org/10.3390/ma15041300.
+Karecki, S.; Pruette, L.; Reif, R.; Sparks, T.; Beu, L.; Vartanian, V. Use of novel hydrofluorocarbon and iodofluorocarbon chemistries for a high aspect ratio via etch in a high density plasma etch tool. J. Electrochem. Soc. 1998, 145, 4305–4312.
+https://doi.org/10.1149/1.1838955.
+Samukawa, S.; Tsuda, K.-I. New radical-control method for SiO2 etching with non-perfluorocompound gas chemistries. Jpn. J.
+Appl. Phys. Part 2 1998, 37, L1095–L1097. https://doi.org/10.1143/JJAP.37.L1095.
+
+Coatings 2023, 13, 1452
+
+11 of 11
+
+16. Kim, J.-H.; Park, J.-S.; Kim, C.-K. SiO2 etching in inductively coupled plasmas using heptafluoroisopropyl methyl ether and
+1,1,2,2-tetrafluoroethyl 2,2,2-trifluoroethyl ether. Appl. Surf. Sci. 2020, 508, 144787. https://doi.org/10.1016/j.apsusc.2019.144787.
+
+17. Kim, J.-H.; Park, J.-S.; Kim, C.-K. Angular dependence of SiO2 etching in plasmas containing heptafluoropropyl methyl ether.
+Thin Solid Films 2019, 669, 262–268. https://doi.org/10.1016/j.tsf.2018.11.010.
+
+18. Kim, J.-H.; Park, J.-S.; Kim, C.-K. Plasma etching of SiO2 using heptafluoropropyl methyl ether and perfluoropropyl vinyl ether.
+ECS J. Solid State Sci. Technol. 2018, 7, Q218–Q221. https://doi.org/10.1149/2.0361811jss.
+
+19. You, S.; Kim, J.-H.; Kim, C.-K. Plasma etching of SiO2 contact hole using perfluoropropyl vinyl ether and perfluoroisopropyl
+vinyl ether. Korean J. Chem. Eng. 2022, 39, 63–68. https://doi.org/10.1007/s11814-021-0987-x.
+
+20. Kim, Y.; Kim, S.; Kang, H.; You, S.; Kim, C.-K.; Chae, H. Low global warming C4H3F7O isomers for plasma etching of SiO2 and
+Si3N4 films. ACS Sustain. Chem. Eng. 2022, 10, 10537–10546. https://doi.org/10.1021/acssuschemeng.2c01705.
+
+21. Kim, J.-H.; Cho, S.-W.; Kim, C.-K. Angular dependence of Si3N4 etching in C4F6/CH2F2/O2/Ar plasmas. Chem. Eng. Technol. 2017,
+40, 2251–2256. https://doi.org/10.1002/ceat.201700126.
+
+22. Lee, G.-R.; Min, J.-H.; Lee, J.-K.; Moon, S.H. Dependence of SiO2 etch rate on sidewall angle as affected by bottom materials in
+a high-density CHF3 plasma. J. Vac. Sci. Technol. B 2006, 24, 298–303. https://doi.org/10.1116/1.2163892.
+
+23. Lee, G.-R.; Hwang, S.-W.; Min, J.-H.; Moon, S.H. Angular dependence of SiO2 etch rate at various bias voltages in a high density
+CHF3 plasma. J. Vac. Sci. Technol. A 2002, 20, 1808–1814. https://doi.org/10.1116/1.1503786.
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.
+
+

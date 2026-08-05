@@ -1,0 +1,1310 @@
+              nanomaterials
+
+Article
+Necking Reduction at Low Temperature in Aspect Ratio Etching
+of SiO2 at CF4/H2/Ar Plasma
+Hee-Tae Kwon, In-Young Bang, Jae-Hyeon Kim, Hyeon-Jo Kim, Seong-Yong Lim, Seo-Yeon Kim, Seong-Hee Cho,
+Ji-Hwan Kim, Woo-Jae Kim, Gi-Won Shin and Gi-Chung Kwon *
+
+
+                                             Department of Electrical and Biological Physics, Kwangwoon University, 20 Kwangwoon-ro, Nowon-gu,
+                                             Seoul 01897, Republic of Korea; heetae_kwon@outlook.com (H.-T.K.); bebe403@naver.com (I.-Y.B.);
+                                             rlawogus6030@gmail.com (J.-H.K.); rlahyeonjo@naver.com (H.-J.K.); leemsy0628@naver.com (S.-Y.L.);
+                                             rlatjdus323@naver.com (S.-Y.K.); sunghhee420@naver.com (S.-H.C.); oneaeo@hanmail.net (J.-H.K.);
+                                             dnwo424@naver.com (W.-J.K.); swat2100@naver.com (G.-W.S.)
+                                             * Correspondence: gckwon@kw.ac.kr
+
+
+                                             Abstract: This study investigated the effect of temperature on the aspect-ratio etching of SiO2 in
+                                             CF4 /H2 /Ar plasma using patterned samples of a 200 nm trench in a low-temperature reactive-ion
+                                             etching system. Lower temperatures resulted in higher etch rates and aspect ratios for SiO2 . However,
+                                             the plasma property was constant with the chuck temperature, indicated by the line intensity ratio
+                                             from optical emission spectroscopy monitoring of the plasma. The variables obtained from the
+                                             characterization of the etched profile for the 200 nm trench after etching were analyzed as a function
+                                             of temperature. A reduction in the necking ratio affected the etch rate and aspect ratio of SiO2 . The
+                                             etching mechanism of the aspect ratio etching of SiO2 was discussed based on the results of the surface
+                                             composition at necking via energy-dispersive X-ray spectroscopy with temperature. The results
+                                             suggested that the neutral species reaching the etch front of SiO2 had a low sticking coefficient. The
+                                             bowing ratio decreased with lowering temperature, indicating the presence of directional ions during
+                                             etching. Therefore, a lower temperature for the aspect ratio etching of SiO2 could achieve a faster
+                                             etch rate and a higher aspect ratio of SiO2 via the reduction of necking than higher temperatures.
+
+                                             Keywords: low temperature; plasma etching; high aspect ratio; necking ratio; SiO2 ; trench; 3D NAND
+Citation: Kwon, H.-T.; Bang, I.-Y.;
+Kim, J.-H.; Kim, H.-J.; Lim, S.-Y.; Kim,
+S.-Y.; Cho, S.-H.; Kim, J.-H.; Kim, W.-J.;
+Shin, G.-W.; et al. Necking Reduction
+at Low Temperature in Aspect Ratio           1. Introduction
+Etching of SiO2 at CF4 /H2 /Ar Plasma.            The current three-dimensional (3D) NAND flash technology is progressing toward
+Nanomaterials 2024, 14, 209. https://        expanding its architecture. This involves stacking an increasing number of deposited layers
+doi.org/10.3390/nano14020209                 comprising alternating layers of stacked silicon (Si)-based materials, such as SiO2 and SiN,
+Academic Editor: Pawel Pohl                  to lower the production costs per memory bit [1]. Considering the rapid development of
+                                             device architectures, this technology is expected to ultimately enable the fabrication of
+Received: 29 November 2023                   stacks of 500–1000 layers [2]. When manufacturing such highly stacked layers, a high-aspect-
+Revised: 12 January 2024
+                                             ratio (HAR) etch is the most important process for achieving a device structure formed
+Accepted: 12 January 2024
+                                             with trenches and holes having the desired aspect ratio (AR; depth/width > 100:1) in 3D
+Published: 17 January 2024
+                                             NAND [2]. However, the current HAR etching methods, particularly when conducted at or
+                                             near room temperature, present various challenges. One such challenge is low productivity
+                                             resulting from the limited etching species at the etch front of the target materials with deeper
+Copyright: © 2024 by the authors.
+                                             features (i.e., a high aspect ratio (HAR)). The limited etching species reduce the etch rate of
+Licensee MDPI, Basel, Switzerland.
+                                             the target materials with the progress of HAR. Therefore, research and development efforts
+This article is an open access article       concerning the HAR process have attempted to overcome this problem using methods
+distributed under the terms and              such as increasing the bias power, tuning the gas chemistry, and varying the substrate
+conditions of the Creative Commons           temperature [3–5]. Currently, the most promising method is the low-temperature HAR
+Attribution (CC BY) license (https://        etching process [2,6]. This technology facilitates a high etch rate with higher AR structures
+creativecommons.org/licenses/by/             compared with conventional HAR etching at room temperature [2]. However, the currently
+4.0/).                                       required low-temperature HAR etching process differs from the process typically used for Si
+
+
+
+Nanomaterials 2024, 14, 209. https://doi.org/10.3390/nano14020209                                      https://www.mdpi.com/journal/nanomaterials
+Nanomaterials 2024, 14, 209                                                                                           2 of 11
+
+
+
+                              because the low-temperature HAR etching process is aimed at Si-containing target materials
+                              such as SiO2 and SiN [2]. Recently, attempts have been made to study low-temperature
+                              etching. Recent studies focusing on etching thin films of SiO2 and SiN at low temperatures
+                              have shown intriguing results via different etching mechanisms compared to those at room
+                              temperature [7–9]. However, examples of related research on the aspect ratio etching of SiO2
+                              are scarce. Although low-temperature etching of SiO2 as the target material in patterned
+                              samples with a large critical dimension (CD) (≥400 nm) has been conducted [10], the
+                              requirement of patterned samples with smaller CD in the low-temperature etching process
+                              must be investigated, considering the technology currently used in the semiconductor etch
+                              process. Furthermore, the low-temperature HAR etching process is expected to occur via
+                              a different mechanism. This is because plasma using leaner gas chemistry with higher
+                              fluorine and hydrogen concentrations, as well as the feature having HAR structure, is used
+                              for the low-temperature HAR etching of Si-containing target materials, such as SiO2 and
+                              SiN [2].
+                                   Therefore, this study investigated the effect of temperature on the aspect ratio etching
+                              of SiO2 in CF4 /H2 /Ar plasma using patterned samples of a 200 nm trench in a low-
+                              temperature reactive ion etching system. The lower temperature resulted in a higher aspect
+                              ratio and etch rate of SiO2 . The results for the variables obtained from the characterization
+                              of the etched profile for the 200 nm trench were analyzed as a function of temperature. A
+                              reduction in the necking ratio was observed with lowering temperature. Furthermore, the
+                              etching mechanism of the aspect ratio etching of SiO2 was discussed, along with the results
+                              of the surface composition at necking via energy-dispersive X-ray spectroscopy (EDS) with
+                              temperature. The bowing and necking ratios exhibited a clear dependence on temperature.
+                              Further, the aspect ratio contact etching of SiO2 was conducted for a 200 nm trench.
+
+                              2. Materials and Methods
+                                   The experimental setup of the 300 mm low-temperature reactive ion etching system
+                              is shown in Figure 1. The system comprised a 300 mm processing chamber and a bottom
+                              chamber. The purpose of the bottom chamber was to prevent condensation on the bottom
+                              surface of the chuck. The vacuum system of the bottom chamber was independent of that
+                              of the 300 mm processing chamber. The 300 mm chuck was accommodated in a 300 mm
+                              processing chamber. The temperature of the chuck was measured using a fluorescence
+                              thermometer installed in the bottom chamber with feedthrough. Here, 13.56 MHz (continu-
+                              ous wave, CW) and 2 MHz (CW) radio frequency (RF) generators were used to supply RF
+                              power to the chuck through a matching network (Path Finder, PLASMART, Seoul, Republic
+                              of Korea) via the bottom chamber. The gap between the chuck and a showerhead was
+                              50 mm. The chuck temperature was reduced using a chiller. The coolant supply and return
+                              lines from the chuck were installed such that they passed through the bottom chamber.
+                              Optical emission spectroscopy (OES) was used to monitor the plasma properties (HR4000
+                              spectrometer, Ocean Optics, Dunedin, FL, USA) through the wall of a 300 mm processing
+                              chamber. The OES was positioned 18 mm from the chuck along the gap axis. The gas
+                              mixture comprising CF4 /H2 /Ar, wherein the flow was controlled by a mass flow controller
+                              (MFC, MARU series, MKP, Yongin-si, Republic of Korea) and an integrated gas system
+                              (IGS, UNILOK, Changwon, Republic of Korea), was injected into the 300 mm processing
+                              chamber through a lid equipped with the showerhead. During the injection of the gas
+                              mixture into the 300 mm processing chamber, the pressure of this processing chamber was
+                              controlled and maintained using a pendulum valve and turbo-molecular pump.
+                                   The experimental conditions were as follows. The total flow rate of the gas mixture
+                              was 400 sccm; the flow rate of Ar was fixed at 200 sccm, and that of (CF4 +H2 ) was fixed
+                              at 200 sccm. The proportion of hydrogen [H2 /(CF4 +H2 )] was fixed at 35%. The pressure
+                              of the 300 mm processing chamber was 25 mTorr. The RF powers at the frequencies of
+                              13.56 and 2 MHz were 600 and 700 W, respectively. Under these conditions, Vdc (monitored
+                              by the matching network) remained at −1000 V. The pressure of the bottom chamber was
+                              maintained at 550 Torr to prevent the arcing of the high RF power with N2 gas and a
+ Nanomaterials 2024, 14, 209                                                                                                                        3 of 11
+
+
+
+                                     rotary vane pump. The etching time was set to 6 min. O2 plasma was used to clean
+Nanomaterials 2024, 14, x FOR PEER REVIEW                                                                              the
+                                                                                                                  3 of 11
+                                 300 mm processing chamber after each etching process. The abovementioned experimental
+                                 conditions were used to etch patterned samples of a 200 nm trench with CF4 /H2 /Ar plasma.
+
+
+
+
+                                 Figure 1. Schematic of the 300 mm low-temperature reactive ion etch system used for the
+                                 experiments.
+
+                                       The experimental conditions were as follows. The total flow rate of the gas mixture
+                                 was 400 sccm; the flow rate of Ar was fixed at 200 sccm, and that of (CF4+H2) was fixed at
+                                 200 sccm. The proportion of hydrogen [H2/(CF4+H2)] was fixed at 35%. The pressure of the
+                                 300 mm processing chamber was 25 mTorr. The RF powers at the frequencies of 13.56 and
+                                 2 MHz were 600 and 700 W, respectively. Under these conditions, Vdc (monitored by the
+                                 matching network) remained at −1000 V. The pressure of the bottom chamber was
+                                 maintained at 550 Torr to prevent the arcing of the high RF power with N2 gas and a rotary
+                                 vane pump. The etching time was set to 6 min. O2 plasma was used to clean the 300 mm
+                                 processing chamber after each etching process. The abovementioned experimental
+                               Figure   1.1. Schematic
+                                             Schematic   ofofthe
+                                                               the   300  mm      low-temperature       reactive    ion   etchused
+                                                                                                                                 system     used  for the
+                                 Figure
+                                 conditions
+                               experiments.
+                                                were used      to300  mm
+                                                                   etch     low-temperature
+                                                                         patterned      samples   reactive ionnm
+                                                                                                    of a 200   etch    system
+                                                                                                                   trench     with CF for4/H
+                                                                                                                                          the experiments.
+                                                                                                                                             2/Ar plasma.
+
+                                       Figure 22 shows
+                                       Figure       showsthe  thetoptopand
+                                                                         andcross-sectional
+                                                                                 cross-sectional    images
+                                                                                                      images  of of
+                                                                                                                 thethe patterned
+                                                                                                                           patterned sample
+                                                                                                                                          samplefor the
+                                                                                                                                                    for 200
+                                                                                                                                                         the
+                                 nm   trench
+                                 200The
+                                      nm trench  before
+                                            experimental   etching.
+                                                      before etching.   SiO
+                                                               conditionsSiO  2 with a thickness of 2400 nm was deposited on the Si
+                                                                                      with a
+                                                                                   2 as
+                                                                                were            thickness
+                                                                                           follows.    The of    2400
+                                                                                                             total   flownm    was
+                                                                                                                            rate      deposited
+                                                                                                                                  of the            on the
+                                                                                                                                            gas mixture
+                                 substrate.
+                                 Si
+                               was  substrate.
+                                    400        Anthe
+                                           sccm;   Anamorphous
+                                                       amorphous
+                                                       flow     rate ofcarbon
+                                                                         Ar    waslayer
+                                                                          carbon      layer(ACL)
+                                                                                     fixed      200 mask
+                                                                                              (ACL)
+                                                                                             at        maskwith
+                                                                                                     sccm,     with
+                                                                                                              and             (CF4+Hof2
+                                                                                                                      a thickness
+                                                                                                                    that  thickness
+                                                                                                                           of           of) 1400  nm was
+                                                                                                                                                  nm
+                                                                                                                                            1400fixed
+                                                                                                                                            was        was
+                                                                                                                                                        at
+                                 deposited
+                                 deposited
+                               200 sccm. The   on
+                                               on   SiO
+                                                   SiO  2.. The
+                                                        2   The   patterned
+                                                                  patterned       sample
+                                                                                  sample    (26
+                                                                                            (26   ×
+                                                                                                  × 28
+                                                                                                     28 mm)
+                                                                                                         mm)   was
+                                                                                                               was     placed
+                                                                                                                        placed
+                                                  proportion of hydrogen [H2/(CF4+H2)] was fixed at 35%. The pressure of the     on
+                                                                                                                                 on  the
+                                                                                                                                     the   chuck
+                                                                                                                                           chuck   surface,
+                                                                                                                                                   surface,
+                                 which
+                                 which
+                               300  mm was  wasinin
+                                           processing close
+                                                   close        proximity
+                                                           proximity
+                                                          chamber        to the
+                                                                       was          the
+                                                                              25tomTorr.  position
+                                                                                   positionThe at which    which
+                                                                                                       at the
+                                                                                                   RF powers   chuck        chuck
+                                                                                                                      the frequencies
+                                                                                                                 at the               temperature
+                                                                                                                         temperature was                was
+                                                                                                                                                 measured
+                                                                                                                                            of 13.56  and
+                                 measured
+                               2 using
+                                 MHz were      using
+                                         fluorescence  fluorescence
+                                                            thermometry
+                                                 600 and 700 W,            thermometry
+                                                                                with vacuum
+                                                                       respectively.            with  vacuum
+                                                                                                    grease for
+                                                                                          Under these             grease
+                                                                                                                  thermalVdc
+                                                                                                            conditions,      for  thermal
+                                                                                                                               conduction.
+                                                                                                                                   (monitored conduction.
+                                                                                                                                                 The  effect
+                                                                                                                                                   by the
+                                 The
+                                 of   eﬀect of
+                                    bowing
+                               matching         at bowing
+                                                   the mask,
+                                              network)         at the  mask,
+                                                                   shown
+                                                            remained              FigureV.in
+                                                                                 shown
+                                                                           atin−1000        2 onFigure
+                                                                                               The the   2 on the
+                                                                                                        results
+                                                                                                     pressure         results
+                                                                                                                  obtained
+                                                                                                                  of            obtained
+                                                                                                                                after etching
+                                                                                                                        the bottom                 etching
+                                                                                                                                             afterwas
+                                                                                                                                         chamber        not
+                                                                                                                                                      was
+                                 was not considered
+                                 considered
+                               maintained      at 550  Torrthe
+                                                 because      because
+                                                                   samples
+                                                               to prevent thethe samples
+                                                                                usedarcingthe used
+                                                                                             of      in the
+                                                                                                 experiments
+                                                                                                 the high   RFexperiments
+                                                                                                                   were the
+                                                                                                                power      with N were
+                                                                                                                                 same.      andsame.
+                                                                                                                                           the
+                                                                                                                                    2 gasThe
+                                                                                                                                                        The
+                                                                                                                                                patterned
+                                                                                                                                                   rotary
+                                 patterned
+                                 samples
+                               vane  pump.      samples the used
+                                                Theinetching
+                                              used             etching
+                                                                  timeinwasthe    etching
+                                                                          experiments
+                                                                                set  to 6 min.        plasma were
+                                                                                               experiments
+                                                                                              were O2supported   was            to cleanby
+                                                                                                                          supported
+                                                                                                                     byused
+                                                                                                                          the  Korea        thethe
+                                                                                                                                                 300 Korea
+                                                                                                                                         Semiconductor
+                                                                                                                                                     mm
+                                 Semiconductor
+                                 Industry             Industry
+                                              Association           Association
+                                                               (KSIA,    Seongnam,    (KSIA,    Seongnam,
+                                                                                          Republic     of      Republic
+                                                                                                          Korea).
+                               processing chamber after each etching process. The abovementioned experimental                 of Korea).
+                               conditions were used to etch patterned samples of a 200 nm trench with CF4/H2/Ar plasma.
+                                     Figure 2 shows the top and cross-sectional images of the patterned sample for the 200
+                               nm trench before etching. SiO2 with a thickness of 2400 nm was deposited on the Si
+                               substrate. An amorphous carbon layer (ACL) mask with a thickness of 1400 nm was
+                               deposited on SiO2. The patterned sample (26 × 28 mm) was placed on the chuck surface,
+                               which was in close proximity to the position at which the chuck temperature was
+                               measured using fluorescence thermometry with vacuum grease for thermal conduction.
+                               The eﬀect of bowing at the mask, shown in Figure 2 on the results obtained after etching
+                               was not considered because the samples used in the experiments were the same. The
+                               patterned samples used in the etching experiments were supported by the Korea
+                               Semiconductor Industry Association (KSIA, Seongnam, Republic of Korea).
+
+
+
+
+                                   (a)                                                                       (b)
+
+                                 Figure 2. (a) SEM image of 200 nm trench before etching for top view; (b) SEM image of 200 nm
+                                 trench before etching for cross-sectional view.
+
+                                       After etching the patterned samples, scanning electron microscopy (SEM, Hitachi
+                                SU-5000 FE-SEM, Tokyo, Japan) was used to characterize the etched profile of the samples
+                                for the 200 nm trench. The surface composition at necking was analyzed using EDS (Oxford
+                                Instruments, Abingdon, UK).
+                                       In Figure 3, the top CD is the width at the boundary between the SiO2 and the mask
+                                (i.e., the ACL) after etching; the bowing CD is the maximum width after etching; the
+
+                                 (a)                                                                       (b)
+                                      After etching the patterned samples, scanning electron microscopy (SEM, Hitachi SU
+                               5000 FE-SEM, Tokyo, Japan) was used to characterize the etched profile of the samples fo
+                               the 200 nm trench. The surface composition at necking was analyzed using EDS (Oxford
+                               Instruments, Abingdon, UK).
+Nanomaterials 2024, 14, 209           In Figure 3, the top CD is the width at the boundary between the SiO2 4and            of 11the mask
+                               (i.e., the ACL) after etching; the bowing CD is the maximum width after etching; the neck
+                               ing CD is the minimum width after etching; the necking distance is the distance from th
+                              necking
+                               boundary CD to
+                                            is the
+                                                theminimum   width
+                                                   location of      after etching;
+                                                                necking   CD after theetching;
+                                                                                       neckingthedistance
+                                                                                                     etch is the distance
+                                                                                                          depth            from
+                                                                                                                   is the distance   from
+                              the boundary to the location of necking CD after etching; the etch depth is the distance
+                               the boundary to the total depth of SiO2 after etching; and the eﬀective mask thickness afte
+                              from the boundary to the total depth of SiO2 after etching; and the effective mask thickness
+                               etching is the mask thickness without a facet. The variables in Equations (1)–(6) were ob
+                              after etching is the mask thickness without a facet. The variables in Equations (1)–(6) were
+                               tained totodetermine
+                              obtained                 theeffect
+                                            determine the  eﬀectofoftemperature
+                                                                      temperatureon on
+                                                                                     the the aspect
+                                                                                          aspect ratioratio  etching
+                                                                                                       etching  of SiOof: SiO2:
+                                                                                                                          2
+
+
+
+
+                               Figure3.3.Characterization
+                              Figure      Characterizationof the etched
+                                                              of the    profile
+                                                                     etched     for 200
+                                                                             profile    nm
+                                                                                      for   trench
+                                                                                          200      after etching
+                                                                                               nm trench   after to obtainto
+                                                                                                                 etching   variables.
+                                                                                                                             obtain variables.
+                                   The etch rate of SiO2 is as follows:
+                                    The etch rate of SiO2 is as follows:
+                                                                           Etch depth
+                                                                                 𝐸𝑡𝑐ℎ 𝑑𝑒𝑝𝑡ℎ                                      (1)
+                                                                           Etch time                                                       (1
+                                                                                  𝐸𝑡𝑐ℎ 𝑡𝑖𝑚𝑒
+                                   The etch rate of mask is as follows:
+                                    The etch rate of mask is as follows:
+                                                           (1400 nm − e f f ective mask thickness)
+                                                               1400 nm 𝑒𝑓𝑓𝑒𝑐𝑡𝑖𝑣𝑒 𝑚𝑎𝑠𝑘 𝑡ℎ𝑖𝑐𝑘𝑛𝑒𝑠𝑠                                  (2)
+                                                                         Etch time                                                         (2
+                                                                                  𝐸𝑡𝑐ℎ 𝑡𝑖𝑚𝑒
+                                   The aspect ratio of SiO2 is as follows:
+                                    The aspect ratio of SiO2 is as follows:
+                                                                           Etch depth
+                                                                                 𝐸𝑡𝑐ℎ 𝑑𝑒𝑝𝑡ℎ                                      (3)
+                                                                            Top CD                                                         (3
+                                                                                    𝑇𝑜𝑝 𝐶𝐷
+                                   Necking distance over effective mask thickness is expressed as follows:
+                                    Necking distance over eﬀective mask thickness is expressed as follows:
+                                                                         Necking  distance
+                                                                               𝑁𝑒𝑐𝑘𝑖𝑛𝑔   𝑑𝑖𝑠𝑡𝑎𝑛𝑐𝑒                                (4)
+                                                                   E f f ective mask thickness                                             (4
+                                                                        𝐸𝑓𝑓𝑒𝑐𝑡𝑖𝑣𝑒 𝑚𝑎𝑠𝑘 𝑡ℎ𝑖𝑐𝑘𝑛𝑒𝑠𝑠
+                                   Necking
+                                    Neckingratio is as
+                                             ratio  is follows:
+                                                       as follows:
+                                                                          𝑇𝑜𝑝
+                                                                   ( Top CD − 𝐶𝐷    𝑁𝑒𝑐𝑘𝑖𝑛𝑔
+                                                                              Necking CD ) 𝐶𝐷
+                                                                                                                                 (5)
+                                                                           Top CD𝑇𝑜𝑝 𝐶𝐷                                                    (5
+
+                                   Bowing
+                                    Bowingratio is as
+                                            ratio     follows:
+                                                   is as  follows:
+                                                                          𝐵𝑜𝑤𝑖𝑛𝑔
+                                                                   ( Bowing CD    𝐶𝐷 CD )
+                                                                               − Top   𝑇𝑜𝑝 𝐶𝐷
+                                                                                                                                 (6)       (6
+                                                                           Top CD𝑇𝑜𝑝 𝐶𝐷
+
+                              3. Results and Discussion
+                                   Based on the SEM results shown in Figure 4, the aspect ratio and etch rate of SiO2
+                              were analyzed as a function of the chuck temperature, as shown in Figure 5. The chuck
+                              temperature is the temperature at the steady state. Figure 5 shows that both the aspect
+                              ratio and etch rate of SiO2 increased as the temperature decreased. The effect of the change
+                              temperature
+                               3. Results andis the temperature at the steady state. Figure 5 shows that both the
+                                               Discussion
+                              ratio andBased  etch
+                                                on rate   of SiO
+                                                     the SEM        2 increased
+                                                                 results    shown as   in the   temperature
+                                                                                           Figure   4, the aspect  decreased.
+                                                                                                                       ratio and Theetcheﬀect
+                                                                                                                                          rate ofofSiOthe2
+                              ofwere
+                                  the plasma        property
+                                        analyzed as a             withofthe
+                                                            function             temperature
+                                                                            the chuck                on theasaspect
+                                                                                            temperature,          shown inratioFigure
+                                                                                                                                  and 5.theThe etch  rate
+                                                                                                                                                   chuck
+Nanomaterials 2024, 14, 209     temperature       is  the  temperature       at  the   steady    state.  Figure     5 shows    that  both    the  aspect
+                              was investigated. Thus, the spectral line intensity ratio in Figure 6 was obtained b                        5 of 11
+                                ratio and
+                              itoring    theetch   rate ofline
+                                                spectral     SiO2intensity
+                                                                   increased of   as the   temperature
+                                                                                     species     (CF3 (610.8decreased.
+                                                                                                                   nm), CF The   eﬀectnm),
+                                                                                                                              2 (340    of theF change
+                                                                                                                                                  (703.8
+                                of
+                              (516.5the  plasma
+                                        nm),       property
+                                                 and    H       with
+                                                            (486.1      the
+                                                                      nm))   temperature
+                                                                              from      CF      on  the   aspect   ratio  and  the  etch
+                                                                                            4/H2/Ar plasma during the aspect ratio etc
+                                                                                                                                           rate of SiO2
+                               of
+                                wastheinvestigated.
+                                        plasma property  Thus,with
+                                                                the the    temperature
+                                                                       spectral               on theratio
+                                                                                   line intensity      aspectin ratio
+                                                                                                                 Figureand  the etch
+                                                                                                                          6 was         rate of
+                                                                                                                                  obtained      by mon-
+                              SiO     using
+                               SiO22 was        OES [11–13].
+                                            investigated.    Thus,As thethe    spectral
+                                                                          spectral           line intensity
+                                                                                      line intensity   ratio in ratio
+                                                                                                                 FigureCF/F
+                                                                                                                          6 waswas     excessively
+                                                                                                                                  obtained    by         lo
+                                itoring the spectral line intensity of species (CF3 (610.8 nm), CF2 (340 nm), F (703.8 nm), C2
+                              not    shownthe
+                               monitoring       inspectral
+                                                   Figureline 6. intensity
+                                                                  However,    of CF     was
+                                                                                  species   (CFformed      in CF2
+                                                                                                  (610.8 nm),  plasma (340 by
+                                                                                                                           nm),a FCF4  /H2nm),
+                                                                                                                                   (703.8    plasma ch
+                                (516.5 nm), and H (486.1 nm)) from CF4/H2/Ar3 plasma during                             the aspect ratio etching of
+                               C2  (516.5
+                              reaction     nm),   and   H (486.1  nm))   from
+                                             [14,15]. The spectral line 4 2      CF   /H    /Ar  plasma    during    the aspect  ratio
+                                                                                     intensity ratio of C2/F in Figure 6 indicates t   etching
+                                SiO
+                               of    2 using OES [11–13]. As the spectral line intensity ratio CF/F was excessively low, it is
+                                   SiO 2 using OES [11–13]. As the spectral line intensity ratio CF/F was excessively low,
+                              plasma      properties      were    depositive        [13].formed
+                                                                                            From the      data shown       in4/H
+                                                                                                                               Figure    6, the    plasm
+                               itnot  shown
+                                  is not  shown in in
+                                                   Figure    6. 6.
+                                                        Figure  However,
+                                                                     However,  CFCF was was formed   in in
+                                                                                                         plasma
+                                                                                                            plasma  bybyaaCFCF4 2/Hplasma
+                                                                                                                                     2 plasma
+                                                                                                                                               chemical
+                              erties
+                                reaction
+                               chemical were     believed
+                                             [14,15].
+                                           reaction     The to
+                                                      [14,15].   remain
+                                                              spectral
+                                                               The           constant
+                                                                          line
+                                                                     spectral    intensity
+                                                                                line         as a
+                                                                                      intensity    function
+                                                                                               ratio    ofCC22/F
+                                                                                                  ratioof      /Fof               indicates
+                                                                                                                      Figure 66indicates
+                                                                                                                   in Figure
+                                                                                                                  in temperature.           thatthat the
+                               plasma
+                              the      properties
+                                  plasma propertieswere
+                                                    were depositive
+                                                           depositive[13].
+                                                                      [13].From
+                                                                            Fromthethedata
+                                                                                       data shown    Figure6,6,the
+                                                                                            shown in Figure     theplasma
+                                                                                                                   plasma prop-
+                              properties
+                               erties    were
+                                      were    believed
+                                           believed  to to remainconstant
+                                                        remain    constantasasaa function
+                                                                                  function of
+                                                                                           oftemperature.
+                                                                                              temperature.
+
+
+
+
+                              Figure 4. SEM images of the etched profiles of 200 nm trench with chuck temperature                    from
+                               Figure4.4.SEM
+                              Figure      SEMimages
+                                               images
+                                                    of of
+                                                       thethe etched
+                                                           etched    profiles
+                                                                  profiles     of nm
+                                                                           of 200 200 nm  trench
+                                                                                     trench with with
+                                                                                                 chuck chuck temperature
+                                                                                                       temperature        from
+                                                                                                                   from 26 ◦ C to 26 °C to
+                              −63 °C.
+                               −63 ◦°C.
+                              −63 C.
+
+
+
+
+                               Figure 5. Aspect ratio and etch rate of SiO2 as a function of chuck temperature from the SEM images
+                               in Figure 4.
+                               Figure 5.5.Aspect
+                              Figure       Aspectratio andand
+                                                    ratio etch etch
+                                                               rate ofrate
+                                                                       SiO2ofasSiO
+                                                                                a function  of chuck temperature
+                                                                                    2 as a function              from the SEM images
+                                                                                                      of chuck temperature     from the SEM
+                               in Figure
+                              in  Figure4.4.
+                                   Because the plasma properties were assumed to be independent of the chuck tem-
+                              perature, analysis of the etched profiles was further performed as a function of the chuck
+                              temperature. Figure 7 shows that effective mask thickness decreased from the temperature
+                              of 26 ◦ C to −63 ◦ C. Regarding the mask thickness, from the spectral line intensity ratio of
+                              C2 /F shown in Figure 6, a polymer appeared to be deposited on the mask. However, as
+                              indicated by the decrease in the effective mask thickness from the temperature of 26 ◦ C to
+                              −63 ◦ C, the etch rate of the mask increased (Figure 7). The increase in the etch rate of the
+      Nanomaterials 2024, 14, 209                                                                                                   6 of 11
+
+
+
+                                    mask could be ascribed to the lower temperature, which induced an increase in the density
+Nanomaterials 2024, 14, x FOR PEER REVIEW
+                                    of fluorine near the feature. The density of fluorine near the wafer increased at lower wafer
+                                     temperatures [16]. The increase in the density of fluorine, which can act as a radical for the
+                                     etching of the mask near the feature, increased the etch rate of the mask [17].
+
+
+
+                                    Figure 6. Spectral line intensity ratio of H/F, C2/F, CF3/F, and CF2/F as a function of chuck t
+                                    ture.
+
+                                          Because the plasma properties were assumed to be independent of the chu
+                                    perature, analysis of the etched profiles was further performed as a function of the
+                                    temperature. Figure 7 shows that eﬀective mask thickness decreased from the te
+                                    ture of 26 °C to −63 °C. Regarding the mask thickness, from the spectral line intensi
+                                    of C2/F shown in Figure 6, a polymer appeared to be deposited on the mask. How
+                                    indicated by the decrease in the eﬀective mask thickness from the temperature of 2
+                                    −63 °C, the etch rate of the mask increased (Figure 7). The increase in the etch rat
+                                    mask could be ascribed to the lower temperature, which induced an increase in t
+                                    sity of fluorine near the feature. The density of fluorine near the wafer increased a
+                                    wafer temperatures [16]. The increase in the density of fluorine, which can act as a
+                                                Spectral line intensity
+                                     Figure 6.
+                                    for        Spectralof
+                                         the6.etching
+                                    Figure                line
+                                                            the   maskratio
+                                                                intensity ratio
+                                                                         near   H/F,
+                                                                            of of
+                                                                               the       C2CF
+                                                                                     C2 /F,
+                                                                                   H/F,
+                                                                                   feature,      /F, and CF
+                                                                                            /F,3increased
+                                                                                                 CF3/F,     /F
+                                                                                                        and2the   /Fa as rate
+                                                                                                             CF2asetchfunction
+                                                                                                                         a     of chuck
+                                                                                                                                 theofmask
+                                                                                                                           function
+                                                                                                                              of        chuck[17
+                                                                                                                                               te
+                                     temperature.
+                                    ture.
+
+                                         Because the plasma properties were assumed to be independent of the chuc
+                                    perature, analysis of the etched profiles was further performed as a function of the
+                                    temperature. Figure 7 shows that eﬀective mask thickness decreased from the te
+                                    ture of 26 °C to −63 °C. Regarding the mask thickness, from the spectral line intensi
+                                    of C2/F shown in Figure 6, a polymer appeared to be deposited on the mask. Howe
+                                    indicated by the decrease in the eﬀective mask thickness from the temperature of 2
+                                    −63 °C, the etch rate of the mask increased (Figure 7). The increase in the etch rate
+                                    mask could be ascribed to the lower temperature, which induced an increase in th
+                                    sity of fluorine near the feature. The density of fluorine near the wafer increased a
+                                    wafer temperatures [16]. The increase in the density of fluorine, which can act as a
+                                    for the etching of the mask near the feature, increased the etch rate of the mask [17
+
+                                    Figure 7.7.Mask
+                                    Figure      Masketch raterate
+                                                       etch   and and
+                                                                  effective mask thickness
+                                                                        eﬀective           as a function
+                                                                                  mask thickness      as of chuck temperature
+                                                                                                         a function  of chuckfrom the
+                                                                                                                               temperature f
+                                    SEM  images  in Figure
+                                    SEM images in Figure 4.4.
+
+                                          Each necking distance was divided by each effective mask thickness with chuck
+                                           Each from
+                                     temperature   necking     distance
+                                                            26 ◦ C to  −63 was
+                                                                             ◦ C, divided    byaseach
+                                                                                  respectively,          eﬀective
+                                                                                                    shown in         mask
+                                                                                                                Figure       thickness
+                                                                                                                        8. Figure   8 showswith chu
+                                    perature from 26 °C to −63 °C, respectively, as shown in Figure 8. Figure 8ashows
+                                     that the necking     distance   over  the  effective mask   thickness  appeared    to be constant   as
+                                     function ofdistance
+                                    necking       temperature.overBoth
+                                                                     thethe   necking CD
+                                                                          eﬀective         andthickness
+                                                                                        mask    necking ratio   are shownto
+                                                                                                             appeared       as be
+                                                                                                                               a function
+                                                                                                                                   constantof as a fu
+                                     temperature in Figure 8. The necking CD tended to widen at lower temperatures. However,
+                                    of  temperature. Both the necking CD and necking ratio are shown as a function
+                                     the necking ratio decreased. The factor influencing the increase in both the aspect ratio
+                                    perature     in of
+                                     and etch rate    Figure
+                                                         SiO2 in8.Figure
+                                                                   The necking        CD tended
+                                                                          5 is the reduction          to widen
+                                                                                              of necking           at lower
+                                                                                                           at a lower          temperatures.
+                                                                                                                       temperature,   which       Ho
+                                    the   necking
+                                     enhanced          ratioof neutrals
+                                                the fluxes    decreased.       The factor
+                                                                          (including          influencing
+                                                                                       radicals) and  ions ontothe  increase
+                                                                                                                 the etch       inSiO
+                                                                                                                          front of  both    the aspe
+                                                                                                                                       2 [18].
+                                     Specifically,  it is believed   that the   flux of neutrals  onto
+                                    and etch rate of SiO2 in Figure 5 is the reduction of necking at a 2the etch  front  of SiO   was  more
+                                                                                                                             lower temperature
+                                     enhanced at lower temperatures than the flux of ions [6]. The flux of ions was independent
+                                    enhanced the fluxes of neutrals (including radicals) and ions onto the etch front
+                                     of the CD of the pattern and temperature rather than that of neutrals [16,19]. Therefore,
+                                    [18].  Specifically,
+                                     the etched   profile ofitSiO
+                                                                is believed      that the flux of neutrals onto the etch front of SiO2 wa
+                                                                    2 can also be described. The etched profile of SiO2 shown in
+
+                                    Figure 7. Mask etch rate and eﬀective mask thickness as a function of chuck temperature f
+                                    SEM images in Figure 4.
+
+                                          Each necking distance was divided by each eﬀective mask thickness with chu
+                               enhanced at lower temperatures than the flux of ions [6]. The flux of ions was inde
+Nanomaterials 2024, 14, 209
+                               of the CD of the pattern and temperature rather than that of neutrals [16,19]. Th
+                                                                                                                          7 of 11
+                               the etched profile of SiO2 can also be described. The etched profile of SiO2 shown i
+                               4 became tapered as the chuck temperature decreased. This tapered profile was att
+                               to  an 4increase
+                              Figure     became in  the as
+                                                 tapered  fluxtheofchuck
+                                                                    neutrals at   lower
+                                                                          temperature      temperatures
+                                                                                         decreased.         [20]. profile
+                                                                                                    This tapered   Accordingly,
+                                                                                                                           was    it is
+                              attributed  to an increase  in the  flux of neutrals at lower  temperatures   [20].
+                               able that the etched profile of SiO2 exhibited a tapered profile at the lower temp Accordingly,
+                              it is reasonable that the etched profile of SiO2 exhibited a tapered profile at the lower
+                               shown in Figure 4, in that the aspect ratio etching with a lower temperature wa
+                              temperature, shown in Figure 4, in that the aspect ratio etching with a lower temperature
+                               mentally
+                              was           aimedaimed
+                                    fundamentally   at enhancing
+                                                           at enhancingthetheneutral   fluxesonto
+                                                                              neutral fluxes   onto
+                                                                                                  the the
+                                                                                                      etch etch   front
+                                                                                                           front at      at the bottom
+                                                                                                                    the bottom
+                               high-aspect-ratio
+                              of the                 structure.
+                                      high-aspect-ratio structure.
+
+
+
+
+                               Figure8. 8.
+                              Figure       Necking
+                                        Necking  ratio,ratio, necking
+                                                        necking        distance/eﬀective
+                                                                distance/effective           maskand
+                                                                                   mask thickness,  thickness,
+                                                                                                       necking and
+                                                                                                              criticalnecking  critical d
+                                                                                                                       dimension
+                              (CD) as a function of chuck  temperature from  the SEM images  in Figure
+                               (CD) as a function of chuck temperature from the SEM images in Figure 4.4.
+
+                                    To determine the neutral species with greater participation in the aspect ratio etching
+                              of SiO2To
+                                      , thedetermine        the neutral
+                                              surface composition           species
+                                                                       at necking   waswith     greater
+                                                                                          analyzed          participation
+                                                                                                      via EDS                     in the aspect ratio
+                                                                                                                  with chuck temperatures
+                                    ◦
+                               of26SiO
+                              of      C 2,and
+                                            the−63   ◦
+                                                  surface     composition
+                                                       C. Figure 9   shows the at     necking
+                                                                                  atomic           was of the
+                                                                                            percentage    analyzed surface viaat EDS
+                                                                                                                                 necking with
+                                                                                                                                            fromchuck t
+                               tures of 26 °C and −63 °C. Figure 9 shows the atomic percentage of the urface
+                              EDS   with    respect   to temperature.     Considering      the  formation     of  (hydro)fluorocarbons         in      at
+                              the plasma, the major composition of the surface at necking can be considered as mainly
+                               from EDS with respect to temperature. Considering the formation of (hydro)flu
+                              carbon (C) and fluorine (F). The appearance of oxygen (O), together with silicon (Si) and
+                               bons in the
+                              aluminum       (Al),plasma,
+                                                    originatedthefrom
+                                                                   majorthe composition
+                                                                             environment before  of thethesurface
+                                                                                                            measurement at necking        can be consid
+                                                                                                                                 and chamber
+                               mainly
+                              components,  carbon      (C) and
+                                                respectively       fluorine
+                                                                [21,22].  The (F).
+                                                                               atomic The    appearance
+                                                                                         percentages    of Si atofchuck
+                                                                                                                     oxygen (O),
+                                                                                                                             temperaturestogether
+                                                                                                                                               of    with
+                                 ◦ C and −63 ◦ C were 3% and 1%, respectively. Nevertheless, the atomic percentages
+                               (Si)
+                              26    and aluminum (Al), originated from the environment before the measurem
+                              of O, Al, and
+                               chamber           Si at each temperature
+                                             components,                     were [21,22].
+                                                                  respectively       significantly
+                                                                                                 Thelower
+                                                                                                       atomic thanpercentages
+                                                                                                                      the combinedof     atomic
+                                                                                                                                            Si at chuck
+                              percentages of carbon and fluorine in Figure 9. Therefore, the most noticeable observation
+                               atures of 26 °C and −63 °C were 3% and 1%, respectively. Nevertheless, the atom
+                              was that the atomic percentage of C increased with increasing temperature. However, the
+                               centages
+                              atomic         of O, Al,
+                                       percentage          and
+                                                        of F      Si at each
+                                                             decreased     withtemperature
+                                                                                 temperature. The   were     significantly
+                                                                                                         clear    difference inlower         than the co
+                                                                                                                                    the atomic
+                               atomic      percentages
+                              percentages of       C and F of    carbon
+                                                              with          and was
+                                                                     temperature   fluorine         Figure
+                                                                                             owing to    the 9.     Therefore,
+                                                                                                               sticking              theofmost
+                                                                                                                           coefficient        the notice
+                              (hydro)fluorocarbons.         The   sticking  coefficient    of a  species  increases
+                               servation was that the atomic percentage of C increased with increasing temp              as the   temperature
+                              lowers [5,23]. The reaction probabilities of fluorine and hydrogen were not considered to
+                               However, the atomic percentage of F decreased with temperature. The clear diﬀe
+                              be dependent on the temperature under the experimental conditions [16,23]. Consequently,
+                               the atomic percentages
+                              (hydro)fluorocarbon                  of Ca and
+                                                         species with           F with
+                                                                          relatively   hightemperature          wasreached
+                                                                                             sticking coefficient       owingthe   toetch
+                                                                                                                                       thefront
+                                                                                                                                             sticking co
+                               ofSiO
+                              of  the2 with
+                                        (hydro)fluorocarbons.
+                                                a low probability. In otherThe words,
+                                                                                 sticking  thecoeﬃcient
+                                                                                                species withof       a specieslow
+                                                                                                                  a relatively      increases
+                                                                                                                                        sticking as the
+                               ature   lowers
+                              coefficient   reached [5,23].  The
+                                                       the etch     reaction
+                                                                 front of       probabilities
+                                                                           SiO2 with a    high       of  fluorine
+                                                                                                 probability.           and
+                                                                                                                Consequently,  hydrogen
+                                                                                                                                    the        were not
+                                                                                                                                         neutral
+                              species  participating      in the  etching   of SiO    at the  etch  front  in
+                               ered to be dependent on the temperature under the experimental conditions [16,2
+                                                                                    2                          the  aspect    ratio  etching   of
+                              SiO2 were considered to be CF3 , H, and F, with a high probability from the results of the
+                               sequently, (hydro)fluorocarbon species with a relatively high sticking coeﬃcient
+                              spectral line intensity ratio in Figure 6. The etching mechanism of the SiO2 film in CF4 /H2
+                               the
+                              plasmaetch
+                                       alsofront     of a
+                                               reached   SiO2   with a
+                                                           similar        low [8].
+                                                                    conclusion  probability. In other words, the species with a re
+                               lowAs sticking       coeﬃcient
+                                        shown in Figure        8, hereached
+                                                                      necking theratio etch     frontwith
+                                                                                        decreased       of SiO      2 with a
+                                                                                                             lowering              high and
+                                                                                                                           temperature,    probability.
+                              the  bowing     ratio  was   confirmed.    Figure   10  shows    the  decrease
+                               quently, the neutral species participating in the etching of SiO2 at the          in  the  bowing     ratio  withetch fron
+                              temperature. Therefore, the necking ratio in Figure 8 is reasonable because bowing became
+                               aspect ratio etching of SiO2 were considered to be CF3, H, and F, with a high pro
+                              severe as necking evolved [24]. Therefore, it is expected that the ions will become more
+                              from the results of the spectral line intensity ratio in Figure 6. The etching mecha
+                              the SiO2 film in CF4/H2 plasma also reached a similar conclusion [8].
+        Nanomaterials 2024, 14, 209                                                                                                 8 of 11
+
+
+
+                                    directional with decreasing temperature because the bowing ratio indicates the degree of
+Nanomaterials 2024, 14, x FOR PEER REVIEW
+                                    ion scattering inside the feature during etching [23,25]. Consequently, the increase in both
+                                      the etch rate and aspect ratio of SiO2 with decreasing temperature in Figure 5 is attributed
+                                      to the reduction of necking at lower temperatures.
+
+
+
+
+                                      Figure 9. Atomic percentage of the surface at necking from energy-dispersive X-ray sp
+                                      (EDS) with chuck temperature of 26 °C and −63 °C, respectively. (The atomic percentage
+                                      is not shown in Figure 9 for the temperature of both 26 °C and −63 °C, is specified in the
+
+                                             As shown in Figure 8, the necking ratio decreased with lowering temper
+                                      the bowing ratio was confirmed. Figure 10 shows the decrease in the bowing
+                                      temperature. Therefore, the necking ratio in Figure 8 is reasonable because b
+                                      came severe as necking evolved [24]. Therefore, it is expected that the ions w
+                                      more directional with decreasing temperature because the bowing ratio indica
+                                      gree of ion scattering inside the feature during etching [23,25]. Consequently, th
+                                       Figure
+                                      in  both9. Atomic  percentage of theaspect
+                                                                           surface atratio
+                                                                                      necking
+                                                                                            ofatfrom
+                                                                                                 SiOenergy-dispersive   X-ray spectroscopy
+                                      Figure   9.the  etch
+                                                  Atomic     rate  and
+                                                            percentage     of the surface              withfrom
+                                                                                                   necking
+                                                                                                     2         decreasing      temperature
+                                                                                                                    energy-dispersive       X-rayinsp
+                                       (EDS) with chuck temperature of 26 ◦ C and −63 ◦ C, respectively. (The atomic percentage of Si, which
+                                      attributed
+                                      (EDS)   with to   thetemperature
+                                                    chuck    reduction of       necking
+                                                                             of 26 °C  andat −63
+                                                                                               ◦lower    temperatures.
+                                                                                                   °C, espectively.
+                                                                                                            ◦          (The atomic percentage
+                                      is not shown in Figure 9 for the temperature of both 26 C and −63 C, is specified in the content).
+                                      is not shown in Figure 9 for the temperature of both 26 °C and −63 °C, is specified in the
+
+                                            As shown in Figure 8, the necking ratio decreased with lowering temper
+                                      the bowing ratio was confirmed. Figure 10 shows the decrease in the bowing
+                                      temperature. Therefore, the necking ratio in Figure 8 is reasonable because b
+                                      came severe as necking evolved [24]. Therefore, it is expected that the ions w
+                                      more directional with decreasing temperature because the bowing ratio indica
+                                      gree of ion scattering inside the feature during etching [23,25]. Consequently, th
+                                      in both the etch rate and aspect ratio of SiO2 with decreasing temperature in
+                                      attributed to the reduction of necking at lower temperatures.
+
+
+
+
+                                              10.Bowing
+                                      Figure 10.
+                                      Figure      Bowingratioratio
+                                                              as a function of chuck of
+                                                                    as a function    temperature from the SEM images
+                                                                                        chuck temperature            in Figure
+                                                                                                              from the   SEM4.images in Fig
+                                            Further experiments at the temperatures of 26 ◦ C and −63 ◦ C were conducted under
+                                             Further
+                                       the same         experiments
+                                                  experimental             at as
+                                                                  conditions   thethose for 6
+                                                                                     temperatures
+                                                                                               min butof   26the
+                                                                                                        with   °C and
+                                                                                                                  process−63  °Cchanged
+                                                                                                                           time    were condu
+                                       to 15 min.   Figure 11   shows   the aspect   ratio contact  etching of
+                                      the same experimental conditions as those for 6 min but2 with the processSiO  at a  200 nm   trench time c
+                                      with a temperature of −63 ◦ C. Both the etching rate of SiO2 and the selectivity for SiO2
+                                      15 min. Figure 11 shows the aspect ratio contact etching of SiO2 at a 200 nm tre
+                                       over the mask, presented in Table 1, were obtained from Figure 11. Table 1 shows the
+                                      temperature       the −63
+                                       increase in both of         °C. ofBoth
+                                                             etch rate    SiO2 the    etching
+                                                                                and the          ratewhen
+                                                                                         selectivity   of SiO  2 and the selectivity
+                                                                                                          the temperature    was changed for SiO
+                                      mask,
+                                       from     ◦
+                                                presented
+                                             26 C to       ◦
+                                                      −63 C.in Table
+                                                                 Therefore,1,a were
+                                                                               lower obtained        from
+                                                                                       temperature for  theFigure   11. Table
+                                                                                                            aspect-ratio contact 1  shows the
+                                                                                                                                  etching
+                                       of SiO   achieved   a  higher  etch  rate,  leading
+                                      both the etch rate of SiO2 and the selectivity
+                                              2                                             to  improved   productivity.   However,
+                                                                                                       when the temperature was       the chang
+                                       etched profile at the temperature of −63 ◦ C presented a twisting. Research on twisting
+                                      °C   to −63 °C. Therefore, a lower temperature for the aspect-ratio contact etchi
+                                       has not been conducted yet. Attempts to improve the etched profile will be conducted in
+                                      achieved
+                                       future      a higher etch rate, leading to improved productivity. However, the etc
+                                              studies.
+                                      at the 10.
+                                      Figure temperature      −63a °C
+                                                          of as
+                                                 Bowing ratio         presented
+                                                                   function       a twisting.
+                                                                            of chuck          Research
+                                                                                     temperature        onSEM
+                                                                                                 from the  twisting
+                                                                                                              imageshas not
+                                                                                                                     in Fig
+                                      ducted yet. Attempts to improve the etched profile will be conducted in future
+                                           Further experiments at the temperatures of 26 °C and −63 °C were conduc
+                                      the same experimental conditions as those for 6 min but with the process time c
+                                      15 min. Figure 11 shows the aspect ratio contact etching of SiO2 at a 200 nm tre
+Nanomaterials2024,
+Nanomaterials 2024,14,
+                    14, x
+                       209FOR PEER REVIEW                                                                                                          99 of 11
+                                                                                                                                                      of 11
+
+
+
+
+                                  Figure 11.
+                                 Figure   11. SEM
+                                              SEM images
+                                                   images ofof the
+                                                                the etched
+                                                                    etched profiles
+                                                                           profiles for
+                                                                                     for 200
+                                                                                         200nm
+                                                                                             nmtrench
+                                                                                                trenchat
+                                                                                                       atchuck
+                                                                                                          chucktemperature
+                                                                                                                temperatureof
+                                                                                                                           of26
+                                                                                                                              26◦°C and
+                                                                                                                                 C and
+                                  −63 ◦°C, respectively, at the same experimental condition as the previous results, only adopting a
+                                 −         respectively, at the same experimental condition as the previous results, only adopting a
+                                  longer process time.
+                                 longer process time.
+                                 Table 1. Comparison between the chuck temperatures of 26 °C and −63 °C for the etch rate of SiO2
+                                 Table 1. Comparison
+                                 and selectivity        between
+                                                  from the      the chuck
+                                                           SEM images     temperatures
+                                                                       in Figure 11.   of 26 ◦ C and −63 ◦ C for the etch rate of SiO2
+                                 and selectivity from the SEM images in Figure 11.
+                                                                                                  Chuck Temperature (°C)
+                                                                                            26                Chuck Temperature
+                                                                                                                             −63(◦ C)
+                                    Etch rate of SiO2 (nm/min)                              69               26                      158 −63
+                                            Selectivity
+                                             Etch rate of SiO2 (nm/min)                     1.5              69                      2.2 158
+                                                          Selectivity                                        1.5                          2.2
+                                 4. Conclusions
+                                 4. Conclusions
+                                      The eﬀect of temperature on the aspect-ratio etching of SiO2 in CF4/H2/Ar plasma was
+                                  investigated
+                                        The effect using    patterned on
+                                                      of temperature       samples
+                                                                                 the of a     200 nmetching
+                                                                                      aspect-ratio      trench of in a   low-temperature
+                                                                                                                      SiO2 in CF    4 /H2 /Arreactive-
+                                                                                                                                                   plasma
+                                  ion etching
+                                 was              system.
+                                       investigated     usingBoth the
+                                                                patterned aspect    ratio of
+                                                                               samples    anda 200
+                                                                                                 etchnm
+                                                                                                      rate of
+                                                                                                          trenchSiOin2 a
+                                                                                                                       were increased
+                                                                                                                          low-temperature    by lowering
+                                                                                                                                                  reactive-
+                                  the chuck
+                                 ion            temperature.
+                                      etching system.       BothThe      spectralratio
+                                                                   the aspect        lineand
+                                                                                           intensity   ratiof SiO
+                                                                                                etch rate     results   confirmed
+                                                                                                                    2 were    increased thatbythe  plasma
+                                                                                                                                                 lowering
+                                 the  chuck did
+                                  properties   temperature.
+                                                      not change Thewith spectral line    intensity
+                                                                                temperature.          ratio results
+                                                                                                  Therefore,            confirmed
+                                                                                                                 the factors           that the the
+                                                                                                                                 influencing       plasma
+                                                                                                                                                        etch
+                                 properties     did  not   change      with   temperature.        Therefore,    the   factors
+                                  rate and aspect ratio of SiO2 were determined by characterizing the etched profile of the     influencing       the  etch
+                                 rate  andtrench.
+                                  200 nm      aspect The
+                                                      ratio of   SiO2 of
+                                                            reduction     were    determined
+                                                                               necking   by       by  characterizing
+                                                                                              lowering the     temperature the etched
+                                                                                                                                  increasedprofile
+                                                                                                                                                the of  the
+                                                                                                                                                     aspect
+                                 200
+                                  rationmandtrench.   The of SiO
+                                               etch rate   reduction2. The of surface
+                                                                              necking by      lowering at
+                                                                                        composition       thenecking
+                                                                                                               temperature       increasedvia
+                                                                                                                          was analyzed         theEDS
+                                                                                                                                                    aspect
+                                                                                                                                                         for
+                                 ratio  and etch of
+                                  temperatures       rate26of°CSiO
+                                                                 and 2 . −63
+                                                                          The °C.
+                                                                                surface    composition
+                                                                                     The EDS      results at
+                                                                                                           were necking
+                                                                                                                   discussed was with
+                                                                                                                                   analyzed
+                                                                                                                                          respect viatoEDS
+                                                                                                                                                         the
+                                 for  temperatures       of of   ◦ C and −63 ◦ C. The EDS results were discussed with respect to
+                                                             26the
+                                  etching    mechanism                aspect ratio etching of SiO2. The neutrals reaching e etch front
+                                 the  etching    mechanism       of  the
+                                  of SiO2 were considered to be species    aspect ratio
+                                                                                      withetching     of low
+                                                                                             relatively  SiO2sticking
+                                                                                                                . The neutrals      reaching
+                                                                                                                            coeﬃcients,      such the
+                                                                                                                                                    asetch
+                                                                                                                                                        CF3,
+                                 front  of  SiO    were   considered        to be   species   with   relatively   low    sticking
+                                  H, and F, at2lower temperatures. The bowing ratio, as well as the necking ratio, decreased        coefficients,     such
+                                 as
+                                  byCF3   , H, and
+                                      lowering     theF,temperature.
+                                                         at lower temperatures.
+                                                                            Therefore, aThe  lowerbowing     ratio, asfacilitated
+                                                                                                     temperature          well as the    necking
+                                                                                                                                      both   a higher ratio,
+                                                                                                                                                         as-
+                                 decreased
+                                  pect  ratio by    loweringetch
+                                               and higher        therate of
+                                                                        temperature.       Therefore, a
+                                                                                 SiO2 by reducing           lower The
+                                                                                                        necking.    temperature
+                                                                                                                           aspect ratiofacilitated
+                                                                                                                                            contact both
+                                                                                                                                                       etch-
+                                 aing
+                                    higher
+                                       of SiO2aspect
+                                                 was ratio
+                                                       furtherand higher
+                                                                  conducted     etch  rate
+                                                                                   for a 200ofnmSiO2 by
+                                                                                                    trench.reducing
+                                                                                                              Lower necking.
+                                                                                                                        temperatures  The aspect
+                                                                                                                                            resultedratio
+                                                                                                                                                        in a
+                                 contact    etching    of SiO    was     further    conducted      for a 200   nm    trench.
+                                  faster etching rate than higher temperatures, although twisting at the bottom of the etched
+                                                               2                                                               Lower      temperatures
+                                 resulted    in a fasteratetching
+                                  profile occurred                    rate than higher
+                                                            lower temperatures.           Thetemperatures,
+                                                                                                 etched profilesalthough
+                                                                                                                      will be twisting
+                                                                                                                                 furtheratimproved
+                                                                                                                                              the bottom  in
+                                 of  the  etched
+                                  future studies.   profile   occurred      at lower    temperatures.       The   etched     profiles    will  be further
+                                 improved in future studies.
+                                  Author Contributions: Conceptualization, H.-T.K., I.-Y.B. and G.-C.K.; Methodology, I.-Y.B., J.-H.K.
+                                 Author    Contributions:
+                                  (Jae-Hyeon                Conceptualization,
+                                               Kim), H.-J.K.,  S.-Y.L., S.-Y.K. and  H.-T.K.,
+                                                                                       S.-H.C.;I.-Y.B. and G.-C.K.;
+                                                                                                  validation, H.-T.K.Methodology,     I.-Y.B., J.-H.K.
+                                                                                                                       and J.-H.K. (Ji-Hwan      Kim);
+                                 (Jae-Hyeon    Kim),  H.-J.K., S.-Y.L., S.-Y.K.   and S.-H.C.;   validation,  H.-T.K. and   J.-H.K. (Ji-Hwan
+                                  formal analysis, H.-T.K., I.-Y.B., W.-J.K. and G.-W.S.; investigation, J.-H.K. (Ji-Hwan Kim); resources,       Kim);
+                                 formal
+                                  G.-C.K.;analysis, H.-T.K., H.-T.K.,
+                                            data curation,   I.-Y.B., W.-J.K.
+                                                                         I.-Y.B.and
+                                                                                 andG.-W.S.;
+                                                                                       G.-C.K.;investigation,  J.-H.K.draft
+                                                                                                  writing—original      (Ji-Hwan   Kim); resources,
+                                                                                                                               preparation,  H.-T.K.;
+                                 G.-C.K.;   data curation,
+                                  writing—review            H.-T.K.,
+                                                     and editing,       I.-Y.B.and
+                                                                    H.-T.K.      andG.-C.K.;
+                                                                                      G.-C.K.;    writing—original
+                                                                                              visualization,  H.-T.K.,draft   preparation,
+                                                                                                                        I.-Y.B. and  G.-C.K.;H.-T.K.;
+                                                                                                                                                super-
+                                 writing—review
+                                  vision,  G.-C.K.; and  editing,
+                                                    project        H.-T.K. andH.-T.K.
+                                                            administration,        G.-C.K.;  visualization,
+                                                                                          and J.-H.K.        H.-T.K.,
+                                                                                                        (Ji-Hwan      I.-Y.B.
+                                                                                                                   Kim);      and G.-C.K.;
+                                                                                                                           funding          supervi-
+                                                                                                                                     acquisition,  G.-
+                                 sion, G.-C.K.;
+                                  C.K. All      project
+                                            authors      administration,
+                                                     have read   and agreed  H.-T.K.
+                                                                                to theand  J.-H.K. version
+                                                                                       published    (Ji-HwanofKim);
+                                                                                                                the funding
+                                                                                                                    manuscript. acquisition, G.-C.K.
+                                 All authors have read and agreed to the published version of the manuscript.
+                                  Funding: This work was supported by the Technology Innovation Program (20010723) funded by
+                                  the Ministry of Trade, Industry and Energy (MOTIE, Korea). This work was supported by the
+Nanomaterials 2024, 14, 209                                                                                                         10 of 11
+
+
+
+                                   Funding: This work was supported by the Technology Innovation Program (20010723) funded
+                                   by the Ministry of Trade, Industry and Energy (MOTIE, Korea). This work was supported by
+                                   the Industrial Fundamental Technology Development Program “Public–private joint investment
+                                   semiconductor R&D program(K-CHIPS) to foster high-quality human resources” (00237548) funded
+                                   By the Ministry of Trade, Industry and Energy (MOTIE, Korea). This research was supported by the
+                                   MOTIE (Ministry of Trade, Industry and Energy) (1415179121 and 1415187530) and KSRC (Korea
+                                   Semiconductor Research Consortium) (20010723 and 00237548) support program for the development
+                                   of the future semiconductor device. The present Research has been conducted by the Research Grant
+                                   of Kwangwoon University in 2023.
+                                   Data Availability Statement: Data available on reasonable request.
+                                   Conflicts of Interest: The authors declare no conflict of interest.
+
+References
+1.    Park, K.T.; Byeon, D.S.; Kim, D.H. A world’s first product of three-dimensional vertical NAND Flash memory and beyond. In
+      Proceedings of the 2014 14th Annual Non-Volatile Memory Technology Symposium (NVMTS), Jeju Island, Republic of Korea,
+      27–29 October 2014; pp. 1–5. [CrossRef]
+2.    Shen, M.; Lill, T.; Hoang, J.; Chi, H.; Routzahn, A.; Church, J.; Subramonium, P.; Puthenkovilakam, R.; Reddy, S.; Bhadauriya, S.;
+      et al. Progress report on high aspect ratio patterning for memory devices. Jpn. J. Appl. Phys. 2023, 62, SI0801. [CrossRef]
+3.    Ishikawa, K.; Karahashi, K.; Ishijima, T.; Cho, S.I.; Elliott, S.; Hausmann, D.; Mocuta, D.; Wilson, A.; Kinoshita, K. Progress in
+      nanoscale dry processes for fabrication of high-aspect-ratio features: How can we control critical dimension uniformity at the
+      bottom? Jpn. J. Appl. Phys. 2018, 57, 06JA01. [CrossRef]
+4.    Iwase, T.; Yokogawa, K.; Mori, M. Eliminating dependence of hole depth on aspect ratio by forming ammonium bromide during
+      plasma etching of deep holes in silicon nitride and silicon dioxide. Jpn. J. Appl. Phys. 2018, 57, 06JC03. [CrossRef]
+5.    Tandou, T.; Kubo, S.; Yokogawa, K.; Negishi, N.; Izawa, M. Improving the etching performance of high-aspect-ratio contacts by
+      wafer temperature control. Precis. Eng. 2016, 44, 87–92. [CrossRef]
+6.    Lill, T.; Berry, I.L.; Shen, M.; Hoang, J.; Fischer, A.; Panagopoulos, T.; Chang, J.P.; Vahedi, V. Dry etching in the presence of
+      physisorption of neutrals at lower temperatures. J. Vac. Sci. Technol. A 2023, 41, 023005. [CrossRef]
+7.    Dussart, R.; Ettouri, R.; Nos, J.; Antoun, G.; Tillocher, T.; Lefaucheux, P. Cryogenic etching of silicon compounds using a CHF3
+      based plasma. J. Appl. Phys. 2023, 133, 113306. [CrossRef]
+8.    Hsiao, S.-N.; Britun, N.; Nguyen, T.T.N.; Tsutsumi, T.; Ishikawa, K.; Sekine, M.; Hori, M. Manipulation of etch selectivity of silicon
+      nitride over silicon dioxide to a-carbon by controlling substate temperature with a CF4 /H2 plasma. Vacuum 2023, 210, 111863.
+      [CrossRef]
+9.    Hattori, T.; Kobayashi, H.; Ohtake, H.; Akinaga, K.; Kurosaki, Y.; Takei, A.; Sekiguchi, A.; Maeda, K.; Takubo, C.; Yamada, M.
+      Highly selective isotropic gas-phase etching of SiO2 using HF and methanol at temperatures −30 ◦ C and lower. Jpn. J. Appl. Phys.
+      2023, 62, abc953. [CrossRef]
+10.   Sato, M.; Takehara, D.; Uda, K.; Hara, K.S. Suppression of microloading effect by low-temperature SiO2 etching. Jpn. J. Appl. Phys.
+      1992, 31, 4370–4375. [CrossRef]
+11.   Kim, J.; Choi, G.; Kwon, K.H. High-aspect-ratio oxide etching using CF4 /C6 F12 O plasma in an inductively coupled plasma
+      etching system with low-frequency bias power. Plasma Process. Polym. 2023, 20, 2200167. [CrossRef]
+12.   Jin, D.Z.; Yang, Z.H.; Tang, P.Y.; Xiao, K.X.; Dai, J.Y. Hydrogen plasma diagnosis in penning ion source by optical emission
+      spectroscopy. Vacuum 2008, 83, 451–453. [CrossRef]
+13.   Fukasawa, T.; Nakamura, A.; Shindo, H.; Yasuhiro Horiike, Y.H. High rate and highly selective SiO2 etching employing inductively
+      coupled plasma. Jpn. J. Appl. Phys. 1994, 33, 2139–2144. [CrossRef]
+14.   Montazer Rahmati, P.M.; Arefi, F.; Amouroux, J. Plasma polymerization of CF4 + H2 mixtures on the surface of polyethylene and
+      polyvinylidene flouride substrates. Surf. Coat. Technol. 1991, 45, 369–378. [CrossRef]
+15.   Ryan, K.R.; Plumb, I.C. Gas-phase reactions of CF3 and CF2 with hydrogen atoms: Their significance in plasma processing. Plasma
+      Chem. Plasma Process. 1984, 4, 141–146. [CrossRef]
+16.   Tinck, S.; Tillocher, T.; Dussart, R.; Bogaerts, A. Cryogenic etching of silicon with SF6 inductively coupled plasmas: A combined
+      modelling and experimental study. J. Phys. D Appl. Phys. 2015, 48, 155204. [CrossRef]
+17.   Li, J.; Kim, Y.; Han, S.; Chae, H. Ion-enhanced etching characteristics of sp2 -rich hydrogenated amorphous carbons in CF4 plasmas
+      and O2 plasmas. Materials 2021, 14, 2941. [CrossRef] [PubMed]
+18.   Coburn, J.W.; Winters, H.F. Conductance considerations in the reactive ion etching of high aspect ratio features. Appl. Phys. Lett.
+      1989, 55, 2730–2732. [CrossRef]
+19.   Doemling, M.F.; Rueger, N.R.; Oehrlein, G.S. Observation of inverse reactive ion etching lag for silicon dioxide etching in
+      inductively coupled plasmas. Appl. Phys. Lett. 1996, 68, 10–12. [CrossRef]
+20.   Huard, C.M.; Zhang, Y.; Sriraman, S.; Paterson, A.; Kushner, M.J. Role of neutral transport in aspect ratio dependent plasma
+      etching of three-dimensional features. J. Vac. Sci. Technol. A 2017, 35, 05C301. [CrossRef]
+Nanomaterials 2024, 14, 209                                                                                                       11 of 11
+
+
+
+21.   Cheng, Q.J.; Long, J.D.; Chen, Z.; Xu, S. Chemically active plasmas for deterministic assembly of nanocrystalline SiC film. J. Phys.
+      D Appl. Phys. 2007, 40, 2304–2307. [CrossRef]
+22.   Zeze, D.A.; Carey, J.D.; Stolojan, V.; Weiss, B.L.; Silva, S.R.P. Damage effects in Pyrex by CF4 reactive ion etching in dual
+      RF-microwave plasmas. Micro Nano Lett. 2006, 1, 103–107. [CrossRef]
+23.   Izawa, M.; Negishi, N.; Yokogawa, K.E.; Momonoi, Y. Investigation of bowing reduction in SiO2 etching taking into account
+      radical sticking in a hole. Jpn. J. Appl. Phys. 2007, 46, 7870–7874. [CrossRef]
+24.   Kim, D.; Hudson, E.A.; Cooperberg, D.; Edelberg, E.; Srinivasan, M. Profile simulation of high aspect ratio contact etch. Thin Solid
+      Film. 2007, 515, 4874–4878. [CrossRef]
+25.   Rangelow, I.W. Critical tasks in high aspect ratio silicon dry etching for microelectromechanical systems. J. Vac. Sci. Technol. A
+      2003, 21, 1550–1562. [CrossRef]
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.
+
