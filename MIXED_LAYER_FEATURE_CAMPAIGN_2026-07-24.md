@@ -347,3 +347,33 @@ attributed and receipted.**
 Delivered: mask exact, mouth equilibrating, neck-band agreement 41.8 vs 41.1,
 clog and necking-absent topology exact, four permanent engine defects found by
 measurement, and ~$1 of total compute spent.
+
+## Campaign 10 (2026-08-05) — §5.2 executed: Gray's measured laws
+
+The dossier's named path was run. Krüger's two-row `n = 1` anomaly on the SiO₂
+channels replaced by Gray's own measured √E laws (`2f1e218`), then graded at
+feature scale (`ml23-gray-12s`).
+
+| observable | pre-Gray | Gray | target |
+|---|---|---|---|
+| physical sputter @ 3406 eV | 4.060 /ion | 0.752 /ion | Gray absolute |
+| chemical channel @ 3406 eV | 3.889 /ion | 2.987 /ion | Gray absolute |
+| rate response to 100× radical shadow | < 1 % | **0.010×** | must respond |
+| ARDE sign (early-span slope) | **+0.7530** | **−0.0033** | must not accelerate |
+| floor rate | ~22 nm/s | 6.97 nm/s | — |
+| aperture @ t = 1 s | 86.00 nm | 86.75 nm | unchanged (no leakage) |
+| depth @ 60 s | ~1066 nm (+29 %) | ~418 nm (−49 %) | 784–866 |
+
+**The regime defect is closed and the depth error changed sign.** A F-free
+physical channel running 5.4× too strong was carrying the etch regardless of
+supply — the reason the model was ion-limited, showed no ARDE, and over-etched.
+With it corrected against absolutely-calibrated data the floor rides its radical
+supply, but is F-starved and under-etches by half.
+
+Residual relocated, not closed: Gray's β_e at the front energy is 2.99 SiF₄/ion
+against the ≈3.15 units/ion Krüger's blanket arithmetic implies (95 %), so the
+chemical channel carries the observed etch **at fluorine saturation**. Depth is
+now a fluorine-delivery question at the front; the largest named candidate is
+thermalised-ion return to the radical ledger (E8, a transport feature; Huang
+measures > 95 % of floor radicals above AR 10 to be thermalised CF_x⁺). Full
+record: `RESULTS_ML23_GRAY_LAWS_2026-08-05.md`.

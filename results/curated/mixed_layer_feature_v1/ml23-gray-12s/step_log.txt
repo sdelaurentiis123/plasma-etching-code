@@ -1,0 +1,14 @@
+step=1 t=0.200s dt=0.2s depth=1.369nm mask_opening=88.680nm wall=110.06s
+step=2 t=0.400s dt=0.2s depth=2.761nm mask_opening=88.113nm wall=83.33s
+step=3 t=0.600s dt=0.2s depth=4.154nm mask_opening=87.623nm wall=86.15s
+step=4 t=0.800s dt=0.2s depth=5.548nm mask_opening=87.155nm wall=98.34s
+step=5 t=1.000s dt=0.2s depth=6.949nm mask_opening=86.748nm wall=93.35s
+step=6 t=1.200s dt=0.2s depth=8.341nm mask_opening=86.345nm wall=89.19s
+step=7 t=1.400s dt=0.2s depth=9.732nm mask_opening=85.903nm wall=81.86s
+step=8 t=1.600s dt=0.2s depth=11.124nm mask_opening=85.458nm wall=74.98s
+step=9 t=1.800s dt=0.2s depth=12.524nm mask_opening=85.036nm wall=72.77s
+step=10 t=2.000s dt=0.2s depth=13.916nm mask_opening=84.644nm wall=70.75s
+step=11 t=2.200s dt=0.2s depth=15.304nm mask_opening=84.286nm wall=69.24s
+step=12 t=2.400s dt=0.2s depth=16.692nm mask_opening=83.934nm wall=68.08s
+step=13 t=2.600s dt=0.2s depth=18.080nm mask_opening=83.513nm wall=65.26s
+step=14 t=2.800s dt=0.2s depth=19.468nm mask_opening=83.096nm wall=64.86s
