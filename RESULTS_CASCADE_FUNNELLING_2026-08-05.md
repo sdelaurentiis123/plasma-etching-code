@@ -150,3 +150,32 @@ engine's chemistry reproduces its own feature runs from the measured delivery.
    force them to consume the measured (E, cos) population. The 1500 eV reference
    produced a 3.4x phantom in this pass and a "2.9x over-delivery" conclusion in
    the previous one.
+
+## Addendum — completed sweep to AR 16, and the rate rises with depth
+
+The full frozen-geometry sweep (`results/curated/cascade_funnelling/scan.json`):
+
+| oxide AR | ion/AR0 | hot/AR0 | total/AR0 | hot/ion |
+|---|---|---|---|---|
+| 0 | 1.000 | 1.000 | 1.000 | 0.097 |
+| 4 | 0.950 | 1.430 | 0.992 | 0.147 |
+| 8 | 0.899 | 1.857 | 0.984 | 0.201 |
+| 12 | 0.850 | 2.284 | 0.977 | 0.262 |
+| 16 | 0.798 | 2.713 | 0.968 | 0.331 |
+
+Over AR 0 -> 16 the direct ion flux falls 20 % and the cascade hot-neutral flux
+rises 171 %, so **total energetic delivery falls 3 %**. The rising cascade term
+very nearly cancels the shadowing term across the entire measured range.
+
+Engine per-atom relaxation on those gathers gives floor recession
+**19.15 nm/s at AR 0 and 24.30 nm/s at AR 4** — the etch rate *increases* 27 %
+with depth. These are straight-walled trenches, so this is not taper focusing
+(Huang's "small initial increase … due to tapering", L5578); it is the
+hot-neutral term outrunning shadowing on a vertical wall.
+
+This is the quantitative form of the ARDE statement in the main text: the
+measured delivery produces no aspect-ratio slowdown at all over the range the
+validation case spans, and the depth channel therefore has nothing to attenuate
+it. Anti-ARDE over AR 0 -> 4 is a sharper falsifier than the +29 % endpoint
+miss, and it is free to re-measure after any change to the beam or the
+ion-energy channel.
