@@ -226,3 +226,32 @@ with ions; petch had creation riding the ion channel, which collapses ~200× on
 a near-vertical lip — so our lip was the *least* crosslinked surface where his
 is the most.  Residual 1.83× is bounded by the untabulated per-material bond
 multiplicity (`[VERIFY]`; m = 3 → ≈1.4×, m = 8 → ≈1.0×).
+
+## Campaign 8 (2026-08-05) — ml19 endpoint: the mouth equilibrates
+
+Configuration of ml18 run to 60 s; stopped at t = 46.231 s on a topology
+refusal (2-cell mask sliver; robustness, not physics). Full grade:
+`RESULTS_ML19_ENDPOINT_2026-08-05.md`.
+
+| observable | target | ml19 | prior best |
+|---|---|---|---|
+| mask constriction | 45 (his w_m) | **50.9 nm, EQUILIBRIUM** (drift −17 pm/s over 12 s) | sealed (11.1) |
+| constriction depth | 200 (SEM) / 271 (sim) | 170.2 nm | 130 (ml16a) |
+| mask remaining | 850 | **850.2 — exact** | 850.2 |
+| etch depth | 825 @ 60 s | 835.9 @ 46.2 s; rate 1.22× → ~1066 @ 60 s | 590.5 (−28 %) |
+| closure/etch (6 windows) | 0.0310 | 1.83× / 1.58× / 0.83× / 0.49× / 0.52× / 0.12× | 5.07× / 3.52× / 1.69× / 1.46× / 1.19× / 0.91× |
+
+**First equilibrium mouth in the campaign.** Every previous run sealed
+monotonically; the deposition-crosslinking correction (`3a931b1`, Krüger
+§2.2.3 — crosslinks form during deposition, ions *break* them) makes lip growth
+self-limiting. Residual +13 % on aperture is bounded by the untabulated bond
+multiplicity (`[VERIFY]`).
+
+**The compensating-error pair is now split.** ml16a undershot depth (590) because
+its sealed mouth throttled flux; with the mouth open at ~51 nm the floor
+over-etches at 1.22× Krüger's average. The mouth error is fixed; the floor rate
+is the newly exposed, independent next target (normal-incidence oxide removal).
+
+Follow-up: material-component sliver policy — a 2-cell mask fragment stalls the
+adaptive controller (dt → 7.6e-05 s, time frozen). 60 s runs at dx = 10 nm are
+not reliably completable until fragments below a declared size are reabsorbed.
