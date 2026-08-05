@@ -7,6 +7,8 @@ on a near-vertical wall, while ion-driven creation does (~200x through the
 double cosine).  See RESULTS_LIP_CROSSLINK_2026-08-04.md.
 """
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -39,13 +41,38 @@ def _fluxes(dep_c, dep_f, ion_flux, cosine, oxygen=0.0):
 
 
 def test_ion_free_steady_state_is_the_row_stoichiometry():
-    """`P(s)+P(s) -> PC(s)+PC(s)` converts two units per deposition event, so
-    with no ions to break bonds the crosslinked fraction relaxes to the exact
-    analytic balance 2(1-x) = x, i.e. x = 2/3.  No constant is fitted: the 2 is
-    the published row's own stoichiometry."""
+    """With no partner count supplied the published row `P(s)+P(s) ->
+    PC(s)+PC(s)` converts two units per deposition event, so the crosslinked
+    fraction relaxes to the analytic balance 2(1-x) = x, i.e. x = 2/3."""
     state, _, total = _relax(_fluxes(1.0e20, 1.7e20, 0.0, 1.0))
     x = float(np.asarray(state.n_xl_film)) / total
     assert x == pytest.approx(2.0 / 3.0, rel=0.05)
+
+
+def test_published_partner_counts_match_the_worked_examples():
+    """Krueger et al., JVST A 42, 043008 (2024): "based on the number of
+    available bonds (three in the example in Fig. 5).  For example, CF2 would
+    have a maximum of two crosslinks and CF3 would have a maximum of a single
+    crosslink."  The rule must reproduce those worked examples exactly."""
+    from petch.mixed_layer_mechanism import (
+        KRUEGER_2024_AVAILABLE_CROSSLINK_BONDS as BONDS)
+    assert BONDS["CF"] == pytest.approx(3.0)
+    assert BONDS["CF2"] == pytest.approx(2.0)
+    assert BONDS["CF3"] == pytest.approx(1.0)
+    # Multi-carbon radicals spend two valences per internal C-C bond.
+    assert BONDS["C2F4"] == pytest.approx(2.0)
+    assert all(v >= 0.0 for v in BONDS.values())
+
+
+def test_partner_count_raises_the_steady_crosslinked_fraction():
+    """Supplying the published per-species counts converts k = 1 + partners
+    units per event, so x relaxes to k/(1+k) -- a stronger, composition-borne
+    crosslink density than the bare row stoichiometry."""
+    fluxes = _fluxes(1.0e20, 1.7e20, 0.0, 1.0)
+    fluxes = replace(fluxes, deposition_available_bonds=2.0)
+    state, _, total = _relax(fluxes)
+    x = float(np.asarray(state.n_xl_film)) / total
+    assert x == pytest.approx(3.0 / 4.0, rel=0.05)
 
 
 def test_crosslinking_survives_grazing_incidence():

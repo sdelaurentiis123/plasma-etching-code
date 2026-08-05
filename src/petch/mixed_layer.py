@@ -113,6 +113,10 @@ class SurfaceFluxes:
     # 0.8/0.85/0.9); None disables the two-state blend.
     chemisorption_activated_carbon_flux: object = None
     chemisorption_activated_fluorine_flux: object = None
+    # Deposition-weighted maximum crosslink partners per arriving radical
+    # (Krueger 2024: CF 3, CF2 2, CF3 1).  None falls back to the published
+    # row stoichiometry alone (one partner).
+    deposition_available_bonds: object = None
     # Atom-resolved ion spectrum (per-event): sparse (face, flux, E, cos)
     # arrays. When present, EVERY ion-driven term is evaluated per atom
     # against the live face state and segment-summed (research doc
@@ -592,12 +596,27 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     # rate = 2 x (deposited atoms) x (fresh fraction) x (film present).
     # No constant is introduced: the 2 is the row's own stoichiometry and the
     # gates are the eligibility conditions the module states.
+    # The partner COUNT is published per species -- Krueger et al., JVST A 42,
+    # 043008 (2024), sec. III (tmp/pdfs/krueger-2024.txt L388-390): "based on
+    # the number of available bonds (three in the example in Fig. 5).  For
+    # example, CF2 would have a maximum of two crosslinks and CF3 would have a
+    # maximum of a single crosslink."  Those worked examples pin the rule
+    # uniquely (available = 4n - m - 2(n-1) for C_nF_m; CF->3, CF2->2,
+    # CF3->1), and the adapter passes the deposition-weighted mean here.  When
+    # the caller supplies no bond count the published row stoichiometry alone
+    # applies (one partner).
     # This channel does not collapse on near-vertical walls (deposition is
     # isotropic) whereas ion-driven creation does by ~200x through the double
     # cosine -- which is why the lip film crosslinks in his model and did not
     # in ours (x_xl = 0.163 measured against ~0.9 required).
     # See RESULTS_LIP_CROSSLINK_2026-08-04.md.
-    xl_rate = xl_rate + (2.0 * (dep_c + dep_f) * fresh_fraction * theta_film)
+    if fluxes.deposition_available_bonds is None:
+        partners = 1.0
+    else:
+        partners = np.maximum(
+            np.asarray(fluxes.deposition_available_bonds, dtype=float), 0.0)
+    xl_rate = xl_rate + ((1.0 + partners)
+                         * (dep_c + dep_f) * fresh_fraction * theta_film)
     # Ion de-crosslinking (Appendix S3d: 0.3 @ 8 eV, q=0.5, e0=500): converts
     # crosslinked film back to fresh — mass-neutral within the film.
     dexl_rate = kernel_dexl * _guarded_ratio(state.n_xl_film, film_total, 1.0)

@@ -440,6 +440,8 @@ class MixedLayerMechanism:
         sub_dep_f = np.zeros(shape)
         xl_dep_c = np.zeros(shape)
         xl_dep_f = np.zeros(shape)
+        bond_capacity = np.zeros(shape)
+        bond_units = np.zeros(shape)
         for name, (c_atoms, f_atoms) in self.precursor_stoichiometry.items():
             value = fluxes.neutral_flux_m2_s.get(name)
             if value is None:
@@ -460,6 +462,14 @@ class MixedLayerMechanism:
                 film_dep_f = film_dep_f + p_film * base * f_atoms
                 sub_dep_c = sub_dep_c + p_sub * base * c_atoms
                 sub_dep_f = sub_dep_f + p_sub * base * f_atoms
+                # Deposition-weighted crosslink capacity: each arriving radical
+                # brings its own maximum partner count (CF 3, CF2 2, CF3 1 --
+                # Krueger 2024 JVST A 42, 043008), so the layer's conversion
+                # rate per deposited unit is the flux-weighted mean.
+                bonds = KRUEGER_2024_AVAILABLE_CROSSLINK_BONDS.get(name, 0.0)
+                dep_units = (p_film + p_sub) * base
+                bond_capacity = bond_capacity + bonds * dep_units
+                bond_units = bond_units + dep_units
                 if self.deposition_probability_on_crosslinked is not None:
                     p_xl = self.deposition_probability_on_crosslinked.get(name, 0.0)
                     xl_dep_c = xl_dep_c + p_xl * base * c_atoms
@@ -496,6 +506,10 @@ class MixedLayerMechanism:
             substrate_deposition_fluorine_flux=(
                 sub_dep_f if self.deposition_probability_on_film is not None
                 else None),
+            deposition_available_bonds=(
+                np.where(bond_units > 0.0,
+                         bond_capacity / np.maximum(bond_units, 1e-300), 0.0)
+                if self.deposition_probability_on_film is not None else None),
             crosslinked_deposition_carbon_flux=(
                 xl_dep_c if self.deposition_probability_on_crosslinked is not None
                 else None),
@@ -511,6 +525,30 @@ KRUEGER_2024_PRECURSOR_STOICHIOMETRY = {
     "CF": (1.0, 1.0), "CF2": (1.0, 2.0), "CF3": (1.0, 3.0),
     "C2F3": (2.0, 3.0), "C2F4": (2.0, 4.0),
     "C3F5": (3.0, 5.0), "C3F6": (3.0, 6.0),
+}
+
+
+def krueger_2024_available_crosslink_bonds(carbon, fluorine):
+    """Maximum crosslink partners of a deposited C_nF_m radical.
+
+    Krueger et al., JVST A 42, 043008 (2024): the count is "based on the
+    number of available bonds (three in the example in Fig. 5).  For example,
+    CF2 would have a maximum of two crosslinks and CF3 would have a maximum
+    of a single crosslink."  Those worked examples pin the rule uniquely:
+    carbon carries four valences, fluorine consumes one each, and the n-1
+    internal C-C bonds of a multi-carbon radical consume two more apiece, so
+
+        available = 4n - m - 2(n - 1)
+
+    reproduces CF -> 3, CF2 -> 2, CF3 -> 1 exactly.  Published rule applied to
+    published stoichiometry: no constant is introduced.
+    """
+    return max(4.0 * carbon - fluorine - 2.0 * (carbon - 1.0), 0.0)
+
+
+KRUEGER_2024_AVAILABLE_CROSSLINK_BONDS = {
+    name: krueger_2024_available_crosslink_bonds(*stoich)
+    for name, stoich in KRUEGER_2024_PRECURSOR_STOICHIOMETRY.items()
 }
 
 # Krueger's published complex-formation probabilities (thesis Appendix B):
