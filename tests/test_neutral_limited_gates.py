@@ -80,24 +80,27 @@ def test_n1_floor_is_pure_physical_sputter(beam_curve):
     assert beam_curve[0.0] < beam_curve[500.0]
 
 
-def test_n1_dynamic_range_records_the_open_miss(beam_curve):
+def test_n1_dynamic_range_matches_gray(beam_curve):
     """GATE N1: the zero-radical floor over the saturated plateau.
 
-    Gray measures 0.28/1.10 = 0.255 (band 0.20-0.30); petch measures 0.873.
-    The miss is REAL and open, so this pins petch's own value as a tripwire
-    rather than asserting the published band -- any change that moves it must
-    move it deliberately and be graded on the depth channel at the same time
-    (RESULTS_ANGULAR_CONVENTION_2026-08-05.md).
+    This gate previously pinned petch's own 0.873 as a tripwire and instructed
+    that it be flipped to assert Gray's published band once a change moved it
+    deliberately WITH a paired depth forecast.  That is what happened: the two
+    SiO2 rows now carry Gray's own measured laws (thesis Table 5-1 and
+    Eq. 5-35), the dynamic range fell to 0.228 inside the measured band, and
+    the paired coupled depth forecast is recorded in
+    RESEARCH_ENERGY_SCALING_2026-08-05.md (depth factor 0.483, an over-
+    correction that the doc states explicitly rather than hides).
+
+    The value is NOT fitted to this band -- both constants come from Gray's
+    fits to his own six-point energy sweep, and the dynamic range is what
+    follows.
     """
     measured = beam_curve[0.0] / beam_curve[500.0]
-    assert measured == pytest.approx(PETCH_DYNAMIC_RANGE, rel=0.08), (
-        f"dynamic range moved to {measured:.3f} from {PETCH_DYNAMIC_RANGE:.3f}; "
-        f"Gray 1993 measures {GRAY_DYNAMIC_RANGE:.3f} (band {GRAY_BAND}). "
-        f"Update the constant only with the paired depth forecast.")
     lo, hi = GRAY_BAND
-    assert not (lo <= measured <= hi), (
-        "dynamic range entered Gray's band -- if this is intended, flip this "
-        "gate to assert the band and cite the run that graded the depth.")
+    assert lo <= measured <= hi, (
+        f"dynamic range {measured:.3f} left Gray's measured band {GRAY_BAND} "
+        f"(centre {GRAY_DYNAMIC_RANGE:.3f})")
 
 
 def test_n2_depositing_carbon_reduces_yield():

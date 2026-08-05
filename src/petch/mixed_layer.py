@@ -268,16 +268,60 @@ def _angular_oxide_sputter(cosine):
     return _class1_shape(cosine, _OXIDE_CLASS1_B)
 
 
-def _complex_energy_factor(e_iface, eps_dep, ref_dep_140):
-    """Energy scaling of the complex (chemically-enhanced) removal channel.
+# --------------------------------------------------------------------------
+# The two SiO2 ion channels, on the primary source's own measured laws.
+#
+# Krueger's Appendix B carries n = 1 (linear in ion energy) on exactly two rows
+# -- SiO2(s)+Ar+ and SiO2CF(s)+Ar+ -- against 416 rows at n = 0.5 in the same
+# table, and Huang/Qu/Huard all state the group default as "typically 0.5".
+# That linear form is Sigmund's, and Gray tested it against Steinbruchel's
+# sqrt form on this exact system and rejected it (MIT thesis 1993, Fig. 5-2,
+# p.161: the sqrt form "was again found to give a much more accurate
+# representation of SiO2 sputtering yields").  Against Gray's six measured
+# points (20-2000 eV, Table 5-10) the fits are sqrt R2 = 0.994, Krueger's
+# linear R2 = -2.53, and petch's previous ZBL-shaped factor R2 = -1.84.
+#
+# So these two rows now carry Gray's own laws, absolutely, with no free
+# parameter and no reference-energy normalisation:
+#
+#   Table 5-1   physical sputter   Y = 0.0139 (sqrt(E) - sqrt(18))
+#               (cited there to Chapman 1980; the same constants ViennaPS's
+#                fluorocarbon-silica model carries)
+#   Eq. (5-35)  ion-enhanced       beta_e = 0.053 (sqrt(E) - sqrt(4))
+#               ("the E_i^1/2 scaling is also observed in the case of SiO2
+#                etching over the range of 20 eV to 2000 eV", p.252)
+#
+# beta_e is defined by Gray as "the number of SiF4 molecules removed from
+# fluorine saturated surface regions per incoming ion", which is exactly the
+# quantity the complex channel supplies here.
+#
+# Extrapolation limit, declared: the feature front runs at ~3406 eV, 1.7x above
+# Gray's top measured point.  No roll-over is expected below 10-20 keV, but ZBL
+# sn is proportional to sqrt(eps) only for eps << 0.01 and eps = 0.048 at
+# 3406 eV, so the sqrt law is the UPPER end of the defensible band there
+# (RESEARCH_ENERGY_SCALING_2026-08-05).
+_GRAY_SPUTTER_A = 0.0139        # eV^-1/2, Table 5-1
+_GRAY_SPUTTER_ETH = 18.0        # eV
+_GRAY_BETA_A = 0.053            # eV^-1/2, Eq. (5-35)
+_GRAY_BETA_ETH = 4.0            # eV
 
-    Default is the ZBL deposited-energy shape eps(E)/eps(140) -- the K24-DEKNOB
-    result that retired the fitted yield-scale knob and is validated against the
-    power sweeps.  Krueger's own row reads `0.1471 35 1 140 2`, i.e. the
-    threshold-power form (E-35)/(140-35) with n=1; both are sourced, and
-    RESULTS_LIMITING_REGIME_2026-08-05 §3 records the choice as open.  Isolated
-    here so a model-space solve can swap it without touching the call sites.
-    """
+
+def _bare_sputter_yield(e_iface):
+    """SiO2 physical sputter yield per ion (Gray thesis Table 5-1)."""
+    e = np.maximum(np.asarray(e_iface, dtype=float), 0.0)
+    return _GRAY_SPUTTER_A * np.maximum(
+        np.sqrt(e) - np.sqrt(_GRAY_SPUTTER_ETH), 0.0)
+
+
+def _complex_yield(e_iface):
+    """SiF4 removed per ion from F-saturated SiO2 (Gray thesis Eq. 5-35)."""
+    e = np.maximum(np.asarray(e_iface, dtype=float), 0.0)
+    return _GRAY_BETA_A * np.maximum(
+        np.sqrt(e) - np.sqrt(_GRAY_BETA_ETH), 0.0)
+
+
+def _complex_energy_factor(e_iface, eps_dep, ref_dep_140):
+    """Retained hook (model-space solves patch it); now unused by the kernels."""
     return np.asarray(eps_dep, dtype=float) / ref_dep_140
 
 
@@ -390,12 +434,10 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         # Appendix-B angular classes: SiO2CF(s)+Ar+ is class 2, SiO2(s)+Ar+ and
         # AC(s)+Ar+ are class 1 (RESULTS_LIP_REMOVAL_AUDIT_2026-08-04).
         kernel_complex = _segment(
-            0.1471 * atom_flux
-            * _complex_energy_factor(atom_e_iface, atom_eps, ref_dep_140)
-            * atom_chem_ang)
+            atom_flux * _complex_yield(atom_e_iface) * atom_chem_ang)
         atom_kress_ox = _angular_oxide_sputter(atom_cos)
-        kernel_bare = _segment(atom_flux * np.asarray(_threshold_power_yield(
-            atom_e_iface, 0.0852, 70.0, 140.0, 1.0)) * atom_kress_ox)
+        kernel_bare = _segment(
+            atom_flux * _bare_sputter_yield(atom_e_iface) * atom_kress_ox)
         kernel_ac = _segment(atom_flux * np.asarray(_threshold_power_yield(
             atom_e_iface, 0.001, 200.0, 250.0, 0.4)) * atom_kress_ox)
         kernel_dexl = _segment(atom_flux * np.asarray(_threshold_power_yield(
@@ -422,13 +464,11 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         kernel_mix = fluxes.ion_flux * energy_ratio
         kernel_xl = fluxes.ion_flux * np.maximum(
             np.asarray(fluxes.ion_energy_eV, dtype=float) - e_iface, 0.0)
-        kernel_complex = (0.1471 * fluxes.ion_flux
-                          * _complex_energy_factor(e_iface, eps_dep,
-                                                   ref_dep_140)
+        kernel_complex = (fluxes.ion_flux * _complex_yield(e_iface)
                           * chem_ang_scalar)
         kress_ox_scalar = _angular_oxide_sputter(cos_scalar)
-        kernel_bare = fluxes.ion_flux * np.asarray(_threshold_power_yield(
-            e_iface, 0.0852, 70.0, 140.0, 1.0)) * kress_ox_scalar
+        kernel_bare = (fluxes.ion_flux * _bare_sputter_yield(e_iface)
+                       * kress_ox_scalar)
         kernel_ac = fluxes.ion_flux * np.asarray(_threshold_power_yield(
             e_iface, 0.001, 200.0, 250.0, 0.4)) * kress_ox_scalar
         kernel_dexl = fluxes.ion_flux * np.asarray(_threshold_power_yield(

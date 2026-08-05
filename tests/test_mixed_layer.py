@@ -154,11 +154,22 @@ def test_carbon_substrate_ledger_closes():
     assert worst < 1e-9
 
 
-def test_rate_follows_derived_energy_law():
-    """In the capacity-limited film-free regime, the substrate removal rate
-    must scale exactly as the ZBL deposited-in-layer factor — the same law
-    the K24-DEKNOB-1 study validated. No fitted energy dependence."""
-    from petch.mixed_layer import _deposited_energy
+def test_rate_follows_measured_sqrt_energy_law():
+    """In the capacity-limited film-free regime the removal rate must follow
+    the energy law of the PRIMARY SOURCE, not a reference-normalised shape.
+
+    Gray (MIT thesis 1993) measured this system over 20-2000 eV and fitted
+    beta_e = 0.053(sqrt(E) - sqrt(4)) (Eq. 5-35), having explicitly tested and
+    rejected the Sigmund form that is linear in E (Fig. 5-2, p.161).  petch
+    previously carried a ZBL-shaped factor that is linear to within 2 percent
+    above 700 eV, i.e. the rejected shape wearing a different label; against
+    Gray's six measured points it scores R2 = -1.84 where the sqrt law scores
+    0.994 (RESEARCH_ENERGY_SCALING_2026-08-05).
+
+    At F-saturated coverage the composite is dominated by the complex channel,
+    so the rate ratio must track Gray's sqrt law directly.
+    """
+    from petch.mixed_layer import _complex_yield
 
     params = MixedLayerParams()
     rates = {}
@@ -166,12 +177,30 @@ def test_rate_follows_derived_energy_law():
         fluxes = SurfaceFluxes(0.0, 1.0e22, 0.0, 6.0e18, energy)
         rates[energy] = steady_state(fluxes, params).sif4_rate
     for energy in (300.0, 3000.0):
-        expected = (_deposited_energy(energy, 1.0, params)[0]
-                    / _deposited_energy(1000.0, 1.0, params)[0])
-        # The published bare-sputter channel adds a small threshold-power
-        # component on top of the ZBL-shaped complex channel; the composite
-        # tracks the ZBL shape within 2 percent at F-saturated coverage.
-        assert rates[energy] / rates[1000.0] == pytest.approx(expected, rel=2e-2)
+        expected = float(_complex_yield(energy) / _complex_yield(1000.0))
+        # The bare-sputter channel adds a small sqrt component of its own on
+        # top; the composite tracks the complex law within 3 percent.
+        assert rates[energy] / rates[1000.0] == pytest.approx(expected, rel=3e-2)
+
+
+def test_reproduces_gray_measured_yield_points():
+    """The complex channel must reproduce Gray's Table 5-10 measurements.
+
+    beta_e = "the number of SiF4 molecules removed from fluorine saturated
+    surface regions per incoming ion", measured at six energies.  Tolerance is
+    Gray's own fit residual (Eq. 5-35 scores R2 = 0.9927 against these points);
+    the 250 eV point sits below his own trend, so it carries the loosest bound.
+    """
+    from petch.mixed_layer import _complex_yield, _bare_sputter_yield
+
+    measured = {20.0: 0.13, 150.0: 0.55, 250.0: 0.60,
+                350.0: 0.85, 500.0: 1.10, 2000.0: 2.25}
+    for energy, value in measured.items():
+        tol = 0.25 if energy == 250.0 else 0.06
+        assert float(_complex_yield(energy)) == pytest.approx(value, rel=tol)
+    # Table 5-1, the physical channel, exactly.
+    assert float(_bare_sputter_yield(350.0)) == pytest.approx(
+        0.0139 * (350.0 ** 0.5 - 18.0 ** 0.5), rel=1e-12)
 
 
 def test_rung0_degenerate_matches_langmuir_closed_form():
@@ -179,16 +208,14 @@ def test_rung0_degenerate_matches_langmuir_closed_form():
     reduce to the Belen/ViennaPS coverage structure exactly — steady state
     theta_F = J/(J + 4*capacity), rate = capacity * theta_F, with capacity
     from the derived deposited-energy factor (nothing fitted)."""
-    from petch.mixed_layer import _deposited_energy
+    from petch.mixed_layer import _complex_yield
 
     params = MixedLayerParams()
     for j_f, energy in ((5.0e19, 400.0), (2.0e20, 1000.0), (1.0e21, 2000.0)):
         fluxes = SurfaceFluxes(0.0, j_f, 0.0, 6.0e18, energy)
         result = steady_state(fluxes, params)
-        eps_dep = _deposited_energy(energy, 1.0, params)[0]
-        eps_ref = _deposited_energy(140.0, 1.0, params)[0]
-        capacity = (params.volatilization_yield * 0.1471
-                    * fluxes.ion_flux * eps_dep / eps_ref)
+        capacity = (params.volatilization_yield * fluxes.ion_flux
+                    * float(_complex_yield(energy)))
         theta = j_f / (j_f + 4.0 * capacity)
         assert result.sif4_rate == pytest.approx(capacity * theta, rel=1e-5)
 
