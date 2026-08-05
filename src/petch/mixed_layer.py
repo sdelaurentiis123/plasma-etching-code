@@ -218,10 +218,45 @@ def _threshold_power_yield(energy_eV, p0, threshold_eV, reference_eV, exponent):
 # peak/normal ratio, which this form reproduces as 4.17, not about p0.)
 
 
-def _angular_physical_sputter(cosine):
-    """Class 1 (Kress 1999): peaked off-normal, zero at grazing, f(0)=1."""
+# Class-1 shape parameter B in (1 + B sin^2 t) cos t.
+#
+# KRUEGER_B is the value his cited source implies and the one the polymer row
+# (CF(s)+Ar+) has carried through every validated lip/mouth result.
+#
+# OXIDE_B is the value bounded by the only angular sputter measurements taken
+# in THIS chemistry on THIS material:
+#   Cho et al., JVST A 18, 2705 (2000): SiO2 in CF4, peak/normal ~1.3 at all
+#     biases;  Schaepkens et al., JVST A 16, 3281 (1998): 54.7-deg V-groove,
+#     peak/normal ~1.33.
+# Kress et al. (1999), the citation behind class 1, is a molecular-dynamics
+# study of "Cu and Ar ion sputtering of Cu(111) surfaces" at 50-250 eV --
+# a different material system, and its shape gives peak/normal 4.17, i.e.
+# 3.2x above every in-chemistry measurement (RESEARCH_VERIFY_HUNT_2026-08-05).
+#
+# Landing OXIDE_B on the oxide/mask rows is a declared model choice between two
+# sourced options, made on chemistry match.  It is not fitted: f(0) = 1 for any
+# B, so every normal-incidence and blanket result is bitwise unchanged, and the
+# resulting peak (1.31) sits inside the measured band [1.30, 1.33].
+# The polymer row keeps KRUEGER_B; the measured FC-film counterpart
+# (Barklund & Blom, JVST A 10, 1212 (1992), Ar+ peak 1.448 at 65 deg) is a
+# flagged follow-up that needs its own graded run against the lip results.
+_KRUEGER_CLASS1_B = 9.3
+_OXIDE_CLASS1_B = 1.7
+
+
+def _class1_shape(cosine, b):
     cos_t = np.clip(np.asarray(cosine, dtype=float), 0.0, 1.0)
-    return np.maximum((1.0 + 9.3 * (1.0 - cos_t ** 2)) * cos_t, 0.0)
+    return np.maximum((1.0 + b * (1.0 - cos_t ** 2)) * cos_t, 0.0)
+
+
+def _angular_physical_sputter(cosine):
+    """Class 1 on the polymer row (Krueger's cited Kress form), f(0)=1."""
+    return _class1_shape(cosine, _KRUEGER_CLASS1_B)
+
+
+def _angular_oxide_sputter(cosine):
+    """Class 1 on the oxide/mask rows, bounded by in-chemistry measurement."""
+    return _class1_shape(cosine, _OXIDE_CLASS1_B)
 
 
 def _angular_chemical_sputter(cosine):
@@ -334,10 +369,11 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         # AC(s)+Ar+ are class 1 (RESULTS_LIP_REMOVAL_AUDIT_2026-08-04).
         kernel_complex = _segment(
             0.1471 * atom_flux * atom_eps / ref_dep_140 * atom_chem_ang)
+        atom_kress_ox = _angular_oxide_sputter(atom_cos)
         kernel_bare = _segment(atom_flux * np.asarray(_threshold_power_yield(
-            atom_e_iface, 0.0852, 70.0, 140.0, 1.0)) * atom_kress)
+            atom_e_iface, 0.0852, 70.0, 140.0, 1.0)) * atom_kress_ox)
         kernel_ac = _segment(atom_flux * np.asarray(_threshold_power_yield(
-            atom_e_iface, 0.001, 200.0, 250.0, 0.4)) * atom_kress)
+            atom_e_iface, 0.001, 200.0, 250.0, 0.4)) * atom_kress_ox)
         kernel_dexl = _segment(atom_flux * np.asarray(_threshold_power_yield(
             atom_energy, 0.3, 8.0, 500.0, 0.5)))
         kernel_act = _segment(atom_flux) * 0.9
@@ -364,10 +400,11 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
             np.asarray(fluxes.ion_energy_eV, dtype=float) - e_iface, 0.0)
         kernel_complex = (0.1471 * fluxes.ion_flux * np.asarray(
             eps_dep, dtype=float) / ref_dep_140 * chem_ang_scalar)
+        kress_ox_scalar = _angular_oxide_sputter(cos_scalar)
         kernel_bare = fluxes.ion_flux * np.asarray(_threshold_power_yield(
-            e_iface, 0.0852, 70.0, 140.0, 1.0)) * kress_scalar
+            e_iface, 0.0852, 70.0, 140.0, 1.0)) * kress_ox_scalar
         kernel_ac = fluxes.ion_flux * np.asarray(_threshold_power_yield(
-            e_iface, 0.001, 200.0, 250.0, 0.4)) * kress_scalar
+            e_iface, 0.001, 200.0, 250.0, 0.4)) * kress_ox_scalar
         kernel_dexl = fluxes.ion_flux * np.asarray(_threshold_power_yield(
             fluxes.ion_energy_eV, 0.3, 8.0, 500.0, 0.5))
         kernel_act = fluxes.ion_flux * 0.9
