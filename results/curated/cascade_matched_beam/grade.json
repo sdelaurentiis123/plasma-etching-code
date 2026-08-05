@@ -1,0 +1,318 @@
+{
+  "law": {
+    "form": "S(b,AR) = (1-p0*kress(90-b))^(AR*tan b) -> exp(-p0*(1+B)*AR*b^2), b in radians",
+    "p0": 0.9,
+    "B": 9.3,
+    "derivation": "specular wall reflection conserves polar angle and (via Eq. 2.34, b<20deg) energy; only the leftover-rule reaction attenuates",
+    "validation": [
+      {
+        "beta_deg": 0.5,
+        "aspect_ratio": 10.0,
+        "exact": 0.992666014196179,
+        "small_angle": 0.9929653510942925,
+        "rel_error": 0.0003015484501662504
+      },
+      {
+        "beta_deg": 0.5,
+        "aspect_ratio": 40.0,
+        "exact": 0.9709852058618388,
+        "small_angle": 0.9721569320628533,
+        "rel_error": 0.0012067394991610114
+      },
+      {
+        "beta_deg": 1.0,
+        "aspect_ratio": 10.0,
+        "exact": 0.9696740465575309,
+        "small_angle": 0.9721569320628533,
+        "rel_error": 0.00256053620712749
+      },
+      {
+        "beta_deg": 1.0,
+        "aspect_ratio": 40.0,
+        "exact": 0.8841034540400218,
+        "small_angle": 0.8931934079932631,
+        "rel_error": 0.010281550096545395
+      },
+      {
+        "beta_deg": 2.0,
+        "aspect_ratio": 10.0,
+        "exact": 0.8725771591216799,
+        "small_angle": 0.8931934079932631,
+        "rel_error": 0.023626849105625382
+      },
+      {
+        "beta_deg": 2.0,
+        "aspect_ratio": 40.0,
+        "exact": 0.579716100502683,
+        "small_angle": 0.6364760069208742,
+        "rel_error": 0.0979098327077231
+      },
+      {
+        "beta_deg": 5.0,
+        "aspect_ratio": 10.0,
+        "exact": 0.24205162131559502,
+        "small_angle": 0.4936389643648312,
+        "rel_error": 1.0393954053346668
+      },
+      {
+        "beta_deg": 5.0,
+        "aspect_ratio": 40.0,
+        "exact": 0.003432669442390528,
+        "small_angle": 0.05937966321088044,
+        "rel_error": 16.29839246319277
+      }
+    ]
+  },
+  "bound_demonstration": {
+    "huang_published_ratio": 0.15,
+    "wide_beam_bound": 0.24528301886792453,
+    "sweep": [
+      {
+        "sigma_deg": 0.8334,
+        "F_ar13": 0.847945,
+        "F_ar53": 0.455055,
+        "ratio": 0.5366562689797097
+      },
+      {
+        "sigma_deg": 2.0,
+        "F_ar13": 0.64134,
+        "F_ar53": 0.210555,
+        "ratio": 0.3283047993264103
+      },
+      {
+        "sigma_deg": 5.0,
+        "F_ar13": 0.330145,
+        "F_ar53": 0.08571,
+        "ratio": 0.25961320026049156
+      },
+      {
+        "sigma_deg": 10.0,
+        "F_ar13": 0.173575,
+        "F_ar53": 0.04276,
+        "ratio": 0.2463488405588362
+      },
+      {
+        "sigma_deg": 30.0,
+        "F_ar13": 0.05794,
+        "F_ar53": 0.0138,
+        "ratio": 0.23817742492233346
+      }
+    ],
+    "verdict": "Huang's 0.150 lies below the 13/53 = 0.245 wide-beam bound; his ion decay is not fixed-beam straight-wall shadowing (tapering + PR erosion + via geometry + re-arrival counting)."
+  },
+  "beam_transfer": {
+    "krueger_digitised_narrow": {
+      "config": {
+        "sigma_deg": 0.8334,
+        "tail_fraction": 0.0
+      },
+      "rows": [
+        {
+          "aspect_ratio": 1.0,
+          "cascade_survival": 0.9977910898720983
+        },
+        {
+          "aspect_ratio": 2.0,
+          "cascade_survival": 0.9955982055227003
+        },
+        {
+          "aspect_ratio": 4.0,
+          "cascade_survival": 0.9912596848127433
+        },
+        {
+          "aspect_ratio": 8.0,
+          "cascade_survival": 0.9827660510607437
+        },
+        {
+          "aspect_ratio": 16.0,
+          "cascade_survival": 0.9664707909146963
+        },
+        {
+          "aspect_ratio": 40.0,
+          "cascade_survival": 0.9223964703381115
+        },
+        {
+          "aspect_ratio": 100.0,
+          "cascade_survival": 0.8353460188877418
+        },
+        {
+          "aspect_ratio": 200.0,
+          "cascade_survival": 0.7343010550298164
+        }
+      ],
+      "survival_ar40_over_ar1": 0.9244384718411834,
+      "survival_ar200_over_ar1": 0.7359266508622989
+    },
+    "kim_core_only": {
+      "config": {
+        "sigma_deg": 0.38,
+        "tail_fraction": 0.0
+      },
+      "rows": [
+        {
+          "aspect_ratio": 1.0,
+          "cascade_survival": 0.9995708615846888
+        },
+        {
+          "aspect_ratio": 2.0,
+          "cascade_survival": 0.9991422957902417
+        },
+        {
+          "aspect_ratio": 4.0,
+          "cascade_survival": 0.9982868768392594
+        },
+        {
+          "aspect_ratio": 8.0,
+          "cascade_survival": 0.9965828531543582
+        },
+        {
+          "aspect_ratio": 16.0,
+          "cascade_survival": 0.993201775500361
+        },
+        {
+          "aspect_ratio": 40.0,
+          "cascade_survival": 0.983268570841117
+        },
+        {
+          "aspect_ratio": 100.0,
+          "cascade_survival": 0.959724729964965
+        },
+        {
+          "aspect_ratio": 200.0,
+          "cascade_survival": 0.9240872697801522
+        }
+      ],
+      "survival_ar40_over_ar1": 0.9836907103136974,
+      "survival_ar200_over_ar1": 0.9244840013794848
+    },
+    "kim_two_component_f0.35": {
+      "config": {
+        "sigma_deg": 0.38,
+        "tail_fraction": 0.35,
+        "tail_width_ratio": 3.5992423445143915
+      },
+      "rows": [
+        {
+          "aspect_ratio": 1.0,
+          "cascade_survival": 0.9974279781925446
+        },
+        {
+          "aspect_ratio": 2.0,
+          "cascade_survival": 0.9949128531196556
+        },
+        {
+          "aspect_ratio": 4.0,
+          "cascade_survival": 0.9900377135653429
+        },
+        {
+          "aspect_ratio": 8.0,
+          "cascade_survival": 0.9808454078330926
+        },
+        {
+          "aspect_ratio": 16.0,
+          "cascade_survival": 0.964311392964357
+        },
+        {
+          "aspect_ratio": 40.0,
+          "cascade_survival": 0.9248064678878427
+        },
+        {
+          "aspect_ratio": 100.0,
+          "cascade_survival": 0.8593422930576851
+        },
+        {
+          "aspect_ratio": 200.0,
+          "cascade_survival": 0.7919141929983685
+        }
+      ],
+      "survival_ar40_over_ar1": 0.927191223935486,
+      "survival_ar200_over_ar1": 0.7939562658282446
+    },
+    "kim_two_component_f0.50": {
+      "config": {
+        "sigma_deg": 0.38,
+        "tail_fraction": 0.5,
+        "tail_width_ratio": 3.5992423445143915
+      },
+      "rows": [
+        {
+          "aspect_ratio": 1.0,
+          "cascade_survival": 0.9965095995959113
+        },
+        {
+          "aspect_ratio": 2.0,
+          "cascade_survival": 0.9931002348322617
+        },
+        {
+          "aspect_ratio": 4.0,
+          "cascade_survival": 0.9865023578765214
+        },
+        {
+          "aspect_ratio": 8.0,
+          "cascade_survival": 0.974100788409693
+        },
+        {
+          "aspect_ratio": 16.0,
+          "cascade_survival": 0.9519298004489268
+        },
+        {
+          "aspect_ratio": 40.0,
+          "cascade_survival": 0.899751280907868
+        },
+        {
+          "aspect_ratio": 100.0,
+          "cascade_survival": 0.8163212486688507
+        },
+        {
+          "aspect_ratio": 200.0,
+          "cascade_survival": 0.7352685886633185
+        }
+      ],
+      "survival_ar40_over_ar1": 0.9029027731119909,
+      "survival_ar200_over_ar1": 0.7378439595177737
+    },
+    "kim_two_component_f0.65": {
+      "config": {
+        "sigma_deg": 0.38,
+        "tail_fraction": 0.65,
+        "tail_width_ratio": 3.5992423445143915
+      },
+      "rows": [
+        {
+          "aspect_ratio": 1.0,
+          "cascade_survival": 0.9955912209992781
+        },
+        {
+          "aspect_ratio": 2.0,
+          "cascade_survival": 0.9912876165448676
+        },
+        {
+          "aspect_ratio": 4.0,
+          "cascade_survival": 0.9829670021877
+        },
+        {
+          "aspect_ratio": 8.0,
+          "cascade_survival": 0.9673561689862935
+        },
+        {
+          "aspect_ratio": 16.0,
+          "cascade_survival": 0.9395482079334965
+        },
+        {
+          "aspect_ratio": 40.0,
+          "cascade_survival": 0.8746960939278935
+        },
+        {
+          "aspect_ratio": 100.0,
+          "cascade_survival": 0.7733002042800164
+        },
+        {
+          "aspect_ratio": 200.0,
+          "cascade_survival": 0.6786229843282683
+        }
+      ],
+      "survival_ar40_over_ar1": 0.8785695127463641,
+      "survival_ar200_over_ar1": 0.6816281321234755
+    }
+  }
+}
