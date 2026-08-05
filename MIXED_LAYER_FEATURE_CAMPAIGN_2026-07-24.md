@@ -300,3 +300,50 @@ measurement-bounded B ≈ 1.7 on the oxide rows; (b) the limiting-regime questio
 overshoot; (c) only then the 60 s endpoint and the 8-condition scorecard.
 
 Box destroyed; `vastai show instances` returns NONE. Spend this pass ≈ $0.14.
+
+## Campaign close (2026-08-05) — the stop rule fires
+
+Definitive record: `VALIDATION_DOSSIER_KRUEGER_2026-08-05.md`.
+
+| # | date | what it tested | endpoint |
+|---|---|---|---|
+| 1 | 07-24 | published constants, k_v probed | opening emerges 90→45.7 @ 6 s, then clogs @ 33 s |
+| 2 | 07-25 | audit-corrected film law + two-state oxide | **depth 811.1 (−1.7 %), zero anchored constants**; mouth 18.8 |
+| 3 | 07-26 | atom-resolved (per-event) ion chemistry | depth 790.8 (gate PASS), mouth 22.5; reflection regression proven real |
+| S1 | 07-26 | 8-condition scorecard on ml9a | absolutes + topology PASS (clog exact); graded transfers miss on one mouth residual |
+| 4 | 07-29 | exact cascade, verbatim-complete appendix set | ml13 depth 852 in gate; ml15 verbatim set 648.6/7.2 — appendix ≠ fig-7 set |
+| 5 | 08-02 | √2 axisymmetric lift (`6e97ef3`) | deconfounding: ml13's 852 partly rode the narrow-beam bug; true state depth ~640, mouth seals |
+| 6 | 08-04 | dx = 5 nm resolution | **resolution acquitted** — floor rate converged to 0.05 %, closure recovers < 3 % of the gap |
+| 7 | 08-04 | deposition-driven crosslinking (`3a931b1`) | early transient closes: 5.07× → **1.83×** Krüger, all windows in band |
+| 8 | 08-05 | ml19 endpoint | **mouth EQUILIBRATES 50.9 nm** (first in campaign), mask 850.2 exact, depth +29 % exposed |
+| 9 | 08-05 | ml21, full final mechanism | robustness passes (zero topology events); endpoint not bought — flagged configuration |
+
+**Stop rule.** The joint ion-channel solve (`953f01c`, `f322cb4`) enumerated the
+entire discrete sourced space — 4 axes, 64 combinations — against nine measured
+constraints and returned an **empty survivor set**. Two constraints select
+assignments uniquely (Gray's beam dynamic range → oxide peak-normalisation;
+the measured FC-film curve → the Barklund yield reading); four cannot be
+satisfied by *any* sourced combination, and the required depth factor
+(0.735–0.812) falls in the **gap between adjacent published options**
+(0.628 | 0.868). The depth term is triple-attributed — cascade audit ~1.4× high,
+joint solve 1.24–1.35× short, and the source author's own statement that "the
+effect of ion energy … might be overestimated in the mechanism" (thesis
+L4884-4888) — to a channel petch inherits from Appendix B row-for-row — and the capstone
+measurement (`74eb2fa`) decomposes it per channel against Gray's *absolute*
+yields: physical sputter **1.22x too strong**, chemically-enhanced **2.8x too
+weak**. Wrong in opposite directions, which is why every single-parameter
+attempt over-corrected, and why neutral-limited behaviour was structurally
+unreachable. Receipted, not applied — both are 350 eV measurements against a
+3406 eV front, pending the ZBL-vs-linear scaling question.
+
+Closing it requires *departing* from the published mechanism with new physics
+and its own gates (Kwon/Sawin site-limited adsorption,
+`RESEARCH_NEUTRAL_LIMITED_REGIME_2026-08-05.md`), not further transcription.
+Continuing to permute published options against a defect the source declares
+would be fitting by search. **The campaign therefore closes with the bound
+declared: depth in band at reference-energy conditions, +29 % at feature keV,
+attributed and receipted.**
+
+Delivered: mask exact, mouth equilibrating, neck-band agreement 41.8 vs 41.1,
+clog and necking-absent topology exact, four permanent engine defects found by
+measurement, and ~$1 of total compute spent.
