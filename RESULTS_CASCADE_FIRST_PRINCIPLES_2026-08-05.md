@@ -132,3 +132,39 @@ larger than the **cascade attenuation** tabulated in §4.  Both are real; the
 document should not conflate them.  Cross-check: core-only cascade survival at
 AR 200 is 0.924 versus two-component 0.679-0.735, i.e. the tail adds ~20-25
 points of cascade attenuation on top of its much larger shadowing effect.
+
+## 7. Flag raised by ml21: the class-1 angular form now drives the oxide rows
+
+`4c66df1` applied the Appendix-B angular markers, putting class 1
+(`f = (1 + B sin²θ) cos θ`, B = 9.3) on the **SiO₂ bare-sputter row** — a
+depth-setting channel.  That transcription is faithful to Krüger's own legend
+(∠=1 → Kress 1999), but two facts from the earlier audits collide here:
+
+- Kress 1999 is **Cu/Ar molecular dynamics** — the wrong material system
+  (`RESEARCH_VERIFY_HUNT_2026-08-05.md`).
+- The only *in-chemistry* angular measurements give peak/normal ≈ **1.3**
+  (Cho 2000, CF₄/SiO₂; Schaepkens 1998, SiO₂ V-groove), where B = 9.3 gives
+  **4.17**.
+
+| θ | B = 9.3 | B = 1.7 (measurement-bounded) | ratio |
+|---|---|---|---|
+| 40° | 3.710 | 1.304 | 2.8× |
+| 52.6° (peak) | 4.172 | 1.259 | 3.3× |
+| 70° | 3.151 | 0.855 | 3.7× |
+| 83° | 1.238 | 0.326 | 3.8× |
+
+**Observed consequence.**  ml21 (first run carrying the classes) is integrating
+at **dt ≈ 0.06 s against ml19's 0.15 s at matched simulated time — a 2.4×
+smaller stable timestep**, with ~65 s of wall per step.  A 60 s endpoint needs
+~950 steps ≈ 17 h, against ml19's 305 steps.  The forecast in `4c66df1`
+correctly predicted a small effect on the *floor* (+7.3 %, the front sits at
+0.92° tilt where both classes are ≈1), but said nothing about **sloped faces**,
+where a 3-4× over-peaked yield raises surface velocity and tightens CFL.
+
+**Status.**  Not reverted — it is source-faithful and the gates it shipped with
+(normal-incidence invariance, ledger closure, scalar/atom agreement) all hold.
+But it is now a *declared risk on the depth channel*, not a neutral
+transcription, and it is the most likely cause of the timestep collapse.  The
+cheap discriminating test is a frozen-geometry forecast of etch-front and
+sidewall velocity under B = 9.3 versus a measurement-bounded B ≈ 1.7 on the
+oxide rows only — no run required — before any further 60 s endpoint is bought.
