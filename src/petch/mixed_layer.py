@@ -184,6 +184,60 @@ def _threshold_power_yield(energy_eV, p0, threshold_eV, reference_eV, exponent):
     return p0 * np.maximum(numerator, 0.0) / denominator
 
 
+# --- Appendix-B angular classes (Krueger Table B.0.1 column 5) -----------------
+# The legend (thesis L5332) reads: "p0 is modified according to Eq. (2.40) if
+# angular or energy dependence of the reaction is present ... and (angle) defines
+# the nature of the angular dependence, with 1 corresponding to the results
+# obtained by [1] and 2 corresponding to the results obtained by [2]", with
+# [1] = Kress et al., JVST A 17, 2819 (1999) and
+# [2] = Chang & Sawin, JVST A 15, 610 (1997).
+#
+# The two shapes are stated verbatim and identically across three theses of the
+# same MCFPM lineage:
+#   Huang (Eq. 2.32 discussion): "For physical sputtering, f(theta) is an
+#     empirical function with a maximum at 60 deg, reduced probability at normal
+#     incidence and zero probability at grazing incidence. For chemically
+#     enhanced etching, f(theta) is unity for normal incidence and angles up to
+#     45 deg, with a monotonic roll-off to zero probability at grazing
+#     incidence."
+#   Huard (Eq. 2.24): "the total yield of a sputtering reaction is given by
+#     P(e,q) = P(e) P(q)" -- energy and angle factors are separable, which is
+#     why the angular class multiplies our energy term rather than replacing it.
+#   Qu (Eq. 2.40 discussion): same two classes.
+#
+# Normalisation convention: f(0) = 1 for BOTH classes, so p0 in the table is the
+# normal-incidence probability at the reference energy.  This is the convention
+# the already-validated polymer row (CF(s)+Ar+, class 1) has used since the
+# audit-corrected campaign, and mixing conventions across rows of one table
+# would be incoherent.  (The sources describe class 1 as "less than unity at
+# normal incidence" relative to its 60-deg peak; that is a statement about the
+# peak/normal ratio, which this form reproduces as 4.17, not about p0.)
+
+
+def _angular_physical_sputter(cosine):
+    """Class 1 (Kress 1999): peaked off-normal, zero at grazing, f(0)=1."""
+    cos_t = np.clip(np.asarray(cosine, dtype=float), 0.0, 1.0)
+    return np.maximum((1.0 + 9.3 * (1.0 - cos_t ** 2)) * cos_t, 0.0)
+
+
+def _angular_chemical_sputter(cosine):
+    """Class 2 (Chang & Sawin 1997): unity to 45 deg, monotone roll-off to zero.
+
+    The plateau edge (45 deg), both endpoints (unity at normal, zero at grazing)
+    and monotonicity between them are verbatim from the source lineage.  The
+    interpolation across the roll-off is the minimal projected-flux choice
+    cos(theta)/cos(45 deg), which introduces no constant beyond the stated
+    plateau edge.  The published curve itself is paywalled; the specific
+    roll-off shape is therefore recorded [VERIFY] while its stated properties
+    are gated.
+    """
+    cos_t = np.clip(np.asarray(cosine, dtype=float), 0.0, 1.0)
+    return np.minimum(cos_t / _COS45, 1.0)
+
+
+_COS45 = float(np.cos(np.pi / 4.0))
+
+
 def _table_lookup(energy_eV, column):
     """Vectorized log-energy interpolation; linear roll-off below the table."""
     energy = np.asarray(energy_eV, dtype=float)
@@ -253,8 +307,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
             atom_energy, d_fc_arr.ravel()[atom_face] if shape else d_fc_arr,
             params))
         atom_eps, _ = _deposited_energy(atom_e_iface, atom_cos, params)
-        atom_kress = np.maximum(
-            (1.0 + 9.3 * (1.0 - atom_cos ** 2)) * atom_cos, 0.0)
+        atom_kress = _angular_physical_sputter(atom_cos)
+        atom_chem_ang = _angular_chemical_sputter(atom_cos)
 
         def _segment(values):
             # bincount == add.at bitwise (both accumulate in input order)
@@ -272,12 +326,14 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
                               / params.reference_energy_eV)
         kernel_xl = _segment(
             atom_flux * np.maximum(atom_energy - atom_e_iface, 0.0))
+        # Appendix-B angular classes: SiO2CF(s)+Ar+ is class 2, SiO2(s)+Ar+ and
+        # AC(s)+Ar+ are class 1 (RESULTS_LIP_REMOVAL_AUDIT_2026-08-04).
         kernel_complex = _segment(
-            0.1471 * atom_flux * atom_eps / ref_dep_140)
+            0.1471 * atom_flux * atom_eps / ref_dep_140 * atom_chem_ang)
         kernel_bare = _segment(atom_flux * np.asarray(_threshold_power_yield(
-            atom_e_iface, 0.0852, 70.0, 140.0, 1.0)))
+            atom_e_iface, 0.0852, 70.0, 140.0, 1.0)) * atom_kress)
         kernel_ac = _segment(atom_flux * np.asarray(_threshold_power_yield(
-            atom_e_iface, 0.001, 200.0, 250.0, 0.4)))
+            atom_e_iface, 0.001, 200.0, 250.0, 0.4)) * atom_kress)
         kernel_dexl = _segment(atom_flux * np.asarray(_threshold_power_yield(
             atom_energy, 0.3, 8.0, 500.0, 0.5)))
         kernel_act = _segment(atom_flux) * 0.9
@@ -294,20 +350,20 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         energy_ratio = eps_dep / params.reference_energy_eV
         cos_scalar = np.clip(
             np.asarray(fluxes.cosine_incidence, dtype=float), 0.0, 1.0)
-        kress_scalar = np.maximum(
-            (1.0 + 9.3 * (1.0 - cos_scalar ** 2)) * cos_scalar, 0.0)
+        kress_scalar = _angular_physical_sputter(cos_scalar)
+        chem_ang_scalar = _angular_chemical_sputter(cos_scalar)
         kernel_sputter = (np.asarray(_threshold_power_yield(
             fluxes.ion_energy_eV, 0.9, 20.0, 500.0, 0.5))
             * kress_scalar * fluxes.ion_flux)
         kernel_mix = fluxes.ion_flux * energy_ratio
         kernel_xl = fluxes.ion_flux * np.maximum(
             np.asarray(fluxes.ion_energy_eV, dtype=float) - e_iface, 0.0)
-        kernel_complex = 0.1471 * fluxes.ion_flux * np.asarray(
-            eps_dep, dtype=float) / ref_dep_140
+        kernel_complex = (0.1471 * fluxes.ion_flux * np.asarray(
+            eps_dep, dtype=float) / ref_dep_140 * chem_ang_scalar)
         kernel_bare = fluxes.ion_flux * np.asarray(_threshold_power_yield(
-            e_iface, 0.0852, 70.0, 140.0, 1.0))
+            e_iface, 0.0852, 70.0, 140.0, 1.0)) * kress_scalar
         kernel_ac = fluxes.ion_flux * np.asarray(_threshold_power_yield(
-            e_iface, 0.001, 200.0, 250.0, 0.4))
+            e_iface, 0.001, 200.0, 250.0, 0.4)) * kress_scalar
         kernel_dexl = fluxes.ion_flux * np.asarray(_threshold_power_yield(
             fluxes.ion_energy_eV, 0.3, 8.0, 500.0, 0.5))
         kernel_act = fluxes.ion_flux * 0.9
