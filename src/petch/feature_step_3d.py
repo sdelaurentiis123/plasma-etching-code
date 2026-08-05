@@ -593,13 +593,18 @@ def _remove_unresolved_subcell_solid_components(
 def _new_unresolved_subcell_material_component_mask(
         phi, material_id, previous_material_id, etchable_material_ids, *,
         periodic_lateral):
-    """Locate newly born material islands too small to own one volume cell.
+    """Locate material islands too small to own one volume cell.
 
     A material component supported by fewer than eight corner nodes has no
-    resolved hexahedral volume.  It is eligible for cleanup only when *every*
-    node changed owner in the candidate step.  A component that existed before
-    the step and became disconnected is therefore a real topology event and is
-    still refused.
+    resolved hexahedral volume: its shape is set entirely by the stencil, it
+    carries no independent surface state, and the level set cannot represent it
+    at this grid.  Such a component is a representation artifact however it
+    arose -- nucleated inside the candidate step, or shed from its parent as a
+    receding surface remeshes (the mode that froze ml19 at t = 46.2 s, and the
+    mode an earlier revision refused by additionally requiring every node to
+    have changed owner).  Both are dissolved here; a component that owns even
+    one full volume cell is a resolvable body and still trips the topology
+    gate.
     """
     field = np.asarray(phi, dtype=float)
     owner = np.asarray(material_id)
@@ -625,8 +630,7 @@ def _new_unresolved_subcell_material_component_mask(
                 rooted, periodic_lateral=True)
             for root in roots:
                 selected = rooted == root
-                if (root not in resolved_roots
-                        and np.all(core_previous[selected] != material)):
+                if root not in resolved_roots:
                     core_mask |= selected
         else:
             component, count = label(occupied)
@@ -634,8 +638,7 @@ def _new_unresolved_subcell_material_component_mask(
                 component, periodic_lateral=False)
             for index in range(1, int(count) + 1):
                 selected = component == index
-                if (index not in resolved_labels
-                        and np.all(core_previous[selected] != material)):
+                if index not in resolved_labels:
                     core_mask |= selected
 
     if not periodic_lateral:

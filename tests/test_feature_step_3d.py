@@ -386,13 +386,16 @@ def test_subcell_material_cleanup_selects_only_new_unresolved_components():
     assert count == 1
     assert np.array_equal(np.argwhere(repair), [[2, 2, 2]])
 
-    # An already-existing fragment is a physical split and remains a refusal.
+    # A fragment shed from its parent is dissolved on the same grounds: an
+    # unresolved component cannot be represented however it arose.  Refusing
+    # this case froze ml19 at t = 46.2 s on a sub-resolution mask fragment
+    # (RESULTS_ML19_ENDPOINT_2026-08-05.md); only resolved bodies trip the gate.
     previous[2, 2, 2] = 2
     repair, count = (
         feature_step_module._new_unresolved_subcell_material_component_mask(
             phi, candidate, previous, (1, 2), periodic_lateral=False))
-    assert count == 0
-    assert not np.any(repair)
+    assert count == 1
+    assert np.array_equal(np.argwhere(repair), [[2, 2, 2]])
 
     # Eight nodes support one resolved hexahedral volume cell and are never cleaned.
     previous.fill(1)
@@ -2044,3 +2047,36 @@ def test_second_chemistry_runs_through_unchanged_transport_remap_and_interface_e
     assert result.validity.nonpredictive_parameters == ()
     assert result.surface_state.removed_atoms_m2.size == result.steps[-1].next_active_face_area.size
     assert _area_weighted_height(result.geometry.phi, geometry.dx) < initial_height - 0.03
+
+
+def test_shed_unresolved_fragment_is_dissolved_periodic():
+    """The ml19 stall mode: a sub-resolution fragment detaching from a parent.
+
+    An unresolved island that existed before the step (so the earlier
+    newly-born-only rule refused it) must now be selected for cleanup under the
+    periodic lateral closure the production cell uses, while a fragment holding
+    a full volume cell must still be refused.
+    """
+    phi = np.ones((6, 6, 6))
+    previous = np.ones(phi.shape, dtype=int)
+    candidate = previous.copy()
+    # One node of material 2, detached, present before and after the step.
+    candidate[3, 3, 3] = 2
+    previous[3, 3, 3] = 2
+
+    repair, count = (
+        feature_step_module._new_unresolved_subcell_material_component_mask(
+            phi, candidate, previous, (1, 2), periodic_lateral=True))
+    assert count >= 1
+    assert repair[3, 3, 3]
+
+    # A resolved 2x2x2 body owns a volume cell: still a real topology event.
+    previous.fill(1)
+    candidate.fill(1)
+    candidate[1:3, 1:3, 1:3] = 2
+    previous[1:3, 1:3, 1:3] = 2
+    repair, count = (
+        feature_step_module._new_unresolved_subcell_material_component_mask(
+            phi, candidate, previous, (1, 2), periodic_lateral=True))
+    assert count == 0
+    assert not np.any(repair)
