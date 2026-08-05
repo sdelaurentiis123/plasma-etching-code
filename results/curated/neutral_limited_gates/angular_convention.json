@@ -1,0 +1,58 @@
+{
+  "gray_dynamic_range": 0.2545454545454546,
+  "front_energy_eV": 3406.0,
+  "cases": [
+    {
+      "convention": "f(0)=1 (current)",
+      "B": 1.7,
+      "peak_normalised": false,
+      "peak_over_normal": 1.309692372784718,
+      "peak_deg": 43.31598579928996,
+      "f_at_normal": 1.0,
+      "n1_floor": 0.3408,
+      "n1_saturated": 0.3904831304847932,
+      "n1_dynamic_range": 0.8727649759847229,
+      "front_removal_per_ion": 3.936805929190441,
+      "front_relative": 1.0
+    },
+    {
+      "convention": "peak-normalised",
+      "B": 1.7,
+      "peak_normalised": true,
+      "peak_over_normal": 1.309692372784718,
+      "peak_deg": 43.31598579928996,
+      "f_at_normal": 0.763538080223955,
+      "n1_floor": 0.26021377774032384,
+      "n1_saturated": 0.39023207448114633,
+      "n1_dynamic_range": 0.6668180161415609,
+      "front_removal_per_ion": 3.6679773163652096,
+      "front_relative": 0.9317140296828111
+    },
+    {
+      "convention": "f(0)=1, Kress B",
+      "B": 9.3,
+      "peak_normalised": false,
+      "peak_over_normal": 4.172174610627611,
+      "peak_deg": 52.58513925696285,
+      "f_at_normal": 1.0,
+      "n1_floor": 0.3408,
+      "n1_saturated": 0.3904831304847932,
+      "n1_dynamic_range": 0.8727649759847229,
+      "front_removal_per_ion": 3.936805929190441,
+      "front_relative": 1.0
+    },
+    {
+      "convention": "peak-normalised, Kress B",
+      "B": 9.3,
+      "peak_normalised": true,
+      "peak_over_normal": 4.172174610627611,
+      "peak_deg": 52.58513925696285,
+      "f_at_normal": 0.23968316125905675,
+      "n1_floor": 0.08168402135708654,
+      "n1_saturated": 0.38967588800270336,
+      "n1_dynamic_range": 0.20962041499606426,
+      "front_removal_per_ion": 3.072417611359066,
+      "front_relative": 0.7804341048609611
+    }
+  ]
+}
