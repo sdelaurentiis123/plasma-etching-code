@@ -245,3 +245,46 @@ python scripts/ion_channel_model_solve.py # §3 joint solve matrix
 Archived runs: `results/curated/mixed_layer_feature_v1/`. Source extracts and
 digitised figure data: `research_sources/` (`555b7fc`). Suite: **1174 passed,
 1 skipped**.
+
+---
+
+## Addendum — §5.2 executed (2026-08-05, `79cb426`)
+
+The path this dossier named for closing depth was run the same day. Outcome:
+**the regime defect closed, the depth error changed sign.**
+
+Krüger's Appendix B carries `n = 1` (linear, Sigmund) on exactly two rows — the
+SiO₂ rows that set the etch — against 416 rows at `n = 0.5` in the same table.
+Gray tested that form against √E on this exact system and rejected it (MIT
+thesis 1993, Fig. 5-2, p. 161). Replacing those two rows with Gray's own
+measured laws, absolutely calibrated and free of any reference-energy
+normalisation:
+
+- physical sputter at the measured 3406 eV front: **4.060 → 0.752 per ion**
+  (the channel was **5.4× too strong**);
+- rate response to a 100× radical shadow: **< 1 % → 0.010×** — the model is
+  neutral-limited for the first time;
+- early-span rate-vs-depth slope: **+0.7530 → −0.0033** — the anti-ARDE
+  pathology is gone;
+- aperture behaviour unchanged (86.75 vs 86.00 nm at t = 1 s) — no cross-channel
+  leakage;
+- depth: **+29 % over → −49 % under**.
+
+The ion-yield question is therefore **settled** and should not be reopened: the
+magnitudes now come from the primary source's own absolute measurements, and
+both remaining sourced options bracket the requirement rather than meeting it.
+
+Depth is relocated, with a number attached. Gray defines β_e as SiF₄ removed
+*from fluorine-saturated regions* per ion; at the front energy that is **2.99**
+against the **≈3.15 units/ion** Krüger's blanket arithmetic implies (95 %). The
+chemical channel carries the observed etch **at fluorine saturation** — ours is
+F-starved. Depth is now a fluorine-delivery-and-coverage question at the etch
+front, and the largest named candidate is a *transport* feature: thermalised-ion
+return to the radical ledger (E8), since Huang measures **> 95 %** of the floor's
+radicals above AR 10 to be thermalised CF_x⁺, a population petch does not
+deliver.
+
+Declared-open ledger, updated: `_THERMAL_F_STICKING = 1.0` against Gray's
+printed **0.02** and Krüger's absence of any thermal-F-on-bare-oxide row —
+sourced, not landed (it would have confounded this grading, and its sign
+reduces F further).
