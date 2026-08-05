@@ -203,3 +203,26 @@ Clean `git archive` deploy passed on the first attempt. Never patch a live tree.
 
 Method: matched-simulated-time comparison against an archived trajectory cost
 ~2.5 h box time (~$0.50) for what a 12 s endpoint would have needed 17 h.
+
+## Campaign 7 (2026-08-04) — deposition-driven crosslinking closes the early transient
+
+`ml18-depxl-12s`, 12 s (not 60: 88 % of the defect completes by t = 8 s),
+graded on `closure/etch` by window vs Krüger's run-average 0.0310.
+Full record: `RESULTS_ML18_DEPOSITION_CROSSLINK_2026-08-04.md`.
+
+| window | ml18 | × Krüger | ml16a baseline | × Krüger |
+|---|---|---|---|---|
+| 1–4 s | 0.0569 | **1.83×** | 0.1572 | 5.07× |
+| 4–8 s | 0.0495 | **1.59×** | 0.1091 | 3.52× |
+| 8–12 s | 0.0367 | **1.18×** | 0.0526 | 1.69× |
+
+Aperture at t = 12: **64.89 nm vs baseline 38.25** (+26.6); closure budget spent
+**49 % vs 101 %**; depth **+10.7 %** (246.0 vs 222.1) with no floor-chemistry
+change — the wider mouth delivers more flux, as the neck regrade predicted;
+mask 850.21 (exact).  All three windows land inside the declared 0.031–0.1 pass
+band.  The fix is zero-constant: Krüger creates crosslinks *at deposition*
+(thesis §2.2.3, Table 6.2 `P(s)+P(s)→PC(s)+PC(s)`, no `M(g)`) and breaks them
+with ions; petch had creation riding the ion channel, which collapses ~200× on
+a near-vertical lip — so our lip was the *least* crosslinked surface where his
+is the most.  Residual 1.83× is bounded by the untabulated per-material bond
+multiplicity (`[VERIFY]`; m = 3 → ≈1.4×, m = 8 → ≈1.0×).
