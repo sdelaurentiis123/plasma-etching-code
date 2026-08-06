@@ -93,3 +93,36 @@ def test_measurement_only_lower_bound_on_the_ion_flux():
     floor_bound = removal / 1.5
     wafer_bound = floor_bound / 0.70
     assert wafer_bound / _ION_PUBLISHED_M2_S == pytest.approx(2.40, abs=0.02)
+
+
+@pytest.mark.parametrize("extra", [
+    dict(low_frequency_power_kw=6.0, oxygen_to_fluorocarbon_ratio=0.5),
+    dict(low_frequency_power_kw=6.0, oxygen_to_fluorocarbon_ratio=1.5),
+    dict(low_frequency_power_kw=6.0, oxygen_to_fluorocarbon_ratio=2.5),
+    dict(low_frequency_power_kw=4.0),
+    dict(low_frequency_power_kw=8.0),
+])
+def test_every_transfer_condition_carries_the_same_calibration(extra):
+    """Regression: the Figure-16 oxygen table supplies its own fluxes and once
+    discarded the normalization, so the oxygen conditions ran uncalibrated while
+    the power conditions ran calibrated -- which would have silently corrupted
+    the out-of-sample scorecard.  Every condition must scale identically.
+    """
+    from petch.reactor_boundary import build_krueger_2024_transfer_boundary
+
+    kw = dict(reference_plane_m=3e-6, neutral_direction_polar_order=12,
+              neutral_direction_azimuthal_order=24,
+              ion_azimuthal_closure="axisymmetric_uniform",
+              ion_azimuthal_order=16)
+    plain = build_krueger_2024_transfer_boundary(DATA, **extra, **kw)
+    scaled = build_krueger_2024_transfer_boundary(
+        DATA, ion_flux_normalization=2.8, **extra, **kw)
+
+    def ion(boundary):
+        return [s.flux_m2_s for s in boundary.species if s.charge_number != 0][0]
+
+    def neutrals(boundary):
+        return [s.flux_m2_s for s in boundary.species if s.charge_number == 0]
+
+    assert ion(scaled) == pytest.approx(ion(plain) * 2.8, rel=1e-12)
+    assert neutrals(scaled) == neutrals(plain)

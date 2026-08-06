@@ -1043,6 +1043,21 @@ def build_krueger_2024_transfer_boundary(
         selected_flux = dict(transfer.flux_m2_s_by_oxygen_ratio[ratio])
         flux_interval = dict(
             transfer.flux_interval_m2_s_by_oxygen_ratio[ratio])
+        # The Figure-16 table supplies its own fluxes and would otherwise
+        # discard the ion normalization applied to the base deck, silently
+        # running the oxygen conditions uncalibrated while the power
+        # conditions ran calibrated.  Re-apply it to the selected ion row so
+        # every transfer condition carries the identical declared calibration.
+        if float(ion_flux_normalization) != 1.0:
+            for name, record in base_by_name.items():
+                if record.role == "positive_ion_mixture":
+                    selected_flux[name] = (
+                        selected_flux[name] * float(ion_flux_normalization))
+                    if flux_interval is not None and name in flux_interval:
+                        lo, hi = flux_interval[name]
+                        flux_interval[name] = (
+                            lo * float(ion_flux_normalization),
+                            hi * float(ion_flux_normalization))
         flux_source = f"Figure 16(a), O2/C4F6={ratio:g}"
     if set(selected_flux) != expected_names:
         raise RuntimeError("Figure-16 boundary species disagree with the base reactor deck")
