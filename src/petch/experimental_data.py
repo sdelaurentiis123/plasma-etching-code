@@ -45,6 +45,10 @@ DEBOER_2002_PDF_SHA256 = (
     "45c245a9b19671f532945155dc16c3e00d35464eb8e49480a09f90a90498ff6c")
 DEBOER_2002_FIGURE9_IMAGE_SHA256 = (
     "0f78ae30e5cc2e128f4fdb84217551fe350bd7696966c6ea40233f70a9a765c4")
+KARAHASHI_2007_FIGURE4_SHA256 = (
+    "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26")
+TAKADA_2005_FIGURE3_SHA256 = (
+    "74f62fbe4b9d88390a35df2f25d605f573b8234b01125d08aac0124ed633ecca")
 
 
 @dataclass(frozen=True)
@@ -254,6 +258,42 @@ class DeBoer2002Figure9Depth:
     source_location: str
 
 
+@dataclass(frozen=True)
+class Karahashi2007ReactiveIonYield:
+    """One normal-incidence SiO2 yield marker from Karahashi Figure 4.
+
+    The plotted lower/upper values reproduce the figure's error-bar caps.  The
+    accessible source text does not define their statistical meaning, so they
+    are deliberately not named confidence or standard-uncertainty bounds.
+    """
+
+    species: str
+    energy_eV: float
+    yield_sio2_per_ion: float
+    plotted_lower_yield: float
+    plotted_upper_yield: float
+    marker_center_x_px: float
+    marker_center_y_px: float
+    upper_cap_y_px: float
+    lower_cap_y_px: float
+    marker: str
+    digitization_yield_uncertainty: float
+
+
+@dataclass(frozen=True)
+class Takada2005CoincidenceYield:
+    """One Figure-3 SiO2 molecule/radical + Ar+ co-incidence marker."""
+
+    coincident_species: str
+    flux_ratio_to_ar_ion: float
+    ar_ion_energy_eV: float
+    yield_sio2_per_ar_ion: float
+    marker_center_x_px: float
+    marker_center_y_px: float
+    marker: str
+    digitization_yield_uncertainty: float
+
+
 def _verified_csv_rows(path, expected_fields, expected_sha256, verify_checksum):
     path = Path(path)
     payload = path.read_bytes()
@@ -266,6 +306,109 @@ def _verified_csv_rows(path, expected_fields, expected_sha256, verify_checksum):
         rows = list(reader)
     if not rows:
         raise ValueError(f"experimental evidence is empty: {path}")
+    return rows
+
+
+def load_karahashi_2007_reactive_ion_yields(path, *, verify_checksum=True):
+    """Load the checksum-bound radical-free, mass-selected SiO2 beam yields."""
+    fields = [
+        "species", "energy_eV", "yield_sio2_per_ion",
+        "plotted_lower_yield", "plotted_upper_yield",
+        "marker_center_x_px", "marker_center_y_px",
+        "upper_cap_y_px", "lower_cap_y_px", "marker",
+        "digitization_yield_uncertainty",
+    ]
+    raw = _verified_csv_rows(
+        path, fields, KARAHASHI_2007_FIGURE4_SHA256, verify_checksum)
+    rows = tuple(Karahashi2007ReactiveIonYield(
+        species=row["species"],
+        energy_eV=float(row["energy_eV"]),
+        yield_sio2_per_ion=float(row["yield_sio2_per_ion"]),
+        plotted_lower_yield=float(row["plotted_lower_yield"]),
+        plotted_upper_yield=float(row["plotted_upper_yield"]),
+        marker_center_x_px=float(row["marker_center_x_px"]),
+        marker_center_y_px=float(row["marker_center_y_px"]),
+        upper_cap_y_px=float(row["upper_cap_y_px"]),
+        lower_cap_y_px=float(row["lower_cap_y_px"]),
+        marker=row["marker"],
+        digitization_yield_uncertainty=float(
+            row["digitization_yield_uncertainty"]),
+    ) for row in raw)
+    expected_species = {"F+", "CF+", "CF2+", "CF3+"}
+    if {row.species for row in rows} != expected_species:
+        raise ValueError("Karahashi Figure 4 must contain all four ion species")
+    for item in rows:
+        values = (
+            item.energy_eV, item.yield_sio2_per_ion,
+            item.plotted_lower_yield, item.plotted_upper_yield,
+            item.marker_center_x_px, item.marker_center_y_px,
+            item.upper_cap_y_px, item.lower_cap_y_px,
+            item.digitization_yield_uncertainty,
+        )
+        if (any(not np.isfinite(value) for value in values)
+                or item.energy_eV <= 0.0
+                or item.yield_sio2_per_ion < 0.0
+                or item.plotted_lower_yield < 0.0
+                or not (item.plotted_lower_yield
+                        <= item.yield_sio2_per_ion
+                        <= item.plotted_upper_yield)
+                or item.digitization_yield_uncertainty <= 0.0):
+            raise ValueError("invalid Karahashi Figure 4 reactive-ion row")
+    for species in expected_species:
+        energies = [
+            item.energy_eV for item in rows if item.species == species]
+        if energies != sorted(energies) or len(set(energies)) != len(energies):
+            raise ValueError(
+                f"Karahashi energies must increase uniquely for {species}")
+    return rows
+
+
+def load_takada_2005_coincidence_yields(path, *, verify_checksum=True):
+    """Load the checksum-bound 400 eV SiO2 co-incidence digitization.
+
+    The C5F8 rows are an analog mechanism constraint, not a C4F6 yield law.
+    """
+    fields = [
+        "coincident_species", "flux_ratio_to_ar_ion", "ar_ion_energy_eV",
+        "yield_sio2_per_ar_ion", "marker_center_x_px",
+        "marker_center_y_px", "marker", "digitization_yield_uncertainty",
+    ]
+    raw = _verified_csv_rows(
+        path, fields, TAKADA_2005_FIGURE3_SHA256, verify_checksum)
+    rows = tuple(Takada2005CoincidenceYield(
+        coincident_species=row["coincident_species"],
+        flux_ratio_to_ar_ion=float(row["flux_ratio_to_ar_ion"]),
+        ar_ion_energy_eV=float(row["ar_ion_energy_eV"]),
+        yield_sio2_per_ar_ion=float(row["yield_sio2_per_ar_ion"]),
+        marker_center_x_px=float(row["marker_center_x_px"]),
+        marker_center_y_px=float(row["marker_center_y_px"]),
+        marker=row["marker"],
+        digitization_yield_uncertainty=float(
+            row["digitization_yield_uncertainty"]),
+    ) for row in raw)
+    if {row.coincident_species for row in rows} != {"C5F8", "CF2"}:
+        raise ValueError("Takada Figure 3 must contain C5F8 and CF2 SiO2 rows")
+    for item in rows:
+        values = (
+            item.flux_ratio_to_ar_ion, item.ar_ion_energy_eV,
+            item.yield_sio2_per_ar_ion, item.marker_center_x_px,
+            item.marker_center_y_px, item.digitization_yield_uncertainty,
+        )
+        if (any(not np.isfinite(value) for value in values)
+                or item.flux_ratio_to_ar_ion <= 0.0
+                or item.ar_ion_energy_eV <= 0.0
+                or item.yield_sio2_per_ar_ion < 0.0
+                or item.digitization_yield_uncertainty <= 0.0):
+            raise ValueError("invalid Takada Figure 3 co-incidence row")
+    for species in {"C5F8", "CF2"}:
+        ratios = [
+            item.flux_ratio_to_ar_ion for item in rows
+            if item.coincident_species == species]
+        if ratios != sorted(ratios) or len(ratios) != len(set(ratios)):
+            raise ValueError(
+                f"Takada flux ratios must increase uniquely for {species}")
+    if {item.ar_ion_energy_eV for item in rows} != {400.0}:
+        raise ValueError("Takada Figure 3 is a 400 eV co-incidence dataset")
     return rows
 
 

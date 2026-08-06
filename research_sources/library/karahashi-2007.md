@@ -9,17 +9,22 @@
 
 ## Claims table
 
-Rows relocated verbatim from the repo's research/results docs. `consumed by` = the
-doc that recorded it (that doc states which constant/decision it fed).
-
-| # | recorded claim (as written in our docs) | consumed by |
+| # | source-backed claim | consumed by / boundary |
 |---|---|---|
-| Q1 | This does not contradict the earlier "2.8x too weak" reading recorded in `BENCHMARK_CERTIFICATION_2026-08-06.md`: that comparison was against Gray's *saturated plateau* at 350 eV, a coverage-curve quantity, not an absolute per-ion yield. Both can hold. What the Karahashi check establishes is narrower and is exactly what the mandate needed: the absolute magnitude is not the defect, so raising it is not the fix. | `RESULTS_RATE_GAP_CLOSURE_2026-08-06.md`:55 |
-| U2 | [unquoted — verify on next use] \| 15 \| Ishikawa, Karahashi, Ishijima, Cho, Elliott, Hausmann, Mocuta, Wilson, Kinoshita — *Progress in nanoscale dry processes for fabrication of high-aspect-ratio features: how can we control critical dimension uniformity at the bottom?* — **Jpn. J. Appl. Phys. 57, 06JA01 (2018)**, DOI 10.7567/JJAP.57.06JA01 \| the field's own statement of the unsolved problems; MaCE AR 160/500 comparison points \| open \| | `RESEARCH_EXTREME_AR_FIELD_2026-08-06.md`:760 |
-| U3 | [unquoted — verify on next use] Karahashi, *Hyomen Kagaku* **28**, 60 (2007) — the open-access full-text review of Karahashi *et al.*, *JVST A* **22**, 1166 (2004), DOI 10.1116/1.1761119. Mass-analyzed single-species ion beam, UHV, SiO2, 250–2000 eV, **no radical flux**. Archived full text (not an abstract): `research_sources/thesis_extracts/karahashi_2007_sio2_cfx_ionbeam.txt`, PDF at `research_sources/karahashi_2007_hyomen_kagaku_28_60.pdf`. | `RESULTS_RATE_GAP_CLOSURE_2026-08-06.md`:18 |
-| U4 | [unquoted — verify on next use] petch's two SiO2 channels carry Gray's beam-measured laws (MIT thesis 1993, Ar+/F on SiO2, QCM) — a *different* apparatus, a different laboratory, eleven years earlier, never cross-fitted to Karahashi: | `RESULTS_RATE_GAP_CLOSURE_2026-08-06.md`:42 |
-| U5 | [unquoted — verify on next use] \| channel at 1000 eV \| petch \| Karahashi measured \| ratio \| | `RESULTS_RATE_GAP_CLOSURE_2026-08-06.md`:46 |
-| U6 | [unquoted — verify on next use] \| Gray β_e (landed) \| 0.053(√E−√4) \| **L1 beam-measured**, MIT 1993 \| corroborated by Karahashi to 4.7%; supply-bounded at floor \| | `RESULTS_RATE_GAP_CLOSURE_2026-08-06.md`:150 |
-| U7 | [unquoted — verify on next use] \| Karahashi CF3+ \| 1.5 molecules/ion @1000 eV, saturating \| **L1 beam-measured**, Osaka 2004 \| it is a *ceiling*, below the 2.52 required \| | `RESULTS_RATE_GAP_CLOSURE_2026-08-06.md`:151 |
+| Q1 | The experiment uses energy-controlled, mass-analyzed single-species ions under ultrahigh vacuum without gas-phase reaction or incident neutral radicals. | `data/experimental/karahashi_2007/`; isolates reactive-ion identity and energy, not a plasma mixture. |
+| Q2 | At 1000 eV the text reports about `0.3 SiO2/ion` for F+ and `1.5 SiO2/ion` for CF3+. | Text cross-check for the visually audited Figure-4 digitization. |
+| Q3 | The abstract states that yield increases with ion energy and with the number of fluorine atoms in CFx+, gradually saturates above 1000 eV, and drops into fluorocarbon-film growth below 500 eV. | Species and energy ordering; “gradually saturated” is not a hard 1.5 ceiling. |
+| Q4 | Figure 4 digitization at 1000 eV gives F+ `0.3232`, CF+ `0.6751`, CF2+ `1.1957`, and CF3+ `1.4703 SiO2/ion`. | Required direct-beam ladder; forbids species-agnostic validation. |
+| Q5 | The same CF3+ series reaches `1.8736` at 1500 eV and `1.7549` at 2000 eV. | Retracts the former 1.5 universal-ceiling claim. |
+| Q6 | Per-fluorine yield approximately follows the square root of energy allocated to each F atom over the measured series. | Supports the measured-domain energy trend; does not authorize extrapolation above 2000 eV or to larger ions. |
+| Q7 | Angular yields rise, peak near 60 degrees, and fall toward grazing incidence; the reported 60/0 ratio depends on species. | Angular-class constraint at the source condition; no energy-wide angular table was digitized. |
 
-_Harvested 1 quoted + 6 unquoted mentions across the repo's docs._
+## Corrected consumption
+
+The former library rows that described a “4.7% independent validation” and a
+`1.5` universal ceiling were invalid. The end-to-end default mechanism
+discarded energetic ion identity and returned the same yield for every CFx+
+name. The source now feeds only the opt-in
+`Karahashi2007ReactiveIonYieldTable`, which reproduces/interpolates the
+digitized data inside measured normal-incidence support and refuses
+extrapolation. Matching its own table is reproduction evidence, not validation.

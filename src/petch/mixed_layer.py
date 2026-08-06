@@ -125,6 +125,12 @@ class SurfaceFluxes:
     ion_atom_flux: object = None
     ion_atom_energy_eV: object = None
     ion_atom_cosine: object = None
+    # Optional measured total SiO2 yield for a mass-selected reactive-ion
+    # event. Finite values replace the Ar-like oxide kernels for that event;
+    # NaN retains the ordinary mechanistic path. The measured total has
+    # unresolved SiFx/COx product branching and is never charged to the
+    # neutral-fluorine ledger.
+    ion_atom_reactive_yield: object = None
 
 
 @dataclass
@@ -444,6 +450,20 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         atom_flux = np.asarray(fluxes.ion_atom_flux, dtype=float)
         atom_energy = np.asarray(fluxes.ion_atom_energy_eV, dtype=float)
         atom_cos = np.clip(np.asarray(fluxes.ion_atom_cosine, dtype=float), 0.0, 1.0)
+        if fluxes.ion_atom_reactive_yield is None:
+            atom_reactive_yield = np.full(atom_flux.shape, np.nan)
+        else:
+            atom_reactive_yield = np.asarray(
+                fluxes.ion_atom_reactive_yield, dtype=float)
+            if atom_reactive_yield.shape != atom_flux.shape:
+                raise ValueError(
+                    "reactive-ion yields must align with atom-resolved events")
+            if np.any(np.isinf(atom_reactive_yield)) or np.any(
+                    atom_reactive_yield[np.isfinite(atom_reactive_yield)] < 0.0):
+                raise ValueError(
+                    "reactive-ion yields must be nonnegative finite values or NaN")
+        atom_has_reactive_yield = np.isfinite(atom_reactive_yield)
+        atom_legacy_flux = atom_flux * np.logical_not(atom_has_reactive_yield)
         shape = np.broadcast(np.asarray(d_fc), np.asarray(state.n_f)).shape
         d_fc_arr = np.broadcast_to(np.asarray(d_fc, dtype=float), shape)
         atom_e_iface = np.asarray(interface_energy_eV(
@@ -472,10 +492,13 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         # Appendix-B angular classes: SiO2CF(s)+Ar+ is class 2, SiO2(s)+Ar+ and
         # AC(s)+Ar+ are class 1 (RESULTS_LIP_REMOVAL_AUDIT_2026-08-04).
         kernel_complex = _segment(
-            atom_flux * _complex_yield(atom_e_iface) * atom_chem_ang)
+            atom_legacy_flux * _complex_yield(atom_e_iface) * atom_chem_ang)
         atom_kress_ox = _angular_oxide_sputter(atom_cos)
         kernel_bare = _segment(
-            atom_flux * _bare_sputter_yield(atom_e_iface) * atom_kress_ox)
+            atom_legacy_flux * _bare_sputter_yield(atom_e_iface) * atom_kress_ox)
+        kernel_reactive = _segment(
+            atom_flux * np.where(
+                atom_has_reactive_yield, atom_reactive_yield, 0.0))
         kernel_ac = _segment(atom_flux * np.asarray(_threshold_power_yield(
             atom_e_iface, 0.001, 200.0, 250.0, 0.4)) * atom_kress_ox)
         kernel_dexl = _segment(atom_flux * np.asarray(_threshold_power_yield(
@@ -507,6 +530,7 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         kress_ox_scalar = _angular_oxide_sputter(cos_scalar)
         kernel_bare = (fluxes.ion_flux * _bare_sputter_yield(e_iface)
                        * kress_ox_scalar)
+        kernel_reactive = np.zeros_like(kernel_bare)
         kernel_ac = fluxes.ion_flux * np.asarray(_threshold_power_yield(
             e_iface, 0.001, 200.0, 250.0, 0.4)) * kress_ox_scalar
         kernel_dexl = fluxes.ion_flux * np.asarray(_threshold_power_yield(
@@ -639,13 +663,20 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
                              * open_area)
         bare_removal = np.zeros_like(substrate_removal)
         f_costed_removal = np.zeros_like(substrate_removal)
+        reactive_removal = np.zeros_like(substrate_removal)
     else:
         f_per_unit = 4.0
         capacity = (params.volatilization_yield * kernel_complex * open_area)
         sif4 = capacity * theta_f_layer
         bare_removal = (params.volatilization_yield * kernel_bare * open_area
                         * np.maximum(1.0 - theta_f_layer, 0.0))
-        substrate_removal = sif4 + bare_removal
+        # Karahashi's mass-selected yield is a measured TOTAL under a
+        # radical-free steady beam, not a SiF4-only channel. It replaces the
+        # two Ar-like oxide kernels event-by-event and bypasses both the fitted
+        # volatilization multiplier and the neutral-F ledger. Existing film
+        # still shields the substrate through the same geometric open area.
+        reactive_removal = kernel_reactive * open_area
+        substrate_removal = sif4 + bare_removal + reactive_removal
         f_costed_removal = sif4
     # Layer oxidation of mixed C by layer O (same probability channel);
     # clamp to available layer carbon first.
@@ -666,7 +697,8 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
     sif4 = sif4 * scale_lf
     cof2 = cof2 * scale_lf
     substrate_removal = f_costed_removal + (
-        bare_removal if params.substrate != "carbon" else 0.0)
+        bare_removal + reactive_removal
+        if params.substrate != "carbon" else 0.0)
 
     # Recession; for SiO2 it liberates lattice Si and O into the layer
     # (1 Si : 2 O per SiF4). Carbon lattice leaves directly as CFx product.
@@ -675,7 +707,7 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         si_in = 0.0
         o_in = 0.0
     else:
-        recession = (sif4 + bare_removal) / _SIO2_FORMULA_DENSITY_M3  # m/s
+        recession = substrate_removal / _SIO2_FORMULA_DENSITY_M3  # m/s
         si_in = sif4
         o_in = 2.0 * sif4
 

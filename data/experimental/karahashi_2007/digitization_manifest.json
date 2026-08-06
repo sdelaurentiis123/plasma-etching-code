@@ -1,0 +1,70 @@
+{
+  "manifest_id": "KARAHASHI-2007-FIG4-REACTIVE-ION-YIELDS-R1",
+  "source": {
+    "citation": "K. Karahashi, Surface Science Society of Japan 28, 60-65 (2007); open review of the mass-selected beam experiments reported in JVST A 22, 1166 (2004), DOI 10.1116/1.1761119",
+    "local_pdf": "research_sources/karahashi_2007_hyomen_kagaku_28_60.pdf",
+    "pdf_sha256": "093b18b91b0a6d910fc414779ee8320b7a046ac4cad38ef5de0b7f2dd25a2d79",
+    "pdf_page": 4,
+    "print_page": 63,
+    "figure": "Figure 4",
+    "render_dpi": 600,
+    "rendered_page_sha256": "075cd97e5d7b5238f028f546d5c63cfc0c96cd6ff33a769b640f130d73b5fe1d",
+    "rendered_page_size_px": [
+      4961,
+      7017
+    ]
+  },
+  "experiment_scope": {
+    "target": "SiO2",
+    "incident_ions": [
+      "F+",
+      "CF+",
+      "CF2+",
+      "CF3+"
+    ],
+    "neutral_radical_flux": "none",
+    "beam_selection": "mass selected",
+    "reported_energy_domain_eV": [
+      250,
+      2000
+    ],
+    "quantity": "etched SiO2 units per incident ion"
+  },
+  "pixel_calibration": {
+    "x_at_0_eV": 973.0,
+    "x_at_2500_eV": 2080.0,
+    "y_at_zero_yield": 1524.0,
+    "y_at_2p5_yield": 650.0,
+    "transform": {
+      "energy_eV": "2500 * (x_px - 973.0) / (2080.0 - 973.0)",
+      "yield": "2.5 * (1524.0 - y_px) / (1524.0 - 650.0)"
+    }
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; PIL dark-pixel axis localization; marker-center and plotted-cap transcription; connected-contour and full-resolution visual-overlay reconciliation",
+    "nominal_energy_policy": "use plotted experimental setpoints; retain marker x pixels only as an independent placement check",
+    "yield_digitization_uncertainty": 0.011,
+    "uncertainty_basis": "3.5-pixel vertical center-placement allowance, rounded upward after the linear y-axis transform",
+    "plotted_bounds_policy": "transcribe the source error-bar caps but do not call them a confidence interval because the accessible source text does not define their statistical meaning"
+  },
+  "derived_checks": {
+    "point_count": 21,
+    "maximum_marker_x_energy_offset_eV": 8.808,
+    "cf3_yield_at_1000_eV": 1.4703,
+    "cf3_maximum_digitized_yield": 1.8736,
+    "cf3_maximum_energy_eV": 1500
+  },
+  "claim_boundary": {
+    "valid": "direct radical-free single-species beam benchmark over the digitized species/energy support",
+    "not_valid": [
+      "a universal yield ceiling",
+      "a fluorocarbon-plasma total-yield ceiling",
+      "an ion-mixture law for the Krueger reactor",
+      "an extrapolation above 2000 eV"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/karahashi_2007/figure4_reactive_ion_yields.csv",
+    "sha256": "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26"
+  }
+}

@@ -2,31 +2,45 @@
 
 Boxes: all campaign instances destroyed (only the user's own `exp015n-spectate`
 remains — NOT ours, an external spawner the user should investigate). Suite at
-last commit: 1202 passed, 1 skipped. Everything below is committed and pushed
+this handoff: 1240 passed, 1 skipped. Everything below is committed and pushed
 to origin/codex/validation-first-multiphysics.
 
-## Where the science stands
+## Where the science stands — correction
 
-- **Model verified against direct measurement.** Per-ion yields match the
-  Karahashi single-species beam experiment to 4.7% (chemical channel) / 1.27x
-  (physical) at 1 keV; angular bound and sqrt-E scaling independently
-  corroborated. Gates pin this (tests/test_rate_gap_supply_bound.py).
-- **Krueger validation (VALIDATION_DOSSIER + BENCHMARK_CERTIFICATION):** mask
-  exact (850.2/850) at all six conditions; power-transfer ratios PASS at
-  endpoint (r4/6=0.909, r8/6=1.036); necking exact; mouth passes through 45nm
-  at t=44s then over-closes to 39.8 (band edge); depth 347 vs 825 = MISS with
-  the proof that his own published inputs cannot reach his own figure (blanket
-  rate demands ~2.5-3 units/ion vs measured ceiling 1.5 => his Table-I ion flux
-  understated ~2x). Karahashi 1keV grade supersedes the 350eV two-channel
-  decomposition (reconciliation note in RESULTS_RATE_GAP_CLOSURE).
-- **IN FLIGHT WHEN PAUSED (relaunch to finish): the blanket-anchored
-  prediction** — calibrate boundary ion flux on his PUBLISHED BLANKET rate
-  (independent observable, yields stay measured), then the six-condition board
-  as out-of-sample tests. Fork was killed after step 1 of the base run; boxes
-  destroyed; the implementation may be partially in the tree/commits of that
-  fork — check git log for its commits before redoing. Expectation: depth
-  ~2x up toward band, closure ratio drops toward Krueger's, clog/ordering may
-  co-recover. This is the "predict depth honestly" move.
+The direct-beam and depth-impossibility claims in the original pause handoff
+were retracted after a full Figure-4 pixel audit. The authoritative correction
+is `RESULTS_DEPTH_IDENTIFIABILITY_2026-08-06.md`.
+
+- **Species-agnostic validation was false.** The default end-to-end mechanism
+  returned the same `0.380584 SiO2/ion` for F+, CF+, CF2+, and CF3+ at 1000 eV
+  because energetic ion identity was discarded. Karahashi instead measures a
+  strong species ladder (`0.3232`, `0.6751`, `1.1957`, `1.4703`) and CF3+
+  reaches `1.8736` at 1500 eV. The former “4.7% independent validation” gate
+  was removed.
+- **The endpoint comparison is numerically unchanged.** Mask thickness,
+  endpoint power ratios, neck, mouth history, and the simulated `346.833 nm`
+  versus measured `825 nm` MISS are unchanged.
+- **The impossibility proof was false.** `2.521 SiO2/wafer-ion` is a
+  run-average lower-bound normalization, not a yield sustained at the floor.
+  Takada's independent stable-C5F8/Ar+ beam experiment reports `2.4–2.5` at
+  900 eV and ratio 1 (a retained journal/conference source discrepancy),
+  proving that Karahashi's rounded `1.5` pure-CF3+ value is not a universal
+  surface ceiling.
+- **Absolute depth is underidentified.** Krüger publishes an aggregate ion
+  flux/IEAD but no positive-ion species composition and no stable C4F6 wafer
+  flux. Both missing variables have order-one effects in direct surface
+  measurements. Exact 825 nm prediction is not authorized from the published
+  boundary.
+- **A direct C4F6 diagnostic now strengthens that verdict.** Kim et al. 2021
+  measured an undissociated C4F6 mass signal and a multi-species CFx+/CxFy+
+  ion distribution at another CCP's powered electrode. Its count rates cannot
+  calibrate Krüger, but it confirms the omitted boundary classes are physical,
+  not speculative.
+- **The code now makes the boundary explicit.** An opt-in Karahashi
+  species-resolved table reproduces the measured ladder only inside measured
+  energy/angle support and leaves the default aggregate path bitwise
+  unchanged. Takada Figure 3 is separately archived, digitized, visually
+  audited, and labeled as a C5F8 analog—not a C4F6 law.
 
 ## Deliverables shelf (all committed)
 
@@ -38,20 +52,22 @@ to origin/codex/validation-first-multiphysics.
 - Validation dossier + benchmark certification (the skeptic-facing records).
 - Field map (RESEARCH_EXTREME_AR_FIELD): 200:1 = undemonstrated whitespace;
   ranked 10-gap list; our transport matches Lam's published numbers.
-- Literature library: research_sources/LIBRARY.md + library/ (92 sources, 844
-  claim rows, reverse constant->source index, quarantine table) + 28 full-text
+- Literature library: research_sources/LIBRARY.md + library/ (94 sources, 858
+  claim rows, reverse constant->source index, quarantine table) + 32 full-text
   extracts. Conventions: fetch=>extract+entry same commit; bibkey provenance.
 
 ## Open decisions for the user
 
-1. Relaunch the blanket-anchored board (the depth answer) — ~$3, an evening.
+1. Do **not** relaunch the former blanket-anchored board as a prediction. There
+   is no published blanket datum; any ion normalization is a fit to 825 nm.
+   First obtain or predict species-resolved ions and stable C4F6 at the wafer.
 2. Send the Krueger email (drafted in RESEARCH_F_SUPPLY_BAND §6) — may yield
    his true fluxes.
 3. Rebuild the public HTML artifact from the certification (old page is stale
    both directions).
-4. Sean's reactor model: reply drafted (in session); integrate as boundary
-   provider; his sources -> library; knobs->profile SF6 loop = first joint
-   deliverable.
+4. Sean's reactor model: integrate as a boundary provider and grade its
+   species-resolved outputs. For this depth case it must be extended from SF6
+   to C4F6 and validated against ion-composition and stable-parent diagnostics.
 5. Kill the exp*-spectate spawner on the vast account (not ours, ~$0.31/hr).
 
 ## Standing rules (unchanged)

@@ -1,0 +1,97 @@
+{
+  "audit_id": "KRUEGER-2024-DEPTH-IDENTIFIABILITY-R1",
+  "inputs": {
+    "target_depth_nm": 825.0,
+    "simulated_depth_nm": 346.83264081620524,
+    "duration_s": 60.0,
+    "sio2_formula_density_m3": 2.2e+28,
+    "published_aggregate_wafer_ion_flux_m2_s": 1.2e+20,
+    "published_positive_ion_species_composition": null,
+    "published_stable_c4f6_wafer_flux_m2_s": null,
+    "diagnostic_final_geometry_ion_floor_delivery": 0.7,
+    "diagnostic_final_geometry_neutral_floor_delivery": 0.1
+  },
+  "run_average_wafer_ion_normalization": {
+    "target_sio2_per_wafer_ion": 2.5208333333333335,
+    "simulation_sio2_per_wafer_ion": 1.0597664024939606,
+    "gap_sio2_per_wafer_ion": 1.461066930839373,
+    "target_to_simulation_ratio": 2.378668853250138,
+    "meaning": "depth-integrated lower-bound normalization; it does not assert that every wafer-plane ion reaches the evolving floor"
+  },
+  "final_geometry_diagnostic": {
+    "target_sio2_per_delivered_floor_ion_if_delivery_were_constant": 3.6011904761904767,
+    "meaning": "counterfactual instantaneous normalization using the final 0.70 delivery for all 60 s; not the evolving-feature history"
+  },
+  "direct_surface_evidence": {
+    "karahashi_pure_cf3_ion_peak_digitized_sio2_per_ion": 1.8736,
+    "karahashi_scope": "CF3+, normal incidence, radical-free, digitized within 250-2000 eV support",
+    "takada_c5f8_ar_400eV_ratio1_digitized_sio2_per_ar_ion": 1.1969,
+    "takada_c5f8_ar_900eV_ratio1_sio2_per_ar_ion": {
+      "tmrsj_open_full_text": 2.5,
+      "jap_publisher_abstract": 2.4,
+      "policy": "retain 2.4--2.5 source discrepancy as a range"
+    },
+    "takada_900eV_to_target_run_average_ratio_range": [
+      0.9520661157024792,
+      0.9917355371900826
+    ],
+    "interpretation": "a measured stable-parent/ion regime reaches 95--99% of the wafer-ion-normalized target, so 1.5 is not a universal surface ceiling; the 2.4--2.5 source discrepancy is retained and C5F8 cannot be transplanted to C4F6"
+  },
+  "external_c4f6_boundary_evidence": {
+    "source_bibkey": "kim-2021-coatings",
+    "measured_condition": {
+      "feed_sccm": {
+        "C4F6": 40.0,
+        "Ar": 80.0
+      },
+      "pressure_mTorr": 20.0,
+      "rf_power_W": 300.0,
+      "oxygen_present": false
+    },
+    "neutral_mass_spectrum_contains_c4f6_parent_signal": true,
+    "reported_positive_ion_density_order": [
+      "CF+",
+      "C3F3+",
+      "CF3+",
+      "CF2+",
+      "C3F5+"
+    ],
+    "species_energy_distributions_differ": true,
+    "absolute_wafer_flux_calibrated": false,
+    "transferable_to_krueger_boundary": false,
+    "meaning": "direct qualitative evidence that both omitted boundary classes exist in a C4F6 CCP; detector count rates and the different reactor condition cannot normalize Krueger"
+  },
+  "c4f6_parent_boundary_sensitivity": {
+    "assumptions": {
+      "total_pressure_mTorr": 10.0,
+      "feed_sccm": {
+        "C4F6": 140.0,
+        "Ar": 100.0,
+        "O2": 105.0
+      },
+      "gas_temperature_k": 300.0,
+      "c4f6_mass_amu": 162.03,
+      "partial_pressure_policy": "total pressure times inlet flow fraction; no-dissociation reference, not a strict bound"
+    },
+    "c4f6_partial_pressure_feed_fraction_reference_pa": 0.5410183066361556,
+    "undissociated_c4f6_impingement_feed_fraction_reference_m2_s": 6.465431177310362e+21,
+    "parent_to_published_ion_ratio_wafer_reference": 53.87859314425302,
+    "parent_to_ion_ratio_floor_reference_with_diagnostic_delivery": 7.696941877750432,
+    "availability_fraction_of_reference_for_wafer_ratio_0p25": 0.004640061764988129,
+    "availability_fraction_of_reference_for_floor_ratio_0p25": 0.032480432354916905,
+    "availability_fraction_of_reference_for_floor_ratio_1": 0.12992172941966762,
+    "meaning": "order-of-magnitude feed-fraction reference only; species-dependent residence time can shift the chamber fraction, and the source publishes neither parent survival nor parent wafer flux"
+  },
+  "verdict": {
+    "former_universal_1p5_ceiling_proof_valid": false,
+    "published_inputs_identify_absolute_depth": false,
+    "exact_825nm_prediction_authorized": false,
+    "measured_missing_mechanism_is_plausible": true,
+    "reason": "species-resolved positive-ion composition and stable C4F6 wafer flux are unpublished, while direct beam evidence shows that both ion identity and parent-molecule co-incidence can change the yield by order unity",
+    "required_new_evidence": [
+      "species-resolved positive-ion flux and IEAD at the wafer",
+      "stable C4F6 molecular flux at the wafer",
+      "direct C4F6/ion co-incidence yield and deposition curve"
+    ]
+  }
+}

@@ -112,13 +112,15 @@ inherit an overclaim.
 | mask constriction (**measured 60 s**) | 45 +/- 5 | **39.82** | **MISS** (0.18 below) |
 
 The depth MISS changed sign when the inherited two-row energy-law anomaly was
-replaced with Gray's measured laws. It is decomposed, not merely attributed:
-the physical channel read 1.22x too strong and the chemical channel 2.8x too
-weak against Gray's absolute yields, and the residual now sits on fluorine
-delivery to the front. Two declared-open supply items remain (the Kwon/Sawin
-adsorption element beyond the scalar; the unpublished CFx+ fraction, swept and
-shown immaterial). E8 was built, gated, and measured immaterial at this
-geometry (+0.02% at AR 200 over the whole physical band).
+replaced with Gray's laws. A later species-resolved audit retracts the former
+claim that the residual was decomposed to fluorine delivery. The default
+mechanism discarded energetic ion identity, while Karahashi measures a strong
+F+/CF+/CF2+/CF3+ ladder and Takada measures an order-one stable-parent/ion
+channel. Krüger publishes neither the ion mixture nor stable C4F6 flux, so
+absolute depth is underidentified. See
+`RESULTS_DEPTH_IDENTIFIABILITY_2026-08-06.md`. E8's implemented
+post-wall-collision thermalized return remains measured immaterial at this
+geometry; that does not bound prompt reactive-ion fragmentation.
 
 ## (a) Eight-condition scorecard
 

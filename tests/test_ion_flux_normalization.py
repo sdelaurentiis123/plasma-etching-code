@@ -1,11 +1,11 @@
-"""Gates for the DECLARED ion-flux calibration (RESULTS_BLANKET_ANCHOR_2026-08-06).
+"""Gates for the explicit, target-fitted ion-flux normalization.
 
 The aggregate positive-ion flux is the one quantity in the removal chain with no
 measurement behind it: the source publishes it as HPEM model output
 (``evidence_type: HPEM_simulation``) and its reactor model carries no
-experimental validation.  A normalization therefore acts there and never on the
-beam-measured yields, which two independent experiments corroborate to 4.7%
-(gray1993_mit, karahashi2007_hyomen).
+experimental validation. A normalization may be explored there without altering
+the other published boundary values, but it is not independently inferred:
+Krueger publishes neither ion-species composition nor a blanket etch datum.
 
 These gates pin the three properties that keep the calibration honest:
   1. default 1.0 is bitwise inert -- no existing result can move;
@@ -68,7 +68,7 @@ def test_calibrated_flux_is_labelled_as_calibration():
     ion = _by_name(scaled)["ions"]
     assert ion.evidence_kind == "declared_calibration"
     assert scaled.provenance["ion_flux_normalization"] == pytest.approx(2.8)
-    assert "beam-measured" in scaled.provenance["ion_flux_normalization_basis"]
+    assert "target fit" in scaled.provenance["ion_flux_normalization_basis"]
 
 
 @pytest.mark.parametrize("bad", [0.0, -1.0, np.nan, np.inf])
@@ -78,21 +78,24 @@ def test_invalid_normalization_refused(bad):
         _normalize_ion_flux(deck, bad)
 
 
-def test_measurement_only_lower_bound_on_the_ion_flux():
-    """The bound that motivates the calibration, recomputed from measurements.
+def test_karahashi_1000ev_marker_is_not_a_universal_ion_yield_ceiling():
+    """The former 2.40x "measurement-only bound" used a false premise.
 
-    825 nm / 60 s (SEM, Krueger Fig. 7b) over 2.2e28 m^-3 needs 3.025e20
-    units/m2/s at the floor.  The measured per-ion ceiling for the most reactive
-    single ion at >=1 keV, saturating, is 1.5 molecules/ion (Karahashi 2007
-    Fig. 3).  Floor ion delivery at AR~21 is 0.70 (cascade scan).  Those three
-    measured numbers alone put the wafer-plane ion flux at >= 2.4x the published
-    HPEM value -- independent of any petch parameter.
+    Figure 4's same CF3+ series rises above the rounded 1.5 value at 1000 eV.
+    More importantly, it ends at 2000 eV and contains no simultaneous molecule
+    flux, while Krueger's aggregate IEAD extends to 4800 eV. It cannot supply a
+    universal per-ion ceiling or an ion-flux lower bound for that reactor.
     """
-    removal = (825e-9 / 60.0) * 2.2e28
-    assert removal == pytest.approx(3.025e20, rel=1e-3)
-    floor_bound = removal / 1.5
-    wafer_bound = floor_bound / 0.70
-    assert wafer_bound / _ION_PUBLISHED_M2_S == pytest.approx(2.40, abs=0.02)
+    from pathlib import Path
+    from petch.experimental_data import load_karahashi_2007_reactive_ion_yields
+
+    path = (Path(__file__).parents[1] / "data" / "experimental"
+            / "karahashi_2007" / "figure4_reactive_ion_yields.csv")
+    rows = load_karahashi_2007_reactive_ion_yields(path)
+    cf3 = [row for row in rows if row.species == "CF3+"]
+    at_1000 = next(row for row in cf3 if row.energy_eV == 1000.0)
+    assert at_1000.yield_sio2_per_ion == pytest.approx(1.4703)
+    assert max(row.yield_sio2_per_ion for row in cf3) == pytest.approx(1.8736)
 
 
 @pytest.mark.parametrize("extra", [

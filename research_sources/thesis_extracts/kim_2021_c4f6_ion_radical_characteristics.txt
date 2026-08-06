@@ -1,0 +1,324 @@
+              coatings
+Article
+Ion and Radical Characteristics (Mass/Energy Distribution) of a
+Capacitively Coupled Plasma Source Using Plasma Process
+Gases (CxFy)
+Yong-Hyun Kim 1,2 , Jong-Sik Kim 1,2 , Dae-Chul Kim 1,2, *, Young-Woo Kim 1,2 , Jong-Bae Park 1,2 ,
+Duk-Sun Han 1,2 and Mi-Young Song 1
+
+                                          1   Fundamental Technology Research Division, Institute of Plasma Technology, Korea Institute of Fusion Energy,
+                                              37 Dongjangsan-ro, Gunsan-si 54004, Korea; poet@kfe.re.kr (Y.-H.K.); jongsik@kfe.re.kr (J.-S.K.);
+                                              ywkim@kfe.re.kr (Y.-W.K.); pjb0410@kfe.re.kr (J.-B.P.); dshan0102@kfe.re.kr (D.-S.H.);
+                                              mysong@kfe.re.kr (M.-Y.S.)
+                                          2   Plasma E.I. Convergence Research Center, Korea Institute of Fusion Energy, 37 Dongjangsan-ro,
+                                              Gunsan-si 54004, Korea
+                                          *   Correspondence: dchcharm@kfe.re.kr
+
+
+                                          Abstract: We constructed a capacitively coupled plasma (CCP) source and installed various diagnostic
+                                          tools to perform process diagnosis using a plasma process gas (CxFy). We obtained the energy and
+                                          mass distributions of the ions and radicals from Ar, C4 F8 /Ar, and C4 F6 /Ar plasmas. The energy
+                                          distribution of the ions incident on the substrate was controlled using the self-bias voltage, and the
+                                          ion energy was found to be inversely proportional to the mass. The measured species and density of
+                                          the ions and radicals can help understand plasma process results as they provide information about
+                                the ions and radicals incident on the substrate.
+         
+
+Citation: Kim, Y.-H.; Kim, J.-S.; Kim,    Keywords: ion energy distribution; CxFy ion and radical; CCP source
+D.-C.; Kim, Y.-W.; Park, J.-B.; Han,
+D.-S.; Song, M.-Y. Ion and Radical
+Characteristics (Mass/Energy
+Distribution) of a Capacitively           1. Introduction
+Coupled Plasma Source Using
+                                               The plasma process has been widely used in many semiconductor processes because it
+Plasma Process Gases (CxFy).
+                                          has several advantages over wet processes. Generally, a plasma process generates various
+Coatings 2021, 11, 993. https://
+                                          plasma species (radicals and ions) that respond to a material surface. The energy and mass
+doi.org/10.3390/coatings11080993
+                                          distributions of the ions and radicals in a plasma depend on various process parameters,
+                                          and they play an important role in controlling semiconductor processes such as etching,
+Received: 29 July 2021
+Accepted: 17 August 2021
+                                          cleaning, and deposition. Thus, it is important to measure and analyze the distribution of
+Published: 20 August 2021
+                                          the plasma species in a plasma [1–7].
+                                               The radio frequency (RF) bias frequency applied to substrates affects the ion energy
+Publisher’s Note: MDPI stays neutral
+                                          distribution of ionic species. It shows the ion energy distribution according to ion behavior
+with regard to jurisdictional claims in
+                                          across the sheath on the substrate. The RF bias power applied to substrates also affects
+published maps and institutional affil-   ion energy distribution according to the change in sheath voltage. Furthermore, the RF
+iations.                                  bias power applied to substrates generates a self-bias voltage and affects the energy of ions
+                                          entering the substrate. Recently, the high aspect ratio contact (HARC) etching process has
+                                          increasingly gained importance as an etching process [8–10]. The high ionic energy required
+                                          in the HARC etching process is generated according to the RF bias power. Therefore, IED
+Copyright: © 2021 by the authors.
+                                          measurements according to RF bias power are very important.
+Licensee MDPI, Basel, Switzerland.
+                                               The measurement of radical species and density plays an important role in under-
+This article is an open access article
+                                          standing the etching or deposition process using plasma. Radical density and production
+distributed under the terms and           ratios generated as a result of processes such as ionization and dissociation affect the
+conditions of the Creative Commons        chemical reaction with the substrate, which changes the process results. In addition, the
+Attribution (CC BY) license (https://     measurement of radical species and density is applied to theoretical calculations to im-
+creativecommons.org/licenses/by/          prove the accuracy of process calculation results. Moreover, energy and mass distribution
+4.0/).                                    measurements of ions and radicals are required for new gases, such as eco-friendly process
+
+
+
+Coatings 2021, 11, 993. https://doi.org/10.3390/coatings11080993                                             https://www.mdpi.com/journal/coatings
+Coatings 2021, 11, 993                                                                                          2 of 8
+
+
+
+
+                         gases [11–13]. To this end, we aim to contribute to the data generation for new gases using
+                         a diagnostic device.
+                              In this study, we used a commercial mass/energy analyzer to measure the ions and
+                         radicals in Ar, C4 F8 /Ar, and C4 F6 /Ar plasmas.
+
+                         2. Materials and Methods
+                              A plasma chamber was operated in the reactive ion etching (RIE) mode with a ca-
+                         pacitively coupled plasma (CCP) source. Figure 1 shows a schematic of the chamber
+                         with diagnostic tools. The electrode device used consists of two circular electrodes with
+                         a diameter of 300 mm and a spacing of 40 mm in the plasma chamber. The upper elec-
+                         trode was grounded. The bottom electrode was electrically insulated from the ground and
+                         connected to an RF power supply. Plasma was generated using a 13.56 MHz RF power
+                         supply (APF-3013, ASE, Yongin, Korea). The plasma chamber was vacuumed using a turbo
+                         molecular pump (STP-A1303C, Edwards, Chiba, Japan) and the base pressure was 2 × 10−6
+                         Torr. The etching process gas was uniformly injected through the showerhead located
+                         at the upper electrode. The gases used for the etching process were C4 F8 and C4 F6 at a
+                         ratio of 1:2 with Ar gas. The chamber pressure was adjusted to 10–30 mTorr using a mass
+                         flow controller (1179 Mass-Flo, MKS, Andover, MA, USA). Various diagnostic tools were
+                         installed in the plasma chamber to diagnose the plasma parameters. The diagnostic tools
+                         include a mass/energy analyzer, an optical emission spectroscopy (USB4000, Ocean Optics,
+                         Orlando, FL, USA), a cut-off probe, a VI probe (Octiv Suite, Impedans, Dublin, Ireland), and
+                         a high-voltage probe (P6015A, Tektronix, Oregon, OR, USA). The mass/energy analyzer
+                         (EQP1000, Hiden, Warrington, UK) was placed at the center of the powered electrode
+                         of the plasma source. A 100-µm aperture plate was installed 1 mm below the bottom
+                         electrode to measure the mass and energy distributions of the ions and radicals incident on
+                         the electrode.
+
+
+
+
+                         Figure 1. Schematic of the chamber with diagnostics tools.
+
+                               The EQP1000 system comprises an ionization source region for measuring the neutral
+                         and radical ions, an electrostatic ion energy analyzer region for measuring the ion energy,
+                         and a quadrupole mass spectrometer region for mass measurement. The detector comprises
+                         a secondary electron multiplier region. The EQP1000 system has a mass range of up
+                         to 1000 amu and an energy range that can measure +/−1000 eV. The EQP1000 system
+                         maintains a base pressure of 1 × 10−8 Torr through differential pumping to satisfy the
+                         collision-free environment between the incident ions and the surrounding particles. We
+                         also used a reference voltage scanning method with an energy ranging from −1000 to
+Coatings 2021, 11, 993                                                                                            3 of 8
+
+
+
+
+                         +1000 V for a wide range of ion energy measurements. We obtained the energy and mass
+                         distributions of the ions and radicals using an inert gas (Ar) and processing gases (C4 F8 and
+                         C4 F6 ) and compared them with the results of other diagnostic equipment (cut off probe,
+                         VI probe) installed within the plasma source. An OES was used to measure the specific
+                         species in the plasma by measuring the specific emission lines from the plasma-emitting
+                         light and to observe the changes in the plasma density. The light emitted from the plasma
+                         was collected using a quartz optical fiber. The OES has a wavelength detection range of
+                         200–1100 nm and a resolution of approximately 1 nm. An optical fiber was installed in front
+                         of the window installed at the vacuum port. A cutoff probe (COP) was used to measure
+                         the electron density of the plasma. A Langmuir probe is generally used to measure the
+                         electron density in a plasma. However, when reactive gases, such as fluorocarbon gases
+                         (CxFy), are used, the probe tip is etched or deposited. This distorts the signal and yields
+                         inaccurate measurement values. On the other hand, because the cutoff probe only requires
+                         a probe serving as an antenna capable of transmitting and receiving microwaves, it has
+                         the advantage of minimizing the influence of probe contamination. The cutoff probe was
+                         installed in the plasma chamber to measure the plasma density. The VI probe measures
+                         the parameters of the plasma power delivery. These parameters include the real power,
+                         forward power, reflected power, impedance, voltage, current, phase angle, harmonics,
+                         and ion flux. The VI probe was installed between the RF-powered electrode and the
+                         matching system to measure the voltage, current, and power applied to the electrode. The
+                         RF current was determined using a magnetic field measured through a pickup coil near
+                         the RF power line, and the RF voltage was measured in a noncontact manner through the
+                         electric field measured at the electrode. A high-voltage probe was installed between the
+                         RF-powered electrode and the matching network to measure the self-bias voltage. Because
+                         the self-bias voltage provides important information regarding the sheath potential that
+                         controls the energy of the ions incident on the substrate, it should be compared with the
+                         ion energy distribution of the ions through an ion energy analyzer. Plasma diagnostics
+                         using process gases was performed using a constructed plasma source and diagnostic tools.
+                         We obtained the energy and mass distributions of the ions and radicals using an inert gas
+                         (Ar) and processing gas (CxFy) and compared them with the results of other diagnostic
+                         tools installed within the plasma source.
+
+                         3. Results and Discussion
+                               Figure 2a shows the variation in the ion energy distribution of the Ar+ ion incident on
+                         the RF-powered electrode as a function of the applied RF power. The flow rate of the Ar
+                         gas was 180 sccm and the chamber pressure was maintained at 20 mTorr. As shown in the
+                         figure, the Ar+ ion energy distribution has multiple peaks, attributed to the exchange of
+                         charges due to collisions with the Ar+ ions through the RF-modulated sheath on the applied
+                         RF-powered electrode [1,14,15]. The energy of the Ar+ ions entering the electrode is the sum
+                         of the plasma potential and the self-bias potential formed on the RF-powered electrode.
+                               In Figure 2b, V b is the self-bias voltage measured using the high-voltage probe. Typi-
+                         cally, the voltage across the electrode and ion transit is measured through a sheath potential
+                         of the form V (t) = V0 + V1 sin ωt. The self-bias voltage is the DC voltage component (V0 ),
+                         excluding the RF cycle voltage (V1 sin ωt). The RF power increased with an increase in
+                         the self-bias voltage. Increasing the self-bias voltage increases the energy of the Ar ions
+                         entering the RF-powered electrode. As a result, the Ar ion energy distribution widens with
+                         increasing RF power, as seen from Equation (1) [16–18].
+                                                                                     1/2
+                                                                     8eV1        2eV0
+                                                          ∆E =                                                      (1)
+                                                                     3ωd          M
+Coatings 2021, 11, 993                                                                                                     4 of 8
+
+
+
+
+                         Figure 2. (a) IEDs of Ar+ ions at the RF-powered electrode as a function of the RF power, (b) Self-bias
+                         voltage (V b ) as a function of the RF power, at a fixed pressure of 20 mTorr.
+
+                              In a CxFy plasma, individual ionized CxFy+ ion species are generated. The density and
+                         energy distributions of CxFy+ ions vary depending on the plasma operation parameters,
+                         and CxFy radicals are generated by ionization, dissociation, and electron attachment. As an
+                         example of a CxFy+ ion, Figure 3a shows the ion energy distribution of a CF+ ion incident
+                         on the RF-powered electrode as a function of the RF power. C4 F8 (40 sccm)/Ar (80 sccm)
+                         was injected into the chamber at a ratio of 1:2 and the chamber pressure was maintained
+                         at 20 mTorr. The measured CF+ ion energy distribution exhibits three dominant peaks.
+                         As the RF power increases, the energy of the third peak increases. However, the first and
+                         second peak energies remain constant. The change in the third peak energy was compared
+                         with the V b value. As shown in Figure 3b, the change in the third energy peak increases
+                         linearly with the change in the V b value. As a result, the third energy peak is affected by
+                         the increase in the sheath potential due to the increase in the self-bias voltage, and therefore
+                         the energy of the ions incident on the substrate increases.
+Coatings 2021, 11, 993                                                                                                        5 of 8
+
+
+
+
+                              The radical mass distribution is an important parameter affecting the plasma process
+                         via chemical reactions during the etching or deposition process. Therefore, it is important to
+                         measure the species and density distributions of the radicals generated from a plasma. The
+                         radical mass distribution changes based on the process parameters, such as the operating
+                         pressure, RF power, process gas combination, and gas ratio. Based on these measurement
+                         results, it is possible to predict the types of radical species that are mainly involved in each
+                         process, and the process results can be predicted on the basis of the radical distribution.
+
+
+
+
+                         Figure 3. (a) IEDs of CF+ ions incident on the RF-powered electrode as a function of the RF power,
+                         (b) Third peak energy of the CF+ ions as a function of the self-bias voltage (V b ), at a fixed pressure of
+                         20 mTorr (C4 F8 (40 sccm)/Ar (80 sccm)).
+Coatings 2021, 11, 993                                                                                                             6 of 8
+
+
+
+
+                                      Figure 4 shows the radical mass distribution obtained using the process gas. The
+                                 gas injected into the chamber was a mixture of C4 F8 /Ar and C4 F6 /Ar. The gas ratio was
+                                 fixed at 1:2, the total pressure was maintained at 20 mTorr, and the RF power was set to
+                                 300 W. The C4 F8 /Ar and C4 F6 /Ar plasmas exhibit different radical mass distributions
+                                 depending on the reaction, such as ionization, dissociation, and electron attachment, and
+                                 plasma parameters, such as the electron temperature and the chemical bond of the used
+                                 gases. In the case of the C4 F8 /Ar plasma, the radical density was measured in the order of
+                                 Ar, C2 F4 , C3 F5 , CF3 , CF, and CF2 . However, the parent molecule C4 F8 was not measured.
+                                 It appears to be mostly ionized and could not be measured. In the case of the C4 F6 /Ar
+                                 plasma, the radical density was measured in the order of Ar, C3 F3 , C4 F6 , CF, C3 F4 , and CF3 .
+                                 Unlike the C4 F8 /Ar plasma, many types of radicals were measured, and C4 F7 radicals,
+                                 which are heavier than the parent molecules, were also measured. This seems to be the
+                                 result of ionization, dissociation, and attachment to the parent molecules in the plasma.
+
+
+
+
+      Figure 4. Radical mass spectra from the plasma: (a) C4 F8 (50 sccm)/Ar (100 sccm) plasma, (b) C4 F6 (40 sccm)/Ar (80 sccm)
+      plasma, at a fixed pressure of 20 mTorr and an RF power of 300 W.
+
+                                       Figure 5 shows the results of the ion energy distribution measured under the same
+                                 conditions as those employed for measuring the radical mass distribution. Comparing
+                                 the ion energy distribution between the C4 F8 /Ar and C4 F6 /Ar plasmas, we find that the
+                                 ion species, density, and energy distribution are different. The ion energy distribution
+                                 shows that smaller ions have an energy distribution that includes high energy, as expressed
+                                 in Equation (1). In addition, as the ion mass increases, the energy distribution mainly
+                                 converges to approximately 270 eV. The causes are explained through further verification.
+                                 The density of the ion species can be determined from the integral of the energy distribution
+                                 of each ion species. In the case of C4 F8 /Ar plasma, the ion density was measured in the
+                                 order of CF+ , CF3 + , C2 F4 + , CF2 + , and C3 F5 + . In the case of C4 F6 /Ar plasma, the order
+                                 was CF+ , C3 F3 + , CF3 + , CF2 + , and C3 F5 + . In all the cases, the measurement differed from
+                                 the radical density distribution. The measurement results of the energy and density
+                                 distributions of the radicals and ions generated from the plasma using the process gases,
+                                 e.g., in the case of C4 F8 /Ar and C4 F6 /Ar plasmas, will be helpful for understanding the
+                                 process results.
+Coatings 2021, 11, 993                                                                                                      7 of 8
+
+
+
+
+                         Figure 5. Ion energy distribution at each plasma: (a) C4 F8 (50 sccm)/Ar (100 sccm) plasma, (b) C4 F6
+                         (40 sccm)/Ar (80 sccm) plasma, at a fixed pressure of 20 mTorr and an RF power of 300 W.
+
+                         4. Conclusions
+                               We measured the energy and mass distributions of the ions and radicals from Ar,
+                         C4 F8 /Ar, and C4 F6 /Ar plasmas using a mass/energy analyzer. The Ar+ ion energy dis-
+                         tribution showed multiple peaks, and as the power increased, the ion energy increased
+                         owing to the self-bias voltage formed at the RF-powered electrode. The measured CF+
+                         ion energy distribution exhibited three dominant peaks. As the RF power increased, the
+                         third peak energy increased owing to the increase in the self-bias voltage, whereas the first
+                         and second peak energies remained constant. From the ion energy distribution measured
+                         from the C4 F8 /Ar and C4 F6 /Ar plasmas, we found that smaller ions have a high ion
+                         energy distribution. As the ion mass increased, the energy distribution mainly converged
+                         to approximately 270 eV. The cause of this will be explained in a future study through
+                         diagnosis using other diagnostic tools and etching process results.
+
+                         Author Contributions: Conceptualization, writing—original draft preparation, Y.-H.K. and D.-C.K.;
+                         experimental work, Y.-H.K., D.-C.K. and J.-S.K.; technical review and advising, Y.-W.K., J.-B.P., D.-S.H.
+                         and M.-Y.S. All authors have read and agreed to the published version of the manuscript.
+                         Funding: This work was supported by the National Research Council of Science & Technology (NST)
+                         grant provided by the Korean government (MSIT) (No. CRC-20-01-NFRI) and R&D Program of
+Coatings 2021, 11, 993                                                                                                             8 of 8
+
+
+
+
+                                  “Plasma BigData ICT Convergence Technology Research Project (code No. 1711124799)” through the
+                                  Korea Institute of Fusion Energy (KFE) funded by the Government funds, Republic of Korea.
+                                  Institutional Review Board Statement: Not applicable.
+                                  Informed Consent Statement: Not applicable.
+                                  Data Availability Statement: Data is contained within the article.
+                                  Conflicts of Interest: The authors declare no conflict of interest.
+
+References
+1.    Zeuner, M.; Neumann, H.; Meichsner, J. Ion energy distributions in a dc biased RF discharge. J. Appl. Phys. 1997, 81, 2985–2994.
+      [CrossRef]
+2.    Mizutani, N.; Hayashi, T. Ion energy analysis through RF-electrode. Jpn. J. Appl. Phys. 1997, 36, 1470–1473. [CrossRef]
+3.    Mizutani, N.; Nagata, Y.; Kubo, A.; Hayashi, T. Ion energy and mass analyzer at radio frequency electrode in a plasma chamber.
+      Rev. Sci. Instrum. 1998, 69, 1918–1919. [CrossRef]
+4.    Sobolewski, M.A.; Olthoff, J.K.; Wang, Y. Ion energy distributions and sheath voltages in a radio-frequency-biased, inductively
+      coupled, high-density plasma reactor. J. Appl. Phys. 1999, 85, 3966–3975. [CrossRef]
+5.    O’Connell, D.; Zorat, R.; Ellingboe, A.R.; Turner, M.M. Comparison of measurements and particle-in-cell simulations of ion
+      energy distribution functions in a capacitively coupled radio-frequency discharge. Phys. Plasmas 2007, 14, 103510. [CrossRef]
+6.    Olevanov, M.; Proshina, O.; Rakhimova, T.; Voloshin, D. Ion energy distribution function in dual-frequency RF capacitively
+      coupled discharges: Analytical model. Phys. Rev. E 2008, 78, 026404. [CrossRef] [PubMed]
+7.    Chen, W.C.; Zhu, X.M.; Zhang, S.; Pu, Y.K. Reconstruction of ion energy distribution function in a capacitive RF discharge. Appl.
+      Phys. Lett. 2009, 94, 211503. [CrossRef]
+8.    Abe, H.; Yoneda, M.; Fujiwara, N. Developments of plasma etching technology for fabricating semiconductor devices. Jpn. J.
+      Appl. Phys. 2008, 47, 1435–1455. [CrossRef]
+9.    Wu, B.; Kumar, A.; Pamarthy, S. High aspect ratio silicon etch: A review. J. Appl. Phys. 2010, 108, 051101. [CrossRef]
+10.   Negishia, N.; Miyake, M.; Yokogawa, K.; Oyama, M.; Kanekiyo, T.; Izawa, M. Bottom profile degradation mechanism in high
+      aspect ratio feature etching based on pattern transfer observation. J. Vac. Sci. Technol. B 2017, 35, 051205. [CrossRef]
+11.   Wielanda, R.; Pittroff, M.; Boudaden, J.; Altmannshofer, S.; Kutter, C. Environmental-friendly fluorine mixture for CVD cleaning
+      processes to replace C2 F6 , CF4 and NF3 . ECS Trans. 2016, 72, 23–34. [CrossRef]
+12.   Rabie, M.; Christian, M. Franck, C.M. Assessment of eco-friendly gases for electrical insulation to replace the most potent
+      industrial greenhouse gas SF6 . Environ. Sci. Technol. 2018, 52, 369–380. [CrossRef] [PubMed]
+13.   Boudaden, J.; Altmannshofer, S.; Wieland, R.; Pittroff, M.; Eisele, I. An approach to reduce greenhouse gases in the semiconductor
+      industry using F2 dissociated in plasma for CVD chamber cleaning. Appl. Sci. 2018, 8, 846. [CrossRef]
+14.   Wild, C.; Koidl, P. Ion and electron dynamics in the sheath of radio-frequency glow discharges. J. Appl. Phys. 1991, 69, 2909–2922.
+      [CrossRef]
+15.   Zeuner, M.; Meichsner, J. Ion kinetics in collisional rf-glow discharge sheaths. Vacuum 1995, 46, 151–157. [CrossRef]
+16.   Kawamura, E.; Vahedi, V.; Lieberman, M.A.; Birdsall, C.K. Ion energy distributions in RF sheaths; review, analysis and simulation.
+      Plasma Sources Sci. Technol. 1999, 8, R45–R64. [CrossRef]
+17.   Coburn, J.W.; Eric, K. Positive-ion bombardment of substrates in RF diode glow discharge sputtering. J. Appl. Phys. 1972, 43,
+      4965–4971. [CrossRef]
+18.   Hayden, C.; Gahan, D.; Hopkins, M.B. Ion energy distributions at a capacitively and directly coupled electrode immersed in a
+      plasma generated by a remote source. Plasma Sources Sci. Technol. 2009, 18, 025018. [CrossRef]
+

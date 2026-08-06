@@ -1,31 +1,15 @@
-"""The rate gap is not a channel-magnitude error.
+"""Sensitivity gates for the incumbent neutral-assisted complex channel.
 
-Two independent gates, both against measurements archived in
-``research_sources/``:
+These tests establish one narrow result: once the existing mixed-layer
+complex channel becomes neutral-supply limited at a HAR floor, multiplying
+its Gray-derived magnitude cannot close the feature-depth gap.
 
-1.  CROSS-EXPERIMENT YIELD CHECK.  The two SiO2 ion channels carry Gray's
-    beam-measured laws (MIT thesis 1993, Ar+/F on SiO2, QCM).  Karahashi
-    measured the same quantities on a completely different apparatus --
-    mass-analyzed single-species CFx+ ion beam, Osaka, UHV, no radical flux --
-    and published absolute yields at 1000 eV
-    (``research_sources/thesis_extracts/karahashi_2007_sio2_cfx_ionbeam.txt``
-    L118-127, the full-text open-access review of JVST A 22, 1166 (2004)):
-
-        "F+ イオンに関しては 0.3 molecules／ion と低く ... CF3+ イオンの場合
-         エッチングイールドの値が 1.5 molecules／ion となる"
-        = F+ gives 0.3 molecules/ion (physical-sputter-like, close to Ne+);
-          CF3+ gives 1.5 molecules/ion (the chemically enhanced maximum).
-
-    petch's laws must reproduce that bracket without ever having been fitted
-    to it.  This is the strongest available check on the absolute magnitudes.
-
-2.  SUPPLY BOUND.  At the floor of a HAR feature the complex channel is
-    carbon/fluorine-supply limited, so its magnitude has no authority over the
-    etch rate there.  Scaling the magnitude 8x must move the floor rate by
-    less than 25%.  This is what refutes "calibrate the chemical-channel
-    magnitude to close the depth gate": no value of that constant can.
-
-See RESULTS_RATE_GAP_CLOSURE_2026-08-06.md.
+They do *not* bound missing channels. Karahashi's CFx+ measurements are
+species-resolved reactive-ion totals, whereas the incumbent kernels are
+Ar-like physical removal plus neutral-F-assisted removal. Comparing one
+formula value to one CF3+ marker was not a cross-experiment validation and has
+been removed. The actual species ladder is gated end-to-end in
+``tests/test_reactive_ion_beam.py``.
 """
 import sys
 
@@ -44,11 +28,6 @@ _TABLE_I_NEUTRALS = {
     "CF": 4.4e20, "CF2": 9.4e20, "C2F3": 6.8e20, "CF3": 8.4e19,
     "O": 7.7e20, "C3F4": 9.5e20,
 }
-
-# Karahashi 2007 (full text archived), Fig. 3, SiO2 at 1000 eV.
-_KARAHASHI_F_PLUS = 0.3          # molecules/ion, physical-sputter-like
-_KARAHASHI_CF3_PLUS = 1.5        # molecules/ion, chemically enhanced maximum
-
 
 def _floor_rate_nm_s(complex_scale, *, neutral_delivery=0.10,
                      ion_delivery=0.70, energy_eV=3406.0, steps=120, dt=2.0):
@@ -74,33 +53,11 @@ def _floor_rate_nm_s(complex_scale, *, neutral_delivery=0.10,
         ml._GRAY_BETA_A = original
 
 
-def test_physical_channel_matches_karahashi_f_plus():
-    """Gray's sputter law vs Karahashi's F+ measurement at 1000 eV."""
-    petch = float(ml._bare_sputter_yield(np.array([1000.0])))
-    # 0.381 vs 0.3 measured: within 30%, two different beams, no fitting.
-    assert petch == pytest.approx(_KARAHASHI_F_PLUS, rel=0.30)
-
-
-def test_chemical_channel_matches_karahashi_cf3_plus():
-    """Gray's beta_e vs Karahashi's CF3+ measurement at 1000 eV.
-
-    Two independent apparatus, eleven years apart, never cross-fitted:
-    petch reads 1.570 against 1.5 molecules/ion measured -- 4.7%.  The channel's
-    ABSOLUTE per-ion magnitude is therefore corroborated to within experimental
-    scatter.  (Not in tension with the earlier "2.8x too weak" reading, which
-    compared against Gray's saturated plateau at 350 eV -- a coverage-curve
-    quantity rather than an absolute yield.)
-    """
-    petch = float(ml._complex_yield(np.array([1000.0])))
-    assert petch == pytest.approx(_KARAHASHI_CF3_PLUS, rel=0.10)
-
-
 def test_complex_magnitude_cannot_close_the_floor_rate():
     """The floor is supply-bounded: an 8x magnitude buys under 25%.
 
-    This is the gate that refutes a chemical-channel magnitude calibration as
-    the depth fix.  Closing the measured depth gate needs 2.38x on the feature
-    average; the magnitude cannot deliver it at any value.
+    This rejects the existing complex-channel magnitude as the sole depth fix.
+    It says nothing about missing reactive-ion or parent-molecule channels.
     """
     base = _floor_rate_nm_s(1.0)
     scaled = _floor_rate_nm_s(8.0)

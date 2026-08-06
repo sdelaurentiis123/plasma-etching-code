@@ -1,0 +1,72 @@
+{
+  "manifest_id": "TAKADA-2005-FIG3-SIO2-COINCIDENCE-YIELDS-R1",
+  "source": {
+    "citation": "N. Takada, H. Toyoda, and H. Sugai, Transactions of the Materials Research Society of Japan 30[1], 319-322 (2005), Evidence of Radical-free Etching of SiO2 by Fluorocarbon Molecule under Ion Bombardment",
+    "related_journal_article": "N. Takada et al., Journal of Applied Physics 97, 013534 (2005), DOI 10.1063/1.1829400",
+    "url": "https://www.mrs-j.org/pub/tmrsj/vol30_no1/vol30_no1_319.pdf",
+    "local_pdf": "research_sources/takada_2005_radical_free_etching.pdf",
+    "pdf_sha256": "9034f445f575b85c0b9c95d79b81699c42eafa47a347a7e73a6de73cbe222e25",
+    "pdf_page": 3,
+    "print_page": 321,
+    "figure": "Figure 3",
+    "render_dpi": 600,
+    "rendered_page_sha256": "dc1b45e63764c6fa562a3b6b1f7d652977eb96f07650668125372543cf014d83",
+    "rendered_page_size_px": [
+      4912,
+      7132
+    ]
+  },
+  "experiment_scope": {
+    "target": "thermally grown 20 nm SiO2 on Si",
+    "ion": "mass-selected Ar+",
+    "ion_energy_eV": 400,
+    "ion_incidence": "parallel to surface normal",
+    "coincident_species": {
+      "C5F8": "stable molecule, 45-degree beam",
+      "CF2": "radical from thermal HFPO decomposition"
+    },
+    "gas_phase_radicals": "absent for the C5F8 series",
+    "quantity": "removed SiO2 units per incident Ar+ ion"
+  },
+  "pixel_calibration": {
+    "x_at_flux_ratio_0p1": 844.0,
+    "x_at_flux_ratio_10": 2084.0,
+    "y_at_zero_yield": 1740.5,
+    "y_at_1p4_yield": 989.0,
+    "x_scale": "log10",
+    "transform": {
+      "flux_ratio": "10 ** (-1 + 2 * (x_px - 844.0) / (2084.0 - 844.0))",
+      "yield": "1.4 * (1740.5 - y_px) / (1740.5 - 989.0)"
+    }
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; PIL/NumPy dark-pixel axis localization; full-resolution marker-center transcription; visual-overlay reconciliation",
+    "nominal_flux_ratio_policy": "use plotted experimental setpoints; retain marker x pixels as an independent log-axis placement check",
+    "yield_digitization_uncertainty": 0.015,
+    "uncertainty_basis": "eight-pixel vertical allowance, wider than the scanned marker-edge and axis-center ambiguity"
+  },
+  "text_cross_checks": {
+    "c5f8_yield_at_ratio_1_rounded": 1.2,
+    "c5f8_yield_at_ratio_0p25_rounded": 0.67,
+    "c5f8_yield_at_900eV_ratio_1_not_in_figure3": 2.5
+  },
+  "derived_checks": {
+    "point_count": 8,
+    "maximum_abs_log10_ratio_pixel_offset": 0.00865,
+    "c5f8_maximum_400eV_yield": 1.1969,
+    "c5f8_maximum_400eV_flux_ratio": 1.0
+  },
+  "claim_boundary": {
+    "valid": "direct radical-free evidence that a stable fluorocarbon molecule can enhance ion-assisted SiO2 removal and can also drive a non-monotone deposition/etch balance",
+    "not_valid": [
+      "a C4F6 surface-yield law",
+      "a boundary flux for the Krueger reactor",
+      "a high-aspect-ratio transport measurement",
+      "an extrapolation in ion energy or molecular identity"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/takada_2005/figure3_sio2_coincidence_yields.csv",
+    "sha256": "74f62fbe4b9d88390a35df2f25d605f573b8234b01125d08aac0124ed633ecca"
+  }
+}

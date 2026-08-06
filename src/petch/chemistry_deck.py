@@ -366,6 +366,7 @@ def _check_probability(label, value) -> None:
 def build_mixed_layer_mechanisms_from_deck(deck=None, *, oxide_parameters=None,
                                            mask_parameters=None,
                                            volatilization_yield=None,
+                                           reactive_ion_yield_table=None,
                                            validate=True):
     """Build the (oxide, mask) mixed-layer mechanism pair declared by ``deck``.
 
@@ -410,7 +411,9 @@ def build_mixed_layer_mechanisms_from_deck(deck=None, *, oxide_parameters=None,
     mask_kwargs = dict(common)
     mask_kwargs["deposition_probability_on_substrate"] = dict(
         deposition["on_mask"])
-    return (MixedLayerMechanism(oxide_parameters, **common),
+    oxide_kwargs = dict(common)
+    oxide_kwargs["reactive_ion_yield_table"] = reactive_ion_yield_table
+    return (MixedLayerMechanism(oxide_parameters, **oxide_kwargs),
             MixedLayerMechanism(mask_parameters, **mask_kwargs))
 
 

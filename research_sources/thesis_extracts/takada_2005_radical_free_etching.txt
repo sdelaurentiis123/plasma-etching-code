@@ -1,0 +1,300 @@
+                     Transactions of the Materials Research Society of Japan 30[1]319-322 (2005)
+
+
+
+                      Evidence of Radical-free Etching of Si0 2
+                 by Fluorocarbon Molecule under Ion Bombardment
+
+
+                                   N. Takada, H. Toyoda and H. Sugai
+               Department of Electrical Engineering and Computer Science, N agoya University,
+                                  Furo-cho, Chikusa-ku, Nagoya 464-8603
+                            Fax: 81-52-789-3152, e-mail: takada@nuee.nagoya-u.ac.jp
+
+
+
+
+     Under ion bombardment to Si0 2/Si surface, the additional beam of C5F8 gas molecule causes an
+     enhancement of etching reactions, regardless of radical-free condition. Etching yield is measured as a
+     function of C5Fs/Ar+ flux ratio, and the result is compared with the etching yield in selective SiOz/Si
+     plasma etching. It is found that the contribution of fluorocarbon parent gas to the Si0 2 etching is not
+     negligible in the conventional plasma etching process.
+      Key words: fluorocarbon molecule, ion bombardment, Si0 2 etching, radical-free, beam experiment
+
+1. INTRODUCTION
+   Recently, high selective dry etching of SiOz!Si is
+achieved in fluorocarbon plasma, for example, using
+C4F8/Ar/0 2 mixture gas. Based on the International
+Technology Roadmap for Semiconductors, etching
+technology is required to achieve the thin contact hole of
+a high aspect ratio with the 32 nm technology node or
+less in the next generation of ultra-large-scale integrated
+circuit [1 ]. Moreover, from a viewpoint of avoiding a
+greenhouse effect, various kinds of fluorocarbon etching
+gases have been developed, such as C5F8 or C4F6 with
+                                                                                 (a) Beam experiment
+less global warming potential. Consequently, these
+alternative gas candidates are requested to attain a good
+performance for the etching even in an extremely thin                           QMA
+hole. Therefore, in order to establish a reproducible
+minute etching and control precisely particle densities in
+the alternative etching plasma, it is important to
+understand the etching mechanism and the chemical                        Ionization Cell
+reactions occurring on the SiOz/Si surface. To data, a
+large number of studies have been reported on the role                                                      Beam
+of ion and neutral radicals on the etching processes in
+fluorocarbon plasmas, and on a comparison of etch
+profile or etching selectivity [2-12]. Recently, the
+researches on the alternative gases are also reported
+from the same viewpoint [13-17]. However, little is                         Tube .Jf
+known about the influence of fluorocarbon parent gas on
+the etching reactions. Because the direct contribution                         /c 5F8 gas molecule
+by parent gas to the etching is neglected from the                                       (b) Beam source
+consideration that they are chemically stable unless
+dissociated. In a previous paper, we have reported the               Fig.l. Schematic illustration of (a) the
+ evidence of the enhancement in etching reactions under              apparatus for beam experiment and (b) setup
+ co-incidence of fluorocarbon molecule and Ar+ to the                for co-incidence of C5 F 8 gas and Ar ion.
+ Si0 2 surface [18]. In the present paper, the direct
+ contribution to SiOz/Si etching by C5F8 gas molecule,
+ one of alternative etching gases, is evaluated by beam
+ experiment under a radical-free condition. In other                2. EXPERIMENTAL
+ words, the Si0 2 etching yield ·under co-incidence of                 Experiments have been performed in a well-controlled
+ C5F8 and Ar+ is obtained and compared with the results             beam     apparatus      reported     previously   [10].
+ in conventional plasma etching. From this comparison,              Experimental setup is shown in fig. 1. The apparatus is
+ the direct contribution of C5F8 molecule to the Si0 2              composed of four parts: an ion beam source for Ar +
+ etching in fluorocarbon plasma is revealed.                        beam production, a monochromated XPS system for the
+                                                                    surface analysis, and a quadrupole mass spectrometer
+
+
+
+
+                                                              319
+320                Evidence of Radical-free Etching of Si0 2 by Fluorocarbon Molecule under Ion Bombardment
+
+
+
+                                                                                   (QMA) for detection of surface-produced species,
+                                                      (a)
+                                                                                   although the QMA is not used in the present experiment.
+                                                                                   A base pressure of about 10·9 Torr is obtained with use
+                                                                                   of four turbomolecular pumps at a total pumping speed
+                                                                                   of about 2000 1/s. Thermally grown 20-nm-thick Si0 2
+                                                                                   layer on silicon substrate is employed as test sample.
+                                                                                   Before the experiment, the surface of sample is cleaned
+                                                                                   by ultrasonic cleaning in acetone and by pre-irradiation
+                                                                                   of Ar+ in the vacuum. The sample installed at the beam
+                                                                                   irradiation part is exposed to Ar+ beam and C5F8 flood
+      Distance fl
+                rorn bearn                                                         simultaneously, in a high vacuum condition.           To
+                             center (rnrn)
+                                                                                   compare the influence of fluorocarbon co-incidence, CF2
+                                                                                   radical is produced by thermal decomposition of
+                                                                                   Hexafluoropropylene Oxide (HFPO) and is directed to
+                                                                                   the sample surface. In the beam source, the Ar+ beam
+                                                      (b)
+                                                                                   is generated by electron-impact ionization of Ar and by
+                                                                                   mass selection of a singly charged Ar ion with a
+                                                                                   quadrupole mass filter. The beam energy (E) of Ar+ is
+                                                                                   controlled from 100 to 900 eV by positive and negative
+                                                                                   as voltages applied to the ion beam source and a sample
+                                                                                   stage, respectively. The Ar+ beam is directed to a
+                                                                                   sample in parallel to the surface normal. The Ar+ flux
+                                                                                   density is determined by average flux density within an
+                                                                                   area of 1 mm diameter of the beam. The C5F8 beam is
+       Distance fJ                                                                 directed from an angle of 45° to the sample through a
+                  rorn bearn                                                       stainless steel tube with a diameter of 1 mm. To
+                               center (rnrn;
+                                                                                   produce CF2 radical by thermal decomposition of HFPO,
+                                                                                   the tube can be heated up to 600 °C by DC current (a
+                                                                                   few A) flowing through the tube wall. The flux ratio
+                                                                                   (R) of C5F8 molecule to Ar+ is varied from 0.25 to 250.
+                                                       (c)                         After exposure to the beam, the sample is transferred to
+                                                                                   the surface analysis station, and the atomic composition
+                                                                                   of the sample surface is measured by in situ x-ray
+                                                                                   photoelectron spectroscopy (XPS). The etching yield
+                                                                                   is evaluated from etched depth and etching time.
+                                                                          700
+                                                                                   3. RESULTS AND DISCCUSION
+                                                                    695     -.#'      The co-incidence of C5F8 gas molecule and Ar+
+                                                        690 fl,...~                causes chemical etching reaction on the Si0 2 surface,
+                                                     685 ~fl,<::'                  which is similar to that in conventional fluorocarbon
+       Distance~                               680        i$.-<:5
+                 rorn beam ce                        ~~                            plasmas. The surface atomic composition is observed
+                                 nter (rnrn;                                       from XPS results, that is, a production of SiFx layer and
+                                                                                   a deposition of fluorocarbon layer on the Si02 surface
+                                                                                   by the beam incidence. In this beam device, the Ar+
+                                                                                   beam has its maximum flux density at the center of the
+                                                                                   beam, and the flux ratio of C5F8 to Ar+ increases with
+                                                                                   increasing the radial distance from the beam center,
+                                                                                   because the C5F8 flux density is almost constant over the
+                                                                                   area of the Ar+ beam. Due to the spatial variation of
+                                                                                   C5F8/Ar+ flux ratio, XPS spectra also change with the
+                                                                      300          spatial position. For examples, figs. 2(a), 2(b), 2(c),
+                                                             295          -.#'     and 2(d) show spatial variation of XPS Si2p, Ols, Fls,
+                                                          290 r/;-~                and C1s spectra, respectively, along the radial position
+                                                  285 °<5                          from beam center, after the co-incidence of an Ar+ beam
+                                                     -~~                           at E=400 eV (fluence: 5x10 17 cm-2) and C5F8 beam
+                                               280 -~~                             (fluence: 1.25x1018 cm- 2).       In a series of this
+                                                     <Q
+                                                                                   experiment, we have observed the decrease in the 0
+                                                                                   component and the increase in the F and C components
+                                                                                   immediately after starting the beam incidence. After
+                                                                                   then, each atomic composition remains almost constant
+        Fig. 2. XPS spectra of (a)Si2p, (b)Ols, (c)Fls,                            during the Si0 2 etching. Subsequently, a decrease in
+        and (d)Cls at the radial position from beam                                the 0 is observed again with the drastic increase in the C,
+        center.                                                                    at Ar+ fluence of 0.5x10 17 cm-2. These changes mean
+                                                                                   the complete removal of the Si0 2 at the beam center.
+               Noriharu Takada et al.      Transactions of the Materials Research Society of Japan 30[1] 319-322 (2005)                321
+
+
+
+
+            1.4                      Ar+ Energy : 400eV                   ·~
+                                                                           ~~ 50
+ )..        1.2                                                            u~
+ ""0          1                                                            ~    40
+ G)                                                                        01
+
+ > 0.6
+ C)
+            0.8                                                            c:
+                                                                           ~
+                                                                           w
+                                                                                30
+ !:
+ ..r:: 0.4                                                                      20
+ ..... 0.2
+ (..)
+
+ w 0                                                                            10
+                                                                                     - - - - - ' Ar• Physical Sputtering
+
+            -0.2                                                                        Evaluation from results at Ar• 400eV
+                                                                                 o~~~~~~~~~~~~
+                0.1                    1                    10
+                                                                                 0.70            0.80            0.90          1.0
+                        Cl alAr+ Flux Ratio R                                           C5F8 Dissociation Rate
+
+                                                                         Fig. 5. Direct contribution of C 5F si Ar + in the
+           Fig. 3. C5Fg/Ar+ flux ratio dependence of                     C 5 F si Arl0 2 plasmas reported by the literature
+           etching yield of Si0 2 and Si under co-incidence              A [13), B [14), and C [15], according to CsFs
+           of C5F81Ar+ and CFz/Ar+.                                      dissociation rate in the plasmas.
+
+
+             25                                                          various Ar+ energy, where monotonic increase in SiOz
+ ~N                                                                      etching yield is observed. Si0 2 etching yield of 2.5 is
+ 0           20                                                          obtained in the condition of £=900 eV and the flux ratio
+ ~                                                                       R=l. Next, dependences of Si0 2 and Si etching yields
+  ~          15                                                          on the C5Fg/Ar+ flux ratio are measured as shown in fig.
+  ~u                                                 Cl a                3. As a reference, the results under co-incidence of
+   Gl
+  (j)        10                      .. .O....._CF                       CF2 radical and Ar+ are also shown in the same figure.
+                                .
+                             ...
+   Ill                          ••                   2                   In the case of C5Fs1Ar+ co-incidence, an etching yield of
+   Cl
+                                                                         -1.2 is observed at R-1. In the case of CFzfAr+, the
+  ·=..cu
+  ..           5
+                                    Ar+ Energy : 400eV                   etching yield has a maximum at R-1, although, the
+  w                                                                      maximum etching yield is about a half of that for
+               0
+                0.1                    1                    10           C5Fs1Ar+. In contrast to the Si0 2 etching yield, Si
+                                                                         etching yield monotonically decreases with increasing R
+                        C5 F8/Ar+ Flux Ratio R                           irrespective of the incident fluorocarbon species. From
+                                                                         these results, the flux ratio dependence of the SiOz/Si
+                                                                         etching selectivity is obtained as shown in fig. 4. In ~he
+           Fig. 4.     Variation of etching selectivity of               case of C5Fs1Ar+ co-incidence, the maximum etchmg
+           SiOz/Si as a function of C5Fg/Ar+ flux ratio,                 selectivity of -20 is obtained at the condition of R=l.
+           evaluated from fig. 3.                                        In the CF2 case, the etching selectivity increases with the
+                                                                         flux ratio, and becomes infinity at R>1, because the Si
+                                                                         etch stop appears at this condition with the deposition of
+In the present study, the Si2p peak (fig. 2(a)), Si-0 peak               fluorocarbon layer on the Si at R> 1. These results
+(binding energy: 103.3 eV) disappears at the beam                        indicate that not only the Si0 2 etching but also the
+center and increase in Si-Si peak (binding energy: 99.3                  selective etching of SiOz/Si can be realized by the
+eV) is observed at the center of the beam. The XPS                       CsFsiAr+ co-incidence under the radical-free condition.
+01s data (fig. 2(b)) shows the disappearance of the                            From the results obtained by the beam experiment,
+oxygen content at the beam center, which is in good                       one can evaluate the contribution of C5Fs molecule to
+agreement with the Si2p result. Moreover, figs. 2(c)                      the Si0 2 etching in commercially available CsFs/Ar
+and 2(d) show the spatial variation of fluorocarbon layer                 plasmas for the SiOz/Si selective etching.              In
+on the surface, i.e., increase in the C content and                       conventional C5Fs1Arl0 2 capacitively-coupled plasma
+decrease in the F content at the beam center . This                       for the SiOz/Si selective etching, the maximum SiOz/Si
+means that, after the Si0 2 removal, thick carbon rich                    etching selectivity is obtained at a pressure of 30 mTorr,
+layer is deposited at the beam center. In contrast with                   an RF bias voltage of 1450 Vp-p, Ar+ flux density of
+the beam center, other region shows thin fluorocarbon                     1016 cm-2s·I, and a total flow rate of 415 seem (CsFs: 7
+ layer, which indicates that the surface is still under SiOz              seem, Ar: 400 seem, 0 2: 8 seem) [13). In this etching
+ etching. The XPS results clearly demonstrate the                         condition, the maximum Si0 2 etching. rate is 500
+ surface chemical reactions of C5Fs parent gas molecule                   nmlmin, which corresponds to a Si0 2 etching yield of
+ under co-incidence of Ar+, without any kinds of radical                   2.2. The C5Fs flux (FcsFs) to the surface is obtained
+ incidence.                                                                from the following equation,
+     Based on the XPS measurements, the energy
+ dependence of the Si0 2 etching yield is measured at
+322                  Evidence of Radical free Etching of Si0 2 by Fluorocarbon Molecule under Ion Bombardment
+
+
+                                                                     direct contribution of C5F8 to SiOzfSi etching was
+                 T          _ N ~8KT                  (1)            discussed, based on a beam experiment under a
+                     CsFs   -
+                                4   7rM                              radical-free condition. The Si0 2 etching yield was
+                                                                     obtained under co-incidence of C5F8 and Ar+, and the
+      where N is the C5F 8 number density under the plasma           result was compared with the reported etching yield
+      etching condition and T is the gas temperature.      If we     from the plasma experiment. The contribution of CsFs
+      assume the survival rate of C5F8 gas molecule to be a          molecule to the Si0 2 etching was estimated to be
+      few % in the plasma at the maximum SiOz/Si etching             roughly 30-40% under typical plasma condition if we
+      selectivity, the C5F8 flux is calculated to be 2.5x10 15       consider the survival C5F8 of a few % in plasma.
+      cm-2s-I, which gives the C5F8/Ar+ flux ratio of 0.25.
+      On the other hand, the present result in fig. 3 shows an       Acknowledgments
+      etching yield of 0.67 at R=0.25 and £=400 eV. Thus,              This work was supported by the 21st Century COE
+      the present beam study suggests that the direct                Program (Plasma-Nano), and by a Grant-in-Aid for the
+      contribution of C5F8 molecule to the SiOziSi etching is        Promotion of Science from the Ministry of Education,
+      about 30%, according to the estimated etching yield            Culture, Sports, Science and Technology in Japan.
+      ratio of 0.67/2.2, although Ar+ energy for the plasma
+      experiment and the beam experiment are different.              References
+      Using the same procedure, the direct contribution of           [1] International         Technology     Roadmap      for
+       C5F8 to the total etching yield is plotted by the curve A            Semiconductors 2003 Edition Interconnect (2003).
+       in fig. 5, as a function of the percentage of the C5F 8       [2] G. S. Oehrlein, J. Vac. Sci. Technol., A 11, 34-46
+       dissociation in the plasma. Based on the data of M.                  (1993).
+       Ooka, et al. [14] and S. Takagi, et al. [15] in the           [3] Y. Hikosaka, H. Sugai, Jpn. J. Appl. Phys., 32,
+       C5F8/Ar/0 2 plasmas, the direct contributions of the C5F8            3040-3044 (1993).
+       molecule to the SiOziSi etching are evaluated in the          [4] K. Nakamura, K. Segi, H. Sugai, Jpn. J. Appl.
+       similar manner, and are plotted in fig. 5 by curves B and            Phys., 36, L439-L442 (1997).
+       C, respectively. Here, we used the ion number density         [5] H. Sugai, H. Mitsuoka, Y. Toyoda, J. Vac. Sci.
+       of 1x1011 cm- 3 and ion mass number of C4F6+ in the                  Technol., A 16, 290-293 (1998).
+       evaluation. These results suggest that, in case where         [6] T. E. F. M. Standaert, M. Schaepkens, N. R.
+       97-99% C 5F8 is dissociated by the plasma, the direct                Rueger, P. G. M. Sebel, G. S. Oehrlein, and J. M.
+       contribution of SiOz/Si etching by C5F8 parent gas will              Cook, J. Vac. Sci. Technol., A 16, 239-249 (1998).
+       be roughly 30-40%. However, it should be noted that           [7] H. Kokura, H. Sugai, Jpn. J. Appl. Phys., 39,
+       the contribution of pure Ar+ physical sputtering to the              2847-2853 (2000).
+       total sputtering yield is about 18% as shown in fig. 5.       [8] T. Tatsumi, M. Matsui, M. Okigawa, and M.
+            Physical and chemical processes taking place on the             Sekine, J. Vac. Sci. Technol., B 18, 1897-1902
+        Si0 2 surface under Ar+ bombardment with thermal flux               (2000).
+        of the fluorocarbon molecule are not well understood yet,     [9] K. Kurihara and M. Sekine, Jpn. J. Appl. Phys., 39,
+        but can be tentatively considered as follows. For                    1369-1370 (2000).
+        example, C5F8 molecules absorbing on the Si0 2 surface        [10] H. Toyoda, H. Morishima, R. Furute, Y. Hori, I.
+        may be dissociated into C,Fy radicals through several                Murakami, and H. Sugai, J. Appl. Phys., 95,
+        processes: (1) direct collision with Ar+ ions, (2)                  5172-5179 (2004).
+        vibrational excitation by collision with energetic lattice    [11] K. Takahashi, M. Hori, T. Go to, Jpn. J. Appl.
+        atoms (Si, 0) under Ar+-induced collision cascade                   Phys., 33,4745-4751 (1994).
+        processes, and (3) collisions with Si and 0 atoms             [12] M. Inayoshi, M. Ito, H. Hori, and T. Go to, J. Vac.
+        sputtered by Ar + impact.        As a consequence, the               Sci. Technol., A 16, 233-238 (1998).
+        resultant CxFy and F radicals react with Si and 0 atoms       [13] T. Tatsumi, M. Matsui, S. Kobayashi, K.
+        on the surface, giving rise to etching of Si0 2 and                  Kinoshita, and M. Sekine, Proc. /nt. Symps. Dry
+        deposition of a fluorocarbon layer. In the case of C5F8,             Process (Tokyo, 2000), pp37-42.
+        there may be an additional process. The C5F8 molecule         [14] M, Ooka and Shin Yokoyama, Jpn. J. Appl. Phys.,
+        has a ring structure with a double bond and four single              43, 3586-3589 (2004).
+        bonds. The double bond is broken by dangling bonds            [15] S. Takagi, S. Ooue, K. Iyanagi, K. Nishitani, T.
+        on Si02 surface, which are continuously produced by                  Shinmura, M. Kanoh, H. Itoh, Y. Shioyama, T.
+        Ar+ bombardment, and thus the C5 F8 molecule is                      Akiyama and D. Kishigami, Plasma Source Sci.
+        chemically bound to the Si0 2 surface.                 The           Technol., 12, S64-S71 (2003).
+        chemisorbed C5F8 is bombarded by Ar+ ions, yielding           [16] S. Nakamura, M. Itano, H. Aoyama, K. Shibahara,
+        radicals for etching and forming a fluorocarbon layer.               S. Yokoyama and M. Hirose, Jpn. J. Appl. Phys.,
+        Such a unique process of C5F 8 may cause results                     42, 5759-5764 (2003).
+        different from other fluorocarbon molecules.                   [17] K. Takahashi, A. Itoh, T. Nakamura, K. Tachibana,
+                                                                             Thin Solid Films, 374, 303-310 (2000).
+       4. Conclusion                                                   [18] N. Takada, H. Toyoda, I. Murakami, and H. Sugai,
+          In the present study, Si0 2 etching by co-incidence of             J. Appl. Phys ., 97, (2005).
+       C5F8 molecule and Ar+ was investigated in a beam -
+       apparatus. From the variation of XPS spectra along the
+       radial position from the beam center, the spatial profile          (Received December 23, 2004; Accepted January 31, 2005)
+       of the etched surface was observed. Moreover, the
+

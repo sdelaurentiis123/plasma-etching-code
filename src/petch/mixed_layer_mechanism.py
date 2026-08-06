@@ -29,6 +29,7 @@ from petch.mixed_layer import (
     step as mixed_layer_step,
 )
 from petch.surface_exchange import unresolved_surface_exchange
+from petch.reactive_ion_beam import Karahashi2007ReactiveIonYieldTable
 from petch.surface_kinetics import (
     EnergeticFlux,
     FaceResolvedEnergeticFlux,
@@ -103,6 +104,7 @@ class MixedLayerMechanism:
                  deposition_probability_on_film=None,
                  deposition_probability_on_substrate=None,
                  deposition_probability_on_crosslinked=None,
+                 reactive_ion_yield_table=None,
                  default_max_step_s=0.01):
         if not isinstance(parameters, MixedLayerParams):
             raise TypeError("parameters must be MixedLayerParams")
@@ -147,6 +149,14 @@ class MixedLayerMechanism:
         self.fluorine_species = tuple(fluorine_species)
         self.oxygen_species = tuple(oxygen_species)
         self.inert_species = tuple(inert_species)
+        if (reactive_ion_yield_table is not None
+                and not isinstance(
+                    reactive_ion_yield_table,
+                    Karahashi2007ReactiveIonYieldTable)):
+            raise TypeError(
+                "reactive_ion_yield_table must be "
+                "Karahashi2007ReactiveIonYieldTable or None")
+        self.reactive_ion_yield_table = reactive_ion_yield_table
         self.default_max_step_s = float(default_max_step_s)
         overlap = (set(self.precursor_species) & set(self.fluorine_species)
                    | set(self.precursor_species) & set(self.oxygen_species)
@@ -176,6 +186,16 @@ class MixedLayerMechanism:
                 "oxygen": list(self.oxygen_species),
                 "inert": list(self.inert_species),
             },
+            "reactive_ion_yield_table": (
+                None if reactive_ion_yield_table is None else {
+                    "model": "karahashi-2007-normal-incidence-linear-interpolation",
+                    "source_table_sha256": (
+                        reactive_ion_yield_table.source_table_sha256),
+                    "fingerprint": reactive_ion_yield_table.fingerprint,
+                    "evidence_role": (
+                        "data-anchored closure; tabulated points are "
+                        "reproduction, not independent validation"),
+                }),
         })
 
     # -- engine contract -------------------------------------------------
@@ -189,19 +209,73 @@ class MixedLayerMechanism:
         unsupported = tuple(sorted(
             name for name, value in fluxes.neutral_flux_m2_s.items()
             if name not in mapped and np.any(np.asarray(value) > 0.0)))
-        reasons = ()
+        reasons = []
         if unsupported:
-            reasons = (f"unmapped nonzero neutral species: {', '.join(unsupported)}",)
+            reasons.append(
+                f"unmapped nonzero neutral species: {', '.join(unsupported)}")
+        reactive_table = self.reactive_ion_yield_table
+        if reactive_table is not None:
+            for population in fluxes.energetic_fluxes:
+                if population.name not in reactive_table.supported_species:
+                    continue
+                if isinstance(population, FaceResolvedEnergeticFlux):
+                    positive = population.event_flux_m2_s > 0.0
+                    energy = population.event_energy_eV[positive]
+                    cosine = population.event_cosine_incidence[positive]
+                else:
+                    if not np.any(
+                            np.asarray(population.flux_m2_s, dtype=float) > 0.0):
+                        continue
+                    positive = population.weight > 0.0
+                    energy = population.energy_eV[positive]
+                    cosine = population.cosine_incidence[positive]
+                if not np.all(reactive_table.supports(
+                        population.name, energy, cosine)):
+                    lo, hi = reactive_table.energy_domain_eV(population.name)
+                    reasons.append(
+                        f"{population.name} leaves Karahashi's normal-incidence "
+                        f"{lo:g}--{hi:g} eV measured support")
+        omissions = [
+            "no spontaneous (ion-free) chemical etch channel",
+            "chemisorption channel uses substrate-agnostic published probabilities",
+            "single projectile species for stopping tables",
+            "product routing unresolved (SiF4/CO/COF2 emission laws undeclared)",
+        ]
+        if reactive_table is None:
+            omissions.append(
+                "energetic ion identity is ignored; events use the aggregate "
+                "Ar-projectile oxide kernels and cannot validate a CFx+ ladder")
+        else:
+            unsupported_energetic = tuple(sorted({
+                population.name for population in fluxes.energetic_fluxes
+                if population.name not in reactive_table.supported_species
+                and (
+                    np.any(population.event_flux_m2_s > 0.0)
+                    if isinstance(population, FaceResolvedEnergeticFlux)
+                    else np.any(
+                        np.asarray(population.flux_m2_s, dtype=float) > 0.0)
+                )
+            }))
+            if unsupported_energetic:
+                omissions.append(
+                    "energetic populations outside the Karahashi species "
+                    "table fall back to the aggregate Ar-projectile oxide "
+                    "kernels: " + ", ".join(unsupported_energetic))
+            omissions.extend([
+                "reactive-ion table is radical-free steady-beam data, not a plasma co-incidence law",
+                "reactive-ion SiFx/COx product branching and incident C/F routing are unresolved",
+                "reactive-ion film stopping/mixing still uses the declared Ar-projectile closure",
+                "reactive-ion digitization uncertainty and plotted experimental error bars are not propagated through feature evolution",
+            ])
+        omissions.append(
+            "stable parent-molecule/ion co-incidence is not represented; "
+            "a species-resolved parent boundary and sourced co-incidence law "
+            "are required")
         return MechanismValidity(
-            within_declared_scope=not unsupported,
-            reasons=reasons,
+            within_declared_scope=not reasons,
+            reasons=tuple(reasons),
             unsupported_neutral_species=unsupported,
-            known_model_form_omissions=(
-                "no spontaneous (ion-free) chemical etch channel",
-                "chemisorption channel uses substrate-agnostic published probabilities",
-                "single projectile species for stopping tables",
-                "product routing unresolved (SiF4/CO/COF2 emission laws undeclared)",
-            ),
+            known_model_form_omissions=tuple(omissions),
             parameter_evidence_supports_prediction=False,
             nonpredictive_parameters=(
                 "sticking_probability", "fluorine_film_sticking",
@@ -397,7 +471,22 @@ class MixedLayerMechanism:
         atom_flux = []
         atom_energy = []
         atom_cosine = []
+        atom_reactive_yield = []
         flat_faces = int(np.prod(shape)) if shape else 1
+
+        def measured_reactive_yield(name, energy, cosine):
+            energy = np.asarray(energy, dtype=float)
+            cosine = np.asarray(cosine, dtype=float)
+            result = np.full(np.broadcast(energy, cosine).shape, np.nan)
+            table = self.reactive_ion_yield_table
+            if table is None or name not in table.supported_species:
+                return result
+            supported = table.supports(name, energy, cosine)
+            if np.any(supported):
+                result[supported] = table.evaluate(
+                    name, energy[supported], cosine[supported])
+            return result
+
         for population in fluxes.energetic_fluxes:
             if isinstance(population, FaceResolvedEnergeticFlux):
                 atom_face.append(np.asarray(population.event_face, dtype=int))
@@ -407,6 +496,9 @@ class MixedLayerMechanism:
                                               dtype=float))
                 atom_cosine.append(np.asarray(
                     population.event_cosine_incidence, dtype=float))
+                atom_reactive_yield.append(measured_reactive_yield(
+                    population.name, population.event_energy_eV,
+                    population.event_cosine_incidence))
             else:
                 base = np.broadcast_to(np.asarray(
                     population.flux_m2_s, dtype=float), shape).ravel()
@@ -420,12 +512,18 @@ class MixedLayerMechanism:
                         flat_faces, float(population.energy_eV[row])))
                     atom_cosine.append(np.full(
                         flat_faces, float(population.cosine_incidence[row])))
+                    atom_reactive_yield.append(np.full(
+                        flat_faces, float(measured_reactive_yield(
+                            population.name,
+                            np.asarray([population.energy_eV[row]]),
+                            np.asarray([population.cosine_incidence[row]]))[0])))
         if atom_face:
             atoms = dict(
                 ion_atom_face=np.concatenate(atom_face),
                 ion_atom_flux=np.concatenate(atom_flux),
                 ion_atom_energy_eV=np.concatenate(atom_energy),
-                ion_atom_cosine=np.concatenate(atom_cosine))
+                ion_atom_cosine=np.concatenate(atom_cosine),
+                ion_atom_reactive_yield=np.concatenate(atom_reactive_yield))
         else:
             atoms = dict()
         carbon_flux = np.zeros(shape)
@@ -589,7 +687,7 @@ KRUEGER_2024_DEPOSITION_ON_MASK = {
 
 def build_krueger_2024_mixed_layer_mechanisms(
         *, oxide_parameters=None, mask_parameters=None,
-        volatilization_yield=1.0):
+        volatilization_yield=1.0, reactive_ion_yield_table=None):
     """Oxide + mask mixed-layer mechanisms wired to the Krueger species set.
 
     Thin wrapper over the chemistry-deck factory: every constant lives in
@@ -604,4 +702,5 @@ def build_krueger_2024_mixed_layer_mechanisms(
 
     return build_mixed_layer_mechanisms_from_deck(
         oxide_parameters=oxide_parameters, mask_parameters=mask_parameters,
-        volatilization_yield=float(volatilization_yield))
+        volatilization_yield=float(volatilization_yield),
+        reactive_ion_yield_table=reactive_ion_yield_table)

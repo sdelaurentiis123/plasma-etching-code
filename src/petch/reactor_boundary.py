@@ -864,16 +864,11 @@ def _normalize_ion_flux(deck, factor):
     an HPEM model output (``evidence_type: HPEM_simulation`` in
     ``base_case_boundary_fluxes.csv``) and its reactor model carries no
     experimental validation -- Krueger's own thesis treats the HPEM fluxes as
-    ground truth.  It is therefore the one quantity in the removal chain with no
-    measurement behind it, which is why a normalization acts here and never on
-    the beam-measured yields (Gray 1993 / Karahashi 2004, corroborated to 4.7%,
-    see RESULTS_RATE_GAP_CLOSURE_2026-08-06.md).
-
-    The measurement-only lower bound is 2.40x (825 nm SEM depth over the
-    Karahashi 1.5 molecules/ion ceiling at 0.70 floor delivery); see
-    RESULTS_BLANKET_ANCHOR_2026-08-06.md for the full chain and the trilemma the
-    bound implies.  Any value used here is a declared calibration and must be
-    reported as such.
+    ground truth. It is therefore a legitimate *sensitivity axis*. It is not an
+    independently measured calibration axis: the source supplies no blanket
+    etch rate, species-resolved ion spectrum, or in-feature flux. Any non-unit
+    value used here is an explicit fit to the 825 nm target and must be reported
+    as such.
     """
     if not np.isfinite(factor) or factor <= 0.0:
         raise ValueError("ion flux normalization must be positive and finite")
@@ -890,8 +885,8 @@ def _normalize_ion_flux(deck, factor):
     provenance = dict(deck.provenance)
     provenance["ion_flux_normalization"] = float(factor)
     provenance["ion_flux_normalization_basis"] = (
-        "declared calibration on the experimental 825 nm depth; yields remain "
-        "beam-measured (gray1993_mit, karahashi2007_hyomen)")
+        "declared target fit to the experimental 825 nm feature depth; no "
+        "independent blanket datum or species-resolved reactor ion measurement")
     return replace(deck, species_fluxes=tuple(records), provenance=provenance)
 
 

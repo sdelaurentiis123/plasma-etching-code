@@ -789,9 +789,9 @@ def run(args):
             if args.compress_boundary_quadrature else None),
         "ion_azimuthal_closure": "axisymmetric_uniform",
         "ion_azimuthal_order": int(args.ion_azimuthal_order),
-        # DECLARED CALIBRATION when != 1.0 (see RESULTS_BLANKET_ANCHOR): scales
-        # only the aggregate ion flux, the one boundary quantity with no
-        # measurement behind it.  Beam-measured yields are never touched.
+        # EXPLICIT TARGET FIT when != 1.0 (RESULTS_DEPTH_IDENTIFIABILITY):
+        # scales only the aggregate ion flux. It is not a blanket calibration
+        # or a measurement-derived correction.
         "ion_flux_normalization": float(args.ion_flux_normalization),
     }
     if args.boundary_case == "base":

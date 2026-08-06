@@ -1,0 +1,9 @@
+coincident_species,flux_ratio_to_ar_ion,ar_ion_energy_eV,yield_sio2_per_ar_ion,marker_center_x_px,marker_center_y_px,marker,digitization_yield_uncertainty
+C5F8,0.25,400,0.6697,1088.0,1381.0,filled_circle,0.015
+C5F8,0.5,400,1.0162,1272.0,1195.0,filled_circle,0.015
+C5F8,1,400,1.1969,1460.0,1098.0,filled_circle,0.015
+C5F8,2.5,400,1.0591,1708.0,1172.0,filled_circle,0.015
+C5F8,10,400,0.7945,2084.0,1314.0,filled_circle,0.015
+CF2,0.25,400,0.4518,1088.0,1498.0,filled_square,0.015
+CF2,1,400,0.6436,1460.0,1395.0,filled_square,0.015
+CF2,2.5,400,0.5002,1708.0,1472.0,filled_square,0.015

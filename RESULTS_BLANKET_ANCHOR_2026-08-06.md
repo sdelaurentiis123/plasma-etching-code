@@ -1,4 +1,10 @@
-# The ion-flux anchor: the premise corrected, the bound derived (2026-08-06)
+# Historical ion-flux anchor — bound retracted 2026-08-06
+
+> **RETRACTED BOUND.** The former `2.40x` “measurement-only” ion-flux lower
+> bound depended on treating Karahashi's rounded `1.5 SiO2/ion` CF3+ value as a
+> universal ceiling and on applying a final-geometry delivery fraction to the
+> full 60 s history. Both steps are invalid. See
+> `RESULTS_DEPTH_IDENTIFIABILITY_2026-08-06.md`.
 
 The mandate was to anchor a boundary-flux normalization on Krüger's "blanket
 etch rate" of 13.75 nm/s, on the reading that his Table-I ion flux is
@@ -12,9 +18,10 @@ one of the twelve places the repo uses it derives it that way
 archived source extracts, and no blanket or unpatterned etch rate appears
 anywhere in the thesis, the paper, the OSTI manuscript, or the 2022 companion.
 
-Anchoring a boundary on it is therefore not a blanket calibration — it is a
-calibration on the feature depth itself. That is worth doing, but it must be
-labelled for what it is, and this document does that.
+Anchoring a boundary on it is therefore not a blanket calibration. It is a fit
+to the feature depth itself. The `ion_flux_normalization` implementation is
+retained as an explicit sensitivity/target-fit axis, defaulting to bitwise
+identity, but it has no independently measured calibration value.
 
 ## 1. The arithmetic, step by step
 
@@ -24,17 +31,18 @@ Every number carries its source.
 |---|---|---|---|
 | 1 | SiO2 formula-unit density | 2.2e28 m^-3 | deck |
 | 2 | experimental depth / time | 825 nm / 60 s | Krüger Fig. 7(b) SEM; thesis Table 6.4 target |
-| 3 | required removal flux at the floor | **3.025e20 units m^-2 s^-1** | (2) x (1) |
+| 3 | depth-integrated average removal flux | **3.025e20 units m^-2 s^-1** | (2) x (1) |
 | 4 | published ion flux | **1.2e20 m^-2 s^-1** | `krueger-2024.txt` L298, Table I, "Ions 1.2 x 10^16 cm^-2s^-1" |
-| 5 | required units per incident ion | **2.521** | (3) / (4) |
-| 6 | measured per-ion ceiling, >=1 keV, saturating | **1.5 molecules/ion** | Karahashi 2007 Fig. 3, CF3+ (`karahashi_2007_sio2_cfx_ionbeam.txt` L118-127) |
-| 7 | hard lower bound on floor ion flux | 2.017e20 m^-2 s^-1 = **1.68x** published | (3) / (6) |
-| 8 | ion delivery to an AR~21 floor | 0.70 | cascade funnelling scan |
-| 9 | hard lower bound at the wafer plane | 2.881e20 = **2.40x** published | (7) / (8) |
+| 5 | target normalized by wafer-plane ions | **2.521** | (3) / (4), a run-average lower-bound normalization |
+| 6 | simulated 346.833 nm on the same basis | **1.060** | endpoint depth normalized by (1), (4), and 60 s |
+| 7 | unresolved effective gap | **1.461** | (5) - (6) |
+| 8 | final-geometry ion delivery diagnostic | 0.70 | cascade-funnelling scan; not a 60 s history average |
+| 9 | counterfactual target if 0.70 held for all 60 s | **3.601 per delivered floor ion** | (5) / (8), diagnostic only |
 
-Step 9 uses only measured quantities — an SEM depth, a beam-measured yield
-ceiling, and a computed-then-benchmarked delivery fraction. It contains no
-petch parameter.
+There is no hard ion-flux lower bound in this table. Karahashi Figure 4 reaches
+`1.8736` for CF3+ at 1500 eV, and Takada measures `2.5` for stable C5F8/Ar+
+co-incidence at 900 eV and ratio 1. The latter is a different molecule and not
+a C4F6 law, but it proves the old ceiling premise false.
 
 ## 2. The cross-check that refutes the "understated 2x" premise
 
@@ -51,27 +59,19 @@ Nothing in the peer literature marks the published value as low. The
 "understated 2x" premise has no independent support, and the normalization
 implemented here is therefore a **declared calibration**, not an inference.
 
-## 3. The trilemma
+## 3. Why the trilemma failed
 
-Steps 1-9 are each independently sourced, and they cannot all hold with the
-published boundary. Exactly one of the following must be false:
+The former trilemma omitted two variables:
 
-1. the wafer-plane ion flux is the published 1.2e20 m^-2 s^-1;
-2. the per-ion removal ceiling is the beam-measured 1.5 molecules/ion
-   (corroborated by two independent experiments, Gray 1993 and Karahashi 2004,
-   which agree with petch's channels to 4.7%);
-3. the experiment removed 825 nm of SiO2 in 60 s at these boundary conditions.
+1. Krüger's positive ions are published only as an aggregate population even
+   though reactive-ion yield depends strongly on ion identity.
+2. Table I omits stable parent C4F6 even though direct beam experiments show
+   that a surviving fluorocarbon molecule can add an order-one,
+   non-monotone ion-assisted channel.
 
-The source reaches (3) while holding (1) only by fitting `ps,SiO2` over the
-optimizer range 0.0-0.3 (`krueger_thesis_2024.txt` L4570-4583) inside an energy
-law that both beam experiments contradict. Under the measured sqrt(E) law the
-same row yields 0.752 units/ion where his converged value yields 4.06.
-
-Of the three, (1) is the only one with no measurement behind it: the ion flux is
-HPEM model output (`evidence_type: HPEM_simulation`) from a reactor model the
-thesis itself treats as ground truth without experimental validation. That is
-why the normalization implemented here acts on the ion flux and never on the
-yields.
+The ion flux is HPEM output rather than a direct measurement, so scaling it is
+a legitimate sensitivity. It is not the only unmeasured variable and is not
+singled out by a valid surface-yield ceiling.
 
 ## 4. What was implemented
 
@@ -87,7 +87,7 @@ so the O2 conditions would have run uncalibrated while the power conditions ran
 calibrated — the two halves of the out-of-sample scorecard graded under
 different boundaries. Fixed and gated for all five transfer conditions.
 
-## 5. Forecast
+## 5. Historical target-fit forecast
 
 Frozen-geometry floor rates, ion-only against uniform scaling
 (`scripts/forecast_ion_flux_normalization.py`):
@@ -105,12 +105,14 @@ deposition in lockstep with removal, so the closure/etch ratio (measured 2.33x
 Krüger's) does not improve, while ion-only raises removal against a fixed
 depositor flux and so acts on the depth gate and the closure ratio together.
 
-The measured 60 s depth of 346.8 nm needs 2.379x to reach 825 nm, which the
-frozen-geometry response reaches at **2.83x**. The coupled run carries mouth
-feedback the frozen estimate cannot, so the realized scale is expected to be
-lower; the run measures it.
+The measured 60 s depth of 346.8 nm needs 2.379x to reach 825 nm, and the
+frozen-geometry response reaches that rate ratio near an ion scale of 2.83x.
+This remains a sensitivity result only. A coupled run at that scale would fit
+the target and cannot be advertised as a prediction or a blanket-anchored
+calibration.
 
 Note this also corrects a supply-bound reading recorded earlier: scaling the
 *yield magnitude* saturates by 4x (10% at 8x), but scaling the *boundary flux*
 is near-linear at the floor. Both are true; they are different levers, and only
-the second has authority over the rate.
+the second has authority over the rate. Neither identifies the missing
+reactive-ion mixture or stable-parent channel.

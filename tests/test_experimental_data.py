@@ -14,7 +14,9 @@ from petch.experimental_data import (
     load_jeon_2022_electron_bias_controls,
     load_jeon_2022_plasma_controls,
     load_jeon_2022_trench_depths,
+    load_karahashi_2007_reactive_ion_yields,
     load_krueger_2024_evidence,
+    load_takada_2005_coincidence_yields,
 )
 
 
@@ -37,6 +39,12 @@ DEBOER_DATA = (
     / "digitized_figure9.csv")
 JEONG_2023_DATA = (
     Path(__file__).parents[1] / "data" / "experimental" / "jeong_2023")
+KARAHASHI_2007_DATA = (
+    Path(__file__).parents[1] / "data" / "experimental" / "karahashi_2007"
+    / "figure4_reactive_ion_yields.csv")
+TAKADA_2005_DATA = (
+    Path(__file__).parents[1] / "data" / "experimental" / "takada_2005"
+    / "figure3_sio2_coincidence_yields.csv")
 
 
 def test_bosch_wafer_measurements_have_verified_provenance_and_units():
@@ -350,3 +358,49 @@ def test_jeon_pulse_gate_rejects_unknown_exposure_basis():
         build_jeon_2022_dimensionless_targets(
             load_jeon_2022_trench_depths(JEON_DATA),
             pulse_exposure_basis="assumed_same_conditions")
+
+
+def test_karahashi_reactive_ion_yields_preserve_species_ladder_and_error_caps():
+    rows = load_karahashi_2007_reactive_ion_yields(KARAHASHI_2007_DATA)
+    assert len(rows) == 21
+    at_1000 = {
+        row.species: row for row in rows if row.energy_eV == 1000.0}
+    assert list(sorted(
+        at_1000, key=lambda name: at_1000[name].yield_sio2_per_ion)) == [
+        "F+", "CF+", "CF2+", "CF3+"]
+    assert at_1000["CF3+"].yield_sio2_per_ion == pytest.approx(1.4703)
+    cf3 = [row for row in rows if row.species == "CF3+"]
+    peak = max(cf3, key=lambda row: row.yield_sio2_per_ion)
+    assert peak.energy_eV == 1500.0
+    assert peak.yield_sio2_per_ion == pytest.approx(1.8736)
+    assert all(
+        row.plotted_lower_yield <= row.yield_sio2_per_ion
+        <= row.plotted_upper_yield for row in rows)
+
+
+def test_karahashi_reactive_ion_yields_reject_unverified_content(tmp_path):
+    altered = tmp_path / "figure4.csv"
+    altered.write_bytes(KARAHASHI_2007_DATA.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        load_karahashi_2007_reactive_ion_yields(altered)
+
+
+def test_takada_coincidence_yields_replay_nonmonotone_parent_series():
+    rows = load_takada_2005_coincidence_yields(TAKADA_2005_DATA)
+    assert len(rows) == 8
+    c5f8 = [
+        row for row in rows if row.coincident_species == "C5F8"]
+    assert [row.flux_ratio_to_ar_ion for row in c5f8] == [
+        0.25, 0.5, 1.0, 2.5, 10.0]
+    peak = max(c5f8, key=lambda row: row.yield_sio2_per_ar_ion)
+    assert peak.flux_ratio_to_ar_ion == 1.0
+    assert peak.yield_sio2_per_ar_ion == pytest.approx(1.1969)
+    assert c5f8[0].yield_sio2_per_ar_ion == pytest.approx(0.6697)
+    assert c5f8[-1].yield_sio2_per_ar_ion < peak.yield_sio2_per_ar_ion
+
+
+def test_takada_coincidence_yields_reject_unverified_content(tmp_path):
+    altered = tmp_path / "figure3.csv"
+    altered.write_bytes(TAKADA_2005_DATA.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        load_takada_2005_coincidence_yields(altered)

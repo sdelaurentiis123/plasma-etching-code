@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 92 sources by topic
+## Index — 94 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -39,6 +39,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`huang-thesis`](library/huang-thesis.md) | Huang, PhD thesis, Univ. Michigan | FULL TEXT: research_sources/thesis_extracts/huang_thesis.txt |
 | [`huard-thesis`](library/huard-thesis.md) | Huard, PhD thesis, Univ. Michigan | FULL TEXT: research_sources/thesis_extracts/huard_chad_phd_thesis.txt |
 | [`izawa-2007-jjap`](library/izawa-2007-jjap.md) | Izawa et al., JJAP 46, 7870 (2007) | ABSTRACT-ONLY — NOT IMPORTABLE (model-inverted) |
+| [`kim-2021-coatings`](library/kim-2021-coatings.md) | Kim et al., measured C4F6/Ar neutral + ion mass/energy spectra | FULL TEXT + FIGURES VISUALLY AUDITED |
 | [`krueger-2024-jvsta`](library/krueger-2024-jvsta.md) | Krüger et al., JVST A 42, 043008 (2024) | FULL TEXT: research_sources/thesis_extracts/krueger-2024.txt, kr2024_osti.txt |
 | [`krueger-2024-thesis`](library/krueger-2024-thesis.md) | Krüger, PhD thesis, Univ. Michigan (2024) | FULL TEXT: research_sources/thesis_extracts/krueger_thesis_2024.txt (469k), krueger_thesis.txt (older OCR) |
 | [`omura-2019-jjap`](library/omura-2019-jjap.md) | Omura et al., JJAP (2019) | ABSTRACT/relay |
@@ -60,6 +61,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`levinson-llnl`](library/levinson-llnl.md) | Levinson, Shaqfeh, Balooch & Hamza (LLNL) | ABSTRACT/relay (citation corrected) |
 | [`mahorowala-2002`](library/mahorowala-2002.md) | Mahorowala & Sawin, JVST B 20, 1055/1077 (2002) | ABSTRACT/relay |
 | [`steinbruchel`](library/steinbruchel.md) | Steinbrüchel, sqrt-E yield form | VIA ARM + THESES |
+| [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | Takada, Toyoda & Sugai, stable C5F8 molecule / Ar+ co-incidence on SiO2 | FULL TEXT + PIL-AUDITED FIGURE 3 |
 | [`yin-2008-jvsta`](library/yin-2008-jvsta.md) | Yin & Sawin, JVST A 26, 161 (2008) | not-fetched |
 
 ### Angular yield laws (class-1 physical, class-2 chemical)
@@ -195,6 +197,9 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Oxide F sticking `s₀ = 0.02` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | printed p.246; landed only as the (s₀,B₀) pair |
 | Silicon F sticking `s₀ = 0.2` + `B₀ = 0.687(√E − √4)` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Si-side pair for the SF₆ arm upgrade (RESEARCH_SF6_RELEVANCE) |
 | Beam gate N1 (floor 0.25 / half-rise / plateau) | [`gray-1993-thesis`](library/gray-1993-thesis.md) | the measured yield-vs-F/Ar⁺ curve petch is graded against |
+| Species-resolved pure-reactive-ion yield ladder | [`karahashi-2007`](library/karahashi-2007.md) | direct F+/CF+/CF2+/CF3+ constraint; forbids species-agnostic validation and extrapolation above measured support |
+| Stable-parent molecule / ion co-incidence envelope | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | C5F8 analog proves molecule-assisted yields can exceed a pure-CF3+ value; explicitly not a C4F6 law |
+| C4F6 parent-signal + ion-mixture existence | [`kim-2021-coatings`](library/kim-2021-coatings.md) | wafer-facing mass/energy spectra directly show C4F6 and multiple CFx+/CxFy+ species in another CCP; qualitative existence constraint only, not Krüger flux calibration |
 | Class-1 angular form `(1+B sin²θ)cosθ` | [`kress-1999-jvsta`](library/kress-1999-jvsta.md) | Krüger's cited source — **wrong system (Cu/Ar MD)**; peak 4.17 vs measured ~1.3 |
 | Class-1 bound `B = 1.7` on oxide/mask rows | [`cho-2000-jvsta`](library/cho-2000-jvsta.md) | in-chemistry peak/normal 1.30 |
 | Class-1 bound cross-check | [`schaepkens-1998-jvsta`](library/schaepkens-1998-jvsta.md) | peak/normal 1.33, 54.7° V-groove |

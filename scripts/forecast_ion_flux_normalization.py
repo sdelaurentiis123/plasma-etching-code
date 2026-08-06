@@ -7,8 +7,10 @@ closure/etch ratio (measured 2.33x Krueger's) does not improve; ion-only raises
 removal against a fixed depositor flux, so it acts on the depth gate and the
 closure ratio together.
 
-Yields are never touched here -- only the boundary flux, which is the quantity
-with no measurement behind it.  See RESULTS_BLANKET_ANCHOR_2026-08-06.md.
+Yields are never touched here -- only the aggregate boundary flux. This is an
+explicit target-fit sensitivity, not a blanket calibration or a
+measurement-derived correction. See
+RESULTS_DEPTH_IDENTIFIABILITY_2026-08-06.md.
 """
 import sys
 
