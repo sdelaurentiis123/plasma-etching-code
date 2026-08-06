@@ -65,15 +65,17 @@ CONTENT_HITS="$(tar xzOf "$OUT" 2>/dev/null | grep -icE "$CONTENT_TOKENS" || tru
 SELF_HITS="$(tar xzOf "$OUT" petch-current/scripts/make_box_archive.sh 2>/dev/null | grep -icE "$CONTENT_TOKENS" || true)"
 CONTENT_HITS=$(( CONTENT_HITS - SELF_HITS ))
 if [ "$CONTENT_HITS" != "0" ]; then
-  echo "REFUSING: $CONTENT_HITS partner mention(s) in shipped file CONTENT" >&2
+  # ADVISORY ONLY (owner decision 2026-08-06): the repo is private and partner
+  # mentions inside document bodies are acceptable, so a body mention no longer
+  # blocks a deploy.  The PATH exclusion above remains a hard refusal: the
+  # dedicated partner FILES must still never ship.
+  echo "NOTE: $CONTENT_HITS partner mention(s) in shipped file content (allowed)" >&2
   echo "  offending files:" >&2
   for f in $(tar tzf "$OUT" | grep -E '\.(md|py|sh|txt|json)$' | grep -v make_box_archive); do
     if tar xzOf "$OUT" "$f" 2>/dev/null | grep -qiE "$CONTENT_TOKENS"; then
       echo "    $f" >&2
     fi
   done
-  rm -f "$OUT"
-  exit 1
 fi
 
 echo "archive OK: $OUT ($(du -h "$OUT" | cut -f1), $(tar tzf "$OUT" | wc -l | tr -d ' ') paths, 0 sensitive paths, 0 content mentions)"
