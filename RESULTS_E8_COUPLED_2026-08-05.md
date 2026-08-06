@@ -80,10 +80,17 @@ band = active faces within 30 nm of the etch front, inside the opening. Flux is
 the delivered (post-radiosity) incident CF2 flux, area-weighted.
 `scripts/e8_coupled_floor_scan.py`, dx = 10 nm.
 
-| geometry | oxide AR | mask | f_FC | plasma CF2 | E8 delivered | E8 share of CF2 |
-|---|---|---|---|---|---|---|
-| Krüger cell | 12 | 0.85 µm | 0.3 | 1.485e20 | 4.377e18 | 2.86 % |
-| smoke check | 3 | 0.05 µm | 1.0 | 5.274e20 | 1.381e19 | 2.55 % |
+| geometry | oxide AR | mask | total AR | f_FC | plasma CF2 | E8 delivered | E8 share |
+|---|---|---|---|---|---|---|---|
+| Krüger cell | 12 | 0.85 µm | 21.4 | 0.3 | 1.485e20 | 4.377e18 | 2.86 % |
+| Krüger cell | 12 | 0.85 µm | 21.4 | 1.0 | 1.485e20 | 1.459e19 | 8.94 % |
+| Huang-like | 20 | 0.05 µm | 20.6 | 0.3 | 1.504e20 | 4.384e18 | 2.83 % |
+| Huang-like | 20 | 0.05 µm | 20.6 | 1.0 | 1.504e20 | 1.461e19 | 8.86 % |
+| smoke check | 3 | 0.05 µm | 3.6 | 1.0 | 5.274e20 | 1.381e19 | 2.55 % |
+
+Linearity check: the f = 1.0 rows equal the f = 0.3 rows scaled by 1/0.3 to four
+digits (1.459e19 predicted, 1.459e19 measured), confirming the solve is linear in
+the E8 source and licensing the forecast scaling in section 5.
 
 **Re-emission is real and roughly doubles delivery.** The raw local deposit at
 the Krüger floor was 6.65e18 at f = 1.0, i.e. ≈2.0e18 at f = 0.3; the coupled
@@ -92,16 +99,30 @@ now diffuses to the front instead of being absorbed where it died. The first
 pass's "stranded on the sidewalls" reading was an artifact of measuring the
 source.
 
-**But the magnitude is small at this geometry**, and the reason is unchanged and
-geometric: Krüger's cell is mask-dominated (0.85 µm mask over a 0.09 µm opening;
-total AR ≈ 22 at oxide AR 12), and plasma neutrals still reach the floor at
-≈4.5e20 across all species. E8 supplies a few percent, not the majority. Huang's
-">95%" is stated for a feature whose plasma-neutral transmission is far lower;
-the AR-10 threshold does not transfer to this stack, which was the original
-specification's error and is restated here rather than smoothed. The AR-3 smoke
-point independently reproduces his *stated* low-AR behaviour ("the majority of
-the CFx and CxFy radicals at low AR (< 5) ... originate from the thermal
-neutrals incident into the feature from the plasma").
+**The magnitude is small, and the Huang-geometry test corrects why.** The first
+pass attributed the shortfall to Krüger's cell being *mask-dominated*. Running a
+thin-mask feature at matched total aspect ratio refutes that: 0.05 µm of mask
+over 1.8 µm of oxide (total AR 20.6) gives **2.83 % / 8.86 %**, statistically
+identical to the 0.85 µm-mask cell's **2.86 % / 8.94 %** at total AR 21.4, and
+plasma CF2 delivery is likewise near-identical (1.504e20 vs 1.485e20). **At
+matched total AR the mask fraction is immaterial to floor radical composition** —
+what governs both plasma and E8 delivery is the total path, not how it splits
+between mask and oxide.
+
+So the real statement is about depth, not stack: total AR ≈ 21 is simply not deep
+enough for the thermalized channel to dominate. The trend is in the right
+direction and measured — E8 share at f = 1.0 rises 2.55 % → 8.9 % as total AR
+goes 3.6 → 21 — but reaching Huang's > 95 % needs plasma transmission orders of
+magnitude lower than either test geometry provides (the first pass estimated
+≈0.009 %). The AR-3 point independently reproduces his *stated* low-AR behaviour
+("the majority of the CFx and CxFy radicals at low AR (< 5) ... originate from
+the thermal neutrals incident into the feature from the plasma"), so the model
+tracks his description at the shallow end and misses his threshold only because
+neither geometry reaches the depth his statement is about.
+
+**Gate 2 verdict: not reproduced at either geometry (8.9 % maximum, at the
+physical upper bound), with the attribution corrected from mask geometry to
+total aspect ratio.**
 
 ## 5. Forecast — and why no run was bought
 

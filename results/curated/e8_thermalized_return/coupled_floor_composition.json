@@ -1,0 +1,68 @@
+[
+ {
+  "label": "krueger_cell_ar12",
+  "oxide_ar": 12.000000000000002,
+  "mask_um": 0.85,
+  "fc_fraction": 0.0,
+  "plasma_floor_flux": 1.4850848186972825e+20,
+  "e8_delivered_floor_flux": 0.0,
+  "total_floor_flux": 1.4850848186972825e+20,
+  "e8_share": 0.0,
+  "floor_faces": 44
+ },
+ {
+  "label": "krueger_cell_ar12",
+  "oxide_ar": 12.000000000000002,
+  "mask_um": 0.85,
+  "fc_fraction": 0.3,
+  "plasma_floor_flux": 1.4850848186972825e+20,
+  "e8_delivered_floor_flux": 4.3768534554623345e+18,
+  "total_floor_flux": 1.528853353251906e+20,
+  "e8_share": 0.028628340619802857,
+  "floor_faces": 44
+ },
+ {
+  "label": "krueger_cell_ar12",
+  "oxide_ar": 12.000000000000002,
+  "mask_um": 0.85,
+  "fc_fraction": 1.0,
+  "plasma_floor_flux": 1.4850848186972825e+20,
+  "e8_delivered_floor_flux": 1.4587565637122327e+19,
+  "total_floor_flux": 1.6309604750685058e+20,
+  "e8_share": 0.08944156440400311,
+  "floor_faces": 44
+ },
+ {
+  "label": "huang_like_ar20_thinmask",
+  "oxide_ar": 20.0,
+  "mask_um": 0.05,
+  "fc_fraction": 0.0,
+  "plasma_floor_flux": 1.5035094112793333e+20,
+  "e8_delivered_floor_flux": 0.0,
+  "total_floor_flux": 1.5035094112793333e+20,
+  "e8_share": 0.0,
+  "floor_faces": 44
+ },
+ {
+  "label": "huang_like_ar20_thinmask",
+  "oxide_ar": 20.0,
+  "mask_um": 0.05,
+  "fc_fraction": 0.3,
+  "plasma_floor_flux": 1.5035094112793333e+20,
+  "e8_delivered_floor_flux": 4.38443215571832e+18,
+  "total_floor_flux": 1.5473537328365165e+20,
+  "e8_share": 0.02833503459923828,
+  "floor_faces": 44
+ },
+ {
+  "label": "huang_like_ar20_thinmask",
+  "oxide_ar": 20.0,
+  "mask_um": 0.05,
+  "fc_fraction": 1.0,
+  "plasma_floor_flux": 1.5035094112793333e+20,
+  "e8_delivered_floor_flux": 1.4613239311682437e+19,
+  "total_floor_flux": 1.6496418043961577e+20,
+  "e8_share": 0.08858431735143578,
+  "floor_faces": 44
+ }
+]
