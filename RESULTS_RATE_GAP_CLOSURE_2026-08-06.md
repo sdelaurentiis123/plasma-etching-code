@@ -180,3 +180,14 @@ figure and disagrees with every measurement of the underlying surface.
 not exist in the source — a measured ion flux and a species-resolved IEAD for
 this reactor, or an in-feature flux measurement at AR≈20 — which is the
 partner-measurable path the dossier already names.
+
+## Reconciliation note (supervisor, 2026-08-06)
+
+The earlier two-channel decomposition (RESULTS_ION_CHANNEL_SOLVE: physical 1.22x
+strong / chemical 2.8x weak) was graded against Gray's 350 eV beam data; this
+pass's Karahashi grade (physical 1.27x / chemical 1.047x) is at 1000 eV — the
+feature-relevant energy. Both are true at their own energies; the 1000 eV
+agreement is the operative one for feature predictions, and the 350 eV plateau
+shortfall remains a low-energy open item (Kwon/Sawin s0-B0 pair, quarantined
+full texts). Library rows recording the 350 eV decomposition remain correct as
+historical statements; this note is the pointer to the superseding grade.
