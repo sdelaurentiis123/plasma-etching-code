@@ -789,6 +789,10 @@ def run(args):
             if args.compress_boundary_quadrature else None),
         "ion_azimuthal_closure": "axisymmetric_uniform",
         "ion_azimuthal_order": int(args.ion_azimuthal_order),
+        # DECLARED CALIBRATION when != 1.0 (see RESULTS_BLANKET_ANCHOR): scales
+        # only the aggregate ion flux, the one boundary quantity with no
+        # measurement behind it.  Beam-measured yields are never touched.
+        "ion_flux_normalization": float(args.ion_flux_normalization),
     }
     if args.boundary_case == "base":
         if args.oxygen_ratio is not None or args.low_frequency_power_kw is not None:
@@ -1200,6 +1204,11 @@ def parse_args():
             "mixed-layer absolute rate constant k_v (substrate removals per "
             "ion at the reference deposited energy); the single "
             "base-condition-anchored constant of the mixed-layer chemistry"))
+    parser.add_argument(
+        "--ion-flux-normalization", type=float, default=1.0,
+        help=("DECLARED CALIBRATION of the aggregate ion flux (default 1.0 = "
+              "published HPEM value untouched). Scales ions only; beam-measured "
+              "yields and all neutral fluxes are unaffected."))
     parser.add_argument(
         "--grazing-ion-reflection", default="off",
         choices=("off", "literature_v1"),

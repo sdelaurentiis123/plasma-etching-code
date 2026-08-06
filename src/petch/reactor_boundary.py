@@ -7,7 +7,7 @@ assumed waveform can only produce a development/sensitivity boundary.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import csv
 from hashlib import sha256
 import json
@@ -55,6 +55,10 @@ _PREDICTIVE_EVIDENCE_KINDS = {
 _REACTOR_FLUX_EVIDENCE_KINDS = _EVIDENCE_KINDS | {
     "HPEM_simulation",
     "published_reactor_model_output",
+    # A boundary quantity deliberately scaled to reproduce an experimental
+    # observable.  Kept as an explicit evidence class so a calibrated flux can
+    # never be mistaken for a measured or model-published one in any audit.
+    "declared_calibration",
 }
 _REACTOR_SPECIES_ROLES = {
     "neutral", "positive_ion", "negative_ion", "electron",
@@ -853,8 +857,47 @@ def load_krueger_2024_reactor_flux_deck(directory):
     )
 
 
+def _normalize_ion_flux(deck, factor):
+    """Scale ONLY the aggregate positive-ion flux; neutrals and yields untouched.
+
+    DECLARED CALIBRATION, not an inference.  The source publishes the ion flux as
+    an HPEM model output (``evidence_type: HPEM_simulation`` in
+    ``base_case_boundary_fluxes.csv``) and its reactor model carries no
+    experimental validation -- Krueger's own thesis treats the HPEM fluxes as
+    ground truth.  It is therefore the one quantity in the removal chain with no
+    measurement behind it, which is why a normalization acts here and never on
+    the beam-measured yields (Gray 1993 / Karahashi 2004, corroborated to 4.7%,
+    see RESULTS_RATE_GAP_CLOSURE_2026-08-06.md).
+
+    The measurement-only lower bound is 2.40x (825 nm SEM depth over the
+    Karahashi 1.5 molecules/ion ceiling at 0.70 floor delivery); see
+    RESULTS_BLANKET_ANCHOR_2026-08-06.md for the full chain and the trilemma the
+    bound implies.  Any value used here is a declared calibration and must be
+    reported as such.
+    """
+    if not np.isfinite(factor) or factor <= 0.0:
+        raise ValueError("ion flux normalization must be positive and finite")
+    if factor == 1.0:
+        # The identity is inert by construction, not by caller convention: an
+        # uncalibrated deck must never acquire a calibration label.
+        return deck
+    records = []
+    for record in deck.species_fluxes:
+        if record.role == "positive_ion_mixture":
+            record = replace(record, flux_m2_s=record.flux_m2_s * factor,
+                             evidence_kind="declared_calibration")
+        records.append(record)
+    provenance = dict(deck.provenance)
+    provenance["ion_flux_normalization"] = float(factor)
+    provenance["ion_flux_normalization_basis"] = (
+        "declared calibration on the experimental 825 nm depth; yields remain "
+        "beam-measured (gray1993_mit, karahashi2007_hyomen)")
+    return replace(deck, species_fluxes=tuple(records), provenance=provenance)
+
+
 def build_krueger_2024_development_boundary(
         directory, *, reference_plane_m, effective_ion_mass_amu=39.948,
+        ion_flux_normalization=1.0,
         ion_mixture_closure=(
             "singly charged aggregate uses Ar mass for trajectory time scaling; "
             "electrostatic path at fixed energy/charge is mass independent"),
@@ -880,6 +923,8 @@ def build_krueger_2024_development_boundary(
             or n_transverse_neutral <= 0 or n_normal_neutral <= 0):
         raise ValueError("invalid Krüger development-boundary controls")
     deck = load_krueger_2024_reactor_flux_deck(directory)
+    if float(ion_flux_normalization) != 1.0:
+        deck = _normalize_ion_flux(deck, float(ion_flux_normalization))
     iead = load_krueger_2024_digitized_iead(directory)
     directional = (
         neutral_direction_polar_order is not None
@@ -960,6 +1005,7 @@ def build_krueger_2024_development_boundary(
 def build_krueger_2024_transfer_boundary(
         directory, *, reference_plane_m, low_frequency_power_kw,
         oxygen_to_fluorocarbon_ratio=None, effective_ion_mass_amu=39.948,
+        ion_flux_normalization=1.0,
         ion_mixture_closure=(
             "singly charged aggregate uses Ar mass for trajectory time scaling; "
             "electrostatic path at fixed energy/charge is mass independent"),
@@ -979,6 +1025,8 @@ def build_krueger_2024_transfer_boundary(
         raise ValueError("Krüger transfer power must be one of 0, 4, 6, or 8 kW")
     transfer = load_krueger_2024_transfer_boundary_data(directory)
     base = load_krueger_2024_reactor_flux_deck(directory)
+    if float(ion_flux_normalization) != 1.0:
+        base = _normalize_ion_flux(base, float(ion_flux_normalization))
     base_by_name = {item.name: item for item in base.species_fluxes}
     expected_names = set(base_by_name)
     if oxygen_to_fluorocarbon_ratio is None:
