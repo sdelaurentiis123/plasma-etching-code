@@ -288,3 +288,59 @@ Declared-open ledger, updated: `_THERMAL_F_STICKING = 1.0` against Gray's
 printed **0.02** and Krüger's absence of any thermal-F-on-bare-oxide row —
 sourced, not landed (it would have confounded this grading, and its sign
 reduces F further).
+
+---
+
+## Addendum, 2026-08-06 — the 60 s endpoints, measured
+
+Every depth number in this dossier above was either measured under a superseded
+mechanism or extrapolated. The final mechanism's own 60 s endpoint had never
+been reached: `ml23` was cut at t = 2.80 s and projected linearly, and the
+same-day scorecard stalled at t = 1.948 s on a box whose warp build exposed no
+CUDA device. All six conditions have now been run to **t = 60.000 s** on a
+GPU-verified box (`RESULTS_SCORECARD_ENDPOINT_2026-08-06.md`).
+
+| gate | target | measured endpoint | verdict |
+|---|---|---|---|
+| mask remaining (all six conditions) | 850 +/- 2 % | 850.20 - 850.40 | **PASS** |
+| r(4/6) | [0.84, 0.94] | **0.909** | **PASS** |
+| r(8/6) | [0.97, 1.06] | **1.036** | **PASS** |
+| necking absent at O2 2.5 | open | 49.60 nm | **PASS** |
+| etch depth | 825 +/- 5 % | **346.8 nm** | **MISS (-58.0 %)** |
+| mask constriction | 45 +/- 5 | **39.82 nm** | **MISS** (0.18 nm below band) |
+| clog at O2 0.5 | sealed | 13.08 nm | **MISS** |
+| O2 depth rank max at 1.5 | 1.5 highest | 2.5 highest | **MISS** |
+
+**What the endpoints add to the record.**
+
+The power-transfer result is the substantive gain: scorecard-1 missed both
+ratios under the ml9a mechanism (0.672, 1.085) and attributed the misses to the
+over-narrowed mouth. Under the final mechanism both land inside their published
+bands **at the published endpoint**, within 0.02 of the matched-time reading, so
+the transfer behaviour across process conditions is certified rather than
+indicated. Mask survival is exact at every oxygen ratio and both powers.
+
+The depth miss is larger than the projection: −58.0 % measured against the
+−49 % extrapolated. The projection was optimistic because it drew a straight
+line through a still-decelerating span; the aspect-ratio dependence the Gray
+laws restored bends the real trajectory below it. This does not change the
+attribution — it sharpens the magnitude the decomposed channel bound has to
+account for.
+
+The mouth result changed character and should be read with the depth result,
+not beside it. Pre-Gray the aperture equilibrated at 50.9 nm (drift −17 pm/s);
+it now passes through 45 nm at t ≈ 44 s and ends at 39.82 nm. The run-average
+closure/etch is 0.0723 against Krüger's 0.0310. Depth and mouth are one
+statement — the etch is too slow relative to lip closure — and the two former
+"independent" residuals collapse into the single open channel-magnitude item
+already named in §5.2.
+
+Clog at O2 0.5 is directionally preserved (3x narrower than base, still closing
+at the endpoint) but does not seal inside 60 s, and is graded MISS on the
+published criterion rather than reinterpreted. The 1.0/1.5 oxygen inversion the
+matched-time pass recorded at 0.60 nm is 6.2 nm at the endpoint, so it is a real
+feature of the mechanism.
+
+No mechanism change was made in this pass. The dossier's §5.2 path — the two
+receipted per-channel magnitudes, held pending the 350 eV -> keV scaling — is
+unchanged and remains the single named route to closing depth.

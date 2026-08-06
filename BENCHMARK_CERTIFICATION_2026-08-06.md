@@ -107,7 +107,9 @@ inherit an overclaim.
 | closure/etch, t = 1-4 s | 0.0310 | 1.83x (pre-multiplicity) | **above band** |
 | depth, reference energies | 825 +/- 5% | 811 / 791 / 852 | **PASS** |
 | depth, feature keV (pre-Gray) | 825 +/- 5% | ~1066 (+29%) | superseded |
-| depth, feature keV (final) | 825 +/- 5% | ~418 projected (-49%) | **MISS** |
+| depth, feature keV (final) | 825 +/- 5% | ~418 projected (-49%) | superseded |
+| depth, feature keV (**measured 60 s**) | 825 +/- 5% | **346.8 (-58.0%)** | **MISS** |
+| mask constriction (**measured 60 s**) | 45 +/- 5 | **39.82** | **MISS** (0.18 below) |
 
 The depth MISS changed sign when the inherited two-row energy-law anomaly was
 replaced with Gray's measured laws. It is decomposed, not merely attributed:
@@ -176,3 +178,42 @@ absent) under this mechanism.
 **Cost to close properly:** one GPU-visible box (warp with a working CUDA
 device), six conditions at 60 s, ~2-3 box-hours in parallel, well under $1.
 The only reason it is open is the CPU-only box drawn this pass.
+
+### CLOSED, same day — the endpoints measured
+
+All six conditions were rerun to **t = 60.000 s** on a GPU-verified box the
+same day (`RESULTS_SCORECARD_ENDPOINT_2026-08-06.md`, grader
+`scripts/grade_scorecard_endpoint.py`). The rows above stand as the matched-time
+record; these are the published endpoint criteria, and nothing here is
+extrapolated.
+
+| criterion | target | endpoint | verdict |
+|---|---|---|---|
+| r(4/6) | [0.84, 0.94] | **0.909** | **PASS** |
+| r(8/6) | [0.97, 1.06] | **1.036** | **PASS** |
+| mask remaining, all six | 850 +/- 2 % | 850.20 - 850.40 | **PASS** |
+| necking absent at O2 2.5 | open | 49.60 nm | **PASS** |
+| base etch depth | 825 +/- 5 % | 346.8 nm | **MISS (-58.0 %)** |
+| base mask opening | 45 +/- 5 | 39.82 nm | **MISS** (0.18 below band) |
+| clog at O2 0.5 | sealed (0.000) | 13.08 nm | **MISS** |
+| O2 depth rank max at 1.5 | 1.5 highest | 2.5 highest | **MISS** |
+
+The matched-time indication held: the power ratios move from 0.902/1.017 at
+t = 1.9 s to 0.909/1.036 at the endpoint, so the early reading was sound and
+the transfer result is now certified rather than indicated. Mask survival is
+exact at every oxygen ratio and both powers.
+
+Two rows changed character on measurement rather than merely resolving:
+
+- **depth is worse than the extrapolation** (346.8 measured vs ~418 projected)
+  because `ml23`'s straight-line projection ran through a still-decelerating
+  span, and the restored aspect-ratio dependence bends the trajectory below it;
+- **the mouth no longer equilibrates.** Pre-Gray it held 50.9 nm (drift
+  -17 pm/s); it now passes through 45 nm at t ~ 44 s and ends at 39.82. Depth
+  and mouth are one statement -- run-average closure/etch is 0.0723 against
+  0.0310 -- not two defects.
+
+**Clog at O2 0.5 is directionally right and quantitatively short:** the starved
+case is 3x narrower than base and still closing at the endpoint, so the
+clogging branch exists; it does not reach zero inside 60 s because the etch is
+slow. Graded MISS on the published criterion rather than reinterpreted.
