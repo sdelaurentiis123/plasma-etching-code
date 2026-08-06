@@ -1,0 +1,24 @@
+# palasantzas
+
+**Palasantzas, self-affine PSD form**
+
+- **DOI/URL:** Palasantzas — self-affine PSD
+- **Retrieval route:** classic
+- **Status:** VIA LER DOCS
+- **Topic:** ler — Line-edge roughness: metrology, transfer, experimental gates
+
+## Claims table
+
+Rows relocated verbatim from the repo's research/results docs. `consumed by` = the
+doc that recorded it (that doc states which constant/decision it fed).
+
+| # | recorded claim (as written in our docs) | consumed by |
+|---|---|---|
+| Q1 | - 16 nm CD, **32 nm pitch** EUV CAR lines on 4 underlayer stacks (organic UL; SOG-A; SOG-B/a-C; SOG-B/SOC) — PSD(0) and ξ per stack, ξ roughly stack-invariant while PSD(0) rises monotonically stack 1→4; - resist-type ξ contrast: **CAR ξ ≈ 9.6 nm vs metal-containing resist ξ ≈ 6.1 nm**, attributed to resist blur; - **the gateable block:** one stack, **four DCS (direct-current-superimposed CCP) plasma conditions** vs post-litho reference. **Unbiased LER: 2.63 nm (post-litho) → 1.95, 2.24, 2.33, 2.07 nm.** Figure 9 gives **absolute LER PSD curves in nm³** for all five states over ~10⁻³–10⁻¹ nm⁻¹; Figure 10 gives **ξ (≈8–14 nm range) and PSD(0) per condition**. - Verified conclusion: "**the etch smoothening plays a big role in the reduction of the high-frequency roughness**"; best condition preserves PSD(0) while raising ξ. - 3-parameter model used is PSD(0)/H/ξ — same family as our Palasant | `RESEARCH_LER_EXPERIMENTAL_GATES_2026-07-29.md`:281 |
+| U2 | [unquoted — verify on next use] \| roughness metrology \| `src/petch/ler_metrology.py` \| Palasantzas synthesis ↔ periodogram Parseval-consistent; HHCF; Mack noise floor; σ/ξ/α recovery (6 gates) \| | `LER_DEMONSTRATOR_PLAN_2026-08-05.md`:11 |
+| U3 | [unquoted — verify on next use] **What we computed.** A rough mask edge u(y) (Palasantzas synthesis, our Rung-0 module) on a tapered wall, with ions carrying transverse tangents (t_x, t_y) ~ N(0, s²) — the same tangent-plane Gaussian each component of the two-component IADF uses. A ray from substrate point (x, y) clears the mask iff `x + z·t_x ≥ u(y + z·t_y) + (h − z)·cot θ_R` for every height z, so the blocking value is `B(y; t_x, t_y) = max_z [u(y + z·t_y) + (h − z)·cot θ_R − z·t_x]` and the received flux fraction at (x, y) is the weighted CDF of B over the beam. The etched edge is the level-quantile of B — exact, closed-form, no bisection and no fitting. Ensemble: 4 seeds × 1024 points × 1 nm, σ_R swept 0.15 → 9 nm. | `LER_DEMONSTRATOR_RESULTS_2026-08-06.md`:25 |
+| U4 | [unquoted — verify on next use] **Date:** 2026-07-29 · **Status:** research memo, NOT committed. **Companions:** `RESEARCH_LER_EXPERIMENTAL_SOURCES_2026-07-21.md` (locator survey), `RESEARCH_LER_MODALITY_DESIGN_2026-07-24.md` (architecture), `src/petch/ler_metrology.py` (Palasantzas PSD, σ/ξ/α, Mack noise floor), `src/petch/ler_transfer.py` (H1 cross-spectral T(f), coherence separation, `PSD_out = \|T\|² PSD_in + PSD_intrinsic`). | `RESEARCH_LER_EXPERIMENTAL_GATES_2026-07-29.md`:3 |
+| U5 | [unquoted — verify on next use] - autocorrelation model **R_m = σ_real² · exp(−\|mΔy/ξ\|^{2α}) + σ_noise² δ_m** (Sinha/Palasantzas form + white metrology noise as a Kronecker spike); - PSD model **P_n = (Δy/2πN) σ_real² Σ_m (2−δ_m) e^{−\|mΔy/ξ\|^{2α}} cos(k_n mΔy)(N−m) + (Δy/2π) σ_noise²**, with **k_n = 2πn/(NΔy)** — i.e. an *angular* wavenumber (rad/nm) and a 1/2π normalization, **not** the f-in-1/nm convention used by Mack/Fractilia/imec and by our `ler_metrology`; - fit varies (σ_noise, ξ, α) under the constraint σ₀² = σ_real² + σ_noise², with σ₀ obtained by Parseval integration of the measured PSD; - finite-box correction σ_inf² = σ_real² + σ_CDV² (Leunissen), valid when L > 10 ξ. | `RESEARCH_LER_EXPERIMENTAL_GATES_2026-07-29.md`:70 |
+| U6 | [unquoted — verify on next use] - **What it gates:** the *shape* of \|T̂(k)\|² from the engine — specifically the three signed predictions of §1.2 (roll-off above k ≈ 0.1 rad/nm; a **turnover/minimum** at 0.15 / 0.10 rad/nm for untreated / HBr resist; **flat T ≈ 1** for VUV-cured resist). Plus the scalar σ-reduction ladder of §1.4 (resist→Si ratio ≈ 0.70; +0.9 nm for a 30 s vs 20 s Si-ARC open) and the sign of dξ/dstep and dα/dstep. - **Why it is first:** it is the only *ratio* published, so it is convention-free; the recipe and stack are fully specified (§1.3); the mask-state contrast (none / HBr / VUV) gives a three-point curve with a built-in null; and the source PDF is open access. - **Digitization feasibility: MEDIUM-HIGH but with one trap.** The ratio curve is a single blue line on a log-log panel — trivially digitizable (WebPlotDigitizer, ~30 points). **The trap:** the plotted PSDs were noise-subtracted and then * | `RESEARCH_LER_EXPERIMENTAL_GATES_2026-07-29.md`:421 |
+
+_Harvested 1 quoted + 5 unquoted mentions across the repo's docs._

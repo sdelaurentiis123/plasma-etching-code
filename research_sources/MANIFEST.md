@@ -36,3 +36,14 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 - krueger_fig7a_simulated_aperture.csv / fig7b_experimental (aperture vs depth,
   600dpi digitization; source of the 38.8@271 / 39.0@200 neck targets)
 - extract_mouth_profiles.py (regenerator)
+
+## library/ — the internal literature library (START HERE)
+
+`LIBRARY.md` indexes every source this project has cited, grouped by topic, with a
+reverse index mapping each petch constant/law/decision to the source that fixed it.
+One `library/<bibkey>.md` per source carries citation, DOI, retrieval route, fetch
+status, and the claims table (verbatim rows relocated from the RESEARCH_/RESULTS_
+docs, each pointing back at `doc:line`).
+
+Two binding conventions: (1) fetch => extract + library entry in the SAME commit;
+(2) provenance strings name bibkeys so a constant is one grep from its evidence.
