@@ -1,0 +1,17 @@
+Warp CUDA error 803: system has unsupported display driver / cuda driver combination (in function init_cuda_driver, /builds/omniverse/warp/warp/native/cuda_util.cpp:333)
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, CUDA driver not available (NVRTC compilation available)
+   Devices:
+     "cpu"      : "x86_64"
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Module petch.boundary_transport_3d a8efe51 load on device 'cpu' took 6431.64 ms  (compiled)
+Module petch.threed 43d4494 load on device 'cpu' took 3478.09 ms  (compiled)
+step=1 t=1.000s dt=1s depth=6.303nm mask_opening=85.842nm wall=270.52s
+step=2 t=1.500s dt=0.5s depth=9.423nm mask_opening=84.672nm wall=87.02s
+step=3 t=2.005s dt=0.5048s depth=12.573nm mask_opening=83.563nm wall=84.92s
+step=4 t=2.510s dt=0.5047s depth=15.721nm mask_opening=82.507nm wall=87.94s
+step=5 t=3.015s dt=0.505s depth=18.864nm mask_opening=81.396nm wall=82.62s
+step=6 t=3.521s dt=0.506s depth=22.020nm mask_opening=80.262nm wall=80.61s
+step=7 t=4.025s dt=0.5044s depth=25.162nm mask_opening=79.144nm wall=78.30s
+step=8 t=4.530s dt=0.5055s depth=28.300nm mask_opening=78.063nm wall=73.25s
