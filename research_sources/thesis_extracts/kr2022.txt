@@ -1,0 +1,941 @@
+1 
+ 
+Voltage Waveform Tailoring for High Aspect Ratio Plasma Etching of SiO2 using 
+Ar/CF4/O2 Mixtures:  Consequences of Ion and Electron Distributions on Etch Profiles 
+ 
+Florian Krüger1, Hyunjae Lee2, Sang Ki Nam2, and Mark J. Kushner1,3 
+ 
+1 Electrical Engineering and Computer Science Department, University of Michigan, 1301 Beal 
+Ave., Ann Arbor, MI 48109-2122 USA  fkrueger@umich.edu, mjkush@umich.edu 
+2 Mechatronics R&D Center, Sams ung Electronics Co., Ltd., 1-1 Samsungjeonja-ro, Hwaseong-
+si, Gyeonggi-do 18448, South Korea  hj0928.lee@samsung.com, sangki.j.nam@samsung.com 
+3 Author to whom correspondence should be addressed. 
+ 
+Abstract: 
+The quality of high aspect ratio (HAR) features etched into dielectrics for microelectronics 
+fabrication using halogen containing low temperature plasmas strongly depends on the energy and 
+angular distribution of the incident ions (IEAD) onto the wafer , as well as potentially that of the 
+electrons (EEAD).  Positive ions, accelerated to high energies by the sheath electric field, have 
+narrow angular spreads and can penetrate deeply into HAR features.  Electrons typically arrive at 
+the wafer with nearly thermal energy and isotropic angular dist ributions and so do not directly 
+penetrate deeply into features.  These differences can lead to charging of the insides of the features 
+which can slow etching rates and produce geometric defects such  as twisting.  In this work, we 
+computationally investigated the plasma etching of HAR features into SiO2 using tailored voltage 
+waveforms in a geometrically asymmetric capacitively coupled plasma sustained in an Ar/CF4/O2 
+mixture at 40 mTorr.  The tailored waveform consisted of a sinu soidal wave and its higher har-
+monics with a fundamental frequenc y of 1 MHz.  We found that so me degree of control of the 
+IEADs and EEADs is possible by adjusting the phase of higher harmonics φ through the resulting 
+generation of electrical asymmetry and electric field reversal.   However, the IEADs and EEADs 
+cannot easily be separately contr olled.  The control of IEADs a nd EEADs are inherently linked.  
+The highest quality feature wa s obtained with a phase angle φ = 0° as this value generated the 
+largest (most negative) DC self-bias and largest electric field  reversal for accelerating electrons 
+into the feature.  That said, the consequences of voltage wavef orm tailoring (VWT) on etched 
+features is dominated by the change in the IEADs.  Although VWT  does produce EEADs with 
+higher energy and narrower angular spread, the effect of these electrons on the feature compared 
+to thermal electrons is not large.  This smaller impact of VWT produced EEADs is attributed to 
+thermal electrons being accelerated into the feature by electric fields produced by the positive in-
+feature charging.   
+ 
+Keywords: Voltage Waveform Tailoring, Plasma Etching, High Aspect Ratio Etch-
+ing, Electric Field Reversal, Plasma Sheath 
+  
+2 
+ 
+I. Introduction 
+Plasma etching of dielectrics, such as SiO2, is an integral step in manufacture of micro- and 
+nanometer scale electronics [1-4].  The particular process of etching high aspect ratio (HAR) fea-
+tures is becoming an increasingly critical process due to the complexity of 3-dimensional structures 
+such as 3D-NAND memory.  Fabricating these devices require etching HAR contact holes through 
+hundreds of layers of SiO 2 and Si3N4 with a total aspect ratio of up to 100 [5-7] with increasing 
+densities of features.  These highly anisotropic etches are ach ieved with energetic ion bombard-
+ment with near normal angles of in cidence onto the wafer.  In c apacitively coupled plasmas 
+(CCPs), which are commonly used for plasma etching of dielectrics, the anisotropy of the positive 
+ions is a consequence of acceleration of the ions in the electr ic field in the sheath bounding the 
+wafer.  The majority of HAR etching of dielectrics is performed in CCPs sustained in fluorocarbon 
+gas mixtures, typically using multiple radio frequency (RF) power supplies having frequencies of 
+a few MHz to tens of MHz [7-10]   These discharges are usually o perated with gas pressures of 
+tens of mTorr with hundreds of watts to many kW of power deposi tion over a 30 cm diameter 
+wafer.  These conditions produce ion fluxes to the wafer of 10 15-1016 cm-2s-1 [11].  Ions (or hot 
+neutrals after ion scattering from the inner sidewalls of featu res) reaching the bottom of HAR 
+features must have a critically high energy and narrow angular distribution to continue the etch.  
+To achieve these goals, substrate biases having voltages of many kV are regularly used [11-14]. 
+In single frequency electropositive RF discharges, the bulk pla sma potential is generally 
+positive with respect to bounding surfaces, leading to an electric field in the sheath above the wafer 
+that points towards the wafer surface during most of the RF cyc le [15-16].  This electric field 
+accelerates positive ions into the wafer with high energies and narrow angular spreads, while con-
+fining the electrons to the bulk plasma.  It is only during a small fraction of the RF cycle at which 
+time the sheath collapses that electron fluxes are able to reach the wafer [17-18].  (By sheath col-
+lapse, we refer to the sheath potential rapidly decreasing to small values.)  The highly anisotropic, 
+high energy ions can penetrate deeply into HAR features.  The electrons incident onto the wafer 
+typically have nearly thermal ene rgy and angularly broad distributions, and so do not naturally 
+penetrate deeply into features [1].  When etching dielectric (o r low conductivity materials), these 
+conditions can result in the low er echelons of the feature being charged positively and the upper 
+echelons being charged negatively [19].  This differential charging generates electric field compo-
+nents within the feature [19-21].  The intra-feature electric fields can deviate ion trajectories which 
+3 
+ 
+can lead to undesired consequences including mask deformation [ 22,23], a reduction of the ion 
+flux at the bottom of the feature [24], and profile distortion such as notching, twisting and bowing 
+[19-21].  Negative charging of the mask, a process that is sens ensitive to the incident energy dis-
+ributions of both electrons and ions, may then also produce deviations in the trajectories of incident 
+charged particles [22,23].  
+The issue of differential charging has previously been addressed by increasing the ion en-
+ergies to minimize the deflection of ions by intra-feature elec tric fields.  However, this approach 
+must overcome several challenges.  The coinciding increase in t h e  p o w e r d e n s i ty  a t th e  w a f e r 
+surface can lead to excessive wafer heating which, unchecked, can stress the thermal budget of the 
+process [8,25].  In high volume manufacturing (HVM) this strategy requires the use of technolog-
+ically complex wafer cooling.  Although successful to date, power onto the wafer and wafer cool-
+ing has their limits. 
+Since the desired increase in ion energy is often achieved by increasing the applied voltage 
+to the substrate, another challe nge arises in that the sheath t hickness is a function of the sheath 
+voltage and by extension the CCP voltage applied to the substrate.  Increasing the sheath thickness 
+for otherwise the same process conditions will lead to an incre ase in the number of collisions in 
+the pre-sheath and sheath, producing a lower energy and broader  angular distribution of the inci-
+dent ion flux.  The higher ion energies can also decrease selec tivity of the dielectric etch with 
+respect to the mask as the result of an increase in non-selecti ve physical sputtering of the mask.  
+Maintaining high selectivity is critical during the typically long etch times required for HAR fea-
+tures [1,8].  
+In a typical CCP of the type used for plasma etching in microelectronics fabrication (pres-
+sures of tens of mTorr, frequencies of 1 – 100 MHz), the net ch arged particle flux to surfaces in 
+contact with the plasma must sum to zero over the RF cycle in the steady state,   
+ 
+0
+() () 0
+T
+ei tt d t      (1) 
+where, T is the RF period. Γe(t) and Γi(t) are the time dependent fluxes to the surface of electrons 
+and positive ions, acknowledging that the flux of negative ions  is negligible in the absence of 
+pulsing.  The electric fields in the sheath and presheath usually point towards surfaces to accelerate 
+ions out of the plasma and to confine electrons.  It is only during a small portion of the anodic part 
+of the RF cycle that the sheath voltage decreases sufficiently to allow electrons to reach the 
+4 
+ 
+substrate.  These electrons arrive at the substrate with largely thermal, isotropic velocity distribu-
+tions. 
+  Voltage waveform tailoring (VWT ) is a technique that is able to provide additional flexi-
+bility in producing ion energy and angular distributions (IEADs) onto the wafer [26].  VWT can 
+also be used to generate direc tional (anisotropic), high energy electron fluxes onto the substrate 
+through promoting an electric field reversal (EFR) in the presheath above the substrate [17].  EFR 
+refers to the electric field in the presheath momentarily point ing into the plasma, as opposed to 
+pointing towards the surface.  In VWT, a non-sinusoidal voltage is applied to the substrate, typi-
+cally using several harmonics of a fundamental frequency.  EFR in the presheath ultimately results 
+from the requirement that the time average of positive and negative fluxes to the substrate must 
+balance.  Only during the sheath collapse during the anodic par t of the cycle are electrons able to 
+diffuse to the surface.  Under certain conditions, this diffusive electron transport may not be suffi-
+cient to satisfy the local charge balance.  These conditiosn in clude short sheath collapse times, 
+thick sheaths or magnetically or collisionally hindered transpo rt.  For these conditions, negative 
+space charge in the presheath produces an EFR, which slows the transport of ions and increases 
+the transport of electrons towar ds the wafer.  Electric field reversal has been observed computa-
+tionally as well as experimentally [17, 27-30].  In the context  of VWT, EFR it was found to be 
+most prevalent when using waveforms that facilitate a rapid and brief sheath collapse [17, 26].  
+ With its ability to produce anisotropic IEADs which naturally penetrate deeply into HAR 
+features, and electron energy and angular distributions (EEADs) onto the substrate which can po-
+tentially penetrate deeply into HAR features, VWT has been prop osed as a (partial) remedy for 
+neutralizing charging inside HAR features [17,26].  Other techn iques can also be used to inject 
+high energy electrons into features.  For example, the top elec trode of CCPs can be biased with a 
+negative DC voltage, which produces a high energy beam of anisotropic electrons onto the wafer 
+[31].  This technique would require an additional power supply and its associated complexities.  
+The use of tailored waveforms does increase complexity in terms of power supply, harmonic filters 
+and match box designs [32].  The DC generated electron-beam sol ution requires a counter elec-
+trode and so would not be easily implemented into inductively c oupled plasma (ICP) systems, 
+whereas the VWT solution is, in principle, applicable to the bi as in ICP systems.  Ultimately, the 
+choice of the most expedient system will likely be application dependent.   
+ In principle, if the flux of positive ions and negative electr ons arriving on the wafer and 
+5 
+ 
+reaching the lower echelons of the features can be balanced ove r the RF cycle, the detrimental 
+effects of intra-feature charging can be avoided.  That said, t he production of the EFR that accel-
+erates electrons into the wafer and narrows the EEAD requires m anipulating the sheath potential 
+during the RF cycle and so the IEADs are also affected.  As a r esult, independent control of the 
+energy and angular distributions (EADs) of both electrons and ions is challenging.  From a practi-
+cal perspective in an actual CCP etching tool, it is not possib le to hold the IEAD constant while 
+varying the EEAD using VWT. 
+The dynamics of VWT, and EFR in particular, are sensitive to the geometry of the plasma 
+reactor and the electronegativity  of the plasma.  (Electronegat ivity refers to the ratio of negative 
+ions to electrons. Highly electronegative plasmas have a large ratio of negative ions to electrons, 
+while the RF cycle averaged plasma potential and floating potential are still positive.)  For exam-
+ple, one of the features of VWT is the electrical asymmetry effect (EAE) in which the dc bias in a 
+symmetric, multi-frequency CCP can be controlled by the amplitu de and phase of the harmonics 
+used in the bias waveform [33,34].  The plasma reactors used in HVM are typically geometrically 
+asymmetric and produce a negative DC bias on the substrate on this basis alone.  Using VWT, the 
+DC bias resulting from the EAE then either decreases or increases the geometrically produced DC 
+bias.  Electronegative plasmas further complicate the VWT produ ced EAE and EFR as space 
+charge is maintained by far less mobile negative ions compared to electrons.  
+In this paper we discuss results from a computational investiga tion of a  multi-frequency 
+CCP sustained in an Ar/CF 4/O2 mixture using a geometry similar to those found in HVM.  High 
+frequency power applied to the top electrode is used to sustain  the plasma while VWT is used to 
+define the low-frequency bias vol tage applied to the bottom ele ctrode.  The consequences of the 
+electrical asymmetry effect and the electric field reversal on the IEADs and EEADs onto the wafer 
+surface are discussed.  The resulting charged and neutral particle fluxes and distributions are then 
+used in self-consistent simulations of etching a HAR feature into SiO2 to investigate the ability of 
+VWT to control feature properties.   
+We found that in spite of the complicating factors of geometry,  gas mixture and multiple 
+frequencies, VWT allowed for effective control of IEADs and EEADs onto the wafer, though this 
+control could not be produced independently.  Optimizing the wa veform to produce a desired 
+EEAD inevitably affects the IEAD.  Peak and mean energies of positive ions and of electrons onto 
+the wafer are strong functions of the shape of the applied volt age waveform.  With the narrow 
+6 
+ 
+angle and energetic EEADs produced by VWT, our investigation di d show a decrease in intra-
+feature charging, as measured by a decrease in the positive ele ctrical potential.  However, the 
+overall characteristics of the final etch feature was dominated by the ion dynamics.   
+Synthetic changes to only the EEADs resulted in minor changes of the final etched feature.  
+For example, there were not significant differences in feature quality between an isotropic, thermal 
+EEAD onto the wafer corresponding to an electron temperature of a 3-4 eV, and the narrow, ener-
+getic EEAD produced by VWT.  We attribute this result to the fa ct that thermal electrons are 
+accelerated into the feature by the electric fields produced by  the positive, in-feature electric po-
+tential.  Ultimately, in a quasi-steady state, the flux of positive and negative charge into the feature 
+must be equal.  This is achieved by producing a positive potential in the feature, which then accel-
+erates thermal electrons into the feature.  The narrow energetic EEADs produced by VWT are also 
+accelerated into the feature.  However, their initially higher wafer directed velocities require a 
+smaller positive potential in the feature to achieve the needed  flux balance.  The end result is a 
+decrease in the intra-feature potential relative to that produc ed with thermal electrons that is ap-
+proximately equal to the average energy of the VWT produced EEAD. 
+The computational platform used for the reactor scale plasma transport, the Hybrid Plasma 
+Equipment Model (HPEM) and the reactor conditions are discussed  in Sec. II.  The Monte Carlo 
+Feature Profile Model (MCFPM) used for the feature scale simulations of etching, and its applica-
+tion here, are described in Sec. III.  The influence of phase a ngle φ of the voltage waveform on 
+charged particle distributions onto the wafer and etch profiles with low bias power is discussed in 
+Sec. IV and with high bias power is discussed in Sec. V.  Concluding remarks are in Sec. VI. 
+ 
+II. Description of the Reactor Scale Model 
+The investigation of the reactor scale plasma dynamics was perf ormed using the Hybrid 
+Plasma Equipment Model (HPEM), which is described in detail in Ref. [35].  In short, the HPEM 
+is a 2-dimensional hydrodynamic model which resolves plasma phe nomena in a time-slicing ap-
+proach.  Different physics regimes are addressed in modules that are coupled by exchanging phys-
+ical quantities – electric and magnetic fields, densities, rate coefficients.  The major modules used 
+in this work are the Fluid Kinetics-Poisson Module (FKPM), the Electron Energy Transport Mod-
+ule (EETM), and the Plasma Chemistry Monte Carlo Module (PCMCM).   
+In the FKPM, the continuity, momentum, and energy equations of the heavy particles are 
+7 
+ 
+solved coincidently with Poisson’s equation to provide heavy pa rticle densities, fluxes and elec-
+trostatic potential.  Electron densities and fluxes in the bulk plasma are addressed using continnum, 
+fluid techniques in the FKPM.  In the EETM, the spatially dependent electron energy distributions 
+(EEDs) in the plasma are obtaine d using a kinetic, Monte Carlo based approach using the space 
+and phase resolved electric fields produced in the FKPM [36].  These EEDs are then used to pro-
+duce electron impact rate coefficients and transport coefficien ts for use in the FKPM.  The tra-
+jetories of secondary electrons produced by ion impact and exci ted state impact on surfaces are 
+addressed using fully kinetic, Monte Carlo techniques in the EETM.  The energy and angular dis-
+tribution of electrons striking the substrate are recorded in the EETM, which are then used as input 
+to the MCFPM.  The EEDs for both bulk and secondary electrons are continuously updated during 
+the simulation by repeatedly executing the EETM.  
+After the plasma reaches a quasi-steady state the PCMCM, using Monte Carlo techniques, 
+tracks the trajectories of ions and reactive neutral species.  EADs of these species are recorded 
+impinging onto the wafer and are used as input to the MCFPM.  The reaction mechanism used for 
+Ar/O2/CF4 plasmas is described by Vasenkov et al [37,38].  That reaction mechanism has been 
+modified by updating the model fo r Ar excited states to include  the processes described in [39]. 
+Ion induced secondary electron emission coefficients on surfaces in contact wtih the plasmas was 
+included using coefficients of 0.15 and 0.05 for wafer and meta ls.  Excited Ar species induce 
+secondary electron emission with a probability of 0.01 on all surfaces [40].  
+A schematic of the cylindrically symmetric CCP reactor used in this investigation is shown 
+in Fig 1.  The reactor, modeled after multi-frequency CCPs used  in industrial HVM applications, 
+consists of two parallel plate electrodes with a diameter of 300 mm separated by a 2.8 cm gap.  A 
+silicon wafer is mounted on the bottom electrode and a showerhe ad gas inlet is distributed across 
+the top electrode.  A focus ring made of silicon and quartz to improve discharge uniformity sur-
+rounds the wafer.  The dielectri c constants of these components  are ε/ε0 = 4 for the outer quartz 
+ring and ε/ε0 = 11.8 for the Si ring.  While the conductivity of the quartz i s negligible, that of the 
+Si wafer is 0.05/Ω-cm .  The feedstock gas Ar/CF 4/O2 = 75,/15/10 flows at 500 sccm through the 
+top electrode.  The reactor pressure is held constant at 40 mTo rr at the location of the pressure 
+sensor near the pump port by throttling the rate of pumping.  
+The VWT power supply is connected to the bottom electrode through a blocking capacitor 
+of 500 nF.  In principle, in the quasi-steady state, the DC bias should be independent of the value 
+8 
+ 
+of the blocking capacitor provided that the RC time constant of the plasma-capacitor series imped-
+ance is large compared to transients in current.  The capacitan ce used here is a balance of there 
+being an acceptably short charging time and long enough RC time constant so that there is little 
+variation in the DC bias during the RF cycle.  
+Sheath properties are in part a function of plasma density at t he edge of the sheath which 
+then determines sheath thickness.  To maintain a relatively con stant plasma density and to mini-
+mize sheath variation based on changes in plasma density, 500 W  is coupled into the plasma 
+through the top electrode using a sinusoidal voltage waveform with a frequency of 80 MHz.  This 
+power was maintained by continually adjusting the amplitude of the voltage at 80 MHz. 
+To control the dynamics of charged particles impinging on the wafer surface, a customized 
+voltage waveform, V(t), was applied to the bottom electrode.  The waveform consists of a funda-
+mental sine wave with a frequency f0 = 1 MHz and 4 consecutive higher harmonics, 
+ 00
+1
+1() c o s ( 2 )()
+N
+k
+i
+NkVt V k ft kNN k  
+
+  . (2) 
+Here, V0 is the total applied voltage amplitude, k is the harmonic order, N is the total number of 
+frequencies, and the relative phase shift of each harmonic freq uency k is φ k..  In this work the 
+number of harmonics is N = 5.  The consequences of VWT were investigated by varying the phase 
+shift of the even harmonics φ for k = 2, 4.  The resulting waveforms are shown in Fig. 2 for phase 
+shifts of φ = 0°, 45°, 90°, 135° and 180°.  The power coupled through the b ottom electrode, P0, 
+was initially held constant at 1 kW by adjusting V0.  
+ 
+III. Description of the Feature Scale Model 
+ The EADs sampled at the substr ate surface were used as input to the Monte Carlo Feature 
+Profile Model (MCFPM) to simulate the evolution of etch features in semiconductor device mate-
+rials [40,41,42].  Briefly, MCFPM is a voxel based, kinetic model in which pseudo-particles rep-
+resenting gas phase species are launched with energies and angl es sampled from the EADs ob-
+tained from the HPEM.  The trajectories of the incoming particles are integrated, with charged 
+particles subject to acceleratio n by electric fields, until a c ollision with a surface occurs.  The 
+specific surface reaction is chosen based on a stochastic Monte Carlo approach.  Depending on the 
+reaction, the voxel representing the surface site is removed (p hysical or chemical sputtering), 
+chemically modified (passivation) or a voxel is added on top of  the site (deposition).  Species 
+9 
+ 
+reflected from or produced at the surface, such as a sputter or chemical etch product, are returned 
+to the gas phase, and their trajectories are tracked until they are consumed in a reaction at a surface 
+or leave the feature.  Although the capability exists in the MC FPM to have electron stimulated 
+surface chemistry or electron implantation, in this study, electrons do not modify the surface other 
+than through depositing their charge. 
+ In this study, we investigated the plasma etching of SiO
+2 in a Ar/O 2/CF4 gas mixture.  A 
+detailed description of the reaction mechanism is given by Huang et al. [40].  Generally, all in-
+coming ions or hot neutrals resulting from neutralization of ions when striking surfaces can phys-
+ically sputter every material according to the incident particles mass, angle and energy as well as 
+the surface binding energy of the material.  Radical C
+xFy species can lead to the deposition of 
+polymer, the main contributor to sidewall passivation, which in turn is removed by sputtering and 
+etching by oxygen radicals.  C xFy radicals can react with the SiO 2 surface to create a layer of 
+SiO2CxFy complexes, significantly lowering the binding energy and making the complex easier to 
+chemically sputter. 
+ The electric potential in the feature was computed by collecti ng charge on surfaces and 
+solving Poisson's equation.  The relative permittivity for SiO
+2 used in solution of Poisson's equa-
+tion was r = 4.0, and for photoresist, polymer and SiO2CxFy complexes was r = 3.0.  The electric 
+potential then provides electric fields used to advance the tra jectories of charged particles.  All 
+positive ions neutralized when striking a surface, and if reflected, continued as a neutral.  Electrons 
+were collected on surfaces with unity probability.  For this st udy, the SiO 2 and photoresist had 
+essentially zero conductivity (10 -10/- c m ) .   P o l y m e r  ( 510-6/-cm) and SiO 2CxFy complexes 
+(110-6/-cm) had finite but small conductivity.  These conditions generally resulted in charge 
+being resident only on surfaces, or buried under polymer or redeposited etch products if deposition 
+occurred on top of charged surfaces.   
+ The geometry used for the feature evolution is shown in Fig. 3.  The feature is a trench 
+consisting of a 3000 nm thick SiO
+2 layer over a Si stop-layer, covered by 100 nm thick photoresist 
+with a 100 nm opening.  This geometry produces an aspect ratio of about 30 for an etched trench 
+down to the stop layer.  The simulation was performed in 3-dime nsions as a finite depth trench.  
+The mesh consists of 60 cells wide by 750 cells tall by 10 cells deep, producing cubic voxels with 
+5 nm edge length.  Reflective boundary conditions are used along the y-axis normal to the geom-
+etry shown in Fig. 2.  Although we are simulating a nominally 2 -dimensional feature (a trench), 
+10 
+ 
+performing the simulation in 3-dimensions results in a more rea listic representation of sidewall 
+roughness.  When simulating a trench in 2-dimensions, sidewall roughness is effectively uniform 
+(and infinite) in the unresolved depth.  In 3-dimensions, sidewall roughness is finite.  The etching 
+was performed for a fixed time of 15 minutes.   
+ The Monte-Carlo method which is used in the MCFPM inherently p roduces statistical var-
+iation in the details of the features that are produced.  This run-to-tun variation can occur naturally 
+in parallel computations by diffe rences in the timings of the p rocessors.  The statistical variation 
+features can be demonstrated by changing the seeds for the random number generators on separate 
+runs.  The features shown here are typical, average features in which outliers due to statistical 
+variation have been excluded.  T he statistical run-to-run diffe rences in features are discussed in 
+Appendix A. 
+ 
+IV. Plasma and Etch Properties for 1000 W of VWT Power 
+In industrial applications of plasma etching, it is most common to control power deposition 
+in the plasma as opposed to voltage amplitude.  To make more direct connection to these applica-
+tions, the power applied through the VWT on the bottom electrode was first held constant at P
+VWT 
+= 1000 W by adjusting the voltage amplitude V 0 while varying the phase φ from 0 – 180 o.  Alt-
+hough this power appears large, by industrial processing standa rds for HAR etching of 30 cm 
+diameter wafers, 1000 W is a moderately small power [40,43,44].  The applied voltage amplitudes 
+necessary to maintain constant power coupling through the top electrode (500 W), bottom elec-
+trode (P
+VWT = 1000 W) and the resulting DC self-bias on the bottom electrode are shown in Fig. 4 
+as a function of phase angle.  At constant power, the amplitude  of the high frequency voltage 
+applied to the top electrode is a weak function of the phase an gle and is nearly constant at V HF = 
+120 V.  The DC self-bias, however, is strongly coupled to φ with its magnitude decreasing (be-
+coming more positive) by 88% from Vdc= -2480 at φ=0° to Vdc= -290 at φ=0°. 
+ Earlier works have described th e trend of how DC bias depends of the shape of the applied 
+waveform through the generation of the electrical asymmetry effect (EAE) [18,45].  The DC self-
+bias can be expressed as 
+ max min ,1
+dc
+VVV 
+
+     (2) 
+where Vmax and Vmin are the maximum and minimum of the applied voltage.   is the discharge 
+11 
+ 
+symmetry parameter given by 
+ 
+2
+,
+ps p s g
+g sg sp
+A nI
+A nI
+
+
+  (2) 
+where the areas of the powered and ground electrodes are Ap and Ag and the ion densities near the 
+powered and grounded surfaces are spn  and sgn .  Isp and Isg are the sheath integrals, described in 
+prior publications on the origin of the EAE [33, 34, 45].  In short, these are dimensionless quantities 
+that depend only on the normalized profile of the sheath charge density.   
+ The formulation for the EAE does not specifically account for a second powered electrode 
+having a unique frequency, such as used here.  However, due to the higher frequency and lower 
+power of this second RF bias, the voltage amplitude applied to the top electrode is smaller than 
+that applied to the lower electrode.  Sinusoidal voltages alone do not induce electrical asymmetry 
+effects and so we do not expect large perturbations to the EAE process by the high frequency 
+source.  With the phase shift applying only to the tailored waveform on the bottom electrode, VHF 
+remains relatively constant for all φ, varying by less than 10%.  Due to the changes to the electron 
+dynamics in the sheath region so me variation does occur in V 0, decreasing from 2800 V to 2200 
+V or about 27% from  = 0 to 180.   
+The DC self-bias on the lower electrode, VDC, is an important parameter in determining the 
+energy of incident positive ions.  For high frequency excitatio n where the energy width of the 
+IEAD is small compared to the RF voltage amplitude, the centroid in energy of the IEAD typically 
+increases with the magnitude of VDC.  With low fundamental frequencies (thin sheath limit), ions 
+transiting the sheath respond to the sheath dynamics during the RF period.  (This is nearly always 
+true for electrons.)  In this low frequency limit, the correlat ion between IEAD and V DC is not 
+straight forward.   
+The radially averaged axial electric field as a function of tim e and distance from the sub-
+strate, Ez(z, t), is shown in Fig. 5 for phase shifts of φ = 0° to 180°.  In CCPs without an electric 
+field reversal, Ez(z, t) near the bottom electrode s heath will point towards the electrode (negative 
+z direction) at all times.  However, with φ = 0°, an EFR occurs during the sheath collapse at around 
+0.5 μs when the applied voltage is at its maximum positive valu e and there is a positive electric 
+field component (pointing in +z direction).  This EFR results, in part, from the short duration of 
+the positive voltage excursion of the voltage waveform and the correspondingly short time during 
+12 
+ 
+which the sheath collapses.  In order to produce the required electron flux to the surface to maintain 
+a charge-neutral flux to the substrate, an EFR occurs to accele rate electrons towards the surface.  
+This field reversal is most pronounced in the φ = 0° case (69 V/cm) as this phase has the shortest 
+sheath collapse and so requires the largest instantaneous electron flux to the surface.  As the dura-
+tion of the sheath collapse increases with increasing φ and becomes less abrupt, the magnitude of 
+the instantaneous electron flux that is required to balance charge decreases, and so the magnitude 
+of the EFR reversal also decreases.  
+The modulation of the sheath as a function of the phase of the harmonics translates into 
+significant variation of IEADs i ncident onto the wafer, as shown in Fig 6a.  These IEADs are 
+collected by summing over all ions striking the wafer for φ = 0° to 180°.  The IEADs generally 
+decrease in maximum energy with increasing φ, following the trend in V dc.  The mean energy of 
+the ions also decreases with increasing φ, as shown in Fig 6c.  Aside from the general decrease in 
+energy, the shape of the IEADs reflect the temporal dynamics of the sheath.  The IEAD for φ = 0° 
+contains a dominant peak at 3000 eV, a result of the sheath maintaining a nearly constant potential 
+and thickness for the majority of the RF cycle. (See Fig. 5.)  The IEADs for φ = 45°, 90° and 135° 
+contain more complex multi-modal structures with broader spreads in energy.  The structure in the 
+IEADs reflects the length of time the sheath is maintained at a given potential and thickness.  The 
+IEAD for φ = 180 ° has a single dominant peak at approximately 400 eV, as the sheath has one of 
+two quasi-binary states – fully collapsed or fully expanded. 
+ The EEADs incident onto the wafer surface are shown in Fig. 6b  for φ = 0° to 180°.  The 
+electric field reversal for small values of φ produces a significant acceleration of electrons normal 
+to the surface, generating an EEAD with a higher energy and nar rower angular distribution that 
+might occur with low frequency, sinusoidal waveforms.  (Recall that for a purely thermal distribu-
+tion of electrons onto the surface, the mean energy will be about the electron temperature, 3-4 eV, 
+and the angular spread would span -90  to +90.)  The EEAD for φ = 0°, where the EFR has is 
+largest magnitude, extends to 125 eV, considerably higher than the thermal bulk temperature of 
+about 3.2 eV.  (Although the electron energy distribution is no n-Maxwellian in the bulk plasma, 
+for convenience we will refer to the electron flux incident ont o the electrode in the absence of 
+significant EFR as being the thermal electron flux or resulting from thermal electrons.)  The down-
+ward trend of the magnitude of the electric field reversal with  increasing φ in turn leads to a de-
+crease in the electron acceleration normal to the surface, and so to an overall reduction in electron 
+13 
+ 
+energy incident onto the surface.  With φ = 180°, the EEADs incident onto the surface closely 
+resemble a thermal distribution, though with a somewhat narrower angular distribution.  The high 
+energy, low angle electrons are likely the result of electrons accelerated in the sheath at the oppos-
+ing elelctrode.  Due to the 2 decade log scale of the image, th ese structures are visually overem-
+phasized. 
+ In addition to the charged particle EADs onto the surface, the  silicon-dioxide etching mech-
+anism depends on the magnitude of the individual fluxes of char ged and neutral species onto the 
+wafer.  In particular, the ratio of polymer depositing and polymer removing species is important 
+in dielectric etching in fluorocarbon containing plasmas.  The time averaged fluxes of neutral and 
+ion species onto the wafer as a function φ are shown in Fig. 7.  With changes in φ there are sys-
+tematic changes in EADs of charged particles onto the surface.  However, the neutral fluxes are 
+fairly stable with moderate variation with changes in phase φ for most species.  With the high 
+frequency power being held constant, the rates of electron impa ct dissociation and ionization are 
+nearly constant, producing nearly constant fluxes.  The small variation in neutral fluxes with φ can 
+be attributed to the contribution to dissociation by secondary electrons emitted from the wafer and 
+accelerated by the sheath into the bulk plasma.  With the elect ron energy distribution of the sec-
+ondary electrons being functions of sheath dynamics, rates of dissociation will also vary. 
+ Similar trends apply for the fl uxes of ions to the wafer as a function of φ, which also show 
+little variation with phase both in terms of overall magnitude as well as the relative ratios of ion 
+fluxes.  The one notable exception is the flux of O + which increases for intermediate values of φ.  
+The atomic weight of O+ is the lightest of ions having a significant flux to the surfa ce and so will 
+respond more quickly to changes in the sheath (and presheath) compared to other ions.  There is 
+also likely a component of ionization of atomic oxygen by high energy secondary electrons.  Given 
+that the fluxes of Ar
++ and CF3+ are 2 orders of magnitude higher than that of O+, we do not expect 
+this sensitivity of the flux of O+ on phase angle to have a large effect on etch properties.  
+ The feature profiles for trenches in SiO 2 after 15 min of plasma etching are shown in Fig. 
+8a for phase angles of φ = 0° to 180°.  Varying φ for constant power produces significant differ-
+ences in etch depth, ranging from 1750 nm for φ = 0° to an immediate etch stop due to excessive 
+polymer buildup at  φ = 180°.  Due to the similar absolute fluxes of reactants for all phase angles, 
+this trend in etch depth is a consequence of the differences in charged particle energy distributions 
+onto the wafer resulting from the change in applied voltage waveforms.  The higher energy of the 
+14 
+ 
+incident ions at low phase angles  produces higher rates of remo val of passivating polymer films 
+and higher rates of sputtering of SiO2, directly or by chemically assisted processes.  The etch stop 
+at φ = 180° is a consequence of the lower ion energies that are unable to balance the deposition of 
+polymer by removal of polymer by sputtering.  A net etch at φ = 180° would be possible for lower 
+rates of polymer deposition (lower incident fluxes of CFx radicals).  
+ The higher incident energies of the positive ions also enable them to partially overcome 
+positive electrical potential that builds up inside features.  This positive potential slows ions, 
+thereby reducing their sputter yield with possible deflection of their trajectories inside the features, 
+which leads to twisting.  One of the original motivations for VWT was to promote in-feature charge 
+neutralization on surfaces by na rrowing the angular distributio n of electrons to better match that 
+of the ions.  These narrow and energetic EEADs presumably would penetrate deeper into the fea-
+ture than is possible by the broad, low energy thermal EEADs produced by conventional CCPs.  
+The desired end result would be a charge neutral feature. 
+ To test this hypothesis, one would need to perform reactor sca le simulations where the ion 
+and neutral fluxes, and IEADs remain the same, while the EEADs varied from low energy, broad 
+angle to high energy, narrow angle.  From our attempts to find such conditions, we conclude that 
+the likelihood is small of being able to hold the IEAD constant while varying the EEAD.  The very 
+conditions that modify the EEADs also modify the IEADs.  A larg e set of computational experi-
+ments were performed to find combinations of voltage, power and waveforms that would maintain 
+the same IEAD while toggling between a nearly thermal EEAD, and  an EFR enhanced EEAD.  
+We were not able to find such conditions.   
+ Instead, to test the hypothesis  that EEADs produced by electric field reversals can decrease 
+the magnitude of positive charge in the feature the following process was used.  Etch profiles were 
+compared when using EEADs produced from using VWT and a synthet ic thermal EEAD having 
+a 3 eV electron temperature.  The fluxes of radicals and ions, and IEADs, were the same for both 
+cases.  These reference simulations were performed for φ = 0°.  For these conditions, the differ-
+ences in EEADs between those generated by VWT and synthetic the rmal distributions are the 
+greatest.  The VWT case, φ = 0° also resulted in the overall most desirable feature profile.   
+ The etch profiles and correspond ing final electric potential a re shown in Fig. 8b for the 
+(left) self consistently generated VWT produced EEAD and (right ) for the synthetic thermal 
+EEAD.  Both cases have both negative and positive charge distri buted throughout the feature, 
+15 
+ 
+though with net negative charge a t the top of the features and net positive charge deeper in the 
+feature.  The end result is positive potential inside the featu re.  The maximum potential with the 
+VWT produced EEAD is 227 V and the maximum potential produced w ith the thermal electrons 
+is 346 V.  The larger positive potential with thermal electrons reduces the final etch depth by 30% 
+by slowing the positive ions incident into the feature.  This r esult confirms the initial hypothesis 
+that directional electrons produced by the EFR can be utilized to at least partially neutralize intra-
+feature surface charging and lessen the decrease in etch rate resulting from that charging.  
+ The maximum ion energy incident into the feature exceeds 3000 eV.  If there was no elec-
+tron neutralization of positive charge in the feature, the positive potential would increase to nearly 
+this maximum value to prevent positive charge from being continually collected.  Even when using 
+the thermal electron EEAD, the potential inside the feature is significantly smaller than the maxi-
+mum ion energy.  The thermal elect rons initially have isotropic  trajectories which dominantly 
+strike the top of the feature.   However, the buildup of positiv e potential in the feature produces 
+electric fields directed upwards that then accelerate these thermal electrons into the feature.  The 
+thermal electrons accelerated into the feature then produce sig nificant neutralization of positive 
+charge on the sidewalls.   
+ In the steady state, the positive potential inside the feature  increases to a large enough 
+magnitude so that the thermal ele ctrons accelerated into the fe ature are able to neutralize incre-
+mental additions to positive charge.  This transient is directl y analogous to the charging of a die-
+lectric surface in contact with a plasma to a negative potentia l that balances the flux of electrons 
+and ions.  The use of the VWT produced EEAD, with its initially  higher energy and velocities 
+towards the wafer, and narrower angular distribution, enables t his balance of electron and ion 
+fluxes to be achieved with a lower positive potential.  The difference in electric maximum potential 
+in the features between the thermal EEAD and the VWT produced EEAD, 120 V, corresponds to 
+approximately the difference in the maximum energy of the VWT produced and thermal EEADs.  
+Although this is not a general result, the difference in potential would not be expected to exceed 
+this value.   
+ When using the VWT generated and thermal EEADs, the location o f maximum potential 
+is not at the bottom of the feature but at depths of 1.2 m for the VWT EEAD and 0.77 m for the 
+thermal EEAD.  The charging of the mask is nominal compared to the energies of ions and EFR 
+accelerated electrons.  The mask charging may be more important  for low aspect ratio (AR) 
+16 
+ 
+features where the voltages and powers are lower.  However, for  HAR features, this is typically 
+not an issue.  The maximum of the positive potential is a function of AR.  As the feature is etched 
+deeper and the AR increases, the maximum in positive potential transitions from the bottom of the 
+feature at low AR to the side of the feature as the AR increases [40].  For small AR, ions even with 
+a finite angular spread can directly strike the bottom of the f eature, and so the maximum positive 
+potential is on the bottom of the  feature.  For HAR features, i ons having a finite angular spread 
+will strike the sidewalls, and positive charging will occur dominantly on the sidewalls.  The neu-
+tralized particles then proceed as hot neutrals deeper into the feature.  The shadowing by the fairly 
+thick photoresist produces a view angle of 3.8 (VWT) to 4.3 (thermal) which is in line with the 
+ion angular spreads.   
+ The charging of the feature occu rs over many RF cycles.  There are no specific in-feature, 
+intra-cycle dynamics of the electric field as the charging and electric fields are the results of aver-
+aging charged particle fluxes over these many RF cycles.  For bias frequencies of many MHz and 
+above, distinct cyclic in-feature electric field dynamics will likely only occur when using pulsed 
+power. 
+ Electron trajectories inside the  feature depend on their initi al distribution in energy and 
+angle as well as the acceleration resulting from electric field s in the feature produced by charge 
+deposition.  In the case with the highest electron energy incident onto the wafer (φ = 0°) the mean 
+energy of the EEAD is 62 eV.  Given the maximum electric potent ial in the feature is 280 V, the 
+electron trajectories are still likely dominated by the electri c fields produced by charging.  To 
+verify this likelihood, electron energies incident onto the sur face inside the feature were spatially 
+sampled.  To enable a side-by-side comparison of these energies , the following process was fol-
+lowed.  The feature shape and potential configuration resulting  f r o m  t h e  φ =  0 °  c a s e  a f t e r  1 5  
+minutes of etching was used and kept constant.  (That is, no fu rther evolution of the feature or 
+potential was allowed.)  Initial electron trajectories were sam pled from the EEAD produced by 
+VWT or from a thermal distribution having an electron temperature of 3 eV.  The electron trajec-
+tories were followed into the feature, and the electron energies striking the surface were recorded 
+and averaged at each spatial location.  Tests were performed for VWT produced EEAD and ther-
+mal distributions when including acceleration from the charge produced electrics fields, and when 
+excluding that acceleration. 
+ The resulting spatially resolved average electron energies inc ident on the feature surface 
+17 
+ 
+are shown in Fig. 9.  The average energies shown in Fig. 9a are  for initial EEADs (VWT and 
+thermal) when including acceleration in the electric fields produced by charging.  The average 
+energies striking the surface for VWT and thermal distributions are spatially similar, and qualita-
+tively resemble the electric po tential shown in Fig. 8b.  These  distributions largely result from 
+acceleration of the incident electrons by the in-feature electr ic fields.  The average energy of the 
+electrons striking the surface for the initially thermal electrons is maximum at about 240 eV, which 
+corresponds to the maximum positive potential inside the featur e.  The average energy for the 
+electrons launched from the VWT produced EEAD is maximum at about 275 eV.  This value is 
+larger than for the thermal electrons by 35-40 eV due to the el ectrons selected from the VWT 
+produced EEAD beginning their trajectories with significant initial velocities.   
+ To reinforce this finding, avera ge electron energies striking the surface of the feature were 
+computed for the VWT produced EEAD and for thermal electrons wh en excluding acceleration 
+by electric fields, as shown in Fig. 9b.  The average energies for the VWT produced EEAD range 
+up to 35 eV and those for the thermal EEAD range up to 6 eV, bo th values largely reflecting the 
+initial distributions.   
+ These findings suggest that for reasonably large positive pote ntials produced inside fea-
+tures, the high energy VWT produced EEADs will not dominate the  resulting feature properties 
+compared to EEADs produced using conventional waveforms.  In bo th cases, in the steady state 
+electrons are accelerated into the feature in such a manner as to neutralize the incremental charge 
+produced by fluxes of positive ions.  This is particularly true for positive potentials that are much 
+larger than the average energy of the incident EEADs.   
+ 
+V. Plasma and Etch Properties for 2000 W of VWT Power  
+ While maintaining 500 W of power on the top electrode, the power delivered by the bottom 
+electrode was increased to P
+VWT = 2000 W to be more aligned with industrial processes.  The 
+resulting voltage amplitudes for the top and bottom electrodes, and the DC self-bias are shown in 
+Fig. 4b as a function of phase angle.  The top electrode voltag e amplitude remains nearly un-
+changed compared to the PVWT = 1000 W cases with there being little variation with phase angle 
+φ.  In order to accommodate the increase in power, the bottom el ectrode voltage amplitude in-
+creased by a factor of 1.5-2 compared to the P VWT = 1000 W cases.  The low- and high-power 
+cases have nearly identical trends with phase angle, which suggests that these trends are the result 
+18 
+ 
+of the sheath dynamics rather th an being of stochastic origin.  Similar to the 1000 W cases, V dc 
+decreases with increasing phase angle as a consequence of the EAE.  The large magnitude of V dc 
+correlates to the larger applied voltage amplitude. 
+ The radially averaged, axial electric fields as a function of time during the RF cycle for 
+PVWT = 2000 W are shown in Fig. 10 for different phase angles φ.  Overall, the sheath dynamics 
+and electric field reversals as a function of phase angle are s imilar to the P VWT = 1000 W cases 
+(Fig. 5) with the EFR decreasing with phase.  One exception is the φ = 0° case whose EFR is 
+reduced compared to φ = 45° at same power and also reduced compared to the φ = 0° case at 1000 
+W.  This apparent outlie r is the result of the geometrical cons traints of the plasma reactor and of 
+the finite electrode gap (distance between bottom and top elect rodes).  For example, the spatially 
+resolved electron densities averaged over the RF period are sho wn in Fig. 11 for φ = 0°, 90° and 
+180°.  While the peak electron densities vary by only about 10%  the spatial distributions vary 
+considerably with change in φ. 
+ With low values of φ, the time averaged sheath thickness is larger, which reflects the larger 
+(more negative) DC bias and voltage amplitude.  The sheath thickness then occupies a significant 
+fraction of the gap.  The compressed bulk plasma is then more sensitive to, for example, disconti-
+nuities between the top electrode and the bounding dielectric i nsulator where electric field en-
+hancements occurs.  The end result is a less spatially uniform plasma.  We acknowledge that, if 
+unaddressed, this expansion of t he sheath could potentially aff ect the spatial uniformity of the 
+wafer processing, and that this effect may be amplified by this  particular reactor configuration.  
+Several reactor configurations were investigated (e.g., adjusting the shape and diameter of the fo-
+cus rings, and top electrode) to confirm that the VWT scaling discussed here, and sheath expansion 
+and plasma compression are general trends.  There are many actions, such as adjusting the process 
+parameters (gas composition, gas pressure, flow rates, power) a nd/or reactor geometry that could 
+be used to recoup the trends with phase angle that were obtained at the lower power.  This optimi-
+zation, is beyond the scope of this work.  That said, this demo nstration emphasizes the concept 
+that design of plasma processing reactors must be performed from a systems perspective.  Opti-
+mizing one aspect of the design, such as EFR, may ultimately be  limited by other aspects of the 
+design, such as gap dimension. 
+ The similarities to the trends of the lower power cases are al so reflected in the IEADs to 
+the wafer as a function of phase angle, are shown in Fig. 12a.  While compared to the lower power 
+19 
+ 
+cases, the ion energies are higher overall due to the larger vo ltage amplitudes, the peak energies 
+still decline with increase in the phase angle from a maximum of about 4500 eV for φ = 0° to 3000 
+eV at φ =180°.  Comparing the cases with highest and lowest ion energi es (φ = 0° and φ = 180°), 
+the peak ion energy was reduced by approximately 85% at 1000 W and reduced by 38% for 2000 
+W.  This degree of ion energy control should enable some degree of customizing fluxes for energy-
+sensitive surface processes.  In particular, the distribution of high-energy ions compared to low 
+energy ions within the IEAD is sensitive to phase angle.   
+These trends for the IEADs are in contrast to the much lighter and more agile electrons, 
+whose EEADs to the wafer are shown in Fig. 12b.  The EEADs display the same general trends as 
+in the low power case.  The EEADs have high energies and narrow angular spreads for low values 
+of φ compared to thermal distributions due to the electric field reversal produced by VWT.  The 
+energies decrease and angular spread increases with increasing phase angle φ.  The φ = 0° case is, 
+again, a notable exception, having a lower peak energy than a larger phase angle.  This exception 
+correlates with the smaller EFR described above.  The suppresse d electric field reversal due to 
+geometric confinement of the sheath leads to reduced electron acceleration, resulting is the com-
+paratively lower electron energy.   
+ The IEADs, EEADs and fluxes for different phase angles for 200 0 W bias power were used 
+as input to otherwise identical MCFPM simulations.  The final etch profiles are shown in Fig. 13a. 
+Significant etch depths were reached for all phases, in deference to the P
+VWT = 1000 W cases where 
+an etch stop occurred due to excessive fluxes of polymer formin g radicals, or lack of polymer 
+sputtering ions, at large phase angle.  There are, however, significant differences in etch depth and 
+overall feature quality.  The φ = 0° case produces the deepest overall etch while having perhaps a 
+tolerable amount of bowing.  The φ = 45° case has less bowing but lower etch rate.  These trends 
+result from φ = 0° case having the higher ion energies (faster overall etch rate) while the φ = 45° 
+has a narrower ion angular distribution (less bowing), albeit at a lower energy.  Some component 
+of the narrower feature could be a result of the EEAD at φ = 45° being more energetic which 
+enables some non-negligible decrease in in-feature charging.  The shape of the EEAD is important 
+to moderately increasing etch rate and moderately modifying sid ewall slope through neutralizing 
+charge.  However, the final feat ure quality is dominated by the EAD of ions rather than the elec-
+trons.   
+ Analogous to the low power case, MCFPM simulations using synth etic thermal EEADs 
+20 
+ 
+were performed, and the resulting profiles are compared to etch profiles resulting from VWT pro-
+duced EEADs in Fig. 13b for φ = 0°, 90° and 180°.  In the φ = 0° and 180° cases the differences 
+between the profiles obtained with thermal and VWT EEADs are sm all and below the statistical 
+threshold discussed in Appendix A.  The profile obtained with t he VWT EEAD for φ  = 90° is 
+deeper with a similar amount of tapering compared to the thermal EEAD.  These trends result from 
+the EEADs onto the wafer for these conditions having the highest energy and lowest angular spread 
+for intermediate values of φ.  This correlation between the improvement of the final etched feature 
+and the energy and directionality of the electrons reinforces t he conclusion that these directional 
+electrons enhance the natural neutralization of charge that is produced by acceleration of thermal 
+electrons into the feature.  However, the properties of the EEADs do not dominate the shape of the 
+feature.  
+ 
+VI. Concluding Remarks 
+To investigate the consequences of voltage waveform tailoring (VWT) on etching of SiO
+2 
+using a capacitively coupled Ar/CF4/O2 plasma, computational investigations of the reactor scale 
+and feature scale processes were performed.  While applying 500 W at 80 MHz to the top electrode 
+with the goal of sustaining a constant plasma density, the bottom electrode was driven using VWT 
+composed of consecutive harmonics with a fundamental frequency of 1 MHz at powers of 1000 
+W and 2000 W.  The phase of the even harmonics φ was varied in order to generate electrical 
+asymmetry as well as electric field reversal in the bottom shea th.  It was found that changing φ 
+enables control of charged particle dynamics incident onto the wafer surface which in turn trans-
+lates to significant changes in etch profiles.  At low phase an gle the EAE as well as the EFR are 
+most significant, which leads to increased energy and direction ality of ions as well as electrons 
+onto the wafer.   
+These favorable distributions in energy and angle increase etch  rate by partially reducing 
+the negative effects of intra-feature charging.  The directional electrons are better able to reach the 
+lower echelons of the feature and partially neutralize positive  charges.  The higher energy ions 
+have larger rates of chemical s puttering while also being more able overcome the remaining de-
+flecting electric fields produced  by in-feature charging.  Overall, for otherwise equal processing 
+conditions and time, low φ cases produced higher etch rates and more favorable sidewall s lope.  
+For low bias power, the reduction in ion energy with large valu es of phase angle resulted in an 
+21 
+ 
+etch stop due to the large incident flux of polymerizing radicals.  At low bias power, having higher 
+ion energies, sputtering of the polymer enabled competitive etching even at high phase angle. 
+A key finding of this investigation is the VWT produced EEADs h aving large energy and 
+narrow angle do not produce the expected significant reductions of in-feature charging compared 
+to thermal EEADs.  The VWT produced EEADs did produce somewhat higher etch rates and lower 
+in-feature potentials.  However, the buildup of positive charge  in the feature accelerates thermal 
+electrons into the feature to energies commensurate with that of the positive potential.  The VWT 
+produced EEADs are also accelerated into the feature by this po sitive potential.  If the positive 
+potential is significantly larger than the average energy of the VWT produced EEAD, there is little 
+difference in feature properties between having thermal or VWT generated EEADs.  Both are 
+accelerated into the feature by the positive charge to sufficie nt energy to neutralize, in the steady 
+state, the incremental positive charge brought into the feature by ions. 
+Another key finding is the need for a systems perspective in process design and in employ-
+ing VWT in particular.  The results of this study showed that a t low power, the VWT generated 
+EEADs produced a beneficial effect, enabling higher etch rates for a given power compared to 
+conventional sinusoidal excitation.  Conversely, the same etch rate could be sustained at a lower 
+power.  We also found that this benefit was not universal.  At higher powers, we found that the 
+gap dimension (distance between wafer and top electrode) ultima tely limited the ability of VWT 
+to generate electric field reversal and energetic fluxes to the  wafer.  Low phase angle produces a 
+larger (more negative) DC bias, which thickens the sheath.  For a narrow gap CCP, the sheath may 
+consume a large fraction of the gap, which then interferes with the formation of EFR.  The funda-
+mental physics of VWT generated EEADs applies to a wide range of powers.  However, as with 
+many excitation schemes in plasma etching, the benefits of VWT are likely process dependent, 
+being sensitive to geometry, frequency, pressure and gas mixture.  
+In the ideal, one would like to tailor an IEAD to best produce the desired etch feature, and 
+then tune the feature profile by tailoring the EEAD.  Unfortunately, independently producing spec-
+ified IEAD and EEAD with the same waveform is difficult.  Changing the waveform to generate, 
+for example, the desired EEAD will also affect the IEAD.  There may be opportunity to separately 
+tailor the IEAD and EEAD by using binary-pulsed system.  The sy stem would consisted of two 
+separate waveforms alternately  applied, with one waveform optim ized to produce the desired 
+IEAD and the second to produce the desired EEAD. 
+22 
+ 
+ 
+Acknowledgements 
+ This work was supported by Samsung Electronics Ltd.  These res ults were also based upon 
+work supported by the U.S. Department of Energy, Office of Science, Office of Fusion Energy 
+Sciences under award number DE-SC0020232, and supported by the National Science Foundation 
+(PHY-2009219). 
+Conflict of Interest 
+ The authors have no conflicts  of interest to disclose. 
+Data Availability 
+ The data that support the findings of this study are available from the corresponding author 
+upon reasonable request. 
+Appendix A:  Statistical Variation in Predicted Feature Profiles 
+ The Monte-Carlo method employed in the MCFPM produces profiles  that are inherently 
+subject to statistical variations.  This is especially the case  when charging processes are included 
+which can act as a feedback loop which amplifies statistical va riations.  These variations result 
+from the sequence of random numbers that are used to initially generate particle trajectories to-
+wards the surface.  Quantitiatively different features are produced by changing the seed that is used 
+to initialize the random number ge nerators.  Even when keeping the same seeds, when executing 
+the simulation in a parallel computing environment, there are n early unavoidable differences in 
+sequencing of the particle trajectories tracked on different pr ocessors.  Different random number 
+generators are used for each par allel thread to minimize these sequencing issues, but they will 
+occur.   
+ To ensure the overall validity o f results produced when statistical variations occur, it is 
+imperative to verify that the r andom run-to-run variations are of significantly smaller magnitude 
+than the effects discussed.  Thi s includes the overall trends i n feature properties as a function of 
+phase angle φ as well as the isolated effects produced by surface charge neutralization by the inci-
+dent electron flux, perhaps most sensitive to these statistical variations. 
+ To assess the statistical variations, a series of identical si mulations was performed while 
+varying the random number seed.  These cases also include the i nherent statistical variations that 
+occur in the parallel comuting environment.  The resulting profiles for the φ = 0°, P
+VWT = 1000 W 
+23 
+ 
+series are shown in Fig. 14a for 15 minutes of etching.  The ma ximum difference from the mean 
+etch depth for this series is less than 5% of the total etch.  This variation is less than the change in 
+etch depth and profile shape produced by the change in IEADs as a function of φ observed in this 
+work.  Similar conclusions extend to variation between the profiles produced with VWT produced 
+and thermal EEADs.  
+ Statistical variations  of this type are not limited to numerical simulations but also occur in 
+actual etch processes, producing a certain degree of feature-to -feature non-uniformity.  This sta-
+tistical feature-to-feature variation results from the small si ze of features, which in turn produces 
+statistically different fluxes of reactant species into the fea ture.  A common approach to remedy 
+these unwanted statistical variations in HVM processes is over-etching.  In over-etching, a terminal 
+or etch stop layer is located at the desired final etch depth.  For any given process, the etch rate 
+into this layer is significantly lower than for the overlying substrate.  This means that once the stop 
+layer is reached during the process, vertical etching effective ly stops (or is significnatly slowed) 
+while etching of the tapered side walls continues.  Extending the etch process beyond this contact 
+time, over-etching, partially remedies some of the statistical variations in f eature profile by 
+straightening the sidewalls of the feature.   
+ A series of profiles are shown in Fig. 14b produced with different random number seeds, 
+analogous to Fig 14a, while etching to the stop layer and over- etching for a total of 30 minutes.  
+Through this over-etching, the variations in etch depth and profile are reduced.  Where applicable, 
+etch stop layers and over-etching can suppress the statistical run to run differences in feature prop-
+erties.   
+   
+24 
+ 
+[1] V. M. Donnelly and A. Kornblit, J. Vac. Sci. Technol. A 31, 050825 (2013). 
+[2] J. H. Kim, et al., Thin Solid Films 637, 43 (2017). 
+[3] K. J. Kanarik, S. Tan and R. A. Gottscho, J. Phys. Chem. Le tt. 9, 4814 (2018). 
+[4] G. S. Oehrlein and S. Hamaguchi, Plasma Sources Sci. Techno l. 27, 023001 (2018). 
+[5] H. Tanaka, M. Kido, K. Yahashi, M. Oomura, et al., Dig. Tec h. Pap. - Symp. VLSI Technol. 
+14–5 (2007). 
+[6] S. N. Hsiao, et al.,  Appl. Surf. Sci. 541, 148439 (2021). 
+[7] K. Ishikawa, et al.,  Jpn. J. Appl. Phys. 57, 06JA01 (2018). 
+[8] B. Wu, A. Kumar and S. Pamarthy J. Appl. Phys. 108, 51101 (2010). 
+[9] T. Iwase, et al., Jpn. J. Appl. Phys. 58, SE0802 (2019). 
+[10] M. Omura, et al., Jpn. J. Appl. Phys. 58, SEEB02 (2019). 
+[11] E. G. Shustin, J. Com mun. Technol. Electron. 62, 454 (2017). 
+[12] H. W. Tak et al., Appl. Surf. Sci. 600, 154050 (2022). 
+[13] B. R. Rogers and T. S. Cale, Vacuum 65, 267 (2002). 
+[14] I. Adamovich, et al J. Phys. D. Appl. Phys. 50, 323001 (2017). 
+[15] R. Sahu, A. Tropina and R. Miles, Phys. Plasmas 29, 040701 (2022). 
+[16] M. Klich, et al., Plasm a Sources Sci. Technol. 31, 045014 (2022). 
+[17] P. Hartmann, et al., J. Phys. D. Appl. Phys.  54, 255202 (2021). 
+[18] J. Schulze, et al., J. Phys. D. Appl. Phys. 41, 105214 (2008). 
+[19] B. Radjenović and M. Radmilović-Radjenović, Engineering 6, 1 (2014). 
+[20] B. M. Radjenović, M. D. Radmilović-Radjenović and Z. L. Pe trović IEEE Trans. Plasma 
+Sci. 36, 874 (2008). 
+[21] G. S. Hwang, J. Vac. Sci. Technol. B. 15, 70 (1997). 
+[22] P. Zhang, L. Zhang and K. Lv, Plasma Chem. Plasma Process. 40, 1605 (2020). 
+[23] P. Zhang, L. Zhang and L. Xu, Plasma Process. Polym. 17, e2000014 (2020). 
+[24] H. Jansen, et al., Microelectron. Eng. 35, 45 (1997). 
+[25] C. Han, et al., Semicond. Sci. Technol. 35, 045003 (2020). 
+[26] F. Krüger, S. Wilczek, T. Mussenbrock and J. Schulze, Plas ma Sources Sci. Technol. 28, 
+75017 (2019). 
+[27] S. Brandt, et al., Plasma Sources Sci. Technol. 28, 095021 (2019). 
+[28] U. Czarnetzki, D. Luggenhölscher and H. F. Döbele, Plasma Sources Sci. Technol. 8, 230 
+(1999). 
+[29] Y. X. Liu, et al., Appl. Phys. Lett. 101 , 114101 (2012). 
+[30] S. Sharma and M. M. Turner, J. Phys. D. Appl. Phys. 47 285201 (2014). 
+[31] 
+M. Wang and M. J. Kushner, J. Appl. Phys. 107, 023309 (2010). 
+[32] J. Wang, S. Dine, J.-P. Booth and E. V. Johnson J. Vac. Sci. Technol. A 37, 021303 (2019). 
+[33] B. G. Heil, U. Czarnetzki, R. P. Brinkmann and T. Mussenbrock, J. Phys. D. Appl. Phys. 
+25 
+ 
+41, 165202 (2008). 
+[34] J. Schulze, E. Schüngel and U. Czarnetzki, J. Phys. D. App l. Phys. 42, 092005 (2009). 
+[35] M. J. Kushner, J. Phys. D. Appl. Phys. 42, 194013 (2009). 
+[36] S. H. Song and M. J. Kushner, Plasma Sources Sci. Technol.  21, 055028 (2012). 
+[37] A. V. Vasenkov, X. Li, G. S.  Oehrlein and M. J. Kushner, J. Vac. Sci. Technol. A. 22, 511 
+(2004). 
+[38] A. V. Vasenkov and M. J. Kushner, J. Appl. Phys. 95, 834 (2004). 
+[39] P. Tian and M. J. Kushner, Plasma Sources Sci. Technol. 24, 034017 (2015). 
+[40] S. Huang, et al, J. Vac. Sci. Technol. A 37, 031304 (2019). 
+[41] Y. Zhang, et al., J. Vac. Sci. Technol. A Vacuum, Surfaces , Film. 35, 021303 (2016). 
+[42] C. M. Huard, S. Sriraman, A. Paterson and M. J. Kushner J.  Vac. Sci. Technol. A Vacuum, 
+Surfaces, Film. 36, 06B101 (2018). 
+[43] J. K. Kim, et al., J. Vac. Sci. Technol. A 31, 061302 (2013). 
+[44] J. K. Kim, S. H. Lee, S. Il Cho and G. Y. Yeom, J. Vac. Sc i. Technol. A 33, 021303 (2014). 
+[45] U. Czarnetzki, J. Schulze, E. Schüngel and Z. Donkó, Plasm a Sources Sci. Technol. 20, 
+024010 (2011). 
+ 
+  
+26 
+ 
+Figures Captions 
+1. Schematics of the reactor.  a) The two frequency CCP has the VWT power applied to the lower 
+electrode and a sinusoidal, 80 MHz waveform applied to the top.   b) Electrical schematic of 
+the system.  From F. Kruger et al, Plasma Sources Sci. Technol.  30, 085002 (2021).  Repro-
+duced by permission of IOP Publishing Ltd. 
+2. Voltage waveforms resulting from different phase angles, φ = 0° (top) to φ = 180° (bottom).  
+The time scale is in units of the period of the fundamental frequency. 
+3. Initial geometry used in for feature profile simulations.  A 700 nm mask defines a 100 nm 
+opening to 3000 nm thick SiO2.  The simulations are for trench etching, performed in 3-dimen-
+sions having a finite depth. 
+4. Voltage amplitudes for the VWT bias (Vbias) and top power (Vtop), and DC self-bias as a func-
+tion of phase angle.  a) PVWT = 1000 W and b) PVWT = 2000 W. 
+5. Vertical electric field component as a function of time and dis tance from wafer for P VWT = 
+1000 W for phase angles of a) 0°, b) 45°, c) 90°, d) 135° and e) 180°.  The shape of the voltage 
+waveform applied to the bottom electrode is shown in each image.  
+6. Properties of ions and electrons incident onto the wafer for P VWT = 1000 W.  a) IEAD and b) 
+EEAD for phase angles of φ = 0°, 45°, 90°, 135° and 180°.  The distributions are separate ly 
+normalized and plotted on a log-scale over 2 decades.  c) Mean ion energy as a function of 
+phase angle φ. 
+7. Fluxes of reactive species onto the wafer as a function of phas e angle φ.  a) Neutrals and b) 
+ions. 
+8. Feature properties for PVWT = 1000 W following 15 minutes of etching  a) Feature profiles for 
+different phase angles ( φ = 0°, 45°, 90°, 135° and 180°).  b) Comparison of etch result and 
+electric potential for (left) self-consistent VWT produced EEAD and (right) synthetic thermal 
+EEAD.  The potentials are separately normalized with the maximu m values indicated at the 
+top of the images. 
+9. Spatial distribution of average electron energies incident on t he surface of the feature.  The 
+feature properties are for PVWT = 1000 W and φ = 0° after 15 minutes of etching.  Results are 
+shown for initial EEADs produced with VWT and for thermal electrons having a temperature 
+27 
+ 
+of 3 eV.   a) When including acceleration in electric fields pr oduced by feature charging.  b) 
+Without acceleration due to feature charging.  The view is looking obliquely into the 3-dimen-
+sional feature having reflective boundary conditions front-and-back. 
+10. Vertical electric field component as a function of time and dis tance from wafer for P VWT = 
+2000 W for phase angles of a) 0°, b) 45°, c) 90°, d) 135° and e) 180°.  The shape of the voltage 
+waveform applied to the bottom electrode is shown in each image. 
+11. Electron density for P VWT = 2000 W for phase angle φ  of a) 0°, b) 90° and c)  180°).  The 
+densities are plotted on a log-scale over 2-decades. 
+12. Energy and angular distributions for charged particles incident onto the wafer for PVWT = 2000 
+W for phase angles of φ = 0°, 45°, 90°, 135° and 180°.  a) Ions and b) electrons. The distribu-
+tions are separately normalized and plotted on a log-scale over 2 decades. 
+13. Feature properties for PVWT = 2000 W following 15 minutes of etching  a) Feature profiles for 
+different phase angles (φ = 0°, 45°, 90°, 135° and 180°).  b) Comparison of profiles obt ained 
+with VWT generated EEADs and synthetic thermal electron distrib utions for phase angles φ 
+of  0°, 90° and 180°. 
+14. Statistical run-to-run variation of the final etch profiles for the PVWT = 1000 W and φ = 0° case.  
+a) 15 min run and b) 30 min to produce over etch into the stop layer.  For each series of profiles, 
+each case had a different seed for the random number generators, in addition to having the 
+inherent statistical variations in the parallel computing environment.  
+ 
+Kruger et al,
+Fig. 1 of 14
+Kruger et al,
+Fig. 2 of 14
+
+Kruger et al,
+Fig. 3 of 14
+
+Kruger et al,
+Fig. 4 of 14
+
+Kruger et al,
+Fig. 5 of 14
+
+Kruger et al,
+Fig. 6 of 14
+
+Kruger et al,
+Fig. 7 of 14
+
+Kruger et al,
+Fig. 8 of 14
+
+Kruger et al,
+Fig. 9 of 14
+
+Kruger et al,
+Fig. 10 of 14
+
+Kruger et al,
+Fig. 11 of 14
+
+Kruger et al,
+Fig. 12 of 14
+
+Kruger et al,
+Fig. 13 of 14
+
+Kruger et al,
+Fig. 14 of 14
