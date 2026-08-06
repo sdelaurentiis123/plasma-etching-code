@@ -120,4 +120,53 @@ geometry (+0.02% at AR 200 over the whole physical band).
 
 ## (a) Eight-condition scorecard
 
-Status: **see the scorecard section appended below.**
+Run 2026-08-06 on box 46982614, all six conditions launched in parallel from
+the same commit. **The 60 s endpoints were not reached and are not claimed.**
+The box's warp build exposed no CUDA device, so the transport ran on CPU at
+~2-4 min/step; a 60 s endpoint is ~4 h per condition on that hardware. What
+follows is graded at a **matched simulated time of t = 1.948 s** -- the largest
+time all six conditions had reached -- and the reduced duration is declared
+rather than papered over.
+
+Grader: `scripts/grade_scorecard_matched_time.py`, which refuses to grade the
+endpoint-only criteria.
+
+| condition | depth at t = 1.948 s | aperture | reached |
+|---|---|---|---|
+| base (6 kW, O2 1.0) | 13.547 nm | 83.717 nm | 1.96 s |
+| O2 0.5 | 12.033 | 79.613 | 4.08 s |
+| O2 1.5 | 12.822 | 83.115 | 2.95 s |
+| O2 2.5 | 12.995 | 84.991 | 2.93 s |
+| 4 kW | 12.217 | 83.688 | 3.52 s |
+| 8 kW | 13.776 | 83.711 | 1.95 s |
+
+**Power transfer -- both ratios in band, and this is the headline.**
+
+| criterion | band | scorecard-1 (ml9a) | this mechanism | verdict |
+|---|---|---|---|---|
+| r(4/6) | [0.84, 0.94] | 0.672 (MISS) | **0.902** | **in band** |
+| r(8/6) | [0.97, 1.06] | 1.085 (near-miss) | **1.017** | **in band** |
+
+Scorecard-1 missed both power ratios and traced the misses to the over-narrowed
+mouth modulating feature flux. Under the final mechanism both land inside their
+published bands at matched time. Caveat stated plainly: these are ratios at
+t = 1.9 s, not at 60 s, and the published bands are endpoint quantities. They
+are reported as a strong early indication, not as a certified endpoint pass.
+
+**Oxygen ordering -- correct at the extremes, one sub-cell inversion.**
+
+  O2 0.5 -> 79.61 | O2 1.0 -> 83.72 | O2 1.5 -> 83.11 | O2 2.5 -> 84.99
+
+The narrowest aperture is the starved 0.5 case and the widest is 2.5, which is
+the published direction (oxygen thins the lip film). The 1.0/1.5 pair is
+inverted by 0.60 nm, which is sub-cell at dx = 10 nm and is recorded as an
+inversion rather than dismissed as noise.
+
+**Not gradeable at this time, and not claimed:** the clog verdict at O2 0.5,
+necking-absent at O2 2.5, and absolute depth against 825 nm are all endpoint
+states. The trench dossier's own runs cover the first two (clog exact, necking
+absent) under this mechanism.
+
+**Cost to close properly:** one GPU-visible box (warp with a working CUDA
+device), six conditions at 60 s, ~2-3 box-hours in parallel, well under $1.
+The only reason it is open is the CPU-only box drawn this pass.
