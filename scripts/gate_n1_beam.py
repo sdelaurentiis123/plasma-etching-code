@@ -46,8 +46,11 @@ from petch.mixed_layer import (  # noqa: E402
 # Gray 1993 beam conditions (Kwon Fig. 3.4).
 BEAM_ENERGY_EV = 350.0
 ION_FLUX = 1.0e19  # m^-2 s^-1; only the RATIO F/Ar+ is observable.
+# Extended past 500 because the transplanted s0 = 0.02 (Gray Table 5-10) puts
+# saturation near F/Ar+ ~ 1e4: at R = 500 the coverage is only theta_F = 0.83,
+# so a "plateau" read there understates the true saturation yield.
 RATIOS = (0.0, 1.0, 2.0, 5.0, 10.0, 20.0, 27.0, 40.0, 60.0, 100.0,
-          150.0, 200.0, 300.0, 500.0)
+          150.0, 200.0, 300.0, 500.0, 1000.0, 2000.0, 5000.0, 20000.0)
 
 # Digitized Gray 1993 curve (Kwon Fig. 3.4; [VERIFY] against the original
 # JVST B figure -- read off the replot).

@@ -137,16 +137,27 @@ def test_normal_incidence_thermalizes_at_the_struck_face():
     assert per_face[4] > 0.0
 
 
-def test_gray_sticking_pair_is_declared_not_half_transplanted():
-    """Gate: Gray's printed SiO2 sticking (0.02) is NOT landed alone.
+def test_gray_sticking_pair_is_transplanted_whole():
+    """Gate: Gray's co-regressed (s0, B0) pair is carried WHOLE, not split.
 
-    It is half of a co-regressed (s0, B0) pair (Gray 1993 p.246); landing the
-    scalar alone moves the measured half-rise from 14x low to 3.9x high.  This
-    gate pins the deliberate choice so a future pass must transplant the pair
-    (Kwon/Sawin E1) rather than silently adopt the scalar.
+    RESTATED 2026-08-06 (the condition its predecessor set is now met).  The
+    predecessor pinned s0 = 1.0 because B0 had no counterpart in this layer;
+    beta_e = 0.053(sqrt(E) - sqrt(4)) IS that counterpart and is now the
+    complex-channel yield, so the pair can be carried together:
+
+      Gray, MIT thesis 1993 p.246 (OCR 1460-1466): "B, is regressed from the
+      intercept of a plot of 1/C versus 1/R, and s, is derived from the
+      slope... the available etching yield data could be well represented by
+      allowing B, to vary, while setting s,=0.2 and 0.02 for the cases of
+      silicon and SiO, etching respectively."
+
+    Both halves are asserted so neither can be adopted alone in future.
     """
-    from petch.mixed_layer import _THERMAL_F_STICKING
-    assert _THERMAL_F_STICKING == 1.0
+    from petch.mixed_layer import _THERMAL_F_STICKING, _complex_yield
+    assert _THERMAL_F_STICKING == 0.02          # s0, Gray Table 5-10 (SiO2)
+    # B0 partner, Gray Table 5-10 parenthetical column at the tabulated points
+    for energy, b0 in ((20.0, 0.13), (350.0, 0.85), (2000.0, 2.25)):
+        assert float(_complex_yield(energy)) == pytest.approx(b0, abs=0.06)
 
 
 # ---------------------------------------------------------------------------

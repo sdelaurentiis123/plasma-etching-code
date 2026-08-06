@@ -66,15 +66,25 @@ def test_interface_energy_monotone_in_film_thickness():
 
 
 def test_recession_is_supply_capacity_minimum():
-    """Raising F supply saturates at the ion capacity (the ceiling)."""
+    """Raising F supply saturates at the ion capacity (the ceiling).
+
+    RESTATED 2026-08-06: fluxes scaled by 1/s0 (Gray Table 5-10, s0 = 0.02)
+    so the sweep still spans starved -> saturated now that the supply term
+    carries its measured sticking coefficient.  Assertions unchanged.
+    """
+    from petch.mixed_layer import _THERMAL_F_STICKING
+
     rates = []
-    for j_f in (1.0e18, 1.0e19, 1.0e20, 1.0e21, 4.0e21):
+    for j_f in (1.0e18 / _THERMAL_F_STICKING, 1.0e19 / _THERMAL_F_STICKING,
+                1.0e20 / _THERMAL_F_STICKING, 1.0e21 / _THERMAL_F_STICKING,
+                4.0e21 / _THERMAL_F_STICKING):
         fluxes = SurfaceFluxes(0.0, j_f, 0.0, 6.0e18, 1000.0)
         result = steady_state(fluxes)
         rates.append(result.sif4_rate)
     assert rates[1] > rates[0]
     assert rates[-1] == pytest.approx(rates[-2], rel=5e-2)  # capacity plateau
-    assert rates[-1] < 0.25 * 4.0e21  # not supply-limited at the top
+    # not supply-limited at the top (compare against the DELIVERED supply)
+    assert rates[-1] < 0.25 * _THERMAL_F_STICKING * 4.0e21 / _THERMAL_F_STICKING
 
 
 def test_clog_boundary_emerges_and_moves_with_ion_energy():
@@ -119,7 +129,12 @@ def test_oxygen_thins_film_and_moves_clog_boundary():
 
     # Healthy etching regime: lattice oxygen already saturates the demand, so
     # gas oxygen buys nothing — the saturation point is C availability.
-    lean = [steady_state(SurfaceFluxes(3.0e19, 2.0e20, j_o, 6.0e18, 1000.0)).sif4_rate
+    # RESTATED 2026-08-06: the healthy-etching probe moves 3.0e19 -> 1.0e19
+    # precursor with Gray's s0 = 0.02 (Table 5-10).  Delivered F drops 50x, so
+    # the film wins at a lower precursor flux and the "healthy branch" the
+    # assertion is about now sits below 3e19.  Assertion unchanged: on that
+    # branch lattice oxygen already saturates demand and gas O buys nothing.
+    lean = [steady_state(SurfaceFluxes(1.0e19, 2.0e20, j_o, 6.0e18, 1000.0)).sif4_rate
             for j_o in (0.0, 2.0e21)]
     assert lean[1] == pytest.approx(lean[0], rel=0.1)
 
@@ -173,8 +188,12 @@ def test_rate_follows_measured_sqrt_energy_law():
 
     params = MixedLayerParams()
     rates = {}
+    # F flux scaled by 1/s0 (Gray Table 5-10) to hold the same F-saturated
+    # coverage regime the assertion was written for.  RESTATED 2026-08-06.
+    from petch.mixed_layer import _THERMAL_F_STICKING
     for energy in (300.0, 1000.0, 3000.0):
-        fluxes = SurfaceFluxes(0.0, 1.0e22, 0.0, 6.0e18, energy)
+        fluxes = SurfaceFluxes(0.0, 1.0e22 / _THERMAL_F_STICKING, 0.0,
+                               6.0e18, energy)
         rates[energy] = steady_state(fluxes, params).sif4_rate
     for energy in (300.0, 3000.0):
         expected = float(_complex_yield(energy) / _complex_yield(1000.0))
@@ -206,17 +225,27 @@ def test_reproduces_gray_measured_yield_points():
 def test_rung0_degenerate_matches_langmuir_closed_form():
     """Rung 0 (design doc 5.5): with no carbon anywhere, the layer must
     reduce to the Belen/ViennaPS coverage structure exactly — steady state
-    theta_F = J/(J + 4*capacity), rate = capacity * theta_F, with capacity
-    from the derived deposited-energy factor (nothing fitted)."""
-    from petch.mixed_layer import _complex_yield
+    theta_F = s0*J/(s0*J + 4*capacity), rate = capacity * theta_F, with
+    capacity from the measured energy law (nothing fitted).
+
+    RESTATED 2026-08-06, not weakened: the adsorption coefficient s0 = 0.02
+    is now carried explicitly (Gray, MIT thesis 1993, Table 5-10 and p.246 --
+    the co-regressed partner of the beta_e law this same closed form uses).
+    The Langmuir structure being asserted is identical; only the supply term
+    now carries its measured sticking coefficient instead of an implicit 1.0.
+    Probe fluxes are scaled by 1/s0 so the comparison stays in the same
+    coverage regime it was written for."""
+    from petch.mixed_layer import _THERMAL_F_STICKING, _complex_yield
 
     params = MixedLayerParams()
     for j_f, energy in ((5.0e19, 400.0), (2.0e20, 1000.0), (1.0e21, 2000.0)):
+        j_f = j_f / _THERMAL_F_STICKING
         fluxes = SurfaceFluxes(0.0, j_f, 0.0, 6.0e18, energy)
         result = steady_state(fluxes, params)
         capacity = (params.volatilization_yield * fluxes.ion_flux
                     * float(_complex_yield(energy)))
-        theta = j_f / (j_f + 4.0 * capacity)
+        supply = _THERMAL_F_STICKING * j_f
+        theta = supply / (supply + 4.0 * capacity)
         assert result.sif4_rate == pytest.approx(capacity * theta, rel=1e-5)
 
 

@@ -58,7 +58,11 @@ def _beam_yield(flux_ratio, cf2_ratio=0.0, energy_eV=BEAM_ENERGY_EV):
 
 @pytest.fixture(scope="module")
 def beam_curve():
-    return {r: _beam_yield(r) for r in (0.0, 5.0, 40.0, 500.0)}
+    # Range extended past 500 on 2026-08-06: with Gray's co-regressed
+    # s0 = 0.02 (Table 5-10) saturation sits near F/Ar+ ~ 1e4, so a "last
+    # decade" read at 500 samples the rising limb, not the plateau.  The
+    # assertions (monotone, saturating) are unchanged.
+    return {r: _beam_yield(r) for r in (0.0, 5.0, 40.0, 500.0, 5000.0, 50000.0)}
 
 
 def test_n1_yield_is_monotone_and_saturating(beam_curve):
@@ -66,9 +70,13 @@ def test_n1_yield_is_monotone_and_saturating(beam_curve):
     ratios = sorted(beam_curve)
     values = [beam_curve[r] for r in ratios]
     assert all(b >= a for a, b in zip(values, values[1:])), values
-    # Saturation: the last decade must add less than the first.
-    early = values[1] - values[0]
-    late = values[-1] - values[-2]
+    # Saturation: the last decade must add less than the preceding decade.
+    # RESTATED 2026-08-06 -- with Gray's s0 = 0.02 the 0 -> 5 interval sits
+    # below the rise, so it is no longer a meaningful "first decade"; the
+    # assertion now compares two true decades (500 -> 5e3 against 5e3 -> 5e4),
+    # which is the saturation statement it always intended.
+    early = values[-3] - values[-4]          # 500 -> 5e3
+    late = values[-1] - values[-2]           # 5e3 -> 5e4
     assert late < early, (early, late)
 
 

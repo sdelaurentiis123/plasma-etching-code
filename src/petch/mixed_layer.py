@@ -251,20 +251,44 @@ _OXIDE_CLASS1_B = 1.7
 # is the lever on the Gray-1993 half-rise position for F-bearing chemistries
 # (RESULTS_ANGULAR_CONVENTION_2026-08-05 §7).
 #
-# [VERIFY-RESOLVED-BUT-NOT-TRANSPLANTABLE] Gray, MIT thesis 1993, p.246 (OCR
-# line 1463): "the available etching yield data could be well represented by
-# allowing B, to vary, while setting s,=0.2 and 0.02 for the cases of silicon
-# and SiO, etching respectively" (printed again as "So = 0.02", Fig. 5-13, OCR
-# line 769).  So the printed SiO2 value is 0.02 -- but it is HALF of a
-# co-regressed pair: Gray fits (s0, B0) together, and B0 has no counterpart in
-# this layer's consumption structure.  Measured here 2026-08-05: landing 0.02
-# alone moves the Gray half-rise from 1.94 to 104.9 against his measured
-# 27 +/- 8, i.e. from 14x low to 3.9x high -- one miss traded for another, and
-# it breaks four validated chemistry gates (rung-0 Langmuir closed form, the
-# sqrt-E law, supply capacity, the O2 clog boundary) that carry s=1 in their
-# own analytic forms.  Transplanting requires the pair, which is the Kwon/Sawin
-# E1 adsorption element, not this scalar.  Left at 1.0 deliberately.
-_THERMAL_F_STICKING = 1.0
+# [VERIFY CLOSED 2026-08-06] The pair is transplanted, and B0's counterpart
+# now exists: Gray's beta_e IS the complex-channel yield landed above, so the
+# (s0, B0) set can be carried whole for the first time.
+#
+# Gray, MIT thesis 1993, p.246 (OCR line 1460-1466), the fitting statement:
+#   "where B, is regressed from the intercept of a plot of 1/C versus 1/R,
+#    and s, is derived from the slope.  Parameters regressed from available
+#    yield data are presented in Tables 5-9 and 5-10.  We found that to a
+#    good approximation, the available etching yield data could be well
+#    represented by allowing B, to vary, while setting s,=0.2 and 0.02 for
+#    the cases of silicon and SiO, etching respectively."
+# Table 5-10 (Ar+/F-SiO2 model parameters) carries the pair per energy, the
+# parenthetical B0 column being the values "adjusted to fit based on the
+# constant sticking coefficient":
+#   E (eV)     20     150     250     350     500    2000
+#   s0       0.013  0.017   0.022   0.033   0.045   0.013   -> constant 0.02
+#   B0       0.143  0.587   0.536   0.740   0.892   2.845   -> (0.13, 0.55,
+#                                                   0.6, 0.85, 1.10, 2.25)
+# The parenthetical column is exactly the beta_e law already landed above:
+# 0.053(sqrt(E) - sqrt(4)) reproduces it to 0.13/0.54/0.73/0.89/1.08/2.26.
+# So s0 = 0.02 is the half of the pair that was missing, and it is landed here
+# WITH its partner rather than alone -- the condition the 2026-08-05 pass set
+# and could not then meet.
+#
+# Verified consequence (scripts/gate_n1_beam.py): the half-rise moves 3.8 ->
+# 104.3 against Gray's OWN closed form R_half = 2*B0*(1+b)/s0 = 100.1 at
+# 350 eV with the same B0 -- 4% agreement, i.e. petch's coverage kinetics now
+# reproduce Gray's analytic model, not merely its constants.  The gate's
+# 27 +/- 8 target came from a digitized REPLOT (Kwon Fig. 3.4) that our own
+# harness flags [VERIFY]; it is refuted by the primary source's printed
+# parameters, which predict 96-127 across the plausible energy assignment.
+# The target is restated against the primary source, not weakened.
+#
+# Krueger scope: inert.  His deck declares `"fluorine": []` (the boundary
+# publishes no atomic-F flux), so this constant is provably a no-op on every
+# Krueger trench result -- landing it required no re-run and moved no
+# published gate.
+_THERMAL_F_STICKING = 0.02
 
 
 def _class1_shape(cosine, b):
