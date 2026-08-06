@@ -142,10 +142,14 @@ endpoint-only criteria.
 
 **Power transfer -- both ratios in band, and this is the headline.**
 
-| criterion | band | scorecard-1 (ml9a) | this mechanism | verdict |
-|---|---|---|---|---|
-| r(4/6) | [0.84, 0.94] | 0.672 (MISS) | **0.902** | **in band** |
-| r(8/6) | [0.97, 1.06] | 1.085 (near-miss) | **1.017** | **in band** |
+| criterion | band | scorecard-1 (ml9a) | t = 1.948 s | t = 2.396 s | verdict |
+|---|---|---|---|---|---|
+| r(4/6) | [0.84, 0.94] | 0.672 (MISS) | **0.902** | **0.903** | **in band, stable** |
+| r(8/6) | [0.97, 1.06] | 1.085 (near-miss) | **1.017** | **1.017** | **in band, stable** |
+
+Graded at two independent matched times as a drift check: both ratios move by
+less than 0.002 between them, so the result is not an artifact of the instant
+chosen.
 
 Scorecard-1 missed both power ratios and traced the misses to the over-narrowed
 mouth modulating feature flux. Under the final mechanism both land inside their
@@ -155,12 +159,14 @@ are reported as a strong early indication, not as a certified endpoint pass.
 
 **Oxygen ordering -- correct at the extremes, one sub-cell inversion.**
 
-  O2 0.5 -> 79.61 | O2 1.0 -> 83.72 | O2 1.5 -> 83.11 | O2 2.5 -> 84.99
+  t = 1.948 s:  O2 0.5 -> 79.61 | 1.0 -> 83.72 | 1.5 -> 83.11 | 2.5 -> 84.99
+  t = 2.396 s:  O2 0.5 -> 77.51 | 1.0 -> 82.78 | 1.5 -> 82.16 | 2.5 -> 84.55
 
 The narrowest aperture is the starved 0.5 case and the widest is 2.5, which is
 the published direction (oxygen thins the lip film). The 1.0/1.5 pair is
-inverted by 0.60 nm, which is sub-cell at dx = 10 nm and is recorded as an
-inversion rather than dismissed as noise.
+inverted by 0.60 nm at the first matched time and 0.63 nm at the second, which
+is sub-cell at dx = 10 nm but persistent across both, so it is recorded as a
+real inversion rather than dismissed as noise.
 
 **Not gradeable at this time, and not claimed:** the clog verdict at O2 0.5,
 necking-absent at O2 2.5, and absolute depth against 825 nm are all endpoint
