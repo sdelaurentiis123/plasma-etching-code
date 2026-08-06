@@ -147,3 +147,90 @@ def test_gray_sticking_pair_is_declared_not_half_transplanted():
     """
     from petch.mixed_layer import _THERMAL_F_STICKING
     assert _THERMAL_F_STICKING == 1.0
+
+
+# ---------------------------------------------------------------------------
+# E8 completion: the returned weight must reach the etch front by DIFFUSING,
+# not by sitting where it thermalized.  petch already solves multi-bounce
+# diffuse re-emission for plasma-sourced neutrals (H = D + B(1-s)H); the gather
+# writes E8 weight into the same per-species ledger that becomes D, so the
+# thermalized radicals redistribute at their own sticking once the option is
+# plumbed to the feature step.  These gates pin that wiring and its
+# conservation.  See scripts/e8_coupled_floor_scan.py and
+# RESULTS_E8_COUPLED_2026-08-05.md.
+
+def test_feature_step_accepts_thermalized_radical_return():
+    """The option must reach the gather through advance_feature_step_3d."""
+    import inspect
+    from petch.feature_step_3d import advance_feature_step_3d, solve_feature_3d
+    for entry in (advance_feature_step_3d, solve_feature_3d):
+        assert "thermalized_radical_return" in inspect.signature(entry).parameters
+
+
+def test_returned_weight_enters_the_neutral_ledger_conservatively():
+    """Gather-side injection conserves rate exactly: returned rate == share x
+    thermalized rate, deposited as flux density on the faces that thermalized."""
+    from tests.test_boundary_transport_3d import _boundary, _flat_unit_plane
+    from petch.boundary_transport_3d import gather_boundary_state_ballistic_3d
+
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    normals = np.tile([0.0, 0.0, 1.0], (2, 1))
+    common = dict(
+        verts=verts, faces=faces, areas=areas, centroids=centroids,
+        normals=normals, source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, face_quadrature_points=3, device="cpu",
+        grazing_ion_reflection={})
+    role = {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"}
+
+    def _gather(**extra):
+        return gather_boundary_state_ballistic_3d(
+            _boundary(), role, common["verts"], common["faces"],
+            common["areas"], common["centroids"], common["normals"],
+            source_bounds=common["source_bounds"], source_z=common["source_z"],
+            mesh_length_unit_m=common["mesh_length_unit_m"],
+            face_quadrature_points=common["face_quadrature_points"],
+            device=common["device"],
+            grazing_ion_reflection=common["grazing_ion_reflection"], **extra)
+
+    off = _gather()
+    share = 0.4
+    on = _gather(thermalized_radical_return={"CF2": share})
+    diagnostic = off.hit_probability["Ar+:hot_neutral"]
+    per_face = np.asarray(diagnostic["thermalized_rate_per_face"], dtype=float)
+    added = (np.asarray(on.surface_fluxes.neutral_flux_m2_s["CF2"], dtype=float)
+             - np.asarray(off.surface_fluxes.neutral_flux_m2_s["CF2"],
+                          dtype=float))
+    # The cascade forms rate as flux x MESH area, so the returned flux density
+    # is per_face / mesh area -- the same convention the primary populations
+    # carry.  Rate in == rate out, exactly.
+    mesh_area = np.asarray(areas, dtype=float)
+    returned_rate = float((added * mesh_area).sum())
+    assert returned_rate == pytest.approx(share * float(per_face.sum()),
+                                          rel=1e-12)
+    assert np.all(added >= 0.0)
+    # And the return is strictly a source: no face loses flux.
+    assert float(added.sum()) > 0.0
+
+
+def test_zero_share_is_bitwise_inert():
+    """Default-off and explicit zero must not move a single bit."""
+    from tests.test_boundary_transport_3d import _boundary, _flat_unit_plane
+    from petch.boundary_transport_3d import gather_boundary_state_ballistic_3d
+
+    verts, faces, areas = _flat_unit_plane()
+    centroids = verts[faces].mean(axis=1)
+    normals = np.tile([0.0, 0.0, 1.0], (2, 1))
+    role = {"Ar+": "energetic_bombardment", "CF2": "neutral_reactant"}
+    kwargs = dict(
+        source_bounds=(0.0, 1.0, 0.0, 1.0), source_z=1.0,
+        mesh_length_unit_m=1e-6, face_quadrature_points=3, device="cpu",
+        grazing_ion_reflection={})
+    off = gather_boundary_state_ballistic_3d(
+        _boundary(), role, verts, faces, areas, centroids, normals, **kwargs)
+    zero = gather_boundary_state_ballistic_3d(
+        _boundary(), role, verts, faces, areas, centroids, normals,
+        thermalized_radical_return={"CF2": 0.0}, **kwargs)
+    assert np.array_equal(
+        np.asarray(off.surface_fluxes.neutral_flux_m2_s["CF2"]),
+        np.asarray(zero.surface_fluxes.neutral_flux_m2_s["CF2"]))

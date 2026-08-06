@@ -3343,7 +3343,7 @@ def gather_boundary_state_ballistic_3d(
         points=wp.array(verts.astype(np.float32), dtype=wp.vec3, device=selected_device),
         indices=wp.array(faces.astype(np.int32).ravel(), dtype=wp.int32, device=selected_device))
     source_area = (bounds[1] - bounds[0]) * (bounds[3] - bounds[2])
-    neutral_flux = {}; energetic_flux = []; hit_probability = {}; escape_probability = {}
+    neutral_flux = {}; energetic_flux = []; hit_probability = {}; escape_probability = {}; thermalized_return_flux = {}
     face_count = faces.shape[0]; point_count = face_quadrature_points
     for species in boundary.species:
         velocity = np.asarray(species.velocity_sqrt_eV, dtype=float).copy()
@@ -3485,14 +3485,24 @@ def gather_boundary_state_ballistic_3d(
                                 thermalized_radical_return).items():
                             if float(share) == 0.0:
                                 continue
+                            # Accumulate separately and merge after the species
+                            # loop: writing into neutral_flux here is lost when
+                            # the target species is gathered later in the loop
+                            # (its own branch assigns, not accumulates).
                             add = float(share) * per_face_flux
-                            if target in neutral_flux:
-                                neutral_flux[target] = (
-                                    np.asarray(neutral_flux[target],
-                                               dtype=float) + add)
-                            else:
-                                neutral_flux[target] = add
+                            thermalized_return_flux[target] = (
+                                thermalized_return_flux.get(target, 0.0) + add)
             energetic_flux.append(primary)
+    # E8 merge: the thermalized return is a source in the SAME per-species
+    # neutral ledger that the diffuse radiosity solve consumes as its direct
+    # term, so returned radicals re-emit and diffuse at their own published
+    # sticking (Huang sec. 6.4.3) rather than sitting where they thermalized.
+    for target, add in thermalized_return_flux.items():
+        if target in neutral_flux:
+            neutral_flux[target] = (
+                np.asarray(neutral_flux[target], dtype=float) + add)
+        else:
+            neutral_flux[target] = add
     return BoundaryTransport3DResult(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),
         hit_probability=hit_probability, escape_probability=escape_probability,
