@@ -1,0 +1,104 @@
+{
+  "scale": "demonstrator (geometric transfer, static mask)",
+  "cases": [
+    {
+      "declared": {
+        "sigma_nm": 3.0,
+        "correlation_length_nm": 15.0,
+        "roughness_exponent": 0.6
+      },
+      "beam_sigma_theta_deg": 25.0,
+      "sidewall_angle_deg": 86.2,
+      "n_realizations": 16,
+      "sigma_in_nm": 2.975050303461807,
+      "sigma_out_nm": 2.969887993050315,
+      "sigma_ratio": 0.9982647989496226,
+      "fitted_in": {
+        "sigma_nm": 2.957028714077932,
+        "xi_nm": 14.815878338736441,
+        "alpha": 0.5870962849616308
+      },
+      "fitted_out": {
+        "sigma_nm": 2.9518222705051187,
+        "xi_nm": 14.815878338736441,
+        "alpha": 0.5798011832279093
+      },
+      "transfer": {
+        "corner_frequency_per_nm": 0.01061032953945969,
+        "mean_T2_low_band": 0.9979274923320893,
+        "mean_T2_high_band": 0.9780557460799575,
+        "T2_at_nyquist": 1.0418088221493373,
+        "mean_coherence_low": 0.9999355907251688,
+        "mean_coherence_high": 0.9861931417687213,
+        "min_coherence": 0.9198478879259862,
+        "intrinsic_share_of_output_power": 0.000579298458422596
+      }
+    },
+    {
+      "declared": {
+        "sigma_nm": 3.0,
+        "correlation_length_nm": 30.0,
+        "roughness_exponent": 0.6
+      },
+      "beam_sigma_theta_deg": 25.0,
+      "sidewall_angle_deg": 86.2,
+      "n_realizations": 16,
+      "sigma_in_nm": 2.971954727519067,
+      "sigma_out_nm": 2.971791053793624,
+      "sigma_ratio": 0.9999449272480743,
+      "fitted_in": {
+        "sigma_nm": 2.9330513048369173,
+        "xi_nm": 27.162443621016806,
+        "alpha": 0.5914009868252308
+      },
+      "fitted_out": {
+        "sigma_nm": 2.9328905379199584,
+        "xi_nm": 27.162443621016806,
+        "alpha": 0.5911778655532245
+      },
+      "transfer": {
+        "corner_frequency_per_nm": 0.005305164769729845,
+        "mean_T2_low_band": 0.9998768727295143,
+        "mean_T2_high_band": 0.9989454050706843,
+        "T2_at_nyquist": 1.0180698711847913,
+        "mean_coherence_low": 0.9999998542607837,
+        "mean_coherence_high": 0.9996297729387037,
+        "min_coherence": 0.9983941246625777,
+        "intrinsic_share_of_output_power": 5.1947459622981896e-06
+      }
+    },
+    {
+      "declared": {
+        "sigma_nm": 3.0,
+        "correlation_length_nm": 15.0,
+        "roughness_exponent": 0.6
+      },
+      "beam_sigma_theta_deg": 2.0,
+      "sidewall_angle_deg": 86.2,
+      "n_realizations": 16,
+      "sigma_in_nm": 2.975050303461807,
+      "sigma_out_nm": 2.975050303461807,
+      "sigma_ratio": 1.0,
+      "fitted_in": {
+        "sigma_nm": 2.957028714077932,
+        "xi_nm": 14.815878338736441,
+        "alpha": 0.5870962849616308
+      },
+      "fitted_out": {
+        "sigma_nm": 2.957028714077932,
+        "xi_nm": 14.815878338736441,
+        "alpha": 0.5870962849616306
+      },
+      "transfer": {
+        "corner_frequency_per_nm": 0.01061032953945969,
+        "mean_T2_low_band": 1.0,
+        "mean_T2_high_band": 1.0,
+        "T2_at_nyquist": 1.0000000000000022,
+        "mean_coherence_low": 1.0,
+        "mean_coherence_high": 1.0,
+        "min_coherence": 0.999999999999999,
+        "intrinsic_share_of_output_power": 8.015110157936597e-17
+      }
+    }
+  ]
+}

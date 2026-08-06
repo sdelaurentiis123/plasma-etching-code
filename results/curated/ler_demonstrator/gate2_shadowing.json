@@ -1,0 +1,591 @@
+{
+  "conditions": {
+    "correlation_length_nm": 30.0,
+    "roughness_exponent": 0.6,
+    "sidewall_angle_deg": 86.2,
+    "mask_height_nm": 150.0,
+    "n_points": 1024,
+    "spacing_nm": 1.0
+  },
+  "seeds": [
+    11,
+    12,
+    13,
+    14
+  ],
+  "sigma_declared_nm": [
+    0.15,
+    0.3,
+    0.6,
+    1.2,
+    2.5,
+    5.0,
+    9.0
+  ],
+  "beam_sweep": [
+    {
+      "sigma_theta_deg": 2.0,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.15960914672138837,
+          "sigma_out_nm": 0.15960914672138837,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.31921829344277675,
+          "sigma_out_nm": 0.31921829344277675,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.6384365868855535,
+          "sigma_out_nm": 0.6384365868855535,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.276873173771107,
+          "sigma_out_nm": 1.276873173771107,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.6601524453564727,
+          "sigma_out_nm": 2.6601524453564727,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.320304890712945,
+          "sigma_out_nm": 5.320304890712945,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.576548803283302,
+          "sigma_out_nm": 9.57651255712728,
+          "ratio": 0.9999962151129007
+        }
+      ],
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.999996632226359,
+        "min_ratio": 0.9999962151129007
+      },
+      "c": NaN
+    },
+    {
+      "sigma_theta_deg": 10.0,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.15960914672138837,
+          "sigma_out_nm": 0.15960914672138837,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.31921829344277675,
+          "sigma_out_nm": 0.31921829344277675,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.6384365868855535,
+          "sigma_out_nm": 0.6384365868855535,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.276873173771107,
+          "sigma_out_nm": 1.276873173771107,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.6601524453564727,
+          "sigma_out_nm": 2.660148788018141,
+          "ratio": 0.9999986251395712
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.320304890712945,
+          "sigma_out_nm": 5.317565076911007,
+          "ratio": 0.9994850269189045
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.576548803283302,
+          "sigma_out_nm": 9.496314663381892,
+          "ratio": 0.9916218105760708
+        }
+      ],
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.99245165345589,
+        "min_ratio": 0.9916218105760708
+      },
+      "c": NaN
+    },
+    {
+      "sigma_theta_deg": 25.0,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.15960914672138837,
+          "sigma_out_nm": 0.15960914672138837,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.31921829344277675,
+          "sigma_out_nm": 0.31921829344277675,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.6384365868855535,
+          "sigma_out_nm": 0.6384365868855535,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.276873173771107,
+          "sigma_out_nm": 1.276873173771107,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.6601524453564727,
+          "sigma_out_nm": 2.6601524453564727,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.320304890712945,
+          "sigma_out_nm": 5.3140961995838465,
+          "ratio": 0.9988330196752565
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.576548803283302,
+          "sigma_out_nm": 9.454700741047338,
+          "ratio": 0.9872764119163483
+        }
+      ],
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.9884667684618225,
+        "min_ratio": 0.9872764119163483
+      },
+      "c": NaN
+    },
+    {
+      "sigma_theta_deg": 45.0,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.15960914672138837,
+          "sigma_out_nm": 0.15960914672138837,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.31921829344277675,
+          "sigma_out_nm": 0.31921829344277675,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.6384365868855535,
+          "sigma_out_nm": 0.6384365868855535,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.276873173771107,
+          "sigma_out_nm": 1.276873173771107,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.6601524453564727,
+          "sigma_out_nm": 2.6601524453564727,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.320304890712945,
+          "sigma_out_nm": 5.317233790256928,
+          "ratio": 0.9994227585600634
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.576548803283302,
+          "sigma_out_nm": 9.467009052229198,
+          "ratio": 0.9885616673287825
+        }
+      ],
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.9897174398630234,
+        "min_ratio": 0.9885616673287825
+      },
+      "c": NaN
+    }
+  ],
+  "xi_scaling": [
+    {
+      "correlation_length_nm": 15.0,
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.955321670243003,
+        "min_ratio": 0.9521342253860944
+      },
+      "c": NaN,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.15386617598552005,
+          "sigma_out_nm": 0.15386617598552005,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.3077323519710401,
+          "sigma_out_nm": 0.3077323519710401,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.6154647039420802,
+          "sigma_out_nm": 0.6154647039420802,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.2309294078841604,
+          "sigma_out_nm": 1.2309294078841604,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.564436266425334,
+          "sigma_out_nm": 2.5646272096740867,
+          "ratio": 1.0000744581767356
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.128872532850668,
+          "sigma_out_nm": 5.069906215532709,
+          "ratio": 0.9885030643791053
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.231970559131204,
+          "sigma_out_nm": 8.790075137105617,
+          "ratio": 0.9521342253860944
+        }
+      ]
+    },
+    {
+      "correlation_length_nm": 30.0,
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.9884667684618225,
+        "min_ratio": 0.9872764119163483
+      },
+      "c": NaN,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.15960914672138837,
+          "sigma_out_nm": 0.15960914672138837,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.31921829344277675,
+          "sigma_out_nm": 0.31921829344277675,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.6384365868855535,
+          "sigma_out_nm": 0.6384365868855535,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.276873173771107,
+          "sigma_out_nm": 1.276873173771107,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.6601524453564727,
+          "sigma_out_nm": 2.6601524453564727,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.320304890712945,
+          "sigma_out_nm": 5.3140961995838465,
+          "ratio": 0.9988330196752565
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.576548803283302,
+          "sigma_out_nm": 9.454700741047338,
+          "ratio": 0.9872764119163483
+        }
+      ]
+    },
+    {
+      "correlation_length_nm": 60.0,
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.998273473011131,
+        "min_ratio": 0.9980538502457867
+      },
+      "c": NaN,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.16302953925612626,
+          "sigma_out_nm": 0.16302953925612623,
+          "ratio": 0.9999999999999998
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.3260590785122525,
+          "sigma_out_nm": 0.3260590785122525,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.652118157024505,
+          "sigma_out_nm": 0.652118157024505,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.30423631404901,
+          "sigma_out_nm": 1.30423631404901,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.7171589876021045,
+          "sigma_out_nm": 2.7171589876021045,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.434317975204209,
+          "sigma_out_nm": 5.434472063873962,
+          "ratio": 1.0000283547393538
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.781772355367575,
+          "sigma_out_nm": 9.762735561502407,
+          "ratio": 0.9980538502457867
+        }
+      ]
+    }
+  ],
+  "taper_scaling": [
+    {
+      "sidewall_angle_deg": 84.0,
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.9909099387560253,
+        "min_ratio": 0.9899066879892091
+      },
+      "c": NaN,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.15960914672138837,
+          "sigma_out_nm": 0.15960914672138837,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.31921829344277675,
+          "sigma_out_nm": 0.31921829344277675,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.6384365868855535,
+          "sigma_out_nm": 0.6384365868855535,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.276873173771107,
+          "sigma_out_nm": 1.276873173771107,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.6601524453564727,
+          "sigma_out_nm": 2.6601524453564727,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.320304890712945,
+          "sigma_out_nm": 5.3171079504126695,
+          "ratio": 0.9993991058095455
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.576548803283302,
+          "sigma_out_nm": 9.479889708225198,
+          "ratio": 0.9899066879892091
+        }
+      ]
+    },
+    {
+      "sidewall_angle_deg": 86.2,
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.9884667684618225,
+        "min_ratio": 0.9872764119163483
+      },
+      "c": NaN,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.15960914672138837,
+          "sigma_out_nm": 0.15960914672138837,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.31921829344277675,
+          "sigma_out_nm": 0.31921829344277675,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.6384365868855535,
+          "sigma_out_nm": 0.6384365868855535,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.276873173771107,
+          "sigma_out_nm": 1.276873173771107,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.6601524453564727,
+          "sigma_out_nm": 2.6601524453564727,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.320304890712945,
+          "sigma_out_nm": 5.3140961995838465,
+          "ratio": 0.9988330196752565
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.576548803283302,
+          "sigma_out_nm": 9.454700741047338,
+          "ratio": 0.9872764119163483
+        }
+      ]
+    },
+    {
+      "sidewall_angle_deg": 88.0,
+      "fit": {
+        "slope": NaN,
+        "intercept_nm": NaN,
+        "threshold_nm": NaN,
+        "n_reducing": 0,
+        "overall_slope": 0.9859204782758646,
+        "min_ratio": 0.9845538678705226
+      },
+      "c": NaN,
+      "sweep": [
+        {
+          "sigma_declared_nm": 0.15,
+          "sigma_in_nm": 0.15960914672138837,
+          "sigma_out_nm": 0.15960914672138837,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.3,
+          "sigma_in_nm": 0.31921829344277675,
+          "sigma_out_nm": 0.31921829344277675,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 0.6,
+          "sigma_in_nm": 0.6384365868855535,
+          "sigma_out_nm": 0.6384365868855535,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 1.2,
+          "sigma_in_nm": 1.276873173771107,
+          "sigma_out_nm": 1.276873173771107,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 2.5,
+          "sigma_in_nm": 2.6601524453564727,
+          "sigma_out_nm": 2.6601524453564727,
+          "ratio": 1.0
+        },
+        {
+          "sigma_declared_nm": 5.0,
+          "sigma_in_nm": 5.320304890712945,
+          "sigma_out_nm": 5.310468395733982,
+          "ratio": 0.9981511407370405
+        },
+        {
+          "sigma_declared_nm": 9.0,
+          "sigma_in_nm": 9.576548803283302,
+          "sigma_out_nm": 9.4286281651234,
+          "ratio": 0.9845538678705226
+        }
+      ]
+    }
+  ]
+}
