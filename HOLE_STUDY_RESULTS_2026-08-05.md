@@ -129,11 +129,27 @@ The tail is what makes deep-hole delivery physical: it puts 60–76 % of the bea
 outside the acceptance cone, so shadowing has something to shadow. This is the
 study's strongest single statement about why the beam model matters.
 
-**Gate on quoting profile numbers:** a configuration whose delivery curve is
-flat (core-only, ≤5 % over the whole range) must not be used to quote depth or
-profile predictions — flat delivery means the depth trend is set by chemistry
-alone with no transport contribution, which is the failure mode the trench arc
-diagnosed. Only the tail-bearing configurations pass this gate.
+**Gate on quoting profile numbers (re-worded 2026-08-06).** A flat delivery
+curve is *not* unphysical and does not disqualify a configuration: Lam's own
+published operating point is a sub-0.5° 1σ beam, and their Fig. 6(b) shows it
+giving a flat ion-flux-vs-AR curve to AR ≈ 60, matching their experiment
+(`RESEARCH_EXTREME_AR_FIELD_2026-08-06.md` §3). Our core-only branch (0.41 % to
+AR 16, 5.4 % to AR 200) is the same qualitative statement, so the earlier
+wording would have disqualified the best experimental reference in the field.
+
+What *is* disqualified is the inference: **a flat-delivery configuration must
+not be used to attribute a depth trend to transport.** When delivery is flat the
+depth trend is set by chemistry, and quoting it as an aspect-ratio *transport*
+effect is the failure mode the trench arc diagnosed. Tail-bearing
+configurations carry a transport contribution that can legitimately be
+attributed.
+
+**Acceptance framing, sourced.** The PPPL analysis states the conversion
+directly: "the tolerance parameter for the angular divergence of the beam is set
+by the value of the aspect ratio of the etched features. For the value of 100,
+it is roughly 0.5°… resulting in the angle of **0.25° in the laboratory frame**"
+(Khrabrov & Kaganovich, arXiv:2604.04214v2, 8 Apr 2026). That is an independent
+statement of the acceptance scale this section sweeps.
 
 ## Honesty appendix
 
@@ -161,18 +177,28 @@ reading this document previously invited.
   (rate linear in ion flux, <1 % sensitivity across a 50× neutral range —
   `RESULTS_FLOOR_DELIVERY_2026-08-05.md`). An ion-limited rate law fed by a
   nearly AR-flat energetic supply cannot produce much ARDE by construction.
-- The magnitude of what is missing: the one clean literature anchor in the local
-  corpus is Huang's MCFPM, whose **etch rate falls 80 % by AR 40**
-  (`huang_thesis.txt` L5578-5580) under his conditions. Our transport-only
-  decline at AR 40 is ≈10 % (tail 0.65). The gap is not a transport error — the
-  transport is graded against exact theory — it is everything that converts
-  delivery into rate at depth: neutral conductance collapse (we *measure*
-  thermal delivery at 0.656 % of source at AR 200, a ~150× starvation, which an
-  ion-limited chemistry ignores), redeposition, tapering, and charging.
+- The magnitude of what is missing (**anchor set corrected 2026-08-06**). Only
+  three deep rate-vs-AR numbers exist, and they span a factor of two: Huang's
+  MCFPM *simulation* falls **80 % by AR 40** (`huang_thesis.txt` L5578-5580)
+  under his conditions; the deepest published *measurement* — Nguyen, Shkondin,
+  Jensen, Hübner, Leussink & Jansen, JVST A **38**, 053002 (2020), the CORE
+  silicon SF₆/O₂ series — falls **≈43 % by AR 54**; a de Boer/Blauw lineage
+  series sits between. Nobody has reconciled them
+  (`RESEARCH_EXTREME_AR_FIELD_2026-08-06.md` §2.1), and this document previously
+  leaned on Huang alone, which overstated the size of the gap. Our
+  transport-only decline at AR 40 is ≈10 % (tail 0.65) — below the whole
+  measured band, as it must be, since transport is one term among several. The
+  gap is not a transport error (the transport is graded against exact theory);
+  it is everything that converts delivery into rate at depth: neutral
+  conductance collapse (we *measure* thermal delivery at 0.656 % of source at
+  AR 200, a ~150× starvation, which an ion-limited chemistry ignores),
+  redeposition, tapering, and charging.
 - Consequence for use: quote section 5 as **energetic delivery vs aspect ratio**,
-  not as etch-rate ARDE. An etch-rate prediction at high AR is blocked on the
-  limiting-regime question, which is the single defect that also owns the
-  validation case's +29 % depth overshoot.
+  not as etch-rate ARDE. *(Superseded for the rate question:
+  `HOLE_STUDY_RESULTS_PHASE2_2026-08-06.md` §1 supplies the chemistry-coupled
+  rate-ARDE curve, which lands inside the 43–80 % measured/simulated band. The
+  limiting-regime defect that blocked it was closed by the Gray-anchored ion
+  laws, `2f1e218`.)*
 - Caveat on Huang's numbers as a reference at all: his published *ion* decay
   (2.0→0.3e15) sits below the fixed-beam straight-wall acceptance bound
   (13/53 = 0.245 vs his 0.150), so his curve embeds profile evolution, mask

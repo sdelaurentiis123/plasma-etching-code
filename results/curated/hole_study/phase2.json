@@ -1,0 +1,482 @@
+{
+  "provenance": {
+    "radius_m": 4.5e-08,
+    "reference_energy_eV": 1500.0,
+    "relaxation_s": 0.2,
+    "cascade_quadrature": {
+      "n_polar": 192,
+      "n_azimuth": 64,
+      "n_radial": 24
+    },
+    "mouth_flux_m2_s": {
+      "C3F4": 9.5e+20,
+      "C2F3": 6.8e+20,
+      "CF": 4.4e+20,
+      "CF2": 9.4e+20,
+      "CF3": 8.4e+19,
+      "O": 7.7e+20
+    },
+    "ion_flux_m2_s": 1.2e+20,
+    "beam": "kim_2025_reference_iadf",
+    "chemistry": "krueger_2024 deck 1 (oxide arm), Gray-anchored ion laws"
+  },
+  "series_a_rate_arde": [
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 1.0,
+      "floor_etch_nm_s": 6.630546854508542,
+      "energetic_delivery": 0.9997277618594395,
+      "max_wall_growth_nm_s": 0.44421505363469943
+    },
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 2.0,
+      "floor_etch_nm_s": 5.883982946170302,
+      "energetic_delivery": 0.9994560791262862,
+      "max_wall_growth_nm_s": 0.3720420200226833
+    },
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 4.0,
+      "floor_etch_nm_s": 4.613396806745349,
+      "energetic_delivery": 0.9989092206421054,
+      "max_wall_growth_nm_s": 0.33779012153357596
+    },
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 8.0,
+      "floor_etch_nm_s": 3.4163180021601023,
+      "energetic_delivery": 0.9978225083720125,
+      "max_wall_growth_nm_s": 0.3323400067213541
+    },
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 16.0,
+      "floor_etch_nm_s": 3.001092383971461,
+      "energetic_delivery": 0.9956452659537292,
+      "max_wall_growth_nm_s": 0.29802473718883826
+    },
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 32.0,
+      "floor_etch_nm_s": 2.93963524884011,
+      "energetic_delivery": 0.9912826791383318,
+      "max_wall_growth_nm_s": 0.2269268507750126
+    },
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 50.0,
+      "floor_etch_nm_s": 2.919195302082254,
+      "energetic_delivery": 0.9864195170180994,
+      "max_wall_growth_nm_s": 0.1747510650924282
+    },
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 100.0,
+      "floor_etch_nm_s": 2.8762056416692223,
+      "energetic_delivery": 0.9727823440349301,
+      "max_wall_growth_nm_s": 0.10225986926886801
+    },
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 150.0,
+      "floor_etch_nm_s": 2.8362137729701926,
+      "energetic_delivery": 0.9593946179126532,
+      "max_wall_growth_nm_s": 0.07028858045866308
+    },
+    {
+      "tail_fraction": 0.0,
+      "aspect_ratio": 200.0,
+      "floor_etch_nm_s": 2.796743971896106,
+      "energetic_delivery": 0.9460867738979629,
+      "max_wall_growth_nm_s": 0.05281907548063374
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 1.0,
+      "floor_etch_nm_s": 6.624723193095199,
+      "energetic_delivery": 0.9985916756772605,
+      "max_wall_growth_nm_s": 0.4398082225675373
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 2.0,
+      "floor_etch_nm_s": 5.873717708077618,
+      "energetic_delivery": 0.9971857820093808,
+      "max_wall_growth_nm_s": 0.3678834824858524
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 4.0,
+      "floor_etch_nm_s": 4.596432183088302,
+      "energetic_delivery": 0.9943587410552709,
+      "max_wall_growth_nm_s": 0.3337652397263352
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 8.0,
+      "floor_etch_nm_s": 3.3877370343412085,
+      "energetic_delivery": 0.9887379894850111,
+      "max_wall_growth_nm_s": 0.32833747275840686
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 16.0,
+      "floor_etch_nm_s": 2.946987747597575,
+      "energetic_delivery": 0.9774746235982573,
+      "max_wall_growth_nm_s": 0.2940343172408977
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 32.0,
+      "floor_etch_nm_s": 2.8351137954103556,
+      "energetic_delivery": 0.9559654835489835,
+      "max_wall_growth_nm_s": 0.2233030497653019
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 50.0,
+      "floor_etch_nm_s": 2.7653911227852137,
+      "energetic_delivery": 0.9344104464751761,
+      "max_wall_growth_nm_s": 0.17147307319159646
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 100.0,
+      "floor_etch_nm_s": 2.61356225969814,
+      "energetic_delivery": 0.8839387934377801,
+      "max_wall_growth_nm_s": 0.09954821457282013
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 150.0,
+      "floor_etch_nm_s": 2.49235565451261,
+      "energetic_delivery": 0.8430723725305902,
+      "max_wall_growth_nm_s": 0.06790288035809118
+    },
+    {
+      "tail_fraction": 0.35,
+      "aspect_ratio": 200.0,
+      "floor_etch_nm_s": 2.3893419706479584,
+      "energetic_delivery": 0.8082660576518808,
+      "max_wall_growth_nm_s": 0.0506331883891753
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 1.0,
+      "floor_etch_nm_s": 6.622226723723494,
+      "energetic_delivery": 0.9981047815991825,
+      "max_wall_growth_nm_s": 0.4379207846879984
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 2.0,
+      "floor_etch_nm_s": 5.869316412028619,
+      "energetic_delivery": 0.9962127975307065,
+      "max_wall_growth_nm_s": 0.36610263375679897
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 4.0,
+      "floor_etch_nm_s": 4.589157534877334,
+      "energetic_delivery": 0.9924085355180551,
+      "max_wall_growth_nm_s": 0.3320417577109823
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 8.0,
+      "floor_etch_nm_s": 3.375482467401663,
+      "energetic_delivery": 0.9848446242477247,
+      "max_wall_growth_nm_s": 0.32662358185940876
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 16.0,
+      "floor_etch_nm_s": 2.923796762359697,
+      "energetic_delivery": 0.9696872054459129,
+      "max_wall_growth_nm_s": 0.2923258152497998
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 32.0,
+      "floor_etch_nm_s": 2.7903167490896745,
+      "energetic_delivery": 0.9408295425821199,
+      "max_wall_growth_nm_s": 0.22175181859034315
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 50.0,
+      "floor_etch_nm_s": 2.6994733192766365,
+      "energetic_delivery": 0.9121208448139226,
+      "max_wall_growth_nm_s": 0.17007005985586898
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 100.0,
+      "floor_etch_nm_s": 2.5009996688229847,
+      "energetic_delivery": 0.8458629860390006,
+      "max_wall_growth_nm_s": 0.09838773478095773
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 150.0,
+      "floor_etch_nm_s": 2.3449870451086166,
+      "energetic_delivery": 0.7932199816525615,
+      "max_wall_growth_nm_s": 0.06688183909694893
+    },
+    {
+      "tail_fraction": 0.5,
+      "aspect_ratio": 200.0,
+      "floor_etch_nm_s": 2.2147404481308888,
+      "energetic_delivery": 0.7492000364035589,
+      "max_wall_growth_nm_s": 0.04969757787088171
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 1.0,
+      "floor_etch_nm_s": 6.619729885296865,
+      "energetic_delivery": 0.9976178875211059,
+      "max_wall_growth_nm_s": 0.4360340664485721
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 2.0,
+      "floor_etch_nm_s": 5.864913968431013,
+      "energetic_delivery": 0.9952398130520324,
+      "max_wall_growth_nm_s": 0.3643226112912985
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 4.0,
+      "floor_etch_nm_s": 4.581880417715878,
+      "energetic_delivery": 0.9904583299808398,
+      "max_wall_growth_nm_s": 0.33031915333968265
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 8.0,
+      "floor_etch_nm_s": 3.3632245186256435,
+      "energetic_delivery": 0.9809512590104393,
+      "max_wall_growth_nm_s": 0.32491057667635337
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 16.0,
+      "floor_etch_nm_s": 2.900603763343157,
+      "energetic_delivery": 0.961899787293568,
+      "max_wall_growth_nm_s": 0.2906183168790552
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 32.0,
+      "floor_etch_nm_s": 2.745518363684379,
+      "energetic_delivery": 0.9256936016152546,
+      "max_wall_growth_nm_s": 0.2202016795939336
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 50.0,
+      "floor_etch_nm_s": 2.633554411565643,
+      "energetic_delivery": 0.8898312431526709,
+      "max_wall_growth_nm_s": 0.1686681464974567
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 100.0,
+      "floor_etch_nm_s": 2.3884363135556974,
+      "energetic_delivery": 0.807787178640223,
+      "max_wall_growth_nm_s": 0.09722824438483259
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 150.0,
+      "floor_etch_nm_s": 2.19761785018642,
+      "energetic_delivery": 0.7433675907745328,
+      "max_wall_growth_nm_s": 0.0658616331541441
+    },
+    {
+      "tail_fraction": 0.65,
+      "aspect_ratio": 200.0,
+      "floor_etch_nm_s": 2.040138451620043,
+      "energetic_delivery": 0.6901340151552371,
+      "max_wall_growth_nm_s": 0.04876268057945071
+    }
+  ],
+  "series_b_thermalized": [
+    {
+      "aspect_ratio": 50.0,
+      "thermalized_return_fraction": 0.0,
+      "floor_etch_nm_s": 2.633554411565643,
+      "thermalised_born_rate_s": 0.0
+    },
+    {
+      "aspect_ratio": 50.0,
+      "thermalized_return_fraction": 0.3,
+      "floor_etch_nm_s": 2.633569932947471,
+      "thermalised_born_rate_s": 96.34887933896884
+    },
+    {
+      "aspect_ratio": 50.0,
+      "thermalized_return_fraction": 0.65,
+      "floor_etch_nm_s": 2.633588040997062,
+      "thermalised_born_rate_s": 208.7559052344325
+    },
+    {
+      "aspect_ratio": 50.0,
+      "thermalized_return_fraction": 1.0,
+      "floor_etch_nm_s": 2.633606148799823,
+      "thermalised_born_rate_s": 321.16293112989615
+    },
+    {
+      "aspect_ratio": 100.0,
+      "thermalized_return_fraction": 0.0,
+      "floor_etch_nm_s": 2.3884363135556974,
+      "thermalised_born_rate_s": 0.0
+    },
+    {
+      "aspect_ratio": 100.0,
+      "thermalized_return_fraction": 0.3,
+      "floor_etch_nm_s": 2.3884817748527465,
+      "thermalised_born_rate_s": 608.1381697571333
+    },
+    {
+      "aspect_ratio": 100.0,
+      "thermalized_return_fraction": 0.65,
+      "floor_etch_nm_s": 2.3885348109506404,
+      "thermalised_born_rate_s": 1317.6327011404553
+    },
+    {
+      "aspect_ratio": 100.0,
+      "thermalized_return_fraction": 1.0,
+      "floor_etch_nm_s": 2.3885878448066022,
+      "thermalised_born_rate_s": 2027.1272325237776
+    },
+    {
+      "aspect_ratio": 200.0,
+      "thermalized_return_fraction": 0.0,
+      "floor_etch_nm_s": 2.040138451620043,
+      "thermalised_born_rate_s": 0.0
+    },
+    {
+      "aspect_ratio": 200.0,
+      "thermalized_return_fraction": 0.3,
+      "floor_etch_nm_s": 2.04025493003511,
+      "thermalised_born_rate_s": 3332.2637302799626
+    },
+    {
+      "aspect_ratio": 200.0,
+      "thermalized_return_fraction": 0.65,
+      "floor_etch_nm_s": 2.040390806617945,
+      "thermalised_born_rate_s": 7219.90474893992
+    },
+    {
+      "aspect_ratio": 200.0,
+      "thermalized_return_fraction": 1.0,
+      "floor_etch_nm_s": 2.040526667157438,
+      "thermalised_born_rate_s": 11107.545767599875
+    }
+  ],
+  "series_c_envelope": [
+    {
+      "aspect_ratio_initial": 10.000000000000002,
+      "straightness_tolerance": 0.02,
+      "stop_reason": "profile_left_straight_wall_envelope",
+      "steps": 5,
+      "process_time_s": 1.25,
+      "depth_advance_nm": 3.9941737734082294,
+      "mouth_radius_loss_nm": 1.2364483753525084,
+      "final_straightness_deviation": 0.02488270619081874,
+      "trace": [
+        {
+          "time_s": 0.25,
+          "floor_depth_nm": 900.7868657648199,
+          "mouth_radius_nm": 44.8992205947183,
+          "straightness_deviation": 0.002049850852225509,
+          "floor_etch_nm_s": 3.1474630592798105
+        },
+        {
+          "time_s": 0.5,
+          "floor_depth_nm": 901.5888999000427,
+          "mouth_radius_nm": 44.64639960058273,
+          "straightness_deviation": 0.007171816984907222,
+          "floor_etch_nm_s": 3.208136540891081
+        },
+        {
+          "time_s": 0.75,
+          "floor_depth_nm": 902.3909523672259,
+          "mouth_radius_nm": 44.35817011646257,
+          "straightness_deviation": 0.012960507057509441,
+          "floor_etch_nm_s": 3.2082098687326828
+        },
+        {
+          "time_s": 1.0,
+          "floor_depth_nm": 903.1927370811104,
+          "mouth_radius_nm": 44.06170680637783,
+          "straightness_deviation": 0.018902344240773427,
+          "floor_etch_nm_s": 3.2071388555379383
+        },
+        {
+          "time_s": 1.25,
+          "floor_depth_nm": 903.9941737734082,
+          "mouth_radius_nm": 43.76355162464749,
+          "straightness_deviation": 0.02488270619081874,
+          "floor_etch_nm_s": 3.2057467691909745
+        }
+      ]
+    },
+    {
+      "aspect_ratio_initial": 50.0,
+      "straightness_tolerance": 0.02,
+      "stop_reason": "profile_left_straight_wall_envelope",
+      "steps": 6,
+      "process_time_s": 1.5,
+      "depth_advance_nm": 3.9519784596597476,
+      "mouth_radius_loss_nm": 0.9546378728710696,
+      "final_straightness_deviation": 0.020550732686283477,
+      "trace": [
+        {
+          "time_s": 0.25,
+          "floor_depth_nm": 4500.658450671812,
+          "mouth_radius_nm": 44.94900699147507,
+          "straightness_deviation": 0.0011019559861905723,
+          "floor_etch_nm_s": 2.6338026872485285
+        },
+        {
+          "time_s": 0.5,
+          "floor_depth_nm": 4501.3171809528985,
+          "mouth_radius_nm": 44.80211814561259,
+          "straightness_deviation": 0.0042685623135218795,
+          "floor_etch_nm_s": 2.63492112434317
+        },
+        {
+          "time_s": 0.75,
+          "floor_depth_nm": 4501.975909976055,
+          "mouth_radius_nm": 44.622009756751034,
+          "straightness_deviation": 0.008144222634744496,
+          "floor_etch_nm_s": 2.634916092625572
+        },
+        {
+          "time_s": 1.0,
+          "floor_depth_nm": 4502.634619122339,
+          "mouth_radius_nm": 44.43256761601895,
+          "straightness_deviation": 0.012218587526820724,
+          "floor_etch_nm_s": 2.6348365851378617
+        },
+        {
+          "time_s": 1.25,
+          "floor_depth_nm": 4503.293309194302,
+          "mouth_radius_nm": 44.23961071636507,
+          "straightness_deviation": 0.016369654168807916,
+          "floor_etch_nm_s": 2.634760287855313
+        },
+        {
+          "time_s": 1.5,
+          "floor_depth_nm": 4503.95197845966,
+          "mouth_radius_nm": 44.04536212712893,
+          "straightness_deviation": 0.020550732686283477,
+          "floor_etch_nm_s": 2.6346770614290578
+        }
+      ]
+    }
+  ]
+}
