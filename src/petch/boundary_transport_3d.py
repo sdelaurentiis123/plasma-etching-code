@@ -769,6 +769,16 @@ def split_grazing_ion_reflection(
     diagnostics = {"reflected_rate": 0.0, "escaped_rate": 0.0,
                    "secondary_events": 0, "thermalized_rate": 0.0,
                    "bounce_generations": 0}
+    # E8 (Huang thesis sec. 6.4.3): "After losing energy through several
+    # collisions with the sidewalls and etch front, these energetic species
+    # become thermal CFx and CxFy radicals, which can passivate the oxide
+    # surface or deposit as polymer."  The weight that drops out of the
+    # cascade is therefore a radical source at the face where it thermalized,
+    # not a sink.  Accumulated per face so the gather can return it to the
+    # neutral ledger; the caller decides the reactive fraction (Huang: the
+    # thermal partners of non-fluorocarbon ions "are non-reactive species and
+    # diffuse out of the feature with no surface reactions").
+    thermalized_per_face = np.zeros(int(population.face_count), dtype=float)
     out_face, out_rate, out_energy, out_cos, out_dir = [], [], [], [], []
 
     for bounce in range(int(max_bounces)):
@@ -790,8 +800,10 @@ def split_grazing_ion_reflection(
                         / (specular_threshold_eV - diffusive_cutoff_eV))))
         new_rate = rate * continue_weight
         alive = (new_rate > minimum_weight * np.maximum(rate, 1e-300))             & (retained > diffusive_cutoff_eV)
-        diagnostics["thermalized_rate"] += float(
-            (rate * continue_weight)[~alive].sum())
+        dead_rate = new_rate[~alive]
+        diagnostics["thermalized_rate"] += float(dead_rate.sum())
+        if dead_rate.size:
+            np.add.at(thermalized_per_face, face[~alive], dead_rate)
         if not np.any(alive):
             break
         diagnostics["bounce_generations"] = bounce + 1
@@ -824,6 +836,10 @@ def split_grazing_ion_reflection(
         rate_alive = new_rate[alive]
         energy_alive = retained[alive]
         diagnostics["escaped_rate"] += float(rate_alive[~landed].sum())
+        if np.any(~landed):
+            # Weight that continues but leaves the feature is lost to the
+            # plasma, not thermalized in place: not a radical source here.
+            pass
         if not np.any(landed):
             break
         face = hit_face_np[landed]
@@ -839,6 +855,7 @@ def split_grazing_ion_reflection(
         out_cos.append(cosine.copy())
         out_dir.append(dirs.copy())
 
+    diagnostics["thermalized_rate_per_face"] = thermalized_per_face
     if not out_face:
         return population, None, diagnostics
     all_face = np.concatenate(out_face)
@@ -3250,7 +3267,7 @@ def gather_boundary_state_ballistic_3d(
         centroids, gas_normals, *, source_bounds, source_z, mesh_length_unit_m=1e-6,
         mesh_origin_m=(0.0, 0.0, 0.0), face_quadrature_points=1,
         periodic_lateral=False, domain_size=None, ray_offset=1e-5, device=None,
-        grazing_ion_reflection=None):
+        grazing_ion_reflection=None, thermalized_radical_return=None):
     """Deterministically gather collisionless boundary flux onto every visible triangle.
 
     For boundary direction ``d`` (pointing from the horizontal source plane toward the surface),
@@ -3448,6 +3465,33 @@ def gather_boundary_state_ballistic_3d(
                 hit_probability[f"{species.name}:hot_neutral"] = reflection_diag
                 if secondary is not None:
                     energetic_flux.append(secondary)
+                if thermalized_radical_return:
+                    # E8: return the thermalized cascade weight to the radical
+                    # ledger at the face where it thermalized.  Keys are
+                    # species names, values the fraction of thermalized rate
+                    # arriving as that species; the sum is the reactive
+                    # (fluorocarbon-ion) fraction, which is a DECLARED input
+                    # because Krueger publishes only an aggregate positive-ion
+                    # flux with a combined IEAD (thesis Table 6.1 lists
+                    # neutrals only; "The combined IEAD of all positive ion
+                    # species").  Non-fluorocarbon thermal partners are
+                    # non-reactive (Huang sec. 6.4.3) and are simply omitted.
+                    per_face = np.asarray(
+                        reflection_diag.get("thermalized_rate_per_face", 0.0),
+                        dtype=float)
+                    if per_face.size:
+                        per_face_flux = per_face / np.maximum(areas, 1e-300)
+                        for target, share in dict(
+                                thermalized_radical_return).items():
+                            if float(share) == 0.0:
+                                continue
+                            add = float(share) * per_face_flux
+                            if target in neutral_flux:
+                                neutral_flux[target] = (
+                                    np.asarray(neutral_flux[target],
+                                               dtype=float) + add)
+                            else:
+                                neutral_flux[target] = add
             energetic_flux.append(primary)
     return BoundaryTransport3DResult(
         surface_fluxes=SurfaceFluxes(neutral_flux, tuple(energetic_flux)),

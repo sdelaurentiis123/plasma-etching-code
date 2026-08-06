@@ -250,6 +250,20 @@ _OXIDE_CLASS1_B = 1.7
 # so this constant is a no-op on every Krueger result; isolated here because it
 # is the lever on the Gray-1993 half-rise position for F-bearing chemistries
 # (RESULTS_ANGULAR_CONVENTION_2026-08-05 §7).
+#
+# [VERIFY-RESOLVED-BUT-NOT-TRANSPLANTABLE] Gray, MIT thesis 1993, p.246 (OCR
+# line 1463): "the available etching yield data could be well represented by
+# allowing B, to vary, while setting s,=0.2 and 0.02 for the cases of silicon
+# and SiO, etching respectively" (printed again as "So = 0.02", Fig. 5-13, OCR
+# line 769).  So the printed SiO2 value is 0.02 -- but it is HALF of a
+# co-regressed pair: Gray fits (s0, B0) together, and B0 has no counterpart in
+# this layer's consumption structure.  Measured here 2026-08-05: landing 0.02
+# alone moves the Gray half-rise from 1.94 to 104.9 against his measured
+# 27 +/- 8, i.e. from 14x low to 3.9x high -- one miss traded for another, and
+# it breaks four validated chemistry gates (rung-0 Langmuir closed form, the
+# sqrt-E law, supply capacity, the O2 clog boundary) that carry s=1 in their
+# own analytic forms.  Transplanting requires the pair, which is the Kwon/Sawin
+# E1 adsorption element, not this scalar.  Left at 1.0 deliberately.
 _THERMAL_F_STICKING = 1.0
 
 
