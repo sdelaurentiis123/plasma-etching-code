@@ -211,3 +211,35 @@ reading this document previously invited.
   affordable at the resolution the mouth region demands. Phase 2 needs either an
   axisymmetric evolution driver or a declared reduced-resolution study; the
   transport and delivery results above are inputs to it, not substitutes.
+
+## Phase-2 note (2026-08-05): E8 is available, the evolution driver is not
+
+`thermalized_radical_return` is now complete and reachable from the feature step
+(`RESULTS_E8_COUPLED_2026-08-05.md`, commits `543d8ae`/`f83ede8`): thermalized
+cascade weight enters the same per-species neutral ledger that the diffuse
+radiosity solve consumes as its direct term, so returned radicals re-emit and
+diffuse at their own published sticking rather than depositing where they
+thermalized. Measured effect at a mask-dominated trench: delivery to the front
+roughly **doubles** versus local deposition (2.2x), reaching a few percent of
+floor radicals.
+
+**Why it matters more here than it did there.** Phase 1 measured that at AR 200
+line-of-sight ions supply only 7-18 % of etch-front energy while wall-reflection
+cascades supply 82-90 %, and that the front is radical-poor by 105-144x. A
+feature whose energy arrives almost entirely by bouncing is exactly the regime
+where the *thermalized tail of those same bounces* is the candidate radical
+source — Huang's ">95 % above AR 10" statement is made for a feature of this
+kind, not for a 0.85 µm mask over a 0.09 µm opening. The trench measurement does
+not bound the hole result; it only shows that Krüger's stack is the wrong
+geometry to test the claim.
+
+**What phase 2 still needs, in order.**
+1. **The axisymmetric evolution driver** — unchanged blocker. The axisymmetric
+   path remains transport-only; delivery numbers (with or without E8) are inputs
+   to a profile study, not substitutes for one.
+2. **E8 on, fraction swept** over its physical band [0, 1] — the CFx+ share is
+   unpublished for any of these reactors and must stay a declared sweep, never a
+   fitted constant. Report the band, not a point.
+3. **The two open transport items from phase 1**: the analytic self-pair kernel
+   (blocks tapered profiles) and the bounce cap, unconverged at AR 200
+   (+1.6 % at cap 64).
