@@ -1,0 +1,107 @@
+{
+  "manifest_id": "KARAHASHI-2007-FIG10-CF3-PRODUCTS-R1",
+  "source": {
+    "citation": "K. Karahashi, Hyomen Kagaku 28, 60-66 (2007), Figure 10",
+    "local_pdf": "research_sources/karahashi_2007_hyomen_kagaku_28_60.pdf",
+    "pdf_sha256": "093b18b91b0a6d910fc414779ee8320b7a046ac4cad38ef5de0b7f2dd25a2d79",
+    "pdf_page": 6,
+    "print_page": 65,
+    "figure": "Figure 10",
+    "render_dpi": 600,
+    "rendered_page_sha256": "e9e49375c53aa95e819302f434b68068f784219d118e2cf2fa3bb78c9c19a352",
+    "rendered_page_size_px": [
+      4961,
+      7017
+    ],
+    "figure_crop_bounds_px": [
+      650,
+      500,
+      2200,
+      1900
+    ]
+  },
+  "experiment_scope": {
+    "target": "SiO2",
+    "incident_ion": "CF3+",
+    "beam_selection": "mass selected",
+    "neutral_radical_flux": "none",
+    "energies_eV": [
+      500,
+      1000,
+      2000
+    ],
+    "detected_products": [
+      "SiF",
+      "SiF2",
+      "SiF4"
+    ],
+    "quantity": "SiFx / sum(SiFx), percent",
+    "absolute_product_yield_reported": false
+  },
+  "pixel_calibration": {
+    "crop_bounds_full_render_px": [
+      650,
+      500,
+      2200,
+      1900
+    ],
+    "x_at_0_eV": 355.5,
+    "x_at_2500_eV": 1413.5,
+    "y_at_zero_percent": 1058.0,
+    "y_at_100_percent": 144.0,
+    "transform": {
+      "energy_eV": "2500 * (x_px - 355.5) / (1413.5 - 355.5)",
+      "percent": "100 * (1058.0 - y_px) / (1058.0 - 144.0)"
+    }
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; exact PIL crop; dark-pixel axis localization; marker-center and connected-contour transcription; full-resolution visual overlay",
+    "uncertainty_percentage_points": 0.72,
+    "uncertainty_basis": "6.5-pixel allowance covering line/marker overlap, rounded upward through the linear ordinate transform",
+    "nominal_energy_policy": "use printed beam-energy setpoints; retain marker x pixels as an independent placement check",
+    "full_resolution_visual_inspection": {
+      "date": "2026-08-06",
+      "passed": true,
+      "overlay_sha256": "71b556bf7f71afe18c0680ae678ae5f4ce8de082e62bedca778354d964c239fe",
+      "assertion": "all nine color-coded crosshairs and rings are centered on their source markers, including the overlapping 500 eV and 2000 eV pairs"
+    }
+  },
+  "derived_checks": {
+    "point_count": 9,
+    "maximum_marker_x_energy_offset_eV": 0.945,
+    "fraction_sum_percent_by_energy": {
+      "500": 99.507,
+      "1000": 99.891,
+      "2000": 98.906
+    },
+    "dominant_product_at_or_below_1000_eV": "SiF2",
+    "sif_fraction_increases_with_energy": true,
+    "sif4_fraction_decreases_with_energy": true
+  },
+  "source_text_cross_checks": {
+    "main_product": "SiF2",
+    "below_or_equal_1000_eV_dominant_path": "thermally activated desorption of a collision-cascade-formed precursor",
+    "sif_path": "prompt physical collision-cascade ejection",
+    "sif4_delay_order_ms": 0.5,
+    "co_detected_as_oxygen_containing_product": true
+  },
+  "claim_boundary": {
+    "valid": [
+      "energy-resolved branching among detected SiF, SiF2, and SiF4 products for CF3+ on SiO2",
+      "a product-identity constraint for a condition-matched reactive-ion event model"
+    ],
+    "not_valid": [
+      "an absolute etch yield",
+      "a product escape probability or diffusion length",
+      "a prompt-versus-delayed numerical partition",
+      "an accounting of CO in the SiFx-normalized ordinate",
+      "a universal branch law for CF+, CF2+, or plasma mixtures",
+      "a target-depth calibration"
+    ],
+    "production_escape_parameter_use": false
+  },
+  "output": {
+    "path": "data/experimental/karahashi_2007/figure10_cf3_product_fractions.csv",
+    "sha256": "c4b47f250079922547a2e5bed5219754c48ad8c2a733582047b720aafa4cdc6e"
+  }
+}

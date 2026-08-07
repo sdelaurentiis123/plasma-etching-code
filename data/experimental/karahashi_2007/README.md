@@ -73,3 +73,22 @@ This evidence supports interpolation only within each species' positive-yield
 measurement range. It does not support extrapolation beyond 2000 eV, does not
 bound molecule-assisted plasma etching, and cannot identify the unpublished
 ion-species mixture in the Krüger reactor.
+
+## Figure 10 product branching
+
+Figure 10 is independently replayed from PDF page 6 at 600 dpi:
+
+```bash
+python3 scripts/digitize_karahashi_2007_fig10.py \
+  --overlay tmp/pdfs/karahashi_figures/fig10_product_overlay.png
+```
+
+The nine-point table resolves the fractions of detected SiF, SiF2, and SiF4
+for CF3+ at 500, 1000, and 2000 eV. SiF2 dominates at or below 1000 eV,
+whereas the SiF fraction rises and the SiF4 fraction falls with energy. The
+source text identifies prompt collision-cascade ejection for SiF and a delayed
+precursor route for SiF2/SiF4 (about 0.5 ms delay for SiF4).
+
+The ordinate is normalized only over detected SiFx products. It supplies a
+product-identity/branching gate, not an absolute product yield, a
+prompt-versus-delayed numerical partition, or a diffusion/escape length.

@@ -1,0 +1,10 @@
+incident_species,target,energy_eV,desorbed_product,product_fraction_percent_of_detected_sifx,marker_center_x_crop_px,marker_center_y_crop_px,marker,digitization_uncertainty_percentage_points
+CF3+,SiO2,500,SiF,21.663,567.5,860.0,up_triangle,0.72
+CF3+,SiO2,500,SiF2,57.932,567.5,528.5,circle,0.72
+CF3+,SiO2,500,SiF4,19.912,567.5,876.0,square,0.72
+CF3+,SiO2,1000,SiF,33.042,779.0,756.0,up_triangle,0.72
+CF3+,SiO2,1000,SiF2,46.937,779.0,629.0,circle,0.72
+CF3+,SiO2,1000,SiF4,19.912,779.0,876.0,square,0.72
+CF3+,SiO2,2000,SiF,46.827,1202.0,630.0,up_triangle,0.72
+CF3+,SiO2,2000,SiF2,45.022,1202.0,646.5,circle,0.72
+CF3+,SiO2,2000,SiF4,7.057,1202.0,993.5,square,0.72
