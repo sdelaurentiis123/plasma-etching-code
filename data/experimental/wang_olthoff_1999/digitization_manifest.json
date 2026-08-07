@@ -1,0 +1,83 @@
+{
+  "manifest_id": "WANG-OLTHOFF-1999-FIG9-CHLORINE-ION-FLUX-R1",
+  "source": {
+    "citation": "Y. Wang and J. K. Olthoff, Journal of Applied Physics 85, 6358-6365 (1999), Ion Energy Distributions in Inductively Coupled Radio-Frequency Discharges in Argon, Nitrogen, Oxygen, Chlorine, and Their Mixtures",
+    "doi": "10.1063/1.370138",
+    "official_nist_url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=1506",
+    "pdf_sha256": "17702f0ffb904cca42760867c693c382b174c68f02ef7b5064ec95933adea460",
+    "pdf_page": 6,
+    "print_page": 6363,
+    "figure": "Figure 9",
+    "render_dpi": 600,
+    "rendered_page_sha256": "44a1953b90353711dfb6798b357ecb90eb0fbc10abb1c49d725a21a39a54b12a",
+    "rendered_page_size_px": [
+      5096,
+      6716
+    ]
+  },
+  "experiment": {
+    "reactor": "inductively coupled GEC rf reference cell",
+    "coil": "five-turn planar coil behind quartz window",
+    "frequency_MHz": 13.56,
+    "flow_sccm": 10.0,
+    "window_to_grounded_electrode_gap_cm": 4.13,
+    "listed_power_node": "net power to the coil matching network",
+    "listed_power_W": 300.0,
+    "plasma_dissipated_fraction": "approximately 80%",
+    "estimated_plasma_dissipated_power_W": 240.0,
+    "measurement": {
+      "total": "total sampled ion current divided by the 10 um orifice area",
+      "species": "mass-resolved IED relative intensities scaled to the measured total"
+    }
+  },
+  "pixel_calibration": {
+    "x_at_0_Pa": 3073.5,
+    "x_at_10_Pa": 4437.5,
+    "panel_a_y_at_10_mA_cm2": 681.5,
+    "panel_a_y_at_1_mA_cm2": 1085.5,
+    "panel_b_y_at_10_mA_cm2": 1981.5,
+    "panel_b_y_at_1_mA_cm2": 2181.5,
+    "x_scale": "linear",
+    "y_scale": "log10"
+  },
+  "digitization": {
+    "method": "official NIST PDF; 600-dpi Poppler full-page render; full-resolution visual/PIL marker identity audit; dark-axis and marker-pixel replay; nearest-neighbor overlap inspection",
+    "vertical_pixel_allowance": 8.0,
+    "panel_a_log10_flux_uncertainty": 0.01980198,
+    "panel_b_log10_flux_uncertainty": 0.04,
+    "maximum_pressure_setpoint_pixel_offset_Pa": 0.05293,
+    "measurement_uncertainty": "not assigned: Figure 9 publishes no chlorine error bars; the pixel allowance is digitization uncertainty only"
+  },
+  "source_internal_checks": {
+    "panel_a_species_sum_to_total_fraction": [
+      0.9748589116346938,
+      0.9826756081646262,
+      0.9738295301217759
+    ],
+    "panel_a_Cl_plus_fraction": [
+      0.833282369855371,
+      0.912842432447711,
+      0.955427859099331
+    ],
+    "panel_a_total_flux_monotone_in_pressure": true,
+    "panel_a_Cl2_plus_flux_monotone_decreasing": true
+  },
+  "claim_boundary": {
+    "valid": [
+      "absolute total positive-ion flux versus pressure",
+      "reactor-output Cl+ and Cl2+ composition at the grounded plane",
+      "held-out validation of a complete reactor/sheath model"
+    ],
+    "not_valid": [
+      "an electron-impact Cl2+ versus Cl+ branching cross section",
+      "a Lam proprietary reactor boundary",
+      "a capacitively coupled dielectric-etch boundary",
+      "a feature-depth calibration"
+    ],
+    "surface_condition_warning": "the paper attributes its pure-Cl2 species disagreement with Woodworth et al. to reactor surface conditions"
+  },
+  "output": {
+    "path": "data/experimental/wang_olthoff_1999/figure9_chlorine_ion_flux.csv",
+    "sha256": "7d33328e2c3dcb6b3ce1b7da91fd4cf295b25f7c6f8ea9b640d86737871c6cf5"
+  }
+}

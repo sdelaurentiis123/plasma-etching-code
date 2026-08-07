@@ -11,6 +11,7 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 - HG_jap97.txt
 - HG_jvstb97.txt
 - hamilton_2018_cl2_dissociation.txt
+- wang_olthoff_1999_ion_energy.txt
 - an_2026_nnp_etch_verified_excerpts.txt
 - arts_2021_apr_angular_verified_excerpt.txt
 - Konina_Kseniia_PhD_Thesis_2024.txt
@@ -40,6 +41,10 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
   600dpi digitization; source of the 38.8@271 / 39.0@200 neck targets)
 - hamilton_2018_cl2_* (exact liborigin extraction of the official CC-BY OPJ:
   eight state cross sections, independent total, and Figure-5 reference rates)
+- Wang–Olthoff 1999 Figure 9 is under
+  `data/experimental/wang_olthoff_1999/`: 24 absolute/species-resolved
+  chlorine-ion markers, with a 600-dpi PIL audit and exact NIST PDF/render
+  hashes.
 - extract_mouth_profiles.py (regenerator)
 
 ## library/ — the internal literature library (START HERE)

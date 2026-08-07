@@ -1,0 +1,76 @@
+{
+  "protocol_id": "WANG-OLTHOFF-1999-AR-CL2-ICP-GATE-R1",
+  "frozen_before_model": {
+    "mixed_Ar_Cl2_global_solver_exists": false,
+    "model_predictions_read": false,
+    "coefficient_selection_target": null,
+    "feature_depth_target": null
+  },
+  "source": {
+    "bibkey": "wang-olthoff-1999-ion-flux",
+    "doi": "10.1063/1.370138",
+    "figure": "Figure 9",
+    "digitized_data": "data/experimental/wang_olthoff_1999/figure9_chlorine_ion_flux.csv",
+    "digitization_manifest": "data/experimental/wang_olthoff_1999/digitization_manifest.json"
+  },
+  "conditions": {
+    "reactor_class": "five-turn planar ICP in a GEC rf reference cell",
+    "frequency_MHz": 13.56,
+    "flow_sccm": 10.0,
+    "window_to_grounded_electrode_gap_cm": 4.13,
+    "listed_net_power_to_matching_network_W": 300.0,
+    "source_statement_for_plasma_power": "approximately 80% of listed power",
+    "plasma_power_use": "published-approximate 240 W reproduction boundary; not a direct absorbed-power measurement"
+  },
+  "splits": {
+    "calibration": [],
+    "held_out": [
+      "panel a: pure Cl2 at 2.7, 4.0, and 6.7 Pa",
+      "panel b: 20% Cl2 / 80% Ar at 0.67, 1.3, 2.7, 4.0, and 6.7 Pa"
+    ]
+  },
+  "required_outputs": [
+    "total positive-ion flux at the grounded plane in mA/cm2",
+    "Cl+ flux fraction",
+    "Cl2+ flux fraction",
+    "Ar+ flux fraction for the mixed feed",
+    "electron temperature and density",
+    "neutral Cl2 and Cl densities",
+    "negative-ion density",
+    "particle, charge, and electron-power residuals"
+  ],
+  "acceptance": {
+    "conservation": {
+      "maximum_normalized_particle_charge_residual": 1e-08,
+      "maximum_normalized_power_residual": 1e-08
+    },
+    "total_positive_ion_flux": {
+      "maximum_mean_absolute_percentage_error": 0.3,
+      "maximum_single_point_absolute_percentage_error": 0.5,
+      "pure_Cl2_pressure_trend": "strictly increasing",
+      "mixed_feed_pressure_trend": "strictly increasing"
+    },
+    "species_fractions": {
+      "maximum_mean_absolute_fraction_error": 0.1,
+      "maximum_single_species_fraction_error": 0.2,
+      "pure_Cl2_Cl_plus_dominant_at_every_pressure": true,
+      "mixed_feed_Cl2_plus_fraction_below": 0.05
+    }
+  },
+  "claim_cap": {
+    "if_all_gates_pass": "independent reactor/species validation conditional on a published-approximate absorbed-power boundary",
+    "not_earned": [
+      "direct absorbed-power validation",
+      "elementary Cl2 ionization branching identification",
+      "Lam device reconstruction",
+      "CCP or fluorocarbon transfer",
+      "feature-depth prediction"
+    ]
+  },
+  "failure_policy": [
+    "No target may select a cross section, wall coefficient, power-transfer fraction, or species branch.",
+    "A failed species board cannot be hidden by reporting only total current.",
+    "Surface-condition sensitivity must be reported explicitly because the source identifies it as a cause of inter-reactor disagreement.",
+    "Any changed physics requires a new protocol revision; this R1 board remains immutable."
+  ]
+}
