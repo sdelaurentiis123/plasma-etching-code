@@ -167,6 +167,16 @@ on impact and coupling energy delivery to fluorocarbon incorporation. The
 current aggregate Krüger path implements neither a measured large-ion mixture
 nor stable-parent co-incidence.
 
+Benck, Goyette, and Wang provide a stronger quantitative C4F6 ion-side board:
+Faraday-cup-normalized total current, mass-resolved component fluxes, and IEDs
+in C4F6/Ar at 5--20 mTorr. At 10 mTorr their mixtures are Ar+-dominated, CF+
+is the largest fluorocarbon ion, and substantial SiFx+/COFx+ byproduct-ion
+return demonstrates plasma/surface coupling. This is an ICP with a grounded
+surface at 200 W and no O2, not Krüger's biased high-power CCP, so its values
+cannot normalize the trench run. It is an independent quantitative validation
+target for a future C4F6 reactor model. The full-text/vision audit and source
+hash are pinned under the library bibkey `benck-2003-c4f6`.
+
 ## 5. What changed in petch
 
 1. Karahashi Figure 4 now has a checksum-bound, species-resolved data table,
