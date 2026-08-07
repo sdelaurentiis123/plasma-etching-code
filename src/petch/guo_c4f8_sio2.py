@@ -203,6 +203,31 @@ class GuoTmlEvaluation:
     source_extrapolation: Mapping[str, object]
 
 
+@dataclass(frozen=True)
+class GuoTmlTransientEvaluation:
+    """Finite-fluence translating-layer evolution.
+
+    Guo Eq. (17) advances atom fractions with reaction yields, whose units are
+    atoms per incident ion.  Its dimensionless integration coordinate is
+    therefore incident ions per real atom in the translating layer.  A
+    feature adapter must supply an independently declared areal layer
+    capacity before converting physical time to this coordinate.
+    """
+
+    state: GuoTmlState
+    incident_ions_per_tml_atom: float
+    integrated_removed_movement_atoms_per_tml_atom: float
+    integrated_deposited_movement_atoms_per_tml_atom: float
+    average_sio2_removal_yield_per_ion: float
+    average_deposition_atoms_per_ion: float
+    average_net_movement_atoms_per_ion: float
+    final_net_movement_atoms_per_ion: float
+    final_state_derivative_residual: float
+    maximum_atom_ledger_residual_atoms_per_ion: float
+    solver_step_count: int
+    source_extrapolation: Mapping[str, object]
+
+
 def nearest_neighbor_probability(
     state: GuoTmlState, first: str, second: str
 ) -> float:
@@ -490,6 +515,173 @@ class GuoC4F8ArSiO2Mechanism:
     def derivative(self, coordinate, values):
         del coordinate
         return self._rates_and_derivative(values)[-1]
+
+    def advance_fluence(
+        self,
+        initial_state: GuoTmlState,
+        incident_ions_per_tml_atom: float,
+        *,
+        relative_tolerance: float = 2.0e-9,
+        absolute_tolerance: float = 2.0e-11,
+    ) -> GuoTmlTransientEvaluation:
+        """Advance Guo Eq. (17) over a finite, dimensionless ion fluence.
+
+        Two accumulator states integrate the gross etch-branch and
+        deposition-branch movement separately.  This preserves their
+        complementarity even if a transient crosses zero net movement; it
+        does not infer a film composition or add a kinetic coefficient.
+        """
+        if not isinstance(initial_state, GuoTmlState):
+            raise TypeError("initial_state must be a GuoTmlState")
+        coordinate = float(incident_ions_per_tml_atom)
+        if not np.isfinite(coordinate) or coordinate < 0.0:
+            raise ValueError(
+                "incident_ions_per_tml_atom must be finite and nonnegative")
+
+        initial_values = initial_state.as_array()
+
+        def augmented_derivative(_coordinate, augmented):
+            (
+                _state,
+                _rates,
+                added,
+                removed,
+                movement_atoms,
+                state_derivative,
+            ) = self._rates_and_derivative(augmented[:5])
+            # The pointwise atom ledger is exact by construction:
+            # movement = removed - incoming.  Keep gross positive and
+            # negative movement in separate accumulators so a branch crossing
+            # cannot cancel physical recession and deposition.
+            ledger_residual = (
+                movement_atoms - sum(removed.values()) + sum(added.values()))
+            if abs(ledger_residual) > 5.0e-13:
+                raise RuntimeError(
+                    "Guo transient atom ledger lost closure: "
+                    f"{ledger_residual:.6g} atoms/ion")
+            return np.concatenate((
+                state_derivative,
+                [max(movement_atoms, 0.0), max(-movement_atoms, 0.0)],
+            ))
+
+        if coordinate == 0.0:
+            (
+                _state,
+                _rates,
+                added,
+                removed,
+                movement_atoms,
+                state_derivative,
+            ) = self._rates_and_derivative(initial_values)
+            positive = max(movement_atoms, 0.0)
+            negative = max(-movement_atoms, 0.0)
+            maximum_ledger_residual = abs(
+                movement_atoms - sum(removed.values()) + sum(added.values()))
+            final_state = initial_state
+            solver_step_count = 0
+            integrated_positive = 0.0
+            integrated_negative = 0.0
+            average_positive = positive
+            average_negative = negative
+        else:
+            solution = solve_ivp(
+                augmented_derivative,
+                (0.0, coordinate),
+                np.concatenate((initial_values, [0.0, 0.0])),
+                method="BDF",
+                rtol=float(relative_tolerance),
+                atol=float(absolute_tolerance),
+            )
+            if not solution.success:
+                raise RuntimeError(
+                    "Guo translating-layer transient integration failed: "
+                    f"{solution.message}")
+            final_values = np.asarray(solution.y[:5, -1], dtype=float)
+            if np.any(final_values < -2.0e-9):
+                raise RuntimeError(
+                    "Guo transient left the nonnegative state domain")
+            # BDF can return boundary-active species a few ulps below zero.
+            # Canonicalize only values already inside GuoTmlState's numerical
+            # feasibility tolerance, then restore the exact real-atom
+            # normalization required by the feature-state contract.
+            final_values = np.maximum(final_values, 0.0)
+            real_total = float(np.sum(final_values[:4]))
+            if real_total <= 0.0:
+                raise RuntimeError("Guo transient erased all real atoms")
+            final_values[:4] /= real_total
+            final_state = GuoTmlState(*final_values)
+            solver_step_count = max(int(solution.t.size) - 1, 0)
+            integrated_positive = float(solution.y[5, -1])
+            integrated_negative = float(solution.y[6, -1])
+            if integrated_positive < -1.0e-10 or integrated_negative < -1.0e-10:
+                raise RuntimeError(
+                    "Guo transient produced a negative gross movement integral")
+            integrated_positive = max(integrated_positive, 0.0)
+            integrated_negative = max(integrated_negative, 0.0)
+            average_positive = integrated_positive / coordinate
+            average_negative = integrated_negative / coordinate
+            maximum_ledger_residual = 0.0
+            for values in solution.y[:5].T:
+                (
+                    _state,
+                    _rates,
+                    added,
+                    removed,
+                    movement_atoms,
+                    _state_derivative,
+                ) = self._rates_and_derivative(values)
+                maximum_ledger_residual = max(
+                    maximum_ledger_residual,
+                    abs(
+                        movement_atoms
+                        - sum(removed.values())
+                        + sum(added.values())
+                    ),
+                )
+
+        (
+            _state,
+            _rates,
+            _added,
+            _removed,
+            final_movement,
+            final_derivative,
+        ) = self._rates_and_derivative(final_state.as_array())
+        return GuoTmlTransientEvaluation(
+            state=final_state,
+            incident_ions_per_tml_atom=coordinate,
+            integrated_removed_movement_atoms_per_tml_atom=(
+                integrated_positive),
+            integrated_deposited_movement_atoms_per_tml_atom=(
+                integrated_negative),
+            average_sio2_removal_yield_per_ion=average_positive / 3.0,
+            average_deposition_atoms_per_ion=average_negative,
+            average_net_movement_atoms_per_ion=(
+                average_positive - average_negative),
+            final_net_movement_atoms_per_ion=float(final_movement),
+            final_state_derivative_residual=float(
+                np.max(np.abs(final_derivative))),
+            maximum_atom_ledger_residual_atoms_per_ion=float(
+                maximum_ledger_residual),
+            solver_step_count=solver_step_count,
+            source_extrapolation=MappingProxyType({
+                "source_fit_energy_max_eV": self.source_energy_max_eV,
+                "quadrature_max_energy_eV": float(
+                    np.max(self.ions.energy_eV)),
+                "beyond_source_fit_energy": bool(
+                    np.max(self.ions.energy_eV)
+                    > self.source_energy_max_eV
+                ),
+                "physical_angular_polynomial_interpretation": (
+                    "declared_degree_sequence_repair_95p31_cosine_power_1"
+                ),
+                "surface_evidence_ceiling": "L1_yield_regressed",
+                "transient_coordinate": (
+                    "incident_ions_per_translating_layer_real_atom"
+                ),
+                "transient_solver": "BDF_finite_fluence",
+            }),
+        )
 
     def _steady_evaluation(
         self,

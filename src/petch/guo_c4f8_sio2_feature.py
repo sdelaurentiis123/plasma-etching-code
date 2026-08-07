@@ -14,10 +14,13 @@ loss probabilities required by neutral radiosity.  The raw coefficients
 20, 3.5, and 1.8 are never passed to transport as probabilities.
 
 At each exposed face the exact energetic event measure and local incident
-neutral fluxes define one Guo translating-layer steady state.  The bounded
-algebraic root is mathematically identical to the independently tested BDF
-fluence integration and avoids an arbitrary mixing-layer thickness in a
-quasi-steady feature calculation.
+neutral fluxes drive Guo's finite-fluence translating-layer balance.  Guo
+Eq. (17) is dimensionally a derivative with respect to incident ions per
+translating-layer real atom because its right-hand side contains reaction
+yields in atoms per ion.  Physical time is converted to that coordinate using
+the source's 2.5 nm profile-cell/mixed-layer scale and the independently
+declared SiO2 atomic density.  The capacity is exposed in provenance and can
+be swept as a source-uncertainty sensitivity; no feature depth sets it.
 
 This is a transfer-audit mechanism, not a declaration that Krueger's missing
 ion composition or C4F6 boundary has been identified.  Its validity record
@@ -142,23 +145,49 @@ class GuoC4F8ArSiO2FeatureStepResult:
     removed_sio2_formula_units_m2: np.ndarray
     deposited_mixed_layer_atoms_m2: np.ndarray
     sio2_yield_per_ion: np.ndarray
+    deposition_atoms_per_ion: np.ndarray
     net_movement_atoms_per_ion: np.ndarray
-    steady_state_residual: np.ndarray
+    final_state_derivative_residual: np.ndarray
     atom_ledger_residual_atoms_per_ion: np.ndarray
-    bdf_fallback_face_count: int
-    algebraic_fallback_face_count: int
-    exact_steady_state_cache_hits: int
-    exact_steady_state_cache_misses: int
+    transient_coordinate_ions_per_tml_atom: np.ndarray
+    transient_solver_step_count: int
+    exact_transition_cache_hits: int
+    exact_transition_cache_misses: int
     maximum_neutral_reaction_probability: float
     material_exchange: SurfaceMaterialExchange
     validity: MechanismValidity
     product_populations: tuple = ()
 
+    @property
+    def steady_state_residual(self):
+        """Backward-compatible diagnostic name; a transient need not be steady."""
+        return self.final_state_derivative_residual
+
+    @property
+    def bdf_fallback_face_count(self):
+        """Compatibility field from the retired quasi-steady adapter."""
+        return 0
+
+    @property
+    def algebraic_fallback_face_count(self):
+        """Compatibility field from the retired quasi-steady adapter."""
+        return 0
+
+    @property
+    def exact_steady_state_cache_hits(self):
+        """Compatibility field from the retired quasi-steady adapter."""
+        return self.exact_transition_cache_hits
+
+    @property
+    def exact_steady_state_cache_misses(self):
+        """Compatibility field from the retired quasi-steady adapter."""
+        return self.exact_transition_cache_misses
+
 
 class GuoC4F8ArSiO2FeatureMechanism:
-    """Quasi-steady local Guo surface law behind the common 3-D engine."""
+    """Finite-fluence local Guo surface law behind the common 3-D engine."""
 
-    quasi_steady_surface_state = True
+    quasi_steady_surface_state = False
 
     def __init__(
         self,
@@ -169,6 +198,7 @@ class GuoC4F8ArSiO2FeatureMechanism:
         ion_species_mapping: Mapping[str, str | None] | None = None,
         bulk_sio2_formula_density_m3: float = 2.2e28,
         deposited_film_atom_density_m3: float = 7.5e28,
+        translating_layer_thickness_nm: float = 2.5,
         allow_out_of_board_transfer_audit: bool = False,
     ):
         neutral = tuple(str(name) for name in neutral_species)
@@ -193,26 +223,33 @@ class GuoC4F8ArSiO2FeatureMechanism:
             normalized_mapping[population] = formula
         density = float(bulk_sio2_formula_density_m3)
         film_density = float(deposited_film_atom_density_m3)
+        layer_thickness_nm = float(translating_layer_thickness_nm)
         if (not np.isfinite(density) or density <= 0.0
-                or not np.isfinite(film_density) or film_density <= 0.0):
-            raise ValueError("invalid SiO2 or deposited-film density")
+                or not np.isfinite(film_density) or film_density <= 0.0
+                or not np.isfinite(layer_thickness_nm)
+                or layer_thickness_nm <= 0.0):
+            raise ValueError(
+                "invalid SiO2/deposited-film density or TML thickness")
 
         self.neutral_species = neutral
         self.ion_species_mapping = MappingProxyType(normalized_mapping)
         self.bulk_sio2_formula_density_m3 = density
         self.deposited_film_atom_density_m3 = film_density
+        self.translating_layer_thickness_nm = layer_thickness_nm
+        self.translating_layer_areal_atom_capacity_m2 = (
+            3.0 * density * layer_thickness_nm * 1.0e-9)
         self.allow_out_of_board_transfer_audit = bool(
             allow_out_of_board_transfer_audit)
         # The feature coupling operator can request the same local constitutive
         # evaluation several times while forming embedded time estimates and
         # radiosity fixed points.  Cache only bit-identical inputs: there is no
         # quantization, interpolation, or surrogate surface in this path.
-        self._steady_state_cache = OrderedDict()
-        self._steady_state_cache_limit = 4096
-        self._steady_state_cache_hits = 0
-        self._steady_state_cache_misses = 0
+        self._transition_cache = OrderedDict()
+        self._transition_cache_limit = 4096
+        self._transition_cache_hits = 0
+        self._transition_cache_misses = 0
         self.provenance = MappingProxyType({
-            "model": "guo-kwon-translating-mixed-layer-feature-adapter-v1",
+            "model": "guo-kwon-translating-mixed-layer-feature-adapter-v2",
             "source_surface_model": (
                 "Guo MIT PhD thesis 2009 Table 4.1/4.2 and Kwon MIT ScD "
                 "thesis 2004 translating-layer balances"
@@ -225,13 +262,28 @@ class GuoC4F8ArSiO2FeatureMechanism:
                     "coefficients are never treated as probabilities"
                 ),
             },
-            "steady_state_solver": (
-                "source-faithful branch-fixed BDF fluence presolve to 30 "
-                "ions/site with a full 2e-8 balance gate, followed when "
-                "needed by the independently tested bounded algebraic "
-                "complementarity solve"
+            "transient_solver": (
+                "source-faithful BDF integration of Guo Eq. 17 over incident "
+                "ions per translating-layer real atom, with gross etch and "
+                "deposition movement integrated separately"
             ),
-            "steady_state_reuse": (
+            "transient_coordinate_conversion": {
+                "equation": (
+                    "xi = local incident-ion flux * duration / translating-"
+                    "layer areal real-atom capacity"
+                ),
+                "translating_layer_thickness_nm": layer_thickness_nm,
+                "thickness_evidence": (
+                    "Guo 2009 Sec. 2.5 uses 2.5 nm profile cells comparable "
+                    "to the surface halogenation-layer depth; the same thesis "
+                    "reports a 2-3 nm theoretical mixed layer and 1.2 nm "
+                    "AR-XPS mixing witness for the Cl/Si antecedent"
+                ),
+                "areal_real_atom_capacity_m2": (
+                    self.translating_layer_areal_atom_capacity_m2),
+                "feature_depth_used": False,
+            },
+            "transition_reuse": (
                 "bounded exact-input memoization; no quantization, "
                 "interpolation, or physics surrogate"
             ),
@@ -255,7 +307,8 @@ class GuoC4F8ArSiO2FeatureMechanism:
 
     @classmethod
     def krueger_2024_transfer_audit(
-        cls, *, aggregate_ion_formula: str | None = None
+        cls, *, aggregate_ion_formula: str | None = None,
+        translating_layer_thickness_nm: float = 2.5,
     ):
         """Declare one endpoint for Krüger's unresolved aggregate ion row.
 
@@ -265,6 +318,7 @@ class GuoC4F8ArSiO2FeatureMechanism:
         """
         return cls(
             ion_species_mapping={"ions": aggregate_ion_formula},
+            translating_layer_thickness_nm=translating_layer_thickness_nm,
             allow_out_of_board_transfer_audit=True,
         )
 
@@ -397,6 +451,9 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 "its printed species list",
                 "the Guo/Yin deck is beam-regressed, not an elementary "
                 "reaction network or interatomic potential",
+                "the 2.5 nm translating-layer capacity is transferred from "
+                "Guo's profile discretization; C4F6/SiO2 layer depth was not "
+                "measured in the Krueger reactor",
                 "surface-product launch identities and energy-angle laws are "
                 "unresolved, so removed oxide cannot be return-transported",
                 "ion-free spontaneous etching is not advanced on faces with "
@@ -408,6 +465,7 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 "C2F3/C3F4 generic-neutral transfer",
                 "reaction coefficients above 370 eV",
                 "Table-4.2 physical angular exponent repair",
+                "translating-layer areal capacity transferred across chemistry",
             ),
         )
 
@@ -416,8 +474,8 @@ class GuoC4F8ArSiO2FeatureMechanism:
         return np.broadcast_to(np.asarray(value, dtype=float), shape)
 
     @staticmethod
-    def _steady_state_key(local, initial):
-        """Return a bit-exact key for one local constitutive solve."""
+    def _transition_key(local, initial, coordinate):
+        """Return a bit-exact key for one local finite-fluence solve."""
         return (
             tuple(
                 sorted(
@@ -436,44 +494,24 @@ class GuoC4F8ArSiO2FeatureMechanism:
             local.ions.cosine_incidence.tobytes(),
             local.ions.weight.tobytes(),
             initial.as_array().tobytes(),
+            float(coordinate).hex(),
         )
 
-    def _solve_local_steady_state(self, local, initial):
-        key = self._steady_state_key(local, initial)
-        cached = self._steady_state_cache.get(key)
+    def _advance_local_transition(self, local, initial, coordinate):
+        key = self._transition_key(local, initial, coordinate)
+        cached = self._transition_cache.get(key)
         if cached is not None:
-            self._steady_state_cache_hits += 1
-            self._steady_state_cache.move_to_end(key)
+            self._transition_cache_hits += 1
+            self._transition_cache.move_to_end(key)
             return cached
 
-        self._steady_state_cache_misses += 1
-        used_algebraic = False
-        try:
-            # Thirty incident ions/site is already sufficient to drive the
-            # source-board etch and deposition witnesses below the 2e-8 full
-            # balance gate.  A face that has not converged by this fluence is
-            # handed to the exact algebraic complementarity solve rather than
-            # integrating a marginal branch indefinitely.
-            solved = local.solve_steady_state_complementarity_bdf(
-                initial, maximum_coordinate=30.0)
-        except RuntimeError as bdf_error:
-            try:
-                # The constrained balance root is independently pinned against
-                # Guo's source-faithful fluence integration and preserves the
-                # explicit etch/deposition complementarity at bound-active
-                # solutions.
-                solved = local.solve_steady_state_algebraic(initial)
-            except RuntimeError as algebraic_error:
-                raise RuntimeError(
-                    f"BDF={bdf_error}; algebraic={algebraic_error}"
-                ) from algebraic_error
-            used_algebraic = True
-
-        self._steady_state_cache[key] = (solved, used_algebraic)
-        self._steady_state_cache.move_to_end(key)
-        if len(self._steady_state_cache) > self._steady_state_cache_limit:
-            self._steady_state_cache.popitem(last=False)
-        return solved, used_algebraic
+        self._transition_cache_misses += 1
+        solved = local.advance_fluence(initial, coordinate)
+        self._transition_cache[key] = solved
+        self._transition_cache.move_to_end(key)
+        if len(self._transition_cache) > self._transition_cache_limit:
+            self._transition_cache.popitem(last=False)
+        return solved
 
     def _face_ion_measure(self, fluxes, shape):
         size = int(np.prod(shape, dtype=int)) if shape else 1
@@ -569,13 +607,14 @@ class GuoC4F8ArSiO2FeatureMechanism:
             for name in _REAL_FIELDS + ("vacancy",)
         }
         yield_per_ion = np.zeros_like(ion_flux)
+        deposition_atoms_per_ion = np.zeros_like(ion_flux)
         residual = np.zeros_like(ion_flux)
         atom_residual = np.zeros_like(ion_flux)
         movement_atoms_per_ion = np.zeros_like(ion_flux)
-        bdf_fallback_face_count = 0
-        algebraic_fallback_face_count = 0
-        cache_hits_before = self._steady_state_cache_hits
-        cache_misses_before = self._steady_state_cache_misses
+        transient_coordinate = np.zeros_like(ion_flux)
+        solver_step_count = 0
+        cache_hits_before = self._transition_cache_hits
+        cache_misses_before = self._transition_cache_misses
 
         for face, supplied_ion_flux in enumerate(ion_flux):
             if supplied_ion_flux <= 0.0:
@@ -605,9 +644,13 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 output["f"][face],
                 output["vacancy"][face],
             )
+            coordinate = (
+                supplied_ion_flux * duration
+                / self.translating_layer_areal_atom_capacity_m2
+            )
             try:
-                solved, used_algebraic = self._solve_local_steady_state(
-                    local, initial)
+                solved = self._advance_local_transition(
+                    local, initial, coordinate)
             except RuntimeError as solve_error:
                 ratios = {
                     name: values[face] / supplied_ion_flux
@@ -615,32 +658,35 @@ class GuoC4F8ArSiO2FeatureMechanism:
                     if values[face] > 0.0
                 }
                 raise RuntimeError(
-                    "Guo local feature steady state failed at "
+                    "Guo local feature transient failed at "
                     f"face={face}, "
                     f"ion_flux_m2_s={supplied_ion_flux:.9g}, "
+                    f"duration_s={duration:.9g}, "
+                    f"ions_per_tml_atom={coordinate:.9g}, "
                     f"energy_eV=[{min(face_energy[face]):.9g},"
                     f"{max(face_energy[face]):.9g}], "
                     f"neutral_to_ion={ratios}; {solve_error}"
                 ) from solve_error
-            if used_algebraic:
-                algebraic_fallback_face_count += 1
             for name, value in zip(
                 _REAL_FIELDS + ("vacancy",),
                 solved.state.as_array(),
             ):
                 output[name][face] = value
-            yield_per_ion[face] = solved.sio2_yield_per_ion
-            movement_atoms_per_ion[face] = solved.movement_atoms_per_ion
-            residual[face] = solved.steady_state_residual
+            yield_per_ion[face] = (
+                solved.average_sio2_removal_yield_per_ion)
+            deposition_atoms_per_ion[face] = (
+                solved.average_deposition_atoms_per_ion)
+            movement_atoms_per_ion[face] = (
+                solved.average_net_movement_atoms_per_ion)
+            residual[face] = solved.final_state_derivative_residual
             atom_residual[face] = (
-                solved.movement_atoms_per_ion
-                - sum(solved.removed_atoms_per_ion.values())
-                + sum(solved.incoming_atoms_per_ion.values())
-            )
+                solved.maximum_atom_ledger_residual_atoms_per_ion)
+            transient_coordinate[face] = (
+                solved.incident_ions_per_tml_atom)
+            solver_step_count += solved.solver_step_count
 
-        movement_atom_rate = movement_atoms_per_ion * ion_flux
-        removal_rate = np.maximum(movement_atom_rate, 0.0) / 3.0
-        deposition_rate = np.maximum(-movement_atom_rate, 0.0)
+        removal_rate = yield_per_ion * ion_flux
+        deposition_rate = deposition_atoms_per_ion * ion_flux
         removed = removal_rate * duration
         deposited = deposition_rate * duration
         next_state = GuoC4F8ArSiO2FeatureState(
@@ -683,16 +729,19 @@ class GuoC4F8ArSiO2FeatureMechanism:
             removed_sio2_formula_units_m2=removed.reshape(shape),
             deposited_mixed_layer_atoms_m2=deposited.reshape(shape),
             sio2_yield_per_ion=yield_per_ion.reshape(shape),
+            deposition_atoms_per_ion=(
+                deposition_atoms_per_ion.reshape(shape)),
             net_movement_atoms_per_ion=
                 movement_atoms_per_ion.reshape(shape),
-            steady_state_residual=residual.reshape(shape),
+            final_state_derivative_residual=residual.reshape(shape),
             atom_ledger_residual_atoms_per_ion=atom_residual.reshape(shape),
-            bdf_fallback_face_count=bdf_fallback_face_count,
-            algebraic_fallback_face_count=algebraic_fallback_face_count,
-            exact_steady_state_cache_hits=(
-                self._steady_state_cache_hits - cache_hits_before),
-            exact_steady_state_cache_misses=(
-                self._steady_state_cache_misses - cache_misses_before),
+            transient_coordinate_ions_per_tml_atom=(
+                transient_coordinate.reshape(shape)),
+            transient_solver_step_count=solver_step_count,
+            exact_transition_cache_hits=(
+                self._transition_cache_hits - cache_hits_before),
+            exact_transition_cache_misses=(
+                self._transition_cache_misses - cache_misses_before),
             maximum_neutral_reaction_probability=maximum_probability,
             material_exchange=exchange,
             validity=validity,

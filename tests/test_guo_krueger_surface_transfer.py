@@ -87,6 +87,26 @@ def test_energy_and_species_sensitivities_block_an_accidental_promotion():
     assert ions["nonconverged_cases"] == []
 
 
+def test_source_bounded_finite_fluence_does_not_fit_planar_depth():
+    audit = json.loads(AUDIT_PATH.read_text())
+    transient = audit[
+        "finite_fluence_planar_forecast_before_target_scoring"]
+
+    assert transient["nominal_thickness_nm"] == 2.5
+    assert transient["source_sensitivity_band_nm"] == [1.2, 3.0]
+    assert transient["authoritative_feature_prediction"] is False
+    assert transient["predicted_depth_range_nm"] == pytest.approx([
+        855.1265466074275,
+        855.1593714985014,
+    ])
+    nominal = transient["cases"]["2.5_nm"]
+    assert nominal["feature_depth_used"] is False
+    assert nominal["incident_ions_per_tml_atom"] == pytest.approx(
+        43.63636363636363)
+    assert nominal[
+        "maximum_atom_ledger_residual_atoms_per_ion"] < 1.0e-12
+
+
 def test_source_typo_and_atomicity_boundaries_remain_explicit():
     audit = json.loads(AUDIT_PATH.read_text())
 

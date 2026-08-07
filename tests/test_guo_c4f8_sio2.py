@@ -130,6 +130,49 @@ def test_bounded_algebraic_feature_solver_matches_independent_fluence_integratio
             "bounded_etch_complementarity_root")
 
 
+def test_finite_fluence_preserves_zero_duration_state_and_atom_ledger():
+    mechanism = GuoC4F8ArSiO2Mechanism(
+        GuoIncidentComposition(
+            {"CF": 3.7, "CF2": 7.8, "CF3": 0.7, "O": 6.4},
+            {},
+        ),
+        GuoIonQuadrature.monoenergetic(350.0),
+    )
+    initial = GuoTmlState.oxide()
+
+    result = mechanism.advance_fluence(initial, 0.0)
+
+    assert result.state == initial
+    assert result.incident_ions_per_tml_atom == 0.0
+    assert result.integrated_removed_movement_atoms_per_tml_atom == 0.0
+    assert result.integrated_deposited_movement_atoms_per_tml_atom == 0.0
+    assert result.solver_step_count == 0
+    assert result.maximum_atom_ledger_residual_atoms_per_ion < 1.0e-12
+
+
+def test_finite_fluence_converges_to_same_source_steady_state_without_jump():
+    mechanism = GuoC4F8ArSiO2Mechanism(
+        GuoIncidentComposition(
+            {"CF": 3.7, "CF2": 7.8, "CF3": 0.7, "O": 6.4},
+            {},
+        ),
+        GuoIonQuadrature.monoenergetic(350.0),
+    )
+    initial = GuoTmlState.oxide()
+    short = mechanism.advance_fluence(initial, 0.05)
+    long = mechanism.advance_fluence(initial, 30.0)
+    steady = mechanism.solve_steady_state_algebraic()
+
+    assert short.state.as_array() != pytest.approx(
+        steady.state.as_array(), rel=1.0e-4, abs=1.0e-5)
+    assert long.state.as_array() == pytest.approx(
+        steady.state.as_array(), rel=2.0e-8, abs=2.0e-9)
+    assert long.final_net_movement_atoms_per_ion / 3.0 == pytest.approx(
+        steady.sio2_yield_per_ion, rel=2.0e-8)
+    assert long.final_state_derivative_residual < 2.0e-8
+    assert long.maximum_atom_ledger_residual_atoms_per_ion < 1.0e-12
+
+
 def test_bounded_algebraic_solver_closes_ion_only_bound_active_state():
     mechanism = GuoC4F8ArSiO2Mechanism(
         GuoIncidentComposition({}, {}),

@@ -64,6 +64,14 @@
         "render_dimensions_px": [1870, 2420],
         "render_mode": "RGB",
         "render_sha256": "7878b42eeb5ec94c434a30f1208aa1e4911ecb941bdbc010dff39781210fdf51"
+      },
+      {
+        "pdf_page": 47,
+        "content": "Guo Figure 2.2 and profile-cell realization of the moving mixed layer",
+        "render_dpi": 240,
+        "render_dimensions_px": [2040, 2640],
+        "render_mode": "RGB",
+        "render_sha256": "cd52ac68ea13bbc1d64eeef2cd1e7729efa6dbf7a32f2572c92f0cede91a410f"
       }
     ],
     "formalism_pages": [
@@ -123,6 +131,17 @@
       "net_deposition": "movement removes atoms from the well-mixed layer into deposited film in the instantaneous layer composition",
       "numerical_realization": "solve etch and deposition branches separately and accept only sign-consistent steady roots, continuing from the incoming face state",
       "depth_or_yield_fit": false
+    },
+    "finite_fluence_policy": {
+      "source_equation": "Guo Equation 17",
+      "dimensional_coordinate": "incident ions per translating-layer real atom",
+      "derivation": "Equation 17 advances atom fractions with addition/removal yields in atoms per ion; wall time therefore enters through ion fluence divided by translating-layer areal real-atom capacity",
+      "nominal_thickness_nm": 2.5,
+      "nominal_thickness_source": "Guo Section 2.5/Figure 2.2 uses 2.5 nm profile cells, described as comparable to the surface-halogenation-layer depth",
+      "source_sensitivity_band_nm": [1.2, 3.0],
+      "sensitivity_evidence": "Guo reports a 1.2 nm AR-XPS mixing witness and a 2-3 nm theoretical mixed layer for the Cl/Si antecedent; no C4F6/SiO2 layer thickness is measured in Krueger",
+      "depth_or_yield_fit": false,
+      "claim_limit": "the finite-fluence topology is source-derived, but the areal capacity remains a cross-chemistry transfer uncertainty"
     }
   },
   "claim_boundary": {

@@ -227,3 +227,13 @@ def test_guo_tml_router_reuses_transport_and_mask_but_carries_transfer_limits():
     assert cf3_endpoint.mechanisms[1].ion_species_mapping == {"ions": "CF3"}
     assert cf3_endpoint.provenance["materials"]["1"]["evidence"]["model"][
         "ion_species_mapping"] == {"ions": "CF3"}
+
+    finite_layer = build_krueger_2024_material_router_3d(
+        surface_model="guo_tml",
+        guo_translating_layer_thickness_nm=1.2,
+    )
+    assert finite_layer.mechanisms[
+        1].translating_layer_thickness_nm == pytest.approx(1.2)
+    with pytest.raises(ValueError, match="applies only"):
+        build_krueger_2024_material_router_3d(
+            guo_translating_layer_thickness_nm=1.2)

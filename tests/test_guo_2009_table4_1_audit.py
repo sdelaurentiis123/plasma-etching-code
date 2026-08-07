@@ -57,6 +57,7 @@ def test_visual_manifest_pins_source_and_preserves_source_contradictions():
     pages = audit["visual_audit"]["pages"]
     assert [page["pdf_page"] for page in pages] == [
         100, 101, 102, 103, 35, 45,
+        47,
     ]
     assert all(page["render_mode"] == "RGB" for page in pages)
     assert all(len(page["render_sha256"]) == 64 for page in pages)

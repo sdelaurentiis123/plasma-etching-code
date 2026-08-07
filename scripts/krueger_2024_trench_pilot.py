@@ -562,6 +562,9 @@ def _configuration(args):
     if str(args.guo_aggregate_ion_formula) != "unresolved":
         configuration["guo_aggregate_ion_formula"] = str(
             args.guo_aggregate_ion_formula)
+    if str(args.surface_model) == "guo_tml":
+        configuration["guo_translating_layer_thickness_nm"] = float(
+            args.guo_translating_layer_thickness_nm)
     if args.radiosity_backend == "deterministic_extruded_2d":
         configuration["deterministic_exchange"] = {
             "exchange_method": str(args.exchange_method),
@@ -872,6 +875,8 @@ def run(args):
                 if str(args.guo_aggregate_ion_formula) == "unresolved"
                 else str(args.guo_aggregate_ion_formula)
             ),
+            guo_translating_layer_thickness_nm=float(
+                args.guo_translating_layer_thickness_nm),
             effective_mask_crosslinked_growth_fraction=float(
                 args.effective_mask_crosslinked_growth_fraction),
             yield_energy_model=str(args.yield_energy_model),
@@ -1286,6 +1291,17 @@ def parse_args():
             "explicit all-one-species sensitivity for Krueger's unpublished "
             "aggregate positive-ion row; unresolved is the nominal "
             "non-incorporating endpoint and no choice is a fitted mixture"
+        ),
+    )
+    parser.add_argument(
+        "--guo-translating-layer-thickness-nm",
+        type=float,
+        default=2.5,
+        help=(
+            "Guo finite-fluence TML capacity scale. The 2.5 nm default is "
+            "source-fixed from Guo's profile discretization and is not fit "
+            "to Krueger depth; 1.2-3.0 nm is the declared source sensitivity "
+            "band."
         ),
     )
     parser.add_argument(

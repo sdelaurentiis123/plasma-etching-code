@@ -627,7 +627,8 @@ def build_krueger_2024_material_router_3d(
         oxygen_half_saturation_flux_m2_s=None,
         surface_model="reduced",
         mixed_layer_volatilization_yield=1.0,
-        guo_aggregate_ion_formula=None):
+        guo_aggregate_ion_formula=None,
+        guo_translating_layer_thickness_nm=2.5):
     """Build one material router for the reduced Krüger oxide/mask development replay.
 
     ``surface_model`` selects the chemistry family: ``"reduced"`` (the
@@ -677,7 +678,9 @@ def build_krueger_2024_material_router_3d(
             GuoC4F8ArSiO2FeatureMechanism,
         )
         oxide = GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit(
-            aggregate_ion_formula=guo_aggregate_ion_formula)
+            aggregate_ion_formula=guo_aggregate_ion_formula,
+            translating_layer_thickness_nm=(
+                guo_translating_layer_thickness_nm))
         mask = AmorphousCarbonMaskMechanism(
             AmorphousCarbonMaskParameters.krueger_2024_reduced_projection(
                 projectile_species=projectile_species,
@@ -707,6 +710,10 @@ def build_krueger_2024_material_router_3d(
     if guo_aggregate_ion_formula is not None:
         raise ValueError(
             "guo_aggregate_ion_formula applies only to surface_model='guo_tml'")
+    if float(guo_translating_layer_thickness_nm) != 2.5:
+        raise ValueError(
+            "guo_translating_layer_thickness_nm applies only to "
+            "surface_model='guo_tml'")
     oxide = ReducedSiO2FluorocarbonMechanism(
         ReducedSiO2FluorocarbonParameters.krueger_2024_reduced_projection(
             oxide_etch_yield_scale=oxide_etch_yield_scale,

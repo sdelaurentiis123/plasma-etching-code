@@ -75,6 +75,31 @@ adds Si:O = 1:2 only during net oxide etching; during net deposition, material
 leaves the well-mixed layer in its instantaneous elemental composition. Both
 branches are tested as a sign-consistent complementarity problem.
 
+## Finite-fluence coordinate
+
+The feature adapter does not jump each newly exposed face to the asymptotic
+surface composition. Guo Equation 17 advances atom fractions using addition
+and removal yields in atoms per incident ion. Dimensional consistency therefore
+identifies its coordinate as cumulative incident ions per real atom in the
+translating layer:
+
+`xi = Gamma_i * delta_t / N_TML`.
+
+`N_TML` is an areal real-atom capacity, not a kinetic fit. The nominal adapter
+uses the thesis's 2.5 nm profile-cell scale, which Guo describes as comparable
+to the surface-halogenation-layer depth, multiplied by the declared SiO2 atomic
+density. The source uncertainty is kept visible: the same thesis reports a
+1.2 nm AR-XPS mixing witness and a 2--3 nm theoretical mixed layer for the
+Cl/Si antecedent. Krüger does not measure this layer for C4F6/SiO2, so the
+1.2--3.0 nm range is a transfer sensitivity, not a parameter that can be
+selected against feature depth.
+
+The 2026-08-06 visual/Pillow recheck added PDF page 47 (Figure 2.2 and its
+2.5 nm cell scale) to `source_manifest.json`. At zero duration the executable
+state is now exactly unchanged; finite steps integrate gross recession and
+deposition separately so a transient branch crossing cannot cancel either
+inventory.
+
 An executable model may resolve the other inconsistencies only through a
 declared mapping with its own evidence grade.
 

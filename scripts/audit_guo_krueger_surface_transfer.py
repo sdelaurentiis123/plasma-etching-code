@@ -25,6 +25,7 @@ from petch.guo_c4f8_sio2 import (
     GuoC4F8ArSiO2Mechanism,
     GuoIncidentComposition,
     GuoIonQuadrature,
+    GuoTmlState,
     physical_sputtering_angular,
     physical_sputtering_angular_literal,
 )
@@ -107,6 +108,56 @@ def _evaluate(
     }
 
 
+def _evaluate_finite_fluence(
+    iead,
+    neutral_flux_ratio,
+    *,
+    ion_flux_m2_s,
+    duration_s,
+    translating_layer_thickness_nm,
+    sio2_formula_density_m3=2.2e28,
+):
+    mechanism = GuoC4F8ArSiO2Mechanism(
+        GuoIncidentComposition(neutral_flux_ratio, {}),
+        _quadrature(iead),
+    )
+    areal_real_atom_capacity_m2 = (
+        3.0
+        * float(sio2_formula_density_m3)
+        * float(translating_layer_thickness_nm)
+        * 1.0e-9
+    )
+    coordinate = (
+        float(ion_flux_m2_s) * float(duration_s)
+        / areal_real_atom_capacity_m2
+    )
+    result = mechanism.advance_fluence(GuoTmlState.oxide(), coordinate)
+    average_yield = result.average_sio2_removal_yield_per_ion
+    return {
+        "translating_layer_thickness_nm": float(
+            translating_layer_thickness_nm),
+        "areal_real_atom_capacity_m2": areal_real_atom_capacity_m2,
+        "incident_ions_per_tml_atom": coordinate,
+        "average_sio2_removal_yield_per_wafer_ion": average_yield,
+        "predicted_planar_depth_nm": (
+            average_yield
+            * float(ion_flux_m2_s)
+            * float(duration_s)
+            / float(sio2_formula_density_m3)
+            * 1.0e9
+        ),
+        "final_net_movement_atoms_per_wafer_ion": (
+            result.final_net_movement_atoms_per_ion),
+        "final_state_derivative_residual": (
+            result.final_state_derivative_residual),
+        "maximum_atom_ledger_residual_atoms_per_ion": (
+            result.maximum_atom_ledger_residual_atoms_per_ion),
+        "final_state": _state_payload(result.state),
+        "solver_step_count": result.solver_step_count,
+        "feature_depth_used": False,
+    }
+
+
 def build_audit(root: Path | None = None):
     root = root or ROOT
     krueger_data = root / "data" / "experimental" / "krueger_2024"
@@ -154,6 +205,16 @@ def build_audit(root: Path | None = None):
     # This ordering is not mathematically necessary, but makes the data
     # firewall visible in the implementation.
     nominal = _evaluate(iead, neutral_ratio)
+    finite_fluence = {
+        f"{thickness_nm:g}_nm": _evaluate_finite_fluence(
+            iead,
+            neutral_ratio,
+            ion_flux_m2_s=ion_flux,
+            duration_s=60.0,
+            translating_layer_thickness_nm=thickness_nm,
+        )
+        for thickness_nm in (1.2, 2.0, 2.5, 3.0)
+    }
     energy_sensitivity = {
         "printed_law_extended_to_full_iead": nominal,
         "energy_censored_at_2000_eV": _evaluate(
@@ -228,7 +289,7 @@ def build_audit(root: Path | None = None):
     ))
 
     return {
-        "audit_id": "GUO-KWON-TO-KRUEGER-SURFACE-TRANSFER-R1",
+        "audit_id": "GUO-KWON-TO-KRUEGER-SURFACE-TRANSFER-R2",
         "status": "passed",
         "question": (
             "Can an independently beam-yield-regressed, atom-balanced "
@@ -314,6 +375,24 @@ def build_audit(root: Path | None = None):
             ),
         },
         "nominal_no_fit_surface_result": nominal,
+        "finite_fluence_planar_forecast_before_target_scoring": {
+            "coordinate": (
+                "incident ions per translating-layer real atom"),
+            "nominal_thickness_nm": 2.5,
+            "source_sensitivity_band_nm": [1.2, 3.0],
+            "cases": finite_fluence,
+            "predicted_depth_range_nm": [
+                min(
+                    case["predicted_planar_depth_nm"]
+                    for case in finite_fluence.values()
+                ),
+                max(
+                    case["predicted_planar_depth_nm"]
+                    for case in finite_fluence.values()
+                ),
+            ],
+            "authoritative_feature_prediction": False,
+        },
         "score": {
             "experimental_run_average_sio2_per_wafer_ion": target_yield,
             "nominal_guo_sio2_per_wafer_ion": nominal_yield,
@@ -416,9 +495,9 @@ def build_audit(root: Path | None = None):
                     "not radiosity sticking probabilities"
                 ),
                 (
-                    "run the frozen feature transport/geometry with local "
-                    "transient Si/O/C/F/V state, then score depth and profile "
-                    "without changing this board"
+                    "run the frozen feature transport/geometry using the "
+                    "implemented local finite-fluence Si/O/C/F/V state, then "
+                    "score depth and profile without changing this board"
                 ),
             ],
         },

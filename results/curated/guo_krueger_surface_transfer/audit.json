@@ -35,7 +35,7 @@
     "bond_probability_resolved": true,
     "meaning": "the closure conserves Si/O/C/F atoms and carries random-bond statistics, but it is a regressed translating mixed layer, not molecular dynamics or a first-principles potential"
   },
-  "audit_id": "GUO-KWON-TO-KRUEGER-SURFACE-TRANSFER-R1",
+  "audit_id": "GUO-KWON-TO-KRUEGER-SURFACE-TRANSFER-R2",
   "boundary": {
     "neutral_flux_ratio_to_published_aggregate_ion_flux": {
       "C2F3": 5.666666666666667,
@@ -195,6 +195,97 @@
     "mean_energy_over_source_maximum": 9.365164289570068,
     "meaning": "the nominal match extrapolates Guo's fitted coefficients for every IEAD sample. Independent Gray beam data support the same square-root form only over the stated lower-energy probability mass; the remaining high-energy tail and coefficient/species transfer remain unvalidated. Censored cases are sensitivity brackets, not alternate laws"
   },
+  "finite_fluence_planar_forecast_before_target_scoring": {
+    "authoritative_feature_prediction": false,
+    "cases": {
+      "1.2_nm": {
+        "areal_real_atom_capacity_m2": 7.92e+19,
+        "average_sio2_removal_yield_per_wafer_ion": 2.612986968467643,
+        "feature_depth_used": false,
+        "final_net_movement_atoms_per_wafer_ion": 7.83916150195949,
+        "final_state": {
+          "C": 0.1236807425512635,
+          "F": 0.12641415236752032,
+          "O": 0.358438423817212,
+          "Si": 0.39146668126400413,
+          "V": 0.048472775914249734
+        },
+        "final_state_derivative_residual": 1.7763568394002505e-15,
+        "incident_ions_per_tml_atom": 90.9090909090909,
+        "maximum_atom_ledger_residual_atoms_per_ion": 8.881784197001252e-16,
+        "predicted_planar_depth_nm": 855.1593714985014,
+        "solver_step_count": 382,
+        "translating_layer_thickness_nm": 1.2
+      },
+      "2.5_nm": {
+        "areal_real_atom_capacity_m2": 1.65e+20,
+        "average_sio2_removal_yield_per_wafer_ion": 2.6129145308222177,
+        "feature_depth_used": false,
+        "final_net_movement_atoms_per_wafer_ion": 7.839161501959078,
+        "final_state": {
+          "C": 0.12368074255127728,
+          "F": 0.12641415236751388,
+          "O": 0.3584384238171818,
+          "Si": 0.39146668126402706,
+          "V": 0.048472775914248416
+        },
+        "final_state_derivative_residual": 1.5720758028692217e-13,
+        "incident_ions_per_tml_atom": 43.63636363636363,
+        "maximum_atom_ledger_residual_atoms_per_ion": 8.881784197001252e-16,
+        "predicted_planar_depth_nm": 855.1356646327258,
+        "solver_step_count": 380,
+        "translating_layer_thickness_nm": 2.5
+      },
+      "2_nm": {
+        "areal_real_atom_capacity_m2": 1.3200000000000002e+20,
+        "average_sio2_removal_yield_per_wafer_ion": 2.612942391455073,
+        "feature_depth_used": false,
+        "final_net_movement_atoms_per_wafer_ion": 7.839161501959453,
+        "final_state": {
+          "C": 0.12368074255126467,
+          "F": 0.12641415236751977,
+          "O": 0.3584384238172094,
+          "Si": 0.39146668126400613,
+          "V": 0.04847277591424962
+        },
+        "final_state_derivative_residual": 1.1546319456101628e-14,
+        "incident_ions_per_tml_atom": 54.54545454545454,
+        "maximum_atom_ledger_residual_atoms_per_ion": 8.881784197001252e-16,
+        "predicted_planar_depth_nm": 855.144782658024,
+        "solver_step_count": 381,
+        "translating_layer_thickness_nm": 2.0
+      },
+      "3_nm": {
+        "areal_real_atom_capacity_m2": 1.9800000000000003e+20,
+        "average_sio2_removal_yield_per_wafer_ion": 2.612886670189362,
+        "feature_depth_used": false,
+        "final_net_movement_atoms_per_wafer_ion": 7.839161501959097,
+        "final_state": {
+          "C": 0.12368074255127637,
+          "F": 0.12641415236751424,
+          "O": 0.3584384238171837,
+          "Si": 0.3914666812640256,
+          "V": 0.048472775914248506
+        },
+        "final_state_derivative_residual": 1.438849039914203e-13,
+        "incident_ions_per_tml_atom": 36.36363636363636,
+        "maximum_atom_ledger_residual_atoms_per_ion": 8.881784197001252e-16,
+        "predicted_planar_depth_nm": 855.1265466074275,
+        "solver_step_count": 380,
+        "translating_layer_thickness_nm": 3.0
+      }
+    },
+    "coordinate": "incident ions per translating-layer real atom",
+    "nominal_thickness_nm": 2.5,
+    "predicted_depth_range_nm": [
+      855.1265466074275,
+      855.1593714985014
+    ],
+    "source_sensitivity_band_nm": [
+      1.2,
+      3.0
+    ]
+  },
   "linear_depth_diagnostic_only": {
     "authoritative_feature_prediction": false,
     "invalidated_assumptions": [
@@ -353,7 +444,7 @@
     "gray_library_record_sha256": "b6d4f06c057e9e70bc33bd7e2b498420114ee91de2e3956aa132d448139c12e5",
     "gray_ocr_extract_sha256": "36cb360591f19209b484db0fb6e532b4e9818824eeba53c9a16aac5dc14a7e0e",
     "gray_pdf_sha256": "be6bce26b699b3172cf67bb68e4d12e039fd3ea775f73873ee1aaf25164c065b",
-    "guo_manifest_sha256": "138f9f2938337ca2f66277bf09668c19a8d5dc735ec378588383cfd5cfe50b25",
+    "guo_manifest_sha256": "253250dbb6ee364f8e54179c40625a5140f09fc04a0d16807200bf2788e7fd7e",
     "guo_pdf_sha256": "f5c78c0089fe4104019435c6fd34e9b8f284358dda1df0101ecec54c592750d2",
     "guo_table_sha256": "2f93b31c1862095d133b765cddc1957ec27f0e0d05b7b2dfbafc0908f54b9600",
     "krueger_flux_table_sha256": "ad50b6099a52d2c2cc00eb4eade496b9d75c41d19881c5fec9e905f9dfd3808b",
@@ -538,7 +629,7 @@
       "obtain a species-resolved positive-ion flux and IEAD, or validate a reactor provider against that diagnostic",
       "measure or independently predict stable C4F6 molecular flux and C4F6/ion co-incidence response",
       "derive a bounded collision-level neutral uptake law; Guo adsorption coefficients exceed one and are rates, not radiosity sticking probabilities",
-      "run the frozen feature transport/geometry with local transient Si/O/C/F/V state, then score depth and profile without changing this board"
+      "run the frozen feature transport/geometry using the implemented local finite-fluence Si/O/C/F/V state, then score depth and profile without changing this board"
     ],
     "no_fit_planar_surface_normalization_within_five_percent": true,
     "reactor_species_boundary_is_identified": false,

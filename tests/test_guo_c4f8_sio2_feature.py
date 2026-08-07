@@ -53,7 +53,7 @@ def test_collision_probability_refuses_unpublished_saturation_closure():
         )
 
 
-def test_planar_feature_adapter_replays_the_same_guo_steady_state_and_yield():
+def test_planar_feature_adapter_replays_the_same_finite_fluence_balance():
     neutral_ratio = {"CF": 3.7, "CF2": 7.8, "CF3": 0.7, "O": 6.4}
     ion_flux = 1.2e20
     fluxes = SurfaceFluxes(
@@ -71,20 +71,27 @@ def test_planar_feature_adapter_replays_the_same_guo_steady_state_and_yield():
         ion_species_mapping={"Ar+": "Ar"},
     )
     observed = feature.advance(feature.initial_state(), fluxes, 2.0)
-    reference = GuoC4F8ArSiO2Mechanism(
+    reference_mechanism = GuoC4F8ArSiO2Mechanism(
         GuoIncidentComposition(neutral_ratio, {}),
         GuoIonQuadrature.monoenergetic(350.0),
-    ).solve_steady_state_algebraic()
+    )
+    coordinate = (
+        ion_flux * 2.0 / feature.translating_layer_areal_atom_capacity_m2)
+    reference = reference_mechanism.advance_fluence(
+        GuoTmlState.oxide(), coordinate)
 
     assert observed.validity.within_declared_scope
     assert observed.sio2_yield_per_ion == pytest.approx(
-        reference.sio2_yield_per_ion)
+        reference.average_sio2_removal_yield_per_ion)
     assert observed.state.si == pytest.approx(reference.state.si)
     assert observed.state.vacancy == pytest.approx(reference.state.vacancy)
     assert observed.etch_velocity_m_s == pytest.approx(
-        reference.sio2_yield_per_ion * ion_flux / 2.2e28)
+        reference.average_sio2_removal_yield_per_ion
+        * ion_flux / 2.2e28)
     assert observed.removed_sio2_formula_units_m2 == pytest.approx(
-        reference.sio2_yield_per_ion * ion_flux * 2.0)
+        reference.average_sio2_removal_yield_per_ion * ion_flux * 2.0)
+    assert observed.transient_coordinate_ions_per_tml_atom == pytest.approx(
+        coordinate)
     assert abs(observed.atom_ledger_residual_atoms_per_ion) < 1.0e-12
 
 
@@ -124,6 +131,13 @@ def test_feature_adapter_reuses_only_bit_identical_local_steady_state():
         0.0,
     )
 
+    assert first.state.si == initial.si
+    assert first.state.o == initial.o
+    assert first.state.c == initial.c
+    assert first.state.f == initial.f
+    assert first.state.vacancy == initial.vacancy
+    assert first.removed_sio2_formula_units_m2 == 0.0
+    assert first.deposited_mixed_layer_atoms_m2 == 0.0
     assert first.exact_steady_state_cache_hits == 0
     assert first.exact_steady_state_cache_misses == 1
     assert repeated.exact_steady_state_cache_hits == 1
@@ -243,13 +257,16 @@ def test_feature_adapter_resolves_source_deposition_complementarity_face():
                 np.asarray([0.2, 0.3, 0.5]),
             ),),
         ),
-        1.0,
+        10.0,
     )
 
     assert result.bdf_fallback_face_count == 0
     assert result.algebraic_fallback_face_count == 0
     assert result.net_movement_atoms_per_ion < 0.0
     assert result.normal_growth_velocity_m_s > 0.0
-    assert result.etch_velocity_m_s == 0.0
+    # The finite transient begins on bare oxide, so gross early recession and
+    # later net deposition are both retained rather than canceled.
+    assert result.etch_velocity_m_s > 0.0
+    assert result.deposition_atoms_per_ion > 0.0
     assert result.state.c + result.state.f > 0.9
-    assert result.steady_state_residual < 2.0e-8
+    assert result.final_state_derivative_residual < 2.0e-8
