@@ -37,6 +37,14 @@ The deterministic arithmetic is replayed by
 `scripts/audit_krueger_depth_identifiability.py` and frozen in
 `results/curated/depth_identifiability/audit.json`.
 
+A separate full-resolution vision/PIL audit closes the possibility that the
+missing boundary was merely overlooked in Krüger's thesis Figure 6.17. The
+figure labels `CF2`, `C3F4`, `O`, `C2F3`, `CF`, `Ions`, `CF3`, `CO`, and `C`;
+it contains no stable-C4F6 parent curve and keeps all positive ions in one
+aggregate curve. It is also a 6.0/2.5 kW oxygen-flow transfer condition, not
+the 8 kW base-case boundary. The checksum-bound receipt is
+`results/curated/krueger_thesis_boundary_visual_audit/audit.json`.
+
 ## 1. What the Karahashi pixels actually say
 
 The source PDF was rendered at 600 dpi. PIL/NumPy axis localization,

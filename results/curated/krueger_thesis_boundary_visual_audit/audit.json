@@ -1,0 +1,66 @@
+{
+  "audit_id": "KRUEGER-2024-THESIS-FIG6.17-BOUNDARY-VISUAL-R1",
+  "source": {
+    "title": "Modeling and Optimization of High Aspect Ratio Plasma Etching",
+    "author": "Florian Krueger",
+    "year": 2024,
+    "doi": "10.7302/23106",
+    "figure": "6.17",
+    "printed_page": 204,
+    "pdf_page_1_based": 228,
+    "pdf_sha256": "4929018bfeb1cfdbbbc5ba5aecfd6a6010a38ee883dc0f1a574c090bd132c89a",
+    "render": {
+      "dpi": 400,
+      "pixel_width": 3400,
+      "pixel_height": 4400,
+      "sha256": "c63e53b63481ff2a23482d5c74a3d5be395916100d9912a12601e1c88d4dc919"
+    }
+  },
+  "method": {
+    "type": "full_resolution_human_vision_plus_PIL_integrity",
+    "vision_task": "read every curve label and inspect the figure for a stable C4F6 parent curve or species-resolved positive-ion curves",
+    "pil_task": "open the exact 400 dpi page render, verify image integrity and dimensions, and bind it to the source by SHA-256",
+    "numerical_curve_digitization_performed": false,
+    "reason_no_curve_digitization": "the audit asks whether required boundary variables are published, not for values of the curves that are present"
+  },
+  "figure_condition": {
+    "low_frequency_power_kW": 6.0,
+    "high_frequency_power_kW": 2.5,
+    "o2_to_c4f6_feed_ratios": [
+      0.5,
+      1.0,
+      1.5,
+      2.5
+    ],
+    "scope": "oxygen-flow transfer study; this is not the 8 kW base-case boundary"
+  },
+  "visual_transcription": {
+    "curve_labels": [
+      "CF2",
+      "C3F4",
+      "O",
+      "C2F3",
+      "CF",
+      "Ions",
+      "CF3",
+      "CO",
+      "C"
+    ],
+    "stable_c4f6_parent_curve_present": false,
+    "positive_ion_species_resolved": false,
+    "positive_ion_label": "Ions"
+  },
+  "claim_boundary": {
+    "proves": [
+      "Figure 6.17 does not publish stable C4F6 wafer flux for the plotted transfer conditions",
+      "Figure 6.17 reports positive ions only as one aggregate curve"
+    ],
+    "does_not_prove": [
+      "stable C4F6 wafer flux is zero",
+      "the aggregate ion flux is species independent",
+      "the plotted transfer-condition fluxes equal the base case",
+      "any numerical C4F6 or species-resolved ion boundary"
+    ],
+    "depth_consequence": "the thesis figure does not supply the stable-parent flux or positive-ion composition needed to close an independently predictive Krueger absolute-depth calculation"
+  }
+}

@@ -7,6 +7,22 @@
 - **Status:** FULL TEXT: research_sources/thesis_extracts/krueger_thesis_2024.txt (469k), krueger_thesis.txt (older OCR)
 - **Topic:** mechanism-fc-oxide — Fluorocarbon/SiO2 surface mechanism (the Krüger–Kushner lineage)
 
+## Boundary-figure visual audit
+
+Figure 6.17 (printed p. 204; PDF p. 228) was rendered at 400 dpi and inspected
+at full resolution, with source/render hashes and dimensions verified using
+PIL. Its complete curve-label set is `CF2`, `C3F4`, `O`, `C2F3`, `CF`,
+`Ions`, `CF3`, `CO`, and `C`. Stable parent `C4F6` is not plotted, and the
+positive-ion curve is aggregate rather than species resolved. The condition
+is the 6.0/2.5 kW oxygen-flow transfer study, not the 8 kW base case.
+
+This supports only a publication-completeness claim: Figure 6.17 cannot close
+the stable-parent or ion-composition boundary required for absolute depth. It
+does **not** show that parent flux is zero and supplies no numerical surrogate
+for either missing variable. Replay and receipt:
+`scripts/audit_krueger_thesis_boundary_figure.py` and
+`results/curated/krueger_thesis_boundary_visual_audit/audit.json`.
+
 ## Claims table
 
 Rows relocated verbatim from the repo's research/results docs. `consumed by` = the
