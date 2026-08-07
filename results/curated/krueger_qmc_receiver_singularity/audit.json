@@ -1,0 +1,173 @@
+{
+  "all_diagnostic_gates_passed": true,
+  "claim": "Frozen paired control isolates the moving-profile speed spike to the eight-ray diffuse-neutral receiver tally on a vanishing-area mask triangle; it is not evidence for changing chemistry.",
+  "decision": {
+    "chemistry_change_authorized": false,
+    "general_3d_reentry_requirement": "replicated, physical-patch-local exchange/velocity convergence or an error-controlled hierarchical deterministic estimator",
+    "krueger_authority_candidate": "deterministic_extruded_2d",
+    "qmc_moving_profile_authority": false,
+    "surface_smoothing_authorized": false
+  },
+  "gates": {
+    "control_target_neutral_flux_zero": {
+      "limit": 0.0,
+      "passed": true,
+      "value": 0.0
+    },
+    "material_ledgers_exact": {
+      "limit": 0.0,
+      "passed": true,
+      "value": 0.0
+    },
+    "qmc_speed_spike_over_100x_control": {
+      "minimum": 100.0,
+      "passed": true,
+      "value": 149.64693855462068
+    },
+    "qmc_target_neutral_flux_positive": {
+      "minimum": 0.0,
+      "passed": true,
+      "value": 6.168046303278928e+24
+    },
+    "same_geometry_face_count": {
+      "passed": true
+    },
+    "target_area_below_1e_4_active_median": {
+      "limit": 0.0001,
+      "passed": true,
+      "value": 2.1127737986744217e-05
+    }
+  },
+  "input": {
+    "audit_sha256": "25840a2799367142f21393701fd332626e278a53153aae133e9c833d85f46f0a",
+    "checkpoint_sha256": "1a95c3925fb0f6f6c49dbf94e9daa19e42dba84bb7b5ca8e4def28a61181772d",
+    "checkpoint_step": 85,
+    "config_hash": "654b5455dea74132dfed082443d1531bb29bba8a74611cb1e23e22721a9c3734",
+    "directory": "/private/tmp/krueger_guo_transient_dt125_dx10",
+    "physical_time_s": 10.249480050516949
+  },
+  "operator": {
+    "control": "identical boundary, energetic transport, surface state, chemistry, and geometry with diffuse neutral exchange disabled",
+    "radiosity_backend": "scrambled_qmc_3d",
+    "rays_per_source_face": 8,
+    "receiver_estimator": "categorical source-ray hit weight divided by receiver area"
+  },
+  "schema": "petch.krueger.qmc-receiver-singularity.v1",
+  "speed_ratio_qmc_over_control": 149.64693855462068,
+  "with_radiosity": {
+    "maximum_face_speed_m_s": 3.5893005517883277e-06,
+    "target_face": {
+      "active_local_face_index": 652,
+      "area_m2": 1.0586623602343975e-21,
+      "area_mesh_units2": 1.0586623602343975e-09,
+      "area_over_active_median": 2.1127737986744217e-05,
+      "assigned_narrow_band_node_count": 5,
+      "assigned_narrow_band_nodes_mesh_units": [
+        [
+          0.07,
+          0.01,
+          2.27
+        ],
+        [
+          0.08,
+          0.01,
+          2.27
+        ],
+        [
+          0.09,
+          0.01,
+          2.27
+        ],
+        [
+          0.1,
+          0.01,
+          2.27
+        ],
+        [
+          0.11,
+          0.01,
+          2.27
+        ]
+      ],
+      "centroid_mesh_units": [
+        0.09999936322371165,
+        0.010033493551115194,
+        2.26999298731486
+      ],
+      "energetic_flux_m2_s": {
+        "ions": 0.0
+      },
+      "etch_velocity_m_s": 2.309138527978106e-06,
+      "global_face_index": 652,
+      "growth_velocity_m_s": 5.898439079766434e-06,
+      "material_id": 2,
+      "neutral_flux_m2_s": {
+        "C2F3": 1.274143775011358e+24,
+        "C3F4": 6.168046303278928e+24,
+        "CF": 2.3966916463503996e+23,
+        "CF2": 5.120204880839492e+23,
+        "CF3": 4.575502233941673e+22,
+        "O": 7.353944465915695e+23
+      },
+      "signed_face_velocity_m_s": -3.5893005517883277e-06
+    }
+  },
+  "without_radiosity": {
+    "maximum_face_speed_m_s": 2.398512516497786e-08,
+    "same_target_face": {
+      "active_local_face_index": 652,
+      "area_m2": 1.0586623602343975e-21,
+      "area_mesh_units2": 1.0586623602343975e-09,
+      "area_over_active_median": 2.1127737986744217e-05,
+      "assigned_narrow_band_node_count": 5,
+      "assigned_narrow_band_nodes_mesh_units": [
+        [
+          0.07,
+          0.01,
+          2.27
+        ],
+        [
+          0.08,
+          0.01,
+          2.27
+        ],
+        [
+          0.09,
+          0.01,
+          2.27
+        ],
+        [
+          0.1,
+          0.01,
+          2.27
+        ],
+        [
+          0.11,
+          0.01,
+          2.27
+        ]
+      ],
+      "centroid_mesh_units": [
+        0.09999936322371165,
+        0.010033493551115194,
+        2.26999298731486
+      ],
+      "energetic_flux_m2_s": {
+        "ions": 0.0
+      },
+      "etch_velocity_m_s": 0.0,
+      "global_face_index": 652,
+      "growth_velocity_m_s": 0.0,
+      "material_id": 2,
+      "neutral_flux_m2_s": {
+        "C2F3": 0.0,
+        "C3F4": 0.0,
+        "CF": 0.0,
+        "CF2": 0.0,
+        "CF3": 0.0,
+        "O": 0.0
+      },
+      "signed_face_velocity_m_s": 0.0
+    }
+  }
+}
