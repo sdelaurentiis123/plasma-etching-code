@@ -1,0 +1,4 @@
+incident_species,target,energy_eV,incidence_angle_deg,beam_pulse_fwhm_us,desorbed_product,peak_measured_sample_time_ms,marker_center_x_crop_px,marker_center_y_crop_px,time_digitization_bound_ms,ordinate_status
+CF3+,SiO2,1000,30,100,SiF,0.2391,457.0,412.0,0.006,arbitrary_units_not_digitized_no_cross_panel_comparison
+CF3+,SiO2,1000,30,100,SiF2,0.2993,519.0,1648.0,0.006,arbitrary_units_not_digitized_no_cross_panel_comparison
+CF3+,SiO2,1000,30,100,SiF4,0.5403,767.0,2867.0,0.006,arbitrary_units_not_digitized_no_cross_panel_comparison

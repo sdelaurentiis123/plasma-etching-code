@@ -96,3 +96,29 @@ The source does not report the ion incidence angle for Figure 10. Because the
 same source shows that the product fractions change with incidence angle,
 Figure 10 cannot be condition-matched to the explicitly normal-incidence
 Figure-4 yield board without an additional assumption.
+
+## Figure 9 product timing
+
+Figure 9 is independently replayed from PDF page 5 at 600 dpi:
+
+```bash
+python3 scripts/digitize_karahashi_2007_fig9.py \
+  --overlay tmp/pdfs/karahashi_figures/fig9_product_peak_overlay.png
+```
+
+The source condition is a mass-selected 1000 eV CF3+ beam at 30 degrees from
+normal, pulsed with 100 microsecond FWHM. The highest measured marker in each
+arbitrary-unit panel occurs at `0.2391 ms` for SiF, `0.2993 ms` for SiF2, and
+`0.5403 ms` for SiF4, each with a `0.006 ms` digitization allowance. The
+original-resolution PIL overlay was inspected with all three crosshairs
+centered on the intended source markers.
+
+This is a timing/topology constraint, not a transport parameter. The measured
+clock convolves the beam pulse, product flight time and velocity distribution,
+detector geometry, and the surface reaction. The source does not report the
+instrument-response deconvolution, a diffusion coefficient, a formation-depth
+distribution, an escape probability, or a prompt/delayed branching fraction.
+The panel ordinates are unlabeled arbitrary units and are deliberately not
+digitized or compared across products. A predictive product-transport model
+must carry a conserved delayed inventory, but Figure 9 alone cannot assign its
+kinetic coefficients.
