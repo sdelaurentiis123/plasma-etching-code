@@ -10,7 +10,8 @@ PDF SHA-256:
 f2049e7041984d658d23688e8e8112a8d8e8a524172a8d2e335be8fde7fc2e23
 
 This is a selected project extract, not a redistributed source PDF or a full
-text. Equations and Table 3 were reconciled against 240--300 dpi page renders.
+text. Equations and Tables 2--3 were reconciled against 240--300 dpi page
+renders.
 
 Geometry and assumptions (report p.3; PDF p.7)
 ------------------------------------------------
@@ -83,6 +84,67 @@ Te is in eV. Printed coefficients are in cm^3 s^-1 unless stated otherwise.
 
 7. Ar* -> Ar at the wall
    k7 = D_eff/Lambda^2 s^-1
+
+Chlorine volume-particle set (Table 2; report p.24; PDF p.28)
+----------------------------------------------------------------
+Te is in eV. Printed coefficients are in cm^3 s^-1. The table was
+independently inspected at 300 dpi; the render hash and transcription boundary
+are pinned in
+research_sources/digitized/lee_lieberman_1994_chlorine_table2_manifest.md.
+
+1. e + Cl2 -> Cl2+ + 2e
+   k1 = 9.21e-8 exp(-12.9/Te)
+
+2. e + Cl2 -> Cl+ + Cl + 2e
+   k1 = 3.88e-9 exp(-15.5/Te)
+
+3. e + Cl2 -> Cl+ + Cl- + e
+   k1 = 8.55e-10 exp(-12.65/Te)
+
+4. e + Cl2 -> 2Cl + e
+   k2 = 3.80e-8 exp(-3.824/Te)
+
+5. e + Cl2 -> Cl + Cl-
+   k3 = 3.69e-10 exp(
+       -1.68/Te + 1.457/Te^2 - 0.44/Te^3
+       + 0.0572/Te^4 - 0.0026/Te^5)
+
+6. e + Cl -> Cl+ + 2e
+   k4 = (Te/12.96)^0.5 exp(-12.96/Te) [
+       1.419e-7
+       - 1.864e-8 log(Te/12.96)
+       - 5.439e-8 log(Te/12.96)^2
+       + 3.306e-8 log(Te/12.96)^3
+       - 3.54e-9 log(Te/12.96)^4
+       - 2.915e-8 log(Te/12.96)^5]
+
+7. Cl- + Cl2+ -> Cl + Cl2
+   k5 = 5.0e-8
+
+8. Cl- + Cl+ -> Cl + Cl*
+   k6 = 5.0e-8
+
+9. e + Cl- -> Cl + 2e
+   k7 = 2.63e-8 exp(-5.37/Te)
+
+The implementation presently evaluates printed ``log`` as the natural
+logarithm, consistent with the usual Lennon analytical fit form. That
+interpretation remains explicitly source-bound pending direct reconciliation
+against the cited Lennon cross-section/rate source; it is not a fitted choice.
+
+The report does not track the fine-structure Cl* product in reaction 8, so the
+particle deck lumps it into ground-state Cl while preserving chlorine atoms
+and charge. This is acceptable for the report-level particle balance, but the
+lost internal energy must be restored before a fundamental energy ledger can
+be claimed.
+
+Energy-ledger boundary
+----------------------
+The activation parameters printed inside fitted rate laws are not
+automatically physical energy losses per event. Tables 4--5 separately list
+electron energy-loss channels. Until their physical thresholds and channel
+mapping are reconciled against the cited primary cross-section sources, the
+Cl2 network is particle-ready only and must reject electron-power evaluation.
 
 Conservation note
 -----------------

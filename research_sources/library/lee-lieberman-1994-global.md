@@ -12,12 +12,15 @@
   `f2049e7041984d658d23688e8e8112a8d8e8a524172a8d2e335be8fde7fc2e23`
 - **Project extract:**
   `research_sources/thesis_extracts/lee_lieberman_1994_global_model.txt`
-- **Visual audit:** equations/assumptions at 240 dpi; Table 3 at 300 dpi;
+- **Visual audit:** equations/assumptions at 240 dpi; Tables 2--3 at 300 dpi;
   Figures 3 and 8 at native 180 dpi review. The source PDF is not
-  redistributed.
-- **Status:** PRIMARY FULL TEXT READ + EQUATIONS/TABLE 3 VISUALLY AUDITED
-- **Topic:** chemistry-agnostic global-model structure, argon reaction deck,
-  cylindrical wall losses, and independent reactor-validation route
+  redistributed. The Table-2 render checksum and transcription boundary are
+  pinned in
+  `research_sources/digitized/lee_lieberman_1994_chlorine_table2_manifest.md`.
+- **Status:** PRIMARY FULL TEXT READ + EQUATIONS/TABLES 2--3 VISUALLY AUDITED
+- **Topic:** chemistry-agnostic global-model structure, argon and chlorine
+  reaction decks, cylindrical wall losses, and independent reactor-validation
+  route
 
 ## Claims table
 
@@ -33,12 +36,17 @@
 | Q8 | Figure 3 reports `Te(p)` at 1000 W, 35 SCCM, zero recombination coefficient; argon `Te` decreases monotonically with pressure. | Published-model reproduction board, not independent validation. |
 | Q9 | Figure 8 compares model curves with three argon experiments using each experiment’s geometry and operating conditions. | The symbols cannot be pooled anonymously; Ra/Mahoney/Oomori primary conditions must be recovered and preregistered separately. |
 | Q10 | Figure 3's pure-Ar curve was PIL-digitized at 18 pressures and used only after the gate was frozen. | The no-fit implementation passed at both 5 and 8 Te wall-energy endpoints: worst MAPE 9.210%, worst point 14.669%, monotonic, with maximum balance residual 1.44e-14. This is reproduction of the source model, not independent validation. |
+| Q11 | Table 2 prints nine chlorine volume reactions spanning molecular and atomic ionization, ion-pair production, dissociation, dissociative attachment, mutual neutralization, and electron detachment. | Landed as an exact source-unit transcription with `e`, `Cl2`, `Cl`, `Cl2+`, `Cl+`, and `Cl-` explicit. Every reaction is atom- and charge-closed. |
+| Q12 | The second mutual-neutralization row produces `Cl + Cl*`, while the report states that chlorine metastable balances are omitted. | The particle-only reproduction lumps `Cl*` into tracked `Cl`; a predictive energy ledger must restore the internal-energy consequence instead of treating the lumping as fundamental. |
+| Q13 | Tables 4--5 separately enumerate electron energy-loss channels; fitted Table-2 activation parameters are not declared to be physical energy losses per event. | The chlorine network deliberately fails closed on electron-power evaluation until physical channel energies are independently sourced and mapped. |
+| Q14 | The atomic-chlorine ionization fit uses a printed polynomial in `log(Te/12.96)`. | The executable transcription currently interprets `log` as natural logarithm and records that assumption; direct reconciliation to the cited Lennon rate source remains required before predictive use. |
 
 ## Use decision
 
 This source is the first executable verification authority for the independent
-global-reactor stack. It supplies universal balance structure and a compact
-argon deck, not a C4F6 mechanism and not Krüger’s missing wafer boundary.
+global-reactor stack. It supplies universal balance structure and compact
+argon/chlorine decks, not a C4F6 mechanism and not Krüger’s missing wafer
+boundary.
 
 The implementation therefore separates:
 

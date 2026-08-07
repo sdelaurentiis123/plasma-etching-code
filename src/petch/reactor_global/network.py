@@ -243,6 +243,174 @@ class ElectronArrheniusRateCoefficient:
 
 
 @dataclass(frozen=True)
+class ElectronInverseTemperaturePolynomialRateCoefficient:
+    """``A exp(sum(c_n / Te**n))`` electron-impact coefficient.
+
+    Several published molecular-plasma fits use inverse-temperature
+    polynomials rather than a one-threshold Arrhenius form.  Coefficients are
+    indexed from ``n=1`` and retain the source's eV convention for ``Te``.
+    """
+
+    prefactor_si: float
+    inverse_temperature_coefficients: tuple[float, ...]
+    density_order: float
+    source: str
+    source_units: str
+    evidence_kind: str
+
+    def __post_init__(self):
+        coefficients = tuple(
+            float(value) for value in self.inverse_temperature_coefficients)
+        if (
+            not np.isfinite(self.prefactor_si)
+            or self.prefactor_si <= 0.0
+            or not coefficients
+            or np.any(~np.isfinite(np.asarray(coefficients)))
+            or not np.isfinite(self.density_order)
+            or self.density_order <= 0.0
+            or not str(self.source).strip()
+            or not str(self.source_units).strip()
+            or self.evidence_kind not in _EVIDENCE_KINDS
+        ):
+            raise ValueError(
+                "invalid inverse-temperature polynomial rate coefficient")
+        object.__setattr__(self, "prefactor_si", float(self.prefactor_si))
+        object.__setattr__(
+            self, "inverse_temperature_coefficients", coefficients)
+        object.__setattr__(self, "density_order", float(self.density_order))
+
+    def coefficient_si(self, context: RateContext) -> float:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        temperature = context.electron_temperature_eV
+        exponent = sum(
+            coefficient / temperature ** order
+            for order, coefficient in enumerate(
+                self.inverse_temperature_coefficients, start=1)
+        )
+        value = self.prefactor_si * np.exp(exponent)
+        if not np.isfinite(value) or value <= 0.0:
+            raise FloatingPointError("nonpositive or nonfinite rate coefficient")
+        return float(value)
+
+    @classmethod
+    def from_cm3_per_s(
+            cls, prefactor: float, *,
+            inverse_temperature_coefficients: tuple[float, ...],
+            source: str, evidence_kind: str = "regressed"):
+        return cls(
+            prefactor_si=float(prefactor) * CM3_TO_M3,
+            inverse_temperature_coefficients=(
+                inverse_temperature_coefficients),
+            density_order=2.0,
+            source=source,
+            source_units="cm^3 s^-1; Te in eV",
+            evidence_kind=evidence_kind,
+        )
+
+
+@dataclass(frozen=True)
+class ElectronLogPolynomialRateCoefficient:
+    """Published log-polynomial electron-impact coefficient.
+
+    The evaluated form is
+
+    ``(Te/Tref)^b exp(-E/Te) sum(c_n log(Te/Tref)^n)``.
+
+    The polynomial coefficients carry the rate units.  This preserves the
+    printed Lennon-form chlorine-ionization fit without algebraically
+    reshaping or refitting it.
+    """
+
+    polynomial_coefficients_si: tuple[float, ...]
+    reference_temperature_eV: float
+    activation_eV: float
+    temperature_power: float
+    density_order: float
+    source: str
+    source_units: str
+    evidence_kind: str
+
+    def __post_init__(self):
+        coefficients = tuple(
+            float(value) for value in self.polynomial_coefficients_si)
+        values = np.asarray([
+            self.reference_temperature_eV,
+            self.activation_eV,
+            self.temperature_power,
+            self.density_order,
+        ], dtype=float)
+        if (
+            not coefficients
+            or np.any(~np.isfinite(np.asarray(coefficients)))
+            or np.any(~np.isfinite(values))
+            or self.reference_temperature_eV <= 0.0
+            or self.activation_eV < 0.0
+            or self.density_order <= 0.0
+            or not str(self.source).strip()
+            or not str(self.source_units).strip()
+            or self.evidence_kind not in _EVIDENCE_KINDS
+        ):
+            raise ValueError("invalid electron log-polynomial rate coefficient")
+        object.__setattr__(
+            self, "polynomial_coefficients_si", coefficients)
+        object.__setattr__(
+            self, "reference_temperature_eV",
+            float(self.reference_temperature_eV))
+        object.__setattr__(self, "activation_eV", float(self.activation_eV))
+        object.__setattr__(
+            self, "temperature_power", float(self.temperature_power))
+        object.__setattr__(self, "density_order", float(self.density_order))
+
+    def coefficient_si(self, context: RateContext) -> float:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        temperature = context.electron_temperature_eV
+        ratio = temperature / self.reference_temperature_eV
+        log_ratio = np.log(ratio)
+        polynomial = sum(
+            coefficient * log_ratio ** order
+            for order, coefficient in enumerate(
+                self.polynomial_coefficients_si)
+        )
+        value = (
+            ratio ** self.temperature_power
+            * np.exp(-self.activation_eV / temperature)
+            * polynomial
+        )
+        if not np.isfinite(value) or value <= 0.0:
+            raise FloatingPointError("nonpositive or nonfinite rate coefficient")
+        return float(value)
+
+    @classmethod
+    def from_cm3_per_s(
+            cls, polynomial_coefficients: tuple[float, ...], *,
+            reference_temperature_eV: float, activation_eV: float,
+            temperature_power: float, source: str,
+            evidence_kind: str = "published_compilation"):
+        return cls(
+            polynomial_coefficients_si=tuple(
+                float(value) * CM3_TO_M3
+                for value in polynomial_coefficients),
+            reference_temperature_eV=reference_temperature_eV,
+            activation_eV=activation_eV,
+            temperature_power=temperature_power,
+            density_order=2.0,
+            source=source,
+            source_units="cm^3 s^-1; Te in eV; natural log",
+            evidence_kind=evidence_kind,
+        )
+
+
+_RATE_COEFFICIENT_TYPES = (
+    ConstantRateCoefficient,
+    ElectronArrheniusRateCoefficient,
+    ElectronInverseTemperaturePolynomialRateCoefficient,
+    ElectronLogPolynomialRateCoefficient,
+)
+
+
+@dataclass(frozen=True)
 class Reaction:
     """A closed, atom- and charge-conserving reaction event.
 
@@ -255,8 +423,13 @@ class Reaction:
     reactants: Mapping[str, float]
     products: Mapping[str, float]
     kinetic_orders: Mapping[str, float]
-    rate_coefficient: ConstantRateCoefficient | ElectronArrheniusRateCoefficient
-    electron_energy_loss_eV: float
+    rate_coefficient: (
+        ConstantRateCoefficient
+        | ElectronArrheniusRateCoefficient
+        | ElectronInverseTemperaturePolynomialRateCoefficient
+        | ElectronLogPolynomialRateCoefficient
+    )
+    electron_energy_loss_eV: float | None
     source: str
     domain: str = "volume"
 
@@ -273,11 +446,11 @@ class Reaction:
             or not products
             or not orders
             or self.domain not in {"volume", "closed_wall_return"}
-            or not isinstance(
-                self.rate_coefficient,
-                (ConstantRateCoefficient, ElectronArrheniusRateCoefficient),
+            or not isinstance(self.rate_coefficient, _RATE_COEFFICIENT_TYPES)
+            or (
+                self.electron_energy_loss_eV is not None
+                and not np.isfinite(self.electron_energy_loss_eV)
             )
-            or not np.isfinite(self.electron_energy_loss_eV)
             or not str(self.source).strip()
         ):
             raise ValueError("invalid reactor reaction")
@@ -290,9 +463,10 @@ class Reaction:
         object.__setattr__(self, "reactants", reactants)
         object.__setattr__(self, "products", products)
         object.__setattr__(self, "kinetic_orders", orders)
-        object.__setattr__(
-            self, "electron_energy_loss_eV",
-            float(self.electron_energy_loss_eV))
+        if self.electron_energy_loss_eV is not None:
+            object.__setattr__(
+                self, "electron_energy_loss_eV",
+                float(self.electron_energy_loss_eV))
 
     def event_rate_m3_s(
             self, densities_m3: Mapping[str, float],
@@ -419,6 +593,14 @@ class ReactionNetwork:
         rates.setflags(write=False)
         return rates
 
+    @property
+    def has_complete_electron_energy_ledger(self) -> bool:
+        """Whether every reaction declares its electron-energy exchange."""
+        return all(
+            reaction.electron_energy_loss_eV is not None
+            for reaction in self.reactions
+        )
+
     def source_vector_m3_s(
             self, densities_m3: Mapping[str, float],
             context: RateContext) -> np.ndarray:
@@ -430,6 +612,15 @@ class ReactionNetwork:
     def electron_power_loss_density_W_m3(
             self, densities_m3: Mapping[str, float],
             context: RateContext) -> float:
+        if not self.has_complete_electron_energy_ledger:
+            missing = [
+                reaction.name
+                for reaction in self.reactions
+                if reaction.electron_energy_loss_eV is None
+            ]
+            raise ValueError(
+                "electron-energy ledger is incomplete for reactions "
+                f"{missing}")
         rates = self.event_rates_m3_s(densities_m3, context)
         losses_eV = np.array([
             reaction.electron_energy_loss_eV for reaction in self.reactions])

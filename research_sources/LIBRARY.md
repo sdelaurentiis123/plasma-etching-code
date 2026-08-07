@@ -112,7 +112,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`hopwood-1994-rf-coupling`](library/hopwood-1994-rf-coupling.md) | Hopwood, measured planar-ICP RF coupling efficiency | PRIMARY AUTHOR ABSTRACT READ |
 | [`lam-direct-drive-patents`](library/lam-direct-drive-patents.md) | Lam DirectDrive and RF-reference patent family | PRIMARY PATENT FULL TEXT READ |
 | [`lam-etch-platforms-2026`](library/lam-etch-platforms-2026.md) | Lam public etch-platform architecture/application map | PRIMARY MANUFACTURER RECORDS READ |
-| [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | Lee & Lieberman, conserved Ar/O2/Cl2 global plasma model and argon rate deck | PRIMARY FULL TEXT + EQUATIONS/TABLE 3 VISUALLY AUDITED |
+| [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | Lee & Lieberman, conserved Ar/O2/Cl2 global plasma model and Ar/Cl2 rate decks | PRIMARY FULL TEXT + EQUATIONS/TABLES 2--3 VISUALLY AUDITED |
 | [`mahoney-1994-planar-icp`](library/mahoney-1994-planar-icp.md) | Mahoney et al., independent planar-argon ICP electron-state board | PRIMARY FULL TEXT + TABLE I/FIGURE 11 VISUALLY AUDITED |
 | [`miller-1997`](library/miller-1997.md) | Miller & Riley (1997) sheath model | not-fetched |
 | [`nist-asd-argon`](library/nist-asd-argon.md) | NIST ASD neutral-argon ionization and 4s metastable energies | PRIMARY NIST DATABASE QUERIES |
@@ -220,6 +220,8 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 |---|---|---|
 | Conserved global-model power/particle balance and cylindrical effective-loss area | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | chemistry-agnostic 0-D reactor skeleton; electrons explicit so plasma shorthand cannot hide charge error |
 | Argon Table-3 electron-impact rates and Bohm/diffusive wall-loss forms | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | first no-fit reactor verification deck; empirical/regressed evidence retained, not called first-principles |
+| Chlorine Table-2 particle rates and six-species stoichiometric deck | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | exact 300-dpi-audited transcription; atoms and charge close, while omitted Cl fine structure remains an energy-ledger boundary |
+| Chlorine electron-power fail-closed boundary | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | fitted rate exponents are not silently reinterpreted as physical event energies; Tables 4--5 and their primary cross-section sources must close the ledger |
 | Argon ionization/metastable event energies `15.7596119 / 11.54835442 / 4.21125748 eV` | [`nist-asd-argon`](library/nist-asd-argon.md) | physical power ledger kept separate from `18.68 / 15.06 / 4.95 eV` rate-fit exponents |
 | Ar+-Ar `Qm(E)` with explicit center-of-mass energy and Maxwellian rate averaging | [`phelps-1994-ar-ion-scattering`](library/phelps-1994-ar-ion-scattering.md) | replaces the fixed ion mean-free-path sensitivity with an energy- and pressure-dependent collision frequency |
 | Ar-in-Ar `D(T,p)` and 298 K reference `0.182 cm2/s` | [`nist-tn-2279-gas-diffusion`](library/nist-tn-2279-gas-diffusion.md) | supplies neutral bulk diffusion before Lee's Knudsen harmonic; 600 K use is explicitly flagged as extrapolated |

@@ -5,6 +5,8 @@ from petch.reactor_global import (
     CM3_TO_M3,
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
+    ElectronInverseTemperaturePolynomialRateCoefficient,
+    ElectronLogPolynomialRateCoefficient,
     RateContext,
     Reaction,
     ReactionNetwork,
@@ -152,3 +154,84 @@ def test_rate_evaluation_rejects_negative_or_nonfinite_density():
         with pytest.raises(ValueError):
             network.event_rates_m3_s(
                 {"A": invalid, "B": 0.0}, RateContext(1.0))
+
+
+def test_inverse_temperature_polynomial_rate_replays_printed_expression():
+    coefficient = (
+        ElectronInverseTemperaturePolynomialRateCoefficient.from_cm3_per_s(
+            3.69e-10,
+            inverse_temperature_coefficients=(
+                -1.68, 1.457, -0.44, 0.0572, -0.0026),
+            source="lee-lieberman-1994-global Table 2 k3",
+        )
+    )
+    temperature = 3.25
+    expected = 3.69e-10 * np.exp(
+        -1.68 / temperature
+        + 1.457 / temperature ** 2
+        - 0.44 / temperature ** 3
+        + 0.0572 / temperature ** 4
+        - 0.0026 / temperature ** 5
+    ) * CM3_TO_M3
+    assert np.isclose(
+        coefficient.coefficient_si(RateContext(temperature)),
+        expected,
+        rtol=2.0e-16,
+        atol=0.0,
+    )
+
+
+def test_log_polynomial_rate_replays_printed_expression():
+    printed = (
+        1.419e-7,
+        -1.864e-8,
+        -5.439e-8,
+        3.306e-8,
+        -3.54e-9,
+        -2.915e-8,
+    )
+    coefficient = ElectronLogPolynomialRateCoefficient.from_cm3_per_s(
+        printed,
+        reference_temperature_eV=12.96,
+        activation_eV=12.96,
+        temperature_power=0.5,
+        source="lee-lieberman-1994-global Table 2 k4",
+    )
+    temperature = 4.0
+    ratio = temperature / 12.96
+    expected = (
+        ratio ** 0.5
+        * np.exp(-12.96 / temperature)
+        * sum(
+            value * np.log(ratio) ** order
+            for order, value in enumerate(printed)
+        )
+        * CM3_TO_M3
+    )
+    assert np.isclose(
+        coefficient.coefficient_si(RateContext(temperature)),
+        expected,
+        rtol=2.0e-16,
+        atol=0.0,
+    )
+
+
+def test_incomplete_electron_energy_ledger_fails_closed():
+    species = _toy_species()[:2]
+    reaction = Reaction(
+        name="unknown_energy_A_to_B",
+        reactants={"A": 1},
+        products={"B": 1},
+        kinetic_orders={"A": 1},
+        rate_coefficient=ConstantRateCoefficient.from_per_second(
+            2.0, source="manufactured"),
+        electron_energy_loss_eV=None,
+        source="manufactured unresolved energy",
+    )
+    network = ReactionNetwork(species=species, reactions=(reaction,))
+    assert not network.has_complete_electron_energy_ledger
+    with pytest.raises(ValueError, match="electron-energy ledger is incomplete"):
+        network.electron_power_loss_density_W_m3(
+            {"A": 3.0, "B": 7.0},
+            RateContext(1.0),
+        )
