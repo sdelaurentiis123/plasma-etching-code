@@ -35,6 +35,9 @@ def test_deepmd_ale_product_table_retains_species_resolved_yields():
     dosage = table.axes[0].values
     evaluated = table.evaluate({"ar_ion_dosage": dosage})
 
+    assert table.provenance["conditions"]["ar_ion_energy_eV"] == 215.0
+    assert "Figures 13-14" in table.provenance["conditions"]["source_figure"]
+    assert "separate Figure 12" in table.provenance["conditions"]["note"]
     assert np.isclose(evaluated.values["sicl_yield"][0], 0.07833333333333332)
     assert np.isclose(evaluated.values["sicl2_yield"][0], 0.065)
     assert np.all(evaluated.values["sicl2_yield"][3:] == 0.0)

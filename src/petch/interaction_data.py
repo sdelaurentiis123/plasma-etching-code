@@ -140,6 +140,10 @@ def load_kounis_melas_2024_tables(directory, *, verify_checksum=True):
             for name, (_, uncertainty, _) in product_names.items()},
         bounds={name: (0.0, None) for name in product_names},
         provenance=_provenance(
-            "Products.csv", ar_ion_energy_eV=80.0, incidence_angle_deg=0.0,
-            substrate_temperature_k=298.0))
+            "Products.csv", ar_ion_energy_eV=215.0, incidence_angle_deg=0.0,
+            substrate_temperature_k=298.0,
+            source_figure="Figures 13-14 and Supplementary Figures S1-S2",
+            note=(
+                "The separate Figure 12 ALE morphology sequence uses 80 eV; "
+                "the Products.csv points are the 215 eV product-yield sequence.")))
     return KounisMelas2024Tables(sputtering, reactive_ion_etch, ale_products)

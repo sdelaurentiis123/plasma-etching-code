@@ -311,7 +311,7 @@ class TabulatedSiClArMechanism:
                 "RIE table has no incidence-angle or ion-energy sweep",
                 f"normal incidence is accepted only within cosine tolerance {self.cosine_tolerance:g}",
                 "surface coverage and damage memory are implicit in archived steady RIE yields",
-                "etch-product branching is available only for the separate 80 eV ALE table",
+                "etch-product branching is available only for the separate 215 eV ALE table",
             ),
             parameter_evidence_supports_prediction=not nonpredictive,
             nonpredictive_parameters=tuple(nonpredictive))

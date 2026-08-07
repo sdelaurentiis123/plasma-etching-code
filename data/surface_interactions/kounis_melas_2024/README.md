@@ -30,9 +30,15 @@ The three CSV files here are byte-for-byte copies extracted from that archive:
 |---|---|---|
 | `DeepMDData/Sputtering/Sputtering.csv` | `80ae627c1cec67258496ee7d22bd130817b678c1fd3288d5141436fcf374ee3c` | Normal-incidence Ar+ physical sputter yield and amorphous-layer thickness versus energy |
 | `DeepMDData/RIE/RIE.csv` | `7cc634ae1218ba12d1e30ba7e6b4aefc0f4f0cc6de04ced8120115a60786cc77` | Si etch yield versus Cl2:Ar flux ratio at 100 eV normal-incidence Ar+ and 298 K |
-| `DeepMDData/ALE/Products.csv` | `79a7cd3a2618a3fc3d65946d2db5247870d428b58270f78b0ffe46b5116bd9bf` | 80 eV ALE product yields versus Ar+ dose |
+| `DeepMDData/ALE/Products.csv` | `79a7cd3a2618a3fc3d65946d2db5247870d428b58270f78b0ffe46b5116bd9bf` | 215 eV ALE product yields versus Ar+ dose |
 
 The archive also contains the 13,020-row `ALE/ALE.csv` trajectory, the final DeepMD model, LAMMPS
 inputs, and the training corpus. They are not vendored because the pinned archive is already public and
 the complete package is 596 MB. The small result tables needed by the interaction contract are retained
 locally and checksum-gated.
+
+Condition audit: the accepted manuscript's Figures 13--14 identify the `Products.csv` sequence as
+215 eV, and the five plotted blue Si and SiCl points match the archived rows. Figure 12 is a distinct
+80 eV morphology/cycle sequence; it must not be used to label `Products.csv`. The public dataset README
+names the product columns but does not state their energy, so the figure captions are the binding source
+for this condition.
