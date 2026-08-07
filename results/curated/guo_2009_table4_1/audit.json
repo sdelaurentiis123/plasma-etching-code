@@ -1,0 +1,244 @@
+{
+  "all_atom_counted_reactions_close": true,
+  "atom_counted_reactions": [
+    {
+      "closed": true,
+      "products": {
+        "F": 1
+      },
+      "reactants": {
+        "F": 1
+      },
+      "reaction_id": 2
+    },
+    {
+      "closed": true,
+      "products": {
+        "Si": 1
+      },
+      "reactants": {
+        "Si": 1
+      },
+      "reaction_id": 5
+    },
+    {
+      "closed": true,
+      "products": {
+        "O": 1
+      },
+      "reactants": {
+        "O": 1
+      },
+      "reaction_id": 6
+    },
+    {
+      "closed": true,
+      "products": {
+        "C": 1
+      },
+      "reactants": {
+        "C": 1
+      },
+      "reaction_id": 7
+    },
+    {
+      "closed": true,
+      "products": {
+        "F": 1
+      },
+      "reactants": {
+        "F": 1
+      },
+      "reaction_id": 8
+    },
+    {
+      "closed": true,
+      "products": {
+        "F": 2,
+        "Si": 1
+      },
+      "reactants": {
+        "F": 2,
+        "Si": 1
+      },
+      "reaction_id": 9
+    },
+    {
+      "closed": true,
+      "products": {
+        "F": 2
+      },
+      "reactants": {
+        "F": 2
+      },
+      "reaction_id": 10
+    },
+    {
+      "closed": true,
+      "products": {
+        "O": 2
+      },
+      "reactants": {
+        "O": 2
+      },
+      "reaction_id": 11
+    },
+    {
+      "closed": true,
+      "products": {
+        "O": 1,
+        "Si": 1
+      },
+      "reactants": {
+        "O": 1,
+        "Si": 1
+      },
+      "reaction_id": 12
+    },
+    {
+      "closed": true,
+      "products": {
+        "C": 1,
+        "O": 1
+      },
+      "reactants": {
+        "C": 1,
+        "O": 1
+      },
+      "reaction_id": 13
+    },
+    {
+      "closed": true,
+      "products": {
+        "C": 1,
+        "O": 2
+      },
+      "reactants": {
+        "C": 1,
+        "O": 2
+      },
+      "reaction_id": 14
+    },
+    {
+      "closed": true,
+      "products": {
+        "C": 1,
+        "F": 2
+      },
+      "reactants": {
+        "C": 1,
+        "F": 2
+      },
+      "reaction_id": 15
+    },
+    {
+      "closed": true,
+      "products": {
+        "C": 2
+      },
+      "reactants": {
+        "C": 2
+      },
+      "reaction_id": 18
+    },
+    {
+      "closed": true,
+      "products": {
+        "C": 1,
+        "F": 4
+      },
+      "reactants": {
+        "C": 1,
+        "F": 4
+      },
+      "reaction_id": 19
+    },
+    {
+      "closed": true,
+      "products": {
+        "F": 4,
+        "Si": 1
+      },
+      "reactants": {
+        "F": 4,
+        "Si": 1
+      },
+      "reaction_id": 20
+    }
+  ],
+  "claim": "Source-table and elemental-accounting audit only; this is not independent validation, an atomistic potential, or a Krueger absolute-depth fit.",
+  "coefficient_semantics": "kinetic rate-expression coefficients, not bounded sticking probabilities",
+  "coefficients_greater_than_one": {
+    "S_F": 20.0,
+    "S_N_on_C": 3.5,
+    "S_N_on_O": 1.8,
+    "beta_C-V": 10000.0,
+    "beta_CF2": 2.0,
+    "beta_SiF2": 6.75,
+    "beta_d_V_by_I": 1.66
+  },
+  "evidence_ceiling": "L1_yield_regressed",
+  "manifest_sha256": "3bede5054f118cb8da7fba445f87bd03fa8e2e6b3c0902326c389f0d73ee69d0",
+  "row_count": 20,
+  "sequential_reaction_ids": true,
+  "source_inconsistencies_preserved": [
+    "Atomic F is absent from the printed neutral species footnote although Table 4.1 reaction 2 explicitly uses F(g).",
+    "C3F3 is printed with a superscript plus in the nominal-neutral species list."
+  ],
+  "source_pdf_sha256": "f5c78c0089fe4104019435c6fd34e9b8f284358dda1df0101ecec54c592750d2",
+  "status": "passed",
+  "table_csv_hash_matches_manifest": true,
+  "table_csv_sha256": "2f93b31c1862095d133b765cddc1957ec27f0e0d05b7b2dfbafc0908f54b9600",
+  "threshold_failures": [],
+  "thresholds_match_visual_transcription": true,
+  "visual_audit": {
+    "method": "Original-resolution visual inspection plus independent Pillow open/mode/dimension verification of Poppler page renders",
+    "pages": [
+      {
+        "content": "Table 4.1, all 20 reactions and parameters",
+        "pdf_page": 100,
+        "render_dimensions_px": [
+          2550,
+          3300
+        ],
+        "render_dpi": 300,
+        "render_mode": "RGB",
+        "render_sha256": "4e76d3f34e251984493a4e69e74926a5d3fb39bd8ba5da2b1a5a8dccabdf4b6e"
+      },
+      {
+        "content": "Table 4.1 species/provenance/threshold footnotes and section 4.4",
+        "pdf_page": 101,
+        "render_dimensions_px": [
+          2550,
+          3300
+        ],
+        "render_dpi": 300,
+        "render_mode": "RGB",
+        "render_sha256": "572e0c0b331ef4b16109ed5b569944ef872f0a46067d423e35d08628c41ad381"
+      },
+      {
+        "content": "Table 4.2 angular-dependence laws",
+        "pdf_page": 102,
+        "render_dimensions_px": [
+          2040,
+          2640
+        ],
+        "render_dpi": 240,
+        "render_mode": "RGB",
+        "render_sha256": "0a8332b370ea59afd9f8af1f24026cfc107890f73f2cf1dc80a5891c1c565781"
+      },
+      {
+        "content": "Figure 4.2 model-versus-measurement yield board",
+        "pdf_page": 103,
+        "render_dimensions_px": [
+          2040,
+          2640
+        ],
+        "render_dpi": 240,
+        "render_mode": "RGB",
+        "render_sha256": "022d7c9fd22e1632b2a03431e0a44fe1fdc200e3fc3418eec62e5878b0c0ab2e"
+      }
+    ],
+    "pillow_version": "12.3.0"
+  }
+}

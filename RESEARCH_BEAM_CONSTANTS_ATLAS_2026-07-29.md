@@ -278,23 +278,32 @@ conditions **measured by Yin**" — i.e. **L1 against S-L/T-4**. Selected values
 
 | # | Reaction | class | A | E_th (eV) |
 |---|---|---|---|---|
-| 5–8 | physical sputter of Si / O / C / F | **Calc.** | 0.042 / 0.018 / 0.009 / 0.023 | — |
-| 9 | Si(s)+2F(s) → SiF₂(g) ion-enhanced | fitted | 6.75 | — |
+| 1 | ion incorporation, `S_I G_I f` | not row-resolved | **1** | — |
+| 2 | F adsorption at Si vacancy, `S_F J_Si-V G_F` | not row-resolved | **20** | — |
+| 3 | generic neutral adsorption at C vacancy | not row-resolved | **3.5** | — |
+| 4 | generic neutral adsorption at O vacancy | not row-resolved | **1.8** | — |
+| 5–8 | physical sputter of Si / O / C / F | **Calc.** | 0.042 / 0.018 / 0.009 / 0.023 | 44 / 60 / 72 / 55 |
+| 9 | Si(s)+2F(s) → SiF₂(g) ion-enhanced | fitted/assumed not row-resolved | 6.75 | 22 |
 | 10 | 2F(s) → F₂(g) | fitted | 0 | 20 |
-| 11 | 2O(s) → O₂(g) | fitted | 0.22 | — |
+| 11 | 2O(s) → O₂(g) | fitted | 0.22 | 10 |
 | 12 | Si(s)+O(s) → SiO(g) | fitted | 0.007 | 20 |
-| 13 | C(s)+O(s) → CO(g) | fitted | 0.24 | — |
-| 14 | C(s)+2O(s) → CO₂(g) | fitted | 0.95 | — |
+| 13 | C(s)+O(s) → CO(g) | fitted | 0.24 | 35 |
+| 14 | C(s)+2O(s) → CO₂(g) | fitted | 0.95 | 14 |
 | 15 | C(s)+2F(s) → CF₂(g) | fitted | 2 | 0 |
-| 16 | vacancy creation by ion | fitted | 0.14 | — |
-| 17 | densification | fitted | 1.66 | — |
+| 16 | vacancy creation by ion | fitted | 0.14 | 40 |
+| 17 | densification | fitted | 1.66 | 20 |
 | 18 | dangling-bond annihilation | fitted | 10000 | — |
 | 19 | CF₃(s)+F(s) → CF₄(g) recombination | fitted | 0 | — |
 | 20 | Si(s)+4F(s) → SiF₄(g) **spontaneous** | fitted | 2.99×10⁻⁵ | — |
 
-(The sticking coefficients `S_I`, `S_F`, `S_N-on-C`, `S_N-on-O` appear as symbols in
-rows 1–4; their numeric values were lost in the OCR of the parameter column and must
-be re-read from the PDF page 100 or from S-I. `[VERIFY]`)
+**Visual correction (2026-08-06):** PDF p. 100 was rendered at 300 dpi and
+inspected at original resolution; rows 1–4 are `1`, `20`, `3.5`, and `1.8`.
+These are coefficients in the printed bond/site rate expressions, **not bounded
+sticking probabilities**. The source PDF and page-render checksums, all twenty
+rows, and atom-balance classifications are frozen in
+`data/surface_interactions/guo_2009/`. The source footnote itself has two
+preserved inconsistencies: it omits atomic F from the neutral list despite row
+2 and prints a superscript `+` on nominal-neutral `C3F3`.
 
 **Table 4.2 — angular forms**: ion incorporation `f(θ)=cosθ`; physical sputtering
 `f(θ) = −141.29cos⁶θ + 641.11cos⁵θ − 1111.3cos⁴θ + 944.63cos³θ − 421.98cos²θ +
@@ -721,8 +730,10 @@ and `/bitstreams/…/download` routes return 405/empty.
 
 1. Belen 2005 abstract wording — verify verbatim against the PDF (AIP blocks fetch;
    two independent search renderings agree).
-2. Guo Table 4.1 rows 1–4 sticking coefficient *values* (`S_I`, `S_F`, `S_N on C`,
-   `S_N on O`) — lost in OCR of the parameter column; re-read thesis p. 100 or S-I.
+2. ~~Guo Table 4.1 rows 1–4 values~~ — **closed 2026-08-06 by
+   original-resolution visual audit**: `1`, `20`, `3.5`, `1.8`; they are kinetic
+   rate coefficients, not probabilities. See
+   `data/surface_interactions/guo_2009/`.
 3. The "35 eV, Chang–Sawin" SiO₂-complex threshold provenance (see §6).
 4. Spinning-wall HBr product study — exact citation.
 5. Eckstein & Preuss 2003 and Yamamura IPPJ-AM-26 (1983) — page/report numbers.

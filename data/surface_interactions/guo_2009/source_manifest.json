@@ -1,0 +1,72 @@
+{
+  "source": {
+    "citation": "W. Guo, Kinetics modeling and 3-dimensional simulation of surface roughness during plasma etching, MIT PhD thesis (2009)",
+    "handle": "https://hdl.handle.net/1721.1/46600",
+    "official_bitstream": "https://dspace.mit.edu/server/api/core/bitstreams/4c94bfd3-d1de-4f8b-b6af-7ba72e8f20fe/content",
+    "pdf_sha256": "f5c78c0089fe4104019435c6fd34e9b8f284358dda1df0101ecec54c592750d2",
+    "pdf_redistributed": false
+  },
+  "visual_audit": {
+    "method": "Original-resolution visual inspection plus independent Pillow open/mode/dimension verification of Poppler page renders",
+    "pillow_version": "12.3.0",
+    "pages": [
+      {
+        "pdf_page": 100,
+        "content": "Table 4.1, all 20 reactions and parameters",
+        "render_dpi": 300,
+        "render_dimensions_px": [2550, 3300],
+        "render_mode": "RGB",
+        "render_sha256": "4e76d3f34e251984493a4e69e74926a5d3fb39bd8ba5da2b1a5a8dccabdf4b6e"
+      },
+      {
+        "pdf_page": 101,
+        "content": "Table 4.1 species/provenance/threshold footnotes and section 4.4",
+        "render_dpi": 300,
+        "render_dimensions_px": [2550, 3300],
+        "render_mode": "RGB",
+        "render_sha256": "572e0c0b331ef4b16109ed5b569944ef872f0a46067d423e35d08628c41ad381"
+      },
+      {
+        "pdf_page": 102,
+        "content": "Table 4.2 angular-dependence laws",
+        "render_dpi": 240,
+        "render_dimensions_px": [2040, 2640],
+        "render_mode": "RGB",
+        "render_sha256": "0a8332b370ea59afd9f8af1f24026cfc107890f73f2cf1dc80a5891c1c565781"
+      },
+      {
+        "pdf_page": 103,
+        "content": "Figure 4.2 model-versus-measurement yield board",
+        "render_dpi": 240,
+        "render_dimensions_px": [2040, 2640],
+        "render_mode": "RGB",
+        "render_sha256": "022d7c9fd22e1632b2a03431e0a44fe1fdc200e3fc3418eec62e5878b0c0ab2e"
+      }
+    ]
+  },
+  "transcription": {
+    "table": "4.1",
+    "csv": "table4_1_reaction_deck.csv",
+    "csv_sha256": "2f93b31c1862095d133b765cddc1957ec27f0e0d05b7b2dfbafc0908f54b9600",
+    "row_count": 20,
+    "coefficient_semantics": "rate-expression coefficients; not bounded per-collision probabilities",
+    "evidence_ceiling": "L1_yield_regressed",
+    "source_species_footnote": {
+      "ions_printed": ["C+", "O+", "CO+", "CF+", "CF2+", "CF3+", "C2F4+", "C2F5+", "C3F3+", "C3F5+", "C4F3+"],
+      "neutrals_printed": ["C", "O", "CO", "CF", "CF2", "CF3", "C2F4", "C2F5", "C3F3+", "C3F5", "C4F3", "SiF", "SiF2", "SiF3"]
+    },
+    "source_inconsistencies": [
+      "Atomic F is absent from the printed neutral species footnote although Table 4.1 reaction 2 explicitly uses F(g).",
+      "C3F3 is printed with a superscript plus in the nominal-neutral species list."
+    ]
+  },
+  "claim_boundary": {
+    "allowed": "source replay of Guo/Yin C4F8-Ar SiO2 yields and transfer tests within a separately declared boundary mapping",
+    "not_allowed": [
+      "calling the coefficients first-principles",
+      "treating coefficients greater than one as sticking probabilities",
+      "claiming a C4F6 reactor boundary is identified by this C4F8 board",
+      "fitting Krueger feature depth with these source constants"
+    ]
+  }
+}

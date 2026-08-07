@@ -1,0 +1,21 @@
+reaction_id,category,source_reaction,rate_expression,coefficient_symbol,coefficient_value,threshold_eV,energy_dependence,angular_family,reactant_formula,product_formula,balance_class,parameter_provenance
+1,ion_incorporation,I+(g) -> I(s),S_I * G_I * f,S_I,1,,threshold_adjustment_factor_unspecified_Eth,ion_incorporation,,,symbolic_same_species,undifferentiated_assumed_calculated_or_fitted
+2,neutral_adsorption,F(g) -> F(s),S_F * J_Si-V * G_F,S_F,20,,none,none,F,F,exact,undifferentiated_assumed_calculated_or_fitted
+3,neutral_adsorption,N(g) -> N(s) on C vacancy,S_N_on_C * J_C-V * G_N,S_N_on_C,3.5,,none,none,,,symbolic_same_species,undifferentiated_assumed_calculated_or_fitted
+4,neutral_adsorption,N(g) -> N(s) on O vacancy,S_N_on_O * J_O-V * G_N,S_N_on_O,1.8,,none,none,,,symbolic_same_species,undifferentiated_assumed_calculated_or_fitted
+5,physical_sputtering,Si(s) -> Si(g) by I+,Y_Si_by_I * x_Si * G_I,A_Si,0.042,44,source_physical_yield_law,physical_sputtering,Si,Si,exact,calculated
+6,physical_sputtering,O(s) -> O(g) by I+,Y_O_by_I * x_O * G_I,A_O,0.018,60,source_physical_yield_law,physical_sputtering,O,O,exact,calculated
+7,physical_sputtering,C(s) -> C(g) by I+,Y_C_by_I * x_C * G_I,A_C,0.009,72,source_physical_yield_law,physical_sputtering,C,C,exact,calculated
+8,physical_sputtering,F(s) -> F(g) by I+,Y_F_by_I * x_F * G_I,A_F,0.023,55,source_physical_yield_law,physical_sputtering,F,F,exact,calculated
+9,ion_enhanced_etching,Si(s) + 2F(s) -> SiF2(g),beta_SiF2 * J_Si-F^2,beta_SiF2,6.75,22,threshold_step,ion_enhanced,SiF2,SiF2,exact,undifferentiated_assumed_or_fitted
+10,ion_enhanced_etching,2F(s) -> F2(g),beta_F2 * J_F-F,beta_F2,0,20,threshold_step,ion_enhanced,F2,F2,exact,undifferentiated_assumed_or_fitted
+11,ion_enhanced_etching,2O(s) -> O2(g),beta_O2 * J_O-O,beta_O2,0.22,10,threshold_step,ion_enhanced,O2,O2,exact,undifferentiated_assumed_or_fitted
+12,ion_enhanced_etching,Si(s) + O(s) -> SiO(g),beta_SiO * J_Si-O,beta_SiO,0.007,20,threshold_step,ion_enhanced,SiO,SiO,exact,undifferentiated_assumed_or_fitted
+13,ion_enhanced_etching,C(s) + O(s) -> CO(g),beta_CO * J_C-O,beta_CO,0.24,35,threshold_step,ion_enhanced,CO,CO,exact,undifferentiated_assumed_or_fitted
+14,ion_enhanced_etching,C(s) + 2O(s) -> CO2(g),beta_CO2 * J_C-O^2,beta_CO2,0.95,14,threshold_step,ion_enhanced,CO2,CO2,exact,undifferentiated_assumed_or_fitted
+15,ion_enhanced_etching,C(s) + 2F(s) -> CF2(g),beta_CF2 * J_C-F^2,beta_CF2,2,0,threshold_step,ion_enhanced,CF2,CF2,exact,undifferentiated_assumed_or_fitted
+16,vacancy_creation,I+ -> V(s),beta_V_by_I * G_I,beta_V_by_I,0.14,40,threshold_step,ion_enhanced,,,surface_state_transition,undifferentiated_assumed_or_fitted
+17,densification,V(s) -> dense state by I+,beta_d_V_by_I * x_V * G_I,beta_d_V_by_I,1.66,20,threshold_step,ion_enhanced,,,surface_state_transition,undifferentiated_assumed_or_fitted
+18,annihilation,CV(s) + CV(s) -> C-C(s),beta_C-V * J_C-V^2,beta_C-V,10000,,none,none,C2,C2,exact_state_transition,undifferentiated_assumed_or_fitted
+19,recombination,CF3(s) + F(s) -> CF4(g),beta_CF3_F * x_F * G_CF3,beta_CF3_F,0,,none,none,CF4,CF4,exact,undifferentiated_assumed_or_fitted
+20,spontaneous_etching,Si(s) + 4F(s) -> SiF4(g),m_SiF4 * x_Si * G_F,m_SiF4,2.99e-5,,none,none,SiF4,SiF4,exact,undifferentiated_assumed_or_fitted

@@ -3,8 +3,9 @@
 **Guo, PhD thesis, MIT (1721.1/46600)**
 
 - **DOI/URL:** MIT DSpace 1721.1/46600
-- **Retrieval route:** dspace bitstream
-- **Status:** not-fetched
+- **Retrieval route:** official MIT DSpace bitstream
+- **Status:** fetched and checksum-pinned for visual audit; PDF not redistributed
+- **Source SHA-256:** `f5c78c0089fe4104019435c6fd34e9b8f284358dda1df0101ecec54c592750d2`
 - **Topic:** beam-yields — Beam-measured yields, thresholds and sticking (the L0/L1 provenance floor)
 
 ## Claims table
@@ -19,5 +20,7 @@ doc that recorded it (that doc states which constant/decision it fed).
 | U3 | [unquoted — verify on next use] \| **T-6** \| W. Guo, *Kinetics modeling and 3-dimensional simulation of surface roughness during plasma etching*, PhD MIT, 2009 (adv. Sawin) \| [1721.1/46600](http://hdl.handle.net/1721.1/46600) \| **Clean text.** Carries **Table 2.1** (physical-sputter coefficients), **Table 2.2** (full Cl₂/Si reaction deck), **Table 3.1/4.2** (angular forms), **Table 3.2** (Cl₂/Ar composition vs N/I), **Table 4.1** (full C₄F₈/SiO₂ reaction deck), **Table 2.3** (surface-chlorination cross-check vs literature) \| | `RESEARCH_BEAM_CONSTANTS_ATLAS_2026-07-29.md`:143 |
 | U4 | [unquoted — verify on next use] ### 2.4 Transcribed constants — Guo 2009 (T-6) | `RESEARCH_BEAM_CONSTANTS_ATLAS_2026-07-29.md`:228 |
 | U5 | [unquoted — verify on next use] **Source list:** 1. Kwon & Sawin, JVST A **24**, 1906 (2006) I, DOI 10.1116/1.2336225 — measured neutral/ion composition (QMS) and yield (QCM) for C₄F₈ and C₄F₈+80%Ar. 2. Kwon & Sawin, JVST A **24**, 1914 (2006) II, DOI 10.1116/1.2336226 — the TML formalism (compare against `petch.mixed_layer` line by line). 3. Kwon, Bai & Sawin, JVST A **24**, 1920 (2006) III, DOI 10.1116/1.2336227. 4. Yin & Sawin, JVST A **26**, 161 (2008) — SiO₂ + coral `Y(θ)`; JVST A **25**, 802 (2007) — kinetics/roughening; JVST A **26**, 151 (2008) — Ar-only sputter arm. 5. Guo thesis Table 4.1 / 4.2 (20-reaction deck + angular forms) — §2.4 above; and Yin thesis ch. 3 for the C₄F₈-percentage and O₂-addition composition series. 6. Standaert *et al.*, JVST A **22**, 53 (2004), DOI 10.1116/1.1626642 — film thickness, XPS composition, defluorination (block B8, L0). 7. Cunge & Booth, JAP **85**, 3952 (1999) — CF₂ surfa | `RESEARCH_BEAM_CONSTANTS_ATLAS_2026-07-29.md`:642 |
+| Q6 | Original-resolution inspection of Table 4.1 recovers `S_I=1`, `S_F=20`, `S_N_on_C=3.5`, and `S_N_on_O=1.8`. They multiply flux and bond/site-density terms in the printed rate expressions; they are not bounded sticking probabilities. All twenty rows and thresholds are checksum-frozen in `data/surface_interactions/guo_2009/`. | `data/surface_interactions/guo_2009/README.md` |
+| Q7 | The Table 4.1 species footnote is internally inconsistent: atomic F is omitted from the neutral list although reaction 2 consumes `F(g)`, and `C3F3` carries a superscript plus in the nominal-neutral list. No silent repair is authorized. | `data/surface_interactions/guo_2009/source_manifest.json` |
 
-_Harvested 1 quoted + 4 unquoted mentions across the repo's docs._
+_Harvested 3 quoted + 4 unquoted mentions across the repo's docs._
