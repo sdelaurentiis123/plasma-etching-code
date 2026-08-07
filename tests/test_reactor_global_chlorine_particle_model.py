@@ -7,10 +7,13 @@ from petch.reactor_global import (
     ChlorineWallRecombinationBoundary,
     CylindricalReactor,
     FixedElectronTemperatureChlorineParticleModel,
+    FixedChlorineChargedTransportProvider,
+    LeeEconomouChlorineChargedTransportProvider,
     PositiveIonWallTransport,
     ReactorScalarInput,
     build_lee_lieberman_chlorine_particle_network,
     lymberopoulos_economou_1995_chlorine_diffusivity,
+    lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities,
     solve_chlorine_neutral_wall_transport,
     standard_volume_flow_molecules_s,
     thermalized_chlorine_incident_velocity_state,
@@ -131,7 +134,8 @@ def test_fixed_pressure_chlorine_particle_solver_closes_every_ledger():
         build_lee_lieberman_chlorine_particle_network()
     ).solve(
         condition,
-        charged_transport=_charged_transport(geometry),
+        charged_transport_provider=FixedChlorineChargedTransportProvider(
+            _charged_transport(geometry)),
         neutral_wall_transport=_neutral_transport(condition),
     )
 
@@ -166,7 +170,8 @@ def test_pressure_controller_exhaust_is_solved_after_dissociation():
         build_lee_lieberman_chlorine_particle_network()
     ).solve(
         condition,
-        charged_transport=_charged_transport(geometry),
+        charged_transport_provider=FixedChlorineChargedTransportProvider(
+            _charged_transport(geometry)),
         neutral_wall_transport=_neutral_transport(condition),
     )
     naive_feed_over_neutral_inventory = (
@@ -185,7 +190,8 @@ def test_solution_refuses_wall_probability_outside_final_ratio_domain():
             build_lee_lieberman_chlorine_particle_network()
         ).solve(
             condition,
-            charged_transport=_charged_transport(geometry),
+            charged_transport_provider=FixedChlorineChargedTransportProvider(
+                _charged_transport(geometry)),
             neutral_wall_transport=_neutral_transport(
                 condition, ratio_domain=(0.9, 1.1)),
         )
@@ -200,7 +206,8 @@ def test_solver_rejects_transport_from_a_different_geometry():
             build_lee_lieberman_chlorine_particle_network()
         ).solve(
             condition,
-            charged_transport=_charged_transport(other_geometry),
+            charged_transport_provider=FixedChlorineChargedTransportProvider(
+                _charged_transport(other_geometry)),
             neutral_wall_transport=_neutral_transport(condition),
         )
 
@@ -235,3 +242,31 @@ def test_no_untracked_units_enter_fixed_pressure_condition():
             chlorine_molecule_feed=condition.chlorine_molecule_feed,
             source_power=condition.source_power,
         )
+
+
+def test_state_dependent_charged_transport_closes_inside_particle_solve():
+    geometry = CylindricalReactor(radius_m=0.1525, length_m=0.075)
+    condition = _condition(geometry)
+    mobilities = (
+        lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities())
+    provider = LeeEconomouChlorineChargedTransportProvider(
+        reduced_mobilities={
+            species: mobilities[species] for species in ("Cl2+", "Cl+")
+        },
+        ion_temperature=_scalar(0.12, "eV"),
+    )
+    solution = FixedElectronTemperatureChlorineParticleModel(
+        build_lee_lieberman_chlorine_particle_network()
+    ).solve(
+        condition,
+        charged_transport_provider=provider,
+        neutral_wall_transport=_neutral_transport(condition),
+    )
+
+    assert solution.maximum_normalized_residual < 1.0e-11
+    assert solution.supports_particle_reproduction
+    assert not solution.charged_transport_supports_prediction
+    assert solution.total_axial_positive_ion_flux_m2_s > 0.0
+    assert abs(solution.electron_current_balance_residual_m3_s) < (
+        2.0e-11 * sum(solution.positive_ion_wall_loss_m3_s.values())
+    )

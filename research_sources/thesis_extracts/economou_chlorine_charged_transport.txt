@@ -1,0 +1,71 @@
+ECONOMOU CHLORINE CHARGED TRANSPORT — VERIFIED PRIMARY-SOURCE EXTRACTION
+
+Sources
+-------
+D. P. Lymberopoulos and D. J. Economou, IEEE Transactions on Plasma Science
+23, 573–580 (1995), DOI 10.1109/27.467977.
+Author-hosted PDF SHA-256:
+142bdb74f969ddc494a9e659e911f56a66fa12994966a18ea1ee2bc4588934b6
+
+B. Ramamurthi and D. J. Economou, Journal of Vacuum Science & Technology A
+20, 467–478 (2002), DOI 10.1116/1.1450581.
+Author-hosted PDF SHA-256:
+b2f1450df1bac12f7b405254bc4b03900bf926f0ee327a0f043c6b37441060e8
+
+Visual verification
+-------------------
+The 1995 scan's PDF page 4 was rendered at 450 dpi and checked for the ion
+temperature, collision-cross-section statement, and printed reduced
+mobilities. Its render SHA-256 is
+b62382c8a7642988b073dc961018745a014b1041ff9549614283323926162347.
+PDF page 8 was checked for reference 12 and the acknowledgment of private
+collision data. Its render SHA-256 is
+bd723ac3092711dd01c0817a987f1e456b17f079d46a2f78412d250dba546df5.
+
+The 2002 PDF page 4 was rendered at 600 dpi and checked for Tables II–III,
+the 300 K gas/ion temperature, and the three mobility values. Its render
+SHA-256 is
+53c1da9bf00833202ebf1898784c20aabdbd57dbad9ef5d3c53a2c231f82dd94.
+
+Printed values and SI conversion
+--------------------------------
+The 1995 transport table prints the density-reduced mobilities
+
+  N mu_Cl2+ = 5.62e19 cm^-1 V^-1 s^-1
+  N mu_Cl+  = 6.48e19 cm^-1 V^-1 s^-1
+  N mu_Cl-  = 6.48e19 cm^-1 V^-1 s^-1.
+
+Since 1 cm^-1 = 100 m^-1, the exact SI values are
+
+  N mu_Cl2+ = 5.62e21 m^-1 V^-1 s^-1
+  N mu_Cl+  = 6.48e21 m^-1 V^-1 s^-1
+  N mu_Cl-  = 6.48e21 m^-1 V^-1 s^-1.
+
+The 1995 paper assumes a constant ion temperature of 0.12 eV. It states that
+ion mobilities and diffusivities were calculated from constant collision
+cross sections obtained from ref. 12. Reference 12 is “M. J. Kushner, private
+communication”; the acknowledgment likewise thanks Kushner for sharing ion
+and neutral collision cross sections. The cross sections and uncertainty are
+not printed.
+
+The 2002 paper reprints exactly the same three reduced mobilities and cites
+the 1995 source, while Table II assumes gas and ion temperatures of 300 K
+(about 0.025852 eV). It does not publish a temperature law or new measurement.
+
+Conflict and executable boundary
+--------------------------------
+The repository keeps separate exact 1995 and 2002 mobility providers, each
+strictly scoped to its printed ion temperature. Both are `published_model`
+evidence with no uncertainty and therefore fail predictive grading.
+
+The charged-wall transport provider uses only the positive-ion values. It
+evaluates mobility at the reactor neutral density, derives collision frequency
+from mu = e/(m nu), computes the ion-speed moment and momentum mean free path,
+and passes those values into the Lee–Lieberman electronegative edge closure.
+The unused Cl- mobility is retained in the source table but is not silently
+treated as sheath-edge transport because the source model confines negative
+ions to the plasma bulk.
+
+Predictive closure requires public differential or momentum-transfer data, or
+direct swarm mobility measurements, with gas-composition, ion-temperature,
+and uncertainty coverage.

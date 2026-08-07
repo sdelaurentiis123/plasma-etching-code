@@ -6,8 +6,8 @@
 pressure-controlled chlorine reactor solve in the native stack. It is a
 particle-balance rung, not yet a knobs-to-flux predictor.
 
-For a supplied electron temperature and species-resolved charged-wall
-transport, the model solves seven positive unknowns:
+For a supplied electron temperature and a versioned charged-wall transport
+provider, the model solves seven positive unknowns:
 
 1. `n_Cl2`, `n_Cl`, `n_Cl2+`, `n_Cl+`, `n_Cl-`, and `n_e`;
 2. the common volumetric exhaust-loss frequency required by the pressure
@@ -63,8 +63,18 @@ future equipment closure and is one reason the model is not predictive.
 
 Every scalar condition input carries units, source, evidence kind, and an
 optional uncertainty. SCCM conversion requires explicit standard pressure and
-temperature. Charged transport is supplied as separate axial/radial flux
-velocities for `Cl2+` and `Cl+`; the solver does not invent them from pressure.
+temperature. Charged transport is recomputed from the current density state
+inside every nonlinear ledger evaluation. A fixed provider remains available
+only for declared source-reproduction and sensitivity checks.
+
+The first dynamic provider reproduces the exact Lymberopoulos/Economou ion
+mobilities and composes them with the Lee–Lieberman electronegative edge
+closure. It exposes mobility, collision frequency, ion-speed convention,
+momentum mean free path, ambipolar diffusivity, Bohm speed, electronegativity,
+and axial/radial edge factors separately for `Cl2+` and `Cl+`. It is not
+predictive: the papers' constant collision cross sections came from a private
+communication, carry no uncertainty, and the identical mobilities were used
+at conflicting ion temperatures (`0.12 eV` in 1995 and `300 K` in 2002).
 
 ## Deliberate fail-closed verdict
 
@@ -75,7 +85,8 @@ The solution reports the missing closures explicitly:
    supplied);
 2. condition-input evidence where measurements are absent;
 3. predictive neutral diffusivity and incident-velocity evidence;
-4. predictive species-resolved charged transport;
+4. predictive species-resolved charged transport (the current provider is an
+   exact source-model replay, not measured/evaluated transport);
 5. equipment-specific exhaust/conductance when the common volumetric throttle
    model is inadequate.
 
@@ -87,9 +98,9 @@ fitted to the Malyshev dissociation board or to any etched depth.
 
 ## Next gates
 
-1. Build an evidence-bearing Lee charged-transport provider from sourced ion
-   momentum transfer and ambipolar diffusion, with the common-edge-factor
-   assumption visible.
+1. Replace the private-communication ion mobilities with public
+   measured/evaluated momentum-transfer data and uncertainty when available;
+   until then preserve this source-reproduction boundary.
 2. Replace the legacy neutral dissociation channel with the already frozen
    Hamilton state-resolved rates while preserving a source-reproduction mode.
 3. Close physical electron energy losses before solving `T_e` from absorbed

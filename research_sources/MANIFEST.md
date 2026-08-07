@@ -13,6 +13,7 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 - hamilton_2018_cl2_dissociation.txt
 - chantry_1987_wall_diffusion.txt
 - economou_chlorine_neutral_transport.txt
+- economou_chlorine_charged_transport.txt
 - guha_2008_cl_wall_interactions.txt
 - malyshev_1998_lam_chlorine_dissociation.txt
 - stafford_2009_cl_wall_recombination.txt
