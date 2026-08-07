@@ -59,9 +59,14 @@ def _angular_yield_factor(cosine, angular_model, angular_parameter):
     if angular_model == "none":
         return np.ones(cosine.shape)
     if angular_model == "chang_sawin_1997":
-        theta = np.arccos(cosine)
-        return np.where(
-            cosine >= 0.5, 1.0, np.maximum(3.0 - 6.0 * theta / np.pi, 0.0))
+        # Chang's measured chlorine/Si response is flat through 40 degrees,
+        # approximately 0.7 and 0.5 of normal at 60 and 70 degrees, and zero
+        # at grazing incidence.  The MCFPM class-2 interpolation used
+        # elsewhere in petch is unity through 45 degrees followed by the
+        # no-extra-parameter projected-flux roll-off.  The former 60-degree
+        # plateau in this shared helper contradicted both the digitized curve
+        # and ``mixed_layer._angular_chemical_sputter``.
+        return np.minimum(cosine / np.cos(np.pi / 4.0), 1.0)
     if angular_model == "kress_1999":
         return ((1.0 + float(angular_parameter) * (1.0 - cosine * cosine))
                 * cosine)

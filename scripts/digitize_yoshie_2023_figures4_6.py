@@ -396,10 +396,13 @@ def manifest(blanket_payload, feature_payload):
         },
         "claim_boundary": {
             "valid": (
-                "same-reactor blanket-conditioned transfer to fixed-duration "
-                "features when Figure 4 alone sets the boundary normalization"
+                "Figure 4 may condition a same-reactor boundary observable "
+                "before fixed-duration feature prediction only inside an "
+                "independently validated material- and cycle-history-resolved "
+                "mechanism"
             ),
             "not_valid": [
+                "a multiplicative blanket-to-feature depth scale",
                 "a measured species-resolved wafer flux",
                 "a measured ion energy-angle distribution",
                 "a first-principles knobs-to-flux validation",

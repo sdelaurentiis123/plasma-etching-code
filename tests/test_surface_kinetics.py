@@ -160,7 +160,8 @@ def test_energetic_yield_reproduces_threshold_reference_and_angular_limits():
         0.2, 20.0, 100.0, energy_exponent=1.0, angular_model="chang_sawin_1997")
     assert law.evaluate(19.0, 1.0) == 0.0
     assert np.isclose(law.evaluate(100.0, 1.0), 0.2)
-    assert np.isclose(law.evaluate(100.0, 0.5), 0.2)
+    assert np.isclose(
+        law.evaluate(100.0, 0.5), 0.2 / np.sqrt(2.0))
     assert np.isclose(law.evaluate(100.0, 0.0), 0.0, atol=1e-15)
 
     sputter = EnergeticYield(

@@ -35,12 +35,21 @@ facility-specific boundary before feature values are used.
 three timings by seven widths for the 4 s cycle and four timings by seven
 widths for the 8 s cycle.  All 49 are held-out transfer targets.
 
-This creates a legitimate Tier-B test—independent blanket conditioning,
-followed by feature depth prediction—but not a first-principles reactor
-validation.  The source does not report species-resolved wafer fluxes or a
-measured IEAD.  The plotted error bars are retained, but their statistical
-semantics are not stated, so they are not silently called standard deviations
-or confidence intervals.
+This creates a possible Tier-B test—independent blanket conditioning followed
+by feature depth prediction—but only for a mechanism that resolves the
+experimental transfer.  The blanket is a 370 nm poly-Si film exposed for 75
+cycles; the patterned target is bulk Si exposed for 450 or 675 cycles.  A
+read-only audit (`scripts/audit_yoshie_2023_blanket_transfer.py`) shows that a
+single multiplicative blanket scale is invalid: for the 8 s timing-I condition,
+every feature rate is more than 2.5 times the blanket rate even after the
+digitization allowances, and the timing rank changes.  The blanket observable
+may therefore condition a reactor boundary only inside a material- and
+cycle-history-resolved mechanism.
+
+The source does not report species-resolved wafer fluxes or a measured IEAD.
+The plotted error bars are retained, but their statistical semantics are not
+stated, so they are not silently called standard deviations or confidence
+intervals.
 
 ## Pixel replay and visual audit
 
@@ -70,3 +79,10 @@ versus 466 nm/bias-min for the 4 s cycle, and 592.683 versus approximately
 591 nm/bias-min for the 8 s cycle.  Full-resolution color-component centers,
 error-cap pixels, and a conservative digitization allowance are retained in
 the committed tables and manifest.
+
+The initial-pattern SEMs in Figures 5(a) and 6(a) were also inspected at full
+resolution with a pixel grid against their 500 nm scale bars.  The apparent
+vertical openings are the trenches through the SiO2 mask; their bottoms
+coincide with the Si/mask interface to within the raster resolution.  There is
+no hidden initial Si depth large enough to explain the super-blanket 8 s
+timing-I rates.

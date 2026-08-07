@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 94 sources by topic
+## Index — 95 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -174,13 +174,14 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`pargon-2013-jvstb`](library/pargon-2013-jvstb.md) | Pargon et al. (LTM), JVST B 31, 012205 (2013) | ABSTRACT/relay |
 | [`rutigliani-2018-spie`](library/rutigliani-2018-spie.md) | Rutigliani, Lorusso, De Simone & Mack, Proc. SPIE 10585 (2018) | FETCHED (absolute nm^3 PSDs) |
 
-### SF₆/O₂ on silicon (the partner-relevant arm)
+### SF₆/C₄F₈ and SF₆/O₂ on silicon (the partner-relevant arm)
 
 | bibkey | source | status |
 |---|---|---|
 | [`belen-2005-jvsta`](library/belen-2005-jvsta.md) | Belen et al., JVST A 23, 99 (2005) | ABSTRACT (self-declares L3 profile-fitted) |
 | [`deboer-2002`](library/deboer-2002.md) | de Boer et al. (2002), cryo SF6/O2 Si | FULL TEXT: research_sources/thesis_extracts/deboer-2002.txt |
 | [`micromachines-2023`](library/micromachines-2023.md) | TU Wien/ViennaPS, Micromachines (2023) | FULL TEXT: research_sources/thesis_extracts/mask_geometry_micromachines_2023.txt |
+| [`yoshie-2023-apsusc`](library/yoshie-2023-apsusc.md) | Yoshie et al., cyclic C4F8/SF6 Si bias timing and ARDE | FULL TEXT ONLINE + PIL-AUDITED FIGURES |
 
 ### In-feature and profile metrology
 
@@ -196,6 +197,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Chemical branching `β = 0.053(√E − √4)` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Table 5-10 parenthetical B₀ column; co-regressed partner of s₀ |
 | Oxide F sticking `s₀ = 0.02` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | printed p.246; landed only as the (s₀,B₀) pair |
 | Silicon F sticking `s₀ = 0.2` + `B₀ = 0.687(√E − √4)` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Si-side pair for the SF₆ arm upgrade (RESEARCH_SF6_RELEVANCE) |
+| Cyclic C4F8/SF6 blanket/feature depth board | [`yoshie-2023-apsusc`](library/yoshie-2023-apsusc.md) | 7 same-reactor poly-Si blanket rates + 49 held-out bulk-Si feature rates; material/history transfer warning |
 | Beam gate N1 (floor 0.25 / half-rise / plateau) | [`gray-1993-thesis`](library/gray-1993-thesis.md) | the measured yield-vs-F/Ar⁺ curve petch is graded against |
 | Species-resolved pure-reactive-ion yield ladder | [`karahashi-2007`](library/karahashi-2007.md) | direct F+/CF+/CF2+/CF3+ constraint; forbids species-agnostic validation and extrapolation above measured support |
 | Stable-parent molecule / ion co-incidence envelope | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | C5F8 analog proves molecule-assisted yields can exceed a pure-CF3+ value; explicitly not a C4F6 law |
@@ -206,6 +208,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | FC-film angular curve (peak 1.448 @ 65°) | [`barklund-1992-jvsta`](library/barklund-1992-jvsta.md) | the only measured FC-*film* angular yield; selects the yield reading (eliminated 48/64 models) |
 | Class-2 chemical roll-off `min(1, cosθ/cos45°)` | [`chang-1997-jvsta`](library/chang-1997-jvsta.md) | unity to 45° then monotone roll-off; digitized curve within 0.065 absolute |
 | Class-2 digitized curve + thresholds | [`chang-thesis`](library/chang-thesis.md) | p.115 rendered at 400 dpi; Table 3.1 sputter thresholds |
+| Ar+/Cl and Ar+/Cl2 poly-Si site balance at 100 eV | [`chang-thesis`](library/chang-thesis.md) | Tables 3.3--3.4 and Eqs. 3.9--3.11; beam-regressed `s`, `Y0`, and `beta`, with explicit SiCl4 simplification |
 | SiO₂-complex threshold 35 eV | [`joubert-1994-jvsta`](library/joubert-1994-jvsta.md) | provenance corrected from 'Chang–Sawin' (via Chang p.90) |
 | Reflection cascade Eq. 2.34 (E_ts=100, E_c=10, θ_c=70°) | [`huang-thesis`](library/huang-thesis.md) | verbatim retention rule + leftover-probability selection |
 | Crosslink formation = deposition-driven (ion-broken) | [`krueger-2024-thesis`](library/krueger-2024-thesis.md) | §2.2.3 + Table 6.2 — the lip inversion fix (ml18: 5.07×→1.83×) |

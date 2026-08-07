@@ -175,6 +175,10 @@ from .chlorine_poly_si import (
     HwangGiapisClSiMechanism, HwangGiapisClSiParameters, HwangGiapisClSiState,
     HwangGiapisClSiStepResult, HwangGiapisClSiYield,
 )
+from .chang_sawin_chlorine_si import (
+    ChangSawinArClSiMechanism, ChangSawinArClSiParameters,
+    ChangSawinArClSiState, ChangSawinArClSiStepResult,
+)
 from .hwang_giapis_scatter_3d import (
     HwangGiapisForwardScatter3DResult, HwangGiapisSiO2ForwardScatter3D,
     NeutralSurfaceFlight3D, OutgoingNeutralParticleEvents3D,
@@ -232,6 +236,8 @@ __all__ = [
     "SurfaceProductRedepositionLaw3D", "transport_surface_product_redeposition_3d",
     "PhysicalSputterMechanism", "PhysicalSputterParameters", "PhysicalSputterState",
     "PhysicalSputterStepResult",
+    "ChangSawinArClSiMechanism", "ChangSawinArClSiParameters",
+    "ChangSawinArClSiState", "ChangSawinArClSiStepResult",
     "BelenSiliconParameters", "BelenSiliconSF6O2Mechanism", "BelenSiliconState",
     "BelenSiliconStepResult",
     "MaterialMechanismRouter3D", "MaterialSurfaceState3D",

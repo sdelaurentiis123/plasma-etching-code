@@ -69,7 +69,7 @@ def test_steinbruchel_yield_is_exact_square_root_threshold_law():
 
     assert law.evaluate(24.0, 1.0) == 0.0
     assert np.isclose(law.evaluate(100.0, 1.0), 1.0)
-    assert np.isclose(law.evaluate(100.0, 0.5), 1.0)
+    assert np.isclose(law.evaluate(100.0, 0.5), 1.0 / np.sqrt(2.0))
     assert law.evaluate(100.0, 0.0) == 0.0
 
 

@@ -1,0 +1,175 @@
+{
+  "audit_id": "YOSHIE-2023-BLANKET-TRANSFER-R1",
+  "conditions": [
+    {
+      "blanket_rate_nm_per_bias_min": 122.203,
+      "cycle_duration_s": 4,
+      "feature_points": 7,
+      "feature_points_above_blanket": 7,
+      "feature_rate_max_nm_per_bias_min": 147.948,
+      "feature_rate_median_nm_per_bias_min": 141.469,
+      "feature_rate_min_nm_per_bias_min": 141.253,
+      "feature_to_blanket_ratio_max": 1.2106740423721185,
+      "feature_to_blanket_ratio_median": 1.1576557040334525,
+      "feature_to_blanket_ratio_min": 1.1558881533186582,
+      "ratio_lower_bound_with_digitization_allowance": 1.1122177583604225,
+      "ratio_upper_bound_with_digitization_allowance": 1.2579213610395712,
+      "timing": "I",
+      "wide_to_narrow_feature_rate_ratio": 0.9547476140265497
+    },
+    {
+      "blanket_rate_nm_per_bias_min": 464.959,
+      "cycle_duration_s": 4,
+      "feature_points": 7,
+      "feature_points_above_blanket": 0,
+      "feature_rate_max_nm_per_bias_min": 264.363,
+      "feature_rate_median_nm_per_bias_min": 243.413,
+      "feature_rate_min_nm_per_bias_min": 187.905,
+      "feature_to_blanket_ratio_max": 0.5685727128628546,
+      "feature_to_blanket_ratio_median": 0.5235149765893337,
+      "feature_to_blanket_ratio_min": 0.4041324073735534,
+      "ratio_lower_bound_with_digitization_allowance": 0.3972677093506055,
+      "ratio_upper_bound_with_digitization_allowance": 0.5765944596814869,
+      "timing": "II",
+      "wide_to_narrow_feature_rate_ratio": 1.4068971022591203
+    },
+    {
+      "blanket_rate_nm_per_bias_min": 233.51,
+      "cycle_duration_s": 4,
+      "feature_points": 7,
+      "feature_points_above_blanket": 0,
+      "feature_rate_max_nm_per_bias_min": 176.89,
+      "feature_rate_median_nm_per_bias_min": 176.458,
+      "feature_rate_min_nm_per_bias_min": 165.443,
+      "feature_to_blanket_ratio_max": 0.7575264442636289,
+      "feature_to_blanket_ratio_median": 0.755676416427562,
+      "feature_to_blanket_ratio_min": 0.7085049890796968,
+      "ratio_lower_bound_with_digitization_allowance": 0.6910616887235213,
+      "ratio_upper_bound_with_digitization_allowance": 0.7760617760617761,
+      "timing": "III",
+      "wide_to_narrow_feature_rate_ratio": 1.0639676504898967
+    },
+    {
+      "blanket_rate_nm_per_bias_min": 148.432,
+      "cycle_duration_s": 8,
+      "feature_points": 7,
+      "feature_points_above_blanket": 7,
+      "feature_rate_max_nm_per_bias_min": 427.535,
+      "feature_rate_median_nm_per_bias_min": 414.977,
+      "feature_rate_min_nm_per_bias_min": 388.222,
+      "feature_to_blanket_ratio_max": 2.8803425137436673,
+      "feature_to_blanket_ratio_median": 2.7957381157701846,
+      "feature_to_blanket_ratio_min": 2.615487226474076,
+      "ratio_lower_bound_with_digitization_allowance": 2.5372576469966717,
+      "ratio_upper_bound_with_digitization_allowance": 2.9672630507728703,
+      "timing": "I",
+      "wide_to_narrow_feature_rate_ratio": 1.1012642251083145
+    },
+    {
+      "blanket_rate_nm_per_bias_min": 592.683,
+      "cycle_duration_s": 8,
+      "feature_points": 7,
+      "feature_points_above_blanket": 0,
+      "feature_rate_max_nm_per_bias_min": 560.218,
+      "feature_rate_median_nm_per_bias_min": 521.451,
+      "feature_rate_min_nm_per_bias_min": 425.351,
+      "feature_to_blanket_ratio_max": 0.9452236693139502,
+      "feature_to_blanket_ratio_median": 0.8798143358253907,
+      "feature_to_blanket_ratio_min": 0.7176703229213593,
+      "ratio_lower_bound_with_digitization_allowance": 0.7073409850541311,
+      "ratio_upper_bound_with_digitization_allowance": 0.9568157806821631,
+      "timing": "II",
+      "wide_to_narrow_feature_rate_ratio": 1.317072253268477
+    },
+    {
+      "blanket_rate_nm_per_bias_min": 326.829,
+      "cycle_duration_s": 8,
+      "feature_points": 7,
+      "feature_points_above_blanket": 6,
+      "feature_rate_max_nm_per_bias_min": 403.51,
+      "feature_rate_median_nm_per_bias_min": 382.215,
+      "feature_rate_min_nm_per_bias_min": 321.061,
+      "feature_to_blanket_ratio_max": 1.2346211627487156,
+      "feature_to_blanket_ratio_median": 1.169464765978539,
+      "feature_to_blanket_ratio_min": 0.9823516273035746,
+      "ratio_lower_bound_with_digitization_allowance": 0.9612890315890961,
+      "ratio_upper_bound_with_digitization_allowance": 1.2584110749809312,
+      "timing": "III",
+      "wide_to_narrow_feature_rate_ratio": 1.256801666972943
+    },
+    {
+      "blanket_rate_nm_per_bias_min": 170.732,
+      "cycle_duration_s": 8,
+      "feature_points": 7,
+      "feature_points_above_blanket": 7,
+      "feature_rate_max_nm_per_bias_min": 228.237,
+      "feature_rate_median_nm_per_bias_min": 227.691,
+      "feature_rate_min_nm_per_bias_min": 217.317,
+      "feature_to_blanket_ratio_max": 1.336814422603847,
+      "feature_to_blanket_ratio_median": 1.3336164280861234,
+      "feature_to_blanket_ratio_min": 1.2728545322493734,
+      "ratio_lower_bound_with_digitization_allowance": 1.2278509428314877,
+      "ratio_upper_bound_with_digitization_allowance": 1.3845718169460806,
+      "timing": "IV",
+      "wide_to_narrow_feature_rate_ratio": 1.0477367164096687
+    }
+  ],
+  "identifiability_verdict": {
+    "blanket_boundary_evidence_tier": "B_facility_conditioned",
+    "direct_scale_transfer_certified": false,
+    "permitted_use": "condition a reactor boundary only inside an independently validated material- and cycle-history-resolved mechanism; do not multiply feature depth by a blanket-derived scale",
+    "why": [
+      "the blanket and feature substrates are not the same material state (poly-Si film versus bulk Si)",
+      "the chamber and surface histories differ by hundreds of gas-modulation cycles",
+      "the 8 s timing-I feature/blanket ratio remains above 2.5 after the committed digitization allowances",
+      "the 8 s timing rank changes from II>III>IV>I on the blanket to II>I>III>IV in the feature medians",
+      "one scalar blanket rate cannot identify time-resolved Ar+, SFx+, F, and CFx fluxes, their IEADs, and the fluorination/polymer state simultaneously"
+    ]
+  },
+  "operation": "read-only comparison; no surface, transport, reactor, or geometry parameter was fitted",
+  "rank_order_by_cycle": {
+    "4": {
+      "blanket_descending": [
+        "II",
+        "III",
+        "I"
+      ],
+      "feature_median_descending": [
+        "II",
+        "III",
+        "I"
+      ]
+    },
+    "8": {
+      "blanket_descending": [
+        "II",
+        "III",
+        "IV",
+        "I"
+      ],
+      "feature_median_descending": [
+        "II",
+        "I",
+        "III",
+        "IV"
+      ]
+    }
+  },
+  "scale_only_null": {
+    "definition": "assign each held-out feature the matching measured blanket rate, before any feature-transport correction",
+    "feature_points": 49,
+    "mean_absolute_percentage_error": 0.378643048437978,
+    "rmse_nm_per_bias_min": 141.97433290319108
+  },
+  "source": {
+    "blanket_cycle_count": 75,
+    "blanket_material": "370 nm poly-Si film on a Si substrate",
+    "citation": "T. Yoshie et al., Applied Surface Science 638 (2023) 157981, DOI 10.1016/j.apsusc.2023.157981",
+    "feature_cycle_counts": {
+      "4_s_cycle": 675,
+      "8_s_cycle": 450
+    },
+    "feature_material": "bulk Si substrate under an approximately 500 nm SiO2 mask",
+    "wafer_boundary_limit": "species-resolved neutral/ion fluxes and the ion energy-angle distribution were not reported"
+  }
+}
