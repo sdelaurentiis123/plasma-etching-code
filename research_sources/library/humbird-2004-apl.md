@@ -59,3 +59,21 @@ fluorine recycling.  That topology directly rejects a same-step
 The seminar curves are used only as a surface-state validation board.  They
 must not be relabeled as beam measurements, oxide data, quantum-accurate
 dynamics, or a source of wafer flux.
+
+## Implemented topology contract
+
+`src/petch/stratified_fluorocarbon_si.py` implements the source-constrained
+reservoir topology without embedding a fitted yield:
+
+- separate FC film, Si--C transport layer, and Si--F reaction front;
+- explicit C--F, C--C-crosslink, and Si--F bond inventories;
+- paired C--F scission / F transfer / Si--F formation;
+- nonzero Si residence (only start-of-step transported Si can leave);
+- number-density-times-depth capacities rather than one-monolayer caps; and
+- finite CSDA ion transmission through both live layers, including the
+  incidence-angle slant path.
+
+The module is deliberately an event-ledger core.  It does not infer event
+probabilities from this paper.  Those belong to the separately preregistered
+surface calibration in
+`data/experimental/humbird_graves_2004/model_protocol.json`.
