@@ -626,7 +626,8 @@ def build_krueger_2024_material_router_3d(
         deposition_layer_depth_nm=1.5,
         oxygen_half_saturation_flux_m2_s=None,
         surface_model="reduced",
-        mixed_layer_volatilization_yield=1.0):
+        mixed_layer_volatilization_yield=1.0,
+        guo_aggregate_ion_formula=None):
     """Build one material router for the reduced Krüger oxide/mask development replay.
 
     ``surface_model`` selects the chemistry family: ``"reduced"`` (the
@@ -643,7 +644,8 @@ def build_krueger_2024_material_router_3d(
     if surface_model == "mixed_layer":
         if (float(oxide_etch_yield_scale) != 1.0
                 or float(effective_mask_crosslinked_growth_fraction) != 0.0
-                or oxygen_half_saturation_flux_m2_s is not None):
+                or oxygen_half_saturation_flux_m2_s is not None
+                or guo_aggregate_ion_formula is not None):
             raise ValueError(
                 "mixed_layer surface model has no yield-scale/crosslink/"
                 "oxygen-saturation knobs; do not pass them")
@@ -674,7 +676,8 @@ def build_krueger_2024_material_router_3d(
         from petch.guo_c4f8_sio2_feature import (
             GuoC4F8ArSiO2FeatureMechanism,
         )
-        oxide = GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit()
+        oxide = GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit(
+            aggregate_ion_formula=guo_aggregate_ion_formula)
         mask = AmorphousCarbonMaskMechanism(
             AmorphousCarbonMaskParameters.krueger_2024_reduced_projection(
                 projectile_species=projectile_species,
@@ -701,6 +704,9 @@ def build_krueger_2024_material_router_3d(
             })
     if surface_model != "reduced":
         raise ValueError(f"unknown surface_model: {surface_model!r}")
+    if guo_aggregate_ion_formula is not None:
+        raise ValueError(
+            "guo_aggregate_ion_formula applies only to surface_model='guo_tml'")
     oxide = ReducedSiO2FluorocarbonMechanism(
         ReducedSiO2FluorocarbonParameters.krueger_2024_reduced_projection(
             oxide_etch_yield_scale=oxide_etch_yield_scale,

@@ -254,8 +254,19 @@ class GuoC4F8ArSiO2FeatureMechanism:
         })
 
     @classmethod
-    def krueger_2024_transfer_audit(cls):
-        return cls(allow_out_of_board_transfer_audit=True)
+    def krueger_2024_transfer_audit(
+        cls, *, aggregate_ion_formula: str | None = None
+    ):
+        """Declare one endpoint for Krüger's unresolved aggregate ion row.
+
+        ``None`` is the nominal non-incorporating endpoint used when no ion
+        identity is assumed.  A formula requests an explicit all-that-species
+        sensitivity, not an inferred mixture or a predictive boundary.
+        """
+        return cls(
+            ion_species_mapping={"ions": aggregate_ion_formula},
+            allow_out_of_board_transfer_audit=True,
+        )
 
     def initial_state(self, shape=()):
         return GuoC4F8ArSiO2FeatureState.oxide(shape)

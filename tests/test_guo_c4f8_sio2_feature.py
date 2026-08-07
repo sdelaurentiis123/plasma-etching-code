@@ -198,6 +198,25 @@ def test_krueger_transfer_mode_executes_but_does_not_upgrade_evidence():
     assert mechanism.provenance["calibration"]["feature_depth_used"] is False
 
 
+def test_krueger_aggregate_ion_identity_is_an_explicit_sensitivity_endpoint():
+    unresolved = (
+        GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit())
+    cf3_endpoint = (
+        GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit(
+            aggregate_ion_formula="CF3"))
+
+    assert unresolved.ion_species_mapping == {"ions": None}
+    assert cf3_endpoint.ion_species_mapping == {"ions": "CF3"}
+    assert not cf3_endpoint.validity(
+        cf3_endpoint.initial_state(),
+        SurfaceFluxes(
+            {},
+            (EnergeticFlux(
+                "ions", 1.0e20, [1000.0], [1.0], [1.0]),),
+        ),
+    ).parameter_evidence_supports_prediction
+
+
 def test_feature_adapter_resolves_source_deposition_complementarity_face():
     mechanism = GuoC4F8ArSiO2FeatureMechanism(
         neutral_species=("C3F4", "C2F3", "CF", "CF2", "CF3", "O"),

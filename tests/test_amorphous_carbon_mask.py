@@ -219,3 +219,11 @@ def test_guo_tml_router_reuses_transport_and_mask_but_carries_transfer_limits():
     with pytest.raises(ValueError, match="no oxide yield scale"):
         build_krueger_2024_material_router_3d(
             surface_model="guo_tml", oxide_etch_yield_scale=1.01)
+
+    cf3_endpoint = build_krueger_2024_material_router_3d(
+        surface_model="guo_tml",
+        guo_aggregate_ion_formula="CF3",
+    )
+    assert cf3_endpoint.mechanisms[1].ion_species_mapping == {"ions": "CF3"}
+    assert cf3_endpoint.provenance["materials"]["1"]["evidence"]["model"][
+        "ion_species_mapping"] == {"ions": "CF3"}

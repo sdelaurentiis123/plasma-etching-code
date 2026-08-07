@@ -559,6 +559,9 @@ def _configuration(args):
     if float(args.oxide_etch_yield_scale) != 1.0:
         configuration["oxide_etch_yield_scale"] = float(
             args.oxide_etch_yield_scale)
+    if str(args.guo_aggregate_ion_formula) != "unresolved":
+        configuration["guo_aggregate_ion_formula"] = str(
+            args.guo_aggregate_ion_formula)
     if args.radiosity_backend == "deterministic_extruded_2d":
         configuration["deterministic_exchange"] = {
             "exchange_method": str(args.exchange_method),
@@ -864,6 +867,11 @@ def run(args):
     elif str(args.surface_model) == "guo_tml":
         mechanism = build_krueger_2024_material_router_3d(
             surface_model="guo_tml",
+            guo_aggregate_ion_formula=(
+                None
+                if str(args.guo_aggregate_ion_formula) == "unresolved"
+                else str(args.guo_aggregate_ion_formula)
+            ),
             effective_mask_crosslinked_growth_fraction=float(
                 args.effective_mask_crosslinked_growth_fraction),
             yield_energy_model=str(args.yield_energy_model),
@@ -1270,6 +1278,16 @@ def parse_args():
             "mechanisms, the element-resolved two-reservoir mixed-layer "
             "chemistry, or the source-fixed Guo/Kwon translating-layer "
             "transfer audit (no oxide yield/depth knob)"))
+    parser.add_argument(
+        "--guo-aggregate-ion-formula",
+        default="unresolved",
+        choices=("unresolved", "C", "CF", "CF2", "CF3", "C3F3"),
+        help=(
+            "explicit all-one-species sensitivity for Krueger's unpublished "
+            "aggregate positive-ion row; unresolved is the nominal "
+            "non-incorporating endpoint and no choice is a fitted mixture"
+        ),
+    )
     parser.add_argument(
         "--yield-energy-model", default="threshold_power",
         choices=("threshold_power", "deposited_in_layer"),
