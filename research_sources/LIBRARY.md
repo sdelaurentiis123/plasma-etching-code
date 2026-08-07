@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 102 sources by topic
+## Index — 103 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -44,6 +44,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`kim-2021-coatings`](library/kim-2021-coatings.md) | Kim et al., measured C4F6/Ar neutral + ion mass/energy spectra | FULL TEXT + FIGURES VISUALLY AUDITED |
 | [`krueger-2024-jvsta`](library/krueger-2024-jvsta.md) | Krüger et al., JVST A 42, 043008 (2024) | FULL TEXT: research_sources/thesis_extracts/krueger-2024.txt, kr2024_osti.txt |
 | [`krueger-2024-thesis`](library/krueger-2024-thesis.md) | Krüger, PhD thesis, Univ. Michigan (2024) | FULL TEXT: research_sources/thesis_extracts/krueger_thesis_2024.txt (469k), krueger_thesis.txt (older OCR) |
+| [`li-2002-c4f6-c4f8`](library/li-2002-c4f6-c4f8.md) | Li et al., matched C4F6/Ar versus C4F8/Ar reactor/surface board | PRIMARY FULL TEXT ONLINE; FIGURES NOT YET DIGITIZED |
 | [`omura-2019-jjap`](library/omura-2019-jjap.md) | Omura et al., JJAP (2019) | ABSTRACT/relay |
 | [`metzler-2016-thesis`](library/metzler-2016-thesis.md) | Metzler, UMD thesis (2016), cyclic C4F8/Ar-ion ALE | FULL TEXT + PIL-AUDITED FIGURES |
 | [`standaert-oehrlein`](library/standaert-oehrlein.md) | Standaert/Oehrlein, mixed-layer selectivity | OFFICIAL OSTI FULL REPORTS + VERIFIED EXCERPTS |
@@ -226,6 +227,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Stable-parent molecule / ion co-incidence envelope | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | C5F8 analog proves molecule-assisted yields can exceed a pure-CF3+ value; explicitly not a C4F6 law |
 | C4F6 parent-signal + ion-mixture existence | [`kim-2021-coatings`](library/kim-2021-coatings.md) | wafer-facing mass/energy spectra directly show C4F6 and multiple CFx+/CxFy+ species in another CCP; qualitative existence constraint only, not Krüger flux calibration |
 | Absolute C4F6/Ar total and mass-resolved ion flux/IED board | [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Faraday-cup-normalized GEC-ICP measurements at 5–20 mTorr; quantitative reactor-model validation, not a Krüger boundary transplant |
+| Matched C4F6/Ar versus C4F8/Ar ion/radical/film/yield board | [`li-2002-c4f6-c4f8`](library/li-2002-c4f6-c4f8.md) | same 600 W ICP and diagnostics expose feed-specific fragmentation and surface-film differences; figures require original-pixel digitization before constants land |
 | Class-1 angular form `(1+B sin²θ)cosθ` | [`kress-1999-jvsta`](library/kress-1999-jvsta.md) | Krüger's cited source — **wrong system (Cu/Ar MD)**; peak 4.17 vs measured ~1.3 |
 | Class-1 bound `B = 1.7` on oxide/mask rows | [`cho-2000-jvsta`](library/cho-2000-jvsta.md) | in-chemistry peak/normal 1.30 |
 | Class-1 bound cross-check | [`schaepkens-1998-jvsta`](library/schaepkens-1998-jvsta.md) | peak/normal 1.33, 54.7° V-groove |

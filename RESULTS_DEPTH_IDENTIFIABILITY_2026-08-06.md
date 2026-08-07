@@ -177,6 +177,18 @@ cannot normalize the trench run. It is an independent quantitative validation
 target for a future C4F6 reactor model. The full-text/vision audit and source
 hash are pinned under the library bibkey `benck-2003-c4f6`.
 
+Li et al. provide the complementary matched reactor-plus-surface board. In
+one 600 W ICP they varied C4F6/Ar and C4F8/Ar while jointly measuring
+wafer-center ion current, absolute CF/CF2/COF2 density, fluorocarbon
+deposition and etching, Si/SiO2 etching, steady-state film thickness, and XPS
+composition. C4F6 produced a thicker, less fluorinated film and a lower
+SiO2 yield than C4F8 even at matched conditions; at matched film thickness,
+C4F8 still etched faster. Therefore C4F6 cannot be represented as a small
+parameter change to the C4F8 deck, and film thickness alone is not a complete
+state. This board is recorded as `li-2002-c4f6-c4f8`; its plotted values
+remain prohibited until an original-pixel digitization is archived and
+overlaid.
+
 ## 5. What changed in petch
 
 1. Karahashi Figure 4 now has a checksum-bound, species-resolved data table,
