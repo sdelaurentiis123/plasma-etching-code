@@ -11,6 +11,8 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 - HG_jap97.txt
 - HG_jvstb97.txt
 - hamilton_2018_cl2_dissociation.txt
+- chantry_1987_wall_diffusion.txt
+- economou_chlorine_neutral_transport.txt
 - stafford_2010_cl_wall_recombination.txt
 - wang_olthoff_1999_ion_energy.txt
 - an_2026_nnp_etch_verified_excerpts.txt

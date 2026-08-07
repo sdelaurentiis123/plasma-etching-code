@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 119 sources by topic
+## Index — 122 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -109,7 +109,9 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`edelberg-1999`](library/edelberg-1999.md) | Edelberg & Aydil (1999) | not-fetched |
 | [`kawamura-1999-psst`](library/kawamura-1999-psst.md) | Kawamura et al., PSST 8, R45 (1999) | not-fetched (citation corrected from p.313) |
 | [`benyoucef-yousfi-2014-ion-transport`](library/benyoucef-yousfi-2014-ion-transport.md) | Benyoucef & Yousfi, semiclassical Ar+/Ar, O2+/O2, N2+/N2 transport validation | AUTHOR-PROVIDED FULL TEXT READ VIA HTML; FIGURES NOT LOCALLY ARCHIVED |
+| [`chantry-1987-wall-diffusion`](library/chantry-1987-wall-diffusion.md) | Chantry, partial-reflection neutral diffusion and low-density wall-loss limit | PRIMARY PUBLISHER ABSTRACT/EQUATIONS READ; FULL PDF REQUESTED |
 | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | Christophorou & Olthoff, NIST-evaluated Cl2/Cl electron-interaction data | PRIMARY NIST FULL TEXT + TABLE 25 PIXEL-AUDITED AT 300 DPI |
+| [`economou-1995-2002-cl-transport`](library/economou-1995-2002-cl-transport.md) | Lymberopoulos/Economou and Ramamurthi/Economou, Cl diffusion and Robin wall transport | TWO PRIMARY FULL TEXTS + EQUATIONS/TABLES VISUALLY AUDITED; 300/500 K COEFFICIENT CONFLICT QUARANTINED |
 | [`hamilton-2018-cl2-dissociation`](library/hamilton-2018-cl2-dissociation.md) | Hamilton et al., state-resolved Cl2 electron-impact dissociation | PRIMARY FULL TEXT + OFFICIAL CC-BY DATASET; FIGURES 4--5 600-DPI AUDIT; RATE REPRODUCTION PASS |
 | [`hopwood-1994-rf-coupling`](library/hopwood-1994-rf-coupling.md) | Hopwood, measured planar-ICP RF coupling efficiency | PRIMARY AUTHOR ABSTRACT READ |
 | [`lam-direct-drive-patents`](library/lam-direct-drive-patents.md) | Lam DirectDrive and RF-reference patent family | PRIMARY PATENT FULL TEXT READ |
@@ -236,6 +238,8 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Argon ionization/metastable event energies `15.7596119 / 11.54835442 / 4.21125748 eV` | [`nist-asd-argon`](library/nist-asd-argon.md) | physical power ledger kept separate from `18.68 / 15.06 / 4.95 eV` rate-fit exponents |
 | Ar+-Ar `Qm(E)` with explicit center-of-mass energy and Maxwellian rate averaging | [`phelps-1994-ar-ion-scattering`](library/phelps-1994-ar-ion-scattering.md) | replaces the fixed ion mean-free-path sensitivity with an energy- and pressure-dependent collision frequency |
 | Ar-in-Ar `D(T,p)` and 298 K reference `0.182 cm2/s` | [`nist-tn-2279-gas-diffusion`](library/nist-tn-2279-gas-diffusion.md) | supplies neutral bulk diffusion before Lee's Knudsen harmonic; 600 K use is explicitly flagged as extrapolated |
+| Exact cylindrical neutral Robin eigenmode and Chantry diagnostic | [`chantry-1987-wall-diffusion`](library/chantry-1987-wall-diffusion.md) | exact radial/axial roots replace a ballistic `A/V` shortcut; absorbing and surface-reaction limits pass; Chantry approximation retained only as an 11% envelope |
+| Cl reduced diffusivity `N D = 6.21e20 m^-1 s^-1` | [`economou-1995-2002-cl-transport`](library/economou-1995-2002-cl-transport.md) | exact unit conversion and published-model replay only; identical value at 500 K and 300 K is preserved as a conflict, so temperature extrapolation and predictive labeling are refused |
 | RF-to-plasma absorbed-power measurement chain | [`hopwood-1994-rf-coupling`](library/hopwood-1994-rf-coupling.md), [`mahoney-1994-planar-icp`](library/mahoney-1994-planar-icp.md) | forbids generator setpoint or forward-minus-reflected power from silently becoming absorbed plasma power |
 | Matched-RF versus DirectDrive output boundary | [`lam-direct-drive-patents`](library/lam-direct-drive-patents.md) | output V/I/phase and reference calibration still terminate upstream of coil/window/electrode loss |
 | Lam equipment-class reactor roadmap | [`lam-etch-platforms-2026`](library/lam-etch-platforms-2026.md) | separates ICP conductor/deep-Si, CCP dielectric/HARC, and radical-rich selective-etch provider requirements |

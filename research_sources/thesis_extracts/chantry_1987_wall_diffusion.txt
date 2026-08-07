@@ -1,0 +1,59 @@
+CHANTRY 1987 — VERIFIED PRIMARY-PUBLISHER ABSTRACT EXTRACTION
+
+Citation
+--------
+P. J. Chantry, “A simple formula for diffusion calculations involving wall
+reflection and low density,” Journal of Applied Physics 62, 1141–1148 (1987).
+DOI: 10.1063/1.339662
+
+Source boundary
+---------------
+The AIP publisher record and complete abstract were read. The full article was
+paywalled and has been requested separately. This extraction therefore records
+only claims and equations present in the publisher abstract plus explicitly
+identified independent algebra.
+
+Verified source content
+-----------------------
+For an active species in a scattering gas, using the zero-density fundamental
+diffusion length Lambda0 can be seriously wrong when the diffusion mean free
+path is comparable to the container size or wall reflection is significant.
+
+Chantry writes the linear extrapolation length as
+
+  lambda = 2(1 + R) lambda_m / [3(1 - R)]
+
+where R is the particle reflection coefficient. The paper solves the
+shape-dependent transcendental equations and identifies the scaling variable
+(V/A) lambda / Lambda0^2. The simple approximation
+
+  Lambda^2 = Lambda0^2 + (V/A) lambda
+
+has the correct limits; the abstract reports a worst disagreement of 11% with
+the numerical shape solutions. In the collisionless limit the predicted loss
+frequency matches the average-chord result.
+
+Independent algebra used by the code
+------------------------------------
+Setting the surface loss probability gamma = 1 - R and using the diffusion
+relation D = lambda_m vbar / 3 gives
+
+  lambda = 2(2 - gamma)D / (gamma vbar)
+
+and reaction velocity
+
+  h = D/lambda = gamma vbar / [2(2 - gamma)].
+
+For a right cylinder spanning -L/2 <= z <= L/2, separation of the diffusion
+equation with Robin boundary -D dn/dnormal = h n gives the fundamental roots
+
+  (lambda/R) x J1(x) = J0(x)
+  (2 lambda/L) y tan(y) = 1
+
+and loss frequency
+
+  nu = D[(x/R)^2 + (2y/L)^2].
+
+These cylinder equations are an independent derivation, not quoted as text
+from the unread body. Tests substitute the numerical roots back into both
+boundary equations and recover the absorbing and surface-reaction limits.

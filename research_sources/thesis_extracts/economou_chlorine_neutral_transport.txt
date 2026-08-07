@@ -1,0 +1,73 @@
+ECONOMOU CHLORINE NEUTRAL TRANSPORT — VERIFIED PRIMARY-SOURCE EXTRACTION
+
+Sources
+-------
+D. P. Lymberopoulos and D. J. Economou, IEEE Transactions on Plasma Science
+23, 573–580 (1995), DOI 10.1109/27.467977.
+Author-hosted PDF SHA-256:
+142bdb74f969ddc494a9e659e911f56a66fa12994966a18ea1ee2bc4588934b6
+
+B. Ramamurthi and D. J. Economou, Journal of Vacuum Science & Technology A
+20, 467–478 (2002), DOI 10.1116/1.1450581.
+Author-hosted PDF SHA-256:
+b2f1450df1bac12f7b405254bc4b03900bf926f0ee327a0f043c6b37441060e8
+
+Visual verification
+-------------------
+Both author-hosted primary PDFs were read. The 1995 scan was rendered at
+500 dpi; printed pages 576–577 were checked for the chemistry, boundary
+conditions, reduced diffusivity, and 500 K base condition. The 2002 article
+was rendered at 400 dpi; printed page 470 was checked for Eq. 10, Tables II–III,
+the 300 K base condition, wall boundary, residence time, and reduced
+diffusivity.
+
+1995 model
+----------
+The neutral module solves diffusion/reaction separately from the charged
+particle module. For Cl at the wall, the boundary ledger contains a thermal
+neutral loss proportional to the surface reaction probability and a return
+term from neutralized Cl+ ions. The wafer and non-wafer walls use different
+reaction probabilities.
+
+The paper states that neutral diffusivities were obtained from standard
+Chapman–Enskog kinetic theory using Lennard–Jones parameters from its ref. 12.
+The actual parameters and collision integral are not tabulated. The printed
+chlorine reduced diffusivity is
+
+  N D_Cl = 6.21e18 cm^-1 s^-1
+         = 6.21e20 m^-1 s^-1.
+
+The base condition on printed page 577 is 10 mTorr, 3560 W plasma power,
+13.56 MHz, 200 sccm pure chlorine, and gas temperature 500 K.
+
+2002 model
+----------
+The Cl atom equation is diffusion dominated with volumetric reaction sources
+and a convective loss n_Cl/tau_res. The printed residence time is 3.8 ms.
+The wall boundary is
+
+  -D_Cl grad(n_Cl)
+    = [gamma/(2(2-gamma))] n_Cl vbar_Cl - J_Cl+
+
+with gamma = 0.1 in the model. The Cl+ term is the atom return associated with
+ion neutralization and is not part of neutral recombination loss.
+
+Table II specifies 20 mTorr, 320 W peak power, 10 kHz pulsing, duty ratio 0.5,
+and gas/ion temperatures of 300 K. Table III prints
+
+  N D_Cl = 6.21e18 cm^-1 s^-1
+
+and cites the 1995 paper.
+
+Conflict and executable boundary
+--------------------------------
+The identical coefficient appears at 500 K in 1995 and at 300 K in 2002 even
+though the original method is Chapman–Enskog transport. The 2002 table does not
+provide a new measured or calculated temperature dependence; it cites the
+1995 source.
+
+The repository therefore keeps two exact, single-temperature
+`published_model` providers for reproducing the papers. Neither supports
+prediction, and neither may be extrapolated between 300 and 500 K. Predictive
+closure requires measured/evaluated Cl–Cl2 transport versus temperature with
+uncertainty.
