@@ -55,7 +55,10 @@ def test_visual_manifest_pins_source_and_preserves_source_contradictions():
     assert audit["source_pdf_sha256"] == (
         "f5c78c0089fe4104019435c6fd34e9b8f284358dda1df0101ecec54c592750d2")
     pages = audit["visual_audit"]["pages"]
-    assert [page["pdf_page"] for page in pages] == [100, 101, 102, 103]
+    assert [page["pdf_page"] for page in pages] == [
+        100, 101, 102, 103, 35, 45,
+    ]
     assert all(page["render_mode"] == "RGB" for page in pages)
     assert all(len(page["render_sha256"]) == 64 for page in pages)
-    assert len(audit["source_inconsistencies_preserved"]) == 2
+    assert len(audit["source_inconsistencies_preserved"]) == 3
+    assert len(audit["visual_audit"]["formalism_pages"]) == 3

@@ -6,6 +6,13 @@
     "pdf_sha256": "f5c78c0089fe4104019435c6fd34e9b8f284358dda1df0101ecec54c592750d2",
     "pdf_redistributed": false
   },
+  "formalism_source": {
+    "citation": "O. Kwon, Surface kinetics modeling of silicon oxide etching in fluorocarbon plasmas, MIT ScD thesis (2004)",
+    "handle": "https://hdl.handle.net/1721.1/28353",
+    "official_bitstream": "https://dspace.mit.edu/server/api/core/bitstreams/7b8ef4d0-ab08-4c93-a8b1-4b3dd43c208d/content",
+    "pdf_sha256": "b6196e768830cb0efed7aa0f013fbae511b58890d2c9a963329d337e6a5fa018",
+    "pdf_redistributed": false
+  },
   "visual_audit": {
     "method": "Original-resolution visual inspection plus independent Pillow open/mode/dimension verification of Poppler page renders",
     "pillow_version": "12.3.0",
@@ -41,6 +48,48 @@
         "render_dimensions_px": [2040, 2640],
         "render_mode": "RGB",
         "render_sha256": "022d7c9fd22e1632b2a03431e0a44fe1fdc200e3fc3418eec62e5878b0c0ab2e"
+      },
+      {
+        "pdf_page": 35,
+        "content": "Guo Equation 1, nearest-neighbor bond probability",
+        "render_dpi": 180,
+        "render_dimensions_px": [1530, 1980],
+        "render_mode": "RGB",
+        "render_sha256": "1450404caa3fedcf8ce7a84323717c0702435c83bbec6602f1f3492528b38b58"
+      },
+      {
+        "pdf_page": 45,
+        "content": "Guo Equations 16 and 17, translating-layer yield and species balances",
+        "render_dpi": 220,
+        "render_dimensions_px": [1870, 2420],
+        "render_mode": "RGB",
+        "render_sha256": "7878b42eeb5ec94c434a30f1208aa1e4911ecb941bdbc010dff39781210fdf51"
+      }
+    ],
+    "formalism_pages": [
+      {
+        "pdf_page": 67,
+        "printed_page": 66,
+        "content": "Kwon translating-mixed-layer addition/removal/movement-flux diagram",
+        "render_dimensions_px": [1947, 2488],
+        "render_mode": "RGB",
+        "render_sha256": "6f9a4c9819852b0dd9958337c2817fd7aea3018ce0135e473538dd8b7d28988d"
+      },
+      {
+        "pdf_page": 70,
+        "printed_page": 69,
+        "content": "Kwon elemental movement-flux balance",
+        "render_dimensions_px": [1877, 2427],
+        "render_mode": "RGB",
+        "render_sha256": "9dd883f4acfab2cc94e99eeca8badd3be50ff5d32ad054242d7a6870a70f8bf9"
+      },
+      {
+        "pdf_page": 71,
+        "printed_page": 70,
+        "content": "Kwon translating-layer species differential equations",
+        "render_dimensions_px": [1935, 2475],
+        "render_mode": "RGB",
+        "render_sha256": "5f2347bc0ac560bf6f437eb7d2c8b71e7d0b7c53e53e48f93e2a0ac47e4272b6"
       }
     ]
   },
@@ -57,8 +106,16 @@
     },
     "source_inconsistencies": [
       "Atomic F is absent from the printed neutral species footnote although Table 4.1 reaction 2 explicitly uses F(g).",
-      "C3F3 is printed with a superscript plus in the nominal-neutral species list."
-    ]
+      "C3F3 is printed with a superscript plus in the nominal-neutral species list.",
+      "Table 4.2 prints both the -421.98 and +95.31 physical-sputtering terms with cos^2(theta); the literal polynomial is negative over most off-normal angles."
+    ],
+    "angular_polynomial_policy": {
+      "literal_printed_expression_is_physical": false,
+      "executable_interpretation": "Use +95.31*cos(theta), completing the descending powers 6 through 0; retain all printed coefficients and clip only the small negative grazing tail.",
+      "evidence_type": "declared_source-defect_inference",
+      "independently_traced_original_fit": false,
+      "feature_angle_claim_requires_sensitivity": true
+    }
   },
   "claim_boundary": {
     "allowed": "source replay of Guo/Yin C4F8-Ar SiO2 yields and transfer tests within a separately declared boundary mapping",
@@ -66,7 +123,8 @@
       "calling the coefficients first-principles",
       "treating coefficients greater than one as sticking probabilities",
       "claiming a C4F6 reactor boundary is identified by this C4F8 board",
-      "fitting Krueger feature depth with these source constants"
+      "fitting Krueger feature depth with these source constants",
+      "calling the inferred Table 4.2 exponent a verbatim source value"
     ]
   }
 }

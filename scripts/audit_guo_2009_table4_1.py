@@ -121,7 +121,7 @@ def build_audit(root: Path | None = None) -> dict:
         or not csv_hash_matches_manifest
         or threshold_failures
         or not payload["all_atom_counted_reactions_close"]
-        or len(inconsistencies) != 2
+        or len(inconsistencies) != 3
     ):
         payload["status"] = "failed"
     return payload

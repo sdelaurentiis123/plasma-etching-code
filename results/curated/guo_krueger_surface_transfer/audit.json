@@ -1,0 +1,512 @@
+{
+  "angular_source_defect": {
+    "angles_deg": [
+      0.0,
+      25.0,
+      45.0,
+      65.0,
+      85.0,
+      90.0
+    ],
+    "declared_degree_sequence_repair": [
+      1.020000000000075,
+      1.4660013559963199,
+      2.768543792640906,
+      3.1418065416605865,
+      0.20582893792431722,
+      0.0
+    ],
+    "literal_negative_sample_count": 5,
+    "literal_printed_duplicate_cos2": [
+      1.020000000000075,
+      -6.627150286854763,
+      -16.970803522248943,
+      -20.11498352445751,
+      -7.376998373151755,
+      -5.46
+    ],
+    "meaning": "near-normal planar scoring is insensitive to this defect; a sidewall/profile claim is not",
+    "repair_independently_traced_to_original_fit": false
+  },
+  "atomicity_statement": {
+    "atom_balanced": true,
+    "atomic_level_accuracy_claimed": false,
+    "atomistic_trajectory_or_interatomic_potential": false,
+    "bond_probability_resolved": true,
+    "meaning": "the closure conserves Si/O/C/F atoms and carries random-bond statistics, but it is a regressed translating mixed layer, not molecular dynamics or a first-principles potential"
+  },
+  "audit_id": "GUO-KWON-TO-KRUEGER-SURFACE-TRANSFER-R1",
+  "boundary": {
+    "neutral_flux_ratio_to_published_aggregate_ion_flux": {
+      "C2F3": 5.666666666666667,
+      "C3F4": 7.916666666666667,
+      "CF": 3.6666666666666665,
+      "CF2": 7.833333333333333,
+      "CF3": 0.7,
+      "O": 6.416666666666667
+    },
+    "nominal_ion_closure": "aggregate ions trigger universal ion reactions but add no material; this is a nonincorporating sensitivity endpoint, not an identified ion composition",
+    "outside_guo_source_species_list": [
+      "C2F3",
+      "C3F4"
+    ],
+    "positive_ion_composition_published": false,
+    "source_species_intersection": [
+      "CF",
+      "CF2",
+      "CF3",
+      "O"
+    ],
+    "stable_C4F6_parent_flux_published": false
+  },
+  "calibration_firewall": {
+    "feature_depth_used_by_surface_solver": false,
+    "model_coefficients_origin": "Guo Table 4.1 coefficients regressed against Yin C4F8/Ar blanket-yield data; no Krueger feature observable",
+    "optimization_performed": false,
+    "surface_or_boundary_parameters_adjusted": [],
+    "target_used_only_after_all_surface_solves_for_scoring": true
+  },
+  "energy_law_sensitivity": {
+    "energy_censored_at_1000_eV": {
+      "atom_ledger_residual": 0.0,
+      "movement_atoms_per_wafer_ion": 4.623654587408092,
+      "sio2_yield_per_wafer_ion": 1.5412181958026974,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": true,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 1000.0,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.17447418496467754,
+        "F": 0.17078531098644545,
+        "O": 0.3212599527303869,
+        "Si": 0.3334805513184902,
+        "V": 0.029334392218628293
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 1.3322676295501878e-15
+    },
+    "energy_censored_at_2000_eV": {
+      "atom_ledger_residual": 0.0,
+      "movement_atoms_per_wafer_ion": 6.2155462320754635,
+      "sio2_yield_per_wafer_ion": 2.0718487440251545,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": true,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 2000.0,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.14691151899684096,
+        "F": 0.14732054719527957,
+        "O": 0.34278204230280795,
+        "Si": 0.36298589150507155,
+        "V": 0.03904230013857628
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 8.881784197001252e-16
+    },
+    "energy_censored_at_500_eV": {
+      "atom_ledger_residual": 0.0,
+      "movement_atoms_per_wafer_ion": 3.188302385142787,
+      "sio2_yield_per_wafer_ion": 1.0627674617142624,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": true,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 500.0,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.2071908988492025,
+        "F": 0.19354394104047276,
+        "O": 0.2926390569928322,
+        "Si": 0.3066261031174925,
+        "V": 0.020593013247858956
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 1.3322676295501878e-15
+    },
+    "energy_censored_at_source_maximum_370_eV": {
+      "atom_ledger_residual": 0.0,
+      "movement_atoms_per_wafer_ion": 2.6248224674080065,
+      "sio2_yield_per_wafer_ion": 0.8749408224693355,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": false,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 370.0,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.22412051585739873,
+        "F": 0.20190581411796543,
+        "O": 0.2772125925488891,
+        "Si": 0.2967610774757467,
+        "V": 0.017212676108042415
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 2.220446049250313e-16
+    },
+    "printed_law_extended_to_full_iead": {
+      "atom_ledger_residual": 0.0,
+      "movement_atoms_per_wafer_ion": 7.839161501959492,
+      "sio2_yield_per_wafer_ion": 2.613053833986497,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": true,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 4820.89368219741,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.1236807425512635,
+        "F": 0.12641415236752032,
+        "O": 0.358438423817212,
+        "Si": 0.39146668126400413,
+        "V": 0.04847277591424973
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 1.7763568394002505e-15
+    }
+  },
+  "energy_support": {
+    "guo_fit_maximum_eV": 370.0,
+    "independent_sqrt_form_support": {
+      "chemical_F_saturated_SiO2_maximum_eV": 2000.0,
+      "chemical_probability_weight_within_support": 0.13183047150523108,
+      "physical_Ar_SiO2_maximum_eV": 1225.0,
+      "physical_probability_weight_within_support": 0.06569097356735597,
+      "source": "Gray 1993 thesis Eq. 5-35/Table 5-10 and Figure 5-2; page renders and OCR are SHA-pinned above",
+      "transfer_limit": "this validates the square-root functional form over part of the Krueger IEAD, not Guo's reaction coefficients, C4F6 radical mapping, or an aggregate-ion projectile"
+    },
+    "krueger_iead_maximum_eV": 4820.89368219741,
+    "krueger_iead_mean_eV": 3465.110787140925,
+    "krueger_iead_minimum_eV": 471.0431912867225,
+    "krueger_iead_probability_within_guo_fit_support": 0.0,
+    "mean_energy_over_source_maximum": 9.365164289570068,
+    "meaning": "the nominal match extrapolates Guo's fitted coefficients for every IEAD sample. Independent Gray beam data support the same square-root form only over the stated lower-energy probability mass; the remaining high-energy tail and coefficient/species transfer remain unvalidated. Censored cases are sensitivity brackets, not alternate laws"
+  },
+  "linear_depth_diagnostic_only": {
+    "authoritative_feature_prediction": false,
+    "invalidated_assumptions": [
+      "depth is linear in planar steady-state yield",
+      "floor delivery and surface state do not evolve",
+      "mouth closure and mask evolution are unchanged"
+    ],
+    "prior_feature_depth_nm": 346.83264081620524,
+    "prior_feature_effective_yield_per_wafer_ion": 1.0597664024939606,
+    "surface_yield_ratio_scaled_depth_nm": 855.1812547592172
+  },
+  "neutral_mapping_sensitivity": {
+    "all_published_neutrals": {
+      "atom_ledger_residual": 0.0,
+      "movement_atoms_per_wafer_ion": 7.839161501959492,
+      "sio2_yield_per_wafer_ion": 2.613053833986497,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": true,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 4820.89368219741,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.1236807425512635,
+        "F": 0.12641415236752032,
+        "O": 0.358438423817212,
+        "Si": 0.39146668126400413,
+        "V": 0.04847277591424973
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 1.7763568394002505e-15
+    },
+    "double_all_neutral_fluxes": {
+      "atom_ledger_residual": 0.0,
+      "movement_atoms_per_wafer_ion": 9.921482188428977,
+      "sio2_yield_per_wafer_ion": 3.3071607294763257,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": true,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 4820.89368219741,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.1971577981457613,
+        "F": 0.20242176760934705,
+        "O": 0.30670016174523307,
+        "Si": 0.29372027249965865,
+        "V": 0.031752266342291675
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 7.105427357601002e-15
+    },
+    "half_all_neutral_fluxes": {
+      "atom_ledger_residual": 0.0,
+      "movement_atoms_per_wafer_ion": 6.06753823241848,
+      "sio2_yield_per_wafer_ion": 2.0225127441394934,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": true,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 4820.89368219741,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.07094216377801156,
+        "F": 0.07805334421743373,
+        "O": 0.3817405315441524,
+        "Si": 0.46926396046040225,
+        "V": 0.06436624059679566
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 8.881784197001252e-16
+    },
+    "omit_C3F4_outside_source_species_list": {
+      "atom_ledger_residual": 0.0,
+      "movement_atoms_per_wafer_ion": 6.138712788422309,
+      "sio2_yield_per_wafer_ion": 2.0462375961407697,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": true,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 4820.89368219741,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.06496480476035173,
+        "F": 0.08154675201742306,
+        "O": 0.39791061847876663,
+        "Si": 0.4555778247434586,
+        "V": 0.061867435996778436
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 8.881784197001252e-16
+    },
+    "source_species_intersection_only": {
+      "atom_ledger_residual": -2.220446049250313e-16,
+      "movement_atoms_per_wafer_ion": 5.228434218526087,
+      "sio2_yield_per_wafer_ion": 1.7428114061753623,
+      "source_extrapolation": {
+        "beyond_source_fit_energy": true,
+        "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+        "quadrature_max_energy_eV": 4820.89368219741,
+        "source_fit_energy_max_eV": 370.0,
+        "surface_evidence_ceiling": "L1_yield_regressed"
+      },
+      "state": {
+        "C": 0.034485311860201574,
+        "F": 0.05391684544445062,
+        "O": 0.4089176986836456,
+        "Si": 0.5026801440117024,
+        "V": 0.0699137752661935
+      },
+      "steady_state_found": true,
+      "steady_state_residual": 1.2212453270876722e-15
+    }
+  },
+  "nominal_no_fit_surface_result": {
+    "atom_ledger_residual": 0.0,
+    "movement_atoms_per_wafer_ion": 7.839161501959492,
+    "sio2_yield_per_wafer_ion": 2.613053833986497,
+    "source_extrapolation": {
+      "beyond_source_fit_energy": true,
+      "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+      "quadrature_max_energy_eV": 4820.89368219741,
+      "source_fit_energy_max_eV": 370.0,
+      "surface_evidence_ceiling": "L1_yield_regressed"
+    },
+    "state": {
+      "C": 0.1236807425512635,
+      "F": 0.12641415236752032,
+      "O": 0.358438423817212,
+      "Si": 0.39146668126400413,
+      "V": 0.04847277591424973
+    },
+    "steady_state_found": true,
+    "steady_state_residual": 1.7763568394002505e-15
+  },
+  "question": "Can an independently beam-yield-regressed, atom-balanced fluorocarbon/SiO2 surface deck supply Krueger's wafer-ion-normalized removal without a depth fit?",
+  "score": {
+    "absolute_percentage_error": 0.036583339102081336,
+    "experimental_run_average_sio2_per_wafer_ion": 2.5208333333333335,
+    "nominal_guo_sio2_per_wafer_ion": 2.613053833986497,
+    "signed_relative_error": 0.036583339102081336,
+    "within_five_percent": true
+  },
+  "sources": {
+    "depth_identifiability_audit_sha256": "7f79f79f77b8d37d83500364251bdefb1c0cf6e953e9fde9e0bde54e3236652c",
+    "gray_library_record_sha256": "b6d4f06c057e9e70bc33bd7e2b498420114ee91de2e3956aa132d448139c12e5",
+    "gray_ocr_extract_sha256": "36cb360591f19209b484db0fb6e532b4e9818824eeba53c9a16aac5dc14a7e0e",
+    "gray_pdf_sha256": "be6bce26b699b3172cf67bb68e4d12e039fd3ea775f73873ee1aaf25164c065b",
+    "guo_manifest_sha256": "6dea140758f46089a10d3f1e83ef704547f44dbffa208263e0717acb314b353c",
+    "guo_pdf_sha256": "f5c78c0089fe4104019435c6fd34e9b8f284358dda1df0101ecec54c592750d2",
+    "guo_table_sha256": "2f93b31c1862095d133b765cddc1957ec27f0e0d05b7b2dfbafc0908f54b9600",
+    "krueger_flux_table_sha256": "ad50b6099a52d2c2cc00eb4eade496b9d75c41d19881c5fec9e905f9dfd3808b",
+    "krueger_iead_metadata_sha256": "7904a700afdcd116c6f57ef35aeb5555661ffed0d004304d815d20f79840ca55",
+    "krueger_iead_table_sha256": "913d31be623ec5d52d226c8cea499e7f014cf4f5a27e017b519633c96e5e3ee3",
+    "kwon_pdf_sha256": "b6196e768830cb0efed7aa0f013fbae511b58890d2c9a963329d337e6a5fa018"
+  },
+  "status": "passed",
+  "unpublished_ion_composition_sensitivity": {
+    "cases": {
+      "aggregate_nonincorporating": {
+        "atom_ledger_residual": 0.0,
+        "movement_atoms_per_wafer_ion": 7.839161501959492,
+        "sio2_yield_per_wafer_ion": 2.613053833986497,
+        "source_extrapolation": {
+          "beyond_source_fit_energy": true,
+          "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+          "quadrature_max_energy_eV": 4820.89368219741,
+          "source_fit_energy_max_eV": 370.0,
+          "surface_evidence_ceiling": "L1_yield_regressed"
+        },
+        "state": {
+          "C": 0.1236807425512635,
+          "F": 0.12641415236752032,
+          "O": 0.358438423817212,
+          "Si": 0.39146668126400413,
+          "V": 0.04847277591424973
+        },
+        "steady_state_found": true,
+        "steady_state_residual": 1.7763568394002505e-15
+      },
+      "all_C3F3_positive_ions": {
+        "error": "Guo translating-layer steady state did not converge: max residual 2.05441",
+        "steady_state_found": false
+      },
+      "all_CF2_positive_ions": {
+        "atom_ledger_residual": 0.0,
+        "movement_atoms_per_wafer_ion": 9.895654744091683,
+        "sio2_yield_per_wafer_ion": 3.298551581363894,
+        "source_extrapolation": {
+          "beyond_source_fit_energy": true,
+          "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+          "quadrature_max_energy_eV": 4820.89368219741,
+          "source_fit_energy_max_eV": 370.0,
+          "surface_evidence_ceiling": "L1_yield_regressed"
+        },
+        "state": {
+          "C": 0.1564914705986072,
+          "F": 0.18833926612778107,
+          "O": 0.34618418309239,
+          "Si": 0.30898508018122167,
+          "V": 0.04218101325322833
+        },
+        "steady_state_found": true,
+        "steady_state_residual": 1.7763568394002505e-15
+      },
+      "all_CF3_positive_ions": {
+        "atom_ledger_residual": 0.0,
+        "movement_atoms_per_wafer_ion": 10.98369670731531,
+        "sio2_yield_per_wafer_ion": 3.66123223577177,
+        "source_extrapolation": {
+          "beyond_source_fit_energy": true,
+          "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+          "quadrature_max_energy_eV": 4820.89368219741,
+          "source_fit_energy_max_eV": 370.0,
+          "surface_evidence_ceiling": "L1_yield_regressed"
+        },
+        "state": {
+          "C": 0.13382811322536503,
+          "F": 0.23406076658200672,
+          "O": 0.3800926254491933,
+          "Si": 0.2520184947434349,
+          "V": 0.04335349494027588
+        },
+        "steady_state_found": true,
+        "steady_state_residual": 1.7763568394002505e-15
+      },
+      "all_CF_positive_ions": {
+        "atom_ledger_residual": 0.0,
+        "movement_atoms_per_wafer_ion": 8.586692708657798,
+        "sio2_yield_per_wafer_ion": 2.862230902885933,
+        "source_extrapolation": {
+          "beyond_source_fit_energy": true,
+          "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+          "quadrature_max_energy_eV": 4820.89368219741,
+          "source_fit_energy_max_eV": 370.0,
+          "surface_evidence_ceiling": "L1_yield_regressed"
+        },
+        "state": {
+          "C": 0.1931858432151561,
+          "F": 0.1546643234460562,
+          "O": 0.2941414455302969,
+          "Si": 0.35800838780849076,
+          "V": 0.03959114409765502
+        },
+        "steady_state_found": true,
+        "steady_state_residual": 8.881784197001252e-16
+      },
+      "all_C_positive_ions": {
+        "atom_ledger_residual": 0.0,
+        "movement_atoms_per_wafer_ion": 6.630610287918328,
+        "sio2_yield_per_wafer_ion": 2.2102034293061092,
+        "source_extrapolation": {
+          "beyond_source_fit_energy": true,
+          "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+          "quadrature_max_energy_eV": 4820.89368219741,
+          "source_fit_energy_max_eV": 370.0,
+          "surface_evidence_ceiling": "L1_yield_regressed"
+        },
+        "state": {
+          "C": 0.3030339120665111,
+          "F": 0.13347539110148177,
+          "O": 0.1930934144271756,
+          "Si": 0.37039728240483166,
+          "V": 0.031845145668231906
+        },
+        "steady_state_found": true,
+        "steady_state_residual": 2.6645352591003757e-15
+      },
+      "all_O_positive_ions": {
+        "atom_ledger_residual": 0.0,
+        "movement_atoms_per_wafer_ion": 7.797832147639648,
+        "sio2_yield_per_wafer_ion": 2.5992773825465494,
+        "source_extrapolation": {
+          "beyond_source_fit_energy": true,
+          "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+          "quadrature_max_energy_eV": 4820.89368219741,
+          "source_fit_energy_max_eV": 370.0,
+          "surface_evidence_ceiling": "L1_yield_regressed"
+        },
+        "state": {
+          "C": 0.10832296306388309,
+          "F": 0.14059282560901892,
+          "O": 0.40707356040312787,
+          "Si": 0.34401065092397015,
+          "V": 0.049349025709340306
+        },
+        "steady_state_found": true,
+        "steady_state_residual": 1.3322676295501878e-15
+      }
+    },
+    "converged_yield_range": [
+      2.2102034293061092,
+      3.66123223577177
+    ],
+    "nonconverged_cases_are_possible_deposition_or_missing_steady_state": [
+      "all_C3F3_positive_ions"
+    ]
+  },
+  "verdict": {
+    "collision_bounded_neutral_transport_coupling_is_defined": false,
+    "energy_support_is_closed": false,
+    "exact_825nm_prediction_authorized": false,
+    "feature_depth_match_earned": false,
+    "next_required_physics": [
+      "bound the >1225/2000 eV reaction moments with a projectile-resolved stopping/cascade calculation and species-resolved high-energy beam or MD evidence",
+      "obtain a species-resolved positive-ion flux and IEAD, or validate a reactor provider against that diagnostic",
+      "measure or independently predict stable C4F6 molecular flux and C4F6/ion co-incidence response",
+      "derive a bounded collision-level neutral uptake law; Guo adsorption coefficients exceed one and are rates, not radiosity sticking probabilities",
+      "run the frozen feature transport/geometry with local transient Si/O/C/F/V state, then score depth and profile without changing this board"
+    ],
+    "no_fit_planar_surface_normalization_within_five_percent": true,
+    "reactor_species_boundary_is_identified": false,
+    "reason": "the 2.613 versus 2.521 planar match is real and uses no Krueger depth fit. Gray independently supports the square-root form to 2000 eV for F-saturated chemical removal and 1225 eV for physical sputtering, but Guo's reaction coefficients are still extended from <=370 eV to a 471--4821 eV boundary. The result also treats two C4F6 radicals through a universal-neutral transfer and chooses one endpoint of an unpublished ion-composition range; no evolving feature calculation has used this surface state",
+    "surface_transfer_hypothesis_is_worth_feature_testing": true
+  }
+}
