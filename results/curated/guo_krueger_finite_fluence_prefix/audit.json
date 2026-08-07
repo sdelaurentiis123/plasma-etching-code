@@ -1,0 +1,119 @@
+{
+  "cases": {
+    "spatial_dt_0p0625_dx_5nm": {
+      "accepted_steps": 8,
+      "artifact_directory": "/private/tmp/krueger_guo_transient_dt0625_dx5",
+      "audit_sha256": "1a8852c59f66c340dd04686b3650ec8dafac4aab415ed53d2484120609ee0571",
+      "config_hash": "93f41a4d833207b4d30e6521c39b017de3633e3d1ac4d26d28e33e84a9747938",
+      "depth_nm": 6.134902414855148,
+      "dx_nm": 5.0,
+      "implementation_revision": "dca43368145f96bddf30f171e1ec79b9059f90ce",
+      "implementation_worktree_was_dirty": true,
+      "mask_opening_nm": 85.41526431239122,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.80356524564646e-12,
+      "mean_depth_rate_nm_s": 12.269804829710296,
+      "nominal_step_s": 0.0625,
+      "profile_sha256": "c09ba5d933e5d4c8d39b63fdb864612383179e741e134cd9eceb937d32dbb354",
+      "wall_time_s": 1863.169575374981
+    },
+    "temporal_dt_0p0625_dx_10nm": {
+      "accepted_steps": 8,
+      "artifact_directory": "/private/tmp/krueger_guo_transient_dt0625_dx10",
+      "audit_sha256": "4ba1d7455895d79da8ab9e64e6e2e56eb0511f9054ee74508e4351cfdc6d7afd",
+      "config_hash": "62167676d4def50c2d82755907c1ab34cd53d415273080603f732593672c5c49",
+      "depth_nm": 5.964729929597512,
+      "dx_nm": 10.0,
+      "implementation_revision": "1747bae1e6f9d88f26edc64cad78ec5639349c72",
+      "implementation_worktree_was_dirty": true,
+      "mask_opening_nm": 85.6848977477694,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.7032983851918263e-12,
+      "mean_depth_rate_nm_s": 11.929459859195024,
+      "nominal_step_s": 0.0625,
+      "profile_sha256": "42f1ac8acc66796cb8f66658f7bdedca8087a97ed187fc6e15bb5a154c06a552",
+      "wall_time_s": 238.34076020802604
+    },
+    "temporal_dt_0p125_dx_10nm": {
+      "accepted_steps": 4,
+      "artifact_directory": "/private/tmp/krueger_guo_transient_dt125_dx10",
+      "audit_sha256": "120a7e25ebcbf468a3f2cc21be7d50d3167b081badf371337d8bc83387834a10",
+      "config_hash": "0360553d652084e98e2c8a2e349dd740646a4054de7e749c771fea85b257b397",
+      "depth_nm": 5.910416421299303,
+      "dx_nm": 10.0,
+      "implementation_revision": "1747bae1e6f9d88f26edc64cad78ec5639349c72",
+      "implementation_worktree_was_dirty": true,
+      "mask_opening_nm": 85.45761376890557,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_relative_balance_error": 1.5665478371716396e-12,
+      "mean_depth_rate_nm_s": 11.820832842598605,
+      "nominal_step_s": 0.125,
+      "profile_sha256": "abf75bad365d3cfba9f132335e09253cf8b53bfcdc201fb670682a5330b4ac89",
+      "wall_time_s": 123.05203783296747
+    },
+    "temporal_dt_0p25_dx_10nm": {
+      "accepted_steps": 2,
+      "artifact_directory": "/private/tmp/krueger_guo_transient_dx10",
+      "audit_sha256": "46824374fa27e06710179fa7e1d9960aaeb2cc68ac5bdec9efb5df033b46fbb4",
+      "config_hash": "36384a12a58cb7373168f5c8f87a9ded9fda4e7ead9b886c563d759373022ebe",
+      "depth_nm": 5.627910330590513,
+      "dx_nm": 10.0,
+      "implementation_revision": "1747bae1e6f9d88f26edc64cad78ec5639349c72",
+      "implementation_worktree_was_dirty": true,
+      "mask_opening_nm": 85.08921579668078,
+      "maximum_material_ledger_residual_units_m2": 0.0,
+      "maximum_neutral_radiosity_relative_balance_error": 6.221108374552489e-13,
+      "mean_depth_rate_nm_s": 11.255820661181026,
+      "nominal_step_s": 0.25,
+      "profile_sha256": "21005ae06bc434413095ae32f5cb02f54c3ddc1996f5a1f5e1504156a7e6a801",
+      "wall_time_s": 65.07965429197066
+    }
+  },
+  "claim": "Numerically converged 0.5 s prefix for the source-fixed finite-fluence Guo/Kwon transfer; not an absolute-depth prediction and not a 60 s extrapolation.",
+  "gates": {
+    "material_ledger_exact": {
+      "limit": 0.0,
+      "passed": true,
+      "value": 0.0
+    },
+    "neutral_radiosity_balance_le_1e_9": {
+      "limit": 1e-09,
+      "passed": true,
+      "value": 1.80356524564646e-12
+    },
+    "spatial_5nm_vs_10nm_abs_relative_le_5pct": {
+      "limit": 0.05,
+      "passed": true,
+      "signed_value": 0.028529788819645477,
+      "value": 0.028529788819645477
+    },
+    "temporal_fine_to_richardson_limit_le_1pct": {
+      "limit": 0.01,
+      "passed": true,
+      "value": 0.0021626347020161805
+    }
+  },
+  "physical_evidence_boundary": {
+    "blockers": [
+      "Krueger publishes an aggregate energetic-ion flux and IEAD but not the ion-species mixture.",
+      "Krueger publishes no stable C4F6 wafer flux.",
+      "C2F3 and C3F4 require declared topology transfers outside Guo's printed neutral list.",
+      "Most Krueger IEAD support lies above the <=370 eV Guo/Yin regression board.",
+      "The source's printed off-normal angular polynomial requires the declared Table 4.2 repair.",
+      "The 2.5 nm translating-layer capacity is a cross-chemistry source transfer.",
+      "The amorphous-carbon mask includes unmeasured density and reduced-film parameters."
+    ],
+    "supports_absolute_depth_prediction": false
+  },
+  "schema": "petch-guo-krueger-finite-fluence-prefix-v1",
+  "spatial_convergence": {
+    "coarse_dx_nm": 10.0,
+    "fine_dx_nm": 5.0,
+    "fine_minus_coarse_relative": 0.028529788819645477
+  },
+  "temporal_convergence": {
+    "fine_to_limit_relative": 0.0021626347020161805,
+    "observed_order": 2.378899011672689,
+    "richardson_limit_nm": 5.977657418968538
+  }
+}
