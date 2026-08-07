@@ -12,7 +12,7 @@
 - **Local extraction:**
   `research_sources/thesis_extracts/malyshev_1998_lam_chlorine_dissociation.txt`
 - **Digitized data:** `data/experimental/malyshev_1998_lam/`
-- **Status:** PRIMARY FULL TEXT + FIGURES 7--8 NATIVE-PIXEL PIL AUDIT
+- **Status:** PRIMARY FULL TEXT + FIGURES 3, 7--8 NATIVE-PIXEL PIL AUDIT
 
 ## Claims table
 
@@ -26,13 +26,15 @@
 | M6 | Reducing the gap from 11 to 6.5 cm lowers dissociation at 2 mTorr and below but slightly raises it at 10 mTorr. | Strong geometry/transport discriminator that a well-mixed rate fit alone should not receive credit for. |
 | M7 | At 6.5 cm and 10 mTorr, the apparent Cl2 density above 100% near 90 W is attributed to enhanced emission during a discharge-mode transition. | Preregistered exclusion from grading, not a negative dissociation datum. |
 | M8 | In the paper's model, wall recombination probability was the sole adjusted parameter and `gamma_Cl = 0.035` gave the reported pressure dependence. | A source-model fit, not an independent constant. It is excluded from the reactor validation inputs; direct wall measurements supersede it. |
+| M9 | Figure 3 reports OES electron-temperature measurements versus TCP power for both 11 and 6.5 cm gaps; the article states Te rises roughly 20--30% between 20 and 900 W. The 11 cm values were reported in source ref. 3 and the 6.5 cm values were previously unpublished. | The 62 visible markers supply measured-Te conditioning across 0.5--20 mTorr. The article supplies no Te uncertainty here, TCP power is not absorbed power, and the assumed Maxwellian EEDF is not independently validated by this figure. |
 
 ## Use decision
 
-The 38 clean Figure 7--8 markers are the first Lam-equipment validation board
-for the native chlorine reactor. They constrain dissociation versus source
-power, pressure, and chamber gap. They do not measure absorbed power, species-
-resolved wafer flux, ion energy, or etched depth.
+The 62 clean Figure-3 markers condition the measured electron state, and the
+38 clean Figure 7--8 markers are the first Lam-equipment validation board for
+the native chlorine reactor. Together they separate the observed Te trend from
+the dissociation test. They do not measure absorbed power, species-resolved
+wafer flux, ion energy, or etched depth.
 
 The reactor model may either calibrate on a preregistered subset and grade the
 held-out conditions, or use independently measured boundaries and grade all

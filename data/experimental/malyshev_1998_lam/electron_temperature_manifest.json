@@ -1,0 +1,52 @@
+{
+  "manifest_id": "MALYSHEV-1998-LAM-ELECTRON-TEMPERATURE-R1",
+  "source": {
+    "citation": "M. V. Malyshev, V. M. Donnelly, A. Kornblit, and N. A. Ciampa, Journal of Applied Physics 84, 137-146 (1998)",
+    "doi": "10.1063/1.368010",
+    "pdf_sha256": "569ab180bb8cab71dda0860e0350f03d24b391e084e19116fefb74f1c719789c",
+    "pdf_page": 4,
+    "figure": 3,
+    "native_image": {
+      "pdfimages_index_on_page": 1,
+      "size_px": [
+        859,
+        1057
+      ],
+      "one_bit_pixel_sha256": "84d7d77205e51cf61a33391aad96bdbe1a8c7827fe8cb4961f41e4bc455053ad"
+    }
+  },
+  "measurement": {
+    "observable": "electron_temperature_eV",
+    "method": "optical emission spectroscopy",
+    "reported_uncertainty": "not reported in this article",
+    "eleven_cm_provenance": "reported elsewhere in source ref. 3",
+    "six_point_five_cm_provenance": "previously unpublished"
+  },
+  "digitization": {
+    "marker_count": 62,
+    "method": "native one-bit figure raster; original-resolution human-vision marker reconciliation; PIL axis and point replay",
+    "horizontal_pixel_allowance": 2.0,
+    "vertical_pixel_allowance": 3.0,
+    "power_range_W": [
+      24.715,
+      899.797
+    ],
+    "temperature_range_eV": [
+      1.28008,
+      3.77832
+    ],
+    "csv_sha256": "cd66b1bce25739be4ab555203d78f8b93f1af2f690050ee7d008e567bd3acb7a"
+  },
+  "exclusions": {
+    "smooth_curves": "guide curves; never digitized as measurements",
+    "low_power_overlap": "markers whose identity could not be reconciled independently at original pixels were omitted",
+    "20_mTorr_6_point_5_cm": "not present in source panel b"
+  },
+  "use_boundary": {
+    "supports_measured_Te_conditioning": true,
+    "supports_absorbed_power_validation": false,
+    "supports_wafer_flux_validation": false,
+    "supports_feature_depth_validation": false,
+    "interpolation_rule": "interpolate only within a fixed gap and pressure series; report interpolation separately from measurement"
+  }
+}
