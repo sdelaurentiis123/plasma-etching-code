@@ -71,6 +71,14 @@ def _maximum(history, name):
     return max(float(row.get(name, 0.0)) for row in history)
 
 
+def _history_through_gate(audit):
+    return [
+        row
+        for row in audit["history"]
+        if float(row["physical_time_s"]) <= MATCH_STOP_S + 1.0e-13
+    ]
+
+
 def build_report(medium_path=DEFAULT_MEDIUM, fine_path=DEFAULT_FINE):
     medium = _load(medium_path)
     fine = _load(fine_path)
@@ -134,19 +142,27 @@ def build_report(medium_path=DEFAULT_MEDIUM, fine_path=DEFAULT_FINE):
     maximum_mask_difference_nm = max(
         abs(row["mask_opening_difference_nm"]) for row in trajectory
     )
+    gate_histories = tuple(
+        _history_through_gate(audit) for audit in (medium, fine)
+    )
     maximum_ledger = max(
-        _maximum(audit["history"], "maximum_material_ledger_residual_units_m2")
-        for audit in (medium, fine)
+        _maximum(history, "maximum_material_ledger_residual_units_m2")
+        for history in gate_histories
     )
     maximum_radiosity = max(
         _maximum(
-            audit["history"],
+            history,
             "maximum_neutral_radiosity_relative_balance_error",
         )
-        for audit in (medium, fine)
+        for history in gate_histories
     )
     topology_event_count = sum(
-        len(audit["topology_events"]) for audit in (medium, fine)
+        sum(
+            float(event.get("physical_time_lower_s", math.inf))
+            < MATCH_STOP_S
+            for event in audit["topology_events"]
+        )
+        for audit in (medium, fine)
     )
     gates = {
         "terminal_depth_abs_relative_le_5pct": {
