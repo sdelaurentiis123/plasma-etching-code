@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 118 sources by topic
+## Index — 119 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -122,6 +122,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`nist-tn-2279-gas-diffusion`](library/nist-tn-2279-gas-diffusion.md) | NIST evaluated gas self-/binary-diffusion correlations | AUTHORITATIVE FULL PDF READ |
 | [`phelps-1994-ar-ion-scattering`](library/phelps-1994-ar-ion-scattering.md) | Phelps, consistent Ar+-Ar momentum-transfer/scattering model | PRIMARY PUBLISHER RECORD; EQUATION CROSS-CHECKED |
 | [`raja-linne`](library/raja-linne.md) | Raja & Linne | not-fetched (DOI corrected from 1.1519941) |
+| [`stafford-2010-cl-wall`](library/stafford-2010-cl-wall.md) | Stafford et al., measured state-dependent Cl wall recombination | PRIMARY FULL TEXT + FIGURE 8 PIL-AUDITED AT 600 DPI |
 | [`wang-olthoff-1999-ion-flux`](library/wang-olthoff-1999-ion-flux.md) | Wang & Olthoff, absolute mass-resolved Cl2/Ar ion fluxes and IEDs | PRIMARY NIST FULL TEXT + FIGURE 9 PIL-AUDITED AT 600 DPI |
 
 ### Transport references and analytic benchmarks
@@ -238,6 +239,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | RF-to-plasma absorbed-power measurement chain | [`hopwood-1994-rf-coupling`](library/hopwood-1994-rf-coupling.md), [`mahoney-1994-planar-icp`](library/mahoney-1994-planar-icp.md) | forbids generator setpoint or forward-minus-reflected power from silently becoming absorbed plasma power |
 | Matched-RF versus DirectDrive output boundary | [`lam-direct-drive-patents`](library/lam-direct-drive-patents.md) | output V/I/phase and reference calibration still terminate upstream of coil/window/electrode loss |
 | Lam equipment-class reactor roadmap | [`lam-etch-platforms-2026`](library/lam-etch-platforms-2026.md) | separates ICP conductor/deep-Si, CCP dielectric/HARC, and radical-rich selective-etch provider requirements |
+| Conditioned-wall Cl recombination envelope and constant-gamma rejection | [`stafford-2010-cl-wall`](library/stafford-2010-cl-wall.md) | 39 spinning-wall markers show gamma depends on Cl/Cl2 ratio, pressure, conditioning, and material; Figure 9 rejects one gamma across pressure |
 | Absolute Cl2/Ar GEC-ICP total and species-resolved ion-flux board | [`wang-olthoff-1999-ion-flux`](library/wang-olthoff-1999-ion-flux.md) | 24 held-out Figure-9 markers freeze total-current and `Cl+`/`Cl2+` composition versus pressure; surface-state disagreement is retained rather than fitted into electron-impact branching |
 | Complex-channel sputter yield `Y = 0.0139(√E − √18)` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | measured absolute law; replaced Krüger's 2-row linear/Sigmund anomaly (RESULTS_GRAY_ANCHORING) |
 | Chemical branching `β = 0.053(√E − √4)` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Table 5-10 parenthetical B₀ column; co-regressed partner of s₀ |

@@ -1,0 +1,91 @@
+{
+  "manifest_id": "STAFFORD-2010-FIG8-CL-WALL-RECOMBINATION-R1",
+  "source": {
+    "citation": "L. Stafford, J. Guha, R. Khare, S. Mattei, O. Boudreault, B. Clain, and V. M. Donnelly, Pure and Applied Chemistry 82, 1301-1315 (2010), Experimental and modeling study of O and Cl atoms surface recombination reactions in O2 and Cl2 plasmas",
+    "doi": "10.1351/PAC-CON-09-11-02",
+    "official_iupac_url": "https://iupac.org/publications/pac/pdf/2010/pdf/8206x1301.pdf",
+    "pdf_sha256": "2f74388576d435d9b3ae3843d5fa14f6a941ef61124b406f3ee7a7496e464b08",
+    "pdf_page": 10,
+    "print_page": 1310,
+    "figure": "Figure 8",
+    "render_dpi": 600,
+    "rendered_page_sha256": "296bc9dfb1426272449d62694ba773bb57cbb692da8f78a1805a839cfb04e447",
+    "rendered_page_size_px": [
+      4500,
+      6450
+    ],
+    "figure_data_lineage": "review figure reproduced from the authors' refs. 31 and 34"
+  },
+  "experiment": {
+    "plasma": "inductively coupled Cl2",
+    "pressure_range_mTorr": [
+      1.25,
+      20.0
+    ],
+    "icp_power_range_W": [
+      100.0,
+      600.0
+    ],
+    "surfaces": [
+      "plasma-conditioned stainless steel",
+      "plasma-conditioned anodized aluminum"
+    ],
+    "measurement": "spinning-wall Langmuir-Hinshelwood recombination; net Cl2 desorption extrapolated to zero reaction time and divided by Cl-atom impingement flux",
+    "individual_power_per_marker": "not encoded in Figure 8"
+  },
+  "pixel_calibration": {
+    "x_at_0_ratio": 1563.5,
+    "x_at_0.9_ratio": 3175.0,
+    "y_at_0.1_gamma": 905.5,
+    "y_at_0.01_gamma": 1554.5,
+    "x_scale": "linear",
+    "y_scale": "log10"
+  },
+  "digitization": {
+    "marker_count": 39,
+    "method": "official IUPAC PDF; 600-dpi Poppler full-page render; original-resolution human-vision reconciliation; PIL/NumPy dark-axis and marker replay; connected-component centers; Hough-circle separation where eye-guide dashes overlap",
+    "horizontal_pixel_allowance": 5.0,
+    "vertical_pixel_allowance": 8.0,
+    "ratio_uncertainty": 0.0027924294135898233,
+    "log10_gamma_uncertainty": 0.012326656394453005,
+    "measurement_uncertainty": "not assigned: Figure 8 has no error bars; digitization uncertainty is not experimental uncertainty"
+  },
+  "source_internal_checks": {
+    "ratio_range": [
+      0.10561,
+      0.779646
+    ],
+    "stainless_steel_gamma_range": [
+      0.0039811,
+      0.0315555
+    ],
+    "anodized_aluminum_gamma_range": [
+      0.0089648,
+      0.0936139
+    ],
+    "paper_text_stainless_steel_range": [
+      0.004,
+      0.03
+    ],
+    "paper_text_anodized_aluminum_relative_statement": "about a factor of 2 larger than stainless steel"
+  },
+  "claim_boundary": {
+    "valid": [
+      "conditioned-surface chlorine recombination evidence envelope",
+      "dependence on Cl/Cl2 density ratio and surface condition",
+      "wall-model validation target within the published domain"
+    ],
+    "not_valid": [
+      "one constant gamma_Cl independent of plasma and wall state",
+      "extrapolation outside the measured pressure, power, and ratio",
+      "an individual power value for any Figure-8 marker",
+      "a proprietary Lam reactor boundary",
+      "a feature-depth calibration"
+    ],
+    "model_warning": "Figure 9 of the paper shows that no one constant gamma_Cl adequately fits the full pressure-dependent dissociation set"
+  },
+  "output": {
+    "path": "data/experimental/stafford_2010/figure8_chlorine_wall_recombination.csv",
+    "sha256": "5fb80781dce2a38c33058bfad594d1c01245652eb670f942062a63075e3578c0"
+  }
+}

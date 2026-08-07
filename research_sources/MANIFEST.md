@@ -11,6 +11,7 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 - HG_jap97.txt
 - HG_jvstb97.txt
 - hamilton_2018_cl2_dissociation.txt
+- stafford_2010_cl_wall_recombination.txt
 - wang_olthoff_1999_ion_energy.txt
 - an_2026_nnp_etch_verified_excerpts.txt
 - arts_2021_apr_angular_verified_excerpt.txt
@@ -45,6 +46,10 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
   `data/experimental/wang_olthoff_1999/`: 24 absolute/species-resolved
   chlorine-ion markers, with a 600-dpi PIL audit and exact NIST PDF/render
   hashes.
+- Stafford et al. 2010 Figure 8 is under
+  `data/experimental/stafford_2010/`: 39 conditioned-wall chlorine
+  recombination markers, with a 600-dpi human-vision/PIL audit and exact
+  IUPAC PDF/render hashes.
 - extract_mouth_profiles.py (regenerator)
 
 ## library/ — the internal literature library (START HERE)

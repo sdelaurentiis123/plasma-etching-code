@@ -1,0 +1,138 @@
+STAFFORD ET AL. 2010 — VERIFIED PRIMARY-SOURCE EXTRACTION
+
+Citation
+--------
+Luc Stafford, Joydeep Guha, Rohit Khare, Stefano Mattei, Olivier Boudreault,
+Boris Clain, and Vincent M. Donnelly, “Experimental and modeling study of O
+and Cl atoms surface recombination reactions in O2 and Cl2 plasmas,” Pure and
+Applied Chemistry 82(6), 1301–1315 (2010).
+DOI: 10.1351/PAC-CON-09-11-02
+
+Official full text
+------------------
+https://iupac.org/publications/pac/pdf/2010/pdf/8206x1301.pdf
+PDF SHA-256:
+2f74388576d435d9b3ae3843d5fa14f6a941ef61124b406f3ee7a7496e464b08
+
+Extraction method and boundary
+------------------------------
+The 15-page PDF was extracted with pdftotext -layout and the scientific claims
+below were checked against original-resolution 300–600 dpi Poppler renders.
+Pages 1301, 1309, 1310, 1311, and 1312 and Figures 7–10 were visually checked.
+This is a concise, paraphrased, grep-ready extraction rather than a
+redistribution of the full article. Equations and numerical values are retained
+where they define the measurement or its validity boundary.
+
+Scope and physical mechanism (pp. 1301–1303)
+--------------------------------------------
+Low-pressure O2 and Cl2 processing plasmas create O and Cl atoms primarily by
+electron-impact dissociation. The atoms are lost primarily by heterogeneous
+recombination at reactor walls and substrates, so the wall state controls
+plasma composition and processing rates.
+
+The article emphasizes that clean-surface beam coefficients are not generally
+reactor coefficients. Positive ions, electrons, UV/VUV radiation, chamber
+erosion, and deposited process material continuously condition the wall.
+Bare-surface Cl recombination probabilities near 300 K had been reported as
+0.2 on anodized aluminum and 0.7 on stainless steel, while values inferred in
+operating Cl2 reactors were commonly 0.01–0.04.
+
+Spinning-wall measurement (pp. 1302–1305, 1308–1310)
+----------------------------------------------------
+A substrate moves periodically between an inductively coupled plasma and a
+differentially pumped analysis chamber. Surface and desorbing species are
+measured by Auger electron spectroscopy or line-of-sight mass spectrometry.
+Rotation frequency changes the reaction time, allowing prompt and delayed
+Langmuir–Hinshelwood contributions to be separated.
+
+For chlorine, Cl2 adsorption/desorption is present even with the plasma off.
+The plasma-on pressure rise is corrected by the measured plasma-off response:
+
+  ΔP_rec = ΔP_on - (n_Cl2,on / n_Cl2,off) ΔP_off
+
+The corrected pressure rise is converted to net Cl2 desorption D_rec. The
+reported Cl-atom recombination probability is
+
+  gamma_Cl = 6 D_rec(tr -> 0) / Gamma_Cl
+
+where Gamma_Cl is the incident Cl-atom flux and the desorption rate is
+extrapolated to zero reaction time.
+
+Conditioned-wall composition (pp. 1308–1309)
+--------------------------------------------
+After Cl2 plasma exposure the test surfaces acquire a silicon-oxychloride-rich
+layer due to silica discharge-tube erosion. Reported conditioned compositions
+were approximately Fe:Si:O:Cl = 1:13:13:3 on stainless steel and
+Al:Si:O:Cl = 3:3:8:1 on anodized aluminum. The stainless surface had more
+silicon and chlorine and a smoother morphology.
+
+Figure 8 direct wall evidence (pp. 1309–1310)
+---------------------------------------------
+Figure 8 reports gamma_Cl versus n_Cl/n_Cl2 for plasma-conditioned stainless
+steel (filled markers) and anodized aluminum (open markers). Marker shapes
+identify pressures of 20, 10, 5, and 1.25 mTorr; the experimental ICP power
+range is 100–600 W. Individual powers are not encoded for the plotted points.
+The dashed curves are guides to the eye only.
+
+For conditioned stainless steel, the text reports gamma_Cl from 0.004 to 0.03,
+increasing with the Cl/Cl2 density ratio. Conditioned anodized aluminum follows
+the same trend at values about a factor of two larger. These coefficients are
+far below bare-surface values and are consistent with silica-rich conditioning.
+
+The authors attribute the ratio dependence to competition for adsorption
+sites. Increasing Cl2 can block sites needed for Cl adsorption and delayed
+Langmuir–Hinshelwood recombination. The article explicitly warns that
+n_Cl/n_Cl2 is not sufficient by itself: absolute Cl2 or O2 impingement density
+also affects recombination dynamics.
+
+The 39 Figure-8 markers are archived at:
+data/experimental/stafford_2010/figure8_chlorine_wall_recombination.csv
+The 600 dpi source/render checksums, axes, pixels, and uncertainty boundary are
+archived in the adjacent digitization_manifest.json.
+
+Large-volume reactor inversion (pp. 1310–1311)
+-----------------------------------------------
+A 190 MHz surface-wave source feeds a 28 cm diameter stainless processing
+chamber through a 14.6 cm fused-silica tube. Downstream electron density and
+temperature are stated as 1e9–1e11 cm^-3 and 2–4 eV. The measured gas
+temperature was near room temperature. Cl2 dissociation was measured by
+plasma-sampling mass spectrometry and Xe actinometry.
+
+The isothermal fluid model tracks electrons, Cl, Cl2, Cl+, Cl2+, and Cl- and
+uses the Lee–Lieberman reaction set. Figure 9 compares measured dissociation
+with curves for gamma_Cl = 0.01, 0.015, 0.02, 0.025, and 0.03.
+
+The paper states that none of the constant-gamma curves adequately fits the
+full pressure range. The gamma required to match the measurement increases
+with pressure. This is consistent with the spinning-wall dependence and
+forbids selecting one chamber-independent gamma from Figure 9.
+
+The review reports cross-check values of gamma_Cl = 0.04 near
+n_Cl/n_Cl2 ~ 30 from Malyshev et al., 0.02 near ratio ~3 from Corr et al., and
+0.007 near ratio ~0.08 from Richards and Sawin.
+
+Quartz-tube inversion (pp. 1311–1313)
+-------------------------------------
+A separate 2.45 GHz surface-wave plasma in a 6 mm inner-diameter fused-silica
+tube was studied at 50 mTorr and 60 W absorbed power. Electron density,
+dissociation, and electron temperature were measured along the tube.
+
+The inferred gamma_Cl spans approximately 0.02–0.04, including about 0.042 at
+z = 1 cm and 0.026 at z = 13 cm. These values exceed the <0.005 reported for
+smooth annealed quartz exposed to an atomic beam. The article attributes the
+reactor values to erosion, roughening, and a conditioned SiOxCly surface.
+The small axial variation may be within experimental/fitting uncertainty and
+may also contain a wall-temperature contribution.
+
+Executable interpretation
+-------------------------
+1. Do not use a universal scalar gamma_Cl.
+2. Carry wall conditioning/material, n_Cl/n_Cl2, absolute impingement density,
+   pressure, and temperature as state or applicability information.
+3. Figure 8 supplies a measured validation envelope, not a coefficient-
+   selection target for feature depth.
+4. Figure 9 supplies a strong negative gate: a model with one constant gamma
+   must not claim pressure-wide predictive closure.
+5. Recover the original Figure-8 papers (Guha et al., JAP 103, 013306 (2008),
+   and Stafford et al., J. Phys. D 42, 055206 (2009)) before promoting an
+   interpolation of the review figure to a production boundary provider.
