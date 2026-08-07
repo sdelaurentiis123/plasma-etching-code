@@ -1,4 +1,4 @@
-"""Cylindrical global-model geometry and electropositive edge factors."""
+"""Cylindrical global-model geometry and sheath-edge factors."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -20,6 +20,39 @@ class ElectropositiveEdgeFactors:
             raise ValueError("edge factors must lie in (0, 1]")
         object.__setattr__(self, "axial", float(self.axial))
         object.__setattr__(self, "radial", float(self.radial))
+
+
+@dataclass(frozen=True)
+class ElectronegativeEdgeFactors(ElectropositiveEdgeFactors):
+    """Lee--Lieberman sheath-edge ratios with negative-ion correction.
+
+    ``electronegativity`` is the volume-average ratio ``n_minus / n_e`` and
+    ``electron_to_ion_temperature_ratio`` is ``T_e / T_i``.  These names keep
+    the temperature ratio distinct from a surface-reaction probability, which
+    is also conventionally written as gamma.
+    """
+
+    electronegativity: float
+    electron_to_ion_temperature_ratio: float
+    electronegative_correction: float
+
+    def __post_init__(self):
+        super().__post_init__()
+        alpha = float(self.electronegativity)
+        temperature_ratio = float(self.electron_to_ion_temperature_ratio)
+        correction = float(self.electronegative_correction)
+        if not np.isfinite(alpha) or alpha < 0.0:
+            raise ValueError("electronegativity must be nonnegative and finite")
+        if not np.isfinite(temperature_ratio) or temperature_ratio <= 0.0:
+            raise ValueError(
+                "electron-to-ion temperature ratio must be positive and finite")
+        expected = (1.0 + 3.0 * alpha / temperature_ratio) / (1.0 + alpha)
+        if not np.isclose(correction, expected, rtol=2e-15, atol=0.0):
+            raise ValueError("electronegative correction is inconsistent")
+        object.__setattr__(self, "electronegativity", alpha)
+        object.__setattr__(
+            self, "electron_to_ion_temperature_ratio", temperature_ratio)
+        object.__setattr__(self, "electronegative_correction", correction)
 
 
 @dataclass(frozen=True)
@@ -57,7 +90,7 @@ class CylindricalReactor:
     def effective_loss_area_m2(
             self, edge_factors: ElectropositiveEdgeFactors) -> float:
         if not isinstance(edge_factors, ElectropositiveEdgeFactors):
-            raise TypeError("electropositive edge factors are required")
+            raise TypeError("sheath-edge factors are required")
         return float(
             edge_factors.axial * 2.0 * np.pi * self.radius_m ** 2
             + edge_factors.radial
@@ -117,3 +150,43 @@ class CylindricalReactor:
             + radial_diffusion
         )
         return ElectropositiveEdgeFactors(axial=axial, radial=radial)
+
+    def electronegative_edge_factors(
+            self, *, electronegativity: float,
+            electron_to_ion_temperature_ratio: float,
+            ion_mean_free_path_m: float,
+            bohm_speed_m_s: float | None = None,
+            ambipolar_diffusion_m2_s: float | None = None,
+            include_high_pressure_diffusion: bool = True,
+            ) -> ElectronegativeEdgeFactors:
+        """Evaluate Lee--Lieberman Eqs. 13--14.
+
+        The source assumes a spatially uniform electron density, a parabolic
+        negative-ion density that vanishes at the sheath edge, and a common
+        edge-to-bulk ratio for all positive-ion species.  The returned values
+        must therefore be treated as a source-model closure, not a universal
+        sheath law.
+        """
+        alpha = float(electronegativity)
+        temperature_ratio = float(electron_to_ion_temperature_ratio)
+        if not np.isfinite(alpha) or alpha < 0.0:
+            raise ValueError("electronegativity must be nonnegative and finite")
+        if not np.isfinite(temperature_ratio) or temperature_ratio <= 0.0:
+            raise ValueError(
+                "electron-to-ion temperature ratio must be positive and finite")
+        electropositive = self.electropositive_edge_factors(
+            ion_mean_free_path_m=ion_mean_free_path_m,
+            bohm_speed_m_s=bohm_speed_m_s,
+            ambipolar_diffusion_m2_s=ambipolar_diffusion_m2_s,
+            include_high_pressure_diffusion=include_high_pressure_diffusion,
+        )
+        correction = (
+            1.0 + 3.0 * alpha / temperature_ratio
+        ) / (1.0 + alpha)
+        return ElectronegativeEdgeFactors(
+            axial=correction * electropositive.axial,
+            radial=correction * electropositive.radial,
+            electronegativity=alpha,
+            electron_to_ion_temperature_ratio=temperature_ratio,
+            electronegative_correction=correction,
+        )

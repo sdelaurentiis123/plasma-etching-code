@@ -6,7 +6,11 @@ is only as predictive as its rate and wall-loss evidence; these classes make
 that evidence and every open-system exchange explicit.
 """
 
-from .geometry import CylindricalReactor, ElectropositiveEdgeFactors
+from .geometry import (
+    CylindricalReactor,
+    ElectronegativeEdgeFactors,
+    ElectropositiveEdgeFactors,
+)
 from .argon import (
     ARGON_4S_METASTABLE_ENERGY_EV,
     ARGON_IONIZATION_ENERGY_EV,
@@ -127,6 +131,7 @@ __all__ = [
     "ElectronBase10LogPolynomialRateCoefficient",
     "ElectronMaxwellianCrossSectionRateCoefficient",
     "ElectronTemperatureTabulatedRateCoefficient",
+    "ElectronegativeEdgeFactors",
     "ElectropositiveEdgeFactors",
     "FixedArgonTransportProvider",
     "DirectDriveRFPowerBoundary",

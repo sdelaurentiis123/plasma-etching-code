@@ -3,6 +3,7 @@ import pytest
 
 from petch.reactor_global import (
     CylindricalReactor,
+    ElectronegativeEdgeFactors,
     ElectropositiveEdgeFactors,
 )
 
@@ -58,4 +59,70 @@ def test_high_pressure_terms_reduce_edge_density_and_require_complete_inputs():
         reactor.electropositive_edge_factors(
             ion_mean_free_path_m=0.01,
             bohm_speed_m_s=2500.0,
+        )
+
+
+def test_zero_electronegativity_recovers_electropositive_edge_factors_exactly():
+    reactor = CylindricalReactor(radius_m=0.1525, length_m=0.075)
+    electropositive = reactor.electropositive_edge_factors(
+        ion_mean_free_path_m=0.01,
+        bohm_speed_m_s=2500.0,
+        ambipolar_diffusion_m2_s=4.0,
+    )
+    electronegative = reactor.electronegative_edge_factors(
+        electronegativity=0.0,
+        electron_to_ion_temperature_ratio=100.0,
+        ion_mean_free_path_m=0.01,
+        bohm_speed_m_s=2500.0,
+        ambipolar_diffusion_m2_s=4.0,
+    )
+    assert isinstance(electronegative, ElectronegativeEdgeFactors)
+    assert electronegative.electronegative_correction == 1.0
+    assert electronegative.axial == electropositive.axial
+    assert electronegative.radial == electropositive.radial
+
+
+def test_electronegative_correction_matches_lee_lieberman_equations_13_14():
+    reactor = CylindricalReactor(radius_m=0.1525, length_m=0.075)
+    alpha = 10.0
+    temperature_ratio = 100.0
+    baseline = reactor.electropositive_edge_factors(
+        ion_mean_free_path_m=0.03,
+        include_high_pressure_diffusion=False,
+    )
+    factors = reactor.electronegative_edge_factors(
+        electronegativity=alpha,
+        electron_to_ion_temperature_ratio=temperature_ratio,
+        ion_mean_free_path_m=0.03,
+        include_high_pressure_diffusion=False,
+    )
+    expected_correction = (
+        1.0 + 3.0 * alpha / temperature_ratio
+    ) / (1.0 + alpha)
+    assert factors.electronegative_correction == expected_correction
+    assert factors.axial == expected_correction * baseline.axial
+    assert factors.radial == expected_correction * baseline.radial
+    assert factors.axial < baseline.axial
+    assert factors.radial < baseline.radial
+    assert reactor.effective_loss_area_m2(factors) < (
+        reactor.effective_loss_area_m2(baseline))
+
+
+@pytest.mark.parametrize(
+    ("electronegativity", "temperature_ratio", "message"),
+    [
+        (-1.0, 100.0, "electronegativity"),
+        (0.0, 0.0, "temperature ratio"),
+        (0.0, np.inf, "temperature ratio"),
+    ],
+)
+def test_electronegative_edge_factors_reject_invalid_plasma_ratios(
+        electronegativity, temperature_ratio, message):
+    reactor = CylindricalReactor(radius_m=0.1525, length_m=0.075)
+    with pytest.raises(ValueError, match=message):
+        reactor.electronegative_edge_factors(
+            electronegativity=electronegativity,
+            electron_to_ion_temperature_ratio=temperature_ratio,
+            ion_mean_free_path_m=0.03,
+            include_high_pressure_diffusion=False,
         )

@@ -17,6 +17,9 @@
   redistributed. The Table-2 render checksum and transcription boundary are
   pinned in
   `research_sources/digitized/lee_lieberman_1994_chlorine_table2_manifest.md`.
+  Equations 13--14 and Appendix equations A.10--A.11 were independently
+  re-rendered at 500 dpi and are pinned in
+  `research_sources/digitized/lee_lieberman_1994_edge_factor_manifest.md`.
 - **Status:** PRIMARY FULL TEXT READ + EQUATIONS/TABLES 2--3 VISUALLY AUDITED
 - **Topic:** chemistry-agnostic global-model structure, argon and chlorine
   reaction decks, cylindrical wall losses, and independent reactor-validation
@@ -41,6 +44,7 @@
 | Q13 | Tables 4--5 separately enumerate electron energy-loss channels; fitted Table-2 activation parameters are not declared to be physical energy losses per event. | The chlorine network deliberately fails closed on electron-power evaluation until physical channel energies are independently sourced and mapped. |
 | Q14 | The atomic-chlorine ionization fit uses a printed polynomial in `log(Te/12.96)`. | The cited primary authority, [`lennon-1988-ionization`](lennon-1988-ionization.md), resolves this as `log10` and restricts Eq. 6 to `0.1 < Te/12.96 < 10`; both are enforced in code. |
 | Q15 | Table 5 visibly prints `e + Cl(2P) -> Cl(3D) + 2e`, followed by `4D`, `4P`, `4S`, `5D`, and `5P` excitation rows. | The first row violates charge conservation. NIST independently identifies these as calculated excited-state channels, so the row is quarantined rather than silently repaired or reinterpreted as ionization. Pixel checksums are pinned in `research_sources/digitized/lee_lieberman_1994_chlorine_table5_anomaly_manifest.md`. |
+| Q16 | For an electronegative discharge, Eqs. 13--14 multiply both electropositive edge factors by `(1 + 3 alpha_avg / gamma) / (1 + alpha_avg)`, where `alpha_avg = n_minus / n_e` and `gamma = T_e / T_i`. The denominator otherwise retains the electropositive form when expressed using `D_a`. | Implemented as an explicit source-model closure. It assumes uniform electrons, parabolic negative ions vanishing at the sheath, and one common edge ratio for every positive-ion species; it is not promoted as a universal sheath law. |
 
 ## Use decision
 
