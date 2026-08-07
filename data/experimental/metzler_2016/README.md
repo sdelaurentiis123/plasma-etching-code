@@ -95,6 +95,16 @@ yield to reconstruct fluence and then multiplying that same yield back into a
 depth is an identity, not a prediction; every prediction gate must use a
 different observable.
 
+The first finite-range replacement is graded in
+`results/curated/metzler_2016_surface_closure/finite_range_audit.json`.
+ZBL/Lindhard CSDA path inversion removes the legacy exponential's
+infinite-energy tail without introducing an attenuation parameter.  It does
+not repair the response: treating 25/30 eV as monoenergetic still overpredicts
+every point by at least 5.66x, while two unfitted broad-spectrum sensitivities
+span zero to multi-fold overprediction.  This localizes the next work to a
+measured/derived low-energy IEDF and an explicit Si/O/C/F reaction volume with
+recoil transfer; it rules out fitting another film attenuation length.
+
 ## Pixel replay and visual audit
 
 Download the official thesis without renaming it:

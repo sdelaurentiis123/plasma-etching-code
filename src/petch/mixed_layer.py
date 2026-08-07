@@ -24,6 +24,7 @@ from petch.ion_energy_deposition import (
     SIO2,
     nuclear_energy_in_layer_eV,
     projected_range_nm,
+    residual_energy_after_layer_eV,
 )
 
 # SiO2 formula-unit density (formula units / m^3); atomic density is 3x this.
@@ -58,6 +59,11 @@ class MixedLayerParams:
     film_sputter_yield: float = 0.1384   # film atoms per ion at reference deposition
     minimum_layer_depth_nm: float = 0.5
     clog_film_thickness_nm: float = 20.0
+    # The production/legacy path remains explicit while the finite-range
+    # replacement is graded.  ``csda_finite_range`` inverts the same
+    # ZBL/Lindhard stopping integral used elsewhere in petch and has no
+    # attenuation length or infinite transmission tail.
+    film_energy_transport: str = "legacy_exponential"
 
 
 @dataclass(frozen=True)
@@ -404,10 +410,31 @@ def _table_lookup(energy_eV, column):
 
 
 def interface_energy_eV(ion_energy_eV, film_thickness_nm,
-                        params: MixedLayerParams):
-    """Standaert defluorination law: E_iface = E * exp(-d_FC / lambda_FC)."""
+                        params: MixedLayerParams, cosine_incidence=1.0):
+    """Ion energy delivered through the fluorocarbon film.
+
+    ``legacy_exponential`` reproduces the historical mixed-layer path exactly.
+    It is retained only while existing feature results are re-earned.
+    ``csda_finite_range`` subtracts the material path from the ion's
+    ZBL/Lindhard continuous-slowing-down path and inverts that same integral.
+    The latter obeys slant-path geometry and stops identically at finite range.
+    """
     energy = np.asarray(ion_energy_eV, dtype=float)
     thickness = np.asarray(film_thickness_nm, dtype=float)
+    if params.film_energy_transport == "csda_finite_range":
+        return residual_energy_after_layer_eV(
+            energy,
+            cosine_incidence,
+            thickness,
+            params.ion_atomic_number,
+            params.ion_mass_amu,
+            FLUOROCARBON_FILM,
+        )
+    if params.film_energy_transport != "legacy_exponential":
+        raise ValueError(
+            "film_energy_transport must be 'legacy_exponential' or "
+            "'csda_finite_range'"
+        )
     _, _, _, lam_fc, _, _ = _stopping_tables(params)
     lam = _table_lookup(np.maximum(energy, _TABLE_ENERGY_MIN_EV * 1e-3), lam_fc)
     safe_lam = np.maximum(lam, 1e-300)
@@ -468,7 +495,7 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         d_fc_arr = np.broadcast_to(np.asarray(d_fc, dtype=float), shape)
         atom_e_iface = np.asarray(interface_energy_eV(
             atom_energy, d_fc_arr.ravel()[atom_face] if shape else d_fc_arr,
-            params))
+            params, atom_cos))
         atom_eps, _ = _deposited_energy(atom_e_iface, atom_cos, params)
         atom_kress = _angular_physical_sputter(atom_cos)
         atom_chem_ang = _angular_chemical_sputter(atom_cos)
@@ -511,7 +538,12 @@ def step(state: MixedLayerState, fluxes: SurfaceFluxes, dt: float,
         eps_dep = _segment(atom_flux * atom_eps) / safe_total
         energy_ratio = eps_dep / params.reference_energy_eV
     else:
-        e_iface = interface_energy_eV(fluxes.ion_energy_eV, d_fc, params)
+        e_iface = interface_energy_eV(
+            fluxes.ion_energy_eV,
+            d_fc,
+            params,
+            fluxes.cosine_incidence,
+        )
         eps_dep, _depth = _deposited_energy(
             e_iface, fluxes.cosine_incidence, params)
         energy_ratio = eps_dep / params.reference_energy_eV

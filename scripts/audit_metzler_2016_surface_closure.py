@@ -91,7 +91,9 @@ def _surface_flux(ion_flux, maximum_energy_eV, spectrum):
     )
 
 
-def _replay(row, film_f_over_c, spectrum, maximum_step_s=0.01):
+def _replay(
+        row, film_f_over_c, spectrum, maximum_step_s=0.01,
+        film_energy_transport="legacy_exponential"):
     energy_eV = float(row["energy_eV"])
     duration_s = float(row["etch_step_s"])
     source_f_per_ion = float(row["fluorine_per_incident_ion"])
@@ -114,7 +116,10 @@ def _replay(row, film_f_over_c, spectrum, maximum_step_s=0.01):
     elapsed_s = 0.0
     removed_formula_m2 = 0.0
     largest_ledger_residual = 0.0
-    params = MixedLayerParams(substrate="sio2")
+    params = MixedLayerParams(
+        substrate="sio2",
+        film_energy_transport=film_energy_transport,
+    )
     while elapsed_s < duration_s:
         step_s = min(dt, duration_s - elapsed_s)
         result = step(state, flux, step_s, params)

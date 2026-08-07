@@ -65,6 +65,32 @@ def test_interface_energy_monotone_in_film_thickness():
     assert all(a > b for a, b in zip(energies, energies[1:]))
 
 
+def test_finite_range_interface_transport_stops_and_obeys_slant_path():
+    from petch.ion_energy_deposition import csda_path_nm, FLUOROCARBON_FILM
+
+    params = MixedLayerParams(film_energy_transport="csda_finite_range")
+    incident = 200.0
+    path_nm = csda_path_nm(
+        incident,
+        params.ion_atomic_number,
+        params.ion_mass_amu,
+        FLUOROCARBON_FILM,
+    )
+    identity = interface_energy_eV(incident, 0.0, params, 0.0)
+    normal = interface_energy_eV(incident, 0.3 * path_nm, params, 1.0)
+    slanted = interface_energy_eV(incident, 0.3 * path_nm, params, 0.5)
+    stopped = interface_energy_eV(incident, 1.01 * path_nm, params, 1.0)
+    assert identity == incident
+    assert 0.0 <= slanted < normal < incident
+    assert stopped == 0.0
+
+
+def test_interface_transport_refuses_unknown_model():
+    params = MixedLayerParams(film_energy_transport="not-a-physics-model")
+    with pytest.raises(ValueError, match="film_energy_transport"):
+        interface_energy_eV(200.0, 0.5, params)
+
+
 def test_recession_is_supply_capacity_minimum():
     """Raising F supply saturates at the ion capacity (the ceiling).
 
