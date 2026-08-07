@@ -1,0 +1,89 @@
+{
+  "schema": "petch.cross-chemistry-depth-evidence.v1",
+  "audit_id": "CROSS-CHEMISTRY-ABSOLUTE-DEPTH-2026-08-06-R1",
+  "claim_rule": "surface depth-per-dose, development replay, evaluated feature depth, and value-blind held-out feature prediction are distinct evidence classes and may not be relabeled as one another",
+  "source_receipts": {
+    "tinacba_2021_sf5_depth_sha256": "cff647002545a1a695a1c38d0e2d00f958b36af38d73af61742182a805895c10",
+    "vella_hao_ale_depth_sha256": "376dfe354be23ea22d4e88c3a40ad76b75504a0b27b4687f1dba5a31dbb593ad",
+    "krueger_depth_identifiability_sha256": "7f79f79f77b8d37d83500364251bdefb1c0cf6e953e9fde9e0bde54e3236652c",
+    "yoshie_visual_audit_sha256": "8a62b075e44a439f51e5f40f64d23898c6afe9054f5db63629ac1b11e77642e0",
+    "yoshie_feature_table_sha256": "5180b06a9357a26facfcc89adb9f239f79f4ca41e5e65a3a31c17d80c634a108"
+  },
+  "boards": [
+    {
+      "board": "Tinacba 2021 SF5+ beam",
+      "chemistry_and_material": "mass-selected SF5+ on Si and SiO2",
+      "evidence_class": "retrospective_surface_depth_per_dose",
+      "absolute_depth_or_depth_per_dose": true,
+      "point_count": 4,
+      "mean_absolute_relative_error": 0.058794014290942664,
+      "maximum_absolute_relative_error": 0.15041275263307718,
+      "fit_to_compared_depth_or_yield": false,
+      "boundary_strength": "mass-selected ion; measured energy and sample-position dose; normal incidence",
+      "uses_common_material_router": true,
+      "feature_profile_test": false,
+      "value_blind_held_out": false,
+      "formal_pass_label": false,
+      "scope": "retrospective no-yield-fit atomistic-provider validation against mass-selected SF5+ beam depth-per-dose; not a feature or reactor prediction"
+    },
+    {
+      "board": "Vella-Hao / Kounis-Melas Si ALE",
+      "chemistry_and_material": "Cl2 adsorption plus Ar+ on Si",
+      "evidence_class": "retrospective_no_depth_fit_cross_source",
+      "absolute_depth_or_depth_per_dose": true,
+      "point_count": 3,
+      "mean_absolute_error_nm": 0.10457805880002091,
+      "maximum_absolute_relative_error": 0.1288480719755431,
+      "fit_to_compared_depth_or_yield": false,
+      "nominal_predeclared_gate": {
+        "limit": 0.15,
+        "passed": true
+      },
+      "boundary_strength": "measured positive-ion fluence; inferred mean energy; no measured species-resolved IEAD",
+      "uses_atom_conservative_event_ledgers": true,
+      "feature_profile_test": false,
+      "value_blind_held_out": false,
+      "formal_pass_label": true,
+      "scope": "no-depth-fit absolute Si/Cl2/Ar+ ALE cross-source validation; not a blind prediction and not a measured species-resolved IEAD"
+    },
+    {
+      "board": "Krueger 2024 Ar/C4F6/O2 trench",
+      "chemistry_and_material": "Ar/C4F6/O2 on masked SiO2",
+      "evidence_class": "evaluated_feature_depth_with_missing_boundary",
+      "absolute_depth_or_depth_per_dose": true,
+      "point_count": 1,
+      "target_depth_nm": 825.0,
+      "predicted_depth_nm": 346.83264081620524,
+      "signed_relative_error": -0.5795967990106603,
+      "fit_to_compared_depth_or_yield": false,
+      "published_boundary_identifies_depth": false,
+      "feature_profile_test": true,
+      "value_blind_held_out": false,
+      "formal_pass_label": false,
+      "scope": "published aggregate boundary; base feature was the source mechanism's optimization target; absolute depth misses and remains underidentified"
+    },
+    {
+      "board": "Yoshie 2023 cyclic SF6/C4F8 trench",
+      "chemistry_and_material": "alternating C4F8/SF6 with Ar bias on Si",
+      "evidence_class": "value_blind_held_out_dataset_ready",
+      "absolute_depth_or_depth_per_dose": true,
+      "point_count": 49,
+      "digitization_visual_gate_passed": true,
+      "feature_profile_test": true,
+      "value_blind_held_out": true,
+      "model_predictions_completed": 0,
+      "formal_pass_label": false,
+      "boundary_strength": "same-reactor blanket rates, phase-resolved bulk electron density and OES; no species-resolved wafer flux or IEAD",
+      "required_model_state": "phase-resolved reactor boundary plus persistent C/F/S-containing surface memory",
+      "scope": "49 held-out feature depths are ready but none has been predicted or graded"
+    }
+  ],
+  "summary": {
+    "independent_non_krueger_chemistry_families_with_absolute_surface_depth_evidence": 2,
+    "formal_held_out_feature_or_profile_predictions_completed": 0,
+    "formal_held_out_feature_or_profile_passes": 0,
+    "value_blind_held_out_feature_depth_targets_ready": 49,
+    "krueger_absolute_feature_depth_passed": false,
+    "current_strongest_defensible_statement": "absolute surface depth-per-dose transfers without a target fit in two non-Krueger chemistry families; no chemistry yet has a completed value-blind held-out feature-depth pass"
+  }
+}
