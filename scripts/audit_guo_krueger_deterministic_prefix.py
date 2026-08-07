@@ -151,6 +151,24 @@ def _health(audits: tuple[dict, dict]) -> dict[str, float]:
             for history in histories
             for row in history
         ),
+        "maximum_mirrored_node_sign_mismatch_pair_count": max(
+            float(row["metrics"].get(
+                "mirrored_node_sign_mismatch_pair_count", 0.0))
+            for history in histories
+            for row in history
+        ),
+        "maximum_mirrored_material_label_mismatch_pair_count": max(
+            float(row["metrics"].get(
+                "mirrored_material_label_mismatch_pair_count", 0.0))
+            for history in histories
+            for row in history
+        ),
+        "maximum_subcell_interface_asymmetry_cells": max(
+            float(row["metrics"].get(
+                "maximum_subcell_interface_asymmetry_cells", 0.0))
+            for history in histories
+            for row in history
+        ),
     }
 
 
@@ -274,6 +292,8 @@ def build_report(
         "rejected_trial_count": 0.0,
         "accepted_topology_event_count": 0.0,
         "maximum_asymmetric_cell_count": 0.0,
+        "maximum_mirrored_node_sign_mismatch_pair_count": 0.0,
+        "maximum_mirrored_material_label_mismatch_pair_count": 0.0,
     }
     gates: dict[str, dict[str, object]] = {}
     for name, limit in limits.items():
@@ -292,7 +312,7 @@ def build_report(
         }
 
     return {
-        "schema": "petch.guo-krueger.deterministic-prefix-gate.v1",
+        "schema": "petch.guo-krueger.deterministic-prefix-gate.v2",
         "comparison": comparison,
         "claim": (
             "Preregistered deterministic-extruded numerical refinement gate; "

@@ -27,6 +27,9 @@ def _audit(n_steps, depths, *, dx_um=0.01):
                     "etch_depth_nm": depth,
                     "mask_opening_nm": 90.0 - 8.0 * time,
                     "asymmetry_cell_count": 0.0,
+                    "mirrored_node_sign_mismatch_pair_count": 0.0,
+                    "mirrored_material_label_mismatch_pair_count": 0.0,
+                    "maximum_subcell_interface_asymmetry_cells": 0.003,
                 },
                 "maximum_material_ledger_residual_units_m2": 0.0,
                 "maximum_neutral_radiosity_relative_balance_error": 1.0e-12,
@@ -97,6 +100,55 @@ def test_unauthorized_configuration_change_is_refused(tmp_path):
 
     with pytest.raises(ValueError, match="unauthorized configuration"):
         build_report(coarse, fine, "time")
+
+
+def test_subcell_asymmetry_is_reported_but_not_mislabeled_as_cell_failure(
+        tmp_path):
+    coarse = tmp_path / "coarse"
+    fine = tmp_path / "fine"
+    _write(coarse, _audit(8, [0.0, 0.65, 1.4, 3.0, 6.10]))
+    _write(fine, _audit(16, [0.0, 0.65, 1.4, 3.0, 6.20]))
+
+    report = build_report(coarse, fine, "time")
+
+    assert report["all_gates_passed"]
+    assert (
+        report["health"]["maximum_subcell_interface_asymmetry_cells"]
+        == 0.003
+    )
+    assert "maximum_subcell_interface_asymmetry_cells" not in report["gates"]
+
+
+@pytest.mark.parametrize(
+    "metric",
+    (
+        "asymmetry_cell_count",
+        "mirrored_node_sign_mismatch_pair_count",
+        "mirrored_material_label_mismatch_pair_count",
+    ),
+)
+def test_each_resolved_symmetry_disagreement_fails_closed(tmp_path, metric):
+    coarse = tmp_path / "coarse"
+    fine = tmp_path / "fine"
+    reference = _audit(8, [0.0, 0.65, 1.4, 3.0, 6.10])
+    refined = _audit(16, [0.0, 0.65, 1.4, 3.0, 6.20])
+    refined["history"][-1]["metrics"][metric] = 1
+    _write(coarse, reference)
+    _write(fine, refined)
+
+    report = build_report(coarse, fine, "time")
+
+    gate = {
+        "asymmetry_cell_count": "maximum_asymmetric_cell_count",
+        "mirrored_node_sign_mismatch_pair_count": (
+            "maximum_mirrored_node_sign_mismatch_pair_count"
+        ),
+        "mirrored_material_label_mismatch_pair_count": (
+            "maximum_mirrored_material_label_mismatch_pair_count"
+        ),
+    }[metric]
+    assert not report["gates"][gate]["passed"]
+    assert not report["all_gates_passed"]
 
 
 def test_committed_time_ladder_preserves_failures_before_final_pass():

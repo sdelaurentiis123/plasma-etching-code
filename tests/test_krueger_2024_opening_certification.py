@@ -239,6 +239,56 @@ def test_mask_metric_is_independent_of_substrate_union_shape():
     assert np.isclose(values[0], values[1])
 
 
+def test_resolved_mirror_symmetry_is_distinct_from_subcell_offset():
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=0.4, cell_length=0.1, domain_height=0.8,
+        dx=0.05, opening_width=0.2, mask_thickness=0.3,
+        substrate_top=0.3, etched_depth=0.2)
+    phi = np.asarray(geometry.phi).copy()
+    substrate = np.asarray(geometry.material_levelsets[1]).copy()
+    mask = np.asarray(geometry.material_levelsets[2]).copy()
+    # A small positive-side signed-distance perturbation changes no resolved
+    # phase or material label, but can move an interpolated zero crossing.
+    positive = (phi > 0.0) & (np.arange(phi.shape[0])[:, None, None]
+                             < phi.shape[0] // 2)
+    phi[positive] += 1.0e-5
+    substrate[positive] += 1.0e-5
+    mask[positive] += 1.0e-5
+    perturbed = FeatureGeometry3D(
+        phi, geometry.material_id, geometry.dx, geometry.mesh_length_unit_m,
+        material_levelsets={1: substrate, 2: mask})
+
+    symmetry = PILOT._mirror_symmetry_diagnostics(perturbed)
+
+    assert symmetry["asymmetry_cell_count"] == 0
+    assert symmetry["mirrored_node_sign_mismatch_pair_count"] == 0
+    assert symmetry["mirrored_material_label_mismatch_pair_count"] == 0
+
+
+def test_resolved_phase_asymmetry_counts_mirror_pair():
+    geometry = make_rectangular_trench_geometry_3d(
+        cell_width=0.4, cell_length=0.1, domain_height=0.8,
+        dx=0.05, opening_width=0.2, mask_thickness=0.3,
+        substrate_top=0.3, etched_depth=0.2)
+    phi = np.asarray(geometry.phi).copy()
+    material = np.asarray(geometry.material_id).copy()
+    substrate = np.asarray(geometry.material_levelsets[1]).copy()
+    mask = np.asarray(geometry.material_levelsets[2]).copy()
+    cell = np.s_[1:3, 0:2, 0:2]
+    phi[cell] = -geometry.dx
+    substrate[cell] = -geometry.dx
+    mask[cell] = -2.0 * geometry.dx
+    material[cell] = 0
+    asymmetric = FeatureGeometry3D(
+        phi, material, geometry.dx, geometry.mesh_length_unit_m,
+        material_levelsets={1: substrate, 2: mask})
+
+    symmetry = PILOT._mirror_symmetry_diagnostics(asymmetric)
+
+    assert symmetry["mirrored_node_sign_mismatch_pair_count"] > 0
+    assert symmetry["asymmetry_cell_count"] > 0
+
+
 def test_local_real_checkpoints_retain_open_throat_and_r18_width():
     root = ROOT / "results"
     shallow = root / "krueger_2024_multiresolution_audit" / (

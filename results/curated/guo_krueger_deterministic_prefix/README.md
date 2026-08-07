@@ -1,8 +1,10 @@
 # Guo/Kwon–Krüger deterministic-extruded prefix refinement
 
 Status: **10 nm time refinement passed on the 0.015625/0.0078125 s
-twofold pair. Spatial refinement is now authorized under the committed
-addendum.**
+twofold pair. The first spatial grade is preserved as a formal failure because
+the implemented “cell count” was actually a continuous subcell residual; the
+corrected observable and clean rerun are frozen in
+`PREREGISTRATION_ADDENDUM_ASYMMETRY_METRIC.md`.**
 
 The candidate moving-profile neutral-exchange authority is
 `deterministic_extruded_2d`, appropriate only because Krüger's published
@@ -54,6 +56,16 @@ floor, and mouth remain connected with no isolated one-cell feature.
 `PREREGISTRATION_ADDENDUM_TIME_REFINEMENT.md` freezes the ensuing 10/5 nm
 spatial pair at 0.015625 s before the 5 nm trajectory is run. It changes no
 spatial threshold and introduces no experimental observable.
+
+The completed first 10/5 nm pair agreed to `0.0798607%` in terminal depth and
+`0.128620 nm` at the mouth, with every conservation, radiosity, extrusion,
+speed, retry, topology, and visual-connectivity gate passing. Its preserved
+`space_gate_first_attempt.json` nevertheless reports **FAIL**: the metric named
+`maximum_asymmetric_cell_count` was a `0.00400585`-cell continuous
+zero-crossing offset, not an integer finite-volume cell count. The
+asymmetry-metric addendum corrects that semantic defect before rerun, retains
+the old quantity as a non-gating diagnostic, and adds exact zero-tolerance
+cell, nodal-sign, and material-label mirror checks. No solver physics changes.
 
 This entire board is numerical. No experimental depth, yield, flux scale, or
 target-dependent constant enters the gate, and a future pass cannot by itself

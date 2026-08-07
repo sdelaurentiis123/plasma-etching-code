@@ -97,6 +97,60 @@ def _gas_interval(field, x, center_index):
     return x_left, x_right
 
 
+def _mirror_symmetry_diagnostics(geometry):
+    """Count resolved mirror disagreements and retain subcell geometry separately.
+
+    ``phi`` and ``material_id`` are nodal fields with duplicate periodic
+    endpoints.  The preregistered *cell count* is therefore evaluated on the
+    physical finite-volume cells: an eight-corner mean supplies the cell-center
+    phase classification, and each x-mirror pair is counted once.  Nodal phase
+    and resolved material-owner comparisons are stricter independent checks.
+    Continuous zero-crossing offsets are not cell counts and are measured by
+    :func:`measure_krueger_metrics` as a separate subcell diagnostic.
+    """
+    phi = np.asarray(geometry.phi, dtype=float)
+    cell_center_phi = 0.125 * (
+        phi[:-1, :-1, :-1]
+        + phi[1:, :-1, :-1]
+        + phi[:-1, 1:, :-1]
+        + phi[1:, 1:, :-1]
+        + phi[:-1, :-1, 1:]
+        + phi[1:, :-1, 1:]
+        + phi[:-1, 1:, 1:]
+        + phi[1:, 1:, 1:]
+    )
+    cell_solid = cell_center_phi >= 0.0
+    cell_pair_count = cell_solid.shape[0] // 2
+    asymmetric_cells = int(np.count_nonzero(
+        cell_solid[:cell_pair_count]
+        != cell_solid[::-1][:cell_pair_count]
+    ))
+
+    node_solid = phi >= 0.0
+    node_pair_count = node_solid.shape[0] // 2
+    node_sign_mismatches = int(np.count_nonzero(
+        node_solid[:node_pair_count]
+        != node_solid[::-1][:node_pair_count]
+    ))
+
+    # Gas ownership is exactly zero even if a stale positive material label
+    # remains away from the interface; solid nodes retain their resolved owner.
+    resolved_material = np.where(
+        node_solid, np.asarray(geometry.material_id, dtype=int), 0
+    )
+    material_label_mismatches = int(np.count_nonzero(
+        resolved_material[:node_pair_count]
+        != resolved_material[::-1][:node_pair_count]
+    ))
+    return {
+        "asymmetry_cell_count": asymmetric_cells,
+        "mirrored_node_sign_mismatch_pair_count": node_sign_mismatches,
+        "mirrored_material_label_mismatch_pair_count": (
+            material_label_mismatches
+        ),
+    }
+
+
 def _periodic_component_roots(field):
     """Label a duplicate-endpoint x/y-periodic Boolean volume."""
     occupied = np.asarray(field, dtype=bool)
@@ -274,10 +328,11 @@ def measure_krueger_metrics(
             feature_profile = [
                 {"width": feature_widths[0], "z": float(z[k])}]
 
-    asymmetry_cells = (
+    maximum_subcell_asymmetry_cells = (
         float(np.max(np.abs(np.asarray(left_offsets) - np.asarray(right_offsets)))
               / geometry.dx)
         if left_offsets else 0.0)
+    symmetry = _mirror_symmetry_diagnostics(geometry)
     minimum_mask = (
         min(mask_widths, key=lambda item: item["width"])
         if mask_widths else None)
@@ -346,7 +401,10 @@ def measure_krueger_metrics(
         "aperture_profile": aperture_profile[::stride],
         "etch_depth_nm": float(etch_depth) * unit_to_nm,
         "remaining_mask_thickness_nm": float(mask_height) * unit_to_nm,
-        "asymmetry_cell_count": asymmetry_cells,
+        **symmetry,
+        "maximum_subcell_interface_asymmetry_cells": (
+            maximum_subcell_asymmetry_cells
+        ),
         "floor_z_um": floor,
         "mask_top_z_um": mask_top,
     }
