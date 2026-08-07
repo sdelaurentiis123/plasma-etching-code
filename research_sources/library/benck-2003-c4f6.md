@@ -16,8 +16,7 @@
 - **Figure-9 page render:** PDF page 6, 600 dpi, 5209 by 6760 pixels,
   SHA-256
   `f423f6992e049ba40f47a540eb56450e9c080dddb4b03ad45ee8883b109a71fd`
-- **Status:** PRIMARY FULL TEXT READ + FIGURE 9 VISUALLY AUDITED; numerical
-  digitization not yet landed
+- **Status:** PRIMARY FULL TEXT READ + FIGURE 9 QUANTITATIVELY PIL-AUDITED
 - **Topic:** quantitative C4F6/Ar reactor-boundary validation for total ion
   current, ion composition, and mass-resolved IEDs
 
@@ -33,15 +32,18 @@
 | Q6 | CF+ and CF2+ rose nearly proportionally from 25% to 75% C4F6 and then leveled, whereas CF3+ continued to rise; the total ion current decreased slowly with C4F6 fraction. | Ion composition is nonlinear in feed fraction. A feed-ratio interpolation is not a species-resolved boundary model. |
 | Q7 | The measured IEDs were double peaked and mass dependent. C4F6 concentration increased the inferred plasma-potential oscillation amplitude. | Species identity, energy distribution, electronegativity, and sheath dynamics are coupled; one species-independent IEAD is not fundamental. |
 | Q8 | The submillimeter diagnostic reports CF2/CF ratios, not absolute stable-C4F6 parent flux. | The paper advances the ion-side closure but does not supply the stable-parent wafer flux or C4F6/ion surface co-incidence law needed for Krüger depth. |
+| Q9 | The checksum-bound Figure-9 digitization gives total positive-ion current `0.2644, 0.2164, 0.2012, 0.1557 mA/cm2` at `25, 50, 75, 100%` C4F6. CF+ rises `0.01319 -> 0.03153`, CF2+ rises `0.006133 -> 0.01752`, and CF3+ rises `0.002390 -> 0.008994 mA/cm2`; Ar+ falls `0.2067 -> 0.06973 mA/cm2` through 75% and is not plotted at 100%. | `BENCK-2003-C4F6-FIG9-ION-CURRENT-R1`; quantitative held-out target for a C4F6 reactor provider, retaining 10.1% digitization and 20% transmission uncertainties separately. |
 
 ## Vision audit and use
 
 Figure 9 was inspected at the original 600 dpi render. The log ordinate is
-absolute ion-flux density in `mA/cm2`; four mixture markers are shown for the
-total and component ions. The marker identities and ordering agree with the
-body text. No numerical table was landed in this pass because overlapping
-open/filled symbols on the log axis require a checksum-bound marker
-transcription and overlay, not cursor estimates.
+positive-ion current density in `mA/cm2`; four mixture markers are shown for
+the total and component ions. A checksum-bound 19-point table now retains the
+unambiguous total, Ar+, CF+, CF2+, and CF3+ glyph centers. The three major
+log-axis ticks and all full-page marker pixels replay through
+`scripts/digitize_benck_2003_figure9.py`. The original-resolution color
+overlay was visually reconciled. Overlapping C/F/Cx and SiFx/COFx glyphs are
+excluded rather than guessed, and source pixels are not redistributed.
 
 This source is now the preferred quantitative validation target for a C4F6
 reactor model's ion side. It cannot normalize Krüger directly and it does not

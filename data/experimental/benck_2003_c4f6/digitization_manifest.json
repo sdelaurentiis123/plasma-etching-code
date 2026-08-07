@@ -1,0 +1,95 @@
+{
+  "manifest_id": "BENCK-2003-C4F6-FIG9-ION-CURRENT-R1",
+  "source": {
+    "citation": "E. C. Benck, A. Goyette, and Y. Wang, Journal of Applied Physics 94, 1382-1389 (2003)",
+    "title": "Ion energy distribution and optical measurements in high-density, inductively coupled C4F6 discharges",
+    "doi": "10.1063/1.1586978",
+    "pdf_sha256": "96ef064afb0f804d3d853adcc275a63cd52507b0ea7e39f921d6cf6209e86d08",
+    "pdf_page": 6,
+    "print_page": 1387,
+    "figure": "Figure 9",
+    "render_dpi": 600,
+    "rendered_page_sha256": "f423f6992e049ba40f47a540eb56450e9c080dddb4b03ad45ee8883b109a71fd",
+    "rendered_page_size_px": [
+      5209,
+      6760
+    ],
+    "redistribution": "source pixels are not committed; the scan carries an AIP redistribution notice"
+  },
+  "experiment": {
+    "reactor": "modified inductively coupled GEC reference cell",
+    "pressure_Pa": 1.33,
+    "pressure_mTorr": 10.0,
+    "power_W": 200.0,
+    "surface_bias": "grounded water-cooled lower electrode",
+    "oxygen_added": false,
+    "sampling": "10 um grounded side orifice; Faraday cup at the same radius and height normalizes total current",
+    "energy_resolution_eV": 1.0,
+    "estimated_energy_scale_uncertainty_eV": 1.0,
+    "corrected_transmission_relative_uncertainty": 0.2,
+    "ordinate": "singly charged positive-ion current density as printed, mA/cm2; no particle-flux conversion is applied"
+  },
+  "pixel_calibration": {
+    "full_page_x_px_by_c4f6_percent": {
+      "25": 1233.5,
+      "50": 1461.5,
+      "75": 1689.5,
+      "100": 1915.7
+    },
+    "full_page_y_major_tick_px": [
+      4182.5,
+      4753.5,
+      5333.5
+    ],
+    "log10_current_at_major_ticks": [
+      -1.0,
+      -2.0,
+      -3.0
+    ],
+    "log10_current_intercept": 6.264818527386197,
+    "log10_current_per_vertical_pixel": -0.0017375840486463148,
+    "major_tick_replay_mA_cm2": [
+      0.09939699249370533,
+      0.0101207512812219,
+      0.0009940632167589145
+    ],
+    "axis_fit": "least-squares affine fit of log10(current) to the three full-page 10^-1, 10^-2, and 10^-3 major-tick centers"
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; PIL/NumPy dark-pixel axis and x-tick localization; full-resolution glyph-center transcription; original-resolution visual overlay",
+    "series_policy": "transcribe only total, Ar+, CF+, CF2+, and CF3+, whose glyph identity and curve continuity are unambiguous; exclude overlapping C/F/Cx and SiFx markers rather than guessing them",
+    "vertical_pixel_allowance": 24.0,
+    "digitization_relative_bound": 0.101,
+    "maximum_exact_bound_from_24_pixels": 0.10078376869239802,
+    "source_measurement_uncertainty_kept_separate": true,
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "derived_checks": {
+    "point_count": 19,
+    "series_point_count": {
+      "total_positive_ion_current": 4,
+      "Ar+": 3,
+      "CF+": 4,
+      "CF2+": 4,
+      "CF3+": 4
+    },
+    "ar_100_percent_c4f6_marker": "not_plotted",
+    "total_current_decreases": true,
+    "cf_and_cf2_level_between_75_and_100_percent": true,
+    "cf3_continues_to_increase": true
+  },
+  "claim_boundary": {
+    "valid": "quantitative held-out reactor-provider target for total and mass-resolved positive-ion current in this C4F6/Ar ICP",
+    "not_valid": [
+      "a boundary normalization for the Krueger reactor",
+      "a species mixture for a high-power biased CCP",
+      "a stable-C4F6 neutral flux",
+      "a C4F6/SiO2 surface-yield law",
+      "a feature-depth fit or prediction"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/benck_2003_c4f6/figure9_mass_resolved_ion_current.csv",
+    "sha256": "40ae5a1355eb12cd6cdb72961e7719a5a4b30b73a994ba669f80f7de4e747d25"
+  }
+}

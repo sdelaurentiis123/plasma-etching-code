@@ -33,7 +33,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 
 | bibkey | source | status |
 |---|---|---|
-| [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Benck, Goyette & Wang, absolute mass-resolved C4F6/Ar ion flux and IEDs | PRIMARY FULL TEXT READ + FIGURE 9 VISUALLY AUDITED |
+| [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Benck, Goyette & Wang, absolute mass-resolved C4F6/Ar ion flux and IEDs | PRIMARY FULL TEXT + FIGURE 9 QUANTITATIVELY PIL-AUDITED |
 | [`bruce-graves`](library/bruce-graves.md) | Bruce / Graves, ion-dose crosslinking | VIA RESEARCH DOCS |
 | [`hiwasa-2022-apex`](library/hiwasa-2022-apex.md) | Hiwasa et al. (KIOXIA), APEX 15, 106002 (2022) | FETCHED |
 | [`huang-2019-jvsta`](library/huang-2019-jvsta.md) | Huang, Huard, ... Kushner, JVST A 37, 031304 (2019) | FULL TEXT (via thesis lineage) |
