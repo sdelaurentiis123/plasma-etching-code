@@ -7,6 +7,28 @@
 - **Status:** FULL TEXT (OCR sections): research_sources/thesis_extracts/gray_thesis_1993_ocr_sections.txt
 - **Topic:** beam-yields — Beam-measured yields, thresholds and sticking (the L0/L1 provenance floor)
 
+## 2026-08-06 silicon beam closure audit
+
+The MIT DSpace PDF used for the audit has SHA-256
+`be6bce26b699b3172cf67bb68e4d12e039fd3ea775f73873ee1aaf25164c065b`.
+PDF pages 246, 247, and 252 were rendered at 300 dpi and inspected at original
+resolution.  The visual audit confirms:
+
+- Eq. 5-30:
+  `theta_F = s0 R / [s0 R + 2 beta2 (1 + b)]`;
+- Eq. 5-31 separates thermal, bare physical, and fluorinated
+  `beta2(1+b)theta_F` removal;
+- Table 5-9 contains the six Ar+/F/Si rows now transcribed under
+  `data/surface_interactions/gray_1993/`; and
+- Eq. 5-34 is
+  `beta2,Si = 0.687 [sqrt(E_i) - sqrt(4)]`.
+
+The resulting implementation,
+`src/petch/gray_argon_fluorine_si.py`, is a species/energy/site/product beam
+closure with explicit Si/F bookkeeping.  It is not called first-principles,
+does not contain a feature-depth fit, and refuses off-normal, SFx+, and
+out-of-board use in strict mode.
+
 ## Claims table
 
 Rows relocated verbatim from the repo's research/results docs. `consumed by` = the

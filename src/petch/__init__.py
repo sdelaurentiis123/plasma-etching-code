@@ -21,6 +21,10 @@ from .fluorocarbon_lamagna import (
     LaMagnaFluorocarbonParameters, LaMagnaFluorocarbonState,
     LaMagnaFluorocarbonStepResult, LaMagnaGarozzoFluorocarbonMechanism,
 )
+from .gray_argon_fluorine_si import (
+    GrayArFSiMechanism, GrayArFSiParameters, GrayArFSiState,
+    GrayArFSiStepResult,
+)
 from .boundary_transport_3d import (
     BoundaryTransport3DResult, ChargedSurfaceReimpactPopulation3D,
     average_boundary_transport_results_3d,

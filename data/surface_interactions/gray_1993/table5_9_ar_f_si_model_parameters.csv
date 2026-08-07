@@ -1,0 +1,7 @@
+ion_energy_eV,fragment_branch_b,free_sticking_regression,constant_s0,free_beta2,constant_s0_beta2,source_table,quantity_semantics
+20,0.040,0.216,0.2,2.46,2.5,Table 5-9,beam_regressed_phenomenological_parameters
+150,0.110,0.203,0.2,6.95,7.0,Table 5-9,beam_regressed_phenomenological_parameters
+250,0.142,0.308,0.2,7.71,8.5,Table 5-9,beam_regressed_phenomenological_parameters
+350,0.168,0.231,0.2,9.58,11.0,Table 5-9,beam_regressed_phenomenological_parameters
+500,0.201,0.126,0.2,15.20,14.0,Table 5-9,beam_regressed_phenomenological_parameters
+1000,0.284,0.177,0.2,21.19,21.0,Table 5-9,beam_regressed_phenomenological_parameters
