@@ -49,3 +49,10 @@ python scripts/digitize_malyshev_1998_lam_electron_temperature.py \
   --overlay tmp/pdfs/malyshev_1998_figure3_overlay.png \
   --write
 ```
+
+The installable runtime copy is consumed with
+`MalyshevMeasuredElectronTemperatureProvider.from_package_data()`. Exact
+markers retain measured provenance; linear interpolation is opt-in, labeled
+`interpolated_measurement`, and limited to an unambiguous fixed-gap,
+fixed-pressure bracket. The provider refuses the visually distinct duplicate
+900 W markers at 6.5 cm and 1 mTorr instead of averaging them silently.

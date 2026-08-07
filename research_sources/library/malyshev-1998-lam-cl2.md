@@ -39,3 +39,8 @@ wafer flux, ion energy, or etched depth.
 The reactor model may either calibrate on a preregistered subset and grade the
 held-out conditions, or use independently measured boundaries and grade all
 markers. Feature depth may never select the reactor parameters used here.
+
+The runtime Figure-3 provider is hash-locked to the audited CSV. It permits
+only an exact marker or an explicitly labeled linear interpolation between two
+unambiguous markers in one fixed-gap, fixed-pressure series. It refuses
+pressure/gap extrapolation and overlapping marker clusters.

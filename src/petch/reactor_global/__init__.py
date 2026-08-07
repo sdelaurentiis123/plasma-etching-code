@@ -72,6 +72,12 @@ from .chlorine_neutral_provider import (
     ChlorineWallBoundaryProvider,
     StateDependentChlorineNeutralTransportProvider,
 )
+from .chlorine_lam import (
+    MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256,
+    ElectronTemperatureConditioningState,
+    MalyshevElectronTemperatureMarker,
+    MalyshevMeasuredElectronTemperatureProvider,
+)
 from .evaluated_chlorine import (
     ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
     HAMILTON_2018_CL2_DISSOCIATION_STATES,
@@ -145,6 +151,7 @@ __all__ = [
     "LYMBEROPOULOS_1995_REDUCED_CLMINUS_MOBILITY_M_INV_V_INV_S_INV",
     "LYMBEROPOULOS_1995_REDUCED_CLPLUS_MOBILITY_M_INV_V_INV_S_INV",
     "MOLECULAR_CHLORINE_TOTAL_IONIZATION_THRESHOLD_EV",
+    "MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256",
     "ARGON_4S_METASTABLE_ENERGY_EV",
     "ARGON_IONIZATION_ENERGY_EV",
     "ARGON_METASTABLE_IONIZATION_ENERGY_EV",
@@ -179,6 +186,7 @@ __all__ = [
     "ElectronBase10LogPolynomialRateCoefficient",
     "ElectronMaxwellianCrossSectionRateCoefficient",
     "ElectronTemperatureTabulatedRateCoefficient",
+    "ElectronTemperatureConditioningState",
     "ElectronegativeEdgeFactors",
     "ElectropositiveEdgeFactors",
     "FixedArgonTransportProvider",
@@ -191,6 +199,8 @@ __all__ = [
     "LeeLiebermanArgonTransportProvider",
     "MatchedRFPowerBoundary",
     "MeasuredAbsorbedPowerBoundary",
+    "MalyshevElectronTemperatureMarker",
+    "MalyshevMeasuredElectronTemperatureProvider",
     "IonMobilityState",
     "NEUTRAL_DIFFUSIVITY_EVIDENCE_KINDS",
     "NeutralDiffusivityState",

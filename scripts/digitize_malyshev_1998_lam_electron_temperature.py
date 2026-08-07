@@ -25,6 +25,10 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIRECTORY = ROOT / "data" / "experimental" / "malyshev_1998_lam"
 CSV_PATH = OUTPUT_DIRECTORY / "figure3_electron_temperature.csv"
 MANIFEST_PATH = OUTPUT_DIRECTORY / "electron_temperature_manifest.json"
+PACKAGE_CSV_PATH = (
+    ROOT / "src" / "petch" / "reactor_global" / "data"
+    / "malyshev_1998_lam_electron_temperature.csv"
+)
 
 SOURCE_PDF_SHA256 = (
     "569ab180bb8cab71dda0860e0350f03d24b391e084e19116fefb74f1c719789c")
@@ -384,6 +388,8 @@ def main() -> None:
     if args.write:
         OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
         CSV_PATH.write_text(csv_payload, encoding="utf-8")
+        PACKAGE_CSV_PATH.parent.mkdir(parents=True, exist_ok=True)
+        PACKAGE_CSV_PATH.write_text(csv_payload, encoding="utf-8")
         MANIFEST_PATH.write_text(
             json.dumps(manifest_payload, indent=2) + "\n", encoding="utf-8")
     else:

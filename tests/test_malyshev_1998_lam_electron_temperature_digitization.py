@@ -17,6 +17,10 @@ SCRIPT = (
 DATA = ROOT / "data" / "experimental" / "malyshev_1998_lam"
 CSV_PATH = DATA / "figure3_electron_temperature.csv"
 MANIFEST_PATH = DATA / "electron_temperature_manifest.json"
+PACKAGE_CSV_PATH = (
+    ROOT / "src" / "petch" / "reactor_global" / "data"
+    / "malyshev_1998_lam_electron_temperature.csv"
+)
 
 
 def _module():
@@ -35,6 +39,7 @@ def test_committed_electron_temperature_board_is_exact_script_replay():
     csv_sha256 = hashlib.sha256(csv_payload.encode("utf-8")).hexdigest()
 
     assert CSV_PATH.read_text(encoding="utf-8") == csv_payload
+    assert PACKAGE_CSV_PATH.read_text(encoding="utf-8") == csv_payload
     assert json.loads(MANIFEST_PATH.read_text(encoding="utf-8")) == (
         module.manifest(csv_sha256)
     )

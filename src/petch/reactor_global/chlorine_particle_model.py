@@ -31,6 +31,7 @@ SECONDS_PER_MINUTE = 60.0
 
 REACTOR_SCALAR_EVIDENCE_KINDS = frozenset({
     "measured",
+    "interpolated_measurement",
     "validated_model",
     "published_model",
     "assumed",
