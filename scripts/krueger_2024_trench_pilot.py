@@ -575,6 +575,42 @@ def _monotone_resume_refinement(previous, current):
     previous = json.loads(json.dumps(previous))
     current = json.loads(json.dumps(current))
     changes = {}
+    horizon_keys_present = (
+        "duration_s" in previous,
+        "n_steps" in previous,
+        "duration_s" in current,
+        "n_steps" in current,
+    )
+    if any(horizon_keys_present) and not all(horizon_keys_present):
+        return False, {}
+    if all(horizon_keys_present):
+        old_duration = float(previous.pop("duration_s"))
+        new_duration = float(current.pop("duration_s"))
+        old_steps = int(previous.pop("n_steps"))
+        new_steps = int(current.pop("n_steps"))
+        if (
+            old_duration <= 0.0
+            or old_steps <= 0
+            or new_duration < old_duration
+            or new_steps < old_steps
+            or not np.isclose(
+                new_duration / new_steps,
+                old_duration / old_steps,
+                rtol=0.0,
+                atol=8.0 * np.finfo(float).eps
+                * max(new_duration / new_steps, old_duration / old_steps),
+            )
+        ):
+            return False, {}
+        if new_duration != old_duration or new_steps != old_steps:
+            changes["physical_time_horizon"] = {
+                "old_duration_s": old_duration,
+                "new_duration_s": new_duration,
+                "old_nominal_steps": old_steps,
+                "new_nominal_steps": new_steps,
+                "nominal_step_duration_s": old_duration / old_steps,
+                "classification": "monotone_execution_horizon_extension",
+            }
     old_remap_declared = "surface_state_remap_backend" in previous
     new_remap_declared = "surface_state_remap_backend" in current
     old_remap_backend = str(previous.pop(

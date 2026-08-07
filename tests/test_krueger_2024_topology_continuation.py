@@ -73,6 +73,37 @@ def test_resume_makes_historical_legacy_remap_explicit_but_never_changes_backend
     assert not incompatible
 
 
+def test_resume_may_extend_time_horizon_only_at_same_nominal_step():
+    previous = {
+        **_resume_configuration("continue_gas_cavity", "legacy_knn"),
+        "duration_s": 5.0,
+        "n_steps": 10,
+    }
+    extended = {
+        **_resume_configuration("continue_gas_cavity", "legacy_knn"),
+        "duration_s": 60.0,
+        "n_steps": 120,
+    }
+
+    compatible, changes = PILOT._monotone_resume_refinement(
+        previous, extended)
+
+    assert compatible
+    assert changes["physical_time_horizon"] == {
+        "old_duration_s": 5.0,
+        "new_duration_s": 60.0,
+        "old_nominal_steps": 10,
+        "new_nominal_steps": 120,
+        "nominal_step_duration_s": 0.5,
+        "classification": "monotone_execution_horizon_extension",
+    }
+    incompatible, _ = PILOT._monotone_resume_refinement(
+        previous, {**extended, "n_steps": 60})
+    assert not incompatible
+    shortened, _ = PILOT._monotone_resume_refinement(extended, previous)
+    assert not shortened
+
+
 def test_pilot_cli_accepts_explicit_surface_state_remap_backend(monkeypatch):
     monkeypatch.setattr(sys, "argv", [
         "krueger_2024_trench_pilot.py",
