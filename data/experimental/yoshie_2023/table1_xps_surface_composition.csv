@@ -1,0 +1,20 @@
+source_table,quantity_group,orbital,chemical_state,timing_II_percent,timing_III_percent,quantity_semantics,observation_id
+Table 1,elemental_composition,,S,32.2,18.5,XPS_reported_surface_atomic_composition_percent,yoshie_xps_element_S
+Table 1,elemental_composition,,C,39.5,45.8,XPS_reported_surface_atomic_composition_percent,yoshie_xps_element_C
+Table 1,elemental_composition,,F,28.3,35.7,XPS_reported_surface_atomic_composition_percent,yoshie_xps_element_F
+Table 1,chemical_state_fraction,S 2p,S,18.4,15.8,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_S2p_S
+Table 1,chemical_state_fraction,S 2p,S-CF,25.3,35.4,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_S2p_S-CF
+Table 1,chemical_state_fraction,S 2p,S-O,43.0,35.8,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_S2p_S-O
+Table 1,chemical_state_fraction,S 2p,S=O,13.3,13.0,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_S2p_S=O
+Table 1,chemical_state_fraction,C 1s,C-C,18.2,16.0,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_C1s_C-C
+Table 1,chemical_state_fraction,C 1s,C-CF,9.8,15.2,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_C1s_C-CF
+Table 1,chemical_state_fraction,C 1s,CF,12.1,16.4,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_C1s_CF
+Table 1,chemical_state_fraction,C 1s,CF2,29.6,23.0,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_C1s_CF2
+Table 1,chemical_state_fraction,C 1s,CF3,13.7,12.3,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_C1s_CF3
+Table 1,chemical_state_fraction,C 1s,CS,10.6,9.1,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_C1s_CS
+Table 1,chemical_state_fraction,C 1s,CS2,6.0,8.0,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_C1s_CS2
+Table 1,chemical_state_fraction,F 1s,F,92.0,85.4,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_F1s_F
+Table 1,chemical_state_fraction,F 1s,F-S,8.0,14.6,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_F1s_F-S
+Table 1,chemical_state_fraction,Si 2p,Si,93.5,92.6,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_Si2p_Si
+Table 1,chemical_state_fraction,Si 2p,Si-F,1.7,2.2,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_Si2p_Si-F
+Table 1,chemical_state_fraction,Si 2p,Si-O,4.8,5.2,XPS_reported_within_orbital_peak_fraction_percent,yoshie_xps_Si2p_Si-O

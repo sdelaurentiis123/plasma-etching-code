@@ -1,0 +1,112 @@
+{
+  "claim_boundary": {
+    "not_valid": [
+      "positive-ion density or ion flux inferred from electron density alone",
+      "species-resolved positive-ion flux",
+      "ground-state CF, CF2, or F density or wafer flux inferred from OES alone",
+      "an ion energy-angle distribution",
+      "a depth calibration or permission to fit Figure 5 or Figure 6"
+    ],
+    "valid": [
+      "relative phase and timing constraints on the measured bulk electron-density trace",
+      "relative phase-resolved CF, CF2, and F optical-emission constraints",
+      "tests of a reactor model against independently measured diagnostic shapes before feature-depth evaluation"
+    ]
+  },
+  "derived_checks": {
+    "bias_window_average_density_1e10_cm3": {
+      "4s_I": 1.3772,
+      "4s_II": 0.2829,
+      "4s_III": 0.5341,
+      "8s_I": 1.7323,
+      "8s_II": 1.0737,
+      "8s_III": 0.1732,
+      "8s_IV": 0.6488
+    },
+    "eight_second_timing_II_crosses_fast_density_collapse": true,
+    "electron_bias_windows": 7,
+    "oes_markers": 60
+  },
+  "digitization": {
+    "figure12_sampling": "start/mid/end of each published 0.25 s bias window; Simpson average",
+    "figure14_error_bar_semantics": "not_reported_by_source",
+    "figure14_sampling": "full marker board at 0.2 s spacing for CF, CF2, and F",
+    "method": "official publisher JPEG; PIL/NumPy checksum and dark-axis checks; full-resolution centerline/color-component transcription; visual overlay reconciliation",
+    "source_figures_visually_inspected_at_full_resolution": true
+  },
+  "manifest_id": "YOSHIE-2023-FIGURES12-14-REACTOR-STATE-R1",
+  "outputs": {
+    "electron_density_csv": {
+      "path": "data/experimental/yoshie_2023/figure12_bias_window_electron_density.csv",
+      "sha256": "df846c9dd376e380ffe5197c0c54d91e79296e641c3983cbe024e6f3daa8639b"
+    },
+    "oes_csv": {
+      "path": "data/experimental/yoshie_2023/figure14_phase_resolved_oes.csv",
+      "sha256": "cf5e8e3c09846d83d68f76fd642c304a0938471a64d1edee57b85a2d4af83e69"
+    }
+  },
+  "pixel_calibration": {
+    "12a": {
+      "x_left_px": 225.0,
+      "x_left_value": -2.0,
+      "x_right_px": 883.0,
+      "x_right_value": 2.0,
+      "y_reference_px": 496.0,
+      "y_reference_value": 1.8,
+      "y_zero_px": 1302.0,
+      "y_zero_value": 0.0
+    },
+    "12b": {
+      "x_left_px": 1298.0,
+      "x_left_value": -4.0,
+      "x_right_px": 2617.0,
+      "x_right_value": 4.0,
+      "y_reference_px": 496.0,
+      "y_reference_value": 2.5,
+      "y_zero_px": 1302.0,
+      "y_zero_value": 0.0
+    },
+    "14b": {
+      "x_left_px": 216.0,
+      "x_left_value": -2.0,
+      "x_right_px": 1259.0,
+      "x_right_value": 2.0,
+      "y_reference_px": 1228.0,
+      "y_reference_value": 17.0,
+      "y_zero_px": 1790.0,
+      "y_zero_value": -3.0
+    },
+    "14e": {
+      "x_left_px": 216.0,
+      "x_left_value": -2.0,
+      "x_right_px": 1259.0,
+      "x_right_value": 2.0,
+      "y_reference_px": 3558.0,
+      "y_reference_value": 1.6,
+      "y_zero_px": 4197.0,
+      "y_zero_value": -0.4
+    }
+  },
+  "source": {
+    "citation": "T. Yoshie et al., Applied Surface Science 638 (2023) 157981, DOI 10.1016/j.apsusc.2023.157981",
+    "figures": {
+      "12": {
+        "sha256": "9ee2992ef60c22debb6619e79ea97446ac0698c258e746322bd8858e70ee2109",
+        "size_px": [
+          2713,
+          1476
+        ],
+        "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr12_lrg.jpg"
+      },
+      "14": {
+        "sha256": "e7a121f1b9be7543c217626978d0ae243f4e22cd87a00765877cbe65b7c547b0",
+        "size_px": [
+          1338,
+          4337
+        ],
+        "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr14_lrg.jpg"
+      }
+    },
+    "license": "CC BY 4.0"
+  }
+}

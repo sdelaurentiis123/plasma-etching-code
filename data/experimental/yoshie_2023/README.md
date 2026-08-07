@@ -86,3 +86,62 @@ vertical openings are the trenches through the SiO2 mask; their bottoms
 coincide with the Si/mask interface to within the raster resolution.  There is
 no hidden initial Si depth large enough to explain the super-blanket 8 s
 timing-I rates.
+
+## Reactor-state diagnostics
+
+Figures 12 and 14 add independent constraints on the time-dependent reactor
+boundary.  `figure12_bias_window_electron_density.csv` retains the start,
+midpoint, and end pixels of each published 0.25 s bias window and a Simpson
+average.  This is essential for 8 s timing II: that window crosses the sharp
+electron-density collapse after SF6 injection.  The measured bulk electron
+density is **not** labeled as positive-ion density or Bohm flux.  The discharge
+is chemically changing and electronegative, and the source does not publish
+the positive-ion mixture, negative-ion density, electron temperature, or
+sheath-edge state needed for that conversion.
+
+`figure14_phase_resolved_oes.csv` retains all 20 markers for each of CF, CF2,
+and F.  The plotted values are optical-emission intensities normalized to Ar.
+They constrain phase and relative waveform shape only.  Without a published
+actinometric/excited-state model, they are not ground-state densities or wafer
+fluxes.  The negative background-subtracted points are consequently retained
+rather than clipped.
+
+Download the two additional official rasters:
+
+```bash
+curl -L -o tmp/sources/yoshie_2023/yoshie_fig12.jpg \
+  https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr12_lrg.jpg
+curl -L -o tmp/sources/yoshie_2023/yoshie_fig14.jpg \
+  https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr14_lrg.jpg
+```
+
+Then replay the checksums, dimensions, dark-axis pixels, committed tables, and
+optional full-resolution overlays:
+
+```bash
+python scripts/digitize_yoshie_2023_reactor_state.py \
+  --source-dir tmp/sources/yoshie_2023 \
+  --overlay-dir tmp/yoshie_2023_reactor_state_overlays
+```
+
+The claim boundary is frozen in
+`reactor_state_digitization_manifest.json`.  These data can grade a
+time-resolved reactor model before depth is revealed; they cannot serve as a
+depth calibration or as an invented species-resolved boundary.
+
+## Surface-state constraint
+
+`table1_xps_surface_composition.csv` is a direct transcription of the
+publisher's Table 1, not a plot digitization.  It retains both the reported
+elemental surface composition and the chemical-state fractions for timings II
+and III.  Each chemical-state block is normalized only within its own XPS
+orbital; those percentages are not converted into layer thicknesses, site
+coverages, or absolute areal inventories.
+
+The table is nevertheless a decisive model-form constraint.  Timing II leaves
+32.2% S, 39.5% C, and 28.3% F, whereas timing III leaves 18.5% S, 45.8% C,
+and 35.7% F.  The bonding-state partitions change as well.  A cyclic surface
+closure must therefore carry at least persistent C/F/S-containing film state
+between phases; a memoryless instantaneous etch yield cannot reproduce this
+observable.  The XPS board is a surface-composition validation target, not a
+depth fit target.
