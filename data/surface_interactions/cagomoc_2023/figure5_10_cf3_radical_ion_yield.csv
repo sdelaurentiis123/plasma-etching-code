@@ -1,0 +1,7 @@
+radical_to_ion_flux_ratio,si_removal_yield_per_cf3_ion,marker_center_x_px,marker_center_y_px,center_policy,digitization_yield_bound
+0,1.8094,927.7,1037.5,blue_disk_distance_core,0.026
+25,3.9449,1066.8,583.7,blue_disk_distance_core,0.026
+50,3.8207,1203.1,610.1,blue_disk_distance_core,0.026
+100,2.2659,1478.5,940.5,blue_disk_distance_core,0.026
+200,0.0000,2027.0,1422.0,zero_axis_center_text_confirmed,0.026
+300,0.0000,2573.0,1422.0,zero_axis_center_text_confirmed,0.026

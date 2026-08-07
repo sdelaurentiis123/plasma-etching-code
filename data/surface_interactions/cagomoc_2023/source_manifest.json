@@ -1,0 +1,100 @@
+{
+  "claim_boundaries": [
+    "Do not use this curve to identify Krueger's C4F6 reactor flux, ion mixture, IEAD, or 60 s depth.",
+    "The source is classical MD, not a direct beam measurement or DFT-trained potential.",
+    "The simulation removes non-covalently bonded products at finite cycle boundaries and acknowledges that slow in-hole redeposition may be underestimated.",
+    "The 0.5 eV normal radical injection is a computational surrogate; Appendix D compares deposited layers with 0.026 eV radicals but does not validate angular transfer into a feature."
+  ],
+  "digitization": {
+    "csv": "figure5_10_cf3_radical_ion_yield.csv",
+    "csv_sha256": "2574a860ecc8d4d404397da44b77106f8e7a100119a5d99514f007e7fbd7e60e",
+    "marker_center_bound_px": 5.5,
+    "method": "400-dpi Poppler render; Pillow RGB/dimension check; dark-pixel axis/tick localization; saturated-blue distance-core marker localization; original-resolution visual reconciliation",
+    "nominal_x_policy": "source ratio setpoints are authoritative; x pixels only audit placement",
+    "yield_bound": 0.02588235294117647,
+    "zero_point_policy": "200:1 and 300:1 centers are occluded by the dashed zero guide; use its calibrated center because the caption and body independently state etch stop"
+  },
+  "manifest_id": "CAGOMOC-2023-FIG5.10-CF3-RADICAL-ION-R1",
+  "mechanism_constraints": [
+    "The response is non-monotone: an intermediate CF3 supply nearly doubles Si removal, while excess CF3 causes FC accumulation and etch stop.",
+    "The same source reports few-nanometer C/F/O/Si mixing layers whose thickness varies with energy and material.",
+    "Nanohole yields can be lower than flat yields because products redeposit on sidewalls and ions intercept tapered surfaces."
+  ],
+  "method_scope": {
+    "evidence_class": "classical molecular dynamics mechanism constraint; not an experimental validation target",
+    "ion": "CF3+ represented as a fast neutral at surface impact",
+    "ion_energy_eV": 2000,
+    "ion_incidence": "normal",
+    "radical": "CF3",
+    "radical_energy_eV": 0.5,
+    "radical_incidence": "normal for computational convenience, not an isotropic 300 K gas distribution",
+    "radical_injection_batch": "25 or 50 at a time",
+    "reported_quantity": "steady-state removed Si atoms per CF3+ ion injection",
+    "reported_ratios": [
+      0,
+      25,
+      50,
+      100,
+      200,
+      300
+    ],
+    "target": "flat SiO2"
+  },
+  "other_visually_audited_pages": [
+    {
+      "figure": "5.7",
+      "pdf_page": 117,
+      "render_dpi": 300,
+      "render_sha256": "7a9c1f39d237bfbaf458f27f7205499af3541c93ac1c0dcf0319148483e92e09"
+    },
+    {
+      "figure": "5.8",
+      "pdf_page": 118,
+      "render_dpi": 300,
+      "render_sha256": "d1c6b57e3724a0267c53e5ea2e4b7a700c2e004e3d5f1254008ffa11fa4a198a"
+    },
+    {
+      "figure": "5.9",
+      "pdf_page": 120,
+      "render_dpi": 300,
+      "render_sha256": "979c03673229b393d234d71e9d26fd08e3c5b70e2a6d986c3bc45ced0e6e4fa2"
+    }
+  ],
+  "pixel_calibration": {
+    "maximum_setpoint_placement_offset_ratio_units": 0.45578851412943777,
+    "right_axis_tick_centers_y_px": [
+      1422.0,
+      1209.5,
+      997.0,
+      784.5,
+      572.0
+    ],
+    "transform": {
+      "ratio": "300 * (x_px - 927.5) / (2573.0 - 927.5)",
+      "yield": "4 * (1422.0 - y_px) / (1422.0 - 572.0)"
+    },
+    "x_at_ratio_0": 927.5,
+    "x_at_ratio_300": 2573.0,
+    "y_at_four_yield": 572.0,
+    "y_at_zero_yield": 1422.0
+  },
+  "source": {
+    "citation": "C. M. D. Cagomoc, Molecular Dynamics Simulation of SiO2 and SiN Etching for 3D NAND Memory Device Applications, Osaka University doctoral dissertation (2023)",
+    "doi": "10.18910/91922",
+    "extracted_text_sha256": "904fc9293090f6cf666e2d9ce5723a74473aaf6a7c730ff842738052327fcc01",
+    "figure": "Figure 5.10",
+    "handle": "https://hdl.handle.net/11094/91922",
+    "local_extracted_text": "research_sources/thesis_extracts/cagomoc_2023_dissertation.txt",
+    "official_pdf": "https://ir.library.osaka-u.ac.jp/repo/ouka/all/91922/33239_Dissertation.pdf",
+    "pdf_page": 121,
+    "pdf_redistributed": false,
+    "pdf_sha256": "f1eb74b1b42bc12cc89fe60426b327c873fd75f68c2012c2f04e3c54adcade9f",
+    "printed_page": 106,
+    "render_dpi": 400,
+    "render_sha256": "e8888593f82d107a15b329e91acf20af1bb60e59ac3fb39aebc4d11f52adacf0",
+    "render_size_px": [
+      3311,
+      4682
+    ]
+  }
+}

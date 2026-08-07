@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 100 sources by topic
+## Index — 101 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -56,7 +56,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`chang-1997-jvsta`](library/chang-1997-jvsta.md) | Chang & Sawin, JVST A 15, 610 (1997) | ABSTRACT-ONLY (curve digitized from thesis p.115) |
 | [`chang-thesis`](library/chang-thesis.md) | Chang, PhD thesis, MIT (1721.1/50356) | FULL TEXT: research_sources/thesis_extracts/chang_thesis.txt |
 | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Gray, PhD thesis, MIT (1993) | FULL TEXT (OCR sections): research_sources/thesis_extracts/gray_thesis_1993_ocr_sections.txt |
-| [`guo-thesis`](library/guo-thesis.md) | Guo, PhD thesis, MIT (1721.1/46600) | not-fetched |
+| [`guo-thesis`](library/guo-thesis.md) | Guo, PhD thesis, MIT (1721.1/46600) | FETCHED + PIL-AUDITED; PDF not redistributed |
 | [`joubert-1994-jvsta`](library/joubert-1994-jvsta.md) | Joubert, Oehrlein & Surendra, JVST A 12, 665 (1994) | VIA CHANG THESIS (body [VERIFY]) |
 | [`karahashi-2007`](library/karahashi-2007.md) | Karahashi, ion-beam SiO2/CFx | FULL TEXT: research_sources/thesis_extracts/karahashi_2007_sio2_cfx_ionbeam.txt |
 | [`kwon-2006-jvsta`](library/kwon-2006-jvsta.md) | Kwon et al., JVST A 24, 1906/1914/1920 (2006) | PARTIAL (Fig 3.4 replot of Gray 1993) |
@@ -71,6 +71,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | bibkey | source | status |
 |---|---|---|
 | [`an-2026-apsusc`](library/an-2026-apsusc.md) | An et al., DFT-trained NNP/MD for HFC ions on SiO2 and Si3N4 | FULL TEXT READ + RELEASED DATA PINNED |
+| [`cagomoc-2023-thesis`](library/cagomoc-2023-thesis.md) | Cagomoc, Osaka thesis, CF3+/radical SiO2 MD and nanohole product escape | FULL TEXT + PIL-AUDITED FIGURES |
 | [`tinacba-2021-jvstb`](library/tinacba-2021-jvstb.md) | Tinacba et al., DFT-informed SF5+ MD versus mass-selected Si/SiO2 beam depths | FULL TEXT READ + PIL-AUDITED FIGURE 8 |
 
 ### Angular yield laws (class-1 physical, class-2 chemical)
