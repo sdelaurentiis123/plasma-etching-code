@@ -47,10 +47,21 @@ own ion-normalized surface-response plot:
 The direct response is especially useful because both axes share the same
 incident-ion denominator.  It constrains the fluorine-supply versus
 ion-capacity closure without requiring us to invent an absolute current for
-this reactor.  The source does not report error bars or enough details of its
-film-to-F conversion to reverse the plotted ratios into an independently
-measured wafer flux or film density.  The board therefore preserves the
-author-derived ratios as plotted and forbids that reverse inference.
+this reactor.  A paired crosswalk with Figure 6.6 does recover a
+**density-conditioned, author-normalized total ion fluence** for each repeated
+5 Å condition:
+
+`fluence = absolute depth * substrate number density / plotted units-per-ion`.
+
+That inference is audited in
+`results/curated/metzler_2016_boundary_crosswalk/audit.json`.  For SiO2, the
+six reconstructed values scale with 20/40/60 s to within 2% inside each
+nominal energy, a strong internal consistency check.  It is not an
+independently measured wafer current: Figure 6.9 is source-derived, the PECVD
+oxide density is not reported, and Si and SiO2 were separate samples/runs.
+The source also does not report enough details of its film-to-F conversion to
+promote the optical film thickness to an independently measured atom
+inventory.
 
 `figures6_14_6_15_xps_cycle_state.csv` contains all 32 markers from the XPS
 trajectories at 0, 5, 15, and 40 s during the 25 eV ion step:
@@ -75,11 +86,14 @@ convert every plotted Å into absolute C and F areal inventories.
 substrate F atoms.  These quantities constrain state evolution but must not
 be placed directly into an atom ledger.
 
-Figure 6.9 supplies a total-incident-ion-normalized response, but the board
-still does not publish species-resolved neutral/ion wafer fluxes or an ion
-energy-angle distribution.  It therefore validates a surface closure under
-declared cyclic boundary conditions; it does not identify a complete
-reactor-to-wafer boundary for Krüger or Yoshie.
+Figure 6.9 plus Figure 6.6 supplies source-derived total-ion fluence evidence,
+but the board still does not publish species-resolved neutral/ion wafer fluxes
+or an ion energy-angle distribution.  It therefore validates a surface
+closure under declared cyclic boundary conditions; it does not identify a
+complete reactor-to-wafer boundary for Krüger or Yoshie.  Reusing the plotted
+yield to reconstruct fluence and then multiplying that same yield back into a
+depth is an identity, not a prediction; every prediction gate must use a
+different observable.
 
 ## Pixel replay and visual audit
 

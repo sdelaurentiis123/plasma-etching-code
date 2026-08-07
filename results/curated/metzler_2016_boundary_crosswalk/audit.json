@@ -1,0 +1,331 @@
+{
+  "audit_id": "METZLER-2016-BOUNDARY-CROSSWALK-R1",
+  "claim_boundary": {
+    "established": [
+      "the paired source observables recover a density-conditioned, author-normalized total ion fluence for each repeated 5 A condition",
+      "the six SiO2 crosswalks scale linearly with 20/40/60 s to within two percent inside each nominal energy"
+    ],
+    "not_established": [
+      "an independently measured ion current or flux",
+      "a universal flux shared by the separately processed Si and SiO2 samples",
+      "ion species fractions",
+      "an ion-energy or ion-angle distribution",
+      "an absolute deposited-film C/F inventory independent of the source normalization",
+      "permission to reuse a target yield as a validation prediction"
+    ],
+    "valid_use": "boundary reconstruction or calibration evidence with the source-derived label; a prediction gate must use a different surface/depth observable than the ratio used here"
+  },
+  "density_conventions": {
+    "SiO2_formula_units_m3": 2.2e+28,
+    "SiO2_limitation": "2.2e28 formula units/m3 is the declared petch oxide density; Metzler did not report a density measurement for the PECVD stack",
+    "Si_atoms_m3": 4.99402346512432e+28,
+    "Si_derivation": "8 atoms / (5.431e-10 m)^3 for diamond-cubic silicon"
+  },
+  "equation": "author_normalized_ion_fluence = etch_depth * substrate_number_density / substrate_units_per_incident_ion",
+  "gates": {
+    "six_SiO2_conditions_recover_duration_linear_fluence": {
+      "observed": 0.013470549545410524,
+      "passes": true,
+      "threshold_maximum_within_energy_range_over_mean": 0.02
+    }
+  },
+  "group_metrics": [
+    {
+      "coefficient_of_variation": 0.06921165317689575,
+      "energy_eV": 25,
+      "mean_author_normalized_flux_m2_s": 2.3158659261052876e+20,
+      "points": 3,
+      "range_over_mean": 0.13558376076763015,
+      "substrate": "Si"
+    },
+    {
+      "coefficient_of_variation": 0.0845657330980157,
+      "energy_eV": 30,
+      "mean_author_normalized_flux_m2_s": 2.2874692304957057e+20,
+      "points": 4,
+      "range_over_mean": 0.20515941861166603,
+      "substrate": "Si"
+    },
+    {
+      "coefficient_of_variation": 0.005165550295357887,
+      "energy_eV": 25,
+      "mean_author_normalized_flux_m2_s": 1.8438589044051408e+20,
+      "points": 3,
+      "range_over_mean": 0.009450558008158657,
+      "substrate": "SiO2"
+    },
+    {
+      "coefficient_of_variation": 0.0068823865259365884,
+      "energy_eV": 30,
+      "mean_author_normalized_flux_m2_s": 1.7754264439815812e+20,
+      "points": 3,
+      "range_over_mean": 0.013470549545410524,
+      "substrate": "SiO2"
+    }
+  ],
+  "material_metrics": {
+    "Si": {
+      "coefficient_of_variation_across_conditions": 0.045147206908543486,
+      "equivalent_singly_charged_current_density_mA_cm2": 3.691437412697394,
+      "independent_nominal_conditions": 6,
+      "mean_author_normalized_flux_m2_s": 2.3040140109154746e+20
+    },
+    "SiO2": {
+      "coefficient_of_variation_across_conditions": 0.021408417931158306,
+      "equivalent_singly_charged_current_density_mA_cm2": 2.8993672084818773,
+      "independent_nominal_conditions": 6,
+      "mean_author_normalized_flux_m2_s": 1.8096426741933608e+20
+    }
+  },
+  "operation": "algebraic crosswalk of two already published observables; no surface parameter, flux, density, energy distribution, or etch depth was optimized",
+  "points": [
+    {
+      "author_normalized_average_ion_flux_m2_s": 1.8373676427092577e+20,
+      "author_normalized_ion_fluence_m2": 1.1024205856255546e+22,
+      "declared_substrate_number_density_m3": 2.2e+28,
+      "depth_observation_id": "metzler_depth_032",
+      "digitization_only_flux_interval_m2_s": [
+        1.7429705798343334e+20,
+        1.9387120515179397e+20
+      ],
+      "energy_eV": 25,
+      "equivalent_singly_charged_current_density_mA_cm2": 2.943787505216433,
+      "etch_depth_A_per_cycle": 2.8237,
+      "etch_step_s": 60.0,
+      "replicate": 1,
+      "substrate": "SiO2",
+      "substrate_units_per_incident_ion": 0.0005635,
+      "yield_observation_id": "metzler_yield_013"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 1.839415932261966e+20,
+      "author_normalized_ion_fluence_m2": 7.357663729047865e+21,
+      "declared_substrate_number_density_m3": 2.2e+28,
+      "depth_observation_id": "metzler_depth_031",
+      "digitization_only_flux_interval_m2_s": [
+        1.732036078169367e+20,
+        1.954483622695543e+20
+      ],
+      "energy_eV": 25,
+      "equivalent_singly_charged_current_density_mA_cm2": 2.947069226877449,
+      "etch_depth_A_per_cycle": 1.9354,
+      "etch_step_s": 40.0,
+      "replicate": 1,
+      "substrate": "SiO2",
+      "substrate_units_per_incident_ion": 0.0005787,
+      "yield_observation_id": "metzler_yield_014"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 1.8547931382441984e+20,
+      "author_normalized_ion_fluence_m2": 3.7095862764883967e+21,
+      "declared_substrate_number_density_m3": 2.2e+28,
+      "depth_observation_id": "metzler_depth_030",
+      "digitization_only_flux_interval_m2_s": [
+        1.6761396702230843e+20,
+        2.0484752891692954e+20
+      ],
+      "energy_eV": 25,
+      "equivalent_singly_charged_current_density_mA_cm2": 2.9717062269983865,
+      "etch_depth_A_per_cycle": 0.8355,
+      "etch_step_s": 20.0,
+      "replicate": 1,
+      "substrate": "SiO2",
+      "substrate_units_per_incident_ion": 0.0004955,
+      "yield_observation_id": "metzler_yield_015"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 1.7620176274416386e+20,
+      "author_normalized_ion_fluence_m2": 1.0572105764649833e+22,
+      "declared_substrate_number_density_m3": 2.2e+28,
+      "depth_observation_id": "metzler_depth_038",
+      "digitization_only_flux_interval_m2_s": [
+        1.699693655964014e+20,
+        1.827383276394989e+20
+      ],
+      "energy_eV": 30,
+      "equivalent_singly_charged_current_density_mA_cm2": 2.8230634713831106,
+      "etch_depth_A_per_cycle": 4.0347,
+      "etch_step_s": 60.0,
+      "replicate": 1,
+      "substrate": "SiO2",
+      "substrate_units_per_incident_ion": 0.0008396,
+      "yield_observation_id": "metzler_yield_016"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 1.7783281071835804e+20,
+      "author_normalized_ion_fluence_m2": 7.113312428734322e+21,
+      "declared_substrate_number_density_m3": 2.2e+28,
+      "depth_observation_id": "metzler_depth_037",
+      "digitization_only_flux_interval_m2_s": [
+        1.7340148960089938e+20,
+        1.8239227877385768e+20
+      ],
+      "energy_eV": 30,
+      "equivalent_singly_charged_current_density_mA_cm2": 2.84919574091498,
+      "etch_depth_A_per_cycle": 4.537,
+      "etch_step_s": 40.0,
+      "replicate": 1,
+      "substrate": "SiO2",
+      "substrate_units_per_incident_ion": 0.0014032,
+      "yield_observation_id": "metzler_yield_017"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 1.7859335973195245e+20,
+      "author_normalized_ion_fluence_m2": 3.571867194639049e+21,
+      "declared_substrate_number_density_m3": 2.2e+28,
+      "depth_observation_id": "metzler_depth_036",
+      "digitization_only_flux_interval_m2_s": [
+        1.731333132711405e+20,
+        1.841880974406414e+20
+      ],
+      "energy_eV": 30,
+      "equivalent_singly_charged_current_density_mA_cm2": 2.861381079500907,
+      "etch_depth_A_per_cycle": 2.6651,
+      "etch_step_s": 20.0,
+      "replicate": 1,
+      "substrate": "SiO2",
+      "substrate_units_per_incident_ion": 0.0016415,
+      "yield_observation_id": "metzler_yield_018"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 2.491510653074715e+20,
+      "author_normalized_ion_fluence_m2": 1.494906391844829e+22,
+      "declared_substrate_number_density_m3": 4.99402346512432e+28,
+      "depth_observation_id": "metzler_depth_035",
+      "digitization_only_flux_interval_m2_s": [
+        2.243013165925629e+20,
+        2.770312711827348e+20
+      ],
+      "energy_eV": 25,
+      "equivalent_singly_charged_current_density_mA_cm2": 3.991840151718389,
+      "etch_depth_A_per_cycle": 1.0417,
+      "etch_step_s": 60.0,
+      "replicate": 1,
+      "substrate": "Si",
+      "substrate_units_per_incident_ion": 0.000348,
+      "yield_observation_id": "metzler_yield_019"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 2.1775168413797496e+20,
+      "author_normalized_ion_fluence_m2": 8.710067365518999e+21,
+      "declared_substrate_number_density_m3": 4.99402346512432e+28,
+      "depth_observation_id": "metzler_depth_034",
+      "digitization_only_flux_interval_m2_s": [
+        2.106988670115508e+20,
+        2.2499738563815608e+20
+      ],
+      "energy_eV": 25,
+      "equivalent_singly_charged_current_density_mA_cm2": 3.488766603400119,
+      "etch_depth_A_per_cycle": 2.5858,
+      "etch_step_s": 40.0,
+      "replicate": 1,
+      "substrate": "Si",
+      "substrate_units_per_incident_ion": 0.0014826,
+      "yield_observation_id": "metzler_yield_020"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 2.2785702838613977e+20,
+      "author_normalized_ion_fluence_m2": 4.5571405677227955e+21,
+      "declared_substrate_number_density_m3": 4.99402346512432e+28,
+      "depth_observation_id": "metzler_depth_033",
+      "digitization_only_flux_interval_m2_s": [
+        2.2036331664991004e+20,
+        2.3548490379144528e+20
+      ],
+      "energy_eV": 25,
+      "equivalent_singly_charged_current_density_mA_cm2": 3.650672067729479,
+      "etch_depth_A_per_cycle": 2.057,
+      "etch_step_s": 20.0,
+      "replicate": 1,
+      "substrate": "Si",
+      "substrate_units_per_incident_ion": 0.0022542,
+      "yield_observation_id": "metzler_yield_021"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 2.327497082966302e+20,
+      "author_normalized_ion_fluence_m2": 1.3964982497797812e+22,
+      "declared_substrate_number_density_m3": 4.99402346512432e+28,
+      "depth_observation_id": "metzler_depth_042",
+      "digitization_only_flux_interval_m2_s": [
+        2.211105262677595e+20,
+        2.450377645849501e+20
+      ],
+      "energy_eV": 30,
+      "equivalent_singly_charged_current_density_mA_cm2": 3.7290614420317683,
+      "etch_depth_A_per_cycle": 2.0623,
+      "etch_step_s": 60.0,
+      "replicate": 1,
+      "substrate": "Si",
+      "substrate_units_per_incident_ion": 0.0007375,
+      "yield_observation_id": "metzler_yield_022"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 2.508038563516123e+20,
+      "author_normalized_ion_fluence_m2": 1.0032154254064493e+22,
+      "declared_substrate_number_density_m3": 4.99402346512432e+28,
+      "depth_observation_id": "metzler_depth_040",
+      "digitization_only_flux_interval_m2_s": [
+        2.445011040376462e+20,
+        2.5725097681111964e+20
+      ],
+      "energy_eV": 30,
+      "equivalent_singly_charged_current_density_mA_cm2": 4.018320783636457,
+      "etch_depth_A_per_cycle": 3.5482,
+      "etch_step_s": 40.0,
+      "replicate": 1,
+      "substrate": "Si",
+      "substrate_units_per_incident_ion": 0.0017663,
+      "yield_observation_id": "metzler_yield_023"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 2.038742706095549e+20,
+      "author_normalized_ion_fluence_m2": 8.154970824382196e+21,
+      "declared_substrate_number_density_m3": 4.99402346512432e+28,
+      "depth_observation_id": "metzler_depth_041",
+      "digitization_only_flux_interval_m2_s": [
+        1.9859953779912996e+20,
+        2.0925909437349777e+20
+      ],
+      "energy_eV": 30,
+      "equivalent_singly_charged_current_density_mA_cm2": 3.266425926444218,
+      "etch_depth_A_per_cycle": 3.1622,
+      "etch_step_s": 40.0,
+      "replicate": 2,
+      "substrate": "Si",
+      "substrate_units_per_incident_ion": 0.0019365,
+      "yield_observation_id": "metzler_yield_024"
+    },
+    {
+      "author_normalized_average_ion_flux_m2_s": 2.2755985694048485e+20,
+      "author_normalized_ion_fluence_m2": 4.5511971388096973e+21,
+      "declared_substrate_number_density_m3": 4.99402346512432e+28,
+      "depth_observation_id": "metzler_depth_039",
+      "digitization_only_flux_interval_m2_s": [
+        2.2257878688562826e+20,
+        2.3259987108213932e+20
+      ],
+      "energy_eV": 30,
+      "equivalent_singly_charged_current_density_mA_cm2": 3.6459108562642757,
+      "etch_depth_A_per_cycle": 3.0987,
+      "etch_step_s": 20.0,
+      "replicate": 1,
+      "substrate": "Si",
+      "substrate_units_per_incident_ion": 0.0034002,
+      "yield_observation_id": "metzler_yield_025"
+    }
+  ],
+  "source": {
+    "citation": "D. Metzler, High Precision Plasma Etch for Pattern Transfer: Towards Fluorocarbon Based Atomic Layer Etching, PhD thesis, University of Maryland (2016), Figures 6.6 and 6.9(b)",
+    "depth_path": "data/experimental/metzler_2016/figures6_5_6_6_cyclic_depth.csv",
+    "full_resolution_visual_receipt": {
+      "condition_mapping_visually_confirmed": "both panels state 5 A FC deposition, 25/30 eV, and 20-60 s etch-step length",
+      "figure_6_6_pdf_page": 142,
+      "figure_6_6_png_sha256": "52845fe4c47ca9ba8f270af1a0de4fc71a04cc489849a51044cf1c5cc4ebc5fa",
+      "figure_6_9_pdf_page": 147,
+      "figure_6_9_png_sha256": "86e665a6d1fc417ac9ae6ff8b7b900e36f69871a5b84d0467756b7cf2d5824e2",
+      "poppler_resolution_dpi": 240
+    },
+    "source_pdf_sha256": "ea5701d0bcf67b56403625253f7bb619c0e3e3a5e0a9cfd2ff6f1e435fa90f62",
+    "yield_path": "data/experimental/metzler_2016/figure6_9_cycle_averaged_yield.csv"
+  }
+}

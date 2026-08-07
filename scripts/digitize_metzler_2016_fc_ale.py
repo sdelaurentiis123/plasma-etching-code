@@ -572,6 +572,10 @@ def _manifest(depth_text, yield_text, xps_text):
                 "cyclic etch depth versus deposited FC optical thickness",
                 "cyclic etch depth versus low-energy Ar-ion step duration",
                 "cycle-averaged substrate removal versus F per incident Ar ion",
+                (
+                    "density-conditioned author-normalized total ion fluence "
+                    "from a paired absolute-depth/per-ion crosswalk"
+                ),
                 "time-resolved FC-film F/C and XPS intensity trajectories",
                 "relative substrate-fluorination proxy delta-F/C",
                 "a finite-thickness film-transfer/mixing model-form test",
@@ -579,7 +583,10 @@ def _manifest(depth_text, yield_text, xps_text):
             "not_valid": [
                 "absolute C or F areal inventory inferred from optical thickness",
                 "absolute substrate F inventory inferred from delta-F/C",
-                "wafer flux reconstructed from the cycle-normalized ratios",
+                (
+                    "an independently measured wafer flux reconstructed from "
+                    "the cycle-normalized ratios"
+                ),
                 "species-resolved neutral or positive-ion wafer flux",
                 "an ion energy-angle distribution",
                 "a value-blind or prospectively held-out claim",
