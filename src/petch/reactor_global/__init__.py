@@ -20,6 +20,12 @@ from .chlorine import (
     build_lee_lieberman_chlorine_particle_network,
     lee_lieberman_chlorine_species,
 )
+from .chlorine_wall import (
+    WALL_RECOMBINATION_EVIDENCE_KINDS,
+    ChlorineWallFlux,
+    ChlorineWallRecombinationBoundary,
+    chlorine_atom_mean_thermal_speed_m_s,
+)
 from .evaluated_chlorine import (
     ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
     HAMILTON_2018_CL2_DISSOCIATION_STATES,
@@ -88,6 +94,8 @@ __all__ = [
     "ATOMIC_MASS_UNIT_KG",
     "CHLORINE_ATOM_MASS_AMU",
     "CHLORINE_MOLECULE_MASS_AMU",
+    "ChlorineWallFlux",
+    "ChlorineWallRecombinationBoundary",
     "ArgonGlobalCondition",
     "ArgonGlobalSolution",
     "ArgonTransportProvider",
@@ -115,9 +123,11 @@ __all__ = [
     "ReactionNetwork",
     "Species",
     "STANDARD_PRESSURE_PA",
+    "WALL_RECOMBINATION_EVIDENCE_KINDS",
     "argon_relative_temperature_eV",
     "build_lee_lieberman_argon_volume_network",
     "build_lee_lieberman_chlorine_particle_network",
+    "chlorine_atom_mean_thermal_speed_m_s",
     "hamilton_2018_cl2_state_dissociation_rates",
     "hamilton_2018_cl2_state_dissociation_reactions",
     "lee_lieberman_argon_species",
