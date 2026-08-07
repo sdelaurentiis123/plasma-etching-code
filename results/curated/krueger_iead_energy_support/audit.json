@@ -1,0 +1,77 @@
+{
+  "atomic_accuracy_verdict": {
+    "granted": false,
+    "reason": "The released atomistic output ends at 1000 eV, below 94.898% of this IEAD. The direct species-resolved SiO2 beam board ends at 2000 eV, below 86.817% of this IEAD. A depth calculation can therefore be a declared high-energy/species sensitivity, but not an atomic-level prediction, until a validated high-energy reactive-event closure and species-resolved reactor boundary exist."
+  },
+  "audit_id": "KRUEGER-IEAD-ENERGY-SUPPORT-R1",
+  "domains": [
+    {
+      "authority": "beam_regressed_mechanism",
+      "authority_limit": "Energy overlap is necessary but insufficient: the published IEAD is aggregate and reactor-computed, C4F6 wafer radical flux is missing, and no domain identifies the incident positive-ion mixture.",
+      "chemistry_match": false,
+      "domain_id": "guo_yin_regression",
+      "evidence": "Guo/Kwon translating-layer coefficients regressed on the Yin C4F8/Ar-SiO2 beam board",
+      "grants_krueger_prediction_authority": false,
+      "iead_probability_above_maximum": 1.0,
+      "iead_probability_at_or_below_maximum": 0.0,
+      "maximum_energy_eV": 370.0,
+      "species_match": false,
+      "target_match": true
+    },
+    {
+      "authority": "atomistic_model_tested_against_direct_beam_data",
+      "authority_limit": "Energy overlap is necessary but insufficient: the published IEAD is aggregate and reactor-computed, C4F6 wafer radical flux is missing, and no domain identifies the incident positive-ion mixture.",
+      "chemistry_match": false,
+      "domain_id": "an_2026_released_nnp_outputs",
+      "evidence": "released DFT-trained NNP plus ZBL molecular-dynamics outputs for mass-selected CFx+ bombardment of SiO2",
+      "grants_krueger_prediction_authority": false,
+      "iead_probability_above_maximum": 0.9489846506185549,
+      "iead_probability_at_or_below_maximum": 0.0510153493814451,
+      "maximum_energy_eV": 1000.0,
+      "species_match": false,
+      "target_match": true
+    },
+    {
+      "authority": "direct_beam_measurement",
+      "authority_limit": "Energy overlap is necessary but insufficient: the published IEAD is aggregate and reactor-computed, C4F6 wafer radical flux is missing, and no domain identifies the incident positive-ion mixture.",
+      "chemistry_match": false,
+      "domain_id": "karahashi_mass_selected_beam",
+      "evidence": "direct normal-incidence F+, CF+, CF2+, and CF3+ SiO2 beam measurements",
+      "grants_krueger_prediction_authority": false,
+      "iead_probability_above_maximum": 0.8681695284947688,
+      "iead_probability_at_or_below_maximum": 0.13183047150523114,
+      "maximum_energy_eV": 2000.0,
+      "species_match": false,
+      "target_match": true
+    },
+    {
+      "authority": "target_mismatched_lead_not_surface_support",
+      "authority_limit": "Energy overlap is necessary but insufficient: the published IEAD is aggregate and reactor-computed, C4F6 wafer radical flux is missing, and no domain identifies the incident positive-ion mixture.",
+      "chemistry_match": false,
+      "domain_id": "tachi_1982_si_target_lead",
+      "evidence": "mass-selected F+, CF+, CF2+, CF3+, and C+ beam study on elemental Si; abstract/metadata lead only, not landed SiO2 data",
+      "grants_krueger_prediction_authority": false,
+      "iead_probability_above_maximum": 0.7285794839278723,
+      "iead_probability_at_or_below_maximum": 0.2714205160721277,
+      "maximum_energy_eV": 3000.0,
+      "species_match": false,
+      "target_match": false
+    }
+  ],
+  "forbidden_inference": "Do not select an extrapolation, ion mixture, or flux scale by agreement with Krueger's 825 nm endpoint.",
+  "question": "What fraction of the published Krueger IEAD lies inside each surface-physics energy domain?",
+  "schema": "petch.krueger-iead.energy-support.v1",
+  "source": {
+    "citation": "Krueger et al., J. Vac. Sci. Technol. A 42, 043008 (2024), Figure 4(a), DOI 10.1116/6.0003554",
+    "iead_kind": "HPEM reactor-model output_not_wafer_measurement",
+    "iead_sha256": "913d31be623ec5d52d226c8cea499e7f014cf4f5a27e017b519633c96e5e3ee3",
+    "maximum_energy_eV": 4820.89368219741,
+    "metadata_sha256": "7904a700afdcd116c6f57ef35aeb5555661ffed0d004304d815d20f79840ca55",
+    "minimum_energy_eV": 471.0431912867225,
+    "node_count": 878,
+    "probability_sum": 0.9999999999999993,
+    "probability_weighted_mean_energy_eV": 3465.1107871409254,
+    "species_resolution": "all_positive_ions_combined"
+  },
+  "status": "completed_provenance_audit"
+}

@@ -20,6 +20,7 @@
 | Q7 | Code, potential, and figure data are released in the author repository, but no license file was found at pinned commit `4bcd0350`. | Numerical data may be audited with provenance; do not import implementation or weights without permission/license. |
 | Q8 | At pinned commit `4bcd0350`, `SM_codes/PlasmaEtchSimulator/calc/byproduct.py` deletes every disconnected cluster matching the byproduct list without testing formation depth; its optional depth-gated diagnostic hard-codes `20.0` Å and labels it an “arbitrary value.” | Code-level confirmation that the reported low-energy improvement is a sensitivity study, not a measured product-transport law. Source SHA-256 `a0471f888bd885a84b7188a4111aa18a4c7c6a68d8061e0b7d5e6193204babd0`. |
 | Q9 | The released SiO2 transient archive and the CF 300 eV default/2 nm histories are checksum-pinned in `AN-NNP-KARAHASHI-TRANSFER-R1`. | Reproducibility receipt only; the arbitrary 2 nm gate is not consumed as a production parameter. |
+| Q10 | The released SiO2 atomistic outputs end at 1000 eV. Only `5.102%` of the checksum-pinned Krüger Figure-4(a) IEAD probability lies at or below that energy. | `KRUEGER-IEAD-ENERGY-SUPPORT-R1`; forbids describing a Krüger depth run as atomistically validated when `94.898%` of the incident distribution is outside the released model domain. |
 
 ## Corrected consumption
 

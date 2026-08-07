@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 104 sources by topic
+## Index — 105 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -67,6 +67,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`mahorowala-2002`](library/mahorowala-2002.md) | Mahorowala & Sawin, JVST B 20, 1055/1077 (2002) | ABSTRACT/relay |
 | [`steinbruchel`](library/steinbruchel.md) | Steinbrüchel, sqrt-E yield form | VIA ARM + THESES |
 | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | Takada, Toyoda & Sugai, stable C5F8 molecule / Ar+ co-incidence on SiO2 | FULL TEXT + PIL-AUDITED FIGURE 3 |
+| [`tachi-1982-jjaps`](library/tachi-1982-jjaps.md) | Tachi et al., mass-selected fluorocarbon ions on elemental Si through 3 keV | ABSTRACT-ONLY — TARGET-MISMATCHED LEAD, NOT IMPORTABLE |
 | [`yin-2008-jvsta`](library/yin-2008-jvsta.md) | Yin & Sawin, JVST A 26, 161 (2008) | not-fetched |
 
 ### Atomistic surface physics and event kernels
