@@ -11,7 +11,7 @@ from petch.reactor_global import (
 )
 
 
-def _condition(*, wall_evidence="assumed"):
+def _condition(*, wall_evidence="assumed", power_evidence="assumed"):
     return ArgonGlobalCondition(
         condition_id="manufactured-argon",
         absorbed_power_W=1000.0,
@@ -21,6 +21,9 @@ def _condition(*, wall_evidence="assumed"):
         ion_wall_energy_factor_Te=5.0,
         ion_wall_energy_source="lee-lieberman-1994-global stated range 5--8 Te",
         ion_wall_energy_evidence=wall_evidence,
+        absorbed_power_source="manufactured absorbed power",
+        absorbed_power_evidence=power_evidence,
+        absorbed_power_boundary_kind="manufactured_test",
     )
 
 
@@ -57,7 +60,10 @@ def test_predictive_flag_requires_both_transport_and_wall_energy_evidence():
         _provider(evidence="validated_model"))
     assert not modeled_transport.solve(_condition()).supports_prediction
     predictive = modeled_transport.solve(
-        _condition(wall_evidence="validated_model"))
+        _condition(
+            wall_evidence="validated_model",
+            power_evidence="validated_model",
+        ))
     assert predictive.supports_prediction
 
 

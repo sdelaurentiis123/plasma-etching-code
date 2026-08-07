@@ -76,6 +76,11 @@ def run_reproduction() -> tuple[list[dict[str, object]], dict[str, object]]:
                 ion_wall_energy_source=(
                     "lee-lieberman-1994-global stated 5--8 Te range"),
                 ion_wall_energy_evidence="published_range_member",
+                absorbed_power_source=(
+                    "lee-lieberman-1994-global published Figure 3 absorbed "
+                    "power condition"),
+                absorbed_power_evidence="published_range_member",
+                absorbed_power_boundary_kind="published_model_condition",
             )
             solution = LeeLiebermanArgonGlobalModel(provider).solve(
                 condition,
@@ -117,6 +122,12 @@ def run_reproduction() -> tuple[list[dict[str, object]], dict[str, object]]:
                     solution.transport.metastable_effective_diffusion_m2_s,
                 "maximum_normalized_residual":
                     solution.maximum_normalized_residual,
+                "absorbed_power_source":
+                    solution.absorbed_power_source,
+                "absorbed_power_evidence":
+                    solution.absorbed_power_evidence,
+                "absorbed_power_boundary_kind":
+                    solution.absorbed_power_boundary_kind,
                 "supports_prediction": solution.supports_prediction,
             }
             member_rows.append(row)

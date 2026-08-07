@@ -132,3 +132,134 @@ endpoints of the source's published ion-wall-energy range:
 The digitization manifest, per-point results, machine-readable grade, and
 claim-boundary report are adjacent to this preregistration. Stage C remains
 unexecuted and requires condition-specific primary experimental inputs.
+
+## Stage C1 addendum: Mahoney 1994 independent argon ICP
+
+Frozen on 2026-08-07 after the primary Mahoney paper and its Table I/Figure
+11 were visually audited, and before any Mahoney-condition reactor result was
+generated.
+
+### Withheld source data and condition
+
+- Primary source: `mahoney-1994-planar-icp`, DOI `10.1063/1.357672`.
+- Source PDF SHA-256:
+  `acd59d5def6373a81f1ec73248608b7c67a8769b010f2287fa05b04fd8cc61b7`.
+- Grounded cylindrical plasma boundary: radius `0.114 m`, length `0.137 m`.
+- Observable location: peak electron density on axis at `z = 0.050 m`.
+- Withheld rows: every 100 W row printed in Table I: `10 mTorr` cryogenic
+  pump; both `20 mTorr` cryogenic/mechanical repeats; `50` and `100 mTorr`
+  mechanical-pump rows.
+- Withheld observables: peak electron density and bulk electron temperature.
+- The experiment reports net generator power, not calorimetric absorbed
+  plasma power. The first board therefore uses `100 W` as a declared
+  all-net-power-absorbed **upper-bound scenario**; it does not fit an
+  absorption fraction.
+- Neutral-gas temperature is unpublished. Both `300 K` and `600 K` endpoints
+  are run as a declared sensitivity bracket. The bracket may not be narrowed
+  from the target data.
+- Both endpoints of Lee and Lieberman's published `5–8 Te` ion-wall-energy
+  range are run. No endpoint may be selected after seeing the comparison.
+
+### Frozen gates
+
+Every combination of gas-temperature endpoint and ion-wall-energy endpoint
+must:
+
+1. converge with maximum normalized particle/power residual at most `1e-8`
+   and return positive finite densities, temperatures, and fluxes;
+2. predict electron temperature decreasing strictly along the
+   `10, 20-mechanical, 50, 100 mTorr` sequence;
+3. achieve bulk-electron-temperature MAPE at most `30%` and maximum APE at
+   most `50%` across all five printed rows;
+4. predict nondecreasing peak density along that same pressure sequence;
+5. place `model peak density / measured peak electron density` within
+   `[1, 5]` for every printed row. This interval is taken directly from the
+   paper's stated electron-versus-ion diagnostic discrepancy, not from a
+   reactor result; and
+6. reproduce the normalized density-pressure shape with log RMSE at most
+   `ln(2)` after both model and experiment are normalized to the 10 mTorr
+   row. This normalization is a grade only and does not alter a model input.
+
+The duplicate 20 mTorr rows are both scored for temperature and absolute
+density. The mechanical-pump repeat is used in the ordered pressure-shape
+sequence so no duplicate pressure is silently averaged.
+
+Passing means the unchanged argon closure survives one independent
+condition-specific plasma-state board within the source's explicit diagnostic
+and missing-boundary limitations. It does **not** validate net-to-absorbed
+power transfer, promote the transport closure to `validated_model`, supply a
+C4F6 deck, or close Krüger depth.
+
+### Stage C1 execution record
+
+Executed on 2026-08-07 without changing the frozen gates or source-backed
+argon coefficients. **Verdict: FAIL.**
+
+- Every numerical solve converged with maximum normalized balance residual
+  below `4.9e-15`.
+- Electron-temperature and density-pressure trend gates passed at every
+  neutral-temperature/wall-energy corner.
+- Normalized density-shape log RMSE was `0.350–0.387`, inside `ln(2)`.
+- At `600 K`, the electron-temperature MAPE was `29.86%`, inside the frozen
+  `30%` limit; at `300 K` it was `37.78%`.
+- The absolute center/model to measured-peak electron-density ratio was
+  `4.05–19.09` across all corners, violating the frozen `[1,5]` interval.
+
+The failure is preserved. Treating Mahoney's net `100 W` as plasma absorption
+is an upper-bound scenario, and the paper explicitly leaves match/coil
+dissipation and neutral-gas temperature unmeasured. Pressure-response shape
+and conservation do not authorize fitting those missing boundaries from the
+target density.
+
+The implementation response is an explicit RF power-boundary contract:
+measured plasma absorption can support prediction; forward-minus-reflected or
+DirectDrive output power requires an independently measured downstream
+hardware-loss closure. No reaction rate was changed to rescue this board.
+
+## Stage C1 diagnostic addendum: target-inverted absorbed power
+
+Frozen on 2026-08-07 after the Stage C1 FAIL and before running the
+inversion. This is explicitly **not a validation gate**: it uses the withheld
+Mahoney density to diagnose whether one constant RF transfer fraction could
+explain the failed upper-bound board.
+
+For each of the same four neutral-temperature/wall-energy corners and all
+five Table I rows:
+
+1. leave every chemistry, geometry, transport, and wall coefficient
+   unchanged;
+2. solve in log absorbed power for the powers at which model center density
+   equals `2x` and `5x` the measured peak electron density, matching the
+   paper's stated electron-versus-ion diagnostic interval;
+3. divide each inferred absorbed power by the reported `100 W` net RF power;
+4. intersect all five per-row `[P(2x), P(5x)]` intervals with the physical
+   `0–100 W` net-power ceiling to test whether a single condition-independent
+   transfer fraction exists; and
+5. compare that target-inverted intersection to Hopwood's separately
+   measured `70–90%` planar-ICP coupling range only as a nonportable external
+   context band.
+
+The inversion may not select a coefficient, relabel the Mahoney board PASS,
+or become an absorbed-power provider. A narrow intersection means a hardware
+measurement could close the board; no intersection means the missing
+boundary cannot be represented by one constant transfer fraction under that
+sensitivity corner.
+
+### Stage C1 diagnostic execution record
+
+Executed on 2026-08-07. Every sensitivity corner admitted a single constant
+transfer-fraction interval satisfying all five rows:
+
+- `300 K`, `5 Te`: `21.9–26.2%`;
+- `300 K`, `8 Te`: `26.3–30.4%`;
+- `600 K`, `5 Te`: `41.4–50.4%`; and
+- `600 K`, `8 Te`: `49.7–59.0%`.
+
+None overlaps Hopwood's separately measured `70–90%` context band. This does
+not select the smallest or largest interval. It shows that one independently
+measured constant hardware-transfer fraction could reconcile the pressure
+series inside each declared corner, while the unresolved neutral temperature
+and ion-wall energy move the inferred range by more than a factor of two.
+
+The Stage C1 validation verdict remains **FAIL**. The inverted intervals are
+target-informed diagnostics and are prohibited as production boundary inputs.

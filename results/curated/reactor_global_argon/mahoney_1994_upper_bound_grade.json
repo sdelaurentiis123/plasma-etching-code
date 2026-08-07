@@ -1,0 +1,93 @@
+{
+  "gate": "Mahoney et al. 1994 independent pure-Ar ICP plasma-state board",
+  "claim_class": "independent condition-specific validation under a declared all-net-rf-power-absorbed upper-bound scenario",
+  "coefficient_selection_target": null,
+  "reference_rows": 5,
+  "gas_temperature_sensitivity_endpoints_K": [
+    300.0,
+    600.0
+  ],
+  "wall_energy_range_members_Te": [
+    5.0,
+    8.0
+  ],
+  "limits": {
+    "temperature_mean_absolute_percent_error": 30.0,
+    "temperature_maximum_absolute_percent_error": 50.0,
+    "model_to_measured_density_ratio": [
+      1.0,
+      5.0
+    ],
+    "normalized_density_shape_log_rmse": 0.6931471805599453,
+    "maximum_normalized_residual": 1e-08,
+    "temperature_strict_decrease_required": true,
+    "density_nondecrease_required": true,
+    "positive_finite_outputs_required": true
+  },
+  "members": [
+    {
+      "gas_temperature_K": 300.0,
+      "wall_energy_factor_Te": 5.0,
+      "temperature_mean_absolute_percent_error": 37.77926518873147,
+      "temperature_maximum_absolute_percent_error": 45.101508751428135,
+      "temperature_strictly_decreases_with_pressure": true,
+      "density_nondecreasing_with_pressure": true,
+      "minimum_model_to_measured_density_ratio": 9.21442478849029,
+      "maximum_model_to_measured_density_ratio": 19.094908538956982,
+      "all_density_ratios_inside_source_diagnostic_interval": false,
+      "normalized_density_shape_log_rmse": 0.36801648908089835,
+      "maximum_normalized_residual": 3.3739951556503784e-15,
+      "all_positive_finite": true,
+      "passed": false
+    },
+    {
+      "gas_temperature_K": 300.0,
+      "wall_energy_factor_Te": 8.0,
+      "temperature_mean_absolute_percent_error": 37.779098163313556,
+      "temperature_maximum_absolute_percent_error": 45.10140000731751,
+      "temperature_strictly_decreases_with_pressure": true,
+      "density_nondecreasing_with_pressure": true,
+      "minimum_model_to_measured_density_ratio": 7.66633008233765,
+      "maximum_model_to_measured_density_ratio": 16.454660462136687,
+      "all_density_ratios_inside_source_diagnostic_interval": false,
+      "normalized_density_shape_log_rmse": 0.3872586731084238,
+      "maximum_normalized_residual": 4.8837289126263006e-15,
+      "all_positive_finite": true,
+      "passed": false
+    },
+    {
+      "gas_temperature_K": 600.0,
+      "wall_energy_factor_Te": 5.0,
+      "temperature_mean_absolute_percent_error": 29.857777490964942,
+      "temperature_maximum_absolute_percent_error": 37.667828961336504,
+      "temperature_strictly_decreases_with_pressure": true,
+      "density_nondecreasing_with_pressure": true,
+      "minimum_model_to_measured_density_ratio": 4.860703907788949,
+      "maximum_model_to_measured_density_ratio": 9.92160804419609,
+      "all_density_ratios_inside_source_diagnostic_interval": false,
+      "normalized_density_shape_log_rmse": 0.35026020074193703,
+      "maximum_normalized_residual": 3.459307979776968e-15,
+      "all_positive_finite": true,
+      "passed": false
+    },
+    {
+      "gas_temperature_K": 600.0,
+      "wall_energy_factor_Te": 8.0,
+      "temperature_mean_absolute_percent_error": 29.856418019643876,
+      "temperature_maximum_absolute_percent_error": 37.666744609351625,
+      "temperature_strictly_decreases_with_pressure": true,
+      "density_nondecreasing_with_pressure": true,
+      "minimum_model_to_measured_density_ratio": 4.046036460611858,
+      "maximum_model_to_measured_density_ratio": 8.476657103454738,
+      "all_density_ratios_inside_source_diagnostic_interval": false,
+      "normalized_density_shape_log_rmse": 0.37110317505440127,
+      "maximum_normalized_residual": 2.848841865698681e-15,
+      "all_positive_finite": true,
+      "passed": false
+    }
+  ],
+  "passed": false,
+  "power_boundary": "Mahoney reports net generator power, not absorbed plasma power. No transfer fraction is inferred here; 100 W is an upper-bound scenario and cannot establish absolute density prediction.",
+  "measurement_boundary": "Mahoney states the electron-density diagnostic can read 2--5x below ion-density determinations. The board freezes [1,5] for model center density / measured peak electron density.",
+  "predictive_boundary": "A pass validates the unchanged argon closure only within the declared temperature, wall-energy, diagnostic, and power-input brackets. It does not validate absorbed-power transfer, C4F6 chemistry, or Krueger depth."
+}

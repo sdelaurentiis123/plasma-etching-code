@@ -1,0 +1,6 @@
+condition_id,pressure_mTorr,pump_mode,net_rf_power_W,peak_electron_density_1e10_cm3,bulk_electron_temperature_eV,bulk_average_electron_energy_eV,peak_plasma_potential_V,source_row
+mahoney-10mT-cryo-100W,10,throttled_cryogenic,100,9.9,3.5,4.7,17.9,Table I row 1
+mahoney-20mT-cryo-100W,20,throttled_cryogenic,100,19.8,2.8,3.9,16.7,Table I row 3
+mahoney-20mT-mechanical-100W,20,throttled_mechanical,100,18.2,3.2,4.2,17.3,Table I row 5
+mahoney-50mT-mechanical-100W,50,throttled_mechanical,100,50.0,2.3,3.5,16.0,Table I row 7
+mahoney-100mT-mechanical-100W,100,throttled_mechanical,100,55.3,1.9,3.1,14.4,Table I row 8

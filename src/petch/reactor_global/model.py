@@ -13,6 +13,11 @@ from petch.sheath import bohm_speed
 from .argon import ARGON_MASS_AMU, build_lee_lieberman_argon_volume_network
 from .geometry import CylindricalReactor, ElectropositiveEdgeFactors
 from .network import E_CHARGE_C, RateContext
+from .power import (
+    POWER_EVIDENCE_KINDS,
+    PREDICTIVE_EVIDENCE_KINDS,
+    AbsorbedPowerEstimate,
+)
 
 BOLTZMANN_J_K = 1.380649e-23
 PASCAL_PER_MTORR = 0.13332236842105263
@@ -31,6 +36,9 @@ class ArgonGlobalCondition:
     ion_wall_energy_factor_Te: float
     ion_wall_energy_source: str
     ion_wall_energy_evidence: str
+    absorbed_power_source: str = "untracked direct scalar"
+    absorbed_power_evidence: str = "assumed"
+    absorbed_power_boundary_kind: str = "untracked_scalar"
 
     def __post_init__(self):
         values = np.asarray([
@@ -45,10 +53,13 @@ class ArgonGlobalCondition:
             or np.any(values <= 0.0)
             or not isinstance(self.geometry, CylindricalReactor)
             or not str(self.ion_wall_energy_source).strip()
+            or not str(self.absorbed_power_source).strip()
+            or not str(self.absorbed_power_boundary_kind).strip()
             or self.ion_wall_energy_evidence not in {
                 "measured", "validated_model", "published_range_member",
                 "assumed", "sensitivity",
             }
+            or self.absorbed_power_evidence not in POWER_EVIDENCE_KINDS
         ):
             raise ValueError("invalid argon global-model condition")
         object.__setattr__(self, "absorbed_power_W", float(self.absorbed_power_W))
@@ -58,6 +69,33 @@ class ArgonGlobalCondition:
         object.__setattr__(
             self, "ion_wall_energy_factor_Te",
             float(self.ion_wall_energy_factor_Te))
+
+    @classmethod
+    def from_power_estimate(
+            cls, *, condition_id: str,
+            power_estimate: AbsorbedPowerEstimate, pressure_Pa: float,
+            gas_temperature_K: float, geometry: CylindricalReactor,
+            ion_wall_energy_factor_Te: float,
+            ion_wall_energy_source: str,
+            ion_wall_energy_evidence: str) -> "ArgonGlobalCondition":
+        """Build a condition without discarding the power evidence chain."""
+        if not isinstance(power_estimate, AbsorbedPowerEstimate):
+            raise TypeError("absorbed-power estimate is required")
+        return cls(
+            condition_id=condition_id,
+            absorbed_power_W=power_estimate.require_point_W(),
+            pressure_Pa=pressure_Pa,
+            gas_temperature_K=gas_temperature_K,
+            geometry=geometry,
+            ion_wall_energy_factor_Te=ion_wall_energy_factor_Te,
+            ion_wall_energy_source=ion_wall_energy_source,
+            ion_wall_energy_evidence=ion_wall_energy_evidence,
+            absorbed_power_source=(
+                f"{power_estimate.measurement_source}; "
+                f"{power_estimate.loss_source}"),
+            absorbed_power_evidence=power_estimate.evidence_kind,
+            absorbed_power_boundary_kind=power_estimate.boundary_kind,
+        )
 
     @property
     def neutral_ground_density_m3(self) -> float:
@@ -175,6 +213,9 @@ class ArgonGlobalSolution:
     transport_provider: str
     transport_provider_version: str
     ion_wall_energy_evidence: str
+    absorbed_power_source: str
+    absorbed_power_evidence: str
+    absorbed_power_boundary_kind: str
 
     @property
     def maximum_normalized_residual(self) -> float:
@@ -189,6 +230,7 @@ class ArgonGlobalSolution:
         return (
             self.transport.supports_prediction
             and self.ion_wall_energy_evidence in _PREDICTIVE_EVIDENCE
+            and self.absorbed_power_evidence in PREDICTIVE_EVIDENCE_KINDS
             and self.maximum_normalized_residual <= 1.0e-8
         )
 
@@ -382,4 +424,8 @@ class LeeLiebermanArgonGlobalModel:
             transport_provider=str(self.transport_provider.name),
             transport_provider_version=str(self.transport_provider.version),
             ion_wall_energy_evidence=condition.ion_wall_energy_evidence,
+            absorbed_power_source=condition.absorbed_power_source,
+            absorbed_power_evidence=condition.absorbed_power_evidence,
+            absorbed_power_boundary_kind=(
+                condition.absorbed_power_boundary_kind),
         )

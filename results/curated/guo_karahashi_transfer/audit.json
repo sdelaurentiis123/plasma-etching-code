@@ -874,7 +874,7 @@
     "guo_reaction_deck_path": "data/surface_interactions/guo_2009/table4_1_reaction_deck.csv",
     "guo_reaction_deck_sha256": "2f93b31c1862095d133b765cddc1957ec27f0e0d05b7b2dfbafc0908f54b9600",
     "guo_source_manifest_path": "data/surface_interactions/guo_2009/source_manifest.json",
-    "guo_source_manifest_sha256": "138f9f2938337ca2f66277bf09668c19a8d5dc735ec378588383cfd5cfe50b25",
+    "guo_source_manifest_sha256": "253250dbb6ee364f8e54179c40625a5140f09fc04a0d16807200bf2788e7fd7e",
     "karahashi_data_path": "data/experimental/karahashi_2007/figure4_reactive_ion_yields.csv",
     "karahashi_data_sha256": "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26",
     "karahashi_digitization_manifest_path": "data/experimental/karahashi_2007/digitization_manifest.json",

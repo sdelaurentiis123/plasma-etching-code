@@ -1,0 +1,464 @@
+ ’ Electron-density and energy distributions                                      in a planar inductively
+   coupled discharge
+            Leonard J. Mahoney, Amy E. Wendt, Ernest0 Barrios, Carolyn J. Richards,
+            and J. Leon Shohet
+           Engineering Research Center for Plasma-Aided Manufacturing,          University of Wisconsin-Madison, Madison,
+           Wkconsin 53706
+            (Received24 January1994; acceptedfor publication 3 May 1994)
+           Electron-densityand electronenergydistribution functions (EEDFs) aremeasuredin a 20-cm-diam
+           by 14-cm-longcylindrical, inductively coupledplasmasourcedriven by fields from a planar,spiral
+           coil at 13.6 MHz. Radio-frequency(r-f)-filtered Langmuir probesare usedto obtain spatial profiles
+           of electron population characteristicsin argon at powers and pressuresof interest for etching and
+           plasma-assistedeposition(l-100 mT). Electron densitiesrangefrom lOlo to 10” cm3 with lOO-
+           500 W of rf power and peak on axis in the centerof the cylindrical volume. The EEDFs show that
+           the observedaverageelectronenergyvaries by 1-2 eV spatially, with the highestvaluesof average
+           energyoccurring at thoseregionsof strongestrf electric field. The EEDF measurementsalso reveal
+           a significant populationof cold electronstrappedin a potential well at the location of peak electron
+           density. From thesespatial measurements,spatial estimatesof conductivity and ionization rate are
+           deduced.
+
+
+  I. INTRODUCTION                                                         II. EXPERIMENT
+
+       Several recent reports have demonstratedthat planar in-                 The planar rf inductively coupledplasmasourceusedin
+  ductively coupled low-pressureplasma sourcesare a prom-                 this work is shown in Fig. 1. The design of this planar coil
+  ising technologyfor etching and deposition’processes   where            induction source is similar to inductively coupled plasma
+  uniform dischargeswith high plasma density are desiredto                sources.describedby other workers,‘-’ and has-been dis-
+  treat large-areasubstrates.Thesesourceswere first described             cussedin recent works regardingpulsed-poweroperationr3
+  in patents by Ogle of Lam ResearchCorporation’‘and by                   andfilm deposition.‘4The plasmasourceandvacuumsystem
+  Coultas and Keller of IBM Corporation’ as devices to gen-               is comprisedof severalcomponents:a vacuumwell or recess
+  eratelow-pressure,densedischargesfor etching and deposi-                (l), a four-turn aluminum induction coil (2), a radially
+  tion. Design refinements and processing performance for                 spokedFaradayshield (3), a 1.27-cm-thickby 20.3-cm-o.d.
+  etching have been reportedby Keller, Barnes, and Forster3               quartz vacuum window (4), and a rf impedancematching
+  and by Hopwood et aLde6 When optimally designed,these                   network (5). The coil current and voltage are monitoredby a
+  plasma sourcesare capableof generatinguniform plasmas                   current transformer (PearsonModel- 110) (6) and a cali-
+  with electron densities on the order of 10”-1012/cm3 at                 brated,low-inductance,capacitivevoltage divider (7). Gas is
+  l-10 mTorr in processinggasesusedfor fabricating submi-                 fed into the plasmasourcethroughan annulargap aroundthe
+                                                                          perimeter of the quartz plate [S)..The source assembly is
+  cron features?”
+                                                                          mounted on one end of a 61-cm-long by 35-cm-diam
+       To date, limited empirical characterization of these
+                                                                          stainless-steelvacuum chamber (9). The coil and quartz
+  plasma sourceshas beenmade. Hopwood et al. have exam-
+                                                                          vacuum window are recessedinto the vacuum chamberfor
+  ined electromagnetic-fields,” the uniformity of ion density,5           easy access by probes (10) and by optical diagnostics
+  and ion energydistributions (IEDs)’ in a planar rf induction            through a 15.2-cm-i.d.vacuum view port (11). For the pur-
+  dischargeand Barnes, Forster, and KellerlO have examined                posesof this work, the main dischargevolume is constrained
+  electron energy distribution functions (EEDFs) of oxygen                by a 22.8-cm-i.d. by 13.7-cm-long grounded, cylindrical,
+  dischargesin a similar system. Much of the aforementioned               metal liner (12) and an end plate (13). The liner has three
+  work has emphasized the uniformity of processing dis-                   l-cm-wide slots cut into its side for accessby optical diag-
+  chargesacrossthe work piece, but little work has beenper-               nostic systems,and the end plate has a 2.5-cm-wide slot cut
+  formed to determinethe spatial dischargecharacteristicsin               acrossits diameterfor accessby the Langmuir probe.
+  the interior of these plasma sources.To assist in modeling                   Figure 2 shows the induction coil and Faradayshield as
+  and designingrf induction plasmasources,we seekto deter-                viewed from the vacuumside of the quartzplate. The 1.2 ,uH
+  mine the spatial electronpopulation characteristicsin the in-           induction coil hasfour turns and is 0.17 cm thick by 1.27 cm
+  terior of pIanar inductively coupled argon discharges.This              wide with 0.64 cm spacingbetweenturns. The planar coil is
+  work has been conductedin connection with optical emis-                 positioned approximately 2 cm from the discharge/quartz
+  sion studiesby Beale, Wendt, and Mahoney” and modeling                  window interface. The grounded,spoked, Faradayshield is
+  studies conducted by Ventzek, Hoekstra, and Kushner.‘”                  used to reduce the degree of capacitive coupling in the
+  Such information will help to determine dischargeheating                sourceby attenuatingdivergent rf electric fields (capacitive
+  and diffusion processesin thesesources.                                 fields) while allowing divergencefree electromagneticfields
+
+  J. Appl. Phys. 76 (4), 15 August 1994          0021-8979/94/76(4)/2041/6.00                    Q 1994 American Institute of Physics   2041
+Downloaded 25 May 2007 to 128.104.198.120. Redistribution subject to AIP license or copyright, see http://jap.aip.org/jap/copyright.jsp
+                                                                                chamber. Other recent reports and innovations have been’
+                                                                                madeon rf inductively coupledplasmasourceswhich feature
+                                                                                capacitive shielding components.6T’5Y16
+                                                                                     For operation at pressuresbelow 20 mT, the vacuum
+                                                                                chamber is pumped through a variable conductancethrottle
+                                                                                valve- by an Air Products cryogenic pump. For operation
+                                                                                above 20 mT, the source is pumped through an automatic
+                                                                                throttle valve and cold trap by a 16 cubic feet per minute
+                                                                                mechanicalpump. Pressureis monitored with a capacitance
+                                                                                manometerand/or with an extendedrange ionization gauge.
+                                                                                The vacuum system is also equippedwith a UTI 300 AMU
+                                                                                Mass Spectrometerwhich is used to monitor and identify
+                                                                                sourcesof gas impurities during the experiments.
+                                                                                     The source is poweredat 13.6 MHz by an ENI A-500,
+                                                                                500 W broadbandrf power amplifier and a HP model 8116A
+                                                                                50 MHz pulse/functiongenerator.The net rf power readings
+                                                                                are taken as the incident power minus the reflectedpower as
+                                                                                monitoredwith an in-line watt meter (Bird Electronics model
+                                                                                43), placedbemeen the power supply and impedancematch-
+                                                                                ing network. In all of the experimental casesreportedhere,
+ FIG. 1. Planar rf induction plasma source: vacuum well (l), induction coil     the impedance matching network is adjusted to minimize
+ (a), Faraday shield (3), quartz plate (4), impedance matching network (5),     reflected power to (5% of the forward power. The net rf
+ current transformer (6), capacitive voltage divider (7), annular gas channel   power, coil current, coil voltage, and the variable vacuum
+ (8). vacuum chamber (9), Langmuir probe (lo), optical view port (ll), metal    capacitor settings are routinely monitored and are used to
+ liner (12), end plate (13).
+                                                                                determinethe effective dischargeimpedanceand to help rep-
+                                                                                licate experimental conditions. (It should be noted that coil
+                                                                                currentsmeasuredat the groundedleg of the coil, as shown
+ (induction fields) to pass and heat the discharge.The induc-
+                                                                                in Fig. 1, are typically 17% greater than those measuredat
+ tion coil and Faradayshield are separatedby an insulating                      the powered leg for the aluminum coil used in this work.)
+ glass plate. The spacing and openingsin the shield used in                          The cylindrical Langmuir probe is 7 mm long and is
+ this work are designedto allow somepenetrationof capaci-
+                                                                                made from either 10 or 6 mil tungsten wire. To avoid rf
+ tive fields to help initiate the discharge.With the Faraday
+                                                                                distortion in the’EEDF measurements,tuned resonantrf fil-
+ shield in place, rf potential fluctuations at 13.6 MHz mea-                    ters in combination with a low-pass filter are used to maxi-
+ suredwith a calibratedcapacitiveprobeplacedin the bulk of                      mize the rf impedanceof the probe tip to ground.‘7’18In
+ the plasmaare reducedfrom LOV peak to peak to <2 Vpsp                          addition to the filters, a floating coaxial capacitor is built into
+ and potential’ fluctuations at the harmonics are reducedto                     the probetip to reducethe capacitive impedancebetweenthe
+ well under 0.05 VP+. Also, when the Faradayshield is in
+                                                                                probe tip and the plasma. As a result, the voltage on the
+ place, both sputtering of the inner ring of the grounded                       probe tip follows rf fluctuations in the plasma potential so
+ vacuum well near the quartz plate is reducedand localized
+                                                                                that the difference in the potential betweenthe probe and the
+ dischargesnear open vacuum ports and hollows disappear.                        plasma is constant on the rf time scale. The probe body is
+ These observationsGdicate that electric fields associated                      made of ceramic materials to minimize stray capacitance
+ with capacitive-couplingare greatly reducedin the vacuum                       which often complicatestuning of external rf filters. A spec-
+                                                                                trum analyzer is used to maximize the rf impedanceof the
+                                                                                probefilters at the operatingfrequencyand its first harmonic.
+                   Aluminum Coil                                                Basedon the filtering techniquesdiscussedin Ref. 17, the rf
+                                                                                impedanceof the filters is more than adequateto compensate
+                                                                                for the rf potential fluctuation levels observedwith calibrated
+                                                                                capacitive probes.
+                                                                                     The EEDF f,(E) is related to the probe I-V character-
+                                                                                istics by the Druyvesteyn relation,l’
+
+                                                                                    fe(E)i~=ev=~$                                             (1)
+                                                                                                     P
+
+                                                                                whereE is the electronenergy,A, is the probe area,e is the
+                                                                                electron charge,m, is the electron mass, V is the difference
+                                                                                between the plasma potential and probe bias, and I, is the
+                        Faraday Shield                                          electron current to the probe. Equation (1) is basedon sev-
+                                                                                eral assumptionsabout the plasma and the probe geometry.
+         FIG. 2. Bottom view of induction coil and Faraday shield.              The principle assumptionis that the Iocal electron velocity
+
+ 2042       J. Appl. Phys., Vol. 76, No. 4, 15 August 1994                                                                         Mahoney et al.
+
+Downloaded 25 May 2007 to 128.104.198.120. Redistribution subject to AIP license or copyright, see http://jap.aip.org/jap/copyright.jsp
+  distribution is isotropic. Another assumptionis that the mean                        c;]   a   0      c7    iz3----Coil
+  free path X,rn, of electrons is large compared to the probe                         lr               Quartz Plate         1
+  dimensions; otherwise the probe may significantly perturb
+  the discharge. In this work, the probe dimensions are much
+  less than X,r, up to about 50 mT in argon.
+       The method used to determine the EEDFs from Lang-
+  muir probe measurementsis similar to that describedby Su-
+  dit and Woods” and by Lai et aZ.,21with some minor differ-
+  ences in probe voltage driving circuitry. The probe is swept
+  by a programmable, bipolar power supply (Kepco model
+  lOO-2M). The probe current is monitored through a sampling
+  resistor and recorded through a 12 bit digital-to-analog board
+  [Computer Boards CIO-DAS16). To acquire the Z-V charac-
+  teristics, the Langmuir probe is swept from a negative to a
+ positive bias potential over a period of several seconds.To
+  avoid hysteresis effects associatedwith surface contamina-                                         Radius (cm)
+  tion, the probe is held at a negative potential of -100 V for
+ cleaning by ion bombardment between sweeps for several                FIG. 3. Spatial contour plot of plasma potential VP, for a 10 mT, 200 W
+ seconds. This procedure is adequate to obtain I-V traces              argon discharge, V,(peak)= 18.1 V. Coil current=38.6 ‘b+, , coil voltage
+ which are free of hysteresiseffects in this experimental sys-         =2.85 kV,.,.
+ tem when using argon.
+       The EEDFs are obtained by ensemble-averagingover
+ several I-V traces (10-20) and by taking the second deriva-           electron energy profile flattens out to a near-constantvalue of
+ tive of a sliding second-order polynomial fitted to an ad-            4.8 eV with only a slight drop off in energy toward the end
+ justed window of data points. The plasma potential is iden-           plate and liner walls.
+ tified as the probe voltage at which the.secondderivative of                The spatial contours of electron density, plasma poten-
+ the I-V trace passesthrough zero. Using this method of data           tial, and averageelectron energy for argon dischargesat dif-
+ acquisition and analysis, we obtain 0.3 eV resolution near the        ferent powers and pressures are very similar to those de-
+ plasma potential and a dynamic range of O-18 eV with two              picted in Figs. 3-5. Peak electron densities and plasma
+ to three decadesin the EEDF amplitude. The resolution of              potentials occur on axis in the range of 2=4-5 cm, and
+ the EEDFs at higher energies is limited by the value of the           electron temperatures and average energies peak in the
+ sampling resistor and by the input gain and digital resolution        high-rf induction field region of the sourcebetweenr =4 and
+ of the 12 bit analog-to-digital board. (This limit of the energy      6 cm. Table I lists a summary of operating conditions and
+ resolution is identified by regular positive-to-negative oscil-       discharge characteristics for several source conditions.
+ lations in the amplitude of the EEDF with increasing energy.)         Among these characteristics are bulk T,, bulk (E,), and
+ Unless explicitly noted, the electron densities and average           peak (E,). The bulk dischargevalues are defined as the mean
+ electron energies presented in this work have been deter-             values of T, and (E,) observed at 2>4 cm within the dis-
+ mined by appropriate numerical integration over the mea-              charge body, and peak (E,) is the averagedelectron energy
+ sured EEDFS. Because of the limited range of resolvable
+ electron energy,no attempt is made to account for the effects
+ of sheath expansion in the ion saturation-current portion of                          0     0    0      c3   -Coil
+ the I-V trace when evaluating the EEDFs.
+
+ III. RESULTS AND DISCUSSION
+      With the metal liner in place, the cylindrical Langmuir
+ probe measurementswere taken at several axial and radial
+ positions for several rf powers and pressuresin argon. Fig-
+ ures 3-5 show spatial contour plots of electron density,
+ plasma potential, and average electron energy, respectively,
+ for a 10 mT, 200 W discharge. Both plasma potential VP,
+ and electron density N, , are peaked on axis in the system at
+ z=5 cm. The plasma potential peaks at 18.1 V, andthe re-
+ sulting dc peak ambipolar electric fields are on the order of
+ l-2 V/cm. The electron density peaks at 19X10’0/cm3 and
+ drops to about one-tenth of that value near the boundariesof
+ the discharge.The averageelectron energy (E,) peaks at 5.4                                           Radius (cm)
+ eV and near r=6 cm. This location is where the strongest
+ induced rf electric fields and currents are believed to               FIG. 4. Spatial profile of electron density N, for a 10 mT, 200 W argon
+ occur.4’122-3 cm away from the quartz plate, the average              discharge, N,(peak)=19X10”/cm3.
+
+
+ J. Appl. Phys., Vol. 76, No. 4, 15 August 1994                                                                             Mahoney et al.   2043
+
+Downloaded 25 May 2007 to 128.104.198.120. Redistribution subject to AIP license or copyright, see http://jap.aip.org/jap/copyright.jsp
+                  0   u       0      L=I   7Coil
+              I
+              I
+              I
+                                                                                                 3   0.16
+              I                                              2
+              I                                                                                  ii
+                                                                                                 m’ 0.12
+              I
+              I                                                                                   k
+                                                                                                 f 0.08
+                                                                                                  E
+                                                                                                  8
+                                                                                                 z 0.04
+
+
+                                                                                                                  4            8            12    16         20
+                                                                                                                      Electron Energy (eV)
+              1 ,,        I       .,.       ,,      .,I
+              b                   5                10        I4
+                                                                                           FfG. 6. Normalized EEDFs for several spatial points in a 10 mT, 200 W
+                                  Radius (cm)                                              argon discharge, as indicated in Fig. 5.
+
+
+FIG. 5. Spatial profile of average electron energy (E,) for a 10 mT, 200 W
+argon discharge, T,(peak)=5.4 eV.
+                                                                                                                       U3(&+W
+                                                                                                                                      dv,                         (2)
+                                                                                                                       4~)    +jw
+measuredat (r-,2)=(4,1.4) cm. Coil current and voltage
+readingsare also reportedfor thesecases.                                                   wherem, is the electronmass, v is the electronvelocity, ZJ,,,
+     Figure 6 shows several normalizedEEDFs for points                                     is the collision frequencyfor momentumtransfer, and w is
+indicated in the (E,) contour plot of Fig. 5. The EEDFs                                    the frequencyof the time-harmonicelectric field. If it is as-
+appearto be Maxwellian, but clearly thereis significantspa-                                sumedthat v, is independentof velocity, Eq. (1) reducesto
+tial variation in the form of the EEDFs. At 10 mT, we see
+that the EEDFs measuredin the interior of the discharge
+exhibit a cold distributionof electronswith T,(cold)=0.7 eV                                                                                                        (3)
+imposedon a bulk electrondistribution with T,(bulk)=3.4
+eV. Thesecold electronsare concentrated.about    the peak of                               which is the expressionof ac electrical conductivity widely
+the plasmapotential andar.etrappedby the ambipolarpoten-                                   usedin the analysisof ohmically heateddischarges.Using
+tial well of the discharge.We alsoobservethat the fraction of                              momentum-transfer-collision   cross-sectiondata from Frost
+cold electronsincreaseswith power andpressureand clean-                                    and Phelpsa3and measurements      of EEDFs for the 10 mT,
+liness of the system. Figure 7 shows severalnormalized                                     200 W case,the real and imaginarypart of the conductivity
+EEDFstakenin a 50 mT diskhargeat variousradial positions                                   are calculatedfor Eq. (2) and are shown in Figs. S(a) and
+and z=4.4 cm. Once again, a populationof cold electrons,                                   8(b). The electrical conductivityclearly follows trendsin the
+here T,(cold)=0.3 eV, is observedat the centerof the dis-                                  electrondensity.This result is expectedas the valuesfor v,
+chargebody.                                                                                (around3.6X107s-l), are less than half that of o and only
+     The sameEEDF datausedto determinethe plasmachar-                                      vary 10% within the dischargevolume. Conductivity values
+acteristicsmay be usedto calculatedischargetransportcoef-                                  calculatedusing Eq. (3) are 10%lower than thosecalculated
+ficients andelectronimpact collision rates.For example,the                                 with Eq. (2) and exhibit nearly the samespatial trends.Ion-
+definition of electrical conductivity a, assuminga uniform                                 electroncollisions were also consideredin the calculationof
+neutral gas pressureand locally uniform, isotropic electron                                the conductivity, but were not found be significant at the
+velocity distributionfu , is22                                                             10’0-10’1/cm3densitylevels observedat theseconditions.
+
+                          TABLE I. Characteristic values of measured discharge parameters for various power and pressure settings.
+
+                          Pressure   Net rf               Coil current   Coil voltage    Peak N,   Pe$,Vp      Peg&)         B;I~\?    Burp)
+                           !mT)    power (W)                 @P-P)         Wp-J         (10r”/cm3)               W              e         e
+
+                               1Oa         100               30.8           2.27           9.9          17.9     5.3           3.5          4.7
+                               10’         .200              38.6           2.85          19.0          18.1     5.4           3.5          4.8
+                               20a         100               28.8           2.20          19.8          16.7     s-0           2.8          3.9
+                               ma          200               37.4           2.78          38.3          16.0     *..           2.6          3.7
+                               2ob         100               29.0           2.12          18.2          17.3     *a.           3.2          4.2
+                               20b         200               38.2           2.71          39.4          17.1     4.7           2.9          4.1
+                               5ob         100               26.6           2.00          50.0          16.0     3.9           2.3          3.5
+                              100b          100              25.6           1.86          55.3          14.4     3.5           1.9          3.1
+
+                          ‘The vacuum system was operated with a throttled cryogenic pump.
+                          %‘he vacuum system was operated with a throttled mechanical pump.
+
+2044       J. Appl. Phys., Vol. 76, No. 4, 15 August 1994                                                                                              Mahoney   et al.
+
+Downloaded 25 May 2007 to 128.104.198.120. Redistribution subject to AIP license or copyright, see http://jap.aip.org/jap/copyright.jsp
+         o”4r---’ ’ I ’ I ’ ’ a 1                2=4.37cm
+                                                                                             a)
+                                                                                                  0   4      0      0   -Coil
+
+                                                                                                                  Quartz Plate       I
+
+
+
+      %
+      ,N0.12
+      2L 0.08
+      22
+         0.04
+
+        0.00
+                0         4                                 16   20
+                              Electrons   E”erg:?e”)
+
+
+  FIG. 7. Normalized EEDPs observed along the radius of a 50 mT, 100 W,
+  argon discharge at 4.4 cm from the quartz plate.
+                                                                                                                 Radius (cm)
+
+
+
+     These values of complex conductivity may be used to                                     b)
+  approximatethe depth of penetrationof the rf electric fields.
+  The skin depth of the fields S may be approximatedby
+                      1
+       s-                                                             (4)
+                M-1                  '-
+ where h is the permeability of free space and (o) is the
+ averagevalue of conductivity along the dischargelength at a
+ fixed radius. Equation (4) reducesto the standardexpression
+ for the collisional skin depth when v,4w and to the colli-
+ sionlessskin depth when v,4w. For the conductivity values
+ shown Figs. S(a) and 8(b), the skin,depth at R=5 cm is on
+ the order of 4.0 cm. This depth of penetrationof the rf fields
+ is reflected in the gradientsof electron temperatureobserved
+ in Fig. 5 and is consistent with the work of Ref. 4 where                                                       Radius (cm)
+ direct measurementsof the attenuation of rf magnetic fields                FIG. 8. Electrical conductivity for a 10 mT argon discharge af iO0 I$ (a)
+ in low-pressure inductively coupled argon dischargeswere                   real part of conductivity, a(peak)=Zl S/m; (b) imaginary part of conductiv-
+ found to range from 1.6 to 3.6 cm. The estimateof 6 is also                ity, o(peak)=-j46     S/m. .-
+ consistent with two-dimensional hybrid modeling work dis-
+ cussedin Ref. 12. The above analysis is only approximateas
+ the actual falloff of the rf field is not purely exponential
+ becauseof the inhomogeneousconductivity of the discharge.
+      Considering the spatial variation in the EEDFs, rates of
+ electron collision processeswhich are sensitive to high-
+ energy electronsin -thetail of the EEDF may exhibit spatial                                                       Ne=9.07x10Vcm3
+ variation in the dischargebody that is significantly different
+ from that of the electron-densityprofile. To facilitate the cal-                                                        a = O.gZOO6
+ culation of inelastic collision rates, statistical fits of analyti-                                                     b = 0.361 0
+ cal EEDFs are made to measuredEEDFs. Using the nonlin-                           5 101
+ ear regression procedures (the Bates and Watts NLS                               2
+ functions),24in the S-PLUS program,X we fit the follawing                        s
+ function to measuredEEDFs:                                                      L     109
+
+
+      f,(E)=at,h?     exp(-HP),                                       (5)         ii
+
+
+ where x= 1 for a Maxwellian electron energy distribution.
+ An example of a fit is shown in the semilog plot in Fig. 9.
+                                                                                             0        4’           a            12       16      20
+ Such fits are used to estimatethe EEDFs at electron energy
+ levels greater than can be readily resolved by the Langmuir                                              Electron Energy (tiV)
+ probe diagnostic system, which is around 16-18 eV.
+     Figure 10 shows the single-stepionization rate for argon               FIG. 9. Example of nonlinear regression analysis of EEDPs used to extrapo-
+ as calculated from ionization collision cross-section data                 late the EEDFs to higher-energy values.
+
+  J. Appl. Phys., Vol. 76, No. 4, 15 August 1994                                                                                Mahoney et a/.   2045
+
+Downloaded 25 May 2007 to 128.104.198.120. Redistribution subject to AIP license or copyright, see http://jap.aip.org/jap/copyright.jsp
+              ~3    e3   0       [=I   -Coil
+
+
+
+
+                                                    63
+                                                         .z
+                                                         u
+                                                    10
+                                                                                         “0        100       200        300     400     500
+                                                                                                                   RF Power (W)
+
+
+             0               5                 10                              FIG. 11. Electron density vs net rf power at various pressure levels mea-
+                             Radius (cm)                                       sured at r =O cm and z=5.0 cm.
+
+
+
+!?IG. 10. Spatial profile of singlestep ionization rate for the 10 mT, 200 W        Figure 11 showselectron-densitymeasurementstakenat
+argon discharge, peak ionization rate=61X10”/(cm3 s).                          various low pressuresand net rf powers in an argon dis-
+                                                                               chargewith the metal liner in place and the probe locatedat
+                                                                               .2=5.0 cm, which is near the peak density location in the
+from Rappand Englander-Golden.%         Thesecalculationssug-                  discharge.(Note: The electrondensitiesshown in this figure
+gest that the single-stepionization rate is threetimes greater                 are calculated by conventional probe analysis through the
+at the quartz boundarythan at the end plate and is peaked                      determinationof the electronsaturationcurrent and estima-
+where the electrondensity peaks,near the centerof the dis-                     tion of an electron temperature.27) Electron densities range
+charge.Similar trendsare to be expectedwith other collision                    from 10” to 1012electrons/cm3.Theseelectron density val-
+rates which are sensitive to the tail of the EEDF, such as                     uesare two to five times lower than ion densitiesreportedby
+excitation of argonneutralsfrom their ground stateto emit-                     workers characterizingsimilar planar inductively coupled
+ting and metastablestates. However, the spatial profile of                     plasma sourcesystems;375.7   however, this is to be expected
+single-stepionization in Fig. 10 appearsto conflict with spa-                  becauseelectron-densitymeasurementsbased on electron
+tially resolvedoptical emission measurementsof the ls5-                        saturationcurrentsor integration of the EEDF are normally
+2p 10 and 1.~3-2~17(Paschennotation) neutral argontransi-                      two to five times lower than ion densitiesdeterminedfrom
+tions performed in a related investigation.” These                             ion saturation. current readings even for electropositive
+measurementshow a ring-shapedstructure,suggestingthat                          discharges.%
+the electronimpact excitation rate (and thereforethe single-                        In Fig. 11, N; is seento increasein direct proportion to
+step ionization rate) has an off-axis maximum in the region                    the dischargepressureand power, although it appearsto
+of peakelectric field. The apparentdiscrepancybetweenspa-                      eventually saturateas seenin the 20 mT case.At this pres-
+tial profiles of single-step ionization rate calculations and                  sure, the saturationin density may be explainedby the de-
+neutral excitation rates inferred from the optical emission                    creasein the skin depthwith the increasein electrondensity.
+measurements    may be attributedto assumptionsmadein per-                     As the level of rf power andelectrondensity is increased,the
+forming the EEDF measurements.                                                 skin depth -decreases,  and as a result the effective plasma
+     An implicit assumptionmadein the measurements        of the               resistanceandpower coupling efficiency also decrease.After
+EEDFs, and in the calculations of conductivity and ioniza-                     reachingsaturationin the electrondensity, further increases
+tion rate, is that the electron velocity distribution in nearly                in rf power may be dissipatedin the induction coil and im-
+isotropic; however, this may not be the case. Due to the                       pedancematchingnetwork.This scenariohasbeendiscussed
+relatively large rf drift currents in the high-induction-field                 by Piejak, Godyak, and Alexandrovich.29Also, Hopwood
+region close to the quartz plate, the electronsin this region                  et al.’ observeda similar saturationin ion densitiesin very
+experiencea strongrf azimuthal drift. Shouldthe drift veloc-                   low-pressure(<I mT), highly densekrypton discharges,and
+ity amplitude be significant in comparisonto the thermal                       suggestedthat the “nonlinear” behaviorat low pressuremay
+velocity, then the assumptionof an isotropic velocity distri-                  be attributedto neutral depletionof the highly ionized gas.
+bution used in evaluating the I-V probe tracesmay be in-
+valid andthe reportedvaluesof the dischargecharacteristics,                    IV.SUMMARY
+conductivity, and ionization rate may be inaccurate.Another
+possiblecontributor to this discrepancyis the useof statisti-                      Spatial measurements  of argon-dischargecharacteristics
+cal fits of Eq. (5) to estimatethe level of high-energyelec-                   havebeenperformedin an experimentalplanar rf inductively
+trons in the tail of the EEDFs, which cannot be resolvedby                     coupled plasmasource.Over the power and pressurerange
+the Langmuir probe diagnosticsystem.‘Therecould be spa-                        examined,electrondensity (1010-10’2/cm3)~and     plasma po-
+tial variation in the tail of the distributions that is not cap-               tentials are peakedon axis, suggestingthat spatial profiles of
+tured by the tit.                                                              the argondischargecharacteristicsin the given sourcegeom-
+
+2046       J. Appl. Phys., Vol. 76, No. 4, 15 August 1994
+
+
+Downloaded 25 May 2007 to 128.104.198.120. Redistribution subject to AIP license or copyright, see http://jap.aip.org/jap/copyright.jsp
+   etry are diffusion dominated. The EEDFs reveal a significant                3J. H. Keller, S. M. Barnes, and J. C. Forster, 43rd Gaseous Electronics
+   population of cold electrons trapped in the ambipolar poten-                  Conference, Champaign-Urbana, IL, 1990.
+                                                                               4J. Hopwood, C. R. Guarnieri, S. J. Whitehair, and J. J. Cuomo, J. Vat. Sci.
+   tial field about the center of the discharge. Inhomogeneities
+                                                                                 Technol. A 11, 147 (1993).
+   in the spatial profiles of averaged electron energy are ob-                 5J. Hopwood, C. R. Guamieri, S. J. Whitehair, and J. J. Cuomo, J. Vat. Sci.
+   served with peak energies and energy gradients located                        Technol. A 11, 152 (1993).
+   within 2-3 cm from the quartz plate. These spatial features                 “J. Hopwood, Plasma Sources Sci. Technol. (to be published).
+   in the electron energy appearto be coincident with the radial               7R. Patrick, P Schoenbom, H. Toda, and F. Bose, J. Vat. Sci. Technol. A
+   profile and skin depth of the rf heating fields.                              ll, 1296 (1993).
+                                                                               ‘5. B. Carter, J. P. Holland, E. Peltzer, B. Richardson, E. Bogel, H. T.
+        Based on the measured EEDFs, single-step ionization                      Nguyen, Y. Melaku, D. Gates, and M. Ben-Dar, J. Vat. Sci. Technol. A 11,
+   rates for argon are calculated and show single-stepionization                 1301 (1993).
+   to be peaked on-axis. This result is in apparentconflict with               9J. Hopwood, Appl. Phys. Lett. 62, 940 (1993).
+   spatially resolved optical emission measurements,reported                 “M S. Barnes, J. C. Forster, and J. H. Keller, Appl. Phys. Lett. 62, 2622
+   elsewhere,*’ in which the emission intensity of excited of                    (1993).
+                                                                             I1D. E Beale, A. E. Wendt, and L. J. Mahoney, J. Vat. Sci. Technol. A (to be
+   neutral argon atoms exhibits an off-axis peak in the source.                 published).
+   The discrepancymay be due to an incorrect assumptionof an                 12P L. G. Ventzek, R. J. Hoekstra, and M. J. Kushner, J. Vat. Sci. Technol.
+   isotropic electron velocity distribution made in the measure                 A 12, 461 (1994).
+   of EEDFs. Strong azimuthal currents in the rf power cou-                  13A. E. Wendt, L. J. Mahoney, and J. L. Shohet (unpublished).
+   pling regions of the plasma source may result in anisotropic              14J.A. Tobin, G. Li, L. J. Mahoney, D. D. Denton, and J. L. Shohet, Plasma
+                                                                                 Chem. Plasma Proc. (to be published).
+   electron velocities and give rise to collision rates that are not
+                                                                             “J. W. Denneman, J. Phys. D 23, 293 (1990).
+   accurately determined from the Langmuir probe measure-                    t6 W. L. Johnson, U.S. Patent No. 5,234,529 (10 August, 1993).
+   ments made in this work.                                                  r’R. R. J. Gag& and A. Cantin, J. Appl. Phys. 43, 2639 (1972).
+                                                                             “V . A . Godyak, in Plasma SurJhce Interactions and Processing of Materi-
+   ACKNOWLEDGMENTS                                                              als, edited by 0. Auciello, A. Gras-Marti, J. A. Valles-Abarca, and D. L.
+                                                                                 Flamm (Kluwer, Boston, 1990), pp. 95-134.
+       We thank Dr. Isacc Sudit (Department of Electrical En-                “M. J. Druyvesteyn, 2. Phys.. 64, 781 (1930).
+   gineering at UCLA) for consultation on EEDF measurement                   “1. D. Sudit and R. C. Woods, Rev. Sci. Instrum. 64, 2440 (1993).
+   techniques.We also thank Dr. Jeffrev Hopwood (Department                  ‘lC_ Lai, R. A. Breun, P. W. Sandstrom, A. E. Wendt, N. Hershkowitz, and
+                                                                                 R. C. Woods, J. Vat. Sci. Technol. A 11, 1199 (1993).
+   of Electrical and Computer Engineering at NortheasternUni-                “B. E. Cherrington, Gaseous Electronics and Gas Lasers (Perganom, New
+   versity) and Dr. Peter Ventzek and Dr. Mark Kushner (De-                     York, 1979). pp. 95-97.
+   partment of Electrical and Computer Engineering at the Uni-               23L. S. Frost and A. V. Phelps, Phys. Rev. A 136, 1538 (1964).
+   versity of Illinois, Urbana) for their many thoughtful                    24D. Bates and D. Watts, Nonlinear Regression Analysis and Its Applica-
+   discussionson planar rf inductively coupled plasma sources.                   tions (Wiley, New York, 1988), p. 108.
+                                                                             25s-~~us, Version 3.1, Statistical Sciences Inc., Seattle, WA, 1993.
+   This work is supported by the National Science Foundation                 26D. Rapp and R Englander-Golden, J. Chem Pbys. 43, 1464 (1965).
+   under Grant No. ECD-8721545.                                              “5. D. Swift and M. J. R. S&war, Electric Probes for Plasma Diagnostics
+                                                                                (American Elsevier, New York, 1969), pp. 1-15.
+   r J. S. Ogle, U.S. Patent No. 4,948,458 (14 August-1990).                 =I. D. Sudit, Ph.D. thesis, University of Wisconsin-Madison, 1992.
+   ‘D. K. Cot&as, and J. H. Keller, European Patent, Publication No. 0 379   29R. B. Piejak, V. A. Godyak, and B. M. Alexandrovich, Plasma Sources
+     828 A2 (8 January 1990).                                                   Sci. Technol, 1, 36 (1992).
+
+
+
+
+   J. Appl. Phys., Vol. 76, No. 4, 15 August 1994                                                                             Mahoney et al.        2047
+
+Downloaded 25 May 2007 to 128.104.198.120. Redistribution subject to AIP license or copyright, see http://jap.aip.org/jap/copyright.jsp
+

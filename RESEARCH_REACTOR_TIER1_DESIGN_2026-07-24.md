@@ -1,10 +1,13 @@
 # Tier-1 reactor-scale model — research + design (2026-07-24)
 
 Author: research/design pass 2026-07-24 (Stage E of `PROGRAM_ROADMAP_2026-07-24.md`).
-Status: **design doc, not built.** No code committed. `[VERIFY]` marks a locator (DOI, volume,
-figure, affiliation) I could not confirm to primary source in this pass — most AIP/AVS bodies
-(`pubs.aip.org`) 403 to automated fetch, so several DOIs are reconstructed from abstract pages and
-must be checked against the paper before they enter a receipt.
+Status: **historical design, implementation now active.** The conserved reaction
+network, cylindrical argon balance, source-backed argon transport, independent
+Mahoney board, and evidence-aware absorbed-power boundary now live in
+`src/petch/reactor_global/`. The governing current architecture/application map
+is `RESEARCH_LAM_REACTOR_ARCHITECTURES_2026-08-07.md`. Unchecked locators in
+this older survey remain marked `[VERIFY]` and still may not support a landed
+constant.
 
 ## 0. Purpose and the one contract this must satisfy
 
