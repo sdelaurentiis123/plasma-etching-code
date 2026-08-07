@@ -24,6 +24,15 @@ from .network import (
     ReactionNetwork,
     Species,
 )
+from .model import (
+    ArgonGlobalCondition,
+    ArgonGlobalSolution,
+    ArgonTransportProvider,
+    ArgonTransportState,
+    FixedArgonTransportProvider,
+    LeeLiebermanArgonGlobalModel,
+    PASCAL_PER_MTORR,
+)
 
 __all__ = [
     "CM3_TO_M3",
@@ -31,10 +40,17 @@ __all__ = [
     "ARGON_4S_METASTABLE_ENERGY_EV",
     "ARGON_IONIZATION_ENERGY_EV",
     "ARGON_METASTABLE_IONIZATION_ENERGY_EV",
+    "ArgonGlobalCondition",
+    "ArgonGlobalSolution",
+    "ArgonTransportProvider",
+    "ArgonTransportState",
     "ConstantRateCoefficient",
     "CylindricalReactor",
     "ElectronArrheniusRateCoefficient",
     "ElectropositiveEdgeFactors",
+    "FixedArgonTransportProvider",
+    "LeeLiebermanArgonGlobalModel",
+    "PASCAL_PER_MTORR",
     "RateContext",
     "Reaction",
     "ReactionNetwork",
