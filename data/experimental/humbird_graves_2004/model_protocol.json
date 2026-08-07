@@ -1,0 +1,51 @@
+{
+  "campaign": "stratified_fluorocarbon_silicon_surface_v1",
+  "created_after_digitization_commit": "27bea9c",
+  "created_before_model_implementation": true,
+  "purpose": "Constrain a finite-residence film / Si-C / Si-F-front closure without using any feature depth.",
+  "calibration": {
+    "source_panels": [
+      "20_eV_surface_state",
+      "200_eV_surface_state",
+      "200_eV_etch_yield",
+      "10_percent_F_surface_state",
+      "10_percent_F_etch_yield"
+    ],
+    "allowed_observables": [
+      "surface_C_uptake_ML",
+      "surface_F_uptake_ML",
+      "cumulative_Si_etch_ML",
+      "Si_etch_yield_per_ion"
+    ],
+    "forbidden_observables": [
+      "any reactor feature depth",
+      "Krueger 825 nm endpoint",
+      "20_percent_F_surface_state",
+      "20_percent_F_etch_yield"
+    ]
+  },
+  "held_out": {
+    "source_panels": [
+      "20_percent_F_surface_state",
+      "20_percent_F_etch_yield"
+    ],
+    "gates": {
+      "carbon_and_fluorine_inventory_normalized_rmse_max": 0.2,
+      "instantaneous_yield_normalized_rmse_max": 0.2,
+      "cumulative_silicon_etch_normalized_rmse_max": 0.15,
+      "silicon_etch_monotone_with_cumulative_fluence": true,
+      "no_negative_element_or_bond_inventory": true,
+      "maximum_relative_element_ledger_residual": 1e-12,
+      "newly_promoted_silicon_may_not_leave_in_same_step": true
+    }
+  },
+  "model_form_requirements": [
+    "separate fluorocarbon-film, Si-C transport-layer, and Si-F reaction-front inventories",
+    "C-F bond destruction and Si-F bond formation are paired internal transfers",
+    "mixed-layer capacities derive from physical number density and depth rather than one-monolayer caps",
+    "ions cross each layer by finite CSDA residual-energy transport with incidence-angle path length",
+    "all fitted coefficients are surface-event probabilities or cross sections and carry calibration provenance",
+    "no feature depth or reactor flux normalization may be selected by this campaign"
+  ],
+  "evidence_limit": "The source is classical MD shown in a primary-author seminar. Passing this protocol validates a reduced representation of that MD response, not quantum-accurate chemistry or oxide transfer."
+}
