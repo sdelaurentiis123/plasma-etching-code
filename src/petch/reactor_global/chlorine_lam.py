@@ -17,6 +17,7 @@ import io
 import math
 
 from .chlorine_particle_model import ReactorScalarInput
+from .geometry import CylindricalReactor
 
 
 MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256 = (
@@ -24,6 +25,83 @@ MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256 = (
 )
 _PACKAGE_DATA_NAME = "malyshev_1998_lam_electron_temperature.csv"
 _VALID_METHODS = frozenset({"exact_marker", "linear_interpolation"})
+MALYSHEV_1998_LAM_RADIUS_M = 0.215
+MALYSHEV_1998_LAM_CONTROL_VOLUME_M3 = 0.043
+_REPORTED_EFFECTIVE_LENGTH_M = {11.0: 0.036, 6.5: 0.025}
+
+
+@dataclass(frozen=True)
+class MalyshevLamGeometryState:
+    """Reported Lam chamber inventory and active cylindrical plasma region."""
+
+    active_geometry: CylindricalReactor
+    neutral_control_volume: ReactorScalarInput
+    window_to_wafer_gap_cm: float
+    reported_effective_length_m: float
+    source: str = "malyshev-1998-lam-cl2 apparatus and Eqs. 6-10"
+
+    def __post_init__(self):
+        values = (
+            self.window_to_wafer_gap_cm,
+            self.reported_effective_length_m,
+        )
+        if (
+            not isinstance(self.active_geometry, CylindricalReactor)
+            or not isinstance(self.neutral_control_volume, ReactorScalarInput)
+            or self.neutral_control_volume.unit != "m3"
+            or self.neutral_control_volume.value < self.active_geometry.volume_m3
+            or any(not math.isfinite(float(value)) for value in values)
+            or any(float(value) <= 0.0 for value in values)
+            or not str(self.source).strip()
+        ):
+            raise ValueError("invalid Malyshev Lam geometry state")
+
+    @property
+    def calculated_effective_length_m(self) -> float:
+        return float(
+            self.active_geometry.volume_m3
+            / self.active_geometry.physical_area_m2
+        )
+
+    @property
+    def active_volume_fraction(self) -> float:
+        return float(
+            self.active_geometry.volume_m3
+            / self.neutral_control_volume.value
+        )
+
+    @property
+    def supports_prediction(self) -> bool:
+        """The source reports no dimensional uncertainties."""
+        return False
+
+
+def malyshev_1998_lam_geometry(
+    window_to_wafer_gap_cm: float,
+) -> MalyshevLamGeometryState:
+    """Return one of the two reported Lam Alliance active geometries."""
+    gap = float(window_to_wafer_gap_cm)
+    if gap not in _REPORTED_EFFECTIVE_LENGTH_M:
+        raise ValueError("Lam gap must be one of the two reported geometries")
+    geometry = CylindricalReactor(
+        radius_m=MALYSHEV_1998_LAM_RADIUS_M,
+        length_m=gap / 100.0,
+    )
+    return MalyshevLamGeometryState(
+        active_geometry=geometry,
+        neutral_control_volume=ReactorScalarInput(
+            value=MALYSHEV_1998_LAM_CONTROL_VOLUME_M3,
+            unit="m3",
+            source=(
+                "malyshev-1998-lam-cl2 Eq. 6 text: "
+                "reported chamber volume 43000 cm3"
+            ),
+            evidence_kind="reported_equipment",
+            relative_uncertainty=None,
+        ),
+        window_to_wafer_gap_cm=gap,
+        reported_effective_length_m=_REPORTED_EFFECTIVE_LENGTH_M[gap],
+    )
 
 
 @dataclass(frozen=True)

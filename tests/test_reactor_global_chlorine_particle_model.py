@@ -33,7 +33,7 @@ def _scalar(value, unit, *, evidence_kind="assumed", uncertainty=None):
     )
 
 
-def _condition(geometry):
+def _condition(geometry, *, control_volume_m3=None):
     flow = standard_volume_flow_molecules_s(
         35.0,
         standard_temperature_K=273.15,
@@ -42,6 +42,11 @@ def _condition(geometry):
     return ChlorineFixedPressureCondition(
         condition_id="lee-chlorine-particle-reproduction",
         geometry=geometry,
+        neutral_control_volume=_scalar(
+            geometry.volume_m3
+            if control_volume_m3 is None else control_volume_m3,
+            "m3",
+        ),
         pressure=_scalar(1.333223684, "Pa"),
         gas_temperature=_scalar(500.0, "K"),
         electron_temperature=_scalar(3.0, "eV"),
@@ -157,7 +162,10 @@ def test_fixed_pressure_chlorine_particle_solver_closes_every_ledger():
         == pytest.approx(condition.target_neutral_density_m3, rel=2.0e-13)
     )
     feed_atom_rate_density = (
-        2.0 * condition.chlorine_molecule_feed.value / geometry.volume_m3)
+        2.0
+        * condition.chlorine_molecule_feed.value
+        / condition.neutral_control_volume.value
+    )
     assert abs(solution.chlorine_atom_inventory_residual_m3_s) <= (
         2.0e-12 * feed_atom_rate_density)
     electron_wall_loss = sum(
@@ -183,7 +191,10 @@ def test_pressure_controller_exhaust_is_solved_after_dissociation():
     )
     naive_feed_over_neutral_inventory = (
         condition.chlorine_molecule_feed.value
-        / (condition.target_neutral_density_m3 * geometry.volume_m3)
+        / (
+            condition.target_neutral_density_m3
+            * condition.neutral_control_volume.value
+        )
     )
     assert solution.exhaust_loss_frequency_s_inv > (
         1.5 * naive_feed_over_neutral_inventory)
@@ -243,12 +254,57 @@ def test_no_untracked_units_enter_fixed_pressure_condition():
         ChlorineFixedPressureCondition(
             condition_id="wrong-pressure-unit",
             geometry=geometry,
+            neutral_control_volume=condition.neutral_control_volume,
             pressure=_scalar(condition.pressure.value, "mTorr"),
             gas_temperature=condition.gas_temperature,
             electron_temperature=condition.electron_temperature,
             chlorine_molecule_feed=condition.chlorine_molecule_feed,
             source_power=condition.source_power,
         )
+
+
+def test_active_plasma_and_neutral_control_volumes_close_independently():
+    geometry = CylindricalReactor(radius_m=0.1525, length_m=0.075)
+    single_volume_condition = _condition(geometry)
+    dual_volume_condition = _condition(
+        geometry, control_volume_m3=2.0 * geometry.volume_m3)
+    charged_provider = FixedChlorineChargedTransportProvider(
+        _charged_transport(geometry))
+
+    single = FixedElectronTemperatureChlorineParticleModel(
+        build_lee_lieberman_chlorine_particle_network()
+    ).solve(
+        single_volume_condition,
+        charged_transport_provider=charged_provider,
+        neutral_wall_transport_provider=_neutral_provider(
+            single_volume_condition),
+    )
+    dual = FixedElectronTemperatureChlorineParticleModel(
+        build_lee_lieberman_chlorine_particle_network()
+    ).solve(
+        dual_volume_condition,
+        charged_transport_provider=charged_provider,
+        neutral_wall_transport_provider=_neutral_provider(
+            dual_volume_condition),
+    )
+
+    assert single.active_volume_fraction == pytest.approx(1.0)
+    assert dual.active_volume_fraction == pytest.approx(0.5)
+    assert dual.neutral_control_volume_m3 == pytest.approx(
+        2.0 * single.active_plasma_volume_m3)
+    assert dual.chlorine_atom_dissociation_fraction == pytest.approx(
+        single.chlorine_atom_dissociation_fraction, rel=2.0e-10)
+    assert dual.total_axial_positive_ion_flux_m2_s == pytest.approx(
+        single.total_axial_positive_ion_flux_m2_s, rel=2.0e-10)
+    assert dual.exhaust_loss_frequency_s_inv == pytest.approx(
+        0.5 * single.exhaust_loss_frequency_s_inv, rel=2.0e-10)
+    assert dual.maximum_normalized_residual < 1.0e-11
+
+
+def test_neutral_control_volume_cannot_be_smaller_than_active_plasma():
+    geometry = CylindricalReactor(radius_m=0.1525, length_m=0.075)
+    with pytest.raises(ValueError, match="cannot be smaller"):
+        _condition(geometry, control_volume_m3=0.9 * geometry.volume_m3)
 
 
 def test_state_dependent_charged_transport_closes_inside_particle_solve():

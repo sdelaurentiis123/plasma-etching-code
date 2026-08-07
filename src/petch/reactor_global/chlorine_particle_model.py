@@ -3,10 +3,12 @@
 This is a deliberately bounded rung toward a recipe-to-wafer reactor model.
 It solves the six-species chlorine particle system at a supplied electron
 temperature, with explicit feed, pressure control, exact neutral wall
-transport, positive-ion wall loss/return, and quasineutrality.  The exhaust
-frequency is solved as the throttle response needed to maintain the pressure
-setpoint; it is not inferred from flow and pressure before chemistry is
-solved.
+transport, positive-ion wall loss/return, and quasineutrality. Active-plasma
+and neutral-control volumes are distinct: chemistry and plasma-wall exchange
+occur only in the active region, while feed, exhaust, and pressure inventory
+close over the control volume. The exhaust frequency is solved as the
+throttle response needed to maintain the pressure setpoint; it is not inferred
+from flow and pressure before chemistry is solved.
 
 No electron power balance is present.  Consequently the solution can
 reproduce a source model or condition on a measured electron state, but it
@@ -32,6 +34,7 @@ SECONDS_PER_MINUTE = 60.0
 REACTOR_SCALAR_EVIDENCE_KINDS = frozenset({
     "measured",
     "interpolated_measurement",
+    "reported_equipment",
     "validated_model",
     "published_model",
     "assumed",
@@ -250,6 +253,7 @@ class ChlorineFixedPressureCondition:
 
     condition_id: str
     geometry: CylindricalReactor
+    neutral_control_volume: ReactorScalarInput
     pressure: ReactorScalarInput
     gas_temperature: ReactorScalarInput
     electron_temperature: ReactorScalarInput
@@ -258,6 +262,7 @@ class ChlorineFixedPressureCondition:
 
     def __post_init__(self):
         required_units = {
+            "neutral control volume": (self.neutral_control_volume, "m3"),
             "pressure": (self.pressure, "Pa"),
             "gas temperature": (self.gas_temperature, "K"),
             "electron temperature": (self.electron_temperature, "eV"),
@@ -276,12 +281,27 @@ class ChlorineFixedPressureCondition:
             if state.unit != expected_unit:
                 raise ValueError(
                     f"{name} must use the explicit unit {expected_unit}")
+        if self.neutral_control_volume.value < self.geometry.volume_m3:
+            raise ValueError(
+                "neutral control volume cannot be smaller than active plasma"
+            )
 
     @property
     def target_neutral_density_m3(self) -> float:
         return float(
             self.pressure.value
             / (BOLTZMANN_J_K * self.gas_temperature.value)
+        )
+
+    @property
+    def active_plasma_volume_m3(self) -> float:
+        return self.geometry.volume_m3
+
+    @property
+    def active_volume_fraction(self) -> float:
+        return float(
+            self.active_plasma_volume_m3
+            / self.neutral_control_volume.value
         )
 
 
@@ -373,9 +393,16 @@ class FixedChlorineNeutralWallTransportProvider:
 
 @dataclass(frozen=True)
 class ChlorineParticleSolution:
-    """Solved particle state and its independent conservation ledgers."""
+    """Solved particle state and its independent conservation ledgers.
+
+    Volumetric source/loss fields are averaged over the neutral control
+    volume; densities and wafer-facing fluxes refer to the active plasma.
+    """
 
     condition_id: str
+    active_plasma_volume_m3: float
+    neutral_control_volume_m3: float
+    active_volume_fraction: float
     densities_m3: Mapping[str, float]
     axial_positive_ion_flux_m2_s: Mapping[str, float]
     positive_ion_wall_loss_m3_s: Mapping[str, float]
@@ -406,6 +433,9 @@ class ChlorineParticleSolution:
             for name, value in self.normalized_balance_residuals.items()
         }
         scalar_values = np.asarray([
+            self.active_plasma_volume_m3,
+            self.neutral_control_volume_m3,
+            self.active_volume_fraction,
             self.exhaust_loss_frequency_s_inv,
             self.chlorine_wall_atom_loss_m3_s,
             self.chlorine_wall_molecule_return_m3_s,
@@ -415,7 +445,17 @@ class ChlorineParticleSolution:
         if (
             not str(self.condition_id).strip()
             or np.any(~np.isfinite(scalar_values))
-            or np.any(scalar_values[:3] < 0.0)
+            or np.any(scalar_values[:3] <= 0.0)
+            or np.any(scalar_values[3:6] < 0.0)
+            or self.neutral_control_volume_m3 < self.active_plasma_volume_m3
+            or not np.isclose(
+                self.active_volume_fraction,
+                self.active_plasma_volume_m3
+                / self.neutral_control_volume_m3,
+                rtol=1.0e-14,
+                atol=0.0,
+            )
+            or self.active_volume_fraction > 1.0
             or not residuals
             or set(residuals) != _BALANCE_AND_AUDIT_NAMES
             or any(not np.isfinite(value) for value in residuals.values())
@@ -452,6 +492,9 @@ class ChlorineParticleSolution:
             float(self.exhaust_loss_frequency_s_inv),
         )
         for name in (
+            "active_plasma_volume_m3",
+            "neutral_control_volume_m3",
+            "active_volume_fraction",
             "chlorine_wall_atom_loss_m3_s",
             "chlorine_wall_molecule_return_m3_s",
             "chlorine_atom_inventory_residual_m3_s",
@@ -549,9 +592,14 @@ class FixedElectronTemperatureChlorineParticleModel:
             gas_temperature_K=condition.gas_temperature.value,
         )
         event_rates = self.network.event_rates_m3_s(densities, context)
-        network_source = self.network.stoichiometric_matrix @ event_rates
+        active_fraction = condition.active_volume_fraction
+        network_source = (
+            self.network.stoichiometric_matrix @ event_rates
+            * active_fraction
+        )
         network_turnover = (
             np.abs(self.network.stoichiometric_matrix) @ event_rates)
+        network_turnover *= active_fraction
         source = {
             name: float(network_source[index])
             for name, index in self._species_index.items()
@@ -562,13 +610,21 @@ class FixedElectronTemperatureChlorineParticleModel:
         }
         feed_rate_density = (
             condition.chlorine_molecule_feed.value
-            / condition.geometry.volume_m3
+            / condition.neutral_control_volume.value
         )
-        neutral_wall = neutral_wall_transport.evaluate_volume_rates(
+        active_neutral_wall = neutral_wall_transport.evaluate_volume_rates(
             densities["Cl"])
+        neutral_wall_atom_loss = (
+            active_fraction * active_neutral_wall.chlorine_atom_loss_m3_s
+        )
+        neutral_wall_molecule_return = (
+            active_fraction
+            * active_neutral_wall.chlorine_molecule_return_m3_s
+        )
         positive_wall_loss = {
             species: (
-                densities[species]
+                active_fraction
+                * densities[species]
                 * charged_transport.wall_loss_frequency_s_inv(species)
             )
             for species in _POSITIVE_ION_SPECIES
@@ -578,12 +634,12 @@ class FixedElectronTemperatureChlorineParticleModel:
             "Cl2": (
                 feed_rate_density,
                 -exhaust_frequency * densities["Cl2"],
-                neutral_wall.chlorine_molecule_return_m3_s,
+                neutral_wall_molecule_return,
                 positive_wall_loss["Cl2+"],
             ),
             "Cl": (
                 -exhaust_frequency * densities["Cl"],
-                -neutral_wall.chlorine_atom_loss_m3_s,
+                -neutral_wall_atom_loss,
                 positive_wall_loss["Cl+"],
             ),
             "Cl2+": (
@@ -653,7 +709,10 @@ class FixedElectronTemperatureChlorineParticleModel:
             "normalized_balances": normalized_balances,
             "densities": densities,
             "exhaust_frequency_s_inv": exhaust_frequency,
-            "neutral_wall": neutral_wall,
+            "active_neutral_wall": active_neutral_wall,
+            "neutral_wall_atom_loss_m3_s": neutral_wall_atom_loss,
+            "neutral_wall_molecule_return_m3_s": (
+                neutral_wall_molecule_return),
             "neutral_wall_transport": neutral_wall_transport,
             "positive_wall_loss": positive_wall_loss,
             "charged_transport": charged_transport,
@@ -717,7 +776,10 @@ class FixedElectronTemperatureChlorineParticleModel:
         if initial_exhaust_loss_frequency_s_inv is None:
             initial_exhaust = (
                 condition.chlorine_molecule_feed.value
-                / (target_density * condition.geometry.volume_m3)
+                / (
+                    target_density
+                    * condition.neutral_control_volume.value
+                )
             )
         else:
             initial_exhaust = float(initial_exhaust_loss_frequency_s_inv)
@@ -789,20 +851,23 @@ class FixedElectronTemperatureChlorineParticleModel:
                 condition.electron_temperature,
                 condition.chlorine_molecule_feed,
                 condition.source_power,
+                condition.neutral_control_volume,
             )
         )
-        neutral_wall = ledger["neutral_wall"]
         return ChlorineParticleSolution(
             condition_id=condition.condition_id,
+            active_plasma_volume_m3=condition.active_plasma_volume_m3,
+            neutral_control_volume_m3=condition.neutral_control_volume.value,
+            active_volume_fraction=condition.active_volume_fraction,
             densities_m3=densities,
             axial_positive_ion_flux_m2_s=axial_flux,
             positive_ion_wall_loss_m3_s=ledger["positive_wall_loss"],
             exhaust_loss_frequency_s_inv=ledger[
                 "exhaust_frequency_s_inv"],
             chlorine_wall_atom_loss_m3_s=(
-                neutral_wall.chlorine_atom_loss_m3_s),
+                ledger["neutral_wall_atom_loss_m3_s"]),
             chlorine_wall_molecule_return_m3_s=(
-                neutral_wall.chlorine_molecule_return_m3_s),
+                ledger["neutral_wall_molecule_return_m3_s"]),
             normalized_balance_residuals=ledger["normalized_balances"],
             chlorine_atom_inventory_residual_m3_s=ledger[
                 "chlorine_atom_residual_m3_s"],

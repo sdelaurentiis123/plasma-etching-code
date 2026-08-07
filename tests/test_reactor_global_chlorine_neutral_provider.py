@@ -29,9 +29,11 @@ def _scalar(value, unit, *, evidence_kind="published_model"):
 
 
 def _condition(*, temperature_K, pressure_Pa, source_power_W):
+    geometry = CylindricalReactor(radius_m=0.1525, length_m=0.075)
     return ChlorineFixedPressureCondition(
         condition_id="state-dependent-neutral-source-reproduction",
-        geometry=CylindricalReactor(radius_m=0.1525, length_m=0.075),
+        geometry=geometry,
+        neutral_control_volume=_scalar(geometry.volume_m3, "m3"),
         pressure=_scalar(pressure_Pa, "Pa"),
         gas_temperature=_scalar(temperature_K, "K"),
         electron_temperature=_scalar(3.0, "eV"),

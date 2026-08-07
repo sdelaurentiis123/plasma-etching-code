@@ -32,6 +32,7 @@ def _condition():
     return ChlorineFixedPressureCondition(
         condition_id="charged-transport-source-reproduction",
         geometry=geometry,
+        neutral_control_volume=_scalar(geometry.volume_m3, "m3"),
         pressure=_scalar(1.333223684, "Pa"),
         gas_temperature=_scalar(500.0, "K"),
         electron_temperature=_scalar(3.0, "eV"),

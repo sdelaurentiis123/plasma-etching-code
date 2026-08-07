@@ -5,8 +5,11 @@ import pytest
 
 from petch.reactor_global import (
     MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256,
+    MALYSHEV_1998_LAM_CONTROL_VOLUME_M3,
+    MALYSHEV_1998_LAM_RADIUS_M,
     MalyshevMeasuredElectronTemperatureProvider,
     REACTOR_SCALAR_EVIDENCE_KINDS,
+    malyshev_1998_lam_geometry,
 )
 
 
@@ -32,6 +35,26 @@ def test_packaged_lam_temperature_board_is_the_audited_data_exactly():
     )
     assert len(_provider().markers) == 62
     assert "interpolated_measurement" in REACTOR_SCALAR_EVIDENCE_KINDS
+
+
+def test_reported_lam_active_and_control_volumes_are_not_collapsed():
+    large = malyshev_1998_lam_geometry(11.0)
+    small = malyshev_1998_lam_geometry(6.5)
+
+    assert large.active_geometry.radius_m == MALYSHEV_1998_LAM_RADIUS_M
+    assert large.active_geometry.volume_m3 == pytest.approx(
+        16.0e-3, rel=2.0e-3)
+    assert large.neutral_control_volume.value == (
+        MALYSHEV_1998_LAM_CONTROL_VOLUME_M3)
+    assert large.neutral_control_volume.evidence_kind == "reported_equipment"
+    assert large.calculated_effective_length_m == pytest.approx(
+        large.reported_effective_length_m, abs=4.0e-4)
+    assert small.calculated_effective_length_m == pytest.approx(
+        small.reported_effective_length_m, abs=5.0e-5)
+    assert small.active_volume_fraction < large.active_volume_fraction < 1.0
+    assert not large.supports_prediction
+    with pytest.raises(ValueError, match="two reported"):
+        malyshev_1998_lam_geometry(8.0)
 
 
 def test_exact_marker_stays_measured_but_not_predictive_without_uncertainty():

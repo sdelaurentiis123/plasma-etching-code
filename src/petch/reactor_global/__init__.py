@@ -74,9 +74,13 @@ from .chlorine_neutral_provider import (
 )
 from .chlorine_lam import (
     MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256,
+    MALYSHEV_1998_LAM_CONTROL_VOLUME_M3,
+    MALYSHEV_1998_LAM_RADIUS_M,
     ElectronTemperatureConditioningState,
     MalyshevElectronTemperatureMarker,
+    MalyshevLamGeometryState,
     MalyshevMeasuredElectronTemperatureProvider,
+    malyshev_1998_lam_geometry,
 )
 from .evaluated_chlorine import (
     ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
@@ -152,6 +156,8 @@ __all__ = [
     "LYMBEROPOULOS_1995_REDUCED_CLPLUS_MOBILITY_M_INV_V_INV_S_INV",
     "MOLECULAR_CHLORINE_TOTAL_IONIZATION_THRESHOLD_EV",
     "MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256",
+    "MALYSHEV_1998_LAM_CONTROL_VOLUME_M3",
+    "MALYSHEV_1998_LAM_RADIUS_M",
     "ARGON_4S_METASTABLE_ENERGY_EV",
     "ARGON_IONIZATION_ENERGY_EV",
     "ARGON_METASTABLE_IONIZATION_ENERGY_EV",
@@ -200,6 +206,7 @@ __all__ = [
     "MatchedRFPowerBoundary",
     "MeasuredAbsorbedPowerBoundary",
     "MalyshevElectronTemperatureMarker",
+    "MalyshevLamGeometryState",
     "MalyshevMeasuredElectronTemperatureProvider",
     "IonMobilityState",
     "NEUTRAL_DIFFUSIVITY_EVIDENCE_KINDS",
@@ -232,6 +239,7 @@ __all__ = [
     "lee_lieberman_chlorine_species",
     "lymberopoulos_economou_1995_chlorine_diffusivity",
     "lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities",
+    "malyshev_1998_lam_geometry",
     "lee_lieberman_argon_ion_temperature_eV",
     "nist_argon_self_diffusion_m2_s",
     "nist_hayes_atomic_chlorine_ionization_rate",
