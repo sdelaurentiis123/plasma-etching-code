@@ -47,6 +47,8 @@ DEBOER_2002_FIGURE9_IMAGE_SHA256 = (
     "0f78ae30e5cc2e128f4fdb84217551fe350bd7696966c6ea40233f70a9a765c4")
 KARAHASHI_2007_FIGURE4_SHA256 = (
     "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26")
+KARAHASHI_2007_FIGURE10_SHA256 = (
+    "71cdb8ddd68f289f6855bb9e6c44dc4201776c7b32d2fb3cc1a5cc35aa7a4710")
 TAKADA_2005_FIGURE3_SHA256 = (
     "74f62fbe4b9d88390a35df2f25d605f573b8234b01125d08aac0124ed633ecca")
 YOSHIE_2023_BLANKET_SHA256 = (
@@ -288,6 +290,23 @@ class Karahashi2007ReactiveIonYield:
     lower_cap_y_px: float
     marker: str
     digitization_yield_uncertainty: float
+
+
+@dataclass(frozen=True)
+class Karahashi2007CF3ProductFraction:
+    """One Figure-10 fraction among detected SiFx products."""
+
+    incident_species: str
+    target: str
+    energy_eV: float
+    ion_incidence_angle_deg: float | None
+    ion_incidence_angle_status: str
+    desorbed_product: str
+    product_fraction_percent_of_detected_sifx: float
+    marker_center_x_crop_px: float
+    marker_center_y_crop_px: float
+    marker: str
+    digitization_uncertainty_percentage_points: float
 
 
 @dataclass(frozen=True)
@@ -607,6 +626,80 @@ def load_karahashi_2007_reactive_ion_yields(path, *, verify_checksum=True):
         if energies != sorted(energies) or len(set(energies)) != len(energies):
             raise ValueError(
                 f"Karahashi energies must increase uniquely for {species}")
+    return rows
+
+
+def load_karahashi_2007_cf3_product_fractions(
+        path, *, verify_checksum=True):
+    """Load the checksum-bound Figure-10 SiFx branching board."""
+    fields = [
+        "incident_species",
+        "target",
+        "energy_eV",
+        "ion_incidence_angle_deg",
+        "ion_incidence_angle_status",
+        "desorbed_product",
+        "product_fraction_percent_of_detected_sifx",
+        "marker_center_x_crop_px",
+        "marker_center_y_crop_px",
+        "marker",
+        "digitization_uncertainty_percentage_points",
+    ]
+    raw = _verified_csv_rows(
+        path, fields, KARAHASHI_2007_FIGURE10_SHA256, verify_checksum)
+    rows = tuple(Karahashi2007CF3ProductFraction(
+        incident_species=row["incident_species"],
+        target=row["target"],
+        energy_eV=float(row["energy_eV"]),
+        ion_incidence_angle_deg=(
+            None
+            if row["ion_incidence_angle_deg"] == ""
+            else float(row["ion_incidence_angle_deg"])
+        ),
+        ion_incidence_angle_status=row["ion_incidence_angle_status"],
+        desorbed_product=row["desorbed_product"],
+        product_fraction_percent_of_detected_sifx=float(
+            row["product_fraction_percent_of_detected_sifx"]),
+        marker_center_x_crop_px=float(row["marker_center_x_crop_px"]),
+        marker_center_y_crop_px=float(row["marker_center_y_crop_px"]),
+        marker=row["marker"],
+        digitization_uncertainty_percentage_points=float(
+            row["digitization_uncertainty_percentage_points"]),
+    ) for row in raw)
+    energies = {500.0, 1000.0, 2000.0}
+    products = {"SiF", "SiF2", "SiF4"}
+    keys = {(row.energy_eV, row.desorbed_product) for row in rows}
+    if keys != {(energy, product)
+                for energy in energies for product in products}:
+        raise ValueError("Karahashi Figure 10 product board is incomplete")
+    for item in rows:
+        values = (
+            item.energy_eV,
+            item.product_fraction_percent_of_detected_sifx,
+            item.marker_center_x_crop_px,
+            item.marker_center_y_crop_px,
+            item.digitization_uncertainty_percentage_points,
+        )
+        if (item.incident_species != "CF3+"
+                or item.target != "SiO2"
+                or item.ion_incidence_angle_deg is not None
+                or item.ion_incidence_angle_status != "unreported_in_source"
+                or any(not np.isfinite(value) for value in values)
+                or item.energy_eV not in energies
+                or item.desorbed_product not in products
+                or not (
+                    0.0
+                    <= item.product_fraction_percent_of_detected_sifx
+                    <= 100.0)
+                or item.digitization_uncertainty_percentage_points <= 0.0):
+            raise ValueError("invalid Karahashi Figure 10 product row")
+    for energy in energies:
+        total = sum(
+            item.product_fraction_percent_of_detected_sifx
+            for item in rows if item.energy_eV == energy)
+        if abs(total - 100.0) > 1.2:
+            raise ValueError(
+                "Karahashi Figure 10 fractions do not close normalization")
     return rows
 
 

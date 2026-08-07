@@ -71,6 +71,8 @@ FIELDNAMES = (
     "incident_species",
     "target",
     "energy_eV",
+    "ion_incidence_angle_deg",
+    "ion_incidence_angle_status",
     "desorbed_product",
     "product_fraction_percent_of_detected_sifx",
     "marker_center_x_crop_px",
@@ -104,6 +106,8 @@ def rows() -> list[dict[str, str]]:
             "incident_species": "CF3+",
             "target": "SiO2",
             "energy_eV": str(point.energy_eV),
+            "ion_incidence_angle_deg": "",
+            "ion_incidence_angle_status": "unreported_in_source",
             "desorbed_product": point.product,
             "product_fraction_percent_of_detected_sifx": (
                 f"{_percent_at_pixel(point.y_px):.3f}"),
@@ -136,7 +140,7 @@ def manifest(csv_sha256: str) -> dict[str, object]:
         for point in PIXEL_POINTS
     ]
     return {
-        "manifest_id": "KARAHASHI-2007-FIG10-CF3-PRODUCTS-R1",
+        "manifest_id": "KARAHASHI-2007-FIG10-CF3-PRODUCTS-R2",
         "source": {
             "citation": (
                 "K. Karahashi, Hyomen Kagaku 28, 60-66 (2007), Figure 10"),
@@ -157,6 +161,8 @@ def manifest(csv_sha256: str) -> dict[str, object]:
             "beam_selection": "mass selected",
             "neutral_radical_flux": "none",
             "energies_eV": [500, 1000, 2000],
+            "ion_incidence_angle_deg": None,
+            "ion_incidence_angle_status": "unreported_in_source",
             "detected_products": ["SiF", "SiF2", "SiF4"],
             "quantity": "SiFx / sum(SiFx), percent",
             "absolute_product_yield_reported": False,
@@ -212,6 +218,7 @@ def manifest(csv_sha256: str) -> dict[str, object]:
             "sif4_fraction_decreases_with_energy": True,
         },
         "source_text_cross_checks": {
+            "figure10_ion_incidence_angle": "unreported",
             "main_product": "SiF2",
             "below_or_equal_1000_eV_dominant_path": (
                 "thermally activated desorption of a collision-cascade-"
@@ -235,6 +242,10 @@ def manifest(csv_sha256: str) -> dict[str, object]:
                 "a prompt-versus-delayed numerical partition",
                 "an accounting of CO in the SiFx-normalized ordinate",
                 "a universal branch law for CF+, CF2+, or plasma mixtures",
+                (
+                    "a condition-matched join to the normal-incidence "
+                    "Figure-4 etch yields"
+                ),
                 "a target-depth calibration",
             ],
             "production_escape_parameter_use": False,

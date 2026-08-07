@@ -1,0 +1,207 @@
+{
+  "answer": false,
+  "audit_id": "KARAHASHI-REACTIVE-ION-EVENT-R1",
+  "calibration_firewall": {
+    "figure4_figure10_join": "explicitly_hypothetical_because_product_incidence_angle_is_unreported",
+    "fitted_parameters": [],
+    "interpolated_product_branches": false,
+    "reactor_boundary_used": false,
+    "target_depth_used": false
+  },
+  "energy_board": [
+    {
+      "condition_match_status": "unresolved_figure10_incidence_angle",
+      "conditional_sifx_f_demand_interval": [
+        1.8180502678203545,
+        1.9535679097952907
+      ],
+      "conditional_sifx_f_demand_per_ion": 1.885251942074427,
+      "energy_eV": 500.0,
+      "figure10_fraction_sum_before_normalization": 0.99507,
+      "figure10_normalized_conditional_fractions": {
+        "SiF": 0.21770327715638094,
+        "SiF2": 0.5821901976745355,
+        "SiF4": 0.20010652516908356
+      },
+      "fragment_energy_reconstruction_eV": 500.00000000000006,
+      "fragment_energy_residual_eV": 5.684341886080802e-14,
+      "hypothetical_sifx_particles_per_ion": {
+        "SiF": 0.18805209080768184,
+        "SiF2": 0.5028958927512638,
+        "SiF4": 0.17285201644105438
+      },
+      "incident_f_atoms_per_cf3_ion": 3.0,
+      "mass_partitioned_fragments": {
+        "C": {
+          "energy_per_fragment_eV": 87.02992536772699,
+          "multiplicity": 1,
+          "total_element_energy_eV": 87.02992536772699
+        },
+        "F": {
+          "energy_per_fragment_eV": 137.65669154409102,
+          "multiplicity": 3,
+          "total_element_energy_eV": 412.97007463227305
+        }
+      },
+      "minimum_f_sink_outside_sifx_within_digitization_interval": 1.0464320902047093,
+      "minimum_resident_surface_f_source_within_digitization_interval": 0.0,
+      "normal_incidence_figure4_yield_sio2_per_ion": 0.8638,
+      "production_eligible": false,
+      "unresolved_f_balance_incident_minus_conditional_sifx": 1.114748057925573,
+      "unresolved_f_balance_interval": [
+        1.0464320902047093,
+        1.1819497321796455
+      ]
+    },
+    {
+      "condition_match_status": "unresolved_figure10_incidence_angle",
+      "conditional_sifx_f_demand_interval": [
+        2.9440487451321937,
+        3.1379103743079955
+      ],
+      "conditional_sifx_f_demand_per_ion": 3.040424554764693,
+      "energy_eV": 1000.0,
+      "figure10_fraction_sum_before_normalization": 0.9989099999999999,
+      "figure10_normalized_conditional_fractions": {
+        "SiF": 0.3307805508003724,
+        "SiF2": 0.469882171567008,
+        "SiF4": 0.19933727763261955
+      },
+      "fragment_energy_reconstruction_eV": 1000.0000000000001,
+      "fragment_energy_residual_eV": 1.1368683772161603e-13,
+      "hypothetical_sifx_particles_per_ion": {
+        "SiF": 0.4863466438417875,
+        "SiF2": 0.6908677568549718,
+        "SiF4": 0.2930855993032405
+      },
+      "incident_f_atoms_per_cf3_ion": 3.0,
+      "mass_partitioned_fragments": {
+        "C": {
+          "energy_per_fragment_eV": 174.05985073545398,
+          "multiplicity": 1,
+          "total_element_energy_eV": 174.05985073545398
+        },
+        "F": {
+          "energy_per_fragment_eV": 275.31338308818204,
+          "multiplicity": 3,
+          "total_element_energy_eV": 825.9401492645461
+        }
+      },
+      "minimum_f_sink_outside_sifx_within_digitization_interval": 0.0,
+      "minimum_resident_surface_f_source_within_digitization_interval": 0.0,
+      "normal_incidence_figure4_yield_sio2_per_ion": 1.4703,
+      "production_eligible": false,
+      "unresolved_f_balance_incident_minus_conditional_sifx": -0.04042455476469309,
+      "unresolved_f_balance_interval": [
+        -0.13791037430799546,
+        0.05595125486780628
+      ]
+    },
+    {
+      "condition_match_status": "unresolved_figure10_incidence_angle",
+      "conditional_sifx_f_demand_interval": [
+        2.8221431470284917,
+        3.0377172274685047
+      ],
+      "conditional_sifx_f_demand_per_ion": 2.929369655025984,
+      "energy_eV": 2000.0,
+      "figure10_fraction_sum_before_normalization": 0.9890600000000002,
+      "figure10_normalized_conditional_fractions": {
+        "SiF": 0.47344953794511957,
+        "SiF2": 0.4551998867611671,
+        "SiF4": 0.07135057529371323
+      },
+      "fragment_energy_reconstruction_eV": 2000.0000000000002,
+      "fragment_energy_residual_eV": 2.2737367544323206e-13,
+      "hypothetical_sifx_particles_per_ion": {
+        "SiF": 0.8308565941398903,
+        "SiF2": 0.7988302812771721,
+        "SiF4": 0.12521312458293735
+      },
+      "incident_f_atoms_per_cf3_ion": 3.0,
+      "mass_partitioned_fragments": {
+        "C": {
+          "energy_per_fragment_eV": 348.11970147090796,
+          "multiplicity": 1,
+          "total_element_energy_eV": 348.11970147090796
+        },
+        "F": {
+          "energy_per_fragment_eV": 550.6267661763641,
+          "multiplicity": 3,
+          "total_element_energy_eV": 1651.8802985290922
+        }
+      },
+      "minimum_f_sink_outside_sifx_within_digitization_interval": 0.0,
+      "minimum_resident_surface_f_source_within_digitization_interval": 0.0,
+      "normal_incidence_figure4_yield_sio2_per_ion": 1.7549,
+      "production_eligible": false,
+      "unresolved_f_balance_incident_minus_conditional_sifx": 0.07063034497401599,
+      "unresolved_f_balance_interval": [
+        -0.0377172274685047,
+        0.17785685297150833
+      ]
+    }
+  ],
+  "evidence_partition": {
+    "derived_without_fit": [
+      "atomic formula inventory C1F3",
+      "mass-weighted fragment energies",
+      "conditional SiFx fluorine-demand intervals"
+    ],
+    "not_measured_or_not_closed": [
+      "Figure-10 ion incidence angle",
+      "absolute product-resolved yields",
+      "resident surface C/F inventory and exchange per impact",
+      "oxygen coproduct branching and absolute CO yield",
+      "prompt-versus-delayed numerical branching",
+      "precursor diffusion, trapping, escape, and reincorporation",
+      "film-state-dependent stopping and reaction probability",
+      "reactor ion mixture and species-resolved IEAD"
+    ],
+    "source_backed": [
+      "mass-selected CF3+ ion identity",
+      "CF3+ fragments into constituent atoms at impact",
+      "kinetic energy is distributed among fragments by mass",
+      "Figure-4 normal-incidence total SiO2 removal yields",
+      "Figure-10 conditional fractions among detected SiFx products",
+      "SiF is primarily prompt collision-cascade product",
+      "SiF2 and SiF4 include delayed precursor-mediated desorption",
+      "CO is observed as an oxygen-containing product"
+    ]
+  },
+  "model_boundary": {
+    "csda_fragment_transport_status": "available_as_an_analytic_ZBL_Lindhard_straight_path_approximation_but_not_claimed_as_atomistic_MD",
+    "event_kernel_ready_for_feature_solver": false,
+    "production_integration_action": "refused_pending_independent_closure",
+    "reason": "A scalar total yield and a condition-unmatched product fraction do not determine state-resolved atom transfer. The surface must carry finite C/F/O/Si and delayed-precursor inventories before this evidence can be consumed without double counting the steady beam-conditioned film."
+  },
+  "next_discriminating_measurements": [
+    "condition-matched ion incidence angle for the Figure-10 branches",
+    "absolute species-resolved product yields versus energy and angle",
+    "dose-resolved surface C/F/O/Si composition or film thickness",
+    "time-resolved product branching sufficient to identify precursor creation and loss rates"
+  ],
+  "numerical_gates": {
+    "all_conditional_rows_marked_nonproduction": true,
+    "default_kernel_refuses_unresolved_condition_join": true,
+    "fragment_energy_conservation_pass": true,
+    "fragment_energy_tolerance_eV": 5e-13,
+    "maximum_fragment_energy_residual_eV": 2.2737367544323206e-13
+  },
+  "question": "Do Karahashi's mass-selected CF3+ data uniquely close a production reactive-ion event for feature-scale depth prediction?",
+  "source_receipts": {
+    "figure10_data_path": "data/experimental/karahashi_2007/figure10_cf3_product_fractions.csv",
+    "figure10_data_sha256": "71cdb8ddd68f289f6855bb9e6c44dc4201776c7b32d2fb3cc1a5cc35aa7a4710",
+    "figure10_loader_checksum": "71cdb8ddd68f289f6855bb9e6c44dc4201776c7b32d2fb3cc1a5cc35aa7a4710",
+    "figure10_manifest_path": "data/experimental/karahashi_2007/figure10_product_digitization_manifest.json",
+    "figure10_manifest_sha256": "f551144e2e4a67859c29607ab6dbf4e10e0a5cbafb3b247e3ab47c7ae40923fc",
+    "figure4_data_path": "data/experimental/karahashi_2007/figure4_reactive_ion_yields.csv",
+    "figure4_data_sha256": "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26",
+    "figure4_loader_checksum": "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26",
+    "figure4_manifest_path": "data/experimental/karahashi_2007/digitization_manifest.json",
+    "figure4_manifest_sha256": "922fcf4bfbf1f4b543ddcfe4b412fd76f07aed944b15bd10443c8a83443e2792",
+    "source_pdf_path": "research_sources/karahashi_2007_hyomen_kagaku_28_60.pdf",
+    "source_pdf_sha256": "093b18b91b0a6d910fc414779ee8320b7a046ac4cad38ef5de0b7f2dd25a2d79"
+  },
+  "status": "completed_nonproduction_constraint"
+}

@@ -1,5 +1,5 @@
 {
-  "manifest_id": "KARAHASHI-2007-FIG10-CF3-PRODUCTS-R1",
+  "manifest_id": "KARAHASHI-2007-FIG10-CF3-PRODUCTS-R2",
   "source": {
     "citation": "K. Karahashi, Hyomen Kagaku 28, 60-66 (2007), Figure 10",
     "local_pdf": "research_sources/karahashi_2007_hyomen_kagaku_28_60.pdf",
@@ -30,6 +30,8 @@
       1000,
       2000
     ],
+    "ion_incidence_angle_deg": null,
+    "ion_incidence_angle_status": "unreported_in_source",
     "detected_products": [
       "SiF",
       "SiF2",
@@ -79,6 +81,7 @@
     "sif4_fraction_decreases_with_energy": true
   },
   "source_text_cross_checks": {
+    "figure10_ion_incidence_angle": "unreported",
     "main_product": "SiF2",
     "below_or_equal_1000_eV_dominant_path": "thermally activated desorption of a collision-cascade-formed precursor",
     "sif_path": "prompt physical collision-cascade ejection",
@@ -96,12 +99,13 @@
       "a prompt-versus-delayed numerical partition",
       "an accounting of CO in the SiFx-normalized ordinate",
       "a universal branch law for CF+, CF2+, or plasma mixtures",
+      "a condition-matched join to the normal-incidence Figure-4 etch yields",
       "a target-depth calibration"
     ],
     "production_escape_parameter_use": false
   },
   "output": {
     "path": "data/experimental/karahashi_2007/figure10_cf3_product_fractions.csv",
-    "sha256": "c4b47f250079922547a2e5bed5219754c48ad8c2a733582047b720aafa4cdc6e"
+    "sha256": "71cdb8ddd68f289f6855bb9e6c44dc4201776c7b32d2fb3cc1a5cc35aa7a4710"
   }
 }

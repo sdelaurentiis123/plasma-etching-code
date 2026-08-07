@@ -92,3 +92,7 @@ precursor route for SiF2/SiF4 (about 0.5 ms delay for SiF4).
 The ordinate is normalized only over detected SiFx products. It supplies a
 product-identity/branching gate, not an absolute product yield, a
 prompt-versus-delayed numerical partition, or a diffusion/escape length.
+The source does not report the ion incidence angle for Figure 10. Because the
+same source shows that the product fractions change with incidence angle,
+Figure 10 cannot be condition-matched to the explicitly normal-incidence
+Figure-4 yield board without an additional assumption.

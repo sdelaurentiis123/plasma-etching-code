@@ -18,7 +18,7 @@
 | Q5 | The same CF3+ series reaches `1.8736` at 1500 eV and `1.7549` at 2000 eV. | Retracts the former 1.5 universal-ceiling claim. |
 | Q6 | Per-fluorine yield approximately follows the square root of energy allocated to each F atom over the measured series. | Supports the measured-domain energy trend; does not authorize extrapolation above 2000 eV or to larger ions. |
 | Q7 | Angular yields rise, peak near 60 degrees, and fall toward grazing incidence; the reported 60/0 ratio depends on species. | `figure6_angular_yields_unknown_energy.csv`; condition-unknown angular-class constraint, not an energy-resolved production law. |
-| Q8 | Figure 10 resolves CF3+-driven desorbed SiF, SiF2, and SiF4 fractions at 500, 1000, and 2000 eV. SiF2 dominates at or below 1000 eV; SiF increases and SiF4 decreases with energy. | `figure10_cf3_product_fractions.csv`; product-branching validation, not an absolute yield. |
+| Q8 | Figure 10 resolves CF3+-driven desorbed SiF, SiF2, and SiF4 fractions at 500, 1000, and 2000 eV. SiF2 dominates at or below 1000 eV; SiF increases and SiF4 decreases with energy. The Figure-10 incidence angle is not reported, while the same source says product composition changes with angle. | `figure10_cf3_product_fractions.csv`; product-branching validation only. It cannot be condition-matched to the explicitly normal-incidence Figure-4 yield board. |
 | Q9 | The text assigns SiF primarily to prompt collision-cascade ejection, whereas SiF2 and SiF4 include thermally activated desorption of collision-generated precursors; the SiF4 delay is about 0.5 ms. | Requires the event architecture to distinguish prompt removal from delayed product transport. No diffusion coefficient or escape length is reported. |
 
 ## Corrected consumption
@@ -40,3 +40,5 @@ Figure 10 now adds a checksum-bound product-identity board. Its ordinate is
 it were an escape probability. It instead grades whether a condition-matched
 event kernel routes removed silicon into the measured product identities while
 a separate conserved transport state handles delayed escape or reincorporation.
+No such condition-matched total-yield join is currently available: Figure 4 is
+normal incidence, but the Figure-10 incidence angle is unreported.

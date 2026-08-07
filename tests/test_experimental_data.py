@@ -15,6 +15,7 @@ from petch.experimental_data import (
     load_jeon_2022_plasma_controls,
     load_jeon_2022_trench_depths,
     load_karahashi_2007_reactive_ion_yields,
+    load_karahashi_2007_cf3_product_fractions,
     load_krueger_2024_evidence,
     load_takada_2005_coincidence_yields,
     load_yoshie_2023_blanket_rates,
@@ -44,6 +45,8 @@ JEONG_2023_DATA = (
 KARAHASHI_2007_DATA = (
     Path(__file__).parents[1] / "data" / "experimental" / "karahashi_2007"
     / "figure4_reactive_ion_yields.csv")
+KARAHASHI_2007_PRODUCTS = (
+    KARAHASHI_2007_DATA.with_name("figure10_cf3_product_fractions.csv"))
 TAKADA_2005_DATA = (
     Path(__file__).parents[1] / "data" / "experimental" / "takada_2005"
     / "figure3_sio2_coincidence_yields.csv")
@@ -387,6 +390,30 @@ def test_karahashi_reactive_ion_yields_reject_unverified_content(tmp_path):
     altered.write_bytes(KARAHASHI_2007_DATA.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="checksum mismatch"):
         load_karahashi_2007_reactive_ion_yields(altered)
+
+
+def test_karahashi_cf3_product_fractions_close_at_every_energy():
+    rows = load_karahashi_2007_cf3_product_fractions(
+        KARAHASHI_2007_PRODUCTS)
+    assert len(rows) == 9
+    assert {row.energy_eV for row in rows} == {500.0, 1000.0, 2000.0}
+    assert {row.desorbed_product for row in rows} == {
+        "SiF", "SiF2", "SiF4"}
+    assert all(row.ion_incidence_angle_deg is None for row in rows)
+    assert {row.ion_incidence_angle_status for row in rows} == {
+        "unreported_in_source"}
+    for energy in {500.0, 1000.0, 2000.0}:
+        total = sum(
+            row.product_fraction_percent_of_detected_sifx
+            for row in rows if row.energy_eV == energy)
+        assert total == pytest.approx(100.0, abs=1.2)
+
+
+def test_karahashi_cf3_products_reject_unverified_content(tmp_path):
+    altered = tmp_path / "figure10.csv"
+    altered.write_bytes(KARAHASHI_2007_PRODUCTS.read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        load_karahashi_2007_cf3_product_fractions(altered)
 
 
 def test_takada_coincidence_yields_replay_nonmonotone_parent_series():
