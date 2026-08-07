@@ -560,6 +560,74 @@ class GuoC4F8ArSiO2Mechanism:
             solver_name="BDF_fluence_integration",
         )
 
+    def solve_steady_state_complementarity_bdf(
+        self,
+        initial_state: GuoTmlState | None = None,
+        *,
+        maximum_coordinate: float = 1.0e5,
+        relative_tolerance: float = 2.0e-9,
+        absolute_tolerance: float = 2.0e-11,
+        residual_tolerance: float = 2.0e-8,
+    ) -> GuoTmlEvaluation:
+        """Integrate each smooth movement branch and enforce its sign.
+
+        Guo Eq. (16) changes the translating-layer movement denominator
+        between substrate and deposited film.  Switching that branch inside a
+        stiff ODE step can make BDF chatter at zero net movement.  Each branch
+        is smooth on its own, so integrate the branch continuous with the
+        incoming state first, accept it only if its converged movement sign is
+        complementary, and otherwise integrate the other branch.  This is the
+        differential-equation analogue of :meth:`solve_steady_state_algebraic`
+        and adds no smoothing or fitted transition.
+        """
+        initial_state = initial_state or GuoTmlState.oxide()
+        initial_values = initial_state.as_array()
+        initial_movement = self._rates_and_derivative(initial_values)[-2]
+        preferred_regime = (
+            "etch" if initial_movement >= 0.0 else "deposition")
+        regime_order = (
+            preferred_regime,
+            "deposition" if preferred_regime == "etch" else "etch",
+        )
+        failures = []
+        for regime in regime_order:
+            solution = solve_ivp(
+                lambda coordinate, values: self._rates_and_derivative(
+                    values, movement_regime=regime)[-1],
+                (0.0, float(maximum_coordinate)),
+                initial_values,
+                method="BDF",
+                rtol=float(relative_tolerance),
+                atol=float(absolute_tolerance),
+            )
+            if not solution.success:
+                failures.append(f"{regime}: {solution.message}")
+                continue
+            final_values = solution.y[:, -1]
+            movement = self._rates_and_derivative(final_values)[-2]
+            sign_consistent = (
+                movement >= -residual_tolerance
+                if regime == "etch"
+                else movement <= residual_tolerance
+            )
+            if not sign_consistent:
+                failures.append(
+                    f"{regime}: converged movement {movement:.6g} "
+                    "violates complementarity")
+                continue
+            try:
+                return self._steady_evaluation(
+                    final_values,
+                    integration_coordinate=float(solution.t[-1]),
+                    residual_tolerance=float(residual_tolerance),
+                    solver_name=f"BDF_{regime}_complementarity_integration",
+                )
+            except RuntimeError as error:
+                failures.append(f"{regime}: {error}")
+        raise RuntimeError(
+            "Guo translating-layer complementarity integration found no "
+            "sign-consistent steady branch; " + "; ".join(failures))
+
     def solve_steady_state_algebraic(
         self,
         initial_state: GuoTmlState | None = None,
@@ -678,9 +746,15 @@ class GuoC4F8ArSiO2Mechanism:
                         np.asarray(
                             [30.0] * (len(active_real) - 1) + [5.0]),
                     ),
-                    xtol=1.0e-14,
-                    ftol=1.0e-14,
-                    gtol=1.0e-14,
+                    # The independently enforced full-balance acceptance gate
+                    # is 2e-8 by default.  Driving the optimizer's internal
+                    # step/cost/gradient criteria to 1e-14 spent most feature
+                    # runtime resolving digits that are discarded by that
+                    # physical residual gate.  These tolerances remain two
+                    # orders tighter than the accepted balance residual.
+                    xtol=min(1.0e-10, residual_tolerance * 0.01),
+                    ftol=min(1.0e-10, residual_tolerance * 0.01),
+                    gtol=min(1.0e-10, residual_tolerance * 0.01),
                     # Log-ratio composition coordinates enforce exact
                     # nonnegativity and normalization while resolving roots
                     # on the Si=0 or C=F=0 active boundaries.  Log vacancy

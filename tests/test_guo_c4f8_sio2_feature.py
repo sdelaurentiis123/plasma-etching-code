@@ -88,6 +88,51 @@ def test_planar_feature_adapter_replays_the_same_guo_steady_state_and_yield():
     assert abs(observed.atom_ledger_residual_atoms_per_ion) < 1.0e-12
 
 
+def test_feature_adapter_reuses_only_bit_identical_local_steady_state():
+    ion_flux = 1.2e20
+    fluxes = SurfaceFluxes(
+        {
+            "CF": 3.7 * ion_flux,
+            "CF2": 7.8 * ion_flux,
+            "CF3": 0.7 * ion_flux,
+            "O": 6.4 * ion_flux,
+        },
+        (EnergeticFlux(
+            "Ar+", ion_flux, np.asarray([350.0]),
+            np.asarray([1.0]), np.asarray([1.0]),
+        ),),
+    )
+    mechanism = GuoC4F8ArSiO2FeatureMechanism(
+        neutral_species=("CF", "CF2", "CF3", "O"),
+        ion_species_mapping={"Ar+": "Ar"},
+    )
+    initial = mechanism.initial_state()
+
+    first = mechanism.advance(initial, fluxes, 0.0)
+    repeated = mechanism.advance(initial, fluxes, 0.0)
+    perturbed = mechanism.advance(
+        initial,
+        SurfaceFluxes(
+            {
+                "CF": np.nextafter(3.7 * ion_flux, np.inf),
+                "CF2": 7.8 * ion_flux,
+                "CF3": 0.7 * ion_flux,
+                "O": 6.4 * ion_flux,
+            },
+            fluxes.energetic_fluxes,
+        ),
+        0.0,
+    )
+
+    assert first.exact_steady_state_cache_hits == 0
+    assert first.exact_steady_state_cache_misses == 1
+    assert repeated.exact_steady_state_cache_hits == 1
+    assert repeated.exact_steady_state_cache_misses == 0
+    assert repeated.sio2_yield_per_ion == first.sio2_yield_per_ion
+    assert perturbed.exact_steady_state_cache_hits == 0
+    assert perturbed.exact_steady_state_cache_misses == 1
+
+
 def test_exact_face_event_measure_drives_independent_local_steady_states():
     mechanism = GuoC4F8ArSiO2FeatureMechanism(
         neutral_species=("CF", "CF2", "CF3", "O"),
@@ -183,6 +228,7 @@ def test_feature_adapter_resolves_source_deposition_complementarity_face():
     )
 
     assert result.bdf_fallback_face_count == 0
+    assert result.algebraic_fallback_face_count == 0
     assert result.net_movement_atoms_per_ion < 0.0
     assert result.normal_growth_velocity_m_s > 0.0
     assert result.etch_velocity_m_s == 0.0

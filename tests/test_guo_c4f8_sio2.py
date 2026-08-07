@@ -173,7 +173,15 @@ def test_source_film_or_substrate_movement_branch_closes_deposition_state():
         ),
     )
     integrated = mechanism.solve_steady_state()
+    branch_fixed = mechanism.solve_steady_state_complementarity_bdf()
+    algebraic = mechanism.solve_steady_state_algebraic()
     assert integrated.movement_atoms_per_ion < 0.0
     assert integrated.sio2_yield_per_ion < 0.0
     assert integrated.state.c + integrated.state.f > 0.9
     assert integrated.steady_state_residual < 2.0e-8
+    assert branch_fixed.source_extrapolation["steady_state_solver"] == (
+        "BDF_deposition_complementarity_integration")
+    assert branch_fixed.movement_atoms_per_ion == pytest.approx(
+        algebraic.movement_atoms_per_ion, rel=1.0e-8, abs=1.0e-10)
+    assert branch_fixed.state.as_array() == pytest.approx(
+        algebraic.state.as_array(), rel=1.0e-8, abs=1.0e-10)

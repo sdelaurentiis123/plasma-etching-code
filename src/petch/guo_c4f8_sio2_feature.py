@@ -26,6 +26,7 @@ allowed to execute for sensitivity scoring.
 """
 from __future__ import annotations
 
+from collections import OrderedDict
 from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Mapping
@@ -145,6 +146,9 @@ class GuoC4F8ArSiO2FeatureStepResult:
     steady_state_residual: np.ndarray
     atom_ledger_residual_atoms_per_ion: np.ndarray
     bdf_fallback_face_count: int
+    algebraic_fallback_face_count: int
+    exact_steady_state_cache_hits: int
+    exact_steady_state_cache_misses: int
     maximum_neutral_reaction_probability: float
     material_exchange: SurfaceMaterialExchange
     validity: MechanismValidity
@@ -199,6 +203,14 @@ class GuoC4F8ArSiO2FeatureMechanism:
         self.deposited_film_atom_density_m3 = film_density
         self.allow_out_of_board_transfer_audit = bool(
             allow_out_of_board_transfer_audit)
+        # The feature coupling operator can request the same local constitutive
+        # evaluation several times while forming embedded time estimates and
+        # radiosity fixed points.  Cache only bit-identical inputs: there is no
+        # quantization, interpolation, or surrogate surface in this path.
+        self._steady_state_cache = OrderedDict()
+        self._steady_state_cache_limit = 4096
+        self._steady_state_cache_hits = 0
+        self._steady_state_cache_misses = 0
         self.provenance = MappingProxyType({
             "model": "guo-kwon-translating-mixed-layer-feature-adapter-v1",
             "source_surface_model": (
@@ -214,8 +226,14 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 ),
             },
             "steady_state_solver": (
-                "bounded algebraic root, independently pinned against BDF "
-                "fluence integration"
+                "source-faithful branch-fixed BDF fluence presolve to 30 "
+                "ions/site with a full 2e-8 balance gate, followed when "
+                "needed by the independently tested bounded algebraic "
+                "complementarity solve"
+            ),
+            "steady_state_reuse": (
+                "bounded exact-input memoization; no quantization, "
+                "interpolation, or physics surrogate"
             ),
             "neutral_species": list(neutral),
             "ion_species_mapping": {
@@ -386,6 +404,66 @@ class GuoC4F8ArSiO2FeatureMechanism:
     def _broadcast_flux(value, shape):
         return np.broadcast_to(np.asarray(value, dtype=float), shape)
 
+    @staticmethod
+    def _steady_state_key(local, initial):
+        """Return a bit-exact key for one local constitutive solve."""
+        return (
+            tuple(
+                sorted(
+                    (name, float(value).hex())
+                    for name, value
+                    in local.composition.neutral_flux_ratio.items()
+                )
+            ),
+            tuple(
+                sorted(
+                    (name, float(value).hex())
+                    for name, value in local.composition.ion_fraction.items()
+                )
+            ),
+            local.ions.energy_eV.tobytes(),
+            local.ions.cosine_incidence.tobytes(),
+            local.ions.weight.tobytes(),
+            initial.as_array().tobytes(),
+        )
+
+    def _solve_local_steady_state(self, local, initial):
+        key = self._steady_state_key(local, initial)
+        cached = self._steady_state_cache.get(key)
+        if cached is not None:
+            self._steady_state_cache_hits += 1
+            self._steady_state_cache.move_to_end(key)
+            return cached
+
+        self._steady_state_cache_misses += 1
+        used_algebraic = False
+        try:
+            # Thirty incident ions/site is already sufficient to drive the
+            # source-board etch and deposition witnesses below the 2e-8 full
+            # balance gate.  A face that has not converged by this fluence is
+            # handed to the exact algebraic complementarity solve rather than
+            # integrating a marginal branch indefinitely.
+            solved = local.solve_steady_state_complementarity_bdf(
+                initial, maximum_coordinate=30.0)
+        except RuntimeError as bdf_error:
+            try:
+                # The constrained balance root is independently pinned against
+                # Guo's source-faithful fluence integration and preserves the
+                # explicit etch/deposition complementarity at bound-active
+                # solutions.
+                solved = local.solve_steady_state_algebraic(initial)
+            except RuntimeError as algebraic_error:
+                raise RuntimeError(
+                    f"BDF={bdf_error}; algebraic={algebraic_error}"
+                ) from algebraic_error
+            used_algebraic = True
+
+        self._steady_state_cache[key] = (solved, used_algebraic)
+        self._steady_state_cache.move_to_end(key)
+        if len(self._steady_state_cache) > self._steady_state_cache_limit:
+            self._steady_state_cache.popitem(last=False)
+        return solved, used_algebraic
+
     def _face_ion_measure(self, fluxes, shape):
         size = int(np.prod(shape, dtype=int)) if shape else 1
         energies = [[] for _ in range(size)]
@@ -484,6 +562,9 @@ class GuoC4F8ArSiO2FeatureMechanism:
         atom_residual = np.zeros_like(ion_flux)
         movement_atoms_per_ion = np.zeros_like(ion_flux)
         bdf_fallback_face_count = 0
+        algebraic_fallback_face_count = 0
+        cache_hits_before = self._steady_state_cache_hits
+        cache_misses_before = self._steady_state_cache_misses
 
         for face, supplied_ion_flux in enumerate(ion_flux):
             if supplied_ion_flux <= 0.0:
@@ -514,30 +595,24 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 output["vacancy"][face],
             )
             try:
-                solved = local.solve_steady_state_algebraic(initial)
-            except RuntimeError as algebraic_error:
-                try:
-                    # Guo integrated the differential balances from the
-                    # substrate composition.  The BDF path is therefore the
-                    # source-faithful fallback when the faster constrained
-                    # root misses a bound-active deposition solution.
-                    solved = local.solve_steady_state(initial)
-                except RuntimeError as bdf_error:
-                    ratios = {
-                        name: values[face] / supplied_ion_flux
-                        for name, values in neutral_flux.items()
-                        if values[face] > 0.0
-                    }
-                    raise RuntimeError(
-                        "Guo local feature steady state failed at "
-                        f"face={face}, "
-                        f"ion_flux_m2_s={supplied_ion_flux:.9g}, "
-                        f"energy_eV=[{min(face_energy[face]):.9g},"
-                        f"{max(face_energy[face]):.9g}], "
-                        f"neutral_to_ion={ratios}; algebraic="
-                        f"{algebraic_error}; BDF={bdf_error}"
-                    ) from bdf_error
-                bdf_fallback_face_count += 1
+                solved, used_algebraic = self._solve_local_steady_state(
+                    local, initial)
+            except RuntimeError as solve_error:
+                ratios = {
+                    name: values[face] / supplied_ion_flux
+                    for name, values in neutral_flux.items()
+                    if values[face] > 0.0
+                }
+                raise RuntimeError(
+                    "Guo local feature steady state failed at "
+                    f"face={face}, "
+                    f"ion_flux_m2_s={supplied_ion_flux:.9g}, "
+                    f"energy_eV=[{min(face_energy[face]):.9g},"
+                    f"{max(face_energy[face]):.9g}], "
+                    f"neutral_to_ion={ratios}; {solve_error}"
+                ) from solve_error
+            if used_algebraic:
+                algebraic_fallback_face_count += 1
             for name, value in zip(
                 _REAL_FIELDS + ("vacancy",),
                 solved.state.as_array(),
@@ -602,6 +677,11 @@ class GuoC4F8ArSiO2FeatureMechanism:
             steady_state_residual=residual.reshape(shape),
             atom_ledger_residual_atoms_per_ion=atom_residual.reshape(shape),
             bdf_fallback_face_count=bdf_fallback_face_count,
+            algebraic_fallback_face_count=algebraic_fallback_face_count,
+            exact_steady_state_cache_hits=(
+                self._steady_state_cache_hits - cache_hits_before),
+            exact_steady_state_cache_misses=(
+                self._steady_state_cache_misses - cache_misses_before),
             maximum_neutral_reaction_probability=maximum_probability,
             material_exchange=exchange,
             validity=validity,
