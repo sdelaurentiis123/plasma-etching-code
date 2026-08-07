@@ -1,0 +1,72 @@
+{
+  "source": {
+    "authors": "Hyungmin An, Sangmin Oh, Dongheon Lee, Jae-hyeon Ko, Dongyean Oh, Changho Hong, and Seungwu Han",
+    "title": "Etching-to-deposition transition in SiO2/Si3N4 using CHxFy ion-based plasma etching: An atomistic study with neural network potentials",
+    "journal": "Applied Surface Science 716 (2026) 164601",
+    "doi": "10.1016/j.apsusc.2025.164601",
+    "arxiv": "2508.00327v1",
+    "author_repository": "https://github.com/HyungminAn/etchZBL",
+    "author_repository_commit": "4bcd035090b9f652cda10150c4da4b662143b34e",
+    "author_repository_commit_date": "2026-01-19T00:47:02+09:00"
+  },
+  "released_figure_data": {
+    "source_path_at_commit": "Figure/etch_yield/plot_with_experiments/dat.yaml",
+    "source_sha256": "7fdb3b72bc55eb47e8e2fbf6b218ddcacdb869136b2978c4a90bebe3a3dafb9a",
+    "transcription_path": "figure3_reported_etch_yields.csv",
+    "transcription_sha256": "c897427ffb8055ffe71f042530efc8acda30c05bcdfe52df0fb4542af1c295d4",
+    "row_count": 35,
+    "yield_semantics": "Si atoms removed per incident ion; numerically equivalent to SiO2 formula units per ion only for stoichiometric SiO2 removal",
+    "comment_policy": "YAML values commented as deposition are preserved as not_plotted source records; active values with inline deposition comments remain plotted records with deposition regime"
+  },
+  "atomistic_model": {
+    "electronic_structure_reference": "spin-polarized PBE DFT single-point calculations with 500 eV cutoff for final training labels",
+    "short_range_collision": "Ziegler-Biersack-Littmark repulsion; NNP learns E_DFT minus E_ZBL",
+    "nn_architecture": "SIMPLE-NN Behler-Parrinello form, two hidden layers of 60 tanh nodes",
+    "surface_state_coverage": [
+      "SiO2 and Si3N4 bulk and slab",
+      "substrate-dominant mixed compositions",
+      "mixed-layer compositions",
+      "fluorocarbon-film compositions",
+      "gas molecules and low-density vapor-to-surface configurations"
+    ],
+    "iterative_training_impacts": "CF+, CF3+, CH2F+, and CHF2+ at 10 and 30 eV; three cycles; DFT labels added",
+    "figure3_simulation_geometry": "3 nm x 3 nm amorphous slab, 6 nm thick, normal incidence, 300 K",
+    "figure3_ion_dose": "5e16 cm^-2, reported as 4500 impacts per condition",
+    "potential_file_at_commit": "pot/simplenn/SiO2/potential_saved_bestmodel",
+    "potential_sha256": "b5ce9619744f94dd1ca6b9a816192f01af7a86c27fa098e9b199b8d5f5d7806d"
+  },
+  "calibration_boundary": {
+    "experimental_etch_yields_in_nnp_loss": false,
+    "training_target": "DFT energies, forces, and stresses",
+    "published_comparison_was_available_during_model_development": true,
+    "blind_validation_claimed_here": false,
+    "post_hoc_parameter_fit_in_petch_audit": false
+  },
+  "known_nonfundamental_operations": {
+    "product_escape": "After every impact, predefined stable clusters are deleted, and any cluster more than 1 nm above the slab is deleted regardless of identity.",
+    "deep_product_transport": "The default permits recognized products to leave regardless of formation depth.",
+    "documented_consequence": "At low-energy CF+ on SiO2, deposition begins too late and simulated removal exceeds 10 nm versus about 2 nm experimentally.",
+    "author_sensitivity": "Restricting product deletion to within an arbitrary 2 nm of the surface improves transient depth agreement.",
+    "neutral_and_radical_coflux": "not included"
+  },
+  "license_boundary": {
+    "license_file_found_at_pinned_commit": false,
+    "code_or_potential_redistributed_by_petch": false,
+    "allowed_consumption_here": "citation, scientific assessment, and transcription of released numerical figure values with provenance",
+    "implementation_import_requires": "an explicit compatible license or author permission"
+  },
+  "claim_boundary": {
+    "allowed": [
+      "no-yield-fit comparison of the released model outputs with exact-overlap beam measurements",
+      "mechanistic guidance for a species-, energy-, and evolving-state-resolved event kernel",
+      "identification of product escape and film evolution as missing closures"
+    ],
+    "not_allowed": [
+      "calling the model first-principles molecular dynamics",
+      "calling the Figure 3 comparison blind",
+      "using the tabulation as a Krueger reactor ion mixture or flux",
+      "extrapolating model outputs above 1000 eV",
+      "copying the released code or potential without licensing"
+    ]
+  }
+}

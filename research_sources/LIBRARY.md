@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 97 sources by topic
+## Index — 98 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -65,6 +65,12 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`steinbruchel`](library/steinbruchel.md) | Steinbrüchel, sqrt-E yield form | VIA ARM + THESES |
 | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | Takada, Toyoda & Sugai, stable C5F8 molecule / Ar+ co-incidence on SiO2 | FULL TEXT + PIL-AUDITED FIGURE 3 |
 | [`yin-2008-jvsta`](library/yin-2008-jvsta.md) | Yin & Sawin, JVST A 26, 161 (2008) | not-fetched |
+
+### Atomistic surface physics and event kernels
+
+| bibkey | source | status |
+|---|---|---|
+| [`an-2026-apsusc`](library/an-2026-apsusc.md) | An et al., DFT-trained NNP/MD for HFC ions on SiO2 and Si3N4 | FULL TEXT READ + RELEASED DATA PINNED |
 
 ### Angular yield laws (class-1 physical, class-2 chemical)
 
@@ -210,6 +216,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Cyclic C4F8/SF6 blanket/feature depth board | [`yoshie-2023-apsusc`](library/yoshie-2023-apsusc.md) | 7 same-reactor poly-Si blanket rates + 49 held-out bulk-Si feature rates; material/history transfer warning |
 | Beam gate N1 (floor 0.25 / half-rise / plateau) | [`gray-1993-thesis`](library/gray-1993-thesis.md) | the measured yield-vs-F/Ar⁺ curve petch is graded against |
 | Species-resolved pure-reactive-ion yield ladder | [`karahashi-2007`](library/karahashi-2007.md) | direct F+/CF+/CF2+/CF3+ constraint; forbids species-agnostic validation and extrapolation above measured support |
+| DFT-trained HFC-ion event physics + product-escape defect | [`an-2026-apsusc`](library/an-2026-apsusc.md) | no-yield-fit atomistic transfer candidate; forces explicit mixed-layer/film and product-escape closure rather than a scalar depth fit |
 | Stable-parent molecule / ion co-incidence envelope | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | C5F8 analog proves molecule-assisted yields can exceed a pure-CF3+ value; explicitly not a C4F6 law |
 | C4F6 parent-signal + ion-mixture existence | [`kim-2021-coatings`](library/kim-2021-coatings.md) | wafer-facing mass/energy spectra directly show C4F6 and multiple CFx+/CxFy+ species in another CCP; qualitative existence constraint only, not Krüger flux calibration |
 | Class-1 angular form `(1+B sin²θ)cosθ` | [`kress-1999-jvsta`](library/kress-1999-jvsta.md) | Krüger's cited source — **wrong system (Cu/Ar MD)**; peak 4.17 vs measured ~1.3 |

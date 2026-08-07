@@ -10,6 +10,7 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 ## thesis_extracts/ (grep-ready, line refs in RESEARCH docs point here)
 - HG_jap97.txt
 - HG_jvstb97.txt
+- an_2026_nnp_etch_verified_excerpts.txt
 - Konina_Kseniia_PhD_Thesis_2024.txt
 - Lanham_Steven_PhD_Thesis_2022.txt
 - Qu_Chenhui_PhD_Thesis_2020.txt

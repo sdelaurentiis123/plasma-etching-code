@@ -1,0 +1,59 @@
+SOURCE
+Hyungmin An et al., "Etching-to-deposition transition in SiO2/Si3N4
+using CHxFy ion-based plasma etching: An atomistic study with neural
+network potentials," Applied Surface Science 716 (2026) 164601.
+DOI: 10.1016/j.apsusc.2025.164601
+Open preprint: arXiv:2508.00327v1
+
+PURPOSE AND EXTRACTION ROUTE
+The open preprint PDF was rendered/read and converted to text with pdftotext on
+2026-08-06. This compact file records grep-ready anchors for the claims actually
+consumed by petch. It is not a substitute for the full paper; refetch from the
+arXiv identifier above before consuming a new claim.
+
+VERIFIED TEXT ANCHORS (short excerpts followed by exact location/meaning)
+
+1. "The NNP is trained to learn only the DFT data with the ZBL potential
+subtracted" — section 2.1.3, equation 1 discussion. The collision potential is
+E_NNP = E_DFT - E_ZBL.
+
+2. "Each ion is injected at normal incidence with a fixed kinetic energy." —
+section 2.3.1. The Figure 3 simulations therefore do not provide an angular
+response law.
+
+3. "We assume that a sufficiently long time interval exists between ion
+impacts" — section 2.3.2. Predefined product clusters are removed after each
+impact; any cluster more than 1 nm above the slab is also removed.
+
+4. "etch yield, which is defined as the number of Si atoms removed per ion
+incidence" — section 3.1.2. Figure 3 uses 5e16 cm^-2, reported as 4500 impacts
+over a 3 nm by 3 nm cell.
+
+5. "a slight overestimation of etch yield at low energies" — section 3.1.2.
+The paper identifies CF+ below 500 eV and delayed deposition onset.
+
+6. "the thickness of the etched film before entering the deposition regime
+exceeds 10 nm" — section 3.1.3. The experimental value quoted by the authors is
+2 nm.
+
+7. "restricting byproduct removal to within 2 nm (an arbitrary value)" —
+section 3.1.3. The restriction improves agreement; the authors retain
+all-depth removal rather than fit a removal height per ion/energy.
+
+8. "does not explicitly include radicals or neutrals" — conclusion. The
+released calculations isolate ion-induced behavior and do not close a
+plasma-reactor boundary.
+
+9. "The codes used for simulation and data analysis are available" — data
+availability statement, followed by https://github.com/HyungminAn/etchZBL .
+
+RELEASED DATA RECEIPT
+Repository commit: 4bcd035090b9f652cda10150c4da4b662143b34e
+Figure 3 YAML path:
+Figure/etch_yield/plot_with_experiments/dat.yaml
+SHA-256:
+7fdb3b72bc55eb47e8e2fbf6b218ddcacdb869136b2978c4a90bebe3a3dafb9a
+
+LICENSE AUDIT
+No LICENSE/COPYING file was found at the pinned commit. Petch does not
+redistribute the code or neural-potential weights.
