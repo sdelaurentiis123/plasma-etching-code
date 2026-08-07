@@ -1,0 +1,900 @@
+{
+  "all_point_metrics": {
+    "correct_net_etch_sign_count": 19,
+    "maximum_absolute_relative_error": 2.848895329839842,
+    "mean_absolute_error_sio2_per_ion": 0.5343075301150776,
+    "mean_absolute_relative_error": 0.9576469015674218,
+    "point_count": 21,
+    "root_mean_square_error_sio2_per_ion": 0.5964884450016018,
+    "within_plotted_source_interval_count": 1
+  },
+  "audit_id": "GUO-KARAHASHI-REACTIVE-ION-TRANSFER-R1",
+  "calibration_firewall": {
+    "comparison_operation": "evaluate_frozen_Guo_deck_then_score_against_observation",
+    "fitted_parameters": [],
+    "incidence": "normal",
+    "incident_ion_fraction": "exactly_one_for_the_measured_mass_selected_species",
+    "incident_neutral_flux": "exactly_zero_as_in_beam_experiment",
+    "ion_energy": "measured_experimental_setpoint",
+    "karahashi_yields_used_by_surface_solver": false
+  },
+  "experiment": {
+    "energy_support_eV": [
+      250.0,
+      2000.0
+    ],
+    "gas_phase_reactions": "none",
+    "incidence": "normal",
+    "mass_selected": true,
+    "measurement_uncertainty_semantics": "source_plots_error_bars_but_accessible_text_does_not_define_their_statistical_meaning",
+    "neutral_radical_flux": "none",
+    "species": [
+      "F+",
+      "CF+",
+      "CF2+",
+      "CF3+"
+    ],
+    "target": "SiO2"
+  },
+  "model_evidence_boundary": {
+    "atomistic_trajectory_or_interatomic_potential": false,
+    "first_principles_claimed": false,
+    "guo_source_fit_maximum_energy_eV": 370.0,
+    "points_beyond_guo_source_energy_support": 20,
+    "points_inside_guo_source_energy_support": 1,
+    "surface_evidence_ceiling": "L1_yield_regressed"
+  },
+  "numerical_and_atomic_gates": {
+    "all_atom_ledgers_pass": true,
+    "all_steady_states_pass": true,
+    "atom_ledger_tolerance": 1e-12,
+    "maximum_absolute_atom_ledger_residual": 0.0,
+    "maximum_steady_state_residual": 1.777311631201428e-11,
+    "steady_state_residual_tolerance": 2e-08
+  },
+  "per_species_metrics": {
+    "CF+": {
+      "correct_net_etch_sign_count": 5,
+      "maximum_absolute_relative_error": 0.8775788964356044,
+      "mean_absolute_error_sio2_per_ion": 0.49206651020449377,
+      "mean_absolute_relative_error": 0.7479962031383376,
+      "point_count": 5,
+      "root_mean_square_error_sio2_per_ion": 0.5035990721519708,
+      "within_plotted_source_interval_count": 0
+    },
+    "CF2+": {
+      "correct_net_etch_sign_count": 5,
+      "maximum_absolute_relative_error": 1.1316340561902223,
+      "mean_absolute_error_sio2_per_ion": 0.40455065314786154,
+      "mean_absolute_relative_error": 0.46779411050273073,
+      "point_count": 5,
+      "root_mean_square_error_sio2_per_ion": 0.42618252869572293,
+      "within_plotted_source_interval_count": 0
+    },
+    "CF3+": {
+      "correct_net_etch_sign_count": 5,
+      "maximum_absolute_relative_error": 1.6288463625113945,
+      "mean_absolute_error_sio2_per_ion": 0.49216652077991124,
+      "mean_absolute_relative_error": 0.5620858877716848,
+      "point_count": 7,
+      "root_mean_square_error_sio2_per_ion": 0.5956364109298129,
+      "within_plotted_source_interval_count": 1
+    },
+    "F+": {
+      "correct_net_etch_sign_count": 4,
+      "maximum_absolute_relative_error": 2.848895329839842,
+      "mean_absolute_error_sio2_per_ion": 0.8230516675488692,
+      "mean_absolute_relative_error": 2.524258037577181,
+      "point_count": 4,
+      "root_mean_square_error_sio2_per_ion": 0.8384615019579811,
+      "within_plotted_source_interval_count": 0
+    }
+  },
+  "point_board": [
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 500.0,
+      "incoming_atoms_per_ion": {
+        "C": 0.0,
+        "F": 1.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 2.471664642965558,
+      "observed_yield_sio2_per_ion": 0.2274,
+      "plotted_lower_yield": 0.1788,
+      "plotted_upper_yield": 0.2746,
+      "predicted_yield_sio2_per_ion": 0.8238882143218528,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.0,
+        "F": 0.9999999999978924,
+        "O": 1.6477764286358905,
+        "Si": 0.8238882143317753
+      },
+      "signed_error_sio2_per_ion": 0.5964882143218528,
+      "signed_relative_error": 2.6230792186537064,
+      "species": "F+",
+      "state": {
+        "C": 0.0,
+        "F": 0.10907964445837162,
+        "O": 0.4872512842236906,
+        "Si": 0.4036690713179378,
+        "V": 0.07560393091382028
+      },
+      "steady_state_residual": 9.922507260284874e-12,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1000.0,
+      "incoming_atoms_per_ion": {
+        "C": 0.0,
+        "F": 1.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 3.2263370241762477,
+      "observed_yield_sio2_per_ion": 0.3232,
+      "plotted_lower_yield": 0.2689,
+      "plotted_upper_yield": 0.3747,
+      "predicted_yield_sio2_per_ion": 1.075445674725416,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.0,
+        "F": 1.0000000000019231,
+        "O": 2.150891349463438,
+        "Si": 1.0754456747108865
+      },
+      "signed_error_sio2_per_ion": 0.752245674725416,
+      "signed_relative_error": 2.327492805462302,
+      "species": "F+",
+      "state": {
+        "C": 0.0,
+        "F": 0.08164459614952091,
+        "O": 0.46209634921545456,
+        "Si": 0.4562590546350245,
+        "V": 0.07858322590274076
+      },
+      "steady_state_residual": 1.4529488723269424e-11,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1500.0,
+      "incoming_atoms_per_ion": {
+        "C": 0.0,
+        "F": 1.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 3.815025050937251,
+      "observed_yield_sio2_per_ion": 0.3304,
+      "plotted_lower_yield": 0.2689,
+      "plotted_upper_yield": 0.3919,
+      "predicted_yield_sio2_per_ion": 1.2716750169790838,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.0,
+        "F": 1.0000000000018407,
+        "O": 2.5433500339741,
+        "Si": 1.2716750169613107
+      },
+      "signed_error_sio2_per_ion": 0.9412750169790838,
+      "signed_relative_error": 2.848895329839842,
+      "species": "F+",
+      "state": {
+        "C": 0.0,
+        "F": 0.07040399124639637,
+        "O": 0.45110107421504725,
+        "Si": 0.4784949345385564,
+        "V": 0.07977696879369715
+      },
+      "steady_state_residual": 1.777311631201428e-11,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 2000.0,
+      "incoming_atoms_per_ion": {
+        "C": 0.0,
+        "F": 1.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 4.315193292507371,
+      "observed_yield_sio2_per_ion": 0.4362,
+      "plotted_lower_yield": 0.3647,
+      "plotted_upper_yield": 0.5077,
+      "predicted_yield_sio2_per_ion": 1.4383977641691237,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.0,
+        "F": 1.0000000000000036,
+        "O": 2.876795528338241,
+        "Si": 1.4383977641691261
+      },
+      "signed_error_sio2_per_ion": 1.0021977641691238,
+      "signed_relative_error": 2.2975647963528743,
+      "species": "F+",
+      "state": {
+        "C": 0.0,
+        "F": 0.06377112642049876,
+        "O": 0.44467392413284373,
+        "Si": 0.4915549494466575,
+        "V": 0.08045583007147035
+      },
+      "steady_state_residual": 6.217248937900877e-15,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 750.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 1.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 2.710495058605602,
+      "observed_yield_sio2_per_ion": 0.5006,
+      "plotted_lower_yield": 0.4319,
+      "plotted_upper_yield": 0.5664,
+      "predicted_yield_sio2_per_ion": 0.903498352868534,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 1.0000000000001812,
+        "F": 1.0000000000000282,
+        "O": 1.8069967057367815,
+        "Si": 0.9034983528686115
+      },
+      "signed_error_sio2_per_ion": 0.4028983528685339,
+      "signed_relative_error": 0.8048309086466917,
+      "species": "CF+",
+      "state": {
+        "C": 0.1938962832884641,
+        "F": 0.09561076427245059,
+        "O": 0.25054960953717886,
+        "Si": 0.45994334290190647,
+        "V": 0.036843806257102894
+      },
+      "steady_state_residual": 2.864375403532904e-13,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1000.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 1.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 3.1183361467686392,
+      "observed_yield_sio2_per_ion": 0.6751,
+      "plotted_lower_yield": 0.5549,
+      "plotted_upper_yield": 0.7437,
+      "predicted_yield_sio2_per_ion": 1.039445382256213,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.9999999999994266,
+        "F": 1.000000000000003,
+        "O": 2.0788907645131682,
+        "Si": 1.0394453822560419
+      },
+      "signed_error_sio2_per_ion": 0.36434538225621305,
+      "signed_relative_error": 0.539690982456248,
+      "species": "CF+",
+      "state": {
+        "C": 0.14919140495517016,
+        "F": 0.08440227028563302,
+        "O": 0.28629261661599587,
+        "Si": 0.48011370814320103,
+        "V": 0.046140783703673686
+      },
+      "steady_state_residual": 7.420730696594546e-13,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1250.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 1.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 3.4457506761625885,
+      "observed_yield_sio2_per_ion": 0.6751,
+      "plotted_lower_yield": 0.5749,
+      "plotted_upper_yield": 0.7551,
+      "predicted_yield_sio2_per_ion": 1.1485835587208628,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.9999999999971899,
+        "F": 1.0000000000000997,
+        "O": 2.2971671174461017,
+        "Si": 1.1485835587191973
+      },
+      "signed_error_sio2_per_ion": 0.4734835587208628,
+      "signed_relative_error": 0.7013532198501893,
+      "species": "CF+",
+      "state": {
+        "C": 0.1263147800786273,
+        "F": 0.07743185176807939,
+        "O": 0.3056601594770315,
+        "Si": 0.4905932086762618,
+        "V": 0.0525600179752473
+      },
+      "steady_state_residual": 4.376055073862517e-12,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1500.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 1.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 3.7335079601650625,
+      "observed_yield_sio2_per_ion": 0.6851,
+      "plotted_lower_yield": 0.5463,
+      "plotted_upper_yield": 0.8238,
+      "predicted_yield_sio2_per_ion": 1.244502653388354,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.9999999999993153,
+        "F": 1.0000000000000389,
+        "O": 2.489005306777932,
+        "Si": 1.2445026533877763
+      },
+      "signed_error_sio2_per_ion": 0.559402653388354,
+      "signed_relative_error": 0.8165270083029543,
+      "species": "CF+",
+      "state": {
+        "C": 0.11167331182896624,
+        "F": 0.07244408094933474,
+        "O": 0.3183153158899811,
+        "Si": 0.4975672913317179,
+        "V": 0.05731319027537008
+      },
+      "steady_state_residual": 1.2239098623467726e-12,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 2000.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 1.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 4.237507811365515,
+      "observed_yield_sio2_per_ion": 0.7523,
+      "plotted_lower_yield": 0.6493,
+      "plotted_upper_yield": 0.8524,
+      "predicted_yield_sio2_per_ion": 1.4125026037885051,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 1.0,
+        "F": 0.9999999999999998,
+        "O": 2.8250052075770102,
+        "Si": 1.4125026037885051
+      },
+      "signed_error_sio2_per_ion": 0.6602026037885051,
+      "signed_relative_error": 0.8775788964356044,
+      "species": "CF+",
+      "state": {
+        "C": 0.0933193921123615,
+        "F": 0.06552723825758708,
+        "O": 0.3343144885160986,
+        "Si": 0.5068388811139528,
+        "V": 0.06384091012575396
+      },
+      "steady_state_residual": 2.220446049250313e-16,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 500.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 2.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 3.4481312492933034,
+      "observed_yield_sio2_per_ion": 0.5392,
+      "plotted_lower_yield": 0.4691,
+      "plotted_upper_yield": 0.6078,
+      "predicted_yield_sio2_per_ion": 1.1493770830977679,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.9999999999999879,
+        "F": 2.000000000000006,
+        "O": 2.2987541661955584,
+        "Si": 1.1493770830977512
+      },
+      "signed_error_sio2_per_ion": 0.6101770830977679,
+      "signed_relative_error": 1.1316340561902223,
+      "species": "CF2+",
+      "state": {
+        "C": 0.12875310950941765,
+        "F": 0.1950438911446288,
+        "O": 0.37433088811298454,
+        "Si": 0.301872111232969,
+        "V": 0.03881727667434305
+      },
+      "steady_state_residual": 2.2648549702353193e-14,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 750.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 2.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 3.9019865602721726,
+      "observed_yield_sio2_per_ion": 0.9682,
+      "plotted_lower_yield": 0.8324,
+      "plotted_upper_yield": 1.0469,
+      "predicted_yield_sio2_per_ion": 1.3006621867573909,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 1.000000000002661,
+        "F": 1.9999999999987164,
+        "O": 2.6013243735091254,
+        "Si": 1.30066218676167
+      },
+      "signed_error_sio2_per_ion": 0.3324621867573909,
+      "signed_relative_error": 0.3433817256325046,
+      "species": "CF2+",
+      "state": {
+        "C": 0.1098134242894135,
+        "F": 0.15711726345459226,
+        "O": 0.3851481154411301,
+        "Si": 0.3479211968148643,
+        "V": 0.04792787078456359
+      },
+      "steady_state_residual": 5.6563642658602475e-12,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1000.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 2.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 4.2549601015600045,
+      "observed_yield_sio2_per_ion": 1.1957,
+      "plotted_lower_yield": 1.0641,
+      "plotted_upper_yield": 1.3287,
+      "predicted_yield_sio2_per_ion": 1.4183200338533348,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 1.00000000000135,
+        "F": 1.9999999999994038,
+        "O": 2.836640067703451,
+        "Si": 1.4183200338558
+      },
+      "signed_error_sio2_per_ion": 0.22262003385333484,
+      "signed_relative_error": 0.1861838536868235,
+      "species": "CF2+",
+      "state": {
+        "C": 0.09769499130487617,
+        "F": 0.13709184616534675,
+        "O": 0.39000586282675537,
+        "Si": 0.3752072997030217,
+        "V": 0.05425075063285316
+      },
+      "steady_state_residual": 3.218758592993254e-12,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1500.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 2.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 4.832387543229444,
+      "observed_yield_sio2_per_ion": 1.2457,
+      "plotted_lower_yield": 1.0984,
+      "plotted_upper_yield": 1.3902,
+      "predicted_yield_sio2_per_ion": 1.610795847743148,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 1.0000000000000229,
+        "F": 1.9999999999999913,
+        "O": 3.221591695486232,
+        "Si": 1.610795847743198
+      },
+      "signed_error_sio2_per_ion": 0.36509584774314807,
+      "signed_relative_error": 0.29308489021686446,
+      "species": "CF2+",
+      "state": {
+        "C": 0.08253889589743771,
+        "F": 0.11510028060118031,
+        "O": 0.39458830080541774,
+        "Si": 0.40777252269596415,
+        "V": 0.0623772803874499
+      },
+      "steady_state_residual": 6.439293542825908e-14,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 2000.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 2.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 5.317194342862997,
+      "observed_yield_sio2_per_ion": 1.28,
+      "plotted_lower_yield": 1.1256,
+      "plotted_upper_yield": 1.4359,
+      "predicted_yield_sio2_per_ion": 1.7723981142876657,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 1.0000000000000346,
+        "F": 1.9999999999999873,
+        "O": 3.5447962285752244,
+        "Si": 1.772398114287751
+      },
+      "signed_error_sio2_per_ion": 0.49239811428766567,
+      "signed_relative_error": 0.3846860267872388,
+      "species": "CF2+",
+      "state": {
+        "C": 0.07306732853598753,
+        "F": 0.10262156298433778,
+        "O": 0.39682314208546116,
+        "Si": 0.4274879663942136,
+        "V": 0.06729205961405678
+      },
+      "steady_state_residual": 1.0702549957386509e-13,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": false,
+      "correct_net_etch_sign": false,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 250.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 3.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": -0.9821322489702959,
+      "observed_yield_sio2_per_ion": 0.5206,
+      "plotted_lower_yield": 0.4491,
+      "plotted_upper_yield": 0.5864,
+      "predicted_yield_sio2_per_ion": -0.327377416323432,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.946341869183224,
+        "F": 2.07152588184648,
+        "O": 1.6333346320684828e-17,
+        "Si": 0.0
+      },
+      "signed_error_sio2_per_ion": -0.8479774163234319,
+      "signed_relative_error": -1.6288463625113945,
+      "species": "CF3+",
+      "state": {
+        "C": 0.05463432330323404,
+        "F": 0.9453656766967661,
+        "O": 1.608337440805162e-17,
+        "Si": 0.0,
+        "V": 0.0326890999396127
+      },
+      "steady_state_residual": 6.661338147750939e-16,
+      "steady_state_solver": "BDF_deposition_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": false,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 500.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 3.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": -0.7830888724265557,
+      "observed_yield_sio2_per_ion": 0.8638,
+      "plotted_lower_yield": 0.758,
+      "plotted_upper_yield": 0.9697,
+      "predicted_yield_sio2_per_ion": -0.2610296241421852,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.9645678766626409,
+        "F": 2.2523432509108035,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "signed_error_sio2_per_ion": -1.1248296241421851,
+      "signed_relative_error": -1.3021875713616407,
+      "species": "CF3+",
+      "state": {
+        "C": 0.045246618340477246,
+        "F": 0.9547533816595228,
+        "O": 0.0,
+        "Si": 0.0,
+        "V": 0.0443899577248847
+      },
+      "steady_state_residual": 1.1102230246251565e-16,
+      "steady_state_solver": "BDF_deposition_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 750.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 3.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 4.83620409228671,
+      "observed_yield_sio2_per_ion": 1.1828,
+      "plotted_lower_yield": 1.0469,
+      "plotted_upper_yield": 1.3229,
+      "predicted_yield_sio2_per_ion": 1.6120680307622368,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 0.9999999999991648,
+        "F": 3.000000000003737,
+        "O": 3.224136061525653,
+        "Si": 1.6120680307581543
+      },
+      "signed_error_sio2_per_ion": 0.42926803076223674,
+      "signed_relative_error": 0.36292528809793434,
+      "species": "CF3+",
+      "state": {
+        "C": 0.07852240479912931,
+        "F": 0.26353096035389056,
+        "O": 0.44507196106536656,
+        "Si": 0.21287467378161365,
+        "V": 0.05229615019352998
+      },
+      "steady_state_residual": 4.082512106151626e-12,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1000.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 3.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 5.282573285488018,
+      "observed_yield_sio2_per_ion": 1.4703,
+      "plotted_lower_yield": 1.3287,
+      "plotted_upper_yield": 1.619,
+      "predicted_yield_sio2_per_ion": 1.7608577618293395,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 1.0000000000000033,
+        "F": 3.0000000000000755,
+        "O": 3.521715523658491,
+        "Si": 1.7608577618294479
+      },
+      "signed_error_sio2_per_ion": 0.29055776182933957,
+      "signed_relative_error": 0.19761801117414105,
+      "species": "CF3+",
+      "state": {
+        "C": 0.07411134500598693,
+        "F": 0.20844692988238456,
+        "O": 0.4507313445343238,
+        "Si": 0.2667103805773048,
+        "V": 0.05806370832934749
+      },
+      "steady_state_residual": 1.8784973576657649e-13,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1250.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 3.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 5.6132335227001455,
+      "observed_yield_sio2_per_ion": 1.5847,
+      "plotted_lower_yield": 1.4159,
+      "plotted_upper_yield": 1.7606,
+      "predicted_yield_sio2_per_ion": 1.8710778409000486,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 1.000000000000341,
+        "F": 2.99999999999939,
+        "O": 3.742155681799011,
+        "Si": 1.871077840901404
+      },
+      "signed_error_sio2_per_ion": 0.2863778409000486,
+      "signed_relative_error": 0.18071423039064086,
+      "species": "CF3+",
+      "state": {
+        "C": 0.06989745075034944,
+        "F": 0.18099699622156556,
+        "O": 0.450092521588812,
+        "Si": 0.29901303143927305,
+        "V": 0.062120795244947305
+      },
+      "steady_state_residual": 1.3553602684623911e-12,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 1500.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 3.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 5.896753801406065,
+      "observed_yield_sio2_per_ion": 1.8736,
+      "plotted_lower_yield": 1.6962,
+      "plotted_upper_yield": 2.0709,
+      "predicted_yield_sio2_per_ion": 1.9655846004686885,
+      "prediction_within_plotted_source_interval": true,
+      "removed_atoms_per_ion": {
+        "C": 0.9999999999999947,
+        "F": 3.00000000000001,
+        "O": 3.9311692009373953,
+        "Si": 1.9655846004686643
+      },
+      "signed_error_sio2_per_ion": 0.09198460046868862,
+      "signed_relative_error": 0.04909511126637949,
+      "species": "CF3+",
+      "state": {
+        "C": 0.06629249183789054,
+        "F": 0.16350076656046142,
+        "O": 0.4483450502576517,
+        "Si": 0.32186169134399645,
+        "V": 0.06514345282048385
+      },
+      "steady_state_residual": 2.4202861936828413e-14,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    },
+    {
+      "atom_ledger_residual": 0.0,
+      "beyond_guo_source_fit_energy": true,
+      "correct_net_etch_sign": true,
+      "digitization_yield_uncertainty": 0.011,
+      "energy_eV": 2000.0,
+      "incoming_atoms_per_ion": {
+        "C": 1.0,
+        "F": 3.0,
+        "O": 0.0,
+        "Si": 0.0
+      },
+      "movement_atoms_per_ion": 6.387211113100342,
+      "observed_yield_sio2_per_ion": 1.7549,
+      "plotted_lower_yield": 1.5761,
+      "plotted_upper_yield": 1.9394,
+      "predicted_yield_sio2_per_ion": 2.1290703710334475,
+      "prediction_within_plotted_source_interval": false,
+      "removed_atoms_per_ion": {
+        "C": 1.000000000000012,
+        "F": 2.999999999999992,
+        "O": 4.258140742066879,
+        "Si": 2.1290703710334586
+      },
+      "signed_error_sio2_per_ion": 0.37417037103344764,
+      "signed_relative_error": 0.21321463959966247,
+      "species": "CF3+",
+      "state": {
+        "C": 0.060558600983853975,
+        "F": 0.1415711470024304,
+        "O": 0.4446207284224797,
+        "Si": 0.3532495235912359,
+        "V": 0.06933420313993695
+      },
+      "steady_state_residual": 1.5987211554602254e-14,
+      "steady_state_solver": "BDF_etch_complementarity_integration"
+    }
+  ],
+  "question": "Does the frozen atom-balanced Guo/Kwon C4F8-Ar/SiO2 closure predict independent mass-selected reactive-ion beam yields?",
+  "source_receipts": {
+    "guo_reaction_deck_path": "data/surface_interactions/guo_2009/table4_1_reaction_deck.csv",
+    "guo_reaction_deck_sha256": "2f93b31c1862095d133b765cddc1957ec27f0e0d05b7b2dfbafc0908f54b9600",
+    "guo_source_manifest_path": "data/surface_interactions/guo_2009/source_manifest.json",
+    "guo_source_manifest_sha256": "138f9f2938337ca2f66277bf09668c19a8d5dc735ec378588383cfd5cfe50b25",
+    "karahashi_data_path": "data/experimental/karahashi_2007/figure4_reactive_ion_yields.csv",
+    "karahashi_data_sha256": "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26",
+    "karahashi_digitization_manifest_path": "data/experimental/karahashi_2007/digitization_manifest.json",
+    "karahashi_digitization_manifest_sha256": "922fcf4bfbf1f4b543ddcfe4b412fd76f07aed944b15bd10443c8a83443e2792",
+    "loader_pinned_karahashi_data_sha256": "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26"
+  },
+  "status": "completed_mixed_transfer",
+  "verdict": {
+    "krueger_ion_identity_envelope_implication": "The all-CF2+ and all-CF3+ Krueger depth-scale bracket is a boundary sensitivity, not an independently validated reactive-ion closure. Its apparent agreement cannot identify the reactor ion mixture.",
+    "next_required_evidence": [
+      "fit no Karahashi point in isolation; derive or import a species-resolved reactive-ion stopping, implantation, fragmentation, and chemical-removal closure",
+      "calibrate only on a declared subset and preregister held-out species/energy blocks before claiming transfer",
+      "retain the measured tabulation as the highest-evidence closure inside its exact species/energy/angle support"
+    ],
+    "physics_defects_exposed": [
+      "generic ion incorporation lacks a species- and energy-resolved threshold/branch closure",
+      "the square-root reaction moments do not transfer quantitatively across F+, CF+, CF2+, and CF3+",
+      "most beam points are above the <=370 eV Guo/Yin fit support, so a high-energy stopping/fragmentation law is still missing"
+    ],
+    "reason": "The frozen closure does not reproduce the full independent species ladder. It overpredicts F+ and CF+ removal, and predicts net deposition for the measured 250 and 500 eV CF3+ etch points. Some CF2+/CF3+ high-energy points are closer, but selecting those after inspection is not a validation gate.",
+    "species_resolved_transfer_validated": false
+  }
+}
