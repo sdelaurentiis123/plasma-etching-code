@@ -1,0 +1,140 @@
+{
+  "claim_boundary": {
+    "not_valid": [
+      "a measured species-resolved wafer flux",
+      "a measured ion energy-angle distribution",
+      "a first-principles knobs-to-flux validation",
+      "permission to fit any Figure 5 or Figure 6 depth"
+    ],
+    "valid": "same-reactor blanket-conditioned transfer to fixed-duration features when Figure 4 alone sets the boundary normalization"
+  },
+  "derived_checks": {
+    "blanket_point_count": 7,
+    "feature_point_count": 49,
+    "feature_series_maxima_nm_per_bias_min": {
+      "4s_I": 147.948,
+      "4s_II": 264.363,
+      "4s_III": 176.89,
+      "8s_I": 427.535,
+      "8s_II": 560.218,
+      "8s_III": 403.51,
+      "8s_IV": 228.237
+    }
+  },
+  "digitization": {
+    "figure4_rate_uncertainty_nm_per_bias_min": 3.0,
+    "figure5_rate_uncertainty_nm_per_bias_min": 2.0,
+    "figure6_rate_uncertainty_nm_per_bias_min": 4.0,
+    "machine_digitization_created_before_preregistration": false,
+    "method": "official publisher JPEG; PIL/NumPy dark-axis localization; full-resolution color-component marker and error-cap transcription; visual overlay reconciliation",
+    "plotted_error_bar_semantics": "not reported by the source",
+    "source_figure_visually_inspected_before_preregistration": true
+  },
+  "experiment": {
+    "C4F8_pulse_sccm_s": [
+      15.0,
+      1.0
+    ],
+    "SF6_pulse_sccm_s": [
+      15.0,
+      1.0
+    ],
+    "bias_pulse_duration_s": 0.25,
+    "continuous_Ar_sccm": 80.0,
+    "figure5": {
+      "cumulative_bias_time_s": 168.75,
+      "cycle_duration_s": 4,
+      "cycles": 675,
+      "wall_time_min": 45
+    },
+    "figure6": {
+      "cumulative_bias_time_s": 112.5,
+      "cycle_duration_s": 8,
+      "cycles": 450,
+      "wall_time_min": 60
+    },
+    "initial_trench_widths_nm": [
+      80,
+      90,
+      100,
+      110,
+      120,
+      130,
+      140
+    ],
+    "pressure_Pa": 4.0,
+    "reactor": "NLD ICP, 150 mm wafer",
+    "source_power_W": 400.0,
+    "substrate_bias_power_W": 50.0
+  },
+  "manifest_id": "YOSHIE-2023-FIGURES4-6-DEPTH-R1",
+  "outputs": {
+    "blanket_csv": {
+      "path": "data/experimental/yoshie_2023/figure4_blanket_poly_si_rates.csv",
+      "sha256": "c4e673e1a6b5a6dab654a0a110a286ce634640d20379a89d4697fca1393b52c1"
+    },
+    "feature_csv": {
+      "path": "data/experimental/yoshie_2023/figures5_6_feature_depths.csv",
+      "sha256": "5180b06a9357a26facfcc89adb9f239f79f4ca41e5e65a3a31c17d80c634a108"
+    }
+  },
+  "pixel_calibration": {
+    "4a": {
+      "reference_rate_nm_per_bias_min": 500.0,
+      "y_reference_px": 732.0,
+      "y_zero_px": 1581.0
+    },
+    "4b": {
+      "reference_rate_nm_per_bias_min": 600.0,
+      "y_reference_px": 720.0,
+      "y_zero_px": 1581.0
+    },
+    "5e": {
+      "reference_rate_nm_per_bias_min": 300.0,
+      "y_reference_px": 83.5,
+      "y_zero_px": 778.0
+    },
+    "6f": {
+      "reference_rate_nm_per_bias_min": 700.0,
+      "y_reference_px": 77.5,
+      "y_zero_px": 718.5
+    }
+  },
+  "preregistration_commit_sha256": "dec49c464af246b04f0168588dc436a76442e64c0294248b324ceb96cf9d0c62",
+  "source": {
+    "citation": "T. Yoshie et al., Applied Surface Science 638 (2023) 157981, DOI 10.1016/j.apsusc.2023.157981",
+    "figures": {
+      "4": {
+        "sha256": "297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df",
+        "size_px": [
+          3150,
+          1778
+        ],
+        "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr4_lrg.jpg"
+      },
+      "5": {
+        "sha256": "de722d00eadba115a690562b519387ea79e3a634f19a12f6252df168c6056aef",
+        "size_px": [
+          2389,
+          3750
+        ],
+        "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr5_lrg.jpg"
+      },
+      "6": {
+        "sha256": "202e04674548182e40d2be4c7677cb1b1124cd9056f87baa13a1525495a9f7fe",
+        "size_px": [
+          2206,
+          4337
+        ],
+        "url": "https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr6_lrg.jpg"
+      }
+    },
+    "license": "CC BY 4.0"
+  },
+  "text_cross_checks": {
+    "digitized_figure4a_timing_II": 464.959,
+    "digitized_figure4b_timing_II": 592.683,
+    "figure4a_reported_maximum_nm_per_bias_min": 466.0,
+    "figure4b_reported_maximum_nm_per_bias_min": 591.0
+  }
+}

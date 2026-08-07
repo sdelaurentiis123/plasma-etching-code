@@ -49,6 +49,16 @@ KARAHASHI_2007_FIGURE4_SHA256 = (
     "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26")
 TAKADA_2005_FIGURE3_SHA256 = (
     "74f62fbe4b9d88390a35df2f25d605f573b8234b01125d08aac0124ed633ecca")
+YOSHIE_2023_BLANKET_SHA256 = (
+    "c4e673e1a6b5a6dab654a0a110a286ce634640d20379a89d4697fca1393b52c1")
+YOSHIE_2023_FEATURE_SHA256 = (
+    "5180b06a9357a26facfcc89adb9f239f79f4ca41e5e65a3a31c17d80c634a108")
+YOSHIE_2023_FIGURE4_SHA256 = (
+    "297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df")
+YOSHIE_2023_FIGURE5_SHA256 = (
+    "de722d00eadba115a690562b519387ea79e3a634f19a12f6252df168c6056aef")
+YOSHIE_2023_FIGURE6_SHA256 = (
+    "202e04674548182e40d2be4c7677cb1b1124cd9056f87baa13a1525495a9f7fe")
 
 
 @dataclass(frozen=True)
@@ -294,6 +304,50 @@ class Takada2005CoincidenceYield:
     digitization_yield_uncertainty: float
 
 
+@dataclass(frozen=True)
+class Yoshie2023BlanketRate:
+    """Same-reactor blanket poly-Si rate used only for boundary conditioning."""
+
+    source_figure: str
+    cycle_duration_s: float
+    timing: str
+    bias_start_s: float
+    blanket_etch_rate_nm_per_bias_min: float
+    marker_center_x_px: float
+    marker_center_y_px: float
+    digitization_rate_uncertainty_nm_per_bias_min: float
+    split: str
+    boundary_evidence_tier: str
+    observation_id: str
+    source_image_sha256: str
+
+
+@dataclass(frozen=True)
+class Yoshie2023FeatureDepth:
+    """Held-out cyclic SF6/C4F8 Si depth derived from cumulative bias-on time."""
+
+    source_figure: str
+    cycle_duration_s: float
+    timing: str
+    initial_width_nm: float
+    etch_rate_nm_per_bias_min: float
+    cumulative_bias_time_s: float
+    derived_etch_depth_nm: float
+    plotted_lower_rate_nm_per_bias_min: float
+    plotted_upper_rate_nm_per_bias_min: float
+    marker_center_x_px: float
+    marker_center_y_px: float
+    upper_cap_y_px: float
+    lower_cap_y_px: float
+    digitization_rate_uncertainty_nm_per_bias_min: float
+    digitization_depth_uncertainty_nm: float
+    measurement_uncertainty_semantics: str
+    split: str
+    boundary_evidence_tier: str
+    observation_id: str
+    source_image_sha256: str
+
+
 def _verified_csv_rows(path, expected_fields, expected_sha256, verify_checksum):
     path = Path(path)
     payload = path.read_bytes()
@@ -306,6 +360,199 @@ def _verified_csv_rows(path, expected_fields, expected_sha256, verify_checksum):
         rows = list(reader)
     if not rows:
         raise ValueError(f"experimental evidence is empty: {path}")
+    return rows
+
+
+def load_yoshie_2023_blanket_rates(path, *, verify_checksum=True):
+    """Load Figure-4 blanket rates without exposing held-out feature values."""
+    fields = [
+        "source_figure", "cycle_duration_s", "timing", "bias_start_s",
+        "blanket_etch_rate_nm_per_bias_min", "marker_center_x_px",
+        "marker_center_y_px",
+        "digitization_rate_uncertainty_nm_per_bias_min", "split",
+        "boundary_evidence_tier", "observation_id", "source_image_sha256",
+    ]
+    raw = _verified_csv_rows(
+        path, fields, YOSHIE_2023_BLANKET_SHA256, verify_checksum)
+    rows = tuple(Yoshie2023BlanketRate(
+        source_figure=row["source_figure"],
+        cycle_duration_s=float(row["cycle_duration_s"]),
+        timing=row["timing"],
+        bias_start_s=float(row["bias_start_s"]),
+        blanket_etch_rate_nm_per_bias_min=float(
+            row["blanket_etch_rate_nm_per_bias_min"]),
+        marker_center_x_px=float(row["marker_center_x_px"]),
+        marker_center_y_px=float(row["marker_center_y_px"]),
+        digitization_rate_uncertainty_nm_per_bias_min=float(
+            row["digitization_rate_uncertainty_nm_per_bias_min"]),
+        split=row["split"],
+        boundary_evidence_tier=row["boundary_evidence_tier"],
+        observation_id=row["observation_id"],
+        source_image_sha256=row["source_image_sha256"],
+    ) for row in raw)
+    axis = {
+        "Figure 4a": (1581.0, 732.0, 500.0, 4.0, {"I", "II", "III"}),
+        "Figure 4b": (1581.0, 720.0, 600.0, 8.0, {"I", "II", "III", "IV"}),
+    }
+    replay_errors = []
+    for item in rows:
+        if item.source_figure not in axis:
+            raise ValueError("unknown Yoshie Figure-4 panel")
+        y_zero, y_reference, reference_rate, cycle, timings = axis[
+            item.source_figure]
+        replayed = reference_rate * (
+            y_zero - item.marker_center_y_px
+        ) / (
+            y_zero - y_reference
+        )
+        replay_errors.append(replayed - item.blanket_etch_rate_nm_per_bias_min)
+        values = (
+            item.cycle_duration_s, item.bias_start_s,
+            item.blanket_etch_rate_nm_per_bias_min,
+            item.marker_center_x_px, item.marker_center_y_px,
+            item.digitization_rate_uncertainty_nm_per_bias_min,
+        )
+        if (any(not np.isfinite(value) for value in values)
+                or item.cycle_duration_s != cycle
+                or item.timing not in timings
+                or item.blanket_etch_rate_nm_per_bias_min <= 0.0
+                or item.digitization_rate_uncertainty_nm_per_bias_min <= 0.0
+                or item.split != "calibration"
+                or item.boundary_evidence_tier != "B_facility_conditioned"
+                or item.source_image_sha256 != YOSHIE_2023_FIGURE4_SHA256):
+            raise ValueError("invalid Yoshie Figure-4 blanket row")
+    expected_ids = {
+        f"yoshie_blanket_{cycle}s_{timing}"
+        for cycle, timings in ((4, ("I", "II", "III")),
+                               (8, ("I", "II", "III", "IV")))
+        for timing in timings
+    }
+    if (len(rows) != 7
+            or {item.observation_id for item in rows} != expected_ids
+            or len({(item.source_figure, item.timing) for item in rows}) != 7
+            or max(abs(error) for error in replay_errors) > 5.1e-4):
+        raise ValueError("Yoshie Figure-4 blanket board is incomplete or unreplayable")
+    return rows
+
+
+def load_yoshie_2023_feature_depths(path, *, verify_checksum=True):
+    """Load all 49 preregistered Figure-5/6 held-out feature-depth targets."""
+    fields = [
+        "source_figure", "cycle_duration_s", "timing", "initial_width_nm",
+        "etch_rate_nm_per_bias_min", "cumulative_bias_time_s",
+        "derived_etch_depth_nm", "plotted_lower_rate_nm_per_bias_min",
+        "plotted_upper_rate_nm_per_bias_min", "marker_center_x_px",
+        "marker_center_y_px", "upper_cap_y_px", "lower_cap_y_px",
+        "digitization_rate_uncertainty_nm_per_bias_min",
+        "digitization_depth_uncertainty_nm",
+        "measurement_uncertainty_semantics", "split",
+        "boundary_evidence_tier", "observation_id", "source_image_sha256",
+    ]
+    raw = _verified_csv_rows(
+        path, fields, YOSHIE_2023_FEATURE_SHA256, verify_checksum)
+    rows = tuple(Yoshie2023FeatureDepth(
+        source_figure=row["source_figure"],
+        cycle_duration_s=float(row["cycle_duration_s"]),
+        timing=row["timing"],
+        initial_width_nm=float(row["initial_width_nm"]),
+        etch_rate_nm_per_bias_min=float(row["etch_rate_nm_per_bias_min"]),
+        cumulative_bias_time_s=float(row["cumulative_bias_time_s"]),
+        derived_etch_depth_nm=float(row["derived_etch_depth_nm"]),
+        plotted_lower_rate_nm_per_bias_min=float(
+            row["plotted_lower_rate_nm_per_bias_min"]),
+        plotted_upper_rate_nm_per_bias_min=float(
+            row["plotted_upper_rate_nm_per_bias_min"]),
+        marker_center_x_px=float(row["marker_center_x_px"]),
+        marker_center_y_px=float(row["marker_center_y_px"]),
+        upper_cap_y_px=float(row["upper_cap_y_px"]),
+        lower_cap_y_px=float(row["lower_cap_y_px"]),
+        digitization_rate_uncertainty_nm_per_bias_min=float(
+            row["digitization_rate_uncertainty_nm_per_bias_min"]),
+        digitization_depth_uncertainty_nm=float(
+            row["digitization_depth_uncertainty_nm"]),
+        measurement_uncertainty_semantics=row[
+            "measurement_uncertainty_semantics"],
+        split=row["split"],
+        boundary_evidence_tier=row["boundary_evidence_tier"],
+        observation_id=row["observation_id"],
+        source_image_sha256=row["source_image_sha256"],
+    ) for row in raw)
+    panel = {
+        "Figure 5e": {
+            "y_zero": 778.0, "y_reference": 83.5, "reference_rate": 300.0,
+            "cycle": 4.0, "timings": {"I", "II", "III"},
+            "bias_time": 168.75, "rate_uncertainty": 2.0,
+            "source_sha256": YOSHIE_2023_FIGURE5_SHA256,
+        },
+        "Figure 6f": {
+            "y_zero": 718.5, "y_reference": 77.5, "reference_rate": 700.0,
+            "cycle": 8.0, "timings": {"I", "II", "III", "IV"},
+            "bias_time": 112.5, "rate_uncertainty": 4.0,
+            "source_sha256": YOSHIE_2023_FIGURE6_SHA256,
+        },
+    }
+    widths = {80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0}
+    expected_ids = set()
+    for cycle, timings in ((5, ("I", "II", "III")),
+                           (6, ("I", "II", "III", "IV"))):
+        for timing in timings:
+            for width in sorted(widths):
+                expected_ids.add(
+                    f"yoshie_fig{cycle}_{timing}_w{int(width)}")
+    for item in rows:
+        if item.source_figure not in panel:
+            raise ValueError("unknown Yoshie feature-depth panel")
+        spec = panel[item.source_figure]
+        scale = spec["reference_rate"] / (
+            spec["y_zero"] - spec["y_reference"])
+        replay_rate = scale * (spec["y_zero"] - item.marker_center_y_px)
+        replay_lower = scale * (spec["y_zero"] - item.lower_cap_y_px)
+        replay_upper = scale * (spec["y_zero"] - item.upper_cap_y_px)
+        replay_depth = replay_rate * spec["bias_time"] / 60.0
+        replay_depth_uncertainty = (
+            spec["rate_uncertainty"] * spec["bias_time"] / 60.0)
+        values = (
+            item.cycle_duration_s, item.initial_width_nm,
+            item.etch_rate_nm_per_bias_min, item.cumulative_bias_time_s,
+            item.derived_etch_depth_nm,
+            item.plotted_lower_rate_nm_per_bias_min,
+            item.plotted_upper_rate_nm_per_bias_min,
+            item.marker_center_x_px, item.marker_center_y_px,
+            item.upper_cap_y_px, item.lower_cap_y_px,
+            item.digitization_rate_uncertainty_nm_per_bias_min,
+            item.digitization_depth_uncertainty_nm,
+        )
+        if (any(not np.isfinite(value) for value in values)
+                or item.cycle_duration_s != spec["cycle"]
+                or item.timing not in spec["timings"]
+                or item.initial_width_nm not in widths
+                or item.cumulative_bias_time_s != spec["bias_time"]
+                or item.etch_rate_nm_per_bias_min <= 0.0
+                or item.derived_etch_depth_nm <= 0.0
+                or item.digitization_rate_uncertainty_nm_per_bias_min
+                != spec["rate_uncertainty"]
+                or abs(item.etch_rate_nm_per_bias_min - replay_rate) > 5.1e-4
+                or abs(item.plotted_lower_rate_nm_per_bias_min
+                       - replay_lower) > 5.1e-4
+                or abs(item.plotted_upper_rate_nm_per_bias_min
+                       - replay_upper) > 5.1e-4
+                or abs(item.derived_etch_depth_nm - replay_depth) > 5.1e-4
+                or abs(item.digitization_depth_uncertainty_nm
+                       - replay_depth_uncertainty) > 5.1e-4
+                or not (item.plotted_lower_rate_nm_per_bias_min
+                        <= item.etch_rate_nm_per_bias_min
+                        <= item.plotted_upper_rate_nm_per_bias_min)
+                or item.measurement_uncertainty_semantics != "not_reported"
+                or item.split != "held_out_transfer"
+                or item.boundary_evidence_tier != "B_facility_conditioned"
+                or item.source_image_sha256 != spec["source_sha256"]):
+            raise ValueError("invalid Yoshie Figure-5/6 feature-depth row")
+    keys = {
+        (item.source_figure, item.timing, item.initial_width_nm)
+        for item in rows}
+    if (len(rows) != 49 or len(keys) != len(rows)
+            or {item.observation_id for item in rows} != expected_ids):
+        raise ValueError("Yoshie held-out feature-depth board is incomplete")
     return rows
 
 

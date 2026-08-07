@@ -1,0 +1,8 @@
+source_figure,cycle_duration_s,timing,bias_start_s,blanket_etch_rate_nm_per_bias_min,marker_center_x_px,marker_center_y_px,digitization_rate_uncertainty_nm_per_bias_min,split,boundary_evidence_tier,observation_id,source_image_sha256
+Figure 4a,4,I,-0.15,122.203,623.0,1373.5,3.0,calibration,B_facility_conditioned,yoshie_blanket_4s_I,297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df
+Figure 4a,4,II,0.35,464.959,718.0,791.5,3.0,calibration,B_facility_conditioned,yoshie_blanket_4s_II,297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df
+Figure 4a,4,III,1.35,233.510,908.0,1184.5,3.0,calibration,B_facility_conditioned,yoshie_blanket_4s_III,297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df
+Figure 4b,8,I,-0.15,148.432,2245.0,1368.0,3.0,calibration,B_facility_conditioned,yoshie_blanket_8s_I,297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df
+Figure 4b,8,II,0.10,592.683,2292.5,730.5,3.0,calibration,B_facility_conditioned,yoshie_blanket_8s_II,297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df
+Figure 4b,8,III,1.10,326.829,2482.5,1112.0,3.0,calibration,B_facility_conditioned,yoshie_blanket_8s_III,297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df
+Figure 4b,8,IV,2.10,170.732,2674.0,1336.0,3.0,calibration,B_facility_conditioned,yoshie_blanket_8s_IV,297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df

@@ -17,6 +17,8 @@ from petch.experimental_data import (
     load_karahashi_2007_reactive_ion_yields,
     load_krueger_2024_evidence,
     load_takada_2005_coincidence_yields,
+    load_yoshie_2023_blanket_rates,
+    load_yoshie_2023_feature_depths,
 )
 
 
@@ -45,6 +47,8 @@ KARAHASHI_2007_DATA = (
 TAKADA_2005_DATA = (
     Path(__file__).parents[1] / "data" / "experimental" / "takada_2005"
     / "figure3_sio2_coincidence_yields.csv")
+YOSHIE_2023_DATA = (
+    Path(__file__).parents[1] / "data" / "experimental" / "yoshie_2023")
 
 
 def test_bosch_wafer_measurements_have_verified_provenance_and_units():
@@ -404,3 +408,64 @@ def test_takada_coincidence_yields_reject_unverified_content(tmp_path):
     altered.write_bytes(TAKADA_2005_DATA.read_bytes() + b"\n")
     with pytest.raises(ValueError, match="checksum mismatch"):
         load_takada_2005_coincidence_yields(altered)
+
+
+def test_yoshie_blanket_rates_are_a_complete_separate_calibration_board():
+    rows = load_yoshie_2023_blanket_rates(
+        YOSHIE_2023_DATA / "figure4_blanket_poly_si_rates.csv")
+
+    assert len(rows) == 7
+    assert sum(row.cycle_duration_s == 4.0 for row in rows) == 3
+    assert sum(row.cycle_duration_s == 8.0 for row in rows) == 4
+    assert all(row.split == "calibration" for row in rows)
+    assert all(
+        row.boundary_evidence_tier == "B_facility_conditioned"
+        for row in rows)
+    four_second_peak = max(
+        row.blanket_etch_rate_nm_per_bias_min for row in rows
+        if row.cycle_duration_s == 4.0)
+    eight_second_peak = max(
+        row.blanket_etch_rate_nm_per_bias_min for row in rows
+        if row.cycle_duration_s == 8.0)
+    assert four_second_peak == pytest.approx(466.0, abs=2.0)
+    assert eight_second_peak == pytest.approx(591.0, abs=2.0)
+
+
+def test_yoshie_feature_depths_replay_all_preregistered_held_out_values():
+    rows = load_yoshie_2023_feature_depths(
+        YOSHIE_2023_DATA / "figures5_6_feature_depths.csv")
+
+    assert len(rows) == 49
+    assert sum(row.source_figure == "Figure 5e" for row in rows) == 21
+    assert sum(row.source_figure == "Figure 6f" for row in rows) == 28
+    assert {row.initial_width_nm for row in rows} == {
+        80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0}
+    assert all(row.split == "held_out_transfer" for row in rows)
+    assert all(
+        row.boundary_evidence_tier == "B_facility_conditioned"
+        for row in rows)
+    assert all(
+        row.derived_etch_depth_nm == pytest.approx(
+            row.etch_rate_nm_per_bias_min
+            * row.cumulative_bias_time_s / 60.0, abs=0.002)
+        for row in rows)
+    assert all(
+        row.measurement_uncertainty_semantics == "not_reported"
+        for row in rows)
+
+
+@pytest.mark.parametrize(
+    ("filename", "loader"),
+    [
+        ("figure4_blanket_poly_si_rates.csv",
+         load_yoshie_2023_blanket_rates),
+        ("figures5_6_feature_depths.csv",
+         load_yoshie_2023_feature_depths),
+    ],
+)
+def test_yoshie_digitizations_reject_unverified_content(
+        tmp_path, filename, loader):
+    altered = tmp_path / filename
+    altered.write_bytes((YOSHIE_2023_DATA / filename).read_bytes() + b"\n")
+    with pytest.raises(ValueError, match="checksum mismatch"):
+        loader(altered)
