@@ -71,6 +71,8 @@ def test_composed_chlorine_wall_transport_is_conserved_but_not_predictive():
         ECONOMOU_CHLORINE_REDUCED_DIFFUSIVITY_M_INV_S
         / total_density
     )
+    assert transport.geometry == CylindricalReactor(
+        radius_m=0.14, length_m=0.10)
     assert transport.wall_loss.numerical_closure_passes
     assert not transport.supports_prediction
     assert not transport.incident_velocity_state.supports_prediction

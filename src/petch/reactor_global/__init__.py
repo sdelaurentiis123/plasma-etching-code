@@ -42,6 +42,16 @@ from .chlorine_transport import (
     ramamurthi_economou_2002_chlorine_diffusivity,
     solve_chlorine_neutral_wall_transport,
 )
+from .chlorine_particle_model import (
+    REACTOR_SCALAR_EVIDENCE_KINDS,
+    ChlorineChargedTransportState,
+    ChlorineFixedPressureCondition,
+    ChlorineParticleSolution,
+    FixedElectronTemperatureChlorineParticleModel,
+    PositiveIonWallTransport,
+    ReactorScalarInput,
+    standard_volume_flow_molecules_s,
+)
 from .evaluated_chlorine import (
     ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
     HAMILTON_2018_CL2_DISSOCIATION_STATES,
@@ -124,6 +134,9 @@ __all__ = [
     "ChlorineWallFlux",
     "ChlorineWallRecombinationBoundary",
     "ChlorineNeutralWallTransport",
+    "ChlorineChargedTransportState",
+    "ChlorineFixedPressureCondition",
+    "ChlorineParticleSolution",
     "ChlorineVolumeWallRates",
     "ArgonGlobalCondition",
     "ArgonGlobalSolution",
@@ -141,6 +154,7 @@ __all__ = [
     "ElectronegativeEdgeFactors",
     "ElectropositiveEdgeFactors",
     "FixedArgonTransportProvider",
+    "FixedElectronTemperatureChlorineParticleModel",
     "DirectDriveRFPowerBoundary",
     "LeeLiebermanArgonGlobalModel",
     "LeeLiebermanArgonTransportProvider",
@@ -151,7 +165,10 @@ __all__ = [
     "PASCAL_PER_MTORR",
     "POWER_EVIDENCE_KINDS",
     "PREDICTIVE_EVIDENCE_KINDS",
+    "PositiveIonWallTransport",
     "RateContext",
+    "REACTOR_SCALAR_EVIDENCE_KINDS",
+    "ReactorScalarInput",
     "Reaction",
     "ReactionNetwork",
     "ReducedNeutralDiffusivity",
@@ -177,5 +194,6 @@ __all__ = [
     "ramamurthi_economou_2002_chlorine_diffusivity",
     "solve_chlorine_neutral_wall_transport",
     "solve_cylindrical_neutral_wall_loss",
+    "standard_volume_flow_molecules_s",
     "time_average_real_power_W",
 ]

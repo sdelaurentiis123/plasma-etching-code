@@ -83,6 +83,7 @@ def ramamurthi_economou_2002_chlorine_diffusivity(
 class ChlorineNeutralWallTransport:
     """Bulk-to-wall chlorine transport with explicit evidence composition."""
 
+    geometry: CylindricalReactor
     diffusivity: NeutralDiffusivityState
     wall_loss: CylindricalNeutralWallLoss
     wall_boundary: ChlorineWallRecombinationBoundary
@@ -90,7 +91,8 @@ class ChlorineNeutralWallTransport:
 
     def __post_init__(self):
         if (
-            not isinstance(self.diffusivity, NeutralDiffusivityState)
+            not isinstance(self.geometry, CylindricalReactor)
+            or not isinstance(self.diffusivity, NeutralDiffusivityState)
             or not isinstance(self.wall_loss, CylindricalNeutralWallLoss)
             or not isinstance(
                 self.wall_boundary, ChlorineWallRecombinationBoundary)
@@ -223,6 +225,7 @@ def solve_chlorine_neutral_wall_transport(
             wall_boundary.recombination_probability),
     )
     return ChlorineNeutralWallTransport(
+        geometry=geometry,
         diffusivity=diffusivity,
         wall_loss=wall_loss,
         wall_boundary=wall_boundary,
