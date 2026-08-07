@@ -228,10 +228,12 @@ far too slow.
 ### Current petch gap
 
 - The continuous-etch path still centers on compact empirical yield laws.
-- `ale.py` implements the later ALE reduced-order model, but the general evolving feature solver does
-  not carry a unified per-surface coverage/mixed-layer/damage state.
-- The versioned interaction schema and sourced Si tables now exist, but no Si-Cl2-Ar+ state mechanism
-  consumes them through the same evolving feature interface as the SiO2 mechanism.
+- `ale.py` implements the later ALE reduced-order model, but its printed equations fail elemental
+  chlorine conservation at partial coverage; it is now explicitly a source-ROM replay, not a
+  fundamental surface closure.
+- The versioned interaction schema, sourced Si tables, atom-counted ALE-cycle ledger, and a narrow
+  Si-Cl2-Ar+ evolving-feature mechanism exist. A general coverage/mixed-layer/damage state spanning
+  released conditions remains open.
 - Released tables are sparse and do not include incidence-angle dependence. Leave-one-out interpolation
   error is now measurable, but the compact-law comparison and angle data remain open.
 
@@ -249,7 +251,7 @@ far too slow.
   training corpus, inputs, and 13,020-row ALE trajectory remain reproducibly available from the pinned
   archive rather than being duplicated in Git.
 - `load_kounis_melas_2024_tables` constructs sourced tables for Ar+ physical sputter yield/damage
-  thickness, 100 eV Si-Cl2-Ar+ reactive etch yield versus flux ratio, and 80 eV species-resolved ALE
+  thickness, 100 eV Si-Cl2-Ar+ reactive etch yield versus flux ratio, and 215 eV species-resolved ALE
   products. Values and uncertainty replay at every archived node and default extrapolation refusal is
   tested. Evidence remains labeled `DeepMD_molecular_dynamics`, never experiment.
 - The surface-state remap and mechanism initialization contracts are now chemistry-neutral. A sourced
@@ -258,6 +260,15 @@ far too slow.
   100 eV, normal-incidence, 10:1 flux-ratio node, its mean dimensional velocity agrees with the table
   yield within 1%, and MD yield uncertainty propagates separately. Unreleased energy, angle, ratio,
   and species are refused. This proves a narrow second-chemistry architecture gate, not general Si.
+- The exact completed-cycle endpoints from the full 13,020-row `ALE/ALE.csv` trajectory are now
+  checksum-bound to their parent archive and represented as atom counts on the physical 32.58 Å cell.
+  The conversion never aliases the source's separate material-ML and fluence-ML labels.
+- A no-depth-fit transfer combines the atom-counted chlorinated transient, the independent DeepMD
+  bare-Si sputter law for the remaining measured fluence, and Vella--Hao's measured positive-ion flux.
+  At 60/80/100 eV it predicts 0.4842/0.9453/1.4006 nm/cycle versus the digitized experimental curve's
+  0.5558/1.0453/1.5427 nm/cycle, a 12.9% maximum nominal relative error. The six source markers and
+  frame pass a checksum-bound PIL/Poppler 1.25-pixel gate. This is retrospective cross-source evidence,
+  not blind Tier-A validation: the mean energy is inferred and no species-resolved IEAD was measured.
 
 ### Attack sequence
 
@@ -305,7 +316,12 @@ this state, not evidence that memory can be discarded.
 
 ### Current petch state and gap
 
-- `ale.py` and `ale_diff.py` already reproduce the published ALE-window reduced model and gradients.
+- `ale.py` and `ale_diff.py` reproduce the published ALE-window reduced model and gradients, but the
+  source equations are not elementally conservative. At partial coverage the quadratic SiCl2 chlorine
+  sink and linear SiCl2 product law create chlorine.
+- `si_cl_ale_depth.py` supplies a separate atom-counted absolute-depth transfer. Its Si removal ledger
+  closes exactly, refuses extrapolation beyond the released table intersection, and carries source
+  uncertainty separately from missing IEAD and model-form terms.
 - That is a zero-dimensional process calculation. It is not yet a field of surface states attached to
   an evolving geometry.
 - The main feature solver does not advect/remap coverage, subsurface Cl, damage depth, or cumulative
@@ -315,8 +331,9 @@ this state, not evidence that memory can be discarded.
 
 ### Attack sequence
 
-1. Add state-conservation tests to the existing zero-dimensional ALE implementation: chlorine/site
-   bounds, dose saturation, zero-flux invariance, and limiting continuous-exposure behavior.
+1. **Partly done:** diagnose the published ROM's chlorine residual and add atom-counted dimensional
+   removal tests. A replacement transient closure still needs chlorine/site bounds, dose saturation,
+   zero-flux invariance, and limiting continuous-exposure behavior.
 2. Define the minimal surface state: top-layer Cl, mixed-layer Cl, mixed-layer/damage depth,
    cumulative ion fluence, and optional product inventory.
 3. Advance that state on a static collection of surface elements under prescribed flux histories and
@@ -328,7 +345,10 @@ this state, not evidence that memory can be discarded.
 
 ### Gates
 
-- Published ALE energy window and etch-per-cycle anchors remain passing.
+- Published ALE-window ROM anchors remain source-replay checks only; they do not pass the elemental
+  conservation gate.
+- The atom-counted 60/80/100 eV absolute-depth board passes its preregistered 15% nominal maximum-error
+  gate (12.9%), with no depth fit. It remains retrospective and boundary-limited rather than blind.
 - Pulse subdivision invariance: splitting an unchanged dose into smaller steps converges to the same
   state and removal.
 - Static-uniform surface reproduces the zero-dimensional solver.

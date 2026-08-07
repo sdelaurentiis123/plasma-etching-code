@@ -1,4 +1,4 @@
-"""Directional plasma Atomic Layer Etching (Si / Cl2 / Ar+) — cyclic three-layer site-balance ROM.
+"""Source-faithful Si/Cl2/Ar+ ALE reduced-order model replay.
 
 Reduced-order model of Vella & Graves (2025), "Si-Cl2-Ar+ Atomic Layer Etching Window", OSTI 2586627
 (https://www.osti.gov/biblio/2586627). A cyclic wrapper around the same coupled-coverage kinetics
@@ -11,10 +11,15 @@ removal completes and the physical-sputter leak Y_Si is negligible (flat EPC = A
 Everything here is smooth in the ion energy E and the parameters, so the whole cycle composes with
 reverse-mode autodiff (the differentiable-calibration path). Pure numpy; no box needed.
 
-Benchmark gates (see CHEMISTRY_FRONTIER_ALE.md): EPC ~0.67/0.75/1.0 Å/cycle at 15/17.5/20 eV
-(the 15-20 eV window), rise to ~1.7/6 at 22.5/30 eV; Cl uptake plateau 0.8e15 cm^-2; synergy S->~100%.
+Atomic-balance warning: the printed coverage equations consume the SiCl2 channel proportional to
+``theta**2``, but the printed product equation emits SiCl2 proportional to ``theta``.  At partial
+coverage the combined equations create Cl atoms.  This module retains the published linear product
+law to reproduce the source ROM; it must not be promoted as an atom-conservative absolute-depth
+closure.  The atom-counted depth-transfer path is :mod:`petch.si_cl_ale_depth`.
 """
 import numpy as np
+
+MODEL_IS_ELEMENTALLY_CONSERVATIVE = False
 
 # fixed constants (Vella-Graves ROM)
 SIGMA1 = 1.0e15      # top-layer site density, sites/cm^2
@@ -53,8 +58,10 @@ def bombardment_step(theta1, theta2, E, t_barr, dt=0.02):
       dtheta1/dt = -(J_Ar/s1)(Y_Cl t1 + Y_SiCl t1 + 2 Y_SiCl2 t1^2 + K t1)      [Eq 6]
       dtheta2/dt = -(J_Ar/s2)(Y_Cl t2 + Y_SiCl t2 + 2 Y_SiCl2 t2^2 - K t1)      [Eq 7]
       J_SiCl  = J_Ar Y_SiCl  (t1+t2)   [Eq 9,  1 Si/molecule]
-      J_SiCl2 = J_Ar Y_SiCl2 (t1+t2)   [Eq 10, 1 Si/molecule]
+      J_SiCl2 = J_Ar Y_SiCl2 (t1+t2)   [Eq 10, 1 Si/molecule; printed linear law]
       J_Si    = J_Ar Y_Si    (1 - t2)  [Eq 11, bare-Si sputter, from the mixed layer]
+    Eq. 10 is inconsistent with the theta-squared SiCl2 sink in Eqs. 6-7 and therefore does not
+    conserve chlorine at partial coverage.  It remains here solely for source-ROM replay.
     The chemical SiCl/SiCl2 channels drive the 15-20 eV window (Y_Si=0 there); the bare-Si sputter
     leak turns on ~20 eV and breaks self-limitation. Forward Euler, dt=0.02 s resolves the ~0.06 s
     K-mixing transient. Returns (theta1, theta2, N_Si_removed[cm^-2])."""

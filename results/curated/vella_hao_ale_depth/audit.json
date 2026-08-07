@@ -1,0 +1,195 @@
+{
+  "absolute_depth_board": {
+    "comparison_curve_operation": "piecewise-linear interpolation between adjacent digitized experimental markers; no extrapolation",
+    "comparison_energy_eV": [
+      60.0,
+      80.0,
+      100.0
+    ],
+    "experimental_curve_depth_nm": [
+      0.5558273084754703,
+      1.0453439733559777,
+      1.542678774951377
+    ],
+    "fit_to_depth_used": false,
+    "mae_nm": 0.10457805880002091,
+    "maximum_absolute_relative_error": 0.1288480719755431,
+    "nominal_gate_maximum_relative_error": 0.15,
+    "nominal_gate_passed": true,
+    "point_ledgers": [
+      {
+        "atom_balance_residual_cm2": 0.0,
+        "chlorinated_transient_depth_nm": 0.07667361111111112,
+        "chlorinated_transient_si_atoms_cm2": 383121404389918.25,
+        "energy_eV": 60.0,
+        "physical_tail_depth_nm": 0.4075364203159394,
+        "physical_tail_si_atoms_cm2": 2036371098593742.2,
+        "source_reported_sputter_tail_uncertainty_nm": 0.27404426527847775,
+        "steady_cycle_si_material_ml": 0.5648148148148149
+      },
+      {
+        "atom_balance_residual_cm2": 0.0,
+        "chlorinated_transient_depth_nm": 0.10621180555555557,
+        "chlorinated_transient_si_atoms_cm2": 530717355261444.1,
+        "energy_eV": 80.0,
+        "physical_tail_depth_nm": 0.8390455712386985,
+        "physical_tail_si_atoms_cm2": 4192528732398880.0,
+        "source_reported_sputter_tail_uncertainty_nm": 0.4153020668200564,
+        "steady_cycle_si_material_ml": 0.7824074074074074
+      },
+      {
+        "atom_balance_residual_cm2": 0.0,
+        "chlorinated_transient_depth_nm": 0.13009375,
+        "chlorinated_transient_si_atoms_cm2": 650050251710762.9,
+        "energy_eV": 100.0,
+        "physical_tail_depth_nm": 1.270554722161458,
+        "physical_tail_si_atoms_cm2": 6348686366204019.0,
+        "source_reported_sputter_tail_uncertainty_nm": 0.5565598683616351,
+        "steady_cycle_si_material_ml": 0.9583333333333334
+      }
+    ],
+    "predicted_depth_nm": [
+      0.48421003142705055,
+      0.945257376794254,
+      1.4006484721614578
+    ],
+    "relative_error": [
+      -0.1288480719755431,
+      -0.09574513185397258,
+      -0.09206732152932863
+    ],
+    "rmse_nm": 0.10850340715654277,
+    "signed_error_nm": [
+      -0.0716172770484198,
+      -0.1000865965617237,
+      -0.14203030278991924
+    ]
+  },
+  "boundary_and_units": {
+    "cell_area_cm2": 1.0614563999999997e-13,
+    "conversion": "atomistic removal uses explicit atoms/cell and cell area; experiment uses measured flux times duration",
+    "deepmd_ar_fluence_cm2": 9421018140735694.0,
+    "deepmd_ar_impacts_per_cycle": 1000,
+    "deepmd_cl2_impacts_per_cycle": 2255,
+    "deepmd_si_atoms_per_material_ml": 72,
+    "experimental_ion_fluence_cm2": 1.11e+17,
+    "ion_bombardment_duration_s": 3.0,
+    "measured_positive_ion_flux_cm2_s": 3.7e+16,
+    "monolayer_alias_used_for_fluence_conversion": false,
+    "remaining_physical_sputter_fluence_cm2": 1.015789818592643e+17
+  },
+  "claim": "no-depth-fit absolute Si/Cl2/Ar+ ALE cross-source validation; not a blind prediction and not a measured species-resolved IEAD",
+  "legacy_transient_rom_atom_balance": {
+    "atom_conservative_theta_squared_depth_nm": 0.02912529483605287,
+    "chlorine_created_per_ar_at_theta_top_0p5_theta_mixed_0p5": 0.0123642095609308,
+    "experiment_schedule_s": {
+      "ar_ion": 3.0,
+      "cl2": 2.0
+    },
+    "first_experimental_energy_eV": 20.6821047804654,
+    "interpretation": "the legacy ROM may replay the paper's empirical curve but cannot serve as an atom-conservative absolute-depth closure",
+    "printed_rom_depth_nm": 0.08134147758987066,
+    "source_equation_conflict": "coverage equations consume the SiCl2 channel as 2*Y*theta^2 Cl atoms, while the printed product equation emits 2*Y*theta Cl atoms",
+    "status": "failed_elemental_conservation",
+    "time_step_refinement_difference_nm": {
+      "conservative": 8.356032389067457e-06,
+      "printed": 9.41789767200385e-06
+    }
+  },
+  "schema_version": 1,
+  "source": {
+    "ale_cycle_table_fingerprint": "aeadd6537f9ce5b0f0dc94d12f3885c7bda7e43783f9d62fc3bd86f577a09ecb",
+    "deepmd_ale_trajectory_sha256": "e76b9895a8191c923a492130452a73a4c929589b5260d9847e1d750fc22be884",
+    "deepmd_archive_sha256": "4c9fa0b9268ac314da77b1012906dff4e45c5af79afd7ea674b26ace48e0f269",
+    "deepmd_dataset_doi": "10.34770/rjv6-2w31",
+    "digitization_sha256": "5e041f07c1423a55312940f8e497cce62ddf38b94a3be1be9c5be12b3fcb9d1b",
+    "experiment_figure": "Figure 8",
+    "experiment_osti_id": "2248044",
+    "experiment_paper_doi": "10.1002/ppap.202200198",
+    "sputter_table_fingerprint": "869c2f6b67b3170df2b3bcf74111c946d8110b875f14e1cf042668d5cd682443"
+  },
+  "uncertainty_and_validity": {
+    "combined_uncertainty_claimed": false,
+    "digitization_bound_nm": 0.01788908765652952,
+    "evidence_tier": "retrospective no-fit cross-source transfer with a measured fluence and inferred mean-energy boundary",
+    "incomplete_terms": [
+      "experimental mean-energy uncertainty",
+      "experimental IEDF and ion angular distribution",
+      "experimental ion-species fractions",
+      "finite-cell/statistical uncertainty of ALE cycle increments",
+      "model-form error of pure-Si tail after the chlorinated transient"
+    ],
+    "known_model_form_assumptions": [
+      "normal-incidence monoenergetic DeepMD impacts represent the inferred experimental mean energy",
+      "the released 1000-impact ALE sequence exhausts the chlorinated transient",
+      "the remaining experimental fluence removes Si through the released pure-Si Ar+ sputter law",
+      "slow between-impact chemistry and facility wall conditioning are not represented"
+    ],
+    "source_reported_sputter_tail_uncertainty_nm": [
+      0.27404426527847775,
+      0.4153020668200564,
+      0.5565598683616351
+    ]
+  },
+  "vision_digitization_audit": {
+    "acceptance_tolerance_pixels": 1.25,
+    "all_markers_match_within_1p25_pixels": true,
+    "digitization_bound_eV": 0.39407313997477933,
+    "digitization_bound_nm": 0.017889087656529516,
+    "marker_centers_pixels": [
+      [
+        722.7490774907749,
+        819.2029520295202
+      ],
+      [
+        830.0,
+        797.5
+      ],
+      [
+        938.5,
+        739.0
+      ],
+      [
+        1081.0277777777778,
+        659.9722222222222
+      ],
+      [
+        1203.5276752767527,
+        477.97047970479707
+      ],
+      [
+        1358.0,
+        343.5
+      ]
+    ],
+    "marker_depths_nm": [
+      0.1115856596848623,
+      0.4221824686940966,
+      1.259391771019678,
+      2.3903796461936,
+      4.995055746621866,
+      6.919499105545618
+    ],
+    "marker_energies_eV": [
+      20.727956333787795,
+      54.53972257250946,
+      88.7452711223203,
+      133.6783662603335,
+      172.2975016635412,
+      220.99621689785624
+    ],
+    "maximum_marker_center_error_pixels": 0.1822188944223141,
+    "method": "Poppler 240-dpi render; plot borders recovered from black-pixel line scores; PIL black-mask centroids recovered independently inside each 19-by-19-pixel marker window",
+    "paper_page": 17,
+    "paper_sha256": "789bf50302fc2ed9175403c47f895e1fb8db5481be5fb980739cad97f33c2218",
+    "paper_url": "https://www.osti.gov/servlets/purl/2248044",
+    "plot_frame_pixels": {
+      "bottom": 827.0,
+      "left": 657.0,
+      "right": 1450.0,
+      "top": 268.0
+    },
+    "render_dpi": 240,
+    "status": "passed"
+  }
+}

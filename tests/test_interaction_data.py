@@ -44,6 +44,28 @@ def test_deepmd_ale_product_table_retains_species_resolved_yields():
     assert evaluated.standard_uncertainty["cl_yield"].shape == dosage.shape
 
 
+def test_deepmd_ale_cycle_table_replays_exact_atom_counted_endpoints():
+    table = load_kounis_melas_2024_tables(DATA).ale_cycles
+
+    assert [axis.name for axis in table.axes] == [
+        "completed_cycle", "ion_energy"]
+    assert np.array_equal(table.axes[0].values, [1.0, 2.0, 3.0, 4.0])
+    assert np.array_equal(table.axes[1].values, [40.0, 60.0, 80.0, 100.0])
+    assert np.isclose(
+        table.outputs["cumulative_si_etched_material_ml"][3, 2],
+        3.0694444444444446,
+    )
+    assert np.isclose(
+        table.outputs["post_bombardment_cl_material_ml"][0, 0],
+        0.3055555555555556,
+    )
+    conditions = table.provenance["conditions"]
+    assert conditions["parent_source_table_sha256"] == (
+        "e76b9895a8191c923a492130452a73a4c929589b5260d9847e1d750fc22be884")
+    assert conditions["silicon_atoms_per_material_ml"] == 72
+    assert "not" in conditions["note"] and "fluence" in conditions["note"]
+
+
 def test_deepmd_tables_refuse_unvalidated_energy_and_flux_ratio_extrapolation():
     tables = load_kounis_melas_2024_tables(DATA)
     with pytest.raises(SurfaceInteractionDomainError, match="ion_energy"):

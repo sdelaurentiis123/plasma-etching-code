@@ -15,9 +15,13 @@ KOUNIS_MELAS_2024_SHA256 = {
     "Sputtering.csv": "80ae627c1cec67258496ee7d22bd130817b678c1fd3288d5141436fcf374ee3c",
     "RIE.csv": "7cc634ae1218ba12d1e30ba7e6b4aefc0f4f0cc6de04ced8120115a60786cc77",
     "Products.csv": "79a7cd3a2618a3fc3d65946d2db5247870d428b58270f78b0ffe46b5116bd9bf",
+    "ALE_cycle_endpoints.csv": (
+        "4867fbc5c671ac7c9c1efba8371f8d8e3009ec21b77f7f41f10a486414d94a36"),
 }
 KOUNIS_MELAS_2024_ARCHIVE_SHA256 = (
     "4c9fa0b9268ac314da77b1012906dff4e45c5af79afd7ea674b26ace48e0f269")
+KOUNIS_MELAS_2024_ALE_TRAJECTORY_SHA256 = (
+    "e76b9895a8191c923a492130452a73a4c929589b5260d9847e1d750fc22be884")
 
 
 @dataclass(frozen=True)
@@ -25,6 +29,7 @@ class KounisMelas2024Tables:
     sputtering: SurfaceInteractionTable
     reactive_ion_etch: SurfaceInteractionTable
     ale_products: SurfaceInteractionTable
+    ale_cycles: SurfaceInteractionTable
 
 
 def _verified_rows(path, expected_fields, verify_checksum):
@@ -79,6 +84,13 @@ def load_kounis_melas_2024_tables(directory, *, verify_checksum=True):
         directory / "Products.csv",
         ["Ion Dosage (cm^-2) × 10^15", "Si Yield", "Si Yield ±", "SiCl Yield",
          "SiCl Yield ±", "SiCl2 Yield", "SiCl2 Yield ±", "Cl Yield", "Cl Yield ±"],
+        verify_checksum)
+    ale_cycle_rows = _verified_rows(
+        directory / "ALE_cycle_endpoints.csv",
+        ["Completed cycle", "Ion energy (eV)",
+         "Cumulative Si etched (material ML)",
+         "Post-bombardment Cl (material ML)", "Source row index",
+         "Source cycle coordinate"],
         verify_checksum)
 
     energy = np.asarray([float(row["Energy (eV)"]) for row in sputter_rows])
@@ -146,4 +158,79 @@ def load_kounis_melas_2024_tables(directory, *, verify_checksum=True):
             note=(
                 "The separate Figure 12 ALE morphology sequence uses 80 eV; "
                 "the Products.csv points are the 215 eV product-yield sequence.")))
-    return KounisMelas2024Tables(sputtering, reactive_ion_etch, ale_products)
+
+    completed_cycles = np.asarray([1.0, 2.0, 3.0, 4.0])
+    ale_energies = np.asarray([40.0, 60.0, 80.0, 100.0])
+    keyed_rows = {}
+    expected_source_rows = {1: 3254, 2: 6509, 3: 9764, 4: 13019}
+    for row in ale_cycle_rows:
+        cycle = int(row["Completed cycle"])
+        energy_node = float(row["Ion energy (eV)"])
+        key = (cycle, energy_node)
+        if key in keyed_rows:
+            raise ValueError(f"duplicate ALE cycle endpoint: {key}")
+        if (cycle not in expected_source_rows
+                or int(row["Source row index"]) != expected_source_rows[cycle]):
+            raise ValueError(f"unexpected ALE source endpoint: {key}")
+        keyed_rows[key] = row
+    expected_keys = {
+        (int(cycle), float(energy_node))
+        for cycle in completed_cycles
+        for energy_node in ale_energies
+    }
+    if set(keyed_rows) != expected_keys:
+        raise ValueError("ALE cycle endpoint grid is incomplete or contains an unknown node")
+
+    def ale_grid(column):
+        return np.asarray([
+            [
+                float(keyed_rows[(int(cycle), float(energy_node))][column])
+                for energy_node in ale_energies
+            ]
+            for cycle in completed_cycles
+        ])
+
+    ale_cycles = SurfaceInteractionTable(
+        material="Si(100)",
+        incident_species=("Ar+", "Cl2"),
+        axes=(
+            InteractionAxis("completed_cycle", completed_cycles, "cycle"),
+            InteractionAxis("ion_energy", ale_energies, "eV"),
+        ),
+        outputs={
+            "cumulative_si_etched_material_ml": ale_grid(
+                "Cumulative Si etched (material ML)"),
+            "post_bombardment_cl_material_ml": ale_grid(
+                "Post-bombardment Cl (material ML)"),
+        },
+        output_units={
+            "cumulative_si_etched_material_ml": (
+                "72 Si atoms per 32.58 angstrom square cell"),
+            "post_bombardment_cl_material_ml": (
+                "72 Cl atoms per 32.58 angstrom square cell"),
+        },
+        bounds={
+            "cumulative_si_etched_material_ml": (0.0, None),
+            "post_bombardment_cl_material_ml": (0.0, None),
+        },
+        provenance=_provenance(
+            "ALE_cycle_endpoints.csv",
+            parent_source_table="DeepMDData/ALE/ALE.csv",
+            parent_source_table_sha256=KOUNIS_MELAS_2024_ALE_TRAJECTORY_SHA256,
+            reduction=(
+                "For each completed cycle, exact final archived row with "
+                "Cycle coordinate below the next integer"),
+            source_row_indices=[3254, 6509, 9764, 13019],
+            silicon_atoms_per_material_ml=72,
+            chlorine_atoms_per_material_ml=72,
+            simulation_cell_x_angstrom=32.58,
+            simulation_cell_y_angstrom=32.58,
+            cl2_impacts_per_cycle=2255,
+            ar_impacts_per_cycle=1000,
+            incidence_angle_deg=0.0,
+            substrate_temperature_k=298.0,
+            note=(
+                "Material ML is an atom count in the simulation cell. It is "
+                "not the source's separate 1e15 impacts/cm2 fluence shorthand.")))
+    return KounisMelas2024Tables(
+        sputtering, reactive_ion_etch, ale_products, ale_cycles)

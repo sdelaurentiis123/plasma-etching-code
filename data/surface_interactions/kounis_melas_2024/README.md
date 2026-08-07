@@ -24,7 +24,7 @@ Archive:
 - Dataset README SHA-256:
   `780d413e66fab00f5e51e951b29ffc07f9a3bffeff986bf46e00d0a71dc3df7f`.
 
-The three CSV files here are byte-for-byte copies extracted from that archive:
+Three CSV files here are byte-for-byte copies extracted from that archive:
 
 | Path in archive | SHA-256 | Meaning |
 |---|---|---|
@@ -32,13 +32,25 @@ The three CSV files here are byte-for-byte copies extracted from that archive:
 | `DeepMDData/RIE/RIE.csv` | `7cc634ae1218ba12d1e30ba7e6b4aefc0f4f0cc6de04ced8120115a60786cc77` | Si etch yield versus Cl2:Ar flux ratio at 100 eV normal-incidence Ar+ and 298 K |
 | `DeepMDData/ALE/Products.csv` | `79a7cd3a2618a3fc3d65946d2db5247870d428b58270f78b0ffe46b5116bd9bf` | 215 eV ALE product yields versus Ar+ dose |
 
-The archive also contains the 13,020-row `ALE/ALE.csv` trajectory, the final DeepMD model, LAMMPS
-inputs, and the training corpus. They are not vendored because the pinned archive is already public and
-the complete package is 596 MB. The small result tables needed by the interaction contract are retained
-locally and checksum-gated.
+`ALE_cycle_endpoints.csv` is a checksum-gated exact reduction, not a byte-exact source table. It keeps
+the final archived row below each completed-cycle integer for all four released energies. Its SHA-256
+is `4867fbc5c671ac7c9c1efba8371f8d8e3009ec21b77f7f41f10a486414d94a36`; its parent
+`DeepMDData/ALE/ALE.csv` SHA-256 is
+`e76b9895a8191c923a492130452a73a4c929589b5260d9847e1d750fc22be884`. Source row indices
+3254/6509/9764/13019 and the original fractional cycle coordinates are retained in every row.
+
+The full 13,020-row `ALE/ALE.csv` trajectory, final DeepMD model, LAMMPS inputs, and training corpus are
+not vendored because the pinned archive is already public and the complete package is 596 MB. The small
+result tables needed by the interaction contract are retained locally and checksum-gated.
 
 Condition audit: the accepted manuscript's Figures 13--14 identify the `Products.csv` sequence as
 215 eV, and the five plotted blue Si and SiCl points match the archived rows. Figure 12 is a distinct
 80 eV morphology/cycle sequence; it must not be used to label `Products.csv`. The public dataset README
 names the product columns but does not state their energy, so the figure captions are the binding source
 for this condition.
+
+The ALE trajectory uses a 32.58 Å square cell, 72 atoms per material monolayer, 2255 Cl₂ impacts, and
+1000 Ar impacts per cycle. The source also uses “ML” as a separate shorthand for `1e15 impacts/cm²`.
+Those are not the same physical unit. `petch.si_cl_ale_depth` converts material removal through explicit
+atoms/cell and area, and experimental fluence through measured `ions/cm²/s × s`; it never aliases the
+two monolayer labels.

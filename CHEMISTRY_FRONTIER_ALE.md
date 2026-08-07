@@ -1,9 +1,34 @@
-# C3 spec — directional plasma ALE (Si/Cl₂/Ar⁺), Vella–Graves reduced-order model
+# C3 historical spec — directional plasma ALE (Si/Cl₂/Ar⁺)
+
+## 2026-08-06 conservation and absolute-depth audit
+
+This document began as an implementation spec. Its old “MD-validated” wording and acceptance anchors
+must not be read as a current validation claim.
+
+- The Vella–Graves model is an MD-regressed reduced-order model. It is useful for replay and gradients,
+  but its printed equations are not elementally conservative: the coverage equations consume the
+  SiCl₂ chlorine channel as `2 Y_SiCl2 θ²`, while the product equation emits SiCl₂ linearly in `θ`.
+  At partial coverage the coupled equations create chlorine.
+- At the first Vella–Hao experimental point (20.682 eV), the printed law gives 0.08134 nm/cycle for
+  the reported 2 s Cl₂ + 3 s Ar-ion schedule. Replacing only the SiCl₂ product term by its
+  atom-conservative `θ²` form gives 0.02913 nm/cycle, versus the digitized 0.11001 nm/cycle.
+  Replaying the printed curve is therefore not an atomic-level validation.
+- The current no-depth-fit result instead uses exact atom-counted endpoints from the released DeepMD
+  `ALE/ALE.csv` trajectory, its independent bare-Si sputter table, and the experiment's measured
+  positive-ion fluence. At 60/80/100 eV it predicts 0.4842/0.9453/1.4006 nm/cycle versus the
+  digitized experimental curve's 0.5558/1.0453/1.5427 nm/cycle (12.9% maximum nominal error).
+- This is a retrospective cross-source transfer, not a blind Tier-A prediction. The experiment did
+  not measure a species-resolved IEAD; its plotted mean energy is inferred. The archived sputter
+  uncertainty is reported separately, and missing energy/IEAD/model-form terms are not invented.
+
+The executable record is
+`results/curated/vella_hao_ale_depth/audit.json`; the dimensional implementation is
+`src/petch/si_cl_ale_depth.py`.
 
 Research scout verdict (2026-07-06): the highest-leverage next chemistry is **cyclic directional
 Atomic Layer Etching**, implemented as a **three-layer site-balance ODE**. It is a cyclic wrapper
-around chemistry petch already has (coupled coverages + IEDF + level set), fully specified in a 2025
-MD-validated paper, fast, trivially differentiable, and **unoccupied in open source** (ViennaPS: no
+around chemistry petch already has (coupled coverages + IEDF + level set), specified in a 2025
+MD-regressed paper, fast, trivially differentiable, and **unoccupied in open source** (ViennaPS: no
 ALE, fixed chemistry; Kushner: closed/CPU; Neural Master Equation: needs MD training). CPU-buildable
 now — no box.
 
@@ -13,7 +38,7 @@ Reduced Order Model." OSTI: https://www.osti.gov/biblio/2586627 · PDF https://w
 Synergy metric: Kanarik et al. JVST A 33, 020802 (2015) https://doi.org/10.1116/1.4913379 ;
 predicting synergy JVST A 35, 05C302 (2017) https://www.osti.gov/servlets/purl/1376399
 
-## The reduced-order model (implement verbatim)
+## The reduced-order model (historical source replay)
 Three layers: top (θ₁, chlorinated surface), mixed (θ₂, Si-Cl mixed), crystalline. Per cycle:
 
 **1. Modification step (Cl₂ dose, ANALYTIC — exact exponential, no integrator):**
@@ -23,8 +48,14 @@ Three layers: top (θ₁, chlorinated surface), mixed (θ₂, Si-Cl mixed), crys
   dθ₁/dt = −(J_Ar/σ₁)( Y_Cl θ₁ + Y_SiCl θ₁ + 2 Y_SiCl₂ θ₁² + K_Cl^mix θ₁ )
   dθ₂/dt = −(J_Ar/σ₂)( Y_Cl θ₂ + Y_SiCl θ₂ + 2 Y_SiCl₂ θ₂² − K_Cl^mix θ₁ )
 
-**3. Si removal flux (Si etches from the mixed layer):**
-  J_Si = J_Ar · Y_Si · (1 − θ₂)     [the residual θ-independent term = physical sputtering leak]
+**3. Printed product/removal fluxes:**
+  J_SiCl = J_Ar · Y_SiCl · (θ₁ + θ₂)
+  J_SiCl₂ = J_Ar · Y_SiCl₂ · (θ₁ + θ₂)
+  J_Si = J_Ar · Y_Si · (1 − θ₂)
+
+The printed SiCl₂ product law is linear while its chlorine sink in step 2 is quadratic. It is retained
+verbatim only to replay the published ROM; an atom-conservative product flux would be proportional to
+`θ₁² + θ₂²` and does not reproduce the same depth.
 
 **Energy-dependent parameters (all smooth → autodiff-clean), E in eV:**
   σ₂(E) = 0.77 (√E − √2.81) · σ₁            (mixed-layer depth; threshold ~2.81 eV)
@@ -36,7 +67,7 @@ Three layers: top (θ₁, chlorinated surface), mixed (θ₂, Si-Cl mixed), crys
 **Fixed constants:**
   σ₁ = 1e15 sites/cm² · γ_Cl = 0.25 · K_Cl^mix = 0.45 · J_Cl₂ = 9.8e17 cm⁻²s⁻¹ · J_Ar = 3.7e16 cm⁻²s⁻¹
 
-## Acceptance gates (the PR must hit these)
+## Historical replay gates (not experimental-validation gates)
 1. **ALE window shape** (Fig 6, Si etched vs cycle, cyclic steady state after ~2 cycles):
    | Ar⁺ energy | regime | EPC (Å/cycle) |
    |---|---|---|

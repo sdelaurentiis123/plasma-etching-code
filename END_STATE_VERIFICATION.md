@@ -51,6 +51,22 @@ UQ, and product contracts. Until that replay passes, “chemistry-extensible” 
 | Performance | Reproducible warmed CPU/GPU benchmarks; accuracy-matched competitor comparison; scaling with cells/faces/AR/species; device-residency and memory profile; deterministic replay | Exact Warp CUDA parity is gated on an A100; one-off end-to-end tracer speedups were 2.7x-9.8x, but the Python fixed-point loop underutilizes the GPU and no committed benchmark manifest or accuracy-matched competitor result exists | **open** |
 | Product behavior | Config-in/result-out API exposes all physical inputs and diagnostics; schema/versioning; checkpoint/restart; invalid-domain refusal; fresh-environment install and examples | The legacy `Domain/SF6O2/Process/Result` remains labeled. Explicit common-engine APIs now cover uncharged, charged C3, and physical finite-arrival ensembles. Charged continuation preserves geometry/surface-state fingerprint/remapped charge and derives a non-reused seed. Versioned safe NPZ checkpoints support registered conservative surface-state types, reject undeclared arrays/pickle loading, and bind the source manifest by SHA-256. Full config serialization, schema migration, CLI examples, and fresh-environment replay remain open | **partial** |
 
+### Si/Cl₂/Ar⁺ absolute-depth update (2026-08-06)
+
+The checksum-bound Kounis-Melas archive now supplies exact atom-counted ALE completed-cycle endpoints
+at 40/60/80/100 eV. A dimensional transfer uses the simulation cell's explicit area and Si count,
+Vella--Hao's measured positive-ion flux and 3 s bombardment time, and the independent DeepMD bare-Si
+sputter table for fluence after the chlorinated transient. No depth is fitted. At 60/80/100 eV the
+predictions are 0.4842/0.9453/1.4006 nm/cycle versus 0.5558/1.0453/1.5427 nm/cycle from the
+checksum- and PIL/Poppler-audited experimental curve; maximum nominal relative error is 12.9%.
+
+This closes one narrow no-fit absolute-rate gate for a second chemistry, not the experimental-transfer
+row above. It is retrospective, the plotted mean energy is inferred, the positive-ion measurement is
+not species resolved, and the experiment supplies no IEAD. The archived sputter uncertainty is carried
+separately; missing energy, distribution, finite-cell, and model-form terms are declared rather than
+combined into an invented confidence interval. The older Vella--Graves ROM is now explicitly a
+source-faithful replay because its printed `theta`/`theta²` SiCl₂ equations do not conserve chlorine.
+
 The Jeon intended-use gate is versioned as `jeon_2022_depth_transfer_v1` and was frozen before the
 first unified-engine prediction. It scores five nontrivial calibration ratios, 40 held-out
 same-condition width ratios, digitization-only interval coverage, numerical uncertainty, parameter
