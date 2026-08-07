@@ -76,6 +76,15 @@ predictive: the papers' constant collision cross sections came from a private
 communication, carry no uncertainty, and the identical mobilities were used
 at conflicting ion temperatures (`0.12 eV` in 1995 and `300 K` in 2002).
 
+An evaluated-dissociation deck now preserves all non-dissociation
+Lee–Lieberman particle rows but replaces its one lumped `e + Cl2 -> e + 2Cl`
+fit with the eight Hamilton state-resolved cross-section integrals. The
+replacement is exact over the frozen `0.3--5 eV` Maxwellian table and carries
+each state's excitation energy. The legacy deck remains unchanged for exact
+source reproduction. This is still not a complete predictive chemistry deck:
+the remaining attachment, detachment, neutralization, and species-resolved
+ionization rows retain their separate evidence boundaries.
+
 ## Deliberate fail-closed verdict
 
 `ChlorineParticleSolution.supports_prediction` is always `False` at this rung.
@@ -101,9 +110,7 @@ fitted to the Malyshev dissociation board or to any etched depth.
 1. Replace the private-communication ion mobilities with public
    measured/evaluated momentum-transfer data and uncertainty when available;
    until then preserve this source-reproduction boundary.
-2. Replace the legacy neutral dissociation channel with the already frozen
-   Hamilton state-resolved rates while preserving a source-reproduction mode.
-3. Close physical electron energy losses before solving `T_e` from absorbed
+2. Close physical electron energy losses before solving `T_e` from absorbed
    power.
-4. Only then grade the Lam Alliance dissociation board as held-out reactor
+3. Only then grade the Lam Alliance dissociation board as held-out reactor
    evidence and emit a feature-plane boundary.

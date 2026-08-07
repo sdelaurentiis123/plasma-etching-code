@@ -10,6 +10,8 @@ from petch.reactor_global import (
     MOLECULAR_CHLORINE_TOTAL_IONIZATION_THRESHOLD_EV,
     RateContext,
     ReactionNetwork,
+    build_hamilton_dissociation_chlorine_particle_network,
+    build_lee_lieberman_chlorine_particle_network,
     hamilton_2018_cl2_state_dissociation_rates,
     hamilton_2018_cl2_state_dissociation_reactions,
     lee_lieberman_chlorine_species,
@@ -219,3 +221,39 @@ def test_hamilton_state_reactions_close_atoms_charge_and_energy():
     }
     assert network.electron_power_loss_density_W_m3(
         densities, RateContext(3.0)) > 0.0
+
+
+def test_hamilton_particle_deck_replaces_only_legacy_neutral_dissociation():
+    legacy = build_lee_lieberman_chlorine_particle_network()
+    upgraded = build_hamilton_dissociation_chlorine_particle_network()
+    legacy_names = {reaction.name for reaction in legacy.reactions}
+    upgraded_names = {reaction.name for reaction in upgraded.reactions}
+    hamilton_names = {
+        f"e_Cl2_dissociation_{state}"
+        for state, _ in HAMILTON_2018_CL2_DISSOCIATION_STATES
+    }
+
+    assert len(upgraded.reactions) == len(legacy.reactions) - 1 + 8
+    assert "e_Cl2_dissociation" in legacy_names
+    assert "e_Cl2_dissociation" not in upgraded_names
+    assert upgraded_names == (
+        legacy_names - {"e_Cl2_dissociation"}
+    ) | hamilton_names
+    upgraded.assert_closed_conservation()
+    assert not upgraded.has_complete_electron_energy_ledger
+
+
+@pytest.mark.parametrize("temperature", [0.3, 1.0, 3.0, 5.0])
+def test_hamilton_particle_deck_sums_exact_state_resolved_rate(temperature):
+    context = RateContext(temperature)
+    upgraded = build_hamilton_dissociation_chlorine_particle_network()
+    expected = sum(
+        provider.coefficient_si(context)
+        for _, _, provider in hamilton_2018_cl2_state_dissociation_rates()
+    )
+    actual = sum(
+        reaction.rate_coefficient.coefficient_si(context)
+        for reaction in upgraded.reactions
+        if reaction.name.startswith("e_Cl2_dissociation_")
+    )
+    assert actual == pytest.approx(expected, rel=4.0e-15)

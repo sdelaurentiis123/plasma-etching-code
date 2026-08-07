@@ -11,6 +11,7 @@ from petch.reactor_global import (
     LeeEconomouChlorineChargedTransportProvider,
     PositiveIonWallTransport,
     ReactorScalarInput,
+    build_hamilton_dissociation_chlorine_particle_network,
     build_lee_lieberman_chlorine_particle_network,
     lymberopoulos_economou_1995_chlorine_diffusivity,
     lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities,
@@ -270,3 +271,37 @@ def test_state_dependent_charged_transport_closes_inside_particle_solve():
     assert abs(solution.electron_current_balance_residual_m3_s) < (
         2.0e-11 * sum(solution.positive_ion_wall_loss_m3_s.values())
     )
+
+
+def test_hamilton_dissociation_deck_closes_particle_solve_without_depth_fit():
+    geometry = CylindricalReactor(radius_m=0.1525, length_m=0.075)
+    condition = _condition(geometry)
+    mobilities = (
+        lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities())
+    provider = LeeEconomouChlorineChargedTransportProvider(
+        reduced_mobilities={
+            species: mobilities[species] for species in ("Cl2+", "Cl+")
+        },
+        ion_temperature=_scalar(0.12, "eV"),
+    )
+    neutral_transport = _neutral_transport(condition)
+    upgraded = FixedElectronTemperatureChlorineParticleModel(
+        build_hamilton_dissociation_chlorine_particle_network()
+    ).solve(
+        condition,
+        charged_transport_provider=provider,
+        neutral_wall_transport=neutral_transport,
+    )
+    legacy = FixedElectronTemperatureChlorineParticleModel(
+        build_lee_lieberman_chlorine_particle_network()
+    ).solve(
+        condition,
+        charged_transport_provider=provider,
+        neutral_wall_transport=neutral_transport,
+    )
+
+    assert upgraded.maximum_normalized_residual < 1.0e-11
+    assert upgraded.supports_particle_reproduction
+    assert not upgraded.supports_prediction
+    assert upgraded.chlorine_atom_dissociation_fraction < (
+        legacy.chlorine_atom_dissociation_fraction)

@@ -10,10 +10,12 @@ import csv
 from functools import lru_cache
 from pathlib import Path
 
+from .chlorine import build_lee_lieberman_chlorine_particle_network
 from .network import (
     ElectronMaxwellianCrossSectionRateCoefficient,
     ElectronTemperatureTabulatedRateCoefficient,
     Reaction,
+    ReactionNetwork,
 )
 
 ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV = 12.967633
@@ -196,3 +198,32 @@ def hamilton_2018_cl2_state_dissociation_reactions():
         for state, excitation_eV, rate
         in hamilton_2018_cl2_state_dissociation_rates()
     )
+
+
+def build_hamilton_dissociation_chlorine_particle_network(
+) -> ReactionNetwork:
+    """Replace only Lee's lumped neutral-dissociation row with Hamilton.
+
+    All other Lee--Lieberman particle reactions are retained verbatim so this
+    deck isolates one evidence upgrade. In particular, total molecular
+    ionization cannot replace the two species-resolved Lee channels because
+    the evaluated source does not resolve the ``Cl2+``/``Cl+`` branch.
+    """
+    legacy = build_lee_lieberman_chlorine_particle_network()
+    retained = tuple(
+        reaction for reaction in legacy.reactions
+        if reaction.name != "e_Cl2_dissociation"
+    )
+    if len(retained) != len(legacy.reactions) - 1:
+        raise RuntimeError(
+            "legacy chlorine deck does not contain exactly one neutral "
+            "dissociation row")
+    network = ReactionNetwork(
+        species=legacy.species,
+        reactions=(
+            *retained,
+            *hamilton_2018_cl2_state_dissociation_reactions(),
+        ),
+    )
+    network.assert_closed_conservation()
+    return network

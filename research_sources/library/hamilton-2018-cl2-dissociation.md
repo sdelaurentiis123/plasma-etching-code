@@ -40,5 +40,8 @@ The runtime reduction evaluates all eight channels in roughly 22 microseconds
 on the development CPU and fails outside 0.3--5 eV.
 
 This closes the neutral-dissociation particle source and its excitation-energy
-ledger. It does not close molecular-ion branching, attachment/detachment
-power exchange, wall recombination, absorbed RF power, or a Lam reactor.
+ledger. The evaluated particle-deck builder replaces exactly the one legacy
+neutral-dissociation row with these eight channels while leaving the original
+Lee deck available for source reproduction. It does not close molecular-ion
+branching, attachment/detachment power exchange, wall recombination, absorbed
+RF power, or a Lam reactor.
