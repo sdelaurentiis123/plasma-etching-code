@@ -115,6 +115,14 @@
       "evidence_type": "declared_source-defect_inference",
       "independently_traced_original_fit": false,
       "feature_angle_claim_requires_sensitivity": true
+    },
+    "movement_flux_policy": {
+      "source_equation": "Guo Equation 16, denominator b_Film_or_Sub",
+      "independent_worked_balance": "Kwon printed page 69, substrate-feed movement flux for net etching",
+      "net_etch": "movement adds underlying SiO2 atoms to the translating layer in Si:O=1:2",
+      "net_deposition": "movement removes atoms from the well-mixed layer into deposited film in the instantaneous layer composition",
+      "numerical_realization": "solve etch and deposition branches separately and accept only sign-consistent steady roots, continuing from the incoming face state",
+      "depth_or_yield_fit": false
     }
   },
   "claim_boundary": {

@@ -178,7 +178,7 @@
     "beta_d_V_by_I": 1.66
   },
   "evidence_ceiling": "L1_yield_regressed",
-  "manifest_sha256": "6dea140758f46089a10d3f1e83ef704547f44dbffa208263e0717acb314b353c",
+  "manifest_sha256": "138f9f2938337ca2f66277bf09668c19a8d5dc735ec378588383cfd5cfe50b25",
   "row_count": 20,
   "sequential_reaction_ids": true,
   "source_inconsistencies_preserved": [

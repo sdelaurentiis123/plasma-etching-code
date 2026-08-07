@@ -347,7 +347,9 @@ class GuoC4F8ArSiO2Mechanism:
                 coefficient, threshold, enhanced)
         return moments
 
-    def _rates_and_derivative(self, values):
+    def _rates_and_derivative(self, values, *, movement_regime=None):
+        if movement_regime not in {None, "etch", "deposition"}:
+            raise ValueError("unknown Guo movement regime")
         real = np.maximum(np.asarray(values[:4], dtype=float), 0.0)
         total = real.sum()
         if total <= 0.0:
@@ -443,12 +445,38 @@ class GuoC4F8ArSiO2Mechanism:
         added_total = sum(added.values())
         removed_total = sum(removed.values())
         movement_atoms = removed_total - added_total
-        movement_sio2 = movement_atoms / 3.0
+        etch_regime = (
+            movement_atoms >= 0.0
+            if movement_regime is None else movement_regime == "etch"
+        )
+        if etch_regime:
+            # Net etch: the translating layer moves into SiO2 and receives
+            # substrate atoms in the source stoichiometry.  Kwon's worked
+            # movement-flux balance uses this same substrate-feed branch.
+            movement = {
+                "Si": movement_atoms / 3.0,
+                "O": 2.0 * movement_atoms / 3.0,
+                "C": 0.0,
+                "F": 0.0,
+            }
+        else:
+            # Net deposition: Guo Eq. (16) explicitly switches the movement
+            # denominator from substrate to deposited film.  Atoms convected
+            # out of a perfectly mixed translating layer therefore carry its
+            # instantaneous composition.  Continuing to drain SiO2 here
+            # makes a fluorocarbon-rich deposition state mathematically
+            # impossible and contradicts the Film_or_Sub branch in Eq. (16).
+            movement = {
+                "Si": movement_atoms * state.si,
+                "O": movement_atoms * state.o,
+                "C": movement_atoms * state.c,
+                "F": movement_atoms * state.f,
+            }
         derivative = np.asarray([
-            added["Si"] - removed["Si"] + movement_sio2,
-            added["O"] - removed["O"] + 2.0 * movement_sio2,
-            added["C"] - removed["C"],
-            added["F"] - removed["F"],
+            added["Si"] - removed["Si"] + movement["Si"],
+            added["O"] - removed["O"] + movement["O"],
+            added["C"] - removed["C"] + movement["C"],
+            added["F"] - removed["F"] + movement["F"],
             (
                 rates["r16_vacancy_creation"]
                 - rates["r17_densification"]
@@ -550,70 +578,174 @@ class GuoC4F8ArSiO2Mechanism:
         with the independent BDF fluence integration.
         """
         initial_state = initial_state or GuoTmlState.oxide()
-        incident_elements = {"Si", "O"}
+        incident_elements = set()
+        incident_atom_weight = {element: 0.0 for element in ELEMENTS}
         for species, value in (
             list(self.composition.neutral_flux_ratio.items())
             + list(self.composition.ion_fraction.items())
         ):
             if value > 0.0:
-                incident_elements.update(formula_atoms(species))
-        active_real = [
-            index for index, element in enumerate(ELEMENTS)
-            if element in incident_elements
-        ]
+                atoms = formula_atoms(species)
+                incident_elements.update(atoms)
+                for element, count in atoms.items():
+                    incident_atom_weight[element] += value * count
 
-        def unpack(independent):
-            values = np.zeros(5)
-            values[active_real] = independent[:-1]
-            values[4] = independent[-1]
-            return values
-
-        def independent_residual(independent):
-            values = unpack(independent)
-            derivative = self._rates_and_derivative(values)[-1]
-            return np.asarray([
-                *[derivative[index] for index in active_real[:-1]],
-                derivative[4],
-                np.sum(values[:4]) - 1.0,
-            ])
-
+        candidates = []
+        attempted_residuals = []
         initial_values = initial_state.as_array()
-        initial_real = initial_values[active_real]
-        initial_total = float(initial_real.sum())
-        if initial_total <= 0.0:
-            initial_real = np.full(
-                len(active_real), 1.0 / len(active_real))
-        else:
-            initial_real = initial_real / initial_total
-        independent_initial = np.concatenate(
-            (initial_real, initial_values[4:5]))
-
-        solution = least_squares(
-            independent_residual,
-            independent_initial,
-            bounds=(
-                np.zeros(len(active_real) + 1),
-                np.asarray([1.0] * len(active_real) + [np.inf]),
-            ),
-            xtol=1.0e-14,
-            ftol=1.0e-14,
-            gtol=1.0e-14,
-            # Vacancy is a dangling-bond density per real atom and sits near
-            # 10^-2--10^-1 on the source boards.  Explicit variable scaling
-            # prevents a bound-active C/F component on an ion-only face from
-            # terminating before the vacancy balance closes.  This changes
-            # only optimizer coordinates, not the physical residual.
-            x_scale=np.asarray([1.0] * len(active_real) + [0.01]),
-            diff_step=1.0e-6,
-            max_nfev=int(maximum_function_evaluations),
+        initial_movement = self._rates_and_derivative(initial_values)[-2]
+        preferred_regime = (
+            "etch" if initial_movement >= 0.0 else "deposition")
+        regime_order = (
+            preferred_regime,
+            "deposition" if preferred_regime == "etch" else "etch",
         )
-        if not solution.success:
+        for regime in regime_order:
+            active_elements = set(incident_elements)
+            if regime == "etch":
+                active_elements.update({"Si", "O"})
+            if not active_elements:
+                continue
+            active_real = [
+                index for index, element in enumerate(ELEMENTS)
+                if element in active_elements
+            ]
+
+            def unpack(transformed):
+                logits = np.concatenate((
+                    np.asarray(transformed[:-1], dtype=float),
+                    np.zeros(1),
+                ))
+                logits = logits - np.max(logits)
+                active_fraction = np.exp(logits)
+                active_fraction /= active_fraction.sum()
+                values = np.zeros(5)
+                values[active_real] = active_fraction
+                values[4] = np.exp(transformed[-1])
+                return values
+
+            def independent_residual(transformed):
+                values = unpack(transformed)
+                derivative = self._rates_and_derivative(
+                    values, movement_regime=regime)[-1]
+                return np.asarray([
+                    *[
+                        derivative[index]
+                        for index in active_real[:-1]
+                    ],
+                    derivative[4],
+                ])
+
+            def transformed_seed(real, vacancy):
+                real = np.maximum(
+                    np.asarray(real, dtype=float), 1.0e-12)
+                real /= real.sum()
+                logits = np.clip(
+                    np.log(real[:-1] / real[-1]), -29.0, 29.0)
+                return np.concatenate((
+                    logits,
+                    [np.clip(
+                        np.log(max(float(vacancy), 1.0e-12)),
+                        -29.0,
+                        4.0,
+                    )],
+                ))
+
+            seed_real = initial_values[active_real]
+            seeds = [transformed_seed(seed_real, initial_values[4])]
+            incident_seed = np.asarray([
+                incident_atom_weight[ELEMENTS[index]]
+                for index in active_real
+            ])
+            if incident_seed.sum() > 0.0:
+                seeds.append(transformed_seed(incident_seed, 0.01))
+            seeds.append(transformed_seed(
+                np.ones(len(active_real)), 0.01))
+            if len(active_real) > 1:
+                for dominant_index in range(len(active_real)):
+                    dominant = np.full(
+                        len(active_real), 0.01 / (len(active_real) - 1))
+                    dominant[dominant_index] = 0.99
+                    seeds.append(transformed_seed(dominant, 0.01))
+
+            for seed_index, transformed_initial in enumerate(seeds):
+                solution = least_squares(
+                    independent_residual,
+                    transformed_initial,
+                    bounds=(
+                        np.asarray(
+                            [-30.0] * (len(active_real) - 1) + [-30.0]),
+                        np.asarray(
+                            [30.0] * (len(active_real) - 1) + [5.0]),
+                    ),
+                    xtol=1.0e-14,
+                    ftol=1.0e-14,
+                    gtol=1.0e-14,
+                    # Log-ratio composition coordinates enforce exact
+                    # nonnegativity and normalization while resolving roots
+                    # on the Si=0 or C=F=0 active boundaries.  Log vacancy
+                    # removes its two-order scale mismatch.
+                    x_scale="jac",
+                    max_nfev=int(maximum_function_evaluations),
+                )
+                values = unpack(solution.x)
+                auto = self._rates_and_derivative(values)
+                movement_atoms = auto[-2]
+                full_residual = float(np.max(np.abs(auto[-1])))
+                attempted_residuals.append(full_residual)
+                sign_consistent = (
+                    movement_atoms >= -residual_tolerance
+                    if regime == "etch"
+                    else movement_atoms <= residual_tolerance
+                )
+                if (
+                    solution.success
+                    and sign_consistent
+                    and full_residual <= residual_tolerance
+                ):
+                    if regime == preferred_regime and seed_index == 0:
+                        # The source integrates from the current substrate or
+                        # film composition.  A converged root on that same
+                        # movement branch is the local continuation and cannot
+                        # be displaced by a second, disconnected steady root.
+                        return self._steady_evaluation(
+                            values,
+                            integration_coordinate=0.0,
+                            residual_tolerance=float(residual_tolerance),
+                            solver_name=(
+                                f"bounded_{regime}_"
+                                "complementarity_root"
+                            ),
+                        )
+                    continuation_distance = float(
+                        np.sum(np.abs(values[:4] - initial_values[:4]))
+                        + 0.1 * abs(values[4] - initial_values[4])
+                    )
+                    candidates.append((
+                        continuation_distance,
+                        full_residual,
+                        regime,
+                        values,
+                    ))
+
+        if not candidates:
+            best = min(attempted_residuals, default=float("inf"))
             raise RuntimeError(
-                "Guo translating-layer algebraic solve failed: "
-                f"{solution.message}")
+                "Guo translating-layer complementarity solve found no "
+                f"sign-consistent branch; best full residual {best:.6g}")
+        (
+            _continuation_distance,
+            residual,
+            regime,
+            values,
+        ) = min(candidates, key=lambda item: (item[0], item[1]))
+        if residual > residual_tolerance:
+            raise RuntimeError(
+                "Guo translating-layer complementarity solve did not "
+                f"converge: best full residual {residual:.6g}")
         return self._steady_evaluation(
-            unpack(solution.x),
+            values,
             integration_coordinate=0.0,
             residual_tolerance=float(residual_tolerance),
-            solver_name="bounded_algebraic_root",
+            solver_name=f"bounded_{regime}_complementarity_root",
         )

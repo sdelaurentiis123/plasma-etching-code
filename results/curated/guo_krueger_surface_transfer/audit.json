@@ -113,8 +113,8 @@
     },
     "energy_censored_at_500_eV": {
       "atom_ledger_residual": 0.0,
-      "movement_atoms_per_wafer_ion": 3.188302385142787,
-      "sio2_yield_per_wafer_ion": 1.0627674617142624,
+      "movement_atoms_per_wafer_ion": 3.1883023851427845,
+      "sio2_yield_per_wafer_ion": 1.0627674617142615,
       "source_extrapolation": {
         "beyond_source_fit_energy": true,
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
@@ -124,19 +124,19 @@
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
-        "C": 0.2071908988492025,
-        "F": 0.19354394104047276,
-        "O": 0.2926390569928322,
+        "C": 0.20719089884920255,
+        "F": 0.1935439410404727,
+        "O": 0.29263905699283216,
         "Si": 0.3066261031174925,
         "V": 0.020593013247858956
       },
       "steady_state_found": true,
-      "steady_state_residual": 1.3322676295501878e-15
+      "steady_state_residual": 2.220446049250313e-16
     },
     "energy_censored_at_source_maximum_370_eV": {
       "atom_ledger_residual": 0.0,
-      "movement_atoms_per_wafer_ion": 2.6248224674080065,
-      "sio2_yield_per_wafer_ion": 0.8749408224693355,
+      "movement_atoms_per_wafer_ion": 2.6248224674080056,
+      "sio2_yield_per_wafer_ion": 0.8749408224693352,
       "source_extrapolation": {
         "beyond_source_fit_energy": false,
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
@@ -146,10 +146,10 @@
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
-        "C": 0.22412051585739873,
+        "C": 0.22412051585739884,
         "F": 0.20190581411796543,
-        "O": 0.2772125925488891,
-        "Si": 0.2967610774757467,
+        "O": 0.27721259254888897,
+        "Si": 0.29676107747574676,
         "V": 0.017212676108042415
       },
       "steady_state_found": true,
@@ -353,7 +353,7 @@
     "gray_library_record_sha256": "b6d4f06c057e9e70bc33bd7e2b498420114ee91de2e3956aa132d448139c12e5",
     "gray_ocr_extract_sha256": "36cb360591f19209b484db0fb6e532b4e9818824eeba53c9a16aac5dc14a7e0e",
     "gray_pdf_sha256": "be6bce26b699b3172cf67bb68e4d12e039fd3ea775f73873ee1aaf25164c065b",
-    "guo_manifest_sha256": "6dea140758f46089a10d3f1e83ef704547f44dbffa208263e0717acb314b353c",
+    "guo_manifest_sha256": "138f9f2938337ca2f66277bf09668c19a8d5dc735ec378588383cfd5cfe50b25",
     "guo_pdf_sha256": "f5c78c0089fe4104019435c6fd34e9b8f284358dda1df0101ecec54c592750d2",
     "guo_table_sha256": "2f93b31c1862095d133b765cddc1957ec27f0e0d05b7b2dfbafc0908f54b9600",
     "krueger_flux_table_sha256": "ad50b6099a52d2c2cc00eb4eade496b9d75c41d19881c5fec9e905f9dfd3808b",
@@ -387,8 +387,26 @@
         "steady_state_residual": 1.7763568394002505e-15
       },
       "all_C3F3_positive_ions": {
-        "error": "Guo translating-layer steady state did not converge: max residual 2.05441",
-        "steady_state_found": false
+        "atom_ledger_residual": 0.0,
+        "movement_atoms_per_wafer_ion": -2.1599630871835895,
+        "sio2_yield_per_wafer_ion": -0.7199876957278631,
+        "source_extrapolation": {
+          "beyond_source_fit_energy": true,
+          "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
+          "quadrature_max_energy_eV": 4820.89368219741,
+          "source_fit_energy_max_eV": 370.0,
+          "steady_state_solver": "BDF_fluence_integration",
+          "surface_evidence_ceiling": "L1_yield_regressed"
+        },
+        "state": {
+          "C": 0.818050343870079,
+          "F": 0.17125182491301552,
+          "O": 0.010697831216905556,
+          "Si": 0.0,
+          "V": 0.01542159718095451
+        },
+        "steady_state_found": true,
+        "steady_state_residual": 1.7763568394002505e-15
       },
       "all_CF2_positive_ions": {
         "atom_ledger_residual": 0.0,
@@ -501,13 +519,14 @@
         "steady_state_residual": 1.3322676295501878e-15
       }
     },
-    "converged_yield_range": [
-      2.2102034293061092,
+    "converged_yield_range_including_deposition": [
+      -0.7199876957278631,
       3.66123223577177
     ],
-    "nonconverged_cases_are_possible_deposition_or_missing_steady_state": [
+    "deposition_cases": [
       "all_C3F3_positive_ions"
-    ]
+    ],
+    "nonconverged_cases": []
   },
   "verdict": {
     "collision_bounded_neutral_transport_coupling_is_defined": false,

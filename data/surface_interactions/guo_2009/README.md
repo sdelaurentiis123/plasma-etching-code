@@ -66,6 +66,15 @@ page renders, their dimensions, and their SHA-256 hashes are recorded in
 `source_manifest.json`. Neither thesis PDF nor the audit renders are
 redistributed.
 
+The net-movement branch is also literal rather than a SiO2-only convenience.
+Guo Equation 16 labels its denominator `b_Film_or_Sub`: positive movement
+receives atoms from the etched substrate, while negative movement convects
+atoms into the deposited film. Kwon's printed-page 69 worked etch balance
+shows the substrate-feed branch explicitly. The executable closure therefore
+adds Si:O = 1:2 only during net oxide etching; during net deposition, material
+leaves the well-mixed layer in its instantaneous elemental composition. Both
+branches are tested as a sign-consistent complementarity problem.
+
 An executable model may resolve the other inconsistencies only through a
 declared mapping with its own evidence grade.
 

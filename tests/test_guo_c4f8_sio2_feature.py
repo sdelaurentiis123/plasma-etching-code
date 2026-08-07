@@ -151,3 +151,40 @@ def test_krueger_transfer_mode_executes_but_does_not_upgrade_evidence():
     assert not result.validity.parameter_evidence_supports_prediction
     assert "feature_depth_used" in mechanism.provenance["calibration"]
     assert mechanism.provenance["calibration"]["feature_depth_used"] is False
+
+
+def test_feature_adapter_resolves_source_deposition_complementarity_face():
+    mechanism = GuoC4F8ArSiO2FeatureMechanism(
+        neutral_species=("C3F4", "C2F3", "CF", "CF2", "CF3", "O"),
+        ion_species_mapping={"Ar+": "Ar"},
+        allow_out_of_board_transfer_audit=True,
+    )
+    ion_flux = 1.0e20
+    ratio = {
+        "C3F4": 45.291916210116725,
+        "C2F3": 17.647329508552286,
+        "CF": 7.59935150762662,
+        "CF2": 16.23497822083869,
+        "CF3": 1.4507852878196275,
+        "O": 16.4880332386623,
+    }
+    result = mechanism.advance(
+        mechanism.initial_state(),
+        SurfaceFluxes(
+            {name: value * ion_flux for name, value in ratio.items()},
+            (EnergeticFlux(
+                "Ar+", ion_flux,
+                np.asarray([500.0, 1500.0, 3500.0]),
+                np.cos(np.deg2rad([4.0, 12.0, 25.0])),
+                np.asarray([0.2, 0.3, 0.5]),
+            ),),
+        ),
+        1.0,
+    )
+
+    assert result.bdf_fallback_face_count == 0
+    assert result.net_movement_atoms_per_ion < 0.0
+    assert result.normal_growth_velocity_m_s > 0.0
+    assert result.etch_velocity_m_s == 0.0
+    assert result.state.c + result.state.f > 0.9
+    assert result.steady_state_residual < 2.0e-8

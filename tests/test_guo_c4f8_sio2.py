@@ -126,7 +126,8 @@ def test_bounded_algebraic_feature_solver_matches_independent_fluence_integratio
         integrated.sio2_yield_per_ion, rel=2.0e-9)
     assert algebraic.steady_state_residual < 2.0e-8
     assert algebraic.source_extrapolation[
-        "steady_state_solver"] == "bounded_algebraic_root"
+        "steady_state_solver"] == (
+            "bounded_etch_complementarity_root")
 
 
 def test_bounded_algebraic_solver_closes_ion_only_bound_active_state():
@@ -150,3 +151,29 @@ def test_bounded_algebraic_solver_closes_ion_only_bound_active_state():
     assert algebraic.state.f < 1.0e-9
     assert algebraic.sio2_yield_per_ion == pytest.approx(
         integrated.sio2_yield_per_ion, rel=2.0e-8)
+
+
+def test_source_film_or_substrate_movement_branch_closes_deposition_state():
+    mechanism = GuoC4F8ArSiO2Mechanism(
+        GuoIncidentComposition(
+            {
+                "C3F4": 45.291916210116725,
+                "C2F3": 17.647329508552286,
+                "CF": 7.59935150762662,
+                "CF2": 16.23497822083869,
+                "CF3": 1.4507852878196275,
+                "O": 16.4880332386623,
+            },
+            {},
+        ),
+        GuoIonQuadrature(
+            np.asarray([500.0, 1500.0, 3500.0]),
+            np.cos(np.deg2rad([4.0, 12.0, 25.0])),
+            np.asarray([0.2, 0.3, 0.5]),
+        ),
+    )
+    integrated = mechanism.solve_steady_state()
+    assert integrated.movement_atoms_per_ion < 0.0
+    assert integrated.sio2_yield_per_ion < 0.0
+    assert integrated.state.c + integrated.state.f > 0.9
+    assert integrated.steady_state_residual < 2.0e-8

@@ -328,13 +328,19 @@ def build_audit(root: Path | None = None):
         "neutral_mapping_sensitivity": neutral_sensitivity,
         "unpublished_ion_composition_sensitivity": {
             "cases": ion_sensitivity,
-            "converged_yield_range": [
+            "converged_yield_range_including_deposition": [
                 min(finite_ion_yields), max(finite_ion_yields)],
-            "nonconverged_cases_are_possible_deposition_or_missing_steady_state":
-                sorted(
-                    name for name, case in ion_sensitivity.items()
-                    if not case["steady_state_found"]
-                ),
+            "deposition_cases": sorted(
+                name for name, case in ion_sensitivity.items()
+                if (
+                    case["steady_state_found"]
+                    and case["sio2_yield_per_wafer_ion"] < 0.0
+                )
+            ),
+            "nonconverged_cases": sorted(
+                name for name, case in ion_sensitivity.items()
+                if not case["steady_state_found"]
+            ),
         },
         "angular_source_defect": {
             "angles_deg": angles_deg.tolist(),

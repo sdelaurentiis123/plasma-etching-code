@@ -80,11 +80,11 @@ def test_energy_and_species_sensitivities_block_an_accidental_promotion():
         "sio2_yield_per_wafer_ion"] == pytest.approx(1.7428114061753623)
 
     ions = audit["unpublished_ion_composition_sensitivity"]
-    assert ions["converged_yield_range"] == pytest.approx([
-        2.2102034293061092, 3.66123223577177])
     assert ions[
-        "nonconverged_cases_are_possible_deposition_or_missing_steady_state"
-    ] == ["all_C3F3_positive_ions"]
+        "converged_yield_range_including_deposition"] == pytest.approx([
+            -0.7199876957278631, 3.66123223577177])
+    assert ions["deposition_cases"] == ["all_C3F3_positive_ions"]
+    assert ions["nonconverged_cases"] == []
 
 
 def test_source_typo_and_atomicity_boundaries_remain_explicit():

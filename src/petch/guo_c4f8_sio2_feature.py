@@ -139,10 +139,12 @@ class GuoC4F8ArSiO2FeatureStepResult:
     etch_velocity_m_s: np.ndarray
     normal_growth_velocity_m_s: np.ndarray
     removed_sio2_formula_units_m2: np.ndarray
-    deposited_mixed_layer_formula_units_m2: np.ndarray
+    deposited_mixed_layer_atoms_m2: np.ndarray
     sio2_yield_per_ion: np.ndarray
+    net_movement_atoms_per_ion: np.ndarray
     steady_state_residual: np.ndarray
     atom_ledger_residual_atoms_per_ion: np.ndarray
+    bdf_fallback_face_count: int
     maximum_neutral_reaction_probability: float
     material_exchange: SurfaceMaterialExchange
     validity: MechanismValidity
@@ -162,6 +164,7 @@ class GuoC4F8ArSiO2FeatureMechanism:
         ),
         ion_species_mapping: Mapping[str, str | None] | None = None,
         bulk_sio2_formula_density_m3: float = 2.2e28,
+        deposited_film_atom_density_m3: float = 7.5e28,
         allow_out_of_board_transfer_audit: bool = False,
     ):
         neutral = tuple(str(name) for name in neutral_species)
@@ -185,12 +188,15 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 formula_atoms(formula)
             normalized_mapping[population] = formula
         density = float(bulk_sio2_formula_density_m3)
-        if not np.isfinite(density) or density <= 0.0:
-            raise ValueError("invalid SiO2 formula density")
+        film_density = float(deposited_film_atom_density_m3)
+        if (not np.isfinite(density) or density <= 0.0
+                or not np.isfinite(film_density) or film_density <= 0.0):
+            raise ValueError("invalid SiO2 or deposited-film density")
 
         self.neutral_species = neutral
         self.ion_species_mapping = MappingProxyType(normalized_mapping)
         self.bulk_sio2_formula_density_m3 = density
+        self.deposited_film_atom_density_m3 = film_density
         self.allow_out_of_board_transfer_audit = bool(
             allow_out_of_board_transfer_audit)
         self.provenance = MappingProxyType({
@@ -216,6 +222,7 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 name: formula for name, formula in normalized_mapping.items()
             },
             "bulk_sio2_formula_density_m3": density,
+            "deposited_film_atom_density_m3": film_density,
             "allow_out_of_board_transfer_audit":
                 self.allow_out_of_board_transfer_audit,
             "calibration": {
@@ -475,6 +482,8 @@ class GuoC4F8ArSiO2FeatureMechanism:
         yield_per_ion = np.zeros_like(ion_flux)
         residual = np.zeros_like(ion_flux)
         atom_residual = np.zeros_like(ion_flux)
+        movement_atoms_per_ion = np.zeros_like(ion_flux)
+        bdf_fallback_face_count = 0
 
         for face, supplied_ion_flux in enumerate(ion_flux):
             if supplied_ion_flux <= 0.0:
@@ -506,25 +515,36 @@ class GuoC4F8ArSiO2FeatureMechanism:
             )
             try:
                 solved = local.solve_steady_state_algebraic(initial)
-            except RuntimeError as error:
-                ratios = {
-                    name: values[face] / supplied_ion_flux
-                    for name, values in neutral_flux.items()
-                    if values[face] > 0.0
-                }
-                raise RuntimeError(
-                    "Guo local feature steady state failed at "
-                    f"face={face}, ion_flux_m2_s={supplied_ion_flux:.9g}, "
-                    f"energy_eV=[{min(face_energy[face]):.9g},"
-                    f"{max(face_energy[face]):.9g}], "
-                    f"neutral_to_ion={ratios}: {error}"
-                ) from error
+            except RuntimeError as algebraic_error:
+                try:
+                    # Guo integrated the differential balances from the
+                    # substrate composition.  The BDF path is therefore the
+                    # source-faithful fallback when the faster constrained
+                    # root misses a bound-active deposition solution.
+                    solved = local.solve_steady_state(initial)
+                except RuntimeError as bdf_error:
+                    ratios = {
+                        name: values[face] / supplied_ion_flux
+                        for name, values in neutral_flux.items()
+                        if values[face] > 0.0
+                    }
+                    raise RuntimeError(
+                        "Guo local feature steady state failed at "
+                        f"face={face}, "
+                        f"ion_flux_m2_s={supplied_ion_flux:.9g}, "
+                        f"energy_eV=[{min(face_energy[face]):.9g},"
+                        f"{max(face_energy[face]):.9g}], "
+                        f"neutral_to_ion={ratios}; algebraic="
+                        f"{algebraic_error}; BDF={bdf_error}"
+                    ) from bdf_error
+                bdf_fallback_face_count += 1
             for name, value in zip(
                 _REAL_FIELDS + ("vacancy",),
                 solved.state.as_array(),
             ):
                 output[name][face] = value
             yield_per_ion[face] = solved.sio2_yield_per_ion
+            movement_atoms_per_ion[face] = solved.movement_atoms_per_ion
             residual[face] = solved.steady_state_residual
             atom_residual[face] = (
                 solved.movement_atoms_per_ion
@@ -532,9 +552,9 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 + sum(solved.incoming_atoms_per_ion.values())
             )
 
-        net_rate = yield_per_ion * ion_flux
-        removal_rate = np.maximum(net_rate, 0.0)
-        deposition_rate = np.maximum(-net_rate, 0.0)
+        movement_atom_rate = movement_atoms_per_ion * ion_flux
+        removal_rate = np.maximum(movement_atom_rate, 0.0) / 3.0
+        deposition_rate = np.maximum(-movement_atom_rate, 0.0)
         removed = removal_rate * duration
         deposited = deposition_rate * duration
         next_state = GuoC4F8ArSiO2FeatureState(
@@ -557,7 +577,7 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 "SiO2_formula_unit": removed.reshape(shape),
             },
             deposited_units_m2={
-                "unresolved_mixed_layer_formula_unit":
+                "unresolved_mixed_layer_atom":
                     deposited.reshape(shape),
             },
             limitations=(
@@ -572,13 +592,16 @@ class GuoC4F8ArSiO2FeatureMechanism:
                 removal_rate / self.bulk_sio2_formula_density_m3
             ).reshape(shape),
             normal_growth_velocity_m_s=(
-                deposition_rate / self.bulk_sio2_formula_density_m3
+                deposition_rate / self.deposited_film_atom_density_m3
             ).reshape(shape),
             removed_sio2_formula_units_m2=removed.reshape(shape),
-            deposited_mixed_layer_formula_units_m2=deposited.reshape(shape),
+            deposited_mixed_layer_atoms_m2=deposited.reshape(shape),
             sio2_yield_per_ion=yield_per_ion.reshape(shape),
+            net_movement_atoms_per_ion=
+                movement_atoms_per_ion.reshape(shape),
             steady_state_residual=residual.reshape(shape),
             atom_ledger_residual_atoms_per_ion=atom_residual.reshape(shape),
+            bdf_fallback_face_count=bdf_fallback_face_count,
             maximum_neutral_reaction_probability=maximum_probability,
             material_exchange=exchange,
             validity=validity,
