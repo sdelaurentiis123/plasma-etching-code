@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 116 sources by topic
+## Index — 117 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -110,6 +110,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`kawamura-1999-psst`](library/kawamura-1999-psst.md) | Kawamura et al., PSST 8, R45 (1999) | not-fetched (citation corrected from p.313) |
 | [`benyoucef-yousfi-2014-ion-transport`](library/benyoucef-yousfi-2014-ion-transport.md) | Benyoucef & Yousfi, semiclassical Ar+/Ar, O2+/O2, N2+/N2 transport validation | AUTHOR-PROVIDED FULL TEXT READ VIA HTML; FIGURES NOT LOCALLY ARCHIVED |
 | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | Christophorou & Olthoff, NIST-evaluated Cl2/Cl electron-interaction data | PRIMARY NIST FULL TEXT + TABLE 25 PIXEL-AUDITED AT 300 DPI |
+| [`hamilton-2018-cl2-dissociation`](library/hamilton-2018-cl2-dissociation.md) | Hamilton et al., state-resolved Cl2 electron-impact dissociation | PRIMARY FULL TEXT + OFFICIAL CC-BY DATASET; FIGURES 4--5 600-DPI AUDIT; RATE REPRODUCTION PASS |
 | [`hopwood-1994-rf-coupling`](library/hopwood-1994-rf-coupling.md) | Hopwood, measured planar-ICP RF coupling efficiency | PRIMARY AUTHOR ABSTRACT READ |
 | [`lam-direct-drive-patents`](library/lam-direct-drive-patents.md) | Lam DirectDrive and RF-reference patent family | PRIMARY PATENT FULL TEXT READ |
 | [`lam-etch-platforms-2026`](library/lam-etch-platforms-2026.md) | Lam public etch-platform architecture/application map | PRIMARY MANUFACTURER RECORDS READ |
@@ -225,6 +226,8 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Chlorine Table-2 particle rates and six-species stoichiometric deck | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | exact 300-dpi-audited transcription; atoms and charge close, while omitted Cl fine structure remains an energy-ledger boundary |
 | Atomic-Cl ionization `log10` law and `0.1 < Te/I < 10` domain | [`lennon-1988-ionization`](library/lennon-1988-ionization.md) | resolves Lee Table 2's ambiguous printed `log`; replaced the initial natural-log interpretation before any solver used it |
 | Atomic-Cl measured ionization cross section, `12.967633 eV` threshold, and ±14% scale uncertainty | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 48-point 300-dpi-audited table integrated exactly over a Maxwellian; rejects use when the unmeasured >200 eV kernel tail is material |
+| Cl2 evaluated total-ionization cross section and unresolved `Cl2+`/`Cl+` branch | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 29-point 300-dpi-audited aggregate rate; no scalar uncertainty invented because source datasets disagree beyond combined uncertainty; cannot drive species-resolved sheath delivery |
+| Eight-state Cl2 neutral-dissociation rates and excitation-energy ledger | [`hamilton-2018-cl2-dissociation`](library/hamilton-2018-cl2-dissociation.md) | exact 50,000-point OPJ arrays reduced to bounded Maxwellian rates; 0.4443% maximum error against authors' supplied total; all reactions conserve `e + Cl2 -> e + 2Cl` |
 | Cl2 predictive electron-collision evidence boundary | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | measured/evaluated ionization, dissociation, and attachment can advance; legacy electronic-excitation rates remain uncertain because the review found no measurements and poor calculation agreement |
 | Chlorine electron-power fail-closed boundary | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | fitted rate exponents are not silently reinterpreted as physical event energies; Tables 4--5 and their primary cross-section sources must close the ledger |
 | Lee chlorine Table-5 charge-inconsistent `Cl(3d)+2e` row | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md), [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | pixel-audited source anomaly; quarantined until the cited primary channel is recovered, never silently repaired |

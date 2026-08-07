@@ -10,6 +10,7 @@ from petch.reactor_global import (
     ElectronInverseTemperaturePolynomialRateCoefficient,
     ElectronBase10LogPolynomialRateCoefficient,
     ElectronMaxwellianCrossSectionRateCoefficient,
+    ElectronTemperatureTabulatedRateCoefficient,
     RateContext,
     Reaction,
     ReactionNetwork,
@@ -281,6 +282,18 @@ def test_tabulated_cross_section_uses_physical_threshold():
     )
 
 
+def test_tabulated_cross_section_allows_threshold_just_below_first_sample():
+    coefficient = ElectronMaxwellianCrossSectionRateCoefficient(
+        electron_energy_eV=(11.5, 12.0, 100.0),
+        cross_section_m2=(0.03e-20, 0.11e-20, 6.19e-20),
+        threshold_eV=11.481,
+        relative_uncertainty=None,
+        source="manufactured sampled-above-threshold test",
+        evidence_kind="derived",
+    )
+    assert coefficient.coefficient_si(RateContext(2.0)) > 0.0
+
+
 def test_tabulated_cross_section_fails_on_unmeasured_maxwellian_tail():
     coefficient = ElectronMaxwellianCrossSectionRateCoefficient(
         electron_energy_eV=(0.0, 100.0),
@@ -292,6 +305,33 @@ def test_tabulated_cross_section_fails_on_unmeasured_maxwellian_tail():
     )
     with pytest.raises(ValueError, match="unmeasured cross-section tail"):
         coefficient.coefficient_si(RateContext(50.0))
+
+
+def test_tabulated_temperature_rate_is_exact_at_nodes_and_positive_between():
+    coefficient = ElectronTemperatureTabulatedRateCoefficient(
+        electron_temperature_eV=(1.0, 2.0, 4.0),
+        coefficient_m3_s=(1.0e-18, 1.0e-15, 1.0e-13),
+        source="manufactured bounded table",
+        evidence_kind="derived",
+    )
+    assert coefficient.coefficient_si(RateContext(1.0)) == pytest.approx(
+        1.0e-18, rel=2.0e-15)
+    assert coefficient.coefficient_si(RateContext(2.0)) == pytest.approx(
+        1.0e-15, rel=2.0e-15)
+    between = coefficient.coefficient_si(RateContext(3.0))
+    assert 1.0e-15 < between < 1.0e-13
+
+
+@pytest.mark.parametrize("temperature", [0.99, 4.01])
+def test_tabulated_temperature_rate_refuses_extrapolation(temperature):
+    coefficient = ElectronTemperatureTabulatedRateCoefficient(
+        electron_temperature_eV=(1.0, 4.0),
+        coefficient_m3_s=(1.0e-18, 1.0e-13),
+        source="manufactured bounded table",
+        evidence_kind="derived",
+    )
+    with pytest.raises(ValueError, match="outside the tabulated rate domain"):
+        coefficient.coefficient_si(RateContext(temperature))
 
 
 def test_incomplete_electron_energy_ledger_fails_closed():

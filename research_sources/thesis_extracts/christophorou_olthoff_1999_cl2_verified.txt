@@ -5,7 +5,7 @@ https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=8765
 SHA-256:
 a70bbed40bae014a551dd91fc96e322a258d959674ea53fe50ea2c6f4e020a6b
 
-Verified from journal pages 131, 148, 160--161:
+Verified from journal pages 131, 138--139, 148--150, 160--161:
 
 - The review supplies suggested Cl2 cross sections for total/elastic
   scattering, total ionization, neutral dissociation, attachment, and
@@ -18,5 +18,13 @@ Verified from journal pages 131, 148, 160--161:
   with a quoted absolute uncertainty of +/-14%.
 - Table 25 gives 48 selected Hayes energy/cross-section pairs in eV and
   10^-20 m2. The full visual transcription is in research_sources/digitized/.
+- Table 12 gives 29 suggested total Cl2 ionization values from 11.5 to 100 eV.
+  The suggested curve averages two experimental datasets even though their
+  magnitudes differ by more than their combined quoted uncertainties.
+- No partial electron-impact ionization measurements exist, so the relative
+  production of Cl2+ and Cl+ is unknown.
+- The printed thresholds are 11.481 eV for ground-state Cl2 ionization,
+  15.45 eV for dissociative ionization, and 11.9 +/- 0.2 eV for ion-pair
+  formation.
 
 This is a bounded project extract, not a redistribution of the source.

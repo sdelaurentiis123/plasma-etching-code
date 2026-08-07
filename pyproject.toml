@@ -30,7 +30,7 @@ petch-nozawa = "petch.nozawa_replay_3d:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"*" = ["*.json"]
+"*" = ["*.json", "data/*.csv"]
 
 [tool.setuptools.data-files]
 "share/petch/data/experimental/nozawa_1995" = [

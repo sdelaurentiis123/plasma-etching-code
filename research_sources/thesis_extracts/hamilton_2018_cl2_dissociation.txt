@@ -1,0 +1,519 @@
+Plasma Sources
+Science and
+Technology
+
+
+PAPER • OPEN ACCESS                                                                              You may also like
+                                                                                                     - Study of electron impact inelastic
+Calculated electron impact dissociation cross                                                          scattering of chlorine molecule (Cl2)
+                                                                                                       Hitesh Yadav, Minaxi Vinodkumar, Chetan
+sections for molecular chlorine (Cl2)                                                                  Limbachiya et al.
+
+                                                                                                     - Electron collision cross section set of Cl2
+                                                                                                       gas and electron transport analysis in Cl2
+                                                                                                       gas and Cl2/N2 mixtures
+To cite this article: James R Hamilton et al 2018 Plasma Sources Sci. Technol. 27 095008
+                                                                                                       Satoru Kawaguchi, Kazuhiro Takahashi
+                                                                                                       and Kohki Satoh
+
+                                                                                                     - Symmetry of Cl2- resonant states formed
+                                                                                                       in dissociative electron attachment
+View the article online for updates and enhancements.                                                  reaction on Cl2
+                                                                                                       R Azria, R Abouaf and D Teillet-Billy
+
+
+
+
+                             This content was downloaded from IP address 74.65.213.227 on 07/08/2026 at 18:39
+                                                                                                                    Plasma Sources Science and Technology
+
+Plasma Sources Sci. Technol. 27 (2018) 095008 (8pp)                                                               https://doi.org/10.1088/1361-6595/aada32
+
+
+
+
+Calculated electron impact dissociation
+cross sections for molecular chlorine (Cl2)
+James R Hamilton1, Jonathan Tennyson 1, Jean-Paul Booth2 ,
+Timo Gans3 and Andrew R Gibson 2,3,4
+1
+  Department of Physics and Astronomy, University College, London, Gower St., London WC1E 6BT,
+United Kingdom
+2
+  LPP, CNRS, Ecole Polytechnique, UPMC Univ. Paris 06, Univ. Paris-Sud, Université Paris-Saclay,
+Sorbonne Universités, F-91128 Palaiseau, France
+3
+  York Plasma Institute, Department of Physics, University of York, Heslington, York, YO10 5DD, United
+Kingdom
+
+E-mail: j.tennyson@ucl.ac.uk and andrew.gibson@york.ac.uk
+
+Received 30 April 2018, revised 31 July 2018
+Accepted for publication 14 August 2018
+Published 18 September 2018
+
+Abstract
+Electron impact dissociation of Cl2 is a key process for the formation of Cl atoms in low-
+temperature plasmas used for industrial etching processes. Despite this, relatively little cross
+section data exist for this process. In this work, electron impact dissociation cross sections were
+calculated for Cl2 molecules using the UK molecular R-matrix code in the low electron energy
+range and extended to high energies using a scaling depending on the speciﬁc nature of each
+transition. Our results are compared with both previous calculations and with experimental
+measurements, and the similarities and differences are discussed. In addition, the rate coefﬁcients
+for electron impact dissociation of Cl2 are calculated by integrating the cross sections derived in
+this (and previous) work, with electron energy distribution functions representative of those
+normally found in low-temperature plasmas used in industry. Depending on the shape and
+effective temperature of the distribution function, signiﬁcant differences arise between the rate
+coefﬁcients calculated from our cross sections and those calculated using previous data.
+Deviations between the two sets of rate coefﬁcients are particularly pronounced at the low
+electron temperatures typical of electron beam and remote plasma sources of interest for atomic
+layer etching and deposition. These differences are principally caused by the higher energy
+resolution in the near-threshold region in this work, emphasising the importance of accurate,
+high-resolution cross sections in this energy range.
+
+Keywords: chlorine, cross sections, r-matrix, atomic layer etching, plasma modelling
+
+
+1. Introduction                                                                        electron impact, are key parameters in determining process
+                                                                                       outcomes. In this context, accurate electron impact dissocia-
+Chlorine plasmas are commonly used for etching processes in                            tion cross sections are essential for understanding chlorine
+the semiconductor industry [1–3]. In these applications, the                           atom production in these systems, and for use in simulation-
+                                                       +
+concentration of chlorine atoms (Cl) and ions (Cl+
+                                                 2 , Cl , and                          based process design. In addition, electron impact excitation
+  −
+Cl ), principally produced from chlorine molecules (Cl2) by                            cross sections, whether dissociative or not, are necessary for
+                                                                                       the construction of the cross section sets needed as inputs to
+4
+    The author to whom any correspondence should be addressed                          plasma models for the calculation of electron energy dis-
+                                                                                       tributions and transport parameters [4, 5]. Due to the highly
+                                                                                       corrosive and toxic nature of Cl2, experimental measurements
+                 Original content from this work may be used under the terms
+                                                                                       of its cross-sections require specialised safety measures and
+                 of the Creative Commons Attribution 3.0 licence. Any
+further distribution of this work must maintain attribution to the author(s) and       often costly experimental systems. In this context, recent
+the title of the work, journal citation and DOI.                                       advances in theoretical calculations of such cross sections
+
+0963-0252/18/095008+08$33.00                                                       1                                             © 2018 IOP Publishing Ltd
+Plasma Sources Sci. Technol. 27 (2018) 095008                                                                          J R Hamilton et al
+
+make them an attractive, safe and relatively cost-effective             from our calculations, as well as rate coefﬁcients calculated
+alternative to experimental measurements.                               assuming different electron energy distributions.
+     The Cl2 molecule is also interesting from a theoretical
+perspective as it exempliﬁes important phenomena associated
+with electron interactions with simple molecules while having           2. Processes and theoretical methods
+potential energy curves that are relatively straightforward to
+interpret. Thus, electron collisions with Cl2 provide a good            2.1. The ab initio R-matrix Method
+test system for theoretical models, allowing algorithmic fra-
+meworks to be established in conjunction with a conceptual              The R-matrix method treats electron scattering from mole-
+interpretation of the potential energy curves. These frame-             cules by dividing the space of the problem into two sepa-
+works can then be applied to the study of more complex                  rately-calculated regions [14], comprising an inner region
+polyatomic molecules where interpretation of potential energy           containing the wavefunction of the molecular target along
+surfaces is non-trivial.                                                with the colliding electron, and an outer region in which only
+     Electron impact cross sections for Cl2 have previously             the incident, scattering electron is considered. The R-matrix
+been reviewed by Christophorou and Olthoff [6] and more                 calculation constructs and solves an electron-energy-inde-
+recently by Gregório and Pitchford [7]. Based on these                  pendent wave equation for the inner region, whose solutions
+reviews and an independent literature search it is clear that           are then used to solve the much simpler, energy-dependent
+electron impact cross section data, and electron swarm para-            problem of the scattering electron in the outer region. By
+meter measurements, for Cl2 are more limited than those for             making the inner region of the problem independent of the
+other diatomic molecules such as O2 and N2, which are easier            colliding electron energy and only the outer region energy
+to use experimentally. In particular, direct determinations of          dependent, the outer region can be resolved on a very ﬁne
+the cross sections for electron impact vibrational excitation           energy grid, showing all of the features and structure of the
+[8, 9] and electronic excitation/dissociation [10–12] are rare.         cross section.
+The only previous calculations of electronic excitation cross                The low-energy calculations reported in this work were
+sections for Cl2, focussed on dissociation to two neutral               all performed using the polyatomic implementation of the UK
+atoms, were carried out by Rescigno [10]. The recent work of            molecular R-matrix code UKRMol [15]. These calculations
+Yadav et al [13] presents calculated electron impact excitation         were performed using the Quantemol-N expert system [16]
+cross sections, without speciﬁcally considering whether or not          which runs the UKRMol codes. A full review of the mole-
+dissociation to two neutral atoms occurs, for the ﬁrst ﬁve              cular R-matrix method has been given in [17].
+excited states of chlorine, along with the total excitation cross
+section. Rescigno calculated state resolved dissociation cross          2.2. CAS-CI calculation model
+sections corresponding to excitation into the ﬁrst ﬁve lowest           Established electron scattering theory provides a range of
+energy excited states of Cl2, which were identiﬁed to dis-              models for treating the interaction of the incident scattering
+sociate into two Cl atoms. These calculations showed good               electron with the bound molecular electrons as discussed by
+agreement with the experimentally measured total dissocia-              Tennyson [17] and the references therein. In the scattering
+tion cross section of Cosby [11, 12]. However, the calcula-             calculations carried out here, the selected target states were
+tions of Rescigno [10] have limited electron energy                     included in the scattering wavefunction through the use of a
+resolution, particularly close to the threshold energy of the           close-coupling (CC) expansion. Here, the target states are
+excitation process, and are calculated up to a maximum                  represented using a complete active space (CAS) conﬁgura-
+energy of only 30eV. Due to the relatively low electron                tion interaction (CI) model [18] in which bound electrons
+temperatures encountered in industrial plasmas (in the range            from the highest (valence) occupied molecular orbitals
+0.3 – 5 eV) accurate, high-resolution cross sections in the             (HOMOs) are excited to the lowest unoccupied molecular
+threshold region of these processes are particularly important.         orbitals (LUMOs). This model can calculate cross sections for
+The experimental data of Cosby [11, 12] on the other hand               electronically inelastic processes while also accounting reli-
+does not resolve the different excited states contributing to           ably for Feshbach resonances, which are temporary anion
+dissociation, and in addition, represents a sum of dissociation         states in which the scattering electron is trapped following
+cross sections from multiple vibrational states of the ground           excitation of the target.
+electronic state [12]. However, the data of Cosby [12] does
+provide cross sections up to a higher energy of 100eV.
+                                                                        2.3. Electron impact dissociation
+     In order to extend the available data for Cl2 dissociation
+cross sections, and complement previous work in this area, we           Dissociation occurs when molecules are excited to electronic
+present new calculations for state-resolved electron-impact             states that are either unbound or have curve-crossings to
+excitation cross sections for the electronic and ground state of        unbound states. The total electron impact dissociation cross
+Cl2 over a wide energy range. Section 2 describes the pro-              section can therefore be taken to be the sum of excitation
+cesses and theoretical methods used in the calculations,                cross sections to all unbound states:
+section 3 describes the details of the calculations with respect                                      ¥
+                                                                                                eid = å s ex ,
+                                                                                              s tot
+to the target structure and the nature of the excited states, and                                         i
+                                                                                                                                     (1 )
+section 4 presents the electron impact cross sections resulting                                      i=1
+
+
+                                                                    2
+Plasma Sources Sci. Technol. 27 (2018) 095008                                                                                  J R Hamilton et al
+
+where seidtot
+              is the total electron impact dissociation cross                            Table 1. Cl2 equilibrium geometry.
+section and s iex is the electron impact excitation cross section                                X (Å)    Y (Å)      Z (Å)
+to a speciﬁc unbound state i. To fully understand the
+dynamics of electrons in low-temperature plasmas, electron-                                Cl     0.0      0.0      0.9940
+impact dissociation cross-sections via speciﬁc excited states,                             Cl     0.0      0.0     −0.9940
+with speciﬁc excitation energies, i.e. s iex , should be known. In
+addition, it is important to know whether or not the atoms
+created by dissociation are created in excited states or the             Table 2. Comparison of vertical excitation energies for excited states
+ground state, i.e. the branching ratio of the products. In this          of Cl2 calculated in this work with those calculated by Rescigno
+                                                                         [10], and Peyerimhoff and Buenker [23]. Energies are given for
+work, the nature of the orbitals populated by excitation col-
+                                                                         excited states up to and just above the measured IP of Cl2 at
+lisions were used to ascertain whether or not an excitation              11.481eV [24].
+process results in dissociation. The asymptotes of the poten-
+tial energy curves for the dissociative excited states were used         State      This work     [10]   [23]     State      This work     [23]
+to determine the branching ratios of the dissociation products.          X1S+  g     0.000      0.00    0.00     C1Dg         7.790      8.12
+                                                                         a 3Pu       3.252      3.36    3.31     D1S+g      8.228      8.29
+2.4. Extension of cross sections to high energies                        A1Pu        4.348      4.30    4.05     E1S-u        8.982      9.43
+                                                                         b 3Pg       6.498      6.38    6.29     d 3Du        9.113
+The R-matrix model is known to provide accurate cross                    c 3S-g      7.257                       e 3S+        9.219      9.74
+                                                                                                                       u
+section data in the low energy range, deﬁned here as between             c′ 3S+                 7.02    6.87     f 3S-      12.691
+                                                                                u                                      u
+0eV and the ionisation potential (IP). For higher energies, the         B1Pg        7.537      7.01    6.83
+inelastic cross sections in this work are scaled according to
+the speciﬁc nature of the transition. In the case of dipole-
+forbidden transitions, i.e. those that involve a spin change, the
+                            1                                            [6 πg,2-3 πu,5-6 σu,2-3 πg]8. All calculations were performed at
+cross section is scaled as  , where ε is electron energy. In the
+                                                                         the Cl2 equilibrium geometry sourced from the NIST Com-
+case of dipole-allowed transitions, that is those with no spin           putational Chemistry Comparison and Benchmark Database
+                                            ln ( )
+change, the cross sections are scaled as  . Where the cal-              [22] and given in table 1.
+culated cross-sections showed non-physical structure at                       The vertical excitation energies (VEEs) of the excited
+energies above the IP, this non-physical structure was                   states of Cl2 calculated from this model are given in table 2
+assumed to be an artefact of the calculation, and smoothed.              along with a comparison to published calculated values. The
+Such non-physical structure can arise in the calculations due            VEEs calculated in this work compare well to the published
+to using only single geometry, incomplete continuum orbital              VEEs. Rescigno [10] and Peyerimhoff and Buenker [23]
+sets, or due to pseudo-resonances. This method of scaling has            identiﬁed the fourth excited state of Cl2 as B1Πg, whereas in
+previously been employed in [19].                                        this work we identiﬁed the fourth state as c 3S-g , and the
+                                                                         B1Pg state as the ﬁfth excited state. The implications of the
+                                                                         different symmetries of the c 3S-g state identiﬁed in this work
+3. Calculation details
+                                                                         and the c′ 3S+
+                                                                                       u state identiﬁed in [10, 23] for the calculated
+                                                                         cross sections will be discussed in section 4.
+3.1. Target structure                                                         The scattering calculation target used an R-matrix sphere
+The point group symmetry of equilibrium Cl2 is D¥ v .                    of radius 10a0. The continuum basis was represented using
+Molecular symmetries can be taken advantage of to calculate              GTOs with ℓ4 (up to g orbitals) [25], which were ortho-
+the integrals between Gaussian-type orbital (GTO) basis                  gonalised to the target orbitals.
+functions, however, the Sweden-Molecule quantum chemistry
+codes [20], upon which the polyatomic UKRmol inner region                3.2. Dissociation of ground state Cl2
+codes used in this work are based, are limited to only using
+Abelian or commutative point groups. This is also true of                The process of electron impact dissociation occurs when
+MOLPRO [21], another quantum chemistry code which can                    energy gained from the scattering electron promotes the
+be used to calculate the integrals between GTO basis func-               molecule into an electronic state, which subsequently dis-
+tions used subsequently in the polyatomic UKRmol inner                   sociates. This occurs when the dissociating bond is weakened
+region codes. Due to this restriction, the non-Abelian sym-              by the transfer of electrons from bonding molecular orbitals,
+metry D¥ v is represented in the D2h point group.                        to orbitals away from the bonding region, which do not
+     The Cl2 target was represented using a Dunning cc-pVTZ              enforce the bond, and pull the nuclei apart. These orbitals are
+GTO basis set. The ground state of Cl2, X1S+ g , has the con-           referred to as anti-bonding orbitals, orbitals that, if occupied,
+ﬁguration [1-5σg,1-2πu,1-4σu,1-2πg]34. MOLPRO was used to                contribute to a reduction in the cohesion between the two
+calculate these orbitals. The target was represented using a             atoms and raise the energy of the molecule above that of
+CAS-CI treatment, freezing electrons of the lowest 13 orbitals           separated atoms [26].
+with 8 electrons from the 2 π HOMOS active in these open                      As discussed by Peyerimhoff and Buenker [23], the σu
+orbitals and 5 valence orbitals: [1-5 σg,1 πu,1-4 σu,1 πg]26             orbital has anti-bonding character. As a result, excitation
+
+                                                                     3
+Plasma Sources Sci. Technol. 27 (2018) 095008                                                                                  J R Hamilton et al
+
+
+
+
+Figure 1. Composite potential energy diagram for Cl2. Reproduced
+from Peyerimhoff and Buenker [23] under the terms of the Creative
+Commons Attribution-Non Commercial-No Derivatives License
+(CC BY-NC-ND).
+
+
+processes that populate σu or s u2 orbitals result in dissociation.
+Of the states listed in table 2, the following were found to
+fulﬁl this criteria by Peyerimhoff and Buenker [23] and dis-
+sociate to form two ground state Cl atoms: a3Pu , A 1Pu , b 3Pg ,
+c′ 3S+                     1 +          3 +                              Figure 2. (a) Comparison between excitation cross sections from
+      u , B Pg , C Dg , D Sg and e Su . The orbital move-
+            1        1
+                    -                                                     Cl2(X 1S+ g ) into dissociative Π states, with different spins and
+ment for the c Sg state identiﬁed in this work is assumed to
+                 3
+                                                                          symmetries, calculated in this work and those calculated in [10] over
+be the same as that of the c′ 3S+u state identiﬁed in [23]. The          the energy range originally calculated in [10] on a linear scale. (b)
+d 3Du and f 3S-u states were not  identiﬁed in the calculations         Comparison of the same data as shown in (a) on log axes to enable
+of [23], as such, orbital movement information and potential              comparison over a wider energy range. Above 30eV the scaling of
+                                                                          the cross sections from [10] proposed by Grégorio and Pitchford [7],
+energy curves are not available for these states. As a result,            based on the experimental dissociation cross section of Cosby [12],
+we cannot be certain of their dissociation pathway, so they are           is shown.
+excluded from the remaining discussion on dissociation. In
+the work of [23] two 1S-    u states were identiﬁed; one dis-
+                                                                          4. Results
+sociating to form two ground state Cl atoms, and the other a
+Rydberg state dissociating into one ground state Cl atom and
+                                                                          4.1. Dissociation cross sections for Cl2
+Cl+. Given that we cannot be certain which of the two states
+is identiﬁed in our calculations, we also exclude the E1S-      u        Figure 2 presents our calculated cross sections for excitation
+from further discussion on dissociation. The excluded states              from ground state Cl2 to the dissociative Π states (with var-
+have signiﬁcantly smaller cross sections than the lower lying             ious spins and symmetries), along with those calculated by
+states (at least 2–3 orders of magnitude lower than that of the           Rescigno [10]. Figure 2(a) shows the data over the energy
+a3Pu state for all energies), therefore these exclusions have             range originally calculated by Rescigno [10] on a linear scale.
+very little effect on the total dissociation cross sections pre-          Figure 2(b) shows the data on log axes to enable comparison
+sented later.                                                             over a wider energy range. Above 30eV the cross-sections
+      The nature of the excited states can be better understood           from Rescigno [10] are scaled as proposed by Grégorio and
+through the Cl2 potential energy curves shown in ﬁgure 1,                 Pitchford [7], based on the experimental dissociation cross
+taken from Peyerimhoff and Buenker [23], which also show                  section of Cosby [12]. The agreement between the cross
+the states of the Cl atoms produced by dissociation of the                sections from this work and those from Rescigno [10] is very
+different excited states of Cl2. All of the dissociative states           good, particularly at energies up to around 15eV. Our cal-
+considered in the results section of this work lead to the                culations show a few sharp peaks in the cross sections which
+formation of two ground state Cl atoms.                                   can be associated with resonances. These features are too
+
+                                                                      4
+Plasma Sources Sci. Technol. 27 (2018) 095008                                                                                     J R Hamilton et al
+
+
+
+
+Figure 3. Calculated excitation cross sections from Cl2(X 1S+
+                                                            g ) into
+dissociative Δ and Σ states. The cross section to the c′ 3S+  u
+calculated in [10], but not identiﬁed in this work, is also shown. The
+scaling of this cross section above 30eV is taken from Grégorio and
+Pitchford [7].
+
+
+narrow to be resolved at the resolution of the experiments
+(shown in ﬁgure 4) or the calculations of Rescigno; however,
+the inclusion of vibrational motion, neglected in the present
+calculations, would be expected to broaden these resonance
+features. The precise role of these resonances in the electronic
+excitation of Cl2 awaits further study.
+      Figure 3 shows the calculated cross sections for excita-
+tion into dissociative Δ and Σ states. The cross-section to the
+c′ 3S+
+      u state, calculated in [10] but not identiﬁed in this work,            Figure 4. (a) Comparison of total electron impact dissociation cross
+is also shown. Here, it is clear that the excitation cross-                  sections for Cl2(X 1S+g ) calculated in this work, those calculated in
+sections to the dissociative Δ and Σ states are much smaller                 [10] and those measured by Cosby [12] on a linear scale over the
+in magnitude than the cross-sections to the Π states (shown in               energy range originally calculated in [10] on a linear scale. (b)
+ﬁgure 2), but similar in shape. Furthermore, the cross-section               Comparison of the same data as shown in (a) on log axes to enable
+for excitation of the c′ 3S+  u state calculated in [10] is sig-
+                                                                             comparison over a wider energy range. Above 30eV the scaling of
+niﬁcantly larger than (but similar in shape to) that of the c3S-g            the cross sections from [10] proposed by Grégorio and Pitchford [7],
+                                                                             based on the experimental dissociation cross section of Cosby [12],
+state identiﬁed in our work, despite their similar threshold                 is shown.
+energies. This is likely to be a result of the different sym-
+metries of the states in the two calculations. According to
+Goddard et al [27] the electron scattering cross sections for                better agreement with the measured total cross section of
+         -
+S+g ↔Sg transitions in a linear molecule must approach zero
+                                                                             Cosby [12] in this range. However, it is important to
+for scattering angles of 0° and 180°, since the reﬂection
+                                                                             emphasise that in the measurements of Cosby [12] the Cl2
+symmetry of the molecule (+↔−) cannot change during
+                                                                             ground state target molecules were in a distribution of
+forward or backward collisions. In contrast, electron impact
+scattering cross sections for S+        +                                    vibrational states due to the experimental technique used,
+                                 g ↔Su transitions, i.e. from the
+                                                                             whereas for the calculations in this work and Rescigno [10]
+ground state to the c′ 3S+u state as identiﬁed by Rescigno [10],
+are not constrained in this way, and therefore exhibit a larger              only Cl2(v=0) was considered. As a result, the measure-
+integrated cross section.                                                    ments and calculations are not directly comparable. Further-
+      Figure 4 shows a comparison of the sum of the excitation               more, calculations for electron-impact dissociation of
+cross sections leading to dissociation calculated in this work,              vibrationally excited H2, O2 and N2 molecules have shown
+those calculated by Rescigno [10], and the measured dis-                     that the magnitude of the dissociation cross section increases
+sociation cross section of Cosby [12]. As before, (a) shows                  strongly as the vibrational level is increased [28–30]. As a
+the electron energy range originally calculated by Rescigno                  result, we believe our calculations to be consistent with the
+with linear axes, while (b) shows a comparison over a wider                  data of Cosby, although further calculations of vibrational-
+energy range with log axes. The summed dissociation cross                    state resolved electron-impact dissociation cross sections
+section from Rescigno is larger above 15 eV and exhibits                     would be required to conﬁrm this.
+
+
+                                                                         5
+Plasma Sources Sci. Technol. 27 (2018) 095008                                                                                         J R Hamilton et al
+
+4.2. Rate coefficients for electron impact dissociation
+
+In ﬂuid and global plasma simulations, electron impact cross
+sections are typically incorporated in the form of rate coef-
+ﬁcients, k, which are derived from the electron energy dis-
+tribution function f through the relation:
+                      ⎛ 2e ⎞1 2        ¥
+          k (Teff ) = ⎜ ⎟
+                      ⎝ me ⎠      ò0       s ( )  1 2f ( ) d .   (2 )
+
+     Here, Teff is the effective electron temperature, e is the
+electron charge, me the electron mass and ò the electron
+energy. In low-temperature plasmas, the shape and effective
+temperature of the electron energy distribution function is
+highly variable, depending on parameters such as the nature
+of the plasma source, the operating pressure [31–33], the
+voltage/current [34, 35] the driving frequency [36–38] and
+the gas or gas mixture [39, 40]. The shape and temperature of
+the distribution function can also vary strongly in space and
+time within the same plasma source [41–46]. To understand
+how the cross sections calculated in this work affect the
+corresponding rate coefﬁcients for electron impact dissocia-
+tion we follow the approach of Gudmundsson [47] and Toneli
+et al [48] and deﬁne a general expression for the electron
+energy distribution function:
+                   f ( ) = c1 1 2 exp ( - c2  x )                 (3 )
+     The parameter x deﬁnes the shape of f (ò). x=1 repre-
+sents a Maxwellian distribution function, x=2 resembles a
+Druyvesteyn distribution (similar to distribution functions
+found at higher gas pressures) and x=0.5 gives a concave
+distribution function that is highly populated at low electron                  Figure 5. (a) Comparison of electron energy distribution functions
+energies, while also having a pronounced high energy tail                       f (ò) of different shapes (values of x) for the same effective electron
+(similar to distribution functions found at low gas pressures).                 temperature Teff=3 eV. (b) Total electron impact dissociation rate
+The parameters c1 and c2 are given by the expressions                           coefﬁcients calculated from the cross sections presented in this work,
+[47, 48]                                                                        and those calculated by Rescigno [10], as a function of effective
+                                                                                electron temperature Teff for different shapes of f (ò) (values of x).
+                              x [G (x2)]3 2
+                    c1 =                       ,                     (4 )
+                           á ñ3 2 [G (x1)]5 2
+                                                                                difference between the rate coefﬁcients can be several orders
+                             1 ⎡ G (x 2 ) ⎤                                     of magnitude. This is also true (but to a lesser extent) when
+                                            x
+                      c2 =       ⎢        ⎥   .                      (5 )       x=1, but is signiﬁcantly less important when x=0.5. These
+                           á ñx ⎣ G (x1) ⎦
+                                                                                differences have the potential to be important when modelling
+     Here, á ñ is the mean electron energy á ñ = 3 2Teff , G                  low Teff plasmas, of interest for atomic layer etching and
+denotes a gamma function, x1 = 3 2x and x2 = 5 2x .                             deposition, such as those produced by electron beams which
+     Figure 5(a) shows the form of f (ò) for different values of                have been shown to exhibit Maxwellian electron energy
+x with Teff=3 eV. Figure 5(b) shows a comparison between                      distribution functions with Teff as low as 0.4eV [49–51]. As
+the dissociation rate coefﬁcients derived from the total cross                  Teff increases to around 3eV and above, the difference in rate
+section calculated in this work and that calculated in [10] for                 coefﬁcient becomes less pronounced, and therefore the impact
+varying Teff and with x=0.5, 1 and 2. As x is decreased from                  of using the different dissociation cross section sets for
+2 to 0.5 the rate coefﬁcient for dissociation increases for a                   modelling of plasmas will be less signiﬁcant.
+given effective electron temperature because a greater pro-                           The differences in dissociation rate coefﬁcients between
+portion of electrons populate the part of the distribution                      the cross sections calculated in this work and those calculated
+function above the threshold energy for excitation of dis-                      in [10] in the low Teff range are primarily a result of the higher
+sociative states. This is the case for both the cross sections                  energy resolution of our calculations around the excitation
+calculated in this work and those calculated in [10]. For a                     threshold, as shown in ﬁgures 2(b) and 4(b). These differ-
+given value of x the dissociation rate coefﬁcients derived from                 ences are particularly pronounced for the dominant dissocia-
+the cross sections calculated in this work and those from [10]                  tion cross section, i.e. that going via the a 3Pu state. Above
+differ to varying degrees. These differences are greatest at low                Teff=3eV, the rate coefﬁcients derived from the cross-
+values of Teff and when x=2, under which conditions the                       sections calculated in this work are generally lower than those
+
+                                                                            6
+Plasma Sources Sci. Technol. 27 (2018) 095008                                                                            J R Hamilton et al
+
+from the cross sections calculated in [10]. This is a result of        ‘Investissements d’avenir’ under the reference ANR-11-
+the lower magnitude of our cross sections at electron energies         IDEX-0004-02.
+above 15eV. The discrepancy in rate coefﬁcients between the
+two cross section sets at higher Teff reaches a maximum of a
+factor of 1.5 – 1.6 for all three values of x when Teff=10eV.       ORCID iDs
+The strong differences between the rate coefﬁcients for dis-
+sociation at low Teff emphasises the importance of the near-           Jonathan Tennyson https://orcid.org/0000-0002-
+threshold region of electron impact dissociation cross sections        4994-5238
+in low-temperature plasmas. This further emphasises the                Jean-Paul Booth https://orcid.org/0000-0002-0980-3278
+advantages of using theoretical calculations for the derivation        Timo Gans https://orcid.org/0000-0003-1362-8000
+of such cross sections, as they are capable of providing the           Andrew R Gibson https://orcid.org/0000-0002-1082-4359
+required high resolution and are not limited by experimental
+detection limits.
+
+                                                                       References
+5. Conclusions
+                                                                        [1] Oehrlein G S, Metzler D and Li C 2015 ECS J. Solid State Sci.
+                                                                               Technol. 4 N5041–53
+In this work, electron impact dissociation cross sections for           [2] Kanarik K J, Lill T, Hudson E A, Sriraman S, Tan S, Marks J,
+Cl2 calculated using the UK molecular R-matrix code have                       Vahedi V and Gottscho R A 2015 J. Vac Sci. Technol. A 33
+been presented and discussed. The results are broadly con-                     020802
+sistent with the previous calculations of Rescigno [10] and the         [3] Dorf L, Wang J C, Rauf S, Monroy G A, Zhang Y, Agarwal A,
+experimental measurements of Cosby [12]. The differences                       Kenney J, Ramaswamy K and Collins K 2017 J. Phys. D:
+                                                                               Appl. Phys. 50 274003
+between the cross sections calculated in this work and those            [4] Pitchford L et al 2013 J. Phys. D: Appl. Phys. 46 334001
+from [10] were most pronounced in the near-threshold region             [5] Bartschat K and Kushner M J 2016 Proc. Natl Acad. Sci. USA
+of the cross section for dissociation occurring through exci-                  113 7026–34
+tation of the a 3Pu state, and above 15eV for all states for          [6] Christophorou L G and Olthoff J K 1999 J. Phys. Chem. Ref.
+which cross sections have been calculated. The potential                       Data 28 131–69
+                                                                        [7] Gregório J and Pitchford L 2012 Plasma Sources Sci. Technol.
+inﬂuence on plasma modelling of these differences was                          21 032002
+assessed through the calculation of electron impact dissocia-           [8] Ruf M, Barsotti S, Braun M, Hotop H and Fabrikant I 2004
+tion rate coefﬁcients for different electron energy distribution               J. Phys. B: At. Mol. Opt. Phys. 37 41
+function shapes and effective temperatures. It is found that the        [9] Kolorenč P and Horáček J 2006 Phys. Rev. A 74 062703
+most signiﬁcant discrepancies in rate coefﬁcients occur at low         [10] Rescigno T N 1994 Phys. Rev. A 50 1382
+                                                                       [11] Cosby P C 1990 Bull. Am. Phys. Soc. 35 1822
+electron temperatures due to differences in the cross sections         [12] Cosby P C and Helm H 1992 Dissociation rates of diatomic
+in the near-threshold region, whereas the differences in cross-                molecules Technical Report WL-TR-93-2004 Aero
+sections above 15eV were less signiﬁcant. All cross sections                  Propulsion and Power Directorate, Wright Laboratory
+presented in this work will be made freely available through           [13] Yadav H, Vinodkumar M, Limbachiya C and Vinodkumar P
+the Quantemol database, QDB [52].                                              2018 J. Phys. B: At. Mol. Opt. Phys. 51 045201
+                                                                       [14] Burke P G 2011 R-matrix Theory of Atomic Collisions
+                                                                               (Springer Series on Atomic, Optical, and Plasma Physics)
+                                                                               (Berlin Heidelberg: Springer-Verlag)
+6. Data Management                                                     [15] Carr J M, Galiatsatos P G, Gorﬁnkiel J D, Harvey A G,
+                                                                               Lysaght M A, Madden D, Man Z, Plummer M,
+                                                                               Tennyson J and Varambhia H N 2012 Eur. Phys. J. D 66 58
+Data underpinning the ﬁgures in this manuscript can be                 [16] Tennyson J, Brown D B, Munro J J, Rozum I,
+accessed at https://doi.org/10.15124/b11c65cf-2913-4c63-                       Varambhia H N and Vinci N 2007 J. Phys.: Conf. Ser. 86
+a522-2f57006cfb8a                                                              012001
+                                                                       [17] Tennyson J 2010 Phys. Rep. 491 29–76
+                                                                       [18] Tennyson J 1996 J. Phys. B: At. Mol. Opt. Phys. 29 6185–201
+                                                                       [19] Hamilton J R, Tennyson J, Huang S and Kushner M J 2017
+Acknowledgments                                                                Plasma Sources Sci. Technol. 26 065010
+                                                                       [20] Almlöf J and Taylor P R 1984 Computational Aspects of
+                                                                               Direct SCF and MCSCF Methods Advanced Theories and
+JRH thanks STFC for provision of PhD studentship which is                      Computational Approaches to the Electronic Structure of
+also sponsored by Quantemol Ltd. The authors would like to                     Molecules (NATO ASI Series (Series C: Mathematical and
+thank the UK Engineering and Physical Sciences Research                        Physical Sciences) 133) ed C E Dykstra (Dordrecht:
+Council (EPSRC) for supporting this research through                           Springer)
+EPSRC Manufacturing Grant (No. EP/K018388/1). This                     [21] Werner H J et al 2012 WIREs Comput. Mol. Sci. 2 242–53
+                                                                       [22] Johnson III R D 2018 NIST Computational Chemistry
+work was performed within the LABEX Plas@par project,                          Comparison and Benchmark Database, NIST Standard
+and received ﬁnancial state aid managed by the Agence                          Reference Database Number 101 Release 19 http://cccbdb.
+Nationale de la Recherche, as part of the programme                            nist.gov/ (https://doi.org/10.18434/T47C7Z)
+
+
+                                                                   7
+Plasma Sources Sci. Technol. 27 (2018) 095008                                                                          J R Hamilton et al
+
+[23] Peyerimhoff S D and Buenker R J 1981 Chem. Phys. 57               [39] Logue M D and Kushner M J 2015 J. Appl. Phys. 117 043301
+        279–96                                                         [40] Fiebrandt M, Oberberg M and Awakowicz P 2017 J. Appl.
+[24] Huber K P and Herzberg G 1979 Molecular Spectra and                      Phys. 122 013302
+        Molecular Structure: IV. Constants of Diatomic Molecules       [41] Gans T, Schulz-Von D G V and Döbele H 2004 Europhys.
+        vol 716 (New York: Van Nostrand Reinhold)                             Lett. 66 232
+[25] Faure A, Gorﬁnkiel J D, Morgan L A and Tennyson J 2002            [42] Schulze J, Gans T, O’Connell D, Czarnetzki U,
+        Comput. Phys. Commun. 144 224–41                                      Ellingboe A R and Turner M M 2007 J. Phys. D: Appl.
+[26] Atkins P and De Paula J 2010 Atkin’s Physical Chemistry                  Phys. 40 7008
+        Ninth Edition 9th edn (Oxford: Oxford University Press)        [43] Song S H and Kushner M J 2012 Plasma Sources Sci. Technol.
+[27] Goddard W III, Huestis D, Cartwright D and Trajmar S 1971                21 055028
+        Chem. Phys. Lett. 11 329–33                                    [44] Schüngel E, Brandt S, Donkó Z, Korolov I, Derzsi A and
+[28] Stibbe D T and Tennyson J 1998 New. J. Phys. 1 2                         Schulze J 2015 Plasma Sources Sci. Technol. 24 044009
+[29] Laporta V, Little D, Celiberto R and Tennyson J 2014 Plasma       [45] Hurlbatt A, Gibson A R, Schröter S, Bredin J, Foote A P S,
+        Sources Sci. Technol. 23 065002                                       Grondein P, O’Connell D and Gans T 2017 Plasma Process.
+[30] Laporta V, Celiberto R and Tennyson J 2015 Phys. Rev. A 91               Polym. 14 1600138
+        012701                                                         [46] Tsutsumi T, Greb A, Gibson A R, Hori M, O’Connell D and
+[31] Godyak V A and Piejak R B 1990 Phys. Rev. Lett. 65 996                   Gans T 2017 J. Appl. Phys. 121 143301
+[32] Laﬂeur T, Chabert P and Booth J P 2014 Plasma Sources Sci.        [47] Gudmundsson J 2001 Plasma Sources Sci. Technol. 10 76
+        Technol. 23 035010                                             [48] Toneli D A, Pessoa R S, Roberto M and Gudmundsson J T
+[33] Gudmundsson J and Ventéjou B 2015 J. Appl. Phys. 118 153302              2015 J. Phys. D: Appl. Phys. 48 495203
+[34] Godyak V, Piejak R and Alexandrovich B 1992 Plasma                [49] Lock E, Fernsler R and Walton S 2008 Plasma Sources Sci.
+        Sources Sci Technol. 1 36                                             Technol. 17 025009
+[35] Huang S and Gudmundsson J 2014 Plasma Sources Sci.                [50] Boris D, Petrov G, Lock E, Petrova T B, Fernsler R and
+        Technol. 23 025015                                                    Walton S 2013 Plasma Sources Sci. Technol. 22 065004
+[36] Godyak V, Piejak R and Alexandrovich B 2002 Plasma                [51] Rauf S, Balakrishna A, Agarwal A, Dorf L, Collins K,
+        Sources Sci. Technol. 11 525                                          Boris D R and Walton S G 2017 Plasma Sources Sci.
+[37] Kim H C and Lee J K 2004 Phys. Rev. Lett. 93 085003                      Technol. 26 065006
+[38] Gudmundsson J T, Snorrason D I and Hannesdottir H 2018            [52] Tennyson J et al 2017 Plasma Sources Sci. Technol. 26
+        Plasma Sources Sci. Technol. 27 025009                                055014
+
+
+
+
+                                                                   8
+

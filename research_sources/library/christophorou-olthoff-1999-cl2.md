@@ -25,6 +25,8 @@ byproducts**
 | Q4 | Hayes et al. measured atomic-Cl single-ionization cross sections from threshold to 200 eV with ±14% absolute uncertainty; Table 25 lists selected values as the NIST suggested data. | Landed as a no-fit, tabulated Maxwellian rate provider. The quoted scale uncertainty propagates directly to the rate coefficient. |
 | Q5 | Atomic-Cl excitation data discussed in the review are calculations for the 4s, 5s, 6s, 4p, 5p, 3d, 4d, and 5d states, not direct measurements. | Confirms that the first Lee Table 5 product denotes an excited `3d` state. Lee's printed extra electron violates charge conservation and is quarantined as a source defect. |
 | Q6 | The review gives `D0(Cl2)=2.4793 eV` and a vibrational quantum of `0.0694 eV`; its threshold table gives 11.48 eV for Cl2 ionization, 15.45 eV for dissociative ionization, and 11.9±0.2 eV for ion-pair formation. | Physical energy-loss thresholds for later molecular-channel mapping; these are not interchangeable with Arrhenius fit exponents. |
+| Q7 | Table 12 is the suggested total Cl2 ionization cross section from 11.5--100 eV. It averages Kurepa--Belic and Stevie--Vasile even though the two magnitudes differ beyond their combined quoted uncertainties. | Landed as aggregate evaluated evidence with no invented scalar uncertainty. |
+| Q8 | No partial electron-impact ionization data exist; the relative production of `Cl2+` and `Cl+` is unknown. | Total positive-ion production can advance, but species-resolved ion flux and sheath transport remain open. |
 
 ## Executable decision
 
@@ -36,3 +38,7 @@ temperatures with a material unmeasured high-energy tail.
 This evaluated provider does not overwrite the Lee--Lieberman reproduction
 deck. The two remain side by side so source replay and predictive evidence
 cannot be confused.
+
+`nist_molecular_chlorine_total_ionization_rate()` similarly integrates the
+29-point, pixel-audited Table 12. It is deliberately aggregate-only and cannot
+replace either species-resolved ionization row.

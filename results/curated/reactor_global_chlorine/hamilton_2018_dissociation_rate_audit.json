@@ -1,0 +1,18 @@
+{
+  "gate": "analytic integration of Hamilton state cross sections versus the authors' supplied Maxwellian x=1 total rate",
+  "claim_class": "numerical source reproduction, not experimental validation",
+  "coefficient_selection_target": null,
+  "temperature_domain_eV": [
+    0.3,
+    5.0
+  ],
+  "state_count": 8,
+  "temperature_points": 235,
+  "runtime_table_points": 237,
+  "relative_error_limit": 0.01,
+  "maximum_absolute_relative_error": 0.0044422122864757885,
+  "mean_absolute_relative_error": 0.001854883605120539,
+  "worst_temperature_eV": 0.31015015015015,
+  "passed": true,
+  "source_boundary": "Hamilton cross sections are fixed-nuclei R-matrix calculations for Cl2(v=0), extended above the ionization potential by transition-specific scaling; no scalar physical uncertainty was published"
+}

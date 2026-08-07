@@ -458,7 +458,7 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
             or np.any(np.asarray(cross_sections) < 0.0)
             or not any(value > 0.0 for value in cross_sections)
             or not np.isfinite(self.threshold_eV)
-            or not energies[0] <= self.threshold_eV < energies[-1]
+            or not 0.0 <= self.threshold_eV < energies[-1]
             or (
                 uncertainty is not None
                 and (
@@ -555,12 +555,99 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
         return float(value)
 
 
+@dataclass(frozen=True)
+class ElectronTemperatureTabulatedRateCoefficient:
+    """Fast bounded electron-temperature rate table.
+
+    Positive coefficients are interpolated linearly in ``log(k)`` against
+    ``1 / Te``.  Threshold-dominated electron-impact rates are approximately
+    Arrhenius in that coordinate, which gives a compact, positive numerical
+    representation without fitting a reactor observable.  Extrapolation is
+    forbidden.
+    """
+
+    electron_temperature_eV: tuple[float, ...]
+    coefficient_m3_s: tuple[float, ...]
+    source: str
+    evidence_kind: str
+    relative_uncertainty: float | None = None
+    density_order: float = field(init=False, default=2.0)
+    _inverse_temperature: np.ndarray = field(
+        init=False, repr=False, compare=False)
+    _log_coefficient: np.ndarray = field(
+        init=False, repr=False, compare=False)
+    source_units: str = field(
+        init=False,
+        default=(
+            "tabulated Te in eV and coefficient in m^3 s^-1; "
+            "log(k) linear in 1/Te"
+        ),
+    )
+
+    def __post_init__(self):
+        temperatures = tuple(
+            float(value) for value in self.electron_temperature_eV)
+        coefficients = tuple(float(value) for value in self.coefficient_m3_s)
+        uncertainty = self.relative_uncertainty
+        if uncertainty is not None:
+            uncertainty = float(uncertainty)
+        if (
+            len(temperatures) < 2
+            or len(temperatures) != len(coefficients)
+            or np.any(~np.isfinite(np.asarray(temperatures)))
+            or np.any(~np.isfinite(np.asarray(coefficients)))
+            or np.any(np.asarray(temperatures) <= 0.0)
+            or np.any(np.diff(np.asarray(temperatures)) <= 0.0)
+            or np.any(np.asarray(coefficients) <= 0.0)
+            or (
+                uncertainty is not None
+                and (
+                    not np.isfinite(uncertainty)
+                    or not 0.0 <= uncertainty < 1.0
+                )
+            )
+            or not str(self.source).strip()
+            or self.evidence_kind not in _EVIDENCE_KINDS
+        ):
+            raise ValueError(
+                "invalid tabulated electron-temperature coefficient")
+        object.__setattr__(self, "electron_temperature_eV", temperatures)
+        object.__setattr__(self, "coefficient_m3_s", coefficients)
+        object.__setattr__(self, "relative_uncertainty", uncertainty)
+        inverse_temperature = 1.0 / np.asarray(temperatures)
+        log_coefficient = np.log(np.asarray(coefficients))
+        inverse_temperature.setflags(write=False)
+        log_coefficient.setflags(write=False)
+        object.__setattr__(
+            self, "_inverse_temperature", inverse_temperature)
+        object.__setattr__(self, "_log_coefficient", log_coefficient)
+
+    def coefficient_si(self, context: RateContext) -> float:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        temperature = context.electron_temperature_eV
+        lower = self.electron_temperature_eV[0]
+        upper = self.electron_temperature_eV[-1]
+        if not lower <= temperature <= upper:
+            raise ValueError(
+                "electron temperature is outside the tabulated rate domain")
+        value = np.exp(np.interp(
+            1.0 / temperature,
+            self._inverse_temperature[::-1],
+            self._log_coefficient[::-1],
+        ))
+        if not np.isfinite(value) or value <= 0.0:
+            raise FloatingPointError("nonpositive or nonfinite rate coefficient")
+        return float(value)
+
+
 _RATE_COEFFICIENT_TYPES = (
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
     ElectronBase10LogPolynomialRateCoefficient,
     ElectronMaxwellianCrossSectionRateCoefficient,
+    ElectronTemperatureTabulatedRateCoefficient,
 )
 
 
@@ -583,6 +670,7 @@ class Reaction:
         | ElectronInverseTemperaturePolynomialRateCoefficient
         | ElectronBase10LogPolynomialRateCoefficient
         | ElectronMaxwellianCrossSectionRateCoefficient
+        | ElectronTemperatureTabulatedRateCoefficient
     )
     electron_energy_loss_eV: float | None
     source: str

@@ -6,9 +6,18 @@ tuned to a reactor state or an etched profile.
 """
 from __future__ import annotations
 
-from .network import ElectronMaxwellianCrossSectionRateCoefficient
+import csv
+from functools import lru_cache
+from pathlib import Path
+
+from .network import (
+    ElectronMaxwellianCrossSectionRateCoefficient,
+    ElectronTemperatureTabulatedRateCoefficient,
+    Reaction,
+)
 
 ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV = 12.967633
+MOLECULAR_CHLORINE_TOTAL_IONIZATION_THRESHOLD_EV = 11.481
 
 _HAYES_ATOMIC_CHLORINE_IONIZATION_ENERGY_EV = (
     11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0,
@@ -25,6 +34,33 @@ _HAYES_ATOMIC_CHLORINE_IONIZATION_CROSS_SECTION_1E20_M2 = (
     3.43, 3.44, 3.47, 3.49, 3.49, 3.47, 3.44, 3.43, 3.43, 3.37,
     3.34, 3.31, 3.23, 3.20, 3.21, 3.15, 3.13, 3.07, 3.05, 3.01,
     2.97, 2.96, 2.91, 2.85, 2.81, 2.72, 2.68, 2.63,
+)
+
+_NIST_MOLECULAR_CHLORINE_TOTAL_IONIZATION_ENERGY_EV = (
+    11.5, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0,
+    22.0, 24.0, 26.0, 28.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0,
+    60.0, 65.0, 70.0, 75.0, 80.0, 85.0, 90.0, 95.0, 100.0,
+)
+
+_NIST_MOLECULAR_CHLORINE_TOTAL_IONIZATION_CROSS_SECTION_1E20_M2 = (
+    0.03, 0.11, 0.25, 0.43, 0.69, 0.99, 1.32, 1.67, 2.06, 2.47,
+    3.25, 3.79, 4.17, 4.51, 4.80, 5.26, 5.49, 5.68, 5.87, 6.03,
+    6.15, 6.25, 6.32, 6.33, 6.31, 6.28, 6.25, 6.22, 6.19,
+)
+
+HAMILTON_2018_CL2_DISSOCIATION_STATES = (
+    ("a_3Pi_u", 3.252),
+    ("A_1Pi_u", 4.348),
+    ("b_3Pi_g", 6.498),
+    ("B_1Pi_g", 7.537),
+    ("C_1Delta_g", 7.790),
+    ("c_3Sigma_g_minus", 7.257),
+    ("D_1Sigma_g_plus", 8.228),
+    ("e_3Sigma_u_plus", 9.219),
+)
+_HAMILTON_2018_RATE_TABLE = (
+    Path(__file__).with_name("data")
+    / "hamilton_2018_cl2_state_maxwellian_rates.csv"
 )
 
 
@@ -55,4 +91,108 @@ def nist_hayes_atomic_chlorine_ionization_rate(
         ),
         evidence_kind="measured",
         maximum_kernel_tail_fraction=maximum_kernel_tail_fraction,
+    )
+
+
+def nist_molecular_chlorine_total_ionization_rate(
+        *, maximum_kernel_tail_fraction: float = 1.0e-6
+) -> ElectronMaxwellianCrossSectionRateCoefficient:
+    """Return the NIST-suggested total Cl2 ionization rate provider.
+
+    Christophorou and Olthoff's Table 12 is the average of two incompatible
+    experimental datasets.  The review says their difference exceeds their
+    combined quoted uncertainties, so this provider deliberately carries no
+    scalar ``relative_uncertainty``.  It is evaluated measurement evidence,
+    not a precision claim.
+
+    This is a *total* positive-ion source only.  The same review says the
+    relative electron-impact production of Cl2+ and Cl+ is unknown.  The
+    provider therefore must not be substituted for either species-resolved
+    Lee--Lieberman reaction without a separately validated branching model.
+    """
+    return ElectronMaxwellianCrossSectionRateCoefficient(
+        electron_energy_eV=(
+            _NIST_MOLECULAR_CHLORINE_TOTAL_IONIZATION_ENERGY_EV),
+        cross_section_m2=tuple(
+            value * 1.0e-20
+            for value in (
+                _NIST_MOLECULAR_CHLORINE_TOTAL_IONIZATION_CROSS_SECTION_1E20_M2)
+        ),
+        threshold_eV=MOLECULAR_CHLORINE_TOTAL_IONIZATION_THRESHOLD_EV,
+        relative_uncertainty=None,
+        source=(
+            "christophorou-olthoff-1999-cl2 Table 12 total ionization; "
+            "evaluated average of Kurepa--Belic and Stevie--Vasile "
+            "measurements"
+        ),
+        evidence_kind="published_compilation",
+        maximum_kernel_tail_fraction=maximum_kernel_tail_fraction,
+    )
+
+
+@lru_cache(maxsize=1)
+def _hamilton_2018_rate_rows():
+    with _HAMILTON_2018_RATE_TABLE.open(
+            newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    if len(rows) < 200:
+        raise RuntimeError("Hamilton Cl2 state-rate table is incomplete")
+    return tuple(rows)
+
+
+def hamilton_2018_cl2_state_dissociation_rates():
+    """Return eight fast, state-resolved Cl2 dissociation rate providers.
+
+    The compact table was generated from all 50,000 points of each source
+    cross section and reproduces the authors' independently supplied
+    Maxwellian total-rate array within 0.445% over 0.3--5 eV.  Its tabulated
+    providers refuse extrapolation outside that source-stated industrial
+    temperature range.
+    """
+    rows = _hamilton_2018_rate_rows()
+    temperatures = tuple(
+        float(row["electron_temperature_eV"]) for row in rows)
+    return tuple(
+        (
+            state,
+            excitation_eV,
+            ElectronTemperatureTabulatedRateCoefficient(
+                electron_temperature_eV=temperatures,
+                coefficient_m3_s=tuple(
+                    float(row[f"{state}_m3_s"]) for row in rows),
+                source=(
+                    "hamilton-2018-cl2-dissociation exact OPJ "
+                    f"{state} cross section; analytic Maxwellian reduction"
+                ),
+                evidence_kind="semi_empirical",
+                relative_uncertainty=None,
+            ),
+        )
+        for state, excitation_eV
+        in HAMILTON_2018_CL2_DISSOCIATION_STATES
+    )
+
+
+def hamilton_2018_cl2_state_dissociation_reactions():
+    """Return energy-resolved ``e + Cl2 -> e + 2Cl`` reactions.
+
+    Hamilton et al. identify all eight retained excited states as
+    dissociating to two ground-state Cl atoms. Their calculated vertical
+    excitation energies are the event-specific electron-energy losses.
+    """
+    return tuple(
+        Reaction(
+            name=f"e_Cl2_dissociation_{state}",
+            reactants={"e": 1, "Cl2": 1},
+            products={"e": 1, "Cl": 2},
+            kinetic_orders={"e": 1, "Cl2": 1},
+            rate_coefficient=rate,
+            electron_energy_loss_eV=excitation_eV,
+            source=(
+                "hamilton-2018-cl2-dissociation state-resolved R-matrix "
+                f"cross section and Table 2 VEE: {state}"
+            ),
+        )
+        for state, excitation_eV, rate
+        in hamilton_2018_cl2_state_dissociation_rates()
     )

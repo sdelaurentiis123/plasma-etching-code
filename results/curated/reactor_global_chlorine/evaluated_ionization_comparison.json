@@ -1,0 +1,28 @@
+{
+  "audit": "evaluated chlorine ionization versus Lee--Lieberman rate fits",
+  "claim_class": "no-fit evidence comparison; no retrospective pass threshold",
+  "coefficient_selection_target": null,
+  "electron_temperature_eV": [
+    2.0,
+    3.0,
+    4.0,
+    5.0
+  ],
+  "lower_temperature_exclusion": "Lennon Eq. 6 is valid only for Te > 1.296 eV; no extrapolated atomic-fit comparison is reported below 2 eV",
+  "atomic_cl_nist_to_lennon_ratio_range": [
+    0.8176734984645678,
+    0.880270551406967
+  ],
+  "molecular_cl2_nist_to_lee_total_ratio_range": [
+    0.6969588521301798,
+    1.146095914307134
+  ],
+  "molecular_total_ionization_evidence": "NIST evaluated average of two incompatible measurement sets",
+  "molecular_species_branching": "unresolved",
+  "branching_missing_quantity": "electron-impact Cl2+ versus Cl+ production fraction",
+  "predictive_use": {
+    "atomic_cl_positive_ion_source": "ready within quoted +/-14%",
+    "molecular_total_positive_ion_source": "ready as aggregate with no defensible scalar uncertainty",
+    "species_resolved_molecular_positive_ion_source": "not ready"
+  }
+}
