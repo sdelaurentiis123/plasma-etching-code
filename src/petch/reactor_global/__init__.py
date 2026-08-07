@@ -25,10 +25,14 @@ from .chlorine import (
     lee_lieberman_chlorine_species,
 )
 from .chlorine_wall import (
+    CHLORINE_INCIDENT_VELOCITY_DISTRIBUTIONS,
+    CHLORINE_INCIDENT_VELOCITY_EVIDENCE_KINDS,
     WALL_RECOMBINATION_EVIDENCE_KINDS,
+    ChlorineIncidentVelocityState,
     ChlorineWallFlux,
     ChlorineWallRecombinationBoundary,
     chlorine_atom_mean_thermal_speed_m_s,
+    thermalized_chlorine_incident_velocity_state,
 )
 from .chlorine_transport import (
     ECONOMOU_CHLORINE_REDUCED_DIFFUSIVITY_M_INV_S,
@@ -113,7 +117,10 @@ __all__ = [
     "ARGON_MASS_KG",
     "ATOMIC_MASS_UNIT_KG",
     "CHLORINE_ATOM_MASS_AMU",
+    "CHLORINE_INCIDENT_VELOCITY_DISTRIBUTIONS",
+    "CHLORINE_INCIDENT_VELOCITY_EVIDENCE_KINDS",
     "CHLORINE_MOLECULE_MASS_AMU",
+    "ChlorineIncidentVelocityState",
     "ChlorineWallFlux",
     "ChlorineWallRecombinationBoundary",
     "ChlorineNeutralWallTransport",
@@ -155,6 +162,7 @@ __all__ = [
     "build_lee_lieberman_argon_volume_network",
     "build_lee_lieberman_chlorine_particle_network",
     "chlorine_atom_mean_thermal_speed_m_s",
+    "thermalized_chlorine_incident_velocity_state",
     "hamilton_2018_cl2_state_dissociation_rates",
     "hamilton_2018_cl2_state_dissociation_reactions",
     "lee_lieberman_argon_species",

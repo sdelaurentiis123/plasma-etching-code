@@ -6,8 +6,8 @@ from dataclasses import dataclass
 import numpy as np
 
 from .chlorine_wall import (
+    ChlorineIncidentVelocityState,
     ChlorineWallRecombinationBoundary,
-    chlorine_atom_mean_thermal_speed_m_s,
 )
 from .geometry import CylindricalReactor
 from .neutral_transport import (
@@ -86,6 +86,7 @@ class ChlorineNeutralWallTransport:
     diffusivity: NeutralDiffusivityState
     wall_loss: CylindricalNeutralWallLoss
     wall_boundary: ChlorineWallRecombinationBoundary
+    incident_velocity_state: ChlorineIncidentVelocityState
 
     def __post_init__(self):
         if (
@@ -93,6 +94,10 @@ class ChlorineNeutralWallTransport:
             or not isinstance(self.wall_loss, CylindricalNeutralWallLoss)
             or not isinstance(
                 self.wall_boundary, ChlorineWallRecombinationBoundary)
+            or not isinstance(
+                self.incident_velocity_state,
+                ChlorineIncidentVelocityState,
+            )
         ):
             raise TypeError("invalid chlorine neutral wall-transport state")
         if not np.isclose(
@@ -110,12 +115,21 @@ class ChlorineNeutralWallTransport:
         ):
             raise ValueError(
                 "wall loss does not use the supplied recombination boundary")
+        if not np.isclose(
+            self.incident_velocity_state.mean_speed_m_s,
+            self.wall_loss.mean_thermal_speed_m_s,
+            rtol=0.0,
+            atol=0.0,
+        ):
+            raise ValueError(
+                "wall loss does not use the supplied incident velocity")
 
     @property
     def supports_prediction(self) -> bool:
         return (
             self.diffusivity.supports_prediction
             and self.wall_boundary.supports_local_prediction
+            and self.incident_velocity_state.supports_prediction
             and self.wall_loss.numerical_closure_passes
         )
 
@@ -172,6 +186,7 @@ def solve_chlorine_neutral_wall_transport(
     *,
     geometry: CylindricalReactor,
     wall_boundary: ChlorineWallRecombinationBoundary,
+    incident_velocity_state: ChlorineIncidentVelocityState,
     diffusivity_model: ReducedNeutralDiffusivity,
     total_neutral_density_m3: float,
     gas_temperature_K: float,
@@ -184,12 +199,18 @@ def solve_chlorine_neutral_wall_transport(
         raise TypeError("chlorine wall boundary is required")
     if not isinstance(diffusivity_model, ReducedNeutralDiffusivity):
         raise TypeError("reduced neutral diffusivity is required")
+    if not isinstance(
+        incident_velocity_state, ChlorineIncidentVelocityState
+    ):
+        raise TypeError("chlorine incident-velocity state is required")
     wall_boundary.require_applicable(
         cl_to_cl2_ratio=cl_to_cl2_ratio,
         pressure_Pa=pressure_Pa,
         icp_power_W=icp_power_W,
         gas_temperature_K=gas_temperature_K,
     )
+    incident_velocity_state.require_compatible_temperature(
+        gas_temperature_K)
     diffusivity = diffusivity_model.evaluate(
         total_neutral_density_m3=total_neutral_density_m3,
         gas_temperature_K=gas_temperature_K,
@@ -197,8 +218,7 @@ def solve_chlorine_neutral_wall_transport(
     wall_loss = solve_cylindrical_neutral_wall_loss(
         geometry=geometry,
         diffusivity_m2_s=diffusivity.diffusivity_m2_s,
-        mean_thermal_speed_m_s=chlorine_atom_mean_thermal_speed_m_s(
-            gas_temperature_K),
+        mean_thermal_speed_m_s=incident_velocity_state.mean_speed_m_s,
         wall_reaction_probability=(
             wall_boundary.recombination_probability),
     )
@@ -206,4 +226,5 @@ def solve_chlorine_neutral_wall_transport(
         diffusivity=diffusivity,
         wall_loss=wall_loss,
         wall_boundary=wall_boundary,
+        incident_velocity_state=incident_velocity_state,
     )

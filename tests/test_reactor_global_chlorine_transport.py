@@ -3,6 +3,7 @@ import pytest
 from petch.reactor_global import (
     ChlorineWallRecombinationBoundary,
     CylindricalReactor,
+    thermalized_chlorine_incident_velocity_state,
 )
 from petch.reactor_global.model import BOLTZMANN_J_K
 from petch.reactor_global.chlorine_transport import (
@@ -50,6 +51,14 @@ def test_composed_chlorine_wall_transport_is_conserved_but_not_predictive():
     transport = solve_chlorine_neutral_wall_transport(
         geometry=CylindricalReactor(radius_m=0.14, length_m=0.10),
         wall_boundary=_wall_boundary(),
+        incident_velocity_state=(
+            thermalized_chlorine_incident_velocity_state(
+                temperature,
+                source="published-model thermal population",
+                evidence_kind="assumed",
+                relative_uncertainty=None,
+            )
+        ),
         diffusivity_model=(
             lymberopoulos_economou_1995_chlorine_diffusivity()),
         total_neutral_density_m3=total_density,
@@ -64,6 +73,7 @@ def test_composed_chlorine_wall_transport_is_conserved_but_not_predictive():
     )
     assert transport.wall_loss.numerical_closure_passes
     assert not transport.supports_prediction
+    assert not transport.incident_velocity_state.supports_prediction
 
     rates = transport.evaluate_volume_rates(2.0e20)
     assert rates.chlorine_atom_loss_m3_s > 0.0
@@ -77,8 +87,39 @@ def test_composed_transport_refuses_cross_temperature_coefficient_use():
         solve_chlorine_neutral_wall_transport(
             geometry=CylindricalReactor(radius_m=0.14, length_m=0.10),
             wall_boundary=_wall_boundary(),
+            incident_velocity_state=(
+                thermalized_chlorine_incident_velocity_state(
+                    500.0,
+                    source="published-model thermal population",
+                    evidence_kind="assumed",
+                    relative_uncertainty=None,
+                )
+            ),
             diffusivity_model=(
                 ramamurthi_economou_2002_chlorine_diffusivity()),
+            total_neutral_density_m3=1.0e21,
+            gas_temperature_K=500.0,
+            cl_to_cl2_ratio=0.3,
+            pressure_Pa=1.333223684,
+            icp_power_W=300.0,
+        )
+
+
+def test_transport_refuses_mismatched_maxwellian_temperature():
+    with pytest.raises(ValueError, match="reference temperature"):
+        solve_chlorine_neutral_wall_transport(
+            geometry=CylindricalReactor(radius_m=0.14, length_m=0.10),
+            wall_boundary=_wall_boundary(),
+            incident_velocity_state=(
+                thermalized_chlorine_incident_velocity_state(
+                    499.0,
+                    source="temperature mismatch test",
+                    evidence_kind="assumed",
+                    relative_uncertainty=None,
+                )
+            ),
+            diffusivity_model=(
+                lymberopoulos_economou_1995_chlorine_diffusivity()),
             total_neutral_density_m3=1.0e21,
             gas_temperature_K=500.0,
             cl_to_cl2_ratio=0.3,

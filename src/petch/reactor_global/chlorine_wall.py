@@ -1,15 +1,21 @@
 """Local, atom-conserving chlorine wall-recombination physics.
 
 This module deliberately stops at the plasma-facing wall.  It converts a
-local Cl number density and gas temperature into the isotropic Maxwellian
-impingement flux and applies a condition-scoped recombination probability:
+local Cl number density and an explicit incident-velocity state into an
+isotropic impingement flux and applies a condition-scoped recombination
+probability:
 
     2 Cl(wall) -> Cl2(gas)
 
-It does not turn the local wall flux into a volume-averaged loss frequency.
-That step requires neutral diffusion/Knudsen transport and the distribution
-of conditioned surface states.  Omitting it here prevents a ballistic
-well-mixed assumption from silently becoming reactor closure.
+The velocity state is mandatory.  Guha et al. (2008) show that the common
+300 K Maxwellian assumption can fail when freshly dissociated Cl reaches the
+wall before thermalizing.  Keeping that state explicit prevents a gas
+temperature from silently certifying the incident flux.
+
+This module does not turn the local wall flux into a volume-averaged loss
+frequency.  That step requires neutral diffusion/Knudsen transport and the
+distribution of conditioned surface states.  Omitting it here prevents a
+ballistic well-mixed assumption from silently becoming reactor closure.
 """
 from __future__ import annotations
 
@@ -33,6 +39,19 @@ WALL_RECOMBINATION_EVIDENCE_KINDS = frozenset({
 })
 _PREDICTIVE_EVIDENCE_KINDS = frozenset({"measured", "validated_model"})
 
+CHLORINE_INCIDENT_VELOCITY_DISTRIBUTIONS = frozenset({
+    "thermalized_maxwellian",
+    "measured_isotropic",
+    "modeled_isotropic",
+    "sensitivity_isotropic",
+})
+CHLORINE_INCIDENT_VELOCITY_EVIDENCE_KINDS = frozenset({
+    "measured",
+    "validated_model",
+    "assumed",
+    "sensitivity",
+})
+
 
 def chlorine_atom_mean_thermal_speed_m_s(
         gas_temperature_K: float) -> float:
@@ -43,6 +62,126 @@ def chlorine_atom_mean_thermal_speed_m_s(
     mass_kg = CHLORINE_ATOM_MASS_AMU * ATOMIC_MASS_UNIT_KG
     return float(np.sqrt(
         8.0 * BOLTZMANN_J_K * temperature / (np.pi * mass_kg)))
+
+
+@dataclass(frozen=True)
+class ChlorineIncidentVelocityState:
+    """Isotropic Cl velocity moment used by the kinetic wall boundary.
+
+    ``mean_speed_m_s`` is the full speed moment ``<|v|>``.  Isotropy is a
+    declared part of every allowed distribution kind, so the incident number
+    flux is ``n <|v|> / 4``.  An anisotropic distribution requires its inward
+    normal velocity moment and is intentionally outside this scalar closure.
+    """
+
+    mean_speed_m_s: float
+    distribution_kind: str
+    source: str
+    evidence_kind: str
+    relative_uncertainty: float | None
+    reference_temperature_K: float | None = None
+    provenance: Mapping[str, object] | None = None
+
+    def __post_init__(self):
+        mean_speed = float(self.mean_speed_m_s)
+        uncertainty = self.relative_uncertainty
+        if uncertainty is not None:
+            uncertainty = float(uncertainty)
+        reference_temperature = self.reference_temperature_K
+        if reference_temperature is not None:
+            reference_temperature = float(reference_temperature)
+        if (
+            not np.isfinite(mean_speed)
+            or mean_speed <= 0.0
+            or self.distribution_kind
+            not in CHLORINE_INCIDENT_VELOCITY_DISTRIBUTIONS
+            or not str(self.source).strip()
+            or self.evidence_kind
+            not in CHLORINE_INCIDENT_VELOCITY_EVIDENCE_KINDS
+            or (
+                uncertainty is not None
+                and (
+                    not np.isfinite(uncertainty)
+                    or not 0.0 <= uncertainty < 1.0
+                )
+            )
+            or (
+                reference_temperature is not None
+                and (
+                    not np.isfinite(reference_temperature)
+                    or reference_temperature <= 0.0
+                )
+            )
+        ):
+            raise ValueError("invalid chlorine incident-velocity state")
+        if (
+            self.distribution_kind == "thermalized_maxwellian"
+            and reference_temperature is None
+        ):
+            raise ValueError(
+                "thermalized Maxwellian state requires a reference temperature")
+        if (
+            self.distribution_kind != "thermalized_maxwellian"
+            and reference_temperature is not None
+        ):
+            raise ValueError(
+                "reference temperature is reserved for a Maxwellian state")
+        object.__setattr__(self, "mean_speed_m_s", mean_speed)
+        object.__setattr__(self, "relative_uncertainty", uncertainty)
+        object.__setattr__(
+            self, "reference_temperature_K", reference_temperature)
+        object.__setattr__(
+            self,
+            "provenance",
+            MappingProxyType(
+                {} if self.provenance is None else dict(self.provenance)),
+        )
+
+    @property
+    def supports_prediction(self) -> bool:
+        return (
+            self.evidence_kind in _PREDICTIVE_EVIDENCE_KINDS
+            and self.relative_uncertainty is not None
+        )
+
+    def require_compatible_temperature(self, gas_temperature_K: float) -> None:
+        """Reject a thermal state evaluated at a different gas temperature."""
+        temperature = float(gas_temperature_K)
+        if not np.isfinite(temperature) or temperature <= 0.0:
+            raise ValueError("gas temperature must be positive and finite")
+        if (
+            self.distribution_kind == "thermalized_maxwellian"
+            and not np.isclose(
+                self.reference_temperature_K,
+                temperature,
+                rtol=1.0e-12,
+                atol=0.0,
+            )
+        ):
+            raise ValueError(
+                "incident Maxwellian reference temperature does not match "
+                "the reactor gas temperature")
+
+
+def thermalized_chlorine_incident_velocity_state(
+    gas_temperature_K: float,
+    *,
+    source: str,
+    evidence_kind: str,
+    relative_uncertainty: float | None,
+    provenance: Mapping[str, object] | None = None,
+) -> ChlorineIncidentVelocityState:
+    """Construct an explicit Maxwellian Cl incident-velocity state."""
+    temperature = float(gas_temperature_K)
+    return ChlorineIncidentVelocityState(
+        mean_speed_m_s=chlorine_atom_mean_thermal_speed_m_s(temperature),
+        distribution_kind="thermalized_maxwellian",
+        source=source,
+        evidence_kind=evidence_kind,
+        relative_uncertainty=relative_uncertainty,
+        reference_temperature_K=temperature,
+        provenance=provenance,
+    )
 
 
 @dataclass(frozen=True)
@@ -157,6 +296,7 @@ class ChlorineWallRecombinationBoundary:
         self,
         *,
         chlorine_atom_density_m3: float,
+        incident_velocity_state: ChlorineIncidentVelocityState,
         gas_temperature_K: float,
         cl_to_cl2_ratio: float,
         pressure_Pa: float,
@@ -169,11 +309,16 @@ class ChlorineWallRecombinationBoundary:
             gas_temperature_K=gas_temperature_K,
         )
         density = float(chlorine_atom_density_m3)
+        if not isinstance(
+            incident_velocity_state, ChlorineIncidentVelocityState
+        ):
+            raise TypeError("chlorine incident-velocity state is required")
+        incident_velocity_state.require_compatible_temperature(
+            gas_temperature_K)
         if not np.isfinite(density) or density < 0.0:
             raise ValueError(
                 "chlorine atom density must be finite and nonnegative")
-        mean_speed = chlorine_atom_mean_thermal_speed_m_s(
-            gas_temperature_K)
+        mean_speed = incident_velocity_state.mean_speed_m_s
         incident = 0.25 * density * mean_speed
         recombined_atoms = self.recombination_probability * incident
         returned_molecules = 0.5 * recombined_atoms
@@ -184,6 +329,8 @@ class ChlorineWallRecombinationBoundary:
             mean_cl_speed_m_s=mean_speed,
             source=self.source,
             evidence_kind=self.evidence_kind,
+            incident_velocity_state=incident_velocity_state,
+            wall_boundary=self,
         )
 
 
@@ -197,6 +344,8 @@ class ChlorineWallFlux:
     mean_cl_speed_m_s: float
     source: str
     evidence_kind: str
+    incident_velocity_state: ChlorineIncidentVelocityState
+    wall_boundary: ChlorineWallRecombinationBoundary
 
     def __post_init__(self):
         values = np.asarray([
@@ -211,6 +360,14 @@ class ChlorineWallFlux:
             or self.mean_cl_speed_m_s <= 0.0
             or not str(self.source).strip()
             or self.evidence_kind not in WALL_RECOMBINATION_EVIDENCE_KINDS
+            or not isinstance(
+                self.incident_velocity_state,
+                ChlorineIncidentVelocityState,
+            )
+            or not isinstance(
+                self.wall_boundary,
+                ChlorineWallRecombinationBoundary,
+            )
         ):
             raise ValueError("invalid chlorine wall flux")
         for name, value in (
@@ -230,6 +387,35 @@ class ChlorineWallFlux:
             atol=0.0,
         ):
             raise ValueError("chlorine wall flux does not conserve atoms")
+        if not np.isclose(
+            self.mean_cl_speed_m_s,
+            self.incident_velocity_state.mean_speed_m_s,
+            rtol=0.0,
+            atol=0.0,
+        ):
+            raise ValueError(
+                "wall flux does not use the supplied incident velocity")
+        if (
+            self.source != self.wall_boundary.source
+            or self.evidence_kind != self.wall_boundary.evidence_kind
+        ):
+            raise ValueError("wall flux evidence does not match its boundary")
+        if self.incident_cl_atom_flux_m2_s > 0.0 and not np.isclose(
+            self.recombined_cl_atom_flux_m2_s
+            / self.incident_cl_atom_flux_m2_s,
+            self.wall_boundary.recombination_probability,
+            rtol=1.0e-14,
+            atol=0.0,
+        ):
+            raise ValueError("wall flux does not use its boundary probability")
+
+    @property
+    def supports_local_prediction(self) -> bool:
+        """Whether wall response and incident velocity are both evidenced."""
+        return (
+            self.wall_boundary.supports_local_prediction
+            and self.incident_velocity_state.supports_prediction
+        )
 
     @property
     def chlorine_atom_inventory_residual_m2_s(self) -> float:

@@ -32,5 +32,7 @@
 Guha is the direct anodized-Al complement to the Stafford stainless-steel
 dataset. Its strongest new contribution is the non-thermal low-pressure
 warning: direct surface probabilities remain conditional on how incident atom
-flux was inferred. The reactor code must therefore distinguish a measured wall
-response from an assumed incident velocity distribution.
+flux was inferred. The reactor code therefore requires a provenance-bearing
+`ChlorineIncidentVelocityState`; a Maxwellian state must carry its reference
+temperature, and assumed thermalization cannot support a predictive wall-loss
+claim even when the wall-response measurement itself is direct.

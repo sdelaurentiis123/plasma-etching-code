@@ -3,8 +3,10 @@ import pytest
 
 from petch.reactor_global import (
     CHLORINE_ATOM_MASS_AMU,
+    ChlorineIncidentVelocityState,
     ChlorineWallRecombinationBoundary,
     chlorine_atom_mean_thermal_speed_m_s,
+    thermalized_chlorine_incident_velocity_state,
 )
 from petch.reactor_global.chlorine_wall import BOLTZMANN_J_K
 from petch.reactor_global.transport import ATOMIC_MASS_UNIT_KG
@@ -45,6 +47,14 @@ def test_local_wall_flux_uses_quarter_n_vbar_and_conserves_chlorine():
     density = 2.0e20
     flux = boundary.evaluate(
         chlorine_atom_density_m3=density,
+        incident_velocity_state=(
+            thermalized_chlorine_incident_velocity_state(
+                350.0,
+                source="assumed thermalized chlorine population",
+                evidence_kind="assumed",
+                relative_uncertainty=None,
+            )
+        ),
         gas_temperature_K=350.0,
         cl_to_cl2_ratio=0.35,
         pressure_Pa=5.0 * 0.1333223684,
@@ -58,6 +68,50 @@ def test_local_wall_flux_uses_quarter_n_vbar_and_conserves_chlorine():
         0.5 * flux.recombined_cl_atom_flux_m2_s)
     assert flux.chlorine_atom_inventory_residual_m2_s == 0.0
     assert not flux.reactor_volume_closure_ready
+    assert not flux.supports_local_prediction
+
+
+def test_measured_nonthermal_isotropic_speed_is_used_exactly():
+    boundary = _boundary(
+        evidence_kind="measured",
+        relative_measurement_uncertainty=0.2,
+    )
+    velocity = ChlorineIncidentVelocityState(
+        mean_speed_m_s=1500.0,
+        distribution_kind="measured_isotropic",
+        source="hypothetical velocity-distribution measurement",
+        evidence_kind="measured",
+        relative_uncertainty=0.1,
+    )
+    flux = boundary.evaluate(
+        chlorine_atom_density_m3=2.0e20,
+        incident_velocity_state=velocity,
+        gas_temperature_K=300.0,
+        cl_to_cl2_ratio=0.35,
+        pressure_Pa=5.0 * 0.1333223684,
+        icp_power_W=300.0,
+    )
+    assert flux.incident_cl_atom_flux_m2_s == pytest.approx(7.5e22)
+    assert flux.mean_cl_speed_m_s == 1500.0
+    assert flux.supports_local_prediction
+
+
+def test_thermalized_state_refuses_a_different_reactor_temperature():
+    velocity = thermalized_chlorine_incident_velocity_state(
+        300.0,
+        source="thermalization sensitivity",
+        evidence_kind="sensitivity",
+        relative_uncertainty=None,
+    )
+    with pytest.raises(ValueError, match="reference temperature"):
+        _boundary().evaluate(
+            chlorine_atom_density_m3=1.0e20,
+            incident_velocity_state=velocity,
+            gas_temperature_K=301.0,
+            cl_to_cl2_ratio=0.35,
+            pressure_Pa=5.0 * 0.1333223684,
+            icp_power_W=300.0,
+        )
 
 
 @pytest.mark.parametrize(
@@ -111,6 +165,14 @@ def test_wall_boundary_fails_outside_declared_evidence_domain(condition):
     with pytest.raises(ValueError, match="outside"):
         _boundary().evaluate(
             chlorine_atom_density_m3=1.0e20,
+            incident_velocity_state=(
+                thermalized_chlorine_incident_velocity_state(
+                    condition["gas_temperature_K"],
+                    source="assumed thermalized chlorine population",
+                    evidence_kind="assumed",
+                    relative_uncertainty=None,
+                )
+            ),
             **condition,
         )
 
