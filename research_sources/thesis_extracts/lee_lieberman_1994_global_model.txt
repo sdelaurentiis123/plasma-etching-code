@@ -1,0 +1,109 @@
+Selected verified extract for lee-lieberman-1994-global
+=======================================================
+
+Source
+------
+C. Lee and M. A. Lieberman, "Global Model of Ar, O2, Cl2 and Ar/O2 High
+Density Plasma Discharges," UCB/ERL M94/49, revised 28 November 1994.
+Berkeley record: https://digicoll.lib.berkeley.edu/record/134386
+PDF SHA-256:
+f2049e7041984d658d23688e8e8112a8d8e8a524172a8d2e335be8fde7fc2e23
+
+This is a selected project extract, not a redistributed source PDF or a full
+text. Equations and Table 3 were reconciled against 240--300 dpi page renders.
+
+Geometry and assumptions (report p.3; PDF p.7)
+------------------------------------------------
+"The cylindrical reactor geometry chosen was based on that of a commercially
+available TCP (transformer coupled plasma) reactor, with L = 7.5 cm and
+R = 15.25 cm."
+
+All densities are volume averaged. The neutral temperature is 600 K. The ion
+temperature is 0.5 eV below 1 mTorr and approaches the 600 K thermal
+temperature at higher pressure.
+
+Power and particle balances (report pp.4--8; PDF pp.8--12)
+-----------------------------------------------------------
+P_abs = P_ev + P_iw + P_ew.
+
+The electron volume-loss term sums reaction frequency multiplied by threshold
+energy, including ionization, excitation, and elastic loss. The electron wall
+energy is epsilon_ew = 2 Te. The text states that ion wall energy epsilon_iw is
+typically 5--8 Te for high-density sources.
+
+For positive-ion species i:
+
+V n_e nu_iz,i =
+    A n_is u_B,i
+    + V k_rec,i n_i n_-
+    + V sum_j k_cx,ij n_i n_j.
+
+Quasineutrality at the sheath edge is n_es = sum_i n_is.
+
+The effective ion-loss area is:
+
+A_eff = h_L (2 pi R^2) + h_R (2 pi R L).
+
+For an electropositive discharge (alpha_avg = 0), Eqs. 13--14 reduce to:
+
+h_L = 0.86 /
+      sqrt(3 + L/(2 lambda)
+             + (0.86 L u_B / (pi D_a))^2)
+
+h_R = 0.8 /
+      sqrt(4 + R/lambda
+             + (0.8 R u_B /
+                (2.405 J_1(2.405) D_a))^2)
+
+The neutral diffusion length is:
+
+1/Lambda^2 = (pi/L)^2 + (2.405/R)^2.
+
+Argon reaction set (Table 3; report p.25; PDF p.29)
+----------------------------------------------------
+Te is in eV. Printed coefficients are in cm^3 s^-1 unless stated otherwise.
+
+1. e + Ar -> Ar+ + 2e
+   k1 = 1.23e-7 exp(-18.68/Te)
+
+2. e + Ar -> Ar* + e
+   k2 = 3.71e-8 exp(-15.06/Te)
+
+3. e + Ar* -> Ar+ + 2e
+   k3 = 2.05e-7 exp(-4.95/Te)
+
+4. e + Ar* -> Ar + e
+   k4 = 2.0e-7
+
+5. Ar* + Ar* -> Ar + Ar+
+   k5 = 6.2e-10
+
+6. Ar+ -> Ar at the wall
+   k6 = 2 u_B,Ar+ (R^2 h_L + R L h_R)/(R^2 L) s^-1
+
+7. Ar* -> Ar at the wall
+   k7 = D_eff/Lambda^2 s^-1
+
+Conservation note
+-----------------
+The printed fifth reaction is customary associative-ionization shorthand. If
+read literally it violates charge conservation; the emitted electron must be
+included in a closed reaction ledger:
+
+Ar* + Ar* -> Ar + Ar+ + e.
+
+Likewise, the printed ion wall-loss row is not a closed gas-phase elementary
+reaction. A current-balanced closed wall-return event consumes the matching
+wall electron, while an open plasma balance must carry ion and electron wall
+losses as explicit boundary exchanges.
+
+Published comparison conditions (report p.9 and caption p.19)
+--------------------------------------------------------------
+Unless otherwise indicated: absorbed power 1000 W and total flow 35 SCCM.
+Figure 3 plots Te versus pressure for Ar, O2, and Cl2 with absorbed power
+1000 W, Q = 35 SCCM, and gamma_rec = 0.
+
+Figure 8 combines three separate argon experiments (Ra, Mahoney, Oomori).
+The report states that each model curve uses the corresponding operating
+conditions and reactor geometry. Those primary conditions must be recovered
+before a quantitative independent-validation claim.

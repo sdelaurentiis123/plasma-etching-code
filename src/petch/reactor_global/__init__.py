@@ -7,6 +7,13 @@ that evidence and every open-system exchange explicit.
 """
 
 from .geometry import CylindricalReactor, ElectropositiveEdgeFactors
+from .argon import (
+    ARGON_4S_METASTABLE_ENERGY_EV,
+    ARGON_IONIZATION_ENERGY_EV,
+    ARGON_METASTABLE_IONIZATION_ENERGY_EV,
+    build_lee_lieberman_argon_volume_network,
+    lee_lieberman_argon_species,
+)
 from .network import (
     CM3_TO_M3,
     E_CHARGE_C,
@@ -21,6 +28,9 @@ from .network import (
 __all__ = [
     "CM3_TO_M3",
     "E_CHARGE_C",
+    "ARGON_4S_METASTABLE_ENERGY_EV",
+    "ARGON_IONIZATION_ENERGY_EV",
+    "ARGON_METASTABLE_IONIZATION_ENERGY_EV",
     "ConstantRateCoefficient",
     "CylindricalReactor",
     "ElectronArrheniusRateCoefficient",
@@ -29,4 +39,6 @@ __all__ = [
     "Reaction",
     "ReactionNetwork",
     "Species",
+    "build_lee_lieberman_argon_volume_network",
+    "lee_lieberman_argon_species",
 ]

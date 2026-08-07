@@ -28,6 +28,7 @@ _EVIDENCE_KINDS = {
     "semi_empirical",
     "estimated",
     "derived",
+    "published_compilation",
 }
 
 
