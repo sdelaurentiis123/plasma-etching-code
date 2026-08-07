@@ -24,6 +24,9 @@ YOSHIE_FEATURES = (
 LEVINSON = (
     ROOT / "results" / "curated"
     / "levinson_1997_feature_identifiability" / "audit.json")
+WOO = (
+    ROOT / "results" / "curated"
+    / "woo_2024_c4f6_board" / "audit.json")
 OUTPUT = (
     ROOT / "results" / "curated" / "cross_chemistry_depth_evidence"
     / "audit.json")
@@ -42,6 +45,7 @@ def build_audit() -> dict:
     vella = _load(VELLA)
     krueger = _load(KRUEGER)
     levinson = _load(LEVINSON)
+    woo = _load(WOO)
     yoshie_vision = _load(YOSHIE_VISION)
     with YOSHIE_FEATURES.open(newline="", encoding="utf-8") as stream:
         yoshie_rows = list(csv.DictReader(stream))
@@ -76,6 +80,7 @@ def build_audit() -> dict:
             "yoshie_feature_table_sha256": _sha256(YOSHIE_FEATURES),
             "levinson_1997_feature_identifiability_sha256":
                 _sha256(LEVINSON),
+            "woo_2024_c4f6_board_sha256": _sha256(WOO),
         },
         "boards": [
             {
@@ -149,6 +154,28 @@ def build_audit() -> dict:
                 "scope": levinson["verdict"],
             },
             {
+                "board": "Woo 2024 CF4/C4F6/He patterned SiO2",
+                "chemistry_and_material": (
+                    "CF4/C4F6/He ICP on ACL-masked SiO2 lines"),
+                "evidence_class": (
+                    "absolute_patterned_rate_board_missing_kinetic_boundary"),
+                "absolute_depth_or_depth_per_dose": True,
+                "point_count": woo["quantitative_rate_points"],
+                "reported_absolute_feature_depths": True,
+                "fit_to_compared_depth_or_yield": False,
+                "boundary_strength": (
+                    "same-reactor Te, aggregate ion current, self-bias, "
+                    "relative OES, XPS, and patterned rates; no "
+                    "species-resolved ion flux, IEAD, or absolute neutrals"),
+                "feature_profile_test": False,
+                "original_pixels_archived": True,
+                "value_blind_held_out": False,
+                "model_predictions_completed": 0,
+                "formal_pass_label": False,
+                "source_internal_consistency_passed": False,
+                "scope": woo["verdict"],
+            },
+            {
                 "board": "Krueger 2024 Ar/C4F6/O2 trench",
                 "chemistry_and_material": "Ar/C4F6/O2 on masked SiO2",
                 "evidence_class": "evaluated_feature_depth_with_missing_boundary",
@@ -196,6 +223,8 @@ def build_audit() -> dict:
             "formal_held_out_feature_or_profile_predictions_completed": 0,
             "formal_held_out_feature_or_profile_passes": 0,
             "controlled_feature_boards_blocked_by_missing_time_or_fluence": 1,
+            "c4f6_same_reactor_absolute_patterned_rate_targets_ready": (
+                woo["quantitative_rate_points"]),
             "value_blind_held_out_feature_depth_targets_ready": len(yoshie_rows),
             "krueger_absolute_feature_depth_passed": False,
             "current_strongest_defensible_statement": (

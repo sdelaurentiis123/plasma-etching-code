@@ -22,6 +22,14 @@ def test_cross_chemistry_ledger_keeps_evidence_classes_separate():
     assert levinson["original_pixels_archived"] is False
     assert levinson["formal_pass_label"] is False
 
+    woo = boards["Woo 2024 CF4/C4F6/He patterned SiO2"]
+    assert woo["point_count"] == 10
+    assert woo["absolute_depth_or_depth_per_dose"] is True
+    assert woo["original_pixels_archived"] is True
+    assert woo["model_predictions_completed"] == 0
+    assert woo["source_internal_consistency_passed"] is False
+    assert woo["formal_pass_label"] is False
+
 
 def test_no_held_out_feature_pass_is_claimed_before_prediction():
     audit = build_audit()
@@ -40,3 +48,5 @@ def test_no_held_out_feature_pass_is_claimed_before_prediction():
         "independent_non_krueger_chemistry_families_with_absolute_surface_depth_evidence"] == 2
     assert summary[
         "controlled_feature_boards_blocked_by_missing_time_or_fluence"] == 1
+    assert summary[
+        "c4f6_same_reactor_absolute_patterned_rate_targets_ready"] == 10

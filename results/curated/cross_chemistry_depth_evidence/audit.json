@@ -8,7 +8,8 @@
     "krueger_depth_identifiability_sha256": "7f79f79f77b8d37d83500364251bdefb1c0cf6e953e9fde9e0bde54e3236652c",
     "yoshie_visual_audit_sha256": "8a62b075e44a439f51e5f40f64d23898c6afe9054f5db63629ac1b11e77642e0",
     "yoshie_feature_table_sha256": "5180b06a9357a26facfcc89adb9f239f79f4ca41e5e65a3a31c17d80c634a108",
-    "levinson_1997_feature_identifiability_sha256": "8f69465fed2584558c280c39f6362b6971a2f3144ef101ef6dc4e08a30cd910e"
+    "levinson_1997_feature_identifiability_sha256": "8f69465fed2584558c280c39f6362b6971a2f3144ef101ef6dc4e08a30cd910e",
+    "woo_2024_c4f6_board_sha256": "f01c6e37b698748b42b65943256a5a218517b3df77275835249a604177743d08"
   },
   "boards": [
     {
@@ -64,6 +65,23 @@
       "scope": "Excellent boundary-identified Cl2/Si surface and neutral-transport board; the 1997 article alone does not identify absolute feature depth because Figure 11 omits exposure time and case-specific ion fluence. Do not fit time to the reported depth."
     },
     {
+      "board": "Woo 2024 CF4/C4F6/He patterned SiO2",
+      "chemistry_and_material": "CF4/C4F6/He ICP on ACL-masked SiO2 lines",
+      "evidence_class": "absolute_patterned_rate_board_missing_kinetic_boundary",
+      "absolute_depth_or_depth_per_dose": true,
+      "point_count": 10,
+      "reported_absolute_feature_depths": true,
+      "fit_to_compared_depth_or_yield": false,
+      "boundary_strength": "same-reactor Te, aggregate ion current, self-bias, relative OES, XPS, and patterned rates; no species-resolved ion flux, IEAD, or absolute neutrals",
+      "feature_profile_test": false,
+      "original_pixels_archived": true,
+      "value_blind_held_out": false,
+      "model_predictions_completed": 0,
+      "formal_pass_label": false,
+      "source_internal_consistency_passed": false,
+      "scope": "Strong same-reactor C4F6 multi-observable board and an original-pixel absolute patterned-rate dataset. It is not a blind depth validation: the SEM times were selected to equalize depth, the kinetic boundary remains aggregate, and two printed condition/arithmetic inconsistencies must be resolved before a reactor model can receive a formal pass."
+    },
+    {
       "board": "Krueger 2024 Ar/C4F6/O2 trench",
       "chemistry_and_material": "Ar/C4F6/O2 on masked SiO2",
       "evidence_class": "evaluated_feature_depth_with_missing_boundary",
@@ -100,6 +118,7 @@
     "formal_held_out_feature_or_profile_predictions_completed": 0,
     "formal_held_out_feature_or_profile_passes": 0,
     "controlled_feature_boards_blocked_by_missing_time_or_fluence": 1,
+    "c4f6_same_reactor_absolute_patterned_rate_targets_ready": 10,
     "value_blind_held_out_feature_depth_targets_ready": 49,
     "krueger_absolute_feature_depth_passed": false,
     "current_strongest_defensible_statement": "absolute surface depth-per-dose transfers without a target fit in two non-Krueger chemistry families; no chemistry yet has a completed value-blind held-out feature-depth pass"

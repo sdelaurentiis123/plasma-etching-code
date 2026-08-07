@@ -1,0 +1,187 @@
+{
+  "manifest_id": "WOO-2024-C4F6-FIG4.1-R1",
+  "source": {
+    "citation": "Byungjun Woo, A Study on the Etching Characteristics of High Aspect Ratio Oxide Etching using C4F6 Plasma in Inductively Coupled Plasma with Low Frequency Bias Power, M.S. thesis, Korea University (2024)",
+    "doi": "10.23186/korea.000000288984.11009.0001569",
+    "repository_record": "https://dcollection.korea.ac.kr/srch/srchDetail/000000288984",
+    "local_pdf": "research_sources/woo_2024_c4f6_thesis.pdf",
+    "pdf_sha256": "16bdf4843d0218fe6801ed418fcdd342ef2f825d29a7074d0a1e334b77229523",
+    "pdf_page": 70,
+    "print_page": 53,
+    "figure": "Figure 4.1",
+    "render_dpi": 600,
+    "rendered_page_sha256": "7b35d03cdd9edd15eacbce1bdac74b469c9756ce35c18fbc5c956493ef5f09a7",
+    "rendered_page_size_px": [
+      4300,
+      6072
+    ]
+  },
+  "experiment": {
+    "reactor": "planar ICP",
+    "pressure_mTorr": 10.0,
+    "total_flow_sccm": 140.0,
+    "he_flow_sccm": 100.0,
+    "total_cf4_plus_c4f6_flow_sccm": 40.0,
+    "source_power_W": 150.0,
+    "bias_power_W": 400.0,
+    "lower_electrode_temperature_C": 17.0,
+    "sample": "2 x 2 cm center coupon; 2400 nm SiO2, 1400 nm ACL, 50 nm SiON; nominal 100 nm line / 500 nm pitch"
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; PIL/NumPy axis integrity; robust least-squares fits to black connecting segments with 55 px excluded around each large marker; adjacent segment intersection averaged at interior markers; visual overlay",
+    "axis_calibration": {
+      "x_at_35_percent_px": 1501.0,
+      "x_at_40_percent_px": 1751.0,
+      "y_at_60_nm_min_px": 2813.0,
+      "y_at_10_nm_min_px": 4179.0
+    },
+    "uncertainty_nm_min": 0.2,
+    "diagnostics": {
+      "x_points_px": [
+        1626.0,
+        1938.5,
+        2251.0,
+        2563.5,
+        2876.0
+      ],
+      "point_centers_y_px": {
+        "SiO2": [
+          3133.168309659131,
+          3194.9401939896443,
+          3257.833110524726,
+          3369.715975355159,
+          3583.3439000831613
+        ],
+        "ACL": [
+          3762.6267016878446,
+          3819.144433338458,
+          3885.5950079158133,
+          3964.7642896667685,
+          4098.076070091618
+        ]
+      },
+      "segment_fits": {
+        "SiO2": [
+          {
+            "left_x_px": 1626.0,
+            "right_x_px": 1938.5,
+            "retained_column_count": 203,
+            "median_absolute_residual_px": 0.7166010139117134,
+            "slope_px_per_px": 0.19869689084237335,
+            "intercept_px": 2810.0871651494317
+          },
+          {
+            "left_x_px": 1938.5,
+            "right_x_px": 2251.0,
+            "retained_column_count": 204,
+            "median_absolute_residual_px": 0.8356545646015547,
+            "slope_px_per_px": 0.21064802708299238,
+            "intercept_px": 2786.278099431536
+          },
+          {
+            "left_x_px": 2251.0,
+            "right_x_px": 2563.5,
+            "retained_column_count": 203,
+            "median_absolute_residual_px": 1.368976132617263,
+            "slope_px_per_px": 0.3667411655683116,
+            "intercept_px": 2429.6850489598314
+          },
+          {
+            "left_x_px": 2563.5,
+            "right_x_px": 2876.0,
+            "retained_column_count": 204,
+            "median_absolute_residual_px": 0.9528464708005231,
+            "slope_px_per_px": 0.6839615240545321,
+            "intercept_px": 1616.270556902327
+          }
+        ],
+        "ACL": [
+          {
+            "left_x_px": 1626.0,
+            "right_x_px": 1938.5,
+            "retained_column_count": 203,
+            "median_absolute_residual_px": 0.7258736884987229,
+            "slope_px_per_px": 0.18189590619450177,
+            "intercept_px": 3466.8639582155847
+          },
+          {
+            "left_x_px": 1938.5,
+            "right_x_px": 2251.0,
+            "retained_column_count": 204,
+            "median_absolute_residual_px": 0.6735113894169444,
+            "slope_px_per_px": 0.21765907372200136,
+            "intercept_px": 3396.8875798931895
+          },
+          {
+            "left_x_px": 2251.0,
+            "right_x_px": 2563.5,
+            "retained_column_count": 203,
+            "median_absolute_residual_px": 0.9003675215394651,
+            "slope_px_per_px": 0.2522442913662573,
+            "intercept_px": 3316.549961124767
+          },
+          {
+            "left_x_px": 2563.5,
+            "right_x_px": 2876.0,
+            "retained_column_count": 204,
+            "median_absolute_residual_px": 0.8296612505391749,
+            "slope_px_per_px": 0.4215222169607949,
+            "intercept_px": 2885.778174112372
+          }
+        ]
+      },
+      "digitized_endpoint_minus_text_nm_min": {
+        "SiO2": [
+          0.1258085776306359,
+          -0.11906808503518818
+        ],
+        "ACL": [
+          0.12060389136732752,
+          0.0600764973785477
+        ]
+      },
+      "maximum_abs_endpoint_difference_nm_min": 0.1258085776306359
+    }
+  },
+  "body_text_cross_checks": {
+    "figure4_1_endpoint_rates_nm_min": {
+      "SiO2": [
+        48.155,
+        31.922
+      ],
+      "ACL": [
+        25.12,
+        12.902
+      ]
+    },
+    "figure4_3_ion_current_density_mA_cm2": [
+      0.0168,
+      0.05255
+    ],
+    "figure4_3_printed_percent_increase": 21.0,
+    "figure4_3_arithmetic_percent_increase": 212.79761904761907,
+    "power_sweep_nominal_fraction_percent": 56.25,
+    "power_sweep_printed_flows_sccm": {
+      "CF4": 15.0,
+      "C4F6": 25.0
+    },
+    "power_sweep_fraction_from_printed_flows_percent": 62.5
+  },
+  "output": {
+    "path": "data/experimental/woo_2024_c4f6/figure4_1_patterned_etch_rates.csv",
+    "sha256": "d46fdf9f884bd9cd2e01104e157b94b83b5c1dc7b17496f195dc9eb2998096b0",
+    "row_count": 10
+  },
+  "claim_boundary": {
+    "supports": [
+      "absolute patterned SiO2 and ACL rate trends in one C4F6 ICP",
+      "same-reactor ion-current, Te, self-bias, OES, XPS, and profile-shape conditioning for a future reactor model"
+    ],
+    "does_not_support": [
+      "species-resolved ion flux or IEAD",
+      "absolute neutral flux",
+      "a boundary transplant to Krueger's CCP",
+      "a blind feature-depth test; exposure time was adjusted to obtain 2100-2200 nm in the SEM comparison"
+    ]
+  }
+}

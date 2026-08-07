@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 103 sources by topic
+## Index — 104 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -49,6 +49,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`metzler-2016-thesis`](library/metzler-2016-thesis.md) | Metzler, UMD thesis (2016), cyclic C4F8/Ar-ion ALE | FULL TEXT + PIL-AUDITED FIGURES |
 | [`standaert-oehrlein`](library/standaert-oehrlein.md) | Standaert/Oehrlein, mixed-layer selectivity | OFFICIAL OSTI FULL REPORTS + VERIFIED EXCERPTS |
 | [`wang-thesis`](library/wang-thesis.md) | Wang (Mingmei), PhD thesis, Univ. Michigan | FULL TEXT: research_sources/thesis_extracts/wang_mingmei_phd_thesis.txt |
+| [`woo-2024-c4f6-thesis`](library/woo-2024-c4f6-thesis.md) | Woo, CF4/C4F6/He ICP diagnostics, patterned rates, and SEM profiles | PRIMARY FULL TEXT + PIL-DIGITIZED FIGURE 4.1 |
 
 ### Beam-measured yields, thresholds, sticking (the provenance floor)
 
@@ -228,6 +229,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | C4F6 parent-signal + ion-mixture existence | [`kim-2021-coatings`](library/kim-2021-coatings.md) | wafer-facing mass/energy spectra directly show C4F6 and multiple CFx+/CxFy+ species in another CCP; qualitative existence constraint only, not Krüger flux calibration |
 | Absolute C4F6/Ar total and mass-resolved ion flux/IED board | [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Faraday-cup-normalized GEC-ICP measurements at 5–20 mTorr; quantitative reactor-model validation, not a Krüger boundary transplant |
 | Matched C4F6/Ar versus C4F8/Ar ion/radical/film/yield board | [`li-2002-c4f6-c4f8`](library/li-2002-c4f6-c4f8.md) | same 600 W ICP and diagnostics expose feed-specific fragmentation and surface-film differences; figures require original-pixel digitization before constants land |
+| CF4/C4F6/He patterned SiO2/ACL rate + reactor-diagnostic board | [`woo-2024-c4f6-thesis`](library/woo-2024-c4f6-thesis.md) | 10 original-pixel rate points plus Te/current/self-bias/OES/profile constraints; two source-reporting conflicts quarantined and equal-depth SEM timing excluded from blind depth validation |
 | Class-1 angular form `(1+B sin²θ)cosθ` | [`kress-1999-jvsta`](library/kress-1999-jvsta.md) | Krüger's cited source — **wrong system (Cu/Ar MD)**; peak 4.17 vs measured ~1.3 |
 | Class-1 bound `B = 1.7` on oxide/mask rows | [`cho-2000-jvsta`](library/cho-2000-jvsta.md) | in-chemistry peak/normal 1.30 |
 | Class-1 bound cross-check | [`schaepkens-1998-jvsta`](library/schaepkens-1998-jvsta.md) | peak/normal 1.33, 54.7° V-groove |

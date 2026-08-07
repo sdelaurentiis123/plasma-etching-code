@@ -1,0 +1,3843 @@
+                 저작자표시-비영리-변경금지 2.0 대한민국
+
+이용자는 아래의 조건을 따르는 경우에 한하여 자유롭게
+
+    l   이 저작물을 복제, 배포, 전송, 전시, 공연 및 방송할 수 있습니다.
+
+다음과 같은 조건을 따라야 합니다:
+
+
+
+             저작자표시. 귀하는 원저작자를 표시하여야 합니다.
+
+
+
+
+             비영리. 귀하는 이 저작물을 영리 목적으로 이용할 수 없습니다.
+
+
+
+
+             변경금지. 귀하는 이 저작물을 개작, 변형 또는 가공할 수 없습니다.
+
+
+
+    l   귀하는, 이 저작물의 재이용이나 배포의 경우, 이 저작물에 적용된 이용허락조건
+        을 명확하게 나타내어야 합니다.
+    l   저작권자로부터 별도의 허가를 받으면 이러한 조건들은 적용되지 않습니다.
+
+
+
+        저작권법에 따른 이용자의 권리는 위의 내용에 의하여 영향을 받지 않습니다.
+
+         이것은 이용허락규약(Legal Code)을 이해하기 쉽게 요약한 것입니다.
+
+                          Disclaimer
+   Thesis for the Degree of Master
+
+
+
+    A Study on the Etching
+ Characteristics of High Aspect
+Ratio Oxide Etching using C4F6
+ Plasma in Inductively Coupled
+Plasma with Low Frequency Bias
+              Power
+
+                 by
+
+          Byungjun Woo
+
+
+     Department of Control and
+    Instrumentation Engineering
+          Graduate School
+          Korea University
+             May. 2024
+    權   光    虎    敎 授 指 導
+        碩 士 學 位 論 文
+
+
+    A Study on the Etching
+ Characteristics of High Aspect
+Ratio Oxide Etching using C4F6
+ Plasma in Inductively Coupled
+Plasma with Low Frequency Bias
+              Power
+
+이 論文을 工學 碩士學位論文으로 出함.
+
+            2024 年 06 月
+
+
+
+        高麗大學校 大學院
+
+         制御計測工學科
+
+             禹 炳 俊
+禹 炳 俊 의 工學 碩士學位
+
+    論文審査를 完了함.
+
+
+
+
+      2024 年 06 月
+
+
+
+
+委 員 長      권 광 호 (印)
+
+
+委    員     황 용 하 (印)
+
+
+委    員     강 승 열 (印)
+                         Abstract
+
+A Study on the Etching Characteristics of High Aspect
+Ratio Oxide Etching using C4F6 Plasma in Inductively
+Coupled Plasma with Low Frequency Bias Power
+Name:             Byungjun Woo
+
+Department:       Control and Instrumentation Engineering
+
+Major:            Measurement & Sensor
+
+Thesis Advisor: Kwang-Ho Kwon
+
+
+
+In this thesis, a study on high aspect ratio (HAR) oxide etching
+
+
+processes in inductively coupled plasma (ICP) using C4F6 gas and
+
+
+low-frequency (2 MHz) bias power was conducted. Amid growing
+
+
+efforts to reduce carbon emissions in the semiconductor industry,
+
+
+C4F6 is environmentally friendly with a Global Warming Potential
+
+
+(GWP) of less than 1. Thus, to verify the feasibility of using C4F6
+
+
+for HAR oxide etching, we investigated the etching characteristics
+
+
+of CF4 + X + He mixed gas (X = C4F6) on Amorphous Carbon
+
+                                 i
+Layer (ACL) and Silicon Oxide (SiO2), including etch rates, etch
+
+
+selectivity, and etch profiles of the X gas. Optical Emission
+
+
+Spectroscopy (OES) and a dual Langmuir probe were employed
+
+
+for plasma diagnostics. Compared to conventional C4F8 mixed
+
+
+plasma, the C4F6 mixed plasma demonstrated similar SiO2/ACL
+
+
+selectivity and superior etch profiles. The chemical changes on the
+
+
+etched ACL and SiO2 surfaces were analyzed using X-ray
+
+
+Photoelectron Spectroscopy (XPS), supporting the above results
+
+
+by showing increased passivation due to the rise in CFX species.
+
+
+Additionally, experiments were conducted to study the correlation
+
+
+of etching characteristics with variations in source power and bias
+
+
+power. Plasma diagnostics revealed that as the source power
+
+
+increased, the ion density and electron temperature contributing to
+
+
+plasma generation also increased. With an increase in bias power,
+
+
+the value of -Vdc associated with ion bombardment energy
+
+
+
+                                ii
+increased. Furthermore, the etch profiles derived from these
+
+
+parameters highlighted the etching characteristics corresponding to
+
+
+each variable. These etching results indicate that the use of C4F6
+
+
+gas can significantly contribute to the development of next-
+
+
+generation HAR oxide etching processes.
+
+
+
+
+                                iii
+                    요 약
+
+
+저주파 바이어스 유도결합 플라즈마에서 C4F6
+
+플라즈마를 이용한 고종횡비 산화물 에칭의 에칭
+
+특성에 관한 연구
+성 명:         우병준
+
+학 과:         제어계측공학과
+
+전 공:         계측 및 센서
+
+지도교수:        권 광 호 교수님
+
+
+본 논문에서는 C4F6 gas 로 저주파(2 MHz) 바이어스 파워를
+
+
+이용하여 유도 결합 플라즈마에서의 고 종횡비(HAR) 산화물
+
+
+식각 공정 연구를 진행하였습니다. 반도체 산업에서 탄소저감을
+
+
+위한 노력이 주목받는 가운데 C4F6 는 GWP <1 로 환경 친화적
+
+
+입니다. 따라서 C4F6 를 이용한 고 종횡비 산화막 에칭 가능성
+
+
+을 확인하기 위하여 CF4 + X + He 혼합 가스 (X=C4F6)를 사
+
+
+용하여    Amorphous   Carbon   Layer(ACL)   및   Silicon
+
+
+                       iv
+Oxide(SiO2)에 대한 식각 속도, 식각 선택도 및 식각 프로파일
+
+
+과 같은 X gas의 식각 특성을 조사했습니다. 플라즈마 진단을
+
+
+위해 광학 방출 분광법과 이중 랭뮤어 프로브 측정을 수행했습
+
+
+니다. 기존의 C4F8 혼합 플라즈마와 비교하여 C4F6 혼합 플라즈
+
+
+마는 SiO2/ACL 선택 비 및 식각 프로파일이 유사하고, 식각 프
+
+
+로파일도 우수하였습니다. X선 광전자 분광법을 사용하여 식각
+
+
+된 ACL, SiO2 표면의 화학적 변화를 분석하여 CFX 종의 증가
+
+
+로 인한 passivation의 증가로 인한 것으로 위의 결과를 뒷받침
+
+
+하였습니다. 또한 소스 전력 변화, 바이어스 전력 변화에 따른
+
+
+실험을 통해 각각의 파라미터에 대한 식각 특성과의 상관관계를
+
+
+연구하였습니다. 플라즈마 진단을 통해 소스 전력이 증가함에 따
+
+
+라 플라즈마 생성에 기여하는 이온밀도 및 전자온도가 증가하는
+
+
+것을   확인하였고,   바이어스       전력이   증가함에   따라   ion
+
+
+bombardment energy 와 연관된 -Vdc의 값이 증가하는 것을
+
+
+확인했습니다. 또한 각각의 식각 프로파일 도출을 통해 변수에
+
+
+
+                     v
+따른 식각 특성을 도출했습니다. 이러한 식각 결과는 또한 C4F6
+
+
+가스의 사용이 차세대 HAR 산화물 식각 개발에 크게 기여할 수
+
+
+있음을 나타냅니다.
+
+
+
+
+                 vi
+CONTENTS
+CHAPTER 1 Introduction ................................................................... 01
+
+       1.1 Current trends in the semiconductor industry....................... 01
+
+       1.2 Dry-etching technology ............................................ 04
+
+           1.2.1 isotropic etching and anisotropic etching ………… 05
+
+       1.3 Multiple-patterning technology ......................................... 09
+
+       1.4 3D NAND Flash memory HAR etching process technology .11
+
+       1.5 capacitively Coupled plasma (CCP) and Inductively Coupled
+
+       Plasma (ICP) ………………………………………………… 14
+
+       1.6 Plasma system used in HAR etching process ........................ 16
+
+       1.7 Perfluorocarbon (PFC) – based gas ……………………… 18
+
+       1.8 Importance of environmental issues ……..………………… 20
+
+       1.9 Research objective ................................................................ 23
+
+
+
+CHAPTER 2 Experimental equipment ................................................ 26
+
+       2.1 Plasma etcher (Inductively Coupled Plasma: ICP) ............. 26
+
+           2.1.1 Vacuum chamber .......................................................... 27
+
+           2.1.2 Flow rate and Pressure control device .......................... 28
+
+           2.1.3 Vacuum measuring device ............................................ 29
+
+           2.1.4 RF supply device ......................................................... 29
+
+
+                                              vii
+      2.2 Langmuir probe (Single, Double) …………………............. 30
+
+      2.3 Optical Emission Spectroscopy (OES) ................................. 36
+
+      2.4 X-Ray photoelectron spectroscopy (XPS) …........................ 39
+
+      2.5 Scanning Electron Microscope (SEM) ….…......................... 41
+
+
+
+CHAPTER 3 Experimental Details ….................................................. 44
+
+      3.1 Etching process ………......................................................... 44
+
+      3.2 Sample preparation …........................................................... 46
+
+      3.3 Analysis of etch properties .................................................... 48
+
+      3.4 Plasma diagnosis ………………………………….……...... 49
+
+      3.5 Surface analysis ………………………………………...... 51
+
+
+
+CHAPTER 4 Result and Discussion .................................................. 53
+
+      4.1 Effect of gas flow ratios .....……........................................... 48
+
+          4.1.1 etching characteristics …............................................... 48
+
+          4.1.2 Plasma diagnostic .......................................................... 50
+
+          4.1.3 OES characteristics ....................................................... 50
+
+          4.1.4 Etched profile ……........................................................ 50
+
+          4.1.5 Surface Anaylsis ............................................................ 50
+
+
+
+
+                                            viii
+       4.2 Effect of Source/Bias power ..…..……................................. 55
+
+           4.2.1 etching characteristics …............................................... 48
+
+           4.2.2 Plasma diagnostic .......................................................... 50
+
+           4.2.3 OES characteristics ....................................................... 50
+
+           4.2.4 Etched profile ……........................................................ 50
+
+
+
+CHAPTER 5 Conclusion ..................................................................... 75
+
+Reference …………………………………………………………… 77
+
+
+
+
+                                              ix
+                LIST OF FIGURES
+
+Figure 1.1 Semiconductor Potential roadmap extension ………… 03
+
+Figure 1.2 Estimated share of etching process in global market …… 03
+
+Figure 1.3 isotropic etching and anisotropic etching ……………… 05
+
+Figure 1.4 Plasma etching schematic diagram In the process of plasma
+
+dry etching…………………………………………………………. 06
+
+Figure 1.5 LELE and SADP process schematic diagram ………… 10
+
+Figure 1.6 V-NAND flash memory architecture ………………… 11
+
+Figure 1.7 Problems arising from the etching profile during high aspect
+
+ratio etching ……………………………………………………… 13
+
+Figure 1.8 Schematic diagram of ICP type and CCP type equipment
+
+……………………………………………………………………….. 16
+
+Figure 1.9 Schematic diagram of chemical reaction on the surface
+
+during SiO2 etching …………………………………………… 17
+
+Figure 1.10 PFC gas consumption in the semiconductor industry
+
+…………………………………………………………………. 19
+
+Figure 1.11 Evolution of average global temperatures ……………… 21
+
+Figure 1.12 The GWP and Lifetime of major gases ……………… 22
+
+Figure 1.13 Chemical bonding structure of Hexafluoro-1,3-butadiene 22
+
+
+                                  x
+Figure 2.1 ICP etcher schematic diagram 1 ……………………… 20
+
+Figure 2.2 anodizing vacuum chamber …………………………… 21
+
+Figure 2.3 Double Langmuir probe ……………………………… 25
+
+Figure 2.4. I-V characteristic curve of Single Langmuir probe
+
+…………………………………………………………………… 28
+
+Figure 2.5. I-V characteristic curve of Double Langmuir probe …… 29
+
+Figure 2.6. Optical emission spectroscopy ………………………… 30
+
+Figure 2.7 X-Ray photoelectron analysis schematic diagram ……… 33
+
+Figure 2.8 Overview of Scanning Electron Microscope (SEM) Analysis
+
+schematic diagram ………………………………………………… 35
+
+Figure 2.9 Function of Scanning Electron Microscope (SEM) 36
+
+Figure 3.1 ICP etcher Schematic diagram 2 ……………………… 38
+
+Figure 3.2 Reference sample SEM profile and schematic ………… 40
+
+Figure 3.3 Alpha step 500(Tencor, Milpitascity, California, USA) … 42
+
+Figure 3.4 Scanning Electron Microscope(MIRA3 LMH, TESCAN) 43
+
+Figure 3.5 Optical Emission Spectroscope (Avaspec-3648, Jinyoung
+
+Tech, Korea) ……………………………………………………… 45
+
+Figure 3.6 X-Ray photoelectron spectroscopy(K-Alpha, Thermo VG,
+
+UK) ……………………………………………………………… 46
+
+
+
+                                 xi
+Figure 4.1 SiO2, ACL etching rate according to the X gas fraction (X =
+
+C4F6) ……………………………………………………………… 48
+
+Figure 4.2 Selectivity (SiO2/ACL) according to the X gas fraction (X =
+
+C4F6) ……………………………………………………………… 50
+
+Figure 4.3 SiO2, ACL etching rate according to the Source power
+
+increase …………………………………………………………… 50
+
+Figure 4.4 SiO2, ACL etching rate according to the Bias power increase
+
+…………………………………………………………………… 51
+
+Figure 4.5 Selectivity (SiO2/ACL) according to the Source power
+
+increase …………………………………………………………… 53
+
+Figure 4.6 Selectivity (SiO2/ACL) according to the Bias power increase
+
+…………………………………………………………………… 53
+
+Figure 4.7 Te & Jis according to X gas fraction (X= C4F6) ……… 55
+
+Figure 4.8 -Vdc according to X gas fraction (X=C4F6) …………… 56
+
+Figure 4.9 Te & Jis according to Source power increase …………… 57
+
+Figure 4.10 Te & Jis according to Bias power increase …………… 58
+
+Figure 4.11 -Vdc according to Source power increase …………… 60
+
+Figure 4.12 -Vdc according to Bias power increase ……………… 60
+
+Figure 4.13 Emission intensity according to the X gas fraction (X=C4F6)
+
+…………………………………………………………………… 62
+
+
+
+                                  xii
+Figure 4.14 Emission intensity according to the Source power increase
+
+…………………………………………………………………… 64
+
+Figure 4.15 Emission intensity according to the Bias power increase
+
+…………………………………………………………………… 64
+
+Figure 4.16 Etched profile in the X gas fraction (X=C4F6) ……… 67
+
+Figure 4.17 Etched profile in the Source power change …………… 69
+
+Figure 4.18 Etched profile in the Bias power change ……………… 71
+
+Figure 4.19 XPS peak spectra of the SiO2 surface in the CF4+C4F6+He
+
+plasma when the X gas fraction is kept constant at 62.5% (X=C4F6)
+
+…………………………………………………………………… 72
+
+Figure 4.20 C1s deconvolution in the X gas fraction (X=C4F6)
+
+…………………………………………………………………… 75
+
+
+                 LIST OF TABLES
+
+Table 1. Atmoic % of XPS etched SiO2 surface at fraction of C4F6
+
+…………………………………………………………………… 73
+
+
+
+
+                                xiii
+                                                                       Chapter 1
+
+
+                                                                  Introduction
+
+
+
+
+1.1 Current trends in the semiconductor industry
+
+
+
+
+                Figure.1.1 Semiconductor Potential roadmap extension
+
+
+
+Currently, the semiconductor industry is reaching the limits of miniaturization with
+
+
+the advancement of microfabrication technologies for high performance, low power
+
+
+consumption, and miniaturization. This has led to increased interest in alternative
+
+                                       -1-
+technologies such as advanced packaging. Enhancing chip performance and
+
+
+production efficiency through advanced processes for pre-processing and post-
+
+
+processing, especially achieving integration below 3nm and 3D integration, is a
+
+
+primary focus. Therefore, the development of microprocessors for detailed circuit
+
+
+implementation is essential. In particular, the transition from 2D planar structures to
+
+
+3D vertical stacking structures in NAND architecture has made the formation of
+
+
+nanoscale patterns in semiconductor devices dependent on five key processes:
+
+
+deposition, lithography, etching, ion implantation, and planarization. Among these
+
+
+processes, etching is gaining more attention in semiconductor manufacturing
+
+
+because it is repeatedly applied alongside deposition and lithography in increasingly
+
+
+complex structures. If the desired area is not etched cleanly during etching,
+
+
+misalignment can occur during multi-patterning processes due to uneven etch
+
+
+profiles, referred to as misalignment caused by rough etch surfaces. [1] During
+
+
+etching, the ion incident angle is influenced by the mask shape, making it difficult to
+
+
+obtain vertical profiles, and issues such as necking and bowing occur during High-
+
+
+
+                                        -2-
+Aspect-Ratio (HAR) etching processes. [2] Therefore, optimizing the etching
+
+
+process through appropriate control of etching gases is essential to adjust the mask
+
+
+shape and ensure the formation of vertical profiles.
+
+
+
+
+          Figure 1.2. Estimated share of etching process in global market
+
+
+
+
+                                        -3-
+1.2 Dry-etching technology
+
+
+
+
+Etching can be divided into dry etching and wet etching. Wet etching involves the
+
+
+use of reactive solutions to selectively remove materials. However, wet etching
+
+
+results in isotropic etching, where the etch rate is high and uniform in both vertical
+
+
+and horizontal directions. Additionally, the pattern size achievable is limited, making
+
+
+it impractical for smaller sizes. On the other hand, plasma etching selectively
+
+
+removes materials using reactive gases, vapors, or ions generated by plasma. In
+
+
+current semiconductor processes, as the component sizes decrease, and circuits
+
+
+become more complex, anisotropic etching in dry etching processes is essential.
+
+
+Plasma dry etching overcomes the issue of isotropy and provides higher patterning
+
+
+resolution. However, due to the complexity of gas reactions and etching mechanisms
+
+
+within the plasma, as well as various other parameters, modeling and controlling
+
+
+plasma etching can be challenging.
+
+
+
+
+                                        -4-
+1.2.1 isotropic etching and anisotropic etching
+
+
+
+
+When etching progresses at the same rate in both the lateral (x-direction) and
+
+
+downward (y-direction) directions, it is called isotropic etching, resulting in etching
+
+
+similar to that shown in Figure 1-(a). Conversely, when the etching rate in the y-
+
+
+direction is greater than that in the x-direction, it is called anisotropic etching, as
+
+
+shown in Figure 1-(b). In particular, when the etching rate in the x-direction is zero,
+
+
+as depicted in Figure 1-(c), it represents an extreme case of anisotropic etching
+
+
+known as vertical etching. Directional etching, as shown in Figure 1-(c), occurs when
+
+
+the etching rate in the x-direction is lower than the etching rate in the y-direction,
+
+
+and this type of etching is generally achievable in plasma etching.
+
+
+
+
+                Figure 1.3 isotropic etching and anisotropic etching
+
+                                        -5-
+Figure 1.4. Plasma etching schematic diagram in the process of plasma dry etching,
+
+
+
+
+In plasma dry etching processes, reactive gases are introduced into a vacuum
+
+
+chamber, and a strong electric field is applied by a power source. This accelerates
+
+
+electrons, which then collide with neutral atoms, leading to ionization,
+
+
+recombination, dissociation, abstraction, and fragmentation processes. Ultimately,
+
+
+plasma refers to ionized gas. When energy such as electricity is applied to gas
+
+
+
+                                      -6-
+composed of atoms and molecules, plasma is formed, consisting of electrons, ions,
+
+
+dissociated gases, and photons, and it becomes electrically neutral. The etching
+
+
+species in the plasma then diffuse towards the target surface, where they are adsorbed.
+
+
+Due to the voltage applied to the electrode, ions gain directionality, and their impact
+
+
+weakens the molecular bonds. The etching species adsorbed at the weakened bond
+
+
+sites react more easily with the target material, forming volatile compounds. These
+
+
+compounds then desorb from the surface, diffuse into the gas phase, and are
+
+
+eventually evacuated by vacuum equipment. Dry etching technology utilizes
+
+
+chemical reactions between surface materials and the impacts of ions to facilitate
+
+
+precise pattern transfer for nanoscale patterning processes. [3]
+
+
+
+
+A representative material for silicon insulators is silicon dioxide (SiO2). To etch
+
+
+insulators, it is necessary to use etching reactive gases that have good reactivity with
+
+
+each material and form volatile by-products. In today's semiconductor
+
+
+manufacturing industry, gases with a high proportion of fluorine (F) such as CF4,
+
+
+
+                                         -7-
+C2F6, C4F6, and C4F8, which induce dry etching on the substrate surface due to their
+
+
+high reactivity with F, are commonly used. [4-9] Additionally, various studies focus
+
+
+on adding oxygen and adjusting the gas ratio to control the fluorocarbon (FC)
+
+
+polymer layer, achieving anisotropic etch profiles through appropriate masking and
+
+
+sidewall passivation.
+
+
+
+
+                                       -8-
+1.3 Multiple-patterning technology
+
+
+
+
+For decades, miniaturization has been a major trend in the electronics market, leading
+
+
+to the integration of more functions into single products and technological
+
+
+advancements. Achieving these required improvements in existing lithography,
+
+
+which led to the adoption of multiple patterning technology. Multiple patterning
+
+
+includes overlaying smaller and denser patterns onto patterns engraved over a wide
+
+
+area. Double patterning methods are broadly classified into SADP (Self-Aligned
+
+
+Double Patterning) and LELE (Litho-Etch-Litho-Etch), which are extensively used
+
+
+in the NAND flash and RAM memory manufacturing industries [10,11]. Among
+
+
+them, one of the most common double patterning techniques is the LELE method,
+
+
+which alternates lithography and etching steps twice. Particularly, the flexibility in
+
+
+design is greatly enhanced as each mask can be independently optimized. In this
+
+
+process, a perfect photomask pattern is divided into two low-density patterns. The
+
+
+first pattern is transferred to the underlying hard mask layer by lithography after
+
+
+
+                                        -9-
+etching, and this process is repeated for the second pattern. The key to this process
+
+
+is that the two patterns must be perfectly aligned. Imperfect alignment causes the
+
+
+combined patterns to have significant relative displacements, leading to yield issues.
+
+
+
+
+              Figure 1.5 LELE and SADP process schematic diagram.
+
+
+
+
+                                       - 10 -
+1.4 3D NAND Flash memory HAR etching process technology
+
+
+
+
+                   Fig. 1.6 V-NAND flash memory architecture
+
+
+
+
+For example, in the production process of 3D NAND Flash, alternating layers of
+
+
+oxide and nitride thin films are deposited, followed by the deposition of a hard mask
+
+
+and the formation of openings to enable the etching of vertical channels. In this
+
+
+process, it is essential to form holes penetrating the NAND uniformly and
+
+
+consistently from the first layer to the last layer. Particularly, as recent 3D NAND
+
+
+reaches the 2xx layer range, an increase in the number of layers requires high aspect
+
+                                       - 11 -
+ratio etching, leading to ongoing research on various methods and equipment
+
+
+development for hole etching. In HARC etching processes, increasing production
+
+
+costs and cycle times are occurring due to long process times. To overcome this
+
+
+situation, methods to increase the selectivity of etching processes are being
+
+
+researched. [12-16] One of these methods is to increase the amount of gas forming
+
+
+polymers to increase passivation. However, excessive polymer formation can lead to
+
+
+etch stoppage. For example, problems encountered during high aspect ratio etching
+
+
+include hole blockage at the top of the pattern, uneven hole sizes at the top of the
+
+
+pattern when etching down to the bottom (necking and bowing), pattern tilting, and
+
+
+pattern closure. [17-26] Due to the challenges of these processes, meticulous control
+
+
+of each process variable is necessary.
+
+
+
+
+                                         - 12 -
+Figure 1.7 Problems arising from the etching profile during high aspect ratio
+
+
+                                  etching.
+
+
+
+
+                                   - 13 -
+1.5 Capacitively Coupled Plasma (CCP) and Inductively Coupled
+
+Plasma (ICP)
+
+
+
+
+If we were to describe the plasma sources of CCP type and ICP type, CCP type injects
+
+
+neutral gas particles between two anode and cathode electrodes and applies voltage
+
+
+to generate plasma. On the other hand, ICP type generates plasma by applying
+
+
+voltage using a circular coil at the top of the chamber. In CCP type, a high voltage
+
+
+between the lower electrode and the plasma results in high ion energy, allowing
+
+
+operation at high pressures. It also offers flexibility in operating RF frequencies and
+
+
+provides excellent plasma uniformity, enabling large-area processes. However, at
+
+
+low pressures, the gas pressure decreases, causing significant electron losses and
+
+
+resulting in a relatively lower plasma density of around 109/cm3 compared to ICP's
+
+
+1011/cm3. Additionally, the high ion energy in CCP type may lead to substrate damage
+
+
+during processing.
+
+
+
+
+                                        - 14 -
+       ICP type, however, generates plasma by applying voltage using a circular coil
+
+
+at the top of the chamber. It creates high-density magnetic fields even at low
+
+
+pressures, resulting in a plasma density 10-100 times higher than that of CCP.
+
+
+Moreover, it offers independent control over plasma density and sheath voltage,
+
+
+providing flexibility to adjust individual factors as required for different processes.
+
+
+Additionally, ICP operates at lower pressures, increasing the mean free path and
+
+
+allowing for higher ion bombardment energy compared to CCP. [27,28]
+
+
+
+
+            Figure 1.8 Schematic diagram of ICP type and CCP type equipment
+
+
+
+
+                                        - 15 -
+1.6 Plasma system used in HAR etching process
+
+
+
+
+The High Aspect Ratio (HAR) etching process has traditionally been performed
+
+
+exclusively using Reactive Ion Etching (RIE) equipment. However, in previous HAR
+
+
+etching processes using Capacitively Coupled Plasma (CCP) or RIE systems, there
+
+
+was a tendency for the etch rate to sharply decrease as the aspect ratio increased.
+
+
+This was due to the inability of ion flux and neutral radicals to reach the bottom of
+
+
+the target material at high aspect ratios [29,30]. Additionally, issues related to profile
+
+
+distortion have been reported as the aspect ratio increases in HAR etching processes
+
+
+[31-34]. Various studies have been conducted to investigate the causes of such profile
+
+
+distortion, which include changes in process gases and pressure, RF power and
+
+
+frequency, and etching profile variations [6,35,36]. The results of these studies
+
+
+suggest a correlation between ion energy, etch rate, and profile distortion due to the
+
+
+adsorbed polymer layer. [17-26]
+
+
+
+
+                                         - 16 -
+In today's semiconductor process development, there are numerous studies and
+
+
+challenges related to various profile distortions. However, the most critical condition
+
+
+is to avoid profile distortion caused by ion energy by adjusting the ratio of carbon
+
+
+(C) and fluorine (F) in CF gases for mask and sidewall passivation. Generally, in CF
+
+
+gases, carbon is known to affect the FC polymer, while fluorine determines the
+
+
+effectiveness of the etching. [37] To achieve higher aspect ratio etching, it is
+
+
+necessary to individually control the source power, which contributes to plasma
+
+
+density generation, and the bias power, which affects ion energy. In Inductively
+
+
+Coupled Plasma (ICP), each element can be controlled individually, and it is known
+
+
+to have advantages in etching processes with smaller patterns due to the benefits of
+
+
+the mean free path at low pressure. [38]
+
+
+
+
+                                        - 17 -
+  Figure 1.9. Schematic diagram of chemical reaction on the surface during SiO2
+
+
+                                     etching
+
+
+1.7 Perfluorocarbon (PFC)- based gas
+
+
+
+
+Perfluorocarbon (PFC)-based gases are the most widely used gases in semiconductor
+
+
+and display manufacturing processes for etching and cleaning, consisting of
+
+
+compounds of carbon and fluorine. [39] These PFC gases are known to have a high
+
+
+Global Warming Potential (GWP) of over 8000, adversely affecting the ozone layer.
+
+
+[39] Representative PFC gases include CF4, C2F6, C4F8, SF6, CHF3, and NF3. [39]
+
+
+Especially, with the increase in patterning process steps due to Double Patterning
+
+                                     - 18 -
+Technology (DPT) and Quadruple Patterning Technology (QPT), the usage of PFC
+
+
+gases is expected to continue rising. [40-42] The emission of PFC gases has been
+
+
+steadily increasing over the past decade in tandem with advancements in
+
+
+semiconductor processing technology. [43]
+
+
+
+
+        Figure 1.10. PFC gas consumption in the semiconductor industry
+
+
+
+
+                                    - 19 -
+1.8 Importance of environmental issues
+
+
+
+
+The Earth's average temperature has generally fluctuated between 1.0°C to -0.5°C.
+
+
+From the 15th to the 19th century, temperatures were relatively low, but since the
+
+
+20th century, a distinct upward trend has emerged. Unlike past temperature patterns
+
+
+in the Earth's climate system, modern temperature increases are primarily attributed
+
+
+to greenhouse gas (GHG) emissions. The rapid increase in GHG emissions due to
+
+
+industrialization has accelerated temperature rise. Consequently, the Earth's climate
+
+
+system is experiencing unprecedented and rapid changes, with this global warming
+
+
+phenomenon formally identified in the 1972 report by the Club of Rome.
+
+
+Subsequently, various countries have begun implementing policies and regulations
+
+
+to mitigate climate change by reducing greenhouse gas emissions.
+
+
+
+
+                                       - 20 -
+              Figure 1.11. Evolution of average global temperatures
+
+
+
+
+The greenhouse gas emissions from the semiconductor industry are expected to
+
+
+increase from the current 11.8 million tons to 14.2 million tons, highlighting the
+
+
+growing need for emission reductions. In response, the World Semiconductor
+
+
+Council (WSC) and the Paris Agreement (2015) have made international efforts
+
+
+through voluntary commitments to reduce perfluorocarbon (PFC) gas emissions.
+
+
+[44,45] The semiconductor industry is striving to minimize GHG emissions by
+
+                                     - 21 -
+producing     high-efficiency     and      high-capacity    environmentally    friendly
+
+
+semiconductors,    thereby      reducing    environmental    pollution   and   resource
+
+
+consumption. [46] A long-term solution to achieve these goals is to replace currently
+
+
+used process chemicals with those that have less environmental impact. [47,48]
+
+
+Various potential solutions that have been recently investigated or are currently under
+
+
+investigation include process optimization, reduction technologies, capture/recovery
+
+
+technologies, and the use of low GWP PFC gas alternatives. [49-52] Particularly,
+
+
+there have been several attempts to replace high GWP PFC gases with low GWP
+
+
+PFC gases and to decompose/recycle them. [51-55] To this end, various gases with
+
+
+low GWP are being tested for application in the semiconductor industry, and efforts
+
+
+are ongoing to reduce the greenhouse effect. Among these, C4F6 has emerged as a
+
+
+potential alternative to traditional etching gases due to its low GWP index. [56-58]
+
+
+
+
+                                           - 22 -
+                 Figure 1.12. The GWP and Lifetime of major gases
+
+
+
+
+1.9 Research objectives
+
+
+
+
+Plasma etching is an essential process step for manufacturing micro and nano
+
+
+electronic devices. High-density plasmas such as helicon, inductively coupled
+
+
+plasma (ICP), and electron cyclotron resonance (ECR) are known to offer many
+
+
+advantages. Given the characteristics of ultra-precision semiconductors, the
+
+
+manufacturing process varies depending on the product specifications. Any changes
+
+
+in the existing process gases and conditions can lead to critical defects and yield loss.
+
+
+Therefore, numerous evaluation procedures and verifications are required to reflect
+
+
+the changed conditions in actual production processes. However, the lack of relevant
+
+                                         - 23 -
+research and systematic studies on gas processes and chemical properties poses
+
+
+difficulties in applying them to actual etching processes. Continuous and sustained
+
+
+research and interest in specific fields are essential for the development of etching
+
+
+processes. Moreover, efforts to reduce carbon emissions in the continuously evolving
+
+
+semiconductor industry should be considered alongside technological advancements.
+
+
+
+
+       Figure 1.13. Chemical bonding structure of Hexafluoro-1,3-butadiene
+
+
+C4F6 stands out as a promising candidate for overcoming environmental concerns
+
+
+due to its low Global Warming Potential (GWP) index (<1) [56-58]. While this gas
+
+
+is suitable for etching processes due to its low GWP, there are limited cases of its
+
+
+application in etching processes, and no research has been conducted on high aspect
+
+
+
+                                       - 24 -
+ratio oxide etching using C4F6 in ICP systems. To confirm the potential of C4F6 as a
+
+
+replacement for conventional etching gases, optimization of plasma etching
+
+
+processes using appropriate operating gases and input process conditions is necessary.
+
+
+Additionally, various experiments and measurements are required to determine the
+
+
+critical process quality factors in semiconductor processes. Therefore, this study
+
+
+investigated the etching mechanism and characteristics of C4F6 gas and evaluated its
+
+
+potential application in high aspect ratio etching processes compared to conventional
+
+
+PFC gases.
+
+
+
+
+                                       - 25 -
+                                                                 Chapter 2
+
+
+                                              Experimental equipment
+
+
+
+
+2.1 Plasma etcher ( Inductively Coupled Plasma : ICP )
+
+
+
+
+                  Figure 2.1 ICP etcher schematic diagram 1
+
+
+
+
+       Figure 2.1 depicts the schematic diagram of the ICP type etcher adopted in
+
+
+this study. The ICP etcher used consists of four main components: an RF power
+
+
+
+                                    - 26 -
+supply unit (source or bias), a vacuum chamber, flow and pressure control devices,
+
+
+and vacuum measurement devices. Plasma diagnostic tools such as Langmuir probes
+
+
+and Optical Emission Spectroscopy are installed through the sides of the vacuum
+
+
+chamber and observed through a viewport.
+
+
+
+2.1.1 Vacuum chamber
+
+
+
+
+                      Figure 2.2 anodizing vacuum chamber
+
+
+
+
+The vacuum chamber is constructed from bipolar oxidized aluminum and is
+
+
+
+                                     - 27 -
+equipped with ports for plasma diagnostic tools as well as viewport windows located
+
+
+on the sides and front. Additionally, gas lines are provided to transfer process gases
+
+
+into the vacuum chamber. Volatile substances generated during the process are
+
+
+expelled to the outside through an exhaust system consisting of a turbo molecular
+
+
+pump (TMP), dry pump, and scrubber.
+
+
+
+
+2.1.2 Flow rate and Pressure control device
+
+
+
+
+    The flow and pressure control system consists of components such as the Mass
+
+
+Flow Controller (MFC), which regulates the flow of gas from the gas cylinder to the
+
+
+vacuum chamber; the Turbo Molecular Pump (TMP) and dry pump, which expel
+
+
+volatile by-products generated during the process; throttle valves to adjust the
+
+
+internal pressure of the chamber; and flow and pressure controllers. During the
+
+
+process, a dry pump is used to decrease the pressure from atmospheric pressure (760
+
+
+Torr) to 5*10-4 Torr, creating a low vacuum condition. Subsequently, a turbo pump
+
+
+
+                                       - 28 -
+(TMP) is employed to further decrease the pressure to 1*10-7 Torr, achieving a high
+
+
+vacuum condition
+
+
+
+
+2.1.3 Vacuum measuring device
+
+
+
+
+The vacuum inside the equipment's chamber was measured using Penning, Pirani,
+
+
+and Baratron gauges, and the measured values were displayed on the control panel.
+
+
+The Pirani gauge and Penning gauge have measurement ranges of atmospheric
+
+
+pressure to 10-3 Torr and 10-4Torr to 10-8 Torr, respectively. The pressure between the
+
+
+throttle valve and the TMP was measured using a Baratron gauge.
+
+
+
+
+2.1.4 RF supply device
+
+
+The power supply unit is used to supply RF (13.56MHz, 2MHz) power for plasma
+
+
+generation and maintenance. This device, consisting of an RF generator and an
+
+
+impedance matching circuit, supplies RF power through the upper coil to deliver
+
+                                        - 29 -
+energy to the plasma. An impedance matching circuit is installed between the power
+
+
+coil and the RF generator to optimize transmission efficiency. The impedance
+
+
+matching circuit maintains the plasma discharge impedance inside the vacuum
+
+
+chamber close to the output impedance of the RF generator (50Ω). The power supply
+
+
+unit is divided into two components. One is connected to the RF induction coil, and
+
+
+the other is connected to the lower electrode. The induction coil is wound in five
+
+
+turns, inducing a non-contact discharge through inductive coupling using a material
+
+
+with a 10mm thickness of quartz between the coil and the plasma generation area.
+
+
+Additionally, the cooling system for the induction coil effectively controls the heat
+
+
+generated by the coil. When high-frequency power is applied, the cooler is installed
+
+
+independently of the equipment to maintain a constant temperature of the circulating
+
+
+water in the equipment.
+
+
+
+
+                                       - 30 -
+    2.2 Langmuir probe (Single , Double)
+
+
+
+
+                            Figure 2.3 Double Langmuir probe
+
+
+
+
+    The single Langmuir probe is a device used for measuring plasma parameters.
+
+
+It can measure electron density, ion density, electron temperature, ion saturation
+
+
+current, and electron energy distribution function. This equipment consists of a metal
+
+
+probe, a variable power supply to apply voltage to the probe, and a current
+
+
+measurement tool to measure the current flowing through the probe. The Langmuir
+
+
+probe inserts a metal probe into the plasma and applies voltage to it to extract electron
+
+
+or ion currents from the plasma for analysis. The basic information obtained is the I-
+
+                                         - 31 -
+V curve, which represents the relationship between the applied voltage and the
+
+
+current. Analyzing this curve provides information such as ion saturation current
+
+
+density, plasma density, electron temperature, plasma potential, floating potential,
+
+
+and electron energy distribution function. When the probe voltage is increased above
+
+
+the plasma potential (Vp), only electrons enter the probe. The current entering the
+
+
+probe at this point is due to electrons, and in this region, the electron current should
+
+
+remain constant regardless of voltage. However, in reality, the current tends to
+
+
+increase with increasing voltage due to the increase in the effective area of the probe
+
+
+caused by the increase in the sheath area around the probe. When the probe voltage
+
+
+is decreased below Vp, electrons entering the probe must have higher energy than the
+
+
+plasma potential. Electrons with lower energy are reflected by the probe. Therefore,
+
+
+if the electron energy distribution follows a Boltzmann distribution, the electron
+
+
+current in this region appears as an exponential function. Additionally, at certain
+
+
+voltages, the current flowing through the probe becomes zero, which is referred to
+
+
+as the floating potential. If Vp is decreased further below Vf, the electron current
+
+
+
+                                        - 32 -
+decreases significantly, and the ion current increases. In this region, known as the
+
+
+ion saturation current, the current magnitude does not change significantly even with
+
+
+decreasing voltage. By analyzing the characteristic curve of the Langmuir probe,
+
+
+plasma parameters can be extracted, and the electron energy distribution function
+
+
+can be obtained through calculations, including second derivatives. The single
+
+
+Langmuir probe is a versatile device for measuring various plasma parameters,
+
+
+especially the electron energy distribution function. Due to its advantages, the single
+
+
+Langmuir probe has been actively used in understanding plasma generation
+
+
+mechanisms, and measurement and interpretation methods continue to evolve. Care
+
+
+should be taken in RF plasmas, as the plasma potential oscillating at RF frequencies
+
+
+can cause distortion in the I-V characteristic curves.
+
+
+
+
+                                        - 33 -
+           Figure 2.4. I-V characteristic curve of Single Langmuir probe
+
+
+
+
+The double Langmuir probe method is a device that can measure ion density, electron
+
+
+temperature, and ion saturation current. It consists of two metal probes, a variable
+
+
+power supply to apply voltage, and a device to measure the current flowing through
+
+
+the probes. The characteristic curve of the double Langmuir probe also shows the
+
+
+I-V characteristic curve representing the current variation with voltage. The
+
+
+characteristic curve of the double Langmuir probe exhibits an origin-symmetrical
+
+
+shape and has two advantages over the single Langmuir probe. With an electrically
+
+
+isolated structure, unlike the single Langmuir probe, the measurement circuit is
+
+
+
+                                      - 34 -
+electrically insulated, resulting in less distortion of the I-V characteristic curve due
+
+
+to changes in plasma potential. It can also be used in environments where the plasma
+
+
+potential is not clearly known, such as when the internal surfaces of the chamber are
+
+
+electrically insulated, as in semiconductor and display processes. The current
+
+
+flowing through the double Langmuir probe has the same maximum size as the ion
+
+
+saturation current, so measuring with a small current captures less perturbation to the
+
+
+plasma discharge state. This feature makes it suitable for measurements in process
+
+
+equipment where harsh environments are created by high-power RF power.
+
+
+
+
+           Figure 2.5. I-V characteristic curve of Double Langmuir probe
+
+
+
+
+                                        - 35 -
+2.3 Optical Emission Spectroscopy (OES)
+
+
+
+
+                     Figure 2.6. Optical emission spectroscopy
+
+
+
+
+Optical emission spectroscopy is a method used to analyze elements by measuring
+
+
+the specific wavelengths of light emitted due to changes in the electronic states of
+
+
+the elements. This method has the advantage of being able to measure without
+
+
+passing through the chamber, thus not affecting the plasma generated inside the
+
+
+chamber. Through the analysis of specific wavelengths, it identifies the elements
+
+
+present in the plasma and estimates the quantity of elements by varying the intensity
+
+
+of light. However, this method has limitations in that it cannot measure plasma
+
+
+species that do not emit light. Additionally, since the emission intensity of each
+
+
+
+
+                                       - 36 -
+plasma species is not directly proportional to its density, it is difficult to directly
+
+
+compare the densities of different plasma species.
+
+
+
+
+                               A + e → A* + e                               (1)
+
+                            AB + e → A* + B + e                             (2)
+
+
+Intense light is emitted from excited species through ion collision processes.
+
+
+
+
+                           A + e (+ M) → A* (+ M)                            (3)
+
+
+
+
+As the excited species A* transitions back to its ground state (A), light corresponding
+
+
+to the energy difference is emitted.
+
+
+
+
+                                  A* → A + h                                (7)
+
+
+
+
+Optical emission spectroscopy is generated by electron collision and dissociation
+
+
+processes in plasma. Light is emitted from excited states during ion detachment
+
+
+                                        - 37 -
+processes. Here, the excited state A* represents the emitting species, while e(+ M)
+
+
+denotes neutral species, negative ions, electrons, third bodies, or surfaces in contact
+
+
+with the plasma. To perform optical spectroscopy, appropriate optical systems and
+
+
+detectors are required to measure the emitted light from the plasma. Light generated
+
+
+in the plasma is transmitted to a spectrometer, passes through a diffraction grating,
+
+
+and is spectrally measured. At the exit of the spectrometer, only light of specific
+
+
+wavelengths is transmitted to the detector, generating a photocurrent proportional to
+
+
+its intensity. For plasma species emitting at specific wavelengths, identification can
+
+
+be achieved through the wavelength of the emitted light. However, since each plasma
+
+
+exhibits a variety of spectral lines, identifying a specific plasma can be challenging.
+
+
+For this reason, optical spectroscopy provides useful information mainly on the light
+
+
+emitted by single or binary particles, as their spectra are simpler and narrower
+
+
+compared to multi-atomic species. Additionally, due to variations in light intensity
+
+
+depending on the plasma state, quantitative interpretation can be challenging.
+
+
+
+
+                                        - 38 -
+    2.4 X-ray Photoelectron Spectroscopy (XPS)
+
+
+
+
+           Figure 2.7 X-Ray photoelectron analysis schematic diagram
+
+
+
+
+    X-ray photoelectron spectroscopy (XPS) is particularly useful for acquiring
+
+
+information about very thin surface layers within 100 angstroms. It is often known
+
+
+as Electron Spectroscopy for Chemical Analysis (ESCA). When X-rays (photons)
+
+
+with specific energy interact with the sample surface, photoelectrons are emitted
+
+
+from the surface atoms. By measuring the kinetic energy of these photons, we can
+
+
+determine the binding energy (BE) of the inner electrons bound to the atomic nucleus,
+
+
+which is the energy required to emit the internal electrons bound to the nucleus of
+
+
+
+                                      - 39 -
+the atom. This allows us to identify the surface components and understand their
+
+
+chemical bonding states. The binding energy, characteristic of the atoms emitting the
+
+
+photoelectrons, plays a crucial role in identifying the components. Additionally,
+
+
+qualitative analysis of the sample can be performed through binding energy, and the
+
+
+bonding states of atoms can be investigated through changes in binding energy. The
+
+
+binding energy of photoelectrons is useful for identifying elements and evaluating
+
+
+the properties of samples.
+
+
+
+
+                                       - 40 -
+2.5 Scanning Electron Microscope (SEM)
+
+
+
+
+Figure 2.8 Overview of Scanning Electron Microscope (SEM) Analysis schematic
+
+
+                                  diagram
+
+
+
+
+                                  - 41 -
+           Figure 2.9 Function of Scanning Electron Microscope (SEM)
+
+
+
+
+    Scanning Electron Microscopy (SEM) is primarily used to observe the fine
+
+
+structure and morphology of solid samples, thanks to its capability to easily visualize
+
+
+features in three-dimensional (3-D) images. It allows for the high-resolution
+
+
+observation of complex surface structures and crystal forms in three dimensions. The
+
+
+instrument consists of a condenser lens, an objective lens, an electron gun that
+
+
+generates electron beams, a focusing lens that concentrates electron beams, and
+
+
+injection coils that control the path of electrons exiting the electron gun filament.
+
+
+
+                                        - 42 -
+The electron beam is focused on the surface of the conductive sample to form a
+
+
+concentrated electron beam area, which is then observed using electromagnetic
+
+
+lenses. This method forms images through scanning and observation. Various
+
+
+secondary emissions occur during this process, but the image is displayed to the
+
+
+observer using secondary electrons generated from the interaction between the
+
+
+sample and the electron beam. At this point, the brightness of the image is
+
+
+proportional to the number of secondary electrons generated by the interaction
+
+
+between the electron beam and the sample. Since the sample is monitored through
+
+
+electrons, distortion may occur due to collisions of electrons if air is present
+
+
+internally. Therefore, observations should be made under vacuum conditions (10- 5
+
+
+Torr) to prevent this.
+
+
+
+
+                                     - 43 -
+                                                            Chapter 3
+
+
+                                                Experimental Details
+
+
+
+
+3.1 Etching process
+
+
+
+
+                Figure 3.1 ICP etcher Schematic diagram 2
+
+
+
+
+                                 - 44 -
+        Prior to this study, etching experiments were conducted in a planar ICP
+
+
+reactor as described in previous research [59-61]. A 13.56 MHz RF generator (AE,
+
+
+Paramount 1513) and a 2 MHz RF generator (Advanced Energy, CESAR RF Power
+
+
+Generator) were connected to the lower electrode to establish -Vdc. The IPA
+
+
+(isopropyl alcohol) flow cooling system of the lower electrode was used to maintain
+
+
+the temperature at approximately 17°C. The experiments were performed varying
+
+
+the CF4/C4F6 flow rates, source power, and bias power. Additionally, a constant total
+
+
+gas flow rate of 140 sccm (CF4+C4F6+He) was maintained, with a gas pressure set
+
+
+at 10 mTorr. In the flow rate variation experiments, the C4F6/(CF4+C4F6) ratio was
+
+
+varied across 5 parameters ranging from approximately 37.5% to 67.5% (total CF4
+
+
++ C4F6 = 40 sccm), while He was fixed at 100 sccm. The source power and bias
+
+
+power were fixed at 150W and 400W, respectively. For the variations in source
+
+
+power and bias power, the C4F6/(CF4+C4F6) ratio was fixed at 56.25% (total CF4 +
+
+
+C4F6 = 40 sccm), with He fixed at 100 SCCM, and only the power levels were varied.
+
+
+Source power was varied from 50W to 200W in 4 parameters, while bias power was
+
+
+
+                                       - 45 -
+varied from 300W to 600W in 4 parameters for comparison.
+
+
+
+
+3.2 Sample preparation
+
+
+
+
+            Figure 3.2 Reference sample SEM profile and schematic
+
+
+
+
+  The sample consists of a Si-based 300mm wafer with a 2400nm SiO2 layer
+
+
+deposited on it, followed by a 1400nm thick Amorphous Carbon Layer (ACL) Mask.
+
+
+On top of this, SiON for mask pattern formation is deposited with a thickness of
+
+
+50nm. The pitch width is 500nm, and etching processes and profile analysis were
+
+                                    - 46 -
+conducted on line patterns with a width of 100nm. For the etching experiments,
+
+
+coupon samples measuring 2x2 cm were used at the center of the lower electrode.
+
+
+The use of small sample sizes allowed us to ignore loading effects and provided an
+
+
+etching system controlled by heterogenous process dynamics. Prior to the etching
+
+
+process, it was confirmed that there were no significant differences in the obtained
+
+
+I-V curves and relevant plasma parameter measurements depending on the presence
+
+
+of the sample loading. Therefore, regardless of the presence of the sample, the
+
+
+sensitivity of plasma parameters during the etching process can be disregarded, and
+
+
+the gas phase can be considered as a permanent source of active species governed by
+
+
+heterogeneous process dynamics.
+
+
+
+
+                                      - 47 -
+3.3 Analysis of etch properties
+
+
+
+
+         Figure 3.3 Scanning Electron Microscope(MIRA3 LMH, TESCAN)
+
+
+
+
+  In this study, to investigate the etching profile of SiO2, a reference sample was
+
+
+prepared by depositing SiO2 followed by ACL, with thicknesses of 2400nm and
+
+
+1400nm, respectively, on a Si substrate as described earlier. The sample consisted of
+
+
+line patterns with a width of 100nm and intervals of 500nm. The hard mask-assisted
+
+
+reactive (HAR) etching process was conducted. Additionally, the cross-sections of
+
+
+
+                                       - 48 -
+the profiles were measured using a Field-emission scanning electron microscope
+
+
+(MIRA3 LMH, TESCAN).
+
+
+
+
+3.4 Plasma diagnosis
+
+
+
+
+   The gas composition for plasma parameters was measured using Double
+
+
+Langmuir probe diagnostics and Optical emission spectroscopy. The Double
+
+
+Langmuir probe (DLP2000, Plasmart Inc., Daejeon, Korea) provided information on
+
+
+electron temperature (Te) and ion current density (Jis). The processing of the raw I-
+
+
+V curves was based on well-established procedures described in the referenced
+
+
+papers [46-47]. To minimize experimental errors caused by the deposition of
+
+
+fluorocarbon polymers on the probe tips, Ar + O2 plasma (in a 1:1 ratio) was used
+
+
+for cleaning before and after measurements. Previous studies have demonstrated the
+
+
+effectiveness of these procedures in obtaining accurate diagnostic results. [62-64]
+
+
+
+
+                                       - 49 -
+      Figure 3.4 Optical Emission Spectroscope (Avaspec-3648, Jinyoung Tech,
+
+
+                                      Korea)
+
+
+
+
+The intensity of light emitted from active species in the plasma was measured using
+
+
+Optical Emission Spectroscopy (OES). For this purpose, a monochromator
+
+
+(Avaspec-3648, Jinyoung Tech, Korea) covering the wavelength range of 200 to 800
+
+
+nm was employed. Specific wavelengths of CF (255.253 nm), CF2 (340.129 nm),
+
+
+CF3 (610.144 nm), F (703.067 nm), and He (501 nm) were utilized [59,60,65]
+
+
+
+
+                                      - 50 -
+3.4 Surface analysis
+
+
+
+
+         Figure 3.5 X-Ray photoelectron spectroscopy(K-Alpha, Thermo VG, UK)
+
+
+
+
+  The chemical composition of the SiO2 and ACL surfaces after the plasma process
+
+
+was examined using X-ray Photoelectron Spectroscopy (XPS) with Mg Ka 1253.6
+
+
+eV radiation, operated at 260W, employing K-Alpha instrument (Thermo VG, UK).
+
+
+The binding energy was calibrated using the C(1s) peak at 285.4 eV. Furthermore,
+
+
+Deconvolution of the narrow spectrum of C(1s) allowed the extraction of three peaks
+
+
+at binding energies corresponding to C-C, C-CFx, and C-F bonds at 284.7, 286.7,
+
+
+and 289.1 eV, respectively. Polymers composed of C-CFx and C-F bonds were
+
+
+predominantly observed in the oxide film. Additionally, the C-CFx peak, closely
+
+                                      - 51 -
+related to polymer thickness, showed a strong correlation with the etching rate of the
+
+
+oxide film. [66-68]
+
+
+
+
+                                       - 52 -
+                                                                 Chapter 4
+
+
+                                                 Results and discussion
+
+
+
+
+4.1 Effect of gas flow ratios
+
+4.1.1 Etching Characteristics
+
+
+
+
+  Figure 4.1 SiO2, ACL etching rate according to the X gas fraction (X = C4F6)
+
+
+
+
+                                    - 53 -
+   Figure 4.2 Selectivity (SiO2/ACL) according to the X gas fraction (X = C4F6)
+
+
+
+
+Figure 4.1 illustrates the influence of the X gas fraction in CF4 + X + He (X = C4F6)
+
+
+gas mixture on the etching rate of SiO2 films. As the X gas fraction increases in the
+
+
+mixed plasma, the etching rate of SiO2 films decreases (e.g., for 37.5%-62.5% SiO2
+
+
+films, the etching rate decreased from 48.155 to 31.922 nm/min, a 33% decrease; for
+
+
+ACL, it decreased from 25.12 to 12.902 nm/min, a 48% decrease). In contrast, the
+
+
+etching selectivity (SiO2/ACL) increased with the increase in the X gas fraction
+
+
+
+                                       - 54 -
+(from 1.91 to 2.47 for 37.5%~62.5%, a 29% increase). The etching of Si and Si-
+
+
+based films is determined by the predominant active species, the volatility of reaction
+
+
+products, and the thickness of deposited FC polymers. [63,69] The decrease in the
+
+
+etching rate of SiO2 films could be attributed to two main factors. Firstly, it may be
+
+
+due to the corresponding changes in the density of reactive neutral species resulting
+
+
+from variations in plasma parameters. Secondly, it may be attributed to changes in
+
+
+FC polymer deposition associated with the F/C ratio within the mixture. [45]
+
+
+
+
+                                        - 55 -
+4.1.2 Plasma diagnostic
+
+
+
+
+             Figure 4.3 Te & Jis according to X gas fraction (X= C4F6)
+
+
+
+
+Figure 4.3 illustrates the values of electron temperature (Te) and ion current density
+
+
+(Jis) as the flow rate of X gas (X = C4F6) increases. With the increase in the flow rate
+
+
+of X gas (X = C4F6), the electron temperature (Te) decreases, while the ion current
+
+
+density (Jis) increases (e.g., for the increase from 37.5% to 62.5%, Te decreased from
+
+
+4.57 to 3.27 eV, a 28% decrease, and Jis increased from 0.0168 to 0.05255 mA/cm2,
+
+
+a 21% increase). Similar observations have been reported in CF4+C4F8+Ar gas
+
+                                        - 56 -
+mixtures after replacing C4F8 with CF4 [63,69]. Therefore, the increase in X gas may
+
+
+be related to the increase in ionization rate coefficients (as the number of particles
+
+
+with low ionization thresholds increases). As CF4 transitions to C4F6-rich plasma,
+
+
+CF4 and F change to CF2 and CF1, respectively [63,69], leading to more ionization
+
+
+with the increase in C4F8 flow rate, resulting in electron temperature loss [70].
+
+
+
+
+        .
+
+               Figure 4.4 -Vdc according to X gas fraction (X=C4F6)
+
+
+
+
+                                        - 57 -
+Figure 4.4 illustrates the variation in -Vdc as the X gas fraction increases. There is a
+
+
+decreasing trend as the X gas fraction increases (a decrease of 1.5%). However, the
+
+
+difference in values is minimal, and it appears that the value of Vdc remains almost
+
+
+unchanged. The value of -Vdc is associated with plasma density. This increase in
+
+
+plasma density is due to the higher ionization resulting from the increased fraction
+
+
+of gas with lower ionization thresholds [71,72]. As plasma density increases, the
+
+
+plasma potential decreases, leading to a narrowing of the sheath region.
+
+
+Consequently, the region where electrons are accelerated decreases, resulting in a
+
+
+decrease in the value of -Vdc [73].
+
+
+
+
+                                        - 58 -
+4.1.3 OES Characteristics
+
+
+                                400                                     0.6
+                                350         F
+                                                                        0.5
+                                300
+
+
+
+                                                                              ICFx (1,2,3)/IF
+
+           Emission intensity
+                                250                                     0.4
+                                200
+                                150                                     0.3
+
+                                100
+                                            CFx                         0.2
+                                 50
+                                 0                                      0.1
+                                      30   40     50        60   70   80
+                                           C4F6 gas fraction [%]
+
+      Figure 4.5 Emission intensity according to the X gas fraction (X=C4F6)
+
+
+
+
+Figures 4.13 and 4.14 present the optical emission intensity data obtained through
+
+
+Optical Emission Spectroscopy (OES) to investigate the behavior of chemical
+
+
+reactive species such as polymer and fluorine in a CF4+C4F6+He mixed plasma as
+
+
+the X gas flow rate increases (X=C4F6). Specific wavelengths of CF1 (255.253 nm),
+
+
+CF2 (340.129 nm), CF3 (610.144 nm), F (703.067 nm), and He (501 nm) were
+
+
+utilized. [60,65,74]
+
+                                                   - 59 -
+As a result, an increase in CFx species (x= 1,2), contributing to polymer formation,
+
+
+was observed with the increase in C4F6 gas. Additionally, a decrease in F intensity
+
+
+was noted. With a higher proportion of C4F6 gas conditions, it provides a higher
+
+
+radical density of CFx (x=1,2), corresponding to a higher polymerization flux, thus
+
+
+leading to a higher deposition rate of fluorocarbon polymer films. Fluorocarbon
+
+
+polymers are known to increase surface passivation, thereby inhibiting etching [67].
+
+
+These results indicate that the decrease in the etch rate of SiO2 is attributed to the
+
+
+increased deposition of FC polymer layers on the SiO2 film surface and the reduction
+
+
+in F atom dissociation throughout the plasma etching process.
+
+
+
+
+                                       - 60 -
+4.1.4 Etched profile
+
+
+
+
+             Figure 4.6 Etched profile in the X gas fraction (X=C4F6)
+
+
+
+
+Figure 4.6 depicts the etch profile images as a function of the X gas flow rate (X =
+
+
+C4F6) in CF4 + C4F6 + He composite plasma. Post-plasma etching FE-SEM images
+
+
+of a 100 nm line pattern with a width of 500 nm are presented. Plasma etching
+
+
+experiments were conducted using the same etching conditions for CF4 + C4F6 + He
+
+
+mixed plasma, except for adjusting the etching time to achieve the same etch depth
+
+
+
+                                      - 61 -
+at different X gas flow rates. The SiO2 film etch depth ranged from 2100 to 2200 nm,
+
+
+and the most vertical profile was obtained at the C4F6 62.5% condition. It was
+
+
+observed that the facet phenomenon of the mask decreased with an increase in the
+
+
+C4F6-rich condition. Additionally, with an increase in the C4F6-rich condition, the
+
+
+widening of the linewidth observed in the CF4-rich condition gradually decreased
+
+
+(e.g., the 100 nm width pattern widened up to 250 nm at the CF4 62.5% condition).
+
+
+This result may be attributed to the formation of polymer on the etched sidewalls.
+
+
+[75] C4F6-containing plasma is characterized by a higher probability of polymer
+
+
+generation compared to CF4 plasma (as evident from the data above) and the
+
+
+formation of sidewall passivation that reflects high-energy ions. These
+
+
+characteristics not only prevent an increase in linewidth due to sidewall passivation
+
+
+but also prevent mask erosion by forming passivation on both the ACL mask surface
+
+
+and sidewalls. [76,77]. Thus, utilizing C4F6 instead of the widely used CF4 for high
+
+
+aspect ratio oxide etching in each etching process seems feasible for achieving the
+
+
+desired etching goals.
+
+
+
+                                       - 62 -
+4.1.5 Surface Analysis
+
+
+                             60
+
+
+
+
+        Atomic percent [%]
+                                     C1s
+                             55      F1s
+                                     O1s
+                             50      Si2P
+                             45
+                             40
+                             35
+                             30
+                             25
+                             20
+                             15
+                              30    35      40   45      50    55   60   65   70
+                                   X gas fraction (X=C4F6)
+Figure 4.7 XPS peak spectra of the SiO2 surface in the CF4+C4F6+He plasma when
+                           the X gas fraction change
+
+
+
+
+       Table 1. Atmoic % of XPS etched SiO2 surface at fraction of C4F6.
+
+
+
+
+                                                      - 63 -
+To investigate how the atomic compositions of SiO2 and ACL surfaces changed as
+
+
+the X gas flow ratios increased (X = C4F6), XPS analysis was conducted in CF4 +
+
+
+C4F6 + He mixed plasma. Figure 4.19 represents the atomic % of each peak C1s, F1s,
+
+
+O1s, Si2p as a function of the X gas ratio. As the X gas ratio increased, the atomic
+
+
+ratios of C1s and F1s on the SiO2 surface gradually increased, while the atomic ratio
+
+
+of Si2p decreased. It is well-known that C1s and F1s are associated with residual
+
+
+fluorocarbon etching residues on the surface. To further investigate these peaks,
+
+
+Deconvolution of the spectrum was performed. Figure 4.20 illustrates the
+
+
+Deconvolution results of the peaks obtained from C4F6. Deconvolution was
+
+
+performed to align with the binding energies of all XPS data. Bond energies of C-Si,
+
+
+C-C, C-CFx, C-F, C-F2, C-F3 were discovered, which were analyzed only for C 1s
+
+
+(to confirm the presence of FC etching residues on the surface). The observed peaks
+
+
+can be assigned to C-Si (283.2eV), C-CFx (287.0eV), C-F1 (289.3eV), C-F2
+
+
+(291.4eV), C-F3 (293.3eV) [76,80-82]. The C-CFx and C-Fx (X<3) peaks may
+
+
+originate from polymers formed on the surface [76,80-82]. The relative area % was
+
+
+
+                                       - 64 -
+calculated by multiplying the ratio of each bonding state corresponding to the C 1s
+
+
+ratio and then diving the sum by 100.
+
+
+
+
+       Figure 4.8 C1s deconvolution in the X gas fraction change (X=C4F6)
+
+
+
+
+As the C4F6 gas ratio increased, the C-C bond gradually decreased, while the C-CFx
+
+
+and C-F bonds increased. The decrease in the C-C bond ratio with increasing C4F6
+
+
+gas ratio indicates its susceptibility to atmospheric contamination, as evidenced by
+
+
+its persistence even without breaking the vacuum immediately after the process. This
+
+
+suggests that the C-C peak can serve as a reference for XPS analysis.
+
+                                        - 65 -
+Furthermore, the C-CFx and C-F bonds noticeably increased as the X gas ratio
+
+
+increased. This indicates that with higher C4F6 abundance in the plasma, there is an
+
+
+increase in polymer formation, as evidenced by the increase in the C-CFx peak.
+
+
+
+
+                                      - 66 -
+4.2 Effect of Source/Bias power
+
+4.2.1 Etching characteristics
+
+
+
+
+    Figure 4.9 SiO2, ACL etching rate according to the Source power increase
+
+
+
+
+    Figure 4.10 SiO2, ACL etching rate according to the bias power increase
+
+                                    - 67 -
+Figures 4.9 and 4.10 show the etch rates of SiO2 and ACL under fixed conditions
+
+
+with an X gas fraction of 56.25% (X = C4F6, total flow rate: CF4 = 15 sccm, C4F6 =
+
+
+25 sccm, He = 100 sccm) as a function of source power and bias power. In the mixed
+
+
+plasma, as the source power increased from 50W to 200W and the bias power
+
+
+increased from 300W to 600W, the etch rates of both SiO2 and ACL thin films
+
+
+monotonically increased. Specifically, as the source power varied from 50W to 200W,
+
+
+the SiO2 etch rate increased from 24.89 to 36.15 nm/min (a 45.24% increase), and
+
+
+the ACL etch rate increased from 8.16 to 15.12 nm/min (an 85.29% increase).
+
+
+Similarly, as the bias power varied from 300W to 600W, the SiO2 etch rate increased
+
+
+from 25.35 to 48.12 nm/min (an 89.82% increase), and the ACL etch rate increased
+
+
+from 10.12 to 20.225 nm/min (a 99.85% increase). This increase in etch rates is
+
+
+attributed to the higher ion flux and reactive neutral density generated by the increase
+
+
+in source power [38,83,84], and to the acceleration of ions towards the wafer with
+
+
+higher energy and momentum in a direction perpendicular to the surface due to the
+
+
+increase in bias power [38,84].
+
+                                        - 68 -
+Figure 4.11 Selectivity (SiO2/ACL) according to the Source power increase
+
+
+
+
+ Figure 4.12 Selectivity (SiO2/ACL) according to the Bias power increase
+
+                                 - 69 -
+Conversely, although the etch rate increased with the increase in source power, the
+
+
+etch selectivity (SiO2/ACL) decreased from 3.048 to 2.390 nm/min as the power
+
+
+increased, representing a 21.59% decrease. This is attributed to the higher increase
+
+
+rate of F radicals with the increase in source power, which leads to a reduction in the
+
+
+FC polymer participating in passivation [85-87]. With the increase in bias power, the
+
+
+etch rate also increased, but the etch selectivity (SiO2/ACL) decreased from 2.50 to
+
+
+2.379 nm/min, showing a smaller change (4.84% decrease). This is attributed to the
+
+
+increased damage from the higher ion bombardment energy [85-87].
+
+
+
+
+                                        - 70 -
+4.2.2 Plasma diagnostic
+
+
+
+
+          Figure 4.13 Te & Jis according to Source power increase
+
+
+
+
+           Figure 4.14 Te & Jis according to Bias power increase
+
+
+                                  - 71 -
+Figures 4.13 and 4.14 show the electron temperature and ion current density
+
+
+measured under fixed conditions with an X gas fraction of 56.25% (X = C4F6, total
+
+
+flow rate: CF4 = 15 sccm, C4F6 = 25 sccm, He = 100 sccm) as the source power and
+
+
+bias power increase. With higher source power, the electron temperature and ion
+
+
+current density increased, with Te changing from 2.94 to 3.87 eV (a 21% increase)
+
+
+and Jis changing from 0.01639 to 0.05487 mA/cm2 (a 28% increase). The increase
+
+
+in electron temperature appears to be due to reduced electron energy losses from
+
+
+vibration and excitation of electrons. This effect enhances the electron-impact
+
+
+dissociation rate for multiple atomic components, enriching the gas phase with less
+
+
+saturated radicals and atomic species. The increase in ion current density seems to
+
+
+be due to the same change in total ionization rate accelerated by the growth of
+
+
+electron density. The relationship between bias voltage and electron density can be
+
+
+confirmed through the source power balance equation [88]. This phenomenon is
+
+
+commonly observed in many fluorocarbon-based plasma experiments under
+
+
+conventional reactive ion etching conditions [89-92]. When the bias power increased,
+
+
+
+                                      - 72 -
+Te and Jis changed from 3.38 to 3.39 eV (a 4.69% increase) and from 0.042 to 0.044
+
+
+mA/cm2 (a 0.41% increase), respectively. It is widely known that in plasma, the
+
+
+frequency is divided into plasma ion frequency (low frequency) and plasma electron
+
+
+frequency (high frequency) [93-96]. Using a low-frequency bias (2 MHz), it was
+
+
+confirmed that bias power contributed minimally to plasma generation.
+
+
+
+
+              Figure 4.15 -Vdc according to Source power increase
+
+
+
+
+                                     - 73 -
+                Figure 4.16 -Vdc according to Bias power increase
+
+
+
+
+Figures 4.15 and 4.16 depict the variation of -Vdc with changes in source power and
+
+
+bias power. With an increase in source power, the value of -Vdc decreased slightly,
+
+
+showing minimal change (-1352 to -1343V, a 0.67% decrease). This slight decrease
+
+
+in -Vdc can be attributed to differences in plasma potential due to the increase in
+
+
+plasma density. Further investigation is needed to confirm the relationship between
+
+
+-Vdc and plasma density [84,97-99]. Additionally, Figure 4.16 illustrates that with
+
+
+the increase in bias power contributing to ion energy generation, the value of -Vdc
+
+
+
+                                      - 74 -
+increased significantly (-1214 to -1598V, a 31% increase). This observation aligns
+
+
+with the analysis of etching characteristics, where an increase in bias power leads to
+
+
+an increase in etch rate. [100]
+
+
+
+
+                                       - 75 -
+4.2.3 OES characteristics
+
+
+
+
+     Figure 4.17 Emission intensity according to the Source power increase
+
+
+
+
+      Figure 4.18 Emission intensity according to the Bias power increase
+
+                                    - 76 -
+Figures 4.17 and 4.18 present optical emission intensity data obtained through OES
+
+
+to investigate the behavior of chemical reactive species such as polymers and
+
+
+fluorine under fixed conditions of X gas fraction 56.25% (X= C4F6, total flow rates
+
+
+CF4 = 15sccm, C4F6 = 25sccm, He = 100sccm). Specific wavelengths of CF1
+
+
+(255.253nm), CF2 (340.129 nm), CF3 (610.144 nm), F (703.067 nm), and He (501
+
+
+nm) were utilized [14,60,65]. In Figure 4.15, the intensity of each component
+
+
+increased with the increase in source power (CFx = 148.95 – 300 (102.7% increase),
+
+
+F = 188.825 – 558.15 (196.81% increase)), indicating a reduction in electron
+
+
+temperature oscillation and electron energy loss due to the earlier explained increase
+
+
+in source power. [101,102]. This effect is attributed to the increase in electron-impact
+
+
+dissociation rate of the gas phase, enriched by less saturated radicals and atomic
+
+
+species, resulting in higher intensity peaks due to increased ionization. [103-105] For
+
+
+bias power, as reported, there was minimal variation in each peak with changes in
+
+
+bias power when using low-frequency bias in the ICP chamber [84]. This aligns with
+
+
+the inference that bias power has little influence on source plasma formation.
+
+
+
+                                        - 77 -
+4.2.4 Etched profile
+
+Figures 4.19 and 4.20 depict the etching profile images obtained from a CF4 + C4F6
+
+
++ He composite plasma as the source power and bias power increase (CF4 = 15sccm
+
+
++ C4F6 = 25sccm + He = 100sccm Fixed). FE-SEM images of a 100nm line pattern
+
+
+with a 500nm width after plasma etching process are shown.
+
+
+
+
+              Figure 4.19 Etched profile in the Source power change
+
+
+
+                                     - 78 -
+In Figure 4.19, SEM profile images are presented with varying source power from
+
+
+50W to 200W. It is widely known in many fluorocarbon-based plasmas that
+
+
+increasing source power leads to higher ionization density due to increased
+
+
+ionization. [101,102]. As a result, the increase in dissociation of F atoms also leads
+
+
+to a reduction in passivation on the ACL mask surface, resulting in an increase in
+
+
+facet formation.
+
+
+
+
+                Figure 4.20 Etched profile in the Bias power change
+
+                                       - 79 -
+Figure 4.20 shows the SEM profile images as the Bias power is varied from 300W
+
+
+to 600W. The bias power applied to the lower electrode, contributing to the
+
+
+generation of -Vdc, increases the ion bombardment energy as the power increases.
+
+
+[106,107] Consequently, the increase in ion bombardment energy leads to damage
+
+
+on the Mask surface, resulting in an increase in ACL Mask erosion and facet
+
+
+formation. [106-108] This can be explained by the increase in -Vdc observed in the
+
+
+plasma diagnostics conducted earlier with increasing bias power.
+
+
+
+
+                                      - 80 -
+5. Conclusion
+
+In this study, plasma etching characteristics and plasma diagnostics were conducted
+
+
+by varying three parameters: gas ratio, Source power, and Bias power in a CF4 +
+
+
+C4F6 + He mixed plasma. With the increasing complexity of circuit structures and
+
+
+the repetition of processes in multiple-patterning techniques, it has been reported that
+
+
+the flattening of etching profiles on both mask and pattern bottom surfaces is crucial
+
+
+to prevent misalignment during patterning. [109,110] Additionally, due to the
+
+
+complexity of circuits, efforts have been made to reduce carbon emissions and
+
+
+explore new materials and gases. [111] C4F6 is an environmentally friendly gas with
+
+
+a GWP index of less than 1 and a lifetime of 2 days. Recent research on high aspect
+
+
+ratio etching using C4F6 gas and C4F8 gas has regained attention. However, previous
+
+
+studies only focused on basic etching evaluation and plasma diagnostics using these
+
+
+gases. [56-58] There were no studies specifically on high aspect ratio etching.
+
+
+Furthermore, it has been reported that research on high-density plasma of ICP type,
+
+
+as opposed to the conventional CCP type, is needed. [27-28] For high aspect ratio
+
+
+
+                                        - 81 -
+etching, research on process optimization for conventional gases is necessary in
+
+
+addition to exploring new variables. We investigated the potential applicability of
+
+
+C4F6 as an environmentally friendly alternative gas for high aspect ratio oxide
+
+
+etching and examined the etching characteristics and plasma properties observed
+
+
+when using C4F6 plasma with various parameter variations. Additionally, the most
+
+
+vertical profiles were observed under the condition of CF4 / C4F6 / He (15/25/100,
+
+
+sccm). In this study, by finely adjusting each parameter, we proposed the possibility
+
+
+of HAR etching through process optimization.
+
+
+
+
+                                       - 82 -
+ References
+
+
+
+1.     Nan Wang, Yi Li, Feng Sha, and Yu He., Sub-nanometer misalignment sensing for
+
+       lithography with structured illumination. Optics Letters Vol. 47, Issue 17, pp. 4427-
+
+       4430 (2022)
+
+2.     Sung-Woon Cho; Chang-Koo Kim; Jin-Kwan Lee; Sang Heup Moon; Heeyeop
+
+       Chae, Angular dependences of SiO2 etch rates in C4F6/O2/Ar and
+
+       C4F6/CH2F2/O2/Ar plasmas . J. Vac. Sci. Technol. A 30, 051301 (2012)
+
+3.     Donnelly, V.M.; Kornblit. A. Plasma etching: Yesterday, today, and tomorrow. J.
+
+       Vac. Sci. Technol. A, 2013, 31.
+
+4.     Donnelly, V.M., et al., Anisotropic etching of SiO2 in low‐frequency CF4/O2 and
+
+       NF3/Ar plasmas. Journal of applied physics, 1984. 55(1): p. 242-252
+
+5.     Ding, J., et al., Etching rate characterization of SiO2 and Si using ion energy flux
+
+       and atomic fluorine density in a CF4/O2/Ar electron cyclotron resonance plasma.
+
+       Journal of Vacuum Science & Technology A: Vacuum, Surfaces, and Films, 1993.
+
+       11(4): p. 1283-1288.
+
+6.     Schaepkens, M., et al., Study of the SiO2 to Si3N4 etch selectivity mechanism in
+
+       inductively coupled fluorocarbon plasmas and a comparison with the SiO2 to Si
+
+       mechanism. Journal of Vacuum Science & Technology A: Vacuum, Surfaces, and
+
+       Films, 1999. 17(1): p. 26-37.
+
+                                         - 83 -
+ 7.   Lee, H.K., K.S. Chung, and J.S. Yu, Selective etching of thick Si3N4, SiO2 and Si
+
+      by using CF4/O2 and C2F6 gases with or without O2 or Ar addition. Journal of the
+
+      Korean Physical Society, 2009. 54(5 PART 1): p. 1816-1823.
+
+ 8.   Hayashi, H., K. Kurihara, and M. Sekine, Characterization of highly selective
+
+      SiO2/Si3N4 etching of high-aspect-ratio holes. Japanese journal of applied physics,
+
+      1996. 35(4S): p. 2488.
+
+ 9.   Lee, J., A. Efremov, and K.-H. Kwon, On the relationships between plasma 121
+
+      chemistry, etching kinetics and etching residues in CF4+C4F8+Ar and CF4+
+
+      CH2F2+Ar plasmas with various CF4/C4F8 and CF4/CH2F2 mixing ratios.
+
+      Vacuum,2018. 148: p. 214-223.
+
+10.   Lee, J., et al., Etching mechanisms and surface conditions for SiOxNy thin films in
+
+      CF4+CHF3+O2 inductively coupled plasma. Plasma Chemistry and Plasma
+
+      Processing, 2019. 39(4): p. 1127-1144. 13 Kim, K. Future silicon technology. In
+
+      2012 Proceedings of the ESSCIRC, 2012, 1-6.
+
+11.   Kim, K. Future memory technology: Challenges and opportunities. In 2008
+
+      International
+
+12.   Ephrath, L., Selective Etching of Silicon Dioxide Using Reactive Ion Etching with
+
+      CF4 H2. Journal of the Electrochemical Society, 1979. 126(8): p. 1419. 16.
+
+      Oehrlein, G., et al., Anisotropic Dry Etching of SiO2 on Si and its Impact on
+
+      Surface and Near-Surface Properties of the Substrate. MRS Online Proceedings
+
+
+
+                                       - 84 -
+      Library (OPL), 1986. 68.
+
+13.   Joyce, S., J. Langan, and J. Steinfeld, Chemisorption of fluorocarbon free radicals
+
+      on silicon and SiO2. The Journal of chemical physics, 1988. 88(3): p. 2027-2032.
+
+14.   Langan, J., et al., Reactions of laser-generated CF2 on silicon and silicon oxide 122
+
+      surfaces. Surface science, 1989. 207(2-3): p. 344-353.
+
+15.   Cardinaud, C. and G. Turban, Mechanistic studies of the initial stages of etching of
+
+      Si and SiO2 in a CHF3 plasma. Applied surface science, 1990. 45(2): p. 109-120.
+
+16.   Akimoto, T., et al., Analysis of fluorocarbon film deposited by highly selective
+
+      oxide etching. Japanese journal of applied physics, 1994. 33(4S): p. 2151.
+
+17.   Liu, G.L., et al., Study on characterizing fluorocarbon polymer films deposited on
+
+      an inner surface during high-aspect-ratio contact hole etching using secondary ion
+
+      mass spectroscopy. Journal of Vacuum Science & Technology B:Microelectronics
+
+      and Nanometer Structures Processing, Measurement, andPhenomena, 1999. 17(2):
+
+      p. 355-361.
+
+18.   Inoue, M., et al., Plasma research activities in the association of super-
+
+      advancedelectronics technologies. Journal of Vacuum Science & Technology A:
+
+      Vacuum,123 Surfaces, and Films, 1998. 16(1): p. 341-344.
+
+19.   Sekine, M., Dielectric film etching in semiconductor device manufacturing:
+
+      Development of SiO2 etching and the next generation plasma reactor. Applied
+
+      Surface Science, 2002. 192(1-4): p. 270-298.
+
+
+
+                                        - 85 -
+20.   Sekine, M., Study for plasma etching of dielectric film in semiconductor device
+
+      manufacturing. Review of ASET research project. Pure and applied chemistry,
+
+      2002. 74(3): p. 381-395.
+
+21.   Tatsumi, T., et al., Mechanism of radical control in capacitive RF plasma for ULSI
+
+      processing. Japanese journal of applied physics, 1998. 37(4S): p. 2394. 28.
+
+      Morishita, S., et al., Plasma-wall interactions in dual frequency narrow-gap reactive
+
+      ion etching system. Japanese journal of applied physics, 1998. 37(12S): p. 6899.
+
+22.   Hayashi, H., et al., Mechanism of C4F8 dissociation in parallel-plate-type plasma.
+
+      Journal of Vacuum Science & Technology A: Vacuum, Surfaces, and Films, 1999.
+
+      17(5): p. 2557-2571.
+
+23.   Matsui, M., T. Tatsumi, and M. Sekine, Observation of surface reaction layers
+
+      formed in highly selective SiO2 etching. Journal of Vacuum Science & Technology
+
+      A: Vacuum, Surfaces, and Films, 2001. 19(4): p. 1282-1288.
+
+24.   Matsui, M., T. Tatsumi, and M. Sekine, Relationship of etch reaction and reactive
+
+25.   124 species flux in C4F8/Ar/O2 plasma for SiO2 selective etching over Si and
+
+      Si3N4. Journal of Vacuum Science & Technology A: Vacuum, Surfaces, and Films,
+
+      2001. 19(5): p. 2089-2096.
+
+26.   Hayashi, S., et al., Studies of CF2 radical and O atom in oxygen/fluorocarbon
+
+      plasmas by laser-induced fluorescence. Science and Technology of Advanced
+
+      Materials, 2001. 2(3-4): p. 555-561.
+
+
+
+                                        - 86 -
+27.   Standaert, T. E. F. M., Schaepkens, M., Rueger, N. R., Sebel, P. G. M., Oehrlein, G.
+
+      S., & Cook, J. M. (1998). High density fluorocarbon etching of silicon in an
+
+      inductively coupled plasma: Mechanism of etching through a thick steady state
+
+      fluorocarbon layer. Journal of Vacuum Science & Technology A: Vacuum, Surfaces,
+
+      and Films, 16(1), 239-249.
+
+28.   Sung, D., Wen, L., Tak, H., Lee, H., Kim, D., & Yeom, G. (2022). Investigation of
+
+      SiO2 etch characteristics by C6F6/Ar/O2 plasmas generated using inductively
+
+      coupled plasma and capacitively coupled plasma. Materials, 15(4), 1300.
+
+29.   Ishikawa, K., et al., Progress in nanoscale dry processes for fabrication of high
+
+      aspect-ratio features: How can we control critical dimension uniformity at the
+
+      bottom? Japanese Journal of Applied Physics, 2018. 57(6S2): p. 06JA01.
+
+30.   Abe, H., M. Yoneda, and N. Fujiwara, Developments of plasma etching technology
+
+      for fabricating semiconductor devices. Japanese Journal of Applied Physics,
+
+      2008.47(3R): p. 1435.
+
+31.   Izawa, M., et al., Investigation of bowing reduction in SiO2 etching taking into
+
+      account radical sticking in a hole. Japanese Journal of Applied Physics, 2007.
+
+      46(12R): p. 7870.
+
+32.   Miyake, M., et al., Effects of mask and necking deformation on bowing and
+
+      twisting in high-aspect-ratio contact hole etching. Japanese Journal of Applied
+
+      Physics, 2009. 48(8S1): p. 08HE01.
+
+
+
+                                       - 87 -
+33.   Huang, S., et al., Plasma etching of high aspect ratio features in SiO2 using 125
+
+      Ar/C4F8/O2 mixtures: A computational investigation. Journal of Vacuum Science
+
+      & Technology A: Vacuum, Surfaces, and Films, 2019. 37(3): p. 031304.
+
+34.   Lee, H.S., et al., SiO2 etch characteristics and environmental impact of Ar/C3F6O
+
+      chemistry. Journal of Vacuum Science & Technology A: Vacuum, Surfaces, and
+
+      Films, 2018. 36(6): p. 061306.
+
+35.   Tatsumi, T., et al., Etch rate control in a 27 MHz reactive ion etching system for
+
+      ultralarge scale integrated circuit processing. Journal of Vacuum Science &
+
+      Technology A: Vacuum, Surfaces, and Films, 1999. 17(4): p. 1562-1569.
+
+36.   Han, J.S., J.P. McVittie, and J. Zheng, Profile modeling of high density plasma
+
+      oxide etching. Journal of Vacuum Science & Technology B: Microelectronics and
+
+      Nanometer Structures Processing, Measurement, and Phenomena, 1995. 13(4): p.
+
+      1893-1899.
+
+37.   Masayuki Nakamura; Masaru Hori; Toshio Goto; Masafumi Ito; Nobuo Ishii.,
+
+      Spatial distributions of the absolute CF and radical densities in high-density plasma
+
+      employing low global warming potential fluorocarbon gases and precursors for
+
+      film formation, J. Vac. Sci. Technol. A 19, 2134–2141 (2001)
+
+38.   Smith, E.P.G.; Gleason, J.K.; Pham, L.T.; Patten, E.A.; Welkowsky, M.S.
+
+      Inductively coupled plasma etching of HgCdTe. J. Electron. Mate, 2003, 32, 816-
+
+      820.
+
+
+
+                                        - 88 -
+39.   Ravishankara, A.R.; Solomon, S.; Turnipseed, A.A.; Warren, R.F. Atmospheric
+
+      lifetimes of long-lived halogenated species. Science, 1993, 259(5092), 194-199.
+
+40.   Hody, H.; Paraschiv, V.; Vecchio, E.; Locorotondo, S.; Winroth, G.; Athimulam, R.;
+
+      Boullart, W. Double patterning with dual hard mask for 28-nm node devices and
+
+      below. Journal of Micro/Nanolithography, MEMS, and MOEMS, 2013, 12(4),
+
+      041606.
+
+41.   Chen, Y.; Cheng, Q.; Kang. Technological merits, process complexity, and cost
+
+      analysis of self-aligned multiple patterning. In Optical Microlithography XXV,
+
+      International Society for Optics and Photonics, 2012, 8326, 532620.
+
+42.   Yaegashi, H.; Oyama, K.; Yabe, K.; Yamauchi, S.; Hara, A.; Natori, S. Novel
+
+      approaches to implement the self-aligned spacer double-patterning process toward
+
+      11-nm node and beyond. In Advances in Resist Materials and Processing
+
+      Technology XXVIII. International Society for Optics and Photonics, 2011, 7972-
+
+      79720.
+
+43.   Jung, K.; Ro, D.; Park, Y.K. Estimation, and Framework Proposal of Greenhouse
+
+      Gas Emissions of Fluorinated Substitutes for Ozone-Depleting Substances by
+
+      Application Area in the Republic of Korea. Sustainability, 2020, 12(16), 6355.
+
+44.   Mogab, C.J.; Adams, A.C.; Flamm, D.L. Plasma etching of Si and SiO2—The
+
+      effect of oxygen additions to CF4 Plasmas. J. Appl. Phys. 1978, 49, 3796–3803.
+
+45.   Lee, J.; Kim, J.; Efremov, A.; Kim, C.; Lee, H.W.; Kwon, K.-H. Etching
+
+
+
+                                      - 89 -
+      mechanisms and surface conditions for SiOxNy thin films in CF4 + CHF3 + O2
+
+      inductively coupled plasma. Plasma Chem. Plasma Process. 2019, 39, 1127–1144.
+
+46.   Wakabayashi, M. Voluntary business activities to mitigate climate change: Case
+
+      studies in Japan. Energ. Policy, 2013, 63, 1086-1090.
+
+47.   Krishnan, N.; Smati, R.; Raoux, S.; Dornfeld, D. Alternatives to reduce
+
+      perfluorinated compound (PFC) emissions from semiconductor dielectric etch
+
+      processes: meeting environmental commitments while minimizing costs. Conf.
+
+      IEEE International Symposium on Electronics and the Environment, 2003, 19-24.
+
+48.   Mocella, M. PFC emission control options for plasma processing tools: A current
+
+      assessment. MRS Online Proceedings Library Archive, 1996, 447.
+
+49.   Yu, S.J.; Chang, M.B. Oxidative conversion of PFC via plasma processing with
+
+      dielectric barrier discharges. Plasma. Chem. Plasma, 2001, 21, 311-327.
+
+50.   Beppu, T.; Mitsui, Y.; Sakai, K.; Sekiya. A. New alternative gas process feasibility
+
+      study for PFC emission reduction from semiconductor CVD chamber cleaning.
+
+      Proc. Greenhouse Gas Control Technologies-6th International Conference, 2002, 2,
+
+      1269-1274.
+
+51.   Li, Y.E.D.; Paganessi, J.E.; Rufin, D. Emission reduction of perfluorocompounds
+
+      in semiconductor manufacturers via capture and recycle. Green Engineering, 2000,
+
+      6, 62-75.
+
+52.   Tsai, W.T.; Chen, H.P.; Hsien, W.Y. A review of uses environmental hazards and
+
+
+
+                                       - 90 -
+      recovery/recycle technologies of perfluorocarbons (PFCs) emissions from the
+
+      semiconductor manufacturing processes. J. Low. Prevent. Proc, 2002, 15, 65-75.
+
+53.   Ø. Hodnebrog, M.; Etminan, J.S.; Fuglestvedt, G.; Marston, G.; Myhre, C.J.;
+
+      Nielsen, K.P.; Shine, T.J.; Wallington. Global warming potentials and radiative
+
+      efficiencies of halocarbons and related compounds: A comprehensive review. Rev.
+
+      Geophys, 2013, 51, 300-378.
+
+54.   Xiang, W.H. Vapor pressures, critical parameters, boiling points, and triple points
+
+      of halomethane molecular substances. J. Phys. Chem. Ref. Data, 2001, 30, 1161-
+
+      1197.
+
+55.   Johnson, E.O.; Malter, L. A floating double probe method for measurements in gas
+
+      discharges. Phys. Rev. 1950, 80, 58–70.
+
+56.   Li, X., Hua, X., Ling, L., Oehrlein, G. S., Barela, M., & Anderson, H. M. (2002).
+
+      Fluorocarbon-based plasma etching of SiO 2: Comparison of C 4 F 6/Ar and C 4 F
+
+      8/Ar discharges. Journal of Vacuum Science & Technology A: Vacuum, Surfaces,
+
+      and Films, 20(6), 2052-2061.
+
+57.   Watanabe, H., Tokimitsu, T., Shiga, J., Haneji, N., & Shimogaki, Y. (2006).
+
+      Preparation of amorphous fluorinated carbon film using low global-warming
+
+      potential gas, C4F6, by plasma enhanced chemical vapor deposition. Japanese
+
+      journal of applied physics, 45(2L), L151.
+
+58.   Watanabe, H., & Shimogaki, Y. (2006). Source gas dependency of amorphous
+
+
+
+                                       - 91 -
+      fluorinated carbon film properties prepared by plasma enhanced chemical vapor
+
+      deposition using C4F8, C4F6, and C5F8 gases. Japanese journal of applied physics,
+
+      45(5L), L463.
+
+59.   N.Lim,Y.S.Choi,A.Efremov,K.‐
+
+      H.Kwon,Materials2021,14,1595.https://doi.org/10.3390/ma14071595
+
+60.   Lee, J., Efremov, A., Yeom, G. Y., Lim, N., & Kwon, K. H. (2015). Application of
+
+      Si and SiO2 etching mechanisms in CF4/C4F8/Ar inductively coupled plasmas for
+
+      nanoscale patterns. Journal of nanoscience and nanotechnology, 15(10), 8340-8347.
+
+61.   Lee, J., Nam, Y., Lee, J., Lee, H. W., & Kwon, K. H. (2020). Etching characteristics
+
+      of thin SiON films using a liquefied perfluorocarbon precursor of C 6 F 12 O with
+
+      a low global warming potential. Plasma Science and Technology, 22(10), 105505.
+
+62.   Qin, L.; Han, J.; Wang, G.; Kim, H.J.; Kawaguchi. I. Highly efficient
+
+      decomposition of CF4 gases by combustion. Conf. Conference on Environmental
+
+      Pollution and Public Health, 2010, 126-130.
+
+63.   Lee, J.; Efremov, A.; Kwon, K.-H. On the relationships between plasma chemistry,
+
+      etching kinetics and etching residues in CF4+C4F8+Ar and CF4+CH2F2+ Ar
+
+      plasmas with various CF4/C4F8 and CF4/CH2F2 mixing ratios. Vacuum 2018, 148,
+
+      214–223.
+
+64.   Gray, D.C.; Tepermeister, I.; Sawin, H.H. Phenomenological modeling of ion-
+
+      enhanced surface kinetics in fluorine-based plasma etching. J. Vac. Sci. Technol. B
+
+
+
+                                       - 92 -
+      1993, 11, 1243–1257.
+
+65.   Lee, J., Lee, H. W., & Kwon, K. H. (2021). Sidewall chemical analysis of plasma-
+
+      etched nano-patterns using tilted X-ray photoelectron spectroscopy combined with
+
+      in-situ ion sputtering. Applied Surface Science, 545, 148907.
+
+66.   Kwon, B. S., Kim, J. S., Lee, N. E., & Shon, J. W. (2010). Ultrahigh selective
+
+      etching of SiO2 using an amorphous carbon mask in dual-frequency capacitively
+
+      coupled C4F8/CH2F2/O2/Ar plasmas. Journal of The Electrochemical Society,
+
+      157(3), D135.
+
+67.   Standaert, T. E. F. M., Hedlund, C., Joseph, E. A., Oehrlein, G. S., & Dalton, T. J.
+
+      (2004). Role of fluorocarbon film formation in the etching of silicon, silicon
+
+      dioxide, silicon nitride, and amorphous hydrogenated silicon carbide. Journal of
+
+      Vacuum Science & Technology A: Vacuum, Surfaces, and Films, 22(1), 53-60.
+
+68.   Standaert, T. E. F. M., Schaepkens, M., Rueger, N. R., Sebel, P. G. M., Oehrlein, G.
+
+      S., & Cook, J. M. (1998). High density fluorocarbon etching of silicon in an
+
+      inductively coupled plasma: Mechanism of etching through a thick steady state
+
+      fluorocarbon layer. Journal of Vacuum Science & Technology A: Vacuum, Surfaces,
+
+      and Films, 16(1), 239-249.
+
+69.   Lee, J.; Efremov, A.; Yeom, G.Y.; Lim, N.; Kwon, K.-H. Application of Si and SiO2
+
+      etching mechanisms in CF4/C4F8/Ar inductively coupled plasmas for nanoscale
+
+      patterns. J. Nanosci. Nanotechno. 2015, 15, 8340–8347.
+
+
+
+                                       - 93 -
+70.   Oh, Y., Efremov, A., Lee, J., Lee, J., Choi, Y., & Kwon, K. H. (2022). Etching
+
+      kinetics and dielectric properties of SiOC films exposed to Ar and CF4 plasmas.
+
+      Thin Solid Films, 749, 139185.
+
+71.   Gupta, D., Choi, H., Kwon, D. C., Yoon, J. S., & Song, M. Y. (2018). Electron
+
+      induced ionization of plasma processing gases: C4Fx (x= 1–8) and the isomers of
+
+      C4F6 and C4F8. Journal of Physics D: Applied Physics, 51(15), 155203.
+
+72.   Nishimura, H. H. W. M., Huo, W. M., Ali, M. A., & Kim, Y. K. (1999). Electron-
+
+      impact total ionization cross sections of CF 4, C 2 F 6, and C 3 F 8. The Journal of
+
+      chemical physics, 110(8), 3811-3822.
+
+73.   Phelps, A. V. (1994). The application of scattering cross sections to ion flux models
+
+      in discharge sheaths. Journal of applied physics, 76(2), 747-753.
+
+74.   Lim, N., Choi, Y. S., Efremov, A., & Kwon, K. H. (2021). Dry etching performance
+
+      and gas-phase parameters of C6F12O+ Ar plasma in comparison with CF4+ Ar.
+
+      Materials, 14(7), 1595.
+
+75.   Lee, J.; Kim, C.; Lee, H.W.; Kwon, K.-H. Sidewall chemistry of nano-contact
+
+      patterns in C4F8+CH2F2+O2+ Ar inductively coupled plasmas. Thin. Solid. Films,
+
+      2019, 669, 227-234.
+
+76.   Kamble, M.M.; Waman, V.S.; Mayabadi, A.H.; Ghosh, S.S.; Gabhale, B.B.;
+
+      Rondiya, S.R.; Rokade, A.V. .; Khadtare, S.S.; Sathe, V.G.; Shripathi, T.; Pathan,
+
+      H.M.; Gosavi, S.W.; Jadkar, S.R. Hydrogenated silicon carbide thin films prepared
+
+
+
+                                        - 94 -
+      with high deposition rate by hot wire chemical vapor deposition method. J. Coat,
+
+      2014, 2014.
+
+77.   Kwon, B. S., Lee, H. L., Lee, N. E., Kim, C. Y., & Choi, C. K. (2013). Effects of
+
+      gas flow rate on the etch characteristics of a low-k sicoh film with an amorphous
+
+      carbon mask in dual-frequency CF 4/C 4 F 8/Ar capacitively-coupled plasmas.
+
+      Journal of the Korean Physical Society, 62, 67-72.
+
+78.   Hayashi, H., Kurihara, K. K. K., & Sekine, M. S. M. (1996). Characterization of
+
+      highly selective SiO2/Si3N4 etching of high-aspect-ratio holes. Japanese journal of
+
+      applied physics, 35(4S), 2488.
+
+79.   Rueger, N. R., Beulens, J. J., Schaepkens, M., Doemling, M. F., Mirza, J. M.,
+
+      Standaert, T. E. F. M., & Oehrlein, G. S. (1997). Role of steady state fluorocarbon
+
+      films in the etching of silicon dioxide using CHF3 in an inductively coupled plasma
+
+      reactor. Journal of Vacuum Science & Technology A: Vacuum, Surfaces, and Films,
+
+      15(4), 1881-1889.
+
+80.   Lee, J.; Efremov, A.; Lee, J.; Yeom, G.Y.; Kwon, K.-H. Silicon surface modification
+
+      using C4F8+ O2 plasma for nano-imprint lithography. J. Nanosci. Nanotechno,
+
+      2015, 15, 8749-8755.
+
+81.   Vandencasteele,     N.;   Reniers,   F.   Plasma-modified     polymer     surfaces:
+
+      Characterization using XPS. J. Electron. Spectrosc, 2010, 178, 394-408.
+
+82.   Mazov, I.; Krasnikov, D.; Stadnichenko, A.; Kuznetsov, V.; Romanenko, A.;
+
+
+
+                                       - 95 -
+      Anikeeva, O.; Tkachev, E.; Direct vapor-phase bromination of multiwall carbon
+
+      nanotubes. J. Nanotech, 2012, 2012.
+
+83.   Lee, J.; Kim, J.; Lee, J.; Lee, H.W.; Kwon, K.-H. Plasma Etching of SiON Films
+
+      Using Liquefied C7F14 Gas as Perfluorocarbon Alternative. Sci. Adv. Mater, 2020,
+
+      12, 641-646.
+
+84.   Lim, N.; Efremov, A.; Kwon, K.-H. “Gas-phase chemistry and etching mechanism
+
+      of SiNx thin films in C4F8+Ar inductively coupled plasma. Thin. Solid. Films,
+
+      2019, 685, 97-107.
+
+85.   Samukawa, S., Noguchi, K., Colonell, J. I., Bogart, K. H., Malyshev, M. V., &
+
+      Donnelly, V. M. (2000). Reduction of plasma induced damage in an inductively
+
+      coupled plasma using pulsed source power. Journal of Vacuum Science &
+
+      Technology B: Microelectronics          and   Nanometer     Structures    Processing,
+
+      Measurement, and Phenomena, 18(2), 834-840.
+
+86.   Min, J. H., Lee, G. R., Lee, J. K., Moon, S. H., & Kim, C. K. (2004). Dependences
+
+      of bottom and sidewall etch rates on bias voltage and source power during the
+
+      etching of poly-Si and fluorocarbon polymer using SF 6, C 4 F 8, and O 2 plasmas.
+
+      Journal of Vacuum Science & Technology B: Microelectronics and Nanometer
+
+      Structures Processing, Measurement, and Phenomena, 22(3), 893-901.
+
+87.   Tepermeister, I., Blayo, N., Klemens, F. P., Ibbotson, D. E., Gottscho, R. A., Lee, J.
+
+      T. C., & Sawin, H. H. (1994). Comparison of advanced plasma sources for etching
+
+
+
+                                        - 96 -
+      applications. I. Etching rate, uniformity, and profile control in a helicon and a
+
+      multiple electron cyclotron resonance source. Journal of Vacuum Science &
+
+      Technology B: Microelectronics and           Nanometer    Structures   Processing,
+
+      Measurement, and Phenomena, 12(4), 2310-2321.
+
+88.   Lieberman, M.A.; Lichtenberg, A.J. Principles of Plasma Discharges and Materials
+
+      Processing; John Wiley & Sons Inc: New York, NY, USA, 1994.
+
+89.   Winters, H.F.; Coburn, J.W.; Chuang, T.J. Surface processes in plasma-assisted
+
+      etching environments. J. Vac. Sci. Technol. B 1983, 1, 469–480.
+
+90.   Coburn, J.W. Plasma Etching and Reactive Ion Etching, AVS Monograph Series;
+
+      American Vacuum Society, American Institute of Physics: New York, NY, USA,
+
+      1982.
+
+91.   Roosmalen, A.J.; Baggerman, J.A.G.; Brader, S.J.H. Dry Etching For VLSI;
+
+      Plenum Press.; Springer Science & Business Media: NewYork, NY, USA, 1991.
+
+92.   Vitale, S.A.; Chae, H.; Sawin, H.H. Silicon etching yields in F2, Cl2, Br2, and HBr
+
+      high density plasmas. J. Vac. Sci. Technol. A 2001, 19, 2197–2206.
+
+93.   Oliver, B. M., Clements, R. M., & Smy, P. R. (1970). Radio‐Frequency Floating
+
+      Double Probe as a Plasma Diagnostic. Journal of Applied Physics, 41(5), 2117-
+
+      2122.
+
+94.   Kostyukova, Y. S., & Nekrasov, F. M. (1970). Effect of a high-frequency electric
+
+      field on the development of ion-acoustic instability in a current-carrying plasma.
+
+
+
+                                       - 97 -
+       Nuclear Fusion, 10(3), 277.
+
+ 95.   Tonks, L. (1931). The high frequency behavior of a plasma. Physical Review,
+
+       37(11), 1458.
+
+ 96.   Oliver, B. M., & Clements, R. M. (1973). Resonance behavior of the ion‐sheath
+
+       capacitance near the plasma ion frequency. Journal of Applied Physics, 44(3), 1128-
+
+       1132.
+
+ 97.   Yun, S., Taylor, K., & Tynan, G. R. (2000). Measurement of radial neutral pressure
+
+       and plasma density profiles in various plasma conditions in large-area high-density
+
+       plasma sources. Physics of Plasmas, 7(8), 3448-3456.
+
+ 98.   Popov, O. A. (1996). High density plasma sources: design, physics and
+
+       performance. Elsevier.
+
+ 99.   Kim, H., Lee, W., Park, W., & Whang, K. W. (2013). Effect of bias application to
+
+       plasma density in weakly magnetized inductively coupled plasma. Journal of
+
+       Vacuum Science & Technology A, 31(4).
+
+100.   Kim, J., Choi, G., & Kwon, K. H. (2023). High‐aspect‐ratio oxide etching using
+
+       CF4/C6F12O plasma in an inductively coupled plasma etching system with low‐
+
+       frequency bias power. Plasma Processes and Polymers, 20(3), 2200167.
+
+101.   Siu, S., Patrick, R., Vahedi, V., Alba, S., Valentini, G., & Colombo, P. (1999, May).
+
+       Effect of plasma density and uniformity, electron temperature, process gas, and
+
+       chamber on electron shading damage. In 1999 4th International Symposium on
+
+
+
+                                         - 98 -
+       Plasma Process-Induced Damage (IEEE Cat. No. 99TH8395) (pp. 25-28). IEEE.
+
+102.   Tepermeister, I., Ibbotson, D. E., Lee, J. T. C., & Sawin, H. H. (1994). Comparison
+
+       of advanced plasma sources for etching applications. II. Langmuir probe studies of
+
+       a helicon and a multipole electron cyclotron resonance source. Journal of Vacuum
+
+       Science & Technology B: Microelectronics and Nanometer Structures Processing,
+
+       Measurement, and Phenomena, 12(4), 2322-2332.
+
+103.   Kwon, B. S., Kim, J. S., Lee, N. E., Lee, S. K., & Park, S. W. (2011). Etching
+
+       Characteristics of ArF and EUV Resists in C4F6-and C4F8-based Dual-frequency
+
+       Superimposed Capacitively-coupled Plasmas. Journal of the Korean Physical
+
+       Society, 58(6), 1622-1627.
+
+104.   Kwon, H., You, S., Kim, J. H., & Kim, C. K. (2021). Optical and Electrical
+
+       Characteristics of Fluorocarbon Films Deposited in a High-Density C 4 F 8 Plasma.
+
+       Korean Chemical Engineering Research, 59(2), 254-259.
+
+105.   Kimura, T., & Hanaki, K. (2009). Comparison of plasma parameters measured in
+
+       inductively coupled Ar/C4F8/O2 and Ar/CF4/O2 plasmas. Japanese Journal of
+
+       Applied Physics, 48(9R), 096004.
+
+106.   Lee, H. C., Lee, M. H., & Chung, C. W. (2010). Effects of rf-bias power on plasma
+
+       parameters in a low gas pressure inductively coupled plasma. Applied Physics
+
+       Letters, 96(7).
+
+107.   Lee, H. C., & Chung, C. W. (2012). Collisionless electron heating by radio
+
+
+
+                                        - 99 -
+       frequency bias in low gas pressure inductive discharge. Applied Physics Letters,
+
+       101(24).
+
+108.   Matsuda, A., Nakakubo, Y., Takao, Y., Eriguchi, K., & Ono, K. (2013, May).
+
+       Atomistic simulations of plasma process-induced Si substrate damage-Effects of
+
+       substrate bias-power frequency. In Proceedings of 2013 International Conference
+
+       on IC Design & Technology (ICICDT) (pp. 191-194). IEEE.
+
+109.   Tan, S., Boudreau, R., & Reed, M. L. (2003). Effects of mask misalignment and
+
+       wafer misorientation on silicon V-groove etching. Sensors and materials, 15(2),
+
+       101-112.
+
+110.   Yang, L., Li, R., Hsu, I., Zhang, H., Ren, J., Zhou, W., ... & Brozek, T. (2022).
+
+       Application of e-beam voltage contrast technique for overlay improvement and
+
+       process window control in multi-patterning interconnect scheme. IEEE Journal of
+
+       the Electron Devices Society, 10, 870-875.
+
+111.   Jennings, C., Nguyen, P., Biltek, S., & Stafford, N. (2023, May). Advances in low
+
+       GWP etch gasses. In Advanced Etch Technology and Process Integration for
+
+       Nanopatterning XII (Vol. 12499, pp. 116-120). SPIE.
+
+
+
+
+                                      - 100 -
+

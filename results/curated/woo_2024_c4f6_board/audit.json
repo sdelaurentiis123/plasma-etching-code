@@ -1,0 +1,41 @@
+{
+  "schema": "petch.woo-2024-c4f6-board.v1",
+  "audit_id": "WOO-2024-C4F6-REACTOR-PROFILE-2026-08-06-R1",
+  "source_pdf_sha256": "16bdf4843d0218fe6801ed418fcdd342ef2f825d29a7074d0a1e334b77229523",
+  "figure4_1_render_sha256": "7b35d03cdd9edd15eacbce1bdac74b469c9756ce35c18fbc5c956493ef5f09a7",
+  "quantitative_rate_points": 10,
+  "pixel_text_reconciliation": {
+    "limit_nm_min": 0.2,
+    "maximum_abs_difference_nm_min": 0.1258085776306359,
+    "passed": true
+  },
+  "source_internal_consistency": {
+    "ion_current_printed_percent_increase": 21.0,
+    "ion_current_arithmetic_percent_increase": 212.79761904761907,
+    "ion_current_percentage_consistent": false,
+    "power_sweep_nominal_fraction_percent": 56.25,
+    "power_sweep_fraction_from_printed_flows_percent": 62.5,
+    "power_sweep_fraction_consistent": false
+  },
+  "feature_depth_classification": {
+    "reported_depth_range_nm": [
+      2100.0,
+      2200.0
+    ],
+    "exposure_time_adjusted_to_equalize_depth": true,
+    "value_blind_held_out_depth": false,
+    "may_calibrate_simulation_time_from_depth": false,
+    "formal_absolute_feature_depth_pass": false
+  },
+  "boundary_identifiability": {
+    "aggregate_ion_current_density_measured": true,
+    "electron_temperature_measured": true,
+    "self_bias_measured": true,
+    "species_resolved_ion_flux_measured": false,
+    "iead_measured": false,
+    "absolute_neutral_flux_measured": false,
+    "oes_is_absolute_flux": false,
+    "knobs_to_feature_depth_identified": false
+  },
+  "verdict": "Strong same-reactor C4F6 multi-observable board and an original-pixel absolute patterned-rate dataset. It is not a blind depth validation: the SEM times were selected to equalize depth, the kinetic boundary remains aggregate, and two printed condition/arithmetic inconsistencies must be resolved before a reactor model can receive a formal pass."
+}
