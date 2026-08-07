@@ -1,0 +1,388 @@
+{
+  "schema": "petch.value-blind-validation-preregistration.v1",
+  "protocol": {
+    "protocol_id": "depth-cross-chemistry-v1",
+    "revision": "R1",
+    "intended_use": "Predict absolute fixed-duration feature depth without fitting a feature endpoint; separately grade surface-law transfer, reactor-boundary evidence, and feature transport across fluorocarbon oxide, cyclic SF6/C4F8 silicon, and chlorine silicon.",
+    "maximum_calibrated_parameters": 3,
+    "mechanism_id": "species-energy-angle-resolved-atom-ledger-v1",
+    "boundary_provider_id": "evidence-tiered-wafer-boundary-v1",
+    "minimum_held_out_chemistry_families": 3
+  },
+  "parameters": [
+    {
+      "name": "cyclic_sf6_boundary_flux_normalization",
+      "role": "reactor_boundary",
+      "unit": "1",
+      "lower": 0.1,
+      "upper": 10.0,
+      "source": "Yoshie et al. 2023 Figure 4 blanket poly-Si rates in the same reactor; facility-conditioned mode only",
+      "calibration_allowed": true,
+      "supports_prediction": true
+    },
+    {
+      "name": "chlorine_dissociative_sticking_probability",
+      "role": "physical_mechanism",
+      "unit": "1",
+      "lower": 0.01,
+      "upper": 1.0,
+      "source": "Chang 1998 and Levinson et al. 1997 controlled Ar+/Cl and Ar+/Cl2 beam yield curves",
+      "calibration_allowed": true,
+      "supports_prediction": true
+    },
+    {
+      "name": "chlorine_atoms_removed_per_si",
+      "role": "physical_mechanism",
+      "unit": "Cl_atom_per_Si_atom",
+      "lower": 1.0,
+      "upper": 4.0,
+      "source": "Levinson et al. 1997 coverage/site-balance regression, constrained by volatile SiClx stoichiometry",
+      "calibration_allowed": true,
+      "supports_prediction": true
+    },
+    {
+      "name": "feature_grid_spacing",
+      "role": "numerical_control",
+      "unit": "nm",
+      "lower": 0.25,
+      "upper": 10.0,
+      "source": "declared convergence ladder, never experimental calibration",
+      "calibration_allowed": false,
+      "supports_prediction": true
+    },
+    {
+      "name": "transport_sample_count",
+      "role": "numerical_control",
+      "unit": "count",
+      "lower": 1024,
+      "upper": 1048576,
+      "source": "declared Monte Carlo convergence ladder, never experimental calibration",
+      "calibration_allowed": false,
+      "supports_prediction": true
+    }
+  ],
+  "target_sets": [
+    {
+      "kind": "rows",
+      "common": {
+        "chemistry_family": "fluorocarbon_oxide",
+        "material": "SiO2",
+        "observable": "removed_formula_units_per_incident_ion",
+        "unit": "SiO2_per_ion",
+        "split": "calibration",
+        "boundary_evidence_tier": "A_species_energy_angle_measured",
+        "source": "Karahashi 2007 Figure 4 mass-selected reactive-ion beam yields",
+        "source_locator": "research_sources/karahashi_2007_hyomen_kagaku_28_60.pdf#page=4&figure=4",
+        "source_sha256": "093b18b91b0a6d910fc414779ee8320b7a046ac4cad38ef5de0b7f2dd25a2d79"
+      },
+      "rows": [
+        {
+          "observation_id": "karahashi_f_1000eV",
+          "condition_id": "F+_1000eV_normal"
+        },
+        {
+          "observation_id": "karahashi_cf_1000eV",
+          "condition_id": "CF+_1000eV_normal"
+        },
+        {
+          "observation_id": "karahashi_cf2_1000eV",
+          "condition_id": "CF2+_1000eV_normal"
+        },
+        {
+          "observation_id": "karahashi_cf3_1000eV",
+          "condition_id": "CF3+_1000eV_normal"
+        }
+      ]
+    },
+    {
+      "kind": "rows",
+      "common": {
+        "chemistry_family": "fluorocarbon_oxide",
+        "material": "SiO2",
+        "observable": "removed_formula_units_per_incident_ion",
+        "unit": "SiO2_per_Ar+",
+        "split": "calibration",
+        "boundary_evidence_tier": "A_species_energy_angle_measured",
+        "source": "Takada et al. 2005 Figure 3 mass-selected Ar+ plus stable C5F8 molecular beam",
+        "source_locator": "research_sources/takada_2005_radical_free_etching.pdf#page=3&figure=3",
+        "source_sha256": "9034f445f575b85c0b9c95d79b81699c42eafa47a347a7e73a6de73cbe222e25"
+      },
+      "rows": [
+        {
+          "observation_id": "takada_c5f8_ratio_0p25_400eV",
+          "condition_id": "Ar+_400eV_C5F8_per_ion_0p25"
+        },
+        {
+          "observation_id": "takada_c5f8_ratio_1_400eV",
+          "condition_id": "Ar+_400eV_C5F8_per_ion_1"
+        },
+        {
+          "observation_id": "takada_c5f8_ratio_10_400eV",
+          "condition_id": "Ar+_400eV_C5F8_per_ion_10"
+        }
+      ]
+    },
+    {
+      "kind": "rows",
+      "common": {
+        "chemistry_family": "fluorocarbon_oxide",
+        "material": "SiO2",
+        "observable": "etch_depth",
+        "unit": "nm",
+        "split": "held_out_transfer",
+        "boundary_evidence_tier": "C_underidentified",
+        "source": "Krueger et al. 2024 Table IV, 60 s C4F6/Ar/O2 base condition",
+        "source_locator": "JVSTA 42 043008 author manuscript#Table-IV",
+        "source_sha256": "65b7750b2b773c3725d8f09f778b5b728ce9974a4548a5d522d19256f6bf9a51"
+      },
+      "rows": [
+        {
+          "observation_id": "krueger_base_60s_depth",
+          "condition_id": "krueger_C4F6_Ar_O2_base_60s"
+        }
+      ]
+    },
+    {
+      "kind": "cartesian",
+      "common": {
+        "observation_id": "jeong_energy_w{width_nm}_bias{bias_v}",
+        "chemistry_family": "fluorocarbon_oxide",
+        "material": "SiO2",
+        "condition_id": "jeong_20min_energy_w{width_nm}_bias{bias_v}",
+        "observable": "etch_depth",
+        "unit": "nm",
+        "split": "held_out_transfer",
+        "boundary_evidence_tier": "C_underidentified",
+        "source": "Jeong et al. 2023 Figure 7 fixed 20 minute Ar/C4F8 etch",
+        "source_locator": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/cdcd/10222222/884a7130302a/materials-16-03820-g007.jpg#energy",
+        "source_sha256": "9c8acd0e9a7219ea5f99e097f7977fcb3ed490635fca3a0f9f69cb0a15a6508c"
+      },
+      "axes": {
+        "width_nm": [
+          60,
+          100,
+          200
+        ],
+        "bias_v": [
+          450,
+          1270
+        ]
+      }
+    },
+    {
+      "kind": "cartesian",
+      "common": {
+        "observation_id": "jeong_energy_w{width_nm}_bias890",
+        "chemistry_family": "fluorocarbon_oxide",
+        "material": "SiO2",
+        "condition_id": "jeong_20min_energy_w{width_nm}_bias890",
+        "observable": "etch_depth",
+        "unit": "nm",
+        "split": "held_out_transfer",
+        "boundary_evidence_tier": "C_underidentified",
+        "source": "Jeong et al. 2023 Figure 7 fixed 20 minute Ar/C4F8 etch",
+        "source_locator": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/cdcd/10222222/884a7130302a/materials-16-03820-g007.jpg#energy",
+        "source_sha256": "9c8acd0e9a7219ea5f99e097f7977fcb3ed490635fca3a0f9f69cb0a15a6508c"
+      },
+      "axes": {
+        "width_nm": [
+          60,
+          100
+        ]
+      }
+    },
+    {
+      "kind": "rows",
+      "common": {
+        "chemistry_family": "fluorocarbon_oxide",
+        "material": "SiO2",
+        "observable": "etch_depth",
+        "unit": "nm",
+        "split": "calibration",
+        "boundary_evidence_tier": "C_underidentified",
+        "source": "Jeong et al. 2023 Figure 7 fixed 20 minute Ar/C4F8 etch; historical magnitude anchor only",
+        "source_locator": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/cdcd/10222222/884a7130302a/materials-16-03820-g007.jpg#energy",
+        "source_sha256": "9c8acd0e9a7219ea5f99e097f7977fcb3ed490635fca3a0f9f69cb0a15a6508c"
+      },
+      "rows": [
+        {
+          "observation_id": "jeong_energy_w200_bias890_anchor",
+          "condition_id": "jeong_20min_energy_w200_bias890"
+        }
+      ]
+    },
+    {
+      "kind": "cartesian",
+      "common": {
+        "observation_id": "jeong_flux_w{width_nm}_ne{density_tag}",
+        "chemistry_family": "fluorocarbon_oxide",
+        "material": "SiO2",
+        "condition_id": "jeong_20min_flux_w{width_nm}_ne{density_tag}",
+        "observable": "etch_depth",
+        "unit": "nm",
+        "split": "held_out_transfer",
+        "boundary_evidence_tier": "C_underidentified",
+        "source": "Jeong et al. 2023 Figure 7 fixed 20 minute Ar/C4F8 etch",
+        "source_locator": "https://cdn.ncbi.nlm.nih.gov/pmc/blobs/cdcd/10222222/884a7130302a/materials-16-03820-g007.jpg#flux",
+        "source_sha256": "9c8acd0e9a7219ea5f99e097f7977fcb3ed490635fca3a0f9f69cb0a15a6508c"
+      },
+      "axes": {
+        "width_nm": [
+          60,
+          100,
+          200
+        ],
+        "density_tag": [
+          "1p1e15",
+          "1p9e15",
+          "3p1e15"
+        ]
+      }
+    },
+    {
+      "kind": "cartesian",
+      "common": {
+        "observation_id": "yoshie_blanket_4s_{timing}",
+        "chemistry_family": "cyclic_sf6_c4f8_silicon",
+        "material": "poly-Si",
+        "condition_id": "yoshie_4s_cycle_blanket_timing_{timing}",
+        "observable": "blanket_etch_rate_per_bias_time",
+        "unit": "nm_per_bias_min",
+        "split": "calibration",
+        "boundary_evidence_tier": "B_facility_conditioned",
+        "source": "Yoshie et al. 2023 Figure 4, 75 cycles/5 min, 0.25 s bias per cycle",
+        "source_locator": "https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr4_lrg.jpg#4s",
+        "source_sha256": "297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df"
+      },
+      "axes": {
+        "timing": [
+          "I",
+          "II",
+          "III"
+        ]
+      }
+    },
+    {
+      "kind": "cartesian",
+      "common": {
+        "observation_id": "yoshie_blanket_8s_{timing}",
+        "chemistry_family": "cyclic_sf6_c4f8_silicon",
+        "material": "poly-Si",
+        "condition_id": "yoshie_8s_cycle_blanket_timing_{timing}",
+        "observable": "blanket_etch_rate_per_bias_time",
+        "unit": "nm_per_bias_min",
+        "split": "calibration",
+        "boundary_evidence_tier": "B_facility_conditioned",
+        "source": "Yoshie et al. 2023 Figure 4, 75 cycles/10 min, 0.25 s bias per cycle",
+        "source_locator": "https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr4_lrg.jpg#8s",
+        "source_sha256": "297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df"
+      },
+      "axes": {
+        "timing": [
+          "I",
+          "II",
+          "III",
+          "IV"
+        ]
+      }
+    },
+    {
+      "kind": "cartesian",
+      "common": {
+        "observation_id": "yoshie_fig5_{timing}_w{width_nm}",
+        "chemistry_family": "cyclic_sf6_c4f8_silicon",
+        "material": "single-crystal Si",
+        "condition_id": "yoshie_4s_cycle_675cycles_timing_{timing}_w{width_nm}",
+        "observable": "etch_depth_derived_from_rate_times_168p75s_bias",
+        "unit": "nm",
+        "split": "held_out_transfer",
+        "boundary_evidence_tier": "B_facility_conditioned",
+        "source": "Yoshie et al. 2023 Figure 5, 675 cycles/45 min, 0.25 s bias per cycle",
+        "source_locator": "https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr5_lrg.jpg",
+        "source_sha256": "de722d00eadba115a690562b519387ea79e3a634f19a12f6252df168c6056aef"
+      },
+      "axes": {
+        "timing": [
+          "I",
+          "II",
+          "III"
+        ],
+        "width_nm": [
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140
+        ]
+      }
+    },
+    {
+      "kind": "cartesian",
+      "common": {
+        "observation_id": "yoshie_fig6_{timing}_w{width_nm}",
+        "chemistry_family": "cyclic_sf6_c4f8_silicon",
+        "material": "single-crystal Si",
+        "condition_id": "yoshie_8s_cycle_450cycles_timing_{timing}_w{width_nm}",
+        "observable": "etch_depth_derived_from_rate_times_112p5s_bias",
+        "unit": "nm",
+        "split": "held_out_transfer",
+        "boundary_evidence_tier": "B_facility_conditioned",
+        "source": "Yoshie et al. 2023 Figure 6, 450 cycles/60 min, 0.25 s bias per cycle",
+        "source_locator": "https://ars.els-cdn.com/content/image/1-s2.0-S0169433223016604-gr6_lrg.jpg",
+        "source_sha256": "202e04674548182e40d2be4c7677cb1b1124cd9056f87baa13a1525495a9f7fe"
+      },
+      "axes": {
+        "timing": [
+          "I",
+          "II",
+          "III",
+          "IV"
+        ],
+        "width_nm": [
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140
+        ]
+      }
+    },
+    {
+      "kind": "rows",
+      "common": {
+        "chemistry_family": "chlorine_silicon",
+        "material": "poly-Si",
+        "observable": "endpoint_center_depth",
+        "unit": "nm",
+        "split": "held_out_transfer",
+        "boundary_evidence_tier": "A_species_energy_angle_measured",
+        "source": "Chang 1998 controlled ion/neutral beam SEM profiles; geometry transfer only because exact exposure time is not printed",
+        "source_locator": "research_sources/chang_thesis.pdf#chapter=6",
+        "source_sha256": "ef5c511a7fd8e6d6a0bf721874e57ba18194184bf3db90457188ed42c4bd3b4b"
+      },
+      "rows": [
+        {
+          "observation_id": "chang_fig6p4_ar95_cl_preendpoint",
+          "condition_id": "Ar+_95eV_atomicCl_ratio100_unshadowed_preendpoint"
+        },
+        {
+          "observation_id": "chang_fig6p5_ar95_cl_15pct_overetch",
+          "condition_id": "Ar+_95eV_atomicCl_ratio100_unshadowed_15pct_overetch"
+        },
+        {
+          "observation_id": "chang_fig6p11_cl35_cl_preendpoint",
+          "condition_id": "Cl+_35eV_atomicCl_unshadowed_preendpoint"
+        },
+        {
+          "observation_id": "chang_fig6p12_cl35_cl_20pct_overetch",
+          "condition_id": "Cl+_35eV_atomicCl_unshadowed_20pct_overetch"
+        }
+      ]
+    }
+  ],
+  "expected_commit_sha256": "dec49c464af246b04f0168588dc436a76442e64c0294248b324ceb96cf9d0c62"
+}

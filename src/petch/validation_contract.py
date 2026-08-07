@@ -29,6 +29,11 @@ _OBSERVATION_SPLITS = frozenset({
     "calibration",
     "held_out_transfer",
 })
+_BOUNDARY_EVIDENCE_TIERS = frozenset({
+    "A_species_energy_angle_measured",
+    "B_facility_conditioned",
+    "C_underidentified",
+})
 
 
 def _is_sha256(value):
@@ -96,6 +101,10 @@ class ValidationObservation:
     source_sha256: str
     digitization_uncertainty: float = 0.0
     measurement_uncertainty: float | None = None
+    chemistry_family: str = ""
+    material: str = ""
+    source_locator: str = ""
+    boundary_evidence_tier: str = ""
 
     def __post_init__(self):
         if (
@@ -116,8 +125,187 @@ class ValidationObservation:
                     or self.measurement_uncertainty < 0.0
                 )
             )
+            or (
+                self.boundary_evidence_tier
+                and self.boundary_evidence_tier not in _BOUNDARY_EVIDENCE_TIERS
+            )
         ):
             raise ValueError("invalid validation observation")
+
+
+@dataclass(frozen=True)
+class ValidationTargetCommitment:
+    """A source panel and data role frozen before its numeric value is known."""
+
+    observation_id: str
+    chemistry_family: str
+    material: str
+    condition_id: str
+    observable: str
+    unit: str
+    split: str
+    boundary_evidence_tier: str
+    source: str
+    source_locator: str
+    source_sha256: str
+
+    def __post_init__(self):
+        if (
+            not str(self.observation_id).strip()
+            or not str(self.chemistry_family).strip()
+            or not str(self.material).strip()
+            or not str(self.condition_id).strip()
+            or not str(self.observable).strip()
+            or not str(self.unit).strip()
+            or self.split not in _OBSERVATION_SPLITS
+            or self.boundary_evidence_tier not in _BOUNDARY_EVIDENCE_TIERS
+            or not str(self.source).strip()
+            or not str(self.source_locator).strip()
+            or not _is_sha256(self.source_sha256)
+        ):
+            raise ValueError("invalid validation target commitment")
+
+
+@dataclass(frozen=True)
+class PreRegisteredValidationProtocol:
+    """A value-blind commitment to sources, splits, and admissible parameters.
+
+    This is deliberately separate from :class:`ValidationProtocol`.  A source
+    image, table, or text panel and its scientific role are committed here
+    before a digitizer reveals any numerical observations.
+    """
+
+    protocol_id: str
+    revision: str
+    intended_use: str
+    targets: tuple[ValidationTargetCommitment, ...]
+    parameters: tuple[ValidationParameter, ...]
+    maximum_calibrated_parameters: int
+    mechanism_id: str
+    boundary_provider_id: str
+    minimum_held_out_chemistry_families: int
+
+    def __post_init__(self):
+        targets = tuple(self.targets)
+        parameters = tuple(self.parameters)
+        calibratable = tuple(
+            item for item in parameters if item.calibration_allowed)
+        condition_splits = {}
+        for target in targets:
+            key = (target.chemistry_family, target.condition_id)
+            condition_splits.setdefault(key, set()).add(target.split)
+        held_out_families = {
+            item.chemistry_family
+            for item in targets
+            if item.split == "held_out_transfer"
+        }
+        if (
+            not str(self.protocol_id).strip()
+            or not str(self.revision).strip()
+            or not str(self.intended_use).strip()
+            or not targets
+            or any(
+                not isinstance(item, ValidationTargetCommitment)
+                for item in targets
+            )
+            or len({item.observation_id for item in targets}) != len(targets)
+            or not any(item.split == "calibration" for item in targets)
+            or not any(item.split == "held_out_transfer" for item in targets)
+            or any(len(splits) != 1 for splits in condition_splits.values())
+            or not parameters
+            or any(
+                not isinstance(item, ValidationParameter)
+                for item in parameters
+            )
+            or len({item.name for item in parameters}) != len(parameters)
+            or int(self.maximum_calibrated_parameters)
+            != self.maximum_calibrated_parameters
+            or self.maximum_calibrated_parameters < 0
+            or len(calibratable) > self.maximum_calibrated_parameters
+            or not str(self.mechanism_id).strip()
+            or not str(self.boundary_provider_id).strip()
+            or int(self.minimum_held_out_chemistry_families)
+            != self.minimum_held_out_chemistry_families
+            or self.minimum_held_out_chemistry_families < 1
+            or len(held_out_families)
+            < self.minimum_held_out_chemistry_families
+        ):
+            raise ValueError("invalid preregistered validation protocol")
+        object.__setattr__(self, "targets", targets)
+        object.__setattr__(self, "parameters", parameters)
+        object.__setattr__(
+            self,
+            "maximum_calibrated_parameters",
+            int(self.maximum_calibrated_parameters),
+        )
+        object.__setattr__(
+            self,
+            "minimum_held_out_chemistry_families",
+            int(self.minimum_held_out_chemistry_families),
+        )
+
+    @property
+    def commit_sha256(self):
+        return _digest({
+            "protocol_id": self.protocol_id,
+            "revision": self.revision,
+            "intended_use": self.intended_use,
+            "targets": [{
+                "observation_id": item.observation_id,
+                "chemistry_family": item.chemistry_family,
+                "material": item.material,
+                "condition_id": item.condition_id,
+                "observable": item.observable,
+                "unit": item.unit,
+                "split": item.split,
+                "boundary_evidence_tier": item.boundary_evidence_tier,
+                "source": item.source,
+                "source_locator": item.source_locator,
+                "source_sha256": item.source_sha256,
+            } for item in sorted(
+                self.targets, key=lambda value: value.observation_id)],
+            "parameters": [{
+                "name": item.name,
+                "role": item.role,
+                "unit": item.unit,
+                "lower": item.lower,
+                "upper": item.upper,
+                "source": item.source,
+                "calibration_allowed": item.calibration_allowed,
+                "supports_prediction": item.supports_prediction,
+            } for item in sorted(self.parameters, key=lambda value: value.name)],
+            "maximum_calibrated_parameters": self.maximum_calibrated_parameters,
+            "mechanism_id": self.mechanism_id,
+            "boundary_provider_id": self.boundary_provider_id,
+            "minimum_held_out_chemistry_families": (
+                self.minimum_held_out_chemistry_families),
+        })
+
+
+@dataclass(frozen=True)
+class ObservationValueReveal:
+    """A numerical value disclosed for one previously committed target."""
+
+    observation_id: str
+    value: float
+    digitization_uncertainty: float = 0.0
+    measurement_uncertainty: float | None = None
+
+    def __post_init__(self):
+        if (
+            not str(self.observation_id).strip()
+            or not np.isfinite(self.value)
+            or not np.isfinite(self.digitization_uncertainty)
+            or self.digitization_uncertainty < 0.0
+            or (
+                self.measurement_uncertainty is not None
+                and (
+                    not np.isfinite(self.measurement_uncertainty)
+                    or self.measurement_uncertainty < 0.0
+                )
+            )
+        ):
+            raise ValueError("invalid observation value reveal")
 
 
 @dataclass(frozen=True)
@@ -132,6 +320,7 @@ class ValidationProtocol:
     maximum_calibrated_parameters: int
     mechanism_id: str
     boundary_provider_id: str
+    preregistration_sha256: str | None = None
 
     def __post_init__(self):
         observations = tuple(self.observations)
@@ -164,6 +353,10 @@ class ValidationProtocol:
             or len(calibratable) > self.maximum_calibrated_parameters
             or not str(self.mechanism_id).strip()
             or not str(self.boundary_provider_id).strip()
+            or (
+                self.preregistration_sha256 is not None
+                and not _is_sha256(self.preregistration_sha256)
+            )
         ):
             raise ValueError("invalid validation protocol")
         object.__setattr__(self, "observations", observations)
@@ -194,7 +387,7 @@ class ValidationProtocol:
 
     @property
     def commit_sha256(self):
-        return _digest({
+        payload = {
             "protocol_id": self.protocol_id,
             "revision": self.revision,
             "intended_use": self.intended_use,
@@ -209,6 +402,17 @@ class ValidationProtocol:
                 "source_sha256": item.source_sha256,
                 "digitization_uncertainty": item.digitization_uncertainty,
                 "measurement_uncertainty": item.measurement_uncertainty,
+                **({
+                    "chemistry_family": item.chemistry_family,
+                    "material": item.material,
+                    "source_locator": item.source_locator,
+                    "boundary_evidence_tier": item.boundary_evidence_tier,
+                } if any((
+                    item.chemistry_family,
+                    item.material,
+                    item.source_locator,
+                    item.boundary_evidence_tier,
+                )) else {}),
             } for item in sorted(
                 self.observations, key=lambda value: value.observation_id)],
             "parameters": [{
@@ -224,7 +428,56 @@ class ValidationProtocol:
             "maximum_calibrated_parameters": self.maximum_calibrated_parameters,
             "mechanism_id": self.mechanism_id,
             "boundary_provider_id": self.boundary_provider_id,
-        })
+        }
+        if self.preregistration_sha256 is not None:
+            payload["preregistration_sha256"] = self.preregistration_sha256
+        return _digest(payload)
+
+
+def reveal_preregistered_observations(preregistration, reveals):
+    """Materialize every and only frozen target without changing its metadata."""
+    if not isinstance(preregistration, PreRegisteredValidationProtocol):
+        raise TypeError(
+            "observation reveal requires a PreRegisteredValidationProtocol")
+    reveals = tuple(reveals)
+    if any(not isinstance(item, ObservationValueReveal) for item in reveals):
+        raise TypeError("reveals must be ObservationValueReveal values")
+    by_id = {item.observation_id: item for item in reveals}
+    expected = {item.observation_id for item in preregistration.targets}
+    if len(by_id) != len(reveals) or set(by_id) != expected:
+        raise ValueError(
+            "observation reveal must cover every and only preregistered targets")
+    observations = []
+    for target in preregistration.targets:
+        reveal = by_id[target.observation_id]
+        observations.append(ValidationObservation(
+            observation_id=target.observation_id,
+            condition_id=target.condition_id,
+            observable=target.observable,
+            value=reveal.value,
+            unit=target.unit,
+            split=target.split,
+            source=target.source,
+            source_sha256=target.source_sha256,
+            digitization_uncertainty=reveal.digitization_uncertainty,
+            measurement_uncertainty=reveal.measurement_uncertainty,
+            chemistry_family=target.chemistry_family,
+            material=target.material,
+            source_locator=target.source_locator,
+            boundary_evidence_tier=target.boundary_evidence_tier,
+        ))
+    return ValidationProtocol(
+        protocol_id=preregistration.protocol_id,
+        revision=preregistration.revision,
+        intended_use=preregistration.intended_use,
+        observations=tuple(observations),
+        parameters=preregistration.parameters,
+        maximum_calibrated_parameters=(
+            preregistration.maximum_calibrated_parameters),
+        mechanism_id=preregistration.mechanism_id,
+        boundary_provider_id=preregistration.boundary_provider_id,
+        preregistration_sha256=preregistration.commit_sha256,
+    )
 
 
 @dataclass(frozen=True)

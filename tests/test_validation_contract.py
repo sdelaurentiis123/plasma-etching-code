@@ -3,9 +3,13 @@ import pytest
 from petch.validation_contract import (
     CalibrationReveal,
     HeldOutPrediction,
+    ObservationValueReveal,
+    PreRegisteredValidationProtocol,
     ValidationObservation,
     ValidationParameter,
     ValidationProtocol,
+    ValidationTargetCommitment,
+    reveal_preregistered_observations,
     score_held_out_predictions,
 )
 
@@ -94,6 +98,40 @@ def _prediction(
     )
 
 
+def _target(observation_id, split, chemistry_family, condition_id=None):
+    return ValidationTargetCommitment(
+        observation_id=observation_id,
+        chemistry_family=chemistry_family,
+        material="Si",
+        condition_id=condition_id or observation_id,
+        observable="etch_depth",
+        unit="um",
+        split=split,
+        boundary_evidence_tier="A_species_energy_angle_measured",
+        source="manufactured source panel",
+        source_locator=f"figure-1:{observation_id}",
+        source_sha256=SOURCE_SHA,
+    )
+
+
+def _preregistration():
+    return PreRegisteredValidationProtocol(
+        protocol_id="value-blind-cross-chemistry",
+        revision="R1",
+        intended_use="predict held-out depth in two chemistry families",
+        targets=(
+            _target("cal", "calibration", "chlorine"),
+            _target("held_cl", "held_out_transfer", "chlorine"),
+            _target("held_f", "held_out_transfer", "fluorine"),
+        ),
+        parameters=_protocol().parameters,
+        maximum_calibrated_parameters=1,
+        mechanism_id="species-resolved-mechanisms-v1",
+        boundary_provider_id="measured-beam-boundaries-v1",
+        minimum_held_out_chemistry_families=2,
+    )
+
+
 def test_numerical_controls_cannot_be_calibration_parameters():
     with pytest.raises(ValueError, match="validation parameter"):
         ValidationParameter(
@@ -105,6 +143,85 @@ def test_numerical_controls_cannot_be_calibration_parameters():
             source="solver control",
             calibration_allowed=True,
             supports_prediction=True,
+        )
+
+
+def test_value_blind_preregistration_freezes_sources_splits_and_chemistries():
+    preregistration = _preregistration()
+
+    assert len(preregistration.commit_sha256) == 64
+    assert {
+        item.chemistry_family for item in preregistration.targets
+        if item.split == "held_out_transfer"
+    } == {"chlorine", "fluorine"}
+    assert all(not hasattr(item, "value") for item in preregistration.targets)
+
+
+def test_observation_reveal_requires_exactly_the_frozen_target_set():
+    preregistration = _preregistration()
+    reveals = (
+        ObservationValueReveal("cal", 1.0, 0.02, 0.1),
+        ObservationValueReveal("held_cl", 2.0, 0.02, 0.1),
+    )
+
+    with pytest.raises(ValueError, match="every and only preregistered"):
+        reveal_preregistered_observations(preregistration, reveals)
+
+
+def test_observation_reveal_preserves_committed_metadata_and_binds_protocol():
+    preregistration = _preregistration()
+    protocol = reveal_preregistered_observations(
+        preregistration,
+        (
+            ObservationValueReveal("cal", 1.0, 0.02, 0.1),
+            ObservationValueReveal("held_cl", 2.0, 0.02, 0.1),
+            ObservationValueReveal("held_f", 3.0, 0.03, 0.2),
+        ),
+    )
+
+    assert protocol.preregistration_sha256 == preregistration.commit_sha256
+    by_id = {item.observation_id: item for item in protocol.observations}
+    assert by_id["held_f"].chemistry_family == "fluorine"
+    assert by_id["held_f"].source_locator == "figure-1:held_f"
+    assert by_id["held_f"].source_sha256 == SOURCE_SHA
+    assert by_id["held_f"].split == "held_out_transfer"
+    assert by_id["held_f"].value == 3.0
+
+
+def test_preregistration_refuses_condition_leakage_between_splits():
+    with pytest.raises(ValueError, match="preregistered"):
+        PreRegisteredValidationProtocol(
+            protocol_id="leaky",
+            revision="R1",
+            intended_use="reject calibration and held-out reuse",
+            targets=(
+                _target("cal", "calibration", "chlorine", "same-condition"),
+                _target(
+                    "held", "held_out_transfer", "chlorine", "same-condition"),
+            ),
+            parameters=_protocol().parameters,
+            maximum_calibrated_parameters=1,
+            mechanism_id="mechanism-v1",
+            boundary_provider_id="boundary-v1",
+            minimum_held_out_chemistry_families=1,
+        )
+
+
+def test_preregistration_enforces_held_out_cross_chemistry_count():
+    with pytest.raises(ValueError, match="preregistered"):
+        PreRegisteredValidationProtocol(
+            protocol_id="single-chemistry",
+            revision="R1",
+            intended_use="reject an undersized held-out chemistry set",
+            targets=(
+                _target("cal", "calibration", "chlorine"),
+                _target("held", "held_out_transfer", "chlorine"),
+            ),
+            parameters=_protocol().parameters,
+            maximum_calibrated_parameters=1,
+            mechanism_id="mechanism-v1",
+            boundary_provider_id="boundary-v1",
+            minimum_held_out_chemistry_families=2,
         )
 
 

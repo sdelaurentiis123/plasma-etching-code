@@ -147,8 +147,10 @@ from .reactor_coupling import (
     resolve_reactor_boundary,
 )
 from .validation_contract import (
-    CalibrationReveal, HeldOutPrediction, ValidationObservation,
+    CalibrationReveal, HeldOutPrediction, ObservationValueReveal,
+    PreRegisteredValidationProtocol, ValidationObservation,
     ValidationParameter, ValidationProtocol, ValidationScore,
+    ValidationTargetCommitment, reveal_preregistered_observations,
     score_held_out_predictions,
 )
 from .physical_api import (
@@ -267,8 +269,10 @@ __all__ = [
     "BoundReactorBoundaryProvider", "ReactorBoundaryPrediction",
     "ReactorBoundaryProvider", "ReactorBoundaryQuery", "SurfaceFeedbackState",
     "resolve_reactor_boundary",
-    "CalibrationReveal", "HeldOutPrediction", "ValidationObservation",
+    "CalibrationReveal", "HeldOutPrediction", "ObservationValueReveal",
+    "PreRegisteredValidationProtocol", "ValidationObservation",
     "ValidationParameter", "ValidationProtocol", "ValidationScore",
+    "ValidationTargetCommitment", "reveal_preregistered_observations",
     "score_held_out_predictions",
     "Domain", "SF6O2", "Process", "Result",
     # config + low-level (full control)
