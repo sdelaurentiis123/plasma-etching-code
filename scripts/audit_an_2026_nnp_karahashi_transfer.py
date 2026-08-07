@@ -44,6 +44,16 @@ AUTHOR_FIGURE_DATA_SHA256 = (
     "7fdb3b72bc55eb47e8e2fbf6b218ddcacdb869136b2978c4a90bebe3a3dafb9a")
 AUTHOR_REPOSITORY_COMMIT = (
     "4bcd035090b9f652cda10150c4da4b662143b34e")
+AUTHOR_BYPRODUCT_SOURCE_PATH = (
+    "SM_codes/PlasmaEtchSimulator/calc/byproduct.py")
+AUTHOR_BYPRODUCT_SOURCE_SHA256 = (
+    "a0471f888bd885a84b7188a4111aa18a4c7c6a68d8061e0b7d5e6193204babd0")
+AUTHOR_SIO2_HEIGHT_DATA_TAR_SHA256 = (
+    "1c6e709b68b21951f143913e2ffc458e2f973a6797bf7f4fde160f2fd3b23e26")
+AUTHOR_CF300_DEFAULT_TRANSIENT_SHA256 = (
+    "03b50dc7114a8c9a01d91464e0471f01666b22d9095b0d2b20236a471c541450")
+AUTHOR_CF300_2NM_TRANSIENT_SHA256 = (
+    "2fc6a4310087f3f664c05a731561fe1d3dcd6cd7360d1cc39be10384c0ec7075")
 
 
 def _sha256(path: Path) -> str:
@@ -226,6 +236,47 @@ def build_audit(root: Path | None = None):
         "source_receipts": {
             "author_repository_commit": AUTHOR_REPOSITORY_COMMIT,
             "author_figure3_yaml_sha256": AUTHOR_FIGURE_DATA_SHA256,
+            "author_code_audit": {
+                "repository": "https://github.com/HyungminAn/etchZBL",
+                "pinned_commit": AUTHOR_REPOSITORY_COMMIT,
+                "source_path": AUTHOR_BYPRODUCT_SOURCE_PATH,
+                "source_sha256": AUTHOR_BYPRODUCT_SOURCE_SHA256,
+                "default_path_semantics": (
+                    "Every disconnected cluster whose composition matches "
+                    "the configured byproduct list is deleted, except atoms "
+                    "inside the fixed bottom region; formation depth below "
+                    "the instantaneous surface is not part of the decision."
+                ),
+                "diagnostic_path_semantics": (
+                    "The optional removal-region branch uses "
+                    "thickness_removal_region = 20.0 Angstrom, explicitly "
+                    "labelled 'arbitrary value' in the pinned source."
+                ),
+                "source_lines_at_pinned_commit": {
+                    "default_composition_deletion": [88, 126],
+                    "arbitrary_2nm_gate": [128, 174],
+                    "arbitrary_gate_assignment": 138,
+                },
+                "implementation_or_weights_copied_into_petch": False,
+                "reason_not_copied": (
+                    "No license file was present at the pinned author "
+                    "commit; petch records behavior and hashes only."
+                ),
+            },
+            "author_transient_data_receipts": {
+                "sio2_height_analysis_tar_sha256": (
+                    AUTHOR_SIO2_HEIGHT_DATA_TAR_SHA256),
+                "cf_300eV_default_transient_sha256": (
+                    AUTHOR_CF300_DEFAULT_TRANSIENT_SHA256),
+                "cf_300eV_2nm_gate_transient_sha256": (
+                    AUTHOR_CF300_2NM_TRANSIENT_SHA256),
+                "interpretation": (
+                    "The released diagnostic changes only the product-"
+                    "removal region; it is evidence that escape/retention "
+                    "controls the low-energy transient, not an independently "
+                    "measured 2 nm transport coefficient."
+                ),
+            },
             "transcribed_model_data_path": str(model_path.relative_to(root)),
             "transcribed_model_data_sha256": _sha256(model_path),
             "model_source_manifest_path": str(
@@ -266,6 +317,13 @@ def build_audit(root: Path | None = None):
             "krueger_iead_maximum_eV": 4821.0,
             "executable_code_or_potential_imported": False,
             "license_file_found_at_pinned_author_commit": False,
+            "product_escape_transport_solved": False,
+            "default_product_escape_rule": (
+                "composition-listed disconnected product deleted without a "
+                "formation-depth or residence-time transport calculation"),
+            "diagnostic_product_escape_depth_nm": 2.0,
+            "diagnostic_escape_depth_status": (
+                "arbitrary_sensitivity_not_measured_parameter"),
         },
         "all_exact_overlap_metrics": all_metrics,
         "per_species_metrics": per_species_metrics,

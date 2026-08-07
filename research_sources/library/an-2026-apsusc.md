@@ -18,6 +18,8 @@
 | Q5 | For low-energy CF+ on SiO2, the model delays deposition and etches more than 10 nm before film growth versus about 2 nm experimentally; an arbitrary 2 nm product-removal-depth rule improves agreement. | Direct evidence that finite product escape/diffusion and evolving film state are required closures. |
 | Q6 | The present calculations omit incident neutrals and radicals and use normal-incidence ions. | Does not identify the Krüger reactor boundary or an angular response law. |
 | Q7 | Code, potential, and figure data are released in the author repository, but no license file was found at pinned commit `4bcd0350`. | Numerical data may be audited with provenance; do not import implementation or weights without permission/license. |
+| Q8 | At pinned commit `4bcd0350`, `SM_codes/PlasmaEtchSimulator/calc/byproduct.py` deletes every disconnected cluster matching the byproduct list without testing formation depth; its optional depth-gated diagnostic hard-codes `20.0` Å and labels it an “arbitrary value.” | Code-level confirmation that the reported low-energy improvement is a sensitivity study, not a measured product-transport law. Source SHA-256 `a0471f888bd885a84b7188a4111aa18a4c7c6a68d8061e0b7d5e6193204babd0`. |
+| Q9 | The released SiO2 transient archive and the CF 300 eV default/2 nm histories are checksum-pinned in `AN-NNP-KARAHASHI-TRANSFER-R1`. | Reproducibility receipt only; the arbitrary 2 nm gate is not consumed as a production parameter. |
 
 ## Corrected consumption
 
@@ -27,3 +29,9 @@ species/energy event kernel. Its low-energy failure identifies the necessary
 coupling to a finite mixed layer, fluorocarbon-film evolution, and
 depth-/time-dependent product escape. The result is therefore a physics
 architecture constraint, not a new depth-fitting knob.
+
+The code audit also rules out a superficially attractive shortcut: copying
+the 2 nm diagnostic threshold into petch would merely reproduce an arbitrary
+author sensitivity. A production escape closure must instead conserve the
+formed product until an independently constrained transport/reaction process
+either releases it or reincorporates it.

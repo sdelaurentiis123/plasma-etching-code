@@ -35,6 +35,15 @@ def test_source_receipts_are_pinned(audit):
         "7fdb3b72bc55eb47e8e2fbf6b218ddcacdb869136b2978c4a90bebe3a3dafb9a")
     assert receipts["author_repository_commit"] == (
         "4bcd035090b9f652cda10150c4da4b662143b34e")
+    code = receipts["author_code_audit"]
+    assert code["source_sha256"] == (
+        "a0471f888bd885a84b7188a4111aa18a4c7c6a68d8061e0b7d5e6193204babd0")
+    assert code["implementation_or_weights_copied_into_petch"] is False
+    assert audit["model_evidence_boundary"][
+        "product_escape_transport_solved"] is False
+    assert audit["model_evidence_boundary"][
+        "diagnostic_escape_depth_status"
+    ] == "arbitrary_sensitivity_not_measured_parameter"
     assert receipts["karahashi_data_sha256"] == (
         receipts["loader_pinned_karahashi_data_sha256"])
 

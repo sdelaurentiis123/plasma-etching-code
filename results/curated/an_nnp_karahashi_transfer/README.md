@@ -23,6 +23,14 @@ locates the defect in product escape and film evolution: deleting stable
 products from any depth delays the etch-to-deposition transition and permits
 more than 10 nm of removal where the cited experiment gives about 2 nm.
 
+The code-level audit is pinned too. At author commit `4bcd0350`,
+`SM_codes/PlasmaEtchSimulator/calc/byproduct.py` deletes every disconnected
+cluster whose composition matches the configured byproduct list without a
+formation-depth or residence-time test. The optional depth-gated path fixes
+the region to 20 Å and labels that value arbitrary in source. The committed
+audit stores the source and released-transient checksums; no unlicensed author
+implementation or weights were copied into petch.
+
 The physics consequence is architectural. Use atomistic calculations to
 derive the prompt, species/energy-resolved event kernel; couple that kernel to
 a finite atom-balanced mixed layer, fluorocarbon film, and explicit

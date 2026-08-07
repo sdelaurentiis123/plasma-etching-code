@@ -67,12 +67,16 @@
   },
   "model_evidence_boundary": {
     "angular_support": "normal_incidence_only",
+    "default_product_escape_rule": "composition-listed disconnected product deleted without a formation-depth or residence-time transport calculation",
+    "diagnostic_escape_depth_status": "arbitrary_sensitivity_not_measured_parameter",
+    "diagnostic_product_escape_depth_nm": 2.0,
     "executable_code_or_potential_imported": false,
     "experimental_yield_regressed": false,
     "ion_neutralized_before_impact": true,
     "krueger_iead_maximum_eV": 4821.0,
     "license_file_found_at_pinned_author_commit": false,
     "potential_is_exact_first_principles": false,
+    "product_escape_transport_solved": false,
     "radicals_or_neutral_coflux_included": false,
     "released_sio2_energy_maximum_eV": 1000.0,
     "surface_evidence_level": "DFT_trained_NNP_plus_ZBL_MD"
@@ -401,8 +405,35 @@
     }
   ],
   "source_receipts": {
+    "author_code_audit": {
+      "default_path_semantics": "Every disconnected cluster whose composition matches the configured byproduct list is deleted, except atoms inside the fixed bottom region; formation depth below the instantaneous surface is not part of the decision.",
+      "diagnostic_path_semantics": "The optional removal-region branch uses thickness_removal_region = 20.0 Angstrom, explicitly labelled 'arbitrary value' in the pinned source.",
+      "implementation_or_weights_copied_into_petch": false,
+      "pinned_commit": "4bcd035090b9f652cda10150c4da4b662143b34e",
+      "reason_not_copied": "No license file was present at the pinned author commit; petch records behavior and hashes only.",
+      "repository": "https://github.com/HyungminAn/etchZBL",
+      "source_lines_at_pinned_commit": {
+        "arbitrary_2nm_gate": [
+          128,
+          174
+        ],
+        "arbitrary_gate_assignment": 138,
+        "default_composition_deletion": [
+          88,
+          126
+        ]
+      },
+      "source_path": "SM_codes/PlasmaEtchSimulator/calc/byproduct.py",
+      "source_sha256": "a0471f888bd885a84b7188a4111aa18a4c7c6a68d8061e0b7d5e6193204babd0"
+    },
     "author_figure3_yaml_sha256": "7fdb3b72bc55eb47e8e2fbf6b218ddcacdb869136b2978c4a90bebe3a3dafb9a",
     "author_repository_commit": "4bcd035090b9f652cda10150c4da4b662143b34e",
+    "author_transient_data_receipts": {
+      "cf_300eV_2nm_gate_transient_sha256": "2fc6a4310087f3f664c05a731561fe1d3dcd6cd7360d1cc39be10384c0ec7075",
+      "cf_300eV_default_transient_sha256": "03b50dc7114a8c9a01d91464e0471f01666b22d9095b0d2b20236a471c541450",
+      "interpretation": "The released diagnostic changes only the product-removal region; it is evidence that escape/retention controls the low-energy transient, not an independently measured 2 nm transport coefficient.",
+      "sio2_height_analysis_tar_sha256": "1c6e709b68b21951f143913e2ffc458e2f973a6797bf7f4fde160f2fd3b23e26"
+    },
     "karahashi_data_path": "data/experimental/karahashi_2007/figure4_reactive_ion_yields.csv",
     "karahashi_data_sha256": "5d3b58a6d23e3fa77b5e1484407dbe0f19f23ec89687f184cd11ceaebb017c26",
     "karahashi_digitization_manifest_path": "data/experimental/karahashi_2007/digitization_manifest.json",

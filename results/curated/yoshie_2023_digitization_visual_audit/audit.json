@@ -1,0 +1,39 @@
+{
+  "audit_id": "YOSHIE-2023-DIGITIZATION-VISUAL-REPLAY-R1",
+  "audit_date": "2026-08-06",
+  "calibration_or_data_change": false,
+  "full_resolution_visual_inspection": true,
+  "observation_counts": {
+    "figure12_bias_windows": 7,
+    "figure14_oes_markers": 60,
+    "figure4_blanket_markers": 7,
+    "figure5_feature_markers": 21,
+    "figure6_feature_markers": 28
+  },
+  "overlay_sha256": {
+    "figure12": "16d80c0383c487d61f6ed3d35259184c779575c035aae95d51c3bc8f0252c92f",
+    "figure14": "0267684c60074d3bf57c41d0f607880d5c3221c1dd88eb303f5bc350887ae00d",
+    "figure4": "7b97f23b902d39d12fa617c4e3bbfda2c2ea6a57a50c0cc0be600ae9c0057b75",
+    "figure5": "d1e160300d95aee7366dab776a4b8b2a9dd874cb69677291876e9ee1ceb96c17",
+    "figure6": "16c5a635f8e90b4e5cba5cf5d44be9f19281e16c64dc0f5d8fe4d88e7fdbd7c1"
+  },
+  "source_manifest_ids": [
+    "YOSHIE-2023-FIGURES4-6-DEPTH-R1",
+    "YOSHIE-2023-FIGURES12-14-REACTOR-STATE-R1"
+  ],
+  "source_raster_sha256": {
+    "figure12": "9ee2992ef60c22debb6619e79ea97446ac0698c258e746322bd8858e70ee2109",
+    "figure14": "e7a121f1b9be7543c217626978d0ae243f4e22cd87a00765877cbe65b7c547b0",
+    "figure4": "297013dbb00ef11e7152355e8ec91fdb7e4bc751f6c3d39d56c8c00dde29b3df",
+    "figure5": "de722d00eadba115a690562b519387ea79e3a634f19a12f6252df168c6056aef",
+    "figure6": "202e04674548182e40d2be4c7677cb1b1124cd9056f87baa13a1525495a9f7fe"
+  },
+  "verdict": "passed",
+  "visual_assertions": {
+    "figure12": "all declared bias-window endpoints and Simpson midpoints align; 8 s timing-II collapse preserved",
+    "figure14": "all 60 CF, CF2, and F marker centers align",
+    "figure4": "all 7 selected blanket marker centers align",
+    "figure5": "all 21 held-out centers and plotted error caps align",
+    "figure6": "all 28 held-out centers and plotted error caps align"
+  }
+}
