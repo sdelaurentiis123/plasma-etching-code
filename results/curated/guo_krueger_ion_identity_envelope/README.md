@@ -25,6 +25,11 @@ Implementation revision: `8e1fb65`.
 | all CF₂⁺ | 3.39053968 | 13.5621587 | -1.366% |
 | all CF₃⁺ | 3.91113123 | 15.6445249 | +13.778% |
 
+The all-CF₂⁺ endpoint was independently repeated at 5 nm:
+3.36199660 nm, or 13.4479864 nm/s.  That is -0.842% relative to its 10 nm
+pair and -2.196% relative to the 825/60 scale.  The endpoint envelope is
+therefore not a 10 nm grid artifact.
+
 Krüger's reported 825 nm after 60 s corresponds to 13.75 nm/s, or
 3.4375 nm over 0.25 s if one uses the run-average rate only as a scale
 reference.  The CF₂⁺ and CF₃⁺ endpoints bracket that scale.  The result is not
@@ -73,10 +78,15 @@ Artifact receipts:
   `00b49ea09f830be4a1cce61f84b143c615443706495af1233a844cd996c5e58c`
 - CF₃ audit SHA-256:
   `135b9beaf4e4709df05c7e1c9972ca316bd037eef4b20c299e9271204f9cc4ef`
+- 5 nm CF₂ config:
+  `29a4e9b5690dccb26de28877bd1626d185cc17e4c347c9945dfc8bfb7cf1d52a`
+- 5 nm CF₂ audit SHA-256:
+  `9e44118bcc74e94f3c3e5142034256770d12f0fba003d85fb301d76bf80e4e13`
 
 Full local artifacts:
 `/private/tmp/krueger_guo_ion_cf2` and
-`/private/tmp/krueger_guo_ion_cf3`.
+`/private/tmp/krueger_guo_ion_cf3`, with the fine pair at
+`/private/tmp/krueger_guo_ion_cf2_dx5`.
 
 ## Scientific verdict
 
