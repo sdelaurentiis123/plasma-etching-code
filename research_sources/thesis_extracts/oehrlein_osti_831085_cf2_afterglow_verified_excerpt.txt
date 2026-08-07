@@ -1,0 +1,25 @@
+SOURCE
+G. S. Oehrlein et al.,
+Fundamental Surface Reaction Mechanisms in Fluorocarbon Plasma-Based
+Processing, DOE final report, OSTI 831085 (2004).
+
+Official full text:
+https://www.osti.gov/servlets/purl/831085
+PDF SHA-256:
+350fdc328449b0548138d53b35a04873b4548aca1beb861faf61273d9d9203a5
+
+RETRIEVAL / EXTRACTION
+Retrieved 2026-08-06 from OSTI.  This file is a short verified extract.
+
+VERIFIED EXTRACT — report section B.3, CF2 loss in the afterglow
+
+The report fits the afterglow CF2 decay with first- and second-order loss
+terms.  Under the stated residence-time assumption, the average CF2 wall-loss
+rate is 1.0 +/- 0.8 s^-1.  The corresponding CF2 sticking coefficient in the
+afterglow is (8 +/- 6) x 10^-3 at 298 K.
+
+CLAIM BOUNDARY
+- This is a directly inferred afterglow wall-loss coefficient with a large
+  uncertainty, not an ion-activated wafer sticking coefficient.
+- It supports the low end of the independently reported CF2 sticking range;
+  it does not identify C4F6 or C4F8 parent sticking.

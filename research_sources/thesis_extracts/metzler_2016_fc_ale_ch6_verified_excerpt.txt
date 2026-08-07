@@ -1,0 +1,66 @@
+SOURCE
+Dominik Metzler, High Precision Plasma Etch for Pattern Transfer:
+Towards Fluorocarbon Based Atomic Layer Etching, PhD thesis,
+University of Maryland, 2016.
+
+Official item:
+https://drum.lib.umd.edu/items/b01bb413-6152-492a-98ec-0abe752ea240
+Official PDF:
+https://api.drum.lib.umd.edu/server/api/core/bitstreams/227fdb28-6ea7-4a8d-92ae-5c521f2d1e0b/content
+PDF SHA-256:
+ea5701d0bcf67b56403625253f7bb619c0e3e3a5e0a9cfd2ff6f1e435fa90f62
+
+RETRIEVAL / EXTRACTION
+Retrieved 2026-08-06 from the University of Maryland DRUM repository.
+Text checked against the original-resolution 240-dpi renders of PDF pages
+141, 142, 143, 146, 147, 157, and 158.  This file is a short verified extract,
+not the complete thesis text.
+
+VERIFIED EXTRACT — thesis pp. 116-119 (PDF pp. 139-143)
+
+"Precise FC film deposition is the source of chemical etchant during the
+etch step."
+
+Metzler reports that thicker deposited FC films supply more F but also inhibit
+energy deposition into the substrate.  For the 40 s ion step, Si and SiO2
+removal increases with deposited film thickness and then saturates because
+more of the ion step is spent removing the film.
+
+At nominal 30 eV, FC removal is faster than at 25 eV.  SiO2 removal approaches
+a reactant-limited saturation with ion-step duration.  Si instead shows
+roughly constant or slightly lower removal at longer ion steps.  The thesis
+attributes the Si behavior to F depletion plus a fluorinated/oxidized reacted
+surface layer; trace oxygen can originate from erosion of the quartz coupling
+window.
+
+VERIFIED EXTRACT — thesis pp. 130-136 (PDF pp. 153-159)
+
+The film F/C ratio is obtained from decomposed C 1s spectra.  The source
+defines delta-F/C as F 1s/C 1s minus the film F/C ratio and uses it as an
+indicator of substrate fluorination.  It is a relative XPS proxy, not an
+absolute areal inventory.
+
+For a nominal 5 Å film, the film F/C ratio falls rapidly during 25 eV ion
+bombardment while delta-F/C rises.  Metzler states:
+
+"Therefore, F is preferentially removed from the FC film and mixing with the
+Si substrate takes place."
+
+For a nominal 11 Å film, F/C decreases more slowly and delta-F/C remains close
+to zero through the cycle.  The thesis says the substrate is then in a fairly
+steady state while the film and substrate are removed together.
+
+SIMS on the 5 Å, 25 eV, 40 s condition is reported to agree with the XPS
+interpretation.  The measured near-surface C/F/O/Si mixed layer extends to
+approximately 15 Å.  F and O are concentrated at the surface and decrease to
+approximately 25 Å depth.
+
+CLAIM BOUNDARY
+- The plotted "FC thickness" is ellipsometric optical thickness.
+- The source does not supply the density/composition trajectory required to
+  turn every optical Å into separate C and F areal atom inventories.
+- delta-F/C is not an absolute substrate-F inventory.
+- The source does not publish a species-resolved wafer ion/neutral flux deck
+  or an ion energy-angle distribution.
+- Figures 6.5, 6.6, 6.14, and 6.15 are replayed in
+  data/experimental/metzler_2016/.

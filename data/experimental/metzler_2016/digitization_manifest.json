@@ -1,0 +1,165 @@
+{
+  "claim_boundary": {
+    "not_valid": [
+      "absolute C or F areal inventory inferred from optical thickness",
+      "absolute substrate F inventory inferred from delta-F/C",
+      "species-resolved neutral or positive-ion wafer flux",
+      "an ion energy-angle distribution",
+      "a value-blind or prospectively held-out claim",
+      "permission to tune feature depth"
+    ],
+    "valid": [
+      "cyclic etch depth versus deposited FC optical thickness",
+      "cyclic etch depth versus low-energy Ar-ion step duration",
+      "time-resolved FC-film F/C and XPS intensity trajectories",
+      "relative substrate-fluorination proxy delta-F/C",
+      "a finite-thickness film-transfer/mixing model-form test"
+    ]
+  },
+  "derived_checks": {
+    "depth_markers": 42,
+    "thick_film_delta_F_over_C_max": 0.0609,
+    "thin_film_delta_F_over_C_increase_0_to_40s": 0.6995,
+    "thin_film_transfers_more_F_to_substrate_proxy": true,
+    "xps_markers": 32
+  },
+  "digitization": {
+    "axis_calibration": {
+      "6.14a": {
+        "x_left_px": 820.0,
+        "x_left_value": -5.0,
+        "x_right_px": 1474.0,
+        "x_right_value": 45.0,
+        "y_reference_px": 268.0,
+        "y_reference_value": 1.1,
+        "y_zero_px": 919.0,
+        "y_zero_value": 0.0
+      },
+      "6.14b": {
+        "x_left_px": 820.0,
+        "x_left_value": -5.0,
+        "x_right_px": 1474.0,
+        "x_right_value": 45.0,
+        "y_reference_px": 1120.0,
+        "y_reference_value": 20.0,
+        "y_zero_px": 1770.0,
+        "y_zero_value": 0.0
+      },
+      "6.15a": {
+        "x_left_px": 831.0,
+        "x_left_value": -5.0,
+        "x_right_px": 1467.0,
+        "x_right_value": 45.0,
+        "y_reference_px": 260.0,
+        "y_reference_value": 1.1,
+        "y_zero_px": 928.0,
+        "y_zero_value": 0.0
+      },
+      "6.15b": {
+        "x_left_px": 831.0,
+        "x_left_value": -5.0,
+        "x_right_px": 1467.0,
+        "x_right_value": 45.0,
+        "y_reference_px": 1110.0,
+        "y_reference_value": 11.0,
+        "y_zero_px": 1781.0,
+        "y_zero_value": 0.0
+      },
+      "6.5a": {
+        "x_left_px": 861.0,
+        "x_left_value": 0.0,
+        "x_right_px": 1400.0,
+        "x_right_value": 13.0,
+        "y_reference_px": 260.0,
+        "y_reference_value": 7.5,
+        "y_zero_px": 829.0,
+        "y_zero_value": 0.0
+      },
+      "6.5b": {
+        "x_left_px": 861.0,
+        "x_left_value": 0.0,
+        "x_right_px": 1400.0,
+        "x_right_value": 13.0,
+        "y_reference_px": 829.0,
+        "y_reference_value": 7.5,
+        "y_zero_px": 1398.0,
+        "y_zero_value": 0.0
+      },
+      "6.5c": {
+        "x_left_px": 861.0,
+        "x_left_value": 0.0,
+        "x_right_px": 1400.0,
+        "x_right_value": 13.0,
+        "y_reference_px": 1398.0,
+        "y_reference_value": 7.5,
+        "y_zero_px": 1967.0,
+        "y_zero_value": 0.0
+      },
+      "6.6": {
+        "x_left_px": 751.0,
+        "x_left_value": 0.0,
+        "x_right_px": 1555.0,
+        "x_right_value": 65.0,
+        "y_reference_px": 257.0,
+        "y_reference_value": 9.0,
+        "y_zero_px": 1108.0,
+        "y_zero_value": 0.0
+      }
+    },
+    "method": "official UMD thesis PDF; Poppler 240-dpi render; PIL/NumPy-compatible RGB and grayscale component isolation; distance-transform marker centers; original-resolution visual reconciliation and QA overlays",
+    "retrospective_board_not_value_blind": true,
+    "source_figures_visually_inspected_at_full_resolution": true
+  },
+  "experimental_conditions": {
+    "argon_flow_sccm": 50,
+    "nominal_ion_energy_eV": [
+      20,
+      25,
+      30
+    ],
+    "precursor_depletion_before_bias_s": 12,
+    "pressure_mTorr": 10,
+    "sample_temperature_C": 10,
+    "source_power_W": 200,
+    "xps_cycle_condition": {
+      "etch_step_s": 40,
+      "ion_energy_eV": 25,
+      "precursor": "C4F8"
+    }
+  },
+  "manifest_id": "METZLER-2016-CYCLIC-FC-ALE-R1",
+  "outputs": {
+    "depth_csv": {
+      "path": "data/experimental/metzler_2016/figures6_5_6_6_cyclic_depth.csv",
+      "sha256": "dcaee524a0a6ac7fa8b5804c153b7607207a4f88a429c2f2b45af4edd1486fa4"
+    },
+    "xps_csv": {
+      "path": "data/experimental/metzler_2016/figures6_14_6_15_xps_cycle_state.csv",
+      "sha256": "3d0e16c4ff77b373a25c01ffd1ea8732ab79e099fe0a700b98e321d7d85c43bf"
+    }
+  },
+  "source": {
+    "citation": "D. Metzler, High Precision Plasma Etch for Pattern Transfer: Towards Fluorocarbon Based Atomic Layer Etching, PhD thesis, University of Maryland (2016)",
+    "item_url": "https://drum.lib.umd.edu/items/b01bb413-6152-492a-98ec-0abe752ea240",
+    "pages": {
+      "141": {
+        "figure": "6.5",
+        "png_sha256": "65533648fdf3047aa42c15cc4fffabe394eb6577f7320cf70a187dd2e4f5b898"
+      },
+      "142": {
+        "figure": "6.6",
+        "png_sha256": "52845fe4c47ca9ba8f270af1a0de4fc71a04cc489849a51044cf1c5cc4ebc5fa"
+      },
+      "157": {
+        "figure": "6.14",
+        "png_sha256": "10ecc9e1693461ae6c75d98b554ccf42e5bacb0194f3dfab824a94ef96393e33"
+      },
+      "158": {
+        "figure": "6.15",
+        "png_sha256": "db6707764a20786f033c5f4ff40d90234502d663b1fe637bcc8415f41957437e"
+      }
+    },
+    "pdf_sha256": "ea5701d0bcf67b56403625253f7bb619c0e3e3a5e0a9cfd2ff6f1e435fa90f62",
+    "url": "https://api.drum.lib.umd.edu/server/api/core/bitstreams/227fdb28-6ea7-4a8d-92ae-5c521f2d1e0b/content"
+  }
+}

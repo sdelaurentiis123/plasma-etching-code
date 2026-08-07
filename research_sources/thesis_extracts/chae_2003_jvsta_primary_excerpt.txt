@@ -1,0 +1,35 @@
+SOURCE
+H. Chae, S. A. Vitale, and H. H. Sawin,
+"Silicon dioxide etching yield measurements with inductively coupled
+fluorocarbon plasmas," Journal of Vacuum Science & Technology A 21,
+381-387 (2003), DOI 10.1116/1.1539085.
+
+Author-uploaded primary full text:
+https://www.researchgate.net/publication/249508706_Silicon_dioxide_etching_yield_measurements_with_inductively_coupled_fluorocarbon_plasmas
+
+RETRIEVAL / EXTRACTION
+Read 2026-08-06 from the author-uploaded full-text page.  This file records a
+short verified extract and claim boundary; the publisher PDF was not fetched.
+
+VERIFIED CLAIMS
+- A quartz-crystal microbalance directly measures SiO2 etch/deposition yield
+  versus ion energy, ion-to-neutral ratio, and incidence angle.
+- At 500 V bias, Ar sputtering approaches 0.25 SiO2 formula units per ion,
+  while the C2HF5 fluorocarbon-plasma yield is about 2 per ion.  The authors
+  attribute the factor above Ar+/F beam data to reactive CFx+ ions; CF+ is the
+  dominant positive ion for most reported C2HF5 conditions.
+- Neutral-only deposition is approximately 30% of total deposition.  The
+  remaining ion-associated deposition is approximately two to three times the
+  ion flux under the reported convention.
+- Film mass is converted using an assumed PTFE density of 2.1 g cm^-3.
+- The published active-site model balances ion-created sites with neutral
+  sticking, then combines neutral deposition and ion-driven removal.
+- Its fitted ion site-creation yield is large and sensitive to assumed
+  monomer mass and to omitted ion-energy, flux-ratio, and FC-removal effects.
+  It is therefore a topology clue, not an importable atomic constant.
+
+CLAIM BOUNDARY
+The plasma-integrated yield includes the measured ion mixture and surface
+synergy.  It must not be called a mass-selected CF+ yield or copied into a
+different ion mixture.  The fitted active-site parameters are not direct
+measurements.

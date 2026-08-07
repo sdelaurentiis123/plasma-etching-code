@@ -1,11 +1,23 @@
 # standaert-oehrlein
 
-**Standaert & Oehrlein, mixed-layer selectivity**
+**Standaert & Oehrlein lineage, fluorocarbon film and mixed-layer selectivity**
 
-- **DOI/URL:** Standaert & Oehrlein — mixed-layer selectivity
-- **Retrieval route:** publisher
-- **Status:** VIA RESEARCH DOCS
+- **Primary sources:** https://www.osti.gov/servlets/purl/810328 and https://www.osti.gov/servlets/purl/831085
+- **Standaert paper DOI:** https://doi.org/10.1116/1.1626642
+- **Retrieval route:** official OSTI full reports; Standaert paper lineage
+- **Status:** OFFICIAL FULL REPORTS + VERIFIED EXCERPTS
+- **Extracts:** `research_sources/thesis_extracts/oehrlein_osti_810328_surface_verified_excerpt.txt`; `research_sources/thesis_extracts/oehrlein_osti_831085_cf2_afterglow_verified_excerpt.txt`
 - **Topic:** mechanism-fc-oxide — Fluorocarbon/SiO2 surface mechanism (the Krüger–Kushner lineage)
+
+## Verified claims added 2026-08-06
+
+| claim | implication |
+|---|---|
+| incident-flux/deposition analysis gives CF sticking 0.4 and CF2 sticking 0.01-0.07 | neutral deposition must be species-resolved |
+| independent CF2 afterglow analysis gives `(8 +/- 6)e-3` at 298 K | supports low CF2 sticking, but only for unbiased afterglow walls |
+| silicon etch yield decreases exponentially with measured steady-state FC thickness across varying plasma conditions | film attenuation is a measured relation, not merely a fitted feature knob |
+| first 1-2 nm of FC film dominate ion energy loss; about 2 nm produces SiO2 etch stop | finite film-depth gate |
+| clean-Si yield about 1.5 Si/ion in that condition | condition-specific point, explicitly not a universal ceiling |
 
 ## Claims table
 

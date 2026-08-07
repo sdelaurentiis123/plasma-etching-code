@@ -1,0 +1,44 @@
+SOURCE
+G. S. Oehrlein, H. M. Anderson, J. L. Cecchi et al.,
+Fundamental Science of High-density Fluorocarbon Plasmas,
+DOE final report, OSTI 810328 (2001).
+
+Official full text:
+https://www.osti.gov/servlets/purl/810328
+PDF SHA-256:
+cf9856c93785a55f2501ac94b762e70e66b01725cb75b12645bc53ab84e43e21
+
+RETRIEVAL / EXTRACTION
+Retrieved 2026-08-06 from OSTI.  Text and scanned report page 6 were checked
+against the official PDF.  This file is a short verified extract.
+
+VERIFIED EXTRACT — report pp. 5-6
+
+The report constructs the thermal incident radical flux as [CF] v / 4 and
+the deposition flux from the measured deposition rate and polymer density.
+Their ratio gives a CF sticking coefficient of 0.4.  Repeating the procedure
+for CF2 gives a range of 0.01 to 0.07.
+
+The report states that film deposition and film removal balance to create a
+thin steady-state fluorocarbon film through which substrate etching occurs.
+For the silicon datasets, etch rate alone scatters with film thickness because
+ion density changes across conditions.  After normalizing by incident ion
+number, the measured silicon etch yield decreases exponentially with FC-film
+thickness across widely different conditions.
+
+For the source's clean-Si condition, the reported yield is approximately
+1.5 Si atoms per incident ion.  This is a condition-specific anchor, not a
+universal ceiling for other materials, ions, or chemistries.
+
+Monte Carlo stopping calculations are used to interpret the first 1-2 nm of
+FC film as the major ion-energy-loss region.  Above roughly 1 nm, direct
+ion energy deposition into Si becomes unimportant.  The report states that
+roughly 2 nm of steady-state FC film produces SiO2 etch stop.
+
+CLAIM BOUNDARY
+- The CF and CF2 sticking coefficients belong to the documented discharge,
+  analysis, and polymer-density convention.
+- The exponential relation is an empirical measured topology; this extract
+  does not digitize or invent its decay length.
+- The approximately 1.5 Si/ion point is not transferable as a universal yield
+  bound.

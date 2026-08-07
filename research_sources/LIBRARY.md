@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 95 sources by topic
+## Index — 97 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -37,20 +37,22 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`hiwasa-2022-apex`](library/hiwasa-2022-apex.md) | Hiwasa et al. (KIOXIA), APEX 15, 106002 (2022) | FETCHED |
 | [`huang-2019-jvsta`](library/huang-2019-jvsta.md) | Huang, Huard, ... Kushner, JVST A 37, 031304 (2019) | FULL TEXT (via thesis lineage) |
 | [`huang-thesis`](library/huang-thesis.md) | Huang, PhD thesis, Univ. Michigan | FULL TEXT: research_sources/thesis_extracts/huang_thesis.txt |
+| [`humbird-2004-apl`](library/humbird-2004-apl.md) | Humbird, Graves, Hua & Oehrlein, APL 84, 1073 (2004) | PRIMARY FULL TEXT ONLINE + VERIFIED EXCERPT |
 | [`huard-thesis`](library/huard-thesis.md) | Huard, PhD thesis, Univ. Michigan | FULL TEXT: research_sources/thesis_extracts/huard_chad_phd_thesis.txt |
 | [`izawa-2007-jjap`](library/izawa-2007-jjap.md) | Izawa et al., JJAP 46, 7870 (2007) | ABSTRACT-ONLY — NOT IMPORTABLE (model-inverted) |
 | [`kim-2021-coatings`](library/kim-2021-coatings.md) | Kim et al., measured C4F6/Ar neutral + ion mass/energy spectra | FULL TEXT + FIGURES VISUALLY AUDITED |
 | [`krueger-2024-jvsta`](library/krueger-2024-jvsta.md) | Krüger et al., JVST A 42, 043008 (2024) | FULL TEXT: research_sources/thesis_extracts/krueger-2024.txt, kr2024_osti.txt |
 | [`krueger-2024-thesis`](library/krueger-2024-thesis.md) | Krüger, PhD thesis, Univ. Michigan (2024) | FULL TEXT: research_sources/thesis_extracts/krueger_thesis_2024.txt (469k), krueger_thesis.txt (older OCR) |
 | [`omura-2019-jjap`](library/omura-2019-jjap.md) | Omura et al., JJAP (2019) | ABSTRACT/relay |
-| [`standaert-oehrlein`](library/standaert-oehrlein.md) | Standaert & Oehrlein, mixed-layer selectivity | VIA RESEARCH DOCS |
+| [`metzler-2016-thesis`](library/metzler-2016-thesis.md) | Metzler, UMD thesis (2016), cyclic C4F8/Ar-ion ALE | FULL TEXT + PIL-AUDITED FIGURES |
+| [`standaert-oehrlein`](library/standaert-oehrlein.md) | Standaert/Oehrlein, mixed-layer selectivity | OFFICIAL OSTI FULL REPORTS + VERIFIED EXCERPTS |
 | [`wang-thesis`](library/wang-thesis.md) | Wang (Mingmei), PhD thesis, Univ. Michigan | FULL TEXT: research_sources/thesis_extracts/wang_mingmei_phd_thesis.txt |
 
 ### Beam-measured yields, thresholds, sticking (the provenance floor)
 
 | bibkey | source | status |
 |---|---|---|
-| [`chae-2003-jvsta`](library/chae-2003-jvsta.md) | Chae, Vitale & Sawin (2003) | not-fetched |
+| [`chae-2003-jvsta`](library/chae-2003-jvsta.md) | Chae, Vitale & Sawin (2003) | PRIMARY FULL TEXT ONLINE + VERIFIED EXCERPT |
 | [`chang-1997-jvsta`](library/chang-1997-jvsta.md) | Chang & Sawin, JVST A 15, 610 (1997) | ABSTRACT-ONLY (curve digitized from thesis p.115) |
 | [`chang-thesis`](library/chang-thesis.md) | Chang, PhD thesis, MIT (1721.1/50356) | FULL TEXT: research_sources/thesis_extracts/chang_thesis.txt |
 | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Gray, PhD thesis, MIT (1993) | FULL TEXT (OCR sections): research_sources/thesis_extracts/gray_thesis_1993_ocr_sections.txt |
@@ -197,6 +199,14 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Chemical branching `β = 0.053(√E − √4)` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Table 5-10 parenthetical B₀ column; co-regressed partner of s₀ |
 | Oxide F sticking `s₀ = 0.02` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | printed p.246; landed only as the (s₀,B₀) pair |
 | Silicon F sticking `s₀ = 0.2` + `B₀ = 0.687(√E − √4)` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Si-side pair for the SF₆ arm upgrade (RESEARCH_SF6_RELEVANCE) |
+| Cyclic C4F8/Ar-ion Si/SiO2 Å-per-cycle + XPS state board | [`metzler-2016-thesis`](library/metzler-2016-thesis.md) | 42 depth markers + 32 XPS markers; finite transfer-depth constraint, retrospective not blind |
+| Measured mixed-layer depth: C/F/O/Si to ~15 Å, F/O tail to ~25 Å | [`metzler-2016-thesis`](library/metzler-2016-thesis.md) | direct SIMS constraint on the silicon-under-film state |
+| Ar+-induced C-F destruction → Si-F formation, nearly 1:1 | [`humbird-2004-apl`](library/humbird-2004-apl.md) | atom-balanced film-to-substrate transfer channel |
+| Energy-dependent Si-C-F depth (~15 Å at 20 eV; ~30 Å at 200 eV) | [`humbird-2004-apl`](library/humbird-2004-apl.md) | atomistic constraint on mixed-layer capacity/depth |
+| Neutral radical sticking: CF 0.4; CF2 0.01-0.07 | [`standaert-oehrlein`](library/standaert-oehrlein.md) | species-resolved film deposition; prevents one precursor-sticking constant |
+| CF2 afterglow wall sticking `(8±6)e-3` at 298 K | [`standaert-oehrlein`](library/standaert-oehrlein.md) | unbiased-wall cross-check only, not ion-activated wafer sticking |
+| Exponential Si-yield attenuation vs measured FC-film thickness | [`standaert-oehrlein`](library/standaert-oehrlein.md) | measured film-shielding topology; no decay length invented from the report text |
+| C2HF5 plasma SiO2 yield/deposition topology | [`chae-2003-jvsta`](library/chae-2003-jvsta.md) | QCM evidence that reactive CFx+ identity and ion-neutral balance matter; fitted site yield not importable |
 | Cyclic C4F8/SF6 blanket/feature depth board | [`yoshie-2023-apsusc`](library/yoshie-2023-apsusc.md) | 7 same-reactor poly-Si blanket rates + 49 held-out bulk-Si feature rates; material/history transfer warning |
 | Beam gate N1 (floor 0.25 / half-rise / plateau) | [`gray-1993-thesis`](library/gray-1993-thesis.md) | the measured yield-vs-F/Ar⁺ curve petch is graded against |
 | Species-resolved pure-reactive-ion yield ladder | [`karahashi-2007`](library/karahashi-2007.md) | direct F+/CF+/CF2+/CF3+ constraint; forbids species-agnostic validation and extrapolation above measured support |

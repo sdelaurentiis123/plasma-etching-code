@@ -1,0 +1,30 @@
+SOURCE
+D. Humbird, D. B. Graves, X. Hua, and G. S. Oehrlein,
+"Molecular dynamics simulations of Ar+-induced transport of fluorine
+through fluorocarbon films," Applied Physics Letters 84, 1073 (2004),
+DOI 10.1063/1.1644338.
+
+Author-uploaded primary full text:
+https://www.researchgate.net/publication/224427642_Molecular_dynamics_simulations_of_Ar-induced_transport_of_fluorine_through_fluorocarbon_films
+
+RETRIEVAL / EXTRACTION
+Read 2026-08-06 from the author-uploaded full-text page.  This file records a
+short verified extract.
+
+VERIFIED CLAIMS
+- Reactive MD injects thermal CF2 and normally incident Ar+ at a 9:1 ratio
+  onto Si, comparing 20 and 200 eV ions in a 470 Å^2 cell.
+- At 20 eV, below the model's physical sputter threshold, ions dissociate CF2
+  and create CF and SiFx while the film F/C remains near two.
+- At 200 eV, the model produces a deeper Si-C-F region and appreciable Si
+  etching.  Pure-Si physical sputtering is only 0.11 Si/ion at that energy;
+  fluorochemical enhancement is therefore required.
+- The simulated Si-C-F region grows from roughly 15 Å at 20 eV to roughly
+  30 Å at 200 eV.
+- Across 20 to 200 eV, destroyed C-F bonds and newly formed Si-F bonds show
+  nearly one-to-one correspondence.
+
+CLAIM BOUNDARY
+The one-to-one bond conversion and mixing depths are mechanistic MD
+constraints under the simulated CF2/Ar+ boundary.  They are not measured
+wafer fluxes and do not by themselves identify a reactor boundary.

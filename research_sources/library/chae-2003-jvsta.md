@@ -2,10 +2,23 @@
 
 **Chae, Vitale & Sawin (2003)**
 
-- **DOI/URL:** 10.1116/1.1539085
-- **Retrieval route:** publisher
-- **Status:** not-fetched
+- **DOI/URL:** https://doi.org/10.1116/1.1539085
+- **Primary full text:** https://www.researchgate.net/publication/249508706_Silicon_dioxide_etching_yield_measurements_with_inductively_coupled_fluorocarbon_plasmas
+- **Retrieval route:** author-uploaded full text
+- **Status:** PRIMARY FULL TEXT ONLINE + VERIFIED EXCERPT
+- **Extract:** `research_sources/thesis_extracts/chae_2003_jvsta_primary_excerpt.txt`
 - **Topic:** beam-yields — Beam-measured yields, thresholds and sticking (the L0/L1 provenance floor)
+
+## Verified claims added 2026-08-06
+
+| claim | implication |
+|---|---|
+| QCM directly measures SiO2 etch/deposition yield versus energy, ion-neutral ratio, and angle | independent surface-validation topology |
+| at 500 V, Ar sputter is about 0.25 SiO2/ion and C2HF5 plasma etching about 2/ion | reactive CFx+ and mixed-plasma synergy cannot be replaced by Ar+ alone |
+| CF+ is the dominant positive ion for most reported C2HF5 conditions | species identity matters |
+| neutral-only deposition is about 30% of total; ion-associated deposition is roughly 2-3 times ion flux | surface film is a dynamic ion-neutral balance |
+| PTFE density 2.1 g cm^-3 is assumed for film-mass conversion | not an atomically exact density |
+| fitted active-site creation yield is sensitive to monomer mass and omitted energy/flux/film-removal physics | topology clue only; fitted number is not importable |
 
 ## Claims table
 
