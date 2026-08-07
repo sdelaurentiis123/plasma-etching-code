@@ -6,6 +6,15 @@ import pytest
 from scripts.audit_guo_krueger_deterministic_prefix import build_report
 
 
+ROOT = Path(__file__).resolve().parents[1]
+RESULTS = (
+    ROOT
+    / "results"
+    / "curated"
+    / "guo_krueger_deterministic_prefix"
+)
+
+
 def _audit(n_steps, depths, *, dx_um=0.01):
     times = [0.0, 0.0625, 0.125, 0.25, 0.5]
     history = []
@@ -88,3 +97,22 @@ def test_unauthorized_configuration_change_is_refused(tmp_path):
 
     with pytest.raises(ValueError, match="unauthorized configuration"):
         build_report(coarse, fine, "time")
+
+
+def test_committed_time_ladder_preserves_failures_before_final_pass():
+    original = json.loads((RESULTS / "time_gate.json").read_text())
+    refined = json.loads((RESULTS / "time_gate_refined.json").read_text())
+    final = json.loads((RESULTS / "time_gate_final.json").read_text())
+
+    assert not original["all_gates_passed"]
+    assert not refined["all_gates_passed"]
+    assert final["all_gates_passed"]
+    assert original["gates"][
+        "maximum_matched_depth_abs_relative"
+    ]["value"] > refined["gates"][
+        "maximum_matched_depth_abs_relative"
+    ]["value"] > final["gates"][
+        "maximum_matched_depth_abs_relative"
+    ]["value"]
+    assert final["reference"]["nominal_step_s"] == 0.015625
+    assert final["refined"]["nominal_step_s"] == 0.0078125
