@@ -13,10 +13,10 @@
   redistribution notice.
 - **PDF SHA-256:**
   `96ef064afb0f804d3d853adcc275a63cd52507b0ea7e39f921d6cf6209e86d08`
-- **Figure-9 page render:** PDF page 6, 600 dpi, 5209 by 6760 pixels,
+- **Figures-9/10 page render:** PDF page 6, 600 dpi, 5209 by 6760 pixels,
   SHA-256
   `f423f6992e049ba40f47a540eb56450e9c080dddb4b03ad45ee8883b109a71fd`
-- **Status:** PRIMARY FULL TEXT READ + FIGURE 9 QUANTITATIVELY PIL-AUDITED
+- **Status:** PRIMARY FULL TEXT READ + FIGURES 9/10 QUANTITATIVELY PIL-AUDITED
 - **Topic:** quantitative C4F6/Ar reactor-boundary validation for total ion
   current, ion composition, and mass-resolved IEDs
 
@@ -33,21 +33,28 @@
 | Q7 | The measured IEDs were double peaked and mass dependent. C4F6 concentration increased the inferred plasma-potential oscillation amplitude. | Species identity, energy distribution, electronegativity, and sheath dynamics are coupled; one species-independent IEAD is not fundamental. |
 | Q8 | The submillimeter diagnostic reports CF2/CF ratios, not absolute stable-C4F6 parent flux. | The paper advances the ion-side closure but does not supply the stable-parent wafer flux or C4F6/ion surface co-incidence law needed for Krüger depth. |
 | Q9 | The checksum-bound Figure-9 digitization gives total positive-ion current `0.2644, 0.2164, 0.2012, 0.1557 mA/cm2` at `25, 50, 75, 100%` C4F6. CF+ rises `0.01319 -> 0.03153`, CF2+ rises `0.006133 -> 0.01752`, and CF3+ rises `0.002390 -> 0.008994 mA/cm2`; Ar+ falls `0.2067 -> 0.06973 mA/cm2` through 75% and is not plotted at 100%. | `BENCK-2003-C4F6-FIG9-ION-CURRENT-R1`; quantitative held-out target for a C4F6 reactor provider, retaining 10.1% digitization and 20% transmission uncertainties separately. |
+| Q10 | The checksum-bound Figure-10 digitization gives total current `0.2343, 0.2159, 0.1747 mA/cm2` at `0.67, 1.33, 2.66 Pa` for 50/50 C4F6/Ar and 200 W. Ar+ falls `0.1302 -> 0.07983`, CF+ falls `0.03192 -> 0.01410`, and CF2+ falls `0.01797 -> 0.007320 mA/cm2`; CF3+ is nonmonotonic (`0.005593, 0.004765, 0.005475`). The independently drawn 1.33-Pa points agree with the Figure-9 50%-C4F6 column within 3.53% across all five retained series. | `BENCK-2003-C4F6-FIG10-PRESSURE-ION-CURRENT-R1`; held-out pressure-response target and independent-panel digitization cross-check. The 3.53% agreement does not create a second experiment. |
 
 ## Vision audit and use
 
-Figure 9 was inspected at the original 600 dpi render. The log ordinate is
-positive-ion current density in `mA/cm2`; four mixture markers are shown for
-the total and component ions. A checksum-bound 19-point table now retains the
-unambiguous total, Ar+, CF+, CF2+, and CF3+ glyph centers. The three major
-log-axis ticks and all full-page marker pixels replay through
-`scripts/digitize_benck_2003_figure9.py`. The original-resolution color
-overlay was visually reconciled. Overlapping C/F/Cx and SiFx/COFx glyphs are
-excluded rather than guessed, and source pixels are not redistributed.
+Figures 9 and 10 were inspected at the original 600 dpi render. The log
+ordinate is positive-ion current density in `mA/cm2`. Checksum-bound 19-point
+and 15-point tables retain the unambiguous total, Ar+, CF+, CF2+, and CF3+
+glyph centers. The major log-axis ticks and all full-page marker pixels replay
+through `scripts/digitize_benck_2003_figure9.py` and
+`scripts/digitize_benck_2003_figure10.py`. Both original-resolution color
+overlays were visually reconciled. Overlapping C/F/Cx and SiFx/COFx glyphs
+are excluded rather than guessed, and source pixels are not redistributed.
+
+The Figure-10 pressure board adds a genuinely independent response axis for a
+future reactor model. Its same-condition reconciliation with Figure 9 is
+recorded solely as a digitization check; it does not reduce the source's 20%
+transmission uncertainty or count as a second measurement.
 
 This source is now the preferred quantitative validation target for a C4F6
-reactor model's ion side. It cannot normalize Krüger directly and it does not
-close the stable-parent channel. Its main model-design consequence is that
-porting a C4F8 global mechanism and calling C4F6 a “small delta” is not
-authorized: C4F6-specific fragmentation, electronegativity, byproduct return,
-and mass-resolved sheath transport must be graded against these measurements.
+reactor model's ion side: mixture and pressure dependence must both be passed.
+It cannot normalize Krüger directly and it does not close the stable-parent
+channel. Its main model-design consequence is that porting a C4F8 global
+mechanism and calling C4F6 a “small delta” is not authorized: C4F6-specific
+fragmentation, electronegativity, byproduct return, and mass-resolved sheath
+transport must be graded against these measurements.

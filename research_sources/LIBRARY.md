@@ -33,7 +33,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 
 | bibkey | source | status |
 |---|---|---|
-| [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Benck, Goyette & Wang, absolute mass-resolved C4F6/Ar ion flux and IEDs | PRIMARY FULL TEXT + FIGURE 9 QUANTITATIVELY PIL-AUDITED |
+| [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Benck, Goyette & Wang, absolute mass-resolved C4F6/Ar ion flux and IEDs | PRIMARY FULL TEXT + FIGURES 9/10 QUANTITATIVELY PIL-AUDITED |
 | [`bruce-graves`](library/bruce-graves.md) | Bruce / Graves, ion-dose crosslinking | VIA RESEARCH DOCS |
 | [`hiwasa-2022-apex`](library/hiwasa-2022-apex.md) | Hiwasa et al. (KIOXIA), APEX 15, 106002 (2022) | FETCHED |
 | [`huang-2019-jvsta`](library/huang-2019-jvsta.md) | Huang, Huard, ... Kushner, JVST A 37, 031304 (2019) | FULL TEXT (via thesis lineage) |
@@ -228,7 +228,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Condition-unknown CFx+/Ar+ angular species board | [`karahashi-2007`](library/karahashi-2007.md), [`arts-2021-apr`](library/arts-2021-apr.md) | 20 PIL-audited markers; normal points strongly imply 1000 eV, but the source/review do not report energy, so production use is forbidden |
 | Stable-parent molecule / ion co-incidence envelope | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | C5F8 analog proves molecule-assisted yields can exceed a pure-CF3+ value; explicitly not a C4F6 law |
 | C4F6 parent-signal + ion-mixture existence | [`kim-2021-coatings`](library/kim-2021-coatings.md) | wafer-facing mass/energy spectra directly show C4F6 and multiple CFx+/CxFy+ species in another CCP; qualitative existence constraint only, not Krüger flux calibration |
-| Absolute C4F6/Ar total and mass-resolved ion flux/IED board | [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Faraday-cup-normalized GEC-ICP measurements at 5–20 mTorr; quantitative reactor-model validation, not a Krüger boundary transplant |
+| Absolute C4F6/Ar total and mass-resolved ion flux/IED board | [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Faraday-cup-normalized GEC-ICP mixture and pressure boards; quantitative reactor-model validation, not a Krüger boundary transplant |
 | Matched C4F6/Ar versus C4F8/Ar ion/radical/film/yield board | [`li-2002-c4f6-c4f8`](library/li-2002-c4f6-c4f8.md) | same 600 W ICP and diagnostics expose feed-specific fragmentation and surface-film differences; figures require original-pixel digitization before constants land |
 | CF4/C4F6/He patterned SiO2/ACL rate + reactor-diagnostic board | [`woo-2024-c4f6-thesis`](library/woo-2024-c4f6-thesis.md) | 10 original-pixel rate points plus Te/current/self-bias/OES/profile constraints; two source-reporting conflicts quarantined and equal-depth SEM timing excluded from blind depth validation |
 | Class-1 angular form `(1+B sin²θ)cosθ` | [`kress-1999-jvsta`](library/kress-1999-jvsta.md) | Krüger's cited source — **wrong system (Cu/Ar MD)**; peak 4.17 vs measured ~1.3 |
