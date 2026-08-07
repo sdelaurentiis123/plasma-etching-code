@@ -1,0 +1,109 @@
+{
+  "axis_calibrations": {
+    "s20_200ev_state": {
+      "x_full_px": 483.0,
+      "x_full_value": 1200.0,
+      "x_zero_px": 195.0,
+      "y_full_px": 499.0,
+      "y_full_value": 20.0,
+      "y_zero_px": 705.0
+    },
+    "s20_200ev_yield": {
+      "x_full_px": 916.0,
+      "x_full_value": 1200.0,
+      "x_zero_px": 620.0,
+      "y_full_px": 483.0,
+      "y_full_value": 0.2,
+      "y_zero_px": 706.0
+    },
+    "s20_20ev_state": {
+      "x_full_px": 486.0,
+      "x_full_value": 1500.0,
+      "x_zero_px": 195.0,
+      "y_full_px": 212.0,
+      "y_full_value": 10.0,
+      "y_zero_px": 413.0
+    },
+    "s21_10f_state": {
+      "x_full_px": 499.0,
+      "x_full_value": 1500.0,
+      "x_zero_px": 200.0,
+      "y_full_px": 204.0,
+      "y_full_value": 50.0,
+      "y_zero_px": 411.0
+    },
+    "s21_10f_yield": {
+      "x_full_px": 911.0,
+      "x_full_value": 1500.0,
+      "x_zero_px": 603.0,
+      "y_full_px": 191.0,
+      "y_full_value": 0.4,
+      "y_zero_px": 412.0
+    },
+    "s21_20f_state": {
+      "x_full_px": 499.0,
+      "x_full_value": 1500.0,
+      "x_zero_px": 200.0,
+      "y_full_px": 482.0,
+      "y_full_value": 80.0,
+      "y_zero_px": 689.0
+    },
+    "s21_20f_yield": {
+      "x_full_px": 911.0,
+      "x_full_value": 1500.0,
+      "x_zero_px": 603.0,
+      "y_full_px": 451.0,
+      "y_full_value": 0.5,
+      "y_zero_px": 704.0
+    }
+  },
+  "digitization": {
+    "copyrighted_rasters_redistributed": false,
+    "curve_fit_used": false,
+    "method": "PIL/NumPy full-resolution RGB-component isolation; sparse manually reconciled trace centers; explicit linear axis transforms; source pixels verified within 4 px",
+    "model_values_visible_or_used": false,
+    "uncertainty_semantics": "conservative digitization allowance only; the seminar does not publish MD ensemble or potential uncertainty"
+  },
+  "limitations": [
+    "The plotted calculations are classical molecular dynamics, not exact quantum dynamics.",
+    "The seminar raster is primary-author evidence but is not the archival journal figure.",
+    "The source does not publish statistical error bars for these traces.",
+    "Monolayer normalization and the empirical interatomic potential are inherited from the source.",
+    "The curves constrain surface-state topology and transient response; they are not reactor flux measurements."
+  ],
+  "observation_count": 86,
+  "rasters": {
+    "slide20": {
+      "height_px": 777,
+      "sha256": "20ee4c5c2b9b0f9e522343073d10cbca800a33806e694c93a11607b2985ace1c",
+      "title": "Thermal CF2 / Ar+: 9/1 (Si impacts)",
+      "url": "https://image1.slideserve.com/3215203/thermal-cf-2-ar-9-1-si-impacts-l.jpg",
+      "width_px": 1023
+    },
+    "slide21": {
+      "height_px": 777,
+      "sha256": "ff8d8610a8785c37046c86b69702314725be72a784635a5e57cdd75b1a425bd5",
+      "title": "Thermal F & CF2 / 200 eV Ar+",
+      "url": "https://image1.slideserve.com/3215203/thermal-f-cf-2-200-ev-ar-l.jpg",
+      "width_px": 1023
+    }
+  },
+  "schema_version": 1,
+  "source": {
+    "affiliation": "University of California, Berkeley",
+    "authors": [
+      "David Humbird",
+      "David Graves"
+    ],
+    "date": "2004-02-23",
+    "event": "FLCC Research Seminar",
+    "evidence_grade": "primary_author_seminar_not_peer_reviewed",
+    "landing_page": "https://www.slideserve.com/moeshe/molecular-dynamics-simulations-of-plasma-surface-interactions-and-etching",
+    "relationship_to_peer_reviewed_sources": [
+      "doi:10.1063/1.1644338",
+      "doi:10.1063/1.1736321",
+      "doi:10.1063/1.1769602"
+    ],
+    "title": "Molecular Dynamics Simulations of Plasma-Surface Interactions and Etching"
+  }
+}
