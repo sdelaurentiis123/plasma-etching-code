@@ -1,0 +1,121 @@
+{
+  "all_held_out_gates_pass": true,
+  "calibration_exclusion_semantics": "held-out values were already present in the frozen digitization commit and are therefore calibration-excluded, not human-blind",
+  "campaign": "stratified_fluorocarbon_silicon_surface_v1",
+  "feature_depth_values_loaded": [],
+  "held_out_gate_results": {
+    "carbon_and_fluorine_inventory_normalized_rmse": {
+      "passed": true,
+      "threshold": 0.2,
+      "value": 0.11707335511641034
+    },
+    "cumulative_silicon_etch_monotone": {
+      "passed": true,
+      "threshold": true,
+      "value": true
+    },
+    "cumulative_silicon_etch_normalized_rmse": {
+      "passed": true,
+      "threshold": 0.15,
+      "value": 0.032504667021754294
+    },
+    "instantaneous_yield_normalized_rmse": {
+      "passed": true,
+      "threshold": 0.2,
+      "value": 0.11677510090394878
+    },
+    "newly_promoted_si_has_nonzero_residence": {
+      "passed": true,
+      "threshold": true,
+      "value": "start-of-step removal guard"
+    },
+    "stratified_element_and_bond_ledger": {
+      "passed": true,
+      "threshold": "tests/test_stratified_fluorocarbon_si.py passes",
+      "value": "structural invariant"
+    }
+  },
+  "model": "petch.humbird_graves_reduced_response.HumbirdGravesReducedResponse",
+  "parameter_values_and_provenance": {
+    "atomic_f_apparent_front_sticking": 1.0,
+    "atomic_f_carbon_half_response_ml": 9.1815723,
+    "atomic_f_carbon_percolation_exponent": 5.82307943,
+    "atomic_f_carbon_turnover_cross_section_m2": 1.13069296e-21,
+    "atomic_f_f_turnover_cross_section_m2": 1.87036901e-20,
+    "atomic_f_si_yield_increment": 0.133256,
+    "baseline_carbon_half_response_ml": 11.23515466,
+    "baseline_carbon_percolation_exponent": 4.35429311,
+    "baseline_si_yield": 0.1685849,
+    "carbon_capacity_fraction_of_transport_layer": 0.5,
+    "carbon_incorporation_per_nrt_opportunity": 0.060858354,
+    "cf2_carbon_turnover_cross_section_m2": 7.50947163e-23,
+    "cf2_f_turnover_cross_section_m2": 9.53753699e-23,
+    "displacement_energy_eV": 25.0,
+    "evidence": {
+      "atomic_f_renewal_response": "one ion-renewed site cap: 2R/(1+R), fixed before evaluating the calibration-excluded R=2 case",
+      "carbon_capacity_fraction_of_transport_layer": "one C site per Si site in a dense Si-C layer",
+      "carbon_kinetics": "regressed on calibration C-inventory panels only; 20% F panel excluded",
+      "displacement_energy_eV": "25 eV declared central value of the 10--80 eV polymer/near-surface displacement band",
+      "fluorine_kinetics": "regressed on calibration F-inventory panels only; 20% F panel excluded",
+      "monolayer_areal_density_m2": "Si(100) surface atomic density used by the source ML axis",
+      "silicon_yield": "regressed on calibration instantaneous-yield and cumulative-Si panels only; no feature depth",
+      "source_fluence_unit_m2": "axis unit 10^15 cm^-2 converted to 10^19 m^-2"
+    },
+    "ion_f_turnover_cross_section_m2": 1.40572631e-21,
+    "monolayer_areal_density_m2": 6.78e+18,
+    "source_fluence_unit_m2": 1e+19,
+    "thermal_cf2_carbon_sticking": 0.0059722105
+  },
+  "predictions_path": "results/curated/humbird_graves_reduced_response/predictions.csv",
+  "protocol_path": "data/experimental/humbird_graves_2004/model_protocol.json",
+  "reactor_flux_normalizations_loaded": [],
+  "schema_version": 1,
+  "scope_limitations": [
+    "classical-MD reduced response, not quantum-accurate dynamics",
+    "strictly evaluated only at the source 20 and 200 eV Ar+ conditions",
+    "not an SiO2 chemistry card",
+    "not a reactor boundary provider",
+    "not evidence that Krueger absolute depth is identified",
+    "the percolation coefficients are regressed, not first-principles constants"
+  ],
+  "source_data_path": "data/experimental/humbird_graves_2004/seminar_surface_state_curves.csv",
+  "source_evidence_grade": "primary_author_seminar_not_peer_reviewed",
+  "surface_metrics": {
+    "calibration": {
+      "Si_etch_yield_per_ion": {
+        "normalized_rmse_by_observed_max": 0.0707889169060409,
+        "observation_count": 12
+      },
+      "cumulative_Si_etch_ML": {
+        "normalized_rmse_by_observed_max": 0.007123688532545749,
+        "observation_count": 12
+      },
+      "surface_C_uptake_ML": {
+        "normalized_rmse_by_observed_max": 0.04731124992674049,
+        "observation_count": 18
+      },
+      "surface_F_uptake_ML": {
+        "normalized_rmse_by_observed_max": 0.13446128473241895,
+        "observation_count": 18
+      }
+    },
+    "held_out": {
+      "Si_etch_yield_per_ion": {
+        "normalized_rmse_by_observed_max": 0.11677510090394878,
+        "observation_count": 7
+      },
+      "cumulative_Si_etch_ML": {
+        "normalized_rmse_by_observed_max": 0.032504667021754294,
+        "observation_count": 7
+      },
+      "surface_C_uptake_ML": {
+        "normalized_rmse_by_observed_max": 0.11707335511641034,
+        "observation_count": 5
+      },
+      "surface_F_uptake_ML": {
+        "normalized_rmse_by_observed_max": 0.10754533171620079,
+        "observation_count": 7
+      }
+    }
+  }
+}

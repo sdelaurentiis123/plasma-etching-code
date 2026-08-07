@@ -58,3 +58,21 @@ deliberately untracked; the copyrighted source rasters are not redistributed.
 
 The CSV retains pixel centers and conservative digitization allowances.  They
 cover raster reading, not the source MD model discrepancy.
+
+## Reduced-response gate
+
+The calibration/held-out roles are frozen in `model_protocol.json`.
+`HumbirdGravesReducedResponse` uses only the 20 eV and 200 eV 9/1 panels and
+the 200 eV 8/1/1 panels to determine its collision cross sections and
+carbon-percolation response.  The complete 7/2/1 (20% F) case is
+calibration-excluded.  Replay its predictions and gates with:
+
+```bash
+python scripts/audit_humbird_graves_reduced_response.py --check
+```
+
+The resulting pass is deliberately narrow: it validates a stratified
+reduced representation of these classical-MD trajectories.  The values were
+already visible in the committed digitization, so this is not a human-blind
+test.  It supplies neither an oxide chemistry card nor a reactor boundary,
+and it uses no feature depth.
