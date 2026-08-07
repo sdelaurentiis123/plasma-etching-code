@@ -22,6 +22,8 @@ KOUNIS_MELAS_2024_ARCHIVE_SHA256 = (
     "4c9fa0b9268ac314da77b1012906dff4e45c5af79afd7ea674b26ace48e0f269")
 KOUNIS_MELAS_2024_ALE_TRAJECTORY_SHA256 = (
     "e76b9895a8191c923a492130452a73a4c929589b5260d9847e1d750fc22be884")
+TINACBA_2021_FIGURE8_SHA256 = (
+    "6049bef74587d074cd569106c320742c1313e9052ea1749fe2d6d4139c655e17")
 
 
 @dataclass(frozen=True)
@@ -30,6 +32,12 @@ class KounisMelas2024Tables:
     reactive_ion_etch: SurfaceInteractionTable
     ale_products: SurfaceInteractionTable
     ale_cycles: SurfaceInteractionTable
+
+
+@dataclass(frozen=True)
+class Tinacba2021Sf5Tables:
+    silicon: SurfaceInteractionTable
+    silicon_dioxide: SurfaceInteractionTable
 
 
 def _verified_rows(path, expected_fields, verify_checksum):
@@ -234,3 +242,98 @@ def load_kounis_melas_2024_tables(directory, *, verify_checksum=True):
                 "not the source's separate 1e15 impacts/cm2 fluence shorthand.")))
     return KounisMelas2024Tables(
         sputtering, reactive_ion_etch, ale_products, ale_cycles)
+
+
+def load_tinacba_2021_sf5_tables(path, *, verify_checksum=True):
+    """Load the digitized DFT-informed SF5+ MD yields for Si and SiO2.
+
+    The returned tables describe steady, normal-incidence 300 K removal by a
+    mass-selected SF5+ projectile. They do not invent an angular law, neutral
+    synergy, an SFx+ mixture, or sulfur-surface reactions absent from the
+    source potential.
+    """
+    path = Path(path)
+    payload = path.read_bytes()
+    if verify_checksum and sha256(payload).hexdigest() != (
+        TINACBA_2021_FIGURE8_SHA256
+    ):
+        raise ValueError(f"checksum mismatch for Tinacba interaction data: {path}")
+    expected_fields = [
+        "material", "series", "energy_eV", "si_removal_yield_per_sf5_ion",
+        "marker_center_x_px", "marker_center_y_px", "marker",
+        "digitization_yield_bound",
+    ]
+    with path.open(newline="", encoding="utf-8") as stream:
+        reader = csv.DictReader(stream)
+        if reader.fieldnames != expected_fields:
+            raise ValueError(
+                f"unexpected Tinacba interaction-data schema: {reader.fieldnames}")
+        rows = list(reader)
+
+    tables = {}
+    for material in ("Si", "SiO2"):
+        selected = [
+            row for row in rows
+            if row["material"] == material and row["series"] == "sf5_md"
+        ]
+        if len(selected) != 6:
+            raise ValueError(
+                f"incomplete Tinacba SF5+ MD energy board for {material}")
+        energy = np.asarray([float(row["energy_eV"]) for row in selected])
+        yield_value = np.asarray([
+            float(row["si_removal_yield_per_sf5_ion"]) for row in selected
+        ])
+        digitization_bounds = {
+            float(row["digitization_yield_bound"]) for row in selected
+        }
+        if len(digitization_bounds) != 1:
+            raise ValueError("Tinacba MD digitization bound is not uniform")
+        target_unit = "Si_atom" if material == "Si" else "SiO2_formula"
+        table = SurfaceInteractionTable(
+            material=material,
+            incident_species=("SF5+",),
+            axes=(InteractionAxis("ion_energy", energy, "eV"),),
+            outputs={"target_removal_yield": yield_value},
+            output_units={
+                "target_removal_yield": f"{target_unit}/SF5+",
+            },
+            bounds={"target_removal_yield": (0.0, None)},
+            provenance={
+                "source": (
+                    "Tinacba et al., JVST B 39, 043203 (2021), Figure 8 "
+                    "DFT-informed modified-Stillinger-Weber MD"
+                ),
+                "evidence_type": "DFT_informed_molecular_dynamics",
+                "supports_prediction_within_declared_domain": True,
+                "paper_doi": "10.1116/6.0001230",
+                "source_table": str(path.name),
+                "source_table_sha256": TINACBA_2021_FIGURE8_SHA256,
+                "target_material_unit": target_unit,
+                "digitization_absolute_yield_bound": next(
+                    iter(digitization_bounds)
+                ),
+                "conditions": {
+                    "incidence_angle_deg": 0.0,
+                    "surface_temperature_K": 300.0,
+                    "typical_impacts_per_trajectory": 4000,
+                    "state": "steady_surface_composition_and_yield",
+                    "neutral_radical_beam": False,
+                },
+                "potential_scope": {
+                    "included": (
+                        "S-F carrier bond plus S mass and radius; transferred "
+                        "Si/O/F potentials"
+                    ),
+                    "intentionally_absent": ["S-S", "S-Si", "S-O"],
+                },
+                "validation": {
+                    "beam_projectile": "mass-selected SF5+",
+                    "beam_overlap_energies_eV": [150, 2000],
+                    "retrospective_not_blind": True,
+                    "post_hoc_pass_gate_declared": False,
+                },
+            },
+        )
+        tables[material] = table
+    return Tinacba2021Sf5Tables(
+        silicon=tables["Si"], silicon_dioxide=tables["SiO2"])

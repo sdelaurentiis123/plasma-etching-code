@@ -219,6 +219,277 @@ class TabulatedSiPhysicalSputterMechanism:
             validity=validity)
 
 
+@dataclass(frozen=True)
+class TabulatedTargetSurfaceState:
+    """Integrated removal inventory for a sourced atomistic target table."""
+
+    removed_target_units_m2: np.ndarray | float = 0.0
+
+    def __post_init__(self):
+        value = np.asarray(self.removed_target_units_m2, dtype=float).copy()
+        if np.any(~np.isfinite(value)) or np.any(value < 0.0):
+            raise ValueError(
+                "removed target-unit inventory must be finite and nonnegative")
+        value.setflags(write=False)
+        object.__setattr__(self, "removed_target_units_m2", value)
+
+    @classmethod
+    def bare(cls, shape=()):
+        return cls(np.zeros(shape))
+
+    def conservative_surface_fields(self):
+        return {"removed_target_units_m2": self.removed_target_units_m2}
+
+    def conservative_surface_upper_bounds(self):
+        return {"removed_target_units_m2": None}
+
+    def with_conservative_surface_fields(self, fields):
+        fields = dict(fields)
+        if set(fields) != {"removed_target_units_m2"}:
+            raise ValueError(
+                "tabulated target remap fields do not match its state contract")
+        return type(self)(fields["removed_target_units_m2"])
+
+
+@dataclass(frozen=True)
+class TabulatedNormalIonRemovalStepResult:
+    state: TabulatedTargetSurfaceState
+    etch_velocity_m_s: np.ndarray
+    etch_velocity_digitization_bound_m_s: np.ndarray
+    removed_target_units_m2: np.ndarray
+    material_exchange: SurfaceMaterialExchange
+    product_populations: tuple[SurfaceProductPopulation, ...]
+    table_fingerprint: str
+    validity: MechanismValidity
+
+    def __post_init__(self):
+        for name in (
+            "etch_velocity_m_s",
+            "etch_velocity_digitization_bound_m_s",
+            "removed_target_units_m2",
+        ):
+            value = np.asarray(getattr(self, name), dtype=float).copy()
+            value.setflags(write=False)
+            object.__setattr__(self, name, value)
+        object.__setattr__(
+            self,
+            "product_populations",
+            validate_surface_product_routing(
+                self.material_exchange, self.product_populations
+            ),
+        )
+
+
+class TabulatedNormalIonRemovalMechanism:
+    """Normal-incidence target removal from a provenance-bound atomistic table.
+
+    The provider supplies a steady removal yield versus projectile energy. A
+    target-unit density converts the event ledger to interface speed. Product
+    routing remains unresolved unless the source separately identifies
+    sputtered products; the feature engine must not silently manufacture a
+    redeposition population.
+    """
+
+    def __init__(
+        self,
+        interaction_table: SurfaceInteractionTable,
+        target_unit_density_m3: float,
+        target_density_evidence: ParameterEvidence,
+        *,
+        cosine_tolerance=1e-5,
+    ):
+        table = interaction_table
+        if (
+            len(table.incident_species) != 1
+            or len(table.axes) != 1
+            or table.axes[0].name != "ion_energy"
+            or set(table.outputs) != {"target_removal_yield"}
+        ):
+            raise ValueError(
+                "interaction table does not implement the normal-ion "
+                "target-removal contract"
+            )
+        target_unit = table.provenance.get("target_material_unit")
+        expected_unit = f"{target_unit}/{table.incident_species[0]}"
+        conditions = dict(table.provenance.get("conditions", {}))
+        if (
+            not isinstance(target_unit, str)
+            or not target_unit
+            or table.output_units["target_removal_yield"] != expected_unit
+            or conditions.get("incidence_angle_deg") != 0.0
+            or not np.isfinite(target_unit_density_m3)
+            or target_unit_density_m3 <= 0.0
+            or not isinstance(target_density_evidence, ParameterEvidence)
+            or not np.isfinite(cosine_tolerance)
+            or cosine_tolerance < 0.0
+        ):
+            raise ValueError("invalid tabulated normal-ion removal inputs")
+        self.table = table
+        self.target_unit_density_m3 = float(target_unit_density_m3)
+        self.target_density_evidence = target_density_evidence
+        self.projectile_species = table.incident_species[0]
+        self.target_material_unit = target_unit
+        self.cosine_tolerance = float(cosine_tolerance)
+        self.digitization_absolute_yield_bound = float(
+            table.provenance.get("digitization_absolute_yield_bound", 0.0)
+        )
+        if (
+            not np.isfinite(self.digitization_absolute_yield_bound)
+            or self.digitization_absolute_yield_bound < 0.0
+        ):
+            raise ValueError("invalid target-yield digitization bound")
+
+    @staticmethod
+    def initial_state(shape=()):
+        return TabulatedTargetSurfaceState.bare(shape)
+
+    def validity(self, fluxes: SurfaceFluxes):
+        unsupported_neutral = tuple(
+            sorted(
+                name
+                for name, value in fluxes.neutral_flux_m2_s.items()
+                if np.any(np.asarray(value) > 0.0)
+            )
+        )
+        unsupported_energetic = tuple(
+            sorted(
+                {
+                    item.name
+                    for item in fluxes.energetic_fluxes
+                    if item.name != self.projectile_species
+                    and np.any(np.asarray(item.flux_m2_s) > 0.0)
+                }
+            )
+        )
+        wrong_angle = False
+        for population in fluxes.energetic_fluxes:
+            if population.name != self.projectile_species:
+                continue
+            cosine = (
+                population.event_cosine_incidence
+                if isinstance(population, FaceResolvedEnergeticFlux)
+                else population.cosine_incidence
+            )
+            wrong_angle |= bool(
+                np.any(np.abs(cosine - 1.0) > self.cosine_tolerance)
+            )
+        reasons = []
+        if unsupported_neutral or unsupported_energetic:
+            reasons.append(
+                "positive incident flux has no atomistic target-removal channel")
+        if wrong_angle:
+            reasons.append(
+                "ion incidence leaves the fixed normal-incidence atomistic board")
+        nonpredictive = []
+        if not self.target_density_evidence.supports_prediction_within_declared_domain:
+            nonpredictive.append("target_unit_density_m3")
+        if self.table.provenance.get(
+            "supports_prediction_within_declared_domain"
+        ) is not True:
+            nonpredictive.append("interaction_table")
+        potential_scope = dict(self.table.provenance.get("potential_scope", {}))
+        intentionally_absent = tuple(
+            potential_scope.get("intentionally_absent", ())
+        )
+        return MechanismValidity(
+            within_declared_scope=not reasons,
+            reasons=tuple(reasons),
+            unsupported_neutral_species=unsupported_neutral,
+            known_model_form_omissions=(
+                "atomistic table has no incidence-angle sweep",
+                "steady surface composition is implicit rather than evolved",
+                "emitted product identities and energy-angle distributions are absent",
+                *(
+                    "source potential intentionally omits " + item
+                    for item in intentionally_absent
+                ),
+            ),
+            parameter_evidence_supports_prediction=not nonpredictive,
+            nonpredictive_parameters=tuple(nonpredictive),
+        )
+
+    def _rate(self, population, shape):
+        if isinstance(population, FaceResolvedEnergeticFlux):
+            evaluated = self.table.evaluate(
+                {"ion_energy": population.event_energy_eV}
+            )
+            rate = np.bincount(
+                population.event_face,
+                weights=(
+                    population.event_flux_m2_s
+                    * evaluated.values["target_removal_yield"]
+                ),
+                minlength=population.face_count,
+            )
+            flux = np.bincount(
+                population.event_face,
+                weights=population.event_flux_m2_s,
+                minlength=population.face_count,
+            )
+            return np.broadcast_to(rate, shape), np.broadcast_to(flux, shape)
+        evaluated = self.table.evaluate({"ion_energy": population.energy_eV})
+        mean_yield = float(
+            np.dot(population.weight, evaluated.values["target_removal_yield"])
+        )
+        flux = np.broadcast_to(
+            np.asarray(population.flux_m2_s, dtype=float), shape
+        )
+        return flux * mean_yield, flux
+
+    def advance(
+        self,
+        state,
+        fluxes: SurfaceFluxes,
+        duration_s: float,
+        *,
+        strict=True,
+    ):
+        if not isinstance(state, TabulatedTargetSurfaceState):
+            raise TypeError(
+                "normal-ion removal requires TabulatedTargetSurfaceState")
+        if not np.isfinite(duration_s) or duration_s < 0.0:
+            raise ValueError("duration_s must be finite and nonnegative")
+        validity = self.validity(fluxes)
+        if strict and not validity.within_declared_scope:
+            raise ValueError(
+                "surface mechanism outside declared scope: "
+                + "; ".join(validity.reasons)
+            )
+        shape = state.removed_target_units_m2.shape
+        removal_rate = np.zeros(shape)
+        projectile_flux = np.zeros(shape)
+        for population in fluxes.energetic_fluxes:
+            if population.name == self.projectile_species:
+                rate, flux = self._rate(population, shape)
+                removal_rate += rate
+                projectile_flux += flux
+        removed = removal_rate * float(duration_s)
+        updated = TabulatedTargetSurfaceState(
+            state.removed_target_units_m2 + removed
+        )
+        exchange = unresolved_surface_exchange(
+            removed_units_m2={self.target_material_unit: removed},
+            limitations=(
+                "atomistic source reports total target removal but not "
+                "product branching or launch distributions",
+            ),
+        )
+        return TabulatedNormalIonRemovalStepResult(
+            state=updated,
+            etch_velocity_m_s=removal_rate / self.target_unit_density_m3,
+            etch_velocity_digitization_bound_m_s=(
+                projectile_flux
+                * self.digitization_absolute_yield_bound
+                / self.target_unit_density_m3
+            ),
+            removed_target_units_m2=removed,
+            material_exchange=exchange,
+            product_populations=(),
+            table_fingerprint=self.table.fingerprint,
+            validity=validity,
+        )
+
+
 class TabulatedSiClArMechanism:
     """Si-Cl2-Ar+ RIE at the exact fixed conditions released in OSTI 2589032.
 

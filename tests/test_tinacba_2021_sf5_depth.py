@@ -52,3 +52,7 @@ def test_sf5_scope_retains_sulfur_chemistry_omission():
     forbidden = report["uncertainty_and_scope"]["not_authorized"]
     assert "an SF6 reactor boundary" in forbidden
     assert "a Krueger C4F6 depth fit" in forbidden
+    adapter = report["common_core_adapter"]
+    assert adapter["atom_or_formula_ledger_closed"]
+    assert not adapter["product_routing_complete"]
+    assert not adapter["feature_profile_validated"]

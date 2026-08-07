@@ -38,5 +38,10 @@
   draws a full-resolution PIL overlay.
 - `results/curated/tinacba_2021_sf5_depth/audit.json` grades the four exact
   MD/beam overlaps as absolute depth per fixed dose.
+- `load_tinacba_2021_sf5_tables` and
+  `TabulatedNormalIonRemovalMechanism` checksum-load the MD nodes into the
+  common material router with exact `Si_atom`/`SiO2_formula` removal ledgers.
+  The executable adapter refuses every source-absent dimension and leaves
+  product routing unresolved.
 - Nothing in this source supplies the species-resolved flux mixture or IEAD
   needed by the Yoshie or Krüger reactors.

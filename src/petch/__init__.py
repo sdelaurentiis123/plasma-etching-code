@@ -86,11 +86,15 @@ from .surface_interaction_table import (
     InteractionAxis, SurfaceInteractionDomainError, SurfaceInteractionEvaluation,
     SurfaceInteractionInterpolationAudit, SurfaceInteractionTable,
 )
-from .interaction_data import KounisMelas2024Tables, load_kounis_melas_2024_tables
+from .interaction_data import (
+    KounisMelas2024Tables, Tinacba2021Sf5Tables,
+    load_kounis_melas_2024_tables, load_tinacba_2021_sf5_tables,
+)
 from .tabulated_chemistry import (
+    TabulatedNormalIonRemovalMechanism, TabulatedNormalIonRemovalStepResult,
     TabulatedSiClArMechanism, TabulatedSiPhysicalSputterMechanism,
     TabulatedSiPhysicalSputterStepResult, TabulatedSiSurfaceState,
-    TabulatedSiSurfaceStepResult,
+    TabulatedSiSurfaceStepResult, TabulatedTargetSurfaceState,
 )
 from .feature_step_3d import (
     FeatureGeometry3D, FeatureSolve3DResult, FeatureStep3DResult, FeatureStepValidity,
@@ -333,10 +337,13 @@ __all__ = [
     "CHARGING_CHECKPOINT_SCHEMA", "PhysicalChargingCheckpoint3D",
     "InteractionAxis", "SurfaceInteractionDomainError", "SurfaceInteractionEvaluation",
     "SurfaceInteractionInterpolationAudit", "SurfaceInteractionTable",
-    "KounisMelas2024Tables", "load_kounis_melas_2024_tables",
+    "KounisMelas2024Tables", "Tinacba2021Sf5Tables",
+    "load_kounis_melas_2024_tables", "load_tinacba_2021_sf5_tables",
+    "TabulatedNormalIonRemovalMechanism",
+    "TabulatedNormalIonRemovalStepResult",
     "TabulatedSiClArMechanism", "TabulatedSiPhysicalSputterMechanism",
     "TabulatedSiPhysicalSputterStepResult", "TabulatedSiSurfaceState",
-    "TabulatedSiSurfaceStepResult",
+    "TabulatedSiSurfaceStepResult", "TabulatedTargetSurfaceState",
     "FeatureGeometry3D", "FeatureSolve3DResult", "FeatureStep3DResult", "FeatureStepValidity",
     "SurfaceTopologyChangeError",
     "advance_feature_step_3d", "conservative_remap_surface_state", "solve_feature_3d",

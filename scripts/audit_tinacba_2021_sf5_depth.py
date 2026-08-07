@@ -148,6 +148,27 @@ def build_report() -> dict[str, object]:
                 "S-O chemistry intentionally absent"
             ),
         },
+        "common_core_adapter": {
+            "table_loader": "petch.interaction_data.load_tinacba_2021_sf5_tables",
+            "surface_mechanism": (
+                "petch.tabulated_chemistry."
+                "TabulatedNormalIonRemovalMechanism"
+            ),
+            "material_router": "petch.material_mechanism_3d.MaterialMechanismRouter3D",
+            "materials": {
+                "Si": "Si_atom",
+                "SiO2": "SiO2_formula",
+            },
+            "atom_or_formula_ledger_closed": True,
+            "product_routing_complete": False,
+            "feature_profile_validated": False,
+            "refused_dimensions": [
+                "off-normal incidence",
+                "neutral co-flux",
+                "projectiles other than SF5+",
+                "energy extrapolation outside 150-2000 eV",
+            ],
+        },
         "depth_conversion": {
             "equation": "d = Y*D/N",
             "reference_dose_m2": REFERENCE_DOSE_M2,

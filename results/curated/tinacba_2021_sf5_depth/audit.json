@@ -12,6 +12,24 @@
     "projectile": "SF5+"
   },
   "claim": "retrospective no-yield-fit atomistic-provider validation against mass-selected SF5+ beam depth-per-dose; not a feature or reactor prediction",
+  "common_core_adapter": {
+    "atom_or_formula_ledger_closed": true,
+    "feature_profile_validated": false,
+    "material_router": "petch.material_mechanism_3d.MaterialMechanismRouter3D",
+    "materials": {
+      "Si": "Si_atom",
+      "SiO2": "SiO2_formula"
+    },
+    "product_routing_complete": false,
+    "refused_dimensions": [
+      "off-normal incidence",
+      "neutral co-flux",
+      "projectiles other than SF5+",
+      "energy extrapolation outside 150-2000 eV"
+    ],
+    "surface_mechanism": "petch.tabulated_chemistry.TabulatedNormalIonRemovalMechanism",
+    "table_loader": "petch.interaction_data.load_tinacba_2021_sf5_tables"
+  },
   "comparison": {
     "maximum_absolute_relative_depth_error": 0.15041275263307718,
     "mean_absolute_relative_depth_error": 0.058794014290942664,
