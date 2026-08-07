@@ -630,9 +630,11 @@ def build_krueger_2024_material_router_3d(
     """Build one material router for the reduced Krüger oxide/mask development replay.
 
     ``surface_model`` selects the chemistry family: ``"reduced"`` (the
-    coverage/site-balance mechanisms) or ``"mixed_layer"`` (the element-resolved
-    two-reservoir chemistry, `petch.mixed_layer_mechanism`; the reduced-model
-    knob arguments do not apply there and are refused if set).
+    coverage/site-balance mechanisms), ``"mixed_layer"`` (the element-resolved
+    two-reservoir chemistry, :mod:`petch.mixed_layer_mechanism`), or
+    ``"guo_tml"`` (the source-fixed Guo/Kwon translating-layer SiO2 adapter).
+    The reduced-model oxide yield multiplier does not apply to either
+    mixed-layer family and is refused if set.
     """
     oxide_id = int(oxide_material_id)
     mask_id = int(mask_material_id)
@@ -661,6 +663,40 @@ def build_krueger_2024_material_router_3d(
                     "role": "amorphous-carbon mask",
                     "model": dict(mask.provenance),
                     "claim_status": "development_replay",
+                },
+            })
+    if surface_model == "guo_tml":
+        if (float(oxide_etch_yield_scale) != 1.0
+                or float(mixed_layer_volatilization_yield) != 1.0):
+            raise ValueError(
+                "guo_tml has no oxide yield scale or volatilization knob; "
+                "do not pass them")
+        from petch.guo_c4f8_sio2_feature import (
+            GuoC4F8ArSiO2FeatureMechanism,
+        )
+        oxide = GuoC4F8ArSiO2FeatureMechanism.krueger_2024_transfer_audit()
+        mask = AmorphousCarbonMaskMechanism(
+            AmorphousCarbonMaskParameters.krueger_2024_reduced_projection(
+                projectile_species=projectile_species,
+                yield_energy_model=yield_energy_model,
+                deposition_layer_depth_nm=deposition_layer_depth_nm,
+                oxygen_half_saturation_flux_m2_s=
+                    oxygen_half_saturation_flux_m2_s,
+                effective_crosslinked_growth_fraction=(
+                    effective_mask_crosslinked_growth_fraction)))
+        return MaterialMechanismRouter3D(
+            {oxide_id: oxide, mask_id: mask},
+            provenance={
+                oxide_id: {
+                    "role": "SiO2 substrate",
+                    "model": dict(oxide.provenance),
+                    "claim_status": (
+                        "out_of_board_transfer_audit_not_prediction"),
+                },
+                mask_id: {
+                    "role": "amorphous-carbon mask",
+                    "model": dict(mask.provenance),
+                    "claim_status": "development_replay_unchanged",
                 },
             })
     if surface_model != "reduced":

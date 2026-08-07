@@ -187,3 +187,35 @@ def test_krueger_router_dispatches_oxide_and_mask_without_forking_the_engine():
         0.5 * router.mechanisms[1].parameters.bare_sio2_yield.reference_yield)
     assert scaled.mechanisms[2].parameters.carbon_sputter_yield == (
         router.mechanisms[2].parameters.carbon_sputter_yield)
+
+
+def test_guo_tml_router_reuses_transport_and_mask_but_carries_transfer_limits():
+    router = build_krueger_2024_material_router_3d(
+        surface_model="guo_tml")
+    material = np.array([1, 2])
+    state = router.initial_state_by_material(material)
+    fluxes = SurfaceFluxes(
+        {
+            "C3F4": np.full(2, 9.5e20),
+            "C2F3": np.full(2, 6.8e20),
+            "CF": np.full(2, 4.4e20),
+            "CF2": np.full(2, 9.4e20),
+            "CF3": np.full(2, 8.4e19),
+            "O": np.full(2, 7.7e20),
+        },
+        (EnergeticFlux(
+            "ions", np.full(2, 1.2e20),
+            [3500.0], [1.0], [1.0]),),
+    )
+
+    result = router.advance_by_material(state, fluxes, 0.01, material)
+
+    assert result.etch_velocity_m_s[0] > 0.0
+    assert result.etch_velocity_m_s[1] > 0.0
+    assert not result.validity.within_declared_scope
+    assert not result.validity.parameter_evidence_supports_prediction
+    assert router.provenance["materials"]["1"]["evidence"][
+        "claim_status"] == "out_of_board_transfer_audit_not_prediction"
+    with pytest.raises(ValueError, match="no oxide yield scale"):
+        build_krueger_2024_material_router_3d(
+            surface_model="guo_tml", oxide_etch_yield_scale=1.01)

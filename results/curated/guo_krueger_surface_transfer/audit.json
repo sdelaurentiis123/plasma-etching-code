@@ -76,6 +76,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 1000.0,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -97,6 +98,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 2000.0,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -118,6 +120,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 500.0,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -139,6 +142,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 370.0,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -160,6 +164,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 4820.89368219741,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -211,6 +216,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 4820.89368219741,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -232,6 +238,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 4820.89368219741,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -253,6 +260,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 4820.89368219741,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -274,6 +282,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 4820.89368219741,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -295,6 +304,7 @@
         "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
         "quadrature_max_energy_eV": 4820.89368219741,
         "source_fit_energy_max_eV": 370.0,
+        "steady_state_solver": "BDF_fluence_integration",
         "surface_evidence_ceiling": "L1_yield_regressed"
       },
       "state": {
@@ -317,6 +327,7 @@
       "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
       "quadrature_max_energy_eV": 4820.89368219741,
       "source_fit_energy_max_eV": 370.0,
+      "steady_state_solver": "BDF_fluence_integration",
       "surface_evidence_ceiling": "L1_yield_regressed"
     },
     "state": {
@@ -362,6 +373,7 @@
           "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
           "quadrature_max_energy_eV": 4820.89368219741,
           "source_fit_energy_max_eV": 370.0,
+          "steady_state_solver": "BDF_fluence_integration",
           "surface_evidence_ceiling": "L1_yield_regressed"
         },
         "state": {
@@ -387,6 +399,7 @@
           "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
           "quadrature_max_energy_eV": 4820.89368219741,
           "source_fit_energy_max_eV": 370.0,
+          "steady_state_solver": "BDF_fluence_integration",
           "surface_evidence_ceiling": "L1_yield_regressed"
         },
         "state": {
@@ -408,6 +421,7 @@
           "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
           "quadrature_max_energy_eV": 4820.89368219741,
           "source_fit_energy_max_eV": 370.0,
+          "steady_state_solver": "BDF_fluence_integration",
           "surface_evidence_ceiling": "L1_yield_regressed"
         },
         "state": {
@@ -429,6 +443,7 @@
           "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
           "quadrature_max_energy_eV": 4820.89368219741,
           "source_fit_energy_max_eV": 370.0,
+          "steady_state_solver": "BDF_fluence_integration",
           "surface_evidence_ceiling": "L1_yield_regressed"
         },
         "state": {
@@ -450,6 +465,7 @@
           "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
           "quadrature_max_energy_eV": 4820.89368219741,
           "source_fit_energy_max_eV": 370.0,
+          "steady_state_solver": "BDF_fluence_integration",
           "surface_evidence_ceiling": "L1_yield_regressed"
         },
         "state": {
@@ -471,6 +487,7 @@
           "physical_angular_polynomial_interpretation": "declared_degree_sequence_repair_95p31_cosine_power_1",
           "quadrature_max_energy_eV": 4820.89368219741,
           "source_fit_energy_max_eV": 370.0,
+          "steady_state_solver": "BDF_fluence_integration",
           "surface_evidence_ceiling": "L1_yield_regressed"
         },
         "state": {

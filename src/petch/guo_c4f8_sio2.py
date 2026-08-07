@@ -32,6 +32,7 @@ from typing import Mapping
 
 import numpy as np
 from scipy.integrate import solve_ivp
+from scipy.optimize import least_squares
 
 
 ELEMENTS = ("Si", "O", "C", "F")
@@ -462,6 +463,47 @@ class GuoC4F8ArSiO2Mechanism:
         del coordinate
         return self._rates_and_derivative(values)[-1]
 
+    def _steady_evaluation(
+        self,
+        values,
+        *,
+        integration_coordinate: float,
+        residual_tolerance: float,
+        solver_name: str,
+    ) -> GuoTmlEvaluation:
+        state, rates, added, removed, movement_atoms, derivative = (
+            self._rates_and_derivative(values))
+        residual = float(np.max(np.abs(derivative)))
+        if residual > residual_tolerance:
+            raise RuntimeError(
+                "Guo translating-layer steady state did not converge: "
+                f"max residual {residual:.6g}")
+        return GuoTmlEvaluation(
+            state=state,
+            sio2_yield_per_ion=movement_atoms / 3.0,
+            movement_atoms_per_ion=movement_atoms,
+            reaction_yields=MappingProxyType(dict(rates)),
+            incoming_atoms_per_ion=MappingProxyType(dict(added)),
+            removed_atoms_per_ion=MappingProxyType(dict(removed)),
+            elemental_derivative_residual=float(sum(derivative[:4])),
+            steady_state_residual=residual,
+            integration_coordinate=float(integration_coordinate),
+            source_extrapolation=MappingProxyType({
+                "source_fit_energy_max_eV": self.source_energy_max_eV,
+                "quadrature_max_energy_eV": float(
+                    np.max(self.ions.energy_eV)),
+                "beyond_source_fit_energy": bool(
+                    np.max(self.ions.energy_eV)
+                    > self.source_energy_max_eV
+                ),
+                "physical_angular_polynomial_interpretation": (
+                    "declared_degree_sequence_repair_95p31_cosine_power_1"
+                ),
+                "surface_evidence_ceiling": "L1_yield_regressed",
+                "steady_state_solver": solver_name,
+            }),
+        )
+
     def solve_steady_state(
         self,
         initial_state: GuoTmlState | None = None,
@@ -483,35 +525,95 @@ class GuoC4F8ArSiO2Mechanism:
         if not solution.success:
             raise RuntimeError(
                 f"Guo translating-layer integration failed: {solution.message}")
-        state, rates, added, removed, movement_atoms, derivative = (
-            self._rates_and_derivative(solution.y[:, -1]))
-        residual = float(np.max(np.abs(derivative)))
-        if residual > residual_tolerance:
-            raise RuntimeError(
-                "Guo translating-layer steady state did not converge: "
-                f"max residual {residual:.6g}")
-        return GuoTmlEvaluation(
-            state=state,
-            sio2_yield_per_ion=movement_atoms / 3.0,
-            movement_atoms_per_ion=movement_atoms,
-            reaction_yields=MappingProxyType(dict(rates)),
-            incoming_atoms_per_ion=MappingProxyType(dict(added)),
-            removed_atoms_per_ion=MappingProxyType(dict(removed)),
-            elemental_derivative_residual=float(
-                sum(derivative[:4])),
-            steady_state_residual=residual,
+        return self._steady_evaluation(
+            solution.y[:, -1],
             integration_coordinate=float(solution.t[-1]),
-            source_extrapolation=MappingProxyType({
-                "source_fit_energy_max_eV": self.source_energy_max_eV,
-                "quadrature_max_energy_eV": float(
-                    np.max(self.ions.energy_eV)),
-                "beyond_source_fit_energy": bool(
-                    np.max(self.ions.energy_eV)
-                    > self.source_energy_max_eV
-                ),
-                "physical_angular_polynomial_interpretation": (
-                    "declared_degree_sequence_repair_95p31_cosine_power_1"
-                ),
-                "surface_evidence_ceiling": "L1_yield_regressed",
-            }),
+            residual_tolerance=float(residual_tolerance),
+            solver_name="BDF_fluence_integration",
+        )
+
+    def solve_steady_state_algebraic(
+        self,
+        initial_state: GuoTmlState | None = None,
+        *,
+        residual_tolerance: float = 2.0e-8,
+        maximum_function_evaluations: int = 3000,
+    ) -> GuoTmlEvaluation:
+        """Solve the same steady balances as an explicitly constrained root.
+
+        The first four elemental derivatives sum to zero by construction.
+        Therefore three elemental balances, the vacancy balance, and the
+        real-atom normalization form five independent residuals for the five
+        state variables.  Nonnegative bounded least squares is much faster
+        than integrating to a very large fluence at every feature face.  It
+        introduces no new physics or fitted quantity; tests require agreement
+        with the independent BDF fluence integration.
+        """
+        initial_state = initial_state or GuoTmlState.oxide()
+        incident_elements = {"Si", "O"}
+        for species, value in (
+            list(self.composition.neutral_flux_ratio.items())
+            + list(self.composition.ion_fraction.items())
+        ):
+            if value > 0.0:
+                incident_elements.update(formula_atoms(species))
+        active_real = [
+            index for index, element in enumerate(ELEMENTS)
+            if element in incident_elements
+        ]
+
+        def unpack(independent):
+            values = np.zeros(5)
+            values[active_real] = independent[:-1]
+            values[4] = independent[-1]
+            return values
+
+        def independent_residual(independent):
+            values = unpack(independent)
+            derivative = self._rates_and_derivative(values)[-1]
+            return np.asarray([
+                *[derivative[index] for index in active_real[:-1]],
+                derivative[4],
+                np.sum(values[:4]) - 1.0,
+            ])
+
+        initial_values = initial_state.as_array()
+        initial_real = initial_values[active_real]
+        initial_total = float(initial_real.sum())
+        if initial_total <= 0.0:
+            initial_real = np.full(
+                len(active_real), 1.0 / len(active_real))
+        else:
+            initial_real = initial_real / initial_total
+        independent_initial = np.concatenate(
+            (initial_real, initial_values[4:5]))
+
+        solution = least_squares(
+            independent_residual,
+            independent_initial,
+            bounds=(
+                np.zeros(len(active_real) + 1),
+                np.asarray([1.0] * len(active_real) + [np.inf]),
+            ),
+            xtol=1.0e-14,
+            ftol=1.0e-14,
+            gtol=1.0e-14,
+            # Vacancy is a dangling-bond density per real atom and sits near
+            # 10^-2--10^-1 on the source boards.  Explicit variable scaling
+            # prevents a bound-active C/F component on an ion-only face from
+            # terminating before the vacancy balance closes.  This changes
+            # only optimizer coordinates, not the physical residual.
+            x_scale=np.asarray([1.0] * len(active_real) + [0.01]),
+            diff_step=1.0e-6,
+            max_nfev=int(maximum_function_evaluations),
+        )
+        if not solution.success:
+            raise RuntimeError(
+                "Guo translating-layer algebraic solve failed: "
+                f"{solution.message}")
+        return self._steady_evaluation(
+            unpack(solution.x),
+            integration_coordinate=0.0,
+            residual_tolerance=float(residual_tolerance),
+            solver_name="bounded_algebraic_root",
         )

@@ -825,6 +825,16 @@ def run(args):
             surface_model="mixed_layer",
             mixed_layer_volatilization_yield=float(
                 args.mixed_layer_volatilization_yield))
+    elif str(args.surface_model) == "guo_tml":
+        mechanism = build_krueger_2024_material_router_3d(
+            surface_model="guo_tml",
+            effective_mask_crosslinked_growth_fraction=float(
+                args.effective_mask_crosslinked_growth_fraction),
+            yield_energy_model=str(args.yield_energy_model),
+            deposition_layer_depth_nm=float(args.deposition_layer_depth_nm),
+            oxygen_half_saturation_flux_m2_s=(
+                None if float(args.oxygen_half_saturation_flux_m2_s) <= 0.0
+                else float(args.oxygen_half_saturation_flux_m2_s)))
     else:
         mechanism = build_krueger_2024_material_router_3d(
             effective_mask_crosslinked_growth_fraction=float(
@@ -1218,11 +1228,12 @@ def parse_args():
             "Helmer/Graves-bounded)"))
     parser.add_argument(
         "--surface-model", default="reduced",
-        choices=("reduced", "mixed_layer"),
+        choices=("reduced", "mixed_layer", "guo_tml"),
         help=(
             "surface chemistry family: the reduced coverage/site-balance "
-            "mechanisms, or the element-resolved mixed-layer chemistry "
-            "(knob-free; refuses the reduced-model calibration flags)"))
+            "mechanisms, the element-resolved two-reservoir mixed-layer "
+            "chemistry, or the source-fixed Guo/Kwon translating-layer "
+            "transfer audit (no oxide yield/depth knob)"))
     parser.add_argument(
         "--yield-energy-model", default="threshold_power",
         choices=("threshold_power", "deposited_in_layer"),

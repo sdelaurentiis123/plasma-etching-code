@@ -103,3 +103,50 @@ def test_translating_layer_reaches_atom_balanced_steady_state_without_depth_fit(
         sum(result.removed_atoms_per_ion.values())
         - sum(result.incoming_atoms_per_ion.values())
     )
+
+
+def test_bounded_algebraic_feature_solver_matches_independent_fluence_integration():
+    mechanism = GuoC4F8ArSiO2Mechanism(
+        GuoIncidentComposition(
+            {"CF": 3.7, "CF2": 7.8, "CF3": 0.7, "O": 6.4},
+            {},
+        ),
+        GuoIonQuadrature(
+            np.asarray([500.0, 1500.0, 3500.0]),
+            np.cos(np.deg2rad([4.0, 12.0, 25.0])),
+            np.asarray([0.2, 0.3, 0.5]),
+        ),
+    )
+    integrated = mechanism.solve_steady_state()
+    algebraic = mechanism.solve_steady_state_algebraic()
+
+    assert algebraic.state.as_array() == pytest.approx(
+        integrated.state.as_array(), rel=2.0e-9, abs=2.0e-10)
+    assert algebraic.sio2_yield_per_ion == pytest.approx(
+        integrated.sio2_yield_per_ion, rel=2.0e-9)
+    assert algebraic.steady_state_residual < 2.0e-8
+    assert algebraic.source_extrapolation[
+        "steady_state_solver"] == "bounded_algebraic_root"
+
+
+def test_bounded_algebraic_solver_closes_ion_only_bound_active_state():
+    mechanism = GuoC4F8ArSiO2Mechanism(
+        GuoIncidentComposition({}, {}),
+        GuoIonQuadrature(
+            np.asarray([500.0, 1500.0, 3500.0]),
+            np.cos(np.deg2rad([4.0, 12.0, 25.0])),
+            np.asarray([0.2, 0.3, 0.5]),
+        ),
+    )
+    integrated = mechanism.solve_steady_state()
+    algebraic = mechanism.solve_steady_state_algebraic()
+
+    assert algebraic.steady_state_residual < 2.0e-8
+    assert algebraic.state.si == pytest.approx(
+        integrated.state.si, rel=2.0e-8)
+    assert algebraic.state.o == pytest.approx(
+        integrated.state.o, rel=2.0e-8)
+    assert algebraic.state.c < 1.0e-10
+    assert algebraic.state.f < 1.0e-9
+    assert algebraic.sio2_yield_per_ion == pytest.approx(
+        integrated.sio2_yield_per_ion, rel=2.0e-8)
