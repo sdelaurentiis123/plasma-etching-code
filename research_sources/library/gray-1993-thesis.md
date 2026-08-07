@@ -7,27 +7,64 @@
 - **Status:** FULL TEXT (OCR sections): research_sources/thesis_extracts/gray_thesis_1993_ocr_sections.txt
 - **Topic:** beam-yields — Beam-measured yields, thresholds and sticking (the L0/L1 provenance floor)
 
-## 2026-08-06 silicon beam closure audit
+## 2026-08-06 silicon and silicon-dioxide beam closure audit
 
 The MIT DSpace PDF used for the audit has SHA-256
 `be6bce26b699b3172cf67bb68e4d12e039fd3ea775f73873ee1aaf25164c065b`.
-PDF pages 246, 247, and 252 were rendered at 300 dpi and inspected at original
+PDF pages 243--247 and 252 were rendered at 300 dpi and inspected at original
 resolution.  The visual audit confirms:
 
+- Tables 5-7/5-8 explicitly route a SiF2-like near-surface species through
+  separate SiF2 and SiF4 volatile-product branches;
+- Eqs. 5-27/5-28 give `b_Si = 0.009 sqrt(E_i)` and
+  `b_SiO2 = 0.007 sqrt(E_i)`;
 - Eq. 5-30:
   `theta_F = s0 R / [s0 R + 2 beta2 (1 + b)]`;
 - Eq. 5-31 separates thermal, bare physical, and fluorinated
   `beta2(1+b)theta_F` removal;
-- Table 5-9 contains the six Ar+/F/Si rows now transcribed under
+- Tables 5-9/5-10 contain the Ar+/F/Si and Ar+/F/SiO2 rows now transcribed under
   `data/surface_interactions/gray_1993/`; and
-- Eq. 5-34 is
-  `beta2,Si = 0.687 [sqrt(E_i) - sqrt(4)]`.
+- Eqs. 5-34/5-35 are
+  `beta2,Si = 0.687 [sqrt(E_i) - sqrt(4)]` and
+  `beta2,SiO2 = 0.053 [sqrt(E_i) - sqrt(4)]`.
 
-The resulting implementation,
-`src/petch/gray_argon_fluorine_si.py`, is a species/energy/site/product beam
-closure with explicit Si/F bookkeeping.  It is not called first-principles,
-does not contain a feature-depth fit, and refuses off-normal, SFx+, and
-out-of-board use in strict mode.
+The resulting implementations,
+`src/petch/gray_argon_fluorine_si.py` and
+`src/petch/gray_argon_fluorine_sio2.py`, are
+species/energy/site/product beam closures with explicit elemental
+bookkeeping.  They are not called first-principles, contain no feature-depth
+fit, and refuse off-normal, reactive-ion, and out-of-board use in strict
+mode.
+
+### Evidence ceiling
+
+The same page-level audit also fixes the ceiling on these claims.  Gray calls
+the common SiF2 near-surface representation a "gross simplification" (p. 244),
+the two-new-site count for a SiO2 cascade event an "arbitrary assumption"
+(p. 243), and says that the full mechanism could not be verified because
+in-situ SiFx concentrations versus energy and flux were unavailable
+(p. 243).  Therefore:
+
+- the printed yield and branching laws are direct controlled-beam
+  benchmarks within their declared board;
+- product-resolved atom accounting is stricter than the legacy SiF4-only
+  approximation; but
+- neither implementation is evidence for an elementary event network or for
+  transfer to a fluorocarbon reactor boundary.
+
+The decisive 300 dpi page-render SHA-256 values are
+`3625197771d2dd2c7f90325b5c56cde2f5afb3c6d204097957a183be333`
+(p. 243),
+`b7006792b10c6266ac3b6692556de3c68c2b12015e8c296ba66391400e4f0fac`
+(p. 244),
+`6ef669220860f4852fb2f779f433f9388d0b3d83526bb39faced7bedf74b6b52`
+(p. 245),
+`7e4bb5dd68102cfb1baf3def89aee438bc4df9649de71dd3c0430e8a67a5e5ee`
+(p. 246),
+`04c4229dc7b62aac301c00941fa45aa9915bdac759b10890ccd81263875463d5`
+(p. 247), and
+`28ac695f8ff5343636b0b519c291198bf7877ca3ab731585c38b433b264e9b67`
+(p. 252).
 
 ## Claims table
 

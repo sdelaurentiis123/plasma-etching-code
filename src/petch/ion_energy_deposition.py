@@ -25,6 +25,7 @@ _trapezoid = getattr(np, "trapezoid", None) or np.trapz
 
 # eV cm^2 (per atom) conversion prefactor of the ZBL reduced nuclear stopping.
 _ZBL_PREFACTOR_EV_CM2 = 8.462e-15
+_RESIDUAL_PATH_TABLE_CACHE = {}
 
 
 @dataclass(frozen=True)
@@ -114,6 +115,104 @@ def csda_path_nm(energy_eV, z1, m1, target, *, minimum_energy_eV=10.0, steps=400
     total = (nuclear + electronic) * (target.atom_density_m3 * 1e-6)  # eV/cm
     path_cm = _trapezoid(1.0 / total, grid)
     return float(path_cm * 1e7)
+
+
+def _csda_path_table(z1, m1, target, minimum_energy_eV, maximum_energy_eV,
+                     points):
+    """Return a dense monotone ``energy -> CSDA path`` table.
+
+    The table is the cumulative form of the same quadrature used by
+    :func:`csda_path_nm`.  It exists so residual-energy inversion is a
+    deterministic interpolation problem rather than a separate fitted
+    attenuation law.
+    """
+    maximum = max(float(maximum_energy_eV), float(minimum_energy_eV) * 1.001)
+    # Round the cache ceiling upward by decades so repeated calls with nearby
+    # event energies share one table without clipping their support.
+    decade_ceiling = 10.0 ** np.ceil(np.log10(maximum))
+    key = (int(z1), float(m1), target, float(minimum_energy_eV),
+           float(decade_ceiling), int(points))
+    cached = _RESIDUAL_PATH_TABLE_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    energy = np.geomspace(minimum_energy_eV, decade_ceiling, int(points))
+    nuclear, electronic = stopping_cross_sections_eV_cm2(
+        energy, z1, m1, target)
+    stopping_eV_cm = (
+        (nuclear + electronic) * (target.atom_density_m3 * 1e-6))
+    inverse_stopping = 1.0 / stopping_eV_cm
+    increments_cm = (
+        0.5 * (inverse_stopping[1:] + inverse_stopping[:-1])
+        * np.diff(energy))
+    path_nm = np.concatenate((
+        np.zeros(1, dtype=float),
+        np.cumsum(increments_cm, dtype=float) * 1e7,
+    ))
+    cached = (energy, path_nm)
+    _RESIDUAL_PATH_TABLE_CACHE[key] = cached
+    return cached
+
+
+def residual_energy_after_layer_eV(
+        energy_eV, cosine_incidence, layer_depth_nm, z1, m1, target,
+        *, minimum_energy_eV=10.0, table_points=4096):
+    """Ion energy remaining after crossing a layer by CSDA path inversion.
+
+    ``layer_depth_nm`` is the layer thickness along its surface normal.
+    The traversed material path is therefore ``depth / cosine_incidence``.
+    Starting from the CSDA path-to-rest at the incident energy, this function
+    subtracts that material path and inverts the same ZBL/Lindhard stopping
+    integral.  It has no attenuation length or fitted transmission constant.
+
+    The analytic stopping model is not extended below ``minimum_energy_eV``:
+    when the residual path enters that unresolved end-of-range interval, the
+    ion is declared stopped and the returned energy is zero.  A zero-thickness
+    layer is an exact identity, including below the cutoff.
+    """
+    energy = np.asarray(energy_eV, dtype=float)
+    cosine = np.asarray(cosine_incidence, dtype=float)
+    depth = np.asarray(layer_depth_nm, dtype=float)
+    energy_b, cosine_b, depth_b = np.broadcast_arrays(energy, cosine, depth)
+    if (np.any(~np.isfinite(energy_b))
+            or np.any(~np.isfinite(cosine_b))
+            or np.any(~np.isfinite(depth_b))):
+        raise ValueError("energy, incidence cosine, and layer depth must be finite")
+    if np.any(energy_b < 0.0):
+        raise ValueError("ion energy must be nonnegative")
+    if np.any((cosine_b < 0.0) | (cosine_b > 1.0)):
+        raise ValueError("incidence cosine must lie in [0, 1]")
+    if np.any(depth_b < 0.0):
+        raise ValueError("layer depth must be nonnegative")
+    if minimum_energy_eV <= 0.0:
+        raise ValueError("minimum energy must be positive")
+    if int(table_points) < 128:
+        raise ValueError("residual path table requires at least 128 points")
+
+    output = np.zeros_like(energy_b, dtype=float)
+    identity = depth_b == 0.0
+    output[identity] = energy_b[identity]
+    active = (
+        (~identity)
+        & (energy_b > minimum_energy_eV)
+        & (cosine_b > 0.0))
+    if not np.any(active):
+        return float(output) if output.ndim == 0 else output
+
+    incident_max = float(np.max(energy_b[active]))
+    energy_grid, path_grid_nm = _csda_path_table(
+        z1, m1, target, minimum_energy_eV, incident_max, table_points)
+    incident_path_nm = np.interp(
+        energy_b[active], energy_grid, path_grid_nm)
+    traversed_path_nm = depth_b[active] / cosine_b[active]
+    residual_path_nm = incident_path_nm - traversed_path_nm
+    survives = residual_path_nm > 0.0
+    remaining = np.zeros_like(residual_path_nm)
+    remaining[survives] = np.interp(
+        residual_path_nm[survives], path_grid_nm, energy_grid)
+    # Interpolation roundoff must never create energy.
+    output[active] = np.minimum(remaining, energy_b[active])
+    return float(output) if output.ndim == 0 else output
 
 
 def projected_range_nm(energy_eV, z1, m1, target):

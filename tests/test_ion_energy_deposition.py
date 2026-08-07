@@ -3,7 +3,8 @@ import pytest
 
 from petch.ion_energy_deposition import (
     AMORPHOUS_CARBON, SIO2, derived_yield_energy_factor,
-    nuclear_energy_in_layer_eV, projected_range_nm,
+    csda_path_nm, nuclear_energy_in_layer_eV, projected_range_nm,
+    residual_energy_after_layer_eV,
     stopping_cross_sections_eV_cm2)
 
 
@@ -56,3 +57,53 @@ def test_bragg_additivity_between_bounds():
     silica_n, _ = stopping_cross_sections_eV_cm2(energy, 18, 39.948, SIO2)
     carbon_n, _ = stopping_cross_sections_eV_cm2(energy, 18, 39.948, AMORPHOUS_CARBON)
     assert silica_n[0] > 0.0 and carbon_n[0] > 0.0
+
+
+def test_residual_energy_is_csda_path_inversion_not_exponential_attenuation():
+    incident = 1000.0
+    path_nm = csda_path_nm(incident, 18, 39.948, AMORPHOUS_CARBON)
+    traversed_nm = 0.37 * path_nm
+    remaining = residual_energy_after_layer_eV(
+        incident, 1.0, traversed_nm, 18, 39.948, AMORPHOUS_CARBON)
+    assert 10.0 < remaining < incident
+    remaining_path_nm = csda_path_nm(
+        remaining, 18, 39.948, AMORPHOUS_CARBON)
+    assert remaining_path_nm == pytest.approx(
+        path_nm - traversed_nm, rel=3e-3)
+
+
+def test_residual_energy_obeys_slant_path_stopping_and_zero_layer_identity():
+    energies = np.array([25.0, 200.0, 1000.0])
+    identity = residual_energy_after_layer_eV(
+        energies, np.array([1.0, 0.5, 0.0]), 0.0,
+        18, 39.948, AMORPHOUS_CARBON)
+    assert np.array_equal(identity, energies)
+
+    normal = residual_energy_after_layer_eV(
+        1000.0, 1.0, 0.5, 18, 39.948, AMORPHOUS_CARBON)
+    oblique = residual_energy_after_layer_eV(
+        1000.0, 0.5, 0.5, 18, 39.948, AMORPHOUS_CARBON)
+    grazing = residual_energy_after_layer_eV(
+        1000.0, 0.0, 0.5, 18, 39.948, AMORPHOUS_CARBON)
+    assert 0.0 < oblique < normal < 1000.0
+    assert grazing == 0.0
+
+
+def test_residual_energy_stops_exactly_when_layer_exceeds_csda_path():
+    incident = 200.0
+    stopping_depth_nm = csda_path_nm(
+        incident, 18, 39.948, AMORPHOUS_CARBON)
+    remaining = residual_energy_after_layer_eV(
+        incident, 1.0, 1.01 * stopping_depth_nm,
+        18, 39.948, AMORPHOUS_CARBON)
+    assert remaining == 0.0
+
+
+@pytest.mark.parametrize(
+    "energy, cosine, depth",
+    [(-1.0, 1.0, 1.0), (100.0, -0.1, 1.0), (100.0, 1.1, 1.0),
+     (100.0, 1.0, -1.0)])
+def test_residual_energy_refuses_nonphysical_inputs(energy, cosine, depth):
+    with pytest.raises(ValueError):
+        residual_energy_after_layer_eV(
+            energy, cosine, depth, 18, 39.948, AMORPHOUS_CARBON)
