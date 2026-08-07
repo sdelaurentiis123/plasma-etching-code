@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 DEFAULT_MEDIUM = Path("/private/tmp/krueger_guo_transient_dt125_dx10")
-DEFAULT_FINE = Path("/private/tmp/krueger_guo_transient_dt0625_dx10_to4s")
+DEFAULT_FINE = Path("/private/tmp/krueger_guo_transient_dt0625_dx10_4s_receipt")
 DEFAULT_OUTPUT = (
     Path(__file__).resolve().parents[1]
     / "results"
