@@ -36,6 +36,22 @@ in Figure 6.6.  Both are retained as plotted replicates.  No experimental
 error bars or statistical semantics are reported; the CSV's uncertainty is
 digitization placement only.
 
+`figure6_9_cycle_averaged_yield.csv` contains all 25 markers from Metzler's
+own ion-normalized surface-response plot:
+
+- panel (a): Si and SiO2 removal per incident Ar ion versus fluorine in the
+  deposited film per incident Ar ion at 25 eV and a 40 s ion step;
+- panel (b): the same ratios at 25 and 30 eV for a nominal 5 Å film while the
+  ion step changes from 20 to 60 s.
+
+The direct response is especially useful because both axes share the same
+incident-ion denominator.  It constrains the fluorine-supply versus
+ion-capacity closure without requiring us to invent an absolute current for
+this reactor.  The source does not report error bars or enough details of its
+film-to-F conversion to reverse the plotted ratios into an independently
+measured wafer flux or film density.  The board therefore preserves the
+author-derived ratios as plotted and forbids that reverse inference.
+
 `figures6_14_6_15_xps_cycle_state.csv` contains all 32 markers from the XPS
 trajectories at 0, 5, 15, and 40 s during the 25 eV ion step:
 
@@ -59,9 +75,10 @@ convert every plotted Å into absolute C and F areal inventories.
 substrate F atoms.  These quantities constrain state evolution but must not
 be placed directly into an atom ledger.
 
-The board also does not publish species-resolved neutral/ion wafer fluxes or
-an ion energy-angle distribution.  It therefore validates a surface closure
-under declared cyclic boundary conditions; it does not identify a complete
+Figure 6.9 supplies a total-incident-ion-normalized response, but the board
+still does not publish species-resolved neutral/ion wafer fluxes or an ion
+energy-angle distribution.  It therefore validates a surface closure under
+declared cyclic boundary conditions; it does not identify a complete
 reactor-to-wafer boundary for Krüger or Yoshie.
 
 ## Pixel replay and visual audit
@@ -74,8 +91,8 @@ curl -L -o tmp/sources/metzler_2016/thesis.pdf \
   https://api.drum.lib.umd.edu/server/api/core/bitstreams/227fdb28-6ea7-4a8d-92ae-5c521f2d1e0b/content
 ```
 
-Then verify the PDF checksum, render pages 141, 142, 157, and 158 at 240 dpi,
-verify the raster checksums and dimensions, reproduce both CSVs and the
+Then verify the PDF checksum, render pages 141, 142, 147, 157, and 158 at 240 dpi,
+verify the raster checksums and dimensions, reproduce all three CSVs and the
 manifest, and optionally create full-resolution PIL overlays:
 
 ```bash

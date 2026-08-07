@@ -199,7 +199,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Chemical branching `β = 0.053(√E − √4)` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Table 5-10 parenthetical B₀ column; co-regressed partner of s₀ |
 | Oxide F sticking `s₀ = 0.02` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | printed p.246; landed only as the (s₀,B₀) pair |
 | Silicon F sticking `s₀ = 0.2` + `B₀ = 0.687(√E − √4)` | [`gray-1993-thesis`](library/gray-1993-thesis.md) | Si-side pair for the SF₆ arm upgrade (RESEARCH_SF6_RELEVANCE) |
-| Cyclic C4F8/Ar-ion Si/SiO2 Å-per-cycle + XPS state board | [`metzler-2016-thesis`](library/metzler-2016-thesis.md) | 42 depth markers + 32 XPS markers; finite transfer-depth constraint, retrospective not blind |
+| Cyclic C4F8/Ar-ion Si/SiO2 Å-per-cycle + ion-normalized yield + XPS state board | [`metzler-2016-thesis`](library/metzler-2016-thesis.md) | 42 depth + 25 cycle-normalized yield + 32 XPS markers; finite transfer-depth constraint, retrospective not blind |
 | Measured mixed-layer depth: C/F/O/Si to ~15 Å, F/O tail to ~25 Å | [`metzler-2016-thesis`](library/metzler-2016-thesis.md) | direct SIMS constraint on the silicon-under-film state |
 | Ar+-induced C-F destruction → Si-F formation, nearly 1:1 | [`humbird-2004-apl`](library/humbird-2004-apl.md) | atom-balanced film-to-substrate transfer channel |
 | Energy-dependent Si-C-F depth (~15 Å at 20 eV; ~30 Å at 200 eV) | [`humbird-2004-apl`](library/humbird-2004-apl.md) | atomistic constraint on mixed-layer capacity/depth |

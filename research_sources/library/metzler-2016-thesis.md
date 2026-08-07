@@ -15,6 +15,7 @@
 |---|---|
 | C4F8-derived films of a few Å are the finite F supply during a separated low-energy Ar-ion step | thesis pp. 116-125; surface-closure topology |
 | Si and SiO2 depth per cycle vary jointly with deposited film thickness, ion energy, and ion-step duration | Figures 6.5-6.6; 42 replayed markers |
+| Cycle-averaged removal is reported directly versus deposited-film F per incident Ar ion at 25/30 eV | Figure 6.9; 25 replayed markers; supply-versus-ion-capacity response without reconstructing an absolute wafer current |
 | 5 Å film: rapid film defluorination and strong rise of the substrate-fluorination proxy | Figure 6.14; finite transfer/mixing-depth gate |
 | 11 Å film: defluorination continues but the substrate proxy stays near zero | Figure 6.15; rejects a single well-mixed reservoir |
 | SIMS mixed C/F/O/Si layer reaches about 15 Å; F/O profiles decrease to about 25 Å | thesis p. 136; direct layer-depth constraint |

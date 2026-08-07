@@ -33,6 +33,18 @@ attributes the Si behavior to F depletion plus a fluorinated/oxidized reacted
 surface layer; trace oxygen can originate from erosion of the quartz coupling
 window.
 
+VERIFIED EXTRACT — thesis pp. 123-124 (PDF p. 147)
+
+Figure 6.9 divides the material removed in a cycle by the incident ions in
+that cycle and plots it against F in the deposited film per incident ion.  At
+25 eV, Si yield rises more strongly with F/Ar+ and saturates above SiO2.  The
+source interprets Si as more F-supply dependent and SiO2 as more
+ion-bombardment limited under these cyclic conditions.
+
+This is a source-derived, common-denominator surface-response observable.  It
+does not independently disclose the wafer current, species-resolved flux, or
+the film density/composition conversion used for its F numerator.
+
 VERIFIED EXTRACT — thesis pp. 130-136 (PDF pp. 153-159)
 
 The film F/C ratio is obtained from decomposed C 1s spectra.  The source
@@ -62,5 +74,5 @@ CLAIM BOUNDARY
 - delta-F/C is not an absolute substrate-F inventory.
 - The source does not publish a species-resolved wafer ion/neutral flux deck
   or an ion energy-angle distribution.
-- Figures 6.5, 6.6, 6.14, and 6.15 are replayed in
+- Figures 6.5, 6.6, 6.9, 6.14, and 6.15 are replayed in
   data/experimental/metzler_2016/.

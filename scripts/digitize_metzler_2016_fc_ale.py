@@ -14,7 +14,7 @@ needed for the first conversion or an XPS sensitivity/depth model for the
 second.
 
 The official thesis PDF is not redistributed.  This script verifies its
-checksum, renders the four audited pages at 240 dpi, checks their pixels,
+checksum, renders the five audited pages at 240 dpi, checks their pixels,
 reproduces the committed CSVs and manifest, and optionally draws PIL QA
 overlays at full raster resolution.
 """
@@ -36,6 +36,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "data" / "experimental" / "metzler_2016"
 DEPTH_CSV = OUTPUT_DIR / "figures6_5_6_6_cyclic_depth.csv"
+YIELD_CSV = OUTPUT_DIR / "figure6_9_cycle_averaged_yield.csv"
 XPS_CSV = OUTPUT_DIR / "figures6_14_6_15_xps_cycle_state.csv"
 MANIFEST_PATH = OUTPUT_DIR / "digitization_manifest.json"
 DEFAULT_PDF = ROOT / "tmp" / "sources" / "metzler_2016" / "thesis.pdf"
@@ -68,6 +69,12 @@ SOURCE = {
             "figure": "6.6",
             "png_sha256": (
                 "52845fe4c47ca9ba8f270af1a0de4fc71a04cc489849a51044cf1c5cc4ebc5fa"
+            ),
+        },
+        147: {
+            "figure": "6.9",
+            "png_sha256": (
+                "86e665a6d1fc417ac9ae6ff8b7b900e36f69871a5b84d0467756b7cf2d5824e2"
             ),
         },
         157: {
@@ -122,6 +129,8 @@ AXES = {
     "6.5b": Axis(861.0, 1400.0, 0.0, 13.0, 1398.0, 829.0, 0.0, 7.5),
     "6.5c": Axis(861.0, 1400.0, 0.0, 13.0, 1967.0, 1398.0, 0.0, 7.5),
     "6.6": Axis(751.0, 1555.0, 0.0, 65.0, 1108.0, 257.0, 0.0, 9.0),
+    "6.9a": Axis(904.0, 1529.0, 0.0, 0.005, 946.0, 284.0, 0.0, 0.005),
+    "6.9b": Axis(905.0, 1530.0, 0.0, 0.005, 1827.0, 1166.0, 0.0, 0.005),
     "6.14a": Axis(820.0, 1474.0, -5.0, 45.0, 919.0, 268.0, 0.0, 1.1),
     "6.14b": Axis(820.0, 1474.0, -5.0, 45.0, 1770.0, 1120.0, 0.0, 20.0),
     "6.15a": Axis(831.0, 1467.0, -5.0, 45.0, 928.0, 260.0, 0.0, 1.1),
@@ -253,6 +262,65 @@ DEPTH_POINTS = (
 
 
 @dataclass(frozen=True)
+class YieldPoint:
+    panel: str
+    energy_eV: int
+    substrate: str
+    etch_step_s: float
+    marker_x_px: float
+    marker_y_px: float
+    marker_fill: str
+    replicate: int = 1
+
+    @property
+    def fluorine_per_incident_ion(self) -> float:
+        return AXES[self.panel].x_value(self.marker_x_px)
+
+    @property
+    def substrate_units_per_incident_ion(self) -> float:
+        return AXES[self.panel].y_value(self.marker_y_px)
+
+
+# Figure 6.9 is the source's own cycle-normalized response: F in the
+# deposited film per incident Ar+ versus SiO2 formula units or Si atoms
+# removed per incident Ar+.  The marker centers below were isolated with PIL
+# RGB/grayscale masks and visually reconciled against the 240-dpi page.  Panel
+# (a) varies deposited FC thickness at fixed 40 s; the individual thickness
+# assignment is intentionally not reverse-mapped from Figure 6.5.  Panel (b)
+# varies the printed 20/40/60 s step at fixed 5 A deposition; its duplicate
+# open Si marker at 40 s is retained.
+YIELD_POINTS = (
+    # 6.9a: 25 eV, 40 s, 3--11 A deposited FC thickness sweep.
+    YieldPoint("6.9a", 25, "SiO2", 40.0, 1015.5, 903.5, "filled"),
+    YieldPoint("6.9a", 25, "SiO2", 40.0, 1032.5, 881.0, "filled"),
+    YieldPoint("6.9a", 25, "SiO2", 40.0, 1073.5, 863.5, "filled"),
+    YieldPoint("6.9a", 25, "SiO2", 40.0, 1093.0, 888.5, "filled"),
+    YieldPoint("6.9a", 25, "SiO2", 40.0, 1115.5, 873.5, "filled"),
+    YieldPoint("6.9a", 25, "SiO2", 40.0, 1182.5, 849.0, "filled"),
+    YieldPoint("6.9a", 25, "SiO2", 40.0, 1222.0, 859.5, "filled"),
+    YieldPoint("6.9a", 25, "Si", 40.0, 1025.5, 771.5, "filled"),
+    YieldPoint("6.9a", 25, "Si", 40.0, 1082.0, 714.0, "filled"),
+    YieldPoint("6.9a", 25, "Si", 40.0, 1094.5, 681.0, "filled"),
+    YieldPoint("6.9a", 25, "Si", 40.0, 1187.0, 596.0, "filled"),
+    YieldPoint("6.9a", 25, "Si", 40.0, 1354.0, 580.0, "filled"),
+    # 6.9b: 5 A deposited FC film, 20--60 s step-length sweep.
+    YieldPoint("6.9b", 25, "SiO2", 60.0, 1052.5, 1752.5, "filled"),
+    YieldPoint("6.9b", 25, "SiO2", 40.0, 1118.0, 1750.5, "filled"),
+    YieldPoint("6.9b", 25, "SiO2", 20.0, 1370.0, 1761.5, "filled"),
+    YieldPoint("6.9b", 30, "SiO2", 60.0, 1018.0, 1716.0, "open"),
+    YieldPoint("6.9b", 30, "SiO2", 40.0, 1083.5, 1641.5, "open"),
+    YieldPoint("6.9b", 30, "SiO2", 20.0, 1297.0, 1610.0, "open"),
+    YieldPoint("6.9b", 25, "Si", 60.0, 1035.0, 1781.0, "filled"),
+    YieldPoint("6.9b", 25, "Si", 40.0, 1111.0, 1631.0, "filled"),
+    YieldPoint("6.9b", 25, "Si", 20.0, 1271.0, 1529.0, "filled"),
+    YieldPoint("6.9b", 30, "Si", 60.0, 1016.5, 1729.5, "open"),
+    YieldPoint("6.9b", 30, "Si", 40.0, 1111.0, 1593.5, "open", 1),
+    YieldPoint("6.9b", 30, "Si", 40.0, 1123.5, 1571.0, "open", 2),
+    YieldPoint("6.9b", 30, "Si", 20.0, 1432.0, 1377.5, "open"),
+)
+
+
+@dataclass(frozen=True)
 class XPSPoint:
     panel: str
     film_thickness_A: int
@@ -325,6 +393,16 @@ XPS_FIELDS = (
     "supports_absolute_areal_atom_inventory", "boundary_evidence_tier",
     "observation_id", "source_pdf_sha256",
 )
+YIELD_FIELDS = (
+    "source_figure", "panel", "energy_eV", "substrate",
+    "sweep_variable", "deposited_fc_thickness_A", "etch_step_s",
+    "fluorine_per_incident_ion", "substrate_units_per_incident_ion",
+    "substrate_unit_semantics", "replicate", "marker_fill",
+    "marker_center_x_px", "marker_center_y_px",
+    "digitization_uncertainty_ratio", "experimental_uncertainty_reported",
+    "source_derived_normalization", "supports_wafer_flux_reconstruction",
+    "boundary_evidence_tier", "observation_id", "source_pdf_sha256",
+)
 
 
 def depth_rows():
@@ -393,6 +471,50 @@ def xps_rows():
     return rows
 
 
+def yield_rows():
+    rows = []
+    for index, point in enumerate(YIELD_POINTS, 1):
+        panel_a = point.panel == "6.9a"
+        rows.append({
+            "source_figure": "Figure 6.9",
+            "panel": point.panel,
+            "energy_eV": str(point.energy_eV),
+            "substrate": point.substrate,
+            "sweep_variable": (
+                "deposited_fc_thickness_3_to_11_A"
+                if panel_a else "etch_step_length_20_to_60_s"
+            ),
+            "deposited_fc_thickness_A": "" if panel_a else "5.0",
+            "etch_step_s": f"{point.etch_step_s:.1f}",
+            "fluorine_per_incident_ion": (
+                f"{point.fluorine_per_incident_ion:.7f}"
+            ),
+            "substrate_units_per_incident_ion": (
+                f"{point.substrate_units_per_incident_ion:.7f}"
+            ),
+            "substrate_unit_semantics": (
+                "SiO2_formula_units_per_Ar_ion"
+                if point.substrate == "SiO2"
+                else "Si_atoms_per_Ar_ion"
+            ),
+            "replicate": str(point.replicate),
+            "marker_fill": point.marker_fill,
+            "marker_center_x_px": f"{point.marker_x_px:.1f}",
+            "marker_center_y_px": f"{point.marker_y_px:.1f}",
+            "digitization_uncertainty_ratio": "0.00002",
+            "experimental_uncertainty_reported": "false",
+            "source_derived_normalization": (
+                "author_cycle_average_from_removed_atoms_and_incident_ions;"
+                "F_numerator_from_deposited_FC_film"
+            ),
+            "supports_wafer_flux_reconstruction": "false",
+            "boundary_evidence_tier": "A_direct_surface_response_source_derived",
+            "observation_id": f"metzler_yield_{index:03d}",
+            "source_pdf_sha256": SOURCE["pdf_sha256"],
+        })
+    return rows
+
+
 def _csv_text(fields, rows):
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
@@ -405,7 +527,7 @@ def _sha_text(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-def _manifest(depth_text, xps_text):
+def _manifest(depth_text, yield_text, xps_text):
     thin_film = [
         point for point in XPS_POINTS
         if point.panel == "6.14a"
@@ -417,7 +539,7 @@ def _manifest(depth_text, xps_text):
         and point.observable == "delta_F_over_C_substrate_proxy"
     ]
     payload = {
-        "manifest_id": "METZLER-2016-CYCLIC-FC-ALE-R1",
+        "manifest_id": "METZLER-2016-CYCLIC-FC-ALE-R2",
         "source": SOURCE,
         "digitization": {
             "method": (
@@ -449,6 +571,7 @@ def _manifest(depth_text, xps_text):
             "valid": [
                 "cyclic etch depth versus deposited FC optical thickness",
                 "cyclic etch depth versus low-energy Ar-ion step duration",
+                "cycle-averaged substrate removal versus F per incident Ar ion",
                 "time-resolved FC-film F/C and XPS intensity trajectories",
                 "relative substrate-fluorination proxy delta-F/C",
                 "a finite-thickness film-transfer/mixing model-form test",
@@ -456,6 +579,7 @@ def _manifest(depth_text, xps_text):
             "not_valid": [
                 "absolute C or F areal inventory inferred from optical thickness",
                 "absolute substrate F inventory inferred from delta-F/C",
+                "wafer flux reconstructed from the cycle-normalized ratios",
                 "species-resolved neutral or positive-ion wafer flux",
                 "an ion energy-angle distribution",
                 "a value-blind or prospectively held-out claim",
@@ -464,6 +588,7 @@ def _manifest(depth_text, xps_text):
         },
         "derived_checks": {
             "depth_markers": len(DEPTH_POINTS),
+            "yield_markers": len(YIELD_POINTS),
             "xps_markers": len(XPS_POINTS),
             "thin_film_delta_F_over_C_increase_0_to_40s": round(
                 thin_film[-1].value - thin_film[0].value, 4
@@ -481,6 +606,10 @@ def _manifest(depth_text, xps_text):
                 "path": str(DEPTH_CSV.relative_to(ROOT)),
                 "sha256": _sha_text(depth_text),
             },
+            "yield_csv": {
+                "path": str(YIELD_CSV.relative_to(ROOT)),
+                "sha256": _sha_text(yield_text),
+            },
             "xps_csv": {
                 "path": str(XPS_CSV.relative_to(ROOT)),
                 "sha256": _sha_text(xps_text),
@@ -492,11 +621,13 @@ def _manifest(depth_text, xps_text):
 
 def expected_files():
     depth_text = _csv_text(DEPTH_FIELDS, depth_rows())
+    yield_text = _csv_text(YIELD_FIELDS, yield_rows())
     xps_text = _csv_text(XPS_FIELDS, xps_rows())
     return {
         DEPTH_CSV: depth_text,
+        YIELD_CSV: yield_text,
         XPS_CSV: xps_text,
-        MANIFEST_PATH: _manifest(depth_text, xps_text),
+        MANIFEST_PATH: _manifest(depth_text, yield_text, xps_text),
     }
 
 
@@ -546,6 +677,7 @@ def _draw_overlays(rendered, overlay_dir):
             point for point in DEPTH_POINTS if point.panel.startswith("6.5")
         ],
         142: [point for point in DEPTH_POINTS if point.panel == "6.6"],
+        147: list(YIELD_POINTS),
         157: [point for point in XPS_POINTS if point.panel.startswith("6.14")],
         158: [point for point in XPS_POINTS if point.panel.startswith("6.15")],
     }
@@ -600,7 +732,8 @@ def main():
 
     print(
         f"verified {len(DEPTH_POINTS)} depth markers, "
-        f"{len(XPS_POINTS)} XPS markers, and four full-resolution pages"
+        f"{len(YIELD_POINTS)} yield markers, {len(XPS_POINTS)} XPS markers, "
+        f"and five full-resolution pages"
     )
 
 

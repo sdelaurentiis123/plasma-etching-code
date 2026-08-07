@@ -5,6 +5,7 @@ import pytest
 
 from scripts.digitize_metzler_2016_fc_ale import (
     DEPTH_POINTS,
+    YIELD_POINTS,
     XPS_POINTS,
     expected_files,
 )
@@ -21,8 +22,9 @@ def _xps(thickness, observable):
     ]
 
 
-def test_complete_depth_and_xps_marker_boards_are_retained():
+def test_complete_depth_yield_and_xps_marker_boards_are_retained():
     assert len(DEPTH_POINTS) == 42
+    assert len(YIELD_POINTS) == 25
     assert len(XPS_POINTS) == 32
 
     assert {
@@ -46,6 +48,49 @@ def test_complete_depth_and_xps_marker_boards_are_retained():
         (11, "CFx_C1s_intensity_kcps"),
         (11, "F1s_intensity_kcps"),
     }
+
+
+def test_cycle_normalized_board_preserves_units_and_supply_capacity_split():
+    sio2_25 = [
+        point for point in YIELD_POINTS
+        if point.energy_eV == 25 and point.substrate == "SiO2"
+    ]
+    si_25 = [
+        point for point in YIELD_POINTS
+        if point.energy_eV == 25 and point.substrate == "Si"
+    ]
+
+    # SiO2 is ion-capacity limited at 25 eV: a roughly fourfold change in
+    # available F/ion produces less than a factor-three yield span.
+    sio2_supply_span = (
+        max(point.fluorine_per_incident_ion for point in sio2_25)
+        / min(point.fluorine_per_incident_ion for point in sio2_25)
+    )
+    sio2_yield_span = (
+        max(point.substrate_units_per_incident_ion for point in sio2_25)
+        / min(point.substrate_units_per_incident_ion for point in sio2_25)
+    )
+    assert sio2_supply_span > 3.0
+    assert sio2_yield_span < 2.5
+
+    # Si is more supply-sensitive under the same nominal ion energy.
+    si_yield_span = (
+        max(point.substrate_units_per_incident_ion for point in si_25)
+        / min(point.substrate_units_per_incident_ion for point in si_25)
+    )
+    assert si_yield_span > 5.0
+
+
+def test_cycle_normalized_duplicate_open_si_marker_is_preserved():
+    duplicates = [
+        point for point in YIELD_POINTS
+        if point.panel == "6.9b"
+        and point.energy_eV == 30
+        and point.substrate == "Si"
+        and point.etch_step_s == 40
+    ]
+    assert len(duplicates) == 2
+    assert {point.replicate for point in duplicates} == {1, 2}
 
 
 def test_published_duplicate_open_si_marker_is_preserved_not_averaged():

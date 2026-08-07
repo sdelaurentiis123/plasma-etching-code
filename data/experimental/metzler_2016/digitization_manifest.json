@@ -3,6 +3,7 @@
     "not_valid": [
       "absolute C or F areal inventory inferred from optical thickness",
       "absolute substrate F inventory inferred from delta-F/C",
+      "wafer flux reconstructed from the cycle-normalized ratios",
       "species-resolved neutral or positive-ion wafer flux",
       "an ion energy-angle distribution",
       "a value-blind or prospectively held-out claim",
@@ -11,6 +12,7 @@
     "valid": [
       "cyclic etch depth versus deposited FC optical thickness",
       "cyclic etch depth versus low-energy Ar-ion step duration",
+      "cycle-averaged substrate removal versus F per incident Ar ion",
       "time-resolved FC-film F/C and XPS intensity trajectories",
       "relative substrate-fluorination proxy delta-F/C",
       "a finite-thickness film-transfer/mixing model-form test"
@@ -21,7 +23,8 @@
     "thick_film_delta_F_over_C_max": 0.0609,
     "thin_film_delta_F_over_C_increase_0_to_40s": 0.6995,
     "thin_film_transfers_more_F_to_substrate_proxy": true,
-    "xps_markers": 32
+    "xps_markers": 32,
+    "yield_markers": 25
   },
   "digitization": {
     "axis_calibration": {
@@ -104,6 +107,26 @@
         "y_reference_value": 9.0,
         "y_zero_px": 1108.0,
         "y_zero_value": 0.0
+      },
+      "6.9a": {
+        "x_left_px": 904.0,
+        "x_left_value": 0.0,
+        "x_right_px": 1529.0,
+        "x_right_value": 0.005,
+        "y_reference_px": 284.0,
+        "y_reference_value": 0.005,
+        "y_zero_px": 946.0,
+        "y_zero_value": 0.0
+      },
+      "6.9b": {
+        "x_left_px": 905.0,
+        "x_left_value": 0.0,
+        "x_right_px": 1530.0,
+        "x_right_value": 0.005,
+        "y_reference_px": 1166.0,
+        "y_reference_value": 0.005,
+        "y_zero_px": 1827.0,
+        "y_zero_value": 0.0
       }
     },
     "method": "official UMD thesis PDF; Poppler 240-dpi render; PIL/NumPy-compatible RGB and grayscale component isolation; distance-transform marker centers; original-resolution visual reconciliation and QA overlays",
@@ -127,7 +150,7 @@
       "precursor": "C4F8"
     }
   },
-  "manifest_id": "METZLER-2016-CYCLIC-FC-ALE-R1",
+  "manifest_id": "METZLER-2016-CYCLIC-FC-ALE-R2",
   "outputs": {
     "depth_csv": {
       "path": "data/experimental/metzler_2016/figures6_5_6_6_cyclic_depth.csv",
@@ -136,6 +159,10 @@
     "xps_csv": {
       "path": "data/experimental/metzler_2016/figures6_14_6_15_xps_cycle_state.csv",
       "sha256": "3d0e16c4ff77b373a25c01ffd1ea8732ab79e099fe0a700b98e321d7d85c43bf"
+    },
+    "yield_csv": {
+      "path": "data/experimental/metzler_2016/figure6_9_cycle_averaged_yield.csv",
+      "sha256": "c84f7dc2b0942c410688f9592881965bc39b4ae6d5e3581951614f7f012f065e"
     }
   },
   "source": {
@@ -149,6 +176,10 @@
       "142": {
         "figure": "6.6",
         "png_sha256": "52845fe4c47ca9ba8f270af1a0de4fc71a04cc489849a51044cf1c5cc4ebc5fa"
+      },
+      "147": {
+        "figure": "6.9",
+        "png_sha256": "86e665a6d1fc417ac9ae6ff8b7b900e36f69871a5b84d0467756b7cf2d5824e2"
       },
       "157": {
         "figure": "6.14",
