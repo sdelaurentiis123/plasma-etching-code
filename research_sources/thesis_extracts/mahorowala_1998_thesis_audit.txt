@@ -1,0 +1,68 @@
+Mahorowala 1998 Cl2/HBr poly-Si thesis audit extract
+====================================================
+
+Source
+------
+A. P. Mahorowala, Feature profile evolution during the high density plasma
+etching of polysilicon, PhD thesis, MIT Department of Chemical Engineering
+(1998).
+
+Official record: http://hdl.handle.net/1721.1/50514
+Bitstream: 42415621-MIT.pdf
+PDF SHA-256:
+e561dfe9780c0e27439b2b7288788c18333b8228152b6cc40baf72ba2edf4b6a
+
+Retrieval and extraction
+------------------------
+Retrieved 2026-08-06 from the official MIT DSpace record. The complete thesis
+was read locally. This short, source-located research audit is retained instead
+of redistributing the copyrighted PDF or a full-text transcription. Table 2.2
+and Figure 2.4 were checked against checksum-bound 600-dpi Poppler renders at
+their original 5100 x 6600 pixel resolution.
+
+Verified experiment description — thesis Chapter 2, pp. 31-42
+----------------------------------------------------------------
+- Reactor: Lam TCP 9400SE inductively coupled plasma; separately RF-biased,
+  electrostatically clamped 200-mm wafer; 60 degrees C wafer-electrode setting.
+- Gas: pure Cl2 or pure HBr; 10 mTorr for all experiments.
+- Structures: 500 nm poly-Si, about 200 nm oxide mask or about 475 nm
+  photoresist after ARC etch, 250 nm lines, 250 nm to 2.5 um spacings.
+- Design variables: 250-550 W inductive power, 20-140 W RF bias, and
+  25-175 sccm feed flow.
+- Table 2.1 (photoresist/Cl2) and Table 2.3 (photoresist/HBr) vary time to
+  approximately equalize depth. They are not blind absolute-depth boards.
+- Table 2.2 (oxide-mask/Cl2) fixes every run at 75 s. Eleven of thirteen runs
+  report poly-Si and oxide etch rates; runs 8 and 12 are marked overetched.
+  The reported poly-Si range is 900-3675 Angstrom/min, dimensionally
+  equivalent to 112.5-459.375 nm in 75 s.
+- Figure 2.4 maps all thirteen Table-2.2 run numbers to SEM cross-sections of
+  250 nm lines and 310 nm spaces.
+
+Verified feature observations — thesis Chapter 2, pp. 42-51
+------------------------------------------------------------
+- Oxide-masked Cl2 profiles exhibit little visible sidewall deposition and
+  minimal mask erosion relative to photoresist-masked Cl2 profiles.
+- The source reports early microtrenching in the oxide-mask center-condition
+  evolution and attributes the initial trenching to scattering from the
+  inclined mask sidewalls.
+- A low-bias, high-flow condition develops inward bowing and merging bottom
+  trenches, giving morphology targets beyond center depth.
+
+Verified boundary and simulator assumptions — thesis Chapter 4, pp. 106-112
+----------------------------------------------------------------------------
+- The thesis estimates, rather than measures per run, about 2 mA/cm2 ion
+  current at the wafer, a sheath energy gain near 100 eV, about 120 eV total
+  ion energy after adding plasma potential, and neutral/ion ratio near 100.
+- Its profile simulations use a reduced neutral/ion ratio of 10, monoenergetic
+  35 eV ions, and a 10-degree Gaussian angular FWHM.
+- These quantities are model assumptions/estimates, not a measured,
+  species-resolved flux plus joint ion energy-angle distribution.
+
+Claim boundary
+--------------
+Table 2.2 plus Figure 2.4 is an absolute fixed-time chlorine rate/profile
+corpus. It can grade an independently validated reactor-boundary provider or
+a facility-conditioned profile transfer. It cannot by itself grant a
+first-principles knobs-to-depth pass: species-resolved wafer fluxes and
+measured per-run IEAD/IAD are not published. The Table-2.2 target rate may not
+be used to select a boundary and then be counted as its own prediction.

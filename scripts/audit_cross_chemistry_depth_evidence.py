@@ -27,6 +27,9 @@ LEVINSON = (
 WOO = (
     ROOT / "results" / "curated"
     / "woo_2024_c4f6_board" / "audit.json")
+MAHOROWALA = (
+    ROOT / "data" / "experimental" / "mahorowala_1998_cl2"
+    / "audit_manifest.json")
 OUTPUT = (
     ROOT / "results" / "curated" / "cross_chemistry_depth_evidence"
     / "audit.json")
@@ -46,6 +49,7 @@ def build_audit() -> dict:
     krueger = _load(KRUEGER)
     levinson = _load(LEVINSON)
     woo = _load(WOO)
+    mahorowala = _load(MAHOROWALA)
     yoshie_vision = _load(YOSHIE_VISION)
     with YOSHIE_FEATURES.open(newline="", encoding="utf-8") as stream:
         yoshie_rows = list(csv.DictReader(stream))
@@ -66,12 +70,13 @@ def build_audit() -> dict:
         - 1.0
     )
     return {
-        "schema": "petch.cross-chemistry-depth-evidence.v1",
-        "audit_id": "CROSS-CHEMISTRY-ABSOLUTE-DEPTH-2026-08-06-R1",
+        "schema": "petch.cross-chemistry-depth-evidence.v2",
+        "audit_id": "CROSS-CHEMISTRY-ABSOLUTE-DEPTH-2026-08-06-R2",
         "claim_rule": (
             "surface depth-per-dose, development replay, evaluated feature "
-            "depth, and value-blind held-out feature prediction are distinct "
-            "evidence classes and may not be relabeled as one another"),
+            "depth, a source fixed-time rate/profile board, and value-blind "
+            "held-out feature prediction are distinct evidence classes and "
+            "may not be relabeled as one another"),
         "source_receipts": {
             "tinacba_2021_sf5_depth_sha256": _sha256(TINACBA),
             "vella_hao_ale_depth_sha256": _sha256(VELLA),
@@ -81,6 +86,7 @@ def build_audit() -> dict:
             "levinson_1997_feature_identifiability_sha256":
                 _sha256(LEVINSON),
             "woo_2024_c4f6_board_sha256": _sha256(WOO),
+            "mahorowala_1998_cl2_fixed_time_sha256": _sha256(MAHOROWALA),
         },
         "boards": [
             {
@@ -176,6 +182,44 @@ def build_audit() -> dict:
                 "scope": woo["verdict"],
             },
             {
+                "board": "Mahorowala 1998 Cl2/oxide-mask Si features",
+                "chemistry_and_material": (
+                    "pure Cl2 on oxide-masked poly-Si"),
+                "evidence_class": (
+                    "fixed_time_absolute_rate_and_profile_board_missing_"
+                    "species_iead_boundary"),
+                "absolute_depth_or_depth_per_dose": True,
+                "source_run_count": mahorowala["transcription"][
+                    "source_run_count"],
+                "point_count": mahorowala["transcription"][
+                    "usable_quantitative_run_count"],
+                "reported_absolute_feature_depths": True,
+                "derived_poly_si_depth_range_nm": mahorowala[
+                    "transcription"]["derived_poly_si_depth_range_nm"],
+                "fit_to_compared_depth_or_yield": False,
+                "boundary_strength": (
+                    "fixed 75 s exposure and absolute rates for every usable "
+                    "run; reactor knobs and corresponding SEM panels are "
+                    "published, but species-resolved wafer flux, measured "
+                    "IEAD, and measured IAD are not"),
+                "source_feature_profiles_available": True,
+                "source_profile_panel_count": mahorowala[
+                    "source_locations"]["profile_montage"]["panel_count"],
+                "feature_profile_test": False,
+                "original_pixels_archived": False,
+                "original_resolution_visual_audit_passed": (
+                    mahorowala["transcription"]["visual_audit_status"]
+                    == "passed_original_resolution"),
+                "value_blind_held_out": False,
+                "model_predictions_completed": 0,
+                "formal_pass_label": False,
+                "scope": (
+                    "absolute fixed-time chlorine rate/profile targets are "
+                    "ready to grade an independently identified reactor "
+                    "boundary; the scored rates may not be used to select "
+                    "that boundary and then be counted as predictions"),
+            },
+            {
                 "board": "Krueger 2024 Ar/C4F6/O2 trench",
                 "chemistry_and_material": "Ar/C4F6/O2 on masked SiO2",
                 "evidence_class": "evaluated_feature_depth_with_missing_boundary",
@@ -223,14 +267,20 @@ def build_audit() -> dict:
             "formal_held_out_feature_or_profile_predictions_completed": 0,
             "formal_held_out_feature_or_profile_passes": 0,
             "controlled_feature_boards_blocked_by_missing_time_or_fluence": 1,
+            "fixed_time_chlorine_absolute_rate_targets_ready": mahorowala[
+                "transcription"]["usable_quantitative_run_count"],
+            "fixed_time_chlorine_sem_profile_targets_ready": mahorowala[
+                "source_locations"]["profile_montage"]["panel_count"],
             "c4f6_same_reactor_absolute_patterned_rate_targets_ready": (
                 woo["quantitative_rate_points"]),
             "value_blind_held_out_feature_depth_targets_ready": len(yoshie_rows),
             "krueger_absolute_feature_depth_passed": False,
             "current_strongest_defensible_statement": (
                 "absolute surface depth-per-dose transfers without a target "
-                "fit in two non-Krueger chemistry families; no chemistry yet "
-                "has a completed value-blind held-out feature-depth pass"),
+                "fit exist in two non-Krueger chemistry families and an "
+                "11-point fixed-time chlorine rate/profile board is ready; "
+                "no chemistry yet has a completed value-blind held-out "
+                "feature-depth pass"),
         },
     }
 

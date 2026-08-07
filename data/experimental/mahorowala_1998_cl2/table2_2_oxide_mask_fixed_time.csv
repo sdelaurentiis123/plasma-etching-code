@@ -1,0 +1,14 @@
+run,inductive_power_W,rf_bias_power_W,cl2_flow_sccm,pressure_mTorr,etch_time_s,poly_si_etch_rate_A_min,oxide_etch_rate_A_min,selectivity,derived_poly_si_removed_nm,derived_oxide_removed_nm,source_profile_panel,quantitative_status
+1,400,80,100,10,75,3150,125,25.20,393.750,15.625,figure2.4_panel1,usable
+2,550,80,175,10,75,3675,250,14.70,459.375,31.250,figure2.4_panel2,usable
+3,250,80,25,10,75,2000,25,80.00,250.000,3.125,figure2.4_panel3,usable
+4,400,20,175,10,75,1400,225,6.22,175.000,28.125,figure2.4_panel4,usable
+5,550,20,100,10,75,1300,100,13.00,162.500,12.500,figure2.4_panel5,usable
+6,550,80,25,10,75,2375,200,11.88,296.875,25.000,figure2.4_panel6,usable
+7,250,80,175,10,75,2125,200,10.63,265.625,25.000,figure2.4_panel7,usable
+8,550,140,100,10,75,,,,,,figure2.4_panel8,overetched_no_rate
+9,400,140,25,10,75,2900,475,6.11,362.500,59.375,figure2.4_panel9,usable
+10,400,20,25,10,75,900,225,4.00,112.500,28.125,figure2.4_panel10,usable
+11,250,20,100,10,75,1075,25,43.00,134.375,3.125,figure2.4_panel11,usable
+12,400,140,175,10,75,,,,,,figure2.4_panel12,overetched_no_rate
+13,250,140,100,10,75,2900,300,9.67,362.500,37.500,figure2.4_panel13,usable

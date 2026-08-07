@@ -30,6 +30,17 @@ def test_cross_chemistry_ledger_keeps_evidence_classes_separate():
     assert woo["source_internal_consistency_passed"] is False
     assert woo["formal_pass_label"] is False
 
+    mahorowala = boards["Mahorowala 1998 Cl2/oxide-mask Si features"]
+    assert mahorowala["source_run_count"] == 13
+    assert mahorowala["point_count"] == 11
+    assert mahorowala["derived_poly_si_depth_range_nm"] == [112.5, 459.375]
+    assert mahorowala["source_profile_panel_count"] == 13
+    assert mahorowala["source_feature_profiles_available"] is True
+    assert mahorowala["original_resolution_visual_audit_passed"] is True
+    assert mahorowala["feature_profile_test"] is False
+    assert mahorowala["model_predictions_completed"] == 0
+    assert mahorowala["formal_pass_label"] is False
+
 
 def test_no_held_out_feature_pass_is_claimed_before_prediction():
     audit = build_audit()
@@ -48,5 +59,7 @@ def test_no_held_out_feature_pass_is_claimed_before_prediction():
         "independent_non_krueger_chemistry_families_with_absolute_surface_depth_evidence"] == 2
     assert summary[
         "controlled_feature_boards_blocked_by_missing_time_or_fluence"] == 1
+    assert summary["fixed_time_chlorine_absolute_rate_targets_ready"] == 11
+    assert summary["fixed_time_chlorine_sem_profile_targets_ready"] == 13
     assert summary[
         "c4f6_same_reactor_absolute_patterned_rate_targets_ready"] == 10

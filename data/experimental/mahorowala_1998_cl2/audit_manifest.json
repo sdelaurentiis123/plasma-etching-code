@@ -1,0 +1,82 @@
+{
+  "schema": "petch.mahorowala-1998-cl2-fixed-time.v1",
+  "audit_id": "MAHOROWALA-1998-CL2-TABLE2.2-R1",
+  "source": {
+    "citation": "A. P. Mahorowala, Feature profile evolution during the high density plasma etching of polysilicon, MIT PhD thesis (1998)",
+    "handle": "http://hdl.handle.net/1721.1/50514",
+    "dspace_item_uuid": "9af24424-813c-401d-9ca1-33cb863d86c3",
+    "dspace_bitstream_uuid": "c04d2da3-cbc2-4898-97ed-c83c58293e05",
+    "bitstream_name": "42415621-MIT.pdf",
+    "pdf_sha256": "e561dfe9780c0e27439b2b7288788c18333b8228152b6cc40baf72ba2edf4b6a",
+    "pdf_pages": 200,
+    "rights": "MIT thesis pixels are viewed locally and not redistributed"
+  },
+  "source_locations": {
+    "table": {
+      "name": "Table 2.2",
+      "pdf_page": 39,
+      "print_page": 39,
+      "render_dpi": 600,
+      "render_sha256": "af753b4aabb5fbe8de7f82c0feedac1273290b67635154e007105aa4c8b20367",
+      "render_size_px": [
+        5100,
+        6600
+      ]
+    },
+    "profile_montage": {
+      "name": "Figure 2.4",
+      "pdf_page": 42,
+      "print_page": 42,
+      "render_dpi": 600,
+      "render_sha256": "3b00616b38ffe691a8c8c91d3bf6139bebebad9e923956bb7c88141dde71b156",
+      "render_size_px": [
+        5100,
+        6600
+      ],
+      "panel_count": 13
+    }
+  },
+  "experiment": {
+    "reactor": "Lam TCP 9400SE inductively coupled plasma",
+    "chemistry": "pure Cl2",
+    "wafer_temperature_C": 60.0,
+    "pressure_mTorr": 10.0,
+    "etch_time_s": 75.0,
+    "initial_poly_si_thickness_nm": 500.0,
+    "oxide_mask_thickness_nm": 200.0,
+    "line_width_nm": 250.0,
+    "figure2_4_spacing_nm": 310.0,
+    "sample_classes": "alternate lines/spaces; approximately 60% exposed polysilicon"
+  },
+  "transcription": {
+    "method": "source Table 2.2 transcription checked on a checksum-bound 600-dpi Poppler render; Figure 2.4 inspected at original render resolution",
+    "source_run_count": 13,
+    "usable_quantitative_run_count": 11,
+    "overetched_no_rate_runs": [
+      8,
+      12
+    ],
+    "reported_measurement_uncertainty": null,
+    "derived_depth_formula": "rate_A_per_min * 75 s / 60 s_per_min * 0.1 nm_per_A",
+    "derived_poly_si_depth_range_nm": [
+      112.5,
+      459.375
+    ],
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "identifiability": {
+    "absolute_time_published": true,
+    "absolute_rate_published": true,
+    "species_resolved_wafer_flux_published": false,
+    "measured_iead_published": false,
+    "measured_iad_published": false,
+    "center_condition_estimates_in_thesis": "2 mA/cm2 ion current and about 100-120 eV; estimates, not per-run measurements",
+    "valid_use": "absolute fixed-time rate/depth and SEM-profile board for a reactor provider or facility-conditioned transfer",
+    "invalid_use": "first-principles knobs-to-depth validation before the species/IEAD boundary is independently identified",
+    "feature_profile_formal_pass_granted": false
+  },
+  "output": {
+    "path": "data/experimental/mahorowala_1998_cl2/table2_2_oxide_mask_fixed_time.csv",
+    "sha256": "6cdeeb0198843367101c13d1af4983ec19f7dceeeade8f0a86607c9d82d4d61f"
+  }
+}
