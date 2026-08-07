@@ -11,6 +11,7 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 - HG_jap97.txt
 - HG_jvstb97.txt
 - an_2026_nnp_etch_verified_excerpts.txt
+- arts_2021_apr_angular_verified_excerpt.txt
 - Konina_Kseniia_PhD_Thesis_2024.txt
 - Lanham_Steven_PhD_Thesis_2022.txt
 - Qu_Chenhui_PhD_Thesis_2020.txt

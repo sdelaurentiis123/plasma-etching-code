@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 98 sources by topic
+## Index — 99 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -76,6 +76,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 
 | bibkey | source | status |
 |---|---|---|
+| [`arts-2021-apr`](library/arts-2021-apr.md) | Arts et al., atomic-level plasma-processing review / angular provenance audit | FULL TEXT READ + VERIFIED EXCERPT |
 | [`barklund-1992-jvsta`](library/barklund-1992-jvsta.md) | Barklund & Blom, JVST A 10, 1212 (1992) | VIA CHANG THESIS FIG 4.16 |
 | [`cho-2000-jvsta`](library/cho-2000-jvsta.md) | Cho et al. (2000) | ABSTRACT-ONLY |
 | [`kress-1999-jvsta`](library/kress-1999-jvsta.md) | Kress et al., JVST A 17, 2819 (1999) | ABSTRACT-ONLY (title verified: Cu/Ar MD, wrong system) |
@@ -217,6 +218,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Beam gate N1 (floor 0.25 / half-rise / plateau) | [`gray-1993-thesis`](library/gray-1993-thesis.md) | the measured yield-vs-F/Ar⁺ curve petch is graded against |
 | Species-resolved pure-reactive-ion yield ladder | [`karahashi-2007`](library/karahashi-2007.md) | direct F+/CF+/CF2+/CF3+ constraint; forbids species-agnostic validation and extrapolation above measured support |
 | DFT-trained HFC-ion event physics + product-escape defect | [`an-2026-apsusc`](library/an-2026-apsusc.md) | no-yield-fit atomistic transfer candidate; forces explicit mixed-layer/film and product-escape closure rather than a scalar depth fit |
+| Condition-unknown CFx+/Ar+ angular species board | [`karahashi-2007`](library/karahashi-2007.md), [`arts-2021-apr`](library/arts-2021-apr.md) | 20 PIL-audited markers; normal points strongly imply 1000 eV, but the source/review do not report energy, so production use is forbidden |
 | Stable-parent molecule / ion co-incidence envelope | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | C5F8 analog proves molecule-assisted yields can exceed a pure-CF3+ value; explicitly not a C4F6 law |
 | C4F6 parent-signal + ion-mixture existence | [`kim-2021-coatings`](library/kim-2021-coatings.md) | wafer-facing mass/energy spectra directly show C4F6 and multiple CFx+/CxFy+ species in another CCP; qualitative existence constraint only, not Krüger flux calibration |
 | Class-1 angular form `(1+B sin²θ)cosθ` | [`kress-1999-jvsta`](library/kress-1999-jvsta.md) | Krüger's cited source — **wrong system (Cu/Ar MD)**; peak 4.17 vs measured ~1.3 |

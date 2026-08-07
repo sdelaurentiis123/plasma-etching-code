@@ -1,0 +1,118 @@
+{
+  "manifest_id": "KARAHASHI-2007-FIG6-ANGULAR-YIELDS-R1",
+  "source": {
+    "citation": "K. Karahashi, Hyomen Kagaku 28, 60-66 (2007), Figure 6; data attributed there to K.-i. Yanai et al., Journal of Applied Physics 97, 053302 (2005), DOI 10.1063/1.1854726",
+    "local_pdf": "research_sources/karahashi_2007_hyomen_kagaku_28_60.pdf",
+    "pdf_sha256": "093b18b91b0a6d910fc414779ee8320b7a046ac4cad38ef5de0b7f2dd25a2d79",
+    "pdf_page": 4,
+    "print_page": 63,
+    "figure": "Figure 6",
+    "caption_reports_energy": false,
+    "body_reports_figure6_energy": false,
+    "render_dpi": 600,
+    "rendered_page_sha256": "075cd97e5d7b5238f028f546d5c63cfc0c96cd6ff33a769b640f130d73b5fe1d",
+    "rendered_page_size_px": [
+      4961,
+      7017
+    ],
+    "figure_crop_bounds_px": [
+      2700,
+      550,
+      4750,
+      1650
+    ]
+  },
+  "independent_condition_audit": {
+    "source": "J. Arts et al., Applied Physics Reviews 8, 041305 (2021), DOI 10.1063/5.0058904, Figure 24(d)",
+    "finding": "The review reproduces the Karahashi angular panel and explicitly labels its kinetic energy unknown.",
+    "reported_energy_eV": null
+  },
+  "experiment_scope": {
+    "target": "SiO2",
+    "incident_ions": [
+      "CF+",
+      "CF2+",
+      "CF3+",
+      "Ar+"
+    ],
+    "neutral_radical_flux": "none",
+    "beam_selection": "mass selected",
+    "incidence_angles_deg": {
+      "CFx+": [
+        0,
+        30,
+        45,
+        60,
+        75
+      ],
+      "Ar+": [
+        0,
+        30,
+        50,
+        60,
+        75
+      ]
+    },
+    "quantity": "etched SiO2 units per incident ion",
+    "ion_energy_eV": null,
+    "ion_energy_status": "not_reported_by_source"
+  },
+  "pixel_calibration": {
+    "crop_bounds_full_render_px": [
+      2700,
+      550,
+      4750,
+      1650
+    ],
+    "x_at_0_deg": 348.5,
+    "x_at_90_deg": 1422.0,
+    "y_at_zero_yield": 993.5,
+    "y_at_2_yield": 206.0,
+    "transform": {
+      "angle_deg": "90 * (x_px - 348.5) / (1422.0 - 348.5)",
+      "yield": "2 * (993.5 - y_px) / (993.5 - 206.0)"
+    }
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; exact PIL crop; dark-pixel axis localization; marker-center transcription; Hough-circle and connected-contour checks; full-resolution visual overlay",
+    "yield_digitization_uncertainty": 0.015,
+    "uncertainty_basis": "5.5-pixel allowance including overlap at the crowded 60-degree markers, rounded upward through the y transform",
+    "nominal_angle_policy": "use printed angular setpoints; retain marker x pixels as independent placement check"
+  },
+  "derived_checks": {
+    "point_count": 20,
+    "maximum_marker_x_angle_offset_deg": 0.776,
+    "yield_ratio_60_to_0": {
+      "CF+": 2.2518,
+      "CF2+": 1.3258,
+      "CF3+": 1.2849,
+      "Ar+": 3.6385
+    },
+    "normal_incidence_cross_figure_candidate_rmse": {
+      "750": 0.22521026471573916,
+      "1000": 0.015358385331798396,
+      "1500": 0.2370015541439901,
+      "2000": 0.18237767589994852
+    },
+    "best_cross_figure_candidate_energy_eV": 1000,
+    "best_candidate_status": "strong_inference_only_not_source_reported"
+  },
+  "claim_boundary": {
+    "valid": [
+      "qualitative species ordering of angular anisotropy at the source's unreported energy condition",
+      "digitized 60-to-0 ratios with the missing-energy warning carried alongside every row",
+      "cross-figure evidence that 1000 eV is the most likely condition"
+    ],
+    "not_valid": [
+      "an energy-resolved production angular law",
+      "an assumption that the source reported 1000 eV",
+      "extrapolation to Krueger's 471-4821 eV IEAD",
+      "a fit target for absolute feature depth"
+    ],
+    "production_surface_model_use": false
+  },
+  "output": {
+    "path": "data/experimental/karahashi_2007/figure6_angular_yields_unknown_energy.csv",
+    "sha256": "5b8fa19fbfecfe05f72549e8c4d3396beef7a4bb47b0099e0c4126c91397af39"
+  }
+}

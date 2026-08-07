@@ -17,7 +17,7 @@
 | Q4 | Figure 4 digitization at 1000 eV gives F+ `0.3232`, CF+ `0.6751`, CF2+ `1.1957`, and CF3+ `1.4703 SiO2/ion`. | Required direct-beam ladder; forbids species-agnostic validation. |
 | Q5 | The same CF3+ series reaches `1.8736` at 1500 eV and `1.7549` at 2000 eV. | Retracts the former 1.5 universal-ceiling claim. |
 | Q6 | Per-fluorine yield approximately follows the square root of energy allocated to each F atom over the measured series. | Supports the measured-domain energy trend; does not authorize extrapolation above 2000 eV or to larger ions. |
-| Q7 | Angular yields rise, peak near 60 degrees, and fall toward grazing incidence; the reported 60/0 ratio depends on species. | Angular-class constraint at the source condition; no energy-wide angular table was digitized. |
+| Q7 | Angular yields rise, peak near 60 degrees, and fall toward grazing incidence; the reported 60/0 ratio depends on species. | `figure6_angular_yields_unknown_energy.csv`; condition-unknown angular-class constraint, not an energy-resolved production law. |
 
 ## Corrected consumption
 
@@ -28,3 +28,7 @@ name. The source now feeds only the opt-in
 `Karahashi2007ReactiveIonYieldTable`, which reproduces/interpolates the
 digitized data inside measured normal-incidence support and refuses
 extrapolation. Matching its own table is reproduction evidence, not validation.
+Figure 6 is now independently digitized and visually audited, but its energy
+remains unreported; Arts et al. (2021) explicitly label it unknown. Its normal
+points strongly identify 1000 eV by cross-figure consistency, recorded only as
+an inference.

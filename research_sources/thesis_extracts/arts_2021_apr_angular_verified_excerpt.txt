@@ -1,0 +1,19 @@
+SOURCE
+J. Arts et al., Applied Physics Reviews 8, 041305 (2021).
+DOI: 10.1063/5.0058904
+
+PURPOSE AND EXTRACTION ROUTE
+The full PDF was retrieved from the University of Antwerp media library and
+converted to layout-preserving text on 2026-08-06. This compact file records
+the exact evidence consumed for the Karahashi Figure 6 condition audit.
+
+VERIFIED FIGURE-CAPTION EXCERPT
+Figure 24(d) describes "SiO2 etching with Ar+ and CFx+ with unknown kinetic
+energy." The caption attributes that panel to K. Karahashi, Hyomen Kagaku 28,
+60 (2007). Figure 24(e), by contrast, labels the ion energies on the
+Kawase-Hamaguchi CF3 calculation.
+
+CONSUMPTION BOUNDARY
+The reproduced Karahashi panel cannot support an energy-resolved angular law.
+Its normal-incidence values closely match the separately digitized 1000 eV
+Karahashi Figure 4 points, which makes 1000 eV a strong inference only.
