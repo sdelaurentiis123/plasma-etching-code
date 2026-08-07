@@ -1,0 +1,715 @@
+RESEARCH ARTICLE | JULY 01 1998
+
+Percent dissociation of Cl2 in inductively coupled, chlorine-
+containing plasmas
+M. V. Malyshev; V. M. Donnelly; A. Kornblit; N. A. Ciampa
+
+
+
+J. Appl. Phys. 84, 137–146 (1998)
+https://doi.org/10.1063/1.368010
+
+
+
+
+                                                                                        
+                                                                                        View      Export
+                                                                                        Online    Citation
+
+
+  Articles You May Be Interested In
+
+   Diagnostics of inductively coupled chlorine plasmas: Measurement of Cl 2 and Cl number densities
+   J. Appl. Phys. (December 2000)
+
+   Magnetostriction of Aluminum‐Iron Single Crystals in the Region of 6 to 30 Atomic Percent Aluminum
+   J. Appl. Phys. (June 1957)
+
+   Studies of chlorine-oxygen plasmas and evidence for heterogeneous formation of ClO and ClO 2
+   J. Appl. Phys. (June 2009)
+
+
+
+
+                                                                                                             07 August 2026 21:56:45
+JOURNAL OF APPLIED PHYSICS                                       VOLUME 84, NUMBER 1                                      1 JULY 1998
+
+
+Percent dissociation of Cl2 in inductively coupled,
+chlorine-containing plasmas
+          M. V. Malyshev,a) V. M. Donnelly,b) A. Kornblit, and N. A. Ciampa
+          Bell Laboratories, Lucent Technologies, 600 Mountain Avenue, Murray Hill, New Jersey 07974
+          ~Received 17 December 1997; accepted for publication 3 April 1998!
+          The percent dissociation of Cl2 was determined for two configurations of a commercial
+          transformer-coupled plasma ~TCP! reactor ~LAM Research Alliance metal etcher!, using Cl2 and
+          BCl3 /Cl2 feed gases, during slow etching of SiO2 covered Si wafers. Emission from Cl2 at 305 nm
+          was recorded as a function of TCP source power, along with emission from 1% Ar and Xe, added
+          as part of an equal mixture of the five rare gases. Absolute Cl2 number densities were determined
+          from the Cl2-to-rare gas emission intensity ratios. The Cl2 percent dissociation increases with power,
+          reaching 70% between 1 and 2 mTorr at the highest power ~900 W, 0.080 W/cm3!. The percent
+          dissociation decreases with increasing pressure between 1 and 10 mTorr. Decreasing the gap
+          between the TCP window and the wafer chuck from 11 to 6.5 cm decreases dissociation at pressures
+          between 0.5 and 2 mTorr, and increases dissociation slightly at 10 mTorr. The percent dissociation
+          as a function of power, and for the most part as a function of pressure and gap, is reproduced by a
+          zero-dimensional model that includes electron-impact dissociation and dissociative attachment of
+          Cl2, and diffusion-controlled recombination of Cl at the walls. Addition of BCl3 to Cl2 increases the
+          percent dissociation of Cl2, most likely due to a passivation of the chamber walls by adsorbed BClx ,
+          lowering the Cl-atom recombination coefficient. © 1998 American Institute of Physics.
+          @S0021-8979~98!09113-0#
+
+
+
+I. INTRODUCTION                                                        The TCP coil is very close to an alumina window ~actually
+
+
+
+
+                                                                                                                                          07 August 2026 21:56:45
+     Previously, a method for determining the percent disso-           two windows sandwiched together!. The distance from the
+ciation of Cl2 in a chlorine plasma was reported.1 Optical             window to the wafer chuck was varied by adding spacer
+emission from an ion-pair state of Cl2 was recorded along              rings. The reactor walls were anodized aluminum, and were
+with emission from a small amount of added Xe. The emis-               heated to a temperature of 60 °C. The temperature of the
+sion ratio was proportional to the Cl2 number density. Since           electrostatic chuck was held at 50 °C. Two TCP window-
+first reported by Coburn and Chen,2 as a means for measur-             chuck gaps were investigated: 6.5 and 11 cm. Power to the
+ing relative F-atom densities in fluorocarbon plasmas, this            TCP source was varied between 10 and 900 W ~measured
+actinometry method has been widely used to determine rela-             into the matching network with inline meters!, at a frequency
+tive number densities of mostly radical species such as F, Cl,         of 13.56 MHz. In some experiments, the rf bias at 13.56
+O, and CF2 in plasmas. The application of actinometry to               MHz ~displaced 1.1 kHz from the source frequency! was
+stable species such as Cl2 has an advantage in that the emis-          applied to the chuck.
+sion ratio can easily be related to the absolute number den-                Cl2 was flowed into the chamber at rates of 114 sccm at
+sity by extrapolating the measurement to zero power, where             2 and 10 mTorr, 57 sccm at 1 mTorr, and 38 sccm at 0.5
+no Cl2 dissociates and the number density is known. In the             mTorr total pressure. In some experiments, a mixture of BCl3
+previous study, percent dissociations were measured in a               and Cl2 was used, with flow rates of 33 and 81 sccm, respec-
+small helical resonator reactor and were found to be high              tively, and a total pressure of 10 mTorr. A mixture of equal
+~;90%! at high power densities (0.4 W/cm3). 1,3 In the                 parts He, Ne, Ar, Kr, and Xe was added at a flow rate equal
+present study, percent dissociations are reported for Cl2 and          to 5% of the total flow ~6 sccm at 2 and 10 mTorr, 3 sccm at
+Cl2 /BCl3 plasmas in a commercial inductively coupled                  1 mTorr, 2 sccm at 0.5 mTorr, and 6 sccm for the BCl3 /Cl2
+plasma ~ICP! reactor for a wide range of pressures and pow-            mixture!. Si wafers coated with nominally 1000 Å SiO2 films
+ers, and two plasma geometries.                                        were used. Al covered substrates were not used because the
+                                                                       rapid consumption of Cl2 from etching of Al, whether or not
+II. EXPERIMENTAL PROCEDURE                                             the plasma is ignited, complicates the question of plasma-
+    The transformer-coupled plasma ~TCP! reactor ~LAM                  induced dissociation of Cl2.
+Research Alliance metal etcher with a high-flow chamber!                    The spectrometer, described in previous publications,1,3,4
+depicted in Fig. 1 is configured with a 12 in. diameter coil           consists of a 0.35 m focal length scanning monochromator
+and an electrostatic chuck that holds a 6 in. diameter wafer.          and a cooled GaAs photomultiplier tube. Colored glass filters
+                                                                       were used to remove higher orders from the dispersed light.
+a!
+ Also at: Princeton University, Plasma Physics Laboratory.             While full spectra were recorded between 200 and 900 nm
+b!
+ Electronic mail: vmd@bell-labs.com                                    for about half of the experiments, only the peak intensity of
+
+0021-8979/98/84(1)/137/10/$15.00                                 137                               © 1998 American Institute of Physics
+138      J. Appl. Phys., Vol. 84, No. 1, 1 July 1998                                                                                Malyshev et al.
+
+
+
+
+                  FIG. 1. Scale drawing of the LAM Research Alliance TCP plasma reactor and the optical emission spectrometer.
+
+
+
+the 305 nm band of Cl2 and the integrated intensities of a line                n Cl25a g ~ T e ,n e ,p,l ! n rare gasI ~ Cl2, 305! /I ~ rare gas,l !
+
+
+
+
+                                                                                                                                                        07 August 2026 21:56:45
+of Ar and Xe were used to determine the Cl2 percent disso-                                                                                        ~1!
+ciations reported here. As depicted in Fig. 1, the emission
+                                                                          The proportionality constant, a g (T e ,n e ,p,l) depends on the
+intensity imaged by the lens onto the entrance slit of the
+                                                                          gases ~designated by the subscript g, representing in this
+monochromator ~and so the Cl2 number density! is a line
+                                                                          case the rare gas and Cl2!, and also can depend on T e , and in
+integral across the plasma.
+                                                                          cases where excitation through rare gas metastable levels is
+                                                                          important, on electron density (n e ), gas composition ~includ-
+III. RESULTS AND DISCUSSION                                               ing products!, total pressure ( p), and the effective reactor
+                                                                          size (l). In simple actinometry, the dependence of
+A. Method of analysis                                                     a g (T e ,n e ,p,l) on these variables is ignored. Below we cor-
+                                                                          rect for these dependencies, where appropriate.
+1. Emission measurements and actinometry
+     Peak emission intensities of Cl2 at 305 nm, denoted as               2. Cl 2 -to-Xe emission measurements and corrections
+I(Cl2, 305), and integrated Xe 828.0 nm, and Ar 750.4 nm                  for Xe metastables
+emission intensities, represented as I(Xe, 828.0) and                          Previously, the emission at 305 nm was assigned to a
+I(Ar, 750.4), respectively, were recorded as a function of                state at an energy of either 8.4 or 9.2 eV.1 Consequently, the
+pressure and power. Sample I(Cl2, 305)/I(Xe, 828.0) and                   best match to this energy for the rare gas would be the 2 p 5
+I(Cl2, 305)/I(Ar, 750.4) emission ratios are plotted as a                 and 2 p 6 levels ~Paschen notation! of Xe at 9.94 and 9.82 eV,
+function of power in Fig. 2 for the four different pressures              emitting at 828.0 and 823.2 nm. In a previous study, the
+used in this study. At each pressure, the emission ratios de-             823.2 nm Xe line was used because it was the most intense
+crease monotonically with increasing power. Emission from                 Xe emission.1 It was subsequently realized, however, that
+Cl2 is assumed to occur exclusively from electron impact                  this level is particularly susceptible to an alternate pathway
+excitation from the ground electronic state of Cl2. Its inten-            for excitation through electron impact excitation of the Xe
+sity is therefore proportional to its ground state number den-            metastable levels.1,3 This dominant route for excitation of the
+sity, n Cl2, and also depends on the electron density and the             823.2 nm emission spoils the simple actinometry relationship
+electron energy distribution function ~EEDF!. In the acti-                in Eq. ~1! @i.e., with a g (T e ,n e ,p,l) independent of plasma
+nometry method, emission from a rare gas with an emitting                 conditions#. As discussed elsewhere, the 2 p 5 level of Xe,
+level close in energy to the upper state of Cl2 is used to                emitting at 828.0 nm is much less affected by metastables,3–5
+obtain the relative dependence of the emission intensity on               and therefore was used instead of the Xe 823.2 nm emission.
+the electron density and the EEDF. In this study, the EEDF is             Nonetheless, it was still necessary to account for the role of
+simplified with an assumed Maxwellian distribution, with an               metastable levels in the excitation of Xe 828.0 nm emission.
+electron temperature T e . The Cl2 ground state number den-                    The energy of the Xe 2p 5 level is a good match to the
+sity is proportional to the Cl2-to-rare gas emission ratio and            energy of the Cl2 emitter. Furthermore, the energy depen-
+the rare gas number density (n rare gas):                                 dence of the electron impact excitation cross sections for
+J. Appl. Phys., Vol. 84, No. 1, 1 July 1998                                                                                       Malyshev et al.          139
+
+
+
+
+                                                                               FIG. 3. T e measurements, determined by OES, for Cl2/5% rare gas mixture
+FIG. 2. Cl2 305 nm-to-rare gas emission ratios vs TCP power for Cl2/5%         plasmas and a SiO2 coated wafer, with no substrate rf bias. ~a! TCP
+rare gas mixture plasmas and a SiO2 coated wafer, with no substrate rf bias.   window–wafer gap511 cm @reported elsewhere ~Ref. 3!#. ~b! TCP
+The gap between the TCP window and the wafer chuck was 11 cm. The              window–wafer gap56.5 cm.
+
+
+
+
+                                                                                                                                                                   07 August 2026 21:56:45
+lines ~polynomial fits to the data in most cases! are to guide the eye. ~a!
+Cl2-to-Xe 828.0 nm emission ratios vs TCP power. ~b! Cl2-to-Ar 750.4 nm        indicate excitation out of the ground and metastable states#,
+emission ratios vs TCP power.                                                  i.e., the reciprocal is proportional to a Xe(T e ,n e ,p,l) in Eq.
+                                                                               ~1!. Figure 4 presents computed a 8Xe(T e ,n e ,p,l) values for
+                                                                               some of the conditions used in this study. At high power
+these Xe and Cl2 emissions must be very similar, since the y                   ~900 W!, a 8Xe(T e ,n e ,p,l) approaches 1.5, meaning that n Cl2
+intercepts in Fig. 2~a! are insensitive to a change in pressure                would be underestimated by this factor if metastable contri-
+that results in a factor of ;2 change in T e ~as shown below!.                 butions to Xe 828.0 nm emission intensities were ignored.
+Consequently, the proportionality constant, a Xe(T e ,n e ,p,l),
+for I(Cl2, 305)/I(Xe, 828.0) is insensitive to changes in T e ,                3. Cl 2 -to-Ar emission measurements and corrections
+and is hence independent of pressure at low power.                             for changes in T e
+     To derive absolute Cl2 number densities from the data in                       Complication from rare gas metastables can be avoided
+Fig. 2~a! and Eq. ~1!, we compute the relative amounts of Xe                   by choosing an emission line from the rare gases that is
+emission coming from ground state excitation, and from ex-                     virtually unaffected by metastables, the 750.4 nm line of Ar.
+citation through the Xe metastable states present at the com-
+puted number densities. The model, described more thor-
+oughly in other publications,3–5 includes electron impact
+excitation from the ground state to the emitting levels and to
+the metastable levels, as well as electron impact excitation
+from the metastable levels to the emitting levels. Metastables
+are lost by diffusion, and by collisions with electrons, Cl, and
+Cl2. Cross sections and rate constants for all of these pro-
+cesses are reviewed in other publications.3–5 Measured elec-
+tron temperatures reported elsewhere3 @reproduced, slightly
+modified in Fig. 3~a!#, previously unpublished electron tem-
+perature measurements @Fig. 3~b!#, and electron densities
+~discussed below! were used in the model.
+     Multiplying the observed Xe 828.0 nm emission inten-
+sity by the computed fraction of emission intensity originat-
+ing solely from the ground state removes the contribution
+from metastables. Equivalently, I(Cl2, 305)/I(Xe, 828.0) in                               8 (T e ,n e , p,l) vs TCP power, determined from modeling of the
+                                                                               FIG. 4. a Xe
+                                                                               relative contributions to Xe 828.0 nm emission intensity from electron im-
+Fig. 2~a! can be multiplied by the reciprocal of this fraction                                                                              8 (T e ,n e ,p,l) is
+                                                                               pact excitation with the Xe ground and metastable states. a Xe
+               8 (T e ,n e , p,l) in Fig. 4, and given by @ I(Xe,
+@designated a Xe                                                               proportional to a Xe(T e ,n e , p,l) in Eq. ~1! and is used to determine Cl2
+828.0!g 1I(Xe, 828.0!m ]/I(Xe,828.0) g , where g and m                         number densities from I(Cl2, 305)/I(Xe, 828.0) in Fig. 2~a!.
+140        J. Appl. Phys., Vol. 84, No. 1, 1 July 1998                                                                                   Malyshev et al.
+
+
+                                                                                          We can also estimate the relative dependence of
+                                                                                    I(Cl2, 305! on T e from the observation that the ratio
+                                                                                    I(Cl2, 305!/I~Xe, 828.0!, extrapolated to zero power, is con-
+                                                                                    stant within 610%, independent of pressure ~and therefore
+                                                                                    T e ! and reactor configuration $TCP small and large gaps in
+                                                                                    this study @see Fig. 2~a!#, single-loop inductively coupled
+                                                                                    plasma,6 or ultrahigh frequency ~500 MHz! plasma6%. There-
+                                                                                    fore, the relative energy dependence of the cross section for
+                                                                                    excitation of Cl2 emission must be similar to the cross sec-
+                                                                                    tion for electron impact excitation of the 2p 5 level of Xe
+                                                                                    from its ground state. With this assumption, a Ar(T e ,n e ,p,l)
+                                                                                    for I(Cl2, 305!/I~Ar, 750.4! is proportional to I~Ar, 750.4!°/
+                                                                                    I~Xe, 828.0!°. Both measured @from the measurements used
+                                                                                    to generate Figs. 2~a! and 2~b!# and computed3–5
+                                                                                    I(Ar, 750.4)°/I(Xe, 828.0)° values are given in Fig. 5. The
+FIG. 5. a 8Ar(T e ,n e ,p,l) vs TCP power, determined from the ‘‘zero-power’’       measured values are in excellent agreement with measure-
+intercepts in Fig. 2~b!, from the zero-power Ar, 750.4 nm-to-Xe, 828.0 nm           ments derived from I(Ar, 750.4)°/I(Cl2, 305)°. The com-
+emission ratios, and from modeling. a Ar    8 (T e ,n e , p,l) is proportional to   puted I(Xe, 828.0)°/I(Ar, 750.4)° values are also in excel-
+a Ar(T e ,n e ,p,l) in Eq. ~1! and is used to determine Cl2 number densities
+from I(Cl2, 305)/I(Ar, 750.4) in Fig. 2~b!.
+                                                                                    lent agreement with the measurements at low T e ~10 mTorr!,
+                                                                                    but deviate somewhat at higher T e ’s. We believe the experi-
+                                                                                    mental data are more reliable and so use the linear least-
+Despite the energy mismatch between this 2 p 1 level of Ar                          squares fit to these data to derive an expression for
+~13.5 eV! and the Cl2 state emitting at 305 nm, this emission                         8 (T e ,n e ,p,l) that can be used throughout the range T e ’s
+                                                                                    a Ar
+can be used if the EEDF is invariant to changes in plasma                           encountered with only a small extrapolation to cover the
+conditions, or if corrections are made to account for a change                      highest T e ~3.3 eV!.
+in the electron temperature (T e ). An increase in the zero-                              Given the uncertainty in these different corrections when
+
+
+
+
+                                                                                                                                                            07 August 2026 21:56:45
+power intercept with increasing pressure is expected @and                           Ar 750.4 nm emission and Xe 828.0 nm lines are used, n Cl2
+observed, see Fig. 2~b!# from the decrease in T e , combined                        determined from the average of these two is likely accurate
+with the higher energy of Ar (2p 1 ), compared with the emit-                       at all powers and pressures to within 625%.
+ting level of Cl2. This effect does not cause problems in
+                                                                                    B. Cl2 percent dissociations in Cl2 plasmas, using
+determining absolute Cl2 number densities from the data in                          SiO2 covered wafers
+Fig. 2~b! because a separate extrapolation to zero power is
+made for each pressure. Unfortunately, the power depen-
+dence of T e ~presented below! does complicate the conver-                          1. 11 cm TCP window-wafer chuck gap
+sion of emission ratios in Fig. 2~b! into absolute Cl2 number
+                                                                                         The emission ratios in Fig. 2 were multiplied by
+densities and so makes it necessary to determine the T e de-
+                                                                                      8 (T e ,n e ,p,l) and a Ar
+                                                                                    a Xe                       8 (T e ,n e ,p,l) in Figs. 4 and 5 to gen-
+pendence of a Ar(T e ,n e , p,l) in Eq. ~1!.
+                                                                                    erate relative Cl2 number densities. They were then con-
+    The TCP source power must be varied over one to
+                                                                                    verted into the absolute number densities presented in Fig. 6
+two orders of magnitude to obtain an absolute Cl2 number
+                                                                                    by normalizing the ‘‘zero-power’’ intercepts to the Cl2 num-
+density under typical high-power operating conditions. Fig-                                                                         0
+                                                                                    ber density with the plasma off (n Cl              ). Two pressure-
+ure 3 shows that T e increases by 20%–30% between 20 and                                                                              2
+
+900 W. This is presumably due to the increasing fraction of                         independent constants were derived for this normalization,
+Cl in the plasma at high powers, and the smaller rate con-                          one for the Xe data and one for the Ar data. The percent Cl2,
+stant for ionization of Cl vis-à-vis Cl2, due to its smaller size                  relative to the Cl2 number density with the plasma off, de-
+                                                                                                          0
+and higher ionization potential ~12.97 eV for Cl, relative to                       fined as 100n Cl2 /n Cl   is plotted in Fig. 6 as a function of TCP
+                                                                                                            2
+11.5 eV Cl2!. As T e increases with increasing power,                               power for Cl2/5% rare gas mixture plasmas at total pressures
+I(Ar, 750.4) increases more rapidly than does I(Cl2, 305.0),                        of 0.5–10 mTorr. The Cl2 percent dissociation is then de-
+                                                                                                                 0
+because of the energy mismatch between the two emitting                             fined as 100 (12n Cl2 /n Cl      ). These values are unchanged by
+                                                                                                                   2
+levels, causing n Cl2 in Eq. ~1! to be underestimated at high                       expansion of the gas ~initially at 333 K! as power and gas
+power.                                                                              temperature increase, since the rare gas and Cl2 will be af-
+    The electron energy-dependent cross section for excita-                         fected similarly.
+tion of Cl2 emission has not been measured. We can, how-                                 The agreement between Figs. 6~a! and 6~b! is quite
+ever, determine the relative dependence of a Ar(T e ,n e ,p,l)                      good. These measurements were averaged to derive the final
+on T e from the pressure dependence of I~Ar, 750.4!°/                               Cl2 number densities presented in Fig. 7 for the 11 cm gap.
+I(Cl2, 305!° ~reciprocals of I(Cl2, 305!/I~Ar, 750.4! in Fig.                       The ends of the error bars represent the two values used in
+2~b!, extrapolated to zero power! plotted vs T e determined                         the average. The discharge is about 75% dissociated at the
+from OES measurements similarly extrapolated to zero                                highest TCP power ~900 W! and lowest pressure ~0.5–1
+power @from Fig. 3~a!#. The resulting values are plotted in                         mTorr!. At constant power, the percent dissociation de-
+Fig. 5.                                                                             creases as pressure increases.
+J. Appl. Phys., Vol. 84, No. 1, 1 July 1998                                                                                     Malyshev et al.         141
+
+
+
+
+                                                                               FIG. 8. Cl2 number density, expressed as a percentage of the Cl2 number
+                                                                               density with the plasma off, determined from the average of the Cl2 305
+                                                                               nm-to-Xe and Cl2 305 nm-to-Ar emission ratios, vs TCP power for Cl2/5%
+                                                                               rare gas mixture plasmas and a SiO2 coated wafer, with no substrate rf bias.
+                                                                               The gap between the TCP window and the wafer chuck was 6.5 cm. The
+                                                                               ends of the error bars represent either the Cl2-to-Ar or Cl2-to-Xe values. The
+                                                                               open square point was at 10 mTorr pressure and 1/3 the normal flow rate.
+
+
+                                                                               behave similarly to those recorded with the larger gap: the
+                                                                               I(Cl2, 305)/I(Xe, 828.0) intercepts are nearly independent
+FIG. 6. Cl2 number density, expressed as a percentage of the Cl2 number        of pressure, while the I(Cl2, 305)/I(Ar, 750.4) intercept in-
+density with the plasma off ~determined from the Cl2 305 nm-to-rare gas
+                                                                               creases by 2.1 as pressure increases from 0.5 to 10 mTorr.
+emission ratio! vs TCP power for Cl2/5% rare gas mixture plasmas and a
+                                                                               Figure 8 presents percent Cl2 ~as defined above! vs TCP
+
+
+
+
+                                                                                                                                                                07 August 2026 21:56:45
+SiO2 coated wafer, with no substrate rf bias. The gap between the TCP
+window and the wafer chuck was 11 cm. ~a! From Cl2-to-Xe emission              power for Cl2/5% rare gas mixture plasmas, determined from
+ratios, ~b! from Cl2-to-Ar emission ratios.                                    the average of Xe 828.0 and Ar 750.4 nm emission data,
+                                                                               using Eq. ~1!, a 8Xe(T e ,n e ,p,l) from a plot analogous to Fig.
+                                                                               4 ~specifically for the 6.5 cm gap! and a 8Ar(T e ,n e ,p,l) from
+2. 6.5 cm TCP window-wafer chuck gap
+                                                                               Fig. 5. As was found with the larger gap, the percent disso-
+    Measurements were also performed for the reactor con-                      ciation decreases with increasing pressure. The two plasma
+figured so that the gap between the TCP window and the                         configurations differ, however, in that at pressures of 2
+wafer was 6.5 cm. This reactor configuration was found to                      mTorr and below, n Cl2 is higher ~Cl2 percent dissociation is
+lead to increased damage to the gate oxide after Al etching.7                  lower! with the smaller gap. This is attributed below to a
+For total pressures of 0.5, 1, 2, and 10 mTorr,                                combination of lower average electron densities and smaller
+I(Cl2, 305)/I(Xe, 828.0) and I(Cl2, 305)/I(Ar, 750.4) de-                      effective diffusion length with the smaller gap, causing the
+crease with increasing power. The zero-power intercepts also                   electron impact dissociation rate to decrease and the Cl-atom
+                                                                               loss rate due to wall recombination to increase. At 10 mTorr,
+                                                                               the situation is reversed; the percent dissociation is slightly
+                                                                               higher with the smaller gap.
+                                                                                    The measurements at 10 mTorr are anomalous in that the
+                                                                               apparent Cl2 density exceeds 100% at 90 W. This is due to
+                                                                               enhanced Cl2 emission at this power ~as opposed to sup-
+                                                                               pressed rare gas emission!. Above and below this power, the
+                                                                               ratio follows a smooth dependence on power. The effect was
+                                                                               reproducible and also occurred at the same pressure and
+                                                                               power for a mixture on Cl2 and BCl3 ~see below!. It was
+                                                                               observed that below and above 100 W, the positive ion spa-
+                                                                               tial distribution measured with the Langmuir probe under-
+                                                                               went a transition from a diffuse discharge below 100 W to
+                                                                               being more confined to the region below the antenna above
+                                                                               100 W.8 While low-energy Cl2 emission emanating from an
+                                                                               extended volume in this transition power region could ex-
+FIG. 7. Cl2 number density, expressed as a percentage of the Cl2 number        plain its enhanced intensity, a similar power dependence of
+density with the plasma off, determined from the average of the Cl2 305        the positive ion spatial dependence with a TCP window-
+nm-to-Xe and Cl2 305 nm-to-Ar emission ratios, vs TCP power for Cl2/5%
+rare gas mixture plasmas and a SiO2 coated wafer, with no substrate rf bias.
+                                                                               wafer gap of 11 cm results in no such anomalous Cl2 emis-
+The gap between the TCP window and the wafer chuck was 11 cm. The              sion near 100 W ~see below!. A broad dip in T e of ;0.2 eV
+ends of the error bars represent either the Cl2-to-Ar or Cl2-to-Xe values.     between 50 and 150 W, determined from OES measure-
+142        J. Appl. Phys., Vol. 84, No. 1, 1 July 1998                                                                                      Malyshev et al.
+
+
+
+
+FIG. 9. Cl2 number density, expressed as a percentage of the Cl2 number          FIG. 10. Cl2 number density, expressed as a percentage of the Cl2 number
+density with the plasma off, determined from the average of the Cl2 305          density with the plasma off, determined from the average of the Cl2 305
+nm-to-Xe and Cl2 305 nm-to-Ar emission ratios, vs TCP power for                  nm-to-Xe and Cl2 305 nm-to-Ar emission ratios, vs TCP power for
+27.5%BCl3/67.5%Cl2/5% rare gas mixture plasmas at a total pressure of 10         27.5%BCl3/67.5%Cl2/5% rare gas mixture plasmas at a total pressure of 10
+mTorr. The gap between the TCP window and the wafer chuck was 11 cm              mTorr. The gap between the TCP window and the wafer chuck was 6.5 cm
+and the substrate was a SiO2 coated wafer. The data from Fig. 7 for Cl2 with     and the substrate was a SiO2 coated wafer. The data from Fig. 8 for Cl2 with
+no added BCl3 are included for comparison. The ends of the error bars            no added BCl3 are included for comparison. The ends of the error bars
+represent either the Cl2-to-Ar or Cl2-to-Xe values. The dotted line represents   represent either the Cl2-to-Ar or Cl2-to-Xe values. The dotted lines repre-
+the Cl2 number densities expected from dilution alone.                           sents the Cl2 number densities expected from dilution alone, and a model
+                                                                                 prediction based on a catalytic reaction with BClx ~see below!.
+
+
+ments, was observed with the smaller gap, but not with the
+larger gap ~see Fig. 3!. This could indicate a change in the
+EEDF as the plasma converts from a capacitive ~at low
+
+
+
+
+                                                                                                                                                                07 August 2026 21:56:45
+                                                                                 D. Effects of Cl2 flow rate and the addition of substrate
+power! to more inductive ~at high power! mode of operation,                      rf bias
+with the smaller gap, perhaps enhancing Cl2 emission near
+100 W. While the high values at 10 mTorr and 100 W with                              In one case the flow rate of Cl2 was reduced from 120 to
+the 6.5 cm gap cannot be completely explained, they only                         40 sccm, maintaining constant pressure ~10 mTorr, open
+cause some increased uncertainty at these conditions, and do                     square in Fig. 8!, Cl2-to-rare gas mixture ratio ~19:1!, and
+not compromise the other measurements.                                           source power ~500 W!. The Cl2 number density did not
+                                                                                 change with this threefold increase in residence time from
+                                                                                 0.28 to 0.84 s, as expected since the formation and destruc-
+C. Effects of addition of BCl3 to Cl2 plasmas                                    tion rates for Cl and Cl2 are fast compared to the gas resi-
+    BCl3 is usually added to Cl2 during etching of Al to                         dence time ~as shown below!.
+remove the native oxide and enhance anisotropic etching.                             rf bias is almost always applied to the substrate during
+Measurements of n Cl2 vs power were performed with both                          etching. The effect of this added power on the dissociation
+gap configurations for 28% BCl3 /Cl2 discharges. The nor-                        and/or consumption of Cl2 was also investigated for the
+malized 828.0 nm Xe and 750.4 nm Ar data, corrected for T e                      larger gap at 2 mTorr Cl2 ~Table I!. Under typical conditions
+and metastable effects, were similar, so we show only the                        ~bias power!source power!, the bias power was found to be
+average of the Xe and Ar data in Figs. 9 and 10, along with                      no more effective than source power in dissociating Cl2.
+the data for 10 mTorr Cl2 plasmas ~from Figs. 7 and 8! for                       Since source power is more efficient than bias power in in-
+comparison. At each TCP window-wafer gap, the zero-                              creasing the electron density and hence electron impact dis-
+power intercepts for BCl3 /Cl2 and Cl2 plasmas are normal-                       sociation rate for Cl2, a relatively small added bias power is
+ized with the same proportionality constant. Consequently,                       expected to have little effect on n Cl2 .
+the lower intercepts for the BCl3 /Cl2 measurements agree
+reasonably well with those expected from the dilution of Cl2.
+Even when this dilution is accounted for ~dotted lines in
+Figs. 9 and 10!, however, the percent consumption of Cl2                         TABLE I. Percent Cl2 relative to that with the plasma off ~i.e.,
+increases when BCl3 is added to Cl2 discharges. This in-                                      0
+                                                                                 100 n Cl2 /n Cl2
+                                                                                                  ! with and without bias power. Cl2 pressure52 mTorr, TCP
+creased consumption of Cl2 cannot be due to an increase in                       window-wafer gap511 cm.
+the electron-impact dissociation rate, since the electron tem-
+                                                                                       Source power                  Bias power
+perature ~determined optically3 and with a Langmuir probe8!                                ~W!                          ~W!                     % Cl2
+decreases when BCl3 is added to Cl2, and the plasma density
+remains the same on average. Below we ascribe the enhance-                                  300                            0                     62
+                                                                                            300                          100                     58
+ment in Cl2 dissociation with addition of BCl3 primarily to a                               820                            0                     27
+lowering of the 2Cl→Cl2 recombination rate on the chamber                                   820                          100                     19
+walls, due to the presence of adsorbed BClx .
+J. Appl. Phys., Vol. 84, No. 1, 1 July 1998                                                                     Malyshev et al.        143
+
+
+E. Computed estimates of Cl2 dissociation
+
+
+1. Computed dissociation in Cl 2 plasmas
+    While detailed modeling is not the focus of this study,
+estimates can be made of the expected percent dissociations
+of Cl2 and its dependence on the reactor geometry. The ma-
+jor formation and destruction reactions that determine the
+steady-state concentrations of Cl and Cl2 are
+                    k dis
+    Cl21e ——→ 2Cl1e,                                        ~2!
+                    k at
+    Cl21e ——→ Cl1Cl2,                                       ~3!
+                           kr
+    Cl1Cl2W→ Cl212W,                                        ~4!
+                           k Cl
+    Cl12W ——→ Cl2W,                                         ~5!
+where Cl–W is a chlorinated site on the wall and 2W is a
+bare site. Assuming that the total site density is conserved
+~i.e., Cl–W12W5constant!, that chlorination of bare sites
+occurs with near unit probability per incident Cl so
+Cl–W@2W, and that n Cl2!n Cl , a steady-state expression
+can be derived for n Cl2 :
+                                                                  FIG. 11. Volume-average electron densities as a function of power in Cl2
+                                           f Cl2                  plasmas, determined from Langmuir probe analysis ~Ref. 5!, ~a! 11 cm gap,
+                                                                  ~b! 6.5 cm gap.
+                                  11          0
+
+
+
+
+                                                                                                                                              07 August 2026 21:56:45
+                                       2k r n Cl V
+                                                   2
+             0
+    n Cl2 /n Cl  5                                          ~6!
+                2                  f Cl2    k dn e
+                           11        0    1                       where g is the Cl wall recombination coefficient, and D eff is
+                              2k r n Cl V    2k r
+                                           2
+                                                                  an effective diffusion coefficient for Cl transport to the walls,
+where f Cl2 is the Cl2 flow rate ~molecules/s!, V is the cham-    defined as
+ber volume (43 000 cm3), k d is the sum of the rate constants
+                                                                                      1
+for electron impact dissociation, k dis[54.5231028                     D eff5                ,                                         ~9!
+exp(27.40/T e ) cm3 s21#,9–11 and dissociative attachment,                      1/D 0 11/D p
+k at@ 52.17310210 1 3.090310212 log Te 1 1.1710310210             combining a molecular diffusion coefficient (D 0 )
+3 (log Te)2 2 5.579793 10211(log Te)3 1 6.8455903 10212
+3(log Te)428.502499310214(log Te)5 cm3 s21#.12 If the de-
+struction reaction, and the sum of the formation13 reaction            D 05
+                                                                              l eff
+                                                                               3
+                                                                                      A   8RT
+                                                                                          p M Cl
+                                                                                                ,                                     ~10!
+rates are fast compared to the gas residence time,14 then Eq.
+~6! reduces to                                                    and a pressure-dependent binary diffusion coefficient (D p ).
+                                                                  T is the gas temperature, M Cl is the atomic weight of Cl, and
+                              1
+             0
+    n Cl2 /n Cl 5                    .                      ~7!   the diffusion coefficients are for Cl in a mixture of Cl and
+                2             k dn e                              Cl2. The effective diffusion length, l eff , is approximately
+                           11
+                               2k r                               given by the plasma volume-to-surface area ratio ~3.6 cm for
+     The electron density, n e , is averaged over the ‘‘plasma    the 11 cm gap and 2.5 cm for the 6.5 cm gap!. D p of Cl in
+volume’’ (16.0l) defined by the radius of the chamber ~21.5       Cl2 was estimated from Lennard–Jones parameters.16–18
+cm! and the 11 cm gap between the TCP window and the                   In deriving Eq. ~6!, it was assumed that the pressure in
+chuck ~Fig. 1!. Electron densities were determined in this        the reactor volume increases in proportion to the percent dis-
+reactor from an analysis of Langmuir probe data that is pre-      sociation, even though no increase in pressure is sensed by
+sented elsewhere.8 Electron densities were measured along a       the pressure meter. This is reasonable, since Cl atoms enter-
+line at a distance of 1.35 cm above the wafer and chuck.          ing the tube leading to the pressure meter will recombine on
+These values were converted into plasma volume average            the tubing or in the metal pressure meter. Therefore, the pres-
+densities ~Fig. 11! by assuming radial symmetry and an axial      sure measurement is the same as with the plasma off, and the
+sin(ph/gap) distribution, where h is the height above the         throttle valve controlling pressure does not change position
+chuck.                                                            when the plasma is ignited. The pressure and number density
+     The first order Cl-atom recombination rate constant (k r )   in the reactor rise, and the mass balance relation is approxi-
+is given by11,15                                                  mately obeyed:
+
+    k r 5 g D eff /l 2eff,                                  ~8!        n 0Cl5n Cl21n Cl/2.                                            ~11!
+144        J. Appl. Phys., Vol. 84, No. 1, 1 July 1998                                                                             Malyshev et al.
+
+
+                                                                                     BCl21Cl2→BCl31Cl.                                       ~13!
+                                                                                 Reaction ~13! is exothermic by 45 kcal/mole. A similar re-
+                                                                                 action with a larger activation barrier to overcome,
+                                                                                 B2Cl41Cl2→2BCl3 has been reported by Apple and Wartik20
+                                                                                 to occur rapidly in the gas phase. Reaction ~13! would also
+                                                                                 be expected to occur rapidly on the walls of the chamber,
+                                                                                 and perhaps this is the more important reaction, especially at
+                                                                                 low pressure. Reactions ~12! and ~13! would catalytically
+                                                                                 dissociate Cl2. The maximum effect of these reactions can be
+                                                                                 estimated by assuming that reaction ~13! is fast compared to
+                                                                                 reaction ~12!, so that every BCl3 dissociated results immedi-
+                                                                                 ately in destruction of one Cl2 and formation of BCl3 and 2
+                                                                                                           0
+                                                                                 Cl atoms. If so, n Cl2 /n Cl is given by
+                                                                                                                2
+
+                                                                                                          k d,BCl3n e f BCl3
+                                                                                                     11
+                                                                                                              2k r
+                                                                                              0
+                                                                                     n Cl2 /n Cl 5                             ,             ~14!
+                                                                                              2              k dn e
+                                                                                                          11
+                                                                                                              2k r
+                                                                                 where k d,BCl3 is the dissociation rate constant for BCl3 by
+                                                                                 electron impact,21 f BCl3 is the fraction of BCl3 in the feed
+FIG. 12. Computed values of 1003n Cl2 /n Cl    0
+                                                    vs TCP power for Cl2 pres-   gas, and the residence time is assumed to be infinitely long
+                                                                                 ~see Sec. III E1!. The model fit to the small gap data ~where
+                                                 2
+sures of 0.5 ~—!, 1 ~----!, 2 ~.-.-.-.!, and 10 ~.....! mTorr, a TCP window—
+wafer chuck gap of 11 or 6.5 cm, and a Cl-atom wall recombination coef-          the model does better at predicting number densities with no
+ficient g 50.035. The points are the data in Figs. 7 and 8 for 0.5 ~L!, 1 ~m!,   added BCl3! is included in Fig. 10. The model @and so reac-
+
+
+
+
+                                                                                                                                                     07 August 2026 21:56:45
+2 ~s!, and 10 ~j! mTorr; ~a! 11 cm gap, ~b! 6.5 cm gap.
+                                                                                 tions ~12! and ~13!# explain only about one-third of the dif-
+                                                                                 ference between the measured percent dissociations and di-
+                       0                                                         lution at intermediate powers and also does not adequately
+     Computed n Cl2 /n Cl  values vs TCP power are shown in                      explain the power dependence.
+                         2
+Fig. 12 for Cl2 pressures of 0.5, 1, 2, and 10 mTorr. The Cl                          A second, more likely explanation for the decrease in Cl2
+wall recombination coefficient, g, was treated as the only                       number density with the addition of BCl3 to the Cl2 plasma is
+adjustable parameter. The best overall fit to the power and                      that BCl2 ~and/or BCl! formed in reaction ~12! adsorbs on
+pressure dependence in Fig. 12 was obtained for g 50.035.                        the anodized walls of the chamber and lowers the Cl-
+This is close to the value reported by Koda et al. for alumina                   recombination coefficient. To explain the observations at in-
+at a wall temperature of 333 K ~;0.06!.19 Given the factor of                    termediate powers, g would have to decrease from 0.035 to
+;2 uncertainty in g,19 an estimated 15% uncertainty in T e , a                   ;0.015. This is certainly possible, given the even lower re-
+factor of ;2 uncertainty in k dis , and the assumptions in the                   combination coefficients observed for some inert surfaces
+model, the computed values are in good agreement with the                        such as quartz, Teflon, and photoresist.19
+observed ones for all but the highest pressure with the 11 cm
+gap and the lowest pressure with the 6.5 cm gap. The most
+likely explanation for the discrepancy with the 10 cm gap at                     F. Comparisons with other studies
+10 mTorr is an error in the electron density, or a systematic
+overestimate in T e by about 0.5 eV at all pressures.                                 Very few measurements of Cl or Cl2 concentrations in
+     When the gap between the TCP window and the wafer                           high-density plasmas have been reported. Previous studies
+chuck was reduced from 11 to 6.5 cm, the average electron                        from this laboratory of a small helical resonator reactor re-
+density decreased by a factor of about 2. In addition, the Cl                    vealed high percent dissociations ~80%–90% when corrected
+recombination rate nearly doubles as the gap ~and effective                      for contributions by metastables to the 823.2 nm Xe emis-
+length! decreases. Counteracting these effects, the electron                     sion! at high power densities (0.4 W/cm3). 1 Ono and
+temperature increases by about 15% with the smaller gap.                         co-workers22 used two-photon laser-induced fluorescence
+The net result is a decrease in the percent dissociation, as                     ~LIF! to detect Cl atoms in an ECR discharge. They found
+observed ~except at 10 mTorr! and predicted by the model.                        much lower percent dissociations ~only 3%! than in the
+                                                                                 present study. Hebner23 also used two-photon LIF to deter-
+                                                                                 mine relative Cl atom densities in a Cl2 inductively coupled
+2. Computed dissociation in BCl 3 / Cl 2 plasmas                                 plasma ~GEC reference cell!. He found that the Cl-atom den-
+      Possible explanations for the decrease in n Cl2 with the                   sity saturated between 150 and 400 W and increased with
+                                                                                 increasing pressure. Anderson and co-workers24 used tunable
+addition of BCl3 are: first, reactions with BCl2 ~and/or BCl!,
+                                                                                 diode laser spectroscopy to deduce absolute Cl densities, also
+e.g.,
+                                                                                 in an inductively coupled GEC reference cell. The corre-
+      BCl31e→BCl21Cl1e,                                                 ~12!     sponding percent dissociations were much higher than those
+J. Appl. Phys., Vol. 84, No. 1, 1 July 1998                                                                                       Malyshev et al.   145
+
+
+measured by Ono and co-workers in an ECR plasma, and              to a lower electron density! and an increase in the Cl wall
+were more in agreement with those reported previously,1 and       recombination rate caused by a lowering of the effective dif-
+in the present study.                                             fusion length for the 6.5 cm gap. Most of these effects are
+     Modeling studies also tend to favor a high percent           reproduced by a zero-dimensional model that considers elec-
+dissociation,11,25–29 although the reported values vary widely.   tron collision induced dissociation of Cl2 and Cl-atom wall
+Lymberopoulos and Economou25 computed Cl/Cl2 number               recombination as the important reactions. Application of rf
+density ratios of 4 for an ICP Cl2 plasma at 10 mTorr and         bias power increases the percent dissociation by no more
+0.15 W/cm3, which extrapolates to a ratio of about 3 at the       than expected from the small increase in total power. Addi-
+0.08 W/cm3 corresponding to the highest power in the              tion of BCl3 causes the percent dissociation of Cl2 to in-
+present study. Ventzek et al.26 computed Cl and Cl2 densities     crease, most likely due to a lowering of the Cl-atom wall
+in a 30%Cl2/70%Ar TCP plasma. At 5 mTorr total pressure           recombination rate due to adsorbed BClx , and possibly in
+and a power density of 0.1 W/cm3, n Cl /n Cl252. Wise et al.27    part, to the reaction of Cl2 with BClx ~x51 or 2!.
+and Bukowski et al.28 both computed an n Cl /n Cl2 ratio of ;1
+for a GEC reference cell at 20 mTorr and 0.25 W/cm3. In the       1
+                                                                     V. M. Donnelly, J. Vac. Sci. Technol. A 14, 1076 ~1997!.
+present study, the highest pressure investigated was 10
+                                                                  2
+                                                                     J. W. Coburn and M. Chen, J. Appl. Phys. 51, 3134 ~1980!.
+                                                                   3
+                                                                     V. M. Donnelly, M. V. Malyshev, A. Kornblit, N. A. Ciampa, J. I. Colo-
+mTorr, where the percent dissociation reached 40%                    nell, and J. T. C. Lee, Jpn. J. Appl. Phys. Part 1 37, 878 ~1998!.
+(n Cl /n Cl251.3) near 0.08 W/cm3. From the experimentally         4
+                                                                     M. V. Malyshev and V. M. Donnelly, J. Vac. Sci. Technol. A 15, 550
+observed falloff in percent dissociation with increasing pres-       ~1997!.
+                                                                   5
+                                                                     M. V. Malyshev and V. M. Donnelly ~unpublished!.
+sure, a lower percent dissociation would be expected at 20         6
+                                                                     M. V. Malyshev, V. M. Donnelly, and S. Samukawa, J. Appl. Phys. ~to be
+mTorr, consistent with the computed n Cl /n Cl2;1.26,27 Fi-          published!.
+                                                                   7
+nally, Meeks and Shon29 computed n Cl /n Cl2 for a high den-         J. I. Colonell, S. W. Downey, T. Kook, R. Patrick, S. Siu and P. L. Jones,
+                                                                     Proceedings of the 2nd International Symposium on Plasma Process-
+sity plasma, using a zero-dimensional model. Their values            Induced Damage ~1997!, p. 229.
+                                                                   8
+never exceeded 1 for all powers and pressures and were thus          M. V. Malyshev, V. M. Donnelly, A. Kornblit, N. A. Ciampa, J. I. Colo-
+lower than those measured in the present study.                      nell, and J. T. C. Lee, J. Vac. Sci. Technol. A ~submitted for publication!.
+                                                                   9
+                                                                     P. C. Cosby and H. Helm, SRI Report, PYU 1147/MP 92-280
+                                                                     ~1992!.
+
+
+
+
+                                                                                                                                                          07 August 2026 21:56:45
+IV. CONCLUSION                                                    10
+                                                                     This expression is derived from a numerical integration of the cross sec-
+                                                                     tion in Ref. 9, assuming a Maxwellian EEDF. It differs somewhat from
+     We have used optical emission actinometry to determine          the expression given in Ref. 11.
+                                                                  11
+the absolute Cl2 number densities in Cl2 transformer-coupled         S. Ashida and M. A. Lieberman, Jpn. J. Appl. Phys., Part 1 36, 854
+plasmas as a function of power, pressure, and addition of            ~1997!.
+                                                                  12
+                                                                     M. V. Kurepa and D. S. Belic, J. Phys. B 11, 3719 ~1978!.
+BCl3. A small amount ~5%! of an equal-parts mixture of the        13
+                                                                     Dissociative attachment is 7–16 times slower than electron impact disso-
+five rare gases was added to the discharge, and optical emis-        ciation under these conditions.
+sion from Ar at 750.4 nm and Xe at 828.0 nm was recorded,         14
+                                                                     At 10 mTorr total pressure, n e 5131011 cm23 and k d 57.0
+along with emission from Cl2 at 305 nm. The Cl2-to-rare gas          31029 cm3 s21, so the dissociation rate is 700 s21. The first-order diffu-
+emission ratio was used to extract absolute Cl2 number den-          sion loss rate, k r , is 38 s21. Thus the Cl2 destruction and formation times
+                                                                     are 2003 and 103 faster than the 0.28 s residence time. The ratios are
+sities by extending the measurement to very low powers. The
+                                                                     larger at lower pressures. This is consistent with the observed lack of a
+Xe 828.0 line provides the best energy match to the emission         flow rate dependence to the percent dissociation, discussed above.
+from Cl2 at 305 nm, and yields a zero-power intercept that is     15
+                                                                     C. Lee, D. B. Graves, M. A. Lieberman, and D. W. Hess, J. Electrochem.
+independent of power. This emitting level is also relatively         Soc. 141, 1546 ~1994!.
+                                                                  16
+                                                                     The diffusion coefficient (cm2 s21) of Cl in Cl2 was estimated from the
+free from the secondary electron impact excitation through
+                                                                     expression ~Ref. 17!:
+
+                                                                                             A
+the Xe metastable levels that complicates the interpretation                                     T 3 ~ M Cl1M Cl2!
+of actinometry data for many gas emission lines. Nonethe-
+                                                                                                       2M ClM Cl2
+less, corrections were made for the contributions to Xe 828.0             DK50.002628
+nm emission from its metastable levels. The Ar 750.4 nm                                     p s Cl,Cl
+                                                                                                2
+                                                                                                      V ~ 1,1! * ~ T Cl,Cl
+                                                                                                     2 Cl,Cl2
+                                                                                                                     * !
+                                                                                                                          2
+
+emitting level, while not as good a match in energy to the Cl2        where T is the gas temperature (K), M Cl and M Cl2 are atomic and mo-
+emission level, has the advantage that this emission is ex-           lecular weights of 35 and 70 g/mole, p is the pressure in atmospheres,
+                                                                                                       (1,1) *
+cited almost entirely from electron impact excitation of              s Cl,Cl25( s Cl1 s Cl2)/2, and V Cl,Cl 2
+                                                                                                               , the collision integral ~Ref. 17! is a
+ground state Ar, and not through the intermediate metastable                         * (5kT/ e Cl,Cl ), where e Cl,Cl 5( e Cle Cl ) 1/2. The Lennard–
+                                                                      function of T Cl,Cl
+                                                                                        2                  2                  2          2
+levels. Because of the energy mismatch, it was necessary to           Jones parameters s Cl53.548, s Cl254.115, e Cl /k575, and e Cl2 /k5357
+adjust the Cl2-to-Ar 750.4 nm emission ratio to account for          are from Ref. 18 ~for Cl! and 17 ~for Cl2!. The final diffusion coefficients
+changes in T e with pressure and power.                              were multiplied by 1.25 to make them consistent with the measured binary
+     The Cl2 percent dissociation increases with TCP power,          diffusion coefficient of 0.15 cm2 s21 for Cl in Cl2 at room temperature and
+and reaches 70% at 900 W (0.080 W/cm3) and pressures of              1 atm pressure ~Ref. 18!.
+                                                                  17
+                                                                     J. O. Hirschfelder, C. F. Curtis, and R. B. Bird, Molecular Theory of
+0.5–2 mTorr. The percent dissociation decreases as pressure          Gases and Liquids ~Wiley, New York, 1954!.
+is raised to 10 mTorr, a result of a decrease in electron den-    18
+                                                                     M.-D. Hwang and T.-M. Su, J. Chin. Chem. Soc. 37, 33 ~1990!.
+sity ~more Cl2 forms! and electron temperature. The percent
+                                                                  19
+                                                                     G. P. Kota, J. W. Coburn, and D. B. Graves, J. Vac. Sci. Technol. A 16,
+                                                                     270 ~1998!.
+dissociation decreases in general as the gap between the TCP      20
+                                                                     E. F. Apple and T. Wartik, J. Am. Chem. Soc. 80, 6153 ~1958!.
+window and wafer chuck is decreased from 11 to 6.5 cm.            21
+                                                                     From a computation of the electron-impact excitation cross section pro-
+This is explained by a decrease in the dissociation rate ~due        vided by V. McCoy, C. Winstead, and W. L. Morgan ~private communi-
+146         J. Appl. Phys., Vol. 84, No. 1, 1 July 1998                                                                             Malyshev et al.
+
+
+     cation!, and assuming a Maxwellian EEDF, k d,BCl358.631028 exp        25
+                                                                              D. P. Lymberoplulos and D. J. Economou, IEEE Trans. Plasma Sci. 23,
+                  3 21
+   (211.89/T e ) cm s .                                                       573 ~1995!.
+                                                                           26
+22                                                                            P. G. Ventzek, M. Grapperhaus, and M. J. Kushner, J. Vac. Sci. Technol.
+   K. Ono, T. Oomori, M. Tuda, and K. Namba, J. Vac. Sci. Technol. A 10,      B 12, 3118 ~1994!.
+   1071 ~1992!; K. Ono, M. Tuda, H. Ootera, and T. Oomori, Pure Appl.      27
+                                                                              R. S. Wise, D. P. Lymberopoulos, and D. J. Economou, Appl. Phys. Lett.
+   Chem. 66, 1327 ~1994!.                                                     68, 2499 ~1996!.
+23
+   G. A. Hebner, J. Appl. Phys. 81, 578 ~1997!.                            28
+                                                                              J. D. Bukowski, D. B. Graves, and P. Vitello, J. Appl. Phys. 80, 2614
+24
+   R. M. Forrister and H. M. Anderson, Bull. Am. Phys. Soc. 40, 1556          ~1996!.
+   ~1995!; H. Anderson ~private communication!.                            29
+                                                                              E. Meeks and J. W. Shon, IEEE Trans. Plasma Sci. 23, 539 ~1995!.
+
+
+
+
+                                                                                                                                                        07 August 2026 21:56:45
+

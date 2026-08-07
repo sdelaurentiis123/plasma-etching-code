@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 122 sources by topic
+## Index — 125 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -112,6 +112,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`chantry-1987-wall-diffusion`](library/chantry-1987-wall-diffusion.md) | Chantry, partial-reflection neutral diffusion and low-density wall-loss limit | PRIMARY PUBLISHER ABSTRACT/EQUATIONS READ; FULL PDF REQUESTED |
 | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | Christophorou & Olthoff, NIST-evaluated Cl2/Cl electron-interaction data | PRIMARY NIST FULL TEXT + TABLE 25 PIXEL-AUDITED AT 300 DPI |
 | [`economou-1995-2002-cl-transport`](library/economou-1995-2002-cl-transport.md) | Lymberopoulos/Economou and Ramamurthi/Economou, Cl diffusion and Robin wall transport | TWO PRIMARY FULL TEXTS + EQUATIONS/TABLES VISUALLY AUDITED; 300/500 K COEFFICIENT CONFLICT QUARANTINED |
+| [`guha-2008-cl-wall`](library/guha-2008-cl-wall.md) | Guha, Donnelly & Pu, direct Cl/Cl2 interaction measurements on conditioned anodized Al | PRIMARY FULL TEXT + FIGURES 13--14 VISUALLY AUDITED AT 450 DPI |
 | [`hamilton-2018-cl2-dissociation`](library/hamilton-2018-cl2-dissociation.md) | Hamilton et al., state-resolved Cl2 electron-impact dissociation | PRIMARY FULL TEXT + OFFICIAL CC-BY DATASET; FIGURES 4--5 600-DPI AUDIT; RATE REPRODUCTION PASS |
 | [`hopwood-1994-rf-coupling`](library/hopwood-1994-rf-coupling.md) | Hopwood, measured planar-ICP RF coupling efficiency | PRIMARY AUTHOR ABSTRACT READ |
 | [`lam-direct-drive-patents`](library/lam-direct-drive-patents.md) | Lam DirectDrive and RF-reference patent family | PRIMARY PATENT FULL TEXT READ |
@@ -119,12 +120,14 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | Lee & Lieberman, conserved Ar/O2/Cl2 global plasma model and Ar/Cl2 rate decks | PRIMARY FULL TEXT + EQUATIONS/TABLES 2--3 VISUALLY AUDITED |
 | [`lennon-1988-ionization`](library/lennon-1988-ionization.md) | Lennon et al., evaluated atomic electron-impact ionization rates | PRIMARY NIST FULL TEXT + EQ. 5--6/TABLES 1--2 PIXEL-AUDITED |
 | [`mahoney-1994-planar-icp`](library/mahoney-1994-planar-icp.md) | Mahoney et al., independent planar-argon ICP electron-state board | PRIMARY FULL TEXT + TABLE I/FIGURE 11 VISUALLY AUDITED |
+| [`malyshev-1998-lam-cl2`](library/malyshev-1998-lam-cl2.md) | Malyshev et al., measured Cl2 dissociation in a Lam Alliance TCP metal etcher | PRIMARY FULL TEXT + FIGURES 7--8 NATIVE-PIXEL PIL AUDIT |
 | [`miller-1997`](library/miller-1997.md) | Miller & Riley (1997) sheath model | not-fetched |
 | [`nist-asd-argon`](library/nist-asd-argon.md) | NIST ASD neutral-argon ionization and 4s metastable energies | PRIMARY NIST DATABASE QUERIES |
 | [`nist-tn-2279-gas-diffusion`](library/nist-tn-2279-gas-diffusion.md) | NIST evaluated gas self-/binary-diffusion correlations | AUTHORITATIVE FULL PDF READ |
 | [`phelps-1994-ar-ion-scattering`](library/phelps-1994-ar-ion-scattering.md) | Phelps, consistent Ar+-Ar momentum-transfer/scattering model | PRIMARY PUBLISHER RECORD; EQUATION CROSS-CHECKED |
 | [`raja-linne`](library/raja-linne.md) | Raja & Linne | not-fetched (DOI corrected from 1.1519941) |
 | [`stafford-2010-cl-wall`](library/stafford-2010-cl-wall.md) | Stafford et al., measured state-dependent Cl wall recombination | PRIMARY FULL TEXT + FIGURE 8 PIL-AUDITED AT 600 DPI |
+| [`stafford-2009-cl-wall`](library/stafford-2009-cl-wall.md) | Stafford et al., direct Cl recombination on plasma-conditioned stainless steel | PRIMARY FULL TEXT + FIGURES 8--10 VISUALLY AUDITED AT 450 DPI |
 | [`wang-olthoff-1999-ion-flux`](library/wang-olthoff-1999-ion-flux.md) | Wang & Olthoff, absolute mass-resolved Cl2/Ar ion fluxes and IEDs | PRIMARY NIST FULL TEXT + FIGURE 9 PIL-AUDITED AT 600 DPI |
 
 ### Transport references and analytic benchmarks

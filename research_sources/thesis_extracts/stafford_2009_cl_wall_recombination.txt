@@ -1,0 +1,493 @@
+Journal of Physics D:
+Applied Physics
+
+
+
+
+                                                                                                   You may also like
+                                                                                                       - In-situ Surface Recombination
+Recombination of chlorine atoms on plasma-                                                               Measurement of Oxygen and Chlorine
+                                                                                                         Atoms on Dynamic Stainless Steel
+conditioned stainless steel surfaces in the                                                              Surfaces in Inductively Coupled O2 and
+                                                                                                         Cl2 Plasmas
+                                                                                                         Luc Stafford, Rohit Khare, Joydeep Guha
+presence of adsorbed Cl2                                                                                 et al.
+
+                                                                                                       - In-situ Surface Recombination
+                                                                                                         Measurement of Oxygen and Chlorine
+To cite this article: Luc Stafford et al 2009 J. Phys. D: Appl. Phys. 42 055206                          Atoms on Dynamic Stainless Steel
+                                                                                                         Surfaces in Inductively Coupled O2 and
+                                                                                                         Cl2 Plasmas
+                                                                                                         Luc Stafford, Joydeep Guha and Vincent
+                                                                                                         M. Donnelly
+View the article online for updates and enhancements.                                                  - The Effect of Chloride on Passive Oxide
+                                                                                                         Film Breakdown on Stainless Steels and
+                                                                                                         Aluminum
+                                                                                                         Paul M. Natishan, William E. O'Grady,
+                                                                                                         Farrel J. Martin et al.
+
+
+
+
+                               This content was downloaded from IP address 47.230.201.13 on 07/08/2026 at 22:45
+IOP PUBLISHING                                                                                       JOURNAL OF PHYSICS D: APPLIED PHYSICS
+J. Phys. D: Appl. Phys. 42 (2009) 055206 (8pp)                                                          doi:10.1088/0022-3727/42/5/055206
+
+
+
+
+Recombination of chlorine atoms on
+plasma-conditioned stainless steel
+surfaces in the presence of adsorbed Cl2
+Luc Stafford1 , Rohit Khare2 , Joydeep Guha2 , Vincent M Donnelly2 ,
+Jean-Sébastien Poirier3 and Joëlle Margot3
+1
+  Département de Physique, Université de Montréal, Montréal, Québec, H3C 3J7, Canada
+2
+  Department of Chemical and Biomolecular Engineering, University of Houston, Houston,
+TX 77204, USA
+3
+  Département de Physique, Université de Montréal, Montréal, Québec, H3C 3J7, Canada
+E-mail: luc.stafford@umontreal.ca and vmdonnelly@uh.edu
+
+Received 8 September 2008, in final form 13 January 2009
+Published 17 February 2009
+Online at stacks.iop.org/JPhysD/42/055206
+
+Abstract
+We investigated the interactions of atomic and molecular chlorine with plasma-conditioned
+stainless steel surfaces through both experiments and modelling. The recombination of Cl
+during adsorption and desorption of Cl2 was characterized using a rotating-substrate technique
+in which portions of the cylindrical substrate surface are periodically exposed to an inductively
+coupled chlorine plasma and then to an Auger electron spectrometer in separate, differentially
+pumped chambers. After several hours of exposure to the Cl2 plasma, the stainless steel
+substrate became coated with a Si-oxychloride-based layer (Fe : Si : O : Cl ≈ 1 : 13 : 13 : 3) due
+to chlorine adsorption and the erosion of the silica discharge tube. Desorption of Cl2 from this
+surface was monitored through measurements of pressure rises in the Auger chamber as a
+function of substrate rotation frequency. Significant adsorption and desorption of Cl2 was
+observed with the plasma off, similar to that observed previously on plasma-conditioned
+anodized aluminium surfaces, but with much faster desorption rates that are most likely
+attributable to the smoother and non-porous stainless steel surface morphology. When the
+plasma was turned on, a much larger pressure rise was observed due to
+Langmuir–Hinshelwood recombination of Cl atoms. Recombination coefficients, γCl , ranged
+from 0.004 to 0.03 and increased with Cl-to-Cl2 number density ratio. This behaviour was
+observed previously for anodized aluminium surfaces, and was explained by the blocking of Cl
+recombination sites by adsorbed Cl2 . Application of this variable recombination coefficient to
+the modelling of high-density chlorine plasmas gives a much better agreement with measured
+Cl2 percent dissociations compared with predictions obtained with a recombination coefficient
+that is independent of plasma conditions.
+(Some figures in this article are in colour only in the electronic version)
+
+
+
+1. Introduction                                                        For example, beam studies have indicated that the ion-assisted
+                                                                       chemical etch yield of poly-Si is larger with Cl than with Cl2
+In chlorine-containing plasmas commonly used for thin film             [1, 2], whereas the opposite trend was observed with Al [3, 4].
+etching in micro- and nanoscale device manufacturing, both             The degree of Cl2 dissociation in the plasma therefore plays
+Cl2 molecules and Cl atoms formed by electron-impact                   an important role in the reactivity of the discharge and in turn
+dissociation of Cl2 in the gas phase react with selected device        on the etching rates and quality of etched profiles [5, 6].
+materials to form volatile reaction products. Cl is usually                 Efforts to improve the accuracy of models for chlorine
+more reactive than Cl2 , although this is not always the case.         etching plasmas have demonstrated the importance of the
+
+0022-3727/09/055206+08$30.00                                       1                           © 2009 IOP Publishing Ltd   Printed in the UK
+J. Phys. D: Appl. Phys. 42 (2009) 055206                                                                                    L Stafford et al
+
+assumed wall recombination coefficient of Cl atoms, γCl , in            characteristics of several materials both over time and across
+predicting neutral and ion compositions and number densities            large area wafers continues to remain a challenge.
+[6–10]. This is because at the low pressures commonly used                   In this paper, we investigate the adsorption and desorption
+for plasma etching (<100 mTorr), atom recombination is more             dynamics of atomic and molecular chlorine on plasma-
+likely to occur on the chamber walls or wafer surfaces than             conditioned stainless steel surfaces using the rotating-substrate
+through three-body gas phase reactions. As a consequence,               technique specially developed to study surface reactions at the
+in chlorine high-density plasmas with relatively low γCl , Cl           plasma wall. In this set-up, a cylindrical substrate made of or
+atoms are usually present at higher concentrations than any             coated with the material of interest is rapidly rotated through
+other species, the main positive ion is Cl+ , and electron number       skimmers, allowing portions of the surface to be periodically
+densities exceed those of Cl− . In contrast, when γCl is                exposed to an inductively coupled chlorine plasma and then to
+relatively high, Cl2 dominates the neutral composition and Cl−          be analysed in near real-time by Auger electron spectroscopy
+and Cl+2 are the dominant charged species [6, 7, 11, 12].               in a separate, differentially pumped chamber. The goal is to
+     In spite of the importance of surface recombination                obtain a comprehensive picture of the influence of the plasma
+reactions in chlorine etching plasmas, there have been only a           conditions on the surface recombination kinetics.
+few attempts to directly measure γCl under conditions relevant
+to materials processing. The main difficulty in performing such         2. Experimental details
+measurements comes from the ‘conditioning’ or ‘seasoning’ of
+the surface following exposure to reactive plasmas [13–16].             Details of the spinning-substrate apparatus can be found
+For example, Aydil and co-workers found that prolonged                  elsewhere [18, 19, 26–28]. An inductively coupled chlorine
+exposure of anodized aluminium chamber walls to a chlorine              plasma operating at 13.56 MHz was ignited in a fused silica
+inductively coupled plasma (ICP) increased the concentration            discharge tube attached to an anodized aluminium chamber
+of Cl atoms in the discharge [17]. This was shown to                    (see figure 1). The lower end of the ICP source was
+result from a decrease in γCl with plasma exposure time as              surrounded by an electromagnet to help confine the plasma
+the anodized Al walls became coated with a Si-oxychloride               in the downstream region. The Cl2 mass flow rate was 10
+(SiOx Cly ) layer due to the erosion of the quartz window               standard cubic centimetres per minutes (sccm), except for
+adjacent to the ICP coil. Surface recombination coefficients            measurements performed at 1.25 mTorr, for which the Cl2 mass
+on anodized Al or stainless steel walls with large quartz or            flow rate was 8 sccm. Separate Langmuir probe measurements
+silica surfaces exposed to the plasma are thus much lower than          have shown that for a 5 mTorr, 600 W Cl2 plasma, the
+those expected on ‘bare’ anodized Al or stainless steel surfaces        ion density, electron density and electron temperature were,
+[18, 19]. For example, at 300 K, Kota et al [20] obtained               respectively, 2 × 1010 cm−3 , 2 × 109 cm−3 and 3.2 eV in
+γCl = 0.2 for anodized Al and γCl = 0.7 for stainless steel             the centre of the downstream chamber, and 6 × 109 cm−3 ,
+in a molecular beam experiment, whereas γCl values reported             6 × 108 cm−3 and 2.0 eV near the chamber wall.
+for the same materials in chlorine high-density plasma reactors              The electropolished stainless steel (304L) cylindrical
+using a combination of experiments and modelling are usually            substrate was located in the first differentially pumped
+in the 0.01–0.04 range [12, 16, 21, 22].                                ‘substrate chamber’ between the plasma chamber and an ultra-
+     In a plasma, surface recombination kinetics can also               high-vacuum diagnostic chamber. The substrate was rotated
+depend on operating parameters such as power and gas                    at speeds up to 20 000 rpm by a brushless motor (Koford
+pressure. For example, the recombination coefficient, γO ,              Engineering LLC) with ceramic bearings. A conical skimmer
+for oxygen atoms on stainless steel in a parallel-plate, radio-         and differential pumping reduce the pressure in the substrate
+frequency discharge was found to increase with increasing               chamber by a factor of a thousand relative to the pressure
+power and decrease with increasing O2 pressure (0.1–3 Torr)             in the plasma chamber. A further three-orders-of-magnitude
+[23]. Similar pressure dependences of γO were reported by               pressure reduction was achieved in a second differentially
+Gomez et al [24] and by Hsu et al [25] in inductively coupled           pumped chamber with a similar conical skimmer. This
+oxygen plasma reactors. This behaviour was ascribed to an               chamber housed an Auger electron spectrometer (AES) (Staib
+enhanced creation of recombination sites by ion bombardment             Instruments, model DESA100). Points on the substrate rotate
+at low pressures and high powers. It is worth pointing out              through the plasma, and at a later time, determined by the
+that experiments by Kurunczi et al [26] are at odds with this           substrate rotation frequency, f , face the AES for analysis.
+explanation; γO was observed to be independent of pressure,                  Conditioning of the stainless steel substrate prior to
+power and the presence or absence of ion bombardment.                   measurements of the adsorption and desorption dynamics of
+Recombination of chlorine atoms on anodized Al in an                    Cl and Cl2 was performed as follows. Auger spectra of
+inductively coupled chlorine plasma was also studied with the           the ‘as-loaded’ stainless steel substrate revealed a mostly C
+same apparatus [27] as that used by Kurunczi et al [26] and in          and O overlayer and less intense Fe peaks (see figure 2).
+this study. γCl was found to increase with increasing power and         Neither Cr nor Ni that are present in 304L stainless steel were
+decrease with increasing Cl2 pressure (1.25–20 mTorr), a result         detected in the Auger measurements. This can be attributed to
+ascribed to a competition for adsorption sites between Cl2 and          the electropolishing process, which leaves an Fe-rich surface
+Cl [27]. From the above survey, it is evident that the factors          relative to the bulk material [29, 30]. This surface was first
+influencing surface recombination kinetics at the plasma wall           exposed to a 5 mTorr, 600 W O2 plasma for 30 min, which was
+remain poorly understood such that the control of the etching           ample time to remove carbon impurities (figure 2) [19, 31]. The
+
+                                                                    2
+J. Phys. D: Appl. Phys. 42 (2009) 055206                                                                                          L Stafford et al
+
+
+
+
+Figure 1. Schematic of the experimental set-up used for the study of the adsorption–desorption dynamics of Cl and Cl2 on
+plasma-conditioned stainless steel surfaces during exposure to an inductively coupled Cl2 plasma. P0 , P1 and P2 are pressure gauges for the
+main plasma, substrate and Auger chambers, respectively. The reaction time is defined as the time taken for a point on the surface to rotate
+from the midpoint of exposure to the plasma chamber (θ = 0) to the midpoint of the region probed by AES (θ = π), i.e. the inverse of twice
+the substrate rotation frequency.
+
+                                                                           Table 1. Auger atomic concentrations for stainless steel ‘as-loaded’
+                                                                           and after exposure to O2 and Cl2 plasmas. Atomic concentrations
+                                                                           for anodized Al after exposure to the same Cl2 plasma are also
+                                                                           shown for comparison [32]. Atomic concentrations were determined
+                                                                           from the peak-to-peak intensities divided by the sensitivity factors
+                                                                           (0.4763, 3.27, 1.1, 0.9168, 0.4498 and 0.2555 for C, Ag, O, Fe, Al
+                                                                           and Si). Note that this is the more conventional treatment, with
+                                                                           electron mean free path energy dependences included in the
+                                                                           sensitivity factors, and gives somewhat different concentrations than
+                                                                           those reported in [27, 32], where corrections for the mean free path
+                                                                           energy dependence were included in the computation.
+                                                                                                     Atomic concentration (%)
+                                                                                                                   Cl2 plasma    Cl2 plasma
+                                                                                                     O2 plasma     for several   Anodized
+                                                                            Species    As-loaded     for 30 min    hours         Al [32]
+                                                                            C          67.5          ND            ND            ND
+                                                                            Cl         ND            ND            8.4           6.6
+                                                                            Ag         ND            0.6           ND            ND
+                                                                            O          27.9          74.1          43.2          50.0
+                                                                            Fe         4.7           14.6          3.4           ND
+Figure 2. Auger spectra EdI /dE versus electron energy, E, before           Al         ND            ND            ND            20.9
+(‘as-loaded’) and during exposure to a 5 mTorr, 600 W O2 and Cl2            Si         ND            10.6          45.0          21.5
+plasmas. The electron beam energy was 5 keV with an emission
+current ∼0.2–0.5 µA. The substrate rotation frequency was                   Note: ND indicates that the species was not detectable.
+2.5 krpm. For clarity purposes, the spectra were offset and scaled
+such that the O peak-to-peak intensity matched that in the O2 plasma
+spectrum. Vertical dashed lines indicate the expected peak positions       discharge tube. Thus, adsorption and desorption of Cl and Cl2
+for Cl, C, Ag, O, Fe and Si.                                               are taking place on a Si-oxychloride-based layer with an overall
+                                                                           stoichoimetry of approximately Fe : Si : O : Cl ≈ 1 : 13 : 13 : 3.
+substrate was then exposed to a 5 mTorr, 600 W Cl2 plasma
+for about 5 h. The total exposure time was long enough                     3. Results and discussion
+that Auger peaks had reached steady-state values. Elemental
+analysis from the measured Auger spectra [32] such as those in             3.1. Adsorption and desorption of Cl2 with the plasma off
+figure 2 revealed that the surface composition, averaged over
+the ∼2 nm depth probed by AES, was 3% Fe, 45% Si, 43% O                    Analysis of the kinetics of Cl2 desorbing from the plasma-
+and 9% Cl (see table 1). The presence of silicon was also                  conditioned stainless steel surface was performed through
+observed in [17, 32] and is attributed to the erosion of the silica        measurements of pressure rises in the Auger chamber [19, 27].
+
+                                                                       3
+J. Phys. D: Appl. Phys. 42 (2009) 055206                                                                                         L Stafford et al
+
+
+
+
+                                                                                                      Anodized aluminium
+
+
+
+
+Figure 3. Pressure rises in the Auger chamber versus substrate           Figure 4. (Colour online) Cl2 desorption flux normalized to the Cl2
+rotation frequency as a function of pressure in the plasma chamber       impingement flux as a function of reaction time, tr (reciprocal of
+with the plasma off. Dashed lines are to guide the eyes only.            twice the rotation frequency) with the plasma off. Desorption fluxes
+                                                                         were calculated using pressure rises plotted in figure 2 with
+                                                                         α = 6.52 × 1022 Torr−1 s−1 and A = 0.77 cm2 . Pressures were 1.25
+                                                                         ( ), 5 (•), 10 (), 20 () and 30 mTorr (). Cl2 desorption fluxes
+Previous desorption mass spectrometry measurements per-
+formed on the same set-up on a plasma-conditioned anodized               measured with the same set-up on an anodized aluminium substrate
+aluminium surface indicated that Cl2 is the only desorption              are also shown for comparison [27] with pressures of 1.25 ( ), 5 (◦),
+product after exposure to Cl2 (i.e. no Cl, AlClx or SiClx des-           10 () and 20 mTorr (). The dashed lines correspond to desorption
+orbs) with the plasma on as well as off [27]. Therefore, we              rates of 165 s−1 (anodized Al) and 740 s−1 (stainless steel).
+expect the pressure rise in the Auger chamber to be a good
+indicator of the Cl2 desorption flux. An example of pressure             procedure in which a known gas flow was introduced into the
+rise versus substrate rotation frequency is shown in figure 3 as         diagnostic chamber and the corresponding pressure rise was
+a function of Cl2 pressure in the main plasma chamber with the           measured. (Here we made an additional compensation for
+plasma off. When the substrate is not rotated and Cl2 is intro-          the measured change in the pumping speed of the cryopump
+duced into the plasma chamber, a small amount of it leaks into           used in the Auger chamber, relative to the turbomolecular
+the substrate chamber through the first conical skimmer and              pump in the previous work [27]). For the configuration used
+a small fraction of this leaks into the Auger chamber through            in this work, we found α = 6.5 × 1022 Torr−1 s−1 . We
+the second conical skimmer. As the substrate is rotated, Cl2             have normalized Doff values to the Cl2 impingement flux,
+molecules adsorb on the surface and then desorbs, thus pro-              Cl2 = nCl2 v/4, where nCl2 is the Cl2 density calculated using
+ducing a pressure rise. As shown in figure 3, the pressure rise          the ideal gas law and v is the thermal speed of Cl2 molecules
+increased with substrate rotation frequency at a given pres-             at 300 K. The results are shown in figure 4 as a function of
+sure and increased with pressure at a given substrate rotation           reaction time, tr , defined as the time taken for a point on the
+frequency. The ‘step-like’ behaviours presented in figure 3              surface to rotate from the midpoint of exposure to the plasma
+result from the relatively small pressure rises with respect to          chamber to the midpoint of the region observed by AES, i.e.
+the Auger base pressure and the two digit precision of the               tr = (2f )−1 (see figure 1). Previous results obtained on an
+ion gauge readout. For example, at 5 mTorr, the base pres-               anodized aluminium surface are also shown for comparison.
+sure in the Auger chamber was ∼2.1 × 10−8 Torr such that the                  In a Langmuir mechanism in which Cl2 adsorbs (with
+minimum pressure rise increment that could be measured was               or without dissociation) on the plasma-conditioned stainless
+1 × 10−9 Torr. Desorption of Cl2 with the plasma off can be              steel surface, we expect the desorption rate to increase linearly
+attributed to either the physisorption–desorption of Cl2 or by           with Cl2 at low flux and saturate at high flux [27, 33]. For
+dissociative adsorption of Cl2 followed by recombination of              both materials, Doff / Cl2 values presented in figure 4 are
+adsorbed Cl and desorption of Cl2 . The present experiments              similar for all pressures investigated, indicating that the surface
+cannot distinguish between the two mechanisms.                           is far from being saturated with adsorbed Cl2 . Doff / Cl2
+      The pressures rises with the plasma off, Poff , presented         decay non-exponentially with reaction time in a manner that
+in figure 3 were converted into absolute desorption fluxes, Doff ,       indicates a range of binding sites with varying desorption
+according to Doff = α(Poff )/A, where α is a proportionality            rates [27, 34, 35]. The most striking differences between
+constant that contains contributions from the pumping speed              stainless steel and anodized Al are the two- to ten-fold lower
+in the diagnostic chamber and the relative sensitivity of the            Doff / Cl2 values and the more rapid fall-off at longer times
+ionization gauge and A (= 0.77 cm2 ) is the area of the rotating         for stainless steel. Single exponential fits to the 2–12 ms
+sample that is exposed to the Auger chamber. The value of                reaction time range yielded desorption rates of 740±40 s−1 for
+α was obtained in a previous study [27], using a calibration             stainless steel, compared with 165 ± 20 s−1 for anodized Al.
+
+                                                                     4
+J. Phys. D: Appl. Phys. 42 (2009) 055206                                                                                     L Stafford et al
+
+
+         (a) Anodized aluminium
+
+
+
+
+         (a) Stainless steel
+
+
+
+
+                                                                      Figure 6. Pressure rise measurements with the plasma on at 600 and
+                                                                      100 W as a function of substrate rotation frequency for a pressure of
+                                                                      20 mTorr in the plasma chamber. Pressure rises with the plasma off
+                                                                      are also shown for comparison.
+
+                                                                            As discussed previously for Cl recombination on anodized
+Figure 5. SEM images from (a) anodized aluminium and                  Al [27], the recombination kinetics of Cl atoms with the plasma
+(b) electropolished stainless steel surfaces. The electron beam       on must be analysed while taking into account adsorption
+energy was 10 kV.                                                     and desorption of Cl2 . Following the procedure in [27], the
+                                                                      contribution of L–H recombination of adsorbed Cl atoms to
+This can probably be attributed to the smoother and non-              the pressure rise with the plasma on, Prec , was extracted
+porous stainless steel surface, compared with the anodized Al         according to Prec = Pon − (non                  off
+                                                                                                                  Cl2 /nCl2 )Poff , where
+surface. As displayed in figure 5, flat samples of anodized Al        Pon and Poff are pressure rises with the plasma on and
+surfaces examined by scanning electron microscopy (SEM)               off. In this expression, the pressure rise with the plasma
+exhibit roughness on varying length scales of 10 µm and               off was scaled to the fractional decrease in the Cl2 number
+below, whereas SEM images from electropolished stainless              density with the plasma on. This approach is valid provided
+steel surfaces show much smoother surface morphology. We              that the pressure rise with the plasma off increases linearly
+are not aware of reports on the influence of surface roughness        with the Cl2 impingement flux (i.e. with the Cl2 number
+on the adsorption and desorption dynamics of Cl2 on stainless         density), independent of rotation frequency; a result that was
+steel or anodized Al, but it has been reported that the water         confirmed in figures 3 and 4. The plasma on-to-plasma off Cl2
+outgassing rate from Al decreases by an order of magnitude for        number density ratios, non      off
+                                                                                                Cl2 /nCl2 , were determined in a previous
+mirror smooth surfaces compared with untreated surfaces [36].         publication using optical emission spectroscopy [27]. As an
+                                                                      example, in a 20 mTorr, 600 W Cl2 plasma, non     Cl2 /nCl2 = 0.877.
+                                                                                                                              off
+
+3.2. Langmuir–Hinshelwood recombination of Cl atoms                   The net Cl2 desorption due to Cl atoms recombination, Drec ,
+                                                                      was then calculated using the α and A values given above.
+Figure 6 shows the pressure rise in the Auger chamber as a                  Drec values were determined as a function of rotation
+function of substrate frequency for a 20 mTorr Cl2 plasma             frequency, pressure (1.25–20 mTorr) and ICP power (100–
+at 100 and 600 W ICP power. Measurements with the                     600 W). Example plots of Drec versus tr on the plasma-
+plasma off are also shown for comparison. The plasma-                 conditioned stainless steel substrate are shown in figure 7 for
+on pressure rises increase with power and are substantially           20 mTorr Cl2 plasmas at 100 and 600 W. Previously reported
+larger than those recorded with the plasma off. As the                values for an anodized Al substrate under the same conditions
+surface is exposed to the chlorine plasma, Cl atoms stick             are also shown for comparison [27]. Drec falls off more rapidly
+to the surface and then recombine over a time comparable              as a function of increasing tr for stainless steel than for anodized
+to the substrate rotation period, forming Cl2 that desorbs            Al. This trend is similar to, though less pronounced, than that
+and thus produces a pressure rise. As discussed in previous           observed for adsorbed Cl2 (figure 4). Again, we attribute this to
+publications [18, 19, 27], the experiments described above only       a lower density of higher binding energy sites on the smoother
+detect delayed Langmuir–Hinshelwood (L–H) recombination               stainless steel surface.
+reactions, not prompt Eley–Rideal (E–R) reactions. In the                   Plots of Drec versus tr were extrapolated to tr → 0 to
+case of L–H recombination, Cl atoms can reside on the surface         obtain the desorption fluxes at pseudo-steady-state condition,
+before recombining, allowing a substantial time between Cl            Dtrec
+                                                                         r
+                                                                            → 0, where the rotation frequency is much faster than the
+adsorption and Cl2 desorption.                                        rate-limiting step in Cl recombination, and Cl2 desorption thus
+
+                                                                  5
+J. Phys. D: Appl. Phys. 42 (2009) 055206                                                                                             L Stafford et al
+
+
+
+
+                                                                                           Anodized aluminium
+
+
+
+
+Figure 7. Net desorption flux, Drec , of Cl2 formed by Cl atom               Figure 8. Recombination coefficient of Cl atoms on stainless steel
+recombination as a function of reaction time, tr (reciprocal of twice        (closed symbols) as a function of the Cl-to-Cl2 number density ratio
+the rotation frequency) at 20 mTorr for different ICP source powers.         varied by changing the plasma pressure (1.25–20 mTorr) and ICP
+Net desorption flux of Cl2 measured on the same experimental                 power (100–600 W). Previously reported recombination coefficients
+set-up on an anodized aluminium substrate is also shown for                  obtained on an anodized aluminium substrate (open symbols) are
+comparison [27]. Dashed lines are decay fits of the data (see text) to       also shown for comparison [27]. Inverted triangles, triangles, circles
+extract the desorption flux at tr → 0.                                       and squares correspond to 20, 10, 5 and 1.25 mTorr pressures.
+                                                                             Dashed lines are first-order least squares fits.
+becomes independent of reaction time [27]. In such cases, it
+is as though the sample is continuously in the plasma, but the               pressure and ICP power. Recombination coefficients for
+impingement flux is reduced by the fraction of time a point                  an anodized Al substrate exposed to the same Cl2 plasma
+is exposed to the plasma per rotation. For our geometry,                     conditions are also shown for comparison [27]. γCl for
+this corresponds to about 1/3 of the rotation period (see                    the plasma-conditioned stainless steel surface increased from
+figure 1). Extrapolations were obtained for each experimental                0.004 to 0.03 with increasing Cl-to-Cl2 number density ratio,
+condition by fitting to the measured values of D rec versus                  and, within the scatter of the data, perhaps began to increase
+tr , a function of the form D rec = a + b exp(−ctr ), where a,               more slowly or level off for Cl/Cl2  0.6. This behaviour
+b and c are fitting parameters. Examples of these fits are                   is similar to that observed for plasma-conditioned anodized
+represented by the dashed lines in figure 7. Dtrec    r →0
+                                                           increased         Al, although γCl values are lower by about a factor of 2–3.
+from 6.5 × 1014 cm2 s−1 at 100 W to 9.1 × 1014 cm2 s−1 at                    This could result from the higher Si coverage on the plasma-
+600 W. For anodized Al under the same Cl2 plasma conditions,                 conditioned stainless steel surface (45% versus 21.5% for
+Dtrec
+    r →0
+           increased from 1.1 × 1015 cm2 s−1 at 100 W to 2.4 ×               anodized Al, see table 1) and the much lower recombination
+1015 cm2 s−1 at 600 W (see figure 7 and [27]).                               coefficient of Cl atoms on silica surfaces [17, 20, 38].
+         L–H recombination coefficients, defined as the probability               The values displayed in figure 8 for high Cl/Cl2 ratios are
+at steady state that an impinging Cl atom will combine with                  comparable to the ones reported by Malyshev et al [21] in
+another Cl atom and lead to delayed desorption of Cl2 , were                 a chlorine ICP reactor with stainless steel and silica surfaces
+determined from the relationship γCl = 2Drec      tr →0
+                                                         /(Cl /3) =         exposed to the plasma. In that study, a value of γCl = 0.04
+      tr →0                                                                  was extracted from the best agreement between the predictions
+6Drec       / Cl [27]. Again, the factor of 3 in this expression
+arises from the fraction of time that a point on the surface of              of a global model and the measured Cl2 neutral densities. On
+the spinning-substrate is exposed to the plasma per rotation                 the other hand, Kota et al [20] reported a value of γCl = 0.7
+(see figure 1), while the factor of 2 from the 2 Cl atoms                    for Cl atoms impinging on stainless steel surfaces that were
+per product Cl2 molecule. The density of Cl atoms near the                   sputter-cleaned with a 500 eV Ar+ beam. As described above,
+spinning-substrate was determined in a previous publication by               in plasma reactors with large silica surfaces exposed to the
+actinometry measurements, using Cl (792.4 nm) emission and                   plasma such as the ones investigated here and in Malyshev
+Xe (828.0 nm) as the actinometer gas [27, 37]. The temperature               et al [21] one should find γCl values that are much lower than
+of the gas near the spinning-substrate was assumed to be equal               that on ‘bare’ stainless steel because of the expected coating
+to the wall temperature of 300 K for all conditions, yielding                of sputtered silica on chamber walls [15, 17].
+Cl atoms impingement flux, Cl , in the 1.9 × 1017 to 1.2 ×                       The increase of γCl with increasing Cl/Cl2 number density
+1018 cm−2 s−1 range depending on pressure (1.25–20 mTorr)                    ratio presented in figure 8 was also observed previously for
+and ICP power (100–600 W) [27].                                              anodized Al [27], and was attributed to Cl2 adsorption that
+         Recombination coefficients determined using the above               blocks sites for Cl adsorption and L–H recombination; hence
+analysis are presented in figure 8 as a function of the Cl/Cl2               for a given Cl number density, γCl decreases as the Cl2 number
+number density ratio, which was varied by changing the                       density increases. To further validate this observation, we have
+
+                                                                         6
+J. Phys. D: Appl. Phys. 42 (2009) 055206                                                                                          L Stafford et al
+
+
+
+
+Figure 9. Influence of gas pressure on the degree of Cl2 dissociation       Figure 10. Recombination coefficient of Cl atoms on
+in a chlorine high-density plasma sustained by travelling                   plasma-conditioned stainless steel surfaces as a function of the
+electromagnetic surface waves in a stainless steel chamber with             Cl-to-Cl2 number density ratio obtained from the spinning-substrate
+large amount of silica exposed to the plasma. Dashed lines are the          technique (closed inverted triangles, triangles, circles and squares
+predictions of a fluid model for different values of γCl (from [12]).       corresponding to 20, 10, 5 and 1.25 mTorr pressures), along with
+                                                                            values obtained through modelling of data from Stafford et al [12]
+                                                                            of surface-wave plasmas () [40], from Malyshev and
+                                                                            Donnelly [21] of a highly dissociated ICP (◦), from Corr et al [22]
+re-examined a comparison of measured and computed degrees
+of dissociation of Cl2 versus pressure in a high-density chlorine           in a moderately dissociated ICP () and from Richards and Sawin in
+plasma [12]. In that study, the authors developed a simple fluid            a weakly dissociated CCP ().
+model in which the particle balance equations for electrons,
+Cl, Cl2 , Cl+ , Cl+2 and Cl− were solved together with the                  a highly dissociated ICP (γCl = 0.04 for nCl /nCl2 ∼ 30), Corr
+corresponding flux equations and the energy balance equations.              et al [22] (γCl = 0.02 for nCl /nCl2 ∼ 3) in a moderately
+The model was used to describe magnetized high-density                      dissociated ICP and Richard and Sawin [41] in a weakly
+chlorine plasmas sustained by an electromagnetic surface wave               dissociated capacitively coupled plasma (CCP) (γCl = 0.007
+in a reactor with large areas of stainless steel and silica surfaces        for nCl /nCl2 ∼ 0.08). This complete set of data suggests
+exposed to the plasma. Figure 9 presents values of the Cl2                  some ‘universal dependence’ of the recombination coefficient
+percent dissociation, τd , measured in this plasma reactor using            of Cl atoms in the presence of adsorbed Cl2 : γCl increases as
+actinometry on Cl2 molecules with Xe as the actinometer gas                 the Cl-to-Cl2 number density ratio in the plasma increases.
+[39] and by plasma sampling mass spectrometry [40]. These                   The small difference between γCl values taken from different
+results are compared with those determined from the model                   reactors under comparable nCl /nCl2 conditions can probably be
+for different values of γCl , as a function of pressure. In [12]            attributed to variations in Si coverage for one plasma reactor
+it was concluded that the experimental data were best fitted                to the other. For example, the value obtained by Richards and
+when assuming a recombination coefficient of 0.02. Recently,                Sawin [41] is slightly higher than those obtained at 20 mTorr in
+Corr et al [22] confirmed this value in a Cl2 ICP, and also                 the spinning-substrate reactor; this is consistent with the much
+the fact that γCl is much lower than the 0.7 value reported by              smaller silica surface exposed to the plasma in their reactor
+Kota et al [20]. It is clear from figure 9, however, that the               and thus the smaller deposition rate of silica on the stainless
+value of γCl that best matches the experimental data is not                 steel surface. Finally, it should be pointed out that the data in
+constant, but rather decreases with increasing pressure from                figure 2 of the report by Corr et al [22] also suggest a γCl that
+0.03 at 0.2 mTorr to 0.01–0.015 at 10 mTorr. These values                   decreases with increasing pressure and therefore with Cl/Cl2
+follow the same trend as the results presented in figure 8, and             number density ratio. It is however impossible to extract the
+where overlapping, are in good agreement (see figure 10). For               full dependence of γCl on nCl /nCl2 from this set of data due to
+example, for a Cl/Cl2 number density ratio of 0.78 (200 W,                  the limited number of γCl values investigated in the modelling
+1.25 mTorr), we found γCl = 0.018, which is similar to the                  of the pressure dependence of the Cl atom density.
+0.01–0.015 value displayed in figure 9 at 10 mTorr, where
+τd ≈ 30%, corresponds to nCl /nCl2 ≈ 0.8. Thus, considering                 4. Conclusion
+that γCl depends on the Cl/Cl2 number density ratio rather than
+being independent of plasma conditions yields a much better                 In summary, we investigated the adsorption and desorption
+agreement between the model predictions and the measured                    dynamics of atomic and molecular chlorine on stainless steel
+degree of dissociation of Cl2 in the plasma.                                surfaces coated with a mostly silicon-oxychloride layer in
+      This dependence of γCl on nCl /nCl2 are further validated             inductively coupled chlorine plasmas using the spinning-
+by adding on figure 10 the data points of Malyshev et al [21] in            substrate method. Substantial Cl2 adsorption and desorption
+
+                                                                        7
+J. Phys. D: Appl. Phys. 42 (2009) 055206                                                                                      L Stafford et al
+
+was observed with the plasma off with desorption rates much             [12] Stafford L, Margot J, Vidal F, Chaker M, Giroux K, Poirier J S,
+faster than those obtained previously on plasma-conditioned                     Quintal-Léonard A and Saussac J 2005 J. Appl. Phys.
+                                                                                98 063301
+anodized aluminium. This was ascribed to a lower number
+                                                                        [13] Lee G W and Kang Y B 2003 Electrochem. Solid State Lett.
+of higher binding energy sites on stainless steel due to its                    6 G49
+smoother surface morphology. A much larger desorption flux              [14] Miwa K and Mukai T 2002 J. Vac. Sci. Technol. B 20 2120
+of Cl2 was observed with the plasma on due to Langmuir–                 [15] Cunge G, Joubert O and Sadeghi N 2003 J. Appl. Phys.
+Hinshelwood recombination of Cl atoms. The recombination                        94 6285
+                                                                        [16] Agarwal A and Kushner M J 2008 J. Vac. Sci. Technol.
+coefficient ranged from 0.004 to 0.03 and increased with Cl-to-
+                                                                                A 26 498
+Cl2 number density ratio. A similar dependence on this number           [17] Ullal S J, Godfrey A R, Edelberg E, Braly L, Vahedi V and
+density ratio was observed for a rough anodized aluminium                       Aydil E S 2002 J. Vac. Sci. Technol. A 20 43
+surface and was ascribed to blocking of Cl recombination                [18] Guha J, Kurunczi P F, Stafford L, Donnelly V M and Pu Y-K
+sites by transient adsorbed Cl2 [27]. It appears that a similar                 2008 J. Phys. Chem. C 112 8963
+                                                                        [19] Stafford L, Guha J and Donnelly V M 2008 J. Vac. Sci.
+mechanism is occurring on the smoother stainless steel surface.
+                                                                                Technol. A 26 455
+This effect was also shown to explain the pressure-dependence           [20] Kota G P, Coburn J W and Graves D B 1998 J. Vac. Sci.
+of the degree of dissociation of Cl2 that was previously found                  Technol. A 16 270
+in high-density chlorine plasmas with large areas of stainless          [21] Malyshev M V and Donnelly V M 2000 J. Appl. Phys. 88 6207
+steel and silica surfaces exposed to the plasma.                        [22] Corr C S, Despiau-Pujo E, Chabert P, Graham W G, Marro F G
+                                                                                and Graves D B 2008 J. Phys. D: Appl. Phys. 41 185202
+                                                                        [23] Tserepi A D and Miller T A 1995 J. Appl. Phys. 77 505
+Acknowledgments                                                         [24] Gomez S, Steen P G and Graham W G 2002 Appl. Phys. Lett.
+                                                                                81 19
+The authors would like to acknowledge Sung Joong Kang for               [25] Hsu C-C, Nierode M A, Coburn J W and Graves D B 2006
+                                                                                J. Phys. D: Appl. Phys. 39 3272
+his help with SEM measurements. This research was supported             [26] Kurunczi P F, Guha J and Donnelly V M 2005 J. Phys.
+by the National Science and Engineering Research Council                        Chem. B 109 20989
+(NSERC), the National Science Foundation and Lam Research               [27] Guha J, Donnelly V M and Pu Y-K 2008 J. Appl. Phys.
+Corporation.                                                                    103 013306
+                                                                        [28] Kurunczi P F, Guha J and Donnelly V M 2006 Phys. Rev. Lett.
+                                                                                96 018306
+References                                                              [29] Rao T, Vook R W, Meyer W and Joshi A 1986 J. Vac. Sci.
+                                                                                Technol. A 4 1604
+ [1] Chang J P and Sawin H H 1997 J. Vac. Sci. Technol. A 15 1853       [30] Lee S-J and Lai J-J 2003 J. Mater. Proc. Technol. 140 206
+ [2] Chang J P, Arnold J C, Zau G C H, Shin H-S and Sawin H H           [31] Baker M A 1980 Thin Solid Films 69 359
+       1997 J. Vac. Sci. Technol. A 15 610                              [32] Guha J, Pu Y-K and Donnelly V M 2006 J. Vac. Sci.
+ [3] Smith D L and Saviano P G 1982 J. Vac. Sci. Technol. 21 769                Technol. A 25 347–52
+ [4] Danner D A and Hess D W 1986 J. Appl. Phys. 59 940                 [33] Oura K, Lifshits V G, Saranin A A, Zotov A V and
+ [5] Mahorowala A P and Sawin H H 2002 J. Vac. Sci. Technol.                    Katayama M 2003 Surface Science, An Introduction
+       B 20 1077                                                                (Berlin: Springer) pp 295–308, chapter 12
+ [6] Lee C, Graves D B and Lieberman M A 1996 Plasma Chem.              [34] Kim Y C and Boudart M 1991 Langmuir 7 2999
+       Plasma Process. 16 99                                            [35] Cartry G, Magne L and Cernogora G 2000 J. Phys. D: Appl.
+ [7] Lee C M and Lieberman M A 1995 J. Vac. Sci. Technol.                       Phys. 33 1303
+       A 13 368                                                         [36] Lafferty J M (ed) 1998 Foundations of Vacuum Science and
+ [8] Deshmukh S C and Economou D J 1992 J. Appl. Phys. 72 4597                  Technology (New York: Wiley) p 619
+ [9] Wise R S, Lymberopoulos D P and Economou D J 1995                  [37] Malyshev M V and Donnelly V M 2000 J. Appl. Phys. 88 6207
+       Plasma Sources Sci. Technol. 4 317                               [38] Ogryzlo E A 1961 Can. J. Chem. 39 2256
+[10] Lymberopoulos D P and Economou D J 1995 IEEE Trans.                [39] Donnelly V M 1996 J. Vac. Sci. Technol. A 14 1076
+       Plasma Sci. 23 573                                               [40] Stafford L, Margot J, Chaker M and Pauna O 2003 J. Appl.
+[11] Malyshev M V and Donnelly V M 2001 J. Appl. Phys.                          Phys. 93 1907
+       90 1130                                                          [41] Richards A D and Sawin H H 1987 J. Appl. Phys. 62 799
+
+
+
+
+                                                                    8
+

@@ -1,0 +1,85 @@
+{
+  "manifest_id": "MALYSHEV-1998-LAM-CL2-DISSOCIATION-R1",
+  "source": {
+    "citation": "M. V. Malyshev, V. M. Donnelly, A. Kornblit, and N. A. Ciampa, Journal of Applied Physics 84, 137-146 (1998)",
+    "doi": "10.1063/1.368010",
+    "pdf_sha256": "569ab180bb8cab71dda0860e0350f03d24b391e084e19116fefb74f1c719789c",
+    "pdf_page": 6,
+    "figures": [
+      7,
+      8
+    ],
+    "native_images": {
+      "7": {
+        "pdfimages_index_on_page": 1,
+        "size_px": [
+          892,
+          692
+        ],
+        "one_bit_pixel_sha256": "b8deff3a79739243d4eeaabad6f9f7a294a44ffc3b3fa20600cd4fe882171ce3"
+      },
+      "8": {
+        "pdfimages_index_on_page": 2,
+        "size_px": [
+          893,
+          649
+        ],
+        "one_bit_pixel_sha256": "d58263f2dd8c924996cdc298a40f0eff548bb3a8e81689dca199f39eb8fef34c"
+      }
+    }
+  },
+  "experiment": {
+    "tool": "Lam Research Alliance metal etcher, high-flow chamber",
+    "plasma": "Cl2 plus 5 percent equal rare-gas mixture",
+    "wafer": "SiO2-coated Si wafer",
+    "substrate_rf_bias": "off",
+    "wall": "anodized aluminum; chamber wall temperature 333 K",
+    "source_power_measurement": "into matching network with inline meters",
+    "gaps_cm": [
+      6.5,
+      11.0
+    ],
+    "pressures_mTorr": [
+      0.5,
+      1.0,
+      2.0,
+      10.0
+    ]
+  },
+  "measurement": {
+    "observable": "100 * n_Cl2 / n_Cl2_plasma_off",
+    "derived_observable": "100 minus relative Cl2 percent",
+    "method": "Cl2 305 nm emission normalized independently to Ar and Xe",
+    "reported_absolute_density_relative_uncertainty_percent": 25.0,
+    "error_bars": "ends are Ar-derived and Xe-derived values; not sigma"
+  },
+  "digitization": {
+    "marker_count": 38,
+    "method": "native one-bit figure rasters extracted from publisher PDF; original-resolution human-vision marker reconciliation; PIL axis and point replay",
+    "power_range_W": [
+      99.744,
+      900.192
+    ],
+    "dissociation_range_percent": [
+      -7.9602,
+      80.0332
+    ],
+    "horizontal_pixel_allowance": 2.0,
+    "vertical_pixel_allowance": 3.0,
+    "csv_sha256": "df312da3ca72f1424be84eef00a17488298ef09bd34bedfdc87c2c926fcd9540"
+  },
+  "exclusions": {
+    "low_power_dense_overlap": "markers not visually separable from overlapping traces were omitted",
+    "documented_10_mTorr_approximately_100_W_anomaly": "excluded; paper attributes apparent n_Cl2 above 100 percent to enhanced emission during a discharge-mode transition",
+    "smooth_curves": "paper model outputs; never digitized as measurements"
+  },
+  "use_boundary": {
+    "supports_reactor_dissociation_validation": true,
+    "supports_absorbed_power_validation": false,
+    "supports_wafer_flux_validation": false,
+    "supports_feature_depth_validation": false,
+    "primary_grade_observable": "relative_cl2_density_percent",
+    "unphysical_derived_values": "retain negative 100-minus-relative values; never clip the primary measured observable",
+    "calibration_rule": "feature depth and these measured markers may not tune the same reactor parameter set"
+  }
+}

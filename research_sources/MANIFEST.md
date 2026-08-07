@@ -13,6 +13,9 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 - hamilton_2018_cl2_dissociation.txt
 - chantry_1987_wall_diffusion.txt
 - economou_chlorine_neutral_transport.txt
+- guha_2008_cl_wall_interactions.txt
+- malyshev_1998_lam_chlorine_dissociation.txt
+- stafford_2009_cl_wall_recombination.txt
 - stafford_2010_cl_wall_recombination.txt
 - wang_olthoff_1999_ion_energy.txt
 - an_2026_nnp_etch_verified_excerpts.txt
@@ -52,6 +55,12 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
   `data/experimental/stafford_2010/`: 39 conditioned-wall chlorine
   recombination markers, with a 600-dpi human-vision/PIL audit and exact
   IUPAC PDF/render hashes.
+- Malyshev et al. 1998 Figures 7--8 are under
+  `data/experimental/malyshev_1998_lam/`: 38 measured Cl2-dissociation
+  markers from a commercial Lam Alliance reactor. The replay extracts and
+  checksums the publisher PDF's native one-bit figure rasters before the PIL
+  marker audit; fitted curves and the documented low-power anomaly are
+  excluded.
 - extract_mouth_profiles.py (regenerator)
 
 ## library/ — the internal literature library (START HERE)

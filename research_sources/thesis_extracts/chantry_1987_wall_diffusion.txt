@@ -1,59 +1,714 @@
-CHANTRY 1987 — VERIFIED PRIMARY-PUBLISHER ABSTRACT EXTRACTION
+RESEARCH ARTICLE | AUGUST 15 1987
 
-Citation
---------
-P. J. Chantry, “A simple formula for diffusion calculations involving wall
-reflection and low density,” Journal of Applied Physics 62, 1141–1148 (1987).
-DOI: 10.1063/1.339662
+A simple formula for diffusion calculations involving wall
+reflection and low density
+P. J. Chantry
 
-Source boundary
----------------
-The AIP publisher record and complete abstract were read. The full article was
-paywalled and has been requested separately. This extraction therefore records
-only claims and equations present in the publisher abstract plus explicitly
-identified independent algebra.
 
-Verified source content
------------------------
-For an active species in a scattering gas, using the zero-density fundamental
-diffusion length Lambda0 can be seriously wrong when the diffusion mean free
-path is comparable to the container size or wall reflection is significant.
 
-Chantry writes the linear extrapolation length as
+J. Appl. Phys. 62, 1141–1148 (1987)
+https://doi.org/10.1063/1.339662
 
-  lambda = 2(1 + R) lambda_m / [3(1 - R)]
 
-where R is the particle reflection coefficient. The paper solves the
-shape-dependent transcendental equations and identifies the scaling variable
-(V/A) lambda / Lambda0^2. The simple approximation
 
-  Lambda^2 = Lambda0^2 + (V/A) lambda
 
-has the correct limits; the abstract reports a worst disagreement of 11% with
-the numerical shape solutions. In the collisionless limit the predicted loss
-frequency matches the average-chord result.
+                                                  
+                                                 View     Export
+                                                 Online   Citation
 
-Independent algebra used by the code
-------------------------------------
-Setting the surface loss probability gamma = 1 - R and using the diffusion
-relation D = lambda_m vbar / 3 gives
 
-  lambda = 2(2 - gamma)D / (gamma vbar)
 
-and reaction velocity
 
-  h = D/lambda = gamma vbar / [2(2 - gamma)].
+                                                                     07 August 2026 21:57:42
+A simple formula for diffusion calculations involving wan reflection and low
+density
+          P. J. Chantry
+          Westinghouse R&D Center, Pittsburgh, Pennsylvania 15235
+          (Received 8 December 1986, accepted for publication 17 April 1987)
+          Diffusion theory is often employed to calculate the effects of wall destruction on the local
+          concentration of an active species immersed in a scattering gas. In many situations the spatial
+          dependence of the concentration is given to a good approximation by the fundamental
+          diffusion mode, and the local loss frequency can be calculated using the container's
+          fundamental mode diffusion length A. The additional assumption that the density of the active
+          species may be taken to be zero at the container boundaries gives a value of A = Ao which
+          depends only on the container dimensions, but use of Ao can be seriously in error if the
+          diffusion mean free path A. m is comparable to the dimensions, or if the particle reflection
+          coefficient R becomes of significance. An improved boundary condition may be written simply
+          in terms of the linear extrapolation length A., whose inverse is the logarithmic gradient of the
+          particle density at the boundary. The equation A = 2( 1 + R )A. m 13 (1 - R) allows the
+          representatitm of the full range of possible values of the particle reflection coefficient, 0 <R < 1,
+          and extends the usefulness of the diffusion approximation to low scatterer densities. In the
+          collisionless limit, the predicted particle loss frequency is identical to that predicted from the
+          average chord length. Using this boundary condition, the dependence of A on A. / Ao has been
+          computed for a range of simple container shapes, by solving the transcendental equations
+          involved. This has allowed the identification of a dimensionless scaling variable, l("A / A~, where
+          10 is the ratio of the container volume to its surface area. For all cases considered the simple
+          empirical approximation A2 = (A6 + lolL) is accurate when A is very large or very small
+          compared to Ao, and disagrees most with the numerical solutions in the region where A and Ao
 
-For a right cylinder spanning -L/2 <= z <= L/2, separation of the diffusion
-equation with Robin boundary -D dn/dnormal = h n gives the fundamental roots
 
-  (lambda/R) x J1(x) = J0(x)
-  (2 lambda/L) y tan(y) = 1
 
-and loss frequency
 
-  nu = D[(x/R)^2 + (2y/L)^2].
+                                                                                                                                       07 August 2026 21:57:42
+          are comparable, with the worst case error being 11 %.
 
-These cylinder equations are an independent derivation, not quoted as text
-from the unread body. Tests substitute the numerical roots back into both
-boundary equations and recover the absorbing and surface-reaction limits.
+
+
+                                                                    situations where the spatial distribution of particles may be
+I. INTRODUCTION                                                     adequately represented by the fundamental diffusion mode
+     The local rate of change of particle density n (q) due to      alone, corresponding to those cases where the volume pro-
+diffusion is given in general by the equation                       cesses of particle production and loss are linearly propor-
+                                                                    tional to the particle density. The extension of the analysis to
+       dn= D"2
+       -    "n(q),                                          (1)     higher-order modes, which arise whenever nonlinear pro-
+      dt                                                            cesses are present, is treated separately in the Appendix.
+where q represents a generalized spatial coordinate. When                In almost all cases of interest the walls represent a net
+the diffusion coefficient D is independent of position, the         sink for the diffusing particles. Consequently, diffusion rep-
+distribution of particles n (q) is conveniently represented by      resents a net local loss of particles, the Laplacian is corre-
+the sum of an infinite set of eigenfunctions, or eigenmodes,        spondingly everywhere negative, and the fundamental diffu-
+n; (q). The form of these eigenmodes depends on the shape of        sion length A is a real positive number having the dimensions
+the container, but in all cases each eigenmode has a shape          oflength. Combining Eqs. (l) and (2) gives
+which is self-replicating in the presence of diffusion alone, or
+with other production or loss processes linear in n. Thus, for                                                                  (3)
+each mode considered in isolation, the Laplacian is linearly
+proportional to the density and the local effect of diffusion       where Vn is the net particle loss frequency due to diffusion.
+within that mode may be represented by an equation of the           In Eq, (3) and in an subsequent equations A is the diffusion
+form                                                                length of the fundamental mode.
+                                                                         In many analyses of volumetric net particle loss due to
+       - V2n;ln; = 1/M,                                     (2)     diffusion the assumption is made that the first zero of the
+where Ai' the mode diffusion length, characterizes that par-        fundamental mode coincides with the container walls, giving
+ticular mode in that particular container.                          a value of A = Ao which depends only on the container di-
+     All eigenmode functions are oscillatory, with the spatial      mensions. While this assumption can never be strictly valid,
+frequency ofthe zeros increasing with the order of the mode.        since zero density must imply zero particle flux, the use of Ao
+The zeros of the lowest order, or "fundamental" mode are            is warranted when the diffusion mean-free-path is small
+common to all modes within the set, and the first of these          compared to the container dimensions, and provided the
+zeros is taken to be the surface at which the particle density      particles disappear on impact with the walls, either by ab-
+goes to zero. In the present analysis we concentrate on those       sorption, recombination, or quenching. When these con-
+
+1141      J. Appl. Phys, 62 (4), 15 August 1987     0021 -8979/87/161141-08$02.40       @ i 987 American Institute of Physics   1141
+straints are not satisfied it is necessary to use a more physi-     to the container dimensions. However, it has provided re-
+caliy based boundary condition. Various approaches to this          su1ts3.6 in good agreement with numerical calculations, even
+problem 1-6 lead to the same general form, which can be rep-        at low scatterer densities where this constraint on Am was
+resented in terms of the "linear extrapolation length" A:           not satisfied. In the present work we explore this region ana-
+                                                                    lytically, and are able to show exact consistency between the
+                                                             (4)    behavior predicted asymptotically by diffusion theory in the
+                                                                    limit of both A and Am large compared to the dimensions,
+where subscript b implies that the quantities are evaluated at      and the predictions of collisionless kinetic theory.
+the boundary. According to Eq. (4), in the vicinity of the               In Sec. II we apply the boundary condition represented
+boundary the density n (q) of diffusing particles extrapolates      by Eq. (7) to various simple container shapes and compute
+to zero a distance A beyond the boundary. 1 The dependence          the dependence of A on A in each case by solving the result-
+of A on the reflection coefficient 2 .4. 6 may be written           ing transcendental equations. In Sec. III we consider the
+       A = eArn (1 + R)/(l - R),                             (5)    asymptotic behavior predicted for large values of A from
+                                                                    various viewpoints, from which we are able to define a gen-
+where                                                               eral scaling parameter applicable to any shape container. In
+       Am = (Num ) - I = 3D Iv                               (6)    Sec. IV we compare all the "exact" computed data with the
+is the diffusion mean free path, N is the number density of         predictions of a simple analytical approximation which uses
+scatterers through which the particles n are diffusing, u m is      the general scaling parameter, and find that, in general, the
+the momentum transfer cross section for species n interact-         agreement is to better than - 11 %.
+ing with N, v is the average velocity of species n, and € is a
+coefficient depending weakly on the reflection coefficient R.
+For a semi-infinite, perfectly absorbing (R = 0) planar sur-        It IMPLEMENTATION FOR SIMPLE GEOMETRIES
+face, the value € = 0.71 is appropriate, 3 while at the other            In this section we apply the generalized boundary condi-
+extreme, when R "'" 1, the value € = j is appropriate. 2 ,4,6 For   tion represented by Eq, (4) to various simple geometries in
+simplicity we shan use a fixed value of e, Since it is important    order to explore how the resulting modified container diffu-
+to accurately represent A when it becomes large, we choose          sion length A depends on the linear extrapolation length )..
+to use the value of j, and incur a small error for those cases      One objective is to establish the most appropriate scaling
+
+
+
+
+                                                                                                                                               07 August 2026 21:57:42
+where R is small. Hence, Eq, (4) becomes                            parameter, and as a first step we compare the results for the
+                                                                    various containers by plotting A6 I A 2 as a function of A lAo.
+       (~)
+        n
+           (dn) = _.l = _ (~i 0- R)
+            dq h   A       2D I (1 + R) .
+                                                            (7)
+                                                                    A. Spherical container
+     When such a boundary condition is used, the di:!fusion            For this shape of container the fundamental diffusion
+length A becomes a function of A, as well as being a function       mode distribution is given by the equationS
+of the container dimensions. It is with this dependence that
+we are primarily concerned in the present paper. Evaluation
+                                                                         n (1') = [n (O)sin( 11"1'11',) ]Ie 11'rlrs)                     (8)
+of A, by matching the form of the fundamental diffusion             and the corresponding diffusion lengths are given by
+mode to Eq. (7) at the boundary, in general involves finding             A = (1'.117'),                                                  (9)
+the root of a transcendental equation. 2 ,4,6 In any particular
+case this does not present any great difficulty, but an exact            Ao = (r0/1T),                                                  (10)
+general analytical relationship between A, the chamber di-          and we must choose rs so that Eq. (8) satisfies Eq. (4) at
+mensions, and A is precluded. For the purpose of treating           I'= 1'0' Differentiating Eq. (8) we obtain from Eq. (4) a
+electron diffusion over a wide range of pressure and plasma         transcendental equation in (roll's):
+density Muller and Phelps 7 have developed a semiempirical               tan(1TYolrs ) = (1Tro/r,)/[I- (ro/A)].                         (11)
+approximation which incorporates the solution of the tran-
+scendental equation applicable for a plane parallel slab when            This may be solved for (ro/l's) as a function of (ro/A),
+free diffusion prevails. They use the same equation to repre-       using appropriate iteration procedures for (rolA) > 1, and
+                                                                    (ro/A) < 1, and by inspection for the special case (1'01
+sent the results expected for a cylinder, by application of an
+appropriate scaling factor. The approach taken here is to           A) = 1. Using the ratio of Eqs. (9) and (10), we can then
+compute A over a wide range of the ratio (A lAo) for a wide         compute A~ I A 2 as a function ofA I Ao. The result is shown in
+range of analytically tractible container shapes. We are then       Fig. 1. It is clear from the figure that A 2 increases linearly
+able to 0) identify the most appropriate scaling parameter          with A for values of A> Ao. This asymptotic behavior may be
+for representing the general dependence of A on A for any           predicted analytically. In this region, where (1'0/;.) 1, we    «
+shape container and, using this as the variable, Oi) generate                             «
+                                                                    also have (roll's) 1, and Eq. (11) may be written in the
+an approximate analytical form for computing directly the           asymptotic form
+value of A as a function ofA for any container for which Ao is           1Tro [1 + ~(1Tro)2] "'" rrro __1_ _                            (12)
+known.                                                                   rs          3    rs         1',   (1- rolA)
+     The methods used to derive Eq. (7) lead us to expect it
+                                                                         This reduces to
+to be adequate for all values of the reflection coefficient R,
+provided the diffusion mean-free-pathA m is small compared               (rolrs)2 = Olt?) (1'0/.1),                                     (13)
+
+
+1142       J. Appl. Phys., Vol. 62, No.4, 15 August 1987                                                           P. J, Chantr)l       1142
+                                                                                                                  1 2.405 II (2.40S701r,)
+                                                                                                                  -=--                    ,                            (23)
+ -
+"'-<
+NO
+
+  -<
+ .c'
+                                                                                                            and
+                                                                                                                  A         rs   Jo(2.40Sro/rs)
+
+ "IS>
+ '"
+ !l
+                                                                                                                                                                       (24)
+  <::
+ ~
+ ~"
+         0.1
+                                                       h    «r0
+  ~
+                                                        o                                                        The variation of (A6/l\2) withA has been computed for
+ '"
+ .~                                                                                                         various shaped containers, and plotted as a function of A / Ao
+ g                                                                                                          in Fig. 1. All the curves show the same general behavior, and
+ U
+
+ ~                                                                                                          we may infer that any shape container will behave similarly.
+  ~                                                                                                         The spread in the curves arises primarily from their relative
+  :!i!
+         C.OI                  I   !   I!   J   I            I   .....L-L...l...~~lL--L __ ~.L-l-'-=""""    displacements along the A / Ao axis, indicating that this is an
+                0.1                             1                           10
+                              Normalized linear Extrapolallon Length. AlAo                                  imperfect scaling variable. In the next section we identify an
+                                                                                                            improved scaling variable by considering the general asymp-
+FIG. 1. The normalized inverse squared diffusion lengths of various shapes
+                                                                                                            totic behavior to be expected when (A lAo)> 1.
+of containers, plotted vs the ratio of the linear extrapolation length.it to the
+diffusion length A" calculated in the limit A. "'" O.
+
+                                                                                                            III. ASYMPTOTIC BEHAVIOR FOR LARGE A
+and it follows from Eq. (9) that the effective diffusion length                                                 Inspection of Fig. 1 and reference to Eqs. (14), (19),
+A behaves asymptotically as                                                                                 and (24) show that in all cases considered the asymptotic
+           A 2 "",rwi 13.                                                                           (14)
+                                                                                                            dependence of the effective diffusion length A on the linear
+                                                                                                            extrapolation length ). may be expressed as
+e, Rectangular parallelepiped container                                                                           A2c::::.A1o.                                         (25)
+   For this shape of container the fundamental diffusion                                                         The parameter 10 has the dimension of length and is re-
+mode distribution may be represented by the equationS                                                       lated to the size of the container. Equation (25) applies
+                                                                                                            when A is large compared to Aoo We note from Eq. (5) that
+
+
+
+
+                                                                                                                                                                                07 August 2026 21:57:42
+n(x,y,z) = n(O,O,O)cos                              (:~ )cos ( ; )cos( :~).                         (15)    this can occur for either of two reasons: (i) the particle re-
+                                                                                                            flection coefficient R approaches unity or (ii) the density of
+where the rectangular coordinates have their origin at the                                                  scatterers is low, making the diffusion mean free path ). m
+center of the container. The results corresponding to Eqs.                                                  large. In each case we can derive the particle loss frequency
+(9)-(11) and (14) are, respectively,                                                                        from an alternate perspective and, by comparison with Eq.
+                                                                                                            (25), extract a definition of 10 ,
+          -1= ( -        1T)2 + (-1T)2 -r. -(1T)2 ,                                                 (16)
+            A2          xs              ys                 ,Zs
+
+                1      (1T)2 (1T)2 (1T)2                                                            (17)    A. Reflection coefficient R= 1
+           A~ =         Xo    + Yo + Zo '                                                                        Here we assume that the scatterer density is sufficiently
+                                                                                                            high for the velocity distribution ofthe particles to be essen-
+                                                                                                    (18)
+                                                                                                            tially isotropic by virtue of collisions. The large relative val-
+                                                                                                            ue of A derives from the present assumption that R c::::. 1. In
+                                                                                                            terms ofthe sticki.ng probability p = (1 - R), Eq. (7) may
+                                                                                                    (19)    be written as
+                                                                                                                  l/J"",vp/4D.                                          (26)
+                                                                                                                 In the region of applicability of Eq. (25), the diffusion
+C. Right circular cylinder
+                                                                                                            loss frequency then becomes
+   For this shape of container the fundamental diffusion
+                                                                                                                            D     D     up
+mode distribution is given by8                                                                                    l' =-=-~-                                             (27)
+                                                                                                                    D A2 AID - 4/0 •
+           n(z,r) =n(O,O) cos                       (1Tz/z.,)Jo(2.405r/rs )'                        (20)
+                                                                                                                 According to standard kinetic theory, the particle flux
+where the origin of the cylindrical coordinate system is at the                                             to the container walls is nv/4, and therefore the net flux in
+center of the container. 10 is the zero-order Bessel function of                                            the present situation is nvp/4. When multiplied by the total
+the first kind whose first zero occurs at J o(2.405). For this                                              surface area A, and divided by the total volume V, this gives
+case9 the results corresponding to Eqs. (9)-( 11) and (14)                                                  the particle loss rate per unit volume, nup/4( V / A). This is
+are, respectively,                                                                                          consistent with Eq. (27), provided we define to as
+           ~ = (~)2 +
+            A
+                                       (2.405)2,
+                                          rs
+                                                                                                    (21 )         I -   container volume                             (28)
+                         Zs                                                                                        0-container surface area
+                                                                                                    (22)        For the particular cases treated above, this definition is
+                                                                                                            consistent with Eqs. (14), (19), and (24).
+
+1143                  J. Appt. Phys., Vol. 62, No.4, 15 August 1987                                                                                   P. J. Chantry     1143
+                                                                                                                                     The corresponding mean lifetime 7 Iv is equivalent to a
+N<                                                           ,"/~nalytiC Approximation                                          loss frequency of
+NO
+
+ <                                                                                 Sphere
+                                                                                                                                     Vn = v(1 - R)/21oCl + R).                                     (30)
+ '"
+ C;
+ .::
+ .5                                                                                                                                  Substituting for A from Eq. (7) gives
+ c:
+ .~
+ ::>       0.1                                                                                                                       VD   =DI104,                                                  (31)
+ ~
+ ~
+ ~
+                                                                                                                                which is exactly equivalent to Eq. (25).
+ .:=                                                                                                                                 We conclude from the above that Eq. (25) is a compre-
+                  ~
+ ~
+ u                                                                                                                              hensive description of the asymptotic behavior to be expect-
+~
+ ~
+li      J         ';-------L-----L---'---'--'-'--'
+                 0.1
+                                                 LJ.!!~t
+                                                       {
+
+                                                        I
+                                                            __   ,         ,   !    ,
+
+
+
+
+                                              Dimensionless Scaling Variable. £o~/A 02
+                                                                                        1   I   i L. ____ ~--1_
+                                                                                                ill                 ~
+                                                                                                                                ed when the linear extrapolation length A becomes large for
+                                                                                                                                either reason, provided we use Eq. (28) as a general defini~
+                                                                                                                                tion of 10 , Use of (/04 I A6) as a scaling variable will then
+                                                                                                                                collapse the high A asymptotes of the various curves of Fig. 1
+                                                                                                                                to a single asymptote. This is illustrated in Fig. 2, where we
+FIG. 2. The normalized inverse squared diffusion lengths of the sphere and
+of the rectangular parallelepiped hav~ng the aspect ratio indicated on the                                                      plot A~ I A 2 vs (loJ.. I ~ ), with 10 calculated according to Eq.
+curve, plotted vs the dimensionless scaling variable ["it I J\f,. All other cases                                               (28). When plotted in this way the curves for all the cases
+studied fall within the envelope of these two cllrves. The broken curve is a                                                    considered fall very closely together over the whole range,
+plot of the analytic approximation given in Eq. (32). See also Table 1.
+                                                                                                                                suggesting the possibility of defining a simple "universal"
+                                                                                                                                curve capable of predicting A for any container to an accept-
+                                                                                                                                able level of approximation.
+
+                                                                                                                                IV. AN EMPIRICAL ANALYTICAL APPROXIMATION
+                                                                                                                                      The normalized inverse squared effective fundamental
+Et Large diffusion mean free path (A'm ~ Ao)                                                                                    mode diffusion length, A~ I A 2 , has been computed as a func-
+     Here we assume that the particles are created uniformly                                                                    tion of the scaling variable 104 I A~ for all the examples
+throughout the volume of the container, with an isotropic                                                                       shown in Fig. 1, and for other aspect ratios of the right circu-
+
+
+
+
+                                                                                                                                                                                                          07 August 2026 21:57:42
+distribution of velocity. Each particle subsequently moves in                                                                   lar cylinder and the rectangular parallelepiped. A selection
+a "free fall" environment, making collisions only with the                                                                      of these is given in Table I, which exhibits generally good
+wall. Following its creation, the particle's first wall collision                                                               agreement across aU rows. To avoid confusion only the ex-
+occurs on average after it has traveled half the average chord                                                                  treme examples are shown in Fig. 2-for the sphere, and for
+length. Case, deHoffmann, and Placzek 10 have shown that                                                                        a rectangular parallelepiped having the aspect ratio 1: 1:0.13.
+particles leaving a wall of a convex container with a cosine                                                                    The latter was identified by trial and error as defining an
+distribution travel an average chord length of 410 , where 10 is                                                                approximate lower bound to the family of curves. An essen-
+defined by Eq. (28). Taking into account the reflection                                                                         tially identical curve exists for the right circular cylinder
+probability, the average total path traveled is therefore                                                                       having holro = 0.2, as may be inferred from Table I. Empiri~
+           1= 210 + R(41o ) + R 2(4/0) + ..,                                                                                    cally we find that all other cases fall within the envelope of
+                                                                                                                                the two full curves in Fig. 2. For application purposes it is
+or                                                                                                                              useful to define an analytical approximation to this general
+           1= 210 0 +R)/(l-R).                                                                                       (29)       behavior. A surprisingly simple function
+
+
+TABLE I. Dependence of A~I A 2 on the dimensionless scaling variable (loA 1/\'6) for various shapes of containers.
+
+                                                                                                Right circular cylinder                        Rectangular parallelepiped
+                                                                                                          hoi"o                                         Xo:Yo:Zu
+
+  loA                                Sphere                           00                               1.85               0.2         1:1:1          1:2:4           1:1:0.13           Eq. (32)
+     A20
+
+       0.0l                         0.994                            0.993                            0.993          0.991           0.992          0.991            0.990              0.990
+       0.03                         0.982                            0.979                            0.978          0.973           0.976          0.972            0.972              0.971
+       0.1                          0.940                            0.933                            0.930          0.913           0.924          0.913            0.911              0.909
+       0.2                          0.883                            0.872                            0.867          0.838           0.856          0.838            0.834              0.833
+       0.4                          0.780                            0.768                            0.760          0.716           0.744          0.718            0.710              0.714
+       0.8                          0.618                            0.610                            0.601          0.551           0.583          0.556            0.544              0.555
+       1                            0.557                            0.549                            0.540          0.493           0.525          0.500            0.487              0.500
+       2                            0.365                            0.358                            0.354          0.323           0.348          0.331            0.318              0.333
+       4                            0.213                            0.210                            0.209          0.193           0.206          0.199            0.190              0.200
+  10                                0.0937                           0.0931                           0.092 8        0.0883          0.092 3        0.0905           0.0875             0.0909
+ 30                                 0.Q326                           0.0325                           0.0325         0.0318          0.0324         0.0322           0.0317             0.0322
+100                                 0.00995                          0.00993                          0.00992        0.0986          0.00992        0.0099           0.00984            0.0099
+
+
+
+1144                     J. Appl. Phys., Vol. 62, No.4, 15 August 1987                                                                                                          P. J. Chantry      1144
+                                                                       (32)                                                                                 Ii I
+                                                                                      LlO ,-,.,..,..,..,.,""-rT'TTTI'TTT----r'-'r;','TT"'''''iJ--r"rr,-nilrrmi
+                                                                                                                                                              I
+                                                                                                Right
+serves this purpose very welL It is plotted as the dotted curve                       1.08      Circular
+                                                                                                Cylinders
+in Fig. 2, and tabulated in Table I.
+                                                                                 ~ 1.06
+      The error incurred by using Eq. (32) is illustrated in                                                                                   «1
+Figs. 3 and 4. In most cases the error is greatest in the region                N< l.ll4
+of lolL 1A~ =< 1. The worst error occurs for the sphere, at                      ~ 1.02
+1(;"1A~ = 0.9, when Eq. (32) overestimatesA2 by 11 %. The                        8:
+                                                                                 ~ 1. oc IB!!!~~::::::-:=:::'
+most serious underestimate identified (5%) occurs at                            "'<
+(lolL 1A~) = 3.8 for the rectangular parallelepiped having                            O.'lIl
+the aspect ratio 1:1:0.13. When possible errors within these
+                                                                                      O. 96 ~'--'-J...l..U:",:--,-,-,-,.uw--,-c=""'---'-J..J...Uw.w
+limits are considered acceptable, Eq. (32), or equivalently                              0,01                          !            10           100
+                                                                                                    Dimens;onless Scaling Variable, f.oA!A~
+        A2 = A,~ + 104                                                 (33)
+
+provides a simple direct estimate of the effective squared                      FIG. 4. The fractional error introduced by using the analytical approxima-
+fundamental mode diffusion length A2 of the container, from                     tion [Le., Eq. (33) J to compute A2 in place of the exact value obtained by
+                                                                                solving transcendental equations. The curves refer to right circular cylin-
+which to calculate the local diffusion loss frequency within                    ders having the ratios (holra) indicated. The curve for hol!'o «1 corre-
+the container. In Eq. (33) Aa is the fundamental diffusion                      sponds to the infinite plane parallel case, and is identical to the curve repre-
+length of the container as usually defined by the boundary                      senting a cube in Fig. 3. See also Table 1.
+condition fl (wall) = 0, 10 is the ratio of the container volume
+to its wall area, and ...t is the linear extrapolation distance
+defined by Eq. (4). As indicated by Eq. (7), this quantity
+depends on the wall refl.ection coefficient, and varies inverse~
+ly as the number density of scatterers, through its depend-                     tent with the results of the collisionless analysis of Seco HI.
+ence on the diffusion coefficient D, or equivalently on the                     Therefore, in order to preserve the applicability of the analy-
+diffusion mean free path 4",.                                                   sis to very low scatterer densities we choose not to take ac-
+     A number of authors ll - 13 have discussed the effect of                   count of surface curvature effects in the formulation,
+surface curvature on the value ofA If accoun t is taken of this
+                                                      0
+
+                                                                                     An implicit assumption throughout the present analysis
+
+
+
+
+                                                                                                                                                                                   07 August 2026 21:57:42
+effect. Eq. (7) is replaced by                                                  has been that the conditions for "free diffusion" prevail, but
+          1 _ v(1-R) +_1_+_1_,                                         (34)     with certain reservations the same general conclusions will
+     A W(1 + R)           2r)                     2r2                           apply in situations involving the diffusion of ions and elec-
+where '1,2 are the principle radii of curvature of the surface.                 trons in the presence of their space-charge field. Muller and
+With decreasing scatterer density we note that A, and hence                     Phelps 7 have drawn on the results of various theoretical
+A2, then tend asymptotically to finite values. As a result, the                 treatments to derive an approximate empirical formula rep-
+particle loss frequency increases without limit in proportion                   resenting the dependence of the effective electron diffusion
+to D, and the resulting predictions are ultimately inconsis-                    coefficient Dse on two dimensionless variables: (A o/4 D ),
+                                                                                where AD is the electron Debye length, and (AoI). -,- ), where
+                                                                                )'f is the ion mean free path. Note that A in the notation of
+                                                                                Ref. 7 is replaced by Ao in the present notation. Thus, their
+                                                                                Eq. (7)
+     l.lO                                                                       A6 _ Dse _ (2j)2
+                                                                                'A2-j)--;;
+                                                                                     e
+     1.00
+                                                                                                         20+ lO(Ao/AD) + (401"4D)2
+     1.%
+                                                                                               X 20 + 12(0'+ 1)!/2(Ao/AD) + (0'+ 1) (A oIAD)2'
+ ~l.04                                                                                                                                                                      (35)
+N<                                                                              together with their Eq. (8),
+ ::: 1. 02
+ ~
+ ~ 1. 00 ~;;;;;;-;;;;;=:-:::,                                                   j tanj = A (~)l/2l..( me ) -.                                lI2
+"'<u           Rectangular                                                                   2    O'\M+
+                                                                                                      Ao 1 + 2.34(0'+ 1)(meIM+)1/2Ao/4o
+               Parall.lopiped
+                Xu' Yo' Zo
+     a.'lIi                                                                                      X-          -----------'----"-.
+                                                                                                     A+           1 + 3.3(AoIAD)
+     O. 94 ~.L-J..,L,W.~-'-.L.W.LUJJ---'"-,-LLll"-l-o-I-J-w"L.WJ                                                                                                            (36)
+        0. 01         O. I           I            10           100
+                 Dimensionless Scaling Varlallle, t/\/A~                        describes the transition from free electron diffusion, when
+                                                                                (Ao/AD) <1, to ambipolar diffusion, when (AD/ADD) > 1,
+FIG. 3. The fractional error introduced by using the analytical approxima-      and also the transition from low scatterer density, when
+tion I i.e., Eq. (33) J to compute A2 in place of the exact value obtained by
+                                                                                (Aa/A+) < 1, to high scatterer density, when (Aol A+) > l.
+solving transcendental equations. The uppermost curve is for the sphere.
+AU other curves are for rectangular parallelepipeds having the aspect ratio~    In Eqs. (35) and (36) De is the free diffusion coefficient of
+indicated. See also Table I.                                                    the electrons, 0' = (f-l.lp+) is the ratio of electron to ion
+
+1145           J. Appl. Phys., Vol. 62, No.4, 15 August 1987                                                                                                P. J. Chantry   1145
+mobilities, and me and M + are the electron and ion masses,            the boundary. This boundary condition, which may be writ-
+respectively.                                                          ten simply in terms of the linear extrapolation length A, also
+     Equation (36) was derived 7 for the case of parallel plane        extends the usefulness of the diffusion representation of par-
+geometry, and corresponds to the present Eq. (18), modi-               tide transport to much lower densities of scatterers than is
+fied to account for space-charge effects. The coefficient A,           possible with the frequently used simple boundary condition
+inserted to account for different container shapes, has the            nCwall) = O. In particular we note that identical results
+value of unity for parallel plane ("slab") geometry. Accord-           were obtained in Sec. III for the particle loss frequency pre-
+ing to the present analysis this coefficient is given for any          dicted for the completely collisionless case as would be pre-
+container by                                                           dicted using the present diffusion formulation. Therefore, it
+       A = (Ao/lo)/(AoI1o)slab = (1T/2)(Ao/io).               (37)     appears that the loss frequency predictions of the latter can
+                                                                       be applied without constraints regarding the magnitude of
+This gives a value of 1T/2A05 = 1.306 for A (cylinder), in             the diffusion mean free path relative to the container dimen-
+agreement with the value of 1.3 derived empirically by Mull-           sioms.
+er and Phelps.                                                              For simple geometries the generalized boundary condi-
+      The separation of the curves for different geometries            tion can be applied without difficulty on a case by case basis,
+noted in the present Fig. 1 is similarly present in Fig. 3 of          but it does require the solution of transcendental equations.
+Muller and Phelps, 7 and it follows from the present work              Evaluation of the fundamental mode diffusion length for a
+that their curves could be collapsed to one independent of             wide range of examples serves to identify the most appropri-
+geometry by using the variable (A6 / [wi +) in place of (Ao/           ate dimensionless scaling variable, loA / A6. When this vari-
+,,1,+). Similary, use of the present approximation, Eq. (32),
+                                                                       able is much less than unity, use of the generalized boundary
+allows us to avoid solving the transcendental equation (36).           condition gives results which differ insignificantly from
+Thus, Eq. (35) becomes                                                 those obtained with the simpler condition, n (wall) = 00 The
+A~ = D,e =
+A2        De
+                   (1 + 10)-1
+                          A~
+                                                                       finding that all of the cases considered behave very similarly
+                                                                       when plotted appropriately as functions of this scaling vari-
+                                                                       able allowed us to write a simple empirical analytical ap-
+                        20 + lO(Ao/AD) + (AoIAD)2                      proximation covering the full range of possibilities for all the
+          X                                                       2'
+               20 + 12(0' + 1) 1/2(Ao/,,1,D) + (0' + 1 )(AoIAo)        cases considered. The approximation gives negligible error
+
+
+
+
+                                                                                                                                          07 August 2026 21:57:42
+                                                              (38)     when Ii, is very large or very small compared to the container
+and by comparing Eqs. ( 18) and (36) we may show that, in              size. The maximum error incurred depends on the shape of
+the context of the Muller and Phelps approximation, the                the container. The worst case identified is that of the sphere,
+linear extrapolation length A is given by                              and in this case the error is always less than 11 %.
+                                                                            Finally, it should be emphasized that in the course of the
+  _ (1T)1I20(me)
+,,1,- -      '--                                                       present analysis a number of simplifying assumptions have
+         6          M+                                                 been made. For example, we have ignored the weak depend-
+                                                                       ence of € on R, and have used the value € = i appropriate
+                                                                       when R = 1 throughout, on the principle that this is the cor-
+                                                              (39)     rect value for those situations where it is most important for
+                                                                       it to be correct, and that in other circumstances the error
+     These two final equations combine the present empirical           will, in any case, be small. Use of the fundamental mode
+approximation, Eq. (32), with the approximation of Muller              approximation will, in any event, often be an approximation
+and Phelps. This modified formulation of their approxima-              requiring its own consideration. With these reservations the
+tion is more satisfactorily generalized to any shape contain-          results presented herein, in particular Eq. (33) used in con-
+er, and avoids the need to solve the transcendental equation,          junction with Eqs. (7) and (28), provide the opportunity to
+Eq. (36).                                                              extend the usefulness of the diffusion approximation in a
+     The effect of an electron or ion reflection coefficient, R,       manner which is simple to implement.
+at the surface will, in general, be representable as a modifica-
+tion of A. In the free diffusion limit the dependence will be as       ACKNOWLEDGMENTS
+expressed by Eq. (5), and can be incorporated into Eqo (39)
+                                                                            The author is indebted to A. V. Phelps for constructive
+by multiplying the right-hand side by (1 + R) / (1 - R).
+                                                                       comments on this paper, including pointing out some of the
+However, as pointed out by Muller and Phelps, in the pres-
+                                                                       references to earlier work, and to H. J. Oskam for a fruitful
+ence of space-charge fields the functional dependence on R
+                                                                       discussion regarding extension of the analysis to higher-or-
+will not generally have this simple form, and it has therefore
+not been embedded in Eq. (39).                                         der modes.
+
+                                                                       APPENDIX: HiGHER~ORDER MODES
+\/0 SUMMARY AND CONCLUSIONS                                                 In the preceding analysis the assumption was made that
+    In the preceding analysis we have explored the effect on           the spatial dependence of the concentration of diffusing par-
+the calculation of diffusion rates of using a generalized              ticles could be adequately represented by the lowest-order
+boundary condition which is capable of representing the im-            diffusion mode. When higher-order modes are included the
+perfect absorption of the diffusing particles as they arrive at        local density is represented by
+
+1146          J. Appl. Phys., Vol. 62, No.4, 15 August 1987                                                     P. J. Chantry     1146
+       n(q) =      I'" 11k (q),                               (Al)                                                                   (A14)
+                  k=l
+
+where k = 1,2,3, ... is the mode index, k = 1 being the funda-        and
+mental mode considered exclusively in the preceding sec-
+                                                                             (Aw/ Ak)2 = (2k _ 2)2.                                  CA1S)
+tions. The boundary condition represented by Eq. (4) is sat-
+isfied when each mode individually satisfies the condition,                For cylindrical geometry, the mode-dependent forms of
+i.e.,                                                                 the radial portions of Eqs. (20), (21), and (23) are
+       d p:nk (q)]                                                           n k (r) = n k (O)JO(Rkrlr,k)'                          (A16)
+                   =                                          (A2)
+           dq                                                                Ak = r,klRk'                                            (AI7)
+is satisfied when                                                            1 Rk J 1 (Rkf'o/rsk )
+                                                                             -=------                                               (A1S)
+       dnk(q)              nk(q)                                             A rsl< Jo(Rkroirsk )
+                   = ----             for all k.              (A3)
+       dq                    A                                        It is convenient to define the variable
+    The type of analysis performed in Sec. II for k = 1 can
+                                                                           s = R/Jolrsk'                                            (A19)
+therefore be generalized to encompass higher values of k by
+appropriately modifying the relevant equations.                       in terms of which Eq. CAlS) may be written as
+    For a spherical container the mode-dependent forms of                    S2   = (rolA)Q)(s),                                    (A20)
+Eqs. (8), (9), and ( 11) are                                          where
+       n k (r) = [nk (0) sin (krrrirsk ) ]/(kl7rlrsk )'       (A4)                                                                  (A21)
+       Ak = rsk lkl7,                                         (AS)    is the "quotient function," which has been tabulated by
+and                                                                   Onoe. 14 In the above, Rk is the position of the k th zero of J o.
+                                                              (A6)    From Eq. (AI7) we note that
+
+    The ratio (rolrsk ), found by solving Eq. (A6), ranges                   (Awl AkO)2 = (R k I2.405)2,                            (A22)
+from a value dose to unity when IL <ro, to a minimum value            where R 1,2,3,4,5.... = 20405, 5.520, 8.654, 11.792, 14.931, ....
+when A» r0' This limit is zero for k = 1, and for k> 2 it is the            In the limit A <1"0 Eg. (A20) is satisfied by s = R k , cor-
+
+
+
+
+                                                                                                                                                 07 August 2026 21:57:42
+solution ofEq. (A6) in the vicinity of (rolr.k )<(1~1I2k).                                                       »
+                                                                      responding to rsk = r(J' In the limit A r0 the root s tends to
+Values of (rolrsk) determined from Eq. (A6) for prescribed            zero for k = 1, and for k>2 tends to the position of the pole
+values of A Iro give directly                                         in QJ adjacent to and less than R k , Le., s = P k _ I . The values
+                                                                      P l,2,3,4.. = 3.835, 7.015, 10.176, 13.326 occur where
+                                                               (A7)
+                                                                      J I (Pk ~ 1 ) = 0, It follows that in this limit
+where previously we have used Ao to represent AIO and A to
+                                                                             (Ako l AI<)2 = (P k _ JIR k )2.                         (A23)
+represent AI' It follows from Eq. (AS) that
+                                                                           In Table II we compare these limiting values with their
+         Am
+       ( Ak
+            )2 = ~(~)2.
+                 k
+                                                              (AS)    counterparts for other geometries, and note that the simple
+                             rsk                                      slab equation could be used to predict the values for the other
+   Similarly, for a planar slab the mode-dependent forms              geometries within 15%.
+ofEqs. (15), (16), (18), and (19) are                                      Solutions of Eq. (A6) have been obtained for a range of
+                                                                      values ofA 11"0' for k = 2 and 3, and the corresponding values
+       n k (x) = n k (O)cos [ (2k - 1)lTx!xs       d,         (A9)
+                                                                      of the normalized diffusion length of a sphere have been
+       Ak   = x sk/(2k - 1 )17,                               (AlO)   computed and plotted in Fig. 5. Similarly, solutions of Eq.
+and                                                                   (All) have been used to compute the normalized diffusion
+                                                                      length for various aspect ratios of rectangular parallele-
+       e2k -      1)11" tan ((2k -   1)lTX   o) = ~,          (All)   pipeds. The results corresponding to a cube or an infinite
+            Xsk                    2X,k            A                  slab are also shown in Fig. 5 for k = 2 and 3. As was found
+       It follows from Eq. CAW) that
+       (AwlAkO)2 = (2k - 1)2.                                 (A12)
+     For a specified k, values of xoIxsk obtained by solving
+                                                                      TABLE II. Asymptotic values of (A ko /Ad 2 for the limiting situations
+Eq. (All) range from values close to unity when)., <xo to
+                                                                      whereA.;>xo or '0'
+values approaching (2k - 2)/(2k - 1) whenA).x o' In the
+latter region the asymptotic form of Eq. (A 11 ), obtained by                                                          k
+replacing the tangent by its argument reduced by (k - 1 )11",
+is                                                                     Shape              Formula         2        3        4        5
+
+                                                                      Slab               (2k ~ 2)'       0.444   0.640     0.735    0.790
+                                                                                          2k~ I
+                                                                      Sphere             Eq. (M)         0.511   0.672     0.753    0.790
+                                                                      Cylinder           (Pk_,/R k )2    0.483   0.657     0.745    0,797
+       It follows that, in the limit of A »xo,
+
+1147         J. Appl. Phys .• Vol. 62, No.4. 15 August 1987                                                         p, J. Chantry        i 147
+                                                                                                                                                        81
+                                                                                                                                                             49    K=5        64
+                                                                                                                                                        25         k =4      36---
+
+                                                                                                                             -
+                                                                                                                            ",,,",
+                    \
+                        \                                                                                                    <:
+                                                                                                                                                                   <=3
+     ..   a.g
+                            \                                                                                               "'-
+                                                                                                                             -<
+                                                                                                                               <>
+                                                                                                                                                                             16
+                                \
+                                            ,
+ ~
+ '5>                                \
+  c:                                    \
+ !l
+ .§       0.7                               \
+                                                \
+ :E                                                 \
+ <5                                                     \
+ ]        0.6                                               \
+                                                                \                                                                                                         k =1
+ ~                                                                  \
+                                                                        \
+ ~        0.5                                                               \
+                                                                                \
+                                                                                    \ k=l
+          a. 4 L--'-....l-.LlJL!.U~'-,\~-,-1-U-'-'-'-':-->--'-''-'-'~                                                                O. 1 ,:--'--'-..w..~'-':---J..--'--'-L.J..,W7--'--O....>-d"""'~
+              D.!
+                                Dimensionless Scaling Variable. Vlk Aka
+                                                                            I                   10
+                                                                                                     ,   100
+                                                                                                                                      0.01                   O.!                  I
+                                                                                                                                                 Dimensionless Scaling Variaole.l oAI A ~o
+
+FIG. 5. Normalized container diffusion lengths for the fundamental mode                                                     FIG. 6. Normalized diffusion lengths for the lowest five modes (k = 1-5)
+(k =!) and next two higher-order modes (k = 2,3). The curves for a                                                          given by Eq. (A25). The asymptotic limiting values are shown by the num-
+sphere, an infinite slab, and an infinite cylinder are labeled SP, SL, and C,                                               bered horizontal lines.
+respectively. The broken curves are given by Eq. (A24).
+
+
+
+                                                                                                                            zation of the ordinate, and of the scaling variable. By so
+for k = 1, all the various container shapes exhibit similar                                                                 doing the ordinate displays the relative decay rates of the
+behavior for the same value of k;;.2, suggesting the possibil-                                                              various modes, and the abscissa may be viewed as represent-
+ity of devising a mode-depenent version of the analytical ap-                                                               ing a fixed pressure scale, decreasing from left to right, or as a
+proximation, Eq. (32), which applies to the k = 1 case. With                                                                fixed reflection coefficient scale, increasing from left to right.
+the constraints that the resulting equation should reduce to                                                                We note that with increasing A. the dynamic differences
+Eg. (32) for the case k = 1, and forlarge A should have the
+
+
+
+
+                                                                                                                                                                                                                    07 August 2026 21:57:42
+                                                                                                                            between the decay rates for different modes tends to in-
+asymptotic behavior appropriate to a rectangular parallel-                                                                  crease. In particular, relative to the fundamental mode rep-
+piped, given by Eq. (A14), we arrive at the form
+
+               = (CZk-n +~)_1 +(2k- 2Y,
+                                                                                            2                               resented by the k = 1 curve, the higher modes tend to decay
+
+          (~)2
+                                                                                                                            faster with increasing A. This suggests that they are likely to
+           Ak      4k - 3 kMo   2k - 11                                                                                     be of decreasing relative importance as A becomes signifi-
+                                                                                                                   (A24)    cant, either for reasons of decreasing pressure or increasing
+                                                                                                                            surface reflection coefficient.
+which may be written alternatively in the form
+
+          (
+              AlO
+                Ak
+                            )2 = (_1_
+                                  4k- 3
+                                        + l~ ) -1 + (2k _
+                                         kAlO
+                                                                                                               2)2, (A25)
+                                                                                                                             'E. W. McDaniel. Collision Phenomena in Ionized Gases (Wiley, New
+                                                                                                                              York, 1964), Section 10.7.
+     The inverse dependence on k imposed on the dimension-                                                                   2A. O. McCoubrey, Phys. Rev. 93,1249 (1954).
+less scaling variable in these equations was arrived at empiri-                                                              'B. Davison, Neutron Transport Theory (Clarendon, Oxford, England,
+cally. The behavior of Eq. (A24) is shown by the broken                                                                       1957).
+curves in Fig. S, the curve for k = 1 being identical to that                                                               'P. J. Chantry, A. V. Phelps, and G. J. Schulz, Phys. Rev. 152, 81 (1966).
+                                                                                                                            5E. BlueandJ. H. Ingold, Plasma Phys.l0, 899 (1968); J. H. Ingold, Phys.
+shown in Fig. 2. For k;;.2, Eq. (A24) has been found to                                                                       Fluids 15, 75 (1972).
+predict the values of (AkO/ Ak)2 for all rectangular paralle-                                                                6G. N. Hays, C. J. Tracy and H.J. Oskam, J. Chern. Phys. 60, 2027 (1973).
+lepipeds to within 6%, the greatest error arising in the case of                                                             7C. H. Muller HI and A. V. Phelps, J. Appl. Phys. 51, 6141 (1980).
+a cube or infinite slab, shown in Fig. 5 by the curve labeled                                                                'E. W. McDaniel, Collision Phenomena in Ionized Gases (Wiley, New
+                                                                                                                              York, 1964), Section 10.8.
+SL. The values for a sphere, shown by the curves labeled SP                                                                  "This case is treated in Ref. 2, where Eq. (13) is a special case of the present
+in Fig. 5, are also given with reasonable accuracy by Eq.                                                                     Eq. (23).
+(A24). The errors are typically less than 8% over most of                                                                   10K. M. Case, F. deHoffmann and O. Placzek, Introduction to the Theory of
+the range, but grow to 15% for the k = 2 case in the A> ro                                                                    Neutron Diffusion, Section ID.I (Los Alamos Scientific Laboratory, Los
+                                                                                                                              Alamos, New Mexico, 1953).
+limit, as indicated in Table It The curves for an infinite                                                                  "E, Davison, Neutron Transport Theory (Clarendon, Oxford, England,
+cylinder for k;;.2 are labeled C in Fig. 5. The error incurred                                                                 1957), Section 8.2.
+by using Eq, (A24) to represent these cases is never greater                                                                12A. M. Winslow, Nuc1. Sci. Eng. 32, !O1 (1968).
+than 8%.                                                                                                                    "G. C. Pomraning, Nukleonik 12, 92 (1969).
+                                                                                                                            14M. Once, Table ofMod(fied QUOlientsofBessel Functions ofthe First Kind
+     The predictions of Eq. (A25) are shown in Fig. 6 for                                                                     for Rea! and Imaginary Arguments (Columbia University, New York,
+k = 1-5. In this plot we have chosen to use Aio for normaH-                                                                    1958).
+
+
+
+
+1148                    J. Appl. Phys., Vol. 62, No.4, 15 August 1987                                                                                                                        P. J. Chantry   1148
+

@@ -1,0 +1,1182 @@
+RESEARCH ARTICLE | JANUARY 11 2008
+
+Mass and Auger electron spectroscopy studies of the
+interactions of atomic and molecular chlorine on a plasma
+reactor wall
+Joydeep Guha; Vincent M. Donnelly; Yi-Kang Pu
+
+
+
+J. Appl. Phys. 103, 013306 (2008)
+https://doi.org/10.1063/1.2828154
+
+
+
+
+                                                 
+                                                View     Export
+                                                Online   Citation
+
+
+
+
+                                                                    07 August 2026 21:55:24
+                                       JOURNAL OF APPLIED PHYSICS 103, 013306 共2008兲
+
+
+Mass and Auger electron spectroscopy studies of the interactions
+of atomic and molecular chlorine on a plasma reactor wall
+         Joydeep Guha and Vincent M. Donnellya兲
+         Department of Chemical and Biomolecular Engineering, University of Houston, Houston, Texas 77204,
+         USA
+         Yi-Kang Pu
+         Department of Engineering Physics, Tsinghua University, Beijing 100084, People’s Republic of China
+         共Received 9 August 2007; accepted 31 October 2007; published online 11 January 2008兲
+         We have investigated the interactions of Cl and Cl2 with an anodized Al surface in an inductively
+         coupled chlorine plasma. The cylindrical substrate is rapidly rotated within a differentially pumped
+         wall and is exposed to the plasma 35% of the time through a conical skimmer. On the opposite side
+         of the substrate, a second skimmer and differential pumping allows the surface and desorbing
+         products to be analyzed by Auger electron spectroscopy 共AES兲, line-of-sight mass spectrometry
+         共MS兲, and through pressure rise measurements. In a 600 W Cl2 plasma at 5 mTorr, the surface
+         becomes covered with a layer with the overall stoichiometry of about Al2Si2O10Cl3, with Si being
+         the result of the slow erosion of the quartz discharge tube. The surface layer composition
+         共specifically Cl coverage兲 does not change as a function of the delay time 共1 ms– 10 min兲 between
+         plasma exposure and AES characterization. In contrast to AES measurements, the MS signals from
+         Cl2 desorption, resulting from recombination of Cl atoms, decrease by about a factor of 10 over the
+         1 – 38 ms probed by varying the substrate rotation frequency. Substantial adsorption and desorption
+         of Cl2 are also observed with the plasma off. Cl recombination coefficients 共␥Cl兲 derived from an
+         analysis of the time-dependent MS signals range from 0.01 to 0.1 and increase with increasing
+         Cl-to-Cl2 number density ratio, suggesting a competition for adsorption sites between Cl2 and Cl.
+         © 2008 American Institute of Physics. 关DOI: 10.1063/1.2828154兴
+
+
+
+
+                                                                                                                                        07 August 2026 21:55:24
+I. INTRODUCTION                                                     et al.13,14 reported a ␥Cl of 0.2 for anodized aluminum and
+                                                                    poly-Si, 0.7 for stainless steel, and ⬃0.01 for quartz at a
+     Chlorine-containing plasmas continue to be widely used         surface temperature of 300 K. ␥Cl was found to decrease
+in semiconductor device fabrication. Besides poly-Si gate1          rapidly with increasing temperature and be first order in Cl
+and crystalline Si deep trench etching,2 chlorine-containing        flux. This latter observation was attributed to a two-step pro-
+plasmas formed from Cl2 or BCl3 feed gases are used to etch         cess in which Cl readily chemisorbs and then is abstracted by
+Mo gates,1 W-silicide gates,3 Cr,4 HfO2,5,6 TaN,5,6 zirconium       subsequent Cl impingement.14 Malyshev et al.15 used a glo-
+aluminum oxide,7 SiC,8 ferromagnetic materials,9 most III-V         bal model to fit Cl2 densities measured in a chlorine induc-
+compound semiconductors,10 and other materials. All of              tively coupled plasma 共ICP兲 and derived an effective average
+these processes require precise control of etching rates, uni-      value of ␥Cl ⬃ 0.035 at a wall temperature of 333 K for a
+formity, and the shape of etched profiles, which in turn re-        chamber with anodized aluminum, alumina, and silica sur-
+quire strict control of plasma conditions, not the least of         faces exposed to the plasma. Similar values of 0.04 共Ref. 16兲
+which is the number density of neutral reactants such as Cl         and 0.02 共Ref. 17兲 were reported for chlorine plasmas in
+atoms. At low pressures 共1 – 100 mTorr兲 typically used for          stainless steel reactors. This value is approximately ten times
+plasma etching, reactions such as atom recombination are            lower than the stainless steel coefficient of ⬃0.5 near 333 K
+much more likely to occur on the chamber walls or wafer             reported by Kota et al.13 The apparent discrepancy was at-
+surface than through three body gas phase reactions. For            tributed to “conditioning” of the stainless steel walls due to
+typical plasma conditions, these heterogeneous reactions be-        long exposure to Cl and Cl2, as well as to a coating from the
+come a major radical loss pathway when the reaction prob-           erosion of the quartz window adjacent to the ICP coil.16 Ay-
+ability exceeds 10−4.11,12 Therefore precise measurements of        dil and co-workers18–20 reported the effect of chamber wall
+wall recombination probabilities or coefficients ␥ are critical     conditions on Cl atom and Cl2 concentrations in an induc-
+in determining and controlling radical densities in etching         tively coupled plasma reactor and measured ␥Cl of ⬃0.03 in
+plasmas.                                                            a reactor with anodized Al walls that were coated with a
+     Several research groups have reported Cl atom recombi-         Si-oxychloride 共SiOxCly兲 layer due to the slow erosion of the
+nation coefficients ␥Cl determined directly in molecular beam       quartz ICP window.18 During Si etching, the walls become
+experiments or somewhat indirectly from an analysis of              coated with Si chloride etching products. This can cause Cl
+plasma data and modeling. In molecular beam studies, Kota           to be depleted from the plasma through heterogeneous reac-
+                                                                    tions that form higher Si chlorides. Conversely, deposited Si
+a兲
+ Electronic mail: vmdonnelly@uh.edu.                                chloride will react with oxygen if present in the plasma to
+
+0021-8979/2008/103共1兲/013306/14/$23.00                     103, 013306-1                         © 2008 American Institute of Physics
+013306-2       Guha, Donnelly, and Pu                                                                               J. Appl. Phys. 103, 013306 共2008兲
+
+
+
+
+FIG. 1. A schematic of the experimental setup, with the ICP source, plasma
+chamber, and the spinning wall and its differentially pumped chamber. The
+system can be configured with either 共1兲 an intermediate chamber and a
+mass spectrometer in a differentially pumped chamber for detection of de-      FIG. 2. Auger spectrum EdI / dE vs E of the anodized Al spinning wall
+sorption products 共as shown兲 or 共2兲 an Auger electron spectrometer in a        surface exposed to a 600 W, 5 mTorr Cl2 plasma, at e-beam energies 共Eb兲 of
+differentially pumped chamber 共shown in the inset兲. Optical emission was       1.5 and 5 keV. The wall rotation frequency was 10 000 rpm. The inset
+collected along a line of sight of 1.6 cm from the spinning wall surface and   shows the scanning electron microscope image of the wall surface 共repro-
+used to derive absolute Cl number densities. Optical emission was also         duced from Ref. 27兲.
+collected along a line of sight through the midpoint of the plasma chamber
+共not shown兲.
+                                                                               tron densities of 2.7⫻ 1010 cm−3 in the center of the chamber
+                                                                               and 0.7⫻ 1010 cm−3 near the wall 共⬃0.5– 1 cm兲 were re-
+form SiOxCly, reducing the rate of Cl loss at the walls                        corded with a Langmuir probe.25
+
+
+
+
+                                                                                                                                                            07 August 2026 21:55:24
+through reactions or recombination.21–24 These studies show                         The aluminum 共2011T-3兲 cylindrical substrate was anod-
+the importance of measuring radical loss rates as a function                   ized 共MIL-A-8625F type 2 black nickel acetate seal兲27 and
+of the instantaneous wall condition.                                           press fitted onto the motor shaft. The surface is rough, with
+     We recently reported a new method for studying plasma-                    features that are typically tens of micrometers long and
+surface reactions that also allows for the presence of a                       ⬍10 ␮m across, with a topography on a scale at least as
+plasma,     while     providing      near-real-time     surface                small as 0.1 ␮m 共see Fig. 2 inset兲. The substrate is situated
+diagnosis.25–27 A small, cylindrical section of the wall is rap-               in the first differentially pumped “wall chamber” 共Fig. 1兲
+idly rotated through skimmers and differential pumping, al-                    between the plasma chamber and a diagnostic chamber and
+lowing portions of the surface to be periodically exposed to                   was rotated at high speed 共up to 35 000 rpm in this study兲.
+the plasma and then analyzed by desorption mass spectros-                      Pressures in all chambers other than the plasma chamber
+copy and Auger electron spectroscopy. Previously, we used                      were measured with the ultrahigh vacuum ionization gauges.
+this “spinning wall” method to investigate O atom recombi-                     With closely fitting conical skimmers forming a small gap
+nation on anodized aluminum in oxygen plasmas. The                             between the substrate and the plasma chamber, the pressure
+present study focuses on recombination of Cl atoms on an-                      in this wall chamber was a thousand-fold lower than the
+odized aluminum.                                                               pressure in the plasma chamber, and changed little with the
+                                                                               plasma on versus off. A further three-orders-of-magnitude
+II. EXPERIMENTAL PROCEDURE                                                     pressure reduction was achieved in a second differentially
+                                                                               pumped chamber with a similar conical skimmer. This cham-
+     The experimental setup for this study has been explained                  ber either served as an intermediate between the substrate
+in detail in previous publications;25–27 a brief summary is                    and a mass spectrometer 共Fig. 1兲 or housed an Auger electron
+given here. Figure 1 shows a schematic depiction of the ap-                    spectrometer 共Fig. 1, inset兲.
+paratus. A chlorine ICP operating at 13.56 MHz was ignited                          As points on the substrate rotate through the plasma, Cl
+in a quartz discharge tube. The ICP is attached to an anod-                    atoms impinge and stick on the surface. At later times, de-
+ized aluminum chamber with quartz viewports and regions                        termined by the substrate rotation frequency, these points
+of stainless steel 共mostly the gate valve and pump flange兲. An                 face the mass spectrometer or the Auger electron spectrom-
+electromagnet surrounding the ICP helps confine the plasma                     eter for analysis. During all the experiments the wall tem-
+in the downstream region. The Cl2 flow rates were 8 SCCM                       perature was 24– 36 ° C, as measured previously with an in-
+共SCCM denotes cubic centimeter per minute at STP兲 at                           frared pyrometer. The upper temperatures were reached after
+1.25 mTorr and 10 SCCM at 5 and 20 mTorr. Gas was in-                          longer periods of operation. No long-term, time-dependent
+jected at the top of the plasma source and was pumped with                     changes in mass spectrometric or Auger signals were ob-
+a throttled turbomolecular pump on the downstream reactor                      served that would be an indication of temperature dependent
+chamber. Pressure was measured with a capacitance manom-                       processes over this small range of temperatures.
+eter. In a prior study of a 10 mTorr, 600 W O2 plasma, elec-                        Two sets of experiments were carried out as a function
+013306-3    Guha, Donnelly, and Pu                                                              J. Appl. Phys. 103, 013306 共2008兲
+
+
+of substrate rotation frequency, plasma pressure, and power.     area under the Cl and Xe peaks. The ratios of Cl-to-Xe in-
+First, Cl2 desorbing from the spinning substrate surface was     tensities as a function of plasma powers and pressures were
+detected using a quadrupole mass spectrometer 共Extrel,           converted into the absolute Cl-atom number densities, as de-
+0 – 400 amu兲 in line of sight with a small region of the spin-   scribed previously,16 and below.
+ning surface that is exposed through an aperture in the coni-
+cal skimmer 共Fig. 1兲. Details of the mass spectrometry
+method were covered in our previous publication of O atom
+                                                                 III. RESULTS AND DISCUSSION
+recombination in an O2 plasma.25 Desorbing Cl2 passes
+through an aperture in the intermediate differentially pumped    A. Auger electron spectroscopy of the plasma-
+chamber and then through a tuning fork chopper 共not shown        conditioned anodized Al surface
+in Fig. 1兲 in the differentially pumped intermediate chamber          The atomic concentrations of species on the spinning
+before entering the ionizer of the mass spectrometer. The        wall surface were measured with an Auger spectrometer at
+mass spectrometer is operated in a pulse counting mode and       normal incidence to the midpoint region of the wall surface
+the chopper-open minus chopper-closed signal provides the        共Fig. 1, inset兲. The details of these measurements have been
+line-of-sight desorption flux. The pressure in the second        reported in a previous publication.27 Figure 2 shows Auger
+stage chamber increases substantially when the plasma is ig-     spectra 共EdI / dE versus E兲 recorded during exposure to a
+nited and the substrate is rotated. This pressure rise is due    5 mTorr, 600 W Cl2 plasma at e-beam energies of Eb = 1.5
+entirely to the desorbing Cl2. In the mass spectrometer cham-    and 5 keV. The exposure time was long enough that the
+ber, the pressure rise is barely measurable 共⬃108 times lower    peaks had reached their steady-state intensities 共typically af-
+than the plasma chamber pressure兲. The pressure rise in the      ter a few minutes兲. A scanning electron micrograph, also
+intermediate chamber was used to calibrate the Cl2 desorp-       included as an inset in Fig. 2, reveals the rough nature of the
+tion fluxes, as described below.                                 surface. As reported elsewhere, the surface layer contains O,
+     Second, the concentrations of species on the wall surface   Cl, Al, Si, and trace Ag.27 Dividing the peak-to-peak inten-
+were measured by Auger electron spectroscopy 共Fig. 1,            sities in the 5 keV spectrum by the corresponding sensitivity
+inset兲.27 The Auger spectrometer 共Staib model DESA 100兲          factors, we obtain the atomic percent compositions of 58.9%,
+has an axial electron beam source that focuses to a spot size    16.3%, 12.1%, 11.2%, and 1.5% for O, Al, Si, Cl, and Ag,
+
+
+
+
+                                                                                                                                    07 August 2026 21:55:24
+of 1 mm at a working distance of 55 mm. Electrons are col-       respectively.27 Thus adsorption and recombination are taking
+lected and dispersed with a double pass cylindrical mirror       place mainly on a chlorinated silicon-aluminum-oxide sur-
+analyzer and are detected by a channeltron electron multi-       face with the overall stoichiometry of approximately
+plier 共CEM兲. The output of the CEM is capacitively coupled       Al2Si2O10Cl3. The small amount of silver comes from the
+to an amplifier-discriminator circuit and pulses are counted     erosion of silver coated copper gaskets in the plasma reactor,
+under computer control. Count rates were kept below ⬃5           while the silicon is attributed to the slow etching of quartz
+⫻ 105 counts/ s to assure linearity and avoid degradation of     discharge tube. If we make the assumption that Cl is uni-
+the CEM. The electron beam 共e-beam兲 was operated at ener-        formly distributed throughout the layer, then we estimate
+gies Eb of 1.5 or 5 keV at emission currents Ie of about         from these atomic concentrations that the Cl at the surface is
+0.1 ␮A. Spectra were recorded with either 0.5 or 1 eV per        3 ⫻ 1014 cm−2. If on the other hand, Cl is only at the surface,
+point and were differentiated with a seven point smooth 共for     then its coverage is 8 ⫻ 1014 cm−2,27 which is close to satu-
+0.5 eV兲 or five point smooth 共for 1 eV兲. The low energy          rated monolayer coverage.
+electrons 共E ⬍ 130 eV兲 were affected somewhat by the mag-             When the plasma is on, the surface potential is deter-
+netic field on the plasma reactor. We could obtain usable        mined by the plasma floating potential at the wall. When the
+scans down to ⬃60 eV. For this reason, we also used the          plasma is off, e-beam irradiation causes the sample to charge
+higher energy KLL Al and Si transitions, to verify observa-      negatively until the leakage current establishes a steady-state
+tions of their lower energy LVV lines. The pressure rise in      potential that is negative with respect to that imposed by the
+Auger chamber provides a direct measure of Cl2 desorption        plasma floating potential. Hence with the plasma off, the O,
+flux simultaneous with Auger analysis of the surface.            Cl, and low energy Si 共LVV, 70 eV兲 Auger peaks at Eb
+     Cl atom densities in the chlorine plasma were measured      = 1.5 keV shift by a positive energy 共in this case +7 eV兲 with
+by trace rare gases–optical emission spectroscopy.16 A small     respect to those recorded with the plasma on. At Eb = 5 keV,
+amount 共1% each兲 of all five rare gases 共He, Ne, Ar, Kr, and     surface charging is severe and no Auger peaks could be ob-
+Xe兲 was added to the Cl2 flow, although only Xe was used to      served with the plasma off. With the plasma on, however, the
+measure the Cl-atom densities by actinometry. Line-              surface charge imposed by the e-beam at 5 keV is neutral-
+integrated emission was collected from a region of 1 cm          ized by the positive ion impingement as the surface sweeps
+from the substrate 共Fig. 1兲, as well as from the center of the   through the plasma. A slightly higher positive ion flux, rela-
+plasma in the horizontal plane of the substrate midpoint 共not    tive to the plasma electron flux brings the surface potential
+shown in Fig. 1兲. Emission spectra were recorded with a          close to the plasma potential. Cl and O coverages as a func-
+0.64 m scanning monochromator and GaAs photomultiplier           tion of substrate rotation frequency were measured at Eb
+tube. The spectral resolution full width at half maximum was     = 1.5 keV, so that comparisons could be made to coverages
+0.6 Å with the monochromator slit widths set to 100 ␮m.          with the plasma off. From a comparison of spectra in Fig. 2
+Recorded spectra covered the 7924 Å Cl and 8280 Å Xe             it can be seen that there is no significant difference in the
+lines. Emission intensities were obtained by integrating the     relative Si, Cl, and O intensities at Eb = 1.5 versus 5 keV.
+013306-4       Guha, Donnelly, and Pu                                                                               J. Appl. Phys. 103, 013306 共2008兲
+
+
+                                                                                     The procedure for deriving absolute Cl number densities
+                                                                                共nCl兲 from ICl / IXe is the same as that described previously,16
+                                                                                with minor simplifications of the notation.28 Cl emission is
+                                                                                assumed to be excited by electron impact excitation of both
+                                                                                Cl and Cl2. Xe emission is excited through a single step
+                                                                                electron impact from the ground state and a two-step process
+                                                                                of electron impact of Xe ground state to the metastable lev-
+                                                                                els, followed by electron impact excitation of the meta-
+                                                                                stables. The emission ratio is therefore
+
+
+                                                                                             冋
+                                                                                    ICl 1 1 nCl
+                                                                                       =          +
+                                                                                                     1 nCl2
+                                                                                    IXe a⬘ bCl nXe bCl2,Cl nXe
+                                                                                                               ,        册                        共1兲
+
+
+                                                                                where nXe is the Xe number density, bCl a moderately
+                                                                                pressure-dependent 共i.e., Te− dependent兲 proportionality con-
+                                                                                stant corresponding to electron impact excitation of Cl, and
+                                                                                bCl2,Cl is the proportionality constant for dissociative excita-
+                                                                                tion of Cl2, which depends strongly on Te and therefore pres-
+                                                                                sure. The Cl2-to-Xe number density ratio 共nCl2 / nXe兲 can be
+                                                                                eliminated from Eq. 共1兲 by making use of the mass balance
+                                                                                relationship
+
+FIG. 3. Cl-to-Xe emission ratios 共ICl / IXe兲, multiplied by a⬘ to correct for
+contributions to the Xe emission from the electron impact excitation of Xe
+metastables, plotted as a function of power for pressures of 1.25, 5, and
+                                                                                               0
+                                                                                    nCl 2SCl2 nCl2
+                                                                                    nXe
+                                                                                        =      0 −
+                                                                                          SCl nXe
+                                                                                                     冋
+                                                                                                   nCl2
+                                                                                                   nXe
+                                                                                                        ,       册                                共2兲
+
+
+
+
+                                                                                                                                                        07 August 2026 21:55:24
+20 mTorr. Line-of-sight measurements were made at the center of the reac-
+tor 共open triangles兲 and 1.6 cm from the spinning substrate 共solid circles兲—    where SCl2 and SCl are the effective pumping speeds of Cl2
+see Fig. 1.                                                                                   0
+                                                                                and Cl and nCl2  / nXe
+                                                                                                    0
+                                                                                                       is the Cl2-to-Xe number density ratio
+                                                                                with the plasma off, given by the input gas flow rate ratio,
+B. Cl-atom number density from Cl2 plasma                                       corrected for relative effective pumping speeds, i.e.,
+actinometry
+                                                                                     0
+     Absolute number densities of Cl atoms in the Cl2 plasma                        nCl2 f Cl2 SXe
+                                                                                     0 =           ,                                             共3兲
+were measured by optical emission spectroscopy and                                  nXe f Xe SCl2
+actinometry.16 The Xe 2p5 共Paschen notation兲 level, emitting
+at 8280 Å, was used because its energy 共9.94 eV兲 is a good                      where SXe is the Xe effective pumping speed. The expression
+match to that of a level of Cl 共4p 2 P0, J = 3 / 2 level,                       for nCl / nXe is therefore
+10.59 eV兲 which emits at a nearby wavelength of 7924 Å.
+
+                                                                                                     冉 冊            冉 冊
+Cl-to-Xe emission ratios 共ICl / IXe兲 measured at the center and                                                        0
+near the wall 共see Fig. 1兲 are presented in Fig. 3 as a function                                     ICl      1      nCl2
+                                                                                                a⬘       −
+of pressure and power. ICl / IXe values are multiplied by a                         nCl              IXe   bCl2,Cl nXe 0
+
+factor a⬘ that corrects for the fraction of Xe emission that is                         = bCl                             .                      共4兲
+                                                                                    nXe                    bCl SCl
+a result of electron impact excitation of metastable levels.16                                        1−
+                                                                                                         2bCl2,Cl SCl2
+As expected, these ratios increase with increasing power 共in-
+creasing Cl density兲, as the intensity of Cl emission from                          We used values for bCl,Xe, given in Table I, that were
+electron impact excitation of Cl rises above the background                     determined in a previous publication.16 For measurements at
+Cl emission caused by dissociative excitation of Cl2.16 They                    the center of the reactor, values for a⬘ at equivalent power
+also increase with decreasing pressure, where the increasing                    densities and pressures were also taken from Fig. 2 in
+electron temperature 共Te兲 causes a higher percent dissocia-                     reference16 and ranged from 1.01 to 1.46. We assumed that
+tion, as found previously in a Cl2 ICP.16                                       Xe metastables were deactivated with unit probability on the
+     a⬘ICl / IXe values measured near the walls are about the                   walls. We are aware of no determinations of Xe metastable
+same as those recorded in the center of the reactor. Although                   deactivation on surfaces, but base this on a reported measure-
+the gas is hotter in the center of the reactor than at the walls,               ment of 0.7 for the probability of deactivation of Ar meta-
+this should affect the Cl and Xe number densities in a similar                  stables on smooth silica surfaces.29 Consequently, the Xe
+manner. Therefore, a position-independent a⬘ICl / IXe indi-                     metastable number density is expected to be very low near
+cates that there is little loss of Cl at the walls, hence the Cl                the wall, excitation of Xe 共2p5兲 through electron impact on
+recombination probability at the walls is quite low. This is                    metastables can be neglected, and a⬘ ⬇ 1 near the wall. For
+consistent with the values of 0.01–0.1 determined below for                     each pressure, bCl2,Cl was calculated by extrapolating the Cl-
+Cl recombination.                                                               to-Xe intensity ratios to zero power where,
+013306-5        Guha, Donnelly, and Pu                                                                                       J. Appl. Phys. 103, 013306 共2008兲
+
+
+                      TABLE I. Cl atom number densities nCl near 共⬃1.6 cm from兲 the wall, and the number density of Cl2 near the
+                      wall relative to that of Cl2 with the plasma off, nCl2 / nCl2
+                                                                                0
+                                                                                    , calculated from Eqs. 共4兲–共7兲. The parameters used in
+                      Eqs. 共4兲–共7兲 were published in Ref. 16. Seff共Xe兲 / Seff共Cl2兲 = 0.79, and Seff共Cl2兲 / Seff共Cl兲 = 0.77, a⬘ = 1.0 near the
+                      wall.
+
+                          Pressure                                         Power              a⬘              nCl 共wall兲
+                                                                                                                                    nCl2
+                          共mTorr兲           bCl,Xe         bC12,Cl          共W兲            共center兲          共1013 cm−3兲             0
+                                                                                                                                    nCl2
+
+                            1.25            19.5             552            100             1.175                1.78              0.699
+                                                                            200             1.325                2.01              0.662
+                                                                            400             1.41                 1.85              0.688
+                                                                            600             1.38                 1.62              0.726
+
+
+                            5               16              1473            100             1.05                 4.03              0.828
+                                                                            200             1.15                 4.50              0.811
+                                                                            400             1.385                5.19              0.781
+                                                                            600             1.46                 5.32              0.776
+
+
+                           20               10               473            100             1.01                 6.07              0.936
+                                                                            200             1.015                7.01              0.926
+                                                                            400             1.075               10.2               0.893
+                                                                            600             1.3                 11.7               0.877
+
+
+
+                   0                                                                that these error bars represent the accuracy for any given
+                  nCl2
+                    0
+                   nXe                                                              point. When comparing values at, say, 10 and 20 mTorr, the
+
+                  冉 冊
+    bCl2,Cl =                                                             共5兲       changes in Cl number density are significant, i.e., the preci-
+                   ICl 0
+
+
+
+
+                                                                                                                                                                  07 August 2026 21:55:24
+                a⬘                                                                  sion, determined mainly by the noise in the signal ratio, is
+                   IXe                                                              much better than the accuracy.
+                                                                                         In addition to the expected increase in nCl with pressure
+and 共ICl / IXe兲0 is the y-intercept of a plot of ICl / IXe versus
+                                                                                    and power at 5 and 20 mTorr, we observe saturation in the
+power.16 Values for bCl2,Cl derived from these plots are sum-
+                                                                                    Cl density with power at 1.25 mTorr. Although it would
+marized in Table I. They are in reasonable agreement with
+                                                                                    seem surprising to observe such saturation at values well
+those reported previously at the same pressures.16
+                                                                                    below 100% dissociation, this trend is not unexpected in the
+    Values for nCl / nXe were derived from Eq. 共4兲. To convert
+                                                                                    downstream region since Cl is formed mainly in the up-
+these values into nCl number densities and Cl fluxes, we must
+                                                                                    stream source region, where the electron density is much
+determine the Xe number density. With the plasma off,
+                                                                                    higher, and the recombination coefficient on the silica dis-
+            f Xe ST                                                                 charge tube is very low. As the percent dissociation become
+     0
+    nXe =            nT                                                   共6兲       high, electron loss due to Cl− formation through dissociative
+             f T SXe
+                                                                                    attachment is suppressed, the electron density is enhanced,
+where nT is the total gas number density, f T is the total gas
+flow rate, and ST is an effective pumping speed for the gas
+mixture, which we assume is the same as that for the major
+component, Cl2. Assuming ideal gas behavior and constant
+pressure, the local Xe number density varies inversely with
+the local gas temperature, hence
+
+           0
+    nXe = nXe   冉 冊
+                  Tw
+                  Tg
+                     ,                                                    共7兲
+
+where Tg and Tw are the local gas temperature and wall tem-
+perature 共300 K兲, respectively. Near the wall, we assume that
+                      0
+Tg = Tw, hence nXe = nXe .
+     In this manner, Cl number densities were determined as
+a function of pressure and power near the spinning wall 共Fig.
+4 and Table I兲. The accuracy in nCl was estimated to be about
+±33%, determined from the square root of the sum of the                             FIG. 4. Absolute number densities of Cl atoms of 1.6 cm from the spinning
+squares of the uncertainty in b1 共32%, from an analysis of the                      wall, determined from the data in Fig. 3, as a function of ICP source power
+                                                                                    at pressures of 1.25, 5, and 20 mTorr. The error bars on the 1.25 and
+results presented in Ref. 16兲, nXe 共5%, due to the uncertainty
+                                                                                    20 mTorr data represent the accuracy of any given measurement. The scatter
+in the mass flow controller兲, Tg 共5%, close to the wall兲, and                       in the data is more representative of the relative uncertainty of one datum
+noise in the emission signal ratio 共5%兲. It should be noted                         compared to another.
+013306-6      Guha, Donnelly, and Pu                                                                       J. Appl. Phys. 103, 013306 共2008兲
+
+
+and Te increases due to the higher ionization potential for Cl
+versus Cl2 and the reduction in number density caused by gas
+heating. This rise in Te further favors fragmentation of the
+gas. Therefore, Cl2 is likely to be nearly completely dissoci-
+ated in the source region at higher powers and low pressures,
+and Cl flux into the downstream region will saturate with
+power at low pressure. In the downstream region, the gas
+residence time is quite long 共⬃15– 300 ms over the range of
+1.25– 20 mTorr pressure兲, Cl will undergo many collisions
+with the walls and recombine, and hence the Cl number den-
+sity will be suppressed, yet independent of power at low
+pressure. At higher pressures, the degree of dissociation will
+fall below 100% in the source region, in part, because of a
+lower Te, hence Cl densities in the source and downstream
+region will increase with power. These trends are all consis-
+tent with those observed in source and downstream regions
+of two ICP reactors,16,30,31 one of which has a geometry very
+similar to that in the present study.30
+                                                                   FIG. 5. Pressure rise measurements in the intermediate chamber 共see Fig. 1兲
+                                                                   with the plasma on ⌬P f on at 600 W 共open circles兲 and 100 W 共solid
+                                                                   squares兲, and off ⌬P f off 共ⴱ兲 as a function of substrate rotation frequency for
+C. Pressure rise measurements and calibration of                   pressures of 5 and 20 mTorr.
+fluxes of desorbing molecules
+     When the substrate is not rotated and gas is introduced           Since Cl2 is the only desorption product detected with
+into the plasma chamber, a small amount of it leaks into the       the mass spectrometer with the plasma on 共i.e., no Cl
+wall chamber and a small fraction of this will leak into the       desorbs—see below兲, we can obtain the portion of the pres-
+
+
+
+
+                                                                                                                                                      07 August 2026 21:55:24
+intermediate chamber. This establishes base pressures in the
+                                                                                 f 兲 in the intermediate chamber that is due to
+                                                                   sure rise 共⌬Prec
+wall and intermediate chambers 共see Fig. 1兲 of, respectively,      recombined Cl2 desorption, provided that the contribution
+⬃10−3 and ⬃10−6 times the plasma chamber pressure. When            from adsorbed Cl2 desorption with the plasma on is removed.
+the substrate is rotated, the pressure in the wall chamber         We cannot simply subtract ⌬Pofff from ⌬P f , however, since
+                                                                                                              on
+increases with increasing rotation frequency by 30% at             the Cl2 impingement rate with the plasma on is less than with
+5 mTorr and ⬃10% at 20 mTorr due to a small amount of              the plasma off. From Fig. 5, it is apparent that ⌬Poff     at
+                                                                                                                           f
+“pumping” by the spinning surface. These wall chamber              20 mTorr is about four times larger than ⌬Poff   at 5 mTorr,
+                                                                                                                 f
+pressures change little, regardless of whether the plasma is       independent of rotation frequency. We can assume that ⌬Pofff
+on or off.                                                         is proportional to nCl2 and scale ⌬Poff
+                                                                                                         f to the fractional de-
+     As the surface is exposed to the plasma chamber, Cl           crease in the Cl2 number density in the plasma chamber with
+atoms stick to the surface and then recombine over a period        the plasma on before subtracting ⌬Pofff from ⌬P f , or
+                                                                                                                    on
+
+
+
+                                                                                            冉 冊
+comparable to the rotation period, forming Cl2 that desorbs
+and is detected as the surface rotates through the quadrupole                                 nCl2
+                                                                        ⌬Prec
+                                                                          f = ⌬P f −
+                                                                                on
+                                                                                               0   ⌬Poff
+                                                                                                     f ,                                     共10兲
+mass spectrometer chamber. This desorption of recombined                                      nCl2
+Cl2 causes a rotation frequency–dependent pressure rise in
+the differentially pumped intermediate chamber, measured           where nCl2 / nCl
+                                                                                  0
+                                                                                      is determined from Eq. 共2兲, with nCl mea-
+                                                                                    2
+with the ultrahigh vacuum ionization gauge. Cl2 also adsorbs       sured near the wall 共Fig. 4兲. Near the wall, Tg ⬇ Tw and
+while the surface is exposed to the plasma chamber with the        nCl2 / nCl
+                                                                           0
+                                                                              from Eqs. 共2兲 and 共7兲 reduces to
+                                                                             2
+plasma on as well as off, and desorption of this adsorbed Cl2
+also causes a pressure rise. Rotation frequency–dependent               nCl2    nClSCl
+                                                                         0 =1−   0        .                                                  共11兲
+pressure rise measurements with the plasma on 共⌬Pon   f 兲 and
+                                                                        nCl2   2nCl2 SCl2
+off 共⌬Poff 兲 are given by
+        f
+                                                                   ⌬Prec
+                                                                       f values determined from Eq. 共10兲 are plotted as a func-
+    ⌬Poff  off   off
+      f = P f − P f=0                                       共8兲    tion of reaction time tr in Fig. 6 共right side y axes兲. Reaction
+                                                                   time is defined as the time taken for a point on the surface to
+    ⌬Pon   on    on
+                                                            共9兲    rotate from the midpoint of plasma exposure to the midpoint
+      f = P f − P f=0 ,
+                                                                   of the region observed by the mass spectrometer,25,26 there-
+where  Poff
+        f    and  Poff
+                   f=0    are pressure measurements with the       fore tr = 共2f兲−1.
+plasma off at rotation frequencies f of f ⫽ 0 and f = 0, respec-        Desorption rates 共molecules/s兲 as a function of rotation
+tively, and Pon          on
+              f and P f=0 are the corresponding values with        frequency for adsorbed Cl2 with the plasma off, adsorbed Cl2
+the plasma on. 共Within the two digit precision of the ion          with the plasma on, and recombined Cl2 are given, respec-
+gauge readout, Pon f=0 = P f=0.兲 ⌬P f and ⌬P f values are plot-
+                           off     on        off
+                                                                   tively, by
+ted in Fig. 5 as a function of rotation frequency for pressures
+                                                                         f = ␣⌬P f ,
+                                                                        qoff                                                                 共12兲
+                                                                                off
+of 5 and 20 mTorr.
+013306-7        Guha, Donnelly, and Pu                                                                                 J. Appl. Phys. 103, 013306 共2008兲
+
+
+
+
+                                                                                   FIG. 7. Pressure rises in the intermediate chamber as a function of cali-
+                                                                                   brated gas leak rate for Cl2 and Ar.
+
+
+                                                                                   ization gauge for Cl2 or Ar. This correction is unnecessary,
+                                                                                   since it cancels out in the calibration of desorption fluxes.兲
+                                                                                   Finally, fluxes for adsorbed Cl2 with the plasma off, adsorbed
+                                                                                   Cl2 with the plasma on, and recombined Cl2 are given, re-
+FIG. 6. Measurements of net pressure rise due to recombined Cl2, ⌬Prec        f
+共right axis兲, determined from the data in Fig. 5 and Eq. 共10兲, as a function of    spectively, by
+reaction time tr, the reciprocal of twice the substrate rotation frequency. The
+net desorption fluxes due to recombined Cl2, ⌫rec       共left axis兲, were deter-               qoff
+                                                                                                f
+                                                    f                                   ⌫off
+                                                                                         f =        ,                                                   共15兲
+mined from Eq. 共17兲, using the calibration data in Fig. 7. The extrapolations                   A
+to tr = 0 were used to derive recombination coefficients 共see below兲.
+
+
+
+
+                                                                                                                                                               07 August 2026 21:55:24
+                                                                                               qphys
+
+               冉 冊
+                                                                                                f
+                                                                                        ⌫ads
+                                                                                         f =         ,                                                  共16兲
+                 nCl2                                                                           A
+      f =␣
+     qads             ⌬Poff
+                        f ,                                               共13兲
+
+                                                                                                         冉 冊冋                                       册
+                  0
+
+
+                                                                                                                               冉 冊
+                 nCl2
+                                                                                               qrec
+                                                                                                f     ␣                        nCl2
+                                                                                        ⌫rec
+                                                                                         f =        =           Pon   on
+                                                                                                                 f − P f=0 −        共Poff
+                                                                                                                                      f − P f=0兲 ,
+                                                                                                                                           off
+      f = ␣⌬P f ,
+     qrec                                                                 共14兲
+             rec                                                                                                                0
+                                                                                                A     A                        nCl2
+where ␣ is a proportionality constant that contains contribu-                                                                                           共17兲
+tions from the pumping speed and the relative sensitivity of
+                                                                                   where A 共=0.77 cm2兲 is the area of the rotating sample that is
+the ionization gauge. We can obtain ␣, and hence an absolute
+                                                                                   exposed to the intermediate chamber 共i.e., the area of the
+calibration of Cl2 flux by producing a pressure rise with a
+                                                                                   opening in the skimmer on the intermediate chamber side of
+known flow of Cl2 into the intermediate chamber and record-
+                                                                                   the wall chamber兲. ⌫rec
+                                                                                                        f values are shown on the left hand
+ing the resulting pressure. This was accomplished as follows.
+                                                                                   axes of Fig. 6.
+     With the plasma chamber gas off, flows of Cl2 or Ar
+were introduced into the intermediate chamber through a
+                                                                                   D. Mass spectrometer measurements of desorbing
+leak valve and an injector tube that released the gas near the
+                                                                                   Cl2
+spinning wall and directed at the mass spectrometer to best
+simulate the geometry of the desorption products. At selected                          Mass spectrometric measurements were carried out with
+leak rates qL 共molecules/s兲 the corresponding pressure 共PL兲                        the plasma on and off, analogous to previous studies of oxy-
+in the intermediate chamber was measured with an ultrahigh                         gen plasmas.25,26 Chopper-open-minus-chopper-closed sig-
+vacuum ionization gauge. The same flow was then directed                           nals of desorbing species were recorded at a fixed rotation
+instead into a known sealed volume 共V兲 and the correspond-                         frequency with the plasma on as the mass spectrometer was
+ing pressure rise was recorded as a function of time. qL was                       scanned over a range of mass-to-charge ratios 共m / e兲. The
+then calculated from the pressure rise dP / dt 共Torr/s兲 in vol-                    only m / e peaks 共35, 37, 70, 72, and 74兲 observed in these
+ume V 共cm3兲, i.e., qL = 3.24⫻ 1016共dP / dt兲V, where a pressure                     mass spectra were associated with the 35 and 37 amu iso-
+of 1 Torr corresponds to 3.24⫻ 1016 molecules/ cm3 at room                         topes of Cl2 and Cl. The ratio of Cl to Cl2 共35: 70⬇ 0.1 at
+temperature.                                                                       70 eV兲 corresponds to the cracking pattern of Cl2 in the mass
+     PL was measured as a function of qL for Cl2 and Ar 共Fig.                      spectrometer, i.e., Cl2 is the desorption product and little if
+7兲. As expected, there is a linear correlation between PL and                      any Cl desorbs.
+qL, i.e., qL = ␣ PL, where ␣ is the same proportionality con-                          Cl2 desorption was recorded at m / e = 70 as a function of
+stant defined above. From the constrained linear fit to the                        substrate rotation frequency, pressure, and plasma power.
+log-log plots in Fig. 7 we obtain the values for ␣ of 3.89                         The chopper-open-minus-chopper-closed mass spectrometer
+⫻ 1021 for Cl2 and 2.91⫻ 1021 for Ar. 共Note that the pressure                      signal with the plasma off, Soff
+                                                                                                                 f , consists of two components:
+measurements are uncorrected for the sensitivity of the ion-                       a dominant line-of-sight desorption of adsorbed Cl2, and a
+013306-8        Guha, Donnelly, and Pu                                                                                J. Appl. Phys. 103, 013306 共2008兲
+
+
+                                                                                   tion 2Cl共ads兲→Cl2共ads兲 leads to prompt desorption, then the
+                                                                                   translational temperature TD of Cl2共g兲 could exceed the sur-
+                                                                                   face temperature, and the angular distribution could be more
+                                                                                   sharply peaked at the surface normal relative to a cosine
+                                                                                   distribution. If instead Cl2共ads兲 lives sufficiently long after re-
+                                                                                   combination such that it is thermally accommodated with the
+                                                                                   surface 共more likely given the rough nature of the surface兲,
+                                                                                   then it will desorb with a cosine angular distribution and a
+                                                                                   translational temperature equal to the surface temperature.
+                                                                                        The temperature and angular distribution of desorbing
+                                                                                   Cl2 have no effect on the pressure rise measurement, since
+                                                                                   the gas bounces off the surfaces of the vacuum chamber
+                                                                                   many times on average before being detected by the ioniza-
+                                                                                   tion gauge. On the other hand, the mass spectrometer signal
+                                                                                   varies as TD−1/2 and increases as the angular distribution be-
+FIG. 8. Adsorbed Cl2 desorption flux 共D f off兲 measured with the mass spec-
+trometer 共points兲 with the plasma off as a function of substrate rotation          comes more sharply peaked, hence these two effects will
+frequency. The thick solid lines plus open symbols are values for the ad-          tend to partially cancel and the net effect could be an en-
+sorbed Cl2 desorption flux 共⌫ f off兲 generated from the pressure rise values for   hancement or suppression of the signal. Assuming Cl2 ther-
+⌬P f off plotted in Fig. 5 and Eqs. 共12兲 and 共15兲, with ␣ = 3.89⫻ 1021 and A       malizes with the surface after it recombines and before it
+= 0.77 cm2. The arbitrary mass spectrometer signals were scaled with the
+same proportionality constant at all four pressures, such that the 5 and           desorbs, then we can follow the same procedure as above for
+20 mTorr data are best matched to ⌫ f off at these pressures. The thin solid       the pressure rise measurements, and the desorption flux for
+lines are a model fit to the data 共see below兲.                                     recombined Cl2 is given by
+
+small line-of-sight leak component, Sleak f , which is deter-
+mined from the signal recorded with no substrate rotation
+                                                                                       Drec
+                                                                                        f =   冉 冊冋
+                                                                                                ␤
+                                                                                                A
+                                                                                                     共Son
+                                                                                                       f − S f=0兲 −
+                                                                                                            on
+                                                                                                                      冉 冊
+                                                                                                                       nCl2
+                                                                                                                        0
+                                                                                                                       nCl2
+                                                                                                                            共Soff        册
+                                                                                                                              f − S f=0兲 ,
+                                                                                                                                   off
+                                                                                                                                                  共19兲
+
+   f=0兲.
+共Soff
+
+
+
+
+                                                                                                                                                          07 August 2026 21:55:24
+      Figure 8 presents these plasma-off data. For any rotation                    where Son         on
+                                                                                             f and S f=0 are the mass spectrometer signals at ro-
+frequency, the desorbing flux of adsorbed Cl2, Doff                                tation frequency f ⫽ 0 and f = 0.
+                                                             f
+共cm−2 s−1兲, determined from the mass spectrometer signal is                             Drec
+                                                                                          f measurements are plotted versus time as a function
+given by                                                                           of pressure and power in Figs. 9共a兲–9共d兲, using the value for
+                                                                                   ␤ determined from the plasma-off data in Fig. 8. ⌫rec f values
+
+     Doff
+      f =    冉冊␤ off off
+               A
+                 共S f − S f=0兲,                                           共18兲
+                                                                                   from the pressure rise data in Fig. 6 are included in Figs. 9共b兲
+                                                                                   and 9共d兲 共lines plus symbols兲. Drecf values are largest at short
+                                                                                   times 共large f兲 and high powers, and decay nonexponentially
+                                                                                                 f and ⌫ f values agree very well at 5 mTorr,
+                                                                                   with time. Drec         rec
+where ␤ is a proportionality constant that depends on pump-
+ing speed in the same manner as does ␣, but in addition                            especially at short times. At 20 mTorr, Drec f are substantially
+contains contributions from the mass spectrometer sensitiv-                        lower than ⌫rec
+                                                                                                 f , particularly at longer  times and low power
+ity. The arbitrarily scaled Soff     off
+                              f − S f=0 values are placed on an
+                                                                                   共100 W兲. These are conditions under which desorption of
+absolute flux scale by normalizing the measurements to the                         adsorbed Cl2 begins to dominate and at least part of the
+pressure rise data in Fig. 5 共included in Fig. 8 as thick solid                    disparity could be in the subtraction of two large numbers.
+lines plus symbols兲, thus determining a value for ␤. Doff     f
+depends on substrate rotation frequency in a manner that is
+similar to ⌫off     off
+              f . D f also scales with pressure in a close-to-                     E. Adsorption and desorption of Cl2
+linear manner, increasing by a factor of 12–15 over the 16-
+fold increase in pressure between 1.25 and 20 mTorr. 共The                               The results present in Fig. 8 indicate that Cl2 molecules
+thin solid lines in Fig. 8 are fits to a model and are discussed                   adsorb on the plasma-conditioned anodized Al surface and
+below.兲                                                                            have residence times of ⬃10 ms and longer. This suggests a
+     The correlation between Doff   f and ⌫ f in Fig. 8 is ex-
+                                             off                                   binding energy that is larger than most physisorption pro-
+pected since they are essentially the same measurement. The                        cesses. Chemisorption of Cl2 on ␥-alumina has been reported
+adsorbed Cl2 共plasma off兲 is expected to desorb with a cosine                      for temperatures between 300 and 420 K.32 Above 420 K, an
+distribution and with a temperature equal to the substrate                         exchange reaction was observed in which one mole of O2共g兲
+temperature. With the plasma on, however, the situation is                         is liberated for every two moles of Cl2 that chemisorb.32 The
+more complicated. First, it should be stressed that the experi-                    present experiments do not provide information on the nature
+ment observes only delayed, Langmuir-Hinshelwood recom-                            of the adsorption process 共physisorption versus chemisorp-
+bination and not prompt, Eley-Rideal 共ER兲 recombination 共if                        tion, nature of the binding sites, etc.兲. We can, however, ob-
+ER recombination even occurs in these experiments兲. The                            tain insights into the kinetics of adsorption and desorption.
+temperature and angular distribution of the recombined Cl2                              Consider the simplified mechanism
+desorption product will depend on how long Cl2 resides on
+the surface after it forms. If the energy released in the reac-                        Cl2共g兲 + ai → Cl2共ads兲 − ai共or 2Cl共ads兲 − ai兲,             共20兲
+013306-9         Guha, Donnelly, and Pu                                                                                        J. Appl. Phys. 103, 013306 共2008兲
+
+
+
+
+                                                                                                           FIG. 9. 共Color online兲 Net desorption flux Drec f of Cl2
+                                                                                                           formed by Cl atom recombination as a function of re-
+                                                                                                           action time at different ICP source powers and pres-
+                                                                                                           sures of 1.25, 5, 10, and 20 mTorr. The recombined Cl2
+                                                                                                           flux at 100 and 600 W derived from pressure rise mea-
+                                                                                                           surements 共⌫recf 兲 are included in 共b兲 and 共d兲 as the line
+                                                                                                           plus open symbols curves. The extrapolations to tr = 0,
+                                                                                                           indicated by the arrows, are used to derive recombina-
+                                                                                                           tion coefficients as described below. The inset 共a兲 is a
+                                                                                                           blow up of the region over which the extrapolation to
+                                                                                                           tr = 0 is performed.
+
+
+
+
+     Cl2共ads兲 − ai共or 2Cl共ads兲 − ai兲 → Cl2共g兲 + ai ,
+
+in which ai is one of many types of sites where Cl2共g兲 can
+                                                                             共21兲
+                                                                                          Ci共t兲 =
+                                                                                                      ⌫siAi
+                                                                                                    ⌫si + kd,iAi
+                                                                                                                  再 冋冉
+                                                                                                                 1 − exp −
+                                                                                                                           ⌫si
+                                                                                                                           Ai
+                                                                                                                               + kd,i t         冊 册冎    + Ci共0兲,
+
+                                                                                                                                                               共23兲
+adsorb with or without dissociation. At any given point on
+the circumference of the rotating substrate, Cl2 coverage is                          with Ci共0兲 being the coverage as the sample just enters the
+
+
+
+
+                                                                                                                                                                        07 August 2026 21:55:24
+modulated as the point enters and leaves the plasma, as in-                           plasma 共at t = 0兲. When the point on the surface leaves the
+dicated in Fig. 10. For a total rotation period of ␶ = 1 / f = 2tr,                   plasma, ⌫ = 0 and over the span ␶ / 3 ⬍ t ⬍ ␶,
+the plasma-exposure time is ⬃␶ / 3 共actually closer to 36% of
+the period兲. If Ci is the Cl2 coverage on ai sites and Ai is the                          Ci共t兲 = Ci共␶/3兲exp− kd,i共t − ␶/3兲.                                 共24兲
+total density of ai sites, then
+
+
+                  冉 冊
+                                                                                      After less than a few seconds at most, corresponding to many
+      dCi           Ci                                                                rotation periods, we get the periodic boundary condition
+          = ⌫si 1 −    − kd,iCi ,                                            共22兲
+       dt           Ai                                                                Ci共t兲 = Ci共t + ␶兲, therefore
+
+where ⌫ is Cl2 impingement rate, si is the sticking coefficient                           Ci共0兲 = Ci共␶/3兲exp− 2kd,i␶/3.                                      共25兲
+for Cl2 at site ai, and kd,i is the desorption rate constant for
+Cl2 at sites ai. For each rotation period, when the point on the                      Substituting Ci共0兲 from Eq. 共25兲 into Eq. 共23兲 and solving for
+surface is in the plasma 共0 ⬍ t ⬍ ␶ / 3兲, the solution to Eq. 共22兲                    Ci共t兲 at t = ␶ / 3,
+
+
+                                                                                                                                   冋冉                冊册
+is
+                                                                                                                                        ⌫si        ␶
+
+                                                                                                      冉                  冊
+                                                                                                                             1 − exp −      + kd,i
+                                                                                                            ⌫siAi                       Ai         3
+
+                                                                                                                                    冋               册
+                                                                                          Ci共␶/3兲 =                                                  . 共26兲
+                                                                                                          ⌫si + kd,iAi                    2kd,i␶
+                                                                                                                                1 − exp −
+                                                                                                                                            3
+
+                                                                                      The point on the sample faces the mass spectrometer at t
+                                                                                      = 2␶ / 3, at which time
+
+                                                                                          Ci共2␶/3兲 = Ci共␶/3兲exp− kd,i␶/3.                                    共27兲
+
+                                                                                      The desorption rate toward the mass spectrometer is simply
+
+                                                                                          Di = kd,iCi共2␶/3兲.                                                   共28兲
+                                                                                           Equations 共26兲–共28兲 predict desorption rates that in-
+                                                                                      crease linearly with Cl2 flux at low flux and saturate at high
+                                                                                      flux. The measurements in Fig. 8 indicate that we are in a
+FIG. 10. Simulation of the relative Cl2 coverage as the surface enters and
+leaves the plasma chamber. The plasma is off in this case. Time for one               nearly linear regime at Cl2 pressures of 20 mTorr and lower.
+rotation is ␶ = 1 / f = 2tr. In this case a periodic steady state has been reached.   Therefore, we can assume that ⌫si / kd,iAi ⬍ 1, and
+013306-10         Guha, Donnelly, and Pu                                                                               J. Appl. Phys. 103, 013306 共2008兲
+
+
+
+
+FIG. 11. Dimensionless desorption decay plot for comparison with the mea-          FIG. 12. Simulated Cl2 coverages just as the surface leaves the plasmas
+surements in Fig. 8. The abscissa is the ratio of reaction to surface residence    chamber 共at t = ␶ / 3兲 and when it is facing the mass spectrometer 共at t
+time, and the ordinate is the ratio of desorption to incoming molecular flux       = 2␶ / 3兲. The plasma was off in this simulation and the Cl2 pressure was
+times the sticking probability at a specific surface site. The dotted line indi-   20 mTorr.
+cates a single exponential decay.
+
+                                                                                         The Cl2 coverages just as the surface leaves the plasma
+
+     Ci共␶/3兲 ⬇     冉 冊
+               ⌫si 1 − exp关− kd,i␶/3兴
+               kd,i 1 − exp关− 2kd,i␶/3兴
+                                        .                                 共29兲
+                                                                                   chamber 共note again that the plasma is off in this simulation兲
+                                                                                   and when it is facing the mass spectrometer are given in Fig.
+                                                                                   12. These transient coverages are quite low compared to the
+Desorption rates were computed as a function of tr from Eqs.                       stable Cl coverage of 共3 – 8兲 ⫻ 1014 cm−2 measured by Auger,
+共27兲–共29兲 for a range of kd,i values of 10, 33, 100, 333, 1000,                    described above and elsewhere.27 As pointed out above, the
+3333, and 10 000 s−1 共for i = 1 – 7, respectively兲. The results                    near-linear dependence of Cl2 desorption rates on pressure in
+
+
+
+
+                                                                                                                                                               07 August 2026 21:55:24
+are contained in the dimensionless plot presented in Fig. 11.                      Fig. 8 indicates that the coverage is not saturated 共i.e.,
+Di decays nonexponentially over the first order of magnitude,                      ⌫si / kd,iAi ⬍ 1兲. Consequently, the site density Ai ⬎ ⌫si / kd,i
+with the opposite curvature to that measured with the mass                         and the total site density Atot ⬎ 兺i=1
+                                                                                                                       7
+                                                                                                                          Ai = 4.5⫻ 1013 cm−2, the
+spectrometer 共Fig. 8兲. We attribute the departure of the ob-                       value computed for the Cl2 impingement flux and the si and
+served desorption kinetics from a simple first order model to                      kd,i coefficients given above. This lower limit is more than an
+a more complicated mechanism in which desorption occurs                            order of magnitude less than saturated monolayer coverage
+from a range of binding sites with rates that span the range of                    of ⬃1015 cm−2 and therefore is a reasonable value. Finally,
+values for kd,i above. A range of binding energies is reason-                      the model predicts a maximum coverage as the surface
+able, given the rough anodized aluminum surface.                                   leaves the plasma chamber 关i.e., Ctot共␶ / 3兲 in Fig. 12兴 of 3
+     The total desorption rate was computed from the sum of                        ⫻ 1013 cm−2, at the slowest times investigated 共40 ms兲 which
+the individual rates, with the si values as adjusted param-                        is below the minimum total site density. Recombination of Cl
+eters,                                                                             atoms, discussed next, must be interpreted while taking the
+              7                                                                    adsorption and desorption of Cl2 into account.
+     Dtot = 兺 Di .                                                        共30兲
+             i=1                                                                   F. Langmuir-Hinshelwood recombination coefficient
+                                                                                   „␥Cl… of Cl atoms
+Dtot was fitted to the 20 mTorr data in Fig. 8. Values of si for
+i = 1 – 6 were constrained to fit to a double exponential ex-                           As mentioned above, and considered in many studied of
+pression, while s7 was adjusted separately. si values of 5.3                       gas-surface chemistry,33 atom recombination can occur by
+⫻ 10−5, 6.6⫻ 10−5, 7.0⫻ 10−5, 8.3⫻ 10−5, 1.1⫻ 10−4, 1.3                            two mechanisms that are distinguished by the time between
+⫻ 10−4, and 5.0⫻ 10−3 for i = 1 – 7 were derived from this                         atom impingement and product desorption. In the ER pro-
+fitting procedure. The total desorption of Cl2 computed from                       cess, this time is effectively zero. In the present study, since
+the model at 20 mTorr is compared with the measurements                            Cl atoms impinge while the sample is in the plasma reactor
+in Fig. 8. With this range of desorption rates, the model                          and Cl2 is detected when the surface is out of the plasma for
+captures the rapid decay at short times. Using the same val-                       at least 0.7 ms, if this process occurs, we cannot observe it.
+ues for si and kd,i, decays were computed for the remaining                        Instead we observe only delayed recombination via the
+pressures 共Fig. 8, three lower curves兲. The model curves re-                       Langmuir-Hinshelwood 共LH兲 mechanism. There is evidence
+produce the measurements at 10 and 5 mTorr and lie some-                           that LH atom recombination dominates over the ER process
+what below the measurements at 1.25 mTorr. A second set of                         near room temperature. Guerra34 has modeled the measure-
+data shows a similar trend, but with the deviation setting in                      ments of Kim and Boudart35 and found that LH recombina-
+more gradually with decreasing pressure. A likely explana-                         tion of O and N on silica is 10–100 times more probable than
+tion is that Cl2 coverage is beginning to approach saturation                      ER recombination. In addition, Kota et al.13 found that the
+going from 1.25 to 20 mTorr.                                                       recombination coefficient of Cl on SiO2 and several other
+013306-11     Guha, Donnelly, and Pu                                                                    J. Appl. Phys. 103, 013306 共2008兲
+
+
+surfaces exhibits a negative temperature that they take as         TABLE II. Cl fluxes ⌫Cl 共1017 cm−2 s−1兲 and recombination coefficients ␥ M
+                                                                   measured by mass spectrometry as a function of chlorine plasma power and
+evidence for a weakly bound, physisorbed Cl that diffuses on
+                                                                   pressure. Net desorption flux of Cl2 off the wall surface at tr → 0 = Drec
+                                                                                                                                          f=⬁
+the surface before recombining with more strongly bound Cl,        共1015 cm−2 s−1兲.
+i.e., the LH mechanism. A positive temperature dependence
+would be indicative of an activated ER recombination                                                          Pressure
+mechanism.34                                                                                                  共mTorr兲
+      The measured decays of recombined Cl2 plotted as a              Power共W兲                        1.25               5           20
+function of reaction time in Fig. 9 exhibit nonexponential
+behavior similar to desorption of adsorbed Cl2 with the            100               ⌫Cl              1.89           4.25           6.44
+plasma off 共Fig. 8兲 and desorption of O2 from O recombina-                           Drec
+                                                                                      f=⬁             1.15           0.993          1.058
+tion of anodized Al.25,26 This suggests a range of rates for Cl                      ␥M               0.036          0.014          0.009
+recombination, as invoked for Cl2 adsorption above and O           200               ⌫Cl              2.13           4.74           7.44
+recombination.25,26 Similar to the mechanism proposed by                             Drec
+                                                                                      f=⬁             1.58           1.6            1.37
+Kota et al.,13,14 Cl recombination is assumed to occur in the                        ␥M               0.044          0.02           0.011
+following steps:
+                                                                   400               ⌫Cl              1.97           5.53         10.8
+                                                                                     Drec
+                                                                                      f=⬁             2.18           2.26          1.98
+    Cl共g兲 + ai → Cl共ads兲 − ai ,                            共31兲                      ␥M               0.066          0.024         0.01
+
+                                                                   600               ⌫Cl              1.72           5.63         12.3
+    Cl共g兲 → Cl共phys兲 ,                                     共32兲                      Drec
+                                                                                      f=⬁             2.38           2.7           2.3
+                                                                                     ␥M               0.083          0.028         0.011
+
+
+    Cl共phys兲 + Cl共ads兲 − ai → Cl2共ads兲 − ai ,              共33兲
+                                                                                6Drec
+                                                                                  f→⬁
+                                                                         ␥M =         ,                                                   共36兲
+    Cl2共ads兲 − ai → Cl2共g兲 + ai ,                          共34兲                  ⌫Cl
+
+
+
+
+                                                                                                                                                 07 August 2026 21:55:24
+where ai are binding sites that have a range of binding ener-      where the subscripts on ␥ refer to Cl2 desorption fluxes taken
+gies and may be common with those for Cl2 adsorption. Re-          from pressure rise or mass spectrometer measurements and
+action 共31兲 is assumed to be fast such that chemisorbed Cl         ⌫Cl are Cl fluxes, nClvCl / 4, with vCl being the Cl mean ther-
+forms rapidly. Cl共g兲 physisorbs in reaction 共32兲 and Cl共phys兲      mal speed 共4.25⫻ 104 cm/ s兲 at the wall temperature
+                                                                   共300 K兲. nCl values near the wall were taken from Table I.
+will then react to form adsorbed Cl2, which subsequently
+                                                                   Values at 10 mTorr were taken from an interpolation of the 5
+desorbs. Cl共phys兲 can diffuse along the surface as well as into
+                                                                   and 20 mTorr data. The factor of 6 in Eqs. 共35兲 and 共36兲
+pores allowing a substantial time between Cl adsorption and
+                                                                   corresponds to two Cl atoms per Cl2, divided by 1 / 3, the
+Cl2共ads兲 formation. Due to the complex nature of this mecha-
+                                                                   fraction of time that a point on the surface area of the spin-
+nism and the complicating role of impinging Cl2, we did not        ning wall is exposed to the plasma.
+attempt to model the decay curves in Fig. 9. Instead we use
+                                                                          f=⬁ and D f=⬁ values 共summarized in Table II兲 were de-
+                                                                        ⌫rec       rec
+them to obtain recombination coefficients, as described next.      termined from the plots of ⌫rec         rec
+                                                                                                  f and D f versus time in Fig. 9.
+     If the rotation period is much longer than the time for       We used a conservative, linear extrapolation of ⌫rec          rec
+                                                                                                                         f and D f
+recombination, the surface will reach saturated coverage           values at high rotation frequencies in this analysis, shown in
+while it is in the plasma and the Cl2 desorption flux will         the example inset in Fig. 9共a兲. Note that the sharply upward-
+reach a constant level. In this case, when a point on the          turning shape in the adsorbed Cl2 between 4 and 1 ms in Fig.
+surface leaves the plasma, the Cl2 desorption rate will decay      8 is absent from the recombined Cl2 traces in Fig. 9, making
+to a very low value before the point reaches the observation       the tr→ 0 extrapolation less steep and therefore more reli-
+location facing the mass spectrometer. At the other extreme,       able. The recombination coefficients, ␥ P and ␥ M , determined
+the sample could be rotated at a rate that is much faster than     from this procedure are presented in Fig. 13 as a function of
+the rate of Cl buildup or Cl2 decay. Under these pseudo-           chlorine atom flux. The associated error bars represent the
+steady-state conditions, the Cl2 desorption is independent of      accuracy of any given data point, determined from the accu-
+time. It is as though the sample was continuously in the           racy of nCl and Drec   f=⬁. The internal area of the dotted
+plasma, but with impingement fluxes of Cl and Cl2 reduced          diamond-shaped feature is more representative of the accu-
+by the fraction of time a point is exposed to the plasma per       racy, taking into account the correlated uncertainty in ⌫Cl
+rotation 共⬃1 / 3 of the period兲. This desorption flux 共⌫rec
+                                                          f=⬁ or   共proportional to nCl兲 and ␥ M 共scales with 1 / nCl兲. The preci-
+Drec
+  f=⬁ 兲 can be  reached by  extrapolating plots of ⌫ rec
+                                                     f   or Drec
+                                                              f    sion in the data points is closer to the scatter in the measure-
+versus tr to tr → 0. The LH recombination coefficient of Cl        ments, thus several trends are reliably established. Recombi-
+atoms on the surface can therefore be determined from the          nation coefficients were 0.04–0.1 at the lowest Cl fluxes
+relationships                                                      investigated 共1.5⫻ 1017 cm−2 s−1兲 and decreased with in-
+                                                                   creasing Cl flux, falling to ⬃0.01 for ⌫Cl = 1 ⫻ 1018 cm−2 s−1.
+            6⌫rec
+              f→⬁                                                  But at constant pressure, ␥Cl 共here and after equated with ␥ M 兲
+    ␥P =          ,                                        共35兲
+             ⌫Cl                                                   increases with power 共indicated by the direction of the ar-
+013306-12      Guha, Donnelly, and Pu                                                                                 J. Appl. Phys. 103, 013306 共2008兲
+
+
+
+
+FIG. 13. Recombination coefficients of Cl atoms on anodized aluminum as         FIG. 14. Recombination coefficients of Cl atoms on anodized aluminum as
+a function of Cl flux in the plasma. Closed symbols are data points derived     a function of the Cl-to-Cl2 number density ratio in the plasma. 共See Fig. 13
+from the mass spectrometer measurements and open triangles and open stars       caption for other details.兲
+are from the pressure rise measurements at 5 and 20 mTorr, respectively.
+The arrows through the data points at each pressure indicate the direction of
+power increase between 100 and 600 W. The error bars on the 1.25 and            14. All of the measurements at various powers and pressures
+20 mTorr data represent the accuracy of any given measurement. The scatter
+in the data is more representative of the relative uncertainty of one datum     fall on a single curve. This correlation should not be assumed
+compared to another. The dotted, diamond-shaped region represents the cor-      to hold beyond the range of nCl and nCl2 investigated in this
+related uncertainties in ␥Cl and ⌫Cl.                                           study. For example, ␥Cl would not be expected to depend on
+                                                                                nCl2 at very low nCl2 values, since the Cl2 contribution to the
+rows in Fig. 13兲, which corresponds to an increasing Cl flux                    number of occupied sites and transient Cl coverage would be
+共with the possible exception of the 400 and 600 W points at                     very small.
+
+
+
+
+                                                                                                                                                               07 August 2026 21:55:24
+1.25 mTorr—see below兲, i.e., opposite to the overall depen-                          The range of nCl / nCl2 values 共0.1–0.8兲 in this study falls
+dence in Fig. 13.                                                               within those in some commercial etching tools and processes
+     These seemingly opposing observations can be ex-                           used for plasma etching. For example, a commercialized ul-
+plained as follows. Adsorbed Cl2 blocks sites for Cl adsorp-                    trahigh frequency plasma source operates at low degrees of
+tion, lowering the probability for Cl recombination, hence,                     dissociation 共nCl / nCl2 = 0.8 at 3.5 mTorr and 1000 W兲.37
+␥Cl decreases as pressure and the Cl2 impingement rate in-                      Also, the LAM Research Alliance TCP system has moderate
+creases. At a constant pressure, the Cl2 number density and                     percent dissociations 共nCl / nCl2 ⬍ 2 at powers ⬍900 W and/or
+impingement rate decrease as power increases, causing ␥ to                      pressures ⬎10 mTorr兲.15 In newer, multiple-frequency paral-
+increase with power. Because the percent dissociation of Cl2                    lel plate capacitively coupled reactors, percent dissociations
+is lower at high pressure 共see Table I兲, the effect is less                     are not likely to be high because the plasma densities are
+important at high pressure, hence ␥ increases less with in-                     lower than in ICP or electron cyclotron resonance systems
+creasing power at higher pressure. The 1.25 mTorr measure-                      and the optimum pressures tend to be somewhat higher. Thus
+ments at 400 and 600 W seem at odds with this explanation,                      the conditions in the present study are relevant to many etch-
+in that ␥ increases with power, but the Cl and Cl2 number                       ing processes. Of course, Cl2 percent dissociations can be
+densities are nearly independent of power between 100 and                       quite high at high powers in low pressure ICP systems where
+600 W. At 1.25 mTorr, the mean free path 共⬃4 cm兲 is about                       the wafer is close to the antenna. For example, nCl / nCl2 ⬎ 8
+equal to the distance of the surface from the plasma 共6 cm to                   were observed previously.16
+the plasma axis, ⬃3 cm to the plasma edge兲, hence some of                            There is some precedence for a dependence of recombi-
+the hot Cl atoms in the center of the chamber, a fraction of                    nation coefficients on pressure, albeit not with Cl atoms. Go-
+which are “born” there with translational energies of                           mez et al.38 reported a similar decrease in the O-atom recom-
+⬃0.5 eV in Franck-Condon electron impact dissociation of                        bination coefficient on several different surfaces, including
+Cl2,36 can reach the walls without completely thermalizing.                     oxidized Al and SiO2. Recombination coefficients fell by a
+This will cause an underestimate in ⌫Cl, calculated from the                    factor of typically 10–30 as pressure was increased from
+measured nCl and the thermal speed computed from Tg = Tw                        25 to 500 mTorr. The authors attribute the pressure depen-
+= 300 K, and hence will lead to an overestimate of ␥Cl, espe-                   dence to changes in atom flux and ion bombardment–created
+cially at higher powers, altering the trend of the 1.25 mTorr                   sites for recombination. We did not investigate the effects of
+data to more closely resemble the 5 mTorr values. 共At                           ion bombardment in the present study of Cl atom recombi-
+5 mTorr and above, the assumption of thermalized Cl im-                         nation. In a previous study of O atom recombination on the
+pinging at the wall temperature is reasonable, since the mean                   same anodized Al rotating substrate, biased grids were
+free path is ⬍1 cm.兲                                                            placed in front of the surface to repel or transmit ions.25,26
+     We found that a more “universal” way of representing                       No significant dependence on the presence or absence of ion
+␥Cl and reflecting the competition between Cl and Cl2 for                       bombardment was found for the O recombination probabil-
+surface sites was to plot ␥Cl versus nCl / nCl2, as shown in Fig.               ity. We should also point out that we see no such dependence
+013306-13    Guha, Donnelly, and Pu                                                                     J. Appl. Phys. 103, 013306 共2008兲
+
+
+
+
+                                                                                                       FIG. 15. Auger spectra EdI / dE versus
+                                                                                                       E for Cl and O on the wall surface
+                                                                                                       exposed to 5 mTorr, 600 W Cl2
+                                                                                                       plasma at different substrate rotation
+                                                                                                       frequencies with the plasma on 共open
+                                                                                                       circles兲 and off 共solid lines兲. The
+                                                                                                       e-beam energy 共Eb兲 was 1.5 keV with
+                                                                                                       an emission current of ⬃0.1 ␮A.
+
+
+
+
+of the O recombination coefficient on pressure.39 This could      confirms that comparable recombination of Cl and desorp-
+be due to a weaker interaction of O2 with the surface, com-       tion of Cl2 from the substrate surface was taking place during
+pared with Cl2 and would be consistent with a pressure de-        the Auger measurements, which were carried out after the
+pendence being observed at much higher pressures for O2           system was vented to atmosphere and the Auger setup in-
+plasmas, as found by Gomez et al.38 compared with Cl2 in          stalled. Prior to Auger experiments, the plasma was operated
+the present study.                                                for several hours to ensure adequate conditioning of the spin-
+
+
+
+
+                                                                                                                                                  07 August 2026 21:55:24
+                                                                  ning wall surface.
+G. Auger electron spectroscopy analysis as a                           Taken together, the mass spectrometer and Auger mea-
+function of delay time after plasma exposure                      surements indicate that desorption of Cl2 formed by the re-
+                                                                  combination of Cl atoms takes place for only a small fraction
+     Langmuir-Hinshelwood recombination will also lead to
+                                                                  of the total surface chlorine coverage. Since the change in Cl
+a decay in Cl coverage as a function of increasing delay
+                                                                  coverage in the measurements in Fig. 16 was ⬍10% and the
+between plasma exposure and surface analysis. To search for
+                                                                  total Cl coverage was ⬃5 ⫻ 1014 cm−2 共determined from the
+such a trend, plasma-off and plasma-on Auger spectra in the
+                                                                  Auger spectrum in Fig. 2兲, the density of sites participating
+Cl and O regions were recorded at Eb = 1.5 eV as a function
+                                                                  in recombination is ⬍5 ⫻ 1013 cm−2. Kota et al.14 reported a
+of substrate rotation frequency, as shown in Fig. 15. The
+                                                                  range of recombination site densities for Cl on crystalline Si
+plasma-off spectra have been shifted by the observed 7.0 eV
+                                                                  共2.5⫻ 1012 cm−2兲, poly-Si 共5 ⫻ 1014 cm−2兲, and W 共2.5
+共see discussion of charging in Sec. III A兲, independent of
+                                                                  ⫻ 1015 cm−2兲 substrates that were Ar-ion sputter cleaned.
+substrate rpm. No differences in the plasma-on and plasma-
+off spectra are discernable.
+     The Cl:O peak-to-peak ratios from these spectra are plot-
+ted in Fig. 16 as a function of substrate rotation frequency.
+To obtain the most sensitive indicator of any change in Cl
+coverage with delay time between plasma exposure and ob-
+servation, the Cl:O ratio with the plasma on is divided by
+that with the plasma off. The error bars represent error propa-
+gation from roughly one sigma scatter in the derivative val-
+ues. From these data, it appears that there was less than a
+10% change in Cl and O coverage as a function of the time
+between plasma exposure and analysis. This time was varied
+between 1 and 23 ms at 30 000 and 1300 rpm, to ⬃10 min
+when comparing plasma-off and plasma-on scans. Also,
+there is no discernable change in peak positions in the
+plasma-on spectra 共other than the charging induced shift兲,
+which could be an indication of a change in the chemical
+bonding of the surface layer.                                     FIG. 16. Cl-to-O coverage ratios as a function of substrate rotation fre-
+     During these measurements, the pressure in the Auger         quency. The pressure was 5 mTorr. Plasma powers: 0 W 共i.e., off兲 or
+                                                                  600 W. Plasma on 共solid circles兲, plasma off 共open circles兲, and the asterisk
+chamber was also recorded. With the plasma on, a large in-
+                                                                  symbol 共plasma on/plasma off兲. The dashed line indicates the result ex-
+crease in pressure was observed, similar to observations          pected no change in Cl coverage with rotation frequency and plasma state
+when the system was configured for mass spectrometry. This        共on vs off兲.
+013306-14     Guha, Donnelly, and Pu                                                                                       J. Appl. Phys. 103, 013306 共2008兲
+
+                                                                               6
+Lower recombination site densities correlated with lower re-                      K. Ono, K. Nakamura, T. Kitagawa, K. Osar, and K. Takahashi, Vacuum
+                                                                                  80, 761 共2006兲.
+combination coefficients 共␥Cl ⬍ 0.01, 0.2, and 0.8 for the                      7
+                                                                                  K. Pelhos, V. M. Donnelly, A. Kornblit, M. L. Green, R. B. V. Dover, L.
+above兲.14 Consequently, a recombination site density of ⬍5                        Manchanda, Y. Hu, M. Morris, and E. Bower, J. Vac. Sci. Technol. A 19,
+⫻ 1013 cm−2 for ␥Cl = 0.1 in the present study seems reason-                      1361 共2001兲.
+                                                                                8
+able.                                                                             L. Jiang, N. O. V. Plank, M. A. Blauw, R. Cheung, and E. v. d. Drift, J.
+                                                                                  Phys. D 37, 1809 共2004兲.
+                                                                                9
+                                                                                  H.-W. Ra, Y. B. Hahn, K. S. Song, M. H. Park, and Y. K. Hong, J. Vac.
+IV. CONCLUSIONS
+                                                                                  Sci. Technol. A 22, 2388 共2004兲.
+                                                                               10
+     Surface interactions of atomic and molecular chlorine                        K. Asakawa, T. Yoshikawa, S. Kohmoto, Y. Nambu, and Y. Sugimoto, Jpn.
+                                                                                  J. Appl. Phys., Part 1 37, 373 共1998兲.
+with anodized aluminum substrate have been studied in a                        11
+                                                                                  S. C. Deshmukh and D. J. Economou, J. Appl. Phys. 72, 4597 共1992兲.
+chlorine inductively coupled plasma by the “spinning wall”                     12
+                                                                                  G. I. Font, I. D. Boyd, and J. Balakrishnan, J. Vac. Sci. Technol. A 16,
+technique. In this method, a cylindrical substrate is rotated,                    2057 共1998兲.
+                                                                               13
+thereby continuously and periodically being exposed to the                        G. P. Kota, J. W. Coburn, and D. B. Graves, J. Vac. Sci. Technol. A 16,
+                                                                                  270 共1998兲.
+reactor at high pressure, and then to low pressure analysis                    14
+                                                                                  G. Kota, J. W. Coburn, and D. B. Graves, J. Appl. Phys. 85, 1 共1999兲.
+chambers. First, with the plasma off, it was found that Cl2                    15
+                                                                                  M. V. Malyshev, V. M. Donnelly, A. Kornblit, and N. A. Ciampa, J. Appl.
+adsorbs on the surface and desorbs over the time scales in-                       Phys. 84, 137 共1998兲.
+vestigated in this study 共1 – 38 ms兲. A simple adsorption-                     16
+                                                                                  M. V. Malyshev and V. M. Donnelly, J. Appl. Phys. 88, 6207 共2000兲.
+                                                                               17
+desorption model has been proposed to explain the Cl2 up-                         L. Stafford, J. Margot, F. Vidal, M. Chaker, K. Giroux, J. S. Poirier, A.
+                                                                                  Quintal-Léonard, and J. Saussac, J. Appl. Phys. 98, 063301 共2005兲.
+take and release by anodized Al. A range of desorption rates,                  18
+                                                                                  S. J. Ullal, A. R. Godfrey, E. Edelberg, L. Braly, V. Vahedi, and E. S.
+corresponding to a range of adsorption sites on the rough                         Aydil, J. Vac. Sci. Technol. A 20, 43 共2002兲.
+                                                                               19
+surface, was invoked to explain the highly nonexponential                         S. J. Ullal, H. Singh, J. Daugherty, and V. Vahedi, J. Vac. Sci. Technol. A
+decay of Cl2 coverage with the plasma off.                                        20, 1195 共2002兲.
+                                                                               20
+                                                                                  T. W. Kim and E. S. Aydil, J. Electrochem. Soc. 150, G418 共2003兲.
+     When a chlorine plasma was ignited, there was a large                     21
+                                                                                  G. Cunge, R. L. Inglebert, O. Joubert, L. Vallier, and N. Sadeghi, J. Vac.
+enhancement in the Cl2 desorption signal due to Langmuir-                         Sci. Technol. B 20, 2137 共2002兲.
+Hinshelwood 共LH兲 recombination of Cl. The LH recombina-                        22
+                                                                                  G. Cunge, M. Kogelschatz, and N. Sadeghi, Plasma Sources Sci. Technol.
+tion coefficient 共␥Cl兲 for Cl was derived from an analysis of                  23
+                                                                                  13, 522 共2004兲.
+the time dependence of the desorption of Cl2. ␥Cl ranged                          G. Cunge, M. Kogelschatz, and N. Sadeghi, J. Appl. Phys. 96, 4578
+
+
+
+
+                                                                                                                                                                           07 August 2026 21:55:24
+                                                                                  共2004兲.
+from 0.01 to 0.1 and was found to increase with increasing                     24
+                                                                                  M. Kogelschatz, G. Cunge, O. Joubert, L. Vallier, and N. Sadeghi, Con-
+power 共and therefore Cl impingement rate兲 and decrease with                       trib. Plasma Phys. 44, 413 共2004兲.
+increasing Cl2 partial pressure. ␥Cl was found to be a                         25
+                                                                                  P. F. Kurunczi, J. Guha, and V. M. Donnelly, J. Phys. Chem. B 109, 20989
+smoothly increasing function of the ratio of the Cl-to-Cl2                        共2005兲.
+                                                                               26
+                                                                                  P. F. Kurunczi, J. Guha, and V. M. Donnelly, Phys. Rev. Lett. 96, 018306
+number density ratio at the wall. The most likely explanation
+                                                                                  共2006兲.
+for these observations is that Cl and Cl2 compete for adsorp-                  27
+                                                                                  J. Guha, Y.-K. Pu, and V. M. Donnelly, J. Vac. Sci. Technol. A 25, 347
+tion sites, particularly at high pressure and low power. Auger                    共2007兲.
+                                                                               28
+analysis of the surface during plasma exposure reveals that                       Notations in the present report have been substituted for those used pre-
+the Cl coverage is about 5 ⫻ 1014 cm−2. Less than 10% of                          viously 共Ref. 16兲 as follows: ICl and IXe for I共Cl兲 and I共Xe兲, respectively,
+                                                                                  bCl for bCl,Xe, bCl2,Cl for bCl2→Cl,Xe, a⬘ for a⬘共Te , ne , l , p兲, SCl, SCl2, and SXe
+this adsorbed Cl actually participates in surface recombina-                      for Seff共Cl兲, Seff共Cl2兲, and Seff共Xe兲, respectively. In the present work, Eq.
+tion.                                                                             共5兲 is a simpler version of Eq. 共14兲 in Ref. 16. Also, in Eq. 共14兲 of Ref. 16,
+                                                                                  nCl0 should read nCl20. 共This introduced negligible errors in the results
+ACKNOWLEDGMENTS                                                                  presented in Ref. 16兲.
+                                                                               29
+                                                                                  P. Macho and N. Sadeghi, Plasma Sources Sci. Technol. 13, 303 共2004兲.
+    This work was supported by the Petroleum Research                          30
+                                                                                  V. M. Donnelly, J. Vac. Sci. Technol. A 14, 1076 共1996兲.
+Fund, the University of Houston GEAR Program, the Na-
+                                                                               31
+                                                                                  V. M. Donnelly and M. J. Schabel, J. Appl. Phys. 91, 6288 共2002兲.
+                                                                               32
+                                                                                  F. Reti, I. Bertoti, G. Mink, and G. Varsanyi, Solid State Ionics 44, 33
+tional Science Foundation, and Lam Research Corp. Y.K.P.
+                                                                                  共1990兲.
+would like to acknowledge the partial financial support from                   33
+                                                                                  C. T. Rettner, J. Chem. Phys. 101, 1529 共1994兲.
+NSFC 共Project No. 10335040兲.                                                   34
+                                                                                  V. Guerra, Jpn. J. Appl. Phys., Part 1 45, 8200 共2006兲.
+                                                                               35
+                                                                                  Y. C. Kim and M. Boudart, Langmuir 7, 2999 共1991兲.
+1                                                                              36
+ D. Ha, H. Takeuchi, Y.-K. Choi, and T.-J. King, IEEE Trans. Electron             P. C. Cosby and H. Helm, “Dissociation Rates of Diatomic Molecules,”
+ Devices 51, 1989 共2004兲.                                                         SRI International Report No. PYU 1147, Contract No. F33615-85-C-2560,
+2
+ S. Gomez, R. J. Belen, M. Kiehlbauch, and E. S. Aydil, J. Vac. Sci.              1992 共unpublished兲.
+                                                                               37
+ Technol. A 23, 1592 共2005兲.                                                      M. V. Malyshev, V. M. Donnelly, and S. Samukawa, J. Appl. Phys. 84,
+3
+ H. Lee, D.-H. Kim, J.-Y. Huh, and D.-K. Kim, Mater. Sci. Semicond.               1222 共1998兲.
+                                                                               38
+ Process. 8, 602 共2005兲.                                                          S. Gomez, P. G. Steen, and W. G. Graham, Appl. Phys. Lett. 81, 19
+4
+ M. J. Buie, B. C. Stoehr, and Y.-C. Huang, Proc. SPIE 4562, 633 共2002兲.          共2002兲.
+5
+ M. S. P. M. H. Shin, N.-E. Lee, J. Kim, C. Y. Kim, and J. Ahn, J. Vac. Sci.
+                                                                               39
+                                                                                  J. Guha, P. Kurunczi, L. Stafford, V. M. Donnelly, and Y.-K. Pu 共unpub-
+ Technol. A 24, 1373 共2006兲.                                                      lished兲.
+

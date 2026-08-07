@@ -8,9 +8,16 @@
 - **DOI:** `10.1063/1.339662`
 - **Publisher record:**
   `https://pubs.aip.org/aip/jap/article/62/4/1141/18611878`
-- **Status:** PRIMARY PUBLISHER ABSTRACT AND EQUATIONS READ; FULL PDF REQUESTED
+- **PDF SHA-256:**
+  `b9ebe79ec1f6beadbe3367998d917ac28691aecd06c763b44ae48194f7d9f4d6`
+- **Status:** PRIMARY FULL TEXT + EQUATIONS 4--7, 18--24 VISUALLY AUDITED
 - **Local extraction:**
   `research_sources/thesis_extracts/chantry_1987_wall_diffusion.txt`
+- **Visual audit:** publisher PDF pages 3--5 were rendered at 500 dpi. Render
+  SHA-256 values are, respectively,
+  `78dbed285bee59c2f106cfe4a661bc1346294e3e9a6bcce406990473f0b03246`,
+  `835842b23c45a48efac71b6f78841fea75f667cde0800549709ff31813868ab8`,
+  and `c42eb1497a345d0d97fd1a864ee41a4979c3849ac6a04b069763e967cc44d50d`.
 
 ## Claims table
 
@@ -29,8 +36,8 @@ cylindrical Robin eigenmode and separately reports the Chantry approximation,
 absorbing-wall limit, and surface-reaction limit. The exact radial Bessel zero
 is retained; rounded `2.405` is not used for certification.
 
-The publisher abstract is sufficient to verify the extrapolation-length law,
-limits, and approximation error. The exact cylinder root equations are an
-independent separation-of-variables derivation and are tested by substitution
-into both boundary equations. Retrieve and visually audit the full paper before
-promoting any further shape-specific formula from this source.
+The full paper now directly verifies both cylindrical roots. Equation 23 gives
+the radial Bessel boundary; Eq. 18 gives the corresponding centered-slab
+boundary used axially. The implementation is additionally tested by direct
+substitution into both equations. No shape-specific relation is imported from
+text extraction alone.
