@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from petch.feature_step_3d import (
     _advect_exposed_material_levelsets,
@@ -38,6 +39,18 @@ def test_cr2_anchors_distorted_slanted_interface_and_restores_gradient():
     assert np.max(displacement) < 0.08 * dx
     assert np.mean(displacement) < 0.02 * dx
     assert abs(np.mean(gradient_norm[near_interface]) - 1.0) < 0.08
+
+
+def test_cr2_refuses_overflowed_material_field_instead_of_flipping_gas_to_solid():
+    """An advection blow-up must be rejected upstream, never hidden in CR-2."""
+    dx = 0.01
+    phi = np.full((9, 7, 7), -0.03)
+    phi[4:, :, :] = 2.456000914917128e31
+
+    with pytest.raises(
+        RuntimeError, match="invalid signed interface boundary"
+    ):
+        reinit_cr2(phi, dx, 4.0 * dx)
 
 
 def _vertical_crossing(phi, dx, i, j):
