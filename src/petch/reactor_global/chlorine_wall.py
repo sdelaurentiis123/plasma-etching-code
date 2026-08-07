@@ -33,6 +33,7 @@ BOLTZMANN_J_K = 1.380649e-23
 WALL_RECOMBINATION_EVIDENCE_KINDS = frozenset({
     "measured",
     "validated_model",
+    "regressed",
     "published_range_member",
     "assumed",
     "sensitivity",
@@ -332,6 +333,248 @@ class ChlorineWallRecombinationBoundary:
             incident_velocity_state=incident_velocity_state,
             wall_boundary=self,
         )
+
+
+@dataclass(frozen=True)
+class LogLinearChlorineWallRecombinationProvider:
+    """In-domain ``log10(gamma) = intercept + slope * nCl/nCl2`` law.
+
+    This is a regression of direct wall measurements, not a site-kinetics
+    mechanism. It therefore exposes fit residuals and returns no experimental
+    uncertainty when the source figure provides none.
+    """
+
+    slope_per_ratio: float
+    intercept_log10: float
+    surface_state: str
+    source: str
+    valid_cl_to_cl2_ratio: tuple[float, float]
+    valid_pressure_Pa: tuple[float, float]
+    valid_icp_power_W: tuple[float, float]
+    valid_gas_temperature_K: tuple[float, float]
+    marker_count: int
+    fit_rmse_log10: float
+    fit_maximum_absolute_residual_log10: float
+    leave_one_out_rmse_log10: float
+    leave_one_out_maximum_absolute_residual_log10: float
+    provenance: Mapping[str, object] | None = None
+    name: str = "log_linear_chlorine_wall_recombination"
+    version: str = "1"
+
+    def __post_init__(self):
+        scalar_values = np.asarray([
+            self.slope_per_ratio,
+            self.intercept_log10,
+            self.fit_rmse_log10,
+            self.fit_maximum_absolute_residual_log10,
+            self.leave_one_out_rmse_log10,
+            self.leave_one_out_maximum_absolute_residual_log10,
+        ], dtype=float)
+        if (
+            np.any(~np.isfinite(scalar_values))
+            or self.slope_per_ratio <= 0.0
+            or np.any(scalar_values[2:] < 0.0)
+            or int(self.marker_count) != self.marker_count
+            or int(self.marker_count) < 3
+            or not str(self.surface_state).strip()
+            or not str(self.source).strip()
+            or not str(self.name).strip()
+            or not str(self.version).strip()
+        ):
+            raise ValueError("invalid chlorine wall regression provider")
+        ratio_domain = _bounded_domain(
+            self.valid_cl_to_cl2_ratio,
+            name="Cl/Cl2 ratio",
+            allow_zero=True,
+        )
+        pressure_domain = _bounded_domain(
+            self.valid_pressure_Pa,
+            name="pressure",
+            allow_zero=False,
+        )
+        power_domain = _bounded_domain(
+            self.valid_icp_power_W,
+            name="ICP power",
+            allow_zero=False,
+        )
+        temperature_domain = _bounded_domain(
+            self.valid_gas_temperature_K,
+            name="gas temperature",
+            allow_zero=False,
+        )
+        endpoint_probabilities = 10.0 ** np.asarray([
+            self.intercept_log10 + self.slope_per_ratio * ratio_domain[0],
+            self.intercept_log10 + self.slope_per_ratio * ratio_domain[1],
+        ])
+        if (
+            np.any(~np.isfinite(endpoint_probabilities))
+            or np.any(endpoint_probabilities <= 0.0)
+            or np.any(endpoint_probabilities > 1.0)
+        ):
+            raise ValueError("wall regression leaves the probability domain")
+        object.__setattr__(self, "slope_per_ratio", scalar_values[0])
+        object.__setattr__(self, "intercept_log10", scalar_values[1])
+        object.__setattr__(self, "fit_rmse_log10", scalar_values[2])
+        object.__setattr__(
+            self,
+            "fit_maximum_absolute_residual_log10",
+            scalar_values[3],
+        )
+        object.__setattr__(
+            self, "leave_one_out_rmse_log10", scalar_values[4])
+        object.__setattr__(
+            self,
+            "leave_one_out_maximum_absolute_residual_log10",
+            scalar_values[5],
+        )
+        object.__setattr__(self, "marker_count", int(self.marker_count))
+        object.__setattr__(self, "valid_cl_to_cl2_ratio", ratio_domain)
+        object.__setattr__(self, "valid_pressure_Pa", pressure_domain)
+        object.__setattr__(self, "valid_icp_power_W", power_domain)
+        object.__setattr__(
+            self, "valid_gas_temperature_K", temperature_domain)
+        object.__setattr__(
+            self,
+            "provenance",
+            MappingProxyType(
+                {} if self.provenance is None else dict(self.provenance)),
+        )
+
+    @property
+    def supports_prediction(self) -> bool:
+        """Direct-data fit lacks source measurement uncertainty/site state."""
+        return False
+
+    def predict(
+        self,
+        *,
+        cl_to_cl2_ratio: float,
+        pressure_Pa: float,
+        icp_power_W: float,
+        gas_temperature_K: float,
+    ) -> ChlorineWallRecombinationBoundary:
+        ratio = float(cl_to_cl2_ratio)
+        values = {
+            "Cl/Cl2 ratio": (ratio, self.valid_cl_to_cl2_ratio),
+            "pressure": (float(pressure_Pa), self.valid_pressure_Pa),
+            "ICP power": (float(icp_power_W), self.valid_icp_power_W),
+            "gas temperature": (
+                float(gas_temperature_K),
+                self.valid_gas_temperature_K,
+            ),
+        }
+        for quantity, (value, domain) in values.items():
+            if not np.isfinite(value) or not domain[0] <= value <= domain[1]:
+                raise ValueError(
+                    f"{quantity} is outside the wall-provider evidence domain")
+        boundary = ChlorineWallRecombinationBoundary(
+            recombination_probability=(
+                10.0 ** (
+                    self.intercept_log10 + self.slope_per_ratio * ratio)
+            ),
+            surface_state=self.surface_state,
+            source=self.source,
+            evidence_kind="regressed",
+            valid_cl_to_cl2_ratio=self.valid_cl_to_cl2_ratio,
+            valid_pressure_Pa=self.valid_pressure_Pa,
+            valid_icp_power_W=self.valid_icp_power_W,
+            valid_gas_temperature_K=self.valid_gas_temperature_K,
+            relative_measurement_uncertainty=None,
+            provenance={
+                **self.provenance,
+                "fit_form": "log10(gamma) = intercept + slope * nCl/nCl2",
+                "slope_per_ratio": self.slope_per_ratio,
+                "intercept_log10": self.intercept_log10,
+                "marker_count": self.marker_count,
+                "fit_rmse_log10": self.fit_rmse_log10,
+                "fit_maximum_absolute_residual_log10": (
+                    self.fit_maximum_absolute_residual_log10),
+                "leave_one_out_rmse_log10": (
+                    self.leave_one_out_rmse_log10),
+                "leave_one_out_maximum_absolute_residual_log10": (
+                    self.leave_one_out_maximum_absolute_residual_log10),
+                "experimental_uncertainty": (
+                    "not reported in source Figure 8; digitization error "
+                    "is not substituted for measurement uncertainty"
+                ),
+                "coefficient_selection_target": (
+                    "direct wall gamma markers only; no reactor, feature, "
+                    "or depth observable"
+                ),
+            },
+        )
+        boundary.require_applicable(
+            cl_to_cl2_ratio=ratio,
+            pressure_Pa=pressure_Pa,
+            icp_power_W=icp_power_W,
+            gas_temperature_K=gas_temperature_K,
+        )
+        return boundary
+
+
+def stafford_2010_conditioned_wall_recombination_provider(
+    material: str,
+) -> LogLinearChlorineWallRecombinationProvider:
+    """Return the exact unweighted Figure-8 first-order data regression."""
+    material_key = str(material).strip().lower()
+    common = {
+        "valid_pressure_Pa": (
+            1.25 * 0.1333223684,
+            20.0 * 0.1333223684,
+        ),
+        "valid_icp_power_W": (100.0, 600.0),
+        "valid_gas_temperature_K": (300.0, 300.0),
+        "source": (
+            "stafford-2010-cl-wall Figure 8 direct spinning-wall markers; "
+            "unweighted first-order least-squares fit in log10(gamma)"
+        ),
+        "provenance": {
+            "doi": "10.1351/PAC-CON-09-11-02",
+            "digitized_dataset": (
+                "data/experimental/stafford_2010/"
+                "figure8_chlorine_wall_recombination.csv"
+            ),
+            "digitization_ratio_uncertainty": 0.0027924294135898233,
+            "digitization_log10_gamma_uncertainty": 0.012326656394453005,
+            "individual_power_per_marker": "not reported in Figure 8",
+        },
+        "name": "stafford_2010_conditioned_wall_log_linear",
+        "version": "1",
+    }
+    if material_key == "anodized_aluminum":
+        return LogLinearChlorineWallRecombinationProvider(
+            slope_per_ratio=1.335091971549131,
+            intercept_log10=-2.1773737439464496,
+            surface_state=(
+                "plasma-conditioned anodized aluminum with Si-oxychloride"
+            ),
+            valid_cl_to_cl2_ratio=(0.105610, 0.779646),
+            marker_count=23,
+            fit_rmse_log10=0.13803939372878862,
+            fit_maximum_absolute_residual_log10=0.3756450974608243,
+            leave_one_out_rmse_log10=0.1529041548822586,
+            leave_one_out_maximum_absolute_residual_log10=(
+                0.4026556294460728),
+            **common,
+        )
+    if material_key == "stainless_steel":
+        return LogLinearChlorineWallRecombinationProvider(
+            slope_per_ratio=1.0928756558958963,
+            intercept_log10=-2.4339733013961156,
+            surface_state=(
+                "plasma-conditioned stainless steel with Si-oxychloride"
+            ),
+            valid_cl_to_cl2_ratio=(0.105721, 0.779088),
+            marker_count=16,
+            fit_rmse_log10=0.11656559337098579,
+            fit_maximum_absolute_residual_log10=0.29980451898009086,
+            leave_one_out_rmse_log10=0.13710284271067782,
+            leave_one_out_maximum_absolute_residual_log10=(
+                0.3430112768690421),
+            **common,
+        )
+    raise ValueError(
+        "material must be 'anodized_aluminum' or 'stainless_steel'")
 
 
 @dataclass(frozen=True)

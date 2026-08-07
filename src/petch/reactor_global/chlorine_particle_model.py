@@ -328,6 +328,48 @@ class FixedChlorineChargedTransportProvider:
         return self.state
 
 
+class ChlorineNeutralWallTransportProvider(Protocol):
+    """Condition- and state-dependent neutral-wall transport provider."""
+
+    name: str
+    version: str
+
+    def predict(
+        self,
+        condition: ChlorineFixedPressureCondition,
+        densities_m3: Mapping[str, float],
+    ) -> ChlorineNeutralWallTransport:
+        ...
+
+
+@dataclass(frozen=True)
+class FixedChlorineNeutralWallTransportProvider:
+    """A declared fixed neutral state for reproduction/sensitivity only."""
+
+    state: ChlorineNeutralWallTransport
+    name: str = "fixed_chlorine_neutral_wall_transport"
+    version: str = "1"
+
+    def __post_init__(self):
+        if (
+            not isinstance(self.state, ChlorineNeutralWallTransport)
+            or not str(self.name).strip()
+            or not str(self.version).strip()
+        ):
+            raise ValueError("invalid fixed chlorine neutral provider")
+
+    def predict(
+        self,
+        condition: ChlorineFixedPressureCondition,
+        densities_m3: Mapping[str, float],
+    ) -> ChlorineNeutralWallTransport:
+        if not isinstance(condition, ChlorineFixedPressureCondition):
+            raise TypeError("chlorine fixed-pressure condition is required")
+        _positive_mapping(densities_m3, expected_keys=_CHLORINE_SPECIES)
+        _require_neutral_transport_matches_condition(self.state, condition)
+        return self.state
+
+
 @dataclass(frozen=True)
 class ChlorineParticleSolution:
     """Solved particle state and its independent conservation ledgers."""
@@ -481,11 +523,21 @@ class FixedElectronTemperatureChlorineParticleModel:
         *,
         condition: ChlorineFixedPressureCondition,
         charged_transport_provider: ChlorineChargedTransportProvider,
-        neutral_wall_transport: ChlorineNeutralWallTransport,
+        neutral_wall_transport_provider: (
+            ChlorineNeutralWallTransportProvider),
     ) -> dict[str, object]:
         state = np.exp(np.asarray(log_state, dtype=float))
         densities = dict(zip(_SOLVED_DENSITY_ORDER, state[:6]))
         exhaust_frequency = float(state[6])
+        neutral_wall_transport = neutral_wall_transport_provider.predict(
+            condition, densities)
+        if not isinstance(
+            neutral_wall_transport, ChlorineNeutralWallTransport
+        ):
+            raise TypeError(
+                "neutral transport provider returned an invalid state")
+        _require_neutral_transport_matches_condition(
+            neutral_wall_transport, condition)
         charged_transport = charged_transport_provider.predict(
             condition, densities)
         if not isinstance(charged_transport, ChlorineChargedTransportState):
@@ -601,6 +653,7 @@ class FixedElectronTemperatureChlorineParticleModel:
             "densities": densities,
             "exhaust_frequency_s_inv": exhaust_frequency,
             "neutral_wall": neutral_wall,
+            "neutral_wall_transport": neutral_wall_transport,
             "positive_wall_loss": positive_wall_loss,
             "charged_transport": charged_transport,
             "chlorine_atom_residual_m3_s": chlorine_atom_residual,
@@ -612,7 +665,8 @@ class FixedElectronTemperatureChlorineParticleModel:
         condition: ChlorineFixedPressureCondition,
         *,
         charged_transport_provider: ChlorineChargedTransportProvider,
-        neutral_wall_transport: ChlorineNeutralWallTransport,
+        neutral_wall_transport_provider: (
+            ChlorineNeutralWallTransportProvider),
         initial_densities_m3: Mapping[str, float] | None = None,
         initial_exhaust_loss_frequency_s_inv: float | None = None,
         residual_tolerance: float = 1.0e-8,
@@ -631,28 +685,17 @@ class FixedElectronTemperatureChlorineParticleModel:
         ):
             raise TypeError(
                 "versioned chlorine charged-transport provider is required")
-        if not isinstance(
-            neutral_wall_transport, ChlorineNeutralWallTransport
+        if (
+            not hasattr(neutral_wall_transport_provider, "predict")
+            or not str(
+                getattr(neutral_wall_transport_provider, "name", "")
+            ).strip()
+            or not str(
+                getattr(neutral_wall_transport_provider, "version", "")
+            ).strip()
         ):
-            raise TypeError("chlorine neutral wall transport is required")
-        if neutral_wall_transport.geometry != condition.geometry:
-            raise ValueError("neutral transport geometry does not match condition")
-        if not np.isclose(
-            neutral_wall_transport.diffusivity.total_neutral_density_m3,
-            condition.target_neutral_density_m3,
-            rtol=1.0e-12,
-            atol=0.0,
-        ):
-            raise ValueError(
-                "neutral transport density does not match pressure setpoint")
-        if not np.isclose(
-            neutral_wall_transport.diffusivity.gas_temperature_K,
-            condition.gas_temperature.value,
-            rtol=1.0e-12,
-            atol=0.0,
-        ):
-            raise ValueError(
-                "neutral transport temperature does not match condition")
+            raise TypeError(
+                "versioned chlorine neutral-transport provider is required")
 
         target_density = condition.target_neutral_density_m3
         if initial_densities_m3 is None:
@@ -691,7 +734,8 @@ class FixedElectronTemperatureChlorineParticleModel:
                 state,
                 condition=condition,
                 charged_transport_provider=charged_transport_provider,
-                neutral_wall_transport=neutral_wall_transport,
+                neutral_wall_transport_provider=(
+                    neutral_wall_transport_provider),
             )["residual"],
             x0=np.clip(np.log(initial_vector), lower, upper),
             bounds=(lower, upper),
@@ -704,7 +748,7 @@ class FixedElectronTemperatureChlorineParticleModel:
             result.x,
             condition=condition,
             charged_transport_provider=charged_transport_provider,
-            neutral_wall_transport=neutral_wall_transport,
+            neutral_wall_transport_provider=neutral_wall_transport_provider,
         )
         residual = np.asarray(ledger["residual"])
         if (
@@ -719,6 +763,7 @@ class FixedElectronTemperatureChlorineParticleModel:
             )
         densities = ledger["densities"]
         charged_transport = ledger["charged_transport"]
+        neutral_wall_transport = ledger["neutral_wall_transport"]
         ratio = densities["Cl"] / densities["Cl2"]
         neutral_wall_transport.wall_boundary.require_applicable(
             cl_to_cl2_ratio=ratio,
@@ -799,3 +844,27 @@ def _nonnegative_mapping(
     ):
         raise ValueError("mapping keys or nonnegative values are invalid")
     return converted
+
+
+def _require_neutral_transport_matches_condition(
+    transport: ChlorineNeutralWallTransport,
+    condition: ChlorineFixedPressureCondition,
+) -> None:
+    if transport.geometry != condition.geometry:
+        raise ValueError("neutral transport geometry does not match condition")
+    if not np.isclose(
+        transport.diffusivity.total_neutral_density_m3,
+        condition.target_neutral_density_m3,
+        rtol=1.0e-12,
+        atol=0.0,
+    ):
+        raise ValueError(
+            "neutral transport density does not match pressure setpoint")
+    if not np.isclose(
+        transport.diffusivity.gas_temperature_K,
+        condition.gas_temperature.value,
+        rtol=1.0e-12,
+        atol=0.0,
+    ):
+        raise ValueError(
+            "neutral transport temperature does not match condition")

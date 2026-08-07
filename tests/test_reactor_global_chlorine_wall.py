@@ -1,3 +1,6 @@
+import csv
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -6,10 +9,17 @@ from petch.reactor_global import (
     ChlorineIncidentVelocityState,
     ChlorineWallRecombinationBoundary,
     chlorine_atom_mean_thermal_speed_m_s,
+    stafford_2010_conditioned_wall_recombination_provider,
     thermalized_chlorine_incident_velocity_state,
 )
 from petch.reactor_global.chlorine_wall import BOLTZMANN_J_K
 from petch.reactor_global.transport import ATOMIC_MASS_UNIT_KG
+
+ROOT = Path(__file__).resolve().parents[1]
+STAFFORD_FIGURE8 = (
+    ROOT / "data" / "experimental" / "stafford_2010"
+    / "figure8_chlorine_wall_recombination.csv"
+)
 
 
 def _boundary(**changes):
@@ -187,3 +197,82 @@ def test_local_prediction_requires_predictive_evidence_and_uncertainty():
         evidence_kind="measured",
         relative_measurement_uncertainty=0.2,
     ).supports_local_prediction
+
+
+@pytest.mark.parametrize(
+    "material", ("anodized_aluminum", "stainless_steel"))
+def test_stafford_wall_fit_is_exactly_reproducible_from_digitized_markers(
+        material):
+    with STAFFORD_FIGURE8.open(newline="", encoding="utf-8") as stream:
+        rows = [
+            row for row in csv.DictReader(stream)
+            if row["material"] == material
+        ]
+    ratio = np.asarray([
+        float(row["cl_to_cl2_density_ratio"]) for row in rows])
+    log_probability = np.log10([
+        float(row["cl_recombination_probability"]) for row in rows])
+    slope, intercept = np.polyfit(ratio, log_probability, 1)
+    residual = log_probability - (intercept + slope * ratio)
+    leave_one_out_residual = []
+    for index in range(len(rows)):
+        loo_slope, loo_intercept = np.polyfit(
+            np.delete(ratio, index),
+            np.delete(log_probability, index),
+            1,
+        )
+        leave_one_out_residual.append(
+            log_probability[index]
+            - (loo_intercept + loo_slope * ratio[index])
+        )
+    leave_one_out_residual = np.asarray(leave_one_out_residual)
+    provider = stafford_2010_conditioned_wall_recombination_provider(
+        material)
+
+    assert provider.marker_count == len(rows)
+    assert provider.slope_per_ratio == pytest.approx(slope, rel=1.0e-15)
+    assert provider.intercept_log10 == pytest.approx(
+        intercept, rel=1.0e-15)
+    assert provider.fit_rmse_log10 == pytest.approx(
+        np.sqrt(np.mean(residual ** 2)), rel=1.0e-15)
+    assert provider.fit_maximum_absolute_residual_log10 == pytest.approx(
+        np.max(np.abs(residual)), rel=1.0e-15)
+    assert provider.leave_one_out_rmse_log10 == pytest.approx(
+        np.sqrt(np.mean(leave_one_out_residual ** 2)), rel=1.0e-15)
+    assert (
+        provider.leave_one_out_maximum_absolute_residual_log10
+        == pytest.approx(
+            np.max(np.abs(leave_one_out_residual)), rel=1.0e-15)
+    )
+
+
+def test_stafford_wall_provider_is_ratio_dependent_and_fail_closed():
+    provider = stafford_2010_conditioned_wall_recombination_provider(
+        "anodized_aluminum")
+    low = provider.predict(
+        cl_to_cl2_ratio=0.2,
+        pressure_Pa=5.0 * 0.1333223684,
+        icp_power_W=300.0,
+        gas_temperature_K=300.0,
+    )
+    high = provider.predict(
+        cl_to_cl2_ratio=0.7,
+        pressure_Pa=5.0 * 0.1333223684,
+        icp_power_W=300.0,
+        gas_temperature_K=300.0,
+    )
+    assert high.recombination_probability > low.recombination_probability
+    assert high.evidence_kind == "regressed"
+    assert high.relative_measurement_uncertainty is None
+    assert not high.supports_local_prediction
+    assert not provider.supports_prediction
+    assert high.provenance["coefficient_selection_target"].endswith(
+        "no reactor, feature, or depth observable")
+
+    with pytest.raises(ValueError, match="Cl/Cl2 ratio"):
+        provider.predict(
+            cl_to_cl2_ratio=0.05,
+            pressure_Pa=5.0 * 0.1333223684,
+            icp_power_W=300.0,
+            gas_temperature_K=300.0,
+        )

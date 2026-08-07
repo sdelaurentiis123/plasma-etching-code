@@ -8,6 +8,7 @@ from petch.reactor_global import (
     CylindricalReactor,
     FixedElectronTemperatureChlorineParticleModel,
     FixedChlorineChargedTransportProvider,
+    FixedChlorineNeutralWallTransportProvider,
     LeeEconomouChlorineChargedTransportProvider,
     PositiveIonWallTransport,
     ReactorScalarInput,
@@ -85,6 +86,11 @@ def _neutral_transport(condition, *, ratio_domain=(0.001, 100.0)):
     )
 
 
+def _neutral_provider(condition, *, ratio_domain=(0.001, 100.0)):
+    return FixedChlorineNeutralWallTransportProvider(
+        _neutral_transport(condition, ratio_domain=ratio_domain))
+
+
 def _charged_transport(geometry):
     return ChlorineChargedTransportState(
         geometry=geometry,
@@ -137,7 +143,7 @@ def test_fixed_pressure_chlorine_particle_solver_closes_every_ledger():
         condition,
         charged_transport_provider=FixedChlorineChargedTransportProvider(
             _charged_transport(geometry)),
-        neutral_wall_transport=_neutral_transport(condition),
+        neutral_wall_transport_provider=_neutral_provider(condition),
     )
 
     assert solution.maximum_normalized_residual < 1.0e-12
@@ -173,7 +179,7 @@ def test_pressure_controller_exhaust_is_solved_after_dissociation():
         condition,
         charged_transport_provider=FixedChlorineChargedTransportProvider(
             _charged_transport(geometry)),
-        neutral_wall_transport=_neutral_transport(condition),
+        neutral_wall_transport_provider=_neutral_provider(condition),
     )
     naive_feed_over_neutral_inventory = (
         condition.chlorine_molecule_feed.value
@@ -193,7 +199,7 @@ def test_solution_refuses_wall_probability_outside_final_ratio_domain():
             condition,
             charged_transport_provider=FixedChlorineChargedTransportProvider(
                 _charged_transport(geometry)),
-            neutral_wall_transport=_neutral_transport(
+            neutral_wall_transport_provider=_neutral_provider(
                 condition, ratio_domain=(0.9, 1.1)),
         )
 
@@ -209,7 +215,7 @@ def test_solver_rejects_transport_from_a_different_geometry():
             condition,
             charged_transport_provider=FixedChlorineChargedTransportProvider(
                 _charged_transport(other_geometry)),
-            neutral_wall_transport=_neutral_transport(condition),
+            neutral_wall_transport_provider=_neutral_provider(condition),
         )
 
 
@@ -261,7 +267,7 @@ def test_state_dependent_charged_transport_closes_inside_particle_solve():
     ).solve(
         condition,
         charged_transport_provider=provider,
-        neutral_wall_transport=_neutral_transport(condition),
+        neutral_wall_transport_provider=_neutral_provider(condition),
     )
 
     assert solution.maximum_normalized_residual < 1.0e-11
@@ -284,20 +290,20 @@ def test_hamilton_dissociation_deck_closes_particle_solve_without_depth_fit():
         },
         ion_temperature=_scalar(0.12, "eV"),
     )
-    neutral_transport = _neutral_transport(condition)
+    neutral_transport_provider = _neutral_provider(condition)
     upgraded = FixedElectronTemperatureChlorineParticleModel(
         build_hamilton_dissociation_chlorine_particle_network()
     ).solve(
         condition,
         charged_transport_provider=provider,
-        neutral_wall_transport=neutral_transport,
+        neutral_wall_transport_provider=neutral_transport_provider,
     )
     legacy = FixedElectronTemperatureChlorineParticleModel(
         build_lee_lieberman_chlorine_particle_network()
     ).solve(
         condition,
         charged_transport_provider=provider,
-        neutral_wall_transport=neutral_transport,
+        neutral_wall_transport_provider=neutral_transport_provider,
     )
 
     assert upgraded.maximum_normalized_residual < 1.0e-11

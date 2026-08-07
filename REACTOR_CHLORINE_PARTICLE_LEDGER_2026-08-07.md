@@ -85,6 +85,16 @@ source reproduction. This is still not a complete predictive chemistry deck:
 the remaining attachment, detachment, neutralization, and species-resolved
 ionization rows retain their separate evidence boundaries.
 
+Neutral wall transport is also now a versioned state-dependent provider. On
+every nonlinear ledger evaluation it obtains the current `n_Cl/n_Cl2`,
+evaluates the condition-scoped wall-response provider, and re-solves the exact
+cylindrical Robin roots. The Stafford Figure-8 empirical providers reproduce
+the committed direct-data regressions and report fit/leave-one-out residuals,
+but remain non-predictive because the source has no absolute measurement
+uncertainty and omits individual marker powers. They fail outside the measured
+surface, ratio, pressure, power, and 300 K domains; in particular they cannot
+be silently transplanted to Malyshev's 333 K Lam wall.
+
 ## Deliberate fail-closed verdict
 
 `ChlorineParticleSolution.supports_prediction` is always `False` at this rung.
@@ -93,7 +103,8 @@ The solution reports the missing closures explicitly:
 1. electron power balance (so `T_e` follows absorbed power rather than being
    supplied);
 2. condition-input evidence where measurements are absent;
-3. predictive neutral diffusivity and incident-velocity evidence;
+3. predictive neutral diffusivity, incident-velocity, and conditioned-wall
+   evidence with uncertainty;
 4. predictive species-resolved charged transport (the current provider is an
    exact source-model replay, not measured/evaluated transport);
 5. equipment-specific exhaust/conductance when the common volumetric throttle

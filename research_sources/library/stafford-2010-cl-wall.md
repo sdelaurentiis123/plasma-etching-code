@@ -32,17 +32,22 @@
 | S6 | Cl2 competes with Cl for adsorption sites; absolute molecular impingement density also matters, so n_Cl/n_Cl2 alone is not sufficient. | Forbids a one-coordinate empirical law from being labeled fundamental closure. |
 | S7 | In Figure 9 no constant gamma_Cl curve fits the full pressure-dependent dissociation dataset; the required gamma rises with pressure. | Negative validation gate for any constant-gamma reactor solver. |
 | S8 | In a conditioned/roughened quartz tube the inferred gamma_Cl is 0.02–0.04, versus less than 0.005 for smooth annealed quartz under an atomic beam. | Quantifies the magnitude of reactor seasoning and roughness effects. |
-| S9 | Figure 8 is reproduced from the authors’ refs. 31 and 34. | The 2010 figure is suitable for an evidence board; retrieve the two original articles before promoting an interpolation to a production provider. |
+| S9 | Figure 8 is reproduced from the authors’ direct spinning-wall studies, now archived separately as `guha-2008-cl-wall` and `stafford-2009-cl-wall`. | The review figure is suitable for a reproducible empirical wall-response provider, while the original articles retain the experiment and flux-assumption details. |
 
 ## Executable decision
 
-The 39 direct Figure-8 markers are frozen as a no-fit wall-model validation
-board. They replace the idea of selecting one chlorine recombination
-coefficient. They do **not** yet define an executable wall law: pressure and
-power are partly confounded, individual powers are absent, absolute impingement
-density is not tabulated, and the original Figure-8 articles have not yet been
-independently archived.
+The 39 direct Figure-8 markers remain the wall-model validation board. Two
+explicit empirical providers reproduce an unweighted first-order regression
+of `log10(gamma)` against `n_Cl/n_Cl2`, separately for conditioned anodized Al
+and conditioned stainless steel. The coefficients are recomputed from the
+committed CSV in tests. Leave-one-out RMS residuals are `0.1529` and `0.1371`
+log10 units, respectively.
 
-The next native reactor implementation must therefore expose wall-condition
-state and fail outside a declared evidence domain. It may be graded against
-this board, but feature depth must not choose its wall parameters.
+These providers are deliberately graded `regressed`, not predictive. The
+figure supplies no absolute measurement uncertainty, individual powers are
+absent, pressure and power are partly confounded, and the paper says absolute
+Cl2 impingement also matters. Runtime use is restricted to the measured ratio,
+pressure, power, surface, and 300 K domains. The neutral-transport provider
+recomputes this wall boundary and the exact cylindrical Robin roots from the
+current nonlinear density state. It refuses a direct transplant to the 333 K
+Malyshev Lam wall. Feature depth never chooses the coefficients.
