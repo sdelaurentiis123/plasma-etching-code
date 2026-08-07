@@ -19,6 +19,7 @@ def _boundary(**changes):
         "valid_cl_to_cl2_ratio": (0.1, 0.8),
         "valid_pressure_Pa": (1.25 * 0.1333223684, 20 * 0.1333223684),
         "valid_icp_power_W": (100.0, 600.0),
+        "valid_gas_temperature_K": (280.0, 350.0),
         "relative_measurement_uncertainty": None,
     }
     arguments.update(changes)
@@ -69,6 +70,7 @@ def test_local_wall_flux_uses_quarter_n_vbar_and_conserves_chlorine():
         ("valid_cl_to_cl2_ratio", (0.8, 0.1)),
         ("valid_pressure_Pa", (0.0, 1.0)),
         ("valid_icp_power_W", (600.0, 100.0)),
+        ("valid_gas_temperature_K", (350.0, 280.0)),
     ),
 )
 def test_wall_boundary_rejects_unphysical_or_unscoped_inputs(field, value):
@@ -83,16 +85,25 @@ def test_wall_boundary_rejects_unphysical_or_unscoped_inputs(field, value):
             "cl_to_cl2_ratio": 0.05,
             "pressure_Pa": 5.0 * 0.1333223684,
             "icp_power_W": 300.0,
+            "gas_temperature_K": 300.0,
         },
         {
             "cl_to_cl2_ratio": 0.35,
             "pressure_Pa": 30.0 * 0.1333223684,
             "icp_power_W": 300.0,
+            "gas_temperature_K": 300.0,
         },
         {
             "cl_to_cl2_ratio": 0.35,
             "pressure_Pa": 5.0 * 0.1333223684,
             "icp_power_W": 700.0,
+            "gas_temperature_K": 300.0,
+        },
+        {
+            "cl_to_cl2_ratio": 0.35,
+            "pressure_Pa": 5.0 * 0.1333223684,
+            "icp_power_W": 300.0,
+            "gas_temperature_K": 400.0,
         },
     ),
 )
@@ -100,7 +111,6 @@ def test_wall_boundary_fails_outside_declared_evidence_domain(condition):
     with pytest.raises(ValueError, match="outside"):
         _boundary().evaluate(
             chlorine_atom_density_m3=1.0e20,
-            gas_temperature_K=300.0,
             **condition,
         )
 

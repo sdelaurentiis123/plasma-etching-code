@@ -26,6 +26,14 @@ from .chlorine_wall import (
     ChlorineWallRecombinationBoundary,
     chlorine_atom_mean_thermal_speed_m_s,
 )
+from .chlorine_transport import (
+    ECONOMOU_CHLORINE_REDUCED_DIFFUSIVITY_M_INV_S,
+    ChlorineNeutralWallTransport,
+    ChlorineVolumeWallRates,
+    lymberopoulos_economou_1995_chlorine_diffusivity,
+    ramamurthi_economou_2002_chlorine_diffusivity,
+    solve_chlorine_neutral_wall_transport,
+)
 from .evaluated_chlorine import (
     ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
     HAMILTON_2018_CL2_DISSOCIATION_STATES,
@@ -59,6 +67,13 @@ from .model import (
     LeeLiebermanArgonGlobalModel,
     PASCAL_PER_MTORR,
 )
+from .neutral_transport import (
+    NEUTRAL_DIFFUSIVITY_EVIDENCE_KINDS,
+    CylindricalNeutralWallLoss,
+    NeutralDiffusivityState,
+    ReducedNeutralDiffusivity,
+    solve_cylindrical_neutral_wall_loss,
+)
 from .power import (
     POWER_EVIDENCE_KINDS,
     PREDICTIVE_EVIDENCE_KINDS,
@@ -82,6 +97,7 @@ from .transport import (
 
 __all__ = [
     "CM3_TO_M3",
+    "ECONOMOU_CHLORINE_REDUCED_DIFFUSIVITY_M_INV_S",
     "E_CHARGE_C",
     "ELECTRON_MASS_KG",
     "ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV",
@@ -96,6 +112,8 @@ __all__ = [
     "CHLORINE_MOLECULE_MASS_AMU",
     "ChlorineWallFlux",
     "ChlorineWallRecombinationBoundary",
+    "ChlorineNeutralWallTransport",
+    "ChlorineVolumeWallRates",
     "ArgonGlobalCondition",
     "ArgonGlobalSolution",
     "ArgonTransportProvider",
@@ -103,6 +121,7 @@ __all__ = [
     "AbsorbedPowerEstimate",
     "ConstantRateCoefficient",
     "CylindricalReactor",
+    "CylindricalNeutralWallLoss",
     "ElectronArrheniusRateCoefficient",
     "ElectronInverseTemperaturePolynomialRateCoefficient",
     "ElectronBase10LogPolynomialRateCoefficient",
@@ -115,12 +134,15 @@ __all__ = [
     "LeeLiebermanArgonTransportProvider",
     "MatchedRFPowerBoundary",
     "MeasuredAbsorbedPowerBoundary",
+    "NEUTRAL_DIFFUSIVITY_EVIDENCE_KINDS",
+    "NeutralDiffusivityState",
     "PASCAL_PER_MTORR",
     "POWER_EVIDENCE_KINDS",
     "PREDICTIVE_EVIDENCE_KINDS",
     "RateContext",
     "Reaction",
     "ReactionNetwork",
+    "ReducedNeutralDiffusivity",
     "Species",
     "STANDARD_PRESSURE_PA",
     "WALL_RECOMBINATION_EVIDENCE_KINDS",
@@ -132,11 +154,15 @@ __all__ = [
     "hamilton_2018_cl2_state_dissociation_reactions",
     "lee_lieberman_argon_species",
     "lee_lieberman_chlorine_species",
+    "lymberopoulos_economou_1995_chlorine_diffusivity",
     "lee_lieberman_argon_ion_temperature_eV",
     "nist_argon_self_diffusion_m2_s",
     "nist_hayes_atomic_chlorine_ionization_rate",
     "nist_molecular_chlorine_total_ionization_rate",
     "phelps_argon_momentum_transfer_cross_section_m2",
     "phelps_argon_momentum_transfer_rate_m3_s",
+    "ramamurthi_economou_2002_chlorine_diffusivity",
+    "solve_chlorine_neutral_wall_transport",
+    "solve_cylindrical_neutral_wall_loss",
     "time_average_real_power_W",
 ]

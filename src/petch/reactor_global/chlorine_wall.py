@@ -61,6 +61,7 @@ class ChlorineWallRecombinationBoundary:
     valid_cl_to_cl2_ratio: tuple[float, float]
     valid_pressure_Pa: tuple[float, float]
     valid_icp_power_W: tuple[float, float]
+    valid_gas_temperature_K: tuple[float, float]
     relative_measurement_uncertainty: float | None = None
     provenance: Mapping[str, object] | None = None
 
@@ -79,6 +80,11 @@ class ChlorineWallRecombinationBoundary:
         power_domain = _bounded_domain(
             self.valid_icp_power_W,
             name="ICP power",
+            allow_zero=False,
+        )
+        temperature_domain = _bounded_domain(
+            self.valid_gas_temperature_K,
+            name="gas temperature",
             allow_zero=False,
         )
         uncertainty = self.relative_measurement_uncertainty
@@ -103,6 +109,8 @@ class ChlorineWallRecombinationBoundary:
         object.__setattr__(self, "valid_cl_to_cl2_ratio", ratio_domain)
         object.__setattr__(self, "valid_pressure_Pa", pressure_domain)
         object.__setattr__(self, "valid_icp_power_W", power_domain)
+        object.__setattr__(
+            self, "valid_gas_temperature_K", temperature_domain)
         object.__setattr__(
             self, "relative_measurement_uncertainty", uncertainty)
         object.__setattr__(
@@ -130,12 +138,15 @@ class ChlorineWallRecombinationBoundary:
         cl_to_cl2_ratio: float,
         pressure_Pa: float,
         icp_power_W: float,
+        gas_temperature_K: float,
     ) -> None:
         values = {
             "Cl/Cl2 ratio": (
                 float(cl_to_cl2_ratio), self.valid_cl_to_cl2_ratio),
             "pressure": (float(pressure_Pa), self.valid_pressure_Pa),
             "ICP power": (float(icp_power_W), self.valid_icp_power_W),
+            "gas temperature": (
+                float(gas_temperature_K), self.valid_gas_temperature_K),
         }
         for name, (value, domain) in values.items():
             if not np.isfinite(value) or not domain[0] <= value <= domain[1]:
@@ -155,6 +166,7 @@ class ChlorineWallRecombinationBoundary:
             cl_to_cl2_ratio=cl_to_cl2_ratio,
             pressure_Pa=pressure_Pa,
             icp_power_W=icp_power_W,
+            gas_temperature_K=gas_temperature_K,
         )
         density = float(chlorine_atom_density_m3)
         if not np.isfinite(density) or density < 0.0:
