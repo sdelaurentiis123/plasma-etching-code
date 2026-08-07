@@ -62,7 +62,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`joubert-1994-jvsta`](library/joubert-1994-jvsta.md) | Joubert, Oehrlein & Surendra, JVST A 12, 665 (1994) | VIA CHANG THESIS (body [VERIFY]) |
 | [`karahashi-2007`](library/karahashi-2007.md) | Karahashi, ion-beam SiO2/CFx | FULL TEXT: research_sources/thesis_extracts/karahashi_2007_sio2_cfx_ionbeam.txt |
 | [`kwon-2006-jvsta`](library/kwon-2006-jvsta.md) | Kwon et al., JVST A 24, 1906/1914/1920 (2006) | PARTIAL (Fig 3.4 replot of Gray 1993) |
-| [`levinson-llnl`](library/levinson-llnl.md) | Levinson, Shaqfeh, Balooch & Hamza (LLNL) | ABSTRACT/relay (citation corrected) |
+| [`levinson-llnl`](library/levinson-llnl.md) | Levinson, Shaqfeh, Balooch & Hamza controlled chlorine-beam corpus | PRIMARY FULL TEXT ONLINE; FEATURE TIME/FLUENCE AND ORIGINAL PIXELS MISSING |
 | [`mahorowala-2002`](library/mahorowala-2002.md) | Mahorowala & Sawin, JVST B 20, 1055/1077 (2002) | ABSTRACT/relay |
 | [`steinbruchel`](library/steinbruchel.md) | Steinbrüchel, sqrt-E yield form | VIA ARM + THESES |
 | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | Takada, Toyoda & Sugai, stable C5F8 molecule / Ar+ co-incidence on SiO2 | FULL TEXT + PIL-AUDITED FIGURE 3 |

@@ -14,6 +14,14 @@ def test_cross_chemistry_ledger_keeps_evidence_classes_separate():
     assert vella["fit_to_compared_depth_or_yield"] is False
     assert vella["feature_profile_test"] is False
 
+    levinson = boards["Levinson 1997 Ar+/Cl2/Si MIBE features"]
+    assert levinson["point_count"] == 3
+    assert levinson["reported_absolute_feature_depths"] is True
+    assert levinson["absolute_depth_or_depth_per_dose"] is False
+    assert levinson["feature_profile_test"] is False
+    assert levinson["original_pixels_archived"] is False
+    assert levinson["formal_pass_label"] is False
+
 
 def test_no_held_out_feature_pass_is_claimed_before_prediction():
     audit = build_audit()
@@ -30,3 +38,5 @@ def test_no_held_out_feature_pass_is_claimed_before_prediction():
     assert summary["formal_held_out_feature_or_profile_passes"] == 0
     assert summary[
         "independent_non_krueger_chemistry_families_with_absolute_surface_depth_evidence"] == 2
+    assert summary[
+        "controlled_feature_boards_blocked_by_missing_time_or_fluence"] == 1

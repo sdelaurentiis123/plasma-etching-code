@@ -21,6 +21,9 @@ YOSHIE_VISION = (
 YOSHIE_FEATURES = (
     ROOT / "data" / "experimental" / "yoshie_2023"
     / "figures5_6_feature_depths.csv")
+LEVINSON = (
+    ROOT / "results" / "curated"
+    / "levinson_1997_feature_identifiability" / "audit.json")
 OUTPUT = (
     ROOT / "results" / "curated" / "cross_chemistry_depth_evidence"
     / "audit.json")
@@ -38,6 +41,7 @@ def build_audit() -> dict:
     tinacba = _load(TINACBA)
     vella = _load(VELLA)
     krueger = _load(KRUEGER)
+    levinson = _load(LEVINSON)
     yoshie_vision = _load(YOSHIE_VISION)
     with YOSHIE_FEATURES.open(newline="", encoding="utf-8") as stream:
         yoshie_rows = list(csv.DictReader(stream))
@@ -70,6 +74,8 @@ def build_audit() -> dict:
             "krueger_depth_identifiability_sha256": _sha256(KRUEGER),
             "yoshie_visual_audit_sha256": _sha256(YOSHIE_VISION),
             "yoshie_feature_table_sha256": _sha256(YOSHIE_FEATURES),
+            "levinson_1997_feature_identifiability_sha256":
+                _sha256(LEVINSON),
         },
         "boards": [
             {
@@ -119,6 +125,30 @@ def build_audit() -> dict:
                 "scope": vella["claim"],
             },
             {
+                "board": "Levinson 1997 Ar+/Cl2/Si MIBE features",
+                "chemistry_and_material": (
+                    "monoenergetic Ar+ plus molecular Cl2 on masked Si"),
+                "evidence_class": (
+                    "controlled_beam_feature_profiles_missing_time_fluence"),
+                "absolute_depth_or_depth_per_dose": False,
+                "point_count": len(levinson["figure11_cases"]),
+                "reported_absolute_feature_depths": True,
+                "surface_model_independent_of_feature_profiles": (
+                    levinson["surface_closure"][
+                        "independent_of_feature_profiles"]),
+                "fit_to_compared_depth_or_yield": False,
+                "boundary_strength": (
+                    "monoenergetic normal Ar+ and isotropic Cl2 with measured "
+                    "sample-position current, but Figure 11 omits the "
+                    "case-specific current/fluence and exposure time"),
+                "feature_profile_test": False,
+                "original_pixels_archived": levinson["source"][
+                    "source_pixels_archived"],
+                "value_blind_held_out": False,
+                "formal_pass_label": False,
+                "scope": levinson["verdict"],
+            },
+            {
                 "board": "Krueger 2024 Ar/C4F6/O2 trench",
                 "chemistry_and_material": "Ar/C4F6/O2 on masked SiO2",
                 "evidence_class": "evaluated_feature_depth_with_missing_boundary",
@@ -165,6 +195,7 @@ def build_audit() -> dict:
             "independent_non_krueger_chemistry_families_with_absolute_surface_depth_evidence": 2,
             "formal_held_out_feature_or_profile_predictions_completed": 0,
             "formal_held_out_feature_or_profile_passes": 0,
+            "controlled_feature_boards_blocked_by_missing_time_or_fluence": 1,
             "value_blind_held_out_feature_depth_targets_ready": len(yoshie_rows),
             "krueger_absolute_feature_depth_passed": False,
             "current_strongest_defensible_statement": (
