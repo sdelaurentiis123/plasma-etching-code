@@ -32,6 +32,7 @@
 | Q7 | Table 3 prints pooling as `Ar* + Ar* -> Ar + Ar+`. | Literal import violates charge. The closed ledger must make the physically emitted electron explicit and record this completion. |
 | Q8 | Figure 3 reports `Te(p)` at 1000 W, 35 SCCM, zero recombination coefficient; argon `Te` decreases monotonically with pressure. | Published-model reproduction board, not independent validation. |
 | Q9 | Figure 8 compares model curves with three argon experiments using each experiment’s geometry and operating conditions. | The symbols cannot be pooled anonymously; Ra/Mahoney/Oomori primary conditions must be recovered and preregistered separately. |
+| Q10 | Figure 3's pure-Ar curve was PIL-digitized at 18 pressures and used only after the gate was frozen. | The no-fit implementation passed at both 5 and 8 Te wall-energy endpoints: worst MAPE 9.210%, worst point 14.669%, monotonic, with maximum balance residual 1.44e-14. This is reproduction of the source model, not independent validation. |
 
 ## Use decision
 

@@ -1,0 +1,41 @@
+{
+  "gate": "Lee--Lieberman 1994 Figure 3 pure-Ar reproduction",
+  "claim_class": "published-model reproduction, not independent validation",
+  "coefficient_selection_target": null,
+  "reference_points": 18,
+  "wall_energy_range_members_Te": [
+    5.0,
+    8.0
+  ],
+  "limits": {
+    "mean_absolute_percent_error": 10.0,
+    "maximum_absolute_percent_error": 20.0,
+    "maximum_normalized_residual": 1e-08,
+    "monotonic_decrease_required": true,
+    "positive_finite_outputs_required": true
+  },
+  "members": [
+    {
+      "wall_energy_factor_Te": 5.0,
+      "mean_absolute_percent_error": 9.206348482953645,
+      "maximum_absolute_percent_error": 14.66858404674115,
+      "monotonically_decreasing_with_pressure": true,
+      "maximum_normalized_residual": 1.1069167805900109e-14,
+      "all_positive_finite": true,
+      "passed": true
+    },
+    {
+      "wall_energy_factor_Te": 8.0,
+      "mean_absolute_percent_error": 9.209509140566487,
+      "maximum_absolute_percent_error": 14.668541983879537,
+      "monotonically_decreasing_with_pressure": true,
+      "maximum_normalized_residual": 1.4374201517125407e-14,
+      "all_positive_finite": true,
+      "passed": true
+    }
+  ],
+  "worst_member_mean_absolute_percent_error": 9.209509140566487,
+  "worst_member_maximum_absolute_percent_error": 14.66858404674115,
+  "passed": true,
+  "predictive_boundary": "Transport is evidence-classed published_model because the NIST Ar self-diffusion correlation is extrapolated from 418 K to the source model's 600 K. Independent reactor data remain required."
+}

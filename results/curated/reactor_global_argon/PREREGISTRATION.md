@@ -118,3 +118,17 @@ unchanged feature physics -> depth/profile`.
 Until the C4F6 molecular deck and the relevant reactor/sheath boundary are
 validated on non-Krüger measurements, Krüger remains a published-boundary
 sensitivity forecast rather than a reactor-derived absolute-depth prediction.
+
+## Execution record
+
+Stage A and Stage B were executed on 2026-08-07. Stage B passed at both
+endpoints of the source's published ion-wall-energy range:
+
+- `5 Te`: MAPE `9.206%`, maximum APE `14.669%`;
+- `8 Te`: MAPE `9.210%`, maximum APE `14.669%`;
+- strictly decreasing electron temperature with pressure in both cases;
+- maximum normalized particle/power residual `1.44e-14`.
+
+The digitization manifest, per-point results, machine-readable grade, and
+claim-boundary report are adjacent to this preregistration. Stage C remains
+unexecuted and requires condition-specific primary experimental inputs.

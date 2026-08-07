@@ -1,0 +1,59 @@
+{
+  "source": {
+    "bibkey": "lee-lieberman-1994-global",
+    "figure": "Figure 3, pure-Ar solid heavy curve",
+    "source_pdf_sha256": "f2049e7041984d658d23688e8e8112a8d8e8a524172a8d2e335be8fde7fc2e23",
+    "render_sha256": "e8f26ee36f1fde182ff4c1f6b7a74ac6f8b4f2791d009b26b978bcc2b2713fae",
+    "render_size_pixels": [
+      1990,
+      1527
+    ],
+    "render_resolution_dpi": 180,
+    "source_raster_committed": false
+  },
+  "conditions": {
+    "absorbed_power_W": 1000.0,
+    "flow_sccm": 35.0,
+    "surface_recombination_coefficient": 0.0,
+    "reactor_radius_m": 0.1525,
+    "reactor_length_m": 0.075,
+    "gas_temperature_K": 600.0
+  },
+  "axis_calibration": {
+    "x_scale": "log10 pressure in mTorr",
+    "x_at_0.1_mTorr_pixels": 389.0,
+    "x_pixels_per_decade": 331.0,
+    "x_interior_major_ticks_pixels": [
+      720.0,
+      1051.0,
+      1382.0
+    ],
+    "y_scale": "log10 electron temperature in eV",
+    "y_at_1_eV_pixels": 1268.0,
+    "y_at_10_eV_pixels": 487.0,
+    "y_pixels_per_decade": 781.0
+  },
+  "method": "Full-resolution visual curve identification and axis calibration; PIL five-column dark-stroke recentering at preregistered pressure samples; explicit overlap flag where Ar and O2 strokes merge.",
+  "uncertainty": {
+    "isolated_stroke_relative_temperature_percent": 2.0,
+    "overlapped_stroke_relative_temperature_percent": 3.5,
+    "basis": "stroke half-height plus a two-pixel axis-center allowance; overlap points carry an additional centerline ambiguity"
+  },
+  "row_count": 18,
+  "outputs": {
+    "csv": "research_sources/digitized/lee_lieberman_1994_figure3_argon.csv",
+    "overlay_committed": false,
+    "overlay_sha256": "ea4be63f42e71933683eb340d2ad8fe0f1254132563228dcf92fe885b2d9ce2c"
+  },
+  "visual_inspection": {
+    "status": "passed",
+    "inspection_date": "2026-08-07",
+    "inspection_resolution_pixels": [
+      1990,
+      1527
+    ],
+    "finding": "All markers centered on the heavy Ar stroke; orange markers correctly flag the Ar/O2 overlap region."
+  },
+  "rights": "Only derived coordinates and calibration metadata are committed; the source raster and annotated overlay remain local.",
+  "source_render_input": "local non-redistributed source render"
+}
