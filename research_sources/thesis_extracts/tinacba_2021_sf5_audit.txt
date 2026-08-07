@@ -1,0 +1,51 @@
+Tinacba et al. 2021 SF5+ beam/MD audit extract
+================================================
+
+Source
+------
+E. J. C. Tinacba, T. Ito, K. Karahashi, M. Isobe, and S. Hamaguchi,
+"Molecular dynamics simulation for reactive ion etching of Si and SiO2 by
+SF5+ ions," Journal of Vacuum Science & Technology B 39, 043203 (2021).
+DOI: 10.1116/6.0001230
+
+Author-hosted full text:
+https://researchmap.jp/satoshi_hamaguchi/published_papers/37820817/attachment_file.pdf
+PDF SHA-256:
+c0be3b475aa17b396c1f788baee14ba37b9026b264bb870dc2553055f27b31ad
+
+Audited source locations
+------------------------
+Printed page 043203-2:
+- SF5+ was mass selected and decelerated to 150--2000 eV.
+- "The mass and energy of incident ions were measured by an energy-mass
+  analyzer"
+- Beam current was measured by a Faraday cup at the sample position.
+- No radical beam was used.
+- Depth was measured with a Dektak3ST contact profilometer.
+- The experimental conversion is Y = d*N/D.
+
+Printed pages 043203-2--6:
+- Si/O/F use previously published modified Stillinger-Weber potentials.
+- The S-F carrier potential was conditioned on B3LYP/6-311G DFT plus a
+  published S-F bond energy/distance.
+- S-S, S-Si, and S-O chemistry was intentionally suppressed; sulfur retains
+  carrier bonding to F plus its physical mass/radius.
+- A typical trajectory uses 4000 successive impacts on one evolving surface.
+
+Printed page 043203-7, Figure 8:
+- DFT-informed MD open diamonds are compared with independent experimental
+  filled circles for Si and SiO2 at 150 and 2000 eV.
+- Figure render and marker centers are audited in
+  data/experimental/tinacba_2021/.
+
+Printed page 043203-8, Figure 10:
+- At 2000 eV, the MD depth slopes are 12.5 nm (Si) and 13.6 nm (SiO2) per
+  1e16 cm^-2.
+
+Claim boundary
+--------------
+This source validates a mass-selected, normal-incidence SF5+ atomistic surface
+provider. It does not supply an SF6 reactor boundary, an ion-mixture law,
+off-normal response, neutral-F synergy, or general sulfur-surface chemistry.
+The full article was read for this audit; the copyrighted PDF is checksum
+pinned but not redistributed in the repository.

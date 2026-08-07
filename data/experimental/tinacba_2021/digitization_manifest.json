@@ -1,0 +1,69 @@
+{
+  "manifest_id": "TINACBA-2021-FIG8-SF5-MD-EXPERIMENT-R1",
+  "source": {
+    "citation": "E. J. C. Tinacba, T. Ito, K. Karahashi, M. Isobe, and S. Hamaguchi, JVST B 39, 043203 (2021)",
+    "doi": "10.1116/6.0001230",
+    "retrieval_url": "https://researchmap.jp/satoshi_hamaguchi/published_papers/37820817/attachment_file.pdf",
+    "pdf_sha256": "c0be3b475aa17b396c1f788baee14ba37b9026b264bb870dc2553055f27b31ad",
+    "pdf_page": 8,
+    "print_page": "043203-7",
+    "figure": "Figure 8",
+    "render_dpi": 300,
+    "render_sha256": "9a0867caa7991dbcf8495baf9ed5a47a4d140fe8055b578777664edcf0800a02",
+    "render_size_px": [
+      2550,
+      3375
+    ]
+  },
+  "experiment": {
+    "projectile": "mass-selected SF5+",
+    "incidence": "normal",
+    "energy_measurement": "energy-mass analyzer",
+    "dose_measurement": "Faraday cup at sample position",
+    "depth_measurement": "Dektak3ST contact profilometer",
+    "radical_beam": "none",
+    "reported_energy_range_eV": [
+      150,
+      2000
+    ],
+    "yield_equation": "Y = d*N/D"
+  },
+  "atomistic_provider": {
+    "method": "modified Stillinger-Weber molecular dynamics",
+    "surface_temperature_K": 300,
+    "impacts_per_trajectory": 4000,
+    "sulfur_model": "DFT-informed S-F carrier model; S-S, S-Si, and S-O chemical reactions intentionally suppressed",
+    "fit_to_beam_depth_or_yield": false
+  },
+  "pixel_calibration": {
+    "y_at_zero_yield": 2484.0,
+    "y_at_seven_yield": 1808.5,
+    "left_x_at_zero_eV": 306.5,
+    "left_x_at_2200_eV": 1233.5,
+    "right_x_at_zero_eV": 1394.5,
+    "right_x_at_2200_eV": 2320.0
+  },
+  "digitization": {
+    "method": "300-dpi Poppler render; Pillow dark-axis verification; full-resolution marker-center transcription and QA overlay",
+    "point_count": 16,
+    "yield_bound": 0.04,
+    "yield_bound_basis": "3.9 source pixels on the linear 0-7 axis; covers line width, anti-aliasing, and center placement",
+    "maximum_setpoint_x_offset_eV": 1.888,
+    "energy_policy": "use plotted nominal setpoints; retain x pixels as a check"
+  },
+  "claim_boundary": {
+    "supports": "retrospective independent validation of the source's DFT-informed atomistic provider at mass-selected beam points",
+    "does_not_support": [
+      "an SF6 reactor boundary",
+      "an SFx+ mixture law",
+      "off-normal incidence",
+      "neutral-F synergy",
+      "sulfur-surface chemistry",
+      "a Krueger C4F6 depth fit"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/tinacba_2021/figure8_sf5_md_experiment.csv",
+    "sha256": "6049bef74587d074cd569106c320742c1313e9052ea1749fe2d6d4139c655e17"
+  }
+}

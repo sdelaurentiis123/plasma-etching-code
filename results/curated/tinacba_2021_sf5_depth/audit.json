@@ -1,0 +1,110 @@
+{
+  "boundary": {
+    "dose_measured_at_sample_position": true,
+    "energies_scored_eV": [
+      150,
+      2000
+    ],
+    "energy_measured": true,
+    "mass_selected": true,
+    "neutral_radical_beam": false,
+    "normal_incidence": true,
+    "projectile": "SF5+"
+  },
+  "claim": "retrospective no-yield-fit atomistic-provider validation against mass-selected SF5+ beam depth-per-dose; not a feature or reactor prediction",
+  "comparison": {
+    "maximum_absolute_relative_depth_error": 0.15041275263307718,
+    "mean_absolute_relative_depth_error": 0.058794014290942664,
+    "point_count": 4,
+    "points": [
+      {
+        "absolute_relative_depth_error": 0.15041275263307718,
+        "digitization_bound_each_yield": 0.04,
+        "energy_eV": 150,
+        "material": "Si",
+        "md_yield_si_per_sf5": 2.0207,
+        "measured_depth_nm_per_1e16_cm2": 3.417368363709941,
+        "measured_yield_si_per_sf5": 1.7565,
+        "predicted_depth_nm_per_1e16_cm2": 3.931384146056748,
+        "signed_relative_depth_error": 0.15041275263307718
+      },
+      {
+        "absolute_relative_depth_error": 0.04114406093015721,
+        "digitization_bound_each_yield": 0.04,
+        "energy_eV": 2000,
+        "material": "Si",
+        "md_yield_si_per_sf5": 6.4249,
+        "measured_depth_nm_per_1e16_cm2": 12.006023440053541,
+        "measured_yield_si_per_sf5": 6.171,
+        "predicted_depth_nm_per_1e16_cm2": 12.500000000000002,
+        "signed_relative_depth_error": 0.04114406093015721
+      },
+      {
+        "absolute_relative_depth_error": 0.0,
+        "digitization_bound_each_yield": 0.04,
+        "energy_eV": 150,
+        "material": "SiO2",
+        "md_yield_si_per_sf5": 0.8187,
+        "measured_depth_nm_per_1e16_cm2": 3.32645793499044,
+        "measured_yield_si_per_sf5": 0.8187,
+        "predicted_depth_nm_per_1e16_cm2": 3.32645793499044,
+        "signed_relative_depth_error": 0.0
+      },
+      {
+        "absolute_relative_depth_error": 0.04361924360053626,
+        "digitization_bound_each_yield": 0.04,
+        "energy_eV": 2000,
+        "material": "SiO2",
+        "md_yield_si_per_sf5": 3.3472,
+        "measured_depth_nm_per_1e16_cm2": 13.031572657743787,
+        "measured_yield_si_per_sf5": 3.2073,
+        "predicted_depth_nm_per_1e16_cm2": 13.600000000000003,
+        "signed_relative_depth_error": 0.04361924360053626
+      }
+    ],
+    "post_hoc_pass_gate_declared": false,
+    "rmse_yield_si_per_sf5": 0.19611148615009777
+  },
+  "depth_conversion": {
+    "comparison_invariance": "predicted/measured depth ratio equals MD/measured yield ratio for any common declared D and N",
+    "density_derivation": "Figure 8 MD yield at 2000 eV combined with Figure 10 printed MD slopes 12.5 nm (Si) and 13.6 nm (SiO2) per 1e16 cm^-2",
+    "equation": "d = Y*D/N",
+    "model_film_number_density_m3": {
+      "Si": 5.13992e+28,
+      "SiO2": 2.461176470588235e+28
+    },
+    "reference_dose_cm2": 1e+16,
+    "reference_dose_m2": 1e+20
+  },
+  "provider": {
+    "beam_depth_or_yield_fit_used": false,
+    "material_limitation": "S-F carrier bond and S mass/radius retained; S-S, S-Si, and S-O chemistry intentionally absent",
+    "method": "DFT-informed modified-Stillinger-Weber MD",
+    "state_evolution": "continuous impacts until steady surface composition/yield",
+    "surface_temperature_K": 300,
+    "typical_impacts_per_trajectory": 4000
+  },
+  "schema_version": 1,
+  "source": {
+    "citation": "E. J. C. Tinacba, T. Ito, K. Karahashi, M. Isobe, and S. Hamaguchi, JVST B 39, 043203 (2021)",
+    "doi": "10.1116/6.0001230",
+    "figure": "Figure 8 comparison; Figure 10 MD depth slopes",
+    "figure8_csv_sha256": "6049bef74587d074cd569106c320742c1313e9052ea1749fe2d6d4139c655e17",
+    "figure8_render_sha256": "9a0867caa7991dbcf8495baf9ed5a47a4d140fe8055b578777664edcf0800a02",
+    "pdf_sha256": "c0be3b475aa17b396c1f788baee14ba37b9026b264bb870dc2553055f27b31ad"
+  },
+  "uncertainty_and_scope": {
+    "combined_uncertainty_claimed": false,
+    "digitization_bound_yield": 0.04,
+    "experimental_statistical_uncertainty": "not reported",
+    "not_authorized": [
+      "an SF6 reactor boundary",
+      "an SFx+ mixture law",
+      "off-normal incidence",
+      "neutral-F synergy",
+      "sulfur-surface chemistry",
+      "a Krueger C4F6 depth fit"
+    ],
+    "retrospective_not_blind": true
+  }
+}

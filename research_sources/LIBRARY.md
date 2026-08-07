@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 99 sources by topic
+## Index — 100 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -71,6 +71,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | bibkey | source | status |
 |---|---|---|
 | [`an-2026-apsusc`](library/an-2026-apsusc.md) | An et al., DFT-trained NNP/MD for HFC ions on SiO2 and Si3N4 | FULL TEXT READ + RELEASED DATA PINNED |
+| [`tinacba-2021-jvstb`](library/tinacba-2021-jvstb.md) | Tinacba et al., DFT-informed SF5+ MD versus mass-selected Si/SiO2 beam depths | FULL TEXT READ + PIL-AUDITED FIGURE 8 |
 
 ### Angular yield laws (class-1 physical, class-2 chemical)
 
@@ -218,6 +219,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Beam gate N1 (floor 0.25 / half-rise / plateau) | [`gray-1993-thesis`](library/gray-1993-thesis.md) | the measured yield-vs-F/Ar⁺ curve petch is graded against |
 | Species-resolved pure-reactive-ion yield ladder | [`karahashi-2007`](library/karahashi-2007.md) | direct F+/CF+/CF2+/CF3+ constraint; forbids species-agnostic validation and extrapolation above measured support |
 | DFT-trained HFC-ion event physics + product-escape defect | [`an-2026-apsusc`](library/an-2026-apsusc.md) | no-yield-fit atomistic transfer candidate; forces explicit mixed-layer/film and product-escape closure rather than a scalar depth fit |
+| DFT-informed SF5+ atomistic depth-per-dose provider | [`tinacba-2021-jvstb`](library/tinacba-2021-jvstb.md) | four independent mass-selected MD/beam overlaps on Si and SiO2; 5.88% mean, 15.04% maximum error; sulfur-surface chemistry omission retained |
 | Condition-unknown CFx+/Ar+ angular species board | [`karahashi-2007`](library/karahashi-2007.md), [`arts-2021-apr`](library/arts-2021-apr.md) | 20 PIL-audited markers; normal points strongly imply 1000 eV, but the source/review do not report energy, so production use is forbidden |
 | Stable-parent molecule / ion co-incidence envelope | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | C5F8 analog proves molecule-assisted yields can exceed a pure-CF3+ value; explicitly not a C4F6 law |
 | C4F6 parent-signal + ion-mixture existence | [`kim-2021-coatings`](library/kim-2021-coatings.md) | wafer-facing mass/energy spectra directly show C4F6 and multiple CFx+/CxFy+ species in another CCP; qualitative existence constraint only, not Krüger flux calibration |

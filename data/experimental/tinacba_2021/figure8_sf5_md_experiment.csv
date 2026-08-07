@@ -1,0 +1,17 @@
+material,series,energy_eV,si_removal_yield_per_sf5_ion,marker_center_x_px,marker_center_y_px,marker,digitization_yield_bound
+Si,sf5_md,150,2.0207,370.0,2289.0,open_diamond,0.04
+Si,sf5_md,300,2.3523,433.0,2257.0,open_diamond,0.04
+Si,sf5_md,500,2.8497,517.0,2209.0,open_diamond,0.04
+Si,sf5_md,1000,4.2487,728.0,2074.0,open_diamond,0.04
+Si,sf5_md,1500,5.8238,939.0,1922.0,open_diamond,0.04
+Si,sf5_md,2000,6.4249,1149.0,1864.0,open_diamond,0.04
+Si,sf5_experiment,150,1.7565,370.5,2314.5,filled_circle,0.04
+Si,sf5_experiment,2000,6.1710,1149.5,1888.5,filled_circle,0.04
+SiO2,sf5_md,150,0.8187,1457.5,2405.0,open_diamond,0.04
+SiO2,sf5_md,300,1.3575,1521.0,2353.0,open_diamond,0.04
+SiO2,sf5_md,500,1.6995,1605.0,2320.0,open_diamond,0.04
+SiO2,sf5_md,1000,2.1451,1815.0,2277.0,open_diamond,0.04
+SiO2,sf5_md,1500,2.6839,2026.0,2225.0,open_diamond,0.04
+SiO2,sf5_md,2000,3.3472,2236.0,2161.0,open_diamond,0.04
+SiO2,sf5_experiment,150,0.8187,1457.5,2405.0,filled_circle,0.04
+SiO2,sf5_experiment,2000,3.2073,2235.5,2174.5,filled_circle,0.04
