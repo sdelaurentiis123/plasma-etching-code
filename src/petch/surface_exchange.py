@@ -81,10 +81,14 @@ class SurfaceProductPopulation:
     """One explicit population emitted from a surface step.
 
     ``integrated_particle_count_m2`` is particle count per emitting face area over the step.
-    ``material_units_per_particle`` maps those particles back to the conserved material-origin ledger.
-    Material allocation may be known before the emission energy/angular law is. Such a population closes
-    the ledger but is not transport-ready; transport must refuse it rather than silently substitute a
-    cosine or Maxwellian distribution.
+    ``material_units_per_particle`` maps those particles back to the primary
+    conserved material-origin ledger.  A compound product can also carry
+    ``additional_source_inventories_per_particle``; for example, one SiCl2
+    molecule removes one ``Si_atom`` and two ``Cl_atom`` units.  Material
+    allocation may be known before the emission energy/angular law is. Such a
+    population closes the ledger but is not transport-ready; transport must
+    refuse it rather than silently substitute a cosine or Maxwellian
+    distribution.
     """
 
     name: str
@@ -97,11 +101,14 @@ class SurfaceProductPopulation:
     energy_parameters: Mapping[str, object] = field(default_factory=dict)
     provenance: Mapping[str, object] = field(default_factory=dict)
     relative_standard_uncertainty: float | None = None
+    additional_source_inventories_per_particle: Mapping[str, float] = field(
+        default_factory=dict)
 
     def __post_init__(self):
         count = np.asarray(self.integrated_particle_count_m2, dtype=float).copy()
         energy_parameters = dict(self.energy_parameters)
         provenance = dict(self.provenance)
+        additional = dict(self.additional_source_inventories_per_particle)
         if (not self.name or not self.source_inventory
                 or np.any(~np.isfinite(count)) or np.any(count < 0.0)
                 or not np.isfinite(self.material_units_per_particle)
@@ -110,6 +117,12 @@ class SurfaceProductPopulation:
                 or (self.angular_model is not None and not self.angular_model)
                 or (self.energy_model is not None and not self.energy_model)):
             raise ValueError("invalid emitted surface-product population")
+        if (self.source_inventory in additional
+                or any(
+                    not isinstance(name, str) or not name
+                    or not np.isfinite(value) or value <= 0.0
+                    for name, value in additional.items())):
+            raise ValueError("invalid additional product-source stoichiometry")
         if self.energy_model is None and energy_parameters:
             raise ValueError("energy parameters require an energy model")
         if self.energy_model == "monoenergetic":
@@ -135,10 +148,25 @@ class SurfaceProductPopulation:
         object.__setattr__(self, "integrated_particle_count_m2", count)
         object.__setattr__(self, "energy_parameters", MappingProxyType(energy_parameters))
         object.__setattr__(self, "provenance", MappingProxyType(provenance))
+        object.__setattr__(
+            self, "additional_source_inventories_per_particle",
+            MappingProxyType(additional))
 
     @property
     def integrated_material_units_m2(self):
         return self.integrated_particle_count_m2 * self.material_units_per_particle
+
+    @property
+    def integrated_material_inventories_m2(self):
+        inventories = {
+            self.source_inventory: self.integrated_material_units_m2,
+        }
+        inventories.update({
+            name: self.integrated_particle_count_m2 * units
+            for name, units
+            in self.additional_source_inventories_per_particle.items()
+        })
+        return MappingProxyType(inventories)
 
     @property
     def transport_ready(self):
@@ -156,8 +184,9 @@ def validate_surface_product_routing(exchange, populations):
         raise ValueError("surface-product names must be unique")
     routed = {}
     for population in populations:
-        value = population.integrated_material_units_m2
-        routed[population.source_inventory] = routed.get(population.source_inventory, 0.0) + value
+        for inventory, value in (
+                population.integrated_material_inventories_m2.items()):
+            routed[inventory] = routed.get(inventory, 0.0) + value
     if set(routed) != set(exchange.outgoing_units_m2):
         raise ValueError("surface-product inventories do not match outgoing material ledger")
     for name, expected in exchange.outgoing_units_m2.items():

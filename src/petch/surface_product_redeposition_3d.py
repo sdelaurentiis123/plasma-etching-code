@@ -192,6 +192,10 @@ def transport_surface_product_redeposition_3d(
     for name in sorted(population_by_name):
         population = population_by_name[name]
         law = laws[name]
+        if population.additional_source_inventories_per_particle:
+            raise ValueError(
+                f"compound product {name!r} requires coupled multi-inventory "
+                "redeposition, which is not implemented")
         if not unique_material.issubset(law.sticking_probability_by_material):
             missing = unique_material - set(law.sticking_probability_by_material)
             raise ValueError(

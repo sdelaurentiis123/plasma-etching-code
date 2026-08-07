@@ -319,7 +319,9 @@ class MaterialMechanismRouter3D:
                     energy_model=population.energy_model,
                     energy_parameters=population.energy_parameters,
                     provenance=dict(population.provenance, material_id=int(material_id)),
-                    relative_standard_uncertainty=population.relative_standard_uncertainty))
+                    relative_standard_uncertainty=population.relative_standard_uncertainty,
+                    additional_source_inventories_per_particle=(
+                        population.additional_source_inventories_per_particle)))
             validity = result.validity
             reasons.extend(f"material {material_id}: {item}" for item in validity.reasons)
             unsupported.extend(validity.unsupported_neutral_species)

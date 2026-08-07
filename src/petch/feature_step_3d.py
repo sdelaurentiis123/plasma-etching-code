@@ -1993,7 +1993,9 @@ def _apply_surface_product_redeposition(
             population.material_units_per_particle, population.mass_amu,
             angular_model=population.angular_model, energy_model=population.energy_model,
             energy_parameters=population.energy_parameters, provenance=population.provenance,
-            relative_standard_uncertainty=population.relative_standard_uncertainty))
+            relative_standard_uncertainty=population.relative_standard_uncertainty,
+            additional_source_inventories_per_particle=(
+                population.additional_source_inventories_per_particle)))
     evolving = np.zeros(len(faces), dtype=bool)
     evolving[active_face] = True
     physical_area = np.asarray(areas) * geometry.mesh_length_unit_m ** 2

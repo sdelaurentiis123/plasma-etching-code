@@ -60,6 +60,45 @@ def test_explicit_product_population_closes_outgoing_material_ledger():
     assert product.transport_ready
 
 
+def test_compound_product_closes_each_elemental_inventory():
+    count = np.array([2.0, 5.0])
+    exchange = SurfaceMaterialExchange(
+        removed_units_m2={
+            "Si_atom": count,
+            "Cl_atom": 2.0 * count,
+        },
+        outgoing_units_m2={
+            "Si_atom": count,
+            "Cl_atom": 2.0 * count,
+        },
+        unresolved_units_m2={},
+        deposited_units_m2={},
+    )
+    product = SurfaceProductPopulation(
+        "SiCl2", "Si_atom", count, 1.0, 98.991,
+        additional_source_inventories_per_particle={"Cl_atom": 2.0},
+        provenance={"source": "manufactured compound-routing gate"})
+
+    assert validate_surface_product_routing(exchange, (product,)) == (product,)
+    assert np.array_equal(
+        product.integrated_material_inventories_m2["Si_atom"], count)
+    assert np.array_equal(
+        product.integrated_material_inventories_m2["Cl_atom"], 2.0 * count)
+    with pytest.raises(TypeError):
+        product.additional_source_inventories_per_particle["Cl_atom"] = 1.0
+
+
+def test_compound_product_rejects_duplicate_or_nonphysical_stoichiometry():
+    with pytest.raises(ValueError, match="stoichiometry"):
+        SurfaceProductPopulation(
+            "SiCl", "Si_atom", [1.0], 1.0, 63.538,
+            additional_source_inventories_per_particle={"Si_atom": 1.0})
+    with pytest.raises(ValueError, match="stoichiometry"):
+        SurfaceProductPopulation(
+            "SiCl", "Si_atom", [1.0], 1.0, 63.538,
+            additional_source_inventories_per_particle={"Cl_atom": 0.0})
+
+
 def test_product_population_cannot_hide_outgoing_material_error():
     exchange = SurfaceMaterialExchange(
         removed_units_m2={"Si": np.array([2.0])},

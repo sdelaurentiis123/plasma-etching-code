@@ -1,0 +1,225 @@
+{
+  "claim": "atom-balanced replay of source DeepMD dose-window products; not experimental validation or a held-out depth prediction",
+  "dose_windows": {
+    "centres_1e15_cm2": [
+      0.9421018055555556,
+      2.826305416666667,
+      4.710509027777778,
+      6.594712638888889,
+      8.47891625
+    ],
+    "edges_m2": [
+      0.0,
+      1.884203611111111e+19,
+      3.768407222222223e+19,
+      5.652610833333333e+19,
+      7.536814444444444e+19,
+      9.421018055555554e+19
+    ],
+    "integration_rule": "exact overlap with piecewise-constant released window-average yields",
+    "interpolation_used": false,
+    "widths_m2": [
+      1.884203611111111e+19,
+      1.884203611111112e+19,
+      1.8842036111111102e+19,
+      1.884203611111111e+19,
+      1.8842036111111094e+19
+    ]
+  },
+  "independent_continuous_rie_diagnostic": {
+    "chang_prediction_si_per_ar": [
+      0.20233830845771147,
+      0.4600293255131964,
+      0.5855038759689922,
+      0.6843187066974596
+    ],
+    "comparison_evidence": "DeepMD molecular dynamics",
+    "deepmd_si_per_ar": [
+      0.24182079610957588,
+      0.37330997562376655,
+      0.5007335313599666,
+      0.6061765299147771
+    ],
+    "fit_to_comparison_used": false,
+    "flux_ratios": [
+      10.0,
+      50.0,
+      100.0,
+      200.0
+    ],
+    "maximum_relative_error": 0.23229850674236557,
+    "rmse_si_per_ar": 0.07478523182068429,
+    "source_model": "Chang-Sawin molecular-Cl2 100 eV beam regression",
+    "verdict": "independent trend agreement with material disagreement; not an exact cross-source pass"
+  },
+  "integrated_sequence": {
+    "all_products_lack_launch_distribution": true,
+    "emitted_chlorine_atoms_m2": 7.631024625e+18,
+    "equivalent_removed_si_depth_nm": 0.4160486073494076,
+    "exchange_residual_atoms_m2": {
+      "Cl_atom": 0.0,
+      "Si_atom": 0.0
+    },
+    "incident_ar_ions_m2": 9.421018055555554e+19,
+    "one_monolayer_cl_loading_atoms_m2": 1e+19,
+    "product_counts_m2": {
+      "cl_yield": 3.0775325648148147e+18,
+      "si_yield": 1.755449697685185e+19,
+      "sicl2_yield": 1.318942527777778e+18,
+      "sicl_yield": 1.9156070046296294e+18
+    },
+    "product_routing_complete": true,
+    "remaining_cl_atoms_m2": 2.3689753750000005e+18,
+    "removed_si_atoms_m2": 2.078904650925926e+19
+  },
+  "known_limits": [
+    "the preceding Cl2 loading transient is not in Products.csv",
+    "initial retained-Cl inventory must be supplied independently",
+    "dose-window averages do not resolve within-window transients",
+    "product energy-angle distributions are absent",
+    "the sequence cannot continue beyond the released final dose",
+    "DeepMD evidence is not a direct experimental measurement"
+  ],
+  "schema_version": 1,
+  "source": {
+    "dataset_doi": "10.34770/rjv6-2w31",
+    "evidence_type": "DeepMD_molecular_dynamics",
+    "incidence_angle_deg": 0.0,
+    "ion_energy_eV": 215.0,
+    "paper_doi": "10.1116/6.0004027",
+    "source_table_sha256": "79a7cd3a2618a3fc3d65946d2db5247870d428b58270f78b0ffe46b5116bd9bf",
+    "table_fingerprint": "08381a19c36ac71b895dc4902771c02b03d9a8dd517940133baee1283683c305"
+  },
+  "vision_condition_and_value_audit": {
+    "condition_disambiguation": "Figures 13-14 bind Products.csv to 215 eV. Figure 12 is the distinct 80 eV morphology/cycle sequence.",
+    "method": "PIL RGB threshold plus connected components on a Poppler 180-dpi render; axis frame recovered from black border pixels",
+    "panels": {
+      "si_yield": {
+        "caption_ion_energy_eV": 215.0,
+        "csv_nodes_match_within_1p25_pixels": true,
+        "figure": "13",
+        "image_shape": [
+          1980,
+          1760,
+          3
+        ],
+        "markers": [
+          {
+            "component_blue_pixels": 431,
+            "x_pixel": 681,
+            "x_value": 0.9363957597173145,
+            "y_pixel": 564,
+            "y_value": 0.13034482758620689
+          },
+          {
+            "component_blue_pixels": 508,
+            "x_pixel": 787,
+            "x_value": 2.8091872791519434,
+            "y_pixel": 503,
+            "y_value": 0.16715517241379307
+          },
+          {
+            "component_blue_pixels": 437,
+            "x_pixel": 894,
+            "x_value": 4.69964664310954,
+            "y_pixel": 406,
+            "y_value": 0.2256896551724138
+          },
+          {
+            "component_blue_pixels": 462,
+            "x_pixel": 1001,
+            "x_value": 6.590106007067138,
+            "y_pixel": 401,
+            "y_value": 0.22870689655172416
+          },
+          {
+            "component_blue_pixels": 386,
+            "x_pixel": 1107,
+            "x_value": 8.462897526501767,
+            "y_pixel": 478,
+            "y_value": 0.18224137931034481
+          }
+        ],
+        "maximum_absolute_x_error": 0.017118137514723575,
+        "maximum_absolute_y_error": 0.0006896551724137889,
+        "output": "si_yield",
+        "paper_page": 31,
+        "plot_frame_pixels": {
+          "bottom": 780,
+          "left": 628,
+          "right": 1477,
+          "top": 200
+        },
+        "x_acceptance_tolerance": 0.022084805653710248,
+        "x_value_per_pixel": 0.0176678445229682,
+        "y_acceptance_tolerance": 0.0007543103448275861,
+        "y_value_per_pixel": 0.0006034482758620689
+      },
+      "sicl_yield": {
+        "caption_ion_energy_eV": 215.0,
+        "csv_nodes_match_within_1p25_pixels": true,
+        "figure": "14",
+        "image_shape": [
+          1980,
+          1760,
+          3
+        ],
+        "markers": [
+          {
+            "component_blue_pixels": 508,
+            "x_pixel": 681,
+            "x_value": 0.9363957597173145,
+            "y_pixel": 401,
+            "y_value": 0.07841379310344827
+          },
+          {
+            "component_blue_pixels": 315,
+            "x_pixel": 787,
+            "x_value": 2.8091872791519434,
+            "y_pixel": 731,
+            "y_value": 0.010137931034482758
+          },
+          {
+            "component_blue_pixels": 376,
+            "x_pixel": 894,
+            "x_value": 4.69964664310954,
+            "y_pixel": 731,
+            "y_value": 0.010137931034482758
+          },
+          {
+            "component_blue_pixels": 330,
+            "x_pixel": 1001,
+            "x_value": 6.590106007067138,
+            "y_pixel": 772,
+            "y_value": 0.0016551724137931034
+          },
+          {
+            "component_blue_pixels": 328,
+            "x_pixel": 1107,
+            "x_value": 8.462897526501767,
+            "y_pixel": 772,
+            "y_value": 0.0016551724137931034
+          }
+        ],
+        "maximum_absolute_x_error": 0.017118137514723575,
+        "maximum_absolute_y_error": 0.00013793103448275779,
+        "output": "sicl_yield",
+        "paper_page": 32,
+        "plot_frame_pixels": {
+          "bottom": 780,
+          "left": 628,
+          "right": 1477,
+          "top": 200
+        },
+        "x_acceptance_tolerance": 0.022084805653710248,
+        "x_value_per_pixel": 0.0176678445229682,
+        "y_acceptance_tolerance": 0.0002586206896551724,
+        "y_value_per_pixel": 0.00020689655172413793
+      }
+    },
+    "paper_sha256": "d8d374d412d99e625b2b989399d564976332f0c342b37b0249d1039bca4b5bb1",
+    "paper_url": "https://www.osti.gov/servlets/purl/2514378",
+    "render_dpi": 180,
+    "status": "passed"
+  }
+}

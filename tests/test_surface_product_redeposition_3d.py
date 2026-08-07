@@ -74,3 +74,28 @@ def test_redeposition_refuses_cross_material_film_and_unbounded_parameters():
             parameter_bounds={
                 "sticking_probability_by_material": (0.0, 0.5),
                 "bulk_material_unit_density_m3": (4e28, 6e28)})
+
+
+def test_redeposition_refuses_compound_product_until_coupled_ledgers_exist():
+    compound = SurfaceProductPopulation(
+        "Si", "Si_atom", integrated_particle_count_m2=np.array([2.0, 0.0]),
+        material_units_per_particle=1.0, mass_amu=98.991,
+        angular_model="diffuse_cosine", energy_model="thompson",
+        energy_parameters={
+            "surface_binding_energy_eV": 4.7,
+            "maximum_energy_eV": 100.0,
+        },
+        additional_source_inventories_per_particle={"Cl_atom": 2.0},
+        provenance={"source": "manufactured compound refusal gate"},
+    )
+    with pytest.raises(ValueError, match="coupled multi-inventory"):
+        transport_surface_product_redeposition_3d(
+            (compound,),
+            duration_s=2.0,
+            face_area_m2=np.array([1.0, 2.0]),
+            form_factors=_factors(),
+            face_material_id=np.array([1, 1]),
+            evolving_face_mask=np.array([True, True]),
+            contract=SurfaceProductRedepositionContract3D(
+                (_law({1: 1.0}),)),
+        )
