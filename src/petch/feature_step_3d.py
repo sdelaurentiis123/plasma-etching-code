@@ -679,7 +679,12 @@ def _restore_unresolved_material_ownership(
         layer[selected] = -np.maximum(np.abs(layer[selected]), float(dx))
         affected.add(material)
         for prior in sorted(int(value) for value in np.unique(previous[selected])):
-            if prior <= 0:
+            if prior <= 0 or prior == material:
+                # An unresolved fragment that already had this same owner is
+                # deliberately dissolved: restoring its own just-retired
+                # layer recreates the island and makes the postcondition
+                # impossible.  Only a *different* prior solid layer is an
+                # authoritative owner to restore.
                 continue
             if prior not in updated:
                 raise RuntimeError("prior material owner has no authoritative level set")

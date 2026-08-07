@@ -2080,3 +2080,31 @@ def test_shed_unresolved_fragment_is_dissolved_periodic():
             phi, candidate, previous, (1, 2), periodic_lateral=True))
     assert count == 0
     assert not np.any(repair)
+
+
+def test_shed_fragment_repair_does_not_restore_its_retired_owner():
+    shape = (6, 6, 6)
+    material_1 = -np.ones(shape)
+    material_2 = -np.ones(shape)
+    material_2[3, 3, 3] = 0.1
+    candidate = np.zeros(shape, dtype=int)
+    candidate[3, 3, 3] = 2
+    previous = candidate.copy()
+    repair = np.zeros(shape, dtype=bool)
+    repair[3, 3, 3] = True
+
+    layers, combined, owner = (
+        feature_step_module._restore_unresolved_material_ownership(
+            {1: material_1, 2: material_2},
+            repair,
+            candidate,
+            previous,
+            0.1,
+            "cr2",
+            False,
+        )
+    )
+
+    assert layers[2][3, 3, 3] < 0.0
+    assert combined[3, 3, 3] < 0.0
+    assert owner[3, 3, 3] == 0
