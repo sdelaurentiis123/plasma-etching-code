@@ -40,6 +40,7 @@
 | Q12 | The second mutual-neutralization row produces `Cl + Cl*`, while the report states that chlorine metastable balances are omitted. | The particle-only reproduction lumps `Cl*` into tracked `Cl`; a predictive energy ledger must restore the internal-energy consequence instead of treating the lumping as fundamental. |
 | Q13 | Tables 4--5 separately enumerate electron energy-loss channels; fitted Table-2 activation parameters are not declared to be physical energy losses per event. | The chlorine network deliberately fails closed on electron-power evaluation until physical channel energies are independently sourced and mapped. |
 | Q14 | The atomic-chlorine ionization fit uses a printed polynomial in `log(Te/12.96)`. | The cited primary authority, [`lennon-1988-ionization`](lennon-1988-ionization.md), resolves this as `log10` and restricts Eq. 6 to `0.1 < Te/12.96 < 10`; both are enforced in code. |
+| Q15 | Table 5 visibly prints `e + Cl(2P) -> Cl(3D) + 2e`, followed by `4D`, `4P`, `4S`, `5D`, and `5P` excitation rows. | The first row violates charge conservation. NIST independently identifies these as calculated excited-state channels, so the row is quarantined rather than silently repaired or reinterpreted as ionization. Pixel checksums are pinned in `research_sources/digitized/lee_lieberman_1994_chlorine_table5_anomaly_manifest.md`. |
 
 ## Use decision
 

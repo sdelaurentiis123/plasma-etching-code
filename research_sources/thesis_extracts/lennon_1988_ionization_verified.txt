@@ -1,0 +1,20 @@
+Selected verified extract for lennon-1988-ionization
+
+Official NIST PDF:
+https://www.nist.gov/system/files/documents/srd/jpcrd347.pdf
+SHA-256:
+ef4ecdc0522a3cbd0608d8af9227d60261b5ff69e53ff4e6735bb2e7cc8d6d76
+
+Verified from journal pages 1325, 1329, 1339, and 1359:
+
+- Equation 5 is the Maxwellian average of cross section times electron
+  velocity.
+- Equation 6 uses log10(kT/I), not a natural logarithm, and applies for
+  I/10 < kT < 10 I.
+- The Cl I Table-2 coefficients are:
+  1.4193e-7, -1.8637e-8, -5.4395e-8, 3.3056e-8, -3.5393e-9,
+  and -2.9152e-8 cm3 s-1.
+- Section 6.17 recommends the Hayes et al. experimental Cl I data.
+- Table 1 assigns the Cl I cross-section fit a 15% estimated error.
+
+This is a bounded project extract, not a redistribution of the source.

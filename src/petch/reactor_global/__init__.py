@@ -20,13 +20,19 @@ from .chlorine import (
     build_lee_lieberman_chlorine_particle_network,
     lee_lieberman_chlorine_species,
 )
+from .evaluated_chlorine import (
+    ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
+    nist_hayes_atomic_chlorine_ionization_rate,
+)
 from .network import (
     CM3_TO_M3,
     E_CHARGE_C,
+    ELECTRON_MASS_KG,
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
     ElectronBase10LogPolynomialRateCoefficient,
+    ElectronMaxwellianCrossSectionRateCoefficient,
     RateContext,
     Reaction,
     ReactionNetwork,
@@ -65,6 +71,8 @@ from .transport import (
 __all__ = [
     "CM3_TO_M3",
     "E_CHARGE_C",
+    "ELECTRON_MASS_KG",
+    "ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV",
     "ARGON_4S_METASTABLE_ENERGY_EV",
     "ARGON_IONIZATION_ENERGY_EV",
     "ARGON_METASTABLE_IONIZATION_ENERGY_EV",
@@ -82,6 +90,7 @@ __all__ = [
     "ElectronArrheniusRateCoefficient",
     "ElectronInverseTemperaturePolynomialRateCoefficient",
     "ElectronBase10LogPolynomialRateCoefficient",
+    "ElectronMaxwellianCrossSectionRateCoefficient",
     "ElectropositiveEdgeFactors",
     "FixedArgonTransportProvider",
     "DirectDriveRFPowerBoundary",
@@ -104,6 +113,7 @@ __all__ = [
     "lee_lieberman_chlorine_species",
     "lee_lieberman_argon_ion_temperature_eV",
     "nist_argon_self_diffusion_m2_s",
+    "nist_hayes_atomic_chlorine_ionization_rate",
     "phelps_argon_momentum_transfer_cross_section_m2",
     "phelps_argon_momentum_transfer_rate_m3_s",
     "time_average_real_power_W",

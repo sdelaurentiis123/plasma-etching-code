@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 115 sources by topic
+## Index — 116 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -109,11 +109,12 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`edelberg-1999`](library/edelberg-1999.md) | Edelberg & Aydil (1999) | not-fetched |
 | [`kawamura-1999-psst`](library/kawamura-1999-psst.md) | Kawamura et al., PSST 8, R45 (1999) | not-fetched (citation corrected from p.313) |
 | [`benyoucef-yousfi-2014-ion-transport`](library/benyoucef-yousfi-2014-ion-transport.md) | Benyoucef & Yousfi, semiclassical Ar+/Ar, O2+/O2, N2+/N2 transport validation | AUTHOR-PROVIDED FULL TEXT READ VIA HTML; FIGURES NOT LOCALLY ARCHIVED |
+| [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | Christophorou & Olthoff, NIST-evaluated Cl2/Cl electron-interaction data | PRIMARY NIST FULL TEXT + TABLE 25 PIXEL-AUDITED AT 300 DPI |
 | [`hopwood-1994-rf-coupling`](library/hopwood-1994-rf-coupling.md) | Hopwood, measured planar-ICP RF coupling efficiency | PRIMARY AUTHOR ABSTRACT READ |
 | [`lam-direct-drive-patents`](library/lam-direct-drive-patents.md) | Lam DirectDrive and RF-reference patent family | PRIMARY PATENT FULL TEXT READ |
 | [`lam-etch-platforms-2026`](library/lam-etch-platforms-2026.md) | Lam public etch-platform architecture/application map | PRIMARY MANUFACTURER RECORDS READ |
 | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | Lee & Lieberman, conserved Ar/O2/Cl2 global plasma model and Ar/Cl2 rate decks | PRIMARY FULL TEXT + EQUATIONS/TABLES 2--3 VISUALLY AUDITED |
-| [`lennon-1988-ionization`](library/lennon-1988-ionization.md) | Lennon et al., evaluated atomic electron-impact ionization rates | PRIMARY NIST FULL TEXT + EQ. 6/TABLE 2 AUDITED |
+| [`lennon-1988-ionization`](library/lennon-1988-ionization.md) | Lennon et al., evaluated atomic electron-impact ionization rates | PRIMARY NIST FULL TEXT + EQ. 5--6/TABLES 1--2 PIXEL-AUDITED |
 | [`mahoney-1994-planar-icp`](library/mahoney-1994-planar-icp.md) | Mahoney et al., independent planar-argon ICP electron-state board | PRIMARY FULL TEXT + TABLE I/FIGURE 11 VISUALLY AUDITED |
 | [`miller-1997`](library/miller-1997.md) | Miller & Riley (1997) sheath model | not-fetched |
 | [`nist-asd-argon`](library/nist-asd-argon.md) | NIST ASD neutral-argon ionization and 4s metastable energies | PRIMARY NIST DATABASE QUERIES |
@@ -223,7 +224,10 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Argon Table-3 electron-impact rates and Bohm/diffusive wall-loss forms | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | first no-fit reactor verification deck; empirical/regressed evidence retained, not called first-principles |
 | Chlorine Table-2 particle rates and six-species stoichiometric deck | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | exact 300-dpi-audited transcription; atoms and charge close, while omitted Cl fine structure remains an energy-ledger boundary |
 | Atomic-Cl ionization `log10` law and `0.1 < Te/I < 10` domain | [`lennon-1988-ionization`](library/lennon-1988-ionization.md) | resolves Lee Table 2's ambiguous printed `log`; replaced the initial natural-log interpretation before any solver used it |
+| Atomic-Cl measured ionization cross section, `12.967633 eV` threshold, and ±14% scale uncertainty | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 48-point 300-dpi-audited table integrated exactly over a Maxwellian; rejects use when the unmeasured >200 eV kernel tail is material |
+| Cl2 predictive electron-collision evidence boundary | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | measured/evaluated ionization, dissociation, and attachment can advance; legacy electronic-excitation rates remain uncertain because the review found no measurements and poor calculation agreement |
 | Chlorine electron-power fail-closed boundary | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | fitted rate exponents are not silently reinterpreted as physical event energies; Tables 4--5 and their primary cross-section sources must close the ledger |
+| Lee chlorine Table-5 charge-inconsistent `Cl(3d)+2e` row | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md), [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | pixel-audited source anomaly; quarantined until the cited primary channel is recovered, never silently repaired |
 | Argon ionization/metastable event energies `15.7596119 / 11.54835442 / 4.21125748 eV` | [`nist-asd-argon`](library/nist-asd-argon.md) | physical power ledger kept separate from `18.68 / 15.06 / 4.95 eV` rate-fit exponents |
 | Ar+-Ar `Qm(E)` with explicit center-of-mass energy and Maxwellian rate averaging | [`phelps-1994-ar-ion-scattering`](library/phelps-1994-ar-ion-scattering.md) | replaces the fixed ion mean-free-path sensitivity with an energy- and pressure-dependent collision frequency |
 | Ar-in-Ar `D(T,p)` and 298 K reference `0.182 cm2/s` | [`nist-tn-2279-gas-diffusion`](library/nist-tn-2279-gas-diffusion.md) | supplies neutral bulk diffusion before Lee's Knudsen harmonic; 600 K use is explicitly flagged as extrapolated |

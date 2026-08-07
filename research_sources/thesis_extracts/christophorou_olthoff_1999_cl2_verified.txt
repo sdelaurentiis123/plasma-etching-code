@@ -1,0 +1,22 @@
+Selected verified extract for christophorou-olthoff-1999-cl2
+
+Official NIST PDF:
+https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=8765
+SHA-256:
+a70bbed40bae014a551dd91fc96e322a258d959674ea53fe50ea2c6f4e020a6b
+
+Verified from journal pages 131, 148, 160--161:
+
+- The review supplies suggested Cl2 cross sections for total/elastic
+  scattering, total ionization, neutral dissociation, attachment, and
+  ion-pair formation.
+- It identifies missing measurements for Cl2 momentum transfer, vibrational
+  excitation, electronic excitation, and dissociative ionization.
+- Atomic-Cl excitation channels shown are calculated 4s, 5s, 6s, 4p, 5p,
+  3d, 4d, and 5d states.
+- Hayes et al. measured atomic-Cl single ionization from threshold to 200 eV
+  with a quoted absolute uncertainty of +/-14%.
+- Table 25 gives 48 selected Hayes energy/cross-section pairs in eV and
+  10^-20 m2. The full visual transcription is in research_sources/digitized/.
+
+This is a bounded project extract, not a redistribution of the source.

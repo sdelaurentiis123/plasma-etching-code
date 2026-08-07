@@ -3,10 +3,13 @@ import pytest
 
 from petch.reactor_global import (
     CM3_TO_M3,
+    E_CHARGE_C,
+    ELECTRON_MASS_KG,
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
     ElectronBase10LogPolynomialRateCoefficient,
+    ElectronMaxwellianCrossSectionRateCoefficient,
     RateContext,
     Reaction,
     ReactionNetwork,
@@ -228,6 +231,67 @@ def test_lennon_equation6_rejects_outside_published_temperature_domain(
     )
     with pytest.raises(ValueError, match="outside the Lennon Eq.-6"):
         coefficient.coefficient_si(RateContext(temperature))
+
+
+def test_tabulated_cross_section_maxwellian_integral_is_analytic():
+    cross_section = 2.5e-20
+    maximum_energy = 100.0
+    temperature = 2.0
+    coefficient = ElectronMaxwellianCrossSectionRateCoefficient(
+        electron_energy_eV=(0.0, maximum_energy),
+        cross_section_m2=(cross_section, cross_section),
+        threshold_eV=0.0,
+        relative_uncertainty=None,
+        source="manufactured constant cross section",
+        evidence_kind="derived",
+    )
+    support_ratio = maximum_energy / temperature
+    retained_kernel = 1.0 - (
+        support_ratio + 1.0) * np.exp(-support_ratio)
+    expected = (
+        cross_section
+        * np.sqrt(8.0 * E_CHARGE_C * temperature
+                  / (np.pi * ELECTRON_MASS_KG))
+        * retained_kernel
+    )
+    assert coefficient.coefficient_si(
+        RateContext(temperature)) == pytest.approx(expected, rel=3.0e-15)
+
+
+def test_tabulated_cross_section_uses_physical_threshold():
+    common = dict(
+        electron_energy_eV=(0.0, 1.0, 2.0, 100.0),
+        threshold_eV=1.5,
+        relative_uncertainty=0.2,
+        source="manufactured threshold test",
+        evidence_kind="measured",
+    )
+    first = ElectronMaxwellianCrossSectionRateCoefficient(
+        cross_section_m2=(0.0, 9.0e-20, 1.0e-20, 1.0e-20),
+        **common,
+    )
+    second = ElectronMaxwellianCrossSectionRateCoefficient(
+        cross_section_m2=(8.0e-20, 7.0e-20, 1.0e-20, 1.0e-20),
+        **common,
+    )
+    assert first.coefficient_si(RateContext(2.0)) == pytest.approx(
+        second.coefficient_si(RateContext(2.0)),
+        rel=0.0,
+        abs=0.0,
+    )
+
+
+def test_tabulated_cross_section_fails_on_unmeasured_maxwellian_tail():
+    coefficient = ElectronMaxwellianCrossSectionRateCoefficient(
+        electron_energy_eV=(0.0, 100.0),
+        cross_section_m2=(1.0e-20, 1.0e-20),
+        threshold_eV=0.0,
+        relative_uncertainty=None,
+        source="manufactured short support",
+        evidence_kind="derived",
+    )
+    with pytest.raises(ValueError, match="unmeasured cross-section tail"):
+        coefficient.coefficient_si(RateContext(50.0))
 
 
 def test_incomplete_electron_energy_ledger_fails_closed():

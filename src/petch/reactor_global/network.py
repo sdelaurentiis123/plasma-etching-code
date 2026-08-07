@@ -15,6 +15,8 @@ import numpy as np
 
 CM3_TO_M3 = 1.0e-6
 E_CHARGE_C = 1.602176634e-19
+# 2022 CODATA recommended electron mass in kg.
+ELECTRON_MASS_KG = 9.1093837139e-31
 _SPECIES_ROLES = {
     "electron",
     "neutral",
@@ -409,11 +411,156 @@ class ElectronBase10LogPolynomialRateCoefficient:
         )
 
 
+@dataclass(frozen=True)
+class ElectronMaxwellianCrossSectionRateCoefficient:
+    """Maxwellian rate coefficient from a tabulated electron cross section.
+
+    The tabulated cross section is linearly interpolated in energy and
+    integrated analytically over each segment:
+
+    ``<sigma v> = sqrt(8 e / (pi m_e)) Te^(-3/2)
+                  integral sigma(E) E exp(-E/Te) dE``.
+
+    Both ``E`` and ``Te`` are in eV.  A separately sourced physical threshold
+    forces the cross section to zero below threshold even when finite
+    experimental energy resolution leaves small sub-threshold table entries.
+    The coefficient fails closed when the unmeasured high-energy support
+    contains more than ``maximum_kernel_tail_fraction`` of the constant-cross-
+    section Maxwellian kernel.
+    """
+
+    electron_energy_eV: tuple[float, ...]
+    cross_section_m2: tuple[float, ...]
+    threshold_eV: float
+    relative_uncertainty: float | None
+    source: str
+    evidence_kind: str
+    maximum_kernel_tail_fraction: float = 1.0e-6
+    density_order: float = field(init=False, default=2.0)
+    source_units: str = field(
+        init=False,
+        default="tabulated E in eV and cross section in m^2; Maxwellian EEDF",
+    )
+
+    def __post_init__(self):
+        energies = tuple(float(value) for value in self.electron_energy_eV)
+        cross_sections = tuple(float(value) for value in self.cross_section_m2)
+        uncertainty = self.relative_uncertainty
+        if uncertainty is not None:
+            uncertainty = float(uncertainty)
+        if (
+            len(energies) < 2
+            or len(energies) != len(cross_sections)
+            or np.any(~np.isfinite(np.asarray(energies)))
+            or np.any(~np.isfinite(np.asarray(cross_sections)))
+            or np.any(np.diff(np.asarray(energies)) <= 0.0)
+            or energies[0] < 0.0
+            or np.any(np.asarray(cross_sections) < 0.0)
+            or not any(value > 0.0 for value in cross_sections)
+            or not np.isfinite(self.threshold_eV)
+            or not energies[0] <= self.threshold_eV < energies[-1]
+            or (
+                uncertainty is not None
+                and (
+                    not np.isfinite(uncertainty)
+                    or not 0.0 <= uncertainty < 1.0
+                )
+            )
+            or not np.isfinite(self.maximum_kernel_tail_fraction)
+            or not 0.0 < self.maximum_kernel_tail_fraction < 1.0
+            or not str(self.source).strip()
+            or self.evidence_kind not in _EVIDENCE_KINDS
+        ):
+            raise ValueError(
+                "invalid tabulated Maxwellian cross-section coefficient")
+        object.__setattr__(self, "electron_energy_eV", energies)
+        object.__setattr__(self, "cross_section_m2", cross_sections)
+        object.__setattr__(self, "threshold_eV", float(self.threshold_eV))
+        object.__setattr__(self, "relative_uncertainty", uncertainty)
+        object.__setattr__(
+            self,
+            "maximum_kernel_tail_fraction",
+            float(self.maximum_kernel_tail_fraction),
+        )
+
+    def maxwellian_kernel_tail_fraction(self, temperature_eV: float) -> float:
+        """Return the constant-cross-section kernel above table support."""
+        temperature = float(temperature_eV)
+        if not np.isfinite(temperature) or temperature <= 0.0:
+            raise ValueError("electron temperature must be finite and positive")
+        ratio = self.electron_energy_eV[-1] / temperature
+        return float((ratio + 1.0) * np.exp(-ratio))
+
+    @staticmethod
+    def _first_moment(
+            lower_eV: np.ndarray, upper_eV: np.ndarray,
+            temperature_eV: float) -> np.ndarray:
+        lower = lower_eV / temperature_eV
+        upper = upper_eV / temperature_eV
+        return temperature_eV ** 2 * (
+            (lower + 1.0) * np.exp(-lower)
+            - (upper + 1.0) * np.exp(-upper)
+        )
+
+    @staticmethod
+    def _second_moment(
+            lower_eV: np.ndarray, upper_eV: np.ndarray,
+            temperature_eV: float) -> np.ndarray:
+        lower = lower_eV / temperature_eV
+        upper = upper_eV / temperature_eV
+        return temperature_eV ** 3 * (
+            (lower ** 2 + 2.0 * lower + 2.0) * np.exp(-lower)
+            - (upper ** 2 + 2.0 * upper + 2.0) * np.exp(-upper)
+        )
+
+    def coefficient_si(self, context: RateContext) -> float:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        temperature = context.electron_temperature_eV
+        tail_fraction = self.maxwellian_kernel_tail_fraction(temperature)
+        if tail_fraction > self.maximum_kernel_tail_fraction:
+            raise ValueError(
+                "unmeasured cross-section tail exceeds declared Maxwellian "
+                "kernel tolerance"
+            )
+
+        source_energies = np.asarray(self.electron_energy_eV)
+        source_cross_sections = np.asarray(self.cross_section_m2)
+        above_threshold = source_energies > self.threshold_eV
+        energies = np.concatenate((
+            np.array([self.threshold_eV]),
+            source_energies[above_threshold],
+        ))
+        cross_sections = np.concatenate((
+            np.array([0.0]),
+            source_cross_sections[above_threshold],
+        ))
+
+        lower = energies[:-1]
+        upper = energies[1:]
+        lower_cross_section = cross_sections[:-1]
+        slopes = np.diff(cross_sections) / np.diff(energies)
+        first_moment = self._first_moment(lower, upper, temperature)
+        second_moment = self._second_moment(lower, upper, temperature)
+        weighted_integral = np.sum(
+            lower_cross_section * first_moment
+            + slopes * (second_moment - lower * first_moment)
+        )
+        prefactor = np.sqrt(
+            8.0 * E_CHARGE_C / (np.pi * ELECTRON_MASS_KG)
+        ) / temperature ** 1.5
+        value = prefactor * weighted_integral
+        if not np.isfinite(value) or value <= 0.0:
+            raise FloatingPointError("nonpositive or nonfinite rate coefficient")
+        return float(value)
+
+
 _RATE_COEFFICIENT_TYPES = (
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
     ElectronBase10LogPolynomialRateCoefficient,
+    ElectronMaxwellianCrossSectionRateCoefficient,
 )
 
 
@@ -435,6 +582,7 @@ class Reaction:
         | ElectronArrheniusRateCoefficient
         | ElectronInverseTemperaturePolynomialRateCoefficient
         | ElectronBase10LogPolynomialRateCoefficient
+        | ElectronMaxwellianCrossSectionRateCoefficient
     )
     electron_energy_loss_eV: float | None
     source: str
