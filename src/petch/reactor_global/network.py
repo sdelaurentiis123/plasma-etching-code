@@ -310,16 +310,17 @@ class ElectronInverseTemperaturePolynomialRateCoefficient:
 
 
 @dataclass(frozen=True)
-class ElectronLogPolynomialRateCoefficient:
-    """Published log-polynomial electron-impact coefficient.
+class ElectronBase10LogPolynomialRateCoefficient:
+    """Lennon Eq.-6 base-10-log electron-impact coefficient.
 
     The evaluated form is
 
-    ``(Te/Tref)^b exp(-E/Te) sum(c_n log(Te/Tref)^n)``.
+    ``(Te/Tref)^b exp(-E/Te) sum(c_n log10(Te/Tref)^n)``.
 
-    The polynomial coefficients carry the rate units.  This preserves the
-    printed Lennon-form chlorine-ionization fit without algebraically
-    reshaping or refitting it.
+    The polynomial coefficients carry the rate units.  Lennon et al.
+    explicitly define Eq. 6 with ``log10`` and bound it to
+    ``0.1 < Te/Tref < 10``.  Both details are enforced here rather than
+    inferred from Lee--Lieberman's abbreviated Table-2 transcription.
     """
 
     polynomial_coefficients_si: tuple[float, ...]
@@ -367,7 +368,10 @@ class ElectronLogPolynomialRateCoefficient:
             raise TypeError("rate context is required")
         temperature = context.electron_temperature_eV
         ratio = temperature / self.reference_temperature_eV
-        log_ratio = np.log(ratio)
+        if not 0.1 < ratio < 10.0:
+            raise ValueError(
+                "temperature is outside the Lennon Eq.-6 validity domain")
+        log_ratio = np.log10(ratio)
         polynomial = sum(
             coefficient * log_ratio ** order
             for order, coefficient in enumerate(
@@ -397,7 +401,10 @@ class ElectronLogPolynomialRateCoefficient:
             temperature_power=temperature_power,
             density_order=2.0,
             source=source,
-            source_units="cm^3 s^-1; Te in eV; natural log",
+            source_units=(
+                "cm^3 s^-1; Te in eV; base-10 log; "
+                "0.1 < Te/Tref < 10"
+            ),
             evidence_kind=evidence_kind,
         )
 
@@ -406,7 +413,7 @@ _RATE_COEFFICIENT_TYPES = (
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
-    ElectronLogPolynomialRateCoefficient,
+    ElectronBase10LogPolynomialRateCoefficient,
 )
 
 
@@ -427,7 +434,7 @@ class Reaction:
         ConstantRateCoefficient
         | ElectronArrheniusRateCoefficient
         | ElectronInverseTemperaturePolynomialRateCoefficient
-        | ElectronLogPolynomialRateCoefficient
+        | ElectronBase10LogPolynomialRateCoefficient
     )
     electron_energy_loss_eV: float | None
     source: str

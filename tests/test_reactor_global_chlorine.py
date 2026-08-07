@@ -32,6 +32,26 @@ def test_chlorine_particle_deck_replays_table2_rates_in_si():
         3.80e-8 * np.exp(-3.824 / temperature) * CM3_TO_M3,
         rel=2.0e-16,
     )
+    ratio = temperature / 12.96
+    atomic_ionization_coefficients = (
+        1.419e-7,
+        -1.864e-8,
+        -5.439e-8,
+        3.306e-8,
+        -3.54e-9,
+        -2.915e-8,
+    )
+    assert coefficients["e_Cl_ionization"] == pytest.approx(
+        ratio ** 0.5
+        * np.exp(-12.96 / temperature)
+        * sum(
+            coefficient * np.log10(ratio) ** order
+            for order, coefficient in enumerate(
+                atomic_ionization_coefficients)
+        )
+        * CM3_TO_M3,
+        rel=2.0e-16,
+    )
     assert coefficients["Clminus_Cl2plus_neutralization"] == pytest.approx(
         5.0e-14,
         rel=2.0e-16,

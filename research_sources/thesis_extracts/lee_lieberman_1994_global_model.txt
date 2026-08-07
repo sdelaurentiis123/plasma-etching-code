@@ -127,10 +127,11 @@ research_sources/digitized/lee_lieberman_1994_chlorine_table2_manifest.md.
 9. e + Cl- -> Cl + 2e
    k7 = 2.63e-8 exp(-5.37/Te)
 
-The implementation presently evaluates printed ``log`` as the natural
-logarithm, consistent with the usual Lennon analytical fit form. That
-interpretation remains explicitly source-bound pending direct reconciliation
-against the cited Lennon cross-section/rate source; it is not a fitted choice.
+The table abbreviates the logarithm as ``log``. Its cited primary authority,
+Lennon et al. (1988), defines the low-temperature analytic rate fit in Eq. 6
+with ``log10`` and a validity domain
+``0.1 < Te / ionization_potential < 10``. The executable deck uses base 10 and
+enforces that domain.
 
 The report does not track the fine-structure Cl* product in reaction 8, so the
 particle deck lumps it into ground-state Cl while preserving chlorine atoms

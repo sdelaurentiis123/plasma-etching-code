@@ -6,7 +6,7 @@ from petch.reactor_global import (
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
-    ElectronLogPolynomialRateCoefficient,
+    ElectronBase10LogPolynomialRateCoefficient,
     RateContext,
     Reaction,
     ReactionNetwork,
@@ -181,7 +181,7 @@ def test_inverse_temperature_polynomial_rate_replays_printed_expression():
     )
 
 
-def test_log_polynomial_rate_replays_printed_expression():
+def test_base10_log_polynomial_rate_replays_lennon_equation6():
     printed = (
         1.419e-7,
         -1.864e-8,
@@ -190,7 +190,7 @@ def test_log_polynomial_rate_replays_printed_expression():
         -3.54e-9,
         -2.915e-8,
     )
-    coefficient = ElectronLogPolynomialRateCoefficient.from_cm3_per_s(
+    coefficient = ElectronBase10LogPolynomialRateCoefficient.from_cm3_per_s(
         printed,
         reference_temperature_eV=12.96,
         activation_eV=12.96,
@@ -203,7 +203,7 @@ def test_log_polynomial_rate_replays_printed_expression():
         ratio ** 0.5
         * np.exp(-12.96 / temperature)
         * sum(
-            value * np.log(ratio) ** order
+            value * np.log10(ratio) ** order
             for order, value in enumerate(printed)
         )
         * CM3_TO_M3
@@ -214,6 +214,20 @@ def test_log_polynomial_rate_replays_printed_expression():
         rtol=2.0e-16,
         atol=0.0,
     )
+
+
+@pytest.mark.parametrize("temperature", [1.29, 130.0])
+def test_lennon_equation6_rejects_outside_published_temperature_domain(
+        temperature):
+    coefficient = ElectronBase10LogPolynomialRateCoefficient.from_cm3_per_s(
+        (1.419e-7,),
+        reference_temperature_eV=12.96,
+        activation_eV=12.96,
+        temperature_power=0.5,
+        source="lennon-1988-ionization Eq. 6",
+    )
+    with pytest.raises(ValueError, match="outside the Lennon Eq.-6"):
+        coefficient.coefficient_si(RateContext(temperature))
 
 
 def test_incomplete_electron_energy_ledger_fails_closed():

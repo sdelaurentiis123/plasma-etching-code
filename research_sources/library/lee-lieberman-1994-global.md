@@ -39,7 +39,7 @@
 | Q11 | Table 2 prints nine chlorine volume reactions spanning molecular and atomic ionization, ion-pair production, dissociation, dissociative attachment, mutual neutralization, and electron detachment. | Landed as an exact source-unit transcription with `e`, `Cl2`, `Cl`, `Cl2+`, `Cl+`, and `Cl-` explicit. Every reaction is atom- and charge-closed. |
 | Q12 | The second mutual-neutralization row produces `Cl + Cl*`, while the report states that chlorine metastable balances are omitted. | The particle-only reproduction lumps `Cl*` into tracked `Cl`; a predictive energy ledger must restore the internal-energy consequence instead of treating the lumping as fundamental. |
 | Q13 | Tables 4--5 separately enumerate electron energy-loss channels; fitted Table-2 activation parameters are not declared to be physical energy losses per event. | The chlorine network deliberately fails closed on electron-power evaluation until physical channel energies are independently sourced and mapped. |
-| Q14 | The atomic-chlorine ionization fit uses a printed polynomial in `log(Te/12.96)`. | The executable transcription currently interprets `log` as natural logarithm and records that assumption; direct reconciliation to the cited Lennon rate source remains required before predictive use. |
+| Q14 | The atomic-chlorine ionization fit uses a printed polynomial in `log(Te/12.96)`. | The cited primary authority, [`lennon-1988-ionization`](lennon-1988-ionization.md), resolves this as `log10` and restricts Eq. 6 to `0.1 < Te/12.96 < 10`; both are enforced in code. |
 
 ## Use decision
 

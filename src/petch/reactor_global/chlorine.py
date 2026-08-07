@@ -18,7 +18,7 @@ from .network import (
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
-    ElectronLogPolynomialRateCoefficient,
+    ElectronBase10LogPolynomialRateCoefficient,
     Reaction,
     ReactionNetwork,
     Species,
@@ -183,20 +183,25 @@ def build_lee_lieberman_chlorine_particle_network() -> ReactionNetwork:
             reactants={"e": 1, "Cl": 1},
             products={"Cl+": 1, "e": 2},
             kinetic_orders={"e": 1, "Cl": 1},
-            rate_coefficient=ElectronLogPolynomialRateCoefficient.from_cm3_per_s(
-                (
-                    1.419e-7,
-                    -1.864e-8,
-                    -5.439e-8,
-                    3.306e-8,
-                    -3.54e-9,
-                    -2.915e-8,
-                ),
-                reference_temperature_eV=12.96,
-                activation_eV=12.96,
-                temperature_power=0.5,
-                source=f"{_LEE_TABLE2} k4",
-                evidence_kind=evidence,
+            rate_coefficient=(
+                ElectronBase10LogPolynomialRateCoefficient.from_cm3_per_s(
+                    (
+                        1.419e-7,
+                        -1.864e-8,
+                        -5.439e-8,
+                        3.306e-8,
+                        -3.54e-9,
+                        -2.915e-8,
+                    ),
+                    reference_temperature_eV=12.96,
+                    activation_eV=12.96,
+                    temperature_power=0.5,
+                    source=(
+                        f"{_LEE_TABLE2} k4; "
+                        "lennon-1988-ionization Eq. 6"
+                    ),
+                    evidence_kind=evidence,
+                )
             ),
             electron_energy_loss_eV=None,
             source=f"{_LEE_TABLE2} k4",

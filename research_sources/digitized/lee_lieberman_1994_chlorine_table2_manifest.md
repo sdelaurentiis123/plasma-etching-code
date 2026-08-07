@@ -41,7 +41,8 @@ Two source-model boundaries remain explicit:
    Electron-power evaluation remains disabled until Tables 4--5 and the cited
    primary channel sources close that ledger.
 
-The printed atomic-chlorine ionization expression uses `log(Te/12.96)`.
-The implementation currently uses natural logarithm, records that
-interpretation, and requires direct confirmation from the cited Lennon source
-before predictive promotion.
+The printed atomic-chlorine ionization expression abbreviates its logarithm as
+`log(Te/12.96)`. The cited primary source, Lennon et al. (1988), Eq. 6,
+explicitly uses `log10` and declares
+`0.1 < Te / ionization_potential < 10`. The implementation uses base 10 and
+enforces that validity domain.
