@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import csv
 from functools import lru_cache
+import hashlib
 from pathlib import Path
 
 from .chlorine import build_lee_lieberman_chlorine_particle_network
@@ -81,6 +82,14 @@ HAMILTON_2018_CL2_DISSOCIATION_STATES = (
 _HAMILTON_2018_RATE_TABLE = (
     Path(__file__).with_name("data")
     / "hamilton_2018_cl2_state_maxwellian_rates.csv"
+)
+_HAMILTON_2018_CROSS_SECTION_TABLE = (
+    Path(__file__).resolve().parents[3]
+    / "research_sources" / "digitized"
+    / "hamilton_2018_cl2_state_cross_sections.csv"
+)
+HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256 = (
+    "7328d289542e23f2d12b4b172a19271120a3c5b62dc0dcd22a831569365dd288"
 )
 
 
@@ -204,6 +213,78 @@ def nist_molecular_chlorine_total_ionization_rate(
         ),
         evidence_kind="published_compilation",
         maximum_kernel_tail_fraction=maximum_kernel_tail_fraction,
+    )
+
+
+@lru_cache(maxsize=1)
+def _hamilton_2018_cross_section_columns():
+    payload = _HAMILTON_2018_CROSS_SECTION_TABLE.read_bytes()
+    if hashlib.sha256(payload).hexdigest() != (
+        HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256
+    ):
+        raise RuntimeError("Hamilton state cross-section table hash mismatch")
+    with _HAMILTON_2018_CROSS_SECTION_TABLE.open(
+        newline="", encoding="utf-8"
+    ) as stream:
+        reader = csv.DictReader(stream)
+        expected = (
+            "electron_energy_eV",
+            *(f"{state}_m2" for state, _ in HAMILTON_2018_CL2_DISSOCIATION_STATES),
+        )
+        if tuple(reader.fieldnames or ()) != expected:
+            raise RuntimeError("Hamilton state cross-section columns changed")
+        rows = tuple(reader)
+    if (
+        len(rows) != 50_000
+        or float(rows[0]["electron_energy_eV"]) != 0.02
+        or float(rows[-1]["electron_energy_eV"]) != 1000.0
+    ):
+        raise RuntimeError("Hamilton state cross-section grid changed")
+    energies = tuple(float(row["electron_energy_eV"]) for row in rows)
+    states = {
+        state: tuple(float(row[f"{state}_m2"]) for row in rows)
+        for state, _ in HAMILTON_2018_CL2_DISSOCIATION_STATES
+    }
+    return energies, states
+
+
+@lru_cache(maxsize=4)
+def hamilton_2018_cl2_state_dissociation_collision_processes(
+    maximum_energy_eV: float = 200.0,
+) -> tuple[ElectronCollisionProcess, ...]:
+    """Return exact OPJ state arrays as non-Maxwellian collision rows."""
+    maximum = float(maximum_energy_eV)
+    if maximum <= max(
+        threshold for _, threshold in HAMILTON_2018_CL2_DISSOCIATION_STATES
+    ) or maximum > 1000.0:
+        raise ValueError("Hamilton collision maximum is outside source support")
+    source_energies, source_states = _hamilton_2018_cross_section_columns()
+    stop = next(
+        (index + 1 for index, value in enumerate(source_energies)
+         if value >= maximum),
+        len(source_energies),
+    )
+    energies = source_energies[:stop]
+    if energies[-1] != maximum:
+        raise ValueError("Hamilton collision maximum must lie on source grid")
+    return tuple(
+        ElectronCollisionProcess(
+            kind="EXCITATION",
+            target="Cl2",
+            product=f"2Cl via {state}",
+            electron_energy_eV=(0.0, *energies),
+            cross_section_m2=(0.0, *source_states[state][:stop]),
+            energy_loss_eV=threshold,
+            electron_number_change=0,
+            comments=(
+                "Hamilton et al. 2018 exact CC-BY OPJ state array",
+                "fixed-nuclei R-matrix Cl2(v=0)",
+                "transition-specific semi-empirical high-energy scaling",
+                "all retained states dissociate to two ground-state Cl",
+                "no reactor or feature fit",
+            ),
+        )
+        for state, threshold in HAMILTON_2018_CL2_DISSOCIATION_STATES
     )
 
 

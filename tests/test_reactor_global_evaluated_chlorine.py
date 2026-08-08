@@ -1,4 +1,5 @@
 import csv
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -7,11 +8,16 @@ import pytest
 from petch.reactor_global import (
     ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
     HAMILTON_2018_CL2_DISSOCIATION_STATES,
+    HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256,
     MOLECULAR_CHLORINE_TOTAL_IONIZATION_THRESHOLD_EV,
+    ElectronCollisionMomentKernel,
+    ElectronEnergyDistribution,
+    ElectronEnergyGrid,
     RateContext,
     ReactionNetwork,
     build_hamilton_dissociation_chlorine_particle_network,
     build_lee_lieberman_chlorine_particle_network,
+    hamilton_2018_cl2_state_dissociation_collision_processes,
     hamilton_2018_cl2_state_dissociation_rates,
     hamilton_2018_cl2_state_dissociation_reactions,
     lee_lieberman_chlorine_species,
@@ -39,6 +45,10 @@ TABLE16_MANIFEST = TABLE16.with_name(
 HAMILTON_RATES = (
     ROOT / "src" / "petch" / "reactor_global" / "data"
     / "hamilton_2018_cl2_state_maxwellian_rates.csv"
+)
+HAMILTON_CROSS_SECTIONS = (
+    ROOT / "research_sources" / "digitized"
+    / "hamilton_2018_cl2_state_cross_sections.csv"
 )
 
 
@@ -288,6 +298,59 @@ def test_hamilton_state_rates_match_compact_table_at_every_node():
             rel=4.0e-15,
             abs=0.0,
         )
+
+
+def test_hamilton_nonmaxwellian_rows_are_hash_gated_exact_state_arrays():
+    processes = hamilton_2018_cl2_state_dissociation_collision_processes()
+    assert len(processes) == len(HAMILTON_2018_CL2_DISSOCIATION_STATES) == 8
+    assert HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256 == (
+        "7328d289542e23f2d12b4b172a19271120a3c5b62dc0dcd22a831569365dd288"
+    )
+    assert hashlib.sha256(HAMILTON_CROSS_SECTIONS.read_bytes()).hexdigest() == (
+        HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256)
+    for process, (state, threshold) in zip(
+        processes, HAMILTON_2018_CL2_DISSOCIATION_STATES
+    ):
+        assert process.kind == "EXCITATION"
+        assert process.target == "Cl2"
+        assert process.product == f"2Cl via {state}"
+        assert process.energy_loss_eV == threshold
+        assert len(process.electron_energy_eV) == 10_001
+        assert process.electron_energy_eV[:2] == (0.0, 0.02)
+        assert process.electron_energy_eV[-1] == 200.0
+        assert all(
+            cross_section == 0.0
+            for energy, cross_section in zip(
+                process.electron_energy_eV, process.cross_section_m2)
+            if energy < threshold
+        )
+
+
+def test_hamilton_nonmaxwellian_moments_reproduce_compact_maxwellian_total():
+    temperature = 3.0
+    processes = hamilton_2018_cl2_state_dissociation_collision_processes()
+    thresholds = tuple(process.energy_loss_eV for process in processes)
+    grid = ElectronEnergyGrid.piecewise_linear(
+        (0.0, 0.5, 5.0, 20.0, 80.0, 200.0),
+        (200, 900, 900, 600, 400),
+        inserted_boundaries_eV=thresholds,
+    )
+    distribution = ElectronEnergyDistribution.maxwellian(grid, temperature)
+    actual = sum(
+        ElectronCollisionMomentKernel.from_process(grid, process).evaluate(
+            distribution,
+            maximum_unresolved_population_fraction=1.0e-7,
+        ).rate_coefficient_m3_s
+        for process in processes
+    )
+    expected = sum(
+        provider.coefficient_si(RateContext(temperature))
+        for _, _, provider in hamilton_2018_cl2_state_dissociation_rates()
+    )
+    # The compact table integrates the exact same 50,000-point arrays against
+    # an analytic Maxwellian kernel. The residual here is solely the declared
+    # piecewise-constant EEPF discretization used by the production solver.
+    assert actual == pytest.approx(expected, rel=2.0e-4)
 
 
 @pytest.mark.parametrize("temperature", [0.299, 5.001])

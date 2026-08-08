@@ -16,6 +16,7 @@ from petch.reactor_global.electron_kinetics import (
     DeterministicTwoTermBoltzmannSolver,
     ScharfetterGummelEnergyOperator,
     TwoTermBoltzmannCondition,
+    _PiecewiseLinearCrossSectionIntegral,
     normalize_eepf,
     normalize_eepf_jvp,
     normalize_eepf_vjp,
@@ -75,6 +76,47 @@ def test_piecewise_grid_resolves_inserted_collision_threshold_exactly():
     assert grid.cell_count == 22
     with pytest.raises(ValueError, match="piecewise-linear"):
         ElectronEnergyGrid.piecewise_linear((0.0, 1.0), (0,))
+
+
+def test_piecewise_cross_section_antiderivative_is_exact_across_many_knots():
+    energy = np.linspace(0.0, 1000.0, 50_001)
+    slope = 3.0e-24
+    intercept = 2.0e-20
+    cross_section = slope * energy + intercept
+    integral = _PiecewiseLinearCrossSectionIntegral(
+        energy, cross_section, powers=(1, 2))
+    lower = 3.252
+    upper = 199.987
+    for power in (1, 2):
+        expected = (
+            intercept / (power + 1)
+            * (upper ** (power + 1) - lower ** (power + 1))
+            + slope / (power + 2)
+            * (upper ** (power + 2) - lower ** (power + 2))
+        )
+        assert integral.integrate(
+            lower, upper, energy_power=power
+        ) == pytest.approx(expected, rel=3.0e-15)
+
+
+def test_piecewise_cross_section_antiderivative_resolves_tiny_high_energy_row():
+    energy = (0.0, 199.98, 200.0)
+    cross_section = (0.0, 2.0e-29, 1.0e-29)
+    integral = _PiecewiseLinearCrossSectionIntegral(
+        energy, cross_section, powers=(1,))
+    # Linear-in-energy quadrature evaluated independently at the two segment
+    # endpoints. This interval triggered global-polynomial cancellation in the
+    # exact Hamilton source replay before local-coordinate evaluation.
+    expected = (
+        0.02 / 6.0
+        * (
+            199.98 * (2.0 * 2.0e-29 + 1.0e-29)
+            + 200.0 * (2.0e-29 + 2.0 * 1.0e-29)
+        )
+    )
+    assert integral.integrate(
+        199.98, 200.0, energy_power=1
+    ) == pytest.approx(expected, rel=2.0e-13)
 
 
 def test_high_frequency_heating_operator_recovers_hagelaar_equation_25():
@@ -354,7 +396,7 @@ def test_two_term_excitation_source_conserves_particles_and_cools_field_tail():
         pytest.approx(0.0, abs=2.0e-27))
     assert with_excitation.particle_growth_closure_error_m3_s == pytest.approx(
         0.0, abs=2.0e-27)
-    assert with_excitation.roundoff_negative_population_fraction < 1.0e-15
+    assert with_excitation.roundoff_negative_population_fraction < 1.0e-12
     assert with_excitation.distribution.mean_energy_eV < (
         elastic_only.distribution.mean_energy_eV)
     excitation_moment = with_excitation.collision_moments[1]

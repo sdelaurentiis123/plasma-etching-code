@@ -7,6 +7,7 @@ from petch.reactor_global.chlorine_siglo_replay import (
     LEGACY_SIGLO_CL2_2013_SHA256,
     _EXPECTED_ROWS,
     _derive_legacy_siglo_comsol_chlorine_replay,
+    derive_hamilton_2018_dissociation_replay,
     derive_legacy_siglo_cl2_replay,
 )
 from petch.reactor_global.chlorine_wall import (
@@ -147,3 +148,38 @@ def test_two_target_replay_adds_atomic_momentum_and_measured_ionization():
         "tracked_vibrational_and_electronic_state_kinetics",
     )
     assert not replay.supports_reactor_state_prediction
+
+
+def test_hamilton_replay_replaces_only_five_legacy_dissociation_rows():
+    molecular = derive_legacy_siglo_cl2_replay(
+        _manufactured_topology_fixture(), maximum_energy_eV=200.0)
+    upgraded = derive_hamilton_2018_dissociation_replay(molecular)
+    original = molecular.derived_deck.processes
+    retained = tuple(
+        process for index, process in enumerate(original)
+        if index not in range(4, 9)
+    )
+
+    assert upgraded.derived_deck.processes[:len(retained)] == retained
+    hamilton = upgraded.derived_deck.processes[len(retained):]
+    assert len(hamilton) == 8
+    assert all(process.target == "Cl2" for process in hamilton)
+    assert all(process.product.startswith("2Cl via ") for process in hamilton)
+    hamilton_mappings = tuple(
+        mapping for mapping in upgraded.collision_chemistry.mappings
+        if mapping.reaction_name.startswith("hamilton_dissociative_excitation_")
+    )
+    assert len(hamilton_mappings) == 8
+    assert all(
+        mapping.evidence_kind == "semi_empirical"
+        and mapping.heavy_reactants == {"Cl2": 1}
+        and mapping.heavy_products == {"Cl": 2}
+        for mapping in hamilton_mappings
+    )
+    assert len(upgraded.collision_chemistry.mappings) == 18
+    assert upgraded.derived_deck.payload_sha256 != (
+        molecular.derived_deck.payload_sha256)
+    assert upgraded.missing_reactor_channels == (
+        molecular.missing_reactor_channels)
+    assert not upgraded.supports_reactor_state_prediction
+    assert not upgraded.supports_feature_depth

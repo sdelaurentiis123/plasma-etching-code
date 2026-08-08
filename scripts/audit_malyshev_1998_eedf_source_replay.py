@@ -23,6 +23,7 @@ from petch.reactor_global import (
     EEDFChlorineCondition,
     ElectronEnergyGrid,
     FixedPositiveIonWallEnergyProvider,
+    HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256,
     LeeEconomouChlorineChargedTransportProvider,
     MalyshevMeasuredElectronDensityProvider,
     MalyshevMeasuredElectronTemperatureProvider,
@@ -32,8 +33,10 @@ from petch.reactor_global import (
     ReactorScalarInput,
     StateDependentChlorineNeutralTransportProvider,
     build_lee_lieberman_chlorine_particle_network,
+    derive_hamilton_2018_dissociation_replay,
     load_legacy_siglo_cl2_replay,
     load_legacy_siglo_comsol_chlorine_replay,
+    load_legacy_siglo_hamilton_comsol_chlorine_replay,
     lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities,
     malyshev_1998_lam_geometry,
     ramamurthi_economou_2002_chlorine_diffusivity,
@@ -54,6 +57,15 @@ REPORT_NAME = "MALYSHEV_1998_EEDF_SOURCE_REPLAY.md"
 ATOMIC_JSON_NAME = "malyshev_1998_eedf_atomic_cl_source_replay.json"
 ATOMIC_CSV_NAME = "malyshev_1998_eedf_atomic_cl_source_replay.csv"
 ATOMIC_REPORT_NAME = "MALYSHEV_1998_EEDF_ATOMIC_CL_SOURCE_REPLAY.md"
+HAMILTON_ATOMIC_JSON_NAME = (
+    "malyshev_1998_eedf_hamilton_atomic_cl_source_replay.json")
+HAMILTON_ATOMIC_CSV_NAME = (
+    "malyshev_1998_eedf_hamilton_atomic_cl_source_replay.csv")
+HAMILTON_ATOMIC_REPORT_NAME = (
+    "MALYSHEV_1998_EEDF_HAMILTON_ATOMIC_CL_SOURCE_REPLAY.md")
+HAMILTON_JSON_NAME = "malyshev_1998_eedf_hamilton_source_replay.json"
+HAMILTON_CSV_NAME = "malyshev_1998_eedf_hamilton_source_replay.csv"
+HAMILTON_REPORT_NAME = "MALYSHEV_1998_EEDF_HAMILTON_SOURCE_REPLAY.md"
 ABSORBED_FRACTIONS = (0.30, 0.50, 0.70)
 SOURCE_POWERS_W = (300.0, 500.0)
 GAP_CM = 6.5
@@ -245,22 +257,36 @@ def run_replay(
     *,
     energy_cells: int,
     atomic_cl_momentum: Path | None = None,
+    hamilton_dissociation: bool = False,
     absorbed_fractions: tuple[float, ...] = ABSORBED_FRACTIONS,
     source_powers_W: tuple[float, ...] = SOURCE_POWERS_W,
 ) -> dict[str, object]:
     if atomic_cl_momentum is None:
         replay = load_legacy_siglo_cl2_replay(
             collision_deck, maximum_energy_eV=200.0)
-        model_variant = "legacy_siglo_molecular_cl2_only"
+        if hamilton_dissociation:
+            replay = derive_hamilton_2018_dissociation_replay(replay)
+            model_variant = "legacy_siglo_hamilton_molecular_cl2_only"
+        else:
+            model_variant = "legacy_siglo_molecular_cl2_only"
         molecular_replay = replay
         atomic_momentum_hash = None
     else:
-        replay = load_legacy_siglo_comsol_chlorine_replay(
-            collision_deck,
-            atomic_cl_momentum,
-            maximum_energy_eV=200.0,
-        )
-        model_variant = "legacy_siglo_plus_comsol_nist_atomic_cl"
+        if hamilton_dissociation:
+            replay = load_legacy_siglo_hamilton_comsol_chlorine_replay(
+                collision_deck,
+                atomic_cl_momentum,
+                maximum_energy_eV=200.0,
+            )
+            model_variant = (
+                "legacy_siglo_hamilton_plus_comsol_nist_atomic_cl")
+        else:
+            replay = load_legacy_siglo_comsol_chlorine_replay(
+                collision_deck,
+                atomic_cl_momentum,
+                maximum_energy_eV=200.0,
+            )
+            model_variant = "legacy_siglo_plus_comsol_nist_atomic_cl"
         molecular_replay = replay.molecular_replay
         atomic_momentum_hash = replay.atomic_momentum_payload_sha256
     if int(energy_cells) != energy_cells or energy_cells < 100:
@@ -423,6 +449,9 @@ def run_replay(
         "raw_collision_payload_sha256": (
             molecular_replay.raw_payload_sha256),
         "atomic_momentum_payload_sha256": atomic_momentum_hash,
+        "hamilton_state_cross_sections_sha256": (
+            HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256
+            if hamilton_dissociation else None),
         "derived_collision_deck_sha256": replay.derived_deck.payload_sha256,
         "raw_collision_bytes_committed": False,
         "energy_grid": {
@@ -486,9 +515,19 @@ def run_replay(
 def _write(result: dict[str, object], output_directory: Path) -> None:
     output_directory.mkdir(parents=True, exist_ok=True)
     atomic = result["atomic_momentum_payload_sha256"] is not None
-    json_name = ATOMIC_JSON_NAME if atomic else JSON_NAME
-    csv_name = ATOMIC_CSV_NAME if atomic else CSV_NAME
-    report_name = ATOMIC_REPORT_NAME if atomic else REPORT_NAME
+    hamilton = "hamilton" in result["model_variant"]
+    if hamilton and atomic:
+        json_name = HAMILTON_ATOMIC_JSON_NAME
+        csv_name = HAMILTON_ATOMIC_CSV_NAME
+        report_name = HAMILTON_ATOMIC_REPORT_NAME
+    elif hamilton:
+        json_name = HAMILTON_JSON_NAME
+        csv_name = HAMILTON_CSV_NAME
+        report_name = HAMILTON_REPORT_NAME
+    else:
+        json_name = ATOMIC_JSON_NAME if atomic else JSON_NAME
+        csv_name = ATOMIC_CSV_NAME if atomic else CSV_NAME
+        report_name = ATOMIC_REPORT_NAME if atomic else REPORT_NAME
     (output_directory / json_name).write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -516,11 +555,7 @@ def _write(result: dict[str, object], output_directory: Path) -> None:
             "{total_positive_ion_axial_flux_m2_s:.3e} | "
             "{maximum_normalized_residual:.1e} |".format(**row)
         )
-    variant_text = (
-        "legacy SIGLO molecular Cl2 plus official COMSOL atomic-Cl momentum "
-        "and NIST/Hayes measured atomic-Cl ionization"
-        if atomic else "legacy SIGLO molecular Cl2 only"
-    )
+    variant_text = str(result["model_variant"]).replace("_", " ")
     atomic_boundary = (
         "- Atomic-Cl ionization is included, but electron detachment from "
         "Cl- and tracked excited-state kinetics remain absent.\n"
@@ -573,6 +608,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("collision_deck", type=Path)
     parser.add_argument("--atomic-cl-momentum", type=Path)
+    parser.add_argument("--hamilton-dissociation", action="store_true")
     parser.add_argument("--energy-cells", type=int, default=400)
     parser.add_argument(
         "--absorbed-fraction",
@@ -592,6 +628,7 @@ def main() -> None:
         arguments.collision_deck,
         energy_cells=arguments.energy_cells,
         atomic_cl_momentum=arguments.atomic_cl_momentum,
+        hamilton_dissociation=arguments.hamilton_dissociation,
         absorbed_fractions=(
             ABSORBED_FRACTIONS
             if arguments.absorbed_fraction is None

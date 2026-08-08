@@ -1,0 +1,95 @@
+{
+  "claim_class": "frozen-state source-replay timescale sensitivity",
+  "coupled_response_is_formal_bound": false,
+  "double_detachment_formula": "3.62e-15 Te^0.72 exp(-25.38/Te) m3/s",
+  "feature_depth_used": false,
+  "fit_temperature_domain_eV": [
+    0.5,
+    10.0
+  ],
+  "maximum_detachment_to_neutralization_loss_ratio": 0.034734656572137604,
+  "mutual_neutralization_rate_coefficient_m3_s": 5e-14,
+  "rate_source": "Kemaneci et al. 2014 Table 4 reactions 23--24; rates trace Fritioff et al. 2003 electron-impact detachment measurements",
+  "rows": [
+    {
+      "absorbed_fraction_sensitivity": 0.3,
+      "detachment_to_neutralization_loss_ratio": 0.019414910903689218,
+      "double_detachment_rate_coefficient_m3_s": 3.79439688676561e-19,
+      "electron_density_m3": 2.4178862057178732e+16,
+      "electron_detachment_loss_frequency_s_inv": 78.51370276237489,
+      "electronegativity": 2.3450621845572623,
+      "mean_energy_temperature_proxy_eV": 2.577927291774508,
+      "mutual_neutralization_loss_frequency_s_inv": 4043.9898566547495,
+      "single_detachment_rate_coefficient_m3_s": 3.246824774335286e-15,
+      "source_power_W": 300.0
+    },
+    {
+      "absorbed_fraction_sensitivity": 0.3,
+      "detachment_to_neutralization_loss_ratio": 0.024768011283808723,
+      "double_detachment_rate_coefficient_m3_s": 3.3200693028244356e-19,
+      "electron_density_m3": 4.430784142721599e+16,
+      "electron_detachment_loss_frequency_s_inv": 138.85740105154562,
+      "electronegativity": 1.53062211209534,
+      "mean_energy_temperature_proxy_eV": 2.5457362221427804,
+      "mutual_neutralization_loss_frequency_s_inv": 5606.320162746337,
+      "single_detachment_rate_coefficient_m3_s": 3.1335918444413798e-15,
+      "source_power_W": 500.0
+    },
+    {
+      "absorbed_fraction_sensitivity": 0.5,
+      "detachment_to_neutralization_loss_ratio": 0.024768011283783545,
+      "double_detachment_rate_coefficient_m3_s": 3.3200693028082285e-19,
+      "electron_density_m3": 4.430784142723772e+16,
+      "electron_detachment_loss_frequency_s_inv": 138.85740105143378,
+      "electronegativity": 1.530622112094633,
+      "mean_energy_temperature_proxy_eV": 2.5457362221416178,
+      "mutual_neutralization_loss_frequency_s_inv": 5606.32016274752,
+      "single_detachment_rate_coefficient_m3_s": 3.1335918444373203e-15,
+      "source_power_W": 300.0
+    },
+    {
+      "absorbed_fraction_sensitivity": 0.5,
+      "detachment_to_neutralization_loss_ratio": 0.030695741405997307,
+      "double_detachment_rate_coefficient_m3_s": 3.027070541242722e-19,
+      "electron_density_m3": 7.941853936779792e+16,
+      "electron_detachment_loss_frequency_s_inv": 242.86803139821498,
+      "electronegativity": 0.9925091539161436,
+      "mean_energy_temperature_proxy_eV": 2.523915698380572,
+      "mutual_neutralization_loss_frequency_s_inv": 7912.108334049349,
+      "single_detachment_rate_coefficient_m3_s": 3.0577745798304974e-15,
+      "source_power_W": 500.0
+    },
+    {
+      "absorbed_fraction_sensitivity": 0.7,
+      "detachment_to_neutralization_loss_ratio": 0.028628565137293983,
+      "double_detachment_rate_coefficient_m3_s": 3.1115984042712126e-19,
+      "electron_density_m3": 6.521807803926562e+16,
+      "electron_detachment_loss_frequency_s_inv": 200.9026751148467,
+      "electronegativity": 1.1520290892092588,
+      "mean_energy_temperature_proxy_eV": 2.5303823949109585,
+      "mutual_neutralization_loss_frequency_s_inv": 7017.560054140958,
+      "single_detachment_rate_coefficient_m3_s": 3.0801640880485084e-15,
+      "source_power_W": 300.0
+    },
+    {
+      "absorbed_fraction_sensitivity": 0.7,
+      "detachment_to_neutralization_loss_ratio": 0.034734656572137604,
+      "double_detachment_rate_coefficient_m3_s": 2.8995725169876528e-19,
+      "electron_density_m3": 1.1550263904213136e+17,
+      "electron_detachment_loss_frequency_s_inv": 349.2148389651678,
+      "electronegativity": 0.7408757221776424,
+      "mean_energy_temperature_proxy_eV": 2.513875470075818,
+      "mutual_neutralization_loss_frequency_s_inv": 10053.7870077947,
+      "single_detachment_rate_coefficient_m3_s": 3.0231460599789234e-15,
+      "source_power_W": 500.0
+    }
+  ],
+  "schema": "petch.malyshev_1998_detachment_importance.v1",
+  "single_detachment_formula": "9.02e-15 Te^0.92 exp(-4.88/Te) m3/s",
+  "source_replay": "results/curated/reactor_global_chlorine/malyshev_1998_eedf_hamilton_atomic_cl_source_replay.json",
+  "supports_feature_depth": false,
+  "supports_reactor_state_prediction": false,
+  "supports_wafer_flux": false,
+  "temperature_input_boundary": "2/3 of non-Maxwellian EEPF mean energy; Maxwellian-fit sensitivity, not an exact EEPF collision moment",
+  "verdict": "low frozen-state leverage: detachment is below 4% of the already active mutual-neutralization loss on this board"
+}

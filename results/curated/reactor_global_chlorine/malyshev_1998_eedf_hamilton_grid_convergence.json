@@ -1,0 +1,145 @@
+{
+  "claim_class": "numerical convergence receipt; not physical validation",
+  "coarse_grid": {
+    "actual_cell_count": 415,
+    "breakpoints_eV": [
+      0.0,
+      0.5,
+      5.0,
+      20.0,
+      80.0,
+      200.0
+    ],
+    "family": "threshold_aligned_piecewise_linear_v1",
+    "inserted_collision_thresholds_eV": [
+      0.069,
+      0.139,
+      3.252,
+      4.348,
+      6.498,
+      7.257,
+      7.537,
+      7.79,
+      8.228,
+      9.219,
+      10.54,
+      10.7,
+      11.0,
+      11.49,
+      12.967633,
+      35.5,
+      43.5
+    ],
+    "nominal_cell_count": 400,
+    "segment_cell_counts": [
+      80,
+      120,
+      100,
+      60,
+      40
+    ]
+  },
+  "collision_identity": {
+    "atomic_momentum_payload_sha256": "6c1391eda01d90ac504e73e3f5306b510e8a5d721860b03b50cdba39edd29661",
+    "derived_collision_deck_sha256": "06eb0d72fffea0c92d676511e9add57888732f5df557b3a7e217e94805398688",
+    "hamilton_state_cross_sections_sha256": "7328d289542e23f2d12b4b172a19271120a3c5b62dc0dcd22a831569365dd288",
+    "raw_collision_bytes_committed": false,
+    "raw_collision_payload_sha256": "b8b1ff807d0586795dcabf4511a2a44b8b04828626b45e0fd95a319817c01063"
+  },
+  "condition": {
+    "absorbed_fraction_sensitivity": 0.3,
+    "source_power_W": 500.0,
+    "validation_role": "held_out_reactor_diagnostic"
+  },
+  "feature_depth_used": false,
+  "fine_grid": {
+    "actual_cell_count": 813,
+    "breakpoints_eV": [
+      0.0,
+      0.5,
+      5.0,
+      20.0,
+      80.0,
+      200.0
+    ],
+    "family": "threshold_aligned_piecewise_linear_v1",
+    "inserted_collision_thresholds_eV": [
+      0.069,
+      0.139,
+      3.252,
+      4.348,
+      6.498,
+      7.257,
+      7.537,
+      7.79,
+      8.228,
+      9.219,
+      10.54,
+      10.7,
+      11.0,
+      11.49,
+      12.967633,
+      35.5,
+      43.5
+    ],
+    "nominal_cell_count": 800,
+    "segment_cell_counts": [
+      160,
+      240,
+      200,
+      120,
+      80
+    ]
+  },
+  "maximum_absolute_relative_change": 0.000327639767132392,
+  "maximum_change_metric": "electron_density_m3",
+  "metrics": {
+    "cl_to_cl2_ratio": {
+      "coarse": 0.7814810601203274,
+      "fine": 0.7813991011615409,
+      "relative_change": -0.00010487644930750878
+    },
+    "clplus_ion_fraction": {
+      "coarse": 0.3221924373209046,
+      "fine": 0.3221316424563582,
+      "relative_change": -0.00018869115939491223
+    },
+    "electron_density_m3": {
+      "coarse": 4.430784142721599e+16,
+      "fine": 4.429332441636864e+16,
+      "relative_change": -0.000327639767132392
+    },
+    "electronegativity": {
+      "coarse": 1.53062211209534,
+      "fine": 1.5310629782518028,
+      "relative_change": 0.00028803069874591653
+    },
+    "mean_electron_energy_eV": {
+      "coarse": 3.818604333214171,
+      "fine": 3.8187698270378245,
+      "relative_change": 4.333882466272616e-05
+    },
+    "modeled_relative_cl2_density_percent_proxy": {
+      "coarse": 56.13306940981211,
+      "fine": 56.135651991064854,
+      "relative_change": 4.600819587988466e-05
+    },
+    "reduced_electric_field_Td": {
+      "coarse": 1091.1803918507187,
+      "fine": 1091.2839627875476,
+      "relative_change": 9.491642042175074e-05
+    },
+    "total_positive_ion_axial_flux_m2_s": {
+      "coarse": 4.879723483666329e+19,
+      "fine": 4.8783534667535794e+19,
+      "relative_change": -0.00028075707923515687
+    }
+  },
+  "model_variant": "legacy_siglo_hamilton_plus_comsol_nist_atomic_cl",
+  "numerical_convergence_passed": true,
+  "numerically_converged_below_relative_change": 0.0005,
+  "schema": "petch.malyshev_1998_hamilton_grid_convergence.v1",
+  "supports_feature_depth": false,
+  "supports_reactor_state_prediction": false,
+  "supports_wafer_flux": false
+}

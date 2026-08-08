@@ -33,6 +33,8 @@ from .electron_collision_deck import (
     load_bolsig_lxcat_file,
 )
 from .evaluated_chlorine import (
+    HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256,
+    hamilton_2018_cl2_state_dissociation_collision_processes,
     nist_hayes_atomic_chlorine_ionization_collision_process,
 )
 
@@ -355,6 +357,94 @@ def load_legacy_siglo_cl2_replay(
         raw, maximum_energy_eV=maximum_energy_eV)
 
 
+def derive_hamilton_2018_dissociation_replay(
+    molecular_replay: LegacySigloChlorineReplay,
+) -> LegacySigloChlorineReplay:
+    """Replace only legacy neutral dissociation with Hamilton state rows.
+
+    This is a provider comparison, not a silent upgrade: the legacy elastic,
+    attachment, vibrational, Rydberg, ion-pair, and ionization rows are kept
+    byte-for-byte from the already derived replay. Five legacy dissociative
+    excitations are removed and eight exact Hamilton OPJ arrays are appended.
+    """
+    if not isinstance(molecular_replay, LegacySigloChlorineReplay):
+        raise TypeError("a molecular chlorine replay is required")
+    removed_indices = frozenset(range(4, 9))
+    retained_indices = tuple(
+        index for index in range(len(molecular_replay.derived_deck.processes))
+        if index not in removed_indices
+    )
+    retained_processes = tuple(
+        molecular_replay.derived_deck.processes[index]
+        for index in retained_indices
+    )
+    hamilton_processes = (
+        hamilton_2018_cl2_state_dissociation_collision_processes(
+            molecular_replay.maximum_energy_eV)
+    )
+    processes = (*retained_processes, *hamilton_processes)
+    old_to_new = {
+        old_index: new_index
+        for new_index, old_index in enumerate(retained_indices)
+    }
+    mappings = [
+        replace(mapping, process_index=old_to_new[mapping.process_index])
+        for mapping in molecular_replay.collision_chemistry.mappings
+        if mapping.process_index not in removed_indices
+    ]
+    first_hamilton_index = len(retained_processes)
+    for offset, process in enumerate(hamilton_processes):
+        state = process.product.removeprefix("2Cl via ")
+        mappings.append(ElectronCollisionHeavyMapping(
+            process_index=first_hamilton_index + offset,
+            reaction_name=f"hamilton_dissociative_excitation_{state}",
+            heavy_reactants={"Cl2": 1},
+            heavy_products={"Cl": 2},
+            source=(
+                "Hamilton et al. 2018 exact CC-BY OPJ state array; "
+                "fixed-nuclei R-matrix plus transition-specific "
+                "semi-empirical high-energy scaling; no reactor fit"
+            ),
+            evidence_kind="semi_empirical",
+        ))
+    derivation = {
+        "schema": "petch.legacy_siglo_hamilton_dissociation_replay.v1",
+        "base_derived_sha256": molecular_replay.derived_deck.payload_sha256,
+        "hamilton_cross_sections_sha256": (
+            HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256),
+        "removed_base_process_indices": sorted(removed_indices),
+        "hamilton_state_process_count": len(hamilton_processes),
+        "maximum_energy_eV": molecular_replay.maximum_energy_eV,
+    }
+    derived_sha = hashlib.sha256(json.dumps(
+        derivation, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")).hexdigest()
+    deck = ElectronCollisionDeck(
+        processes=processes,
+        payload_sha256=derived_sha,
+        source_database=(
+            "legacy SIGLO Cl2 source replay with Hamilton 2018 "
+            "state-resolved dissociation provider"),
+        retrieved_at="2026-08-08",
+        source_reference=json.dumps(derivation, sort_keys=True),
+        packaged_or_redistributed=False,
+    )
+    chemistry = ElectronCollisionChemistry(
+        deck, lee_lieberman_chlorine_species(), tuple(mappings))
+    return LegacySigloChlorineReplay(
+        raw_payload_sha256=molecular_replay.raw_payload_sha256,
+        derived_deck=deck,
+        collision_chemistry=chemistry,
+        maximum_energy_eV=molecular_replay.maximum_energy_eV,
+        missing_reactor_channels=molecular_replay.missing_reactor_channels,
+        declared_sensitivity_closures=(
+            *molecular_replay.declared_sensitivity_closures,
+            "five legacy dissociative excitations replaced by eight exact "
+            "Hamilton 2018 state arrays",
+        ),
+    )
+
+
 def _parse_two_column_cross_section(payload: bytes) -> tuple[
     tuple[float, ...], tuple[float, ...]
 ]:
@@ -482,6 +572,29 @@ def load_legacy_siglo_comsol_chlorine_replay(
     """Load a rights-safe two-target source replay from local raw assets."""
     molecular = load_legacy_siglo_cl2_replay(
         molecular_cl2_path, maximum_energy_eV=maximum_energy_eV)
+    payload = Path(atomic_cl_momentum_path).read_bytes()
+    digest = hashlib.sha256(payload).hexdigest()
+    if digest != COMSOL_64_ATOMIC_CL_MOMENTUM_SHA256:
+        raise RuntimeError("official COMSOL atomic-Cl momentum hash mismatch")
+    energies, cross_sections = _parse_two_column_cross_section(payload)
+    return _derive_legacy_siglo_comsol_chlorine_replay(
+        molecular,
+        atomic_momentum_energy_eV=energies,
+        atomic_momentum_cross_section_m2=cross_sections,
+        atomic_momentum_payload_sha256=digest,
+    )
+
+
+def load_legacy_siglo_hamilton_comsol_chlorine_replay(
+    molecular_cl2_path: str | Path,
+    atomic_cl_momentum_path: str | Path,
+    *,
+    maximum_energy_eV: float = 200.0,
+) -> LegacySigloComsolChlorineReplay:
+    """Load the declared Hamilton-dissociation plus atomic-Cl replay."""
+    molecular = derive_hamilton_2018_dissociation_replay(
+        load_legacy_siglo_cl2_replay(
+            molecular_cl2_path, maximum_energy_eV=maximum_energy_eV))
     payload = Path(atomic_cl_momentum_path).read_bytes()
     digest = hashlib.sha256(payload).hexdigest()
     if digest != COMSOL_64_ATOMIC_CL_MOMENTUM_SHA256:

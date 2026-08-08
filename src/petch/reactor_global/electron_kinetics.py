@@ -80,29 +80,134 @@ def _integrate_energy_cross_section(
     energy_power: int,
 ) -> float:
     """Integrate ``E**energy_power * sigma(E)`` on source-linear knots."""
-    lower = max(float(lower_eV), float(energy[0]))
-    upper = min(float(upper_eV), float(energy[-1]))
-    if upper <= lower:
-        return 0.0
-    knots = np.concatenate((
-        np.array([lower]),
-        energy[(energy > lower) & (energy < upper)],
-        np.array([upper]),
-    ))
-    sigma = np.interp(knots, energy, cross_section)
-    integral = 0.0
-    for left, right, sigma_left, sigma_right in zip(
-        knots[:-1], knots[1:], sigma[:-1], sigma[1:]
-    ):
-        slope = (sigma_right - sigma_left) / (right - left)
-        intercept = sigma_left - slope * left
-        integral += (
-            intercept / (energy_power + 1.0)
-            * (right ** (energy_power + 1) - left ** (energy_power + 1))
-            + slope / (energy_power + 2.0)
-            * (right ** (energy_power + 2) - left ** (energy_power + 2))
+    return _PiecewiseLinearCrossSectionIntegral(
+        energy, cross_section, powers=(energy_power,)
+    ).integrate(lower_eV, upper_eV, energy_power=energy_power)
+
+
+class _PiecewiseLinearCrossSectionIntegral:
+    """Exact O(log n) antiderivatives for a source-linear cross section."""
+
+    def __init__(self, energy, cross_section, *, powers=(1, 2)):
+        self.energy = np.asarray(energy, dtype=float)
+        self.cross_section = np.asarray(cross_section, dtype=float)
+        self.powers = tuple(sorted({int(value) for value in powers}))
+        if (
+            self.energy.ndim != 1
+            or self.cross_section.shape != self.energy.shape
+            or self.energy.size < 2
+            or np.any(~np.isfinite(self.energy))
+            or np.any(~np.isfinite(self.cross_section))
+            or np.any(np.diff(self.energy) <= 0.0)
+            or np.any(self.cross_section < 0.0)
+            or not self.powers
+            or any(value < 0 for value in self.powers)
+        ):
+            raise ValueError("invalid piecewise-linear cross-section integral")
+        energy_extended = self.energy.astype(np.longdouble)
+        cross_section_extended = self.cross_section.astype(np.longdouble)
+        self.energy_extended = energy_extended
+        self.cross_section_extended = cross_section_extended
+        self.slope = (
+            np.diff(cross_section_extended) / np.diff(energy_extended))
+        self.cumulative = {}
+        for power in self.powers:
+            segment = self._segment_integral(
+                self.energy[:-1], self.energy[1:], power)
+            self.cumulative[power] = np.concatenate((
+                np.array([0.0], dtype=np.longdouble),
+                np.cumsum(segment, dtype=np.longdouble),
+            ))
+
+    def _segment_integral(self, lower, upper, power):
+        """Integrate each native segment in a local energy coordinate.
+
+        A global ``m E + b`` primitive catastrophically cancels when a tiny
+        cross section changes over a narrow interval at high energy. Expanding
+        ``E**p`` around each source knot keeps the same exact polynomial while
+        evaluating only non-cancelling local powers.
+        """
+        lower = np.asarray(lower, dtype=np.longdouble)
+        upper = np.asarray(upper, dtype=np.longdouble)
+        base = self.energy_extended[:-1]
+        t_lower = lower - base
+        t_upper = upper - base
+        result = np.zeros_like(base)
+        for exponent in range(power + 1):
+            coefficient = (
+                math.comb(power, exponent)
+                * base ** (power - exponent)
+            )
+            result += coefficient * (
+                self.cross_section_extended[:-1]
+                * (t_upper ** (exponent + 1)
+                   - t_lower ** (exponent + 1))
+                / (exponent + 1)
+                + self.slope
+                * (t_upper ** (exponent + 2)
+                   - t_lower ** (exponent + 2))
+                / (exponent + 2)
+            )
+        return result
+
+    def _partial_segment_integral(
+        self, segment: int, upper: np.longdouble, power: int
+    ) -> np.longdouble:
+        base = self.energy_extended[segment]
+        span = upper - base
+        result = np.longdouble(0.0)
+        for exponent in range(power + 1):
+            coefficient = (
+                math.comb(power, exponent)
+                * base ** (power - exponent)
+            )
+            result += coefficient * (
+                self.cross_section_extended[segment]
+                * span ** (exponent + 1) / (exponent + 1)
+                + self.slope[segment]
+                * span ** (exponent + 2) / (exponent + 2)
+            )
+        return result
+
+    def _primitive(self, value: float, power: int) -> np.longdouble:
+        x = min(max(float(value), self.energy[0]), self.energy[-1])
+        if x <= self.energy[0]:
+            return np.longdouble(0.0)
+        if x >= self.energy[-1]:
+            return self.cumulative[power][-1]
+        segment = int(np.searchsorted(self.energy, x, side="right") - 1)
+        x = np.longdouble(x)
+        partial = self._partial_segment_integral(segment, x, power)
+        return self.cumulative[power][segment] + partial
+
+    def integrate(
+        self,
+        lower_eV: float,
+        upper_eV: float,
+        *,
+        energy_power: int,
+    ) -> float:
+        power = int(energy_power)
+        if power not in self.cumulative or power != energy_power:
+            raise ValueError("energy power was not compiled")
+        lower = max(float(lower_eV), float(self.energy[0]))
+        upper = min(float(upper_eV), float(self.energy[-1]))
+        if upper <= lower:
+            return 0.0
+        upper_primitive = self._primitive(upper, power)
+        lower_primitive = self._primitive(lower, power)
+        value = upper_primitive - lower_primitive
+        # Cumulative subtraction can leave a signed ulp for vanishing tail
+        # intervals. A physically negative resolved cross-section integral is
+        # still rejected at a scale larger than roundoff.
+        scale = max(
+            abs(upper_primitive),
+            abs(lower_primitive),
+            np.finfo(np.longdouble).tiny,
         )
-    return float(integral)
+        if value < -32.0 * np.finfo(np.longdouble).eps * scale:
+            raise FloatingPointError("negative cross-section antiderivative")
+        return float(max(value, 0.0))
 
 
 @dataclass(frozen=True)
@@ -470,6 +575,8 @@ class ElectronCollisionMomentKernel:
 
         energy, sigma, resolved_lower = _collision_support_nodes(process)
         resolved_upper = float(energy[-1])
+        integral = _PiecewiseLinearCrossSectionIntegral(
+            energy, sigma, powers=(1, 2))
 
         boundaries = grid.boundaries
         rate_weights = np.zeros(grid.cell_count)
@@ -483,18 +590,14 @@ class ElectronCollisionMomentKernel:
             overlap_upper = min(cell_upper, resolved_upper)
             if overlap_upper > overlap_lower:
                 rate_weights[cell] += ELECTRON_SPEED_PER_SQRT_EV_M_S * (
-                    _integrate_energy_cross_section(
-                        energy,
-                        sigma,
+                    integral.integrate(
                         overlap_lower,
                         overlap_upper,
                         energy_power=1,
                     )
                 )
                 energy_weights[cell] += ELECTRON_SPEED_PER_SQRT_EV_M_S * (
-                    _integrate_energy_cross_section(
-                        energy,
-                        sigma,
+                    integral.integrate(
                         overlap_lower,
                         overlap_upper,
                         energy_power=2,
@@ -1180,6 +1283,8 @@ class DeterministicTwoTermBoltzmannSolver:
                 raise ValueError("unsupported inelastic collision kind")
 
             energy, cross_section, _ = _collision_support_nodes(process)
+            integral = _PiecewiseLinearCrossSectionIntegral(
+                energy, cross_section, powers=(1,))
             for destination in range(cell_count):
                 parent_lower = parent_lower_from_child(boundaries[destination])
                 parent_upper = parent_upper_from_child(
@@ -1206,9 +1311,7 @@ class DeterministicTwoTermBoltzmannSolver:
                     event_integral = (
                         ELECTRON_SPEED_PER_SQRT_EV_M_S
                         * fraction
-                        * _integrate_energy_cross_section(
-                            energy,
-                            cross_section,
+                        * integral.integrate(
                             lower,
                             upper,
                             energy_power=1,
