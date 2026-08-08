@@ -19,16 +19,34 @@ from importlib.resources import files
 import io
 import math
 
+from scipy.optimize import brentq
+
 from .chlorine_lam import (
     ElectronDensityConditioningState,
     ElectronTemperatureConditioningState,
+    MalyshevLamGeometryState,
     MalyshevMeasuredElectronDensityProvider,
     MalyshevMeasuredElectronTemperatureProvider,
+    malyshev_1998_lam_geometry,
+)
+from .chlorine_transport import (
+    malyshev_1998_chlorine_in_chlorine_diffusivity,
+)
+from .chlorine_wall import (
+    BOLTZMANN_J_K,
+    ChlorineIncidentVelocityState,
+    thermalized_chlorine_incident_velocity_state,
 )
 from .evaluated_chlorine import (
     build_hamilton_dissociation_chlorine_particle_network,
 )
+from .model import PASCAL_PER_MTORR
 from .network import RateContext
+from .neutral_transport import (
+    CylindricalNeutralWallLoss,
+    NeutralDiffusivityState,
+    solve_cylindrical_neutral_wall_loss,
+)
 
 
 MALYSHEV_1998_CHLORINE_DISSOCIATION_CSV_SHA256 = (
@@ -133,7 +151,8 @@ class MalyshevMeasuredChlorineDissociationProvider:
             )
         records = list(csv.DictReader(io.StringIO(payload.decode("utf-8"))))
         if len(records) != 38:
-            raise RuntimeError("incomplete packaged Malyshev dissociation board")
+            raise RuntimeError(
+                "incomplete packaged Malyshev dissociation board")
         markers = []
         for row in records:
             if (
@@ -164,11 +183,13 @@ class MalyshevMeasuredChlorineDissociationProvider:
                     row["digitization_power_uncertainty_W"]),
                 digitization_relative_cl2_uncertainty_percentage_point=float(
                     row[
-                        "digitization_relative_cl2_uncertainty_percentage_point"]
+                        "digitization_relative_cl2_uncertainty_"
+                        "percentage_point"]
                 ),
                 reported_absolute_density_relative_uncertainty_percent=float(
                     row[
-                        "reported_absolute_density_relative_uncertainty_percent"]
+                        "reported_absolute_density_relative_"
+                        "uncertainty_percent"]
                 ),
                 validation_role=row["validation_role"],
             ))
@@ -262,6 +283,178 @@ class MalyshevEq7WallReturnInversion:
         return False
 
 
+@dataclass(frozen=True)
+class MalyshevEq7TransportDiagnostic:
+    """Exact-cylinder transport mapping at one declared gas temperature.
+
+    The source reports an initial gas/wall temperature of 333 K and says the
+    gas heats with power, but it does not publish the powered gas temperature.
+    Consequently this object reports a model-conditioned effective wall
+    probability at the caller-declared temperature, never a local measured
+    probability or predictive boundary condition.
+    """
+
+    eq7_inversion: MalyshevEq7WallReturnInversion
+    geometry_state: MalyshevLamGeometryState
+    gas_temperature_K: float
+    gas_temperature_basis: str
+    gauge_pressure_Pa: float
+    initial_cl2_particle_fraction: float
+    particle_pressure_multiplier: float
+    bulk_particle_pressure_Pa: float
+    bulk_neutral_density_m3: float
+    diffusivity_state: NeutralDiffusivityState
+    incident_velocity_state: ChlorineIncidentVelocityState
+    absorbing_wall_state: CylindricalNeutralWallLoss
+    effective_wall_recombination_probability: float | None
+    matched_wall_state: CylindricalNeutralWallLoss | None
+    status: str
+
+    def __post_init__(self):
+        numeric = (
+            self.gas_temperature_K,
+            self.gauge_pressure_Pa,
+            self.initial_cl2_particle_fraction,
+            self.particle_pressure_multiplier,
+            self.bulk_particle_pressure_Pa,
+            self.bulk_neutral_density_m3,
+        )
+        probability = self.effective_wall_recombination_probability
+        if probability is not None:
+            probability = float(probability)
+        if (
+            not isinstance(
+                self.eq7_inversion, MalyshevEq7WallReturnInversion)
+            or not isinstance(self.geometry_state, MalyshevLamGeometryState)
+            or not isinstance(self.diffusivity_state, NeutralDiffusivityState)
+            or not isinstance(
+                self.incident_velocity_state, ChlorineIncidentVelocityState)
+            or not isinstance(
+                self.absorbing_wall_state, CylindricalNeutralWallLoss)
+            or any(not math.isfinite(float(value)) for value in numeric)
+            or any(float(value) <= 0.0 for value in numeric)
+            or not str(self.gas_temperature_basis).strip()
+            or self.status not in {
+                "model_conditioned_effective_probability",
+                "target_exceeds_absorbing_wall_limit",
+            }
+        ):
+            raise ValueError("invalid Malyshev Eq.-7 transport diagnostic")
+        marker = self.eq7_inversion.dissociation_marker
+        expected_initial_cl2_fraction = (
+            marker.cl2_flow_sccm
+            / (marker.cl2_flow_sccm + marker.rare_gas_flow_sccm)
+        )
+        if not math.isclose(
+            self.initial_cl2_particle_fraction,
+            expected_initial_cl2_fraction,
+            rel_tol=1.0e-13,
+            abs_tol=0.0,
+        ):
+            raise ValueError("initial Cl2 particle fraction is inconsistent")
+        relative_cl2 = marker.relative_cl2_density_percent / 100.0
+        expected_multiplier = (
+            1.0
+            + self.initial_cl2_particle_fraction * (1.0 - relative_cl2)
+        )
+        if not math.isclose(
+            self.particle_pressure_multiplier,
+            expected_multiplier,
+            rel_tol=1.0e-13,
+            abs_tol=0.0,
+        ):
+            raise ValueError("particle-pressure multiplier violates Eq. 11")
+        if not math.isclose(
+            self.bulk_particle_pressure_Pa,
+            self.gauge_pressure_Pa * self.particle_pressure_multiplier,
+            rel_tol=1.0e-13,
+            abs_tol=0.0,
+        ):
+            raise ValueError("bulk particle pressure is inconsistent")
+        if not math.isclose(
+            self.bulk_neutral_density_m3,
+            self.bulk_particle_pressure_Pa
+            / (BOLTZMANN_J_K * self.gas_temperature_K),
+            rel_tol=1.0e-13,
+            abs_tol=0.0,
+        ):
+            raise ValueError("bulk particle density is inconsistent")
+        if not math.isclose(
+            self.diffusivity_state.total_neutral_density_m3,
+            self.bulk_neutral_density_m3,
+            rel_tol=1.0e-13,
+            abs_tol=0.0,
+        ):
+            raise ValueError("transport diffusivity uses a different density")
+        if not math.isclose(
+            self.diffusivity_state.gas_temperature_K,
+            self.gas_temperature_K,
+            rel_tol=1.0e-13,
+            abs_tol=0.0,
+        ):
+            raise ValueError(
+                "transport diffusivity uses a different temperature")
+        if probability is None:
+            if (
+                self.matched_wall_state is not None
+                or self.status != "target_exceeds_absorbing_wall_limit"
+                or self.required_wall_return_frequency_s_inv
+                <= self.absorbing_wall_state.exact_loss_frequency_s_inv
+            ):
+                raise ValueError("invalid unattainable transport target")
+        else:
+            if (
+                not 0.0 < probability <= 1.0
+                or not isinstance(
+                    self.matched_wall_state, CylindricalNeutralWallLoss)
+                or self.status
+                != "model_conditioned_effective_probability"
+                or not math.isclose(
+                    self.matched_wall_state.wall_reaction_probability,
+                    probability,
+                    rel_tol=0.0,
+                    abs_tol=1.0e-14,
+                )
+                or not math.isclose(
+                    self.matched_wall_state.exact_loss_frequency_s_inv,
+                    self.required_wall_return_frequency_s_inv,
+                    rel_tol=2.0e-12,
+                    abs_tol=2.0e-9,
+                )
+            ):
+                raise ValueError("transport inversion does not close")
+        object.__setattr__(
+            self,
+            "effective_wall_recombination_probability",
+            probability,
+        )
+
+    @property
+    def required_wall_return_frequency_s_inv(self) -> float:
+        return float(
+            self.eq7_inversion.required_wall_return_frequency_s_inv)
+
+    @property
+    def target_is_transport_attainable(self) -> bool:
+        return self.effective_wall_recombination_probability is not None
+
+    @property
+    def supports_prediction(self) -> bool:
+        return False
+
+    @property
+    def supports_local_wall_probability_prediction(self) -> bool:
+        return False
+
+    @property
+    def supports_wafer_flux(self) -> bool:
+        return False
+
+    @property
+    def supports_feature_depth(self) -> bool:
+        return False
+
+
 def malyshev_1998_eq7_wall_return_inversion(
     marker: MalyshevChlorineDissociationMarker,
     *,
@@ -341,4 +534,121 @@ def malyshev_1998_eq7_wall_return_inversion(
         cl_to_cl2_number_density_ratio=cl_to_cl2_ratio,
         reported_cl2_uncertainty_lower_frequency_s_inv=lower_frequency,
         reported_cl2_uncertainty_upper_frequency_s_inv=upper_frequency,
+    )
+
+
+def malyshev_1998_eq7_transport_diagnostic(
+    inversion: MalyshevEq7WallReturnInversion,
+    *,
+    gas_temperature_K: float,
+    gas_temperature_basis: str,
+) -> MalyshevEq7TransportDiagnostic:
+    """Map an Eq.-7 frequency to effective gamma without tuning a target.
+
+    Malyshev Eq. 11 implies that dissociation raises the in-reactor particle
+    density above the plasma-off gauge-density basis. The source's explicit
+    Cl2 and rare-gas flows retain the non-dissociating 5% actinometry
+    inventory, giving ``1 + x_Cl2,0 * (1 - relative_Cl2)`` rather than silently
+    applying the pure-Cl2 multiplier to total pressure. The
+    source-parameterized Cl-in-Cl2 binary diffusivity, with Neufeld's evaluated
+    collision integral, is evaluated at that particle density. The requested
+    first-order wall loss is then inverted through the exact fundamental
+    cylindrical Robin mode.
+
+    If even a perfectly absorbing wall cannot supply the requested loss, the
+    result fails closed with no probability.  Gas temperature is mandatory
+    because the source did not measure its powered value.
+    """
+    if not isinstance(inversion, MalyshevEq7WallReturnInversion):
+        raise TypeError("a Malyshev Eq.-7 inversion is required")
+    temperature = float(gas_temperature_K)
+    if not math.isfinite(temperature) or temperature <= 0.0:
+        raise ValueError("gas temperature must be positive and finite")
+    if not str(gas_temperature_basis).strip():
+        raise ValueError("gas-temperature evidence basis is required")
+
+    marker = inversion.dissociation_marker
+    relative_cl2 = marker.relative_cl2_density_percent / 100.0
+    gauge_pressure = marker.pressure_mTorr * PASCAL_PER_MTORR
+    initial_cl2_fraction = (
+        marker.cl2_flow_sccm
+        / (marker.cl2_flow_sccm + marker.rare_gas_flow_sccm)
+    )
+    particle_multiplier = (
+        1.0 + initial_cl2_fraction * (1.0 - relative_cl2))
+    bulk_pressure = gauge_pressure * particle_multiplier
+    bulk_density = bulk_pressure / (BOLTZMANN_J_K * temperature)
+    diffusivity = (
+        malyshev_1998_chlorine_in_chlorine_diffusivity().evaluate(
+            total_neutral_density_m3=bulk_density,
+            gas_temperature_K=temperature,
+        )
+    )
+    velocity = thermalized_chlorine_incident_velocity_state(
+        temperature,
+        source=(
+            "declared-temperature Maxwellian sensitivity for Malyshev "
+            "Eq.-7 transport diagnostic"
+        ),
+        evidence_kind="assumed",
+        relative_uncertainty=None,
+        provenance={
+            "gas_temperature_basis": gas_temperature_basis,
+            "source_powered_gas_temperature_measured": False,
+            "coefficient_selection_target": None,
+            "feature_depth_target": None,
+        },
+    )
+    geometry = malyshev_1998_lam_geometry(
+        marker.window_to_wafer_gap_cm)
+    solver_inputs = {
+        "geometry": geometry.active_geometry,
+        "diffusivity_m2_s": diffusivity.diffusivity_m2_s,
+        "mean_thermal_speed_m_s": velocity.mean_speed_m_s,
+    }
+    absorbing = solve_cylindrical_neutral_wall_loss(
+        **solver_inputs,
+        wall_reaction_probability=1.0,
+    )
+    target = inversion.required_wall_return_frequency_s_inv
+    if target > absorbing.exact_loss_frequency_s_inv:
+        probability = None
+        matched = None
+        status = "target_exceeds_absorbing_wall_limit"
+    else:
+        probability = float(brentq(
+            lambda gamma: (
+                solve_cylindrical_neutral_wall_loss(
+                    **solver_inputs,
+                    wall_reaction_probability=gamma,
+                ).exact_loss_frequency_s_inv
+                - target
+            ),
+            0.0,
+            1.0,
+            xtol=1.0e-14,
+            rtol=1.0e-14,
+        ))
+        matched = solve_cylindrical_neutral_wall_loss(
+            **solver_inputs,
+            wall_reaction_probability=probability,
+        )
+        status = "model_conditioned_effective_probability"
+
+    return MalyshevEq7TransportDiagnostic(
+        eq7_inversion=inversion,
+        geometry_state=geometry,
+        gas_temperature_K=temperature,
+        gas_temperature_basis=gas_temperature_basis,
+        gauge_pressure_Pa=gauge_pressure,
+        initial_cl2_particle_fraction=initial_cl2_fraction,
+        particle_pressure_multiplier=particle_multiplier,
+        bulk_particle_pressure_Pa=bulk_pressure,
+        bulk_neutral_density_m3=bulk_density,
+        diffusivity_state=diffusivity,
+        incident_velocity_state=velocity,
+        absorbing_wall_state=absorbing,
+        effective_wall_recombination_probability=probability,
+        matched_wall_state=matched,
+        status=status,
     )

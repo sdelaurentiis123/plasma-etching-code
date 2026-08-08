@@ -1,0 +1,104 @@
+{
+  "audit_id": "MALYSHEV-1998-LAM-NEUTRAL-TRANSPORT-DIAGNOSTIC-R1",
+  "boundaries": {
+    "incident_velocity": "thermalized isotropic Maxwellian sensitivity; Guha 2008 shows freshly dissociated chlorine may be nonthermal at low pressure, and Malyshev publishes no local velocity moment",
+    "no_depth": "volume-average electron state and neutral wall return do not identify species-resolved sheath-edge ion flux, IEAD, wafer neutral flux, surface kinetics, etch rate, or feature depth",
+    "rare_gas_transport": "the 5% rare-gas inventory is retained in the particle-pressure ledger from the reported flows, but the source's Cl-in-Cl2 approximation is replayed rather than inventing an unvalidated multicomponent transport correction"
+  },
+  "claim_class": "temperature-declared retrospective transport diagnostic; not a predictive reactor boundary or feature-depth result",
+  "coefficient_selection_target": null,
+  "cross_source_wall_comparison": {
+    "reason": "Stafford direct conditioned-wall data are at 300 K and do not certify Malyshev's unmeasured powered gas temperature or its distributed chamber surface state",
+    "status": "not_scored"
+  },
+  "csv_sha256": "1c5a7c867ab246c141313914a07cf4987e9622c2e533607a4dcbbaa54fced2fb",
+  "diffusivity": {
+    "333K_one_atm_cm2_s": 0.1862154115776554,
+    "333K_reduced_diffusivity_m_inv_s": 4.103975103414651e+20,
+    "collision_integral_method": "Neufeld 1972 evaluated correlation replaces the older Hirschfelder table cited by Malyshev",
+    "economou_constant_m_inv_s": 6.21e+20,
+    "economou_excess_relative_to_new": 0.5131670742429852,
+    "new_to_economou_ratio": 0.6608655561054189,
+    "reason": "the source measurement anchor and LJ parameters carry no complete physical uncertainty",
+    "room_temperature_298p15K_one_atm_cm2_s": 0.15167523928085008,
+    "room_temperature_anchor_relative_residual": 0.011168261872333884,
+    "source_correction_factor": 1.25,
+    "source_measurement_anchor_cm2_s": 0.15,
+    "supports_prediction": false
+  },
+  "effective_probability_at_declared_temperature": {
+    "interpretation": "model-conditioned values required to reproduce each marker; not local measurements, a fitted law, or predictive inputs",
+    "maximum": 0.2945468844622958,
+    "median": 0.050095758025194045,
+    "minimum": 0.014968433551322269
+  },
+  "feature_depth_target": null,
+  "gas_temperature": {
+    "basis": "source-reported initial 60 C wall/gas condition; source says gas heats with power but does not publish the powered gas temperature",
+    "declared_K": 333.0,
+    "formal_uncertainty_available": false,
+    "measured_at_each_power": false
+  },
+  "marker_accounting": {
+    "audited_marker_total": 38,
+    "excluded": {
+      "diagnostic_flow_check": 1,
+      "electron_density_support_missing": 8,
+      "electron_temperature_support_missing": 2,
+      "nonphysical_or_zero_derived_dissociation": 4
+    },
+    "successful_measured_state_rows": 23,
+    "transport_attainable_rows": 22,
+    "transport_unattainable_rows": 1
+  },
+  "published_gamma_forward_replay": {
+    "formal_gate": null,
+    "gamma": 0.035,
+    "gamma_role": "same Figures 7-8 board fit in the source; retrospective, not independent validation",
+    "maximum_absolute_error_percentage_point": 27.79631422217517,
+    "mean_absolute_error_percentage_point": 9.878390550940201,
+    "mean_error_percentage_point": -8.235022329168864,
+    "root_mean_square_error_percentage_point": 12.266236147327628,
+    "row_count": 23
+  },
+  "reactor_fit_target": null,
+  "sources": {
+    "chantry_1987": {
+      "bibkey": "chantry-1987-wall-diffusion",
+      "doi": "10.1063/1.339662",
+      "uses": "partial-reflection Robin boundary and exact limits"
+    },
+    "malyshev_1998": {
+      "bibkey": "malyshev-1998-lam-cl2",
+      "doi": "10.1063/1.368010",
+      "uses": [
+        "Cl-in-Cl2 Chapman-Enskog expression and LJ parameters",
+        "source-declared 1.25 diffusion correction",
+        "333 K initial gas/wall state",
+        "Eq. 11 particle-density adjustment with measured flows",
+        "same-board fitted gamma=0.035 replay"
+      ]
+    },
+    "neufeld_1972": {
+      "bibkey": "neufeld-1972-collision-integrals",
+      "doi": "10.1063/1.1678363",
+      "table_ii_maximum_relative_fit_error": 0.0011,
+      "uses": "original Eq. 2 and Table-I Omega(1,1)* row",
+      "valid_reduced_temperature": [
+        0.3,
+        100.0
+      ]
+    }
+  },
+  "unattainable_conditions": [
+    {
+      "absorbing_wall_limit_frequency_s_inv": 1095.0355235357254,
+      "interpretation": "near-zero inferred dissociation makes Eq. 7 singular; the required return exceeds the exact absorbing-wall limit at the declared temperature",
+      "measured_relative_cl2_density_percent": 99.8342,
+      "pressure_mTorr": 10.0,
+      "required_wall_return_frequency_s_inv": 11319.731126686684,
+      "tcp_source_power_W": 200.704,
+      "window_to_wafer_gap_cm": 11.0
+    }
+  ]
+}

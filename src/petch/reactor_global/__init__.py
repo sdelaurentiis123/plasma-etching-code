@@ -41,6 +41,7 @@ from .chlorine_transport import (
     ChlorineNeutralWallTransport,
     ChlorineVolumeWallRates,
     lymberopoulos_economou_1995_chlorine_diffusivity,
+    malyshev_1998_chlorine_in_chlorine_diffusivity,
     ramamurthi_economou_2002_chlorine_diffusivity,
     solve_chlorine_neutral_wall_transport,
 )
@@ -89,8 +90,10 @@ from .chlorine_lam import (
 from .chlorine_lam_dissociation import (
     MALYSHEV_1998_CHLORINE_DISSOCIATION_CSV_SHA256,
     MalyshevChlorineDissociationMarker,
+    MalyshevEq7TransportDiagnostic,
     MalyshevEq7WallReturnInversion,
     MalyshevMeasuredChlorineDissociationProvider,
+    malyshev_1998_eq7_transport_diagnostic,
     malyshev_1998_eq7_wall_return_inversion,
 )
 from .evaluated_chlorine import (
@@ -129,9 +132,14 @@ from .model import (
 )
 from .neutral_transport import (
     NEUTRAL_DIFFUSIVITY_EVIDENCE_KINDS,
+    NEUFELD_1972_OMEGA_11_COEFFICIENTS,
+    NEUFELD_1972_OMEGA_11_MAXIMUM_RELATIVE_FIT_ERROR,
+    NEUFELD_1972_REDUCED_TEMPERATURE_DOMAIN,
+    ChapmanEnskogBinaryDiffusivity,
     CylindricalNeutralWallLoss,
     NeutralDiffusivityState,
     ReducedNeutralDiffusivity,
+    neufeld_1972_lennard_jones_omega_11,
     solve_cylindrical_neutral_wall_loss,
 )
 from .power import (
@@ -180,6 +188,7 @@ __all__ = [
     "CHLORINE_INCIDENT_VELOCITY_DISTRIBUTIONS",
     "CHLORINE_INCIDENT_VELOCITY_EVIDENCE_KINDS",
     "CHLORINE_MOLECULE_MASS_AMU",
+    "ChapmanEnskogBinaryDiffusivity",
     "ChlorineIncidentVelocityState",
     "LogLinearChlorineWallRecombinationProvider",
     "ChlorineWallFlux",
@@ -220,6 +229,7 @@ __all__ = [
     "MatchedRFPowerBoundary",
     "MeasuredAbsorbedPowerBoundary",
     "MalyshevChlorineDissociationMarker",
+    "MalyshevEq7TransportDiagnostic",
     "MalyshevEq7WallReturnInversion",
     "MalyshevElectronDensityMarker",
     "MalyshevElectronTemperatureMarker",
@@ -229,6 +239,9 @@ __all__ = [
     "MalyshevMeasuredElectronTemperatureProvider",
     "IonMobilityState",
     "NEUTRAL_DIFFUSIVITY_EVIDENCE_KINDS",
+    "NEUFELD_1972_OMEGA_11_COEFFICIENTS",
+    "NEUFELD_1972_OMEGA_11_MAXIMUM_RELATIVE_FIT_ERROR",
+    "NEUFELD_1972_REDUCED_TEMPERATURE_DOMAIN",
     "NeutralDiffusivityState",
     "PASCAL_PER_MTORR",
     "POWER_EVIDENCE_KINDS",
@@ -259,11 +272,14 @@ __all__ = [
     "lymberopoulos_economou_1995_chlorine_diffusivity",
     "lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities",
     "malyshev_1998_lam_geometry",
+    "malyshev_1998_chlorine_in_chlorine_diffusivity",
+    "malyshev_1998_eq7_transport_diagnostic",
     "malyshev_1998_eq7_wall_return_inversion",
     "lee_lieberman_argon_ion_temperature_eV",
     "nist_argon_self_diffusion_m2_s",
     "nist_hayes_atomic_chlorine_ionization_rate",
     "nist_molecular_chlorine_total_ionization_rate",
+    "neufeld_1972_lennard_jones_omega_11",
     "phelps_argon_momentum_transfer_cross_section_m2",
     "phelps_argon_momentum_transfer_rate_m3_s",
     "ramamurthi_economou_2002_chlorine_diffusivity",

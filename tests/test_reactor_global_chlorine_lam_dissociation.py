@@ -8,6 +8,7 @@ from petch.reactor_global import (
     MalyshevMeasuredChlorineDissociationProvider,
     RateContext,
     build_hamilton_dissociation_chlorine_particle_network,
+    malyshev_1998_eq7_transport_diagnostic,
     malyshev_1998_eq7_wall_return_inversion,
 )
 
@@ -48,7 +49,9 @@ def test_packaged_lam_dissociation_board_is_the_audited_data_exactly():
         == "reactor_dissociation_validation_candidate"
         for marker in provider.markers
     ) == 37
-    assert sum(marker.supports_eq7_inversion for marker in provider.markers) == 33
+    assert sum(
+        marker.supports_eq7_inversion for marker in provider.markers
+    ) == 33
 
 
 def test_eq7_inversion_reproduces_marker_and_rate_ledger_exactly():
@@ -124,3 +127,62 @@ def test_eq7_diagnostic_cannot_masquerade_as_wall_flux_or_depth_prediction():
     assert not state.supports_feature_depth
     assert not state.electron_temperature_state.supports_prediction
     assert not state.electron_density_state.supports_prediction
+
+
+def test_eq7_transport_diagnostic_closes_exact_cylinder_at_declared_T():
+    inversion = malyshev_1998_eq7_wall_return_inversion(
+        _marker(gap_cm=11.0, pressure_mTorr=2.0, power_W=499.936))
+    state = malyshev_1998_eq7_transport_diagnostic(
+        inversion,
+        gas_temperature_K=333.0,
+        gas_temperature_basis=(
+            "source-reported initial 60 C wall/gas condition; powered gas "
+            "temperature unmeasured"
+        ),
+    )
+    relative_cl2 = (
+        inversion.dissociation_marker.relative_cl2_density_percent / 100.0)
+    assert state.initial_cl2_particle_fraction == pytest.approx(0.95)
+    assert state.particle_pressure_multiplier == pytest.approx(
+        1.0 + 0.95 * (1.0 - relative_cl2))
+    assert state.diffusivity_state.provenance[
+        "source_correction_factor"] == 1.25
+    assert state.diffusivity_state.provenance[
+        "feature_depth_target"] is None
+    assert state.target_is_transport_attainable
+    assert state.effective_wall_recombination_probability == pytest.approx(
+        0.06544819172183121)
+    assert state.matched_wall_state.exact_loss_frequency_s_inv == (
+        pytest.approx(inversion.required_wall_return_frequency_s_inv))
+    assert state.matched_wall_state.numerical_closure_passes
+    assert not state.supports_prediction
+    assert not state.supports_local_wall_probability_prediction
+    assert not state.supports_wafer_flux
+    assert not state.supports_feature_depth
+
+
+def test_eq7_transport_diagnostic_fails_closed_above_absorbing_limit():
+    inversion = malyshev_1998_eq7_wall_return_inversion(
+        _marker(gap_cm=11.0, pressure_mTorr=10.0, power_W=200.704))
+    state = malyshev_1998_eq7_transport_diagnostic(
+        inversion,
+        gas_temperature_K=333.0,
+        gas_temperature_basis="source initial temperature sensitivity",
+    )
+    assert not state.target_is_transport_attainable
+    assert state.effective_wall_recombination_probability is None
+    assert state.matched_wall_state is None
+    assert state.status == "target_exceeds_absorbing_wall_limit"
+    assert state.required_wall_return_frequency_s_inv > (
+        state.absorbing_wall_state.exact_loss_frequency_s_inv)
+
+
+def test_eq7_transport_diagnostic_requires_temperature_evidence_label():
+    inversion = malyshev_1998_eq7_wall_return_inversion(
+        _marker(gap_cm=6.5, pressure_mTorr=2.0, power_W=499.297))
+    with pytest.raises(ValueError, match="evidence basis"):
+        malyshev_1998_eq7_transport_diagnostic(
+            inversion,
+            gas_temperature_K=333.0,
+            gas_temperature_basis="",
+        )

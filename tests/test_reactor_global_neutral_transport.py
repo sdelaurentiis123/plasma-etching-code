@@ -4,9 +4,35 @@ from scipy.special import jn_zeros
 
 from petch.reactor_global import CylindricalReactor
 from petch.reactor_global.neutral_transport import (
+    NEUFELD_1972_OMEGA_11_COEFFICIENTS,
+    NEUFELD_1972_OMEGA_11_MAXIMUM_RELATIVE_FIT_ERROR,
+    NEUFELD_1972_REDUCED_TEMPERATURE_DOMAIN,
     ReducedNeutralDiffusivity,
+    neufeld_1972_lennard_jones_omega_11,
     solve_cylindrical_neutral_wall_loss,
 )
+
+
+def test_neufeld_1972_omega_11_replays_original_table_row_and_domain():
+    assert NEUFELD_1972_OMEGA_11_COEFFICIENTS == (
+        1.06036,
+        0.15610,
+        0.19300,
+        0.47635,
+        1.03587,
+        1.52996,
+        1.76474,
+        3.89411,
+    )
+    assert NEUFELD_1972_REDUCED_TEMPERATURE_DOMAIN == (0.3, 100.0)
+    assert NEUFELD_1972_OMEGA_11_MAXIMUM_RELATIVE_FIT_ERROR == 0.0011
+    assert neufeld_1972_lennard_jones_omega_11(3.6) == pytest.approx(
+        0.9071290120425223,
+        rel=2.0e-15,
+    )
+    for outside in (0.299999, 100.000001):
+        with pytest.raises(ValueError, match="Neufeld"):
+            neufeld_1972_lennard_jones_omega_11(outside)
 
 
 def test_exact_cylindrical_robin_mode_satisfies_both_wall_boundaries():

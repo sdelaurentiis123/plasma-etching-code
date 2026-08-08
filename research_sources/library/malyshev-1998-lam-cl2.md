@@ -13,6 +13,12 @@
   `research_sources/thesis_extracts/malyshev_1998_lam_chlorine_dissociation.txt`
 - **Digitized data:** `data/experimental/malyshev_1998_lam/`
 - **Status:** PRIMARY FULL TEXT + FIGURES 3, 7--8, 11 NATIVE-PIXEL PIL AUDIT
+  + FOOTNOTE 16 EQUATION VISUALLY AUDITED
+- **Footnote-16 visual audit:** publisher PDF page 10 was rendered at 500 dpi;
+  render SHA-256
+  `e5eb5218302f592c2ce01dcd8ad002cb6563077e7fabf06dd5a3a5380c94754d`.
+  The equation, units, masses, mixing rules, Lennard--Jones constants, `1.25`
+  multiplier, and rounded `0.15 cm2/s` anchor were read from the pixels.
 
 ## Claims table
 
@@ -30,6 +36,9 @@
 | M10 | The paper uses a 21.5 cm chamber radius, an 11 cm active-plasma gap giving 16.0 L, a 43,000 cm3 chamber volume, and effective `V/A` lengths of 3.6 cm (11 cm gap) and 2.5 cm (6.5 cm gap). | Requires distinct active-plasma and neutral-control volumes. The exact cylinders reproduce both quoted `V/A` values; a one-volume residence/source ledger is not a faithful Lam reproduction. |
 | M11 | Figure 11 reports volume-average electron densities derived from Langmuir-probe analysis. Measurements along a line 1.35 cm above the wafer/chuck were converted assuming radial symmetry and an axial `sin(pi*h/gap)` distribution. Reducing the gap decreases average electron density by about a factor of two. | The 27 resolved markers condition/grade the volume-average electron state. They are not local sheath-edge density or wafer flux; the article reports no density uncertainty and points to the probe analysis elsewhere. |
 | M12 | Footnote 14 uses `ne = 1e11 cm^-3`, `kd = 7e-9 cm3/s`, and therefore `kd*ne = 700 s^-1`. But the article's printed `kdis = 4.52e-8 exp(-7.40/Te)` law, evaluated at the highest measured 11 cm/10 mTorr Figure-3 Te and augmented by the article's maximum stated 1/7 attachment contribution, gives at most `1.13e-9 cm3/s` or `113 s^-1`. | The footnote arithmetic is internally consistent but its nominal `kd` is 6.18x above the maximum supported by the article's own printed rate law and measured Te board. The footnote rate and `200x` residence-time statement are quarantined from calibration; the measured boards and explicit equations remain usable with their stated uncertainty limits. |
+| M13 | Footnote 16 prints the complete Chapman--Enskog Cl-in-Cl2 diffusion equation, masses 35/70 g/mol, `sigma_Cl=3.548 A`, `sigma_Cl2=4.115 A`, `epsilon_Cl/k=75 K`, `epsilon_Cl2/k=357 K`, and a final factor of 1.25 tied to a reported 0.15 cm2/s room-temperature, one-atmosphere measurement. | Reconstructs temperature-dependent diffusion without importing the temperature-conflicted Economou constant. The factor 1.25 is source-declared and is never retuned to reactor or depth data. Neufeld's later evaluated collision integral explicitly upgrades the Hirschfelder table cited by Malyshev, so the provider is source-parameterized rather than a source-identical replay. Missing physical uncertainty keeps it non-predictive. |
+| M14 | The gas is initially at 333 K, while the article explicitly says gas temperature increases with power and publishes no powered gas-temperature board. | A 333 K transport replay is an initial-condition sensitivity, not a condition-resolved prediction or temperature extrapolation of the Stafford wall data. |
+| M15 | Eq. 11 uses `n0_Cl2 = n_Cl2 + n_Cl/2` and says the in-reactor pressure/number density rises even though wall recombination in the gauge line leaves the pressure reading unchanged. | For each measured relative-Cl2 row, the transport diagnostic combines Eq. 11 with the reported Cl2/rare-gas flows: `p_particles/p_gauge = 1 + x_Cl2,0(1-relative_Cl2)`, with `x_Cl2,0=0.95`. It does not dissociate the rare-gas inventory or equate gauge pressure with powered particle density. |
 
 ## Use decision
 
@@ -53,5 +62,12 @@ The measured-state Eq.-7 inversion is frozen under
 `results/curated/reactor_global_chlorine/`. It replaces the paper's legacy
 neutral-dissociation fit with Hamilton's eight-state rate, retains the
 published attachment channel, and solves only for the wall-return frequency
-required by each supported marker. It does not infer `gamma`, wafer flux, or
-feature depth.
+required by each supported marker.
+
+The separate neutral-transport diagnostic reconstructs a source-parameterized
+temperature-dependent Cl/Cl2 diffusivity with the Neufeld collision integral,
+applies Eq. 11's particle-density multiplier, and inverts the exact cylindrical
+Robin mode. It reports only a model-conditioned effective `gamma` at an
+explicitly declared gas temperature. Because the powered gas temperature and
+distributed wall state are unmeasured, it does not supply a predictive local
+wall law, wafer flux, or feature depth.

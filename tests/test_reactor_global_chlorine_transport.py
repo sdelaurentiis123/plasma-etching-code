@@ -9,6 +9,7 @@ from petch.reactor_global.model import BOLTZMANN_J_K
 from petch.reactor_global.chlorine_transport import (
     ECONOMOU_CHLORINE_REDUCED_DIFFUSIVITY_M_INV_S,
     lymberopoulos_economou_1995_chlorine_diffusivity,
+    malyshev_1998_chlorine_in_chlorine_diffusivity,
     ramamurthi_economou_2002_chlorine_diffusivity,
     solve_chlorine_neutral_wall_transport,
 )
@@ -42,6 +43,81 @@ def test_published_chlorine_diffusivities_retain_temperature_conflict():
     assert "temperature_conflict" in reused.provenance
     assert not original.supports_prediction
     assert not reused.supports_prediction
+
+
+def test_malyshev_chapman_enskog_diffusivity_replays_source_correction():
+    model = malyshev_1998_chlorine_in_chlorine_diffusivity()
+    assert model.mixed_sigma_angstrom == pytest.approx(3.8315)
+    assert model.mixed_epsilon_over_k_K == pytest.approx(
+        163.63068171953572)
+    assert model.collision_integral(333.0) == pytest.approx(
+        1.0689196299076194)
+    assert model.diffusivity_cm2_s_at_pressure(
+        gas_temperature_K=298.15,
+        pressure_Pa=101325.0,
+    ) == pytest.approx(0.15167523928085008)
+    assert model.diffusivity_cm2_s_at_pressure(
+        gas_temperature_K=333.0,
+        pressure_Pa=101325.0,
+    ) == pytest.approx(0.1862154115776554)
+    assert model.source_correction_factor == 1.25
+    assert model.provenance["source_bibkey"] == "malyshev-1998-lam-cl2"
+    assert model.provenance["collision_integral_bibkey"] == (
+        "neufeld-1972-collision-integrals")
+    assert model.provenance["coefficient_selection_target"] is None
+    assert model.provenance["feature_depth_target"] is None
+    assert not model.supports_prediction
+
+
+def test_malyshev_diffusivity_is_temperature_consistent_and_composable():
+    pressure = 10.0 * 0.1333223684
+    temperature = 333.0
+    density = pressure / (BOLTZMANN_J_K * temperature)
+    model = malyshev_1998_chlorine_in_chlorine_diffusivity()
+    state = model.evaluate(
+        total_neutral_density_m3=density,
+        gas_temperature_K=temperature,
+    )
+    assert state.diffusivity_m2_s * density == pytest.approx(
+        4.103975103414651e20)
+    assert state.provenance["omega_11"] == pytest.approx(
+        1.0689196299076194)
+    assert state.diffusivity_m2_s * density < (
+        ECONOMOU_CHLORINE_REDUCED_DIFFUSIVITY_M_INV_S)
+    assert not state.supports_prediction
+
+    boundary = ChlorineWallRecombinationBoundary(
+        recombination_probability=0.035,
+        surface_state="source-model anodized aluminum",
+        source="Malyshev 1998 fitted reactor value",
+        evidence_kind="regressed",
+        valid_cl_to_cl2_ratio=(0.1, 1.0),
+        valid_pressure_Pa=(pressure, pressure),
+        valid_icp_power_W=(500.0, 500.0),
+        valid_gas_temperature_K=(temperature, temperature),
+        relative_measurement_uncertainty=None,
+    )
+    transport = solve_chlorine_neutral_wall_transport(
+        geometry=CylindricalReactor(radius_m=0.215, length_m=0.11),
+        wall_boundary=boundary,
+        incident_velocity_state=(
+            thermalized_chlorine_incident_velocity_state(
+                temperature,
+                source="source-model initial gas temperature",
+                evidence_kind="assumed",
+                relative_uncertainty=None,
+            )
+        ),
+        diffusivity_model=model,
+        total_neutral_density_m3=density,
+        gas_temperature_K=temperature,
+        cl_to_cl2_ratio=0.5,
+        pressure_Pa=pressure,
+        icp_power_W=500.0,
+    )
+    assert transport.wall_loss.numerical_closure_passes
+    assert transport.diffusivity == state
+    assert not transport.supports_prediction
 
 
 def test_composed_chlorine_wall_transport_is_conserved_but_not_predictive():

@@ -1,0 +1,37 @@
+Neufeld, Janzen, and Aziz, Journal of Chemical Physics 57, 1100--1102
+(1972), DOI 10.1063/1.1678363.
+
+Verified implementation extract
+================================
+
+The original article computes 16 reduced Lennard--Jones (12-6) transport
+collision integrals over 0.3 <= T* <= 100. Its Eq. 2 has the form
+
+Omega(l,s)* = A/T*^B + C/exp(D T*) + E/exp(F T*)
+              + G/exp(H T*) + R T*^B sin(S T*^W - P).
+
+For the Table-I (1,1) row used by binary diffusion, R, S, W, and P are blank,
+and the coefficients are
+
+A = 1.06036     B = 0.15610
+C = 0.19300     D = 0.47635
+E = 1.03587     F = 1.52996
+G = 1.76474     H = 3.89411.
+
+Table II reports average deviation 0.036% and maximum deviation 0.11% at
+T* = 0.75 for the (1,1) equation.
+
+Retrieval and audit boundary
+============================
+
+The official AIP record confirms the citation, pages, DOI, reduced-temperature
+domain, and stated sub-0.1% probable error. The equation and Table-I/II rows
+above were checked in text extracted from a scan of the original article at
+https://www.scribd.com/document/832627226/Neufeld-Colision-Integral-Formula-ORIGINAL-PAPER .
+The AIP title page was visually checked from the hosted scan; the coefficient
+table still lacks a locally archived publisher-PDF pixel audit. This boundary
+is recorded rather than silently upgraded.
+
+Only the equation, coefficient row, domain, and error row above are consumed
+by petch. No coefficient was selected against reactor, wafer, profile, or
+feature-depth data.

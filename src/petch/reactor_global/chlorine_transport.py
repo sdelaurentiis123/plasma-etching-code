@@ -11,6 +11,7 @@ from .chlorine_wall import (
 )
 from .geometry import CylindricalReactor
 from .neutral_transport import (
+    ChapmanEnskogBinaryDiffusivity,
     CylindricalNeutralWallLoss,
     NeutralDiffusivityState,
     ReducedNeutralDiffusivity,
@@ -18,6 +19,64 @@ from .neutral_transport import (
 )
 
 ECONOMOU_CHLORINE_REDUCED_DIFFUSIVITY_M_INV_S = 6.21e20
+
+
+def malyshev_1998_chlorine_in_chlorine_diffusivity(
+) -> ChapmanEnskogBinaryDiffusivity:
+    """Return a source-parameterized Cl-in-Cl2 Chapman--Enskog model.
+
+    Malyshev et al. print the full binary-diffusion expression and the
+    Lennard--Jones parameters ``sigma_Cl=3.548 A``, ``sigma_Cl2=4.115 A``,
+    ``epsilon_Cl/k=75 K``, and ``epsilon_Cl2/k=357 K``.  They multiply the
+    calculated coefficient by exactly 1.25 to agree with a reported room-
+    temperature, one-atmosphere measurement of 0.15 cm2/s. Malyshev cites the
+    older Hirschfelder tables for the collision integral; this implementation
+    deliberately upgrades that lookup to Neufeld's more accurate 1972
+    correlation. The published factor is retained verbatim and is not adjusted
+    against reactor or feature data. Missing physical uncertainty keeps this
+    model non-predictive.
+    """
+    return ChapmanEnskogBinaryDiffusivity(
+        species_a="Cl",
+        species_b="Cl2",
+        molar_mass_a_g_mol=35.0,
+        molar_mass_b_g_mol=70.0,
+        sigma_a_angstrom=3.548,
+        sigma_b_angstrom=4.115,
+        epsilon_a_over_k_K=75.0,
+        epsilon_b_over_k_K=357.0,
+        source_correction_factor=1.25,
+        source=(
+            "malyshev-1998-cl-in-cl2 Chapman-Enskog model with source-"
+            "declared measured-diffusion correction"
+        ),
+        evidence_kind="published_model",
+        relative_uncertainty=None,
+        provenance={
+            "source_bibkey": "malyshev-1998-lam-cl2",
+            "formula_source_doi": "10.1063/1.368010",
+            "collision_integral_bibkey": (
+                "neufeld-1972-collision-integrals"),
+            "collision_integral_source_doi": "10.1063/1.1678363",
+            "collision_integral_method": (
+                "Neufeld 1972 upgrade to the Hirschfelder table cited by "
+                "Malyshev; not a source-identical table replay"
+            ),
+            "lennard_jones_parameter_sources": (
+                "Hwang-Su 1990 for Cl; Hirschfelder-Curtiss-Bird 1954 "
+                "for Cl2"
+            ),
+            "measurement_anchor": (
+                "0.15 cm2/s for Cl in Cl2 at room temperature and 1 atm"
+            ),
+            "measurement_anchor_temperature_K": (
+                "reported only as room temperature"
+            ),
+            "coefficient_selection_target": None,
+            "reactor_target": None,
+            "feature_depth_target": None,
+        },
+    )
 
 
 def lymberopoulos_economou_1995_chlorine_diffusivity(
@@ -175,7 +234,8 @@ class ChlorineVolumeWallRates:
             rtol=1.0e-14,
             atol=0.0,
         ):
-            raise ValueError("chlorine volume wall rates do not conserve atoms")
+            raise ValueError(
+                "chlorine volume wall rates do not conserve atoms")
 
     @property
     def chlorine_atom_inventory_residual_m3_s(self) -> float:
@@ -189,7 +249,8 @@ def solve_chlorine_neutral_wall_transport(
     geometry: CylindricalReactor,
     wall_boundary: ChlorineWallRecombinationBoundary,
     incident_velocity_state: ChlorineIncidentVelocityState,
-    diffusivity_model: ReducedNeutralDiffusivity,
+    diffusivity_model: (
+        ReducedNeutralDiffusivity | ChapmanEnskogBinaryDiffusivity),
     total_neutral_density_m3: float,
     gas_temperature_K: float,
     cl_to_cl2_ratio: float,
@@ -199,8 +260,11 @@ def solve_chlorine_neutral_wall_transport(
     """Compose source-scoped diffusivity, wall state, and exact geometry."""
     if not isinstance(wall_boundary, ChlorineWallRecombinationBoundary):
         raise TypeError("chlorine wall boundary is required")
-    if not isinstance(diffusivity_model, ReducedNeutralDiffusivity):
-        raise TypeError("reduced neutral diffusivity is required")
+    if not isinstance(
+        diffusivity_model,
+        (ReducedNeutralDiffusivity, ChapmanEnskogBinaryDiffusivity),
+    ):
+        raise TypeError("a supported neutral diffusivity model is required")
     if not isinstance(
         incident_velocity_state, ChlorineIncidentVelocityState
     ):
