@@ -556,6 +556,181 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
 
 
 @dataclass(frozen=True)
+class ElectronTabulatedCrossSectionSupport:
+    """Exact Maxwellian moments over only the tabulated energy support.
+
+    Some evaluated collision tables do not span either a physical threshold
+    or the full high-energy tail needed by a reactor EEDF.  Extending those
+    tables to zero or infinity would add an unmeasured closure.  This class
+    instead integrates the piecewise-linear source table only between its
+    first and last samples and reports the missing constant-cross-section
+    kernel fractions on both sides.
+
+    ``tabulated_rate_coefficient_si`` returns the supported contribution to
+    ``<sigma v>``.  ``tabulated_incident_energy_moment_eV_m3_s`` returns the
+    supported contribution to ``<sigma v E>``.  The latter is the required
+    electron-energy moment for a particle-removing event such as
+    dissociative attachment; it must not be replaced by an Arrhenius fit
+    exponent.
+    """
+
+    electron_energy_eV: tuple[float, ...]
+    cross_section_m2: tuple[float, ...]
+    relative_uncertainty: float | None
+    source: str
+    evidence_kind: str
+    density_order: float = field(init=False, default=2.0)
+    source_units: str = field(
+        init=False,
+        default=(
+            "tabulated E in eV and cross section in m^2; support-only "
+            "Maxwellian moments"
+        ),
+    )
+
+    def __post_init__(self):
+        energies = tuple(float(value) for value in self.electron_energy_eV)
+        cross_sections = tuple(float(value) for value in self.cross_section_m2)
+        uncertainty = self.relative_uncertainty
+        if uncertainty is not None:
+            uncertainty = float(uncertainty)
+        if (
+            len(energies) < 2
+            or len(energies) != len(cross_sections)
+            or np.any(~np.isfinite(np.asarray(energies)))
+            or np.any(~np.isfinite(np.asarray(cross_sections)))
+            or np.any(np.diff(np.asarray(energies)) <= 0.0)
+            or energies[0] < 0.0
+            or np.any(np.asarray(cross_sections) < 0.0)
+            or not any(value > 0.0 for value in cross_sections)
+            or (
+                uncertainty is not None
+                and (
+                    not np.isfinite(uncertainty)
+                    or not 0.0 <= uncertainty < 1.0
+                )
+            )
+            or not str(self.source).strip()
+            or self.evidence_kind not in _EVIDENCE_KINDS
+        ):
+            raise ValueError("invalid tabulated cross-section support")
+        object.__setattr__(self, "electron_energy_eV", energies)
+        object.__setattr__(self, "cross_section_m2", cross_sections)
+        object.__setattr__(self, "relative_uncertainty", uncertainty)
+
+    @staticmethod
+    def _first_moment(
+            lower_eV: np.ndarray, upper_eV: np.ndarray,
+            temperature_eV: float) -> np.ndarray:
+        return ElectronMaxwellianCrossSectionRateCoefficient._first_moment(
+            lower_eV, upper_eV, temperature_eV)
+
+    @staticmethod
+    def _second_moment(
+            lower_eV: np.ndarray, upper_eV: np.ndarray,
+            temperature_eV: float) -> np.ndarray:
+        return ElectronMaxwellianCrossSectionRateCoefficient._second_moment(
+            lower_eV, upper_eV, temperature_eV)
+
+    @staticmethod
+    def _third_moment(
+            lower_eV: np.ndarray, upper_eV: np.ndarray,
+            temperature_eV: float) -> np.ndarray:
+        lower = lower_eV / temperature_eV
+        upper = upper_eV / temperature_eV
+        return temperature_eV ** 4 * (
+            (
+                lower ** 3 + 3.0 * lower ** 2 + 6.0 * lower + 6.0
+            ) * np.exp(-lower)
+            - (
+                upper ** 3 + 3.0 * upper ** 2 + 6.0 * upper + 6.0
+            ) * np.exp(-upper)
+        )
+
+    @staticmethod
+    def _prefactor(temperature_eV: float) -> float:
+        return float(
+            np.sqrt(8.0 * E_CHARGE_C / (np.pi * ELECTRON_MASS_KG))
+            / temperature_eV ** 1.5
+        )
+
+    def _piecewise_moments(
+            self, context: RateContext) -> tuple[float, float]:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        temperature = context.electron_temperature_eV
+        energies = np.asarray(self.electron_energy_eV)
+        cross_sections = np.asarray(self.cross_section_m2)
+        lower = energies[:-1]
+        upper = energies[1:]
+        lower_cross_section = cross_sections[:-1]
+        slopes = np.diff(cross_sections) / np.diff(energies)
+        first = self._first_moment(lower, upper, temperature)
+        second = self._second_moment(lower, upper, temperature)
+        third = self._third_moment(lower, upper, temperature)
+        rate_integral = np.sum(
+            lower_cross_section * first
+            + slopes * (second - lower * first)
+        )
+        energy_integral = np.sum(
+            lower_cross_section * second
+            + slopes * (third - lower * second)
+        )
+        prefactor = self._prefactor(temperature)
+        rate = prefactor * rate_integral
+        energy = prefactor * energy_integral
+        if (
+            not np.isfinite(rate)
+            or rate <= 0.0
+            or not np.isfinite(energy)
+            or energy <= 0.0
+        ):
+            raise FloatingPointError("nonpositive or nonfinite support moment")
+        return float(rate), float(energy)
+
+    def tabulated_rate_coefficient_si(self, context: RateContext) -> float:
+        """Return the ``<sigma v>`` contribution on measured support."""
+        return self._piecewise_moments(context)[0]
+
+    def tabulated_incident_energy_moment_eV_m3_s(
+            self, context: RateContext) -> float:
+        """Return the ``<sigma v E>`` contribution on measured support."""
+        return self._piecewise_moments(context)[1]
+
+    def rate_kernel_missing_fractions(
+            self, temperature_eV: float) -> tuple[float, float]:
+        """Return missing fractions of the ``E exp(-E/Te)`` kernel."""
+        temperature = float(temperature_eV)
+        if not np.isfinite(temperature) or temperature <= 0.0:
+            raise ValueError(
+                "electron temperature must be finite and positive")
+        lower = self.electron_energy_eV[0] / temperature
+        upper = self.electron_energy_eV[-1] / temperature
+        lower_fraction = 1.0 - (lower + 1.0) * np.exp(-lower)
+        upper_fraction = (upper + 1.0) * np.exp(-upper)
+        return float(lower_fraction), float(upper_fraction)
+
+    def incident_energy_kernel_missing_fractions(
+            self, temperature_eV: float) -> tuple[float, float]:
+        """Return missing fractions of the ``E^2 exp(-E/Te)`` kernel."""
+        temperature = float(temperature_eV)
+        if not np.isfinite(temperature) or temperature <= 0.0:
+            raise ValueError(
+                "electron temperature must be finite and positive")
+        lower = self.electron_energy_eV[0] / temperature
+        upper = self.electron_energy_eV[-1] / temperature
+
+        def survival(ratio: float) -> float:
+            return float(
+                0.5
+                * (ratio ** 2 + 2.0 * ratio + 2.0)
+                * np.exp(-ratio)
+            )
+
+        return float(1.0 - survival(lower)), survival(upper)
+
+
+@dataclass(frozen=True)
 class ElectronTemperatureTabulatedRateCoefficient:
     """Fast bounded electron-temperature rate table.
 

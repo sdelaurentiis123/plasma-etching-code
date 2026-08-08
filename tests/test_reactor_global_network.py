@@ -10,6 +10,7 @@ from petch.reactor_global import (
     ElectronInverseTemperaturePolynomialRateCoefficient,
     ElectronBase10LogPolynomialRateCoefficient,
     ElectronMaxwellianCrossSectionRateCoefficient,
+    ElectronTabulatedCrossSectionSupport,
     ElectronTemperatureTabulatedRateCoefficient,
     RateContext,
     Reaction,
@@ -305,6 +306,63 @@ def test_tabulated_cross_section_fails_on_unmeasured_maxwellian_tail():
     )
     with pytest.raises(ValueError, match="unmeasured cross-section tail"):
         coefficient.coefficient_si(RateContext(50.0))
+
+
+def test_tabulated_cross_section_support_integrates_rate_and_energy_moments():
+    cross_section = 2.5e-20
+    maximum_energy = 100.0
+    temperature = 2.0
+    support = ElectronTabulatedCrossSectionSupport(
+        electron_energy_eV=(0.0, maximum_energy),
+        cross_section_m2=(cross_section, cross_section),
+        relative_uncertainty=None,
+        source="manufactured constant support",
+        evidence_kind="derived",
+    )
+    ratio = maximum_energy / temperature
+    rate_retained = 1.0 - (ratio + 1.0) * np.exp(-ratio)
+    energy_retained = 1.0 - 0.5 * (
+        ratio ** 2 + 2.0 * ratio + 2.0) * np.exp(-ratio)
+    speed_scale = np.sqrt(
+        8.0 * E_CHARGE_C * temperature / (np.pi * ELECTRON_MASS_KG)
+    )
+    expected_rate = cross_section * speed_scale * rate_retained
+    expected_energy = (
+        2.0 * temperature * cross_section * speed_scale * energy_retained
+    )
+    context = RateContext(temperature)
+    assert support.tabulated_rate_coefficient_si(context) == pytest.approx(
+        expected_rate, rel=3.0e-15)
+    assert (
+        support.tabulated_incident_energy_moment_eV_m3_s(context)
+        == pytest.approx(expected_energy, rel=3.0e-15)
+    )
+    assert support.rate_kernel_missing_fractions(temperature) == (
+        pytest.approx(0.0, abs=0.0),
+        pytest.approx((ratio + 1.0) * np.exp(-ratio), rel=2.0e-15),
+    )
+    assert support.incident_energy_kernel_missing_fractions(temperature) == (
+        pytest.approx(0.0, abs=0.0),
+        pytest.approx(1.0 - energy_retained, rel=2.0e-15),
+    )
+
+
+def test_tabulated_cross_section_support_does_not_hide_missing_tails():
+    support = ElectronTabulatedCrossSectionSupport(
+        electron_energy_eV=(0.05, 11.8),
+        cross_section_m2=(1.83e-20, 0.0043e-20),
+        relative_uncertainty=None,
+        source="manufactured finite support",
+        evidence_kind="derived",
+    )
+    rate_low, rate_high = support.rate_kernel_missing_fractions(3.0)
+    energy_low, energy_high = (
+        support.incident_energy_kernel_missing_fractions(3.0)
+    )
+    assert 0.0 < rate_low < 0.001
+    assert 0.09 < rate_high < 0.10
+    assert 0.0 < energy_low < 1.0e-5
+    assert 0.24 < energy_high < 0.25
 
 
 def test_tabulated_temperature_rate_is_exact_at_nodes_and_positive_between():

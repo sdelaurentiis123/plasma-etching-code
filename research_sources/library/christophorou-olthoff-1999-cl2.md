@@ -11,7 +11,8 @@ byproducts**
   `https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=8765`
 - **PDF SHA-256:**
   `a70bbed40bae014a551dd91fc96e322a258d959674ea53fe50ea2c6f4e020a6b`
-- **Status:** PRIMARY NIST FULL TEXT READ; TABLE 25 PIXEL-AUDITED AT 300 DPI
+- **Status:** PRIMARY NIST FULL TEXT READ; TABLES 12/25 PIXEL-AUDITED AT
+  300 DPI; TABLE 16 PIXEL-AUDITED AT 500 DPI
 - **Topic:** evaluated molecular-chlorine collision data, atomic-chlorine
   ionization, evidence gaps, and predictive reactor-deck boundaries
 
@@ -27,6 +28,7 @@ byproducts**
 | Q6 | The review gives `D0(Cl2)=2.4793 eV` and a vibrational quantum of `0.0694 eV`; its threshold table gives 11.48 eV for Cl2 ionization, 15.45 eV for dissociative ionization, and 11.9±0.2 eV for ion-pair formation. | Physical energy-loss thresholds for later molecular-channel mapping; these are not interchangeable with Arrhenius fit exponents. |
 | Q7 | Table 12 is the suggested total Cl2 ionization cross section from 11.5--100 eV. It averages Kurepa--Belic and Stevie--Vasile even though the two magnitudes differ beyond their combined quoted uncertainties. | Landed as aggregate evaluated evidence with no invented scalar uncertainty. |
 | Q8 | No partial electron-impact ionization data exist; the relative production of `Cl2+` and `Cl+` is unknown. | Total positive-ion production can advance, but species-resolved ion flux and sheath transport remain open. |
+| Q9 | Table 16 gives 42 suggested total dissociative-attachment cross sections from 0.05--11.8 eV. The review obtained them by adjusting Kurepa--Belic upward by 30 percent to agree with swarm data. | Landed as a pixel-audited, support-only object with no invented scalar uncertainty or tail extrapolation. |
 
 ## Executable decision
 
@@ -42,3 +44,10 @@ cannot be confused.
 `nist_molecular_chlorine_total_ionization_rate()` similarly integrates the
 29-point, pixel-audited Table 12. It is deliberately aggregate-only and cannot
 replace either species-resolved ionization row.
+
+`nist_cl2_dissociative_attachment_cross_section_support()` preserves the
+42-point Table 16 without extending it below 0.05 eV or above 11.8 eV. It
+computes separate support-only `<sigma v>` and `<sigma v E>` moments and
+reports the missing Maxwellian-kernel fractions. The latter is the incident
+electron kinetic-energy removal moment required by an attachment power
+ledger; the object deliberately cannot masquerade as a complete reactor rate.

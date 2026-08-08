@@ -1,0 +1,81 @@
+{
+  "audit_id": "MALYSHEV-1998-CL2-ATTACHMENT-ENERGY-SUPPORT-R1",
+  "claim_class": "measured-Te support diagnostic; not an absorbed-power, reactor-state, wafer-flux, or feature-depth prediction",
+  "coefficient_selection_target": null,
+  "reactor_fit_target": null,
+  "feature_depth_target": null,
+  "source_table": {
+    "identity": "Christophorou--Olthoff 1999 Table 16",
+    "energy_support_eV": [
+      0.05,
+      11.8
+    ],
+    "row_count": 42,
+    "csv_sha256": "be78487a2e5e7176a0b1518ecdd1a730be8c358b2498404b147431697308197f",
+    "scalar_relative_uncertainty": null
+  },
+  "kernel_tolerance": {
+    "value": 1e-06,
+    "basis": "inherited from the pre-existing evaluated Maxwellian cross-section provider before this board was evaluated",
+    "interpretation": "constant-cross-section EEDF-kernel exposure diagnostic; not a bound on the unknown cross-section-weighted tail error"
+  },
+  "marker_accounting": {
+    "lam_measured_Te_markers": 62,
+    "particle_rate_support_complete": 0,
+    "incident_energy_support_complete": 0
+  },
+  "electron_temperature_eV": {
+    "minimum": 1.28008,
+    "median": 2.07379,
+    "maximum": 3.77832
+  },
+  "support_only_attachment_rate_m3_s": {
+    "minimum": 2.415934673870211e-16,
+    "median": 2.7844403382834583e-16,
+    "maximum": 2.9317198296234657e-16
+  },
+  "support_only_incident_energy_moment_eV_m3_s": {
+    "minimum": 5.27395982046103e-16,
+    "median": 1.0209177057479017e-15,
+    "maximum": 1.3729834471708922e-15
+  },
+  "support_conditioned_mean_incident_energy_eV": {
+    "minimum": 2.18298941502934,
+    "median": 3.666499994144341,
+    "maximum": 4.814203103098401
+  },
+  "rate_kernel_missing_below_table": {
+    "minimum": 8.679269869704687e-05,
+    "median": 0.000286038423513435,
+    "maximum": 0.0007432675638855413
+  },
+  "rate_kernel_missing_above_table": {
+    "minimum": 0.0010138442574239976,
+    "median": 0.0226102444270034,
+    "maximum": 0.18150348577693245
+  },
+  "incident_energy_kernel_missing_below_table": {
+    "minimum": 3.8243143707372695e-07,
+    "median": 2.2943052990220814e-06,
+    "maximum": 9.645776631872494e-06
+  },
+  "incident_energy_kernel_missing_above_table": {
+    "minimum": 0.005229428302240051,
+    "median": 0.07731854581968593,
+    "maximum": 0.39618746244064756
+  },
+  "electron_power_closure": {
+    "status": "blocked",
+    "demonstrated_blocker": "Table 16 does not close either Maxwellian tail on any of the 62 measured Lam electron-temperature markers at the inherited tolerance",
+    "other_unclosed_channels": [
+      "Cl2 elastic momentum-transfer energy exchange",
+      "Cl2 vibrational excitation",
+      "Cl2 non-dissociative electronic excitation",
+      "electron-impact detachment from Cl-",
+      "ion-pair energy partition",
+      "species-resolved molecular ionization branch"
+    ],
+    "next_required_evidence": "primary attachment cross sections or energy-weighted rates covering the Lam EEDF, plus the remaining channel moments"
+  },
+  "csv_sha256": "0e813132fa1836bd569bbdd639a5a2bea74c11a426861099f089d319ff47e0c4"
+}

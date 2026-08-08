@@ -13,6 +13,7 @@ from pathlib import Path
 from .chlorine import build_lee_lieberman_chlorine_particle_network
 from .network import (
     ElectronMaxwellianCrossSectionRateCoefficient,
+    ElectronTabulatedCrossSectionSupport,
     ElectronTemperatureTabulatedRateCoefficient,
     Reaction,
     ReactionNetwork,
@@ -48,6 +49,22 @@ _NIST_MOLECULAR_CHLORINE_TOTAL_IONIZATION_CROSS_SECTION_1E20_M2 = (
     0.03, 0.11, 0.25, 0.43, 0.69, 0.99, 1.32, 1.67, 2.06, 2.47,
     3.25, 3.79, 4.17, 4.51, 4.80, 5.26, 5.49, 5.68, 5.87, 6.03,
     6.15, 6.25, 6.32, 6.33, 6.31, 6.28, 6.25, 6.22, 6.19,
+)
+
+_NIST_CL2_DISSOCIATIVE_ATTACHMENT_ENERGY_EV = (
+    0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.80, 1.0, 1.2,
+    1.6, 2.0, 2.2, 2.6, 3.0, 3.2, 3.6, 4.0, 4.2, 4.6, 5.0,
+    5.2, 5.6, 6.0, 6.2, 6.6, 7.0, 7.2, 7.6, 8.0, 8.2, 8.6,
+    9.0, 9.2, 9.6, 10.0, 10.2, 10.6, 11.0, 11.2, 11.6, 11.8,
+)
+
+_NIST_CL2_DISSOCIATIVE_ATTACHMENT_CROSS_SECTION_1E20_M2 = (
+    1.83, 1.04, 0.32, 0.081, 0.026, 0.013, 0.0088, 0.0065,
+    0.0055, 0.0062, 0.011, 0.024, 0.032, 0.036, 0.025, 0.018,
+    0.012, 0.017, 0.022, 0.033, 0.047, 0.053, 0.062, 0.062,
+    0.060, 0.052, 0.039, 0.030, 0.018, 0.0091, 0.0066, 0.0053,
+    0.0051, 0.0049, 0.0051, 0.0049, 0.0048, 0.0046, 0.0045,
+    0.0042, 0.0041, 0.0043,
 )
 
 HAMILTON_2018_CL2_DISSOCIATION_STATES = (
@@ -129,6 +146,39 @@ def nist_molecular_chlorine_total_ionization_rate(
         ),
         evidence_kind="published_compilation",
         maximum_kernel_tail_fraction=maximum_kernel_tail_fraction,
+    )
+
+
+def nist_cl2_dissociative_attachment_cross_section_support(
+) -> ElectronTabulatedCrossSectionSupport:
+    """Return NIST's evaluated Cl2 attachment table without tail closure.
+
+    Table 16 begins at 0.05 eV and ends at 11.8 eV.  Dissociative
+    attachment removes the incident electron, so its electron-fluid power
+    sink requires the energy-weighted moment ``<sigma v E>`` rather than a
+    guessed event threshold.  The returned object evaluates both that moment
+    and the particle-rate moment only on the printed support and exposes the
+    missing low/high Maxwellian kernel fractions.  It is therefore evidence
+    for an energy audit, not by itself a complete reactor rate provider.
+
+    The review adjusted the Kurepa--Belic cross section upward by 30 percent
+    to reconcile swarm measurements but did not assign the resulting table a
+    scalar uncertainty.  No uncertainty is invented here.
+    """
+    return ElectronTabulatedCrossSectionSupport(
+        electron_energy_eV=(
+            _NIST_CL2_DISSOCIATIVE_ATTACHMENT_ENERGY_EV),
+        cross_section_m2=tuple(
+            value * 1.0e-20
+            for value in (
+                _NIST_CL2_DISSOCIATIVE_ATTACHMENT_CROSS_SECTION_1E20_M2)
+        ),
+        relative_uncertainty=None,
+        source=(
+            "christophorou-olthoff-1999-cl2 Table 16 suggested total "
+            "dissociative attachment cross section"
+        ),
+        evidence_kind="published_compilation",
     )
 
 

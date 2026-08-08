@@ -15,6 +15,7 @@ from petch.reactor_global import (
     hamilton_2018_cl2_state_dissociation_rates,
     hamilton_2018_cl2_state_dissociation_reactions,
     lee_lieberman_chlorine_species,
+    nist_cl2_dissociative_attachment_cross_section_support,
     nist_hayes_atomic_chlorine_ionization_rate,
     nist_molecular_chlorine_total_ionization_rate,
 )
@@ -30,6 +31,10 @@ TABLE12 = TABLE25.with_name(
     "christophorou_olthoff_1999_table12_cl2_total_ionization.csv")
 TABLE12_MANIFEST = TABLE12.with_name(
     "christophorou_olthoff_1999_table12_manifest.md")
+TABLE16 = TABLE25.with_name(
+    "christophorou_olthoff_1999_table16_cl2_attachment.csv")
+TABLE16_MANIFEST = TABLE16.with_name(
+    "christophorou_olthoff_1999_table16_manifest.md")
 HAMILTON_RATES = (
     ROOT / "src" / "petch" / "reactor_global" / "data"
     / "hamilton_2018_cl2_state_maxwellian_rates.csv"
@@ -161,6 +166,81 @@ def test_nist_molecular_chlorine_rate_rejects_unsupported_hot_eedf():
     coefficient = nist_molecular_chlorine_total_ionization_rate()
     with pytest.raises(ValueError, match="unmeasured cross-section tail"):
         coefficient.coefficient_si(RateContext(8.0))
+
+
+def test_nist_cl2_attachment_table16_transcription_and_boundary():
+    support = nist_cl2_dissociative_attachment_cross_section_support()
+    assert len(support.electron_energy_eV) == 42
+    assert support.electron_energy_eV[:4] == (0.05, 0.10, 0.20, 0.30)
+    assert support.electron_energy_eV[-4:] == (11.0, 11.2, 11.6, 11.8)
+    np.testing.assert_allclose(
+        np.asarray(support.cross_section_m2[:8]) / 1.0e-20,
+        [1.83, 1.04, 0.32, 0.081, 0.026, 0.013, 0.0088, 0.0065],
+        rtol=0.0,
+        atol=5.0e-16,
+    )
+    np.testing.assert_allclose(
+        np.asarray(support.cross_section_m2[-8:]) / 1.0e-20,
+        [
+            0.0051, 0.0049, 0.0048, 0.0046,
+            0.0045, 0.0042, 0.0041, 0.0043,
+        ],
+        rtol=0.0,
+        atol=5.0e-18,
+    )
+    assert support.relative_uncertainty is None
+    assert support.evidence_kind == "published_compilation"
+    assert "Table 16" in support.source
+
+
+def test_nist_cl2_attachment_executable_table_matches_pixel_audited_csv():
+    support = nist_cl2_dissociative_attachment_cross_section_support()
+    with TABLE16.open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    np.testing.assert_allclose(
+        support.electron_energy_eV,
+        [float(row["electron_energy_eV"]) for row in rows],
+        rtol=0.0,
+        atol=0.0,
+    )
+    np.testing.assert_allclose(
+        np.asarray(support.cross_section_m2) / 1.0e-20,
+        [float(row["cross_section_1e_minus_20_m2"]) for row in rows],
+        rtol=0.0,
+        atol=5.0e-16,
+    )
+    manifest = TABLE16_MANIFEST.read_text(encoding="utf-8")
+    assert "original-resolution visual review of all 42" in manifest
+    assert (
+        "97f73d5fcb067bd86a1415a2ff8c4aa097b51da279b32f4a4e2d19cbb3274164"
+        in manifest
+    )
+    assert "does not set the" in manifest
+    assert "cross section to zero outside the table" in manifest
+
+
+@pytest.mark.parametrize("temperature", [0.3, 1.0, 3.0, 5.0])
+def test_nist_cl2_attachment_support_reports_particle_and_energy_moments(
+        temperature):
+    support = nist_cl2_dissociative_attachment_cross_section_support()
+    context = RateContext(temperature)
+    rate = support.tabulated_rate_coefficient_si(context)
+    energy = support.tabulated_incident_energy_moment_eV_m3_s(context)
+    assert rate > 0.0
+    assert energy > 0.0
+    assert 0.05 < energy / rate < 11.8
+
+
+def test_nist_cl2_attachment_support_exposes_lam_temperature_tail_gap():
+    support = nist_cl2_dissociative_attachment_cross_section_support()
+    rate_low, rate_high = support.rate_kernel_missing_fractions(3.0)
+    energy_low, energy_high = (
+        support.incident_energy_kernel_missing_fractions(3.0)
+    )
+    assert rate_low < 0.001
+    assert rate_high > 0.09
+    assert energy_low < 1.0e-5
+    assert energy_high > 0.24
 
 
 def test_hamilton_state_rates_match_compact_table_at_every_node():
