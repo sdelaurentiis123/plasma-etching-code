@@ -41,6 +41,8 @@
 | K9 | Table 4 labels charge exchange as reactions `(28)--(32)` while printing `Cl2(v=0--3)`, which expands to four channels, not five. The official COMSOL reproduction implements four channels. Table 4 stars eight excitation rows (10--15 and 17--18), and the raw COMSOL 6.4 model contains 38 forward rows (including two elastic channels) plus all eight reverses = 46 volume features. | The printed range is quarantined as an off-by-one source defect. The native forward replay expands exactly four charge-exchange channels and records the missing source label rather than inventing a fifth species or event. A 44-count is valid only for the non-elastic forward+reverse subset. |
 | K10 | A 600-dpi visual audit confirms reaction 17 is `4.55e-14 Te^-0.46 exp(-2.01/Te - 0.001/Te^2)`. The first native replay and its formula-shaped test both carried `Te^+0.46`; the official COMSOL model independently exposes the negative exponent. | Corrected before any Kemaneci solve. The regression now uses an independently precomputed 50-digit value at `Te=2.3 eV`, rather than repeating the implementation formula. |
 | K11 | The official COMSOL 6.4 model uses the Table-4 reaction-20 fit with `exp(-13.29/Te)`, whereas the primary paper prints `exp(-13.19/Te)`. | The native primary-paper replay retains `-13.19`; the COMSOL divergence is quarantined and must be selected explicitly in any implementation-reproduction mode. |
+| K12 | The raw COMSOL model defines `eCl12=1.35 eV` and `eCl52=10.17 eV` and uses those values directly as excitation and reverse-reaction gaps from ground `Cl`. Figure 10, however, places ground `Cl(2P3/2)` at `1.25 eV` on the same absolute molecular ledger, implying differences of `0.10 eV` and `8.92 eV`. Wang et al. independently give the physical fine-structure separation as `0.109 eV`. | COMSOL's `1.35/10.17 eV` values are retained only in a named implementation-reproduction mode. They are not physical atomic excitation energies and cannot enter the evaluated tier. The higher-state identity/gap remains fail-closed pending its Griffin-source audit. |
+| K13 | The raw COMSOL model uses `eionCl=14.25 eV` as the ground-Cl ionization event energy, even though Figure 10 places ground Cl at `1.25 eV` below that absolute level. The evaluated atomic threshold is `12.967633 eV`; Table-4's `13.29/13.19 eV` exponential parameters are rate-fit parameters, not event energies. | The source-reproduction ledger is internally inconsistent by construction. Predictive power balance must use the evaluated threshold and separately evaluated excited-state gaps, never the COMSOL absolute coordinate or a fit exponent. |
 
 ## Use decision
 
@@ -68,10 +70,18 @@ The native implementation must therefore keep two tiers side by side:
 
 Neither tier may tune a reactor constant to feature depth.
 
-The first source-reproduction rung is now executable as
+The first source-reproduction rung is executable as
 `build_kemaneci_2014_forward_chlorine_network()`: 36 printed non-elastic
 forward reactions, ten heavy states plus electrons, exact atom/charge closure,
-and strict enforcement of the `0.5--10 eV` fit domain. The two elastic channels
-and eight detailed-balance reverses remain explicit next gates, so this
-forward network cannot yet be called the paper's complete 44-reaction
-non-elastic model (46 features when the two elastic rows are included).
+and strict enforcement of the `0.5--10 eV` fit domain.
+
+The separate
+`build_kemaneci_2014_comsol_nonelastic_chlorine_network()` reproduces the raw
+official implementation's 44 non-elastic rows, including all eight reverse
+expressions, COMSOL's reaction-20 coefficient, its unit statistical-weight
+ratios, and its questionable `1.35/10.17 eV` atomic gaps. A generic
+`ElectronDetailedBalanceRateCoefficient` independently enforces the physical
+`(g_lower/g_upper) exp(deltaE/Te)` relation. Keeping the exact replay and the
+physical operator separate prevents the former from being graded as atomic
+physics. The two elastic channels and the evaluated higher atomic state remain
+open; the complete raw implementation contains 46 volume features.

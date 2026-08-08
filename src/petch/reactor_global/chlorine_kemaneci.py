@@ -1,4 +1,4 @@
-"""Kemaneci 2014 detailed-chlorine forward reaction replay.
+"""Kemaneci 2014 detailed-chlorine source-reproduction networks.
 
 This module reproduces the 36 non-elastic *forward* volume reactions printed
 in Table 4 of ``kemaneci-2014-chlorine-global``.  It deliberately omits the
@@ -14,9 +14,9 @@ records label 32 as a source defect instead of inventing a fifth molecular
 state.
 
 All electron fits fail outside the paper's declared ``0.5--10 eV`` domain.
-No electron-event energy is inferred from a fit exponent, so the returned
-network is particle/chemistry verification infrastructure and intentionally
-fails the electron-power ledger.
+No electron-event energy is inferred from a fit exponent.  The forward-only
+paper replay and the separate COMSOL nonelastic replay are particle/chemistry
+verification infrastructure and intentionally fail the electron-power ledger.
 """
 from __future__ import annotations
 
@@ -29,6 +29,7 @@ from .network import (
     ConstantRateCoefficient,
     ElectronAnalyticRateTerm,
     ElectronCompositeRateCoefficient,
+    ElectronDetailedBalanceRateCoefficient,
     GasTemperatureArrheniusRateCoefficient,
     Reaction,
     ReactionNetwork,
@@ -38,6 +39,10 @@ from .network import (
 _SOURCE = "kemaneci-2014-chlorine-global Table 4"
 _EVIDENCE = "published_compilation"
 _ELECTRON_UNITS = "m^3 s^-1; Te in eV; 0.5 <= Te <= 10"
+_COMSOL_SOURCE = (
+    "comsol-6.4 chlorine_global_model raw dmodel.xml; "
+    "Kemaneci 2014 implementation reproduction"
+)
 
 
 def _term(
@@ -58,14 +63,15 @@ def _term(
 
 
 def _electron_rate(
-        row: str, *terms: ElectronAnalyticRateTerm
+        row: str, *terms: ElectronAnalyticRateTerm,
+        source: str | None = None,
 ) -> ElectronCompositeRateCoefficient:
     return ElectronCompositeRateCoefficient(
         terms=terms,
         minimum_temperature_eV=0.5,
         maximum_temperature_eV=10.0,
         density_order=2.0,
-        source=f"{_SOURCE} reaction {row}",
+        source=source or f"{_SOURCE} reaction {row}",
         source_units=_ELECTRON_UNITS,
         evidence_kind=_EVIDENCE,
     )
@@ -328,5 +334,78 @@ def build_kemaneci_2014_forward_chlorine_network() -> ReactionNetwork:
 
     return ReactionNetwork(
         species=kemaneci_2014_chlorine_species(),
+        reactions=tuple(reactions),
+    )
+
+
+def build_kemaneci_2014_comsol_nonelastic_chlorine_network(
+) -> ReactionNetwork:
+    """Return the official COMSOL 6.4 model's 44 nonelastic reactions.
+
+    This is an implementation-reproduction mode, not an evaluated-physics
+    deck.  It intentionally preserves COMSOL's unit statistical-weight ratio,
+    its absolute Figure-10 atomic energies used as de-excitation gaps, and its
+    reaction-20 ``13.29 eV`` fit parameter.  Those choices are explicit so a
+    successful replay cannot be mistaken for independent physical validation.
+    """
+    forward_network = build_kemaneci_2014_forward_chlorine_network()
+    reactions = list(forward_network.reactions)
+
+    reaction20_index = next(
+        index for index, reaction in enumerate(reactions)
+        if reaction.name.startswith("k20_"))
+    paper_reaction20 = reactions[reaction20_index]
+    comsol_reaction20_rate = _electron_rate(
+        "20",
+        _term(3.17e-14, power=0.53, inverse=(-13.29,)),
+        source=f"{_COMSOL_SOURCE}; forward reaction 20",
+    )
+    reactions[reaction20_index] = Reaction(
+        name=paper_reaction20.name,
+        reactants=paper_reaction20.reactants,
+        products=paper_reaction20.products,
+        kinetic_orders=paper_reaction20.kinetic_orders,
+        rate_coefficient=comsol_reaction20_rate,
+        electron_energy_loss_eV=None,
+        source=f"{_COMSOL_SOURCE}; forward reaction 20",
+    )
+
+    forward_by_label = {
+        int(reaction.name[1:3]): reaction for reaction in reactions
+    }
+    reverse_rows = (
+        (10, "Cl2_v1_to_v0", 0.07),
+        (11, "Cl2_v2_to_v0", 0.14),
+        (12, "Cl2_v3_to_v0", 0.21),
+        (13, "Cl2_v2_to_v1", 0.07),
+        (14, "Cl2_v3_to_v2", 0.07),
+        (15, "Cl2_v3_to_v1", 0.14),
+        (17, "Cl_2P1_2_to_ground", 1.35),
+        (18, "Cl_1P5_2_to_ground", 10.17),
+    )
+    for label, name, gap_eV in reverse_rows:
+        forward = forward_by_label[label]
+        reactions.append(Reaction(
+            name=f"k{label:02d}r_{name}_comsol",
+            reactants=forward.products,
+            products=forward.reactants,
+            kinetic_orders=forward.products,
+            rate_coefficient=ElectronDetailedBalanceRateCoefficient(
+                forward_rate_coefficient=forward.rate_coefficient,
+                excitation_energy_eV=gap_eV,
+                lower_statistical_weight=1.0,
+                upper_statistical_weight=1.0,
+                source=(
+                    f"{_COMSOL_SOURCE}; reverse of reaction {label}; "
+                    "unit statistical-weight ratio"
+                ),
+                evidence_kind=_EVIDENCE,
+            ),
+            electron_energy_loss_eV=-gap_eV,
+            source=f"{_COMSOL_SOURCE}; reverse of reaction {label}",
+        ))
+
+    return ReactionNetwork(
+        species=forward_network.species,
         reactions=tuple(reactions),
     )

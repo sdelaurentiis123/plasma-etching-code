@@ -1090,6 +1090,92 @@ class ElectronCompositeRateCoefficient:
         return float(value)
 
 
+_DETAILED_BALANCE_FORWARD_TYPES = (
+    ConstantRateCoefficient,
+    ElectronArrheniusRateCoefficient,
+    ElectronInverseTemperaturePolynomialRateCoefficient,
+    ElectronBase10LogPolynomialRateCoefficient,
+    ElectronMaxwellianCrossSectionRateCoefficient,
+    ElectronTemperatureTabulatedRateCoefficient,
+    ElectronCompositeRateCoefficient,
+)
+
+
+@dataclass(frozen=True)
+class ElectronDetailedBalanceRateCoefficient:
+    """Maxwellian electron de-excitation coefficient from detailed balance.
+
+    For lower and upper target levels ``l`` and ``u`` separated by
+    ``delta_E``, equilibrium requires
+
+    ``k_ul = k_lu (g_l / g_u) exp(delta_E / Te)``.
+
+    The statistical weights and level gap are explicit because omitting either
+    can still reproduce a legacy implementation while violating the physical
+    Boltzmann population ratio.  The wrapped forward coefficient retains its
+    own temperature-domain checks and density order.
+    """
+
+    forward_rate_coefficient: object
+    excitation_energy_eV: float
+    lower_statistical_weight: float
+    upper_statistical_weight: float
+    source: str
+    evidence_kind: str = "derived"
+
+    def __post_init__(self):
+        values = np.asarray([
+            self.excitation_energy_eV,
+            self.lower_statistical_weight,
+            self.upper_statistical_weight,
+        ], dtype=float)
+        if (
+            not isinstance(
+                self.forward_rate_coefficient,
+                _DETAILED_BALANCE_FORWARD_TYPES,
+            )
+            or np.any(~np.isfinite(values))
+            or self.excitation_energy_eV <= 0.0
+            or self.lower_statistical_weight <= 0.0
+            or self.upper_statistical_weight <= 0.0
+            or not str(self.source).strip()
+            or self.evidence_kind not in _EVIDENCE_KINDS
+        ):
+            raise ValueError("invalid detailed-balance rate coefficient")
+        for name in (
+            "excitation_energy_eV",
+            "lower_statistical_weight",
+            "upper_statistical_weight",
+        ):
+            object.__setattr__(self, name, float(getattr(self, name)))
+
+    @property
+    def density_order(self) -> float:
+        return float(self.forward_rate_coefficient.density_order)
+
+    @property
+    def source_units(self) -> str:
+        return str(self.forward_rate_coefficient.source_units)
+
+    def coefficient_si(self, context: RateContext) -> float:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        forward = self.forward_rate_coefficient.coefficient_si(context)
+        factor = (
+            self.lower_statistical_weight
+            / self.upper_statistical_weight
+            * np.exp(
+                self.excitation_energy_eV
+                / context.electron_temperature_eV
+            )
+        )
+        value = forward * factor
+        if not np.isfinite(value) or value <= 0.0:
+            raise FloatingPointError(
+                "nonpositive or nonfinite detailed-balance coefficient")
+        return float(value)
+
+
 @dataclass(frozen=True)
 class GasTemperatureArrheniusRateCoefficient:
     """``A (Tg/Tref)^b exp(C/Tg)`` heavy-particle coefficient."""
@@ -1156,6 +1242,7 @@ _RATE_COEFFICIENT_TYPES = (
     ElectronMaxwellianCrossSectionRateCoefficient,
     ElectronTemperatureTabulatedRateCoefficient,
     ElectronCompositeRateCoefficient,
+    ElectronDetailedBalanceRateCoefficient,
     GasTemperatureArrheniusRateCoefficient,
 )
 
@@ -1181,6 +1268,7 @@ class Reaction:
         | ElectronMaxwellianCrossSectionRateCoefficient
         | ElectronTemperatureTabulatedRateCoefficient
         | ElectronCompositeRateCoefficient
+        | ElectronDetailedBalanceRateCoefficient
         | GasTemperatureArrheniusRateCoefficient
     )
     electron_energy_loss_eV: float | None

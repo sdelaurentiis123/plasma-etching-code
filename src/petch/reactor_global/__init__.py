@@ -25,6 +25,7 @@ from .chlorine import (
     lee_lieberman_chlorine_species,
 )
 from .chlorine_kemaneci import (
+    build_kemaneci_2014_comsol_nonelastic_chlorine_network,
     build_kemaneci_2014_forward_chlorine_network,
     kemaneci_2014_chlorine_species,
 )
@@ -125,6 +126,7 @@ from .network import (
     ElectronTemperatureTabulatedRateCoefficient,
     ElectronAnalyticRateTerm,
     ElectronCompositeRateCoefficient,
+    ElectronDetailedBalanceRateCoefficient,
     GasTemperatureArrheniusRateCoefficient,
     RateContext,
     Reaction,
@@ -228,6 +230,7 @@ __all__ = [
     "ElectronTemperatureTabulatedRateCoefficient",
     "ElectronAnalyticRateTerm",
     "ElectronCompositeRateCoefficient",
+    "ElectronDetailedBalanceRateCoefficient",
     "GasTemperatureArrheniusRateCoefficient",
     "ElectronDensityConditioningState",
     "ElectronTemperatureConditioningState",
@@ -277,6 +280,7 @@ __all__ = [
     "build_lee_lieberman_argon_volume_network",
     "build_hamilton_dissociation_chlorine_particle_network",
     "build_lee_lieberman_chlorine_particle_network",
+    "build_kemaneci_2014_comsol_nonelastic_chlorine_network",
     "build_kemaneci_2014_forward_chlorine_network",
     "chlorine_atom_mean_thermal_speed_m_s",
     "thermalized_chlorine_incident_velocity_state",

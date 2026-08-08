@@ -15,6 +15,7 @@ from petch.reactor_global import (
     ElectronTemperatureTabulatedRateCoefficient,
     ElectronAnalyticRateTerm,
     ElectronCompositeRateCoefficient,
+    ElectronDetailedBalanceRateCoefficient,
     GasTemperatureArrheniusRateCoefficient,
     RateContext,
     Reaction,
@@ -645,6 +646,53 @@ def test_composite_electron_fit_supports_inverse_and_log_gaussian_terms():
     assert coefficient.coefficient_si(
         RateContext(temperature)) == pytest.approx(
             expected, rel=3.0e-15, abs=0.0)
+
+
+def test_electron_detailed_balance_recovers_boltzmann_equilibrium():
+    forward = ElectronArrheniusRateCoefficient.from_cm3_per_s(
+        3.2e-8,
+        activation_eV=0.4,
+        temperature_power=-0.25,
+        source="manufactured excitation coefficient",
+    )
+    coefficient = ElectronDetailedBalanceRateCoefficient(
+        forward_rate_coefficient=forward,
+        excitation_energy_eV=0.109,
+        lower_statistical_weight=4.0,
+        upper_statistical_weight=2.0,
+        source="microscopic reversibility regression",
+    )
+    context = RateContext(2.3)
+    # Independent 50-digit evaluation of the complete reverse coefficient.
+    assert coefficient.coefficient_si(context) == pytest.approx(
+        4.579312925020376e-14, rel=3.0e-15, abs=0.0)
+
+    upper_to_lower_population = 0.5 * np.exp(-0.109 / 2.3)
+    forward_event_rate = forward.coefficient_si(context)
+    reverse_event_rate = (
+        upper_to_lower_population * coefficient.coefficient_si(context))
+    assert reverse_event_rate == pytest.approx(
+        forward_event_rate, rel=3.0e-15, abs=0.0)
+    assert coefficient.density_order == forward.density_order
+    assert coefficient.source_units == forward.source_units
+
+
+@pytest.mark.parametrize(
+    "gap,lower_weight,upper_weight",
+    [(0.0, 4.0, 2.0), (0.109, 0.0, 2.0), (0.109, 4.0, -2.0)],
+)
+def test_electron_detailed_balance_rejects_nonphysical_levels(
+        gap, lower_weight, upper_weight):
+    forward = ElectronArrheniusRateCoefficient.from_cm3_per_s(
+        1.0e-8, activation_eV=0.1, source="manufactured")
+    with pytest.raises(ValueError, match="invalid detailed-balance"):
+        ElectronDetailedBalanceRateCoefficient(
+            forward_rate_coefficient=forward,
+            excitation_energy_eV=gap,
+            lower_statistical_weight=lower_weight,
+            upper_statistical_weight=upper_weight,
+            source="manufactured",
+        )
 
 
 def test_gas_temperature_rate_requires_and_replays_declared_temperature():

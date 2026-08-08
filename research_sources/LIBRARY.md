@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 127 sources by topic
+## Index — 128 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -130,6 +130,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`raja-linne`](library/raja-linne.md) | Raja & Linne | not-fetched (DOI corrected from 1.1519941) |
 | [`stafford-2010-cl-wall`](library/stafford-2010-cl-wall.md) | Stafford et al., measured state-dependent Cl wall recombination | PRIMARY FULL TEXT + FIGURE 8 PIL-AUDITED AT 600 DPI |
 | [`stafford-2009-cl-wall`](library/stafford-2009-cl-wall.md) | Stafford et al., direct Cl recombination on plasma-conditioned stainless steel | PRIMARY FULL TEXT + FIGURES 8--10 VISUALLY AUDITED AT 450 DPI |
+| [`wang-2013-cl-fine-structure`](library/wang-2013-cl-fine-structure.md) | Wang et al., fine-structure-resolved e-Cl elastic, excitation, and superelastic cross sections | PRIMARY FULL TEXT READ ONLINE; NOT LOCALLY ARCHIVED |
 | [`wang-olthoff-1999-ion-flux`](library/wang-olthoff-1999-ion-flux.md) | Wang & Olthoff, absolute mass-resolved Cl2/Ar ion fluxes and IEDs | PRIMARY NIST FULL TEXT + FIGURE 9 PIL-AUDITED AT 600 DPI |
 
 ### Transport references and analytic benchmarks
@@ -238,7 +239,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Cl2 evaluated total-ionization cross section and unresolved `Cl2+`/`Cl+` branch | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 29-point 300-dpi-audited aggregate rate; no scalar uncertainty invented because source datasets disagree beyond combined uncertainty; cannot drive species-resolved sheath delivery |
 | Cl2 dissociative-attachment particle and incident-energy moments | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 42-point 500-dpi-audited Table 16 integrated only over its printed 0.05--11.8 eV support; `<sigma v>` and `<sigma v E>` remain separate, missing EEDF tails are exposed, and no complete reactor-rate claim is allowed |
 | Detailed chlorine electron-energy ledger topology and source-reproduction boundary | [`kemaneci-2014-chlorine-global`](library/kemaneci-2014-chlorine-global.md) | equations split chemical, wall, and elastic losses; Figure 10 gives an approximate 2.50 eV atomic asymptote, COMSOL separately uses 4 eV, and the evaluated 2.4793 eV threshold remains the physical authority |
-| Kemaneci detailed-chlorine forward reaction deck | [`kemaneci-2014-chlorine-global`](library/kemaneci-2014-chlorine-global.md) | 36 non-elastic forward reactions replayed exactly with ten heavy states plus electrons, atom/charge closure, and a strict 0.5--10 eV domain; printed 28--32 range quarantined as off-by-one, elastic/reverse channels remain open |
+| Kemaneci detailed-chlorine source-reproduction decks | [`kemaneci-2014-chlorine-global`](library/kemaneci-2014-chlorine-global.md), [`wang-2013-cl-fine-structure`](library/wang-2013-cl-fine-structure.md) | 36 primary-paper forward rows and a separate 44-row COMSOL nonelastic replay both close atoms/charge and enforce 0.5--10 eV; COMSOL's unit statistical weights and absolute atomic energies are quarantined, while the physical detailed-balance operator requires explicit weights and gaps |
 | Eight-state Cl2 neutral-dissociation rates and excitation-energy ledger | [`hamilton-2018-cl2-dissociation`](library/hamilton-2018-cl2-dissociation.md) | exact 50,000-point OPJ arrays reduced to bounded Maxwellian rates; 0.4443% maximum error against authors' supplied total; all reactions conserve `e + Cl2 -> e + 2Cl` |
 | Cl2 predictive electron-collision evidence boundary | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | measured/evaluated ionization, dissociation, and attachment can advance; legacy electronic-excitation rates remain uncertain because the review found no measurements and poor calculation agreement |
 | Chlorine electron-power fail-closed boundary | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | fitted rate exponents are not silently reinterpreted as physical event energies; Tables 4--5 and their primary cross-section sources must close the ledger |

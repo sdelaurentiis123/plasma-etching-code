@@ -3,6 +3,7 @@ import pytest
 
 from petch.reactor_global import (
     RateContext,
+    build_kemaneci_2014_comsol_nonelastic_chlorine_network,
     build_kemaneci_2014_forward_chlorine_network,
     kemaneci_2014_chlorine_species,
 )
@@ -124,3 +125,50 @@ def test_kemaneci_forward_replay_cannot_masquerade_as_power_model():
     with pytest.raises(ValueError, match="electron-energy ledger is incomplete"):
         network.electron_power_loss_density_W_m3(
             densities, RateContext(2.0, gas_temperature_K=600.0))
+
+
+def test_kemaneci_comsol_nonelastic_replay_is_explicitly_44_rows():
+    network = build_kemaneci_2014_comsol_nonelastic_chlorine_network()
+    assert len(network.reactions) == 44
+    assert sum("_comsol" in item.name for item in network.reactions) == 8
+    network.assert_closed_conservation()
+    assert not network.has_complete_electron_energy_ledger
+
+    context = RateContext(2.3, gas_temperature_K=600.0)
+    # COMSOL uses 13.29 in both ground- and fine-state atomic ionization fits;
+    # the primary paper prints 13.19 for row 20.
+    assert _coefficient(network, 20, context) == _coefficient(
+        network, 19, context)
+
+
+def test_kemaneci_comsol_reverse_rows_replay_raw_model_expressions():
+    network = build_kemaneci_2014_comsol_nonelastic_chlorine_network()
+    context = RateContext(2.3, gas_temperature_K=600.0)
+    reverse = {
+        int(item.name[1:3]): item for item in network.reactions
+        if "_comsol" in item.name
+    }
+    assert set(reverse) == {10, 11, 12, 13, 14, 15, 17, 18}
+
+    # Independent high-precision evaluations of the raw COMSOL kf*exp(dE/Te)
+    # expressions.  Literals prevent a copied sign or gap from self-passing.
+    expected = {
+        10: 4.5032358682758177e-14,
+        11: 1.8604247950516934e-17,
+        12: 5.713331032574398e-18,
+        13: 2.260188387782102e-16,
+        14: 2.260188387782102e-16,
+        15: 6.917410928737043e-17,
+        17: 2.3276134651034147e-14,
+        18: 2.311809726948781e-15,
+    }
+    for label, value in expected.items():
+        assert reverse[label].rate_coefficient.coefficient_si(
+            context) == pytest.approx(value, rel=5.0e-15, abs=0.0)
+
+    with pytest.raises(ValueError, match="published fit domain"):
+        reverse[10].rate_coefficient.coefficient_si(
+            RateContext(0.499, gas_temperature_K=600.0))
+
+    assert reverse[17].electron_energy_loss_eV == -1.35
+    assert reverse[18].electron_energy_loss_eV == -10.17

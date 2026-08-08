@@ -55,14 +55,35 @@ rung. `has_complete_electron_energy_ledger` is false and an electron-power
 request fails closed. It does not support a reactor prediction, wafer flux, or
 feature depth.
 
+## Official-implementation replay
+
+`build_kemaneci_2014_comsol_nonelastic_chlorine_network()` is a separate
+44-row replay of the raw COMSOL 6.4 implementation. It adds the eight explicit
+reverse expressions and selects COMSOL's reaction-20 `13.29 eV` fit parameter.
+All rows conserve atoms and charge and retain the `0.5--10 eV` forward-fit
+domain.
+
+This mode deliberately preserves two nonphysical implementation choices so
+they remain observable in regression tests:
+
+1. COMSOL multiplies each forward coefficient by `exp(deltaE/Te)` with a unit
+   statistical-weight ratio. A physical Maxwellian detailed-balance closure is
+   `(g_lower/g_upper) exp(deltaE/Te)`.
+2. COMSOL uses `1.35 eV` and `10.17 eV` as atomic excitation gaps even though
+   Figure 10 places ground Cl at `1.25 eV` on that same absolute ledger. The
+   physical fine-structure gap is `0.109 eV`, not `1.35 eV`.
+
+The exact replay is therefore code-verification evidence only. It cannot
+support an atomic-accuracy, electron-power, wafer-flux, or depth claim.
+
 ## Next gates
 
 1. Recover the exact elastic cross-section files used by the official
    implementation and compare them with the primary Griffin/Gregorio sources.
-2. Implement detailed-balance reverse rates from explicit degeneracies and
-   level energies, then reproduce the 44-reaction non-elastic source model.
-   The two elastic collision rows raise the complete volume-feature count to
-   46.
+2. Use the landed physical detailed-balance operator with evaluated level
+   energies and degeneracies. The COMSOL 44-row non-elastic reproduction is
+   complete, but its unit weights and atomic gaps are quarantined. The two
+   elastic collision rows raise the raw volume-feature count to 46.
 3. Add a separate physical/evaluated energy ledger; do not reuse Table-4 fit
    exponents as thresholds.
 4. Preregister published density/temperature boards before solving or grading
