@@ -1,6 +1,7 @@
 # Malyshev 1998 Lam Alliance chlorine reactor data
 
-This directory freezes the measured markers in Figures 3, 7, and 8 of Malyshev
+This directory freezes the measured markers in Figures 3, 7, 8, and 11 of
+Malyshev
 et al., *J. Appl. Phys.* **84**, 137--146 (1998), DOI
 `10.1063/1.368010`.
 
@@ -18,6 +19,14 @@ marker overlap are excluded. The article reports no uncertainty for these Te
 measurements, so only digitization resolution is tabulated; it must not be
 misrepresented as experimental uncertainty.
 
+Figure 11 adds 27 volume-averaged electron-density markers derived from
+Langmuir-probe analysis. The source converted measurements along a line 1.35
+cm above the wafer/chuck by assuming radial symmetry and an axial
+`sin(pi*h/gap)` distribution. The committed board therefore conditions or
+grades a volume-averaged plasma state; it is not a local sheath-edge density,
+wafer electron flux, or positive-ion flux. The lower-panel low-power marker
+pair is inseparable in the native raster and is omitted.
+
 Important boundaries:
 
 - TCP source power was measured into the matching network; it is not measured
@@ -30,6 +39,8 @@ Important boundaries:
 - These data validate reactor dissociation, not wafer flux or feature depth.
 - Figure 3 conditions the measured electron state; it does not validate
   absorbed power, an EEDF shape, wafer flux, or feature depth.
+- Figure 11 conditions the volume-averaged electron density; it does not
+  validate a local wafer density, sheath delivery, or feature depth.
 
 Replay the native-pixel extraction, checksum verification, CSV, manifest, and
 QA overlays with:
@@ -56,3 +67,12 @@ markers retain measured provenance; linear interpolation is opt-in, labeled
 `interpolated_measurement`, and limited to an unambiguous fixed-gap,
 fixed-pressure bracket. The provider refuses the visually distinct duplicate
 900 W markers at 6.5 cm and 1 mTorr instead of averaging them silently.
+
+Replay Figure 11 and generate its visual QA overlay with:
+
+```bash
+python scripts/digitize_malyshev_1998_lam_electron_density.py \
+  --source-pdf /path/to/137_1_online.pdf \
+  --overlay tmp/pdfs/malyshev_1998_figure11_overlay.png \
+  --write
+```

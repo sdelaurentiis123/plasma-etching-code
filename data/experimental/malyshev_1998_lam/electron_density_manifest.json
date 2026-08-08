@@ -1,0 +1,52 @@
+{
+  "manifest_id": "MALYSHEV-1998-LAM-ELECTRON-DENSITY-R1",
+  "source": {
+    "citation": "M. V. Malyshev, V. M. Donnelly, A. Kornblit, and N. A. Ciampa, Journal of Applied Physics 84, 137-146 (1998)",
+    "doi": "10.1063/1.368010",
+    "pdf_sha256": "569ab180bb8cab71dda0860e0350f03d24b391e084e19116fefb74f1c719789c",
+    "pdf_page": 8,
+    "figure": 11,
+    "native_image": {
+      "pdfimages_index_on_page": 0,
+      "size_px": [
+        872,
+        1097
+      ],
+      "one_bit_pixel_sha256": "b941d2ab8d77dfc8034541234cfde780fc4f958e2f83ccf7a802eb789d645cbb"
+    }
+  },
+  "measurement": {
+    "observable": "volume_average_electron_density_cm3",
+    "method": "Langmuir probe analysis reported elsewhere",
+    "reported_uncertainty": "not reported in this article",
+    "conversion": "measured along a line 1.35 cm above wafer/chuck; converted assuming radial symmetry and axial sin(pi*h/gap)"
+  },
+  "digitization": {
+    "marker_count": 27,
+    "method": "native one-bit figure raster; original-resolution human-vision marker reconciliation; PIL axis and point replay",
+    "horizontal_pixel_allowance": 2.0,
+    "vertical_pixel_allowance": 3.0,
+    "power_range_W": [
+      147.747,
+      898.91
+    ],
+    "electron_density_range_cm3": [
+      17405063300.0,
+      210443038000.0
+    ],
+    "csv_sha256": "0fe210a294866b5a8cc9f0f09011ab099458162e4c346db7d08c1f756cc5bd91"
+  },
+  "exclusions": {
+    "linear_lines": "fits/guides; never digitized as measurements",
+    "low_power_panel_b_overlap": "open-circle and filled-square identities merge in the one-bit raster and were omitted",
+    "unreported_pressure_series_panel_b": "0.5 and 1 mTorr are absent from panel b"
+  },
+  "use_boundary": {
+    "supports_measured_volume_average_ne_conditioning": true,
+    "supports_local_wafer_electron_density": false,
+    "supports_absorbed_power_validation": false,
+    "supports_wafer_flux_validation": false,
+    "supports_feature_depth_validation": false,
+    "interpolation_rule": "interpolate only within a fixed gap and pressure series; report interpolation separately from measurement"
+  }
+}

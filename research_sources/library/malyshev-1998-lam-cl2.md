@@ -12,7 +12,7 @@
 - **Local extraction:**
   `research_sources/thesis_extracts/malyshev_1998_lam_chlorine_dissociation.txt`
 - **Digitized data:** `data/experimental/malyshev_1998_lam/`
-- **Status:** PRIMARY FULL TEXT + FIGURES 3, 7--8 NATIVE-PIXEL PIL AUDIT
+- **Status:** PRIMARY FULL TEXT + FIGURES 3, 7--8, 11 NATIVE-PIXEL PIL AUDIT
 
 ## Claims table
 
@@ -28,14 +28,16 @@
 | M8 | In the paper's model, wall recombination probability was the sole adjusted parameter and `gamma_Cl = 0.035` gave the reported pressure dependence. | A source-model fit, not an independent constant. It is excluded from the reactor validation inputs; direct wall measurements supersede it. |
 | M9 | Figure 3 reports OES electron-temperature measurements versus TCP power for both 11 and 6.5 cm gaps; the article states Te rises roughly 20--30% between 20 and 900 W. The 11 cm values were reported in source ref. 3 and the 6.5 cm values were previously unpublished. | The 62 visible markers supply measured-Te conditioning across 0.5--20 mTorr. The article supplies no Te uncertainty here, TCP power is not absorbed power, and the assumed Maxwellian EEDF is not independently validated by this figure. |
 | M10 | The paper uses a 21.5 cm chamber radius, an 11 cm active-plasma gap giving 16.0 L, a 43,000 cm3 chamber volume, and effective `V/A` lengths of 3.6 cm (11 cm gap) and 2.5 cm (6.5 cm gap). | Requires distinct active-plasma and neutral-control volumes. The exact cylinders reproduce both quoted `V/A` values; a one-volume residence/source ledger is not a faithful Lam reproduction. |
+| M11 | Figure 11 reports volume-average electron densities derived from Langmuir-probe analysis. Measurements along a line 1.35 cm above the wafer/chuck were converted assuming radial symmetry and an axial `sin(pi*h/gap)` distribution. Reducing the gap decreases average electron density by about a factor of two. | The 27 resolved markers condition/grade the volume-average electron state. They are not local sheath-edge density or wafer flux; the article reports no density uncertainty and points to the probe analysis elsewhere. |
 
 ## Use decision
 
-The 62 clean Figure-3 markers condition the measured electron state, and the
-38 clean Figure 7--8 markers are the first Lam-equipment validation board for
-the native chlorine reactor. Together they separate the observed Te trend from
-the dissociation test. They do not measure absorbed power, species-resolved
-wafer flux, ion energy, or etched depth.
+The 62 clean Figure-3 markers condition measured electron temperature, the 27
+clean Figure-11 markers condition volume-averaged electron density, and the 38
+clean Figure 7--8 markers are the first Lam-equipment dissociation board for
+the native chlorine reactor. Together they separate observed electron state
+from the dissociation test. They do not measure absorbed power, species-
+resolved wafer flux, ion energy, or etched depth.
 
 The reactor model may either calibrate on a preregistered subset and grade the
 held-out conditions, or use independently measured boundaries and grade all

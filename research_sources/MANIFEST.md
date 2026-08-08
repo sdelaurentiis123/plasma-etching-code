@@ -56,13 +56,13 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
   `data/experimental/stafford_2010/`: 39 conditioned-wall chlorine
   recombination markers, with a 600-dpi human-vision/PIL audit and exact
   IUPAC PDF/render hashes.
-- Malyshev et al. 1998 Figures 3 and 7--8 are under
+- Malyshev et al. 1998 Figures 3, 7--8, and 11 are under
   `data/experimental/malyshev_1998_lam/`: 62 measured electron-temperature
-  markers and 38 measured Cl2-dissociation markers from a commercial Lam
-  Alliance reactor. The replays extract and checksum the publisher PDF's
-  native one-bit figure rasters before the PIL marker audits; fitted curves,
-  inseparable marker overlaps, and the documented dissociation anomaly are
-  excluded.
+  markers, 38 measured Cl2-dissociation markers, and 27 volume-averaged
+  electron-density markers from a commercial Lam Alliance reactor. The
+  replays extract and checksum the publisher PDF's native one-bit figure
+  rasters before the PIL marker audits; fitted curves, inseparable marker
+  overlaps, and the documented dissociation anomaly are excluded.
 - extract_mouth_profiles.py (regenerator)
 
 ## library/ — the internal literature library (START HERE)
