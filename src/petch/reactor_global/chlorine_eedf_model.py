@@ -70,6 +70,7 @@ class EEDFChlorineCondition:
     source_power: ReactorScalarInput
     absorbed_power: AbsorbedPowerEstimate
     reduced_field_bounds_Td: tuple[float, float]
+    source_frequency: ReactorScalarInput | None = None
 
     def __post_init__(self):
         from .geometry import CylindricalReactor
@@ -93,6 +94,11 @@ class EEDFChlorineCondition:
             or bounds[1] <= bounds[0]
         ):
             raise ValueError("invalid EEPF chlorine condition")
+        if self.source_frequency is not None and (
+            not isinstance(self.source_frequency, ReactorScalarInput)
+            or self.source_frequency.unit != "Hz"
+        ):
+            raise ValueError("source frequency must use the explicit unit Hz")
         for name, (state, unit) in required_units.items():
             if not isinstance(state, ReactorScalarInput):
                 raise TypeError(f"{name} must be a sourced reactor scalar")
@@ -119,6 +125,15 @@ class EEDFChlorineCondition:
         return float(
             self.absorbed_power.require_point_W()
             / self.neutral_control_volume.value
+        )
+
+    @property
+    def angular_field_frequency_over_density_m3_s(self) -> float:
+        if self.source_frequency is None:
+            return 0.0
+        return float(
+            2.0 * math.pi * self.source_frequency.value
+            / self.target_neutral_density_m3
         )
 
     def transport_condition(
@@ -348,12 +363,15 @@ class EEDFChlorineAbsorbedPowerModel:
             gas_temperature_K=condition.gas_temperature.value,
             target_mole_fractions=target_fractions,
             growth_model="temporal_growth",
+            angular_field_frequency_over_density_m3_s=(
+                condition.angular_field_frequency_over_density_m3_s),
         )
         electron_key = (
             reduced_field_Td,
             condition.gas_temperature.value,
             *(target_fractions[name] for name in targets),
             maximum_tail_population_fraction,
+            condition.angular_field_frequency_over_density_m3_s,
         )
         electron_solution = (
             None if electron_cache is None else electron_cache.get(electron_key)
@@ -607,9 +625,16 @@ class EEDFChlorineAbsorbedPowerModel:
             or not math.isfinite(max_residual)
             or max_residual > float(residual_tolerance)
         ):
+            dominant_balance = max(
+                ledger["balances"],
+                key=lambda name: abs(ledger["balances"][name]),
+            )
             raise RuntimeError(
                 "EEPF chlorine power solve failed conservation gate: "
                 f"success={result.success}, residual={max_residual}, "
+                f"dominant={dominant_balance}="
+                f"{ledger['balances'][dominant_balance]}, "
+                f"E/N={ledger['reduced_field_Td']} Td, "
                 f"message={result.message}"
             )
         densities = ledger["densities"]

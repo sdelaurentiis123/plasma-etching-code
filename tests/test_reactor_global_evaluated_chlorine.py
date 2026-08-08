@@ -16,6 +16,7 @@ from petch.reactor_global import (
     hamilton_2018_cl2_state_dissociation_reactions,
     lee_lieberman_chlorine_species,
     nist_cl2_dissociative_attachment_cross_section_support,
+    nist_hayes_atomic_chlorine_ionization_collision_process,
     nist_hayes_atomic_chlorine_ionization_rate,
     nist_molecular_chlorine_total_ionization_rate,
 )
@@ -63,6 +64,23 @@ def test_nist_hayes_table25_transcription_and_evidence():
         ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV)
     assert coefficient.relative_uncertainty == 0.14
     assert coefficient.evidence_kind == "measured"
+
+
+def test_nist_hayes_nonmaxwellian_row_enforces_physical_threshold():
+    process = nist_hayes_atomic_chlorine_ionization_collision_process()
+    assert process.kind == "IONIZATION"
+    assert process.target == "Cl"
+    assert process.product == "Cl+"
+    assert process.energy_loss_eV == ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV
+    assert process.electron_number_change == 1
+    threshold_index = process.electron_energy_eV.index(
+        ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV)
+    assert all(
+        value == 0.0
+        for value in process.cross_section_m2[:threshold_index + 1]
+    )
+    assert process.electron_energy_eV[-1] == 200.0
+    assert process.cross_section_m2[-1] == pytest.approx(2.63e-20)
 
 
 def test_nist_hayes_executable_table_matches_pixel_audited_csv():

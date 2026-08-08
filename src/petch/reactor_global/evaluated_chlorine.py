@@ -11,6 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from .chlorine import build_lee_lieberman_chlorine_particle_network
+from .electron_collision_deck import ElectronCollisionProcess
 from .network import (
     ElectronMaxwellianCrossSectionRateCoefficient,
     ElectronTabulatedCrossSectionSupport,
@@ -110,6 +111,63 @@ def nist_hayes_atomic_chlorine_ionization_rate(
         ),
         evidence_kind="measured",
         maximum_kernel_tail_fraction=maximum_kernel_tail_fraction,
+    )
+
+
+def nist_hayes_atomic_chlorine_ionization_collision_process(
+) -> ElectronCollisionProcess:
+    """Return Table-25 Cl ionization as a non-Maxwellian collision row.
+
+    The two printed sub-threshold values are retained by the tabulated
+    Maxwellian evidence object above for transcription fidelity. Here they
+    are set to zero and an exact zero is inserted at the NIST threshold so a
+    Boltzmann solve cannot create ions below the physical channel opening.
+    """
+    source_energies = _HAYES_ATOMIC_CHLORINE_IONIZATION_ENERGY_EV
+    source_cross_sections = tuple(
+        value * 1.0e-20
+        for value in _HAYES_ATOMIC_CHLORINE_IONIZATION_CROSS_SECTION_1E20_M2
+    )
+    energies = (
+        0.0,
+        *tuple(
+            energy for energy in source_energies
+            if energy < ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV
+        ),
+        ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
+        *tuple(
+            energy for energy in source_energies
+            if energy > ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV
+        ),
+    )
+    cross_sections = (
+        0.0,
+        *tuple(
+            0.0 for energy in source_energies
+            if energy < ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV
+        ),
+        0.0,
+        *tuple(
+            cross_section
+            for energy, cross_section in zip(
+                source_energies, source_cross_sections)
+            if energy > ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV
+        ),
+    )
+    return ElectronCollisionProcess(
+        kind="IONIZATION",
+        target="Cl",
+        product="Cl+",
+        electron_energy_eV=energies,
+        cross_section_m2=cross_sections,
+        energy_loss_eV=ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
+        electron_number_change=1,
+        comments=(
+            "Christophorou-Olthoff 1999 Table 25 Hayes measurements",
+            "NIST ASD physical threshold; sub-threshold table values zeroed",
+            "+/-14% absolute cross-section uncertainty",
+            "no reactor or feature fit",
+        ),
     )
 
 

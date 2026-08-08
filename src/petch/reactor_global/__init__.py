@@ -73,9 +73,13 @@ from .chlorine_eedf_model import (
     PositiveIonWallEnergyState,
 )
 from .chlorine_siglo_replay import (
+    COMSOL_64_ATOMIC_CL_MOMENTUM_SHA256,
+    DeclaredLogLinearWallExtrapolation,
     LEGACY_SIGLO_CL2_2013_SHA256,
+    LegacySigloComsolChlorineReplay,
     LegacySigloChlorineReplay,
     derive_legacy_siglo_cl2_replay,
+    load_legacy_siglo_comsol_chlorine_replay,
     load_legacy_siglo_cl2_replay,
 )
 from .chlorine_charged_transport import (
@@ -162,6 +166,7 @@ from .evaluated_chlorine import (
     hamilton_2018_cl2_state_dissociation_rates,
     hamilton_2018_cl2_state_dissociation_reactions,
     nist_cl2_dissociative_attachment_cross_section_support,
+    nist_hayes_atomic_chlorine_ionization_collision_process,
     nist_hayes_atomic_chlorine_ionization_rate,
     nist_molecular_chlorine_total_ionization_rate,
 )
@@ -310,6 +315,8 @@ __all__ = [
     "EEDFChlorineAbsorbedPowerModel",
     "EEDFChlorineCondition",
     "EEDFChlorineSolution",
+    "COMSOL_64_ATOMIC_CL_MOMENTUM_SHA256",
+    "DeclaredLogLinearWallExtrapolation",
     "FixedArgonTransportProvider",
     "FixedChlorineChargedTransportProvider",
     "FixedChlorineNeutralWallTransportProvider",
@@ -322,6 +329,7 @@ __all__ = [
     "ElectronCollisionHeavyMapping",
     "LeeLiebermanArgonGlobalModel",
     "LEGACY_SIGLO_CL2_2013_SHA256",
+    "LegacySigloComsolChlorineReplay",
     "LegacySigloChlorineReplay",
     "LeeEconomouChlorineChargedTransportProvider",
     "LeeLiebermanArgonTransportProvider",
@@ -381,6 +389,7 @@ __all__ = [
     "lee_lieberman_chlorine_species",
     "kemaneci_2014_chlorine_species",
     "load_bolsig_lxcat_file",
+    "load_legacy_siglo_comsol_chlorine_replay",
     "load_legacy_siglo_cl2_replay",
     "lymberopoulos_economou_1995_chlorine_diffusivity",
     "lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities",
@@ -391,6 +400,7 @@ __all__ = [
     "lee_lieberman_argon_ion_temperature_eV",
     "nist_argon_self_diffusion_m2_s",
     "nist_cl2_dissociative_attachment_cross_section_support",
+    "nist_hayes_atomic_chlorine_ionization_collision_process",
     "nist_hayes_atomic_chlorine_ionization_rate",
     "nist_molecular_chlorine_total_ionization_rate",
     "normalize_eepf",

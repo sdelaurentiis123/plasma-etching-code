@@ -146,6 +146,54 @@ class ElectronEnergyGrid:
             raise ValueError("invalid linear electron-energy grid")
         return cls(tuple(np.linspace(minimum, maximum, int(cell_count) + 1)))
 
+    @classmethod
+    def piecewise_linear(
+        cls,
+        breakpoints_eV: tuple[float, ...],
+        cells_per_segment: tuple[int, ...],
+        *,
+        inserted_boundaries_eV: tuple[float, ...] = (),
+    ) -> "ElectronEnergyGrid":
+        """Build a fixed nonuniform grid with exact physical boundaries.
+
+        Each consecutive breakpoint pair is divided linearly by its declared
+        cell count. Additional boundaries, such as collision thresholds, are
+        inserted exactly without perturbing the surrounding fixed topology.
+        """
+        breakpoints = tuple(float(value) for value in breakpoints_eV)
+        raw_counts = tuple(cells_per_segment)
+        counts = tuple(int(value) for value in raw_counts)
+        inserted = tuple(float(value) for value in inserted_boundaries_eV)
+        if (
+            len(breakpoints) < 2
+            or len(counts) != len(breakpoints) - 1
+            or any(not math.isfinite(value) for value in breakpoints)
+            or breakpoints[0] < 0.0
+            or any(
+                right <= left
+                for left, right in zip(breakpoints, breakpoints[1:])
+            )
+            or any(value < 1 for value in counts)
+            or any(raw != converted for raw, converted in zip(
+                raw_counts, counts))
+            or any(not math.isfinite(value) for value in inserted)
+            or any(
+                value <= breakpoints[0] or value >= breakpoints[-1]
+                for value in inserted
+            )
+        ):
+            raise ValueError("invalid piecewise-linear electron-energy grid")
+        pieces = [
+            np.linspace(left, right, count + 1)
+            for left, right, count in zip(
+                breakpoints[:-1], breakpoints[1:], counts)
+        ]
+        boundaries = np.unique(np.concatenate((
+            *pieces,
+            np.asarray(inserted, dtype=float),
+        )))
+        return cls(tuple(boundaries))
+
     @property
     def cell_count(self) -> int:
         return len(self.boundaries_eV) - 1
@@ -808,7 +856,12 @@ K_BOLTZMANN_J_K = 1.380649e-23
 
 @dataclass(frozen=True)
 class TwoTermBoltzmannCondition:
-    """One local-field gas state for the deterministic two-term solve."""
+    """One local-field gas state for the deterministic two-term solve.
+
+    ``angular_field_frequency_over_density_m3_s`` is omega/N. Zero selects
+    the DC equation. A positive value selects the high-frequency two-term
+    heating operator with ``E/N`` interpreted as the RMS field.
+    """
 
     reduced_electric_field_Td: float
     gas_temperature_K: float
@@ -817,10 +870,13 @@ class TwoTermBoltzmannCondition:
     inelastic_momentum_closure: str = "isotropic_source_reproduction"
     ionization_energy_sharing: str = "equal_sharing"
     initial_electron_temperature_eV: float = 2.0
+    angular_field_frequency_over_density_m3_s: float = 0.0
 
     def __post_init__(self):
         field = float(self.reduced_electric_field_Td)
         temperature = float(self.gas_temperature_K)
+        reduced_frequency = float(
+            self.angular_field_frequency_over_density_m3_s)
         fractions = {
             str(name).strip(): float(value)
             for name, value in dict(self.target_mole_fractions).items()
@@ -830,6 +886,8 @@ class TwoTermBoltzmannCondition:
             or field < 0.0
             or not math.isfinite(temperature)
             or temperature <= 0.0
+            or not math.isfinite(reduced_frequency)
+            or reduced_frequency < 0.0
             or not fractions
             or any(not name for name in fractions)
             or any(
@@ -855,6 +913,11 @@ class TwoTermBoltzmannCondition:
             "initial_electron_temperature_eV",
             float(self.initial_electron_temperature_eV),
         )
+        object.__setattr__(
+            self,
+            "angular_field_frequency_over_density_m3_s",
+            reduced_frequency,
+        )
 
 
 @dataclass(frozen=True)
@@ -863,6 +926,7 @@ class TwoTermElectronTransportMoments:
 
     flux_reduced_mobility_m_inv_V_inv_s_inv: float
     scalar_reduced_diffusion_m_inv_s_inv: float
+    dissipative_reduced_mobility_m_inv_V_inv_s_inv: float
     reduced_field_power_gain_eV_m3_s: float
     mean_electron_speed_m_s: float
     isotropic_wall_flux_coefficient_m_s: float
@@ -877,6 +941,7 @@ class TwoTermElectronTransportMoments:
         values = np.asarray((
             self.flux_reduced_mobility_m_inv_V_inv_s_inv,
             self.scalar_reduced_diffusion_m_inv_s_inv,
+            self.dissipative_reduced_mobility_m_inv_V_inv_s_inv,
             self.reduced_field_power_gain_eV_m3_s,
             self.mean_electron_speed_m_s,
             self.isotropic_wall_flux_coefficient_m_s,
@@ -884,14 +949,15 @@ class TwoTermElectronTransportMoments:
         ), dtype=float)
         if (
             np.any(~np.isfinite(values))
-            or np.any(values[:2] <= 0.0)
-            or values[2] < 0.0
-            or np.any(values[3:] <= 0.0)
+            or np.any(values[:3] <= 0.0)
+            or values[3] < 0.0
+            or np.any(values[4:] <= 0.0)
         ):
             raise ValueError("invalid two-term electron transport moments")
         for name, value in zip((
             "flux_reduced_mobility_m_inv_V_inv_s_inv",
             "scalar_reduced_diffusion_m_inv_s_inv",
+            "dissipative_reduced_mobility_m_inv_V_inv_s_inv",
             "reduced_field_power_gain_eV_m3_s",
             "mean_electron_speed_m_s",
             "isotropic_wall_flux_coefficient_m_s",
@@ -909,6 +975,7 @@ class TwoTermBoltzmannSolution:
     transport_moments: TwoTermElectronTransportMoments
     reduced_electric_field_Td: float
     gas_temperature_K: float
+    angular_field_frequency_over_density_m3_s: float
     growth_model: str
     net_growth_rate_coefficient_m3_s: float
     iteration_count: int
@@ -1025,12 +1092,30 @@ class DeterministicTwoTermBoltzmannSolver:
         reduced_field = condition.reduced_electric_field_Td * 1.0e-21
         gas_thermal_energy_eV = (
             K_BOLTZMANN_J_K * condition.gas_temperature_K / E_CHARGE_C)
+        reduced_frequency = (
+            condition.angular_field_frequency_over_density_m3_s)
+        if reduced_frequency == 0.0:
+            # Preserve the established DC arithmetic path bit-for-bit.
+            field_heating = (
+                (reduced_field ** 2 / 3.0) * face_energy / sigma_tilde)
+        else:
+            equivalent_ac_cross_section = np.divide(
+                reduced_frequency,
+                ELECTRON_SPEED_PER_SQRT_EV_M_S * np.sqrt(face_energy),
+            )
+            field_heating_inverse_cross_section = np.divide(
+                sigma_tilde,
+                sigma_tilde ** 2 + equivalent_ac_cross_section ** 2,
+            )
+            field_heating = (
+                (reduced_field ** 2 / 3.0)
+                * face_energy * field_heating_inverse_cross_section)
         drift = (
             -ELECTRON_SPEED_PER_SQRT_EV_M_S
             * face_energy ** 2 * sigma_epsilon
         )
         diffusion = ELECTRON_SPEED_PER_SQRT_EV_M_S * (
-            (reduced_field ** 2 / 3.0) * face_energy / sigma_tilde
+            field_heating
             + gas_thermal_energy_eV
             * face_energy ** 2 * sigma_epsilon
         )
@@ -1175,6 +1260,29 @@ class DeterministicTwoTermBoltzmannSolver:
         reduced_mobility = -(
             ELECTRON_SPEED_PER_SQRT_EV_M_S / 3.0
         ) * simpson(mobility_integrand, x=boundaries)
+        reduced_frequency = (
+            condition.angular_field_frequency_over_density_m3_s)
+        if reduced_frequency == 0.0:
+            dissipative_reduced_mobility = reduced_mobility
+        else:
+            equivalent_ac_cross_section = np.zeros_like(boundaries)
+            equivalent_ac_cross_section[1:] = np.divide(
+                reduced_frequency,
+                ELECTRON_SPEED_PER_SQRT_EV_M_S * np.sqrt(boundaries[1:]),
+            )
+            dissipative_integrand = np.zeros_like(boundaries)
+            dissipative_integrand[1:] = (
+                derivative[1:]
+                * boundaries[1:]
+                * effective_boundary
+                / (
+                    effective_boundary ** 2
+                    + equivalent_ac_cross_section[1:] ** 2
+                )
+            )
+            dissipative_reduced_mobility = -(
+                ELECTRON_SPEED_PER_SQRT_EV_M_S / 3.0
+            ) * simpson(dissipative_integrand, x=boundaries)
 
         # The EEPF is piecewise constant in this solver.  Midpoint integration
         # is therefore the representation-consistent scalar-diffusion moment.
@@ -1199,8 +1307,10 @@ class DeterministicTwoTermBoltzmannSolver:
         return TwoTermElectronTransportMoments(
             flux_reduced_mobility_m_inv_V_inv_s_inv=reduced_mobility,
             scalar_reduced_diffusion_m_inv_s_inv=reduced_diffusion,
+            dissipative_reduced_mobility_m_inv_V_inv_s_inv=(
+                dissipative_reduced_mobility),
             reduced_field_power_gain_eV_m3_s=(
-                reduced_mobility * reduced_field_V_m2 ** 2
+                dissipative_reduced_mobility * reduced_field_V_m2 ** 2
             ),
             mean_electron_speed_m_s=mean_speed,
             isotropic_wall_flux_coefficient_m_s=0.25 * mean_speed,
@@ -1307,7 +1417,19 @@ class DeterministicTwoTermBoltzmannSolver:
         sample_count = min(max(33, int(math.sqrt(maximum_iterations)) * 4), 129)
         samples = np.linspace(lower, upper, sample_count)
         if lower < 0.0 < upper:
-            samples = np.unique(np.concatenate((samples, np.array([0.0]))))
+            # Attaching gases can place the physical eigen-root many orders
+            # of magnitude closer to zero than either pure attachment or
+            # ionization column bound. A linear scan can then miss the sign
+            # change entirely, especially on threshold-refined grids. Add a
+            # deterministic signed-log scan without weakening either bound.
+            logarithmic_fraction = np.geomspace(1.0e-12, 1.0, 49)
+            samples = np.unique(np.concatenate((
+                samples,
+                -abs(lower) * logarithmic_fraction,
+                np.array([0.0]),
+                upper * logarithmic_fraction,
+            )))
+            samples = samples[(samples >= lower) & (samples <= upper)]
         evaluated = []
         for growth in samples:
             try:
@@ -1541,6 +1663,8 @@ class DeterministicTwoTermBoltzmannSolver:
             transport_moments=transport_moments,
             reduced_electric_field_Td=condition.reduced_electric_field_Td,
             gas_temperature_K=condition.gas_temperature_K,
+            angular_field_frequency_over_density_m3_s=(
+                condition.angular_field_frequency_over_density_m3_s),
             growth_model=condition.growth_model,
             net_growth_rate_coefficient_m3_s=final_growth,
             iteration_count=iteration_count,

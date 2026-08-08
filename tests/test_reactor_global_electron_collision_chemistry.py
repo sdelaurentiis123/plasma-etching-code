@@ -115,8 +115,11 @@ def test_collision_chemistry_closes_growth_atoms_charge_and_power():
         "Cl-": 1.0e15,
     }
     state = chemistry.evaluate(solution, condition, densities)
-    assert state.electron_growth_closure_error_m3_s == pytest.approx(
-        0.0, abs=2.0e4)
+    # The two ledgers deliberately recompute the same physical moment by
+    # independent summation paths. Judge their closure relative to the
+    # O(1e21--1e22) event-rate scale rather than with an absolute tolerance
+    # smaller than a few floating-point ulps at that scale.
+    assert state.relative_electron_growth_closure < 5.0e-15
     assert state.species_sources_m3_s["e"] > 0.0
     assert state.species_sources_m3_s["Cl2+"] > 0.0
     assert state.species_sources_m3_s["Cl-"] > 0.0

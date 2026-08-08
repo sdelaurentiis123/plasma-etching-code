@@ -63,6 +63,53 @@ def test_fixed_grid_carries_exact_piecewise_constant_eepf_weights():
         ElectronEnergyGrid((0.0, 1.0, 1.0))
 
 
+def test_piecewise_grid_resolves_inserted_collision_threshold_exactly():
+    grid = ElectronEnergyGrid.piecewise_linear(
+        (0.0, 0.5, 5.0),
+        (10, 9),
+        inserted_boundaries_eV=(0.069, 0.139, 0.208),
+    )
+    assert grid.boundaries[0] == 0.0
+    assert grid.boundaries[-1] == 5.0
+    assert all(value in grid.boundaries for value in (0.069, 0.139, 0.208))
+    assert grid.cell_count == 22
+    with pytest.raises(ValueError, match="piecewise-linear"):
+        ElectronEnergyGrid.piecewise_linear((0.0, 1.0), (0,))
+
+
+def test_high_frequency_heating_operator_recovers_hagelaar_equation_25():
+    grid = ElectronEnergyGrid.linear(20.0, 40)
+    cross_section = 2.0e-20
+    solver = DeterministicTwoTermBoltzmannSolver(
+        grid, _deck(_constant_elastic(200.0, cross_section)))
+    common = dict(
+        reduced_electric_field_Td=100.0,
+        gas_temperature_K=300.0,
+        target_mole_fractions={"manufactured": 1.0},
+    )
+    dc = TwoTermBoltzmannCondition(**common)
+    reduced_frequency = 3.0e-12
+    ac = TwoTermBoltzmannCondition(
+        **common,
+        angular_field_frequency_over_density_m3_s=reduced_frequency,
+    )
+    zero_field = TwoTermBoltzmannCondition(
+        **{**common, "reduced_electric_field_Td": 0.0})
+    _, dc_diffusion = solver._transport_coefficients(dc, 0.0)
+    _, ac_diffusion = solver._transport_coefficients(ac, 0.0)
+    _, thermal_diffusion = solver._transport_coefficients(zero_field, 0.0)
+    face_energy = grid.boundaries[1:-1]
+    q = reduced_frequency / (
+        ELECTRON_SPEED_PER_SQRT_EV_M_S * np.sqrt(face_energy))
+    expected_suppression = cross_section ** 2 / (
+        cross_section ** 2 + q ** 2)
+    assert (ac_diffusion - thermal_diffusion) == pytest.approx(
+        (dc_diffusion - thermal_diffusion) * expected_suppression,
+        rel=2.0e-15,
+    )
+    assert np.all(ac_diffusion < dc_diffusion)
+
+
 def test_maxwellian_eepf_recovers_mean_energy_and_batch_first_shape():
     grid = ElectronEnergyGrid.linear(120.0, 4800)
     temperatures = np.array([1.0, 2.5, 5.0])

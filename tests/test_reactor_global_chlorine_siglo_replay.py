@@ -3,9 +3,14 @@ from dataclasses import replace
 import pytest
 
 from petch.reactor_global.chlorine_siglo_replay import (
+    DeclaredLogLinearWallExtrapolation,
     LEGACY_SIGLO_CL2_2013_SHA256,
     _EXPECTED_ROWS,
+    _derive_legacy_siglo_comsol_chlorine_replay,
     derive_legacy_siglo_cl2_replay,
+)
+from petch.reactor_global.chlorine_wall import (
+    stafford_2010_conditioned_wall_recombination_provider,
 )
 from petch.reactor_global.electron_collision_deck import (
     ElectronCollisionDeck,
@@ -83,3 +88,62 @@ def test_legacy_replay_refuses_signature_or_hash_drift():
     with pytest.raises(RuntimeError, match="raw hash mismatch"):
         derive_legacy_siglo_cl2_replay(replace(
             deck, payload_sha256="0" * 64))
+
+
+def test_declared_wall_extension_is_sensitivity_only_and_keeps_other_domains():
+    direct = stafford_2010_conditioned_wall_recombination_provider(
+        "anodized_aluminum")
+    extrapolated = DeclaredLogLinearWallExtrapolation(
+        provider=direct,
+        allowed_cl_to_cl2_ratio=(1.0e-5, 1.5),
+        source="declared source-replay sensitivity; no reactor fit",
+    )
+    boundary = extrapolated.predict(
+        cl_to_cl2_ratio=0.9,
+        pressure_Pa=2.0 * 0.1333223684,
+        icp_power_W=300.0,
+        gas_temperature_K=300.0,
+    )
+    assert boundary.evidence_kind == "sensitivity"
+    assert not boundary.supports_local_prediction
+    assert boundary.provenance["direct_marker_ratio_domain"] == (
+        0.105610, 0.779646)
+    assert boundary.provenance["coefficient_selection_target"] is None
+    with pytest.raises(ValueError, match="extrapolation interval"):
+        extrapolated.predict(
+            cl_to_cl2_ratio=1.6,
+            pressure_Pa=2.0 * 0.1333223684,
+            icp_power_W=300.0,
+            gas_temperature_K=300.0,
+        )
+    with pytest.raises(ValueError, match="source wall-provider domain"):
+        extrapolated.predict(
+            cl_to_cl2_ratio=0.9,
+            pressure_Pa=2.0 * 0.1333223684,
+            icp_power_W=300.0,
+            gas_temperature_K=333.0,
+        )
+
+
+def test_two_target_replay_adds_atomic_momentum_and_measured_ionization():
+    molecular = derive_legacy_siglo_cl2_replay(
+        _manufactured_topology_fixture(), maximum_energy_eV=200.0)
+    energies = tuple(25.0 * index / 27.0 for index in range(28))
+    replay = _derive_legacy_siglo_comsol_chlorine_replay(
+        molecular,
+        atomic_momentum_energy_eV=energies,
+        atomic_momentum_cross_section_m2=(2.0e-20,) * 28,
+        atomic_momentum_payload_sha256="a" * 64,
+    )
+    assert replay.derived_deck.targets == ("Cl", "Cl2")
+    assert replay.derived_deck.processes[-2].kind == "MOMENTUM"
+    assert replay.derived_deck.processes[-2].target == "Cl"
+    assert replay.derived_deck.processes[-1].kind == "IONIZATION"
+    assert replay.derived_deck.processes[-1].target == "Cl"
+    assert replay.collision_chemistry.mappings[-1].reaction_name == (
+        "atomic_chlorine_ionization")
+    assert replay.missing_reactor_channels == (
+        "electron_detachment_from_Clminus",
+        "tracked_vibrational_and_electronic_state_kinetics",
+    )
+    assert not replay.supports_reactor_state_prediction
