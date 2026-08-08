@@ -119,6 +119,46 @@ def test_isotropic_coulomb_board_is_bounded_negative_sensitivity():
     assert coulomb["supports_feature_depth"] is False
 
 
+def test_300W_conditioned_power_fraction_transfers_to_held_out_500W_density():
+    receipt = _load("malyshev_1998_power_fraction_transfer.json")
+    assert receipt["schema"] == (
+        "petch.malyshev_1998_power_fraction_transfer.v1")
+    assert receipt["collision_identity"][
+        "raw_collision_payload_sha256"] == LEGACY_SIGLO_CL2_2013_SHA256
+    assert receipt["collision_identity"][
+        "atomic_momentum_payload_sha256"] == (
+            COMSOL_64_ATOMIC_CL_MOMENTUM_SHA256)
+    assert receipt["collision_identity"][
+        "hamilton_state_cross_sections_sha256"] == (
+            HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256)
+    calibration = receipt["calibration"]
+    assert calibration["root_converged"] is True
+    assert calibration["fraction_search_bracket"] == [0.30, 0.50]
+    assert calibration["fitted_absorbed_fraction"] == pytest.approx(
+        0.3571645074783968, rel=2.0e-10)
+    assert calibration["held_out_500W_used_for_selection"] is False
+    assert calibration["temperature_used_for_selection"] is False
+    assert calibration["dissociation_used_for_selection"] is False
+    assert calibration["feature_depth_used_for_selection"] is False
+    assert receipt["transfer"]["formal_pass_threshold"] is None
+
+    training, held_out = receipt["rows"]
+    assert training["validation_role"] == "calibration_training"
+    assert held_out["validation_role"] == (
+        "held_out_reactor_diagnostic_forecast")
+    assert training["absorbed_fraction"] == held_out["absorbed_fraction"]
+    assert abs(training["electron_density_percent_error"]) < 1.0e-4
+    assert abs(held_out["electron_density_percent_error"]) < 2.0
+    assert held_out["temperature_proxy_percent_error"] > 7.0
+    assert held_out["relative_cl2_proxy_error_percentage_point"] < -18.0
+    assert held_out["total_positive_ion_axial_flux_m2_s"] == pytest.approx(
+        5.708360397494694e19, rel=2.0e-9)
+    assert receipt["supports_absorbed_power_measurement"] is False
+    assert receipt["supports_reactor_state_prediction"] is False
+    assert receipt["supports_wafer_flux"] is False
+    assert receipt["supports_feature_depth"] is False
+
+
 def test_detachment_timescale_receipt_is_low_leverage_and_reproducible():
     committed = _load("malyshev_1998_detachment_importance.json")
     assert committed == audit()

@@ -216,6 +216,15 @@ repository already contains 62 electron-temperature, 27 electron-density, and
 equipment-class model; it does not claim proprietary fidelity to every Lam
 platform.
 
+The first controlled transfer on that board is now landed. A constant
+source-to-plasma fraction fitted only to the 300 W volume-average electron
+density is `0.3571645`; frozen at 500 W it predicts electron density within
+`-1.01%`. The source supplies no density uncertainty and does not measure
+absorbed power, so this remains a reactor-diagnostic-conditioned closure rather
+than a formally validated loss model. Its independent temperature (`+7.70%`)
+and Cl2 (`-18.71` percentage points) residuals reject a power-only explanation
+and route the next rung to chemistry/wall/diagnostic and spatial closures.
+
 ## Gate 4 - charged transport, sheath, and wafer boundary
 
 Replace private-communication ion mobilities with public measured/evaluated

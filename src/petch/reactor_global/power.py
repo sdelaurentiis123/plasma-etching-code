@@ -159,6 +159,72 @@ class MeasuredAbsorbedPowerBoundary:
         )
 
 
+@dataclass(frozen=True)
+class ReactorDiagnosticConditionedPowerFraction:
+    """Constant source-to-plasma fraction inferred from a reactor diagnostic.
+
+    This boundary is useful for an out-of-sample equipment transfer, but it is
+    deliberately weaker than an absorbed-power measurement. A density or
+    temperature diagnostic can identify an effective fraction only through a
+    declared reactor model; it cannot turn the source setpoint into measured
+    plasma absorption.
+    """
+
+    absorbed_fraction: float
+    calibration_condition_id: str
+    calibration_observable: str
+    calibration_source: str
+    feature_depth_used: bool = False
+
+    def __post_init__(self):
+        fraction = float(self.absorbed_fraction)
+        if (
+            not np.isfinite(fraction)
+            or not 0.0 < fraction <= 1.0
+            or not str(self.calibration_condition_id).strip()
+            or not str(self.calibration_observable).strip()
+            or not str(self.calibration_source).strip()
+            or self.feature_depth_used is not False
+        ):
+            raise ValueError(
+                "invalid reactor-diagnostic-conditioned power fraction")
+        object.__setattr__(self, "absorbed_fraction", fraction)
+
+    def estimate(
+        self,
+        source_power_W: float,
+        *,
+        source: str,
+        source_evidence: str = "measured",
+    ) -> AbsorbedPowerEstimate:
+        power = float(source_power_W)
+        if not np.isfinite(power) or power <= 0.0 or not str(source).strip():
+            raise ValueError("invalid source-power setpoint")
+        absorbed = self.absorbed_fraction * power
+        return AbsorbedPowerEstimate(
+            lower_W=absorbed,
+            upper_W=absorbed,
+            point_W=absorbed,
+            boundary_kind=(
+                "reactor_diagnostic_conditioned_constant_power_fraction"),
+            measurement_source=source,
+            loss_source=(
+                "effective constant source-to-plasma fraction conditioned "
+                f"on {self.calibration_observable} at "
+                f"{self.calibration_condition_id}; {self.calibration_source}"
+            ),
+            measurement_evidence=_validate_evidence(source_evidence),
+            loss_evidence="sensitivity",
+            provenance={
+                "absorbed_fraction": self.absorbed_fraction,
+                "calibration_condition_id": self.calibration_condition_id,
+                "calibration_observable": self.calibration_observable,
+                "calibration_source": self.calibration_source,
+                "feature_depth_used": False,
+            },
+        )
+
+
 def _rf_delivery_estimate(
         *, delivered_power_W: float, hardware_loss_lower_W: float,
         hardware_loss_upper_W: float, hardware_loss_point_W: float | None,

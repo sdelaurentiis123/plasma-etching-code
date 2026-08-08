@@ -10,6 +10,7 @@ from petch.reactor_global import (
     LeeLiebermanArgonGlobalModel,
     MatchedRFPowerBoundary,
     MeasuredAbsorbedPowerBoundary,
+    ReactorDiagnosticConditionedPowerFraction,
     time_average_real_power_W,
 )
 
@@ -61,6 +62,37 @@ def test_direct_absorbed_power_measurement_preserves_uncertainty_and_evidence():
     assert solution.absorbed_power_boundary_kind == (
         "direct_absorbed_power_measurement")
     assert solution.supports_prediction
+
+
+def test_reactor_diagnostic_conditioned_fraction_never_claims_measured_power():
+    boundary = ReactorDiagnosticConditionedPowerFraction(
+        absorbed_fraction=0.357,
+        calibration_condition_id="lam-cl2-300W",
+        calibration_observable="volume-average electron density",
+        calibration_source="Malyshev 1998 Figure 11 training marker",
+    )
+    estimate = boundary.estimate(
+        500.0,
+        source="Malyshev reported forward TCP power into matching network",
+    )
+    assert estimate.point_W == pytest.approx(178.5)
+    assert estimate.lower_W == estimate.upper_W == estimate.point_W
+    assert estimate.boundary_kind == (
+        "reactor_diagnostic_conditioned_constant_power_fraction")
+    assert estimate.evidence_kind == "sensitivity"
+    assert not estimate.supports_prediction
+    assert estimate.provenance["feature_depth_used"] is False
+
+
+def test_reactor_diagnostic_fraction_rejects_depth_conditioning():
+    with pytest.raises(ValueError, match="invalid reactor-diagnostic"):
+        ReactorDiagnosticConditionedPowerFraction(
+            absorbed_fraction=0.357,
+            calibration_condition_id="bad-depth-fit",
+            calibration_observable="feature depth",
+            calibration_source="forbidden",
+            feature_depth_used=True,
+        )
 
 
 def test_matched_rf_power_does_not_become_absorbed_power_without_loss_closure():

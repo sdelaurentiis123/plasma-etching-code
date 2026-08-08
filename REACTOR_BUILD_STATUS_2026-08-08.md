@@ -103,6 +103,25 @@ the axial ion flux by roughly 1--3%. It is therefore retained as a physical
 density-coupling sensitivity, not selected as a correction and not promoted
 to wafer-flux or feature-depth support.
 
+## First reactor-diagnostic-conditioned equipment transfer
+
+A single constant source-to-plasma fraction was inferred from only the 300 W
+Malyshev volume-average electron-density marker over the pre-existing
+`0.30--0.50` sensitivity bracket. The deterministic inverse solve converged to
+`0.3571645`, or `107.15 W` effective absorbed power. With that fraction frozen,
+the untouched 500 W density is predicted within `-1.01%` and the global axial
+positive-ion flux is `5.708e19 m^-2 s^-1`.
+
+This is a successful power-scaling transfer but not a direct absorbed-power
+measurement: the paper reports forward power into the matching network and no
+density uncertainty. The independent 500 W residuals remain `+7.70%` for the
+mean-energy temperature proxy and `-18.71` percentage points for the Cl2
+proxy. The result therefore separates the next work cleanly: the constant
+equipment-power scale is adequate for the density trend, while chemistry,
+wall state, diagnostic forward models, and spatial wafer transfer remain
+open. No temperature, dissociation, held-out measurement, or feature depth
+selected the fraction, and every wafer/depth support flag remains false.
+
 ## Shortest defensible path to depth prediction
 
 1. Load and hash a user-downloaded Gregorio/SIGLO molecular-Cl2 deck from

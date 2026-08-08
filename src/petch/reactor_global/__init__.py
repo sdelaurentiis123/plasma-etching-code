@@ -229,6 +229,7 @@ from .power import (
     DirectDriveRFPowerBoundary,
     MatchedRFPowerBoundary,
     MeasuredAbsorbedPowerBoundary,
+    ReactorDiagnosticConditionedPowerFraction,
     time_average_real_power_W,
 )
 from .transport import (
@@ -345,6 +346,7 @@ __all__ = [
     "LeeLiebermanArgonTransportProvider",
     "MatchedRFPowerBoundary",
     "MeasuredAbsorbedPowerBoundary",
+    "ReactorDiagnosticConditionedPowerFraction",
     "MalyshevChlorineDissociationMarker",
     "MalyshevEq7TransportDiagnostic",
     "MalyshevEq7WallReturnInversion",
