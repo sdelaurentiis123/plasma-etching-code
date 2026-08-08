@@ -78,6 +78,11 @@ from .chlorine_neutral_provider import (
     ChlorineWallBoundaryProvider,
     StateDependentChlorineNeutralTransportProvider,
 )
+from .chlorine_swarm import (
+    GONZALEZ_MAGANA_2018_PURE_CL2_SWARM_CSV_SHA256,
+    ChlorineSwarmMeasurement,
+    GonzalezMaganaPureChlorineSwarmBoard,
+)
 from .chlorine_lam import (
     MALYSHEV_1998_ELECTRON_DENSITY_CSV_SHA256,
     MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256,
@@ -196,6 +201,7 @@ __all__ = [
     "MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256",
     "MALYSHEV_1998_LAM_CONTROL_VOLUME_M3",
     "MALYSHEV_1998_LAM_RADIUS_M",
+    "GONZALEZ_MAGANA_2018_PURE_CL2_SWARM_CSV_SHA256",
     "ARGON_4S_METASTABLE_ENERGY_EV",
     "ARGON_IONIZATION_ENERGY_EV",
     "ARGON_METASTABLE_IONIZATION_ENERGY_EV",
@@ -207,6 +213,7 @@ __all__ = [
     "CHLORINE_MOLECULE_MASS_AMU",
     "ChapmanEnskogBinaryDiffusivity",
     "ChlorineIncidentVelocityState",
+    "ChlorineSwarmMeasurement",
     "LogLinearChlorineWallRecombinationProvider",
     "ChlorineWallFlux",
     "ChlorineWallRecombinationBoundary",
@@ -236,6 +243,7 @@ __all__ = [
     "ElectronCompositeRateCoefficient",
     "ElectronDetailedBalanceRateCoefficient",
     "GasTemperatureArrheniusRateCoefficient",
+    "GonzalezMaganaPureChlorineSwarmBoard",
     "ElectronDensityConditioningState",
     "ElectronTemperatureConditioningState",
     "ElectronegativeEdgeFactors",

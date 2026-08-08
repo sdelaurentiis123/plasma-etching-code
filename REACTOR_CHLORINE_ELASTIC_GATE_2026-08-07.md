@@ -81,10 +81,20 @@ gates correctly refuse unsupported temperatures.
   data, declines to retune momentum transfer because those measurements are
   unreliable, and explicitly calls for new measurements.
 - Gonzalez-Magana--de Urquijo supplied those newer direct pulsed-Townsend
-  measurements in 2018 over `3--450 Td`. Kawaguchi et al. published an updated
-  cross-section set in 2020 and validated transport against measured data. The
-  full papers/curves are not locally archived, so neither source can yet land a
-  number or a pass.
+  measurements in 2018. The publisher PDF is now archived by hash and full-text
+  extract; Tables A1--A3 provide 52 pure-Cl2 drift, effective-ionization, and
+  longitudinal-diffusion markers, visually audited at 300 dpi and exposed as a
+  hash-locked executable board.
+- Kawaguchi et al.'s 2020 full paper is now audited. Their revised set keeps the
+  Gregorio momentum-transfer row below `1 eV` and modifies its shape above
+  `1 eV` against integrated Gote--Ehrhardt differential measurements. It also
+  scales Hamilton dissociative excitation by `2.5`, Rescigno Rydberg excitation
+  by `4.0`, low-energy attachment by `1.05`, and measured ionization by `0.85`.
+  It is therefore a useful swarm-calibrated provider candidate, not an
+  untouched fundamental deck.
+- The revised set tracks direct drift well and longitudinal diffusion through
+  about `330 Td`, then trends low. The full numeric cross-section arrays are
+  not supplied in the article, so a no-fit local replay remains open.
 - Griffin et al. and Wang et al. provide calculated atomic-Cl elastic and
   momentum-transfer data. Griffin validates method quality indirectly against
   Ar; Wang reports strong low-energy model dependence near the Ramsauer
@@ -95,15 +105,18 @@ gates correctly refuse unsupported temperatures.
 
 ## Next gates
 
-1. Archive and pixel-audit the full Kawaguchi 2020 and
-   Gonzalez-Magana--de Urquijo 2018 articles; grade the Gregorio and Kawaguchi
-   sets against the direct swarm markers without tuning.
-2. Audit the full Griffin 1995 paper against the COMSOL atomic-Cl table nodes
+1. Recover native Kawaguchi cross-section arrays from the authors or an
+   explicitly usable primary repository. Plot digitization is a declared lossy
+   fallback, not the preferred provider.
+2. Implement a two-term Boltzmann or independently checked Monte Carlo swarm
+   solver and grade candidate decks against the 52 direct markers without
+   tuning those markers.
+3. Audit the full Griffin 1995 paper against the COMSOL atomic-Cl table nodes
    and provenance.
-3. Recover author-supplied Wang fine-structure arrays rather than digitizing a
+4. Recover author-supplied Wang fine-structure arrays rather than digitizing a
    lossy plot if possible.
-4. Extend the high-energy support from primary/evaluated data or keep each
+5. Extend the high-energy support from primary/evaluated data or keep each
    temperature outside support fail-closed.
-5. Only then add the two elastic rows to the 44-row nonelastic COMSOL replay
+6. Only then add the two elastic rows to the 44-row nonelastic COMSOL replay
    and compare the source approximation with the exact stationary-target
    energy moment side by side.

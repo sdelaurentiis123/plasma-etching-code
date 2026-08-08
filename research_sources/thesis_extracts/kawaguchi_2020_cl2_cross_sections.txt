@@ -1,0 +1,420 @@
+Japanese Journal of
+Applied Physics
+
+
+
+REGULAR PAPER                                                                                     You may also like
+                                                                                                      - Measurement of electron swarm
+Electron collision cross section set of Cl2 gas and                                                     coefficients in chlorine and its mixtures
+                                                                                                        with nitrogen
+electron transport analysis in Cl2 gas and Cl2/N2                                                       O González-Magaña and J de Urquijo
+
+                                                                                                      - Electron collision cross section set for N2
+mixtures                                                                                                and electron transport in N2, N2/He, and
+                                                                                                        N2/Ar
+                                                                                                        S Kawaguchi, K Takahashi and K Satoh
+To cite this article: Satoru Kawaguchi et al 2020 Jpn. J. Appl. Phys. 59 SHHA09
+                                                                                                      - Calculated electron impact dissociation
+                                                                                                        cross sections for molecular chlorine (Cl2)
+                                                                                                        James R Hamilton, Jonathan Tennyson,
+                                                                                                        Jean-Paul Booth et al.
+
+View the article online for updates and enhancements.
+
+
+
+
+                              This content was downloaded from IP address 47.230.201.13 on 08/08/2026 at 16:36
+Japanese Journal of Applied Physics 59, SHHA09 (2020)                                                                         REGULAR PAPER
+https://doi.org/10.35848/1347-4065/ab72ce
+
+
+
+Electron collision cross section set of Cl2 gas and electron transport analysis in
+Cl2 gas and Cl2/N2 mixtures
+Satoru Kawaguchi1,2* , Kazuhiro Takahashi1 , and Kohki Satoh1
+1
+    Division of Information and Electronic Engineering, Graduate School of Muroran Institute of Technology, Muroran, Hokkaido, 050-8585, Japan
+2
+    Department of Systems Design Engineering, Faculty of Science and Technology, Seikei University, Musashino, Tokyo, 180-8633, Japan
+*
+E-mail: skawaguchi@st.seikei.ac.jp
+Received November 6, 2019; revised January 15, 2020; accepted February 4, 2020; published online March 9, 2020
+
+     A detailed and reliable electron collision cross section set of Cl2 gas is constructed. The present cross section set consists of one elastic
+     momentum transfer, three vibrational excitation, eight dissociative electronic excitation, two electronic excitation, one ion-pair formation, one
+     dissociative electron attachment, and four ionization cross sections. The electron drift velocity, longitudinal diffusion coefficient, ionization
+     coefficient, and electron attachment coefficient in both Cl2 gas and Cl2/N2 mixtures and the electron attachment rate coefficient in mixtures of N2
+     gas and a minute amount of Cl2 gas are calculated by Monte Carlo simulation using the present cross section set, and then the reliability of the
+     present cross section set is demonstrated by comparing calculated and measured electron transport coefficients and rate coefficients.
+     Furthermore, the rate coefficients for both elastic and inelastic electron collisions and the mean energy of electrons in Cl2 gas are calculated
+     from the present cross section set and are provided. © 2020 The Japan Society of Applied Physics
+
+
+
+                                                                                gas and Cl2/N2 mixtures have been measured by pulsed
+1. Introduction                                                                 experiment.16) These new measured transport coefﬁcients
+Discharge plasmas generated in gas mixtures containing                          allow us to construct a further reliable electron collision cross
+molecular chlorine (Cl2) are used to etch Si thin ﬁlms1) in                     section set of Cl2 gas. Furthermore, eight kinds of electronic
+manufacturing semiconductor devices, and recently such                          excitation cross sections have been calculated by R-matrix
+plasmas are applied to etch MgO,2) Ta and TaN,3) HfO2,4,5)                      method.17) By considering these electronic excitation cross
+and Bi4−xLaxTi3O126) thin ﬁlms. Etching characteristics of                      sections, we can construct a more detailed electron collision
+those thin ﬁlms are affected by the amounts of active species                   cross section set.
+generated in plasmas, which depend on operating conditions,                        In this work, we propose a reliable and detailed electron
+such as input power, Cl2 concentration of gas mixtures, and                     collision cross section set of Cl2 gas. The electron collision
+gas pressure in chamber; therefore, the relation between                        cross section set is constructed based on previously reported
+etching characteristics and operating conditions was investi-                   electron collision cross sections. The mean-arrival-time
+gated by experiment,2–6) and the effect of operation condi-                     electron drift velocity Wm, longitudinal diffusion coefﬁcient
+tions on the number densities of active species in plasmas and                  NDL, ionization coefﬁcient α/N, electron attachment coefﬁ-
+those ﬂuxes to the substrate of thin ﬁlms were investigated by                  cient η/N, and effective ionization coefﬁcient (α − η)/N in
+numerical simulation.7–9) Electron collisions with gas mole-                    Cl2 gas are calculated by Monte Carlo simulation using the
+cules are fundamental process to generate species constituting                  present cross section set, and the reliability of the present
+plasmas. For this reason, electron transport coefﬁcients and                    cross section set is demonstrated by comparing those
+rate coefﬁcients for reactions induced by electron collisions                   calculated electron transport coefﬁcients with measured
+are valuable information that should be helpful to optimize                     data. Furthermore, those coefﬁcients and electron attachment
+operating conditions, and those coefﬁcients are required to                     rate coefﬁcient in Cl2/N2 mixtures are calculated, and then
+model plasmas. Those coefﬁcients can be calculated by                           those calculated coefﬁcients are compared with measured
+electron transport analysis using electron collision cross                      data. The mean energy of electrons and rate coefﬁcients for
+sections, namely Boltzmann equation analysis and Monte                          both elastic and inelastic electron collisions in Cl2 gas, which
+Carlo simulation. Since the accuracy of the model depends on                    are valuable data for modeling Cl2 plasma, are calculated
+that of those coefﬁcients, a reliable and detailed electron                     from the present cross section set, and the reliability of the
+collision cross section set of Cl2 gas is required.                             calculated rate coefﬁcients are discussed.
+   Electron collision cross section sets of Cl2 gas were
+reported by Rogoff et al.10) Tuan and Jeon,11) and Gregório                     2. Present cross section set of Cl2 gas
+and Pitchford.12) They calculated the ionization coefﬁcient,                    Table I shows reactions between an electron and a Cl2
+electron attachment coefﬁcient, and effective ionization                        molecule for elastic momentum transfer (mom), vibrational
+coefﬁcient in Cl2 gas by using their cross section sets.                        excitation (vib1–vib3), dissociative electronic excitation
+Furthermore, Rogoff et al. and Gregório and Pitchford                           (dex1–dex8), electronic excitation (ex1–ex2), dissociative
+calculated both the characteristic energy and electron drift                    electron attachment (a1), ion-pair formation (ip), and ioniza-
+velocity in Cl2/He mixtures, and Gregório and Pitchford also                    tion (i1–i4) collisions considered in the present cross section
+calculated the electron attachment rate coefﬁcient in Cl2/N2                    set, together with their threshold energies. The electron
+mixtures. They demonstrated the reliability of their cross                      collision cross sections for those reactions are shown in
+section sets by comparing those calculated transport and rate                   Fig. 1. Here, Σqdex denotes the sum of the dissociative
+coefﬁcients with measured data.13–15)                                           electronic excitation cross sections shown in Fig. 2.
+   Recently, the electron drift velocity, longitudinal diffusion                   The elastic momentum transfer cross section is taken from
+coefﬁcient, and effective ionization coefﬁcient in both Cl2                     Gregório and Pitchford,12) and its shape above 1 eV is
+                                                                        SHHA09-1                        © 2020 The Japan Society of Applied Physics
+                                                    All rights, including for text and data mining, AI training, and similar technologies, are reserved.
+Jpn. J. Appl. Phys. 59, SHHA09 (2020)                                                                                          S. Kawaguchi et al.
+
+Table I. Reactions for collisions between an electron and a chlorine              where h is the Planck constant, c is the speed of light, and
+molecule considered in the present cross section set and their threshold          ñ = 559.72 cm−1 for Cl2, the threshold energy εν′ of the
+energies εth.
+                                                                                  vibrational excitation cross section for ν = 0 → ν = ν′ is
+Label       Reaction                                                εth (eV)      calculated by
+mom         Cl2 + e → Cl2 + e                                       —                                   en ¢ = En ¢ - E 0.                     (2 )
+vib1        Cl2 (ν = 0) + e → Cl2 (ν = 1) + e                       0.069
+vib2        Cl2 (ν = 0) + e → Cl2 (ν = 2) + e                       0.139            Hamilton et al.17) calculated the electronic excitation cross
+vib3        Cl2 (ν = 0) + e → Cl2 (ν = 3) + e                       0.208         sections for a 3Πu, A 1Πu, b 3Πg, c 3Σg, B 1Πg, C 1Δg, D 1Σg+,
+dex1        Cl2 (X 1Σg+) + e → Cl2 (a 3Πu) + e → 2Cl + e            3.252         and e 3Σu+ by R-matrix method. Those excitation states are
+dex2        Cl2 (X 1Σg+) + e → Cl2 (A 1Πu) + e → 2Cl + e            4.348
+dex3        Cl2 (X 1Σg+) + e → Cl2 (b 3Πg) + e → 2Cl + e            6.498
+                                                                                  known to be dissociative; therefore, those electronic excitation
+dex4        Cl2 (X 1Σg+) + e → Cl2 (c 3Σg−) + e → 2Cl + e           7.257         cross sections are used as dissociative electronic excitation
+dex5        Cl2 (X 1Σg+) + e → Cl2 (B 1Πg) + e → 2Cl + e            7.537         cross sections. Furthermore, Rescigno21) calculated the elec-
+dex6        Cl2 (X 1Σg+) + e → Cl2 (C 1Δg) + e → 2Cl + e            7.790         tronic excitation cross sections for Rydberg 1Πu and Rydberg
+dex7        Cl2 (X 1Σg+) + e → Cl2 (D 1Σg+) + e → 2Cl + e           8.228         1
+                                                                                   Σu states, and those cross sections are used as electronic
+dex8        Cl2 (X 1Σg+) + e → Cl2 (e 3Σu+) + e → 2Cl + e           9.219
+ex1         Cl2 (X 1Σg+) + e → Cl2 (Rydberg 1Πu) + e                10.84
+                                                                                  excitation cross sections. When those electronic excitation
+ex2         Cl2 (X 1Σg+) + e → Cl2 (Rydberg 1Σu) + e                10.96         cross sections are used without any modiﬁcation, the values
+a1          Cl2 + e → Cl‒ + Cl                                      —             of the ionization coefﬁcient deduced from those cross sections
+ip          Cl2 + e → Cl+ + Cl− + e                                 11.87         are higher than measured values of the ionization coefﬁcient;
+i1          Cl2 + e → Cl2+ + 2e                                     11.49         therefore, in order to reproduce the measured ionization
+i2          Cl2 + e → Cl+ + Cl + 2e                                 11.49
+                                                                                  coefﬁcient, the electronic excitation cross sections calculated
+i3          Cl2 + e → Cl22+ + 3e                                    35.5
+i4          Cl2 + e → Cl2+ + Cl + 3e                                43.5          by Hamilton et al. and those calculated by Rescigno are
+                                                                                  multiplied by 2.5 and 4.0, respectively. The threshold energies
+                                                                                  of the dissociative electronic excitation and electronic excita-
+modiﬁed to reproduce the elastic momentum transfer cross                          tion cross sections are taken from Refs. 17 and 21, respectively.
+section deduced by integrating elastic differential cross                            The dissociative electron attachment cross sections were
+sections measured by Gote and Ehrhardt.18)                                        theoretically calculated by Ruf et al.19) from 0 to 9 eV and
+   Ruf et al.19) calculated nine kinds of vibrational excitation                  were measured by Kurepa and Belić22) from 0 to 11 eV. The
+cross sections for ν = 0 → ν = 1, 2, and 3 through the 2Σu+,                      theoretically calculated dissociative electron attachment cross
+2
+  Πg, and 2Πu resonances. Here, ν is the state for vibrational                    section is used below 0.2 eV, but multiplied by 1.05 to
+excitation of a Cl2 molecule. The present vibrational excita-                     reproduce the measured electron attachment rate coefﬁcient
+tion cross sections for ν = 0 → ν = ν′ are deduced by adding                      in mixtures of N2 gas and a minute amount of Cl2 gas.
+together the calculated vibrational excitation cross sections                     Furthermore, the shape of the dissociative electron attach-
+regarding the same excited state ν′. Since the vibrational                        ment cross section above 0.2 eV is determined by using the
+energy of diatomic molecules is described as20)                                   measured dissociative electron attachment cross section.
+                            ⎛   1⎞                                                   The ion-pair formation cross section is taken from
+                       En = ⎜n + ⎟ hcn˜ ,                                  (1 )   Gregório and Pitchford,12) who determined it by following
+                            ⎝   2⎠
+
+
+
+
+                                          Fig. 1. (Color online) Electron collision cross section set of Cl2 gas.
+
+                                                                       SHHA09-2                         © 2020 The Japan Society of Applied Physics
+Jpn. J. Appl. Phys. 59, SHHA09 (2020)                                                                                         S. Kawaguchi et al.
+
+
+
+
+                              Fig. 2. (Color online) Dissociative electronic excitation cross sections of Cl2 gas.
+
+measured data reported by Kurepa and Belić.22) Its threshold
+energy is taken from Ref. 22.
+   The ionization cross sections follow those measured by
+Basner and Becker;23) however, the measured ionization
+cross sections are found to yield the values of the ionization
+coefﬁcient slightly higher than those measured. To reduce the
+values of the ionization coefﬁcient calculated from the cross
+section set, the magnitudes of the measured ionization cross
+sections are therefore reduced by 15%, which is within their
+experimental uncertainty. The threshold energies of the
+ionization cross sections are taken from Ref. 12.
+   Figure 3 shows the comparison between Σqdex and the total
+neutral dissociation cross section of Cl2 gas measured by
+Cosby and Helm.24) It is found that the sum of the
+dissociative electronic excitation cross sections in the present
+cross section set roughly reproduces the measured data. This
+indicates that the magnitudes of the present dissociative
+electronic excitation cross sections are reasonable.
+3. Simulation method and conditions
+The behaviour of electrons in Cl2 gas and Cl2/N2 mixtures
+                                                                          Fig. 3. (Color online) Total neutral dissociation cross section of Cl2 gas.
+under a uniform DC electric ﬁeld E is simulated by Monte
+Carlo method. The electron collision cross section set of N2
+gas proposed in our group25) is used. An isotropic electron
+scattering is assumed. Residual energy after an ionization                4. Results and discussion
+collision is shared between scattered and ejected electrons               4.1. Electron transport and rate coefficients in Cl2 gas
+uniformly. Thermal motion of gas molecules, which may                     Figure 4 shows values of the ionization coefﬁcient α/N in Cl2
+affect electron transport in low reduced electric ﬁeld E/N, are           gas calculated from the present cross section set as a function
+considered, and the number density of gas molecules N is set              of reduced electric ﬁeld E/N, together with those calculated
+to 3.535 × 1016 cm−3 (0 °C, 1 Torr) unless otherwise speci-               from the previously reported cross section sets. Values of α/N
+ﬁed. The mean-arrival-time drift velocity Wm, longitudinal                measured by steady-state Townsend experiment13) are also
+diffusion coefﬁcient NDL, ionization coefﬁcient α/N, electron             shown in Fig. 4. The values calculated from the present cross
+attachment coefﬁcient η/N, mean energy of electrons, and rate             section set agree well with the measured data. The values
+coefﬁcients for both elastic and inelastic collisions are                 calculated from the cross section set reported by Rogoff et al.
+calculated by sampling in the simulation. A method for the                agree with the measured data from 250 to 400 Td, but tend to
+simulation and sampling principles are described in Refs.                 be lower than the measured data below 250 Td and higher
+26–28 in detail.                                                          than the measured data above 400 Td. The values calculated
+                                                                 SHHA09-3                         © 2020 The Japan Society of Applied Physics
+Jpn. J. Appl. Phys. 59, SHHA09 (2020)                                                                                  S. Kawaguchi et al.
+
+
+
+
+                               Fig. 4. (Color online) Ionization coefﬁcient in Cl2 gas as a function of E/N.
+
+
+from the other reported cross section sets do not reproduce             those values tend to be lower than the measured data with
+the measured data.                                                      decreasing E/N values. In contrast, the values calculated from
+   Figure 5 shows values of the electron attachment coefﬁ-              Gregório and Pitchford’s set agree with the measured data
+cient η/N in Cl2 gas calculated from the present and                    below 300 Td, but tend to be higher than the measured data
+previously reported cross section sets as a function of E/N,            with increasing E/N values.
+together with those measured by steady-state Townsend                      Figure 6 shows values of the effective ionization coefﬁ-
+experiment.13) It is found that the values of η/N calculated            cient (α − η)/N in Cl2 gas calculated from the present and
+from Tuan and Jeon’s set well reproduce the measured data.              previously reported cross section sets as a function of E/N,
+The values calculated from the present cross section set and            together with those measured by steady-state Townsend
+the cross section set reported by Rogoff et al. agree with the          experiment13) and pulsed experiment.16) It is found that the
+measured data above 260 Td and 320 Td, respectively, but                values calculated from the present cross section set well
+
+
+
+
+                           Fig. 5. (Color online) Electron attachment coefﬁcient in Cl2 gas as a function of E/N.
+
+                                                               SHHA09-4                         © 2020 The Japan Society of Applied Physics
+Jpn. J. Appl. Phys. 59, SHHA09 (2020)                                                                                    S. Kawaguchi et al.
+
+
+
+
+                            Fig. 6. (Color online) Effective ionization coefﬁcient in Cl2 gas as a function of E/N.
+
+
+
+
+                                Fig. 7. (Color online) Electron drift velocity in Cl2 gas as a function of E/N.
+
+
+
+reproduce the measured data. A slight discrepancy between                with values of the electron drift velocity measured by pulsed
+the two measured data appears below 270 Td, and the values               experiment.16) The values calculated from the present cross
+calculated from the present cross section set is found to agree          section set and Tuan and Jeon’s set reproduce the measured
+with those measured by pulsed experiment below 270 Td.                   data; however, agreement between the values calculated from
+The values calculated from the previously reported cross                 the other cross section sets and the measured data is found to
+section sets do not necessarily agree with the measured data.            be poor.
+   Figure 7 shows values of the mean-arrival time drift                     Figure 8 shows values of the longitudinal diffusion
+velocity Wm calculated from the present and previously                   coefﬁcient NDL calculated from the present and previously
+reported cross section sets as a function of E/N, together               reported cross section sets as a function of E/N, together with
+                                                                SHHA09-5                          © 2020 The Japan Society of Applied Physics
+Jpn. J. Appl. Phys. 59, SHHA09 (2020)                                                                                             S. Kawaguchi et al.
+
+
+
+
+                             Fig. 8. (Color online) Longitudinal diffusion coefﬁcient in Cl2 gas as a function of E/N.
+
+
+
+
+      Fig. 9. (Color online) Rate coefﬁcients for elastic and inelastic collisions and mean energy of electrons in Cl2 gas as a function of E/N.
+
+
+
+those measured by pulsed experiment.16) The values calcu-                    sections are determined by following the measured and
+lated from the previously reported cross section sets do not                 theoretically calculated cross sections, it is difﬁcult to obtain
+agree with the measured data. The values calculated from the                 agreement between calculated and measured values on α/N,
+present cross section set agree with the measured data up to                 Wm, and NDL simultaneously; therefore, those shapes may
+330 Td and tend to be slightly lower than those data above                   need to be modiﬁed in disregard of several measured and
+330 Td. The elastic momentum transfer and inelastic cross                    theoretically calculated cross sections. However, when the
+sections affect the values of NDL and Wm, and those cross                    values of the effective ionization coefﬁcient is not zero, the
+sections except for the elastic momentum transfer and                        values of NDL measured by pulsed experiment are known to
+vibrational excitation cross sections drastically affect the                 be different from those of NDL measured by time-of-ﬂight
+values of α/N. Although the shapes of the present cross                      (TOF) experiment.29) New data on NDL measured by TOF
+                                                                    SHHA09-6                         © 2020 The Japan Society of Applied Physics
+Jpn. J. Appl. Phys. 59, SHHA09 (2020)                                                                                              S. Kawaguchi et al.
+
+
+
+
+              Fig. 10. (Color online) Rate coefﬁcients for dissociative electronic excitation collisions in Cl2 gas as a function of E/N.
+
+
+
+
+                       Fig. 11. (Color online) Electron attachment rate coefﬁcient in Cl2/N2 mixtures as a function of E/N.
+
+
+
+experiment, such as a double-shutter drift tube method,30) are                  Rate coefﬁcients for electron collisions are used to
+therefore desired, and no further modiﬁcation of the present                 simulate plasmas by ﬂuid and global model; therefore, values
+cross sections is carried out.                                               of the rate coefﬁcients for both elastic and inelastic collisions
+   It is found that the values of α/N, η/N, (α − η)/N, Wm, and               in Cl2 gas are calculated by using the present cross section set
+NDL in Cl2 gas calculated from the previously reported cross                 and are provided in Fig. 9, together with calculated values of
+section sets do not necessarily reproduce the measured data.                 the mean energy of electrons. Here, Σkdex denotes the sum of
+The reliability of the present cross section set is demonstrated             the rate coefﬁcients for dissociative electronic excitations,
+by comparing those calculated transport coefﬁcients with the                 and those rate coefﬁcients are shown in Fig. 10. No measured
+measured data.                                                               data on those rate coefﬁcients in Cl2 gas are available, and
+                                                                    SHHA09-7                          © 2020 The Japan Society of Applied Physics
+Jpn. J. Appl. Phys. 59, SHHA09 (2020)                                                                                               S. Kawaguchi et al.
+
+
+                                                                             therefore, comparison between measured and calculated rate
+                                                                             coefﬁcients in Cl2 gas is not carried out; however, it seems
+                                                                             reasonable to suppose that the calculated values of the rate
+                                                                             coefﬁcients are reliable. The rate coefﬁcient for lth electron
+                                                                             collision reaction kl can be deﬁned as
+                                                                                                 p      ¥
+                                                                             kl (E / N ) = 2p   ò0 ò0       ql (v ) vfPT (v , q , E / N ) v 2 sin qdvdq ,
+                                                                                                                                                        (3 )
+
+                                                                             where ql is the cross section for lth electron collision reaction,
+                                                                             v is the electron velocity, θ is the polar angle, and fPT is the
+                                                                             normalized electron velocity distribution function (EVDF)
+                                                                             for the pulsed Townsend experiment. The present electron
+                                                                             collision cross sections are determined by following theore-
+                                                                             tically calculated and measured cross sections. Furthermore,
+                                                                             considering that α/N, η/N, and (α − η)/N are deﬁned by the
+                                                                             EVDF for the steady-state Townsend experiment and that
+                                                                             both Wm and NDL are deﬁned by the spatiotemporal
+                                                                             development of the EVDF, the agreement between the
+                                                                             calculated and measured electron transport coefﬁcients
+                                                                             shown in Figs. 4–8 indicates that the EVDF deduced from
+                                                                             the present electron collision cross section set is reliable at
+                                                                             least from E/N = 100 to 760 Td. Consequently, the calculated
+                                                                             values of the rate coefﬁcients can probably be regarded as
+                                                                             reliable.
+                                                                             4.2. Electron transport and rate coefficients in Cl2/N2
+                                                                             mixtures
+                                                                             McCorkle et al.14) measured the electron attachment rate
+                                                                             coefﬁcient in mixtures of N2 gas and a minute amount of Cl2
+                                                                             gas. Figure 11 shows measured values of the electron
+                                                                             attachment rate coefﬁcient in Cl2/N2 mixtures, where
+                                                                             the number density of gas molecules is 6.48 × 1019 cm−3
+                                                                             and the number density of Cl2 gas molecules NCl2 is
+                                                                             0.4–2.3 × 1015 cm−3. The values of the electron attachment
+                                                                             coefﬁcient calculated from the present cross section set are
+                                                                             also shown in Fig. 11. Here, the gas temperature Tg is set to
+                                                                             298 K, N is set to 6.48 × 1019 cm−3, and NCl2 is set to
+                                                                             0.4 × 1015 cm−3 or 2.3 × 1015 cm−3 in the Monte Carlo
+                                                                             simulation. It is found that the calculated values well
+                                                                             reproduce the measured data. The electron attachment rate
+                                                                             coefﬁcient is determined by both the EVDF and the electron
+                                                                             attachment cross section, and the EVDF in such gas mixtures
+                                                                             is determined by electron collision cross sections of N2 gas.
+                                                                             The reliability of the electron collision cross sections for N2
+                                                                             gas used in the simulation was demonstrated by comparing
+                                                                             calculated Wm, α/N, and NDL in N2 with measured data;25)
+                                                                             therefore, the result shown in Fig. 11 indicates the reliability
+                                                                             of the present dissociative electron attachment cross section
+                                                                             of Cl2 gas.
+                                                                                Figure 12 shows values of (α – η)/N, Wm, and NDL in
+                                                                             Cl2/N2 mixtures calculated from the present cross section set
+                                                                             as functions of E/N. Those values measured by pulsed
+                                                                             experiment,16) steady-state Townsend experiment,13,31) and
+                                                                             double-shutter drift tube method32,33) are also shown in
+                                                                             Fig. 12. The calculated values roughly reproduce the
+Fig. 12. (Color online) Electron transport coefﬁcients in Cl2/N2 mixtures
+                                                                             measured data. This indicates that the present cross section
+as functions of E/N. (a) Electron drift velocity, (b) Effective ionization   set of Cl2 gas can be used to calculate electron transport
+coefﬁcient, (c) Longitudinal diffusion coefﬁcient.                           coefﬁcients in gas mixtures containing Cl2 gas properly.
+
+
+
+
+                                                                      SHHA09-8                       © 2020 The Japan Society of Applied Physics
+Jpn. J. Appl. Phys. 59, SHHA09 (2020)                                                                                                  S. Kawaguchi et al.
+
+
+                                                                                 6) D.-P. Kim, K.-T. Kim, C.-I. Kim, and A. M. Efremov, Thin Solid Films
+5. Conclusions                                                                      447–448, 343 (2004).
+                                                                                 7) C. B. Corr, E. Despiau-Pujo, P. Chabert, W. G. Graham, F. G. Marro, and
+The detailed and reliable electron collision cross section set                      D. B. Graves, J. Phys. D: Appl. Phys. 41, 185202 (2008).
+of Cl2 gas was constructed. The present cross section set                        8) S. Tinck, W. Boullart, and A. Bogaerts, J. Phys. D: Appl. Phys. 41, 065207
+includes eight kinds of dissociative electronic excitation cross                    (2008).
+sections, the sum of which reproduces the measured total                         9) E. G. Thorsteinsson and J. T. Gudmundsson, J. Phys. D: Appl. Phys. 43,
+                                                                                    115201 (2010).
+neutral dissociation cross section, one dissociative electron                   10) G. L. Rogoff, J. M. Kramber, and R. B. Piejak, IEEE Trans. Plasma Sci. 14,
+attachment cross section, one ion-pair formation cross sec-                         103 (1986).
+tion, and four ionization cross sections. The values of the                     11) D. A. Tuan and B.-H. Jeon, J. Phys. Soc. Jpn. 80, 084301 (2011).
+ionization coefﬁcient, electron attachment coefﬁcient, mean-                    12) J. Gregório and L. C. Pitchford, Plasma Sources Sci. Technol. 21, 032002
+                                                                                    (2012).
+arrival-time drift velocity, and longitudinal diffusion coefﬁ-                  13) S. E. Božin and C. C. Goodyear, Br. J. Appl. Phys. 18, 49 (1967).
+cient in both Cl2 and Cl2/N2 gas mixtures were calculated                       14) D. L. McCorkle, A. A. Christodoulides, and L. G. Christophorou, Chem.
+from the present cross section set by Monte Carlo simulation,                       Phys. Lett. 3, 109 (1984).
+                                                                                15) V. A. Bailey and R. H. Healey, Phil. Mag. 19, 725 (1935).
+and the reliability of the present cross section set was
+                                                                                16) O. González-Magaña and J. de Urquijo, Plasma Sources Sci. Technol. 27,
+demonstrated by comparing the calculated transport coefﬁ-                           06LT02 (2018).
+cients with the measured data. Furthermore, the electron                        17) J. R. Hamilton, J. Tennyson, J.-P. Booth, T. Gans, and A. R. Gibson, Plasma
+attachment rate coefﬁcient in mixtures of N2 gas and a minute                       Sources Sci. Technol. 27, 095008 (2018).
+                                                                                18) M. Gote and H. Ehrhardt, J. Phys. B: At. Mol. Opt. Phys. 28, 3957 (1995).
+amount of Cl2 gas was calculated, and then the reliability of
+                                                                                19) M.-W. Ruf, S. Barsotti, M. Braun, H. Hotop, and I. I. Fabrikant, J. Phys. B:
+the present dissociative electron attachment cross section was                      At. Mol. Opt. Phys. 37, 41 (2004).
+conﬁrmed by comparing the calculated values of the electron                     20) D. A. McQuarrie and J. D. Simon, Physical Chemistry (Tokyo Kagaku
+attachment rate coefﬁcient with the measured data.                                  Doujin, Tokyo, 2010) Japanese ed. Chap. 13.
+                                                                                21) T. N. Rescigno, Phys. Rev. A 50, 1382 (1994).
+ORCID iDs                                                                       22) M. V. Kurepa and D. S. Belić, J. Phys. B: At. Mol. Phys. 11, 3719 (1978).
+                                                                                23) R. Basner and K. Becker, New J. Phys. 6, 118 (2004).
+Satoru Kawaguchi https://orcid.org/0000-0003-3115-8719                          24) P. C. Cosby and H. Helm, “Dissociation rates of diatomic molecules,”
+Kazuhiro Takahashi    https://orcid.org/0000-0002-9358-                             Technical Report WL-TR-93-2004 Aero Propulsion and Power Directorate,
+0117                                                                                Wright Laboratory.
+                                                                                25) K. Satoh and S. Kawaguchi, Proc. 22nd Int. Conf. Gas Discharges and their
+                                                                                    Applications, 2018, vol. 2, p. 622.
+                                                                                26) S. Kawaguchi, K. Satoh, and H. Itoh, Eur. Phys. J. D 68, 100 (2014).
+                                                                                27) S. Kawaguchi, K. Satoh, and H. Itoh, Jpn. J. Appl. Phys. 54, 01AC01
+1) M. A. Lieberman and A. J. Lichtenberg, Principles of Plasma Discharges           (2015).
+   and Materials Processing (Wiley, New York, 2005), Chap. 15.                  28) S. Kawaguchi, H. Higuchi, H. Li, K. Denpoh, K. Takahashi, and K. Satoh,
+2) S.-M. Gu, D.-P. Kim, K.-T. Kim, and C.-I. Kim, Thins Solid Films 475, 313        Jpn. J. Appl. Phys. 58, 066003 (2019).
+   (2005).                                                                      29) Y. Terashita, K. Satoh, and H. Itoh, Electron. Commun. Jpn. 99, 13 (2016).
+3) M.-H. Shin, S. W. Na, N.-E. Lee, and J. H. Ahn, Thin Solid Films 506–507,    30) K. Yoshida, T. Ohshima, H. Ohuchi, Y. Kishimoto, and H. Tagashira, J.
+   230 (2006).                                                                      Phys. D: Appl. Phys. 29, 2447 (1996).
+4) M. Kim, A. Efremov, H. W. Lee, H.-H. Park, M. Hong, N. K. Min, and           31) S. C. Haydon and O. M. Williams, J. Phys. D: Appl. Phys. 9, 523 (1976).
+   K.-H. Kwon, Thin Solid Films 519, 6708 (2011).                               32) H. Hasegawa, H. Date, M. Shimozuma, K. Yoshida, and H. Tagashira, J.
+5) T. Maeda, H. Ito, R. Mitsuhashi, A. Horiuchi, T. Kawahara, A. Muto,              Phys. D: Appl. Phys. 29, 2664 (1996).
+   T. Sasaki, K. Torii, and H. Kitajima, Jpn. J. Appl. Phys. 43, 1864 (2004).   33) Y. Nakamura, J. Phys. D: Appl. Phys. 20, 933 (1987).
+
+
+
+
+                                                                        SHHA09-9                          © 2020 The Japan Society of Applied Physics
+

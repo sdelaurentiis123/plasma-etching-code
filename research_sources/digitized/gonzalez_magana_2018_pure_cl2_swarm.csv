@@ -1,0 +1,53 @@
+observation_id,observable,reduced_field_Td,value_si,si_unit,published_value,published_unit,relative_uncertainty_min,relative_uncertainty_max,source_table,source_pdf_page,source_print_page,measurement_method,gas_temperature_K_min,gas_temperature_K_max,pressure_Torr_min,pressure_Torr_max,supports_cross_section_validation,supports_reactor_state_prediction,supports_wafer_flux,supports_feature_depth
+gonzalez_2018_cl2_W_100Td,electron_drift_velocity,100,8.930000e+4,m s^-1,8.93,10^6 cm s^-1,0.02,0.02,Table A1,6,5,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_120Td,electron_drift_velocity,120,9.970000e+4,m s^-1,9.97,10^6 cm s^-1,0.02,0.02,Table A1,6,5,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_140Td,electron_drift_velocity,140,1.124000e+5,m s^-1,11.24,10^6 cm s^-1,0.02,0.02,Table A1,6,5,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_160Td,electron_drift_velocity,160,1.146000e+5,m s^-1,11.46,10^6 cm s^-1,0.02,0.02,Table A1,6,5,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_180Td,electron_drift_velocity,180,1.255000e+5,m s^-1,12.55,10^6 cm s^-1,0.02,0.02,Table A1,6,5,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_200Td,electron_drift_velocity,200,1.363000e+5,m s^-1,13.63,10^6 cm s^-1,0.02,0.02,Table A1,6,5,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_220Td,electron_drift_velocity,220,1.438000e+5,m s^-1,14.38,10^6 cm s^-1,0.02,0.02,Table A1,6,5,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_240Td,electron_drift_velocity,240,1.512000e+5,m s^-1,15.12,10^6 cm s^-1,0.02,0.02,Table A1,6,5,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_260Td,electron_drift_velocity,260,1.627000e+5,m s^-1,16.27,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_270Td,electron_drift_velocity,270,1.660000e+5,m s^-1,16.60,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_280Td,electron_drift_velocity,280,1.710000e+5,m s^-1,17.10,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_290Td,electron_drift_velocity,290,1.766000e+5,m s^-1,17.66,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_300Td,electron_drift_velocity,300,1.809000e+5,m s^-1,18.09,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_310Td,electron_drift_velocity,310,1.859000e+5,m s^-1,18.59,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_320Td,electron_drift_velocity,320,1.924000e+5,m s^-1,19.24,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_330Td,electron_drift_velocity,330,1.982000e+5,m s^-1,19.82,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_340Td,electron_drift_velocity,340,2.052000e+5,m s^-1,20.52,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_360Td,electron_drift_velocity,360,2.172000e+5,m s^-1,21.72,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_380Td,electron_drift_velocity,380,2.261000e+5,m s^-1,22.61,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_400Td,electron_drift_velocity,400,2.366000e+5,m s^-1,23.66,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_420Td,electron_drift_velocity,420,2.463000e+5,m s^-1,24.63,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_440Td,electron_drift_velocity,440,2.571000e+5,m s^-1,25.71,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_W_460Td,electron_drift_velocity,460,2.683000e+5,m s^-1,26.83,10^6 cm s^-1,0.02,0.02,Table A1,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_100Td,effective_ionization_coefficient,100,-2.540000e-21,m^2,-2.540,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_120Td,effective_ionization_coefficient,120,-2.380000e-21,m^2,-2.380,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_140Td,effective_ionization_coefficient,140,-2.260000e-21,m^2,-2.260,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_160Td,effective_ionization_coefficient,160,-2.180000e-21,m^2,-2.180,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_180Td,effective_ionization_coefficient,180,-1.940000e-21,m^2,-1.940,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_200Td,effective_ionization_coefficient,200,-1.560000e-21,m^2,-1.560,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_220Td,effective_ionization_coefficient,220,-1.260000e-21,m^2,-1.260,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_240Td,effective_ionization_coefficient,240,-8.470000e-22,m^2,-0.847,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_260Td,effective_ionization_coefficient,260,-4.520000e-22,m^2,-0.452,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_270Td,effective_ionization_coefficient,270,-1.890000e-22,m^2,-0.189,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_280Td,effective_ionization_coefficient,280,2.000000e-24,m^2,0.002,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_290Td,effective_ionization_coefficient,290,2.370000e-22,m^2,0.237,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_300Td,effective_ionization_coefficient,300,4.910000e-22,m^2,0.491,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_310Td,effective_ionization_coefficient,310,8.900000e-22,m^2,0.890,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_320Td,effective_ionization_coefficient,320,1.096000e-21,m^2,1.096,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_340Td,effective_ionization_coefficient,340,1.618000e-21,m^2,1.618,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_360Td,effective_ionization_coefficient,360,2.220000e-21,m^2,2.220,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_380Td,effective_ionization_coefficient,380,2.789000e-21,m^2,2.789,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_400Td,effective_ionization_coefficient,400,3.490000e-21,m^2,3.490,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_420Td,effective_ionization_coefficient,420,4.000000e-21,m^2,4.000,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_alpha_minus_eta_440Td,effective_ionization_coefficient,440,4.610000e-21,m^2,4.610,10^-17 cm^2,0.05,0.09,Table A2,7,6,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_NDL_240Td,density_normalized_longitudinal_diffusion,240,1.380000e+24,m^-1 s^-1,1.38,10^22 cm^-1 s^-1,0.10,0.15,Table A3,8,7,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_NDL_270Td,density_normalized_longitudinal_diffusion,270,1.590000e+24,m^-1 s^-1,1.59,10^22 cm^-1 s^-1,0.10,0.15,Table A3,8,7,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_NDL_300Td,density_normalized_longitudinal_diffusion,300,1.960000e+24,m^-1 s^-1,1.96,10^22 cm^-1 s^-1,0.10,0.15,Table A3,8,7,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_NDL_310Td,density_normalized_longitudinal_diffusion,310,1.870000e+24,m^-1 s^-1,1.87,10^22 cm^-1 s^-1,0.10,0.15,Table A3,8,7,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_NDL_320Td,density_normalized_longitudinal_diffusion,320,2.050000e+24,m^-1 s^-1,2.05,10^22 cm^-1 s^-1,0.10,0.15,Table A3,8,7,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_NDL_330Td,density_normalized_longitudinal_diffusion,330,1.980000e+24,m^-1 s^-1,1.98,10^22 cm^-1 s^-1,0.10,0.15,Table A3,8,7,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_NDL_340Td,density_normalized_longitudinal_diffusion,340,2.070000e+24,m^-1 s^-1,2.07,10^22 cm^-1 s^-1,0.10,0.15,Table A3,8,7,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false
+gonzalez_2018_cl2_NDL_360Td,density_normalized_longitudinal_diffusion,360,2.260000e+24,m^-1 s^-1,2.26,10^22 cm^-1 s^-1,0.10,0.15,Table A3,8,7,pulsed_townsend_transient,293,298,1.1,6.1,true,false,false,false

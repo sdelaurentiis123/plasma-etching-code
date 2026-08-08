@@ -1,0 +1,463 @@
+Plasma Sources
+Science and
+Technology
+
+
+LETTER                                                                                           You may also like
+                                                                                                     - Electron collision cross section set of O2
+Measurement of electron swarm coefficients in                                                          and electron transport coefficients in O2
+                                                                                                       and O2-Ar mixtures
+chlorine and its mixtures with nitrogen                                                                S Kawaguchi, Y Iwabe, K Takahashi et al.
+
+                                                                                                     - Scanning drift tube measurements and
+                                                                                                       kinetic studies of electron transport in CO
+To cite this article: O González-Magaña and J de Urquijo 2018 Plasma Sources Sci. Technol. 27          S Dujko, D Bošnjakovi, M Vass et al.
+06LT02
+                                                                                                     - Dominance of Cl2+ or Cl+ Ions in Time-
+                                                                                                       Modulated Inductively Coupled Cl2 Plasma
+                                                                                                       Investigated with Laser-Induced
+                                                                                                       Fluorescence Technique and Probe
+                                                                                                       Measurements
+View the article online for updates and enhancements.                                                  Shinya Kumagai Shinya Kumagai, Minoru
+                                                                                                       Sasaki Minoru Sasaki, Mitsumasa
+                                                                                                       Koyanagi Mitsumasa Koyanagi et al.
+
+
+
+
+                             This content was downloaded from IP address 47.230.201.13 on 08/08/2026 at 16:37
+                                                                                                               Plasma Sources Science and Technology
+
+Plasma Sources Sci. Technol. 27 (2018) 06LT02 (7pp)                                                          https://doi.org/10.1088/1361-6595/aac95e
+
+
+
+Letter
+
+Measurement of electron swarm coefﬁcients
+in chlorine and its mixtures with nitrogen
+O González-Magaña                  and J de Urquijo
+Instituto de Ciencias Físicas, Universidad Nacional Autónoma de México. PO Box 48-3, 62251,
+Cuernavaca, Morelos. México
+
+E-mail: olmogm@icf.unam.mx
+
+Received 23 April 2018, revised 16 May 2018
+Accepted for publication 1 June 2018
+Published 21 June 2018
+
+Abstract
+We have measured the electron drift velocity, density-normalized longitudinal diffusion and
+effective ionization coefﬁcients for electrons in Cl2 and Cl2–N2 mixtures over the combined E/N
+range from 3 to 450 Td, using a pulsed Townsend apparatus especially designed to withstand the
+action of corrosive gases. Our measurements for the electron drift velocity and the effective
+ionization coefﬁcient are compared with the only two previous measurements available, one of
+them indirect. In view of the present incompleteness and uncertainty in the electron collision
+cross section set for Cl2, Cl2–N2 mixtures with Cl2 contents from 1% to 80% have been
+measured in the aim of shedding more light into the completeness and reliability of the cross
+section set by testing the cross sections derived for pure Cl2 with those of the Cl2–N2 mixture for
+which the cross sections for N2 are well known.
+
+Keywords: chlorine, Cl2, electron transport, drift velocity, electron attachment, electron swarm
+coefﬁcients, longitudinal diffusion coefﬁcient
+
+
+1. Introduction                                                              To our knowledge, the only available indirect measurement
+                                                                       of the electron drift velocity, W, in Cl2 is that of Bailey and
+Molecular chlorine, Cl2, is a widely used gas in reactive              Healey, performed in 1935, using a diffusion apparatus con-
+plasma etching [1–6] and other industrial applications. In the         structed of brass and platinum [9]. The reactions of Cl2 with
+semiconductor industry, for instance, chlorine is used in the          these surfaces caused the initial pressure in the diffusion vessel
+processes of etching silicon surfaces. However, in spite of its        to decrease at a considerable rate. According to Gillardini [10],
+importance, there is hitherto a remarkable lack of direct              the measurements from Bailey’s method provide only the ratio
+measurements of transport coefﬁcients and collision sections           DT/μ|| (DT is the transverse diffusion coefﬁcient and μ|| is the
+for electrons in this gas. In fact, there has been little progress     electron mobility), and the drift velocity was derived from this
+since the thorough reviews of Gallagher et al [7] and Chris-
+                                                                       ratio when very special assumptions were made. Bailey and
+tophorou and Olthoff [8], in which they conclude that there is
+                                                                       Healy’s data for Cl2 have been questioned since their
+a strong need of cross sections and electron swarm coefﬁ-
+                                                                       drift velocities were not measured directly but were inferred
+cients such as electron drift velocities, diffusion coefﬁcients,
+ionization and attachment coefﬁcients, among others, as a              indirectly after measuring W in the mixtures of Cl2–CO2 and
+function of the density-normalized electric ﬁeld, E/N. This is         Cl2–He [7, 8]. These authors measured W values for the
+largely due to the experimental difﬁculties imposed by Cl2, a          volume mixtures of 20%Cl2-80%He, 20%Cl2-80%CO2, and
+highly corrosive and toxic gas. In fact, swarm and cross               40%Cl2-60%CO2, using initial Cl2 pressures of 0.5, 1, and
+section measurements in the halogen gases are still scarce             3 Torr, because of the considerable rate of pressure decrease in
+because of their high reactivity with the materials of some            the diffusion cell due to reactions of Cl2 with the vessel mate-
+vacuum systems. Our approach to solve this long-standing               rials, mainly brass and platinum. Thus these authors decided to
+problem is described in detail in section 2.                           only study the above mixtures. The W values for Cl2 were
+
+0963-0252/18/06LT02+07$33.00                                           1                                                         © 2018 IOP Publishing Ltd
+                                                        All rights, including for text and data mining, AI training, and similar technologies, are reserved.
+Plasma Sources Sci. Technol. 27 (2018) 06LT02
+
+derived indirectly from those measured for these mixtures, pre-
+vious knowledge of W for He and CO2.
+     Thirty-two years later, in 1967, Božin and Goodyear [11]
+used a steady-state swarm experiment to measure the density-
+normalized ionization, α/N, and electron attachment, η/N,
+coefﬁcients in pure Cl2 over the E/N range 210–450 Td
+(Townsend=10−16 V cm2), and calculated the density-
+normalized effective ionization coefﬁcient, (α−η)/N, up to
+750 Td. The pressure range used was 1–10 Torr (1 Torr=
+133.3 Pa). No particular dependence of these coefﬁcients with
+pressure was found over the entire E/N range covered.
+     It appears from rather recent compilations that other
+important data of electron interactions with Cl2 such as the
+momentum transfer cross sections have never been reported
+[12]; instead, their values have been calculated from the
+above mentioned swarm data using Boltzmann methods
+[13, 14]. On the one hand, these cross sections deserve
+revision and, on the other, newer and more reliable mea-
+surements are needed, as stated in [15].
+     This research is aimed at providing, for the ﬁrst time, a
+consistent set of electron swarm coefﬁcients in Cl2 and its
+mixtures with N2, namely W, (α−η)/N and the density-nor-
+malized longitudinal diffusion coefﬁcient, NDL. A special
+apparatus has been designed for these measurements. The
+Cl2–N2 mixture was studied with the purpose of validating
+and/or deriving cross sections provided that the cross section
+set for N2 is already well established.
+                                                                        Figure 1. Schematic diagram of the experimental setup. L: Nd-YAG
+                                                                        laser with frequency quadrupling (266 nm); M: Mesh; A: Anode;
+                                                                        K: Cathode; HV: High voltage regulated power supply; I/V:
+2. The apparatus                                                        Transimpedance (current-to-voltage) ampliﬁer; OSC: Oscilloscope:
+                                                                        PC: Control computer; P1: Turbomolecular pump system:
+Because of the strong reactivity and corrosiveness of chlorine,         P2: Rotary pump.
+a new pulsed Townsend apparatus has been built for this
+purpose, the layout of which is given in ﬁgure 1.
+     The vacuum vessel was made of glass and stainless steel            in the gaseous phase were injected into the vessel straight
+in order to withstand the corrosive action of chlorine on the           from their cylinders (Sigma Aldrich, 99.9% and Praxair,
+surfaces exposed to it. The vacuum chamber, with a volume               Grade 5.0 stated purity, respectively) through a needle valve.
+of 1.81 l, was made of glass with stainless steel ﬂanges                In order to prepare the Cl2–N2 mixtures accurately, both Cl2
+(Conﬂat). The stainless steel, parallel-plate electrodes, of            and N2 were mixed inside the chamber. Two capacitive
+8.6 cm in diameter and 2±0.003 cm separation, were ﬁrmly              pressure transducers (Agilent CDG-500) with full scales of
+held by PTFE (Teﬂon) pillars to the bottom ﬂange. The upper             100 and 1000 Torr were used, depending on the gas mixture
+ﬂange allocates a quartz window at its centre to allow the              ratio and total pressure. The temperature was measured with a
+passage of a 3 ns duration, 266 nm wavelength and 6 mm                  J-type thermocouple to an accuracy of 0.1 °C attached to the
+waist laser beam pulsed at 10 Hz repetition rate, (EKSPLA
+                                                                        glass vessel from the outside to prevent corrosion.
+NL301HT). At the centre of the anode there is a 1 cm dia-
+                                                                             For safety reasons, the removal of Cl2 or the Cl2–N2
+meter electroformed copper mesh (3 lines mm–1) to allow the
+                                                                        mixtures from the discharge vessel was performed by passing
+passage of the laser beam to strike the cathode from which the
+                                                                        them through a water trap, its exit connected to a rotary pump
+initial photoelectrons are liberated. Using a motorized laser
+                                                                        and to the fume exhaust pipework of the laboratory therefrom.
+beam attenuator, the beam energies were varied over the
+range 1–20 mJ, depending on E/N and gas density, N. The                 The PH of the water was frequently tested in order to check
+lateral ﬂange allowed the connection of the anode to a high             any worrisome presence of hydrogen chloride or hydrochloric
+voltage power supply.                                                   acid, always obtaining negative results. Besides, raising the
+     The pumping system was based on a turbomolecular                   pressure above 6.1 Torr would in turn mean a limited lifetime
+pump coupled to a dry pump (Pfeiffer, HiCube 80) that                   of the copper mesh, the only material other than glass,
+allowed vacuum base pressures of less than 10−6 Torr to be              stainless steel and PTFE used throughout. During the course
+reached readily. This pump was isolated from the discharge              of the measurements we did not notice any decrease of the
+vessel by a stainless steel butterﬂy valve in order to protect it       pressure in the discharge vessel due to the reactivity of
+from the corrosive action of chlorine. Chlorine and nitrogen            chlorine.
+
+                                                                    2
+Plasma Sources Sci. Technol. 27 (2018) 06LT02
+
+     The total displacement current between the electrodes
+was measured by a 50 kV A−1, 100 MHz, transimpedance
+ampliﬁer (Femto HCA-100M-50K-C) connected between the
+cathode and ground, and registered by a 200 MHz bandwidth
+oscilloscope. The experimental setup is fully automated. The
+swarm coefﬁcients reported in this paper were derived from
+an analysis of the measured electron transients according to a
+method described in detail in [16, 17].
+
+
+
+3. Measurements
+
+The overall E/N range covered for the measurements with
+pure Cl2 was 100–420 Td, at gas pressures from 1.1 to
+6.1 Torr. In general, three or more different gas pressures
+                                                                           Figure 2. The electron drift velocity, W, in Cl2 as a function of E/N.
+were used to obtain an average for a particular value of E/N,              For comparison, the data indirectly derived by Bailey and Healey [9]
+excepting the low and high E/N ends, where only pressures                  from measurements of W in Cl2–He and Cl2–CO2 mixtures.
+of 2.1 and 1.1 Torr could be used because of the high elec-
+tronegativity of Cl2 at the low E/N end and, at the high E/N
+end, where gas ampliﬁcation is large, measuring at low
+pressures is necessary to avoid gas breakdown. Lower pres-
+sures could not be used in order to avoid signiﬁcant space
+charge effects superposed on the external ﬁeld. For the
+Cl2–N2 mixtures, high pressures up to 60 Torr were used,
+depending on the amount of Cl2 in the mixture. The experi-
+ments were performed at room temperatures in the range
+293–298 K.
+     The uncertainty in the measurements of the electron drift
+velocity, W, the effective ionization coefﬁcient, (α−η)/N
+and the density-normalized longitudinal diffusion coefﬁcient
+for electrons, NDL, were typically ±2% for W, ±5%–9% for
+(α-η)/N, and±10%–15% for NDL.
+     Values for the swarm coefﬁcients measured in this work
+are tabulated in appendix, tables A1–A3 for W, (α-η)/N and
+NDL, respectively.
+                                                                           Figure 3. The density-normalized effective ionization coefﬁcients,
+                                                                           (α−η)/N, in Cl2 (+). For comparison, the measured values of Božin
+3.1. Drift velocity of electrons in Cl2                                    and Goodyear [11] (dotted line) are shown. The inset shows the
+                                                                           region of E/N around (α−η)/Ν≈0.
+The electron drift velocity in Cl2, shown in ﬁgure 2, was mea-
+sured at pressures between 1.1–6.1 Torr, and found to bear a               3.2. Density-normalized effective ionization coefficient,
+weak and rather unresolved dependence with pressure over this              (α−η)/N in Cl2
+range. The values shown correspond to an average as described
+above. The mean values of the drift velocities as a function of            The values of the density-normalized effective ionization
+E/N and mixture ratio are given in table A1 (appendix),                    coefﬁcient, (α-η)/N, for Cl2, measured at pressures ranging
+including those for Cl2. To our knowledge, the present direct              from 1.1 to 6.1 Torr are shown plotted in ﬁgure 3 as a
+measurements are the ﬁrst to be reported in the literature.                function of E/N. The only values of (α-η)/N with which we
+     For comparison, the data of Bailey and Healey, who used a             can compare ours are those measured by Božin and Goodyear
+diffusion apparatus [9] are also displayed in ﬁgure 2. It is of            [11], also plotted in this ﬁgure. Overall, our measurements are
+relevance to state that these values were derived indirectly from          in good agreement with those reported by Božin and Good-
+the measurements of W in the mixtures of Cl2–CO2 and Cl2–He,               year. A slightly different trend between both sets of data is
+using an argumentation similar to Blanc’s law [18], and relying            found below 350 Td, and shown in the inset of ﬁgure 3. For
+on previously known W values for He and CO2 in their parent                instance, the E/N value for which α-η=0, called the critical
+gas. As said above, the reviews [7] and [8] state clearly that these       ﬁeld strength, E/Ncrit, is 280 Td in our case, which is 4.6%
+values should be regarded as only approximate. Nevertheless,               smaller than that reported by Božin and Goodyear of 293 Td
+there is fair agreement in the trend of the curves to within 12% in        [11]. Our measurements could be extended further down to
+the overlap range 120<E/N<220 Td between Bailey and                    E/N=100 Td. At the low E/N end our measurements were
+Healy’s data and those measured in the present work.                       limited by strong attachment which precluded the observation
+
+                                                                       3
+Plasma Sources Sci. Technol. 27 (2018) 06LT02
+
+
+
+
+Figure 4. The electron drift velocity in Cl2, N2 (N2 M), and the Cl2–N2
+mixtures as a function of E/N. For the sake of clarity, the mixture           Figure 6. The density-normalised effective ionization coefﬁcient in
+curves have been multiplied by powers of 2. The measured curve for            the Cl2–N2 mixtures and for N2 as a function of E/N for low Cl2
+N2 (N2 M) and 1% Cl2–N2, and the dotted line corresponding to N2,             concentrations from 1%–5%. The curve for N2 was calculated
+calculated with Bolsig+ [19] and the SIGLO database [20] (N2 B),              from [19, 20].
+were both multiplied by 256.
+
+
+
+
+                                                                              Figure 7. The density-normalised longitudinal coefﬁcients for
+Figure 5. The density-normalised effective ionization coefﬁcient in           electrons, NDL, in Cl2 and Cl2–N2 mixtures. The NDL curve for pure
+the Cl2–N2 mixtures as a function of E/N for Cl2 concentrations               N2 was calculated from [19, 20]. The lines joining the points are
+from 10%–100%.                                                                drawn only to guide the eye. N2B and N2M are the calculated and
+                                                                              measured curves for N2, respectively.
+of the falling edge of the electron transient, thereby hindering
+the measurement of the drift velocity, which is essential for                 curve for pure N2 (N2 B) using the Boltzmann solver Bolsig+
+the determination of (α-η)/N [16, 17]. The upper E/N end                      and the SIGLO database [19, 20] is also plotted by the same
+was limited by the lowest gas pressure (1.1 Torr) and the                     factor. The agreement between this curve and that measured
+combined bandwidth of the measuring setup (≈100 MHz).                         in the present work is excellent for low E/N up to about
+                                                                              E/N=140 Td, the latter increasing slightly thereafter up to
+                                                                              E/N=260 Td, where the difference is 10%.
+3.3. Electron drift velocities in Cl2–N2 mixtures
+
+The electron drift velocities in the Cl2–N2 mixtures are plotted
+                                                                              3.4. Density-normalised effective ionization coefficients in
+in ﬁgure 4 as a function of E/N. Note in this ﬁgure that the
+                                                                              Cl2–N2 mixtures
+curves are multiplied by successive powers of two in order to
+see them clearly. Indeed, as the amount of Cl2 in the mixture                 The values of (α−η)/N for the Cl2–N2 mixtures containing
+increases, the drift velocity decreases towards the curve of                  10%–80% Cl2 are shown in ﬁgure 5 and, for the sake of
+pure Cl2. On the other hand, the measured curves for 1%                       clarity and discussion, the (α−η)/N values for low Cl2 con-
+Cl2–N2 and that for N2, multiplied by the same factor (256),                  tent from 1%–5% have been plotted in ﬁgure 6 together with
+depart from each other for E/N>70 Td. The calculated                        those calculated for N2 [19, 20]. From ﬁgure 5 one sees that
+
+                                                                          4
+Plasma Sources Sci. Technol. 27 (2018) 06LT02
+
+the mixture becomes progressively less electronegative as the             4. Discussion
+amount of Cl2 is reduced. Figure 6 shows how the 1% Cl2 and
+2% Cl2 curves approach that of N2, albeit keeping its slightly            We have designed successfully a Townsend apparatus with
+electronegative character at the lower E/N end. Another                   several special features to measure the drift velocity, the
+interesting feature is the marked deviation in trend of the 5%            effective ionization coefﬁcient and the longitudinal diffusion
+Cl2 curve for E/N>150 Td, merging eventually with those                 coefﬁcient from a single pulse shape in a highly corrosive gas
+for higher Cl2 concentrations. This may be due to the addi-               such as Cl2. In this respect, we believe that our data are self-
+tional contribution to ionization from Cl2, past the critical             consistent. The present apparatus can also be used to study
+ﬁeld strength, E/Ncrit, where α−η. There is an excellent                  negative ion drift and, after some changes, become part of a
+                                                                          photodetachment experiment.
+agreement between our measured N2 curve and that calcu-
+                                                                               To the best of our knowledge, the electron drift velocities
+lated using Bolsig+ [19] and the SIGLO database [20], also
+                                                                          and the longitudinal diffusion coefﬁcients are the ﬁrst being
+plotted in ﬁgure 6.
+                                                                          measured directly, and the effective ionization coefﬁcients
+                                                                          agree fairly well with the measured data of Božin and
+                                                                          Goodyear through most of the overlap range [11]. Addition-
+3.5. Density-normalised longitudinal diffusion coefficients for           ally, the Cl2–N2 mixtures have been studied over a wide range
+electrons in Cl2 and Cl2–N2                                               of combinations and gas pressures in the hope of shedding
+The longitudinal diffusion coefﬁcient, DL, is the most difﬁcult           more light into the incomplete and not so reliable present set
+parameter to evaluate since most of its inﬂuence in the pulse             of cross sections for electron interactions with gaseous
+shape relies on the fall of the electron avalanche. This in turn          molecular chlorine.
+demands as low gas densities as possible to be used since
+DL∼N−1. Figure 7 presents a set of measured values of the               Acknowledgments
+density-normalized longitudinal diffusion coefﬁcient, NDL, for
+Cl2 and Cl2–N2 mixtures. A comparison between the calculated              This work has been supported by Projects CONACyT—
+curve [19, 20] (N2B) for N2 and that measured shows that the              2400073 and PAPIIT-UNAM—IN108417. O González-
+latter curve follows the former fairly in shape, although there are       Magaña is grateful to CONACyT and DGAPA-UNAM for
+large discrepancies ranging between 54% for E/N=60 Td, 4%               the bestowment of postdoctoral grants to carry out this
+for E/N=140 Td and 58% for E/N=230 Td. It is interesting              research. Thanks are due to G Bustos, A Bustos and
+to see that the measured N2 curve (N2M) gets closer to that               H Hinojosa for their valuable technical assistance.
+calculated but it becomes almost ﬂat for 180<E/N<260 Td,
+while that calculated latter keeps growing for E/N>180 Td.              Appendix
+
+
+
+           Table A1. Electron drift velocities (in units of 106 cm s−1) in Cl2 N2 and Cl2–N2 mixtures as a function of E/N (Td).
+
+                        E/N       N2        1%     2%      5%     10%         20%     50%     70%      80%      Cl2
+                        20                 2.93    2.92
+                        23                 3.26    3.25
+                        26                 3.56    3.56
+                        30                 3.87    4.00
+                        33                 4.21    4.28
+                        36                 4.49    4.57
+                        40        5.09     4.78    4.92
+                        50        5.89     5.67    5.73    6.18
+                        60        6.85     6.50    6.53    7.05
+                        70        7.71     7.32    7.35    8.01
+                        80        8.64     7.99    8.41    8.90    9.01
+                        90        9.60     8.78    9.21    9.84
+                        100      10.52     9.69   10.04   10.90    9.75      10.65                              8.93
+                        120      12.55    11.52   11.78   12.83   11.76      11.72                              9.97
+                        140      14.64    13.11   13.54   14.77   13.68      13.44                             11.24
+                        160      16.59    14.82   15.75   16.81   15.42      15.04                             11.46
+                        180      18.53    16.43   17.73   18.70   16.88      16.60    15.51                    12.55
+                        200      20.55    16.92   19.66   20.39   18.40      18.23    16.34   15.46   15.07    13.63
+                        210                               21.34                       16.96   16.25   15.60
+                        220                       22.25           21.28      19.91    17.65   16.71   16.46    14.38
+                        230      23.33    19.62                                       18.33   17.23   16.93
+                        240                       24.13           22.22      21.50    19.26   17.87   17.42    15.12
+
+
+                                                                      5
+Plasma Sources Sci. Technol. 27 (2018) 06LT02
+
+                                                                Table A1. (Continued.)
+
+                        E/N       N2        1%         2%      5%       10%      20%      50%       70%     80%        Cl2
+                        250                                                               19.94    18.48    18.02
+                        260      26.06                26.06            23.93    23.11              19.15    18.66     16.27
+                        270                                                                        19.78    19.28     16.60
+                        280                           27.70            25.74    24.64              20.37    19.98     17.10
+                        290                                                                        21.05    20.35     17.66
+                        300                                            26.95    26.69              21.68    21.08     18.09
+                        310                                                                        22.23              18.59
+                        320                                            29.31                                          19.24
+                        330                                                                                           19.82
+                        340                                                                                           20.52
+                        360                                                                                           21.72
+                        380                                                                                           22.61
+                        400                                                                                           23.66
+                        420                                                                                           24.63
+                        440                                                                                           25.71
+                        460                                                                                           26.83
+
+
+
+                                                                                     −17
+Table A2. Density-normalized effective ionization coefﬁcient, (α-η)/N (in units of 10    cm2), in Cl2, N2 and Cl2–N2 mixtures as a function
+of E/N (in Td).
+              E/N        N2         1%           2%           5%       10%        20%        50%          70%        80%       Cl2
+              40      −0.016      −0.032        −0.075
+              50      −0.018      −0.023        −0.066      −0.105
+              60      −0.013      −0.022        −0.068      −0.076
+              70      −0.016      −0.018        −0.050      −0.096
+              80      −0.006      −0.021        −0.053      −0.066   −0.184
+              90      −0.011      −0.021        −0.054      −0.072
+              100     −0.011      −0.018        −0.035      −0.061   −0.201     −0.396                                        −2.540
+              120      0.006      −0.005        −0.024      −0.028   −0.271     −0.427                                        −2.380
+              140      0.055       0.015         0.010       0.028   −0.053     −0.292                                        −2.260
+              160      0.125       0.055         0.081       0.127   −0.005     −0.125                                        −2.180
+              180      0.217                     0.172       0.247    0.040      0.071     −0.353                             −1.940
+              200      0.360                     0.294       0.418    0.195      0.312     −0.048     −0.482        −0.906    −1.560
+              210                                            0.513                          0.153     −0.244        −0.640
+              220                                0.474                 0.562      0.611     0.353     −0.035        −0.325    −1.260
+              230       0.603                                                               0.579      0.171        −0.109
+              240                                0.674                            0.913     0.825      0.424         0.161    −0.847
+              250                                                                           1.049      0.645         0.397
+              260       0.915                    0.856                                                 0.908         0.666    −0.452
+              270                                                                                      1.202         0.893    −0.189
+              280                                                                                      1.472         1.208     0.002
+              290                                                                                      1.768         1.405     0.237
+              300                                                                                      2.026         1.689     0.491
+              310                                                                                      2.257                   0.890
+              320                                                                                                              1.096
+              340                                                                                                              1.618
+              360                                                                                                              2.220
+              380                                                                                                              2.789
+              400                                                                                                              3.490
+              420                                                                                                              4.000
+              440                                                                                                              4.610
+
+
+
+
+                                                                          6
+Plasma Sources Sci. Technol. 27 (2018) 06LT02
+
+Table A3. Density-normalised longitudinal diffusion coefﬁcients for electrons (in units of 1022 cm−1 s−1), in Cl2, N2 and Cl2–N2 mixtures as
+a function of E/N (in Td).
+                              E/N       N2      1%     2%     5%     10%     20%     50%     70%     80%     Cl2
+                              40       0.58     1.23   1.04
+                              45                1.27   0.99
+                              50       0.79     1.17   1.04   0.99
+                              55                1.22   1.10
+                              60       0.70     1.13   0.99   1.00
+                              65                1.18   1.05
+                              70       0.80     1.17   1.13
+                              80       1.42     1.24   1.25
+                              90       1.44     1.31   1.44   1.44
+                              100      1.50     1.48   1.63   1.61   1.26    1.17
+                              120      2.21     1.81          1.94           1.32
+                              140      2.81     2.07   2.17   2.26   1.84    1.59
+                              160      2.70            2.66   2.62   2.28    2.00
+                              180      2.81            2.85   3.04
+                              190                             3.12                   2.17
+                              200      2.90            3.05   3.22           2.58    2.31    1.81
+                              210                                                    2.41            1.62
+                              220                      3.36          3.22    2.73    2.40    2.11    1.72
+                              230      3.20                                          2.43    2.12    1.89
+                              240                      3.68                  3.02    2.63    2.20    1.91    1.38
+                              250                                                    2.75    2.28    2.02
+                              260                      3.57          3.28    3.09            2.34    2.07
+                              270                                                            2.38    2.23    1.59
+                              280                      3.58          3.35                            2.32
+                              290                                                                    2.37
+                              300                                    3.38    3.09                    2.47    1.96
+                              310                                                                            1.87
+                              320                                                                            2.05
+                              330                                                                            1.98
+                              340                                                                            2.07
+                              360                                                                            2.26
+
+
+ORCID iDs                                                                  [9] Bailey V A and Healey R H 1935 Phil. Mag. 19 725
+                                                                          [10] Gilardini A L 1972 Low energy electron collisions in gases
+O González-Magaña           https://orcid.org/0000-0001-                         (New York: Wiley)
+                                                                          [11] Božin S E and Goodyear C C 1967 Br. J. Appl. Phys. 18 49
+6722-2327                                                                 [12] Christophorou L G and Olthoff J K 2004 Fundamental
+                                                                                 Electron Interactions with Plasma Processing Gases (New
+References                                                                       York: Kluwer Academic/Plenum Publishers)
+                                                                          [13] Rogoff G L, Kramer J M and Piejak R B 1986 IEEE Trans.
+                                                                                 Plasma Science PS-14 103
+ [1] Matsutani A, Ishiwari F, Shoji Y, Kajitani T, Uehara T,              [14] Pinhao N and Chouki A 1997 Proc. 22 ICPIG vol 2 ed
+       Nakagawa M and Fukushima T 2016 Japan. J. Appl. Phys.                     K H Becker p 5 Contributed papers
+       55 06GL01                                                          [15] Gregório J and Pitchford L C 2012 Plasma Sources Sci.
+ [2] Mourey O, Petit-Etienne C, Cunge G, Darnon M,                               Technol. 21 032002
+       Despiau-Pujo E, Brichon P, Lattu-Romain E, Pons M and              [16] Hernández-Ávila J L, Basurto E and de. Urquijo J 2002
+       Joubert O 2016 J. Vac. Sci. Technol. A 34 041306                          J. Phys. D: Appl. Phys. 35 2264
+ [3] Richards A and Sawin H 1987 J. Appl. Phys. 62 799–807                [17] Basurto E, Hernández-Ávila J L, Juárez A M and de Urquijo J
+ [4] Petit-Etienne C et al 2009 J. Vac. Sci. Technol. B 29 051202                2013 J. Phys D: Appl. Phys. 46 355207
+ [5] Marinov D, Foucher M, Campbell E, Brouard M, Chabert P and           [18] Šašić O, Jovanović J, Lj P Z, de Urquijo J, Castrejón-Pita J R,
+       Booth J-P 2016 Plasma Sources Sci. Tech. 25 035019                        Hernández-Ávila J L and Basurto E 2005 Phys. Rev. E 71
+ [6] Kemaneci E, Carbone E A D, Booth J-P, Graef W, van Dijk J and               046408
+       Kroesen G 2014 Plasma Sources Sci. Tech. 23 045002                 [19] Hagelaar G J M and Pitchford L C 2005 Solving the
+ [7] Gallagher J W, Beaty E C, Dutton J and Pitchford L C 1983                   Boltzmann equation to obtain electron transport coefﬁcients
+       J. Phys. Chem. Ref. Data 12 109                                           and rate coefﬁcients for ﬂuid models Plasma Sources Sci.
+ [8] Christophorou L G and Olthoff J K 1999 J. Phys. Chem. Ref.                  Technol. 14 722
+       Data 28 131                                                        [20] SIGLO database (www.lxcat.net) Accessed on 15 April, 2018
+
+
+
+
+                                                                      7
+

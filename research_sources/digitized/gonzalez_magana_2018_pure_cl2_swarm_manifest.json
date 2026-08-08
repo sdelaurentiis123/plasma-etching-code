@@ -1,0 +1,73 @@
+{
+  "source": {
+    "bibkey": "gonzalez-magana-de-urquijo-2018-cl2",
+    "doi": "10.1088/1361-6595/aac95e",
+    "publisher_pdf_sha256": "fc42a2fede6094acc8344780a790ac6e0dae0d55cce2dcad6b8f5cae2a6dba5d",
+    "publisher_pdf_committed": false
+  },
+  "visual_audit": {
+    "status": "passed",
+    "inspection_date": "2026-08-08",
+    "render_resolution_dpi": 300,
+    "pages": [
+      {
+        "pdf_page": 6,
+        "print_page": 5,
+        "render_sha256": "3e9d7c6c26b1d2551ee4e08091c8d71511d5ab79ecbfb5248c92ab8104a46ae8"
+      },
+      {
+        "pdf_page": 7,
+        "print_page": 6,
+        "render_sha256": "d37c469236097421437f8e8f3ad42e83c4de0282f96726847c482288bbe614ff"
+      },
+      {
+        "pdf_page": 8,
+        "print_page": 7,
+        "render_sha256": "4cace83fa2e94ad78dd0f9f4ccd076b1ebe76331a06a513db4ffaae7ce801eed"
+      }
+    ],
+    "finding": "All 52 pure-Cl2 numeric cells were read from Tables A1-A3; signs, decimal precision, headings, and units were checked against the 300-dpi page renders."
+  },
+  "transcription": {
+    "method": "manual_native_table_transcription_with_pixel_audit",
+    "row_count": 52,
+    "observable_counts": {
+      "electron_drift_velocity": 23,
+      "effective_ionization_coefficient": 21,
+      "density_normalized_longitudinal_diffusion": 8
+    },
+    "csv_sha256": "a2bd033aeacaecb302a3fa7c3d3892b478a1ce119e0d7890dfaa4fd66b783d5c",
+    "si_conversions": {
+      "10^6 cm s^-1_to_m s^-1": "multiply by 1e4",
+      "10^-17 cm^2_to_m^2": "multiply by 1e-21",
+      "10^22 cm^-1 s^-1_to_m^-1 s^-1": "multiply by 1e24"
+    }
+  },
+  "measurement_uncertainty": {
+    "electron_drift_velocity_relative": [
+      0.02,
+      0.02
+    ],
+    "effective_ionization_coefficient_relative": [
+      0.05,
+      0.09
+    ],
+    "density_normalized_longitudinal_diffusion_relative": [
+      0.1,
+      0.15
+    ],
+    "semantics": "paper-wide typical ranges; no point-specific sigma is invented"
+  },
+  "source_conflicts_preserved": {
+    "pure_cl2_range": "body says 100-420 Td; Table A1 prints W through 460 Td",
+    "resolution": "all printed table markers are retained and the conflict is not silently repaired"
+  },
+  "use_boundary": {
+    "supports_electron_cross_section_validation": true,
+    "supports_reactor_state_prediction": false,
+    "supports_wafer_flux": false,
+    "supports_feature_depth": false,
+    "reason": "swarm transport constrains the electron-collision deck; it does not measure a plasma-reactor state or wafer boundary"
+  },
+  "rights": "Only derived table values and audit metadata are committed; the publisher PDF and rendered pages remain local."
+}
