@@ -24,6 +24,7 @@ from typing import Mapping
 
 import numpy as np
 from scipy import sparse
+from scipy.optimize import brentq
 from scipy.sparse.linalg import spsolve
 
 from .electron_collision_deck import ElectronCollisionProcess
@@ -965,17 +966,8 @@ class DeterministicTwoTermBoltzmannSolver:
         growth_rate_coefficient_m3_s: float,
     ) -> tuple[np.ndarray, np.ndarray]:
         face_energy = self.grid.boundaries[1:-1]
-        sigma_m = np.zeros_like(face_energy)
-        sigma_epsilon = np.zeros_like(face_energy)
-        for process in self.collision_deck.processes:
-            fraction = condition.target_mole_fractions[process.target]
-            cross_section = self._cross_section_at(process, face_energy)
-            sigma_m += fraction * cross_section
-            if process.kind in {"ELASTIC", "MOMENTUM"}:
-                sigma_epsilon += (
-                    2.0 * float(process.mass_ratio)
-                    * fraction * cross_section
-                )
+        sigma_m, sigma_epsilon = self._momentum_cross_sections(
+            condition, face_energy)
         growth_correction = np.divide(
             growth_rate_coefficient_m3_s,
             ELECTRON_SPEED_PER_SQRT_EV_M_S * np.sqrt(face_energy),
@@ -1000,6 +992,25 @@ class DeterministicTwoTermBoltzmannSolver:
         if np.any(diffusion <= 0.0) or np.any(~np.isfinite(diffusion)):
             raise ValueError("nonpositive electron energy diffusion")
         return drift, diffusion
+
+    def _momentum_cross_sections(
+        self,
+        condition: TwoTermBoltzmannCondition,
+        energies_eV: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        energies = np.asarray(energies_eV, dtype=float)
+        sigma_m = np.zeros_like(energies)
+        sigma_epsilon = np.zeros_like(energies)
+        for process in self.collision_deck.processes:
+            fraction = condition.target_mole_fractions[process.target]
+            cross_section = self._cross_section_at(process, energies)
+            sigma_m += fraction * cross_section
+            if process.kind in {"ELASTIC", "MOMENTUM"}:
+                sigma_epsilon += (
+                    2.0 * float(process.mass_ratio)
+                    * fraction * cross_section
+                )
+        return sigma_m, sigma_epsilon
 
     def _collision_source_matrix(
         self,
@@ -1076,6 +1087,8 @@ class DeterministicTwoTermBoltzmannSolver:
         matrix: sparse.csr_matrix,
         normalization_weights: np.ndarray,
         compatibility_direction: np.ndarray,
+        *,
+        allow_physical_negative: bool = False,
     ) -> tuple[np.ndarray, float, float, float]:
         augmented = sparse.bmat(
             (
@@ -1094,12 +1107,12 @@ class DeterministicTwoTermBoltzmannSolver:
             raise FloatingPointError("nonfinite two-term Boltzmann state")
         values = state[:-1]
         minimum = float(np.min(values))
-        scale = max(float(np.max(values)), 1.0)
-        if minimum < -1.0e-12 * scale:
+        scale = max(float(np.max(np.abs(values))), np.finfo(float).tiny)
+        if minimum < -1.0e-12 * scale and not allow_physical_negative:
             raise FloatingPointError("negative two-term Boltzmann EEPF")
         negative_population = float(np.dot(
             np.maximum(-values, 0.0), normalization_weights))
-        if minimum < 0.0:
+        if minimum < 0.0 and not allow_physical_negative:
             # Sparse direct solves can leave signed roundoff in an
             # exponentially small tail.  The projected mass and raw minimum
             # are returned as receipts; a physical-scale negative solution
@@ -1107,6 +1120,170 @@ class DeterministicTwoTermBoltzmannSolver:
             values = np.maximum(values, 0.0)
             values /= np.dot(values, normalization_weights)
         return values, float(state[-1]), minimum, negative_population
+
+    def _temporal_growth_eigenstate(
+        self,
+        condition: TwoTermBoltzmannCondition,
+        collision_source: sparse.csr_matrix,
+        *,
+        relative_tolerance: float,
+        maximum_iterations: int,
+    ) -> tuple[
+        np.ndarray,
+        float,
+        int,
+        float,
+        float,
+        float,
+        float,
+        ScharfetterGummelEnergyOperator,
+    ]:
+        """Solve the PT growth coefficient as a bordered scalar eigen-root."""
+        normalization_weights = self.grid.normalization_weights
+        compatibility_direction = self.grid.cell_widths_eV
+        column_growth = np.asarray(collision_source.sum(axis=0)).ravel()
+        population_specific_growth = np.divide(
+            column_growth,
+            normalization_weights,
+        )
+        lower = float(np.min(population_specific_growth))
+        upper = float(np.max(population_specific_growth))
+        face_energy = self.grid.boundaries[1:-1]
+        sigma_m, _ = self._momentum_cross_sections(condition, face_energy)
+        physical_lower = float(np.max(
+            -sigma_m
+            * ELECTRON_SPEED_PER_SQRT_EV_M_S
+            * np.sqrt(face_energy)
+        ))
+        rate_scale = max(abs(lower), abs(upper), 1.0e-30)
+        lower = max(lower, physical_lower + 1.0e-12 * rate_scale)
+        if upper <= lower:
+            raise ValueError("temporal-growth eigenvalue domain is empty")
+
+        def state_at(growth: float):
+            drift, diffusion = self._transport_coefficients(
+                condition, growth)
+            transport = ScharfetterGummelEnergyOperator(
+                self.grid, drift, diffusion)
+            matrix = (
+                transport._matrix(0)
+                - collision_source
+                + sparse.diags(
+                    growth * normalization_weights, format="csr")
+            )
+            state = self._solve_normalized_nullspace(
+                matrix,
+                normalization_weights,
+                compatibility_direction,
+                allow_physical_negative=True,
+            )
+            return state, transport, matrix
+
+        sample_count = min(max(33, int(math.sqrt(maximum_iterations)) * 4), 129)
+        samples = np.linspace(lower, upper, sample_count)
+        if lower < 0.0 < upper:
+            samples = np.unique(np.concatenate((samples, np.array([0.0]))))
+        evaluated = []
+        for growth in samples:
+            try:
+                state, _, _ = state_at(float(growth))
+            except (FloatingPointError, ValueError):
+                continue
+            compatibility = state[1]
+            if math.isfinite(compatibility):
+                evaluated.append((float(growth), float(compatibility)))
+        if len(evaluated) < 2:
+            raise RuntimeError("could not evaluate temporal-growth eigen-root")
+
+        brackets = []
+        for left_item, right_item in zip(evaluated, evaluated[1:]):
+            left_growth, left_value = left_item
+            right_growth, right_value = right_item
+            if left_value == 0.0:
+                brackets.append((left_growth, left_growth))
+            elif left_value * right_value < 0.0:
+                brackets.append((left_growth, right_growth))
+        if evaluated[-1][1] == 0.0:
+            brackets.append((evaluated[-1][0], evaluated[-1][0]))
+        if not brackets:
+            raise RuntimeError("temporal-growth compatibility root is unbracketed")
+
+        candidates = []
+        total_iterations = 0
+        # Solve the scalar eigen-root to floating-point precision.  The
+        # user tolerance is a convergence gate on the resulting conservation
+        # closure, not permission to stop the root solve early.
+        absolute_tolerance = np.finfo(float).tiny
+        for bracket_lower, bracket_upper in brackets:
+            if bracket_lower == bracket_upper:
+                root = bracket_lower
+                iterations = 0
+            else:
+                root, result = brentq(
+                    lambda growth: state_at(growth)[0][1],
+                    bracket_lower,
+                    bracket_upper,
+                    xtol=absolute_tolerance,
+                    rtol=4.0 * np.finfo(float).eps,
+                    maxiter=maximum_iterations,
+                    full_output=True,
+                    disp=True,
+                )
+                iterations = int(result.iterations)
+            total_iterations += iterations
+            (
+                raw_values,
+                compatibility,
+                minimum,
+                negative_population,
+            ), transport, matrix = state_at(root)
+            scale = max(
+                float(np.max(np.abs(raw_values))),
+                np.finfo(float).tiny,
+            )
+            if minimum < -1.0e-10 * scale:
+                continue
+            values = np.maximum(raw_values, 0.0)
+            values /= np.dot(values, normalization_weights)
+            collision_growth = float(np.sum(collision_source @ values))
+            closure_error = collision_growth - root
+            candidates.append((
+                abs(closure_error) / rate_scale,
+                values,
+                root,
+                total_iterations,
+                compatibility,
+                minimum,
+                negative_population,
+                transport,
+                matrix,
+            ))
+        if not candidates:
+            raise RuntimeError(
+                "temporal-growth roots have no positive normalized eigenstate"
+            )
+        candidates.sort(key=lambda item: item[0])
+        (
+            relative_closure,
+            values,
+            growth,
+            iteration_count,
+            compatibility,
+            minimum,
+            negative_population,
+            transport,
+            _matrix,
+        ) = candidates[0]
+        return (
+            values,
+            growth,
+            iteration_count,
+            relative_closure,
+            compatibility,
+            minimum,
+            negative_population,
+            transport,
+        )
 
     def solve(
         self,
@@ -1138,75 +1315,69 @@ class DeterministicTwoTermBoltzmannSolver:
                 "number-changing collisions require temporal_growth"
             )
 
-        values = ElectronEnergyDistribution.maxwellian(
-            self.grid,
-            condition.initial_electron_temperature_eV,
-        ).eepf_eV_minus_3_over_2
         normalization_weights = self.grid.normalization_weights
         compatibility_direction = self.grid.cell_widths_eV
-        weighted_residual = math.inf
-        compatibility = math.inf
-        minimum_raw_eepf = 0.0
-        negative_population = 0.0
-        iteration_count = 0
-
-        for iteration_count in range(1, int(maximum_iterations) + 1):
-            collision_source_values = collision_source @ values
-            growth = float(np.sum(collision_source_values))
-            if condition.growth_model == "no_growth":
-                growth = 0.0
-            drift, diffusion = self._transport_coefficients(condition, growth)
+        if condition.growth_model == "temporal_growth":
+            (
+                final_values,
+                final_growth,
+                iteration_count,
+                weighted_residual,
+                compatibility,
+                minimum_raw_eepf,
+                negative_population,
+                transport,
+            ) = self._temporal_growth_eigenstate(
+                condition,
+                collision_source,
+                relative_tolerance=tolerance,
+                maximum_iterations=int(maximum_iterations),
+            )
+            # The bordered solve can carry signed roundoff in a vanishing
+            # high-energy tail.  Projection makes the returned EEPF physical;
+            # close the reported growth and its final operator on that exact
+            # returned state rather than on the pre-projection vector.
+            eigen_growth = final_growth
+            final_growth = float(np.sum(collision_source @ final_values))
+            growth_scale = max(abs(eigen_growth), abs(final_growth), 1.0e-30)
+            weighted_residual = max(
+                weighted_residual,
+                abs(final_growth - eigen_growth) / growth_scale,
+            )
+            if weighted_residual > tolerance:
+                raise RuntimeError(
+                    "temporal-growth conservation closure did not converge"
+                )
+            drift, diffusion = self._transport_coefficients(
+                condition, final_growth)
             transport = ScharfetterGummelEnergyOperator(
                 self.grid, drift, diffusion)
-            matrix = transport._matrix(0) - collision_source
-            if condition.growth_model == "temporal_growth":
-                matrix = matrix + sparse.diags(
-                    growth * normalization_weights, format="csr")
+            final_matrix = (
+                transport._matrix(0)
+                - collision_source
+                + sparse.diags(
+                    final_growth * normalization_weights,
+                    format="csr",
+                )
+            )
+        else:
+            drift, diffusion = self._transport_coefficients(condition, 0.0)
+            transport = ScharfetterGummelEnergyOperator(
+                self.grid, drift, diffusion)
+            final_matrix = transport._matrix(0) - collision_source
             (
-                candidate,
+                final_values,
                 compatibility,
                 minimum_raw_eepf,
                 negative_population,
             ) = self._solve_normalized_nullspace(
-                matrix,
+                final_matrix,
                 normalization_weights,
                 compatibility_direction,
             )
-            weighted_residual = float(np.sum(
-                np.abs(candidate - values) * normalization_weights))
-            values = damping * candidate + (1.0 - damping) * values
-            if weighted_residual <= tolerance:
-                break
-        else:
-            raise RuntimeError("two-term Boltzmann iteration did not converge")
-
-        collision_source_values = collision_source @ values
-        growth = float(np.sum(collision_source_values))
-        if condition.growth_model == "no_growth":
-            growth = 0.0
-        drift, diffusion = self._transport_coefficients(condition, growth)
-        transport = ScharfetterGummelEnergyOperator(self.grid, drift, diffusion)
-        matrix = transport._matrix(0) - collision_source
-        if condition.growth_model == "temporal_growth":
-            matrix = matrix + sparse.diags(
-                growth * normalization_weights, format="csr")
-        (
-            final_values,
-            compatibility,
-            minimum_raw_eepf,
-            negative_population,
-        ) = self._solve_normalized_nullspace(
-            matrix,
-            normalization_weights,
-            compatibility_direction,
-        )
-        final_growth = float(np.sum(collision_source @ final_values))
-        if condition.growth_model == "no_growth":
             final_growth = 0.0
-        final_matrix = transport._matrix(0) - collision_source
-        if condition.growth_model == "temporal_growth":
-            final_matrix = final_matrix + sparse.diags(
-                final_growth * normalization_weights, format="csr")
+            iteration_count = 1
+            weighted_residual = 0.0
         equation_residual = np.asarray(final_matrix @ final_values)
         distribution = ElectronEnergyDistribution(self.grid, final_values)
         tail_receipt = distribution.convergence_receipt(

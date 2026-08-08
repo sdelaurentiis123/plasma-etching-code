@@ -248,7 +248,7 @@ def test_two_term_zero_field_elastic_limit_is_gas_maxwellian():
         expected.eepf_eV_minus_3_over_2, rel=8.0e-10, abs=1.0e-13)
     assert solution.distribution.mean_energy_eV == pytest.approx(
         1.5 * gas_thermal_energy_eV, rel=2.0e-3)
-    assert solution.iteration_count == 2
+    assert solution.iteration_count == 1
     assert solution.maximum_equation_residual_m3_s < 2.0e-25
     assert solution.particle_growth_closure_error_m3_s == pytest.approx(0.0)
     assert solution.supports_collision_boltzmann_solve
@@ -359,6 +359,62 @@ def test_temporal_growth_ionization_closes_particle_source_and_rate_moment():
         0.0, abs=1.0e-28)
     assert solution.maximum_equation_residual_m3_s < 1.0e-23
     assert solution.iteration_count < 100
+
+
+def test_temporal_growth_eigenroot_crosses_attachment_ionization_balance():
+    attachment = ElectronCollisionProcess(
+        kind="ATTACHMENT",
+        target="manufactured",
+        product="negative + fragment",
+        electron_energy_eV=(0.0, 0.2, 1.0, 100.0),
+        cross_section_m2=(2.0e-20, 2.0e-20, 0.0, 0.0),
+        energy_loss_eV=0.0,
+    )
+    excitation = ElectronCollisionProcess(
+        kind="EXCITATION",
+        target="manufactured",
+        product="manufactured(v=1)",
+        electron_energy_eV=(0.0, 2.0, 5.0, 100.0),
+        cross_section_m2=(0.0, 0.0, 1.0e-20, 1.0e-20),
+        energy_loss_eV=2.0,
+    )
+    ionization = ElectronCollisionProcess(
+        kind="IONIZATION",
+        target="manufactured",
+        product="positive + electron",
+        electron_energy_eV=(0.0, 10.0, 15.0, 100.0),
+        cross_section_m2=(0.0, 0.0, 2.0e-20, 2.0e-20),
+        energy_loss_eV=10.0,
+    )
+    solver = DeterministicTwoTermBoltzmannSolver(
+        ElectronEnergyGrid.linear(80.0, 480),
+        _deck(
+            _constant_elastic(100.0, 2.0e-20),
+            excitation,
+            attachment,
+            ionization,
+        ),
+    )
+    solutions = tuple(
+        solver.solve(
+            TwoTermBoltzmannCondition(
+                reduced_electric_field_Td=field_Td,
+                gas_temperature_K=300.0,
+                target_mole_fractions={"manufactured": 1.0},
+                growth_model="temporal_growth",
+            ),
+            relative_tolerance=1.0e-8,
+            maximum_tail_population_fraction=1.0e-5,
+        )
+        for field_Td in (30.0, 100.0)
+    )
+    assert solutions[0].net_growth_rate_coefficient_m3_s < 0.0
+    assert solutions[1].net_growth_rate_coefficient_m3_s > 0.0
+    for solution in solutions:
+        assert solution.particle_growth_closure_error_m3_s == 0.0
+        assert solution.maximum_equation_residual_m3_s < 1.0e-23
+        assert solution.weighted_iteration_residual < 1.0e-8
+        assert solution.iteration_count < 100
 
 
 def test_independent_bolos_oracle_receipt_converges_without_claim_inflation():
