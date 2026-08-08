@@ -75,21 +75,35 @@ gates correctly refuse unsupported temperatures.
   sections but identifies molecular momentum-transfer measurements as missing.
   Total elastic cannot replace momentum transfer without an angular-scattering
   assumption.
+- Gregorio--Pitchford's 2012 recommended Cl2 momentum-transfer row is
+  Rescigno's close-coupling calculation with a low-energy extrapolation. The
+  paper obtains poor agreement with the old drift and characteristic-energy
+  data, declines to retune momentum transfer because those measurements are
+  unreliable, and explicitly calls for new measurements.
+- Gonzalez-Magana--de Urquijo supplied those newer direct pulsed-Townsend
+  measurements in 2018 over `3--450 Td`. Kawaguchi et al. published an updated
+  cross-section set in 2020 and validated transport against measured data. The
+  full papers/curves are not locally archived, so neither source can yet land a
+  number or a pass.
 - Griffin et al. and Wang et al. provide calculated atomic-Cl elastic and
-  momentum-transfer data. Wang reports strong low-energy model dependence near
-  the Ramsauer minimum and no resolving experiment.
+  momentum-transfer data. Griffin validates method quality indirectly against
+  Ar; Wang reports strong low-energy model dependence near the Ramsauer
+  minimum and no resolving experiment.
 - The COMSOL tables can support an exact implementation replay after their
-  source mapping is verified. They cannot yet support an evaluated physical
-  electron-power claim.
+  node mapping is verified. The Cl2 table is not measured evidence, and neither
+  table can yet support an evaluated physical electron-power claim.
 
 ## Next gates
 
-1. Audit the full Griffin 1995 and Gregorio--Pitchford 2012 papers against the
-   COMSOL table nodes and provenance.
-2. Recover author-supplied Wang fine-structure arrays rather than digitizing a
+1. Archive and pixel-audit the full Kawaguchi 2020 and
+   Gonzalez-Magana--de Urquijo 2018 articles; grade the Gregorio and Kawaguchi
+   sets against the direct swarm markers without tuning.
+2. Audit the full Griffin 1995 paper against the COMSOL atomic-Cl table nodes
+   and provenance.
+3. Recover author-supplied Wang fine-structure arrays rather than digitizing a
    lossy plot if possible.
-3. Extend the high-energy support from primary/evaluated data or keep each
+4. Extend the high-energy support from primary/evaluated data or keep each
    temperature outside support fail-closed.
-4. Only then add the two elastic rows to the 44-row nonelastic COMSOL replay
+5. Only then add the two elastic rows to the 44-row nonelastic COMSOL replay
    and compare the source approximation with the exact stationary-target
    energy moment side by side.
