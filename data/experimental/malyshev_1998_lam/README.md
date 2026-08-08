@@ -76,3 +76,9 @@ python scripts/digitize_malyshev_1998_lam_electron_density.py \
   --overlay tmp/pdfs/malyshev_1998_figure11_overlay.png \
   --write
 ```
+
+The installable runtime copy is consumed with
+`MalyshevMeasuredElectronDensityProvider.from_package_data()`. It converts the
+reported `cm^-3` values to SI `m^-3`, preserves exact/interpolated provenance,
+and refuses pressure, gap, or power extrapolation. Its output remains labeled
+as a volume average and cannot support local sheath density or wafer flux.

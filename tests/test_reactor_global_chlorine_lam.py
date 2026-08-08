@@ -4,9 +4,11 @@ from pathlib import Path
 import pytest
 
 from petch.reactor_global import (
+    MALYSHEV_1998_ELECTRON_DENSITY_CSV_SHA256,
     MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256,
     MALYSHEV_1998_LAM_CONTROL_VOLUME_M3,
     MALYSHEV_1998_LAM_RADIUS_M,
+    MalyshevMeasuredElectronDensityProvider,
     MalyshevMeasuredElectronTemperatureProvider,
     REACTOR_SCALAR_EVIDENCE_KINDS,
     malyshev_1998_lam_geometry,
@@ -22,10 +24,22 @@ PACKAGE_CSV = (
     ROOT / "src" / "petch" / "reactor_global" / "data"
     / "malyshev_1998_lam_electron_temperature.csv"
 )
+EXPERIMENTAL_DENSITY_CSV = (
+    ROOT / "data" / "experimental" / "malyshev_1998_lam"
+    / "figure11_electron_density.csv"
+)
+PACKAGE_DENSITY_CSV = (
+    ROOT / "src" / "petch" / "reactor_global" / "data"
+    / "malyshev_1998_lam_electron_density.csv"
+)
 
 
 def _provider():
     return MalyshevMeasuredElectronTemperatureProvider.from_package_data()
+
+
+def _density_provider():
+    return MalyshevMeasuredElectronDensityProvider.from_package_data()
 
 
 def test_packaged_lam_temperature_board_is_the_audited_data_exactly():
@@ -35,6 +49,15 @@ def test_packaged_lam_temperature_board_is_the_audited_data_exactly():
     )
     assert len(_provider().markers) == 62
     assert "interpolated_measurement" in REACTOR_SCALAR_EVIDENCE_KINDS
+
+
+def test_packaged_lam_density_board_is_the_audited_data_exactly():
+    assert PACKAGE_DENSITY_CSV.read_bytes() == (
+        EXPERIMENTAL_DENSITY_CSV.read_bytes())
+    assert hashlib.sha256(PACKAGE_DENSITY_CSV.read_bytes()).hexdigest() == (
+        MALYSHEV_1998_ELECTRON_DENSITY_CSV_SHA256
+    )
+    assert len(_density_provider().markers) == 27
 
 
 def test_reported_lam_active_and_control_volumes_are_not_collapsed():
@@ -130,6 +153,77 @@ def test_provider_refuses_gap_pressure_power_extrapolation_and_ambiguity():
 def test_exact_only_mode_refuses_to_hide_an_interpolation():
     with pytest.raises(ValueError, match="not an exact"):
         _provider().evaluate(
+            window_to_wafer_gap_cm=11.0,
+            pressure_mTorr=2.0,
+            tcp_source_power_W=400.0,
+            allow_linear_interpolation=False,
+        )
+
+
+def test_exact_density_marker_stays_volume_average_and_nonpredictive():
+    state = _density_provider().evaluate(
+        window_to_wafer_gap_cm=11.0,
+        pressure_mTorr=2.0,
+        tcp_source_power_W=500.0,
+    )
+
+    assert state.method == "exact_marker"
+    assert state.volume_average_electron_density.value == pytest.approx(
+        1.03902954e17)
+    assert state.volume_average_electron_density.unit == "m^-3"
+    assert state.volume_average_electron_density.evidence_kind == "measured"
+    assert state.volume_average_electron_density.relative_uncertainty is None
+    assert "volume average" in state.volume_average_electron_density.source
+    assert not state.volume_average_electron_density.supports_prediction
+    assert not state.supports_prediction
+    assert not state.supports_local_wafer_electron_density
+    assert not state.supports_wafer_flux
+
+
+def test_density_interpolation_is_local_explicit_and_si_converted():
+    state = _density_provider().evaluate(
+        window_to_wafer_gap_cm=6.5,
+        pressure_mTorr=2.0,
+        tcp_source_power_W=600.0,
+    )
+    left, right = state.support_markers
+    fraction = (
+        (600.0 - left.tcp_source_power_W)
+        / (right.tcp_source_power_W - left.tcp_source_power_W)
+    )
+    expected = (
+        left.volume_average_electron_density_m3
+        + fraction
+        * (
+            right.volume_average_electron_density_m3
+            - left.volume_average_electron_density_m3
+        )
+    )
+
+    assert state.method == "linear_interpolation"
+    assert state.volume_average_electron_density.value == pytest.approx(
+        expected)
+    assert state.volume_average_electron_density.evidence_kind == (
+        "interpolated_measurement")
+    assert not state.volume_average_electron_density.supports_prediction
+
+
+def test_density_provider_refuses_gap_pressure_and_power_extrapolation():
+    provider = _density_provider()
+    with pytest.raises(ValueError, match="gap/pressure"):
+        provider.evaluate(
+            window_to_wafer_gap_cm=6.5,
+            pressure_mTorr=1.0,
+            tcp_source_power_W=500.0,
+        )
+    with pytest.raises(ValueError, match="outside"):
+        provider.evaluate(
+            window_to_wafer_gap_cm=11.0,
+            pressure_mTorr=2.0,
+            tcp_source_power_W=50.0,
+        )
+    with pytest.raises(ValueError, match="not an exact"):
+        provider.evaluate(
             window_to_wafer_gap_cm=11.0,
             pressure_mTorr=2.0,
             tcp_source_power_W=400.0,
