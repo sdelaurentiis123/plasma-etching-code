@@ -442,7 +442,7 @@
     "model_source_manifest_path": "data/surface_interactions/an_2026_nnp/source_manifest.json",
     "model_source_manifest_sha256": "31a6b99874040e49a86df401beb119ef60c6854799c0fb425a01a7a27271728e",
     "same_support_guo_audit_path": "results/curated/guo_karahashi_transfer/audit.json",
-    "same_support_guo_audit_sha256": "a9550bffd33bb28c1cc61e123303f4ac14fb65791ee9a1243e7230464af975e8",
+    "same_support_guo_audit_sha256": "c587e037e375d3a29e5f298b3cbb019dc2005bb11a15953bde92e05a68997e04",
     "transcribed_model_data_path": "data/surface_interactions/an_2026_nnp/figure3_reported_etch_yields.csv",
     "transcribed_model_data_sha256": "c897427ffb8055ffe71f042530efc8acda30c05bcdfe52df0fb4542af1c295d4"
   },
