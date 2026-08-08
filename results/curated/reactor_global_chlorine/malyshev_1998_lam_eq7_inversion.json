@@ -1,0 +1,50 @@
+{
+  "audit_id": "MALYSHEV-1998-LAM-EQ7-MEASURED-STATE-INVERSION-R1",
+  "claim_class": "measured-state diagnostic inversion; not a wall fit and not reactor or feature-depth prediction",
+  "coefficient_selection_target": null,
+  "feature_depth_target": null,
+  "source_equation": "Malyshev et al. Eq. 7: relative Cl2 = 1/(1 + kd*ne/(2*kr))",
+  "electron_destruction_evidence": {
+    "neutral_dissociation": "Hamilton 2018 eight-state Maxwellian rate; no scalar physical uncertainty published",
+    "dissociative_attachment": "Lee-Lieberman retained published-compilation rate"
+  },
+  "marker_accounting": {
+    "audited_marker_total": 38,
+    "successful_inversions": 23,
+    "excluded": {
+      "diagnostic_flow_check": 1,
+      "nonphysical_or_zero_derived_dissociation": 4,
+      "electron_temperature_support_missing": 2,
+      "electron_density_support_missing": 8
+    },
+    "electron_state_method_pairs": {
+      "Te:exact_marker|ne:linear_interpolation": 11,
+      "Te:exact_marker|ne:exact_marker": 11,
+      "Te:linear_interpolation|ne:linear_interpolation": 1
+    }
+  },
+  "required_wall_return_frequency_s_inv": {
+    "minimum_all": 65.0853754,
+    "median_all": 172.503508,
+    "maximum_all": 11319.7311,
+    "finite_reported_cl2_upper_envelope_count": 16,
+    "minimum_finite_envelope_subset": 65.0853754,
+    "median_finite_envelope_subset": 148.59570150000002,
+    "maximum_finite_envelope_subset": 304.83108
+  },
+  "source_internal_consistency": {
+    "status": "printed_nominal_values_do_not_share_one_condition",
+    "figure3_maximum_Te_eV_at_11cm_10mTorr": 1.93747,
+    "printed_kdis_at_that_Te_cm3_s": 9.917175984729802e-10,
+    "printed_kd_upper_using_source_attachment_1_over_7_cm3_s": 1.1333915411119772e-09,
+    "footnote14_kd_cm3_s": 7e-09,
+    "footnote_to_printed_upper_ratio": 6.176153382203874,
+    "footnote14_ne_cm3": 100000000000.0,
+    "footnote14_destruction_frequency_s_inv": 700.0,
+    "printed_upper_destruction_frequency_s_inv": 113.33915411119773,
+    "interpretation": "Footnote 14 is algebraically self-consistent as 7e-9 times 1e11 = 700/s, but its kd is over six times the maximum from the article's printed kdis law across the measured 11 cm, 10 mTorr Te board even after adding the source-stated maximum 1/7 attachment contribution. The nominal footnote numbers are quarantined from calibration."
+  },
+  "uncertainty_boundary": "The source's +/-25% absolute-density accuracy statement is propagated as a non-statistical envelope. Te and volume-average ne lack complete measurement uncertainties, Hamilton publishes no scalar physical uncertainty, and attachment is compiled; therefore no formal pass/fail or predictive interval is claimed.",
+  "inversion_boundary": "The output is kr required by the paper's fast-reaction Eq. 7. Mapping kr to gamma requires independently validated neutral diffusion and wall-state physics. Volume-average ne cannot be used as a local sheath density or wafer flux.",
+  "csv_sha256": "7647ddd8d8eb9711bfb3140297be7a35cedae234404aa92413406d09092af27b"
+}

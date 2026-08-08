@@ -14,6 +14,10 @@ SCRIPT = ROOT / "scripts" / "digitize_malyshev_1998_lam_dissociation.py"
 DATA = ROOT / "data" / "experimental" / "malyshev_1998_lam"
 CSV_PATH = DATA / "figures7_8_chlorine_dissociation.csv"
 MANIFEST_PATH = DATA / "digitization_manifest.json"
+PACKAGE_CSV_PATH = (
+    ROOT / "src" / "petch" / "reactor_global" / "data"
+    / "malyshev_1998_lam_chlorine_dissociation.csv"
+)
 
 
 def _module():
@@ -30,6 +34,7 @@ def test_committed_lam_dataset_is_exact_script_replay():
     csv_payload = module.csv_text()
     csv_sha256 = hashlib.sha256(csv_payload.encode("utf-8")).hexdigest()
     assert CSV_PATH.read_text(encoding="utf-8") == csv_payload
+    assert PACKAGE_CSV_PATH.read_text(encoding="utf-8") == csv_payload
     assert json.loads(MANIFEST_PATH.read_text(encoding="utf-8")) == (
         module.manifest(csv_sha256))
 

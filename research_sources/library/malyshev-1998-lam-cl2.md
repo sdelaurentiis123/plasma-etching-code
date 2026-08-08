@@ -29,6 +29,7 @@
 | M9 | Figure 3 reports OES electron-temperature measurements versus TCP power for both 11 and 6.5 cm gaps; the article states Te rises roughly 20--30% between 20 and 900 W. The 11 cm values were reported in source ref. 3 and the 6.5 cm values were previously unpublished. | The 62 visible markers supply measured-Te conditioning across 0.5--20 mTorr. The article supplies no Te uncertainty here, TCP power is not absorbed power, and the assumed Maxwellian EEDF is not independently validated by this figure. |
 | M10 | The paper uses a 21.5 cm chamber radius, an 11 cm active-plasma gap giving 16.0 L, a 43,000 cm3 chamber volume, and effective `V/A` lengths of 3.6 cm (11 cm gap) and 2.5 cm (6.5 cm gap). | Requires distinct active-plasma and neutral-control volumes. The exact cylinders reproduce both quoted `V/A` values; a one-volume residence/source ledger is not a faithful Lam reproduction. |
 | M11 | Figure 11 reports volume-average electron densities derived from Langmuir-probe analysis. Measurements along a line 1.35 cm above the wafer/chuck were converted assuming radial symmetry and an axial `sin(pi*h/gap)` distribution. Reducing the gap decreases average electron density by about a factor of two. | The 27 resolved markers condition/grade the volume-average electron state. They are not local sheath-edge density or wafer flux; the article reports no density uncertainty and points to the probe analysis elsewhere. |
+| M12 | Footnote 14 uses `ne = 1e11 cm^-3`, `kd = 7e-9 cm3/s`, and therefore `kd*ne = 700 s^-1`. But the article's printed `kdis = 4.52e-8 exp(-7.40/Te)` law, evaluated at the highest measured 11 cm/10 mTorr Figure-3 Te and augmented by the article's maximum stated 1/7 attachment contribution, gives at most `1.13e-9 cm3/s` or `113 s^-1`. | The footnote arithmetic is internally consistent but its nominal `kd` is 6.18x above the maximum supported by the article's own printed rate law and measured Te board. The footnote rate and `200x` residence-time statement are quarantined from calibration; the measured boards and explicit equations remain usable with their stated uncertainty limits. |
 
 ## Use decision
 
@@ -47,3 +48,10 @@ The runtime Figure-3 provider is hash-locked to the audited CSV. It permits
 only an exact marker or an explicitly labeled linear interpolation between two
 unambiguous markers in one fixed-gap, fixed-pressure series. It refuses
 pressure/gap extrapolation and overlapping marker clusters.
+
+The measured-state Eq.-7 inversion is frozen under
+`results/curated/reactor_global_chlorine/`. It replaces the paper's legacy
+neutral-dissociation fit with Hamilton's eight-state rate, retains the
+published attachment channel, and solves only for the wall-return frequency
+required by each supported marker. It does not infer `gamma`, wafer flux, or
+feature depth.

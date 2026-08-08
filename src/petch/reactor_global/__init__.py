@@ -86,6 +86,13 @@ from .chlorine_lam import (
     MalyshevMeasuredElectronTemperatureProvider,
     malyshev_1998_lam_geometry,
 )
+from .chlorine_lam_dissociation import (
+    MALYSHEV_1998_CHLORINE_DISSOCIATION_CSV_SHA256,
+    MalyshevChlorineDissociationMarker,
+    MalyshevEq7WallReturnInversion,
+    MalyshevMeasuredChlorineDissociationProvider,
+    malyshev_1998_eq7_wall_return_inversion,
+)
 from .evaluated_chlorine import (
     ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV,
     HAMILTON_2018_CL2_DISSOCIATION_STATES,
@@ -159,6 +166,7 @@ __all__ = [
     "LYMBEROPOULOS_1995_REDUCED_CLMINUS_MOBILITY_M_INV_V_INV_S_INV",
     "LYMBEROPOULOS_1995_REDUCED_CLPLUS_MOBILITY_M_INV_V_INV_S_INV",
     "MOLECULAR_CHLORINE_TOTAL_IONIZATION_THRESHOLD_EV",
+    "MALYSHEV_1998_CHLORINE_DISSOCIATION_CSV_SHA256",
     "MALYSHEV_1998_ELECTRON_DENSITY_CSV_SHA256",
     "MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256",
     "MALYSHEV_1998_LAM_CONTROL_VOLUME_M3",
@@ -211,9 +219,12 @@ __all__ = [
     "LeeLiebermanArgonTransportProvider",
     "MatchedRFPowerBoundary",
     "MeasuredAbsorbedPowerBoundary",
+    "MalyshevChlorineDissociationMarker",
+    "MalyshevEq7WallReturnInversion",
     "MalyshevElectronDensityMarker",
     "MalyshevElectronTemperatureMarker",
     "MalyshevLamGeometryState",
+    "MalyshevMeasuredChlorineDissociationProvider",
     "MalyshevMeasuredElectronDensityProvider",
     "MalyshevMeasuredElectronTemperatureProvider",
     "IonMobilityState",
@@ -248,6 +259,7 @@ __all__ = [
     "lymberopoulos_economou_1995_chlorine_diffusivity",
     "lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities",
     "malyshev_1998_lam_geometry",
+    "malyshev_1998_eq7_wall_return_inversion",
     "lee_lieberman_argon_ion_temperature_eV",
     "nist_argon_self_diffusion_m2_s",
     "nist_hayes_atomic_chlorine_ionization_rate",
