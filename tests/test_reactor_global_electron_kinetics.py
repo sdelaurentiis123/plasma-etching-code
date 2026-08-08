@@ -468,6 +468,114 @@ def test_temporal_growth_ionization_closes_particle_source_and_rate_moment():
     assert solution.iteration_count < 100
 
 
+def test_temporal_growth_couples_density_dependent_isotropic_coulomb_term():
+    ionization = ElectronCollisionProcess(
+        kind="IONIZATION",
+        target="manufactured",
+        product="manufactured+",
+        electron_energy_eV=(0.0, 10.0, 15.0, 200.0),
+        cross_section_m2=(0.0, 0.0, 4.0e-21, 4.0e-21),
+        energy_loss_eV=10.0,
+    )
+    solver = DeterministicTwoTermBoltzmannSolver(
+        ElectronEnergyGrid.linear(80.0, 200),
+        _deck(_constant_elastic(200.0), ionization),
+    )
+    common = dict(
+        reduced_electric_field_Td=50.0,
+        gas_temperature_K=300.0,
+        target_mole_fractions={"manufactured": 1.0},
+        growth_model="temporal_growth",
+    )
+    baseline = solver.solve(
+        TwoTermBoltzmannCondition(**common),
+        relative_tolerance=1.0e-7,
+        maximum_tail_population_fraction=1.0e-5,
+    )
+    coulomb = solver.solve(
+        TwoTermBoltzmannCondition(
+            **common,
+            electron_electron_coulomb_model="isotropic_classical_debye",
+            electron_to_neutral_density_ratio=7.0e-4,
+            gas_number_density_m3=6.0e19,
+        ),
+        relative_tolerance=1.0e-7,
+        maximum_iterations=60,
+        damping=0.5,
+        maximum_tail_population_fraction=1.0e-5,
+    )
+    assert coulomb.electron_electron_coulomb_model == (
+        "isotropic_classical_debye")
+    assert 10.0 < coulomb.coulomb_logarithm < 20.0
+    assert 1 <= coulomb.nonlinear_iteration_count < 60
+    assert coulomb.nonlinear_weighted_residual < 1.0e-7
+    assert coulomb.particle_growth_closure_error_m3_s == pytest.approx(
+        0.0, abs=2.0e-28)
+    assert coulomb.net_growth_rate_coefficient_m3_s > (
+        baseline.net_growth_rate_coefficient_m3_s)
+    assert coulomb.distribution.mean_energy_eV < (
+        baseline.distribution.mean_energy_eV)
+
+
+def test_temporal_growth_continuation_preserves_solution_and_avoids_global_scan():
+    ionization = ElectronCollisionProcess(
+        kind="IONIZATION",
+        target="manufactured",
+        product="manufactured+",
+        electron_energy_eV=(0.0, 10.0, 15.0, 200.0),
+        cross_section_m2=(0.0, 0.0, 4.0e-21, 4.0e-21),
+        energy_loss_eV=10.0,
+    )
+    solver = DeterministicTwoTermBoltzmannSolver(
+        ElectronEnergyGrid.linear(80.0, 200),
+        _deck(_constant_elastic(200.0), ionization),
+    )
+    condition = TwoTermBoltzmannCondition(
+        reduced_electric_field_Td=50.0,
+        gas_temperature_K=300.0,
+        target_mole_fractions={"manufactured": 1.0},
+        growth_model="temporal_growth",
+        electron_electron_coulomb_model="isotropic_classical_debye",
+        electron_to_neutral_density_ratio=7.0e-4,
+        gas_number_density_m3=6.0e19,
+    )
+    controls = dict(
+        relative_tolerance=1.0e-7,
+        maximum_iterations=60,
+        damping=0.5,
+        maximum_tail_population_fraction=1.0e-5,
+    )
+    cold = solver.solve(condition, **controls)
+    warm = solver.solve(condition, initial_solution=cold, **controls)
+
+    assert warm.growth_root_evaluations < cold.growth_root_evaluations / 10
+    assert warm.nonlinear_iteration_count < cold.nonlinear_iteration_count
+    assert warm.net_growth_rate_coefficient_m3_s == pytest.approx(
+        cold.net_growth_rate_coefficient_m3_s, rel=5.0e-7)
+    assert warm.distribution.mean_energy_eV == pytest.approx(
+        cold.distribution.mean_energy_eV, rel=1.0e-7)
+    assert warm.particle_growth_closure_error_m3_s == pytest.approx(
+        0.0, abs=2.0e-28)
+
+
+def test_coulomb_condition_requires_explicit_positive_plasma_state():
+    common = dict(
+        reduced_electric_field_Td=50.0,
+        gas_temperature_K=300.0,
+        target_mole_fractions={"manufactured": 1.0},
+        growth_model="temporal_growth",
+        electron_electron_coulomb_model="isotropic_classical_debye",
+    )
+    with pytest.raises(ValueError, match="invalid two-term"):
+        TwoTermBoltzmannCondition(**common)
+    with pytest.raises(ValueError, match="invalid two-term"):
+        TwoTermBoltzmannCondition(
+            **common,
+            electron_to_neutral_density_ratio=1.0e-4,
+            gas_number_density_m3=-1.0,
+        )
+
+
 def test_multiple_ionization_growth_uses_declared_electron_multiplicity():
     double_ionization = ElectronCollisionProcess(
         kind="IONIZATION",

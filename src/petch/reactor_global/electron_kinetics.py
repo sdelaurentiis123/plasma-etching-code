@@ -974,12 +974,19 @@ class TwoTermBoltzmannCondition:
     ionization_energy_sharing: str = "equal_sharing"
     initial_electron_temperature_eV: float = 2.0
     angular_field_frequency_over_density_m3_s: float = 0.0
+    electron_electron_coulomb_model: str = "none"
+    electron_to_neutral_density_ratio: float = 0.0
+    gas_number_density_m3: float | None = None
 
     def __post_init__(self):
         field = float(self.reduced_electric_field_Td)
         temperature = float(self.gas_temperature_K)
         reduced_frequency = float(
             self.angular_field_frequency_over_density_m3_s)
+        ionization_degree = float(self.electron_to_neutral_density_ratio)
+        gas_density = (
+            None if self.gas_number_density_m3 is None
+            else float(self.gas_number_density_m3))
         fractions = {
             str(name).strip(): float(value)
             for name, value in dict(self.target_mole_fractions).items()
@@ -1003,6 +1010,25 @@ class TwoTermBoltzmannCondition:
             or self.inelastic_momentum_closure
             != "isotropic_source_reproduction"
             or self.ionization_energy_sharing != "equal_sharing"
+            or self.electron_electron_coulomb_model not in {
+                "none", "isotropic_classical_debye"
+            }
+            or not math.isfinite(ionization_degree)
+            or ionization_degree < 0.0
+            or (
+                self.electron_electron_coulomb_model == "none"
+                and (ionization_degree != 0.0 or gas_density is not None)
+            )
+            or (
+                self.electron_electron_coulomb_model
+                == "isotropic_classical_debye"
+                and (
+                    ionization_degree <= 0.0
+                    or gas_density is None
+                    or not math.isfinite(gas_density)
+                    or gas_density <= 0.0
+                )
+            )
             or not math.isfinite(self.initial_electron_temperature_eV)
             or self.initial_electron_temperature_eV <= 0.0
         ):
@@ -1021,6 +1047,9 @@ class TwoTermBoltzmannCondition:
             "angular_field_frequency_over_density_m3_s",
             reduced_frequency,
         )
+        object.__setattr__(
+            self, "electron_to_neutral_density_ratio", ionization_degree)
+        object.__setattr__(self, "gas_number_density_m3", gas_density)
 
 
 @dataclass(frozen=True)
@@ -1090,6 +1119,11 @@ class TwoTermBoltzmannSolution:
     roundoff_negative_population_fraction: float
     energy_flux_faces_reduced: np.ndarray
     collision_deck_sha256: str
+    electron_electron_coulomb_model: str = "none"
+    coulomb_logarithm: float | None = None
+    nonlinear_iteration_count: int = 0
+    nonlinear_weighted_residual: float = 0.0
+    growth_root_evaluations: int = 0
     solver_id: str = "petch-two-term-sg-v1"
     supports_collision_boltzmann_solve: bool = True
     supports_direct_swarm_grade: bool = False
@@ -1121,6 +1155,23 @@ class DeterministicTwoTermBoltzmannSolver:
             raise TypeError("an ElectronCollisionDeck is required")
         self.grid = grid
         self.collision_deck = collision_deck
+        self._collision_kernels = tuple(
+            ElectronCollisionMomentKernel.from_process(self.grid, process)
+            for process in self.collision_deck.processes
+        )
+        self._collision_source_components = tuple(
+            self._build_collision_source_component(process, kernel)
+            for process, kernel in zip(
+                self.collision_deck.processes, self._collision_kernels)
+        )
+        self._momentum_bases = {
+            "internal_faces": self._compile_momentum_basis(
+                self.grid.boundaries[1:-1]),
+            "upper_boundaries": self._compile_momentum_basis(
+                self.grid.boundaries[1:]),
+            "centers": self._compile_momentum_basis(
+                self.grid.cell_centers_eV),
+        }
 
     def _validate_condition(self, condition: TwoTermBoltzmannCondition):
         if not isinstance(condition, TwoTermBoltzmannCondition):
@@ -1179,10 +1230,11 @@ class DeterministicTwoTermBoltzmannSolver:
         self,
         condition: TwoTermBoltzmannCondition,
         growth_rate_coefficient_m3_s: float,
+        electron_electron_coefficients=None,
     ) -> tuple[np.ndarray, np.ndarray]:
         face_energy = self.grid.boundaries[1:-1]
-        sigma_m, sigma_epsilon = self._momentum_cross_sections(
-            condition, face_energy)
+        sigma_m, sigma_epsilon = self._weighted_momentum_basis(
+            condition, "internal_faces")
         growth_correction = np.divide(
             growth_rate_coefficient_m3_s,
             ELECTRON_SPEED_PER_SQRT_EV_M_S * np.sqrt(face_energy),
@@ -1222,6 +1274,26 @@ class DeterministicTwoTermBoltzmannSolver:
             + gas_thermal_energy_eV
             * face_energy ** 2 * sigma_epsilon
         )
+        if electron_electron_coefficients is not None:
+            drift = (
+                drift
+                + np.asarray(
+                    electron_electron_coefficients.drift_eV_m3_s,
+                    dtype=float,
+                )
+            )
+            diffusion = (
+                diffusion
+                + np.asarray(
+                    electron_electron_coefficients.diffusion_eV2_m3_s,
+                    dtype=float,
+                )
+            )
+            if drift.shape != face_energy.shape or diffusion.shape != (
+                face_energy.shape
+            ):
+                raise ValueError(
+                    "electron-electron coefficients differ from solver grid")
         if np.any(diffusion <= 0.0) or np.any(~np.isfinite(diffusion)):
             raise ValueError("nonpositive electron energy diffusion")
         return drift, diffusion
@@ -1245,80 +1317,122 @@ class DeterministicTwoTermBoltzmannSolver:
                 )
         return sigma_m, sigma_epsilon
 
+    def _compile_momentum_basis(
+        self,
+        energies_eV: np.ndarray,
+    ) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+        """Compile target-resolved momentum arrays on one fixed solver grid."""
+        energies = np.asarray(energies_eV, dtype=float)
+        basis = {
+            target: (np.zeros_like(energies), np.zeros_like(energies))
+            for target in self.collision_deck.targets
+        }
+        for process in self.collision_deck.processes:
+            momentum, energy_transfer = basis[process.target]
+            cross_section = self._cross_section_at(process, energies)
+            momentum += cross_section
+            if process.kind in {"ELASTIC", "MOMENTUM"}:
+                energy_transfer += (
+                    2.0 * float(process.mass_ratio) * cross_section)
+        return basis
+
+    def _weighted_momentum_basis(
+        self,
+        condition: TwoTermBoltzmannCondition,
+        location: str,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        basis = self._momentum_bases[location]
+        first = next(iter(basis.values()))
+        sigma_m = np.zeros_like(first[0])
+        sigma_epsilon = np.zeros_like(first[1])
+        for target, (momentum, energy_transfer) in basis.items():
+            fraction = condition.target_mole_fractions[target]
+            sigma_m += fraction * momentum
+            sigma_epsilon += fraction * energy_transfer
+        return sigma_m, sigma_epsilon
+
+    def _build_collision_source_component(
+        self,
+        process: ElectronCollisionProcess,
+        kernel: ElectronCollisionMomentKernel,
+    ) -> sparse.csr_matrix:
+        """Compile one unit-target-fraction scattering operator."""
+        cell_count = self.grid.cell_count
+        boundaries = self.grid.boundaries
+        source = np.zeros((cell_count, cell_count))
+        if process.kind in _MOMENTUM_KINDS:
+            return sparse.csr_matrix(source)
+        out_weights = np.asarray(kernel.rate_weights_m3_s)
+        source[np.arange(cell_count), np.arange(cell_count)] -= out_weights
+        if process.kind == "ATTACHMENT":
+            return sparse.csr_matrix(source)
+        if process.kind in {"EXCITATION", "ROTATION"}:
+            energy_loss = float(process.energy_loss_eV or 0.0)
+            parent_lower_from_child = lambda value: value + energy_loss
+            parent_upper_from_child = lambda value: value + energy_loss
+            in_factor = 1.0
+        elif process.kind == "IONIZATION":
+            energy_loss = float(process.energy_loss_eV or 0.0)
+            outgoing_electron_count = 1 + process.electron_number_change
+            parent_lower_from_child = (
+                lambda value: outgoing_electron_count * value + energy_loss)
+            parent_upper_from_child = (
+                lambda value: outgoing_electron_count * value + energy_loss)
+            in_factor = float(outgoing_electron_count)
+        else:
+            raise ValueError("unsupported inelastic collision kind")
+
+        energy, cross_section, _ = _collision_support_nodes(process)
+        integral = _PiecewiseLinearCrossSectionIntegral(
+            energy, cross_section, powers=(1,))
+        for destination in range(cell_count):
+            parent_lower = parent_lower_from_child(boundaries[destination])
+            parent_upper = parent_upper_from_child(
+                boundaries[destination + 1])
+            parent_lower = max(parent_lower, boundaries[0], energy[0])
+            parent_upper = min(parent_upper, boundaries[-1], energy[-1])
+            if parent_upper <= parent_lower:
+                continue
+            first_parent = max(
+                0,
+                int(np.searchsorted(
+                    boundaries, parent_lower, side="right") - 1),
+            )
+            last_parent = min(
+                cell_count - 1,
+                int(np.searchsorted(
+                    boundaries, parent_upper, side="left")),
+            )
+            for parent in range(first_parent, last_parent + 1):
+                lower = max(parent_lower, boundaries[parent])
+                upper = min(parent_upper, boundaries[parent + 1])
+                if upper <= lower:
+                    continue
+                event_integral = (
+                    ELECTRON_SPEED_PER_SQRT_EV_M_S
+                    * integral.integrate(
+                        lower,
+                        upper,
+                        energy_power=1,
+                    )
+                )
+                source[destination, parent] += in_factor * event_integral
+        return sparse.csr_matrix(source)
+
     def _collision_source_matrix(
         self,
         condition: TwoTermBoltzmannCondition,
     ) -> tuple[sparse.csr_matrix, tuple[ElectronCollisionMomentKernel, ...]]:
-        cell_count = self.grid.cell_count
-        boundaries = self.grid.boundaries
-        source = np.zeros((cell_count, cell_count))
-        kernels = []
-        for process in self.collision_deck.processes:
-            kernel = ElectronCollisionMomentKernel.from_process(
-                self.grid, process)
-            kernels.append(kernel)
-            if process.kind in _MOMENTUM_KINDS:
-                continue
+        source = sparse.csr_matrix(
+            (self.grid.cell_count, self.grid.cell_count))
+        for process, component in zip(
+            self.collision_deck.processes,
+            self._collision_source_components,
+        ):
             fraction = condition.target_mole_fractions[process.target]
-            out_weights = fraction * np.asarray(kernel.rate_weights_m3_s)
-            source[np.arange(cell_count), np.arange(cell_count)] -= out_weights
-            if process.kind == "ATTACHMENT":
-                continue
-            if process.kind in {"EXCITATION", "ROTATION"}:
-                energy_loss = float(process.energy_loss_eV or 0.0)
-                parent_lower_from_child = lambda value: value + energy_loss
-                parent_upper_from_child = lambda value: value + energy_loss
-                in_factor = 1.0
-            elif process.kind == "IONIZATION":
-                energy_loss = float(process.energy_loss_eV or 0.0)
-                outgoing_electron_count = 1 + process.electron_number_change
-                parent_lower_from_child = (
-                    lambda value: outgoing_electron_count * value + energy_loss
-                )
-                parent_upper_from_child = (
-                    lambda value: outgoing_electron_count * value + energy_loss
-                )
-                in_factor = float(outgoing_electron_count)
-            else:
-                raise ValueError("unsupported inelastic collision kind")
-
-            energy, cross_section, _ = _collision_support_nodes(process)
-            integral = _PiecewiseLinearCrossSectionIntegral(
-                energy, cross_section, powers=(1,))
-            for destination in range(cell_count):
-                parent_lower = parent_lower_from_child(boundaries[destination])
-                parent_upper = parent_upper_from_child(
-                    boundaries[destination + 1])
-                parent_lower = max(parent_lower, boundaries[0], energy[0])
-                parent_upper = min(parent_upper, boundaries[-1], energy[-1])
-                if parent_upper <= parent_lower:
-                    continue
-                first_parent = max(
-                    0,
-                    int(np.searchsorted(
-                        boundaries, parent_lower, side="right") - 1),
-                )
-                last_parent = min(
-                    cell_count - 1,
-                    int(np.searchsorted(
-                        boundaries, parent_upper, side="left")),
-                )
-                for parent in range(first_parent, last_parent + 1):
-                    lower = max(parent_lower, boundaries[parent])
-                    upper = min(parent_upper, boundaries[parent + 1])
-                    if upper <= lower:
-                        continue
-                    event_integral = (
-                        ELECTRON_SPEED_PER_SQRT_EV_M_S
-                        * fraction
-                        * integral.integrate(
-                            lower,
-                            upper,
-                            energy_power=1,
-                        )
-                    )
-                    source[destination, parent] += in_factor * event_integral
-        return sparse.csr_matrix(source), tuple(kernels)
+            if fraction > 0.0 and component.nnz:
+                source = source + fraction * component
+        return source, self._collision_kernels
 
     def _transport_moments(
         self,
@@ -1329,14 +1443,14 @@ class DeterministicTwoTermBoltzmannSolver:
         """Evaluate Hagelaar--Pitchford flux moments on the solved EEPF."""
         boundaries = self.grid.boundaries
         centers = self.grid.cell_centers_eV
-        momentum_boundary, _ = self._momentum_cross_sections(
-            condition, boundaries[1:])
+        momentum_boundary, _ = self._weighted_momentum_basis(
+            condition, "upper_boundaries")
         effective_boundary = momentum_boundary + np.divide(
             growth_rate_coefficient_m3_s,
             ELECTRON_SPEED_PER_SQRT_EV_M_S * np.sqrt(boundaries[1:]),
         )
-        momentum_center, _ = self._momentum_cross_sections(
-            condition, centers)
+        momentum_center, _ = self._weighted_momentum_basis(
+            condition, "centers")
         effective_center = momentum_center + np.divide(
             growth_rate_coefficient_m3_s,
             ELECTRON_SPEED_PER_SQRT_EV_M_S * np.sqrt(centers),
@@ -1466,6 +1580,8 @@ class DeterministicTwoTermBoltzmannSolver:
         *,
         relative_tolerance: float,
         maximum_iterations: int,
+        electron_electron_coefficients=None,
+        initial_growth_rate_coefficient_m3_s: float | None = None,
     ) -> tuple[
         np.ndarray,
         float,
@@ -1475,6 +1591,7 @@ class DeterministicTwoTermBoltzmannSolver:
         float,
         float,
         ScharfetterGummelEnergyOperator,
+        int,
     ]:
         """Solve the PT growth coefficient as a bordered scalar eigen-root."""
         normalization_weights = self.grid.normalization_weights
@@ -1487,7 +1604,8 @@ class DeterministicTwoTermBoltzmannSolver:
         lower = float(np.min(population_specific_growth))
         upper = float(np.max(population_specific_growth))
         face_energy = self.grid.boundaries[1:-1]
-        sigma_m, _ = self._momentum_cross_sections(condition, face_energy)
+        sigma_m, _ = self._weighted_momentum_basis(
+            condition, "internal_faces")
         physical_lower = float(np.max(
             -sigma_m
             * ELECTRON_SPEED_PER_SQRT_EV_M_S
@@ -1500,7 +1618,7 @@ class DeterministicTwoTermBoltzmannSolver:
 
         def state_at(growth: float):
             drift, diffusion = self._transport_coefficients(
-                condition, growth)
+                condition, growth, electron_electron_coefficients)
             transport = ScharfetterGummelEnergyOperator(
                 self.grid, drift, diffusion)
             matrix = (
@@ -1517,44 +1635,100 @@ class DeterministicTwoTermBoltzmannSolver:
             )
             return state, transport, matrix
 
-        sample_count = min(max(33, int(math.sqrt(maximum_iterations)) * 4), 129)
-        samples = np.linspace(lower, upper, sample_count)
-        if lower < 0.0 < upper:
-            # Attaching gases can place the physical eigen-root many orders
-            # of magnitude closer to zero than either pure attachment or
-            # ionization column bound. A linear scan can then miss the sign
-            # change entirely, especially on threshold-refined grids. Add a
-            # deterministic signed-log scan without weakening either bound.
-            logarithmic_fraction = np.geomspace(1.0e-12, 1.0, 49)
-            samples = np.unique(np.concatenate((
-                samples,
-                -abs(lower) * logarithmic_fraction,
-                np.array([0.0]),
-                upper * logarithmic_fraction,
-            )))
-            samples = samples[(samples >= lower) & (samples <= upper)]
-        evaluated = []
-        for growth in samples:
+        state_by_growth = {}
+
+        def evaluate_growth(growth: float):
+            growth = float(growth)
+            if growth in state_by_growth:
+                cached = state_by_growth[growth]
+                return None if cached is None else float(cached[0][1])
             try:
-                state, _, _ = state_at(float(growth))
+                evaluated_state = state_at(growth)
             except (FloatingPointError, ValueError):
-                continue
-            compatibility = state[1]
+                state_by_growth[growth] = None
+                return None
+            compatibility = evaluated_state[0][1]
             if math.isfinite(compatibility):
-                evaluated.append((float(growth), float(compatibility)))
-        if len(evaluated) < 2:
-            raise RuntimeError("could not evaluate temporal-growth eigen-root")
+                state_by_growth[growth] = evaluated_state
+                return float(compatibility)
+            state_by_growth[growth] = None
+            return None
 
         brackets = []
-        for left_item, right_item in zip(evaluated, evaluated[1:]):
-            left_growth, left_value = left_item
-            right_growth, right_value = right_item
-            if left_value == 0.0:
-                brackets.append((left_growth, left_growth))
-            elif left_value * right_value < 0.0:
-                brackets.append((left_growth, right_growth))
-        if evaluated[-1][1] == 0.0:
-            brackets.append((evaluated[-1][0], evaluated[-1][0]))
+        if initial_growth_rate_coefficient_m3_s is not None:
+            initial = float(initial_growth_rate_coefficient_m3_s)
+            if math.isfinite(initial):
+                center = min(max(initial, lower), upper)
+                center_value = evaluate_growth(center)
+                span = max(
+                    1.0e-8 * (upper - lower),
+                    1.0e-6 * max(abs(center), rate_scale),
+                    np.finfo(float).tiny,
+                )
+                for _ in range(14):
+                    left = max(lower, center - span)
+                    right = min(upper, center + span)
+                    left_value = evaluate_growth(left)
+                    right_value = evaluate_growth(right)
+                    candidates = (
+                        (left, left_value, center, center_value),
+                        (center, center_value, right, right_value),
+                        (left, left_value, right, right_value),
+                    )
+                    for x0, y0, x1, y1 in candidates:
+                        if y0 == 0.0:
+                            brackets = [(x0, x0)]
+                            break
+                        if y1 == 0.0:
+                            brackets = [(x1, x1)]
+                            break
+                        if (
+                            y0 is not None
+                            and y1 is not None
+                            and y0 * y1 < 0.0
+                        ):
+                            brackets = [(x0, x1)]
+                            break
+                    if brackets or (left == lower and right == upper):
+                        break
+                    span *= 4.0
+
+        if not brackets:
+            sample_count = min(
+                max(33, int(math.sqrt(maximum_iterations)) * 4), 129)
+            samples = np.linspace(lower, upper, sample_count)
+            if lower < 0.0 < upper:
+                # Attaching gases can place the physical eigen-root many
+                # orders of magnitude closer to zero than either pure column
+                # bound. Preserve the exhaustive signed-log fallback.
+                logarithmic_fraction = np.geomspace(1.0e-12, 1.0, 49)
+                samples = np.unique(np.concatenate((
+                    samples,
+                    -abs(lower) * logarithmic_fraction,
+                    np.array([0.0]),
+                    upper * logarithmic_fraction,
+                )))
+                samples = samples[(samples >= lower) & (samples <= upper)]
+            for growth in samples:
+                evaluate_growth(float(growth))
+        evaluated = sorted(
+            (growth, float(state[0][1]))
+            for growth, state in state_by_growth.items()
+            if state is not None
+        )
+        if not brackets and len(evaluated) < 2:
+            raise RuntimeError("could not evaluate temporal-growth eigen-root")
+
+        if not brackets:
+            for left_item, right_item in zip(evaluated, evaluated[1:]):
+                left_growth, left_value = left_item
+                right_growth, right_value = right_item
+                if left_value == 0.0:
+                    brackets.append((left_growth, left_growth))
+                elif left_value * right_value < 0.0:
+                    brackets.append((left_growth, right_growth))
+            if evaluated[-1][1] == 0.0:
+                brackets.append((evaluated[-1][0], evaluated[-1][0]))
         if not brackets:
             raise RuntimeError("temporal-growth compatibility root is unbracketed")
 
@@ -1570,7 +1744,7 @@ class DeterministicTwoTermBoltzmannSolver:
                 iterations = 0
             else:
                 root, result = brentq(
-                    lambda growth: state_at(growth)[0][1],
+                    lambda growth: evaluate_growth(growth),
                     bracket_lower,
                     bracket_upper,
                     xtol=absolute_tolerance,
@@ -1586,7 +1760,7 @@ class DeterministicTwoTermBoltzmannSolver:
                 compatibility,
                 minimum,
                 negative_population,
-            ), transport, matrix = state_at(root)
+            ), transport, matrix = state_by_growth.get(root) or state_at(root)
             scale = max(
                 float(np.max(np.abs(raw_values))),
                 np.finfo(float).tiny,
@@ -1633,18 +1807,34 @@ class DeterministicTwoTermBoltzmannSolver:
             minimum,
             negative_population,
             transport,
+            len(state_by_growth),
         )
 
     def solve(
         self,
         condition: TwoTermBoltzmannCondition,
         *,
+        initial_solution: TwoTermBoltzmannSolution | None = None,
         relative_tolerance: float = 1.0e-9,
         maximum_iterations: int = 200,
         damping: float = 0.7,
         maximum_tail_population_fraction: float = 1.0e-8,
     ) -> TwoTermBoltzmannSolution:
         self._validate_condition(condition)
+        if initial_solution is not None:
+            if not isinstance(initial_solution, TwoTermBoltzmannSolution):
+                raise TypeError("initial_solution must be a two-term solution")
+            if (
+                initial_solution.collision_deck_sha256
+                != self.collision_deck.payload_sha256
+                or not np.array_equal(
+                    initial_solution.distribution.grid.boundaries,
+                    self.grid.boundaries,
+                )
+            ):
+                raise ValueError(
+                    "initial_solution must use the same grid and collision deck"
+                )
         tolerance = float(relative_tolerance)
         if (
             not math.isfinite(tolerance)
@@ -1667,7 +1857,102 @@ class DeterministicTwoTermBoltzmannSolver:
 
         normalization_weights = self.grid.normalization_weights
         compatibility_direction = self.grid.cell_widths_eV
+        coulomb_coefficients = None
+        coulomb_logarithm = None
+        nonlinear_iteration_count = 0
+        nonlinear_weighted_residual = 0.0
+        growth_root_evaluations = 0
         if condition.growth_model == "temporal_growth":
+            growth_seed = (
+                None
+                if initial_solution is None
+                else initial_solution.net_growth_rate_coefficient_m3_s
+            )
+
+            def solve_temporal(frozen_coulomb=None):
+                nonlocal growth_seed, growth_root_evaluations
+                result = self._temporal_growth_eigenstate(
+                    condition,
+                    collision_source,
+                    relative_tolerance=tolerance,
+                    maximum_iterations=int(maximum_iterations),
+                    electron_electron_coefficients=frozen_coulomb,
+                    initial_growth_rate_coefficient_m3_s=growth_seed,
+                )
+                growth_seed = result[1]
+                growth_root_evaluations += result[-1]
+                return result
+
+            if condition.electron_electron_coulomb_model != "none":
+                from dataclasses import replace
+
+                from .electron_coulomb import (
+                    IsotropicElectronElectronCoulombKernel,
+                )
+
+                coulomb_kernel = IsotropicElectronElectronCoulombKernel(
+                    self.grid)
+                previous_coefficients = None
+                if initial_solution is None:
+                    state = solve_temporal()
+                    previous_values = state[0]
+                else:
+                    state = None
+                    previous_values = np.asarray(
+                        initial_solution.distribution
+                        .eepf_eV_minus_3_over_2,
+                        dtype=float,
+                    )
+                for nonlinear_iteration_count in range(
+                    1, int(maximum_iterations) + 1
+                ):
+                    evaluated = coulomb_kernel.evaluate(
+                        ElectronEnergyDistribution(
+                            self.grid, previous_values),
+                        electron_to_neutral_density_ratio=(
+                            condition.electron_to_neutral_density_ratio),
+                        gas_number_density_m3=(
+                            condition.gas_number_density_m3),
+                    )
+                    if previous_coefficients is None:
+                        frozen = evaluated
+                    else:
+                        frozen = replace(
+                            evaluated,
+                            drift_eV_m3_s=(
+                                damping * evaluated.drift_eV_m3_s
+                                + (1.0 - damping)
+                                * previous_coefficients.drift_eV_m3_s),
+                            diffusion_eV2_m3_s=(
+                                damping * evaluated.diffusion_eV2_m3_s
+                                + (1.0 - damping)
+                                * previous_coefficients.diffusion_eV2_m3_s),
+                        )
+                    new_state = solve_temporal(frozen)
+                    new_values = new_state[0]
+                    nonlinear_weighted_residual = float(np.sum(
+                        np.abs(new_values - previous_values)
+                        * normalization_weights
+                    ))
+                    state = new_state
+                    previous_values = new_values
+                    previous_coefficients = frozen
+                    if nonlinear_weighted_residual <= tolerance:
+                        break
+                else:
+                    raise RuntimeError(
+                        "electron-electron Coulomb fixed point did not converge"
+                    )
+                coulomb_coefficients = coulomb_kernel.evaluate(
+                    ElectronEnergyDistribution(self.grid, state[0]),
+                    electron_to_neutral_density_ratio=(
+                        condition.electron_to_neutral_density_ratio),
+                    gas_number_density_m3=condition.gas_number_density_m3,
+                )
+                coulomb_logarithm = float(
+                    coulomb_coefficients.coulomb_logarithm)
+            else:
+                state = solve_temporal()
             (
                 final_values,
                 final_growth,
@@ -1677,12 +1962,8 @@ class DeterministicTwoTermBoltzmannSolver:
                 minimum_raw_eepf,
                 negative_population,
                 transport,
-            ) = self._temporal_growth_eigenstate(
-                condition,
-                collision_source,
-                relative_tolerance=tolerance,
-                maximum_iterations=int(maximum_iterations),
-            )
+                _final_growth_root_evaluations,
+            ) = state
             # The bordered solve can carry signed roundoff in a vanishing
             # high-energy tail.  Projection makes the returned EEPF physical;
             # close the reported growth and its final operator on that exact
@@ -1699,7 +1980,7 @@ class DeterministicTwoTermBoltzmannSolver:
                     "temporal-growth conservation closure did not converge"
                 )
             drift, diffusion = self._transport_coefficients(
-                condition, final_growth)
+                condition, final_growth, coulomb_coefficients)
             transport = ScharfetterGummelEnergyOperator(
                 self.grid, drift, diffusion)
             final_matrix = (
@@ -1711,6 +1992,10 @@ class DeterministicTwoTermBoltzmannSolver:
                 )
             )
         else:
+            if condition.electron_electron_coulomb_model != "none":
+                raise ValueError(
+                    "electron-electron Coulomb coupling currently requires "
+                    "temporal_growth")
             drift, diffusion = self._transport_coefficients(condition, 0.0)
             transport = ScharfetterGummelEnergyOperator(
                 self.grid, drift, diffusion)
@@ -1781,4 +2066,10 @@ class DeterministicTwoTermBoltzmannSolver:
             roundoff_negative_population_fraction=negative_population,
             energy_flux_faces_reduced=fluxes,
             collision_deck_sha256=self.collision_deck.payload_sha256,
+            electron_electron_coulomb_model=(
+                condition.electron_electron_coulomb_model),
+            coulomb_logarithm=coulomb_logarithm,
+            nonlinear_iteration_count=nonlinear_iteration_count,
+            nonlinear_weighted_residual=nonlinear_weighted_residual,
+            growth_root_evaluations=growth_root_evaluations,
         )

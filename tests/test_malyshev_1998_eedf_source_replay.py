@@ -73,6 +73,52 @@ def test_source_replays_are_conservative_evidence_bounded_fixed_boards():
     assert held_out["relative_cl2_proxy_error_percentage_point"] < -15.0
 
 
+def test_isotropic_coulomb_board_is_bounded_negative_sensitivity():
+    baseline = _load(
+        "malyshev_1998_eedf_hamilton_atomic_cl_source_replay.json")
+    coulomb = _load(
+        "malyshev_1998_eedf_hamilton_atomic_cl_ee_source_replay.json")
+    assert coulomb["raw_collision_payload_sha256"] == (
+        LEGACY_SIGLO_CL2_2013_SHA256)
+    assert coulomb["atomic_momentum_payload_sha256"] == (
+        COMSOL_64_ATOMIC_CL_MOMENTUM_SHA256)
+    assert coulomb["hamilton_state_cross_sections_sha256"] == (
+        HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256)
+    assert coulomb["electron_electron_coulomb_model"] == (
+        "isotropic_classical_debye")
+    assert "electron-ion" in coulomb["comparison_boundaries"]["coulomb"]
+    assert len(coulomb["rows"]) == 6
+    assert max(
+        row["maximum_normalized_residual"] for row in coulomb["rows"]
+    ) < 2.0e-7
+    assert all(
+        12.0 < row["coulomb_logarithm"] < 14.0
+        and row["coulomb_nonlinear_iterations"] >= 1
+        and row["electron_growth_root_evaluations"] < 50
+        and row["supports_feature_depth"] is False
+        for row in coulomb["rows"]
+    )
+    baseline_held_out = next(
+        row for row in baseline["rows"]
+        if row["absorbed_fraction_sensitivity"] == 0.30
+        and row["source_power_W"] == 500.0
+    )
+    coulomb_held_out = next(
+        row for row in coulomb["rows"]
+        if row["absorbed_fraction_sensitivity"] == 0.30
+        and row["source_power_W"] == 500.0
+    )
+    assert coulomb_held_out["electron_density_percent_error"] < (
+        baseline_held_out["electron_density_percent_error"])
+    assert abs(coulomb_held_out["temperature_proxy_percent_error"]) > abs(
+        baseline_held_out["temperature_proxy_percent_error"])
+    assert coulomb_held_out["total_positive_ion_axial_flux_m2_s"] < (
+        baseline_held_out["total_positive_ion_axial_flux_m2_s"])
+    assert coulomb["supports_reactor_state_prediction"] is False
+    assert coulomb["supports_wafer_flux"] is False
+    assert coulomb["supports_feature_depth"] is False
+
+
 def test_detachment_timescale_receipt_is_low_leverage_and_reproducible():
     committed = _load("malyshev_1998_detachment_importance.json")
     assert committed == audit()

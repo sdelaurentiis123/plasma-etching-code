@@ -137,6 +137,10 @@ from .electron_kinetics import (
     normalize_eepf_jvp,
     normalize_eepf_vjp,
 )
+from .electron_coulomb import (
+    ElectronElectronCoulombCoefficients,
+    IsotropicElectronElectronCoulombKernel,
+)
 from .chlorine_lam import (
     MALYSHEV_1998_ELECTRON_DENSITY_CSV_SHA256,
     MALYSHEV_1998_ELECTRON_TEMPERATURE_CSV_SHA256,
@@ -305,8 +309,10 @@ __all__ = [
     "ElectronCollisionMomentKernel",
     "ElectronCollisionMoments",
     "ElectronCollisionProcess",
+    "ElectronElectronCoulombCoefficients",
     "ElectronEnergyDistribution",
     "ElectronEnergyGrid",
+    "IsotropicElectronElectronCoulombKernel",
     "ElectronSwarmPrediction",
     "ElectronDetailedBalanceRateCoefficient",
     "GasTemperatureArrheniusRateCoefficient",

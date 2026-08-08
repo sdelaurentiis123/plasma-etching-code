@@ -66,6 +66,12 @@ HAMILTON_ATOMIC_REPORT_NAME = (
 HAMILTON_JSON_NAME = "malyshev_1998_eedf_hamilton_source_replay.json"
 HAMILTON_CSV_NAME = "malyshev_1998_eedf_hamilton_source_replay.csv"
 HAMILTON_REPORT_NAME = "MALYSHEV_1998_EEDF_HAMILTON_SOURCE_REPLAY.md"
+HAMILTON_ATOMIC_EE_JSON_NAME = (
+    "malyshev_1998_eedf_hamilton_atomic_cl_ee_source_replay.json")
+HAMILTON_ATOMIC_EE_CSV_NAME = (
+    "malyshev_1998_eedf_hamilton_atomic_cl_ee_source_replay.csv")
+HAMILTON_ATOMIC_EE_REPORT_NAME = (
+    "MALYSHEV_1998_EEDF_HAMILTON_ATOMIC_CL_EE_SOURCE_REPLAY.md")
 ABSORBED_FRACTIONS = (0.30, 0.50, 0.70)
 SOURCE_POWERS_W = (300.0, 500.0)
 GAP_CM = 6.5
@@ -258,6 +264,7 @@ def run_replay(
     energy_cells: int,
     atomic_cl_momentum: Path | None = None,
     hamilton_dissociation: bool = False,
+    electron_electron_collisions: bool = False,
     absorbed_fractions: tuple[float, ...] = ABSORBED_FRACTIONS,
     source_powers_W: tuple[float, ...] = SOURCE_POWERS_W,
 ) -> dict[str, object]:
@@ -314,7 +321,12 @@ def run_replay(
         ),
         replay.collision_chemistry,
         heavy,
+        electron_electron_coulomb_model=(
+            "isotropic_classical_debye"
+            if electron_electron_collisions else "none"),
     )
+    if electron_electron_collisions:
+        model_variant += "_plus_isotropic_ee"
     charged, neutral, wall_energy = _providers()
     absorbed_fractions = tuple(float(value) for value in absorbed_fractions)
     source_powers_W = tuple(float(value) for value in source_powers_W)
@@ -433,6 +445,23 @@ def run_replay(
                 "relative_electron_growth_closure": (
                     solution.collision_chemistry_state
                     .relative_electron_growth_closure),
+                "electron_to_neutral_density_ratio": (
+                    densities["e"]
+                    / sum(
+                        densities[name]
+                        for name in replay.derived_deck.targets)
+                ),
+                "electron_electron_coulomb_model": (
+                    solution.electron_solution
+                    .electron_electron_coulomb_model),
+                "coulomb_logarithm": (
+                    solution.electron_solution.coulomb_logarithm),
+                "coulomb_nonlinear_iterations": (
+                    solution.electron_solution.nonlinear_iteration_count),
+                "coulomb_nonlinear_weighted_residual": (
+                    solution.electron_solution.nonlinear_weighted_residual),
+                "electron_growth_root_evaluations": (
+                    solution.electron_solution.growth_root_evaluations),
                 "solver_evaluations": solution.solver_evaluations,
                 "supports_reactor_state_prediction": False,
                 "supports_wafer_flux": False,
@@ -487,12 +516,22 @@ def run_replay(
             "ion_wall_energy_eV_sensitivity": ION_WALL_ENERGY_EV,
         },
         "missing_physics": list(replay.missing_reactor_channels),
+        "electron_electron_coulomb_model": (
+            "isotropic_classical_debye"
+            if electron_electron_collisions else "none"),
         "comparison_boundaries": {
             "rf_heating": (
                 "Hagelaar-Pitchford high-frequency two-term operator at "
                 "13.56 MHz with modern RMS E/N convention; this is a "
                 "quasi-stationary local-field sensitivity, not a "
                 "time-periodic or nonlocal ICP electron-heating solution"
+            ),
+            "coulomb": (
+                "Hagelaar-Pitchford 2005 isotropic electron-electron "
+                "Fokker-Planck term with classical Debye Coulomb logarithm; "
+                "electron-ion and anisotropic momentum terms remain absent"
+                if electron_electron_collisions else
+                "electron-electron and electron-ion Coulomb collisions absent"
             ),
             "temperature": (
                 "2/3 mean E is a diagnostic proxy, not the exact Malyshev "
@@ -516,7 +555,12 @@ def _write(result: dict[str, object], output_directory: Path) -> None:
     output_directory.mkdir(parents=True, exist_ok=True)
     atomic = result["atomic_momentum_payload_sha256"] is not None
     hamilton = "hamilton" in result["model_variant"]
-    if hamilton and atomic:
+    electron_electron = "isotropic_ee" in result["model_variant"]
+    if hamilton and atomic and electron_electron:
+        json_name = HAMILTON_ATOMIC_EE_JSON_NAME
+        csv_name = HAMILTON_ATOMIC_EE_CSV_NAME
+        report_name = HAMILTON_ATOMIC_EE_REPORT_NAME
+    elif hamilton and atomic:
         json_name = HAMILTON_ATOMIC_JSON_NAME
         csv_name = HAMILTON_ATOMIC_CSV_NAME
         report_name = HAMILTON_ATOMIC_REPORT_NAME
@@ -563,6 +607,15 @@ def _write(result: dict[str, object], output_directory: Path) -> None:
         "- Atomic-Cl ionization, electron detachment from Cl-, and tracked "
         "excited-state kinetics are absent.\n"
     )
+    coulomb_boundary = (
+        "- Isotropic electron-electron Coulomb drift/diffusion is included "
+        "with the classical Debye logarithm. Electron-ion and anisotropic "
+        "electron-electron momentum terms remain absent; this is a "
+        "density-coupling sensitivity, not a complete Coulomb model.\n"
+        if electron_electron else
+        "- Electron-electron and electron-ion Coulomb collisions are "
+        "absent.\n"
+    )
     report = f"""# Malyshev 1998 deterministic Cl2 EEPF source replay
 
 ## Verdict
@@ -593,7 +646,7 @@ than optimized.
 - The Stafford wall regression is extrapolated in Cl/Cl2 from the direct
   `{DIRECT_WALL_RATIO_DOMAIN}` marker interval to
   `{DECLARED_WALL_RATIO_DOMAIN}`. Every other Stafford domain remains strict.
-{atomic_boundary}- The global axial flux is not yet a local wafer flux,
+{atomic_boundary}{coulomb_boundary}- The global axial flux is not yet a local wafer flux,
   and it carries no species-resolved IED/IAD.
 - Raw collision bytes are not committed. Replay identity is the SHA-256 in the
   JSON receipt.
@@ -609,6 +662,7 @@ def main() -> None:
     parser.add_argument("collision_deck", type=Path)
     parser.add_argument("--atomic-cl-momentum", type=Path)
     parser.add_argument("--hamilton-dissociation", action="store_true")
+    parser.add_argument("--electron-electron-collisions", action="store_true")
     parser.add_argument("--energy-cells", type=int, default=400)
     parser.add_argument(
         "--absorbed-fraction",
@@ -629,6 +683,8 @@ def main() -> None:
         energy_cells=arguments.energy_cells,
         atomic_cl_momentum=arguments.atomic_cl_momentum,
         hamilton_dissociation=arguments.hamilton_dissociation,
+        electron_electron_collisions=(
+            arguments.electron_electron_collisions),
         absorbed_fractions=(
             ABSORBED_FRACTIONS
             if arguments.absorbed_fraction is None

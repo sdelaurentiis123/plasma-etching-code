@@ -81,6 +81,14 @@ observable. The current piecewise-constant inelastic reconstruction remains
 first order; a piecewise-exponential upgrade is the performance/accuracy path
 before large physical decks are graded.
 
+The density-dependent isotropic electron--electron Fokker--Planck term from
+Hagelaar--Pitchford equations 34--41 is also landed with exact
+piecewise-constant `A1/A2/A3` moments, a classical Debye Coulomb logarithm,
+and analytic batch JVP/VJP operators. Particle conservation closes to
+roundoff and the finite-volume energy defect converges below `0.3%` in the
+declared refinement gate. Electron-ion collisions and anisotropic Coulomb
+momentum remain explicitly absent.
+
 ### Required solver physics
 
 A simple local-field EEDF and scalar mobility are insufficient for the direct
@@ -173,6 +181,15 @@ Jacobian numerically. It is deterministic and cacheable, but it is not yet the
 released differentiable path. The next implementation gate is the bordered
 implicit JVP/VJP for the EEPF eigen-root plus the eight-equation reactor
 residual, followed by batched condition sharding.
+
+The nonlinear EEPF now uses solve-local continuation only as a numerical seed;
+every state still passes the independent positivity, tail, growth, and
+conservation gates, and an exhaustive global eigen-root bracket remains the
+fallback. On a density-coupled manufactured condition this reduced growth-root
+evaluations from `479` to `11`. The six-condition Hamilton/atomic-Cl/e-e Lam
+sensitivity completes in `98 s`. Its held-out point does not improve the
+reactor grade, so e-e thermalization is ruled out as the dominant missing
+boundary rather than tuned to an observable.
 
 Replace supplied `Te` with the converged EEDF and integrate every accepted
 collision channel over that distribution. Complete electron energy losses,

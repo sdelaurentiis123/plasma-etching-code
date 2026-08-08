@@ -308,6 +308,8 @@ class EEDFChlorineAbsorbedPowerModel:
         electron_solver: DeterministicTwoTermBoltzmannSolver,
         collision_chemistry: ElectronCollisionChemistry,
         heavy_reaction_network: ReactionNetwork,
+        *,
+        electron_electron_coulomb_model: str = "none",
     ):
         if not isinstance(
             electron_solver, DeterministicTwoTermBoltzmannSolver
@@ -330,9 +332,15 @@ class EEDFChlorineAbsorbedPowerModel:
                 )
         if electron_solver.collision_deck is not collision_chemistry.collision_deck:
             raise ValueError("electron solver and chemistry must share one deck")
+        if electron_electron_coulomb_model not in {
+            "none", "isotropic_classical_debye"
+        }:
+            raise ValueError("unknown electron-electron Coulomb model")
         self.electron_solver = electron_solver
         self.collision_chemistry = collision_chemistry
         self.heavy_reaction_network = heavy_reaction_network
+        self.electron_electron_coulomb_model = (
+            electron_electron_coulomb_model)
         self._species_index = {
             name: index
             for index, name in enumerate(heavy_reaction_network.species_names)
@@ -348,6 +356,7 @@ class EEDFChlorineAbsorbedPowerModel:
         wall_energy_provider: PositiveIonWallEnergyProvider,
         maximum_tail_population_fraction: float,
         electron_cache: dict[tuple[float, ...], TwoTermBoltzmannSolution] | None = None,
+        electron_continuation: dict[str, TwoTermBoltzmannSolution] | None = None,
     ) -> dict[str, object]:
         state = np.exp(np.asarray(log_state, dtype=float))
         densities = dict(zip(_STATE_ORDER, state[:6]))
@@ -358,6 +367,8 @@ class EEDFChlorineAbsorbedPowerModel:
         target_fractions = {
             name: densities[name] / total_target_density for name in targets
         }
+        coulomb_enabled = (
+            self.electron_electron_coulomb_model != "none")
         electron_condition = TwoTermBoltzmannCondition(
             reduced_electric_field_Td=reduced_field_Td,
             gas_temperature_K=condition.gas_temperature.value,
@@ -365,6 +376,13 @@ class EEDFChlorineAbsorbedPowerModel:
             growth_model="temporal_growth",
             angular_field_frequency_over_density_m3_s=(
                 condition.angular_field_frequency_over_density_m3_s),
+            electron_electron_coulomb_model=(
+                self.electron_electron_coulomb_model),
+            electron_to_neutral_density_ratio=(
+                densities["e"] / total_target_density
+                if coulomb_enabled else 0.0),
+            gas_number_density_m3=(
+                total_target_density if coulomb_enabled else None),
         )
         electron_key = (
             reduced_field_Td,
@@ -372,6 +390,9 @@ class EEDFChlorineAbsorbedPowerModel:
             *(target_fractions[name] for name in targets),
             maximum_tail_population_fraction,
             condition.angular_field_frequency_over_density_m3_s,
+            electron_condition.electron_electron_coulomb_model,
+            electron_condition.electron_to_neutral_density_ratio,
+            electron_condition.gas_number_density_m3,
         )
         electron_solution = (
             None if electron_cache is None else electron_cache.get(electron_key)
@@ -379,6 +400,11 @@ class EEDFChlorineAbsorbedPowerModel:
         if electron_solution is None:
             electron_solution = self.electron_solver.solve(
                 electron_condition,
+                initial_solution=(
+                    None
+                    if electron_continuation is None
+                    else electron_continuation.get("latest")
+                ),
                 relative_tolerance=1.0e-8,
                 maximum_iterations=200,
                 maximum_tail_population_fraction=(
@@ -386,6 +412,8 @@ class EEDFChlorineAbsorbedPowerModel:
             )
             if electron_cache is not None:
                 electron_cache[electron_key] = electron_solution
+        if electron_continuation is not None:
+            electron_continuation["latest"] = electron_solution
         chemistry = self.collision_chemistry.evaluate(
             electron_solution, electron_condition, densities)
         equivalent_temperature = (
@@ -588,6 +616,12 @@ class EEDFChlorineAbsorbedPowerModel:
         electron_cache: dict[
             tuple[float, ...], TwoTermBoltzmannSolution
         ] = {}
+        # This state is also solve-local and is only a numerical seed. Every
+        # EEPF is re-solved and must pass the same independent conservation,
+        # positivity, and tail gates. The scalar eigen-root retains its global
+        # exhaustive bracket as a fallback when neighboring states are not
+        # sufficiently close.
+        electron_continuation: dict[str, TwoTermBoltzmannSolution] = {}
 
         def residual(log_state):
             return self._ledger(
@@ -599,6 +633,7 @@ class EEDFChlorineAbsorbedPowerModel:
                 maximum_tail_population_fraction=(
                     maximum_tail_population_fraction),
                 electron_cache=electron_cache,
+                electron_continuation=electron_continuation,
             )["residual"]
 
         result = least_squares(
@@ -618,6 +653,7 @@ class EEDFChlorineAbsorbedPowerModel:
             wall_energy_provider=wall_energy_provider,
             maximum_tail_population_fraction=maximum_tail_population_fraction,
             electron_cache=electron_cache,
+            electron_continuation=electron_continuation,
         )
         max_residual = float(np.max(np.abs(ledger["residual"])))
         if (
