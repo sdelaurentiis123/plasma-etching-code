@@ -24,6 +24,7 @@ from typing import Mapping
 
 import numpy as np
 from scipy import sparse
+from scipy.integrate import simpson
 from scipy.optimize import brentq
 from scipy.sparse.linalg import spsolve
 
@@ -857,11 +858,45 @@ class TwoTermBoltzmannCondition:
 
 
 @dataclass(frozen=True)
+class TwoTermElectronTransportMoments:
+    """Local two-term flux moments with deliberately bounded evidence."""
+
+    flux_reduced_mobility_m_inv_V_inv_s_inv: float
+    scalar_reduced_diffusion_m_inv_s_inv: float
+    reduced_field_power_gain_eV_m3_s: float
+    supports_flux_transport_moments: bool = True
+    supports_direct_swarm_grade: bool = False
+    supports_reactor_state_prediction: bool = False
+    supports_wafer_flux: bool = False
+    supports_feature_depth: bool = False
+
+    def __post_init__(self):
+        values = np.asarray((
+            self.flux_reduced_mobility_m_inv_V_inv_s_inv,
+            self.scalar_reduced_diffusion_m_inv_s_inv,
+            self.reduced_field_power_gain_eV_m3_s,
+        ), dtype=float)
+        if (
+            np.any(~np.isfinite(values))
+            or np.any(values[:2] <= 0.0)
+            or values[2] < 0.0
+        ):
+            raise ValueError("invalid two-term electron transport moments")
+        for name, value in zip((
+            "flux_reduced_mobility_m_inv_V_inv_s_inv",
+            "scalar_reduced_diffusion_m_inv_s_inv",
+            "reduced_field_power_gain_eV_m3_s",
+        ), values):
+            object.__setattr__(self, name, float(value))
+
+
+@dataclass(frozen=True)
 class TwoTermBoltzmannSolution:
     """Converged local-field two-term EEPF with explicit evidence limits."""
 
     distribution: ElectronEnergyDistribution
     collision_moments: tuple[ElectronCollisionMoments, ...]
+    transport_moments: TwoTermElectronTransportMoments
     reduced_electric_field_Td: float
     gas_temperature_K: float
     growth_model: str
@@ -1081,6 +1116,69 @@ class DeterministicTwoTermBoltzmannSolver:
                     )
                     source[destination, parent] += in_factor * event_integral
         return sparse.csr_matrix(source), tuple(kernels)
+
+    def _transport_moments(
+        self,
+        condition: TwoTermBoltzmannCondition,
+        values: np.ndarray,
+        growth_rate_coefficient_m3_s: float,
+    ) -> TwoTermElectronTransportMoments:
+        """Evaluate Hagelaar--Pitchford flux moments on the solved EEPF."""
+        boundaries = self.grid.boundaries
+        centers = self.grid.cell_centers_eV
+        momentum_boundary, _ = self._momentum_cross_sections(
+            condition, boundaries[1:])
+        effective_boundary = momentum_boundary + np.divide(
+            growth_rate_coefficient_m3_s,
+            ELECTRON_SPEED_PER_SQRT_EV_M_S * np.sqrt(boundaries[1:]),
+        )
+        momentum_center, _ = self._momentum_cross_sections(
+            condition, centers)
+        effective_center = momentum_center + np.divide(
+            growth_rate_coefficient_m3_s,
+            ELECTRON_SPEED_PER_SQRT_EV_M_S * np.sqrt(centers),
+        )
+        if (
+            np.any(effective_boundary <= 0.0)
+            or np.any(effective_center <= 0.0)
+        ):
+            raise ValueError(
+                "nonpositive effective momentum cross section in moments"
+            )
+
+        derivative = np.concatenate((
+            np.array([0.0]),
+            np.diff(values) / np.diff(centers),
+            np.array([0.0]),
+        ))
+        mobility_integrand = np.zeros_like(boundaries)
+        mobility_integrand[1:] = (
+            derivative[1:]
+            * boundaries[1:]
+            / effective_boundary
+        )
+        reduced_mobility = -(
+            ELECTRON_SPEED_PER_SQRT_EV_M_S / 3.0
+        ) * simpson(mobility_integrand, x=boundaries)
+
+        # The EEPF is piecewise constant in this solver.  Midpoint integration
+        # is therefore the representation-consistent scalar-diffusion moment.
+        reduced_diffusion = (
+            ELECTRON_SPEED_PER_SQRT_EV_M_S / 3.0
+        ) * float(np.sum(
+            values
+            * centers
+            / effective_center
+            * self.grid.cell_widths_eV
+        ))
+        reduced_field_V_m2 = condition.reduced_electric_field_Td * 1.0e-21
+        return TwoTermElectronTransportMoments(
+            flux_reduced_mobility_m_inv_V_inv_s_inv=reduced_mobility,
+            scalar_reduced_diffusion_m_inv_s_inv=reduced_diffusion,
+            reduced_field_power_gain_eV_m3_s=(
+                reduced_mobility * reduced_field_V_m2 ** 2
+            ),
+        )
 
     @staticmethod
     def _solve_normalized_nullspace(
@@ -1398,6 +1496,8 @@ class DeterministicTwoTermBoltzmannSolver:
             )
             for kernel in kernels
         )
+        transport_moments = self._transport_moments(
+            condition, final_values, final_growth)
         left, right = transport._face_coefficients(0)
         fluxes = np.zeros(self.grid.cell_count + 1)
         fluxes[1:-1] = (
@@ -1411,6 +1511,7 @@ class DeterministicTwoTermBoltzmannSolver:
         return TwoTermBoltzmannSolution(
             distribution=distribution,
             collision_moments=moments,
+            transport_moments=transport_moments,
             reduced_electric_field_Td=condition.reduced_electric_field_Td,
             gas_temperature_K=condition.gas_temperature_K,
             growth_model=condition.growth_model,

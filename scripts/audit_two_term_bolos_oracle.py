@@ -134,6 +134,36 @@ def main() -> int:
         oracle_eepf = oracle.converge(
             oracle.maxwell(2.0), rtol=1.0e-10, maxn=300)
         oracle_mean = float(oracle.mean_energy(oracle_eepf))
+        # BOLOS 0.2's convenience methods assume at least one number-changing
+        # process.  This manufactured deck has none, so evaluate the identical
+        # documented flux moments directly on BOLOS's own EEPF/interpolants.
+        oracle_derivative = np.concatenate((
+            np.array([0.0]),
+            np.diff(oracle_eepf) / np.diff(oracle.cenergy),
+            np.array([0.0]),
+        ))
+        mobility_integrand = (
+            oracle_derivative * oracle.benergy / oracle.sigma_m
+        )
+        mobility_integrand[0] = 0.0
+        oracle_mobility = float(
+            -(bolos_solver.GAMMA / 3.0)
+            * scipy.integrate.simpson(
+                mobility_integrand, x=oracle.benergy)
+        )
+        oracle_sigma_center = np.zeros_like(oracle.cenergy)
+        for oracle_target, oracle_process in oracle.iter_momentum():
+            oracle_sigma_center += (
+                oracle_target.density
+                * oracle_process.interp(oracle.cenergy)
+            )
+        oracle_diffusion = float(
+            (bolos_solver.GAMMA / 3.0)
+            * scipy.integrate.simpson(
+                oracle_eepf * oracle.cenergy / oracle_sigma_center,
+                x=oracle.cenergy,
+            )
+        )
         oracle_rate = float(oracle.rate(
             oracle_eepf,
             oracle.search("manufactured", "manufactured(v=1)"),
@@ -147,6 +177,14 @@ def main() -> int:
         normalized_oracle_eepf = normalize_eepf(
             grid, np.maximum(oracle_eepf, 0.0))
         petch_mean = float(petch_solution.distribution.mean_energy_eV)
+        petch_mobility = (
+            petch_solution.transport_moments
+            .flux_reduced_mobility_m_inv_V_inv_s_inv
+        )
+        petch_diffusion = (
+            petch_solution.transport_moments
+            .scalar_reduced_diffusion_m_inv_s_inv
+        )
         petch_rate = float(
             petch_solution.collision_moments[1].rate_coefficient_m3_s)
         rows.append({
@@ -155,6 +193,16 @@ def main() -> int:
             "oracle_mean_energy_eV": oracle_mean,
             "mean_energy_relative_error": _relative_error(
                 petch_mean, oracle_mean),
+            "petch_flux_reduced_mobility_m_inv_V_inv_s_inv": (
+                petch_mobility),
+            "oracle_flux_reduced_mobility_m_inv_V_inv_s_inv": (
+                oracle_mobility),
+            "flux_reduced_mobility_relative_error": _relative_error(
+                petch_mobility, oracle_mobility),
+            "petch_scalar_reduced_diffusion_m_inv_s_inv": petch_diffusion,
+            "oracle_scalar_reduced_diffusion_m_inv_s_inv": oracle_diffusion,
+            "scalar_reduced_diffusion_relative_error": _relative_error(
+                petch_diffusion, oracle_diffusion),
             "petch_excitation_rate_m3_s": petch_rate,
             "oracle_excitation_rate_m3_s": oracle_rate,
             "excitation_rate_relative_error": _relative_error(
@@ -193,6 +241,8 @@ def main() -> int:
         "finest_grid_pass": (
             rows[-1]["mean_energy_relative_error"] < 0.01
             and rows[-1]["excitation_rate_relative_error"] < 0.01
+            and rows[-1]["flux_reduced_mobility_relative_error"] < 0.01
+            and rows[-1]["scalar_reduced_diffusion_relative_error"] < 0.01
         ),
         "supports_direct_swarm_grade": False,
         "supports_reactor_state_prediction": False,

@@ -61,11 +61,21 @@ elastic gas exchange, field heating, and temporal-growth normalization. The
 zero-field elastic limit recovers the gas Maxwellian and every returned state
 keeps reactor/wafer/depth evidence false.
 
+Temporal growth is now solved as a conservative bordered scalar eigen-root,
+not a damped fixed point. A local-only 16-process legacy-SIGLO Cl2 replay
+crosses from net attachment to net ionization without losing positivity and
+agrees with LGPL BOLOS mean energy from `0.362%` at 50 Td to `0.089%` at
+760 Td. The raw collision bytes remain outside the repository and this replay
+does not upgrade the legacy deck to current physical evidence.
+
 The independent manufactured-deck receipt at
 `results/curated/reactor_global_kinetics/two_term_bolos_oracle_v1.json`
 converges monotonically toward local LGPL BOLOS 0.2. At 2400 cells the mean
-energy residual is `0.458%`, excitation-rate residual `0.634%`, and weighted
-EEPF L1 residual `0.122%`. This passes the numerical two-term operator gate;
+energy residual is `0.458%`, excitation-rate residual `0.634%`, flux reduced
+mobility residual `0.634%`, scalar reduced diffusion residual `0.403%`, and
+weighted EEPF L1 residual `0.122%`. These transport moments also close the
+local field-power gain needed by a reactor power ledger. This passes the
+numerical two-term operator gate;
 it does not pass a physical collision set or any measurement-defined swarm
 observable. The current piecewise-constant inelastic reconstruction remains
 first order; a piecewise-exponential upgrade is the performance/accuracy path

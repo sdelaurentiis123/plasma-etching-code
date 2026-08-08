@@ -11,8 +11,10 @@ The comparison uses a repository-defined manufactured elastic-plus-excitation
 deck, not LXCat data. BOLOS 0.2 is an LGPL local oracle and is not a petch
 dependency or redistributed artifact. At 2400 fixed energy cells, petch and
 BOLOS agree to 0.458% in mean energy and 0.634% in excitation rate; the
-weighted EEPF L1 difference is 0.122%. The monotone refinement trend is part of
-the gate. The remaining discrepancy is consistent with petch's current
+flux-reduced-mobility residual is 0.634%, the scalar-reduced-diffusion
+residual is 0.403%, and the weighted EEPF L1 difference is 0.122%. The
+monotone refinement trend is part of the gate. The remaining discrepancy is
+consistent with petch's current
 piecewise-constant inelastic source reconstruction versus BOLOS's
 piecewise-exponential reconstruction.
 

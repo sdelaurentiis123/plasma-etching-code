@@ -250,6 +250,13 @@ def test_two_term_zero_field_elastic_limit_is_gas_maxwellian():
         1.5 * gas_thermal_energy_eV, rel=2.0e-3)
     assert solution.iteration_count == 1
     assert solution.maximum_equation_residual_m3_s < 2.0e-25
+    assert (
+        solution.transport_moments.reduced_field_power_gain_eV_m3_s
+        == 0.0
+    )
+    assert solution.transport_moments.supports_flux_transport_moments
+    assert not solution.transport_moments.supports_direct_swarm_grade
+    assert not solution.transport_moments.supports_reactor_state_prediction
     assert solution.particle_growth_closure_error_m3_s == pytest.approx(0.0)
     assert solution.supports_collision_boltzmann_solve
     assert not solution.supports_direct_swarm_grade
@@ -428,6 +435,8 @@ def test_independent_bolos_oracle_receipt_converges_without_claim_inflation():
     finest = receipt["rows"][-1]
     assert finest["mean_energy_relative_error"] < 0.01
     assert finest["excitation_rate_relative_error"] < 0.01
+    assert finest["flux_reduced_mobility_relative_error"] < 0.01
+    assert finest["scalar_reduced_diffusion_relative_error"] < 0.01
     assert finest["eepf_weighted_l1"] < 0.002
     assert not receipt["supports_direct_swarm_grade"]
     assert not receipt["supports_reactor_state_prediction"]
