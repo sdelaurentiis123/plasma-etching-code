@@ -6,6 +6,8 @@ from petch.reactor_global import (
     E_CHARGE_C,
     ELECTRON_MASS_KG,
     INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT,
+    KEMANECI_ELASTIC_ENERGY_APPROXIMATION,
+    STATIONARY_TARGET_ELASTIC_ENERGY_MOMENT,
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
@@ -556,6 +558,106 @@ def test_incident_energy_moment_rejects_unrelated_rate_or_scalar_override():
                 evidence_kind="derived",
             ),
             electron_energy_loss_eV=2.0,
+            **common,
+        )
+
+
+def test_elastic_energy_moment_uses_same_momentum_transfer_cross_section():
+    electron = Species(
+        name="e", mass_amu=5.48579909065e-4, charge_number=-1,
+        composition={}, role="electron", source="CODATA")
+    molecule = Species(
+        name="Cl2", mass_amu=70.906, charge_number=0,
+        composition={"Cl": 2}, role="neutral", source="manufactured")
+    coefficient = ElectronMaxwellianCrossSectionRateCoefficient(
+        electron_energy_eV=(0.0, 100.0),
+        cross_section_m2=(2.5e-20, 2.5e-20),
+        threshold_eV=0.0,
+        relative_uncertainty=None,
+        source="manufactured complete momentum-transfer cross section",
+        evidence_kind="derived",
+    )
+    target_mass_kg = 70.906 * 1.66053906892e-27
+    common = dict(
+        reactants={"e": 1, "Cl2": 1},
+        products={"e": 1, "Cl2": 1},
+        kinetic_orders={"e": 1, "Cl2": 1},
+        rate_coefficient=coefficient,
+        electron_energy_loss_eV=None,
+        elastic_target_mass_kg=target_mass_kg,
+        source="manufactured elastic transfer",
+    )
+    exact = Reaction(
+        name="manufactured_exact_elastic",
+        electron_energy_loss_moment=(
+            STATIONARY_TARGET_ELASTIC_ENERGY_MOMENT),
+        **common,
+    )
+    kemaneci = Reaction(
+        name="manufactured_kemaneci_elastic",
+        electron_energy_loss_moment=(
+            KEMANECI_ELASTIC_ENERGY_APPROXIMATION),
+        **common,
+    )
+    densities = {"e": 2.0e16, "Cl2": 3.0e20}
+    context = RateContext(2.0)
+    transfer_fraction = (
+        2.0 * ELECTRON_MASS_KG * target_mass_kg
+        / (ELECTRON_MASS_KG + target_mass_kg) ** 2
+    )
+    expected_exact = (
+        transfer_fraction
+        * coefficient.incident_energy_moment_eV_m3_s(context)
+        * densities["e"]
+        * densities["Cl2"]
+    )
+    assert exact.electron_energy_loss_rate_eV_m3_s(
+        densities, context) == pytest.approx(
+            expected_exact, rel=3.0e-15, abs=0.0)
+
+    expected_kemaneci = (
+        3.0 * context.electron_temperature_eV
+        * ELECTRON_MASS_KG / target_mass_kg
+        * coefficient.coefficient_si(context)
+        * densities["e"]
+        * densities["Cl2"]
+    )
+    assert kemaneci.electron_energy_loss_rate_eV_m3_s(
+        densities, context) == pytest.approx(
+            expected_kemaneci, rel=3.0e-15, abs=0.0)
+    assert expected_kemaneci / expected_exact == pytest.approx(
+        0.7500116051257543, rel=2.0e-15, abs=0.0)
+
+    network = ReactionNetwork(
+        species=(electron, molecule), reactions=(exact, kemaneci))
+    assert network.has_complete_electron_energy_ledger
+
+
+def test_elastic_energy_moment_rejects_missing_mass_and_changed_target():
+    coefficient = ElectronMaxwellianCrossSectionRateCoefficient(
+        electron_energy_eV=(0.0, 100.0),
+        cross_section_m2=(1.0e-20, 1.0e-20),
+        threshold_eV=0.0,
+        relative_uncertainty=None,
+        source="manufactured momentum-transfer table",
+        evidence_kind="derived",
+    )
+    common = dict(
+        name="invalid_elastic_transfer",
+        reactants={"e": 1, "Cl2": 1},
+        kinetic_orders={"e": 1, "Cl2": 1},
+        rate_coefficient=coefficient,
+        electron_energy_loss_eV=None,
+        electron_energy_loss_moment=(
+            STATIONARY_TARGET_ELASTIC_ENERGY_MOMENT),
+        source="manufactured invalid elastic transfer",
+    )
+    with pytest.raises(ValueError, match="elastic electron-energy transfer"):
+        Reaction(products={"e": 1, "Cl2": 1}, **common)
+    with pytest.raises(ValueError, match="elastic electron-energy transfer"):
+        Reaction(
+            products={"e": 1, "Cl": 2},
+            elastic_target_mass_kg=70.906 * 1.66053906892e-27,
             **common,
         )
 

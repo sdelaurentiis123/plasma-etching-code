@@ -78,8 +78,8 @@ support an atomic-accuracy, electron-power, wafer-flux, or depth claim.
 
 ## Next gates
 
-1. Recover the exact elastic cross-section files used by the official
-   implementation and compare them with the primary Griffin/Gregorio sources.
+1. Compare the recovered, hash-pinned elastic cross-section files with the
+   primary Griffin/Gregorio sources. The raw assets are not redistributed.
 2. Use the landed physical detailed-balance operator with evaluated level
    energies and degeneracies. The COMSOL 44-row non-elastic reproduction is
    complete, but its unit weights and atomic gaps are quarantined. The two

@@ -35,6 +35,12 @@ _EVIDENCE_KINDS = {
 INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT = (
     "incident_electron_kinetic_energy"
 )
+STATIONARY_TARGET_ELASTIC_ENERGY_MOMENT = (
+    "stationary_target_elastic_momentum_transfer_energy"
+)
+KEMANECI_ELASTIC_ENERGY_APPROXIMATION = (
+    "kemaneci_maxwellian_elastic_energy_approximation"
+)
 
 
 def _immutable_numeric_mapping(
@@ -1275,6 +1281,7 @@ class Reaction:
     source: str
     electron_energy_loss_moment: str | None = None
     domain: str = "volume"
+    elastic_target_mass_kg: float | None = None
 
     def __post_init__(self):
         reactants = _immutable_numeric_mapping(
@@ -1295,11 +1302,21 @@ class Reaction:
                 and not np.isfinite(self.electron_energy_loss_eV)
             )
             or self.electron_energy_loss_moment not in {
-                None, INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT,
+                None,
+                INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT,
+                STATIONARY_TARGET_ELASTIC_ENERGY_MOMENT,
+                KEMANECI_ELASTIC_ENERGY_APPROXIMATION,
             }
             or (
                 self.electron_energy_loss_eV is not None
                 and self.electron_energy_loss_moment is not None
+            )
+            or (
+                self.elastic_target_mass_kg is not None
+                and (
+                    not np.isfinite(self.elastic_target_mass_kg)
+                    or self.elastic_target_mass_kg <= ELECTRON_MASS_KG
+                )
             )
             or not str(self.source).strip()
         ):
@@ -1317,7 +1334,10 @@ class Reaction:
             object.__setattr__(
                 self, "electron_energy_loss_eV",
                 float(self.electron_energy_loss_eV))
-        if self.electron_energy_loss_moment is not None:
+        if (
+            self.electron_energy_loss_moment
+            == INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT
+        ):
             if (
                 not isinstance(
                     self.rate_coefficient,
@@ -1333,6 +1353,49 @@ class Reaction:
                     "removal reaction driven by the same Maxwellian cross "
                     "section"
                 )
+            if self.elastic_target_mass_kg is not None:
+                raise ValueError(
+                    "an incident-electron removal moment has no elastic target"
+                )
+        elif self.electron_energy_loss_moment in {
+            STATIONARY_TARGET_ELASTIC_ENERGY_MOMENT,
+            KEMANECI_ELASTIC_ENERGY_APPROXIMATION,
+        }:
+            heavy_reactants = {
+                name: amount for name, amount in reactants.items()
+                if name != "e"
+            }
+            heavy_products = {
+                name: amount for name, amount in products.items()
+                if name != "e"
+            }
+            if (
+                not isinstance(
+                    self.rate_coefficient,
+                    ElectronMaxwellianCrossSectionRateCoefficient,
+                )
+                or reactants.get("e") != 1.0
+                or products.get("e") != 1.0
+                or orders.get("e") != 1.0
+                or heavy_reactants != heavy_products
+                or len(heavy_reactants) != 1
+                or orders != reactants
+                or self.elastic_target_mass_kg is None
+                or self.domain != "volume"
+            ):
+                raise ValueError(
+                    "elastic electron-energy transfer requires one unchanged "
+                    "heavy target, its mass, and the same Maxwellian "
+                    "momentum-transfer cross section"
+                )
+            object.__setattr__(
+                self,
+                "elastic_target_mass_kg",
+                float(self.elastic_target_mass_kg),
+            )
+        elif self.elastic_target_mass_kg is not None:
+            raise ValueError(
+                "an elastic target mass requires an elastic energy moment")
 
     def event_rate_m3_s(
             self, densities_m3: Mapping[str, float],
@@ -1375,6 +1438,45 @@ class Reaction:
             if not np.isfinite(moment) or moment < 0.0:
                 raise FloatingPointError("nonfinite electron-energy loss rate")
             return float(moment)
+        if (
+            self.electron_energy_loss_moment
+            == STATIONARY_TARGET_ELASTIC_ENERGY_MOMENT
+        ):
+            coefficient = self.rate_coefficient
+            target_mass = self.elastic_target_mass_kg
+            transfer_fraction = (
+                2.0 * ELECTRON_MASS_KG * target_mass
+                / (ELECTRON_MASS_KG + target_mass) ** 2
+            )
+            moment = (
+                transfer_fraction
+                * coefficient.incident_energy_moment_eV_m3_s(context)
+            )
+            for name, order in self.kinetic_orders.items():
+                if name not in densities_m3:
+                    raise KeyError(f"missing density for {name}")
+                density = float(densities_m3[name])
+                if not np.isfinite(density) or density < 0.0:
+                    raise ValueError(
+                        "densities must be finite and nonnegative")
+                moment *= density ** order
+            if not np.isfinite(moment) or moment < 0.0:
+                raise FloatingPointError("nonfinite electron-energy loss rate")
+            return float(moment)
+        if (
+            self.electron_energy_loss_moment
+            == KEMANECI_ELASTIC_ENERGY_APPROXIMATION
+        ):
+            energy_per_event = (
+                3.0
+                * context.electron_temperature_eV
+                * ELECTRON_MASS_KG
+                / self.elastic_target_mass_kg
+            )
+            return float(
+                energy_per_event
+                * self.event_rate_m3_s(densities_m3, context)
+            )
         raise ValueError(
             f"electron-energy ledger is incomplete for reaction {self.name}")
 

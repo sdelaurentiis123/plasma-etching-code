@@ -88,9 +88,12 @@ ionization rows retain their separate evidence boundaries.
 A separate detailed source-reproduction rung now replays Kemaneci's 36
 printed non-elastic forward reactions with ten heavy states plus electrons.
 It resolves the paper's charge-exchange numbering anomaly on the record and
-enforces the printed `0.5--10 eV` domain. It is not yet the complete 46-feature
-source model: two elastic channels and eight detailed-balance reverses remain
-open, and no fit exponent has been imported as an electron-event energy.
+enforces the printed `0.5--10 eV` domain. A second, explicitly named COMSOL
+mode reproduces all 44 non-elastic implementation rows, including the eight
+reverse expressions and reaction-20 divergence. It preserves COMSOL's unit
+statistical weights and incorrect absolute atomic gaps only as replay evidence.
+The two elastic channels remain open, and no fit exponent has been imported as
+an electron-event energy.
 
 Neutral wall transport is also now a versioned state-dependent provider. On
 every nonlinear ledger evaluation it obtains the current `n_Cl/n_Cl2`,

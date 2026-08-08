@@ -53,12 +53,20 @@ topology:
   states;
 - all printed electron-rate fits are bounded to `0.5--10 eV`.
 
-It does not supply a fundamental thermochemical ledger. Its 500-dpi-audited
-Figure 10 places both ground-state Cl2 and ground-state Cl at zero, so the
-species-level difference in its Equation 17 cannot reproduce the NIST
-`D0(Cl2)=2.4793 eV`. Its ground-state dissociation rate fit contains an
-`8.84 eV` exponential parameter, independently demonstrating why fit
-parameters and physical event energies must remain separate.
+It does not supply a fundamental thermochemical ledger. The 600-dpi-audited
+Figure 10 places ground-state Cl2 at zero and ground-state Cl at `1.25 eV` per
+atom, encoding an approximate `2.50 eV` molecular asymptote. The official
+COMSOL reproduction nevertheless uses `ediss=4 eV`, and its ground-state
+dissociation rate fit contains an `8.84 eV` exponential parameter. The
+evaluated physical value is `D0(Cl2)=2.4793 eV`. These three distinct numbers
+demonstrate why a level coordinate, implementation event input, fit parameter,
+and physical threshold must remain separate.
+
+The raw COMSOL model also uses Figure 10's absolute `1.35/10.17 eV` atomic
+coordinates directly as excitation gaps from ground Cl, despite that ground
+state being at `1.25 eV`. Wang's primary fine-structure calculation gives the
+physical first gap as `0.109 eV`. The exact COMSOL replay therefore remains a
+separate code-verification mode and cannot supply the evaluated energy ledger.
 
 The implementation therefore preserves Kemaneci as a future
 source-reproduction tier and uses NIST/evaluated thresholds and collision
@@ -82,6 +90,21 @@ hold:
 
 The network electron-power sum fails closed if any reaction lacks either a
 fixed event energy or an allowed energy moment.
+
+Elastic momentum transfer now has two explicit, non-interchangeable modes:
+
+- `STATIONARY_TARGET_ELASTIC_ENERGY_MOMENT` evaluates
+  `2 me M/(me+M)^2 <sigma_m v E>` from the same momentum-transfer table. This
+  is collision-exact for a stationary heavy target and applies the stricter
+  energy-kernel support gate.
+- `KEMANECI_ELASTIC_ENERGY_APPROXIMATION` reproduces Equation 18 as
+  `3 Te (me/M) <sigma_m v>` and applies the rate-kernel support gate.
+
+For a constant cross section and heavy Cl2 target, the Kemaneci form is about
+25 percent below the collision-exact stationary-target moment because
+collision events are speed-weighted. Neither mode upgrades an uncertain
+cross-section table; the evaluated Cl/Cl2 momentum-transfer evidence remains
+open and is documented in `REACTOR_CHLORINE_ELASTIC_GATE_2026-08-07.md`.
 
 The audit also repaired a threshold-node defect: a cross section printed at
 exactly the physical threshold is now retained, while a zero node is inserted
