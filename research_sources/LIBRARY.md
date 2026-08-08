@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 126 sources by topic
+## Index — 127 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -115,6 +115,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`guha-2008-cl-wall`](library/guha-2008-cl-wall.md) | Guha, Donnelly & Pu, direct Cl/Cl2 interaction measurements on conditioned anodized Al | PRIMARY FULL TEXT + FIGURES 13--14 VISUALLY AUDITED AT 450 DPI |
 | [`hamilton-2018-cl2-dissociation`](library/hamilton-2018-cl2-dissociation.md) | Hamilton et al., state-resolved Cl2 electron-impact dissociation | PRIMARY FULL TEXT + OFFICIAL CC-BY DATASET; FIGURES 4--5 600-DPI AUDIT; RATE REPRODUCTION PASS |
 | [`hopwood-1994-rf-coupling`](library/hopwood-1994-rf-coupling.md) | Hopwood, measured planar-ICP RF coupling efficiency | PRIMARY AUTHOR ABSTRACT READ |
+| [`kemaneci-2014-chlorine-global`](library/kemaneci-2014-chlorine-global.md) | Kemaneci et al., detailed continuous/pulsed chlorine global model and energy-ledger topology | PRIMARY FULL TEXT + EQUATIONS 13--18, TABLE 4, FIGURE 10 PIXEL-AUDITED AT 500 DPI |
 | [`lam-direct-drive-patents`](library/lam-direct-drive-patents.md) | Lam DirectDrive and RF-reference patent family | PRIMARY PATENT FULL TEXT READ |
 | [`lam-etch-platforms-2026`](library/lam-etch-platforms-2026.md) | Lam public etch-platform architecture/application map | PRIMARY MANUFACTURER RECORDS READ |
 | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | Lee & Lieberman, conserved Ar/O2/Cl2 global plasma model and Ar/Cl2 rate decks | PRIMARY FULL TEXT + EQUATIONS/TABLES 2--3 VISUALLY AUDITED |
@@ -236,6 +237,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Atomic-Cl measured ionization cross section, `12.967633 eV` threshold, and ±14% scale uncertainty | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 48-point 300-dpi-audited table integrated exactly over a Maxwellian; rejects use when the unmeasured >200 eV kernel tail is material |
 | Cl2 evaluated total-ionization cross section and unresolved `Cl2+`/`Cl+` branch | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 29-point 300-dpi-audited aggregate rate; no scalar uncertainty invented because source datasets disagree beyond combined uncertainty; cannot drive species-resolved sheath delivery |
 | Cl2 dissociative-attachment particle and incident-energy moments | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 42-point 500-dpi-audited Table 16 integrated only over its printed 0.05--11.8 eV support; `<sigma v>` and `<sigma v E>` remain separate, missing EEDF tails are exposed, and no complete reactor-rate claim is allowed |
+| Detailed chlorine electron-energy ledger topology and source-reproduction boundary | [`kemaneci-2014-chlorine-global`](library/kemaneci-2014-chlorine-global.md) | equations split chemical, wall, and elastic losses; Figure 10 cannot encode the Cl2 bond energy because both Cl and Cl2 ground states are zero, so physical thresholds/moments remain independently sourced |
 | Eight-state Cl2 neutral-dissociation rates and excitation-energy ledger | [`hamilton-2018-cl2-dissociation`](library/hamilton-2018-cl2-dissociation.md) | exact 50,000-point OPJ arrays reduced to bounded Maxwellian rates; 0.4443% maximum error against authors' supplied total; all reactions conserve `e + Cl2 -> e + 2Cl` |
 | Cl2 predictive electron-collision evidence boundary | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | measured/evaluated ionization, dissociation, and attachment can advance; legacy electronic-excitation rates remain uncertain because the review found no measurements and poor calculation agreement |
 | Chlorine electron-power fail-closed boundary | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | fitted rate exponents are not silently reinterpreted as physical event energies; Tables 4--5 and their primary cross-section sources must close the ledger |

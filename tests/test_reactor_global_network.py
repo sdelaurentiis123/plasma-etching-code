@@ -5,6 +5,7 @@ from petch.reactor_global import (
     CM3_TO_M3,
     E_CHARGE_C,
     ELECTRON_MASS_KG,
+    INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT,
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
@@ -257,7 +258,52 @@ def test_tabulated_cross_section_maxwellian_integral_is_analytic():
         * retained_kernel
     )
     assert coefficient.coefficient_si(
-        RateContext(temperature)) == pytest.approx(expected, rel=3.0e-15)
+        RateContext(temperature)) == pytest.approx(
+            expected, rel=3.0e-15, abs=0.0)
+
+
+def test_tabulated_cross_section_incident_energy_moment_is_analytic():
+    cross_section = 2.5e-20
+    maximum_energy = 100.0
+    temperature = 2.0
+    coefficient = ElectronMaxwellianCrossSectionRateCoefficient(
+        electron_energy_eV=(0.0, maximum_energy),
+        cross_section_m2=(cross_section, cross_section),
+        threshold_eV=0.0,
+        relative_uncertainty=None,
+        source="manufactured constant cross section",
+        evidence_kind="derived",
+    )
+    support_ratio = maximum_energy / temperature
+    retained_kernel = 1.0 - 0.5 * (
+        support_ratio ** 2 + 2.0 * support_ratio + 2.0
+    ) * np.exp(-support_ratio)
+    expected = (
+        2.0
+        * temperature
+        * cross_section
+        * np.sqrt(8.0 * E_CHARGE_C * temperature
+                  / (np.pi * ELECTRON_MASS_KG))
+        * retained_kernel
+    )
+    assert coefficient.incident_energy_moment_eV_m3_s(
+        RateContext(temperature)) == pytest.approx(
+            expected, rel=3.0e-15, abs=0.0)
+
+
+def test_energy_moment_applies_stricter_tail_gate_than_particle_rate():
+    coefficient = ElectronMaxwellianCrossSectionRateCoefficient(
+        electron_energy_eV=(0.0, 34.0),
+        cross_section_m2=(1.0e-20, 1.0e-20),
+        threshold_eV=0.0,
+        relative_uncertainty=None,
+        source="manufactured energy-tail gate",
+        evidence_kind="derived",
+    )
+    context = RateContext(2.0)
+    assert coefficient.coefficient_si(context) > 0.0
+    with pytest.raises(ValueError, match="incident-energy Maxwellian"):
+        coefficient.incident_energy_moment_eV_m3_s(context)
 
 
 def test_tabulated_cross_section_uses_physical_threshold():
@@ -332,18 +378,23 @@ def test_tabulated_cross_section_support_integrates_rate_and_energy_moments():
     )
     context = RateContext(temperature)
     assert support.tabulated_rate_coefficient_si(context) == pytest.approx(
-        expected_rate, rel=3.0e-15)
+        expected_rate, rel=3.0e-15, abs=0.0)
     assert (
         support.tabulated_incident_energy_moment_eV_m3_s(context)
-        == pytest.approx(expected_energy, rel=3.0e-15)
+        == pytest.approx(expected_energy, rel=3.0e-15, abs=0.0)
     )
     assert support.rate_kernel_missing_fractions(temperature) == (
         pytest.approx(0.0, abs=0.0),
-        pytest.approx((ratio + 1.0) * np.exp(-ratio), rel=2.0e-15),
+        pytest.approx(
+            (ratio + 1.0) * np.exp(-ratio), rel=2.0e-15, abs=0.0),
     )
     assert support.incident_energy_kernel_missing_fractions(temperature) == (
         pytest.approx(0.0, abs=0.0),
-        pytest.approx(1.0 - energy_retained, rel=2.0e-15),
+        pytest.approx(
+            0.5 * (ratio ** 2 + 2.0 * ratio + 2.0) * np.exp(-ratio),
+            rel=2.0e-15,
+            abs=0.0,
+        ),
     )
 
 
@@ -373,9 +424,9 @@ def test_tabulated_temperature_rate_is_exact_at_nodes_and_positive_between():
         evidence_kind="derived",
     )
     assert coefficient.coefficient_si(RateContext(1.0)) == pytest.approx(
-        1.0e-18, rel=2.0e-15)
+        1.0e-18, rel=2.0e-15, abs=0.0)
     assert coefficient.coefficient_si(RateContext(2.0)) == pytest.approx(
-        1.0e-15, rel=2.0e-15)
+        1.0e-15, rel=2.0e-15, abs=0.0)
     between = coefficient.coefficient_si(RateContext(3.0))
     assert 1.0e-15 < between < 1.0e-13
 
@@ -409,5 +460,117 @@ def test_incomplete_electron_energy_ledger_fails_closed():
     with pytest.raises(ValueError, match="electron-energy ledger is incomplete"):
         network.electron_power_loss_density_W_m3(
             {"A": 3.0, "B": 7.0},
+            RateContext(1.0),
+        )
+
+
+def test_particle_removing_collision_uses_same_cross_section_energy_moment():
+    electron = Species(
+        name="e", mass_amu=5.48579909065e-4, charge_number=-1,
+        composition={}, role="electron", source="CODATA")
+    molecule = Species(
+        name="Cl2", mass_amu=70.906, charge_number=0,
+        composition={"Cl": 2}, role="neutral", source="manufactured")
+    atom = Species(
+        name="Cl", mass_amu=35.453, charge_number=0,
+        composition={"Cl": 1}, role="neutral", source="manufactured")
+    anion = Species(
+        name="Cl-", mass_amu=35.453, charge_number=-1,
+        composition={"Cl": 1}, role="negative_ion", source="manufactured")
+    coefficient = ElectronMaxwellianCrossSectionRateCoefficient(
+        electron_energy_eV=(0.0, 100.0),
+        cross_section_m2=(2.5e-20, 2.5e-20),
+        threshold_eV=0.0,
+        relative_uncertainty=None,
+        source="manufactured complete attachment cross section",
+        evidence_kind="derived",
+    )
+    reaction = Reaction(
+        name="manufactured_dissociative_attachment",
+        reactants={"e": 1, "Cl2": 1},
+        products={"Cl": 1, "Cl-": 1},
+        kinetic_orders={"e": 1, "Cl2": 1},
+        rate_coefficient=coefficient,
+        electron_energy_loss_eV=None,
+        electron_energy_loss_moment=(
+            INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT),
+        source="manufactured Boltzmann moment",
+    )
+    network = ReactionNetwork(
+        species=(electron, molecule, atom, anion),
+        reactions=(reaction,),
+    )
+    densities = {
+        "e": 2.0e16,
+        "Cl2": 3.0e20,
+        "Cl": 0.0,
+        "Cl-": 0.0,
+    }
+    context = RateContext(2.0)
+    expected = (
+        E_CHARGE_C
+        * coefficient.incident_energy_moment_eV_m3_s(context)
+        * densities["e"]
+        * densities["Cl2"]
+    )
+    assert network.has_complete_electron_energy_ledger
+    assert network.electron_power_loss_density_W_m3(
+        densities, context) == pytest.approx(
+            expected, rel=3.0e-15, abs=0.0)
+
+
+def test_incident_energy_moment_rejects_unrelated_rate_or_scalar_override():
+    common = dict(
+        name="invalid_moment",
+        reactants={"e": 1, "Cl2": 1},
+        products={"Cl": 1, "Cl-": 1},
+        kinetic_orders={"e": 1, "Cl2": 1},
+        electron_energy_loss_moment=(
+            INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT),
+        source="manufactured invalid moment",
+    )
+    with pytest.raises(ValueError, match="same Maxwellian cross section"):
+        Reaction(
+            rate_coefficient=(
+                ElectronArrheniusRateCoefficient.from_cm3_per_s(
+                    1.0e-8,
+                    activation_eV=1.0,
+                    source="unrelated fit",
+                )
+            ),
+            electron_energy_loss_eV=None,
+            **common,
+        )
+    with pytest.raises(ValueError, match="invalid reactor reaction"):
+        Reaction(
+            rate_coefficient=ElectronMaxwellianCrossSectionRateCoefficient(
+                electron_energy_eV=(0.0, 100.0),
+                cross_section_m2=(1.0e-20, 1.0e-20),
+                threshold_eV=0.0,
+                relative_uncertainty=None,
+                source="manufactured complete table",
+                evidence_kind="derived",
+            ),
+            electron_energy_loss_eV=2.0,
+            **common,
+        )
+
+
+def test_electron_power_ledger_rejects_unknown_density_species():
+    reaction = Reaction(
+        name="A_to_B_with_energy",
+        reactants={"A": 1},
+        products={"B": 1},
+        kinetic_orders={"A": 1},
+        rate_coefficient=ConstantRateCoefficient.from_per_second(
+            2.0, source="manufactured"),
+        electron_energy_loss_eV=1.0,
+        source="manufactured",
+    )
+    network = ReactionNetwork(
+        species=_toy_species()[:2], reactions=(reaction,))
+    with pytest.raises(KeyError, match="unknown density species"):
+        network.electron_power_loss_density_W_m3(
+            {"A": 3.0, "B": 7.0, "ghost": 1.0},
             RateContext(1.0),
         )

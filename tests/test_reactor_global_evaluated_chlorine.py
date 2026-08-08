@@ -260,10 +260,16 @@ def test_hamilton_state_rates_match_compact_table_at_every_node():
         for state, _ in HAMILTON_2018_CL2_DISSOCIATION_STATES:
             actual = providers[state].coefficient_si(context)
             expected = float(row[f"{state}_m3_s"])
-            assert actual == pytest.approx(expected, rel=4.0e-15)
+            # Exact table nodes round once through exp(log(k)); the measured
+            # maximum over all 1,896 state/node pairs is 6.50e-15 relative.
+            assert actual == pytest.approx(
+                expected, rel=8.0e-15, abs=0.0)
             actual_sum += actual
         assert actual_sum == pytest.approx(
-            float(row["summed_state_rate_m3_s"]), rel=4.0e-15)
+            float(row["summed_state_rate_m3_s"]),
+            rel=4.0e-15,
+            abs=0.0,
+        )
 
 
 @pytest.mark.parametrize("temperature", [0.299, 5.001])
@@ -336,4 +342,4 @@ def test_hamilton_particle_deck_sums_exact_state_resolved_rate(temperature):
         for reaction in upgraded.reactions
         if reaction.name.startswith("e_Cl2_dissociation_")
     )
-    assert actual == pytest.approx(expected, rel=4.0e-15)
+    assert actual == pytest.approx(expected, rel=4.0e-15, abs=0.0)

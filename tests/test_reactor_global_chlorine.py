@@ -19,18 +19,22 @@ def test_chlorine_particle_deck_replays_table2_rates_in_si():
     assert coefficients["e_Cl2_nondissociative_ionization"] == pytest.approx(
         9.21e-8 * np.exp(-12.9 / temperature) * CM3_TO_M3,
         rel=2.0e-16,
+        abs=0.0,
     )
     assert coefficients["e_Cl2_dissociative_ionization"] == pytest.approx(
         3.88e-9 * np.exp(-15.5 / temperature) * CM3_TO_M3,
         rel=2.0e-16,
+        abs=0.0,
     )
     assert coefficients["e_Cl2_ion_pair_production"] == pytest.approx(
         8.55e-10 * np.exp(-12.65 / temperature) * CM3_TO_M3,
         rel=2.0e-16,
+        abs=0.0,
     )
     assert coefficients["e_Cl2_dissociation"] == pytest.approx(
         3.80e-8 * np.exp(-3.824 / temperature) * CM3_TO_M3,
         rel=2.0e-16,
+        abs=0.0,
     )
     ratio = temperature / 12.96
     atomic_ionization_coefficients = (
@@ -51,18 +55,22 @@ def test_chlorine_particle_deck_replays_table2_rates_in_si():
         )
         * CM3_TO_M3,
         rel=2.0e-16,
+        abs=0.0,
     )
     assert coefficients["Clminus_Cl2plus_neutralization"] == pytest.approx(
         5.0e-14,
         rel=2.0e-16,
+        abs=0.0,
     )
     assert coefficients["Clminus_Clplus_neutralization"] == pytest.approx(
         5.0e-14,
         rel=2.0e-16,
+        abs=0.0,
     )
     assert coefficients["e_Clminus_detachment"] == pytest.approx(
         2.63e-8 * np.exp(-5.37 / temperature) * CM3_TO_M3,
         rel=2.0e-16,
+        abs=0.0,
     )
 
 

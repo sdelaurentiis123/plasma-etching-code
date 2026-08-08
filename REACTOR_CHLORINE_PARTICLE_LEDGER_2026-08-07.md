@@ -122,6 +122,8 @@ fitted to the Malyshev dissociation board or to any etched depth.
    measured/evaluated momentum-transfer data and uncertainty when available;
    until then preserve this source-reproduction boundary.
 2. Close physical electron energy losses before solving `T_e` from absorbed
-   power.
+   power. The first infrastructure rung now separates fixed event energies
+   from the same-cross-section `<sigma v E>` moment required by electron-
+   removing collisions; see `REACTOR_CHLORINE_ENERGY_LEDGER_2026-08-07.md`.
 3. Only then grade the Lam Alliance dissociation board as held-out reactor
    evidence and emit a feature-plane boundary.

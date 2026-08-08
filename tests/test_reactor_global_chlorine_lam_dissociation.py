@@ -77,9 +77,9 @@ def test_eq7_inversion_reproduces_marker_and_rate_ledger_exactly():
     relative = marker.relative_cl2_density_percent / 100.0
 
     assert state.hamilton_neutral_dissociation_rate_m3_s == pytest.approx(
-        expected_hamilton)
+        expected_hamilton, rel=4.0e-15, abs=0.0)
     assert state.lee_dissociative_attachment_rate_m3_s == pytest.approx(
-        expected_attachment)
+        expected_attachment, rel=4.0e-15, abs=0.0)
     assert state.electron_driven_cl2_destruction_frequency_s_inv == (
         pytest.approx(expected_frequency))
     assert state.required_wall_return_frequency_s_inv == pytest.approx(

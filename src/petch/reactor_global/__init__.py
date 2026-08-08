@@ -110,6 +110,7 @@ from .evaluated_chlorine import (
 from .network import (
     CM3_TO_M3,
     E_CHARGE_C,
+    INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT,
     ELECTRON_MASS_KG,
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
@@ -169,6 +170,7 @@ __all__ = [
     "CM3_TO_M3",
     "ECONOMOU_CHLORINE_REDUCED_DIFFUSIVITY_M_INV_S",
     "E_CHARGE_C",
+    "INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT",
     "ELECTRON_MASS_KG",
     "ATOMIC_CHLORINE_IONIZATION_THRESHOLD_EV",
     "HAMILTON_2018_CL2_DISSOCIATION_STATES",

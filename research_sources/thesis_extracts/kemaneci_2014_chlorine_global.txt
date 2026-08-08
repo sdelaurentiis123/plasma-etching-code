@@ -1,0 +1,1238 @@
+Global (volume-averaged) model of inductively coupled
+chlorine plasma : influence of Cl wall recombination and
+external heating on continuous and pulse-modulated plasmas
+Citation for published version (APA):
+Kemaneci, E. H., Carbone, E. A. D., Booth, J. P., Graef, W. A. A. D., Dijk, van, J., & Kroesen, G. M. W. (2014).
+Global (volume-averaged) model of inductively coupled chlorine plasma : influence of Cl wall recombination and
+external heating on continuous and pulse-modulated plasmas. Plasma Sources Science and Technology, 23(4),
+045002-1/14. https://doi.org/10.1088/0963-0252/23/4/045002
+
+
+
+
+DOI:
+10.1088/0963-0252/23/4/045002
+
+
+Document status and date:
+Published: 01/08/2014
+
+
+Document Version:
+Publisher’s PDF, also known as Version of Record (includes final page, issue and volume numbers)
+
+
+Please check the document version of this publication:
+• A submitted manuscript is the version of the article upon submission and before peer-review. There can be
+important differences between the submitted version and the official published version of record. People
+interested in the research are advised to contact the author for the final version of the publication, or visit the
+DOI to the publisher's website.
+• The final author version and the galley proof are versions of the publication after peer review.
+• The final published version features the final layout of the paper including the volume, issue and page
+numbers.
+Link to publication
+
+
+
+
+General rights
+Copyright and moral rights for the publications made accessible in the public portal are retained by the authors and/or other copyright owners
+and it is a condition of accessing publications that users recognise and abide by the legal requirements associated with these rights.
+
+       • Users may download and print one copy of any publication from the public portal for the purpose of private study or research.
+       • You may not further distribute the material or use it for any profit-making activity or commercial gain
+       • You may freely distribute the URL identifying the publication in the public portal.
+
+If the publication is distributed under the terms of Article 25fa of the Dutch Copyright Act, indicated by the “Taverne” license above, please
+follow below link for the End User Agreement:
+www.tue.nl/taverne
+
+Take down policy
+If you believe that this document breaches copyright please contact us at:
+openaccess@tue.nl
+providing details and we will investigate your claim.
+
+
+
+Download date: 08. Aug. 2026
+Home   Search    Collections   Journals   About   Contact us    My IOPscience
+
+
+
+
+       Global (volume-averaged) model of inductively coupled chlorine plasma: Influence of Cl wall
+
+       recombination and external heating on continuous and pulse-modulated plasmas
+
+
+
+       This content has been downloaded from IOPscience. Please scroll down to see the full text.
+
+       2014 Plasma Sources Sci. Technol. 23 045002
+
+       (http://iopscience.iop.org/0963-0252/23/4/045002)
+
+       View the table of contents for this issue, or go to the journal homepage for more
+
+
+
+
+       Download details:
+
+
+       IP Address: 131.155.108.56
+       This content was downloaded on 19/08/2014 at 13:46
+
+
+
+       Please note that terms and conditions apply.
+                                                                                                   Plasma Sources Science and Technology
+Plasma Sources Sci. Technol. 23 (2014) 045002 (14pp)                                                    doi:10.1088/0963-0252/23/4/045002
+
+
+
+
+Global (volume-averaged) model of
+inductively coupled chlorine plasma:
+Influence of Cl wall recombination and
+external heating on continuous and
+pulse-modulated plasmas
+Efe Kemaneci1 , Emile Carbone1,2 , Jean-Paul Booth3 , Wouter Graef1 ,
+Jan van Dijk1 and Gerrit Kroesen1
+1
+  Department of Applied Physics, Eindhoven University of Technology, P O Box 513, 5600 MB
+Eindhoven, The Netherlands
+2
+  Univ. Grenoble Alpes , CNRS, CEA-Leti Minatec, LTM, F-38054 Grenoble Cedex, France
+3
+  LPP, CNRS, Ecole Polytechnique, UPMC, Paris XI, 91128 Palaiseau, France
+E-mail: efekemaneci@gmail.com
+
+Received 12 March 2014, revised 17 April 2014
+Accepted for publication 14 May 2014
+Published 12 June 2014
+
+Abstract
+An inductively coupled radio-frequency plasma in chlorine is investigated via a global
+(volume-averaged) model, both in continuous and square wave modulated power input modes.
+After the power is switched off (in a pulsed mode) an ion–ion plasma appears. In order to
+model this phenomenon, a novel quasi-neutrality implementation is proposed. Several distinct
+Cl wall recombination probability measurements exist in the literature, and their effect on the
+simulation data is compared. We also investigated the effect of the gas temperature that was
+imposed over the range 300–1500 K, not calculated self-consistently. Comparison with
+published experimental data from several sources for both continuous and pulsed modes shows
+good agreement with the simulation results.
+
+Keywords: plasma physics, atomic and molecular physics, chemical physics and
+physical chemistry
+(Some figures may appear in colour only in the online journal)
+
+
+
+1. Introduction                                                       scales [4]. The use of pulsed plasmas allows different process
+                                                                      regimes to be accessed, in which the gas fragmentation and
+Chlorine-based inductively coupled plasmas are widely used            the reactive neutral to ion flux ratios to the substrate can be
+for surface etching in the fabrication of microelectronics [1].       controlled.
+The low dissociation energy of chlorine leads to significant               Chlorine atoms can only recombine to form Cl2 molecules
+dissociation rates in these plasmas. Moreover, the large              at the chamber walls, with a rate that is described by a wall
+electron affinity of atomic chlorine leads to high degrees of         recombination probability. This process has a major effect
+electronegativity. In applications a wide range of operation          on the atomic and molecular chlorine densities in the plasma.
+parameters is used, with a pressure range 1–100 mTorr and             This recombination rate has been measured by several groups,
+power input variation within 100–1000 W. Furthermore, the             which have shown that it can depend on numerous parameters
+power is applied either continuously or in a modulated mode,          such as the atomic to molecular chlorine density ratio [5], the
+with periods in the microsecond [2, 3] or millisecond time-           gas temperature [6], the pressure [7], the wall material [6, 8],
+
+0963-0252/14/045002+14$33.00                                      1                            © 2014 IOP Publishing Ltd Printed in the UK
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                             E Kemaneci et al
+
+and even the surface coating history [9]. The role of the               volume is irrelevant and only the net transport at the plasma–
+recombination probability has been studied via models by Lee            sheath boundary is influential. The transport phenomena
+et al [10] and is further discussed by Meeks et al [11] with            at the boundary is effectively taken into account, based on
+experimental comparisons. However, a detailed discussion is             a combination of analytic models [14]. This eradicates
+mostly absent and an up to date analysis is necessary due to            the computational load due to the transport and allows a
+recent improvements in the chemical kinetics [5, 12, 13]. The           significantly larger number of distinct species to be taken into
+gas temperature is another parameter that can have a major              account compared with spatially resolved models.
+effect on the plasma characteristics due to its impact on the gas            In the model, we assume that the power is distributed
+density, the volume chemical reaction rates and the interactions        uniformly inside the chamber and the plasma is spatially
+at the plasma boundary. Nonetheless, the plasma sensitivity             homogeneous, i.e. the spatial particle profiles do not change
+to a gas temperature variation has not been analysed up to              significantly compared with their volume averages. We use
+now. In this study, we address these issues by providing a              a two-temperature description: one temperature is assigned
+detailed analysis of the plasma response with respect to the            to electrons and the other to heavy particles both with the
+recombination probability and the gas temperature.                      assumption of Maxwellian distribution functions. Governing
+     Global (volume-averaged) models [1, 14] are simple but             equations include particle balance equations for various
+powerful tools to analyse systematic trends. They have                  species and the electron energy balance equation; all are
+less computational load and simulation results are easily               integrated over the volume [14]. Particle balance equations
+analysed compared with spatially resolved hybrid (kinetic-              determine all particle densities except for the electrons.
+fluid) models [15, 16]. Global models have been employed                The electron density is calculated from the quasi-neutrality
+for a long time in simple [17, 18] and detailed forms of                assumption. This assumption, however, is implemented
+chemical kinetics [10, 19]. Recently, they were compared                in different ways for the continuous and modulated power
+with various other models, where their validity has been                inputs due to faster recombination of electrons compared with
+discussed in detail [20, 21], while practical recommendations           millisecond scale modulation periods. The quasi-neutrality
+are also provided [22]. Time-dependent global plasma models             implementation in the power modulation is explained in
+can be also used to investigate the effect of power modulation          section 4. The electron temperature is derived from the electron
+[23]. Good agreement with the measurements is reported in               energy balance equation, while the heavy particle temperature
+modulated argon plasmas [24, 25], yet benchmarking against              is provided externally.
+measurements is sparse in chlorine plasmas [25]. Here we
+attempt to fill this gap by providing extensive comparison with         2.1. Setup
+experimental data available in the literature.
+     Thorsteinsson et al recently published a series of                 We simulate several different experimental setups composed
+global model studies of radio-frequency chlorine plasma in              of cylindrical chambers and particularly the one presented
+continuous [19, 26, 27] and in modulated power input [25],              in [28]. In this setup, the plasma forms inside a (hollow)
+with a modulation period in the microseconds range. In                  cylindrical chamber with length L = 1.0 × 10−1 m and
+this study, we additionally include spin–orbit-excited chlorine         radius R = 2.75 × 10−1 m. The chamber wall is composed
+atoms, and we use updated cross-sections for vibrational                of hard anodized aluminum. Inductive power coupling is
+excitation of molecular chlorine. Heavy particle quenching              realized by an external four-turn planar spiral coil operated
+of the vibrational levels are also incorporated. Furthermore,           at a radio-frequency of f = 13.56 MHz. Pure Cl2 gas at
+we extend the modulation period to the millisecond range, for           Tin = 300 K is introduced into the chamber with a mass flow
+which an ion–ion plasma appears after the power is cut-off.             rate of Q = 50 sccm.
+     In this work we investigate an inductively coupled
+chlorine plasma [28], with focus on the role of the wall                2.2. Particle balance equation
+recombination probability and the gas temperature. We
+employ a global model in the investigation that covers both             For a species i, the volume-averaged particle balance equation
+continuous and millisecond scaled modulated power inputs,               can be expressed by the relation [14]
+while comparison with available experimental data is also
+                                                                                                   dni
+provided. The simulations are performed using the modular                                              = Si ,                         (1)
+plasma simulation platform Plasimo [29]. We firstly introduce                                      dt
+the setup and global model in section 2. The chemical reactions         where ni is the particle density and Si is the source. The source
+and species are discussed in section 3. Section 4 contains              is located either inside the plasma or at its boundary. These
+the details about the implementations of the quasi-neutrality           locations distinctively characterize the nature of the source.
+constraints and results are presented in section 5.                     Source terms inside the volume are defined by the chemical
+                                                                        reactions among the species, whereas at the boundary, they are
+2. Global (volume-averaged) model                                       determined by the chamber wall and the particle transport. In
+                                                                        order to denote these two source types, we use the subscripts
+Global models concern volume-averaged quantities under the              V and W that symbolize the volume and the wall, respectively.
+assumption that the sheath length is negligible [1]. For                The source includes the reactions, in which the species i is
+these quantities, particle or energy transport inside the plasma        produced and destructed. The former is represented by {P }
+
+                                                                    2
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                  E Kemaneci et al
+
+and the latter by {D}. Based on these notations, the source is            these models, they are defined by a number of spatial ion
+written as [19]                                                           profiles, that are combined by an ansatz [22]. As a caveat;
+                                                                        the electronegativity modifies the Bohm velocity with respect
+                                            
+                     j            j                                   to the electropositive plasmas [31] and the modification is
+              Si =            
+                           Ri  −        Ri  ,          (2)             internally taken into account in the ratios. We adapt the ansatz
+                   j ∈{P }       j ∈{D}     
+                                V,W              V,W                      hp = (h2a,p + h2c,p )1/2 [19], which combines a low-pressure
+                                                                          electropositive edge and a flat-topped electronegative profile:
+                                           j
+where j is a particular reaction and Ri is the rate of the reaction
+involving the species i.                                                                       0.86 (3 + L/2λ)−1/2
+                                                                                      hL,a,p ≈                     ,
+                                                                                                      1 + α0
+                           The volume reactions are composed                                   0.8 (4 + R/λ)−1/2                           (6)
+2.2.1. Reaction rates.                                                                hR,a,p ≈                   ,
+of the chemical interactions between the individual plasma                                          1 + α0                  −1
+                                                                                                             1/2       −3/2
+species, and their rates are distinctively characterized by the                       hc,p ≈ γ 1/2 + γ 1/2 np∗ np n−               ,
+reactants. For a volume reaction j , the rate is expressed by the
+relation                           νj i                                 where γ = Te /Th , α0 ≈ (3/2)α is the central electronegativity
+                      R j V = k j    ni ,                    (3)         [10], n− is the total negative ion density, and
+                                       l
+                                                                                                         15 vp
+         j
+where k is the rate coefficient and νj i is the stoichiometric                                   np∗ =             .                       (7)
+                                                                                                         56 kr,p λ
+coefficient of reactant i. The rate coefficient either depends on
+the electron temperature Te or the gas temperature Th when all            Here vp = (8kB Th /π mp )1/2 represents its mean thermal
+the reactants are heavy particles.                                        velocity, where kB is the Boltzmann constant, and kr,p is the
+      Unlike the volume reactions, the wall reactions are                 rate coefficient of mutual neutralization with negative ions
+induced by the chamber wall and effectively derived from the              (reactions 25 and 27 in table 4). The mean free path is
+particle transport. These reactions are uniquely defined by
+                                                                                                         kB Th
+the particle charge and state. The positive ions recombine                                          λ=         ,                           (8)
+at the wall and return back to the plasma as neutrals. On                                                 Pσ
+the other hand, the potential drop at the sheath traps most of            where P is the gas pressure and σ is the effective scattering
+the negative ions; therefore, their wall losses are negligible.           cross-section. We set an average value for the cross-section
+The neutral particles diffuse towards the boundary, where they            σ = 7 × 10−19 m2 based on [19].
+recombine or de-excite at the chamber wall and return back                     The neutral particles are lost at the boundary due to the
+into the volume. In addition to these processes, the convection           outward diffusive flux. Their collisions with the wall provoke
+due to mass flow carries all the species out of the plasma and            reactions that are unique for each species and the consequent
+feeds the chamber with the input gas.                                     products return to the plasma. A superscript N is introduced
+      For a positive ion labelled by p, the ion flux towards the          to represent their rates and for a neutral particle i, the wall
+boundary   explicitly depends on the density located at the wall          reaction rate is given by [32, 33]
+    
+np W . This wall density is coupled    to its volume-averaged                                                        
+                                                                                        N
+                                                                                                     0 2V (2 − γi ) −1
+equivalent np by a ratio hp : np W = np hp . Furthermore,                              Ri W = ni          +                 ,         (9)
+it is assumed that the ion reaches the Bohm velocity uBp =                                            Di       Avi γi
+(eTe /mp )1/2 at the wall, where mp identifies the mass. Hence,           where Di is the diffusion coefficient [1], vi the mean neutral
+the ion flux towards the boundary is defined by the expression            velocity, and γi is the wall reaction probability. The effective
+np hp uBp . With the assumption that every ion that collides with         diffusion length 0 for a cylinder is [33]
+the wall neutralizes, the ion wall loss rate is conventionally                                  
+expressed by the relation [30]                                                                     π 2  2.405 2 −1/2
+                                                                                        0 =            +                   .         (10)
+                                     Aeff,p                                                        L         R
+                      Rp+ W = uBp np        ,                 (4)
+                                       V                                       The mass flux simply feeds the chamber with Cl2 on one
+where V is the plasma volume, Aeff,p is the effective wall area           side and drains the plasma species on the other. In this respect,
+and superscript ‘+’ denotes the positive ions. The effective              the Cl2 flow-in rate is formulated as
+wall area represents the total plasma surface and embodies the
+                                                                                               in 
+                                                                                                           Patm
+ratio hp , which, in general differs in radial and axial surfaces.                            RCl 2 W
+                                                                                                      = CQ          ,                     (11)
+                                                                                                           V kB Tin
+For a cylinder, it satisfies
+                                                                          where C = 1.6667 × 10−8 is a conversion unit from sccm to
+                Aeff,p = 2π(R hL,p + LRhR,p ),
+                                  2
+                                                               (5)        m3 s−1 , Q is the mass flow rate in sccm, Patm is the atmospheric
+                                                                          pressure and Tin = 300 K is the temperature of the input gas.
+where hL,p , hR,p are the axial and the radial edge ratios,               Similarly, a particle i flows out of the chamber at a rate
+respectively.
+     The ion ratios, hp , are derived from analytic models of                                             Patm Th
+                                                                                             Riout W = CQ         ni .                   (12)
+electronegative radio-frequency plasmas [30]. According to                                                 V P Tin
+
+                                                                      3
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                       E Kemaneci et al
+
+Table 1. The power transfer efficiency β and gas temperature Th (K)          where keiEl
+                                                                                         is the elastic rate coefficient and mi represents the
+measurements at various input power P (W) and pressure P                     mass of a particle. The elastic rate coefficient is computed from
+(mTorr).
+                                                                             the corresponding collision cross-section and is a function of
+ Par. \ P        2 mTorr 5 mTorr 10 mTorr 20 mTorr 50 mTorr                  the electron temperature.
+ β(P = 100) 0.76           0.79      0.82           0.80   0.81                   The wall energy losses are due to the positive ions lost by
+ β(P = 200) 0.86           0.88      0.90           0.91   0.85              the transport at the plasma boundary
+ β(P = 500) 0.91           0.93      0.94           0.94   0.95                                                                
+                                                                                                                               
+ Th (P = 100) 400          450       500            600    600                                                                
+                                                                                                                             +
+ Th (P = 200) 450          550       650            800    500                              QW =            (Ee + Es + EP ) Rp  ,         (19)
+ Th (P = 500) 550          700       900            1200   1100                                     p∈I ons                    
+                                                                                                                                W
+
+                                                                             where Ee = 2Te is the mean energy loss per electron, Es , EP
+2.3. Electron energy balance equation                                        are the sheath and the plasma potentials, respectively. We use
+                                                                             the sheath potential expression [19]
+The electron energy balance equation can be written as [14]                                                               
+                                                                                                      uB     1 + αs
+                             dpe                                                          Es ≈ ln 4                          Te ,      (20)
+                                 = Qe ,                           (13)                                ve 1 + αs (v− /ve )2
+                              dt
+where pe = 3/2ne Te is the energy density, the right-hand side               where ve and v− are the electron and negative ion
+represents the source and the unit eV is used to describe the                mean thermal velocities, respectively, αs = n− /ne |W is the
+electron temperature. The source contains the power absorbed                 degree of electronegativity at the sheath edge and uB  =
+or released by the electronic reactions. Additionally, it includes              p np uB  ,p / p np is the density weighted positive ion Bohm
+the loss rate due to elastic electron collisions and absorption              velocity. The electronegativity changes the Bohm velocity
+of energy, which is applied externally                                       by a factor that is provided by Braithwaite et al [31].
+                                                                             Conventionally, this factor is included in the effective area for
+               Qe = Qabs − QChe − QW − QEla ,                     (14)       the ion wall loss rate (see equation (4)). In the sheath potential
+                                                                             we explicitly express the factor within the relation
+where Qabs is the absorbed input power, QChe is the chemical
+loss in the volume, QW is the loss at the plasma wall and, QEla                                           eTe (1 + αs ) 1/2
+represents the elastic losses within the plasma.                                              uB  ,p =                     .                  (21)
+                                                                                                          mp (1 + αs γ )
+     We assume that the electrical energy provided to the
+chamber is mostly absorbed by the electrons and then                         The plasma potential for an electronegative plasma is given
+distributed to the rest of the plasma species. The electronic                by [1]
+                                                                                                         1 1 + αs
+reaction energies are either absorbed or released by the                                           EP =             Te .            (22)
+electrons, i.e. they are the ultimate energy reservoir in the                                            2 1 + αs γ
+particle interactions. In view of this, the absorption is written as         The sheath electronegativity αs is related to the presheath
+                                                                             electronegativity αb by [14]
+                          Qabs = β P /V ,                         (15)
+                                                                                                           (1 + αs ) (1 − γ )
+where β is the power transfer efficiency (see table 1) and P is                             αs = αb exp                       .                (23)
+                                                                                                             2 (1 + αs ) γ
+the input power. The chemical source term QChe contains the
+electronic reactions in the following                                        We employ a fit function for γ > 10, presented in [19],
+                                                                            with the assumption that αb is equal to the central degree of
+                                        
+                                                                           electronegativity.
+                                      j
+                    QChe =        Ej Re  ,                (16)
+                                j       
+                                                V                            2.4. Numerical approach
+                                     j
+where Ej is the reaction energy and Re is the reaction rate. The             We introduce a vector notation for the sake of simplicity in the
+reaction rate is defined in the previous section and the reaction            numerical implementation. Let n = {ni , pe } be the density
+energy represents the net amount of energy absorbed by the                   vector that includes the particle densities complemented with
+reaction. It is the sum of internal energies of the products                 the electron energy density. Similarly, we define the source
+subtracted from those of the reactants                                       vector S = {Si , Qe }. By definition the source vector explicitly
+                                                                           depends on the density vector and the system of equations takes
+              Ej =           νj i i −         νj i i ,       (17)
+                                                                             the form
+                     i∈products         i∈reactants                                                    dn
+                                                                                                           = S (n).                       (24)
+where i is the internal energy of the particle. The internal                                           dt
+energies are shown in the energy diagram figure 10. With the                 Providing an initial value at time t0 , n(t0 ), the set is solved
+assumption that the electron temperature is much bigger than                 iteratively for a variable time-step t until time T . For the
+the gas temperature we define the elastic loss [34]                          iterative solution, we use the Livermore Solver for Ordinary
+                                                                            Differential Equations (LSODE) [35]. We set T large enough
+                                      me El
+                QEla =       ne ni 3Te kei  ,           (18)                 for steady-state solutions, i.e. after T the solution does not
+                          i
+                                      mi                                     change any more.
+
+                                                                         4
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                           E Kemaneci et al
+
+Table 2. The distinct plasma species included in the model.                         a stainless steel wall by Stafford et al [8]. We define these
+Cl(2 P 3/2) is often referred as Cl in this work.                                   variable recombination probabilities by parametric fits [19]
+    Cl2 plasma species                                                                                                                
+                                                                                                                                   nCl
+    Cl2 , Cl2 (v = 0, 1, 2, 3), Cl(2 P 3/2), Cl(2 P 1/2), Cl(1 P 5/2),                   log10 (γA2 ) = −0.82 − 1.59 exp −1.81            ,
+                                                                                                                                  nCl2
+    Cl+2 , Cl+ , Cl− , e                                                                                                                    (26)
+                                                                                                                                  nCl
+                                                                                          log10 (γS ) = −1.22 − 1.34 exp −1.48           ,
+       Table 3. Neutral wall reactions and their probabilities.
+                                                                                                                                  nCl2
+
+#         Reaction                        Probability(γ ) Ref. Note                 where A2 denotes the aluminum wall measurement by Guha
+                                                                                    et al [5], and γS is the measurement for the stainless steel by
+(1)     Cl + wall → 1/2Cl2           γ[A,S]                       See text
+(2)–(4) Cl2 (v) + wall → Cl2 (v − 1) 1.0                   [26]                     Stafford et al [8]. We observe that the plasma is not sensitive
+(5)     Cl(2 P 1/2) + wall → Cl      1.0                          See text          to the variations of Cl(2 P 1/2) and Cl(1 P 5/2) de-excitation
+(6)     Cl(1 P 5/2) + wall → Cl      1.0                          See text          probabilities at the wall. Over the range of Cl(2 P 1/2)
+                                                                                    de-excitation probability 10−3 −1 the simulation results, except
+                                                                                    Cl(2 P 1/2) density, change at most with a ratio of 1.09 for
+3. Chemical model                                                                   the parameters given in table 1. The same variation of the
+                                                                                    Cl(1 P 5/2) de-excitation probability does not alter the results.
+The set of species, that are contained in the model, are shown                      Consequently, both probabilities are estimated by unity in the
+in table 2 and the energy diagram is depicted in figure 10                          simulations.
+together with the internal energies. Compared with similar                               The wall recombination together with the volume
+chlorine studies [10, 19], we explicitly include the atomic                         reactions identify the degree of dissociation κd = nCl /(nCl +
+excited levels Cl(2 P 1/2) and Cl(1 P 5/2). The reactions and                       2nCl2 ).     The gas temperature determines the mutual
+the rate coefficients are listed in table 4. The rate coefficients                  recombination coefficients between the positive and the
+of the electronic reactions are numerically calculated from                         negative ions. It is also influential on the interactions at the
+the corresponding cross-sections with the assumption that the                       boundary such as ion recombination, neutral reaction rates at
+electron energy distribution function is Maxwellian. These                          the wall and the flow-out rates.
+numerical data are parametrically fit to functions of the electron
+temperature.                                                                        4. Quasi-neutrality implementations
+     Most of the fit functions are adapted from a paper by
+Thorsteinsson et al [26], whereas certain rate coefficients are                     For a continuous power input, the electron density is computed
+directly computed from the cross-sections (reactions 10, 17,                        from the quasi-neutrality assumption
+18, 20, 21 in table 4). A recently updated vibrational excitation                                               
+cross-section (reaction (10)) by Gregório et al [12] is preferred                                        ne =      ni qi /e,                 (27)
+over the one used in the paper [26], since it improves the                                                         i
+agreement with experimental observations. The electronic                            where i represents an ion and qi is its charge. In the previous
+excitation cross-section to level Cl(2 P 1/2) (reaction (17))                       global model studies that consider the modulated power input
+is calculated by Wang et al [13] and to level Cl(1 P 5/2)                           with the modulation periods in the microsecond time-scale
+(reaction (18)) by Griffin et al [36]. We estimate an ionization                    [23, 25, 56], the electron density is calculated from the same
+rate coefficient from level Cl(2 P 1/2) (reaction (20)) based on                    quasi-neutrality implementation. In these cases, the power
+the electronic Cl ionization (reaction (19)). The ionization                        modulation periods overlap with the electron recombination
+cross-section from atomic level Cl(1 P 5/2) (reaction 21) and                       time-scale and electrons are still present even at the end of the
+the radiative decay coefficient are taken from [37]. Backward                       period.
+reactions of the excitations are also included in the model by                           For larger modulation periods, such as milliseconds,
+detailed balancing [1, 38]. Additionally, the heavy particle                        the electrons quickly recombine and vanish in the power-
+quenching reactions (35)–(37) are incorporated. The elastic                         off region. Afterwards, the quasi-neutrality implementation
+momentum transfer cross-sections are provided by [36].                              induces non-physical negative electron densities due to the
+     The neutral wall reactions are shown in table 3. The Cl                        electronegativity. In order to prevent this a different approach
+recombination probability at a hard anodized aluminum wall                          is employed to impose the quasi-neutrality. We multiply the
+has been experimentally determined by Booth et al [7]. It                           particle balance equation of each species with its charge qi , and
+depends on the gas pressure and we use an average value for                         their summation defines a volume-averaged charge continuity
+the parameter range in this study                                                   equation:
+                                                                                                         dρ 
+                          γA1 = 2.5 × 10−1 ,                             (25)                                +     qi Ri |W = 0,                  (28)
+                                                                                                         dt     i
+
+where subscript A1 stands for this anodized aluminum                                where ρ represents the total charge density. The net volume
+measurement. It is also measured by Guha et al [5], and lower                       source vanishes due to the charge conservation in the reactions
+values are reported that also depend on the nCl /nCl2 density                       and only the wall flux remains. According to this expression,
+ratio. Additionally, such a dependence is also observed for                         if initially quasi-neutrality is satisfied, it is further conserved
+
+                                                                                5
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                      E Kemaneci et al
+
+Table 4. The chemical reactions included in the plasma volume (see text). All rate coefficients are in m 3 s−1 , Th is in K and Te is in eV unless
+stated otherwise. The parametric fit range is Te = 0.5–10 eV. The backward reactions of the electronic excitations are also included in the
+model via detailed balancing. These excitations are indicated by a letter ‘*’ next to the reaction number. The electronic ionization from
+Cl(2 P 1/2), which is symbolized by ‘**’, is estimated from the electronic ionization of the ground state. The symbol ‘***’ denotes the
+elastic collisions.
+                  #             Reaction                                Rate coefficient                                Ref
+                  (1)           e + Cl2 (v = 0) → Cl + Cl + e           1.04 × 10 Te−0.29 e−8.84/Te
+                                                                                    −13
+                                                                                                                        [39]
+                  (2)           e + Cl2 (v = 0) → Cl+2 + 2e             5.12 × 10−14 Te0.48 e−12.34/Te                  [40]
+                  (3)           e + Cl2 (v = 0) → Cl + Cl+ + 2e         2.14 × 10−13 Te−0.07 e−25.26/Te                 [40, 41]
+                  (4)           e + Cl2 (v = 0) → Cl+ + Cl+ + 3e        2.27 × 10−16 Te1.92 e−21.26/Te                  [40, 41]
+                  (5)           e + Cl2 (v = 0) → Cl + Cl−              3.43 × 10−15 Te−1.18 e−3.98/Te +
+                                                                        3.05 × 10−16 Te−1.33 e−0.11/(Te +0.014)         [42, 43]
+                  (6)           e + Cl2 (v = 1) → Cl + Cl−              14.06 × 10−15 Te−1.18 e−3.98/Te +
+                                                                        12.51 × 10−16 Te−1.33 e−0.11/(Te +0.014)        [42, 43]
+                  (7)           e + Cl2 (v = 2) → Cl + Cl−              30.18 × 10−15 Te−1.18 e−3.98/Te +
+                                                                        26.84 × 10−16 Te−1.33 e−0.11/(Te +0.014)        [42, 43]
+                  (8)           e + Cl2 (v = 3) → Cl + Cl−              46.31 × 10−15 Te−1.18 e−3.98/Te +
+                                                                        41.18 × 10−16 Te−1.33 e−0.11/(Te +0.014)        [42, 43]
+                  (9)           e + Cl2 (v = 0) → Cl+ + Cl− + e         2.94 × 10−16 Te0.19 e−18.79/Te                  [44, 45]
+                                                                        3.99 × 10−12 Te−1.5 e−7.51/Te −0.0001/Te
+                                                                                                                  2
+                  (10)*         e + Cl2 (v = 0) → Cl2 (v = 1) + e                                                       [12]
+                  (11)*         e + Cl2 (v = 0) → Cl2 (v = 2) + e       3.28 × 10−17 Te−1.12 e−0.37/Te +
+                                                                                 −17 −(ln(Te )+0.99)2 /(2×1.062 )
+                                                                        2.86 × 10 e                                     [46]
+                  (12)*         e + Cl2 (v = 0) → Cl2 (v = 3) + e       1.30 × 10−17 Te−1.24 e−0.41/Te +
+                                                                        6.08 × 10−18 e−(ln(Te )+0.94) /(2×1.02 )
+                                                                                                     2        2
+                                                                                                                        [46]
+                  (13)*         e + Cl2 (v = 1) → Cl2 (v = 2) + e       3.00 × 10−16 Te−1.00 e−0.37/Te +
+                                                                        4.61 × 10−16 e−(ln(Te )+1.04) /(2×1.10 )
+                                                                                                     2        2
+                                                                                                                        [46]
+                                                                                 −16 −1.00 −0.37/Te
+                  (14)*         e + Cl2 (v = 2) → Cl2 (v = 3) + e       3.00 × 10 Te         e          +
+                                                                        4.61 × 10−16 e−(ln(Te )+1.04) /(2×1.10 )
+                                                                                                     2        2
+                                                                                                                        [46]
+                  (15)*         e + Cl2 (v = 1) → Cl2 (v = 3) + e       1.25 × 10−16 Te−1.13 e−0.36/Te +
+                                                                        1.06 × 10−16 e−(ln(Te )+1.01) /(2×1.06 )
+                                                                                                     2        2
+                                                                                                                        [46]
+                                                                                 −14 −0.50
+                  (16)          e + Cl+2 → Cl + Cl                      9.00 × 10 Te                                    [19]
+                                                                        4.55 × 10−14 Te−0.46 e−2.01/Te −0.001/Te
+                                                                                                                 2
+                  (17)*         e + Cl → Cl(2 P 1/2) + e                                                                [13]
+                                                                                 −17 0.55 −2.15/Te −1.5/Te2 −2.05/Te3
+                  (18)*         e + Cl → Cl(1 P 5/2) + e                7.03 × 10 Te e                                  [36]
+                  (19)          e + Cl → Cl+ + 2e                       3.17 × 10−14 Te0.53 e−13.29/Te                  [47, 48]
+                  (20)**        e + Cl(2 P 1/2) → Cl+ + 2e              3.17 × 10−14 Te0.53 e−13.19/Te
+                                                                        4.33 × 10−14 Te0.55 e−0.15/Te −0.85/Te
+                                                                                                              2
+                  (21)          e + Cl(1 P 5/2) → Cl+ + 2e                                                              [37]
+                                                                                5 −1
+                  (22)          Cl(1 P 5/2) → Cl                        1.0 × 10 s                                      [37]
+                  (23)          e + Cl− → Cl + 2e                       9.02 × 10−15 Te0.92 e−4.88/Te                   [49]
+                  (24)          e + Cl− → Cl+ + 3e                      3.62 × 10−15 Te0.72 e−25.38/Te                  [49]
+                  (25)          Cl+2 + Cl− → 3Cl                        5.00 × 10−14 (300/Th )0.50                      [1, 50]
+                  (26)          Cl+2 + Cl− → Cl + Cl2                   5.00 × 10−14                                    [51]
+                  (27)          Cl+ + Cl− → Cl + Cl                     5.00 × 10−14 (300/Th )0.50                      [1, 50]
+                  (28)–(32)     Cl2 (v = 0 − 3) + Cl+ → Cl + Cl+2       5.40 × 10−16                                    [52]
+                  (33)          2Cl + Cl2 → 2Cl2                        3.50 × 10−45 e810/Th m6 s−1                     [53]
+                  (34)          2Cl + Cl → Cl2 + Cl                     8.75 × 10−46 e810/Th m6 s−1                     [54]
+                  (35)–(37)     Cl + Cl2 (v > 0) → Cl2 (v − 1) + Cl     1.3 × 10−17 (Th /300)1/2                        [55]
+                  (1)***        e + Cl2 → Cl2 + e                                                                       [36]
+                  (2)***        e + Cl → Cl + e                                                                         [36]
+
+
+in time, when the total flux—or the net current—to the wall                 and sheath potential. A minimum value for the electron
+vanishes                                                                   temperature is identified by the gas temperature with the
+                           qi Ri |W = 0.               (29)                 assumption that electrons and background gas are in thermal
+                            i                                               equilibrium. Afterwards, all the electrons recombine, which
+Accordingly, we explicitly solve the electron particle balance              is defined by a minimal
+                                                                                                      density condition in the model. The
+equation but impose a constraint on its wall flux                           ion wall rates Rp+ W that are derived in the presence of the
+                                                                           electrons and a power input, are no longer valid and they are
+                  Re | W =     qi /eRi |W .               (30)              switched off. The chemical kinetics, mass flow and the wall
+                                 i=e
+                                                                            flux define an ion recombination time-scale. In case this time-
+A caveat about the approach: the numerical integration                      scale is larger than that of electrons, the ions remain in the
+schemes that use large time-steps can produce deviations.                   chamber and they form a quasi-neutral ion–ion plasma.
+    As the power is switched off, the electron temperature                       In the chlorine plasma, the ion recombination time-scales
+steeply drops in microseconds, together with the plasma                     are relatively large and a quasi-neutral ion–ion plasma appears
+
+                                                                        6
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                                   E Kemaneci et al
+
+after the electrons disappear. In this respect, we define two                (a) 1e18
+separate regions with respect to time: (1) the plasma, (2) the                                                                          Cl- Hebner et al.
+
+ion–ion plasma (afterglow). The transition between these
+regions is defined by a minimal electron density condition.
+After theelectrons disappear, the electron and the ion wall flux
+rates Rp+ W are switched off and only the flow rates and the
+                                                                                                                                               e Hebner et al.
+
+                                                                               n (m )
+                                                                              -3
+                                                                                        1e17
+neutral wall reactions are kept. Similarly, the quasi-neutrality
+is imposed with negative ion wall flux
+                              
+                  RCl− |W =         qi /eRi |W .            (31)
+                                                                                                                                              e Efremov et al.
+                                i=e,Cl−
+                                                                                        1e16
+                                                                                               1                               10
+5. Results                                                                                                           Pressure (mTorr)
+
+                                                                             (b)          5
+In this section, we firstly compare the simulation data with
+various experimental results obtained from the literature. The                           4.5
+comparison covers both continuous and modulated power
+                                                                                          4
+inputs. Secondly, the simulation results for the recombination
+probabilities γA1 , γA2 and γS are compared with each other in                           3.5
+the continuous mode. The recombination probability and the                    Te (eV)
+                                                                                          3
+gas temperature are varied within a large spectrum to observe
+their role on the plasma. Finally, their influence on the power                          2.5
+modulation is provided at the end of the section.
+                                                                                          2
+
+5.1. Experimental comparison                                                             1.5
+                                                                                               1                               10
+For steady power input we compare the simulation results with                                                        Pressure (mTorr)
+
+the measurements realized by Efremov et al [57] and Hebner                   (c)
+et al [58]. The former are carried out on a setup with a radius
+of R = 1.5 × 10−1 m, a length of L = 1.4 × 10−1 m at                                    1e20         Cl
+a flow rate of Q = 20 sccm and a power input of 400 W.
+                                                                                        1e19
+We assume that 300 W is absorbed by the plasma and the
+gas temperature is Th = 500 K adapted from [19]. The                                                 2
+                                                                                                   Cl( P1/2)
+
+                                                                               n (m )
+                                                                              -3        1e18
+second setup is a cylinder with R = 5.5 × 10−2 m and
+L = 3.8 × 10−2 m . The mass flow rate is 30 sccm and the                                1e17
+power input is fixed at 240 W. For this case, we estimate the β
+factors and the gas temperatures from the measurements listed                           1e16
+
+in table 1 by interpolation. The chamber walls in both setups
+                                                                                        1e15         e
+are composed of stainless steel and the corresponding wall
+recombination probability, γS , is used in the simulations. The                                      100       200        300           400           500
+                                                                                                                       Power (W)
+comparisons of the electron, negative ion densities and the
+electron temperature with respect to the pressure are shown               Figure 1. Various experimental data (points) measured by Efremov
+in figures 1(a) and (b). The simulation results mostly show               et al [57] Hebner et al [58] and Sirse et al [59] together with
+good agreement with the experimental measurements for these               corresponding simulation results (lines or line-points). A distinct
+                                                                          colour is assigned to each data set. See text for the operation
+                                                                          conditions. (a) e (◦) and Cl− () densities (m−3 ) by Efremov et al
+cases. The agreement is fair for the electron density profile at
+1.5 mTorr pressure and for the electron temperature profile at            and Hebner et al. (b) Electron temperature, Te (eV), by Efremov
+1 mTorr and 25 mTorr.                                                     et al. (c) e (◦), Cl ( ) and Cl(2 P1/2) () densities (m−3 ) by
+     Sirse et al [59] recently measured the e, Cl and Cl(2 P 1/2)         Sirse et al.
+densities in a setup identical to the one described in section 2.1.
+We also compare the calculated e, Cl and Cl(2 P 1/2) densities            L = 1.6 × 10−1 m. The power input is 400 W and the pressure
+at 50 mTorr with these measurements. The comparison is                    is fixed at 8 mTorr. The period of the modulation is 100 µs
+shown with respect to the power input in figure 1(c). In general,         with a 50% duty ratio. For the glass wall, we assume a chlorine
+the results agree well with the experimental data, though the             wall recombination constant of γG = 0.15 proposed by Ashida
+agreement is fair for the excited state density and deviates the          et al [23]. The absorbed power is estimated by a factor of
+most at 100 W.                                                            β = 0.9 based on table 1. The setup is connected to a diffusion
+     In pulsed mode we compare the simulation results with                chamber with identical gas pressure. Ramamurthi et al [3]
+the experimental data obtained by Ahn et al [60]. The plasma              showed in a similar setup that the plasma does not diffuse into
+is formed inside a glass Pyrex tube with R = 1.6 × 10−1 m and             this chamber for the same modulation parameters. Since the
+
+                                                                      7
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                                                                          E Kemaneci et al
+
+         (a)                                          Pulse on       Pulse off
+                                                                                                           7                       gas temperature of 800 K. Considering the increment of the
+               1e+17
+                                            e
+                                                                                                                                   factor β with the power input (see table 1), we assume that
+                                                                                                           6
+                           Te
+                                                                                            -
+                                                                                           Cl
+                                                                                                                                   all of the power is absorbed within the plasma. The gas
+                                                                                                           5                       temperature identifies the flow-out rate. If it is not properly
+                                                                                                                                   defined in the pulse off region, the mass flow drains excessive
+                                                                                                           4
+                                                                                                                                   amount of species from the chamber with the pulse on value
+                                                                                                                Te (eV)
+     n (m )
+    -3
+
+               1e+16
+                                                                                                           3
+                                                                                                                                   of 800 K. Regarding this, we estimate a cooling time-scale
+                                                                                                                                   about 20 ms that is based on the observations by Cunge et al
+                                                                                                           2                       [61, 62]. In this respect, we assume that the gas temperature
+                                                                                                                                   drops to the ambient temperature in 20 ms. The calculated
+                                                                                                           1
+                                                                                                                                   and the measured data are given in figure 2(b) that show
+               1e+15                                                                                        0                      good agreement with each other throughout the modulation
+                       0                    20          40      50       60         80                   100
+                                                             Time (µs)
+                                                                                                                                   period. However, the model predicts a fairly smaller decay
+                                                                                                                                   time-scale in chlorine density compared with the experimental
+   (b)         6e+20                                                                                 7e+13                         observation.
+                       Pulse on Pulse off
+
+                                                                                                     6e+13
+               5e+20
+                                                              Cl2 Bodart et al. (m-3)                                              5.2. Wall recombination probability and gas temperature
+               4e+20             Cl2
+                                                                                                     5e+13                         variations
+
+
+                                                                                                                Cl (count/s)
+                                                                                                     4e+13                         In this section, we fix the power input at 200 W and
+     n (m )
+    -3
+               3e+20
+                                                                                                                                   use the setup described in section 2.1 for the analysis.
+                                                                                                     3e+13
+                                                                                                                                   In the simulations we employ the β and gas temperature
+               2e+20            Cl
+                                                                                                     2e+13                         measurements of the setup (see table 1), whenever necessary.
+               1e+20
+                                                                                                                                   We firstly compare the different recombination probability
+                                                                                                     1e+13
+                                                              Cl Bodart et al. (count/s)                                           measurements γA1 , γA2 and γS discussed in section 3. The
+                  0                                                                                  0
+                                                                                                                                   pressure-resolved densities of electron, Cl and Cl(2 P 1/2)
+                       0               10        20           30         40       50            60
+                                                                                                                                   species and the electron temperature for these probabilities
+                                                        Time (ms)
+                                                                                                                                   are shown in figure 3, together with the experimental data
+Figure 2. Various experimental data (points) by Ahn et al [60] and                                                                 [59]. The measurement, γA1 , is the largest among the
+by Bodart et al [4] together with the simulation results (lines) in the                                                            wall recombination probabilities and it is a constant number.
+power modulation. In both graphs the experimental and the                                                                          However, γA2 and γS vary with the pressure due to different
+numerical results are linked with their colours. See text for the
+operation conditions. (a) The e ( ), Cl− (◦) densities (m−3 ) and the                                                              nCl /nCl2 ratio. They satisfy 0.006 < γA2 < 0.1, 0.003 < γS <
+electron temperature (), Te (eV), measurements (at a period of                                                                    0.04 and peak at 2 mTorr, where the nCl /nCl2 is relatively larger.
+100 µs) by Ahn et al. (b) The measurements (at modulation period                                                                   Their difference with γA1 rises with the pressure. The highest
+of 66 ms) of Cl2 ( ) density (m−3 ) and Cl (◦) density (count/s) by                                                                difference is at 50 mTorr, consequently, the corresponding
+Bodart et al.                                                                                                                      profiles disagree most at this value. This disagreement is
+                                                                                                                                   more obvious for the Cl and Cl(2 P 1/2) densities, compared
+period is very small compared with the flow time-scale, we also                                                                    with electron density and temperature. Their profiles for these
+observed that a mass flow rate of 30 sccm and 0 sccm does not                                                                      recombination probabilities fairly agree with each other in the
+change the calculations. Hence, the plasma expansion into                                                                          presented pressure range.
+the downstream region directed towards the diffusion chamber                                                                            In order to observe its influence on the plasma, the Cl
+is neglected. The electron, negative ion densities and the                                                                         wall recombination probability is hypothetically varied within
+electron temperature data in one modulation period are shown                                                                       the range 0.001–1. In the investigation, we denote this
+in figure 2(a). Generally, good agreement is observed between                                                                      hypothetical probability by γrec covering a pressure range
+the calculations and the measurements. The agreement for                                                                           5–50 mTorr. The particle densities are shown as a function
+the electron density and temperature is valid throughout the                                                                       of γrec at 5 mTorr and 50 mTorr pressure in figure 4: (a)
+modulation period; however, the model proposes a fairly                                                                            charged particles at 5 mTorr, (b) charged particles at 50 mTorr,
+smaller time-scale for the electron temperature decay. The                                                                         (c) neutral particles at 5 mTorr and (d) neutral particles at
+negative ion density measurements deviate from the simulation                                                                      50 mTorr. According to these figures, there are two distinct
+mostly between 50 and 55 µs. Since the experimental data are                                                                       chemical partitions and corresponding reaction channels with
+inconsistent by rapid fluctuations at this interval, it is possible                                                                respect to γrec variation. The first partition is composed of
+that the disagreement is due to the experimental errors.                                                                           excited atomic states and Cl+ that are mainly produced from
+      Bodart et al [4] recently measured the atomic and                                                                            Cl. The second partition consists of vibrational excited states,
+the molecular chlorine densities with a completely different                                                                       Cl+2 and Cl− that are dominantly produced from Cl2 . Since
+modulation period compared with the previous case. The                                                                             the wall recombination probability determines the dominant
+measurements are carried out for a period of 0.66 ms with                                                                          neutral in the plasma, either Cl or Cl2 , these two channels
+a 15% duty ratio. The setup dimensions are identical to the                                                                        respond oppositely to the wall recombination probability.
+one described in the section 2.1. It is operated at 800 W                                                                               Generally, the electron density depends on the species
+input power, 20 mTorr pressure, 100 sccm mass flow rate and                                                                        from both chemical partitions described above. It directly
+
+                                                                                                                               8
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                       E Kemaneci et al
+
+    (a)                                                                          dominant positive ion, the electron density behaviour is mostly
+              1e20
+                                                                                 identified by Cl+ at this pressure due to quasi-neutrality.
+                                                                                      The degree of dissociation κd = nCl /(nCl + 2nCl2 ), the
+              1e19
+                         Cl
+                                                                                 degree of electronegativity α = nCl− /ne and the electron
+                                                                                 temperature Te variations with respect to γrec are shown in
+                         Cl(2 P1/2)                                              figure 5: (a) κd and α (b) Te . The wall recombination
+    n (m-3)
+              1e18
+                                                                                 probability dramatically reduces the degree of dissociation
+              1e17                                                               with a steeper drop at lower pressures. On the other hand, it
+                                                                                 increases the degree of electronegativity with a similar profile.
+                              e
+              1e16                                                               The electron temperature is almost linearly proportional to γrec
+                                                                                 for γrec > 0.02. Below this point, the relation depends on the
+              1e15                                                               pressure. At 5 mTorr and 10 mTorr, the temperature slightly
+                     1                          10
+                                      Pressure (mTorr)                           decreases with increasing γrec , while at 50 and 20 mTorr
+                                                                                 the temperature shows an increasing trend. The transition
+    (b)        3.4
+                                                                                 between these two trends corresponds to the dominant ion
+               3.2
+                                                                                 transition, and the electron density shows a slight bump (see
+                                                                                 figure 4(a)) that causes such an electron temperature behaviour.
+                3                                                                We observe that the well in the electron temperature for
+                                                                                 γrec < 0.002 deepens for a higher electron density bump (for
+               2.8
+    Te (eV)
+                                                                                 example at 500 W).
+               2.6                                                                    Finally, the influence of the gas temperature on the plasma
+                                                                                 is investigated by externally varying its value, where the
+               2.4
+                                                                                 recombination probability γA1 is used in the simulations. This
+               2.2
+                                                                                 can also be physically achievable, for example, by the control
+                                                                                 of the chamber wall temperature. The resultant particle density
+                2
+                     1                          10
+                                                                                 profiles are shown in figure 6: (a) charged particles at 5 mTorr
+                                      Pressure (mTorr)                           (b) charged particles at 50 mTorr (c) neutral particles at 5 mTorr
+                                                                                 and (d) neutral particles at 50 mTorr. The gas temperature
+Figure 3. Comparison of the electron, chlorine atom and the excited
+                                                                                 variation barely alters the molecular and the negative ion
+chlorine atom densities and the electron temperature for various
+recombination probability measurements at 200 W power input. The                 densities. The largest effect on the charged particles is the
+type of line correspond to each probability: anodized aluminum γA1               increase in the electron and Cl+ densities. These behaviours
+by [7] (——), anodized aluminum γA2 by [5] (- - - -) and stainless                agree with the observations by Thorsteinsson et al [19]. The
+steel γS by [8] (· · · · · ·). The experimental data for the densities and       magnitude of the increase at 50 mTorr is significantly larger
+the temperature are provided by Sirse et al. [59] for the setup
+                                                                                 than the one at 5 mTorr. All the neutral densities are inversely
+described in section 2.1. (a) The electron e, Cl and Cl(2 P1/2)
+density computations for different recombination probabilities and               proportional to the gas temperature, which is more apparent
+the measurements. A distinct colour is assigned to each species and              at 5 mTorr.
+the points are measurements: e (◦), Cl ( ) and Cl(2 P1/2) ().                        The degree of electronegativity α, the degree of
+(b) The electron temperature for different recombination                         dissociation κd and the electron temperature Te , profiles at
+probabilities and the measurement.
+                                                                                 different pressure values are shown in figure 7: (a) α,
+                                                                                 κd and (b) Te . The gas temperature does not affect the
+relies on all the ions in the plasma by the quasi-neutrality                     degree of dissociation; however, it decreases the degree
+requirement and is indirectly determined by the neutrals as                      of electronegativity with an identical trend for all the
+the source of the charged particle production. However, the                      pressure values. The electron temperature is almost linearly
+electron density behaves similar to the first partition in the                   proportional with the gas temperature regardless of the
+studied parameter range. This is mostly caused by the larger                     pressure.
+negative ion density that limits the electron density via quasi-
+neutrality. Otherwise (for example at 500 W), we observe that                    5.2.1. Power modulation.        In this section, we investigate
+the electrons behave proportionally to the dominant positive                     the role of the wall recombination probability and the gas
+ion. The pressure plays a significant role on the densities and                  temperature on the plasma for a modulated power input. In
+their aforementioned variations. As a consequence, it defines a                  the investigation, a square wave power modulation is applied
+distinctive behaviour for the electron density together with the                 with a period of 100 ms and a duty ratio of 50% at a 200 W peak
+wall recombination probability. At a low pressure of 5 mTorr,                    power input and pressure 50 mTorr. We use the gas temperature
+Cl+ is the dominant positive ion for small γrec , whereas the                    and β measurements given in table 1, whenever necessary.
+dominant ion switches to Cl+2 abruptly as γrec increases. At                          Firstly, we compare four different wall recombination
+the transition, the electron density shows a slight bump and                     probabilities: γA1 , γA2 , γrec = 0.001 and γrec = 1.0. The
+then decreases with the wall recombination probability. At                       corresponding time-resolved charged particles and the electron
+50 mTorr, the positive ions are dominated by Cl+2 in the whole                   temperature profiles are shown in figure 8: (a) γA1 , (b) γA2 ,
+γrec range. Since the negative ions are equally important as the                 (c) γrec = 0.001 and (d) γrec = 1.0. Similar Cl+2 and Cl−
+
+                                                                             9
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                                                                   E Kemaneci et al
+
+
+                                                              Cl
+                                                                   -                                                               Cl2+
+                                                                                                                   1e17
+                     1e17
+                                                                                                                                  -
+                                                                                                                              Cl
+
+                                                        e                                                                     e
+                                  Cl2+                                                                             1e16
+
+           n (m-3)                                                                                    n (m )
+                                                                                                      -3
+
+                     1e16                                                                                                     Cl+
+
+                                                                                                                   1e15
+                                                                                              +
+                                                                                           Cl
+                                  (a) 5 mTorr
+                                                                                                                           (b) 50 mTorr
+                     1e15                                                                                          1e14
+                        0.001                    0.01                     0.1                     1                   0.001                     0.01             0.1                   1
+                                                             γrec                                                                                       γrec
+
+
+                     1e21                                                                                          1e22
+                                                              Cl                                                                                 Cl
+                     1e20                                                                                          1e21
+                                                                                                                   1e20                          Cl2
+                     1e19
+                                  Cl2
+                                                                                                                   1e19       Cl2 (v=1)
+                     1e18         Cl2 (v=1)                                        2
+                                                                                Cl ( P 1/2)                                                                             Cl (2 P 1/2)
+           n (m-3)                                                                                    n (m )
+                                                                                                      -3           1e18
+                     1e17
+                                                                                                                   1e17
+                     1e16         Cl2 (v=2)                                                                        1e16       Cl2 (v=2)
+                     1e15         Cl2 (v=3)
+                                                                                                                   1e15
+                     1e14         (c) 5 mTorr                                                                                 Cl2 (v=3)                                    1
+                                                                                    1                              1e14                                                 Cl ( P 5/2)
+                                                                                Cl ( P 5/2)
+                                                                                                                           (d) 50 mTorr
+                     1e13                                                                                          1e13
+                        0.001                    0.01                     0.1                     1                   0.001                     0.01             0.1                   1
+                                                             γrec                                                                                       γrec
+
+Figure 4. The charged and neutral particle densities with respect to the wall recombination probability γrec variation at 200 W power input
+for the pressure at 5 mTorr and 50 mTorr. (a) The charged particles at 5 mTorr and (b) at 50 mTorr. (c) The neutral particles at 5 mTorr and
+(d) at 50 mTorr.
+
+                     100                                                                                             3.4
+                            (a)                                                  50 mTorr                                     (b)
+                                                                                 20 mTorr                            3.2
+
+                                                                                 10 mTorr                              3
+                      10
+                                                                          α      5 mTorr                             2.8
+
+        α, κd                                                                                            Te (eV)     2.6
+                       1                                                  κd                                                          5 mTorr
+                                                                                5 mTorr                              2.4
+                                                                       20 mTorr 10 mTorr                                              10 mTor
+                                                                                                                     2.2
+                      0.1                                    50 mTorr                                                          20 mTorr
+                                                                                                                       2
+                                                                                                                                          50 mTorr
+                     0.02                                                                                            1.8
+                        0.001                   0.01                     0.1                    1                      0.001                     0.01             0.1                      1
+                                                            γrec                                                                                          γrec
+
+Figure 5. (a) The degree of electronegativity α, dissociation κd and (b) the electron temperature Te with respect to the wall recombination
+probability γrec variation at 200 W power input.
+
+profiles are observed for the wall recombination probabilities                                           and the electron temperature are shown with respect to time in
+γA1 and γA2 . However, γA2 produces larger electron and atomic                                           figure 9: (a) Th = 300 K and (b) Th = 1500 K. The molecular
+positive ion densities and slightly lower electron temperatures.                                         and negative ion profiles are invariant with respect to the gas
+The difference is more obvious for the cases of γrec = 0.001                                             temperature variation. On the other hand, the electron and Cl+
+and γrec = 1.0. For γrec = 1.0, the electron temperature and                                             densities and the electron temperature increase.
+the Cl+ densities are smaller, while the electron temperature                                                 In all of the power modulation cases, the electron
+is higher. The Cl+2 and Cl− profiles do not alter for these two                                          temperature initially shows a very steep peak due to the low
+wall recombination probabilities.                                                                        electron density, which is also measured by Ahn et al [60].
+     Secondly, the comparison of two extreme cases of the gas                                            The quantities during the pulse on are slightly larger than
+temperature is shown that are Th = 300 K and Th = 1500 K,                                                those for the continuous power input. However, the role of the
+respectively, where we employ the recombination probability                                              wall recombination probability is identical for the modulated
+γA1 in the simulations. The resultant charged particle densities                                         and continuous power inputs that is also observed for the gas
+
+                                                                                                    10
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                                                          E Kemaneci et al
+
+                                                                                    +                                                                                        +
+                                                                           Cl2                                                                                      Cl2
+                  1e17                                                                                                                                                   -
+                                                                                                          1e17                                                      Cl
+                                                                                -
+                                                                           Cl
+
+
+                                                                                                          1e16
+         n (m )                                                                                n (m-3)
+        -3
+                          e
+                  1e16
+                                                                                                                  e
+                          Cl+
+                                                                                                          1e15
+
+                                                                     (a) 5 mTorr
+                                                                                                                                                           (b) 50 mTorr
+                                                                                                                Cl+
+                  1e15                                                                                    1e14
+                      200       400       600   800    1000   1200      1400            1600                  200   400             600   800    1000   1200    1400             1600
+                                                  Th (K)                                                                                    Th (K)
+
+
+                                                                                                          1e21            Cl2
+                  1e20           Cl2
+                                 Cl                                                                                        Cl
+                                                                                                          1e20
+                  1e19           Cl2(v=1)                                                                                 Cl2(v=1)
+                                                                                                          1e19
+                                      2
+                  1e18           Cl( P1/2)                                                                                Cl(2 P1/2)
+                                                                                                n (m )
+                                                                                                          1e18
+         n (m )
+        -3                                                                                     -3
+
+                  1e17                                                                                    1e17            Cl2(v=2)
+                                 Cl2(v=2)
+                  1e16                                                                                    1e16
+                                                                                                                          Cl2(v=3)
+                                 Cl2(v=3)
+                                                                                                          1e15                                             (d) 50 mTorr
+                  1e15                                               (c) 5 mTorr
+                                 Cl(1 P5/2)                                                                                     1
+                                                                                                          1e14            Cl( P5/2)
+                  1e14                                                                                    3e13
+                      200       400       600   800    1000   1200      1400            1600                  200         400       600   800    1000   1200    1400             1600
+                                                  Th (K)                                                                                    Th (K)
+
+
+Figure 6. The charged and neutral densities with respect to the gas temperature variation at 200 W power input for the pressure at 5 and
+50 mTorr. (a) The charged particles at 5 mTorr and (b) at 50 mTorr. (c) The neutral particles at 5 mTorr and (d) at 50 mTorr.
+
+                   80                                                                                       3.4
+                         (a)
+                                                                     50 mTorr                               3.3     (b)
+                                                                                                                                                               5 mTorr
+                                                                     20 mTorr                               3.2
+                   10                                                10 mTorr                               3.1                                                10 mTorr
+                                                                     5 mTorr
+                                                        α                                                    3
+        α, κd                                                                                   Te (eV)     2.9                                                20 mTorr
+                    1                                                                                       2.8
+                                                        κd                                                                                                     50 mTorr
+                                                                     5 mTorr                                2.7
+                                                                     10 mTorr                               2.6
+                                                                     20 mTorr
+                   0.1                                                                                      2.5
+                                                                     50 mTorr
+                  0.04                                                                                      2.4
+                      200       400       600   800    1000   1200     1400             1600                   200        400       600   800    1000   1200     1400            1600
+                                                  Th (K)                                                                                    Th (K)
+
+
+Figure 7. (a) The degree of electronegativity α, dissociation κd and (b) the electron temperature Te with respect to gas temperature variation
+at 200 W power input.
+
+temperature. As shown in the continuous case (see figure 4(a)),                                     6. Conclusion and discussion
+we also observe that at 5 mTorr, Cl+ is the dominant ion at most
+of the pulse on time for γrec = 0.001. As the power is cut-off,                                     We analysed a chlorine inductively coupled-radio frequency
+the electron temperature and the plasma potential immediately                                       plasma for continuous and modulated power input modes with
+drop within 50 µs, and shortly after the electrons vanish in                                        a global model. The model shows good agreement with
+the chamber. Cl+ follows the electrons within 200 µs, which                                         the various experimental data from the literature for both
+is in an agreement with the observations [2]. Afterwards, an                                        power input modes. In the model a novel quasi-neutrality
+ion–ion plasma that is composed of Cl+2 and Cl− appears in                                          implementation is employed for the power modulation and
+the chamber. These ions mutually recombine, as well as they                                         we observed an agreement with the conventional approach
+slowly flow out due to the net mass flow rate. The dominant loss                                    in the pulse on mode. In the pulse off mode an ion–ion
+mechanism of the ions is initially the mutual recombination                                         plasma composed of Cl− and Cl+2 appears in the chamber and
+then the dominance switches to the flow out rate. In the model                                      the quasi-neutrality is imposed by a similar condition on the
+we do not set any wall diffusion for these ions, which may                                          negative ion. For an ion–ion plasma composed of multiple
+lower the ion–ion plasma lifetime.                                                                  dominant negative ions the quasi-neutrality condition is to
+
+                                                                                           11
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                                         E Kemaneci et al
+
+                                                                        5                                                                              5
+                  1e+17                                Cl-                                             1e+17                          Cl-
+                                                        +                                                                              +
+                                                      Cl                                                                             Cl
+                                                     Cl2+               4                                                           Cl2+               4
+                  1e+16                                 e                                              1e+16                           e
+                                                       Te               3                                                             Te               3
+                                                                               Te (eV)                                                                      Te (eV)
+        n (m-3)   1e+15                                                                     n (m-3)    1e+15
+                                                                        2                                                                              2
+
+
+                  1e+14                                                                                1e+14
+                                                                        1                                                                              1
+                                                     (a) γA1                                                                        (b) γA2
+
+                  1e+13                                                  0                             1e+13                                            0
+                          0   20     40         60          80        100                                      0   20   40     60          80        100
+                                      Time (ms)                                                                         Time (ms)
+
+
+                                                                        5                                                                              5
+                  1e+17                                Cl-                                             1e+17                          Cl-
+                                                      Cl+                                                                            Cl+
+                                                     Cl2+               4                                                           Cl2+               4
+                  1e+16                                 e                                              1e+16                           e
+                                                       Te               3                                                             Te               3
+                                                                               Te (eV)                                                                      Te (eV)
+        n (m-3)                                                                              n (m )
+                                                                                            -3
+
+                  1e+15                                                                                1e+15
+                                                                        2                                                                              2
+
+
+                  1e+14                                                                                1e+14
+                                                                        1                                                                              1
+                                                     (c) γrec=0.001                                                                 (d) γrec=1
+
+                  1e+13                                                  0                             1e+13                                            0
+                          0   20     40         60          80        100                                      0   20   40     60          80        100
+                                      Time (ms)                                                                         Time (ms)
+
+Figure 8. Power modulation with period 100 ms and 50% duty ratio at 200 W power input and at 50 mTorr pressure. Each figure shows a
+different recombination probability (a) γA1 , (b) γA2 , (c) γrec = 0.001 and (d) γrec = 1.
+
+                                                                        5                                                                              5
+                  1e+17                               Cl-                                              1e+17                          Cl-
+                                                      Cl+                                                                            Cl+
+                                                     Cl2+               4                                                           Cl2+               4
+                  1e+16                                 e                                              1e+16                           e
+                                                       Te               3                                                             Te               3
+                                                                             Te (eV)                                                                        Te (eV)
+         n (m )                                                                              n (m-3)
+        -3
+
+                  1e+15                                                                                1e+15
+                                                                        2                                                                              2
+
+
+                  1e+14                                                                                1e+14
+                                                                        1                                                                              1
+                                                     (a) Th = 300K                                                                  (b) Th = 1500K
+
+                  1e+13                                                 0                              1e+13                                            0
+                          0   20     40         60       80          100                                       0   20   40     60           80       100
+                                      Time (ms)                                                                         Time (ms)
+
+Figure 9. Power modulation with period 100 ms and 50% duty ratio at 200 W peak power input 50 mTorr. The figures show (a) Th = 300 K
+and (b) Th = 1500 K cases.
+
+be applied to all negative ions, for example, by a density                                   Further analysis with a consistent gas heating requires a model
+weighted flux.                                                                               self-consistently coupled to a volume-averaged heavy particle
+     In the analysis, a comparison of the plasma for distinct                                energy balance equation. Additionally, we assume that all the
+measurements of the Cl wall recombination probability is                                     heavy particles are in thermal equilibrium and deviation from
+provided. Furthermore, the roles of the wall recombination and                               this, for example large ion temperature, may alter the influence
+the gas temperature variations on the plasma are investigated                                of the gas temperature.
+and it is shown that they have a significant influence. The wall                                   We observe that the updated vibrational excitation cross-
+recombination releases energy at the wall and this reaction may                              section [12] produces significantly larger Cl2 (v = 1) density
+directly alter the gas temperature, or indirectly by changing                                compared with the one provided in [46]. On the other
+the plasma features. In the model we do not calculate the gas                                hand, the rest of the vibrational excited levels Cl2 (v = 2, 3)
+temperature but it is provided externally from measurements.                                 do not change and up to date excitation cross-sections are
+
+                                                                                       12
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                  E Kemaneci et al
+
+                                                                         References
+
+                                                                          [1] Lieberman M A and Lichtenberg A J 2005 Principles of
+                                                                                 Plasma Discharges and Materials Processing (New Jersey:
+                                                                                 Wiley)
+                                                                          [2] Kanakasabapathy S K, Overzet L J, Midha V and Economou D
+                                                                                 2001 Alternating fluxes of positive and negative ions from
+                                                                                 an ion–ion plasma Appl. Phys. Lett. 78 22–4
+                                                                          [3] Ramamurthi B and Economou D J 2002 Two-dimensional
+                                                                                 pulsed-plasma simulation of a chlorine discharge J. Vac.
+                                                                                 Sci. Technol. A 20 467–78
+                                                                          [4] Bodart P, Brihoum M, Cunge G, Joubert O and Sadeghi N
+                                                                                 2011 Analysis of pulsed high-density HBr and Cl2 plasmas:
+                                                                                 impact of the pulsing parameters on the radical densities J.
+                                                                                 Appl. Phys. 110 113302
+                                                                          [5] Guha J, Donnelly V M and Pu Y 2008 Mass and Auger
+                                                                                 electron spectroscopy studies of the interactions of atomic
+                                                                                 and molecular chlorine on a plasma reactor wall J. Appl.
+                                                                                 Phys. 103 013306
+                                                                          [6] Kota G P, Coburn J W and Graves D B 1998 The
+                                                                                 recombination of chlorine atoms at surfaces J. Vac. Sci.
+                                                                                 Technol. A 16 270–7
+                                                                          [7] Booth J P, Sirse N, Chabert P, Azamoum Y and
+                                                                                 Zaka ul Islam M 2011 Recombination coefficient of Cl
+                                                                                 atoms on Al2 O3 wall determined by two-photon
+                                                                                 laser-induced fluorescence ICPIG-2011 Int. Conf. on
+                                                                                 Phenomena in Ionized Gases (28 August–2 September
+                                                                                 2011)
+                                                                          [8] Stafford L, Khare R, Guha J, Donnelly V M, Poirier J-S and
+                                                                                 Margot J 2009 Recombination of chlorine atoms on
+                                                                                 plasma-conditioned stainless steel surfaces in the presence
+                                                                                 of adsorbed Cl2 J. Phys. D: Appl. Phys. 42 055206
+Figure 10. Energy diagram of the Cl & Cl2 system. We use the
+                                                                          [9] Cunge G, Sadeghi N and Ramos R 2007 Influence of the
+symbol Cl instead of Cl(2 P 3/2).
+                                                                                 reactor wall composition on radicals’ densities and total
+                                                                                 pressure in Cl2 inductively coupled plasmas: II. during
+also necessary for these levels. Furthermore, this updated                       silicon etching J. Appl. Phys. 102 093305
+cross-section relatively increases the electron temperature              [10] Lee C and Lieberman M A 1995 Global model of Ar, O2 , Cl2 ,
+and reduces the electron density; hence, it improves the                         and Ar/O2 high-density plasma discharges J. Vac. Sci.
+                                                                                 Technol. A 13 368–80
+overall agreement with the experimental data. The quenching              [11] Meeks E, Shon J W, Ra Y and Jones P 1995 Effects of atomic
+reactions of the vibrational levels also play similar role;                      chlorine wall recombination: comparison of a plasma
+however, these reactions barely affect the plasma. The                           chemistry model with experiment J. Vac. Sci. Technol. A
+                                                                                 13 2884–9
+influence of the atomic excited chlorine levels is negligible
+                                                                         [12] Greg J and Pitchford L C 2012 Updated compilation of
+within the parameter range. It is also observed that stepwise                    electron-Cl2 scattering cross sections Plasma Sources Sci.
+ionization from the considered atomic and molecular excited                      Technol. 21 032002
+levels are insignificant. Additionally, the plasma is not                [13] Wang Y, Zatsarinny O, Bartschat K and Booth J P 2013
+sensitive to variation of the wall de-excitation probabilities of                Fine-structure-resolved electron collisions from chlorine
+                                                                                                     2 o              2 o
+                                                                                 atoms in the (3p 5 ) P3/2 and (3p 5 ) P1/2 states Phys. Rev. A
+these excited levels.                                                            87 022703
+                                                                         [14] Chabert P and Braithwaite N 2011 Physics of Radio-Frequency
+                                                                                 Plasmas (Cambridge: Cambridge University Press)
+                                                                         [15] Subramonium P and Kushner M J 2002 Two-dimensional
+Acknowledgments                                                                  modeling of long-term transients in inductively coupled
+                                                                                 plasmas using moderate computational parallelism: I. Ar
+This research is supported by the Dutch Technology                               pulsed plasmas J. Vac. Sci. Technol. A 20 313–24
+                                                                         [16] Sommerer T J and Kushner M J 1992 Monte Carlo-fluid model
+Foundation STW (project number 10744), and the Draka
+                                                                                 of chlorine atom production in Cl2 , HCl, and CCl4
+Comteq Fibre of the Prysmian group (The Netherlands). The                        radio-frequency discharges for plasma etching J. Vac. Sci.
+work of JPB was performed within the LABEX Plas@par                              Technol. B 10 2179–87
+project, and received financial state aid, managed by the                [17] Rogoff G L, Kramer J M and Piejak R B 1986 A model for the
+                                                                                 bulk plasma in an RF chlorine discharge IEEE Trans.
+Agence Nationale de la Recherche, as part of the programme
+                                                                                 Plasma Sci. 14 103–11
+‘Investissements d’aveni’ (ANR-11-IDEX-0004-02). JPB was                 [18] Richards A D and Sawin H H 1987 Atomic chlorine
+also supported by the Agence Nationale de la Recherche                           concentration measurements in a plasma etching reactor: II.
+project INCLINE (ANR-09 BLAN 0019) and by the Applied                            A simple predictive model J. Appl. Phys. 62 799–807
+                                                                         [19] Thorsteinsson E G and Gudmundsson J T 2010 A global
+Materials University Research Partnership Programme. The
+                                                                                 (volume averaged) model of a chlorine discharge Plasma
+authors thank Jean-Luc Raimbault and Pascal Chabert for the                      Sources Sci. Technol. 19 015001
+fruitful discussions on the global models.
+                                                                    13
+Plasma Sources Sci. Technol. 23 (2014) 045002                                                                                    E Kemaneci et al
+
+[20] Lazzaroni C, Chabert P, Lieberman M A, Lichtenberg A J and              [42] Ruf M, Barsotti S, Braun M, Hotop H and Fabrikant I 2004
+        Leblanc A 2012 Analytical-numerical global model of                          Dissociative attachment and vibrational excitation in
+        atmospheric-pressure radio-frequency capacitive discharges                   low-energy electron collisions with chlorine molecules
+        Plasma Sources Sci. Technol. 21 035013                                       J. Phys. B: At. Mol. Opt. Phys. 37 41
+[21] Monahan D D and Turner M M 2009 On the global model                     [43] Christophorou L G and Olthoff J K 1999 Electron interactions
+        approximation Plasma Sources Sci. Technol. 18 045024                         with Cl2 J. Phys. Chem. Ref. Data 28 131
+[22] Monahan D D and Turner M M 2008 Global models of                        [44] Kurepa M V and Belic D S 1978 Electron-chlorine molecule
+        electronegative discharges: critical evaluation and practical                total ionisation and electron attachment cross sections J.
+        recommendations Plasma Sources Sci. Technol.                                 Phys. B: At. Mol. Opt. Phys. 11 3719
+        17 045003                                                            [45] Golovitskii A P 2000 Temperature dependence of an electron
+[23] Ashida S and Lieberman M A 1997 Spatially averaged                              attachment to chlorine molecules Tech. Phys. 45 532
+        (global) model of time modulated high density chlorine               [46] Kolorenč P and Horáček J 2006 Dissociative electron
+        plasmas Japan. J. Appl. Phys. 36 854                                         attachment, vibrational excitation of the chlorine molecule
+[24] Lieberman M A and Ashida S 1996 Global models of                                Phys. Rev. A 74 062703
+        pulse-power-modulated high-density, low-pressure                     [47] Hayes T R, Wetzel R C and Freund R S 1987 Absolute
+        discharges Plasma Sources Sci. Technol. 5 145                                electron-impact-ionization cross-section measurements of
+[25] Thorsteinsson E G and Gudmundsson J T 2010 A global                             the halogen atoms Phys. Rev. A 35 578
+        (volume averaged) model of a Cl2 /Ar discharge: II. Pulsed           [48] Ali M A and Kim Y K 2005 Total ionization cross sections of
+        power modulation J. Phys. D: Appl. Phys. 43 115202                           Cl and Cl2 by electron impact Surf. Interface Anal.
+[26] Thorsteinsson E G and Gudmundsson J T 2010 The low                              37 969–72
+        pressure Cl2 /O2 discharge and the role of ClO Plasma                [49] Fritioff K, Sandström J, Hanstorp D, Ehlerding A, Larsson M,
+        Sources Sci. Technol. 19 055008                                              Collins G F, Pegg D J, Danared H, Källberg A and
+[27] Thorsteinsson E G and Gudmundsson J T 2010 A global                             Le Padellec A 2003 Electron-impact detachment from Cl−
+        (volume averaged) model of a Cl2 /Ar discharge: I.                           Phys. Rev. A 68 012712
+        Continuous power J. Phys. D: Appl. Phys. 43 115201                   [50] Church M J and Smith D 1978 Ionic recombination of atomic
+[28] Booth J P, Azamoum Y, Sirse N and Chabert P 2012 Absolute                       and molecular ions in flowing afterglow plasmas J. Phys. D:
+        atomic chlorine densities in a Cl2 inductively coupled                       Appl. Phys. 11 2199
+        plasma determined by two-photon laser-induced                        [51] Lee C, Graves D B and Lieberman M A 1996 Role of etch
+        fluorescence with a new calibration method J. Phys. D:                       products in polysilicon etching in a high-density chlorine
+        Appl. Phys. 45 195201                                                        discharge Plasma Chem. Plasma Process. 16 99–120
+[29] van Dijk J, Peerenboom K, Jimenez M, Mihailova D and                    [52] Španěl P, Tichý M and Smith D 1993 The reactions of positive
+        van der Mullen J 2009 The plasma modelling toolkit                           and negative halogen ions with Cl2 and Br2 J. Chem. Phys.
+        Plasimo J. Phys. D: Appl. Phys. 42 194012                                    98 8660–6
+[30] Kim S, Lieberman M A, Lichtenberg A J and                               [53] Lloyd A C 1971 A critical review of the kinetics of the
+        Gudmundsson J T Improved volume-averaged model for                           dissociation–recombination reactions of fluorine and
+        steady and pulsed-power electronegative discharges 2006 J.                   chlorine Int. J. Chem. Kinetics 3 39–68
+        Vac. Sci. Technol. A 24 2025–40                                      [54] Subramonium P 2003 Simulation of transients, transport in
+[31] Braithwaite N St J and Allen J E 1988 Boundaries and probes                     plasma processing reactors PhD Thesis University of
+        in electronegative plasmas J. Phys. D: Appl. Phys. 21 1733                   Illinois at Urbana-Champaign
+[32] Booth J P and Sadeghi N 1991 Oxygen and fluorine atom                   [55] Thompson D L 1974 Monte Carlo classical dynamical
+        kinetics in electron cyclotron resonance plasmas by                          study of the Cl + Cl2 and I + I2 systems: vibrational
+        time-resolved actinometry J. Appl. Phys. 70 611-20                           relaxation and atom-exchange reactions J. Chem. Phys.
+[33] Chantry P J 1987 A simple formula for diffusion calculations                    60 4557
+        involving wall reflection and low density J. Appl. Phys.             [56] Ashida S, Lee C and Lieberman M A 1995 Spatially averaged
+        62 1141                                                                      (global) model of time modulated high density argon
+[34] Mitchner M and Kruger C H 1973 Partially Ionized Gases                          plasmas J. Vac. Sci. Technol. A 13 2498
+        (New York: Wiley)                                                    [57] Efremov A M, Kim G-H, Kim J-G and Kim C-I 2007
+                                                                                     Self-consistent global model for inductively coupled Cl2
+[35] Hindmarsh A C 1980 LSODE and LSODI two new initial
+                                                                                     plasma: Comparison with experimental data and application
+        value ordinary differential equation solvers SIGNUM
+                                                                                     for the etch process analysis Thin Solid Films 515 5395–402
+        Newslett. 15 10–11
+                                                                             [58] Hebner G A 1996 Negative ion density in inductively coupled
+[36] Griffin D C, Pindzola M S, Gorczyca T W and Badnell N R
+                                                                                     chlorine plasmas J. Vac. Sci. Technol. A 14 2158–62
+        1995 Elastic and inelastic scattering of electrons from Ar
+                                                                             [59] Sirse N, Booth J P, Chabert P, Surzhykov A and Indelicato P
+        and Cl Phys. Rev. A 51 2265–76                                                                                             o
+                                                                                     2013 Chlorine atom densities in the (3p5 )2 P1/2 excited
+[37] Tinck S, Boullart W and Bogaerts A 2009 Investigation of
+                                                                                     spin–orbit state measured by two-photon absorption
+        etching and deposition processes of Cl2 /O2 /Ar inductively
+                                                                                     laser-induced fluorescence in a chlorine inductively coupled
+        coupled plasmas on silicon by means of plasma–surface
+                                                                                     plasma J. Phys. D: Appl. Phys. 46 295203
+        simulations and experiments J. Phys. D: Appl. Phys.
+                                                                             [60] Ahn T H, Nakamura K and Sugai H 1996 Negative ion
+        42 095204
+                                                                                     measurements and etching in a pulsed-power inductively
+[38] J A M van der Mullen 1990 Excitation equilibria in plasmas; a                   coupled plasma in chlorine Plasma Sources Sci. Technol.
+        classification Phys. Rep. 191 109                                            5 139
+[39] Cosby P C and Helm H 1992 Technical Report                              [61] Cunge G, Vempaire D and Sadeghi N 2010 Gas convection
+        WL-TR-93-2004 (US Air Force Material Command Wright                          caused by electron pressure drop in the afterglow of a
+        Patterson AFB, OH) pp 45433–7650                                             pulsed inductively coupled plasma discharge Appl. Phys.
+[40] Basner R and Becker K 2004 Experimental absolute electron                       Lett. 96 131501
+        impact ionization cross-sections of Cl2 New J. Phys.                 [62] Cunge G, Vempaire D, Ramos R, Touzeau M, Joubert O,
+        6 118                                                                        Bodard P and Sadeghi N 2010 Radical surface interactions
+[41] Calandra P, O’Connor C S S and Price S D 2000                                   in industrial silicon plasma etch reactors Plasma Sources
+        Electron-impact ionization of the chlorine molecule                          Sci. Technol. 19 034017
+        J. Chem. Phys. 112 10821
+
+                                                                        14
+

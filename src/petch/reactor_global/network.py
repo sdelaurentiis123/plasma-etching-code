@@ -32,6 +32,9 @@ _EVIDENCE_KINDS = {
     "derived",
     "published_compilation",
 }
+INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT = (
+    "incident_electron_kinetic_energy"
+)
 
 
 def _immutable_numeric_mapping(
@@ -425,8 +428,9 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
     forces the cross section to zero below threshold even when finite
     experimental energy resolution leaves small sub-threshold table entries.
     The coefficient fails closed when the unmeasured high-energy support
-    contains more than ``maximum_kernel_tail_fraction`` of the constant-cross-
-    section Maxwellian kernel.
+    contains more than ``maximum_kernel_tail_fraction`` of the rate kernel.
+    Its separate incident-energy moment applies the stricter
+    ``maximum_energy_kernel_tail_fraction`` to the ``E^2 exp(-E/Te)`` kernel.
     """
 
     electron_energy_eV: tuple[float, ...]
@@ -436,6 +440,7 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
     source: str
     evidence_kind: str
     maximum_kernel_tail_fraction: float = 1.0e-6
+    maximum_energy_kernel_tail_fraction: float = 1.0e-6
     density_order: float = field(init=False, default=2.0)
     source_units: str = field(
         init=False,
@@ -468,6 +473,8 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
             )
             or not np.isfinite(self.maximum_kernel_tail_fraction)
             or not 0.0 < self.maximum_kernel_tail_fraction < 1.0
+            or not np.isfinite(self.maximum_energy_kernel_tail_fraction)
+            or not 0.0 < self.maximum_energy_kernel_tail_fraction < 1.0
             or not str(self.source).strip()
             or self.evidence_kind not in _EVIDENCE_KINDS
         ):
@@ -482,6 +489,11 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
             "maximum_kernel_tail_fraction",
             float(self.maximum_kernel_tail_fraction),
         )
+        object.__setattr__(
+            self,
+            "maximum_energy_kernel_tail_fraction",
+            float(self.maximum_energy_kernel_tail_fraction),
+        )
 
     def maxwellian_kernel_tail_fraction(self, temperature_eV: float) -> float:
         """Return the constant-cross-section kernel above table support."""
@@ -490,6 +502,19 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
             raise ValueError("electron temperature must be finite and positive")
         ratio = self.electron_energy_eV[-1] / temperature
         return float((ratio + 1.0) * np.exp(-ratio))
+
+    def incident_energy_kernel_tail_fraction(
+            self, temperature_eV: float) -> float:
+        """Return the constant-cross-section energy kernel above support."""
+        temperature = float(temperature_eV)
+        if not np.isfinite(temperature) or temperature <= 0.0:
+            raise ValueError("electron temperature must be finite and positive")
+        ratio = self.electron_energy_eV[-1] / temperature
+        return float(
+            0.5
+            * (ratio ** 2 + 2.0 * ratio + 2.0)
+            * np.exp(-ratio)
+        )
 
     @staticmethod
     def _first_moment(
@@ -513,6 +538,89 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
             - (upper ** 2 + 2.0 * upper + 2.0) * np.exp(-upper)
         )
 
+    @staticmethod
+    def _third_moment(
+            lower_eV: np.ndarray, upper_eV: np.ndarray,
+            temperature_eV: float) -> np.ndarray:
+        lower = lower_eV / temperature_eV
+        upper = upper_eV / temperature_eV
+        return temperature_eV ** 4 * (
+            (
+                lower ** 3 + 3.0 * lower ** 2 + 6.0 * lower + 6.0
+            ) * np.exp(-lower)
+            - (
+                upper ** 3 + 3.0 * upper ** 2 + 6.0 * upper + 6.0
+            ) * np.exp(-upper)
+        )
+
+    def _thresholded_support(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return source nodes at/above threshold plus an unsampled zero node.
+
+        If the source tabulates the threshold itself, its printed value is
+        retained: the physical rule is zero *below* threshold.  If threshold
+        lies between samples or below the first sample, a zero-cross-section
+        threshold node is inserted and the unknown interval is represented by
+        the explicit linear rise to the first measured point.
+        """
+        source_energies = np.asarray(self.electron_energy_eV)
+        source_cross_sections = np.asarray(self.cross_section_m2)
+        first = int(np.searchsorted(
+            source_energies, self.threshold_eV, side="left"))
+        if (
+            first < source_energies.size
+            and source_energies[first] == self.threshold_eV
+        ):
+            return (
+                source_energies[first:],
+                source_cross_sections[first:],
+            )
+        return (
+            np.concatenate((
+                np.array([self.threshold_eV]),
+                source_energies[first:],
+            )),
+            np.concatenate((
+                np.array([0.0]),
+                source_cross_sections[first:],
+            )),
+        )
+
+    def _piecewise_moments(
+            self, context: RateContext) -> tuple[float, float]:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        temperature = context.electron_temperature_eV
+        energies, cross_sections = self._thresholded_support()
+        lower = energies[:-1]
+        upper = energies[1:]
+        lower_cross_section = cross_sections[:-1]
+        slopes = np.diff(cross_sections) / np.diff(energies)
+        first_moment = self._first_moment(lower, upper, temperature)
+        second_moment = self._second_moment(lower, upper, temperature)
+        third_moment = self._third_moment(lower, upper, temperature)
+        rate_integral = np.sum(
+            lower_cross_section * first_moment
+            + slopes * (second_moment - lower * first_moment)
+        )
+        energy_integral = np.sum(
+            lower_cross_section * second_moment
+            + slopes * (third_moment - lower * second_moment)
+        )
+        prefactor = np.sqrt(
+            8.0 * E_CHARGE_C / (np.pi * ELECTRON_MASS_KG)
+        ) / temperature ** 1.5
+        rate = prefactor * rate_integral
+        energy = prefactor * energy_integral
+        if (
+            not np.isfinite(rate)
+            or rate <= 0.0
+            or not np.isfinite(energy)
+            or energy <= 0.0
+        ):
+            raise FloatingPointError(
+                "nonpositive or nonfinite cross-section moment")
+        return float(rate), float(energy)
+
     def coefficient_si(self, context: RateContext) -> float:
         if not isinstance(context, RateContext):
             raise TypeError("rate context is required")
@@ -524,35 +632,21 @@ class ElectronMaxwellianCrossSectionRateCoefficient:
                 "kernel tolerance"
             )
 
-        source_energies = np.asarray(self.electron_energy_eV)
-        source_cross_sections = np.asarray(self.cross_section_m2)
-        above_threshold = source_energies > self.threshold_eV
-        energies = np.concatenate((
-            np.array([self.threshold_eV]),
-            source_energies[above_threshold],
-        ))
-        cross_sections = np.concatenate((
-            np.array([0.0]),
-            source_cross_sections[above_threshold],
-        ))
+        return self._piecewise_moments(context)[0]
 
-        lower = energies[:-1]
-        upper = energies[1:]
-        lower_cross_section = cross_sections[:-1]
-        slopes = np.diff(cross_sections) / np.diff(energies)
-        first_moment = self._first_moment(lower, upper, temperature)
-        second_moment = self._second_moment(lower, upper, temperature)
-        weighted_integral = np.sum(
-            lower_cross_section * first_moment
-            + slopes * (second_moment - lower * first_moment)
-        )
-        prefactor = np.sqrt(
-            8.0 * E_CHARGE_C / (np.pi * ELECTRON_MASS_KG)
-        ) / temperature ** 1.5
-        value = prefactor * weighted_integral
-        if not np.isfinite(value) or value <= 0.0:
-            raise FloatingPointError("nonpositive or nonfinite rate coefficient")
-        return float(value)
+    def incident_energy_moment_eV_m3_s(
+            self, context: RateContext) -> float:
+        """Return ``<sigma v E>`` for the same evaluated collision table."""
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        tail_fraction = self.incident_energy_kernel_tail_fraction(
+            context.electron_temperature_eV)
+        if tail_fraction > self.maximum_energy_kernel_tail_fraction:
+            raise ValueError(
+                "unmeasured cross-section tail exceeds declared incident-"
+                "energy Maxwellian kernel tolerance"
+            )
+        return self._piecewise_moments(context)[1]
 
 
 @dataclass(frozen=True)
@@ -849,6 +943,7 @@ class Reaction:
     )
     electron_energy_loss_eV: float | None
     source: str
+    electron_energy_loss_moment: str | None = None
     domain: str = "volume"
 
     def __post_init__(self):
@@ -869,6 +964,13 @@ class Reaction:
                 self.electron_energy_loss_eV is not None
                 and not np.isfinite(self.electron_energy_loss_eV)
             )
+            or self.electron_energy_loss_moment not in {
+                None, INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT,
+            }
+            or (
+                self.electron_energy_loss_eV is not None
+                and self.electron_energy_loss_moment is not None
+            )
             or not str(self.source).strip()
         ):
             raise ValueError("invalid reactor reaction")
@@ -885,6 +987,22 @@ class Reaction:
             object.__setattr__(
                 self, "electron_energy_loss_eV",
                 float(self.electron_energy_loss_eV))
+        if self.electron_energy_loss_moment is not None:
+            if (
+                not isinstance(
+                    self.rate_coefficient,
+                    ElectronMaxwellianCrossSectionRateCoefficient,
+                )
+                or reactants.get("e") != 1.0
+                or products.get("e", 0.0) != 0.0
+                or orders.get("e") != 1.0
+                or self.domain != "volume"
+            ):
+                raise ValueError(
+                    "incident-electron energy moment requires a one-electron "
+                    "removal reaction driven by the same Maxwellian cross "
+                    "section"
+                )
 
     def event_rate_m3_s(
             self, densities_m3: Mapping[str, float],
@@ -900,6 +1018,35 @@ class Reaction:
         if not np.isfinite(rate) or rate < 0.0:
             raise FloatingPointError("nonfinite reaction event rate")
         return float(rate)
+
+    def electron_energy_loss_rate_eV_m3_s(
+            self, densities_m3: Mapping[str, float],
+            context: RateContext) -> float:
+        """Return this reaction's signed free-electron energy loss rate."""
+        if self.electron_energy_loss_eV is not None:
+            return float(
+                self.electron_energy_loss_eV
+                * self.event_rate_m3_s(densities_m3, context)
+            )
+        if (
+            self.electron_energy_loss_moment
+            == INCIDENT_ELECTRON_KINETIC_ENERGY_MOMENT
+        ):
+            coefficient = self.rate_coefficient
+            moment = coefficient.incident_energy_moment_eV_m3_s(context)
+            for name, order in self.kinetic_orders.items():
+                if name not in densities_m3:
+                    raise KeyError(f"missing density for {name}")
+                density = float(densities_m3[name])
+                if not np.isfinite(density) or density < 0.0:
+                    raise ValueError(
+                        "densities must be finite and nonnegative")
+                moment *= density ** order
+            if not np.isfinite(moment) or moment < 0.0:
+                raise FloatingPointError("nonfinite electron-energy loss rate")
+            return float(moment)
+        raise ValueError(
+            f"electron-energy ledger is incomplete for reaction {self.name}")
 
 
 @dataclass(frozen=True)
@@ -1015,7 +1162,10 @@ class ReactionNetwork:
     def has_complete_electron_energy_ledger(self) -> bool:
         """Whether every reaction declares its electron-energy exchange."""
         return all(
-            reaction.electron_energy_loss_eV is not None
+            (
+                reaction.electron_energy_loss_eV is not None
+                or reaction.electron_energy_loss_moment is not None
+            )
             for reaction in self.reactions
         )
 
@@ -1030,19 +1180,27 @@ class ReactionNetwork:
     def electron_power_loss_density_W_m3(
             self, densities_m3: Mapping[str, float],
             context: RateContext) -> float:
+        extra = set(densities_m3) - set(self.species_names)
+        if extra:
+            raise KeyError(f"unknown density species {sorted(extra)}")
         if not self.has_complete_electron_energy_ledger:
             missing = [
                 reaction.name
                 for reaction in self.reactions
-                if reaction.electron_energy_loss_eV is None
+                if (
+                    reaction.electron_energy_loss_eV is None
+                    and reaction.electron_energy_loss_moment is None
+                )
             ]
             raise ValueError(
                 "electron-energy ledger is incomplete for reactions "
                 f"{missing}")
-        rates = self.event_rates_m3_s(densities_m3, context)
-        losses_eV = np.array([
-            reaction.electron_energy_loss_eV for reaction in self.reactions])
-        return float(E_CHARGE_C * np.dot(rates, losses_eV))
+        losses_eV_m3_s = sum(
+            reaction.electron_energy_loss_rate_eV_m3_s(
+                densities_m3, context)
+            for reaction in self.reactions
+        )
+        return float(E_CHARGE_C * losses_eV_m3_s)
 
     def source_conservation_report(
             self, densities_m3: Mapping[str, float],

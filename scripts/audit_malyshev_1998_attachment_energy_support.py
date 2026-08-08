@@ -236,6 +236,12 @@ the Lam electron-power balance: both tails remain exposed on every measured
 temperature marker, and elastic, vibrational, non-dissociative electronic,
 detachment, ion-pair, and molecular branching channels remain open.
 
+The native network now has a guarded full-support path that requires
+`<sigma v>` and `<sigma v E>` to come from the same tabulated cross section and
+applies a separate, stricter energy-kernel tail gate. Table 16 deliberately
+does not qualify for that path at any Lam marker; it remains a support-only
+diagnostic rather than being zero-filled or extrapolated into a solver input.
+
 No coefficient was selected against a reactor observable or feature depth.
 No absorbed-power, wafer-flux, or etched-depth prediction is supported by this
 audit.
