@@ -67,7 +67,10 @@ def test_kemaneci_table4_electron_fits_replay_every_forward_row():
         15: (1.25e-16 * t ** -1.13 * np.exp(-0.36 / t)
              + log_term(1.06e-16, 1.01, 1.06)),
         16: 9.00e-14 * t ** -0.50,
-        17: 4.55e-14 * t ** 0.46 * np.exp(-2.01 / t - 0.001 / t ** 2),
+        # Independent 50-digit evaluation of the visually audited Table-4
+        # row.  Keeping a literal here prevents the source exponent sign from
+        # being copied from the implementation into its own regression gate.
+        17: 1.2941925109736606e-14,
         18: 7.03e-17 * t ** 0.55 * np.exp(
             -2.15 / t - 1.5 / t ** 2 - 2.05 / t ** 3),
         19: 3.17e-14 * t ** 0.53 * np.exp(-13.29 / t),

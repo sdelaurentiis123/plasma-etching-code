@@ -30,8 +30,9 @@ The official COMSOL reproduction resolves the intended topology:
 - unqualified `Cl2` is the ground vibrational state;
 - there are four charge-exchange reactions, for ground `Cl2` and `v=1--3`;
 - 38 forward volume entries include those four plus two elastic channels;
-- six reverse excitation reactions obtained by detailed balance bring the
-  complete implementation to 44.
+- eight starred excitation rows (10--15 and 17--18) each have a reverse;
+- the raw COMSOL 6.4 model therefore contains 46 volume reaction features,
+  not 44.
 
 The native replay therefore retains source labels 28--31, leaves label 32
 absent, and records the printed range as an off-by-one source defect. It does
@@ -43,7 +44,7 @@ This rung omits:
 
 1. the two elastic electron channels, because Table 4 points to cross-section
    data rather than printing it;
-2. the six reverse vibrational/atomic excitation reactions, because the paper
+2. the eight reverse vibrational/atomic excitation reactions, because the paper
    says they follow detailed balance but does not print their coefficients;
 3. electron-event energies, because rate-fit exponents are not event energies
    and the paper's Figure-10 level convention is not thermochemically complete;
@@ -59,7 +60,9 @@ feature depth.
 1. Recover the exact elastic cross-section files used by the official
    implementation and compare them with the primary Griffin/Gregorio sources.
 2. Implement detailed-balance reverse rates from explicit degeneracies and
-   level energies, then reproduce the 44-reaction source model.
+   level energies, then reproduce the 44-reaction non-elastic source model.
+   The two elastic collision rows raise the complete volume-feature count to
+   46.
 3. Add a separate physical/evaluated energy ledger; do not reuse Table-4 fit
    exponents as thresholds.
 4. Preregister published density/temperature boards before solving or grading

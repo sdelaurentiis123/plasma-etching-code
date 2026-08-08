@@ -2,15 +2,16 @@
 
 This module reproduces the 36 non-elastic *forward* volume reactions printed
 in Table 4 of ``kemaneci-2014-chlorine-global``.  It deliberately omits the
-two elastic cross-section channels and the six reverse excitation reactions
+two elastic cross-section channels and the eight reverse excitation reactions
 that the paper says are obtained by detailed balance but does not print.
 
 The source's printed charge-exchange range ``(28)--(32)`` is inconsistent:
 ``Cl2(v=0--3)`` expands to four reactions.  The official COMSOL reproduction
-also implements four and obtains 44 total reactions only as 38 forward rows
-(including two elastic channels) plus six detailed-balance reverses.  This
-replay therefore retains Table-4 labels 28--31 and records label 32 as a
-source defect instead of inventing a fifth molecular state.
+also implements four.  Its raw model contains 38 forward rows (including two
+elastic channels) plus eight detailed-balance reverses, for 46 volume
+reaction features.  This replay therefore retains Table-4 labels 28--31 and
+records label 32 as a source defect instead of inventing a fifth molecular
+state.
 
 All electron fits fail outside the paper's declared ``0.5--10 eV`` domain.
 No electron-event energy is inferred from a fit exponent, so the returned
@@ -240,7 +241,7 @@ def build_kemaneci_2014_forward_chlorine_network() -> ReactionNetwork:
     electron(17, "Cl_excitation_2P1_2", {"e": 1, "Cl": 1},
              {"Cl(2P1/2)": 1, "e": 1},
              _electron_rate("17", _term(
-                 4.55e-14, power=0.46, inverse=(-2.01, -0.001))))
+                 4.55e-14, power=-0.46, inverse=(-2.01, -0.001))))
     electron(18, "Cl_excitation_1P5_2", {"e": 1, "Cl": 1},
              {"Cl(1P5/2)": 1, "e": 1},
              _electron_rate("18", _term(
