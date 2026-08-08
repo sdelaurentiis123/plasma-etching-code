@@ -51,3 +51,11 @@ pressure, power, surface, and 300 K domains. The neutral-transport provider
 recomputes this wall boundary and the exact cylindrical Robin roots from the
 current nonlinear density state. It refuses a direct transplant to the 333 K
 Malyshev Lam wall. Feature depth never chooses the coefficients.
+
+A second executable sensitivity uses the bounded competitive-coverage form
+`gamma_inf/(1+(K/(nCl/nCl2))^h)`. `gamma_inf` is fixed to the largest direct
+marker rather than inferred from the narrow ratio interval; `K` and `h` are
+fit only to the same direct Figure-8 markers and carry leave-one-out residuals.
+This prevents the old raw-ratio log-linear extrapolation from exceeding the
+probability domain. Any use beyond the measured ratio interval or from 300 to
+333 K is labeled sensitivity, never predictive wall evidence.

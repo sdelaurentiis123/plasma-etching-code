@@ -59,6 +59,29 @@ _VALIDATION_ROLES = frozenset({
 })
 
 
+def malyshev_1998_eq11_relative_cl2_density_percent(
+    chlorine_molecule_density_m3: float,
+    chlorine_atom_density_m3: float,
+) -> float:
+    """Return the source's ``100 n_Cl2 / n_Cl2^0`` observable.
+
+    Malyshev Eq. 11 defines the plasma-off molecular density by chlorine-nuclei
+    conservation, ``n_Cl2^0 = n_Cl2 + n_Cl/2``. This is not the molecular
+    particle fraction ``n_Cl2/(n_Cl2+n_Cl)``.
+    """
+    molecule = float(chlorine_molecule_density_m3)
+    atom = float(chlorine_atom_density_m3)
+    if (
+        not math.isfinite(molecule)
+        or not math.isfinite(atom)
+        or molecule < 0.0
+        or atom < 0.0
+        or molecule + 0.5 * atom <= 0.0
+    ):
+        raise ValueError("invalid chlorine densities for Malyshev Eq. 11")
+    return float(100.0 * molecule / (molecule + 0.5 * atom))
+
+
 @dataclass(frozen=True)
 class MalyshevChlorineDissociationMarker:
     """One audited Figure-7/8 relative-Cl2 measurement."""

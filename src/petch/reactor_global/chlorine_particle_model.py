@@ -354,6 +354,7 @@ class ChlorineNeutralWallTransportProvider(Protocol):
 
     name: str
     version: str
+    neutral_density_basis: str
 
     def predict(
         self,
@@ -370,12 +371,14 @@ class FixedChlorineNeutralWallTransportProvider:
     state: ChlorineNeutralWallTransport
     name: str = "fixed_chlorine_neutral_wall_transport"
     version: str = "1"
+    neutral_density_basis: str = "condition_target"
 
     def __post_init__(self):
         if (
             not isinstance(self.state, ChlorineNeutralWallTransport)
             or not str(self.name).strip()
             or not str(self.version).strip()
+            or self.neutral_density_basis != "condition_target"
         ):
             raise ValueError("invalid fixed chlorine neutral provider")
 
@@ -581,7 +584,15 @@ class FixedElectronTemperatureChlorineParticleModel:
             raise TypeError(
                 "neutral transport provider returned an invalid state")
         _require_neutral_transport_matches_condition(
-            neutral_wall_transport, condition)
+            neutral_wall_transport,
+            condition,
+            expected_neutral_density_m3=(
+                densities["Cl2"] + densities["Cl"]
+                if neutral_wall_transport_provider.neutral_density_basis
+                == "state_total_neutral_particles"
+                else condition.target_neutral_density_m3
+            ),
+        )
         charged_transport = charged_transport_provider.predict(
             condition, densities)
         if not isinstance(charged_transport, ChlorineChargedTransportState):
@@ -753,6 +764,13 @@ class FixedElectronTemperatureChlorineParticleModel:
             or not str(
                 getattr(neutral_wall_transport_provider, "version", "")
             ).strip()
+            or getattr(
+                neutral_wall_transport_provider,
+                "neutral_density_basis",
+                None,
+            ) not in {
+                "condition_target", "state_total_neutral_particles"
+            }
         ):
             raise TypeError(
                 "versioned chlorine neutral-transport provider is required")
@@ -915,17 +933,26 @@ def _nonnegative_mapping(
 def _require_neutral_transport_matches_condition(
     transport: ChlorineNeutralWallTransport,
     condition: ChlorineFixedPressureCondition,
+    *,
+    expected_neutral_density_m3: float | None = None,
 ) -> None:
     if transport.geometry != condition.geometry:
         raise ValueError("neutral transport geometry does not match condition")
+    expected_density = (
+        condition.target_neutral_density_m3
+        if expected_neutral_density_m3 is None
+        else float(expected_neutral_density_m3)
+    )
+    if not np.isfinite(expected_density) or expected_density <= 0.0:
+        raise ValueError("expected neutral transport density is invalid")
     if not np.isclose(
         transport.diffusivity.total_neutral_density_m3,
-        condition.target_neutral_density_m3,
+        expected_density,
         rtol=1.0e-12,
         atol=0.0,
     ):
         raise ValueError(
-            "neutral transport density does not match pressure setpoint")
+            "neutral transport density does not match current neutral state")
     if not np.isclose(
         transport.diffusivity.gas_temperature_K,
         condition.gas_temperature.value,

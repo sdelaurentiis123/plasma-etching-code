@@ -3,12 +3,14 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from scipy.optimize import least_squares
 
 from petch.reactor_global import (
     CHLORINE_ATOM_MASS_AMU,
     ChlorineIncidentVelocityState,
     ChlorineWallRecombinationBoundary,
     chlorine_atom_mean_thermal_speed_m_s,
+    stafford_2010_bounded_hill_wall_recombination_provider,
     stafford_2010_conditioned_wall_recombination_provider,
     thermalized_chlorine_incident_velocity_state,
 )
@@ -275,4 +277,75 @@ def test_stafford_wall_provider_is_ratio_dependent_and_fail_closed():
             pressure_Pa=5.0 * 0.1333223684,
             icp_power_W=300.0,
             gas_temperature_K=300.0,
+        )
+
+
+@pytest.mark.parametrize(
+    "material", ("anodized_aluminum", "stainless_steel"))
+def test_bounded_hill_wall_fit_replays_direct_markers(material):
+    with STAFFORD_FIGURE8.open(newline="", encoding="utf-8") as stream:
+        rows = [
+            row for row in csv.DictReader(stream)
+            if row["material"] == material
+        ]
+    ratio = np.asarray([
+        float(row["cl_to_cl2_density_ratio"]) for row in rows])
+    probability = np.asarray([
+        float(row["cl_recombination_probability"]) for row in rows])
+    asymptote = float(np.max(probability))
+
+    def residual(log_parameters):
+        half_saturation, hill_exponent = np.exp(log_parameters)
+        modeled = asymptote / (
+            1.0 + (half_saturation / ratio) ** hill_exponent)
+        return np.log10(modeled) - np.log10(probability)
+
+    fit = least_squares(
+        residual,
+        np.log((0.7, 1.3)),
+        xtol=1.0e-14,
+        ftol=1.0e-14,
+        gtol=1.0e-14,
+        max_nfev=100_000,
+    )
+    provider = stafford_2010_bounded_hill_wall_recombination_provider(
+        material)
+    assert provider.asymptotic_probability == asymptote
+    assert provider.half_saturation_ratio == pytest.approx(
+        np.exp(fit.x[0]), rel=1.0e-8)
+    assert provider.hill_exponent == pytest.approx(
+        np.exp(fit.x[1]), rel=1.0e-8)
+    assert provider.fit_rmse_log10 == pytest.approx(
+        np.sqrt(np.mean(residual(fit.x) ** 2)), rel=1.0e-12)
+    assert provider.recombination_probability(1.0e6) < asymptote
+    assert provider.recombination_probability(1.0e6) == pytest.approx(
+        asymptote, rel=2.0e-7)
+    assert not provider.extends_direct_evidence
+
+
+def test_bounded_hill_wall_transfer_is_bounded_and_sensitivity_only():
+    provider = stafford_2010_bounded_hill_wall_recombination_provider(
+        "anodized_aluminum",
+        valid_cl_to_cl2_ratio=(1.0e-5, 30.0),
+        valid_gas_temperature_K=(300.0, 333.0),
+        transfer_source=(
+            "declared Malyshev anodized-wall ratio/temperature sensitivity"),
+    )
+    boundary = provider.predict(
+        cl_to_cl2_ratio=3.0,
+        pressure_Pa=2.0 * 0.1333223684,
+        icp_power_W=500.0,
+        gas_temperature_K=333.0,
+    )
+    assert 0.0 < boundary.recombination_probability < (
+        provider.asymptotic_probability)
+    assert boundary.evidence_kind == "sensitivity"
+    assert boundary.provenance["runtime_extension_is_sensitivity"] is True
+    assert boundary.provenance["coefficient_selection_target"].endswith(
+        "no reactor, feature, or depth observable")
+    assert not provider.supports_prediction
+    with pytest.raises(ValueError, match="transfer source"):
+        stafford_2010_bounded_hill_wall_recombination_provider(
+            "anodized_aluminum",
+            valid_cl_to_cl2_ratio=(1.0e-5, 30.0),
         )

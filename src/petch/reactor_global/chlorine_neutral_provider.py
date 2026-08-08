@@ -15,7 +15,10 @@ from .chlorine_wall import (
     ChlorineIncidentVelocityState,
     ChlorineWallRecombinationBoundary,
 )
-from .neutral_transport import ReducedNeutralDiffusivity
+from .neutral_transport import (
+    ChapmanEnskogBinaryDiffusivity,
+    ReducedNeutralDiffusivity,
+)
 
 _CHLORINE_SPECIES = frozenset({"e", "Cl2", "Cl", "Cl2+", "Cl+", "Cl-"})
 
@@ -43,9 +46,11 @@ class StateDependentChlorineNeutralTransportProvider:
 
     wall_recombination_provider: ChlorineWallBoundaryProvider
     incident_velocity_state: ChlorineIncidentVelocityState
-    diffusivity_model: ReducedNeutralDiffusivity
+    diffusivity_model: (
+        ReducedNeutralDiffusivity | ChapmanEnskogBinaryDiffusivity)
     name: str = "state_dependent_chlorine_neutral_transport"
     version: str = "1"
+    neutral_density_basis: str = "state_total_neutral_particles"
 
     def __post_init__(self):
         wall_provider = self.wall_recombination_provider
@@ -57,9 +62,13 @@ class StateDependentChlorineNeutralTransportProvider:
                 self.incident_velocity_state,
                 ChlorineIncidentVelocityState,
             )
-            or not isinstance(self.diffusivity_model, ReducedNeutralDiffusivity)
+            or not isinstance(
+                self.diffusivity_model,
+                (ReducedNeutralDiffusivity, ChapmanEnskogBinaryDiffusivity),
+            )
             or not str(self.name).strip()
             or not str(self.version).strip()
+            or self.neutral_density_basis != "state_total_neutral_particles"
         ):
             raise ValueError("invalid state-dependent neutral provider")
 
@@ -95,7 +104,7 @@ class StateDependentChlorineNeutralTransportProvider:
             wall_boundary=boundary,
             incident_velocity_state=self.incident_velocity_state,
             diffusivity_model=self.diffusivity_model,
-            total_neutral_density_m3=condition.target_neutral_density_m3,
+            total_neutral_density_m3=(densities["Cl2"] + densities["Cl"]),
             gas_temperature_K=condition.gas_temperature.value,
             cl_to_cl2_ratio=ratio,
             pressure_Pa=condition.pressure.value,

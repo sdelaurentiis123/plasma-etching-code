@@ -578,6 +578,303 @@ def stafford_2010_conditioned_wall_recombination_provider(
 
 
 @dataclass(frozen=True)
+class BoundedHillChlorineWallRecombinationProvider:
+    """Bounded competitive-coverage response for conditioned Cl walls.
+
+    ``gamma = gamma_inf / (1 + (K / (nCl/nCl2))**h)`` is the minimal
+    Langmuir--Hill form consistent with molecular chlorine blocking Cl
+    adsorption sites.  The asymptote is fixed to the largest direct marker,
+    rather than inferred from a narrow ratio interval.  ``K`` and ``h`` are
+    regressed in log-gamma space.  Runtime extensions beyond the direct data
+    are always labeled sensitivity evidence.
+    """
+
+    asymptotic_probability: float
+    half_saturation_ratio: float
+    hill_exponent: float
+    surface_state: str
+    source: str
+    direct_cl_to_cl2_ratio: tuple[float, float]
+    valid_cl_to_cl2_ratio: tuple[float, float]
+    valid_pressure_Pa: tuple[float, float]
+    valid_icp_power_W: tuple[float, float]
+    direct_gas_temperature_K: tuple[float, float]
+    valid_gas_temperature_K: tuple[float, float]
+    marker_count: int
+    fit_rmse_log10: float
+    fit_maximum_absolute_residual_log10: float
+    leave_one_out_rmse_log10: float
+    leave_one_out_maximum_absolute_residual_log10: float
+    provenance: Mapping[str, object] | None = None
+    name: str = "bounded_hill_chlorine_wall_recombination"
+    version: str = "1"
+
+    def __post_init__(self):
+        scalar_values = np.asarray([
+            self.asymptotic_probability,
+            self.half_saturation_ratio,
+            self.hill_exponent,
+            self.fit_rmse_log10,
+            self.fit_maximum_absolute_residual_log10,
+            self.leave_one_out_rmse_log10,
+            self.leave_one_out_maximum_absolute_residual_log10,
+        ], dtype=float)
+        direct_ratio = _bounded_domain(
+            self.direct_cl_to_cl2_ratio,
+            name="direct Cl/Cl2 ratio",
+            allow_zero=False,
+        )
+        valid_ratio = _bounded_domain(
+            self.valid_cl_to_cl2_ratio,
+            name="valid Cl/Cl2 ratio",
+            allow_zero=False,
+        )
+        pressure_domain = _bounded_domain(
+            self.valid_pressure_Pa,
+            name="pressure",
+            allow_zero=False,
+        )
+        power_domain = _bounded_domain(
+            self.valid_icp_power_W,
+            name="ICP power",
+            allow_zero=False,
+        )
+        direct_temperature = _bounded_domain(
+            self.direct_gas_temperature_K,
+            name="direct gas temperature",
+            allow_zero=False,
+        )
+        valid_temperature = _bounded_domain(
+            self.valid_gas_temperature_K,
+            name="valid gas temperature",
+            allow_zero=False,
+        )
+        if (
+            np.any(~np.isfinite(scalar_values))
+            or not 0.0 < self.asymptotic_probability <= 1.0
+            or self.half_saturation_ratio <= 0.0
+            or self.hill_exponent <= 0.0
+            or np.any(scalar_values[3:] < 0.0)
+            or int(self.marker_count) != self.marker_count
+            or int(self.marker_count) < 3
+            or valid_ratio[0] > direct_ratio[0]
+            or valid_ratio[1] < direct_ratio[1]
+            or valid_temperature[0] > direct_temperature[0]
+            or valid_temperature[1] < direct_temperature[1]
+            or not str(self.surface_state).strip()
+            or not str(self.source).strip()
+            or not str(self.name).strip()
+            or not str(self.version).strip()
+        ):
+            raise ValueError("invalid bounded chlorine wall provider")
+        object.__setattr__(self, "marker_count", int(self.marker_count))
+        object.__setattr__(self, "asymptotic_probability", scalar_values[0])
+        object.__setattr__(self, "half_saturation_ratio", scalar_values[1])
+        object.__setattr__(self, "hill_exponent", scalar_values[2])
+        object.__setattr__(self, "fit_rmse_log10", scalar_values[3])
+        object.__setattr__(
+            self, "fit_maximum_absolute_residual_log10", scalar_values[4])
+        object.__setattr__(
+            self, "leave_one_out_rmse_log10", scalar_values[5])
+        object.__setattr__(
+            self,
+            "leave_one_out_maximum_absolute_residual_log10",
+            scalar_values[6],
+        )
+        object.__setattr__(self, "direct_cl_to_cl2_ratio", direct_ratio)
+        object.__setattr__(self, "valid_cl_to_cl2_ratio", valid_ratio)
+        object.__setattr__(self, "valid_pressure_Pa", pressure_domain)
+        object.__setattr__(self, "valid_icp_power_W", power_domain)
+        object.__setattr__(self, "direct_gas_temperature_K", direct_temperature)
+        object.__setattr__(self, "valid_gas_temperature_K", valid_temperature)
+        object.__setattr__(
+            self,
+            "provenance",
+            MappingProxyType(
+                {} if self.provenance is None else dict(self.provenance)),
+        )
+
+    @property
+    def extends_direct_evidence(self) -> bool:
+        return (
+            self.valid_cl_to_cl2_ratio != self.direct_cl_to_cl2_ratio
+            or self.valid_gas_temperature_K != self.direct_gas_temperature_K
+        )
+
+    @property
+    def supports_prediction(self) -> bool:
+        return False
+
+    def recombination_probability(self, cl_to_cl2_ratio: float) -> float:
+        ratio = float(cl_to_cl2_ratio)
+        if not np.isfinite(ratio) or ratio <= 0.0:
+            raise ValueError("Cl/Cl2 ratio must be positive and finite")
+        return float(
+            self.asymptotic_probability
+            / (
+                1.0
+                + (self.half_saturation_ratio / ratio)
+                ** self.hill_exponent
+            )
+        )
+
+    def predict(
+        self,
+        *,
+        cl_to_cl2_ratio: float,
+        pressure_Pa: float,
+        icp_power_W: float,
+        gas_temperature_K: float,
+    ) -> ChlorineWallRecombinationBoundary:
+        ratio = float(cl_to_cl2_ratio)
+        values = {
+            "Cl/Cl2 ratio": (ratio, self.valid_cl_to_cl2_ratio),
+            "pressure": (float(pressure_Pa), self.valid_pressure_Pa),
+            "ICP power": (float(icp_power_W), self.valid_icp_power_W),
+            "gas temperature": (
+                float(gas_temperature_K), self.valid_gas_temperature_K),
+        }
+        for quantity, (value, domain) in values.items():
+            if not np.isfinite(value) or not domain[0] <= value <= domain[1]:
+                raise ValueError(
+                    f"{quantity} is outside the wall-provider evidence domain")
+        evidence_kind = (
+            "sensitivity" if self.extends_direct_evidence else "regressed")
+        boundary = ChlorineWallRecombinationBoundary(
+            recombination_probability=self.recombination_probability(ratio),
+            surface_state=self.surface_state,
+            source=self.source,
+            evidence_kind=evidence_kind,
+            valid_cl_to_cl2_ratio=self.valid_cl_to_cl2_ratio,
+            valid_pressure_Pa=self.valid_pressure_Pa,
+            valid_icp_power_W=self.valid_icp_power_W,
+            valid_gas_temperature_K=self.valid_gas_temperature_K,
+            relative_measurement_uncertainty=None,
+            provenance={
+                **self.provenance,
+                "fit_form": (
+                    "gamma_inf/(1+(K/(nCl/nCl2))**hill_exponent)"),
+                "asymptotic_probability": self.asymptotic_probability,
+                "asymptote_selection": (
+                    "largest direct marker; not fitted or reactor-conditioned"),
+                "half_saturation_ratio": self.half_saturation_ratio,
+                "hill_exponent": self.hill_exponent,
+                "direct_cl_to_cl2_ratio": self.direct_cl_to_cl2_ratio,
+                "direct_gas_temperature_K": self.direct_gas_temperature_K,
+                "runtime_extension_is_sensitivity": self.extends_direct_evidence,
+                "marker_count": self.marker_count,
+                "fit_rmse_log10": self.fit_rmse_log10,
+                "fit_maximum_absolute_residual_log10": (
+                    self.fit_maximum_absolute_residual_log10),
+                "leave_one_out_rmse_log10": self.leave_one_out_rmse_log10,
+                "leave_one_out_maximum_absolute_residual_log10": (
+                    self.leave_one_out_maximum_absolute_residual_log10),
+                "coefficient_selection_target": (
+                    "direct wall gamma markers only; no reactor, feature, "
+                    "or depth observable"),
+            },
+        )
+        boundary.require_applicable(
+            cl_to_cl2_ratio=ratio,
+            pressure_Pa=pressure_Pa,
+            icp_power_W=icp_power_W,
+            gas_temperature_K=gas_temperature_K,
+        )
+        return boundary
+
+
+def stafford_2010_bounded_hill_wall_recombination_provider(
+    material: str,
+    *,
+    valid_cl_to_cl2_ratio: tuple[float, float] | None = None,
+    valid_gas_temperature_K: tuple[float, float] | None = None,
+    transfer_source: str | None = None,
+) -> BoundedHillChlorineWallRecombinationProvider:
+    """Return the direct-data bounded coverage fit, optionally transferred."""
+    material_key = str(material).strip().lower()
+    common = {
+        "valid_pressure_Pa": (
+            1.25 * 0.1333223684,
+            20.0 * 0.1333223684,
+        ),
+        "valid_icp_power_W": (100.0, 600.0),
+        "direct_gas_temperature_K": (300.0, 300.0),
+        "source": (
+            "stafford-2010-cl-wall Figure 8 direct spinning-wall markers; "
+            "bounded competitive-coverage fit"
+            + ("; " + str(transfer_source).strip() if transfer_source else "")
+        ),
+        "provenance": {
+            "doi": "10.1351/PAC-CON-09-11-02",
+            "digitized_dataset": (
+                "data/experimental/stafford_2010/"
+                "figure8_chlorine_wall_recombination.csv"),
+            "fit_objective": "unweighted least squares in log10(gamma)",
+            "individual_power_per_marker": "not reported in Figure 8",
+            "transfer_source": transfer_source,
+        },
+        "name": "stafford_2010_conditioned_wall_bounded_hill",
+        "version": "1",
+    }
+    if material_key == "anodized_aluminum":
+        direct_ratio = (0.105610, 0.779646)
+        arguments = {
+            "asymptotic_probability": 0.0936139,
+            "half_saturation_ratio": 0.7393616472582842,
+            "hill_exponent": 1.4187390386706562,
+            "surface_state": (
+                "plasma-conditioned anodized aluminum with Si-oxychloride"),
+            "marker_count": 23,
+            "fit_rmse_log10": 0.1557656867939786,
+            "fit_maximum_absolute_residual_log10": 0.3828248597650947,
+            "leave_one_out_rmse_log10": 0.17556698300658477,
+            "leave_one_out_maximum_absolute_residual_log10": (
+                0.4130957243868183),
+        }
+    elif material_key == "stainless_steel":
+        direct_ratio = (0.105721, 0.779088)
+        arguments = {
+            "asymptotic_probability": 0.0315555,
+            "half_saturation_ratio": 0.6681457009377358,
+            "hill_exponent": 1.107272478264904,
+            "surface_state": (
+                "plasma-conditioned stainless steel with Si-oxychloride"),
+            "marker_count": 16,
+            "fit_rmse_log10": 0.1418591311122737,
+            "fit_maximum_absolute_residual_log10": 0.33663345154882185,
+            "leave_one_out_rmse_log10": 0.17340673047252256,
+            "leave_one_out_maximum_absolute_residual_log10": (
+                0.39605700122802223),
+        }
+    else:
+        raise ValueError(
+            "material must be 'anodized_aluminum' or 'stainless_steel'")
+    runtime_ratio = (
+        direct_ratio
+        if valid_cl_to_cl2_ratio is None
+        else valid_cl_to_cl2_ratio
+    )
+    runtime_temperature = (
+        (300.0, 300.0)
+        if valid_gas_temperature_K is None
+        else valid_gas_temperature_K
+    )
+    if (
+        (runtime_ratio != direct_ratio
+         or runtime_temperature != (300.0, 300.0))
+        and not str(transfer_source or "").strip()
+    ):
+        raise ValueError("wall evidence extension requires a transfer source")
+    return BoundedHillChlorineWallRecombinationProvider(
+        direct_cl_to_cl2_ratio=direct_ratio,
+        valid_cl_to_cl2_ratio=runtime_ratio,
+        valid_gas_temperature_K=runtime_temperature,
+        **arguments,
+        **common,
+    )
+
+
+@dataclass(frozen=True)
 class ChlorineWallFlux:
     """Species fluxes at one plasma-facing wall location."""
 

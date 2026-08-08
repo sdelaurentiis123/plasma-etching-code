@@ -20,6 +20,7 @@ from petch.reactor_global import (
     ReactionNetwork,
     build_lee_lieberman_chlorine_particle_network,
     load_legacy_siglo_hamilton_comsol_chlorine_replay,
+    malyshev_1998_eq11_relative_cl2_density_percent,
 )
 try:
     from scripts.audit_malyshev_1998_eedf_source_replay import (
@@ -114,13 +115,23 @@ def _solve(
 
 def _row(solution, reference, *, role: str, absorbed_fraction: float):
     densities = solution.densities_m3
-    cl2_proxy = 100.0 * densities["Cl2"] / (
+    cl2_particle_fraction = 100.0 * densities["Cl2"] / (
         densities["Cl2"] + densities["Cl"])
+    cl2_eq11 = malyshev_1998_eq11_relative_cl2_density_percent(
+        densities["Cl2"], densities["Cl"])
     density_reference = float(reference["electron_density_m3"])
     temperature_reference = float(reference["electron_temperature_eV"])
     temperature_proxy = 2.0 / 3.0 * solution.mean_electron_energy_eV
     cl2_reference = reference["relative_cl2_density_percent"]
+    reported_cl2_accuracy = reference[
+        "reported_absolute_cl2_density_accuracy_percent"]
+    cl2_relative_error_percent = (
+        None if cl2_reference is None else 100.0 * (
+            cl2_eq11 / float(cl2_reference) - 1.0))
     total_flux = sum(solution.axial_positive_ion_flux_m2_s.values())
+    chlorine_nuclei_equivalent_density = (
+        densities["Cl2"] + 0.5 * densities["Cl"])
+    chlorine_particle_density = densities["Cl2"] + densities["Cl"]
     electron = solution.electron_solution
     return {
         "validation_role": role,
@@ -143,10 +154,26 @@ def _row(solution, reference, *, role: str, absorbed_fraction: float):
         "measured_oes_electron_temperature_eV": temperature_reference,
         "temperature_proxy_percent_error": 100.0 * (
             temperature_proxy / temperature_reference - 1.0),
-        "modeled_relative_cl2_density_percent_proxy": cl2_proxy,
+        "modeled_cl2_particle_fraction_percent": cl2_particle_fraction,
+        "chlorine_nuclei_equivalent_molecule_density_m3": (
+            chlorine_nuclei_equivalent_density),
+        "chlorine_particle_density_m3": chlorine_particle_density,
+        "chlorine_particle_density_multiplier_vs_gauge_equivalent": (
+            chlorine_particle_density / chlorine_nuclei_equivalent_density),
+        "modeled_relative_cl2_density_percent_eq11": cl2_eq11,
         "measured_relative_cl2_density_percent": cl2_reference,
-        "relative_cl2_proxy_error_percentage_point": (
-            None if cl2_reference is None else cl2_proxy - cl2_reference),
+        "relative_cl2_eq11_error_percentage_point": (
+            None if cl2_reference is None else cl2_eq11 - cl2_reference),
+        "relative_cl2_eq11_error_percent": cl2_relative_error_percent,
+        "reported_absolute_cl2_density_accuracy_percent": (
+            reported_cl2_accuracy),
+        "within_reported_cl2_density_accuracy": (
+            None
+            if cl2_relative_error_percent is None
+            or reported_cl2_accuracy is None
+            else abs(cl2_relative_error_percent)
+            <= float(reported_cl2_accuracy)
+        ),
         "total_positive_ion_axial_flux_m2_s": total_flux,
         "cl2plus_axial_flux_m2_s": (
             solution.axial_positive_ion_flux_m2_s["Cl2+"]),
@@ -268,7 +295,7 @@ def audit(collision_deck: Path, atomic_cl_momentum: Path):
         ),
     ]
     return {
-        "schema": "petch.malyshev_1998_power_fraction_transfer.v1",
+        "schema": "petch.malyshev_1998_power_fraction_transfer.v2",
         "claim_class": (
             "reactor-diagnostic-conditioned equipment transfer; not an "
             "absorbed-power measurement or knobs-to-wafer validation"),
@@ -314,6 +341,19 @@ def audit(collision_deck: Path, atomic_cl_momentum: Path):
                 "article and the diagnostic does not directly measure "
                 "absorbed plasma power"),
         },
+        "independent_held_out_cl2_gate": {
+            "observable": "Malyshev Eq. 11 relative Cl2 density",
+            "used_for_power_fraction_selection": False,
+            "reported_accuracy_percent": rows[1][
+                "reported_absolute_cl2_density_accuracy_percent"],
+            "relative_error_percent": rows[1][
+                "relative_cl2_eq11_error_percent"],
+            "passed_reported_accuracy": rows[1][
+                "within_reported_cl2_density_accuracy"],
+            "accuracy_semantics": (
+                "source-reported about +/-25% absolute-density accuracy; "
+                "not a statistical sigma"),
+        },
         "evidence_boundary": {
             "power": (
                 "forward TCP power was measured into the matching network; "
@@ -323,8 +363,10 @@ def audit(collision_deck: Path, atomic_cl_momentum: Path):
                 "2/3 mean electron energy is a proxy, not the OES forward "
                 "observable"),
             "relative_cl2": (
-                "model nCl2/(nCl2+nCl) is not Malyshev's rare-gas-reduced "
-                "absolute Cl2 observable"),
+                "Malyshev Eq. 11 observable 100*nCl2/(nCl2+nCl/2); the "
+                "distinct particle fraction is reported separately. The "
+                "about +/-25% source accuracy is a bounded absolute-density "
+                "accuracy statement, not one sigma"),
             "flux": (
                 "global axial positive-ion flux is not a local wafer flux "
                 "and has no IED/IAD"),
@@ -364,12 +406,15 @@ fraction frozen, the untouched 500 W density error is
 `{held_out['electron_density_percent_error']:+.2f}%`. This closes the power-scaling
 residual numerically, but it is **not a direct absorbed-power validation**:
 Malyshev reports forward TCP power into the matching network and no density
-uncertainty in this article.
+uncertainty in this article. The independently predicted Eq.-11 Cl2 density is
+`{held_out['relative_cl2_eq11_error_percent']:+.2f}%` relative to the measured
+value and **{'passes' if held_out['within_reported_cl2_density_accuracy'] else 'misses'}**
+the source's about +/-25% absolute-density accuracy band.
 
-| role | source W | absorbed W | ne error | energy-proxy error | Cl2-proxy error | axial ion flux m-2 s-1 |
-|---|---:|---:|---:|---:|---:|---:|
-| training | {training['source_power_W']:.0f} | {training['absorbed_power_W']:.2f} | {training['electron_density_percent_error']:+.2f}% | {training['temperature_proxy_percent_error']:+.2f}% | n/a | {training['total_positive_ion_axial_flux_m2_s']:.3e} |
-| held out | {held_out['source_power_W']:.0f} | {held_out['absorbed_power_W']:.2f} | {held_out['electron_density_percent_error']:+.2f}% | {held_out['temperature_proxy_percent_error']:+.2f}% | {held_out['relative_cl2_proxy_error_percentage_point']:+.2f} pp | {held_out['total_positive_ion_axial_flux_m2_s']:.3e} |
+| role | source W | absorbed W | ne error | energy-proxy error | Eq.-11 Cl2 error | Cl2 accuracy gate | axial ion flux m-2 s-1 |
+|---|---:|---:|---:|---:|---:|:---:|---:|
+| training | {training['source_power_W']:.0f} | {training['absorbed_power_W']:.2f} | {training['electron_density_percent_error']:+.2f}% | {training['temperature_proxy_percent_error']:+.2f}% | n/a | n/a | {training['total_positive_ion_axial_flux_m2_s']:.3e} |
+| held out | {held_out['source_power_W']:.0f} | {held_out['absorbed_power_W']:.2f} | {held_out['electron_density_percent_error']:+.2f}% | {held_out['temperature_proxy_percent_error']:+.2f}% | {held_out['relative_cl2_eq11_error_percentage_point']:+.2f} pp | {'PASS' if held_out['within_reported_cl2_density_accuracy'] else 'MISS'} | {held_out['total_positive_ion_axial_flux_m2_s']:.3e} |
 
 ## Interpretation boundary
 
@@ -377,8 +422,10 @@ uncertainty in this article.
   feature depth selected the fraction.
 - The held-out density transfer is descriptive because the source provides no
   uncertainty for that observable here.
-- The remaining temperature and Cl2 residuals show that a power fraction alone
-  does not close the reactor physics.
+- The held-out Eq.-11 Cl2 observable is graded against the source's about
+  +/-25% absolute-density accuracy statement; this is not relabeled as sigma.
+- The bounded wall ratio/temperature transfer remains sensitivity evidence, so
+  this diagnostic pass does not by itself certify a predictive wafer flux.
 - The axial ion flux is still volume-model output, not a wafer boundary; no
   species-resolved IED/IAD exists yet.
 - Every prediction/depth support flag remains false.
@@ -406,7 +453,7 @@ def main():
                 f"{row['validation_role']} {row['source_power_W']:.0f} W: "
                 f"ne={row['electron_density_percent_error']:+.2f}% "
                 f"energy={row['temperature_proxy_percent_error']:+.2f}% "
-                f"Cl2={row['relative_cl2_proxy_error_percentage_point']}"
+                f"Cl2={row['relative_cl2_eq11_error_percentage_point']}"
             )
     else:
         print(json.dumps(result, indent=2, sort_keys=True))

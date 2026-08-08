@@ -151,6 +151,7 @@ def test_provider_exposes_every_mobility_and_edge_intermediate():
             mobility * condition.electron_temperature.value,
             rel=1.0e-14,
         )
+        assert provenance["total_neutral_density_m3"] == pytest.approx(1.9e20)
         assert provenance["electronegativity"] == 1.0
         assert transport.axial_flux_velocity_m_s > 0.0
         assert transport.radial_flux_velocity_m_s > 0.0

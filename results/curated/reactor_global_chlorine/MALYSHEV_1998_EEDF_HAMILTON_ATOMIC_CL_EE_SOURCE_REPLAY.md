@@ -9,14 +9,14 @@ never selects a coefficient from feature depth. Forward TCP power is not
 measured absorbed plasma power, so 30%, 50%, and 70% are all reported rather
 than optimized.
 
-| absorbed fraction | source W | E/N Td | ne error | 2/3 mean-E proxy error vs OES | relative-Cl2 proxy error | axial positive-ion flux m-2 s-1 | max closure |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 0.30 | 300 | 1116.8 | -18.4% | +16.3% | n/a | 2.857e+19 | 6.0e-11 |
-| 0.30 | 500 | 1077.9 | -18.5% | +7.2% | -17.1 pp | 4.786e+19 | 1.1e-08 |
-| 0.50 | 300 | 1077.9 | +46.7% | +17.2% | n/a | 4.786e+19 | 2.4e-09 |
-| 0.50 | 500 | 1047.1 | +42.9% | +8.8% | -21.6 pp | 8.023e+19 | 3.9e-10 |
-| 0.70 | 300 | 1056.9 | +112.9% | +18.2% | n/a | 6.725e+19 | 2.1e-09 |
-| 0.70 | 500 | 1030.4 | +104.8% | +10.0% | -24.1 pp | 1.128e+20 | 3.0e-10 |
+| absorbed fraction | source W | E/N Td | ne error | 2/3 mean-E proxy error vs OES | Eq.-11 Cl2 error | within reported Cl2 accuracy | axial positive-ion flux m-2 s-1 | max closure |
+|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
+| 0.30 | 300 | 983.3 | -20.8% | +14.3% | n/a | n/a | 2.781e+19 | 1.6e-10 |
+| 0.30 | 500 | 865.7 | -19.2% | +4.6% | -5.2 pp | PASS | 4.701e+19 | 1.3e-09 |
+| 0.50 | 300 | 865.7 | +45.5% | +14.3% | n/a | n/a | 4.701e+19 | 3.9e-10 |
+| 0.50 | 500 | 743.2 | +47.6% | +5.9% | -15.9 pp | PASS | 8.141e+19 | 6.7e-11 |
+| 0.70 | 300 | 785.4 | +116.3% | +15.1% | n/a | n/a | 6.728e+19 | 1.4e-10 |
+| 0.70 | 500 | 662.2 | +119.2% | +7.5% | -24.2 pp | MISS | 1.188e+20 | 1.2e-10 |
 
 ## Use boundary
 
@@ -30,9 +30,12 @@ than optimized.
   heating solution.
 - `2/3 <E>` is not the exact OES forward observable. Its error diagnoses EEPF
   shape/chemistry but is not an apples-to-apples temperature validation.
-- The Stafford wall regression is extrapolated in Cl/Cl2 from the direct
-  `(0.10561, 0.779646)` marker interval to
-  `(1e-05, 1.5)`. Every other Stafford domain remains strict.
+- Malyshev's about +/-25% Cl2 absolute-density accuracy is used as a reported
+  accuracy band, not a statistical sigma; digitization error remains separate.
+- The bounded Stafford coverage fit is trained only on the direct Cl/Cl2
+  interval `(0.10561, 0.779646)`. Its transfer to ratio domain
+  `(1e-05, 30.0)` and from 300 to 333 K is sensitivity evidence;
+  pressure, power, material, and the direct-marker provenance remain explicit.
 - Atomic-Cl ionization is included, but electron detachment from Cl- and tracked excited-state kinetics remain absent.
 - Isotropic electron-electron Coulomb drift/diffusion is included with the classical Debye logarithm. Electron-ion and anisotropic electron-electron momentum terms remain absent; this is a density-coupling sensitivity, not a complete Coulomb model.
 - The global axial flux is not yet a local wafer flux,

@@ -33,6 +33,7 @@ from .chlorine_wall import (
     CHLORINE_INCIDENT_VELOCITY_DISTRIBUTIONS,
     CHLORINE_INCIDENT_VELOCITY_EVIDENCE_KINDS,
     WALL_RECOMBINATION_EVIDENCE_KINDS,
+    BoundedHillChlorineWallRecombinationProvider,
     ChlorineIncidentVelocityState,
     LogLinearChlorineWallRecombinationProvider,
     ChlorineWallFlux,
@@ -40,6 +41,7 @@ from .chlorine_wall import (
     chlorine_atom_mean_thermal_speed_m_s,
     thermalized_chlorine_incident_velocity_state,
     stafford_2010_conditioned_wall_recombination_provider,
+    stafford_2010_bounded_hill_wall_recombination_provider,
 )
 from .chlorine_transport import (
     ECONOMOU_CHLORINE_REDUCED_DIFFUSIVITY_M_INV_S,
@@ -161,6 +163,7 @@ from .chlorine_lam_dissociation import (
     MalyshevEq7TransportDiagnostic,
     MalyshevEq7WallReturnInversion,
     MalyshevMeasuredChlorineDissociationProvider,
+    malyshev_1998_eq11_relative_cl2_density_percent,
     malyshev_1998_eq7_transport_diagnostic,
     malyshev_1998_eq7_wall_return_inversion,
 )
@@ -357,6 +360,7 @@ __all__ = [
     "MalyshevMeasuredElectronDensityProvider",
     "MalyshevMeasuredElectronTemperatureProvider",
     "IonMobilityState",
+    "BoundedHillChlorineWallRecombinationProvider",
     "NEUTRAL_DIFFUSIVITY_EVIDENCE_KINDS",
     "NEUFELD_1972_OMEGA_11_COEFFICIENTS",
     "NEUFELD_1972_OMEGA_11_MAXIMUM_RELATIVE_FIT_ERROR",
@@ -393,6 +397,7 @@ __all__ = [
     "chlorine_atom_mean_thermal_speed_m_s",
     "thermalized_chlorine_incident_velocity_state",
     "stafford_2010_conditioned_wall_recombination_provider",
+    "stafford_2010_bounded_hill_wall_recombination_provider",
     "HAMILTON_2018_CL2_STATE_CROSS_SECTIONS_SHA256",
     "hamilton_2018_cl2_state_dissociation_collision_processes",
     "hamilton_2018_cl2_state_dissociation_rates",
@@ -413,6 +418,7 @@ __all__ = [
     "malyshev_1998_chlorine_in_chlorine_diffusivity",
     "malyshev_1998_eq7_transport_diagnostic",
     "malyshev_1998_eq7_wall_return_inversion",
+    "malyshev_1998_eq11_relative_cl2_density_percent",
     "lee_lieberman_argon_ion_temperature_eV",
     "nist_argon_self_diffusion_m2_s",
     "nist_cl2_dissociative_attachment_cross_section_support",

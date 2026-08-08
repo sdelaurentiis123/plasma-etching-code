@@ -71,6 +71,7 @@ class EEDFChlorineCondition:
     absorbed_power: AbsorbedPowerEstimate
     reduced_field_bounds_Td: tuple[float, float]
     source_frequency: ReactorScalarInput | None = None
+    neutral_density_constraint: str = "total_neutral_particles"
 
     def __post_init__(self):
         from .geometry import CylindricalReactor
@@ -92,6 +93,10 @@ class EEDFChlorineCondition:
             or len(bounds) != 2
             or not all(math.isfinite(value) and value > 0.0 for value in bounds)
             or bounds[1] <= bounds[0]
+            or self.neutral_density_constraint not in {
+                "total_neutral_particles",
+                "chlorine_nuclei_equivalent_molecules",
+            }
         ):
             raise ValueError("invalid EEPF chlorine condition")
         if self.source_frequency is not None and (
@@ -135,6 +140,34 @@ class EEDFChlorineCondition:
             2.0 * math.pi * self.source_frequency.value
             / self.target_neutral_density_m3
         )
+
+    def angular_field_frequency_over_density(
+        self,
+        actual_neutral_density_m3: float,
+    ) -> float:
+        density = float(actual_neutral_density_m3)
+        if not math.isfinite(density) or density <= 0.0:
+            raise ValueError("actual neutral density must be positive")
+        if self.source_frequency is None:
+            return 0.0
+        return float(2.0 * math.pi * self.source_frequency.value / density)
+
+    def constrained_neutral_density_m3(
+        self,
+        densities_m3: Mapping[str, float],
+    ) -> float:
+        chlorine_molecule = float(densities_m3["Cl2"])
+        chlorine_atom = float(densities_m3["Cl"])
+        if (
+            not math.isfinite(chlorine_molecule)
+            or not math.isfinite(chlorine_atom)
+            or chlorine_molecule < 0.0
+            or chlorine_atom < 0.0
+        ):
+            raise ValueError("invalid neutral chlorine density")
+        if self.neutral_density_constraint == "total_neutral_particles":
+            return chlorine_molecule + chlorine_atom
+        return chlorine_molecule + 0.5 * chlorine_atom
 
     def transport_condition(
         self,
@@ -375,7 +408,8 @@ class EEDFChlorineAbsorbedPowerModel:
             target_mole_fractions=target_fractions,
             growth_model="temporal_growth",
             angular_field_frequency_over_density_m3_s=(
-                condition.angular_field_frequency_over_density_m3_s),
+                condition.angular_field_frequency_over_density(
+                    total_target_density)),
             electron_electron_coulomb_model=(
                 self.electron_electron_coulomb_model),
             electron_to_neutral_density_ratio=(
@@ -389,7 +423,7 @@ class EEDFChlorineAbsorbedPowerModel:
             condition.gas_temperature.value,
             *(target_fractions[name] for name in targets),
             maximum_tail_population_fraction,
-            condition.angular_field_frequency_over_density_m3_s,
+            electron_condition.angular_field_frequency_over_density_m3_s,
             electron_condition.electron_electron_coulomb_model,
             electron_condition.electron_to_neutral_density_ratio,
             electron_condition.gas_number_density_m3,
@@ -422,6 +456,24 @@ class EEDFChlorineAbsorbedPowerModel:
             equivalent_temperature)
         neutral_transport = neutral_wall_transport_provider.predict(
             transport_condition, densities)
+        expected_transport_density = (
+            densities["Cl2"] + densities["Cl"]
+            if neutral_wall_transport_provider.neutral_density_basis
+            == "state_total_neutral_particles"
+            else condition.target_neutral_density_m3
+        )
+        if (
+            neutral_transport.geometry != condition.geometry
+            or not math.isclose(
+                neutral_transport.diffusivity.total_neutral_density_m3,
+                expected_transport_density,
+                rel_tol=1.0e-12,
+                abs_tol=0.0,
+            )
+        ):
+            raise ValueError(
+                "neutral transport does not match the declared density basis"
+            )
         charged_transport = charged_transport_provider.predict(
             transport_condition, densities)
         wall_energy = wall_energy_provider.predict(
@@ -513,7 +565,7 @@ class EEDFChlorineAbsorbedPowerModel:
             1.0,
         )
         balances["neutral_pressure"] = (
-            densities["Cl2"] + densities["Cl"]
+            condition.constrained_neutral_density_m3(densities)
             - condition.target_neutral_density_m3
         ) / condition.target_neutral_density_m3
 
@@ -570,12 +622,26 @@ class EEDFChlorineAbsorbedPowerModel:
     ) -> EEDFChlorineSolution:
         if not isinstance(condition, EEDFChlorineCondition):
             raise TypeError("an EEPF chlorine condition is required")
+        if getattr(
+            neutral_wall_transport_provider,
+            "neutral_density_basis",
+            None,
+        ) not in {"condition_target", "state_total_neutral_particles"}:
+            raise TypeError(
+                "neutral transport provider must declare its density basis"
+            )
         target_density = condition.target_neutral_density_m3
         if initial_densities_m3 is None:
             seed = min(1.0e16, 1.0e-3 * target_density)
+            initial_cl_fraction = (
+                0.6
+                if condition.neutral_density_constraint
+                == "chlorine_nuclei_equivalent_molecules"
+                else 0.3
+            )
             initial = {
-                "Cl2": 0.7 * target_density,
-                "Cl": 0.3 * target_density,
+                "Cl2": (1.0 - 0.5 * initial_cl_fraction) * target_density,
+                "Cl": initial_cl_fraction * target_density,
                 "Cl2+": seed,
                 "Cl+": seed,
                 "Cl-": seed,

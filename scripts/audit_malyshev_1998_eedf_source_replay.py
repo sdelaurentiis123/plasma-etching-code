@@ -17,7 +17,6 @@ import numpy as np
 
 from petch.reactor_global import (
     AbsorbedPowerEstimate,
-    DeclaredLogLinearWallExtrapolation,
     DeterministicTwoTermBoltzmannSolver,
     EEDFChlorineAbsorbedPowerModel,
     EEDFChlorineCondition,
@@ -38,9 +37,10 @@ from petch.reactor_global import (
     load_legacy_siglo_comsol_chlorine_replay,
     load_legacy_siglo_hamilton_comsol_chlorine_replay,
     lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities,
+    malyshev_1998_chlorine_in_chlorine_diffusivity,
     malyshev_1998_lam_geometry,
-    ramamurthi_economou_2002_chlorine_diffusivity,
-    stafford_2010_conditioned_wall_recombination_provider,
+    malyshev_1998_eq11_relative_cl2_density_percent,
+    stafford_2010_bounded_hill_wall_recombination_provider,
     standard_volume_flow_molecules_s,
     thermalized_chlorine_incident_velocity_state,
 )
@@ -77,7 +77,7 @@ SOURCE_POWERS_W = (300.0, 500.0)
 GAP_CM = 6.5
 PRESSURE_MTORR = 2.0
 CHLORINE_PARTIAL_PRESSURE_FRACTION = 0.95
-GAS_TEMPERATURE_K = 300.0
+GAS_TEMPERATURE_K = 333.0
 CL2_FLOW_SCCM = 114.0
 STANDARD_TEMPERATURE_K = 273.15
 STANDARD_PRESSURE_PA = 101325.0
@@ -85,7 +85,7 @@ ION_TEMPERATURE_EV = 0.12
 SOURCE_FREQUENCY_HZ = 13.56e6
 ION_WALL_ENERGY_EV = {"Cl2+": 12.0, "Cl+": 14.0}
 DIRECT_WALL_RATIO_DOMAIN = (0.105610, 0.779646)
-DECLARED_WALL_RATIO_DOMAIN = (1.0e-5, 1.5)
+DECLARED_WALL_RATIO_DOMAIN = (1.0e-5, 30.0)
 
 
 def _scalar(value: float, unit: str, source: str) -> ReactorScalarInput:
@@ -117,8 +117,8 @@ def _condition(source_power_W: float, absorbed_fraction: float):
         gas_temperature=_scalar(
             GAS_TEMPERATURE_K,
             "K",
-            "300 K Stafford-wall compatibility sensitivity; Malyshev "
-            "powered gas temperature is unpublished",
+            "Malyshev printed 333 K initial gas/wall temperature; powered "
+            "gas temperature is unpublished",
         ),
         chlorine_molecule_feed=_scalar(
             standard_volume_flow_molecules_s(
@@ -163,31 +163,32 @@ def _condition(source_power_W: float, absorbed_fraction: float):
             "Hz",
             "Malyshev printed 13.56 MHz TCP source frequency",
         ),
+        neutral_density_constraint=(
+            "chlorine_nuclei_equivalent_molecules"),
     )
 
 
 def _providers():
-    wall = DeclaredLogLinearWallExtrapolation(
-        provider=stafford_2010_conditioned_wall_recombination_provider(
-            "anodized_aluminum"),
-        allowed_cl_to_cl2_ratio=DECLARED_WALL_RATIO_DOMAIN,
-        source=(
-            "Stafford 2010 anodized-Al log-linear wall fit extrapolated only "
-            "in Cl/Cl2 for a declared Malyshev source-replay sensitivity; "
-            "no reactor or feature fit"),
+    wall = stafford_2010_bounded_hill_wall_recombination_provider(
+        "anodized_aluminum",
+        valid_cl_to_cl2_ratio=DECLARED_WALL_RATIO_DOMAIN,
+        valid_gas_temperature_K=(300.0, GAS_TEMPERATURE_K),
+        transfer_source=(
+            "declared transfer to Malyshev anodized-Al ratio and 333 K "
+            "initial wall state; no reactor, feature, or depth fit"),
     )
     neutral = StateDependentChlorineNeutralTransportProvider(
         wall_recombination_provider=wall,
         incident_velocity_state=thermalized_chlorine_incident_velocity_state(
             GAS_TEMPERATURE_K,
             source=(
-                "300 K isotropic thermalized-Cl sensitivity; Malyshev "
+                "333 K isotropic thermalized-Cl sensitivity; Malyshev "
                 "publishes no powered incident velocity moment"),
             evidence_kind="sensitivity",
             relative_uncertainty=None,
             provenance={"coefficient_selection_target": None},
         ),
-        diffusivity_model=ramamurthi_economou_2002_chlorine_diffusivity(),
+        diffusivity_model=malyshev_1998_chlorine_in_chlorine_diffusivity(),
     )
     all_mobilities = (
         lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities())
@@ -255,6 +256,9 @@ def _reference(source_power_W: float) -> dict[str, object]:
         "relative_cl2_digitization_uncertainty_percentage_point": (
             None if marker is None else
             marker.digitization_relative_cl2_uncertainty_percentage_point),
+        "reported_absolute_cl2_density_accuracy_percent": (
+            None if marker is None else
+            marker.reported_absolute_density_relative_uncertainty_percent),
     }
 
 
@@ -338,6 +342,7 @@ def run_replay(
     ):
         raise ValueError("requested audit subset is outside the preregistration")
     rows = []
+    solver_failures = []
     reference_seeds = {}
     # The middle sensitivity is a numerical continuation anchor only. It was
     # declared before the board and is not selected from any observable.
@@ -356,18 +361,40 @@ def run_replay(
                 previous_exhaust = seed["exhaust"]
                 previous_field = seed["field"]
             condition = _condition(source_power_W, fraction)
-            solution = model.solve(
-                condition,
-                charged_transport_provider=charged,
-                neutral_wall_transport_provider=neutral,
-                wall_energy_provider=wall_energy,
-                initial_densities_m3=previous,
-                initial_exhaust_loss_frequency_s_inv=previous_exhaust,
-                initial_reduced_electric_field_Td=previous_field,
-                residual_tolerance=2.0e-7,
-                maximum_evaluations=1200,
-                maximum_tail_population_fraction=1.0e-6,
-            )
+            try:
+                solution = model.solve(
+                    condition,
+                    charged_transport_provider=charged,
+                    neutral_wall_transport_provider=neutral,
+                    wall_energy_provider=wall_energy,
+                    initial_densities_m3=previous,
+                    initial_exhaust_loss_frequency_s_inv=previous_exhaust,
+                    initial_reduced_electric_field_Td=previous_field,
+                    residual_tolerance=2.0e-7,
+                    maximum_evaluations=1200,
+                    maximum_tail_population_fraction=1.0e-6,
+                )
+            except RuntimeError as error:
+                if atomic_cl_momentum is not None:
+                    raise
+                solver_failures.append({
+                    "absorbed_fraction_sensitivity": fraction,
+                    "source_power_W": source_power_W,
+                    "validation_role": (
+                        "reactor_diagnostic_training_candidate"
+                        if source_power_W == 300.0
+                        else "held_out_reactor_diagnostic"),
+                    "failure_class": type(error).__name__,
+                    "failure_message": str(error),
+                    "physical_interpretation": (
+                        "molecular-only electron collision deck cannot close "
+                        "a dissociated chlorine state; atomic-Cl electron "
+                        "collisions are mandatory"),
+                })
+                previous = None
+                previous_exhaust = None
+                previous_field = 300.0
+                continue
             previous = dict(solution.densities_m3)
             previous_exhaust = solution.exhaust_loss_frequency_s_inv
             previous_field = solution.reduced_electric_field_Td
@@ -382,14 +409,29 @@ def run_replay(
             ratio = densities["Cl"] / densities["Cl2"]
             mean_energy_temperature_proxy = (
                 2.0 / 3.0 * solution.mean_electron_energy_eV)
-            modeled_relative_cl2 = (
+            modeled_cl2_particle_fraction = (
                 100.0 * densities["Cl2"]
                 / (densities["Cl2"] + densities["Cl"])
             )
+            modeled_relative_cl2 = (
+                malyshev_1998_eq11_relative_cl2_density_percent(
+                    densities["Cl2"], densities["Cl"])
+            )
+            chlorine_nuclei_equivalent_density = (
+                densities["Cl2"] + 0.5 * densities["Cl"])
+            chlorine_particle_density = densities["Cl2"] + densities["Cl"]
             reference_temperature = float(
                 reference["electron_temperature_eV"])
             reference_density = float(reference["electron_density_m3"])
             reference_relative_cl2 = reference["relative_cl2_density_percent"]
+            reported_cl2_accuracy = reference[
+                "reported_absolute_cl2_density_accuracy_percent"]
+            relative_cl2_error_percent = (
+                None if reference_relative_cl2 is None else 100.0 * (
+                    modeled_relative_cl2 / float(reference_relative_cl2)
+                    - 1.0
+                )
+            )
             rows.append({
                 "absorbed_fraction_sensitivity": fraction,
                 "source_power_W": source_power_W,
@@ -416,16 +458,36 @@ def run_replay(
                     densities["e"] - reference_density) / reference_density,
                 "electronegativity": densities["Cl-"] / densities["e"],
                 "cl_to_cl2_ratio": ratio,
+                "chlorine_nuclei_equivalent_molecule_density_m3": (
+                    chlorine_nuclei_equivalent_density),
+                "target_chlorine_nuclei_equivalent_molecule_density_m3": (
+                    condition.target_neutral_density_m3),
+                "chlorine_particle_density_m3": chlorine_particle_density,
+                "chlorine_particle_density_multiplier_vs_gauge_equivalent": (
+                    chlorine_particle_density
+                    / chlorine_nuclei_equivalent_density),
                 "wall_ratio_inside_direct_marker_domain": (
                     DIRECT_WALL_RATIO_DOMAIN[0]
                     <= ratio <= DIRECT_WALL_RATIO_DOMAIN[1]),
-                "modeled_relative_cl2_density_percent_proxy": (
+                "modeled_cl2_particle_fraction_percent": (
+                    modeled_cl2_particle_fraction),
+                "modeled_relative_cl2_density_percent_eq11": (
                     modeled_relative_cl2),
                 "measured_relative_cl2_density_percent": (
                     reference_relative_cl2),
-                "relative_cl2_proxy_error_percentage_point": (
+                "relative_cl2_eq11_error_percentage_point": (
                     None if reference_relative_cl2 is None else
                     modeled_relative_cl2 - float(reference_relative_cl2)
+                ),
+                "relative_cl2_eq11_error_percent": relative_cl2_error_percent,
+                "reported_absolute_cl2_density_accuracy_percent": (
+                    reported_cl2_accuracy),
+                "within_reported_cl2_density_accuracy": (
+                    None
+                    if relative_cl2_error_percent is None
+                    or reported_cl2_accuracy is None
+                    else abs(relative_cl2_error_percent)
+                    <= float(reported_cl2_accuracy)
                 ),
                 "cl2plus_axial_flux_m2_s": (
                     solution.axial_positive_ion_flux_m2_s["Cl2+"]),
@@ -470,7 +532,7 @@ def run_replay(
     rows.sort(key=lambda row: (
         row["absorbed_fraction_sensitivity"], row["source_power_W"]))
     return {
-        "schema": "petch.malyshev_1998_eedf_source_replay.v1",
+        "schema": "petch.malyshev_1998_eedf_source_replay.v2",
         "claim_class": (
             "physical source replay and preregistered sensitivity; not "
             "independent reactor validation"),
@@ -509,13 +571,16 @@ def run_replay(
             "cl2_flow_sccm": CL2_FLOW_SCCM,
             "gas_temperature_K_sensitivity": GAS_TEMPERATURE_K,
             "direct_wall_ratio_domain": list(DIRECT_WALL_RATIO_DOMAIN),
-            "declared_wall_ratio_extrapolation": list(
+            "bounded_wall_ratio_sensitivity_domain": list(
                 DECLARED_WALL_RATIO_DOMAIN),
             "ion_temperature_eV": ION_TEMPERATURE_EV,
             "source_frequency_Hz": SOURCE_FREQUENCY_HZ,
             "ion_wall_energy_eV_sensitivity": ION_WALL_ENERGY_EV,
         },
-        "missing_physics": list(replay.missing_reactor_channels),
+        "missing_physics": list(replay.missing_reactor_channels) + [
+            "five_percent_rare_gas_collision_ion_and_transport_channels",
+            "powered_condition_gas_temperature",
+        ],
         "electron_electron_coulomb_model": (
             "isotropic_classical_debye"
             if electron_electron_collisions else "none"),
@@ -536,10 +601,17 @@ def run_replay(
             "temperature": (
                 "2/3 mean E is a diagnostic proxy, not the exact Malyshev "
                 "OES observable"),
+            "wall": (
+                "bounded Langmuir-Hill coverage response fitted only to "
+                "Stafford direct spinning-wall markers; the asymptote is the "
+                "largest direct marker and transfer beyond ratio 0.78 and "
+                "from 300 to 333 K remains sensitivity evidence"),
             "relative_cl2": (
-                "nCl2/(nCl2+nCl) is a fixed-pressure diagnostic proxy; "
-                "Malyshev's rare-gas reduction and particle-pressure "
-                "correction are not reproduced here"),
+                "Malyshev Eq. 11 observable 100*nCl2/(nCl2+nCl/2); "
+                "the distinct particle fraction nCl2/(nCl2+nCl) is also "
+                "reported but never compared to the measurement. The "
+                "source's about +/-25% absolute-density accuracy is used as "
+                "a bounded accuracy band, never relabeled as one sigma"),
             "wafer_flux": (
                 "axial global-model flux is not a validated local wafer "
                 "flux or IED/IAD"),
@@ -548,6 +620,8 @@ def run_replay(
         "supports_wafer_flux": False,
         "supports_feature_depth": False,
         "rows": rows,
+        "solver_failures": solver_failures,
+        "all_requested_conditions_closed": not solver_failures,
     }
 
 
@@ -577,25 +651,54 @@ def _write(result: dict[str, object], output_directory: Path) -> None:
         encoding="utf-8",
     )
     rows = result["rows"]
+    csv_rows = rows if rows else result["solver_failures"]
     with (output_directory / csv_name).open(
         "w", newline="", encoding="utf-8"
     ) as stream:
         writer = csv.DictWriter(
             stream,
-            fieldnames=list(rows[0]),
+            fieldnames=list(csv_rows[0]),
             lineterminator="\n",
         )
         writer.writeheader()
-        writer.writerows(rows)
+        writer.writerows(csv_rows)
+    if not rows:
+        failure_lines = [
+            "| {absorbed_fraction_sensitivity:.2f} | {source_power_W:.0f} | "
+            "{failure_class} | {physical_interpretation} |".format(**row)
+            for row in result["solver_failures"]
+        ]
+        report = f"""# Malyshev 1998 molecular-only EEPF failure receipt
+
+## Verdict
+
+The molecular-only collision deck is **retired under the corrected Malyshev
+Eq. 11 pressure closure**. It creates a dissociated chlorine population but
+contains no atomic-Cl electron collision target, so the coupled particle and
+charge system does not close. This failure is recorded rather than preserving
+the stale source-replay numbers. The atomic-Cl replay is the minimum operative
+deck.
+
+| absorbed fraction | source W | failure | interpretation |
+|---:|---:|---|---|
+{chr(10).join(failure_lines)}
+
+No reactor state, wafer flux, or feature-depth claim is supported by this
+negative board. No feature observable selected any coefficient.
+"""
+        (output_directory / report_name).write_text(report, encoding="utf-8")
+        return
     table_lines = []
     for row in rows:
-        cl2_error = row["relative_cl2_proxy_error_percentage_point"]
+        cl2_error = row["relative_cl2_eq11_error_percentage_point"]
+        cl2_pass = row["within_reported_cl2_density_accuracy"]
         table_lines.append(
             "| {absorbed_fraction_sensitivity:.2f} | {source_power_W:.0f} | "
             "{reduced_electric_field_Td:.1f} | "
             "{electron_density_percent_error:+.1f}% | "
             "{temperature_proxy_percent_error:+.1f}% | "
             f"{'n/a' if cl2_error is None else f'{cl2_error:+.1f} pp'} | "
+            f"{'n/a' if cl2_pass is None else ('PASS' if cl2_pass else 'MISS')} | "
             "{total_positive_ion_axial_flux_m2_s:.3e} | "
             "{maximum_normalized_residual:.1e} |".format(**row)
         )
@@ -627,8 +730,8 @@ never selects a coefficient from feature depth. Forward TCP power is not
 measured absorbed plasma power, so 30%, 50%, and 70% are all reported rather
 than optimized.
 
-| absorbed fraction | source W | E/N Td | ne error | 2/3 mean-E proxy error vs OES | relative-Cl2 proxy error | axial positive-ion flux m-2 s-1 | max closure |
-|---:|---:|---:|---:|---:|---:|---:|---:|
+| absorbed fraction | source W | E/N Td | ne error | 2/3 mean-E proxy error vs OES | Eq.-11 Cl2 error | within reported Cl2 accuracy | axial positive-ion flux m-2 s-1 | max closure |
+|---:|---:|---:|---:|---:|---:|:---:|---:|---:|
 {chr(10).join(table_lines)}
 
 ## Use boundary
@@ -643,9 +746,12 @@ than optimized.
   heating solution.
 - `2/3 <E>` is not the exact OES forward observable. Its error diagnoses EEPF
   shape/chemistry but is not an apples-to-apples temperature validation.
-- The Stafford wall regression is extrapolated in Cl/Cl2 from the direct
-  `{DIRECT_WALL_RATIO_DOMAIN}` marker interval to
-  `{DECLARED_WALL_RATIO_DOMAIN}`. Every other Stafford domain remains strict.
+- Malyshev's about +/-25% Cl2 absolute-density accuracy is used as a reported
+  accuracy band, not a statistical sigma; digitization error remains separate.
+- The bounded Stafford coverage fit is trained only on the direct Cl/Cl2
+  interval `{DIRECT_WALL_RATIO_DOMAIN}`. Its transfer to ratio domain
+  `{DECLARED_WALL_RATIO_DOMAIN}` and from 300 to 333 K is sensitivity evidence;
+  pressure, power, material, and the direct-marker provenance remain explicit.
 {atomic_boundary}{coulomb_boundary}- The global axial flux is not yet a local wafer flux,
   and it carries no species-resolved IED/IAD.
 - Raw collision bytes are not committed. Replay identity is the SHA-256 in the
@@ -700,14 +806,22 @@ def main() -> None:
         _write(result, arguments.output_directory)
     if arguments.summary_only:
         for row in result["rows"]:
-            cl2_error = row["relative_cl2_proxy_error_percentage_point"]
+            cl2_error = row["relative_cl2_eq11_error_percentage_point"]
+            cl2_pass = row["within_reported_cl2_density_accuracy"]
             print(
                 f"f={row['absorbed_fraction_sensitivity']:.2f} "
                 f"P={row['source_power_W']:.0f} W "
                 f"E/N={row['reduced_electric_field_Td']:.1f} Td "
                 f"ne={row['electron_density_percent_error']:+.1f}% "
                 f"energy={row['temperature_proxy_percent_error']:+.1f}% "
-                f"Cl2={'n/a' if cl2_error is None else f'{cl2_error:+.1f} pp'}"
+                f"Cl2={'n/a' if cl2_error is None else f'{cl2_error:+.1f} pp'} "
+                f"gate={'n/a' if cl2_pass is None else ('PASS' if cl2_pass else 'MISS')}"
+            )
+        for failure in result["solver_failures"]:
+            print(
+                f"f={failure['absorbed_fraction_sensitivity']:.2f} "
+                f"P={failure['source_power_W']:.0f} W "
+                f"FAIL={failure['failure_class']}"
             )
     else:
         print(json.dumps(result, indent=2, sort_keys=True))

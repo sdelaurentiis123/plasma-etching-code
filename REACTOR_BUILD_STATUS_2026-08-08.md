@@ -22,14 +22,14 @@ from the `825 nm` feature target.
 | argon source-model rung | **implemented** | source reproduction and transport checks; not a complete equipment-specific predictor |
 | chlorine particle balance | **implemented, fail-closed** | solves five heavy-species balances, quasineutrality, and pressure-controller exhaust at supplied `Te`; atom/current ledgers close |
 | chlorine chemistry | **partly upgraded** | Lee--Lieberman replay plus evaluated ionization/attachment support, eight state-resolved Hamilton dissociation channels, and separate Kemaneci 36-row forward / 44-row COMSOL nonelastic replays |
-| neutral and wall transport | **implemented with applicability gates** | exact cylindrical Robin roots and state-dependent conditioned-wall providers; missing absolute uncertainties and reactor-wall transfer prevent predictive status |
+| neutral and wall transport | **implemented with applicability gates** | exact cylindrical Robin roots, Chapman--Enskog Cl-in-Cl2 diffusion, and a bounded differentiable coverage response replace the former unphysical raw-ratio exponential extrapolation; ratio/temperature transfer remains sensitivity evidence |
 | electron-energy ledger | **two-term density-coupled operator implemented; model incomplete** | fixed event losses, attachment energy moments, exact elastic transfer, and the isotropic Hagelaar--Pitchford electron--electron Landau term are distinct; e-ion, anisotropic Coulomb momentum, excited states, and several collision channels remain open |
 | direct molecular-Cl2 swarm board | **implemented from primary measurement** | 52 pure-Cl2 mean-arrival-time drift, effective-ionization, and spatiotemporal longitudinal-diffusion markers validate a collision/EEDF solver only |
 | Lam Alliance state boards | **implemented as held-out observables** | 62 electron-temperature, 27 volume-average electron-density, and 38 chlorine-dissociation markers; these do not measure absorbed power or wafer flux |
 | user collision-deck ingestion | **implemented, rights-safe, and hash-gated** | parses local BOLSIG/LXCat process arrays without packaging third-party bytes; multi-term readiness fails closed unless an elastic angular closure is declared |
 | transport-definition-safe swarm grade | **implemented** | refuses flux mobility in place of pulsed-Townsend mean-arrival-time drift and scalar diffusion in place of spatiotemporal longitudinal diffusion |
 | deterministic nonconservative swarm/EEDF solve | **two-term temporal-growth rung implemented; multi-term board open** | the conservative eigen-root and density-dependent isotropic e-e fixed point pass manufactured and independent numerical gates, but mean-arrival-time drift, longitudinal diffusion, and steady-state Townsend still require the preregistered multi-term hierarchy |
-| absorbed-power-to-EEPF closure | **six-condition physical sensitivity board runs; prediction gate open** | coupled eight-equation reference maps an explicit absorbed-power sensitivity to EEPF, six species, and mass-resolved axial ion fluxes; the complete Hamilton/atomic-Cl/e-e board finishes in 98 s, while outer implicit derivatives, measured absorbed power, and complete excited-state chemistry remain open |
+| absorbed-power-to-EEPF closure | **six-condition atomic-Cl board closes; prediction gate open** | coupled eight-equation reference maps absorbed-power sensitivity to EEPF, six species, and mass-resolved axial ion fluxes; the obsolete molecular-only deck now fails explicitly because atomic-Cl electron collisions are mandatory |
 | charged transport, sheath, IED/IAD, wafer boundary | **open for prediction** | source-model ion mobilities exist, but public evaluated species-resolved transport and a validated equipment closure do not |
 | feature coupling | **interfaces exist; predictive chain absent** | nothing currently supports a knobs -> fluxes -> profile/depth claim |
 
@@ -67,14 +67,12 @@ The complete rung-by-rung execution and claim plan is recorded in
 
 ## Validation state
 
-The current reactor and Malyshev test surface passes: **277 passed** on
-2026-08-08. The
-repository-wide suite passes **1,696 passed, 1 skipped** in 16m25s. A final
-source-definition/angular-closure correction made after that run collected was
-separately replayed on the exact affected surface: **12 passed**. The swarm
-board, collision parser, and strict grade carry independent replay, hash, unit,
-count, definition, corruption, angular-closure, and evidence-boundary tests.
-The repository contains **132 source entries**. ReactorLab was audited
+The repository-wide suite passes **1,748 passed, 1 skipped** in 12m23s after
+the Eq.-11, state-dependent transport-density, bounded-wall, and regenerated-
+receipt changes. The swarm board, collision parser, and strict grade carry
+independent replay, hash, unit, count, definition, corruption, angular-
+closure, and evidence-boundary tests. The repository contains **132 source
+entries**. ReactorLab was audited
 read-only and rejected as a boundary provider at its audited commit; no
 ReactorLab source, fit, or claimed validation was integrated.
 
@@ -94,39 +92,49 @@ changing the converged state outside its `1e-7` tolerance. The complete
 six-condition Lam sensitivity now takes `98 s`; the held-out 30%-absorbed,
 500-W point takes `35.7 s` instead of running beyond 13 minutes.
 
-This new physics does **not** close the Lam state board. At the held-out point,
-the previous Hamilton/atomic-Cl replay gave `E/N=1091.2 Td`, electron-density
-error `-15.1%`, energy-proxy error `+1.3%`, and Cl2 proxy error `-16.9`
-percentage points. Adding isotropic e-e collisions gives `1077.9 Td`,
-`-18.5%`, `+7.2%`, and `-17.1` points. Across the full sensitivity it lowers
-the axial ion flux by roughly 1--3%. It is therefore retained as a physical
-density-coupling sensitivity, not selected as a correction and not promoted
-to wafer-flux or feature-depth support.
+The first version of that board compared Malyshev's measured Eq. 11 quantity
+to the wrong model observable, `nCl2/(nCl2+nCl)`, and incorrectly constrained
+the powered neutral particle density to the gauge density. The corrected
+closure enforces `nCl2+nCl/2=nCl2^0`, evaluates neutral diffusion and ion
+mobility at the actual powered particle density, and compares only
+`100*nCl2/(nCl2+nCl/2)` to the measurement. It also uses the paper's printed
+333 K initial state and source-parameterized Chapman--Enskog diffusion.
+
+At the held-out 30%-absorbed, 500 W point, the Hamilton/atomic-Cl replay gives
+`E/N=880.5 Td`, electron-density error `-15.9%`, non-equivalent energy-proxy
+error `-1.3%`, and Eq.-11 Cl2 error `-4.8` percentage points (`-6.6%`
+relative), which passes the source's about `+/-25%` absolute-density accuracy
+band. Adding isotropic e-e collisions gives `865.7 Td`, `-19.2%`, `+4.6%`,
+and `-5.2` points; it remains a negative density sensitivity. The corrected
+non-Coulomb board is converged from 415 to 813 cells with a largest physical
+change of `0.0348%`.
 
 ## First reactor-diagnostic-conditioned equipment transfer
 
 A single constant source-to-plasma fraction was inferred from only the 300 W
 Malyshev volume-average electron-density marker over the pre-existing
 `0.30--0.50` sensitivity bracket. The deterministic inverse solve converged to
-`0.3571645`, or `107.15 W` effective absorbed power. With that fraction frozen,
-the untouched 500 W density is predicted within `-1.01%` and the global axial
-positive-ion flux is `5.708e19 m^-2 s^-1`.
+`0.3646468`, or `109.39 W` effective absorbed power. With that fraction frozen,
+the untouched 500 W density is predicted within `+1.76%` and the global axial
+positive-ion flux is `5.779e19 m^-2 s^-1`.
 
 This is a successful power-scaling transfer but not a direct absorbed-power
 measurement: the paper reports forward power into the matching network and no
-density uncertainty. The independent 500 W residuals remain `+7.70%` for the
-mean-energy temperature proxy and `-18.71` percentage points for the Cl2
-proxy. The result therefore separates the next work cleanly: the constant
-equipment-power scale is adequate for the density trend, while chemistry,
-wall state, diagnostic forward models, and spatial wafer transfer remain
-open. No temperature, dissociation, held-out measurement, or feature depth
-selected the fraction, and every wafer/depth support flag remains false.
+density uncertainty. The independent 500 W Eq.-11 Cl2 residual is `-8.96`
+percentage points, or `-12.28%` relative, and passes the source's about
+`+/-25%` absolute-density accuracy statement. That accuracy is not relabeled
+as a statistical sigma. The mean-energy temperature proxy is `+4.98%`, but it
+is not the OES forward observable and receives no validation label. The
+bounded wall ratio/temperature transfer, unmeasured absorbed power, omitted
+5% rare-gas collision/ion channels, and lack of a local wafer boundary keep
+reactor-prediction, wafer-flux, and depth support false. No temperature,
+dissociation, held-out measurement, or feature depth selected the fraction.
 
 ## Shortest defensible path to depth prediction
 
-1. Load and hash a user-downloaded Gregorio/SIGLO molecular-Cl2 deck from
-   LXCat; pursue native Kawaguchi arrays separately and keep plot digitization
-   as a declared last-resort sensitivity.
+1. Retain the hash-gated user-downloaded SIGLO molecular-Cl2 deck and evaluated
+   Hamilton/atomic-Cl upgrade; pursue native Kawaguchi arrays separately and
+   keep plot digitization as a declared last-resort sensitivity.
 2. Complete and independently verify a deterministic, differentiable,
    nonconservative multi-term Boltzmann solver with density-gradient and
    steady-state-Townsend modes, then preregister a no-fit grade against all 52
@@ -134,8 +142,9 @@ selected the fraction, and every wafer/depth support flag remains false.
 3. Land only the collision channels that pass, complete their electron-energy
    moments and uncertainty/support gates, and solve `Te` from independently
    measured or validated absorbed power.
-4. Grade predicted Lam electron temperature, density, dissociation, and a
-   mass-resolved ion-flux board without using feature depth.
+4. Add the declared 5% diagnostic-gas collision/ion channels and a real OES
+   forward observable, then extend the Lam grade across power, pressure, and
+   both gaps without using feature depth.
 5. Add equipment-specific charged transport, sheath, species-resolved IED/IAD,
    neutral/radical delivery, and covariance to the feature-plane boundary.
 6. Predict depths on multiple held-out chemistries/reactors. Krueger may be one

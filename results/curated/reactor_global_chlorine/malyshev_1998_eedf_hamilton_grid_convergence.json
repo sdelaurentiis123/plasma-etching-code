@@ -91,48 +91,48 @@
       80
     ]
   },
-  "maximum_absolute_relative_change": 0.000327639767132392,
+  "maximum_absolute_relative_change": 0.00034847227959425753,
   "maximum_change_metric": "electron_density_m3",
   "metrics": {
     "cl_to_cl2_ratio": {
-      "coarse": 0.7814810601203274,
-      "fine": 0.7813991011615409,
-      "relative_change": -0.00010487644930750878
+      "coarse": 0.9344886254495873,
+      "fine": 0.9342902562821169,
+      "relative_change": -0.0002122756361801258
     },
     "clplus_ion_fraction": {
-      "coarse": 0.3221924373209046,
-      "fine": 0.3221316424563582,
-      "relative_change": -0.00018869115939491223
+      "coarse": 0.35052792986781683,
+      "fine": 0.35045288965731336,
+      "relative_change": -0.0002140776928439673
     },
     "electron_density_m3": {
-      "coarse": 4.430784142721599e+16,
-      "fine": 4.429332441636864e+16,
-      "relative_change": -0.000327639767132392
+      "coarse": 4.3898766130113976e+16,
+      "fine": 4.388346862700924e+16,
+      "relative_change": -0.00034847227959425753
     },
     "electronegativity": {
-      "coarse": 1.53062211209534,
-      "fine": 1.5310629782518028,
-      "relative_change": 0.00028803069874591653
+      "coarse": 1.6262401001382032,
+      "fine": 1.6267435965446992,
+      "relative_change": 0.0003096076689126424
     },
     "mean_electron_energy_eV": {
-      "coarse": 3.818604333214171,
-      "fine": 3.8187698270378245,
-      "relative_change": 4.333882466272616e-05
+      "coarse": 3.7211089887745943,
+      "fine": 3.7213007872752697,
+      "relative_change": 5.154337087518965e-05
     },
-    "modeled_relative_cl2_density_percent_proxy": {
-      "coarse": 56.13306940981211,
-      "fine": 56.135651991064854,
-      "relative_change": 4.600819587988466e-05
+    "modeled_relative_cl2_density_percent_eq11": {
+      "coarse": 68.15497537304593,
+      "fine": 68.15958290827349,
+      "relative_change": 6.760379858321874e-05
     },
     "reduced_electric_field_Td": {
-      "coarse": 1091.1803918507187,
-      "fine": 1091.2839627875476,
-      "relative_change": 9.491642042175074e-05
+      "coarse": 880.5469397669752,
+      "fine": 880.6798292118867,
+      "relative_change": 0.0001509169345891447
     },
     "total_positive_ion_axial_flux_m2_s": {
-      "coarse": 4.879723483666329e+19,
-      "fine": 4.8783534667535794e+19,
-      "relative_change": -0.00028075707923515687
+      "coarse": 4.792443516338717e+19,
+      "fine": 4.791046393344641e+19,
+      "relative_change": -0.0002915262306823008
     }
   },
   "model_variant": "legacy_siglo_hamilton_plus_comsol_nist_atomic_cl",

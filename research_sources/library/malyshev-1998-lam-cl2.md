@@ -53,6 +53,18 @@ The reactor model may either calibrate on a preregistered subset and grade the
 held-out conditions, or use independently measured boundaries and grade all
 markers. Feature depth may never select the reactor parameters used here.
 
+The executable source replay now applies M15 literally. The powered chlorine
+constraint is `nCl2+nCl/2=nCl2^0`; neutral diffusion and ion mobility use the
+larger actual `nCl2+nCl` particle density; and the comparison observable is
+`100*nCl2/(nCl2+nCl/2)`. The former particle-fraction comparison is retained
+only as a separately named diagnostic. Under a power fraction selected from
+the 300 W electron-density marker alone, the untouched 500 W Eq.-11 chlorine
+observable is `-12.28%` relative to the measured value, inside the paper's
+about `+/-25%` absolute-density accuracy statement. This is a bounded accuracy
+statement, not one sigma. Unmeasured absorbed power, the independently trained
+but out-of-domain wall transfer, missing 5% rare-gas collision/ion channels,
+and absent local wafer IEAD keep wafer-flux and depth support false.
+
 The runtime Figure-3 provider is hash-locked to the audited CSV. It permits
 only an exact marker or an explicitly labeled linear interpolation between two
 unambiguous markers in one fixed-gap, fixed-pressure series. It refuses

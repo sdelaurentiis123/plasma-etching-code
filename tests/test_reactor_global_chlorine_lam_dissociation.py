@@ -10,6 +10,7 @@ from petch.reactor_global import (
     build_hamilton_dissociation_chlorine_particle_network,
     malyshev_1998_eq7_transport_diagnostic,
     malyshev_1998_eq7_wall_return_inversion,
+    malyshev_1998_eq11_relative_cl2_density_percent,
 )
 
 
@@ -26,6 +27,18 @@ PACKAGE_CSV = (
 
 def _provider():
     return MalyshevMeasuredChlorineDissociationProvider.from_package_data()
+
+
+def test_eq11_observable_is_not_the_neutral_particle_fraction():
+    molecule = 6.0e19
+    atom = 8.0e19
+    assert malyshev_1998_eq11_relative_cl2_density_percent(
+        molecule, atom) == pytest.approx(60.0)
+    assert 100.0 * molecule / (molecule + atom) == pytest.approx(
+        42.857142857142854)
+
+    with pytest.raises(ValueError, match="Eq. 11"):
+        malyshev_1998_eq11_relative_cl2_density_percent(0.0, 0.0)
 
 
 def _marker(*, gap_cm, pressure_mTorr, power_W):

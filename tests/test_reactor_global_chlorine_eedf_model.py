@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import pytest
 
 from petch.reactor_global.chlorine import (
@@ -246,3 +248,17 @@ def test_absorbed_power_eepf_model_closes_knobs_to_species_fluxes():
     assert not solution.supports_reactor_state_prediction
     assert not solution.supports_wafer_flux
     assert not solution.supports_feature_depth
+
+
+def test_eq11_condition_constrains_chlorine_nuclei_not_particle_count():
+    condition = replace(
+        _condition(CylindricalReactor(radius_m=0.10, length_m=0.08)),
+        neutral_density_constraint="chlorine_nuclei_equivalent_molecules",
+    )
+    target = condition.target_neutral_density_m3
+    densities = {"Cl2": 0.6 * target, "Cl": 0.8 * target}
+    assert condition.constrained_neutral_density_m3(densities) == (
+        pytest.approx(target))
+    assert densities["Cl2"] + densities["Cl"] == pytest.approx(1.4 * target)
+    assert condition.angular_field_frequency_over_density(
+        1.4 * target) == pytest.approx(0.0)

@@ -322,7 +322,7 @@ class LeeEconomouChlorineChargedTransportProvider:
         electron_temperature = condition.electron_temperature.value
         ion_temperature = self.ion_temperature.value
         electronegativity = densities["Cl-"] / densities["e"]
-        total_neutral_density = condition.target_neutral_density_m3
+        total_neutral_density = densities["Cl2"] + densities["Cl"]
         transport = {}
         for species, mass_amu in _POSITIVE_ION_MASS_AMU.items():
             mobility = self.reduced_mobilities[species].evaluate(
@@ -361,6 +361,7 @@ class LeeEconomouChlorineChargedTransportProvider:
                 provenance={
                     **mobility.provenance,
                     "mobility_m2_V_s": mobility.mobility_m2_V_s,
+                    "total_neutral_density_m3": total_neutral_density,
                     "momentum_collision_frequency_s_inv": (
                         momentum_collision_frequency),
                     "mean_ion_speed_m_s": mean_ion_speed,

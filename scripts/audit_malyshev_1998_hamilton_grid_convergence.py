@@ -24,7 +24,7 @@ PHYSICAL_METRICS = (
     "electron_density_m3",
     "electronegativity",
     "cl_to_cl2_ratio",
-    "modeled_relative_cl2_density_percent_proxy",
+    "modeled_relative_cl2_density_percent_eq11",
     "total_positive_ion_axial_flux_m2_s",
     "clplus_ion_fraction",
 )

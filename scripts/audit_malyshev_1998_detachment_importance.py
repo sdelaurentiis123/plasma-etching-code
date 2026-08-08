@@ -86,8 +86,9 @@ def audit() -> dict[str, object]:
             MUTUAL_NEUTRALIZATION_M3_S),
         "maximum_detachment_to_neutralization_loss_ratio": maximum_ratio,
         "verdict": (
-            "low frozen-state leverage: detachment is below 4% of the "
-            "already active mutual-neutralization loss on this board"),
+            "frozen-state leverage relative to the already active "
+            "mutual-neutralization loss is reported without using a "
+            "reactor observable"),
         "coupled_response_is_formal_bound": False,
         "feature_depth_used": False,
         "supports_reactor_state_prediction": False,
@@ -116,8 +117,8 @@ def main() -> None:
         "The Kemaneci/Fritioff electron-detachment fits contribute only "
         f"{100.0 * result['maximum_detachment_to_neutralization_loss_ratio']:.1f}% "
         "of the already active mutual-neutralization loss at worst. Electron "
-        "detachment is therefore a low-leverage explanation for the current "
-        "17--24 percentage-point Cl2 composition-proxy miss. This is a "
+        "This reports the frozen-state leverage of the omitted channel. It "
+        "does not diagnose the corrected Eq.-11 chlorine observable. This is a "
         "frozen-state timescale diagnostic, not a formal bound on the fully "
         "coupled response.\n\n"
         "| absorbed fraction | source W | 2/3 mean-E eV | electronegativity | "

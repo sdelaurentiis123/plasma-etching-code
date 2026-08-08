@@ -84,6 +84,8 @@ def test_stafford_wall_law_recomputes_exact_transport_from_density_ratio():
     low = provider.predict(condition, _densities(ratio=0.2))
     high = provider.predict(condition, _densities(ratio=0.7))
 
+    assert low.diffusivity.total_neutral_density_m3 == pytest.approx(1.2e20)
+    assert high.diffusivity.total_neutral_density_m3 == pytest.approx(1.7e20)
     assert high.wall_boundary.recombination_probability > (
         low.wall_boundary.recombination_probability)
     assert high.wall_loss.exact_loss_frequency_s_inv > (
