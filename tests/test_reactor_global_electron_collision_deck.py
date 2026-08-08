@@ -80,11 +80,32 @@ def test_parser_hash_locks_user_supplied_deck_and_preserves_process_metadata():
     assert excitation.product == "Cl2(v=1)"
     assert excitation.energy_loss_eV == pytest.approx(0.069)
     assert ionization.energy_loss_eV == pytest.approx(11.49)
+    assert elastic.electron_number_change == 0
+    assert excitation.electron_number_change == 0
+    assert ionization.electron_number_change == 1
+    assert attachment.electron_number_change == -1
     assert attachment.energy_loss_eV == 0.0
     assert attachment.product == "Cl- + Cl"
     assert attachment.comments == (
         "COMMENT: attachment has no third parameter line",
     )
+
+
+def test_explicit_multiple_ionization_multiplicity_is_never_inferred_from_label():
+    base = _parse().processes[2]
+    from dataclasses import replace
+
+    double = replace(
+        base,
+        product="Cl2++",
+        electron_number_change=2,
+    )
+    assert double.electron_number_change == 2
+    with pytest.raises(ValueError, match="electron-number change"):
+        replace(
+            _parse().processes[1],
+            electron_number_change=1,
+        )
 
 
 def test_structural_readiness_is_not_promoted_to_reactor_or_depth_evidence():

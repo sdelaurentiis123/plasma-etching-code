@@ -64,6 +64,14 @@ from .chlorine_particle_model import (
     ReactorScalarInput,
     standard_volume_flow_molecules_s,
 )
+from .chlorine_eedf_model import (
+    EEDFChlorineAbsorbedPowerModel,
+    EEDFChlorineCondition,
+    EEDFChlorineSolution,
+    FixedPositiveIonWallEnergyProvider,
+    PositiveIonWallEnergyProvider,
+    PositiveIonWallEnergyState,
+)
 from .chlorine_charged_transport import (
     LYMBEROPOULOS_1995_REDUCED_CL2PLUS_MOBILITY_M_INV_V_INV_S_INV,
     LYMBEROPOULOS_1995_REDUCED_CLMINUS_MOBILITY_M_INV_V_INV_S_INV,
@@ -95,6 +103,11 @@ from .electron_collision_deck import (
     ElectronCollisionProcess,
     load_bolsig_lxcat_file,
     parse_bolsig_lxcat_bytes,
+)
+from .electron_collision_chemistry import (
+    ElectronCollisionChemistry,
+    ElectronCollisionChemistryState,
+    ElectronCollisionHeavyMapping,
 )
 from .electron_kinetics import (
     ELECTRON_SPEED_PER_SQRT_EV_M_S,
@@ -288,12 +301,19 @@ __all__ = [
     "ElectronTemperatureConditioningState",
     "ElectronegativeEdgeFactors",
     "ElectropositiveEdgeFactors",
+    "EEDFChlorineAbsorbedPowerModel",
+    "EEDFChlorineCondition",
+    "EEDFChlorineSolution",
     "FixedArgonTransportProvider",
     "FixedChlorineChargedTransportProvider",
     "FixedChlorineNeutralWallTransportProvider",
     "FixedElectronTemperatureChlorineParticleModel",
+    "FixedPositiveIonWallEnergyProvider",
     "DirectDriveRFPowerBoundary",
     "DeterministicTwoTermBoltzmannSolver",
+    "ElectronCollisionChemistry",
+    "ElectronCollisionChemistryState",
+    "ElectronCollisionHeavyMapping",
     "LeeLiebermanArgonGlobalModel",
     "LeeEconomouChlorineChargedTransportProvider",
     "LeeLiebermanArgonTransportProvider",
@@ -318,6 +338,8 @@ __all__ = [
     "POWER_EVIDENCE_KINDS",
     "PREDICTIVE_EVIDENCE_KINDS",
     "PositiveIonWallTransport",
+    "PositiveIonWallEnergyProvider",
+    "PositiveIonWallEnergyState",
     "RateContext",
     "REACTOR_SCALAR_EVIDENCE_KINDS",
     "ReactorScalarInput",

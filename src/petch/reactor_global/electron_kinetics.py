@@ -864,6 +864,9 @@ class TwoTermElectronTransportMoments:
     flux_reduced_mobility_m_inv_V_inv_s_inv: float
     scalar_reduced_diffusion_m_inv_s_inv: float
     reduced_field_power_gain_eV_m3_s: float
+    mean_electron_speed_m_s: float
+    isotropic_wall_flux_coefficient_m_s: float
+    mean_wall_loss_electron_energy_eV: float
     supports_flux_transport_moments: bool = True
     supports_direct_swarm_grade: bool = False
     supports_reactor_state_prediction: bool = False
@@ -875,17 +878,24 @@ class TwoTermElectronTransportMoments:
             self.flux_reduced_mobility_m_inv_V_inv_s_inv,
             self.scalar_reduced_diffusion_m_inv_s_inv,
             self.reduced_field_power_gain_eV_m3_s,
+            self.mean_electron_speed_m_s,
+            self.isotropic_wall_flux_coefficient_m_s,
+            self.mean_wall_loss_electron_energy_eV,
         ), dtype=float)
         if (
             np.any(~np.isfinite(values))
             or np.any(values[:2] <= 0.0)
             or values[2] < 0.0
+            or np.any(values[3:] <= 0.0)
         ):
             raise ValueError("invalid two-term electron transport moments")
         for name, value in zip((
             "flux_reduced_mobility_m_inv_V_inv_s_inv",
             "scalar_reduced_diffusion_m_inv_s_inv",
             "reduced_field_power_gain_eV_m3_s",
+            "mean_electron_speed_m_s",
+            "isotropic_wall_flux_coefficient_m_s",
+            "mean_wall_loss_electron_energy_eV",
         ), values):
             object.__setattr__(self, name, float(value))
 
@@ -1073,9 +1083,14 @@ class DeterministicTwoTermBoltzmannSolver:
                 in_factor = 1.0
             elif process.kind == "IONIZATION":
                 energy_loss = float(process.energy_loss_eV or 0.0)
-                parent_lower_from_child = lambda value: 2.0 * value + energy_loss
-                parent_upper_from_child = lambda value: 2.0 * value + energy_loss
-                in_factor = 2.0
+                outgoing_electron_count = 1 + process.electron_number_change
+                parent_lower_from_child = (
+                    lambda value: outgoing_electron_count * value + energy_loss
+                )
+                parent_upper_from_child = (
+                    lambda value: outgoing_electron_count * value + energy_loss
+                )
+                in_factor = float(outgoing_electron_count)
             else:
                 raise ValueError("unsupported inelastic collision kind")
 
@@ -1172,12 +1187,24 @@ class DeterministicTwoTermBoltzmannSolver:
             * self.grid.cell_widths_eV
         ))
         reduced_field_V_m2 = condition.reduced_electric_field_Td * 1.0e-21
+        speed_weights = 0.5 * (
+            boundaries[1:] ** 2 - boundaries[:-1] ** 2)
+        wall_energy_weights = (1.0 / 3.0) * (
+            boundaries[1:] ** 3 - boundaries[:-1] ** 3)
+        reduced_speed_moment = float(np.dot(values, speed_weights))
+        mean_speed = (
+            ELECTRON_SPEED_PER_SQRT_EV_M_S * reduced_speed_moment)
+        mean_wall_energy = float(
+            np.dot(values, wall_energy_weights) / reduced_speed_moment)
         return TwoTermElectronTransportMoments(
             flux_reduced_mobility_m_inv_V_inv_s_inv=reduced_mobility,
             scalar_reduced_diffusion_m_inv_s_inv=reduced_diffusion,
             reduced_field_power_gain_eV_m3_s=(
                 reduced_mobility * reduced_field_V_m2 ** 2
             ),
+            mean_electron_speed_m_s=mean_speed,
+            isotropic_wall_flux_coefficient_m_s=0.25 * mean_speed,
+            mean_wall_loss_electron_energy_eV=mean_wall_energy,
         )
 
     @staticmethod

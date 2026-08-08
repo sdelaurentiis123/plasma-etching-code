@@ -29,7 +29,7 @@ from the `825 nm` feature target.
 | user collision-deck ingestion | **implemented, rights-safe, and hash-gated** | parses local BOLSIG/LXCat process arrays without packaging third-party bytes; multi-term readiness fails closed unless an elastic angular closure is declared |
 | transport-definition-safe swarm grade | **implemented** | refuses flux mobility in place of pulsed-Townsend mean-arrival-time drift and scalar diffusion in place of spatiotemporal longitudinal diffusion |
 | deterministic nonconservative swarm/EEDF solve | **open** | no no-fit multi-term density-gradient/steady-state-Townsend replay against the 52-marker board yet; a basic two-term flux/scalar solver is definition-incomplete for this board |
-| absorbed-power-to-`Te` closure | **open** | generator or forward-minus-reflected power cannot silently become absorbed plasma power |
+| absorbed-power-to-EEPF closure | **manufactured full-stack gate passes; physical board open** | coupled eight-equation reference maps an explicit absorbed-power boundary to EEPF, six species, and mass-resolved axial ion fluxes; outer implicit derivatives and a current complete Cl2 deck remain open; generator or forward-minus-reflected power still cannot silently become absorbed plasma power |
 | charged transport, sheath, IED/IAD, wafer boundary | **open for prediction** | source-model ion mobilities exist, but public evaluated species-resolved transport and a validated equipment closure do not |
 | feature coupling | **interfaces exist; predictive chain absent** | nothing currently supports a knobs -> fluxes -> profile/depth claim |
 

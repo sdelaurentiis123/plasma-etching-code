@@ -45,6 +45,7 @@ class ElectronCollisionProcess:
     cross_section_m2: tuple[float, ...]
     mass_ratio: float | None = None
     energy_loss_eV: float | None = None
+    electron_number_change: int | None = None
     statistical_weight_ratio: float | None = None
     automatic_superelastic: bool = False
     comments: tuple[str, ...] = ()
@@ -53,6 +54,7 @@ class ElectronCollisionProcess:
         energies = tuple(float(value) for value in self.electron_energy_eV)
         cross_sections = tuple(float(value) for value in self.cross_section_m2)
         comments = tuple(str(value).strip() for value in self.comments)
+        electron_change = self.electron_number_change
         if (
             self.kind not in BOLSIG_COLLISION_KINDS
             or not str(self.target).strip()
@@ -75,6 +77,7 @@ class ElectronCollisionProcess:
                 or self.automatic_superelastic
             ):
                 raise ValueError("invalid momentum-transfer process metadata")
+            expected_electron_change = 0
         elif self.kind == "ATTACHMENT":
             if (
                 self.mass_ratio is not None
@@ -84,6 +87,7 @@ class ElectronCollisionProcess:
             ):
                 raise ValueError("invalid attachment process metadata")
             object.__setattr__(self, "energy_loss_eV", 0.0)
+            expected_electron_change = -1
         elif self.kind in _INELASTIC_KINDS:
             if (
                 self.mass_ratio is not None
@@ -107,6 +111,21 @@ class ElectronCollisionProcess:
                 )
             ):
                 raise ValueError("invalid inelastic process metadata")
+            expected_electron_change = 1 if self.kind == "IONIZATION" else 0
+        if electron_change is None:
+            electron_change = expected_electron_change
+        if (
+            int(electron_change) != electron_change
+            or (
+                self.kind == "IONIZATION"
+                and electron_change < 1
+            )
+            or (
+                self.kind != "IONIZATION"
+                and electron_change != expected_electron_change
+            )
+        ):
+            raise ValueError("invalid collision electron-number change")
         object.__setattr__(self, "target", str(self.target).strip())
         object.__setattr__(
             self, "product",
@@ -114,6 +133,8 @@ class ElectronCollisionProcess:
         )
         object.__setattr__(self, "electron_energy_eV", energies)
         object.__setattr__(self, "cross_section_m2", cross_sections)
+        object.__setattr__(
+            self, "electron_number_change", int(electron_change))
         object.__setattr__(self, "comments", comments)
 
 

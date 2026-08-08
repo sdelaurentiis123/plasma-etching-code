@@ -146,6 +146,34 @@ contributor permission or a compliant interface exists.
 
 ## Gate 2 - EEDF-coupled chlorine volume reactor
 
+### Landed reference coupling
+
+The first complete reference residual now exists. It solves pressure/feed,
+absorbed plasma power, reduced field, the non-Maxwellian EEPF, all six chlorine
+particle densities, throttle frequency, and mass-resolved axial positive-ion
+fluxes in one deterministic system. Every non-momentum collision row requires
+an explicit deck-indexed heavy-species mapping; atom, charge, electron-growth,
+deck-hash, particle, and power ledgers fail closed. An EEPF-derived flux-energy
+moment replaces the Maxwellian `2 Te` electron wall-loss shortcut.
+
+The manufactured end-to-end gate converges in 10 nonlinear evaluations with a
+maximum normalized residual below `8e-14`. A solve-local immutable EEPF cache
+reduced its 320-cell wall time from about 12 seconds to about 3.4 seconds.
+This is functional coupling, not the performance endpoint.
+
+The coupling also exposed and repaired a multiple-ionization defect: BOLSIG
+syntax does not distinguish single from double ionization, while the legacy
+Cl2 set contains `Cl2++` and `Cl++ + Cl`. Collision rows now carry an explicit
+electron-number change; equal sharing, temporal growth, and chemistry charge
+all use that declared multiplicity. Product text is never parsed to infer it.
+
+The reference nonlinear reactor currently reports
+`supports_implicit_differentiation = false`: SciPy still constructs its outer
+Jacobian numerically. It is deterministic and cacheable, but it is not yet the
+released differentiable path. The next implementation gate is the bordered
+implicit JVP/VJP for the EEPF eigen-root plus the eight-equation reactor
+residual, followed by batched condition sharding.
+
 Replace supplied `Te` with the converged EEDF and integrate every accepted
 collision channel over that distribution. Complete electron energy losses,
 including channel thresholds, attachment-selected kinetic energy, elastic

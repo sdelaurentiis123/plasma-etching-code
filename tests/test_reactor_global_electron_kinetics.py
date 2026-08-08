@@ -254,6 +254,17 @@ def test_two_term_zero_field_elastic_limit_is_gas_maxwellian():
         solution.transport_moments.reduced_field_power_gain_eV_m3_s
         == 0.0
     )
+    expected_mean_speed = (
+        ELECTRON_SPEED_PER_SQRT_EV_M_S
+        * 2.0 / np.sqrt(np.pi)
+        * np.sqrt(gas_thermal_energy_eV)
+    )
+    assert solution.transport_moments.mean_electron_speed_m_s == (
+        pytest.approx(expected_mean_speed, rel=2.0e-3))
+    assert solution.transport_moments.isotropic_wall_flux_coefficient_m_s == (
+        pytest.approx(0.25 * expected_mean_speed, rel=2.0e-3))
+    assert solution.transport_moments.mean_wall_loss_electron_energy_eV == (
+        pytest.approx(2.0 * gas_thermal_energy_eV, rel=3.0e-3))
     assert solution.transport_moments.supports_flux_transport_moments
     assert not solution.transport_moments.supports_direct_swarm_grade
     assert not solution.transport_moments.supports_reactor_state_prediction
@@ -366,6 +377,35 @@ def test_temporal_growth_ionization_closes_particle_source_and_rate_moment():
         0.0, abs=1.0e-28)
     assert solution.maximum_equation_residual_m3_s < 1.0e-23
     assert solution.iteration_count < 100
+
+
+def test_multiple_ionization_growth_uses_declared_electron_multiplicity():
+    double_ionization = ElectronCollisionProcess(
+        kind="IONIZATION",
+        target="manufactured",
+        product="manufactured++",
+        electron_energy_eV=(0.0, 15.0, 20.0, 200.0),
+        cross_section_m2=(0.0, 0.0, 4.0e-21, 4.0e-21),
+        energy_loss_eV=15.0,
+        electron_number_change=2,
+    )
+    solution = DeterministicTwoTermBoltzmannSolver(
+        ElectronEnergyGrid.linear(100.0, 600),
+        _deck(_constant_elastic(200.0), double_ionization),
+    ).solve(
+        TwoTermBoltzmannCondition(
+            reduced_electric_field_Td=80.0,
+            gas_temperature_K=300.0,
+            target_mole_fractions={"manufactured": 1.0},
+            growth_model="temporal_growth",
+        ),
+        relative_tolerance=1.0e-8,
+        maximum_tail_population_fraction=1.0e-5,
+    )
+    ionization_rate = solution.collision_moments[1].rate_coefficient_m3_s
+    assert solution.net_growth_rate_coefficient_m3_s == pytest.approx(
+        2.0 * ionization_rate, rel=3.0e-13)
+    assert solution.particle_growth_closure_error_m3_s == 0.0
 
 
 def test_temporal_growth_eigenroot_crosses_attachment_ionization_balance():
