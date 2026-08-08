@@ -10,6 +10,8 @@
 - **DOI:** `10.1088/0963-0252/23/4/045002`
 - **Official university full text:**
   `https://pure.tue.nl/ws/files/3931833/844662334177360.pdf`
+- **Official implementation cross-check:**
+  `https://doc.comsol.com/6.4/doc/com.comsol.help.models.plasma.chlorine_global_model/chlorine_global_model.html`
 - **PDF SHA-256:**
   `fda9f3da209e31993b2c1405cad86a5838185d0e0dc297a1131e744243466c75`
 - **Local extraction:**
@@ -29,12 +31,13 @@
 |---|---|---|
 | K1 | The model is volume averaged and Maxwellian, evolves particle balances plus electron energy density `p_e = 3/2 n_e T_e`, and supplies heavy-particle temperature externally. | A detailed source-reproduction target, not evidence that spatial transport, EEDF shape, gas heating, or RF absorption is closed. |
 | K2 | The particularly studied chamber is a hard-anodized-Al cylinder of radius 0.275 m and length 0.10 m, with a four-turn 13.56 MHz planar coil and 50 sccm pure Cl2 feed. | Defines one equipment board. It is neither the Malyshev Lam Alliance geometry nor a generic Lam reactor. |
-| K3 | Table 4 contains a ten-species chlorine mechanism, states a fit domain of `T_e = 0.5--10 eV`, and says most electron-rate fits were adapted from Thorsteinsson while selected rates were recomputed from cited cross sections. | Every landed row must remain a published-compilation/source-reproduction rate with its temperature domain; the table is not a uniform measurement set. |
+| K3 | Table 2 resolves to ten heavy species plus electrons when unqualified `Cl2` is treated as `Cl2(v=0)`. Table 4 states a fit domain of `T_e = 0.5--10 eV` and says most electron-rate fits were adapted from Thorsteinsson while selected rates were recomputed from cited cross sections. | Every landed row must remain a published-compilation/source-reproduction rate with its temperature domain; the table is not a uniform measurement set. |
 | K4 | Equations 13--18 split absorbed power, chemical reaction exchange, charged-particle wall loss, and elastic electron loss. Equation 17 computes a reaction-energy scalar from the printed species internal energies. | Supplies the ledger topology and elastic-loss form. It does not justify replacing a collision-energy moment with an Arrhenius fit exponent. |
 | K5 | Figure 10 prints Cl2 vibrational levels at 0.07, 0.14, and 0.21 eV; Cl fine/excited levels at 1.25, 1.35, and 10.17 eV; Cl2+ at 11.50 eV; Cl+ at 14.25 eV; and Cl- at -2.36 eV. | These values can reproduce the source's level convention. NIST independently supplies the predictive molecular thresholds and dissociation energy. |
 | K6 | Figure 10 places both ground-state Cl2 and ground-state Cl at zero, while Table 4's ground-state dissociation fit has an `8.84 eV` exponential parameter. | **Inference from the audited source:** the Figure-10 level convention cannot encode the Cl2 bond-dissociation energy, and the fit exponent is not a thermochemical event energy. A fundamental ledger must source those quantities separately. |
 | K7 | The paper imposes gas temperature over 300--1500 K rather than solving heavy-particle heating, and states that self-consistent gas heating requires a coupled heavy-particle energy balance. | No gas-temperature or depth prediction may be claimed from this reproduction rung. |
 | K8 | The paper compares several published chlorine measurements and reports generally good agreement, while also noting that updated vibrational cross sections materially change `Cl2(v=1)`, electron temperature, and electron density. | Supplies preregistration candidates and a mechanism-sensitivity warning; it is not one clean held-out board because source conditions and wall closures vary across comparisons. |
+| K9 | Table 4 labels charge exchange as reactions `(28)--(32)` while printing `Cl2(v=0--3)`, which expands to four channels, not five. The official COMSOL reproduction implements four channels and obtains 38 forward volume entries (including two elastic channels) plus six detailed-balance reverses = 44. | The printed range is quarantined as an off-by-one source defect. The native forward replay expands exactly four charge-exchange channels and records the missing source label rather than inventing a fifth species or event. |
 
 ## Use decision
 
@@ -60,3 +63,10 @@ The native implementation must therefore keep two tiers side by side:
    those data are incomplete.
 
 Neither tier may tune a reactor constant to feature depth.
+
+The first source-reproduction rung is now executable as
+`build_kemaneci_2014_forward_chlorine_network()`: 36 printed non-elastic
+forward reactions, ten heavy states plus electrons, exact atom/charge closure,
+and strict enforcement of the `0.5--10 eV` fit domain. The two elastic channels
+and six detailed-balance reverses remain explicit next gates, so this forward
+network cannot yet be called the paper's complete 44-reaction model.

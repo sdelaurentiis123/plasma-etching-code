@@ -85,6 +85,13 @@ source reproduction. This is still not a complete predictive chemistry deck:
 the remaining attachment, detachment, neutralization, and species-resolved
 ionization rows retain their separate evidence boundaries.
 
+A separate detailed source-reproduction rung now replays Kemaneci's 36
+printed non-elastic forward reactions with ten heavy states plus electrons.
+It resolves the paper's charge-exchange numbering anomaly on the record and
+enforces the printed `0.5--10 eV` domain. It is not yet the complete 44-reaction
+source model: two elastic channels and six detailed-balance reverses remain
+open, and no fit exponent has been imported as an electron-event energy.
+
 Neutral wall transport is also now a versioned state-dependent provider. On
 every nonlinear ledger evaluation it obtains the current `n_Cl/n_Cl2`,
 evaluates the condition-scoped wall-response provider, and re-solves the exact

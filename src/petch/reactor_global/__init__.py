@@ -24,6 +24,10 @@ from .chlorine import (
     build_lee_lieberman_chlorine_particle_network,
     lee_lieberman_chlorine_species,
 )
+from .chlorine_kemaneci import (
+    build_kemaneci_2014_forward_chlorine_network,
+    kemaneci_2014_chlorine_species,
+)
 from .chlorine_wall import (
     CHLORINE_INCIDENT_VELOCITY_DISTRIBUTIONS,
     CHLORINE_INCIDENT_VELOCITY_EVIDENCE_KINDS,
@@ -119,6 +123,9 @@ from .network import (
     ElectronMaxwellianCrossSectionRateCoefficient,
     ElectronTabulatedCrossSectionSupport,
     ElectronTemperatureTabulatedRateCoefficient,
+    ElectronAnalyticRateTerm,
+    ElectronCompositeRateCoefficient,
+    GasTemperatureArrheniusRateCoefficient,
     RateContext,
     Reaction,
     ReactionNetwork,
@@ -219,6 +226,9 @@ __all__ = [
     "ElectronMaxwellianCrossSectionRateCoefficient",
     "ElectronTabulatedCrossSectionSupport",
     "ElectronTemperatureTabulatedRateCoefficient",
+    "ElectronAnalyticRateTerm",
+    "ElectronCompositeRateCoefficient",
+    "GasTemperatureArrheniusRateCoefficient",
     "ElectronDensityConditioningState",
     "ElectronTemperatureConditioningState",
     "ElectronegativeEdgeFactors",
@@ -267,6 +277,7 @@ __all__ = [
     "build_lee_lieberman_argon_volume_network",
     "build_hamilton_dissociation_chlorine_particle_network",
     "build_lee_lieberman_chlorine_particle_network",
+    "build_kemaneci_2014_forward_chlorine_network",
     "chlorine_atom_mean_thermal_speed_m_s",
     "thermalized_chlorine_incident_velocity_state",
     "stafford_2010_conditioned_wall_recombination_provider",
@@ -274,6 +285,7 @@ __all__ = [
     "hamilton_2018_cl2_state_dissociation_reactions",
     "lee_lieberman_argon_species",
     "lee_lieberman_chlorine_species",
+    "kemaneci_2014_chlorine_species",
     "lymberopoulos_economou_1995_chlorine_diffusivity",
     "lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities",
     "malyshev_1998_lam_geometry",

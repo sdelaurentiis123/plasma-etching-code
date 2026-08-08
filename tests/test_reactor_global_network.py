@@ -13,6 +13,9 @@ from petch.reactor_global import (
     ElectronMaxwellianCrossSectionRateCoefficient,
     ElectronTabulatedCrossSectionSupport,
     ElectronTemperatureTabulatedRateCoefficient,
+    ElectronAnalyticRateTerm,
+    ElectronCompositeRateCoefficient,
+    GasTemperatureArrheniusRateCoefficient,
     RateContext,
     Reaction,
     ReactionNetwork,
@@ -574,3 +577,89 @@ def test_electron_power_ledger_rejects_unknown_density_species():
             {"A": 3.0, "B": 7.0, "ghost": 1.0},
             RateContext(1.0),
         )
+
+
+def test_composite_electron_fit_replays_terms_and_enforces_domain():
+    coefficient = ElectronCompositeRateCoefficient(
+        terms=(
+            ElectronAnalyticRateTerm(
+                prefactor_si=3.43e-15,
+                temperature_power=-1.18,
+                inverse_temperature_coefficients=(-3.98,),
+            ),
+            ElectronAnalyticRateTerm(
+                prefactor_si=3.05e-16,
+                temperature_power=-1.33,
+                shifted_inverse_coefficient_eV=-0.11,
+                shifted_inverse_offset_eV=0.014,
+            ),
+        ),
+        minimum_temperature_eV=0.5,
+        maximum_temperature_eV=10.0,
+        density_order=2.0,
+        source="manufactured Kemaneci-form fit",
+        source_units="m^3 s^-1; Te in eV",
+        evidence_kind="published_compilation",
+    )
+    temperature = 2.5
+    expected = (
+        3.43e-15 * temperature ** -1.18 * np.exp(-3.98 / temperature)
+        + 3.05e-16 * temperature ** -1.33
+        * np.exp(-0.11 / (temperature + 0.014))
+    )
+    assert coefficient.coefficient_si(
+        RateContext(temperature)) == pytest.approx(
+            expected, rel=3.0e-15, abs=0.0)
+    for invalid in (0.499, 10.001):
+        with pytest.raises(ValueError, match="published fit domain"):
+            coefficient.coefficient_si(RateContext(invalid))
+
+
+def test_composite_electron_fit_supports_inverse_and_log_gaussian_terms():
+    coefficient = ElectronCompositeRateCoefficient(
+        terms=(
+            ElectronAnalyticRateTerm(
+                prefactor_si=3.28e-17,
+                temperature_power=-1.12,
+                inverse_temperature_coefficients=(-0.37,),
+            ),
+            ElectronAnalyticRateTerm(
+                prefactor_si=2.86e-17,
+                log_temperature_shift=0.99,
+                log_temperature_width=1.06,
+            ),
+        ),
+        minimum_temperature_eV=0.5,
+        maximum_temperature_eV=10.0,
+        density_order=2.0,
+        source="manufactured Kemaneci-form log fit",
+        source_units="m^3 s^-1; Te in eV",
+        evidence_kind="published_compilation",
+    )
+    temperature = 3.0
+    expected = (
+        3.28e-17 * temperature ** -1.12 * np.exp(-0.37 / temperature)
+        + 2.86e-17 * np.exp(
+            -(np.log(temperature) + 0.99) ** 2 / (2.0 * 1.06 ** 2))
+    )
+    assert coefficient.coefficient_si(
+        RateContext(temperature)) == pytest.approx(
+            expected, rel=3.0e-15, abs=0.0)
+
+
+def test_gas_temperature_rate_requires_and_replays_declared_temperature():
+    coefficient = GasTemperatureArrheniusRateCoefficient(
+        prefactor_si=5.0e-14,
+        temperature_power=-0.5,
+        activation_temperature_K=0.0,
+        reference_temperature_K=300.0,
+        density_order=2.0,
+        source="manufactured heavy-particle fit",
+        source_units="m^3 s^-1; Tg in K",
+        evidence_kind="published_compilation",
+    )
+    with pytest.raises(ValueError, match="gas temperature is required"):
+        coefficient.coefficient_si(RateContext(2.0))
+    assert coefficient.coefficient_si(
+        RateContext(2.0, gas_temperature_K=1200.0)
+    ) == pytest.approx(2.5e-14, rel=2.0e-15, abs=0.0)

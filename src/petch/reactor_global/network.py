@@ -910,6 +910,244 @@ class ElectronTemperatureTabulatedRateCoefficient:
         return float(value)
 
 
+@dataclass(frozen=True)
+class ElectronAnalyticRateTerm:
+    """One term in a bounded published electron-temperature fit.
+
+    The represented form is
+
+    ``A Te^b exp(sum(c_n / Te^n) + c_s / (Te + d)
+                   - (ln(Te) + mu)^2 / (2 width^2))``.
+
+    Zero-valued exponent groups are omitted.  This is deliberately a numeric
+    expression object rather than an evaluated string, so a literature table
+    can be reproduced without ``eval`` or silently changing its algebra.
+    """
+
+    prefactor_si: float
+    temperature_power: float = 0.0
+    inverse_temperature_coefficients: tuple[float, ...] = ()
+    shifted_inverse_coefficient_eV: float = 0.0
+    shifted_inverse_offset_eV: float | None = None
+    log_temperature_shift: float | None = None
+    log_temperature_width: float | None = None
+
+    def __post_init__(self):
+        coefficients = tuple(
+            float(value) for value in self.inverse_temperature_coefficients)
+        values = np.asarray([
+            self.prefactor_si,
+            self.temperature_power,
+            self.shifted_inverse_coefficient_eV,
+        ], dtype=float)
+        paired_shift = (
+            self.shifted_inverse_offset_eV is not None
+            or self.shifted_inverse_coefficient_eV != 0.0
+        )
+        paired_log = (
+            self.log_temperature_shift is not None
+            or self.log_temperature_width is not None
+        )
+        if (
+            np.any(~np.isfinite(values))
+            or self.prefactor_si <= 0.0
+            or np.any(~np.isfinite(np.asarray(coefficients)))
+            or (
+                paired_shift
+                and (
+                    self.shifted_inverse_offset_eV is None
+                    or not np.isfinite(self.shifted_inverse_offset_eV)
+                    or self.shifted_inverse_offset_eV <= 0.0
+                )
+            )
+            or (
+                paired_log
+                and (
+                    self.log_temperature_shift is None
+                    or self.log_temperature_width is None
+                    or not np.isfinite(self.log_temperature_shift)
+                    or not np.isfinite(self.log_temperature_width)
+                    or self.log_temperature_width <= 0.0
+                )
+            )
+        ):
+            raise ValueError("invalid analytic electron-rate term")
+        object.__setattr__(self, "prefactor_si", float(self.prefactor_si))
+        object.__setattr__(
+            self, "temperature_power", float(self.temperature_power))
+        object.__setattr__(
+            self, "inverse_temperature_coefficients", coefficients)
+        object.__setattr__(
+            self,
+            "shifted_inverse_coefficient_eV",
+            float(self.shifted_inverse_coefficient_eV),
+        )
+        if self.shifted_inverse_offset_eV is not None:
+            object.__setattr__(
+                self,
+                "shifted_inverse_offset_eV",
+                float(self.shifted_inverse_offset_eV),
+            )
+        if self.log_temperature_shift is not None:
+            object.__setattr__(
+                self,
+                "log_temperature_shift",
+                float(self.log_temperature_shift),
+            )
+            object.__setattr__(
+                self,
+                "log_temperature_width",
+                float(self.log_temperature_width),
+            )
+
+    def value_si(self, temperature_eV: float) -> float:
+        temperature = float(temperature_eV)
+        if not np.isfinite(temperature) or temperature <= 0.0:
+            raise ValueError("electron temperature must be finite and positive")
+        exponent = sum(
+            coefficient / temperature ** order
+            for order, coefficient in enumerate(
+                self.inverse_temperature_coefficients, start=1)
+        )
+        if self.shifted_inverse_offset_eV is not None:
+            exponent += self.shifted_inverse_coefficient_eV / (
+                temperature + self.shifted_inverse_offset_eV)
+        if self.log_temperature_shift is not None:
+            exponent -= (
+                (np.log(temperature) + self.log_temperature_shift) ** 2
+                / (2.0 * self.log_temperature_width ** 2)
+            )
+        value = (
+            self.prefactor_si
+            * temperature ** self.temperature_power
+            * np.exp(exponent)
+        )
+        if not np.isfinite(value) or value <= 0.0:
+            raise FloatingPointError("nonpositive analytic electron-rate term")
+        return float(value)
+
+
+@dataclass(frozen=True)
+class ElectronCompositeRateCoefficient:
+    """A sum of analytic terms on an enforced published ``Te`` domain."""
+
+    terms: tuple[ElectronAnalyticRateTerm, ...]
+    minimum_temperature_eV: float
+    maximum_temperature_eV: float
+    density_order: float
+    source: str
+    source_units: str
+    evidence_kind: str
+
+    def __post_init__(self):
+        terms = tuple(self.terms)
+        values = np.asarray([
+            self.minimum_temperature_eV,
+            self.maximum_temperature_eV,
+            self.density_order,
+        ], dtype=float)
+        if (
+            not terms
+            or any(not isinstance(term, ElectronAnalyticRateTerm)
+                   for term in terms)
+            or np.any(~np.isfinite(values))
+            or self.minimum_temperature_eV <= 0.0
+            or self.maximum_temperature_eV <= self.minimum_temperature_eV
+            or self.density_order <= 0.0
+            or not str(self.source).strip()
+            or not str(self.source_units).strip()
+            or self.evidence_kind not in _EVIDENCE_KINDS
+        ):
+            raise ValueError("invalid composite electron-rate coefficient")
+        object.__setattr__(self, "terms", terms)
+        object.__setattr__(
+            self,
+            "minimum_temperature_eV",
+            float(self.minimum_temperature_eV),
+        )
+        object.__setattr__(
+            self,
+            "maximum_temperature_eV",
+            float(self.maximum_temperature_eV),
+        )
+        object.__setattr__(self, "density_order", float(self.density_order))
+
+    def coefficient_si(self, context: RateContext) -> float:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        temperature = context.electron_temperature_eV
+        if not (
+            self.minimum_temperature_eV
+            <= temperature
+            <= self.maximum_temperature_eV
+        ):
+            raise ValueError(
+                "electron temperature is outside the published fit domain")
+        value = sum(term.value_si(temperature) for term in self.terms)
+        if not np.isfinite(value) or value <= 0.0:
+            raise FloatingPointError(
+                "nonpositive composite electron-rate coefficient")
+        return float(value)
+
+
+@dataclass(frozen=True)
+class GasTemperatureArrheniusRateCoefficient:
+    """``A (Tg/Tref)^b exp(C/Tg)`` heavy-particle coefficient."""
+
+    prefactor_si: float
+    temperature_power: float
+    activation_temperature_K: float
+    reference_temperature_K: float
+    density_order: float
+    source: str
+    source_units: str
+    evidence_kind: str
+
+    def __post_init__(self):
+        values = np.asarray([
+            self.prefactor_si,
+            self.temperature_power,
+            self.activation_temperature_K,
+            self.reference_temperature_K,
+            self.density_order,
+        ], dtype=float)
+        if (
+            np.any(~np.isfinite(values))
+            or self.prefactor_si <= 0.0
+            or self.reference_temperature_K <= 0.0
+            or self.density_order <= 0.0
+            or not str(self.source).strip()
+            or not str(self.source_units).strip()
+            or self.evidence_kind not in _EVIDENCE_KINDS
+        ):
+            raise ValueError("invalid gas-temperature Arrhenius coefficient")
+        for name in (
+            "prefactor_si",
+            "temperature_power",
+            "activation_temperature_K",
+            "reference_temperature_K",
+            "density_order",
+        ):
+            object.__setattr__(self, name, float(getattr(self, name)))
+
+    def coefficient_si(self, context: RateContext) -> float:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        if context.gas_temperature_K is None:
+            raise ValueError("gas temperature is required for this rate")
+        temperature = context.gas_temperature_K
+        value = (
+            self.prefactor_si
+            * (temperature / self.reference_temperature_K) ** (
+                self.temperature_power)
+            * np.exp(self.activation_temperature_K / temperature)
+        )
+        if not np.isfinite(value) or value <= 0.0:
+            raise FloatingPointError(
+                "nonpositive gas-temperature rate coefficient")
+        return float(value)
+
+
 _RATE_COEFFICIENT_TYPES = (
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
@@ -917,6 +1155,8 @@ _RATE_COEFFICIENT_TYPES = (
     ElectronBase10LogPolynomialRateCoefficient,
     ElectronMaxwellianCrossSectionRateCoefficient,
     ElectronTemperatureTabulatedRateCoefficient,
+    ElectronCompositeRateCoefficient,
+    GasTemperatureArrheniusRateCoefficient,
 )
 
 
@@ -940,6 +1180,8 @@ class Reaction:
         | ElectronBase10LogPolynomialRateCoefficient
         | ElectronMaxwellianCrossSectionRateCoefficient
         | ElectronTemperatureTabulatedRateCoefficient
+        | ElectronCompositeRateCoefficient
+        | GasTemperatureArrheniusRateCoefficient
     )
     electron_energy_loss_eV: float | None
     source: str
