@@ -1,0 +1,59 @@
+{
+  "condition": {
+    "gas_temperature_K": 300.0,
+    "maximum_energy_eV": 200.0,
+    "reduced_electric_field_Td": 5.0
+  },
+  "finest_grid_pass": true,
+  "manufactured_deck_sha256": "eef79f59f7499812da62cbbed28a13d89a65faee5b64e9bd6601b61994127246",
+  "numpy_version": "1.24.4",
+  "oracle": {
+    "license": "LGPL; local audit dependency only",
+    "name": "BOLOS",
+    "version": "0.2"
+  },
+  "rows": [
+    {
+      "cell_count": 600,
+      "eepf_weighted_l1": 0.019015554736834053,
+      "excitation_rate_relative_error": 0.05920304135029105,
+      "mean_energy_relative_error": 0.033052646944599244,
+      "oracle_excitation_rate_m3_s": 1.5267050316488834e-16,
+      "oracle_mean_energy_eV": 1.131948761420332,
+      "oracle_minimum_raw_eepf": 2.0399239345829335e-118,
+      "oracle_roundoff_negative_population_fraction": 0.0,
+      "petch_excitation_rate_m3_s": 1.4363194505304771e-16,
+      "petch_mean_energy_eV": 1.0945348586497294
+    },
+    {
+      "cell_count": 1200,
+      "eepf_weighted_l1": 0.004862525206498152,
+      "excitation_rate_relative_error": 0.019102217305577044,
+      "mean_energy_relative_error": 0.012164106588999702,
+      "oracle_excitation_rate_m3_s": 1.4588416223836655e-16,
+      "oracle_mean_energy_eV": 1.1118321649192795,
+      "oracle_minimum_raw_eepf": -7.595892800878648e-17,
+      "oracle_roundoff_negative_population_fraction": 7.596646343931776e-16,
+      "petch_excitation_rate_m3_s": 1.430974512698472e-16,
+      "petch_mean_energy_eV": 1.098307719956123
+    },
+    {
+      "cell_count": 2400,
+      "eepf_weighted_l1": 0.0012212955165422166,
+      "excitation_rate_relative_error": 0.006339116639032418,
+      "mean_energy_relative_error": 0.004576499498050364,
+      "oracle_excitation_rate_m3_s": 1.4385914451671964e-16,
+      "oracle_mean_energy_eV": 1.10430766818818,
+      "oracle_minimum_raw_eepf": -1.1155096979501953e-16,
+      "oracle_roundoff_negative_population_fraction": 4.265531763647015e-16,
+      "petch_excitation_rate_m3_s": 1.4294720462003673e-16,
+      "petch_mean_energy_eV": 1.0992538046990237
+    }
+  ],
+  "schema": "petch.two_term_bolos_oracle.v1",
+  "scipy_version": "1.15.2",
+  "supports_direct_swarm_grade": false,
+  "supports_feature_depth": false,
+  "supports_reactor_state_prediction": false,
+  "supports_wafer_flux": false
+}

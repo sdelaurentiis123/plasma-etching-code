@@ -51,6 +51,26 @@ Kawaguchi source-reproduction mode may use the paper's explicit isotropic-
 scattering assumption; that mode must remain separate from a later provider
 backed by angular differential data.
 
+`electron_kinetics.py` now lands the deterministic fixed-grid foundation and
+the first physical two-term solve. It carries exact finite-volume EEPF
+normalization/mean-energy weights, exact piecewise-linear cross-section rate
+and incident-energy moments, support/tail refusal, analytic moment and
+normalization JVP/VJP contracts, conservative Scharfetter--Gummel energy
+fluxes, excitation scattering-out/in, equal-sharing ionization, attachment,
+elastic gas exchange, field heating, and temporal-growth normalization. The
+zero-field elastic limit recovers the gas Maxwellian and every returned state
+keeps reactor/wafer/depth evidence false.
+
+The independent manufactured-deck receipt at
+`results/curated/reactor_global_kinetics/two_term_bolos_oracle_v1.json`
+converges monotonically toward local LGPL BOLOS 0.2. At 2400 cells the mean
+energy residual is `0.458%`, excitation-rate residual `0.634%`, and weighted
+EEPF L1 residual `0.122%`. This passes the numerical two-term operator gate;
+it does not pass a physical collision set or any measurement-defined swarm
+observable. The current piecewise-constant inelastic reconstruction remains
+first order; a piecewise-exponential upgrade is the performance/accuracy path
+before large physical decks are graded.
+
 ### Required solver physics
 
 A simple local-field EEDF and scalar mobility are insufficient for the direct
