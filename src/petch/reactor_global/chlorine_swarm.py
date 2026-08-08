@@ -23,6 +23,17 @@ _UNITS = {
     "effective_ionization_coefficient": "m^2",
     "density_normalized_longitudinal_diffusion": "m^-1 s^-1",
 }
+_TRANSPORT_DEFINITIONS = {
+    "electron_drift_velocity": (
+        "pulsed_townsend_mean_arrival_time_drift_velocity"
+    ),
+    "effective_ionization_coefficient": (
+        "steady_state_townsend_effective_ionization_coefficient"
+    ),
+    "density_normalized_longitudinal_diffusion": (
+        "pulsed_townsend_spatiotemporal_longitudinal_diffusion"
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -84,6 +95,17 @@ class ChlorineSwarmMeasurement:
     @property
     def supports_cross_section_validation(self) -> bool:
         return True
+
+    @property
+    def transport_definition(self) -> str:
+        """Return the measurement-equivalent coefficient definition.
+
+        In attaching gases, flux drift is not interchangeable with
+        pulsed-Townsend mean-arrival-time drift, and scalar diffusion is not
+        interchangeable with spatiotemporal longitudinal diffusion.
+        """
+
+        return _TRANSPORT_DEFINITIONS[self.observable]
 
     @property
     def supports_reactor_state_prediction(self) -> bool:
