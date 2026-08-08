@@ -72,6 +72,12 @@ from .chlorine_eedf_model import (
     PositiveIonWallEnergyProvider,
     PositiveIonWallEnergyState,
 )
+from .chlorine_siglo_replay import (
+    LEGACY_SIGLO_CL2_2013_SHA256,
+    LegacySigloChlorineReplay,
+    derive_legacy_siglo_cl2_replay,
+    load_legacy_siglo_cl2_replay,
+)
 from .chlorine_charged_transport import (
     LYMBEROPOULOS_1995_REDUCED_CL2PLUS_MOBILITY_M_INV_V_INV_S_INV,
     LYMBEROPOULOS_1995_REDUCED_CLMINUS_MOBILITY_M_INV_V_INV_S_INV,
@@ -315,6 +321,8 @@ __all__ = [
     "ElectronCollisionChemistryState",
     "ElectronCollisionHeavyMapping",
     "LeeLiebermanArgonGlobalModel",
+    "LEGACY_SIGLO_CL2_2013_SHA256",
+    "LegacySigloChlorineReplay",
     "LeeEconomouChlorineChargedTransportProvider",
     "LeeLiebermanArgonTransportProvider",
     "MatchedRFPowerBoundary",
@@ -368,10 +376,12 @@ __all__ = [
     "hamilton_2018_cl2_state_dissociation_rates",
     "hamilton_2018_cl2_state_dissociation_reactions",
     "grade_gonzalez_magana_pure_cl2_swarm",
+    "derive_legacy_siglo_cl2_replay",
     "lee_lieberman_argon_species",
     "lee_lieberman_chlorine_species",
     "kemaneci_2014_chlorine_species",
     "load_bolsig_lxcat_file",
+    "load_legacy_siglo_cl2_replay",
     "lymberopoulos_economou_1995_chlorine_diffusivity",
     "lymberopoulos_economou_1995_chlorine_reduced_ion_mobilities",
     "malyshev_1998_lam_geometry",
