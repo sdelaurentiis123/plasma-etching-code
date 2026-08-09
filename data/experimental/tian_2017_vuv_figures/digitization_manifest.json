@@ -1,0 +1,97 @@
+{
+  "manifest_id": "TIAN-2017-VUV-FIG5.10-FIG5.12-R1",
+  "source": {
+    "citation": "P. Tian, Controlling Photon and Ion Fluxes in Low Pressure Low Temperature Plasmas, PhD dissertation, University of Michigan (2017; published 2018)",
+    "official_url": "https://cpseg.eecs.umich.edu/pub/theses/tian_peng_phd_thesis.pdf",
+    "pdf_sha256": "4d260ab9e85240bd051ccb3ba32cd047b4ac1ddb6c309dbbca4093822e37790b",
+    "pdf_pages": [
+      171,
+      173
+    ],
+    "print_pages": [
+      153,
+      155
+    ],
+    "figures": [
+      "5.10(a,c)",
+      "5.12(c)"
+    ],
+    "render_dpi": 300,
+    "render_size_px": [
+      2550,
+      3300
+    ],
+    "render_sha256_by_pdf_page": {
+      "171": "c0fc7cc6f06aef081ce46f81116bf06963d8886d20754cbad85dbb0aba0da63c",
+      "173": "21f084f3cd7c309db86dc656be68c2ff991481aac56f990b80847c15a7f3c863"
+    }
+  },
+  "experiment_context": {
+    "evidence_type": "source_equipment_model_digitized",
+    "not_measurement": true,
+    "reactor": "HPEM Ar/Cl2 ICP, 22.5 cm diameter, 12 cm height",
+    "pressure_mTorr": 20.0,
+    "flow_sccm": 200.0,
+    "frequency_MHz": 10.0,
+    "continuous_wave_power_W": 150.0,
+    "mixture_sweep": "Ar/Cl2 = 95/5 through 5/95"
+  },
+  "pixel_calibration": {
+    "figure_5_10_a": {
+      "x_at_0_percent": 1000.0,
+      "x_at_100_percent": 1730.0,
+      "y_at_1e16_cm-2_s-1": 250.0,
+      "y_at_1e12_cm-2_s-1": 916.0,
+      "y_scale": "log10"
+    },
+    "figure_5_10_c": {
+      "x_at_0_percent": 1000.0,
+      "x_at_100_percent": 1631.0,
+      "left_y_top_beta": 0.5,
+      "right_y_top_fraction": 1.0,
+      "y_top_px": 1793.0,
+      "y_bottom_px": 2458.0
+    },
+    "figure_5_12_c": {
+      "x_at_0_percent": 981.0,
+      "x_at_100_percent": 1711.0,
+      "y_at_0": 2480.0,
+      "y_at_100": 2359.0,
+      "cl_139_printed_multiplier": 10.0
+    }
+  },
+  "digitization": {
+    "marker_count": 97,
+    "method": "300-dpi Poppler full-page render; full-resolution visual inspection; PIL/NumPy dark-axis and color/marker-component isolation; printed-axis replay; optional QA overlay",
+    "vertical_pixel_uncertainty": 4.0,
+    "measurement_uncertainty": "not applicable: these curves are source equipment-model outputs; the pixel allowance is digitization uncertainty"
+  },
+  "source_internal_checks": {
+    "total_photon_flux_decreases_across_mixture_sweep": true,
+    "beta_decreases_across_mixture_sweep": true,
+    "ar_106_7_trapping_factor_endpoint_ratio": 43.06666675701333,
+    "ar_104_8_trapping_factor_endpoint_ratio": 4.530081301395254,
+    "cl_139_trapping_factor_min_max": [
+      4.04958678,
+      11.0330579
+    ]
+  },
+  "claim_boundary": {
+    "valid": [
+      "regression target for wavelength-resolved reactor output",
+      "regression target for deterministic line escape/trapping",
+      "mixture-trend comparison for VUV/ion ratio"
+    ],
+    "not_valid": [
+      "experimental validation",
+      "Lam chamber calibration",
+      "surface photo-etch yield",
+      "feature-depth calibration or validation",
+      "atomic branching data independent of the HPEM mechanism"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/tian_2017_vuv_figures/digitized_figures_5_10_5_12.csv",
+    "sha256": "5fc63f0183239818dd9ada8fcfad3c29ab7782e3beeecfe347f0e66e856f6393"
+  }
+}

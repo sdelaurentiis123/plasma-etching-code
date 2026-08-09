@@ -8,6 +8,7 @@ from petch.reactor_global.chlorine import (
 from petch.reactor_global.chlorine_eedf_model import (
     EEDFChlorineAbsorbedPowerModel,
     EEDFChlorineCondition,
+    EEDFChlorineFixedFeedback,
     FixedPositiveIonWallEnergyProvider,
     PositiveIonWallEnergyState,
 )
@@ -248,6 +249,43 @@ def test_absorbed_power_eepf_model_closes_knobs_to_species_fluxes():
     assert not solution.supports_reactor_state_prediction
     assert not solution.supports_wafer_flux
     assert not solution.supports_feature_depth
+
+    extra_neutral = 0.08 * condition.target_neutral_density_m3
+    feedback = EEDFChlorineFixedFeedback(
+        chlorine_species_source_m3_s={"Cl2": 0.0, "Cl": 0.0},
+        extra_neutral_density_m3=extra_neutral,
+        extra_positive_charge_density_m3=1.0e15,
+        extra_collisional_power_density_W_m3=5.0,
+        extra_charged_wall_power_density_W_m3=0.0,
+        source="manufactured conserved product block",
+    )
+    coupled = model.solve(
+        condition,
+        charged_transport_provider=charged,
+        neutral_wall_transport_provider=neutral,
+        wall_energy_provider=wall_energy,
+        initial_densities_m3=solution.densities_m3,
+        initial_exhaust_loss_frequency_s_inv=(
+            solution.exhaust_loss_frequency_s_inv),
+        initial_reduced_electric_field_Td=solution.reduced_electric_field_Td,
+        maximum_tail_population_fraction=1.0e-5,
+        residual_tolerance=2.0e-7,
+        maximum_evaluations=800,
+        fixed_feedback=feedback,
+    )
+    assert (
+        coupled.densities_m3["Cl2"]
+        + coupled.densities_m3["Cl"]
+        + extra_neutral
+    ) == pytest.approx(condition.target_neutral_density_m3, rel=2.0e-7)
+    assert (
+        coupled.densities_m3["Cl2+"]
+        + coupled.densities_m3["Cl+"]
+        + feedback.extra_positive_charge_density_m3
+    ) == pytest.approx(
+        coupled.densities_m3["Cl-"] + coupled.densities_m3["e"],
+        rel=2.0e-7,
+    )
 
 
 def test_eq11_condition_constrains_chlorine_nuclei_not_particle_count():

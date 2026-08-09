@@ -184,8 +184,31 @@ from .chlorine_poly_si import (
     HwangGiapisClSiStepResult, HwangGiapisClSiYield,
 )
 from .chang_sawin_chlorine_si import (
+    BaloochCl2IonSiMechanism, BaloochCl2IonSiParameters,
+    BaloochCl2IonSiStepResult,
     ChangSawinArClSiMechanism, ChangSawinArClSiParameters,
     ChangSawinArClSiState, ChangSawinArClSiStepResult,
+    ChangSawinClIonSiMechanism, ChangSawinClIonSiParameters,
+    ChangSawinClIonSiStepResult,
+    ChangSawinClIonSiCl2SuppressionMechanism,
+    ChangSawinSiCl2SuppressionParameters,
+    ChangSawinSiCl2SuppressionStepResult,
+)
+from .chang_sawin_chlorine_sio2 import (
+    ChangSawinArClSiO2Mechanism,
+    ChangSawinArClSiO2Parameters,
+    ChangSawinArClSiO2State,
+    ChangSawinArClSiO2StepResult,
+    chang_sawin_sio2_angular_factor,
+)
+from .chlorine_species_resolved_si import (
+    SpeciesResolvedChlorineSiMechanism,
+    SpeciesResolvedChlorineSiStepResult,
+)
+from .product_ion_chlorine_si import (
+    LeeChangProductIonSiSurfaceSensitivity,
+    ProductIonSiSurfaceLimit,
+    PRODUCT_ION_MASS_AMU,
 )
 from .hwang_giapis_scatter_3d import (
     HwangGiapisForwardScatter3DResult, HwangGiapisSiO2ForwardScatter3D,
@@ -246,6 +269,13 @@ __all__ = [
     "PhysicalSputterStepResult",
     "ChangSawinArClSiMechanism", "ChangSawinArClSiParameters",
     "ChangSawinArClSiState", "ChangSawinArClSiStepResult",
+    "ChangSawinClIonSiMechanism", "ChangSawinClIonSiParameters",
+    "ChangSawinClIonSiStepResult",
+    "ChangSawinClIonSiCl2SuppressionMechanism",
+    "ChangSawinSiCl2SuppressionParameters",
+    "ChangSawinSiCl2SuppressionStepResult",
+    "SpeciesResolvedChlorineSiMechanism",
+    "SpeciesResolvedChlorineSiStepResult",
     "BelenSiliconParameters", "BelenSiliconSF6O2Mechanism", "BelenSiliconState",
     "BelenSiliconStepResult",
     "MaterialMechanismRouter3D", "MaterialSurfaceState3D",
@@ -375,3 +405,7 @@ __all__ = [
 ]
 
 __version__ = "0.3.0"
+from .chlorine_photoassisted_si import (
+    Du2022ShortwavePhotoEtchYield,
+    Hirsch2020PulsedDCAntiSynergySensitivity,
+)

@@ -1,0 +1,26 @@
+Alkhayat et al. (2019), arXiv:1910.05803
+Verified extraction from Tables 1 and 2; PDF SHA-256
+8af6e61bb4bcda6e4f7b40075826f7bd3ad6c7e34f6ff6a3fa8eaed3a235d25e.
+
+Measured upper-level lifetimes (ns):
+  wavelength A    J_upper    lifetime ns
+  1004.68         1/2        1.04 +/- 0.08
+  1079.88         1/2        5.83 +/- 0.36
+  1090.73         3/2        8.98 +/- 0.72
+  1094.77         5/2        6.28 +/- 0.18
+
+Measured/inferred absorption oscillator strengths f (not x10^-2):
+  wavelength A    J_lower    J_upper    f
+  1004.68         3/2        1/2        0.0473 +/- 0.0036
+  1079.88         3/2        1/2        0.0047 +/- 0.0003
+  1090.73         3/2        3/2        0.0095 +/- 0.0008
+  1094.77         3/2        5/2        0.0385 +/- 0.0011
+
+The paper says its measured lifetimes agree with Singh et al. (2006) and
+Oliver & Hibbert (2013) within 15% when the printed 2-sigma uncertainty is
+considered. It attributes larger discrepancies in older calculations to
+configuration mixing. It also identifies the 1094.77 A state as particularly
+mixed and notes that Oliver & Hibbert changed its designation.
+
+Boundary: these are radiative lifetimes/oscillator strengths, not
+electron-impact excitation rates or silicon photoetch yields.

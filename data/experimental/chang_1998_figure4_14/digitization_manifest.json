@@ -1,0 +1,167 @@
+{
+  "experiment": {
+    "atomic_cl_to_ar_ion_flux_ratio": 90.0,
+    "ion_energy_eV": 100.0,
+    "projectile": "Ar+",
+    "target": "SiO2",
+    "yield_unit": "removed SiO2 formula unit per incident Ar+"
+  },
+  "extraction": {
+    "feature_depth_used": false,
+    "markers": [
+      {
+        "angle_deg": 0.0,
+        "axis_clipped_zero_marker": false,
+        "center_x_px": 1538.0,
+        "center_y_px": 3563.5,
+        "dense_pixel_count": 494,
+        "dense_x_span_px": [
+          1529,
+          1547
+        ],
+        "dense_y_span_px": [
+          3551,
+          3576
+        ],
+        "pixel_recovered_angle_deg": -0.10440835266821345,
+        "yield_sio2_formula_per_ar_ion": 0.07355117139334155
+      },
+      {
+        "angle_deg": 15.0,
+        "axis_clipped_zero_marker": false,
+        "center_x_px": 1821.0,
+        "center_y_px": 3562.0,
+        "dense_pixel_count": 658,
+        "dense_x_span_px": [
+          1808,
+          1834
+        ],
+        "dense_y_span_px": [
+          3550,
+          3574
+        ],
+        "pixel_recovered_angle_deg": 14.66937354988399,
+        "yield_sio2_formula_per_ar_ion": 0.07373612823674476
+      },
+      {
+        "angle_deg": 30.0,
+        "axis_clipped_zero_marker": false,
+        "center_x_px": 2108.0,
+        "center_y_px": 3545.0,
+        "dense_pixel_count": 698,
+        "dense_x_span_px": [
+          2096,
+          2121
+        ],
+        "dense_y_span_px": [
+          3530,
+          3558
+        ],
+        "pixel_recovered_angle_deg": 29.651972157772622,
+        "yield_sio2_formula_per_ar_ion": 0.07583230579531443
+      },
+      {
+        "angle_deg": 45.0,
+        "axis_clipped_zero_marker": false,
+        "center_x_px": 2394.0,
+        "center_y_px": 3424.0,
+        "dense_pixel_count": 703,
+        "dense_x_span_px": [
+          2381,
+          2408
+        ],
+        "dense_y_span_px": [
+          3412,
+          3439
+        ],
+        "pixel_recovered_angle_deg": 44.582366589327144,
+        "yield_sio2_formula_per_ar_ion": 0.0907521578298397
+      },
+      {
+        "angle_deg": 60.0,
+        "axis_clipped_zero_marker": false,
+        "center_x_px": 2681.0,
+        "center_y_px": 3014.0,
+        "dense_pixel_count": 717,
+        "dense_x_span_px": [
+          2668,
+          2696
+        ],
+        "dense_y_span_px": [
+          3002,
+          3028
+        ],
+        "pixel_recovered_angle_deg": 59.56496519721578,
+        "yield_sio2_formula_per_ar_ion": 0.14130702836004932
+      },
+      {
+        "angle_deg": 75.0,
+        "axis_clipped_zero_marker": false,
+        "center_x_px": 2969.0,
+        "center_y_px": 3175.0,
+        "dense_pixel_count": 714,
+        "dense_x_span_px": [
+          2956,
+          2982
+        ],
+        "dense_y_span_px": [
+          3162,
+          3188
+        ],
+        "pixel_recovered_angle_deg": 74.59976798143852,
+        "yield_sio2_formula_per_ar_ion": 0.12145499383477189
+      },
+      {
+        "angle_deg": 90.0,
+        "axis_clipped_zero_marker": true,
+        "center_x_px": 3260.0,
+        "center_y_px": 4154.0,
+        "dense_pixel_count": 970,
+        "dense_x_span_px": [
+          3244,
+          3279
+        ],
+        "dense_y_span_px": [
+          4137,
+          4169
+        ],
+        "pixel_recovered_angle_deg": 89.79118329466357,
+        "yield_sio2_formula_per_ar_ion": 0.0
+      }
+    ],
+    "method": "original-resolution visual seeds followed by PIL/NumPy dense-square-core localization; guide curves ignored",
+    "ninety_degree_handling": "filled square is clipped by the zero axis; the plotted zero and axis intersection are authoritative",
+    "reactor_state_used": false
+  },
+  "output": {
+    "csv_path": "data/experimental/chang_1998_figure4_14/sio2_angular_yield_100eV_r90.csv",
+    "csv_sha256": "8e8876ee8559edb8fca77ef756a8ebfe6013fc65a7a704ecefe3f7be37d60ec8"
+  },
+  "pixel_calibration": {
+    "angle_ninety_x_px": 3264.0,
+    "angle_zero_x_px": 1540.0,
+    "dark_threshold": 90,
+    "dense_window_minimum_dark_pixels": 115,
+    "dense_window_px": 11,
+    "yield_point_two_y_px": 2538.0,
+    "yield_zero_y_px": 4160.0
+  },
+  "schema": "petch.chang-1998-figure4.14-sio2-angular-yield.v1",
+  "scope": {
+    "invalid_use": "Cl+ or Cl2+ projectile identity, energy scaling, fluorocarbon oxide etching, or target-reactor calibration",
+    "valid_use": "incidence-angle interpolation for 100 eV Ar+/Cl etching of SiO2 at atomic-Cl/Ar+=90"
+  },
+  "source": {
+    "citation": "J. P. Chang, Study of plasma-surface kinetics and simulation of feature profile evolution in chlorine etching of patterned polysilicon, MIT PhD thesis (1998), Figure 4.14",
+    "pdf_page": 99,
+    "pdf_path": "research_sources/chang_thesis.pdf",
+    "pdf_sha256": "ef5c511a7fd8e6d6a0bf721874e57ba18194184bf3db90457188ed42c4bd3b4b",
+    "print_page": 99,
+    "render_dpi": 600,
+    "render_sha256": "766bcd772ffbc8fcd9dc9b37be3fbe5bbc8f9182ebcad2c13b4415761bed78bc",
+    "render_size_px": [
+      5100,
+      6600
+    ]
+  }
+}

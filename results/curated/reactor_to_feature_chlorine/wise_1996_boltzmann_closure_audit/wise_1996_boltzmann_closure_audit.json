@@ -1,0 +1,132 @@
+{
+  "schema": "petch.wise_1996_boltzmann_closure_audit.v1",
+  "claim_class": "direct_bulk_closure_check_not_reactor_or_depth_prediction",
+  "source": {
+    "wise_figure3_csv": "data/experimental/wise_1996_gec_icp/figure3_radial_measurements.csv",
+    "wise_figure3_csv_sha256": "d01825ebb7417b97c7d33b2232b2c116c970cb1e5ab307c3292160e6b5e9c468",
+    "wise_pdf_sha256": "25bfedd2ebf45bcb62b237ea0a5e27d1e495850673d73f3ded4c8b8321999e65",
+    "miller_geometry_json": "data/experimental/wise_1996_gec_icp/gec_icp_geometry.json",
+    "miller_pdf_sha256": "e67774edeefae2fb3c50c8343479519a88d6020f3022961b0ded6708cad5ceb9"
+  },
+  "condition": {
+    "reactor": "GEC reference-cell chlorine ICP",
+    "plasma_power_W": 180.0,
+    "pressure_mTorr": 20.0,
+    "flow_sccm": 20.0,
+    "frequency_MHz": 13.56,
+    "wafer_present": false,
+    "substrate_bias": false,
+    "diagnostic": "radially translated Langmuir probe",
+    "marker_source_reference": 15
+  },
+  "radial_distance_m": [
+    0.0,
+    0.0127,
+    0.0254,
+    0.0381,
+    0.0508,
+    0.0635,
+    0.0762
+  ],
+  "measured": {
+    "electron_density_m3": [
+      1.4097561e+17,
+      1.27560976e+17,
+      9.12195122e+16,
+      6.97560976e+16,
+      5.3902439e+16,
+      3.2195122e+16,
+      2e+16
+    ],
+    "electron_temperature_eV": [
+      3.82874618,
+      3.85321101,
+      3.88379205,
+      3.74311927,
+      3.45565749,
+      3.22324159,
+      2.97859327
+    ],
+    "plasma_potential_V": [
+      16.899696,
+      16.4741641,
+      15.5015198,
+      14.8328267,
+      13.3130699,
+      11.9148936,
+      10.5167173
+    ],
+    "axis_to_outer_potential_drop_V": -6.382978699999999
+  },
+  "pressure_gradient_with_measured_local_temperature": {
+    "reconstructed_potential_V": [
+      16.899696,
+      16.540092149345497,
+      15.273465323232257,
+      14.109779727108087,
+      12.894290843418034,
+      10.940853633852424,
+      9.219912243126679
+    ],
+    "residual_V": [
+      0.0,
+      0.0659280493454979,
+      -0.2280544767677437,
+      -0.7230469728919129,
+      -0.41877905658196646,
+      -0.9740399661475756,
+      -1.2968050568733211
+    ],
+    "unweighted_mape_percent_excluding_gauge": 5.066249972222311,
+    "maximum_absolute_residual_V_excluding_gauge": 1.2968050568733211,
+    "axis_to_outer_drop_V": -7.67978375687332
+  },
+  "boltzmann_constant_axis_temperature_sensitivity": {
+    "reconstructed_potential_V": [
+      16.899696,
+      16.516850467919244,
+      15.232973591167173,
+      14.205858879198432,
+      13.218696657990796,
+      11.245511051869038,
+      9.422711321564169
+    ],
+    "residual_V": [
+      0.0,
+      0.04268636791924507,
+      -0.2685462088328272,
+      -0.6269678208015677,
+      -0.09437324200920472,
+      -0.6693825481309617,
+      -1.0940059784358311
+    ],
+    "unweighted_mape_percent_excluding_gauge": 3.824640365101938,
+    "maximum_absolute_residual_V_excluding_gauge": 1.0940059784358311,
+    "axis_to_outer_drop_V": -7.47698467843583
+  },
+  "density_width": {
+    "digitized_full_width_half_maximum_m": 0.07533409080957697,
+    "independent_miller_typical_interval_m": [
+      0.07,
+      0.09
+    ],
+    "inside_independent_interval": true
+  },
+  "digitization_only_uncertainty": {
+    "vertical_pixels": 3.0,
+    "electron_density_m3": 1463414634146341.5,
+    "electron_temperature_eV": 0.03669724770642202,
+    "plasma_potential_V": 0.182370820668693,
+    "source_measurement_uncertainty": "not printed"
+  },
+  "certification": {
+    "potential_gauge_only_parameter": "measured axis potential",
+    "slope_or_temperature_fit_performed": false,
+    "feature_depth_used": false,
+    "formal_uncertainty_weighted_pass": false,
+    "supports_boltzmann_electron_pressure_closure": true,
+    "supports_spatial_reactor_state_prediction": false,
+    "supports_wafer_flux_or_feature_depth_prediction": false,
+    "reason": "All three fields are direct measurements and the source prints no marker uncertainties. The check tests the closure locally; it does not predict any field from machine knobs."
+  }
+}

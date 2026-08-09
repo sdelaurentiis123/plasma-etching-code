@@ -1,0 +1,141 @@
+{
+  "schema": "petch.tian-2017-zonal-partial-redistribution-audit.v1",
+  "claim_class": "source-model mechanism reproduction",
+  "formal_experimental_validation": false,
+  "formal_gate_pass": false,
+  "source_model_target_visible_during_model_selection": true,
+  "atomic_or_depth_parameter_fitted": false,
+  "spatial_field_input": "data/experimental/tian_2017_vuv_figures/base_case_spatial_moments.json",
+  "target_input": "data/experimental/tian_2017_vuv_figures/digitized_figures_5_10_5_12.csv",
+  "condition": {
+    "Ar_fraction": 0.8,
+    "Cl2_fraction": 0.2,
+    "pressure_mTorr": 20.0,
+    "flow_sccm": 200.0,
+    "frequency_MHz": 10.0,
+    "continuous_wave_power_W": 150.0,
+    "reactor_radius_cm": 11.25,
+    "plasma_height_cm": 12.0
+  },
+  "model": {
+    "spatial_method": "conservative projected-chord finite-volume zone-to-zone absorption propagator",
+    "frequency_method": "zero-padded FFT natural-Lorentz propagator plus matrix-free preconditioned GMRES renewal solve",
+    "boundary_method": "conservative lower-endcap/upper-endcap/sidewall terminal ledger including quenching and analytic far-wing escape",
+    "absorber_density": "local ideal-gas Ar density from printed pressure, mixture, and contour-bracketed zone temperature",
+    "emitter_density": "contour-bracketed Ar(1s4) field; reused for the unprinted Ar(1s2) spatial shape as an explicit sensitivity",
+    "velocity_changing_collisions_s_inv": 0.0,
+    "quenching_collisions_s_inv": 0.0,
+    "fitted_parameters": []
+  },
+  "summary": {
+    "base_case_line_count": 2,
+    "combined_mape_percent": 3.455504882548603,
+    "maximum_absolute_line_error_percent": 6.5314076264332295,
+    "line_order_reproduced": true,
+    "formal_gate_pass": false
+  },
+  "rows": [
+    {
+      "series": "Ar_104.8_nm_trapping_factor",
+      "observed_hpep_trapping_factor": 214.46281,
+      "predicted_zonal_partial_redistribution_trapping_factor": 215.27691541339885,
+      "predicted_zonal_complete_redistribution_trapping_factor": 438.28930809382894,
+      "signed_error_percent": 0.3796021386639778,
+      "initial_emission_zone_probability": [
+        0.5560099313567987,
+        0.3908280998977655,
+        0.05316196874543594
+      ],
+      "escape_boundary_labels": [
+        "lower_endcap_wafer_plane",
+        "upper_endcap",
+        "cylindrical_sidewall"
+      ],
+      "partial_redistribution_escape_boundary_probability": [
+        0.19247189635335532,
+        0.33548536190077055,
+        0.47204273863499724
+      ],
+      "complete_redistribution_escape_boundary_probability": [
+        0.19580614264934973,
+        0.3260342309179093,
+        0.4781596264337719
+      ],
+      "partial_redistribution_wafer_escape_probability": 0.19247189635335532,
+      "partial_redistribution_quench_probability": 0.0,
+      "terminal_probability_conservation_error_maximum": 3.110876889422798e-09,
+      "transition_probability_conservation_error_maximum": 1.0658141036401503e-14,
+      "zone_source_measure_relative_volume_error_maximum": 0.00253705611504762,
+      "linear_solver_iterations": 82,
+      "linear_solver_relative_residual": 4.608577611410733e-09,
+      "coherent_frequency_grid_points": 65536
+    },
+    {
+      "series": "Ar_106.7_nm_trapping_factor",
+      "observed_hpep_trapping_factor": 360.330579,
+      "predicted_zonal_partial_redistribution_trapping_factor": 336.795920082823,
+      "predicted_zonal_complete_redistribution_trapping_factor": 264.3370310670794,
+      "signed_error_percent": -6.5314076264332295,
+      "initial_emission_zone_probability": [
+        0.5560099313567987,
+        0.3908280998977655,
+        0.05316196874543594
+      ],
+      "escape_boundary_labels": [
+        "lower_endcap_wafer_plane",
+        "upper_endcap",
+        "cylindrical_sidewall"
+      ],
+      "partial_redistribution_escape_boundary_probability": [
+        0.19777734131142968,
+        0.35926279526480687,
+        0.44295941811688255
+      ],
+      "complete_redistribution_escape_boundary_probability": [
+        0.19848947762466124,
+        0.34890353823707615,
+        0.4526069841374809
+      ],
+      "partial_redistribution_wafer_escape_probability": 0.19777734131142968,
+      "partial_redistribution_quench_probability": 0.0,
+      "terminal_probability_conservation_error_maximum": 4.453068809251448e-07,
+      "transition_probability_conservation_error_maximum": 1.1102230246251565e-14,
+      "zone_source_measure_relative_volume_error_maximum": 0.00253705611504762,
+      "linear_solver_iterations": 115,
+      "linear_solver_relative_residual": 4.453074149776678e-09,
+      "coherent_frequency_grid_points": 262144
+    }
+  ],
+  "numerical_convergence": [
+    {
+      "series": "Ar_104.8_nm_trapping_factor",
+      "order_8_trapping_factor": 214.35821021031703,
+      "order_10_trapping_factor": 214.53364050015287,
+      "order_12_trapping_factor": 215.27691541339885,
+      "order_10_to_12_relative_change": 0.0034526456857608885,
+      "order_10_to_12_wafer_escape_relative_change": 0.0006471143048085326,
+      "frequency_coarse_grid_points": 65536,
+      "frequency_refined_grid_points": 131072,
+      "frequency_refinement_relative_change": 3.9522427034903655e-08,
+      "transition_probability_conservation_error_maximum": 1.0658141036401503e-14,
+      "terminal_probability_conservation_error_maximum": 1.80451054099251e-09,
+      "refined_linear_solver_relative_residual": 4.631467938729861e-09
+    },
+    {
+      "series": "Ar_106.7_nm_trapping_factor",
+      "order_8_trapping_factor": 332.11512245091063,
+      "order_10_trapping_factor": 333.70660534246457,
+      "order_12_trapping_factor": 336.795920082823,
+      "order_10_to_12_relative_change": 0.009172660819640306,
+      "order_10_to_12_wafer_escape_relative_change": 0.005231214742556572,
+      "frequency_coarse_grid_points": 262144,
+      "frequency_refined_grid_points": 524288,
+      "frequency_refinement_relative_change": 3.1823066281228836e-09,
+      "transition_probability_conservation_error_maximum": 1.1102230246251565e-14,
+      "terminal_probability_conservation_error_maximum": 4.7252525670060663e-07,
+      "refined_linear_solver_relative_residual": 4.866341827776444e-09
+    }
+  ],
+  "remaining_blocker": "Tian does not publish the Ar(1s2) emitter field or its numerical mesh. A raw source-state field export is required for a blind base-case grade and mixture-dependent spatial fields are required for the 22-point sweep.",
+  "verdict": "Coupled spatial and partial-frequency transport closes the base mechanism without fitting atomic or depth parameters. Because the source target was visible during model selection and one line's emitter field is unpublished, this is a high-accuracy mechanism reproduction, not experimental validation. The boundary ledger is numerically usable, but absolute wafer photon flux additionally requires a line-specific upper-state population field."
+}

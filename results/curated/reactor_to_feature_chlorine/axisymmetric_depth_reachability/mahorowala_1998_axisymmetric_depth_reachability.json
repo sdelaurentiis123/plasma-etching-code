@@ -1,0 +1,141 @@
+{
+  "schema": "petch.mahorowala_1998_axisymmetric_depth_reachability.v1",
+  "reactor_receipt": "results/curated/reactor_to_feature_chlorine/mahorowala_1998_diagnostic_conditioned_depth_projection.json",
+  "reactor_receipt_sha256": "0e89b2c979f5115b2cd1d74fd26474e9e2c2c4248654c054a327b1141e469d1a",
+  "spatial_receipt": "results/curated/reactor_to_feature_chlorine/axisymmetric_ion_transport_audit/mahorowala_1998_axisymmetric_ion_transport.json",
+  "spatial_receipt_sha256": "e4a32f36f218d016837d185dcb9f25e20f8c1cf08e327fd09a8df200c1e09275",
+  "base_global_edge_surface_plane_mape_percent": 21.720058157389573,
+  "source_mode_summary": {
+    "uniform": {
+      "usable_depth_count": 11,
+      "clean_surface_plane_mape_percent": 22.05002871107035,
+      "clean_surface_plane_signed_error_range_percent": [
+        -26.599312609775716,
+        46.99890960800004
+      ],
+      "overpredicted_condition_count": 6,
+      "underpredicted_condition_count": 5,
+      "formal_feature_depth_passes": 0,
+      "feature_depth_used_to_select_source_moment": false
+    },
+    "top_center_broad": {
+      "usable_depth_count": 11,
+      "clean_surface_plane_mape_percent": 22.17280876628681,
+      "clean_surface_plane_signed_error_range_percent": [
+        -26.33004776788942,
+        47.40477557539553
+      ],
+      "overpredicted_condition_count": 6,
+      "underpredicted_condition_count": 5,
+      "formal_feature_depth_passes": 0,
+      "feature_depth_used_to_select_source_moment": false
+    },
+    "top_center_compact": {
+      "usable_depth_count": 11,
+      "clean_surface_plane_mape_percent": 22.340870303163047,
+      "clean_surface_plane_signed_error_range_percent": [
+        -26.010848314411483,
+        47.86286683050811
+      ],
+      "overpredicted_condition_count": 6,
+      "underpredicted_condition_count": 5,
+      "formal_feature_depth_passes": 0,
+      "feature_depth_used_to_select_source_moment": false
+    },
+    "top_annular_wise_class": {
+      "usable_depth_count": 11,
+      "clean_surface_plane_mape_percent": 21.32218753755973,
+      "clean_surface_plane_signed_error_range_percent": [
+        -25.79146147617407,
+        48.6002006176399
+      ],
+      "overpredicted_condition_count": 6,
+      "underpredicted_condition_count": 5,
+      "formal_feature_depth_passes": 0,
+      "feature_depth_used_to_select_source_moment": false
+    },
+    "inductive_em_annular": {
+      "usable_depth_count": 11,
+      "clean_surface_plane_mape_percent": 21.67884944787671,
+      "clean_surface_plane_signed_error_range_percent": [
+        -25.81251622146492,
+        48.4903190984705
+      ],
+      "overpredicted_condition_count": 6,
+      "underpredicted_condition_count": 5,
+      "formal_feature_depth_passes": 0,
+      "feature_depth_used_to_select_source_moment": false
+    }
+  },
+  "source_modes_selected_from_depth": [],
+  "formal_feature_depth_passes": 0,
+  "conclusion": "The center-conditioned spatial tier can change sweep trends and ion composition, but no unmeasured source moment is an authorized absolute-depth calibration. Mixed-sign residuals prevent a single positive rate channel from closing the board globally.",
+  "next_measurement": "radially and species-resolved Cl+/Cl2+ current/flux at the wafer plane across at least two source-power/flow conditions",
+  "evolving_feature_board": {
+    "global_edge": {
+      "receipt": "results/curated/reactor_to_feature_chlorine/axisymmetric_depth_reachability/feature_global_edge_clean_dx40nm_no_reflection.json",
+      "receipt_sha256": "0e9d24ba5932fd40533866e9c8d585aded464b1dca518a25ca757517e406b11c",
+      "run_count": 11,
+      "mape_percent": 19.468531649218082,
+      "signed_error_range_percent": [
+        -26.747399618085687,
+        36.44053431184106
+      ],
+      "overpredicted_condition_count": 6,
+      "underpredicted_condition_count": 5,
+      "dx_um": 0.04,
+      "product_wall_limit": "none",
+      "chlorine_specular_reflection": false,
+      "formal_feature_depth_pass": false
+    },
+    "top_annular_wise_class": {
+      "receipt": "results/curated/reactor_to_feature_chlorine/axisymmetric_depth_reachability/feature_top_annular_wise_class_clean_dx40nm_no_reflection.json",
+      "receipt_sha256": "feb138c937a9323d776eedc40e18d9da26689bee01e0c2479865091df094250f",
+      "run_count": 11,
+      "mape_percent": 19.282271444541916,
+      "signed_error_range_percent": [
+        -28.371255145055528,
+        35.220842129570464
+      ],
+      "overpredicted_condition_count": 6,
+      "underpredicted_condition_count": 5,
+      "dx_um": 0.04,
+      "product_wall_limit": "none",
+      "chlorine_specular_reflection": false,
+      "formal_feature_depth_pass": false
+    },
+    "top_center_compact": {
+      "receipt": "results/curated/reactor_to_feature_chlorine/axisymmetric_depth_reachability/feature_top_center_compact_clean_dx40nm_no_reflection.json",
+      "receipt_sha256": "11c97b7806727a93b0c6f5287cbb05453afa7327742e65abb92aa5f320659972",
+      "run_count": 11,
+      "mape_percent": 20.152787021039416,
+      "signed_error_range_percent": [
+        -28.600324675993704,
+        34.78032031330469
+      ],
+      "overpredicted_condition_count": 6,
+      "underpredicted_condition_count": 5,
+      "dx_um": 0.04,
+      "product_wall_limit": "none",
+      "chlorine_specular_reflection": false,
+      "formal_feature_depth_pass": false
+    },
+    "inductive_em_annular": {
+      "receipt": "results/curated/reactor_to_feature_chlorine/axisymmetric_depth_reachability/feature_inductive_em_annular_clean_dx40nm_no_reflection.json",
+      "receipt_sha256": "25c401b5e829f9e2e7e29c6518b9cf5e534e314062eb6a4cb0cb41e073ffd58c",
+      "run_count": 11,
+      "mape_percent": 19.587178694107855,
+      "signed_error_range_percent": [
+        -28.390345961405504,
+        35.15073984669388
+      ],
+      "overpredicted_condition_count": 6,
+      "underpredicted_condition_count": 5,
+      "dx_um": 0.04,
+      "product_wall_limit": "none",
+      "chlorine_specular_reflection": false,
+      "formal_feature_depth_pass": false
+    },
+    "maximum_spatial_mape_change_from_global_edge_points": 0.6842553718213331
+  }
+}

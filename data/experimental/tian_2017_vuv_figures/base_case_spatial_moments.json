@@ -1,0 +1,134 @@
+{
+  "manifest_id": "TIAN-2017-FIG5.2-FIG5.3-SPATIAL-MOMENTS-R1",
+  "source": {
+    "citation": "P. Tian, Controlling Photon and Ion Fluxes in Low Pressure Low Temperature Plasmas, PhD dissertation, University of Michigan (2017; published 2018)",
+    "official_url": "https://cpseg.eecs.umich.edu/pub/theses/tian_peng_phd_thesis.pdf",
+    "pdf_sha256": "4d260ab9e85240bd051ccb3ba32cd047b4ac1ddb6c309dbbca4093822e37790b",
+    "pdf_pages": [
+      163,
+      164
+    ],
+    "print_pages": [
+      145,
+      146
+    ],
+    "figures": [
+      "5.2(b)",
+      "5.3(b), middle row"
+    ],
+    "render_dpi": 300,
+    "render_size_px": [
+      2550,
+      3300
+    ],
+    "render_sha256_by_pdf_page": {
+      "163": "2b20db4ab6176869c5fa866b54e30c9daad4bbe8cf4f5542e498fdf5fc225e12",
+      "164": "7513344258a23940fbc180e0ca7df2a83e57496e787374ecb8b4c78d11a24a2d"
+    }
+  },
+  "condition": {
+    "Ar_fraction": 0.8,
+    "Cl2_fraction": 0.2,
+    "pressure_mTorr": 20.0,
+    "flow_sccm": 200.0,
+    "frequency_MHz": 10.0,
+    "continuous_wave_power_W": 150.0,
+    "reactor_radius_cm": 11.25,
+    "plasma_height_cm": 12.0
+  },
+  "pixel_calibration_300dpi": {
+    "figure_5_2_b_gas_temperature": {
+      "plot_left_px": 1318,
+      "plot_right_px": 1705,
+      "plot_top_12cm_px": 563,
+      "plot_bottom_0cm_px": 1001
+    },
+    "figure_5_3_b_Ar_1s4_density": {
+      "plot_left_px": 1320,
+      "plot_right_px": 1711,
+      "plot_top_12cm_px": 1139,
+      "plot_bottom_0cm_px": 1555
+    },
+    "visual_QA": "full-resolution pages inspected; zone edges replayed as PIL overlays against both panels"
+  },
+  "axisymmetric_zone_field": {
+    "radial_edges_cm": [
+      0.0,
+      7.5,
+      10.0,
+      11.25
+    ],
+    "axial_edges_cm": [
+      0.0,
+      2.5,
+      6.0,
+      10.5,
+      12.0
+    ],
+    "cell_zone_index_radial_by_axial": [
+      [
+        2,
+        1,
+        0,
+        1
+      ],
+      [
+        2,
+        1,
+        1,
+        1
+      ],
+      [
+        2,
+        2,
+        2,
+        2
+      ]
+    ],
+    "zones": [
+      {
+        "zone_index": 0,
+        "name": "hot_emitting_core",
+        "gas_temperature_K": 800.0,
+        "Ar_1s4_emitter_density_cm3": 4700000000.0,
+        "visible_contour_support": "Tgas labels 795 and 830 K; Ar(1s4) maximum label 4.7e9 cm^-3"
+      },
+      {
+        "zone_index": 1,
+        "name": "warm_bulk",
+        "gas_temperature_K": 650.0,
+        "Ar_1s4_emitter_density_cm3": 1200000000.0,
+        "visible_contour_support": "Tgas bounded by printed 590 and 720 K contours; Ar(1s4) bounded by 0.8 and 1.6e9 cm^-3 labels"
+      },
+      {
+        "zone_index": 2,
+        "name": "cold_boundary_shell",
+        "gas_temperature_K": 400.0,
+        "Ar_1s4_emitter_density_cm3": 200000000.0,
+        "visible_contour_support": "outside printed 455 K contour; Ar(1s4) outer label 0.2e9 cm^-3"
+      }
+    ]
+  },
+  "digitization": {
+    "evidence_type": "source_equipment_model_digitized",
+    "not_measurement": true,
+    "method": "300-dpi checksum-pinned Poppler render; full-resolution visual inspection; printed contour anchors; three-zone axisymmetric moment compression; PIL boundary replay",
+    "model_reduction": true,
+    "fitted_to_trapping_factor": false,
+    "uncertainty": "zone averages and boundaries are bracketed by visible contours; no source mesh values or uncertainty were printed"
+  },
+  "claim_boundary": {
+    "valid": [
+      "base-case spatial-moment sensitivity",
+      "deterministic zonal radiation model-discovery input",
+      "cold-absorber/hot-emitter mechanism check"
+    ],
+    "not_valid": [
+      "experimental field validation",
+      "pixel-perfect reconstruction of the HPEM mesh",
+      "Ar(1s2) emitter field independent of Ar(1s4)",
+      "mixture-sweep spatial closure",
+      "feature-depth calibration"
+    ]
+  }
+}

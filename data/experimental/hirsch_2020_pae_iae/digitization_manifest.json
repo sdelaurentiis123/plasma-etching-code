@@ -1,0 +1,223 @@
+{
+  "evidence_class": {
+    "curve": "author-assumed smooth relative PAE-yield response constrained to unity at high Cl/ion ratio and nearly zero at low ratio",
+    "not": "a direct spectral photon-flux measurement or a universal RF suppression law"
+  },
+  "experiment": {
+    "bias": "-70 V pulsed DC at 10 kHz",
+    "chemistry": "10% Cl2 / 90% Ar",
+    "flow_case": "high flow, 250 sccm",
+    "ion_flux_cm2_s": 1.4e+17,
+    "pressure_mTorr": 60.0,
+    "surface": "silicon"
+  },
+  "extraction": {
+    "feature_depth_used": false,
+    "method": "original-resolution PIL/NumPy red-pixel isolation; uppermost vertical cluster rejects the nearby red annotation",
+    "points": [
+      {
+        "center_x_px": 302.0,
+        "center_y_px": 1363.0,
+        "dc_bias_duty_cycle_percent": 0.0,
+        "evidence": "textual limiting constraint",
+        "line_y_max_px": 1363.0,
+        "line_y_min_px": 1363.0,
+        "relative_pae_yield": 1.0
+      },
+      {
+        "center_x_px": 324.15,
+        "center_y_px": 1370.0,
+        "dc_bias_duty_cycle_percent": 5.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1371,
+        "line_y_min_px": 1369,
+        "relative_pae_yield": 0.981081081081081
+      },
+      {
+        "center_x_px": 346.3,
+        "center_y_px": 1375.5,
+        "dc_bias_duty_cycle_percent": 10.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1379,
+        "line_y_min_px": 1373,
+        "relative_pae_yield": 0.9662162162162162
+      },
+      {
+        "center_x_px": 368.45,
+        "center_y_px": 1396.0,
+        "dc_bias_duty_cycle_percent": 15.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1402,
+        "line_y_min_px": 1391,
+        "relative_pae_yield": 0.9108108108108108
+      },
+      {
+        "center_x_px": 390.6,
+        "center_y_px": 1425.5,
+        "dc_bias_duty_cycle_percent": 20.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1431,
+        "line_y_min_px": 1420,
+        "relative_pae_yield": 0.831081081081081
+      },
+      {
+        "center_x_px": 412.75,
+        "center_y_px": 1459.0,
+        "dc_bias_duty_cycle_percent": 25.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1465,
+        "line_y_min_px": 1450,
+        "relative_pae_yield": 0.7405405405405405
+      },
+      {
+        "center_x_px": 434.9,
+        "center_y_px": 1489.0,
+        "dc_bias_duty_cycle_percent": 30.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1495,
+        "line_y_min_px": 1483,
+        "relative_pae_yield": 0.6594594594594595
+      },
+      {
+        "center_x_px": 457.04999999999995,
+        "center_y_px": 1518.0,
+        "dc_bias_duty_cycle_percent": 35.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1524,
+        "line_y_min_px": 1512,
+        "relative_pae_yield": 0.581081081081081
+      },
+      {
+        "center_x_px": 479.2,
+        "center_y_px": 1545.0,
+        "dc_bias_duty_cycle_percent": 40.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1550,
+        "line_y_min_px": 1541,
+        "relative_pae_yield": 0.5081081081081081
+      },
+      {
+        "center_x_px": 501.35,
+        "center_y_px": 1573.0,
+        "dc_bias_duty_cycle_percent": 45.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1579,
+        "line_y_min_px": 1567,
+        "relative_pae_yield": 0.43243243243243246
+      },
+      {
+        "center_x_px": 523.5,
+        "center_y_px": 1604.5,
+        "dc_bias_duty_cycle_percent": 50.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1610,
+        "line_y_min_px": 1598,
+        "relative_pae_yield": 0.3472972972972973
+      },
+      {
+        "center_x_px": 545.65,
+        "center_y_px": 1635.0,
+        "dc_bias_duty_cycle_percent": 55.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1641,
+        "line_y_min_px": 1628,
+        "relative_pae_yield": 0.2648648648648649
+      },
+      {
+        "center_x_px": 567.8,
+        "center_y_px": 1662.0,
+        "dc_bias_duty_cycle_percent": 60.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1666,
+        "line_y_min_px": 1657,
+        "relative_pae_yield": 0.1918918918918919
+      },
+      {
+        "center_x_px": 589.95,
+        "center_y_px": 1682.0,
+        "dc_bias_duty_cycle_percent": 65.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1686,
+        "line_y_min_px": 1678,
+        "relative_pae_yield": 0.13783783783783785
+      },
+      {
+        "center_x_px": 612.0999999999999,
+        "center_y_px": 1697.0,
+        "dc_bias_duty_cycle_percent": 70.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1700,
+        "line_y_min_px": 1694,
+        "relative_pae_yield": 0.0972972972972973
+      },
+      {
+        "center_x_px": 634.25,
+        "center_y_px": 1710.0,
+        "dc_bias_duty_cycle_percent": 75.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1712,
+        "line_y_min_px": 1707,
+        "relative_pae_yield": 0.062162162162162166
+      },
+      {
+        "center_x_px": 656.4,
+        "center_y_px": 1719.0,
+        "dc_bias_duty_cycle_percent": 80.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1721,
+        "line_y_min_px": 1717,
+        "relative_pae_yield": 0.03783783783783784
+      },
+      {
+        "center_x_px": 678.55,
+        "center_y_px": 1725.0,
+        "dc_bias_duty_cycle_percent": 85.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1726,
+        "line_y_min_px": 1724,
+        "relative_pae_yield": 0.021621621621621623
+      },
+      {
+        "center_x_px": 700.7,
+        "center_y_px": 1726.0,
+        "dc_bias_duty_cycle_percent": 90.0,
+        "evidence": "PIL digitization of author-assumed red curve",
+        "line_y_max_px": 1727,
+        "line_y_min_px": 1725,
+        "relative_pae_yield": 0.01891891891891892
+      }
+    ],
+    "reactor_parameter_fit_used": false
+  },
+  "output": {
+    "csv_path": "data/experimental/hirsch_2020_pae_iae/figure8_relative_pae_yield.csv",
+    "csv_sha256": "057b9a77962a625d3eb6410ccc33758b0af7c8a6a208d85e951491ef4211c723"
+  },
+  "pixel_calibration": {
+    "duty_hundred_x_px": 745.0,
+    "duty_zero_x_px": 302.0,
+    "red_dominance": 1.5,
+    "red_minimum": 150,
+    "relative_yield_one_y_px": 1363.0,
+    "relative_yield_zero_y_px": 1733.0,
+    "x_half_window_px": 3
+  },
+  "schema": "petch.hirsch-2020-figure8-pae-anti-synergy.v1",
+  "scope": {
+    "invalid_use": "direct transfer to 13.56 MHz RF, pure Cl2, another reactor, or absolute depth without a spectral photon boundary",
+    "valid_use": "pulsed-DC high-flow sensitivity for the existence and scale of PAE/IAE anti-synergy"
+  },
+  "source": {
+    "citation": "E. W. Hirsch, W. H. Du, and D. J. Economou, Evidence for anti-synergism between ion-assisted etching and in-plasma photoassisted etching of silicon in a high-density chlorine plasma, JVST A 38, 023009 (2020), DOI 10.1116/1.5138189",
+    "journal_page": "023009-9",
+    "official_url": "https://www.chee.uh.edu/sites/chbe/files/faculty/economou/pae-iae-anti-synergism.pdf",
+    "pdf_page": 9,
+    "pdf_sha256": "36a5644eb3314e5baa0e999c3023e0f7ec547cf77527c055ac2386c649ef9b62",
+    "render_dpi": 220,
+    "render_sha256": "7ab90ee667b6715b73736644973a22c9799567e4398bcb1f554b804504a95020",
+    "render_size_px": [
+      1870,
+      2475
+    ]
+  }
+}

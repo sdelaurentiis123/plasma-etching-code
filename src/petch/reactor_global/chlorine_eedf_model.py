@@ -195,6 +195,62 @@ class EEDFChlorineCondition:
 
 
 @dataclass(frozen=True)
+class EEDFChlorineFixedFeedback:
+    """Frozen non-chlorine plasma terms for one block-coupled iteration.
+
+    The global chlorine solve remains responsible for its six base species,
+    EEPF, pressure, charge, and power equations.  A separately conserved
+    product block may contribute neutral pressure, positive charge, chlorine
+    sources, and electron/charged-wall power loss.  Freezing those terms for
+    one nonlinear solve and alternating with the product block gives a fully
+    deterministic block Gauss--Seidel fixed point without hiding the missing
+    product cross sections inside the chlorine collision deck.
+    """
+
+    chlorine_species_source_m3_s: Mapping[str, float]
+    extra_neutral_density_m3: float
+    extra_positive_charge_density_m3: float
+    extra_collisional_power_density_W_m3: float
+    extra_charged_wall_power_density_W_m3: float
+    source: str
+    supports_prediction: bool = False
+
+    def __post_init__(self):
+        sources = {
+            str(name): float(value)
+            for name, value in self.chlorine_species_source_m3_s.items()
+        }
+        scalars = (
+            self.extra_neutral_density_m3,
+            self.extra_positive_charge_density_m3,
+            self.extra_collisional_power_density_W_m3,
+            self.extra_charged_wall_power_density_W_m3,
+        )
+        if (
+            set(sources) != {"Cl2", "Cl"}
+            or any(not math.isfinite(value) for value in sources.values())
+            or any(not math.isfinite(float(value)) or value < 0.0
+                   for value in scalars)
+            or not str(self.source).strip()
+        ):
+            raise ValueError("invalid fixed chlorine-plasma feedback")
+        object.__setattr__(
+            self, "chlorine_species_source_m3_s", MappingProxyType(sources))
+
+    @classmethod
+    def zero(cls) -> "EEDFChlorineFixedFeedback":
+        return cls(
+            chlorine_species_source_m3_s={"Cl2": 0.0, "Cl": 0.0},
+            extra_neutral_density_m3=0.0,
+            extra_positive_charge_density_m3=0.0,
+            extra_collisional_power_density_W_m3=0.0,
+            extra_charged_wall_power_density_W_m3=0.0,
+            source="no non-chlorine plasma feedback",
+            supports_prediction=True,
+        )
+
+
+@dataclass(frozen=True)
 class PositiveIonWallEnergyState:
     """Positive-ion kinetic/electrostatic energy charged to electron power."""
 
@@ -388,6 +444,7 @@ class EEDFChlorineAbsorbedPowerModel:
         neutral_wall_transport_provider: ChlorineNeutralWallTransportProvider,
         wall_energy_provider: PositiveIonWallEnergyProvider,
         maximum_tail_population_fraction: float,
+        fixed_feedback: EEDFChlorineFixedFeedback,
         electron_cache: dict[tuple[float, ...], TwoTermBoltzmannSolution] | None = None,
         electron_continuation: dict[str, TwoTermBoltzmannSolution] | None = None,
     ) -> dict[str, object]:
@@ -552,20 +609,30 @@ class EEDFChlorineAbsorbedPowerModel:
             "Cl-": (),
         }
         balances = {
-            name: (sources[name] + sum(terms)) / max(
-                turnover[name] + sum(abs(value) for value in terms), 1.0)
+            name: (
+                sources[name]
+                + fixed_feedback.chlorine_species_source_m3_s.get(name, 0.0)
+                + sum(terms)
+            ) / max(
+                turnover[name]
+                + abs(fixed_feedback.chlorine_species_source_m3_s.get(
+                    name, 0.0))
+                + sum(abs(value) for value in terms), 1.0)
             for name, terms in external.items()
         }
         balances["quasineutrality"] = (
             densities["Cl2+"] + densities["Cl+"]
+            + fixed_feedback.extra_positive_charge_density_m3
             - densities["Cl-"] - densities["e"]
         ) / max(
-            densities["Cl2+"] + densities["Cl+"],
+            densities["Cl2+"] + densities["Cl+"]
+            + fixed_feedback.extra_positive_charge_density_m3,
             densities["Cl-"] + densities["e"],
             1.0,
         )
         balances["neutral_pressure"] = (
             condition.constrained_neutral_density_m3(densities)
+            + fixed_feedback.extra_neutral_density_m3
             - condition.target_neutral_density_m3
         ) / condition.target_neutral_density_m3
 
@@ -579,7 +646,12 @@ class EEDFChlorineAbsorbedPowerModel:
             * (electron_wall_energy + wall_energy.energy_eV_per_lost_ion[name])
             for name in _POSITIVE_IONS
         )
-        modeled_power = collisional_power + charged_wall_power
+        modeled_power = (
+            collisional_power
+            + charged_wall_power
+            + fixed_feedback.extra_collisional_power_density_W_m3
+            + fixed_feedback.extra_charged_wall_power_density_W_m3
+        )
         balances["electron_power"] = (
             condition.absorbed_power_density_W_m3 - modeled_power
         ) / max(
@@ -604,6 +676,7 @@ class EEDFChlorineAbsorbedPowerModel:
             "collisional_power": collisional_power,
             "charged_wall_power": charged_wall_power,
             "modeled_power": modeled_power,
+            "fixed_feedback": fixed_feedback,
         }
 
     def solve(
@@ -619,6 +692,7 @@ class EEDFChlorineAbsorbedPowerModel:
         residual_tolerance: float = 1.0e-7,
         maximum_evaluations: int = 1200,
         maximum_tail_population_fraction: float = 1.0e-6,
+        fixed_feedback: EEDFChlorineFixedFeedback | None = None,
     ) -> EEDFChlorineSolution:
         if not isinstance(condition, EEDFChlorineCondition):
             raise TypeError("an EEPF chlorine condition is required")
@@ -630,6 +704,10 @@ class EEDFChlorineAbsorbedPowerModel:
             raise TypeError(
                 "neutral transport provider must declare its density basis"
             )
+        if fixed_feedback is None:
+            fixed_feedback = EEDFChlorineFixedFeedback.zero()
+        if not isinstance(fixed_feedback, EEDFChlorineFixedFeedback):
+            raise TypeError("fixed_feedback must be EEDFChlorineFixedFeedback")
         target_density = condition.target_neutral_density_m3
         if initial_densities_m3 is None:
             seed = min(1.0e16, 1.0e-3 * target_density)
@@ -698,6 +776,7 @@ class EEDFChlorineAbsorbedPowerModel:
                 wall_energy_provider=wall_energy_provider,
                 maximum_tail_population_fraction=(
                     maximum_tail_population_fraction),
+                fixed_feedback=fixed_feedback,
                 electron_cache=electron_cache,
                 electron_continuation=electron_continuation,
             )["residual"]
@@ -718,6 +797,7 @@ class EEDFChlorineAbsorbedPowerModel:
             neutral_wall_transport_provider=neutral_wall_transport_provider,
             wall_energy_provider=wall_energy_provider,
             maximum_tail_population_fraction=maximum_tail_population_fraction,
+            fixed_feedback=fixed_feedback,
             electron_cache=electron_cache,
             electron_continuation=electron_continuation,
         )

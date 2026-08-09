@@ -1,0 +1,39 @@
+wise-1996-rapid-2d-cl — verified source extraction
+Official PDF SHA-256: 25bfedd2ebf45bcb62b237ea0a5e27d1e495850673d73f3ded4c8b8321999e65
+Pages: APL 68, 2499--2501 (1996)
+
+Architecture (pp. 2499--2500):
+- Electromagnetic power deposition feeds an electron-energy module.
+- Electron-impact rates feed separate neutral and charged transport modules.
+- Modules are iterated to a self-consistent solution by equation splitting.
+- The bulk and sheath are separated to avoid resolving the thin sheath inside
+  the bulk finite-element solve.
+
+Bulk charged closure (p. 2500):
+- Quasineutrality is imposed in the bulk.
+- Positive- and negative-ion particle balances are solved.
+- Electron density follows from electroneutrality.
+- Boltzmann electron equilibrium closes the electric field through the
+  electron-pressure gradient.
+
+Wall closure (p. 2500):
+- Positive-ion wall flux is local ion density times local Bohm velocity.
+- Negative-ion density is zero at the wall.
+- The sheath is a potential discontinuity outside the bulk model.
+
+Base case and spatial source (p. 2500):
+- 20 mTorr, 180 W plasma power, 20 sccm pure chlorine, 13.56 MHz.
+- No substrate bias, wafer, or etching.
+- The calculated power deposition is toroidal and decays over about 1 cm
+  beneath the coil.
+
+Validation boundary (pp. 2500--2501):
+- Compared line-integrated electron density, central negative-ion density,
+  and radial electron density, electron temperature, and plasma potential
+  with GEC-ICP measurements.
+- The authors report no adjusted reaction rates for the comparison.
+- Negative-ion measurement uncertainty is stated to be about a factor of two.
+- Predicted electron temperature is about 50 percent below the probe result.
+
+This extraction is intentionally claim-scoped. Consult the SHA-pinned primary
+PDF before importing a numerical curve or coefficient.

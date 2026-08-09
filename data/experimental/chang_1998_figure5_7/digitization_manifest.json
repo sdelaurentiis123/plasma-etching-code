@@ -1,0 +1,75 @@
+{
+  "fit_line_extraction": {
+    "corridor_half_width_px": 2.0,
+    "fit_pixel_count": 1326,
+    "fit_x_range_px": [
+      1920,
+      2765
+    ],
+    "fit_y_range_px": [
+      2550,
+      4240
+    ],
+    "method": "original-resolution visual identification; long-line Hough seed; PIL/NumPy dark-pixel ordinary-least-squares replay inside a two-pixel corridor",
+    "pixel_line_intercept": 8108.5195378914605,
+    "pixel_line_slope": -2.0129959367287817,
+    "seed_line_xyxy_px": [
+      1926.0,
+      4231.0,
+      2677.0,
+      2719.0
+    ],
+    "x_intercept_px": 1918.2947503444152
+  },
+  "output": {
+    "csv_path": "data/experimental/chang_1998_figure5_7/cl2plus_poly_si_yield_fit.csv",
+    "csv_sha256": "ba095626cdc54d8110a344c271efd7bf034686800c0e10aeae08b6967c95a232"
+  },
+  "pixel_calibration": {
+    "axis_dark_fraction": {
+      "x_axis_y0": 0.7895595432300163,
+      "x_axis_y4": 0.8611201740076129,
+      "y_axis_x0": 0.8372093023255814,
+      "y_axis_x40": 0.8660703637447823
+    },
+    "sqrt_energy_40_x_px": 3522.0,
+    "sqrt_energy_zero_x_px": 1684.0,
+    "yield_four_y_px": 2571.0,
+    "yield_zero_y_px": 4247.0
+  },
+  "reconciled_yield_law": {
+    "declared_threshold_digitization_bound_eV": 2.0,
+    "law": "Y_Si_per_Cl2plus=0.22*max(sqrt(E_eV)-sqrt(25.999_eV),0)",
+    "pixel_recovered_slope_si_per_ion_per_sqrt_eV": 0.22075695296584136,
+    "pixel_recovered_threshold_energy_eV": 25.998846756576185,
+    "pixel_recovered_threshold_sqrt_eV": 5.098906427517197,
+    "printed_slope_rounding_half_width": 0.005,
+    "printed_slope_si_per_ion_per_sqrt_eV": 0.22,
+    "valid_energy_domain_eV": [
+      26.0,
+      625.0
+    ]
+  },
+  "schema": "petch.chang-1998-figure5.7-cl2plus-yield.v1",
+  "scope": {
+    "feature_depth_used": false,
+    "invalid_use": "bare-Si sputtering, oxygenated/passivated surfaces, incidence-angle response, or extrapolation outside the plotted energy support",
+    "reactor_state_used": false,
+    "surface_state": "highly chlorinated poly-Si; source text attributes the elevated Cl2+ curve to approximately 1e-4 Torr chlorine background",
+    "valid_use": "species-resolved Cl2+ removal yield on a highly chlorinated poly-Si surface inside the plotted energy support"
+  },
+  "source": {
+    "citation": "J. P. Chang, Study of plasma-surface kinetics and simulation of feature profile evolution in chlorine etching of patterned polysilicon, MIT PhD thesis (1998), Figure 5.7",
+    "pdf_page": 113,
+    "pdf_path": "research_sources/chang_thesis.pdf",
+    "pdf_sha256": "ef5c511a7fd8e6d6a0bf721874e57ba18194184bf3db90457188ed42c4bd3b4b",
+    "print_page": 113,
+    "render_dpi": 600,
+    "render_sha256": "34c7bf8df4fcc77ec6f87fd682639b54e7a2538271da49b397cf9bb34ed9460a",
+    "render_size_px": [
+      5100,
+      6600
+    ],
+    "underlying_cl2plus_data": "Balooch et al. (1996), as plotted by Chang"
+  }
+}

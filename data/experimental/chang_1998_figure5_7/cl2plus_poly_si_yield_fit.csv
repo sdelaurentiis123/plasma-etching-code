@@ -1,0 +1,2 @@
+source_curve,yield_law,printed_slope_si_per_ion_per_sqrt_eV,digitized_slope_si_per_ion_per_sqrt_eV,threshold_sqrt_eV,threshold_energy_eV,minimum_valid_energy_eV,maximum_valid_energy_eV,source_surface_state,supports_chlorinated_poly_si_prediction
+Chang thesis Figure 5.7 Cl2+ (Balooch),"Y=0.22*max(sqrt(E_eV)-sqrt(Eth_eV),0)",0.22,0.22075695296584136,5.098906427517197,25.998846756576185,26.0,625.0,Balooch approximately 1e-4 Torr chlorine background; Chang interprets surface as highly chlorinated,True

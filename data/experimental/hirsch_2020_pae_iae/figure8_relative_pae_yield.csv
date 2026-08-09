@@ -1,0 +1,20 @@
+dc_bias_duty_cycle_percent,relative_pae_yield,center_x_px,center_y_px,line_y_min_px,line_y_max_px,evidence
+0.0,1.0,302.0,1363.0,1363.0,1363.0,textual limiting constraint
+5.0,0.981081081081081,324.15,1370.0,1369,1371,PIL digitization of author-assumed red curve
+10.0,0.9662162162162162,346.3,1375.5,1373,1379,PIL digitization of author-assumed red curve
+15.0,0.9108108108108108,368.45,1396.0,1391,1402,PIL digitization of author-assumed red curve
+20.0,0.831081081081081,390.6,1425.5,1420,1431,PIL digitization of author-assumed red curve
+25.0,0.7405405405405405,412.75,1459.0,1450,1465,PIL digitization of author-assumed red curve
+30.0,0.6594594594594595,434.9,1489.0,1483,1495,PIL digitization of author-assumed red curve
+35.0,0.581081081081081,457.04999999999995,1518.0,1512,1524,PIL digitization of author-assumed red curve
+40.0,0.5081081081081081,479.2,1545.0,1541,1550,PIL digitization of author-assumed red curve
+45.0,0.43243243243243246,501.35,1573.0,1567,1579,PIL digitization of author-assumed red curve
+50.0,0.3472972972972973,523.5,1604.5,1598,1610,PIL digitization of author-assumed red curve
+55.0,0.2648648648648649,545.65,1635.0,1628,1641,PIL digitization of author-assumed red curve
+60.0,0.1918918918918919,567.8,1662.0,1657,1666,PIL digitization of author-assumed red curve
+65.0,0.13783783783783785,589.95,1682.0,1678,1686,PIL digitization of author-assumed red curve
+70.0,0.0972972972972973,612.0999999999999,1697.0,1694,1700,PIL digitization of author-assumed red curve
+75.0,0.062162162162162166,634.25,1710.0,1707,1712,PIL digitization of author-assumed red curve
+80.0,0.03783783783783784,656.4,1719.0,1717,1721,PIL digitization of author-assumed red curve
+85.0,0.021621621621621623,678.55,1725.0,1724,1726,PIL digitization of author-assumed red curve
+90.0,0.01891891891891892,700.7,1726.0,1725,1727,PIL digitization of author-assumed red curve

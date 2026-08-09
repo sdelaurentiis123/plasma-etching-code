@@ -1,0 +1,41 @@
+{
+  "schema": "petch.wise_1996_gec_icp_geometry.v1",
+  "source": {
+    "citation": "P. A. Miller et al., An Inductively Coupled Plasma Source for the Gaseous Electronics Conference RF Reference Cell, J. Res. NIST 100, 427-439 (1995)",
+    "doi": "10.6028/jres.100.032",
+    "official_url": "https://nvlpubs.nist.gov/nistpubs/jres/100/4/j14mil.pdf",
+    "pdf_sha256": "e67774edeefae2fb3c50c8343479519a88d6020f3022961b0ded6708cad5ceb9",
+    "figure": "1",
+    "pdf_page": 2,
+    "print_page": 428,
+    "render_dpi": 300,
+    "audit_method": "full-resolution visual inspection of the official NIST PDF render"
+  },
+  "dimensions": {
+    "standard_cell_body_inner_diameter_m": 0.248,
+    "lower_electrode_extension_diameter_m": 0.1651,
+    "window_to_lower_electrode_gap_m": 0.0405,
+    "langmuir_probe_height_above_lower_electrode_m": 0.015,
+    "silica_window_thickness_m": 0.0095,
+    "upper_clear_span_m": 0.1143,
+    "window_recess_dimension_m": 0.0064,
+    "coil_turn_count": 5,
+    "coil_tube_outer_diameter_m": 0.003,
+    "coil_outer_diameter_approx_m": 0.10
+  },
+  "applicability": {
+    "wise_1996_base_condition": {
+      "gas": "Cl2",
+      "pressure_mTorr": 20.0,
+      "plasma_power_W": 180.0,
+      "flow_sccm": 20.0,
+      "frequency_MHz": 13.56,
+      "wafer_present": false,
+      "substrate_bias": false
+    },
+    "supports_exact_cylindrical_outer_domain": false,
+    "supports_generator_to_plasma_field_prediction": false,
+    "supports_wafer_flux_or_feature_depth_prediction": false,
+    "reason": "The central gap is dimensioned, but the outer body, source assembly, side ports, coil-side field, and wall state do not reduce to one exact cylindrical plasma boundary."
+  }
+}

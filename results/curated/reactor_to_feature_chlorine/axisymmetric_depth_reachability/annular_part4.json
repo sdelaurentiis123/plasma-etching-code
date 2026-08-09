@@ -1,0 +1,86 @@
+{
+  "schema": "petch.mahorowala_1998_deterministic_feature_depth.v1",
+  "reactor_receipt": "results/curated/reactor_to_feature_chlorine/axisymmetric_depth_reachability/reactor_receipt_top_annular_wise_class.json",
+  "dx_um": 0.04,
+  "product_wall_limit": "none",
+  "chlorine_specular_reflection": false,
+  "observed_depth_used_for_conditioning": false,
+  "geometry": {
+    "pitch_um": 0.56,
+    "opening_um": 0.31,
+    "oxide_mask_thickness_um": 0.2,
+    "etch_duration_s": 75.0
+  },
+  "rows": [
+    {
+      "run": 11,
+      "observed_feature_depth_nm": 134.375,
+      "predicted_center_feature_depth_nm": 110.26821587450952,
+      "signed_error_percent": -17.939932372458035,
+      "surface_plane_depth_nm": 112.73429369523106,
+      "accepted_feature_steps": 21,
+      "maximum_step_displacement_cells": 0.14850181920708433,
+      "within_declared_scope": false,
+      "known_limitations": [
+        "no intra-feature electric-field trajectory coupling",
+        "no surface reflection or neutral re-emission",
+        "no spatially varying boundary density",
+        "triangle visibility quadrature requires refinement at partial occlusion",
+        "float32 triangle-ray intersection",
+        "first-order material-local conservative surface-state remap with declared intensive-field exceptions",
+        "new subcell material-label components below one resolved volume cell are suppressed and bounded",
+        "physical volume-topology-changing surface steps are refused",
+        "first-order Godunov interface advection",
+        "Cl2+ surface kinetics were outside Chang's measured mechanism",
+        "broad-IEAD coefficients are flux-quadrature extensions of monoenergetic cards",
+        "SiCl4 is the low-energy simultaneous-Cl+/Cl product assumption",
+        "SiClx branching below neutral-to-ion ratio five is unresolved",
+        "etch-product return, implantation, damage, and transient site density are unresolved",
+        "Cl2+ angular response is unresolved; non-strict mode transfers the measured Cl+ roll-off",
+        "Cl2+ product identity and chlorine consumption are unresolved",
+        "Eq. 5.6 has no conservative returned-SiClx film state",
+        "surface-product populations lack a complete energy/angular launch model"
+      ]
+    },
+    {
+      "run": 13,
+      "observed_feature_depth_nm": 362.5,
+      "predicted_center_feature_depth_nm": 407.8582898480278,
+      "signed_error_percent": 12.51263168221457,
+      "surface_plane_depth_nm": 427.8534728255247,
+      "accepted_feature_steps": 39,
+      "maximum_step_displacement_cells": 0.2726685463787486,
+      "within_declared_scope": false,
+      "known_limitations": [
+        "no intra-feature electric-field trajectory coupling",
+        "no surface reflection or neutral re-emission",
+        "no spatially varying boundary density",
+        "triangle visibility quadrature requires refinement at partial occlusion",
+        "float32 triangle-ray intersection",
+        "first-order material-local conservative surface-state remap with declared intensive-field exceptions",
+        "new subcell material-label components below one resolved volume cell are suppressed and bounded",
+        "physical volume-topology-changing surface steps are refused",
+        "first-order Godunov interface advection",
+        "Cl2+ surface kinetics were outside Chang's measured mechanism",
+        "broad-IEAD coefficients are flux-quadrature extensions of monoenergetic cards",
+        "SiCl4 is the low-energy simultaneous-Cl+/Cl product assumption",
+        "SiClx branching below neutral-to-ion ratio five is unresolved",
+        "etch-product return, implantation, damage, and transient site density are unresolved",
+        "Cl2+ angular response is unresolved; non-strict mode transfers the measured Cl+ roll-off",
+        "Cl2+ product identity and chlorine consumption are unresolved",
+        "Eq. 5.6 has no conservative returned-SiClx film state",
+        "surface-product populations lack a complete energy/angular launch model"
+      ]
+    }
+  ],
+  "mape_percent": 15.226282027336303,
+  "formal_feature_depth_pass": false,
+  "evidence_blockers": [
+    "target-tool per-run species-resolved IEAD/IAD measurements",
+    "measured Cl2+ angular response",
+    "target-tool absorbed bias-power fraction and waveform",
+    "self-consistent SiClx collision-power/base-chlorine feedback",
+    "target-tool conditioned chamber-wall Si/Cl coverage",
+    "measured SiClx+ surface deposition probabilities"
+  ]
+}

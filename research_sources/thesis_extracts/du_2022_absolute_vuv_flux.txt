@@ -1,0 +1,533 @@
+Absolute measurement of vacuum ultraviolet
+photon flux in an inductively coupled plasma
+using a Au thin film
+Cite as: J. Vac. Sci. Technol. B 40, 022206 (2022); https://doi.org/10.1116/6.0001709
+Submitted: 22 December 2021 • Accepted: 31 January 2022 • Published Online: 25 February 2022
+
+
+Linfeng Du, Paul Ruchhoeft,     Demetre J. Economou, et al.
+
+
+
+
+J. Vac. Sci. Technol. B 40, 022206 (2022); https://doi.org/10.1116/6.0001709               40, 022206
+
+© 2022 Author(s).
+                                                                                                ARTICLE            avs.scitation.org/journal/jvb
+
+
+
+
+    Absolute measurement of vacuum ultraviolet
+    photon flux in an inductively coupled plasma
+    using a Au thin film
+    Cite as: J. Vac. Sci. Technol. B 40, 022206 (2022); doi: 10.1116/6.0001709
+    Submitted: 22 December 2021 · Accepted: 31 January 2022 ·                                                         View Online   Export Citation    CrossMark
+    Published Online: 25 February 2022
+
+    Linfeng Du,1 Paul Ruchhoeft,2,a) Demetre J. Economou,1,b)                  and Vincent M. Donnelly1,c)
+
+    AFFILIATIONS
+    1
+        Plasma Processing Laboratory, William A. Brookshire Department of Chemical and Biomolecular Engineering,
+    University of Houston, Houston, Texas 77204
+    2
+      Department of Electrical and Computer Engineering, University of Houston, Houston, Texas 77204
+
+    Note: This paper is a part of the Special Topic Collection on Plasma Processing for Advanced Microelectronics.
+    a)
+         Electronic mail: pruchhoeft@uh.edu
+    b)
+         Electronic mail: economou@uh.edu
+    c)
+         Electronic mail: vmdonnelly@uh.edu
+
+
+    ABSTRACT
+    A new method for absolute measurement of the vacuum ultraviolet (VUV) photon flux at the edge of a plasma is described. The light pro-
+    duced by the plasma was allowed to strike a negatively biased, gold-coated copper substrate remote from the plasma. The resulting photo-
+    electron emission current was measured, and the absolute photon flux was then found from the known photoelectron yield of Au. The
+    method was used to quantify the amount of VUV light produced by an Ar/He inductively coupled plasma (ICP). Strong emissions at
+    104.82 and 106.67 nm, corresponding to the 1s2 and 1s4 resonant states of Ar, were observed. The maximum, integrated VUV photon flux
+    measured at the remote location was 3.2 × 1013 photons/cm2 s. This was estimated to correspond to a flux of 5 × 1015 photons/cm2 s at the
+    edge of the ICP, in the range of reported values under similar conditions.
+
+    Published under an exclusive license by the AVS. https://doi.org/10.1116/6.0001709
+
+
+    I. INTRODUCTION                                                          VUV photons are also useful for medical sterilization.17 In many
+          Low temperature plasmas are widely used in microelectronics        cases, however, they are detrimental. This is the case for photo-
+    fabrication.1 In addition to electrons, ions, and radicals, the plasma   assisted etching (PAE) of Si, where crystallographic etching results
+    also produces electromagnetic radiation in the infrared to vacuum        in sloped (111) sidewalls on (100) surfaces masked along (110)
+    ultraviolet (VUV) regions. Energetic enough photons can break            directions.18,19 The self-limiting atomic layer etching process is also
+    chemical bonds in the gas phase and on a surface, as well as create      hindered by fast etching in the presence of VUV light, even when
+    electron–hole pairs in the near-surface region of semiconductors,        no bias is applied to the substrate.18,20–23 To better understand the
+    including Si.2,3 Surface irradiation can lead to various reactions       mechanism of reactions stimulated by these energetic photons,
+    such as photodesorption of products4–6 and damage to                     their etching yield (etched Si atoms-per-photon) should be deter-
+    substrates,7–10 as well as to thin films, including photoresist and      mined, requiring a measurement of absolute incident photon flux.
+    other organic materials.11–13 Plasma-generated photons can also be             The fundamentals of generation and propagation of VUV
+    used to enhance processes. For example, etching stimulated by            light in Ar-containing plasmas (argon is a common carrier gas in
+    VUV photons in a chlorine plasma was used to achieve extremely           plasma processing) have been widely studied by experiments and
+    selective etching of silicon over a thin native oxide layer.14 Photons   numerical simulations.10,24–29 The most intense VUV Ar emissions
+    can enhance the Si oxidation rate in an oxygen plasma by faster          correspond to the resonant transitions from the 1s2 and 1s4 states
+    oxygen negative ion migration under irradiation by UV light.15,16        (Paschen notation) to the ground state, with respective energies of
+
+
+
+
+J. Vac. Sci. Technol. B 40(2) Mar/Apr 2022; doi: 10.1116/6.0001709                                                                                    40, 022206-1
+Published under an exclusive license by the AVS
+                                                                                                   ARTICLE              avs.scitation.org/journal/jvb
+
+
+
+
+    11.83 eV at 104.82 nm and 11.62 eV at 106.67 nm. Absolute photon
+    flux measurements were usually done by placing a VUV photodi-
+    ode in an adjacent, differentially pumped chamber separated from
+    the main plasma generation chamber by either a small pinhole or a
+    short wavelength cut-off window (e.g., MgF2). The installation and
+    calibration of photodiodes reduces the feasibility and increases the
+    complexity of this measurement, while any window limits the
+    range of wavelengths detected (e.g., MgF2 does not transmit Ar
+    106 nm emission).
+         In this work, a new method is presented for absolute measure-
+    ments of the intensity of plasma-produced VUV light by recording
+    the electron photoemission current produced when light from the
+    plasma was incident on a Au thin film deposited on a Cu substrate.
+    The main motivation for this study was to make in situ measure-
+    ments for conditions used in other studies of VUV photo-assisted
+    etching of Si in a Cl2/Ar plasma, allowing absolute quantum yields
+    (Si atoms-per-photon) to be determined, as reported in Paper II.19
+    VUV emission spectra were also recorded under the same conditions.
+
+
+    II. EXPERIMENT
+          The experimental systems used in this study are shown sche-
+    matically in Figs. 1(a) and 1(b). The VUV source was a compact ICP
+    generated in a water-cooled alumina tube (19.5 cm long, 3.56 cm
+    inside diameter) and was powered by a 3-turn water-cooled copper
+    coil. The VUV source was either connected directly to a differentially
+    pumped VUV monochromator [Fig. 1(a)] or to a chamber used for
+    in-plasma photo-assisted etching of Si22,23 [Fig. 1(b)]. In the experi-
+    ments presented here, the ICP source in the etching chamber was
+    always off. In the configuration in Fig. 1(a), no gas was injected
+    downstream of the VUV source, while for the tandem system shown
+    in Fig. 1(b), Ar flow was added to the downstream chamber.
+          The VUV source was sustained by 13.56 MHz power, either
+    cw, or with 5 kHz pulsed power with a 50% duty cycle, produced
+    by a function generator (BNC, Model 645) and an RF amplifier
+    (ENI, A500). Power in the range between 50 and 200 W was sup-              FIG. 1. Schematics of (a) VUV source connected to a differentially pumped
+    plied through a T-matching network. The forward and reflected              VUV monochromator and (b) VUV source in tandem with the etching chamber.
+    powers were measured with in-line power meters (Bird model 43).            Plasma was confined in the VUV source by a metal mesh and a bundle of capil-
+                                                                               lary tubes in a honeycomb configuration. TMP, turbomolecular pump; PMT, pho-
+    Plasma was confined to the VUV source chamber by a grounded                tomultiplier tube; CM, capacitance manometer.
+    tungsten mesh (230 μm square openings, 81% transparency), fol-
+    lowed by a bundle of 31 quartz tubes (each 5 mm OD, 4 mm ID,
+    and 30 mm-long) arranged in a honeycomb configuration with a
+    bundle diameter of ∼40 mm and ∼50% open area.
+          Ar (Matheson, 99.999% purity) and He (Advanced Specialty
+    Gases, 99.999% purity) flows were regulated by mass flow controllers      VUV source and downstream chamber. Poiseuille’s law for laminar
+    (MKS Model 1179A) and fed to the VUV source plasma. Ar was                flow (with a modification for the dependence of volumetric flow
+    also sometimes injected into the downstream chamber. The pressure         rate on pressure, assuming the ideal gas law) was used to estimate
+    was measured with a capacitance manometer (MKS 629, 0.1 Torr              the pressure in the VUV source,30
+    full scale) in the position indicated in Fig. 1(b). Using ionization
+    gauges, base pressures of ∼2.0 × 10−6 and ∼2.0 × 10−7 Torr were                                              πD4 Pu2  Pd2
+                                                                                                      Qo /N ¼                  ,                         (1)
+    measured in the systems shown in Figs. 1(a) and 1(b), respectively.                                         256μL Pu
+    The gas fed into the VUV source chamber flowed through the hon-
+    eycomb separator into the downstream chamber and, thus, did not           where Qo is the volumetric flow rate into the VUV source (upper
+    have its own vacuum pump.                                                 reactor) at a pressure Pu, L = 3 cm is the length of the glass tube
+          Pressure in the downstream region was either 15 or 60 mTorr,        bundle, N = 31 is the number of tubes in the bundle, D = 0.4 cm is
+    and was changed by throttling the gate valve just above the turbo-        the tube internal diameter, μ is the gas viscosity, and Pd is the pres-
+    molecular pump, and/or by adjusting the gas flow rates into the           sure at the tube outlet (the pressure in the etching chamber
+
+
+
+
+J. Vac. Sci. Technol. B 40(2) Mar/Apr 2022; doi: 10.1116/6.0001709                                                                                  40, 022206-2
+Published under an exclusive license by the AVS
+                                                                                                ARTICLE             avs.scitation.org/journal/jvb
+
+
+
+
+    measured by the capacitance manometer downstream from the              covered with a tungsten mesh (230 μm square openings, 81% trans-
+    etching chamber, corrected for an additional small pressure drop).     parency). For cw plasma experiments, the nA-level currents
+    The viscosity of He at 500 K (μ = 2.73 × 10−4 P) was used, since the   through the Au film were measured by a picoammeter (Keithley
+    feed gas was mostly He and the viscosity of He is nearly the same      6485). For the pulsed-power experiments, currents were recorded
+    as that of Ar. For a flow rate of 47.5 SCCM He and 2.5 SCCM Ar         using an oscilloscope (Agilent, DSO 7034B) to measure the voltage-
+    into the upper chamber, and an added downstream flow of                drop across a 1.04 kΩ precision resistor.
+    250 SCCM Ar, a pressure of Pd = 60 mTorr was established. With              The absolute VUV flux was then found from the known
+    this condition, the VUV source pressure computed from Eq. (1)          photo-electric yield of Au as a function of wavelength. As discussed
+    was Pu = 277 mTorr.                                                    in more detail below, the photoelectric yield of gold is ∼0.07 at
+          A VUV spectrometer (McPherson model 234/302) was                 ∼105 nm,32 near the most intense Ar VUV lines, but it is more
+    installed downstream of the plasma VUV source [Fig. 1(a)], cover-      than two orders of magnitude lower at 200 nm and still lower at
+    ing the spectral range from 50 to 280 nm. The spectrometer has a       longer wavelengths.33 The photoelectron current was measured for
+    2400 grooves/mm platinum-coated grating that has an efficiency of      both continuous wave (cw) and pulsed plasma operation of the
+    4% at 50 nm, rising to a near-constant 7.5% between 60 and             VUV source.
+    120 nm, and then falling to a near-constant 3% at 200 nm. The dis-
+    tance from the downstream end of the quartz honeycomb to the           III. RESULTS AND DISCUSSION
+    entrance slit of the monochromator (36.4 cm light path) matched
+    that from the honeycomb to the Au film in the configuration            A. Argon VUV emission intensity
+    shown in Fig. 1(b). Survey spectra were collected by scanning over           Emission spectra of the VUV source are shown in Figs. 2(a)
+    the wavelength range of 50–280 nm, with a spectral resolution of       and 2(b). Figure 2(a) shows a low resolution spectrum from 50 to
+    0.3 nm (150 μm slit widths). High resolution spectra (used to inte-    280 nm of a typical plasma contained strong emissions from Ar,
+    grate the intensities of the Ar VUV emission lines) were obtained      weaker N, and H Lyman-α [Fig. 2(a)] from impurities, and very
+    in the range of 80–130 nm with a resolution of 0.1 nm (50 μm slit      weak He emission at 58.43 nm, corresponding to decay from the 2p
+    widths). The voltage on the photomultiplier tube (Hamamatsu            state to the ground state. The weak He emission is due to the much
+    model R6095, coated with a sodium salicylate scintillator) was         higher excitation energies required to populate emitting levels of
+    −675 V. The relative quantum efficiency of the this VUV detector,      He. The most intense emissions are from the Ar 1s4 resonant state
+    determined by the scintillator, is constant between 30 and 120 nm,                                    
+                                                                           at 106.67 nm (3s2 3p5 (2 P3/2    )4s 2 [3/2]o1 ! 3s2 3p6 1 S0 ) with a photon
+    and then rises slightly (∼20%) between 120 and 160 nm.31 Between       energy of 11.62 eV, and the 1s2 resonant state at 104.82 nm
+    121 and 254 nm, it has been reported to be constant or increase by                  
+                                                                           (3s2 3p5 (2 P1/2 )4s 2 [1/2]o1 ! 3s2 3p6 1 S0 ) with a photon energy of
+    ∼70%.31                                                                11.83 eV. Higher resolution (0.1 nm) spectra such as that from 80
+          Absolute photon fluxes at the substrate position [Fig. 1(b)]     to 130 nm in Fig. 2(b) also reveal five weak Ar peaks corresponding
+    were determined from photoelectron currents resulting from illu-       to radiative decay from higher energy states: 2s2 at 86.9 nm, 2s4 at
+    mination of a Au-coated Cu sample with light from the plasma.          87.9 nm, 3d1 at 86.7 nm, 3d2 at 87.6 nm, and 3d5 at 89.4 nm.
+    These measurements were used to compute Si etching yields for          Moreover, two relatively strong Ar+ emissions can be seen at 92.0
+    VUV photons in a chlorine-containing plasma, as reported else-         and 93.2 nm.
+    where.19 The photoelectron detection sample consisted of a 100 nm            Figure 3 shows the intensities of the most important Ar VUV
+    Au film on top of 15 nm-thick NiCr adhesion layer that was depos-      emissions at 104.82 and 106.67 nm, obtained by the integration of
+    ited on a ∼2 cm diameter Cu disk using an in-house thermal evap-       the peaks in high resolution spectra like that in Fig. 2(b), as a func-
+    orator. The system consisted of a rectangular chamber pumped by        tion of Ar percentage in the Ar/He feed gas at plasma powers in
+    a 2-in. diffusion pump to a base pressure of about 4 × 10−6 Torr.      the VUV source of 100, 150, and 200 W. For ≤ 20% Ar, the inten-
+    The sample was mounted on a chuck that was placed about 12 in.         sity of the 106.67 nm line was ∼five times stronger than the
+    from the metal source. NiCr and Au pellets were placed into two        104.82 nm peak, and increased with plasma power. The 106.67 nm
+    alumina-coated tungsten baskets (R.D. Mathis Co.) and sequen-          intensity maximized near 5% Ar or at an Ar partial pressure of
+    tially heated by a high-current AC source to deposit the two films.    about 15 mTorr. Near 50% Ar, the intensity of both lines was
+    A quartz crystal monitor (Kurt J. Lesker FTM-2400) was used to         nearly equal and had a relatively small dependence on power. At
+    measure the deposition rates of the films, which were maintained       100% Ar (and lower pressure), the intensity of both lines decreased
+    at about 0.5 nm/s. A manual shutter was used to control the film       slightly, with the 104.82 nm line weakly decreasing with increasing
+    thickness.                                                             power.
+          The coated Cu disk was bonded to the stainless steel sample
+    holder with silver paste. The resistance between the gold surface
+    and the sample holder was ∼0.5 Ω. Current was measured as a            B. In situ photocurrent measurement
+    function of DC voltage on the substrate, using a bank of 1.5 and             To find the absolute photon flux from the VUV source in
+    9 V batteries. A grounded stainless steel “cage” (5 cm outer diame-    tandem with the etching chamber, the photoelectron current pro-
+    ter, 0.3 cm height, with a 2.54 cm diameter opening at the top) sur-   duced by light striking the Au film was measured [Fig. 1(b)].
+    rounded the Au sensor, as shown in Fig. 1(b), providing a return       Absolute photoelectron yields for Au, Y Aupe , defined as the number
+    path for the generated photoelectrons and preventing charging of       of electrons ejected from the surface divided by the number of inci-
+    exposed insulating parts. The opening at the top of the cage was       dent photons, have been reported by several researchers. Cairns
+
+
+
+
+J. Vac. Sci. Technol. B 40(2) Mar/Apr 2022; doi: 10.1116/6.0001709                                                                              40, 022206-3
+Published under an exclusive license by the AVS
+                                                                                                       ARTICLE            avs.scitation.org/journal/jvb
+
+
+
+
+                                                                                   at 11.7 eV). Krolikowski and Spicer reported measured and com-
+                                                                                   puted yields (defined as the number of photoelectrons divided by
+                                                                                   the number of absorbed photons) between 107.8 nm (11.5 eV) and
+                                                                                   225 nm (5.5 eV).33 Their measured and computed values were in
+                                                                                   excellent agreement throughout the energy range investigated, deviat-
+                                                                                   ing by a maximum of ∼20% at 11.5 eV. Extrapolating slightly their
+                                                                                   measured value at 11.5 eV and converting to incident and not
+                                                                                   absorbed photons (using a Au reflectivity of ∼15% at 11.7 eV35) pro-
+                                                                                   vides a yield of 0.02 at 11.7 eV, i.e., much lower than the other mea-
+                                                                                   surements cited. Both Feuerbacher and Fitton34 and Krolikowski and
+                                                                                   Spicer33 found that the photoemission yield falls off rapidly with
+                                                                                   increasing wavelength to ∼10−4 near 200 nm. Since no photoelec-
+                                                                                   trons are emitted as a result of the strong emission from Ar in the
+                                                                                   red-near-infrared region, and the other VUV Ar emissions are weak,
+                                                                                   we attributed all the Au photoemission signal to the 104.82 and
+                                                                                   106.67 nm emission lines and used a value of 0.048 for the yield (the
+                                                                                   average of the three reported measurements).
+                                                                                         Before installing the stainless steel cage, photoemission cur-
+                                                                                   rents measured as a function of substrate bias showed no clear satu-
+                                                                                   ration. This was attributed to the ill-defined return path for ejected
+                                                                                   electrons since the substrate is surrounded by an alumina tube that
+                                                                                   can charge up. Nonetheless, this bare-substrate configuration
+                                                                                   allowed sputter-cleaning of the Au surface by operating the lower
+                                                                                   ICP [Fig. 1(b)] in Ar and negatively biasing the substrate (−50 V
+                                                                                   for 10 s). Photocurrents measured after sputter-cleaning with just
+                                                                                   the remote plasma and −25 to −45 V bias were indistinguishable
+                                                                                   from measurements before cleaning. Thus, it was concluded that
+                                                                                   any surface contamination had little impact on the photoemission
+                                                                                   measurements with the grounded cage in place.
+                                                                                         Figure 4 shows the current through the gold thin film for a
+                                                                                   pulsed-power VUV source ICP. As power was turned on, the mea-
+                                                                                   sured photoelectron current rapidly increased from 10% to 90% of
+                                                                                   its steady-state value in 13 μs. This is the characteristic time of elec-
+                                                                                   tron temperature rise in a pulsed plasma as power is turned on.36
+                                                                                   In the plasma off period (afterglow), the current dropped from
+                                                                                   90% to 10% in ∼20 μs to a small steady current of an unknown
+                                                                                   origin (perhaps a small leakage current). The decay time for emis-
+                                                                                   sion was attributed to the loss rate of Ar 1s3 and 1s5 metastables
+                                                                                   due to collisions with electrons that mostly result in population of
+                                                                                   the 1s2 and 1s4 emitting levels. The rate constants for these pro-
+                                                                                   cesses range from 4 × 10−8 (1s5 → 1s2) to 1 × 10−7 cm3 s−1
+                                                                                   (1s3 → 1s2) between Te = 0.5 and 1 eV.37 Hence for an electron
+      FIG. 2. Optical emission spectra of a 5 SCCM Ar/45 SCCM He plasma at
+      150 W in the VUV source. The measured downstream pressure was 100 mTorr
+                                                                                   density near 1012 cm3, emission would be expected to decay with a
+      and the estimated pressure in the VUV source was ∼310 mTorr. (a) 50–280 nm   lifetime of ∼10–20 μs.
+      survey spectrum, and (b) 80–130 nm high resolution spectrum.                       The time response in Fig. 4 is 1000 times faster than the
+                                                                                   ∼13 ms for free diffusion of any positive ions that pass through the
+                                                                                   separator between the VUV source and the etching chamber and
+                                                                                   reach the substrate. Therefore, stray positive ions did not contribute
+    and Samson measured yields for gold in the wavelength range of                 to the photoelectron current. Likewise, stray electrons cannot
+    20–121 nm (62–10.4 eV).32 A maximum yield of 0.13 was found at                 reduce the measured current since the substrate was negatively
+    80 nm (15.5 eV). At 105.7 nm (11.7 eV), the average wavelength of              biased at a voltage well beyond the energy expected for electrons
+    the strongest 104.82 and 106.67 nm Ar emission lines,                          diffusing from the remote source. Consequently, we concluded that
+      pe ¼ 0:063. At the other wavelengths with significant emissions
+    Y Au                                                                           the current measured in pulsed or steady-state remote plasma oper-
+    (∼92.5 nm, the average of the two strongest Ar II lines and                    ation is a result of photoemission by VUV photons.
+    113.5 nm, for N impurity), Y Au  pe ¼ 0:10 and 0:039, respectively.                  All other photoemission measurements reported here were
+    These values are in excellent agreement with the yields measured               carried out with a continuous wave powered VUV source and the
+    by Feuerbacher and Fitton34 (maximum of 0.13 at 17 eV and 0.06                 grounded cage in place. Figure 5 shows current as a function of bias
+
+
+
+
+J. Vac. Sci. Technol. B 40(2) Mar/Apr 2022; doi: 10.1116/6.0001709                                                                                  40, 022206-4
+Published under an exclusive license by the AVS
+                                                                                                            ARTICLE                  avs.scitation.org/journal/jvb
+
+
+
+
+                                                                                        FIG. 5. Photoelectron current through the Au thin film for a continuous wave
+      FIG. 3. Ar VUV emission intensity at 104.82 and 106.67 nm as a function of Ar     200 W VUV source plasma with 47.5 SCCM He and 2.5 SCCM Ar. An additional
+      percentage in Ar/He feed gas, at different plasma powers in the VUV source        250 SCCM Ar was added to the etching chamber (no plasma) and the down-
+      [Fig. 1(a)]. The total gas flow rate was 50 SCCM except for 100% Ar for which     stream pressure was 60 mTorr. The estimated pressure in the VUV source was
+      the flow rate was 25 SCCM. The measured downstream pressure was kept at           277 mTorr.
+      100 mTorr by throttling a gate valve (pressure in the VUV source was estimated
+      to be 310 mTorr, except for 100% Ar, where it was 237 mTorr).
+                                                                                       of the accelerated photoelectrons leaving the surface with the Ar gas
+                                                                                       inside the cage, resulting in an increasing positive ion current.
+    voltage for one set of conditions. A saturated photoelectron current                     The measured photoelectron current, Ipe, produced when mul-
+    of 260 nA was measured in the voltage range of −9 to −20 V. At                     tiple wavelengths of light are incident on the Au surface is given by
+    more positive voltages stray electrons begin to reduce the current,                the relationship
+    while more negative voltages likely produced Ar+ through collisions
+                                                                                                                                  Xn
+                                                                                                              I pe ¼ tgrid Ae        i¼1
+                                                                                                                                           YiAu fi ,                 (2)
+
+                                                                                       where YiAu is the Au photoemission yield for emission line i, fi is
+                                                                                       the absolute photon flux for line i, tgrid (=0.81) is the transmission
+                                                                                       of the grid above the Au detector, A (=3.14 cm2) is the area of the
+                                                                                       Au detector, and e is the elemental charge. fi is simply the total
+                                                                                       photon flux, fph, multiplied by the fraction, δi, of the total light for
+                                                                                       each line i, determined from spectra such as those in Figs. 2(a)
+                                                                                       and 2(b), with a known relative intensity calibration (in this case a
+                                                                                       constant sensitivity over the small range of wavelengths, as stated
+                                                                                       above). Therefore, the total absolute photon flux is given by
+
+                                                                                                                                  I pe
+                                                                                                              f ph ¼              Pn     Au :                        (3)
+                                                                                                                       tgrid Ae     i¼1 Yi δ i
+
+                                                                                             Using the average intensities in the spectra in Figs. 2(a) and 2(b)
+                                                                                       for emissions from Ar I at 104.82 and 106.67 nm, Ar II at 92.0 and
+                                                                                       93.2
+                                                                                       Pn nm,Au and N at 113.5 nm, and ignoring other weaker lines,
+                                                                                          i¼1 Yi δ i ¼ 0:064. Finally, using the average of the values for the
+      FIG. 4. Time-resolved photoelectron current through the gold film for a pulsed   published photoemission yields (defined as the number of electrons
+      Ar/He VUV source ICP. Pulsing frequency = 5 kHz, duty cycle = 50%, period-       ejected fromPthe surface divided by the number of incident photons,
+      averaged power = 200 W. VUV source flow rates were 2.5 SCCM Ar and               see above), ni¼1 YiAu δ i ¼ 0:048.
+      47.5 SCCM He. 250 SCCM Ar was injected into the downstream chamber (no                 Figures 6–8 present the saturated photoemission currents with
+      plasma) where it mixed with the output gas from the VUV source. Downstream       a −13 V bias applied to the substrate and absolute photon fluxes
+      pressure = 60 mTorr. Substrate bias = −13 VDC. Twenty-point smoothing (adja-
+      cent averaging) was used to reduce noise induced by the plasma.
+                                                                                       computed from Eq. (2), as a function of power, percent Ar, and
+                                                                                       downstream pressure, respectively.
+
+
+
+
+J. Vac. Sci. Technol. B 40(2) Mar/Apr 2022; doi: 10.1116/6.0001709                                                                                            40, 022206-5
+Published under an exclusive license by the AVS
+                                                                                                                ARTICLE               avs.scitation.org/journal/jvb
+
+
+
+
+      FIG. 6. Saturated photoelectron current with −13 V bias on the Au substrate as        FIG. 8. Saturated photoelectron current with −13 V bias on the Au substrate as
+      a function of VUV source power, with 47.5 SCCM He and 2.5 SCCM Ar. An                 a function of measured downstream pressure. The VUV source feed gas was
+      additional 250 SCCM Ar was added to the etching chamber (no plasma) and               47.5 SCCM He and 2.5 SCCM Ar at a power of 200 W. Between 60 and
+      the downstream pressure was 60 mTorr. The estimated pressure in the VUV               250 SCCM, Ar was added to the downstream chamber (no plasma), as indi-
+      source was 277 mTorr. The solid line is a least squares fit. The right axis is the    cated by the labels in the figure. The estimated VUV source pressure was a
+      calculated photon flux based on the photoelectron yield for the corresponding         nearly-constant 270–277 mTorr between 15 and 60 mTorr downstream pres-
+      current.                                                                              sures. Downstream pressure was adjusted by throttling the gate valve.
+
+
+
+    C. Discussion                                                                          here is in agreement with the results of Titus et al. Boffard et al. also
+         The photon flux in Fig. 6 increases linearly with power, as                       found a linear increase with power in an Ar ICP at 15 mTorr up to
+    would be expected. This is consistent with the spectrometer mea-                       about 150 W and then a sub-linear increase up to 1000 W.25
+    surements at 5%Ar given in Fig. 3. Titus et al. also found a near                            In Fig. 7, the photon flux first increased as the Ar percentage
+    linear dependence of total VUV light intensity in 10 and 20 mTorr                      increased, and then fell between 5% and 100% Ar. While this
+    pure Ar ICPs.38 For the measurements in Fig. 6, the Ar partial pres-                   trend was also consistent with the sum of 104.82 and 106.67 nm
+    sure was 13.8 mTorr, hence the linear trend with power reported                        emission at 200 W in Fig. 3, the magnitude of the rise and fall of
+                                                                                           emission intensity measured with the spectrometer was much
+                                                                                           greater than the photon flux measurements in Fig. 7. First, the
+                                                                                           trend measured with the spectrometer between Ar partial pres-
+                                                                                           sures of 6.9 and 27.7 mTorr (2.5%–10% Ar in Fig. 3) is similar to
+                                                                                           that reported by Boffard et al. for Ar ICPs between 5 and
+                                                                                           25 mTorr pressure.25 Radiation trapping, where photons are
+                                                                                           repeatedly absorbed and re-emitted until escaping at the edge of
+                                                                                           the chamber, is important in all these investigations.25,27 It is
+                                                                                           likely responsible for the severe falloff in 1s4 emission with
+                                                                                           increasing Ar partial pressure (Fig. 3), relative to that from 1s2.
+                                                                                           Tian and Kushner modeled the behavior of VUV radiation from
+                                                                                           an Ar ICP and found similar trends with pressure.27 They com-
+                                                                                           puted large trapping factors (the ratio of the effective lifetime
+                                                                                           including reabsorption to the natural lifetime of the excited state)
+                                                                                           for the 106.67 nm line while that of 104.82 nm emission line
+                                                                                           remained unchanged. Consequently, this explains why the photon
+                                                                                           flux measurements in Fig. 7 are a much better match to the 1s2
+                                                                                           emission intensities in Fig. 3 than to the combined 1s2 + 1s4 emis-
+                                                                                           sion intensity: the added Ar downstream traps most of the
+      FIG. 7. Saturated photoelectron current with −13 V bias on the Au substrate as       106.67 nm light emitted by the upstream ICP (VUV source).
+      a function of %Ar, with a constant 50 SCCM He plus Ar flow rate, and 200 W                 Radiation trapping also explains why the photon flux
+      power. An additional 250 SCCM Ar was added to the etching chamber (no                decreases as a function of increasing downstream Ar pressure at
+      plasma) and the downstream pressure was 60 mTorr. The estimated pressure in          near-constant upstream pressure in the VUV source, as shown in
+      the VUV source was 277 mTorr.
+                                                                                           Fig. 8.
+
+
+
+
+J. Vac. Sci. Technol. B 40(2) Mar/Apr 2022; doi: 10.1116/6.0001709                                                                                                 40, 022206-6
+Published under an exclusive license by the AVS
+                                                                                                    ARTICLE               avs.scitation.org/journal/jvb
+
+
+
+
+          Though the main motivation for this study was to determine         The absolute VUV photon flux was then deduced from the known
+    the absolute flux of additional VUV photons from the VUV source          photoemission yield of gold. VUV source plasma power and gas
+    that are incident on a Si sample during etching in the downstream        composition were varied to find the maximum Ar VUV emission
+    ICP, it is also of interest to compare the magnitude of light incident   intensity at 104.82 and 106.67 nm. A comparison between the inte-
+    on the top of the honeycomb separator in the VUV source to               grated intensity of the Ar VUV emission with the photocurrent
+    reported intensities of light produced in other Ar ICPs. An attenua-     through the gold film suggested that the photocurrent was mostly
+    tion factor can be defined as the ratio of light incident on the plane   from the Ar 1s2 and 1s4 resonant states. The highest VUV photon
+    at the top of the honeycomb-to-the light incident on the plane at the    flux to the substrate surface was found to be 3.2 × 1013 photons/cm2 s
+    grid just above the Au sample. If we assume a cosine distribution of     when the VUV source power was 200 W, the feed gas was 2.5 SCCM
+    light incident on the honeycomb, and further assume that the tubes       Ar and 47.5 SCCM He, and that to the etching chamber was
+    in the honeycomb cut-off light at angles greater than an angle equal     60 SCCM Ar, and downstream ICP pressure of 15 mTorr. When
+    to the arctan of the ratio of tube radius to length (2 mm/30 mm),        adjusted for differences in operating and geometric conditions, the
+    account for the 40% open area of the honeycomb and grid combina-         photon flux measured in this work was comparable to that reported
+    tion, and further account for the roughly 2 times larger diameter of     in the literature. The absolute VUV photon flux measurement by
+    the light spot reaching the sample (i.e., 4 times the area), then the    monitoring the photocurrent through a gold thin film was demon-
+    total attenuation factor is 1/(0.067 × 0.4 × 0.25) ∼150.                 strated to be a feasible and simple method. Using the measured
+          The highest intensity (3.2 × 1013 photons/cm2 s) in the            photon fluxes in this study, the absolute yield of p-type Si atoms
+    present study was for a 200 W power and 15 mTorr downstream              etched per VUV photon in a chlorine-containing plasma was
+    pressure with a 5% Ar/He mixture at an estimated VUV source              obtained and will be reported in a separate publication.19
+    pressure of 274 mTorr, corresponding to an Ar partial pressure of
+    about 13.7 mTorr (Fig. 8, upper left point). This would then corre-      ACKNOWLEDGMENTS
+    spond to a photon flux at the edge of the ICP of
+                                                                                 This work was supported financially by the National Science
+    150 × 3.2 × 1013 = 5 × 1015 photons/cm2 s. Woodworth et al. mea-
+                                                                             Foundation (No. PHY-1500518) and the Department of Energy
+    sured the VUV spectra of an Ar ICP.24 The highest VUV photon
+                                                                             (DOE), Office of Fusion Energy Science (No. DE-SC0001939).
+    flux at 200 W and 20 mTorr was ∼3.1 × 1016 photons/cm2 s through
+    a hole in the center of a Si wafer and about 2 × 1015 photons/cm2 s
+    when observed through a side port. Titus et al. measured a flux of       Conflict of Interest
+    1 × 1016 photons/cm2 s in a 10 mTorr, 200 W Ar ICP.38 Jinnai et al.            The authors have no conflicts of interest to disclose.
+    combined an on-wafer monitor with a neural network model to
+    predict the plasma VUV emission.10 For pure Ar ICP (typical oper-        DATA AVAILABILITY
+    ating conditions of 1000 W and 5 mTorr), the highest VUV emis-
+    sion flux was estimated to be about 1.5 × 1015 photons/cm2 s near             The data that support the findings of this study are available
+    the substrate. Boffard et al. measured the VUV flux and the Ar 1s2       within the article.
+    and 1s4 resonant state densities in an Ar ICP.25 The highest photon
+    flux was found to be 9 × 1016 cm2 s−1 at 600 W and 10 mTorr. Iglesias    REFERENCES
+    et al. used a sodium salicylate (NaSal) detector to measure the VUV      1
+                                                                               V. M. Donnelly and A. Kornblit, J. Vac. Sci. Technol. A 31, 050825 (2013).
+    emission of microwave Ar/O2 plasmas.26 The re-emitted fluorescence       2
+                                                                               F. A. Houle, Phys. Rev. B 39, 10120 (1989).
+                                                                             3
+    of NaSal in the UV/VIS spectral range was used to deduce a VUV             W. Sesselmann, E. Hudeczek, and F. Bachmann, J. Vac. Sci. Technol. B 7, 1284
+    radiation intensity (<112 nm) of about 1.6 × 1015/cm2 s in a pure Ar     (1989).
+                                                                             4
+    plasma at 1500 W and 190 mTorr. Tian and Kushner reported a                T. N. Rhodin and C. Paulsen-Boaz, Prog. Surf. Sci. 54, 287 (1997).
+                                                                             5
+    computational study of VUV emission in Ar/Cl2 ICP. In pure Ar,             N. Van Hieu and D. Lichtman, J. Vac. Sci. Technol. A 1, 1 (1983).
+                                                                             6
+                                                                               E. Ekwelundu and A. Ignatiev, Surf. Sci. 179, 119 (1987).
+    they predicted a flux of about 1.1 × 1016 photons/cm2 s.27 In            7
+                                                                               T. Yunogami, T. Mizutani, K. Suzuki, and S. Nishimatsu, Jpn. J. Appl. Phys. 28,
+    summary, given the differences in geometries, power densities, and
+                                                                             2172 (1989).
+    experimental uncertainties, the photon fluxes measured in the            8
+                                                                               T. Tatsumi, S. Fukuda, and S. Kadomura, Jpn. J. Appl. Phys. 33, 2175 (1994).
+    present study are, therefore, within reasonable agreement with the       9
+                                                                               S. Samukawa, Y. Ishikawa, S. Kumagai, and M. Okigawa, Jpn. J. Appl. Phys. 40,
+    range of values reported for Ar ICPs.                                    L1346 (2001).
+                                                                             10
+                                                                                B. Jinnai, S. Fukuda, H. Ohtake, and S. Samukawa, J. Appl. Phys. 107, 043302
+                                                                             (2010).
+    IV. SUMMARY AND CONCLUSIONS                                              11
+                                                                                D. Nest, D. B. Graves, S. Engelmann, R. L. Bruce, F. Weilnboeck, G. S. Oehrlein,
+          A new method was presented for measurement of the absolute         C. Andes, and E. A. Hudson, Appl. Phys. Lett. 92, 153113 (2008).
+                                                                             12
+    flux of VUV photons produced by an inductively coupled plasma               B. Jinnai, T. Nozawa, and S. Samukawa, J. Vac. Sci. Technol. B 26, 1926
+                                                                             (2008).
+    (VUV source). Optical emission spectra from this reactor (fed by an      13
+                                                                                S. Uchida, S. Takashima, M. Hori, M. Fukasawa, K. Ohshima, K. Nagahata,
+    Ar/He mixture), attached to a differentially pumped VUV mono-            and T. Tatsumi, J. Appl. Phys. 103, 073303 (2008).
+    chromator, showed relatively strong emissions at 104.82 and              14
+                                                                                S. Tian, V. M. Donnelly, and D. J. Economou, J. Vac. Sci. Technol. B 33,
+    106.67 nm, corresponding to the 1s2 and 1s4 resonant states of Ar,       030602 (2015).
+    respectively. Light from the VUV source was allowed to strike a gold     15
+                                                                                A. Kazor and I. W. Boyd, Appl. Surf. Sci. 54, 460 (1992).
+                                                                             16
+    film, and the resulting electron photoemission current was measured.        I. W. Boyd, V. Craciun, and A. Kazor, Jpn. J. Appl. Phys. 32, 6141 (1993).
+
+
+
+
+J. Vac. Sci. Technol. B 40(2) Mar/Apr 2022; doi: 10.1116/6.0001709                                                                                     40, 022206-7
+Published under an exclusive license by the AVS
+                                                                                                                ARTICLE               avs.scitation.org/journal/jvb
+
+
+
+
+    17                                                                                    26
+      G. Y. Park, S. J. Park, M. Y. Choi, I. G. Koo, J. H. Byun, J. W. Hong, J. Y. Sim,      E. J. Iglesias, F. Mitschker, M. Fiebrandt, N. Bibinov, and P. Awakowicz, Meas.
+    G. J. Collins, and J. K. Lee, Plasma Sources Sci. Technol. 21, 043001 (2012).         Sci. Technol. 28, 085501 (2017).
+    18                                                                                    27
+      W. Zhu, S. Sridhar, L. Liu, E. Hernandez, V. M. Donnelly, and                          P. Tian and M. J. Kushner, Plasma Sources Sci. Technol. 24, 034017 (2015).
+                                                                                          28
+    D. J. Economou, J. Appl. Phys. 115, 203303 (2014).                                       S. Espinho, E. Felizardo, J. Henriques, and E. Tatarova, J. Appl. Phys. 121,
+    19
+      L. Du, D. J. Economou, and V. M. Donnelly, J. Vac. Sci. Technol. B 40,              153303 (2017).
+                                                                                          29
+    022207 (2022).                                                                           L. R. Peterson and J. E. Allen, J. Chem. Phys. 56, 6068 (1972).
+    20                                                                                    30
+      H. Shin, W. Zhu, V. M. Donnelly, and D. J. Economou, J. Vac. Sci. Technol. A           J. Welty, C. E. Wicks, G. L. Rorrer, and R. E. Wilson, Fundamentals of
+    30, 021306 (2012).                                                                    Momentum, Heat, and Mass Transfer, 5th ed. (Wiley, New York, 2007).
+    21                                                                                    31
+      S. Sridhar, L. Liu, E. W. Hirsch, V. M. Donnelly, and D. J. Economou, J. Vac.          J. A. R. Samson, Techniques of Vacuum Ultraviolet Spectroscopy (Pied Publ.,
+    Sci. Technol. A 34, 061303 (2016).                                                    Nebraska, 1967, 1980), pp. 212–216.
+    22                                                                                    32
+      E. W. Hirsch, L. Du, D. J. Economou, and V. M. Donnelly, J. Vac. Sci.                  R. B. Cairns and J. A. R. Samson, J. Opt. Soc. Am. 56, 1568 (1966).
+                                                                                          33
+    Technol. A 38, 023009 (2020).                                                            W. F. Krolikowski and W. E. Spicer, Phys. Rev. B 1, 478 (1970).
+    23                                                                                    34
+      L. Du, E. W. Hirsch, D. J. Economou, and V. M. Donnelly, J. Vac. Sci.                  B. Feuerbacher and B. Fitton, J. Appl. Phys. 43, 1563 (1972).
+                                                                                          35
+    Technol. A 38, 053003 (2020).                                                            B. R. Cooper, H. Ehrenreich, and H. R. Philipp, Phys. Rev. 138, A494 (1965).
+    24                                                                                    36
+      J. R. Woodworth, M. E. Riley, V. A. Amatucci, T. W. Hamilton, and                      H. Shin, W. Zhu, D. J. Economou, and V. M. Donnelly, J. Vac. Sci. Technol. A
+    B. P. Aragon, J. Vac. Sci. Technol. A 19, 45 (2001).                                  30, 031304 (2012).
+    25                                                                                    37
+      J. B. Boffard, C. C. Lin, C. Culver, S. Wang, A. E. Wendt, S. Radovanov, and           V. M. Donnelly, J. Phys. D Appl. Phys. 37, R217 (2004).
+                                                                                          38
+    H. Persing, J. Vac. Sci. Technol. A 32, 021304 (2014).                                   M. J. Titus, D. Nest, and D. B. Graves, Appl. Phys. Lett. 94, 171501 (2009).
+
+
+
+
+J. Vac. Sci. Technol. B 40(2) Mar/Apr 2022; doi: 10.1116/6.0001709                                                                                                 40, 022206-8
+Published under an exclusive license by the AVS
+

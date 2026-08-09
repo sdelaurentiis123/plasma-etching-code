@@ -1,0 +1,415 @@
+Insights into the mechanism of in-plasma photo-assisted etching
+using optical emission spectroscopy
+             Shyam Sridhar, Lei Liu, Emilia W. Hirsch, Vincent M. Donnelly,a) and
+             Demetre J. Economoub)
+             Plasma Processing Laboratory, Department of Chemical and Biomolecular Engineering,
+             University of Houston, Houston, Texas 77204
+             (Received 5 August 2016; accepted 27 September 2016; published 13 October 2016)
+             Various mechanisms have been proposed to explain photo-assisted etching (PAE) of Si, including
+             photogenerated carrier-mediated etching, photon-stimulated desorption, and photon-induced damage
+             (breaking of Si–Si bonds) caused mainly by vacuum ultraviolet photons irradiating the substrate. In
+             this study, the authors use optical emission spectroscopy to gain an insight into possible in-plasma
+             PAE mechanisms. Emissions from Cl, Si, SiCl, and Ar were recorded as a function of power while
+             etching p-Si in Cl2/Ar Faraday-shielded inductively coupled plasmas at a pressure of 60 mTorr with
+             no substrate bias. Under these conditions, ion-assisted etching was negligible and PAE was dominant.
+             The Si:Ar optical emission intensity ratio, ISi/IAr (proportional to the etching rate of Si), increased
+             substantially with power. Accounting for the contribution to this signal from the dissociation of SiClx
+             (x ¼ 1–4) etch products, the residual increase in the emission indicated that the PAE rate also
+             increased with power. Time resolved emissions were also recorded in a pulsed plasma where power
+             was modulated between 500 and 300 W. ISi/IAr was found to modulate with the instantaneous power.
+             This rules out the photon-induced damage mechanism since, if this mechanism was dominant, the
+                                                    V 2016 American Vacuum Society.
+             ISi/IAr signal would not be modulated. C
+             [http://dx.doi.org/10.1116/1.4964641]
+
+
+I. INTRODUCTION                                                        generation of crystal defects that promoted silicon etching
+    Plasma etching continues to play a crucial role in the fab-        by Cl atoms in the damaged layer.10,11
+rication of nanoelectronic devices. Plasma etching (or reac-               The two processes discussed above should behave dif-
+tive ion etching) is typically an ion-assisted process in which        ferently in that carrier-mediated etching should cease rap-
+energetic ion bombardment results in breaking substrate lat-           idly after the plasma is extinguished and photo-generated
+tice bonds, promoting surface reactions and desorption of              carriers decay rapidly, while etching caused by defects
+etch products. Recently, it was discovered for p-type silicon          should continue after the plasma is extinguished until the
+that, in addition to ion-assisted etching, vacuum ultraviolet          damaged layer etches away. This can be verified by mod-
+(VUV) photons (<180 nm) generated in the plasma also con-              ulating the plasma power between two different values at
+tribute substantially toward etching, especially at ion ener-          a rate that is much faster than that required to remove a
+gies lower than the ion-assisted etching threshold.1,2 This            monolayer. Defects (broken Si–Si bonds) created by VUV
+in-plasma photo-assisted etching (PAE) could be detrimental            photons when the plasma is operated at a higher power
+to the development of self-limiting processes required for             would remain even after the plasma power is turned
+atomic layer etching.3 Hence, it is imperative to understand           down, as it takes longer for the plasma to etch one
+the role of VUV photons in etching silicon, especially at              monolayer compared to the power modulation period. The
+very low ion energies.                                                 defect sites would therefore not be modulated, nor would
+    A number of studies have been carried out to elucidate             the Cl number density if the modulation frequency is cho-
+the role of visible and ultraviolet (UV) photons in the etching        sen to be faster than the Cl loss rate, and etching would
+of silicon in a halogen environment without a plasma. Most             continue at a high rate even after plasma power is turned
+of these studies attributed photo-assisted etching to the crea-        down.
+tion of electron–hole pairs and reactions of these carriers at             On the other hand, if photo-generated carriers dominate,
+the surface.4,5 Other researchers have proposed that VUV               then etching would be proportional to the instantaneous
+photons possess sufficient energy (>7 eV) to enhance photo-            carrier density. If the carrier recombination occurs at a rate
+desorption, thereby facilitating etching.6 Photon induced              that is higher than the power modulation frequency, then
+damage was reported for thin films of SiO2,7 and SiCOH                 the carrier density should be modulated in proportion to light
+(Refs. 8 and 9) due to scission of Si–O and Si–C bonds,                intensity. Minority carrier recombination near the surface
+respectively. UV irradiation was found to enhance etching of           will dominate and be fast on these highly defective surface
+silicon using a chlorine atom beam and was attributed to               layers. Minority carrier lifetimes of 10 ls have been
+                                                                       reported12 on native oxide covered Si surfaces; hence, carrier
+                                                                       lifetimes in plasma-exposed Si will be 10 ls. Light inten-
+a)
+     Electronic mail: vmdonnelly@uh.edu                                sity is proportional to the product of plasma electron density
+b)
+     Electronic mail: economou@uh.edu                                  (ne) and the electron impact excitation rate coefficient for
+
+061303-1 J. Vac. Sci. Technol. A 34(6), Nov/Dec 2016   0734-2101/2016/34(6)/061303/7/$30.00   C
+                                                                                              V   2016 American Vacuum Society 061303-1
+061303-2 Sridhar et al.: Insights into the mechanism of in-plasma PAE                                                             061303-2
+
+
+producing emission, which is a function of electron tempera-        (RCA C31034). For time resolved emission measurements,
+ture (Te). Te should be nearly independent of power and ne          current from the photomultiplier tube was measured as the
+will be proportional to power. Therefore, a carrier-mediated        voltage drop across a R ¼ 3 kX resistor using an oscillo-
+PAE etching rate should be proportional to power over much          scope, and further damped by the capacitance, C of the
+of the modulation period. A concerted, photo-stimulated             input. The detector response time determined from the RC
+desorption process will behave in a similar manner.                 time constant was 0.3 ls, very small compared to the time
+   In this work, we use optical emission spectroscopy               of flight (10 ls) of etching products across the 1 cm region
+(OES), in an effort to gain insight into the mechanism of in-       over which light was collected. For low intensity emissions
+plasma photo-assisted etching of Si. The light intensity of         (e.g., Si), the slits of the monochromator were set to
+key emitting radicals was monitored in both continuous              500 lm, yielding a resolution of 10 Å FWHM.
+wave (cw) and pulsed plasmas.
+                                                                    III. RESULTS
+II. EXPERIMENT                                                      A. Silicon etching in Cl2/Ar plasmas with cw power
+   The apparatus consisted of a Faraday-shielded induc-                 As mentioned above, the contribution of ion-assisted etch-
+tively coupled plasma (ICP) powered by a 3 turn copper              ing was negligible in the Faraday-shielded ICP at a pressure
+coil, as described previously.1 Radio frequency (RF) power          of 60 mTorr, and no substrate bias. In addition, Cl atoms do
+(13.56 MHz) was delivered to the plasma by a RF amplifier           not etch p-type Si spontaneously at room temperature.13
+(ENI A500) that was driven by a function generator (HP              Hence, photo-assisted etching was the prevailing mode of
+3325A). For some experiments, the plasma was modulated              etching.1,2 An emission spectrum recorded while etching at a
+between 500 and 300 W power at 1 kHz with 50% duty                  power of 350 W is shown in Fig. 1. SiCl and Si peaks are
+cycle. A Cl2/Ar gas mixture was fed through the electrically        observed due to etching of the Si substrate, as found previ-
+grounded top flange. The fraction of chlorine in the gas mix-       ously.1,2 (It should be pointed out that if the bare Si substrate
+ture was varied between 10% and 71% by changing Ar flow             is replaced with a SiO2-coated Si sample, and the plasma is
+rate for a fixed Cl2 flow of 25 sccm. A needle valve was            ignited with no intervening “conditioning” of the chamber
+employed to introduce a trace amount of SiCl4 for some              walls, Si and SiCl emissions are not detected, indicating that
+experiments. The pressure downstream from the ICP source            very little of these emissions detected with a Si substrate on
+was measured using a capacitance manometer (MKS 629).               the stage are due to etching of Si-containing layers that could
+Pressure above the sample (corrected for the pressure drop          be present on the chamber walls.) The broad emission band
+between the ICP source and the point at which the measure-          corresponding to SiCl2 (band centered 323.5 nm) is not
+ment was made) was maintained at 60 mTorr using a throt-            observed, and emission corresponding to SiCl3 (band centered
+tle valve. At this pressure, with no bias applied to the            at 385.5 nm) is not clearly distinguished from other broad
+substrate, it is expected that very few ions will have ener-        emitters in this region (Cl2 and Cl2þ). Cl2 emission bands
+gies above the ion-assisted etching threshold of silicon            near 255 and 305 nm can also be seen clearly. Several lines
+(16 eV).2                                                          expected for Ar are observed between 700 and 900 nm,
+   The sample to be etched [p-Si (100), resistivity ¼ 5–50 X/cm]    where the vast majority of emission is from Cl.
+was cleaved into small pieces (approximately 1.5 cm2), cleaned          Optical emissions from Si, SiCl, Cl, and Ar were recorded
+with acetone and methanol to remove carbon contaminants, fol-       as a function of power and gas composition. Not surpris-
+lowed by dipping in 48% hydrofluoric acid solution to strip the     ingly, the Ar emission intensity increases with power and
+native oxide, and blown dry with nitrogen. The cleaned sample       %Ar in the feed gas (Fig. 2). The super-linear increase in
+was fixed to a 1 in. diameter stainless steel sample holder using
+carbon tape to ensure good electrical contact. The sample holder
+was mounted on a water cooled rod that served to maintain the
+sample at a fixed temperature, and transferred into the plasma,
+where it was held against a grounded stage.
+   OES was used to monitor the light intensity of key emit-
+ting species Si (288.1 nm), Ar (750.4 nm), Cl (724 nm), SiCl
+(280.3 nm), and Cl2 (band centered at 305 nm). A periscope,
+comprised of two right angle prisms (1  1 cm along the
+perpendicular faces), was employed to collect light inte-
+grated over a region 1 cm above the Si surface. The light
+was imaged with lenses (magnification slightly smaller
+than 1:1) onto a 1 cm long, vertically oriented entrance slit
+of a monochromator. The scanning monochromator had a
+1200 grooves/mm diffraction grating which, combined with
+entrance and exit slit widths of 100 lm, produced a resolu-
+tion of 2 Å full width at half maximum (FWHM). The dis-            FIG. 1. Optical emission spectrum (200–900 nm) recorded while etching Si
+persed light was detected by a GaAs photomultiplier tube            in a 50%Cl2/50%Ar ICP with 300 W of power.
+
+
+J. Vac. Sci. Technol. A, Vol. 34, No. 6, Nov/Dec 2016
+061303-3 Sridhar et al.: Insights into the mechanism of in-plasma PAE                                                                               061303-3
+
+
+
+
+FIG. 2. (Color online) Ar (750.4 nm) intensity as a function of power for dif-   FIG. 4. (Color online) ISi/IAr as a function of power for different gas compo-
+ferent gas compositions.                                                         sitions. Open inverted triangles denote ISi/IAr when a trace amount of SiCl4
+                                                                                 gas was added to the gas mixture with no Si substrate present.
+intensity with increasing %Ar is attributed mainly to the
+increasing electron-to-Cl number density ratio between                              Emission intensity ratios for Si/Ar (ISi/IAr) and SiCl/Ar
+29% and 90% Ar. The Ar 750.4 nm emission is produced                             (ISiCl/IAr) are presented in Figs. 4 and 5, respectively. Si and
+when the 4p0 [1/2] level at 13.48 eV decays to the 4s0 [1/2]                    SiCl emission intensities are expected to arise, at least in
+level at 11.83 eV. This in turn decays to the ground state by                    part, from electron impact excitation of these species, and to
+emitting the most intense of the VUV Ar emissions at                             therefore scale, at least qualitatively, with their relative num-
+104.8 nm. It therefore follows that the relative intensity of                    ber densities in the plasma. These emissions can also come
+the Ar VUV emission is expected to depend on power in a                          from electron-impact dissociative excitation of more highly
+manner similar to that for the 750.4 nm emission shown in                        chlorinated species such as SiCl2. Previously, it was shown
+Fig. 2.                                                                          that Si emission intensity was directly proportional to etch-
+   Cl/Ar emission intensity ratios (ICl/IAr) are presented in                    ing rate, which was varied by changing substrate bias power
+Fig. 3. Since the Cl2 feed gas is probably substantially disso-                  at constant ICP power, pressure, and feed gas composi-
+ciated, and the electron temperature is rather low at 60                         tion.1,2 In the present study, ISi/IAr increases with power,
+mTorr, the higher-energy process of dissociative excitation                      especially at higher Cl2 percentages. Since the VUV photon
+of Cl2 to produce Cl emission14 is expected to be negligible.                    flux to the substrate increases with power between 300 and
+Hence, ICl/IAr is expected to be proportional to Cl number                       500 W (assumed proportional to the 750.4 nm Ar line inten-
+density. At a given power, ICl/IAr scales nearly with the Cl2                    sity), the increase in ISi/IAr likely reflects an increasing
+to Ar feed gas ratio. At higher %Cl2, ICl/IAr increases subli-                   photo-assisted Si etching rate.
+nearly with power, as might be expected. For chlorine addi-                          To determine how much of the rise in ISi/IAr with increas-
+tion <50%, however, ICl/IAr is independent of power,                             ing power is due to the increasing dissociation of SiClx
+suggesting that Cl2 is mostly dissociated into Cl, as reported                   (x ¼ 1–4) etching products (eventually producing Si), a trace
+in Refs. 14 and 15.
+
+
+
+
+                                                                                 FIG. 5. (Color online) ISiCl/IAr as a function of power for different gas com-
+FIG. 3. (Color online) ICl/IAr as a function of power for different gas          positions. Open inverted triangles denote ISiCl/IAr when a trace amount of
+compositions.                                                                    SiCl4 gas was added to the gas mixture with no Si substrate present.
+
+
+JVST A - Vacuum, Surfaces, and Films
+061303-4 Sridhar et al.: Insights into the mechanism of in-plasma PAE                                                                 061303-4
+
+
+amount of SiCl4 gas was introduced in a 50%Cl2/50%Ar
+gas mixture, with no Si substrate present, to simulate the
+dissociation of SiClx etching products. At 320 W, a flow of
+0.3 sccm SiCl4 was found to produce a ISi/IAr value equal to
+that observed during Si etching in a 320 W 50%Cl2/50%Ar
+plasma. As power was then increased from 320 to 500 W,
+ISi/IAr increased 2-fold (red open inverted triangles in
+Fig. 4). During Si etching (with no added SiCl4), however,
+ISi/IAr increased 6.5-fold between 320 and 500 W (red solid
+inverted triangles in Fig. 4). If half of this increase is due to
+fragmentation of etching products, then a remaining factor
+of 3.2 is attributed to an increase in etching rate. This is
+somewhat in excess of the 1.9-fold increase in the product
+of VUV (using the 750.4 nm Ar line as a surrogate) and Cl
+fluxes determined from Figs. 2 and 3, respectively (the prod-
+                                                                    FIG. 6. (Color online) Time resolved optical emission of Ar, Cl, Si, SiCl,
+uct is simply given by the Cl emission intensity). Given the        and Cl2 recorded while etching Si in a 50%Cl2/50%Ar pulsed plasma.
+large mismatch in energies of the levels involved in Ar and         Plasma power was modulated between 500 and 300 W at a frequency of 1
+Si emission [13.5 (Ref. 16) and 5 eV, (Ref. 17), respec-            kHz and 50% duty cycle. Emission intensity of Si and SiCl are multiplied
+                                                                    by a factor of 2 for clarity.
+tively], the remaining unexplained factor of 1.8 increase of
+ISi/IAr with power is perhaps not surprising.
+    The dependence of ISi/IAr on power is much stronger with        period of plasma modulation. Other mechanisms such as
+increasing Cl2 percentage. This trend can be qualitatively          photo-stimulated desorption of products would also exhibit a
+explained as a transition from chlorine-starved conditions at       modulated signal.
+10% Cl2 addition, where etching is limited by the flux of Cl           Time resolved emission intensities of Ar, Si, SiCl, Cl, and
+and Cl2, and is nearly independent of VUV flux, to chlorine-        Cl2 were recorded during Si etching (Fig. 6). As the plasma
+saturated conditions at 71% Cl2 addition, where etching is          power is modulated from 500 to 300 W, emissions are also
+limited by photon flux and depends less on chlorine flux.           found to modulate. At 500 W, Ar emission intensity rises
+Additional complications in relating ISi/IAr to etching rate at     quickly and reaches a quasisteady state level which is about
+higher Cl2 percentages, due to changes in the electron energy       twice that at 300 W. This modulation in intensity is compara-
+distribution and the mismatch in threshold energies to excite       ble to the factor of 1.66 (500/300) modulation in the plasma
+the Ar and Si emitting levels (see above), precludes quantita-      power and is attributed to the change in electron density with
+tive interpretations. The trends in ISiCl/IAr as a function of      plasma power. Similar behavior is observed for the Cl emis-
+power and gas composition are very similar to those in ISi/         sion. Si and SiCl emissions rise and fall at slower rates, rela-
+IAr versus power and gas composition (Fig. 5). This implies         tive to Ar and Cl emissions. This is ascribed to the slower
+that ISiCl/IAr is also proportional to the Si etching rate.         modulation in the population of low energy electrons capa-
+                                                                    ble of exciting Si and SiCl emissions.
+B. Silicon etching in Cl2/Ar plasmas with pulsed power                 Time-resolved emission intensities for Cl, Si, and SiCl,
+                                                                    normalized to Ar emission, are presented in Fig. 7. ICl/IAr
+    The results presented above would be consistent with
+                                                                    exhibits small spikes when power first drops to 300 W, but
+either the lattice damage or carrier mediated processes dis-
+cussed earlier. To distinguish between these two mecha-
+nisms, Si was etched as power to the ICP coil was switched
+between 500 and 300 W at a frequency of 1 kHz and 50%
+duty cycle. The etching rate at 400 W was reported to be
+330 nm/min at 60 mTorr in a previous publication.2 During
+the 500 ls period at 500 W, approximately 0.00275 nm of Si
+is removed, which is about 1% of a monolayer. The density
+of any defects created by the VUV photons would not be
+altered during this period. In addition, the chlorine coverage
+on the surface is not expected to change significantly
+because the Cl flux (proportional to the Cl number density)
+is nearly the same at 500 and 300 W (see optical emission
+actinometry measurements below). Therefore, photo-assisted
+etching due to a photon-induced damage mechanism would
+not be modulated. Conversely, for a carrier-mediated etching
+mechanism, the etching rate would be modulated in propor-
+                                                                    FIG. 7. (Color online) Time resolved normalized emission intensities recorded
+tion to the VUV flux, and therefore plasma power, since the         during Si etching in a 50%Cl2/50%Ar plasma where power was modulated
+carrier lifetime is 500 ls (Ref. 12), i.e., much less than the     between 500 and 300 W, at a frequency of 1 kHz and 50% duty cycle.
+
+
+J. Vac. Sci. Technol. A, Vol. 34, No. 6, Nov/Dec 2016
+061303-5 Sridhar et al.: Insights into the mechanism of in-plasma PAE                                                                061303-5
+
+
+then settles to values that are nearly equal to (85% of) that      IAr in Fig. 7 to reach quasisteady state, after power changes
+at 500 W. Conversely, when power drops from 500 to                  from 500 to 300 W. The conclusion that emission from Si
+300 W, ISi/IAr spikes but finally settles to a quasisteady value    and SiCl is enriched near the surface is also supported by the
+that is about 25% of that at 500 W. ISiCl/IAr exhibits similar      fact that only 0.092 sccm of the equivalent product flow rate
+but less pronounced trends, settling to a value at the end          from etching in a 50%Cl2/50%Ar plasma at 320 W produces
+of the 300 W period that is about 60% that at 500 W. The            the same ISiCl/IAr and ISi/IAr values as that obtained from the
+more pronounced spikes in ICl/IAr and ISiCl/IAr accompany-          addition of 0.3 sccm of SiCl4 background gas, as discussed
+ing power switching are due to the lower-energy emitting            above. The ratio of 0.3/0.092 ¼ 3.3 is comparable to the fac-
+levels of Si and SiCl being less sensitive to rapid transients      tor of 6.1 found above.
+in Te, compared with Ar. The modulation in ISi/IAr and ISiCl/          It appears that Cav is also modulated, as verified by experi-
+IAr suggests that the Si etching rate is also modulated.            ments and simple estimates based on the Si loss processes.
+    The time response of the normalized emission intensities        Emission signals shown in Fig. 8 were recorded through a
+may be understood by considering the localized and global           window on the boundary electrode that is about 10 cm away
+Si production and loss mechanisms. For an etching rate of           from the sample stage. ISi/IAr was recorded while etching sili-
+330 nm/min (measured under similar conditions2), the flux           con in the power-modulated plasma. The signal modulated by
+of Si-containing products is FSiClx ¼ 2.78  1016 cm2 s1.         a factor of 1.67 (power ratio ¼ 500/300) which is similar to
+For the 1.5 cm2 sample, this corresponds to a flow rate of          the modulation of the signal recorded with a trace amount of
+0.092 sccm. For the Cl2 and Ar feed gas flow rates of 25 and        SiCl4, where the Si emission is solely due to the dissociation
+25 sccm (50%Cl2/50%Ar), the total flow rate through the             of SiCl4 (also shown in Fig. 8). This modulation in Si emis-
+reactor is between 50 (if no Cl2 dissociation) and 75 sccm          sion intensity is less compared to the modulation in Cl
+(for complete dissociation in Cl atoms). Taking the average         observed in the vicinity (l ¼ 1 cm) of the substrate (Fig. 7).
+of the two, the mole fraction of Si etching products released          Away from the Si surface, the loss of Si etch products in
+into the reactor is 0.092/67 ¼ 1.37  103. An upper limit to       the plasma is due to pumping, as well as reactions on the
+the partial pressure in the reactor (if no Si products deposit      walls, and in the gas-phase. At 60 mTorr and 50 sccm, the
+on the walls) is then 0.08 mTorr at the total pressure of           gas residence time within the combined 10 l volume of the
+60 mTorr. If the gas temperature is 600 K (typical for these        plasma chamber and tubing above the pump is 1 s. If we
+conditions), then this corresponds to a number density, Cav,        just take the 1 l discharge tube volume, then the gas resi-
+of about 1.4  1012 cm3 for the background etching product         dence time is 0.1 s. Both are much longer than the 1 ms mod-
+gas in the chamber.                                                 ulation period. For a cylindrical chamber of radius R and
+    The number density above the sample will be enriched in         height h, the loss to the walls by diffusion and reaction is
+primary products of Si etching. The mean free path at 60            given by21
+mTorr is 0.1 cm, thus at a distance of l ¼ 1 cm from the sur-
+face, desorbing products will be escaping by ordinary diffu-            1   K2   V 2ð2  cÞ
+                                                                          ¼    þ            ;                                               (2)
+sion. At 600 K and 60 mTorr, the binary diffusion coefficient           kd Dbin A cvth
+Dbin for SiCl3, SiCl2, SiCl, and Si in Ar was estimated to be
+3570, 4080, 5230, and 4480 cm2/s, respectively, from                where V/A (¼ Rh/2[R þ h]) is the volume to surface area
+Chapman–Enskog           theory,19     using      Lennard-Jones     ratio of the chamber, K is an effective length (1/K2 ¼ [p/h]2
+parameters.  20                                                     þ [2.405/R]2),18 and c is the probability that the species
+    The reactor geometry was approximated in 1D as a Si sur-
+face a distance H from a plane at which diffusing species
+evolving from the surface (i.e., etching products, SiClx) are
+removed from the gas through pumping or are depositing on
+the walls. Then, the concentration of species at a distance
+l from the surface, Cl, relative to the average concentration,
+Cav, in the reactor (defined above) is given by
+                                  
+                    FSiClx H
+    Cl =Cav ¼ 1 þ               l ;                         (1)
+                   Cav Dbin 2
+
+where a linear concentration profile was assumed. Equating
+H with the discharge tube radius of 4.3 cm, and assuming a
+uniform temperature of 600 K yields a value of Cl/Cav ¼ 6.1
+at a distance of l ¼ 1 cm from the substrate surface.
+Therefore, the large majority of the signal is coming from
+the primary products diffusing through the near-surface             FIG. 8. Time resolved ISi/IAr in a 50%Cl2/50%Ar plasma where power is
+                                                                    modulated between 500 and 300 W, recorded through a window on the top
+region imaged by the spectrometer optics. The time it takes
+                                                                    flange. The modulation of the signal in the background gas (thicker line) is
+for products to reach the 1 cm distance from the Si surface is      due to the dissociation of the etch products alone (no Si sample present) by
+l2/D  225 ls, or about the time it takes for ISi/IAr and ISiCl/   adding 0.1 sccm of SiCl4.
+
+
+JVST A - Vacuum, Surfaces, and Films
+061303-6 Sridhar et al.: Insights into the mechanism of in-plasma PAE                                                             061303-6
+
+
+(etch product) sticks to the wall. Si and SiCl have wall stick-     be obtained in a cw plasma, under otherwise the same oper-
+ing probabilities greater than those for the higher chloride        ating conditions. This disparity could be due to a long time
+etching products.22,23 Assuming that they are lost at the           scale process (for example, changing wall conditions).
+walls (and probably converted to higher chlorides that subse-
+quently desorb) with a high 50% probability (i.e., c ¼ 0.5),        IV. SUMMARY
+and further assuming the volume is defined by just the dis-             OES was used to study in-plasma photo-assisted etching
+charge tube and not the downstream chamber (R ¼ 4.3 cm,             (PAE) of p-Si in Cl2-Ar plasmas at 60 mTorr, without sub-
+h ¼ 17.8 cm, and V ¼ 1 L), then 1/kd is estimated to be
+                                                                    strate bias. The light intensity from key species (Si, Ar, Cl,
+1 ms, or about equal to the modulation period.
+                                                                    and SiCl) was monitored in both cw and pulsed plasmas.
+   A far more important loss process, at least for Si, is the
+                                                                    The emission intensity ratio, ISi/IAr, was found to increase
+gas phase reaction with Cl2
+                                                                    super-linearly with plasma power during silicon etching in
+   Si þ Cl2 ! SiCl þ Cl:                                    (3)     cw plasmas. To account for the contribution to this signal
+                                                                    from the dissociation of silicon etch products, a trace amount
+With a reported rate coefficient of 3.3  1010 cm3 s1,24          of SiCl4 gas was introduced into the plasma (without a Si
+this is the dominant loss process. Even if Cl2 were 90% dis-        substrate present) to simulate the emission of etching prod-
+sociated, this reaction would occur in 100 ls, i.e., much          ucts. With added SiCl4, it was found that the ratio ISi/IAr
+faster than the modulation period and the time for loss at the      increased roughly by a factor of two, which was smaller
+walls. A similar process for SiCl, forming SiCl2, could also        compared to the six fold increase observed while etching sil-
+be the rate-limiting reaction.                                      icon (no added SiCl4). This super-linear increase in the sig-
+    The lifetime for the loss of Cl atoms to the walls by diffu-    nal may be attributed to the addition of silicon etch products
+sion and recombination was estimated from Eq. (2) to be             into the plasma due to PAE that increases with power. The
+6.4 ms for a recombination coefficient of c ¼ 0.04 (Ref. 25)        increase in PAE with power is due to the corresponding
+on plasma-conditioned stainless steel. A lower average              increase in the VUV photon flux to the substrate.
+recombination probability is expected in the present case               Time resolved emission was also recorded during Si etch-
+because of the more inert alumina tube surface, favoring a          ing in a pulsed plasma where the power was modulated
+still longer lifetime for Cl, and thus much longer than the         between 500 and 300 W. The time evolution of the signal
+1 ms modulation period. Therefore, the Cl atom density (pro-        (ISi/IAr) over the pulse period was explained based on the
+portional to the ICl/IAr intensity ratio) recorded in the pulsed    rate of production and loss of the silicon etch products. It
+plasma is hardly modulated (Fig. 7).                                was found that the region in the immediate vicinity of the
+    Assuming that the Si and SiCl emission signals are              sample, where the emission signals were recorded, was
+mostly coming from species that have not reached the walls          enriched with the etching products in comparison to the reac-
+and become part of the background gas, we can finally               tor bulk. The contribution to the signal due to back diffusion
+determine how the instantaneous etching rate scales with            of the etching products was minimal, and modulation of the
+instantaneous power. As given above (Fig. 7), ISi/IAr is 3.8        signal was mainly due to the modulation of the PAE rate
+times higher at 500 W than at 300 W. To remove the portion          with power. The observation of a substantially modulated
+of this increase that is due to increased fragmentation of          ISi/IAr signal rules out a damage-induced mechanism of in-
+SiClx products at higher power, we note that ISi/IAr pro-           plasma PAE since, if this mechanism was dominant, ISi/IAr
+duced by adding a trace of SiCl4 to the Cl2/Ar feed gas with        would not be modulated.
+no Si substrate present is 2.2 times higher at 500 W, com-
+pared with 300 W (derived from a linear least squares fit to
+                                                                    ACKNOWLEDGMENTS
+the open red inverted triangles in Fig. 4). Thus the corrected
+increase in ISi/IAr, which is expected to reflect the relative        This work was supported by the National Science
+change in instantaneous etching rate, is 3.8/2.2 ¼ 1.7, which       Foundation Grant No. PHY-1500518 and the Department of
+is comparable to the ratio of powers (1.67), as well as the         Energy, Office of Fusion Energy Science, Contract No. DE-
+ratio of Ar emission at 750.4 nm (2.0 from Fig. 6) that is          SC0001319.
+assumed to be proportional to the VUV flux. Similarly for           1
+                                                                      H. Shin, W. Zhu, V. M. Donnelly, and D. J. Economou, J. Vac. Sci.
+ISiCl/IAr, the corrected rise is 1.7 between 300 and 500 W
+                                                                      Technol., A 30, 021306 (2012).
+(using the data in Figs. 5 and 7). Therefore, it appears that       2
+                                                                      W. Zhu, S. Sridhar, L. Liu, E. Hernandez, V. M. Donnelly, and D. J.
+the instantaneous etching rate is proportional to the instanta-       Economou, J. Appl. Phys. 115, 203303 (2014).
+                                                                    3
+neous VUV flux.                                                       S. D. Athavale and D. J. Economou, J. Vac. Sci. Technol., B 14, 3702
+                                                                      (1996).
+    Lastly, it has to be mentioned that the ratio of ISi/IAr        4
+                                                                      H. Okano, Y. Horiike, and M. Sekine, Jpn. J. Appl. Phys., Part 1 24, 68
+(Fig. 4) in a cw plasma at 500 W to that at 300 W (0.491/             (1985).
+0.076  6.5), is higher than the ratio of the quasisteady state     5
+                                                                      F. A. Houle, Phys. Rev. B 39, 10120 (1989).
+                                                                    6
+values of ISi/IAr (Fig. 7) in a pulsed plasma operating               W. Sesselmann, E. Hudeczek, and F. Bachmann, J. Vac. Sci. Technol., B
+                                                                      7, 1284 (1989).
+between 500 and 300 W (3.4). This implies that, under              7
+                                                                      T. Yunogami, T. Mizutani, K. Suzuki, and S. Nishimatsu, Jpn. J. Appl.
+the conditions used, the modulation period of the pulsed              Phys., Part 1 28, 2172 (1989).
+                                                                    8
+plasma is not long enough to reach the plateau that would             J. Lee and D. B. Graves, J. Phys. D: Appl. Phys. 43, 425201 (2010).
+
+
+J. Vac. Sci. Technol. A, Vol. 34, No. 6, Nov/Dec 2016
+061303-7 Sridhar et al.: Insights into the mechanism of in-plasma PAE                                                                            061303-7
+
+9                                                                               17
+   J. Shoeb, M. M. Wang, and M. J. Kushner, J. Vac. Sci. Technol., A 30,           W. F. Meggers, B. F. Scribner, and C. H. Corliss, Tables of Spectral Line
+   041303 (2012).                                                                  Intensities (U.S. National Bureau Standards, Washington DC, 1975).
+10                                                                              18
+   S. Samukawa, B. Jinnai, F. Oda, and Y. Morimoto, Jpn. J. Appl. Phys.,           C. Lee and M. A. Lieberman, J. Vac. Sci. Technol., A 13, 368 (1995).
+                                                                                19
+   Part 2 46, L64 (2007).                                                          R. B. Bird, E. N. Lightfoot, and W. E. Stewart, Transport Phenomena
+11
+   S. Samukawa, Jpn. J. Appl. Phys., Part 1 45, 2395 (2006).                       (Wiley, New York, 2002).
+12                                                                              20
+   S. Avasthi, G. Vertelov, J. Schwartz, and J. C. Sturm, IEEE Photovoltaic        T. Moore, B. Brady, and L. R. Martin, Combust. Flame 146, 407 (2006).
+                                                                                21
+   Specialists Conference (2009), p. 001681.                                       G. Cunge, P. Bodart, M. Brihoum, F. Boulard, T. Chevolleau, and N.
+13
+   E. A. Ogryzlo, D. E. Ibbotson, D. L. Flamm, and J. A. Mucha, J. Appl.           Sadeghi, Plasma Sources Sci. Technol. 21, 024006 (2012).
+                                                                                22
+   Phys. 67, 3115 (1990).                                                          C. Lee, D. B. Graves, and M. A. Lieberman, Plasma Chem. Plasma
+14
+   N. C. M. Fuller, I. P. Herman, and V. M. Donnelly, J. Appl. Phys. 90,           Process. 16, 99 (1996).
+                                                                                23
+   3182 (2001).                                                                    G. Cunge, M. Kogelsehatz, and N. Sadeghi, Plasma Sources Sci. Technol.
+15
+   S. C. Deshmukh and D. J. Economou, J. Appl. Phys. 72, 4597 (1992).              13, 522 (2004).
+16                                                                              24
+   A. R. Striganov and N. S. Sventitskii, Tables of Spectral Lines of Neutral      D. Husain and P. E. Norris, J. Chem. Soc. Faraday Trans. 2, 93 (1978).
+                                                                                25
+   and Ionized Atoms (Springer Science & Business Media, New York, 2013).          M. V. Malyshev and V. M. Donnelly, J. Appl. Phys. 88, 6207 (2000).
+
+
+
+
+JVST A - Vacuum, Surfaces, and Films
+

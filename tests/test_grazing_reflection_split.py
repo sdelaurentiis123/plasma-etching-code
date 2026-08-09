@@ -3,7 +3,10 @@
 import numpy as np
 import pytest
 
-from petch.boundary_transport_3d import split_grazing_ion_reflection
+from petch.boundary_transport_3d import (
+    split_chang_sawin_chlorine_ion_reflection,
+    split_grazing_ion_reflection,
+)
 from petch.surface_kinetics import FaceResolvedEnergeticFlux
 
 
@@ -126,3 +129,60 @@ def test_empty_options_dict_activates_reflection_in_gather():
         mesh_length_unit_m=1e-6, face_quadrature_points=3, device="cpu",
         grazing_ion_reflection={})
     assert "Ar+:hot_neutral" in result.hit_probability
+    assert any("reflection enabled" in item for item in result.known_limitations)
+
+
+def test_chang_chlorine_large_event_ledger_uses_extended_precision():
+    """A feature solve carries many more events than a hand-sized unit mesh;
+    its conservation certificate must not depend on float64 reduction order."""
+    verts, faces, areas, centroids, normals = _box_trench_mesh()
+    count = 50_000
+    direction = np.tile([-0.5, 0.0, -np.sqrt(0.75)], (count, 1))
+    pop = FaceResolvedEnergeticFlux(
+        "Cl+", 6, np.zeros(count, dtype=int),
+        np.linspace(0.9e14, 1.1e14, count), np.full(count, 100.0),
+        np.full(count, 0.5), event_incident_direction=direction)
+    _, _, diag = split_chang_sawin_chlorine_ion_reflection(
+        pop, verts, faces, areas, centroids, normals,
+        domain_size=(1.0, 1.0, 1.0), periodic_lateral=False,
+        extruded_symmetrize=False)
+
+    assert abs(diag["relative_rate_closure_residual"]) < 2.0e-10
+
+
+def test_chang_chlorine_normal_incidence_reacts_without_reflection():
+    verts, faces, areas, centroids, normals = _box_trench_mesh()
+    pop = FaceResolvedEnergeticFlux(
+        "Cl+", 6, np.array([4]), np.array([1.0e19]),
+        np.array([100.0]), np.array([1.0]),
+        event_incident_direction=np.array([[0.0, 0.0, -1.0]]))
+    reacted, secondary, diag = split_chang_sawin_chlorine_ion_reflection(
+        pop, verts, faces, areas, centroids, normals,
+        domain_size=(1.0, 1.0, 1.0), periodic_lateral=False,
+        extruded_symmetrize=False)
+
+    assert secondary is None
+    assert reacted.event_flux_m2_s[0] == pytest.approx(1.0e19)
+    assert diag["reacted_rate"] == pytest.approx(1.0e19 * areas[4])
+    assert diag["reflected_rate"] == 0.0
+    assert diag["relative_rate_closure_residual"] == pytest.approx(0.0)
+
+
+def test_chang_chlorine_grazing_remainder_cascades_at_full_energy():
+    verts, faces, areas, centroids, normals = _box_trench_mesh()
+    direction = np.array([[-0.02, 0.0, -0.9998]])
+    direction /= np.linalg.norm(direction)
+    pop = FaceResolvedEnergeticFlux(
+        "Cl+", 6, np.array([0]), np.array([2.0e19]),
+        np.array([100.0]), np.array([0.02]),
+        event_incident_direction=direction)
+    reacted, secondary, diag = split_chang_sawin_chlorine_ion_reflection(
+        pop, verts, faces, areas, centroids, normals,
+        domain_size=(1.0, 1.0, 1.0), periodic_lateral=False,
+        extruded_symmetrize=False)
+
+    assert secondary is None
+    assert diag["bounce_generations"] >= 1
+    assert diag["reflected_rate"] > 0.0
+    assert np.all(reacted.event_energy_eV == 100.0)
+    assert abs(diag["relative_rate_closure_residual"]) < 2.0e-10

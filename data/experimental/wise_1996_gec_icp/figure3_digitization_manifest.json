@@ -1,0 +1,89 @@
+{
+  "manifest_id": "WISE-1996-FIG3-GEC-ICP-RADIAL-R1",
+  "source": {
+    "citation": "R. S. Wise, D. P. Lymberopoulos, and D. J. Economou, Rapid two-dimensional self-consistent simulation of inductively coupled plasma and comparison with experimental data, Applied Physics Letters 68, 2499-2501 (1996)",
+    "official_url": "https://www.chee.uh.edu/sites/chbe/files/faculty/economou/apl_mpres_1996.pdf",
+    "pdf_sha256": "25bfedd2ebf45bcb62b237ea0a5e27d1e495850673d73f3ded4c8b8321999e65",
+    "pdf_page": 3,
+    "print_page": 2501,
+    "figure": "3",
+    "render_dpi": 300,
+    "render_size_px": [
+      2550,
+      3300
+    ],
+    "render_sha256": "067184f05194b8667387f67de51ca89821838d2d82539f58d48b1e7ed1927d6a"
+  },
+  "experiment_context": {
+    "reactor": "GEC reference-cell chlorine ICP",
+    "plasma_power_W": 180.0,
+    "pressure_mTorr": 20.0,
+    "flow_sccm": 20.0,
+    "frequency_MHz": 13.56,
+    "wafer_present": false,
+    "substrate_bias": false,
+    "diagnostic": "radially translated Langmuir probe",
+    "marker_source_reference": 15
+  },
+  "pixel_calibration_300dpi": {
+    "x_positions": {
+      "radial_distance_m": [
+        0.0,
+        0.0127,
+        0.0254,
+        0.0381,
+        0.0508,
+        0.0635,
+        0.0762
+      ],
+      "note": "visible marker train uses 0.5-inch (0.0127 m) increments; axis spans approximately 0--0.14 m"
+    },
+    "electron_density": {
+      "y_top_px": 181.0,
+      "y_bottom_px": 509.0,
+      "top_value": 16.0,
+      "bottom_value": 0.0
+    },
+    "electron_temperature": {
+      "y_top_px": 687.0,
+      "y_bottom_px": 1014.0,
+      "top_value": 4.0,
+      "bottom_value": 0.0
+    },
+    "plasma_potential": {
+      "y_top_px": 1148.0,
+      "y_bottom_px": 1477.0,
+      "top_value": 20.0,
+      "bottom_value": 0.0
+    }
+  },
+  "digitization": {
+    "marker_count": 21,
+    "method": "300-dpi checksum-pinned Poppler full-page render; full-resolution visual inspection; PIL grayscale component isolation and 11x11 filled-square density scan; printed-axis replay; PIL QA overlay",
+    "vertical_pixel_uncertainty": 3.0,
+    "axis_overlapping_marker_count": 3,
+    "source_measurement_uncertainty": "not printed in Figure 3; the paper separately warns that Langmuir-probe electron-temperature errors can be substantial"
+  },
+  "source_internal_checks": {
+    "electron_density_decreases_after_axis": true,
+    "plasma_potential_decreases_radially": true,
+    "electron_temperature_peak_eV": 3.8837920489296636
+  },
+  "claim_boundary": {
+    "valid": [
+      "independent radial reactor-state grade at the printed GEC condition",
+      "shape/width grade for a chlorine charged spatial model",
+      "electron-energy and Boltzmann-potential localization"
+    ],
+    "not_valid": [
+      "Lam reactor calibration",
+      "wafer flux or IEAD validation",
+      "feature-depth calibration or validation",
+      "absolute uncertainty-weighted chi-square because error bars are absent"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/wise_1996_gec_icp/figure3_radial_measurements.csv",
+    "sha256": "d01825ebb7417b97c7d33b2232b2c116c970cb1e5ab307c3292160e6b5e9c468"
+  }
+}

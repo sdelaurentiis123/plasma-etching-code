@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 133 sources by topic
+## Index — 146 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -102,6 +102,23 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`kim-2025-jjap-05sp15`](library/kim-2025-jjap-05sp15.md) | Kim et al., JJAP 64, 05SP15 (2025) | ABSTRACT/relay [VERIFY verbatim] |
 | [`kim-2025-jjap-096002`](library/kim-2025-jjap-096002.md) | Kim et al., JJAP 64, 096002 (2025) | ABSTRACT-ONLY |
 
+### Chlorine VUV generation and photo-assisted silicon etching
+
+| bibkey | source | status |
+|---|---|---|
+| [`shin-2012-chlorine-pae`](library/shin-2012-chlorine-pae.md) | Shin et al., direct photon/ion/Cl separation and PAE discovery | PRIMARY FULL TEXT + FIGURES VISUALLY AUDITED |
+| [`zhu-2014-chlorine-pae-spectrum`](library/zhu-2014-chlorine-pae-spectrum.md) | Zhu et al., wavelength-window and halogen-coverage PAE discrimination | PRIMARY FULL TEXT + TABLE II/FIGURE 8 VISUALLY AUDITED |
+| [`sridhar-2016-chlorine-pae`](library/sridhar-2016-chlorine-pae.md) | Sridhar et al., instantaneous power/Cl limitation of PAE | PRIMARY FULL TEXT READ |
+| [`hirsch-2020-pae-iae`](library/hirsch-2020-pae-iae.md) | Hirsch et al., ion/PAE anti-synergy | PRIMARY FULL TEXT + FIGURE 8 PIL-DIGITIZED |
+| [`du-2022-absolute-pae`](library/du-2022-absolute-pae.md) | Du et al., absolute 105-nm Si/photon yield | PRIMARY FULL TEXT + TABLE I VISUALLY AUDITED |
+| [`du-2022-absolute-vuv`](library/du-2022-absolute-vuv.md) | Du et al., Au-film absolute VUV metrology | PRIMARY FULL TEXT + METHOD VISUALLY AUDITED |
+| [`tian-2018-vuv-thesis`](library/tian-2018-vuv-thesis.md) | Tian, spectrum/trapping-resolved Ar/Cl2 equipment model | PRIMARY FULL THESIS READ + FIGURES 5.10/5.12 PIL-DIGITIZED |
+| [`nist-argon-persistent-lines`](library/nist-argon-persistent-lines.md) | NIST, evaluated Ar I 104.8/106.7-nm resonance A-values | PRIMARY EVALUATED DATABASE TABLE READ |
+| [`woodworth-1999-commercial-vuv`](library/woodworth-1999-commercial-vuv.md) | Woodworth et al., absolute commercial-etcher Cl VUV | PRIMARY RECORD/ABSTRACT; FULL PDF OPEN |
+| [`lane-2000-lam-polysi`](library/lane-2000-lam-polysi.md) | Lane et al., Lam 9400SE pure-Cl2 poly-Si profiles/rate | ABSTRACT + PRIMARY RELAY; FULL PDF OPEN |
+| [`open-adas-cl0-vuv`](library/open-adas-cl0-vuv.md) | OPEN-ADAS Cl I collision strengths, branching, and NIST observed levels | PRIMARY DATABASE RECORDS; LICENSE-RESTRICTED RAW FILES NOT REDISTRIBUTED |
+| [`alkhayat-2019-cl1`](library/alkhayat-2019-cl1.md) | Alkhayat et al., measured 100--110 nm Cl I lifetimes/oscillator strengths | PRIMARY FULL TEXT + TABLES 1--2 READ |
+
 ### Reactor-scale and sheath closure models
 
 | bibkey | source | status |
@@ -126,6 +143,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | Lee & Lieberman, conserved Ar/O2/Cl2 global plasma model and Ar/Cl2 rate decks | PRIMARY FULL TEXT + EQUATIONS/TABLES 2--3 VISUALLY AUDITED |
 | [`lennon-1988-ionization`](library/lennon-1988-ionization.md) | Lennon et al., evaluated atomic electron-impact ionization rates | PRIMARY NIST FULL TEXT + EQ. 5--6/TABLES 1--2 PIXEL-AUDITED |
 | [`mahoney-1994-planar-icp`](library/mahoney-1994-planar-icp.md) | Mahoney et al., independent planar-argon ICP electron-state board | PRIMARY FULL TEXT + TABLE I/FIGURE 11 VISUALLY AUDITED |
+| [`miller-1995-gec-icp`](library/miller-1995-gec-icp.md) | Miller et al., dimensioned GEC inductively coupled source and diagnostics | PRIMARY NIST FULL TEXT + FIGURE 1 VISUALLY AUDITED AT 300 DPI |
 | [`malyshev-1998-lam-cl2`](library/malyshev-1998-lam-cl2.md) | Malyshev et al., measured Te, ne, and Cl2 dissociation in a Lam Alliance TCP metal etcher | PRIMARY FULL TEXT + FIGURES 3, 7--8, 11 NATIVE-PIXEL PIL AUDIT + FOOTNOTE 16 EQUATION VISUAL AUDIT |
 | [`neufeld-1972-collision-integrals`](library/neufeld-1972-collision-integrals.md) | Neufeld, Janzen & Aziz, Lennard--Jones transport collision-integral correlations | PRIMARY ARTICLE SCAN TEXT READ; EQ. 2 AND TABLE-I/II (1,1) ROW VERIFIED; LOCAL PUBLISHER-PDF PIXEL AUDIT OPEN |
 | [`miller-1997`](library/miller-1997.md) | Miller & Riley (1997) sheath model | not-fetched |
@@ -137,6 +155,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`stafford-2009-cl-wall`](library/stafford-2009-cl-wall.md) | Stafford et al., direct Cl recombination on plasma-conditioned stainless steel | PRIMARY FULL TEXT + FIGURES 8--10 VISUALLY AUDITED AT 450 DPI |
 | [`wang-2013-cl-fine-structure`](library/wang-2013-cl-fine-structure.md) | Wang et al., fine-structure-resolved e-Cl elastic, excitation, and superelastic cross sections | PRIMARY FULL TEXT READ ONLINE; NOT LOCALLY ARCHIVED |
 | [`wang-olthoff-1999-ion-flux`](library/wang-olthoff-1999-ion-flux.md) | Wang & Olthoff, absolute mass-resolved Cl2/Ar ion fluxes and IEDs | PRIMARY NIST FULL TEXT + FIGURE 9 PIL-AUDITED AT 600 DPI |
+| [`wise-1996-rapid-2d-cl`](library/wise-1996-rapid-2d-cl.md) | Wise, Lymberopoulos & Economou, rapid quasineutral 2-D chlorine ICP | PRIMARY FULL TEXT + EQUATIONS/BOUNDARIES VERIFIED + FIGURE 3 PIL-DIGITIZED |
 
 ### Transport references and analytic benchmarks
 
@@ -237,6 +256,8 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | petch constant, law or decision | source | what it fixed / why it is there |
 |---|---|---|
 | Conserved global-model power/particle balance and cylindrical effective-loss area | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | chemistry-agnostic 0-D reactor skeleton; electrons explicit so plasma shorthand cannot hide charge error |
+| GEC-ICP central geometry, coil, and diagnostic plane | [`miller-1995-gec-icp`](library/miller-1995-gec-icp.md), [`wise-1996-rapid-2d-cl`](library/wise-1996-rapid-2d-cl.md) | 165.1 mm electrode, 40.5 mm gap, 15 mm probe plane, five-turn coil, and 21 radial chlorine-plasma markers form an independent spatial-reactor gate; neither paper supplies a generator-to-plasma field law or wafer boundary |
+| Quasineutral Boltzmann electron-pressure closure in chlorine | [`wise-1996-rapid-2d-cl`](library/wise-1996-rapid-2d-cl.md), [`miller-1995-gec-icp`](library/miller-1995-gec-icp.md) | direct Figure-3 density/temperature integration reconstructs the independently measured radial plasma-potential curve with a 5.07% unweighted MAPE after only the physically arbitrary axis gauge; absent source error bars prevent an uncertainty-weighted pass |
 | Argon Table-3 electron-impact rates and Bohm/diffusive wall-loss forms | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | first no-fit reactor verification deck; empirical/regressed evidence retained, not called first-principles |
 | Chlorine Table-2 particle rates and six-species stoichiometric deck | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | exact 300-dpi-audited transcription; atoms and charge close, while omitted Cl fine structure remains an energy-ledger boundary |
 | Atomic-Cl ionization `log10` law and `0.1 < Te/I < 10` domain | [`lennon-1988-ionization`](library/lennon-1988-ionization.md) | resolves Lee Table 2's ambiguous printed `log`; replaced the initial natural-log interpretation before any solver used it |
@@ -244,6 +265,12 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Cl2 evaluated total-ionization cross section and unresolved `Cl2+`/`Cl+` branch | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 29-point 300-dpi-audited aggregate rate; no scalar uncertainty invented because source datasets disagree beyond combined uncertainty; cannot drive species-resolved sheath delivery |
 | Cl2 dissociative-attachment particle and incident-energy moments | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | 42-point 500-dpi-audited Table 16 integrated only over its printed 0.05--11.8 eV support; `<sigma v>` and `<sigma v E>` remain separate, missing EEDF tails are exposed, and no complete reactor-rate claim is allowed |
 | Detailed chlorine electron-energy ledger topology and source-reproduction boundary | [`kemaneci-2014-chlorine-global`](library/kemaneci-2014-chlorine-global.md) | equations split chemical, wall, and elastic losses; Figure 10 gives an approximate 2.50 eV atomic asymptote, COMSOL separately uses 4 eV, and the evaluated 2.4793 eV threshold remains the physical authority |
+| Deterministic cylinder-to-wafer photon view factor and 139-nm emissivity proxy | [`kemaneci-2014-chlorine-global`](library/kemaneci-2014-chlorine-global.md), [`tian-2018-vuv-thesis`](library/tian-2018-vuv-thesis.md) | fixed quadrature reduces the exact isotropic cosine kernel to a disk-overlap integral; Kemaneci reaction 18 supplies only a transparent emission sensitivity because trapping/quenching are unresolved |
+| Deterministic resonance-line escape and axisymmetric moment interface | [`nist-argon-persistent-lines`](library/nist-argon-persistent-lines.md), [`tian-2018-vuv-thesis`](library/tian-2018-vuv-thesis.md) | NIST wavelengths/A-values fix line-specific Voigt absorption; projected-chord quadrature resolves the optically thick uniform limit and the axisymmetric solver consumes spatial temperature/absorber/emitter moments; the held-out Tian board rejects a single homogeneous escape factor |
+| Line-resolved neutral-Cl shortwave source sensitivity | [`open-adas-cl0-vuv`](library/open-adas-cl0-vuv.md), [`alkhayat-2019-cl1`](library/alkhayat-2019-cl1.md) | observed-energy/direct-coronal hybrid predicts strong 109--120 nm but negligible atomic emission in Du's 105-nm band; raw ADAS data remain license-gated and unresolved/mixed levels are excluded |
+| Absolute 105--107 nm chlorine-assisted Si photoetch yield `90--244 Si/photon` | [`du-2022-absolute-pae`](library/du-2022-absolute-pae.md), [`du-2022-absolute-vuv`](library/du-2022-absolute-vuv.md) | measured tandem-source photon flux and rate increment; runtime enforces wavelength scope and refuses transfer to 139 nm |
+| Chlorine PAE wavelength and ion-damage boundary | [`zhu-2014-chlorine-pae-spectrum`](library/zhu-2014-chlorine-pae-spectrum.md), [`hirsch-2020-pae-iae`](library/hirsch-2020-pae-iae.md) | below-120-nm photons dominate; energetic-ion exposure suppresses PAE, while the digitized Figure-8 curve remains a pulsed-DC sensitivity rather than an RF law |
+| Commercial chlorine-reactor VUV amplitude band | [`woodworth-1999-commercial-vuv`](library/woodworth-1999-commercial-vuv.md) | 0.7e14 reactive to 4e14 nonreactive photons cm^-2 s^-1 above 8.8 eV is an abstract-level plausibility comparator, not a landed reactor normalization |
 | Elastic electron momentum-transfer energy moments | [`kemaneci-2014-chlorine-global`](library/kemaneci-2014-chlorine-global.md) | exact stationary-target two-body transfer uses the same-cross-section `<sigma_m v E>` moment; Kemaneci Eq. 18's `3 Te me/M <sigma_m v>` remains a separately named source-replay approximation and is about 25% lower for a constant cross section |
 | Direct pure-Cl2 electron-swarm board | [`gonzalez-magana-de-urquijo-2018-cl2`](library/gonzalez-magana-de-urquijo-2018-cl2.md) | 52 hash-locked native-table markers cover drift velocity, effective ionization, and longitudinal diffusion with source-wide uncertainty intervals; validates collision transport only, never reactor flux or feature depth |
 | Conservative two-term EEPF operator and moment definitions | [`hagelaar-pitchford-2005-bolsig`](library/hagelaar-pitchford-2005-bolsig.md) | primary equations fix EEPF normalization, energy-space Scharfetter--Gummel fluxes, rate/energy moments, and two-term evidence limits; implementation remains non-predictive until collision, swarm, reactor, and wafer gates pass |

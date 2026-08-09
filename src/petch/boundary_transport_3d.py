@@ -899,6 +899,224 @@ def split_grazing_ion_reflection(
     return population, secondary, diagnostics
 
 
+def split_chang_sawin_chlorine_ion_reflection(
+        population, verts, faces, areas, centroids, normals, *,
+        domain_size, periodic_lateral, device=None, launch_offset=1e-4,
+        max_bounces=16, minimum_weight=1e-6, extruded_symmetrize=True):
+    """Mahorowala/Chang chlorine reaction-or-specular-reflection cascade.
+
+    Mahorowala thesis Eq. 3.13 defines ion consumption as the normalized
+    yield/coverage weighted angular response ``alpha`` and scattering as
+    ``1-alpha``.  Section 3.2.3 makes the scattered branch specular with full
+    retained energy.  For poly-Si's ion-enhanced response, Chang's measured
+    class-2 curve is unity through 45 degrees and then falls with projected
+    flux.  Every deterministic incident event is split by those weights and
+    the reflected remainder is traced until reaction, escape, or the declared
+    tail cutoff.
+
+    The returned population contains *only consumed/reacting* flux, including
+    later bounces.  It keeps the original ion name because the surface law
+    acts on the ion at its final reacting collision, not at first contact.
+    """
+    from .surface_kinetics import FaceResolvedEnergeticFlux as _Population
+
+    direction = population.event_incident_direction
+    if direction is None:
+        raise ValueError("chlorine ion reflection requires incident directions")
+    areas = np.asarray(areas, dtype=float)
+    centroids = np.asarray(centroids, dtype=float)
+    normals = np.asarray(normals, dtype=float)
+    selected_device = DEVICE if device is None else str(device)
+    mesh = wp.Mesh(
+        points=wp.array(np.asarray(verts, dtype=np.float32), dtype=wp.vec3,
+                        device=selected_device),
+        indices=wp.array(np.asarray(faces, dtype=np.int32).ravel(),
+                         dtype=wp.int32, device=selected_device))
+    domain = np.asarray(domain_size, dtype=float)
+    if (
+        int(max_bounces) != max_bounces
+        or int(max_bounces) <= 0
+        or not np.isfinite(minimum_weight)
+        or not 0.0 < minimum_weight < 1.0
+        or not np.isfinite(launch_offset)
+        or launch_offset <= 0.0
+    ):
+        raise ValueError("invalid chlorine ion-reflection controls")
+
+    face = np.asarray(population.event_face, dtype=int)
+    initial_rate = (
+        np.asarray(population.event_flux_m2_s, dtype=float) * areas[face]
+    )
+    rate = initial_rate.copy()
+    energy = np.asarray(population.event_energy_eV, dtype=float)
+    cosine = np.clip(
+        np.asarray(population.event_cosine_incidence, dtype=float), 0.0, 1.0
+    )
+    dirs = np.asarray(direction, dtype=float)
+    dirs = dirs / np.maximum(
+        np.linalg.norm(dirs, axis=1, keepdims=True), 1e-300
+    )
+    # This cascade can contain millions of quadrature-face events.  A plain
+    # float64 reduction accumulates O(N eps) bookkeeping drift large enough to
+    # trip the deliberately tight physical conservation gate even though each
+    # event is split conservatively.  Keep the audit ledger in extended
+    # precision and convert only the reported scalars.
+    initial_total_ld = np.sum(initial_rate, dtype=np.longdouble)
+    initial_total = float(initial_total_ld)
+    reacted_total = np.longdouble(0.0)
+    reflected_total = np.longdouble(0.0)
+    escaped_total = np.longdouble(0.0)
+    truncated_total = np.longdouble(0.0)
+    diagnostics = {
+        "model": "mahorowala_eq3_13_chang_class2_specular_full_energy",
+        "incident_rate": initial_total,
+        "reacted_rate": 0.0,
+        "reflected_rate": 0.0,
+        "escaped_rate": 0.0,
+        "truncated_rate": 0.0,
+        "secondary_events": 0,
+        "bounce_generations": 0,
+    }
+    out_face, out_rate, out_energy, out_cos, out_dir = [], [], [], [], []
+    reference_rate = np.maximum(initial_total, 1e-300)
+    cos45 = float(np.cos(np.pi / 4.0))
+    for bounce in range(int(max_bounces) + 1):
+        reaction_probability = np.minimum(cosine / cos45, 1.0)
+        reacted = rate * reaction_probability
+        positive = reacted > 0.0
+        if np.any(positive):
+            out_face.append(face[positive].copy())
+            out_rate.append(reacted[positive].copy())
+            out_energy.append(energy[positive].copy())
+            out_cos.append(cosine[positive].copy())
+            out_dir.append(dirs[positive].copy())
+            reacted_total += np.sum(reacted[positive], dtype=np.longdouble)
+        # Form the reflected branch as the exact leftover of the represented
+        # incident event.  Two independent products, rate*p and rate*(1-p),
+        # acquire a coherent O(N eps) surplus in million-event feature
+        # gathers.  The residual form is both the physical leftover rule in
+        # Mahorowala Eq. 3.13 and conservative by construction.
+        continuing = rate - reacted
+        alive = continuing > float(minimum_weight) * reference_rate
+        truncated_total += np.sum(continuing[~alive], dtype=np.longdouble)
+        if not np.any(alive):
+            break
+        if bounce == int(max_bounces):
+            truncated_total += np.sum(continuing[alive], dtype=np.longdouble)
+            break
+        diagnostics["bounce_generations"] = bounce + 1
+        face_a = face[alive]
+        normal_a = normals[face_a]
+        dir_a = dirs[alive]
+        specular = dir_a - 2.0 * np.einsum(
+            "rc,rc->r", dir_a, normal_a
+        )[:, None] * normal_a
+        if extruded_symmetrize and specular.shape[0]:
+            specular[:, 1] = 0.0
+        specular /= np.maximum(
+            np.linalg.norm(specular, axis=1, keepdims=True), 1e-300
+        )
+        origin = centroids[face_a] + float(launch_offset) * normal_a
+        count = len(face_a)
+        hit_face = wp.full(count, -1, dtype=int, device=selected_device)
+        hit_cos = wp.zeros(count, dtype=float, device=selected_device)
+        wp.launch(
+            _specular_secondary_hits_3d,
+            dim=count,
+            inputs=[
+                mesh.id,
+                wp.array(origin.astype(np.float32), dtype=wp.vec3,
+                         device=selected_device),
+                wp.array(specular.astype(np.float32), dtype=wp.vec3,
+                         device=selected_device),
+                float(domain[0]),
+                float(domain[1]),
+                float(domain[2]),
+                int(bool(periodic_lateral)),
+                hit_face,
+                hit_cos,
+            ],
+            device=selected_device,
+        )
+        hit_face_np = hit_face.numpy()
+        hit_cos_np = np.clip(hit_cos.numpy(), 0.0, 1.0)
+        landed = hit_face_np >= 0
+        continuing_alive = continuing[alive]
+        escaped_total += np.sum(
+            continuing_alive[~landed], dtype=np.longdouble)
+        if not np.any(landed):
+            break
+        face = hit_face_np[landed]
+        rate = continuing_alive[landed]
+        energy = energy[alive][landed]
+        cosine = hit_cos_np[landed]
+        dirs = specular[landed]
+        reflected_total += np.sum(rate, dtype=np.longdouble)
+        diagnostics["secondary_events"] += int(landed.sum())
+
+    if not out_face:
+        # A fully grazing measure may escape without reaction.  Retain a
+        # zero-weight event so the typed population remains representable.
+        return _Population(
+            population.name,
+            population.face_count,
+            population.event_face[:1],
+            np.zeros(1),
+            population.event_energy_eV[:1],
+            population.event_cosine_incidence[:1],
+            event_incident_direction=population.event_incident_direction[:1],
+        ), None, diagnostics
+    all_face = np.concatenate(out_face)
+    all_rate = np.concatenate(out_rate)
+    all_energy = np.concatenate(out_energy)
+    all_cos = np.concatenate(out_cos)
+    all_dir = np.concatenate(out_dir)
+    if extruded_symmetrize:
+        keys, groups = _extrusion_strip_groups(centroids, normals)
+        new_face, new_rate, new_energy, new_cos, new_dir = [], [], [], [], []
+        for index in range(len(all_face)):
+            members = groups[tuple(keys[all_face[index]])]
+            share = all_rate[index] / len(members)
+            for member in members:
+                new_face.append(member)
+                new_rate.append(share)
+                new_energy.append(all_energy[index])
+                new_cos.append(all_cos[index])
+                new_dir.append(all_dir[index])
+        all_face = np.asarray(new_face, dtype=int)
+        all_rate = np.asarray(new_rate, dtype=float)
+        all_energy = np.asarray(new_energy, dtype=float)
+        all_cos = np.asarray(new_cos, dtype=float)
+        all_dir = np.asarray(new_dir, dtype=float)
+    reacted_population = _Population(
+        population.name,
+        population.face_count,
+        all_face,
+        all_rate / areas[all_face],
+        all_energy,
+        all_cos,
+        event_incident_direction=all_dir,
+    )
+    diagnostics["reacted_rate"] = float(reacted_total)
+    diagnostics["reflected_rate"] = float(reflected_total)
+    diagnostics["escaped_rate"] = float(escaped_total)
+    diagnostics["truncated_rate"] = float(truncated_total)
+    closure_ld = reacted_total + escaped_total + truncated_total
+    diagnostics["relative_rate_closure_residual"] = float(
+        (closure_ld - initial_total_ld)
+        / max(initial_total_ld, np.longdouble(1.0))
+    )
+    if abs(diagnostics["relative_rate_closure_residual"]) > 2.0e-10:
+        raise RuntimeError(
+            "chlorine reflection rate ledger does not close: "
+            f"incident={initial_total:.17g}, reacted={diagnostics['reacted_rate']:.17g}, "
+            f"escaped={diagnostics['escaped_rate']:.17g}, "
+            f"truncated={diagnostics['truncated_rate']:.17g}, "
+            f"relative_residual={diagnostics['relative_rate_closure_residual']:.17g}"
+        )
+    return reacted_population, None, diagnostics
+
+
 def _extrusion_strip_groups(centroids, normals):
     """Group faces into y-strips: geometrically equivalent up to the extruded
     (y) coordinate, i.e. matching quantized (centroid_x, centroid_z, normal).
@@ -3455,7 +3673,15 @@ def gather_boundary_state_ballistic_3d(
             if grazing_ion_reflection is not None:
                 options = (dict(grazing_ion_reflection)
                            if isinstance(grazing_ion_reflection, Mapping) else {})
-                primary, secondary, reflection_diag = split_grazing_ion_reflection(
+                reflection_model = options.pop("model", "mcfpm")
+                splitter = (
+                    split_chang_sawin_chlorine_ion_reflection
+                    if reflection_model == "chang_sawin_chlorine"
+                    else split_grazing_ion_reflection
+                )
+                if reflection_model not in {"mcfpm", "chang_sawin_chlorine"}:
+                    raise ValueError("unknown ion-reflection model")
+                primary, secondary, reflection_diag = splitter(
                     primary, verts, faces, areas, centroids, normals,
                     domain_size=(domain_size if domain_size is not None
                                  else (bounds[1] - bounds[0],
@@ -3510,7 +3736,9 @@ def gather_boundary_state_ballistic_3d(
         transport_model="collisionless_deterministic_face_gather_3d",
         known_limitations=(
             "no intra-feature electric-field trajectory coupling",
-            "no surface reflection or neutral re-emission",
+            ("deterministic declared ion reflection enabled; no neutral re-emission"
+             if grazing_ion_reflection is not None
+             else "no surface reflection or neutral re-emission"),
             "no spatially varying boundary density",
             "triangle visibility quadrature requires refinement at partial occlusion",
             "float32 triangle-ray intersection",

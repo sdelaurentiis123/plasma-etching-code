@@ -1,0 +1,1611 @@
+{
+  "atomic_source": {
+    "calculated_level_count": 538,
+    "collision_physical_records_sha256": "f215093e9ab5ac36a202cdb353a0e3a3b9651982158ba105531fb44cab74c4e7",
+    "included_physics": [
+      "ground-fine-structure Boltzmann populations",
+      "direct electron excitation",
+      "radiative branching over all calculated lower levels"
+    ],
+    "matched_observed_level_count": 45,
+    "method": "observed NIST level separations plus OPEN-ADAS AUTOSTRUCTURE distorted-wave effective collision strengths and branching",
+    "missing_physics": [
+      "excited-state cascades",
+      "radiation trapping and escape outside the separately solved dominant 118.88 nm line",
+      "collisional and wall quenching",
+      "measured transition probabilities for every line"
+    ],
+    "nist_level_physical_records_sha256": "12905140158c763f9a1cc6efff4d27fb74ecbf77e2162c67726b8dc528d1f430",
+    "open_adas_personal_use_restriction_acknowledged": true,
+    "prediction_supported": false,
+    "raw_files_redistributed": false,
+    "resolved_observed_level_count": 59
+  },
+  "claim_class": "atomic-source sensitivity and exact measurement target",
+  "exact_experimental_blockers": [
+    "absolute line-resolved 109.2--110.9 and 118.88 nm wafer flux under each target condition",
+    "chlorinated-poly-Si photoetch yield at 109.7, 110.8, and 118.9 nm at 60 C",
+    "the same yields under the target 13.56 MHz RF ion waveform to resolve PAE/IAE anti-synergy",
+    "electromagnetic validation of the direct geometrical floor sensitivity for the 310 nm opening (2.6--2.8 wavelengths wide)"
+  ],
+  "feature_depth_fit_used": false,
+  "formal_depth_prediction_or_validation": false,
+  "input_boards": {
+    "deterministic_feature": "results/curated/reactor_to_feature_chlorine/mahorowala_1998_center_anchored_feature_depth_dx40nm_no_reflection.json",
+    "reactor_boundary": "results/curated/reactor_to_feature_chlorine/coupled_center_anchored_table4_feedback/mahorowala_1998_diagnostic_conditioned_depth_projection.json"
+  },
+  "radiation_transfer": {
+    "direct_absorbing_lamellar_floor_sensitivity_included": true,
+    "dominant_118p88_quadrature_receipt": {
+      "condition_run": 1,
+      "levels": [
+        {
+          "coherent_grid_points_per_lorentz_hwhm": 8.0,
+          "direction_quadrature_order": 6,
+          "frequency_quadrature_order": 24,
+          "label": "coarse",
+          "surface_quadrature_order": 6,
+          "wafer_escape_probability": 0.08740552457094515,
+          "wafer_photon_flux_m2_s": 9.058827024313766e+17
+        },
+        {
+          "coherent_grid_points_per_lorentz_hwhm": 8.0,
+          "direction_quadrature_order": 12,
+          "frequency_quadrature_order": 24,
+          "label": "production",
+          "surface_quadrature_order": 12,
+          "wafer_escape_probability": 0.08683192591679954,
+          "wafer_photon_flux_m2_s": 8.999378482419064e+17
+        },
+        {
+          "coherent_grid_points_per_lorentz_hwhm": 8.0,
+          "direction_quadrature_order": 16,
+          "frequency_quadrature_order": 24,
+          "label": "fine",
+          "surface_quadrature_order": 16,
+          "wafer_escape_probability": 0.08669298747049765,
+          "wafer_photon_flux_m2_s": 8.984978713545711e+17
+        }
+      ],
+      "partial_wafer_radial_discontinuity_split_exactly": true,
+      "passed_one_percent_gate": true,
+      "production_to_fine_relative_change": 0.0016026491917719987
+    },
+    "feature_scale_delivery_included": false,
+    "geometry_flux_length_m": 0.027289074816574433,
+    "line_opening_width_nm": 310.0,
+    "method": "transparent one-pass band integral plus conservative zonal partial-frequency redistribution for dominant 118.88 nm",
+    "oxide_mask_thickness_nm": 200.0,
+    "resonance_transfer_included_for_dominant_118p88_nm": true,
+    "uniform_emissivity_assumed": true,
+    "wafer_intercept_probability": 0.0908235630621939,
+    "wave_electromagnetics_included": false
+  },
+  "rows": [
+    {
+      "atomic_chlorine_density_m3": 7.219168381272222e+19,
+      "cl2_flow_sccm": 100.0,
+      "conserved_nonphoton_feature_depth_nm": 302.19472453101906,
+      "corresponding_surface_plane_depth_nm": 313.0461154348574,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.1860710813759127,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 44,
+        "linear_solver_relative_residual": 4.86484665116348e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 6.945032157683875e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 7.27171362797275e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08683192591679954,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 3.2559892031338534e+17,
+        "primary_line_emissivity_m3_s": 3.449394026426553e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 364.50267168643893,
+        "residual_closing_yield_at_wafer_si_per_photon": 67.82340628510497,
+        "terminal_probability_conservation_error_maximum": 2.925626407801474e-11,
+        "transition_probability_conservation_error_maximum": 1.1879386363489175e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 89993784824190.64,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.864542319465896e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 5.6542462273308575e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 2.7192310770840635e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.5244728708321442e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 8.817446087703889e-13,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 8.091370522055017e-13,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 3.956568978064659e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.1344930955585122e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 5.6734176968596104e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 213102.22373718471,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 1145273.2050643698,
+        "uniform_clear_volume_emissivity_m3_s": 1.0495794548967964e+16,
+        "uniform_clear_wafer_flux_cm2_s": 28642052270.618088
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.10482991131046221,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.03866677056533442,
+      "electron_density_m3": 2.5626151565791784e+16,
+      "electron_temperature_proxy_eV": 2.3419957236891937,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 400.0,
+      "observed_depth_nm": 393.75,
+      "rf_bias_power_W": 80.0,
+      "run": 1,
+      "target_optical_path_depth_nm": 593.75,
+      "unexplained_depth_nm": 91.55527546898094,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.1037457812274017e-11,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 109.53771674182187,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 588.6874840079355,
+          "uniform_clear_volume_emissivity_m3_s": 2.0419242109505503e+19,
+          "uniform_clear_wafer_flux_cm2_s": 55722222562404.28
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 2.0223951059209464e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 59.78148996954403,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 321.2830791732201,
+          "uniform_clear_volume_emissivity_m3_s": 3.741420897025452e+19,
+          "uniform_clear_wafer_flux_cm2_s": 102099914779222.58
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 8.16213070494929e+19,
+      "cl2_flow_sccm": 175.0,
+      "conserved_nonphoton_feature_depth_nm": 345.49978636005386,
+      "corresponding_surface_plane_depth_nm": 368.043420635915,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.16890035292017708,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 44,
+        "linear_solver_relative_residual": 4.0793473087103785e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 7.852187014801565e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 7.660409190752924e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08696062206094106,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 5.3128164437518957e+17,
+        "primary_line_emissivity_m3_s": 5.6283962142564794e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 305.63973339273616,
+        "residual_closing_yield_at_wafer_si_per_photon": 51.622658836461966,
+        "terminal_probability_conservation_error_maximum": 1.9973800391426266e-11,
+        "transition_probability_conservation_error_maximum": 1.021405182655144e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 147061020885805.44,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.816893681878355e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 5.484362745610651e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 2.6376243691782325e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.4854858640891493e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 8.554345258946768e-13,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 7.848540805847425e-13,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 3.840798450968935e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.0771664051710246e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 5.519694192894624e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 162696.78419511966,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 963270.8362190975,
+        "uniform_clear_volume_emissivity_m3_s": 1.7098978442714172e+16,
+        "uniform_clear_wafer_flux_cm2_s": 46661530201.02204
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.1707812005357407,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.06299306577137977,
+      "electron_density_m3": 3.795347994942822e+16,
+      "electron_temperature_proxy_eV": 2.3289842412857933,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 550.0,
+      "observed_depth_nm": 459.375,
+      "rf_bias_power_W": 80.0,
+      "run": 2,
+      "target_optical_path_depth_nm": 659.375,
+      "unexplained_depth_nm": 113.87521363994614,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.0707959376308924e-11,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 83.86625904757481,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 496.5428289377839,
+          "uniform_clear_volume_emissivity_m3_s": 3.3171251910415544e+19,
+          "uniform_clear_wafer_flux_cm2_s": 90521277514276.73
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.970710476491811e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 45.56917444936329,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 269.799166558873,
+          "uniform_clear_volume_emissivity_m3_s": 6.10489182493878e+19,
+          "uniform_clear_wafer_flux_cm2_s": 166596849757848.0
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 5.795841164493213e+19,
+      "cl2_flow_sccm": 25.0,
+      "conserved_nonphoton_feature_depth_nm": 245.65414415017673,
+      "corresponding_surface_plane_depth_nm": 249.37648683813453,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.23860915102901156,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 43,
+        "linear_solver_relative_residual": 4.418565373626965e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 5.575753486046232e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 6.586004229402386e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08660433856991957,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 1.4797521757591142e+17,
+        "primary_line_emissivity_m3_s": 1.5676490298992396e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 29.765843812809383,
+        "residual_closing_yield_at_wafer_si_per_photon": 7.1024027218366035,
+        "terminal_probability_conservation_error_maximum": 1.6849521777828613e-11,
+        "transition_probability_conservation_error_maximum": 1.099120794378905e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 40792353611656.6,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.7855270668408386e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 5.3729302474336e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 2.5840945799913508e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.4598215019267357e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 8.381753656974928e-13,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 7.689257042901093e-13,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 3.764820511902156e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.0394728113485034e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 5.418637710676107e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 22316.32773070794,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 93526.7052184205,
+        "uniform_clear_volume_emissivity_m3_s": 4757431185597387.0,
+        "uniform_clear_wafer_flux_cm2_s": 12982589555.84715
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.047516277774400574,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.01752649590039366,
+      "electron_density_m3": 1.5148370720197638e+16,
+      "electron_temperature_proxy_eV": 2.3203148444004937,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 250.0,
+      "observed_depth_nm": 250.0,
+      "rf_bias_power_W": 80.0,
+      "run": 3,
+      "target_optical_path_depth_nm": 450.0,
+      "unexplained_depth_nm": 4.345855849823266,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.0491802850829594e-11,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 11.525578275220777,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 48.30316953694465,
+          "uniform_clear_volume_emissivity_m3_s": 9.211545916297898e+18,
+          "uniform_clear_wafer_flux_cm2_s": 25137456568616.402
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.9366870397508112e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 6.243863490767202,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 26.1677453016378,
+          "uniform_clear_volume_emissivity_m3_s": 1.7003637835944503e+19,
+          "uniform_clear_wafer_flux_cm2_s": 46401354505902.53
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 7.10485804261808e+19,
+      "cl2_flow_sccm": 175.0,
+      "conserved_nonphoton_feature_depth_nm": 114.97617252695169,
+      "corresponding_surface_plane_depth_nm": 118.29215177263882,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.27888195529526216,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 44,
+        "linear_solver_relative_residual": 4.766455288860395e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 6.835062568947278e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 7.221415461870767e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08681523415399388,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 3.303184814118943e+17,
+        "primary_line_emissivity_m3_s": 3.499393043145905e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 157.19295201090003,
+        "residual_closing_yield_at_wafer_si_per_photon": 43.83827781543411,
+        "terminal_probability_conservation_error_maximum": 3.425248973343287e-11,
+        "transition_probability_conservation_error_maximum": 9.769962616701378e-15,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 91280695720998.05,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.142883779370178e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 6.66048691507617e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 3.2025596180545233e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.7522304194861531e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 1.0375338650728897e-12,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 9.52956764396712e-13,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 4.640907891851089e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.4708908204537746e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 6.576174570472835e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 136545.11703099916,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 489616.17787868,
+        "uniform_clear_volume_emissivity_m3_s": 1.0739088962253176e+16,
+        "uniform_clear_wafer_flux_cm2_s": 29305980215.27756
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.1072598875879159,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.039563073290624716,
+      "electron_density_m3": 2.298469269669874e+16,
+      "electron_temperature_proxy_eV": 2.414580256418698,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 400.0,
+      "observed_depth_nm": 175.0,
+      "rf_bias_power_W": 20.0,
+      "run": 4,
+      "target_optical_path_depth_nm": 375.0,
+      "unexplained_depth_nm": 60.023827473048314,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.2988183828990737e-11,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 69.1354956292815,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 247.90236268992487,
+          "uniform_clear_volume_emissivity_m3_s": 2.1210091079987974e+19,
+          "uniform_clear_wafer_flux_cm2_s": 57880376234814.99
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 2.3243140379924548e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 38.63266803297639,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 138.52695486186843,
+          "uniform_clear_volume_emissivity_m3_s": 3.795674059853943e+19,
+          "uniform_clear_wafer_flux_cm2_s": 103580433398685.06
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 8.520381406664835e+19,
+      "cl2_flow_sccm": 100.0,
+      "conserved_nonphoton_feature_depth_nm": 123.36247306248372,
+      "corresponding_surface_plane_depth_nm": 128.2943086605293,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.2868329660595385,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 44,
+        "linear_solver_relative_residual": 4.639958717961488e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 8.196833726517245e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 7.797050211582625e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08700567586739137,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 5.698825897734945e+17,
+        "primary_line_emissivity_m3_s": 6.037334518914171e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 57.635485398193445,
+        "residual_closing_yield_at_wafer_si_per_photon": 16.53175722704505,
+        "terminal_probability_conservation_error_maximum": 2.5345059384562774e-11,
+        "transition_probability_conservation_error_maximum": 1.1657341758564144e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 157827654172941.1,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.8802386388746127e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 5.710366965519695e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 2.7461892878527635e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.5373160463757723e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 8.904355325121904e-13,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 8.171587637025296e-13,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 3.9947977858530436e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.1533949105938337e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 5.724111531402056e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 52020.31221535173,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 181360.99532071836,
+        "uniform_clear_volume_emissivity_m3_s": 1.837978191924226e+16,
+        "uniform_clear_wafer_flux_cm2_s": 50156724390.652405
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.18357361126978783,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.06771157792738075,
+      "electron_density_m3": 3.768540881598131e+16,
+      "electron_temperature_proxy_eV": 2.3462414226020014,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 550.0,
+      "observed_depth_nm": 162.5,
+      "rf_bias_power_W": 20.0,
+      "run": 5,
+      "target_optical_path_depth_nm": 362.5,
+      "unexplained_depth_nm": 39.137526937516284,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.1146296431485515e-11,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 26.714709307201243,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 93.1368164343286,
+          "uniform_clear_volume_emissivity_m3_s": 3.579009537009358e+19,
+          "uniform_clear_wafer_flux_cm2_s": 97667859024681.8
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 2.039420965885711e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 14.60071628172705,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 50.90320154725991,
+          "uniform_clear_volume_emissivity_m3_s": 6.548459510069762e+19,
+          "uniform_clear_wafer_flux_cm2_s": 178701401503602.06
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 8.283067860756454e+19,
+      "cl2_flow_sccm": 25.0,
+      "conserved_nonphoton_feature_depth_nm": 334.5523117434416,
+      "corresponding_surface_plane_depth_nm": 353.6458918487542,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.21863085318044229,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 44,
+        "linear_solver_relative_residual": 4.2641303830175225e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 7.968531778045827e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 7.707163701875891e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08697605196530436,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 5.039523728686109e+17,
+        "primary_line_emissivity_m3_s": 5.338869990426717e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 0.0,
+        "residual_closing_yield_at_wafer_si_per_photon": 0.0,
+        "terminal_probability_conservation_error_maximum": 2.1723733922840438e-11,
+        "transition_probability_conservation_error_maximum": 1.2101430968414206e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 139520913765104.52,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.412780640431945e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 4.075045656334134e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 1.9605448613688156e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.1548639783421506e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 6.37051218618402e-13,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 5.833816416755988e-13,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.877235775934605e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.5944393312153206e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 4.226845443009542e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 0.0,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 0.0,
+        "uniform_clear_volume_emissivity_m3_s": 1.5973165008090738e+16,
+        "uniform_clear_wafer_flux_cm2_s": 43589289496.32769
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.15953679955655933,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.05884554082004238,
+      "electron_density_m3": 4.562295286276298e+16,
+      "electron_temperature_proxy_eV": 2.209888854453915,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 550.0,
+      "observed_depth_nm": 296.875,
+      "rf_bias_power_W": 80.0,
+      "run": 6,
+      "target_optical_path_depth_nm": 496.875,
+      "unexplained_depth_nm": 0.0,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 7.97237833291931e-12,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 0.0,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 0.0,
+          "uniform_clear_volume_emissivity_m3_s": 3.0127459434139533e+19,
+          "uniform_clear_wafer_flux_cm2_s": 82215049453154.5
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.5323702093598798e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 0.0,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 0.0,
+          "uniform_clear_volume_emissivity_m3_s": 5.790796597038633e+19,
+          "uniform_clear_wafer_flux_cm2_s": 158025481584151.88
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 5.588656232478352e+19,
+      "cl2_flow_sccm": 175.0,
+      "conserved_nonphoton_feature_depth_nm": 262.63267717844445,
+      "corresponding_surface_plane_depth_nm": 268.2151024961424,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.23158639759882826,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 43,
+        "linear_solver_relative_residual": 4.894511977450764e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 5.376436066166744e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 6.473882885713442e-07,
+        "partial_redistribution_wafer_escape_probability": 0.0865672251472707,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 1.521691979315424e+17,
+        "primary_line_emissivity_m3_s": 1.612080045738419e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 20.543468148184072,
+        "residual_closing_yield_at_wafer_si_per_photon": 4.7575877826242206,
+        "terminal_probability_conservation_error_maximum": 3.159017492038174e-11,
+        "transition_probability_conservation_error_maximum": 1.1546319456101628e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 41930532281985.17,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.2824855137026685e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 7.1734917464372755e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 3.4489493976941062e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.8664698072387473e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 1.1169315036441757e-12,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.0262727476065388e-12,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 4.988981098676189e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.640522885194538e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 7.031810720797428e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 14719.146546373917,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 63557.90624573535,
+        "uniform_clear_volume_emissivity_m3_s": 4966446306166439.0,
+        "uniform_clear_wafer_flux_cm2_s": 13552972482.14757
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.04960387928466011,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.018296512850899223,
+      "electron_density_m3": 1.2637791213719258e+16,
+      "electron_temperature_proxy_eV": 2.4490583211764347,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 250.0,
+      "observed_depth_nm": 265.625,
+      "rf_bias_power_W": 80.0,
+      "run": 7,
+      "target_optical_path_depth_nm": 465.625,
+      "unexplained_depth_nm": 2.992322821555547,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.3982157599560243e-11,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 7.402452142939358,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 31.96410592198275,
+          "uniform_clear_volume_emissivity_m3_s": 9.875356109514007e+18,
+          "uniform_clear_wafer_flux_cm2_s": 26948933171284.312
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 2.4757416504240695e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 4.180656429480503,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 18.05225381467592,
+          "uniform_clear_volume_emissivity_m3_s": 1.748573512993629e+19,
+          "uniform_clear_wafer_flux_cm2_s": 47716953418363.52
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 7.012828313699701e+19,
+      "cl2_flow_sccm": 25.0,
+      "conserved_nonphoton_feature_depth_nm": 420.41302942446566,
+      "corresponding_surface_plane_depth_nm": 440.8217338792283,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.19549367968199943,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 44,
+        "linear_solver_relative_residual": 4.599975805030635e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 6.746527519888284e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 7.180375643662741e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08680161111290687,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 2.9052246771454176e+17,
+        "primary_line_emissivity_m3_s": 3.0777941883612692e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 0.0,
+        "residual_closing_yield_at_wafer_si_per_photon": 0.0,
+        "terminal_probability_conservation_error_maximum": 3.188360686579017e-11,
+        "transition_probability_conservation_error_maximum": 1.3100631690576847e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 80270808608188.36,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.4788899470320365e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 4.3014653510318585e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 2.0693357552783765e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.2089466726952926e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 6.721534273024495e-13,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 6.157535662047853e-13,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 3.032465190414319e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.6729535496473758e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 4.436910672092001e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 0.0,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 0.0,
+        "uniform_clear_volume_emissivity_m3_s": 9233883770897682.0,
+        "uniform_clear_wafer_flux_cm2_s": 25198414507.15793
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.09222619709619803,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.034017859584663204,
+      "electron_density_m3": 2.96763518641013e+16,
+      "electron_temperature_proxy_eV": 2.2305971056450504,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 400.0,
+      "observed_depth_nm": 362.5,
+      "rf_bias_power_W": 140.0,
+      "run": 9,
+      "target_optical_path_depth_nm": 562.5,
+      "unexplained_depth_nm": 0.0,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 8.412161517241614e-12,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 0.0,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 0.0,
+          "uniform_clear_volume_emissivity_m3_s": 1.7506983451529064e+19,
+          "uniform_clear_wafer_flux_cm2_s": 47774938122130.71
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.604078463931136e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 0.0,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 0.0,
+          "uniform_clear_volume_emissivity_m3_s": 3.3383304713584435e+19,
+          "uniform_clear_wafer_flux_cm2_s": 91099949995350.77
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 7.466659829415956e+19,
+      "cl2_flow_sccm": 25.0,
+      "conserved_nonphoton_feature_depth_nm": 109.49874089173306,
+      "corresponding_surface_plane_depth_nm": 112.12266207998903,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.3232997876611916,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 44,
+        "linear_solver_relative_residual": 4.445990130415039e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 7.183125519042358e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 7.378132115803449e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08686721995973092,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 3.369786707777616e+17,
+        "primary_line_emissivity_m3_s": 3.569951070154657e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 6.641992021831072,
+        "residual_closing_yield_at_wafer_si_per_photon": 2.1473546103053143,
+        "terminal_probability_conservation_error_maximum": 1.9269807971511455e-11,
+        "transition_probability_conservation_error_maximum": 1.27675647831893e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 93176944129726.58,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.7831878894974555e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 5.364633023768797e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 2.5801087353802565e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.4579075848494647e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 8.368902071752085e-13,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 7.677396724790032e-13,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 3.759161926836984e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.0366632155965973e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 5.411105840442882e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 6768.18519380461,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 20934.703492281486,
+        "uniform_clear_volume_emissivity_m3_s": 1.083306094640048e+16,
+        "uniform_clear_wafer_flux_cm2_s": 29562421065.88333
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.10819846110113301,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.039909268438942505,
+      "electron_density_m3": 2.6812591512465948e+16,
+      "electron_temperature_proxy_eV": 2.3196649231162825,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 400.0,
+      "observed_depth_nm": 112.5,
+      "rf_bias_power_W": 20.0,
+      "run": 10,
+      "target_optical_path_depth_nm": 312.5,
+      "unexplained_depth_nm": 3.001259108266936,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.047570703929826e-11,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 3.4960281243077285,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 10.813580019951823,
+          "uniform_clear_volume_emissivity_m3_s": 2.0972417867928134e+19,
+          "uniform_clear_wafer_flux_cm2_s": 57231788028235.33
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.9341497299046503e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 1.8935124755414163,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 5.856831794537892,
+          "uniform_clear_volume_emissivity_m3_s": 3.872177429411765e+19,
+          "uniform_clear_wafer_flux_cm2_s": 105668139574268.5
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 5.907838478279998e+19,
+      "cl2_flow_sccm": 100.0,
+      "conserved_nonphoton_feature_depth_nm": 98.82306406489893,
+      "corresponding_surface_plane_depth_nm": 100.35227884514534,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.3063474513295834,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 43,
+        "linear_solver_relative_residual": 4.6641586991698305e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 5.6834978832875045e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 6.645153806849872e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08662393931186867,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 1.6384178803024774e+17,
+        "primary_line_emissivity_m3_s": 1.7357394317113422e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 171.25568138861692,
+        "residual_closing_yield_at_wafer_si_per_photon": 52.46374151911397,
+        "terminal_probability_conservation_error_maximum": 1.8853696381881946e-11,
+        "transition_probability_conservation_error_maximum": 1.1102230246251565e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 45176516079711.336,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.324135975852793e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 7.327558617362694e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 3.5229431382732884e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.900554315055933e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 1.1407732982566693e-12,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.0482903972422958e-12,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 5.093417683994399e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.691243488903413e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 7.168096792205923e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 162239.3979913437,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 529592.7786805666,
+        "uniform_clear_volume_emissivity_m3_s": 5353365027616378.0,
+        "uniform_clear_wafer_flux_cm2_s": 14608837875.905642
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.05346834662581465,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.019721931132472618,
+      "electron_density_m3": 1.2641376998447054e+16,
+      "electron_temperature_proxy_eV": 2.459125267838271,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 250.0,
+      "observed_depth_nm": 134.375,
+      "rf_bias_power_W": 20.0,
+      "run": 11,
+      "target_optical_path_depth_nm": 334.375,
+      "unexplained_depth_nm": 35.55193593510107,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.4280604542872632e-11,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 81.43546758260958,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 265.8271424461676,
+          "uniform_clear_volume_emissivity_m3_s": 1.0665214372685285e+19,
+          "uniform_clear_wafer_flux_cm2_s": 29104383295101.37
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 2.5209204637109997e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 46.13186830175584,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 150.58675403218857,
+          "uniform_clear_volume_emissivity_m3_s": 1.8827044108147188e+19,
+          "uniform_clear_wafer_flux_cm2_s": 51377261524217.55
+        }
+      ]
+    },
+    {
+      "atomic_chlorine_density_m3": 5.735526042094759e+19,
+      "cl2_flow_sccm": 100.0,
+      "conserved_nonphoton_feature_depth_nm": 365.5135694270603,
+      "corresponding_surface_plane_depth_nm": 376.08410883826923,
+      "direct_geometrical_floor_fraction_at_target_depth": 0.19549367968199943,
+      "dominant_118p88_resonance_boundary": {
+        "alternate_branch_loss_frequency_s_inv": 3.9901034235954285,
+        "known_limitations": [
+          "direct excitation only; excited-state cascades are absent",
+          "uniform global electron and chlorine densities replace spatial fields",
+          "velocity-changing and nonradiative collision rates require external inputs",
+          "OPEN-ADAS collision strengths are a distorted-wave calculation, not a target-tool spectrum measurement"
+        ],
+        "linear_solver_iterations": 43,
+        "linear_solver_relative_residual": 4.787151300072942e-09,
+        "lower_ground_population_fraction": 0.9620266200883326,
+        "lower_state_absorber_density_m3": 5.517728732705033e+19,
+        "nonradiative_quenching_frequency_s_inv": 0.0,
+        "partial_redistribution_quench_probability": 6.553731347043406e-07,
+        "partial_redistribution_wafer_escape_probability": 0.08659365000065629,
+        "prediction_supported": false,
+        "primary_line_emission_rate_s": 1.5266398687189514e+17,
+        "primary_line_emissivity_m3_s": 1.617321838351097e+19,
+        "residual_closing_yield_at_direct_target_floor_si_per_photon": 0.0,
+        "residual_closing_yield_at_wafer_si_per_photon": 0.0,
+        "terminal_probability_conservation_error_maximum": 1.8268053736392176e-11,
+        "transition_probability_conservation_error_maximum": 1.1435297153639112e-14,
+        "velocity_changing_collision_frequency_s_inv": 0.0,
+        "wafer_photon_flux_cm2_s": 42079713395636.84,
+        "wavelength_nm": 118.87742619911066
+      },
+      "dominant_sub120nm_lines": [
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.0517129107632216e-11,
+          "transition_probability_s_inv": 521000000.0,
+          "upper_observed_index": 12,
+          "wavelength_nm": 118.87742619911066
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 6.328376907089238e-12,
+          "transition_probability_s_inv": 16000000.0,
+          "upper_observed_index": 34,
+          "wavelength_nm": 109.7369243790783
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 3.043043673287911e-12,
+          "transition_probability_s_inv": 12300000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 110.75281345372018
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 1.6776259231084842e-12,
+          "transition_probability_s_inv": 62500000.0,
+          "upper_observed_index": 13,
+          "wavelength_nm": 118.87515101601998
+        },
+        {
+          "lower_observed_index": 2,
+          "photon_rate_coefficient_cm3_s": 9.861240441672407e-13,
+          "transition_probability_s_inv": 4540000.0,
+          "upper_observed_index": 44,
+          "wavelength_nm": 109.51482305032951
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 9.054910442466467e-13,
+          "transition_probability_s_inv": 3660000.0,
+          "upper_observed_index": 35,
+          "wavelength_nm": 109.68098080242825
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 4.4152891640597196e-13,
+          "transition_probability_s_inv": 5070000.0,
+          "upper_observed_index": 38,
+          "wavelength_nm": 109.21287008146187
+        },
+        {
+          "lower_observed_index": 1,
+          "photon_rate_coefficient_cm3_s": 2.360427721035294e-13,
+          "transition_probability_s_inv": 10300000.0,
+          "upper_observed_index": 32,
+          "wavelength_nm": 109.80682563620427
+        }
+      ],
+      "du_supported_band": {
+        "direct_coronal_rate_coefficient_cm3_s": 6.279610896403056e-15,
+        "maximum_wavelength_nm": 106.67,
+        "minimum_wavelength_nm": 104.82,
+        "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 0.0,
+        "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 0.0,
+        "uniform_clear_volume_emissivity_m3_s": 4950084286072051.0,
+        "uniform_clear_wafer_flux_cm2_s": 13508322043.096964
+      },
+      "du_supported_band_depth_addition_at_244_yield_nm": 0.04944045867773489,
+      "du_supported_band_depth_addition_at_90_yield_nm": 0.018236234758180904,
+      "electron_density_m3": 1.3743792935050116e+16,
+      "electron_temperature_proxy_eV": 2.3914052707297064,
+      "feature_depth_used_to_select_any_model_parameter": false,
+      "feature_scale_photon_delivery_assumed": "unity only to report an optimistic lower bound on required yield",
+      "inductive_power_W": 250.0,
+      "observed_depth_nm": 362.5,
+      "rf_bias_power_W": 140.0,
+      "run": 13,
+      "target_optical_path_depth_nm": 562.5,
+      "unexplained_depth_nm": 0.0,
+      "unmeasured_shortwave_bands": [
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 1.2344513041576001e-11,
+          "maximum_wavelength_nm": 112.0,
+          "minimum_wavelength_nm": 106.67,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 0.0,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 0.0,
+          "uniform_clear_volume_emissivity_m3_s": 9.730918210444923e+18,
+          "uniform_clear_wafer_flux_cm2_s": 26554775507879.81
+        },
+        {
+          "direct_coronal_rate_coefficient_cm3_s": 2.225420166043101e-11,
+          "maximum_wavelength_nm": 120.0,
+          "minimum_wavelength_nm": 112.0,
+          "residual_closing_yield_si_per_photon_if_unit_feature_delivery": 0.0,
+          "residual_rate_divided_by_target_depth_direct_floor_flux_si_per_photon": 0.0,
+          "uniform_clear_volume_emissivity_m3_s": 1.7542515890829724e+19,
+          "uniform_clear_wafer_flux_cm2_s": 47871902861579.82
+        }
+      ]
+    }
+  ],
+  "schema": "petch.mahorowala-1998-cl-vuv-spectrum-audit.v2",
+  "summary": {
+    "conserved_nonphoton_feature_mape_percent": 15.264891324561328,
+    "dominant_118p88_partial_redistribution_wafer_flux_range_cm2_s": [
+      40792353611656.6,
+      157827654172941.1
+    ],
+    "dominant_118p88_residual_closing_yield_at_direct_target_floor_range_si_per_photon": [
+      6.641992021831072,
+      364.50267168643893
+    ],
+    "dominant_118p88_residual_closing_yield_at_wafer_range_si_per_photon": [
+      2.1473546103053143,
+      67.82340628510497
+    ],
+    "du_supported_104p82_106p67_rate_coefficient_range_cm3_s": [
+      4.226845443009542e-15,
+      7.168096792205923e-15
+    ],
+    "du_supported_atomic_band_mape_range_percent": [
+      15.254198337984736,
+      15.235901449842567
+    ],
+    "formal_depth_closure_granted": false,
+    "nonunderpredicted_runs_not_repairable_by_additive_photons": [
+      6,
+      9,
+      13
+    ],
+    "required_106p67_112_yield_if_unit_feature_delivery_range_si_per_photon": [
+      3.4960281243077285,
+      109.53771674182187
+    ],
+    "required_112_120_yield_if_unit_feature_delivery_range_si_per_photon": [
+      1.8935124755414163,
+      59.78148996954403
+    ],
+    "residual_rate_over_target_depth_direct_floor_flux_106p67_112_range_si_per_photon": [
+      10.813580019951823,
+      588.6874840079355
+    ],
+    "residual_rate_over_target_depth_direct_floor_flux_112_120_range_si_per_photon": [
+      5.856831794537892,
+      321.2830791732201
+    ],
+    "target_depth_direct_geometrical_floor_fraction_range": [
+      0.16890035292017708,
+      0.3232997876611916
+    ],
+    "underpredicted_run_count_with_positive_residual": 8,
+    "unmeasured_106p67_112_rate_coefficient_range_cm3_s": [
+      7.97237833291931e-12,
+      1.4280604542872632e-11
+    ],
+    "unmeasured_112_120_rate_coefficient_range_cm3_s": [
+      1.5323702093598798e-11,
+      2.5209204637109997e-11
+    ],
+    "usable_run_count": 11
+  },
+  "surface_response": {
+    "du_measured_band_nm": [
+      104.82,
+      106.67
+    ],
+    "du_measured_yield_si_per_photon": [
+      90.0,
+      244.0
+    ],
+    "du_yield_applied_outside_measured_band": false,
+    "rf_ion_pae_antisynergy_included": false
+  },
+  "verdict": "The atomic-Cl source does not populate the band where the large 90--244 Si/photon yield was measured, so that measurement cannot close Mahorowala depth. The source instead predicts strong 109--111 and 118.88 nm lines, but their wavelength-resolved chlorinated-Si yield is unpublished. Depth is therefore experimentally blocked at a much narrower interface: those line yields, their RF anti-synergy, and feature-floor photon delivery."
+}

@@ -1,0 +1,2078 @@
+{
+  "schema": "petch.mahorowala_1998_axisymmetric_ion_transport_audit.v1",
+  "claim_class": "failure_localization_not_feature_depth_prediction",
+  "source": "Mahorowala 1998 Table 2.2 settings; Lam-equipment-class chlorine global state; quasineutral Boltzmann-electron drift diffusion; Lee/Economou mobility, mutual neutralization, and Bohm boundary",
+  "raw_collision_payload_sha256": "b8b1ff807d0586795dcabf4511a2a44b8b04828626b45e0fd95a319817c01063",
+  "atomic_momentum_payload_sha256": "6c1391eda01d90ac504e73e3f5306b510e8a5d721860b03b50cdba39edd29661",
+  "energy_grid_cell_count": 432,
+  "grid": {
+    "radius_m": 0.215,
+    "length_m": 0.065,
+    "radial_cell_count": 14,
+    "axial_cell_count": 10,
+    "wafer_radius_m": 0.1,
+    "window_to_wafer_gap_cm": 6.5
+  },
+  "rows": [
+    {
+      "inductive_power_W": 250.0,
+      "cl2_flow_sccm": 25.0,
+      "mean_electron_energy_eV": 3.738317474837294,
+      "reduced_electric_field_Td": 385.585102296675,
+      "volume_average_density_m3": {
+        "Cl+": 1.879045322233468e+16,
+        "Cl2+": 7.965130767792778e+16,
+        "Cl-": 8.61732913953414e+16
+      },
+      "free_ion_mobility_m2_V_s": {
+        "Cl+": 33.55252995410806,
+        "Cl2+": 29.0995707318036,
+        "Cl-": 33.55252995410806
+      },
+      "ion_temperature_eV": 0.12,
+      "electron_temperature_eV": 2.492211649891529,
+      "positive_negative_recombination_m3_s": 5e-14,
+      "bohm_wall_velocity_m_s": {
+        "Cl+": 2604.3335978653595,
+        "Cl2+": 1841.541947522555
+      },
+      "global_analytic_axial_flux_m2_s": {
+        "Cl+": 4.244395377529904e+18,
+        "Cl2+": 1.343075458960566e+19
+      },
+      "spatial_source_modes": {
+        "uniform": {
+          "source_provenance": "uniform volumetric source limiting case",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 7.008346264348652e+18,
+            "Cl2+": 2.507974682337908e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 6.324195590971294e+18,
+            "Cl2+": 2.273846784060772e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.6512001453614047,
+            "Cl2+": 1.867337137020493
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.8154354077555772,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.108179872607685,
+            "Cl2+": 1.1029655559549252
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.1480285998688705e+20,
+            "Cl2+": 1.186091262150025e+21,
+            "Cl-": 1.7148451912080608e+21
+          },
+          "minimum_electron_density_m3": 1.1961846608415876e+16,
+          "electrostatic_potential_span_V": 0.12049409858288981,
+          "nonlinear_solver_evaluations": 103,
+          "maximum_potential_fixed_point_relative_residual": 1.0653443775680533e-13,
+          "maximum_particle_ledger_relative_residual": 2.5304332108562915e-16,
+          "maximum_inventory_relative_residual": 4.017510940233758e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.1132303272803254
+        },
+        "top_center_broad": {
+          "source_provenance": "declared ICP-like sensitivity: 30 mm axial skin depth and 180 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 6.744805462051162e+18,
+            "Cl2+": 2.3901238329602044e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 4.416085051473447e+18,
+            "Cl2+": 1.5700402025395284e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.5891086626280355,
+            "Cl2+": 1.779590131748793
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.7338491525466648,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.5273268932627841,
+            "Cl2+": 1.522332886186097
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.125944066018146e+20,
+            "Cl2+": 1.1776102251499017e+21,
+            "Cl-": 1.7272682145524493e+21
+          },
+          "minimum_electron_density_m3": 1.0894438923580464e+16,
+          "electrostatic_potential_span_V": 0.5218782546052307,
+          "nonlinear_solver_evaluations": 122,
+          "maximum_potential_fixed_point_relative_residual": 2.061664429291921e-10,
+          "maximum_particle_ledger_relative_residual": 1.7351962845729688e-16,
+          "maximum_inventory_relative_residual": 4.017510940233758e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.1200356000841865
+        },
+        "top_center_compact": {
+          "source_provenance": "declared ICP-like sensitivity: 15 mm axial skin depth and 100 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 7.677183577627e+18,
+            "Cl2+": 2.690426224052615e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 3.493004924412002e+18,
+            "Cl2+": 1.2269057224745464e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.8087814387581544,
+            "Cl2+": 2.0031832210937663
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.9565008434130657,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 2.1978736771804996,
+            "Cl2+": 2.19285489892923
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.345208500651511e+20,
+            "Cl2+": 1.2552694274683503e+21,
+            "Cl-": 1.9422380447078789e+21
+          },
+          "minimum_electron_density_m3": 8430064229783705.0,
+          "electrostatic_potential_span_V": 1.4665246566009795,
+          "nonlinear_solver_evaluations": 189,
+          "maximum_potential_fixed_point_relative_residual": 1.7668599776715338e-08,
+          "maximum_particle_ledger_relative_residual": 3.351263689175702e-16,
+          "maximum_inventory_relative_residual": 2.128740564514711e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.1318280581804123
+        },
+        "top_annular_wise_class": {
+          "source_provenance": "Wise 1996 source-class sensitivity: published approximately 10 mm axial skin depth and toroidal topology; 140 mm ring radius and 35 mm width are declared Lam-geometry moments, not measured or fitted fields",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 2.319733639554077e+18,
+            "Cl2+": 8.042885419784695e+18
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 2.9251247935939855e+18,
+            "Cl2+": 1.0201737509403957e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5465404217135126,
+            "Cl2+": 0.5988409188869589
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.5862818181801339,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.7930374952324383,
+            "Cl2+": 0.7883838818996045
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.9961638488002966e+20,
+            "Cl2+": 1.4866570850202925e+21,
+            "Cl-": 2.4224712746486333e+21
+          },
+          "minimum_electron_density_m3": 9640396803376044.0,
+          "electrostatic_potential_span_V": 0.7157265388923665,
+          "nonlinear_solver_evaluations": 8253,
+          "maximum_potential_fixed_point_relative_residual": 2.1659512684175618e-10,
+          "maximum_particle_ledger_relative_residual": 1.7912704553904264e-16,
+          "maximum_inventory_relative_residual": 1.8567237877216527e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0010345791101782
+        },
+        "inductive_em_annular": {
+          "source_provenance": "deterministic axisymmetric harmonic Etheta solve using the EEPF-derived complex Drude conductivity and a declared Lam-geometry annular coil-side field; generator coupling and the target-tool coil map are not measured",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 2.5111167925519575e+18,
+            "Cl2+": 8.731491259996442e+18
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 3.154279073305443e+18,
+            "Cl2+": 1.1031794699810195e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5916312146238702,
+            "Cl2+": 0.6501117418044347
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.6360686089482938,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.7960984853253645,
+            "Cl2+": 0.7914842052079404
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.4358122493424324e+20,
+            "Cl2+": 1.2864622504589958e+21,
+            "Cl-": 1.996757555916587e+21
+          },
+          "minimum_electron_density_m3": 9544550727847308.0,
+          "electrostatic_potential_span_V": 0.7780308338195192,
+          "nonlinear_solver_evaluations": 161,
+          "maximum_potential_fixed_point_relative_residual": 4.843854019007524e-09,
+          "maximum_particle_ledger_relative_residual": 3.25976071340182e-16,
+          "maximum_inventory_relative_residual": 2.008755470116879e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "inductive_field_receipt": {
+            "complex_conductivity_S_m": {
+              "real": 1.4327894174427886,
+              "imaginary": -5.014107045937214
+            },
+            "classical_dissipative_skin_depth_m": 0.11418238346077234,
+            "absorbed_power_mean_depth_below_top_m": 0.012860305942058226,
+            "absorbed_power_mean_radius_m": 0.13859774698179403,
+            "complex_power_ledger_relative_residual": 1.7719609119305767e-16,
+            "linear_system_relative_residual": 3.6117218620288643e-16,
+            "supports_implicit_differentiation": true,
+            "supports_generator_to_plasma_power_prediction": false
+          },
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0427631253473484
+        }
+      },
+      "feature_depth_used_to_condition_transport": false
+    },
+    {
+      "inductive_power_W": 250.0,
+      "cl2_flow_sccm": 100.0,
+      "mean_electron_energy_eV": 3.7463902293636107,
+      "reduced_electric_field_Td": 389.14098392128744,
+      "volume_average_density_m3": {
+        "Cl+": 1.8080330357266336e+16,
+        "Cl2+": 8.041337817865048e+16,
+        "Cl-": 8.647024714974496e+16
+      },
+      "free_ion_mobility_m2_V_s": {
+        "Cl+": 33.552529954108074,
+        "Cl2+": 29.09957073180361,
+        "Cl-": 33.552529954108074
+      },
+      "ion_temperature_eV": 0.12,
+      "electron_temperature_eV": 2.497593486242407,
+      "positive_negative_recombination_m3_s": 5e-14,
+      "bohm_wall_velocity_m_s": {
+        "Cl+": 2607.1440611298235,
+        "Cl2+": 1843.529245155133
+      },
+      "global_analytic_axial_flux_m2_s": {
+        "Cl+": 4.0485952450987945e+18,
+        "Cl2+": 1.344154602316163e+19
+      },
+      "spatial_source_modes": {
+        "uniform": {
+          "source_provenance": "uniform volumetric source limiting case",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 6.729710341937103e+18,
+            "Cl2+": 2.5268785735354843e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 6.071077086054594e+18,
+            "Cl2+": 2.290381158128823e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.6622334253057405,
+            "Cl2+": 1.8799017383724501
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.8295161592182225,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.1084870520579297,
+            "Cl2+": 1.1032567939913867
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.0269607297980596e+20,
+            "Cl2+": 1.1968721181439343e+21,
+            "Cl-": 1.7239885766758635e+21
+          },
+          "minimum_electron_density_m3": 1.1732488051026998e+16,
+          "electrostatic_potential_span_V": 0.11808654130439966,
+          "nonlinear_solver_evaluations": 54,
+          "maximum_potential_fixed_point_relative_residual": 2.627668867101296e-09,
+          "maximum_particle_ledger_relative_residual": 1.8127672779441618e-16,
+          "maximum_inventory_relative_residual": 2.2123489565512463e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.1218646854580656
+        },
+        "top_center_broad": {
+          "source_provenance": "declared ICP-like sensitivity: 30 mm axial skin depth and 180 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 6.472812893716612e+18,
+            "Cl2+": 2.4065965122853753e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 4.230622395242787e+18,
+            "Cl2+": 1.5780773533545413e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.5987799475762763,
+            "Cl2+": 1.7904164507107134
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.746056681199566,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.5299906938031398,
+            "Cl2+": 1.525018090633922
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.005526946645515e+20,
+            "Cl2+": 1.188252624502967e+21,
+            "Cl-": 1.7361646914239013e+21
+          },
+          "minimum_electron_density_m3": 1.0704330033539526e+16,
+          "electrostatic_potential_span_V": 0.5122193304001654,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 7.793112737960076e-11,
+          "maximum_particle_ledger_relative_residual": 9.129584765540003e-17,
+          "maximum_inventory_relative_residual": 1.8503474347993917e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.1279214456666666
+        },
+        "top_center_compact": {
+          "source_provenance": "declared ICP-like sensitivity: 15 mm axial skin depth and 100 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 7.364336307901698e+18,
+            "Cl2+": 2.7076576803347784e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 3.3396942559522156e+18,
+            "Cl2+": 1.2306214588456112e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.8189855646392215,
+            "Cl2+": 2.0143945314542777
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.9691615169369632,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 2.205092964655824,
+            "Cl2+": 2.200236035925057
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.2161091904422425e+20,
+            "Cl2+": 1.2665489578951702e+21,
+            "Cl-": 1.95053897130943e+21
+          },
+          "minimum_electron_density_m3": 8304898098218361.0,
+          "electrostatic_potential_span_V": 1.4464778598881507,
+          "nonlinear_solver_evaluations": 131,
+          "maximum_potential_fixed_point_relative_residual": 3.84626668204592e-09,
+          "maximum_particle_ledger_relative_residual": 2.5298238685072797e-16,
+          "maximum_inventory_relative_residual": 1.8503474347993917e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.1391522081178134
+        },
+        "top_annular_wise_class": {
+          "source_provenance": "Wise 1996 source-class sensitivity: published approximately 10 mm axial skin depth and toroidal topology; 140 mm ring radius and 35 mm width are declared Lam-geometry moments, not measured or fitted fields",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 2.2087992412016914e+18,
+            "Cl2+": 8.032581085579573e+18
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 2.7923369538951137e+18,
+            "Cl2+": 1.0215664868933652e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5455717619279553,
+            "Cl2+": 0.5975935410806414
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.5855516070282647,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.7910217418856172,
+            "Cl2+": 0.7863003718932728
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.843728139698233e+20,
+            "Cl2+": 1.5006787805528635e+21,
+            "Cl-": 2.432548456453138e+21
+          },
+          "minimum_electron_density_m3": 9479125209600862.0,
+          "electrostatic_potential_span_V": 0.7066638143854038,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 2.6712392473755418e-09,
+          "maximum_particle_ledger_relative_residual": 1.4457794964327567e-16,
+          "maximum_inventory_relative_residual": 1.989718671494385e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9997877954126351
+        },
+        "inductive_em_annular": {
+          "source_provenance": "deterministic axisymmetric harmonic Etheta solve using the EEPF-derived complex Drude conductivity and a declared Lam-geometry annular coil-side field; generator coupling and the target-tool coil map are not measured",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 2.3953988374591954e+18,
+            "Cl2+": 8.736980552309798e+18
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 3.016286631266037e+18,
+            "Cl2+": 1.106681251672597e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5916617227565663,
+            "Cl2+": 0.6499981875042335
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.6364945382099948,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.7941549097586146,
+            "Cl2+": 0.789475789808949
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.2991964175237906e+20,
+            "Cl2+": 1.2965140486812855e+21,
+            "Cl-": 2.0019875065913195e+21
+          },
+          "minimum_electron_density_m3": 9386688718136262.0,
+          "electrostatic_potential_span_V": 0.7677880820967888,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 1.4205935178217088e-08,
+          "maximum_particle_ledger_relative_residual": 3.3468987302711365e-16,
+          "maximum_inventory_relative_residual": 5.551042304398175e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "inductive_field_receipt": {
+            "complex_conductivity_S_m": {
+              "real": 1.4100405379837457,
+              "imaginary": -4.894394896325984
+            },
+            "classical_dissipative_skin_depth_m": 0.11509977842418607,
+            "absorbed_power_mean_depth_below_top_m": 0.0128962849471738,
+            "absorbed_power_mean_radius_m": 0.13859299152064428,
+            "complex_power_ledger_relative_residual": 0.0,
+            "linear_system_relative_residual": 4.244767076966764e-16,
+            "supports_implicit_differentiation": true,
+            "supports_generator_to_plasma_power_prediction": false
+          },
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0434613885879171
+        }
+      },
+      "feature_depth_used_to_condition_transport": false
+    },
+    {
+      "inductive_power_W": 250.0,
+      "cl2_flow_sccm": 175.0,
+      "mean_electron_energy_eV": 3.7539079099119306,
+      "reduced_electric_field_Td": 392.46243076532954,
+      "volume_average_density_m3": {
+        "Cl+": 1.7426446011255818e+16,
+        "Cl2+": 8.111234503017064e+16,
+        "Cl-": 8.673801303712333e+16
+      },
+      "free_ion_mobility_m2_V_s": {
+        "Cl+": 33.55252995410811,
+        "Cl2+": 29.099570731803638,
+        "Cl-": 33.55252995410811
+      },
+      "ion_temperature_eV": 0.12,
+      "electron_temperature_eV": 2.5026052732746202,
+      "positive_negative_recombination_m3_s": 5e-14,
+      "bohm_wall_velocity_m_s": {
+        "Cl+": 2609.7585583449268,
+        "Cl2+": 1845.3779738653257
+      },
+      "global_analytic_axial_flux_m2_s": {
+        "Cl+": 3.871150003861785e+18,
+        "Cl2+": 1.3450408542770958e+19
+      },
+      "spatial_source_modes": {
+        "uniform": {
+          "source_provenance": "uniform volumetric source limiting case",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 6.474351133410875e+18,
+            "Cl2+": 2.5442134920802087e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 5.839225814457534e+18,
+            "Cl2+": 2.3055351640885625e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.672461962711904,
+            "Cl2+": 1.891551088570926
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.8425874304721515,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.1087687544778304,
+            "Cl2+": 1.103524045830809
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 2.9156573157369558e+20,
+            "Cl2+": 1.206757163136731e+21,
+            "Cl-": 1.7322578947360662e+21
+          },
+          "minimum_electron_density_m3": 1.1523673840298382e+16,
+          "electrostatic_potential_span_V": 0.11589481225658563,
+          "nonlinear_solver_evaluations": 54,
+          "maximum_potential_fixed_point_relative_residual": 1.931766823988978e-09,
+          "maximum_particle_ledger_relative_residual": 3.75749584097399e-16,
+          "maximum_inventory_relative_residual": 5.917718194702158e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.1298800274051366
+        },
+        "top_center_broad": {
+          "source_provenance": "declared ICP-like sensitivity: 30 mm axial skin depth and 180 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 6.223888393433041e+18,
+            "Cl2+": 2.4217101432085942e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 4.0614361805118167e+18,
+            "Cl2+": 1.5854261635791196e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.6077621345657516,
+            "Cl2+": 1.800473298270307
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.7574047822294039,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.5324353545914182,
+            "Cl2+": 1.5274821362488133
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 2.8948383914048907e+20,
+            "Cl2+": 1.1980105328054313e+21,
+            "Cl-": 1.7442124335472186e+21
+          },
+          "minimum_electron_density_m3": 1.053068889105104e+16,
+          "electrostatic_potential_span_V": 0.5034098130721496,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 3.183834859979621e-11,
+          "maximum_particle_ledger_relative_residual": 9.055223440207497e-17,
+          "maximum_inventory_relative_residual": 5.917718194702158e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.1352521163470437
+        },
+        "top_center_compact": {
+          "source_provenance": "declared ICP-like sensitivity: 15 mm axial skin depth and 100 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 7.078329956451276e+18,
+            "Cl2+": 2.7234827889182736e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 3.2003291059953285e+18,
+            "Cl2+": 1.233996502031433e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.8284824792090386,
+            "Cl2+": 2.024832762705958
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.9809509492611093,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 2.2117506425170785,
+            "Cl2+": 2.2070425519317234
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.097455108662441e+20,
+            "Cl2+": 1.2768894855347212e+21,
+            "Cl-": 1.9580415856563886e+21
+          },
+          "minimum_electron_density_m3": 8190160786342632.0,
+          "electrostatic_potential_span_V": 1.4281097797575113,
+          "nonlinear_solver_evaluations": 131,
+          "maximum_potential_fixed_point_relative_residual": 5.6493993029660345e-09,
+          "maximum_particle_ledger_relative_residual": 1.6991686721787524e-16,
+          "maximum_inventory_relative_residual": 1.972572731567386e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.1459723484409885
+        },
+        "top_annular_wise_class": {
+          "source_provenance": "Wise 1996 source-class sensitivity: published approximately 10 mm axial skin depth and toroidal topology; 140 mm ring radius and 35 mm width are declared Lam-geometry moments, not measured or fitted fields",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 2.1086059835996047e+18,
+            "Cl2+": 8.02272799978881e+18
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 2.6719490120411264e+18,
+            "Cl2+": 1.0228100998076977e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5446975657094403,
+            "Cl2+": 0.5964672354952889
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.5848973668341129,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.7891640050379634,
+            "Cl2+": 0.7843809912805116
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.703492234381486e+20,
+            "Cl2+": 1.5135424770438364e+21,
+            "Cl-": 2.4416581284432933e+21
+          },
+          "minimum_electron_density_m3": 9331902224426008.0,
+          "electrostatic_potential_span_V": 0.6983247962773924,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 2.260548458764509e-09,
+          "maximum_particle_ledger_relative_residual": 1.777194428966456e-16,
+          "maximum_inventory_relative_residual": 4.590723773988549e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.998670726731531
+        },
+        "inductive_em_annular": {
+          "source_provenance": "deterministic axisymmetric harmonic Etheta solve using the EEPF-derived complex Drude conductivity and a declared Lam-geometry annular coil-side field; generator coupling and the target-tool coil map are not measured",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 2.2906326864793068e+18,
+            "Cl2+": 8.741802374075464e+18
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 2.890840698150196e+18,
+            "Cl2+": 1.1098755550617563e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.59171891665118,
+            "Cl2+": 0.6499283903739729
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.6369193067040403,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.79237596452307,
+            "Cl2+": 0.7876380675479466
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 3.1739618209633816e+20,
+            "Cl2+": 1.305718836374121e+21,
+            "Cl-": 2.0066993607839187e+21
+          },
+          "minimum_electron_density_m3": 9242533246284732.0,
+          "electrostatic_potential_span_V": 0.7583748006047627,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 1.331634826637632e-08,
+          "maximum_particle_ledger_relative_residual": 4.3248144770574233e-16,
+          "maximum_inventory_relative_residual": 1.972572731567386e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "inductive_field_receipt": {
+            "complex_conductivity_S_m": {
+              "real": 1.3892439734666495,
+              "imaginary": -4.786014940311567
+            },
+            "classical_dissipative_skin_depth_m": 0.11595808275223439,
+            "absorbed_power_mean_depth_below_top_m": 0.012929057895187406,
+            "absorbed_power_mean_radius_m": 0.13858863762204374,
+            "complex_power_ledger_relative_residual": 0.0,
+            "linear_system_relative_residual": 5.195778980886408e-16,
+            "supports_implicit_differentiation": true,
+            "supports_generator_to_plasma_power_prediction": false
+          },
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0441577488801383
+        }
+      },
+      "feature_depth_used_to_condition_transport": false
+    },
+    {
+      "inductive_power_W": 400.0,
+      "cl2_flow_sccm": 25.0,
+      "mean_electron_energy_eV": 3.6466265718650073,
+      "reduced_electric_field_Td": 361.16427308299944,
+      "volume_average_density_m3": {
+        "Cl+": 3.004750498387022e+16,
+        "Cl2+": 1.0080765524087352e+17,
+        "Cl-": 1.0774713554666974e+17
+      },
+      "free_ion_mobility_m2_V_s": {
+        "Cl+": 33.55252995410809,
+        "Cl2+": 29.099570731803613,
+        "Cl-": 33.55252995410809
+      },
+      "ion_temperature_eV": 0.12,
+      "electron_temperature_eV": 2.431084381243338,
+      "positive_negative_recombination_m3_s": 5e-14,
+      "bohm_wall_velocity_m_s": {
+        "Cl+": 2572.196656557486,
+        "Cl2+": 1818.8176983971634
+      },
+      "global_analytic_axial_flux_m2_s": {
+        "Cl+": 7.965287677218336e+18,
+        "Cl2+": 1.9951958082419286e+19
+      },
+      "spatial_source_modes": {
+        "uniform": {
+          "source_provenance": "uniform volumetric source limiting case",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.177093115194603e+19,
+            "Cl2+": 3.3354564582989468e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 1.0743781558553188e+19,
+            "Cl2+": 3.059688550429399e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.477778534680208,
+            "Cl2+": 1.6717439183264884
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.616402138071132,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.0956041025029144,
+            "Cl2+": 1.0901294047823418
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.585548149576907e+20,
+            "Cl2+": 1.6756082774711447e+21,
+            "Cl-": 2.2880728420540977e+21
+          },
+          "minimum_electron_density_m3": 2.222678952020573e+16,
+          "electrostatic_potential_span_V": 0.15989866225987487,
+          "nonlinear_solver_evaluations": 69,
+          "maximum_potential_fixed_point_relative_residual": 8.809862377931726e-09,
+          "maximum_particle_ledger_relative_residual": 2.913300387294203e-16,
+          "maximum_inventory_relative_residual": 7.424791350053913e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9911825413861332
+        },
+        "top_center_broad": {
+          "source_provenance": "declared ICP-like sensitivity: 30 mm axial skin depth and 180 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.1287069909348223e+19,
+            "Cl2+": 3.1604069495087362e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 7.65658060812944e+18,
+            "Cl2+": 2.1511705756632814e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.4170322989878417,
+            "Cl2+": 1.584008414840013
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.5363671536125179,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.4741658825303923,
+            "Cl2+": 1.469156832685977
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.566380615385267e+20,
+            "Cl2+": 1.6691837945272756e+21,
+            "Cl-": 2.3208576348791804e+21
+          },
+          "minimum_electron_density_m3": 1.9519648831321204e+16,
+          "electrostatic_potential_span_V": 0.7207671685911136,
+          "nonlinear_solver_evaluations": 102,
+          "maximum_potential_fixed_point_relative_residual": 1.6623221411242158e-10,
+          "maximum_particle_ledger_relative_residual": 2.8045459304116126e-16,
+          "maximum_inventory_relative_residual": 1.4849582700107825e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9924657541969856
+        },
+        "top_center_compact": {
+          "source_provenance": "declared ICP-like sensitivity: 15 mm axial skin depth and 100 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.274774078405534e+19,
+            "Cl2+": 3.519932430425694e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 6.191609561303797e+18,
+            "Cl2+": 1.7144204650368362e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.6004118495952613,
+            "Cl2+": 1.7642040023767342
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.7174711825488709,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 2.0588734896537932,
+            "Cl2+": 2.053132532076992
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.969903009707542e+20,
+            "Cl2+": 1.7818987884415287e+21,
+            "Cl-": 2.656287652335935e+21
+          },
+          "minimum_electron_density_m3": 1.4297000676305416e+16,
+          "electrostatic_potential_span_V": 1.8976002382217758,
+          "nonlinear_solver_evaluations": 160,
+          "maximum_potential_fixed_point_relative_residual": 9.186020303660443e-09,
+          "maximum_particle_ledger_relative_residual": 0.0,
+          "maximum_inventory_relative_residual": 4.761543147224983e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9935503376190997
+        },
+        "top_annular_wise_class": {
+          "source_provenance": "Wise 1996 source-class sensitivity: published approximately 10 mm axial skin depth and toroidal topology; 140 mm ring radius and 35 mm width are declared Lam-geometry moments, not measured or fitted fields",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 4.3961841834868675e+18,
+            "Cl2+": 1.1995755706148962e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 5.303335595387444e+18,
+            "Cl2+": 1.4565058425610953e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5519178166107515,
+            "Cl2+": 0.6012320022223308
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.587161786329763,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8289470097480597,
+            "Cl2+": 0.8235981865377092
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 7.03631562062033e+20,
+            "Cl2+": 2.0819004379114717e+21,
+            "Cl-": 3.300431256316642e+21
+          },
+          "minimum_electron_density_m3": 1.6756819215751436e+16,
+          "electrostatic_potential_span_V": 0.9477898066859815,
+          "nonlinear_solver_evaluations": 116,
+          "maximum_potential_fixed_point_relative_residual": 1.9168741141458497e-08,
+          "maximum_particle_ledger_relative_residual": 2.629535891714252e-16,
+          "maximum_inventory_relative_residual": 3.174362098149989e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0025370622487968
+        },
+        "inductive_em_annular": {
+          "source_provenance": "deterministic axisymmetric harmonic Etheta solve using the EEPF-derived complex Drude conductivity and a declared Lam-geometry annular coil-side field; generator coupling and the target-tool coil map are not measured",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 4.5666838063556936e+18,
+            "Cl2+": 1.2477092642187397e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 5.482284543942794e+18,
+            "Cl2+": 1.5073714652818244e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5733231480661959,
+            "Cl2+": 0.6253567990994136
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.6105106712634508,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8329891981621568,
+            "Cl2+": 0.8277384128307503
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 6.40013413590069e+20,
+            "Cl2+": 1.901362446524466e+21,
+            "Cl-": 2.910702899489363e+21
+          },
+          "minimum_electron_density_m3": 1.6412230673424656e+16,
+          "electrostatic_potential_span_V": 1.0573420167293326,
+          "nonlinear_solver_evaluations": 154,
+          "maximum_potential_fixed_point_relative_residual": 3.3513903208776847e-10,
+          "maximum_particle_ledger_relative_residual": 1.6950040152163996e-16,
+          "maximum_inventory_relative_residual": 4.454874810032348e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "inductive_field_receipt": {
+            "complex_conductivity_S_m": {
+              "real": 2.6209705965465315,
+              "imaginary": -9.711429333924153
+            },
+            "classical_dissipative_skin_depth_m": 0.08442269511144816,
+            "absorbed_power_mean_depth_below_top_m": 0.011608323923142264,
+            "absorbed_power_mean_radius_m": 0.1387485230019531,
+            "complex_power_ledger_relative_residual": 1.1322409210401334e-16,
+            "linear_system_relative_residual": 4.604848045565041e-16,
+            "supports_implicit_differentiation": true,
+            "supports_generator_to_plasma_power_prediction": false
+          },
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.000863753797249
+        }
+      },
+      "feature_depth_used_to_condition_transport": false
+    },
+    {
+      "inductive_power_W": 400.0,
+      "cl2_flow_sccm": 100.0,
+      "mean_electron_energy_eV": 3.65487106996815,
+      "reduced_electric_field_Td": 364.81089652957826,
+      "volume_average_density_m3": {
+        "Cl+": 2.896888142581435e+16,
+        "Cl2+": 1.0192343159339669e+17,
+        "Cl-": 1.0828519649206605e+17
+      },
+      "free_ion_mobility_m2_V_s": {
+        "Cl+": 33.552529954108046,
+        "Cl2+": 29.09957073180359,
+        "Cl-": 33.552529954108046
+      },
+      "ion_temperature_eV": 0.12,
+      "electron_temperature_eV": 2.4365807133121,
+      "positive_negative_recombination_m3_s": 5e-14,
+      "bohm_wall_velocity_m_s": {
+        "Cl+": 2575.102698261216,
+        "Cl2+": 1820.8725801922817
+      },
+      "global_analytic_axial_flux_m2_s": {
+        "Cl+": 7.596288850136774e+18,
+        "Cl2+": 1.9954291286288744e+19
+      },
+      "spatial_source_modes": {
+        "uniform": {
+          "source_provenance": "uniform volumetric source limiting case",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.1311963470360785e+19,
+            "Cl2+": 3.3617012553914946e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 1.03216722030194e+19,
+            "Cl2+": 3.0828716029843755e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.4891434085154764,
+            "Cl2+": 1.6847009032595566
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.6307814863351524,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.0959429100113929,
+            "Cl2+": 1.090444782759424
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.380553618190215e+20,
+            "Cl2+": 1.6933112788118298e+21,
+            "Cl-": 2.305366844944463e+21
+          },
+          "minimum_electron_density_m3": 2.17716296707821e+16,
+          "electrostatic_potential_span_V": 0.1554206989201542,
+          "nonlinear_solver_evaluations": 54,
+          "maximum_potential_fixed_point_relative_residual": 2.8262186335236617e-09,
+          "maximum_particle_ledger_relative_residual": 2.0161964414963117e-16,
+          "maximum_inventory_relative_residual": 1.5698058581689858e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0
+        },
+        "top_center_broad": {
+          "source_provenance": "declared ICP-like sensitivity: 30 mm axial skin depth and 180 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.0834761210917323e+19,
+            "Cl2+": 3.1814374243455623e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 7.334168144778609e+18,
+            "Cl2+": 2.1608437786658116e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.4263229617344315,
+            "Cl2+": 1.5943625251835596
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.5480303951198886,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.477299265170363,
+            "Cl2+": 1.4723125548251825
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.3616054122612294e+20,
+            "Cl2+": 1.686705541114557e+21,
+            "Cl-": 2.337545209162042e+21
+          },
+          "minimum_electron_density_m3": 1.916482633058157e+16,
+          "electrostatic_potential_span_V": 0.7074141549982211,
+          "nonlinear_solver_evaluations": 96,
+          "maximum_potential_fixed_point_relative_residual": 5.31225144765551e-11,
+          "maximum_particle_ledger_relative_residual": 2.0233217896764278e-16,
+          "maximum_inventory_relative_residual": 4.709417574506957e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0
+        },
+        "top_center_compact": {
+          "source_provenance": "declared ICP-like sensitivity: 15 mm axial skin depth and 100 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.2225894146601046e+19,
+            "Cl2+": 3.539859517741581e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 5.915426349912295e+18,
+            "Cl2+": 1.7173626195893658e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.6094561947023531,
+            "Cl2+": 1.773984085405196
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.7286201992186356,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 2.0667815679561814,
+            "Cl2+": 2.061218450526184
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.750086746748306e+20,
+            "Cl2+": 1.8005911933093203e+21,
+            "Cl-": 2.6718511846436414e+21
+          },
+          "minimum_electron_density_m3": 1.4077002112160876e+16,
+          "electrostatic_potential_span_V": 1.8722753994086876,
+          "nonlinear_solver_evaluations": 131,
+          "maximum_potential_fixed_point_relative_residual": 2.049910174957131e-09,
+          "maximum_particle_ledger_relative_residual": 9.433121217179844e-17,
+          "maximum_inventory_relative_residual": 1.5698058581689858e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0
+        },
+        "top_annular_wise_class": {
+          "source_provenance": "Wise 1996 source-class sensitivity: published approximately 10 mm axial skin depth and toroidal topology; 140 mm ring radius and 35 mm width are declared Lam-geometry moments, not measured or fitted fields",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 4.179984074859203e+18,
+            "Cl2+": 1.1955726470383841e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 5.056345024514918e+18,
+            "Cl2+": 1.4558046081575627e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.550266604828217,
+            "Cl2+": 0.5991556552348726
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.5856758901388612,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8266809433678254,
+            "Cl2+": 0.8212452690004032
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 6.780467400958537e+20,
+            "Cl2+": 2.104683405366408e+21,
+            "Cl-": 3.318862284643198e+21
+          },
+          "minimum_electron_density_m3": 1.6455055195914378e+16,
+          "electrostatic_potential_span_V": 0.937286648471863,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 8.288376681423884e-10,
+          "maximum_particle_ledger_relative_residual": 3.0926037704145685e-16,
+          "maximum_inventory_relative_residual": 3.1396117163379716e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0
+        },
+        "inductive_em_annular": {
+          "source_provenance": "deterministic axisymmetric harmonic Etheta solve using the EEPF-derived complex Drude conductivity and a declared Lam-geometry annular coil-side field; generator coupling and the target-tool coil map are not measured",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 4.348957028581156e+18,
+            "Cl2+": 1.2456450409716339e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 5.237300903196627e+18,
+            "Cl2+": 1.5097901277452796e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5725107502333658,
+            "Cl2+": 0.624249201888497
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.6099837954438759,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.830381356535527,
+            "Cl2+": 0.8250451622914504
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 6.150937958815637e+20,
+            "Cl2+": 1.9173023068295156e+21,
+            "Cl-": 2.917415634632739e+21
+          },
+          "minimum_electron_density_m3": 1.6121658004013218e+16,
+          "electrostatic_potential_span_V": 1.044878422416144,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 1.724682881017606e-08,
+          "maximum_particle_ledger_relative_residual": 2.974756953927369e-16,
+          "maximum_inventory_relative_residual": 4.1423760288192295e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "inductive_field_receipt": {
+            "complex_conductivity_S_m": {
+              "real": 2.5762882944277727,
+              "imaginary": -9.461090914171697
+            },
+            "classical_dissipative_skin_depth_m": 0.08515164783411315,
+            "absorbed_power_mean_depth_below_top_m": 0.011667523086521992,
+            "absorbed_power_mean_radius_m": 0.13874205215357843,
+            "complex_power_ledger_relative_residual": 2.286582501412546e-16,
+            "linear_system_relative_residual": 5.651077372567321e-16,
+            "supports_implicit_differentiation": true,
+            "supports_generator_to_plasma_power_prediction": false
+          },
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0
+        }
+      },
+      "feature_depth_used_to_condition_transport": false
+    },
+    {
+      "inductive_power_W": 400.0,
+      "cl2_flow_sccm": 175.0,
+      "mean_electron_energy_eV": 3.6625642698137018,
+      "reduced_electric_field_Td": 368.2200801418568,
+      "volume_average_density_m3": {
+        "Cl+": 2.7975607245723976e+16,
+        "Cl2+": 1.0294685645051477e+17,
+        "Cl-": 1.0877028555556347e+17
+      },
+      "free_ion_mobility_m2_V_s": {
+        "Cl+": 33.55252995410804,
+        "Cl2+": 29.099570731803578,
+        "Cl-": 33.55252995410804
+      },
+      "ion_temperature_eV": 0.12,
+      "electron_temperature_eV": 2.441709513209134,
+      "positive_negative_recombination_m3_s": 5e-14,
+      "bohm_wall_velocity_m_s": {
+        "Cl+": 2577.8114621611976,
+        "Cl2+": 1822.787965514592
+      },
+      "global_analytic_axial_flux_m2_s": {
+        "Cl+": 7.262934786441501e+18,
+        "Cl2+": 1.9954105255263363e+19
+      },
+      "spatial_source_modes": {
+        "uniform": {
+          "source_provenance": "uniform volumetric source limiting case",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.0892430520779837e+19,
+            "Cl2+": 3.385752753292132e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 9.936029604866384e+18,
+            "Cl2+": 3.104097850106843e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.499728531380167,
+            "Cl2+": 1.6967700179886844
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.6441890075162646,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.0962558440289907,
+            "Cl2+": 1.0907364770010695
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.1921506906191364e+20,
+            "Cl2+": 1.7095444935433454e+21,
+            "Cl-": 2.3210145072464464e+21
+          },
+          "minimum_electron_density_m3": 2.1357207526998628e+16,
+          "electrostatic_potential_span_V": 0.15194290684919892,
+          "nonlinear_solver_evaluations": 54,
+          "maximum_potential_fixed_point_relative_residual": 2.1071078356298382e-09,
+          "maximum_particle_ledger_relative_residual": 2.804356377197777e-16,
+          "maximum_inventory_relative_residual": 3.108399916551312e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0082215313905991
+        },
+        "top_center_broad": {
+          "source_provenance": "declared ICP-like sensitivity: 30 mm axial skin depth and 180 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.0422354348699042e+19,
+            "Cl2+": 3.2007224679365534e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 7.041204295190068e+18,
+            "Cl2+": 2.1696455814869217e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.4350059108551503,
+            "Cl2+": 1.604042089079533
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.5589343647600704,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.4801948518691153,
+            "Cl2+": 1.4752282562864505
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.173440203224295e+20,
+            "Cl2+": 1.7027712399506615e+21,
+            "Cl-": 2.3526466650884955e+21
+          },
+          "minimum_electron_density_m3": 1.8840467032168828e+16,
+          "electrostatic_potential_span_V": 0.6952118619032652,
+          "nonlinear_solver_evaluations": 96,
+          "maximum_potential_fixed_point_relative_residual": 1.3025984064606994e-11,
+          "maximum_particle_ledger_relative_residual": 1.0484564073548339e-16,
+          "maximum_inventory_relative_residual": 4.2894511259748185e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.007043769731238
+        },
+        "top_center_compact": {
+          "source_provenance": "declared ICP-like sensitivity: 15 mm axial skin depth and 100 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.1751007387370246e+19,
+            "Cl2+": 3.5581520053168804e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 5.665498776440322e+18,
+            "Cl2+": 1.7199638953601909e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.6179420210831457,
+            "Cl2+": 1.783167904448301
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.7390769667829815,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 2.074134661582876,
+            "Cl2+": 2.0687364513379745
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.548086214821841e+20,
+            "Cl2+": 1.8177220502214345e+21,
+            "Cl-": 2.685907928789117e+21
+          },
+          "minimum_electron_density_m3": 1.3875238923440378e+16,
+          "electrostatic_potential_span_V": 1.8490247471220793,
+          "nonlinear_solver_evaluations": 131,
+          "maximum_potential_fixed_point_relative_residual": 1.7909255799795201e-09,
+          "maximum_particle_ledger_relative_residual": 4.88828608561176e-16,
+          "maximum_inventory_relative_residual": 2.9419799568011006e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0060491989906588
+        },
+        "top_annular_wise_class": {
+          "source_provenance": "Wise 1996 source-class sensitivity: published approximately 10 mm axial skin depth and toroidal topology; 140 mm ring radius and 35 mm width are declared Lam-geometry moments, not measured or fitted fields",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 3.985601510088529e+18,
+            "Cl2+": 1.1917826273252213e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 4.833519133398169e+18,
+            "Cl2+": 1.4550608515218915e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5487590935731488,
+            "Cl2+": 0.597261872722086
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.5843187855465475,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8245755111527783,
+            "Cl2+": 0.8190603341975012
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 6.54514809819851e+20,
+            "Cl2+": 2.125586412496951e+21,
+            "Cl-": 3.3355250024318805e+21
+          },
+          "minimum_electron_density_m3": 1.6179802251349054e+16,
+          "electrostatic_potential_span_V": 0.9276036437865152,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 1.01685988712178e-09,
+          "maximum_particle_ledger_relative_residual": 2.601870002561136e-16,
+          "maximum_inventory_relative_residual": 1.429817041991606e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9976828402617154
+        },
+        "inductive_em_annular": {
+          "source_provenance": "deterministic axisymmetric harmonic Etheta solve using the EEPF-derived complex Drude conductivity and a declared Lam-geometry annular coil-side field; generator coupling and the target-tool coil map are not measured",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 4.1529476406944256e+18,
+            "Cl2+": 1.2436893463490126e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 5.015762237618721e+18,
+            "Cl2+": 1.5119641588884974e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5718002106320957,
+            "Cl2+": 0.6232749253545009
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.6095387697840698,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.827979366634826,
+            "Cl2+": 0.8225653624377552
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 5.922973388044378e+20,
+            "Cl2+": 1.931865179007013e+21,
+            "Cl-": 2.923417154131607e+21
+          },
+          "minimum_electron_density_m3": 1.5856602936637096e+16,
+          "electrostatic_potential_span_V": 1.0333943759203574,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 1.274313714901865e-08,
+          "maximum_particle_ledger_relative_residual": 1.8315552590819667e-16,
+          "maximum_inventory_relative_residual": 6.216799833102624e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "inductive_field_receipt": {
+            "complex_conductivity_S_m": {
+              "real": 2.535454058557082,
+              "imaginary": -9.234633109647175
+            },
+            "classical_dissipative_skin_depth_m": 0.0858346052189691,
+            "absorbed_power_mean_depth_below_top_m": 0.011721726157035215,
+            "absorbed_power_mean_radius_m": 0.1387360735214757,
+            "complex_power_ledger_relative_residual": 3.4613594459614096e-16,
+            "linear_system_relative_residual": 2.4857214443394524e-16,
+            "supports_implicit_differentiation": true,
+            "supports_generator_to_plasma_power_prediction": false
+          },
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9992704303571175
+        }
+      },
+      "feature_depth_used_to_condition_transport": false
+    },
+    {
+      "inductive_power_W": 550.0,
+      "cl2_flow_sccm": 25.0,
+      "mean_electron_energy_eV": 3.585721556941004,
+      "reduced_electric_field_Td": 343.0135871096365,
+      "volume_average_density_m3": {
+        "Cl+": 4.210377006486698e+16,
+        "Cl2+": 1.1697364186224411e+17,
+        "Cl-": 1.2313018416670896e+17
+      },
+      "free_ion_mobility_m2_V_s": {
+        "Cl+": 33.55252995410809,
+        "Cl2+": 29.099570731803617,
+        "Cl-": 33.55252995410809
+      },
+      "ion_temperature_eV": 0.12,
+      "electron_temperature_eV": 2.390481037960669,
+      "positive_negative_recombination_m3_s": 5e-14,
+      "bohm_wall_velocity_m_s": {
+        "Cl+": 2550.6261289479216,
+        "Cl2+": 1803.5650320506686
+      },
+      "global_analytic_axial_flux_m2_s": {
+        "Cl+": 1.2694063066310752e+19,
+        "Cl2+": 2.633389197156997e+19
+      },
+      "spatial_source_modes": {
+        "uniform": {
+          "source_provenance": "uniform volumetric source limiting case",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.7284829811321532e+19,
+            "Cl2+": 4.056913407591247e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 1.589970379917422e+19,
+            "Cl2+": 3.750772526047263e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.36164675730928,
+            "Cl2+": 1.5405673464336698
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.4823724130839209,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.087116466422428,
+            "Cl2+": 1.0816207539694787
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 8.450213438412895e+20,
+            "Cl2+": 2.105419731316618e+21,
+            "Cl-": 2.7487298247161015e+21
+          },
+          "minimum_electron_density_m3": 3.412175105561708e+16,
+          "electrostatic_potential_span_V": 0.20902675099027965,
+          "nonlinear_solver_evaluations": 70,
+          "maximum_potential_fixed_point_relative_residual": 6.434959426178855e-10,
+          "maximum_particle_ledger_relative_residual": 2.3679853059539587e-16,
+          "maximum_inventory_relative_residual": 2.7356590331422966e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9089951201342428
+        },
+        "top_center_broad": {
+          "source_provenance": "declared ICP-like sensitivity: 30 mm axial skin depth and 180 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.6624436178709516e+19,
+            "Cl2+": 3.850803511788523e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 1.1582182290163175e+19,
+            "Cl2+": 2.6918950971416457e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.3096229388390017,
+            "Cl2+": 1.4622994261333813
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.4126405353056006,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.4353457545586,
+            "Cl2+": 1.430517673544355
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 8.443591268357565e+20,
+            "Cl2+": 2.1022527010515313e+21,
+            "Cl-": 2.807326764003181e+21
+          },
+          "minimum_electron_density_m3": 2.90571849863201e+16,
+          "electrostatic_potential_span_V": 0.8965522885393822,
+          "nonlinear_solver_evaluations": 106,
+          "maximum_potential_fixed_point_relative_residual": 1.869638763670903e-11,
+          "maximum_particle_ledger_relative_residual": 1.284791353997574e-16,
+          "maximum_inventory_relative_residual": 0.0,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9125405675230281
+        },
+        "top_center_compact": {
+          "source_provenance": "declared ICP-like sensitivity: 15 mm axial skin depth and 100 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.8759671861512765e+19,
+            "Cl2+": 4.278332768169349e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 9.565153392606104e+18,
+            "Cl2+": 2.188125972264501e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.4778303655430671,
+            "Cl2+": 1.6246488642044368
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.5768953173045404,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.9612515441743001,
+            "Cl2+": 1.955249753624415
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 9.06085996819173e+20,
+            "Cl2+": 2.24421193830119e+21,
+            "Cl-": 3.261177756629096e+21
+          },
+          "minimum_electron_density_m3": 2.04707997509098e+16,
+          "electrostatic_potential_span_V": 2.2488745936055095,
+          "nonlinear_solver_evaluations": 133,
+          "maximum_potential_fixed_point_relative_residual": 8.105862651469921e-09,
+          "maximum_particle_ledger_relative_residual": 1.9335523304429186e-16,
+          "maximum_inventory_relative_residual": 1.3678295165711483e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9122277513691687
+        },
+        "top_annular_wise_class": {
+          "source_provenance": "Wise 1996 source-class sensitivity: published approximately 10 mm axial skin depth and toroidal topology; 140 mm ring radius and 35 mm width are declared Lam-geometry moments, not measured or fitted fields",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 7.153137469477733e+18,
+            "Cl2+": 1.6115749383388131e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 8.364652319612261e+18,
+            "Cl2+": 1.8973262035427434e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5635025942530341,
+            "Cl2+": 0.6119775003553091
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.5962107630359051,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8551625574091181,
+            "Cl2+": 0.8493926533716938
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 1.0591629899002891e+21,
+            "Cl2+": 2.6003541866807915e+21,
+            "Cl-": 4.049425612640791e+21
+          },
+          "minimum_electron_density_m3": 2.456481369251114e+16,
+          "electrostatic_potential_span_V": 1.1248018071673154,
+          "nonlinear_solver_evaluations": 118,
+          "maximum_potential_fixed_point_relative_residual": 2.5454743592619017e-09,
+          "maximum_particle_ledger_relative_residual": 3.0726865916915617e-16,
+          "maximum_inventory_relative_residual": 2.7356590331422966e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0179875475060893
+        },
+        "inductive_em_annular": {
+          "source_provenance": "deterministic axisymmetric harmonic Etheta solve using the EEPF-derived complex Drude conductivity and a declared Lam-geometry annular coil-side field; generator coupling and the target-tool coil map are not measured",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 7.260529788778926e+18,
+            "Cl2+": 1.6349213343869135e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 8.381292345582514e+18,
+            "Cl2+": 1.8996532191018906e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5719626372463767,
+            "Cl2+": 0.6208430322992029
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.6049444074057257,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8662780737633734,
+            "Cl2+": 0.860641993995022
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 1.0157669921805652e+21,
+            "Cl2+": 2.4971019812546004e+21,
+            "Cl-": 3.846211559409234e+21
+          },
+          "minimum_electron_density_m3": 2.3831350348340708e+16,
+          "electrostatic_potential_span_V": 1.2799132307358052,
+          "nonlinear_solver_evaluations": 118,
+          "maximum_potential_fixed_point_relative_residual": 3.167590371165331e-08,
+          "maximum_particle_ledger_relative_residual": 4.271945492139717e-16,
+          "maximum_inventory_relative_residual": 3.898313019252179e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "inductive_field_receipt": {
+            "complex_conductivity_S_m": {
+              "real": 3.980938861937439,
+              "imaginary": -15.427848910963501
+            },
+            "classical_dissipative_skin_depth_m": 0.06850109801771204,
+            "absorbed_power_mean_depth_below_top_m": 0.010431915770821523,
+            "absorbed_power_mean_radius_m": 0.13886534319526878,
+            "complex_power_ledger_relative_residual": 1.7365132219782383e-16,
+            "linear_system_relative_residual": 3.1951069841029023e-16,
+            "supports_implicit_differentiation": true,
+            "supports_generator_to_plasma_power_prediction": false
+          },
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9917384886684029
+        }
+      },
+      "feature_depth_used_to_condition_transport": false
+    },
+    {
+      "inductive_power_W": 550.0,
+      "cl2_flow_sccm": 100.0,
+      "mean_electron_energy_eV": 3.594300611904295,
+      "reduced_electric_field_Td": 346.83659618772595,
+      "volume_average_density_m3": {
+        "Cl+": 4.060388329203994e+16,
+        "Cl2+": 1.1847087518190208e+17,
+        "Cl-": 1.2397740918632355e+17
+      },
+      "free_ion_mobility_m2_V_s": {
+        "Cl+": 33.552529954108095,
+        "Cl2+": 29.099570731803627,
+        "Cl-": 33.552529954108095
+      },
+      "ion_temperature_eV": 0.12,
+      "electron_temperature_eV": 2.3962004079361963,
+      "positive_negative_recombination_m3_s": 5e-14,
+      "bohm_wall_velocity_m_s": {
+        "Cl+": 2553.6755694245126,
+        "Cl2+": 1805.721312090491
+      },
+      "global_analytic_axial_flux_m2_s": {
+        "Cl+": 1.2084948193411142e+19,
+        "Cl2+": 2.6328691556964786e+19
+      },
+      "spatial_source_modes": {
+        "uniform": {
+          "source_provenance": "uniform volumetric source limiting case",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.6593756870524815e+19,
+            "Cl2+": 4.090518429689279e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 1.5259385442854228e+19,
+            "Cl2+": 3.780798185747602e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.3730929255925093,
+            "Cl2+": 1.5536352882706037
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.4968365804715211,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.087445948112901,
+            "Cl2+": 1.0819192743768296
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 8.141564086014575e+20,
+            "Cl2+": 2.1313732725010667e+21,
+            "Cl-": 2.7764633199038657e+21
+          },
+          "minimum_electron_density_m3": 3.3370471070628612e+16,
+          "electrostatic_potential_span_V": 0.20306480769230906,
+          "nonlinear_solver_evaluations": 54,
+          "maximum_potential_fixed_point_relative_residual": 3.0050462754999258e-09,
+          "maximum_particle_ledger_relative_residual": 4.071836012298417e-16,
+          "maximum_inventory_relative_residual": 3.94050979925279e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9178645900839572
+        },
+        "top_center_broad": {
+          "source_provenance": "declared ICP-like sensitivity: 30 mm axial skin depth and 180 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.5931615427582417e+19,
+            "Cl2+": 3.875407912452257e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 1.1073956491141884e+19,
+            "Cl2+": 2.7027942745902064e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.3183023354844436,
+            "Cl2+": 1.4719333484793273
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.423600963289864,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.4386561334538563,
+            "Cl2+": 1.4338523463980035
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 8.134335147119983e+20,
+            "Cl2+": 2.1280114466025578e+21,
+            "Cl-": 2.833953840777911e+21
+          },
+          "minimum_electron_density_m3": 2.8498726340611812e+16,
+          "electrostatic_potential_span_V": 0.8796772117966929,
+          "nonlinear_solver_evaluations": 95,
+          "maximum_potential_fixed_point_relative_residual": 9.861671790627354e-13,
+          "maximum_particle_ledger_relative_residual": 1.5311827457708206e-16,
+          "maximum_inventory_relative_residual": 1.970254899626395e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9196208083366555
+        },
+        "top_center_compact": {
+          "source_provenance": "declared ICP-like sensitivity: 15 mm axial skin depth and 100 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.7951962980101495e+19,
+            "Cl2+": 4.2988242274773434e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 9.117196021823701e+18,
+            "Cl2+": 2.1897066589317714e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.4854811698646022,
+            "Cl2+": 1.6327527018106474
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.5864210121947255,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.9690223767406272,
+            "Cl2+": 1.9631963989069139
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 8.729546075376517e+20,
+            "Cl2+": 2.271913429543201e+21,
+            "Cl-": 3.2863357987277793e+21
+          },
+          "minimum_electron_density_m3": 2.0136009453295804e+16,
+          "electrostatic_potential_span_V": 2.2188032258892707,
+          "nonlinear_solver_evaluations": 131,
+          "maximum_potential_fixed_point_relative_residual": 4.441222620880705e-10,
+          "maximum_particle_ledger_relative_residual": 3.7281158600703005e-16,
+          "maximum_inventory_relative_residual": 2.701085811248266e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9177383284725086
+        },
+        "top_annular_wise_class": {
+          "source_provenance": "Wise 1996 source-class sensitivity: published approximately 10 mm axial skin depth and toroidal topology; 140 mm ring radius and 35 mm width are declared Lam-geometry moments, not measured or fitted fields",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 6.783909561573724e+18,
+            "Cl2+": 1.604130999811277e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 7.953754303038023e+18,
+            "Cl2+": 1.893780016333189e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5613519771042454,
+            "Cl2+": 0.6092710670184948
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.5941956999652218,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8529191754116087,
+            "Cl2+": 0.8470524485295067
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 1.0208844891701994e+21,
+            "Cl2+": 2.6335268589413933e+21,
+            "Cl-": 4.078437781360164e+21
+          },
+          "minimum_electron_density_m3": 2.4081069510147452e+16,
+          "electrostatic_potential_span_V": 1.1130399351389626,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 8.539706914792585e-10,
+          "maximum_particle_ledger_relative_residual": 1.6477148158095367e-16,
+          "maximum_inventory_relative_residual": 1.970254899626395e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.0145469703803935
+        },
+        "inductive_em_annular": {
+          "source_provenance": "deterministic axisymmetric harmonic Etheta solve using the EEPF-derived complex Drude conductivity and a declared Lam-geometry annular coil-side field; generator coupling and the target-tool coil map are not measured",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 6.892676361542457e+18,
+            "Cl2+": 1.6291687574371228e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 7.983788518358239e+18,
+            "Cl2+": 1.899683122133983e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5703521646290902,
+            "Cl2+": 0.6187807525156545
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.6035450971731152,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8633340356765669,
+            "Cl2+": 0.8576002694633716
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 9.755190310300548e+20,
+            "Cl2+": 2.5203327357115706e+21,
+            "Cl-": 3.853423999830742e+21
+          },
+          "minimum_electron_density_m3": 2.3368206525325828e+16,
+          "electrostatic_potential_span_V": 1.265679972993445,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 9.596479878499129e-09,
+          "maximum_particle_ledger_relative_residual": 1.7217175977698685e-16,
+          "maximum_inventory_relative_residual": 1.970254899626395e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "inductive_field_receipt": {
+            "complex_conductivity_S_m": {
+              "real": 3.907471013910724,
+              "imaginary": -14.995452549399081
+            },
+            "classical_dissipative_skin_depth_m": 0.06914207428018744,
+            "absorbed_power_mean_depth_below_top_m": 0.010509794508053345,
+            "absorbed_power_mean_radius_m": 0.13885833254780644,
+            "complex_power_ledger_relative_residual": 1.750921658357216e-16,
+            "linear_system_relative_residual": 2.711949681580733e-16,
+            "supports_implicit_differentiation": true,
+            "supports_generator_to_plasma_power_prediction": false
+          },
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9894444765273226
+        }
+      },
+      "feature_depth_used_to_condition_transport": false
+    },
+    {
+      "inductive_power_W": 550.0,
+      "cl2_flow_sccm": 175.0,
+      "mean_electron_energy_eV": 3.602300303082552,
+      "reduced_electric_field_Td": 350.4050482993506,
+      "volume_average_density_m3": {
+        "Cl+": 3.92266664378442e+16,
+        "Cl2+": 1.1984043801930136e+17,
+        "Cl-": 1.247389113432516e+17
+      },
+      "free_ion_mobility_m2_V_s": {
+        "Cl+": 33.552529954107975,
+        "Cl2+": 29.09957073180352,
+        "Cl-": 33.552529954107975
+      },
+      "ion_temperature_eV": 0.12,
+      "electron_temperature_eV": 2.401533535388368,
+      "positive_negative_recombination_m3_s": 5e-14,
+      "bohm_wall_velocity_m_s": {
+        "Cl+": 2556.5157967695113,
+        "Cl2+": 1807.729656106251
+      },
+      "global_analytic_axial_flux_m2_s": {
+        "Cl+": 1.1537744761618115e+19,
+        "Cl2+": 2.6319458608832467e+19
+      },
+      "spatial_source_modes": {
+        "uniform": {
+          "source_provenance": "uniform volumetric source limiting case",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.596569026281367e+19,
+            "Cl2+": 4.12119716718022e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 1.4677679848861495e+19,
+            "Cl2+": 3.808171656817579e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.3837791173822567,
+            "Cl2+": 1.5658366034159987
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.5103509198792497,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.0877529982405278,
+            "Cl2+": 1.082198371967358
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 7.858805720765548e+20,
+            "Cl2+": 2.1551115277217277e+21,
+            "Cl-": 2.8015004601893163e+21
+          },
+          "minimum_electron_density_m3": 3.268830429856569e+16,
+          "electrostatic_potential_span_V": 0.19765063502139174,
+          "nonlinear_solver_evaluations": 54,
+          "maximum_potential_fixed_point_relative_residual": 2.2587784853970733e-09,
+          "maximum_particle_ledger_relative_residual": 2.3233806053079403e-16,
+          "maximum_inventory_relative_residual": 4.078857943575824e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9261516227250374
+        },
+        "top_center_broad": {
+          "source_provenance": "declared ICP-like sensitivity: 30 mm axial skin depth and 180 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.530428467322139e+19,
+            "Cl2+": 3.897873513800338e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 1.061519172640966e+19,
+            "Cl2+": 2.712598069747954e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.3264537385272368,
+            "Cl2+": 1.4809854456855212
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.4338887973324344,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.4417341737828135,
+            "Cl2+": 1.436952107749054
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 7.851075040271295e+20,
+            "Cl2+": 2.1515673663775561e+21,
+            "Cl-": 2.85799262933204e+21
+          },
+          "minimum_electron_density_m3": 2.79893555587854e+16,
+          "electrostatic_potential_span_V": 0.8642678908759158,
+          "nonlinear_solver_evaluations": 95,
+          "maximum_potential_fixed_point_relative_residual": 7.643511807311776e-13,
+          "maximum_particle_ledger_relative_residual": 1.3817538365931028e-16,
+          "maximum_inventory_relative_residual": 2.6702172095571044e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9262665654710129
+        },
+        "top_center_compact": {
+          "source_provenance": "declared ICP-like sensitivity: 15 mm axial skin depth and 100 mm center scale; not a fitted Lam field",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 1.7222664048900188e+19,
+            "Cl2+": 4.3175467413310685e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 8.714577883947058e+18,
+            "Cl2+": 2.1909328033372967e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 1.4927236132137136,
+            "Cl2+": 1.6404390399892785
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 1.5954197902889624,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 1.9763050234051724,
+            "Cl2+": 1.9706431592764724
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 8.425956408078677e+20,
+            "Cl2+": 2.2972289061974293e+21,
+            "Cl-": 3.3089841914863173e+21
+          },
+          "minimum_electron_density_m3": 1.9829840095540596e+16,
+          "electrostatic_potential_span_V": 2.191214047346071,
+          "nonlinear_solver_evaluations": 131,
+          "maximum_potential_fixed_point_relative_residual": 5.866822879541002e-10,
+          "maximum_particle_ledger_relative_residual": 2.5749606413520193e-16,
+          "maximum_inventory_relative_residual": 2.5653582875950926e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.922944086277667
+        },
+        "top_annular_wise_class": {
+          "source_provenance": "Wise 1996 source-class sensitivity: published approximately 10 mm axial skin depth and toroidal topology; 140 mm ring radius and 35 mm width are declared Lam-geometry moments, not measured or fitted fields",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 6.453988913005906e+18,
+            "Cl2+": 1.5970507232113426e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 7.585608509083674e+18,
+            "Cl2+": 1.8903037184365814e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.5593804548767609,
+            "Cl2+": 0.6067946711773902
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.5923442343504634,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8508201952786428,
+            "Cl2+": 0.8448646149478136
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 9.857838004275214e+20,
+            "Cl2+": 2.6638808828066985e+21,
+            "Cl-": 4.104588628696388e+21
+          },
+          "minimum_electron_density_m3": 2.3641527863890364e+16,
+          "electrostatic_potential_span_V": 1.102205604598696,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 8.989591619260445e-10,
+          "maximum_particle_ledger_relative_residual": 2.1143659527645484e-16,
+          "maximum_inventory_relative_residual": 6.413395718987732e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "diagnostic_center_renormalized_total_ion_flux_scale": 1.011385724295431
+        },
+        "inductive_em_annular": {
+          "source_provenance": "deterministic axisymmetric harmonic Etheta solve using the EEPF-derived complex Drude conductivity and a declared Lam-geometry annular coil-side field; generator coupling and the target-tool coil map are not measured",
+          "source_conditioned_or_measured": false,
+          "wafer_flux_m2_s": {
+            "Cl+": 6.563935165182527e+18,
+            "Cl2+": 1.6237367452954157e+19
+          },
+          "full_lower_endcap_flux_m2_s": {
+            "Cl+": 7.627159109513605e+18,
+            "Cl2+": 1.8996020918319514e+19
+          },
+          "wafer_to_global_analytic_flux_ratio": {
+            "Cl+": 0.568909722029764,
+            "Cl2+": 0.6169339458793088
+          },
+          "total_wafer_to_global_analytic_flux_ratio": 0.602297596972898,
+          "center_wafer_to_full_endcap_flux_ratio": {
+            "Cl+": 0.8606002668798552,
+            "Cl2+": 0.854777299033981
+          },
+          "inferred_source_amplitude_m3_s": {
+            "Cl+": 9.388630039180036e+20,
+            "Cl2+": 2.5414257250503644e+21,
+            "Cl-": 3.859724849499031e+21
+          },
+          "minimum_electron_density_m3": 2.294768557727731e+16,
+          "electrostatic_potential_span_V": 1.2525598252890144,
+          "nonlinear_solver_evaluations": 97,
+          "maximum_potential_fixed_point_relative_residual": 2.651278375830346e-09,
+          "maximum_particle_ledger_relative_residual": 2.310934185925736e-16,
+          "maximum_inventory_relative_residual": 2.6702172095571044e-16,
+          "supports_reactor_state_prediction": false,
+          "supports_implicit_differentiation": true,
+          "inductive_field_receipt": {
+            "complex_conductivity_S_m": {
+              "real": 3.8405334652589778,
+              "imaginary": -14.605769148107008
+            },
+            "classical_dissipative_skin_depth_m": 0.06974201805851597,
+            "absorbed_power_mean_depth_below_top_m": 0.010581339281599593,
+            "absorbed_power_mean_radius_m": 0.13885180817200637,
+            "complex_power_ledger_relative_residual": 0.0,
+            "linear_system_relative_residual": 4.227707033752236e-16,
+            "supports_implicit_differentiation": true,
+            "supports_generator_to_plasma_power_prediction": false
+          },
+          "diagnostic_center_renormalized_total_ion_flux_scale": 0.9873993399031448
+        }
+      },
+      "feature_depth_used_to_condition_transport": false
+    }
+  ],
+  "grid_convergence_receipt": {
+    "condition": "400 W, 100 sccm, uniform source",
+    "levels": [
+      {
+        "radial_cell_count": 10,
+        "axial_cell_count": 8,
+        "wafer_positive_ion_flux_m2_s": {
+          "Cl+": 1.1075021525002058e+19,
+          "Cl2+": 3.2919289422015627e+19
+        },
+        "total_wafer_positive_ion_flux_m2_s": 4.399431094701769e+19,
+        "nonlinear_solver_evaluations": 86
+      },
+      {
+        "radial_cell_count": 14,
+        "axial_cell_count": 10,
+        "wafer_positive_ion_flux_m2_s": {
+          "Cl+": 1.1311963470360785e+19,
+          "Cl2+": 3.3617012553914946e+19
+        },
+        "total_wafer_positive_ion_flux_m2_s": 4.492897602427573e+19,
+        "nonlinear_solver_evaluations": 54
+      },
+      {
+        "radial_cell_count": 20,
+        "axial_cell_count": 14,
+        "wafer_positive_ion_flux_m2_s": {
+          "Cl+": 1.1496509561877946e+19,
+          "Cl2+": 3.416479911352199e+19
+        },
+        "total_wafer_positive_ion_flux_m2_s": 4.566130867539994e+19,
+        "nonlinear_solver_evaluations": 97
+      }
+    ],
+    "production_to_fine_total_flux_relative_change": 0.016299785036910652,
+    "passed_three_percent_gate": true
+  },
+  "summary": {
+    "condition_count": 9,
+    "total_wafer_to_global_analytic_flux_ratio_range_by_source_mode": {
+      "uniform": [
+        1.4823724130839209,
+        1.8425874304721515
+      ],
+      "top_center_broad": [
+        1.4126405353056006,
+        1.7574047822294039
+      ],
+      "top_center_compact": [
+        1.5768953173045404,
+        1.9809509492611093
+      ],
+      "top_annular_wise_class": [
+        0.5843187855465475,
+        0.5962107630359051
+      ],
+      "inductive_em_annular": [
+        0.602297596972898,
+        0.6369193067040403
+      ]
+    },
+    "center_condition_raw_flux_ratio_by_source_mode": {
+      "uniform": 1.6307814863351524,
+      "top_center_broad": 1.5480303951198886,
+      "top_center_compact": 1.7286201992186356,
+      "top_annular_wise_class": 0.5856758901388612,
+      "inductive_em_annular": 0.6099837954438759
+    },
+    "diagnostic_center_renormalized_total_ion_flux_scale_range_by_source_mode": {
+      "uniform": [
+        0.9089951201342428,
+        1.1298800274051366
+      ],
+      "top_center_broad": [
+        0.9125405675230281,
+        1.1352521163470437
+      ],
+      "top_center_compact": [
+        0.9122277513691687,
+        1.1459723484409885
+      ],
+      "top_annular_wise_class": [
+        0.9976828402617154,
+        1.0179875475060893
+      ],
+      "inductive_em_annular": [
+        0.9873993399031448,
+        1.0441577488801383
+      ]
+    },
+    "maximum_particle_ledger_relative_residual": 4.88828608561176e-16,
+    "formal_feature_depth_passes": 0,
+    "supports_reactor_state_prediction": false,
+    "supports_implicit_differentiation": true,
+    "feature_depth_used_to_select_any_parameter": false,
+    "electropositive_scalar_diffusion_reference_rejected": true
+  },
+  "next_measurement": "radially resolved species-resolved ion saturation/current density at the Mahorowala wafer plane, with a documented probe-to-wafer transfer, to select or reject the source moment"
+}

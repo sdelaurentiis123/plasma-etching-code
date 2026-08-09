@@ -1,0 +1,98 @@
+figure,panel,series,cl2_fraction_percent,value,units,marker_center_x_px,marker_center_y_px,marker_state,digitization_vertical_uncertainty_px,evidence_type
+5.10,a,total_photon_flux,5,5.04315949e+15,cm^-2 s^-1,1037.0,299.5,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,10,2.08122157e+15,cm^-2 s^-1,1073.5,363.5,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,15,1.04236067e+15,cm^-2 s^-1,1109.5,413.5,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,20,5.67222897e+14,cm^-2 s^-1,1146.0,457.5,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,30,2.88044415e+14,cm^-2 s^-1,1219.0,506.5,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,40,1.58928287e+14,cm^-2 s^-1,1291.5,549.5,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,50,1.09405471e+14,cm^-2 s^-1,1364.5,576.5,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,60,7.74263683e+13,cm^-2 s^-1,1437.5,601.5,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,80,4.09838367e+13,cm^-2 s^-1,1583.5,647.5,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,90,2.50841506e+13,cm^-2 s^-1,1656.5,683.0,isolated,4,source_equipment_model_digitized
+5.10,a,total_photon_flux,95,2.32469706e+13,cm^-2 s^-1,1693.5,688.5,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,5,1.36500781e+15,cm^-2 s^-1,1037.0,394.0,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,10,5.87176639e+14,cm^-2 s^-1,1073.5,455.0,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,15,3.0653953e+14,cm^-2 s^-1,1109.5,502.0,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,20,1.75567629e+14,cm^-2 s^-1,1146.0,542.3,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,30,1.00138389e+14,cm^-2 s^-1,1219.0,582.9,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,40,6.02809628e+13,cm^-2 s^-1,1291.5,619.6,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,50,5.32999408e+13,cm^-2 s^-1,1364.5,628.5,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,60,3.15136348e+13,cm^-2 s^-1,1437.5,666.5,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,80,1.30772527e+13,cm^-2 s^-1,1583.5,730.1,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_104.8_nm_photon_flux,90,4.24255643e+12,cm^-2 s^-1,1656.5,811.5,overlapping_markers,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,5,3.64890169e+15,cm^-2 s^-1,1037.0,322.9,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,10,1.46678468e+15,cm^-2 s^-1,1073.5,388.8,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,15,6.74262224e+14,cm^-2 s^-1,1109.5,445.0,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,20,3.42400614e+14,cm^-2 s^-1,1146.0,494.0,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,30,1.51209675e+14,cm^-2 s^-1,1219.0,553.1,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,40,7.40746605e+13,cm^-2 s^-1,1291.5,604.7,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,50,3.14700837e+13,cm^-2 s^-1,1364.5,666.6,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,60,2.60024946e+13,cm^-2 s^-1,1437.5,680.4,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,80,7.959777e+12,cm^-2 s^-1,1583.5,766.0,isolated,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,90,4.24255643e+12,cm^-2 s^-1,1656.5,811.5,overlapping_markers,4,source_equipment_model_digitized
+5.10,a,Ar_106.7_nm_photon_flux,95,2.82130768e+12,cm^-2 s^-1,1693.5,841.0,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,5,3.851107e+13,cm^-2 s^-1,1037.0,652.0,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,10,5.44171429e+13,cm^-2 s^-1,1073.5,627.0,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,15,5.32999408e+13,cm^-2 s^-1,1109.5,628.5,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,20,5.03618995e+13,cm^-2 s^-1,1146.0,632.6,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,30,3.52003147e+13,cm^-2 s^-1,1219.0,658.5,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,40,2.61467321e+13,cm^-2 s^-1,1291.5,680.0,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,50,2.49457748e+13,cm^-2 s^-1,1364.5,683.4,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,60,1.94217468e+13,cm^-2 s^-1,1437.5,701.5,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,80,1.99388313e+13,cm^-2 s^-1,1583.5,699.6,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,90,1.99112763e+13,cm^-2 s^-1,1656.5,699.7,isolated,4,source_equipment_model_digitized
+5.10,a,Cl_139_nm_photon_flux,95,1.90493377e+13,cm^-2 s^-1,1693.5,702.9,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,5,0.427443609,dimensionless,1032.4,1889.5,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,10,0.263533835,dimensionless,1063.5,2107.5,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,15,0.186090226,dimensionless,1095.0,2210.5,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,20,0.138646617,dimensionless,1126.5,2273.6,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,30,0.0989473684,dimensionless,1189.5,2326.4,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,40,0.0761654135,dimensionless,1252.0,2356.7,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,50,0.0515037594,dimensionless,1315.4,2389.5,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,60,0.0439849624,dimensionless,1378.5,2399.5,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,80,0.027443609,dimensionless,1504.5,2421.5,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,90,0.0187969925,dimensionless,1567.5,2433.0,isolated,4,source_equipment_model_digitized
+5.10,c,total_photon_to_total_ion_flux_ratio_beta,95,0.0184962406,dimensionless,1598.9,2433.4,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,10,0.0255639098,dimensionless,1063.5,2441.0,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,15,0.0518796992,dimensionless,1095.0,2423.5,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,20,0.0887218045,dimensionless,1126.5,2399.0,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,30,0.123308271,dimensionless,1189.5,2376.0,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,40,0.152330827,dimensionless,1252.0,2356.7,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,50,0.229924812,dimensionless,1315.4,2305.1,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,60,0.24962406,dimensionless,1378.5,2292.0,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,80,0.487218045,dimensionless,1504.5,2134.0,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,90,0.784210526,dimensionless,1567.5,1936.5,isolated,4,source_equipment_model_digitized
+5.10,c,Cl_139_nm_fraction_of_three_line_spectrum,95,0.833834586,dimensionless,1598.9,1903.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,5,533.884298,dimensionless,1018.0,1834.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,10,474.46281,dimensionless,1054.5,1905.9,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,15,416.528926,dimensionless,1090.5,1976.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,20,360.330579,dimensionless,1127.0,2044.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,30,290.909091,dimensionless,1200.0,2128.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,40,223.140496,dimensionless,1273.0,2210.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,50,208.264463,dimensionless,1346.0,2228.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,60,146.280992,dimensionless,1419.0,2303.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,80,78.5123967,dimensionless,1565.0,2385.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,90,28.0991736,dimensionless,1638.0,2446.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_106.7_nm_trapping_factor,95,12.3966942,dimensionless,1674.0,2465.0,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,5,230.247934,dimensionless,1018.0,2201.4,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,10,227.68595,dimensionless,1054.5,2204.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,15,221.07438,dimensionless,1090.5,2212.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,20,214.46281,dimensionless,1127.0,2220.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,30,203.719008,dimensionless,1200.0,2233.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,40,190.495868,dimensionless,1273.0,2249.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,50,187.190083,dimensionless,1346.0,2253.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,60,169.834711,dimensionless,1419.0,2274.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,80,138.429752,dimensionless,1565.0,2312.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,90,91.322314,dimensionless,1638.0,2369.5,isolated,4,source_equipment_model_digitized
+5.12,c,Ar_104.8_nm_trapping_factor,95,50.8264463,dimensionless,1674.0,2418.5,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,5,4.04958678,dimensionless,1018.0,2431.0,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,10,7.02479339,dimensionless,1054.5,2395.0,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,15,9.01652893,dimensionless,1090.5,2370.9,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,20,10.0082645,dimensionless,1127.0,2358.9,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,30,9.91735537,dimensionless,1200.0,2360.0,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,40,9.75206612,dimensionless,1273.0,2362.0,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,50,9.50413223,dimensionless,1346.0,2365.0,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,60,9.00826446,dimensionless,1419.0,2371.0,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,80,10,dimensionless,1565.0,2359.0,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,90,11.0330579,dimensionless,1638.0,2346.5,isolated,4,source_equipment_model_digitized
+5.12,c,Cl_139_nm_trapping_factor,95,11.0330579,dimensionless,1674.0,2346.5,isolated,4,source_equipment_model_digitized

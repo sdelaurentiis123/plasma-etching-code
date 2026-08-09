@@ -1,5 +1,10 @@
 # Native reactor-to-feature build status - 2026-08-08
 
+> **Superseded for the spatial/EM/radiation tiers by
+> `REACTOR_TIER_ADVANCE_2026-08-09.md`.** The 0-D evidence and collision-deck
+> history below remain valid; the rows that call charged transport, radiation,
+> and feature coupling open describe the state before the 2026-08-09 advance.
+
 ## Bottom line
 
 The native reactor program has advanced from a design document to a
