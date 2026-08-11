@@ -1,0 +1,86 @@
+{
+  "cases": [
+    {
+      "atoms": 64,
+      "final_nve_total_energy_eV": -333.8023986816406,
+      "initial_nve_total_energy_eV": -333.8048095703125,
+      "lattice_constant_angstrom": 5.2,
+      "nve_energy_drift_eV": 0.002410888671875,
+      "nve_relative_energy_drift": 7.2224503744520535e-06,
+      "static_energy_eV_per_atom": -5.25007438659668,
+      "static_max_force_eV_per_angstrom": 1.0819793715199921e-05
+    },
+    {
+      "atoms": 64,
+      "final_nve_total_energy_eV": -341.4306640625,
+      "initial_nve_total_energy_eV": -341.43206787109375,
+      "lattice_constant_angstrom": 5.43,
+      "nve_energy_drift_eV": 0.00140380859375,
+      "nve_relative_energy_drift": 4.111531182478155e-06,
+      "static_energy_eV_per_atom": -5.369233131408691,
+      "static_max_force_eV_per_angstrom": 1.2057447747793049e-05
+    },
+    {
+      "atoms": 64,
+      "final_nve_total_energy_eV": -336.1708068847656,
+      "initial_nve_total_energy_eV": -336.1724548339844,
+      "lattice_constant_angstrom": 5.7,
+      "nve_energy_drift_eV": 0.00164794921875,
+      "nve_relative_energy_drift": 4.902094728623213e-06,
+      "static_energy_eV_per_atom": -5.302077293395996,
+      "static_max_force_eV_per_angstrom": 1.1716138942574617e-05
+    }
+  ],
+  "configuration": {
+    "deterministic_algorithms": true,
+    "integrator": "NVE velocity Verlet",
+    "lattice_constants_angstrom": [
+      5.2,
+      5.43,
+      5.7
+    ],
+    "seed": 0,
+    "steps": 20,
+    "supercell_repetition": [
+      2,
+      2,
+      2
+    ],
+    "temperature_k": 300.0,
+    "timestep_ps": 0.001
+  },
+  "differentiability": {
+    "adapter_autograd_gate_passed": false,
+    "adapter_energy_requires_grad": false,
+    "adapter_forces_require_grad": false,
+    "note": "MACE 0.3.16's TorchSim adapter detaches returned energy and forces; this tested adapter is inference-only for autograd purposes."
+  },
+  "experiment": "torchsim_mace_mp_bulk_si_feasibility",
+  "lowest_sampled_energy_lattice_constant_angstrom": 5.43,
+  "performance": {
+    "batched_dynamics_s": 4.061789875035174,
+    "batched_static_inference_s": 1.7100953330518678,
+    "model_load_s": 0.06832608405966312,
+    "system_steps_per_s": 14.771812881994643
+  },
+  "predictive_etch_physics": false,
+  "schema_version": 1,
+  "software": {
+    "device": "cpu",
+    "dtype": "float32",
+    "potential": "MACE-MP small 2023-12-10 checkpoint",
+    "potential_sha256": "2ddb079cee0e131eaaf6912ba581b394551ead283e95c99cfe78c605d10b5736",
+    "potential_url": "https://github.com/ACEsuit/mace-mp/releases/download/mace_mp_0/2023-12-10-mace-128-L0_energy_epoch-249.model",
+    "python_version": "3.12.10",
+    "torch_version": "2.13.0",
+    "torchsim_version": "0.6.1"
+  },
+  "supported_claim": "TorchSim can batch and integrate a real MACE potential for crystalline Si.",
+  "unsupported_claims": [
+    "ion or radical impact response",
+    "surface reaction probabilities",
+    "sputter or reactive etch yields",
+    "charged or electronically excited states",
+    "transfer to SiO2, fluorocarbon films, masks, or reactor conditions"
+  ]
+}

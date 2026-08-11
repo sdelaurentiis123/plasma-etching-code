@@ -1,0 +1,142 @@
+{
+  "cases": [
+    {
+      "ejected_target_count": 0,
+      "energy_drift_eV": 0.005430459805244592,
+      "energy_drift_over_incident_energy": 0.05430459805244592,
+      "final_total_energy_eV": -2.0751579191630007,
+      "incident_energy_eV": 0.1,
+      "initial_total_energy_eV": -2.0805883789682453,
+      "maximum_target_z_angstrom": 14.292098863160465,
+      "projectile_final_pz_sqrt_amu_eV": 0.07612256957384339,
+      "projectile_final_z_angstrom": 17.599333923735784,
+      "projectile_outcome": "reflected",
+      "relative_energy_drift": 0.0026100596639579104
+    },
+    {
+      "ejected_target_count": 0,
+      "energy_drift_eV": 0.0183259555247135,
+      "energy_drift_over_incident_energy": 0.036651911049427,
+      "final_total_energy_eV": -1.662262423443532,
+      "incident_energy_eV": 0.5,
+      "initial_total_energy_eV": -1.6805883789682454,
+      "maximum_target_z_angstrom": 15.541668777750472,
+      "projectile_final_pz_sqrt_amu_eV": 1.609475309803516,
+      "projectile_final_z_angstrom": 19.76336922992497,
+      "projectile_outcome": "reflected",
+      "relative_energy_drift": 0.0109044878294138
+    },
+    {
+      "ejected_target_count": 4,
+      "energy_drift_eV": 0.025624198583230617,
+      "energy_drift_over_incident_energy": 0.025624198583230617,
+      "final_total_energy_eV": -1.154964180385015,
+      "incident_energy_eV": 1.0,
+      "initial_total_energy_eV": -1.1805883789682456,
+      "maximum_target_z_angstrom": 16.685386645036157,
+      "projectile_final_pz_sqrt_amu_eV": 3.4739262196905427,
+      "projectile_final_z_angstrom": 23.337566942241896,
+      "projectile_outcome": "reflected",
+      "relative_energy_drift": 0.02170460004495761
+    },
+    {
+      "ejected_target_count": 8,
+      "energy_drift_eV": 0.043950068998221514,
+      "energy_drift_over_incident_energy": 0.021975034499110757,
+      "final_total_energy_eV": -0.1366383099700239,
+      "incident_energy_eV": 2.0,
+      "initial_total_energy_eV": -0.18058837896824542,
+      "maximum_target_z_angstrom": 18.827204220432602,
+      "projectile_final_pz_sqrt_amu_eV": 3.438205643160722,
+      "projectile_final_z_angstrom": 23.62074272169794,
+      "projectile_outcome": "reflected",
+      "relative_energy_drift": 0.24337152395586692
+    }
+  ],
+  "configuration": {
+    "batched_systems": 4,
+    "deterministic_algorithms": true,
+    "energies_eV": [
+      0.1,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "epsilon_eV": 0.0104,
+    "integrator": "NVE velocity Verlet",
+    "potential": "analytic Lennard-Jones Ar",
+    "seed": 0,
+    "sigma_angstrom": 3.405,
+    "steps": 6000,
+    "timestep_ps": 0.00025
+  },
+  "differentiability": {
+    "energy_eV": -0.0104,
+    "force_energy_gradient_max_abs_error_eV_per_angstrom": 0.0,
+    "nve_final_separation_gradient_wrt_sigma_autodiff": null,
+    "nve_final_separation_gradient_wrt_sigma_finite_difference": -0.002757832130217963,
+    "nve_parameter_gradient_available": false,
+    "nve_parameter_gradient_gate_passed": false
+  },
+  "experiment": "torchsim_deterministic_batched_impact_feasibility",
+  "interaction_table": {
+    "axes": [
+      {
+        "interpolation": "linear",
+        "name": "incident_energy",
+        "unit": "eV",
+        "values": [
+          0.1,
+          0.5,
+          1.0,
+          2.0
+        ]
+      }
+    ],
+    "bounds": {
+      "ejected_target_count_per_projectile": [
+        0.0,
+        null
+      ]
+    },
+    "conservation_groups": {},
+    "incident_species": [
+      "Ar_projectile"
+    ],
+    "material": "Ar_Lennard_Jones_slab_NONPREDICTIVE",
+    "output_units": {
+      "ejected_target_count_per_projectile": "Ar/projectile"
+    },
+    "outputs": {
+      "ejected_target_count_per_projectile": [
+        0,
+        0,
+        4,
+        8
+      ]
+    },
+    "provenance": {
+      "evidence_type": "toy_atomistic_model_nonpredictive",
+      "potential": "analytic Lennard-Jones Ar",
+      "purpose": "software_and_exchange_contract_only",
+      "source": "petch TorchSim 0.6.1 feasibility experiment",
+      "supports_prediction_within_declared_domain": false
+    },
+    "schema_version": 1,
+    "standard_uncertainty": {}
+  },
+  "nonpredictive_reason": "Lennard-Jones argon is a software/contract probe and cannot represent reactive semiconductor plasma-surface chemistry.",
+  "performance": {
+    "elapsed_s": 15.222231708932668,
+    "trajectory_steps_per_s": 1576.6413531805842
+  },
+  "predictive_physics": false,
+  "schema_version": 1,
+  "software": {
+    "device": "cpu",
+    "dtype": "float64",
+    "python_version": "3.12.10",
+    "torch_version": "2.13.0",
+    "torchsim_version": "0.6.1"
+  }
+}
