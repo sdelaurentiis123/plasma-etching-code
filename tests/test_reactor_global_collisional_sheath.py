@@ -244,6 +244,7 @@ def test_power_closed_argon_projection_lifts_without_changing_legacy_path():
         delivered_bias_power_W=20.0,
     )
     lift = DeterministicArgonCollisionalSheathTransfer(
+        solver_kind="collision_order_reference",
         initial_thermal_radial_order=1,
         initial_thermal_azimuth_order=2,
         position_quadrature_order=3,

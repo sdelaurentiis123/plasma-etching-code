@@ -543,6 +543,10 @@ class DeterministicArgonCollisionalSheathTransfer:
     impact_quadrature_order: int = 3
     collision_azimuth_order: int = 4
     maximum_collision_order: int = 2
+    solver_kind: str = "implicit_discrete_ordinates"
+    potential_node_count: int = 9
+    total_energy_node_count: int = 9
+    transverse_fraction_node_count: int = 13
     steps_per_period: int = 256
     steps_per_transit: int = 256
 
@@ -559,10 +563,18 @@ class DeterministicArgonCollisionalSheathTransfer:
             self.impact_quadrature_order,
             self.collision_azimuth_order,
             self.maximum_collision_order,
+            self.potential_node_count,
+            self.total_energy_node_count,
+            self.transverse_fraction_node_count,
             self.steps_per_period,
             self.steps_per_transit,
         )
-        if any(int(value) < 1 for value in orders):
+        if (
+            any(int(value) < 1 for value in orders)
+            or self.solver_kind not in {
+                "implicit_discrete_ordinates", "collision_order_reference"
+            }
+        ):
             raise ValueError("collisional transfer orders must be positive")
 
     def project(
@@ -604,25 +616,43 @@ class DeterministicArgonCollisionalSheathTransfer:
                 collisionless.sheath_thickness_m_by_species["Ar+"]),
         )
         density = pressure / (BOLTZMANN_J_K * gas_temperature)
-        collisional = DeterministicCollisionalRFSheath(
-            sheath=sheath,
-            collision_model=self.collision_model,
-            gas_number_density_m3=density,
-            neutral_gas_temperature_K=gas_temperature,
-            source_ion_flux_m2_s=source.flux_m2_s,
-            phase_count=source.energy_eV.size,
-            initial_thermal_radial_order=int(
+        common = {
+            "sheath": sheath,
+            "collision_model": self.collision_model,
+            "gas_number_density_m3": density,
+            "neutral_gas_temperature_K": gas_temperature,
+            "source_ion_flux_m2_s": source.flux_m2_s,
+            "phase_count": source.energy_eV.size,
+            "initial_thermal_radial_order": int(
                 self.initial_thermal_radial_order),
-            initial_thermal_azimuth_order=int(
+            "initial_thermal_azimuth_order": int(
                 self.initial_thermal_azimuth_order),
-            position_quadrature_order=int(self.position_quadrature_order),
-            hazard_quadrature_order=int(self.hazard_quadrature_order),
-            impact_quadrature_order=int(self.impact_quadrature_order),
-            collision_azimuth_order=int(self.collision_azimuth_order),
-            maximum_collision_order=int(self.maximum_collision_order),
-            steps_per_period=int(self.steps_per_period),
-            steps_per_transit=int(self.steps_per_transit),
-        ).solve()
+            "position_quadrature_order": int(self.position_quadrature_order),
+            "hazard_quadrature_order": int(self.hazard_quadrature_order),
+            "impact_quadrature_order": int(self.impact_quadrature_order),
+            "collision_azimuth_order": int(self.collision_azimuth_order),
+            "steps_per_period": int(self.steps_per_period),
+            "steps_per_transit": int(self.steps_per_transit),
+        }
+        if self.solver_kind == "implicit_discrete_ordinates":
+            # Local import avoids a module cycle: the bounded operator reuses
+            # the source-audited collision law and solution contract here.
+            from .collisional_sheath_discrete_ordinates import (
+                DeterministicDiscreteOrdinatesRFSheath,
+            )
+            collisional = DeterministicDiscreteOrdinatesRFSheath(
+                **common,
+                potential_node_count=int(self.potential_node_count),
+                total_energy_node_count=int(
+                    self.total_energy_node_count),
+                transverse_fraction_node_count=int(
+                    self.transverse_fraction_node_count),
+            ).solve()
+        else:
+            collisional = DeterministicCollisionalRFSheath(
+                **common,
+                maximum_collision_order=int(self.maximum_collision_order),
+            ).solve()
         reference = collisional.collisionless_reference_mean_normal_energy_eV
         residual = (
             reference - source.mean_energy_eV
@@ -635,7 +665,12 @@ class DeterministicArgonCollisionalSheathTransfer:
             neutral_density_m3=density,
             collisionless_reference_relative_residual=residual,
             provenance={
-                "operator": "deterministic_Ar_collision_order_lift",
+                "operator": (
+                    "deterministic_Ar_implicit_discrete_ordinates_lift"
+                    if self.solver_kind == "implicit_discrete_ordinates"
+                    else "deterministic_Ar_collision_order_reference_lift"
+                ),
+                "solver_kind": self.solver_kind,
                 "upstream_power_closure_relative_residual": (
                     collisionless.power_closure_relative_residual),
                 "upstream_delivered_bias_power_W": (

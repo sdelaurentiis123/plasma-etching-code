@@ -83,4 +83,5 @@ def test_absorbed_knobs_close_to_common_collisional_wafer_boundary():
     assert not first.supports_equipment_prediction
     assert not first.supports_feature_depth
     assert first.provenance["generator_forward_power_inversion_closed"] is False
+    assert first.provenance["ion_collision_order_closed"] is True
     assert first.provenance["fast_neutral_wafer_transport_closed"] is False

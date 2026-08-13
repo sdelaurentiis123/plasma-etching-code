@@ -69,7 +69,8 @@
         "initial_thermal_radial_order": 1,
         "phase_count": 4,
         "position_quadrature_order": 3
-      }
+      },
+      "role": "explicit Neumann-series reference; intentionally truncated"
     },
     "condition": {
       "feature_depth_target_used": null,
@@ -78,6 +79,124 @@
       "ion_energy_angle_target_used": null,
       "sheath_thickness_m": 0.01,
       "sheath_voltage_V": 1000.0
+    },
+    "implicit_discrete_ordinates_convergence_probe": {
+      "conditions": {
+        "10_mTorr": {
+          "ion_collision_order_closed": true,
+          "limits": {
+            "collision_count_relative_change": 0.01,
+            "ion_probability_ledger_residual": 2e-11,
+            "mean_energy_relative_change": 0.01,
+            "neutral_arrival_relative_change": 0.01,
+            "rms_angle_relative_change": 0.02
+          },
+          "passed": true,
+          "relative_changes": {
+            "collision_count": 0.005543293505228702,
+            "mean_energy": 0.006239587927108772,
+            "resolved_fast_neutral_arrival": 0.0001138144208804599,
+            "rms_angle": 0.008439088157639996
+          },
+          "rows": {
+            "coarse": {
+              "expected_collision_count": 1.4214193947694471,
+              "grid": {
+                "potential_nodes": 7,
+                "total_energy_nodes": 7,
+                "transverse_fraction_nodes": 10
+              },
+              "ion_arrival_probability": 0.9999999999999992,
+              "ion_escape_probability": 8.489813117995185e-16,
+              "linear_solve_relative_residual": 4.85722573273506e-17,
+              "maximum_row_probability_residual": 1.5543122344752192e-15,
+              "mean_energy_eV": 758.4426702750155,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.3605893954169101,
+              "rms_angle_deg": 0.6582947468914228,
+              "unresolved_ion_probability": 0.0
+            },
+            "fine": {
+              "expected_collision_count": 1.4135400498702155,
+              "grid": {
+                "potential_nodes": 9,
+                "total_energy_nodes": 9,
+                "transverse_fraction_nodes": 13
+              },
+              "ion_arrival_probability": 0.9999999999999994,
+              "ion_escape_probability": 4.4757148469867215e-20,
+              "linear_solve_relative_residual": 8.326672684688674e-17,
+              "maximum_row_probability_residual": 1.3322676295501878e-15,
+              "mean_energy_eV": 763.2047534404949,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.3606304403616317,
+              "rms_angle_deg": 0.663897435880449,
+              "unresolved_ion_probability": 5.550667551641084e-16
+            }
+          },
+          "status": "converged"
+        },
+        "1_mTorr": {
+          "ion_collision_order_closed": true,
+          "limits": {
+            "collision_count_relative_change": 0.01,
+            "ion_probability_ledger_residual": 2e-11,
+            "mean_energy_relative_change": 0.01,
+            "neutral_arrival_relative_change": 0.01,
+            "rms_angle_relative_change": 0.02
+          },
+          "passed": true,
+          "relative_changes": {
+            "collision_count": 0.0005030175692367565,
+            "mean_energy": 0.0007153578099065636,
+            "resolved_fast_neutral_arrival": 0.000407638383458179,
+            "rms_angle": 0.012191885622226511
+          },
+          "rows": {
+            "coarse": {
+              "expected_collision_count": 0.13708891910655033,
+              "grid": {
+                "potential_nodes": 7,
+                "total_energy_nodes": 7,
+                "transverse_fraction_nodes": 10
+              },
+              "ion_arrival_probability": 1.0,
+              "ion_escape_probability": 1.3668397116865215e-19,
+              "linear_solve_relative_residual": 1.0408340855860843e-17,
+              "maximum_row_probability_residual": 4.440892098500626e-16,
+              "mean_energy_eV": 973.0584181651416,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.06464681039013684,
+              "rms_angle_deg": 0.423260008892588,
+              "unresolved_ion_probability": 0.0
+            },
+            "fine": {
+              "expected_collision_count": 0.13701996097169206,
+              "grid": {
+                "potential_nodes": 9,
+                "total_energy_nodes": 9,
+                "transverse_fraction_nodes": 13
+              },
+              "ion_arrival_probability": 1.0,
+              "ion_escape_probability": 7.468245863177236e-25,
+              "linear_solve_relative_residual": 1.3877787807814457e-17,
+              "maximum_row_probability_residual": 2.220446049250313e-16,
+              "mean_energy_eV": 973.755001410336,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.06462045786885368,
+              "rms_angle_deg": 0.418099671275707,
+              "unresolved_ion_probability": 0.0
+            }
+          },
+          "status": "converged"
+        }
+      },
+      "role": "bounded absorbing-system solution of all ion collision orders",
+      "scattering_quadrature": {
+        "collision_azimuth_order": 2,
+        "hazard_quadrature_order": 4,
+        "impact_quadrature_order": 2,
+        "initial_thermal_azimuth_order": 2,
+        "initial_thermal_radial_order": 1,
+        "phase_count": 4,
+        "position_quadrature_order": 3
+      }
     },
     "rows": [
       {
@@ -160,7 +279,7 @@
     ],
     "sheath_collisions_already_upstream_of_boundary": true
   },
-  "schema": "petch.collisional-sheath-depth-scope.v1",
+  "schema": "petch.collisional-sheath-depth-scope.v2",
   "source_receipts": {
     "depth_identifiability_audit_sha256": "7f79f79f77b8d37d83500364251bdefb1c0cf6e953e9fde9e0bde54e3236652c",
     "krueger_author_pdf_sha256": "65b7750b2b773c3725d8f09f778b5b728ce9974a4548a5d522d19256f6bf9a51",
@@ -168,5 +287,5 @@
     "krueger_iead_metadata_sha256": "7904a700afdcd116c6f57ef35aeb5555661ffed0d004304d815d20f79840ca55",
     "krueger_iead_table_sha256": "913d31be623ec5d52d226c8cea499e7f014cf4f5a27e017b519633c96e5e3ee3"
   },
-  "verdict": "The deterministic collisional sheath is now available for source-supported pure-Ar knobs-to-wafer prediction and exposes an unscattered fast-neutral lower-bound boundary. It does not repair Krueger depth: the paper already supplies a downstream HPEM wafer IEAD, and the missing molecular-ion composition and stable-parent boundary remain depth-identifying data."
+  "verdict": "The deterministic pure-Ar ion sheath now closes all collision orders by a bounded absorbing discrete-ordinates solve and passes a dual-grid gate through 10 mTorr. It exposes an unscattered fast-neutral lower-bound boundary. It does not repair Krueger depth: the paper already supplies a downstream HPEM wafer IEAD, and the missing molecular-ion composition and stable-parent boundary remain depth-identifying data."
 }

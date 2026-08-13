@@ -12,6 +12,8 @@ import numpy as np
 from petch.reactor_global import (
     ArgonBornMayerPhelpsCollisionModel,
     DeterministicCollisionalRFSheath,
+    DeterministicDiscreteOrdinatesRFSheath,
+    certify_discrete_ordinates_convergence,
 )
 from petch.sheath import CollisionlessWaveformSheath, PeriodicSheathVoltage
 
@@ -140,6 +142,80 @@ def _argon_sensitivity() -> dict[str, object]:
             },
             "status": "converged" if converged else "not_converged",
         }
+    implicit_convergence = {}
+    for pressure_mTorr in (1.0, 10.0):
+        density = (
+            pressure_mTorr * 0.13332236842105263
+            / (1.380649e-23 * 500.0)
+        )
+        rows_by_resolution = {}
+        results = []
+        for label, grid in (
+            ("coarse", (7, 7, 10)),
+            ("fine", (9, 9, 13)),
+        ):
+            result = DeterministicDiscreteOrdinatesRFSheath(
+                sheath=sheath,
+                collision_model=ArgonBornMayerPhelpsCollisionModel(),
+                gas_number_density_m3=density,
+                neutral_gas_temperature_K=500.0,
+                source_ion_flux_m2_s=1.0e19,
+                phase_count=4,
+                initial_thermal_radial_order=1,
+                initial_thermal_azimuth_order=2,
+                potential_node_count=grid[0],
+                total_energy_node_count=grid[1],
+                transverse_fraction_node_count=grid[2],
+                position_quadrature_order=3,
+                hazard_quadrature_order=4,
+                impact_quadrature_order=2,
+                collision_azimuth_order=2,
+                steps_per_period=64,
+                steps_per_transit=128,
+            ).solve()
+            results.append(result)
+            rows_by_resolution[label] = {
+                "grid": {
+                    "potential_nodes": grid[0],
+                    "total_energy_nodes": grid[1],
+                    "transverse_fraction_nodes": grid[2],
+                },
+                "ion_arrival_probability": result.ion_arrival_probability,
+                "ion_escape_probability": result.escaped_probability,
+                "unresolved_ion_probability": result.unresolved_probability,
+                "mean_energy_eV": result.distribution.mean_energy_eV,
+                "rms_angle_deg": float(np.rad2deg(np.sqrt(
+                    result.distribution.mean_squared_polar_angle_rad2))),
+                "expected_collision_count": (
+                    result.expected_collision_count_lower_bound),
+                "resolved_fast_neutral_arrivals_per_source_ion": (
+                    result.resolved_fast_neutral_arrivals_per_source_ion),
+                "linear_solve_relative_residual": result.provenance[
+                    "linear_solve_relative_residual"],
+                "maximum_row_probability_residual": result.provenance[
+                    "maximum_row_probability_residual"],
+            }
+        receipt = certify_discrete_ordinates_convergence(
+            *results,
+            mean_energy_relative_limit=1.0e-2,
+            rms_angle_relative_limit=2.0e-2,
+            collision_count_relative_limit=1.0e-2,
+            neutral_arrival_relative_limit=1.0e-2,
+        )
+        implicit_convergence[f"{pressure_mTorr:g}_mTorr"] = {
+            "rows": rows_by_resolution,
+            "relative_changes": {
+                "mean_energy": receipt.mean_energy_relative_change,
+                "rms_angle": receipt.rms_angle_relative_change,
+                "collision_count": receipt.collision_count_relative_change,
+                "resolved_fast_neutral_arrival": (
+                    receipt.neutral_arrival_relative_change),
+            },
+            "limits": dict(receipt.limits),
+            "ion_collision_order_closed": receipt.ion_transport_closed,
+            "passed": receipt.passed,
+            "status": "converged" if receipt.passed else "not_converged",
+        }
     return {
         "condition": {
             "gas": "pure Ar",
@@ -151,8 +227,26 @@ def _argon_sensitivity() -> dict[str, object]:
         },
         "rows": rows,
         "collision_order_convergence_probe": {
+            "role": (
+                "explicit Neumann-series reference; intentionally truncated"
+            ),
             "conditions": convergence,
             "quadrature": {
+                "phase_count": 4,
+                "initial_thermal_radial_order": 1,
+                "initial_thermal_azimuth_order": 2,
+                "position_quadrature_order": 3,
+                "hazard_quadrature_order": 4,
+                "impact_quadrature_order": 2,
+                "collision_azimuth_order": 2,
+            },
+        },
+        "implicit_discrete_ordinates_convergence_probe": {
+            "role": (
+                "bounded absorbing-system solution of all ion collision orders"
+            ),
+            "conditions": implicit_convergence,
+            "scattering_quadrature": {
                 "phase_count": 4,
                 "initial_thermal_radial_order": 1,
                 "initial_thermal_azimuth_order": 2,
@@ -176,7 +270,7 @@ def build_audit() -> dict[str, object]:
     ):
         raise ValueError("Krueger IEAD source-pixel receipt changed")
     return {
-        "schema": "petch.collisional-sheath-depth-scope.v1",
+        "schema": "petch.collisional-sheath-depth-scope.v2",
         "audit_id": "COLLISIONAL-SHEATH-DEPTH-SCOPE-2026-08-12",
         "source_receipts": {
             "krueger_iead_table_sha256": _sha(KRUEGER_IEAD),
@@ -220,12 +314,13 @@ def build_audit() -> dict[str, object]:
             ],
         },
         "verdict": (
-            "The deterministic collisional sheath is now available for "
-            "source-supported pure-Ar knobs-to-wafer prediction and exposes "
-            "an unscattered fast-neutral lower-bound boundary. It does not "
-            "repair Krueger depth: the paper already supplies a downstream "
-            "HPEM wafer IEAD, and the missing molecular-ion composition and "
-            "stable-parent boundary remain depth-identifying data."),
+            "The deterministic pure-Ar ion sheath now closes all collision "
+            "orders by a bounded absorbing discrete-ordinates solve and passes "
+            "a dual-grid gate through 10 mTorr. It exposes an unscattered "
+            "fast-neutral lower-bound boundary. It does not repair Krueger "
+            "depth: the paper already supplies a downstream HPEM wafer IEAD, "
+            "and the missing molecular-ion composition and stable-parent "
+            "boundary remain depth-identifying data."),
     }
 
 

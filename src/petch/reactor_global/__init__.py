@@ -354,6 +354,11 @@ from .collisional_sheath import (
     DeterministicCollisionalSheathSolution,
     PowerClosedArgonCollisionalSheathProjection,
 )
+from .collisional_sheath_discrete_ordinates import (
+    DiscreteOrdinatesConvergenceReceipt,
+    DeterministicDiscreteOrdinatesRFSheath,
+    certify_discrete_ordinates_convergence,
+)
 from .etch_product_residence import (
     DiagnosticConditionedEtchProductResidenceTransfer,
     EtchProductResidenceProjection,
@@ -569,6 +574,9 @@ __all__ = [
     "DeterministicArgonCollisionalSheathTransfer",
     "DeterministicArgonReactorToWaferModel",
     "DeterministicCollisionalRFSheath",
+    "DeterministicDiscreteOrdinatesRFSheath",
+    "DiscreteOrdinatesConvergenceReceipt",
+    "certify_discrete_ordinates_convergence",
     "DeterministicCollisionalSheathSolution",
     "PowerClosedArgonCollisionalSheathProjection",
     "maxwellian_floating_sheath_potential_eV",

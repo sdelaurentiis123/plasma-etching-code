@@ -5,13 +5,15 @@ equipment calibration:
 
 ``absorbed bulk power, p, Tg, geometry`` -> global Ar state and Bohm flux
 ``bias power, frequency`` -> power-closed collisionless RF sheath
-``p, Tg`` -> deterministic elastic/CX collision-order lift
+``p, Tg`` -> implicit deterministic elastic/CX discrete-ordinates lift
 
 The input powers are absorbed/delivered powers, not generator forward powers.
-The Maxwellian floating-potential relation is a published-model closure, not a
-measurement of a driven CCP plasma potential.  Consequently this stack is a
-physics-complete pure-Ar sensitivity path to the resolved ion boundary, but
-it is not promoted to equipment prediction or feature-depth prediction.
+The ion collision order is closed by a bounded absorbing-system solve, but the
+Maxwellian floating-potential relation is a published-model closure, not a
+measurement of a driven CCP plasma potential.  Fast neutrals after their next
+neutral--neutral collision also remain unresolved.  Consequently this stack
+is a physics-complete pure-Ar sensitivity path to the resolved ion boundary,
+but it is not promoted to equipment or feature-depth prediction.
 """
 from __future__ import annotations
 
@@ -187,7 +189,7 @@ class DeterministicArgonReactorToWaferModel:
             wafer=wafer,
             maximum_conservation_residual=maximum_residual,
             provenance={
-                "stack": "absorbed_knobs_to_collisional_Ar_wafer_v1",
+                "stack": "absorbed_knobs_to_collisional_Ar_wafer_v2",
                 "absorbed_bulk_power_boundary_kind": (
                     condition.global_condition.absorbed_power_boundary_kind),
                 "plasma_potential_source": (
@@ -195,6 +197,8 @@ class DeterministicArgonReactorToWaferModel:
                 "plasma_potential_evidence": (
                     condition.plasma_potential_evidence),
                 "generator_forward_power_inversion_closed": False,
+                "ion_collision_order_closed": wafer.collisional.provenance[
+                    "ion_collision_order_closed"],
                 "fast_neutral_wafer_transport_closed": False,
                 "feature_depth_used": False,
             },
