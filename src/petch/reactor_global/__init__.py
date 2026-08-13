@@ -96,6 +96,12 @@ from .argon import (
     build_lee_lieberman_argon_volume_network,
     lee_lieberman_argon_species,
 )
+from .argon_reactor_to_wafer import (
+    ArgonReactorToWaferCondition,
+    ArgonReactorToWaferSolution,
+    DeterministicArgonReactorToWaferModel,
+    maxwellian_floating_sheath_potential_eV,
+)
 from .chlorine import (
     CHLORINE_ATOM_MASS_AMU,
     CHLORINE_MOLECULE_MASS_AMU,
@@ -339,6 +345,15 @@ from .wafer_sheath_transfer import (
     PowerClosedRFSheathProjection,
     SpeciesResolvedIonEnergyDistribution,
 )
+from .collisional_sheath import (
+    ArgonBornMayerPhelpsCollisionModel,
+    CollisionalIonEnergyAngleDistribution,
+    CollisionalSheathDensityTangent,
+    DeterministicArgonCollisionalSheathTransfer,
+    DeterministicCollisionalRFSheath,
+    DeterministicCollisionalSheathSolution,
+    PowerClosedArgonCollisionalSheathProjection,
+)
 from .etch_product_residence import (
     DiagnosticConditionedEtchProductResidenceTransfer,
     EtchProductResidenceProjection,
@@ -546,6 +561,17 @@ __all__ = [
     "DiagnosticConditionedRFSheathTransfer",
     "PowerClosedRFSheathProjection",
     "SpeciesResolvedIonEnergyDistribution",
+    "ArgonBornMayerPhelpsCollisionModel",
+    "ArgonReactorToWaferCondition",
+    "ArgonReactorToWaferSolution",
+    "CollisionalIonEnergyAngleDistribution",
+    "CollisionalSheathDensityTangent",
+    "DeterministicArgonCollisionalSheathTransfer",
+    "DeterministicArgonReactorToWaferModel",
+    "DeterministicCollisionalRFSheath",
+    "DeterministicCollisionalSheathSolution",
+    "PowerClosedArgonCollisionalSheathProjection",
+    "maxwellian_floating_sheath_potential_eV",
     "DiagnosticConditionedEtchProductResidenceTransfer",
     "DeterministicAxisymmetricReactionDiffusion",
     "DeterministicAxisymmetricDriftDiffusion",

@@ -1,0 +1,172 @@
+{
+  "argon_collision_operator": {
+    "collision_order_convergence_probe": {
+      "conditions": {
+        "10_mTorr": {
+          "gate": {
+            "mean_energy_relative_change_limit": 0.005,
+            "passed": false,
+            "unresolved_ion_probability_limit": 0.001
+          },
+          "order2_to_order3_mean_energy_relative_change": 0.035855098521394124,
+          "rows": [
+            {
+              "collision_order": 1,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.1605781927083053,
+              "resolved_ion_mean_energy_eV": 904.0750583506671,
+              "unresolved_ion_probability": 0.40117281937865074
+            },
+            {
+              "collision_order": 2,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.2754348274917247,
+              "resolved_ion_mean_energy_eV": 842.9807158170303,
+              "unresolved_ion_probability": 0.16160460150177935
+            },
+            {
+              "collision_order": 3,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.3285506503578181,
+              "resolved_ion_mean_energy_eV": 812.7555591997753,
+              "unresolved_ion_probability": 0.053004011171869675
+            }
+          ],
+          "status": "not_converged"
+        },
+        "1_mTorr": {
+          "gate": {
+            "mean_energy_relative_change_limit": 0.005,
+            "passed": true,
+            "unresolved_ion_probability_limit": 0.001
+          },
+          "order2_to_order3_mean_energy_relative_change": 0.00015634433436140238,
+          "rows": [
+            {
+              "collision_order": 1,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.05997317872827657,
+              "resolved_ion_mean_energy_eV": 981.1999028053674,
+              "unresolved_ion_probability": 0.008722068822857726
+            },
+            {
+              "collision_order": 2,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.06427787834483972,
+              "resolved_ion_mean_energy_eV": 978.7697725768834,
+              "unresolved_ion_probability": 0.00040197148909113244
+            },
+            {
+              "collision_order": 3,
+              "resolved_fast_neutral_arrivals_per_source_ion": 0.06448095464752385,
+              "resolved_ion_mean_energy_eV": 978.6167474682968,
+              "unresolved_ion_probability": 1.4419596454196043e-05
+            }
+          ],
+          "status": "converged"
+        }
+      },
+      "quadrature": {
+        "collision_azimuth_order": 2,
+        "hazard_quadrature_order": 4,
+        "impact_quadrature_order": 2,
+        "initial_thermal_azimuth_order": 2,
+        "initial_thermal_radial_order": 1,
+        "phase_count": 4,
+        "position_quadrature_order": 3
+      }
+    },
+    "condition": {
+      "feature_depth_target_used": null,
+      "gas": "pure Ar",
+      "gas_temperature_K": 500.0,
+      "ion_energy_angle_target_used": null,
+      "sheath_thickness_m": 0.01,
+      "sheath_voltage_V": 1000.0
+    },
+    "rows": [
+      {
+        "fast_neutral_lineage_ledger_relative_residual": 0.0,
+        "maximum_resolved_energy_ledger_relative_residual": 1.134559032866714e-16,
+        "mean_optical_depth": 0.0,
+        "pressure_mTorr": 0.0,
+        "probability_ledger_relative_residual": 0.0,
+        "resolved_fast_neutral_arrivals_per_source_ion": 0.0,
+        "resolved_ion_arrival_probability": 1.0,
+        "resolved_ion_mean_energy_eV": 1002.0354554347089,
+        "resolved_ion_rms_angle_deg": 0.37571250245190274,
+        "unresolved_fast_neutral_collisions_per_source_ion": 0.0,
+        "unresolved_ion_probability": 0.0
+      },
+      {
+        "fast_neutral_lineage_ledger_relative_residual": 6.661338147750939e-16,
+        "maximum_resolved_energy_ledger_relative_residual": 7.941913230066997e-16,
+        "mean_optical_depth": 0.13671797386176937,
+        "pressure_mTorr": 1.0,
+        "probability_ledger_relative_residual": 3.9968028886505635e-15,
+        "resolved_fast_neutral_arrivals_per_source_ion": 0.0645495878780792,
+        "resolved_ion_arrival_probability": 0.9922214873712379,
+        "resolved_ion_mean_energy_eV": 980.4132338703887,
+        "resolved_ion_rms_angle_deg": 0.45161009928772106,
+        "unresolved_fast_neutral_collisions_per_source_ion": 0.026461812435141542,
+        "unresolved_ion_probability": 0.00040654211025754775
+      },
+      {
+        "fast_neutral_lineage_ledger_relative_residual": 3.9968028886505635e-15,
+        "maximum_resolved_energy_ledger_relative_residual": 7.941913230066997e-16,
+        "mean_optical_depth": 0.6835898693088468,
+        "pressure_mTorr": 5.0,
+        "probability_ledger_relative_residual": 1.4432899320127035e-15,
+        "resolved_fast_neutral_arrivals_per_source_ion": 0.2221637554919834,
+        "resolved_ion_arrival_probability": 0.9371249910284252,
+        "resolved_ion_mean_energy_eV": 907.5444772905628,
+        "resolved_ion_rms_angle_deg": 0.641389578766758,
+        "unresolved_fast_neutral_collisions_per_source_ion": 0.19960295570188544,
+        "unresolved_ion_probability": 0.033609431818502754
+      },
+      {
+        "fast_neutral_lineage_ledger_relative_residual": 6.661338147750939e-16,
+        "maximum_resolved_energy_ledger_relative_residual": 7.941913230066997e-16,
+        "mean_optical_depth": 1.3671797386176936,
+        "pressure_mTorr": 10.0,
+        "probability_ledger_relative_residual": 2.4424906541753444e-15,
+        "resolved_fast_neutral_arrivals_per_source_ion": 0.27132989039368455,
+        "resolved_ion_arrival_probability": 0.7942941321966085,
+        "resolved_ion_mean_energy_eV": 850.1592636657048,
+        "resolved_ion_rms_angle_deg": 0.7579546360720911,
+        "unresolved_fast_neutral_collisions_per_source_ion": 0.4508638151827978,
+        "unresolved_ion_probability": 0.16357043804717045
+      }
+    ]
+  },
+  "audit_id": "COLLISIONAL-SHEATH-DEPTH-SCOPE-2026-08-12",
+  "digitization_visual_gate": {
+    "angle_standard_deviation_deg": 0.8332245172423626,
+    "author_pdf_re_rendered_at_dpi": 400,
+    "claim": "the checksum-bound table is a faithful deterministic digitization of the archived HPEM image; it remains model output, not a wafer measurement",
+    "exact_embedded_image_file_hash_match": true,
+    "exact_source_pdf_hash_match": true,
+    "mean_energy_eV": 3465.110787140924,
+    "visual_result": "Figure 4a axes, 0--5000 eV support, -5--5 degree angle support, narrow central plume, low-energy lobe, and high-energy maximum agree with the archived calibration"
+  },
+  "krueger_depth_impact": {
+    "argon_cross_sections_transferable_to_CFx_positive_ions": false,
+    "depth_changed_by_this_audit": false,
+    "exact_depth_prediction_authorized": false,
+    "existing_simulated_depth_nm": 346.83264081620524,
+    "experimental_depth_nm": 825.0,
+    "postprocessing_with_new_sheath_would_double_count": true,
+    "published_feature_boundary_kind": "HPEM wafer-plane combined-positive-ion IEAD and aggregate flux",
+    "remaining_boundary_requirements": [
+      "species-resolved positive-ion fluxes and IEADs",
+      "stable C4F6 wafer flux",
+      "species-resolved ion-neutral elastic/CX cross sections",
+      "measured or validated reactor voltage/current waveform"
+    ],
+    "sheath_collisions_already_upstream_of_boundary": true
+  },
+  "schema": "petch.collisional-sheath-depth-scope.v1",
+  "source_receipts": {
+    "depth_identifiability_audit_sha256": "7f79f79f77b8d37d83500364251bdefb1c0cf6e953e9fde9e0bde54e3236652c",
+    "krueger_author_pdf_sha256": "65b7750b2b773c3725d8f09f778b5b728ce9974a4548a5d522d19256f6bf9a51",
+    "krueger_embedded_figure_png_sha256": "99ac8dd2f916071b51de67c729e131a6e20d3b92688d92693d1a467cd0782f9c",
+    "krueger_iead_metadata_sha256": "7904a700afdcd116c6f57ef35aeb5555661ffed0d004304d815d20f79840ca55",
+    "krueger_iead_table_sha256": "913d31be623ec5d52d226c8cea499e7f014cf4f5a27e017b519633c96e5e3ee3"
+  },
+  "verdict": "The deterministic collisional sheath is now available for source-supported pure-Ar knobs-to-wafer prediction and exposes an unscattered fast-neutral lower-bound boundary. It does not repair Krueger depth: the paper already supplies a downstream HPEM wafer IEAD, and the missing molecular-ion composition and stable-parent boundary remain depth-identifying data."
+}
