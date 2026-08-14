@@ -17,25 +17,25 @@
   "members": [
     {
       "wall_energy_factor_Te": 5.0,
-      "mean_absolute_percent_error": 9.206348482953645,
-      "maximum_absolute_percent_error": 14.66858404674115,
+      "mean_absolute_percent_error": 8.543065869823607,
+      "maximum_absolute_percent_error": 13.73982359208702,
       "monotonically_decreasing_with_pressure": true,
-      "maximum_normalized_residual": 1.1069167805900109e-14,
+      "maximum_normalized_residual": 1.1801377289019416e-14,
       "all_positive_finite": true,
       "passed": true
     },
     {
       "wall_energy_factor_Te": 8.0,
-      "mean_absolute_percent_error": 9.209509140566487,
-      "maximum_absolute_percent_error": 14.668541983879537,
+      "mean_absolute_percent_error": 8.546108994014407,
+      "maximum_absolute_percent_error": 13.739775538143094,
       "monotonically_decreasing_with_pressure": true,
-      "maximum_normalized_residual": 1.4374201517125407e-14,
+      "maximum_normalized_residual": 1.533695692683184e-14,
       "all_positive_finite": true,
       "passed": true
     }
   ],
-  "worst_member_mean_absolute_percent_error": 9.209509140566487,
-  "worst_member_maximum_absolute_percent_error": 14.66858404674115,
+  "worst_member_mean_absolute_percent_error": 8.546108994014407,
+  "worst_member_maximum_absolute_percent_error": 13.73982359208702,
   "passed": true,
   "predictive_boundary": "Transport is evidence-classed published_model because the NIST Ar self-diffusion correlation is extrapolated from 418 K to the source model's 600 K. Independent reactor data remain required."
 }

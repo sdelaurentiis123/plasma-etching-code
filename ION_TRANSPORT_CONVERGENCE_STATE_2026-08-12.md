@@ -8,7 +8,10 @@ linear Boltzmann series as an absorbing sparse system on fixed
 potential/energy/angle ordinates.  At the frozen 1 keV, 10 mm, 500 K audit
 condition, both 1 mTorr and 10 mTorr pass the dual-grid gate.
 
-This closes a numerical failure, not the Krüger fluorocarbon depth gap.
+This closes a numerical failure, not the Krüger fluorocarbon depth gap.  The
+effective-static operator described here also is not the final sheath model.
+The separate current-driven moving-sheath path landed on 2026-08-13 and is
+documented in `MOVING_RF_SHEATH_REACTOR_BREAKTHROUGH_2026-08-13.md`.
 Krüger Figure 4 is already a downstream HPEM wafer-plane combined-positive-ion
 IEAD.  Applying this Ar sheath after Figure 4 would double-count upstream
 transport, and Ar+/Ar cross sections do not identify the paper's unknown CFx+
@@ -54,10 +57,15 @@ receipt is `results/curated/collisional_sheath_depth_scope/audit.json` schema
 ## Remaining physical, not numerical, limits
 
 1. Subsequent fast-neutral Ar--Ar collisions remain an explicit unresolved
-   ledger because the current angular evidence is only supported above 400 eV.
-   The exported neutral boundary is a lower bound and cannot yet certify depth.
-2. The effective phase-conditioned Child profile is not a self-consistent
-   moving RF sheath.
+   ledger because they require neutral--neutral differential scattering and
+   loss channels, not the Ar+--Ar law used for the ion solve.  The exported
+   neutral boundary is a lower bound and cannot yet certify depth.  The later
+   2026-08-13 current-driven path separately closes low-energy *ion* angles
+   with the Phelps/LXCat isotropic/backscatter decomposition.
+2. The legacy default in this receipt remains an effective phase-conditioned
+   Child profile.  The new current-driven path resolves the moving electron
+   front and RF phase as a kinetic coordinate, conditional on a sheath-current
+   waveform; it does not retroactively change this frozen receipt.
 3. The Ar global stack consumes absorbed bulk and delivered bias power, not
    generator forward power; chamber/circuit coupling remains equipment data.
 4. Krüger still lacks species-resolved positive-ion flux/IEAD, stable C4F6
@@ -65,3 +73,8 @@ receipt is `results/curated/collisional_sheath_depth_scope/audit.json` schema
 
 No feature depth was used to select any coefficient or grid.  No Krüger input,
 yield, or profile was altered by this work.
+
+The numbers in this document are a frozen 2026-08-12 receipt for the former
+hybrid collision law.  They are retained as history; current predictions use
+the 2026-08-13 Phelps low-energy decomposition documented in the moving-sheath
+receipt.

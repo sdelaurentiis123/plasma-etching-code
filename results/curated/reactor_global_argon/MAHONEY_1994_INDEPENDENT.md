@@ -8,10 +8,10 @@ Mahoney temperature, density, flux, or profile selected a coefficient.
 
 | gas T (K) | ion wall energy (Te) | Te MAPE | Te max APE | model/measured density | density-shape log RMSE | max residual | verdict |
 |---:|---:|---:|---:|---:|---:|---:|:---:|
-| 300 | 5 | 37.78% | 45.10% | 9.21–19.09 | 0.368 | 3.37e-15 | FAIL |
-| 300 | 8 | 37.78% | 45.10% | 7.67–16.45 | 0.387 | 4.88e-15 | FAIL |
-| 600 | 5 | 29.86% | 37.67% | 4.86–9.92 | 0.350 | 3.46e-15 | FAIL |
-| 600 | 8 | 29.86% | 37.67% | 4.05–8.48 | 0.371 | 2.85e-15 | FAIL |
+| 300 | 5 | 36.96% | 44.38% | 8.00–15.85 | 0.333 | 6.31e-15 | FAIL |
+| 300 | 8 | 36.96% | 44.38% | 6.73–13.64 | 0.351 | 3.05e-15 | FAIL |
+| 600 | 5 | 29.07% | 36.96% | 4.35–8.61 | 0.325 | 3.66e-15 | FAIL |
+| 600 | 8 | 29.07% | 36.96% | 3.62–7.35 | 0.345 | 2.65e-15 | FAIL |
 
 Frozen limits were Te MAPE <= 30%, Te maximum
 APE <= 50%, model/measured peak-density

@@ -78,6 +78,40 @@ def test_argon_born_mayer_source_inference_reproduces_independent_geometry():
     assert np.all(np.diff(theta) < 0.0)
 
 
+def test_phelps_low_energy_components_close_momentum_and_angles():
+    model = ArgonBornMayerPhelpsCollisionModel()
+    for laboratory_energy_eV in (0.01, 0.1, 1.0, 10.0, 100.0):
+        momentum = (
+            1.15e-18
+            * laboratory_energy_eV ** -0.1
+            * (1.0 + 0.015 / laboratory_energy_eV) ** 0.6
+        )
+        isotropic = model.phelps_isotropic_cross_section_m2(
+            laboratory_energy_eV)
+        backscatter = model.phelps_backscatter_cross_section_m2(
+            laboratory_energy_eV)
+        assert isotropic + 2.0 * backscatter == pytest.approx(
+            momentum, rel=2.0e-15)
+        elastic_probability, charge_exchange_probability = (
+            model.channel_probabilities(laboratory_energy_eV))
+        total = isotropic + backscatter
+        assert elastic_probability == pytest.approx(isotropic / total)
+        assert charge_exchange_probability == pytest.approx(
+            backscatter / total)
+        assert elastic_probability + charge_exchange_probability == (
+            pytest.approx(1.0))
+        assert model.total_cross_section_m2(laboratory_energy_eV) == (
+            pytest.approx(total))
+
+    angles, weights = model.impact_quadrature(10.0, 8)
+    # Gauss nodes in cos(theta), not theta, integrate an isotropic COM law.
+    assert np.dot(weights, np.cos(angles)) == pytest.approx(
+        0.0, abs=2.0e-15)
+    assert np.sum(weights) == pytest.approx(1.0)
+    energetic_probabilities = model.channel_probabilities(1000.0)
+    assert energetic_probabilities == pytest.approx((0.5, 0.5))
+
+
 def test_charge_label_swap_reproduces_published_half_angle_kinematics():
     from petch.reactor_global.collisional_sheath import (
         _equal_mass_collision_velocities,
@@ -125,7 +159,10 @@ def test_one_collision_expansion_is_deterministic_conservative_and_broadens():
     )
     np.testing.assert_array_equal(
         first.distribution.weight, second.distribution.weight)
-    assert first.mean_total_optical_depth > 1.0
+    # The Phelps physical event cross section is Qi+Qb, while its momentum
+    # cross section is Qi+2Qb.  The former gives an optical depth just below
+    # one for this manufactured condition.
+    assert 0.8 < first.mean_total_optical_depth < 1.1
     assert 0.0 < first.unresolved_probability < 1.0
     assert first.ion_arrival_probability < 1.0
     assert first.expected_charge_exchange_count_lower_bound > 0.0

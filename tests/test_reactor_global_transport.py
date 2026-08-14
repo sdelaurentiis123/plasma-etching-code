@@ -29,7 +29,7 @@ def _condition(*, pressure_mTorr=10.0, gas_temperature_K=600.0):
     )
 
 
-def test_phelps_momentum_transfer_law_uses_center_of_mass_energy():
+def test_phelps_momentum_transfer_law_uses_projectile_lab_energy():
     energies = np.array([0.01, 1.0, 100.0])
     expected = (
         1.15e-18
@@ -48,7 +48,7 @@ def test_phelps_momentum_transfer_law_uses_center_of_mass_energy():
         rtol=1.0e-15,
         atol=0.0,
     )
-    with pytest.raises(ValueError, match="center-of-mass"):
+    with pytest.raises(ValueError, match="laboratory"):
         phelps_argon_momentum_transfer_cross_section_m2(0.0)
 
 

@@ -434,10 +434,18 @@ class DeterministicDiscreteOrdinatesRFSheath:
                 event_energy
                 < self.collision_model.born_mayer_minimum_lab_energy_eV
             )
+            elastic_probability, charge_exchange_probability = (
+                self.collision_model.channel_probabilities(event_energy))
             for angle, angular_weight in zip(angles, impact_weight):
                 for azimuth in azimuths:
                     projectile, target = _equal_mass_collision_velocities(
                         event_velocity, float(angle), float(azimuth))
+                    cx_projectile, cx_target = (
+                        (projectile, target)
+                        if not below_support
+                        else _equal_mass_collision_velocities(
+                            event_velocity, 0.0, float(azimuth))
+                    )
                     residual = abs(
                         float(np.dot(projectile, projectile))
                         + float(np.dot(target, target))
@@ -455,13 +463,13 @@ class DeterministicDiscreteOrdinatesRFSheath:
                         (
                             projectile,
                             target,
-                            self.collision_model.elastic_probability,
+                            elastic_probability,
                             False,
                         ),
                         (
-                            target,
-                            projectile,
-                            self.collision_model.charge_exchange_probability,
+                            cx_target,
+                            cx_projectile,
+                            charge_exchange_probability,
                             True,
                         ),
                     ):

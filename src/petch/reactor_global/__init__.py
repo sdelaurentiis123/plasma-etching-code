@@ -97,9 +97,12 @@ from .argon import (
     lee_lieberman_argon_species,
 )
 from .argon_reactor_to_wafer import (
+    ArgonCurrentDrivenReactorToWaferCondition,
+    ArgonCurrentDrivenReactorToWaferSolution,
     ArgonReactorToWaferCondition,
     ArgonReactorToWaferSolution,
     DeterministicArgonReactorToWaferModel,
+    DeterministicCurrentDrivenArgonReactorToWaferModel,
     maxwellian_floating_sheath_potential_eV,
 )
 from .chlorine import (
@@ -345,6 +348,16 @@ from .wafer_sheath_transfer import (
     PowerClosedRFSheathProjection,
     SpeciesResolvedIonEnergyDistribution,
 )
+from .current_driven_rf_sheath import (
+    PeriodicCurrentDensity,
+    TurnerChabertCurrentDrivenSheath,
+    TurnerChabertCurrentSheathTangent,
+)
+from .moving_collisional_sheath_discrete_ordinates import (
+    DeterministicMovingCollisionalRFSheath,
+    MovingSheathConvergenceReceipt,
+    certify_moving_sheath_convergence,
+)
 from .collisional_sheath import (
     ArgonBornMayerPhelpsCollisionModel,
     CollisionalIonEnergyAngleDistribution,
@@ -566,13 +579,22 @@ __all__ = [
     "DiagnosticConditionedRFSheathTransfer",
     "PowerClosedRFSheathProjection",
     "SpeciesResolvedIonEnergyDistribution",
+    "PeriodicCurrentDensity",
+    "TurnerChabertCurrentDrivenSheath",
+    "TurnerChabertCurrentSheathTangent",
+    "DeterministicMovingCollisionalRFSheath",
+    "MovingSheathConvergenceReceipt",
+    "certify_moving_sheath_convergence",
     "ArgonBornMayerPhelpsCollisionModel",
+    "ArgonCurrentDrivenReactorToWaferCondition",
+    "ArgonCurrentDrivenReactorToWaferSolution",
     "ArgonReactorToWaferCondition",
     "ArgonReactorToWaferSolution",
     "CollisionalIonEnergyAngleDistribution",
     "CollisionalSheathDensityTangent",
     "DeterministicArgonCollisionalSheathTransfer",
     "DeterministicArgonReactorToWaferModel",
+    "DeterministicCurrentDrivenArgonReactorToWaferModel",
     "DeterministicCollisionalRFSheath",
     "DeterministicDiscreteOrdinatesRFSheath",
     "DiscreteOrdinatesConvergenceReceipt",

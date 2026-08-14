@@ -33,25 +33,30 @@ _NIST_DIFFUSION_2024 = "nist-tn-2279-gas-diffusion"
 
 
 def phelps_argon_momentum_transfer_cross_section_m2(
-        center_of_mass_energy_eV: float | np.ndarray,
+        laboratory_energy_eV: float | np.ndarray,
         ) -> float | np.ndarray:
     """Return Phelps' Ar+--Ar momentum-transfer cross section.
 
-    Energy is the ion--neutral center-of-mass collision energy in eV.  The
-    analytic approximation is Phelps' 1994 suggested momentum-transfer law,
+    Energy is the projectile laboratory energy for a stationary Ar target.
+    For equal masses, ``E_lab = 2 E_cm``.  This convention matches the Phelps
+    LXCat Ar+/Ar records, whose analytic component expressions evaluate
+    ``Qm`` at ``2 E_cm``.
+
+    The analytic approximation is Phelps' 1994 suggested momentum-transfer
+    law,
 
     ``Qm = 1.15e-18 E^-0.1 (1 + 0.015/E)^0.6 m2``.
     """
-    energy = np.asarray(center_of_mass_energy_eV, dtype=float)
+    energy = np.asarray(laboratory_energy_eV, dtype=float)
     if np.any(~np.isfinite(energy)) or np.any(energy <= 0.0):
         raise ValueError(
-            "center-of-mass collision energy must be positive and finite")
+            "laboratory collision energy must be positive and finite")
     cross_section = (
         1.15e-18
         * energy ** -0.1
         * (1.0 + 0.015 / energy) ** 0.6
     )
-    if np.ndim(center_of_mass_energy_eV) == 0:
+    if np.ndim(laboratory_energy_eV) == 0:
         return float(cross_section)
     return cross_section
 
@@ -70,11 +75,12 @@ def argon_relative_temperature_eV(
 @lru_cache(maxsize=256)
 def phelps_argon_momentum_transfer_rate_m3_s(
         ion_temperature_eV: float, gas_temperature_K: float) -> float:
-    """Maxwellian-average ``Qm(E_rel) * v_rel`` for Ar+ in Ar.
+    """Maxwellian-average ``Qm(2 E_rel) * v_rel`` for Ar+ in Ar.
 
     The relative-energy distribution is integrated in dimensionless energy
     ``x = E_rel / T_rel``.  For equal ion and neutral masses the reduced mass
-    is one half of the argon mass.
+    is one half of the argon mass, and the equivalent stationary-target
+    projectile energy used by the Phelps law is ``2 E_rel``.
     """
     relative_temperature = argon_relative_temperature_eV(
         ion_temperature_eV, gas_temperature_K)
@@ -89,7 +95,7 @@ def phelps_argon_momentum_transfer_rate_m3_s(
             x
             * np.exp(-x)
             * phelps_argon_momentum_transfer_cross_section_m2(
-                relative_temperature * x)
+                2.0 * relative_temperature * x)
         )
 
     integral, error = quad(

@@ -1,0 +1,122 @@
+{
+  "bohm_flux_seam": {
+    "relative_residual": 0.0,
+    "sheath_edge_density_m3": 1.636423102940084e+17
+  },
+  "collisional_wafer_boundary": {
+    "arriving_ion_flux_m2_s": 4.644357474149295e+20,
+    "expected_collision_count": 0.015338206416372197,
+    "ion_arrival_probability": 0.9968501197412641,
+    "linear_solve_relative_residual": 5.421010862427522e-19,
+    "low_energy_phelps_collision_count_per_source_ion": 0.01504612424058113,
+    "maximum_collision_energy_ledger_relative_residual": 7.717693318024935e-16,
+    "mean_impact_energy_eV": 234.45819745885316,
+    "probability_ledger_relative_residual": 0.0,
+    "resolved_fast_neutral_flux_lower_bound_m2_s": 7.021179883576613e+18,
+    "rms_impact_angle_deg": 1.1506662180408456,
+    "source_ion_flux_m2_s": 4.6590328698107134e+20,
+    "unresolved_fast_neutral_collisions_per_source_ion": 0.00023167301806113806
+  },
+  "generated_on": "2026-08-13",
+  "global_plasma": {
+    "axial_ion_flux_m2_s": 4.6590328698107134e+20,
+    "electron_density_m3": 7.053711972051397e+17,
+    "electron_temperature_eV": 3.3560937913646147,
+    "maximum_normalized_balance_residual": 3.3944271057995696e-15
+  },
+  "inputs": {
+    "absorbed_bulk_power_W": 500.0,
+    "feature_depth_target_used": null,
+    "gas_temperature_K": 500.0,
+    "ion_energy_angle_target_used": null,
+    "pressure_mTorr": 2.0,
+    "reactor_length_m": 0.075,
+    "reactor_radius_m": 0.15,
+    "sheath_current_frequency_hz": 2000000.0,
+    "sheath_current_harmonics_A_m2": {
+      "cosine": [
+        0.0,
+        -2.5
+      ],
+      "sine": [
+        -40.0,
+        4.5
+      ]
+    }
+  },
+  "maximum_conservation_residual": 3.3944271057995696e-15,
+  "moving_rf_sheath": {
+    "charge_voltage_relative_residual": 1.3278027525881406e-16,
+    "child_current_relative_residual": 3.8075360762320786e-16,
+    "exact_uniform_current_scale_jvp": {
+      "d_voltage_d_log_current_v": 1812.6608057915896,
+      "d_width_d_log_current_m": 0.002515929893554692
+    },
+    "maximum_voltage_v": 453.1652014478974,
+    "maximum_width_m": 0.0008386432978515641,
+    "mean_voltage_v": 179.42364636559697,
+    "xi": 0.39593429899807997
+  },
+  "purpose": "numerical and conservation audit; no equipment or depth target was fitted or used",
+  "rf_phase_ordinate_convergence": {
+    "angle_gate_blocker": "none for the declared Phelps/LXCat low-energy model; an independent measured IEAD remains required for equipment validation",
+    "angle_is_equipment_validated": false,
+    "angle_is_numerically_gradeable": true,
+    "coarse_phase_node_count": 12,
+    "coarse_to_reported_relative_changes": {
+      "arrival_probability_relative_change": 6.388359985785184e-06,
+      "collision_count_relative_change": 0.0024899145181215793,
+      "mean_energy_relative_change": 0.006835804617763637,
+      "rms_angle_relative_change": 0.0110406903984481
+    },
+    "limits": {
+      "arrival_probability_relative_change": 0.01,
+      "collision_count_relative_change": 0.01,
+      "mean_energy_relative_change": 0.01,
+      "rms_angle_relative_change": 0.02
+    },
+    "passed": true,
+    "reported_phase_node_count": 24
+  },
+  "schema": "petch.current_driven_argon_reactor_stack.v1",
+  "source": {
+    "argon_scattering": "phelps-1994-ar-ion-scattering; LXCat Phelps records 3075/3076 (retrieved 2026-08-13); khrabrov-2026-arxiv equations 8--10; turner-chabert-2014-rf-sheath",
+    "moving_sheath": "Turner & Chabert, APL 104, 164102 (2014), DOI 10.1063/1.4872172, equations 1-19"
+  },
+  "support_gates": {
+    "RF_phase_is_kinetic_state": true,
+    "all_ion_collision_orders_closed": true,
+    "bulk_condition_is_equipment_evidenced": false,
+    "feature_surface_law_closed": false,
+    "generator_matching_network_inversion_closed": false,
+    "low_energy_ion_angular_model": "Phelps LXCat isotropic/backscatter decomposition",
+    "low_energy_ion_angular_scattering_closed": true,
+    "molecular_chemistry_closed": false,
+    "moving_electron_front_resolved": true,
+    "repeated_fast_neutral_transport_closed": false,
+    "resolved_ion_boundary_predictive": false,
+    "sheath_current_is_measured_or_circuit_validated": false,
+    "supports_equipment_prediction": false,
+    "supports_feature_depth": false,
+    "time_dependent_poisson_field_resolved": true
+  },
+  "temporal_characteristic_convergence": {
+    "coarse_steps_per_period_and_transit": 48,
+    "coarse_to_fine_relative_changes": {
+      "arrival_probability_relative_change": 1.8912523937678356e-06,
+      "collision_count_relative_change": 0.0007891458977477237,
+      "mean_energy_relative_change": 5.377516533054178e-05,
+      "rms_angle_relative_change": 2.4048611959386422e-05
+    },
+    "fine_steps_per_period_and_transit": 96,
+    "limits": {
+      "arrival_probability_relative_change": 0.002,
+      "collision_count_relative_change": 0.002,
+      "mean_energy_relative_change": 0.002,
+      "rms_angle_relative_change": 0.002
+    },
+    "note": "This certifies the time characteristic at a fixed kinetic ordinate grid. A production prediction must additionally carry a condition-specific ordinate-grid receipt.",
+    "passed": true,
+    "reported_steps_per_period_and_transit": 64
+  }
+}

@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 146 sources by topic
+## Index — 148 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -149,10 +149,11 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`miller-1997`](library/miller-1997.md) | Miller & Riley (1997) sheath model | not-fetched |
 | [`nist-asd-argon`](library/nist-asd-argon.md) | NIST ASD neutral-argon ionization and 4s metastable energies | PRIMARY NIST DATABASE QUERIES |
 | [`nist-tn-2279-gas-diffusion`](library/nist-tn-2279-gas-diffusion.md) | NIST evaluated gas self-/binary-diffusion correlations | AUTHORITATIVE FULL PDF READ |
-| [`phelps-1994-ar-ion-scattering`](library/phelps-1994-ar-ion-scattering.md) | Phelps, consistent Ar+-Ar momentum-transfer/scattering model | PRIMARY PUBLISHER RECORD; EQUATION CROSS-CHECKED |
+| [`phelps-1994-ar-ion-scattering`](library/phelps-1994-ar-ion-scattering.md) | Phelps, consistent Ar+-Ar momentum-transfer/scattering model | PRIMARY PUBLISHER RECORD + PUBLIC LXCAT PROCESS RECORDS READ |
 | [`raja-linne`](library/raja-linne.md) | Raja & Linne | not-fetched (DOI corrected from 1.1519941) |
 | [`stafford-2010-cl-wall`](library/stafford-2010-cl-wall.md) | Stafford et al., measured state-dependent Cl wall recombination | PRIMARY FULL TEXT + FIGURE 8 PIL-AUDITED AT 600 DPI |
 | [`stafford-2009-cl-wall`](library/stafford-2009-cl-wall.md) | Stafford et al., direct Cl recombination on plasma-conditioned stainless steel | PRIMARY FULL TEXT + FIGURES 8--10 VISUALLY AUDITED AT 450 DPI |
+| [`turner-chabert-2014-rf-sheath`](library/turner-chabert-2014-rf-sheath.md) | Turner & Chabert, arbitrary-current moving RF sheath | PRIMARY FULL MANUSCRIPT READ; EQUATIONS 1--19 EXECUTABLE |
 | [`wang-2013-cl-fine-structure`](library/wang-2013-cl-fine-structure.md) | Wang et al., fine-structure-resolved e-Cl elastic, excitation, and superelastic cross sections | PRIMARY FULL TEXT READ ONLINE; NOT LOCALLY ARCHIVED |
 | [`wang-olthoff-1999-ion-flux`](library/wang-olthoff-1999-ion-flux.md) | Wang & Olthoff, absolute mass-resolved Cl2/Ar ion fluxes and IEDs | PRIMARY NIST FULL TEXT + FIGURE 9 PIL-AUDITED AT 600 DPI |
 | [`wise-1996-rapid-2d-cl`](library/wise-1996-rapid-2d-cl.md) | Wise, Lymberopoulos & Economou, rapid quasineutral 2-D chlorine ICP | PRIMARY FULL TEXT + EQUATIONS/BOUNDARIES VERIFIED + FIGURE 3 PIL-DIGITIZED |

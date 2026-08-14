@@ -9,8 +9,8 @@ ion flux, etch rate, nor feature depth selected any coefficient.
 
 | ion wall energy member | MAPE | maximum APE | monotonic | maximum balance residual | verdict |
 |---:|---:|---:|:---:|---:|:---:|
-| 5.0 | 9.206% | 14.669% | yes | 1.107e-14 | PASS |
-| 8.0 | 9.210% | 14.669% | yes | 1.437e-14 | PASS |
+| 5.0 | 8.543% | 13.740% | yes | 1.180e-14 | PASS |
+| 8.0 | 8.546% | 13.740% | yes | 1.534e-14 | PASS |
 
 Frozen limits were MAPE <= 10%, maximum
 APE <= 20%, normalized particle/power

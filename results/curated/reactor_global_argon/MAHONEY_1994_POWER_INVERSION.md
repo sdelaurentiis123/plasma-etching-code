@@ -9,10 +9,10 @@ diagnostic interval.
 
 | gas T (K) | ion wall energy (Te) | one constant transfer fraction satisfying all 5 rows | overlaps Hopwood 70–90% context |
 |---:|---:|---:|:---:|
-| 300 | 5 | 21.9–26.2% | no |
-| 300 | 8 | 26.3–30.4% | no |
-| 600 | 5 | 41.4–50.4% | no |
-| 600 | 8 | 49.7–59.0% | no |
+| 300 | 5 | 25.1–31.6% | no |
+| 300 | 8 | 29.8–36.7% | no |
+| 600 | 5 | 46.2–58.1% | no |
+| 600 | 8 | 55.5–68.0% | no |
 
 The intersection uses all five rows and is clipped at the physical 100 W net
 RF ceiling. Hopwood's 70–90% range comes from a different planar ICP and is

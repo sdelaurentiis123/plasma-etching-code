@@ -20,8 +20,8 @@
       "gas_temperature_K": 300.0,
       "wall_energy_factor_Te": 5.0,
       "constant_transfer_fraction_intersection": [
-        0.21925671491190887,
-        0.2619321730197312
+        0.2510775267731033,
+        0.3155613828211808
       ],
       "constant_transfer_fraction_exists": true,
       "overlaps_hopwood_70_90_percent_context": false
@@ -30,8 +30,8 @@
       "gas_temperature_K": 300.0,
       "wall_energy_factor_Te": 8.0,
       "constant_transfer_fraction_intersection": [
-        0.262974850180786,
-        0.3039428170639219
+        0.29833535948330364,
+        0.36658918612163766
       ],
       "constant_transfer_fraction_exists": true,
       "overlaps_hopwood_70_90_percent_context": false
@@ -40,8 +40,8 @@
       "gas_temperature_K": 600.0,
       "wall_energy_factor_Te": 5.0,
       "constant_transfer_fraction_intersection": [
-        0.4140120505539224,
-        0.5041999611461228
+        0.46247892211076996,
+        0.5809183039828061
       ],
       "constant_transfer_fraction_exists": true,
       "overlaps_hopwood_70_90_percent_context": false
@@ -50,8 +50,8 @@
       "gas_temperature_K": 600.0,
       "wall_energy_factor_Te": 8.0,
       "constant_transfer_fraction_intersection": [
-        0.4968530892143175,
-        0.590061612116209
+        0.5552160519238313,
+        0.6804987010572838
       ],
       "constant_transfer_fraction_exists": true,
       "overlaps_hopwood_70_90_percent_context": false

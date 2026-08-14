@@ -70,10 +70,11 @@ def _readonly_velocity(value) -> np.ndarray:
 
 @dataclass(frozen=True)
 class ArgonBornMayerPhelpsCollisionModel:
-    """Equal-mass Ar+--Ar elastic/CX collision model at energetic support.
+    """Equal-mass Ar+--Ar Phelps/Born--Mayer hybrid collision model.
 
     The integrated cross section is Phelps' published Ar+--Ar momentum-transfer
-    law evaluated in the center-of-mass frame.  Khrabrov and Kaganovich's
+    law evaluated at the stationary-target projectile laboratory energy
+    ``E_lab = 2 E_cm``.  Khrabrov and Kaganovich's
     Born--Mayer construction makes the ion-atom collision region symmetric:
     elastic and identity-switch charge exchange each carry probability 1/2.
 
@@ -85,8 +86,10 @@ class ArgonBornMayerPhelpsCollisionModel:
     ``R_cx ~= 8.09 a0`` statement is retained as a test, not used in the fit.
 
     Below 400 eV the source explicitly declines to claim Born--Mayer angular
-    validity.  The model retains resonant identity switching there but applies
-    zero resolved elastic angle, exposing the count in solution provenance.
+    validity.  There the model uses Phelps' LXCat two-component approximation:
+    isotropic scattering plus exact backscatter/identity switch, with
+    ``Qm = Qi + 2 Qb``.  Above 400 eV it retains the Born--Mayer differential
+    angle and the symmetric 1/2 charge-label choice used for the HAR tail.
     """
 
     born_mayer_potential_eV: float = 500.0 / 0.06
@@ -96,8 +99,8 @@ class ArgonBornMayerPhelpsCollisionModel:
     elastic_probability: float = 0.5
     charge_exchange_probability: float = 0.5
     source: str = (
-        "Phelps 1994 DOI 10.1063/1.357820 momentum-transfer law; "
-        "Khrabrov & Kaganovich arXiv:2604.04214v2 equations 8--10"
+        "phelps-1994-ar-ion-scattering; LXCat Phelps records 3075/3076 "
+        "(retrieved 2026-08-13); khrabrov-2026-arxiv equations 8--10"
     )
     evidence_kind: str = "published_model_inference"
     provenance: Mapping[str, object] = field(default_factory=lambda: {
@@ -107,12 +110,13 @@ class ArgonBornMayerPhelpsCollisionModel:
         ),
         "independent_check_not_fit": "R_cx~=8.09 a0 at 1 keV lab",
         "channel_rule": (
-            "equal-mass ion-atom collision; elastic and identity-switch "
-            "charge exchange each probability 1/2"
+            "below 400 eV use energy-dependent Phelps isotropic/backscatter "
+            "weights; above 400 eV use equal-mass Born-Mayer scattering and "
+            "the symmetric 1/2 charge-label choice"
         ),
         "low_energy_rule": (
-            "below 400 eV: identity-switch energy channel retained, "
-            "Born-Mayer angular deflection unresolved and set to zero"
+            "below 400 eV: Phelps LXCat isotropic/backscatter decomposition; "
+            "Qm=Qi+2Qb, records 3075/3076, retrieved 2026-08-13"
         ),
         "coefficient_selection_target": None,
     })
@@ -148,8 +152,54 @@ class ArgonBornMayerPhelpsCollisionModel:
         energy = np.asarray(laboratory_energy_eV, dtype=float)
         if np.any(~np.isfinite(energy)) or np.any(energy <= 0.0):
             raise ValueError("laboratory collision energy must be positive")
-        result = phelps_argon_momentum_transfer_cross_section_m2(0.5 * energy)
+        momentum = phelps_argon_momentum_transfer_cross_section_m2(energy)
+        isotropic = self.phelps_isotropic_cross_section_m2(energy)
+        backscatter = 0.5 * np.maximum(momentum - isotropic, 0.0)
+        result = np.where(
+            energy < self.born_mayer_minimum_lab_energy_eV,
+            isotropic + backscatter,
+            momentum,
+        )
         return float(result) if energy.ndim == 0 else np.asarray(result)
+
+    @staticmethod
+    def phelps_isotropic_cross_section_m2(
+        laboratory_energy_eV,
+    ) -> np.ndarray | float:
+        """Phelps/LXCat isotropic Ar+--Ar component ``Qi(E_lab)``."""
+        energy = np.asarray(laboratory_energy_eV, dtype=float)
+        if np.any(~np.isfinite(energy)) or np.any(energy <= 0.0):
+            raise ValueError("laboratory collision energy must be positive")
+        value = (
+            2.0e-19 / (np.sqrt(energy) * (1.0 + energy))
+            + 3.0e-19 * energy / (1.0 + energy / 3.0) ** 2.3
+        )
+        return float(value) if energy.ndim == 0 else value
+
+    def phelps_backscatter_cross_section_m2(
+        self, laboratory_energy_eV,
+    ) -> np.ndarray | float:
+        """Phelps/LXCat backscatter component ``Qb=(Qm-Qi)/2``."""
+        energy = np.asarray(laboratory_energy_eV, dtype=float)
+        momentum = np.asarray(
+            phelps_argon_momentum_transfer_cross_section_m2(energy))
+        isotropic = np.asarray(self.phelps_isotropic_cross_section_m2(energy))
+        value = 0.5 * np.maximum(momentum - isotropic, 0.0)
+        return float(value) if energy.ndim == 0 else value
+
+    def channel_probabilities(
+        self, laboratory_energy_eV: float,
+    ) -> tuple[float, float]:
+        """Return elastic/isotropic and identity-switch branch probabilities."""
+        energy = float(laboratory_energy_eV)
+        if energy < self.born_mayer_minimum_lab_energy_eV:
+            isotropic = float(self.phelps_isotropic_cross_section_m2(energy))
+            backscatter = float(
+                self.phelps_backscatter_cross_section_m2(energy))
+            total = isotropic + backscatter
+            return isotropic / total, backscatter / total
+        return float(self.elastic_probability), float(
+            self.charge_exchange_probability)
 
     def collision_radius_m(self, laboratory_energy_eV: float) -> float:
         return float(np.sqrt(
@@ -209,6 +259,12 @@ class ArgonBornMayerPhelpsCollisionModel:
         order: int,
     ) -> tuple[np.ndarray, np.ndarray]:
         node, weight = np.polynomial.legendre.leggauss(int(order))
+        if laboratory_energy_eV < self.born_mayer_minimum_lab_energy_eV:
+            # A uniform cos(theta) measure is isotropic in COM solid angle.
+            # The backscatter branch performs the exact charge-label swap in
+            # the common equal-mass kinematics, so this quadrature applies to
+            # the Qi channel only.
+            return np.arccos(node), 0.5 * weight
         area_fraction = 0.5 * (node + 1.0)
         weight = 0.5 * weight
         radius = self.collision_radius_m(laboratory_energy_eV)
@@ -1196,6 +1252,12 @@ class DeterministicCollisionalRFSheath:
                         self.collision_model.impact_quadrature(
                             event_energy, int(self.impact_quadrature_order)))
                 angles, impact_weight = impact_cache[cache_key]
+                below_born_mayer = (
+                    event_energy
+                    < self.collision_model.born_mayer_minimum_lab_energy_eV
+                )
+                elastic_probability, charge_exchange_probability = (
+                    self.collision_model.channel_probabilities(event_energy))
                 # The incoming global azimuth is redundant, but collision
                 # azimuths are not: the wafer normal distinguishes scattering
                 # toward from scattering away from the electrode.  Retain the
@@ -1272,10 +1334,16 @@ class DeterministicCollisionalRFSheath:
                     for azimuth in azimuths:
                         projectile, target = _equal_mass_collision_velocities(
                             event_velocity, float(angle), float(azimuth))
+                        cx_projectile, cx_target = (
+                            (projectile, target)
+                            if not below_born_mayer
+                            else _equal_mass_collision_velocities(
+                                event_velocity, 0.0, float(azimuth))
+                        )
                         continue_branch(
                             _canonical_axisymmetric_velocity(projectile),
                             _canonical_axisymmetric_velocity(target),
-                            self.collision_model.elastic_probability
+                            elastic_probability
                             * float(angular_weight)
                             / len(azimuths),
                             charge_exchange=False,
@@ -1289,9 +1357,9 @@ class DeterministicCollisionalRFSheath:
                         # finite-angle replacement for a delta-function
                         # identity switch.
                         continue_branch(
-                            _canonical_axisymmetric_velocity(target),
-                            _canonical_axisymmetric_velocity(projectile),
-                            self.collision_model.charge_exchange_probability
+                            _canonical_axisymmetric_velocity(cx_target),
+                            _canonical_axisymmetric_velocity(cx_projectile),
+                            charge_exchange_probability
                             * float(angular_weight)
                             / len(azimuths),
                             charge_exchange=True,
