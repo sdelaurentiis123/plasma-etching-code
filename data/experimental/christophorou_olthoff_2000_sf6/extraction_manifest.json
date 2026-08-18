@@ -1,0 +1,84 @@
+{
+  "schema": "petch.christophorou_olthoff_2000_sf6.v1",
+  "source": {
+    "authors": [
+      "L. G. Christophorou",
+      "J. K. Olthoff"
+    ],
+    "doi": "10.1063/1.1288407",
+    "journal": "J. Phys. Chem. Ref. Data 29, 267-330 (2000)",
+    "nist_url": "https://srd.nist.gov/jpcrdreprint/1.1288407.pdf",
+    "pdf_sha256": "b13fac820570646e6b72a59e573fb85ba99814f72cbb0962193b969036a54ad0",
+    "source_pdf_committed": false,
+    "title": "Electron Interactions with SF6"
+  },
+  "tables": {
+    "table14_momentum_transfer.csv": {
+      "row_count": 46,
+      "sha256": "dc702c0a1651aba096dc4dddec8bcc16dfe97028b8ec9091e9de06f681a07e5e"
+    },
+    "table15_vibrational_excitation.csv": {
+      "row_count": 37,
+      "sha256": "4d8579dbd68e2f11e386c8f38fd9e969760fcc625b6f5ae427e3bf92f024b3db"
+    },
+    "table17_total_ionization.csv": {
+      "row_count": 30,
+      "sha256": "9566c88d59c4ab1c39833850dec3ef2535fcb8ccbb89c30612f3a0fc770d7663"
+    },
+    "table20_total_neutral_dissociation.csv": {
+      "row_count": 22,
+      "sha256": "a4a7ed0c6d4227f8fbfaf5e69407d88ce03688c2b12c8a96427f90f5158c42f1"
+    },
+    "table28_total_attachment.csv": {
+      "row_count": 82,
+      "sha256": "e8ee625160731eb829864f458164c4432355a1b38840eec187e737f6450e76de"
+    },
+    "table35_effective_ionization.csv": {
+      "row_count": 24,
+      "sha256": "cfac7c0e58834a986995805616916c1c7423692fab7d2cc0a910ea05d9bc50c4"
+    },
+    "table36_drift_velocity.csv": {
+      "row_count": 29,
+      "sha256": "007006f5c347b8986f949ef6bfaf4e3902b3cedf314a5262514437e6338df5c6"
+    },
+    "table37_attachment_rate.csv": {
+      "row_count": 12,
+      "sha256": "fa459460ad6d98b6835b26d9d4adf22c72c6b885cc92cbd714da5a0df4e5ab03"
+    },
+    "table9_total_scattering.csv": {
+      "row_count": 73,
+      "sha256": "5c22dee68eec50f3bb1a0dd33c57400d6f40d599a30abbbe7cd1671da4ee75bf"
+    }
+  },
+  "transcription": {
+    "method": "manual_double_column_transcription_visually_checked_at_400_dpi",
+    "render_pixels_committed": false,
+    "render_sha256": {
+      "table14_pdf_page23": "6f7cebb10d612883b06adca52788a656e66c5824f47b9be08e418b650c3f27bf",
+      "table15_pdf_page26": "eb9641df2b3f9736618eef1e70044421fc560613edb8dabcc95193ba3acef5a6",
+      "table17_pdf_page28": "a2f83b2c43162d155f22c2e6781d5f286f7e94512cd2759824f5e1750d30290a",
+      "table20_pdf_page33": "82c9da2506adb36c1cfbfc247c02b8affed8bef92edc9f799505f62f40ca5838",
+      "table28_pdf_page44": "7b9fb4d0adff153fd41427c1daaeff7ff59da696cb6625aa0dec94f5361e0d64",
+      "table36_pdf_page52": "1ac7b23d2a85d27aeb29bb30fe2a6a542840b5f9143bf0481ed51fdcf8f27ffb",
+      "table37_pdf_page53": "e81d3e81942928d01e0e3c7a80074a1f9369b4a94e2f2a51902ba565a192c97b",
+      "table9_pdf_page17": "503fea7ec6fa6834104fbcb6df00531592c276ce968d3f435b69a3ff344b6183"
+    },
+    "si_conversion": "cross sections 1e-20 m2; drift 1e6 cm/s to 1e4 m/s"
+  },
+  "use_boundaries": {
+    "supports_collision_input": true,
+    "supports_feature_depth": false,
+    "supports_unique_reactor_state": false,
+    "supports_wafer_flux": false,
+    "table15_is_deduced_not_directly_measured": true,
+    "table20_is_approximate_and_requires_confirmation": true,
+    "table28_is_room_temperature": true,
+    "table35_is_recommended_effective_townsend_fit": true,
+    "table36_direct_recommended_interval_Td": [
+      275,
+      1000
+    ],
+    "table37_is_derived_product_not_independent_attachment_data": true,
+    "total_scattering_is_not_elastic_momentum_transfer": true
+  }
+}
