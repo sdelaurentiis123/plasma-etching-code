@@ -1,0 +1,44 @@
+{
+  "schema": "petch.external-collision-source.v1",
+  "source_id": "song-2026-o2-electron-collisions",
+  "article": {
+    "title": "Cross Sections for Electron Collisions with Molecular and Atomic Oxygen",
+    "doi": "10.1063/5.0287254",
+    "year": 2026,
+    "publisher": "AIP Publishing"
+  },
+  "supplement": {
+    "dataset_doi": "10.60893/figshare.jpr.30850013.v1",
+    "file_name": "supplimental data_O2.xlsx",
+    "official_file_id": 60268601,
+    "official_download_url": "https://ndownloader.figshare.com/files/60268601",
+    "sha256": "6f98ac82e169d25d0a4328b1a3703f733668539adb8141d736209d199013c860",
+    "md5_reported_by_repository": "71120ea0c9db8d7c9e5a64af0ea9f9ba",
+    "license": "CC BY-NC 4.0",
+    "artifact_committed": false,
+    "ingestion_rule": "The caller must supply an exact hash-matching workbook. Petch reads its cached OOXML values without modifying or recalculating it."
+  },
+  "source_units": {
+    "electron_energy": "eV",
+    "cross_section": "1e-16 cm2",
+    "si_conversion": "1 source cross-section unit = 1e-20 m2"
+  },
+  "ingested_curves": [
+    {"name": "momentum_transfer", "point_count": 50},
+    {"name": "vibrational_v0_to_v1", "point_count": 1800},
+    {"name": "electronic_a1Delta_g", "point_count": 1500},
+    {"name": "electronic_b1Sigma_g_plus", "point_count": 1500},
+    {"name": "electronic_c1Sigma_u_minus", "point_count": 1500},
+    {"name": "electronic_A3Delta_u", "point_count": 1500},
+    {"name": "electronic_A3Sigma_u_plus", "point_count": 1500},
+    {"name": "neutral_dissociation_total", "point_count": 13},
+    {"name": "positive_ionization_total", "point_count": 43},
+    {"name": "dissociative_attachment_total", "point_count": 56}
+  ],
+  "interpretation_guards": [
+    "The workbook ionization product headers render minus superscripts. Article Table VII and the section context identify positive-ion production; the total positive-ionization curve is used.",
+    "Rotational excitation is omitted because the source review reports no accurate comprehensive rotational dataset.",
+    "The finite-support vibration/electronic tails and the neutral-dissociation onset are explicit sensitivity axes, not fitted parameters.",
+    "The workbook is an electron-collision input. It does not determine a reactor state, wafer flux, TiO2 surface response, or feature depth."
+  ]
+}

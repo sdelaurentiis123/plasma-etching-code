@@ -419,6 +419,17 @@ from .sf6_electron_collisions import (
     load_nist_2000_sf6_total_scattering,
     load_nist_2000_sf6_vibrational_excitation,
 )
+from .o2_electron_collisions import (
+    O2_MASS_AMU,
+    SONG_2026_O2_ARTICLE_DOI,
+    SONG_2026_O2_DATASET_DOI,
+    SONG_2026_O2_WORKBOOK_MD5,
+    SONG_2026_O2_WORKBOOK_SHA256,
+    Song2026O2CrossSectionCurve,
+    Song2026O2Replay,
+    load_song_2026_o2_replay,
+)
+from .electron_collision_mixture import compose_electron_collision_decks
 from .current_driven_rf_sheath import (
     PeriodicCurrentDensity,
     TurnerChabertCurrentDrivenSheath,
@@ -709,6 +720,15 @@ __all__ = [
     "load_nist_2000_sf6_total_neutral_dissociation",
     "load_nist_2000_sf6_total_scattering",
     "load_nist_2000_sf6_vibrational_excitation",
+    "O2_MASS_AMU",
+    "SONG_2026_O2_ARTICLE_DOI",
+    "SONG_2026_O2_DATASET_DOI",
+    "SONG_2026_O2_WORKBOOK_MD5",
+    "SONG_2026_O2_WORKBOOK_SHA256",
+    "Song2026O2CrossSectionCurve",
+    "Song2026O2Replay",
+    "load_song_2026_o2_replay",
+    "compose_electron_collision_decks",
     "PeriodicCurrentDensity",
     "TurnerChabertCurrentDrivenSheath",
     "TurnerChabertCurrentSheathTangent",
