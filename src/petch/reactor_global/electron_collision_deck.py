@@ -277,9 +277,17 @@ def parse_bolsig_lxcat_bytes(
     retrieved_at: str,
     source_reference: str,
     target: str | None = None,
+    database_filter: str | None = None,
     expected_sha256: str | None = None,
 ) -> ElectronCollisionDeck:
-    """Parse a user-supplied BOLSIG/LXCat deck without redistributing it."""
+    """Parse a user-supplied BOLSIG/LXCat deck without redistributing it.
+
+    LXCat exports may concatenate many databases, including duplicate target
+    names with mutually incompatible recommended sets.  ``target`` alone is
+    therefore not a sufficient selector.  ``database_filter`` is an exact,
+    whitespace-normalized match to the payload's ``DATABASE:`` value and
+    prevents silently mixing processes from different contributors.
+    """
 
     if not isinstance(payload, bytes) or not payload:
         raise ValueError("collision deck payload must be non-empty bytes")
@@ -293,8 +301,20 @@ def parse_bolsig_lxcat_bytes(
     lines = tuple(text.splitlines())
     processes: list[ElectronCollisionProcess] = []
     index = 0
+    selected_database = (
+        None if database_filter is None else " ".join(
+            str(database_filter).split())
+    )
+    if database_filter is not None and not selected_database:
+        raise ValueError("database filter must be non-empty")
+    current_database: str | None = None
     while index < len(lines):
         current = lines[index].strip()
+        if current.startswith("DATABASE:"):
+            current_database = " ".join(
+                current.split(":", 1)[1].split())
+            index += 1
+            continue
         if current == "COMMENT":
             index += 1
             while index < len(lines) and not _is_separator(lines[index]):
@@ -358,7 +378,12 @@ def parse_bolsig_lxcat_bytes(
         if index >= len(lines):
             raise ValueError("collision process data table is unterminated")
         index += 1
-        if target is None or process_target == target:
+        target_matches = target is None or process_target == target
+        database_matches = (
+            selected_database is None
+            or current_database == selected_database
+        )
+        if target_matches and database_matches:
             processes.append(ElectronCollisionProcess(
                 kind=kind,
                 target=process_target,
@@ -372,7 +397,12 @@ def parse_bolsig_lxcat_bytes(
                 comments=tuple(comments),
             ))
     if not processes:
-        suffix = "" if target is None else f" for target {target!r}"
+        selectors = []
+        if target is not None:
+            selectors.append(f"target {target!r}")
+        if selected_database is not None:
+            selectors.append(f"database {selected_database!r}")
+        suffix = "" if not selectors else " for " + " in ".join(selectors)
         raise ValueError(f"collision deck contains no supported processes{suffix}")
     return ElectronCollisionDeck(
         processes=tuple(processes),

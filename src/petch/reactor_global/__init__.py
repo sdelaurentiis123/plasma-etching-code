@@ -220,6 +220,10 @@ from .electron_collision_deck import (
     load_bolsig_lxcat_file,
     parse_bolsig_lxcat_bytes,
 )
+from .effective_momentum import (
+    EffectiveMomentumDeconvolution,
+    deconvolve_effective_momentum,
+)
 from .electron_collision_chemistry import (
     ElectronCollisionChemistry,
     ElectronCollisionChemistryState,
@@ -599,6 +603,7 @@ __all__ = [
     "ElectronCollisionMomentKernel",
     "ElectronCollisionMoments",
     "ElectronCollisionProcess",
+    "EffectiveMomentumDeconvolution",
     "ElectronElectronCoulombCoefficients",
     "ElectronEnergyDistribution",
     "ElectronEnergyGrid",
@@ -792,6 +797,7 @@ __all__ = [
     "Song2026O2Replay",
     "load_song_2026_o2_replay",
     "compose_electron_collision_decks",
+    "deconvolve_effective_momentum",
     "ZhuParentCollisionChemistry",
     "build_zhu_parent_collision_chemistry",
     "zhu_parent_collision_species",

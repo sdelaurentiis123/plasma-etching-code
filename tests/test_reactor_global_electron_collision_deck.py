@@ -160,3 +160,24 @@ def test_file_loader_never_packages_or_redistributes_source_bytes(tmp_path):
     assert not deck.packaged_or_redistributed
     assert not hasattr(deck, "source_payload")
     assert deck.payload_sha256 == hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_exact_database_filter_prevents_cross_database_target_mixing():
+    payload = (
+        b"DATABASE: First recommended set\n"
+        + DECK
+        + b"\nDATABASE: Second recommended set\n"
+        + DECK.replace(b"2.0e-20", b"3.0e-20")
+    )
+    selected = _parse(
+        payload,
+        database_filter="  Second   recommended set ",
+    )
+    assert len(selected.processes) == 4
+    assert selected.processes[0].cross_section_m2[0] == pytest.approx(3.0e-20)
+
+    with pytest.raises(ValueError, match="database 'Missing set'"):
+        _parse(payload, database_filter="Missing set")
+
+    with pytest.raises(ValueError, match="database filter must be non-empty"):
+        _parse(payload, database_filter="  ")
