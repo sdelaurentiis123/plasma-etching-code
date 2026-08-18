@@ -448,6 +448,11 @@ from .o2_electron_collisions import (
     load_song_2026_o2_replay,
 )
 from .electron_collision_mixture import compose_electron_collision_decks
+from .zhu_parent_collision_chemistry import (
+    ZhuParentCollisionChemistry,
+    build_zhu_parent_collision_chemistry,
+    zhu_parent_collision_species,
+)
 from .current_driven_rf_sheath import (
     PeriodicCurrentDensity,
     TurnerChabertCurrentDrivenSheath,
@@ -763,6 +768,9 @@ __all__ = [
     "Song2026O2Replay",
     "load_song_2026_o2_replay",
     "compose_electron_collision_decks",
+    "ZhuParentCollisionChemistry",
+    "build_zhu_parent_collision_chemistry",
+    "zhu_parent_collision_species",
     "PeriodicCurrentDensity",
     "TurnerChabertCurrentDrivenSheath",
     "TurnerChabertCurrentSheathTangent",

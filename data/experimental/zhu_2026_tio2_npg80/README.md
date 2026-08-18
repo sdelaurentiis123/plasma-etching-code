@@ -122,6 +122,18 @@ python scripts/audit_zhu_npg80_feed_electron_kinetics.py \
 python scripts/audit_zhu_npg80_feed_electron_kinetics.py --check
 ```
 
+The SF6 parent chemistry is now product-resolved rather than an aggregate
+`SFx+`/`SFx-` source.  NIST Tables 24, 25, and 27 provide seven negative-ion
+curves; Tables 3 and 16 constrain nine positive-ion branches.  Their executable
+split preserves the evaluated total attachment and ionization curves exactly
+and treats double ionization with the correct two-electron source.  The entire
+three-gas deck is mapped to 44 explicit heavy species through 46 atom- and
+charge-checked events in `zhu_parent_collision_chemistry.py`.  Two source gaps
+remain visibly graded: aggregate SF6 neutral dissociation currently uses the
+literature-dominant `SF5 + F` branch, and aggregate O2 ionization currently
+uses the `O2+` branch.  This closes the parent collision source term, not the
+daughter-species, wall, exhaust, or absorbed-power balances.
+
 ## Machine-family self-bias evidence
 
 The two downloaded files are valid despite their generic/misleading names.
