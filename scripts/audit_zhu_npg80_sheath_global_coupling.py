@@ -26,6 +26,7 @@ COUPLED_DIR = (
     ROOT / "results" / "curated" / "zhu_npg80_sheath_coupled_v1"
 )
 COUPLED = COUPLED_DIR / "central_276V.json"
+AXISYMMETRIC = COUPLED_DIR / "axisymmetric_audit.json"
 OUTPUT = COUPLED_DIR / "audit.json"
 SELF_BIAS = DATA / "oxford80_self_bias_transfer.json"
 
@@ -91,6 +92,7 @@ def build_receipt() -> dict:
     baseline = _load(BASELINE)
     coupled = _load(COUPLED)
     bias = _load(SELF_BIAS)
+    axisymmetric = _load(AXISYMMETRIC)
     if baseline["condition_id"] != coupled["condition_id"]:
         raise ValueError("baseline and coupled states differ in condition")
     if coupled["input"]["feature_or_sem_target_used"]:
@@ -101,6 +103,12 @@ def build_receipt() -> dict:
         raise ValueError("unexpected O2 collision workbook")
     if coupled["numerics"]["maximum_normalized_residual"] > 2.0e-6:
         raise ValueError("coupled state failed conservation")
+    if axisymmetric["input"]["open_reactor_state"] != str(
+        COUPLED.relative_to(ROOT)
+    ):
+        raise ValueError("axisymmetric solve did not consume the coupled state")
+    if not axisymmetric["grid_convergence"]["passed_0p1_percent"]:
+        raise ValueError("axisymmetric solve failed grid convergence")
     anchor = float(bias["mechanical_anchor_selection"]["anchor_V"])
     if bias["mechanical_anchor_selection"]["is_target_measurement"]:
         raise ValueError("family anchor was mislabeled as a target measurement")
@@ -139,6 +147,9 @@ def build_receipt() -> dict:
         "total_axial_positive_ion_flux_m2_s"
     ])
     new_flux = float(state["total_axial_positive_ion_flux_m2_s"])
+    optic_flux = float(axisymmetric["central_48x16_result"][
+        "central_3mm_optic_average_flux_m2_s"
+    ])
     old_f = float(baseline["state"]["neutral_thermal_flux_m2_s"]["F"])
     new_f = float(state["neutral_thermal_flux_m2_s"]["F"])
     return {
@@ -154,6 +165,21 @@ def build_receipt() -> dict:
             "path": str(COUPLED.relative_to(ROOT)),
             "sha256": _sha(COUPLED),
             "summary": _summary(coupled),
+        },
+        "axisymmetric_wafer_state": {
+            "path": str(AXISYMMETRIC.relative_to(ROOT)),
+            "sha256": _sha(AXISYMMETRIC),
+            "central_3mm_optic_average_flux_m2_s": optic_flux,
+            "central_3mm_to_full_electrode_flux_ratio": axisymmetric[
+                "central_48x16_result"
+            ]["central_3mm_to_full_electrode_flux_ratio"],
+            "first_to_last_annulus_flux_ratio": axisymmetric[
+                "central_48x16_result"
+            ]["first_to_last_annulus_flux_ratio"],
+            "central_to_fine_optic_flux_relative_change": axisymmetric[
+                "grid_convergence"
+            ]["central_to_fine_optic_flux_relative_change"],
+            "absolute_target_wafer_flux_supported": False,
         },
         "boundary_evidence": {
             "self_bias_transfer_path": str(SELF_BIAS.relative_to(ROOT)),
@@ -214,6 +240,9 @@ def build_receipt() -> dict:
             ),
             "required_blanket_formula_units_per_positive_ion": (
                 _required_yield(new_flux)
+            ),
+            "required_central_3mm_formula_units_per_positive_ion": (
+                _required_yield(optic_flux)
             ),
             "interpretation": (
                 "Exact atom/dose requirement conditional on the family-anchor "

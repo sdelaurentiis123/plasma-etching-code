@@ -11,6 +11,9 @@ def test_sheath_global_fixed_point_is_target_free_and_conserved():
     assert receipt["certification"][
         "supports_unique_absolute_depth_prediction"
     ] is False
+    assert receipt["axisymmetric_wafer_state"][
+        "absolute_target_wafer_flux_supported"
+    ] is False
 
 
 def test_wall_resolution_strengthens_but_does_not_fit_clearance():
@@ -24,3 +27,7 @@ def test_wall_resolution_strengthens_but_does_not_fit_clearance():
         "required_blanket_formula_units_per_positive_ion"
     ]
     assert 0.9 < min(required) < max(required) < 1.3
+    optic_required = receipt["conditional_tio2_dose"][
+        "required_central_3mm_formula_units_per_positive_ion"
+    ]
+    assert max(optic_required) < max(required)

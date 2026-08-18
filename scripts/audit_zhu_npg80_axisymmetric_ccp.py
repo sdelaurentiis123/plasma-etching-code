@@ -93,6 +93,7 @@ def _run_resolution(state, radial_count: int, axial_count: int):
 
 
 def build_receipt(state_path: Path = DEFAULT_STATE) -> dict:
+    state_path = Path(state_path).resolve()
     state = _load_input(state_path)
     resolutions = []
     central_result = None

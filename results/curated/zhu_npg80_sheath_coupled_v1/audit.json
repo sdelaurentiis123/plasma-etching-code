@@ -1,4 +1,13 @@
 {
+  "axisymmetric_wafer_state": {
+    "absolute_target_wafer_flux_supported": false,
+    "central_3mm_optic_average_flux_m2_s": 1.4572248811804377e+19,
+    "central_3mm_to_full_electrode_flux_ratio": 1.007398707714177,
+    "central_to_fine_optic_flux_relative_change": 2.480971419083211e-05,
+    "first_to_last_annulus_flux_ratio": 1.0148198152207704,
+    "path": "results/curated/zhu_npg80_sheath_coupled_v1/axisymmetric_audit.json",
+    "sha256": "4300b82ce9fd20b27268a8829f72a157884dfc70854eb58710b9a679a7d2df03"
+  },
   "boundary_evidence": {
     "anchor_is_target_measurement": false,
     "family_anchor_bias_magnitude_V": 276.0,
@@ -32,6 +41,10 @@
     "required_blanket_formula_units_per_positive_ion": [
       0.9847064829051287,
       1.2573944320173183
+    ],
+    "required_central_3mm_formula_units_per_positive_ion": [
+      0.9809854039573721,
+      1.2526429004378752
     ]
   },
   "coupled_state": {

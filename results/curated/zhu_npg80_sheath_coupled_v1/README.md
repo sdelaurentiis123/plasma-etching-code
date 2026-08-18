@@ -14,6 +14,15 @@ electron density rises by 1.879x, positive-ion flux rises by 1.161x to
 700 nm blanket-clearance requirement becomes 0.985--1.257 TiO2 formula units
 per positive ion before feature attenuation.
 
+The deterministic axisymmetric lift reproduces the coupled global flux within
+0.358%, changes by only 0.0025% on the final grid refinement, and predicts the
+centered 3 mm optic receives 0.740% more ion flux than the full-electrode
+average. The resulting central-optic clearance requirement is
+0.981--1.252 formula units per ion. This smooth radial response is too weak to
+explain strongly clustered pillar failures within one small write field by
+itself; wafer position, local loading, CD/mask variation, undercut, adhesion,
+and strip/dry mechanics remain distinct hypotheses.
+
 This is a stronger physical boundary, not a unique equipment prediction. The
 276 V bias is a machine-family transfer rather than a target-tool diagnostic;
 90 W remains an absorbed-power sensitivity; molecular ion-neutral angular
