@@ -1,0 +1,340 @@
+Mobility of         in               in          and       in
+E. Basurto, and J. de Urquijo
+
+
+Citation: Journal of Applied Physics 91, 36 (2002); doi: 10.1063/1.1421034
+View online: https://doi.org/10.1063/1.1421034
+View Table of Contents: http://aip.scitation.org/toc/jap/91/1
+Published by the American Institute of Physics
+
+
+Articles you may be interested in
+Electron Interactions with CF4
+Journal of Physical and Chemical Reference Data 25, 1341 (1996); 10.1063/1.555986
+
+Experimental measurement of the mobilities of atomic and dimer Ar, Kr, and Xe ions in their parent gases
+The Journal of Chemical Physics 133, 124316 (2010); 10.1063/1.3497651
+
+Cross Sections for Electron Collisions With Carbon Dioxide
+Journal of Physical and Chemical Reference Data 31, 749 (2002); 10.1063/1.1481879
+
+                                            +    +        +
+Dissociative charge transfer reactions of Ar , Ne , and He with CF4 from thermal to 50 eV
+The Journal of Chemical Physics 92, 2296 (1990); 10.1063/1.457969
+
+Electron-impact total ionization cross sections of        and
+The Journal of Chemical Physics 110, 3811 (1999); 10.1063/1.478270
+
+Evaluated Bimolecular Ion-Molecule Gas Phase Kinetics of Positive Ions for Use in Modeling Planetary
+Atmospheres, Cometary Comae, and Interstellar Clouds
+Journal of Physical and Chemical Reference Data 22, 1469 (1993); 10.1063/1.555940
+JOURNAL OF APPLIED PHYSICS                                     VOLUME 91, NUMBER 1                                     1 JANUARY 2002
+
+
+Mobility of CF3¿ in CF4 , CHF2¿ in CHF3 , and C¿ in Ar
+          E. Basurto
+          Departamento de Ciencias Básicas, Universidad Autónoma Metropolitana–Azcapotzalco, Av. San Pablo
+          180, 02200 México, DF, Mexico
+          J. de Urquijoa)
+          Centro de Ciencias Fı́sicas, Universidad Nacional Autónoma de México, P.O. Box 48-3, 62251,
+          Cuernavaca, Moreno, Mexico
+          共Received 15 March 2001; accepted for publication 25 September 2001兲
+          A drift tube-double mass spectrometer technique has been used to study the transport of CF⫹
+                                                                                                    3 in CF4
+          and of CHF⫹   2  in CHF   3 .  The reduced mobilities of these two  ions were  measured   over the
+          density-normalized electric field strength E/N, between 30 and 750 Td (1 Td⫽10⫺17 V cm2 ). It
+          was found that substantial amounts of C⫹ were produced thorugh the reaction of CF⫹3 with Ar. Thus,
+          the mobility of C⫹ could be measured over the E/N range from 30 to 260 Td. Further measurements
+          of the abundance of secondary ions formed by the reactions of CF⫹           ⫹
+                                                                           3 and CHF2 with Ar revealed that
+                                                                 ⫹
+          for E/N⬎250 Td and E/N⬎120 Td, respectively, Ar predominates as a secondary species over
+          F⫹ , CF⫹ , CF⫹                ⫹                    ⫹
+                         2 , and ArH . The injection of Ar into CF4 was also found to be a very efficient
+          dissociative charge transfer process, leading predominantly to CF⫹   3 formation, with conversion
+          efficiencies of practically 100% for E/N⬎100 Td. The above finding is consistent with a previous
+          beam study. © 2002 American Institute of Physics. 关DOI: 10.1063/1.1421034兴
+
+
+
+I. INTRODUCTION                                                        tion of the density-normalized electric field intensity E/N is
+                                                                       useful for the calculation of mean ion energies and reaction
+     Carbon tetrafluoride, or tetrafluoromethane CF4 , and             rates, two parameters that are essential for the quantitative
+fluoroform, or trifluoromethane CHF3 , and their mixtures              description of a discharge.
+with argon as a buffer gas are of interest for plasma                       This research was aimed at investigating the transport
+processing.1 The mixture of these perfluorocabons with SF6             properties of the most abundant positive ion species in CF4
+has also been suggested for some high voltage applications.2           and CHF3 , and also for gaining further insight into the com-
+An appropriate modeling of these discharges and the quanti-            plex ion chemistry of the mixture of these two gases with Ar.
+tative evaluation of a plasma process demand proper consid-            Thus, the present article reports on the measurement of the
+eration of the electron and ion kinetics, the electron-impact          mobility of the two most abundant daughter ion species drift-
+processes, the gas-phase processes, and the surface                    ing in their parent gas, namely CF⫹ 3 in CF4 , and CHF2 in
+                                                                                                                                 ⫹
+
+reactions.3 Although still incomplete, there exists a good             CHF3 . Additionally, through a fast ion-molecule reaction
+amount of electron swarm and transport data,1,4 – 8 which con-         process between CF⫹                              ⫹
+                                                                                            3 and Ar, the mobility of C in Ar could
+trast with the scarcity on ion transport and ion-molecule re-          also be measured. The overall E/N range covered was 30–
+action parameters. Ion-molecule reactions in CF4 have been             700 Td (1 Td⫽10⫺17 V cm2 ).
+studied by Peko et al.,9 and the interaction of Ar⫹ with CF4
+by Fisher, Weber, and Armentrout.10 Useful measurements of
+the ion energy distributions and relative ion intensities in
+radio-frequency plasmas generated in CF4 and CHF3 and its
+                                                                       II. EXPERIMENT
+mixtures with Ar have been reported in Refs. 11 and 12.
+However, still little is known about the ion drift and ion-                 The ion drift tube with double mass spectrometry used
+molecule reactions in the parent gases of the several ionic            for the present measurements has been described previously
+species at swarm energies. Mobility data available for CF4             in detail in Refs. 19 and 20. The outstanding features of this
+are those due to Dutton et al.,13 who used a pulsed drift tube         system are its mass-analyzed ion source, movable over a drift
+without mass analysis. By indirect comparison with Langev-             distance z, from 0 to 38.70⫾0.05 cm at 13 discrete positions.
+in’s equation for the low field ionic mobility,14,15 they de-          Upon exit from the source, the ions are electrostatically fo-
+duced that the two ion species under question were CF⫺  3 and          cused through a small orifice into the drift space, in which
+F⫺ . In the absence of any mass-analyzed mobility data, the            these lose part or all of the excess translational energy over
+above mobilities have been used by other researchers,16 –18            the first 3.1 cm of drift space, by collisions with the neutrals.
+even though Langevin’s equation is essentially valid for neg-          This relaxation region is terminated by a pair of ion shutter
+ligibly small fields. We do not know of published data on ion          grids, intended for mobility measurements. After traversing
+transport in CHF3 . Knowledge of the ion mobility as a func-           the drift space, a sample of the drifting ions enters the ion
+                                                                       detection chamber into a second quadrupole mass spectrom-
+a兲
+ Electronic mail: jdu@fis.unam.mx                                      eter. The ionic pulses are routed into a multichannel scaler,
+
+0021-8979/2002/91(1)/36/4/$19.00                                  36                                © 2002 American Institute of Physics
+J. Appl. Phys., Vol. 91, No. 1, 1 January 2002                                                        E. Basurto and J. de Urquijo             37
+
+
+where a time of arrival spectrum 共TAS兲 is formed. The cal-
+culated mean, 具 t 典 , of the TAS can be expressed to a very
+good approximation as21
+    具 t 典 ⫽z/ v d ,                                           共1兲
+where z is drift distance, and v d is ion drift velocity. Thus,
+from Eq. 共1兲, a plot of 具 t 典 as a function of z would give a
+straight line, the slope of which is the inverse of v d . At least
+three consecutive ion source positions were used to obtain
+each v d . The ion abundance measurements were performed
+according to the procedure described in Ref. 22.
+                                                                     FIG. 1. Mobility of CF⫹     3 in CF4 共squares兲, 共Nz range: 0.39⫺4.61
+     The gas pressure in the drift chamber was controlled to         ⫻1016 cm⫺2 ), CHF⫹        in CHF3 , 共circles兲, 共Nz range: 0.53⫺2.87
+                                                                                            2
+within 0.3% of its set value by a servo valve coupled to a           ⫻1016 cm⫺2 ,兲 and C⫹ in Ar 共triangles兲 共Nz range: 0.79⫺4.61
+Baratron gauge with 0.05% full range accuracy. Drift dis-            ⫻1016 cm⫺2 .兲 The figures within the parenthesis indicate the range of the
+tances could be read from a graduated scale to an accuracy of        product of gas density and drift distance, Nz, used for measuring the mo-
+⫾0.5 mm. For a time uncertainty of ⫾1 ␮ s, the instrumental          bility of the corresponding ion. The drift distance z is measured between the
+                                                                     end of the relaxation region and the drift tube exit.
+errors in the measured drift velocity ranged typically be-
+tween 0.5% and 1.3%.
+     The gases with quoted purities CF4 共99.97%兲, CHF3
+共99%兲 and Ar 共99.999%兲 were injected from their cylinders            bility increases and, for the case of CF⫹
+                                                                                                             3 in CF4 , it shows a
+into the drift and ion source chambers without further puri-         well defined maximum for 200⬍E/N⬍300 Td, followed by
+fication. All measurements were taken over the ambient tem-          a decrease, due to the predominance of the repulsive part of
+perature range 293⫺310 K, for pressures between 5 and 100            the interaction potential. This behavior, however, was not
+mTorr (0.67⫺13.3 Pa).                                                observed for CHF⫹  2 in CHF3 .
+                                                                          Comparison of the average reduced mobility at low E/N
+                                                                     of the above ions with the so-called polarization limit
+III. RESULTS AND DISCUSSION                                          formula14,15 or Langevin’s equation for the zero-field reduced
+                                                                     mobility
+    The measured drift velocity v d was used to calculate the
+reduced mobility K 0 by the expression                                            13.56
+                                                                          K 00⫽              ,                                                共3兲
+                vd                                                                冑␣ d ␮ r
+    K 0⫽               ,                                      共2兲
+           N 0 共 E/N 兲                                               where ␣ d is the dipole polarizability of the neutral in Å 3 , and
+                                ⫺3
+where N 0 ⫽2.69⫻10 cm is gas density at standard tem-
+                           19                                        ␮ r is the reduced mass of the ion-neutral system, reveals that
+perature and pressure.                                               the measured reduced mobility of CF⫹      3 in CF4 , K 00⫽0.96
+     Most of the mobility measurements reported here are the         ⫾0.04 cm2 V⫺1 s⫺1 , is smaller by about 15% than its calcu-
+average of two or three values obtained at different gas pres-       lated value of 1.11 cm2 V⫺1 s⫺1 . The dipole polarizabilites
+sures; therefore, the final uncertainties ascribed to the mobil-     of CF4 and CHF3 were taken from Ref. 23. A deviation like
+ity data herein reported range between 2% and 4%.                    this is expected, since Langevin’s equation was formulated
+     The drift distances z, used for measuring the mobility,         for monoatomic systems at vanishingly low temperatures. As
+were in the range 4.72⫺14.02 cm, and in all cases these drift        stated above, the ion transport study of Dutton et al.13 reports
+lengths do not include the initial 3.1 cm relaxation region.         two unknown mass, negative ion mobilities, which were
+                                                                     indirectly ascribed to F⫺ and CF⫺      3 , with K 00 values of
+A. Ion mobilities
+                                                                     1.46 cm2 V⫺1 s⫺1 and 0.99 cm2 V⫺1 s⫺1 . Thus it appears that
+     The most abundant ion that was produced by electron             the mobility of their second negative ion, assumed to be
+impact on CF4 in the ion source was CF⫹       3 , followed by        CF⫺                                               ⫹
+                                                                         3 , is very close to the value of ours for CF3 , a fact that
+smaller amounts of CF⫹   2 and  CF⫹
+                                     共about 10%  that of CF⫹
+                                                           3 兲,      would be expected, provided that both positive and negative
+in fair agreement with what has been found from beam                 ionic species would not react strongly with the CF4 gas. For
+experiments.6,8 For the case of CHF3 , the most abundant ion         CHF⫹  2 drifting in CHF3 , one obtains a calculated value of
+species was CHF⫹  2 , also followed by smaller amounts 共about        K 00⫽1.33 cm2 V⫺1 s⫺1 , a value which is 2.4 times larger
+12% that of CHF⫹             ⫹         ⫹
+                   2 兲 of CF and CF3 , also in good corre-           than that measured here of 0.53⫾0.01 cm2 V⫺1 s⫺1 . The
+spondence with what is observed from beam methods.7,8                strong discrepancy between these two values may suggest
+Only the two majority ions for each gaseous component                that processes other than drift are influencing the measured
+could be studied in the drift tube.                                  drift velocity, like the formation of the unstable cluster
+     The mobilities of CF⫹                      ⫹
+                           3 in CF4 and of CHF2 in CHF3 are          (CHF2 ) ⫹ (CHF3 ), with a smaller average mobility than that
+shown plotted in Fig. 1 as a function of E/N. Both mobility          of CHF⫹  2 , but eventually destroyed and detected as CHF2 .
+                                                                                                                                     ⫹
+
+curves display a trend towards a fairly constant value at low        Another plausible mechanism could be proton transfer or, as
+E/N which, on purely qualitative grounds, results from the           discussed by Mason and McDaniel14,15 for the case of H⫹       3 in
+predominance of the attractive part of the interaction poten-        H2 , the initial drop in the mobility may be caused by a
+tial over its repulsive counterpart. At higher fields, the mo-       strong valence attraction between CHF⫹     2 and CHF3 .
+38         J. Appl. Phys., Vol. 91, No. 1, 1 January 2002                                                                   E. Basurto and J. de Urquijo
+
+
+                                                                                  TABLE I. Average abundance of minority ions from CF⫹
+                                                                                                                                     3 in Ar.
+
+
+                                                                                      Ion species            F⫹         ArH⫹         C2 F ⫹       CF⫹3
+                                                                                  Av. abundance 共%兲         20–3        10–5         7–3           3.5
+                                                                                   E/N range 共Td兲          30–95       30–200       30–140       60–150
+
+                                                                                  Obtained with 50 and 100 mTorr Ar, and 4.71 cm drift distance. Nz range:
+                                                                                  0.77⫺1.55⫻1016 cm⫺2 .
+
+
+
+                                                                                  70% at E/N⫽400 Td. We could not find any previous study
+                                                                                  on this process to help us discuss the possible reaction
+FIG. 2. Abundance of C⫹ 共triangles兲, CF⫹ 共circles兲, and Ar⫹ 共squares兲
+                                                                                  mechanisms. Concerning the formation of Ar⫹ from CF⫹       3 ,
+resulting from injecting CF⫹                                                      we believe that this is a nonresonant charge transfer process,
+                            3 into Ar as a function of E/N. Closed and open
+symbols represent ion abundance measurements at 50 and 100 mTorr Ar               with a threshold.
+pressure, respectively. The product of gas density and drift distance, Nz,            The reaction of CHF⫹   2 with Ar rendered fairly similar
+used for measuring these relative abundances was 0.77⫺1.55⫻1016 cm⫺2 .            results, as is shown in Fig. 3, that displays the variation of
+The drift distance z, is measured between the end of the relaxation region
+and the drift tube exit. For other minority ionic species see Table I.            the relative fragment ion abundance as a function of E/N.
+                                                                                  Thus we see that C⫹ is the most abundant ion for E/N
+                                                                                  ⬍70 Td, and that the situation reverses in favor of Ar⫹ for-
+    Also shown in Fig. 1 is the mobility of C⫹ in Ar, a                           mation for E/N⬎200 Td, becoming 100% efficient for
+measurement that was made possible after the impossibility                        E/N⬎400 Td. This finding is quite consistent with the mea-
+of measuring the mobility of CF⫹    3 in Ar. A fragment ion                       surement of Wang et al.11 for a rf plasma generated in a
+abundance described below indicated that substantial                              50:50 mixture of CHF3 and Ar at 5 mTorr, where the Ar⫹
+amounts of C⫹ were formed over the range 30⫺200 Td. A                             signal was found to be about ten times higher than that of
+comparison of the measured low-field reduced mobility of                          CHF⫹ 2 .
+C⫹ in Ar (K 00⫽3.40⫾0.08 cm2 V⫺1 s⫺1 ) with its calculated                            For the sake of clarity, the abundance of other minority
+value of 3.48 cm2 V⫺1 s⫺1 , shows a surprisingly small dif-                       ions was not plotted in Figs. 1 and 2. Tables I and II sum-
+ference of only 2.5%. Even though in this case the colliding                      marize the abundances of such minority ionic species formed
+system was monoatomic, we are still puzzled by the agree-                         by the reaction of CF⫹            ⫹
+                                                                                                         3 and CHF2 with Ar, respectively.
+ment. Certainly, C⫹ was formed at the very early portions of
+the drift space, and therefore some excess kinetic energy may                     2. Ar ¿ in CF 4 and CHF 3
+have influenced its mobility value from the outset.
+                                                                                       The attempts at measuring the mobility of Ar⫹ in both
+B. Ion conversion
+                                                                                  CF4 and CHF3 were unsuccessful, since it was found that a
+                                                                                  fast reaction between Ar⫹ and CF4 led to the formation of
+1. CF 3¿ and CHF 2¿ in Ar                                                         substantial amounts of CF⫹3 , as is shown in Fig. 4, where the
+    Figure 2 shows a measurement of the abundance of sec-                         share of other fragment ions is comparatively small. A pos-
+ondary ions formed by injecting CF⫹
+                                  3 in Ar at pressures of 50                      sible mechanism leading to the formation of CF⫹ 3 may be the
+and 100 mTorr. Thus one sees that for E/N⬍100 Td, C⫹ is                           dissociative charge transfer reaction
+the predominant ion, followed by smaller amounts of CF⫹
+                                                                                      Ar⫹ ⫹CF4 →CF⫹
+                                                                                                  3 ⫹F⫹Ar.                                            共4兲
+and Ar⫹ . This situation reverses for E/N⬎150 Td, where
+Ar⫹ takes over, and reaches a relative abundance of nearly                             This very efficient process observed in the present
+                                                                                  swarm experiment is quite consistent with the beam study of
+                                                                                  Fisher, Weber, and Armentrout,10 who determined a cross
+                                                                                  section of 2⫻10⫺14 cm2 at Ar⫹ energies of 0.02 eV, that
+                                                                                  decreases monotonically down to 3⫻10⫺15 cm2 at 2 eV, and
+                                                                                  then remains fairly constant up to their measurement limit of
+                                                                                  50 eV. Moreover, they also found that the reaction cross sec-
+                                                                                  tion was essentially equivalent to the total cross section over
+                                                                                  this range, thereby indicating that it occurred practically with
+                                                                                  100% efficiency at all kinetic energies up to 50 eV. In the
+                                                                                  absence of any published mobility data of Ar⫹ in CF4 , then
+
+
+FIG. 3. Abundance of C⫹ 共closed symbols兲 and Ar⫹ 共open symbols兲 result-           TABLE II. Average abundance of minority ions from CHF⫹
+                                                                                                                                       2 in Ar.
+ing from injecting CHF⫹ 2 into Ar as a function of E/N. The ion abundance
+measurements correspond to Ar pressures of 100 mTorr 共circles兲, 50 mTorr              Ion species        F⫹         CH⫹       ArH⫹      C2 F ⫹     CHF⫹2
+共triangles兲, and 25mTorr 共squares兲 The product of gas density and drift           Av. abundance 共%兲     3–15         3        8 –10       2          4
+distance, Nz, used for measuring these relative abundances was 0.39                E/N range 共Td兲      50–120      60–120    60– 400   80–100     60–140
+⫺3.60⫻1016 cm⫺2 . The drift distance z is measured between the end of the
+relaxation region and the drift tube exit. For other minority ionic species see   Obtained with 50 and 100 mTorr Ar, and 4.71 cm drift distance. Nz range:
+Table II.                                                                         0.39⫺3.60⫻1016 cm⫺2 .
+J. Appl. Phys., Vol. 91, No. 1, 1 January 2002                                                                  E. Basurto and J. de Urquijo             39
+
+
+                                                                              ACKNOWLEDGMENTS
+
+                                                                                   This work was supported by DGAPA-UNAM, Project
+                                                                              No. IN 113898. Thanks are due to A. Bustos and A. Gonzá-
+                                                                              lez for technical assistance.
+
+
+
+
+                                                                              1
+                                                                                 L. G. Christophorou and J. K. Olthoff, Adv. At., Mol., Opt. Phys. 44, 59
+                                                                                 共2000兲.
+                                                                               2
+                                                                                 L. G. Christophorou and J. K. Olthoff, NIST Technical Report No. 1425,
+                                                                                 1999.
+FIG. 4. Abundance of CF⫹ 共circles兲, CF⫹                       ⫹
+                                          2 共squares兲, and CF3 共triangles兲
+                                                                               3
+                                                                                 T. Kimura and K. Ohe, Plasma Sources Sci. Technol. 8, 553 共1999兲.
+products from injecting Ar⫹ into CF4 as a function of E/N. These data were     4
+                                                                                 J. de Urquijo, I. Alvarez, and C. Cisneros, Phys. Rev. E 60, 4990 共1999兲.
+obtained at a single pressure of 25 mTorr. The product of gas density and      5
+                                                                                 M. Kushner and D. Zhang, J. Appl. Phys. 88, 3231 共2000兲.
+drift distance, Nz, used for measuring these relative abundances was 0.39      6
+                                                                                 L. G. Christophorou, J. K. Olthoff, and M. V. V. S. Rao, J. Phys. Chem.
+⫻1016 cm⫺2 . The drift distance z is measured between the end of the relax-      Ref. Data 25, 1341 共1996兲.
+ation region and the drift tube exit.                                          7
+                                                                                 L. G. Christophorou, J. K. Olthoff, and M. V. V. S. Rao, J. Phys. Chem.
+                                                                                 Ref. Data 26, 1 共1999兲.
+                                                                               8
+                                                                                 L. G. Christophorou and J. K. Olthoff, J. Phys. Chem. Ref. Data 28, 967
+we resort to a rough calculation from Eq. 共2兲, that leads us to                9
+                                                                                 共1999兲.
+estimate that—order of magnitude—the Ar⫹ energies in our                         B. L. Peko, I. V. Dyakov, R. L. Champion, M. V. V. S. Rao, and J. K.
+                                                                                 Olthoff, Phys. Rev. E 60, 7449 共1999兲.
+experiment ranged between 0.02 and 2 eV, thereby confirm-                     10
+                                                                                 E. R. Fisher, M. E. Weber, and P. B. Armentrout, J. Chem. Phys. 92, 2296
+ing that the process that we observed operated with an effi-                     共1990兲.
+ciency close to 100%, in agreement with Jarvis et al.,24 who                  11
+                                                                                 Y. Wang, M. Misakian, A. N. Goyette, and J. K. Olthoff, J. Appl. Phys. 88,
+found this reaction to proceed with 100% efficiency at 300                       5612 共2000兲.
+                                                                              12
+                                                                                 J. K. Olthoff and Y. Wang, J. Vac. Sci. Technol. A 17, 1552 共1999兲.
+K. Additionally, also in coincidence with these authors, we                   13
+                                                                                 J. Dutton, A. Goddings, A. K. Loucas, and A. W. Williams, in Proceedings
+found no trace of the CF⫹ 4 species, since it is a predissocia-                  of the XVIII International Conference on the Physics of Ionized Gases,
+tive state leading to CF⫹
+                        3 ⫹F.                                                 14
+                                                                                 Swansea, 1987, edited by W. Terry Williams, p. 20-1.
+                                                                                 E. W. McDaniel and E. A. Mason, The Mobility and Diffusion of Ions in
+                                                                                 Gases 共Wiley, New York, 1988兲.
+IV. CONCLUSIONS                                                               15
+                                                                                 E. A. Mason and E. W. McDaniel, Transport Properties of Ions in Gases
+                                                                                 共Wiley, New York, 1988兲.
+     Thus we have reported three useful mobility sets of data                 16
+                                                                                 A. Kono, M. Haverlag, G. M. W. Kroesen, and F. J. de Hoog, J. Appl.
+for ions that play important roles in CF4 and CHF3 dis-                          Phys. 70, 2939 共1991兲.
+                                                                              17
+charges, and their mixtures with Ar. It is hoped that these                      N. V. Mantzaris, A. Boudouvis, and E. Gogolides, J. Appl. Phys. 77, 6169
+mobilities will be useful when inserted into the discharge                       共1995兲.
+                                                                              18
+                                                                                 V. N. Volynets, A. V. Lukyanova, A. T. Rakhimov, D. I. Slovetsky, and N.
+models, which hitherto have relied upon either educated                          V. Suetin, J. Phys. D 26, 647 共1993兲.
+guesses, or comparison with unkown-mass ionic mobilities.                     19
+                                                                                 J. de Urquijo, I. Alvarez, C. Cisneros, and H. Martinez, J. Phys. D 23, 778
+It was found that the above ion–molecule systems obey a                          共1990兲.
+                                                                              20
+fairly complex reaction scheme, as reflected by the abun-                        E. Basurto, J. de Urquijo, I. Alvarez, and C. Cisneros, Phys. Rev. E 61,
+                                                                                 3053 共2000兲.
+dance measurements reported here. Thus, a more systematic                     21
+                                                                                 J. de Urquijo, I. Alvarez, C. Cisneros, and H. Martı́nez, Int. J. Mass.
+measurement of ion abundances under several conditions of                        Spectrom. Ion Processes 154, 25 共1996兲.
+                                                                              22
+gas density and drift distance is called for. Moreover, ana-                     E. Basurto, J. de Urquijo, C. Cisneros, and I. Alvarez, Phys. Rev. E 63,
+lytical methods need be generated to obtain reaction rates for                   016407 共2001兲.
+                                                                              23
+                                                                                 CRC Handbook of Chemistry and Physics, 75th ed., edited by D. R. Lide
+at least the major reactions. In this respect, the beam studies                  共CRC, Boca Raton, 1994兲, p. 10–198.
+like that of Fisher, Weber, and Armentrout10 should be en-                    24
+                                                                                 G. K. Jarvis, R. A. Kennedy, C. A. Mayhew, and R. P. Tuckett, Int. J.
+couraged.                                                                        Mass. Spectrom. 202, 323 共2000兲.
+

@@ -1,0 +1,7 @@
+sample,batch,mask_height_nm,mask_diameter_nm,CHF3_sccm,O2_sccm,Ar_sccm,rf_power_W,pressure_ubar,tio2_etch_rate_nm_min,cr_etch_rate_nm_min,tio2_to_cr_selectivity
+Ra1,Ra,100,535,50,5,30,200,50,68,3.7,18
+Ra2,Ra,100,535,50,5,30,165,50,58,3.2,18
+Ra3,Ra,100,535,50,5,30,100,50,30,1.7,18
+Ra4,Ra,100,535,50,5,30,200,10,30,8.3,4
+Rb1,Rb,100,345,50,5,30,200,50,77,4.1,19
+Rb2,Rb,100,345,50,5,0,200,50,73,3.5,21

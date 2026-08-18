@@ -1,0 +1,518 @@
+JOURNAL OF APPLIED PHYSICS                                              VOLUME      92, NUMBER      3                                      I AUGUST 2002
+
+
+
+Measuredcross sections and ion energies for a CHF3discharge
+          B. L. Pekoa) and R. L. Champion
+          Department    of Physics,   College   of William and Mary, Williamsburg,       Virginia 23187
+          M. V. V. S. Raob) and J. K. Olthoff
+          Electricity Division, Electronics and Electrical Engineering         Laboratory,   National   Institute   of Standards
+          and Technology, Gaithersburg, Maryland 20899
+
+          (Received 4 March 2002; accepted for publication 10 May 2002)
+          Trifluoromethane (CHF3) is used in semiconductor plasma processing chambers to achieve
+          high-etch selectivity of an oxide layer over a silicon substrate. Such surface etching is governed by
+          the ion and molecule fluxes near the surface, the concentrations of which are dependent upon
+          species interactions in and their transport through the plasma. In order to assist in the interpretation
+          of ion flux measurements and to provide fundamental data required for plasma modeling, we report
+          the first total cross sections for significant ion-molecule reactions occurring in CHF3 discharges. The
+          reactions studied include collision-induced dissociation for CFt on CHF3, dissociative charge
+          transfer for CFt and F+ on CHF3, and electron detachment from F- on CHF3. Collision energies
+          range from a few to a few hundred electron volts. In addition, ion-flux energy distributions and
+          relative ion intensities have been measured and are presented for dc towns end discharges with EIN
+          values ranging from 5 X 10-18 to 25 X 10-18 V m2 [5 to 25 kTd]. The townsend discharge results
+          are qualitatively interpreted using the cross-section measurements. @ 2002 American Institute of
+          Physics. [DOl: 10.1063/1.1491276]
+
+
+
+I. INTRODUCTION                                                                 the results of two distinct experiments. From the first experi-
+                                                                                ment, we present measured absolute cross sections for ion-
+     Trifluoromethane is a common feedgas in materials pro-
+                                                                                molecule reactions typically found in CHF3 discharges. The
+cessing applications because it is relatively inert and disso-                  reactions studied include: dissociative charge transfer (DCT)
+ciates readily into chemically reactive ionic and neutral spe-
+                                                                                for collisions of F+ and CFt with CHF3, collision-induced
+cies in a discharge environment. Other positive properties of
+                                                                                dissociation (CID)for CFt impacting CHF3, and collisional
+CHF3 include its short atmospheric lifetime (250 years)1 and                    electron detachment (ED) for F- on CHF3. The relative col-
+the fact that high-etch selectivities for Si02 over silicon and                 lision energy range investigated is 20-400 eV, which is com-
+photoresist can be achieved.2-7 Because the successful fabri-
+                                                                                parable to ion energies found in discharge environments.
+cation of micro devices depends on a delicate balance of etch-
+                                                                                From the second experiment, we present relative ion-flux
+ing and deposition, it is of paramount importance to under-                     intensities and kinetic-energy distributions for ions generated
+stand the physical and chemical interactions that drive these
+                                                                                in dc townsend discharges in CHF3' The electric field-to-gas
+processes. Numerous experiments have been conducted that
+                                                                                density ratio, EIN, range for these discharges is 5
+focus on varying discharge parameters, such as power, pres-                     X 1O-18_25X 10-18 Vm2 [5-25 kTd]. The ion data from
+sure, and admixture concentration, in order to optimize etch
+                                                                                the towns end discharge experiments are used as an example
+rate and selectivity.3-9 In select instances, modeling of the
+                                                                                of how discharge data can be more fully interpreted in light
+observations is done.IO-12This is a difficult task because,                     of the cross-section measurements.
+despite the fact that much work has been done to characterize
+electron interactions with CHF3,13-14almost no quantitative
+information is available concerning ion-molecule interac-                        II. EXPERIMENTALMETHODS
+                                                                                                                                                         ~-
+tions that occur in these discharges. Such data are essential
+because of the important role that secondary products from                             The experimental arrangements and operating conditions
+ion-molecule reactions play in the etching and deposition                        employed for the cross-section and ion-flux measurements
+                                                                                 are identical to those used in our study of CF4
+processes. Owing to this lack of data, plasma models may
+employ estimates of cross-section values, 10or in some cases                     discharges.15-17Only a brief description of each experiment
+                                                                                 will be provided here.
+even ignore potentially important ion-molecule reactions.
+     In the same spirit as our previous work involving CF4,]5                          For the cross-section experiments, complementary elec-
+we add to the minimal amount of ion-molecule interaction                         trostatic trapping cell and crossed-beam techniques were
+data available for plasma processing models by presenting                        used. The primary ions were formed in a low-pressure (-1.3
+                                                                                 Pa) arc discharge source with the source gas comprised of a
+                                                                                 9: I, Ar:CF 4 mixture. After extraction and mass analysis the
+a)Present address: Department of Physics and Astronomy, University of Den-
+                                                                                 primary ions were focused into an electrostatic trapping cell
+ ver, Denver, CO 80208-2238; electronic mail: bpeko@du.edu
+b)Present address: NASA/Ames Research Center, Moffet Field, CA 94035-            for the measurement of total cross sections for CID, ED, or
+  1000.                                                                          the summed cross section for all DCT reaction channels. For
+
+0021-8979/2002/92(3)/1657/6/$19.00                                           1657                                     @ 2002 American Institute of Physics
+
+
+    Downloaded 07 Oct 2002 to 129.6.64.63. Redistribution subject to AlP license or copyright, see http://ojps.aip.org/japo/japcr.jsp
+1658     J. Appl. Phys., Vol. 92, No.3,   1 August 2002                                                                                                  Peko at al.
+
+                                                                                     28
+the electron detachment cross sections, the free electrons
+                                                                                     26
+produced were uniquely detected by isolating and confining
+                                                                                     24
+them to a small radius of gyration with an axial magnetic
+                                                                                     22
+field. This same scheme was used to measure the target ion-                          20
+ization cross section for the p+ and CP; primaries, which                            18
+was found to be negligible (:$0.01 A2) for both primary ions.
+In order to determine the cross sections for each individual                                  '+
+                                                                                                                                       <Y
+DCT reaction channel the primary ions were intersected or-                           12-1 +.:I:"+.+..+..+..~
+                                                                                     10                                   +
+thogonally with a beam of CHP3. Product ions with minimal
+                                                                              ~8                   + +                  ... ... +.+..+         +            +
+kinetic energy were extracted, mass analyzed, and subse-                      t;'7
+quently counted. Prom these values, branching ratios were                                                       CF+
+                                                                                                                  2
+calculated. The relative branching ratios were then combined                              "
+
+
+
+
+with the total absolute DCT cross sections found with the                                      ~
+trapping cell to determine the cross section for each DCT                            4-1 Q. .            '-a-.-s.,, 0     e_ .-e_--'.'cr
+                                                                                                                                   0           D D. _,_,_.{]
+reaction channel. The collision-induced dissociation and                                                            If                ...0 []
+                                                                                                                                           0.--0", 0...8"'0
+                                                                                          .                               0" 0...0
+electron detachment cross-section measurements have uncer-
+tainties of :!:15% while uncertainties for dissociative charge-
+transfer measurements are :!:25%.                                                                        1L~=:.A                  .A.'lJ...l>--A ,...A.."
+                                                                                                                                         C1-IF
+     Por the townsend discharge experiments, the ion-flux en-
+ergy distributions and relative ion intensities were measured                        o
+                                                                                                   50     100           ISO        200       250      300
+in a parallel plate discharge cell which has been described in
+detail elsewhere.15,18,19Pressures for these discharges in                                                               E~1(eV)
+CHP3 ranged from approximately 5 to 20 Pa with discharge               FIG. 1. Dissociative charge-transfer cross sections for F+ +CHF3 presented
+currents kept below -100 /LAto minimize space-charge ef-               as a function of relative collision energy. The summed cross section for
+fects. Ions formed in the discharge were extracted through a           reactions I-lOin Table I is also presented.
+0.1 mm hole in the cathode and subsequently energy and
+mass analyzed.18 This apparatus can detect positive and
+negative ions, however P- was the only negative ion ob-                energy range studied. In fact, the competing channels for
+served, exhibiting a weak signal compared to the positive              dissociative charge transfer yielding CP; or CHP; (Reac-
+ions. The ion-flux energy distributions presented here were            tions 1 and 6, respectively) are exothermic, and have very
+derived 18,19from the kinetic-energy distributions which were          small cross sections; such has been observed before for exo-
+determined by setting the quadrupole mass analyzer to trans-           thermic dissociative charge transfer for p+ /CP4 system at
+mit ions of a certain mass and then scanning the potential of          similar collision energiesY In the previous studies of CP4,
+the analyzer. The relative ion intensities of the ion fluxes           however,CP; rather than CP+ was the dominant ion pro-
+were determined by integrating the ion-flux energy distribu-           duced. Also, the cross section for CP;+ production (Reac-
+tions for each ion at each EIN. Uncertainties for the ion-flux         tion 10) is 0.5 A2 here compared to roughly 5 A2 for the CP4
+energy distributions and relative ion intensities presented            target; both processes are endothermic by -21 eY. Clearly,
+here are estimated to be :!:3%.                                        there is much that remains to be understood regarding these
+                                                                       reactions. Pinally, in Pig. 1, proton production increases
+III. RESULTS AND DISCUSSION                                            slightly as CHP+ production decreases suggesting CHP+ is
+                                                                       produced as an excited molecular ion that may further disso-
+A. Cross sections                                                      ciate into H+ and CP. The energetic threshold for this second
+                                                                       dissociation is -17.2 eY.
+1. r-+CHF3
+     Presented in Pig. 1 are dissociative charge-transfer cross
+sections plotted as a function of relative collision energy for        2. Ct1+CHF3
+p+ on CHP3. Two points clearly illustrated in Pig. 1 are the                Measured DCT cross sections for CP; +CHP3 are shown
+Cp+ is the ion most likely to be produced from dissociative            in Pig. 2. The product ions CHP; and CP+ are most prob-
+charge transfer for p+ impinging on CHP3, and that the                 able. Energetically, Reaction 11 is most favorable, however,
+summed cross section for p+ destruction is large, -23 A2 on            the cross section for producing CP; is small. The cross sec-
+average for the energy range studied. Por clarity, the cross           tions for producing all the other ions (Reactions 12, 14, 16,
+sections for some product ions have been omitted from Pig.             and 17)are also negligible (:$0.5 A2) over the energy range
+1. A complete list of all DCT reaction pathways, as well as            studied and are not shown. Unlike the results for the p+
+all reaction channels studied here is given in Table 1. The            projectile, no H+, P+, or doubly charged ions were observed.
+cross sections for the DCT channels not presented in Pig. 1            The summed cross section is also considerably less than that
+(Reactions 1, 4-6, 8, 10) each are less than 2 A2 and ap-              for the p+ projectile and increases sharply as a function of
+proximately independent of collision energy. Even though               collision energy. This behavior is similar to the CP4 results. 15
+the production of CP+ is quite endothermic (-3.4 eV), the                   Cross sections were measured for collision-induced dis-
+cross section exceeds that of the competing thermoneutral              sociation (CID) for these reactants (Reactions 8-21). They
+channel yielding CP; by a factor of three over the entire              were all found to have the same energy-independent magni-
+
+   Downloaded 07 Oct 2002 to 129.6.64.63. Redistribution subject to AlP license or copyright, see http://ojps.aip.org/japo/japcr.jsp
+J. Appl. Phys., Vol. 92, No.3, 1 August 2002                                                                                                               Peko et al.                   1659
+
+TABLE
+    I. Reaction channel5 relevant to thi5 work and their ground-5tate
+energetics are listed. The majority of the products follow from dissociative                  8
+chargetransfer. The products arising from collision-induced dissociation of
+CFj are indicated in curly brackets.                                                          7
+Reaction                                                  Endothermicity"
+Number          Reactants              Products                 (eV)                          6
+     1        F+ +CHF3           F+CFj +H                       +2.7
+     2                           F+CFi+HF                       -0.2                          5                                                                   CHF+
+                                                                                                                                                                     2
+     3                           F+CF++HF+F                     -3.4
+                                                               -15.0
+                                                                                        -..                                             .+      +..+.+.. +
+                                                                                        '-' 4
+     4                           F+C+F2+HF                                                                                       y'"                           .-t.+.
+     5                           F+CHF2+F+                     -13.0
+                                                                                         b                 .+.,+.                                                       ....
+     6                           F+CHFi +F                      +1.1
+                                                                -2.4                          3~ AlE +..:1-.                                               cr+              ++
+     7                           F+CHF++F2                                                            .. .".                                                                     ...
+     8                           F+CH++F2+F                    -16.6                                 ...{-}-                                                Ja~
+     9                           F+H++CF3                       -1.9                          2                                                         .Ej"EI
+                                                               -22.5                                                                            !3,.E:r
+    10                           F- +cFi+ + HF                                                                                           ,g-"
+                                                                -6.2                                                             0--"
+    11         CFj +CHF3         CF3+CFj +H                                                                                [J"
+    12                           CF3+CFi+HF                     -8.6                                               c( .                                        CF +
+    13                           CF3+CF++HF+F                  -11.9                                         eJ u                                                J
+                                                               -18.0                                 ..a.~",=,=_.~-e-oe"-"o,,_o.._,-,.                 -:::-
+                                                                                                                                                          ~
+    14                           CF3+C++F2+HF
+                                                                -7.8
+                                                                                              o'-I!!rd~          '<;T                           'V 0" -.::r~'~
+    15                           CF3+CHFi +F                                                      m                    ~                ro       W 100                           ~
+    16                           CF3+CHF++F2                   -10.8
+    17                           CF3+CH++F2+F                  -24.5                                                                   Ere'(eV)
+    18                           {CFi +F}+CHF3                  -6.2
+                                                                -7.4           FIG. 2. Absolute       cross sections       for select DCT channels                  for the CFj +CHF3
+    19                           {CF++F2}+CHF3
+    20                                                         -12.3           system. The total cross section             for all DCT processes                 for these reactants       is
+                                 {F++CF2}+CHF3
+                                                               -15.1           also presented.
+    21                           {C++F+F2}+CHF3
+    22         F- +CHF3          F+CHF3+e                       -3.4
+
+3Endothermicities listed were determined from data in Ref. 14 and refer-
+ encescited therein. Positive values indicatean exothermicreaction.            in the discharge. It is reasonable to assume, however, that the
+                                                                               differences between the two mass spectra are partially attrib-
+                                                                               utable to ion-converting collisions experienced by ions as
+                                                                               they traverse the discharge. Interestingly, unlike the CF4, no
+tude, viz. -6 A2 for 20<Ere1<225 eV, and are not shown
+                                                                               doubly charged ions are observed in either mass spectrum.
+here. The CID channels producing C+ and F+ could not be
+                                                                                    Clearly missing in Fig. 4(a) is the presence of F+ in the
+distinguished with the current experimental arrangementl5
+due to the similar ion mass. Thus, the summed cross-section                    discharge, it was not observed for any EIN investigated here.
+values for Reactions 20 and 21 is determined to be -6 A2.                      This is directly attributable to the large (~20 A2) DCT cross
+                                                                               sections for F++CHF3 (Reactions 1-10) that remove F+
+There was no evidence for the production of free electrons
+                                                                               ions as they traverse the discharge. Additionally, the total
+which would accompany ionization.
+                                                                               cross section for the formation of F+ ions by DCT (Reaction
+                                                                               5) is small (:$1 A2), and the cross sections for converting
+3. F-+CHF3
+                                                                               CF; to F+ and/or C+ via CID (Reaction 20) are also rela-
+     Electron detachment cross sections for F- +CHF3, pre-
+sented in Fig. 3 as a function of relative collision energy,
+start at the electron affinity of F and increase rapidly with                                 14.0
+collision energy. This agrees qualitatively with similar mea-
+surements for F- striking CF4 (Ref. IS) and rare gas                                          12.0
+                                                                                                                                                                 ,.,.
+targets.20These results indicate that electron detachment may
+be a significant contributor to the neutral fluorine population
+in a CHF3 etching discharge.
+                                                                                              10.0                                                             .
+                                                                                                                                                               "
+B. Townsend        discharge      experiments
+                                                                                        -..
+                                                                                              8.0
+                                                                                                                                                  ~,'
+                                                                                                                                                ,..
+                                                                                       ~b 60.                                              ,.
+     The mass spectrum for positive ions striking the cathode
+                                                                                                                                       ~
+                                                                                                                                         ,
+of a CHF3 discharge at 7.5 X 10- 18 V m2 is compared in Fig.
+4(a) to that produced by 70 eV electrons colliding with
+                                                                                              4.0                             I.
+CHF3y,14 Again, the only negative ion observed for all EIN                                    20                           ,,"
+values was F- which exhibited a weak signal intensity, near                                                            ,'.
+the threshold sensitivity for the apparatus. Because the actual                               0.0
+                                                                                                                 ..-
+electron energy distributions for townsend discharges in                                              I                                   '10                                      100
+CHF3 at these EIN values are unknown, it is an oversimpli-                                                                             Erel(eV)
+fication to assume that the electron-impact mass spectrum is
+indicative of the relative distribution of positive ions formed                FIG. 3. Electron detachment cross sections for collisions of F- and CHF3.
+
+
+    Downloaded 07 Oct 2002 to 129.6.64.63. Redistribution subject to AlP license or copyright, see http://ojps.aip.org/japo/japcr.jsp
+1660         J. Appl. Phys.. Vol. 92. No.3.             1 August 2002
+                                                                                                                                                                      Peko et al.
+
+
+             OJ                                                                                          or is converted into other ions as the result of dissociative
+                                                                                                (a)      charge transfer with CHF3' Cross sections for these processes
+    -In 0.4                                            c:::::::::J    r,:kclron    hnl'l:\Ct             remain to be determined.
+       :::                                             _              TownselldDischarge
+       (!)                                                                                                    Conversely, Fig. 4(a) suggests that collisional processes
+             0.3 '
+    .s                                                                                                   exist which lead to the formation ofCHFi, CHF+, CF+, and
+     0;>
+    ....     0.2                                                                                         C+. This is in agreement with the cross section data shown in
+                                                                                                         Figs. 1 and 2, where all but C+ have cross sections greater
+             0.1                                                                                         than 2 A2 resulting in their formation. The summed cross
+                                                                                                         section for producing CF+ from DCT and CID approaches
+             0.0                                                                                         20 A2. For many discharge environments CF+ concentration
+                          CI'.\+CAF,'CF/ cm:" CF+ CH' '1'" C'                                  H+
+                                                                                                         is observed to be high.8,22-24The cross section for C+ pro-
+                                                                                                         duction from DCT exclusively is 1 A2, but is production
+                                                                                                                                                   ~
+
+
+
+                                                                              "T
+                                                                                                         from CID of CF~ (reaction 20 + 21) has an upper limit of ~6
+             0.5 rr                       .                                                     (b)      A2.
+       en                  ~CBFJ.~                                                                            The observed relative ion intensities in the townsend dis-
+    :€
+    E
+       If)
+     :::     0.4   ~
+             0.3 I",...~~~ ,
+                                 ~__._
+                                     .,               ,......                     ~~:~
+                                                                                                         charge, as a function of EIN, can also be discussed in terms
+                                                                                                         of the measured ion-molecule cross sections. In Fig. 4(b), the
+    .E                                                                                                   CF+ flux is independent of EIN corresponding well to the
+      <I)
+      ;>     0.2
+    ';:1                                                                                                 energy-independent CID and combined DCT cross sections
+      ro
+    '0                                                                                                   for its production (Figs. 1 and 2). The same can be said for
+    ~
+             0.1                                                                                         the relatively constant abundance of C+ ions for 10
+                      r../:~!':::~~~:;~;~~~'~~~~~~.~~                                                     X 10- 18 V m2;5EIN;5 10- 18 V m2. The slight decrease in
+                       ~;;:':-""//CHF.
+                                    I                 I .
+               o I I                                                                                     C+ intensity at lower EIN is most likely due to an anticipated
+                                     10              15                       20                    25   reduction in the relevant CID cross section (Reaction 21) at
+                                              EIN (10.18 V rn2)                                           energies below 20 eV as it approaches its energetic thresh-
+                                                                                                          old. The fact that CHF; is the dominant ion observed for
+FIG. 4. (a) Comparison of standard electron-impact mass spectrum for
+                                                                                                          nearly all EIN suggests the cross section for the destruction
+CHF3 for 70 eV electrons, with the mass spectrum of positive ions samples
+from a CHF3 townsend discharge with E/N=7.5X 10-18 Vm2. The two                                           of this ion, once formed, is relatively small and that other
+mass spectra are normalized to have equal total signals. (b) The relative                                 pathways may exist that produce this ion. The decrease in
+intensities of the five dominant ions sampled from CHF3 townsend dis-                                     CHFi flux with increasing EIN is consistent with decreasing
+charges as a function of E/N.
+                                                                                                          production of CHFi above 100 eV (see Fig. 2), and may
+                                                                                                          suggest increasing destruction mechanisms with increasing
+                                                                                                          collision energies. Additional collisional studies involving
+tively small, viz. 6 A2. Thus, the net effect of ion-molecule                                             CHFi would be useful. The qualitative behavior of the CF~
+collisions in CHF3 results in a reduction in F+ ion flux. This                                            flux as a function of EIN is difficult to explain because the
+is similar to that observed previously for CF4.15                                                         production cross sections measured here are nearly constant
+     Comparing the mass spectra in Fig. 4(a) also suggests                                                as a function of collisional energy. The decrease of the CF~
+that collisional processes exist that destroy CF~ in a CHF3                                               population with decreasing EIN suggests that CF~ is readily
+discharge. This observation is supported by the cross-section                                             converted or neutralized at low-collision energies and/or that
+measurements presented in Sec. III A 2. Specifically, the                                                 CF~ production decreases at lower-collision energies. Disso-
+summed cross section for collision-induced dissociation of                                               ciative   ionization   of CHF 3 to CF   ~+ H is exothermic     by more
+CF~ is ~18 A2 (Reactions 18-21), and the summed DCT                                                      than 15 eV and the summed cross section for the production
+cross section for CF~ + CHF3 is                            ~         8 A 2 at the highest-               of CF~ from DCT (Reactions 1 and ll)is 2 A2 for all rela-
+collision energies (Fig. 2 and Reactions 12-17). Only two                                                tive collision energies. Furthermore, the summed cross sec-
+reaction channels studied here (Reactions 1 and 11) result in                                            tion for the destruction of CF~ via DCT (Reactions 11-17)
+a formed CF~, and their combined cross section is less than                                              decreases steadily as the relative energy is decreased, and
+~1.5A2.                                                                                                  CID cross sections are expected to decrease for Erel<20 eV.
+     Two other species that can be surmised to be destroyed                                                   Ion-flux energy distributions for the four most abundant
+by ongoing ion-molecule reactions in the discharge are CF;                                               ions in the townsend discharge are presented in Fig. 5 for the
+and H+. The cross sections for producing H+ are nonzero,                                                 two EIN limits investigated here. All ion energy distributions
+~2.5A2, thereby suggesting a potential increase in H+ flux                                               exhibit a linear decay with increasing ion energy on the
+in the discharge. However, protons are highly reactive in                                                5 X 10-18 V m2 semilog plots. This behavior indicates that
+discharge environments, and collisional interactions that                                                the ions are in equilibrium, i.e., each ion undergoes many
+would deplete free protons are expected to exist. The                                                    collisions before striking the cathode. 18,19Similar conditions
+summed cross section for CF; production (Reaction 2+ 12                                                  exist for CHFi and CF~ at 25X 10-18 Vm2, but CF+ and
+ + 18) is greaterthan loA 2, one of the largest measured for
+                                 ~
+                                                                                                         C+ exhibit nonlinear dependencies indicative of nonequilib-
+a particular species. A plausible explanation as to why a cor-                                           rium conditions. This suggests that few ion molecule colli-
+responding increase in CFi flux is not observed in the                                                   sions exist for these lighter molecules that result in signifi-
+townsend           discharge     is that CF        i further dissociates via CID                         cant energy loss or destruction.
+
+    Downloaded 07 Oct 2002 to 129.6.64.63. Redistribution subject to AlP license or copyright, see http://ojps.aip.org/japo/japcr.jsp
+J. Appl.           Phys., Vol. 92, No.3,             1 August                  2002                                                                                           Peko et al.    1661
+
+
+                         EIN= SXIO.J~Vrrr                                                 EiN'" 25x 1O-I~
+                                                                                                        Vm2
+                            P-I7.7Pa                                                          P-6.11':1                                 In addition to the simple dc discharge discussed here, the
+                            V,,=442V                                                          Vd=7S6V                              current cross-section measurements support observations
+       10s                                     CHF +                                                                               made in more complex plasmas. For example, Haverlag and
+                                                  2                  104
+                                                                                                                                   coworkers 10report that CFx radical densities are larger near
+ .~
+ ~ 104                                                        .~
+                                                              S I~                                                                 the electrodes of a capactively coupled CHF3 plasma than in
+ ~ Jo-\                                                       ~                                                                    the glow region. They suggest that this density gradient is
+ o     102                                                     ,g    102
+                   (a)                                                                                                             due to inelastic ion-molecule collisions-not surface recom-
+       101
+              o             100         200             300                     0         200     400         600           800   bination or sputtering--occurring in the plasma, with cross
+                                                                                                                                   sections for dissociative charge-transfer and collision-
+
+
+
+
+                                                                                ~
+       IOs
+                                               cr+                   10~                                        cr+
+                                                                                                                                   induced dissociation reactions, among others, ranging from
+ .~. 104                                                      .~
+ ~                                                             ~ I~                                                               0.1 to 100 A2. Snijkers et al.II have reported that these same
+ .5
+  " 10~                                                       .sc.                                                                types of reactions occur in rf capacitively coupled CF4dis-
+ .,g     .,                                                   .2     102
+       10-         (b)                                                              (I)                                            charges. The cross sections here support Haeverlag's analy-
+       10'                                                           101                                                £          sis. The total cross section for the production of CF3 via the
+              o             100         200             300                    0          200     400         600           800
+                                                                                                                                   ion-molecule reactions measured here (Reactions 9 and 11-
+       10,                                     CF ) +                10' I'\..                                  CF ) +             17) is on the order of 14 A2 for Erei;:::100 eV. The only
+ >,
+
+ 5
+ e:
+
+ g,
+       10~
+                   \       '\.
+                                                              ~
+                                                              ";;
+
+                                                              .s~
+                                                               g 102
+                                                                     10"
+                                                                           ,                                                      reaction studied here that would produce a CF2 radical is
+                                                                                                                                  CID (Reaction 20) for which the cross section is -6 A2.
+                                                                                                                                  There are many possible reactions that could produce CF2
+       10- (c)                "'~"
+                             ...\                                         (g)                     ~.....                          which were not studied here, e.g., the neutralization of CF;
+       101                                                           IOJ1'-                 .      .!!t: ..
+              (I            100         200             300                    0          200     400         600           800   from dissociative charge transfer, for which a substantial
+       10'                                     C'
+                                                                                                                    +             cross section has been proposed elsewhere in this article. No
+ >,                                                           ~      JO~                                                          ion-molecule reactions investigated here produced CF, al-
+
+                                  ,
+                                                                               CSJ
+ .~ 10~                       ~                               .~                                                                  though these may exist even though no information is cur-
+ i;                                                           c
+ -;;                                   ~                      -;; 102                                     ..                      rently available for such cross sections.
+ o     IO:!                                -~.!!
+                                                                                                                                        The mass distributions of positive ions generated in in-
+                   <d)                        !t                                    (h)~..
+       101
+              o             100       200               300
+                                                                     101
+                                                                               0          200      400    600               800
+                                                                                                                                  ductively coupled plasmas and other discharges are typically
+                            IonEnergy(eV)                                                    la1 Energy(eV)                       similar to those for electron impact ionization of the feed
+                                                                                                                                  gas.21There are however examples where this is not the case.
+FIG. 5. Ion-flux             energy     distributions         for positive                ions sampled    from CHF3
+                                                                                                                                  In agreement with most observations for CHF3 plasmas,
+townsend           discharges        with E/N= 5 x 10-18                   V m2an d 25X 10-18                  V m2.
+                                                                                                                                  Kirsme et al.8 found that for a high-power, low-pressure
+                                                                                                                                   (1000 W, I m Torr) electron cyclotron resonance discharge in
+                                                                                                                                  CHF3 that CF+ was the dominant ion, while the concentra-
+                                                                                                                                  tion of F+ is "small." This is consistent with the townsend
+     The corresponding mean energies (not presented) and                                                                          discharges studied here where no F+ was detected and the
+the maximum ion energy for the distributions, with the ex-                                                                        CF+ flux was comparable to CHF; at high EIN. This sug-
+ception of H+, increase with decreasing mass suggesting that                                                                      gests that the cross sections for the destruction of F+ and the
+the magnitude of the collisional cross sections for ion energy                                                                    formation of CF+ are of similar importance in these two very
+loss is smaller for less massive ions. The mean energies                                                                          different CHF3 discharges.
+range from 10 to 70 eV for EIN=5 and 25 kTd, respectively,                                                                              In the inductively coupled plasma (ICP) of Wang et al.,21
+for CF~ and 50-160 eV for C+. The low CF~ ion energy                                                                              it was recently reported that the relative intensities for ions
+correlates well with the large cross section (-18 A2) for the                                                                     produced via direct ionization all exhibited similar intensi-
+destruction of "high" energy CF~ due to CID and its con-                                                                          ties, save for CF;. This result is quite different from electron
+version cross section (- 8 A2) from "high" -to-"low" energy                                                                       impact mass spectra for CHF3.13,14In the ICP experiment,
+via DCT (Reactions 11-17). One can then infer that the cross                                                                      the relative CF + concentration exceeds that resulting from
+sections may be similar for CF;, CHF;, CF+, and C+, but                                                                           electron impact of CHF3. This can partially be explained by
+somehow scaled according to ion mass.                                                                                             the large cross-section values for CF+ production measured
+     These observations are consistent with those observed                                                                        here (Reactions 3, 13, and 19). Also observed by Wang et al.
+previously for CF4,15 except that in the previous study, the                                                                      was a relatively high concentration of CF; and C+. The
+energy distributions for all the positive and negative ions                                                                       summed cross section for CF; production (Reactions 2, 12,
+indicated a lack of equilibrium at high EIN                 25                                                      (-            and 18)is -10 A2. However, based on the current observa-
+X 10-18 V m2). Only the lightest ions exhibit such behavior                                                                       tions, it appears that the destruction cross section for CF;
+in CHF3. This is inconsistent with the somewhat larger DCT                                                                        must exceed that for its production, namely, 10 A2. The pro-
+cross sections measured for CHF 3 as compared to CF4'                                                                             cesses that lead to the destruction of CF;, DCT, and CID
+     Intensities of F- flux were too small to provide reliable                                                                    perhaps, would therefore not be considered important in the
+ion energy distributions. The relatively small F- signal is                                                                       analysis of the ICP reactor of Wang et al.. The summed cross
+supported by the large cross section for collisional electron                                                                     section for C+ production (Reactions 4, 14, and 21) is -6 A2
+detachment (Reaction 22) and the fact that dissociative elec-                                                                     and thus it is reasonable to assume that additional reaction
+tron attachment to CHF3 is improbable. 13.14                                                                                      pathways play a role in this particular discharge.
+
+       Downloaded 07 Oct 2002 to 129.6.64.63. Redistribution subject to AlP license or copyright, see http://ojps.aip.org/japo/japcr.jsp
+1662     J. Appl. Phys., Vol. 92, No.3,   1 August 2002                                                                                         Peko et al.
+
+CONCLUSIONS                                                               2R. A. Heinecke, Solid-State Electron. 18, 1146 (1975).
+                                                                          3N. R. Rueger, M. F. Doemling, M. Schaepkens, J. J. Beulens, T. E. F. M.
+     Measured cross sections for ion-molecule reactions oc-                 Standaert, and G. S. Oehrlein, J. Vac. Sci. Technol. A 17, 2492 (1999).
+curring in CHF3 discharges have been presented. A myriad of               4G. S. Oerhlein, Y. Zhang, D. Vender, and M. Haverlag, J. Vac. Sci. Tech-
+ions and neutrals are formed from the reactants studied here                nol. A 12, 323 (1994).
+and a few general conclusions may be drawn. The large cross               5G. S. Oerhlein, Y. Zhang, D. Vender, and O. Joubert, J. Vac. Sci. Technol.
+                                                                            A 12, 333 (1994).
+section for electron detachment -14 A2, dissociative charge               6M. V. Bazylenko and M. Gross, J. Vac. Sci. Technol. A 14, 2994 (1996).
+transfer for ionized fluorine -25 A2, and collision induced               'B. Kim, K-H. Kwon, and S-H. Park, J. Vac. Sci. Technol. A 17, 2593
+dissociation -6 A2, at large collision energies indicates that              (1999).
+neutral fluorine, one of the most important radicals in semi-             8K. H. R. Kirmse, A. E. Wendt, G. S. Oehrlein, and Y. Zhang, J. Vac. Sci.
+                                                                           Technol. A 12, 1287 (1994).
+conductor etching, may be a dominant species in discharge
+                                                                          9X. Li, M. Schaepkens, G. S. Oehrlein, R. Ellefson, L. C. Frees, N. Muel-
+environments. The cross section for the production of the                   ler, and N. Komer, J. Vac. Sci. Technol. A 17, 2438 (1999).
+CF3 radical is substantial as well, -26 A2, for higher-                  10M. Haverlag, W. W. Stoffels, E. Stoffels, G. M. W. Kroesen, and F. J. de
+collision energies. For the ions, CF+ has the highest-                     Hoog, J. Vac. Sci. Technol. A 14, 384 (1996).
+production probability for the collision energies studied fol-           IIR. J. M. M. Snijkers, M. J. M. van Sambeck, M. B. Hoppenbrouwers, G.
+                                                                           M. W. Kroesen, and F. J. de Hoog, J. Appl. Phys. 79, 8982 (1996).
+lowed by CF~ and CHFr                                                    12M.Haverlag, E. Stoffels, G. M. W. Kroesen, and F. J. de Hoog, J. Vac. Sci.
+     These ion-molecule cross sections have been used to in-               Technol. A 12, 3102 (1994).
+terpret the characteristics of ion kinetic-energy distributions          13L. G. Christophorou and J. K. Olthoff, J. Phys. Chern. Ref. Data 28, 967
+and relative ion intensities measured for dc townsend dis-                 (1999)an d references cited therein.
+charges. It is clear from the analysis that while the reactants          14L. G. Christophorou, J. K. Olthoff, and M. V. V. S. Rao, J. Phys. Chern.
+                                                                           Ref. Data 26, I (1997).
+chosen for this investigation are important in a CHF3 plasma,            15B. L. Peko, I. V. Dyakov, R. L. Champion, M. V. V. S. Rao, and J. K.
+more cross-section measurements of this type are needed to                 Olthoff, Phys. Rev. E 60, 7449 (1999).
+fully assess ion production and transport mechanisms that                16B. L. Peko, R. L. Champion, and Y. Wang, J. Chern. Phys. 104, 6149
+characterize this simple CHF3 discharge. In particular, these              (1996).
+include collision-induced dissociation and dissociative                  I'B. L. Peko and R. L. Champion, J. Chern. Phys. 107, 1156 (1997).
+                                                                         18M. V. V. S. Rao, R. J. Van Brunt, and J. K. Olthoff, Phys. Rev. E 54,5641
+charge transfer for the ionic species CF;, CHF;, CF+, and                  (1996).
+CHF+ along with dissociative charge transfer for C+.                     19M. V. V. S. Rao, R. J. Van Brunt, and J. K. Olthoff,     Phys. Rev. E 59, 4565
+                                                                           (1999).
+ACKNOWLEDGMENTS                                                          20M. S. Huq, L. D. Doverspike,    R. L. Champion,      and V. A. Esaulov,   J. Phys.
+                                                                           B 15,951 (1982).
+   The work at W&M was supported by the Division of                      21Y. Wang, M. Misakian,    A. N. Goyette,   and J. K. Olthoff,   J. Appl. Phys. 88,
+                                                                           5612 (2000).
+Chemical Sciences, Office of Basic Energy Sciences, U.S.
+                                                                         22R. Jayaraman,  R. T. McGrath,     and G. A. Hebner,     J. Vac. Sci. Technol.    A
+Department of Energy.                                                      17, 1545 (1999).
+                                                                         23M. Schaepkens,  N. R. Rueger, J. J. Beulens, X. Li, T. E. F. M. Standaert,
+IThe 1994 Report of the Scientific Assessment Working Group of IPCC        P.1. Matsuo, and G. S. Oerhlein, J. Vac. Sci. Technol. A 17, 3272 (1999).
+ Intergovernmental Panel on Climate Change (unpublished), p. 28.         24J. K. Olthoff   and Y. Wang, 1. Vac. Sci. Technol.     A 17,1552    (1999).
+
+
+
+
+   Downloaded   07 Oct 2002   to 129.6.64.63. Redistribution subject to AlP license or copyright, see http://ojps.aip.org/japo/japcr.jsp
+

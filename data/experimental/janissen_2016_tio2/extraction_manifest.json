@@ -1,0 +1,69 @@
+{
+  "manifest_id": "JANISSEN-2016-TIO2-SUPPLEMENTARY-TABLES-R1",
+  "source": {
+    "citation": "R. Janissen et al., Nanoscale 8, 14010-14017 (2016); supplement reproduced in S. Ha, TU Delft thesis (2018)",
+    "doi": "10.1039/C6NR00898D",
+    "thesis_url": "https://pure.tudelft.nl/ws/portalfiles/portal/47058891/PhD_Thesis_S.Ha.pdf",
+    "pdf_sha256": "d4e8afedd1349a91b14ee10f589e9cae01aab48eb31d2be44433cd26e6fce912",
+    "source_pixel_redistribution": "not committed"
+  },
+  "visual_audit": {
+    "render_dpi": 300,
+    "render_size_px": [
+      2055,
+      2884
+    ],
+    "pdf_page_54_sha256": "83e144798df436a8bf6b411b5ce599f9044c4079afd659dba384ea66fa4ed4a2",
+    "pdf_page_55_sha256": "d79e4a59189b58befa426d13e67b8e8a354c5178b010439ede32f670c0e03e4b",
+    "pdf_page_56_sha256": "787c95b14b45b7c544487504eda0f80adc8ec99659ee39363d034f58385498f5",
+    "table_boxes_full_page_px": {
+      "pdf_page_54_table_s3_1": [
+        280,
+        400,
+        2015,
+        1020
+      ],
+      "pdf_page_55_table_s3_2": [
+        280,
+        325,
+        2015,
+        2360
+      ],
+      "pdf_page_56_table_s3_3": [
+        280,
+        280,
+        2015,
+        890
+      ]
+    },
+    "status": "passed_original_resolution",
+    "method": "300-dpi Poppler renders; original-resolution visual reading; PIL crop-box overlay; values transcribed from printed tables"
+  },
+  "outputs": [
+    {
+      "path": "data/experimental/janissen_2016_tio2/table_s3_1_chf3_rie_optimization.csv",
+      "sha256": "705cd64f90c4f292e9b382aab181111953b0e66b3dbac27a6bf50e45ff78235c"
+    },
+    {
+      "path": "data/experimental/janissen_2016_tio2/table_s3_2_tio2_nanofabrication.csv",
+      "sha256": "ce73cf92cb69b8836c3e761e44d33292b464692ca841cd3a844fa5af891e3d8b"
+    },
+    {
+      "path": "data/experimental/janissen_2016_tio2/table_s3_3_feature_dimensions.csv",
+      "sha256": "75c92690f3b873ff942bc10c1dda4a296fcc7fdade19529a6dda3067bfaecbc8"
+    }
+  ],
+  "claim_boundary": {
+    "valid": [
+      "printed process settings and rates in Tables S3.1-S3.3",
+      "measured feature dimensions and printed RSD values",
+      "equipment-specific DC self-bias witnesses"
+    ],
+    "not_valid": [
+      "transfer of Fluor Z401S voltage to Oxford NPG80",
+      "transfer from single-crystal rutile to ALD TiO2",
+      "a CHF3/SF6/O2 surface coefficient",
+      "an uncertainty-free absolute-depth prediction"
+    ]
+  }
+}

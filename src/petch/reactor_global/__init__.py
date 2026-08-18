@@ -348,6 +348,34 @@ from .wafer_sheath_transfer import (
     PowerClosedRFSheathProjection,
     SpeciesResolvedIonEnergyDistribution,
 )
+from .oxford80_self_bias import (
+    Oxford80RIECondition,
+    Oxford80SelfBiasObservation,
+    Oxford80SelfBiasTransfer,
+    SelfBiasSensitivityHistory,
+    build_oxford80_self_bias_transfer,
+    load_oxford80_self_bias_evidence,
+)
+from .self_bias_sheath_ensemble import (
+    CollisionlessSelfBiasSheathEnsemble,
+    QuasiSteadySelfBiasSheathSnapshot,
+    build_collisionless_self_bias_sheath_ensemble,
+)
+from .chf3_ion_collisions import (
+    ANGSTROM2_TO_M2,
+    PEKO_DCT_CSV_SHA256,
+    Peko2002CF3CHF3ReactiveCollisionModel,
+    ReactiveCrossSectionBand,
+    ReactiveSlabSensitivity,
+    load_peko_2002_cf3_chf3_reactive_collision_model,
+)
+from .chf3_ion_mobility import (
+    BASURTO_MOBILITY_CSV_SHA256,
+    CHF2_PLUS_MASS_AMU,
+    Basurto2002CHF2CHF3MobilityModel,
+    CHF2MobilityState,
+    load_basurto_2002_chf2_chf3_mobility_model,
+)
 from .current_driven_rf_sheath import (
     PeriodicCurrentDensity,
     TurnerChabertCurrentDrivenSheath,
@@ -579,6 +607,26 @@ __all__ = [
     "DiagnosticConditionedRFSheathTransfer",
     "PowerClosedRFSheathProjection",
     "SpeciesResolvedIonEnergyDistribution",
+    "Oxford80RIECondition",
+    "Oxford80SelfBiasObservation",
+    "Oxford80SelfBiasTransfer",
+    "SelfBiasSensitivityHistory",
+    "build_oxford80_self_bias_transfer",
+    "load_oxford80_self_bias_evidence",
+    "CollisionlessSelfBiasSheathEnsemble",
+    "QuasiSteadySelfBiasSheathSnapshot",
+    "build_collisionless_self_bias_sheath_ensemble",
+    "ANGSTROM2_TO_M2",
+    "PEKO_DCT_CSV_SHA256",
+    "Peko2002CF3CHF3ReactiveCollisionModel",
+    "ReactiveCrossSectionBand",
+    "ReactiveSlabSensitivity",
+    "load_peko_2002_cf3_chf3_reactive_collision_model",
+    "BASURTO_MOBILITY_CSV_SHA256",
+    "CHF2_PLUS_MASS_AMU",
+    "Basurto2002CHF2CHF3MobilityModel",
+    "CHF2MobilityState",
+    "load_basurto_2002_chf2_chf3_mobility_model",
     "PeriodicCurrentDensity",
     "TurnerChabertCurrentDrivenSheath",
     "TurnerChabertCurrentSheathTangent",

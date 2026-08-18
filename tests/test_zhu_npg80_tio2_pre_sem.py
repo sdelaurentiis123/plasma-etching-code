@@ -4,6 +4,15 @@ from scripts.audit_zhu_npg80_tio2_pre_sem import (
     build_receipt,
     load_manifest,
 )
+from scripts.audit_zhu_npg80_cf3_collision_scale import (
+    build_receipt as build_cf3_collision_receipt,
+)
+from scripts.audit_zhu_npg80_chf2_mobility_scale import (
+    build_receipt as build_chf2_mobility_receipt,
+)
+from scripts.audit_zhu_npg80_tio2_analog_board import (
+    build_receipt as build_tio2_analog_receipt,
+)
 
 
 def test_operator_corrections_override_screenshot_values():
@@ -75,3 +84,99 @@ def test_same_group_nature_device_is_context_not_a_transferred_target():
     assert evidence["reported_width_range_nm"] == [100.0, 190.0]
     assert evidence["reported_unit_cell_nm"] == 290.0
     assert evidence["used_as_condition_matched_target"] is False
+
+
+def test_machine_family_bias_evidence_enables_sensitivity_not_fake_prediction():
+    receipt = build_receipt(load_manifest())
+    evidence = receipt["machine_family_self_bias_evidence"]
+    gates = receipt["identifiability_gates"]
+
+    assert evidence["available"] is True
+    assert evidence["matched_chemistry_reduced_drive_anchor_V"] == 276.0
+    assert evidence["exact_tool_conditioning_drift_is_censored"] is True
+    assert gates["machine_family_self_bias_sensitivity_available"] is True
+    assert gates["achieved_dc_self_bias_measured"] is False
+    assert gates["supports_absolute_depth_prediction"] is False
+
+
+def test_cf3_collision_scale_is_target_free_and_partial_by_construction():
+    receipt = build_cf3_collision_receipt()
+    sample = next(
+        item for item in receipt["samples"]
+        if item["laboratory_energy_eV"] == 200.0
+    )
+    gates = receipt["identifiability_gates"]
+
+    assert receipt["sem_target_used"] is False
+    assert receipt["measured_depth_target_used"] is False
+    assert receipt["energy_convention"]["laboratory_to_relative_factor"] == (
+        70.0 / 139.0
+    )
+    assert 0.18 < sample["reactive_optical_depth_per_1mm"]["central"] < 0.20
+    assert gates["measured_cf3_chf3_reactive_kernel_available"] is True
+    assert gates["elastic_or_momentum_transfer_kernel_available"] is False
+    assert gates["supports_target_iead"] is False
+    assert gates["supports_absolute_depth_prediction"] is False
+
+
+def test_chf2_mobility_scale_is_measured_target_free_and_partial():
+    receipt = build_chf2_mobility_receipt()
+    low = next(
+        item for item in receipt["samples"]
+        if item["reduced_field_Td"] == 100.0
+    )
+    gates = receipt["identifiability_gates"]
+
+    assert receipt["sem_target_used"] is False
+    assert receipt["measured_depth_target_used"] is False
+    assert 0.48 < low["reduced_mobility_cm2_V_s"] < 0.50
+    assert 0.08e-3 < low["drift_relaxation_length_m"] < 0.13e-3
+    assert gates["measured_chf2_chf3_swarm_mobility_available"] is True
+    assert gates["elastic_differential_cross_section_available"] is False
+    assert gates["supports_target_iead"] is False
+    assert gates["supports_absolute_depth_prediction"] is False
+
+
+def test_pre_sem_receipt_includes_measured_chf2_mobility_without_overclaim():
+    receipt = build_receipt(load_manifest())
+    evidence = receipt["measured_molecular_mobility_evidence"]
+    gates = receipt["identifiability_gates"]
+
+    assert evidence["available"] is True
+    assert evidence["elastic_differential_cross_section"] is False
+    assert gates["measured_chf2_chf3_swarm_mobility_available"] is True
+    assert gates["complete_molecular_ion_transport_available"] is False
+    assert gates["supports_absolute_depth_prediction"] is False
+
+
+def test_exact_tio2_analog_board_brackets_clearance_without_transfer():
+    receipt = build_tio2_analog_receipt()
+    closest = receipt["closest_stack_witness"]
+    sweep = receipt["source_power_sweep_interpolation"]
+    depths = receipt["source_feature_depth_board"]
+    gates = receipt["identifiability_gates"]
+
+    assert receipt["sem_target_used"] is False
+    assert closest["system_model"] == "Fluor Z401S"
+    assert closest["dc_bias_V_signed"] == -950.0
+    assert receipt["target_similarity"]["same_cr_mask_thickness"] is True
+    assert 1.06 < receipt["target_similarity"][
+        "source_to_target_reduced_drive_ratio"] < 1.07
+    assert 52.0 < sweep["source_system_tio2_rate_nm_min"] < 53.0
+    assert sweep["source_system_cr_residual_after_700nm_nm"] > 5.0
+    assert depths["minimum_implied_rate_nm_min"] < 35.0
+    assert depths["maximum_implied_rate_nm_min"] > 40.0
+    assert sweep["supports_target_prediction"] is False
+    assert gates["supports_absolute_target_depth_prediction"] is False
+
+
+def test_pre_sem_receipt_links_exact_tio2_board_without_promoting_it():
+    receipt = build_receipt(load_manifest())
+    analogs = receipt["audited_tio2_process_analogs"]
+    gates = receipt["identifiability_gates"]
+
+    assert analogs["available"] is True
+    assert analogs["closest_source_dc_bias_V_signed"] == -950.0
+    assert analogs["transferred_as_target_coefficient"] is False
+    assert gates["adjacent_tio2_process_response_board_available"] is True
+    assert gates["tio2_surface_law_measured_or_validated_for_condition"] is False

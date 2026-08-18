@@ -1,0 +1,239 @@
+{
+  "certification": {
+    "claim_class": "target-free machine-family self-bias sensitivity transfer",
+    "forbidden_use": "select a history after viewing the held-out SEM or call the 276 V family anchor a measured target-machine boundary",
+    "permitted_use": "propagate each deterministic voltage history through the collisional sheath and report depth/profile sensitivity",
+    "supports_absolute_depth_prediction": false,
+    "supports_unique_target_bias": false
+  },
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "evidence_table": {
+    "observation_count": 5,
+    "path": "data/experimental/zhu_2026_tio2_npg80/oxford80_self_bias_evidence.csv",
+    "sha256": "3aee4655a479d322d692b2976b0668dc8ae2653a44823e9dd7fe42fae56b2b75"
+  },
+  "frozen_before_specific_condition_sem": true,
+  "measured_target_bias_used": false,
+  "mechanical_anchor_selection": {
+    "anchor_V": 276.0,
+    "is_target_measurement": false,
+    "rule": "same active-gas set, uncensored voltage, then minimum absolute log separation in reported forward-power/pressure",
+    "source_id": "penaud-2006-plasmalab80-ternary",
+    "supports_unique_target_bias": false
+  },
+  "observations": [
+    {
+      "bias_lower_V": 300.0,
+      "bias_relation": "greater_than",
+      "bias_upper_V": null,
+      "gas_flows_sccm": {
+        "CHF3": 40.0
+      },
+      "loading_context": "recipe procedure; sample and carrier loading not reported on the cited page",
+      "pressure_mTorr": 25.0,
+      "reduced_drive_W_per_mTorr": 8.0,
+      "rf_power_W": 200.0,
+      "run_phase": "start",
+      "source_id": "harmon-2019-ngp80-chf3-start",
+      "source_locator": "repository.lib.ncsu.edu/server/api/core/bitstreams/619c77c4-da13-4040-9c28-92420dc4b447/content",
+      "source_page": "PDF 148 / printed 126",
+      "source_pdf_sha256": "1f7c3530e062f045c809f1e407e14c4647f0d2a1671e7e868c33c9426747b634",
+      "tool_model": "Oxford PlasmaPro NGP80",
+      "tool_relation": "exact_ngp80"
+    },
+    {
+      "bias_lower_V": null,
+      "bias_relation": "less_than_approx",
+      "bias_upper_V": 200.0,
+      "gas_flows_sccm": {
+        "CHF3": 40.0
+      },
+      "loading_context": "recipe procedure; source states conditioning-sensitive drift during the run",
+      "pressure_mTorr": 25.0,
+      "reduced_drive_W_per_mTorr": 8.0,
+      "rf_power_W": 200.0,
+      "run_phase": "end",
+      "source_id": "harmon-2019-ngp80-chf3-end",
+      "source_locator": "repository.lib.ncsu.edu/server/api/core/bitstreams/619c77c4-da13-4040-9c28-92420dc4b447/content",
+      "source_page": "PDF 148 / printed 126",
+      "source_pdf_sha256": "1f7c3530e062f045c809f1e407e14c4647f0d2a1671e7e868c33c9426747b634",
+      "tool_model": "Oxford PlasmaPro NGP80",
+      "tool_relation": "exact_ngp80"
+    },
+    {
+      "bias_lower_V": 276.0,
+      "bias_relation": "measured_point",
+      "bias_upper_V": 276.0,
+      "gas_flows_sccm": {
+        "CHF3": 10.0,
+        "O2": 10.0,
+        "SF6": 15.0
+      },
+      "loading_context": "HSQ-masked dense silicon-fin patterns; exact loaded area not stated in Table 3.5",
+      "pressure_mTorr": 10.0,
+      "reduced_drive_W_per_mTorr": 5.0,
+      "rf_power_W": 50.0,
+      "run_phase": "unspecified",
+      "source_id": "penaud-2006-plasmalab80-ternary",
+      "source_locator": "pepite-depot.univ-lille.fr/LIBRE/Th_Num/2006/50376-2006-Penaud.pdf",
+      "source_page": "PDF 110 / printed 112",
+      "source_pdf_sha256": "fceed7b5bd6d2ed43a7fe5fe3b1f1b8eeb8ae338ad3d1144326cbc41d2ba3e46",
+      "tool_model": "Oxford PlasmaLab 80",
+      "tool_relation": "oxford_rie80_family"
+    },
+    {
+      "bias_lower_V": 360.0,
+      "bias_relation": "measured_range",
+      "bias_upper_V": 387.0,
+      "gas_flows_sccm": {
+        "SF6": 12.0
+      },
+      "loading_context": "approximately 3.5 cm2 sample on dummy 4-inch wafer; O2 flow varied across the plotted sweep",
+      "pressure_mTorr": 30.0,
+      "reduced_drive_W_per_mTorr": 5.333333333333333,
+      "rf_power_W": 160.0,
+      "run_phase": "O2 flow sweep",
+      "source_id": "zou-2004-plasmalab80-sf6-o2-30mtorr",
+      "source_locator": "doi.org/10.1007/s00542-003-0338-3",
+      "source_page": "PDF 3 / article 604",
+      "source_pdf_sha256": "b23135afe677a4816ff460e20949c8173a9b71f123cbe8702f3414ad570f8421",
+      "tool_model": "Oxford PlasmaLab 80+",
+      "tool_relation": "oxford_rie80_family"
+    },
+    {
+      "bias_lower_V": 400.0,
+      "bias_relation": "measured_point",
+      "bias_upper_V": 400.0,
+      "gas_flows_sccm": {
+        "Ar": 7.5,
+        "CHF3": 6.0
+      },
+      "loading_context": "process appendix; sample loading not reported",
+      "pressure_mTorr": 25.0,
+      "reduced_drive_W_per_mTorr": 8.0,
+      "rf_power_W": 200.0,
+      "run_phase": "unspecified",
+      "source_id": "plattner-2003-plasmalab80-chf3-ar",
+      "source_locator": "eprints.soton.ac.uk/260031/5/AppendixB.pdf",
+      "source_page": "PDF 3 / printed 179",
+      "source_pdf_sha256": "b42b9a357d347cc203ff1357fa6e420e73595c413484464b5905312bddbb37fc",
+      "tool_model": "Oxford PlasmaLab RIE 80",
+      "tool_relation": "oxford_rie80_family"
+    }
+  ],
+  "printed_reference_window": {
+    "contains_all_physically_allowed_target_values": false,
+    "is_probability_interval": false,
+    "lower_V": 200.0,
+    "upper_V": 400.0,
+    "warning": "Exact-NGP80 endpoint statements are censored (>300 V at start and <~200 V at end); this printed-source window is not a credible interval."
+  },
+  "schema": "petch.oxford80-self-bias-transfer.v1",
+  "sem_target_used": false,
+  "sensitivity_histories": [
+    {
+      "bias_magnitude_V": [
+        276.0,
+        276.0
+      ],
+      "endpoints_are_censor_thresholds": false,
+      "interpretation": "Exact active-gas set and exact P/p match in the Oxford RIE-80 family; mixture fractions and target material differ.",
+      "measured_on_target_condition": false,
+      "name": "same-chemistry-reduced-drive anchor",
+      "source_ids": [
+        "penaud-2006-plasmalab80-ternary"
+      ],
+      "supports_absolute_depth_prediction": false,
+      "time_s": [
+        0.0,
+        1200.0
+      ]
+    },
+    {
+      "bias_magnitude_V": [
+        300.0,
+        200.0
+      ],
+      "endpoints_are_censor_thresholds": true,
+      "interpretation": "Linear connection between printed censor thresholds only; the source states the true start is higher and end lower.",
+      "measured_on_target_condition": false,
+      "name": "exact-NGP80 conditioning thresholds",
+      "source_ids": [
+        "harmon-2019-ngp80-chf3-start",
+        "harmon-2019-ngp80-chf3-end"
+      ],
+      "supports_absolute_depth_prediction": false,
+      "time_s": [
+        0.0,
+        1200.0
+      ]
+    },
+    {
+      "bias_magnitude_V": [
+        360.0,
+        360.0
+      ],
+      "endpoints_are_censor_thresholds": false,
+      "interpretation": "Low end of a measured 30 mTorr O2-sweep range on a PlasmaLab 80+; chemistry and loading differ.",
+      "measured_on_target_condition": false,
+      "name": "same-pressure SF6/O2 low witness",
+      "source_ids": [
+        "zou-2004-plasmalab80-sf6-o2-30mtorr"
+      ],
+      "supports_absolute_depth_prediction": false,
+      "time_s": [
+        0.0,
+        1200.0
+      ]
+    },
+    {
+      "bias_magnitude_V": [
+        387.0,
+        387.0
+      ],
+      "endpoints_are_censor_thresholds": false,
+      "interpretation": "High end of a measured 30 mTorr O2-sweep range on a PlasmaLab 80+; chemistry and loading differ.",
+      "measured_on_target_condition": false,
+      "name": "same-pressure SF6/O2 high witness",
+      "source_ids": [
+        "zou-2004-plasmalab80-sf6-o2-30mtorr"
+      ],
+      "supports_absolute_depth_prediction": false,
+      "time_s": [
+        0.0,
+        1200.0
+      ]
+    },
+    {
+      "bias_magnitude_V": [
+        400.0,
+        400.0
+      ],
+      "endpoints_are_censor_thresholds": false,
+      "interpretation": "Measured CHF3/Ar value on a PlasmaLab RIE 80; pressure, composition, loading, and exact machine differ.",
+      "measured_on_target_condition": false,
+      "name": "same-family CHF3/Ar high witness",
+      "source_ids": [
+        "plattner-2003-plasmalab80-chf3-ar"
+      ],
+      "supports_absolute_depth_prediction": false,
+      "time_s": [
+        0.0,
+        1200.0
+      ]
+    }
+  ],
+  "target": {
+    "duration_s": 1200.0,
+    "gas_flows_sccm": {
+      "CHF3": 55.0,
+      "O2": 1.0,
+      "SF6": 5.0
+    },
+    "pressure_mTorr": 30.0,
+    "reduced_drive_W_per_mTorr": 5.0,
+    "rf_power_W": 150.0,
+    "tool_model": "PlasmaPro NPG80 RIE"
+  },
+  "voltage_convention": "magnitude of negative powered-electrode DC self-bias"
+}

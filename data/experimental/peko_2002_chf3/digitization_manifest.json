@@ -1,0 +1,89 @@
+{
+  "manifest_id": "PEKO-2002-CHF3-FIG2-DCT-R1",
+  "source": {
+    "citation": "B. L. Peko, R. L. Champion, M. V. V. S. Rao, and J. K. Olthoff, Journal of Applied Physics 92, 1657-1662 (2002)",
+    "title": "Measured cross sections and ion energies for a CHF3 discharge",
+    "doi": "10.1063/1.1491276",
+    "official_pdf": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=9195",
+    "pdf_sha256": "c0ab4fac39a611e364efc29c12632590d37e319cd8274382ae13be5a2d33d99c",
+    "pdf_page": 3,
+    "print_page": 1659,
+    "figure": "Figure 2, summed DCT series",
+    "render_dpi": 400,
+    "rendered_page_sha256": "b4b1cc4422a697fdae471b5c86b6b23316d7a13fb9077a5b567899e6b0c9ac07",
+    "rendered_page_size_px": [
+      3400,
+      4446
+    ],
+    "redistribution": "source pixels are not committed"
+  },
+  "pixel_calibration": {
+    "x_tick_centers_full_page_px": [
+      2012.5,
+      2260.5,
+      2404.5,
+      2507.0,
+      2587.5,
+      2838.0
+    ],
+    "collision_energy_at_x_ticks_eV": [
+      20.0,
+      40.0,
+      60.0,
+      80.0,
+      100.0,
+      200.0
+    ],
+    "x_axis": "log10",
+    "x_pixel_intercept": 938.6502595742603,
+    "x_pixels_per_log10_energy": 824.786450451706,
+    "y_tick_centers_full_page_px": [
+      530.5,
+      658.5,
+      786.5,
+      915.0,
+      1043.5,
+      1173.5,
+      1301.5,
+      1429.5
+    ],
+    "cross_section_at_y_ticks_A2": [
+      8.0,
+      7.0,
+      6.0,
+      5.0,
+      4.0,
+      3.0,
+      2.0,
+      1.0
+    ],
+    "y_axis": "linear",
+    "cross_section_intercept_A2": 12.122504793211597,
+    "cross_section_A2_per_vertical_pixel": -0.007779554550703933
+  },
+  "digitization": {
+    "method": "400-dpi Poppler render; PIL/NumPy dark-pixel tick localization and density-peak marker detection; original-resolution PIL overlay visually audited",
+    "marker": "asterisk, summed DCT curve only",
+    "point_count": 21,
+    "center_placement_allowance_px": 6.0,
+    "digitization_energy_relative_bound": 0.016891483902389925,
+    "digitization_cross_section_A2_bound": 0.046677327304223595,
+    "source_measurement_relative_uncertainty": 0.25,
+    "source_measurement_uncertainty_kept_separate": true,
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "claim_boundary": {
+    "valid": "summed dissociative-charge-transfer cross section for CF3+ + CHF3 over the plotted collision-energy support",
+    "not_valid": [
+      "an elastic or total momentum-transfer cross section",
+      "an angular scattering law",
+      "SF5+ transport in SF6",
+      "a species-resolved target-reactor ion flux",
+      "a TiO2 etch-depth fit"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/peko_2002_chf3/figure2_cf3_chf3_dct_sum.csv",
+    "sha256": "e10cc18dfa63e8fb79ccd386fba86bacc019b37f3714563b044b6b10c05105bb"
+  }
+}

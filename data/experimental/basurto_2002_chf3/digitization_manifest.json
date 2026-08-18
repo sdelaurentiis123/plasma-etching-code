@@ -1,0 +1,79 @@
+{
+  "manifest_id": "BASURTO-2002-CHF2-CHF3-FIG1-R1",
+  "source": {
+    "citation": "E. Basurto and J. de Urquijo, Journal of Applied Physics 91, 36-39 (2002)",
+    "title": "Mobility of CF3+ in CF4, CHF2+ in CHF3, and C+ in Ar",
+    "doi": "10.1063/1.1421034",
+    "pdf_sha256": "a959267e28687a1497ddb96669bdc096d096446a3c08765e1a5a5c3ecdd53b48",
+    "pdf_page": 2,
+    "print_page": 37,
+    "figure": "Figure 1, CHF2+ in CHF3 open-circle series",
+    "render_dpi": 600,
+    "rendered_page_sha256": "44f37a67b73d60bdcf5a7dbc510d7ce6b656f6b77ea7b83f0d11972014f2dc74",
+    "rendered_page_size_px": [
+      5100,
+      6600
+    ],
+    "redistribution": "source pixels are not committed"
+  },
+  "pixel_calibration": {
+    "crop_origin_full_page_px": [
+      2200.0,
+      200.0
+    ],
+    "x_tick_centers_crop_px": [
+      951.0,
+      1394.5,
+      2028.0
+    ],
+    "reduced_field_at_x_ticks_Td": [
+      20.0,
+      100.0,
+      1000.0
+    ],
+    "x_axis": "log10",
+    "x_pixel_intercept": 126.45712316836044,
+    "x_pixels_per_log10_reduced_field": 633.8850367707274,
+    "y_tick_centers_crop_px": [
+      246.0,
+      733.0,
+      1010.0
+    ],
+    "reduced_mobility_at_y_ticks_cm2_V_s": [
+      5.0,
+      1.0,
+      0.4
+    ],
+    "y_axis": "log10",
+    "y_pixel_intercept": 732.8920400216914,
+    "y_pixels_per_log10_reduced_mobility": -696.5289940711441
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; PIL/NumPy tick localization; OpenCV Hough candidates followed by original-resolution visual overlay audit",
+    "marker": "open circles, CHF2+ in CHF3 only",
+    "point_count": 23,
+    "center_placement_allowance_px": 10.0,
+    "digitization_reduced_field_relative_bound": 0.03699277671860135,
+    "digitization_reduced_mobility_relative_bound": 0.03361048015010115,
+    "source_measurement_relative_uncertainty_range": [
+      0.02,
+      0.04
+    ],
+    "source_measurement_uncertainty_kept_separate": true,
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "claim_boundary": {
+    "valid": "measured CHF2+ reduced mobility in CHF3 over the plotted reduced-field support",
+    "not_valid": [
+      "CF3+ mobility in CHF3",
+      "an elastic differential cross section",
+      "a target-reactor ion species fraction",
+      "a target sheath IEAD",
+      "a TiO2 etch-depth fit"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/basurto_2002_chf3/figure1_chf2_chf3_reduced_mobility.csv",
+    "sha256": "96dc38fc862888ae2252be123a2209166ac3a6d35c2e2c0718ab33aead227775"
+  }
+}

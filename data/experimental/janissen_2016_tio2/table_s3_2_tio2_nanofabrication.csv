@@ -1,0 +1,9 @@
+figure,system_id,system_model,mask_height_nm,mask_diameter_nm,CHF3_sccm,O2_sccm,SF6_sccm,CH4_sccm,Ar_sccm,He_sccm,icp_power_W,rf_power_W,pressure_ubar,dc_bias_V_signed,etch_time_min,sample_holder_temperature_C,chamber_temperature_C,optimized
+3.2a,F1,Fluor Z401S,45,175,50,0.5,,,,,,200,50,-950,11,,,True
+3.2b,F2,Fluor Z401S,100,255,50,8,,,,,,200,50,-1100,15,,,True
+3.2c,F1,Fluor Z401S,100,535,50,5,,,30,,,165,50,-855,15,,,False
+3.2d,F3,AMS100 I-speeder,100,535,,,15,30,50,,2500,300,30,-50,10,0,200,False
+3.2e,F4,Plasmalab System 100,130,185,,,50,,,100,800,200,50,-475,12,,25,False
+3.2f,F4,Plasmalab System 100,120,205,,,20,,,100,300,300,100,-835,4,,25,True
+3.3,F2,Fluor Z401S,60,220,50,4,,,,,,200,50,-1100,15,,,True
+S3.4,F2,Fluor Z401S,30,190,50,4,,,,,,200,50,-1100,8,,,False

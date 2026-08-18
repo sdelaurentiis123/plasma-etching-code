@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 151 sources by topic
+## Index — 157 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -124,6 +124,12 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | bibkey | source | status |
 |---|---|---|
 | [`cuny-asrc-npg80-rie`](library/cuny-asrc-npg80-rie.md) | ASRC CUNY exact Oxford PlasmaPro NPG80 RIE equipment record | PRIMARY FACILITY EQUIPMENT RECORD READ |
+| [`harmon-2019-ngp80-rie`](library/harmon-2019-ngp80-rie.md) | Harmon, exact PlasmaPro NGP80 CHF3 recipe and conditioning-driven self-bias drift | PRIMARY FULL THESIS + BIAS PAGE VISUALLY AUDITED |
+| [`penaud-2006-plasmalab80-ternary`](library/penaud-2006-plasmalab80-ternary.md) | Penaud, PlasmaLab 80 SF6/O2/CHF3 bias and anisotropy table | PRIMARY FULL THESIS + TABLES/SEMS VISUALLY AUDITED |
+| [`zou-2004-plasmalab80-sf6-o2`](library/zou-2004-plasmalab80-sf6-o2.md) | Zou, PlasmaLab 80+ SF6/O2 bias-pressure-loading study | PRIMARY FULL ARTICLE + FIGURES VISUALLY AUDITED |
+| [`plattner-2003-plasmalab80-appendix`](library/plattner-2003-plasmalab80-appendix.md) | Plattner, PlasmaLab RIE 80 CHF3/Ar process appendix | PRIMARY THESIS APPENDIX TABLE VISUALLY AUDITED |
+| [`peko-2002-chf3-ion-molecule`](library/peko-2002-chf3-ion-molecule.md) | Peko et al., measured CF3+/F+/F- reactive cross sections and CHF3 discharge ion energies | PRIMARY NIST FULL TEXT + FIGURE 2 SUM CURVE PIL-DIGITIZED |
+| [`basurto-2002-chf3-ion-mobility`](library/basurto-2002-chf3-ion-mobility.md) | Basurto & de Urquijo, mass-resolved CHF2+ mobility in CHF3 | PRIMARY FULL TEXT + FIGURE 1 CHECKSUM-PINNED PIL DIGITIZATION |
 | [`edelberg-1999`](library/edelberg-1999.md) | Edelberg & Aydil (1999) | not-fetched |
 | [`kawamura-1999-psst`](library/kawamura-1999-psst.md) | Kawamura et al., PSST 8, R45 (1999) | not-fetched (citation corrected from p.313) |
 | [`benyoucef-yousfi-2014-ion-transport`](library/benyoucef-yousfi-2014-ion-transport.md) | Benyoucef & Yousfi, semiclassical Ar+/Ar, O2+/O2, N2+/N2 transport validation | AUTHOR-PROVIDED FULL TEXT READ VIA HTML; FIGURES NOT LOCALLY ARCHIVED |
@@ -251,7 +257,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 
 | bibkey | source | status |
 |---|---|---|
-| [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | Janissen et al., CHF3/O2 RIE of TiO2 with Cr masks | PRIMARY FULL TEXT ONLINE; LOCAL FIGURE/TABLE PIXEL AUDIT OPEN |
+| [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | Janissen et al., CHF3/O2 RIE of TiO2 with Cr masks | PRIMARY FULL TEXT + TABLES S3.1--S3.3 CHECKSUM-PINNED AND VISUALLY AUDITED |
 | [`holman-2026-nature-metasurface-tweezers`](library/holman-2026-nature-metasurface-tweezers.md) | Holman et al., same-group TiO2/SRN metasurface optical-tweezer arrays | PRIMARY NATURE RECORD + AUTHOR FULL MANUSCRIPT ONLINE; LOCAL PIXEL AUDIT OPEN |
 
 ### In-feature and profile metrology
@@ -265,7 +271,11 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | petch constant, law or decision | source | what it fixed / why it is there |
 |---|---|---|
 | Zhu NPG80 topology, 13.56 MHz source, 300 W ceiling, and actively temperature-controlled electrode | [`cuny-asrc-npg80-rie`](library/cuny-asrc-npg80-rie.md) | exact-tool constraints for the prospective TiO2 validation case; does not convert the 150 W forward demand into absorbed power or self-bias |
+| Oxford RIE-80 self-bias evidence (`276 V` same-chemistry/reduced-drive point; exact-NGP80 `>300` to `<~200 V` drift; `360--400 V` adjacent witnesses) | [`harmon-2019-ngp80-rie`](library/harmon-2019-ngp80-rie.md), [`penaud-2006-plasmalab80-ternary`](library/penaud-2006-plasmalab80-ternary.md), [`zou-2004-plasmalab80-sf6-o2`](library/zou-2004-plasmalab80-sf6-o2.md), [`plattner-2003-plasmalab80-appendix`](library/plattner-2003-plasmalab80-appendix.md) | target-free deterministic voltage histories for sheath/depth sensitivity; censor statements remain inequalities and the transfer is not a target-voltage measurement or probability interval |
+| CF3+ + CHF3 reactive-destruction kernel (`18 A2` summed CID plus 21-point summed-DCT curve) | [`peko-2002-chf3-ion-molecule`](library/peko-2002-chf3-ion-molecule.md) | measured target-independent collision floor with explicit lab-to-relative energy conversion and source uncertainty; elastic/angular transport, other species pairs, target IEAD, and depth remain open |
+| CHF2+ in CHF3 low-field mobility `0.53 +/- 0.01 cm2 V-1 s-1` | [`basurto-2002-chf3-ion-mobility`](library/basurto-2002-chf3-ion-mobility.md) | rejects the `1.33 cm2 V-1 s-1` naive polarization-limit closure; retained as a future molecular-transport validation board, not a fitted cross section |
 | TiO2/Cr `40 nm/min`, `14:1` comparison scenario and machine-specific O2 sensitivity | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | target-free mask-survival warning for the Zhu pre-SEM receipt; explicitly not a transferred model coefficient or absolute-depth prediction |
+| TiO2/Cr power/pressure response, `-950/-1100 V` RIE witnesses, and `652/273 nm` feature depths | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | visually audited Tables S3.1--S3.3 validation board; Fluor Z401S and single-crystal rutile boundaries remain explicit |
 | Same-group TiO2 meta-atom scale (`750 nm` tall, `100–190 nm` wide, `290 nm` unit cell) and successful vertical-pillar profile class | [`holman-2026-nature-metasurface-tweezers`](library/holman-2026-nature-metasurface-tweezers.md) | adjacent device evidence for the Zhu condition; withheld exact layout remains authoritative and Nature dimensions are never substituted into it |
 | Conserved global-model power/particle balance and cylindrical effective-loss area | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | chemistry-agnostic 0-D reactor skeleton; electrons explicit so plasma shorthand cannot hide charge error |
 | GEC-ICP central geometry, coil, and diagnostic plane | [`miller-1995-gec-icp`](library/miller-1995-gec-icp.md), [`wise-1996-rapid-2d-cl`](library/wise-1996-rapid-2d-cl.md) | 165.1 mm electrode, 40.5 mm gap, 15 mm probe plane, five-turn coil, and 21 radial chlorine-plasma markers form an independent spatial-reactor gate; neither paper supplies a generator-to-plasma field law or wafer boundary |

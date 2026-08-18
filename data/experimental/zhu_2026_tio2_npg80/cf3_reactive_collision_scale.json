@@ -1,0 +1,138 @@
+{
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "declared_scale_assumptions": {
+    "chf3_density_proxy_m3": 7.462868702163137e+20,
+    "chf3_feed_fraction": 0.9016393442622951,
+    "comparison_path_length_m": 0.001,
+    "feed_fraction_used_as_sheath_edge_density_proxy": true,
+    "gas_temperature_K": 350.0,
+    "ideal_total_neutral_density_m3": 8.276999833308206e+20,
+    "path_is_not_an_inferred_sheath_thickness": true,
+    "pressure_mTorr": 30.0
+  },
+  "energy_convention": {
+    "laboratory_to_relative_factor": 0.5035971223021583,
+    "projectile": "CF3+",
+    "projectile_mass_amu": 69.0,
+    "source_axis": "relative collision energy",
+    "stationary_target": "CHF3",
+    "supported_laboratory_energy_eV": [
+      40.75637268571429,
+      388.90456542857146
+    ],
+    "target_mass_amu": 70.0
+  },
+  "identifiability_gates": {
+    "all_target_ion_neutral_pairs_available": false,
+    "angular_scattering_kernel_available": false,
+    "elastic_or_momentum_transfer_kernel_available": false,
+    "measured_cf3_chf3_reactive_kernel_available": true,
+    "supports_absolute_depth_prediction": false,
+    "supports_complete_molecular_transport": false,
+    "supports_target_iead": false,
+    "target_sheath_neutral_composition_validated": false
+  },
+  "interpretation": "The measured CF3+ destruction scale is non-negligible at the target pressure. This rejects a collisionless final boundary, but the feed-fraction density proxy and fixed 1 mm slab are sensitivity assumptions rather than a target-tool transport solution.",
+  "measured_depth_target_used": false,
+  "model": "Peko2002CF3CHF3ReactiveCollisionModel",
+  "samples": [
+    {
+      "laboratory_energy_eV": 50.0,
+      "reactive_cross_section_A2": {
+        "central": 21.030798966040905,
+        "lower": 17.52642189753068,
+        "upper": 24.53517603455113
+      },
+      "reactive_destruction_probability_per_1mm": {
+        "central": 0.14525328302213797,
+        "lower": 0.12260447050828617,
+        "upper": 0.1673174462061889
+      },
+      "reactive_optical_depth_per_1mm": {
+        "central": 0.15695009138515154,
+        "lower": 0.13079738543998837,
+        "upper": 0.1831027973303147
+      },
+      "relative_collision_energy_eV": 25.179856115107913
+    },
+    {
+      "laboratory_energy_eV": 100.0,
+      "reactive_cross_section_A2": {
+        "central": 23.880046586210618,
+        "lower": 19.66335761265796,
+        "upper": 28.09673555976327
+      },
+      "reactive_destruction_probability_per_1mm": {
+        "central": 0.16323637206285807,
+        "lower": 0.13648590299834854,
+        "upper": 0.1891581486976134
+      },
+      "reactive_optical_depth_per_1mm": {
+        "central": 0.1782136522744289,
+        "lower": 0.14674505610694635,
+        "upper": 0.20968224844191138
+      },
+      "relative_collision_energy_eV": 50.35971223021583
+    },
+    {
+      "laboratory_energy_eV": 200.0,
+      "reactive_cross_section_A2": {
+        "central": 25.162631276850064,
+        "lower": 20.625296130637544,
+        "upper": 29.699966423062584
+      },
+      "reactive_destruction_probability_per_1mm": {
+        "central": 0.17120746409207802,
+        "lower": 0.14266271835760824,
+        "upper": 0.19880182247434416
+      },
+      "reactive_optical_depth_per_1mm": {
+        "central": 0.1877854134200756,
+        "lower": 0.15392387696618137,
+        "upper": 0.2216469498739698
+      },
+      "relative_collision_energy_eV": 100.71942446043165
+    },
+    {
+      "laboratory_energy_eV": 300.0,
+      "reactive_cross_section_A2": {
+        "central": 25.814787029651164,
+        "lower": 21.11441294523837,
+        "upper": 30.515161114063957
+      },
+      "reactive_destruction_probability_per_1mm": {
+        "central": 0.17523135821509175,
+        "lower": 0.14578647872599002,
+        "upper": 0.2036612679026916
+      },
+      "reactive_optical_depth_per_1mm": {
+        "central": 0.19265236617659057,
+        "lower": 0.15757409153356763,
+        "upper": 0.2277306408196135
+      },
+      "relative_collision_energy_eV": 151.0791366906475
+    },
+    {
+      "laboratory_energy_eV": 380.0,
+      "reactive_cross_section_A2": {
+        "central": 26.071906264041665,
+        "lower": 21.307252371031247,
+        "upper": 30.836560157052084
+      },
+      "reactive_destruction_probability_per_1mm": {
+        "central": 0.17681244570318932,
+        "lower": 0.1470149234101717,
+        "upper": 0.20556904435150192
+      },
+      "reactive_optical_depth_per_1mm": {
+        "central": 0.19457121326364757,
+        "lower": 0.15901322684886038,
+        "upper": 0.23012919967843476
+      },
+      "relative_collision_energy_eV": 191.36690647482013
+    }
+  ],
+  "schema": "petch.cf3-reactive-collision-scale.v1",
+  "sem_target_used": false,
+  "source": "peko-2002-chf3-ion-molecule"
+}

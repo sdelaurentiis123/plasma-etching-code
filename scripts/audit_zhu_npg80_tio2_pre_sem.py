@@ -12,6 +12,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data" / "experimental" / "zhu_2026_tio2_npg80"
 DEFAULT_MANIFEST = DATA_DIR / "recipe_manifest.json"
 DEFAULT_OUTPUT = DATA_DIR / "pre_sem_receipt.json"
+SELF_BIAS_TRANSFER = DATA_DIR / "oxford80_self_bias_transfer.json"
+CF3_COLLISION_SCALE = DATA_DIR / "cf3_reactive_collision_scale.json"
+CHF2_MOBILITY_SCALE = DATA_DIR / "chf2_mobility_scale.json"
+TIO2_ANALOG_BOARD = DATA_DIR / "janissen_tio2_analog_board.json"
 
 
 def _sha256(path: Path) -> str:
@@ -66,6 +70,34 @@ def build_receipt(manifest: dict) -> dict:
     adjacent_mask_required = film_nm / adjacent_selectivity
     adjacent_clear_time = film_nm / adjacent_rate
     adjacent_mask_exhaustion_time = adjacent_supported_relief / adjacent_rate
+
+    self_bias_transfer = None
+    if SELF_BIAS_TRANSFER.exists():
+        self_bias_transfer = json.loads(
+            SELF_BIAS_TRANSFER.read_text(encoding="utf-8"))
+        if self_bias_transfer.get("condition_id") != manifest["condition_id"]:
+            raise ValueError("self-bias transfer belongs to another condition")
+
+    cf3_collision_scale = None
+    if CF3_COLLISION_SCALE.exists():
+        cf3_collision_scale = json.loads(
+            CF3_COLLISION_SCALE.read_text(encoding="utf-8"))
+        if cf3_collision_scale.get("condition_id") != manifest["condition_id"]:
+            raise ValueError("CF3 collision receipt belongs to another condition")
+
+    chf2_mobility_scale = None
+    if CHF2_MOBILITY_SCALE.exists():
+        chf2_mobility_scale = json.loads(
+            CHF2_MOBILITY_SCALE.read_text(encoding="utf-8"))
+        if chf2_mobility_scale.get("condition_id") != manifest["condition_id"]:
+            raise ValueError("CHF2 mobility receipt belongs to another condition")
+
+    tio2_analog_board = None
+    if TIO2_ANALOG_BOARD.exists():
+        tio2_analog_board = json.loads(
+            TIO2_ANALOG_BOARD.read_text(encoding="utf-8"))
+        if tio2_analog_board.get("condition_id") != manifest["condition_id"]:
+            raise ValueError("TiO2 analog board belongs to another condition")
 
     return {
         "schema": "petch.pre-sem-depth-receipt.v1",
@@ -130,15 +162,102 @@ def build_receipt(manifest: dict) -> dict:
             **manifest["experimental_program"]["adjacent_publication"],
             "used_as_condition_matched_target": False,
         },
+        "machine_family_self_bias_evidence": {
+            "available": self_bias_transfer is not None,
+            "receipt": (
+                str(SELF_BIAS_TRANSFER.relative_to(ROOT))
+                if self_bias_transfer is not None else None
+            ),
+            "matched_chemistry_reduced_drive_anchor_V": (
+                self_bias_transfer["mechanical_anchor_selection"]["anchor_V"]
+                if self_bias_transfer is not None else None
+            ),
+            "exact_tool_conditioning_drift_is_censored": (
+                True if self_bias_transfer is not None else None
+            ),
+            "interpretation": (
+                "Enables a deterministic machine-family sensitivity ensemble, "
+                "not a unique target-condition voltage or depth prediction."
+                if self_bias_transfer is not None else
+                "No machine-family voltage transfer is committed."
+            ),
+        },
+        "measured_molecular_collision_evidence": {
+            "available": cf3_collision_scale is not None,
+            "receipt": (
+                str(CF3_COLLISION_SCALE.relative_to(ROOT))
+                if cf3_collision_scale is not None else None
+            ),
+            "covered_pair_and_channels": (
+                "CF3+ + CHF3 summed CID and summed DCT destruction"
+                if cf3_collision_scale is not None else None
+            ),
+            "complete_molecular_transport": False,
+            "interpretation": (
+                "Measured reactive destruction proves collisions are "
+                "non-negligible; elastic/angular kernels and the remaining "
+                "ion-neutral pairs are still unresolved."
+                if cf3_collision_scale is not None else
+                "No target-relevant molecular collision kernel committed."
+            ),
+        },
+        "measured_molecular_mobility_evidence": {
+            "available": chf2_mobility_scale is not None,
+            "receipt": (
+                str(CHF2_MOBILITY_SCALE.relative_to(ROOT))
+                if chf2_mobility_scale is not None else None
+            ),
+            "covered_pair_and_observable": (
+                "CHF2+ in CHF3 reduced mobility"
+                if chf2_mobility_scale is not None else None
+            ),
+            "elastic_differential_cross_section": False,
+            "interpretation": (
+                "Measured mass-resolved mobility closes a bulk/presheath "
+                "momentum-relaxation scale, not an angular collision kernel "
+                "or a target sheath IEAD."
+                if chf2_mobility_scale is not None else
+                "No target-relevant molecular-ion mobility is committed."
+            ),
+        },
+        "audited_tio2_process_analogs": {
+            "available": tio2_analog_board is not None,
+            "receipt": (
+                str(TIO2_ANALOG_BOARD.relative_to(ROOT))
+                if tio2_analog_board is not None else None
+            ),
+            "closest_source_dc_bias_V_signed": (
+                tio2_analog_board["closest_stack_witness"]
+                ["dc_bias_V_signed"]
+                if tio2_analog_board is not None else None
+            ),
+            "source_feature_depth_board_available": (
+                True if tio2_analog_board is not None else False
+            ),
+            "transferred_as_target_coefficient": False,
+        },
         "identifiability_gates": {
             "recipe_and_stack_frozen": True,
             "specific_condition_sem_withheld": True,
             "achieved_dc_self_bias_measured": (
                 process["measured_dc_self_bias_V"] is not None
             ),
+            "machine_family_self_bias_sensitivity_available": (
+                self_bias_transfer is not None
+            ),
             "absorbed_plasma_power_measured": False,
+            "measured_cf3_chf3_reactive_collision_kernel_available": (
+                cf3_collision_scale is not None
+            ),
+            "measured_chf2_chf3_swarm_mobility_available": (
+                chf2_mobility_scale is not None
+            ),
+            "complete_molecular_ion_transport_available": False,
             "species_resolved_wafer_fluxes_measured_or_validated": False,
             "tio2_surface_law_measured_or_validated_for_condition": False,
+            "adjacent_tio2_process_response_board_available": (
+                tio2_analog_board is not None
+            ),
             "cr_surface_law_measured_or_validated_for_condition": False,
             "feature_geometry_and_loading_known": False,
             "supports_absolute_depth_prediction": False,

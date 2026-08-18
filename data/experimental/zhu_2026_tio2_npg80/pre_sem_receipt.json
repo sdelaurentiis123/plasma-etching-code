@@ -23,6 +23,13 @@
     "source": "holman-2026-nature-metasurface-tweezers",
     "used_as_condition_matched_target": false
   },
+  "audited_tio2_process_analogs": {
+    "available": true,
+    "closest_source_dc_bias_V_signed": -950.0,
+    "receipt": "data/experimental/zhu_2026_tio2_npg80/janissen_tio2_analog_board.json",
+    "source_feature_depth_board_available": true,
+    "transferred_as_target_coefficient": false
+  },
   "authoritative_recipe": {
     "device_family": "visible-wavelength TiO2 photonic metasurface pillars",
     "etch_time_min": 20.0,
@@ -48,15 +55,41 @@
   "identifiability_gates": {
     "absorbed_plasma_power_measured": false,
     "achieved_dc_self_bias_measured": false,
+    "adjacent_tio2_process_response_board_available": true,
+    "complete_molecular_ion_transport_available": false,
     "cr_surface_law_measured_or_validated_for_condition": false,
     "feature_geometry_and_loading_known": false,
+    "machine_family_self_bias_sensitivity_available": true,
+    "measured_cf3_chf3_reactive_collision_kernel_available": true,
+    "measured_chf2_chf3_swarm_mobility_available": true,
     "recipe_and_stack_frozen": true,
     "species_resolved_wafer_fluxes_measured_or_validated": false,
     "specific_condition_sem_withheld": true,
     "supports_absolute_depth_prediction": false,
     "tio2_surface_law_measured_or_validated_for_condition": false
   },
+  "machine_family_self_bias_evidence": {
+    "available": true,
+    "exact_tool_conditioning_drift_is_censored": true,
+    "interpretation": "Enables a deterministic machine-family sensitivity ensemble, not a unique target-condition voltage or depth prediction.",
+    "matched_chemistry_reduced_drive_anchor_V": 276.0,
+    "receipt": "data/experimental/zhu_2026_tio2_npg80/oxford80_self_bias_transfer.json"
+  },
   "measured_depth_target_used": false,
+  "measured_molecular_collision_evidence": {
+    "available": true,
+    "complete_molecular_transport": false,
+    "covered_pair_and_channels": "CF3+ + CHF3 summed CID and summed DCT destruction",
+    "interpretation": "Measured reactive destruction proves collisions are non-negligible; elastic/angular kernels and the remaining ion-neutral pairs are still unresolved.",
+    "receipt": "data/experimental/zhu_2026_tio2_npg80/cf3_reactive_collision_scale.json"
+  },
+  "measured_molecular_mobility_evidence": {
+    "available": true,
+    "covered_pair_and_observable": "CHF2+ in CHF3 reduced mobility",
+    "elastic_differential_cross_section": false,
+    "interpretation": "Measured mass-resolved mobility closes a bulk/presheath momentum-relaxation scale, not an angular collision kernel or a target sheath IEAD.",
+    "receipt": "data/experimental/zhu_2026_tio2_npg80/chf2_mobility_scale.json"
+  },
   "necessary_conditions_for_full_clear": {
     "minimum_effective_tio2_rate_nm_min": 35.0,
     "minimum_zero_margin_tio2_to_cr_selectivity": 15.555555555555555,

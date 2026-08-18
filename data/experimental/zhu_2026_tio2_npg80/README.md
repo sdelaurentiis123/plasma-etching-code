@@ -43,18 +43,85 @@ therefore a mask-survival warning, not a transferable prediction. The supplied
 condition additionally contains SF6 and runs on a particular machine whose
 achieved self-bias is unknown.
 
+The full supplementary tables are now visually audited rather than represented
+only by that headline. The closest stack witness uses the same `45 nm` Cr mask,
+`175 nm` diameter, `200 W`, `37.5 mTorr`, and a measured `-950 V` DC bias. A
+within-batch power sweep gives `30/58/68 nm/min` at `100/165/200 W`, and two
+feature batches on a second nominally identical RIE give `273 nm` after `8 min`
+and `652 nm` after `15 min`. Those exact rows form a target-free process and
+depth validation board. They do not transfer as an Oxford/ALD-TiO2 coefficient:
+the source tool is a Fluor Z401S, the material is single-crystal rutile, and the
+target adds SF6. Rebuild it with:
+
+```bash
+python scripts/audit_zhu_npg80_tio2_analog_board.py --check
+```
+
 Run the target-free receipt with:
 
 ```bash
 python scripts/audit_zhu_npg80_tio2_pre_sem.py --check
 ```
 
+## Measured CHF3 ion-collision floor
+
+The NIST Peko data now supply a checksum-replayed reactive-destruction kernel
+for `CF3+ + CHF3`: a 21-point summed-DCT curve plus the reported `18 A2`
+summed CID cross section. The implementation explicitly converts powered-ion
+laboratory energy to the paper's relative collision energy. At the target
+pressure, an ideal-gas/feed-fraction scale check gives order `0.2` reactive
+optical depth per millimeter near a `200 eV` CF3+ laboratory energy. That is
+large enough to reject the collisionless sheath as the final boundary.
+
+This is not yet a full molecular IEAD. The comparison uses feed fraction as a
+neutral-density proxy and a declared 1 mm slab; elastic/momentum-transfer and
+angular scattering, other ion-neutral pairs, and the actual sheath composition
+remain open. Rebuild the target-free scale receipt with:
+
+```bash
+python scripts/audit_zhu_npg80_cf3_collision_scale.py --check
+```
+
+Basurto and de Urquijo independently measured the mass-resolved `CHF2+` reduced
+mobility in `CHF3`. The checksum-pinned Figure 1 series now provides a C1,
+no-extrapolation swarm closure over `45.18--450.35 Td`. At `30 mTorr`, using
+the `20 C` electrode setpoint only as a declared ideal-gas density proxy, the
+derived drift-relaxation scale grows from roughly `0.1 mm` at `100 Td` toward
+`1 mm` at `400 Td`. This is direct evidence that molecular momentum relaxation
+belongs in the boundary model; it is not a unique elastic/angular cross
+section or a target IEAD. Rebuild the receipt with:
+
+```bash
+python scripts/audit_zhu_npg80_chf2_mobility_scale.py --check
+```
+
+## Machine-family self-bias evidence
+
+The two downloaded files are valid despite their generic/misleading names.
+The NCSU thesis contains an exact Oxford PlasmaPro NGP80 CHF3 procedure whose
+self-bias typically drifts from above 300 V at run start to below about 200 V
+at run end. A separate Oxford PlasmaLab 80 thesis measures 276 V for the same
+active-gas set (`SF6/O2/CHF3`) at exactly the target recipe's reported
+`power/pressure = 5 W/mTorr`. Same-family measurements at adjacent chemistries
+extend to 360--387 V at 30 mTorr and 400 V for CHF3/Ar.
+
+Those values remove the fiction that the voltage is wholly unconstrained, but
+they do not identify one exact target voltage. The committed transfer therefore
+provides five deterministic sensitivity histories, preserves the exact-tool
+start/end statements as censored inequalities, and forbids selecting a history
+after viewing the held-out SEM. Rebuild it with:
+
+```bash
+python scripts/audit_zhu_npg80_self_bias.py --check
+```
+
 ## What remains unidentifiable from the recipe alone
 
 Forward power and feed flows do not uniquely determine absorbed power,
 self-bias, ion energy distribution, species-resolved wafer fluxes, or the
-TiO2/Cr surface response. The exact absolute depth and profile are therefore
-not yet a defensible model output. The highest-value missing observations are:
+TiO2/Cr surface response. The family evidence now supports a physics-constrained
+voltage sensitivity ensemble, but exact absolute depth and profile are not yet
+a defensible model output. The highest-value missing observations are:
 
 1. achieved DC self-bias (and, if available, RF voltage/current waveforms),
 2. blanket TiO2 rate and Cr loss or residual Cr for this condition,

@@ -1,0 +1,83 @@
+{
+  "closest_stack_witness": {
+    "dc_bias_V_signed": -950.0,
+    "etch_time_min": 11.0,
+    "figure": "3.2a",
+    "forward_power_per_pressure_W_mTorr": 5.33289473473877,
+    "gas_flows_sccm": {
+      "CHF3": 50.0,
+      "O2": 0.5
+    },
+    "implied_feature_rate_nm_min": 39.09090909090909,
+    "mask_diameter_nm": 175.0,
+    "mask_height_nm": 45.0,
+    "pressure_mTorr": 37.50308415,
+    "reported_approximate_selectivity": 14.0,
+    "reported_feature_height_nm": 430.0,
+    "rf_power_W": 200.0,
+    "source_material": "single-crystal rutile TiO2",
+    "system_model": "Fluor Z401S",
+    "target_material": "ALD TiO2; phase and density unreported"
+  },
+  "coefficient_selected_from_target": null,
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "identifiability_gates": {
+    "exact_source_tables_visually_audited": true,
+    "source_feature_depths_available": true,
+    "source_power_response_available": true,
+    "supports_absolute_target_depth_prediction": false,
+    "target_machine_boundary_validated": false,
+    "target_material_surface_law_validated": false
+  },
+  "measured_depth_target_used": false,
+  "schema": "petch.target-free-tio2-analog-board.v1",
+  "sem_target_used": false,
+  "source": "janissen-2016-tio2-rie",
+  "source_feature_depth_board": {
+    "maximum_implied_rate_nm_min": 43.46666666666667,
+    "minimum_implied_rate_nm_min": 34.125,
+    "same_F2_nominal_recipe_different_mask_and_pattern": [
+      {
+        "etch_time_min": 8.0,
+        "figure": "S3.4",
+        "height_global_rsd_percent": 3.1,
+        "height_nm": 273.0,
+        "implied_rate_nm_min": 34.125
+      },
+      {
+        "etch_time_min": 15.0,
+        "figure": "3.3",
+        "height_global_rsd_percent": 1.4,
+        "height_nm": 652.0,
+        "implied_rate_nm_min": 43.46666666666667
+      }
+    ],
+    "target_required_clear_rate_nm_min": 35.0,
+    "warning": "The non-proportional source heights differ in mask and pattern as well as time; they are validation outcomes, not a temporal-rate fit."
+  },
+  "source_power_sweep_interpolation": {
+    "power_support_W": [
+      100.0,
+      165.0,
+      200.0
+    ],
+    "scope": "PCHIP interpolation inside the Janissen Ra batch only; not transferred to the target",
+    "source_system_clear_time_for_700nm_min": 13.301892781889965,
+    "source_system_cr_consumption_for_700nm_nm": 38.852919657512054,
+    "source_system_cr_rate_nm_min": 2.9208564746822248,
+    "source_system_cr_residual_after_700nm_nm": 6.147080342487946,
+    "source_system_selectivity": 18.016664028610727,
+    "source_system_tio2_rate_nm_min": 52.62408978014197,
+    "supports_target_prediction": false,
+    "target_power_W": 150.0
+  },
+  "target_similarity": {
+    "same_active_gas_set": false,
+    "same_cr_mask_thickness": true,
+    "same_machine": false,
+    "same_tio2_material_state": false,
+    "source_to_target_reduced_drive_ratio": 1.066578946947754,
+    "target_added_SF6_sccm": 5.0,
+    "target_forward_power_per_pressure_W_mTorr": 5.0
+  }
+}
