@@ -6,14 +6,15 @@ from petch.reactor_global.zhu_supplemental_chemistry import (
     KOKKORIS_2009_TARGET_PRESSURE_PA,
     ZHU_RECIPE_PRESSURE_PA,
     build_zhu_supplemental_chemistry,
+    zhu_reactor_species,
 )
 
 
 def test_supplemental_network_is_closed_and_does_not_duplicate_parent_rows():
     chemistry = build_zhu_supplemental_chemistry()
     names = {reaction.name for reaction in chemistry.network.reactions}
-    assert len(chemistry.network.species) == 45
-    assert len(chemistry.network.reactions) == 46
+    assert len(chemistry.network.species) == 55
+    assert len(chemistry.network.reactions) == 188
     assert chemistry.parent_sf6_rows_replaced == (
         "G1", "G2", "G3", "G8", "G9", "G10", "G17", "G18")
     assert not any(
@@ -67,6 +68,36 @@ def test_declared_limits_remain_false_until_next_physics_layers_land():
     chemistry = build_zhu_supplemental_chemistry()
     assert chemistry.supports_measured_parent_eedf is True
     assert chemistry.supports_complete_daughter_eedf is False
-    assert chemistry.supports_complete_oxygen_heavy_chemistry is False
+    assert chemistry.supports_oxygen_daughter_chemistry is True
+    assert chemistry.supports_sf6_o2_titration_chemistry is True
+    assert chemistry.supports_complete_cross_ion_recombination is False
     with pytest.raises(ValueError):
         build_zhu_supplemental_chemistry(kokkoris_eedf_shape="interpolated")
+
+
+def test_every_parent_negative_ion_has_a_volume_loss_path():
+    chemistry = build_zhu_supplemental_chemistry()
+    negative_names = {
+        species.name for species in zhu_reactor_species()
+        if species.role == "negative_ion"
+    }
+    consumed = {
+        name
+        for reaction in chemistry.network.reactions
+        for name in reaction.reactants
+        if name in negative_names
+    }
+    assert consumed == negative_names
+
+
+def test_oxygen_titration_releases_fluorine_without_losing_atoms():
+    chemistry = build_zhu_supplemental_chemistry()
+    reaction = next(
+        item for item in chemistry.network.reactions
+        if item.name == "pateau_2014_R134_O")
+    assert reaction.reactants == {"SF3": 1, "O": 1}
+    assert reaction.products == {"SOF3": 1}
+    fluorine_releasing = next(
+        item for item in chemistry.network.reactions
+        if item.name == "pateau_2014_R119_O")
+    assert fluorine_releasing.products == {"SOF2": 1, "F": 1}

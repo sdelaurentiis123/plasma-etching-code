@@ -25,7 +25,8 @@
 ## Executable decision
 
 `build_zhu_supplemental_chemistry()` installs 36 Kokkoris daughter/heavy
-reactions plus ten explicitly selected Sandia CHF2/recombination rows. It
+reactions plus ten explicitly selected Sandia CHF2/recombination rows before
+adding the separately sourced Pateau oxygen/cross-chemistry block. It
 exposes the two Kokkoris EEDF assumptions, excludes all measured-parent
 duplicates, and excludes the three pressure-specific fall-off rows. Oxygen
 heavy chemistry, target-machine wall probabilities, and true daughter

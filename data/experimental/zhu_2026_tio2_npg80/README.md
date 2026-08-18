@@ -127,12 +127,17 @@ The SF6 parent chemistry is now product-resolved rather than an aggregate
 curves; Tables 3 and 16 constrain nine positive-ion branches.  Their executable
 split preserves the evaluated total attachment and ionization curves exactly
 and treats double ionization with the correct two-electron source.  The entire
-three-gas deck is mapped to 44 explicit heavy species through 46 atom- and
-charge-checked events in `zhu_parent_collision_chemistry.py`.  Two source gaps
+three-gas deck is mapped through 46 atom- and charge-checked events in
+`zhu_parent_collision_chemistry.py`; its shared species basis contains 45
+entries including the daughter F2+ closure. Two source gaps
 remain visibly graded: aggregate SF6 neutral dissociation currently uses the
 literature-dominant `SF5 + F` branch, and aggregate O2 ionization currently
 uses the `O2+` branch.  This closes the parent collision source term, not the
-daughter-species, wall, exhaust, or absorbed-power balances.
+daughter-species, wall, exhaust, or absorbed-power balances. The supplemental
+reactor network now contains 188 conserved daughter/heavy reactions over 55
+species, including the Pateau SFx/O -> SOxFy titration chain that releases F,
+while keeping target-machine wall physics and cross-family ion closures
+explicit.
 
 ## Machine-family self-bias evidence
 

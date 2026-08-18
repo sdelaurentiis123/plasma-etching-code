@@ -457,9 +457,11 @@ from .zhu_parent_collision_chemistry import (
 from .zhu_supplemental_chemistry import (
     KOKKORIS_2009_DOI,
     KOKKORIS_2009_TARGET_PRESSURE_PA,
+    PATEAU_2014_DOI,
     ZHU_RECIPE_PRESSURE_PA,
     ZhuSupplementalChemistry,
     build_zhu_supplemental_chemistry,
+    zhu_reactor_species,
 )
 from .current_driven_rf_sheath import (
     PeriodicCurrentDensity,
@@ -782,9 +784,11 @@ __all__ = [
     "zhu_parent_collision_species",
     "KOKKORIS_2009_DOI",
     "KOKKORIS_2009_TARGET_PRESSURE_PA",
+    "PATEAU_2014_DOI",
     "ZHU_RECIPE_PRESSURE_PA",
     "ZhuSupplementalChemistry",
     "build_zhu_supplemental_chemistry",
+    "zhu_reactor_species",
     "PeriodicCurrentDensity",
     "TurnerChabertCurrentDrivenSheath",
     "TurnerChabertCurrentSheathTangent",

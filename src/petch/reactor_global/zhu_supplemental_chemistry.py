@@ -26,9 +26,11 @@ import numpy as np
 
 from .network import (
     ConstantRateCoefficient,
+    ElectronArrheniusRateCoefficient,
     ElectronLogTemperatureInversePolynomialRateCoefficient,
     Reaction,
     ReactionNetwork,
+    Species,
 )
 from .sandia_chf3_mechanism import build_sandia_2001_chf3_table9_network
 from .zhu_parent_collision_chemistry import zhu_parent_collision_species
@@ -37,6 +39,7 @@ from .zhu_parent_collision_chemistry import zhu_parent_collision_species
 KOKKORIS_2009_DOI = "10.1088/0022-3727/42/5/055209"
 KOKKORIS_2009_TARGET_PRESSURE_PA = 2.0
 ZHU_RECIPE_PRESSURE_PA = 3.0e-2 * 133.32236842105263
+PATEAU_2014_DOI = "10.1116/1.4853675"
 
 _PARENT_SF6_ROWS_REPLACED_BY_MEASURED_CROSS_SECTIONS = (
     "G1", "G2", "G3", "G8", "G9", "G10", "G17", "G18",
@@ -164,7 +167,237 @@ class ZhuSupplementalChemistry:
     supports_measured_parent_eedf: bool = True
     supports_complete_daughter_eedf: bool = False
     supports_target_pressure_falloff: bool = False
-    supports_complete_oxygen_heavy_chemistry: bool = False
+    supports_oxygen_daughter_chemistry: bool = True
+    supports_sf6_o2_titration_chemistry: bool = True
+    supports_complete_cross_ion_recombination: bool = False
+
+
+def zhu_reactor_species() -> tuple[Species, ...]:
+    """Return parent products plus the Pateau O/S/F coupling products."""
+    source = "pateau-2014-sf6-o2 Table I and Tables V/VII"
+    extra = (
+        Species(
+            name="O(1d)", mass_amu=15.9994, charge_number=0,
+            composition={"O": 1}, role="excited_neutral",
+            source=source, evidence_kind="published_compilation"),
+        Species(
+            name="O+", mass_amu=15.9994, charge_number=1,
+            composition={"O": 1}, role="positive_ion",
+            source=source, evidence_kind="published_compilation"),
+    )
+    oxygenated = (
+        ("SO", {"S": 1, "O": 1}),
+        ("SO2", {"S": 1, "O": 2}),
+        ("SOF", {"S": 1, "O": 1, "F": 1}),
+        ("SOF2", {"S": 1, "O": 1, "F": 2}),
+        ("SOF3", {"S": 1, "O": 1, "F": 3}),
+        ("SOF4", {"S": 1, "O": 1, "F": 4}),
+        ("SO2F", {"S": 1, "O": 2, "F": 1}),
+        ("SO2F2", {"S": 1, "O": 2, "F": 2}),
+    )
+    atomic_mass = {"S": 32.065, "O": 15.9994, "F": 18.998403163}
+    return (
+        *zhu_parent_collision_species(),
+        *extra,
+        *(Species(
+            name=name,
+            mass_amu=sum(
+                atomic_mass[element] * count
+                for element, count in composition.items()),
+            charge_number=0,
+            composition=composition,
+            role="neutral",
+            source=source,
+            evidence_kind="published_compilation",
+        ) for name, composition in oxygenated),
+    )
+
+
+def _pateau_oxygen_reactions() -> tuple[Reaction, ...]:
+    electron_rows = (
+        (75, {"e": 1, "O": 1}, {"e": 1, "O(1d)": 1},
+         4.47e-9, 0.0, 2.286, 1.96),
+        (76, {"e": 1, "O": 1}, {"e": 2, "O+": 1},
+         9.0e-9, .7, 13.6, 13.62),
+        (77, {"e": 1, "O(1d)": 1}, {"e": 2, "O+": 1},
+         9.0e-9, .7, 11.6, 11.65),
+        (78, {"e": 1, "O2+": 1}, {"O": 2},
+         5.2e-9, -1.0, 0.0, 0.0),
+        (79, {"e": 1, "O-": 1}, {"e": 2, "O": 1},
+         2.0e-7, 0.0, 5.5, 5.5),
+    )
+    reactions = [Reaction(
+        name=f"pateau_2014_R{number}",
+        reactants=reactants,
+        products=products,
+        kinetic_orders=reactants,
+        rate_coefficient=ElectronArrheniusRateCoefficient.from_cm3_per_s(
+            prefactor,
+            activation_eV=activation,
+            temperature_power=power,
+            source=f"pateau-2014-sf6-o2 Table V R{number}",
+            evidence_kind="published_compilation",
+        ),
+        electron_energy_loss_eV=energy_loss,
+        source=f"pateau-2014-sf6-o2 Table V R{number}",
+    ) for (
+        number, reactants, products, prefactor, power, activation, energy_loss
+    ) in electron_rows]
+    heavy_rows = (
+        (80, {"O(1d)": 1, "O2": 1}, {"O": 1, "O2": 1}, 4.11e-11),
+        (81, {"O(1d)": 1, "O": 1}, {"O": 2}, 8.1e-12),
+        (82, {"O+": 1, "O2": 1}, {"O": 1, "O2+": 1}, 2.0e-11),
+        (83, {"O": 1, "O-": 1}, {"O2": 1, "e": 1}, 3.0e-10),
+        (84, {"O-": 1, "O2+": 1}, {"O": 1, "O2": 1}, 1.5e-7),
+        (85, {"O-": 1, "O+": 1}, {"O": 2}, 2.5e-7),
+    )
+    reactions.extend(Reaction(
+        name=f"pateau_2014_R{number}",
+        reactants=reactants,
+        products=products,
+        kinetic_orders=reactants,
+        rate_coefficient=ConstantRateCoefficient.from_cm3_per_s(
+            coefficient,
+            source=f"pateau-2014-sf6-o2 Table V R{number}",
+            evidence_kind="published_compilation",
+        ),
+        electron_energy_loss_eV=0.0,
+        source=f"pateau-2014-sf6-o2 Table V R{number}",
+    ) for number, reactants, products, coefficient in heavy_rows)
+    return tuple(reactions)
+
+
+def _pateau_titration_reactions() -> tuple[Reaction, ...]:
+    base_rows = (
+        (119, "SF3", "SOF2", "F", 2.0e-11),
+        (120, "SF2", "SOF", "F", 1.1e-10),
+        (121, "SF", "SO", "F", 1.7e-10),
+        (122, "SOF", "SO2", "F", 7.9e-11),
+        (123, "SOF3", "SO2F2", "F", 5.0e-11),
+    )
+    reactions = []
+    for number, reactant, product, coproduct, coefficient in base_rows:
+        for oxygen in ("O", "O(1d)"):
+            reactions.append(Reaction(
+                name=f"pateau_2014_R{number}_{oxygen}",
+                reactants={reactant: 1, oxygen: 1},
+                products={product: 1, coproduct: 1},
+                kinetic_orders={reactant: 1, oxygen: 1},
+                rate_coefficient=ConstantRateCoefficient.from_cm3_per_s(
+                    coefficient,
+                    source=f"pateau-2014-sf6-o2 Table VII R{number}",
+                    evidence_kind="published_compilation"),
+                electron_energy_loss_eV=0.0,
+                source=f"pateau-2014-sf6-o2 Table VII R{number}",
+            ))
+    simple_rows = (
+        (124, {"SOF3": 1, "F": 1}, {"SOF4": 1}, 5.2e-14),
+        (125, {"SOF2": 1, "F": 1}, {"SOF3": 1}, 5.2e-14),
+        (126, {"SOF": 1, "F": 1}, {"SOF2": 1}, 1.0e-13),
+        (127, {"SO": 1, "F": 1}, {"SOF": 1}, 1.0e-14),
+        (128, {"SO2": 1, "F": 1}, {"SO2F": 1}, 1.0e-13),
+        (129, {"SO2F": 1, "F": 1}, {"SO2F2": 1}, 1.0e-11),
+    )
+    reactions.extend(Reaction(
+        name=f"pateau_2014_R{number}",
+        reactants=reactants,
+        products=products,
+        kinetic_orders=reactants,
+        rate_coefficient=ConstantRateCoefficient.from_cm3_per_s(
+            coefficient,
+            source=f"pateau-2014-sf6-o2 Table VII R{number}",
+            evidence_kind="published_compilation"),
+        electron_energy_loss_eV=0.0,
+        source=f"pateau-2014-sf6-o2 Table VII R{number}",
+    ) for number, reactants, products, coefficient in simple_rows)
+    continued_rows = (
+        (130, "SO", {"SO2": 1}, 1.4e-13),
+        (131, "SOF2", {"SO2F2": 1}, 1.0e-15),
+        (132, "SF5", {"SOF4": 1, "F": 1}, 1.0e-12),
+        (133, "SF4", {"SOF4": 1}, 1.0e-14),
+        (134, "SF3", {"SOF3": 1}, 1.0e-10),
+        (135, "SF2", {"SOF2": 1}, 1.0e-10),
+        (136, "SF", {"SOF": 1}, 1.0e-10),
+        (137, "SO2F2", {"SOF2": 1, "O2": 1}, 1.0e-12),
+    )
+    for number, reactant, products, coefficient in continued_rows:
+        for oxygen in ("O", "O(1d)"):
+            reactions.append(Reaction(
+                name=f"pateau_2014_R{number}_{oxygen}",
+                reactants={reactant: 1, oxygen: 1},
+                products=products,
+                kinetic_orders={reactant: 1, oxygen: 1},
+                rate_coefficient=ConstantRateCoefficient.from_cm3_per_s(
+                    coefficient,
+                    source=f"pateau-2014-sf6-o2 Table VII R{number}",
+                    evidence_kind="published_compilation"),
+                electron_energy_loss_eV=0.0,
+                source=f"pateau-2014-sf6-o2 Table VII R{number}",
+            ))
+    return tuple(reactions)
+
+
+def _pateau_sf6_charge_closure_reactions() -> tuple[Reaction, ...]:
+    """Fill exact Table-III R38/R50 pairs absent from Kokkoris's subset."""
+    reactions = []
+    negative_parents = {
+        "SF6-": "SF6", "SF5-": "SF5", "SF4-": "SF4",
+        "SF3-": "SF3", "SF2-": "SF2", "F-": "F", "F2-": "F2",
+    }
+    neutral_partners = ("SF6", "SF5", "SF4", "SF3", "SF2", "SF", "S", "F", "F2")
+    kokkoris_detachment = {
+        (negative, partner)
+        for negative in ("SF6-", "F-")
+        for partner in ("SF6", "SF5", "SF4", "SF3", "F", "F2")
+    }
+    for negative, neutral in negative_parents.items():
+        for partner in neutral_partners:
+            if (negative, partner) in kokkoris_detachment:
+                continue
+            products = {neutral: 1, partner: 1, "e": 1}
+            if neutral == partner:
+                products = {neutral: 2, "e": 1}
+            reactions.append(Reaction(
+                name=f"pateau_2014_R38_{negative}_{partner}",
+                reactants={negative: 1, partner: 1},
+                products=products,
+                kinetic_orders={negative: 1, partner: 1},
+                rate_coefficient=ConstantRateCoefficient.from_cm3_per_s(
+                    5.27e-14,
+                    source="pateau-2014-sf6-o2 Table III R38",
+                    evidence_kind="published_compilation"),
+                electron_energy_loss_eV=0.0,
+                source="pateau-2014-sf6-o2 Table III R38",
+            ))
+    positive_parents = {
+        "SF5+": "SF5", "SF4+": "SF4", "SF3+": "SF3",
+        "SF2+": "SF2", "SF+": "SF", "S+": "S", "F+": "F", "F2+": "F2",
+    }
+    kokkoris_recombination = {
+        (positive, negative)
+        for positive in ("SF5+", "SF4+", "SF3+", "F2+")
+        for negative in ("SF6-", "F-")
+    }
+    for positive, positive_neutral in positive_parents.items():
+        for negative, negative_neutral in negative_parents.items():
+            if (positive, negative) in kokkoris_recombination:
+                continue
+            products = {positive_neutral: 1, negative_neutral: 1}
+            if positive_neutral == negative_neutral:
+                products = {positive_neutral: 2}
+            reactions.append(Reaction(
+                name=f"pateau_2014_R50_{positive}_{negative}",
+                reactants={positive: 1, negative: 1},
+                products=products,
+                kinetic_orders={positive: 1, negative: 1},
+                rate_coefficient=ConstantRateCoefficient.from_cm3_per_s(
+                    1.0e-7,
+                    source="pateau-2014-sf6-o2 Table III R50",
+                    evidence_kind="published_compilation"),
+                electron_energy_loss_eV=0.0,
+                source="pateau-2014-sf6-o2 Table III R50",
+            ))
+    return tuple(reactions)
 
 
 def _electron_reaction(row: _KokkorisElectronRow, shape: str) -> Reaction:
@@ -234,8 +467,14 @@ def build_zhu_supplemental_chemistry(
     if len(selected_sandia) != len(selected_names):
         raise RuntimeError("Sandia daughter-row selection is incomplete")
     network = ReactionNetwork(
-        species=zhu_parent_collision_species(),
-        reactions=tuple((*kokkoris, *selected_sandia)),
+        species=zhu_reactor_species(),
+        reactions=tuple((
+            *kokkoris,
+            *selected_sandia,
+            *_pateau_oxygen_reactions(),
+            *_pateau_titration_reactions(),
+            *_pateau_sf6_charge_closure_reactions(),
+        )),
     )
     return ZhuSupplementalChemistry(
         network=network,

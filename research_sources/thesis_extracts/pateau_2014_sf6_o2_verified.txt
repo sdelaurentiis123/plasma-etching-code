@@ -1,0 +1,62 @@
+Pateau et al. 2014, JVST A 32 021303
+DOI 10.1116/1.4853675
+Focused verified extraction: Tables I, III, V, VII
+
+Model boundary:
+- 0-D SF6/O2/Ar ICP global model, Maxwellian EEDF.
+- 1500 W source, 20/30/40 mTorr, 200 sccm, 20% Ar.
+- cylindrical reactor R=18 cm, L=17.5 cm.
+- particle balance: feed + electron + volume + wall - exhaust.
+- charge neutrality and electron power balance solved at steady state.
+
+Oxygen daughter rows imported after replacing parent-O2 rows by Song 2026:
+R75 e+O -> O(1d)+e: 4.47e-9 exp(-2.286/Te) cm3/s, Eth=1.96 eV
+R76 e+O -> O+ +2e: 9.0e-9 Te^0.7 exp(-13.6/Te), Eth=13.62
+R77 e+O(1d) -> O+ +2e: 9.0e-9 Te^0.7 exp(-11.6/Te), Eth=11.65
+R78 e+O2+ -> 2O: 5.2e-9/Te cm3/s
+R79 e+O- -> O+2e: 2.0e-7 exp(-5.5/Te), Eth=5.5
+R80 O(1d)+O2 -> O+O2: 4.11e-11 cm3/s
+R81 O(1d)+O -> 2O: 8.1e-12 cm3/s
+R82 O+ +O2 -> O+O2+: 2.0e-11 cm3/s
+R83 O+O- -> O2+e: 3.0e-10 cm3/s
+R84 O-+O2+ -> O+O2: 1.5e-7 cm3/s
+R85 O-+O+ -> 2O: 2.5e-7 cm3/s
+
+SF6 negative-ion closures:
+R38 X-+Y -> X+Y+e: 5.27e-14 cm3/s;
+  X=SF6,SF5,SF4,SF3,SF2,F,F2;
+  Y=SF6,SF5,SF4,SF3,SF2,SF,S,F,F2.
+R50 X+ +Y- -> X+Y: 1.0e-7 cm3/s;
+  X=SF5,SF4,SF3,SF2,SF,S,F,F2;
+  Y=SF6,SF5,SF4,SF3,SF2,F,F2.
+
+SF6/O2 coupling, Table VII (all cm3/s):
+R119 SF3+O(a) -> SOF2+F, 2.0e-11
+R120 SF2+O(a) -> SOF+F, 1.1e-10
+R121 SF+O(a) -> SO+F, 1.7e-10
+R122 SOF+O(a) -> SO2+F, 7.9e-11
+R123 SOF3+O(a) -> SO2F2+F, 5.0e-11
+R124 SOF3+F -> SOF4, 5.2e-14
+R125 SOF2+F -> SOF3, 5.2e-14
+R126 SOF+F -> SOF2, 1.0e-13
+R127 SO+F -> SOF, 1.0e-14
+R128 SO2+F -> SO2F, 1.0e-13
+R129 SO2F+F -> SO2F2, 1.0e-11
+R130 SO+O(a) -> SO2, 1.4e-13
+R131 SOF2+O(a) -> SO2F2, 1.0e-15
+R132 SF5+O(a) -> SOF4+F, 1.0e-12
+R133 SF4+O(a) -> SOF4, 1.0e-14
+R134 SF3+O(a) -> SOF3, 1.0e-10
+R135 SF2+O(a) -> SOF2, 1.0e-10
+R136 SF+O(a) -> SOF, 1.0e-10
+R137 SO2F2+O(a) -> SOF2+O2, 1.0e-12
+Footnote a: O(a) is separately O(3p) and O(1d), same rate.
+
+Quarantine:
+R138 prints SOF4 -> SOF3+F but gives bimolecular units. It is not imported.
+
+Observed/model validation trend:
+O2 titrates SFx into SOxFy and releases F; F density rises with O2 to a
+mid-mixture maximum before SF6 starvation. This topology matters even for a
+small O2 recipe fraction, but the target magnitude must emerge from the Zhu
+reactor state rather than transfer from Pateau's ICP.
