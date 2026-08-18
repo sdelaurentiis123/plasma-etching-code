@@ -1,0 +1,48 @@
+{
+  "citation": {
+    "authors": "Phan-Thi Lan and Byong-Hoon Jeon",
+    "doi": "10.3938/jkps.64.1320",
+    "journal": "Journal of the Korean Physical Society 64, 1320-1326 (2014)",
+    "title": "Determination of the Electron Collision Cross-section Set for the C4F6 Molecule by Using an Electron Swarm Study"
+  },
+  "evidence_boundary": {
+    "figure8_present_in_source_pdf": false,
+    "note": "The text references Figure 8, but the archived seven-page publisher PDF contains Figures 1-7 only. Figure 7 remains a combined measured/source-replay board.",
+    "reported_exception_0p5pct_20_35Td_percent": 21.0,
+    "reported_exception_10pct_120_230Td_percent": -16.0,
+    "reported_typical_drift_reproduction": "within +/-5%",
+    "supports_feature_depth": false,
+    "supports_independent_validation_of_regressed_rows": false,
+    "supports_reactor_state_prediction": false,
+    "supports_wafer_flux": false,
+    "swarm_fit_domain_Td": [
+      0.35,
+      1200.0
+    ]
+  },
+  "generated_payload_sha256": {
+    "table1_momentum_transfer.csv": "ed3bd6f0281fd498b4b95a5c8a3f34025ccb221d5833897d1483251be1a80cbd",
+    "table2_inelastic.csv": "46d65c7ffcd54382b5869d873dddb48ddd16c060466d3ac02ba43478d8fd257a"
+  },
+  "schema": "petch.lan-jeon-2014-c4f6-electron-evidence.v1",
+  "si_conversion": "1e-16 cm2 = 1e-20 m2",
+  "source_pdf_sha256": "82d672f5b60611894a4584aa503e4c26d66aec3c66792550de46fb660f77aeb6",
+  "source_units": "1e-16 cm2",
+  "table1_point_count": 37,
+  "table2_point_count_by_process": {
+    "Qa": 34,
+    "Qdiss": 9,
+    "Qex1": 13,
+    "Qex2": 14,
+    "Qex3": 12,
+    "Qex4": 12,
+    "Qi": 10,
+    "Qv1": 27,
+    "Qv2": 35
+  },
+  "visual_audit_render_sha256": {
+    "figure7_pdf_page6_600dpi": "6cf27de7bb64e8cf9a34969b7ed9d44f5508bac0c6705eec3ef34f52fb540033",
+    "table1_pdf_page3_600dpi": "ccf3f0d9da9699d7074cd36b229fc6225405836599c9dc618085dc7ee9cc3bbc",
+    "table2_pdf_page5_600dpi": "59fce2e88c65d14c0fc165267a17197d79657cb7f7ee702d8dc4e4857231abb0"
+  }
+}

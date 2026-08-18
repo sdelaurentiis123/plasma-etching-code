@@ -1,0 +1,77 @@
+{
+  "manifest_id": "LAN-JEON-2014-C4F6-FIG7-PURE-DRIFT-R1",
+  "source": {
+    "citation": "P.-T. Lan and B.-H. Jeon, Journal of the Korean Physical Society 64, 1320-1326 (2014)",
+    "doi": "10.3938/jkps.64.1320",
+    "pdf_sha256": "82d672f5b60611894a4584aa503e4c26d66aec3c66792550de46fb660f77aeb6",
+    "pdf_page": 6,
+    "print_page": 1325,
+    "figure": "Figure 7",
+    "render_dpi": 600,
+    "rendered_page_sha256": "6cf27de7bb64e8cf9a34969b7ed9d44f5508bac0c6705eec3ef34f52fb540033",
+    "rendered_page_size_px": [
+      4961,
+      7017
+    ],
+    "source_measurement": "Goyette et al. reference [17]",
+    "redistribution": "source pixels are not committed"
+  },
+  "pixel_calibration": {
+    "full_page_x_major_tick_px": [
+      576.0,
+      978.5,
+      1381.5,
+      1783.5,
+      2186.0
+    ],
+    "log10_field_Td_at_major_ticks": [
+      -1.0,
+      0.0,
+      1.0,
+      2.0,
+      3.0
+    ],
+    "field_log10_intercept": -2.4313039242246606,
+    "field_log10_per_horizontal_pixel": 0.0024844717429763673,
+    "full_page_y_major_tick_px": [
+      2084.5,
+      1644.5,
+      1204.0
+    ],
+    "log10_printed_W_at_major_ticks": [
+      -1.0,
+      0.0,
+      1.0
+    ],
+    "drift_log10_intercept": 3.7349986521004657,
+    "drift_log10_per_vertical_pixel": -0.002271436439550253,
+    "ordinate_conversion": "1 printed unit = 1e6 cm/s = 1e4 m/s"
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; PIL/NumPy axis localization; Hough-assisted candidate localization; original-resolution visual acceptance and full-page marker centers",
+    "series_policy": "retain only the 18 unambiguous filled-circle pure-C4F6 markers; exclude four lower-field candidates overlapped by C4F6/Ar mixture glyphs",
+    "marker_center_allowance_px": 5.0,
+    "field_digitization_relative_bound": 0.029016547631050216,
+    "drift_digitization_relative_bound": 0.02649581286382574,
+    "source_measurement_uncertainty": "not reported in this paper",
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "evidence_boundary": {
+    "point_count": 18,
+    "field_range_Td": [
+      121.40133670896553,
+      1196.774055887745
+    ],
+    "supports_source_replay": true,
+    "supports_independent_validation_of_regressed_set": false,
+    "supports_resolved_product_branching": false,
+    "supports_reactor_state_prediction": false,
+    "supports_wafer_flux": false,
+    "supports_feature_depth": false,
+    "note": "The same drift data constrained the printed effective cross-section set; agreement catches transcription/solver errors but is not a held-out physical validation."
+  },
+  "output": {
+    "path": "data/experimental/lan_jeon_2014_c4f6/figure7_pure_c4f6_drift.csv",
+    "sha256": "fe1663430fdbc4f3bc1e0e0e7cd2df0dc2a3182e896db765f721dfda7563f87e"
+  }
+}
