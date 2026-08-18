@@ -1,0 +1,59 @@
+{
+  "manifest_id": "KUSHNER-ZHANG-2000-CHF3-XSEC-R1",
+  "source": {
+    "citation": "M. J. Kushner and D. Zhang, J. Appl. Phys. 88, 3231 (2000)",
+    "doi": "10.1063/1.1289187",
+    "author_data_url": "https://cpseg.eecs.umich.edu/pub/data/chf3_xsec.xls",
+    "author_legend_url": "https://cpseg.eecs.umich.edu/pub/data/chf3_xsec.pdf",
+    "xls_sha256": "5835f36cb7d0e01c7f2c9c8e8206beccf51f52420f58b6ee4b0c8072f5750c87",
+    "legend_pdf_sha256": "47cce6d46b67a791d694273ae591397e3ba340884a49d4ddea7e50e8399bd6e8",
+    "paper_pdf_sha256": "5a6ea61d002f0c2d6385e77869f33ef5cc4968bbf5d41a94760efa59037f61a2",
+    "source_artifacts_committed": false
+  },
+  "conversion": "author cm^2 values multiplied by 1e-4 exactly",
+  "process_row_counts": {
+    "MOM": 150,
+    "VIB14": 100,
+    "VIB25": 100,
+    "VIB36": 100,
+    "NEU1": 200,
+    "NEU2": 200,
+    "NEU3": 200,
+    "NEU4": 200,
+    "NEU5": 200,
+    "NEU6": 200,
+    "NEU1_ADD_ON": 200,
+    "ION1": 200,
+    "ION2": 200,
+    "ION3": 200,
+    "ION4": 200,
+    "ION5": 200,
+    "ION6": 200,
+    "ION7": 200,
+    "ATT1": 183,
+    "ATT2": 183
+  },
+  "output": {
+    "path": "data/experimental/kushner_zhang_2000_chf3/cross_sections.csv",
+    "sha256": "61d6b8ba5582174fa8300c62c76f843db91d71a41ad40c5b8770d93951ab1735"
+  },
+  "claim_boundary": {
+    "valid": [
+      "exact replay of the author-tabulated working set",
+      "deterministic two-term source-reproduction calculations",
+      "species-resolved electron-impact source terms within support"
+    ],
+    "not_valid": [
+      "independent validation against the swarm data used to regress the set",
+      "direct measurement of neutral-dissociation branches",
+      "a unique target-reactor plasma state or wafer flux",
+      "an atomic-accuracy feature-depth claim"
+    ],
+    "notable_source_limits": [
+      "neutral dissociation was scaled/regressed to swarm data",
+      "CF neutral branching was arbitrarily divided equally",
+      "attachment is weak and uncertain",
+      "published total-ionization measurements disagree by about 2x"
+    ]
+  }
+}

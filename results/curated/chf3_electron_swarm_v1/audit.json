@@ -1,0 +1,1113 @@
+{
+  "certification": {
+    "feature_depth_used": false,
+    "independent_bolos_replay_committed": false,
+    "independent_bolos_replay_performed": true,
+    "source_curve_visually_overpredicts_low_field_measurements": true,
+    "supports_feature_depth": false,
+    "supports_independent_chemical_branch_validation": false,
+    "supports_target_reactor_state_prediction": false,
+    "supports_use_as_electron_transport_input": true,
+    "supports_wafer_flux": false
+  },
+  "claim_class": "source_replay_and_evaluated_transport_consistency; not_independent_branch_or_reactor_validation",
+  "comparison_quantity": {
+    "bulk_flux_distinction_resolved": false,
+    "predicted": "flux drift velocity from the local two-term solve",
+    "reason": "The NIST table does not label its fitted drift curve as a bulk-versus-flux coefficient. The comparison is retained as a source-replay diagnostic, not promoted to a direct grade.",
+    "tabulated": "NIST Table 6 recommended 298 K drift velocity"
+  },
+  "models": {
+    "kushner_zhang_working_set": {
+      "actual_cell_count": 427,
+      "collision_deck_sha256": "6bae1e5dbe99a9e6c3eafa31aa46a2358c75b4f16de0410c7a3fd0fcbe967d54",
+      "comparison": {
+        "all_points": {
+          "maximum_absolute_relative_residual": 0.8219369409843256,
+          "median_absolute_relative_residual": 0.25007170226536,
+          "p90_absolute_relative_residual": 0.7863127669420881,
+          "point_count": 33
+        },
+        "declared_reactor_development_band": {
+          "interval_Td": [
+            40.0,
+            100.0
+          ],
+          "maximum_absolute_relative_residual": 0.1341805457372327,
+          "median_absolute_relative_residual": 0.0760057043159037,
+          "point_count": 7,
+          "role": "engineering transport band for the next reactor rung; not inferred from the withheld TiO2 feature"
+        }
+      },
+      "nominal_cell_scale": 1,
+      "rows": [
+        {
+          "flux_drift_velocity_m_s": 226.78802699601425,
+          "mean_electron_energy_eV": 0.03697632948196332,
+          "net_growth_rate_coefficient_m3_s": -2.9440272989505602e-21,
+          "nist_recommended_drift_velocity_m_s": 220.0,
+          "reduced_electric_field_Td": 0.4,
+          "relative_residual": 0.030854668163701193,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 4.2518630124271285e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 256.2442207762938,
+          "mean_electron_energy_eV": 0.03739003752470955,
+          "net_growth_rate_coefficient_m3_s": -2.9992807950351474e-21,
+          "nist_recommended_drift_velocity_m_s": 240.0,
+          "reduced_electric_field_Td": 0.45,
+          "relative_residual": 0.0676842532345574,
+          "tail_population_fraction": 5.250213170966525e-18,
+          "weighted_iteration_residual": 1.420051376014135e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 285.78778375577826,
+          "mean_electron_energy_eV": 0.03775001006412616,
+          "net_growth_rate_coefficient_m3_s": -3.0483538768270357e-21,
+          "nist_recommended_drift_velocity_m_s": 260.0,
+          "reduced_electric_field_Td": 0.5,
+          "relative_residual": 0.09918378367607028,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.7038160030438665e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 345.075725578582,
+          "mean_electron_energy_eV": 0.038336330512982825,
+          "net_growth_rate_coefficient_m3_s": -3.1305613516989813e-21,
+          "nist_recommended_drift_velocity_m_s": 300.0,
+          "reduced_electric_field_Td": 0.6,
+          "relative_residual": 0.15025241859527338,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.214567099636123e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 404.6428205068176,
+          "mean_electron_energy_eV": 0.0387987130035092,
+          "net_growth_rate_coefficient_m3_s": -3.1972858275561106e-21,
+          "nist_recommended_drift_velocity_m_s": 340.0,
+          "reduced_electric_field_Td": 0.7,
+          "relative_residual": 0.1901259426671107,
+          "tail_population_fraction": 6.452163653757901e-19,
+          "weighted_iteration_residual": 3.560572193235922e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 464.58535935857145,
+          "mean_electron_energy_eV": 0.03919268111208795,
+          "net_growth_rate_coefficient_m3_s": -3.254802862058028e-21,
+          "nist_recommended_drift_velocity_m_s": 380.0,
+          "reduced_electric_field_Td": 0.8,
+          "relative_residual": 0.22259305094360915,
+          "tail_population_fraction": 1.5873065114702817e-19,
+          "weighted_iteration_residual": 8.10116265072289e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 525.0301149514512,
+          "mean_electron_energy_eV": 0.03955636225916261,
+          "net_growth_rate_coefficient_m3_s": -3.3076469957069234e-21,
+          "nist_recommended_drift_velocity_m_s": 420.0,
+          "reduced_electric_field_Td": 0.9,
+          "relative_residual": 0.25007170226536,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.2050686176655477e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 586.0969025322983,
+          "mean_electron_energy_eV": 0.03991295095177383,
+          "net_growth_rate_coefficient_m3_s": -3.3587284061974994e-21,
+          "nist_recommended_drift_velocity_m_s": 460.0,
+          "reduced_electric_field_Td": 1.0,
+          "relative_residual": 0.2741237011571702,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.903664505675046e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 903.3133655472307,
+          "mean_electron_energy_eV": 0.04185842838190272,
+          "net_growth_rate_coefficient_m3_s": -3.626481504822592e-21,
+          "nist_recommended_drift_velocity_m_s": 650.0,
+          "reduced_electric_field_Td": 1.5,
+          "relative_residual": 0.38971287007266264,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.0265828120975578e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 1241.7870095498317,
+          "mean_electron_energy_eV": 0.04408166778456033,
+          "net_growth_rate_coefficient_m3_s": -3.928058642137359e-21,
+          "nist_recommended_drift_velocity_m_s": 850.0,
+          "reduced_electric_field_Td": 2.0,
+          "relative_residual": 0.46092589358803737,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.7597426707100496e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 1599.1144945463993,
+          "mean_electron_energy_eV": 0.046396314835466,
+          "net_growth_rate_coefficient_m3_s": -4.249113532959616e-21,
+          "nist_recommended_drift_velocity_m_s": 1050.0,
+          "reduced_electric_field_Td": 2.5,
+          "relative_residual": 0.5229661852822851,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 3.8676159153458345e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 1971.8369092954715,
+          "mean_electron_energy_eV": 0.04868917988694631,
+          "net_growth_rate_coefficient_m3_s": -4.5782156340515826e-21,
+          "nist_recommended_drift_velocity_m_s": 1250.0,
+          "reduced_electric_field_Td": 3.0,
+          "relative_residual": 0.5774695274363773,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.9627897636103808e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 2752.948660644141,
+          "mean_electron_energy_eV": 0.05307205326606368,
+          "net_growth_rate_coefficient_m3_s": -5.243825382952064e-21,
+          "nist_recommended_drift_velocity_m_s": 1660.0,
+          "reduced_electric_field_Td": 4.0,
+          "relative_residual": 0.6584028076169524,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 5.419624356158516e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 3570.6202572071516,
+          "mean_electron_energy_eV": 0.057175265115845655,
+          "net_growth_rate_coefficient_m3_s": -5.914584295044237e-21,
+          "nist_recommended_drift_velocity_m_s": 2080.0,
+          "reduced_electric_field_Td": 5.0,
+          "relative_residual": 0.7166443544265151,
+          "tail_population_fraction": 1.9309315132224067e-17,
+          "weighted_iteration_residual": 8.376815642162087e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 4417.041334991757,
+          "mean_electron_energy_eV": 0.061057590489792,
+          "net_growth_rate_coefficient_m3_s": -6.5938425980243e-21,
+          "nist_recommended_drift_velocity_m_s": 2520.0,
+          "reduced_electric_field_Td": 6.0,
+          "relative_residual": 0.7527941805522846,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.2907491828151225e-17
+        },
+        {
+          "flux_drift_velocity_m_s": 5287.5535144382875,
+          "mean_electron_energy_eV": 0.06477938720411752,
+          "net_growth_rate_coefficient_m3_s": -7.28661837462109e-21,
+          "nist_recommended_drift_velocity_m_s": 2960.0,
+          "reduced_electric_field_Td": 7.0,
+          "relative_residual": 0.7863356467696918,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.195147472172239e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 6179.058603483265,
+          "mean_electron_energy_eV": 0.06838800162897689,
+          "net_growth_rate_coefficient_m3_s": -7.997457879768696e-21,
+          "nist_recommended_drift_velocity_m_s": 3420.0,
+          "reduced_electric_field_Td": 8.0,
+          "relative_residual": 0.806742281720253,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.3643023348940443e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 7089.303135882018,
+          "mean_electron_energy_eV": 0.07191904615628096,
+          "net_growth_rate_coefficient_m3_s": -8.730190277205464e-21,
+          "nist_recommended_drift_velocity_m_s": 3900.0,
+          "reduced_electric_field_Td": 9.0,
+          "relative_residual": 0.8177700348415431,
+          "tail_population_fraction": 1.0172328402498526e-17,
+          "weighted_iteration_residual": 1.4526183067719437e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 8016.522540331032,
+          "mean_electron_energy_eV": 0.07539937725928311,
+          "net_growth_rate_coefficient_m3_s": -9.48802918365832e-21,
+          "nist_recommended_drift_velocity_m_s": 4400.0,
+          "reduced_electric_field_Td": 10.0,
+          "relative_residual": 0.8219369409843256,
+          "tail_population_fraction": 8.955923977218792e-18,
+          "weighted_iteration_residual": 8.752573030275156e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 12860.792982948047,
+          "mean_electron_energy_eV": 0.09262183768875722,
+          "net_growth_rate_coefficient_m3_s": -1.373783213153927e-20,
+          "nist_recommended_drift_velocity_m_s": 7200.0,
+          "reduced_electric_field_Td": 15.0,
+          "relative_residual": 0.7862212476316732,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.2253518244051758e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 17950.42281978997,
+          "mean_electron_energy_eV": 0.11035950287873472,
+          "net_growth_rate_coefficient_m3_s": -1.8910024547619527e-20,
+          "nist_recommended_drift_velocity_m_s": 10900.0,
+          "reduced_electric_field_Td": 20.0,
+          "relative_residual": 0.6468277816321071,
+          "tail_population_fraction": 1.2524395197752795e-18,
+          "weighted_iteration_residual": 8.22612337006139e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 23155.34923609961,
+          "mean_electron_energy_eV": 0.1291230555108893,
+          "net_growth_rate_coefficient_m3_s": -2.5146402810283665e-20,
+          "nist_recommended_drift_velocity_m_s": 15200.0,
+          "reduced_electric_field_Td": 25.0,
+          "relative_residual": 0.5233782392170796,
+          "tail_population_fraction": 1.3436022691587113e-17,
+          "weighted_iteration_residual": 3.023816721380535e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 28353.153459297053,
+          "mean_electron_energy_eV": 0.1490962700047012,
+          "net_growth_rate_coefficient_m3_s": -3.2539166916815834e-20,
+          "nist_recommended_drift_velocity_m_s": 20200.0,
+          "reduced_electric_field_Td": 30.0,
+          "relative_residual": 0.40362145838104224,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.55641497517323e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 38335.30244591847,
+          "mean_electron_energy_eV": 0.19292085314441706,
+          "net_growth_rate_coefficient_m3_s": -5.1051666628928646e-20,
+          "nist_recommended_drift_velocity_m_s": 33800.0,
+          "reduced_electric_field_Td": 40.0,
+          "relative_residual": 0.1341805457372327,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.973500079348224e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 47394.658142366614,
+          "mean_electron_energy_eV": 0.24260682683429738,
+          "net_growth_rate_coefficient_m3_s": -7.483599233460181e-20,
+          "nist_recommended_drift_velocity_m_s": 49800.0,
+          "reduced_electric_field_Td": 50.0,
+          "relative_residual": -0.048300037301875265,
+          "tail_population_fraction": 5.245899168196007e-18,
+          "weighted_iteration_residual": 7.713425628311198e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 55451.67116076985,
+          "mean_electron_energy_eV": 0.30162587912100747,
+          "net_growth_rate_coefficient_m3_s": -1.0412545320823295e-19,
+          "nist_recommended_drift_velocity_m_s": 61000.0,
+          "reduced_electric_field_Td": 60.0,
+          "relative_residual": -0.09095621047918279,
+          "tail_population_fraction": 1.509096103945559e-17,
+          "weighted_iteration_residual": 2.6260744624455365e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 62663.3316227222,
+          "mean_electron_energy_eV": 0.38473459726021725,
+          "net_growth_rate_coefficient_m3_s": -1.33775863997016e-19,
+          "nist_recommended_drift_velocity_m_s": 69200.0,
+          "reduced_electric_field_Td": 70.0,
+          "relative_residual": -0.09446052568320518,
+          "tail_population_fraction": 1.7623252464439522e-17,
+          "weighted_iteration_residual": 1.1094002367126663e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 69207.17274673881,
+          "mean_electron_energy_eV": 0.5354542836001657,
+          "net_growth_rate_coefficient_m3_s": -8.667794163900523e-20,
+          "nist_recommended_drift_velocity_m_s": 74900.0,
+          "reduced_electric_field_Td": 80.0,
+          "relative_residual": -0.0760057043159037,
+          "tail_population_fraction": 3.678516977731525e-17,
+          "weighted_iteration_residual": 4.883379337536104e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 75212.5202675667,
+          "mean_electron_energy_eV": 0.8254285916730554,
+          "net_growth_rate_coefficient_m3_s": 4.183479664270829e-19,
+          "nist_recommended_drift_velocity_m_s": 81200.0,
+          "reduced_electric_field_Td": 90.0,
+          "relative_residual": -0.07373743512848896,
+          "tail_population_fraction": 1.5747474381788484e-16,
+          "weighted_iteration_residual": 1.0718605793025644e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 80848.32258891521,
+          "mean_electron_energy_eV": 1.303202905248175,
+          "net_growth_rate_coefficient_m3_s": 2.2979290597884124e-18,
+          "nist_recommended_drift_velocity_m_s": 86600.0,
+          "reduced_electric_field_Td": 100.0,
+          "relative_residual": -0.06641659828042479,
+          "tail_population_fraction": 7.488464393448294e-17,
+          "weighted_iteration_residual": 5.602802502597818e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 110344.71132204519,
+          "mean_electron_energy_eV": 4.498932842601758,
+          "net_growth_rate_coefficient_m3_s": 6.128060117674201e-17,
+          "nist_recommended_drift_velocity_m_s": 116000.0,
+          "reduced_electric_field_Td": 150.0,
+          "relative_residual": -0.0487524886030587,
+          "tail_population_fraction": 8.070142470730536e-18,
+          "weighted_iteration_residual": 1.8690570183615976e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 143328.75158672337,
+          "mean_electron_energy_eV": 6.328519799859825,
+          "net_growth_rate_coefficient_m3_s": 2.0464154912488408e-16,
+          "nist_recommended_drift_velocity_m_s": 143000.0,
+          "reduced_electric_field_Td": 200.0,
+          "relative_residual": 0.002298962144918759,
+          "tail_population_fraction": 1.2244656894975771e-17,
+          "weighted_iteration_residual": 4.71438777898304e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 176451.96649147233,
+          "mean_electron_energy_eV": 7.4201928596507285,
+          "net_growth_rate_coefficient_m3_s": 4.217599760237608e-16,
+          "nist_recommended_drift_velocity_m_s": 169000.0,
+          "reduced_electric_field_Td": 250.0,
+          "relative_residual": 0.04409447628090124,
+          "tail_population_fraction": 1.0200106328147018e-17,
+          "weighted_iteration_residual": 2.9846900465201488e-15
+        }
+      ]
+    },
+    "nist_evaluated_constant_join_ratio": {
+      "actual_cell_count": 427,
+      "collision_deck_sha256": "5ef8302d27278fc0042589fc3ea3962050475705e0ddb9caaefa0492924019cd",
+      "comparison": {
+        "all_points": {
+          "maximum_absolute_relative_residual": 0.2960956385473752,
+          "median_absolute_relative_residual": 0.13688652480730512,
+          "p90_absolute_relative_residual": 0.26889865148502406,
+          "point_count": 33
+        },
+        "declared_reactor_development_band": {
+          "interval_Td": [
+            40.0,
+            100.0
+          ],
+          "maximum_absolute_relative_residual": 0.09593069852536917,
+          "median_absolute_relative_residual": 0.05061225920438961,
+          "point_count": 7,
+          "role": "engineering transport band for the next reactor rung; not inferred from the withheld TiO2 feature"
+        }
+      },
+      "nominal_cell_scale": 1,
+      "rows": [
+        {
+          "flux_drift_velocity_m_s": 162.66806531497335,
+          "mean_electron_energy_eV": 0.03598772544446151,
+          "net_growth_rate_coefficient_m3_s": -2.8131835554090012e-21,
+          "nist_recommended_drift_velocity_m_s": 220.0,
+          "reduced_electric_field_Td": 0.4,
+          "relative_residual": -0.26059970311375746,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 3.2143214689617966e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 183.95277302126846,
+          "mean_electron_energy_eV": 0.03644003518647583,
+          "net_growth_rate_coefficient_m3_s": -2.8689784558550016e-21,
+          "nist_recommended_drift_velocity_m_s": 240.0,
+          "reduced_electric_field_Td": 0.45,
+          "relative_residual": -0.23353011241138144,
+          "tail_population_fraction": 1.2952260960955093e-17,
+          "weighted_iteration_residual": 3.488347919771418e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 205.43032879222713,
+          "mean_electron_energy_eV": 0.03688150643664004,
+          "net_growth_rate_coefficient_m3_s": -2.9238852473405073e-21,
+          "nist_recommended_drift_velocity_m_s": 260.0,
+          "reduced_electric_field_Td": 0.5,
+          "relative_residual": -0.20988335079912646,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.651388095035077e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 248.88819266728285,
+          "mean_electron_energy_eV": 0.037709513564354494,
+          "net_growth_rate_coefficient_m3_s": -3.0280952531906187e-21,
+          "nist_recommended_drift_velocity_m_s": 300.0,
+          "reduced_electric_field_Td": 0.6,
+          "relative_residual": -0.17037269110905717,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.4647905813069381e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 292.9123297101029,
+          "mean_electron_energy_eV": 0.03845095602668188,
+          "net_growth_rate_coefficient_m3_s": -3.122757644848289e-21,
+          "nist_recommended_drift_velocity_m_s": 340.0,
+          "reduced_electric_field_Td": 0.7,
+          "relative_residual": -0.13849314791146217,
+          "tail_population_fraction": 5.0205724758069345e-18,
+          "weighted_iteration_residual": 3.1253424838495737e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 337.4180228938181,
+          "mean_electron_energy_eV": 0.03911069666599787,
+          "net_growth_rate_coefficient_m3_s": -3.2079478716391738e-21,
+          "nist_recommended_drift_velocity_m_s": 380.0,
+          "reduced_electric_field_Td": 0.8,
+          "relative_residual": -0.11205783448995243,
+          "tail_population_fraction": 6.911833573677345e-19,
+          "weighted_iteration_residual": 1.5123869087181583e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 382.3594328393434,
+          "mean_electron_energy_eV": 0.03970397923904034,
+          "net_growth_rate_coefficient_m3_s": -3.285154766669005e-21,
+          "nist_recommended_drift_velocity_m_s": 420.0,
+          "reduced_electric_field_Td": 0.9,
+          "relative_residual": -0.0896203980015633,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.60843839948944e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 427.71556298495875,
+          "mean_electron_energy_eV": 0.040247423804153665,
+          "net_growth_rate_coefficient_m3_s": -3.3561936407144678e-21,
+          "nist_recommended_drift_velocity_m_s": 460.0,
+          "reduced_electric_field_Td": 1.0,
+          "relative_residual": -0.07018355872835058,
+          "tail_population_fraction": 1.4894667498415823e-17,
+          "weighted_iteration_residual": 8.902466529526072e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 660.5485304781528,
+          "mean_electron_energy_eV": 0.04260239431589806,
+          "net_growth_rate_coefficient_m3_s": -3.6650330855388976e-21,
+          "nist_recommended_drift_velocity_m_s": 650.0,
+          "reduced_electric_field_Td": 1.5,
+          "relative_residual": 0.016228508427927446,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 3.5417242426022083e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 903.1134261143812,
+          "mean_electron_energy_eV": 0.044752979126363904,
+          "net_growth_rate_coefficient_m3_s": -3.949979970101157e-21,
+          "nist_recommended_drift_velocity_m_s": 850.0,
+          "reduced_electric_field_Td": 2.0,
+          "relative_residual": 0.06248638366397796,
+          "tail_population_fraction": 1.4404969994110935e-18,
+          "weighted_iteration_residual": 8.891737194647393e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 1154.5458989672227,
+          "mean_electron_energy_eV": 0.04681555478501722,
+          "net_growth_rate_coefficient_m3_s": -4.230326092559287e-21,
+          "nist_recommended_drift_velocity_m_s": 1050.0,
+          "reduced_electric_field_Td": 2.5,
+          "relative_residual": 0.09956752282592629,
+          "tail_population_fraction": 3.43533585659961e-19,
+          "weighted_iteration_residual": 2.9297749924130325e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 1413.9241314085043,
+          "mean_electron_energy_eV": 0.048793590058029745,
+          "net_growth_rate_coefficient_m3_s": -4.508244402004928e-21,
+          "nist_recommended_drift_velocity_m_s": 1250.0,
+          "reduced_electric_field_Td": 3.0,
+          "relative_residual": 0.1311393051268035,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 7.039779861670977e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 1953.769178562006,
+          "mean_electron_energy_eV": 0.05250792214510765,
+          "net_growth_rate_coefficient_m3_s": -5.058412531925304e-21,
+          "nist_recommended_drift_velocity_m_s": 1660.0,
+          "reduced_electric_field_Td": 4.0,
+          "relative_residual": 0.17696938467590706,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.5328305853562097e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 2518.757197472473,
+          "mean_electron_energy_eV": 0.05595570576158232,
+          "net_growth_rate_coefficient_m3_s": -5.60521884693061e-21,
+          "nist_recommended_drift_velocity_m_s": 2080.0,
+          "reduced_electric_field_Td": 5.0,
+          "relative_residual": 0.21094096032330434,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.1398125289158545e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 3106.6860326272927,
+          "mean_electron_energy_eV": 0.059206767910204704,
+          "net_growth_rate_coefficient_m3_s": -6.154370968232944e-21,
+          "nist_recommended_drift_velocity_m_s": 2520.0,
+          "reduced_electric_field_Td": 6.0,
+          "relative_residual": 0.23281191770924314,
+          "tail_population_fraction": 4.0771372379464324e-20,
+          "weighted_iteration_residual": 3.523255288792362e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 3716.26081751907,
+          "mean_electron_energy_eV": 0.06231667914944892,
+          "net_growth_rate_coefficient_m3_s": -6.710987293165128e-21,
+          "nist_recommended_drift_velocity_m_s": 2960.0,
+          "reduced_electric_field_Td": 7.0,
+          "relative_residual": 0.2554935194321182,
+          "tail_population_fraction": 1.5670358593505312e-17,
+          "weighted_iteration_residual": 3.0722893526774225e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 4346.7289889362155,
+          "mean_electron_energy_eV": 0.06532725499600825,
+          "net_growth_rate_coefficient_m3_s": -7.279436647252498e-21,
+          "nist_recommended_drift_velocity_m_s": 3420.0,
+          "reduced_electric_field_Td": 8.0,
+          "relative_residual": 0.2709733885778407,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 7.500114870273059e-17
+        },
+        {
+          "flux_drift_velocity_m_s": 4997.685839406333,
+          "mean_electron_energy_eV": 0.06827025035655723,
+          "net_growth_rate_coefficient_m3_s": -7.863488762817985e-21,
+          "nist_recommended_drift_velocity_m_s": 3900.0,
+          "reduced_electric_field_Td": 9.0,
+          "relative_residual": 0.2814579075400854,
+          "tail_population_fraction": 4.269569660038968e-18,
+          "weighted_iteration_residual": 2.5335304874096867e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 5668.9556218483785,
+          "mean_electron_energy_eV": 0.0711702990120982,
+          "net_growth_rate_coefficient_m3_s": -8.466473749443231e-21,
+          "nist_recommended_drift_velocity_m_s": 4400.0,
+          "reduced_electric_field_Td": 10.0,
+          "relative_residual": 0.2883990049655405,
+          "tail_population_fraction": 3.61474102473766e-18,
+          "weighted_iteration_residual": 4.398271088303679e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 9331.888597541101,
+          "mean_electron_energy_eV": 0.08559902560035443,
+          "net_growth_rate_coefficient_m3_s": -1.1863920572809062e-20,
+          "nist_recommended_drift_velocity_m_s": 7200.0,
+          "reduced_electric_field_Td": 15.0,
+          "relative_residual": 0.2960956385473752,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 5.934936802863075e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 13520.03094882457,
+          "mean_electron_energy_eV": 0.10083410039824918,
+          "net_growth_rate_coefficient_m3_s": -1.6126628130275656e-20,
+          "nist_recommended_drift_velocity_m_s": 10900.0,
+          "reduced_electric_field_Td": 20.0,
+          "relative_residual": 0.24036981181876782,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 4.18033210028831e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 18243.760576310728,
+          "mean_electron_energy_eV": 0.1176653448225264,
+          "net_growth_rate_coefficient_m3_s": -2.1557271330810143e-20,
+          "nist_recommended_drift_velocity_m_s": 15200.0,
+          "reduced_electric_field_Td": 25.0,
+          "relative_residual": 0.20024740633623206,
+          "tail_population_fraction": 2.810259643965692e-19,
+          "weighted_iteration_residual": 5.570578360352407e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 23483.506125470187,
+          "mean_electron_energy_eV": 0.1366472577762908,
+          "net_growth_rate_coefficient_m3_s": -2.848086009207686e-20,
+          "nist_recommended_drift_velocity_m_s": 20200.0,
+          "reduced_electric_field_Td": 30.0,
+          "relative_residual": 0.16254980819159348,
+          "tail_population_fraction": 3.3560586883997716e-18,
+          "weighted_iteration_residual": 4.104597039072111e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 35256.761413253764,
+          "mean_electron_energy_eV": 0.1830587651379408,
+          "net_growth_rate_coefficient_m3_s": -4.820233406575063e-20,
+          "nist_recommended_drift_velocity_m_s": 33800.0,
+          "reduced_electric_field_Td": 40.0,
+          "relative_residual": 0.043099450096265146,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 4.0607286460563394e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 48073.51519932653,
+          "mean_electron_energy_eV": 0.24503699632152035,
+          "net_growth_rate_coefficient_m3_s": -7.771974187817542e-20,
+          "nist_recommended_drift_velocity_m_s": 49800.0,
+          "reduced_electric_field_Td": 50.0,
+          "relative_residual": -0.03466836949143515,
+          "tail_population_fraction": 7.721188002237065e-17,
+          "weighted_iteration_residual": 1.0992982786600161e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 60937.37271331071,
+          "mean_electron_energy_eV": 0.33509052328182176,
+          "net_growth_rate_coefficient_m3_s": -1.1954429947785533e-19,
+          "nist_recommended_drift_velocity_m_s": 61000.0,
+          "reduced_electric_field_Td": 60.0,
+          "relative_residual": -0.0010266768309720176,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.4579545702508358e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 72702.36833694376,
+          "mean_electron_energy_eV": 0.494562759952703,
+          "net_growth_rate_coefficient_m3_s": -1.7053303413943214e-19,
+          "nist_recommended_drift_velocity_m_s": 69200.0,
+          "reduced_electric_field_Td": 70.0,
+          "relative_residual": 0.05061225920438961,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.7748613723427844e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 82085.20931955015,
+          "mean_electron_energy_eV": 0.8043495401625345,
+          "net_growth_rate_coefficient_m3_s": -1.1820879489641897e-19,
+          "nist_recommended_drift_velocity_m_s": 74900.0,
+          "reduced_electric_field_Td": 80.0,
+          "relative_residual": 0.09593069852536917,
+          "tail_population_fraction": 8.313095227795524e-18,
+          "weighted_iteration_residual": 7.627907850221313e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 88276.48519170342,
+          "mean_electron_energy_eV": 1.320425262990845,
+          "net_growth_rate_coefficient_m3_s": 4.91652553862339e-19,
+          "nist_recommended_drift_velocity_m_s": 81200.0,
+          "reduced_electric_field_Td": 90.0,
+          "relative_residual": 0.0871488324101406,
+          "tail_population_fraction": 9.197765114223605e-17,
+          "weighted_iteration_residual": 1.172509550748487e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 91713.04613494908,
+          "mean_electron_energy_eV": 1.9962183457520049,
+          "net_growth_rate_coefficient_m3_s": 2.4392927066523327e-18,
+          "nist_recommended_drift_velocity_m_s": 86600.0,
+          "reduced_electric_field_Td": 100.0,
+          "relative_residual": 0.059042103174931526,
+          "tail_population_fraction": 2.054626136304354e-18,
+          "weighted_iteration_residual": 2.6464128426271554e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 103073.92234170774,
+          "mean_electron_energy_eV": 4.932646869398851,
+          "net_growth_rate_coefficient_m3_s": 4.6935464692603543e-17,
+          "nist_recommended_drift_velocity_m_s": 116000.0,
+          "reduced_electric_field_Td": 150.0,
+          "relative_residual": -0.11143170395079527,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 6.896549973205914e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 123425.22695255537,
+          "mean_electron_energy_eV": 6.38823786951504,
+          "net_growth_rate_coefficient_m3_s": 1.5146200435513632e-16,
+          "nist_recommended_drift_velocity_m_s": 143000.0,
+          "reduced_electric_field_Td": 200.0,
+          "relative_residual": -0.13688652480730512,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 4.519837327491516e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 147252.97155723217,
+          "mean_electron_energy_eV": 7.298702318979117,
+          "net_growth_rate_coefficient_m3_s": 3.140766453589676e-16,
+          "nist_recommended_drift_velocity_m_s": 169000.0,
+          "reduced_electric_field_Td": 250.0,
+          "relative_residual": -0.12868064167318238,
+          "tail_population_fraction": 7.53875965382805e-18,
+          "weighted_iteration_residual": 6.578805472794333e-15
+        }
+      ]
+    },
+    "nist_evaluated_linear_return_to_working_set_at_120eV": {
+      "actual_cell_count": 427,
+      "collision_deck_sha256": "f731518f7ee7c45bc05e6b2cacdf9efd4b04c6ef52c8100c02072c10e15aebd4",
+      "comparison": {
+        "all_points": {
+          "maximum_absolute_relative_residual": 0.2960956385468614,
+          "median_absolute_relative_residual": 0.1368838065419461,
+          "p90_absolute_relative_residual": 0.26889865147824826,
+          "point_count": 33
+        },
+        "declared_reactor_development_band": {
+          "interval_Td": [
+            40.0,
+            100.0
+          ],
+          "maximum_absolute_relative_residual": 0.09593069853327063,
+          "median_absolute_relative_residual": 0.050612259207952315,
+          "point_count": 7,
+          "role": "engineering transport band for the next reactor rung; not inferred from the withheld TiO2 feature"
+        }
+      },
+      "nominal_cell_scale": 1,
+      "rows": [
+        {
+          "flux_drift_velocity_m_s": 162.6680653223771,
+          "mean_electron_energy_eV": 0.03598772542607917,
+          "net_growth_rate_coefficient_m3_s": -2.813182819059586e-21,
+          "nist_recommended_drift_velocity_m_s": 220.0,
+          "reduced_electric_field_Td": 0.4,
+          "relative_residual": -0.26059970308010416,
+          "tail_population_fraction": 1.0350054279669276e-17,
+          "weighted_iteration_residual": 1.1040682910876334e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 183.95277302255752,
+          "mean_electron_energy_eV": 0.03644003519005356,
+          "net_growth_rate_coefficient_m3_s": -2.8689787403586095e-21,
+          "nist_recommended_drift_velocity_m_s": 240.0,
+          "reduced_electric_field_Td": 0.45,
+          "relative_residual": -0.2335301124060103,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.0837230043716607e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 205.43032879054329,
+          "mean_electron_energy_eV": 0.03688150643180963,
+          "net_growth_rate_coefficient_m3_s": -2.923885034986831e-21,
+          "nist_recommended_drift_velocity_m_s": 260.0,
+          "reduced_electric_field_Td": 0.5,
+          "relative_residual": -0.20988335080560272,
+          "tail_population_fraction": 4.892244592711234e-18,
+          "weighted_iteration_residual": 3.573717079401903e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 248.8881926663355,
+          "mean_electron_energy_eV": 0.037709513570098725,
+          "net_growth_rate_coefficient_m3_s": -3.0280949214362287e-21,
+          "nist_recommended_drift_velocity_m_s": 300.0,
+          "reduced_electric_field_Td": 0.6,
+          "relative_residual": -0.17037269111221498,
+          "tail_population_fraction": 1.8560824076477786e-17,
+          "weighted_iteration_residual": 3.001162970541057e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 292.91232971655256,
+          "mean_electron_energy_eV": 0.03845095603148564,
+          "net_growth_rate_coefficient_m3_s": -3.122757317357925e-21,
+          "nist_recommended_drift_velocity_m_s": 340.0,
+          "reduced_electric_field_Td": 0.7,
+          "relative_residual": -0.13849314789249245,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 6.683599718090597e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 337.4180228886481,
+          "mean_electron_energy_eV": 0.0391106966405132,
+          "net_growth_rate_coefficient_m3_s": -3.207947613175246e-21,
+          "nist_recommended_drift_velocity_m_s": 380.0,
+          "reduced_electric_field_Td": 0.8,
+          "relative_residual": -0.11205783450355755,
+          "tail_population_fraction": 1.2477148756458765e-17,
+          "weighted_iteration_residual": 3.311112740620569e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 382.3594328155791,
+          "mean_electron_energy_eV": 0.03970397920136088,
+          "net_growth_rate_coefficient_m3_s": -3.285155059358396e-21,
+          "nist_recommended_drift_velocity_m_s": 420.0,
+          "reduced_electric_field_Td": 0.9,
+          "relative_residual": -0.08962039805814492,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 3.844548560773519e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 427.71556297303505,
+          "mean_electron_energy_eV": 0.04024742379454174,
+          "net_growth_rate_coefficient_m3_s": -3.356194043408227e-21,
+          "nist_recommended_drift_velocity_m_s": 460.0,
+          "reduced_electric_field_Td": 1.0,
+          "relative_residual": -0.07018355875427162,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.25269865396914e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 660.5485304455793,
+          "mean_electron_energy_eV": 0.04260239426607482,
+          "net_growth_rate_coefficient_m3_s": -3.665034226966337e-21,
+          "nist_recommended_drift_velocity_m_s": 650.0,
+          "reduced_electric_field_Td": 1.5,
+          "relative_residual": 0.01622850837781442,
+          "tail_population_fraction": 2.3855164284371727e-17,
+          "weighted_iteration_residual": 1.1321262700178537e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 903.1134261152679,
+          "mean_electron_energy_eV": 0.04475297912645435,
+          "net_growth_rate_coefficient_m3_s": -3.949979915604745e-21,
+          "nist_recommended_drift_velocity_m_s": 850.0,
+          "reduced_electric_field_Td": 2.0,
+          "relative_residual": 0.06248638366502113,
+          "tail_population_fraction": 2.7315469552042733e-18,
+          "weighted_iteration_residual": 7.739206278377161e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 1154.5458989653835,
+          "mean_electron_energy_eV": 0.04681555478130646,
+          "net_growth_rate_coefficient_m3_s": -4.230326118012708e-21,
+          "nist_recommended_drift_velocity_m_s": 1050.0,
+          "reduced_electric_field_Td": 2.5,
+          "relative_residual": 0.0995675228241748,
+          "tail_population_fraction": 1.4922089072773134e-18,
+          "weighted_iteration_residual": 9.073244590435812e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 1413.9241314048488,
+          "mean_electron_energy_eV": 0.048793590053576794,
+          "net_growth_rate_coefficient_m3_s": -4.5082446663348624e-21,
+          "nist_recommended_drift_velocity_m_s": 1250.0,
+          "reduced_electric_field_Td": 3.0,
+          "relative_residual": 0.13113930512387917,
+          "tail_population_fraction": 3.510368591879279e-18,
+          "weighted_iteration_residual": 3.171127524283985e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 1953.7691785626023,
+          "mean_electron_energy_eV": 0.05250792214056482,
+          "net_growth_rate_coefficient_m3_s": -5.058412378867951e-21,
+          "nist_recommended_drift_velocity_m_s": 1660.0,
+          "reduced_electric_field_Td": 4.0,
+          "relative_residual": 0.17696938467626655,
+          "tail_population_fraction": 4.271781214200576e-18,
+          "weighted_iteration_residual": 9.054777980400485e-17
+        },
+        {
+          "flux_drift_velocity_m_s": 2518.7571974712596,
+          "mean_electron_energy_eV": 0.05595570575926446,
+          "net_growth_rate_coefficient_m3_s": -5.6052194073463615e-21,
+          "nist_recommended_drift_velocity_m_s": 2080.0,
+          "reduced_electric_field_Td": 5.0,
+          "relative_residual": 0.21094096032272103,
+          "tail_population_fraction": 3.601626344682509e-18,
+          "weighted_iteration_residual": 1.6629552356237848e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 3106.6860326266437,
+          "mean_electron_energy_eV": 0.05920676791720195,
+          "net_growth_rate_coefficient_m3_s": -6.154371013480934e-21,
+          "nist_recommended_drift_velocity_m_s": 2520.0,
+          "reduced_electric_field_Td": 6.0,
+          "relative_residual": 0.23281191770898557,
+          "tail_population_fraction": 1.6494729959762482e-17,
+          "weighted_iteration_residual": 2.1622416521226865e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 3716.2608175218747,
+          "mean_electron_energy_eV": 0.062316679151036954,
+          "net_growth_rate_coefficient_m3_s": -6.71098648719585e-21,
+          "nist_recommended_drift_velocity_m_s": 2960.0,
+          "reduced_electric_field_Td": 7.0,
+          "relative_residual": 0.25549351943306586,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.8783400414474415e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 4346.728988936023,
+          "mean_electron_energy_eV": 0.06532725499513202,
+          "net_growth_rate_coefficient_m3_s": -7.279436633669897e-21,
+          "nist_recommended_drift_velocity_m_s": 3420.0,
+          "reduced_electric_field_Td": 8.0,
+          "relative_residual": 0.2709733885777843,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.2934139122544717e-16
+        },
+        {
+          "flux_drift_velocity_m_s": 4997.685839410645,
+          "mean_electron_energy_eV": 0.06827025036449255,
+          "net_growth_rate_coefficient_m3_s": -7.86348883593262e-21,
+          "nist_recommended_drift_velocity_m_s": 3900.0,
+          "reduced_electric_field_Td": 9.0,
+          "relative_residual": 0.28145790754119093,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.1377577555057432e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 5668.955621854895,
+          "mean_electron_energy_eV": 0.07117029902126337,
+          "net_growth_rate_coefficient_m3_s": -8.466473746965421e-21,
+          "nist_recommended_drift_velocity_m_s": 4400.0,
+          "reduced_electric_field_Td": 10.0,
+          "relative_residual": 0.28839900496702153,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.673719750098421e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 9331.888597537401,
+          "mean_electron_energy_eV": 0.08559902559689656,
+          "net_growth_rate_coefficient_m3_s": -1.1863920448052696e-20,
+          "nist_recommended_drift_velocity_m_s": 7200.0,
+          "reduced_electric_field_Td": 15.0,
+          "relative_residual": 0.2960956385468614,
+          "tail_population_fraction": 7.049945384008254e-18,
+          "weighted_iteration_residual": 3.5223484636951598e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 13520.030948824045,
+          "mean_electron_energy_eV": 0.1008341003848052,
+          "net_growth_rate_coefficient_m3_s": -1.612662770218638e-20,
+          "nist_recommended_drift_velocity_m_s": 10900.0,
+          "reduced_electric_field_Td": 20.0,
+          "relative_residual": 0.24036981181871986,
+          "tail_population_fraction": 1.7823541727311584e-17,
+          "weighted_iteration_residual": 2.490261062056804e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 18243.760576313754,
+          "mean_electron_energy_eV": 0.1176653448294331,
+          "net_growth_rate_coefficient_m3_s": -2.155727043476034e-20,
+          "nist_recommended_drift_velocity_m_s": 15200.0,
+          "reduced_electric_field_Td": 25.0,
+          "relative_residual": 0.20024740633643123,
+          "tail_population_fraction": 2.7005829570280957e-17,
+          "weighted_iteration_residual": 2.477340168972148e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 23483.50612547172,
+          "mean_electron_energy_eV": 0.13664725777338077,
+          "net_growth_rate_coefficient_m3_s": -2.8480860148829647e-20,
+          "nist_recommended_drift_velocity_m_s": 20200.0,
+          "reduced_electric_field_Td": 30.0,
+          "relative_residual": 0.1625498081916692,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.8165868173956886e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 35256.761413285116,
+          "mean_electron_energy_eV": 0.18305876511830818,
+          "net_growth_rate_coefficient_m3_s": -4.820233072799023e-20,
+          "nist_recommended_drift_velocity_m_s": 33800.0,
+          "reduced_electric_field_Td": 40.0,
+          "relative_residual": 0.04309945009719285,
+          "tail_population_fraction": 1.2060455084640752e-16,
+          "weighted_iteration_residual": 5.749689183417447e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 48073.51519935711,
+          "mean_electron_energy_eV": 0.24503699630746675,
+          "net_growth_rate_coefficient_m3_s": -7.7719744274122e-20,
+          "nist_recommended_drift_velocity_m_s": 49800.0,
+          "reduced_electric_field_Td": 50.0,
+          "relative_residual": -0.03466836949082108,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.243975357744982e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 60937.37271329022,
+          "mean_electron_energy_eV": 0.33509052328639166,
+          "net_growth_rate_coefficient_m3_s": -1.19544297994179e-19,
+          "nist_recommended_drift_velocity_m_s": 61000.0,
+          "reduced_electric_field_Td": 60.0,
+          "relative_residual": -0.00102667683130786,
+          "tail_population_fraction": 3.920215057267997e-17,
+          "weighted_iteration_residual": 2.311686337642906e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 72702.3683371903,
+          "mean_electron_energy_eV": 0.49456275990120935,
+          "net_growth_rate_coefficient_m3_s": -1.7053303463022226e-19,
+          "nist_recommended_drift_velocity_m_s": 69200.0,
+          "reduced_electric_field_Td": 70.0,
+          "relative_residual": 0.050612259207952315,
+          "tail_population_fraction": 6.884808582329682e-18,
+          "weighted_iteration_residual": 3.82373725143642e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 82085.20932014196,
+          "mean_electron_energy_eV": 0.8043495401108323,
+          "net_growth_rate_coefficient_m3_s": -1.1820879627042824e-19,
+          "nist_recommended_drift_velocity_m_s": 74900.0,
+          "reduced_electric_field_Td": 80.0,
+          "relative_residual": 0.09593069853327063,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 1.2810013757321027e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 88276.48519706115,
+          "mean_electron_energy_eV": 1.3204252630990483,
+          "net_growth_rate_coefficient_m3_s": 4.916525643024385e-19,
+          "nist_recommended_drift_velocity_m_s": 81200.0,
+          "reduced_electric_field_Td": 90.0,
+          "relative_residual": 0.08714883247612248,
+          "tail_population_fraction": 3.237826543785432e-19,
+          "weighted_iteration_residual": 8.5261428123127e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 91713.04618493332,
+          "mean_electron_energy_eV": 1.9962183468010566,
+          "net_growth_rate_coefficient_m3_s": 2.4392928469949156e-18,
+          "nist_recommended_drift_velocity_m_s": 86600.0,
+          "reduced_electric_field_Td": 100.0,
+          "relative_residual": 0.05904210375211694,
+          "tail_population_fraction": 7.204667285487121e-18,
+          "weighted_iteration_residual": 3.076960695025901e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 103073.94467430825,
+          "mean_electron_energy_eV": 4.932647171526965,
+          "net_growth_rate_coefficient_m3_s": 4.693555641996298e-17,
+          "nist_recommended_drift_velocity_m_s": 116000.0,
+          "reduced_electric_field_Td": 150.0,
+          "relative_residual": -0.11143151142837715,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 7.461116965142092e-15
+        },
+        {
+          "flux_drift_velocity_m_s": 123425.6156645017,
+          "mean_electron_energy_eV": 6.388241862194131,
+          "net_growth_rate_coefficient_m3_s": 1.5146410334748289e-16,
+          "nist_recommended_drift_velocity_m_s": 143000.0,
+          "reduced_electric_field_Td": 200.0,
+          "relative_residual": -0.1368838065419461,
+          "tail_population_fraction": 7.516930155437021e-18,
+          "weighted_iteration_residual": 1.3173770390651524e-14
+        },
+        {
+          "flux_drift_velocity_m_s": 147255.1887750104,
+          "mean_electron_energy_eV": 7.298721422176811,
+          "net_growth_rate_coefficient_m3_s": 3.140914548597256e-16,
+          "nist_recommended_drift_velocity_m_s": 169000.0,
+          "reduced_electric_field_Td": 250.0,
+          "relative_residual": -0.12866752204135856,
+          "tail_population_fraction": 0.0,
+          "weighted_iteration_residual": 2.437006489120969e-15
+        }
+      ]
+    }
+  },
+  "numerical_convergence": {
+    "coarse_actual_cell_count": 427,
+    "fields_Td": [
+      10.0,
+      60.0,
+      150.0,
+      250.0
+    ],
+    "fine_actual_cell_count": 839,
+    "flux_drift_relative_change": [
+      -0.0015288119599604633,
+      0.0004807714157930576,
+      0.0001536963110861933,
+      -2.2328922899217396e-05
+    ],
+    "maximum_absolute_flux_drift_relative_change": 0.0015288119599604633
+  },
+  "schema": "petch.chf3_electron_swarm_audit.v1",
+  "sources": {
+    "christophorou_olthoff_table4_csv_sha256": "845b090424f9df9ca8d5612783fe9cbf7a275a1bc26f239940cab266531a9da1",
+    "christophorou_olthoff_table5_csv_sha256": "fd6bc530ab6794f56cb733862a71b7cd40d4757b6b9d604a63e0841e498fb865",
+    "christophorou_olthoff_table6_csv_sha256": "d5e0de969eedd64f38e8b15b7f5bd5c90f6e0ff6ccf22e77aebefd9c3a742901",
+    "kushner_zhang_figure3_render_sha256": "86028a1dc9f0c1e7658736df02815d74497d9df037a839741f12bdce94c077d2",
+    "kushner_zhang_working_set_csv_sha256": "61d6b8ba5582174fa8300c62c76f843db91d71a41ad40c5b8770d93951ab1735",
+    "source_artifacts_committed": false
+  }
+}

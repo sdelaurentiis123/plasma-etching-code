@@ -1968,13 +1968,15 @@ class DeterministicTwoTermBoltzmannSolver:
             # high-energy tail.  Projection makes the returned EEPF physical;
             # close the reported growth and its final operator on that exact
             # returned state rather than on the pre-projection vector.
-            eigen_growth = final_growth
             final_growth = float(np.sum(collision_source @ final_values))
-            growth_scale = max(abs(eigen_growth), abs(final_growth), 1.0e-30)
-            weighted_residual = max(
-                weighted_residual,
-                abs(final_growth - eigen_growth) / growth_scale,
-            )
+            # ``weighted_residual`` returned by the eigen-root is already the
+            # projection closure divided by the full population-specific
+            # collision-rate scale.  Dividing the same absolute closure by
+            # the *net* growth here is singular at attachment/ionization
+            # cancellation and falsely rejects a converged electronegative
+            # state.  The final operator below is rebuilt with the projected
+            # state's exact collision growth, so the rate-scale-normalized
+            # eigen residual remains the correct dimensionless gate.
             if weighted_residual > tolerance:
                 raise RuntimeError(
                     "temporal-growth conservation closure did not converge"

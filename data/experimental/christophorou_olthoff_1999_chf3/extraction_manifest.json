@@ -1,0 +1,53 @@
+{
+  "manifest_id": "CHRISTOPHOROU-OLTHOFF-1999-CHF3-TABLE6-R1",
+  "source": {
+    "citation": "L. G. Christophorou and J. K. Olthoff, J. Phys. Chem. Ref. Data 28, 967 (1999)",
+    "doi": "10.1063/1.556050",
+    "nist_url": "https://www.nist.gov/publications/electron-interactions-plasma-processing-gases-update-cf4-chf3-c2f6-and-c3f8",
+    "pdf_sha256": "2699b108bf21eb292f6d49a948d3d867ee49341fc831701085b0495e9b1a9ffa"
+  },
+  "visual_audit": {
+    "render_dpi": 400,
+    "render_size_px": [
+      3400,
+      4406
+    ],
+    "renders": {
+      "pdf_page_8_tables_4_5_sha256": "5ee4792cbd2c913fb1a73c2d13cd43e29b5ce7c4c7590b4fbcdcf566238c4b1c",
+      "pdf_page_11_table_6_sha256": "3179fabd1990d9e85e9088095ef73df69872835a8430dfbe73323c0838142ca6"
+    },
+    "status": "passed_original_resolution"
+  },
+  "conversions": [
+    "printed 10^6 cm/s values multiplied by 1e4 to m/s",
+    "printed 1e-20 m^2 cross sections multiplied by 1e-20"
+  ],
+  "outputs": [
+    {
+      "path": "data/experimental/christophorou_olthoff_1999_chf3/table4_total_scattering.csv",
+      "sha256": "845b090424f9df9ca8d5612783fe9cbf7a275a1bc26f239940cab266531a9da1",
+      "row_count": 49
+    },
+    {
+      "path": "data/experimental/christophorou_olthoff_1999_chf3/table5_momentum_transfer.csv",
+      "sha256": "fd6bc530ab6794f56cb733862a71b7cd40d4757b6b9d604a63e0841e498fb865",
+      "row_count": 5
+    },
+    {
+      "path": "data/experimental/christophorou_olthoff_1999_chf3/table6_drift_velocity.csv",
+      "sha256": "d5e0de969eedd64f38e8b15b7f5bd5c90f6e0ff6ccf22e77aebefd9c3a742901",
+      "row_count": 33
+    }
+  ],
+  "claim_boundary": {
+    "valid": [
+      "recommended total electron-scattering curve",
+      "suggested calculated momentum-transfer values from 10-30 eV",
+      "recommended 298 K pure-CHF3 drift-velocity curve"
+    ],
+    "not_valid": [
+      "a statistically independent grade of a swarm-regressed deck",
+      "target-reactor power coupling, plasma density, or wafer flux"
+    ]
+  }
+}
