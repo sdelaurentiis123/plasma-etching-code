@@ -1,0 +1,100 @@
+{
+  "boundary_evidence": {
+    "anchor_is_target_measurement": false,
+    "family_anchor_bias_magnitude_V": 276.0,
+    "o2_workbook": {
+      "doi": "10.60893/figshare.jpr.30850013.v1",
+      "license": "CC BY-NC 4.0",
+      "sha256": "6f98ac82e169d25d0a4328b1a3703f733668539adb8141d736209d199013c860",
+      "source_file_committed": false
+    },
+    "self_bias_transfer_path": "data/experimental/zhu_2026_tio2_npg80/oxford80_self_bias_transfer.json",
+    "self_bias_transfer_sha256": "4725fa709b12a85f62e94189d08b20a286d6fa6a53a66036dae504f33d1243e9"
+  },
+  "certification": {
+    "forward_to_absorbed_power_transfer_measured": false,
+    "global_particle_and_power_conservation_passed": true,
+    "result": "The corrected wall physics materially strengthens the clearance case but does not identify a unique target-tool profile.",
+    "sheath_global_fixed_point_passed": true,
+    "supports_unique_absolute_depth_prediction": false,
+    "target_machine_self_bias_measured": false,
+    "target_tio2_surface_response_measured": false
+  },
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "conditional_tio2_dose": {
+    "ald_tio2_density_sensitivity_kg_m3": [
+      3250.0,
+      4150.0
+    ],
+    "etch_time_s": 1200.0,
+    "film_thickness_nm": 700.0,
+    "interpretation": "Exact atom/dose requirement conditional on the family-anchor self-bias, 90 W absorbed-power, geometry, and wall sensitivities; not a fitted TiO2 yield or target-tool depth prediction.",
+    "required_blanket_formula_units_per_positive_ion": [
+      0.9847064829051287,
+      1.2573944320173183
+    ]
+  },
+  "coupled_state": {
+    "path": "results/curated/zhu_npg80_sheath_coupled_v1/central_276V.json",
+    "sha256": "669cb7baab66e594611a58888dd9731904d7c422e2ea670478035e13dc536d18",
+    "summary": {
+      "electron_density_m3": 2.2305696317071276e+16,
+      "electronegativity": 111.18052662617309,
+      "maximum_normalized_residual": 3.59146886292011e-09,
+      "mean_electron_energy_eV": 6.375262337736328,
+      "neutral_F_thermal_flux_m2_s": 2.2057858751870633e+21,
+      "power_density_W_m3": {
+        "absorbed": 66314.55962162306,
+        "charged_wall": 26294.427120416556,
+        "grounded_charged_wall": 2635.2571044538777,
+        "parent_collision": 23474.67642441734,
+        "powered_electrode_charged_wall": 23659.170015962678,
+        "supplemental_collision": 16545.45606183906
+      },
+      "total_axial_positive_ion_flux_m2_s": 1.45171821607602e+19
+    }
+  },
+  "effect_of_corrected_wall_power": {
+    "charged_wall_power_ratio": 0.702421248677658,
+    "electron_density_ratio": 1.8792301887141103,
+    "neutral_F_flux_ratio": 2.647640700579469,
+    "positive_ion_flux_ratio": 1.160549398696408
+  },
+  "fixed_point": {
+    "converged_below_0p01_V": true,
+    "effective_multi_ion_bohm_mass_amu": 52.60941426147404,
+    "electron_temperature_eV": 4.250174891824218,
+    "grounded_surface_sheath_drop_V": 20.474843685564036,
+    "maximum_voltage_residual_V": 0.0034606166218296153,
+    "maxwellian_floating_plasma_potential_V": 20.471383068942224,
+    "powered_electrode_sheath_drop_V": 296.47484368556405
+  },
+  "schema": "petch.zhu-npg80-sheath-global-coupling-audit.v1",
+  "source_state": {
+    "path": "results/curated/zhu_npg80_open_reactor_v2/source_geometry_central.json",
+    "sha256": "8006c8f95108df3036a6809806d45e7a2f22bdf939d149683a08e37c83579061",
+    "summary": {
+      "electron_density_m3": 1.1869592374063692e+16,
+      "electronegativity": 209.0256337959833,
+      "maximum_normalized_residual": 4.5498782306614605e-09,
+      "mean_electron_energy_eV": 6.593134661486392,
+      "neutral_F_thermal_flux_m2_s": 8.331137509346716e+20,
+      "power_density_W_m3": {
+        "absorbed": 66314.55962162306,
+        "charged_wall": 37433.98590221621,
+        "parent_collision": 20512.161006984985,
+        "supplemental_collision": 8368.412739142113
+      },
+      "total_axial_positive_ion_flux_m2_s": 1.250888775356455e+19
+    }
+  },
+  "target_outcome_used": false,
+  "wall_ledger": {
+    "charged_wall_power_density_W_m3": 26294.427120416556,
+    "grounded_charged_wall_power_density_W_m3": 2635.2571044538777,
+    "grounded_positive_ion_loss_fraction": 0.5382776212456991,
+    "particle_closure_relative_residual": -2.220446049250313e-16,
+    "powered_electrode_charged_wall_power_density_W_m3": 23659.170015962678,
+    "powered_electrode_positive_ion_loss_fraction": 0.4617223787543006
+  }
+}
