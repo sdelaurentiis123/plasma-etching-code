@@ -293,6 +293,7 @@ from .network import (
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
+    ElectronLogTemperatureInversePolynomialRateCoefficient,
     ElectronBase10LogPolynomialRateCoefficient,
     ElectronMaxwellianCrossSectionRateCoefficient,
     ElectronTabulatedCrossSectionSupport,
@@ -453,6 +454,13 @@ from .zhu_parent_collision_chemistry import (
     build_zhu_parent_collision_chemistry,
     zhu_parent_collision_species,
 )
+from .zhu_supplemental_chemistry import (
+    KOKKORIS_2009_DOI,
+    KOKKORIS_2009_TARGET_PRESSURE_PA,
+    ZHU_RECIPE_PRESSURE_PA,
+    ZhuSupplementalChemistry,
+    build_zhu_supplemental_chemistry,
+)
 from .current_driven_rf_sheath import (
     PeriodicCurrentDensity,
     TurnerChabertCurrentDrivenSheath,
@@ -565,6 +573,7 @@ __all__ = [
     "CylindricalNeutralWallLoss",
     "ElectronArrheniusRateCoefficient",
     "ElectronInverseTemperaturePolynomialRateCoefficient",
+    "ElectronLogTemperatureInversePolynomialRateCoefficient",
     "ElectronBase10LogPolynomialRateCoefficient",
     "ElectronMaxwellianCrossSectionRateCoefficient",
     "ElectronTabulatedCrossSectionSupport",
@@ -771,6 +780,11 @@ __all__ = [
     "ZhuParentCollisionChemistry",
     "build_zhu_parent_collision_chemistry",
     "zhu_parent_collision_species",
+    "KOKKORIS_2009_DOI",
+    "KOKKORIS_2009_TARGET_PRESSURE_PA",
+    "ZHU_RECIPE_PRESSURE_PA",
+    "ZhuSupplementalChemistry",
+    "build_zhu_supplemental_chemistry",
     "PeriodicCurrentDensity",
     "TurnerChabertCurrentDrivenSheath",
     "TurnerChabertCurrentSheathTangent",

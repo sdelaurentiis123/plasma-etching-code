@@ -45,10 +45,11 @@ def _grid(deck) -> ElectronEnergyGrid:
 def test_parent_product_species_have_explicit_atoms_and_charge():
     species = zhu_parent_collision_species()
     by_name = {item.name: item for item in species}
-    assert len(species) == len(by_name) == 44
+    assert len(species) == len(by_name) == 45
     assert by_name["SF4++"].charge_number == 2
     assert by_name["SF4++"].composition == {"S": 1, "F": 4}
     assert by_name["F2-"].charge_number == -1
+    assert by_name["F2+"].charge_number == 1
     assert by_name["CHF2+"].composition == {"C": 1, "H": 1, "F": 2}
     assert by_name["O2+"].composition == {"O": 2}
 

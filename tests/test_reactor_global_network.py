@@ -11,6 +11,7 @@ from petch.reactor_global import (
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
+    ElectronLogTemperatureInversePolynomialRateCoefficient,
     ElectronBase10LogPolynomialRateCoefficient,
     ElectronMaxwellianCrossSectionRateCoefficient,
     ElectronTabulatedCrossSectionSupport,
@@ -189,6 +190,32 @@ def test_inverse_temperature_polynomial_rate_replays_printed_expression():
         coefficient.coefficient_si(RateContext(temperature)),
         expected,
         rtol=2.0e-16,
+        atol=0.0,
+    )
+
+
+def test_log_temperature_inverse_polynomial_replays_kokkoris_equation2():
+    printed = (-34.92, 1.487, -2.377, -29.71, -0.1449)
+    coefficient = (
+        ElectronLogTemperatureInversePolynomialRateCoefficient.from_log_si(
+            printed[0],
+            temperature_power=printed[1],
+            inverse_temperature_coefficients=printed[2:],
+            source="Kokkoris et al. 2009 Table 1 G11 Druyvesteyn",
+        )
+    )
+    temperature = 3.25
+    expected = np.exp(
+        printed[0]
+        + printed[1] * np.log(temperature)
+        + printed[2] / temperature
+        + printed[3] / temperature ** 2
+        + printed[4] / temperature ** 3
+    )
+    assert np.isclose(
+        coefficient.coefficient_si(RateContext(temperature)),
+        expected,
+        rtol=1.0e-14,
         atol=0.0,
     )
 

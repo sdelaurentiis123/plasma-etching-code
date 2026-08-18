@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 160 sources by topic
+## Index — 161 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -137,6 +137,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`benyoucef-yousfi-2014-ion-transport`](library/benyoucef-yousfi-2014-ion-transport.md) | Benyoucef & Yousfi, semiclassical Ar+/Ar, O2+/O2, N2+/N2 transport validation | AUTHOR-PROVIDED FULL TEXT READ VIA HTML; FIGURES NOT LOCALLY ARCHIVED |
 | [`chantry-1987-wall-diffusion`](library/chantry-1987-wall-diffusion.md) | Chantry, partial-reflection neutral diffusion and low-density wall-loss limit | PRIMARY FULL TEXT + EQUATIONS 4--7, 18--24 VISUALLY AUDITED |
 | [`christophorou-olthoff-2000-sf6`](library/christophorou-olthoff-2000-sf6.md) | Christophorou & Olthoff, NIST-evaluated SF6 collision, product, and swarm data | PRIMARY NIST FULL TEXT + TABLES 9, 14--17, 20, 24--25, 27--28, 35--37 PIXEL-AUDITED AT 400 DPI |
+| [`kokkoris-2009-sf6-global`](library/kokkoris-2009-sf6-global.md) | Kokkoris et al., conservation-checked SF6 daughter/heavy global chemistry | PRIMARY FULL TEXT + TABLE 1 VISUALLY AUDITED; TARGET-PRESSURE TRANSFER LIMIT PINNED |
 | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | Christophorou & Olthoff, NIST-evaluated Cl2/Cl electron-interaction data | PRIMARY NIST FULL TEXT + TABLES 12/25 PIXEL-AUDITED AT 300 DPI + TABLE 16 AT 500 DPI |
 | [`economou-1995-2002-cl-transport`](library/economou-1995-2002-cl-transport.md) | Lymberopoulos/Economou and Ramamurthi/Economou, Cl diffusion and Robin wall transport | TWO PRIMARY FULL TEXTS + EQUATIONS/TABLES VISUALLY AUDITED; 300/500 K COEFFICIENT CONFLICT QUARANTINED |
 | [`gonzalez-magana-de-urquijo-2018-cl2`](library/gonzalez-magana-de-urquijo-2018-cl2.md) | Gonzalez-Magana & de Urquijo, direct Cl2/Cl2-N2 pulsed-Townsend swarm measurements | PRIMARY FULL TEXT + TABLES A1--A3 300-DPI AUDIT; 52 PURE-CL2 MARKERS EXECUTABLE |

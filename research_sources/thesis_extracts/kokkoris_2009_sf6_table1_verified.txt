@@ -1,0 +1,65 @@
+Kokkoris et al. 2009, J. Phys. D 42 055209
+DOI 10.1088/0022-3727/42/5/055209
+Focused verified extraction: Table 1 and equation 2
+
+Rate equation (Te in eV, k in m3/s):
+  ln(k) = A + B ln(Te) + C/Te + D/Te^2 + E/Te^3
+
+Every electron-impact row prints one Druyvesteyn coefficient set followed by
+one Maxwellian set. The paper uses the Druyvesteyn branch in its reported
+model results. The executable Zhu subset retains both branches.
+
+Daughter electron rows used (Druyvesteyn / Maxwellian A,B,C,D,E):
+G4 e+SF5 -> SF4+F+e, Eth 9.6:
+  -29.36,-0.2379,-14.11,-15.25,-1.204 /
+  -29.57,-0.2859,-13.80,1.148,-0.0781
+G5 e+SF4 -> SF3+F+e, Eth 9.6: same printed coefficients as G4
+G6 e+F2 -> 2F+e, Eth 3.16:
+  -31.44,-0.6986,-5.170,-1.389,-0.0650 /
+  -31.89,-0.5549,-5.238,0.4288,-0.0266
+G7 e+F2 -> 2F+e, Eth 4.34:
+  -33.44,-0.2761,-3.564,-3.946,-0.0393 /
+  -33.36,-0.2982,-5.312,0.1970,-0.0124
+G11 e+SF5 -> SF5+ +2e, Eth 11.2:
+  -34.92,1.487,-2.377,-29.71,-0.1449 /
+  -32.78,0.8601,-10.76,-0.0558,0.0025
+G12 e+SF5 -> SF4+ +F+2e, Eth 14.5:
+  -36.27,1.892,-1.387,-50.87,-0.0758 /
+  -33.20,1.0177,-13.76,-0.1309,0.0075
+G13 e+SF4 -> SF4+ +2e, Eth 13.0:
+  -32.95,0.8763,-10.19,-31.21,-3.989 /
+  -32.01,0.5939,-14.83,2.220,-0.9045
+G14 e+SF4 -> SF3+ +F+2e, Eth 14.5:
+  -32.75,0.8222,-10.82,-40.59,-4.274 /
+  -31.78,0.5357,-16.26,1.974,-0.7729
+G15 e+SF3 -> SF3+ +2e, Eth 11.0:
+  -35.55,1.750,-2.086,-28.70,-0.1357 /
+  -33.23,1.073,-10.36,-0.1016,0.0055
+G16 e+F2 -> F2+ +2e, Eth 15.69:
+  -35.60,1.467,-6.140,-57.14,-0.4860 /
+  -33.38,0.8249,-15.96,0.0655,-0.0041
+G19 e+F2 -> F+F-, no printed threshold:
+  -33.31,-1.487,-0.2795,0.0109,-0.0004 /
+  -32.81,-1.440,-0.5283,0.0558,-0.0028
+
+Heavy rows used (constant k = exp(A) m3/s):
+G20 F-+N -> F+N+e, A=-44.39, N=SF6,SF5,SF4,SF3,F,F2
+G21 SF6-+N -> SF6+N+e, A=-44.98, same N set
+G38--G40 F2+SF5/SF4/SF3 rearrangements, A=-46.41
+G41 SF5+SF5 -> SF6+SF4, A=-41.50
+G42--G49 {SF5+,SF4+,SF3+,F2+}+{SF6-,F-} -> parents, A=-29.93
+G50 SF5+ +SF6 -> SF3+ +F2+SF6, A=-39.65
+
+Pressure-transfer quarantine:
+G35--G37 F+SF5/SF4/SF3 recombination print A=-42.83, but Table-1
+footnote f states the coefficient was calculated from the Ryan and Plumb
+fall-off formula and is valid at 2 Pa. It is not portable to the 3e-2 Torr
+(3.9997 Pa) Zhu condition without recovering that formula.
+
+Parent rows excluded from the executable supplemental deck:
+G1--G3, G8--G10, G17--G18. These are replaced by the NIST evaluated
+cross-section deck and product-resolved replay, preventing double counting.
+
+Wall-transfer boundary:
+The wall parameters in Kokkoris were selected/fitted for an Oxford ICP380.
+They are not numerical evidence for an Oxford PlasmaPro NPG80 CCP wall state.

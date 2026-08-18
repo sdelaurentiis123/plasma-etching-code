@@ -321,6 +321,86 @@ class ElectronInverseTemperaturePolynomialRateCoefficient:
 
 
 @dataclass(frozen=True)
+class ElectronLogTemperatureInversePolynomialRateCoefficient:
+    """``exp(A) Te**B exp(C/Te + D/Te**2 + ...)`` electron rate.
+
+    This is the rate form used by Kokkoris et al. (J. Phys. D 42,
+    055209, 2009), whose printed equation is
+
+    ``ln(k) = A + B ln(Te) + C/Te + D/Te**2 + E/Te**3``.
+
+    The leading coefficient is stored after exponentiating ``A`` so the
+    object remains usable for other sources with the same analytic form.
+    ``Te`` is in eV and the coefficient is in SI units.
+    """
+
+    prefactor_si: float
+    temperature_power: float
+    inverse_temperature_coefficients: tuple[float, ...]
+    density_order: float
+    source: str
+    source_units: str
+    evidence_kind: str
+
+    def __post_init__(self):
+        coefficients = tuple(
+            float(value) for value in self.inverse_temperature_coefficients)
+        if (
+            not np.isfinite(self.prefactor_si)
+            or self.prefactor_si <= 0.0
+            or not np.isfinite(self.temperature_power)
+            or not coefficients
+            or np.any(~np.isfinite(np.asarray(coefficients)))
+            or not np.isfinite(self.density_order)
+            or self.density_order <= 0.0
+            or not str(self.source).strip()
+            or not str(self.source_units).strip()
+            or self.evidence_kind not in _EVIDENCE_KINDS
+        ):
+            raise ValueError(
+                "invalid log-temperature inverse-polynomial rate coefficient")
+        object.__setattr__(self, "prefactor_si", float(self.prefactor_si))
+        object.__setattr__(self, "temperature_power", float(self.temperature_power))
+        object.__setattr__(
+            self, "inverse_temperature_coefficients", coefficients)
+        object.__setattr__(self, "density_order", float(self.density_order))
+
+    def coefficient_si(self, context: RateContext) -> float:
+        if not isinstance(context, RateContext):
+            raise TypeError("rate context is required")
+        temperature = context.electron_temperature_eV
+        exponent = sum(
+            coefficient / temperature ** order
+            for order, coefficient in enumerate(
+                self.inverse_temperature_coefficients, start=1)
+        )
+        value = (
+            self.prefactor_si
+            * temperature ** self.temperature_power
+            * np.exp(exponent)
+        )
+        if not np.isfinite(value) or value <= 0.0:
+            raise FloatingPointError("nonpositive or nonfinite rate coefficient")
+        return float(value)
+
+    @classmethod
+    def from_log_si(
+            cls, log_prefactor: float, *, temperature_power: float,
+            inverse_temperature_coefficients: tuple[float, ...],
+            source: str, evidence_kind: str = "regressed"):
+        return cls(
+            prefactor_si=float(np.exp(log_prefactor)),
+            temperature_power=temperature_power,
+            inverse_temperature_coefficients=(
+                inverse_temperature_coefficients),
+            density_order=2.0,
+            source=source,
+            source_units="m^3 s^-1; Te in eV",
+            evidence_kind=evidence_kind,
+        )
+
+
+@dataclass(frozen=True)
 class ElectronBase10LogPolynomialRateCoefficient:
     """Lennon Eq.-6 base-10-log electron-impact coefficient.
 
@@ -1244,6 +1324,7 @@ _RATE_COEFFICIENT_TYPES = (
     ConstantRateCoefficient,
     ElectronArrheniusRateCoefficient,
     ElectronInverseTemperaturePolynomialRateCoefficient,
+    ElectronLogTemperatureInversePolynomialRateCoefficient,
     ElectronBase10LogPolynomialRateCoefficient,
     ElectronMaxwellianCrossSectionRateCoefficient,
     ElectronTemperatureTabulatedRateCoefficient,
@@ -1270,6 +1351,7 @@ class Reaction:
         ConstantRateCoefficient
         | ElectronArrheniusRateCoefficient
         | ElectronInverseTemperaturePolynomialRateCoefficient
+        | ElectronLogTemperatureInversePolynomialRateCoefficient
         | ElectronBase10LogPolynomialRateCoefficient
         | ElectronMaxwellianCrossSectionRateCoefficient
         | ElectronTemperatureTabulatedRateCoefficient
