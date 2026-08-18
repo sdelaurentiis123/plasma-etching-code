@@ -158,6 +158,10 @@ def run(args) -> dict:
             "Oxford-80 family geometry/voltage and target-pressure mobility "
             "sensitivity; not target-tool diagnostics"
         ),
+        powered_electrode_sheath_drop_V=(
+            args.powered_electrode_sheath_drop_V),
+        grounded_surface_sheath_drop_V=(
+            args.grounded_surface_sheath_drop_V),
     )
     model = ZhuOpenReactorModel(solver, parent, supplemental)
     initial_densities = None
@@ -206,6 +210,12 @@ def run(args) -> dict:
             "plasma_height_mm": args.plasma_height_mm,
             "ion_mfp_um": args.ion_mfp_um,
             "mean_all_wall_ion_energy_eV": args.mean_wall_ion_energy_eV,
+            "powered_electrode_sheath_drop_V": (
+                condition.powered_electrode_sheath_drop_V),
+            "grounded_surface_sheath_drop_V": (
+                condition.grounded_surface_sheath_drop_V),
+            "wall_resolved_sheath_power": (
+                condition.uses_wall_resolved_sheath_power),
             "kokkoris_eedf_shape": args.kokkoris_eedf_shape,
             "chf3_f_rate_branch": args.chf3_f_rate_branch,
             "o2_source_workbook_sha256": (
@@ -235,6 +245,12 @@ def run(args) -> dict:
             "densities_m3": densities,
             "axial_positive_ion_flux_m2_s": dict(
                 solution.axial_positive_ion_flux_m2_s),
+            "positive_ion_wall_loss_m3_s": dict(
+                solution.positive_ion_wall_loss_m3_s),
+            "powered_electrode_positive_ion_wall_loss_m3_s": dict(
+                solution.powered_electrode_positive_ion_wall_loss_m3_s),
+            "grounded_positive_ion_wall_loss_m3_s": dict(
+                solution.grounded_positive_ion_wall_loss_m3_s),
             "neutral_thermal_flux_m2_s": dict(
                 solution.neutral_thermal_flux_m2_s),
             "total_axial_positive_ion_flux_m2_s": (
@@ -249,6 +265,10 @@ def run(args) -> dict:
             "supplemental_collision": (
                 solution.supplemental_collision_power_density_W_m3),
             "charged_wall": solution.charged_wall_power_density_W_m3,
+            "powered_electrode_charged_wall": (
+                solution.powered_electrode_charged_wall_power_density_W_m3),
+            "grounded_charged_wall": (
+                solution.grounded_charged_wall_power_density_W_m3),
         },
         "numerics": {
             "solver_evaluations": solution.solver_evaluations,
@@ -286,6 +306,8 @@ def main() -> None:
     parser.add_argument("--ion-temperature-eV", type=float, default=.03)
     parser.add_argument("--ion-mfp-um", type=float, default=100.0)
     parser.add_argument("--mean-wall-ion-energy-eV", type=float, default=250.0)
+    parser.add_argument("--powered-electrode-sheath-drop-V", type=float)
+    parser.add_argument("--grounded-surface-sheath-drop-V", type=float)
     parser.add_argument(
         "--neutral-reduced-diffusivity-m-inv-s", type=float, default=6.0e20)
     parser.add_argument("--f-wall-probability", type=float, default=.05)

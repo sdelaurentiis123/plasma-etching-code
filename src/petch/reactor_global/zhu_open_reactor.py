@@ -84,6 +84,55 @@ def _finite_mapping(
     return MappingProxyType(converted)
 
 
+def wall_resolved_charged_power_density_W_m3(
+    *,
+    powered_positive_ion_loss_m3_s: Mapping[str, float],
+    grounded_positive_ion_loss_m3_s: Mapping[str, float],
+    ion_charge_numbers: Mapping[str, int],
+    electron_wall_energy_eV: float,
+    powered_electrode_sheath_drop_V: float,
+    grounded_surface_sheath_drop_V: float,
+) -> tuple[float, float]:
+    """Return powered and grounded charged-particle wall-power densities.
+
+    Sheath inputs are potential drops.  Multiplication by the ion charge
+    number therefore gives each ion's directed sheath energy in eV.  The
+    electron wall-loss energy is allocated over the same ambipolar loss
+    channels, so equal sheath drops recover the legacy all-wall expression.
+    """
+    powered = _finite_mapping(
+        powered_positive_ion_loss_m3_s, nonnegative=True)
+    grounded = _finite_mapping(
+        grounded_positive_ion_loss_m3_s, nonnegative=True)
+    charges = {str(name): int(value) for name, value in ion_charge_numbers.items()}
+    electron_energy = float(electron_wall_energy_eV)
+    powered_drop = float(powered_electrode_sheath_drop_V)
+    grounded_drop = float(grounded_surface_sheath_drop_V)
+    if (
+        set(powered) != set(grounded)
+        or set(powered) != set(charges)
+        or any(value <= 0 for value in charges.values())
+        or any(
+            not math.isfinite(value) or value <= 0.0
+            for value in (electron_energy, powered_drop, grounded_drop)
+        )
+    ):
+        raise ValueError("invalid wall-resolved charged-power inputs")
+
+    def channel_power(losses, sheath_drop):
+        return E_CHARGE_C * sum(
+            losses[name]
+            * charges[name]
+            * (electron_energy + sheath_drop)
+            for name in charges
+        )
+
+    return (
+        float(channel_power(powered, powered_drop)),
+        float(channel_power(grounded, grounded_drop)),
+    )
+
+
 @dataclass(frozen=True)
 class ZhuOpenReactorCondition:
     """One pressure-controlled condition with explicit machine closures."""
@@ -105,6 +154,8 @@ class ZhuOpenReactorCondition:
     source: str
     absorbed_power_source: str
     machine_closure_source: str
+    powered_electrode_sheath_drop_V: float | None = None
+    grounded_surface_sheath_drop_V: float | None = None
 
     def __post_init__(self):
         scalars = np.asarray((
@@ -122,6 +173,21 @@ class ZhuOpenReactorCondition:
         feed = _finite_mapping(self.feed_molecules_s, nonnegative=False)
         probabilities = _finite_mapping(
             self.neutral_wall_probabilities, nonnegative=True)
+        resolved_drops = (
+            self.powered_electrode_sheath_drop_V,
+            self.grounded_surface_sheath_drop_V,
+        )
+        if any(value is None for value in resolved_drops):
+            if not all(value is None for value in resolved_drops):
+                raise ValueError(
+                    "powered and grounded sheath drops must be supplied together")
+        else:
+            resolved_drops = tuple(float(value) for value in resolved_drops)
+            if any(
+                not math.isfinite(value) or value <= 0.0
+                for value in resolved_drops
+            ):
+                raise ValueError("sheath drops must be positive and finite")
         if (
             not str(self.condition_id).strip()
             or not isinstance(self.geometry, CylindricalReactor)
@@ -140,6 +206,11 @@ class ZhuOpenReactorCondition:
         object.__setattr__(self, "feed_molecules_s", feed)
         object.__setattr__(self, "neutral_wall_probabilities", probabilities)
         object.__setattr__(self, "reduced_field_bounds_Td", bounds)
+        if resolved_drops[0] is not None:
+            object.__setattr__(
+                self, "powered_electrode_sheath_drop_V", resolved_drops[0])
+            object.__setattr__(
+                self, "grounded_surface_sheath_drop_V", resolved_drops[1])
         for name, value in zip((
             "neutral_control_volume_m3",
             "pressure_Pa",
@@ -170,6 +241,10 @@ class ZhuOpenReactorCondition:
     def supports_unique_machine_state(self) -> bool:
         return False
 
+    @property
+    def uses_wall_resolved_sheath_power(self) -> bool:
+        return self.powered_electrode_sheath_drop_V is not None
+
 
 @dataclass(frozen=True)
 class ZhuOpenReactorSolution:
@@ -181,11 +256,15 @@ class ZhuOpenReactorSolution:
     axial_positive_ion_flux_m2_s: Mapping[str, float]
     neutral_thermal_flux_m2_s: Mapping[str, float]
     positive_ion_wall_loss_m3_s: Mapping[str, float]
+    powered_electrode_positive_ion_wall_loss_m3_s: Mapping[str, float]
+    grounded_positive_ion_wall_loss_m3_s: Mapping[str, float]
     neutral_wall_loss_m3_s: Mapping[str, float]
     absorbed_power_density_W_m3: float
     parent_collision_power_density_W_m3: float
     supplemental_collision_power_density_W_m3: float
     charged_wall_power_density_W_m3: float
+    powered_electrode_charged_wall_power_density_W_m3: float
+    grounded_charged_wall_power_density_W_m3: float
     normalized_residuals: Mapping[str, float]
     electron_solution: TwoTermBoltzmannSolution
     parent_collision_state: ElectronCollisionChemistryState
@@ -204,6 +283,12 @@ class ZhuOpenReactorSolution:
             self.neutral_thermal_flux_m2_s, nonnegative=True)
         positive_loss = _finite_mapping(
             self.positive_ion_wall_loss_m3_s, nonnegative=True)
+        powered_positive_loss = _finite_mapping(
+            self.powered_electrode_positive_ion_wall_loss_m3_s,
+            nonnegative=True,
+        )
+        grounded_positive_loss = _finite_mapping(
+            self.grounded_positive_ion_wall_loss_m3_s, nonnegative=True)
         neutral_loss = _finite_mapping(
             self.neutral_wall_loss_m3_s, nonnegative=True)
         residuals = {
@@ -218,6 +303,8 @@ class ZhuOpenReactorSolution:
             self.parent_collision_power_density_W_m3,
             self.supplemental_collision_power_density_W_m3,
             self.charged_wall_power_density_W_m3,
+            self.powered_electrode_charged_wall_power_density_W_m3,
+            self.grounded_charged_wall_power_density_W_m3,
             self.electron_collision_basis_neutral_fraction,
         ), dtype=float)
         if (
@@ -226,6 +313,24 @@ class ZhuOpenReactorSolution:
             or np.any(values[4:-1] < 0.0)
             or not 0.0 < values[-1] <= 1.0
             or set(axial) != set(positive_loss)
+            or set(powered_positive_loss) != set(positive_loss)
+            or set(grounded_positive_loss) != set(positive_loss)
+            or any(
+                not math.isclose(
+                    positive_loss[name],
+                    powered_positive_loss[name] + grounded_positive_loss[name],
+                    rel_tol=2.0e-14,
+                    abs_tol=0.0,
+                )
+                for name in positive_loss
+            )
+            or not math.isclose(
+                self.charged_wall_power_density_W_m3,
+                self.powered_electrode_charged_wall_power_density_W_m3
+                + self.grounded_charged_wall_power_density_W_m3,
+                rel_tol=2.0e-14,
+                abs_tol=0.0,
+            )
             or set(neutral_flux) != set(neutral_loss)
             or not residuals
             or any(not math.isfinite(value) for value in residuals.values())
@@ -236,6 +341,13 @@ class ZhuOpenReactorSolution:
         object.__setattr__(self, "axial_positive_ion_flux_m2_s", axial)
         object.__setattr__(self, "neutral_thermal_flux_m2_s", neutral_flux)
         object.__setattr__(self, "positive_ion_wall_loss_m3_s", positive_loss)
+        object.__setattr__(
+            self,
+            "powered_electrode_positive_ion_wall_loss_m3_s",
+            powered_positive_loss,
+        )
+        object.__setattr__(
+            self, "grounded_positive_ion_wall_loss_m3_s", grounded_positive_loss)
         object.__setattr__(self, "neutral_wall_loss_m3_s", neutral_loss)
         object.__setattr__(self, "normalized_residuals", MappingProxyType(residuals))
         object.__setattr__(self, "solver_evaluations", int(self.solver_evaluations))
@@ -247,6 +359,8 @@ class ZhuOpenReactorSolution:
             "parent_collision_power_density_W_m3",
             "supplemental_collision_power_density_W_m3",
             "charged_wall_power_density_W_m3",
+            "powered_electrode_charged_wall_power_density_W_m3",
+            "grounded_charged_wall_power_density_W_m3",
             "electron_collision_basis_neutral_fraction",
         ), values):
             object.__setattr__(self, name, float(value))
@@ -419,7 +533,11 @@ class ZhuOpenReactorModel:
         densities: Mapping[str, float],
         equivalent_temperature_eV: float,
         condition: ZhuOpenReactorCondition,
-    ) -> tuple[dict[str, float], dict[str, float]]:
+    ) -> tuple[
+        dict[str, float],
+        dict[str, float],
+        dict[str, tuple[float, float]],
+    ]:
         negative_charge = sum(
             -self.species_by_name[name].charge_number * densities[name]
             for name in self.negative_names)
@@ -433,10 +551,23 @@ class ZhuOpenReactorModel:
             ion_mean_free_path_m=condition.ion_momentum_mean_free_path_m,
             include_high_pressure_diffusion=False,
         )
-        loss_area_over_volume = (
-            condition.geometry.effective_loss_area_m2(edge)
+        powered_area_over_volume = (
+            edge.axial * math.pi * condition.geometry.radius_m ** 2
             / condition.geometry.volume_m3
         )
+        grounded_area_over_volume = (
+            (
+                edge.axial * math.pi * condition.geometry.radius_m ** 2
+                + edge.radial
+                * 2.0
+                * math.pi
+                * condition.geometry.radius_m
+                * condition.geometry.length_m
+            )
+            / condition.geometry.volume_m3
+        )
+        loss_area_over_volume = powered_area_over_volume + grounded_area_over_volume
+        resolved_frequencies = {}
         for name in self.positive_names:
             species = self.species_by_name[name]
             charge = species.charge_number
@@ -445,8 +576,12 @@ class ZhuOpenReactorModel:
                 * bohm_speed(equivalent_temperature_eV, species.mass_amu)
             )
             wall_frequencies[name] = loss_area_over_volume * speed
+            resolved_frequencies[name] = (
+                powered_area_over_volume * speed,
+                grounded_area_over_volume * speed,
+            )
             axial_velocities[name] = edge.axial * speed
-        return wall_frequencies, axial_velocities
+        return wall_frequencies, axial_velocities, resolved_frequencies
 
     def jacobian_sparsity(self):
         """Return the exact structural dependency graph for the log solve.
@@ -628,7 +763,11 @@ class ZhuOpenReactorModel:
             )
             for name in self.species_order
         }
-        positive_wall_frequency, axial_velocity = self._charged_wall_transport(
+        (
+            positive_wall_frequency,
+            axial_velocity,
+            resolved_wall_frequency,
+        ) = self._charged_wall_transport(
             densities, equivalent_temperature, condition)
         external_terms = {name: [] for name in self.heavy_order}
         for name in self.neutral_names:
@@ -657,10 +796,17 @@ class ZhuOpenReactorModel:
             elif name == "O(1d)":
                 external_terms["O"].append(loss)
         positive_wall_loss = {}
+        powered_positive_wall_loss = {}
+        grounded_positive_wall_loss = {}
         axial_flux = {}
         for name, frequency in positive_wall_frequency.items():
             loss = active_fraction * frequency * densities[name]
+            powered_frequency, grounded_frequency = resolved_wall_frequency[name]
+            powered_loss = active_fraction * powered_frequency * densities[name]
+            grounded_loss = active_fraction * grounded_frequency * densities[name]
             positive_wall_loss[name] = loss
+            powered_positive_wall_loss[name] = powered_loss
+            grounded_positive_wall_loss[name] = grounded_loss
             axial_flux[name] = densities[name] * axial_velocity[name]
             external_terms[name].append(-loss)
             for product, amount in positive_ion_wall_return(name).items():
@@ -698,12 +844,28 @@ class ZhuOpenReactorModel:
         )
         electron_wall_energy = (
             electron_solution.transport_moments.mean_wall_loss_electron_energy_eV)
-        charged_wall_power = E_CHARGE_C * sum(
-            positive_wall_loss[name]
-            * self.species_by_name[name].charge_number
-            * (electron_wall_energy + condition.mean_positive_ion_wall_energy_eV)
-            for name in self.positive_names
+        if condition.uses_wall_resolved_sheath_power:
+            powered_sheath_drop = condition.powered_electrode_sheath_drop_V
+            grounded_sheath_drop = condition.grounded_surface_sheath_drop_V
+        else:
+            powered_sheath_drop = condition.mean_positive_ion_wall_energy_eV
+            grounded_sheath_drop = condition.mean_positive_ion_wall_energy_eV
+        (
+            powered_charged_wall_power,
+            grounded_charged_wall_power,
+        ) = wall_resolved_charged_power_density_W_m3(
+            powered_positive_ion_loss_m3_s=powered_positive_wall_loss,
+            grounded_positive_ion_loss_m3_s=grounded_positive_wall_loss,
+            ion_charge_numbers={
+                name: self.species_by_name[name].charge_number
+                for name in self.positive_names
+            },
+            electron_wall_energy_eV=electron_wall_energy,
+            powered_electrode_sheath_drop_V=powered_sheath_drop,
+            grounded_surface_sheath_drop_V=grounded_sheath_drop,
         )
+        charged_wall_power = (
+            powered_charged_wall_power + grounded_charged_wall_power)
         modeled_power = parent_power + supplemental_power + charged_wall_power
         balances["electron_power"] = (
             condition.absorbed_power_density_W_m3 - modeled_power
@@ -722,12 +884,16 @@ class ZhuOpenReactorModel:
             "parent_state": parent_state,
             "equivalent_temperature": equivalent_temperature,
             "positive_wall_loss": positive_wall_loss,
+            "powered_positive_wall_loss": powered_positive_wall_loss,
+            "grounded_positive_wall_loss": grounded_positive_wall_loss,
             "neutral_wall_loss": neutral_wall_loss,
             "neutral_thermal_flux": neutral_thermal_flux,
             "axial_flux": axial_flux,
             "parent_power": parent_power,
             "supplemental_power": supplemental_power,
             "charged_wall_power": charged_wall_power,
+            "powered_charged_wall_power": powered_charged_wall_power,
+            "grounded_charged_wall_power": grounded_charged_wall_power,
         }
 
     def solve(
@@ -901,12 +1067,20 @@ class ZhuOpenReactorModel:
             axial_positive_ion_flux_m2_s=ledger["axial_flux"],
             neutral_thermal_flux_m2_s=ledger["neutral_thermal_flux"],
             positive_ion_wall_loss_m3_s=ledger["positive_wall_loss"],
+            powered_electrode_positive_ion_wall_loss_m3_s=(
+                ledger["powered_positive_wall_loss"]),
+            grounded_positive_ion_wall_loss_m3_s=(
+                ledger["grounded_positive_wall_loss"]),
             neutral_wall_loss_m3_s=ledger["neutral_wall_loss"],
             absorbed_power_density_W_m3=condition.absorbed_power_density_W_m3,
             parent_collision_power_density_W_m3=ledger["parent_power"],
             supplemental_collision_power_density_W_m3=(
                 ledger["supplemental_power"]),
             charged_wall_power_density_W_m3=ledger["charged_wall_power"],
+            powered_electrode_charged_wall_power_density_W_m3=(
+                ledger["powered_charged_wall_power"]),
+            grounded_charged_wall_power_density_W_m3=(
+                ledger["grounded_charged_wall_power"]),
             normalized_residuals=ledger["balances"],
             electron_solution=ledger["electron_solution"],
             parent_collision_state=ledger["parent_state"],

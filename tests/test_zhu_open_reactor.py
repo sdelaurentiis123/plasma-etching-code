@@ -11,6 +11,7 @@ from petch.reactor_global.zhu_open_reactor import (
     ZhuOpenReactorModel,
     compile_bimolecular_kinetic_pairs,
     positive_ion_wall_return,
+    wall_resolved_charged_power_density_W_m3,
 )
 from petch.reactor_global.zhu_supplemental_chemistry import (
     build_zhu_supplemental_chemistry,
@@ -50,6 +51,62 @@ def test_condition_keeps_forward_to_absorbed_transfer_explicit():
         3.99967104 / (1.380649e-23 * 293.15))
     assert condition.active_volume_fraction == 1.0
     assert condition.supports_unique_machine_state is False
+    assert condition.uses_wall_resolved_sheath_power is False
+
+
+def test_condition_requires_a_complete_wall_resolved_sheath_pair():
+    condition = _condition()
+    with pytest.raises(ValueError, match="supplied together"):
+        ZhuOpenReactorCondition(**{
+            **condition.__dict__,
+            "powered_electrode_sheath_drop_V": 300.0,
+        })
+    resolved = ZhuOpenReactorCondition(**{
+        **condition.__dict__,
+        "powered_electrode_sheath_drop_V": 300.0,
+        "grounded_surface_sheath_drop_V": 20.0,
+    })
+    assert resolved.uses_wall_resolved_sheath_power is True
+
+
+def test_powered_and_grounded_loss_channels_close_and_recover_legacy_power():
+    model = object.__new__(ZhuOpenReactorModel)
+    species = zhu_reactor_species()
+    model.species_by_name = {item.name: item for item in species}
+    model.positive_names = tuple(
+        item.name for item in species if item.role == "positive_ion")
+    model.negative_names = tuple(
+        item.name for item in species if item.role == "negative_ion")
+    densities = {name: 1.0e15 for name in model.positive_names}
+    densities.update({name: 2.0e15 for name in model.negative_names})
+    densities["e"] = 1.0e15
+    total, _, resolved = model._charged_wall_transport(
+        densities, equivalent_temperature_eV=4.0, condition=_condition())
+    for name, frequency in total.items():
+        assert sum(resolved[name]) == pytest.approx(frequency, rel=2.0e-15)
+
+    powered_loss = {name: resolved[name][0] * densities[name] for name in total}
+    grounded_loss = {name: resolved[name][1] * densities[name] for name in total}
+    charge = {
+        name: model.species_by_name[name].charge_number for name in total}
+    powered_power, grounded_power = (
+        wall_resolved_charged_power_density_W_m3(
+            powered_positive_ion_loss_m3_s=powered_loss,
+            grounded_positive_ion_loss_m3_s=grounded_loss,
+            ion_charge_numbers=charge,
+            electron_wall_energy_eV=8.0,
+            powered_electrode_sheath_drop_V=250.0,
+            grounded_surface_sheath_drop_V=250.0,
+        )
+    )
+    legacy = 1.602176634e-19 * sum(
+        (powered_loss[name] + grounded_loss[name])
+        * charge[name]
+        * (8.0 + 250.0)
+        for name in total
+    )
+    assert powered_power + grounded_power == pytest.approx(
+        legacy, rel=2.0e-15)
 
 
 def test_every_positive_ion_has_atom_conserving_wall_return():
