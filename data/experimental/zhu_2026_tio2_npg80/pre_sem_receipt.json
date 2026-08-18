@@ -1,0 +1,74 @@
+{
+  "adjacent_literature_comparison": {
+    "approximate_tio2_rate_nm_min": 40.0,
+    "approximate_tio2_to_cr_selectivity": 14.0,
+    "chemistry_boundary": "CHF3/O2 on TiO2 with Cr mask; not the supplied CHF3/SF6/O2 condition and not machine-transferable",
+    "interpretation": "The comparison rate clears the film in time, but the comparison selectivity exhausts 45 nm Cr before full clear.",
+    "mask_exhaustion_time_at_comparison_rate_min": 15.75,
+    "mask_required_for_700nm_clear_nm": 50.0,
+    "mask_shortfall_for_full_clear_nm": 5.0,
+    "mask_supported_tio2_relief_nm": 630.0,
+    "rate_implied_clear_time_min": 17.5,
+    "source": "janissen-2016-tio2-rie",
+    "time_after_comparison_mask_exhaustion_min": 4.25
+  },
+  "adjacent_same_group_device_evidence": {
+    "relationship": "Same research group and TiO2 metasurface fabrication lineage; not demonstrated to use this exact recipe or layout.",
+    "reported_tio2_meta_atom_height_nm": 750.0,
+    "reported_unit_cell_nm": 290.0,
+    "reported_width_range_nm": [
+      100.0,
+      190.0
+    ],
+    "source": "holman-2026-nature-metasurface-tweezers",
+    "used_as_condition_matched_target": false
+  },
+  "authoritative_recipe": {
+    "device_family": "visible-wavelength TiO2 photonic metasurface pillars",
+    "etch_time_min": 20.0,
+    "film_deposition_method": "atomic layer deposition (ALD)",
+    "film_initial_thickness_nm": 700.0,
+    "gas_flow_fractions": {
+      "Ar": 0.0,
+      "CHF3": 0.9016393442622951,
+      "O2": 0.01639344262295082,
+      "SF6": 0.08196721311475409
+    },
+    "mask_initial_thickness_nm": 45.0,
+    "pressure_Torr": 0.03,
+    "substrate_material": "fused silica",
+    "table_rf_forward_power_setpoint_W": 150.0,
+    "table_temperature_C": 20.0,
+    "total_process_flow_sccm": 61.0
+  },
+  "claim_class": "target-free recipe arithmetic plus adjacent-experiment comparison; not an absolute-depth prediction",
+  "coefficient_selected_from_target": null,
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "frozen_on": "2026-08-18",
+  "identifiability_gates": {
+    "absorbed_plasma_power_measured": false,
+    "achieved_dc_self_bias_measured": false,
+    "cr_surface_law_measured_or_validated_for_condition": false,
+    "feature_geometry_and_loading_known": false,
+    "recipe_and_stack_frozen": true,
+    "species_resolved_wafer_fluxes_measured_or_validated": false,
+    "specific_condition_sem_withheld": true,
+    "supports_absolute_depth_prediction": false,
+    "tio2_surface_law_measured_or_validated_for_condition": false
+  },
+  "measured_depth_target_used": false,
+  "necessary_conditions_for_full_clear": {
+    "minimum_effective_tio2_rate_nm_min": 35.0,
+    "minimum_zero_margin_tio2_to_cr_selectivity": 15.555555555555555,
+    "warning": "Both gates are necessary. Practical mask survival needs selectivity above the zero-margin threshold."
+  },
+  "next_discriminating_observations": [
+    "achieved DC self-bias and, if available, RF voltage/current",
+    "blanket TiO2 removal and Cr loss or residual Cr",
+    "TiO2 phase/density and actual wafer-surface temperature",
+    "mask geometry, pitch, loading, chip/carrier size and position",
+    "scale-bearing SEM for the exact condition"
+  ],
+  "schema": "petch.pre-sem-depth-receipt.v1",
+  "sem_target_used": false
+}

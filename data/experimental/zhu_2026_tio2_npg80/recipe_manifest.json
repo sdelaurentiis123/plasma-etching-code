@@ -1,0 +1,152 @@
+{
+  "schema": "petch.experimental-recipe.v1",
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "received_on": "2026-08-18",
+  "measurement_state": "pre_sem_specific_condition",
+  "source_precedence": [
+    {
+      "rank": 1,
+      "source": "operator_chat_2026-08-18",
+      "rule": "Operator corrections after the screenshot override the displayed recipe values."
+    },
+    {
+      "rank": 2,
+      "source": "user_supplied_meeting_transcript_2026-08-13",
+      "rule": "The transcript supplies the research group, material stack, fabrication route, and device-family context; it does not supply a condition-matched quantitative profile."
+    },
+    {
+      "rank": 3,
+      "source": "recipe_ui_2026-08-18.png",
+      "rule": "The screenshot supplies every field not explicitly corrected by the operator."
+    },
+    {
+      "rank": 4,
+      "source": "external_literature",
+      "rule": "Literature is comparison evidence only and cannot replace a missing achieved-machine observable."
+    }
+  ],
+  "experimental_program": {
+    "research_group": "Nanfang Yu Group, Columbia University",
+    "device_family": "visible-wavelength TiO2 photonic metasurface pillars",
+    "context_source": "user_supplied_meeting_transcript_2026-08-13",
+    "adjacent_publication": {
+      "source": "holman-2026-nature-metasurface-tweezers",
+      "relationship": "Same research group and TiO2 metasurface fabrication lineage; not demonstrated to use this exact recipe or layout.",
+      "reported_tio2_meta_atom_height_nm": 750.0,
+      "reported_unit_cell_nm": 290.0,
+      "reported_width_range_nm": [
+        100.0,
+        190.0
+      ]
+    },
+    "context_only_not_condition_matched": [
+      "The group fabricates square, rectangular, and cross-section pillar families with varying critical dimensions.",
+      "Historical SEMs discussed in the meeting showed bottom-profile distortion and loss or collapse of some small pillars.",
+    "Those historical observations are not identified as outcomes of the exact 2026-08-18 recipe and are not numerical targets."
+    ]
+  },
+  "source_image": {
+    "path": "data/experimental/zhu_2026_tio2_npg80/recipe_ui_2026-08-18.png",
+    "sha256": "40d232e5481e8d32d0e8e4d59df870e66f3af68bbf02cb9cf9357e261ba54991",
+    "width_px": 1152,
+    "height_px": 1536
+  },
+  "tool": {
+    "manufacturer": "Oxford Instruments",
+    "model": "PlasmaPro NPG80 RIE",
+    "facility": "Advanced Science Research Center at The Graduate Center, CUNY",
+    "configuration_claim": "Single-electrode RIE; the supplied recipe contains a table-RF setpoint and no independent ICP setpoint.",
+    "rf_frequency_hz": 13560000,
+    "maximum_source_power_W": 300,
+    "equipment_evidence": "cuny-asrc-npg80-rie"
+  },
+  "process": {
+    "etch_time_s": 1200.0,
+    "pressure_Torr": 0.03,
+    "pressure_Pa": 3.99967104,
+    "table_temperature_C": 20.0,
+    "table_rf_forward_power_setpoint_W": 150.0,
+    "maximum_reflected_power_recipe_limit_W": 10.0,
+    "measured_reflected_power_W": null,
+    "rf_stabilization_time_s": 10.0,
+    "minimum_dc_bias_recipe_constraint_V": 0.0,
+    "measured_dc_self_bias_V": null,
+    "measured_rf_voltage_waveform": null,
+    "measured_rf_current_waveform": null,
+    "gases_sccm": {
+      "CHF3": 55.0,
+      "SF6": 5.0,
+      "O2": 1.0,
+      "Ar": 0.0
+    }
+  },
+  "displayed_then_corrected": {
+    "pressure_Torr": {
+      "screenshot": 0.045,
+      "operator_correction": 0.03
+    },
+    "SF6_sccm": {
+      "screenshot": 2.0,
+      "operator_correction": 5.0
+    }
+  },
+  "stabilization": {
+    "minimum_time_s": 5.0,
+    "maximum_time_s": 630.0
+  },
+  "purge": {
+    "duration_s": 300.0,
+    "Ar_sccm": 100.0
+  },
+  "stack": {
+    "film_material": "TiO2",
+    "film_initial_thickness_nm": 700.0,
+    "film_deposition_method": "atomic layer deposition (ALD)",
+    "film_phase": null,
+    "film_density_kg_m3": null,
+    "mask_material": "Cr",
+    "mask_initial_thickness_nm": 45.0,
+    "substrate_material": "fused silica"
+  },
+  "pattern": {
+    "feature_family": "metasurface pillars",
+    "known_cross_section_families": [
+      "square",
+      "rectangular",
+      "cross"
+    ],
+    "layout_id": null,
+    "feature_shape": null,
+    "critical_dimensions_nm": null,
+    "pitch_nm": null,
+    "patterned_area_fraction": null,
+    "chip_dimensions_mm": null,
+    "chip_position_on_carrier": null,
+    "carrier_material": null
+  },
+  "boundary_measurements": {
+    "ion_flux_m2_s": null,
+    "ion_species_fractions": null,
+    "ion_energy_distribution": null,
+    "ion_angular_distribution": null,
+    "neutral_radical_fluxes_m2_s": null,
+    "electron_density_m3": null,
+    "electron_energy_distribution": null,
+    "gas_temperature_K": null
+  },
+  "outcomes": {
+    "specific_condition_sem_path": null,
+    "specific_condition_sem_received": false,
+    "blanket_tio2_etch_rate_nm_min": null,
+    "blanket_cr_loss_nm": null,
+    "residual_cr_thickness_nm": null,
+    "post_etch_tio2_depth_nm": null
+  },
+  "interpretation_guards": [
+    "The 150 W value is a forward-power demand, not measured absorbed plasma power.",
+    "The 0 V minimum DC-bias field is a recipe constraint, not the achieved negative self-bias.",
+    "The 10 s total-time field belongs to RF stabilization, not the 20 minute etch duration.",
+    "Feed flow fractions are not wafer radical or ion flux fractions.",
+    "No SEM or measured depth for this exact condition was available when this manifest was frozen."
+  ]
+}
