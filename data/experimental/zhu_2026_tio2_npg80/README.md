@@ -140,6 +140,36 @@ chain, and the Pateau SFx/O -> SOxFy titration chain that releases F,
 while keeping target-machine wall physics and cross-family ion closures
 explicit.
 
+## First conserved open-reactor state
+
+The fixed-pressure model now solves all 66 species, quasineutrality, throttle
+loss, the represented-feed electron state, and absorbed-power balance in one
+open system.  The central target-free sensitivity (`90 W` absorbed, `350 K`,
+`170 mm` powered diameter, `30 mm` active height, published-compilation wall
+probabilities) converges to a maximum normalized balance residual of
+`3.90e-7`.  It produces `2.29e19 m^-2 s^-1` total axial positive-ion flux and
+explicit thermal neutral-flux channels without using the held-out SEM or any
+TiO2 depth.
+
+That convergence exposes rather than hides the next gap.  Only `37.6%` of the
+neutral inventory remains in the three gases represented by the exact
+Boltzmann collision deck; HF and daughter molecules dominate the solved gas.
+The reported `311.9 Td` is therefore `E/N` on the represented-parent basis.
+Holding its dimensional field fixed gives `117.1 Td` on the total-neutral
+basis, but neither number closes electron momentum and energy loss in the
+unrepresented daughter gas.  The state is a conserved chemistry checkpoint,
+not yet a certified wafer boundary.  Rebuild it with a previously converged
+continuation state using:
+
+```bash
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 \
+python scripts/run_zhu_open_reactor.py \
+  --source-workbook /path/to/o2_song_2026_supplement.xlsx \
+  --initial-state-json /path/to/prior-open-reactor-state.json \
+  --output results/curated/zhu_npg80_open_reactor_v1/central.json \
+  --maximum-evaluations 150
+```
+
 ## Machine-family self-bias evidence
 
 The two downloaded files are valid despite their generic/misleading names.

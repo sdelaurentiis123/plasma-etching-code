@@ -32,13 +32,39 @@ from .electron_kinetics import (
     TwoTermBoltzmannSolution,
 )
 from .geometry import CylindricalReactor
-from .network import E_CHARGE_C, RateContext
+from .network import E_CHARGE_C, RateContext, ReactionNetwork
 from .neutral_transport import solve_cylindrical_neutral_wall_loss
 from .zhu_parent_collision_chemistry import ZhuParentCollisionChemistry
 from .zhu_supplemental_chemistry import ZhuSupplementalChemistry
 
 
-_FEED_SPECIES = frozenset({"CHF3", "SF6", "O2"})
+_FEED_SPECIES = ("CHF3", "SF6", "O2")
+_FEED_SPECIES_SET = frozenset(_FEED_SPECIES)
+
+
+def compile_bimolecular_kinetic_pairs(
+    network: ReactionNetwork,
+) -> np.ndarray:
+    """Compile one exact pair of density indices per bimolecular event."""
+    index = {
+        name: position for position, name in enumerate(network.species_names)
+    }
+    pairs = []
+    for reaction in network.reactions:
+        expanded = []
+        for name, order in reaction.kinetic_orders.items():
+            integer_order = int(order)
+            if order != integer_order or integer_order < 0:
+                raise ValueError(
+                    "compiled mass action requires integer kinetic orders")
+            expanded.extend([index[name]] * integer_order)
+        if len(expanded) != 2:
+            raise ValueError(
+                "compiled mass action requires bimolecular reactions")
+        pairs.append(expanded)
+    result = np.asarray(pairs, dtype=np.intp)
+    result.setflags(write=False)
+    return result
 
 
 def _finite_mapping(
@@ -102,7 +128,7 @@ class ZhuOpenReactorCondition:
             or np.any(~np.isfinite(scalars))
             or np.any(scalars <= 0.0)
             or self.neutral_control_volume_m3 < self.geometry.volume_m3
-            or set(feed) != _FEED_SPECIES
+            or set(feed) != _FEED_SPECIES_SET
             or len(bounds) != 2
             or not 0.0 < bounds[0] < bounds[1]
             or any(value > 1.0 for value in probabilities.values())
@@ -233,6 +259,21 @@ class ZhuOpenReactorSolution:
     def total_axial_positive_ion_flux_m2_s(self) -> float:
         return float(sum(self.axial_positive_ion_flux_m2_s.values()))
 
+    @property
+    def implied_total_neutral_reduced_electric_field_Td(self) -> float:
+        """Field divided by total neutral density under transparent daughters.
+
+        The solved electron operator currently normalizes collision frequency
+        to the represented CHF3/SF6/O2 basis.  Multiplying by that basis'
+        neutral fraction preserves the dimensional electric field while
+        expressing it against the full pressure density.  This is a
+        diagnostic conversion, not a daughter-collision closure.
+        """
+        return float(
+            self.reduced_electric_field_Td
+            * self.electron_collision_basis_neutral_fraction
+        )
+
 
 def positive_ion_wall_return(species_name: str) -> Mapping[str, float]:
     """Return the atom-conserving neutralization product at a material wall."""
@@ -296,6 +337,8 @@ class ZhuOpenReactorModel:
             name: index for index, name in enumerate(
                 self.supplemental_chemistry.network.species_names)
         }
+        self._supplemental_kinetic_pairs = compile_bimolecular_kinetic_pairs(
+            self.supplemental_chemistry.network)
         for name in self.positive_names:
             products = positive_ion_wall_return(name)
             self._assert_wall_return_conserves(name, products)
@@ -339,6 +382,38 @@ class ZhuOpenReactorModel:
             ).exact_loss_frequency_s_inv
         return frequencies
 
+    def _supplemental_event_rates_m3_s(
+        self,
+        densities: Mapping[str, float],
+        context: RateContext,
+        coefficient_cache: dict[tuple[float, float], np.ndarray],
+    ) -> np.ndarray:
+        """Evaluate this fixed bimolecular mechanism as a dense vector plan."""
+        key = (
+            context.electron_temperature_eV,
+            context.gas_temperature_K,
+        )
+        coefficients = coefficient_cache.get(key)
+        if coefficients is None:
+            coefficients = np.asarray([
+                reaction.rate_coefficient.coefficient_si(context)
+                for reaction in self.supplemental_chemistry.network.reactions
+            ])
+            coefficients.setflags(write=False)
+            coefficient_cache[key] = coefficients
+        density = np.asarray([
+            densities[name]
+            for name in self.supplemental_chemistry.network.species_names
+        ])
+        pairs = self._supplemental_kinetic_pairs
+        rates = (
+            coefficients
+            * density[pairs[:, 0]]
+            * density[pairs[:, 1]]
+        )
+        rates.setflags(write=False)
+        return rates
+
     def _charged_wall_transport(
         self,
         densities: Mapping[str, float],
@@ -351,6 +426,17 @@ class ZhuOpenReactorModel:
         electronegativity = negative_charge / densities["e"]
         wall_frequencies = {}
         axial_velocities = {}
+        edge = condition.geometry.electronegative_edge_factors(
+            electronegativity=electronegativity,
+            electron_to_ion_temperature_ratio=(
+                equivalent_temperature_eV / condition.ion_temperature_eV),
+            ion_mean_free_path_m=condition.ion_momentum_mean_free_path_m,
+            include_high_pressure_diffusion=False,
+        )
+        loss_area_over_volume = (
+            condition.geometry.effective_loss_area_m2(edge)
+            / condition.geometry.volume_m3
+        )
         for name in self.positive_names:
             species = self.species_by_name[name]
             charge = species.charge_number
@@ -358,19 +444,7 @@ class ZhuOpenReactorModel:
                 math.sqrt(charge)
                 * bohm_speed(equivalent_temperature_eV, species.mass_amu)
             )
-            edge = condition.geometry.electronegative_edge_factors(
-                electronegativity=electronegativity,
-                electron_to_ion_temperature_ratio=(
-                    equivalent_temperature_eV / condition.ion_temperature_eV),
-                ion_mean_free_path_m=(
-                    condition.ion_momentum_mean_free_path_m),
-                include_high_pressure_diffusion=False,
-            )
-            wall_frequencies[name] = (
-                condition.geometry.effective_loss_area_m2(edge)
-                / condition.geometry.volume_m3
-                * speed
-            )
+            wall_frequencies[name] = loss_area_over_volume * speed
             axial_velocities[name] = edge.axial * speed
         return wall_frequencies, axial_velocities
 
@@ -461,6 +535,8 @@ class ZhuOpenReactorModel:
         *,
         condition: ZhuOpenReactorCondition,
         maximum_tail_population_fraction: float,
+        neutral_wall_frequency: Mapping[str, float],
+        supplemental_coefficient_cache: dict[tuple[float, float], np.ndarray],
         electron_cache: dict[tuple[float, ...], TwoTermBoltzmannSolution],
         electron_continuation: dict[str, TwoTermBoltzmannSolution],
     ) -> dict[str, object]:
@@ -482,7 +558,7 @@ class ZhuOpenReactorModel:
         )
         electron_key = (
             reduced_field,
-            *(target_fractions[name] for name in sorted(_FEED_SPECIES)),
+            *(target_fractions[name] for name in _FEED_SPECIES),
             electron_condition.angular_field_frequency_over_density_m3_s,
             maximum_tail_population_fraction,
         )
@@ -490,13 +566,16 @@ class ZhuOpenReactorModel:
         if electron_solution is None:
             electron_solution = self.electron_solver.solve(
                 electron_condition,
-                initial_solution=electron_continuation.get("latest"),
+                initial_solution=electron_continuation.get("reference"),
                 relative_tolerance=1.0e-8,
                 maximum_iterations=220,
                 maximum_tail_population_fraction=maximum_tail_population_fraction,
             )
             electron_cache[electron_key] = electron_solution
-        electron_continuation["latest"] = electron_solution
+        # A moving "latest" warm start makes the nonlinear residual depend on
+        # finite-difference column order.  Freeze the first solved EEPF as the
+        # common reference so identical reactor states are bitwise replayable.
+        electron_continuation.setdefault("reference", electron_solution)
         parent_densities = {
             name: densities[name] for name in self.parent_species_names
         }
@@ -511,10 +590,18 @@ class ZhuOpenReactorModel:
             gas_temperature_K=condition.gas_temperature_K,
         )
         network = self.supplemental_chemistry.network
-        supplemental_rates = network.event_rates_m3_s(densities, context)
-        supplemental_source = network.stoichiometric_matrix @ supplemental_rates
-        supplemental_turnover = (
-            np.abs(network.stoichiometric_matrix) @ supplemental_rates)
+        supplemental_rates = self._supplemental_event_rates_m3_s(
+            densities, context, supplemental_coefficient_cache)
+        # This network is small enough that dispatching two 66x259 GEMVs to a
+        # multithreaded BLAS costs far more than the arithmetic.  The explicit
+        # reductions are deterministic, avoid thread oversubscription inside
+        # finite-difference Jacobians, and are algebraically identical.
+        weighted_events = (
+            network.stoichiometric_matrix
+            * supplemental_rates[np.newaxis, :]
+        )
+        supplemental_source = np.sum(weighted_events, axis=1)
+        supplemental_turnover = np.sum(np.abs(weighted_events), axis=1)
         parent_turnover = {name: 0.0 for name in self.species_order}
         for mapping in self.parent_chemistry.collision_chemistry.mappings:
             rate = parent_state.event_rates_m3_s[mapping.reaction_name]
@@ -541,7 +628,6 @@ class ZhuOpenReactorModel:
             )
             for name in self.species_order
         }
-        neutral_wall_frequency = self._neutral_wall_frequencies(condition)
         positive_wall_frequency, axial_velocity = self._charged_wall_transport(
             densities, equivalent_temperature, condition)
         external_terms = {name: [] for name in self.heavy_order}
@@ -602,8 +688,13 @@ class ZhuOpenReactorModel:
         parent_power = (
             active_fraction * parent_state.collisional_field_power_gain_W_m3)
         supplemental_power = active_fraction * E_CHARGE_C * sum(
-            reaction.electron_energy_loss_rate_eV_m3_s(densities, context)
-            for reaction in network.reactions
+            (
+                rate * reaction.electron_energy_loss_eV
+                if reaction.electron_energy_loss_eV is not None
+                else reaction.electron_energy_loss_rate_eV_m3_s(
+                    densities, context)
+            )
+            for rate, reaction in zip(supplemental_rates, network.reactions)
         )
         electron_wall_energy = (
             electron_solution.transport_moments.mean_wall_loss_electron_energy_eV)
@@ -649,9 +740,12 @@ class ZhuOpenReactorModel:
         residual_tolerance: float = 2.0e-6,
         maximum_evaluations: int = 1000,
         maximum_tail_population_fraction: float = 2.0e-6,
+        nonlinear_verbose: int = 0,
     ) -> ZhuOpenReactorSolution:
         if not isinstance(condition, ZhuOpenReactorCondition):
             raise TypeError("a Zhu open-reactor condition is required")
+        if int(nonlinear_verbose) not in {0, 1, 2}:
+            raise ValueError("nonlinear_verbose must be 0, 1, or 2")
         target_density = condition.target_neutral_density_m3
         if initial_densities_m3 is None:
             total_feed = sum(condition.feed_molecules_s.values())
@@ -667,7 +761,12 @@ class ZhuOpenReactorModel:
             # composition-neutral fraction for every daughter.  This is only
             # an interior numerical seed; pressure and all species balances
             # still determine the converged inventory.
-            neutral_seed_fraction = 0.80
+            # A dissociating fluorocarbon discharge does not retain a nearly
+            # frozen feed inventory.  Reserve most of the neutral pressure for
+            # daughters so the cold start lies inside their reaction basin;
+            # this is a composition-neutral numerical seed, not a fitted
+            # steady-state fraction.
+            neutral_seed_fraction = 0.40
             for name, fraction in feed_fraction.items():
                 densities[name] = neutral_seed_fraction * fraction * target_density
             daughter_neutrals = tuple(
@@ -678,12 +777,16 @@ class ZhuOpenReactorModel:
             )
             for name in daughter_neutrals:
                 densities[name] = daughter_seed
-            charged_seed = min(1.0e15, 1.0e-5 * target_density)
+            # The CHF3/SF6 feed is strongly electronegative.  Start the log
+            # solve on a charge-neutral interior state at a few parts per
+            # thousand ionization instead of a nearly unionized boundary,
+            # where derivatives of rare charged daughters vanish.
+            charged_seed = 5.0e-3 * target_density
             for name in self.positive_names:
                 densities[name] = charged_seed / len(self.positive_names)
             for name in self.negative_names:
-                densities[name] = 0.5 * charged_seed / len(self.negative_names)
-            densities["e"] = 0.5 * charged_seed
+                densities[name] = 0.99 * charged_seed / len(self.negative_names)
+            densities["e"] = 0.01 * charged_seed
         else:
             densities = {
                 str(name): float(value)
@@ -731,6 +834,13 @@ class ZhuOpenReactorModel:
         ])
         electron_cache: dict[tuple[float, ...], TwoTermBoltzmannSolution] = {}
         electron_continuation: dict[str, TwoTermBoltzmannSolution] = {}
+        supplemental_coefficient_cache: dict[
+            tuple[float, float], np.ndarray
+        ] = {}
+        # These are exact condition-only closures.  Solving the cylindrical
+        # diffusion eigenproblem inside every nonlinear residual evaluation
+        # made a 0-D solve needlessly scale with the Jacobian color count.
+        neutral_wall_frequency = self._neutral_wall_frequencies(condition)
 
         def residual(log_state):
             return self._ledger(
@@ -738,6 +848,9 @@ class ZhuOpenReactorModel:
                 condition=condition,
                 maximum_tail_population_fraction=(
                     maximum_tail_population_fraction),
+                neutral_wall_frequency=neutral_wall_frequency,
+                supplemental_coefficient_cache=(
+                    supplemental_coefficient_cache),
                 electron_cache=electron_cache,
                 electron_continuation=electron_continuation,
             )["residual"]
@@ -751,17 +864,20 @@ class ZhuOpenReactorModel:
             gtol=2.0e-10,
             max_nfev=int(maximum_evaluations),
             jac_sparsity=self.jacobian_sparsity(),
+            verbose=int(nonlinear_verbose),
         )
         ledger = self._ledger(
             result.x,
             condition=condition,
             maximum_tail_population_fraction=maximum_tail_population_fraction,
+            neutral_wall_frequency=neutral_wall_frequency,
+            supplemental_coefficient_cache=supplemental_coefficient_cache,
             electron_cache=electron_cache,
             electron_continuation=electron_continuation,
         )
         maximum_residual = float(np.max(np.abs(ledger["residual"])))
         if (
-            not result.success
+            result.status < 0
             or not math.isfinite(maximum_residual)
             or maximum_residual > residual_tolerance
         ):

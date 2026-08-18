@@ -91,6 +91,7 @@ def test_bimolecular_reaction_preserves_analytic_invariants():
         {"A": 2.0, "B": 3.0, "C": 0.0},
         RateContext(1.0),
     )["normalized_maximum_residual"] == 0.0
+    assert network.stoichiometric_matrix is network.stoichiometric_matrix
 
 
 def test_electron_impact_ionization_conserves_charge_with_explicit_electrons():

@@ -8,6 +8,7 @@ plasma-chemistry shorthand.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from functools import cached_property
 from types import MappingProxyType
 from typing import Mapping
 
@@ -1609,7 +1610,7 @@ class ReactionNetwork:
             for element in species.composition
         }))
 
-    @property
+    @cached_property
     def stoichiometric_matrix(self) -> np.ndarray:
         index = {name: position for position, name in enumerate(self.species_names)}
         matrix = np.zeros((len(self.species), len(self.reactions)), dtype=float)

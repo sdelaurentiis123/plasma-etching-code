@@ -2,15 +2,20 @@ import math
 import json
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
-from petch.reactor_global import CylindricalReactor
+from petch.reactor_global import CylindricalReactor, RateContext
 from petch.reactor_global.zhu_open_reactor import (
     ZhuOpenReactorCondition,
     ZhuOpenReactorModel,
+    compile_bimolecular_kinetic_pairs,
     positive_ion_wall_return,
 )
-from petch.reactor_global.zhu_supplemental_chemistry import zhu_reactor_species
+from petch.reactor_global.zhu_supplemental_chemistry import (
+    build_zhu_supplemental_chemistry,
+    zhu_reactor_species,
+)
 from scripts.run_zhu_open_reactor import _continuation_state
 
 
@@ -111,3 +116,20 @@ def test_continuation_lifts_old_solution_without_breaking_pressure(tmp_path):
     assert densities["e"] == pytest.approx(0.1)
     assert exhaust == 3.0
     assert field == 250.0
+
+
+def test_compiled_zhu_mass_action_matches_general_network_evaluator():
+    supplemental = build_zhu_supplemental_chemistry()
+    model = object.__new__(ZhuOpenReactorModel)
+    model.supplemental_chemistry = supplemental
+    model._supplemental_kinetic_pairs = compile_bimolecular_kinetic_pairs(
+        supplemental.network)
+    densities = {
+        name: 1.0e14 * (index + 1)
+        for index, name in enumerate(supplemental.network.species_names)
+    }
+    context = RateContext(3.7, 350.0)
+    general = supplemental.network.event_rates_m3_s(densities, context)
+    compiled = model._supplemental_event_rates_m3_s(
+        densities, context, {})
+    np.testing.assert_allclose(compiled, general, rtol=3.0e-16, atol=0.0)

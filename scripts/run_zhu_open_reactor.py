@@ -9,6 +9,7 @@ certified machine identification and not a fit to the withheld SEM.
 from __future__ import annotations
 
 import argparse
+from hashlib import sha256
 import json
 import math
 from pathlib import Path
@@ -177,6 +178,7 @@ def run(args) -> dict:
         initial_reduced_electric_field_Td=initial_field,
         maximum_evaluations=args.maximum_evaluations,
         residual_tolerance=args.residual_tolerance,
+        nonlinear_verbose=args.nonlinear_verbose,
     )
     densities = dict(solution.densities_m3)
     positive_total = sum(
@@ -200,14 +202,24 @@ def run(args) -> dict:
             "mean_all_wall_ion_energy_eV": args.mean_wall_ion_energy_eV,
             "kokkoris_eedf_shape": args.kokkoris_eedf_shape,
             "chf3_f_rate_branch": args.chf3_f_rate_branch,
-            "continuation_state_json": (
-                None if args.initial_state_json is None
-                else str(args.initial_state_json)
+            "o2_source_workbook_sha256": (
+                parent.o2_replay.source_workbook_sha256),
+            "continuation_state": (
+                None if args.initial_state_json is None else {
+                    "path": str(args.initial_state_json),
+                    "sha256": sha256(
+                        args.initial_state_json.read_bytes()).hexdigest(),
+                }
             ),
             "feature_or_sem_target_used": False,
         },
         "state": {
             "reduced_electric_field_Td": solution.reduced_electric_field_Td,
+            "reduced_electric_field_convention": (
+                "E divided by represented CHF3+SF6+O2 neutral density"
+            ),
+            "implied_total_neutral_reduced_electric_field_Td": (
+                solution.implied_total_neutral_reduced_electric_field_Td),
             "mean_electron_energy_eV": solution.mean_electron_energy_eV,
             "electron_density_m3": densities["e"],
             "electronegativity": negative_total / densities["e"],
@@ -287,6 +299,7 @@ def main() -> None:
     parser.add_argument("--initial-field-Td", type=float)
     parser.add_argument("--maximum-evaluations", type=int, default=1000)
     parser.add_argument("--residual-tolerance", type=float, default=2.0e-6)
+    parser.add_argument("--nonlinear-verbose", type=int, choices=(0, 1, 2), default=0)
     args = parser.parse_args()
     result = run(args)
     encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
