@@ -89,6 +89,13 @@ from .chlorine_axisymmetric_transport import (
     ChlorineAxisymmetricWaferIonResult,
     DeterministicChlorineAxisymmetricTransport,
 )
+from .zhu_axisymmetric_transport import (
+    ZHU_POSITIVE_ION_IDENTITIES,
+    DeterministicZhuAxisymmetricCCPTransport,
+    PositiveIonIdentity,
+    ZhuAxisymmetricTransportInput,
+    ZhuAxisymmetricWaferIonResult,
+)
 from .argon import (
     ARGON_4S_METASTABLE_ENERGY_EV,
     ARGON_IONIZATION_ENERGY_EV,
@@ -676,6 +683,11 @@ __all__ = [
     "ChlorineAxisymmetricTransportInput",
     "ChlorineAxisymmetricWaferIonResult",
     "DeterministicChlorineAxisymmetricTransport",
+    "ZHU_POSITIVE_ION_IDENTITIES",
+    "PositiveIonIdentity",
+    "ZhuAxisymmetricTransportInput",
+    "ZhuAxisymmetricWaferIonResult",
+    "DeterministicZhuAxisymmetricCCPTransport",
     "RateContext",
     "REACTOR_SCALAR_EVIDENCE_KINDS",
     "ReactorScalarInput",

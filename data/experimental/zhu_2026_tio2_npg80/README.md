@@ -192,6 +192,27 @@ positive-ion flux and explicit thermal neutral-flux channels without using the
 held-out SEM or any TiO2 depth. The prior `170 mm` state remains immutable in
 the geometry-correction audit as a retracted development assumption.
 
+## Deterministic radial CCP closure
+
+The corrected conserved inventory now has a 2-D axisymmetric transport lift.
+It uses the same Lee--Lieberman electronegative edge physics as the 0-D model,
+the measured Basurto `CHF2+` mobility scale, and a volume-uniform source moment
+supported by Zhao et al.'s spatial measurements of a comparable `13.56 MHz`,
+`3 Pa`, `3 cm`-gap CCP. No measured etch outcome enters the solve.
+
+At `48 x 16` cells, the spatial model predicts
+`1.2473e19 m^-2 s^-1` over the full electrode versus the independently computed
+0-D value `1.2509e19 m^-2 s^-1`, a `-0.286%` residual. Refining to `96 x 32`
+changes the flux by only `0.00195%`. A centered `3 mm` optic receives just
+`0.626%` more ion flux than the full `240 mm` electrode average. Thus radial
+tool response is not the leading uncertainty for Freddie's centered optic at
+this rung; absolute source normalization, sheath energy, and TiO2/Cr surface
+kinetics are. Rebuild the receipt with:
+
+```bash
+python scripts/audit_zhu_npg80_axisymmetric_ccp.py --check
+```
+
 That convergence exposes rather than hides the next gap.  Only `37.6%` of the
 neutral inventory remains in the three gases represented by the exact
 Boltzmann collision deck; HF and daughter molecules dominate the solved gas.
