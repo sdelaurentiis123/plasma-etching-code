@@ -1,0 +1,112 @@
+{
+  "schema": "petch.zhu-npg80-device-geometry-evidence.v1",
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "target_specific_inputs": {
+    "film_material": "TiO2",
+    "film_thickness_nm": 700.0,
+    "film_deposition": "ALD blanket film",
+    "mask_material": "Cr",
+    "mask_thickness_nm": 45.0,
+    "substrate": "fused silica",
+    "requested_feature_family": "square pillar",
+    "sources": [
+      "operator chat and recipe screenshot received 2026-08-18",
+      "user modeling direction received 2026-08-18"
+    ]
+  },
+  "same_group_public_geometry_prior": {
+    "source_id": "li-2026-nano3d-arxiv-2503.15770v3",
+    "title": "Physically Grounded Monocular Depth via Nanophotonic Wavefront Encoding",
+    "authors_include": [
+      "Zezheng Zhu",
+      "Nanfang Yu"
+    ],
+    "source_url": "https://arxiv.org/abs/2503.15770",
+    "source_pdf_sha256": "83a65c1aeb9e5d2f2be9b75d672f5e95eba1e1758c6aea9bce9e1b606e3f89ac",
+    "source_version": "arXiv v3, 2026-07-08",
+    "visually_audited_pdf_pages": [
+      46,
+      47,
+      48
+    ],
+    "paper_page_labels": [
+      25,
+      26,
+      27
+    ],
+    "device_diameter_mm": 3.0,
+    "pitch_nm": 400.0,
+    "pillar_height_nm": 700.0,
+    "cross_section_families": [
+      "rectangular",
+      "cross"
+    ],
+    "parameterization_label_in_equation_38": "Square",
+    "minimum_reliable_geometry_nm": 80.0,
+    "maximum_lateral_dimension_nm": 320.0,
+    "square_width_scan_nm": [
+      80.0,
+      120.0,
+      160.0,
+      200.0,
+      240.0,
+      280.0,
+      320.0
+    ]
+  },
+  "process_nontransfer_guard": {
+    "public_paper_route": "700 nm ZEP hole template, conformal TiO2 ALD fill, BCl3/Ar ICP removal of excess TiO2, then resist ash",
+    "target_route": "700 nm blanket ALD TiO2 etched through 45 nm Cr in CHF3/SF6/O2 on an Oxford NPG80 CCP RIE",
+    "same_process": false,
+    "pitch_is_target_measured": false,
+    "width_scan_is_target_layout": false,
+    "permitted_use": "pre-SEM square-pillar geometry envelope and deterministic unit-cell sensitivity board",
+    "forbidden_use": "claim that the public paper used Freddie's recipe or that its pitch and widths identify the held-out target layout"
+  },
+  "derived_square_unit_cells": [
+    {
+      "width_nm": 80.0,
+      "minimum_neighbor_gap_nm": 320.0,
+      "mask_area_fraction": 0.04,
+      "exposed_area_fraction": 0.96
+    },
+    {
+      "width_nm": 120.0,
+      "minimum_neighbor_gap_nm": 280.0,
+      "mask_area_fraction": 0.09,
+      "exposed_area_fraction": 0.91
+    },
+    {
+      "width_nm": 160.0,
+      "minimum_neighbor_gap_nm": 240.0,
+      "mask_area_fraction": 0.16,
+      "exposed_area_fraction": 0.84
+    },
+    {
+      "width_nm": 200.0,
+      "minimum_neighbor_gap_nm": 200.0,
+      "mask_area_fraction": 0.25,
+      "exposed_area_fraction": 0.75
+    },
+    {
+      "width_nm": 240.0,
+      "minimum_neighbor_gap_nm": 160.0,
+      "mask_area_fraction": 0.36,
+      "exposed_area_fraction": 0.64
+    },
+    {
+      "width_nm": 280.0,
+      "minimum_neighbor_gap_nm": 120.0,
+      "mask_area_fraction": 0.49,
+      "exposed_area_fraction": 0.51
+    },
+    {
+      "width_nm": 320.0,
+      "minimum_neighbor_gap_nm": 80.0,
+      "mask_area_fraction": 0.64,
+      "exposed_area_fraction": 0.36
+    }
+  ],
+  "sem_target_used": false,
+  "measured_profile_target_used": false
+}

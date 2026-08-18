@@ -21,6 +21,14 @@ ALD/fused-silica stack and identifies square, rectangular, and cross-section
 pillar families, but it does not identify which exact layout the Monday SEM
 will contain.
 
+A later same-group paper now pins a useful pre-SEM geometry envelope: a
+`400 nm` square lattice, `700 nm` pillar height, and reliable lateral
+dimensions from `80--320 nm`. Its supplement was visually audited at 300 dpi
+and is checksum-bound in `device_geometry_evidence.json`. That paper used a
+resist-hole ALD-fill route followed by BCl3/Ar excess-film clearing, not this
+blanket-TiO2/Cr-mask etch. The dimensions therefore define a square-pillar
+sensitivity board, not the unrevealed target layout.
+
 The same group has a 2026 Nature paper on TiO2/SRN metasurface optical-tweezer
 arrays. Zezheng Zhu is a coauthor and is credited with metasurface design and
 fabrication; Teng Qu is not an author on that paper. Its TiO2 example reports
@@ -65,15 +73,16 @@ python scripts/audit_zhu_npg80_tio2_pre_sem.py --check
 
 ## Blind reactor-dose clearance call
 
-The shortest reactor-to-depth ledger is now frozen separately from the larger
-chemistry build.  Conditional on the central conserved reactor state's
-`2.29e19 m^-2 s^-1` global axial positive-ion flux, clearing `700 nm` in
-`1200 s` requires `0.62--0.80` TiO2 formula units per incident positive ion
-over the published `3.25--4.15 g cm^-3` ALD-density sensitivity.  A candidate
-surface yield of `1` therefore needs a run-averaged feature-floor transmission
-of `0.62--0.80`; a yield of `2` needs `0.31--0.40`.  These are exact atom/dose
-requirements, not fitted yields.  The global axial flux remains a sensitivity,
-not a validated local wafer diagnostic.
+The shortest reactor-to-depth ledger was frozen separately from the larger
+chemistry build. The original blind call used an undocumented `170 mm`
+development diameter. Official Oxford family evidence subsequently fixed the
+electrode diameter at `240 mm`; the conserved central state then gives
+`1.2509e19 m^-2 s^-1` global axial positive-ion flux. Clearing `700 nm` in
+`1200 s` consequently requires `1.143--1.459` TiO2 formula units per incident
+positive ion over the published `3.25--4.15 g cm^-3` ALD-density sensitivity.
+These are exact atom/dose requirements, not fitted yields. The corrected
+global axial flux remains a sensitivity, not a validated local wafer
+diagnostic, and the original preregistration is retained rather than rewritten.
 
 The independent Janissen feature board maps to `682.5--700 nm` after twenty
 minutes when capped at the supplied film thickness; that pair is a
@@ -175,12 +184,13 @@ explicit.
 
 The fixed-pressure model now solves all 66 species, quasineutrality, throttle
 loss, the represented-feed electron state, and absorbed-power balance in one
-open system.  The central target-free sensitivity (`90 W` absorbed, `350 K`,
-`170 mm` powered diameter, `30 mm` active height, published-compilation wall
-probabilities) converges to a maximum normalized balance residual of
-`3.90e-7`.  It produces `2.29e19 m^-2 s^-1` total axial positive-ion flux and
-explicit thermal neutral-flux channels without using the held-out SEM or any
-TiO2 depth.
+open system. The source-corrected central target-free sensitivity (`90 W`
+absorbed, `350 K`, `240 mm` powered diameter, `30 mm` active height,
+published-compilation wall probabilities) converges to a maximum normalized
+balance residual of `4.55e-9`. It produces `1.2509e19 m^-2 s^-1` total axial
+positive-ion flux and explicit thermal neutral-flux channels without using the
+held-out SEM or any TiO2 depth. The prior `170 mm` state remains immutable in
+the geometry-correction audit as a retracted development assumption.
 
 That convergence exposes rather than hides the next gap.  Only `37.6%` of the
 neutral inventory remains in the three gases represented by the exact

@@ -181,6 +181,80 @@ def make_rectangular_trench_geometry_3d(
         })
 
 
+def make_square_pillar_mask_geometry_3d(
+        *, pitch, domain_height, dx, pillar_width, film_thickness,
+        mask_thickness, base_top, mesh_length_unit_m=1e-6,
+        film_material_id=1, mask_material_id=2, base_material_id=3):
+    """Construct one periodic square-mask cell above a finite etch film.
+
+    The initial state is a blanket film on a substrate with a centered square
+    hard-mask island.  Etching the exposed film leaves the protected material
+    as a pillar.  This geometry is distinct from a square *opening* in a
+    blanket mask, which would instead describe a hole or trench process.
+
+    All geometric inputs use the declared mesh unit.  The lateral cell has a
+    duplicate periodic endpoint on both axes, consistent with the common 3-D
+    transport engine.
+    """
+    values = np.asarray([
+        pitch, domain_height, dx, pillar_width, film_thickness,
+        mask_thickness, base_top, mesh_length_unit_m,
+    ], dtype=float)
+    material_ids = tuple(map(int, (
+        film_material_id, mask_material_id, base_material_id)))
+    film_top = float(base_top) + float(film_thickness)
+    mask_top = film_top + float(mask_thickness)
+    if (
+        np.any(~np.isfinite(values))
+        or np.any(values[:7] <= 0.0)
+        or pillar_width >= pitch
+        or mask_top >= domain_height
+        or any(material_id <= 0 for material_id in material_ids)
+        or len(set(material_ids)) != 3
+    ):
+        raise ValueError("invalid square-pillar mask geometry inputs")
+
+    shape = tuple(
+        max(3, int(round(length / dx)) + 1)
+        for length in (pitch, pitch, domain_height)
+    )
+    x, y, z = (np.arange(size) * dx for size in shape)
+    X, Y, Z = np.meshgrid(x, y, z, indexing="ij")
+    half_width = 0.5 * float(pillar_width)
+    x_inside = half_width - np.abs(X - 0.5 * float(pitch))
+    y_inside = half_width - np.abs(Y - 0.5 * float(pitch))
+
+    base_levelset = float(base_top) - Z
+    film_levelset = np.minimum(
+        Z - float(base_top), film_top - Z)
+    mask_levelset = np.minimum.reduce((
+        Z - film_top,
+        mask_top - Z,
+        x_inside,
+        y_inside,
+    ))
+
+    band = float(domain_height) + 2.0 * float(pitch)
+    base_phi = reinit_narrow(base_levelset, dx, band)
+    film_phi = reinit_narrow(film_levelset, dx, band)
+    mask_phi = reinit_narrow(mask_levelset, dx, band)
+    layers = {
+        material_ids[0]: film_phi,
+        material_ids[1]: mask_phi,
+        material_ids[2]: base_phi,
+    }
+    phi = reinit_narrow(
+        np.maximum.reduce(tuple(layers.values())), dx, band)
+
+    stack = np.stack(tuple(layers.values()), axis=0)
+    labels = np.asarray(material_ids, dtype=int)
+    material = labels[np.argmax(stack, axis=0)]
+    material[phi < 0.0] = 0
+    return FeatureGeometry3D(
+        phi, material, dx, mesh_length_unit_m,
+        material_levelsets=layers)
+
+
 @dataclass(frozen=True)
 class FeatureStepValidity:
     within_declared_scope: bool
