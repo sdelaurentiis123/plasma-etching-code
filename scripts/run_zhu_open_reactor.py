@@ -28,6 +28,7 @@ from petch.reactor_global import (
 
 
 FEED_SCCM = {"CHF3": 55.0, "SF6": 5.0, "O2": 1.0}
+NPG80_ELECTRODE_DIAMETER_MM = 240.0
 
 
 def _grid(deck) -> ElectronEnergyGrid:
@@ -197,6 +198,11 @@ def run(args) -> dict:
             "forward_power_setpoint_W": 150.0,
             "absorbed_power_sensitivity_W": condition.absorbed_power_W,
             "electrode_diameter_mm": args.electrode_diameter_mm,
+            "electrode_diameter_source": (
+                "Oxford Instruments PlasmaPro 80 manufacturer specification: "
+                "240 mm electrode; exact CUNY ASRC tool inventory: Oxford "
+                "PlasmaPro NPG80 RIE, 300 W at 13.56 MHz"
+            ),
             "plasma_height_mm": args.plasma_height_mm,
             "ion_mfp_um": args.ion_mfp_um,
             "mean_all_wall_ion_energy_eV": args.mean_wall_ion_energy_eV,
@@ -270,7 +276,11 @@ def main() -> None:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--initial-state-json", type=Path)
     parser.add_argument("--absorbed-power-W", type=float, default=90.0)
-    parser.add_argument("--electrode-diameter-mm", type=float, default=170.0)
+    parser.add_argument(
+        "--electrode-diameter-mm",
+        type=float,
+        default=NPG80_ELECTRODE_DIAMETER_MM,
+    )
     parser.add_argument("--plasma-height-mm", type=float, default=30.0)
     parser.add_argument("--gas-temperature-K", type=float, default=350.0)
     parser.add_argument("--ion-temperature-eV", type=float, default=.03)

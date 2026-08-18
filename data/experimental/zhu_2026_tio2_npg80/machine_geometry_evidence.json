@@ -1,0 +1,27 @@
+{
+  "exact_tool": {
+    "facility": "CUNY Advanced Science Research Center Nanofabrication Facility",
+    "model": "Oxford PlasmaPro NPG80 RIE",
+    "maximum_sample_diameter_in": 8.0,
+    "rf_frequency_MHz": 13.56,
+    "rf_power_max_W": 300.0,
+    "source_url": "https://asrc.gc.cuny.edu/instruments/reactive-ion-etch-rie/"
+  },
+  "manufacturer_family_specification": {
+    "electrode_diameter_mm": 240.0,
+    "family": "Oxford Instruments PlasmaPro 80 RIE",
+    "source_url": "https://plasma.oxinst.com/technology/reactive-ion-etching-pe"
+  },
+  "not_published_for_exact_serial_tool": [
+    "electrode gap or active plasma height",
+    "absorbed RF power",
+    "powered-electrode voltage and current waveform",
+    "achieved DC self-bias",
+    "wafer or coupon radius and placement"
+  ],
+  "retracted_development_assumption": {
+    "electrode_diameter_mm": 170.0,
+    "reason": "the v1 development sensitivity had no source for this dimension"
+  },
+  "schema": "petch.zhu-npg80-machine-geometry-evidence.v1"
+}

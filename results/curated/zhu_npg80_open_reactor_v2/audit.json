@@ -1,0 +1,99 @@
+{
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "geometry_effect_central_over_v1": {
+    "electron_density_ratio": 0.4375928999756834,
+    "neutral_F_flux_ratio": 0.38262517053652206,
+    "positive_ion_flux_ratio": 0.5464487948209091
+  },
+  "immutable_preregistered_v1": {
+    "blind_gate_path": "data/experimental/zhu_2026_tio2_npg80/pre_sem_depth_gate.json",
+    "blind_gate_sha256": "d2548e6f7206607912e317b355975b9c12005399ab15eb0a53405eadfc5b5a4e",
+    "forecast_changed_retroactively": false,
+    "path": "results/curated/zhu_npg80_open_reactor_v1/central.json",
+    "sha256": "3be22b9ae12b72a647e31df156881332bd296db468a4fda5bcffe73f9a8b4ae5",
+    "state": {
+      "chf3_f_rate_branch": "voloshin_350K",
+      "electrode_diameter_mm": 170.0,
+      "electron_collision_basis_neutral_fraction": 0.3755114622864711,
+      "electron_density_m3": 2.7124737112332656e+16,
+      "electronegativity": 162.2538169543085,
+      "maximum_normalized_residual": 3.898330648886364e-07,
+      "mean_electron_energy_eV": 6.513486467917572,
+      "neutral_F_thermal_flux_m2_s": 2.1773626386535639e+21,
+      "total_axial_positive_ion_flux_m2_s": 2.2891234955809833e+19
+    }
+  },
+  "published_chf3_f_rate_branch_effect_at_240mm": {
+    "neutral_F_flux_ratio": 1.373274189034628,
+    "positive_ion_flux_ratio": 1.0118524175432844
+  },
+  "revised_conditional_clearance_ledger": {
+    "ald_tio2_density_sensitivity_kg_m3": [
+      3250.0,
+      4150.0
+    ],
+    "alternate_required_formula_units_per_positive_ion": [
+      1.1294142276228893,
+      1.4421750906569202
+    ],
+    "central_required_formula_units_per_positive_ion": [
+      1.142800516628002,
+      1.4592683520019103
+    ],
+    "etch_time_s": 1200.0,
+    "film_thickness_nm": 700.0,
+    "interpretation": "This is an exact atom/dose requirement conditional on each global state, not a fitted TiO2 yield or a certified local wafer flux."
+  },
+  "schema": "petch.zhu-npg80-geometry-correction-audit.v1",
+  "source_evidence": {
+    "exact_tool": {
+      "facility": "CUNY Advanced Science Research Center Nanofabrication Facility",
+      "maximum_sample_diameter_in": 8.0,
+      "model": "Oxford PlasmaPro NPG80 RIE",
+      "rf_frequency_MHz": 13.56,
+      "rf_power_max_W": 300.0,
+      "source_url": "https://asrc.gc.cuny.edu/instruments/reactive-ion-etch-rie/"
+    },
+    "manufacturer_family_specification": {
+      "electrode_diameter_mm": 240.0,
+      "family": "Oxford Instruments PlasmaPro 80 RIE",
+      "source_url": "https://plasma.oxinst.com/technology/reactive-ion-etching-pe"
+    },
+    "path": "data/experimental/zhu_2026_tio2_npg80/machine_geometry_evidence.json",
+    "sha256": "29f932afee3baa4f5fcd3289d2fc41e28a32b17a57fc2bba116099bf30dc1bdd"
+  },
+  "source_geometry_v2": {
+    "alternate_path": "results/curated/zhu_npg80_open_reactor_v2/source_geometry_chf3_rate_alternate.json",
+    "alternate_sha256": "a41a0ffc27f1dc36ff1854902a53245c98f4cde59b8509ab1d6dd33553de86c6",
+    "central": {
+      "chf3_f_rate_branch": "voloshin_350K",
+      "electrode_diameter_mm": 240.0,
+      "electron_collision_basis_neutral_fraction": 0.4261025356583915,
+      "electron_density_m3": 1.1869592374063692e+16,
+      "electronegativity": 209.0256337959833,
+      "maximum_normalized_residual": 4.5498782306614605e-09,
+      "mean_electron_energy_eV": 6.593134661486392,
+      "neutral_F_thermal_flux_m2_s": 8.331137509346716e+20,
+      "total_axial_positive_ion_flux_m2_s": 1.250888775356455e+19
+    },
+    "central_path": "results/curated/zhu_npg80_open_reactor_v2/source_geometry_central.json",
+    "central_sha256": "8006c8f95108df3036a6809806d45e7a2f22bdf939d149683a08e37c83579061",
+    "published_rate_alternate": {
+      "chf3_f_rate_branch": "lim_700K",
+      "electrode_diameter_mm": 240.0,
+      "electron_collision_basis_neutral_fraction": 0.5260125175268852,
+      "electron_density_m3": 1.0444296749502852e+16,
+      "electronegativity": 259.12266518487536,
+      "maximum_normalized_residual": 4.336899674602399e-09,
+      "mean_electron_energy_eV": 6.6392520861400275,
+      "neutral_F_thermal_flux_m2_s": 1.1440936106884082e+21,
+      "total_axial_positive_ion_flux_m2_s": 1.2657148314221873e+19
+    }
+  },
+  "verdict": {
+    "current_reactor_only_call": "clearance remains unresolved",
+    "frozen_binary_forecast": "TiO2 film clearance expected",
+    "reason": "The source-correct diameter raises the central required blanket yield from 0.62--0.80 to about 1.14--1.46 formula units per ion. That is physically reachable but no target-tool TiO2 yield, local ion flux, feature transmission, or exact self-bias has been measured.",
+    "spatial_profile_authorized": false
+  }
+}

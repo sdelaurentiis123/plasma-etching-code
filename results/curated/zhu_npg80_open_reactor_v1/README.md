@@ -26,6 +26,14 @@ python scripts/run_zhu_open_reactor.py \
   --source-workbook /path/to/o2_song_2026_supplement.xlsx \
   --initial-state-json \
     results/curated/zhu_npg80_open_reactor_v1/hydrogen_closed_continuation.json \
+  --electrode-diameter-mm 170 \
   --output results/curated/zhu_npg80_open_reactor_v1/central.json \
   --maximum-evaluations 150
 ```
+
+This explicit `170 mm` flag is now required to replay the immutable v1
+development state. It was an unsourced sensitivity. Oxford's current
+PlasmaPro 80 specification gives a `240 mm` electrode; the exact CUNY
+inventory confirms that the target tool is an NPG80. The source-correct
+follow-up is archived separately in `zhu_npg80_open_reactor_v2` so the blind
+v1 forecast is never rewritten after the fact.
