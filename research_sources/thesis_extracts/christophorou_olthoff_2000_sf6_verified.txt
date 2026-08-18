@@ -1,0 +1,32 @@
+Christophorou and Olthoff, Electron Interactions with SF6
+J. Phys. Chem. Ref. Data 29, 267-330 (2000)
+DOI 10.1063/1.1288407
+Official NIST PDF https://srd.nist.gov/jpcrdreprint/1.1288407.pdf
+PDF SHA256 b13fac820570646e6b72a59e573fb85ba99814f72cbb0962193b969036a54ad0
+
+Focused verification notes (manual visual audit of the source PDF at 400 dpi):
+
+- Table 16 lists partial positive-ion cross sections at 100 eV from three
+  experiments. The executable transcription uses the preferred case-A
+  analysis in Ref. 158. Its nine branches sum to 6.51 x 10^-20 m2; Table 17's
+  independently recommended total at 100 eV is 6.53 x 10^-20 m2.
+- The article warns that the analysis procedures differ by 7-40% for larger
+  fragments and by as much as a factor of three for F+.
+- Table 24 is the recommended SF6- attachment curve from 0.0001 to 0.40 eV.
+- Table 25 is the suggested SF5- dissociative-attachment curve.
+- Table 27 gives suggested SF4-, SF3-, SF2-, F2-, and F- curves and explicitly
+  uses 10^-22 m2 units. Blank cells are blank in the source.
+- The surrounding text says total attachment is represented by the sum of all
+  recommended/suggested partial cross sections. It says SF5- dominates below
+  about 1.5 eV, F- above that energy, and total attachment is dissociative
+  beyond about 0.3 eV.
+- Table 28 tabulates the resulting room-temperature total attachment curve.
+- Table 3 supplies multiple reported appearance/formation energies. The
+  executable closure uses the earliest listed direct-formation threshold for
+  each Table-16 branch and preserves that choice in its derivation receipt.
+- Figure 15 plots energy-dependent partial positive-ion data, but those curves
+  are not tabulated in the review. No curve values are claimed from Table 16.
+
+Machine-readable transcriptions, evidence labels, PDF/render hashes, and use
+boundaries are in:
+data/experimental/christophorou_olthoff_2000_sf6/extraction_manifest.json

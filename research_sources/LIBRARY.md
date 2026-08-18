@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 159 sources by topic
+## Index — 160 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -136,6 +136,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`kawamura-1999-psst`](library/kawamura-1999-psst.md) | Kawamura et al., PSST 8, R45 (1999) | not-fetched (citation corrected from p.313) |
 | [`benyoucef-yousfi-2014-ion-transport`](library/benyoucef-yousfi-2014-ion-transport.md) | Benyoucef & Yousfi, semiclassical Ar+/Ar, O2+/O2, N2+/N2 transport validation | AUTHOR-PROVIDED FULL TEXT READ VIA HTML; FIGURES NOT LOCALLY ARCHIVED |
 | [`chantry-1987-wall-diffusion`](library/chantry-1987-wall-diffusion.md) | Chantry, partial-reflection neutral diffusion and low-density wall-loss limit | PRIMARY FULL TEXT + EQUATIONS 4--7, 18--24 VISUALLY AUDITED |
+| [`christophorou-olthoff-2000-sf6`](library/christophorou-olthoff-2000-sf6.md) | Christophorou & Olthoff, NIST-evaluated SF6 collision, product, and swarm data | PRIMARY NIST FULL TEXT + TABLES 9, 14--17, 20, 24--25, 27--28, 35--37 PIXEL-AUDITED AT 400 DPI |
 | [`christophorou-olthoff-1999-cl2`](library/christophorou-olthoff-1999-cl2.md) | Christophorou & Olthoff, NIST-evaluated Cl2/Cl electron-interaction data | PRIMARY NIST FULL TEXT + TABLES 12/25 PIXEL-AUDITED AT 300 DPI + TABLE 16 AT 500 DPI |
 | [`economou-1995-2002-cl-transport`](library/economou-1995-2002-cl-transport.md) | Lymberopoulos/Economou and Ramamurthi/Economou, Cl diffusion and Robin wall transport | TWO PRIMARY FULL TEXTS + EQUATIONS/TABLES VISUALLY AUDITED; 300/500 K COEFFICIENT CONFLICT QUARANTINED |
 | [`gonzalez-magana-de-urquijo-2018-cl2`](library/gonzalez-magana-de-urquijo-2018-cl2.md) | Gonzalez-Magana & de Urquijo, direct Cl2/Cl2-N2 pulsed-Townsend swarm measurements | PRIMARY FULL TEXT + TABLES A1--A3 300-DPI AUDIT; 52 PURE-CL2 MARKERS EXECUTABLE |
@@ -278,6 +279,9 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | CHF2+ in CHF3 low-field mobility `0.53 +/- 0.01 cm2 V-1 s-1` | [`basurto-2002-chf3-ion-mobility`](library/basurto-2002-chf3-ion-mobility.md) | rejects the `1.33 cm2 V-1 s-1` naive polarization-limit closure; retained as a future molecular-transport validation board, not a fitted cross section |
 | CHF3/H/F Table-9 gas mechanism (`38` rows; `24` regressed, `14` copied/estimated) | [`sandia-2001-fluorocarbon-mechanisms`](library/sandia-2001-fluorocarbon-mechanisms.md) | closes a conservation-checked hydrogen-bearing topology while keeping the source's evidence debt visible; no source surface fit or machine-specific coupling is imported |
 | CHF3 neutral chain `CHF3 + F -> CF3 + HF` and wall-loss sensitivity | [`voloshin-2007-chf3-kinetics`](library/voloshin-2007-chf3-kinetics.md) | supplies the missing F/HF recycling topology and an uncertainty direction; numeric Table-III expansion remains barred until pixel transcription |
+| SF6 evaluated collision/EEDF backbone and swarm board | [`christophorou-olthoff-2000-sf6`](library/christophorou-olthoff-2000-sf6.md) | keeps recommendation classes distinct, prevents low-energy total-scattering double counting, and supplies direct drift/effective-ionization gates; no reactor state or wafer flux is inferred from a collision table |
+| SF6 seven-anion attachment split | [`christophorou-olthoff-2000-sf6`](library/christophorou-olthoff-2000-sf6.md) | Tables 24/25/27 resolve SF6-/SF5-/SF4-/SF3-/SF2-/F2-/F- while exact reconstruction of Table 28 prevents product refinement from changing total attachment |
+| SF6 nine-positive-ion branch closure | [`christophorou-olthoff-2000-sf6`](library/christophorou-olthoff-2000-sf6.md) | Table-16 100-eV fractions plus Table-3 thresholds split the Table-17 total under an explicit unmeasured shape closure; SF4++/SF2++ create two electrons and Figure-15 curve digitization remains an upgrade gate |
 | TiO2/Cr `40 nm/min`, `14:1` comparison scenario and machine-specific O2 sensitivity | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | target-free mask-survival warning for the Zhu pre-SEM receipt; explicitly not a transferred model coefficient or absolute-depth prediction |
 | TiO2/Cr power/pressure response, `-950/-1100 V` RIE witnesses, and `652/273 nm` feature depths | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | visually audited Tables S3.1--S3.3 validation board; Fluor Z401S and single-crystal rutile boundaries remain explicit |
 | Same-group TiO2 meta-atom scale (`750 nm` tall, `100–190 nm` wide, `290 nm` unit cell) and successful vertical-pillar profile class | [`holman-2026-nature-metasurface-tweezers`](library/holman-2026-nature-metasurface-tweezers.md) | adjacent device evidence for the Zhu condition; withheld exact layout remains authoritative and Nature dimensions are never substituted into it |

@@ -33,6 +33,9 @@ TABLE_PAGE_RENDER_SHA256 = {
     "table28_pdf_page44": "7b9fb4d0adff153fd41427c1daaeff7ff59da696cb6625aa0dec94f5361e0d64",
     "table36_pdf_page52": "1ac7b23d2a85d27aeb29bb30fe2a6a542840b5f9143bf0481ed51fdcf8f27ffb",
     "table37_pdf_page53": "e81d3e81942928d01e0e3c7a80074a1f9369b4a94e2f2a51902ba565a192c97b",
+    "table16_pdf_page27": "22363680fac11268ba546bdae9f56cb986d3c835231e5fb2e4e5023ad851bc98",
+    "tables24_25_pdf_page39": "a03ca31efabf1d2f122c05b3e3afc88ee8b7720387b826924d3ed88c7b020551",
+    "table27_pdf_page42": "e22c6b83ff58bf8da20fb6f3c4cbc7b8154ac52531c0a8a554df9b5c4d11eeab",
 }
 
 TABLE9 = (
@@ -94,6 +97,15 @@ TABLE17 = (
     (550.0, 4.00), (600.0, 3.65),
 )
 
+# Table 16, case-A preferred analysis of Margreiter et al. (Ref. 158).
+# Units in the source are 1e-20 m2 at exactly 100 eV.  The nine rows sum to
+# 6.51e-20 m2, within source rounding of the recommended 6.53e-20 m2 total.
+TABLE16 = (
+    ("SF5+", 3.42), ("SF4+", .39), ("SF3+", 1.09),
+    ("SF2+", .27), ("SF+", .46), ("S+", .31), ("F+", .27),
+    ("SF4++", .18), ("SF2++", .12),
+)
+
 TABLE20 = (
     (15.0, .8), (16.0, 1.2), (17.0, 1.6), (18.0, 1.8),
     (19.0, 2.2), (20.0, 2.7), (22.0, 3.5), (25.0, 3.7),
@@ -123,6 +135,67 @@ TABLE28 = (
     (10.5, .0142), (11.0, .0227), (11.5, .0252), (12.0, .0206),
     (12.5, .0128), (13.0, .0066), (13.5, .0041), (14.0, .0035),
     (14.5, .0031), (15.0, .0030),
+)
+
+# Tables 24 and 25 retain their distinct recommendation classes.  Both use
+# 1e-20 m2.  Table 24 is nondissociative SF6- formation; Table 25 is the
+# dissociative SF5- + F branch.
+TABLE24 = (
+    (.0001, 7617), (.0002, 5283), (.0003, 4284), (.0004, 3692),
+    (.0005, 3280), (.0006, 2968), (.0007, 2724), (.0008, 2529),
+    (.0009, 2369), (.001, 2237), (.002, 1511), (.003, 1202),
+    (.004, 993), (.005, 859), (.006, 760), (.007, 683),
+    (.008, 621), (.009, 569), (.010, 526), (.015, 383),
+    (.020, 304), (.025, 257), (.030, 221), (.035, 190),
+    (.040, 171), (.045, 149), (.050, 132), (.060, 109),
+    (.070, 92.7), (.080, 82.9), (.090, 74.3), (.10, 49.5),
+    (.12, 30.8), (.14, 17.8), (.15, 14.2), (.16, 10.5),
+    (.18, 5.85), (.20, 2.86), (.22, 1.24), (.25, .52),
+    (.28, .25), (.30, .16), (.35, .05), (.40, .01),
+)
+TABLE25 = (
+    (.10, 1.85), (.12, 2.09), (.14, 2.36), (.15, 2.48),
+    (.16, 2.61), (.18, 2.87), (.20, 3.15), (.22, 3.45),
+    (.25, 3.86), (.28, 4.15), (.30, 4.24), (.35, 4.07),
+    (.40, 3.45), (.45, 2.75), (.50, 2.15), (.60, 1.25),
+    (.70, .72), (.80, .42), (.90, .25), (1.0, .15),
+    (1.2, .060), (1.5, .020), (1.9, .005),
+)
+
+# Table 27 units are 1e-22 m2, two orders smaller than Tables 24/25/28.
+# None denotes an em dash in the source table, not a measured zero.
+TABLE27 = (
+    (1.50, None, None, None, .0030, None),
+    (2.00, None, None, None, .0080, .022),
+    (2.25, None, None, None, .0075, .075),
+    (2.50, None, None, None, .0060, .149),
+    (2.75, None, None, None, .0042, .162),
+    (3.00, None, None, None, .0026, .098),
+    (3.50, .0084, None, None, .0026, .171),
+    (4.00, .0350, None, None, .0265, .856),
+    (4.50, .144, None, None, .0707, 2.69),
+    (5.00, .457, None, None, .0489, 4.63),
+    (5.50, .528, None, None, .0155, 4.39),
+    (6.00, .394, None, None, .0038, 2.78),
+    (6.50, .251, None, None, .0019, 1.37),
+    (7.00, .130, None, None, .0015, .749),
+    (7.50, .0460, None, None, .0015, .615),
+    (8.00, .0084, .0014, None, .0018, .977),
+    (8.50, .0032, .0046, None, .0031, 1.42),
+    (9.00, None, .0150, None, .0065, 1.57),
+    (9.50, None, .0330, None, .0104, 1.39),
+    (10.00, None, .0510, None, .0200, 1.13),
+    (10.25, None, .0577, .00019, .0308, 1.14),
+    (10.50, None, .0640, .00037, .0503, 1.31),
+    (11.00, None, .0750, .00140, .0910, 2.10),
+    (11.50, None, .0710, .00420, .0954, 2.35),
+    (12.00, None, .0490, .00760, .0615, 1.95),
+    (12.50, None, .0260, .01060, .0274, 1.22),
+    (13.00, None, .0110, .00870, .0111, .629),
+    (13.50, None, .0031, .00440, .0050, .400),
+    (14.00, None, .0008, .00170, .0032, .340),
+    (14.50, None, None, .00068, .0018, .310),
+    (15.00, None, None, .00028, .0012, .300),
 )
 
 # Square brackets are deduced, plain values at 275--1000 Td are recommended,
@@ -229,6 +302,50 @@ def _payloads() -> dict[str, str]:
             for field, rate in TABLE37
         ),
     )
+    payloads["table16_partial_ionization_100eV.csv"] = _csv_text(
+        (
+            "product_ion", "electron_energy_eV", "cross_section_m2",
+            "evidence_class",
+        ),
+        (
+            (species, 100.0, sigma * 1.0e-20,
+             "measured_case_A_preferred_analysis")
+            for species, sigma in TABLE16
+        ),
+    )
+    payloads["table24_sf6_minus_attachment.csv"] = _csv_text(
+        ("electron_energy_eV", "cross_section_m2", "evidence_class"),
+        (
+            (energy, sigma * 1.0e-20,
+             "recommended_nondissociative_SF6_minus")
+            for energy, sigma in TABLE24
+        ),
+    )
+    payloads["table25_sf5_minus_attachment.csv"] = _csv_text(
+        ("electron_energy_eV", "cross_section_m2", "evidence_class"),
+        (
+            (energy, sigma * 1.0e-20,
+             "suggested_dissociative_SF5_minus")
+            for energy, sigma in TABLE25
+        ),
+    )
+    payloads["table27_minor_anion_attachment.csv"] = _csv_text(
+        (
+            "electron_energy_eV", "SF4_minus_cross_section_m2",
+            "SF3_minus_cross_section_m2", "SF2_minus_cross_section_m2",
+            "F2_minus_cross_section_m2", "F_minus_cross_section_m2",
+            "evidence_class",
+        ),
+        (
+            (
+                energy,
+                *("" if value is None else value * 1.0e-22
+                  for value in values),
+                "suggested_dissociative_partial_anions",
+            )
+            for energy, *values in TABLE27
+        ),
+    )
     return payloads
 
 
@@ -262,6 +379,9 @@ def _manifest(payloads: dict[str, str]) -> str:
             "table15_is_deduced_not_directly_measured": True,
             "table20_is_approximate_and_requires_confirmation": True,
             "table28_is_room_temperature": True,
+            "table16_is_one_energy_branch_anchor_not_a_curve": True,
+            "tables24_25_27_resolve_attachment_products": True,
+            "table27_blank_cells_are_unreported_not_measured_zero": True,
             "table36_direct_recommended_interval_Td": [275, 1000],
             "table35_is_recommended_effective_townsend_fit": True,
             "table37_is_derived_product_not_independent_attachment_data": True,

@@ -21,6 +21,10 @@
       "row_count": 37,
       "sha256": "4d8579dbd68e2f11e386c8f38fd9e969760fcc625b6f5ae427e3bf92f024b3db"
     },
+    "table16_partial_ionization_100eV.csv": {
+      "row_count": 9,
+      "sha256": "3bf597105de4294cd677cd5cbe16947ca852113327eac5713914c1c9f3487063"
+    },
     "table17_total_ionization.csv": {
       "row_count": 30,
       "sha256": "9566c88d59c4ab1c39833850dec3ef2535fcb8ccbb89c30612f3a0fc770d7663"
@@ -28,6 +32,18 @@
     "table20_total_neutral_dissociation.csv": {
       "row_count": 22,
       "sha256": "a4a7ed0c6d4227f8fbfaf5e69407d88ce03688c2b12c8a96427f90f5158c42f1"
+    },
+    "table24_sf6_minus_attachment.csv": {
+      "row_count": 44,
+      "sha256": "000ef875fc230f5609088b52b7792a3c23aaf7288f0e21e9714d20ea69861390"
+    },
+    "table25_sf5_minus_attachment.csv": {
+      "row_count": 23,
+      "sha256": "06a85f8cede5ce9d5e9b2a35f22aa2d9f69a77551662578702813127269ff063"
+    },
+    "table27_minor_anion_attachment.csv": {
+      "row_count": 31,
+      "sha256": "335d8a16ce8af84e6f3bf3bc5edbe11c73156d331ff8b1b991b993c2b131a1bb"
     },
     "table28_total_attachment.csv": {
       "row_count": 82,
@@ -56,12 +72,15 @@
     "render_sha256": {
       "table14_pdf_page23": "6f7cebb10d612883b06adca52788a656e66c5824f47b9be08e418b650c3f27bf",
       "table15_pdf_page26": "eb9641df2b3f9736618eef1e70044421fc560613edb8dabcc95193ba3acef5a6",
+      "table16_pdf_page27": "22363680fac11268ba546bdae9f56cb986d3c835231e5fb2e4e5023ad851bc98",
       "table17_pdf_page28": "a2f83b2c43162d155f22c2e6781d5f286f7e94512cd2759824f5e1750d30290a",
       "table20_pdf_page33": "82c9da2506adb36c1cfbfc247c02b8affed8bef92edc9f799505f62f40ca5838",
+      "table27_pdf_page42": "e22c6b83ff58bf8da20fb6f3c4cbc7b8154ac52531c0a8a554df9b5c4d11eeab",
       "table28_pdf_page44": "7b9fb4d0adff153fd41427c1daaeff7ff59da696cb6625aa0dec94f5361e0d64",
       "table36_pdf_page52": "1ac7b23d2a85d27aeb29bb30fe2a6a542840b5f9143bf0481ed51fdcf8f27ffb",
       "table37_pdf_page53": "e81d3e81942928d01e0e3c7a80074a1f9369b4a94e2f2a51902ba565a192c97b",
-      "table9_pdf_page17": "503fea7ec6fa6834104fbcb6df00531592c276ce968d3f435b69a3ff344b6183"
+      "table9_pdf_page17": "503fea7ec6fa6834104fbcb6df00531592c276ce968d3f435b69a3ff344b6183",
+      "tables24_25_pdf_page39": "a03ca31efabf1d2f122c05b3e3afc88ee8b7720387b826924d3ed88c7b020551"
     },
     "si_conversion": "cross sections 1e-20 m2; drift 1e6 cm/s to 1e4 m/s"
   },
@@ -71,7 +90,9 @@
     "supports_unique_reactor_state": false,
     "supports_wafer_flux": false,
     "table15_is_deduced_not_directly_measured": true,
+    "table16_is_one_energy_branch_anchor_not_a_curve": true,
     "table20_is_approximate_and_requires_confirmation": true,
+    "table27_blank_cells_are_unreported_not_measured_zero": true,
     "table28_is_room_temperature": true,
     "table35_is_recommended_effective_townsend_fit": true,
     "table36_direct_recommended_interval_Td": [
@@ -79,6 +100,7 @@
       1000
     ],
     "table37_is_derived_product_not_independent_attachment_data": true,
+    "tables24_25_27_resolve_attachment_products": true,
     "total_scattering_is_not_elastic_momentum_transfer": true
   }
 }
