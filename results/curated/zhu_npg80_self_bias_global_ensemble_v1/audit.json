@@ -1,0 +1,201 @@
+{
+  "certification": {
+    "absorbed_power_measured": false,
+    "all_axisymmetric_global_residuals_below_1_percent": true,
+    "all_reactor_conservation_gates_passed": true,
+    "all_sheath_global_fixed_points_below_0p01_V": true,
+    "supports_unique_profile_depth": false,
+    "target_machine_self_bias_measured": false,
+    "tio2_cr_surface_law_validated_for_target": false
+  },
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "exact_ngp80_conditioning_threshold_history": {
+    "endpoint_bias_magnitude_V": [
+      300.0,
+      200.0
+    ],
+    "endpoints_are_censor_thresholds": true,
+    "linear_history_is_sensitivity_not_measurement": true,
+    "required_blanket_formula_units_per_positive_ion": [
+      0.9675279020208389,
+      1.2354587056573791
+    ],
+    "simpson_node_bias_magnitude_V": [
+      300.0,
+      250.0,
+      200.0
+    ],
+    "time_averaged_full_electrode_ion_flux_m2_s": 1.47749365753251e+19,
+    "time_averaged_neutral_F_thermal_flux_m2_s": 2.5275725933715527e+21
+  },
+  "schema": "petch.zhu-npg80-self-bias-global-ensemble.v1",
+  "self_bias_transfer": {
+    "path": "data/experimental/zhu_2026_tio2_npg80/oxford80_self_bias_transfer.json",
+    "sha256": "4725fa709b12a85f62e94189d08b20a286d6fa6a53a66036dae504f33d1243e9",
+    "supports_unique_target_bias": false
+  },
+  "sem_or_depth_target_used": false,
+  "state_board": [
+    {
+      "axisymmetric_global_flux_relative_residual": -0.00397232434276375,
+      "central_3mm_optic_ion_flux_m2_s": 1.5345404221750084e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.008123127477047,
+      "continuation_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_200V_iter0.json",
+      "continuation_sha256": "4adc8dcadbfc0880df375a6684e32c696df2b50aa5eb8dcdffd4c29ddf80a039",
+      "electron_density_m3": 2.7798307052280028e+16,
+      "electronegativity": 85.21155370642933,
+      "fixed_point_residual_V": 0.0006321524145143087,
+      "full_electrode_global_ion_flux_m2_s": 1.5282462856905206e+19,
+      "maximum_normalized_reactor_residual": 6.400022091237092e-09,
+      "mean_electron_energy_eV": 6.337179220992615,
+      "neutral_F_thermal_flux_m2_s": 3.183297822042341e+21,
+      "plasma_potential_V": 20.309107515810492,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        0.9315599107486362,
+        1.1895303475713355
+      ],
+      "self_bias_magnitude_V": 200,
+      "state_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_200V.json",
+      "state_sha256": "32cbf626c5cb958170566fcb898febe9cb70ba2ff0ecabd5916bed06cdc2cab8"
+    },
+    {
+      "axisymmetric_global_flux_relative_residual": -0.003703300030161839,
+      "central_3mm_optic_ion_flux_m2_s": 1.482574141206555e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0076199840999056,
+      "continuation_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_250V_iter0.json",
+      "continuation_sha256": "d4e55842d6b89f438e62711667a1c2be1b162c762c546c28e648866c8eff28da",
+      "electron_density_m3": 2.4091304476371804e+16,
+      "electronegativity": 101.64156544120434,
+      "fixed_point_residual_V": 0.0002948807422029631,
+      "full_electrode_global_ion_flux_m2_s": 1.4768315335036269e+19,
+      "maximum_normalized_reactor_residual": 8.771957250503298e-09,
+      "mean_electron_energy_eV": 6.358483648248234,
+      "neutral_F_thermal_flux_m2_s": 2.505575620188006e+21,
+      "plasma_potential_V": 20.409987940510817,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        0.9642123783152929,
+        1.2312250369256819
+      ],
+      "self_bias_magnitude_V": 250,
+      "state_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_250V.json",
+      "state_sha256": "6c26470f64abb564b4aca1443b02eb66d064c908513867053da69536cd179f4b"
+    },
+    {
+      "axisymmetric_global_flux_relative_residual": -0.0035790223612430267,
+      "central_3mm_optic_ion_flux_m2_s": 1.4572248811804377e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.007398707714177,
+      "continuation_path": "results/curated/zhu_npg80_open_reactor_v2/source_geometry_central.json",
+      "continuation_sha256": "8006c8f95108df3036a6809806d45e7a2f22bdf939d149683a08e37c83579061",
+      "electron_density_m3": 2.2305696317071276e+16,
+      "electronegativity": 111.18052662617309,
+      "fixed_point_residual_V": 0.0034606166218296153,
+      "full_electrode_global_ion_flux_m2_s": 1.45171821607602e+19,
+      "maximum_normalized_reactor_residual": 3.59146886292011e-09,
+      "mean_electron_energy_eV": 6.375262337736328,
+      "neutral_F_thermal_flux_m2_s": 2.2057858751870633e+21,
+      "plasma_potential_V": 20.471383068942224,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        0.9809854039573721,
+        1.2526429004378752
+      ],
+      "self_bias_magnitude_V": 276,
+      "state_path": "results/curated/zhu_npg80_sheath_coupled_v1/central_276V.json",
+      "state_sha256": "669cb7baab66e594611a58888dd9731904d7c422e2ea670478035e13dc536d18"
+    },
+    {
+      "axisymmetric_global_flux_relative_residual": -0.0034720689786628895,
+      "central_3mm_optic_ion_flux_m2_s": 1.4347044072055914e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0072154092342391,
+      "continuation_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_300V_iter0.json",
+      "continuation_sha256": "f6a1bb59c735cbfb74adc71772877a9fa8192bb9f7790077fa84fc81eb379ab4",
+      "electron_density_m3": 2.075059630885813e+16,
+      "electronegativity": 120.60985182762887,
+      "fixed_point_residual_V": 0.00035869423473400275,
+      "full_electrode_global_ion_flux_m2_s": 1.4293895254900308e+19,
+      "maximum_normalized_reactor_residual": 6.196588182062463e-09,
+      "mean_electron_energy_eV": 6.394074189749057,
+      "neutral_F_thermal_flux_m2_s": 1.959835257434951e+21,
+      "plasma_potential_V": 20.533547006218733,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        0.9963838763873522,
+        1.2723055652330806
+      ],
+      "self_bias_magnitude_V": 300,
+      "state_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_300V.json",
+      "state_sha256": "fec1f5b6b297aa789f131f99b83b76df2170c68efc5d294c2b40534f2db3f450"
+    },
+    {
+      "axisymmetric_global_flux_relative_residual": -0.0032358839796154744,
+      "central_3mm_optic_ion_flux_m2_s": 1.3802409044773898e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0068326627554898,
+      "continuation_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_360V_iter0.json",
+      "continuation_sha256": "b2b27d9bf201717dcf3493a3ce5348d4d0d5103fc815be9340835af0066f185a",
+      "electron_density_m3": 1.729780629928465e+16,
+      "electronegativity": 146.4597283429561,
+      "fixed_point_residual_V": 0.0015352965382540162,
+      "full_electrode_global_ion_flux_m2_s": 1.3753245742579306e+19,
+      "maximum_normalized_reactor_residual": 8.297396918303392e-09,
+      "mean_electron_energy_eV": 6.451679690455383,
+      "neutral_F_thermal_flux_m2_s": 1.4654302227443488e+21,
+      "plasma_potential_V": 20.70737248558125,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        1.035700604209229,
+        1.3225100022979386
+      ],
+      "self_bias_magnitude_V": 360,
+      "state_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_360V.json",
+      "state_sha256": "77b0580f54835005d585d2eacde1a15d4b9d9e5334bb359ef8e6aec01fd6b095"
+    },
+    {
+      "axisymmetric_global_flux_relative_residual": -0.0031447529723323073,
+      "central_3mm_optic_ion_flux_m2_s": 1.3557551573484636e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0066908673671382,
+      "continuation_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_387V_iter0.json",
+      "continuation_sha256": "d9ac843aecf51d5633870e54cbd3123b43d15bad31220bf1a28ad317bc6cf129",
+      "electron_density_m3": 1.5964754356798872e+16,
+      "electronegativity": 158.7883624659901,
+      "fixed_point_residual_V": 0.002108490123976736,
+      "full_electrode_global_ion_flux_m2_s": 1.3509928087108315e+19,
+      "maximum_normalized_reactor_residual": 5.60655876020039e-09,
+      "mean_electron_energy_eV": 6.480235277302509,
+      "neutral_F_thermal_flux_m2_s": 1.2936932260142257e+21,
+      "plasma_potential_V": 20.79036207102796,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        1.0544059751299941,
+        1.3463953220890694
+      ],
+      "self_bias_magnitude_V": 387,
+      "state_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_387V.json",
+      "state_sha256": "4d20d32f4a48ff1bb2bb26611b13055ce5890543ec3b4f684212c9d203b4f237"
+    },
+    {
+      "axisymmetric_global_flux_relative_residual": -0.0031042209693467235,
+      "central_3mm_optic_ion_flux_m2_s": 1.3438747263030116e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0066283509614566,
+      "continuation_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_400V_iter0.json",
+      "continuation_sha256": "a97f6c406e451c5376dedd21dcff3e23fc004722a299e0178e3849de1b560753",
+      "electron_density_m3": 1.5371928072532144e+16,
+      "electronegativity": 164.79787174391944,
+      "fixed_point_residual_V": 0.0023775693279688426,
+      "full_electrode_global_ion_flux_m2_s": 1.3391828267846773e+19,
+      "maximum_normalized_reactor_residual": 5.6735771024851914e-09,
+      "mean_electron_energy_eV": 6.494137202546138,
+      "neutral_F_thermal_flux_m2_s": 1.2207473516857275e+21,
+      "plasma_potential_V": 20.83060817640897,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        1.0637273778145326,
+        1.3582980362862493
+      ],
+      "self_bias_magnitude_V": 400,
+      "state_path": "results/curated/zhu_npg80_self_bias_global_ensemble_v1/bias_400V.json",
+      "state_sha256": "000243e08c985b353caae8bf9bcf000239b2d8721d0900b8b6b8a3eff2a5111c"
+    }
+  ],
+  "voltage_response": {
+    "F_flux_200V_to_400V_ratio": 2.60766309887671,
+    "F_flux_monotonically_decreases_with_bias_at_fixed_absorbed_power": true,
+    "ion_flux_200V_to_400V_ratio": 1.1411782283377818,
+    "ion_flux_monotonically_decreases_with_bias_at_fixed_absorbed_power": true,
+    "mechanism": "At fixed absorbed power, a larger powered-electrode sheath drop consumes more charged-particle wall power and leaves less power for ionization/dissociation sustaining the bulk plasma."
+  }
+}
