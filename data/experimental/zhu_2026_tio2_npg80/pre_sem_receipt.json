@@ -48,6 +48,15 @@
     "table_temperature_C": 20.0,
     "total_process_flow_sccm": 61.0
   },
+  "blind_tio2_clearance_forecast": {
+    "available": true,
+    "forecast_type": "film-capped binary clearance call",
+    "interpretation": "A preregistered binary film-clearance call is available, while the continuous feature profile remains unidentified.",
+    "predicted_film_capped_tio2_depth_nm": 700.0,
+    "primary_outcome": "TiO2 film clearance expected",
+    "promoted_to_absolute_feature_profile_prediction": false,
+    "receipt": "data/experimental/zhu_2026_tio2_npg80/pre_sem_depth_gate.json"
+  },
   "claim_class": "target-free recipe arithmetic plus adjacent-experiment comparison; not an absolute-depth prediction",
   "coefficient_selected_from_target": null,
   "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
@@ -66,6 +75,7 @@
     "species_resolved_wafer_fluxes_measured_or_validated": false,
     "specific_condition_sem_withheld": true,
     "supports_absolute_depth_prediction": false,
+    "target_free_binary_clearance_forecast_frozen": true,
     "tio2_surface_law_measured_or_validated_for_condition": false
   },
   "machine_family_self_bias_evidence": {

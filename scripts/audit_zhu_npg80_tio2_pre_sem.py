@@ -16,6 +16,7 @@ SELF_BIAS_TRANSFER = DATA_DIR / "oxford80_self_bias_transfer.json"
 CF3_COLLISION_SCALE = DATA_DIR / "cf3_reactive_collision_scale.json"
 CHF2_MOBILITY_SCALE = DATA_DIR / "chf2_mobility_scale.json"
 TIO2_ANALOG_BOARD = DATA_DIR / "janissen_tio2_analog_board.json"
+TIO2_DEPTH_GATE = DATA_DIR / "pre_sem_depth_gate.json"
 
 
 def _sha256(path: Path) -> str:
@@ -98,6 +99,18 @@ def build_receipt(manifest: dict) -> dict:
             TIO2_ANALOG_BOARD.read_text(encoding="utf-8"))
         if tio2_analog_board.get("condition_id") != manifest["condition_id"]:
             raise ValueError("TiO2 analog board belongs to another condition")
+
+    tio2_depth_gate = None
+    if TIO2_DEPTH_GATE.exists():
+        tio2_depth_gate = json.loads(
+            TIO2_DEPTH_GATE.read_text(encoding="utf-8"))
+        if tio2_depth_gate.get("condition_id") != manifest["condition_id"]:
+            raise ValueError("TiO2 depth gate belongs to another condition")
+        if (
+            tio2_depth_gate.get("sem_target_used") is not False
+            or tio2_depth_gate.get("measured_depth_target_used") is not False
+        ):
+            raise ValueError("TiO2 depth gate is not target-free")
 
     return {
         "schema": "petch.pre-sem-depth-receipt.v1",
@@ -236,6 +249,32 @@ def build_receipt(manifest: dict) -> dict:
             ),
             "transferred_as_target_coefficient": False,
         },
+        "blind_tio2_clearance_forecast": {
+            "available": tio2_depth_gate is not None,
+            "receipt": (
+                str(TIO2_DEPTH_GATE.relative_to(ROOT))
+                if tio2_depth_gate is not None else None
+            ),
+            "forecast_type": (
+                tio2_depth_gate["blind_forecast"]["forecast_type"]
+                if tio2_depth_gate is not None else None
+            ),
+            "primary_outcome": (
+                tio2_depth_gate["blind_forecast"]["primary_outcome"]
+                if tio2_depth_gate is not None else None
+            ),
+            "predicted_film_capped_tio2_depth_nm": (
+                tio2_depth_gate["blind_forecast"]["predicted_tio2_depth_nm"]
+                if tio2_depth_gate is not None else None
+            ),
+            "promoted_to_absolute_feature_profile_prediction": False,
+            "interpretation": (
+                "A preregistered binary film-clearance call is available, "
+                "while the continuous feature profile remains unidentified."
+                if tio2_depth_gate is not None else
+                "No target-free clearance call is committed."
+            ),
+        },
         "identifiability_gates": {
             "recipe_and_stack_frozen": True,
             "specific_condition_sem_withheld": True,
@@ -257,6 +296,9 @@ def build_receipt(manifest: dict) -> dict:
             "tio2_surface_law_measured_or_validated_for_condition": False,
             "adjacent_tio2_process_response_board_available": (
                 tio2_analog_board is not None
+            ),
+            "target_free_binary_clearance_forecast_frozen": (
+                tio2_depth_gate is not None
             ),
             "cr_surface_law_measured_or_validated_for_condition": False,
             "feature_geometry_and_loading_known": False,

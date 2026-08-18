@@ -180,3 +180,16 @@ def test_pre_sem_receipt_links_exact_tio2_board_without_promoting_it():
     assert analogs["transferred_as_target_coefficient"] is False
     assert gates["adjacent_tio2_process_response_board_available"] is True
     assert gates["tio2_surface_law_measured_or_validated_for_condition"] is False
+
+
+def test_pre_sem_receipt_links_binary_clearance_call_without_profile_overclaim():
+    receipt = build_receipt(load_manifest())
+    forecast = receipt["blind_tio2_clearance_forecast"]
+    gates = receipt["identifiability_gates"]
+
+    assert forecast["available"] is True
+    assert forecast["forecast_type"] == "film-capped binary clearance call"
+    assert forecast["predicted_film_capped_tio2_depth_nm"] == 700.0
+    assert forecast["promoted_to_absolute_feature_profile_prediction"] is False
+    assert gates["target_free_binary_clearance_forecast_frozen"] is True
+    assert gates["supports_absolute_depth_prediction"] is False

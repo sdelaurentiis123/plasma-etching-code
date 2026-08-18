@@ -1,0 +1,165 @@
+{
+  "blind_forecast": {
+    "basis": [
+      "the central reactor dose requires 0.62--0.80 TiO2 formula units per incident positive ion before feature attenuation",
+      "the audited adjacent TiO2 feature-rate board straddles but mostly exceeds the 35 nm/min clearance threshold",
+      "an independent common-condition TiO2 experiment measures faster SF6 than CHF3 etching, fixing only the sign of the added-SF6 evidence"
+    ],
+    "forecast_type": "film-capped binary clearance call",
+    "highest_risk_failure_mode": "Cr mask exhaustion or feature-bottom transport can prevent a usable 700 nm pillar even if open TiO2 clears.",
+    "not_claimed": [
+      "atomic-accuracy profile",
+      "unique continuous depth uncertainty interval",
+      "validated local wafer ion flux",
+      "validated TiO2 or Cr surface yield for this condition"
+    ],
+    "predicted_tio2_depth_nm": 700.0,
+    "primary_outcome": "TiO2 film clearance expected"
+  },
+  "central_reactor_dose_clearance_gate": {
+    "density_endpoint_ledgers": [
+      {
+        "delivered_positive_ion_dose_m2": 2.74694819469718e+22,
+        "depth_nm": 700.0,
+        "duration_s": 1200.0,
+        "feature_transmission": 1.0,
+        "formula_unit_density_m3": 2.450599437808329e+28,
+        "incident_positive_ion_dose_m2": 2.74694819469718e+22,
+        "mass_density_kg_m3": 3250.0,
+        "positive_ion_flux_m2_s": 2.2891234955809833e+19,
+        "required_formula_units_per_incident_ion": 0.624481965032084
+      },
+      {
+        "delivered_positive_ion_dose_m2": 2.74694819469718e+22,
+        "depth_nm": 700.0,
+        "duration_s": 1200.0,
+        "feature_transmission": 1.0,
+        "formula_unit_density_m3": 3.1292269744321737e+28,
+        "incident_positive_ion_dose_m2": 2.74694819469718e+22,
+        "mass_density_kg_m3": 4150.0,
+        "positive_ion_flux_m2_s": 2.2891234955809833e+19,
+        "required_formula_units_per_incident_ion": 0.797415432271738
+      }
+    ],
+    "interpretation": "These are exact atom/dose requirements conditional on the central global axial flux. They are not fitted yields and the global axial flux is not certified as a local wafer flux.",
+    "minimum_run_averaged_feature_transmission_by_candidate_surface_yield": {
+      "0.5": [
+        1.248963930064168,
+        1.594830864543476
+      ],
+      "1.0": [
+        0.624481965032084,
+        0.797415432271738
+      ],
+      "1.5": [
+        0.41632131002138933,
+        0.5316102881811586
+      ],
+      "2.0": [
+        0.312240982516042,
+        0.398707716135869
+      ]
+    },
+    "required_blanket_formula_units_per_positive_ion": [
+      0.624481965032084,
+      0.797415432271738
+    ]
+  },
+  "coefficient_selected_from_target": null,
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "cr_mask_survival_straddle": {
+    "closest_feature_witness_selectivity": 14.0,
+    "closest_feature_witness_supported_tio2_nm": 630.0,
+    "full_clear_selectivity_requirement": 15.555555555555555,
+    "interpretation": "Independent source rows straddle mask survival; mask loss cannot be collapsed into a TiO2 yield.",
+    "source_power_sweep_interpolated_selectivity": 18.016664028610727,
+    "source_power_sweep_supported_tio2_nm": 810.7498812874827
+  },
+  "decisive_post_forecast_discriminators": [
+    "scale-bearing cross-section SEM for the frozen condition",
+    "residual Cr thickness or direct evidence of mask exhaustion",
+    "blanket TiO2 loss on an unpatterned witness",
+    "achieved powered-electrode DC self-bias"
+  ],
+  "frozen_before_specific_condition_sem": true,
+  "independent_sf6_direction_evidence": {
+    "common_source_condition": {
+      "bias_power_W": 20.0,
+      "icp_power_W": 1500.0,
+      "pressure_mTorr": 10.0,
+      "single_gas_flow_sccm": 25.0,
+      "temperature_C": 10.0
+    },
+    "reported_tio2_rate_nm_min": {
+      "CHF3": 15.0,
+      "SF6": 55.0
+    },
+    "source": "hegeman-2020-tio2-rie",
+    "supports_direction_not_magnitude": true,
+    "warning": "The source is an ICP tool with sputtered TiO2 and a single-gas comparison; neither rate is a Zhu coefficient."
+  },
+  "independent_tio2_process_comparison": {
+    "effective_blanket_yield_range_if_central_flux_were_shared": [
+      0.6088699159062818,
+      0.9903140225546154
+    ],
+    "feature_rate_range_nm_min": [
+      34.125,
+      43.46666666666667
+    ],
+    "same_recipe_or_machine": false,
+    "source": "janissen-2016-tio2-rie",
+    "target_required_rate_nm_min": 35.0,
+    "twenty_minute_film_capped_depth_comparison_nm": [
+      682.5,
+      700.0
+    ],
+    "warning": "The depth pair is a cross-machine comparison, not a probability or target uncertainty interval."
+  },
+  "inputs": {
+    "ald_tio2_density_sensitivity_kg_m3": [
+      3250.0,
+      4150.0
+    ],
+    "cr_mask_thickness_nm": 45.0,
+    "density_sources": [
+      {
+        "bibkey": "piercy-2017-ald-tio2-density",
+        "doi": "10.1116/1.4979047",
+        "measurement": "XRR and ellipsometry",
+        "reported_density_kg_m3": [
+          3250.0,
+          3680.0
+        ],
+        "scope": "TiCl4/H2O ALD, 38--125 C"
+      },
+      {
+        "bibkey": "saari-2022-ald-tio2-density",
+        "doi": "10.1021/acs.jpcc.2c04905",
+        "measurement": "XRR in the source paper plus its explicitly scoped report of the Go et al. oxygen-plasma-duration split",
+        "reported_density_kg_m3": [
+          3730.0,
+          4150.0
+        ],
+        "scope": "TDMAT/O3 ALD; amorphous to anatase process split"
+      }
+    ],
+    "etch_duration_s": 1200.0,
+    "film_thickness_nm": 700.0,
+    "manifest": {
+      "path": "data/experimental/zhu_2026_tio2_npg80/recipe_manifest.json",
+      "sha256": "17678a0010e0c1ce844b230cfb2cd43318842e800094cb7939eaeaf47548bb9a"
+    },
+    "reactor_sensitivity_state": {
+      "F_to_positive_ion_incident_flux_ratio": 95.11774453658062,
+      "certified_as_local_wafer_flux": false,
+      "neutral_F_thermal_flux_m2_s": 2.1773626386535639e+21,
+      "path": "results/curated/zhu_npg80_open_reactor_v1/central.json",
+      "sha256": "3be22b9ae12b72a647e31df156881332bd296db468a4fda5bcffe73f9a8b4ae5",
+      "total_axial_positive_ion_flux_m2_s": 2.2891234955809833e+19
+    }
+  },
+  "measured_depth_target_used": false,
+  "schema": "petch.zhu-tio2-pre-sem-depth-gate.v1",
+  "sem_target_used": false
+}

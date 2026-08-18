@@ -63,6 +63,37 @@ Run the target-free receipt with:
 python scripts/audit_zhu_npg80_tio2_pre_sem.py --check
 ```
 
+## Blind reactor-dose clearance call
+
+The shortest reactor-to-depth ledger is now frozen separately from the larger
+chemistry build.  Conditional on the central conserved reactor state's
+`2.29e19 m^-2 s^-1` global axial positive-ion flux, clearing `700 nm` in
+`1200 s` requires `0.62--0.80` TiO2 formula units per incident positive ion
+over the published `3.25--4.15 g cm^-3` ALD-density sensitivity.  A candidate
+surface yield of `1` therefore needs a run-averaged feature-floor transmission
+of `0.62--0.80`; a yield of `2` needs `0.31--0.40`.  These are exact atom/dose
+requirements, not fitted yields.  The global axial flux remains a sensitivity,
+not a validated local wafer diagnostic.
+
+The independent Janissen feature board maps to `682.5--700 nm` after twenty
+minutes when capped at the supplied film thickness; that pair is a
+cross-machine comparison, not a target confidence interval.  Its mask rows
+also straddle the target: the closest feature witness supports `630 nm` with
+`45 nm` Cr, while its separate power-sweep selectivity supports `811 nm`.
+Hegeman et al. independently measure the expected direction of the added SF6
+term (`55 nm/min` TiO2 in SF6 versus `15 nm/min` in CHF3 at their common ICP
+condition), but their rates and selectivity are not transferable to this CCP.
+
+The preregistered binary call is therefore **full TiO2 film clearance expected
+(`700 nm`)**, with Cr-mask exhaustion or feature-bottom transport as the
+highest-risk route to a shorter or unusable pillar.  This is deliberately not
+called an atomic-accuracy profile or a unique continuous uncertainty interval.
+Rebuild the receipt with:
+
+```bash
+python scripts/audit_zhu_npg80_tio2_depth_gate.py --check
+```
+
 ## Measured CHF3 ion-collision floor
 
 The NIST Peko data now supply a checksum-replayed reactive-destruction kernel

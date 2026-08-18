@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 163 sources by topic
+## Index — 166 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -265,6 +265,9 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 |---|---|---|
 | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | Janissen et al., CHF3/O2 RIE of TiO2 with Cr masks | PRIMARY FULL TEXT + TABLES S3.1--S3.3 CHECKSUM-PINNED AND VISUALLY AUDITED |
 | [`holman-2026-nature-metasurface-tweezers`](library/holman-2026-nature-metasurface-tweezers.md) | Holman et al., same-group TiO2/SRN metasurface optical-tweezer arrays | PRIMARY NATURE RECORD + AUTHOR FULL MANUSCRIPT ONLINE; LOCAL PIXEL AUDIT OPEN |
+| [`hegeman-2020-tio2-rie`](library/hegeman-2020-tio2-rie.md) | Hegeman et al., common-condition SF6/CHF3 TiO2 RIE comparison | PRIMARY FULL TEXT READ ONLINE; TABLES 1--2 READ; PDF NOT LOCALLY ARCHIVED |
+| [`piercy-2017-ald-tio2-density`](library/piercy-2017-ald-tio2-density.md) | Piercy et al., XRR/ellipsometry ALD TiO2 density versus growth temperature | PRIMARY ARTICLE RECORD + NUMERICAL ABSTRACT READ; FULL PDF NOT LOCALLY ARCHIVED |
+| [`saari-2022-ald-tio2-density`](library/saari-2022-ald-tio2-density.md) | Saari et al., XRR density and crystallization of TDMAT/H2O ALD TiO2 | PRIMARY FULL TEXT READ ONLINE; PDF NOT LOCALLY ARCHIVED |
 
 ### In-feature and profile metrology
 
@@ -288,6 +291,8 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | TiO2/Cr `40 nm/min`, `14:1` comparison scenario and machine-specific O2 sensitivity | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | target-free mask-survival warning for the Zhu pre-SEM receipt; explicitly not a transferred model coefficient or absolute-depth prediction |
 | TiO2/Cr power/pressure response, `-950/-1100 V` RIE witnesses, and `652/273 nm` feature depths | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | visually audited Tables S3.1--S3.3 validation board; Fluor Z401S and single-crystal rutile boundaries remain explicit |
 | Same-group TiO2 meta-atom scale (`750 nm` tall, `100–190 nm` wide, `290 nm` unit cell) and successful vertical-pillar profile class | [`holman-2026-nature-metasurface-tweezers`](library/holman-2026-nature-metasurface-tweezers.md) | adjacent device evidence for the Zhu condition; withheld exact layout remains authoritative and Nature dimensions are never substituted into it |
+| ALD TiO2 formula-unit-density sensitivity (`3.25--4.15 g cm-3`) | [`piercy-2017-ald-tio2-density`](library/piercy-2017-ald-tio2-density.md), [`saari-2022-ald-tio2-density`](library/saari-2022-ald-tio2-density.md) | atom/dose conversion for the blind Zhu clearance gate only; deposition history and phase are unresolved, so neither endpoint is a target coefficient |
+| SF6-versus-CHF3 TiO2 etch direction (`55` versus `15 nm/min` in the source's common ICP condition) | [`hegeman-2020-tio2-rie`](library/hegeman-2020-tio2-rie.md) | sign evidence for the blind Zhu clearance call and simultaneous mask-risk warning; source rates are not transferred across film/tool/plasma topology |
 | Conserved global-model power/particle balance and cylindrical effective-loss area | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | chemistry-agnostic 0-D reactor skeleton; electrons explicit so plasma shorthand cannot hide charge error |
 | GEC-ICP central geometry, coil, and diagnostic plane | [`miller-1995-gec-icp`](library/miller-1995-gec-icp.md), [`wise-1996-rapid-2d-cl`](library/wise-1996-rapid-2d-cl.md) | 165.1 mm electrode, 40.5 mm gap, 15 mm probe plane, five-turn coil, and 21 radial chlorine-plasma markers form an independent spatial-reactor gate; neither paper supplies a generator-to-plasma field law or wafer boundary |
 | Quasineutral Boltzmann electron-pressure closure in chlorine | [`wise-1996-rapid-2d-cl`](library/wise-1996-rapid-2d-cl.md), [`miller-1995-gec-icp`](library/miller-1995-gec-icp.md) | direct Figure-3 density/temperature integration reconstructs the independently measured radial plasma-potential curve with a 5.07% unweighted MAPE after only the physically arbitrary axis gauge; absent source error bars prevent an uncertainty-weighted pass |
