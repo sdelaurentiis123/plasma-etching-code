@@ -153,6 +153,7 @@ class ZhuOpenReactorSolution:
     mean_electron_energy_eV: float
     exhaust_loss_frequency_s_inv: float
     axial_positive_ion_flux_m2_s: Mapping[str, float]
+    neutral_thermal_flux_m2_s: Mapping[str, float]
     positive_ion_wall_loss_m3_s: Mapping[str, float]
     neutral_wall_loss_m3_s: Mapping[str, float]
     absorbed_power_density_W_m3: float
@@ -163,6 +164,7 @@ class ZhuOpenReactorSolution:
     electron_solution: TwoTermBoltzmannSolution
     parent_collision_state: ElectronCollisionChemistryState
     solver_evaluations: int
+    electron_collision_basis_neutral_fraction: float
     machine_closure_supports_prediction: bool = False
     supports_reactor_state_prediction: bool = False
     supports_wafer_flux_prediction: bool = False
@@ -172,6 +174,8 @@ class ZhuOpenReactorSolution:
         densities = _finite_mapping(self.densities_m3, nonnegative=False)
         axial = _finite_mapping(
             self.axial_positive_ion_flux_m2_s, nonnegative=True)
+        neutral_flux = _finite_mapping(
+            self.neutral_thermal_flux_m2_s, nonnegative=True)
         positive_loss = _finite_mapping(
             self.positive_ion_wall_loss_m3_s, nonnegative=True)
         neutral_loss = _finite_mapping(
@@ -188,12 +192,15 @@ class ZhuOpenReactorSolution:
             self.parent_collision_power_density_W_m3,
             self.supplemental_collision_power_density_W_m3,
             self.charged_wall_power_density_W_m3,
+            self.electron_collision_basis_neutral_fraction,
         ), dtype=float)
         if (
             np.any(~np.isfinite(values))
             or np.any(values[:4] <= 0.0)
-            or np.any(values[4:] < 0.0)
+            or np.any(values[4:-1] < 0.0)
+            or not 0.0 < values[-1] <= 1.0
             or set(axial) != set(positive_loss)
+            or set(neutral_flux) != set(neutral_loss)
             or not residuals
             or any(not math.isfinite(value) for value in residuals.values())
             or int(self.solver_evaluations) <= 0
@@ -201,6 +208,7 @@ class ZhuOpenReactorSolution:
             raise ValueError("invalid Zhu open-reactor solution")
         object.__setattr__(self, "densities_m3", densities)
         object.__setattr__(self, "axial_positive_ion_flux_m2_s", axial)
+        object.__setattr__(self, "neutral_thermal_flux_m2_s", neutral_flux)
         object.__setattr__(self, "positive_ion_wall_loss_m3_s", positive_loss)
         object.__setattr__(self, "neutral_wall_loss_m3_s", neutral_loss)
         object.__setattr__(self, "normalized_residuals", MappingProxyType(residuals))
@@ -213,6 +221,7 @@ class ZhuOpenReactorSolution:
             "parent_collision_power_density_W_m3",
             "supplemental_collision_power_density_W_m3",
             "charged_wall_power_density_W_m3",
+            "electron_collision_basis_neutral_fraction",
         ), values):
             object.__setattr__(self, name, float(value))
 
@@ -235,6 +244,7 @@ def positive_ion_wall_return(species_name: str) -> Mapping[str, float]:
         "SF2+": "SF2", "SF+": "SF", "S+": "S",
         "SF4++": "SF4", "SF2++": "SF2",
         "O2+": "O2", "O+": "O",
+        "H2+": "H2", "H+": "H",
     }
     try:
         return MappingProxyType({direct[species_name]: 1.0})
@@ -418,10 +428,11 @@ class ZhuOpenReactorModel:
             for product in positive_ion_wall_return(ion_name):
                 for dependency in dependencies:
                     matrix[row_index[product], column_index[dependency]] = True
-        for name in ("F", "O", "O(1d)"):
+        for name in ("F", "H", "O", "O(1d)"):
             if name in self.neutral_names:
                 matrix[row_index[name], column_index[name]] = True
         matrix[row_index["F2"], column_index["F"]] = True
+        matrix[row_index["H2"], column_index["H"]] = True
         matrix[row_index["O2"], column_index["O"]] = True
         matrix[row_index["O"], column_index["O(1d)"]] = True
         for name in ("e", *self.positive_names, *self.negative_names):
@@ -540,12 +551,21 @@ class ZhuOpenReactorModel:
             external_terms[name].append(
                 feed / condition.neutral_control_volume_m3)
         neutral_wall_loss = {}
+        neutral_thermal_flux = {}
         for name, frequency in neutral_wall_frequency.items():
+            species = self.species_by_name[name]
+            mean_speed = math.sqrt(
+                8.0 * BOLTZMANN_J_K * condition.gas_temperature_K
+                / (math.pi * species.mass_amu * 1.66053906660e-27)
+            )
+            neutral_thermal_flux[name] = 0.25 * densities[name] * mean_speed
             loss = active_fraction * frequency * densities[name]
             neutral_wall_loss[name] = loss
             external_terms[name].append(-loss)
             if name == "F":
                 external_terms["F2"].append(0.5 * loss)
+            elif name == "H":
+                external_terms["H2"].append(0.5 * loss)
             elif name == "O":
                 external_terms["O2"].append(0.5 * loss)
             elif name == "O(1d)":
@@ -612,6 +632,7 @@ class ZhuOpenReactorModel:
             "equivalent_temperature": equivalent_temperature,
             "positive_wall_loss": positive_wall_loss,
             "neutral_wall_loss": neutral_wall_loss,
+            "neutral_thermal_flux": neutral_thermal_flux,
             "axial_flux": axial_flux,
             "parent_power": parent_power,
             "supplemental_power": supplemental_power,
@@ -762,6 +783,7 @@ class ZhuOpenReactorModel:
                 ledger["electron_solution"].distribution.mean_energy_eV),
             exhaust_loss_frequency_s_inv=ledger["exhaust_frequency"],
             axial_positive_ion_flux_m2_s=ledger["axial_flux"],
+            neutral_thermal_flux_m2_s=ledger["neutral_thermal_flux"],
             positive_ion_wall_loss_m3_s=ledger["positive_wall_loss"],
             neutral_wall_loss_m3_s=ledger["neutral_wall_loss"],
             absorbed_power_density_W_m3=condition.absorbed_power_density_W_m3,
@@ -773,4 +795,11 @@ class ZhuOpenReactorModel:
             electron_solution=ledger["electron_solution"],
             parent_collision_state=ledger["parent_state"],
             solver_evaluations=result.nfev,
+            electron_collision_basis_neutral_fraction=(
+                sum(ledger["densities"][name] for name in _FEED_SPECIES)
+                / sum(
+                    ledger["densities"][name]
+                    for name in self.neutral_names
+                )
+            ),
         )

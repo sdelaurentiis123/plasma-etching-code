@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 162 sources by topic
+## Index — 163 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -132,6 +132,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`basurto-2002-chf3-ion-mobility`](library/basurto-2002-chf3-ion-mobility.md) | Basurto & de Urquijo, mass-resolved CHF2+ mobility in CHF3 | PRIMARY FULL TEXT + FIGURE 1 CHECKSUM-PINNED PIL DIGITIZATION |
 | [`sandia-2001-fluorocarbon-mechanisms`](library/sandia-2001-fluorocarbon-mechanisms.md) | Ho et al., C2F6/CHF3 reactor and surface mechanisms | PRIMARY OSTI FULL REPORT + TABLE 9 TRANSCRIBED AND CONSERVATION-CHECKED |
 | [`voloshin-2007-chf3-kinetics`](library/voloshin-2007-chf3-kinetics.md) | Voloshin et al., validated CHF3 gas-phase kinetic chain | PRIMARY AUTHOR-POSTED FULL TEXT READ ONLINE; TABLE III PIXEL TRANSCRIPTION OPEN |
+| [`lim-2014-hfo2-chf3-o2`](library/lim-2014-hfo2-chf3-o2.md) | Lim et al., CHF3/O2 daughter chemistry, wall probabilities, and HfO2 etch board | PRIMARY FULL TEXT + TABLE I VERIFIED AND CONSERVATION-CHECKED |
 | [`edelberg-1999`](library/edelberg-1999.md) | Edelberg & Aydil (1999) | not-fetched |
 | [`kawamura-1999-psst`](library/kawamura-1999-psst.md) | Kawamura et al., PSST 8, R45 (1999) | not-fetched (citation corrected from p.313) |
 | [`benyoucef-yousfi-2014-ion-transport`](library/benyoucef-yousfi-2014-ion-transport.md) | Benyoucef & Yousfi, semiclassical Ar+/Ar, O2+/O2, N2+/N2 transport validation | AUTHOR-PROVIDED FULL TEXT READ VIA HTML; FIGURES NOT LOCALLY ARCHIVED |

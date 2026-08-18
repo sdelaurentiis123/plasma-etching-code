@@ -13,8 +13,10 @@ from petch.reactor_global.zhu_supplemental_chemistry import (
 def test_supplemental_network_is_closed_and_does_not_duplicate_parent_rows():
     chemistry = build_zhu_supplemental_chemistry()
     names = {reaction.name for reaction in chemistry.network.reactions}
-    assert len(chemistry.network.species) == 56
-    assert len(chemistry.network.reactions) == 188
+    assert len(chemistry.network.species) == 66
+    assert len(chemistry.network.reactions) == 259
+    assert chemistry.sandia_rows_selected == tuple(range(20, 39))
+    assert chemistry.chf3_f_rate_branch == "voloshin_350K"
     assert chemistry.parent_sf6_rows_replaced == (
         "G1", "G2", "G3", "G8", "G9", "G10", "G17", "G18")
     assert not any(
@@ -70,9 +72,29 @@ def test_declared_limits_remain_false_until_next_physics_layers_land():
     assert chemistry.supports_complete_daughter_eedf is False
     assert chemistry.supports_oxygen_daughter_chemistry is True
     assert chemistry.supports_sf6_o2_titration_chemistry is True
+    assert chemistry.supports_chf3_neutral_chain is True
     assert chemistry.supports_complete_cross_ion_recombination is False
     with pytest.raises(ValueError):
         build_zhu_supplemental_chemistry(kokkoris_eedf_shape="interpolated")
+
+
+def test_conflicting_chf3_f_rates_are_explicit_branches_not_duplicates():
+    voloshin = build_zhu_supplemental_chemistry(
+        chf3_f_rate_branch="voloshin_350K")
+    lim = build_zhu_supplemental_chemistry(chf3_f_rate_branch="lim_700K")
+    v_reaction = next(
+        reaction for reaction in voloshin.network.reactions
+        if reaction.name == "voloshin_2007_R13")
+    l_reaction = next(
+        reaction for reaction in lim.network.reactions
+        if reaction.name == "lim_2014_R26")
+    context = RateContext(3.0, 350.0)
+    assert (
+        v_reaction.rate_coefficient.coefficient_si(context)
+        / l_reaction.rate_coefficient.coefficient_si(context)
+    ) == pytest.approx(1.82e-12 / 1.58e-13)
+    with pytest.raises(ValueError):
+        build_zhu_supplemental_chemistry(chf3_f_rate_branch="average")
 
 
 def test_every_parent_negative_ion_has_a_volume_loss_path():

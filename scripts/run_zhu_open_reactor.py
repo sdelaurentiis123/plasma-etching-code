@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
+from typing import Mapping
 
 from petch.reactor_global import (
     CylindricalReactor,
@@ -51,10 +53,67 @@ def _feed_molecules_s() -> dict[str, float]:
     }
 
 
+def _continuation_state(
+    path: Path,
+    *,
+    model: ZhuOpenReactorModel,
+    condition: ZhuOpenReactorCondition,
+) -> tuple[dict[str, float], float, float]:
+    """Lift a prior solved state onto an expanded conserved species basis."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    state = payload.get("state")
+    if not isinstance(state, Mapping):
+        raise ValueError("continuation JSON has no state mapping")
+    previous = state.get("densities_m3")
+    if not isinstance(previous, Mapping):
+        raise ValueError("continuation JSON has no state.densities_m3 mapping")
+    usable = {
+        str(name): float(value)
+        for name, value in previous.items()
+        if isinstance(value, (int, float))
+        and math.isfinite(float(value))
+        and float(value) > 0.0
+    }
+    target_density = condition.target_neutral_density_m3
+    floor = max(1.0e4, 1.0e-16 * target_density)
+    densities = {
+        name: usable.get(name, floor) for name in model.species_order
+    }
+    new_neutrals = tuple(
+        name for name in model.neutral_names if name not in usable)
+    old_neutrals = tuple(
+        name for name in model.neutral_names if name in usable)
+    if new_neutrals:
+        # Log-density derivatives disappear if newly added daughter species
+        # begin at the numerical floor.  Reserve a small, pressure-neutral
+        # seed inventory and rescale the converged old neutral composition.
+        reserve = min(0.10, 0.005 * len(new_neutrals))
+        old_total = sum(densities[name] for name in old_neutrals)
+        if old_total <= 0.0:
+            raise ValueError("continuation state has no usable neutral density")
+        for name in old_neutrals:
+            densities[name] *= (1.0 - reserve) * target_density / old_total
+        for name in new_neutrals:
+            densities[name] = reserve * target_density / len(new_neutrals)
+    else:
+        total = sum(densities[name] for name in model.neutral_names)
+        for name in model.neutral_names:
+            densities[name] *= target_density / total
+    exhaust = float(state.get("exhaust_loss_frequency_s_inv", float("nan")))
+    field = float(state.get("reduced_electric_field_Td", float("nan")))
+    if not math.isfinite(exhaust) or exhaust <= 0.0:
+        raise ValueError("continuation state has no valid exhaust frequency")
+    if not math.isfinite(field) or field <= 0.0:
+        raise ValueError("continuation state has no valid reduced field")
+    return densities, exhaust, field
+
+
 def run(args) -> dict:
     parent = build_zhu_parent_collision_chemistry(args.source_workbook)
     supplemental = build_zhu_supplemental_chemistry(
-        kokkoris_eedf_shape=args.kokkoris_eedf_shape)
+        kokkoris_eedf_shape=args.kokkoris_eedf_shape,
+        chf3_f_rate_branch=args.chf3_f_rate_branch,
+    )
     solver = DeterministicTwoTermBoltzmannSolver(
         _grid(parent.mixed_deck), parent.mixed_deck)
     geometry = CylindricalReactor(
@@ -78,8 +137,13 @@ def run(args) -> dict:
             args.neutral_reduced_diffusivity_m_inv_s),
         neutral_wall_probabilities={
             "F": args.f_wall_probability,
+            "H": args.h_wall_probability,
             "O": args.o_wall_probability,
-            "O(1d)": args.o_wall_probability,
+            "O(1d)": args.excited_o_wall_probability,
+            "C": args.c_wall_probability,
+            "CF3": args.cf3_wall_probability,
+            "CF2": args.cf2_wall_probability,
+            "CF": args.cf_wall_probability,
         },
         source=(
             "Zhu operator recipe manifest; sccm standard state explicitly "
@@ -94,9 +158,23 @@ def run(args) -> dict:
         ),
     )
     model = ZhuOpenReactorModel(solver, parent, supplemental)
+    initial_densities = None
+    initial_exhaust = None
+    continuation_field = None
+    if args.initial_state_json is not None:
+        initial_densities, initial_exhaust, continuation_field = (
+            _continuation_state(
+                args.initial_state_json, model=model, condition=condition))
+    initial_field = (
+        args.initial_field_Td
+        if args.initial_field_Td is not None
+        else (continuation_field if continuation_field is not None else 240.0)
+    )
     solution = model.solve(
         condition,
-        initial_reduced_electric_field_Td=args.initial_field_Td,
+        initial_densities_m3=initial_densities,
+        initial_exhaust_loss_frequency_s_inv=initial_exhaust,
+        initial_reduced_electric_field_Td=initial_field,
         maximum_evaluations=args.maximum_evaluations,
         residual_tolerance=args.residual_tolerance,
     )
@@ -121,6 +199,11 @@ def run(args) -> dict:
             "ion_mfp_um": args.ion_mfp_um,
             "mean_all_wall_ion_energy_eV": args.mean_wall_ion_energy_eV,
             "kokkoris_eedf_shape": args.kokkoris_eedf_shape,
+            "chf3_f_rate_branch": args.chf3_f_rate_branch,
+            "continuation_state_json": (
+                None if args.initial_state_json is None
+                else str(args.initial_state_json)
+            ),
             "feature_or_sem_target_used": False,
         },
         "state": {
@@ -134,8 +217,12 @@ def run(args) -> dict:
             "densities_m3": densities,
             "axial_positive_ion_flux_m2_s": dict(
                 solution.axial_positive_ion_flux_m2_s),
+            "neutral_thermal_flux_m2_s": dict(
+                solution.neutral_thermal_flux_m2_s),
             "total_axial_positive_ion_flux_m2_s": (
                 solution.total_axial_positive_ion_flux_m2_s),
+            "electron_collision_basis_neutral_fraction": (
+                solution.electron_collision_basis_neutral_fraction),
         },
         "power_density_W_m3": {
             "absorbed": solution.absorbed_power_density_W_m3,
@@ -158,8 +245,8 @@ def run(args) -> dict:
             "feature_depth_prediction": False,
             "reason": (
                 "absorbed power, active geometry, wall state, all-wall sheath "
-                "energy, and several cross-family reactions remain machine "
-                "sensitivity inputs"
+                "energy, daughter-gas electron transport, and several "
+                "cross-family reactions remain machine sensitivity inputs"
             ),
         },
     }
@@ -169,6 +256,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-workbook", type=Path, required=True)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--initial-state-json", type=Path)
     parser.add_argument("--absorbed-power-W", type=float, default=90.0)
     parser.add_argument("--electrode-diameter-mm", type=float, default=170.0)
     parser.add_argument("--plasma-height-mm", type=float, default=30.0)
@@ -178,14 +266,25 @@ def main() -> None:
     parser.add_argument("--mean-wall-ion-energy-eV", type=float, default=250.0)
     parser.add_argument(
         "--neutral-reduced-diffusivity-m-inv-s", type=float, default=6.0e20)
-    parser.add_argument("--f-wall-probability", type=float, default=.02)
-    parser.add_argument("--o-wall-probability", type=float, default=.02)
+    parser.add_argument("--f-wall-probability", type=float, default=.05)
+    parser.add_argument("--h-wall-probability", type=float, default=.05)
+    parser.add_argument("--o-wall-probability", type=float, default=.10)
+    parser.add_argument("--excited-o-wall-probability", type=float, default=1.0)
+    parser.add_argument("--c-wall-probability", type=float, default=1.0)
+    parser.add_argument("--cf3-wall-probability", type=float, default=.05)
+    parser.add_argument("--cf2-wall-probability", type=float, default=.10)
+    parser.add_argument("--cf-wall-probability", type=float, default=.10)
     parser.add_argument(
         "--kokkoris-eedf-shape",
         choices=("druyvesteyn", "maxwellian"),
         default="druyvesteyn",
     )
-    parser.add_argument("--initial-field-Td", type=float, default=240.0)
+    parser.add_argument(
+        "--chf3-f-rate-branch",
+        choices=("voloshin_350K", "lim_700K"),
+        default="voloshin_350K",
+    )
+    parser.add_argument("--initial-field-Td", type=float)
     parser.add_argument("--maximum-evaluations", type=int, default=1000)
     parser.add_argument("--residual-tolerance", type=float, default=2.0e-6)
     args = parser.parse_args()

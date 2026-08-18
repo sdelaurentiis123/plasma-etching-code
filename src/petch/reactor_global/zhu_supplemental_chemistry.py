@@ -14,9 +14,10 @@ F + SFx fall-off coefficients are excluded: they are valid at 2 Pa, whereas
 the Zhu condition is 3e-2 Torr (3.9997 Pa), and the source does not print a
 portable pressure law.
 
-CHF2 daughter and fluorocarbon ion-recombination rows are selected from the
-conservation-checked Sandia Table-9 transcription.  The source labels those
-rows as copied or estimated, which remains visible in every coefficient.
+CHF2 daughter, hydrogen, and fluorocarbon ion-recombination rows are selected
+from the conservation-checked Sandia Table-9 transcription.  The source
+labels copied and estimated rows explicitly, which remains visible in every
+coefficient.
 """
 from __future__ import annotations
 
@@ -32,6 +33,10 @@ from .network import (
     ReactionNetwork,
     Species,
 )
+from .lim_2014_chf3_oxygen_chemistry import (
+    build_lim_2014_daughter_chemistry,
+    lim2014_daughter_species,
+)
 from .sandia_chf3_mechanism import build_sandia_2001_chf3_table9_network
 from .zhu_parent_collision_chemistry import zhu_parent_collision_species
 
@@ -45,7 +50,7 @@ _PARENT_SF6_ROWS_REPLACED_BY_MEASURED_CROSS_SECTIONS = (
     "G1", "G2", "G3", "G8", "G9", "G10", "G17", "G18",
 )
 _PRESSURE_SPECIFIC_ROWS_EXCLUDED = ("G35", "G36", "G37")
-_SANDIA_ROWS_SELECTED = (20, 21, 22, 23, 24, 25, 33, 34, 37, 38)
+_SANDIA_ROWS_SELECTED = tuple(range(20, 39))
 
 
 @dataclass(frozen=True)
@@ -164,26 +169,43 @@ class ZhuSupplementalChemistry:
     parent_sf6_rows_replaced: tuple[str, ...]
     pressure_specific_rows_excluded: tuple[str, ...]
     sandia_rows_selected: tuple[int, ...]
+    chf3_f_rate_branch: str
     supports_measured_parent_eedf: bool = True
     supports_complete_daughter_eedf: bool = False
     supports_target_pressure_falloff: bool = False
     supports_oxygen_daughter_chemistry: bool = True
     supports_sf6_o2_titration_chemistry: bool = True
+    supports_chf3_neutral_chain: bool = True
     supports_complete_cross_ion_recombination: bool = False
 
 
 def zhu_reactor_species() -> tuple[Species, ...]:
     """Return parent products plus the Pateau O/S/F coupling products."""
-    source = "pateau-2014-sf6-o2 Table I and Tables V/VII"
+    pateau_source = "pateau-2014-sf6-o2 Table I and Tables V/VII"
     extra = (
         Species(
             name="O(1d)", mass_amu=15.9994, charge_number=0,
             composition={"O": 1}, role="excited_neutral",
-            source=source, evidence_kind="published_compilation"),
+            source=pateau_source, evidence_kind="published_compilation"),
         Species(
             name="O+", mass_amu=15.9994, charge_number=1,
             composition={"O": 1}, role="positive_ion",
-            source=source, evidence_kind="published_compilation"),
+            source=pateau_source, evidence_kind="published_compilation"),
+        Species(
+            name="H2", mass_amu=2.01568, charge_number=0,
+            composition={"H": 2}, role="neutral",
+            source="sandia-2001-fluorocarbon-mechanisms Table 9",
+            evidence_kind="published_compilation"),
+        Species(
+            name="H2+", mass_amu=2.01568, charge_number=1,
+            composition={"H": 2}, role="positive_ion",
+            source="sandia-2001-fluorocarbon-mechanisms Table 9",
+            evidence_kind="published_compilation"),
+        Species(
+            name="H+", mass_amu=1.00784, charge_number=1,
+            composition={"H": 1}, role="positive_ion",
+            source="sandia-2001-fluorocarbon-mechanisms Table 9",
+            evidence_kind="published_compilation"),
     )
     oxygenated = (
         ("CH", {"C": 1, "H": 1}),
@@ -211,9 +233,13 @@ def zhu_reactor_species() -> tuple[Species, ...]:
             charge_number=0,
             composition=composition,
             role="neutral",
-            source=source,
+            source=(
+                "sandia-2001-fluorocarbon-mechanisms Table 9"
+                if name == "CH" else pateau_source
+            ),
             evidence_kind="published_compilation",
         ) for name, composition in oxygenated),
+        *lim2014_daughter_species(),
     )
 
 
@@ -450,7 +476,9 @@ def _constant_reaction(row: _KokkorisConstantRow) -> Reaction:
 
 
 def build_zhu_supplemental_chemistry(
-    *, kokkoris_eedf_shape: str = "druyvesteyn",
+    *,
+    kokkoris_eedf_shape: str = "druyvesteyn",
+    chf3_f_rate_branch: str = "voloshin_350K",
 ) -> ZhuSupplementalChemistry:
     """Return the non-parent volume network for a declared EEDF closure."""
     if kokkoris_eedf_shape not in {"druyvesteyn", "maxwellian"}:
@@ -470,11 +498,14 @@ def build_zhu_supplemental_chemistry(
     ]
     if len(selected_sandia) != len(selected_names):
         raise RuntimeError("Sandia daughter-row selection is incomplete")
+    lim = build_lim_2014_daughter_chemistry(
+        chf3_f_rate_branch=chf3_f_rate_branch)
     network = ReactionNetwork(
         species=zhu_reactor_species(),
         reactions=tuple((
             *kokkoris,
             *selected_sandia,
+            *lim.reactions,
             *_pateau_oxygen_reactions(),
             *_pateau_titration_reactions(),
             *_pateau_sf6_charge_closure_reactions(),
@@ -486,4 +517,5 @@ def build_zhu_supplemental_chemistry(
         parent_sf6_rows_replaced=_PARENT_SF6_ROWS_REPLACED_BY_MEASURED_CROSS_SECTIONS,
         pressure_specific_rows_excluded=_PRESSURE_SPECIFIC_ROWS_EXCLUDED,
         sandia_rows_selected=_SANDIA_ROWS_SELECTED,
+        chf3_f_rate_branch=lim.chf3_f_rate_branch,
     )

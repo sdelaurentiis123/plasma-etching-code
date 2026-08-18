@@ -1,4 +1,6 @@
 import math
+import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -9,6 +11,7 @@ from petch.reactor_global.zhu_open_reactor import (
     positive_ion_wall_return,
 )
 from petch.reactor_global.zhu_supplemental_chemistry import zhu_reactor_species
+from scripts.run_zhu_open_reactor import _continuation_state
 
 
 def _condition():
@@ -27,7 +30,9 @@ def _condition():
         ion_momentum_mean_free_path_m=1.0e-4,
         mean_positive_ion_wall_energy_eV=250.0,
         neutral_reduced_diffusivity_m_inv_s=6.0e20,
-        neutral_wall_probabilities={"F": .02, "O": .02, "O(1d)": .02},
+        neutral_wall_probabilities={
+            "F": .02, "H": .10, "O": .02, "O(1d)": .02,
+        },
         source="manufactured",
         absorbed_power_source="sensitivity, not forward power",
         machine_closure_source="manufactured",
@@ -56,6 +61,7 @@ def test_every_positive_ion_has_atom_conserving_wall_return():
                 for product, amount in products.items()
             ) == count
     assert set(positive_ion_wall_return("SF4++")) == {"SF4"}
+    assert set(positive_ion_wall_return("H2+")) == {"H2"}
     with pytest.raises(KeyError):
         positive_ion_wall_return("missing+")
 
@@ -83,3 +89,25 @@ def test_sparse_jacobian_shape_requires_no_false_dense_columns():
     # structural source check rather than a brittle manufactured collision
     # deck.
     assert callable(ZhuOpenReactorModel.jacobian_sparsity)
+
+
+def test_continuation_lifts_old_solution_without_breaking_pressure(tmp_path):
+    path = tmp_path / "prior.json"
+    path.write_text(json.dumps({"state": {
+        "densities_m3": {"CHF3": 8.0, "F": 2.0, "e": 0.1},
+        "exhaust_loss_frequency_s_inv": 3.0,
+        "reduced_electric_field_Td": 250.0,
+    }}), encoding="utf-8")
+    model = SimpleNamespace(
+        species_order=("CHF3", "F", "CO", "e"),
+        neutral_names=("CHF3", "F", "CO"),
+    )
+    condition = SimpleNamespace(target_neutral_density_m3=100.0)
+    densities, exhaust, field = _continuation_state(
+        path, model=model, condition=condition)
+    assert sum(densities[name] for name in model.neutral_names) == pytest.approx(100.0)
+    assert densities["CO"] == pytest.approx(0.5)
+    assert densities["CHF3"] / densities["F"] == pytest.approx(4.0)
+    assert densities["e"] == pytest.approx(0.1)
+    assert exhaust == 3.0
+    assert field == 250.0

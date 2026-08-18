@@ -454,6 +454,13 @@ from .zhu_parent_collision_chemistry import (
     build_zhu_parent_collision_chemistry,
     zhu_parent_collision_species,
 )
+from .lim_2014_chf3_oxygen_chemistry import (
+    LIM_2014_DOI,
+    VOLOSHIN_2007_DOI,
+    Lim2014DaughterChemistry,
+    build_lim_2014_daughter_chemistry,
+    lim2014_daughter_species,
+)
 from .zhu_supplemental_chemistry import (
     KOKKORIS_2009_DOI,
     KOKKORIS_2009_TARGET_PRESSURE_PA,
@@ -788,6 +795,11 @@ __all__ = [
     "ZhuParentCollisionChemistry",
     "build_zhu_parent_collision_chemistry",
     "zhu_parent_collision_species",
+    "LIM_2014_DOI",
+    "VOLOSHIN_2007_DOI",
+    "Lim2014DaughterChemistry",
+    "build_lim_2014_daughter_chemistry",
+    "lim2014_daughter_species",
     "KOKKORIS_2009_DOI",
     "KOKKORIS_2009_TARGET_PRESSURE_PA",
     "PATEAU_2014_DOI",
