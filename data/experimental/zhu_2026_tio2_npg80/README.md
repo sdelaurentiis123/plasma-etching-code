@@ -95,6 +95,33 @@ section or a target IEAD. Rebuild the receipt with:
 python scripts/audit_zhu_npg80_chf2_mobility_scale.py --check
 ```
 
+## Measured feed-electron kinetics
+
+The exact `55/5/1 sccm` feed is now assembled from independently audited
+CHF3, SF6, and O2 electron-collision data and solved with the deterministic
+finite-frequency two-term Boltzmann operator at the measured `13.56 MHz` and
+`30 mTorr`.  A field scan from `40` to `400 Td` brackets the frozen-feed
+attachment-to-ionization transition between solved points at `200` and
+`225 Td` (a linear diagnostic interpolation gives about `210 Td`).  This
+corrects the earlier `40--100 Td` development scan, which sampled only a
+net-attaching state and therefore could not participate in a sustaining
+power/particle balance.
+
+The bracket is not a fitted bulk field.  The feed fractions are not the
+unknown steady plasma composition: CHF3 and SF6 dissociate, their daughter
+species alter attachment and ionization, and wall/exhaust loss closes the
+inventory.  The complete 38-reaction hydrogen-bearing CHF3 extension from
+Sandia Table 9 is conservation-checked in code, with all copied and estimated
+rates still labelled as such.  It is the next chemistry rung, not yet a
+species-resolved wafer-flux prediction.  Rebuild the measured-feed receipt
+with the licensed Song O2 workbook using:
+
+```bash
+python scripts/audit_zhu_npg80_feed_electron_kinetics.py \
+  --source-workbook /path/to/o2_song_2026_supplement.xlsx
+python scripts/audit_zhu_npg80_feed_electron_kinetics.py --check
+```
+
 ## Machine-family self-bias evidence
 
 The two downloaded files are valid despite their generic/misleading names.

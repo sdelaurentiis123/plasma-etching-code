@@ -392,6 +392,15 @@ from .chf3_electron_collisions import (
     load_nist_1999_chf3_momentum_transfer,
     load_nist_1999_chf3_total_scattering,
 )
+from .sandia_chf3_mechanism import (
+    KELVIN_PER_EV,
+    SANDIA_REPORT_DOI,
+    SANDIA_REPORT_SHA256,
+    SANDIA_TABLE9_ROWS,
+    SandiaTable9Row,
+    build_sandia_2001_chf3_table9_network,
+    sandia_table9_evidence_counts,
+)
 from .sf6_electron_collisions import (
     SF6_MASS_AMU,
     NIST_SF6_TABLE9_CSV_SHA256,
@@ -695,6 +704,13 @@ __all__ = [
     "load_nist_1999_chf3_drift_curve",
     "load_nist_1999_chf3_momentum_transfer",
     "load_nist_1999_chf3_total_scattering",
+    "KELVIN_PER_EV",
+    "SANDIA_REPORT_DOI",
+    "SANDIA_REPORT_SHA256",
+    "SANDIA_TABLE9_ROWS",
+    "SandiaTable9Row",
+    "build_sandia_2001_chf3_table9_network",
+    "sandia_table9_evidence_counts",
     "SF6_MASS_AMU",
     "NIST_SF6_TABLE9_CSV_SHA256",
     "NIST_SF6_TABLE14_CSV_SHA256",

@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 157 sources by topic
+## Index — 159 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -130,6 +130,8 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`plattner-2003-plasmalab80-appendix`](library/plattner-2003-plasmalab80-appendix.md) | Plattner, PlasmaLab RIE 80 CHF3/Ar process appendix | PRIMARY THESIS APPENDIX TABLE VISUALLY AUDITED |
 | [`peko-2002-chf3-ion-molecule`](library/peko-2002-chf3-ion-molecule.md) | Peko et al., measured CF3+/F+/F- reactive cross sections and CHF3 discharge ion energies | PRIMARY NIST FULL TEXT + FIGURE 2 SUM CURVE PIL-DIGITIZED |
 | [`basurto-2002-chf3-ion-mobility`](library/basurto-2002-chf3-ion-mobility.md) | Basurto & de Urquijo, mass-resolved CHF2+ mobility in CHF3 | PRIMARY FULL TEXT + FIGURE 1 CHECKSUM-PINNED PIL DIGITIZATION |
+| [`sandia-2001-fluorocarbon-mechanisms`](library/sandia-2001-fluorocarbon-mechanisms.md) | Ho et al., C2F6/CHF3 reactor and surface mechanisms | PRIMARY OSTI FULL REPORT + TABLE 9 TRANSCRIBED AND CONSERVATION-CHECKED |
+| [`voloshin-2007-chf3-kinetics`](library/voloshin-2007-chf3-kinetics.md) | Voloshin et al., validated CHF3 gas-phase kinetic chain | PRIMARY AUTHOR-POSTED FULL TEXT READ ONLINE; TABLE III PIXEL TRANSCRIPTION OPEN |
 | [`edelberg-1999`](library/edelberg-1999.md) | Edelberg & Aydil (1999) | not-fetched |
 | [`kawamura-1999-psst`](library/kawamura-1999-psst.md) | Kawamura et al., PSST 8, R45 (1999) | not-fetched (citation corrected from p.313) |
 | [`benyoucef-yousfi-2014-ion-transport`](library/benyoucef-yousfi-2014-ion-transport.md) | Benyoucef & Yousfi, semiclassical Ar+/Ar, O2+/O2, N2+/N2 transport validation | AUTHOR-PROVIDED FULL TEXT READ VIA HTML; FIGURES NOT LOCALLY ARCHIVED |
@@ -274,6 +276,8 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Oxford RIE-80 self-bias evidence (`276 V` same-chemistry/reduced-drive point; exact-NGP80 `>300` to `<~200 V` drift; `360--400 V` adjacent witnesses) | [`harmon-2019-ngp80-rie`](library/harmon-2019-ngp80-rie.md), [`penaud-2006-plasmalab80-ternary`](library/penaud-2006-plasmalab80-ternary.md), [`zou-2004-plasmalab80-sf6-o2`](library/zou-2004-plasmalab80-sf6-o2.md), [`plattner-2003-plasmalab80-appendix`](library/plattner-2003-plasmalab80-appendix.md) | target-free deterministic voltage histories for sheath/depth sensitivity; censor statements remain inequalities and the transfer is not a target-voltage measurement or probability interval |
 | CF3+ + CHF3 reactive-destruction kernel (`18 A2` summed CID plus 21-point summed-DCT curve) | [`peko-2002-chf3-ion-molecule`](library/peko-2002-chf3-ion-molecule.md) | measured target-independent collision floor with explicit lab-to-relative energy conversion and source uncertainty; elastic/angular transport, other species pairs, target IEAD, and depth remain open |
 | CHF2+ in CHF3 low-field mobility `0.53 +/- 0.01 cm2 V-1 s-1` | [`basurto-2002-chf3-ion-mobility`](library/basurto-2002-chf3-ion-mobility.md) | rejects the `1.33 cm2 V-1 s-1` naive polarization-limit closure; retained as a future molecular-transport validation board, not a fitted cross section |
+| CHF3/H/F Table-9 gas mechanism (`38` rows; `24` regressed, `14` copied/estimated) | [`sandia-2001-fluorocarbon-mechanisms`](library/sandia-2001-fluorocarbon-mechanisms.md) | closes a conservation-checked hydrogen-bearing topology while keeping the source's evidence debt visible; no source surface fit or machine-specific coupling is imported |
+| CHF3 neutral chain `CHF3 + F -> CF3 + HF` and wall-loss sensitivity | [`voloshin-2007-chf3-kinetics`](library/voloshin-2007-chf3-kinetics.md) | supplies the missing F/HF recycling topology and an uncertainty direction; numeric Table-III expansion remains barred until pixel transcription |
 | TiO2/Cr `40 nm/min`, `14:1` comparison scenario and machine-specific O2 sensitivity | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | target-free mask-survival warning for the Zhu pre-SEM receipt; explicitly not a transferred model coefficient or absolute-depth prediction |
 | TiO2/Cr power/pressure response, `-950/-1100 V` RIE witnesses, and `652/273 nm` feature depths | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | visually audited Tables S3.1--S3.3 validation board; Fluor Z401S and single-crystal rutile boundaries remain explicit |
 | Same-group TiO2 meta-atom scale (`750 nm` tall, `100–190 nm` wide, `290 nm` unit cell) and successful vertical-pillar profile class | [`holman-2026-nature-metasurface-tweezers`](library/holman-2026-nature-metasurface-tweezers.md) | adjacent device evidence for the Zhu condition; withheld exact layout remains authoritative and Nature dimensions are never substituted into it |

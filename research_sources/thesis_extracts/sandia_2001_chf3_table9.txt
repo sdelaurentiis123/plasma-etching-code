@@ -1,0 +1,63 @@
+Ho, Johannes, Buss, and Meeks, SAND2001-1292 (2001), DOI 10.2172/782704
+Official PDF SHA256:
+3e401d0d5c5ffb0308767bffb2d4d952b1c6110f79f95c03b781e927342a4d8f
+
+Focused verbatim text extraction: section 5.1 and Table 9, PDF pages 55--56.
+The original PDF remains authoritative for symbols and table layout.
+
+"To construct the gas phase reaction mechanism for CHF3 plasma etching, the
+38 reactions in Table 9 were added to the 122 reactions in Table 2 that do not
+involve the C2F6 itself."
+
+"For electron-impact reactions of CHF3, the rate parameters are primarily
+based on a cross section set recently published by Kushner and Zhang [53]."
+
+"There are also a few estimated rate parameters. Electron impact reactions
+for H and H2 were taken from Janev, et al. [54] The remaining ion-ion reactions
+or dissociative recombination reactions have estimated rate parameters."
+
+Table 9. Additional gas-phase reactions for CHF3 plasma etching of silicon dioxide.
+No. Reaction                                      A          B        C         e(eV)  note
+1   e + CHF3 -> CHF3 + e                         1.089E-2  -1.2214  2.645E4   0.37    V1,4 ref53
+2   e + CHF3 -> CHF3 + e                         3.019E-2  -1.3964  1.759E4   0.18    V2,5 ref53
+3   e + CHF3 -> CHF3 + e                         5.218E-2  -1.4396  1.406E4   0.13    V3,6 ref53
+4   e + CHF3 -> CHF3 + e                         4.122E-2  -1.3790  1.549E5  10.9     estimate
+5   e + CHF3 -> CHF3 + e                         1.584E-11  0.4322  1.415E5  11.9     estimate
+6   e + CHF3 -> CF3+ + H + 2e                    5.361E-15  1.3438  1.736E5  15.2
+7   e + CHF3 -> CHF2+ + F + 2e                   2.225E-15  1.2886  1.906E5  16.8
+8   e + CHF3 -> CF2+ + HF + 2e                   6.533E-17  1.4404  1.800E5  17.6
+9   e + CHF3 -> CF+ + 2F + H + 2e                6.780E-16  1.5225  2.335E5  20.9
+10  e + CHF3 -> F+ + CHF2 + 2e                   8.120E-14  0.9194  4.273E5  37.0
+11  e + CHF3 -> CHF+ + 2F + 2e                   1.006E-15  1.3223  2.120E5  19.8
+12  e + CHF3 -> CF3 + H + e                      3.963E-17  1.6416  1.044E5  11.0
+13  e + CHF3 -> CHF2 + F + e                     1.187E-16  1.3167  1.376E5  13.0
+14  e + CHF3 -> CF2 + HF + e                     3.626E-14  1.0759  2.631E5  23.6
+15  e + CHF3 -> CHF + 2F + e                     8.084E-13  0.5725  4.070E5  35.0
+16  e + CHF3 -> CF + H + 2F + e                  6.752E-9   0.1877  2.358E5  13.3
+17  e + CHF3 -> CF3 + H + e                      2.555E-6  -0.4365  1.546E5  11.0    add-on
+18  e + CHF3 -> F- + CHF2                        8.988E-5  -1.3618  1.129E5   1.3
+19  e + CHF3 -> F- + CHF2                        1.166E-6  -1.2306  4.219E4   1.3
+20  e + CHF2 -> CF2+ + H + 2e                    5.361E-15  1.3438  1.736E5  17.2    copy CHF3
+21  e + CHF2 -> CHF+ + F + 2e                    2.225E-15  1.2886  1.906E5  14.3    copy CHF3
+22  e + CHF2 -> CF+ + HF + 2e                    6.533E-17  1.4404  1.800E5  14.6    copy CHF3
+23  e + CHF2 -> CF2 + H + e                      3.963E-17  1.6416  1.044E5   2.71   copy CHF3
+24  e + CHF2 -> CHF + F + e                      1.187E-16  1.3167  1.376E5   4.75   copy CHF3
+25  e + CHF2 -> CF + H + F + e                   3.626E-14  1.0759  2.631E5   8.09   copy CHF3
+26  e + H2 -> H2 + e                             1.400E-5  -0.7604  2.264E4   0.5
+27  e + H2 -> H2 + e                             4.185E-12  0.6434  1.407E5  11.37
+28  e + H2 -> H2 + e                             6.250E-13  0.8498  1.702E5  11.70
+29  e + H2 -> 2H + e                             1.697E-8  -0.0244  1.199E5   4.4
+30  e + H2 -> H2+ + 2e                           1.329E-13  1.0750  1.976E5  15.4
+31  e + H -> H + e                               8.367E-10  0.3014  1.335E5  10.2
+32  e + H -> H+ + 2e                             7.332E-12  0.6938  1.694E5  13.6
+33  F- + CHF2+ -> F + CF2 + H                    4.0E-7   -0.5      0.0
+34  F- + CHF+ -> F + CF + H                      4.0E-7   -0.5      0.0
+35  F- + H2+ -> F + 2H                           4.0E-7   -0.5      0.0
+36  e + H2+ -> 2H                                4.0E-8    0.0      0.0      0.0
+37  e + CHF2+ -> H + CF2                         4.0E-8    0.0      0.0      0.0
+38  e + CHF+ -> H + CF                           4.0E-8    0.0      0.0      0.0
+
+Table note: "Rate coefficients of form: kf = A T^B exp(-C/T). Units for A
+depend on the order of the reaction, but are in molecules, cm and s. B is for
+temperature in K. Units for C are K. e is the electron collision energy loss
+in eV."

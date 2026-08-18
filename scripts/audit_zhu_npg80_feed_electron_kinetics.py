@@ -50,7 +50,10 @@ FEED_FRACTIONS = {
     species: flow / sum(FEED_SCCM.values())
     for species, flow in FEED_SCCM.items()
 }
-CANDIDATE_BULK_FIELDS_TD = (40.0, 60.0, 80.0, 100.0)
+CANDIDATE_BULK_FIELDS_TD = (
+    40.0, 60.0, 80.0, 100.0, 125.0, 150.0, 175.0, 200.0,
+    225.0, 250.0, 275.0, 300.0, 350.0, 400.0,
+)
 
 
 def _grid(deck, *, scale: int = 5) -> ElectronEnergyGrid:
@@ -238,6 +241,42 @@ def _relative_change(candidate: dict, nominal: dict) -> dict:
     return changes
 
 
+def _growth_transition(rows: list[dict]) -> dict:
+    """Locate the first attachment-to-ionization sign change in a field scan.
+
+    The interpolation is reported only as a diagnostic estimate.  The
+    bracket endpoints remain the evidence because the Boltzmann equation was
+    solved there, whereas the interpolated field was not independently
+    solved.
+    """
+    ordered = sorted(rows, key=lambda row: row["reduced_electric_field_Td"])
+    for lower, upper in zip(ordered[:-1], ordered[1:]):
+        lower_growth = lower["net_growth_rate_coefficient_m3_s"]
+        upper_growth = upper["net_growth_rate_coefficient_m3_s"]
+        if lower_growth <= 0.0 < upper_growth:
+            field_span = (
+                upper["reduced_electric_field_Td"]
+                - lower["reduced_electric_field_Td"]
+            )
+            interpolated = (
+                lower["reduced_electric_field_Td"]
+                - lower_growth * field_span / (upper_growth - lower_growth)
+            )
+            return {
+                "lower_field_Td": lower["reduced_electric_field_Td"],
+                "lower_growth_rate_coefficient_m3_s": lower_growth,
+                "upper_field_Td": upper["reduced_electric_field_Td"],
+                "upper_growth_rate_coefficient_m3_s": upper_growth,
+                "linearly_interpolated_zero_Td": float(interpolated),
+                "interpolation_status": (
+                    "diagnostic only; solved endpoints are the certified "
+                    "bracket"
+                ),
+            }
+    raise RuntimeError(
+        "candidate field scan does not bracket electron-growth transition")
+
+
 def audit(workbook: Path) -> dict:
     number_density = PRESSURE_PA / (BOLTZMANN_J_K * GAS_TEMPERATURE_K)
     angular_frequency = 2.0 * math.pi * RF_FREQUENCY_HZ
@@ -248,7 +287,7 @@ def audit(workbook: Path) -> dict:
         CANDIDATE_BULK_FIELDS_TD,
         angular_frequency_over_density_m3_s=reduced_frequency,
     )
-    representative = (60.0, 100.0)
+    representative = (100.0, 225.0, 400.0)
     nominal_rf_representative = {
         **nominal_rf,
         "rows": [
@@ -312,7 +351,7 @@ def audit(workbook: Path) -> dict:
         grid_scale=6,
     )
     return {
-        "schema": "petch.zhu_npg80_feed_electron_kinetics_audit.v1",
+        "schema": "petch.zhu_npg80_feed_electron_kinetics_audit.v2",
         "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
         "claim_class": (
             "measured_recipe_feed_and_frequency_conditioned_local_electron_"
@@ -347,6 +386,9 @@ def audit(workbook: Path) -> dict:
             ),
         },
         "nominal_finite_frequency_prediction": nominal_rf,
+        "frozen_feed_growth_transition": _growth_transition(
+            nominal_rf["rows"]
+        ),
         "dc_vs_rf_diagnostic": {
             "dc_prediction": _scalar_rows(dc),
             "rf_prediction": _scalar_rows(nominal_rf_representative),
@@ -381,10 +423,12 @@ def audit(workbook: Path) -> dict:
             ),
         },
         "physics_findings": {
-            "feed_is_electronegative_in_scanned_local_state": all(
-                row["net_growth_rate_coefficient_m3_s"] < 0.0
+            "feed_is_electronegative_below_growth_transition": True,
+            "feed_becomes_net_ionizing_in_scan": any(
+                row["net_growth_rate_coefficient_m3_s"] > 0.0
                 for row in nominal_rf["rows"]
             ),
+            "frozen_feed_composition_is_not_a_bulk_plasma_closure": True,
             "forward_power_does_not_close_bulk_field": True,
             "electron_density_not_closed_by_eedf_alone": True,
             "requires_global_particle_and_power_balance_next": True,
@@ -411,9 +455,13 @@ def _write(result: dict, output: Path) -> None:
 def _check(output: Path) -> None:
     path = output / "audit.json"
     payload = json.loads(path.read_text(encoding="utf-8"))
+    rows = payload.get("nominal_finite_frequency_prediction", {}).get(
+        "rows", []
+    )
+    transition = payload.get("frozen_feed_growth_transition", {})
     if (
         payload.get("schema")
-        != "petch.zhu_npg80_feed_electron_kinetics_audit.v1"
+        != "petch.zhu_npg80_feed_electron_kinetics_audit.v2"
         or payload.get("source", {}).get("song_2026_o2_workbook_sha256")
         != SONG_2026_O2_WORKBOOK_SHA256
         or payload.get("source", {}).get(
@@ -421,6 +469,15 @@ def _check(output: Path) -> None:
         ) is not False
         or payload.get("physics_findings", {}).get("feature_depth_used")
         is not False
+        or len(rows) != len(CANDIDATE_BULK_FIELDS_TD)
+        or [row.get("reduced_electric_field_Td") for row in rows]
+        != list(CANDIDATE_BULK_FIELDS_TD)
+        or transition.get("lower_field_Td") != 200.0
+        or transition.get("upper_field_Td") != 225.0
+        or not transition.get("lower_growth_rate_coefficient_m3_s", 1.0)
+        < 0.0
+        or not transition.get("upper_growth_rate_coefficient_m3_s", -1.0)
+        > 0.0
     ):
         raise RuntimeError("committed NPG80 electron-kinetic audit is stale")
 
