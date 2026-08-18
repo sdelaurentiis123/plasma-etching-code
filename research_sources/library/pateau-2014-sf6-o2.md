@@ -29,5 +29,6 @@
 The Zhu supplemental network adds 11 oxygen daughter reactions, 32 SFx/O
 titration reactions, and the non-duplicated R38/R50 charge-closure pairs.
 Together with the Kokkoris and Sandia blocks it contains 188 conserved volume
-reactions over 55 species. Cross-family O-/fluorocarbon-ion recombination and
+reactions over a 56-species reactor basis (including neutral CH for conserved
+CH+ wall return). Cross-family O-/fluorocarbon-ion recombination and
 CHF3/O/S neutral chemistry remain incomplete and are exposed as limitations.

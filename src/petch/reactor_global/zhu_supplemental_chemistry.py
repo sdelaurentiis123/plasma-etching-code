@@ -186,6 +186,7 @@ def zhu_reactor_species() -> tuple[Species, ...]:
             source=source, evidence_kind="published_compilation"),
     )
     oxygenated = (
+        ("CH", {"C": 1, "H": 1}),
         ("SO", {"S": 1, "O": 1}),
         ("SO2", {"S": 1, "O": 2}),
         ("SOF", {"S": 1, "O": 1, "F": 1}),
@@ -195,7 +196,10 @@ def zhu_reactor_species() -> tuple[Species, ...]:
         ("SO2F", {"S": 1, "O": 2, "F": 1}),
         ("SO2F2", {"S": 1, "O": 2, "F": 2}),
     )
-    atomic_mass = {"S": 32.065, "O": 15.9994, "F": 18.998403163}
+    atomic_mass = {
+        "C": 12.011, "H": 1.00784, "S": 32.065,
+        "O": 15.9994, "F": 18.998403163,
+    }
     return (
         *zhu_parent_collision_species(),
         *extra,

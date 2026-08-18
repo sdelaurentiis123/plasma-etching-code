@@ -134,8 +134,8 @@ remain visibly graded: aggregate SF6 neutral dissociation currently uses the
 literature-dominant `SF5 + F` branch, and aggregate O2 ionization currently
 uses the `O2+` branch.  This closes the parent collision source term, not the
 daughter-species, wall, exhaust, or absorbed-power balances. The supplemental
-reactor network now contains 188 conserved daughter/heavy reactions over 55
-species, including the Pateau SFx/O -> SOxFy titration chain that releases F,
+reactor network now contains 188 conserved daughter/heavy reactions over a
+56-species basis, including the Pateau SFx/O -> SOxFy titration chain that releases F,
 while keeping target-machine wall physics and cross-family ion closures
 explicit.
 

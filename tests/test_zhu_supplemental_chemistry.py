@@ -13,7 +13,7 @@ from petch.reactor_global.zhu_supplemental_chemistry import (
 def test_supplemental_network_is_closed_and_does_not_duplicate_parent_rows():
     chemistry = build_zhu_supplemental_chemistry()
     names = {reaction.name for reaction in chemistry.network.reactions}
-    assert len(chemistry.network.species) == 55
+    assert len(chemistry.network.species) == 56
     assert len(chemistry.network.reactions) == 188
     assert chemistry.parent_sf6_rows_replaced == (
         "G1", "G2", "G3", "G8", "G9", "G10", "G17", "G18")

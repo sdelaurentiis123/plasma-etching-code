@@ -463,6 +463,12 @@ from .zhu_supplemental_chemistry import (
     build_zhu_supplemental_chemistry,
     zhu_reactor_species,
 )
+from .zhu_open_reactor import (
+    ZhuOpenReactorCondition,
+    ZhuOpenReactorModel,
+    ZhuOpenReactorSolution,
+    positive_ion_wall_return,
+)
 from .current_driven_rf_sheath import (
     PeriodicCurrentDensity,
     TurnerChabertCurrentDrivenSheath,
@@ -789,6 +795,10 @@ __all__ = [
     "ZhuSupplementalChemistry",
     "build_zhu_supplemental_chemistry",
     "zhu_reactor_species",
+    "ZhuOpenReactorCondition",
+    "ZhuOpenReactorModel",
+    "ZhuOpenReactorSolution",
+    "positive_ion_wall_return",
     "PeriodicCurrentDensity",
     "TurnerChabertCurrentDrivenSheath",
     "TurnerChabertCurrentSheathTangent",
