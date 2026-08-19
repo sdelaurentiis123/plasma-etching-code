@@ -95,3 +95,11 @@ pytest -q tests/test_zhu_npg80_conditional_profiles.py
 `audit.json` is the aggregate receipt. `trajectories/` contains all 28
 specification-bound, checksum-pinned trajectory caches so the board can be
 audited or resumed without rerunning completed cases.
+
+`profile_atlas.svg` renders all 56 endpoints at one common lateral and
+vertical scale. Orange panels show the last pre-clear surface rather than an
+invented post-clear fused-silica profile. Reproduce it with:
+
+```bash
+python scripts/render_zhu_npg80_conditional_profile_atlas.py --check
+```

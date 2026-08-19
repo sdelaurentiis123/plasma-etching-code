@@ -1,0 +1,45 @@
+{
+  "schema": "petch.zhu-npg80-conditional-profile-atlas.v1",
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "source": {
+    "path": "results/curated/zhu_npg80_conditional_profiles_v1/audit.json",
+    "sha256": "01c48963fc968c23000bca8a6e5c00059561240e43ffc0403c540a97e9af2c47"
+  },
+  "target_sem_used": false,
+  "target_depth_used": false,
+  "profile_count": 56,
+  "cleared_profile_count": 50,
+  "not_cleared_profile_count": 6,
+  "endpoint_geometry_relief_range_nm": [
+    567.3642334302317,
+    677.7119603145428
+  ],
+  "axes": {
+    "width_nm": [
+      80.0,
+      120.0,
+      160.0,
+      200.0,
+      240.0,
+      280.0,
+      320.0
+    ],
+    "transport_scenario": [
+      "ion_low_tail_0p0",
+      "ion_low_tail_0p65",
+      "ion_high_tail_0p0",
+      "ion_high_tail_0p65"
+    ],
+    "blanket_rate_nm_min": [
+      34.125,
+      43.46666666666667
+    ]
+  },
+  "render": {
+    "path": "results/curated/zhu_npg80_conditional_profiles_v1/profile_atlas.svg",
+    "sha256": "95586df2e0d21135aee9b5fa688c9124b434b569f2452215041fb70ccfe23062",
+    "same_lateral_scale_nm": 400.0,
+    "same_vertical_scale_nm": 700.0
+  },
+  "claim_boundary": "complete visualization of the frozen conditional board; not a validated Oxford surface law or target SEM prediction"
+}
