@@ -1445,7 +1445,17 @@ def advect_3d_gpu(phi, Fspeed, mask, mask_phi, dx, dt, nsub):
 
 
 def extend_velocity_3d(V, centroids, geo, band):
-    """Nearest-face velocity extension into the 3D narrow band (CPU KDTree fallback)."""
+    """Nearest-face velocity extension into the active-surface narrow band.
+
+    ``geo['phi']`` limits work to nodes near the *union* surface.  That is not
+    sufficient for a multi-material feature when ``centroids`` contains only
+    the evolving-material faces: a node near a pinned mask can be close to the
+    union surface while being arbitrarily far from every evolving face.  Such
+    a node must remain stationary rather than inherit the globally nearest
+    active-face velocity.  The explicit centroid-distance gate is equivalent
+    to the historical union band for a single resolved material and prevents
+    velocity leaking across buried material contacts.
+    """
     phi, dx = geo['phi'], geo['dx']
     Fs = np.zeros_like(phi)
     bm = np.abs(phi) < band
@@ -1453,8 +1463,9 @@ def extend_velocity_3d(V, centroids, geo, band):
     pts = np.stack([geo['xs'][ii], geo['ys'][jj], geo['zs'][kk]], axis=1)
     if len(centroids) == 0:
         return Fs
-    _, idx = cKDTree(centroids).query(pts)
-    Fs[ii, jj, kk] = V[idx]
+    distance, idx = cKDTree(centroids).query(pts)
+    local = distance <= float(band)
+    Fs[ii[local], jj[local], kk[local]] = V[idx[local]]
     return Fs
 
 

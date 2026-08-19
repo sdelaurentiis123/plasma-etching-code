@@ -5,7 +5,7 @@ from petch.feature_step_3d import (
     _advect_exposed_material_levelsets,
     make_rectangular_trench_geometry_3d,
 )
-from petch.threed import advect_3d, reinit_cr2
+from petch.threed import advect_3d, extend_velocity_3d, reinit_cr2
 
 
 def _cut_edge_displacements(before, after, dx):
@@ -19,6 +19,30 @@ def _cut_edge_displacements(before, after, dx):
         after_fraction = after[left][cut] / (after[left][cut] - after[right][cut])
         displacement.append(np.abs(after_fraction - before_fraction) * dx)
     return np.concatenate(displacement)
+
+
+def test_velocity_extension_does_not_cross_a_distant_pinned_union_surface():
+    """A mask-near node is not active merely because the film exists elsewhere."""
+    dx = 0.1
+    shape = (9, 5, 5)
+    coordinate = tuple(np.arange(size) * dx for size in shape)
+    # Manufacture a union narrow band everywhere, as occurs close to a pinned
+    # mask.  The sole evolving face lies at x=0.1; only its own physical band
+    # may inherit its recession velocity.
+    geometry = {
+        "phi": np.zeros(shape),
+        "dx": dx,
+        "xs": coordinate[0],
+        "ys": coordinate[1],
+        "zs": coordinate[2],
+    }
+    extended = extend_velocity_3d(
+        np.asarray([2.0]), np.asarray([[0.1, 0.2, 0.2]]), geometry,
+        band=0.25,
+    )
+
+    assert extended[1, 2, 2] == 2.0
+    assert extended[8, 2, 2] == 0.0
 
 
 def test_cr2_anchors_distorted_slanted_interface_and_restores_gradient():
