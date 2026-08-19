@@ -17,8 +17,8 @@
   `https://pure.tudelft.nl/ws/portalfiles/portal/47058891/PhD_Thesis_S.Ha.pdf`
 - **Thesis PDF SHA256:**
   `d4e8afedd1349a91b14ee10f589e9cae01aab48eb31d2be44433cd26e6fce912`
-- **Status:** PRIMARY FULL TEXT + SUPPLEMENTARY TABLES S3.1--S3.3
-  CHECKSUM-PINNED AND VISUALLY AUDITED
+- **Status:** PRIMARY FULL TEXT + SUPPLEMENTARY TABLES S3.1--S3.3 AND
+  FIGURE S3.3 CHECKSUM-PINNED AND VISUALLY AUDITED
 - **Extraction receipt:**
   `data/experimental/janissen_2016_tio2/extraction_manifest.json`
 - **Topic:** TiO2/Cr feature etching, fluorocarbon passivation, selectivity,
@@ -35,11 +35,12 @@
 | Q5 | The within-batch `Ra` power sweep at `50 ubar`, `50/5/30 sccm CHF3/O2/Ar` reports TiO2 rates of `30`, `58`, and `68 nm/min` at `100`, `165`, and `200 W`; Cr rates are `1.7`, `3.2`, and `3.7 nm/min`, leaving the printed selectivity near `18:1`. | A quantitative, out-of-target process-response board. It can grade a reactor-plus-surface model without using the Zhu SEM. It does not isolate ion flux, energy, or radical flux. |
 | Q6 | The closest printed stack witness (Fig. 3.2a) used a `45 nm` Cr mask of `175 nm` diameter, `50/0.5 sccm CHF3/O2`, `200 W`, `50 ubar` (`37.5 mTorr`), measured `-950 V` DC bias, and `11 min`; the main text reports a `430 nm`-tall, `110 nm`-diameter, `89 degree` cylinder and about `40 nm/min`, `14:1`. | Directly demonstrates that comparable RIE forward-power/pressure can coexist with a voltage far above the Oxford-family witnesses. The machine is a Fluor Z401S and the substrate is single-crystal rutile, so the voltage and yield are not target coefficients. |
 | Q7 | On a second nominally identical Fluor Z401S at `-1100 V`, `200 W`, `50 ubar`, and `50/4 sccm CHF3/O2`, the source reports `652 nm` height after `15 min` and `273 nm` after `8 min`, with global height RSD `1.4%` and `3.1%`. | Two scale-bearing feature-depth outcomes for model validation. The non-proportional implied rates expose pattern/loading/startup dependence and forbid treating one profile height divided by time as a universal surface yield. |
+| Q8 | At otherwise fixed F1 conditions, the five-point `0/0.5/1/5/10 sccm` O2 sweep changes the profile from positive to vertical to negative sidewall and then symmetric/asymmetric hourglass, while rounded-height rates rise from `33.3` to `98.0 nm/min`; Cr remains `2.5--3.5 nm/min` and selectivity rises from about `12` to `28`. | A quantitative passivation/profile discriminator for candidate TiO2 surface laws. It remains single-crystal rutile on a Fluor Z401S without SF6, so it is a falsification board rather than an Oxford coefficient. |
 
 ## Use in petch
 
-The exact Tables S3.1--S3.3 are now committed as replayable CSVs after a
-300-dpi original-resolution visual audit. They form a process-response and
+The exact Tables S3.1--S3.3 and Figure S3.3 oxygen-response board are now
+committed as replayable CSVs after 300/400-dpi original-resolution visual audits. They form a process-response and
 feature-depth validation board. No row is installed directly as an Oxford
 NPG80 reactor input or a TiO2 surface coefficient. At the comparison
 selectivity, a 45 nm Cr mask protects only 630 nm of TiO2 removal, exposing the

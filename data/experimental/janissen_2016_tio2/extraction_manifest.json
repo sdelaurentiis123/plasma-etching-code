@@ -1,5 +1,5 @@
 {
-  "manifest_id": "JANISSEN-2016-TIO2-SUPPLEMENTARY-TABLES-R1",
+  "manifest_id": "HA-2016-TIO2-SUPPLEMENTARY-DATA-R2",
   "source": {
     "citation": "S. Ha et al., Nanoscale 8, 10739-10748 (2016); supplement reproduced in S. Ha, TU Delft thesis (2018)",
     "doi": "10.1039/C6NR00898D",
@@ -37,7 +37,65 @@
       ]
     },
     "status": "passed_original_resolution",
-    "method": "300-dpi Poppler renders; original-resolution visual reading; PIL crop-box overlay; values transcribed from printed tables"
+    "method": "300-dpi Poppler renders; original-resolution visual reading; PIL crop-box overlay; values transcribed from printed tables",
+    "figure_s3_3": {
+      "source_pdf_sha256": "097ca9738beea5ae04438a50f8bcb3b24012d6be398036df99e17bbfe17b3ed1",
+      "source_pdf_page": 59,
+      "source_print_page": 48,
+      "render_dpi": 400,
+      "render_size_px": [
+        2739,
+        3845
+      ],
+      "render_sha256": "0e50197123bec731e9a4e4d7c82bedfc2320cc280f4339024ded5ae4f4aae0ee",
+      "caption_values": "verbatim dimensions and profile classes; TiO2 rate calculated as rounded caption height divided by the printed 15 minute etch time",
+      "plot_values": "Cr rate and selectivity read to the plotted precision; uncertainty bounds cover marker thickness and axis reading",
+      "axis_calibration_pixels_in_2300x700_plot_crop": {
+        "TiO2_rate": {
+          "x_ticks_0_5_10": [
+            216,
+            409,
+            602
+          ],
+          "y_ticks_0_25_50_75_100": [
+            382,
+            303,
+            225,
+            146,
+            67
+          ]
+        },
+        "Cr_rate": {
+          "x_ticks_0_5_10": [
+            874,
+            1066,
+            1260
+          ],
+          "y_ticks_0_1_2_3_4_5": [
+            382,
+            323,
+            264,
+            206,
+            147,
+            89
+          ]
+        },
+        "selectivity": {
+          "x_ticks_0_5_10": [
+            1531,
+            1725,
+            1918
+          ],
+          "y_ticks_0_10_20_30": [
+            382,
+            285,
+            187,
+            90
+          ]
+        }
+      },
+      "status": "passed_original_resolution_and_ratio_crosscheck"
+    }
   },
   "outputs": [
     {
@@ -51,19 +109,26 @@
     {
       "path": "data/experimental/janissen_2016_tio2/table_s3_3_feature_dimensions.csv",
       "sha256": "75c92690f3b873ff942bc10c1dda4a296fcc7fdade19529a6dda3067bfaecbc8"
+    },
+    {
+      "path": "data/experimental/janissen_2016_tio2/figure_s3_3_oxygen_profile_response.csv",
+      "sha256": "a390c0b32787a8ff73867261e4126426e70b9f3efc6740d2c1036819ae539100"
     }
   ],
   "claim_boundary": {
     "valid": [
       "printed process settings and rates in Tables S3.1-S3.3",
       "measured feature dimensions and printed RSD values",
+      "Figure S3.3 caption dimensions and profile classes",
+      "Figure S3.3 Cr-rate and selectivity values within digitization uncertainty",
       "equipment-specific DC self-bias witnesses"
     ],
     "not_valid": [
       "transfer of Fluor Z401S voltage to Oxford NPG80",
       "transfer from single-crystal rutile to ALD TiO2",
       "a CHF3/SF6/O2 surface coefficient",
-      "an uncertainty-free absolute-depth prediction"
+      "an uncertainty-free absolute-depth prediction",
+      "transfer of the single-crystal oxygen sweep to ALD TiO2 or an SF6-containing feed"
     ]
   }
 }

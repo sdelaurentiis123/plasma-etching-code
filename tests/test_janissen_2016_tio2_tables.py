@@ -2,6 +2,7 @@ import csv
 
 from scripts.extract_janissen_2016_tio2_tables import (
     MANIFEST_PATH,
+    FIGURE_S33_CSV,
     TABLE_S31_CSV,
     TABLE_S32_CSV,
     TABLE_S33_CSV,
@@ -51,3 +52,32 @@ def test_feature_depth_rows_are_measured_outputs_not_surface_coefficients():
     assert float(rows["3.3"]["height_global_rsd_percent"]) == 1.4
     assert float(rows["S3.4"]["average_height_nm"]) == 273.0
     assert float(rows["S3.4"]["height_global_rsd_percent"]) == 3.1
+
+
+def test_oxygen_sweep_binds_rate_mask_and_profile_shape_without_transfer():
+    rows = {float(row["O2_sccm"]): row for row in _rows(FIGURE_S33_CSV)}
+    assert tuple(rows) == (0.0, 0.5, 1.0, 5.0, 10.0)
+    assert rows[0.0]["profile_class"] == "positive_sidewall"
+    assert rows[0.5]["profile_class"] == "vertical_sidewall"
+    assert rows[1.0]["profile_class"] == "negative_sidewall"
+    assert rows[5.0]["profile_class"] == "symmetric_hourglass"
+    assert rows[10.0]["profile_class"] == "asymmetric_hourglass"
+    assert float(rows[0.0]["reported_sidewall_angle_deg"]) == 84.0
+    assert float(rows[1.0]["reported_sidewall_angle_deg"]) == -88.0
+    assert float(rows[10.0]["upper_sidewall_angle_deg"]) == -82.0
+    assert float(rows[10.0]["lower_sidewall_angle_deg"]) == 84.0
+    assert float(rows[0.0]["tio2_rate_from_rounded_height_nm_min"]) == (
+        500.0 / 15.0
+    )
+    assert float(rows[10.0]["tio2_rate_from_rounded_height_nm_min"]) == 98.0
+    assert [float(rows[value]["cr_rate_digitized_nm_min"])
+            for value in rows] == [2.7, 2.7, 2.5, 3.4, 3.5]
+    for row in rows.values():
+        assert abs(
+            float(row["selectivity_digitized"])
+            - float(row["selectivity_from_height_and_cr_rate"])
+        ) <= float(row["selectivity_digitization_uncertainty"])
+    manifest = __import__("json").loads(MANIFEST_PATH.read_text())
+    assert "SF6-containing feed" in " ".join(
+        manifest["claim_boundary"]["not_valid"]
+    )

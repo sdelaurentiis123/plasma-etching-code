@@ -41,6 +41,16 @@ def test_independent_boards_force_energy_passivation_mask_and_loading_physics():
     assert audit["experimental_discriminants"]["oxygen_competition"][
         "transferable_coefficient_identified"
     ] is False
+    oxygen_profile = audit["experimental_discriminants"][
+        "oxygen_passivation_profile_transition"
+    ]
+    assert oxygen_profile["oxygen_flow_sccm"] == [0.0, 0.5, 1.0, 5.0, 10.0]
+    assert oxygen_profile["profile_class"] == [
+        "positive_sidewall", "vertical_sidewall", "negative_sidewall",
+        "symmetric_hourglass", "asymmetric_hourglass",
+    ]
+    assert oxygen_profile["same_machine_and_feed_as_target"] is False
+    assert oxygen_profile["transferable_coefficient_identified"] is False
     assert audit["experimental_discriminants"]["pressure"][
         "isolated_surface_parameter"
     ] is False

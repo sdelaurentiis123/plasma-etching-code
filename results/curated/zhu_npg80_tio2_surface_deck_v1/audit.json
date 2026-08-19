@@ -6,7 +6,7 @@
   "inputs": {
     "surface_topology": {
       "path": "results/curated/zhu_npg80_tio2_surface_topology_v1/audit.json",
-      "sha256": "fc087b8c41f0943095d7eadfce28ff1008247237e008e0a9bc1ac272f4de6047"
+      "sha256": "d2325c5cd46d4ad2e71d319b4caacbc6b6f02ba071d6f8b989802d9446c62526"
     },
     "choi_multiaxis_response": {
       "path": "data/experimental/choi_2013_tio2_cf4/bias_response_audit.json",

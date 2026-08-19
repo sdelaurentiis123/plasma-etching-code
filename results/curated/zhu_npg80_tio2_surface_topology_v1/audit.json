@@ -19,6 +19,10 @@
     "conditional_profile_board": {
       "path": "results/curated/zhu_npg80_conditional_profiles_v1/audit.json",
       "sha256": "01c48963fc968c23000bca8a6e5c00059561240e43ffc0403c540a97e9af2c47"
+    },
+    "ha_oxygen_profile_response": {
+      "path": "data/experimental/janissen_2016_tio2/figure_s3_3_oxygen_profile_response.csv",
+      "sha256": "a390c0b32787a8ff73867261e4126426e70b9f3efc6740d2c1036819ae539100"
     }
   },
   "experimental_discriminants": {
@@ -37,6 +41,45 @@
         "neutral fluorine supply and fluorinated-surface formation",
         "a competing oxygen blocking or cleanup pathway"
       ],
+      "transferable_coefficient_identified": false
+    },
+    "oxygen_passivation_profile_transition": {
+      "observable": "TiO2 rate, Cr rate, selectivity, and feature-profile class",
+      "oxygen_flow_sccm": [
+        0.0,
+        0.5,
+        1.0,
+        5.0,
+        10.0
+      ],
+      "tio2_rate_from_rounded_height_nm_min": [
+        33.333333333333336,
+        36.333333333333336,
+        34.666666666666664,
+        74.0,
+        98.0
+      ],
+      "cr_rate_digitized_nm_min": [
+        2.7,
+        2.7,
+        2.5,
+        3.4,
+        3.5
+      ],
+      "profile_class": [
+        "positive_sidewall",
+        "vertical_sidewall",
+        "negative_sidewall",
+        "symmetric_hourglass",
+        "asymmetric_hourglass"
+      ],
+      "forces": [
+        "physical passivation thickness and sidewall coverage",
+        "oxygen-assisted fluorocarbon removal",
+        "separate TiO2 and Cr response laws",
+        "a morphology observable beyond scalar depth"
+      ],
+      "same_machine_and_feed_as_target": false,
       "transferable_coefficient_identified": false
     },
     "source_power": {

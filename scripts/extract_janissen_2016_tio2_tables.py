@@ -17,6 +17,7 @@ OUTPUT_DIR = ROOT / "data" / "experimental" / "janissen_2016_tio2"
 TABLE_S31_CSV = OUTPUT_DIR / "table_s3_1_chf3_rie_optimization.csv"
 TABLE_S32_CSV = OUTPUT_DIR / "table_s3_2_tio2_nanofabrication.csv"
 TABLE_S33_CSV = OUTPUT_DIR / "table_s3_3_feature_dimensions.csv"
+FIGURE_S33_CSV = OUTPUT_DIR / "figure_s3_3_oxygen_profile_response.csv"
 MANIFEST_PATH = OUTPUT_DIR / "extraction_manifest.json"
 
 SOURCE_PDF_SHA256 = (
@@ -38,6 +39,17 @@ TABLE_BOXES = {
     "pdf_page_55_table_s3_2": (280, 325, 2015, 2360),
     "pdf_page_56_table_s3_3": (280, 280, 2015, 890),
 }
+
+# Independent 400-dpi replay of thesis print page 48 (PDF page 59).  The TU
+# Delft portal regenerated container metadata on the 2026-08-19 download, so
+# both that exact PDF and the rendered page are pinned here rather than
+# replacing the earlier table-source checksum.
+FIGURE_S33_SOURCE_PDF_SHA256 = (
+    "097ca9738beea5ae04438a50f8bcb3b24012d6be398036df99e17bbfe17b3ed1"
+)
+FIGURE_S33_RENDER_SHA256 = (
+    "0e50197123bec731e9a4e4d7c82bedfc2320cc280f4339024ded5ae4f4aae0ee"
+)
 
 S31_FIELDS = (
     "sample", "batch", "mask_height_nm", "mask_diameter_nm", "CHF3_sccm",
@@ -91,6 +103,50 @@ S33_ROWS = (
     ("S3.4", 8, 149, 187, 273, 0.98, 0.99, 0.006, 1.3, 3.1),
 )
 
+FIGURE_S33_FIELDS = (
+    "figure_panel", "O2_sccm", "etch_time_min", "profile_class",
+    "top_diameter_nm", "bottom_diameter_nm", "waist_diameter_nm",
+    "upper_height_nm", "lower_height_nm", "total_height_nm",
+    "reported_sidewall_angle_deg", "upper_sidewall_angle_deg",
+    "lower_sidewall_angle_deg",
+    "tio2_rate_from_rounded_height_nm_min", "cr_rate_digitized_nm_min",
+    "cr_rate_digitization_uncertainty_nm_min",
+    "selectivity_digitized", "selectivity_digitization_uncertainty",
+    "selectivity_from_height_and_cr_rate",
+)
+
+
+def _figure_s33_row(
+        panel, oxygen, profile, top, bottom, waist, upper_height,
+        lower_height, total_height, sidewall_angle, upper_angle, lower_angle,
+        cr_rate, plotted_selectivity):
+    tio2_rate = float(total_height) / 15.0
+    return (
+        panel, oxygen, 15.0, profile, top, bottom, waist, upper_height,
+        lower_height, total_height, sidewall_angle, upper_angle, lower_angle,
+        tio2_rate, cr_rate, 0.1, plotted_selectivity, 0.5,
+        tio2_rate / cr_rate,
+    )
+
+
+FIGURE_S33_ROWS = (
+    _figure_s33_row(
+        "S3.3a", 0.0, "positive_sidewall", 285, 395, "", "", "",
+        500, 84, "", "", 2.7, 12.0),
+    _figure_s33_row(
+        "S3.3b", 0.5, "vertical_sidewall", 275, 275, "", "", "",
+        545, 90, "", "", 2.7, 13.5),
+    _figure_s33_row(
+        "S3.3c", 1.0, "negative_sidewall", 305, 260, "", "", "",
+        520, -88, "", "", 2.5, 14.0),
+    _figure_s33_row(
+        "S3.3d", 5.0, "symmetric_hourglass", 260, 260, 175, 555, 555,
+        1110, "", -86, 86, 3.4, 22.0),
+    _figure_s33_row(
+        "S3.3e", 10.0, "asymmetric_hourglass", 245, 370, 135, 385,
+        1085, 1470, "", -82, 84, 3.5, 28.0),
+)
+
 
 def _sha256(path: Path) -> str:
     return sha256(path.read_bytes()).hexdigest()
@@ -109,12 +165,13 @@ def outputs() -> dict[Path, str]:
         TABLE_S31_CSV: _csv_text(S31_FIELDS, S31_ROWS),
         TABLE_S32_CSV: _csv_text(S32_FIELDS, S32_ROWS),
         TABLE_S33_CSV: _csv_text(S33_FIELDS, S33_ROWS),
+        FIGURE_S33_CSV: _csv_text(FIGURE_S33_FIELDS, FIGURE_S33_ROWS),
     }
 
 
 def manifest(payloads: dict[Path, str]) -> dict:
     return {
-        "manifest_id": "JANISSEN-2016-TIO2-SUPPLEMENTARY-TABLES-R1",
+        "manifest_id": "HA-2016-TIO2-SUPPLEMENTARY-DATA-R2",
         "source": {
             "citation": (
                 "S. Ha et al., Nanoscale 8, 10739-10748 (2016); "
@@ -142,6 +199,38 @@ def manifest(payloads: dict[Path, str]) -> dict:
                 "300-dpi Poppler renders; original-resolution visual reading; "
                 "PIL crop-box overlay; values transcribed from printed tables"
             ),
+            "figure_s3_3": {
+                "source_pdf_sha256": FIGURE_S33_SOURCE_PDF_SHA256,
+                "source_pdf_page": 59,
+                "source_print_page": 48,
+                "render_dpi": 400,
+                "render_size_px": [2739, 3845],
+                "render_sha256": FIGURE_S33_RENDER_SHA256,
+                "caption_values": (
+                    "verbatim dimensions and profile classes; TiO2 rate "
+                    "calculated as rounded caption height divided by the "
+                    "printed 15 minute etch time"
+                ),
+                "plot_values": (
+                    "Cr rate and selectivity read to the plotted precision; "
+                    "uncertainty bounds cover marker thickness and axis reading"
+                ),
+                "axis_calibration_pixels_in_2300x700_plot_crop": {
+                    "TiO2_rate": {
+                        "x_ticks_0_5_10": [216, 409, 602],
+                        "y_ticks_0_25_50_75_100": [382, 303, 225, 146, 67],
+                    },
+                    "Cr_rate": {
+                        "x_ticks_0_5_10": [874, 1066, 1260],
+                        "y_ticks_0_1_2_3_4_5": [382, 323, 264, 206, 147, 89],
+                    },
+                    "selectivity": {
+                        "x_ticks_0_5_10": [1531, 1725, 1918],
+                        "y_ticks_0_10_20_30": [382, 285, 187, 90],
+                    },
+                },
+                "status": "passed_original_resolution_and_ratio_crosscheck",
+            },
         },
         "outputs": [
             {
@@ -154,6 +243,8 @@ def manifest(payloads: dict[Path, str]) -> dict:
             "valid": [
                 "printed process settings and rates in Tables S3.1-S3.3",
                 "measured feature dimensions and printed RSD values",
+                "Figure S3.3 caption dimensions and profile classes",
+                "Figure S3.3 Cr-rate and selectivity values within digitization uncertainty",
                 "equipment-specific DC self-bias witnesses",
             ],
             "not_valid": [
@@ -161,6 +252,7 @@ def manifest(payloads: dict[Path, str]) -> dict:
                 "transfer from single-crystal rutile to ALD TiO2",
                 "a CHF3/SF6/O2 surface coefficient",
                 "an uncertainty-free absolute-depth prediction",
+                "transfer of the single-crystal oxygen sweep to ALD TiO2 or an SF6-containing feed",
             ],
         },
     }

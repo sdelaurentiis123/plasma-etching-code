@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -25,6 +26,10 @@ CONDITIONAL = (
     ROOT / "results" / "curated" / "zhu_npg80_conditional_profiles_v1"
     / "audit.json"
 )
+HA_O2 = (
+    ROOT / "data" / "experimental" / "janissen_2016_tio2"
+    / "figure_s3_3_oxygen_profile_response.csv"
+)
 OUTPUT = (
     ROOT / "results" / "curated"
     / "zhu_npg80_tio2_surface_topology_v1" / "audit.json"
@@ -42,11 +47,17 @@ def _receipt(path: Path) -> dict[str, str]:
     }
 
 
+def _csv_rows(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
 def build() -> dict[str, object]:
     choi = _load(CHOI)
     ji3 = _load(JI3)
     ji4 = _load(JI4)
     conditional = _load(CONDITIONAL)
+    ha_o2 = _csv_rows(HA_O2)
     if (
         conditional["target_sem_used"] is not False
         or conditional["target_depth_used"] is not False
@@ -55,6 +66,8 @@ def build() -> dict[str, object]:
         ] is not False
         or ji4["derived_checks"]["strict_threshold_identified"] is not False
         or choi["freddie_boundary"]["coefficient_transfer_allowed"] is not False
+        or [float(row["O2_sccm"]) for row in ha_o2]
+        != [0.0, 0.5, 1.0, 5.0, 10.0]
     ):
         raise RuntimeError("surface-topology evidence boundary changed")
     current = {
@@ -138,6 +151,7 @@ def build() -> dict[str, object]:
             "ji_rf_morphology_response": _receipt(JI3),
             "ji_spacing_morphology_response": _receipt(JI4),
             "conditional_profile_board": _receipt(CONDITIONAL),
+            "ha_oxygen_profile_response": _receipt(HA_O2),
         },
         "experimental_discriminants": {
             "energy": {
@@ -155,6 +169,31 @@ def build() -> dict[str, object]:
                     "neutral fluorine supply and fluorinated-surface formation",
                     "a competing oxygen blocking or cleanup pathway",
                 ],
+                "transferable_coefficient_identified": False,
+            },
+            "oxygen_passivation_profile_transition": {
+                "observable": (
+                    "TiO2 rate, Cr rate, selectivity, and feature-profile class"
+                ),
+                "oxygen_flow_sccm": [
+                    float(row["O2_sccm"]) for row in ha_o2
+                ],
+                "tio2_rate_from_rounded_height_nm_min": [
+                    float(row["tio2_rate_from_rounded_height_nm_min"])
+                    for row in ha_o2
+                ],
+                "cr_rate_digitized_nm_min": [
+                    float(row["cr_rate_digitized_nm_min"])
+                    for row in ha_o2
+                ],
+                "profile_class": [row["profile_class"] for row in ha_o2],
+                "forces": [
+                    "physical passivation thickness and sidewall coverage",
+                    "oxygen-assisted fluorocarbon removal",
+                    "separate TiO2 and Cr response laws",
+                    "a morphology observable beyond scalar depth",
+                ],
+                "same_machine_and_feed_as_target": False,
                 "transferable_coefficient_identified": False,
             },
             "source_power": {
