@@ -1,9 +1,9 @@
 {
-  "schema": "petch.choi-2013-tio2-bias-response.v1",
+  "schema": "petch.choi-2013-tio2-multiaxis-response.v2",
   "source": {
     "citation": "K.-R. Choi et al., Dry etching properties of TiO2 thin films in O2/CF4/Ar plasma, Vacuum 92, 85-89 (2013)",
     "doi": "10.1016/j.vacuum.2012.11.009",
-    "figure": "Figure 5 and source-reported endpoint values",
+    "figures": "Figures 2-6 and source-reported endpoint values",
     "full_text_read_online": true,
     "local_source_pdf_archived": false,
     "source_measurement_uncertainty_reported": false
@@ -20,25 +20,114 @@
     "pressure_Pa": 2.0
   },
   "source_reported_endpoints": {
-    "dc_bias_magnitude_V": [
-      50.0,
-      250.0
-    ],
-    "tio2_etch_rate_nm_min": [
-      130.9,
-      197.2
-    ],
-    "tio2_to_sio2_selectivity": [
-      0.65,
-      0.56
-    ]
+    "oxygen_sweep": {
+      "fixed_feed_sccm": {
+        "CF4": 16.0,
+        "Ar": 4.0
+      },
+      "source_power_W": 700.0,
+      "dc_bias_magnitude_V": 150.0,
+      "pressure_Pa": 2.0,
+      "o2_flow_sccm": [
+        0.0,
+        3.0,
+        9.0
+      ],
+      "tio2_etch_rate_nm_min": [
+        154.1,
+        179.4,
+        137.5
+      ],
+      "tio2_to_sio2_selectivity_over_0_to_9_sccm": [
+        0.57,
+        0.81
+      ]
+    },
+    "source_power_sweep": {
+      "feed_sccm": {
+        "O2": 3.0,
+        "CF4": 16.0,
+        "Ar": 4.0
+      },
+      "dc_bias_magnitude_V": 150.0,
+      "pressure_Pa": 2.0,
+      "source_power_W": [
+        600.0,
+        800.0
+      ],
+      "tio2_etch_rate_nm_min": [
+        136.0,
+        208.3
+      ],
+      "tio2_to_sio2_selectivity": [
+        0.66,
+        0.83
+      ]
+    },
+    "dc_bias_sweep": {
+      "feed_sccm": {
+        "O2": 3.0,
+        "CF4": 16.0,
+        "Ar": 4.0
+      },
+      "source_power_W": 700.0,
+      "pressure_Pa": 2.0,
+      "dc_bias_magnitude_V": [
+        50.0,
+        250.0
+      ],
+      "tio2_etch_rate_nm_min": [
+        130.9,
+        197.2
+      ],
+      "tio2_to_sio2_selectivity": [
+        0.65,
+        0.56
+      ]
+    },
+    "pressure_sweep": {
+      "feed_sccm": {
+        "O2": 3.0,
+        "CF4": 16.0,
+        "Ar": 4.0
+      },
+      "source_power_W": 700.0,
+      "dc_bias_magnitude_V": 150.0,
+      "pressure_Pa": [
+        1.2,
+        2.8
+      ],
+      "tio2_etch_rate_nm_min": [
+        187.7,
+        138.7
+      ],
+      "tio2_to_sio2_selectivity": [
+        0.6,
+        0.5
+      ]
+    },
+    "afm_rms_roughness_angstrom": {
+      "as_deposited": 36.5,
+      "cf4_ar": 59.8,
+      "o2_cf4_ar": 29.8
+    }
   },
-  "direct_response": {
+  "bias_direct_response": {
     "bias_magnitude_ratio": 5.0,
     "etch_rate_ratio": 1.5064935064935063,
     "selectivity_ratio": 0.8615384615384616,
     "etch_rate_monotone_in_bias_over_reported_interval": true,
     "selectivity_decreases_over_reported_interval": true
+  },
+  "multiaxis_direct_response": {
+    "oxygen_rate_is_nonmonotonic": true,
+    "oxygen_peak_flow_sccm": 3.0,
+    "oxygen_peak_rate_nm_min": 179.4,
+    "source_power_rate_ratio": 1.5316176470588236,
+    "source_power_selectivity_ratio": 1.2575757575757573,
+    "pressure_rate_ratio": 0.7389451251997868,
+    "pressure_selectivity_ratio": 0.8333333333333334,
+    "oxygen_addition_reverses_cf4_ar_roughening": true
   },
   "two_point_sqrt_bias_decomposition": {
     "equation": "rate_nm_min = intercept + slope*sqrt(abs(dc_bias_V))",
@@ -53,6 +142,7 @@
     "ion_bombardment_enhanced_bond_breaking_reported": true,
     "ion_bombardment_enhanced_product_desorption_reported": true,
     "oxygen_nonmonotonicity_reported": true,
+    "cf4_ar_roughening_and_oxygen_assisted_smoothing_reported": true,
     "minimum_model_topology": [
       "fluorinated TiOxFy or TiFx surface inventory",
       "neutral fluorine supply",
@@ -63,7 +153,17 @@
   "model_discrimination": {
     "energy_independent_rate_normalized_removal_sufficient": false,
     "pure_physical_sputtering_only_supported": false,
-    "ion_assisted_surface_chemistry_required": true
+    "ion_assisted_surface_chemistry_required": true,
+    "neutral_supply_and_competitive_oxygen_state_required": true,
+    "collisional_sheath_or_ion_delivery_pressure_response_required": true,
+    "chemistry_dependent_surface_morphology_response_required": true,
+    "axis_interpretation": {
+      "dc_bias": "closest source axis to an ion-energy perturbation, but the unreported ion flux and IEAD prevent microscopic-yield inversion",
+      "source_power": "entangles ion density, ion energy, electron kinetics, and neutral-F supply",
+      "oxygen_flow": "requires competing F production/availability and oxygen blocking or cleanup",
+      "pressure": "entangles neutral residence/supply with sheath collisions and ion delivery",
+      "roughness": "requires a chemistry-dependent morphology observable, not only net depth; the three AFM endpoints do not uniquely identify its microscopic cause"
+    }
   },
   "freddie_boundary": {
     "same_target_film_state": false,

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Freeze the source-reported TiO2 DC-bias response and its claim boundary."""
+"""Freeze Choi's source-reported TiO2 response axes and claim boundary.
+
+The filename is retained because the original receipt was a bias-only board.
+Schema v2 adds the source-reported oxygen, source-power, pressure, and AFM
+endpoints.  These axes discriminate model topology; none identifies a
+transferable Oxford coefficient because wafer fluxes and IEADs were not
+reported.
+"""
 from __future__ import annotations
 
 import argparse
@@ -20,18 +27,26 @@ def build() -> dict[str, object]:
     voltage = np.asarray([50.0, 250.0])
     rate = np.asarray([130.9, 197.2])
     selectivity = np.asarray([0.65, 0.56])
+    oxygen_flow = np.asarray([0.0, 3.0, 9.0])
+    oxygen_rate = np.asarray([154.1, 179.4, 137.5])
+    source_power = np.asarray([600.0, 800.0])
+    power_rate = np.asarray([136.0, 208.3])
+    power_selectivity = np.asarray([0.66, 0.83])
+    pressure = np.asarray([1.2, 2.8])
+    pressure_rate = np.asarray([187.7, 138.7])
+    pressure_selectivity = np.asarray([0.60, 0.50])
     root_voltage = np.sqrt(voltage)
     root_slope = float((rate[1] - rate[0]) / np.diff(root_voltage)[0])
     root_intercept = float(rate[0] - root_slope * root_voltage[0])
     return {
-        "schema": "petch.choi-2013-tio2-bias-response.v1",
+        "schema": "petch.choi-2013-tio2-multiaxis-response.v2",
         "source": {
             "citation": (
                 "K.-R. Choi et al., Dry etching properties of TiO2 thin films "
                 "in O2/CF4/Ar plasma, Vacuum 92, 85-89 (2013)"
             ),
             "doi": "10.1016/j.vacuum.2012.11.009",
-            "figure": "Figure 5 and source-reported endpoint values",
+            "figures": "Figures 2-6 and source-reported endpoint values",
             "full_text_read_online": True,
             "local_source_pdf_archived": False,
             "source_measurement_uncertainty_reported": False,
@@ -44,16 +59,68 @@ def build() -> dict[str, object]:
             "pressure_Pa": 2.0,
         },
         "source_reported_endpoints": {
-            "dc_bias_magnitude_V": voltage.tolist(),
-            "tio2_etch_rate_nm_min": rate.tolist(),
-            "tio2_to_sio2_selectivity": selectivity.tolist(),
+            "oxygen_sweep": {
+                "fixed_feed_sccm": {"CF4": 16.0, "Ar": 4.0},
+                "source_power_W": 700.0,
+                "dc_bias_magnitude_V": 150.0,
+                "pressure_Pa": 2.0,
+                "o2_flow_sccm": oxygen_flow.tolist(),
+                "tio2_etch_rate_nm_min": oxygen_rate.tolist(),
+                "tio2_to_sio2_selectivity_over_0_to_9_sccm": [0.57, 0.81],
+            },
+            "source_power_sweep": {
+                "feed_sccm": {"O2": 3.0, "CF4": 16.0, "Ar": 4.0},
+                "dc_bias_magnitude_V": 150.0,
+                "pressure_Pa": 2.0,
+                "source_power_W": source_power.tolist(),
+                "tio2_etch_rate_nm_min": power_rate.tolist(),
+                "tio2_to_sio2_selectivity": power_selectivity.tolist(),
+            },
+            "dc_bias_sweep": {
+                "feed_sccm": {"O2": 3.0, "CF4": 16.0, "Ar": 4.0},
+                "source_power_W": 700.0,
+                "pressure_Pa": 2.0,
+                "dc_bias_magnitude_V": voltage.tolist(),
+                "tio2_etch_rate_nm_min": rate.tolist(),
+                "tio2_to_sio2_selectivity": selectivity.tolist(),
+            },
+            "pressure_sweep": {
+                "feed_sccm": {"O2": 3.0, "CF4": 16.0, "Ar": 4.0},
+                "source_power_W": 700.0,
+                "dc_bias_magnitude_V": 150.0,
+                "pressure_Pa": pressure.tolist(),
+                "tio2_etch_rate_nm_min": pressure_rate.tolist(),
+                "tio2_to_sio2_selectivity": pressure_selectivity.tolist(),
+            },
+            "afm_rms_roughness_angstrom": {
+                "as_deposited": 36.5,
+                "cf4_ar": 59.8,
+                "o2_cf4_ar": 29.8,
+            },
         },
-        "direct_response": {
+        "bias_direct_response": {
             "bias_magnitude_ratio": float(voltage[1] / voltage[0]),
             "etch_rate_ratio": float(rate[1] / rate[0]),
             "selectivity_ratio": float(selectivity[1] / selectivity[0]),
             "etch_rate_monotone_in_bias_over_reported_interval": True,
             "selectivity_decreases_over_reported_interval": True,
+        },
+        "multiaxis_direct_response": {
+            "oxygen_rate_is_nonmonotonic": bool(
+                oxygen_rate[1] > oxygen_rate[0]
+                and oxygen_rate[1] > oxygen_rate[2]
+            ),
+            "oxygen_peak_flow_sccm": float(oxygen_flow[np.argmax(oxygen_rate)]),
+            "oxygen_peak_rate_nm_min": float(np.max(oxygen_rate)),
+            "source_power_rate_ratio": float(power_rate[1] / power_rate[0]),
+            "source_power_selectivity_ratio": float(
+                power_selectivity[1] / power_selectivity[0]
+            ),
+            "pressure_rate_ratio": float(pressure_rate[1] / pressure_rate[0]),
+            "pressure_selectivity_ratio": float(
+                pressure_selectivity[1] / pressure_selectivity[0]
+            ),
+            "oxygen_addition_reverses_cf4_ar_roughening": True,
         },
         "two_point_sqrt_bias_decomposition": {
             "equation": "rate_nm_min = intercept + slope*sqrt(abs(dc_bias_V))",
@@ -73,6 +140,7 @@ def build() -> dict[str, object]:
             "ion_bombardment_enhanced_bond_breaking_reported": True,
             "ion_bombardment_enhanced_product_desorption_reported": True,
             "oxygen_nonmonotonicity_reported": True,
+            "cf4_ar_roughening_and_oxygen_assisted_smoothing_reported": True,
             "minimum_model_topology": [
                 "fluorinated TiOxFy or TiFx surface inventory",
                 "neutral fluorine supply",
@@ -84,6 +152,28 @@ def build() -> dict[str, object]:
             "energy_independent_rate_normalized_removal_sufficient": False,
             "pure_physical_sputtering_only_supported": False,
             "ion_assisted_surface_chemistry_required": True,
+            "neutral_supply_and_competitive_oxygen_state_required": True,
+            "collisional_sheath_or_ion_delivery_pressure_response_required": True,
+            "chemistry_dependent_surface_morphology_response_required": True,
+            "axis_interpretation": {
+                "dc_bias": (
+                    "closest source axis to an ion-energy perturbation, but the "
+                    "unreported ion flux and IEAD prevent microscopic-yield inversion"
+                ),
+                "source_power": (
+                    "entangles ion density, ion energy, electron kinetics, and neutral-F supply"
+                ),
+                "oxygen_flow": (
+                    "requires competing F production/availability and oxygen blocking or cleanup"
+                ),
+                "pressure": (
+                    "entangles neutral residence/supply with sheath collisions and ion delivery"
+                ),
+                "roughness": (
+                    "requires a chemistry-dependent morphology observable, not only net depth; "
+                    "the three AFM endpoints do not uniquely identify its microscopic cause"
+                ),
+            },
         },
         "freddie_boundary": {
             "same_target_film_state": False,

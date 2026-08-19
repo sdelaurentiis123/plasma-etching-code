@@ -19,6 +19,10 @@ from .surface_kinetics import (
     ReducedSiO2FluorocarbonParameters, SiO2SurfaceState, SteinbruchelYield,
     SurfaceFluxes,
 )
+from .tio2_surface_deck import (
+    TIO2_REDUCED_SURFACE_REQUIRED_EVIDENCE, TIO2_TARGET_MODEL_FORM_GAPS,
+    Tio2ReducedSurfaceDeck, Tio2SurfaceDeckReadiness,
+)
 from .fluorocarbon_lamagna import (
     LaMagnaFluorocarbonParameters, LaMagnaFluorocarbonState,
     LaMagnaFluorocarbonStepResult, LaMagnaGarozzoFluorocarbonMechanism,

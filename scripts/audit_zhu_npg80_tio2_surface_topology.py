@@ -82,6 +82,13 @@ def build() -> dict[str, object]:
             "required": True,
             "evidence": "Choi Ti-F/O blocking plus Ji feed chemistry",
         },
+        "competitive_oxygen_blocking_or_cleanup_state": {
+            "required": True,
+            "evidence": (
+                "Choi O2 sweep peaks at 3 sccm and then reverses while AFM roughness "
+                "falls below the as-deposited value"
+            ),
+        },
         "fluorinated_tio2_surface_inventory": {
             "required": True,
             "evidence": "Choi XPS Ti-F formation",
@@ -102,13 +109,27 @@ def build() -> dict[str, object]:
             "required": True,
             "evidence": "Ji spacing response",
         },
+        "pressure_dependent_collisional_sheath_and_delivery": {
+            "required": True,
+            "evidence": (
+                "Choi TiO2 rate and selectivity both fall from 1.2 to 2.8 Pa; "
+                "neutral density alone has the wrong response sign"
+            ),
+        },
+        "chemistry_dependent_surface_morphology_observable": {
+            "required": True,
+            "evidence": (
+                "Choi AFM roughness changes from 36.5 A as deposited to 59.8 A "
+                "in CF4/Ar and 29.8 A in O2/CF4/Ar"
+            ),
+        },
     }
     missing = [
         name for name, value in required.items()
         if value["required"] and not current.get(name, False)
     ]
     return {
-        "schema": "petch.zhu-npg80-tio2-surface-topology.v1",
+        "schema": "petch.zhu-npg80-tio2-surface-topology.v2",
         "condition_id": conditional["condition_id"],
         "target_sem_used": False,
         "target_depth_used": False,
@@ -126,6 +147,46 @@ def build() -> dict[str, object]:
                     "ion-energy-dependent bond breaking",
                     "ion-assisted reaction-product desorption",
                 ],
+            },
+            "oxygen_competition": {
+                "observable": "TiO2 etch rate versus O2 flow",
+                "response": "154.1, 179.4, and 137.5 nm/min at 0, 3, and 9 sccm O2",
+                "forces": [
+                    "neutral fluorine supply and fluorinated-surface formation",
+                    "a competing oxygen blocking or cleanup pathway",
+                ],
+                "transferable_coefficient_identified": False,
+            },
+            "source_power": {
+                "observable": "TiO2 rate and TiO2:SiO2 selectivity",
+                "response": (
+                    "136.0 to 208.3 nm/min and 0.66 to 0.83 from 600 to 800 W"
+                ),
+                "forces": [
+                    "coupled electron-kinetic, radical-supply, and ion-delivery response",
+                ],
+                "isolated_surface_parameter": False,
+            },
+            "pressure": {
+                "observable": "TiO2 rate and TiO2:SiO2 selectivity",
+                "response": (
+                    "187.7 to 138.7 nm/min and 0.60 to 0.50 from 1.2 to 2.8 Pa"
+                ),
+                "forces": [
+                    "collisional sheath or ion-delivery response coupled to neutral supply",
+                ],
+                "isolated_surface_parameter": False,
+            },
+            "roughness": {
+                "observable": "AFM RMS roughness",
+                "response": (
+                    "36.5 A as deposited, 59.8 A after CF4/Ar, and 29.8 A "
+                    "after O2/CF4/Ar"
+                ),
+                "forces": [
+                    "chemistry-dependent morphology rather than a depth-only score",
+                ],
+                "microscopic_cause_uniquely_identified": False,
             },
             "rf_morphology": {
                 "observable": "upper height, corner radius, and interfeature gap",
@@ -162,6 +223,7 @@ def build() -> dict[str, object]:
         "deterministic_differentiable_state_design": {
             "per_surface_element_state": [
                 "bounded fluorinated-site fraction",
+                "bounded oxygen-blocked or oxygen-cleaned site fraction",
                 "nonnegative passivation units per square metre",
                 "bounded activated-passivation fraction",
                 "cumulative removed TiO2 formula units per square metre",
@@ -172,6 +234,7 @@ def build() -> dict[str, object]:
                 "deterministic angular quadrature for ion and neutral delivery",
                 "energy- and angle-resolved ion-assisted removal",
                 "conservative surface-state remap during level-set motion",
+                "deterministic collisional sheath and radial delivery closure",
             ],
             "monte_carlo_required": False,
             "compatible_with_automatic_differentiation": True,

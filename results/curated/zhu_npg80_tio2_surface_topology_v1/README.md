@@ -1,9 +1,12 @@
 # Oxford TiO2 surface-topology contract
 
-This target-free audit binds three independent TiO2 response axes before the
-withheld Oxford SEM is used: Choi's DC-bias response, Ji's RF morphology
-response, and Ji's spacing response. Together they reject a single
-energy-independent removal scalar as a complete target surface law.
+This target-free audit binds seven independent TiO2 response axes before the
+withheld Oxford SEM is used: Choi's DC-bias, oxygen-flow, source-power,
+pressure, and AFM responses, plus Ji's RF morphology and spacing responses.
+Together they reject a single energy-independent removal scalar as a complete
+target surface law. They require energy-dependent ion assistance, neutral
+fluorine/oxygen competition, collisional delivery, physical passivation, mask
+motion, and pattern transport. None supplies a transferable Oxford coefficient.
 
 The existing conditional Oxford profiles remain physically meaningful inside
 their declared removal-only scope. In particular, a wider lower section does

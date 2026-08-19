@@ -1,0 +1,38 @@
+SOURCE: K.-R. Choi, J.-C. Woo, Y.-H. Joo, Y.-S. Chun, and C.-I. Kim,
+"Dry etching properties of TiO2 thin films in O2/CF4/Ar plasma," Vacuum 92,
+85-89 (2013), DOI 10.1016/j.vacuum.2012.11.009.
+
+RETRIEVAL: Full article text and figures were read through the publicly
+accessible publisher-manuscript relay linked from the DOI record. The raw PDF
+could not be archived locally because the relay rejected non-browser download
+requests. Values below are source-reported endpoint values in the article text,
+not visual digitizations. The source reports no measurement uncertainties for
+these plotted responses.
+
+FIXED BASE CONDITION: planar ICP; approximately 200 nm electron-beam-
+evaporated TiO2; O2/CF4/Ar = 3/16/4 sccm; 700 W source power; -150 V DC bias;
+2 Pa, except for the independently swept variable.
+
+SOURCE-REPORTED RESPONSE ENDPOINTS:
+- Oxygen sweep, fixed CF4/Ar = 16/4 sccm: TiO2 rate is 154.1, 179.4, and
+  137.5 nm/min at 0, 3, and 9 sccm O2. TiO2:SiO2 selectivity changes from
+  0.57 to 0.81 over the reported 0-to-9-sccm interval.
+- Source-power sweep, 600 to 800 W: TiO2 rate changes from 136.0 to
+  208.3 nm/min and TiO2:SiO2 selectivity from 0.66 to 0.83.
+- DC-bias-magnitude sweep, 50 to 250 V: TiO2 rate changes from 130.9 to
+  197.2 nm/min and TiO2:SiO2 selectivity from 0.65 to 0.56.
+- Pressure sweep, 1.2 to 2.8 Pa: TiO2 rate changes from 187.7 to
+  138.7 nm/min and TiO2:SiO2 selectivity from 0.60 to 0.50.
+- AFM RMS roughness: 36.5 angstrom as deposited, 59.8 angstrom after CF4/Ar,
+  and 29.8 angstrom after O2/CF4/Ar exposure.
+
+SOURCE INTERPRETATION BOUNDARY:
+- XPS supports Ti-F bond formation after fluorocarbon-plasma exposure.
+- The article attributes the bias response to ion-assisted bond breaking and
+  reaction-product desorption.
+- The oxygen response is nonmonotonic; excess oxygen is described as blocking
+  fluorine adsorption.
+- No ion flux, species-resolved IEAD, radical flux, or uncertainty is reported.
+  Consequently these data constrain response signs and required state topology
+  but do not identify a microscopic yield or a coefficient transferable to the
+  Oxford NPG80 condition.

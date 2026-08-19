@@ -24,16 +24,25 @@ def test_independent_boards_force_energy_passivation_mask_and_loading_physics():
     for name in (
         "ion_energy_dependent_surface_yield",
         "neutral_radical_surface_reactions",
+        "competitive_oxygen_blocking_or_cleanup_state",
         "fluorinated_tio2_surface_inventory",
         "passivation_inventory_with_physical_thickness",
         "ion_assisted_passivation_removal",
         "cr_mask_geometry_evolution",
         "pattern_dependent_neutral_and_ion_transport",
+        "pressure_dependent_collisional_sheath_and_delivery",
+        "chemistry_dependent_surface_morphology_observable",
     ):
         assert required[name]["required"] is True
         assert name in missing
     assert audit["experimental_discriminants"]["spacing"][
         "sharp_threshold_identified"
+    ] is False
+    assert audit["experimental_discriminants"]["oxygen_competition"][
+        "transferable_coefficient_identified"
+    ] is False
+    assert audit["experimental_discriminants"]["pressure"][
+        "isolated_surface_parameter"
     ] is False
     assert audit["deterministic_differentiable_state_design"][
         "monte_carlo_required"

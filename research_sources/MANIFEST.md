@@ -22,6 +22,7 @@ recreate from RESEARCH_LER_EXPERIMENTAL_GATES notes if needed).
 - wang_olthoff_1999_ion_energy.txt
 - lan_jeon_2014_c4f6_verified_excerpt.txt
 - casey_2021_pt_verified_excerpt.txt
+- choi_2013_tio2_verified_excerpt.txt
 - an_2026_nnp_etch_verified_excerpts.txt
 - arts_2021_apr_angular_verified_excerpt.txt
 - Konina_Kseniia_PhD_Thesis_2024.txt
