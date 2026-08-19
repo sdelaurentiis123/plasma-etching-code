@@ -3,10 +3,16 @@ import numpy as np
 from types import SimpleNamespace
 
 from scripts.audit_zhu_npg80_moving_cr_profiles import (
+    ANALOG_BOARD,
     CHROMIUM_REFERENCE_DENSITY_KG_M3,
+    PREREGISTRATION,
+    REACTOR_DOSE,
+    _load,
     _mask_metrics,
     _process_pool_options,
+    _run_trajectory,
     _router,
+    _scenario_inputs,
     chromium_atom_density_m3,
 )
 
@@ -65,3 +71,39 @@ def test_cuda_multiworker_campaign_uses_spawn_context():
     assert _process_pool_options("cuda:0")[
         "mp_context"
     ].get_start_method() == "spawn"
+
+
+def test_oxford_thin_cr_first_steps_do_not_create_subcell_material_island():
+    """Pin the exact geometry path that failed the first production board.
+
+    At 10 nm resolution, the first Cr-mask redistance repair used to expose a
+    second one-node component.  That is a discretization artifact, not mask
+    exhaustion and not a permissible topology-change endpoint.
+    """
+    preregistration = _load(PREREGISTRATION)
+    analog = _load(ANALOG_BOARD)
+    reactor = _load(REACTOR_DOSE)
+    scenario = _scenario_inputs(preregistration, reactor)[0]
+    rates = (
+        float(analog["source_feature_depth_board"][
+            "minimum_implied_rate_nm_min"]),
+        float(analog["source_feature_depth_board"][
+            "maximum_implied_rate_nm_min"]),
+    )
+
+    profiles = _run_trajectory(
+        width_nm=80.0,
+        scenario=scenario,
+        rates_nm_min=rates,
+        selectivity=14.0,
+        duration_s=6.0,
+        dx_nm=10.0,
+        preregistration=preregistration,
+    )
+
+    assert len(profiles) == 2
+    assert [item["accepted_profile_steps"] for item in profiles] == [1, 2]
+    assert all(
+        item["terminal_reason"] == "requested_duration"
+        for item in profiles
+    )

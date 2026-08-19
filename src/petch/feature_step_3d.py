@@ -2811,16 +2811,39 @@ def advance_feature_step_3d(
     if duration_s == 0.0 or material_levelsets is None:
         reassigned_unresolved_material_nodes = 0
     else:
-        unresolved_material_mask, reassigned_unresolved_material_nodes = (
-            _new_unresolved_subcell_material_component_mask(
-                phi, output_material_id, geometry.material_id, etchable,
-                periodic_lateral=profile_periodic_lateral))
-        if reassigned_unresolved_material_nodes:
+        # Redistancing after retiring one subcell material island can move an
+        # adjacent tie across zero and expose a second, different subcell
+        # island.  A single cleanup pass therefore has no closed postcondition:
+        # the Oxford 10-nm Cr mask demonstrated a 14-node repair followed by a
+        # newly born one-node component.  Iterate the same resolution criterion
+        # to a fixed point.  Every resolved component (one owning all corners
+        # of a physical volume cell) remains untouched and still reaches the
+        # topology gate below.
+        repaired_material_mask = np.zeros_like(phi, dtype=bool)
+        maximum_material_cleanup_passes = 12
+        for _material_cleanup_pass in range(maximum_material_cleanup_passes):
+            unresolved_material_mask, unresolved_material_nodes = (
+                _new_unresolved_subcell_material_component_mask(
+                    phi, output_material_id, geometry.material_id, etchable,
+                    periodic_lateral=profile_periodic_lateral))
+            if not unresolved_material_nodes:
+                break
+            repaired_material_mask |= unresolved_material_mask
             material_levelsets, phi, output_material_id = (
                 _restore_unresolved_material_ownership(
                     material_levelsets, unresolved_material_mask,
                     output_material_id, geometry.material_id, geometry.dx,
                     reinitialization_method, profile_periodic_lateral))
+        else:
+            remaining_coordinates = tuple(
+                tuple(int(value) for value in index)
+                for index in np.argwhere(unresolved_material_mask)[:12])
+            raise RuntimeError(
+                "subcell material-island cleanup did not reach a fixed point; "
+                f"passes={maximum_material_cleanup_passes}; "
+                f"coordinates={remaining_coordinates}")
+        reassigned_unresolved_material_nodes = int(np.count_nonzero(
+            repaired_material_mask))
     if duration_s == 0.0:
         removed_unresolved_solid_cells = 0
         unresolved_solid_mask = np.zeros_like(output_material_id, dtype=bool)

@@ -417,13 +417,19 @@ def _execute(payload):
     job, transport_device = payload
     preregistration = _load(PREREGISTRATION)
     width, scenario, rates, selectivity, duration, dx = job
-    profiles = _run_trajectory(
-        width_nm=width, scenario=scenario, rates_nm_min=rates,
-        selectivity=selectivity, duration_s=duration, dx_nm=dx,
-        preregistration=preregistration,
-        transport_device=transport_device,
-    )
     spec = _job_spec(job)
+    try:
+        profiles = _run_trajectory(
+            width_nm=width, scenario=scenario, rates_nm_min=rates,
+            selectivity=selectivity, duration_s=duration, dx_nm=dx,
+            preregistration=preregistration,
+            transport_device=transport_device,
+        )
+    except Exception as error:
+        raise RuntimeError(
+            "moving-mask trajectory failed for "
+            f"job_spec={json.dumps(spec, sort_keys=True)}"
+        ) from error
     path = _cache_path(spec)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(_render({
