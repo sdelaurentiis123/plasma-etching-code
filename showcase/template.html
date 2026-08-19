@@ -1,0 +1,676 @@
+<meta charset="utf-8">
+<title>petch — reactor to feature</title>
+<style>
+:root{
+  --bg:#0b1220; --panel:#101a2d; --panel2:#0e1626; --line:#1e2a42;
+  --ink:#e8ecf4; --muted:#8fa0b8; --dim:#5b6b85;
+  --teal:#2dd4bf; --oxide:#1f8a8c; --mag:#e26ad0; --amber:#f5b04a;
+  --blue:#6ea8fe; --pass:#34d399;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.6 -apple-system,"Segoe UI",Roboto,Helvetica,sans-serif;
+  -webkit-font-smoothing:antialiased}
+main{max-width:1060px;margin:0 auto;padding:3rem 1.2rem 5rem;
+  display:flex;flex-direction:column;gap:4.2rem}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.eyebrow{font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--teal)}
+h1{font-size:clamp(1.9rem,4.5vw,3rem);line-height:1.1;margin:.5rem 0 .4rem;
+  font-weight:750;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:1.45rem;margin:0 0 .3rem;letter-spacing:-.01em;text-wrap:balance}
+p{margin:.4rem 0;max-width:72ch;color:var(--muted)}
+p strong{color:var(--ink)}
+section>p:first-of-type{font-size:1.02rem}
+.panel{background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;overflow:hidden}
+canvas{display:block;width:100%;height:auto}
+figcaption,.cap{font-size:.85rem;color:var(--dim);padding:.6rem .9rem .8rem;
+  line-height:1.5}
+.statrow{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1rem}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:.7rem 1rem;flex:1;min-width:130px}
+.stat b{display:block;font-size:1.35rem;font-family:ui-monospace,Menlo,monospace;
+  font-weight:600;color:var(--ink);letter-spacing:-.01em;white-space:nowrap}
+.stat span{color:var(--dim);font-size:.76rem;line-height:1.35;display:block;
+  margin-top:.15rem}
+.chain{display:flex;flex-wrap:wrap;gap:.45rem;align-items:stretch;
+  margin:1.4rem 0 0}
+.chain .step{background:var(--panel);border:1px solid var(--line);
+  border-radius:9px;padding:.55rem .8rem;flex:1;min-width:118px}
+.chain .step b{display:block;font-size:.83rem;color:var(--ink)}
+.chain .step span{font-size:.71rem;color:var(--dim);
+  font-family:ui-monospace,Menlo,monospace}
+.chain .arr{align-self:center;color:var(--oxide);font-size:1rem;flex:0}
+.knobs{display:flex;gap:.5rem;margin:1.1rem 0 1rem}
+.knobs button{background:var(--panel);border:1px solid var(--line);
+  color:var(--muted);border-radius:99px;padding:.5rem 1.15rem;
+  font:600 .95rem ui-monospace,Menlo,monospace;cursor:pointer;
+  transition:all .18s}
+.knobs button.on{background:var(--oxide);border-color:var(--oxide);
+  color:#03110f}
+.readouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:.8rem;margin-bottom:1.2rem}
+.readouts .r{background:var(--panel2);border:1px solid var(--line);
+  border-radius:10px;padding:.65rem .9rem}
+.readouts .r b{display:block;font-size:1.25rem;
+  font-family:ui-monospace,Menlo,monospace;font-weight:600;
+  transition:color .3s}
+.readouts .r span{font-size:.74rem;color:var(--dim)}
+.twocol{display:grid;grid-template-columns:1.25fr 1fr;gap:1rem}
+@media(max-width:760px){.twocol{grid-template-columns:1fr}}
+.bars .row{display:flex;align-items:center;gap:.55rem;margin:.24rem 0}
+.bars .name{width:56px;text-align:right;font:.76rem ui-monospace,Menlo,monospace;
+  color:var(--muted);flex:none}
+.bars .track{flex:1;height:11px;background:var(--panel2);border-radius:6px;
+  overflow:hidden}
+.bars .fill{height:100%;border-radius:6px;background:var(--oxide);
+  transition:width .55s cubic-bezier(.2,.8,.2,1)}
+.bars .val{width:70px;font:.72rem ui-monospace,Menlo,monospace;
+  color:var(--dim);flex:none}
+.stack{height:26px;border-radius:8px;overflow:hidden;display:flex;
+  background:var(--panel2)}
+.stack div{height:100%;transition:width .55s cubic-bezier(.2,.8,.2,1)}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem .9rem;margin-top:.5rem}
+.legend span{font:.74rem ui-monospace,Menlo,monospace;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;
+  margin-right:.35rem}
+.movies{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1rem}
+.movies figure{margin:0}
+.movies img,.movies video{width:100%;display:block;background:#000}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+  gap:1rem}
+.chart{padding:.9rem .9rem .2rem}
+.chart h3{margin:0 0 .1rem;font-size:.95rem}
+.chart .sub{font-size:.76rem;color:var(--dim);margin:0 0 .4rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:.8rem;margin-top:1rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:.8rem 1rem}
+.card b{font-size:1.3rem;font-family:ui-monospace,Menlo,monospace;
+  font-weight:600;color:var(--pass)}
+.card i{font-style:normal;color:var(--dim);
+  font:.78rem ui-monospace,Menlo,monospace;margin-left:.45rem}
+.card p{font-size:.8rem;margin:.3rem 0 0;color:var(--muted)}
+footer{color:var(--dim);font-size:.8rem;border-top:1px solid var(--line);
+  padding-top:1.2rem;line-height:1.7}
+svg text{font-family:ui-monospace,Menlo,monospace}
+</style>
+
+<main>
+<header>
+  <div class="eyebrow">petch &middot; deterministic plasma-etch engine</div>
+  <h1>Reactor to feature, first&nbsp;principles all the way&nbsp;down.</h1>
+  <p><strong>Machine knobs in, etched feature out</strong> — plasma chemistry,
+  RF sheath, ion energies, and surface evolution solved as one deterministic
+  chain. No Monte Carlo. Every constant traced to a published measurement.</p>
+  <div class="chain">
+    <div class="step"><b>Knobs</b><span>power &middot; pressure &middot; flows</span></div>
+    <div class="arr">&#9656;</div>
+    <div class="step"><b>Electron kinetics</b><span>EEPF vs BOLSIG+ &le;0.6%</span></div>
+    <div class="arr">&#9656;</div>
+    <div class="step"><b>Plasma chemistry</b><span>67 species &middot; 259 reactions</span></div>
+    <div class="arr">&#9656;</div>
+    <div class="step"><b>Moving RF sheath</b><span>time-dependent Poisson</span></div>
+    <div class="arr">&#9656;</div>
+    <div class="step"><b>Wafer flux</b><span>IEAD, species-resolved</span></div>
+    <div class="arr">&#9656;</div>
+    <div class="step"><b>Feature</b><span>3-D surface evolution</span></div>
+  </div>
+</header>
+
+<section id="flyby">
+  <div class="eyebrow">the dive</div>
+  <h2>Fly from the plasma to the wafer</h2>
+  <p>One continuous descent through the machine: the solved discharge at
+  centimetres, the moving RF sheath at millimetres, the etching feature at
+  micrometres.</p>
+  <figure class="panel" style="margin:0"><video autoplay muted loop playsinline
+    controls src="__FLYBY_MP4__"></video>
+    <figcaption>Reactor &rarr; sheath &rarr; feature. The reactor readouts are the
+    solved 105&nbsp;W Oxford state; the sheath is the replayed Turner&ndash;Chabert
+    field; the feature is the engine&rsquo;s level-set evolution.</figcaption></figure>
+</section>
+
+<section id="sheath">
+  <div class="eyebrow">the sheath, live</div>
+  <h2>Ions falling through a moving RF sheath</h2>
+  <p>The electron front (blue) oscillates at 2&nbsp;MHz. Ions enter from the
+  plasma at the Bohm speed, drift — then the front sweeps past and the field
+  takes them. Every trajectory below integrates the <strong>solved
+  Turner&ndash;Chabert field</strong>; the energy histogram they build is the
+  engine&rsquo;s ion energy distribution at the wafer.</p>
+  <div class="panel"><canvas id="sheathCanvas" width="1600" height="760"></canvas>
+  <div class="cap">Argon, 500&nbsp;W absorbed, 2&nbsp;mTorr. The falling points are
+  tracers of a deterministic field solution — the engine itself transports the
+  full distribution with a sparse absorbing solve, no particles anywhere.</div>
+  </div>
+  <div class="statrow">
+    <div class="stat"><b>453.2 V</b><span>peak sheath voltage</span></div>
+    <div class="stat"><b>0.84 mm</b><span>peak sheath width</span></div>
+    <div class="stat"><b>234.5 eV</b><span>mean ion impact energy</span></div>
+    <div class="stat"><b>1.15&deg;</b><span>RMS impact angle</span></div>
+    <div class="stat"><b>3.4e-15</b><span>conservation residual</span></div>
+  </div>
+</section>
+
+<section id="knobs">
+  <div class="eyebrow">reactor scale</div>
+  <h2>Turn the knob, re-solve the machine</h2>
+  <p>An Oxford PlasmaPro&nbsp;80 running CHF<sub>3</sub>/SF<sub>6</sub>/O<sub>2</sub>
+  at 55/5/1&nbsp;sccm, 30&nbsp;mTorr. Each operating point is one deterministic
+  solve of the full gas: <strong>67 species, 259 reactions</strong>, exact
+  particle and charge balance, wall and pump losses, self-bias sheath.
+  Pick an absorbed power:</p>
+  <div class="knobs" id="knobBtns"></div>
+  <div class="readouts" id="readouts"></div>
+  <div class="twocol">
+    <div class="panel" style="padding:.9rem 1rem">
+      <div class="eyebrow" style="color:var(--dim)">species densities &middot; log scale</div>
+      <div class="bars" id="densityBars" style="margin-top:.5rem"></div>
+    </div>
+    <div class="panel" style="padding:.9rem 1rem">
+      <div class="eyebrow" style="color:var(--dim)">who hits the wafer &middot; ion flux</div>
+      <div class="stack" id="fluxStack" style="margin-top:.7rem"></div>
+      <div class="legend" id="fluxLegend"></div>
+      <p style="font-size:.8rem;margin-top:1rem">The feed gas barely reaches the
+      wafer as itself — the solved discharge is dominated by its own daughter
+      chemistry, and the ion mix shifts as the knob turns.</p>
+    </div>
+  </div>
+</section>
+
+<section id="etch">
+  <div class="eyebrow">feature scale</div>
+  <h2>Watch it etch</h2>
+  <p>The same engine at the nanometer end: level-set surface evolution driven by
+  the transported fluxes — shadowing, re-emission, and surface chemistry
+  resolved inside the feature.</p>
+  <div class="movies">
+    <figure class="panel"><video autoplay muted loop playsinline
+      src="__HERO3D_MP4__"></video>
+      <figcaption>Deep contact hole, 3-D cutaway, 60&nbsp;s of process time.</figcaption></figure>
+    <figure class="panel"><img src="__ETCH_HOLE_GIF__" alt="hole etch cross-section evolving">
+      <figcaption>Hole cross-section: tapering and floor slowdown emerge from
+      transport, not from a fitted aspect-ratio law.</figcaption></figure>
+    <figure class="panel"><img src="__ETCH_TRENCH_GIF__" alt="trench etch cross-section evolving">
+      <figcaption>Trench under the same physics.</figcaption></figure>
+  </div>
+  <div class="statrow">
+    <div class="stat"><b>~14&times;</b><span>faster than GPU ViennaPS on the same
+      deep feature, wall clock, at matched profiles (within 0.08)</span></div>
+    <div class="stat"><b>10 s</b><span>an AR-40 hole on a laptop CPU</span></div>
+    <div class="stat"><b>1,856</b><span>tests passing in the engine suite</span></div>
+  </div>
+</section>
+
+<section id="validation">
+  <div class="eyebrow">against experiment</div>
+  <h2>Measured, not tuned</h2>
+  <p>Model curves below carry <strong>no fit to the data they are compared
+  with</strong>. Where a point is marked held-out, it was predicted before
+  comparison.</p>
+  <div class="charts" id="chartGrid"></div>
+  <div class="cards" id="cardGrid"></div>
+</section>
+
+<footer>
+  petch &middot; internal showcase &middot; every number on this page is read from
+  frozen boards under <span class="mono">results/curated/</span> by
+  <span class="mono">showcase/build_data.py</span> &middot; engine suite:
+  1,856 tests passing &middot; sheath model: Turner &amp; Chabert, APL 104,
+  164102 (2014) &middot; chemistry, yields, and cross sections cited per value in
+  <span class="mono">research_sources/library/</span>
+</footer>
+</main>
+
+<script id="showcaseData" type="application/json">__DATA_JSON__</script>
+<script>
+"use strict";
+const DATA = JSON.parse(document.getElementById("showcaseData").textContent);
+
+/* ---------- moving RF sheath animation ---------- */
+(() => {
+const cv = document.getElementById("sheathCanvas");
+const ctx = cv.getContext("2d");
+const S = DATA.sheath;
+const W = cv.width, H = cv.height;
+const QM = 1.602176634e-19 / (39.948 * 1.66053906660e-27); // C/kg for Ar+
+const smax = S.maximum_width_m, Vmax = S.maximum_voltage_v;
+const period = S.period_s, bohm = S.bohm_speed_m_s;
+const ycurve = S.normalized_charge, NY = ycurve.length - 1;
+
+// layout: left = sheath column, right = waveform + IEAD
+const colX = 70, colW = W * 0.56;
+const topY = 60, botY = H - 90;               // x=0 (plasma) .. x=smax (wafer)
+const pxPerM = (botY - topY) / smax;
+const SLOWMO = 8.5e-8;                        // sim seconds per real second
+
+function ynorm(t) {                            // normalized charge y(t)
+  let u = (t % period) / period * NY;
+  const i = Math.floor(u), f = u - i;
+  return ycurve[i] * (1 - f) + ycurve[Math.min(i + 1, NY)] * f;
+}
+function efield(x, t) {                        // V/m toward wafer
+  const y = ynorm(t), r = Math.min(Math.max(x / smax, 0), 1);
+  if (r < y * y * y) return 0;
+  return Math.max((4 / 3) * Vmax / smax * (Math.cbrt(r) - y), 0);
+}
+function vwave(t) {                            // sheath voltage V(t)
+  const y = ynorm(t);
+  return Vmax * (1 - (4 / 3) * y + (1 / 3) * Math.pow(y, 4));
+}
+
+const ions = [];
+function spawn(t) {
+  ions.push({ x: 0, v: bohm, cx: colX + 8 + Math.random() * (colW - 16),
+              hue: 0, dead: false });
+}
+for (let i = 0; i < 30; i++) {                 // pre-seed mid-flight
+  const io = { x: Math.random() * smax * 0.9, v: bohm,
+               cx: colX + 8 + Math.random() * (colW - 16), dead: false };
+  ions.push(io);
+}
+const impacts = [];                            // recent wafer hits
+const liveHist = new Array(48).fill(0);
+const eMaxHist = Vmax * 1.05;
+
+// static IEAD from the audited distribution
+const hist = S.iead_hist, edges = S.iead_edges_eV;
+const histMax = Math.max(...hist);
+
+let simT = 0, lastReal = null;
+function frame(realMs) {
+  if (lastReal === null) lastReal = realMs;
+  let realDt = Math.min((realMs - lastReal) / 1000, 0.05);
+  lastReal = realMs;
+  const simDt = realDt * SLOWMO;
+  // integrate ions with substeps
+  const nSub = 40, h = simDt / nSub;
+  for (let s = 0; s < nSub; s++) {
+    const t = simT + s * h;
+    for (const io of ions) {
+      if (io.dead) continue;
+      const a = QM * efield(io.x, t);
+      io.v += a * h; io.x += io.v * h;
+      if (io.x >= smax) {
+        io.dead = true;
+        const eV = 0.5 * (39.948 * 1.66053906660e-27) * io.v * io.v
+                   / 1.602176634e-19;
+        impacts.push({ cx: io.cx, age: 0, eV });
+        const bi = Math.min(Math.floor(eV / eMaxHist * liveHist.length),
+                            liveHist.length - 1);
+        liveHist[bi] += 1;
+      }
+    }
+  }
+  simT += simDt;
+  for (let i = ions.length - 1; i >= 0; i--)
+    if (ions[i].dead) ions.splice(i, 1);
+  while (ions.length < 34) spawn(simT);
+
+  // ---- draw ----
+  ctx.clearRect(0, 0, W, H);
+  const y = ynorm(simT), frontX = y * y * y * smax;
+  const frontPy = topY + frontX * pxPerM;
+
+  // plasma glow above column
+  let g = ctx.createLinearGradient(0, 0, 0, topY + 30);
+  g.addColorStop(0, "rgba(110,168,254,0.30)");
+  g.addColorStop(1, "rgba(110,168,254,0.0)");
+  ctx.fillStyle = g; ctx.fillRect(colX - 10, 0, colW + 20, topY + 30);
+
+  // ion sheath region (below front): field-tinted
+  const sh = ctx.createLinearGradient(0, frontPy, 0, botY);
+  sh.addColorStop(0, "rgba(226,106,208,0.05)");
+  sh.addColorStop(1, "rgba(226,106,208,0.22)");
+  ctx.fillStyle = sh;
+  ctx.fillRect(colX, frontPy, colW, botY - frontPy);
+
+  // electron-covered region (above front): cool blue
+  const eb = ctx.createLinearGradient(0, topY, 0, frontPy);
+  eb.addColorStop(0, "rgba(110,168,254,0.16)");
+  eb.addColorStop(1, "rgba(110,168,254,0.05)");
+  ctx.fillStyle = eb;
+  ctx.fillRect(colX, topY, colW, Math.max(frontPy - topY, 0));
+
+  // the moving electron front
+  ctx.strokeStyle = "rgba(110,168,254,0.95)"; ctx.lineWidth = 2.5;
+  ctx.shadowColor = "rgba(110,168,254,0.8)"; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.moveTo(colX, frontPy); ctx.lineTo(colX + colW, frontPy);
+  ctx.stroke(); ctx.shadowBlur = 0;
+
+  // wafer
+  ctx.fillStyle = "#182643";
+  ctx.fillRect(colX - 10, botY, colW + 20, 34);
+  ctx.fillStyle = "#2dd4bf";
+  ctx.fillRect(colX - 10, botY, colW + 20, 3);
+
+  // ions
+  for (const io of ions) {
+    const py = topY + io.x * pxPerM;
+    const hot = Math.min((io.v - bohm) / 40000, 1);
+    ctx.fillStyle = `rgba(${245},${176 + hot * 60},${74},${0.55 + hot * 0.45})`;
+    ctx.beginPath();
+    ctx.arc(io.cx, py, 2.2 + hot * 1.6, 0, 6.283); ctx.fill();
+    if (hot > 0.05) {                          // motion streak
+      ctx.strokeStyle = `rgba(245,176,74,${hot * 0.35})`;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(io.cx, py);
+      ctx.lineTo(io.cx, py - 6 - hot * 26); ctx.stroke();
+    }
+  }
+  // impact flashes
+  for (let i = impacts.length - 1; i >= 0; i--) {
+    const im = impacts[i]; im.age += realDt;
+    if (im.age > 0.5) { impacts.splice(i, 1); continue; }
+    const al = 1 - im.age / 0.5;
+    ctx.strokeStyle = `rgba(45,212,191,${al})`; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(im.cx, botY, 3 + im.age * 34, Math.PI, 2 * Math.PI); ctx.stroke();
+  }
+
+  // labels
+  ctx.fillStyle = "#8fa0b8"; ctx.font = "600 20px ui-monospace,Menlo,monospace";
+  ctx.fillText("plasma", colX, topY - 18);
+  ctx.fillText("wafer", colX, botY + 26);
+  ctx.fillStyle = "#6ea8fe";
+  ctx.fillText("electron front", colX + colW - 168, frontPy - 10);
+
+  /* right panels */
+  const rx = colX + colW + 60, rw = W - rx - 50;
+  // voltage waveform
+  const wTop = 70, wH = 200;
+  ctx.strokeStyle = "#1e2a42"; ctx.lineWidth = 1;
+  ctx.strokeRect(rx, wTop, rw, wH);
+  ctx.fillStyle = "#8fa0b8"; ctx.font = "600 19px ui-monospace,Menlo,monospace";
+  ctx.fillText("sheath voltage V(t)", rx, wTop - 14);
+  ctx.strokeStyle = "#e26ad0"; ctx.lineWidth = 2.4; ctx.beginPath();
+  for (let i = 0; i <= 200; i++) {
+    const tt = i / 200 * period;
+    const px = rx + i / 200 * rw;
+    const py = wTop + wH - vwave(tt) / (Vmax * 1.06) * wH;
+    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+  }
+  ctx.stroke();
+  const ph = (simT % period) / period;
+  ctx.fillStyle = "#f5b04a"; ctx.beginPath();
+  ctx.arc(rx + ph * rw, wTop + wH - vwave(simT) / (Vmax * 1.06) * wH,
+          5.5, 0, 6.283); ctx.fill();
+  ctx.fillStyle = "#5b6b85"; ctx.font = "16px ui-monospace,Menlo,monospace";
+  ctx.fillText("0", rx, wTop + wH + 22);
+  ctx.fillText("one RF period (0.5 µs)", rx + rw - 218, wTop + wH + 22);
+
+  // IEAD histogram: audited distribution + live tracer hits
+  const hTop = wTop + wH + 90, hH = H - hTop - 80;
+  ctx.fillStyle = "#8fa0b8"; ctx.font = "600 19px ui-monospace,Menlo,monospace";
+  ctx.fillText("ion energy at the wafer", rx, hTop - 14);
+  const liveMax = Math.max(...liveHist, 1);
+  const nb = hist.length;
+  for (let i = 0; i < nb; i++) {
+    const bx = rx + i / nb * rw, bw = rw / nb - 1.5;
+    const bh = hist[i] / histMax * hH;
+    ctx.fillStyle = "rgba(31,138,140,0.85)";
+    ctx.fillRect(bx, hTop + hH - bh, bw, bh);
+  }
+  for (let i = 0; i < liveHist.length; i++) {
+    const e0 = i / liveHist.length * eMaxHist;
+    const bx = rx + (e0 - edges[0]) / (edges[edges.length - 1] - edges[0]) * rw;
+    const bh = liveHist[i] / liveMax * hH * 0.6;
+    if (bx < rx || liveHist[i] === 0) continue;
+    ctx.fillStyle = "rgba(245,176,74,0.9)";
+    ctx.fillRect(bx, hTop + hH - bh, rw / liveHist.length - 2, bh);
+  }
+  ctx.strokeStyle = "#1e2a42";
+  ctx.strokeRect(rx, hTop, rw, hH);
+  ctx.fillStyle = "#5b6b85"; ctx.font = "16px ui-monospace,Menlo,monospace";
+  ctx.fillText(Math.round(edges[0]) + " eV", rx, hTop + hH + 22);
+  ctx.fillText(Math.round(edges[edges.length - 1]) + " eV",
+               rx + rw - 74, hTop + hH + 22);
+  ctx.fillStyle = "#1f8a8c";
+  ctx.fillText("■ solved distribution", rx, hTop + hH + 48);
+  ctx.fillStyle = "#f5b04a";
+  ctx.fillText("■ tracer impacts (live)", rx + 240, hTop + hH + 48);
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+
+/* ---------- knob panel ---------- */
+(() => {
+const Z = DATA.zhu, nodes = Z.nodes;
+const btns = document.getElementById("knobBtns");
+const readouts = document.getElementById("readouts");
+const barsEl = document.getElementById("densityBars");
+const stackEl = document.getElementById("fluxStack");
+const legEl = document.getElementById("fluxLegend");
+const COLORS = ["#2dd4bf","#e26ad0","#f5b04a","#6ea8fe","#34d399",
+                "#f87171","#a78bfa","#fb923c"];
+const fmt = (v, d) => v.toExponential(d === undefined ? 2 : d);
+
+// union of species across nodes for stable bar rows
+const speciesOrder = [];
+for (const n of nodes) for (const [sp] of n.top_densities)
+  if (!speciesOrder.includes(sp)) speciesOrder.push(sp);
+const densLookup = nodes.map(n => Object.fromEntries(n.top_densities));
+const allVals = nodes.flatMap(n => n.top_densities.map(d => d[1]));
+const logMin = Math.log10(Math.min(...allVals)) - 0.4;
+const logMax = Math.log10(Math.max(...allVals)) + 0.1;
+
+// stable ion order for the stacked bar
+const ionOrder = [];
+for (const n of nodes) for (const [sp] of n.top_ion_fluxes)
+  if (!ionOrder.includes(sp)) ionOrder.push(sp);
+
+// build DOM once
+const R = [
+  ["electron_density_m3", "electron density", v => fmt(v) + " m⁻³"],
+  ["mean_electron_energy_eV", "mean electron energy",
+   v => v.toFixed(2) + " eV"],
+  ["electronegativity", "electronegativity n₋/nₑ",
+   v => v.toFixed(0)],
+  ["reduced_field_Td", "reduced field E/N", v => v.toFixed(0) + " Td"],
+  ["total_ion_flux_m2_s", "ion flux to wafer", v => fmt(v) + " m⁻²s⁻¹"],
+  ["powered_sheath_V", "powered-electrode sheath", v => v.toFixed(0) + " V"],
+];
+readouts.innerHTML = R.map(([k,l]) =>
+  `<div class="r"><b data-k="${k}">–</b><span>${l}</span></div>`).join("");
+barsEl.innerHTML = speciesOrder.slice(0, 14).map(sp =>
+  `<div class="row"><span class="name">${sp}</span>` +
+  `<span class="track"><span class="fill" data-sp="${sp}"` +
+  ` style="width:0%;display:block"></span></span>` +
+  `<span class="val" data-spv="${sp}"></span></div>`).join("");
+stackEl.innerHTML = ionOrder.map((sp, i) =>
+  `<div data-ion="${sp}" style="background:${COLORS[i % COLORS.length]};width:0%"></div>`)
+  .join("");
+legEl.innerHTML = ionOrder.map((sp, i) =>
+  `<span><i style="background:${COLORS[i % COLORS.length]}"></i>${sp}</span>`)
+  .join("");
+
+function show(idx) {
+  const n = nodes[idx];
+  [...btns.children].forEach((b, i) => b.classList.toggle("on", i === idx));
+  for (const [k,,f] of R)
+    readouts.querySelector(`[data-k="${k}"]`).textContent = f(n[k]);
+  const dl = densLookup[idx];
+  for (const sp of speciesOrder.slice(0, 14)) {
+    const v = dl[sp];
+    const el = barsEl.querySelector(`[data-sp="${sp}"]`);
+    const tv = barsEl.querySelector(`[data-spv="${sp}"]`);
+    if (v === undefined) { el.style.width = "0%"; tv.textContent = "–"; }
+    else {
+      el.style.width =
+        (100 * (Math.log10(v) - logMin) / (logMax - logMin)).toFixed(1) + "%";
+      tv.textContent = fmt(v, 1);
+    }
+  }
+  const fl = Object.fromEntries(n.top_ion_fluxes);
+  const tot = n.top_ion_fluxes.reduce((a, kv) => a + kv[1], 0);
+  for (const sp of ionOrder) {
+    stackEl.querySelector(`[data-ion="${sp}"]`).style.width =
+      (100 * (fl[sp] || 0) / tot).toFixed(2) + "%";
+  }
+}
+nodes.forEach((n, i) => {
+  const b = document.createElement("button");
+  b.textContent = n.absorbed_power_W + " W";
+  b.onclick = () => show(i);
+  btns.appendChild(b);
+});
+show(nodes.length - 1);
+})();
+
+/* ---------- validation charts (inline SVG) ---------- */
+(() => {
+const V = DATA.validation;
+const grid = document.getElementById("chartGrid");
+const NS = "http://www.w3.org/2000/svg";
+
+function chartShell(title, sub) {
+  const wrap = document.createElement("div");
+  wrap.className = "panel chart";
+  wrap.innerHTML = `<h3>${title}</h3><p class="sub">${sub}</p>`;
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 360 230");
+  svg.setAttribute("width", "100%");
+  wrap.appendChild(svg); grid.appendChild(wrap);
+  return svg;
+}
+function el(svg, tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  svg.appendChild(e); return e;
+}
+const AXIS = "#1e2a42", TXT = "#5b6b85", EXP = "#e8ecf4", MOD = "#2dd4bf";
+const M = { l: 44, r: 10, t: 12, b: 34 }, PW = 360, PH = 230;
+function frameAxes(svg) {
+  el(svg, "rect", { x: M.l, y: M.t, width: PW - M.l - M.r,
+    height: PH - M.t - M.b, fill: "none", stroke: AXIS });
+}
+function legend(svg, entries) {
+  entries.forEach(([label, color, shape], i) => {
+    const x = M.l + 8 + i * 130, y = M.t + 14;
+    if (shape === "line")
+      el(svg, "line", { x1: x, y1: y - 3, x2: x + 16, y2: y - 3,
+        stroke: color, "stroke-width": 2.5 });
+    else el(svg, "rect", { x, y: y - 9, width: 10, height: 10, fill: color });
+    el(svg, "text", { x: x + 21, y, fill: TXT, "font-size": 11 }, label);
+  });
+}
+
+/* Tinacba grouped bars */
+{
+  const svg = chartShell("SF₅⁺ beam → etch depth",
+    "mass-selected ion beam, Si + SiO₂ · 5.9% mean error, no fit");
+  frameAxes(svg);
+  const pts = V.tinacba.points;
+  const maxV = Math.max(...pts.flatMap(p => [p.measured, p.predicted])) * 1.15;
+  const bw = 22, gw = (PW - M.l - M.r) / pts.length;
+  pts.forEach((p, i) => {
+    const cx = M.l + gw * (i + 0.5);
+    const hM = p.measured / maxV * (PH - M.t - M.b);
+    const hP = p.predicted / maxV * (PH - M.t - M.b);
+    el(svg, "rect", { x: cx - bw - 2, y: PH - M.b - hM, width: bw,
+      height: hM, fill: EXP, opacity: 0.85 });
+    el(svg, "rect", { x: cx + 2, y: PH - M.b - hP, width: bw,
+      height: hP, fill: MOD });
+    el(svg, "text", { x: cx, y: PH - M.b + 14, fill: TXT,
+      "font-size": 10, "text-anchor": "middle" },
+      `${p.material} ${p.energy_eV}eV`);
+  });
+  el(svg, "text", { x: 12, y: PH / 2, fill: TXT, "font-size": 10,
+    transform: `rotate(-90 12 ${PH / 2})`, "text-anchor": "middle" },
+    "nm per 10¹⁶ ions/cm²");
+  legend(svg, [["measured", EXP, "rect"], ["petch", MOD, "rect"]]);
+}
+
+/* Vella ALE lines */
+{
+  const svg = chartShell("Si–Cl₂/Ar⁺ ALE depth per cycle",
+    "atom-counted from released MD · ≤12.9% across 60–100 eV");
+  frameAxes(svg);
+  const E = V.vella_ale.energy_eV;
+  const maxY = Math.max(...V.vella_ale.experiment_nm,
+                        ...V.vella_ale.predicted_nm) * 1.2;
+  const X = e => M.l + (e - 50) / 60 * (PW - M.l - M.r);
+  const Y = v => PH - M.b - v / maxY * (PH - M.t - M.b);
+  [["experiment_nm", EXP], ["predicted_nm", MOD]].forEach(([k, c]) => {
+    const d = V.vella_ale[k]
+      .map((v, i) => `${i ? "L" : "M"}${X(E[i])},${Y(v)}`).join("");
+    el(svg, "path", { d, fill: "none", stroke: c, "stroke-width": 2.5 });
+    V.vella_ale[k].forEach((v, i) =>
+      el(svg, "circle", { cx: X(E[i]), cy: Y(v), r: 4, fill: c }));
+  });
+  E.forEach(e => el(svg, "text", { x: X(e), y: PH - M.b + 14, fill: TXT,
+    "font-size": 10, "text-anchor": "middle" }, e + " eV"));
+  el(svg, "text", { x: 12, y: PH / 2, fill: TXT, "font-size": 10,
+    transform: `rotate(-90 12 ${PH / 2})`, "text-anchor": "middle" },
+    "nm / cycle");
+  legend(svg, [["experiment", EXP, "line"], ["petch", MOD, "line"]]);
+}
+
+/* Lee-Lieberman Te vs pressure */
+{
+  const svg = chartShell("Global argon model: Tₑ vs pressure",
+    "vs published Lee–Lieberman curve · 8.5% MAPE, no fit");
+  frameAxes(svg);
+  const rows = V.lee_lieberman.rows;
+  const pMin = Math.log10(rows[0].pressure_mTorr);
+  const pMax = Math.log10(rows[rows.length - 1].pressure_mTorr);
+  const tMax = Math.max(...rows.map(r => r.reference_Te_eV)) * 1.15;
+  const X = p => M.l + (Math.log10(p) - pMin) / (pMax - pMin)
+    * (PW - M.l - M.r);
+  const Y = v => PH - M.b - v / tMax * (PH - M.t - M.b);
+  const d = rows.map((r, i) =>
+    `${i ? "L" : "M"}${X(r.pressure_mTorr)},${Y(r.model_Te_eV)}`).join("");
+  el(svg, "path", { d, fill: "none", stroke: MOD, "stroke-width": 2.5 });
+  rows.forEach(r => el(svg, "circle",
+    { cx: X(r.pressure_mTorr), cy: Y(r.reference_Te_eV), r: 3.5,
+      fill: "none", stroke: EXP, "stroke-width": 1.8 }));
+  [1, 10, 100].forEach(p => el(svg, "text", { x: X(p), y: PH - M.b + 14,
+    fill: TXT, "font-size": 10, "text-anchor": "middle" }, p + " mTorr"));
+  el(svg, "text", { x: 12, y: PH / 2, fill: TXT, "font-size": 10,
+    transform: `rotate(-90 12 ${PH / 2})`, "text-anchor": "middle" },
+    "Tₑ (eV)");
+  legend(svg, [["published", EXP, "line"], ["petch", MOD, "line"]]);
+}
+
+/* de Boer ARDE held-out */
+{
+  const svg = chartShell("Aspect-ratio-dependent etch rate",
+    "SF₆/O₂ on Si · AR 40 point predicted held-out, error 0.034");
+  frameAxes(svg);
+  const D = V.deboer;
+  const X = a => M.l + a / 42 * (PW - M.l - M.r);
+  const Y = v => PH - M.b - v / 1.1 * (PH - M.t - M.b);
+  [["experiment", EXP], ["model", MOD]].forEach(([k, c]) => {
+    const d = D[k].map((v, i) =>
+      `${i ? "L" : "M"}${X(D.aspect_ratio[i])},${Y(v)}`).join("");
+    el(svg, "path", { d, fill: "none", stroke: c, "stroke-width": 2.5 });
+    D[k].forEach((v, i) => el(svg, "circle",
+      { cx: X(D.aspect_ratio[i]), cy: Y(v), r: 4, fill: c }));
+  });
+  const hx = X(D.aspect_ratio[D.held_out_index]);
+  el(svg, "circle", { cx: hx, cy: Y(D.model[D.held_out_index]), r: 9,
+    fill: "none", stroke: "#f5b04a", "stroke-width": 2 });
+  el(svg, "text", { x: hx - 6, y: Y(D.model[D.held_out_index]) - 14,
+    fill: "#f5b04a", "font-size": 11, "text-anchor": "end" }, "held-out");
+  D.aspect_ratio.forEach(a => el(svg, "text", { x: X(a), y: PH - M.b + 14,
+    fill: TXT, "font-size": 10, "text-anchor": "middle" }, "AR " + a));
+  el(svg, "text", { x: 12, y: PH / 2, fill: TXT, "font-size": 10,
+    transform: `rotate(-90 12 ${PH / 2})`, "text-anchor": "middle" },
+    "normalized rate");
+  legend(svg, [["experiment", EXP, "line"], ["petch", MOD, "line"]]);
+}
+
+/* stat cards */
+const cardGrid = document.getElementById("cardGrid");
+cardGrid.innerHTML = V.cards.map(c =>
+  `<div class="card"><b>${c.value}</b><i>${c.target}</i><p>${c.label}</p></div>`
+).join("");
+})();
+</script>
