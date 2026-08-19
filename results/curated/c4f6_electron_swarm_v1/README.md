@@ -20,5 +20,8 @@ The remaining gap is therefore physical/observational, not grid error.
 This authorizes the deck as a bounded C4F6 component for local EEDF and
 aggregate-rate calculations. It does not resolve product branching, a Krueger
 reactor state, wafer flux, or feature depth. The next gates are deterministic
-density-gradient/PT transport and mass-resolved reactor validation against
-Benck's ion-current board.
+density-gradient/PT transport and a product-resolved reaction network graded
+against Benck's ion-current board. The NIST SRD-69 EI spectrum now forbids the
+tempting light-ion shortcut: direct parent ionization is dominated by C3F3+
+and intact C4F6+, so secondary fragmentation and ion-neutral/wall chemistry
+must be explicit before the Benck comparison.

@@ -1,0 +1,24 @@
+nominal_m_over_z,assignment,assignment_class,relative_intensity_percent,stick_center_x_full_image_px,stick_top_y_full_image_px,m_over_z_from_axis,digitization_absolute_intensity_bound_percent
+31,CF+,monoisotopic_fragment,15.227273,202.0,439.0,31.201248,0.455
+32,CF+ isotope,isotope_satellite,0.454545,205.0,504.0,32.137285,0.455
+36,C3+,monoisotopic_fragment,0.454545,218.0,504.0,36.193448,0.455
+43,C2F+,monoisotopic_fragment,0.681818,240.5,503.0,43.213729,0.455
+50,CF2+,monoisotopic_fragment,1.590909,262.5,499.0,50.078003,0.455
+55,C3F+,monoisotopic_fragment,2.727273,279.0,494.0,55.226209,0.455
+62,C2F2+,monoisotopic_fragment,2.727273,301.5,494.0,62.246490,0.455
+69,CF3+,monoisotopic_fragment,4.772727,323.5,485.0,69.110764,0.455
+74,C3F2+,monoisotopic_fragment,7.272727,339.5,474.0,74.102964,0.455
+75,C3F2+ isotope,isotope_satellite,1.818182,343.0,498.0,75.195008,0.455
+81,C2F3+,monoisotopic_fragment,2.045455,362.0,497.0,81.123245,0.455
+93,C3F3+,monoisotopic_fragment,100.000000,400.5,66.0,93.135725,0.455
+94,C3F3+ isotope,isotope_satellite,3.636364,403.5,490.0,94.071763,0.455
+112,C3F4+,monoisotopic_fragment,11.818182,461.5,454.0,112.168487,0.455
+113,C3F4+ isotope,isotope_satellite,0.454545,465.0,504.0,113.260530,0.455
+124,C4F4+,monoisotopic_fragment,4.090909,500.0,488.0,124.180967,0.455
+125,C4F4+ isotope 1,isotope_satellite,0.454545,503.0,504.0,125.117005,0.455
+126,C4F4+ isotope 2,isotope_satellite,0.454545,506.0,504.0,126.053042,0.455
+131,C3F5+,monoisotopic_fragment,1.818182,522.5,498.0,131.201248,0.455
+143,C4F5+,monoisotopic_fragment,5.454545,560.5,482.0,143.057722,0.455
+144,C4F5+ isotope,isotope_satellite,0.909091,564.0,502.0,144.149766,0.455
+162,C4F6+,monoisotopic_parent,43.863636,621.5,313.0,162.090484,0.455
+163,C4F6+ isotope,isotope_satellite,2.045455,624.5,497.0,163.026521,0.455

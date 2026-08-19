@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 166 sources by topic
+## Index — 167 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -47,6 +47,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`li-2002-c4f6-c4f8`](library/li-2002-c4f6-c4f8.md) | Li et al., matched C4F6/Ar versus C4F8/Ar reactor/surface board | PRIMARY FULL TEXT ONLINE; FIGURES NOT YET DIGITIZED |
 | [`omura-2019-jjap`](library/omura-2019-jjap.md) | Omura et al., JJAP (2019) | ABSTRACT/relay |
 | [`metzler-2016-thesis`](library/metzler-2016-thesis.md) | Metzler, UMD thesis (2016), cyclic C4F8/Ar-ion ALE | FULL TEXT + PIL-AUDITED FIGURES |
+| [`nist-c4f6-mass-spectrum`](library/nist-c4f6-mass-spectrum.md) | NIST SRD 69, direct C4F6 electron-ionization fragmentation spectrum | PRIMARY DATABASE IMAGE + QUANTITATIVE PIL AUDIT |
 | [`standaert-oehrlein`](library/standaert-oehrlein.md) | Standaert/Oehrlein, mixed-layer selectivity | OFFICIAL OSTI FULL REPORTS + VERIFIED EXCERPTS |
 | [`wang-thesis`](library/wang-thesis.md) | Wang (Mingmei), PhD thesis, Univ. Michigan | FULL TEXT: research_sources/thesis_extracts/wang_mingmei_phd_thesis.txt |
 | [`woo-2024-c4f6-thesis`](library/woo-2024-c4f6-thesis.md) | Woo, CF4/C4F6/He ICP diagnostics, patterned rates, and SEM profiles | PRIMARY FULL TEXT + PIL-DIGITIZED FIGURE 4.1 |
@@ -363,6 +364,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Condition-unknown CFx+/Ar+ angular species board | [`karahashi-2007`](library/karahashi-2007.md), [`arts-2021-apr`](library/arts-2021-apr.md) | 20 PIL-audited markers; normal points strongly imply 1000 eV, but the source/review do not report energy, so production use is forbidden |
 | Stable-parent molecule / ion co-incidence envelope | [`takada-2005-tmrsj`](library/takada-2005-tmrsj.md) | C5F8 analog proves molecule-assisted yields can exceed a pure-CF3+ value; explicitly not a C4F6 law |
 | C4F6 parent-signal + ion-mixture existence | [`kim-2021-coatings`](library/kim-2021-coatings.md) | wafer-facing mass/energy spectra directly show C4F6 and multiple CFx+/CxFy+ species in another CCP; qualitative existence constraint only, not Krüger flux calibration |
+| Direct C4F6 electron-ionization fragmentation topology | [`nist-c4f6-mass-spectrum`](library/nist-c4f6-mass-spectrum.md) | `C3F3+` base peak and 43.86-relative-intensity parent; forbids collapsing aggregate parent ionization directly onto only CF+/CF2+/CF3+ |
 | Absolute C4F6/Ar total and mass-resolved ion flux/IED board | [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Faraday-cup-normalized GEC-ICP mixture and pressure boards; quantitative reactor-model validation, not a Krüger boundary transplant |
 | Matched C4F6/Ar versus C4F8/Ar ion/radical/film/yield board | [`li-2002-c4f6-c4f8`](library/li-2002-c4f6-c4f8.md) | same 600 W ICP and diagnostics expose feed-specific fragmentation and surface-film differences; figures require original-pixel digitization before constants land |
 | CF4/C4F6/He patterned SiO2/ACL rate + reactor-diagnostic board | [`woo-2024-c4f6-thesis`](library/woo-2024-c4f6-thesis.md) | 10 original-pixel rate points plus Te/current/self-bias/OES/profile constraints; two source-reporting conflicts quarantined and equal-depth SEM timing excluded from blind depth validation |

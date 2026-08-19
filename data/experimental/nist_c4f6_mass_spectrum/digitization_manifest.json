@@ -1,0 +1,63 @@
+{
+  "manifest_id": "NIST-WEBBOOK-C4F6-EI-MASS-SPECTRUM-R1",
+  "source": {
+    "database": "NIST Chemistry WebBook SRD 69",
+    "species": "1,3-butadiene, 1,1,2,3,4,4-hexafluoro-",
+    "formula": "C4F6",
+    "cas_registry_number": "685-63-2",
+    "nist_ms_number": 5987,
+    "spectrum_type": "electron ionization mass spectrum",
+    "url": "https://webbook.nist.gov/cgi/cbook.cgi?Index=0&Large=on&Spec=C685632&Type=Mass",
+    "source_image_sha256": "3efe05fb3a4c27cbc74e46a6b342cce9010a17ff4a9f645b635c4ea04c96e011",
+    "source_image_size_px": [
+      800,
+      600
+    ],
+    "redistribution": "NIST states that this spectrum cannot be downloaded; source pixels and overlays are not committed"
+  },
+  "pixel_calibration": {
+    "plot_left_x_px_at_m_over_z_0": 102.0,
+    "plot_right_x_px_at_m_over_z_200": 743.0,
+    "plot_top_y_px_at_relative_intensity_100": 66.0,
+    "plot_baseline_y_px_at_relative_intensity_0": 506.0,
+    "maximum_nominal_mass_axis_error": 0.260530421216842,
+    "absolute_intensity_bound_percent": 0.455
+  },
+  "digitization": {
+    "method": "PIL full-image red-stick segmentation followed by original-resolution visual assignment and two-axis affine replay",
+    "point_count": 23,
+    "visual_audit_status": "passed_original_resolution",
+    "raw_source_committed": false
+  },
+  "derived_checks": {
+    "base_peak": "C3F3+",
+    "parent_relative_intensity_percent": 43.86363636363637,
+    "cfx_direct_ei_relative_intensity": {
+      "CF+": 15.227272727272727,
+      "CF2+": 1.5909090909090908,
+      "CF3+": 4.7727272727272725
+    },
+    "cfx_direct_ei_ratios_to_cf": {
+      "CF2+/CF+": 0.1044776119402985,
+      "CF3+/CF+": 0.31343283582089554
+    },
+    "heavy_parent_or_c3f3_fraction_of_monoisotopic_intensity": 0.7033333333333334
+  },
+  "model_consequence": {
+    "required": [
+      "retain C3F3+ and C4F6+ direct-parent ionization products",
+      "resolve secondary fragment ionization and ion-neutral chemistry",
+      "grade reactor composition against Benck mixture and pressure boards"
+    ],
+    "forbidden": [
+      "map aggregate C4F6 ionization directly only to CF+/CF2+/CF3+",
+      "use EI relative intensity as an absolute plasma ion flux",
+      "transplant the 70 eV spectrum into Krueger as a wafer mixture",
+      "fit a C4F6 branching ratio to Krueger's 825 nm endpoint"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/nist_c4f6_mass_spectrum/electron_ionization_sticks.csv",
+    "sha256": "2115e1a887f53fcc99423ab81fee94fde461f00c2e0da30ac188e95748c7a665"
+  }
+}
