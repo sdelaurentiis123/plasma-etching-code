@@ -7,6 +7,11 @@ from scripts.run_zhu_npg80_daughter_reclosed_board import (
     _plasma_potential_V,
     _run_args,
 )
+from scripts.audit_zhu_npg80_daughter_wafer_dose_board import (
+    CANDIDATE_FEATURE_TRANSMISSIONS,
+    CANDIDATE_SURFACE_YIELDS,
+    _depth_sensitivity,
+)
 
 
 def test_reclosed_board_args_preserve_self_bias_and_full_daughter_inputs(tmp_path):
@@ -46,3 +51,21 @@ def test_plasma_potential_uses_multi_ion_inventory_not_flux_target():
         "CF3+": 0.09,
     }
     assert _plasma_potential_V(payload) == pytest.approx(original)
+
+
+def test_wafer_dose_sensitivity_keeps_surface_and_transport_unfitted():
+    board = _depth_sensitivity(
+        ion_flux_m2_s=1.0e19,
+        duration_s=1200.0,
+        film_thickness_nm=700.0,
+    )
+    assert board["surface_yield_candidates_are_fitted"] is False
+    assert board["feature_transmission_candidates_are_fitted"] is False
+    assert len(board["rows"]) == (
+        len(CANDIDATE_SURFACE_YIELDS)
+        * len(CANDIDATE_FEATURE_TRANSMISSIONS)
+    )
+    lowest = board["rows"][0]["film_capped_depth_nm_by_density_endpoint"]
+    highest = board["rows"][-1]["film_capped_depth_nm_by_density_endpoint"]
+    assert lowest[0] > lowest[1]
+    assert highest[0] == highest[1] == 700.0
