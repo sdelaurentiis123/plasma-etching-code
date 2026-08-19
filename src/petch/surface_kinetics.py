@@ -546,6 +546,7 @@ class ReducedSiO2FluorocarbonParameters:
     polymer_sputter_yield: EnergeticYield
     material_name: str = "SiO2"
     material_inventory_name: str = "SiO2_formula_unit"
+    polymer_bulk_unit_density_m3: float | None = None
     complex_removal_reaction_order: int = 1
     oxygen_half_saturation_flux_m2_s: float | None = None
     activated_polymer_deposition_probability_on_substrate: Mapping[str, float] = field(
@@ -570,6 +571,14 @@ class ReducedSiO2FluorocarbonParameters:
     def __post_init__(self):
         if not self.material_name or not self.material_inventory_name:
             raise ValueError("oxide material and inventory names must be nonempty")
+        if (
+            self.polymer_bulk_unit_density_m3 is not None
+            and (
+                not np.isfinite(self.polymer_bulk_unit_density_m3)
+                or self.polymer_bulk_unit_density_m3 <= 0.0
+            )
+        ):
+            raise ValueError("polymer bulk unit density must be positive and finite")
         for name, value in (
                 ("site_density_m2", self.site_density_m2),
                 ("bulk_formula_density_m3", self.bulk_formula_density_m3),
@@ -990,6 +999,10 @@ class ReducedSiO2FluorocarbonMechanism:
                 "site_density_m2": float(par.site_density_m2),
                 "bulk_formula_density_m3": float(par.bulk_formula_density_m3),
                 "polymer_monolayer_density_m2": float(par.polymer_monolayer_density_m2),
+                "polymer_bulk_unit_density_m3": (
+                    None if par.polymer_bulk_unit_density_m3 is None
+                    else float(par.polymer_bulk_unit_density_m3)
+                ),
                 "complex_formation_probability": dict(
                     par.complex_formation_probability),
                 "polymer_deposition_probability_on_substrate": dict(
@@ -1131,6 +1144,8 @@ class ReducedSiO2FluorocarbonMechanism:
             required_evidence.add("complex_removal_reaction_order")
         if par.declared_inert_neutral_species:
             required_evidence.add("declared_inert_neutral_species")
+        if par.polymer_bulk_unit_density_m3 is not None:
+            required_evidence.add("polymer_bulk_unit_density_m3")
         missing_evidence = tuple(sorted(required_evidence - set(par.evidence)))
         nonpredictive = tuple(sorted(
             name for name in required_evidence
@@ -1671,13 +1686,26 @@ class ReducedSiO2FluorocarbonMechanism:
         new_state = SiO2SurfaceState(
             complex_fraction, polymer, removed_total,
             activated_complex, activated_polymer)
-        velocity = ((removed_complex + removed_bare)
-                    / self.parameters.bulk_formula_density_m3
-                    / duration_s if duration_s > 0.0 else np.zeros(shape))
-        removed_sio2 = removed_complex + removed_bare
+        removed_oxide = removed_complex + removed_bare
+        if duration_s > 0.0:
+            velocity = (
+                removed_oxide / self.parameters.bulk_formula_density_m3
+                / duration_s
+            )
+            if self.parameters.polymer_bulk_unit_density_m3 is None:
+                growth_velocity = np.zeros(shape)
+            else:
+                polymer_density = self.parameters.polymer_bulk_unit_density_m3
+                velocity = velocity + removed_polymer / polymer_density / duration_s
+                growth_velocity = (
+                    deposited_polymer / polymer_density / duration_s
+                )
+        else:
+            velocity = np.zeros(shape)
+            growth_velocity = np.zeros(shape)
         exchange = unresolved_surface_exchange(
             removed_units_m2={
-                self.parameters.material_inventory_name: removed_sio2,
+                self.parameters.material_inventory_name: removed_oxide,
                 "fluorocarbon_film_unit": removed_polymer,
             },
             deposited_units_m2={"fluorocarbon_film_unit": deposited_polymer},
@@ -1695,7 +1723,8 @@ class ReducedSiO2FluorocarbonMechanism:
             deposited_polymer_units_m2=deposited_polymer,
             removed_polymer_units_m2=removed_polymer,
             material_exchange=exchange,
-            validity=validity)
+            validity=validity,
+            normal_growth_velocity_m_s=growth_velocity)
 
 
 # The conservative state equations are oxide-generic; the historical names

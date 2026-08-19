@@ -26,6 +26,13 @@ a future TiO2 deck must supply its own evidence-bearing density, adsorption,
 activation, passivation, and energetic-yield parameters. Merely relabelling a
 SiO2 deck remains nonpredictive and is tested as such.
 
+When a deck supplies an evidence-bearing passivation bulk-unit density, the
+kernel now converts deposited and removed passivation ledgers into outward
+growth and inward recession velocities exactly. With no such density the
+legacy behavior remains bitwise unchanged and no geometric film thickness is
+invented. The Oxford deck still lacks that target coefficient, so this is a
+physical capability, not a newly claimed Freddie prediction.
+
 These cross-process boards identify model topology and response signs, not the
 Oxford coefficients. Absolute profile prediction still needs same-condition
 self-bias/waveform, blanket TiO2 loss, Cr loss, target GDS/radius, and the SEM
