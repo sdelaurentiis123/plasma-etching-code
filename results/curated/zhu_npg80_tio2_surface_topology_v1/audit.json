@@ -1,0 +1,150 @@
+{
+  "schema": "petch.zhu-npg80-tio2-surface-topology.v1",
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "target_sem_used": false,
+  "target_depth_used": false,
+  "inputs": {
+    "choi_bias_response": {
+      "path": "data/experimental/choi_2013_tio2_cf4/bias_response_audit.json",
+      "sha256": "9dcf2cedea946eae7b8632b522f8f7220ac1a2fc34606de424fe1be14956d275"
+    },
+    "ji_rf_morphology_response": {
+      "path": "data/experimental/ji_2024_tio2_hierarchical/figure3_digitization_manifest.json",
+      "sha256": "2ef301b27f31a2a5d0602ca8e604405879718fdf5248b5d39c075f1b29ea1142"
+    },
+    "ji_spacing_morphology_response": {
+      "path": "data/experimental/ji_2024_tio2_hierarchical/figure4_digitization_manifest.json",
+      "sha256": "7ac86898aba4c08d23b6d2c30fc6e9ff8a56f23f1a71005e79356047f53cae24"
+    },
+    "conditional_profile_board": {
+      "path": "results/curated/zhu_npg80_conditional_profiles_v1/audit.json",
+      "sha256": "01c48963fc968c23000bca8a6e5c00059561240e43ffc0403c540a97e9af2c47"
+    }
+  },
+  "experimental_discriminants": {
+    "energy": {
+      "observable": "TiO2 etch rate",
+      "response": "130.9 to 197.2 nm/min as bias magnitude rises 50 to 250 V",
+      "forces": [
+        "ion-energy-dependent bond breaking",
+        "ion-assisted reaction-product desorption"
+      ]
+    },
+    "rf_morphology": {
+      "observable": "upper height, corner radius, and interfeature gap",
+      "response": "gap narrows 95.96 to 18.02 nm over 90 to 210 W",
+      "forces": [
+        "positive retained or deposited surface volume",
+        "ion-assisted removal of that passivation",
+        "evolving mask or equivalent measured boundary"
+      ]
+    },
+    "spacing": {
+      "observable": "two-zone TiO2 morphology",
+      "response": "100 and 70 nm gap points separate from 350 to 750 nm cluster",
+      "forces": [
+        "pattern-dependent transport and surface-state feedback"
+      ],
+      "sharp_threshold_identified": false,
+      "sampled_transition_bracket_nm": [
+        100.0,
+        350.0
+      ]
+    }
+  },
+  "current_conditional_mechanism": {
+    "name": "RateNormalizedRemovalMechanism",
+    "capabilities": {
+      "local_geometric_ion_dose": true,
+      "removal_velocity_nonnegative": true,
+      "ion_energy_dependent_surface_yield": false,
+      "neutral_radical_surface_reactions": false,
+      "fluorinated_tio2_surface_inventory": false,
+      "fluorocarbon_or_tifx_passivation_inventory": false,
+      "positive_surface_volume_deposition_or_retention": false,
+      "cr_mask_geometry_evolution": false,
+      "surface_charging_feedback": false,
+      "removed_product_redeposition": false
+    },
+    "physical_within_declared_scope": true,
+    "sufficient_for_target_surface_prediction": false,
+    "interpretation": "a converged wider lower section can be a physical consequence of slower shadowed-wall recession, but this mechanism cannot attribute the real Oxford profile"
+  },
+  "minimum_physical_model_contract": {
+    "local_geometric_ion_dose": {
+      "required": true,
+      "evidence": "feature shadowing and AR-dependent transport"
+    },
+    "ion_energy_dependent_surface_yield": {
+      "required": true,
+      "evidence": "Choi DC-bias response"
+    },
+    "neutral_radical_surface_reactions": {
+      "required": true,
+      "evidence": "Choi Ti-F/O blocking plus Ji feed chemistry"
+    },
+    "fluorinated_tio2_surface_inventory": {
+      "required": true,
+      "evidence": "Choi XPS Ti-F formation"
+    },
+    "passivation_inventory_with_physical_thickness": {
+      "required": true,
+      "evidence": "Ji gap narrowing and reported lower-feature passivation"
+    },
+    "ion_assisted_passivation_removal": {
+      "required": true,
+      "evidence": "Ji RF response and Choi product-desorption response"
+    },
+    "cr_mask_geometry_evolution": {
+      "required": true,
+      "evidence": "Ji observed lateral Cr shrink"
+    },
+    "pattern_dependent_neutral_and_ion_transport": {
+      "required": true,
+      "evidence": "Ji spacing response"
+    }
+  },
+  "missing_from_current_conditional_mechanism": [
+    "ion_energy_dependent_surface_yield",
+    "neutral_radical_surface_reactions",
+    "fluorinated_tio2_surface_inventory",
+    "passivation_inventory_with_physical_thickness",
+    "ion_assisted_passivation_removal",
+    "cr_mask_geometry_evolution",
+    "pattern_dependent_neutral_and_ion_transport"
+  ],
+  "deterministic_differentiable_state_design": {
+    "per_surface_element_state": [
+      "bounded fluorinated-site fraction",
+      "nonnegative passivation units per square metre",
+      "bounded activated-passivation fraction",
+      "cumulative removed TiO2 formula units per square metre"
+    ],
+    "moving_materials": [
+      "TiO2",
+      "Cr mask",
+      "passivation overlayer"
+    ],
+    "operators": [
+      "analytic bounded adsorption/activation update",
+      "deterministic angular quadrature for ion and neutral delivery",
+      "energy- and angle-resolved ion-assisted removal",
+      "conservative surface-state remap during level-set motion"
+    ],
+    "monte_carlo_required": false,
+    "compatible_with_automatic_differentiation": true
+  },
+  "target_parameter_status": {
+    "identified_from_existing_cross_process_boards": false,
+    "reason": "the boards identify topology and response signs but change tool, feed, film state, mask, and unreported wafer fluxes",
+    "required_same_condition_observables": [
+      "achieved DC self-bias or electrode voltage waveform",
+      "blanket TiO2 loss over the 1200 s recipe",
+      "remaining Cr thickness or Cr loss",
+      "target GDS dimensions and sample radius",
+      "cross-section/top-down SEM answer key"
+    ]
+  },
+  "supports_absolute_oxford_profile_prediction": false,
+  "supports_atomic_accuracy": false
+}
