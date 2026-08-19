@@ -9,6 +9,7 @@ def test_oxford_surface_deck_is_executable_but_fail_closed():
     assert audit["executable_contract"]["reduced_sensitivity_execution_available"] is True
     assert audit["executable_contract"]["silent_sio2_coefficient_transfer_allowed"] is False
     assert audit["executable_contract"]["numerical_defaults_supplied"] is False
+    assert audit["executable_contract"]["competitive_oxygen_state_implemented"] is True
     assert audit["supports_absolute_oxford_profile_prediction"] is False
     assert audit["supports_atomic_accuracy"] is False
 
@@ -22,6 +23,7 @@ def test_every_required_surface_coefficient_remains_explicit():
         status["numerical_target_value_identified"] is False
         for status in slots.values()
     )
-    assert "competitive_oxygen_blocking_or_cleanup_surface_state" in (
+    assert "competitive_oxygen_blocking_or_cleanup_surface_state" not in (
         audit["unresolved_model_form"]
     )
+    assert "chemistry_dependent_roughness_evolution" in audit["unresolved_model_form"]

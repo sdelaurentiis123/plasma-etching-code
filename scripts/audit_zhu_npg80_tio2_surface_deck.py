@@ -77,6 +77,14 @@ def build() -> dict[str, object]:
             "numerical_target_value_identified": False,
             "available_evidence": "Choi nonmonotonic O2 response; coefficient not isolated",
         },
+        "oxygen_blocking_probability": {
+            "numerical_target_value_identified": False,
+            "available_evidence": "Choi excess-O blocking interpretation; coefficient absent",
+        },
+        "oxygen_blocker_ion_removal_yield": {
+            "numerical_target_value_identified": False,
+            "available_evidence": "no state-resolved beam or same-tool measurement",
+        },
         "bare_sio2_yield": {
             "meaning_in_tio2_deck": "bare TiO2 energetic removal yield",
             "numerical_target_value_identified": False,
@@ -115,6 +123,7 @@ def build() -> dict[str, object]:
             "silent_sio2_coefficient_transfer_allowed": False,
             "numerical_defaults_supplied": False,
             "reduced_sensitivity_execution_available": True,
+            "competitive_oxygen_state_implemented": True,
         },
         "parameter_slots": slots,
         "target_parameters_not_identified": missing,

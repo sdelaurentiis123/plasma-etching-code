@@ -448,6 +448,8 @@ class SiO2SurfaceState:
     ``activated_polymer_fraction`` is the conditional activated fraction of the exposed
     fluorocarbon-polymer surface.  The two states remain separate because Huang et al. assign
     different activation energy windows to complex (5--70 eV) and polymer (5--30 eV) sites.
+    ``oxygen_blocked_fraction`` is the fraction of oxide sites competitively occupied by the
+    optional oxygen-blocking channel; it and ``complex_fraction`` may not exceed unity in sum.
     """
 
     complex_fraction: np.ndarray | float
@@ -455,6 +457,7 @@ class SiO2SurfaceState:
     removed_formula_units_m2: np.ndarray | float = 0.0
     activated_complex_fraction: np.ndarray | float = 0.0
     activated_polymer_fraction: np.ndarray | float = 0.0
+    oxygen_blocked_fraction: np.ndarray | float = 0.0
 
     def __post_init__(self):
         arrays = np.broadcast_arrays(
@@ -462,8 +465,10 @@ class SiO2SurfaceState:
             np.asarray(self.polymer_units_m2, dtype=float),
             np.asarray(self.removed_formula_units_m2, dtype=float),
             np.asarray(self.activated_complex_fraction, dtype=float),
-            np.asarray(self.activated_polymer_fraction, dtype=float))
-        complex_fraction, polymer, removed, activated_complex, activated_polymer = [
+            np.asarray(self.activated_polymer_fraction, dtype=float),
+            np.asarray(self.oxygen_blocked_fraction, dtype=float))
+        (complex_fraction, polymer, removed, activated_complex,
+         activated_polymer, oxygen_blocked) = [
             np.array(item, copy=True) for item in arrays]
         if (np.any(~np.isfinite(complex_fraction))
                 or np.any((complex_fraction < 0.0) | (complex_fraction > 1.0))
@@ -473,25 +478,31 @@ class SiO2SurfaceState:
                 or np.any(activated_complex < 0.0)
                 or np.any(activated_complex > complex_fraction + 16.0 * np.finfo(float).eps)
                 or np.any(~np.isfinite(activated_polymer))
-                or np.any((activated_polymer < 0.0) | (activated_polymer > 1.0))):
+                or np.any((activated_polymer < 0.0) | (activated_polymer > 1.0))
+                or np.any(~np.isfinite(oxygen_blocked))
+                or np.any((oxygen_blocked < 0.0) | (oxygen_blocked > 1.0))
+                or np.any(complex_fraction + oxygen_blocked
+                          > 1.0 + 32.0 * np.finfo(float).eps)):
             raise ValueError("invalid SiO2 surface state")
         # Erase only representational excursions at the dependent upper bound.
         activated_complex = np.minimum(activated_complex, complex_fraction)
         activated_polymer = np.where(polymer > 0.0, activated_polymer, 0.0)
+        oxygen_blocked = np.minimum(oxygen_blocked, 1.0 - complex_fraction)
         for array in (
                 complex_fraction, polymer, removed,
-                activated_complex, activated_polymer):
+                activated_complex, activated_polymer, oxygen_blocked):
             array.setflags(write=False)
         object.__setattr__(self, "complex_fraction", complex_fraction)
         object.__setattr__(self, "polymer_units_m2", polymer)
         object.__setattr__(self, "removed_formula_units_m2", removed)
         object.__setattr__(self, "activated_complex_fraction", activated_complex)
         object.__setattr__(self, "activated_polymer_fraction", activated_polymer)
+        object.__setattr__(self, "oxygen_blocked_fraction", oxygen_blocked)
 
     @classmethod
     def bare(cls, shape=()):
         zero = np.zeros(shape)
-        return cls(zero, zero, zero, zero, zero)
+        return cls(zero, zero, zero, zero, zero, zero)
 
     def conservative_surface_fields(self):
         return {
@@ -500,6 +511,7 @@ class SiO2SurfaceState:
             "removed_formula_units_m2": self.removed_formula_units_m2,
             "activated_complex_fraction": self.activated_complex_fraction,
             "activated_polymer_fraction": self.activated_polymer_fraction,
+            "oxygen_blocked_fraction": self.oxygen_blocked_fraction,
         }
 
     def conservative_surface_upper_bounds(self):
@@ -509,6 +521,7 @@ class SiO2SurfaceState:
             "removed_formula_units_m2": None,
             "activated_complex_fraction": 1.0,
             "activated_polymer_fraction": 1.0,
+            "oxygen_blocked_fraction": 1.0,
         }
 
     def with_conservative_surface_fields(self, fields):
@@ -522,7 +535,10 @@ class SiO2SurfaceState:
                 fields["activated_complex_fraction"], fields["complex_fraction"]),
             np.where(
                 np.asarray(fields["polymer_units_m2"]) > 0.0,
-                fields["activated_polymer_fraction"], 0.0))
+                fields["activated_polymer_fraction"], 0.0),
+            np.minimum(
+                fields["oxygen_blocked_fraction"],
+                1.0 - fields["complex_fraction"]))
 
 
 @dataclass(frozen=True)
@@ -559,6 +575,8 @@ class ReducedSiO2FluorocarbonParameters:
     energetic_polymer_deposition_yield: LowEnergyActivationYield | None = None
     energetic_polymer_deposition_species: tuple[str, ...] = ()
     declared_inert_neutral_species: tuple[str, ...] = ()
+    oxygen_blocking_probability: float = 0.0
+    oxygen_blocker_ion_removal_yield: EnergeticYield | None = None
     evidence: Mapping[str, ParameterEvidence] = field(default_factory=dict)
     known_omissions: tuple[str, ...] = (
         "polymer_crosslinking",
@@ -588,6 +606,16 @@ class ReducedSiO2FluorocarbonParameters:
         if (not self.oxygen_species or not np.isfinite(self.oxygen_polymer_etch_probability)
                 or not 0.0 <= self.oxygen_polymer_etch_probability <= 1.0):
             raise ValueError("invalid oxygen polymer-etch input")
+        if (not np.isfinite(self.oxygen_blocking_probability)
+                or not 0.0 <= self.oxygen_blocking_probability <= 1.0):
+            raise ValueError("oxygen blocking probability must lie in [0, 1]")
+        if self.oxygen_blocking_probability > 0.0:
+            if not isinstance(self.oxygen_blocker_ion_removal_yield, EnergeticYield):
+                raise ValueError(
+                    "positive oxygen blocking requires an energetic blocker-removal law")
+        elif self.oxygen_blocker_ion_removal_yield is not None:
+            raise ValueError(
+                "an oxygen blocker-removal law requires positive oxygen blocking")
         if (int(self.complex_removal_reaction_order) != self.complex_removal_reaction_order
                 or int(self.complex_removal_reaction_order) not in {1, 2}):
             raise ValueError("complex removal reaction order must be one or two")
@@ -952,6 +980,8 @@ class SurfaceStepResult:
     # Outward surface motion from net film/deposit thickening (m/s, >= 0).
     # Mechanisms without a resolved growing film leave the default.
     normal_growth_velocity_m_s: np.ndarray | float = 0.0
+    formed_oxygen_blocked_sites_m2: np.ndarray | float = 0.0
+    removed_oxygen_blocked_sites_m2: np.ndarray | float = 0.0
 
 
 class ReducedSiO2FluorocarbonMechanism:
@@ -1017,6 +1047,10 @@ class ReducedSiO2FluorocarbonMechanism:
                 "oxygen_species": par.oxygen_species,
                 "oxygen_polymer_etch_probability": float(
                     par.oxygen_polymer_etch_probability),
+                "oxygen_blocking_probability": float(
+                    par.oxygen_blocking_probability),
+                "oxygen_blocker_ion_removal_yield": yield_manifest(
+                    par.oxygen_blocker_ion_removal_yield),
                 "complex_removal_reaction_order": int(
                     par.complex_removal_reaction_order),
                 "bare_sio2_yield": yield_manifest(par.bare_sio2_yield),
@@ -1078,6 +1112,9 @@ class ReducedSiO2FluorocarbonMechanism:
         par = self.parameters
         access = np.exp(-state.polymer_units_m2 / par.polymer_monolayer_density_m2)
         polymer_coverage = 1.0 - access
+        accessible_unoccupied_sites = (
+            1.0 - state.complex_fraction - state.oxygen_blocked_fraction
+        ) * access
         probability = {}
 
         def add(species, value):
@@ -1099,6 +1136,10 @@ class ReducedSiO2FluorocarbonMechanism:
                 substrate_probability.get(species, 0.0) * access
                 + polymer_probability.get(species, 0.0) * polymer_coverage)
         add(par.oxygen_species, par.oxygen_polymer_etch_probability * polymer_coverage)
+        add(
+            par.oxygen_species,
+            par.oxygen_blocking_probability * accessible_unoccupied_sites,
+        )
         # An inert declaration is still a transport closure and must be visible to the common
         # radiosity operator. Returning an explicit zero distinguishes "known not to react" from
         # an accidentally missing species route.
@@ -1147,6 +1188,11 @@ class ReducedSiO2FluorocarbonMechanism:
             required_evidence.add("declared_inert_neutral_species")
         if par.polymer_bulk_unit_density_m3 is not None:
             required_evidence.add("polymer_bulk_unit_density_m3")
+        if par.oxygen_blocking_probability > 0.0:
+            required_evidence.update({
+                "oxygen_blocking_probability",
+                "oxygen_blocker_ion_removal_yield",
+            })
         missing_evidence = tuple(sorted(required_evidence - set(par.evidence)))
         nonpredictive = tuple(sorted(
             name for name in required_evidence
@@ -1474,6 +1520,182 @@ class ReducedSiO2FluorocarbonMechanism:
                 f"removed={float(removed[failed]):.6e}")
         return updated, deposited, removed
 
+    def _oxygen_block_step(
+            self, complex_fraction, blocked_fraction, polymer_inventory,
+            fluxes, duration_s, shape):
+        """Exact bounded oxygen-site competition at fixed fluorination.
+
+        The resolved state occupies only sites not already in the fluorinated
+        complex.  Oxygen adsorption and energetic cleanup form a two-state
+        linear system on that capacity, so both the coverage and the integrated
+        formation/removal ledgers are analytic and conservative.
+        """
+        par = self.parameters
+        if par.oxygen_blocking_probability == 0.0 or duration_s == 0.0:
+            return (
+                np.array(blocked_fraction, copy=True),
+                np.zeros(shape),
+                np.zeros(shape),
+            )
+        access = np.exp(
+            -polymer_inventory / par.polymer_monolayer_density_m2
+        )
+        oxygen_flux = self._broadcast(
+            fluxes.neutral_flux_m2_s.get(par.oxygen_species, 0.0), shape
+        )
+        formation_event_rate = (
+            oxygen_flux * par.oxygen_blocking_probability * access
+        )
+        removal_event_rate = self._energetic_rate(
+            fluxes, par.oxygen_blocker_ion_removal_yield, shape
+        ) * access
+        formation_hazard = formation_event_rate / par.site_density_m2
+        removal_hazard = removal_event_rate / par.site_density_m2
+        total_hazard = formation_hazard + removal_hazard
+        capacity = 1.0 - complex_fraction
+        equilibrium = np.divide(
+            capacity * formation_hazard,
+            total_hazard,
+            out=np.zeros(shape),
+            where=total_hazard > 0.0,
+        )
+        bare_equilibrium = np.divide(
+            capacity * removal_hazard,
+            total_hazard,
+            out=np.zeros(shape),
+            where=total_hazard > 0.0,
+        )
+        decay = np.exp(-total_hazard * duration_s)
+        active = total_hazard > 0.0
+        bare_fraction = capacity - blocked_fraction
+        updated_blocked = equilibrium + (blocked_fraction - equilibrium) * decay
+        updated_bare = bare_equilibrium + (bare_fraction - bare_equilibrium) * decay
+        updated = np.where(
+            updated_blocked >= 0.5 * capacity,
+            capacity - updated_bare,
+            updated_blocked,
+        )
+        updated = np.where(active, updated, blocked_fraction)
+        integral_kernel = np.empty(shape)
+        integral_kernel[active] = (
+            -np.expm1(-total_hazard[active] * duration_s)
+            / total_hazard[active]
+        )
+        integral_kernel[~active] = duration_s
+        integral_blocked = np.empty(shape)
+        integral_bare = np.empty(shape)
+        integral_blocked[active] = (
+            equilibrium[active] * duration_s
+            + (blocked_fraction[active] - equilibrium[active])
+            * integral_kernel[active]
+        )
+        integral_bare[active] = (
+            bare_equilibrium[active] * duration_s
+            + (bare_fraction[active] - bare_equilibrium[active])
+            * integral_kernel[active]
+        )
+        integral_blocked[~active] = blocked_fraction[~active] * duration_s
+        integral_bare[~active] = bare_fraction[~active] * duration_s
+        removed = removal_event_rate * integral_blocked
+        formed_from_rate = formation_event_rate * integral_bare
+        site_change = (updated - blocked_fraction) * par.site_density_m2
+        formed = site_change + removed
+        scale = np.maximum.reduce((
+            np.abs(site_change), np.abs(formed_from_rate), np.abs(removed),
+            np.ones(shape),
+        ))
+        tolerance = np.maximum(
+            5.0e-12 * scale,
+            8.0 * np.finfo(float).eps * par.site_density_m2,
+        )
+        if np.any(np.abs(formed_from_rate - formed) > tolerance):
+            raise RuntimeError(
+                "oxygen-blocking analytic update failed conservation"
+            )
+        return updated, formed, removed
+
+    def _substrate_step_with_blocker(
+            self, complex_fraction, blocked_fraction, polymer_inventory,
+            fluxes, duration_s, shape):
+        """Linear fluorination/removal update on oxygen-unblocked sites."""
+        par = self.parameters
+        if par.complex_removal_reaction_order != 1:
+            raise ValueError(
+                "oxygen-site competition currently requires first-order complex removal"
+            )
+        access = np.exp(-polymer_inventory / par.polymer_monolayer_density_m2)
+        formation_event_rate = self._neutral_weighted_rate(
+            fluxes, par.complex_formation_probability, shape) * access
+        complex_removal_event_rate = self._energetic_rate(
+            fluxes, par.complex_sio2_yield, shape) * access
+        bare_removal_event_rate = self._energetic_rate(
+            fluxes, par.bare_sio2_yield, shape) * access
+        formation_hazard = formation_event_rate / par.site_density_m2
+        removal_hazard = complex_removal_event_rate / par.site_density_m2
+        total_hazard = formation_hazard + removal_hazard
+        capacity = 1.0 - blocked_fraction
+        equilibrium = np.divide(
+            capacity * formation_hazard,
+            total_hazard,
+            out=np.zeros(shape),
+            where=total_hazard > 0.0,
+        )
+        bare_equilibrium = np.divide(
+            capacity * removal_hazard,
+            total_hazard,
+            out=np.zeros(shape),
+            where=total_hazard > 0.0,
+        )
+        decay = np.exp(-total_hazard * duration_s)
+        active = total_hazard > 0.0
+        bare_fraction = capacity - complex_fraction
+        updated_complex = equilibrium + (complex_fraction - equilibrium) * decay
+        updated_bare = bare_equilibrium + (bare_fraction - bare_equilibrium) * decay
+        updated = np.where(
+            updated_complex >= 0.5 * capacity,
+            capacity - updated_bare,
+            updated_complex,
+        )
+        updated = np.where(active, updated, complex_fraction)
+        integral_kernel = np.empty(shape)
+        integral_kernel[active] = (
+            -np.expm1(-total_hazard[active] * duration_s)
+            / total_hazard[active]
+        )
+        integral_kernel[~active] = duration_s
+        integral_complex = np.empty(shape)
+        integral_bare = np.empty(shape)
+        integral_complex[active] = (
+            equilibrium[active] * duration_s
+            + (complex_fraction[active] - equilibrium[active])
+            * integral_kernel[active]
+        )
+        integral_bare[active] = (
+            bare_equilibrium[active] * duration_s
+            + (bare_fraction[active] - bare_equilibrium[active])
+            * integral_kernel[active]
+        )
+        integral_complex[~active] = complex_fraction[~active] * duration_s
+        integral_bare[~active] = bare_fraction[~active] * duration_s
+        removed_complex = complex_removal_event_rate * integral_complex
+        formed_from_rate = formation_event_rate * integral_bare
+        removed_bare = bare_removal_event_rate * integral_bare
+        site_change = (updated - complex_fraction) * par.site_density_m2
+        formed_complex = site_change + removed_complex
+        scale = np.maximum.reduce((
+            np.abs(site_change), np.abs(formed_from_rate),
+            np.abs(removed_complex), np.ones(shape),
+        ))
+        tolerance = np.maximum(
+            5.0e-12 * scale,
+            8.0 * np.finfo(float).eps * par.site_density_m2,
+        )
+        if np.any(np.abs(formed_from_rate - formed_complex) > tolerance):
+            raise RuntimeError(
+                "oxygen-competing fluorination update failed conservation"
+            )
+        return updated, formed_complex, removed_complex, removed_bare
+
     def _substrate_step(self, complex_fraction, polymer_inventory, fluxes, duration_s, shape):
         par = self.parameters
         access = np.exp(-polymer_inventory / par.polymer_monolayer_density_m2)
@@ -1648,9 +1870,12 @@ class ReducedSiO2FluorocarbonMechanism:
         removed_total = np.array(state.removed_formula_units_m2, copy=True)
         activated_complex = np.array(state.activated_complex_fraction, copy=True)
         activated_polymer = np.array(state.activated_polymer_fraction, copy=True)
+        oxygen_blocked = np.array(state.oxygen_blocked_fraction, copy=True)
         formed_complex = np.zeros(shape); removed_complex = np.zeros(shape)
         removed_bare = np.zeros(shape); deposited_polymer = np.zeros(shape)
         removed_polymer = np.zeros(shape)
+        formed_oxygen_blocked = np.zeros(shape)
+        removed_oxygen_blocked = np.zeros(shape)
         for _ in range(n_steps):
             activated_complex, activated_polymer = self._activation_step(
                 activated_complex, activated_polymer, complex_fraction,
@@ -1668,8 +1893,28 @@ class ReducedSiO2FluorocarbonMechanism:
                 self._energetic_rate(
                     fluxes, self.parameters.complex_sio2_yield, shape)
                 * access / self.parameters.site_density_m2)
-            complex_fraction, formed, removed_c, removed_b = self._substrate_step(
-                complex_fraction, polymer, fluxes, step, shape)
+            if self.parameters.oxygen_blocking_probability > 0.0:
+                oxygen_blocked, formed_o, removed_o = self._oxygen_block_step(
+                    complex_fraction, oxygen_blocked, polymer,
+                    fluxes, 0.5 * step, shape,
+                )
+                formed_oxygen_blocked += formed_o
+                removed_oxygen_blocked += removed_o
+                complex_fraction, formed, removed_c, removed_b = (
+                    self._substrate_step_with_blocker(
+                        complex_fraction, oxygen_blocked, polymer,
+                        fluxes, step, shape,
+                    )
+                )
+                oxygen_blocked, formed_o, removed_o = self._oxygen_block_step(
+                    complex_fraction, oxygen_blocked, polymer,
+                    fluxes, 0.5 * step, shape,
+                )
+                formed_oxygen_blocked += formed_o
+                removed_oxygen_blocked += removed_o
+            else:
+                complex_fraction, formed, removed_c, removed_b = self._substrate_step(
+                    complex_fraction, polymer, fluxes, step, shape)
             activated_complex *= np.exp(-complex_removal_hazard * step)
             activated_complex = np.minimum(activated_complex, complex_fraction)
             formed_complex += formed; removed_complex += removed_c; removed_bare += removed_b
@@ -1686,7 +1931,7 @@ class ReducedSiO2FluorocarbonMechanism:
                 polymer, fluxes, 0.5 * step, shape)
         new_state = SiO2SurfaceState(
             complex_fraction, polymer, removed_total,
-            activated_complex, activated_polymer)
+            activated_complex, activated_polymer, oxygen_blocked)
         removed_oxide = removed_complex + removed_bare
         if duration_s > 0.0:
             velocity = (
@@ -1725,7 +1970,9 @@ class ReducedSiO2FluorocarbonMechanism:
             removed_polymer_units_m2=removed_polymer,
             material_exchange=exchange,
             validity=validity,
-            normal_growth_velocity_m_s=growth_velocity)
+            normal_growth_velocity_m_s=growth_velocity,
+            formed_oxygen_blocked_sites_m2=formed_oxygen_blocked,
+            removed_oxygen_blocked_sites_m2=removed_oxygen_blocked)
 
 
 # The conservative state equations are oxide-generic; the historical names

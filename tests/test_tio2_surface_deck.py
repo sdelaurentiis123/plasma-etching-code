@@ -33,6 +33,8 @@ def _deck(*, evidence=None):
         passivation_deposition_probability_on_passivation={"CF2": 0.1},
         oxygen_species="O",
         oxygen_passivation_removal_probability=0.05,
+        oxygen_blocking_probability=0.04,
+        oxygen_blocker_ion_removal_yield=EnergeticYield(0.1, 10.0, 150.0),
         bare_tio2_yield=EnergeticYield(0.2, 30.0, 150.0),
         fluorinated_tio2_yield=EnergeticYield(0.8, 15.0, 150.0),
         passivation_sputter_yield=EnergeticYield(0.4, 20.0, 150.0),
@@ -50,7 +52,7 @@ def test_tio2_deck_refuses_missing_evidence_and_unresolved_model_form():
     deck = _deck()
     assert deck.readiness().supports_reduced_sensitivity is True
     assert deck.readiness().supports_absolute_target_prediction is False
-    with pytest.raises(ValueError, match="oxygen_blocking"):
+    with pytest.raises(ValueError, match="roughness"):
         deck.build_parameters()
 
 
@@ -64,9 +66,7 @@ def test_tio2_reduced_sensitivity_deck_is_material_specific_and_nonpredictive():
     assert parameters.bulk_formula_density_m3 == pytest.approx(
         tio2_formula_unit_density_m3(3600.0)
     )
-    assert "competitive_oxygen_blocking_or_cleanup_surface_state" in (
-        parameters.known_omissions
-    )
+    assert "chemistry_dependent_roughness_evolution" in parameters.known_omissions
 
     result = mechanism.advance(
         mechanism.initial_state(),
@@ -86,3 +86,38 @@ def test_even_predictive_parameter_evidence_cannot_override_model_form_gap():
     assert deck.readiness().nonpredictive_parameter_evidence == ()
     assert deck.readiness().unresolved_model_form
     assert deck.readiness().supports_absolute_target_prediction is False
+
+
+def test_oxygen_competition_is_bounded_conservative_and_suppresses_fluorination():
+    mechanism = _deck().build_mechanism(allow_reduced_sensitivity=True)
+    ion = EnergeticFlux("Ar+", 2.0e17, [150.0], [1.0], [1.0])
+    without_oxygen = mechanism.advance(
+        mechanism.initial_state(),
+        SurfaceFluxes({"F": 2.0e19, "CF2": 1.0e19}, (ion,)),
+        1.0,
+    )
+    with_oxygen = mechanism.advance(
+        mechanism.initial_state(),
+        SurfaceFluxes(
+            {"F": 2.0e19, "CF2": 1.0e19, "O": 5.0e20}, (ion,)
+        ),
+        1.0,
+        max_step_s=0.02,
+    )
+
+    assert with_oxygen.state.oxygen_blocked_fraction > 0.0
+    assert with_oxygen.state.complex_fraction < without_oxygen.state.complex_fraction
+    assert (
+        with_oxygen.state.complex_fraction
+        + with_oxygen.state.oxygen_blocked_fraction
+        <= 1.0
+    )
+    blocker_change = (
+        with_oxygen.state.oxygen_blocked_fraction
+        * mechanism.parameters.site_density_m2
+    )
+    assert blocker_change == pytest.approx(
+        with_oxygen.formed_oxygen_blocked_sites_m2
+        - with_oxygen.removed_oxygen_blocked_sites_m2,
+        rel=2.0e-11,
+    )

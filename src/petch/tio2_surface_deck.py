@@ -3,15 +3,14 @@
 The common fluorinated-oxide kernel is executable, conservative, and
 material-labelled, but published SiO2 coefficients do not become TiO2 data by
 changing that label.  This module makes every TiO2-specific numeric input and
-its evidence explicit.  It also records the model-form gap exposed by Choi's
-nonmonotonic oxygen response: the current reduced kernel removes passivation
-with oxygen but does not carry a separate oxygen-blocked/cleaned TiO2 site
-state.
+its evidence explicit.  Choi's nonmonotonic oxygen response is represented by
+a separate oxygen-blocked TiO2 site fraction with analytic adsorption and
+energetic-cleanup updates; its two coefficients remain mandatory data inputs.
 
 Consequently a complete instance can be built for controlled sensitivity
-studies, while target prediction remains fail-closed until the model-form gap
-is resolved.  There are deliberately no default surface probabilities or
-yield curves in this module.
+studies, while target prediction remains fail-closed until the remaining
+roughness model-form gap and parameter evidence are resolved. There are
+deliberately no default surface probabilities or yield curves in this module.
 """
 from __future__ import annotations
 
@@ -37,13 +36,14 @@ TIO2_REDUCED_SURFACE_REQUIRED_EVIDENCE = (
     "polymer_deposition_probability_on_substrate",
     "polymer_deposition_probability_on_polymer",
     "oxygen_polymer_etch_probability",
+    "oxygen_blocking_probability",
+    "oxygen_blocker_ion_removal_yield",
     "bare_sio2_yield",
     "complex_sio2_yield",
     "polymer_sputter_yield",
 )
 
 TIO2_TARGET_MODEL_FORM_GAPS = (
-    "competitive_oxygen_blocking_or_cleanup_surface_state",
     "chemistry_dependent_roughness_evolution",
 )
 
@@ -78,6 +78,8 @@ class Tio2ReducedSurfaceDeck:
     passivation_deposition_probability_on_passivation: Mapping[str, float]
     oxygen_species: str
     oxygen_passivation_removal_probability: float
+    oxygen_blocking_probability: float
+    oxygen_blocker_ion_removal_yield: EnergeticYield
     bare_tio2_yield: EnergeticYield
     fluorinated_tio2_yield: EnergeticYield
     passivation_sputter_yield: EnergeticYield
@@ -154,6 +156,10 @@ class Tio2ReducedSurfaceDeck:
             oxygen_species=self.oxygen_species,
             oxygen_polymer_etch_probability=(
                 self.oxygen_passivation_removal_probability
+            ),
+            oxygen_blocking_probability=self.oxygen_blocking_probability,
+            oxygen_blocker_ion_removal_yield=(
+                self.oxygen_blocker_ion_removal_yield
             ),
             bare_sio2_yield=self.bare_tio2_yield,
             complex_sio2_yield=self.fluorinated_tio2_yield,

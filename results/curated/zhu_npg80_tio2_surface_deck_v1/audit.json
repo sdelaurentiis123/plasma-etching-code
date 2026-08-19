@@ -19,7 +19,8 @@
     "inventory_name": "TiO2_formula_unit",
     "silent_sio2_coefficient_transfer_allowed": false,
     "numerical_defaults_supplied": false,
-    "reduced_sensitivity_execution_available": true
+    "reduced_sensitivity_execution_available": true,
+    "competitive_oxygen_state_implemented": true
   },
   "parameter_slots": {
     "site_density_m2": {
@@ -55,6 +56,14 @@
       "numerical_target_value_identified": false,
       "available_evidence": "Choi nonmonotonic O2 response; coefficient not isolated"
     },
+    "oxygen_blocking_probability": {
+      "numerical_target_value_identified": false,
+      "available_evidence": "Choi excess-O blocking interpretation; coefficient absent"
+    },
+    "oxygen_blocker_ion_removal_yield": {
+      "numerical_target_value_identified": false,
+      "available_evidence": "no state-resolved beam or same-tool measurement"
+    },
     "bare_sio2_yield": {
       "meaning_in_tio2_deck": "bare TiO2 energetic removal yield",
       "numerical_target_value_identified": false,
@@ -75,6 +84,8 @@
     "bulk_formula_density_m3",
     "complex_formation_probability",
     "complex_sio2_yield",
+    "oxygen_blocker_ion_removal_yield",
+    "oxygen_blocking_probability",
     "oxygen_polymer_etch_probability",
     "polymer_bulk_unit_density_m3",
     "polymer_deposition_probability_on_polymer",
@@ -84,7 +95,6 @@
     "site_density_m2"
   ],
   "unresolved_model_form": [
-    "competitive_oxygen_blocking_or_cleanup_surface_state",
     "chemistry_dependent_roughness_evolution"
   ],
   "current_best_use": [
