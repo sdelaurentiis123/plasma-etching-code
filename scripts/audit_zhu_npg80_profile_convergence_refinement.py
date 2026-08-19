@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.audit_zhu_npg80_conditional_profiles import (
     ANALOG_BOARD,
+    FILM_THICKNESS_UM,
     PREREGISTRATION as PROFILE_PREREGISTRATION,
     REACTOR_DOSE,
     _run_profile_dose_trajectory,
@@ -36,6 +37,9 @@ OUTPUT = (
     / "zhu_npg80_profile_convergence_refinement_v1" / "audit.json"
 )
 CASE_DIR = OUTPUT.parent / "cases"
+JI_PHYSICAL_SHAPE_WITNESS = (
+    ROOT / "research_sources" / "library" / "ji-2024-tio2-hierarchical.md"
+)
 
 
 def _case_path(name):
@@ -138,6 +142,63 @@ def build_audit():
         "state_remap_conservation": maximum_remap
         <= gates["maximum_state_remap_relative_conservation_residual"],
     }
+    bottom_cd_certified = all(
+        gate_results[name]
+        for name in (
+            "cpu_cuda_cd", "fine_timestep_cd", "ultrafine_grid_cd",
+            "ultrafine_xy_symmetry",
+        )
+    )
+    ultrafine_metrics = cases["ultrafine_dt2"]["profile"]["profile"]
+    fine_metrics = cases["fine_dt2"]["profile"]["profile"]
+    fine_section = fine_metrics["cross_section"]
+    ultrafine_section = ultrafine_metrics["cross_section"]
+    fine_fraction = [
+        float(row["relief_fraction_from_top"]) for row in fine_section
+    ]
+    ultrafine_fraction = [
+        float(row["relief_fraction_from_top"]) for row in ultrafine_section
+    ]
+    if fine_fraction != ultrafine_fraction:
+        raise RuntimeError("refinement cross-section sampling fractions changed")
+    section_change = [
+        abs(float(candidate["mean_width_nm"]) - float(reference["mean_width_nm"]))
+        for reference, candidate in zip(fine_section, ultrafine_section)
+    ]
+    body_change = [
+        change for fraction, change in zip(fine_fraction, section_change)
+        if fraction <= 0.75
+    ]
+    junction_change = [
+        change for fraction, change in zip(fine_fraction, section_change)
+        if fraction >= 0.80
+    ]
+    first_over_bottom_gate = next((
+        fraction for fraction, change in zip(fine_fraction, section_change)
+        if change > gates["maximum_ultrafine_grid_cd_absolute_change_nm"]
+    ), None)
+    remaining_film_nm = (
+        1.0e3 * float(FILM_THICKNESS_UM)
+        - float(ultrafine_metrics["etched_depth_nm"])
+    )
+    bottom_minus_top_nm = (
+        float(ultrafine_metrics["bottom_cd_nm"])
+        - float(ultrafine_metrics["top_cd_nm"])
+    )
+    qualitative_footing_present = bottom_minus_top_nm > 0.0
+    if bottom_cd_certified:
+        footing_classification = (
+            "numerically certified geometric-transport result within the declared "
+            "conditional model"
+            if qualitative_footing_present else
+            "no positive bottom-minus-top footing in the numerically certified "
+            "conditional result"
+        )
+    else:
+        footing_classification = (
+            "bottom-CD magnitude remains numerically unresolved; do not classify "
+            "the conditional footing quantitatively"
+        )
     return {
         "schema": "petch.zhu-npg80-profile-convergence-refinement.v1",
         "condition_id": preregistration["condition_id"],
@@ -156,6 +217,10 @@ def build_audit():
                 "path": str(reference_path.relative_to(ROOT)),
                 "sha256": _hash(reference_path),
             },
+            "external_physical_shape_witness": {
+                "path": str(JI_PHYSICAL_SHAPE_WITNESS.relative_to(ROOT)),
+                "sha256": _hash(JI_PHYSICAL_SHAPE_WITNESS),
+            },
             "cases": {
                 name: {
                     "path": str(_case_path(name).relative_to(ROOT)),
@@ -171,16 +236,77 @@ def build_audit():
         "ultrafine_maximum_xy_asymmetry_nm": float(ultrafine_asymmetry),
         "maximum_transport_relative_particle_balance_error": maximum_balance,
         "maximum_state_remap_relative_conservation_residual": maximum_remap,
+        "conditional_shape_diagnostic": {
+            "ultrafine_top_cd_nm": float(ultrafine_metrics["top_cd_nm"]),
+            "ultrafine_bottom_cd_nm": float(ultrafine_metrics["bottom_cd_nm"]),
+            "ultrafine_bottom_minus_top_cd_nm": bottom_minus_top_nm,
+            "qualitative_footing_present": qualitative_footing_present,
+            "classification": footing_classification,
+            "surface_mechanism_growth_enabled": False,
+            "surface_product_redeposition_enabled": False,
+            "material_motion_invariant": {
+                "evolving_material": "ALD TiO2 external gas-solid boundary",
+                "pinned_materials": ["Cr mask", "fused-silica substrate"],
+                "allowed_normal_velocity": "removal-only and nonnegative",
+                "negative_removal_velocity_rejected_by_mechanism": True,
+                "wider_lower_section_requires_slow_lower-wall_recession_not_growth": True,
+            },
+            "candidate_mechanism_if_present": (
+                "differential geometric ion dose from deterministic angular "
+                "transport and feature self-shadowing"
+            ),
+            "external_physical_shape_witness": {
+                "bibkey": "ji-2024-tio2-hierarchical",
+                "observed_shape": (
+                    "upper triangle over a wider rectangular lower TiO2 section"
+                ),
+                "reported_mechanisms": (
+                    "Cr-mask lateral shrink plus lower-feature passivation"
+                ),
+                "same_feed_constituents": True,
+                "same_reactor_or_condition": False,
+                "coefficient_transfer_allowed": False,
+            },
+            "interpretation_limit": (
+                "numerical certification can establish that the shape is not a "
+                "discretization artifact of this conditional model; it cannot "
+                "validate the omitted Oxford TiO2/Cr surface response or prove "
+                "which physical mechanism made Freddie's withheld profile"
+            ),
+        },
+        "post_result_localization_diagnostic": {
+            "changes_frozen_gate_result": False,
+            "exploratory_not_preregistered": True,
+            "sentinel_cleared_tio2": bool(
+                cases["ultrafine_dt2"]["profile"]["tio2_clearance_detected"]
+            ),
+            "remaining_tio2_below_etched_floor_nm": remaining_film_nm,
+            "independent_pillar_bottom_exists": False,
+            "reason": (
+                "the pre-clear sidewall joins a continuous unetched TiO2 film; "
+                "the deepest width samples measure that junction rather than a "
+                "freestanding pillar base"
+            ),
+            "body_fraction_limit_from_top": 0.75,
+            "body_maximum_10nm_to_5nm_width_change_nm": max(body_change),
+            "near_floor_fraction_start_from_top": 0.80,
+            "near_floor_maximum_10nm_to_5nm_width_change_nm": max(junction_change),
+            "first_fraction_exceeding_frozen_5nm_cd_gate": first_over_bottom_gate,
+            "body_profile_within_frozen_timestep_cd_tolerance": (
+                max(body_change)
+                <= gates["maximum_fine_timestep_cd_absolute_change_nm"]
+            ),
+            "physical_classification": (
+                "the relief-to-unetched-film junction is physical in a partial "
+                "etch, but its quantitative flare magnitude is not grid-certified"
+            ),
+            "nonphysical_growth_or_interface_drift_detected": False,
+            "target_pillar_bottom_certified": False,
+        },
         "frozen_gates": gates,
         "gate_results": gate_results,
         "all_numerical_gates_pass": all(gate_results.values()),
-        "bottom_cd_numerically_certified_for_sentinel": all(
-            gate_results[name]
-            for name in (
-                "cpu_cuda_cd", "fine_timestep_cd", "ultrafine_grid_cd",
-                "ultrafine_xy_symmetry",
-            )
-        ),
+        "bottom_cd_numerically_certified_for_sentinel": bottom_cd_certified,
         "supports_absolute_target_profile_prediction": False,
         "supports_atomic_accuracy": False,
     }

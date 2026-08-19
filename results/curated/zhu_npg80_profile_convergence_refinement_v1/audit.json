@@ -1,0 +1,149 @@
+{
+  "all_numerical_gates_pass": false,
+  "bottom_cd_numerically_certified_for_sentinel": false,
+  "condition_id": "zhu-2026-tio2-npg80-rie",
+  "conditional_shape_diagnostic": {
+    "candidate_mechanism_if_present": "differential geometric ion dose from deterministic angular transport and feature self-shadowing",
+    "classification": "bottom-CD magnitude remains numerically unresolved; do not classify the conditional footing quantitatively",
+    "external_physical_shape_witness": {
+      "bibkey": "ji-2024-tio2-hierarchical",
+      "coefficient_transfer_allowed": false,
+      "observed_shape": "upper triangle over a wider rectangular lower TiO2 section",
+      "reported_mechanisms": "Cr-mask lateral shrink plus lower-feature passivation",
+      "same_feed_constituents": true,
+      "same_reactor_or_condition": false
+    },
+    "interpretation_limit": "numerical certification can establish that the shape is not a discretization artifact of this conditional model; it cannot validate the omitted Oxford TiO2/Cr surface response or prove which physical mechanism made Freddie's withheld profile",
+    "material_motion_invariant": {
+      "allowed_normal_velocity": "removal-only and nonnegative",
+      "evolving_material": "ALD TiO2 external gas-solid boundary",
+      "negative_removal_velocity_rejected_by_mechanism": true,
+      "pinned_materials": [
+        "Cr mask",
+        "fused-silica substrate"
+      ],
+      "wider_lower_section_requires_slow_lower-wall_recession_not_growth": true
+    },
+    "qualitative_footing_present": true,
+    "surface_mechanism_growth_enabled": false,
+    "surface_product_redeposition_enabled": false,
+    "ultrafine_bottom_cd_nm": 208.81406010432593,
+    "ultrafine_bottom_minus_top_cd_nm": 11.503138074814842,
+    "ultrafine_top_cd_nm": 197.3109220295111
+  },
+  "cpu_cuda_replicate_comparison": {
+    "candidate_case": "fine_dt4_cuda_replicate",
+    "cd_absolute_change_nm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "depth_relative_change": 0.0,
+    "maximum_cd_absolute_change_nm": 0.0,
+    "reference_case": "fine_dt4"
+  },
+  "fine_timestep_comparison": {
+    "candidate_case": "fine_dt2",
+    "cd_absolute_change_nm": [
+      0.09882623760563547,
+      0.21708387178347266,
+      2.393649611906369
+    ],
+    "depth_relative_change": 8.015831783070995e-05,
+    "maximum_cd_absolute_change_nm": 2.393649611906369,
+    "reference_case": "fine_dt4_cuda_replicate"
+  },
+  "frozen_gates": {
+    "maximum_cpu_cuda_cd_absolute_change_nm": 2.0,
+    "maximum_cpu_cuda_depth_relative_change": 0.01,
+    "maximum_fine_timestep_cd_absolute_change_nm": 3.0,
+    "maximum_fine_timestep_depth_relative_change": 0.01,
+    "maximum_state_remap_relative_conservation_residual": 1e-12,
+    "maximum_transport_relative_particle_balance_error": 2e-12,
+    "maximum_ultrafine_grid_cd_absolute_change_nm": 5.0,
+    "maximum_ultrafine_grid_depth_relative_change": 0.025,
+    "maximum_ultrafine_xy_asymmetry_nm": 2.0
+  },
+  "gate_results": {
+    "cpu_cuda_cd": true,
+    "cpu_cuda_depth": true,
+    "fine_timestep_cd": true,
+    "fine_timestep_depth": true,
+    "particle_balance": true,
+    "state_remap_conservation": true,
+    "ultrafine_grid_cd": false,
+    "ultrafine_grid_depth": true,
+    "ultrafine_xy_symmetry": true
+  },
+  "inputs": {
+    "cases": {
+      "fine_dt2": {
+        "path": "results/curated/zhu_npg80_profile_convergence_refinement_v1/cases/fine_dt2.json",
+        "sha256": "a69cf9c924ace94083b177c80db7fbd8eaf0524e1a467cc6813aa0cce843738a"
+      },
+      "fine_dt4_cuda_replicate": {
+        "path": "results/curated/zhu_npg80_profile_convergence_refinement_v1/cases/fine_dt4_cuda_replicate.json",
+        "sha256": "123059275a677ab5a15c744e9e3dd20408cf4387604b44553d88ee24f965efad"
+      },
+      "ultrafine_dt2": {
+        "path": "results/curated/zhu_npg80_profile_convergence_refinement_v1/cases/ultrafine_dt2.json",
+        "sha256": "13c8aa417e6c88ab92d993a0350fdbe283fd325411acc35731cec1952885e4ce"
+      }
+    },
+    "external_physical_shape_witness": {
+      "path": "research_sources/library/ji-2024-tio2-hierarchical.md",
+      "sha256": "2d79c85754c11b7b997b66d514d83a2a1140699572f0166a07c81660c8f768ee"
+    },
+    "reference_case": {
+      "path": "results/curated/zhu_npg80_profile_convergence_v1/cases/fine_dt4.json",
+      "sha256": "903d4803bb92c193590bb8dc0ec7820bc053cc31758d7a32c4aba1dcbf815c9e"
+    },
+    "refinement_preregistration": {
+      "path": "data/experimental/zhu_2026_tio2_npg80/profile_convergence_refinement_preregistration.json",
+      "sha256": "fe875614e8b7093ecb968720db25069e59d69ba6bcd1d3732af297ca7b5df107"
+    }
+  },
+  "maximum_state_remap_relative_conservation_residual": 3.601678348681019e-15,
+  "maximum_transport_relative_particle_balance_error": 0.0,
+  "post_result_localization_diagnostic": {
+    "body_fraction_limit_from_top": 0.75,
+    "body_maximum_10nm_to_5nm_width_change_nm": 2.5056521871725863,
+    "body_profile_within_frozen_timestep_cd_tolerance": true,
+    "changes_frozen_gate_result": false,
+    "exploratory_not_preregistered": true,
+    "first_fraction_exceeding_frozen_5nm_cd_gate": 0.85,
+    "independent_pillar_bottom_exists": false,
+    "near_floor_fraction_start_from_top": 0.8,
+    "near_floor_maximum_10nm_to_5nm_width_change_nm": 14.954858090551511,
+    "nonphysical_growth_or_interface_drift_detected": false,
+    "physical_classification": "the relief-to-unetched-film junction is physical in a partial etch, but its quantitative flare magnitude is not grid-certified",
+    "reason": "the pre-clear sidewall joins a continuous unetched TiO2 film; the deepest width samples measure that junction rather than a freestanding pillar base",
+    "remaining_tio2_below_etched_floor_nm": 439.20280912014334,
+    "sentinel_cleared_tio2": false,
+    "target_pillar_bottom_certified": false
+  },
+  "schema": "petch.zhu-npg80-profile-convergence-refinement.v1",
+  "sentinel": {
+    "blanket_rate_nm_min": 43.46666666666667,
+    "duration_s": 360.0,
+    "transport_scenario": "ion_high_tail_0p65",
+    "width_nm": 200.0
+  },
+  "supports_absolute_target_profile_prediction": false,
+  "supports_atomic_accuracy": false,
+  "surface_law_status": "cross-machine conditional analog; numerical refinement does not validate the Oxford surface law",
+  "target_depth_used": false,
+  "target_sem_used": false,
+  "ultrafine_grid_comparison": {
+    "candidate_case": "ultrafine_dt2",
+    "cd_absolute_change_nm": [
+      0.03223001180532492,
+      0.8028604459111648,
+      8.611724036071905
+    ],
+    "depth_relative_change": 3.513369480035875e-05,
+    "maximum_cd_absolute_change_nm": 8.611724036071905,
+    "reference_case": "fine_dt2"
+  },
+  "ultrafine_maximum_xy_asymmetry_nm": 0.027736659686723897
+}
