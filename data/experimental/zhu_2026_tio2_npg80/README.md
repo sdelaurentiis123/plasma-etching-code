@@ -232,6 +232,45 @@ python scripts/run_zhu_open_reactor.py \
   --maximum-evaluations 150
 ```
 
+## Daughter-reclosed reactor and radial dose board
+
+The former parent-only electron-kinetic gap is now materially closed.  A
+67-species augmented solve adds HF+, exact/partial HF electron collisions, F2
+electron collisions, material-wall neutralization, and the corresponding
+heavy-particle sinks, then recloses the nonlinear reactor and floating-sheath
+fixed point at `60/90/105/120 W` absorbed-power sensitivities.  Every state is
+independently replayed from a retained continuation path.  Maximum physical
+balance residuals are `2.06e-9--3.10e-8`, and sheath residuals are below
+`1.7e-4 V`.
+
+The explicit collision targets now represent `76.9--84.5%` of the solved
+neutral inventory, rather than falling to `13.0%` in the old parent-only
+high-power state.  The centered `3 mm` positive-ion flux remains near
+`1.03--1.06e19 m^-2 s^-1`, while the neutral-F thermal flux rises from
+`1.07e21` to `9.22e21 m^-2 s^-1`.  Thus absorbed power primarily changes the
+chemical-to-ion balance and ion composition, not just a scalar ion dose.
+
+The fixed-topology radial lift remains grid converged below `0.01%` and predicts
+only `0.7--2.3%` centered-optic enhancement across the power board.  Exact
+formula-unit arithmetic then shows that blanket removal of the supplied
+`700 nm` film requires `1.34--1.78 TiO2/ion` over the declared ALD-density
+sensitivity, before feature attenuation.  This replaces the old parent-only
+dose normalization as the current conditional result; it does not overwrite
+the historically frozen binary clearance call or select a surface yield from
+the future SEM.
+
+Rebuild/check the radial dose receipt with:
+
+```bash
+python scripts/audit_zhu_npg80_daughter_wafer_dose_board.py
+python scripts/audit_zhu_npg80_daughter_wafer_dose_board.py --check
+```
+
+HF vibration and dissociative attachment, the target absorbed power and
+self-bias, species-resolved TiO2/Cr surface response, and feature-floor
+transmission remain open.  Therefore the current board supports conserved,
+species-resolved conditional depths, not one unique SEM profile.
+
 ## Machine-family self-bias evidence
 
 The two downloaded files are valid despite their generic/misleading names.
@@ -254,11 +293,12 @@ python scripts/audit_zhu_npg80_self_bias.py --check
 
 ## What remains unidentifiable from the recipe alone
 
-Forward power and feed flows do not uniquely determine absorbed power,
-self-bias, ion energy distribution, species-resolved wafer fluxes, or the
-TiO2/Cr surface response. The family evidence now supports a physics-constrained
-voltage sensitivity ensemble, but exact absolute depth and profile are not yet
-a defensible model output. The highest-value missing observations are:
+Forward power and feed flows do not uniquely determine the target absorbed
+power, self-bias, or TiO2/Cr surface response.  The daughter-reclosed board now
+predicts species-resolved wafer-flux sensitivities, but the recipe does not
+choose one member or one feature-floor transmission.  Exact absolute depth and
+profile are therefore not yet a defensible unique output. The highest-value
+missing observations are:
 
 1. achieved DC self-bias (and, if available, RF voltage/current waveforms),
 2. blanket TiO2 rate and Cr loss or residual Cr for this condition,

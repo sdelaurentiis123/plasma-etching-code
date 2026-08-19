@@ -1,0 +1,252 @@
+{
+  "certification": {
+    "all_global_particle_power_residuals_below_2e_6": true,
+    "all_sheath_fixed_points_below_voltage_tolerance": true,
+    "daughter_collision_nonlinear_reclose_completed": true,
+    "hf_vibrational_and_attachment_basis_complete": false,
+    "supports_unique_sem_profile": false,
+    "target_machine_absorbed_power_measured": false,
+    "target_machine_self_bias_measured": false,
+    "target_tio2_surface_law_validated": false
+  },
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "fixed_inputs": {
+    "absorbed_power_sensitivity_W": [
+      60,
+      90,
+      105,
+      120
+    ],
+    "feature_or_sem_target_used": false,
+    "hf_collision_basis_complete": false,
+    "raw_lxcat_bytes_committed": false,
+    "self_bias_family_anchor_magnitude_V": 276.0,
+    "self_bias_is_target_machine_measurement": false
+  },
+  "schema": "petch.zhu-npg80-daughter-reclosed-board.v1",
+  "source_inputs": {
+    "f2_lxcat_payload_sha256": "00b478976ede8cc2d1c442da5dbd814c4bc2bd1ee156783c1411f0142e50fc45",
+    "hcl_lxcat_payload_sha256": "bb6d62b102dc052e8de7a15e16f85c89ad55bcdf806a1f025ef1f5db6d072789",
+    "o2_workbook_sha256": "6f98ac82e169d25d0a4328b1a3703f733668539adb8141d736209d199013c860"
+  },
+  "state_board": [
+    {
+      "F2_density_m3": 2.4847828635284337e+19,
+      "HF_density_m3": 2.392586660810497e+20,
+      "HF_positive_ion_density_m3": 4.2889576891268326e+17,
+      "absorbed_power_W": 60,
+      "electron_density_m3": 6358653372921114.0,
+      "electronegativity": 271.0097464723383,
+      "fixed_point_history": [
+        {
+          "grounded_sheath_drop_V": 20.20650777233977,
+          "iteration": "resumed_existing",
+          "maximum_normalized_reactor_residual": 2.0587093513311706e-09,
+          "powered_electrode_sheath_drop_V": 296.20650777233976,
+          "predicted_plasma_potential_V": 20.206348658442955,
+          "solver_evaluations": 62,
+          "voltage_residual_V": 0.0001591138968137784
+        }
+      ],
+      "grounded_sheath_drop_V": 20.20650777233977,
+      "maximum_normalized_reactor_residual": 2.0587093513311706e-09,
+      "mean_electron_energy_eV": 6.591553760511616,
+      "neutral_F_thermal_flux_m2_s": 1.0722278434670604e+21,
+      "plasma_potential_V": 20.206348658442955,
+      "powered_electrode_sheath_drop_V": 296.20650777233976,
+      "represented_reduced_field_Td": 255.39256596492075,
+      "sheath_fixed_point_residual_V": 0.0001591138968137784,
+      "solver_evaluations": 62,
+      "stable_continuation_path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_60W.json",
+      "stable_continuation_sha256": "ebecc0d2b922a216e7952baea965edbcb2a9c6417c3965a6721530ebc65c9c47",
+      "state_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_60W.json",
+      "state_sha256": "8dee4ef69faeaec5646cbb1917c9194dead7e41a3b6c7409de50237ecb0d34fc",
+      "total_axial_positive_ion_flux_m2_s": 1.0221440770724456e+19,
+      "total_neutral_reduced_field_Td": 215.81865128537117
+    },
+    {
+      "F2_density_m3": 4.817282738092131e+19,
+      "HF_density_m3": 3.9332351442096056e+20,
+      "HF_positive_ion_density_m3": 4.852272343826123e+17,
+      "absorbed_power_W": 90,
+      "electron_density_m3": 1.3288620210969436e+16,
+      "electronegativity": 86.41330514560464,
+      "fixed_point_history": [
+        {
+          "grounded_sheath_drop_V": 20.474843685564036,
+          "iteration": 0,
+          "maximum_normalized_reactor_residual": 6.069938738895396e-09,
+          "powered_electrode_sheath_drop_V": 296.47484368556405,
+          "predicted_plasma_potential_V": 18.340334140352684,
+          "solver_evaluations": 90,
+          "voltage_residual_V": 2.134509545211351
+        },
+        {
+          "grounded_sheath_drop_V": 18.340334140352684,
+          "iteration": 1,
+          "maximum_normalized_reactor_residual": 3.480656688729911e-09,
+          "powered_electrode_sheath_drop_V": 294.3403341403527,
+          "predicted_plasma_potential_V": 18.32156618041979,
+          "solver_evaluations": 113,
+          "voltage_residual_V": 0.018767959932894485
+        },
+        {
+          "grounded_sheath_drop_V": 18.32156618041979,
+          "iteration": 2,
+          "maximum_normalized_reactor_residual": 1.7590864529008642e-09,
+          "powered_electrode_sheath_drop_V": 294.3215661804198,
+          "predicted_plasma_potential_V": 18.321401597890972,
+          "solver_evaluations": 60,
+          "voltage_residual_V": 0.00016458252881790258
+        },
+        {
+          "grounded_sheath_drop_V": 18.32156618041979,
+          "iteration": "stable_replay",
+          "maximum_normalized_reactor_residual": 2.086446792971701e-09,
+          "powered_electrode_sheath_drop_V": 294.3215661804198,
+          "predicted_plasma_potential_V": 18.32140163343622,
+          "solver_evaluations": 103,
+          "voltage_residual_V": 0.00016454698356938025
+        }
+      ],
+      "grounded_sheath_drop_V": 18.32156618041979,
+      "maximum_normalized_reactor_residual": 2.086446792971701e-09,
+      "mean_electron_energy_eV": 6.175955599520676,
+      "neutral_F_thermal_flux_m2_s": 4.2205143565339827e+21,
+      "plasma_potential_V": 18.32140163343622,
+      "powered_electrode_sheath_drop_V": 294.3215661804198,
+      "represented_reduced_field_Td": 245.87794947821675,
+      "sheath_fixed_point_residual_V": 0.00016454698356938025,
+      "solver_evaluations": 103,
+      "stable_continuation_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_60W.json",
+      "stable_continuation_sha256": "8dee4ef69faeaec5646cbb1917c9194dead7e41a3b6c7409de50237ecb0d34fc",
+      "state_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_90W.json",
+      "state_sha256": "cd1ea739cf0ef2facb270dac28ab78e8ca560e1f1641437c4b8ef3efad2e2222",
+      "total_axial_positive_ion_flux_m2_s": 1.0575845279851262e+19,
+      "total_neutral_reduced_field_Td": 199.83943520121446
+    },
+    {
+      "F2_density_m3": 6.0084030753566196e+19,
+      "HF_density_m3": 4.220354673165301e+20,
+      "HF_positive_ion_density_m3": 3.5431187319298074e+17,
+      "absorbed_power_W": 105,
+      "electron_density_m3": 1.786477435829879e+16,
+      "electronegativity": 43.32704128254539,
+      "fixed_point_history": [
+        {
+          "grounded_sheath_drop_V": 20.22140392984418,
+          "iteration": 0,
+          "maximum_normalized_reactor_residual": 1.4329629668421744e-08,
+          "powered_electrode_sheath_drop_V": 296.2214039298442,
+          "predicted_plasma_potential_V": 17.622710185145326,
+          "solver_evaluations": 148,
+          "voltage_residual_V": 2.5986937446988527
+        },
+        {
+          "grounded_sheath_drop_V": 17.622710185145326,
+          "iteration": 1,
+          "maximum_normalized_reactor_residual": 1.0828923326797174e-08,
+          "powered_electrode_sheath_drop_V": 293.6227101851453,
+          "predicted_plasma_potential_V": 17.60512719712024,
+          "solver_evaluations": 155,
+          "voltage_residual_V": 0.01758298802508662
+        },
+        {
+          "grounded_sheath_drop_V": 17.60512719712024,
+          "iteration": 2,
+          "maximum_normalized_reactor_residual": 1.823514761977795e-08,
+          "powered_electrode_sheath_drop_V": 293.6051271971202,
+          "predicted_plasma_potential_V": 17.605009097015348,
+          "solver_evaluations": 72,
+          "voltage_residual_V": 0.00011810010489199385
+        },
+        {
+          "grounded_sheath_drop_V": 17.60512719712024,
+          "iteration": "stable_replay",
+          "maximum_normalized_reactor_residual": 8.249590545018305e-09,
+          "powered_electrode_sheath_drop_V": 293.6051271971202,
+          "predicted_plasma_potential_V": 17.60500863227902,
+          "solver_evaluations": 214,
+          "voltage_residual_V": 0.00011856484121963717
+        }
+      ],
+      "grounded_sheath_drop_V": 17.60512719712024,
+      "maximum_normalized_reactor_residual": 8.249590545018305e-09,
+      "mean_electron_energy_eV": 6.028006250622754,
+      "neutral_F_thermal_flux_m2_s": 6.688178177970601e+21,
+      "plasma_potential_V": 17.60500863227902,
+      "powered_electrode_sheath_drop_V": 293.6051271971202,
+      "represented_reduced_field_Td": 240.50273349393788,
+      "sheath_fixed_point_residual_V": 0.00011856484121963717,
+      "solver_evaluations": 214,
+      "stable_continuation_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_90W.json",
+      "stable_continuation_sha256": "cd1ea739cf0ef2facb270dac28ab78e8ca560e1f1641437c4b8ef3efad2e2222",
+      "state_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_105W.json",
+      "state_sha256": "cfedb95241984bd2b072eb661d7282f5959d6cda1e2f0470f90369833b3c1267",
+      "total_axial_positive_ion_flux_m2_s": 1.0263132464124428e+19,
+      "total_neutral_reduced_field_Td": 190.29211802275063
+    },
+    {
+      "F2_density_m3": 6.9209680507791974e+19,
+      "HF_density_m3": 4.296128599653382e+20,
+      "HF_positive_ion_density_m3": 2.312863617987497e+17,
+      "absorbed_power_W": 120,
+      "electron_density_m3": 2.25616850057427e+16,
+      "electronegativity": 21.69784051182661,
+      "fixed_point_history": [
+        {
+          "grounded_sheath_drop_V": 20.077811323036663,
+          "iteration": 0,
+          "maximum_normalized_reactor_residual": 1.5063747735144988e-08,
+          "powered_electrode_sheath_drop_V": 296.07781132303666,
+          "predicted_plasma_potential_V": 17.091076686581314,
+          "solver_evaluations": 240,
+          "voltage_residual_V": 2.986734636455349
+        },
+        {
+          "grounded_sheath_drop_V": 17.091076686581314,
+          "iteration": 1,
+          "maximum_normalized_reactor_residual": 4.8611940403785847e-08,
+          "powered_electrode_sheath_drop_V": 293.0910766865813,
+          "predicted_plasma_potential_V": 17.0776629922359,
+          "solver_evaluations": 195,
+          "voltage_residual_V": 0.013413694345413063
+        },
+        {
+          "grounded_sheath_drop_V": 17.0776629922359,
+          "iteration": 2,
+          "maximum_normalized_reactor_residual": 7.27806814294432e-09,
+          "powered_electrode_sheath_drop_V": 293.0776629922359,
+          "predicted_plasma_potential_V": 17.0776023590251,
+          "solver_evaluations": 61,
+          "voltage_residual_V": 6.063321080063133e-05
+        },
+        {
+          "grounded_sheath_drop_V": 17.0776629922359,
+          "iteration": "stable_replay",
+          "maximum_normalized_reactor_residual": 3.1022280324213204e-08,
+          "powered_electrode_sheath_drop_V": 293.0776629922359,
+          "predicted_plasma_potential_V": 17.07760284267775,
+          "solver_evaluations": 263,
+          "voltage_residual_V": 6.014955815203393e-05
+        }
+      ],
+      "grounded_sheath_drop_V": 17.0776629922359,
+      "maximum_normalized_reactor_residual": 3.1022280324213204e-08,
+      "mean_electron_energy_eV": 5.93245654021989,
+      "neutral_F_thermal_flux_m2_s": 9.22104489885406e+21,
+      "plasma_potential_V": 17.07760284267775,
+      "powered_electrode_sheath_drop_V": 293.0776629922359,
+      "represented_reduced_field_Td": 236.84175375270738,
+      "sheath_fixed_point_residual_V": 6.014955815203393e-05,
+      "solver_evaluations": 263,
+      "stable_continuation_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_105W.json",
+      "stable_continuation_sha256": "cfedb95241984bd2b072eb661d7282f5959d6cda1e2f0470f90369833b3c1267",
+      "state_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_120W.json",
+      "state_sha256": "df26f5218f203e4aa6e4ba86c3100d8abaf80bce0a460d5c92fa2b61e1ef98fc",
+      "total_axial_positive_ion_flux_m2_s": 1.0377830979063503e+19,
+      "total_neutral_reduced_field_Td": 182.14894662494376
+    }
+  ],
+  "target_outcome_used": false
+}

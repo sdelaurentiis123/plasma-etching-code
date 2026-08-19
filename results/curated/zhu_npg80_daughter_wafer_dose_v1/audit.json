@@ -1,0 +1,917 @@
+{
+  "certification": {
+    "all_axisymmetric_lifts_conserved_and_grid_converged": true,
+    "all_reactor_states_conserved": true,
+    "feature_floor_transmission_predicted": false,
+    "species_resolved_tio2_surface_law_validated": false,
+    "supports_conditional_atom_counted_depths": true,
+    "supports_unique_sem_profile": false,
+    "surface_coefficient_fitted_to_target": false,
+    "target_machine_absorbed_power_measured": false,
+    "target_machine_self_bias_measured": false,
+    "target_outcome_used": false
+  },
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "input": {
+    "ald_tio2_density_sensitivity_kg_m3": [
+      3250.0,
+      4150.0
+    ],
+    "etch_duration_s": 1200.0,
+    "feature_floor_transmission_candidates": [
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "film_thickness_nm": 700.0,
+    "reactor_board_path": "results/curated/zhu_npg80_daughter_reclosed_v1/audit.json",
+    "reactor_board_sha256": "36988cc39297253160bf889fcb3dd8b37ba0e93bb9cd913861b71a137270d14f",
+    "surface_yield_candidates_formula_units_per_ion": [
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "target_manifest_path": "data/experimental/zhu_2026_tio2_npg80/recipe_manifest.json",
+    "target_manifest_sha256": "17678a0010e0c1ce844b230cfb2cd43318842e800094cb7939eaeaf47548bb9a"
+  },
+  "measured_depth_target_used": false,
+  "power_board": [
+    {
+      "absorbed_power_sensitivity_W": 60,
+      "axisymmetric_grid_convergence": {
+        "central_to_fine_full_flux_relative_change": 2.2944720295070553e-05,
+        "central_to_fine_optic_flux_relative_change": 2.4447895426771282e-05,
+        "passed_0p1_percent": true
+      },
+      "axisymmetric_species_flux_fraction_at_center": {
+        "CF+": 0.03946818786331542,
+        "CF2+": 0.011467803674638044,
+        "CF3+": 0.41651404490766814,
+        "CH+": 5.3115642036213715e-06,
+        "CHF+": 0.010339354395097268,
+        "CHF2+": 0.03757107690738985,
+        "F+": 1.4719680878240597e-08,
+        "F2+": 5.1805020584922604e-05,
+        "H+": 0.02227393473469881,
+        "H2+": 0.12019919817604471,
+        "HF+": 0.3234278942673225,
+        "O+": 0.0008468041219229732,
+        "O2+": 0.01745714772966311,
+        "S+": 2.6994441431853834e-09,
+        "SF+": 6.760219459993553e-08,
+        "SF2+": 3.141555630848575e-07,
+        "SF2++": 7.786354859553121e-08,
+        "SF3+": 8.675378425481056e-05,
+        "SF4+": 7.780469762816932e-05,
+        "SF4++": 4.960410558811891e-06,
+        "SF5+": 0.00020744070457736092
+      },
+      "central_3mm_positive_ion_flux_m2_s": 1.0261724569287215e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0072990918687337,
+      "conditional_depth_sensitivity": {
+        "feature_transmission_candidates_are_fitted": false,
+        "rows": [
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              62.81151711883621,
+              49.18974232198016
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              125.62303423767241,
+              98.37948464396032
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              188.43455135650862,
+              147.5692269659405
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              251.24606847534483,
+              196.75896928792065
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              125.62303423767241,
+              98.37948464396032
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              251.24606847534483,
+              196.75896928792065
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              376.86910271301724,
+              295.138453931881
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              502.49213695068966,
+              393.5179385758413
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              188.43455135650862,
+              147.5692269659405
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              376.86910271301724,
+              295.138453931881
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              565.3036540695259,
+              442.7076808978215
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              590.276907863762
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              251.24606847534483,
+              196.75896928792065
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              502.49213695068966,
+              393.5179385758413
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              590.276907863762
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              700.0
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          }
+        ],
+        "surface_yield_candidates_are_fitted": false
+      },
+      "electron_collision_basis_neutral_fraction": 0.845046724324054,
+      "electron_density_m3": 6358653372921114.0,
+      "electronegativity": 271.0097464723383,
+      "global_F_to_local_positive_ion_flux_ratio": 104.48807471174779,
+      "global_neutral_F_thermal_flux_m2_s": 1.0722278434670604e+21,
+      "global_positive_ion_flux_m2_s": 1.0221440770724456e+19,
+      "grounded_sheath_drop_V": 20.20650777233977,
+      "mean_electron_energy_eV": 6.591553760511616,
+      "neutral_F_radial_transfer_solved": false,
+      "power_closure_residual_W_m3": -3.270357774454169e-05,
+      "power_density_W_m3": {
+        "absorbed": 44209.70641441538,
+        "charged_wall": 18440.31905019614,
+        "grounded_charged_wall": 1816.0484981281609,
+        "parent_collision": 23714.850489756205,
+        "powered_electrode_charged_wall": 16624.270552067977,
+        "supplemental_collision": 2054.536907166608
+      },
+      "powered_electrode_sheath_drop_V": 296.20650777233976,
+      "represented_reduced_field_Td": 255.39256596492075,
+      "required_blanket_formula_units_per_positive_ion": [
+        1.3930566242247333,
+        1.7788261509331211
+      ],
+      "state_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_60W.json",
+      "state_sha256": "8dee4ef69faeaec5646cbb1917c9194dead7e41a3b6c7409de50237ecb0d34fc",
+      "tio2_clearance_gate_by_density_endpoint": [
+        {
+          "delivered_positive_ion_dose_m2": 1.2314069483144658e+22,
+          "depth_nm": 700.0,
+          "duration_s": 1200.0,
+          "feature_transmission": 1.0,
+          "formula_unit_density_m3": 2.450599437808329e+28,
+          "incident_positive_ion_dose_m2": 1.2314069483144658e+22,
+          "mass_density_kg_m3": 3250.0,
+          "positive_ion_flux_m2_s": 1.0261724569287215e+19,
+          "required_formula_units_per_incident_ion": 1.3930566242247333
+        },
+        {
+          "delivered_positive_ion_dose_m2": 1.2314069483144658e+22,
+          "depth_nm": 700.0,
+          "duration_s": 1200.0,
+          "feature_transmission": 1.0,
+          "formula_unit_density_m3": 3.1292269744321737e+28,
+          "incident_positive_ion_dose_m2": 1.2314069483144658e+22,
+          "mass_density_kg_m3": 4150.0,
+          "positive_ion_flux_m2_s": 1.0261724569287215e+19,
+          "required_formula_units_per_incident_ion": 1.7788261509331211
+        }
+      ],
+      "total_neutral_reduced_field_Td": 215.81865128537117
+    },
+    {
+      "absorbed_power_sensitivity_W": 90,
+      "axisymmetric_grid_convergence": {
+        "central_to_fine_full_flux_relative_change": 3.764272025974513e-05,
+        "central_to_fine_optic_flux_relative_change": 4.00816520544911e-05,
+        "passed_0p1_percent": true
+      },
+      "axisymmetric_species_flux_fraction_at_center": {
+        "CF+": 0.022118794062889042,
+        "CF2+": 0.007314088804380168,
+        "CF3+": 0.2720464888015651,
+        "CH+": 2.265450307599576e-06,
+        "CHF+": 0.004944988078613798,
+        "CHF2+": 0.019585563969593465,
+        "F+": 1.4018084946656524e-08,
+        "F2+": 0.000256113364156184,
+        "H+": 0.07869257923369331,
+        "H2+": 0.10975358307372221,
+        "HF+": 0.46977827860332966,
+        "O+": 0.0015853792663688335,
+        "O2+": 0.012944847482186802,
+        "S+": 3.1223866534981884e-09,
+        "SF+": 8.605952222084413e-08,
+        "SF2+": 4.472736630340174e-07,
+        "SF2++": 4.445269839707305e-08,
+        "SF3+": 0.00026751619445136243,
+        "SF4+": 0.00019428439022840251,
+        "SF4++": 3.057896341057231e-06,
+        "SF5+": 0.0005115764018176113
+      },
+      "central_3mm_positive_ion_flux_m2_s": 1.0636745958208164e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.011505499832091,
+      "conditional_depth_sensitivity": {
+        "feature_transmission_candidates_are_fitted": false,
+        "rows": [
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              65.107004805247,
+              50.987413401699456
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              130.214009610494,
+              101.97482680339891
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              195.32101441574102,
+              152.96224020509837
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              260.428019220988,
+              203.94965360679782
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              130.214009610494,
+              101.97482680339891
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              260.428019220988,
+              203.94965360679782
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              390.64202883148204,
+              305.92448041019674
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              520.856038441976,
+              407.89930721359565
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              195.32101441574102,
+              152.96224020509837
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              390.64202883148204,
+              305.92448041019674
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              585.963043247223,
+              458.88672061529513
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              611.8489608203935
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              260.428019220988,
+              203.94965360679782
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              520.856038441976,
+              407.89930721359565
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              611.8489608203935
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              700.0
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          }
+        ],
+        "surface_yield_candidates_are_fitted": false
+      },
+      "electron_collision_basis_neutral_fraction": 0.8127586700039524,
+      "electron_density_m3": 1.3288620210969436e+16,
+      "electronegativity": 86.41330514560464,
+      "global_F_to_local_positive_ion_flux_ratio": 396.78623266141807,
+      "global_neutral_F_thermal_flux_m2_s": 4.2205143565339827e+21,
+      "global_positive_ion_flux_m2_s": 1.0575845279851262e+19,
+      "grounded_sheath_drop_V": 18.32156618041979,
+      "mean_electron_energy_eV": 6.175955599520676,
+      "neutral_F_radial_transfer_solved": false,
+      "power_closure_residual_W_m3": 8.240255192504264e-05,
+      "power_density_W_m3": {
+        "absorbed": 66314.55962162306,
+        "charged_wall": 18778.01066796419,
+        "grounded_charged_wall": 1716.6426333746933,
+        "parent_collision": 44318.43386457334,
+        "powered_electrode_charged_wall": 17061.368034589497,
+        "supplemental_collision": 3218.115006682984
+      },
+      "powered_electrode_sheath_drop_V": 294.3215661804198,
+      "represented_reduced_field_Td": 245.87794947821675,
+      "required_blanket_formula_units_per_positive_ion": [
+        1.3439414124753033,
+        1.7161098036223104
+      ],
+      "state_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_90W.json",
+      "state_sha256": "cd1ea739cf0ef2facb270dac28ab78e8ca560e1f1641437c4b8ef3efad2e2222",
+      "tio2_clearance_gate_by_density_endpoint": [
+        {
+          "delivered_positive_ion_dose_m2": 1.2764095149849797e+22,
+          "depth_nm": 700.0,
+          "duration_s": 1200.0,
+          "feature_transmission": 1.0,
+          "formula_unit_density_m3": 2.450599437808329e+28,
+          "incident_positive_ion_dose_m2": 1.2764095149849797e+22,
+          "mass_density_kg_m3": 3250.0,
+          "positive_ion_flux_m2_s": 1.0636745958208164e+19,
+          "required_formula_units_per_incident_ion": 1.3439414124753033
+        },
+        {
+          "delivered_positive_ion_dose_m2": 1.2764095149849797e+22,
+          "depth_nm": 700.0,
+          "duration_s": 1200.0,
+          "feature_transmission": 1.0,
+          "formula_unit_density_m3": 3.1292269744321737e+28,
+          "incident_positive_ion_dose_m2": 1.2764095149849797e+22,
+          "mass_density_kg_m3": 4150.0,
+          "positive_ion_flux_m2_s": 1.0636745958208164e+19,
+          "required_formula_units_per_incident_ion": 1.7161098036223104
+        }
+      ],
+      "total_neutral_reduced_field_Td": 199.83943520121446
+    },
+    {
+      "absorbed_power_sensitivity_W": 105,
+      "axisymmetric_grid_convergence": {
+        "central_to_fine_full_flux_relative_change": 5.475460489545725e-05,
+        "central_to_fine_optic_flux_relative_change": 5.82272794138472e-05,
+        "passed_0p1_percent": true
+      },
+      "axisymmetric_species_flux_fraction_at_center": {
+        "CF+": 0.017742984923684754,
+        "CF2+": 0.006173597232883303,
+        "CF3+": 0.2317178133666582,
+        "CH+": 1.6166618926942694e-06,
+        "CHF+": 0.0038601387285330103,
+        "CHF2+": 0.01593697116767376,
+        "F+": 2.0828728548858368e-08,
+        "F2+": 0.0007312207781054545,
+        "H+": 0.1273519905361591,
+        "H2+": 0.10986446119204653,
+        "HF+": 0.4696968572295451,
+        "O+": 0.0020432218876904862,
+        "O2+": 0.012654910963589394,
+        "S+": 5.011971719430858e-09,
+        "SF+": 1.4492462611229333e-07,
+        "SF2+": 7.905720560534313e-07,
+        "SF2++": 3.5822151627747565e-08,
+        "SF3+": 0.0006549837037530636,
+        "SF4+": 0.0004273130422438658,
+        "SF4++": 2.5778598583490066e-06,
+        "SF5+": 0.0011383435661486616
+      },
+      "central_3mm_positive_ion_flux_m2_s": 1.0339519024610679e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0159989746745266,
+      "conditional_depth_sensitivity": {
+        "feature_transmission_candidates_are_fitted": false,
+        "rows": [
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              63.28769319716567,
+              49.562651298985166
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              126.57538639433135,
+              99.12530259797033
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              189.863079591497,
+              148.6879538969555
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              253.1507727886627,
+              198.25060519594066
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              126.57538639433135,
+              99.12530259797033
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              253.1507727886627,
+              198.25060519594066
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              379.726159182994,
+              297.375907793911
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              506.3015455773254,
+              396.50121039188133
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              189.863079591497,
+              148.6879538969555
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              379.726159182994,
+              297.375907793911
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              569.5892387744909,
+              446.0638616908665
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              594.751815587822
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              253.1507727886627,
+              198.25060519594066
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              506.3015455773254,
+              396.50121039188133
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              594.751815587822
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              700.0
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          }
+        ],
+        "surface_yield_candidates_are_fitted": false
+      },
+      "electron_collision_basis_neutral_fraction": 0.7912264249900808,
+      "electron_density_m3": 1.786477435829879e+16,
+      "electronegativity": 43.32704128254539,
+      "global_F_to_local_positive_ion_flux_ratio": 646.8558316930449,
+      "global_neutral_F_thermal_flux_m2_s": 6.688178177970601e+21,
+      "global_positive_ion_flux_m2_s": 1.0263132464124428e+19,
+      "grounded_sheath_drop_V": 17.60512719712024,
+      "mean_electron_energy_eV": 6.028006250622754,
+      "neutral_F_radial_transfer_solved": false,
+      "power_closure_residual_W_m3": 0.00020482882609940134,
+      "power_density_W_m3": {
+        "absorbed": 77366.98622522691,
+        "charged_wall": 18114.04400776919,
+        "grounded_charged_wall": 1607.3623910553601,
+        "parent_collision": 55380.05526698172,
+        "powered_electrode_charged_wall": 16506.681616713828,
+        "supplemental_collision": 3872.886745647174
+      },
+      "powered_electrode_sheath_drop_V": 293.6051271971202,
+      "represented_reduced_field_Td": 240.50273349393788,
+      "required_blanket_formula_units_per_positive_ion": [
+        1.3825752777463958,
+        1.7654422777377055
+      ],
+      "state_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_105W.json",
+      "state_sha256": "cfedb95241984bd2b072eb661d7282f5959d6cda1e2f0470f90369833b3c1267",
+      "tio2_clearance_gate_by_density_endpoint": [
+        {
+          "delivered_positive_ion_dose_m2": 1.2407422829532816e+22,
+          "depth_nm": 700.0,
+          "duration_s": 1200.0,
+          "feature_transmission": 1.0,
+          "formula_unit_density_m3": 2.450599437808329e+28,
+          "incident_positive_ion_dose_m2": 1.2407422829532816e+22,
+          "mass_density_kg_m3": 3250.0,
+          "positive_ion_flux_m2_s": 1.0339519024610679e+19,
+          "required_formula_units_per_incident_ion": 1.3825752777463958
+        },
+        {
+          "delivered_positive_ion_dose_m2": 1.2407422829532816e+22,
+          "depth_nm": 700.0,
+          "duration_s": 1200.0,
+          "feature_transmission": 1.0,
+          "formula_unit_density_m3": 3.1292269744321737e+28,
+          "incident_positive_ion_dose_m2": 1.2407422829532816e+22,
+          "mass_density_kg_m3": 4150.0,
+          "positive_ion_flux_m2_s": 1.0339519024610679e+19,
+          "required_formula_units_per_incident_ion": 1.7654422777377055
+        }
+      ],
+      "total_neutral_reduced_field_Td": 190.29211802275063
+    },
+    {
+      "absorbed_power_sensitivity_W": 120,
+      "axisymmetric_grid_convergence": {
+        "central_to_fine_full_flux_relative_change": 8.655574185811865e-05,
+        "central_to_fine_optic_flux_relative_change": 9.173312908483666e-05,
+        "passed_0p1_percent": true
+      },
+      "axisymmetric_species_flux_fraction_at_center": {
+        "CF+": 0.014950216664822262,
+        "CF2+": 0.0053720886857131864,
+        "CF3+": 0.20281377480920545,
+        "CH+": 1.266062404214026e-06,
+        "CHF+": 0.0033209881488496865,
+        "CHF2+": 0.014151448438023202,
+        "F+": 3.8961408374946855e-08,
+        "F2+": 0.002158719585825284,
+        "H+": 0.1791998685132463,
+        "H2+": 0.11200832161987001,
+        "HF+": 0.4453607301113496,
+        "O+": 0.0024129250579595436,
+        "O2+": 0.01258798612142293,
+        "S+": 9.854531647902308e-09,
+        "SF+": 2.940681566872737e-07,
+        "SF2+": 1.6552383785909422e-06,
+        "SF2++": 3.0442800817314187e-08,
+        "SF3+": 0.0017811674139791571,
+        "SF4+": 0.001051904993909602,
+        "SF4++": 2.2517534306182934e-06,
+        "SF5+": 0.0028243134547128396
+      },
+      "central_3mm_positive_ion_flux_m2_s": 1.0475227243024208e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0233541296588817,
+      "conditional_depth_sensitivity": {
+        "feature_transmission_candidates_are_fitted": false,
+        "rows": [
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              64.11835660334987,
+              50.21317083394869
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              128.23671320669973,
+              100.42634166789738
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              192.35506981004957,
+              150.63951250184604
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              256.47342641339947,
+              200.85268333579475
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 0.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              128.23671320669973,
+              100.42634166789738
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              256.47342641339947,
+              200.85268333579475
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              384.71013962009914,
+              301.2790250036921
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              512.9468528267989,
+              401.7053666715895
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 1.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              192.35506981004957,
+              150.63951250184604
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              384.71013962009914,
+              301.2790250036921
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              577.0652094301488,
+              451.9185375055382
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              602.5580500073842
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 1.5
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              256.47342641339947,
+              200.85268333579475
+            ],
+            "run_averaged_feature_floor_transmission": 0.25,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              512.9468528267989,
+              401.7053666715895
+            ],
+            "run_averaged_feature_floor_transmission": 0.5,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              602.5580500073842
+            ],
+            "run_averaged_feature_floor_transmission": 0.75,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          },
+          {
+            "film_capped_depth_nm_by_density_endpoint": [
+              700.0,
+              700.0
+            ],
+            "run_averaged_feature_floor_transmission": 1.0,
+            "surface_yield_formula_units_per_incident_ion": 2.0
+          }
+        ],
+        "surface_yield_candidates_are_fitted": false
+      },
+      "electron_collision_basis_neutral_fraction": 0.7690744716201106,
+      "electron_density_m3": 2.25616850057427e+16,
+      "electronegativity": 21.69784051182661,
+      "global_F_to_local_positive_ion_flux_ratio": 880.2715859930057,
+      "global_neutral_F_thermal_flux_m2_s": 9.22104489885406e+21,
+      "global_positive_ion_flux_m2_s": 1.0377830979063503e+19,
+      "grounded_sheath_drop_V": 17.0776629922359,
+      "mean_electron_energy_eV": 5.93245654021989,
+      "neutral_F_radial_transfer_solved": false,
+      "power_closure_residual_W_m3": 0.0009049957770912442,
+      "power_density_W_m3": {
+        "absorbed": 88419.41282883075,
+        "charged_wall": 18237.99940164713,
+        "grounded_charged_wall": 1583.082907725632,
+        "parent_collision": 65597.2023204172,
+        "powered_electrode_charged_wall": 16654.916493921497,
+        "supplemental_collision": 4584.21020177065
+      },
+      "powered_electrode_sheath_drop_V": 293.0776629922359,
+      "represented_reduced_field_Td": 236.84175375270738,
+      "required_blanket_formula_units_per_positive_ion": [
+        1.3646637973161742,
+        1.7425706950344992
+      ],
+      "state_path": "results/curated/zhu_npg80_daughter_reclosed_v1/power_120W.json",
+      "state_sha256": "df26f5218f203e4aa6e4ba86c3100d8abaf80bce0a460d5c92fa2b61e1ef98fc",
+      "tio2_clearance_gate_by_density_endpoint": [
+        {
+          "delivered_positive_ion_dose_m2": 1.257027269162905e+22,
+          "depth_nm": 700.0,
+          "duration_s": 1200.0,
+          "feature_transmission": 1.0,
+          "formula_unit_density_m3": 2.450599437808329e+28,
+          "incident_positive_ion_dose_m2": 1.257027269162905e+22,
+          "mass_density_kg_m3": 3250.0,
+          "positive_ion_flux_m2_s": 1.0475227243024208e+19,
+          "required_formula_units_per_incident_ion": 1.3646637973161742
+        },
+        {
+          "delivered_positive_ion_dose_m2": 1.257027269162905e+22,
+          "depth_nm": 700.0,
+          "duration_s": 1200.0,
+          "feature_transmission": 1.0,
+          "formula_unit_density_m3": 3.1292269744321737e+28,
+          "incident_positive_ion_dose_m2": 1.257027269162905e+22,
+          "mass_density_kg_m3": 4150.0,
+          "positive_ion_flux_m2_s": 1.0475227243024208e+19,
+          "required_formula_units_per_incident_ion": 1.7425706950344992
+        }
+      ],
+      "total_neutral_reduced_field_Td": 182.14894662494376
+    }
+  ],
+  "schema": "petch.zhu-npg80-daughter-wafer-dose-board.v1",
+  "sem_target_used": false,
+  "target_outcome_used": false
+}

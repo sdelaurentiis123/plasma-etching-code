@@ -14,6 +14,12 @@ from dataclasses import asdict
 from hashlib import sha256
 import json
 from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from petch.tio2_ion_dose import (
     build_clearance_gate,
@@ -23,8 +29,6 @@ from scripts.audit_zhu_npg80_axisymmetric_ccp import (
     build_receipt as build_axisymmetric_receipt,
 )
 
-
-ROOT = Path(__file__).resolve().parents[1]
 REACTOR_BOARD = (
     ROOT / "results" / "curated" / "zhu_npg80_daughter_reclosed_v1"
     / "audit.json"
@@ -144,6 +148,17 @@ def build_receipt(
             for density in ALD_TIO2_DENSITY_KG_M3
         ]
         state = state_payload["state"]
+        power_density = state_payload["power_density_W_m3"]
+        power_closure_residual = (
+            float(power_density["absorbed"])
+            - float(power_density["parent_collision"])
+            - float(power_density["supplemental_collision"])
+            - float(power_density["charged_wall"])
+        )
+        if abs(power_closure_residual) > (
+            2.0e-6 * float(power_density["absorbed"])
+        ):
+            raise ValueError(f"reactor power is not closed: {state_path}")
         f_flux = float(state["neutral_thermal_flux_m2_s"]["F"])
         rows.append({
             "absorbed_power_sensitivity_W": reactor_row[
@@ -157,6 +172,22 @@ def build_receipt(
             "powered_electrode_sheath_drop_V": reactor_row[
                 "powered_electrode_sheath_drop_V"
             ],
+            "power_density_W_m3": power_density,
+            "power_closure_residual_W_m3": power_closure_residual,
+            "represented_reduced_field_Td": state[
+                "reduced_electric_field_Td"
+            ],
+            "total_neutral_reduced_field_Td": state[
+                "implied_total_neutral_reduced_electric_field_Td"
+            ],
+            "electron_collision_basis_neutral_fraction": state[
+                "electron_collision_basis_neutral_fraction"
+            ],
+            "mean_electron_energy_eV": state[
+                "mean_electron_energy_eV"
+            ],
+            "electron_density_m3": state["electron_density_m3"],
+            "electronegativity": state["electronegativity"],
             "global_positive_ion_flux_m2_s": state[
                 "total_axial_positive_ion_flux_m2_s"
             ],

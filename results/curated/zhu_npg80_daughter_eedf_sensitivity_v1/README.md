@@ -15,10 +15,12 @@ The result is decisive about model form:
   the electron-balance change more negative.
 
 Therefore the parent-only heavy-particle state cannot be certified as the
-self-consistent solution once daughter collisions are admitted.  The next
-physics step is a nonlinear reactor reclose with the enlarged collision basis.
-This board is not that reclose and supports no wafer flux, TiO2 depth, or SEM
-claim.
+self-consistent solution once daughter collisions are admitted.  That result
+has now been acted on: the nonlinear augmented reactor/sheath reclose is in
+`results/curated/zhu_npg80_daughter_reclosed_v1/`, and its radial atom-dose
+lift is in `results/curated/zhu_npg80_daughter_wafer_dose_v1/`.  This frozen
+one-way board remains only the diagnostic that required the reclose and, by
+itself, supports no wafer flux, TiO2 depth, or SEM claim.
 
 HF is a deliberately partial literature replay.  Huang et al. transfer HCl
 momentum to HF and threshold-shift HCl dissociation/ionization.  Their separate

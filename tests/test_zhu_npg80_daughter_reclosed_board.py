@@ -1,4 +1,8 @@
+from hashlib import sha256
 import json
+from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -12,6 +16,9 @@ from scripts.audit_zhu_npg80_daughter_wafer_dose_board import (
     CANDIDATE_SURFACE_YIELDS,
     _depth_sensitivity,
 )
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_reclosed_board_args_preserve_self_bias_and_full_daughter_inputs(tmp_path):
@@ -69,3 +76,66 @@ def test_wafer_dose_sensitivity_keeps_surface_and_transport_unfitted():
     highest = board["rows"][-1]["film_capped_depth_nm_by_density_endpoint"]
     assert lowest[0] > lowest[1]
     assert highest[0] == highest[1] == 700.0
+
+
+def test_wafer_dose_script_is_directly_executable():
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" /
+                "audit_zhu_npg80_daughter_wafer_dose_board.py"),
+            "--help",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "--reactor-board" in completed.stdout
+
+
+def test_committed_reclosed_and_wafer_dose_boards_fail_closed_on_authority():
+    reactor_path = (
+        ROOT / "results" / "curated" / "zhu_npg80_daughter_reclosed_v1"
+        / "audit.json"
+    )
+    wafer_path = (
+        ROOT / "results" / "curated"
+        / "zhu_npg80_daughter_wafer_dose_v1" / "audit.json"
+    )
+    reactor = json.loads(reactor_path.read_text(encoding="utf-8"))
+    wafer = json.loads(wafer_path.read_text(encoding="utf-8"))
+    assert reactor["target_outcome_used"] is False
+    assert reactor["certification"][
+        "daughter_collision_nonlinear_reclose_completed"
+    ] is True
+    assert reactor["certification"]["supports_unique_sem_profile"] is False
+    assert [row["absorbed_power_W"] for row in reactor["state_board"]] == [
+        60, 90, 105, 120,
+    ]
+    for row in reactor["state_board"]:
+        state_path = ROOT / row["state_path"]
+        assert sha256(state_path.read_bytes()).hexdigest() == row[
+            "state_sha256"
+        ]
+        assert row["maximum_normalized_reactor_residual"] < 2.0e-6
+        assert abs(row["sheath_fixed_point_residual_V"]) < 0.01
+
+    certification = wafer["certification"]
+    assert certification[
+        "all_axisymmetric_lifts_conserved_and_grid_converged"
+    ] is True
+    assert certification["supports_conditional_atom_counted_depths"] is True
+    assert certification["supports_unique_sem_profile"] is False
+    assert certification["species_resolved_tio2_surface_law_validated"] is False
+    rows = wafer["power_board"]
+    assert min(
+        row["electron_collision_basis_neutral_fraction"] for row in rows
+    ) > 0.75
+    assert max(row["global_positive_ion_flux_m2_s"] for row in rows) / min(
+        row["global_positive_ion_flux_m2_s"] for row in rows
+    ) < 1.04
+    assert rows[-1]["global_neutral_F_thermal_flux_m2_s"] / rows[0][
+        "global_neutral_F_thermal_flux_m2_s"
+    ] > 8.0
