@@ -1,0 +1,161 @@
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Warp 1.16.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.2
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 3090" (24 GiB, sm_86, mempool enabled)
+   Kernel cache:
+     /root/.cache/warp/1.16.0
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 3.70 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 5.17 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 4.47 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 4.97 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 4.42 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 4.54 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 4.31 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 4.47 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 5.06 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 4.63 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 4.73 ms  (cached)
+Module petch.boundary_transport_3d dac2643 load on device 'cuda:0' took 4.63 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 2.63 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 2.21 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 2.62 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 3.35 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 2.04 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 3.04 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 2.38 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 4.00 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 3.20 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 3.26 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 3.56 ms  (cached)
+Module petch.threed 43d4494 load on device 'cpu' took 6.24 ms  (cached)
+concurrent.futures.process._RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 246, in _process_worker
+    r = call_item.fn(*call_item.args, **call_item.kwargs)
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 205, in _process_chunk
+    return [fn(*args) for args in chunk]
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 205, in <listcomp>
+    return [fn(*args) for args in chunk]
+  File "/root/petch/scripts/audit_zhu_npg80_moving_cr_profiles.py", line 420, in _execute
+    profiles = _run_trajectory(
+  File "/root/petch/scripts/audit_zhu_npg80_moving_cr_profiles.py", line 312, in _run_trajectory
+    step = advance_feature_step_3d(
+  File "/root/petch/src/petch/feature_step_3d.py", line 2917, in advance_feature_step_3d
+    next_face_material) = _extract_uniform_surface_arrays(output_geometry)
+  File "/root/petch/src/petch/feature_step_3d.py", line 419, in _extract_uniform_surface_arrays
+    surface = UniformFeatureGeometryBackend3D(geometry).extract_surface()
+  File "/root/petch/src/petch/feature_geometry_backend_3d.py", line 339, in extract_surface
+    vertices, faces, centroids, areas = extract_mesh_3d(
+  File "/root/petch/src/petch/threed.py", line 158, in extract_mesh_3d
+    _certify_extracted_surface_topology_3d(
+  File "/root/petch/src/petch/threed.py", line 128, in _certify_extracted_surface_topology_3d
+    raise RuntimeError(
+RuntimeError: marching-cubes surface contains 3 unmatched interior edges
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/petch/scripts/audit_zhu_npg80_moving_cr_profiles.py", line 599, in <module>
+    main()
+  File "/root/petch/scripts/audit_zhu_npg80_moving_cr_profiles.py", line 583, in main
+    rendered = _render(build(
+  File "/root/petch/scripts/audit_zhu_npg80_moving_cr_profiles.py", line 512, in build
+    computed = list(pool.map(_execute, payloads))
+  File "/usr/lib/python3.10/concurrent/futures/process.py", line 575, in _chain_from_iterable_of_lists
+    for element in iterable:
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 621, in result_iterator
+    yield _result_or_cancel(fs.pop())
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 319, in _result_or_cancel
+    return fut.result(timeout)
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 458, in result
+    return self.__get_result()
+  File "/usr/lib/python3.10/concurrent/futures/_base.py", line 403, in __get_result
+    raise self._exception
+RuntimeError: marching-cubes surface contains 3 unmatched interior edges
