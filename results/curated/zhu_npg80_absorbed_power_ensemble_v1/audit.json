@@ -1,0 +1,193 @@
+{
+  "certification": {
+    "absorbed_power_measured": false,
+    "all_accepted_states_conserve_below_2e_6": true,
+    "all_axisymmetric_global_residuals_below_1_percent": true,
+    "all_sheath_fixed_points_below_0p01_V": true,
+    "daughter_gas_electron_collision_basis_complete": false,
+    "supports_unique_profile_depth": false,
+    "target_tio2_cr_surface_law_validated": false
+  },
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "corrected_depth_verdict": {
+    "current_clearance_supported_over_full_power_envelope": false,
+    "current_unique_depth_supported": false,
+    "original_frozen_binary_call_preserved": true,
+    "reason": "The atom-count requirement spans the independent plausible surface-response range as absorbed power changes; target TiO2/Cr surface kinetics and feature transport remain unmeasured."
+  },
+  "field_domain_audit": {
+    "accepted_120W_collision_basis_fraction": 0.12950782989280998,
+    "accepted_120W_implied_total_neutral_field_Td": 89.39853140726005,
+    "accepted_120W_represented_field_Td": 690.2944129420802,
+    "default_upper_represented_field_Td": 600.0,
+    "extended_upper_represented_field_Td": 900.0,
+    "interpretation": "The extended coordinate is required because the electron collision deck represents only a shrinking parent-neutral fraction. The total-neutral E/N remains below 100 Td. This exposes missing daughter-gas electron collisions and makes the 120 W row a domain sensitivity, not a stronger grade.",
+    "rejected_default_domain_path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_120W_default_domain_failure.json",
+    "rejected_default_domain_sha256": "457e11bf9d4b22cb827d101bbbd462cd590d6c7e18f045e0147c0f59fc7ea298"
+  },
+  "fixed_inputs": {
+    "ald_tio2_density_sensitivity_kg_m3": [
+      3250.0,
+      4150.0
+    ],
+    "etch_time_s": 1200.0,
+    "film_thickness_nm": 700.0,
+    "forward_power_setpoint_W": 150.0,
+    "pressure_mTorr": 30.0,
+    "self_bias_magnitude_V": 276.0
+  },
+  "independent_feature_response": {
+    "c4f8_sf6_ar_p1_over_p3_depth_ratio": {
+      "CW": 1.48472505,
+      "S30_B70": 1.11405295,
+      "S70_B30": 1.08961303
+    },
+    "cw_layout_depth_ratio": 1.48472505,
+    "same_tool_or_chemistry": false,
+    "source": "hong-2023-tio2",
+    "warning": "Constrains the existence and scale of TiO2 pattern response; never transferred as a Zhu absolute coefficient."
+  },
+  "power_response": {
+    "F_flux_120W_to_60W_ratio": 12.00929309917373,
+    "F_flux_monotonically_increases_with_absorbed_power": true,
+    "central_ion_flux_120W_to_60W_ratio": 1.5542525114462444,
+    "interpretation": "The recipe's 150 W forward setpoint does not choose one row. These are conserved conditional states spanning 40--80% forward-to-absorbed transfer at fixed self-bias.",
+    "ion_flux_monotonically_increases_with_absorbed_power": true,
+    "required_surface_yield_envelope": [
+      0.8208722774461649,
+      1.6291531123103986
+    ]
+  },
+  "schema": "petch.zhu-npg80-absorbed-power-ensemble.v1",
+  "sem_or_depth_target_used": false,
+  "state_board": [
+    {
+      "absorbed_power_W": 60,
+      "absorbed_to_forward_power_fraction": 0.4,
+      "axisymmetric_global_flux_relative_residual": -0.0026294032920006435,
+      "central_3mm_optic_ion_flux_m2_s": 1.120448647802918e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0058689793238915,
+      "continuation": {
+        "path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_60W_iter0.json",
+        "sha256": "8f472624c57feb1f49dd4bd1efaa01e13c41cb743cc5b42540de00fba7bea3b3"
+      },
+      "electron_collision_basis_neutral_fraction": 0.5166191104375206,
+      "electron_density_m3": 8474737018338399.0,
+      "electronegativity": 274.55560011958346,
+      "full_electrode_global_ion_flux_m2_s": 1.1168477696353714e+19,
+      "implied_total_neutral_reduced_field_Td": 143.93896718354645,
+      "maximum_normalized_reactor_residual": 3.0677771870709642e-09,
+      "mean_electron_energy_eV": 6.725281757853113,
+      "neutral_F_thermal_flux_m2_s": 5.2813881948858345e+20,
+      "plasma_potential_V": 21.525506691605425,
+      "reduced_field_bounds_Td": [
+        205.0,
+        600.0
+      ],
+      "represented_neutral_reduced_field_Td": 278.6171945161798,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        1.2758427987973002,
+        1.6291531123103986
+      ],
+      "sheath_fixed_point_residual_V": 0.007660950536557465,
+      "state_path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_60W.json",
+      "state_sha256": "ebecc0d2b922a216e7952baea965edbcb2a9c6417c3965a6721530ebc65c9c47"
+    },
+    {
+      "absorbed_power_W": 90,
+      "absorbed_to_forward_power_fraction": 0.6,
+      "axisymmetric_global_flux_relative_residual": -0.0035790223612430267,
+      "central_3mm_optic_ion_flux_m2_s": 1.4572248811804377e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.007398707714177,
+      "continuation": {
+        "path": "results/curated/zhu_npg80_open_reactor_v2/source_geometry_central.json",
+        "sha256": "8006c8f95108df3036a6809806d45e7a2f22bdf939d149683a08e37c83579061"
+      },
+      "electron_collision_basis_neutral_fraction": 0.2583185869764276,
+      "electron_density_m3": 2.2305696317071276e+16,
+      "electronegativity": 111.18052662617309,
+      "full_electrode_global_ion_flux_m2_s": 1.45171821607602e+19,
+      "implied_total_neutral_reduced_field_Td": 100.36809226619745,
+      "maximum_normalized_reactor_residual": 3.59146886292011e-09,
+      "mean_electron_energy_eV": 6.375262337736328,
+      "neutral_F_thermal_flux_m2_s": 2.2057858751870633e+21,
+      "plasma_potential_V": 20.471383068942224,
+      "reduced_field_bounds_Td": [
+        205.0,
+        600.0
+      ],
+      "represented_neutral_reduced_field_Td": 388.54382660182466,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        0.9809854039573721,
+        1.2526429004378752
+      ],
+      "sheath_fixed_point_residual_V": 0.0034606166218296153,
+      "state_path": "results/curated/zhu_npg80_sheath_coupled_v1/central_276V.json",
+      "state_sha256": "669cb7baab66e594611a58888dd9731904d7c422e2ea670478035e13dc536d18"
+    },
+    {
+      "absorbed_power_W": 105,
+      "absorbed_to_forward_power_fraction": 0.7,
+      "axisymmetric_global_flux_relative_residual": -0.0043287914426321005,
+      "central_3mm_optic_ion_flux_m2_s": 1.5959476231280546e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0088145930269845,
+      "continuation": {
+        "path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_105W_iter0.json",
+        "sha256": "9ef86d91a027657daebad39bcce77c395706431715153aaa1e54379a3a5a1376"
+      },
+      "electron_collision_basis_neutral_fraction": 0.17631567172805457,
+      "electron_density_m3": 3.221448114864525e+16,
+      "electronegativity": 69.88433199409387,
+      "full_electrode_global_ion_flux_m2_s": 1.5888808451031073e+19,
+      "implied_total_neutral_reduced_field_Td": 92.27324736256882,
+      "maximum_normalized_reactor_residual": 9.389124609878617e-09,
+      "mean_electron_energy_eV": 6.32889742344577,
+      "neutral_F_thermal_flux_m2_s": 4.074843886509481e+21,
+      "plasma_potential_V": 20.22066710447097,
+      "reduced_field_bounds_Td": [
+        205.0,
+        600.0
+      ],
+      "represented_neutral_reduced_field_Td": 523.3411554299555,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        0.8957163242736473,
+        1.1437608448417345
+      ],
+      "sheath_fixed_point_residual_V": 0.0007368253732309427,
+      "state_path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_105W.json",
+      "state_sha256": "79bbcb8579820b940f1156afeebdf03f8b2980ca44ea3838dfd675f10171c169"
+    },
+    {
+      "absorbed_power_W": 120,
+      "absorbed_to_forward_power_fraction": 0.8,
+      "axisymmetric_global_flux_relative_residual": -0.005400500686715694,
+      "central_3mm_optic_ion_flux_m2_s": 1.741460124794234e+19,
+      "central_3mm_to_full_electrode_flux_ratio": 1.0108685536583657,
+      "continuation": {
+        "path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_120W_iter0.json",
+        "sha256": "6a12b3c91490cd5f9e51522271f2a2ab5f2e052959f7e42f29bd55c916b020b2"
+      },
+      "electron_collision_basis_neutral_fraction": 0.12950782989280998,
+      "electron_density_m3": 4.223559581398144e+16,
+      "electronegativity": 45.68728632247558,
+      "full_electrode_global_ion_flux_m2_s": 1.7320906276437762e+19,
+      "implied_total_neutral_reduced_field_Td": 89.39853140726005,
+      "maximum_normalized_reactor_residual": 1.0761666638769069e-08,
+      "mean_electron_energy_eV": 6.3474360519339506,
+      "neutral_F_thermal_flux_m2_s": 6.342573880290006e+21,
+      "plasma_potential_V": 20.07748812531759,
+      "reduced_field_bounds_Td": [
+        205.0,
+        900.0
+      ],
+      "represented_neutral_reduced_field_Td": 690.2944129420802,
+      "required_central_3mm_formula_units_per_positive_ion": [
+        0.8208722774461649,
+        1.0481907542774105
+      ],
+      "sheath_fixed_point_residual_V": 0.00032319771907296513,
+      "state_path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_120W.json",
+      "state_sha256": "8adfb996b41c74b916a95cb1255e55163ee1404905b0c9bc9d6be0b8fc5c3b30"
+    }
+  ]
+}

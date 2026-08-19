@@ -1,0 +1,16 @@
+{
+  "schema": "petch.zhu-open-reactor-rejected-state.v1",
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "absorbed_power_W": 120.0,
+  "self_bias_magnitude_V": 276.0,
+  "reduced_field_bounds_Td": [205.0, 600.0],
+  "solver_success_flag": true,
+  "solver_message": "xtol termination condition is satisfied",
+  "accepted": false,
+  "maximum_normalized_residual": 0.004541401197452694,
+  "dominant_balance": "CHF3",
+  "dominant_balance_residual": -0.004541401197452694,
+  "terminal_reduced_field_Td": 599.9998460747477,
+  "interpretation": "The numerical optimizer stopped at the declared upper field boundary but failed the 2e-6 conservation gate. This state is rejected, not rounded into the ensemble.",
+  "target_sem_or_depth_used": false
+}

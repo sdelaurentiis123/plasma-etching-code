@@ -131,7 +131,10 @@ def run(args) -> dict:
         feed_molecules_s=_feed_molecules_s(),
         absorbed_power_W=args.absorbed_power_W,
         source_frequency_hz=13.56e6,
-        reduced_field_bounds_Td=(205.0, 600.0),
+        reduced_field_bounds_Td=(
+            args.minimum_reduced_field_Td,
+            args.maximum_reduced_field_Td,
+        ),
         ion_temperature_eV=args.ion_temperature_eV,
         ion_momentum_mean_free_path_m=1.0e-6 * args.ion_mfp_um,
         mean_positive_ion_wall_energy_eV=args.mean_wall_ion_energy_eV,
@@ -201,6 +204,9 @@ def run(args) -> dict:
             "gas_temperature_K": condition.gas_temperature_K,
             "forward_power_setpoint_W": 150.0,
             "absorbed_power_sensitivity_W": condition.absorbed_power_W,
+            "reduced_field_bounds_Td": list(
+                condition.reduced_field_bounds_Td
+            ),
             "electrode_diameter_mm": args.electrode_diameter_mm,
             "electrode_diameter_source": (
                 "Oxford Instruments PlasmaPro 80 manufacturer specification: "
@@ -296,6 +302,10 @@ def main() -> None:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--initial-state-json", type=Path)
     parser.add_argument("--absorbed-power-W", type=float, default=90.0)
+    parser.add_argument(
+        "--minimum-reduced-field-Td", type=float, default=205.0)
+    parser.add_argument(
+        "--maximum-reduced-field-Td", type=float, default=600.0)
     parser.add_argument(
         "--electrode-diameter-mm",
         type=float,
