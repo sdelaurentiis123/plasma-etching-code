@@ -227,20 +227,60 @@ def build_board(args) -> dict:
     stable_initial = INITIAL_60W
     rows = []
     for power_W in POWER_NODES_W:
-        payload, history = solve_sheath_fixed_point(
-            source_workbook=args.source_workbook,
-            hcl_lxcat=args.hcl_lxcat,
-            f2_lxcat=args.f2_lxcat,
-            stable_initial_state=stable_initial,
-            absorbed_power_W=power_W,
-            initial_grounded_sheath_V=INITIAL_GROUNDED_SHEATH_V[power_W],
-            maximum_fixed_point_iterations=args.maximum_fixed_point_iterations,
-            maximum_evaluations=args.maximum_evaluations,
-            voltage_tolerance_V=args.voltage_tolerance_V,
-            nonlinear_verbose=args.nonlinear_verbose,
-        )
         state_path = output_dir / f"power_{power_W}W.json"
-        state_path.write_text(_render(payload), encoding="utf-8")
+        if args.resume_existing and state_path.exists():
+            payload = json.loads(state_path.read_text(encoding="utf-8"))
+            daughter = payload["input"]["daughter_collision_basis"]
+            plasma = _plasma_potential_V(payload)
+            grounded = float(payload["input"][
+                "grounded_surface_sheath_drop_V"
+            ])
+            if (
+                payload["input"]["absorbed_power_sensitivity_W"] != power_W
+                or payload["numerics"]["maximum_normalized_residual"]
+                > 2.0e-6
+                or abs(grounded - plasma) > args.voltage_tolerance_V
+                or payload["input"]["o2_source_workbook_sha256"]
+                != _hash(args.source_workbook)
+                or daughter["hcl_lxcat_payload_sha256"]
+                != _hash(args.hcl_lxcat)
+                or daughter["f2_lxcat_payload_sha256"]
+                != _hash(args.f2_lxcat)
+            ):
+                raise RuntimeError(
+                    f"existing {power_W} W state is not a valid resume node"
+                )
+            history = [{
+                "iteration": "resumed_existing",
+                "grounded_sheath_drop_V": grounded,
+                "powered_electrode_sheath_drop_V": (
+                    grounded + SELF_BIAS_MAGNITUDE_V
+                ),
+                "predicted_plasma_potential_V": plasma,
+                "voltage_residual_V": grounded - plasma,
+                "maximum_normalized_reactor_residual": payload["numerics"][
+                    "maximum_normalized_residual"
+                ],
+                "solver_evaluations": payload["numerics"][
+                    "solver_evaluations"
+                ],
+            }]
+        else:
+            payload, history = solve_sheath_fixed_point(
+                source_workbook=args.source_workbook,
+                hcl_lxcat=args.hcl_lxcat,
+                f2_lxcat=args.f2_lxcat,
+                stable_initial_state=stable_initial,
+                absorbed_power_W=power_W,
+                initial_grounded_sheath_V=INITIAL_GROUNDED_SHEATH_V[power_W],
+                maximum_fixed_point_iterations=(
+                    args.maximum_fixed_point_iterations
+                ),
+                maximum_evaluations=args.maximum_evaluations,
+                voltage_tolerance_V=args.voltage_tolerance_V,
+                nonlinear_verbose=args.nonlinear_verbose,
+            )
+            state_path.write_text(_render(payload), encoding="utf-8")
         state = payload["state"]
         grounded = float(payload["input"][
             "grounded_surface_sheath_drop_V"
@@ -336,6 +376,7 @@ def main() -> None:
     parser.add_argument("--maximum-fixed-point-iterations", type=int, default=8)
     parser.add_argument("--maximum-evaluations", type=int, default=800)
     parser.add_argument("--voltage-tolerance-V", type=float, default=0.01)
+    parser.add_argument("--resume-existing", action="store_true")
     parser.add_argument(
         "--nonlinear-verbose", type=int, choices=(0, 1, 2), default=0
     )
