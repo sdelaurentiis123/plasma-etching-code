@@ -9,7 +9,8 @@ and depth are not used.
 
 Production uses a 10 nm mesh so the initial mask spans 4.5 vertical cells. It
 reports mask thickness and stops a controlled-profile claim if the Cr center
-is exhausted. The board is not a microscopic Cr prediction: Nguyen et al.
+falls below one resolved vertical cell. That numerical stop is explicitly not
+called physical mask exhaustion. The board is not a microscopic Cr prediction: Nguyen et al.
 show that real F/O Cr etching cycles through CrOx and CrFx with neutral
 conversion and ion-assisted inhibitor removal. Those state coefficients are
 not published for the Oxford condition.
@@ -17,4 +18,13 @@ not published for the Oxford condition.
 ```bash
 python scripts/audit_zhu_npg80_moving_cr_profiles.py --check
 pytest -q tests/test_audit_zhu_npg80_moving_cr_profiles.py
+```
+
+CUDA production uses deterministic face-gather transport and a single worker
+by default; independent workers can be requested explicitly after a memory
+sentinel:
+
+```bash
+python scripts/audit_zhu_npg80_moving_cr_profiles.py --write \
+  --transport-device cuda:0 --workers 1
 ```

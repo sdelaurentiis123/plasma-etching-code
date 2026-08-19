@@ -1,7 +1,10 @@
 import pytest
+import numpy as np
+from types import SimpleNamespace
 
 from scripts.audit_zhu_npg80_moving_cr_profiles import (
     CHROMIUM_REFERENCE_DENSITY_KG_M3,
+    _mask_metrics,
     _router,
     chromium_atom_density_m3,
 )
@@ -33,3 +36,21 @@ def test_moving_mask_router_preserves_conditional_selectivity():
     assert router.provenance["materials"]["2"]["evidence"]["source"] == (
         "janissen-2016-tio2-rie"
     )
+
+
+def test_subcell_mask_is_unresolved_but_not_relabelled_physically_exhausted():
+    dx = 0.01
+    mask = -np.ones((41, 41, 101), dtype=float)
+    # Retain a real center interval thinner than one vertical cell.  The
+    # production driver must stop its quantitative claim, but must not call
+    # the remaining material physically exhausted.
+    x = np.arange(mask.shape[0]) * dx
+    z = np.arange(mask.shape[2]) * dx
+    middle = int(np.argmin(np.abs(x - 0.2)))
+    mask[middle, middle, :] = np.abs(z - 0.82) - 0.004
+    geometry = SimpleNamespace(material_levelsets={2: mask}, dx=dx)
+
+    metrics = _mask_metrics(geometry, pitch_nm=400.0)
+    assert 0.0 < metrics["center_remaining_thickness_nm"] < 10.0
+    assert metrics["mask_below_vertical_resolution_at_center"] is True
+    assert metrics["mask_exhausted_at_center"] is False

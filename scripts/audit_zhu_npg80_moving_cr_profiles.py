@@ -13,6 +13,7 @@ import argparse
 from concurrent.futures import ProcessPoolExecutor
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -67,7 +68,7 @@ OUTPUT = (
     / "audit.json"
 )
 CACHE_DIR = OUTPUT.parent / "trajectories"
-MODEL_REVISION = "two-material-moving-tio2-cr-dose-factorization-v1"
+MODEL_REVISION = "two-material-moving-tio2-cr-dose-factorization-v2"
 PRODUCTION_MESH_SPACING_NM = 10.0
 CHROMIUM_MOLAR_MASS_KG_MOL = 51.9961e-3
 CHROMIUM_REFERENCE_DENSITY_KG_M3 = 7190.0
@@ -205,6 +206,7 @@ def _mask_metrics(geometry, *, pitch_nm):
             "center_bottom_height_nm": None,
             "vertical_cells_remaining": 0.0,
             "mask_exhausted_at_center": True,
+            "mask_below_vertical_resolution_at_center": True,
         }
     bottom, top = crossing[-2], crossing[-1]
     thickness = max(0.0, top - bottom)
@@ -213,7 +215,10 @@ def _mask_metrics(geometry, *, pitch_nm):
         "center_top_height_nm": float(top * 1.0e3),
         "center_bottom_height_nm": float(bottom * 1.0e3),
         "vertical_cells_remaining": float(thickness / geometry.dx),
-        "mask_exhausted_at_center": bool(thickness < geometry.dx),
+        "mask_exhausted_at_center": False,
+        "mask_below_vertical_resolution_at_center": bool(
+            thickness < geometry.dx
+        ),
     }
 
 
@@ -232,6 +237,9 @@ def _snapshot(
         "transport_scenario": dict(scenario),
         "dose_equivalent_reference_rate_nm_min": float(reference_rate_nm_min),
         "dose_equivalent_reference_time_s": float(reference_elapsed_s),
+        "accepted_process_equivalent_duration_s": float(
+            reference_elapsed_s * reference_rate_nm_min / rate_nm_min
+        ),
         "accepted_profile_steps": int(accepted_steps),
         "terminal_reason": terminal_reason,
         "profile": _profile_metrics(
@@ -325,6 +333,12 @@ def _run_trajectory(
                 transport_device=transport_device,
             )
         except SurfaceTopologyChangeError as error:
+            # A feature-floor breakthrough is an interpretable physical end
+            # point.  Solid or material-component changes can instead expose a
+            # discretization/remap defect, so never relabel them as successful
+            # process completion here.
+            if error.event_kind != "domain_gas_breakthrough":
+                raise
             terminal_reason = error.event_kind
             for unresolved in targets[target_index:]:
                 profiles.append(_snapshot(
@@ -357,8 +371,8 @@ def _run_trajectory(
             "max_relative_conservation_residual",
         ))
         mask = _mask_metrics(geometry, pitch_nm=pitch_nm)
-        if mask["mask_exhausted_at_center"]:
-            terminal_reason = "cr_mask_exhausted_at_center"
+        if mask["mask_below_vertical_resolution_at_center"]:
+            terminal_reason = "cr_mask_below_vertical_resolution_at_center"
             for unresolved in targets[target_index:]:
                 profiles.append(_snapshot(
                     geometry, width_nm=width_nm, dx_nm=dx_nm,
@@ -398,22 +412,28 @@ def _cache_path(spec):
     )
 
 
-def _execute(job):
+def _execute(payload):
+    job, transport_device = payload
     preregistration = _load(PREREGISTRATION)
     width, scenario, rates, selectivity, duration, dx = job
     profiles = _run_trajectory(
         width_nm=width, scenario=scenario, rates_nm_min=rates,
         selectivity=selectivity, duration_s=duration, dx_nm=dx,
         preregistration=preregistration,
+        transport_device=transport_device,
     )
     spec = _job_spec(job)
     path = _cache_path(spec)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(_render({"job_spec": spec, "profiles": profiles}), encoding="utf-8")
-    return profiles, path
+    path.write_text(_render({
+        "job_spec": spec,
+        "execution": {"transport_device": str(transport_device)},
+        "profiles": profiles,
+    }), encoding="utf-8")
+    return profiles, path, str(transport_device)
 
 
-def build(*, smoke=False):
+def build(*, smoke=False, transport_device="cpu", workers=None):
     preregistration = _load(PREREGISTRATION)
     analog = _load(ANALOG_BOARD)
     reactor = _load(REACTOR_DOSE)
@@ -446,20 +466,43 @@ def build(*, smoke=False):
             if cached.get("job_spec") != spec:
                 raise RuntimeError(f"moving-mask cache mismatch: {path}")
             groups.append(cached["profiles"])
-            receipts.append({"path": str(path.relative_to(ROOT)), "sha256": _hash(path)})
+            receipts.append({
+                "path": str(path.relative_to(ROOT)),
+                "sha256": _hash(path),
+                "transport_device": cached.get("execution", {}).get(
+                    "transport_device", "unrecorded"
+                ),
+            })
         else:
             groups.append(None)
             receipts.append(None)
             missing.append((len(groups) - 1, job))
     if missing:
         if smoke:
-            computed = [_execute(missing[0][1])]
+            computed = [_execute((missing[0][1], transport_device))]
         else:
-            with ProcessPoolExecutor(max_workers=min(4, len(missing))) as pool:
-                computed = list(pool.map(_execute, [item[1] for item in missing]))
-        for (index, _), (profiles, path) in zip(missing, computed):
+            if workers is None:
+                workers = 1 if str(transport_device).startswith("cuda") else 4
+            workers = int(workers)
+            if workers <= 0:
+                raise ValueError("workers must be a positive integer")
+            payloads = [
+                (item[1], str(transport_device)) for item in missing
+            ]
+            if workers == 1:
+                computed = [_execute(payload) for payload in payloads]
+            else:
+                with ProcessPoolExecutor(
+                    max_workers=min(workers, len(missing))
+                ) as pool:
+                    computed = list(pool.map(_execute, payloads))
+        for (index, _), (profiles, path, device) in zip(missing, computed):
             groups[index] = profiles
-            receipts[index] = {"path": str(path.relative_to(ROOT)), "sha256": _hash(path)}
+            receipts[index] = {
+                "path": str(path.relative_to(ROOT)),
+                "sha256": _hash(path),
+                "transport_device": str(device),
+            }
     profiles = [profile for group in groups for profile in group]
     return {
         "schema": "petch.zhu-npg80-moving-cr-profile-board.v1",
@@ -471,6 +514,13 @@ def build(*, smoke=False):
         "mesh_spacing_nm": 20.0 if smoke else PRODUCTION_MESH_SPACING_NM,
         "moving_materials": ["ALD TiO2", "Cr hard mask"],
         "pinned_materials": ["fused-silica substrate"],
+        "execution": {
+            "trajectory_transport_devices": sorted(set(
+                receipt["transport_device"] for receipt in receipts
+            )),
+            "execution_device_not_part_of_physics_spec": True,
+            "cross_device_numerical_parity_required_before_combining": True,
+        },
         "conditional_axes": {
             "tio2_rate_nm_min": list(rates),
             "tio2_to_cr_selectivity": list(selectivities),
@@ -492,13 +542,35 @@ def main():
     parser.add_argument("--write", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument(
+        "--transport-device",
+        default=os.environ.get("PETCH_TRANSPORT_DEVICE", "cpu"),
+        help="deterministic Warp transport device, for example cpu or cuda:0",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=(
+            int(os.environ["PETCH_PROFILE_WORKERS"])
+            if "PETCH_PROFILE_WORKERS" in os.environ else None
+        ),
+        help="independent trajectory workers (default 1 on CUDA, 4 on CPU)",
+    )
     args = parser.parse_args()
     if args.smoke:
-        print(_render(build(smoke=True)))
+        print(_render(build(
+            smoke=True,
+            transport_device=args.transport_device,
+            workers=args.workers,
+        )))
         return
     if args.write == args.check:
         parser.error("select exactly one of --write or --check")
-    rendered = _render(build(smoke=False))
+    rendered = _render(build(
+        smoke=False,
+        transport_device=args.transport_device,
+        workers=args.workers,
+    ))
     if args.write:
         OUTPUT.parent.mkdir(parents=True, exist_ok=True)
         OUTPUT.write_text(rendered, encoding="utf-8")
