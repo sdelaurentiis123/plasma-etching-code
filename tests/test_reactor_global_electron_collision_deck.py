@@ -181,3 +181,21 @@ def test_exact_database_filter_prevents_cross_database_target_mixing():
 
     with pytest.raises(ValueError, match="database filter must be non-empty"):
         _parse(payload, database_filter="  ")
+
+
+def test_filter_ignores_parameter_extensions_in_unselected_databases():
+    extended_unselected = (
+        b"DATABASE: Unselected angular set\n"
+        b"ELASTIC\nNe\n2.715e-5 1.0\n"
+        b"------------------------------------------------------------\n"
+        b"0.0 1.0e-20\n1.0 1.0e-20\n"
+        b"------------------------------------------------------------\n"
+        b"DATABASE: Selected set\n"
+        + DECK
+    )
+    selected = _parse(
+        extended_unselected,
+        database_filter="Selected set",
+    )
+    assert selected.targets == ("Cl2",)
+    assert len(selected.processes) == 4

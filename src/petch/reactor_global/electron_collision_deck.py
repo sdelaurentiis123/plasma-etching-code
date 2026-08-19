@@ -328,11 +328,17 @@ def parse_bolsig_lxcat_bytes(
         index, raw_signature = _next_nonempty(lines, index + 1)
         process_target, product, automatic_superelastic = _signature(
             raw_signature)
+        target_matches = target is None or process_target == target
+        database_matches = (
+            selected_database is None
+            or current_database == selected_database
+        )
+        process_selected = target_matches and database_matches
         index += 1
         mass_ratio = None
         energy_loss_eV = None
         statistical_weight_ratio = None
-        if kind != "ATTACHMENT":
+        if kind != "ATTACHMENT" and process_selected:
             index, parameter_line = _next_nonempty(lines, index)
             values = _parameter_values(parameter_line)
             index += 1
@@ -378,12 +384,7 @@ def parse_bolsig_lxcat_bytes(
         if index >= len(lines):
             raise ValueError("collision process data table is unterminated")
         index += 1
-        target_matches = target is None or process_target == target
-        database_matches = (
-            selected_database is None
-            or current_database == selected_database
-        )
-        if target_matches and database_matches:
+        if process_selected:
             processes.append(ElectronCollisionProcess(
                 kind=kind,
                 target=process_target,

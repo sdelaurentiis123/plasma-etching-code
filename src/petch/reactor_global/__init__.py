@@ -460,6 +460,17 @@ from .o2_electron_collisions import (
     load_song_2026_o2_replay,
 )
 from .electron_collision_mixture import compose_electron_collision_decks
+from .zhu_daughter_electron_collisions import (
+    F2EffectiveDeconvolution,
+    HFDaughterCollisionSensitivity,
+    HF_DISSOCIATION_THRESHOLD_EV,
+    HF_IONIZATION_THRESHOLD_EV,
+    HF_MASS_AMU,
+    HUANG_2020_DOI,
+    LXCAT_EFFECTIVE_DEFINITION_DOI,
+    deconvolve_siglo_f2_effective_momentum,
+    derive_huang_2020_partial_hf_replay,
+)
 from .zhu_parent_collision_chemistry import (
     ZhuParentCollisionChemistry,
     build_zhu_parent_collision_chemistry,
@@ -810,6 +821,15 @@ __all__ = [
     "load_song_2026_o2_replay",
     "compose_electron_collision_decks",
     "deconvolve_effective_momentum",
+    "F2EffectiveDeconvolution",
+    "HFDaughterCollisionSensitivity",
+    "HF_DISSOCIATION_THRESHOLD_EV",
+    "HF_IONIZATION_THRESHOLD_EV",
+    "HF_MASS_AMU",
+    "HUANG_2020_DOI",
+    "LXCAT_EFFECTIVE_DEFINITION_DOI",
+    "deconvolve_siglo_f2_effective_momentum",
+    "derive_huang_2020_partial_hf_replay",
     "ZhuParentCollisionChemistry",
     "build_zhu_parent_collision_chemistry",
     "zhu_parent_collision_species",
