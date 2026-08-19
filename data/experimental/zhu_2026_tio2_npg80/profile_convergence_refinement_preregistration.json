@@ -1,0 +1,45 @@
+{
+  "schema": "petch.zhu-npg80-profile-convergence-refinement-preregistration.v1",
+  "condition_id": "zhu-2026-tio2-npg80-rie",
+  "frozen_before_target_sem": true,
+  "frozen_after_10nm_bottom_cd_failure": true,
+  "target_sem_used": false,
+  "target_depth_used": false,
+  "sentinel": {
+    "width_nm": 200.0,
+    "duration_s": 360.0,
+    "blanket_rate_nm_min": 43.46666666666667,
+    "transport_scenario": "ion_high_tail_0p65"
+  },
+  "reference_case": {
+    "name": "fine_dt4",
+    "mesh_spacing_nm": 10.0,
+    "maximum_step_s": 4.0,
+    "source": "results/curated/zhu_npg80_profile_convergence_v1/cases/fine_dt4.json"
+  },
+  "cases": {
+    "fine_dt2": {
+      "mesh_spacing_nm": 10.0,
+      "maximum_step_s": 2.0
+    },
+    "ultrafine_dt2": {
+      "mesh_spacing_nm": 5.0,
+      "maximum_step_s": 2.0
+    }
+  },
+  "gates": {
+    "maximum_fine_timestep_depth_relative_change": 0.01,
+    "maximum_fine_timestep_cd_absolute_change_nm": 3.0,
+    "maximum_ultrafine_grid_depth_relative_change": 0.025,
+    "maximum_ultrafine_grid_cd_absolute_change_nm": 5.0,
+    "maximum_ultrafine_xy_asymmetry_nm": 2.0,
+    "maximum_transport_relative_particle_balance_error": 2e-12,
+    "maximum_state_remap_relative_conservation_residual": 1e-12
+  },
+  "interpretation": {
+    "pass": "bottom-CD numerical certification for this conditional sentinel only",
+    "failure": "bottom CD remains unresolved and requires local refinement or a finer global rung",
+    "does_not_validate_target_surface_law": true,
+    "does_not_support_atomic_accuracy": true
+  }
+}
