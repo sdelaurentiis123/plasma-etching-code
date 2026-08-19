@@ -1,0 +1,76 @@
+{
+  "schema": "petch.choi-2013-tio2-bias-response.v1",
+  "source": {
+    "citation": "K.-R. Choi et al., Dry etching properties of TiO2 thin films in O2/CF4/Ar plasma, Vacuum 92, 85-89 (2013)",
+    "doi": "10.1016/j.vacuum.2012.11.009",
+    "figure": "Figure 5 and source-reported endpoint values",
+    "full_text_read_online": true,
+    "local_source_pdf_archived": false,
+    "source_measurement_uncertainty_reported": false
+  },
+  "condition": {
+    "reactor": "planar inductively coupled plasma",
+    "film": "approximately 200 nm electron-beam-evaporated TiO2",
+    "feed_sccm": {
+      "O2": 3.0,
+      "CF4": 16.0,
+      "Ar": 4.0
+    },
+    "source_power_W": 700.0,
+    "pressure_Pa": 2.0
+  },
+  "source_reported_endpoints": {
+    "dc_bias_magnitude_V": [
+      50.0,
+      250.0
+    ],
+    "tio2_etch_rate_nm_min": [
+      130.9,
+      197.2
+    ],
+    "tio2_to_sio2_selectivity": [
+      0.65,
+      0.56
+    ]
+  },
+  "direct_response": {
+    "bias_magnitude_ratio": 5.0,
+    "etch_rate_ratio": 1.5064935064935063,
+    "selectivity_ratio": 0.8615384615384616,
+    "etch_rate_monotone_in_bias_over_reported_interval": true,
+    "selectivity_decreases_over_reported_interval": true
+  },
+  "two_point_sqrt_bias_decomposition": {
+    "equation": "rate_nm_min = intercept + slope*sqrt(abs(dc_bias_V))",
+    "intercept_nm_min": 77.262173272941,
+    "slope_nm_min_sqrtV": 7.585534201362492,
+    "endpoint_replay_max_abs_error_nm_min": 0.0,
+    "identified_as_surface_law": false,
+    "reason": "two endpoints cannot distinguish a thresholded sputter law, ion-assisted chemical desorption, or changing radical flux"
+  },
+  "surface_evidence": {
+    "xps_ti_f_bond_formation_reported": true,
+    "ion_bombardment_enhanced_bond_breaking_reported": true,
+    "ion_bombardment_enhanced_product_desorption_reported": true,
+    "oxygen_nonmonotonicity_reported": true,
+    "minimum_model_topology": [
+      "fluorinated TiOxFy or TiFx surface inventory",
+      "neutral fluorine supply",
+      "ion-energy-dependent bond breaking and product desorption",
+      "competitive oxygen or fluorocarbon blocking/passivation state"
+    ]
+  },
+  "model_discrimination": {
+    "energy_independent_rate_normalized_removal_sufficient": false,
+    "pure_physical_sputtering_only_supported": false,
+    "ion_assisted_surface_chemistry_required": true
+  },
+  "freddie_boundary": {
+    "same_target_film_state": false,
+    "same_feed_chemistry": false,
+    "same_reactor_topology": false,
+    "coefficient_transfer_allowed": false,
+    "valid_use": "response-sign and surface-state topology gate for a future TiO2 mechanism",
+    "changes_absolute_oxford_depth_forecast": false
+  }
+}
