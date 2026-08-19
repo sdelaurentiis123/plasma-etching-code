@@ -1,0 +1,139 @@
+{
+  "manifest_id": "JI-2024-TIO2-FIG4-SPACING-MORPHOLOGY-R1",
+  "source": {
+    "citation": "X. Ji et al., Micromachines 15, 1160 (2024)",
+    "doi": "10.3390/mi15091160",
+    "license": "CC BY 4.0",
+    "pdf_sha256": "92a57c600e93e4113e574ef286aae4a248d787c3445f8d21e2ff151c73647e81",
+    "pdf_page": 7,
+    "figure": "Figure 4(a-f)",
+    "render_dpi": 600,
+    "rendered_page_sha256": "9c6348025b0214c5d43f482e14d48f9b1fa445aec9a4bc44ce7517365582cbdc",
+    "rendered_page_size_px": [
+      4961,
+      7016
+    ],
+    "source_pixels_committed": false
+  },
+  "experiment": {
+    "material": "800 nm electron-beam-deposited TiO2",
+    "mask": "60 nm Cr",
+    "nominal_feature_cd_nm": 200.0,
+    "designed_gap_nm": [
+      750.0,
+      530.0,
+      350.0,
+      100.0,
+      70.0
+    ],
+    "source_power_W": 350.0,
+    "rf_power_W": 120.0,
+    "feed_sccm": {
+      "SF6": 40.0,
+      "CHF3": 10.0,
+      "O2": 5.0
+    },
+    "pressure_mTorr": 10.0,
+    "temperature_C": 40.0,
+    "etch_time_s": null
+  },
+  "transcription": {
+    "method": "yellow SEM annotations transcribed at printed precision and cross-checked against the grouped bar chart on the same page",
+    "point_count": 20,
+    "annotation_regions_full_page_px": {
+      "4a": [
+        1750,
+        1330,
+        2260,
+        1870
+      ],
+      "4b": [
+        2740,
+        1330,
+        3240,
+        1870
+      ],
+      "4c": [
+        3720,
+        1330,
+        4230,
+        1870
+      ],
+      "4d": [
+        1750,
+        2000,
+        2260,
+        2540
+      ],
+      "4e": [
+        1750,
+        2680,
+        2260,
+        3240
+      ]
+    },
+    "source_measurement_uncertainty_reported": false,
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "derived_checks": {
+    "source_text_boundary_claim": "gaps_greater_than_100nm_stable_and_gaps_smaller_than_100nm_change",
+    "digitized_100nm_point_already_shifted": true,
+    "strict_threshold_identified": false,
+    "empirical_transition_bracket_nm": [
+      100.0,
+      350.0
+    ],
+    "high_gap_h1_range_nm": [
+      399.0,
+      414.0
+    ],
+    "high_gap_h2_range_nm": [
+      255.0,
+      261.0
+    ],
+    "all_widths_within_15nm": true,
+    "loading_gap_h1_below_every_high_gap_h1": true,
+    "loading_gap_angle_above_every_high_gap_angle": true
+  },
+  "freddie_geometry_implication": {
+    "conditional_board_pitch_nm": 400.0,
+    "conditional_board_width_nm": [
+      80.0,
+      120.0,
+      160.0,
+      200.0,
+      240.0,
+      280.0,
+      320.0
+    ],
+    "corresponding_gap_nm": [
+      320.0,
+      280.0,
+      240.0,
+      200.0,
+      160.0,
+      120.0,
+      80.0
+    ],
+    "member_at_or_below_changed_100nm_point_width_nm": [
+      320.0
+    ],
+    "member_in_unsampled_transition_interval_width_nm": [
+      280.0
+    ],
+    "threshold_transfer_allowed": false,
+    "use": "predeclare enhanced pattern-loading sensitivity for the widest/smallest-gap board member and uncertainty for the 120 nm-gap member; do not impose a sharp Ji threshold on Oxford"
+  },
+  "claim_boundary": {
+    "valid": "same-gas TiO2/Cr pattern-loading response validation and a topology requirement for passivation-aware feature transport",
+    "not_valid": [
+      "an Oxford pattern-loading threshold",
+      "a Freddie target geometry measurement",
+      "an absolute etch-depth or time calibration"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/ji_2024_tio2_hierarchical/figure4_spacing_morphology_response.csv",
+    "sha256": "ae78ca5b984086b009bd73073a637a65cb643736a1ea28aefc0e4b8f81900ed4"
+  }
+}

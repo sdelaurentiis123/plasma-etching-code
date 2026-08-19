@@ -1,0 +1,6 @@
+panel,designed_gap_nm,upper_triangle_height_h1_nm,lower_rectangle_height_h2_nm,feature_width_L_nm,upper_triangle_angle_theta_deg,value_origin,source_measurement_uncertainty_reported
+4a,750.0,414.0,255.0,261.0,31.6,printed_SEM_annotation_cross_checked_to_bar_chart,false
+4b,530.0,399.0,258.0,264.0,31.0,printed_SEM_annotation_cross_checked_to_bar_chart,false
+4c,350.0,399.0,261.0,261.0,32.0,printed_SEM_annotation_cross_checked_to_bar_chart,false
+4d,100.0,277.0,411.0,276.0,38.0,printed_SEM_annotation_cross_checked_to_bar_chart,false
+4e,70.0,267.0,386.0,264.0,40.0,printed_SEM_annotation_cross_checked_to_bar_chart,false

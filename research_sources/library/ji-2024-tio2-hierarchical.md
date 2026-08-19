@@ -14,7 +14,10 @@
 - **Figure-3 page render:** PDF page 6, 600 dpi, 4961 by 7016 pixels,
   SHA-256
   `976db637feed609a182301266654e675a42d1422f6e7c08cff17ea3744d6c148`
-- **Status:** PRIMARY CC-BY FULL TEXT READ + FIGURE 3 QUANTITATIVELY
+- **Figure-4 page render:** PDF page 7, 600 dpi, 4961 by 7016 pixels,
+  SHA-256
+  `9c6348025b0214c5d43f482e14d48f9b1fa445aec9a4bc44ce7517365582cbdc`
+- **Status:** PRIMARY CC-BY FULL TEXT READ + FIGURES 3 AND 4 QUANTITATIVELY
   PIL-AUDITED; PROPOSED SURFACE REACTION SCHEME NOT A QUANTITATIVE KINETIC LAW
 - **Topic:** TiO2/Cr feature etching, CHF3/SF6/O2, mask shrink, lower-feature
   passivation, and physical wide-base profiles
@@ -27,9 +30,10 @@
 | Q2 | A `200 nm` CD, `300 nm` pitch TiO2 grating evolves from a vertical profile to a trapezoidal upper region over a rectangular lower region and finally to an upper triangle over a lower rectangle. | Direct experimental evidence that a positive bottom-minus-top width and a two-zone profile can be physical in TiO2/Cr under CHF3/SF6/O2. It does not validate the magnitude or mechanism in the conditional Oxford profile. |
 | Q3 | The authors report Cr linewidth loss and lower-feature passivation occurring together; lateral Cr shrink is visible once TiO2 depth reaches about `300 nm`. | Requires explicit Cr geometry evolution and a passivating/growth state before the reported shape may be mechanistically reproduced. A pinned-mask, removal-only model cannot claim this pathway. |
 | Q4 | Increasing ICP power changes the profile from upper-triangle/lower-rectangle through near vertical at `500 W` to upper-rectangle/lower-trapezoid at higher source power; changing RF power also changes the upper height, tip radius, and gap. | Shows the sign of the profile response is plasma- and surface-state-dependent. It rules out treating a generic flare as a universal geometry-only law. |
-| Q5 | At fixed `200 nm` CD, designed gaps at or above `100 nm` leave the reported morphology metrics comparatively stable, while the `70 nm` gap changes the upper/lower heights and angle. | Qualitative pattern-loading/transport validation target. It cannot identify radial reactor nonuniformity. |
+| Q5 | The prose describes gaps greater than `100 nm` as stable and gaps smaller than `100 nm` as changed. The printed Figure-4 values show that the `100 nm` datum has already moved with the `70 nm` datum away from the `350--750 nm` cluster. | The experiment establishes a pattern-loading response but not a sharp `100 nm` threshold; the sampled transition is bracketed only between `100` and `350 nm`. It cannot identify radial reactor nonuniformity or set an Oxford threshold. |
 | Q6 | The paper proposes TiF4 passivation, sputter removal, and bottom accumulation as its mechanism. It does not report species-resolved fluxes, energy/angular distributions, reaction probabilities, TiF4 coverage/thickness metrology, or sputter yields. | Mechanism topology only. The printed CF3-negative-ion sputter channel is not installed: a powered negative wafer does not receive an unconstrained bulk negative-ion beam, and no target flux is measured. |
 | Q7 | The checksum-bound Figure-3 RF board gives upper-triangle height `143.7, 206.9, 269.8, 347.8, 336.1 nm`, tip radius `99.9, 84.9, 15.0, 9.8, 9.8 nm`, and gap `96.0, 80.0, 69.9, 42.1, 18.0 nm` at `90, 120, 150, 180, 210 W`. | `JI-2024-TIO2-FIG3-RF-MORPHOLOGY-R1`; target-free response gate for a TiO2 mechanism. Strict gap narrowing requires retained/deposited surface volume and rejects a removal-only explanation for this experiment. The unspecified etch time and different ICP/material condition prohibit Oxford coefficient transfer. |
+| Q8 | The checksum-bound Figure-4 board gives `(h1,h2,L,theta)` values of `(414,255,261,31.6)`, `(399,258,264,31)`, `(399,261,261,32)`, `(277,411,276,38)`, and `(267,386,264,40)` in nm/degrees at gaps `750,530,350,100,70 nm`. | `JI-2024-TIO2-FIG4-SPACING-MORPHOLOGY-R1`; a target-free spacing-response gate. It exposes the source's `100 nm` boundary ambiguity and constrains future passivation-aware feature transport without transferring any coefficient. |
 
 ## Use in petch
 
@@ -46,3 +50,9 @@ marker centers and three ordinate calibrations replay through
 `scripts/digitize_ji_2024_figure3.py`; the color overlay was reconciled at
 original resolution. The committed digitization bounds are pixel-localization
 bounds, not experimental error bars, because the source reports none.
+
+Figure 4(a-e) was independently inspected at the original 600 dpi render.
+Twenty values printed directly on the SEMs were transcribed and cross-checked
+against Figure 4(f)'s grouped bars. The committed record preserves the
+disagreement between the paper's verbal boundary and its changed `100 nm`
+point instead of collapsing it into a fabricated threshold.
