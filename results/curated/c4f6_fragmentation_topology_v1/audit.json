@@ -1,0 +1,128 @@
+{
+  "calibration_firewall": {
+    "absolute_NIST_and_Benck_scales_equated": false,
+    "feature_depth_used": false,
+    "krueger_825_nm_used": false,
+    "reaction_parameters_fitted": false
+  },
+  "certification": {
+    "supports_absolute_branching_fraction": false,
+    "supports_absolute_reactor_flux": false,
+    "supports_feature_depth": false,
+    "supports_krueger_boundary": false,
+    "supports_required_reaction_topology": true
+  },
+  "claim_class": "independent_shape_comparison_no_absolute_scale_transfer",
+  "diagnostics": {
+    "condition_count_including_repeated_cross_figure_condition": 7,
+    "maximum_CF2+/CF+_enhancement_over_direct_EI": 5.38890408023274,
+    "maximum_reactor_CF3+/CF+": 0.38817365079159133,
+    "maximum_to_minimum_reactor_CF3+/CF+": 2.2154858706141174,
+    "maximum_unresolved_positive_ion_fraction": 0.6271354859940578,
+    "minimum_CF2+/CF+_enhancement_over_direct_EI": 4.450442661317528,
+    "minimum_reactor_CF3+/CF+": 0.17520926490223668,
+    "minimum_unresolved_positive_ion_fraction": 0.13599105121621746
+  },
+  "direct_70_eV_EI_reference": {
+    "CF2+/CF+": 0.10447760409890858,
+    "CF3+/CF+": 0.3134328122967257,
+    "heavy_C3F3+_plus_parent_fraction": 0.703333333431111
+  },
+  "physics_decision": {
+    "direct_fragmentation_only_is_adequate": false,
+    "heavy_primary_products_must_be_retained": true,
+    "ion_neutral_conversion_required": true,
+    "pressure_dependent_residence_and_wall_loss_required": true,
+    "secondary_fragment_ionization_required": true,
+    "smallest_authorized_next_model": "An atom/charge-conserving C4F6/Ar global model retaining C4F6, C3F3, CF, CF2, CF3 and their measured positive ions, with secondary CFx electron ionization, source-backed ion-neutral conversion, Bohm/wall losses, and gas residence time."
+  },
+  "question": "Can one-step direct electron-impact fragmentation of C4F6 explain the light positive-ion composition measured in a C4F6/Ar reactor?",
+  "reactor_conditions": [
+    {
+      "CF2+/CF+": 0.46497158643402575,
+      "CF2+/CF+_enhancement_over_direct_EI": 4.450442661317528,
+      "CF3+/CF+": 0.181228030361552,
+      "CF3+/CF+_ratio_to_direct_EI": 0.5782037593115301,
+      "board": "Benck_Figure_9_feed_sweep",
+      "c4f6_feed_percent": 25,
+      "pressure_Pa": 1.33,
+      "resolved_fraction_of_total_positive_current": 0.8640089487837825,
+      "unresolved_fraction_of_total_positive_current": 0.13599105121621746
+    },
+    {
+      "CF2+/CF+": 0.541970792831304,
+      "CF2+/CF+_enhancement_over_direct_EI": 5.187435120719481,
+      "CF3+/CF+": 0.21977430785128338,
+      "CF3+/CF+_ratio_to_direct_EI": 0.7011847491041361,
+      "board": "Benck_Figure_9_feed_sweep",
+      "c4f6_feed_percent": 50,
+      "pressure_Pa": 1.33,
+      "resolved_fraction_of_total_positive_current": 0.770680227352957,
+      "unresolved_fraction_of_total_positive_current": 0.22931977264704295
+    },
+    {
+      "CF2+/CF+": 0.5452331559194098,
+      "CF2+/CF+_enhancement_over_direct_EI": 5.218660598334926,
+      "CF3+/CF+": 0.22162862259811805,
+      "CF3+/CF+_ratio_to_direct_EI": 0.7071008965975873,
+      "board": "Benck_Figure_9_feed_sweep",
+      "c4f6_feed_percent": 75,
+      "pressure_Pa": 1.33,
+      "resolved_fraction_of_total_positive_current": 0.6059450418046699,
+      "unresolved_fraction_of_total_positive_current": 0.3940549581953301
+    },
+    {
+      "CF2+/CF+": 0.5555829402976316,
+      "CF2+/CF+_enhancement_over_direct_EI": 5.317722827675711,
+      "CF3+/CF+": 0.28527742154141345,
+      "CF3+/CF+_ratio_to_direct_EI": 0.9101708894196513,
+      "board": "Benck_Figure_9_feed_sweep",
+      "c4f6_feed_percent": 100,
+      "pressure_Pa": 1.33,
+      "resolved_fraction_of_total_positive_current": 0.3728645140059422,
+      "unresolved_fraction_of_total_positive_current": 0.6271354859940578
+    },
+    {
+      "CF2+/CF+": 0.5630197870215492,
+      "CF2+/CF+_enhancement_over_direct_EI": 5.38890408023274,
+      "CF3+/CF+": 0.17520926490223668,
+      "CF3+/CF+_ratio_to_direct_EI": 0.5590010299762959,
+      "board": "Benck_Figure_10_pressure_sweep",
+      "c4f6_feed_percent": 50,
+      "pressure_Pa": 0.67,
+      "resolved_fraction_of_total_positive_current": 0.792665600968105,
+      "unresolved_fraction_of_total_positive_current": 0.207334399031895
+    },
+    {
+      "CF2+/CF+": 0.539581229913462,
+      "CF2+/CF+_enhancement_over_direct_EI": 5.164563588217838,
+      "CF3+/CF+": 0.2211954402746344,
+      "CF3+/CF+_ratio_to_direct_EI": 0.7057188386046496,
+      "board": "Benck_Figure_10_pressure_sweep",
+      "c4f6_feed_percent": 50,
+      "pressure_Pa": 1.33,
+      "resolved_fraction_of_total_positive_current": 0.7789644939114344,
+      "unresolved_fraction_of_total_positive_current": 0.2210355060885656
+    },
+    {
+      "CF2+/CF+": 0.5189887522112032,
+      "CF2+/CF+_enhancement_over_direct_EI": 4.967464143988968,
+      "CF3+/CF+": 0.38817365079159133,
+      "CF3+/CF+_ratio_to_direct_EI": 1.238458883571222,
+      "board": "Benck_Figure_10_pressure_sweep",
+      "c4f6_feed_percent": 50,
+      "pressure_Pa": 2.66,
+      "resolved_fraction_of_total_positive_current": 0.6110213499336656,
+      "unresolved_fraction_of_total_positive_current": 0.38897865006633436
+    }
+  ],
+  "schema": "petch.c4f6_fragmentation_topology_audit.v1",
+  "sources": {
+    "benck_feed_csv_sha256": "40ae5a1355eb12cd6cdb72961e7719a5a4b30b73a994ba669f80f7de4e747d25",
+    "benck_feed_manifest_sha256": "8760ab6999f292ba3fe1e7bc367795687a65f0ac21a0b4db6961bc7440baaa0a",
+    "benck_pressure_csv_sha256": "f1303336bf323b831c2d08b7aed7c14f836ac76debe086cc2591a0b43a25a051",
+    "benck_pressure_manifest_sha256": "37b998f9fc128b82f7e9af26a0bc39bc3dba7c3fc5ac128dc8fa245c5e95ac1a",
+    "nist_manifest_sha256": "6ccf5c380d8859b77fca4d7051b9acd2411e996ed01b4aebe6f22a6c1cb653be",
+    "nist_spectrum_csv_sha256": "2115e1a887f53fcc99423ab81fee94fde461f00c2e0da30ac188e95748c7a665"
+  }
+}
