@@ -129,9 +129,12 @@ svg text{font-family:ui-monospace,Menlo,monospace}
   micrometres.</p>
   <figure class="panel" style="margin:0"><video autoplay muted loop playsinline
     controls src="__FLYBY_MP4__"></video>
-    <figcaption>Reactor &rarr; sheath &rarr; feature. The reactor readouts are the
-    solved 105&nbsp;W Oxford state; the sheath is the replayed Turner&ndash;Chabert
-    field; the feature is the engine&rsquo;s level-set evolution.</figcaption></figure>
+    <figcaption>Reactor &rarr; sheath &rarr; feature &rarr; the validation wall.
+    The reactor sweep steps through the three solved Oxford operating points
+    (60/90/105&nbsp;W) with the solved gas inventory on screen; the sheath is the
+    replayed Turner&ndash;Chabert field with its input current, response voltage,
+    and instantaneous E(x,t); the feature is the engine&rsquo;s level-set
+    evolution.</figcaption></figure>
 </section>
 
 <section id="sheath">
@@ -209,9 +212,9 @@ svg text{font-family:ui-monospace,Menlo,monospace}
 <section id="validation">
   <div class="eyebrow">against experiment</div>
   <h2>Measured, not tuned</h2>
-  <p>Model curves below carry <strong>no fit to the data they are compared
-  with</strong>. Where a point is marked held-out, it was predicted before
-  comparison.</p>
+  <p>Where a point is marked <strong>held-out</strong>, it was predicted
+  before comparison. Where a curve carries a calibration, the chart says
+  so; everything else carries no fit to the data it is compared with.</p>
   <div class="charts" id="chartGrid"></div>
   <div class="cards" id="cardGrid"></div>
 </section>
@@ -219,8 +222,8 @@ svg text{font-family:ui-monospace,Menlo,monospace}
 <footer>
   petch &middot; internal showcase &middot; every number on this page is read from
   frozen boards under <span class="mono">results/curated/</span> by
-  <span class="mono">showcase/build_data.py</span> &middot; engine suite:
-  1,856 tests passing &middot; sheath model: Turner &amp; Chabert, APL 104,
+  <span class="mono">showcase/build_data.py</span> &middot; 1,856-test engine
+  suite &middot; sheath model: Turner &amp; Chabert, APL 104,
   164102 (2014) &middot; chemistry, yields, and cross sections cited per value in
   <span class="mono">research_sources/library/</span>
 </footer>
@@ -642,7 +645,8 @@ function legend(svg, entries) {
 /* de Boer ARDE held-out */
 {
   const svg = chartShell("Aspect-ratio-dependent etch rate",
-    "SF₆/O₂ on Si · AR 40 point predicted held-out, error 0.034");
+    "SF₆/O₂ on Si · one sticking coefficient calibrated on AR 10/20 · " +
+    "AR 40 predicted held-out, error 0.034");
   frameAxes(svg);
   const D = V.deboer;
   const X = a => M.l + a / 42 * (PW - M.l - M.r);

@@ -97,13 +97,37 @@ def nice_scale_label(m: float) -> str:
 
 # ---------------------------------------------------------------- reactor
 class ReactorScene:
-    """Oxford PlasmaPro 80 cross-section with the solved 105 W state."""
+    """Oxford PlasmaPro 80: stepped sweep over the three solved operating
+    points (60/90/105 W) with the solved species inventory and ion-flux
+    composition on screen, then the dive to the sheath."""
 
-    N = int(8.5 * FPS)
+    SWEEP_S = 3.2                 # seconds per operating point
+    DIVE_S = 3.6
+    N = int((3 * 3.2 + 3.6) * FPS)
+    ION_COLORS = ["#2dd4bf", "#e26ad0", "#f5b04a", "#6ea8fe",
+                  "#34d399", "#f87171", "#a78bfa", "#fb923c"]
 
     def __init__(self):
         data = json.loads((HERE / "data" / "showcase_data.json").read_text())
-        self.node = data["zhu"]["nodes"][-1]          # 105 W solved state
+        self.nodes = data["zhu"]["nodes"]
+        # stable species/ion orders (union over nodes, like the web panel)
+        self.species = []
+        for n in self.nodes:
+            for sp, _v in n["top_densities"]:
+                if sp not in self.species:
+                    self.species.append(sp)
+        self.species = self.species[:10]
+        self.ions = []
+        for n in self.nodes:
+            for sp, _v in n["top_ion_fluxes"]:
+                if sp not in self.ions:
+                    self.ions.append(sp)
+        allv = [v for n in self.nodes for _s, v in n["top_densities"]]
+        self.logmin = np.log10(min(allv)) - 0.4
+        self.logmax = np.log10(max(allv)) + 0.1
+        self.ne_max = max(n["electron_density_m3"] for n in self.nodes)
+        self.dens = [dict(n["top_densities"]) for n in self.nodes]
+        self.flux = [dict(n["top_ion_fluxes"]) for n in self.nodes]
         self.fig = plt.figure(figsize=(W / DPI, H / DPI), dpi=DPI)
         self.fig.patch.set_facecolor(BG)
         # glow field over the plasma slab
@@ -118,21 +142,32 @@ class ReactorScene:
             gaussian_filter(rng.normal(0, 1, (ny, nx)), sigma=2.2)
             for _ in range(24)])
 
+    def _blend(self, t: float):
+        """Current node index + 0.35 s eased visual transition weight."""
+        seg = min(int(t / self.SWEEP_S), 2)
+        tau = t - seg * self.SWEEP_S
+        w = ease(min(tau / 0.35, 1.0)) if seg > 0 else 1.0
+        prev = self.nodes[max(seg - 1, 0)]
+        cur = self.nodes[seg]
+        return seg, prev, cur, w
+
+    def _mix(self, prev, cur, w, key):
+        return (1 - w) * prev[key] + w * cur[key]
+
     def frame(self, i: int) -> np.ndarray:
         fig = self.fig
         fig.clf()
+        t = i / FPS
+        sweep_end = 3 * self.SWEEP_S
+        zoom_u = ease(max(t - sweep_end, 0.0) / self.DIVE_S)
+        seg, prev, cur, wmix = self._blend(min(t, sweep_end - 1e-6))
+
         ax = fig.add_axes([0, 0, 1, 1])
         ax.set_facecolor(BG)
         ax.set_xticks([]); ax.set_yticks([])
         for s in ax.spines.values():
             s.set_visible(False)
-
-        t = i / FPS
-        u = i / (self.N - 1)
-        # camera: hold wide, then dive toward the wafer center
-        zoom_u = ease(max(u - 0.52, 0.0) / 0.48)
-        # wide view / target view boxes (metres)
-        wx, wy, ww = 0.0, 0.078, 0.42        # centre x, centre y, width
+        wx, wy, ww = 0.0, 0.078, 0.42        # wide view (metres)
         tx, ty, tw = 0.0, 0.0545, 0.052
         cx = wx + (tx - wx) * zoom_u
         cy = wy + (ty - wy) * zoom_u
@@ -163,12 +198,15 @@ class ReactorScene:
                                 head_width=0.007, head_length=0.008,
                                 fc=DIM, ec="none"))
 
-        # plasma glow slab between sheaths (sheath gaps drawn dark)
+        # plasma glow slab between sheaths (sheath gaps drawn dark);
+        # brightness follows the solved electron density of the node
         s_lo, s_hi = 0.0545, 0.080           # bulk plasma band
+        ne_mix = self._mix(prev, cur, wmix, "electron_density_m3")
+        bri = 0.50 + 0.50 * ne_mix / self.ne_max
         namp = 0.55 * (1.0 - 0.9 * zoom_u)
         shimmer = 1.0 + 0.05 * np.sin(2 * np.pi * 1.7 * t) \
             + namp * self.noise[i % 24]
-        g = np.clip(self.glow * shimmer, 0, 1.35)
+        g = np.clip(self.glow * shimmer * bri, 0, 1.35)
         rgb = np.zeros(g.shape + (4,))
         rgb[..., 0] = np.clip(0.28 * g + 0.30 * g**3, 0, 1)   # R
         rgb[..., 1] = np.clip(0.22 * g + 0.18 * g**2, 0, 1)   # G
@@ -184,7 +222,7 @@ class ReactorScene:
 
         # labels (fade out during the dive)
         la = 1.0 - ease(min(zoom_u / 0.55, 1.0))
-        n = self.node
+        n = cur
         if la > 0.01:
             ax.text(0.03, 0.960, "Oxford PlasmaPro 80 · CCP",
                     transform=ax.transAxes, color=INK, fontsize=16,
@@ -194,25 +232,31 @@ class ReactorScene:
                     "30 mTorr · 13.56 MHz",
                     transform=ax.transAxes, color=MUTED, fontsize=12.5,
                     family="monospace", alpha=la)
+            ax.text(0.03, 0.884,
+                    f"operating point {seg+1}/3 · "
+                    f"{n['absorbed_power_W']:.0f} W absorbed",
+                    transform=ax.transAxes, color=AMBER, fontsize=12.5,
+                    family="monospace", alpha=la, weight="bold")
             read = [
-                ("absorbed power", f"{n['absorbed_power_W']:.0f} W"),
                 ("electron density",
                  f"{n['electron_density_m3']:.2e} m⁻³"),
                 ("mean electron energy",
                  f"{n['mean_electron_energy_eV']:.1f} eV"),
+                ("electronegativity n₋/nₑ",
+                 f"{n['electronegativity']:.0f}"),
                 ("reduced field E/N", f"{n['reduced_field_Td']:.0f} Td"),
                 ("ion flux to wafer",
                  f"{n['total_ion_flux_m2_s']:.2e} m⁻²s⁻¹"),
             ]
             for k, (lab, val) in enumerate(read):
-                ax.text(0.03, 0.876 - 0.033 * k, f"{lab:<22s}",
-                        transform=ax.transAxes, color=DIM, fontsize=11,
+                ax.text(0.03, 0.845 - 0.031 * k, f"{lab:<24s}",
+                        transform=ax.transAxes, color=DIM, fontsize=10.5,
                         family="monospace", alpha=la)
-                ax.text(0.32, 0.876 - 0.033 * k, val,
-                        transform=ax.transAxes, color=TEAL, fontsize=11,
+                ax.text(0.34, 0.845 - 0.031 * k, val,
+                        transform=ax.transAxes, color=TEAL, fontsize=10.5,
                         family="monospace", alpha=la)
-            ax.text(0.03, 0.712, "67 species · 259 reactions · "
-                    "one deterministic solve",
+            ax.text(0.03, 0.680, "67 species · 259 reactions · "
+                    "one deterministic solve per point",
                     transform=ax.transAxes, color=MUTED, fontsize=11,
                     family="monospace", alpha=la)
             ax.text(0, 0.0935, "grounded showerhead",
@@ -221,6 +265,60 @@ class ReactorScene:
             ax.text(0, 0.030, "powered electrode · 240 mm wafer",
                     color=MUTED, fontsize=10.5, family="monospace",
                     alpha=la, ha="center", va="center", clip_on=True)
+
+        # ---- science insets: solved gas inventory + ion mix ----
+        if la > 0.02:
+            dprev, dcur = (self.dens[max(seg - 1, 0)], self.dens[seg])
+            axb = fig.add_axes([0.075, 0.045, 0.46, 0.235])
+            axb.set_facecolor("none")
+            axb.set_xlim(0, 1); axb.set_ylim(-0.6, len(self.species) - 0.4)
+            axb.invert_yaxis()
+            axb.set_xticks([]); axb.set_yticks([])
+            for sp_ in axb.spines.values():
+                sp_.set_visible(False)
+            axb.set_title("solved neutral & radical densities · log scale",
+                          color=DIM, fontsize=10, family="monospace",
+                          loc="left", alpha=la)
+            for k, sp in enumerate(self.species):
+                v0 = dprev.get(sp, 10 ** self.logmin)
+                v1 = dcur.get(sp, 10 ** self.logmin)
+                v = 10 ** ((1 - wmix) * np.log10(v0) + wmix * np.log10(v1))
+                frac = (np.log10(v) - self.logmin) \
+                    / (self.logmax - self.logmin)
+                axb.barh(k, max(frac, 0.0), height=0.62, color=OXIDE,
+                         alpha=0.9 * la)
+                axb.text(-0.015, k, sp, color=MUTED, fontsize=9.5,
+                         family="monospace", ha="right", va="center",
+                         alpha=la)
+                if sp in dcur:
+                    axb.text(max(frac, 0.0) + 0.015, k,
+                             f"{dcur[sp]:.1e}", color=DIM, fontsize=8.5,
+                             family="monospace", va="center", alpha=la)
+            fprev, fcur = (self.flux[max(seg - 1, 0)], self.flux[seg])
+            axi = fig.add_axes([0.635, 0.205, 0.325, 0.042])
+            axi.set_facecolor("none")
+            axi.set_xlim(0, 1); axi.set_ylim(0, 1)
+            axi.set_xticks([]); axi.set_yticks([])
+            for sp_ in axi.spines.values():
+                sp_.set_visible(False)
+            axi.set_title("who hits the wafer · ion flux mix",
+                          color=DIM, fontsize=10, family="monospace",
+                          loc="left", alpha=la)
+            tot0 = sum(fprev.values()); tot1 = sum(fcur.values())
+            left = 0.0
+            for k, sp in enumerate(self.ions):
+                fr = ((1 - wmix) * fprev.get(sp, 0.0) / tot0
+                      + wmix * fcur.get(sp, 0.0) / tot1)
+                axi.barh(0.5, fr, left=left, height=1.0,
+                         color=self.ION_COLORS[k % len(self.ION_COLORS)],
+                         alpha=0.95 * la)
+                left += fr
+            for k, sp in enumerate(self.ions[:6]):
+                col = k % 3; row = k // 3
+                fig.text(0.635 + 0.11 * col, 0.165 - 0.032 * row,
+                         "■ " + sp, family="monospace", fontsize=9.5,
+                         alpha=la,
+                         color=self.ION_COLORS[k % len(self.ION_COLORS)])
         # dive label
         da = ease(max(zoom_u - 0.65, 0) / 0.35)
         if da > 0.01:
@@ -354,6 +452,14 @@ class SheathScene:
                  fontsize=14, family="monospace", va="top")
         axm.text(0.98, front - 0.015 * self.smax, "electron front",
                  color=BLUE, fontsize=12, family="monospace", ha="right")
+        # instantaneous field profile E(x,t), drawn in the column
+        depth = np.linspace(0, self.smax, 120)
+        efld = np.array([float(s.electric_field_V_m(d, t)) for d in depth])
+        emax_g = (4.0 / 3.0) * self.Vmax / self.smax
+        axm.plot(0.055 + 0.26 * efld / emax_g, depth, color=AMBER,
+                 lw=2.2, alpha=0.85)
+        axm.text(0.06, 0.045 * self.smax, "E(x,t)", color=AMBER,
+                 fontsize=11.5, family="monospace")
         # scale bar = 0.2 mm
         blen = 0.2e-3 / self.smax * 0.82  # fraction of axis height... draw v
         axm.plot([0.955, 0.955], [self.smax * 0.98,
@@ -363,25 +469,42 @@ class SheathScene:
                  fontsize=11.5, family="monospace", ha="right",
                  rotation=90, va="center")
 
-        # V(t) sparkline
-        axv = fig.add_axes([0.68, 0.62, 0.28, 0.24])
-        axv.set_facecolor(PANEL)
+        ph = (t % self.period) / self.period
+        vnow = self.Vmax * (1 - (4 / 3) * y + (1 / 3) * y ** 4)
         tt = np.linspace(0, self.period, 200)
+
+        # driving current waveform J(t) — the model input
+        axj = fig.add_axes([0.68, 0.80, 0.28, 0.11])
+        axj.set_facecolor(PANEL)
+        jj = np.asarray(s.current.current_density_A_m2(tt))
+        axj.plot(tt / self.period, jj, color=BLUE, lw=2)
+        axj.axhline(0, color=LINE, lw=1)
+        jnow = float(np.asarray(s.current.current_density_A_m2(t)))
+        axj.plot([ph], [jnow], "o", color=AMBER, ms=6)
+        axj.set_xlim(0, 1)
+        axj.set_xticks([]); axj.set_yticks([])
+        for sp in axj.spines.values():
+            sp.set_color(LINE)
+        axj.set_title("input: current J(t)",
+                      color=MUTED, fontsize=11, family="monospace",
+                      loc="left")
+
+        # V(t) sparkline — the nonlinear response
+        axv = fig.add_axes([0.68, 0.575, 0.28, 0.15])
+        axv.set_facecolor(PANEL)
         yy = np.asarray(s.normalized_charge(tt))
         vv = self.Vmax * (1 - (4 / 3) * yy + (1 / 3) * yy ** 4)
         axv.plot(tt / self.period, vv, color=MAG, lw=2)
-        ph = (t % self.period) / self.period
-        vnow = self.Vmax * (1 - (4 / 3) * y + (1 / 3) * y ** 4)
-        axv.plot([ph], [vnow], "o", color=AMBER, ms=7)
+        axv.plot([ph], [vnow], "o", color=AMBER, ms=6)
         axv.set_xlim(0, 1); axv.set_ylim(0, self.Vmax * 1.1)
         axv.set_xticks([]); axv.set_yticks([])
         for sp in axv.spines.values():
             sp.set_color(LINE)
-        axv.set_title("sheath voltage V(t)", color=MUTED, fontsize=12,
-                      family="monospace", loc="left")
+        axv.set_title("response: voltage V(t)", color=MUTED,
+                      fontsize=11, family="monospace", loc="left")
 
         # IEAD building
-        axh = fig.add_axes([0.68, 0.13, 0.28, 0.38])
+        axh = fig.add_axes([0.68, 0.13, 0.28, 0.35])
         axh.set_facecolor(PANEL)
         centers = 0.5 * (self.edges[:-1] + self.edges[1:])
         axh.bar(centers, self.hist / self.hist.max(),
@@ -408,6 +531,12 @@ class SheathScene:
                  "Turner–Chabert field, solved · "
                  f"slowed {1/ (self.SLOWMO_SIM_PER_S):,.0f}×",
                  color=MUTED, fontsize=12, family="monospace")
+        fig.text(0.06, 0.042,
+                 f"electron front s(t) = {front*1e3:5.3f} mm", color=BLUE,
+                 fontsize=12.5, family="monospace", ha="left")
+        fig.text(0.50, 0.042,
+                 f"V(t) = {vnow:5.1f} V", color=MAG,
+                 fontsize=12.5, family="monospace", ha="left")
         return fig_to_rgb(fig)
 
 
@@ -457,6 +586,114 @@ class FeatureScene:
         fig.text(0.5, 0.055, f"process t = {u_total*60:4.1f} s",
                  color=MUTED, fontsize=15, family="monospace", ha="center")
         return fig_to_rgb(fig)
+
+
+# ------------------------------------------------------------- validation
+class ValidationScene:
+    """The four model-vs-experiment charts, appearing in sequence."""
+
+    N = int(7.5 * FPS)
+
+    def __init__(self):
+        self.v = json.loads(
+            (HERE / "data" / "showcase_data.json").read_text())["validation"]
+        self.fig = plt.figure(figsize=(W / DPI, H / DPI), dpi=DPI)
+        self.fig.patch.set_facecolor(BG)
+
+    def frame(self, i: int) -> np.ndarray:
+        t = i / FPS
+        fig = self.fig
+        fig.clf()
+        fig.text(0.06, 0.945, "measured, not tuned", color=INK,
+                 fontsize=18, family="monospace", weight="bold")
+        fig.text(0.06, 0.912, "held-out = predicted before comparison; "
+                 "calibrations stated per chart",
+                 color=MUTED, fontsize=11.5, family="monospace")
+
+        def A(k):
+            return ease((t - 0.55 - 0.85 * k) / 0.5)
+
+        boxes = [[0.08, 0.50, 0.40, 0.34], [0.57, 0.50, 0.40, 0.34],
+                 [0.08, 0.06, 0.40, 0.34], [0.57, 0.06, 0.40, 0.34]]
+        V = self.v
+
+        # 1: Tinacba bars
+        a = A(0)
+        ax = fig.add_axes(boxes[0]); self._style(ax, a)
+        pts = V["tinacba"]["points"]
+        mx = max(max(p["measured"], p["predicted"]) for p in pts) * 1.15
+        for k, p in enumerate(pts):
+            ax.bar(k - 0.18, p["measured"], 0.32, color=INK, alpha=0.85 * a)
+            ax.bar(k + 0.18, p["predicted"], 0.32, color=TEAL, alpha=a)
+            ax.text(k, -mx * 0.10, f"{p['material']}\n{p['energy_eV']} eV",
+                    color=DIM, fontsize=8.5, family="monospace",
+                    ha="center", va="top", alpha=a)
+        ax.set_ylim(0, mx)
+        ax.set_xticks([])
+        ax.tick_params(colors=DIM, labelsize=8.5)
+        ax.set_title("SF₅⁺ beam → depth · 5.9%, no fit",
+                     color=MUTED, fontsize=10.5, family="monospace",
+                     loc="left", alpha=a)
+
+        # 2: Vella ALE
+        a = A(1)
+        ax = fig.add_axes(boxes[1]); self._style(ax, a)
+        E = V["vella_ale"]["energy_eV"]
+        for key, c in (("experiment_nm", INK), ("predicted_nm", TEAL)):
+            ax.plot(E, V["vella_ale"][key], "-o", color=c, lw=2, ms=5,
+                    alpha=a)
+        ax.set_title("Si–Cl₂/Ar⁺ ALE nm/cycle · ≤12.9%",
+                     color=MUTED, fontsize=10.5,
+                     family="monospace", loc="left", alpha=a)
+        ax.tick_params(colors=DIM, labelsize=8.5)
+
+        # 3: Lee-Lieberman
+        a = A(2)
+        ax = fig.add_axes(boxes[2]); self._style(ax, a)
+        rows = V["lee_lieberman"]["rows"]
+        P = [r["pressure_mTorr"] for r in rows]
+        ax.semilogx(P, [r["model_Te_eV"] for r in rows], color=TEAL,
+                    lw=2.2, alpha=a)
+        ax.semilogx(P, [r["reference_Te_eV"] for r in rows], "o",
+                    mfc="none", mec=INK, ms=5, alpha=a)
+        ax.set_title("Ar global model Tₑ(p) · 8.5%, no fit",
+                     color=MUTED, fontsize=10.5,
+                     family="monospace", loc="left", alpha=a)
+        ax.tick_params(colors=DIM, labelsize=8.5, which="both")
+
+        # 4: de Boer held-out
+        a = A(3)
+        ax = fig.add_axes(boxes[3]); self._style(ax, a)
+        D = V["deboer"]
+        ax.plot(D["aspect_ratio"], D["experiment"], "-o", color=INK,
+                lw=2, ms=5, alpha=a)
+        ax.plot(D["aspect_ratio"], D["model"], "-o", color=TEAL, lw=2,
+                ms=5, alpha=a)
+        hi = D["held_out_index"]
+        ax.plot([D["aspect_ratio"][hi]], [D["model"][hi]], "o", ms=13,
+                mfc="none", mec=AMBER, mew=2, alpha=a)
+        ax.text(D["aspect_ratio"][hi] - 2, D["model"][hi] + 0.12,
+                "held-out", color=AMBER, fontsize=9.5,
+                family="monospace", ha="right", alpha=a)
+        ax.set_title("ARDE · cal AR10/20 · AR40 held-out",
+                     color=MUTED, fontsize=10.5,
+                     family="monospace", loc="left", alpha=a)
+        ax.tick_params(colors=DIM, labelsize=8.5)
+        fig.text(0.30, 0.012, "■ model", color=TEAL, fontsize=11,
+                 family="monospace", alpha=A(0))
+        fig.text(0.44, 0.012, "■ experiment / published", color=INK,
+                 fontsize=11, family="monospace", alpha=A(0))
+        return fig_to_rgb(fig)
+
+    @staticmethod
+    def _style(ax, a):
+        ax.set_facecolor(PANEL)
+        for sp in ax.spines.values():
+            sp.set_color(LINE)
+            sp.set_alpha(a)
+        ax.patch.set_alpha(a)
+        if a <= 0.01:
+            ax.set_xticks([]); ax.set_yticks([])
 
 
 # ------------------------------------------------------------------ cards
@@ -545,8 +782,16 @@ def main() -> None:
     f_first = feature.frame(0)
     for f in zoom_transition(s_last, f_first):
         wtr.add(f)
+    f_last = None
     for i in range(feature.N):
-        wtr.add(feature.frame(i))
+        f = feature.frame(i)
+        wtr.add(f)
+        f_last = f
+    validation = ValidationScene()
+    for f in zoom_transition(f_last, validation.frame(0)):
+        wtr.add(f)
+    for i in range(validation.N):
+        wtr.add(validation.frame(i))
     end = text_card([
         ("453 V sheath · 234.5 eV mean ion · 1.15° RMS angle",
          0.62, 15, MUTED, "normal"),
