@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from scripts.audit_zhu_npg80_moving_cr_profiles import (
     CHROMIUM_REFERENCE_DENSITY_KG_M3,
     _mask_metrics,
+    _process_pool_options,
     _router,
     chromium_atom_density_m3,
 )
@@ -54,3 +55,13 @@ def test_subcell_mask_is_unresolved_but_not_relabelled_physically_exhausted():
     assert 0.0 < metrics["center_remaining_thickness_nm"] < 10.0
     assert metrics["mask_below_vertical_resolution_at_center"] is True
     assert metrics["mask_exhausted_at_center"] is False
+
+
+def test_cuda_multiworker_campaign_uses_spawn_context():
+    # Keep this as a structural regression: actually exercising CUDA belongs
+    # to the hardware parity sentinel, while this test prevents a future
+    # refactor from reintroducing the known forked-primary-context failure.
+    assert _process_pool_options("cpu") == {}
+    assert _process_pool_options("cuda:0")[
+        "mp_context"
+    ].get_start_method() == "spawn"

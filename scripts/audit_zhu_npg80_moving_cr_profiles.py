@@ -13,6 +13,7 @@ import argparse
 from concurrent.futures import ProcessPoolExecutor
 from hashlib import sha256
 import json
+import multiprocessing
 import os
 from pathlib import Path
 import sys
@@ -433,6 +434,13 @@ def _execute(payload):
     return profiles, path, str(transport_device)
 
 
+def _process_pool_options(transport_device):
+    """Return a fork-safe executor configuration for the selected device."""
+    if str(transport_device).startswith("cuda"):
+        return {"mp_context": multiprocessing.get_context("spawn")}
+    return {}
+
+
 def build(*, smoke=False, transport_device="cpu", workers=None):
     preregistration = _load(PREREGISTRATION)
     analog = _load(ANALOG_BOARD)
@@ -492,8 +500,14 @@ def build(*, smoke=False, transport_device="cpu", workers=None):
             if workers == 1:
                 computed = [_execute(payload) for payload in payloads]
             else:
+                # CUDA primary contexts are not fork-safe.  A forked worker
+                # inherits Warp's initialized runtime but cannot acquire the
+                # parent's device context.  Spawn gives every deterministic
+                # trajectory worker its own clean CUDA context.
+                pool_options = _process_pool_options(transport_device)
                 with ProcessPoolExecutor(
-                    max_workers=min(workers, len(missing))
+                    max_workers=min(workers, len(missing)),
+                    **pool_options,
                 ) as pool:
                     computed = list(pool.map(_execute, payloads))
         for (index, _), (profiles, path, device) in zip(missing, computed):
