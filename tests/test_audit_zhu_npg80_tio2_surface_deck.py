@@ -27,3 +27,8 @@ def test_every_required_surface_coefficient_remains_explicit():
         audit["unresolved_model_form"]
     )
     assert "chemistry_dependent_roughness_evolution" in audit["unresolved_model_form"]
+    bare = slots["bare_sio2_yield"]
+    assert bare["reference_formula_unit_yield_at_276_eV"] == 0.192143
+    assert bare["reference_evidence_class"] == "digitized_semiempirical_fit_curve"
+    assert bare["reference_transferable_as_target_coefficient"] is False
+    assert bare["numerical_target_value_identified"] is False

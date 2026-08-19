@@ -1,0 +1,11 @@
+argon_ion_energy_eV,curve_x_crop_px,curve_y_crop_px,fitted_total_atom_yield_per_ion,stoichiometric_tio2_formula_units_per_ion,digitization_relative_uncertainty,evidence_class
+125,46.134804,514.469720,0.178605,0.059535,0.03,digitized_semiempirical_fit_curve
+150,68.305553,475.155142,0.246776,0.082259,0.03,digitized_semiempirical_fit_curve
+175,87.050654,445.184346,0.315749,0.105250,0.03,digitized_semiempirical_fit_curve
+200,103.288399,421.469723,0.383740,0.127913,0.03,digitized_semiempirical_fit_curve
+225,117.611105,402.167907,0.449751,0.149917,0.03,digitized_semiempirical_fit_curve
+250,130.423202,386.104519,0.513264,0.171088,0.03,digitized_semiempirical_fit_curve
+276,142.454543,371.991286,0.576428,0.192143,0.03,digitized_semiempirical_fit_curve
+300,152.593951,360.785689,0.632070,0.210690,0.03,digitized_semiempirical_fit_curve
+350,171.339052,341.608628,0.740039,0.246680,0.03,digitized_semiempirical_fit_curve
+400,187.576798,326.474077,0.838121,0.279374,0.03,digitized_semiempirical_fit_curve

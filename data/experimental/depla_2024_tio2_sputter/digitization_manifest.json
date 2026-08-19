@@ -1,0 +1,102 @@
+{
+  "manifest_id": "DEPLA-2024-TIO2-AR-SPUTTER-FIT-R1",
+  "source": {
+    "citation": "D. Depla and J. Van Bever, Calculation of oxide sputter yields, Vacuum 222 (2024) 112994",
+    "doi": "10.1016/j.vacuum.2024.112994",
+    "primary_record": "https://biblio.ugent.be/publication/01HN0EVQ4K9X7ZKEMNFYB2R2RP",
+    "source_pdf_sha256": "af5e2530985073d01c401dd0107797080b65fd24208c7d18805a9f0f628ab5e3",
+    "source_pdf_committed": false
+  },
+  "visual_audit": {
+    "render_dpi": 400,
+    "render_size_px": [
+      3400,
+      4400
+    ],
+    "figure1_pdf_page": 10,
+    "figure1_render_sha256": "4d402bb4a0ebaa2b6491cbf0dd5d4e658379e1a38e7d5bdce33b6359710c5c86",
+    "figure1_crop_box_full_render_px": [
+      2050,
+      2350,
+      3250,
+      3800
+    ],
+    "figure1_crop_size_px": [
+      1200,
+      1450
+    ],
+    "figure1_crop_sha256": "7bae96dd92a4725f27d1736a19e92876b9490ef4fabd912b764c7b699963548b",
+    "figure2_pdf_page": 15,
+    "figure2_render_sha256": "c96ed3c82b9f9c847c8c5cab81a43500ce51f43e2ba4cc6265587c6bb92909da",
+    "status": "passed_original_resolution"
+  },
+  "quantity": {
+    "projectile": "Ar+",
+    "target": "stoichiometric TiO2 reference",
+    "source_vertical_axis": "total target atoms emitted per incident ion",
+    "formula_unit_conversion": "divide total atom yield by 3",
+    "incidence_angle": "source compilation normalizes literature oblique data using its stated <=35 degree inverse-cosine approximation"
+  },
+  "source_evidence": {
+    "fit_model": "Seah-Nunney semi-empirical model",
+    "fit_free_parameter": "oxygen surface binding energy",
+    "tio2_oxygen_surface_binding_energy_eV": 3.52,
+    "tio2_oxygen_surface_binding_energy_95pct_eV": 1.14,
+    "low_energy_input": "Crist 2023 reports etch rates from 0.2--3 keV without ion current density; Depla and Van Bever infer current density from metal references before converting to yield",
+    "high_energy_input": "Bach 1974 crystalline-target IBE data"
+  },
+  "pixel_replay": {
+    "axis_type": "log10-log10",
+    "x_calibration": {
+      "100_eV_px": 19.0,
+      "1000_eV_px": 299.0,
+      "10000_eV_px": 579.0
+    },
+    "y_calibration": {
+      "0.1_atom_per_ion_px": 585.0,
+      "1_atom_per_ion_px": 305.0,
+      "10_atom_per_ion_px": 25.0
+    },
+    "curve_rgb": [
+      255,
+      0,
+      0
+    ],
+    "curve_pixel_polynomial_high_to_low": [
+      -5.35989911e-06,
+      0.00534245709,
+      -2.33135012,
+      611.181418
+    ],
+    "fit_support_x_px": [
+      44,
+      183
+    ],
+    "kept_columns": 93,
+    "pixel_residual_mad": 0.789,
+    "digitization_relative_uncertainty": 0.03
+  },
+  "derived_checks": {
+    "tio2_formula_units_per_ion_at_200_eV": 0.127913,
+    "tio2_formula_units_per_ion_at_276_eV": 0.192143,
+    "tio2_formula_units_per_ion_at_400_eV": 0.279374
+  },
+  "output": {
+    "path": "data/experimental/depla_2024_tio2_sputter/figure1_tio2_ar_sputter_fit.csv",
+    "sha256": "a18730ceba2c03f97686f2b7ee56b46b33e1c29fdf10716fe939fe64f4e49145"
+  },
+  "claim_boundary": {
+    "valid": [
+      "bare stoichiometric TiO2 Ar-sputter reference scale",
+      "shape of the source's semi-empirical TiO2 fit over 125--400 eV",
+      "evidence that pure physical sputtering is much smaller than the Oxford effective-removal requirement"
+    ],
+    "not_valid": [
+      "direct low-energy TiO2 beam-yield measurement",
+      "reactive CHF3/SF6/O2 TiO2 yield coefficient",
+      "CFx+, HF+, SFx+, O+, or mixed-ion sputter yield",
+      "ALD-film-specific yield or Oxford NPG80 target coefficient",
+      "lower or upper bound on ion-assisted chemical removal"
+    ]
+  }
+}

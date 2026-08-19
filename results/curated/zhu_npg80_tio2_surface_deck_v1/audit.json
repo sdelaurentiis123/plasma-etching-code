@@ -11,6 +11,10 @@
     "choi_multiaxis_response": {
       "path": "data/experimental/choi_2013_tio2_cf4/bias_response_audit.json",
       "sha256": "b252463f9274ed6e0a3740b009acf48f71315a705d6f69573f35fc0bfcef0094"
+    },
+    "depla_bare_tio2_ar_sputter_reference": {
+      "path": "data/experimental/depla_2024_tio2_sputter/digitization_manifest.json",
+      "sha256": "64b0f498377b1a605fc660bf73b3530b09d02963ba16a2d926bfdbd75d592207"
     }
   },
   "executable_contract": {
@@ -67,7 +71,10 @@
     "bare_sio2_yield": {
       "meaning_in_tio2_deck": "bare TiO2 energetic removal yield",
       "numerical_target_value_identified": false,
-      "available_evidence": "Choi bias response without ion flux or IEAD"
+      "available_evidence": "Depla/Van Bever semi-empirical bare Ar->TiO2 reference curve plus Choi reactive bias response; neither identifies the Oxford mixed-ion fluorinated-surface target law",
+      "reference_formula_unit_yield_at_276_eV": 0.192143,
+      "reference_evidence_class": "digitized_semiempirical_fit_curve",
+      "reference_transferable_as_target_coefficient": false
     },
     "complex_sio2_yield": {
       "meaning_in_tio2_deck": "fluorinated TiO2 energetic removal yield",

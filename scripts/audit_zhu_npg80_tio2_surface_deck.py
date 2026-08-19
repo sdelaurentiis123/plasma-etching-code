@@ -22,6 +22,10 @@ CHOI = (
     ROOT / "data" / "experimental" / "choi_2013_tio2_cf4"
     / "bias_response_audit.json"
 )
+DEPLA = (
+    ROOT / "data" / "experimental" / "depla_2024_tio2_sputter"
+    / "digitization_manifest.json"
+)
 OUTPUT = (
     ROOT / "results" / "curated" / "zhu_npg80_tio2_surface_deck_v1"
     / "audit.json"
@@ -88,7 +92,14 @@ def build() -> dict[str, object]:
         "bare_sio2_yield": {
             "meaning_in_tio2_deck": "bare TiO2 energetic removal yield",
             "numerical_target_value_identified": False,
-            "available_evidence": "Choi bias response without ion flux or IEAD",
+            "available_evidence": (
+                "Depla/Van Bever semi-empirical bare Ar->TiO2 reference "
+                "curve plus Choi reactive bias response; neither identifies "
+                "the Oxford mixed-ion fluorinated-surface target law"
+            ),
+            "reference_formula_unit_yield_at_276_eV": 0.192143,
+            "reference_evidence_class": "digitized_semiempirical_fit_curve",
+            "reference_transferable_as_target_coefficient": False,
         },
         "complex_sio2_yield": {
             "meaning_in_tio2_deck": "fluorinated TiO2 energetic removal yield",
@@ -115,6 +126,7 @@ def build() -> dict[str, object]:
         "inputs": {
             "surface_topology": _receipt(TOPOLOGY),
             "choi_multiaxis_response": _receipt(CHOI),
+            "depla_bare_tio2_ar_sputter_reference": _receipt(DEPLA),
         },
         "executable_contract": {
             "class": "petch.tio2_surface_deck.Tio2ReducedSurfaceDeck",
