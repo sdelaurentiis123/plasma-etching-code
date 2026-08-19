@@ -121,3 +121,33 @@ def test_oxygen_competition_is_bounded_conservative_and_suppresses_fluorination(
         - with_oxygen.removed_oxygen_blocked_sites_m2,
         rel=2.0e-11,
     )
+
+
+def test_species_resolved_ion_yields_are_preserved_and_fail_closed():
+    low = EnergeticYield(0.1, 10.0, 150.0)
+    high = EnergeticYield(0.6, 10.0, 150.0)
+    base = _deck()
+    mapped = Tio2ReducedSurfaceDeck(
+        **{
+            **base.__dict__,
+            "bare_tio2_yield": {"light+": low, "heavy+": high},
+            "fluorinated_tio2_yield": {"light+": low, "heavy+": high},
+            "passivation_sputter_yield": {"light+": low, "heavy+": high},
+        }
+    ).build_mechanism(allow_reduced_sensitivity=True)
+    fluxes = SurfaceFluxes({}, (
+        EnergeticFlux("light+", 1.0e18, [150.0], [1.0], [1.0]),
+        EnergeticFlux("heavy+", 1.0e18, [150.0], [1.0], [1.0]),
+    ))
+    result = mapped.advance(mapped.initial_state(), fluxes, 0.01)
+    expected = (0.1 + 0.6) * 1.0e18 * 0.01
+    assert result.removed_bare_formula_units_m2 == pytest.approx(expected)
+    assert mapped.provenance["parameters"]["bare_sio2_yield"]["type"] == (
+        "species_resolved_energetic_yield"
+    )
+
+    missing = SurfaceFluxes({}, fluxes.energetic_fluxes + (
+        EnergeticFlux("unmapped+", 1.0e18, [150.0], [1.0], [1.0]),
+    ))
+    with pytest.raises(ValueError, match="unmapped\\+"):
+        mapped.advance(mapped.initial_state(), missing, 0.01)

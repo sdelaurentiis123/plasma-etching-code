@@ -557,9 +557,9 @@ class ReducedSiO2FluorocarbonParameters:
     polymer_deposition_probability_on_polymer: Mapping[str, float]
     oxygen_species: str
     oxygen_polymer_etch_probability: float
-    bare_sio2_yield: EnergeticYield
-    complex_sio2_yield: EnergeticYield
-    polymer_sputter_yield: EnergeticYield
+    bare_sio2_yield: EnergeticYield | Mapping[str, EnergeticYield]
+    complex_sio2_yield: EnergeticYield | Mapping[str, EnergeticYield]
+    polymer_sputter_yield: EnergeticYield | Mapping[str, EnergeticYield]
     material_name: str = "SiO2"
     material_inventory_name: str = "SiO2_formula_unit"
     polymer_bulk_unit_density_m3: float | None = None
@@ -651,6 +651,26 @@ class ReducedSiO2FluorocarbonParameters:
                 raise ValueError(f"invalid probability map: {name}")
             maps[name] = MappingProxyType(values)
         for name, values in maps.items(): object.__setattr__(self, name, values)
+        for name in (
+                "bare_sio2_yield", "complex_sio2_yield",
+                "polymer_sputter_yield"):
+            supplied = getattr(self, name)
+            if isinstance(supplied, Mapping):
+                laws = {str(species): law for species, law in supplied.items()}
+                if (
+                    not laws
+                    or any(not species for species in laws)
+                    or any(not isinstance(law, EnergeticYield)
+                           for law in laws.values())
+                ):
+                    raise ValueError(
+                        f"invalid species-resolved energetic-yield map: {name}"
+                    )
+                object.__setattr__(self, name, MappingProxyType(laws))
+            elif not isinstance(supplied, EnergeticYield):
+                raise TypeError(
+                    f"{name} must be EnergeticYield or a species mapping"
+                )
         if (maps["activated_polymer_deposition_probability_on_substrate"]
                 and self.complex_activation_yield is None):
             raise ValueError(
@@ -996,6 +1016,14 @@ class ReducedSiO2FluorocarbonMechanism:
         def yield_manifest(law):
             if law is None:
                 return None
+            if isinstance(law, Mapping):
+                return {
+                    "type": "species_resolved_energetic_yield",
+                    "by_species": {
+                        name: yield_manifest(item)
+                        for name, item in sorted(law.items())
+                    },
+                }
             if isinstance(law, LowEnergyActivationYield):
                 return {
                     "type": type(law).__name__,
@@ -1201,6 +1229,22 @@ class ReducedSiO2FluorocarbonMechanism:
         reasons = []
         if unsupported:
             reasons.append("positive incident neutral flux has no declared reaction channel")
+        energetic_names = {
+            population.name
+            for population in fluxes.energetic_fluxes
+            if np.any(np.asarray(population.flux_m2_s) > 0.0)
+        }
+        for field_name in (
+                "bare_sio2_yield", "complex_sio2_yield",
+                "polymer_sputter_yield"):
+            law = getattr(par, field_name)
+            if isinstance(law, Mapping):
+                missing = tuple(sorted(energetic_names - set(law)))
+                if missing:
+                    reasons.append(
+                        f"{field_name} has no species law for: "
+                        + ", ".join(missing)
+                    )
         if missing_evidence:
             reasons.append("missing parameter evidence: " + ", ".join(missing_evidence))
         return MechanismValidity(
@@ -1226,7 +1270,15 @@ class ReducedSiO2FluorocarbonMechanism:
     def _energetic_rate(self, fluxes, yield_law, shape):
         total = np.zeros(shape)
         for population in fluxes.energetic_fluxes:
-            total = total + self._broadcast(population.yield_rate_m2_s(yield_law), shape)
+            if isinstance(yield_law, Mapping):
+                if population.name not in yield_law:
+                    continue
+                local_law = yield_law[population.name]
+            else:
+                local_law = yield_law
+            total = total + self._broadcast(
+                population.yield_rate_m2_s(local_law), shape
+            )
         return total
 
     def _activation_rate(self, fluxes, yield_law, shape):

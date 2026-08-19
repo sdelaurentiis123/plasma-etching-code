@@ -12,7 +12,7 @@ from petch.surface_kinetics import (
 )
 
 
-def _mechanism(*, predictive_rate=False):
+def _mechanism(*, predictive_rate=False, inert_neutrals=()):
     return RateNormalizedRemovalMechanism(RateNormalizedRemovalParameters(
         material_name="TiO2",
         material_inventory_name="tio2_formula_units",
@@ -20,6 +20,7 @@ def _mechanism(*, predictive_rate=False):
         reference_projectile_flux_m2_s=2.0e19,
         blanket_removal_velocity_m_s=40.0e-9 / 60.0,
         bulk_material_unit_density_m3=3.2e28,
+        declared_inert_neutral_species=tuple(inert_neutrals),
         evidence={
             "reference_projectile_flux_m2_s": ParameterEvidence(
                 "conserved reactor boundary", "calculated",
@@ -71,6 +72,16 @@ def test_rate_normalized_law_refuses_undeclared_positive_population():
     mechanism = _mechanism()
     with pytest.raises(ValueError, match="no rate-normalized removal channel"):
         mechanism.advance(mechanism.initial_state((1,)), _flux([1.0], "other"), 1.0)
+
+
+def test_rate_normalized_law_accepts_only_explicitly_inert_neutrals():
+    flux = SurfaceFluxes({"HF": np.asarray([1.0e20])}, _flux([1.0e19]).energetic_fluxes)
+    with pytest.raises(ValueError, match="no rate-normalized removal channel"):
+        _mechanism().advance(_mechanism().initial_state((1,)), flux, 1.0)
+
+    mechanism = _mechanism(inert_neutrals=("HF",))
+    result = mechanism.advance(mechanism.initial_state((1,)), flux, 1.0)
+    assert result.validity.within_declared_scope is True
 
 
 def test_rate_normalized_parameters_require_complete_evidence():

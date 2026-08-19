@@ -42,6 +42,7 @@ class RateNormalizedRemovalParameters:
     blanket_removal_velocity_m_s: float
     bulk_material_unit_density_m3: float
     evidence: Mapping[str, ParameterEvidence]
+    declared_inert_neutral_species: tuple[str, ...] = ()
     known_omissions: tuple[str, ...] = (
         "blanket rate is transferred without a species-resolved surface reaction law",
         "ion-energy and incidence-angle yield response beyond geometric projected flux is omitted",
@@ -66,6 +67,7 @@ class RateNormalizedRemovalParameters:
         ):
             raise ValueError("invalid rate-normalized removal parameters")
         evidence = dict(self.evidence)
+        inert = tuple(str(name) for name in self.declared_inert_neutral_species)
         required = {
             "reference_projectile_flux_m2_s",
             "blanket_removal_velocity_m_s",
@@ -77,7 +79,14 @@ class RateNormalizedRemovalParameters:
             raise ValueError(
                 "rate-normalized removal evidence must cover every physical input"
             )
+        if (
+            any(not name for name in inert)
+            or len(set(inert)) != len(inert)
+            or set(inert) & set(projectiles)
+        ):
+            raise ValueError("invalid declared inert neutral species")
         object.__setattr__(self, "projectile_species", projectiles)
+        object.__setattr__(self, "declared_inert_neutral_species", inert)
         object.__setattr__(self, "evidence", MappingProxyType(evidence))
         object.__setattr__(self, "known_omissions", tuple(self.known_omissions))
 
@@ -127,7 +136,8 @@ class RateNormalizedRemovalMechanism:
         unsupported_neutral = tuple(sorted(
             name
             for name, value in fluxes.neutral_flux_m2_s.items()
-            if np.any(np.asarray(value) > 0.0)
+            if name not in par.declared_inert_neutral_species
+            and np.any(np.asarray(value) > 0.0)
         ))
         unsupported_energetic = tuple(sorted({
             population.name

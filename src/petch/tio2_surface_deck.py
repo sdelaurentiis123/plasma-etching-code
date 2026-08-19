@@ -80,9 +80,9 @@ class Tio2ReducedSurfaceDeck:
     oxygen_passivation_removal_probability: float
     oxygen_blocking_probability: float
     oxygen_blocker_ion_removal_yield: EnergeticYield
-    bare_tio2_yield: EnergeticYield
-    fluorinated_tio2_yield: EnergeticYield
-    passivation_sputter_yield: EnergeticYield
+    bare_tio2_yield: EnergeticYield | Mapping[str, EnergeticYield]
+    fluorinated_tio2_yield: EnergeticYield | Mapping[str, EnergeticYield]
+    passivation_sputter_yield: EnergeticYield | Mapping[str, EnergeticYield]
     evidence: Mapping[str, ParameterEvidence]
     declared_inert_neutral_species: tuple[str, ...] = ()
     additional_known_omissions: tuple[str, ...] = ()
