@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 170 sources by topic
+## Index — 172 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -138,6 +138,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`edelberg-1999`](library/edelberg-1999.md) | Edelberg & Aydil (1999) | not-fetched |
 | [`kawamura-1999-psst`](library/kawamura-1999-psst.md) | Kawamura et al., PSST 8, R45 (1999) | not-fetched (citation corrected from p.313) |
 | [`benyoucef-yousfi-2014-ion-transport`](library/benyoucef-yousfi-2014-ion-transport.md) | Benyoucef & Yousfi, semiclassical Ar+/Ar, O2+/O2, N2+/N2 transport validation | AUTHOR-PROVIDED FULL TEXT READ VIA HTML; FIGURES NOT LOCALLY ARCHIVED |
+| [`casey-2021-pt-foundations`](library/casey-2021-pt-foundations.md) | Casey et al., physical flux/bulk/legacy pulsed-Townsend transport definitions | PRIMARY CC-BY FULL TEXT + EQUATIONS 24, 30--32 VERIFIED |
 | [`chantry-1987-wall-diffusion`](library/chantry-1987-wall-diffusion.md) | Chantry, partial-reflection neutral diffusion and low-density wall-loss limit | PRIMARY FULL TEXT + EQUATIONS 4--7, 18--24 VISUALLY AUDITED |
 | [`christophorou-olthoff-2000-sf6`](library/christophorou-olthoff-2000-sf6.md) | Christophorou & Olthoff, NIST-evaluated SF6 collision, product, and swarm data | PRIMARY NIST FULL TEXT + TABLES 9, 14--17, 20, 24--25, 27--28, 35--37 PIXEL-AUDITED AT 400 DPI |
 | [`kokkoris-2009-sf6-global`](library/kokkoris-2009-sf6-global.md) | Kokkoris et al., conservation-checked SF6 daughter/heavy global chemistry | PRIMARY FULL TEXT + TABLE 1 VISUALLY AUDITED; TARGET-PRESSURE TRANSFER LIMIT PINNED |
@@ -155,6 +156,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`kawaguchi-2020-cl2`](library/kawaguchi-2020-cl2.md) | Kawaguchi et al., updated Cl2 cross-section set and transport validation | PRIMARY FULL TEXT + TABLE I/FIGURES 1--12 VISUAL AUDIT; ARRAYS NOT SUPPLIED |
 | [`lam-direct-drive-patents`](library/lam-direct-drive-patents.md) | Lam DirectDrive and RF-reference patent family | PRIMARY PATENT FULL TEXT READ |
 | [`lam-etch-platforms-2026`](library/lam-etch-platforms-2026.md) | Lam public etch-platform architecture/application map | PRIMARY MANUFACTURER RECORDS READ |
+| [`lan-jeon-2014-c4f6`](library/lan-jeon-2014-c4f6.md) | Lan & Jeon, swarm-inverted C4F6 electron collision set | PRIMARY FULL TEXT + TABLES 1--2 TRANSCRIBED + FIGURE 7 PIL-AUDITED |
 | [`lee-lieberman-1994-global`](library/lee-lieberman-1994-global.md) | Lee & Lieberman, conserved Ar/O2/Cl2 global plasma model and Ar/Cl2 rate decks | PRIMARY FULL TEXT + EQUATIONS/TABLES 2--3 VISUALLY AUDITED |
 | [`lennon-1988-ionization`](library/lennon-1988-ionization.md) | Lennon et al., evaluated atomic electron-impact ionization rates | PRIMARY NIST FULL TEXT + EQ. 5--6/TABLES 1--2 PIXEL-AUDITED |
 | [`mahoney-1994-planar-icp`](library/mahoney-1994-planar-icp.md) | Mahoney et al., independent planar-argon ICP electron-state board | PRIMARY FULL TEXT + TABLE I/FIGURE 11 VISUALLY AUDITED |
@@ -319,6 +321,8 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Commercial chlorine-reactor VUV amplitude band | [`woodworth-1999-commercial-vuv`](library/woodworth-1999-commercial-vuv.md) | 0.7e14 reactive to 4e14 nonreactive photons cm^-2 s^-1 above 8.8 eV is an abstract-level plausibility comparator, not a landed reactor normalization |
 | Elastic electron momentum-transfer energy moments | [`kemaneci-2014-chlorine-global`](library/kemaneci-2014-chlorine-global.md) | exact stationary-target two-body transfer uses the same-cross-section `<sigma_m v E>` moment; Kemaneci Eq. 18's `3 Te me/M <sigma_m v>` remains a separately named source-replay approximation and is about 25% lower for a constant cross section |
 | Direct pure-Cl2 electron-swarm board | [`gonzalez-magana-de-urquijo-2018-cl2`](library/gonzalez-magana-de-urquijo-2018-cl2.md) | 52 hash-locked native-table markers cover drift velocity, effective ionization, and longitudinal diffusion with source-wide uncertainty intervals; validates collision transport only, never reactor flux or feature depth |
+| C4F6 printed electron-collision deck and pure-gas legacy PT board | [`lan-jeon-2014-c4f6`](library/lan-jeon-2014-c4f6.md) | checksum-locks 37 momentum and nine inelastic tables; most rows are swarm-inverted rather than independent measurements, and the board supports collision kinetics only |
+| Flux/bulk/legacy pulsed-Townsend definition map | [`casey-2021-pt-foundations`](library/casey-2021-pt-foundations.md) | requires `W_B = W_tilde + alpha_tilde_T D_tilde_L` using same-study co-observables; forbids retuning a flux or bulk solver to an untransformed legacy PT `Wv` curve |
 | Conservative two-term EEPF operator and moment definitions | [`hagelaar-pitchford-2005-bolsig`](library/hagelaar-pitchford-2005-bolsig.md) | primary equations fix EEPF normalization, energy-space Scharfetter--Gummel fluxes, rate/energy moments, and two-term evidence limits; implementation remains non-predictive until collision, swarm, reactor, and wafer gates pass |
 | Legacy and revised Cl2 momentum-transfer evidence boundary | [`gregorio-pitchford-2012-cl2`](library/gregorio-pitchford-2012-cl2.md), [`gonzalez-magana-de-urquijo-2018-cl2`](library/gonzalez-magana-de-urquijo-2018-cl2.md), [`kawaguchi-2020-cl2`](library/kawaguchi-2020-cl2.md) | Rescigno close-coupling theory plus low-energy extrapolation is not a direct momentum-transfer measurement; Kawaguchi modifies the shape above 1 eV against integrated differential measurements and applies additional 2.5x/4x/1.05x/0.85x channel changes, so it is an explicit swarm-calibrated candidate provider |
 | Atomic-Cl elastic evidence boundary | [`griffin-1995-cl`](library/griffin-1995-cl.md), [`wang-2013-cl-fine-structure`](library/wang-2013-cl-fine-structure.md) | calculation-grade cross sections remain open until full arrays, support, angular integration, and model spread are audited; no resolving atomic-Cl measurement has been identified |

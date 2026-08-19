@@ -1,0 +1,117 @@
+{
+  "conditions": {
+    "collision_coefficients_retuned": false,
+    "energy_grid": "800-point manual parabolic, 0--200 eV",
+    "field_count": 18,
+    "gas_temperature_K": 300.0,
+    "growth_model": "BOLSIG+ density-gradient expansion",
+    "mole_fraction": {
+      "C4F6": 1.0
+    }
+  },
+  "cross_solver_flux_agreement": {
+    "interpretation": "independent deterministic two-term flux replay",
+    "maximum_absolute_relative_difference": 0.002344786243319019,
+    "mean_absolute_relative_difference": 0.0005923151940355506
+  },
+  "legacy_pt_Wv_comparison": {
+    "bolsig_bulk": {
+      "maximum_absolute_relative_residual": 0.2908366933464881,
+      "mean_absolute_relative_residual": 0.08176347315493679,
+      "mean_signed_relative_residual": 0.00047006484900048565,
+      "signed_relative_residual": [
+        0.2908366933464881,
+        0.23104972655541678,
+        0.13597868027058513,
+        0.07336519287144094,
+        -0.055121659536908174,
+        -0.07736927500030266,
+        -0.09133856402534368,
+        -0.07973515090248029,
+        -0.09715443966729387,
+        -0.08280457977004496,
+        -0.06474008041898982,
+        -0.058155244541472695,
+        -0.05002727439583976,
+        -0.028965340719924404,
+        -0.022899099474397056,
+        -0.0030533982579679098,
+        0.008871548991504552,
+        -0.020276568042461474
+      ]
+    },
+    "bolsig_flux": {
+      "maximum_absolute_relative_residual": 0.14786827362523725,
+      "mean_absolute_relative_residual": 0.07770167267073722,
+      "mean_signed_relative_residual": -0.07770167267073722,
+      "signed_relative_residual": [
+        -0.02162281423449519,
+        -0.013575500063942147,
+        -0.04107972514195979,
+        -0.05730977376425761,
+        -0.14786827362523725,
+        -0.13883583186799997,
+        -0.1369165368938896,
+        -0.1108821369455264,
+        -0.11841710684904228,
+        -0.09999410879429982,
+        -0.08051594909089976,
+        -0.07398456816262433,
+        -0.06832036215294557,
+        -0.05263972388968652,
+        -0.05367078427622607,
+        -0.04324104208212698,
+        -0.0431768542238784,
+        -0.09657901601423236
+      ]
+    },
+    "petch_flux": {
+      "maximum_absolute_relative_residual": 0.1486645089489287,
+      "mean_absolute_relative_residual": 0.07822288857645258,
+      "mean_signed_relative_residual": -0.07822288857645258,
+      "signed_relative_residual": [
+        -0.023911533044075894,
+        -0.015549470231987828,
+        -0.04260978737506649,
+        -0.05847005140230388,
+        -0.1486645089489287,
+        -0.13938252828431763,
+        -0.13737035243014717,
+        -0.11121146732556075,
+        -0.11867568559344965,
+        -0.10014975234703904,
+        -0.08066545442800721,
+        -0.0739906645194438,
+        -0.06823660516368124,
+        -0.05263697237047038,
+        -0.05370981830700128,
+        -0.04324481723633622,
+        -0.04306929291677142,
+        -0.09646323245155808
+      ]
+    }
+  },
+  "schema": "petch.c4f6-bolsig-bulk-reference-audit.v1",
+  "sources": {
+    "bolsig_binary_sha256": "fe9d3c995e5b71033eb7db8c562b8d191e30aabaa8549ba0438de994607b8dc0",
+    "bolsig_download_url": "https://www.bolsig.laplace.univ-tlse.fr/wp-content/uploads/2016/03/bolsigplus032016-mac.zip",
+    "bolsig_method_doi": "10.1088/0963-0252/14/4/011",
+    "bolsig_raw_output_sha256": "2df9619acc40910109d5dfe368f7a134936a0fc4659788c895aaf8238b35603a",
+    "bolsig_version": "03/2016",
+    "bolsig_zip_sha256": "60a98cf2a4d67a3ff212fd30e0072eff95b2c1295eeeb2e8ae8d94f7ebde5f42",
+    "collision_deck_bibkey": "lan-jeon-2014-c4f6",
+    "exported_collision_sha256": "1403f7977be4c06379a097b4df60369c36539a3e59633f6b1a9c513348d208d0",
+    "exported_instruction_sha256": "9ce147ccc5d90994368bc1d1201c3b1a0da9ab1ea5fe75afdaec3e654899b3cd",
+    "lan_jeon_doi": "10.3938/jkps.64.1320",
+    "pt_definition_bibkey": "casey-2021-pt-foundations",
+    "pt_definition_doi": "10.1088/1361-6595/abe729"
+  },
+  "verdict": {
+    "density_gradient_bulk_resolves_legacy_Wv": false,
+    "flux_replay_independently_corroborated": true,
+    "reason": "Lan--Jeon reports legacy pulsed-Townsend average drift Wv. It is neither flux drift nor the universal bulk coefficient. The casey-2021-pt-foundations transformation requires the same-study PT Townsend property and longitudinal diffusion, which are not reported in the Lan--Jeon source.",
+    "supports_krueger_depth": false,
+    "supports_unique_c4f6_reactor_state": false,
+    "supports_wafer_flux": false
+  }
+}

@@ -1,0 +1,40 @@
+Casey, M. J. E., et al. (2021)
+"Foundations and interpretations of the pulsed-Townsend experiment"
+Plasma Sources Science and Technology 30, 035017.
+DOI: 10.1088/1361-6595/abe729
+
+Institutional-repository publisher PDF SHA-256:
+21acda40d9bba7fad36a97b1ba614010327846ea225914b8a55eac46249e74c1
+Retrieval URL:
+https://pure.ulster.ac.uk/ws/files/91167940/Casey_et_al_2021_PSST_Foundations_and_interpretations_of_the_pulsed_Townsend_experiment_30_035017.pdf
+
+Verified source facts (13-page CC-BY publisher PDF read in full):
+
+1. In a nonconservative electron swarm, flux and bulk transport coefficients
+   are distinct kinetic quantities. Time-of-flight measurements generally
+   sample universal bulk coefficients.
+2. The older Brambring representation used for many pulsed-Townsend analyses
+   is not the physical continuity equation when ionization or attachment is
+   active. Its fitted transport properties carry tildes and are not themselves
+   universal flux or bulk coefficients.
+3. Equations 30-32 give the exact reported transformation at the retained
+   order:
+
+       R_net = alpha_tilde_T * W_tilde
+       W_B   = W_tilde + alpha_tilde_T * D_tilde_L
+       D_B,L = D_tilde_L
+
+4. The paper applies this conversion only when W_tilde, alpha_tilde_T, and
+   D_tilde_L are available from the same pulsed-Townsend study. Reanalysis of
+   the original current transient with the physical equation is preferred.
+5. The paper separately notes that a calibrated PT current amplitude can, in
+   principle, measure flux drift. That does not turn a transit-time W_tilde
+   value into flux drift.
+
+Executable consequence:
+
+Lan-Jeon reports legacy PT Wv but not same-study alpha_tilde_T and D_tilde_L.
+Neither a flux-drift calculation nor a modern density-gradient bulk result is
+the measurement-equivalent target. Cross sections must not be retuned solely
+to force either quantity through Wv. This definition result does not establish
+a reactor state, wafer boundary, or feature depth.
