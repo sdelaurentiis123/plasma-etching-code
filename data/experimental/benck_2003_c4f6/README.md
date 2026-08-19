@@ -1,8 +1,9 @@
 # Benck 2003 C4F6/Ar mass-resolved ion-current board
 
 This directory digitizes the five unambiguous reactor-boundary series in
-Figures 9 and 10 and the 5 sccm CF2/CF neutral-ratio series in Figure 14(a) of
-Benck, Goyette, and Wang, *Journal of Applied Physics*
+Figures 9 and 10, the plasma-potential-oscillation response in Figure 13, and
+the 5 sccm CF2/CF neutral-ratio series in Figure 14(a) of Benck, Goyette, and
+Wang, *Journal of Applied Physics*
 **94**, 1382–1389 (2003), DOI `10.1063/1.1586978`: total positive-ion current
 and the Ar+, CF+, CF2+, and CF3+ components. Figure 9 sweeps 25–100% C4F6 at
 1.33 Pa; Figure 10 sweeps 0.67–2.66 Pa at 50% C4F6.
@@ -26,6 +27,12 @@ python scripts/digitize_benck_2003_figure10.py \
   --source-pdf /path/to/benck_2003_c4f6.pdf \
   --render /tmp/benck_page6.png \
   --overlay /tmp/benck_figure10_overlay.png
+pdftoppm -f 7 -l 7 -singlefile -png -r 600 \
+  /path/to/benck_2003_c4f6.pdf /tmp/benck_page7
+python scripts/digitize_benck_2003_figure13.py \
+  --source-pdf /path/to/benck_2003_c4f6.pdf \
+  --render /tmp/benck_page7.png \
+  --overlay /tmp/benck_figure13_overlay.png
 pdftoppm -f 8 -l 8 -singlefile -png -r 600 \
   /path/to/benck_2003_c4f6.pdf /tmp/benck_page8
 python scripts/digitize_benck_2003_figure14.py \
@@ -34,7 +41,7 @@ python scripts/digitize_benck_2003_figure14.py \
   --overlay /tmp/benck_figure14_overlay.png
 ```
 
-Both overlays were inspected at original resolution. Overlapping C/F/Cx and
+All overlays were inspected at original resolution. Overlapping C/F/Cx and
 SiFx/COFx glyphs were excluded instead of guessed. The retained curves agree
 with the source text: total and Ar+ current fall as C4F6 replaces Ar; CF+ and
 CF2+ rise nearly proportionally through 75% and then level; CF3+ continues to
@@ -62,3 +69,12 @@ location, while Krüger used a high-power dual-frequency biased CCP. Neither
 figure measures stable neutral C4F6. A model can earn held-out composition and
 pressure-response grades here without gaining authority to normalize
 Krüger's 825 nm endpoint.
+
+Figure 13 adds an independent voltage-response gate. At 1.33 Pa and 5 sccm,
+the inferred plasma-potential peak-to-peak oscillation rises from 6.65 to
+19.81 V as C4F6 increases from 25% to 100%. At 5 sccm, pure C4F6 is
+nonmonotonic with pressure (14.72, 20.00, and 17.45 V), while 50/50 C4F6/Ar
+rises monotonically (3.15, 10.85, and 16.32 V) from 0.67 to 2.66 Pa. The
+source inferred this observable from effective IED widths; it is not a direct
+waveform measurement, a powered-electrode self-bias, or a transferable
+Krüger voltage.

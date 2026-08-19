@@ -1,0 +1,13 @@
+panel,series,c4f6_feed_percent,ar_feed_percent,flow_sccm,pressure_Pa,power_W,plasma_potential_peak_to_peak_V,marker_center_x_full_page_px,marker_center_y_full_page_px,marker,digitization_absolute_bound_V,overlap_note
+13a,5_sccm,25,75,5.0,1.33,200.0,6.6454317,3303.3,1438.5,filled_circle,0.6,
+13a,10_sccm,25,75,10.0,1.33,200.0,7.58328307,3303.3,1400.0,open_circle,0.6,partially overlaps the 5 sccm marker
+13a,5_sccm,50,50,5.0,1.33,200.0,10.852161,3651.6,1262.1,filled_circle,0.6,
+13a,10_sccm,50,50,10.0,1.33,200.0,13.7606663,3651.8,1142.7,open_circle,0.6,
+13a,5_sccm,75,25,5.0,1.33,200.0,13.5157753,4004.3,1149.0,filled_circle,0.6,
+13a,5_sccm,100,0,5.0,1.33,200.0,19.8133753,4358.9,886.7,filled_circle,0.6,
+13b,100_percent_C4F6,100,0,5.0,0.67,200.0,14.7246596,3291.5,2472.3,filled_circle,0.6,
+13b,50_percent_C4F6,50,50,5.0,0.67,200.0,3.15224131,3292.6,2945.7,open_circle,0.6,
+13b,100_percent_C4F6,100,0,5.0,1.33,200.0,19.9988631,3634.0,2253.6,filled_circle,0.6,
+13b,50_percent_C4F6,50,50,5.0,1.33,200.0,10.8518347,3632.9,2627.8,open_circle,0.6,
+13b,100_percent_C4F6,100,0,5.0,2.66,200.0,17.448948,4322.7,2352.0,filled_circle,0.6,partially overlaps the 50 percent marker
+13b,50_percent_C4F6,50,50,5.0,2.66,200.0,16.3244854,4322.7,2398.0,open_circle,0.6,partially overlaps the 100 percent marker

@@ -16,7 +16,10 @@
 - **Figures-9/10 page render:** PDF page 6, 600 dpi, 5209 by 6760 pixels,
   SHA-256
   `f423f6992e049ba40f47a540eb56450e9c080dddb4b03ad45ee8883b109a71fd`
-- **Status:** PRIMARY FULL TEXT READ + FIGURES 9/10 QUANTITATIVELY PIL-AUDITED
+- **Figure-13 page render:** PDF page 7, 600 dpi, 5181 by 6745 pixels,
+  SHA-256
+  `77d5990061addab5a38fc24dea4fd501b11dfaaac6219c1400140dfe23c62e51`
+- **Status:** PRIMARY FULL TEXT READ + FIGURES 9/10/13/14 QUANTITATIVELY PIL-AUDITED
 - **Topic:** quantitative C4F6/Ar reactor-boundary validation for total ion
   current, ion composition, and mass-resolved IEDs
 
@@ -35,10 +38,11 @@
 | Q9 | The checksum-bound Figure-9 digitization gives total positive-ion current `0.2644, 0.2164, 0.2012, 0.1557 mA/cm2` at `25, 50, 75, 100%` C4F6. CF+ rises `0.01319 -> 0.03153`, CF2+ rises `0.006133 -> 0.01752`, and CF3+ rises `0.002390 -> 0.008994 mA/cm2`; Ar+ falls `0.2067 -> 0.06973 mA/cm2` through 75% and is not plotted at 100%. | `BENCK-2003-C4F6-FIG9-ION-CURRENT-R1`; quantitative held-out target for a C4F6 reactor provider, retaining 10.1% digitization and 20% transmission uncertainties separately. |
 | Q10 | The checksum-bound Figure-10 digitization gives total current `0.2343, 0.2159, 0.1747 mA/cm2` at `0.67, 1.33, 2.66 Pa` for 50/50 C4F6/Ar and 200 W. Ar+ falls `0.1302 -> 0.07983`, CF+ falls `0.03192 -> 0.01410`, and CF2+ falls `0.01797 -> 0.007320 mA/cm2`; CF3+ is nonmonotonic (`0.005593, 0.004765, 0.005475`). The independently drawn 1.33-Pa points agree with the Figure-9 50%-C4F6 column within 3.53% across all five retained series. | `BENCK-2003-C4F6-FIG10-PRESSURE-ION-CURRENT-R1`; held-out pressure-response target and independent-panel digitization cross-check. The 3.53% agreement does not create a second experiment. |
 | Q11 | The checksum-bound 5 sccm Figure-14(a) digitization gives CF2/CF `10.88, 13.74, 15.32, 17.00` at `25, 50, 75, 100%` C4F6. The source says the ratio rises approximately 10 to 16 and that increasing flow raises it. Its plotted fit bars are not true statistical uncertainty. | `BENCK-2003-C4F6-FIG14A-CF2-CF-R1`; co-conditioned neutral-ratio input for a model-form audit. It is not an exact local-density gate and the 10 sccm series is not mixed into the 5 sccm ion board. |
+| Q12 | The checksum-bound Figure-13 digitization gives plasma-potential peak-to-peak oscillation `6.65, 10.85, 13.52, 19.81 V` for the 5 sccm `25, 50, 75, 100%` C4F6 series at 1.33 Pa. At 5 sccm, pure C4F6 is nonmonotonic with pressure (`14.72, 20.00, 17.45 V`) while 50/50 C4F6/Ar rises (`3.15, 10.85, 16.32 V`) at `0.67, 1.33, 2.66 Pa`. | `BENCK-2003-C4F6-FIG13-VPP-R1`; independent C4F6 reactor/sheath voltage-response gate with a conservative 0.6 V digitization bound. The source inferred this observable from effective IED widths, so it is not a direct waveform, target-machine self-bias, or Krüger boundary. |
 
 ## Vision audit and use
 
-Figures 9, 10, and 14(a) were inspected at the original 600 dpi render. The log
+Figures 9, 10, 13, and 14(a) were inspected at the original 600 dpi render. The log
 ordinate is positive-ion current density in `mA/cm2`. Checksum-bound 19-point
 and 15-point tables retain the unambiguous total, Ar+, CF+, CF2+, and CF3+
 glyph centers. The major log-axis ticks and all full-page marker pixels replay
@@ -49,6 +53,10 @@ are excluded rather than guessed, and source pixels are not redistributed.
 Figure 14(a)'s four filled markers replay through
 `scripts/digitize_benck_2003_figure14.py`; its 2D affine axis calibration
 removes the visible scan rotation rather than misreading it as a density trend.
+Figure 13's twelve filled/open markers replay through
+`scripts/digitize_benck_2003_figure13.py`; separate affine calibrations for its
+two panels remove the same scan rotation. The two partially overlapping marker
+pairs are retained with explicit overlap notes and a conservative 0.6 V bound.
 
 The Figure-10 pressure board adds a genuinely independent response axis for a
 future reactor model. Its same-condition reconciliation with Figure 9 is

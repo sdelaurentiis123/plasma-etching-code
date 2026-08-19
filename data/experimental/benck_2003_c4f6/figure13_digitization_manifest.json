@@ -1,0 +1,100 @@
+{
+  "manifest_id": "BENCK-2003-C4F6-FIG13-VPP-R1",
+  "source": {
+    "citation": "E. C. Benck, A. Goyette, and Y. Wang, Journal of Applied Physics 94, 1382-1389 (2003)",
+    "doi": "10.1063/1.1586978",
+    "pdf_sha256": "96ef064afb0f804d3d853adcc275a63cd52507b0ea7e39f921d6cf6209e86d08",
+    "pdf_page": 7,
+    "print_page": 1388,
+    "figure": "Figure 13(a,b)",
+    "render_dpi": 600,
+    "rendered_page_sha256": "77d5990061addab5a38fc24dea4fd501b11dfaaac6219c1400140dfe23c62e51",
+    "rendered_page_size_px": [
+      5181,
+      6745
+    ],
+    "redistribution": "source pixels are not committed; the scan carries an AIP redistribution notice"
+  },
+  "experiment": {
+    "reactor": "modified inductively coupled GEC reference cell",
+    "power_W": 200.0,
+    "observable": "plasma-potential peak-to-peak oscillation inferred from the effective widths of measured ion-energy distributions",
+    "panel_13a": "C4F6 feed fraction and 5/10 sccm flow at 1.33 Pa",
+    "panel_13b": "0.67/1.33/2.66 Pa pressure at 5 sccm for pure and 50% C4F6"
+  },
+  "pixel_calibration": {
+    "axis_fit": "separate least-squares 2D affine fits to fourteen linear-axis ticks per panel; horizontal term removes scan rotation",
+    "panel_13a": {
+      "intercept": 42.543713830769455,
+      "volts_per_vertical_pixel": -0.024359775811860326,
+      "volts_per_horizontal_pixel_scan_tilt": -0.0002593602228400256,
+      "left_tick_replay_V": [
+        -0.019809379166521368,
+        3.9971176522092438,
+        8.014044683585016,
+        11.996868028824178,
+        16.001615172294013,
+        19.945462876234203,
+        24.06470096601978
+      ],
+      "right_tick_replay_V": [
+        0.014990300564709846,
+        4.009993533709801,
+        8.004996766854893,
+        11.999999999999988,
+        15.995003233145082,
+        19.990006466290172,
+        23.985009699435267
+      ]
+    },
+    "panel_13b": {
+      "intercept": 75.85045125297385,
+      "volts_per_vertical_pixel": -0.02444484045653222,
+      "volts_per_horizontal_pixel_scan_tilt": -0.00020987773039394633,
+      "left_tick_replay_V": [
+        0.01993290426007832,
+        3.9946639624922016,
+        7.976728472861315,
+        11.988126791778248,
+        16.011747530923447,
+        19.97181168488166,
+        24.03698865280298
+      ],
+      "right_tick_replay_V": [
+        0.056949376951406006,
+        3.9681238499965565,
+        7.977077684867849,
+        11.986031519739127,
+        15.994985354610412,
+        20.003939189481695,
+        24.01289302435298
+      ]
+    }
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; PIL/NumPy dark-pixel axis and marker localization; original-resolution visual audit",
+    "point_count": 12,
+    "overlapping_marker_pairs": 2,
+    "digitization_absolute_bound_V": 0.6,
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "derived_checks": {
+    "minimum_V": 3.15224131,
+    "maximum_V": 19.9988631,
+    "five_sccm_feed_series_increases": true,
+    "pure_C4F6_pressure_response_is_nonmonotonic": true,
+    "fifty_percent_C4F6_pressure_response_increases": true
+  },
+  "claim_boundary": {
+    "valid": "independent voltage-response validation board for a C4F6/Ar reactor and sheath model at the Benck apparatus",
+    "not_valid": [
+      "a direct voltage waveform measurement",
+      "a target-machine self-bias",
+      "a Krueger boundary or feature-depth coefficient"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/benck_2003_c4f6/figure13_plasma_potential_oscillation.csv",
+    "sha256": "43d4bd747c9ba7b4ef97dc03e1e79a7d34aad59ba3458e056a54dd9a8852ea5a"
+  }
+}

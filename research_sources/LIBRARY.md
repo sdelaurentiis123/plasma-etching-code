@@ -33,7 +33,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 
 | bibkey | source | status |
 |---|---|---|
-| [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Benck, Goyette & Wang, absolute mass-resolved C4F6/Ar ion flux and IEDs | PRIMARY FULL TEXT + FIGURES 9/10 QUANTITATIVELY PIL-AUDITED |
+| [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Benck, Goyette & Wang, absolute mass-resolved C4F6/Ar ion flux and IEDs | PRIMARY FULL TEXT + FIGURES 9/10/13/14 QUANTITATIVELY PIL-AUDITED |
 | [`bruce-graves`](library/bruce-graves.md) | Bruce / Graves, ion-dose crosslinking | VIA RESEARCH DOCS |
 | [`hiwasa-2022-apex`](library/hiwasa-2022-apex.md) | Hiwasa et al. (KIOXIA), APEX 15, 106002 (2022) | FETCHED |
 | [`huang-2019-jvsta`](library/huang-2019-jvsta.md) | Huang, Huard, ... Kushner, JVST A 37, 031304 (2019) | FULL TEXT (via thesis lineage) |
@@ -370,6 +370,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Direct C4F6 electron-ionization fragmentation topology | [`nist-c4f6-mass-spectrum`](library/nist-c4f6-mass-spectrum.md) | `C3F3+` base peak and 43.86-relative-intensity parent; forbids collapsing aggregate parent ionization directly onto only CF+/CF2+/CF3+ |
 | Secondary CF/CF2/CF3 electron-impact ionization | [`christophorou-olthoff-rao-1996-cfx`](library/christophorou-olthoff-rao-1996-cfx.md) | six measured parent/dissociative curves through 200 eV replace copied daughter-ionization rates; F+ remains one-energy evidence and exact ion-pair splitting is open |
 | Absolute C4F6/Ar total and mass-resolved ion flux/IED board | [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | Faraday-cup-normalized GEC-ICP mixture and pressure boards; quantitative reactor-model validation, not a Krüger boundary transplant |
+| C4F6/Ar plasma-potential-oscillation response board | [`benck-2003-c4f6`](library/benck-2003-c4f6.md) | 12 feed/flow/pressure points inferred from measured IED widths; reactor/sheath response validation, not a waveform, target self-bias, or Krüger boundary |
 | Matched C4F6/Ar versus C4F8/Ar ion/radical/film/yield board | [`li-2002-c4f6-c4f8`](library/li-2002-c4f6-c4f8.md) | same 600 W ICP and diagnostics expose feed-specific fragmentation and surface-film differences; figures require original-pixel digitization before constants land |
 | CF4/C4F6/He patterned SiO2/ACL rate + reactor-diagnostic board | [`woo-2024-c4f6-thesis`](library/woo-2024-c4f6-thesis.md) | 10 original-pixel rate points plus Te/current/self-bias/OES/profile constraints; two source-reporting conflicts quarantined and equal-depth SEM timing excluded from blind depth validation |
 | Class-1 angular form `(1+B sin²θ)cosθ` | [`kress-1999-jvsta`](library/kress-1999-jvsta.md) | Krüger's cited source — **wrong system (Cu/Ar MD)**; peak 4.17 vs measured ~1.3 |
