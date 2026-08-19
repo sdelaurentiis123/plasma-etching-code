@@ -25,10 +25,12 @@ from .iadf_two_component import TwoComponentIADF, build_two_component_boundary
 BOLTZMANN_EV_K = 8.617333262145e-5
 
 
-def _finite_mapping(values, *, positive: bool, label: str):
+def _finite_mapping(
+    values, *, positive: bool, label: str, allow_empty: bool = False,
+):
     converted = {str(name): float(value) for name, value in dict(values).items()}
     if (
-        not converted
+        (not converted and not allow_empty)
         or any(not name for name in converted)
         or any(
             not math.isfinite(value)
@@ -114,7 +116,7 @@ def build_species_resolved_feature_boundary(
     ion_mass_amu: Mapping[str, float],
     ion_charge_number: Mapping[str, int],
     ion_energy_eV: Mapping[str, float | np.ndarray],
-    ion_iadf: TwoComponentIADF,
+    ion_iadf: TwoComponentIADF | Mapping[str, TwoComponentIADF],
     neutral_flux_m2_s: Mapping[str, float],
     neutral_mass_amu: Mapping[str, float],
     neutral_temperature_K: float,
@@ -142,15 +144,33 @@ def build_species_resolved_feature_boundary(
         dict(ion_energy_eV), ion_energy_weight, ions
     )
     neutrals = _finite_mapping(
-        neutral_flux_m2_s, positive=False, label="neutral flux"
+        neutral_flux_m2_s,
+        positive=False,
+        label="neutral flux",
+        allow_empty=True,
     )
     neutral_mass = _finite_mapping(
-        neutral_mass_amu, positive=True, label="neutral mass"
+        neutral_mass_amu,
+        positive=True,
+        label="neutral mass",
+        allow_empty=True,
     )
     if set(neutral_mass) != set(neutrals) or set(ions) & set(neutrals):
         raise ValueError("neutral identities are incomplete or overlap ions")
-    if not isinstance(ion_iadf, TwoComponentIADF):
-        raise TypeError("ion_iadf must be a TwoComponentIADF")
+    if isinstance(ion_iadf, TwoComponentIADF):
+        ion_iadfs = MappingProxyType({name: ion_iadf for name in ions})
+    else:
+        ion_iadfs = MappingProxyType(dict(ion_iadf))
+        if (
+            set(ion_iadfs) != set(ions)
+            or any(
+                not isinstance(value, TwoComponentIADF)
+                for value in ion_iadfs.values()
+            )
+        ):
+            raise TypeError(
+                "ion_iadf mapping must cover every ion with TwoComponentIADF"
+            )
     values = np.asarray([
         neutral_temperature_K,
         reference_plane_m,
@@ -172,7 +192,7 @@ def build_species_resolved_feature_boundary(
     species = []
     for name in sorted(ions):
         temporary = build_two_component_boundary(
-            ion_iadf,
+            ion_iadfs[name],
             ions[name],
             energies[name],
             energy_weight=energy_weights[name],

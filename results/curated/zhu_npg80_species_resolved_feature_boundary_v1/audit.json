@@ -1,0 +1,166 @@
+{
+  "boundary_cases": [
+    {
+      "boundary_sha256": "e06f050533d154e69ec6bf32e947d1265a877430ced967956ac5e135606f0774",
+      "current_density_A_m2": 2.334769098938112,
+      "deterministic_quadrature": true,
+      "ion_flux_relative_conservation_residual": 6.661338147750939e-16,
+      "ion_species_count": 20,
+      "monte_carlo": false,
+      "name": "kim_widths_tail_fraction_0",
+      "neutral_flux_relative_conservation_residual": 0.0,
+      "neutral_species_count": 37,
+      "neutral_thermal_flux_m2_s": 1.1496621106223125e+23,
+      "particle_flux_weighted_mean_ion_energy_eV": 298.6046859189685,
+      "positive_ion_flux_m2_s": 1.4572248811804385e+19,
+      "quadrature_node_count": 3252,
+      "tail_fraction": 0.0,
+      "tail_fraction_is_target_measurement": false
+    },
+    {
+      "boundary_sha256": "dc51104935ed42ff47322ae78ded1c07d3afdcafb4b2e50847822b8429b97766",
+      "current_density_A_m2": 2.334769098938112,
+      "deterministic_quadrature": true,
+      "ion_flux_relative_conservation_residual": 6.661338147750939e-16,
+      "ion_species_count": 20,
+      "monte_carlo": false,
+      "name": "kim_widths_tail_fraction_0.65",
+      "neutral_flux_relative_conservation_residual": 0.0,
+      "neutral_species_count": 37,
+      "neutral_thermal_flux_m2_s": 1.1496621106223125e+23,
+      "particle_flux_weighted_mean_ion_energy_eV": 298.6046859189688,
+      "positive_ion_flux_m2_s": 1.4572248811804385e+19,
+      "quadrature_node_count": 3252,
+      "tail_fraction": 0.65,
+      "tail_fraction_is_target_measurement": false
+    }
+  ],
+  "certification": {
+    "absolute_flux_preserved": true,
+    "conditional_feature_transport_boundary_executable": true,
+    "deterministic_non_monte_carlo_boundary": true,
+    "ion_mass_and_charge_preserved": true,
+    "reactor_species_identity_preserved": true,
+    "result": "The reactor-to-feature software join is closed without species aggregation. Experimental boundary and surface-law gates remain open and are not converted into fitted claims.",
+    "species_specific_iadf_interface_supported": true,
+    "supports_unique_absolute_profile_prediction": false,
+    "target_machine_iead_measured": false,
+    "target_machine_self_bias_measured": false,
+    "target_neutral_radial_transfer_solved": false,
+    "target_tio2_cr_surface_probabilities_validated": false,
+    "zero_fit_to_sem_or_depth": true
+  },
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "inputs": {
+    "axisymmetric_ion_state": "results/curated/zhu_npg80_sheath_coupled_v1/axisymmetric_audit.json",
+    "axisymmetric_ion_state_sha256": "063f4335a493d2418b8ba6ca786a252e2bc9bfe403a9bb52f80fd52e70b5aa08",
+    "coupled_reactor_state": "results/curated/zhu_npg80_sheath_coupled_v1/central_276V.json",
+    "coupled_reactor_state_sha256": "669cb7baab66e594611a58888dd9731904d7c422e2ea670478035e13dc536d18",
+    "electron_temperature_eV": 4.250174891824218,
+    "gas_temperature_K": 350.0,
+    "impact_energy_rule": "Z_i*V_s + Te/2",
+    "impact_energy_rule_is_target_iead_measurement": false,
+    "powered_electrode_sheath_drop_V": 296.47484368556405
+  },
+  "inventory": {
+    "dominant_positive_ions": [
+      {
+        "flux_m2_s": 1.0972697214864873e+19,
+        "particle_flux_fraction": 0.7529858539044666,
+        "species": "CF3+"
+      },
+      {
+        "flux_m2_s": 1.3477740054528225e+18,
+        "particle_flux_fraction": 0.09248908818802529,
+        "species": "CF+"
+      },
+      {
+        "flux_m2_s": 8.074329320088165e+17,
+        "particle_flux_fraction": 0.05540894493612736,
+        "species": "H+"
+      },
+      {
+        "flux_m2_s": 5.912142049832197e+17,
+        "particle_flux_fraction": 0.04057124007547148,
+        "species": "H2+"
+      },
+      {
+        "flux_m2_s": 3.650146226038951e+17,
+        "particle_flux_fraction": 0.025048613108239796,
+        "species": "O2+"
+      },
+      {
+        "flux_m2_s": 3.089111238165057e+17,
+        "particle_flux_fraction": 0.021198589717070258,
+        "species": "CF2+"
+      },
+      {
+        "flux_m2_s": 1.0575059877765851e+17,
+        "particle_flux_fraction": 0.007256985530743495,
+        "species": "CHF2+"
+      },
+      {
+        "flux_m2_s": 3.750294192123866e+16,
+        "particle_flux_fraction": 0.002573586438550174,
+        "species": "CHF+"
+      }
+    ],
+    "dominant_thermal_neutrals": [
+      {
+        "flux_m2_s": 6.646057052405309e+22,
+        "particle_flux_fraction": 0.5780878565101006,
+        "species": "HF"
+      },
+      {
+        "flux_m2_s": 1.620081233272965e+22,
+        "particle_flux_fraction": 0.14091803307286646,
+        "species": "CHF3"
+      },
+      {
+        "flux_m2_s": 1.4306691513891684e+22,
+        "particle_flux_fraction": 0.12444257649012601,
+        "species": "H2"
+      },
+      {
+        "flux_m2_s": 4.140945370039606e+21,
+        "particle_flux_fraction": 0.03601880354044294,
+        "species": "H"
+      },
+      {
+        "flux_m2_s": 3.4151852381962974e+21,
+        "particle_flux_fraction": 0.029705991061562048,
+        "species": "F2"
+      },
+      {
+        "flux_m2_s": 2.2057858751870633e+21,
+        "particle_flux_fraction": 0.019186384023676926,
+        "species": "F"
+      },
+      {
+        "flux_m2_s": 1.2262645220297272e+21,
+        "particle_flux_fraction": 0.010666303696535234,
+        "species": "SF3"
+      },
+      {
+        "flux_m2_s": 1.0773427816338487e+21,
+        "particle_flux_fraction": 0.009370951444600385,
+        "species": "CF3"
+      }
+    ],
+    "multiply_charged_ions": {
+      "SF2++": {
+        "charge_number": 2,
+        "flux_m2_s": 6057336822026.766,
+        "impact_energy_eV": 595.0747748170402
+      },
+      "SF4++": {
+        "charge_number": 2,
+        "flux_m2_s": 227648651598334.66,
+        "impact_energy_eV": 595.0747748170402
+      }
+    },
+    "positive_ion_species_count": 20,
+    "thermal_neutral_species_count": 37
+  },
+  "schema": "petch.zhu-npg80-species-resolved-feature-boundary.v1"
+}

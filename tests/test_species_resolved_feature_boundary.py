@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from petch.iadf_two_component import kim_2025_reference_iadf
 from petch.species_resolved_feature_boundary import (
@@ -51,3 +52,30 @@ def test_absolute_current_and_deterministic_replay_close():
         np.testing.assert_array_equal(left.velocity_sqrt_eV, right.velocity_sqrt_eV)
         np.testing.assert_array_equal(left.weight, right.weight)
     assert first.provenance["monte_carlo"] is False
+
+
+def test_species_specific_iadfs_and_ion_only_boundaries_are_supported():
+    boundary = build_species_resolved_feature_boundary(
+        ion_flux_m2_s={"A+": 2.0e18, "B++": 3.0e18},
+        ion_mass_amu={"A+": 20.0, "B++": 40.0},
+        ion_charge_number={"A+": 1, "B++": 2},
+        ion_energy_eV={"A+": 100.0, "B++": 200.0},
+        ion_iadf={
+            "A+": kim_2025_reference_iadf(tail_fraction=0.0),
+            "B++": kim_2025_reference_iadf(tail_fraction=0.65),
+        },
+        neutral_flux_m2_s={},
+        neutral_mass_amu={},
+        neutral_temperature_K=300.0,
+        reference_plane_m=1.0e-6,
+        ion_polar_order=8,
+        ion_azimuthal_order=4,
+    )
+
+    assert len(boundary.species) == 2
+    assert boundary.get("A+").mean_energy_eV == pytest.approx(100.0)
+    assert boundary.get("B++").mean_energy_eV == pytest.approx(200.0)
+    assert not np.array_equal(
+        boundary.get("A+").weight,
+        boundary.get("B++").weight,
+    )
