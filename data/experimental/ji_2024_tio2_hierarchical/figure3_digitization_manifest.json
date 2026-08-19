@@ -1,0 +1,131 @@
+{
+  "manifest_id": "JI-2024-TIO2-FIG3-RF-MORPHOLOGY-R1",
+  "source": {
+    "citation": "X. Ji et al., Micromachines 15, 1160 (2024)",
+    "doi": "10.3390/mi15091160",
+    "license": "CC BY 4.0",
+    "pdf_sha256": "92a57c600e93e4113e574ef286aae4a248d787c3445f8d21e2ff151c73647e81",
+    "pdf_page": 6,
+    "figure": "Figure 3(b1-b3)",
+    "render_dpi": 600,
+    "rendered_page_sha256": "976db637feed609a182301266654e675a42d1422f6e7c08cff17ea3744d6c148",
+    "rendered_page_size_px": [
+      4961,
+      7016
+    ],
+    "source_pixels_committed": false
+  },
+  "experiment": {
+    "material": "800 nm electron-beam-deposited TiO2",
+    "mask": "60 nm Cr",
+    "geometry": "200 nm nominal CD, 300 nm pitch grating",
+    "source_power_W": 350.0,
+    "rf_power_W": [
+      90.0,
+      120.0,
+      150.0,
+      180.0,
+      210.0
+    ],
+    "feed_sccm": {
+      "SF6": 40.0,
+      "CHF3": 10.0,
+      "O2": 5.0
+    },
+    "pressure_mTorr": 10.0,
+    "temperature_C": 40.0,
+    "etch_time_s": null
+  },
+  "pixel_calibration": {
+    "3b1": {
+      "observable": "upper_triangle_height",
+      "intercept": 1149.7951914144596,
+      "value_per_vertical_pixel": -0.5096834663047808,
+      "tick_replay": [
+        150.0510722576321,
+        200.00005195550068,
+        249.94903165336916,
+        299.89801135123764,
+        350.1018327822586
+      ],
+      "tick_values": [
+        150.0,
+        200.0,
+        250.0,
+        300.0,
+        350.0
+      ]
+    },
+    "3b2": {
+      "observable": "upper_tip_corner_radius",
+      "intercept": 588.6493621925378,
+      "value_per_vertical_pixel": -0.22408942486225167,
+      "tick_replay": [
+        20.022446604574156,
+        39.96640541731449,
+        60.022408942486095,
+        79.96636775522649,
+        100.02237128039798
+      ],
+      "tick_values": [
+        20.0,
+        40.0,
+        60.0,
+        80.0,
+        100.0
+      ]
+    },
+    "3b3": {
+      "observable": "interfeature_gap",
+      "intercept": 727.2865678342291,
+      "value_per_vertical_pixel": -0.22459242968403262,
+      "tick_replay": [
+        20.045006759210423,
+        39.92143678624734,
+        60.02245924296824,
+        80.01118548484715,
+        99.99991172672605
+      ],
+      "tick_values": [
+        20.0,
+        40.0,
+        60.0,
+        80.0,
+        100.0
+      ]
+    }
+  },
+  "digitization": {
+    "method": "600-dpi Poppler render; PIL/NumPy red-marker localization; linear ordinate calibration; original-resolution visual audit",
+    "point_count": 15,
+    "height_digitization_absolute_bound_nm": 2.0,
+    "radius_and_gap_digitization_absolute_bound_nm": 1.0,
+    "source_measurement_uncertainty_reported": false,
+    "visual_audit_status": "passed_original_resolution"
+  },
+  "derived_checks": {
+    "upper_height_peaks_at_180W": true,
+    "corner_radius_nonincreasing": true,
+    "gap_strictly_decreases": true,
+    "gap_change_90W_to_210W_nm": -77.9335731
+  },
+  "physics_use": {
+    "valid": "same-gas TiO2/Cr response validation for a surface mechanism with mask erosion and passivation/growth",
+    "removal_only_model_can_reproduce_strict_gap_narrowing": false,
+    "required_model_topology": [
+      "evolving Cr mask",
+      "fluorinated or passivating surface inventory",
+      "positive deposited or retained surface-volume channel",
+      "ion-assisted removal of TiO2 and passivating material"
+    ],
+    "not_valid": [
+      "an Oxford NPG80 TiO2 coefficient",
+      "a Freddie target profile",
+      "an etch-time or absolute-depth calibration"
+    ]
+  },
+  "output": {
+    "path": "data/experimental/ji_2024_tio2_hierarchical/figure3_rf_morphology_response.csv",
+    "sha256": "33c60ce4eb2b7f61e8fbfce4a07eaae21e9555a8e175034e3b1ce5e843f36efc"
+  }
+}

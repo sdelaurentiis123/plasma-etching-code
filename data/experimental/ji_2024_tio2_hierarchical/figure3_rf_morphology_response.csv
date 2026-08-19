@@ -1,0 +1,16 @@
+panel,rf_power_W,observable,value,unit,marker_center_x_full_page_px,marker_center_y_full_page_px,digitization_absolute_bound
+3b1,90.0,upper_triangle_height,143.680029,nm,3944.0,1974.0,2.0
+3b1,120.0,upper_triangle_height,206.880779,nm,4074.5,1850.0,2.0
+3b1,150.0,upper_triangle_height,269.826687,nm,4205.0,1726.5,2.0
+3b1,180.0,upper_triangle_height,347.808257,nm,4335.5,1573.5,2.0
+3b1,210.0,upper_triangle_height,336.085537,nm,4466.0,1596.5,2.0
+3b2,90.0,upper_tip_corner_radius,99.9103266,nm,3939.5,2181.0,1.0
+3b2,120.0,upper_tip_corner_radius,84.8963351,nm,4070.0,2248.0,1.0
+3b2,150.0,upper_tip_corner_radius,14.9804345,nm,4200.0,2560.0,1.0
+3b2,180.0,upper_tip_corner_radius,9.82637777,nm,4330.5,2583.0,1.0
+3b2,210.0,upper_tip_corner_radius,9.82637777,nm,4461.0,2583.0,1.0
+3b3,90.0,interfeature_gap,95.957248,nm,3938.0,2811.0,1.0
+3b3,120.0,interfeature_gap,80.0111855,nm,4069.5,2882.0,1.0
+3b3,150.0,interfeature_gap,69.9045261,nm,4201.5,2927.0,1.0
+3b3,180.0,interfeature_gap,42.0550649,nm,4333.0,3051.0,1.0
+3b3,210.0,interfeature_gap,18.0236749,nm,4465.0,3158.0,1.0
