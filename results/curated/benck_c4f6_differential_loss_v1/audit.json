@@ -1,0 +1,358 @@
+{
+  "calibration_firewall": {
+    "absolute_current_scale_used": false,
+    "feature_depth_used": false,
+    "krueger_825_nm_used": false,
+    "negative_density_used": false,
+    "reaction_rate_fitted": false
+  },
+  "certification": {
+    "identifies_unique_reaction": false,
+    "supports_absolute_reactor_flux": false,
+    "supports_feature_depth": false,
+    "supports_krueger_boundary": false,
+    "supports_required_effective_loss_bound": true,
+    "supports_steady_reactor_composition": false
+  },
+  "conditions": [
+    {
+      "board": "Benck_Figures_9_and_14a_5sccm_feed_sweep",
+      "c4f6_feed_percent": 25.0,
+      "measured_CF2+_to_CF+": 0.46497158643402575,
+      "measured_CF3+_to_CF+": 0.181228030361552,
+      "neutral_nCF2_to_nCF": 10.8767752,
+      "positive_selective_CF3plus_loss_suffices_at_every_temperature": true,
+      "pressure_Pa": 1.33,
+      "temperature_sweep": [
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 2.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.7966078310667744e-14,
+          "measured_CF2plus_to_CFplus": 0.46497158643402575,
+          "measured_CF3plus_to_CFplus": 0.181228030361552,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.6135130711685481,
+          "source_CF2plus_to_CFplus": 0.46497158643402575,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.29241379585049465
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 3.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.3301804131785775e-13,
+          "measured_CF2plus_to_CFplus": 0.46497158643402575,
+          "measured_CF3plus_to_CFplus": 0.181228030361552,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.5483906875504749,
+          "source_CF2plus_to_CFplus": 0.46497158643402575,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.28061179453494184
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 5.551115123125783e-17,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 4.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 3.7243524641228924e-13,
+          "measured_CF2plus_to_CFplus": 0.46497158643402575,
+          "measured_CF3plus_to_CFplus": 0.181228030361552,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.4936394454632713,
+          "source_CF2plus_to_CFplus": 0.4649715864340258,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.27068933477162943
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 5.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 7.003133954801872e-13,
+          "measured_CF2plus_to_CFplus": 0.46497158643402575,
+          "measured_CF3plus_to_CFplus": 0.181228030361552,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.4461057891278051,
+          "source_CF2plus_to_CFplus": 0.46497158643402575,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.26207490385807
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 5.551115123125783e-17,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 6.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.0739867909878938e-12,
+          "measured_CF2plus_to_CFplus": 0.46497158643402575,
+          "measured_CF3plus_to_CFplus": 0.181228030361552,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.4034674282682962,
+          "source_CF2plus_to_CFplus": 0.4649715864340257,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.2543476377016561
+        }
+      ]
+    },
+    {
+      "board": "Benck_Figures_9_and_14a_5sccm_feed_sweep",
+      "c4f6_feed_percent": 50.0,
+      "measured_CF2+_to_CF+": 0.541970792831304,
+      "measured_CF3+_to_CF+": 0.21977430785128338,
+      "neutral_nCF2_to_nCF": 13.7357134,
+      "positive_selective_CF3plus_loss_suffices_at_every_temperature": true,
+      "pressure_Pa": 1.33,
+      "temperature_sweep": [
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 2.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.853113159146732e-14,
+          "measured_CF2plus_to_CFplus": 0.541970792831304,
+          "measured_CF3plus_to_CFplus": 0.21977430785128338,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.3172813405460033,
+          "source_CF2plus_to_CFplus": 0.541970792831304,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.2895045948639086
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 3.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.3599437255133068e-13,
+          "measured_CF2plus_to_CFplus": 0.541970792831304,
+          "measured_CF3plus_to_CFplus": 0.21977430785128338,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.25285588866666253,
+          "source_CF2plus_to_CFplus": 0.541970792831304,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.2753455357691203
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 4.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 3.777783770336134e-13,
+          "measured_CF2plus_to_CFplus": 0.541970792831304,
+          "measured_CF3plus_to_CFplus": 0.21977430785128338,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.1989131999953837,
+          "source_CF2plus_to_CFplus": 0.541970792831304,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.26349031870275275
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 5.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 7.051475029046522e-13,
+          "measured_CF2plus_to_CFplus": 0.541970792831304,
+          "measured_CF3plus_to_CFplus": 0.21977430785128338,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.15211167338057363,
+          "source_CF2plus_to_CFplus": 0.541970792831304,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.2532045455845994
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 1.1102230246251565e-16,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 6.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.0737486037354042e-12,
+          "measured_CF2plus_to_CFplus": 0.541970792831304,
+          "measured_CF3plus_to_CFplus": 0.21977430785128338,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.11012154580479971,
+          "source_CF2plus_to_CFplus": 0.5419707928313039,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.2439761943600466
+        }
+      ]
+    },
+    {
+      "board": "Benck_Figures_9_and_14a_5sccm_feed_sweep",
+      "c4f6_feed_percent": 75.0,
+      "measured_CF2+_to_CF+": 0.5452331559194098,
+      "measured_CF3+_to_CF+": 0.22162862259811805,
+      "neutral_nCF2_to_nCF": 15.3246888,
+      "positive_selective_CF3plus_loss_suffices_at_every_temperature": true,
+      "pressure_Pa": 1.33,
+      "temperature_sweep": [
+        {
+          "CF2_ratio_replay_absolute_error": 1.1102230246251565e-16,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 2.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 2.0563195453876737e-14,
+          "measured_CF2plus_to_CFplus": 0.5452331559194098,
+          "measured_CF3plus_to_CFplus": 0.22162862259811805,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.3082839933820172,
+          "source_CF2plus_to_CFplus": 0.5452331559194097,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.28995317942042187
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 1.1102230246251565e-16,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 3.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.5090326532794784e-13,
+          "measured_CF2plus_to_CFplus": 0.5452331559194098,
+          "measured_CF3plus_to_CFplus": 0.22162862259811805,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.24421389487707845,
+          "source_CF2plus_to_CFplus": 0.5452331559194097,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.27575341173904655
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 4.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 4.1921932637266964e-13,
+          "measured_CF2plus_to_CFplus": 0.5452331559194098,
+          "measured_CF3plus_to_CFplus": 0.22162862259811805,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.19065707885034455,
+          "source_CF2plus_to_CFplus": 0.5452331559194098,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.2638836883723007
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 1.1102230246251565e-16,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 5.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 7.825509217409122e-13,
+          "measured_CF2plus_to_CFplus": 0.5452331559194098,
+          "measured_CF3plus_to_CFplus": 0.22162862259811805,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.14420227930538876,
+          "source_CF2plus_to_CFplus": 0.5452331559194097,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.25358797513608045
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 6.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.1916798073471625e-12,
+          "measured_CF2plus_to_CFplus": 0.5452331559194098,
+          "measured_CF3plus_to_CFplus": 0.22162862259811805,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.1025197733847123,
+          "source_CF2plus_to_CFplus": 0.5452331559194098,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.24434993876244304
+        }
+      ]
+    },
+    {
+      "board": "Benck_Figures_9_and_14a_5sccm_feed_sweep",
+      "c4f6_feed_percent": 100.0,
+      "measured_CF2+_to_CF+": 0.5555829402976316,
+      "measured_CF3+_to_CF+": 0.28527742154141345,
+      "neutral_nCF2_to_nCF": 16.9968719,
+      "positive_selective_CF3plus_loss_suffices_at_every_temperature": false,
+      "pressure_Pa": 1.33,
+      "temperature_sweep": [
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 2.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 2.229208446060348e-14,
+          "measured_CF2plus_to_CFplus": 0.5555829402976316,
+          "measured_CF3plus_to_CFplus": 0.28527742154141345,
+          "positive_selective_CF3plus_loss_is_sufficient": true,
+          "required_CF3plus_selective_loss_over_common_loss": 0.01636900831125887,
+          "source_CF2plus_to_CFplus": 0.5555829402976316,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.2899471300256393
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 1.1102230246251565e-16,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 3.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.6343213618865684e-13,
+          "measured_CF2plus_to_CFplus": 0.5555829402976316,
+          "measured_CF3plus_to_CFplus": 0.28527742154141345,
+          "positive_selective_CF3plus_loss_is_sufficient": false,
+          "required_CF3plus_selective_loss_over_common_loss": -0.03437750128271866,
+          "source_CF2plus_to_CFplus": 0.5555829402976314,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.27547029661644284
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 4.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 4.536539525925136e-13,
+          "measured_CF2plus_to_CFplus": 0.5555829402976316,
+          "measured_CF3plus_to_CFplus": 0.28527742154141345,
+          "positive_selective_CF3plus_loss_is_sufficient": false,
+          "required_CF3plus_selective_loss_over_common_loss": -0.07673713392721915,
+          "source_CF2plus_to_CFplus": 0.5555829402976316,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.26338604983817826
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 0.0,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 5.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 8.461814697353091e-13,
+          "measured_CF2plus_to_CFplus": 0.5555829402976316,
+          "measured_CF3plus_to_CFplus": 0.28527742154141345,
+          "positive_selective_CF3plus_loss_is_sufficient": false,
+          "required_CF3plus_selective_loss_over_common_loss": -0.11347150189089972,
+          "source_CF2plus_to_CFplus": 0.5555829402976316,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.25290656406354595
+        },
+        {
+          "CF2_ratio_replay_absolute_error": 1.1102230246251565e-16,
+          "all_source_terms_nonnegative": true,
+          "assumed_nCF3_to_nCF": 0.0,
+          "electron_temperature_eV": 6.0,
+          "inferred_parent_source_per_ne_nCF_m3_s": 1.287612655699897e-12,
+          "measured_CF2plus_to_CFplus": 0.5555829402976316,
+          "measured_CF3plus_to_CFplus": 0.28527742154141345,
+          "positive_selective_CF3plus_loss_is_sufficient": false,
+          "required_CF3plus_selective_loss_over_common_loss": -0.1464345295123971,
+          "source_CF2plus_to_CFplus": 0.5555829402976314,
+          "source_CF3plus_to_CFplus_before_differential_loss": 0.2435029565374868
+        }
+      ]
+    }
+  ],
+  "declared_model": {
+    "differential_operator": "additional first-order CF3+ removal relative to the common light-ion wall/exhaust loss",
+    "direct_parent_branching": "NIST 70 eV EI branching prior",
+    "neutral_CF2_to_CF": "condition-resolved Benck Figure-14a filled-circle series",
+    "neutral_CF3_to_CF": 0.0,
+    "parent_source_identification": "solve the measured CF2+/CF+ ratio exactly",
+    "secondary_ionization": "NIST measured CF/CF2 curves"
+  },
+  "diagnostics": {
+    "all_Ar_mixture_rows_admit_positive_CF3plus_selective_loss": true,
+    "all_Ar_mixture_rows_have_nonnegative_sources": true,
+    "condition_count": 4,
+    "maximum_CF2_ratio_replay_absolute_error": 1.1102230246251565e-16,
+    "maximum_required_Ar_mixture_CF3plus_selective_loss_over_common_loss": 0.6135130711685481,
+    "minimum_required_Ar_mixture_CF3plus_selective_loss_over_common_loss": 0.1025197733847123,
+    "pure_C4F6_rows_requiring_missing_CF3plus_source_or_changed_branching": 4,
+    "pure_C4F6_rows_requiring_positive_loss": 1,
+    "temperature_count_per_condition": 5
+  },
+  "physics_decision": {
+    "Ar_mixture_model_form_can_be_repaired_by_positive_differential_loss": true,
+    "common_loss_model_is_reinstated": false,
+    "interpretation": "The nonphysical negative-density result was caused by forcing all light ions through one loss operator. Every Ar-containing condition is compatible with nonnegative sources and a modest positive CF3+-selective removal term. Pure C4F6 changes sign across the Te grid, proving that one fixed loss factor is still not a complete reactor model.",
+    "narrowed_missing_operator": "condition-dependent CF3+ removal/source balance; candidate mechanisms include ion-neutral conversion, heavy-fragment cascades, and surface-product return, but this audit does not select among them",
+    "negative_CF3_density_is_required": false,
+    "single_condition_independent_CF3plus_loss_is_certified": false
+  },
+  "question": "What species-selective CF3+ loss is required after a nonnegative parent source is fixed independently by Benck CF2+/CF+?",
+  "schema": "petch.benck-c4f6-differential-light-ion-loss.v1",
+  "sources": {
+    "benck_feed_csv_sha256": "40ae5a1355eb12cd6cdb72961e7719a5a4b30b73a994ba669f80f7de4e747d25",
+    "benck_neutral_ratio_csv_sha256": "1cf6e8afa49c050d1957ce2fc43d33df1cf3977293558f8a4793fe2ef7815270",
+    "benck_neutral_ratio_manifest_sha256": "a820548f2268b6772219d62a344e081ada436703ca80ff094cfa5a501bcbd243",
+    "nist_direct_spectrum_sha256": "2115e1a887f53fcc99423ab81fee94fde461f00c2e0da30ac188e95748c7a665"
+  }
+}
