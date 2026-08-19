@@ -1,5 +1,8 @@
 # Pause-state handoff — 2026-08-06
 
+> Historical record. For the current build and scientific state, read
+> `CURRENT_STATE.md` and `CONTINUATION_STATE_2026-08-18.md` first.
+
 Boxes: all campaign instances destroyed (only the user's own `exp015n-spectate`
 remains — NOT ours, an external spawner the user should investigate). Suite at
 this handoff: 1240 passed, 1 skipped. Everything below is committed and pushed
