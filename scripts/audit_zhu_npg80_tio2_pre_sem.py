@@ -17,6 +17,10 @@ CF3_COLLISION_SCALE = DATA_DIR / "cf3_reactive_collision_scale.json"
 CHF2_MOBILITY_SCALE = DATA_DIR / "chf2_mobility_scale.json"
 TIO2_ANALOG_BOARD = DATA_DIR / "janissen_tio2_analog_board.json"
 TIO2_DEPTH_GATE = DATA_DIR / "pre_sem_depth_gate.json"
+ABSORBED_POWER_ENSEMBLE = (
+    ROOT / "results" / "curated"
+    / "zhu_npg80_absorbed_power_ensemble_v1" / "audit.json"
+)
 
 
 def _sha256(path: Path) -> str:
@@ -111,6 +115,20 @@ def build_receipt(manifest: dict) -> dict:
             or tio2_depth_gate.get("measured_depth_target_used") is not False
         ):
             raise ValueError("TiO2 depth gate is not target-free")
+
+    absorbed_power_ensemble = None
+    if ABSORBED_POWER_ENSEMBLE.exists():
+        absorbed_power_ensemble = json.loads(
+            ABSORBED_POWER_ENSEMBLE.read_text(encoding="utf-8")
+        )
+        if absorbed_power_ensemble.get("condition_id") != manifest[
+            "condition_id"
+        ]:
+            raise ValueError(
+                "absorbed-power ensemble belongs to another condition"
+            )
+        if absorbed_power_ensemble.get("sem_or_depth_target_used") is not False:
+            raise ValueError("absorbed-power ensemble is not target-free")
 
     return {
         "schema": "petch.pre-sem-depth-receipt.v1",
@@ -269,10 +287,51 @@ def build_receipt(manifest: dict) -> dict:
             ),
             "promoted_to_absolute_feature_profile_prediction": False,
             "interpretation": (
-                "A preregistered binary film-clearance call is available, "
-                "while the continuous feature profile remains unidentified."
+                "The historical preregistered binary film-clearance call is "
+                "preserved. It is not the current physics verdict after the "
+                "wall-power correction and absorbed-power ensemble."
                 if tio2_depth_gate is not None else
                 "No target-free clearance call is committed."
+            ),
+        },
+        "physics_corrected_absorbed_power_envelope": {
+            "available": absorbed_power_ensemble is not None,
+            "receipt": (
+                str(ABSORBED_POWER_ENSEMBLE.relative_to(ROOT))
+                if absorbed_power_ensemble is not None else None
+            ),
+            "receipt_sha256": (
+                _sha256(ABSORBED_POWER_ENSEMBLE)
+                if absorbed_power_ensemble is not None else None
+            ),
+            "absorbed_power_W": (
+                [
+                    row["absorbed_power_W"]
+                    for row in absorbed_power_ensemble["state_board"]
+                ]
+                if absorbed_power_ensemble is not None else None
+            ),
+            "required_surface_yield_envelope": (
+                absorbed_power_ensemble["power_response"]
+                ["required_surface_yield_envelope"]
+                if absorbed_power_ensemble is not None else None
+            ),
+            "current_clearance_supported_over_full_power_envelope": (
+                absorbed_power_ensemble["corrected_depth_verdict"]
+                ["current_clearance_supported_over_full_power_envelope"]
+                if absorbed_power_ensemble is not None else None
+            ),
+            "daughter_gas_electron_collision_basis_complete": (
+                absorbed_power_ensemble["certification"]
+                ["daughter_gas_electron_collision_basis_complete"]
+                if absorbed_power_ensemble is not None else None
+            ),
+            "interpretation": (
+                "Current reactor-dose verdict: depth remains conditional on "
+                "absorbed power, daughter-gas electron kinetics, the TiO2/Cr "
+                "surface law, and feature transport."
+                if absorbed_power_ensemble is not None else
+                "No physics-corrected absorbed-power envelope is committed."
             ),
         },
         "identifiability_gates": {
@@ -285,6 +344,10 @@ def build_receipt(manifest: dict) -> dict:
                 self_bias_transfer is not None
             ),
             "absorbed_plasma_power_measured": False,
+            "absorbed_power_sensitivity_ensemble_available": (
+                absorbed_power_ensemble is not None
+            ),
+            "daughter_gas_electron_collision_basis_complete": False,
             "measured_cf3_chf3_reactive_collision_kernel_available": (
                 cf3_collision_scale is not None
             ),

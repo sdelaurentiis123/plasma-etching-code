@@ -51,7 +51,7 @@
   "blind_tio2_clearance_forecast": {
     "available": true,
     "forecast_type": "film-capped binary clearance call",
-    "interpretation": "A preregistered binary film-clearance call is available, while the continuous feature profile remains unidentified.",
+    "interpretation": "The historical preregistered binary film-clearance call is preserved. It is not the current physics verdict after the wall-power correction and absorbed-power ensemble.",
     "predicted_film_capped_tio2_depth_nm": 700.0,
     "primary_outcome": "TiO2 film clearance expected",
     "promoted_to_absolute_feature_profile_prediction": false,
@@ -63,10 +63,12 @@
   "frozen_on": "2026-08-18",
   "identifiability_gates": {
     "absorbed_plasma_power_measured": false,
+    "absorbed_power_sensitivity_ensemble_available": true,
     "achieved_dc_self_bias_measured": false,
     "adjacent_tio2_process_response_board_available": true,
     "complete_molecular_ion_transport_available": false,
     "cr_surface_law_measured_or_validated_for_condition": false,
+    "daughter_gas_electron_collision_basis_complete": false,
     "feature_geometry_and_loading_known": false,
     "machine_family_self_bias_sensitivity_available": true,
     "measured_cf3_chf3_reactive_collision_kernel_available": true,
@@ -112,6 +114,24 @@
     "mask geometry, pitch, loading, chip/carrier size and position",
     "scale-bearing SEM for the exact condition"
   ],
+  "physics_corrected_absorbed_power_envelope": {
+    "absorbed_power_W": [
+      60,
+      90,
+      105,
+      120
+    ],
+    "available": true,
+    "current_clearance_supported_over_full_power_envelope": false,
+    "daughter_gas_electron_collision_basis_complete": false,
+    "interpretation": "Current reactor-dose verdict: depth remains conditional on absorbed power, daughter-gas electron kinetics, the TiO2/Cr surface law, and feature transport.",
+    "receipt": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/audit.json",
+    "receipt_sha256": "c736db9be50d6e7a1ae08ab90b29838c52bb460c9e2ec4bc05e3df819174a30b",
+    "required_surface_yield_envelope": [
+      0.8208722774461649,
+      1.6291531123103986
+    ]
+  },
   "schema": "petch.pre-sem-depth-receipt.v1",
   "sem_target_used": false
 }

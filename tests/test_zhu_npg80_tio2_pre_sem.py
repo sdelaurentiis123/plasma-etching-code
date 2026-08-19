@@ -193,3 +193,20 @@ def test_pre_sem_receipt_links_binary_clearance_call_without_profile_overclaim()
     assert forecast["promoted_to_absolute_feature_profile_prediction"] is False
     assert gates["target_free_binary_clearance_forecast_frozen"] is True
     assert gates["supports_absolute_depth_prediction"] is False
+
+
+def test_pre_sem_receipt_preserves_forecast_but_exposes_current_power_verdict():
+    receipt = build_receipt(load_manifest())
+    frozen = receipt["blind_tio2_clearance_forecast"]
+    assert frozen["primary_outcome"] == "TiO2 film clearance expected"
+    current = receipt["physics_corrected_absorbed_power_envelope"]
+    assert current["available"] is True
+    assert current["absorbed_power_W"] == [60, 90, 105, 120]
+    low, high = current["required_surface_yield_envelope"]
+    assert low < 0.9 < high
+    assert current[
+        "current_clearance_supported_over_full_power_envelope"
+    ] is False
+    assert current[
+        "daughter_gas_electron_collision_basis_complete"
+    ] is False
