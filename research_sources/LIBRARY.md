@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 168 sources by topic
+## Index — 169 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -266,6 +266,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | bibkey | source | status |
 |---|---|---|
 | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | Janissen et al., CHF3/O2 RIE of TiO2 with Cr masks | PRIMARY FULL TEXT + TABLES S3.1--S3.3 CHECKSUM-PINNED AND VISUALLY AUDITED |
+| [`ji-2024-tio2-hierarchical`](library/ji-2024-tio2-hierarchical.md) | Ji et al., same-gas TiO2/Cr two-zone profile evolution | PRIMARY CC-BY FULL TEXT READ; PROFILE/METHOD VERIFIED, SURFACE SCHEME QUALITATIVE |
 | [`holman-2026-nature-metasurface-tweezers`](library/holman-2026-nature-metasurface-tweezers.md) | Holman et al., same-group TiO2/SRN metasurface optical-tweezer arrays | PRIMARY NATURE RECORD + AUTHOR FULL MANUSCRIPT ONLINE; LOCAL PIXEL AUDIT OPEN |
 | [`hegeman-2020-tio2-rie`](library/hegeman-2020-tio2-rie.md) | Hegeman et al., common-condition SF6/CHF3 TiO2 RIE comparison | PRIMARY FULL TEXT READ ONLINE; TABLES 1--2 READ; PDF NOT LOCALLY ARCHIVED |
 | [`piercy-2017-ald-tio2-density`](library/piercy-2017-ald-tio2-density.md) | Piercy et al., XRR/ellipsometry ALD TiO2 density versus growth temperature | PRIMARY ARTICLE RECORD + NUMERICAL ABSTRACT READ; FULL PDF NOT LOCALLY ARCHIVED |
@@ -292,6 +293,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | SF6 nine-positive-ion branch closure | [`christophorou-olthoff-2000-sf6`](library/christophorou-olthoff-2000-sf6.md) | Table-16 100-eV fractions plus Table-3 thresholds split the Table-17 total under an explicit unmeasured shape closure; SF4++/SF2++ create two electrons and Figure-15 curve digitization remains an upgrade gate |
 | TiO2/Cr `40 nm/min`, `14:1` comparison scenario and machine-specific O2 sensitivity | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | target-free mask-survival warning for the Zhu pre-SEM receipt; explicitly not a transferred model coefficient or absolute-depth prediction |
 | TiO2/Cr power/pressure response, `-950/-1100 V` RIE witnesses, and `652/273 nm` feature depths | [`janissen-2016-tio2-rie`](library/janissen-2016-tio2-rie.md) | visually audited Tables S3.1--S3.3 validation board; Fluor Z401S and single-crystal rutile boundaries remain explicit |
+| Same-gas TiO2/Cr upper-triangle/lower-rectangle profile, mask shrink near `300 nm` depth, and lower-feature passivation topology | [`ji-2024-tio2-hierarchical`](library/ji-2024-tio2-hierarchical.md) | physical-shape witness for the Oxford convergence interpretation; ICP/SF6-rich process and qualitative TiF4 scheme prohibit coefficient transfer |
 | Same-group TiO2 meta-atom scale (`750 nm` tall, `100–190 nm` wide, `290 nm` unit cell) and successful vertical-pillar profile class | [`holman-2026-nature-metasurface-tweezers`](library/holman-2026-nature-metasurface-tweezers.md) | adjacent device evidence for the Zhu condition; withheld exact layout remains authoritative and Nature dimensions are never substituted into it |
 | ALD TiO2 formula-unit-density sensitivity (`3.25--4.15 g cm-3`) | [`piercy-2017-ald-tio2-density`](library/piercy-2017-ald-tio2-density.md), [`saari-2022-ald-tio2-density`](library/saari-2022-ald-tio2-density.md) | atom/dose conversion for the blind Zhu clearance gate only; deposition history and phase are unresolved, so neither endpoint is a target coefficient |
 | SF6-versus-CHF3 TiO2 etch direction (`55` versus `15 nm/min` in the source's common ICP condition) | [`hegeman-2020-tio2-rie`](library/hegeman-2020-tio2-rie.md) | sign evidence for the blind Zhu clearance call and simultaneous mask-risk warning; source rates are not transferred across film/tool/plasma topology |
