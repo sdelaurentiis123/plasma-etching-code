@@ -1,0 +1,491 @@
+{
+  "accepted_120W_state": {
+    "collision_basis_closure_milestones": [
+      {
+        "minimum_ranked_daughter_targets": [
+          "HF"
+        ],
+        "threshold": 0.5,
+        "total_neutral_fraction_represented": 0.7288080741519719
+      },
+      {
+        "minimum_ranked_daughter_targets": [
+          "HF",
+          "F2"
+        ],
+        "threshold": 0.75,
+        "total_neutral_fraction_represented": 0.7902435570372619
+      },
+      {
+        "minimum_ranked_daughter_targets": [
+          "HF",
+          "F2",
+          "F",
+          "SF3",
+          "H2",
+          "CF4"
+        ],
+        "threshold": 0.9,
+        "total_neutral_fraction_represented": 0.9114952021326068
+      },
+      {
+        "minimum_ranked_daughter_targets": [
+          "HF",
+          "F2",
+          "F",
+          "SF3",
+          "H2",
+          "CF4",
+          "SF5",
+          "CF3",
+          "SF4"
+        ],
+        "threshold": 0.95,
+        "total_neutral_fraction_represented": 0.9515650973795066
+      },
+      {
+        "minimum_ranked_daughter_targets": [
+          "HF",
+          "F2",
+          "F",
+          "SF3",
+          "H2",
+          "CF4",
+          "SF5",
+          "CF3",
+          "SF4",
+          "H",
+          "CF2O",
+          "CF2",
+          "SOF3"
+        ],
+        "threshold": 0.99,
+        "total_neutral_fraction_represented": 0.9924416301774395
+      }
+    ],
+    "electron_rate_regression_only_fraction": 0.7895370582517773,
+    "electron_transparent_fraction": 0.08095511185541251,
+    "energy_resolved_two_term_eedf_fraction": 0.12950782989280998,
+    "ranked_missing_targets": [
+      {
+        "density_m3": 4.960408021872091e+20,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.599300244259162,
+        "peak_neutral_fraction_over_power_board": 0.599300244259162,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R14"
+        ],
+        "species": "HF"
+      },
+      {
+        "density_m3": 5.085014816045929e+19,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.06143548288529005,
+        "peak_neutral_fraction_over_power_board": 0.06143548288529005,
+        "reduced_electron_reaction_count": 4,
+        "reduced_rate_sources": [
+          "Kokkoris et al. 2009 Table 1 G16; daughter-only transcription",
+          "Kokkoris et al. 2009 Table 1 G19; daughter-only transcription",
+          "Kokkoris et al. 2009 Table 1 G6; daughter-only transcription",
+          "Kokkoris et al. 2009 Table 1 G7; daughter-only transcription"
+        ],
+        "species": "F2"
+      },
+      {
+        "density_m3": 4.0622149850735395e+19,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 0.049078350451280194,
+        "peak_neutral_fraction_over_power_board": 0.049078350451280194,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "F"
+      },
+      {
+        "density_m3": 2.285167667868987e+19,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.02760864702033452,
+        "peak_neutral_fraction_over_power_board": 0.02760864702033452,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Kokkoris et al. 2009 Table 1 G15; daughter-only transcription"
+        ],
+        "species": "SF3"
+      },
+      {
+        "density_m3": 1.8503197368153256e+19,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.022354956796728744,
+        "peak_neutral_fraction_over_power_board": 0.055951841480657634,
+        "reduced_electron_reaction_count": 5,
+        "reduced_rate_sources": [
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 26: vibrational; ref 54",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 27: electronic B1; ref 54",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 28: electronic C1; ref 54",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 29: ref 54",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 30: ref 54"
+        ],
+        "species": "H2"
+      },
+      {
+        "density_m3": 1.8382960727430623e+19,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 0.02220969082700156,
+        "peak_neutral_fraction_over_power_board": 0.02220969082700156,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "CF4"
+      },
+      {
+        "density_m3": 1.1836648073152602e+19,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.014300650370234829,
+        "peak_neutral_fraction_over_power_board": 0.019937460436598404,
+        "reduced_electron_reaction_count": 3,
+        "reduced_rate_sources": [
+          "Kokkoris et al. 2009 Table 1 G11; daughter-only transcription",
+          "Kokkoris et al. 2009 Table 1 G12; daughter-only transcription",
+          "Kokkoris et al. 2009 Table 1 G4; daughter-only transcription"
+        ],
+        "species": "SF5"
+      },
+      {
+        "density_m3": 1.129110164970076e+19,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.013641539056432039,
+        "peak_neutral_fraction_over_power_board": 0.015887803699639696,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R10"
+        ],
+        "species": "CF3"
+      },
+      {
+        "density_m3": 1.0038101905323545e+19,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.012127705820232794,
+        "peak_neutral_fraction_over_power_board": 0.016257964147783615,
+        "reduced_electron_reaction_count": 3,
+        "reduced_rate_sources": [
+          "Kokkoris et al. 2009 Table 1 G13; daughter-only transcription",
+          "Kokkoris et al. 2009 Table 1 G14; daughter-only transcription",
+          "Kokkoris et al. 2009 Table 1 G5; daughter-only transcription"
+        ],
+        "species": "SF4"
+      },
+      {
+        "density_m3": 9.907861707331193e+18,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.011970353880382248,
+        "peak_neutral_fraction_over_power_board": 0.011970353880382248,
+        "reduced_electron_reaction_count": 2,
+        "reduced_rate_sources": [
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 31: electronic 2P; ref 54",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 32: ref 54"
+        ],
+        "species": "H"
+      },
+      {
+        "density_m3": 9.875978182648406e+18,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.011931833250534896,
+        "peak_neutral_fraction_over_power_board": 0.012359778317166864,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R25"
+        ],
+        "species": "CF2O"
+      },
+      {
+        "density_m3": 8.572840286198143e+18,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.01035742474179438,
+        "peak_neutral_fraction_over_power_board": 0.01035742474179438,
+        "reduced_electron_reaction_count": 2,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R11",
+          "Lim et al. 2014 Table I R12"
+        ],
+        "species": "CF2"
+      },
+      {
+        "density_m3": 5.476825339548415e+18,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 0.006616920925221359,
+        "peak_neutral_fraction_over_power_board": 0.006616920925221359,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SOF3"
+      },
+      {
+        "density_m3": 3.2635533655156925e+18,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.003942918244794335,
+        "peak_neutral_fraction_over_power_board": 0.003942918244794335,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R13"
+        ],
+        "species": "CF"
+      },
+      {
+        "density_m3": 1.231040033822431e+18,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 0.0014873022334242444,
+        "peak_neutral_fraction_over_power_board": 0.0014873022334242444,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SOF2"
+      },
+      {
+        "density_m3": 7.86723813394269e+17,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 0.0009504939340730759,
+        "peak_neutral_fraction_over_power_board": 0.0009688583201588704,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SO2F2"
+      },
+      {
+        "density_m3": 4.438791494238239e+17,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 0.0005362802444845054,
+        "peak_neutral_fraction_over_power_board": 0.0005362802444845054,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SOF4"
+      },
+      {
+        "density_m3": 2.1662842147847782e+17,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.00026172336092733647,
+        "peak_neutral_fraction_over_power_board": 0.0006929829145325188,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R24"
+        ],
+        "species": "CFO"
+      },
+      {
+        "density_m3": 1.0955766366695304e+17,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 0.0001323639795487798,
+        "peak_neutral_fraction_over_power_board": 0.0014953732704235047,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R21"
+        ],
+        "species": "CO"
+      },
+      {
+        "density_m3": 8.080296774926296e+16,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 9.762349809829247e-05,
+        "peak_neutral_fraction_over_power_board": 0.000117003908558978,
+        "reduced_electron_reaction_count": 2,
+        "reduced_rate_sources": [
+          "pateau-2014-sf6-o2 Table V R75",
+          "pateau-2014-sf6-o2 Table V R76"
+        ],
+        "species": "O"
+      },
+      {
+        "density_m3": 4.022096504481908e+16,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 4.8593652113726964e-05,
+        "peak_neutral_fraction_over_power_board": 4.8593652113726964e-05,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "C"
+      },
+      {
+        "density_m3": 3.245208919123102e+16,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 3.9207550857247525e-05,
+        "peak_neutral_fraction_over_power_board": 0.00021497372469912225,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R20"
+        ],
+        "species": "CO2"
+      },
+      {
+        "density_m3": 1.3791834194657294e+16,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 1.6662842179907095e-05,
+        "peak_neutral_fraction_over_power_board": 7.106881495977912e-05,
+        "reduced_electron_reaction_count": 6,
+        "reduced_rate_sources": [
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 20: copied from CHF3",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 21: copied from CHF3",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 22: copied from CHF3",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 23: copied from CHF3",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 24: copied from CHF3",
+          "sandia-2001-fluorocarbon-mechanisms Table 9 row 25: copied from CHF3"
+        ],
+        "species": "CHF2"
+      },
+      {
+        "density_m3": 1.269466759084913e+16,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 1.5337281438218205e-05,
+        "peak_neutral_fraction_over_power_board": 1.5337281438218205e-05,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SF2"
+      },
+      {
+        "density_m3": 1.02354722318701e+16,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 1.2366162181861328e-05,
+        "peak_neutral_fraction_over_power_board": 7.137420111279073e-05,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R6"
+        ],
+        "species": "CHF"
+      },
+      {
+        "density_m3": 3685917458161844.5,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 4.453204702628117e-06,
+        "peak_neutral_fraction_over_power_board": 4.453204702628117e-06,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SOF"
+      },
+      {
+        "density_m3": 3497833197578823.5,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 4.225967461635656e-06,
+        "peak_neutral_fraction_over_power_board": 4.225967461635656e-06,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SF"
+      },
+      {
+        "density_m3": 1943907003205256.0,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 2.3485647485069842e-06,
+        "peak_neutral_fraction_over_power_board": 8.04268503766984e-06,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R17"
+        ],
+        "species": "CH"
+      },
+      {
+        "density_m3": 1901660320776066.8,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 2.2975236910227717e-06,
+        "peak_neutral_fraction_over_power_board": 2.2975236910227717e-06,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "Lim et al. 2014 Table I R23"
+        ],
+        "species": "FO"
+      },
+      {
+        "density_m3": 1688075326081952.5,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 2.039477298617403e-06,
+        "peak_neutral_fraction_over_power_board": 2.039477298617403e-06,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SO"
+      },
+      {
+        "density_m3": 734002121103054.0,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 8.867973128907785e-07,
+        "peak_neutral_fraction_over_power_board": 9.352879409302391e-07,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SO2"
+      },
+      {
+        "density_m3": 586378775424242.0,
+        "electron_kinetic_tier": "electron_rate_regression_only",
+        "neutral_fraction": 7.08443623570122e-07,
+        "peak_neutral_fraction_over_power_board": 7.08443623570122e-07,
+        "reduced_electron_reaction_count": 1,
+        "reduced_rate_sources": [
+          "pateau-2014-sf6-o2 Table V R77"
+        ],
+        "species": "O(1d)"
+      },
+      {
+        "density_m3": 437495953579409.25,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 5.285682764128387e-07,
+        "peak_neutral_fraction_over_power_board": 5.285682764128387e-07,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "S"
+      },
+      {
+        "density_m3": 6862728276778.975,
+        "electron_kinetic_tier": "electron_transparent",
+        "neutral_fraction": 8.291323444408282e-09,
+        "peak_neutral_fraction_over_power_board": 8.474357445768673e-09,
+        "reduced_electron_reaction_count": 0,
+        "reduced_rate_sources": [],
+        "species": "SO2F"
+      }
+    ]
+  },
+  "condition_id": "zhu-2026-npg80-tio2-chf3-sf6-o2-20min",
+  "power_board": [
+    {
+      "absorbed_power_W": 60,
+      "electron_rate_regression_only_fraction": 0.46790487925720964,
+      "electron_transparent_fraction": 0.015476010305269487,
+      "energy_resolved_two_term_eedf_fraction": 0.5166191104375208,
+      "state_path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_60W.json",
+      "state_sha256": "ebecc0d2b922a216e7952baea965edbcb2a9c6417c3965a6721530ebc65c9c47"
+    },
+    {
+      "absorbed_power_W": 90,
+      "electron_rate_regression_only_fraction": 0.7040123128939287,
+      "electron_transparent_fraction": 0.03766910012964366,
+      "energy_resolved_two_term_eedf_fraction": 0.2583185869764276,
+      "state_path": "results/curated/zhu_npg80_sheath_coupled_v1/central_276V.json",
+      "state_sha256": "669cb7baab66e594611a58888dd9731904d7c422e2ea670478035e13dc536d18"
+    },
+    {
+      "absorbed_power_W": 105,
+      "electron_rate_regression_only_fraction": 0.7655912188481934,
+      "electron_transparent_fraction": 0.058093109423751704,
+      "energy_resolved_two_term_eedf_fraction": 0.17631567172805457,
+      "state_path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_105W.json",
+      "state_sha256": "79bbcb8579820b940f1156afeebdf03f8b2980ca44ea3838dfd675f10171c169"
+    },
+    {
+      "absorbed_power_W": 120,
+      "electron_rate_regression_only_fraction": 0.7895370582517773,
+      "electron_transparent_fraction": 0.08095511185541251,
+      "energy_resolved_two_term_eedf_fraction": 0.12950782989280998,
+      "state_path": "results/curated/zhu_npg80_absorbed_power_ensemble_v1/power_120W.json",
+      "state_sha256": "8adfb996b41c74b916a95cb1255e55163ee1404905b0c9bc9d6be0b8fc5c3b30"
+    }
+  ],
+  "priority_verdict": {
+    "first_target": "HF",
+    "first_target_120W_neutral_fraction": 0.599300244259162,
+    "interpretation": "HF is the first kinetic-closure target by a wide margin. The ranking is a leverage audit of the current conditional state, not a converged composition: adding collisions feeds back on the EEPF and all daughter densities.",
+    "supports_feature_depth_prediction": false,
+    "supports_unique_reactor_state": false,
+    "supports_wafer_flux_prediction": false
+  },
+  "schema": "petch.zhu-npg80-daughter-collision-gap.v1",
+  "scope": {
+    "electron_rate_regression_only_definition": "Published or regressed scalar electron-rate laws contribute chemistry and power but do not alter the solved EEPF momentum and energy operator as an energy-resolved collision target.",
+    "electron_transparent_definition": "No direct electron-impact row is active for this neutral in either the two-term collision deck or reduced rate network.",
+    "energy_resolved_two_term_eedf_targets": [
+      "CHF3",
+      "O2",
+      "SF6"
+    ]
+  },
+  "sem_or_depth_target_used": false
+}
