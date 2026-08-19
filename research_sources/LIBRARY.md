@@ -27,7 +27,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 - Grep-ready full texts live in `research_sources/thesis_extracts/` (30+ files);
   digitized figure data in `research_sources/digitized/`.
 
-## Index — 172 sources by topic
+## Index — 173 sources by topic
 
 ### Fluorocarbon/SiO₂ surface mechanism (the Krüger–Kushner lineage)
 
@@ -274,6 +274,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | [`hegeman-2020-tio2-rie`](library/hegeman-2020-tio2-rie.md) | Hegeman et al., common-condition SF6/CHF3 TiO2 RIE comparison | PRIMARY FULL TEXT READ ONLINE; TABLES 1--2 READ; PDF NOT LOCALLY ARCHIVED |
 | [`piercy-2017-ald-tio2-density`](library/piercy-2017-ald-tio2-density.md) | Piercy et al., XRR/ellipsometry ALD TiO2 density versus growth temperature | PRIMARY ARTICLE RECORD + NUMERICAL ABSTRACT READ; FULL PDF NOT LOCALLY ARCHIVED |
 | [`saari-2022-ald-tio2-density`](library/saari-2022-ald-tio2-density.md) | Saari et al., XRR density and crystallization of TDMAT/H2O ALD TiO2 | PRIMARY FULL TEXT READ ONLINE; PDF NOT LOCALLY ARCHIVED |
+| [`nguyen-2021-cr-sf6-o2`](library/nguyen-2021-cr-sf6-o2.md) | Nguyen et al., Cr/CrOx etching and CrFx inhibitor cycle in SF6/O2 | PRIMARY OPEN FULL TEXT + VERIFIED EXCERPT |
 
 ### In-feature and profile metrology
 
@@ -300,6 +301,7 @@ actually consumed. Built so no future pass has to re-hunt a paper we already rea
 | Same-gas TiO2/Cr upper-triangle/lower-rectangle profile, mask shrink near `300 nm` depth, and lower-feature passivation topology | [`ji-2024-tio2-hierarchical`](library/ji-2024-tio2-hierarchical.md) | physical-shape witness for the Oxford convergence interpretation; ICP/SF6-rich process and qualitative TiF4 scheme prohibit coefficient transfer |
 | Same-gas TiO2/Cr RF morphology-response board | [`ji-2024-tio2-hierarchical`](library/ji-2024-tio2-hierarchical.md) | 15 digitized height/radius/gap points; strict gap narrowing requires a retained/deposited surface-volume channel, while missing time and different process prohibit Oxford coefficient transfer |
 | Same-gas TiO2/Cr spacing-response board | [`ji-2024-tio2-hierarchical`](library/ji-2024-tio2-hierarchical.md) | 20 printed SEM values across five gaps; preserves the changed `100 nm` datum and brackets rather than invents a sharp loading threshold |
+| Cr-mask F/O state topology (Cr oxidation, fluorinated volatile removal, CrFx inhibition, ion-assisted inhibitor clearing) | [`nguyen-2021-cr-sf6-o2`](library/nguyen-2021-cr-sf6-o2.md) | rejects a universal pure-sputter Cr law for the Oxford mixed chemistry; source coefficients and mixed-feed boundary do not transfer |
 | Same-group TiO2 meta-atom scale (`750 nm` tall, `100–190 nm` wide, `290 nm` unit cell) and successful vertical-pillar profile class | [`holman-2026-nature-metasurface-tweezers`](library/holman-2026-nature-metasurface-tweezers.md) | adjacent device evidence for the Zhu condition; withheld exact layout remains authoritative and Nature dimensions are never substituted into it |
 | ALD TiO2 formula-unit-density sensitivity (`3.25--4.15 g cm-3`) | [`piercy-2017-ald-tio2-density`](library/piercy-2017-ald-tio2-density.md), [`saari-2022-ald-tio2-density`](library/saari-2022-ald-tio2-density.md) | atom/dose conversion for the blind Zhu clearance gate only; deposition history and phase are unresolved, so neither endpoint is a target coefficient |
 | SF6-versus-CHF3 TiO2 etch direction (`55` versus `15 nm/min` in the source's common ICP condition) | [`hegeman-2020-tio2-rie`](library/hegeman-2020-tio2-rie.md) | sign evidence for the blind Zhu clearance call and simultaneous mask-risk warning; source rates are not transferred across film/tool/plasma topology |

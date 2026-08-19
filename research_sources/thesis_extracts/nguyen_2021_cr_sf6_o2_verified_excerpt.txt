@@ -1,0 +1,33 @@
+SOURCE: V. T. H. Nguyen et al., "Cr and CrOx etching using SF6 and O2 plasma,"
+J. Vac. Sci. Technol. B 39, 032201 (2021), DOI 10.1116/6.0000922.
+
+RETRIEVAL: Primary open full text read from the institutional author copy.
+The rows below are verified paraphrases and source-reported numerical values;
+they are not a new fit or digitization.
+
+MIXED-PROCESS RESPONSE:
+- The Cr etch-rate maximum occurs near 0.75% SF6/O2 in an oxygen-rich feed.
+- At 300 W the mixed process reaches approximately 400 nm/min Cr removal,
+  generates about 420 V self-bias, and has selectivity below 5 toward Si.
+- Lower power improves selectivity but the mixed process develops substantial
+  undercut, demonstrating that rate and directionality are coupled.
+
+PROPOSED SURFACE CYCLE:
+- O radicals oxidize pristine Cr to CrOx.
+- F radicals convert the oxide into volatile CrO2F2 and leave a fluorinated
+  CrFx surface.
+- CrFx inhibits spontaneous continuation on protected surfaces.
+- Ion impact ruptures/removes the CrFx layer at bombarded surfaces, restoring
+  directional etching.
+
+SWITCHED-PROCESS RESPONSE:
+- A 30 W switched O-rich/F-rich process reports selectivity above 20, good
+  directionality, and approximately 1 nm/cycle or 7 nm/min Cr removal.
+- The source states that bias must be high enough to clear CrFx but low enough
+  to avoid physical sputtering of the underlying bulk Cr.
+
+TRANSFER BOUNDARY:
+These data establish state topology and response directions. The tool,
+pressure, temporal gas sequence, surface history, and wafer fluxes differ from
+the Oxford NPG80 CHF3/SF6/O2 recipe, so no numerical rate, probability, or
+yield is transferred into the target model.
