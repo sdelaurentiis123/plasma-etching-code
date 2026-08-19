@@ -999,9 +999,10 @@ class ReducedSiO2FluorocarbonMechanism:
                 "site_density_m2": float(par.site_density_m2),
                 "bulk_formula_density_m3": float(par.bulk_formula_density_m3),
                 "polymer_monolayer_density_m2": float(par.polymer_monolayer_density_m2),
-                "polymer_bulk_unit_density_m3": (
-                    None if par.polymer_bulk_unit_density_m3 is None
-                    else float(par.polymer_bulk_unit_density_m3)
+                **(
+                    {"polymer_bulk_unit_density_m3": float(
+                        par.polymer_bulk_unit_density_m3)}
+                    if par.polymer_bulk_unit_density_m3 is not None else {}
                 ),
                 "complex_formation_probability": dict(
                     par.complex_formation_probability),
